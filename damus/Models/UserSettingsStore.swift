@@ -107,8 +107,8 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "left_handed", default_value: false)
     var left_handed: Bool
     
-    @Setting(key: "always_show_images", default_value: false)
-    var always_show_images: Bool
+    @Setting(key: "blur_images", default_value: true)
+    var blur_images: Bool
     
     @Setting(key: "hide_nsfw_tagged_content", default_value: false)
     var hide_nsfw_tagged_content: Bool

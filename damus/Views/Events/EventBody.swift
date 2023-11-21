@@ -11,19 +11,19 @@ struct EventBody: View {
     let damus_state: DamusState
     let event: NostrEvent
     let size: EventViewKind
-    let should_show_img: Bool
+    let should_blur_img: Bool
     let options: EventViewOptions
     
-    init(damus_state: DamusState, event: NostrEvent, size: EventViewKind, should_show_img: Bool? = nil, options: EventViewOptions) {
+    init(damus_state: DamusState, event: NostrEvent, size: EventViewKind, should_blur_img: Bool? = nil, options: EventViewOptions) {
         self.damus_state = damus_state
         self.event = event
         self.size = size
         self.options = options
-        self.should_show_img = should_show_img ?? should_show_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
+        self.should_blur_img = should_blur_img ?? should_blur_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
     }
 
     var note_content: some View {
-        NoteContentView(damus_state: damus_state, event: event, show_images: should_show_img, size: size, options: options)
+        NoteContentView(damus_state: damus_state, event: event, blur_images: should_blur_img, size: size, options: options)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 

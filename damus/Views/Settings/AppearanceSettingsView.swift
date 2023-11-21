@@ -78,7 +78,7 @@ struct AppearanceSettingsView: View {
             // MARK: - Images
             Section(NSLocalizedString("Images", comment: "Section title for images configuration.")) {
                 self.EnableAnimationsToggle
-                Toggle(NSLocalizedString("Always show images", comment: "Setting to always show and never blur images"), isOn: $settings.always_show_images)
+                Toggle(NSLocalizedString("Blur images", comment: "Setting to blur images"), isOn: $settings.blur_images)
                     .toggleStyle(.switch)
                 
                 Picker(NSLocalizedString("Image uploader", comment: "Prompt selection of user's image uploader"),

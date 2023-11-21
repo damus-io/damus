@@ -54,21 +54,21 @@ struct EventView: View {
 }
 
 // blame the porn bots for this code
-func should_show_images(settings: UserSettingsStore, contacts: Contacts, ev: NostrEvent, our_pubkey: Pubkey, booster_pubkey: Pubkey? = nil) -> Bool {
-    if settings.always_show_images {
-        return true
+func should_blur_images(settings: UserSettingsStore, contacts: Contacts, ev: NostrEvent, our_pubkey: Pubkey, booster_pubkey: Pubkey? = nil) -> Bool {
+    if !settings.blur_images {
+        return false
     }
     
     if ev.pubkey == our_pubkey {
-        return true
+        return false
     }
     if contacts.is_in_friendosphere(ev.pubkey) {
-        return true
+        return false
     }
     if let boost_key = booster_pubkey, contacts.is_in_friendosphere(boost_key) {
-        return true
+        return false
     }
-    return false
+    return true
 }
 
 func format_relative_time(_ created_at: UInt32) -> String

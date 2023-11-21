@@ -26,7 +26,7 @@ struct NoteContentView: View {
     
     let damus_state: DamusState
     let event: NostrEvent
-    @State var show_images: Bool
+    @State var blur_images: Bool
     let size: EventViewKind
     let preview_height: CGFloat?
     let options: EventViewOptions
@@ -39,10 +39,10 @@ struct NoteContentView: View {
         return self.artifacts_model.state.artifacts ?? .separated(.just_content(event.get_content(damus_state.keypair)))
     }
     
-    init(damus_state: DamusState, event: NostrEvent, show_images: Bool, size: EventViewKind, options: EventViewOptions) {
+    init(damus_state: DamusState, event: NostrEvent, blur_images: Bool, size: EventViewKind, options: EventViewOptions) {
         self.damus_state = damus_state
         self.event = event
-        self.show_images = show_images
+        self.blur_images = blur_images
         self.size = size
         self.options = options
         self.preview_height = lookup_cached_preview_size(previews: damus_state.previews, evid: event.id)
@@ -61,7 +61,7 @@ struct NoteContentView: View {
     }
     
     var preview: LinkViewRepresentable? {
-        guard show_images,
+        guard blur_images,
               case .loaded(let preview) = preview_model.state,
               case .value(let cached) = preview else {
             return nil
@@ -92,7 +92,7 @@ struct NoteContentView: View {
     
     func previewView(links: [URL]) -> some View {
         Group {
-            if let preview = self.preview, show_images {
+            if let preview = self.preview, blur_images {
                 if let preview_height {
                     preview
                         .frame(height: preview_height)
@@ -133,14 +133,14 @@ struct NoteContentView: View {
                 }
             }
 
-            if show_images && artifacts.media.count > 0 {
+            if !blur_images && artifacts.media.count > 0 {
                 ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media)
-            } else if !show_images && artifacts.media.count > 0 {
+            } else if blur_images && artifacts.media.count > 0 {
                 ZStack {
                     ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media)
                     Blur()
                         .onTapGesture {
-                            show_images = true
+                            blur_images = false
                         }
                 }
                 //.cornerRadius(10)
@@ -618,17 +618,17 @@ struct NoteContentView_Previews: PreviewProvider {
 
         Group {
             VStack {
-                NoteContentView(damus_state: state, event: test_note, show_images: true, size: .normal, options: [])
+                NoteContentView(damus_state: state, event: test_note, blur_images: false, size: .normal, options: [])
             }
             .previewDisplayName("Short note")
             
             VStack {
-                NoteContentView(damus_state: state, event: test_encoded_note_with_image!, show_images: true, size: .normal, options: [])
+                NoteContentView(damus_state: state, event: test_encoded_note_with_image!, blur_images: false, size: .normal, options: [])
             }
             .previewDisplayName("Note with image")
 
             VStack {
-                NoteContentView(damus_state: state2, event: test_longform_event.event, show_images: true, size: .normal, options: [.wide])
+                NoteContentView(damus_state: state2, event: test_longform_event.event, blur_images: false, size: .normal, options: [.wide])
                     .border(Color.red)
             }
             .previewDisplayName("Long-form note")
