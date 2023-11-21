@@ -16,11 +16,19 @@ class NotificationService: UNNotificationServiceExtension {
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         self.contentHandler = contentHandler
         
+        let ndb: Ndb? = try? Ndb(owns_db_file: false)
+        
         // Modify the notification content here...
         guard let nostrEventInfoDictionary = request.content.userInfo["nostr_event"] as? [AnyHashable: Any],
               let nostrEventInfo = NostrEventInfoFromPushNotification.from(dictionary: nostrEventInfoDictionary) else {
             contentHandler(request.content)
             return;
+        }
+        
+        // Log that we got a push notification
+        if let pubkey = Pubkey(hex: nostrEventInfo.pubkey),
+           let txn = ndb?.lookup_profile(pubkey) {
+            Log.debug("Got push notification from %s (%s)", for: .push_notifications, (txn.unsafeUnownedValue?.profile?.display_name ?? "Unknown"), nostrEventInfo.pubkey)
         }
         
         if let improvedContent = NotificationFormatter.shared.formatMessage(event: nostrEventInfo) {

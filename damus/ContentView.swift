@@ -608,7 +608,7 @@ struct ContentView: View {
 
     func connect() {
         // nostrdb
-        let ndb = Ndb()!
+        let ndb = try! Ndb()!
 
         let pool = RelayPool(ndb: ndb)
         let model_cache = RelayModelCache()

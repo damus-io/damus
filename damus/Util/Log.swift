@@ -13,6 +13,7 @@ enum LogCategory: String {
     case nav
     case render
     case storage
+    case push_notifications
 }
 
 /// Damus structured logger

@@ -24,7 +24,7 @@ func generate_test_damus_state(
     }
 
     print("opening \(tempDir!)")
-    let ndb = Ndb(path: tempDir)!
+    let ndb = try! Ndb(path: tempDir)!
     let our_pubkey = test_pubkey
     let pool = RelayPool(ndb: ndb)
     let settings = UserSettingsStore()
