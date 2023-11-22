@@ -81,6 +81,9 @@ struct AppearanceSettingsView: View {
                 Toggle(NSLocalizedString("Always show images", comment: "Setting to always show and never blur images"), isOn: $settings.always_show_images)
                     .toggleStyle(.switch)
                 
+                Toggle(NSLocalizedString("Media previews", comment: "Setting to show media"), isOn: $settings.media_previews)
+                    .toggleStyle(.switch)
+                
                 Picker(NSLocalizedString("Image uploader", comment: "Prompt selection of user's image uploader"),
                        selection: $settings.default_media_uploader) {
                     ForEach(MediaUploader.allCases, id: \.self) { uploader in

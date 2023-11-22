@@ -27,6 +27,7 @@ struct NoteContentView: View {
     let damus_state: DamusState
     let event: NostrEvent
     @State var show_images: Bool
+    @State var load_media: Bool = false
     let size: EventViewKind
     let preview_height: CGFloat?
     let options: EventViewOptions
@@ -132,18 +133,21 @@ struct NoteContentView: View {
                     translateView
                 }
             }
-
-            if show_images && artifacts.media.count > 0 {
-                ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media)
-            } else if !show_images && artifacts.media.count > 0 {
-                ZStack {
+            
+            if artifacts.media.count > 0 {
+                if !damus_state.settings.media_previews && !load_media {
+                    loadMediaButton(artifacts: artifacts)
+                } else if show_images || (show_images && !damus_state.settings.media_previews && load_media) {
                     ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media)
-                    Blur()
-                        .onTapGesture {
-                            show_images = true
-                        }
+                } else if !show_images || (!show_images && !damus_state.settings.media_previews && load_media) {
+                    ZStack {
+                        ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media)
+                        Blur()
+                            .onTapGesture {
+                                show_images = true
+                            }
+                    }
                 }
-                //.cornerRadius(10)
             }
             
             if artifacts.invoices.count > 0 {
@@ -155,13 +159,52 @@ struct NoteContentView: View {
                 }
             }
             
-            if with_padding {
-                previewView(links: artifacts.links).padding(.horizontal)
-            } else {
-                previewView(links: artifacts.links)
+            if damus_state.settings.media_previews {
+                if with_padding {
+                    previewView(links: artifacts.links).padding(.horizontal)
+                } else {
+                    previewView(links: artifacts.links)
+                }
             }
             
         }
+    }
+    
+    func loadMediaButton(artifacts: NoteArtifactsSeparated) -> some View {
+        Button(action: {
+            load_media = true
+        }, label: {
+            VStack(alignment: .leading) {
+                HStack {
+                    Image("images")
+                    Text("Load media", comment: "Button to show media in note.")
+                        .fontWeight(.bold)
+                        .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
+                }
+                .padding(EdgeInsets(top: 5, leading: 10, bottom: 0, trailing: 10))
+                
+                ForEach(artifacts.media.indices, id: \.self) { index in
+                    Divider()
+                        .frame(height: 1)
+                    switch artifacts.media[index] {
+                    case .image(let url), .video(let url):
+                        Text("\(url)")
+                            .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
+                            .foregroundStyle(DamusColors.neutral6)
+                            .multilineTextAlignment(.leading)
+                            .padding(EdgeInsets(top: 0, leading: 10, bottom: 5, trailing: 10))
+                    }
+                }
+            }
+            .background(DamusColors.neutral1)
+            .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(DamusColors.neutral3, lineWidth: 1)
+            )
+        })
+        .padding(.horizontal)
     }
     
     func load(force_artifacts: Bool = false) {
