@@ -29,6 +29,9 @@ static const int THREAD_QUEUE_BATCH = 4096;
 // the maximum size of inbox queues
 static const int DEFAULT_QUEUE_SIZE = 1000000;
 
+// increase if we need bigger filters
+#define NDB_FILTER_PAGES 64
+
 #define ndb_flag_set(flags, f) ((flags & f) == f)
 
 #define NDB_PARSED_ID           (1 << 0)
@@ -142,6 +145,391 @@ static void lowercase_strncpy(char *dst, const char *src, int n) {
 	while (j < n) {
 		dst[j++] = '\0';
 	}
+}
+
+int ndb_filter_init(struct ndb_filter *filter)
+{
+	struct cursor cur;
+	int page_size, elem_pages, data_pages, buf_size;
+
+	page_size = 4096; // assuming this, not a big deal if we're wrong
+	elem_pages = NDB_FILTER_PAGES / 4;
+	data_pages = NDB_FILTER_PAGES - elem_pages;
+	buf_size = page_size * NDB_FILTER_PAGES;
+
+	unsigned char *buf = malloc(buf_size);
+	if (!buf)
+		return 0;
+
+	// init memory arena for the cursor
+	make_cursor(buf, buf + buf_size, &cur);
+
+	cursor_slice(&cur, &filter->elem_buf, page_size * elem_pages);
+	cursor_slice(&cur, &filter->data_buf, page_size * data_pages);
+
+	// make sure we are fully allocated
+	assert(cur.p == cur.end);
+
+	// make sure elem_buf is the start of the buffer
+	assert(filter->elem_buf.start == cur.start);
+
+	filter->num_elements = 0;
+	filter->elements[0] = (struct ndb_filter_elements*) buf;
+	filter->current = NULL;
+
+	return 1;
+}
+
+void ndb_filter_reset(struct ndb_filter *filter)
+{
+	filter->num_elements = 0;
+	filter->elem_buf.p = filter->elem_buf.start;
+	filter->data_buf.p = filter->data_buf.start;
+	filter->current = NULL;
+}
+
+void ndb_filter_free(struct ndb_filter *filter)
+{
+	if (filter->elem_buf.start)
+		free(filter->elem_buf.start);
+
+	memset(filter, 0, sizeof(*filter));
+}
+
+static const char *ndb_filter_field_name(enum ndb_filter_fieldtype field)
+{
+	switch (field) {
+	case NDB_FILTER_IDS: return "ids";
+	case NDB_FILTER_AUTHORS: return "authors";
+	case NDB_FILTER_KINDS: return "kinds";
+	case NDB_FILTER_GENERIC: return "generic";
+	case NDB_FILTER_SINCE: return "since";
+	case NDB_FILTER_UNTIL: return "until";
+	case NDB_FILTER_LIMIT: return "limit";
+	}
+
+	return "unknown";
+}
+
+static int ndb_filter_start_field_impl(struct ndb_filter *filter, enum ndb_filter_fieldtype field, char generic)
+{
+	int i;
+	struct ndb_filter_elements *els, *el;
+
+	if (filter->current) {
+		fprintf(stderr, "ndb_filter_start_field: filter field already in progress, did you forget to call ndb_filter_end_field?\n");
+		return 0;
+	}
+
+	// you can only start and end fields once
+	for (i = 0; i < filter->num_elements; i++) {
+		el = filter->elements[i];
+		if (el->field.type == field) {
+			fprintf(stderr, "ndb_filter_start_field: field '%s' already exists\n",
+					ndb_filter_field_name(field));
+			return 0;
+		}
+	}
+
+	els = (struct ndb_filter_elements *) filter->elem_buf.p ;
+	filter->current = els;
+
+	// advance elem buffer to the variable data section
+	if (!cursor_skip(&filter->elem_buf, sizeof(struct ndb_filter_elements))) {
+		fprintf(stderr, "ndb_filter_start_field: '%s' oom (todo: realloc?)\n",
+				ndb_filter_field_name(field));
+		return 0;
+	}
+
+	els->field.type = field;
+	els->field.generic = generic;
+	els->field.elem_type = 0;
+	els->count = 0;
+
+	return 1;
+}
+
+int ndb_filter_start_field(struct ndb_filter *filter, enum ndb_filter_fieldtype field)
+{
+	return ndb_filter_start_field_impl(filter, field, 0);
+}
+
+int ndb_filter_start_generic_field(struct ndb_filter *filter, char tag)
+{
+	return ndb_filter_start_field_impl(filter, NDB_FILTER_GENERIC, tag);
+}
+
+static int ndb_filter_add_element(struct ndb_filter *filter, union ndb_filter_element el)
+{
+	unsigned char *data;
+	const char *str;
+
+	if (!filter->current)
+		return 0;
+
+	data = filter->data_buf.p;
+
+	switch (filter->current->field.type) {
+	case NDB_FILTER_IDS:
+	case NDB_FILTER_AUTHORS:
+		if (!cursor_push(&filter->data_buf, (unsigned char *)el.id, 32))
+			return 0;
+		el.id = data;
+		break;
+	case NDB_FILTER_KINDS:
+		break;
+	case NDB_FILTER_SINCE:
+	case NDB_FILTER_UNTIL:
+	case NDB_FILTER_LIMIT:
+		// only one allowed for since/until
+		if (filter->current->count != 0)
+			return 0;
+		break;
+	case NDB_FILTER_GENERIC:
+		str = (const char *)filter->data_buf.p;
+		if (!cursor_push_c_str(&filter->data_buf, el.string))
+			return 0;
+		// push a pointer of the string in the databuf as an element
+		el.string = str;
+		break;
+	}
+
+	if (!cursor_push(&filter->elem_buf, (unsigned char*)&el, sizeof(el)))
+		return 0;
+
+	filter->current->count++;
+
+	return 1;
+}
+
+static int ndb_filter_set_elem_type(struct ndb_filter *filter,
+				    enum ndb_generic_element_type elem_type)
+{
+	enum ndb_generic_element_type current_elem_type;
+
+	if (!filter->current)
+		return 0;
+
+	current_elem_type = filter->current->field.elem_type;
+
+	// element types must be uniform
+	if (current_elem_type != elem_type && current_elem_type != NDB_ELEMENT_UNKNOWN) {
+		fprintf(stderr, "ndb_filter_set_elem_type: element types must be uniform\n");
+		return 0;
+	}
+
+	filter->current->field.elem_type = elem_type;
+
+	return 1;
+}
+
+int ndb_filter_add_str_element(struct ndb_filter *filter, const char *str)
+{
+	union ndb_filter_element el;
+
+	if (!filter->current)
+		return 0;
+
+	// only generic queries are allowed to have strings
+	switch (filter->current->field.type) {
+	case NDB_FILTER_SINCE:
+	case NDB_FILTER_UNTIL:
+	case NDB_FILTER_LIMIT:
+	case NDB_FILTER_IDS:
+	case NDB_FILTER_AUTHORS:
+	case NDB_FILTER_KINDS:
+		return 0;
+	case NDB_FILTER_GENERIC:
+		break;
+	}
+
+	if (!ndb_filter_set_elem_type(filter, NDB_ELEMENT_STRING))
+		return 0;
+
+	el.string = str;
+	return ndb_filter_add_element(filter, el);
+}
+
+int ndb_filter_add_int_element(struct ndb_filter *filter, uint64_t integer)
+{
+	union ndb_filter_element el;
+	if (!filter->current)
+		return 0;
+
+	switch (filter->current->field.type) {
+	case NDB_FILTER_IDS:
+	case NDB_FILTER_AUTHORS:
+	case NDB_FILTER_GENERIC:
+		return 0;
+	case NDB_FILTER_KINDS:
+	case NDB_FILTER_SINCE:
+	case NDB_FILTER_UNTIL:
+	case NDB_FILTER_LIMIT:
+		break;
+	}
+
+	el.integer = integer;
+
+	return ndb_filter_add_element(filter, el);
+}
+
+int ndb_filter_add_id_element(struct ndb_filter *filter, const unsigned char *id)
+{
+	union ndb_filter_element el;
+
+	if (!filter->current)
+		return 0;
+
+	// only certain filter types allow pushing id elements
+	switch (filter->current->field.type) {
+	case NDB_FILTER_SINCE:
+	case NDB_FILTER_UNTIL:
+	case NDB_FILTER_LIMIT:
+		return 0;
+	case NDB_FILTER_IDS:
+	case NDB_FILTER_AUTHORS:
+	case NDB_FILTER_KINDS:
+	case NDB_FILTER_GENERIC:
+		break;
+	}
+
+	if (!ndb_filter_set_elem_type(filter, NDB_ELEMENT_ID))
+		return 0;
+
+	// this is needed so that generic filters know its an id
+	el.id = id;
+
+	return ndb_filter_add_element(filter, el);
+}
+
+// TODO: build a hashtable so this is O(1)
+static int ndb_generic_filter_matches(struct ndb_filter_elements *els,
+				      struct ndb_note *note)
+{
+	int i;
+	union ndb_filter_element el;
+	struct ndb_iterator iter, *it = &iter;
+	struct ndb_str str;
+
+	ndb_tags_iterate_start(note, it);
+
+	while (ndb_tags_iterate_next(it)) {
+		// we're looking for tags with 2 or more entries: ["p", id], etc
+		if (it->tag->count < 2)
+			continue;
+
+		str = ndb_note_str(note, &it->tag->strs[0]);
+
+		// we only care about packed strings (single char, etc)
+		if (str.flag != NDB_PACKED_STR)
+			continue;
+
+		// do we have #e matching e (or p, etc)
+		if (str.str[0] != els->field.generic)
+			continue;
+
+		str = ndb_note_str(note, &it->tag->strs[1]);
+
+		switch (els->field.elem_type) {
+		case NDB_ELEMENT_ID:
+			// if our filter element type is an id, then we
+			// expect a packed id in the tag, otherwise skip
+			if (str.flag != NDB_PACKED_ID)
+				continue;
+			break;
+		case NDB_ELEMENT_STRING:
+			// if our filter element type is a string, then
+			// we should not expect an id
+			if (str.flag == NDB_PACKED_ID)
+				continue;
+			break;
+		case NDB_ELEMENT_UNKNOWN:
+		default:
+			// For some reason the element type is not set. It's
+			// possible nothing was added to the generic filter?
+			// Let's just fail here and log a note for debugging
+			fprintf(stderr, "UNUSUAL ndb_generic_filter_matches: have unknown element type %d\n", els->field.elem_type);
+			return 0;
+		}
+
+		for (i = 0; i < els->count; i++) {
+			el = els->elements[i];
+			switch (els->field.elem_type) {
+			case NDB_ELEMENT_ID:
+				if (!memcmp(el.id, str.id, 32))
+					return 1;
+				break;
+			case NDB_ELEMENT_STRING:
+				if (!strcmp(el.string, str.str))
+					return 1;
+				break;
+			case NDB_ELEMENT_UNKNOWN:
+				return 0;
+			}
+		}
+	}
+
+	return 0;
+}
+
+// returns 1 if a filter matches a note
+int ndb_filter_matches(struct ndb_filter *filter, struct ndb_note *note)
+{
+	int i, j;
+	struct ndb_filter_elements *els;
+
+	for (i = 0; i < filter->num_elements; i++) {
+		els = filter->elements[i];
+
+		switch (els->field.type) {
+		case NDB_FILTER_KINDS:
+			for (j = 0; j < els->count; j++) {
+				if ((unsigned int)els->elements[j].integer == note->kind)
+					goto cont;
+			}
+			break;
+		// TODO: add filter hashtable for large id lists
+		case NDB_FILTER_IDS:
+			for (j = 0; j < els->count; j++) {
+				if (!memcmp(els->elements[j].id, note->id, 32))
+					goto cont;
+			}
+			break;
+		case NDB_FILTER_AUTHORS:
+			for (j = 0; j < els->count; j++) {
+				if (!memcmp(els->elements[j].id, note->pubkey, 32))
+					goto cont;
+			}
+			break;
+		case NDB_FILTER_GENERIC:
+			if (ndb_generic_filter_matches(els, note))
+				continue;
+			break;
+		case NDB_FILTER_SINCE:
+			assert(els->count == 1);
+			if (note->created_at >= els->elements[0].integer)
+				continue;
+			break;
+		case NDB_FILTER_UNTIL:
+			assert(els->count == 1);
+			if (note->created_at < els->elements[0].integer)
+				continue;
+		case NDB_FILTER_LIMIT:
+cont:
+			continue;
+		}
+
+		// all need to match
+		return 0;
+	}
+
+	return 1;
+}
+
+void ndb_filter_end_field(struct ndb_filter *filter)
+{
+	filter->elements[filter->num_elements++] = filter->current;
+	filter->current = NULL;
 }
 
 static void ndb_make_search_key(struct ndb_search_key *key, unsigned char *id,

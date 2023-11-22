@@ -223,6 +223,51 @@ struct ndb_iterator {
 	int index;
 };
 
+enum ndb_filter_fieldtype {
+	NDB_FILTER_IDS     = 1,
+	NDB_FILTER_AUTHORS = 2,
+	NDB_FILTER_KINDS   = 3,
+	NDB_FILTER_GENERIC = 4,
+	NDB_FILTER_SINCE   = 5,
+	NDB_FILTER_UNTIL   = 6,
+	NDB_FILTER_LIMIT   = 7,
+};
+#define NDB_NUM_FILTERS 7
+
+// when matching generic tags, we need to know if we're dealing with
+// a pointer to a 32-byte ID or a null terminated string
+enum ndb_generic_element_type {
+	NDB_ELEMENT_UNKNOWN = 0,
+	NDB_ELEMENT_STRING  = 1,
+	NDB_ELEMENT_ID      = 2,
+};
+
+union ndb_filter_element {
+	const char *string;
+	const unsigned char *id;
+	uint64_t integer;
+};
+
+struct ndb_filter_field {
+	enum ndb_filter_fieldtype type;
+	enum ndb_generic_element_type elem_type;
+	char generic; // for generic queries like #t
+};
+
+struct ndb_filter_elements {
+	struct ndb_filter_field field;
+	int count;
+	union ndb_filter_element elements[0];
+};
+
+struct ndb_filter {
+	struct cursor elem_buf;
+	struct cursor data_buf;
+	int num_elements;
+	struct ndb_filter_elements *current;
+	struct ndb_filter_elements *elements[NDB_NUM_FILTERS];
+};
+
 // HELPERS
 int ndb_calculate_id(struct ndb_note *note, unsigned char *buf, int buflen);
 int ndb_sign_id(struct ndb_keypair *keypair, unsigned char id[32], unsigned char sig[64]);
@@ -268,6 +313,18 @@ void ndb_builder_set_id(struct ndb_builder *builder, unsigned char *id);
 void ndb_builder_set_kind(struct ndb_builder *builder, uint32_t kind);
 int ndb_builder_new_tag(struct ndb_builder *builder);
 int ndb_builder_push_tag_str(struct ndb_builder *builder, const char *str, int len);
+
+// FILTERS
+int ndb_filter_init(struct ndb_filter *);
+int ndb_filter_add_id_element(struct ndb_filter *, const unsigned char *id);
+int ndb_filter_add_int_element(struct ndb_filter *, uint64_t integer);
+int ndb_filter_add_str_element(struct ndb_filter *, const char *str);
+int ndb_filter_start_field(struct ndb_filter *, enum ndb_filter_fieldtype);
+int ndb_filter_start_generic_field(struct ndb_filter *, char tag);
+int ndb_filter_matches(struct ndb_filter *, struct ndb_note *);
+void ndb_filter_reset(struct ndb_filter *);
+void ndb_filter_end_field(struct ndb_filter *);
+void ndb_filter_free(struct ndb_filter *filter);
 
 // stats
 int ndb_stat(struct ndb *ndb, struct ndb_stat *stat);
