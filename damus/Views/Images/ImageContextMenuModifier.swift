@@ -14,9 +14,9 @@ struct ImageContextMenuModifier: ViewModifier {
     let image: UIImage?
     let settings: UserSettingsStore
     
-    @State var qrCodeLink: String = ""
+    @State var qrCodeValue: String = ""
     @State var open_link_confirm: Bool = false
-    @State var no_link_found: Bool = false
+    @State var not_found: Bool = false
     
     @Binding var showShareSheet: Bool
     
@@ -41,7 +41,7 @@ struct ImageContextMenuModifier: ViewModifier {
                     Label(NSLocalizedString("Save Image", comment: "Context menu option to save an image."), image: "download")
                 }
                 Button {
-                    qrCodeLink = ""
+                    qrCodeValue = ""
                     guard let detector:CIDetector = CIDetector(ofType: CIDetectorTypeQRCode, context: nil, options: [CIDetectorAccuracy:CIDetectorAccuracyHigh]) else {
                         return
                     }
@@ -52,22 +52,22 @@ struct ImageContextMenuModifier: ViewModifier {
                     if let qrfeatures = features as? [CIQRCodeFeature] {
                         for feature in qrfeatures {
                             if let msgStr = feature.messageString {
-                                qrCodeLink += msgStr
+                                qrCodeValue = msgStr
                             }
                         }
                     }
                     
-                    if qrCodeLink == "" {
-                        no_link_found.toggle()
+                    if qrCodeValue == "" {
+                        not_found.toggle()
                     } else {
-                        if qrCodeLink.contains("lnurl") {
+                        if qrCodeValue.contains("lnurl") {
                             do {
-                                try open_with_wallet(wallet: settings.default_wallet.model, invoice: qrCodeLink)
+                                try open_with_wallet(wallet: settings.default_wallet.model, invoice: qrCodeValue)
                             }
                             catch {
-                                present_sheet(.select_wallet(invoice: qrCodeLink))
+                                present_sheet(.select_wallet(invoice: qrCodeValue))
                             }
-                        } else if let _ = URL(string: qrCodeLink) {
+                        } else if let _ = URL(string: qrCodeValue) {
                             open_link_confirm.toggle()
                         }
                     }
@@ -81,15 +81,18 @@ struct ImageContextMenuModifier: ViewModifier {
                 Label(NSLocalizedString("Share", comment: "Button to share an image."), image: "upload")
             }
         }
-        .alert(NSLocalizedString("Found \(qrCodeLink).\nOpen link?", comment: "Alert message asking if the user wants to open the link."), isPresented: $open_link_confirm) {
-            Button(NSLocalizedString("Open", comment: "Button to proceed with opening link."), role: .none) {
-                if let url = URL(string: qrCodeLink) {
+        .alert(NSLocalizedString("Found\n \(qrCodeValue)", comment: "Alert message asking if the user wants to open the link."), isPresented: $open_link_confirm) {
+            Button(NSLocalizedString("Open in browser", comment: "Button to open the value found in browser."), role: .none) {
+                if let url = URL(string: qrCodeValue) {
                     openURL(url)
                 }
             }
-            Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
+            Button(NSLocalizedString("Copy", comment: "Button to copy the value found."), role: .none) {
+                UIPasteboard.general.string = qrCodeValue
+            }
+            Button(NSLocalizedString("Cancel", comment: "Button to cancel any interaction with the QRCode link."), role: .cancel) {}
         }
-        .alert(NSLocalizedString("Unable to find a QR Code", comment: "Alert message letting user know a link was not found."), isPresented: $no_link_found) {
+        .alert(NSLocalizedString("Unable to find a QR Code", comment: "Alert message letting user know a QR Code was not found."), isPresented: $not_found) {
             Button(NSLocalizedString("Dismiss", comment: "Button to dismiss alert"), role: .cancel) {}
         }
     }
