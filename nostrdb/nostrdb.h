@@ -37,10 +37,11 @@ enum ndb_dbs {
 	NDB_DB_META,
 	NDB_DB_PROFILE,
 	NDB_DB_NOTE_ID,
-	NDB_DB_PROFILE_PK,
+	NDB_DB_PROFILE_PK, // profile pk index
 	NDB_DB_NDB_META,
 	NDB_DB_PROFILE_SEARCH,
 	NDB_DB_PROFILE_LAST_FETCH,
+	NDB_DB_NOTE_KIND, // note kind index
 	NDB_DBS,
 };
 
@@ -525,6 +526,8 @@ ndb_db_name(enum ndb_dbs db)
 			return "profile_search";
 		case NDB_DB_PROFILE_LAST_FETCH:
 			return "profile_last_fetch";
+		case NDB_DB_NOTE_KIND:
+			return "note_kind_index";
 		case NDB_DBS:
 			return "count";
 	}
