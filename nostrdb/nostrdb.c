@@ -127,6 +127,12 @@ struct ndb_tsid {
 	uint64_t timestamp;
 };
 
+// A u64 + timestamp id. Just using this for kinds at the moment.
+struct ndb_u64_tsid {
+	uint64_t u64; // kind, etc
+	uint64_t timestamp;
+};
+
 // Copies only lowercase characters to the destination string and fills the rest with null bytes.
 // `dst` and `src` are pointers to the destination and source strings, respectively.
 // `n` is the maximum number of characters to copy.
@@ -751,6 +757,27 @@ static int mdb_cmp_memn(const MDB_val *a, const MDB_val *b) {
 
 	diff = memcmp(a->mv_data, b->mv_data, len);
 	return diff ? diff : len_diff<0 ? -1 : len_diff;
+}
+
+// custom kind+timestamp comparison function. This is used by lmdb to perform
+// b+ tree searches over the kind+timestamp index
+static int ndb_u64_tsid_compare(const MDB_val *a, const MDB_val *b)
+{
+	struct ndb_u64_tsid *tsa, *tsb;
+	tsa = a->mv_data;
+	tsb = b->mv_data;
+
+	if (tsa->u64 < tsb->u64)
+		return -1;
+	else if (tsa->u64 > tsb->u64)
+		return 1;
+
+	if (tsa->timestamp < tsb->timestamp)
+		return -1;
+	else if (tsa->timestamp > tsb->timestamp)
+		return 1;
+
+	return 0;
 }
 
 static int ndb_tsid_compare(const MDB_val *a, const MDB_val *b)
