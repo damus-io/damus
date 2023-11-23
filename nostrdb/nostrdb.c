@@ -425,7 +425,7 @@ static int ndb_generic_filter_matches(struct ndb_filter_elements *els,
 			continue;
 
 		// do we have #e matching e (or p, etc)
-		if (str.str[0] != els->field.generic)
+		if (str.str[0] != els->field.generic || str.str[1] != 0)
 			continue;
 
 		str = ndb_note_str(note, &it->tag->strs[1]);
