@@ -438,6 +438,9 @@
 		D72A2D072AD9C1FB002AFF62 /* MockProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2D062AD9C1FB002AFF62 /* MockProfiles.swift */; };
 		D7315A2A2ACDF3B70036E30A /* DamusCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7315A292ACDF3B70036E30A /* DamusCacheManager.swift */; };
 		D7315A2C2ACDF4DA0036E30A /* DamusCacheManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7315A2B2ACDF4DA0036E30A /* DamusCacheManagerTests.swift */; };
+		D7453F7C2B0EDA2E00D6F98B /* NotificationsDisplayedCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7453F7B2B0EDA2E00D6F98B /* NotificationsDisplayedCache.swift */; };
+		D7453F7D2B0EDA2E00D6F98B /* NotificationsDisplayedCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7453F7B2B0EDA2E00D6F98B /* NotificationsDisplayedCache.swift */; };
+		D7453F812B0F376C00D6F98B /* NotificationsDisplayedCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7453F802B0F376C00D6F98B /* NotificationsDisplayedCacheTests.swift */; };
 		D76874F32AE3632B00FB0F68 /* ProfileZapLinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76874F22AE3632B00FB0F68 /* ProfileZapLinkView.swift */; };
 		D77BFA0B2AE3051200621634 /* ProfileActionSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77BFA0A2AE3051200621634 /* ProfileActionSheetView.swift */; };
 		D783A63F2AD4E53D00658DDA /* SuggestedHashtagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D783A63E2AD4E53D00658DDA /* SuggestedHashtagsView.swift */; };
@@ -1247,6 +1250,8 @@
 		D72A2D062AD9C1FB002AFF62 /* MockProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockProfiles.swift; sourceTree = "<group>"; };
 		D7315A292ACDF3B70036E30A /* DamusCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusCacheManager.swift; sourceTree = "<group>"; };
 		D7315A2B2ACDF4DA0036E30A /* DamusCacheManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusCacheManagerTests.swift; sourceTree = "<group>"; };
+		D7453F7B2B0EDA2E00D6F98B /* NotificationsDisplayedCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsDisplayedCache.swift; sourceTree = "<group>"; };
+		D7453F802B0F376C00D6F98B /* NotificationsDisplayedCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsDisplayedCacheTests.swift; sourceTree = "<group>"; };
 		D76874F22AE3632B00FB0F68 /* ProfileZapLinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileZapLinkView.swift; sourceTree = "<group>"; };
 		D77BFA0A2AE3051200621634 /* ProfileActionSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileActionSheetView.swift; sourceTree = "<group>"; };
 		D783A63E2AD4E53D00658DDA /* SuggestedHashtagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedHashtagsView.swift; sourceTree = "<group>"; };
@@ -1754,6 +1759,7 @@
 				4C54AA0929A55429003E4487 /* EventGroup.swift */,
 				4C54AA0B29A5543C003E4487 /* ZapGroup.swift */,
 				4C9AA1492A4587A6003F49FD /* NotificationStatusModel.swift */,
+				D7453F7B2B0EDA2E00D6F98B /* NotificationsDisplayedCache.swift */,
 			);
 			path = Notifications;
 			sourceTree = "<group>";
@@ -2332,6 +2338,7 @@
 				D71DC1EB2A9129C3006E207C /* PostViewTests.swift */,
 				D72A2CFF2AD9B66B002AFF62 /* EventViewTests.swift */,
 				D7315A2B2ACDF4DA0036E30A /* DamusCacheManagerTests.swift */,
+				D7453F802B0F376C00D6F98B /* NotificationsDisplayedCacheTests.swift */,
 			);
 			path = damusTests;
 			sourceTree = "<group>";
@@ -3117,6 +3124,7 @@
 				4C9147002A2A891E00DDEA40 /* error.c in Sources */,
 				4CE879552996BAB900F758CC /* RelayPaidDetail.swift in Sources */,
 				4C1253602A76CF890004F4B8 /* ScrollToTopNotify.swift in Sources */,
+				D7453F7C2B0EDA2E00D6F98B /* NotificationsDisplayedCache.swift in Sources */,
 				4CA3529E2A76AE67003BB08B /* FollowNotify.swift in Sources */,
 				4CF0ABD42980996B00D66079 /* Report.swift in Sources */,
 				4C06670B28FDE64700038D2A /* damus.c in Sources */,
@@ -3169,6 +3177,7 @@
 				4C9B0DEE2A65A75F00CBDA21 /* AttrStringTestExtensions.swift in Sources */,
 				4C19AE552A5D977400C90DB7 /* HashtagTests.swift in Sources */,
 				3A3040ED29A5CB86008A0F29 /* ReplyDescriptionTests.swift in Sources */,
+				D7453F812B0F376C00D6F98B /* NotificationsDisplayedCacheTests.swift in Sources */,
 				D71DC1EC2A9129C3006E207C /* PostViewTests.swift in Sources */,
 				3AAC7A022A60FE72002B50DF /* LocalizationUtilTests.swift in Sources */,
 				D7DEEF2F2A8C021E00E0C99F /* NostrEventTests.swift in Sources */,
@@ -3286,6 +3295,7 @@
 				D7CE1B2C2B0BE24B002EDAD4 /* amount.c in Sources */,
 				D7CE1B202B0BE1C8002EDAD4 /* error.c in Sources */,
 				D798D22D2B086DC400234419 /* NostrEvent.swift in Sources */,
+				D7453F7D2B0EDA2E00D6F98B /* NotificationsDisplayedCache.swift in Sources */,
 				D798D22E2B086E4800234419 /* NostrResponse.swift in Sources */,
 				D7CE1B302B0BE263002EDAD4 /* nostr_bech32.c in Sources */,
 				D7CCFC132B05887C00323D86 /* ProofOfWork.swift in Sources */,

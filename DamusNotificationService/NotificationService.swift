@@ -25,6 +25,14 @@ class NotificationService: UNNotificationServiceExtension {
             return;
         }
         
+        // Don't show notifications that were already shown (e.g. by a local notification)
+        guard let note_id = NoteId(hex: nostrEventInfo.id),
+              NotificationsDisplayedCache.shared.check_and_register(note_id: note_id) == false else {
+            // Don't deliver the notification to the user.
+            contentHandler(UNNotificationContent())
+            return
+        }
+        
         // Log that we got a push notification
         if let pubkey = Pubkey(hex: nostrEventInfo.pubkey),
            let txn = ndb?.lookup_profile(pubkey) {

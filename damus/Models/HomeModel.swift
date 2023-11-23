@@ -1216,6 +1216,11 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
     guard ev.age < HomeModel.event_max_age_for_notification else {
         return
     }
+    
+    // Don't show notifications that were already shown (e.g. by a push notification)
+    guard NotificationsDisplayedCache.shared.check_and_register(note_id: ev.id) == false else {
+        return
+    }
 
     if type == .text, damus_state.settings.mention_notification {
         let blocks = ev.blocks(damus_state.keypair).blocks
