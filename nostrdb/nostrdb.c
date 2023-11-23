@@ -2170,13 +2170,13 @@ static int ndb_init_lmdb(const char *filename, struct ndb_lmdb *lmdb, size_t map
 
 	// index dbs
 	if ((rc = mdb_dbi_open(txn, "note_id", tsid_flags, &lmdb->dbs[NDB_DB_NOTE_ID]))) {
-		fprintf(stderr, "mdb_dbi_open id failed, error %d\n", rc);
+		fprintf(stderr, "mdb_dbi_open id failed: %s\n", mdb_strerror(rc));
 		return 0;
 	}
 	mdb_set_compare(txn, lmdb->dbs[NDB_DB_NOTE_ID], ndb_tsid_compare);
 
 	if ((rc = mdb_dbi_open(txn, "profile_pk", tsid_flags, &lmdb->dbs[NDB_DB_PROFILE_PK]))) {
-		fprintf(stderr, "mdb_dbi_open id failed, error %d\n", rc);
+		fprintf(stderr, "mdb_dbi_open id failed: %s\n", mdb_strerror(rc));
 		return 0;
 	}
 	mdb_set_compare(txn, lmdb->dbs[NDB_DB_PROFILE_PK], ndb_tsid_compare);
