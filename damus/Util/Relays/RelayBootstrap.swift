@@ -19,6 +19,16 @@ let REGION_SPECIFIC_BOOTSTRAP_RELAYS: [Locale.Region: [String]] = [
         "wss://relay-jp.nostr.wirednet.jp",
         "wss://yabu.me",
         "wss://r.kojira.io",
+    ],
+    Locale.Region.thailand: [
+        "wss://relay.siamstr.com",
+        "wss://relay.zerosatoshi.xyz",
+        "wss://th2.nostr.earnkrub.xyz",
+    ],
+    Locale.Region.germany: [
+        "wss://nostr.einundzwanzig.space",
+        "wss://nostr.cercatrova.me",
+        "wss://nostr.bitcoinplebs.de",
     ]
 ]
 
