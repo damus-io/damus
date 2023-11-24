@@ -430,7 +430,6 @@
 		BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */; };
 		D2277EEA2A089BD5006C3807 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2277EE92A089BD5006C3807 /* Router.swift */; };
 		D70A3B172B02DCE5008BD568 /* NotificationFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */; };
-		D70A3B192B02DD2D008BD568 /* NostrEventInfoFromPushNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70A3B182B02DD2D008BD568 /* NostrEventInfoFromPushNotification.swift */; };
 		D71DC1EC2A9129C3006E207C /* PostViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71DC1EB2A9129C3006E207C /* PostViewTests.swift */; };
 		D723C38E2AB8D83400065664 /* ContentFilters.swift in Sources */ = {isa = PBXBuildFile; fileRef = D723C38D2AB8D83400065664 /* ContentFilters.swift */; };
 		D72A2D022AD9C136002AFF62 /* EventViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2CFF2AD9B66B002AFF62 /* EventViewTests.swift */; };
@@ -466,6 +465,8 @@
 		D79C4C1B2AFEB061003A41B4 /* DamusNotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D79C4C142AFEB061003A41B4 /* DamusNotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D7A343EE2AD0D77C00CED48B /* InlineSnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = D7A343ED2AD0D77C00CED48B /* InlineSnapshotTesting */; };
 		D7A343F02AD0D77C00CED48B /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = D7A343EF2AD0D77C00CED48B /* SnapshotTesting */; };
+		D7CB5D3B2B112FBB00AD4105 /* NotificationFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */; };
+		D7CB5D3C2B1130C600AD4105 /* LocalNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDA128B29EB19C40006FA5A /* LocalNotification.swift */; };
 		D7CCFC072B05833200323D86 /* NdbNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90548A2A6AEDEE00811EEC /* NdbNote.swift */; };
 		D7CCFC082B05834500323D86 /* NoteId.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC14FF42A740BB7007AEB17 /* NoteId.swift */; };
 		D7CCFC0B2B0585EA00323D86 /* nostrdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CE9FBB82A6B3B26007E485C /* nostrdb.c */; settings = {COMPILER_FLAGS = "-w"; }; };
@@ -529,7 +530,6 @@
 		D7CE1B482B0BE719002EDAD4 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B93D2A9AD44700DC3548 /* Message.swift */; };
 		D7CE1B492B0BE729002EDAD4 /* DisplayName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9BB83029C0ED4F00FC4E37 /* DisplayName.swift */; };
 		D7DBD41F2B02F15E002A6197 /* NostrKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFD32819DE8F00B3DE84 /* NostrKind.swift */; };
-		D7DBD4202B0307C7002A6197 /* NostrEventInfoFromPushNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70A3B182B02DD2D008BD568 /* NostrEventInfoFromPushNotification.swift */; };
 		D7DEEF2F2A8C021E00E0C99F /* NostrEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */; };
 		D7FB10A72B0C371A00FA8D42 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2B10272A7B0F5C008AA43E /* Log.swift */; };
 		D7FF94002AC7AC5300FD969D /* RelayURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FF93FF2AC7AC5200FD969D /* RelayURL.swift */; };
@@ -1239,7 +1239,6 @@
 		BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectWalletView.swift; sourceTree = "<group>"; };
 		D2277EE92A089BD5006C3807 /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationFormatter.swift; sourceTree = "<group>"; };
-		D70A3B182B02DD2D008BD568 /* NostrEventInfoFromPushNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrEventInfoFromPushNotification.swift; sourceTree = "<group>"; };
 		D71DC1EB2A9129C3006E207C /* PostViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostViewTests.swift; sourceTree = "<group>"; };
 		D723C38D2AB8D83400065664 /* ContentFilters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentFilters.swift; sourceTree = "<group>"; };
 		D72A2CFF2AD9B66B002AFF62 /* EventViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventViewTests.swift; sourceTree = "<group>"; };
@@ -2476,7 +2475,6 @@
 				D79C4C162AFEB061003A41B4 /* NotificationService.swift */,
 				D79C4C182AFEB061003A41B4 /* Info.plist */,
 				D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */,
-				D70A3B182B02DD2D008BD568 /* NostrEventInfoFromPushNotification.swift */,
 			);
 			path = DamusNotificationService;
 			sourceTree = "<group>";
@@ -2890,7 +2888,6 @@
 				9C83F89329A937B900136C08 /* TextViewWrapper.swift in Sources */,
 				4C1253502A76C5B20004F4B8 /* UnfollowedNotify.swift in Sources */,
 				4C86F7C62A76C51100EC0817 /* AttachedWalletNotify.swift in Sources */,
-				D7DBD4202B0307C7002A6197 /* NostrEventInfoFromPushNotification.swift in Sources */,
 				4CF0ABE12981A83900D66079 /* MutelistView.swift in Sources */,
 				4CB883A82975FC1800DC99E7 /* Zaps.swift in Sources */,
 				4C75EFB128049D510006080F /* NostrResponse.swift in Sources */,
@@ -2914,6 +2911,7 @@
 				BA3759932ABCCEBA0018D73B /* CameraModel.swift in Sources */,
 				4C0A3F8F280F640A000448DE /* ThreadModel.swift in Sources */,
 				4C3AC79F2833115300E1F516 /* FollowButtonView.swift in Sources */,
+				D7CB5D3B2B112FBB00AD4105 /* NotificationFormatter.swift in Sources */,
 				4C4E137B2A76D5FB00BDD832 /* MuteThreadNotify.swift in Sources */,
 				4CC7AAE7297EFA7B00430951 /* Zap.swift in Sources */,
 				4C12535A2A76C9960004F4B8 /* UnfollowNotify.swift in Sources */,
@@ -3244,7 +3242,6 @@
 				D7CE1B292B0BE239002EDAD4 /* node_id.c in Sources */,
 				D7CE1B2E2B0BE25C002EDAD4 /* talstr.c in Sources */,
 				D798D2292B08686C00234419 /* ContentParsing.swift in Sources */,
-				D70A3B192B02DD2D008BD568 /* NostrEventInfoFromPushNotification.swift in Sources */,
 				D798D2242B0859C900234419 /* LocalizationUtil.swift in Sources */,
 				D7CE1B322B0BE6C3002EDAD4 /* NdbTxn.swift in Sources */,
 				D7CE1B372B0BE719002EDAD4 /* Verifier.swift in Sources */,
@@ -3295,6 +3292,7 @@
 				D798D2262B085C4200234419 /* Bech32.swift in Sources */,
 				D7CE1B482B0BE719002EDAD4 /* Message.swift in Sources */,
 				D7CE1B1E2B0BE190002EDAD4 /* midl.c in Sources */,
+				D7CB5D3C2B1130C600AD4105 /* LocalNotification.swift in Sources */,
 				D7CE1B2D2B0BE250002EDAD4 /* take.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -1217,6 +1217,18 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
         return
     }
 
+    guard let local_notification = generate_local_notification_object(from: ev, damus_state: damus_state) else {
+        return
+    }
+    create_local_notification(profiles: damus_state.profiles, notify: local_notification)
+}
+
+// TODO: Further break down this function and related functionality so that we can use this from the Notification service extension
+func generate_local_notification_object(from ev: NostrEvent, damus_state: DamusState) -> LocalNotification? {
+    guard let type = ev.known_kind else {
+        return nil
+    }
+    
     if type == .text, damus_state.settings.mention_notification {
         let blocks = ev.blocks(damus_state.keypair).blocks
         for case .mention(let mention) in blocks {
@@ -1224,56 +1236,30 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
                 continue
             }
             let content_preview = render_notification_content_preview(cache: damus_state.events, ev: ev, profiles: damus_state.profiles, keypair: damus_state.keypair)
-            let notify = LocalNotification(type: .mention, event: ev, target: ev, content: content_preview)
-            create_local_notification(profiles: damus_state.profiles, notify: notify )
+            return LocalNotification(type: .mention, event: ev, target: ev, content: content_preview)
         }
     } else if type == .boost,
               damus_state.settings.repost_notification,
               let inner_ev = ev.get_inner_event(cache: damus_state.events)
     {
         let content_preview = render_notification_content_preview(cache: damus_state.events, ev: inner_ev, profiles: damus_state.profiles, keypair: damus_state.keypair)
-        let notify = LocalNotification(type: .repost, event: ev, target: inner_ev, content: content_preview)
-        create_local_notification(profiles: damus_state.profiles, notify: notify)
+        return LocalNotification(type: .repost, event: ev, target: inner_ev, content: content_preview)
     } else if type == .like,
               damus_state.settings.like_notification,
               let evid = ev.referenced_ids.last,
               let liked_event = damus_state.events.lookup(evid)
     {
         let content_preview = render_notification_content_preview(cache: damus_state.events, ev: liked_event, profiles: damus_state.profiles, keypair: damus_state.keypair)
-        let notify = LocalNotification(type: .like, event: ev, target: liked_event, content: content_preview)
-        create_local_notification(profiles: damus_state.profiles, notify: notify)
+        return LocalNotification(type: .like, event: ev, target: liked_event, content: content_preview)
     }
-
+    
+    return nil
 }
 
 func create_local_notification(profiles: Profiles, notify: LocalNotification) {
-    let content = UNMutableNotificationContent()
-    var title = ""
-    var identifier = ""
-    
     let displayName = event_author_name(profiles: profiles, pubkey: notify.event.pubkey)
     
-    switch notify.type {
-    case .mention:
-        title = String(format: NSLocalizedString("Mentioned by %@", comment: "Mentioned by heading in local notification"), displayName)
-        identifier = "myMentionNotification"
-    case .repost:
-        title = String(format: NSLocalizedString("Reposted by %@", comment: "Reposted by heading in local notification"), displayName)
-        identifier = "myBoostNotification"
-    case .like:
-        title = String(format: NSLocalizedString("%@ reacted with %@", comment: "Reacted by heading in local notification"), displayName, to_reaction_emoji(ev: notify.event) ?? "")
-        identifier = "myLikeNotification"
-    case .dm:
-        title = displayName
-        identifier = "myDMNotification"
-    case .zap, .profile_zap:
-        // not handled here
-        break
-    }
-    content.title = title
-    content.body = notify.content
-    content.sound = UNNotificationSound.default
-    content.userInfo = notify.to_lossy().to_user_info()
+    let (content, identifier) = NotificationFormatter.shared.format_message(displayName: displayName, notify: notify)
 
     let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
 
