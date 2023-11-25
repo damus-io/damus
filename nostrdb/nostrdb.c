@@ -814,6 +814,13 @@ static inline void ndb_tsid_init(struct ndb_tsid *key, unsigned char *id,
 	key->timestamp = timestamp;
 }
 
+static inline void ndb_u64_tsid_init(struct ndb_tsid *key, uint64_t integer,
+				     uint64_t timestamp)
+{
+	key->integer = integer;
+	key->timestamp = timestamp;
+}
+
 // useful for range-searching for the latest key with a clustered created_at timen
 static inline void ndb_tsid_high(struct ndb_tsid *key, const unsigned char *id)
 {
@@ -1844,6 +1851,32 @@ static int ndb_write_note_id_index(struct ndb_txn *txn, struct ndb_note *note,
 	return 1;
 }
 
+static int ndb_write_note_kind_index(struct ndb_txn *txn, struct ndb_note *note,
+				     uint64_t note_key)
+{
+	struct ndb_u64_tsid tsid;
+	int rc;
+	MDB_val key, val;
+	MDB_dbi kind_db;
+
+	ndb_u64_tsid_init(&tsid, note->kind, note->created_at);
+
+	key.mv_data = &tsid;
+	key.mv_size = sizeof(tsid);
+	val.mv_data = &note_key;
+	val.mv_size = sizeof(note_key);
+
+	kind_db = txn->lmdb->dbs[NDB_DB_NOTE_KIND];
+
+	if ((rc = mdb_put(txn->mdb_txn, id_db, &key, &val, 0))) {
+		ndb_debug("write note kind index to db failed: %s\n",
+				mdb_strerror(rc));
+		return 0;
+	}
+
+	return 1;
+}
+
 static uint64_t ndb_write_note(struct ndb_txn *txn,
 			       struct ndb_writer_note *note)
 {
@@ -1871,6 +1904,10 @@ static uint64_t ndb_write_note(struct ndb_txn *txn,
 
 	// write id index key clustered with created_at
 	if (!ndb_write_note_id_index(txn, note->note, note_key))
+		return 0;
+
+	// write note kind index
+	if (!ndb_write_note_kind_index(txn, note->note, note_key))
 		return 0;
 
 	if (note->note->kind == 7) {
