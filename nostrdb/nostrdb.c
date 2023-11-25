@@ -1602,19 +1602,45 @@ static int ndb_search_key_cmp(const MDB_val *a, const MDB_val *b)
 	return 0;
 }
 
+static int ndb_write_profile_pk_index(struct ndb_txn *txn, struct ndb_note *note, uint64_t profile_key)
+	
+{
+	MDB_val key, val;
+	int rc;
+	struct ndb_tsid tsid;
+	MDB_dbi pk_db;
+
+	pk_db = txn->lmdb->dbs[NDB_DB_PROFILE_PK];
+
+	// write profile_pk + created_at index
+	ndb_tsid_init(&tsid, note->pubkey, note->created_at);
+
+	key.mv_data = &tsid;
+	key.mv_size = sizeof(tsid);
+	val.mv_data = &profile_key;
+	val.mv_size = sizeof(profile_key);
+
+	if ((rc = mdb_put(txn->mdb_txn, pk_db, &key, &val, 0))) {
+		ndb_debug("write profile_pk(%" PRIu64 ") to db failed: %s\n",
+				profile_key, mdb_strerror(rc));
+		return 0;
+	}
+
+	return 1;
+}
+
 static int ndb_write_profile(struct ndb_txn *txn,
 			     struct ndb_writer_profile *profile,
 			     uint64_t note_key)
 {
 	uint64_t profile_key;
-	struct ndb_tsid tsid;
 	struct ndb_note *note;
 	void *flatbuf;
 	size_t flatbuf_len;
 	int rc;
 
 	MDB_val key, val;
-	MDB_dbi profile_db, pk_db;
+	MDB_dbi profile_db;
 	
 	note = profile->note.note;
 
@@ -1634,7 +1660,6 @@ static int ndb_write_profile(struct ndb_txn *txn,
 
 	// get dbs
 	profile_db = txn->lmdb->dbs[NDB_DB_PROFILE];
-	pk_db = txn->lmdb->dbs[NDB_DB_PROFILE_PK];
 
 	// get new key
 	profile_key = ndb_get_last_key(txn->mdb_txn, profile_db) + 1;
@@ -1644,20 +1669,11 @@ static int ndb_write_profile(struct ndb_txn *txn,
 	key.mv_size = sizeof(profile_key);
 	val.mv_data = flatbuf;
 	val.mv_size = flatbuf_len;
-	//ndb_debug("profile_len %ld\n", profile->profile_len);
 
 	if ((rc = mdb_put(txn->mdb_txn, profile_db, &key, &val, 0))) {
 		ndb_debug("write profile to db failed: %s\n", mdb_strerror(rc));
 		return 0;
 	}
-
-	// write profile_pk + created_at index
-	ndb_tsid_init(&tsid, note->pubkey, note->created_at);
-
-	key.mv_data = &tsid;
-	key.mv_size = sizeof(tsid);
-	val.mv_data = &profile_key;
-	val.mv_size = sizeof(profile_key);
 
 	// write last fetched record
 	if (!ndb_maybe_write_last_profile_fetch(txn, note)) {
@@ -1665,9 +1681,9 @@ static int ndb_write_profile(struct ndb_txn *txn,
 		return 0;
 	}
 
-	if ((rc = mdb_put(txn->mdb_txn, pk_db, &key, &val, 0))) {
-		ndb_debug("write profile_pk(%" PRIu64 ") to db failed: %s\n",
-				profile_key, mdb_strerror(rc));
+	// write profile pubkey index
+	if (!ndb_write_profile_pk_index(txn, note, profile_key)) {
+		ndb_debug("failed to write profile pubkey index\n");
 		return 0;
 	}
 
