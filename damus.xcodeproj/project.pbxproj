@@ -578,6 +578,8 @@
 		D7EDED2E2B128E8A0018B19C /* CollectionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EDED2D2B128E8A0018B19C /* CollectionExtension.swift */; };
 		D7EDED2F2B128E8A0018B19C /* CollectionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EDED2D2B128E8A0018B19C /* CollectionExtension.swift */; };
 		D7EDED312B1290B80018B19C /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = D7EDED302B1290B80018B19C /* MarkdownUI */; };
+		D7EDED332B12ACAE0018B19C /* DamusUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */; };
+		D7EDED342B12ACAE0018B19C /* DamusUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */; };
 		D7FB10A72B0C371A00FA8D42 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2B10272A7B0F5C008AA43E /* Log.swift */; };
 		D7FF94002AC7AC5300FD969D /* RelayURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FF93FF2AC7AC5200FD969D /* RelayURL.swift */; };
 		E4FA1C032A24BB7F00482697 /* SearchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */; };
@@ -1318,6 +1320,7 @@
 		D7EDED1D2B11797D0018B19C /* LongformEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongformEvent.swift; sourceTree = "<group>"; };
 		D7EDED202B117DCA0018B19C /* SequenceUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SequenceUtils.swift; sourceTree = "<group>"; };
 		D7EDED2D2B128E8A0018B19C /* CollectionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionExtension.swift; sourceTree = "<group>"; };
+		D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusUserDefaults.swift; sourceTree = "<group>"; };
 		D7FF93FF2AC7AC5200FD969D /* RelayURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayURL.swift; sourceTree = "<group>"; };
 		E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSettingsView.swift; sourceTree = "<group>"; };
 		E990020E2955F837003BBC5A /* EditMetadataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditMetadataView.swift; sourceTree = "<group>"; };
@@ -1524,6 +1527,7 @@
 				D7CB5D5E2B11770C00AD4105 /* FollowState.swift */,
 				D7EDED1B2B1178FE0018B19C /* NoteContent.swift */,
 				D7EDED1D2B11797D0018B19C /* LongformEvent.swift */,
+				D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -3026,6 +3030,7 @@
 				4C3AC7A12835A81400E1F516 /* SetupView.swift in Sources */,
 				4C06670128FC7C5900038D2A /* RelayView.swift in Sources */,
 				4C285C8C28398BC7008A31F1 /* Keys.swift in Sources */,
+				D7EDED332B12ACAE0018B19C /* DamusUserDefaults.swift in Sources */,
 				4CA352AE2A76C1AC003BB08B /* FollowedNotify.swift in Sources */,
 				4CACA9DC280C38C000D9BBE8 /* Profiles.swift in Sources */,
 				4CE879582996C45300F758CC /* ZapsView.swift in Sources */,
@@ -3308,6 +3313,7 @@
 				D7CB5D412B116F0900AD4105 /* StringCodable.swift in Sources */,
 				D7CE1B1F2B0BE1B8002EDAD4 /* damus.c in Sources */,
 				D7CE1B1B2B0BE144002EDAD4 /* emitter.c in Sources */,
+				D7EDED342B12ACAE0018B19C /* DamusUserDefaults.swift in Sources */,
 				D7CB5D562B11759900AD4105 /* MuteThreadNotify.swift in Sources */,
 				D7EDED182B1177A00018B19C /* LNUrlPayRequest.swift in Sources */,
 				D798D21C2B0857E400234419 /* Bech32Object.swift in Sources */,
