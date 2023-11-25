@@ -1817,18 +1817,43 @@ static int ndb_write_reaction_stats(struct ndb_txn *txn, struct ndb_note *note)
 }
 
 
+static int ndb_write_note_id_index(struct ndb_txn *txn, struct ndb_note *note,
+				   uint64_t note_key)
+	
+{
+	struct ndb_tsid tsid;
+	int rc;
+	MDB_val key, val;
+	MDB_dbi id_db;
+
+	ndb_tsid_init(&tsid, note->id, note->created_at);
+
+	key.mv_data = &tsid;
+	key.mv_size = sizeof(tsid);
+	val.mv_data = &note_key;
+	val.mv_size = sizeof(note_key);
+
+	id_db = txn->lmdb->dbs[NDB_DB_NOTE_ID];
+
+	if ((rc = mdb_put(txn->mdb_txn, id_db, &key, &val, 0))) {
+		ndb_debug("write note id index to db failed: %s\n",
+				mdb_strerror(rc));
+		return 0;
+	}
+
+	return 1;
+}
+
 static uint64_t ndb_write_note(struct ndb_txn *txn,
 			       struct ndb_writer_note *note)
 {
 	int rc;
 	uint64_t note_key;
-	struct ndb_tsid tsid;
-	MDB_dbi note_db, id_db;
+	MDB_dbi note_db;
 	MDB_val key, val;
 	
 	// get dbs
 	note_db = txn->lmdb->dbs[NDB_DB_NOTE];
-	id_db = txn->lmdb->dbs[NDB_DB_NOTE_ID];
 
 	// get new key
 	note_key = ndb_get_last_key(txn->mdb_txn, note_db) + 1;
@@ -1845,18 +1870,8 @@ static uint64_t ndb_write_note(struct ndb_txn *txn,
 	}
 
 	// write id index key clustered with created_at
-	ndb_tsid_init(&tsid, note->note->id, note->note->created_at);
-
-	key.mv_data = &tsid;
-	key.mv_size = sizeof(tsid);
-	val.mv_data = &note_key;
-	val.mv_size = sizeof(note_key);
-
-	if ((rc = mdb_put(txn->mdb_txn, id_db, &key, &val, 0))) {
-		ndb_debug("write note id index to db failed: %s\n",
-				mdb_strerror(rc));
+	if (!ndb_write_note_id_index(txn, note->note, note_key))
 		return 0;
-	}
 
 	if (note->note->kind == 7) {
 		ndb_write_reaction_stats(txn, note->note);
