@@ -7,26 +7,6 @@
 
 import SwiftUI
 
-enum ZapType: String, StringCodable {
-    case pub
-    case anon
-    case priv
-    case non_zap
-    
-    init?(from string: String) {
-        guard let v = ZapType(rawValue: string) else {
-            return nil
-        }
-        
-        self = v
-    }
-    
-    func to_string() -> String {
-        return self.rawValue
-    }
-    
-}
-
 struct ZapTypePicker: View {
     @Binding var zap_type: ZapType
     @ObservedObject var settings: UserSettingsStore

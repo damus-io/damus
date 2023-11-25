@@ -8,21 +8,6 @@
 import Foundation
 import UIKit
 
-struct NewEventsBits: OptionSet {
-    let rawValue: Int
-    
-    static let home = NewEventsBits(rawValue: 1 << 0)
-    static let zaps = NewEventsBits(rawValue: 1 << 1)
-    static let mentions = NewEventsBits(rawValue: 1 << 2)
-    static let reposts = NewEventsBits(rawValue: 1 << 3)
-    static let likes = NewEventsBits(rawValue: 1 << 4)
-    static let search = NewEventsBits(rawValue: 1 << 5)
-    static let dms = NewEventsBits(rawValue: 1 << 6)
-    
-    static let all = NewEventsBits(rawValue: 0xFFFFFFFF)
-    static let notifications: NewEventsBits = [.zaps, .likes, .reposts, .mentions]
-}
-
 enum Resubscribe {
     case following
     case unfollowing(FollowRef)
@@ -58,7 +43,7 @@ enum HomeResubFilter {
 
 class HomeModel {
     // Don't trigger a user notification for events older than a certain age
-    static let event_max_age_for_notification: TimeInterval = 12 * 60 * 60
+    static let event_max_age_for_notification: TimeInterval = EVENT_MAX_AGE_FOR_NOTIFICATION
     
     var damus_state: DamusState
 
@@ -1174,104 +1159,16 @@ func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: 
     }
 }
 
-func render_notification_content_preview(cache: EventCache, ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> String {
-
-    let prefix_len = 300
-    let artifacts = cache.get_cache_data(ev.id).artifacts.artifacts ?? render_note_content(ev: ev, profiles: profiles, keypair: keypair)
-
-    // special case for longform events
-    if ev.known_kind == .longform {
-        let longform = LongformEvent(event: ev)
-        return longform.title ?? longform.summary ?? "Longform Event"
-    }
-    
-    switch artifacts {
-    case .longform:
-        // we should never hit this until we have more note types built out of parts
-        // since we handle this case above in known_kind == .longform
-        return String(ev.content.prefix(prefix_len))
-        
-    case .separated(let artifacts):
-        return String(NSAttributedString(artifacts.content.attributed).string.prefix(prefix_len))
-    }
-}
-    
 func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
-    guard let type = ev.known_kind else {
-        return
-    }
-
-    if damus_state.settings.notification_only_from_following,
-       damus_state.contacts.follow_state(ev.pubkey) != .follows
-        {
-        return
-    }
-
-    // Don't show notifications from muted threads.
-    if damus_state.muted_threads.isMutedThread(ev, keypair: damus_state.keypair) {
-        return
-    }
-    
-    // Don't show notifications for old events
-    guard ev.age < HomeModel.event_max_age_for_notification else {
-        return
-    }
-
-    guard let local_notification = generate_local_notification_object(from: ev, damus_state: damus_state) else {
-        return
-    }
-    create_local_notification(profiles: damus_state.profiles, notify: local_notification)
-}
-
-// TODO: Further break down this function and related functionality so that we can use this from the Notification service extension
-func generate_local_notification_object(from ev: NostrEvent, damus_state: DamusState) -> LocalNotification? {
-    guard let type = ev.known_kind else {
-        return nil
-    }
-    
-    if type == .text, damus_state.settings.mention_notification {
-        let blocks = ev.blocks(damus_state.keypair).blocks
-        for case .mention(let mention) in blocks {
-            guard case .pubkey(let pk) = mention.ref, pk == damus_state.keypair.pubkey else {
-                continue
-            }
-            let content_preview = render_notification_content_preview(cache: damus_state.events, ev: ev, profiles: damus_state.profiles, keypair: damus_state.keypair)
-            return LocalNotification(type: .mention, event: ev, target: ev, content: content_preview)
-        }
-    } else if type == .boost,
-              damus_state.settings.repost_notification,
-              let inner_ev = ev.get_inner_event(cache: damus_state.events)
-    {
-        let content_preview = render_notification_content_preview(cache: damus_state.events, ev: inner_ev, profiles: damus_state.profiles, keypair: damus_state.keypair)
-        return LocalNotification(type: .repost, event: ev, target: inner_ev, content: content_preview)
-    } else if type == .like,
-              damus_state.settings.like_notification,
-              let evid = ev.referenced_ids.last,
-              let liked_event = damus_state.events.lookup(evid)
-    {
-        let content_preview = render_notification_content_preview(cache: damus_state.events, ev: liked_event, profiles: damus_state.profiles, keypair: damus_state.keypair)
-        return LocalNotification(type: .like, event: ev, target: liked_event, content: content_preview)
-    }
-    
-    return nil
-}
-
-func create_local_notification(profiles: Profiles, notify: LocalNotification) {
-    let displayName = event_author_name(profiles: profiles, pubkey: notify.event.pubkey)
-    
-    let (content, identifier) = NotificationFormatter.shared.format_message(displayName: displayName, notify: notify)
-
-    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-
-    let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
-
-    UNUserNotificationCenter.current().add(request) { error in
-        if let error = error {
-            print("Error: \(error)")
-        } else {
-            print("Local notification scheduled")
-        }
-    }
+    process_local_notification(
+        ndb: damus_state.ndb,
+        settings: damus_state.settings,
+        contacts: damus_state.contacts,
+        muted_threads: damus_state.muted_threads,
+        user_keypair: damus_state.keypair,
+        profiles: damus_state.profiles,
+        event: ev
+    )
 }
 
 
@@ -1279,21 +1176,6 @@ enum ProcessZapResult {
     case already_processed(Zap)
     case done(Zap)
     case failed
-}
-
-extension Sequence {
-    func just_one() -> Element? {
-        var got_one = false
-        var the_x: Element? = nil
-        for x in self {
-            guard !got_one else {
-                return nil
-            }
-            the_x = x
-            got_one = true
-        }
-        return the_x
-    }
 }
 
 // securely get the zap target's pubkey. this can be faked so we need to be

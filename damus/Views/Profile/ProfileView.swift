@@ -7,13 +7,6 @@
 
 import SwiftUI
 
-enum FollowState {
-    case follows
-    case following
-    case unfollowing
-    case unfollows
-}
-
 func follow_btn_txt(_ fs: FollowState, follows_you: Bool) -> String {
     switch fs {
     case .follows:

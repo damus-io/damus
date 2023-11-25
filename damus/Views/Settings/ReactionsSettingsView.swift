@@ -8,8 +8,6 @@
 import SwiftUI
 import Combine
 
-let default_emoji_reactions = ["🤣", "🤙", "⚡", "💜", "🔥", "😀", "😃", "😄", "🥶"]
-
 struct ReactionsSettingsView: View {
     @ObservedObject var settings: UserSettingsStore
     

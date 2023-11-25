@@ -68,12 +68,6 @@ func determine_reacting_to(our_pubkey: Pubkey, ev: NostrEvent?) -> ReactingTo {
     return .tagged_in
 }
 
-func event_author_name(profiles: Profiles, pubkey: Pubkey) -> String {
-    return profiles.lookup(id: pubkey).map({ profile in
-        Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
-    }).value
-}
-
 func event_group_unique_pubkeys(profiles: Profiles, group: EventGroupType) -> [Pubkey] {
     var seen = Set<Pubkey>()
     var sorted = [Pubkey]()
