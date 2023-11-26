@@ -12,67 +12,74 @@ import UIKit
 
 let EVENT_MAX_AGE_FOR_NOTIFICATION: TimeInterval = 12 * 60 * 60
 
-func process_local_notification(ndb: Ndb, settings: UserSettingsStore, contacts: Contacts, muted_threads: MutedThreadsManager, user_keypair: Keypair, profiles: Profiles, event ev: NostrEvent) {
-    if ev.known_kind == nil {
+func process_local_notification(state: HeadlessDamusState, event ev: NostrEvent) {
+    guard should_display_notification(state: state, event: ev) else {
+        // We should not display notification. Exit.
         return
     }
 
-    if settings.notification_only_from_following,
-       contacts.follow_state(ev.pubkey) != .follows
-        {
+    guard let local_notification = generate_local_notification_object(from: ev, state: state) else {
         return
+    }
+    create_local_notification(profiles: state.profiles, notify: local_notification)
+}
+
+func should_display_notification(state: HeadlessDamusState, event ev: NostrEvent) -> Bool {
+    if ev.known_kind == nil {
+        return false
+    }
+
+    if state.settings.notification_only_from_following,
+       state.contacts.follow_state(ev.pubkey) != .follows
+        {
+        return false
     }
 
     // Don't show notifications from muted threads.
-    if muted_threads.isMutedThread(ev, keypair: user_keypair) {
-        return
+    if state.muted_threads.isMutedThread(ev, keypair: state.keypair) {
+        return false
     }
     
     // Don't show notifications for old events
     guard ev.age < EVENT_MAX_AGE_FOR_NOTIFICATION else {
-        return
+        return false
     }
-
-    guard let local_notification = generate_local_notification_object(
-        ndb: ndb,
-        from: ev,
-        settings: settings,
-        user_keypair: user_keypair,
-        profiles: profiles
-    ) else {
-        return
-    }
-    create_local_notification(profiles: profiles, notify: local_notification)
+    
+    return true
 }
 
-
-func generate_local_notification_object(ndb: Ndb, from ev: NostrEvent, settings: UserSettingsStore, user_keypair: Keypair, profiles: Profiles) -> LocalNotification? {
+func generate_local_notification_object(from ev: NostrEvent, state: HeadlessDamusState) -> LocalNotification? {
     guard let type = ev.known_kind else {
         return nil
     }
     
-    if type == .text, settings.mention_notification {
-        let blocks = ev.blocks(user_keypair).blocks
+    if type == .text, state.settings.mention_notification {
+        let blocks = ev.blocks(state.keypair).blocks
         for case .mention(let mention) in blocks {
-            guard case .pubkey(let pk) = mention.ref, pk == user_keypair.pubkey else {
+            guard case .pubkey(let pk) = mention.ref, pk == state.keypair.pubkey else {
                 continue
             }
-            let content_preview = render_notification_content_preview(ev: ev, profiles: profiles, keypair: user_keypair)
+            let content_preview = render_notification_content_preview(ev: ev, profiles: state.profiles, keypair: state.keypair)
             return LocalNotification(type: .mention, event: ev, target: ev, content: content_preview)
         }
     } else if type == .boost,
-              settings.repost_notification,
+              state.settings.repost_notification,
               let inner_ev = ev.get_inner_event()
     {
-        let content_preview = render_notification_content_preview(ev: inner_ev, profiles: profiles, keypair: user_keypair)
+        let content_preview = render_notification_content_preview(ev: inner_ev, profiles: state.profiles, keypair: state.keypair)
         return LocalNotification(type: .repost, event: ev, target: inner_ev, content: content_preview)
     } else if type == .like,
-              settings.like_notification,
+              state.settings.like_notification,
               let evid = ev.referenced_ids.last,
-              let liked_event = ndb.lookup_note(evid).unsafeUnownedValue   // We are only accessing it temporarily to generate notification content
+              let liked_event = state.ndb.lookup_note(evid).unsafeUnownedValue   // We are only accessing it temporarily to generate notification content
     {
-        let content_preview = render_notification_content_preview(ev: liked_event, profiles: profiles, keypair: user_keypair)
+        let content_preview = render_notification_content_preview(ev: liked_event, profiles: state.profiles, keypair: state.keypair)
         return LocalNotification(type: .like, event: ev, target: liked_event, content: content_preview)
+    }
+    else if type == .dm,
+            state.settings.dm_notification {
+        let convo = ev.decrypted(keypair: state.keypair) ?? NSLocalizedString("New encrypted direct message", comment: "Notification that the user has received a new direct message")
+        return LocalNotification(type: .dm, event: ev, target: ev, content: convo)
     }
     
     return nil

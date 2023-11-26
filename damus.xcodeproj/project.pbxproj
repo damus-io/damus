@@ -437,6 +437,9 @@
 		D72A2D072AD9C1FB002AFF62 /* MockProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2D062AD9C1FB002AFF62 /* MockProfiles.swift */; };
 		D7315A2A2ACDF3B70036E30A /* DamusCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7315A292ACDF3B70036E30A /* DamusCacheManager.swift */; };
 		D7315A2C2ACDF4DA0036E30A /* DamusCacheManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7315A2B2ACDF4DA0036E30A /* DamusCacheManagerTests.swift */; };
+		D74AAFC22B153395006CF0F4 /* HeadlessDamusState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFC12B153395006CF0F4 /* HeadlessDamusState.swift */; };
+		D74AAFC32B153395006CF0F4 /* HeadlessDamusState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFC12B153395006CF0F4 /* HeadlessDamusState.swift */; };
+		D74AAFC52B1538DF006CF0F4 /* NotificationExtensionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFC42B1538DE006CF0F4 /* NotificationExtensionState.swift */; };
 		D76874F32AE3632B00FB0F68 /* ProfileZapLinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76874F22AE3632B00FB0F68 /* ProfileZapLinkView.swift */; };
 		D77BFA0B2AE3051200621634 /* ProfileActionSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77BFA0A2AE3051200621634 /* ProfileActionSheetView.swift */; };
 		D783A63F2AD4E53D00658DDA /* SuggestedHashtagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D783A63E2AD4E53D00658DDA /* SuggestedHashtagsView.swift */; };
@@ -1295,6 +1298,8 @@
 		D72A2D062AD9C1FB002AFF62 /* MockProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockProfiles.swift; sourceTree = "<group>"; };
 		D7315A292ACDF3B70036E30A /* DamusCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusCacheManager.swift; sourceTree = "<group>"; };
 		D7315A2B2ACDF4DA0036E30A /* DamusCacheManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusCacheManagerTests.swift; sourceTree = "<group>"; };
+		D74AAFC12B153395006CF0F4 /* HeadlessDamusState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadlessDamusState.swift; sourceTree = "<group>"; };
+		D74AAFC42B1538DE006CF0F4 /* NotificationExtensionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationExtensionState.swift; sourceTree = "<group>"; };
 		D76874F22AE3632B00FB0F68 /* ProfileZapLinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileZapLinkView.swift; sourceTree = "<group>"; };
 		D77BFA0A2AE3051200621634 /* ProfileActionSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileActionSheetView.swift; sourceTree = "<group>"; };
 		D783A63E2AD4E53D00658DDA /* SuggestedHashtagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedHashtagsView.swift; sourceTree = "<group>"; };
@@ -1528,6 +1533,7 @@
 				D7EDED1B2B1178FE0018B19C /* NoteContent.swift */,
 				D7EDED1D2B11797D0018B19C /* LongformEvent.swift */,
 				D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */,
+				D74AAFC12B153395006CF0F4 /* HeadlessDamusState.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2549,6 +2555,7 @@
 				D79C4C162AFEB061003A41B4 /* NotificationService.swift */,
 				D79C4C182AFEB061003A41B4 /* Info.plist */,
 				D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */,
+				D74AAFC42B1538DE006CF0F4 /* NotificationExtensionState.swift */,
 			);
 			path = DamusNotificationService;
 			sourceTree = "<group>";
@@ -2945,6 +2952,7 @@
 				BA4AB0B02A63B94D0070A32A /* EmojiListItemView.swift in Sources */,
 				4C75EFB328049D640006080F /* NostrEvent.swift in Sources */,
 				4C32B9582A9AD44700DC3548 /* VeriferOptions.swift in Sources */,
+				D74AAFC22B153395006CF0F4 /* HeadlessDamusState.swift in Sources */,
 				4CA2EFA0280E37AC0044ACD8 /* TimelineView.swift in Sources */,
 				4C30AC7629A5770900E2BD5A /* NotificationItemView.swift in Sources */,
 				BA3759972ABCCF360018D73B /* CameraPreview.swift in Sources */,
@@ -3343,6 +3351,7 @@
 				D7CE1B292B0BE239002EDAD4 /* node_id.c in Sources */,
 				D7EDED2C2B128CFA0018B19C /* DamusColors.swift in Sources */,
 				D7CE1B2E2B0BE25C002EDAD4 /* talstr.c in Sources */,
+				D74AAFC52B1538DF006CF0F4 /* NotificationExtensionState.swift in Sources */,
 				D798D2292B08686C00234419 /* ContentParsing.swift in Sources */,
 				D798D2242B0859C900234419 /* LocalizationUtil.swift in Sources */,
 				D7CE1B322B0BE6C3002EDAD4 /* NdbTxn.swift in Sources */,
@@ -3374,6 +3383,7 @@
 				D7CB5D542B1174F700AD4105 /* NIP05.swift in Sources */,
 				D798D2232B0859B700234419 /* KeychainStorage.swift in Sources */,
 				D7CB5D432B116F9B00AD4105 /* MutedThreadsManager.swift in Sources */,
+				D74AAFC32B153395006CF0F4 /* HeadlessDamusState.swift in Sources */,
 				D7CE1B272B0BE224002EDAD4 /* bech32_util.c in Sources */,
 				D7CCFC102B05880F00323D86 /* Id.swift in Sources */,
 				D7CB5D532B1174E900AD4105 /* DeepLPlan.swift in Sources */,
