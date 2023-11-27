@@ -4,6 +4,10 @@
 #include <inttypes.h>
 #include "cursor.h"
 
+// how many filters are allowed in a filter group
+#define NDB_MAX_FILTERS    16
+
+// maximum number of filters allowed in a filter group
 #define NDB_PACKED_STR     0x1
 #define NDB_PACKED_ID      0x2
 
@@ -26,6 +30,7 @@ struct ndb_blocks;
 struct ndb_block;
 struct ndb_note;
 struct ndb_tag;
+struct ndb_filter_group;
 struct ndb_tags;
 struct ndb_lmdb;
 union ndb_packed_str;
@@ -234,6 +239,11 @@ struct ndb_filter {
 	int num_elements;
 	struct ndb_filter_elements *current;
 	struct ndb_filter_elements *elements[NDB_NUM_FILTERS];
+};
+
+struct ndb_filter_group {
+	struct ndb_filter *filters[NDB_MAX_FILTERS];
+	int num_filters;
 };
 
 struct ndb_config {
@@ -462,11 +472,20 @@ void ndb_filter_reset(struct ndb_filter *);
 void ndb_filter_end_field(struct ndb_filter *);
 void ndb_filter_free(struct ndb_filter *);
 
+// SUBSCRIPTIONS
+uint64_t ndb_subscribe(struct ndb *, struct ndb_filter_group *);
+int ndb_wait_for_notes(struct ndb *, uint64_t subid, uint64_t *note_ids,
+		       int note_id_capacity);
+int ndb_unsubscribe(int subid);
+
 // FULLTEXT SEARCH
 int ndb_text_search(struct ndb_txn *txn, const char *query, struct ndb_text_search_results *, struct ndb_text_search_config *);
 void ndb_default_text_search_config(struct ndb_text_search_config *);
 void ndb_text_search_config_set_order(struct ndb_text_search_config *, enum ndb_search_order);
 void ndb_text_search_config_set_limit(struct ndb_text_search_config *, int limit);
+
+// QUERY
+void ndb_query(struct ndb_filter **, int num_filters);
 
 // STATS
 int ndb_stat(struct ndb *ndb, struct ndb_stat *stat);

@@ -19,8 +19,6 @@
 #include "cursor.h"
 #include "util.h"
 
-#define BUFFER_SIZE 100
-
 /* 
  * The prot_queue structure represents a thread-safe queue that can hold
  * generic data elements.
@@ -53,7 +51,7 @@ static inline int prot_queue_init(struct prot_queue* q, void* buf,
 {
 	// buffer elements must fit nicely in the buffer
 	if (buflen == 0 || buflen % elem_size != 0)
-		return 0;
+		assert(!"queue elements don't fit nicely");
 
 	q->head = 0;
 	q->tail = 0;
