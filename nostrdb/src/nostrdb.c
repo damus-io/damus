@@ -33,8 +33,12 @@
 // the maximum number of things threads pop and push in bulk
 static const int THREAD_QUEUE_BATCH = 4096;
 
+// maximum number of active subscriptions
+#define MAX_SUBSCRIPTIONS 32
+
 // the maximum size of inbox queues
 static const int DEFAULT_QUEUE_SIZE = 1000000;
+
 
 // increase if we need bigger filters
 #define NDB_FILTER_PAGES 64
@@ -154,6 +158,7 @@ struct ndb_lmdb {
 
 struct ndb_writer {
 	struct ndb_lmdb *lmdb;
+	struct ndb_monitor *monitor;
 
 	void *queue_buf;
 	int queue_buflen;
@@ -170,16 +175,47 @@ struct ndb_ingester {
 	ndb_ingest_filter_fn filter;
 };
 
+struct ndb_subscription {
+	uint64_t subid;
+	struct ndb_filter_group filter;
+	struct prot_queue inbox;
+};
+
+struct ndb_monitor {
+	struct ndb_subscription subscriptions[MAX_SUBSCRIPTIONS];
+	int num_subscriptions;
+};
 
 struct ndb {
 	struct ndb_lmdb lmdb;
 	struct ndb_ingester ingester;
+	struct ndb_monitor monitor;
 	struct ndb_writer writer;
 	int version;
 	uint32_t flags; // setting flags
 	// lmdb environ handles, etc
 };
 
+// We get the KeyMatchResult function from the scan_cursor_type
+// This function is used to match the key for the corresponding cursor type.
+// For example, KIND scanners will look for a kind 
+enum ndb_scan_cursor_type {
+	NDB_SCAN_KIND,
+	NDB_SCAN_PK_KIND,
+	NDB_SCAN_ID,
+};
+
+// same idea as DBScan::ScanCursor in strfry
+struct ndb_scan_cursor {
+	enum ndb_scan_cursor_type type;
+	int outstanding;
+};
+
+// same idea as DBScan in strfry
+struct ndb_dbscan {
+	struct ndb_scan_cursor cursors[12];
+	int num_cursors;
+};
 
 // A clustered key with an id and a timestamp
 struct ndb_tsid {
@@ -826,6 +862,38 @@ void ndb_filter_end_field(struct ndb_filter *filter)
 {
 	filter->elements[filter->num_elements++] = filter->current;
 	filter->current = NULL;
+}
+
+static void ndb_filter_group_init(struct ndb_filter_group *group)
+{
+	group->num_filters = 0;
+}
+
+static int ndb_filter_group_add(struct ndb_filter_group *group,
+				struct ndb_filter *filter)
+{
+	if (group->num_filters + 1 >= NDB_MAX_FILTERS)
+		return 0;
+	group->filters[group->num_filters++] = filter;
+}
+
+static int ndb_filter_group_matches(struct ndb_filter_group *group,
+				    struct ndb_note *note)
+{
+	int i;
+	struct ndb_filter *filter;
+
+	if (group->num_filters == 0)
+		return 1;
+
+	for (i = 0; i < group->num_filters; i++) {
+		filter = group->filters[i];
+
+		if (ndb_filter_matches(filter, note))
+			return 1;
+	}
+
+	return 0;
 }
 
 static void ndb_make_search_key(struct ndb_search_key *key, unsigned char *id,
@@ -2136,6 +2204,23 @@ static int ndb_write_note_id_index(struct ndb_txn *txn, struct ndb_note *note,
 	return 1;
 }
 
+/*
+static int ndb_filter_query(struct ndb *ndb, struct ndb_filter *filter)
+{
+}
+
+static int ndb_filter_cursors(struct ndb_filter *filter, struct ndb_cursor)
+{
+}
+
+int ndb_query(struct ndb *ndb, struct ndb_filter **filters, int num_filters)
+{
+	struct ndb_filter_group group;
+	ndb_filter_group_init(&group);
+
+}
+*/
+
 static int ndb_write_note_kind_index(struct ndb_txn *txn, struct ndb_note *note,
 				     uint64_t note_key)
 {
@@ -2519,7 +2604,6 @@ int ndb_text_search(struct ndb_txn *txn, const char *query,
 	MDB_val k, v;
 	int i, j, keysize, saved_size, limit;
 	MDB_cursor_op op, order_op;
-	//int num_note_ids;
 
 	saved = NULL;
 	ndb_text_search_results_init(results);
@@ -2693,7 +2777,7 @@ static int ndb_write_new_blocks(struct ndb_txn *txn, struct ndb_note *note,
 	content = ndb_note_content(note);
 
 	if (!ndb_parse_content(scratch, scratch_size, content, content_len, &blocks)) {
-		ndb_debug("failed to parse content '%.*s'\n", content_len, content);
+		//ndb_debug("failed to parse content '%.*s'\n", content_len, content);
 		return 0;
 	}
 
@@ -2779,22 +2863,64 @@ static void ndb_write_version(struct ndb_txn *txn, uint64_t version)
 	//fprintf(stderr, "writing version %" PRIu64 "\n", version);
 }
 
+struct written_note {
+	uint64_t note_id;
+	struct ndb_writer_note *note;
+};
+
+// When the data has been committed to the database, take all of the written
+// notes, check them against subscriptions, and then write to the subscription
+// inbox for all matching notes
+static void ndb_notify_subscriptions(struct ndb_monitor *monitor,
+				     struct written_note *wrote, int num_notes)
+{
+	int i, k;
+	struct written_note *written;
+	struct ndb_note *note;
+	struct ndb_subscription *sub;
+
+	for (i = 0; i < monitor->num_subscriptions; i++) {
+		sub = &monitor->subscriptions[i];
+		ndb_debug("checking subscription %d, %d notes\n", i, num_notes);
+
+		for (k = 0; k < num_notes; k++) {
+			written = &wrote[k];
+			note = written->note->note;
+
+			if (ndb_filter_group_matches(&sub->filter, note)) {
+				ndb_debug("pushing note\n");
+				if (!prot_queue_push(&sub->inbox, &written->note_id)) {
+					ndb_debug("couldn't push note to subscriber");
+				}
+			} else {
+				ndb_debug("not pushing note\n");
+			}
+		}
+
+	}
+}
+
 static void *ndb_writer_thread(void *data)
 {
 	struct ndb_writer *writer = data;
 	struct ndb_writer_msg msgs[THREAD_QUEUE_BATCH], *msg;
-	// 8mb scratch buffer for parsing note content
-	size_t scratch_size = 8 * 1024 * 1024;
-	unsigned char *scratch = malloc(scratch_size);
-	int i, popped, done, any_note;
+	struct written_note written_notes[THREAD_QUEUE_BATCH];
+	size_t scratch_size;
+	int i, popped, done, any_note, num_notes;
 	uint64_t note_nkey;
-	MDB_txn *mdb_txn = NULL;
 	struct ndb_txn txn;
+	unsigned char *scratch;
+
+	// 8mb scratch buffer for parsing note content
+	scratch_size = 8 * 1024 * 1024;
+	scratch = malloc(scratch_size);
+	MDB_txn *mdb_txn = NULL;
 	ndb_txn_from_mdb(&txn, writer->lmdb, mdb_txn);
 
 	done = 0;
 	while (!done) {
 		txn.mdb_txn = NULL;
+		num_notes = 0;
 		popped = prot_queue_pop_all(&writer->inbox, msgs, THREAD_QUEUE_BATCH);
 		//ndb_debug("writer popped %d items\n", popped);
 
@@ -2816,7 +2942,7 @@ static void *ndb_writer_thread(void *data)
 			fprintf(stderr, "writer thread txn_begin failed");
 			// should definitely not happen unless DB is full
 			// or something ?
-			assert(false);
+			continue;
 		}
 
 		for (i = 0; i < popped; i++) {
@@ -2838,11 +2964,17 @@ static void *ndb_writer_thread(void *data)
 				}
 				break;
 			case NDB_WRITER_NOTE:
-				ndb_write_note(&txn, &msg->note, scratch,
-					       scratch_size);
-				//printf("wrote note ");
-				//print_hex(msg->note.note->id, 32);
-				//printf("\n");
+				note_nkey = ndb_write_note(&txn, &msg->note,
+							   scratch,
+							   scratch_size);
+
+				ndb_debug("note_nkey %" PRIu64 "\n", note_nkey);
+				if (note_nkey > 0) {
+					written_notes[num_notes++] = (struct written_note){
+						.note_id = note_nkey,
+						.note = &msg->note,
+					};
+				}
 				break;
 			case NDB_WRITER_DBMETA:
 				ndb_write_version(&txn, msg->ndb_meta.version);
@@ -2861,9 +2993,16 @@ static void *ndb_writer_thread(void *data)
 		}
 
 		// commit writes
-		if (any_note && !ndb_end_query(&txn)) {
-			fprintf(stderr, "writer thread txn commit failed");
-			assert(false);
+		if (any_note) {
+			if (!ndb_end_query(&txn)) {
+				ndb_debug("writer thread txn commit failed\n");
+			} else {
+				ndb_debug("notifying subscriptions\n");
+				ndb_notify_subscriptions(writer->monitor,
+							 written_notes,
+							 num_notes);
+				// update subscriptions
+			}
 		}
 
 		// free notes
@@ -2957,9 +3096,11 @@ static void *ndb_ingester_thread(void *data)
 }
 
 
-static int ndb_writer_init(struct ndb_writer *writer, struct ndb_lmdb *lmdb)
+static int ndb_writer_init(struct ndb_writer *writer, struct ndb_lmdb *lmdb,
+			   struct ndb_monitor *monitor)
 {
 	writer->lmdb = lmdb;
+	writer->monitor = monitor;
 	writer->queue_buflen = sizeof(struct ndb_writer_msg) * DEFAULT_QUEUE_SIZE;
 	writer->queue_buf = malloc(writer->queue_buflen);
 	if (writer->queue_buf == NULL) {
@@ -3213,6 +3354,11 @@ static int ndb_run_migrations(struct ndb *ndb)
 	return 1;
 }
 
+static void ndb_monitor_init(struct ndb_monitor *monitor)
+{
+	monitor->num_subscriptions = 0;
+}
+
 int ndb_init(struct ndb **pndb, const char *filename, const struct ndb_config *config)
 {
 	struct ndb *ndb;
@@ -3229,7 +3375,9 @@ int ndb_init(struct ndb **pndb, const char *filename, const struct ndb_config *c
 	if (!ndb_init_lmdb(filename, &ndb->lmdb, config->mapsize))
 		return 0;
 
-	if (!ndb_writer_init(&ndb->writer, &ndb->lmdb)) {
+	ndb_monitor_init(&ndb->monitor);
+
+	if (!ndb_writer_init(&ndb->writer, &ndb->lmdb, &ndb->monitor)) {
 		fprintf(stderr, "ndb_writer_init failed\n");
 		return 0;
 	}
@@ -4746,4 +4894,63 @@ struct ndb_blocks *ndb_get_blocks_by_key(struct ndb *ndb, struct ndb_txn *txn, u
 	 ndb_writer_queue_msg(&ndb->writer, &msg);
 
 	 return blocks;
+}
+
+struct ndb_subscription *ndb_find_subscription(struct ndb *ndb, uint64_t subid)
+{
+	struct ndb_subscription *sub, *tsub;
+	int i;
+
+	for (i = 0, sub = NULL; i < ndb->monitor.num_subscriptions; i++) {
+		tsub = &ndb->monitor.subscriptions[i];
+		if (tsub->subid == subid) {
+			sub = tsub;
+			break;
+		}
+	}
+
+	return sub;
+}
+
+int ndb_wait_for_notes(struct ndb *ndb, uint64_t subid, uint64_t *note_ids,
+		       int note_id_capacity)
+{
+	struct ndb_subscription *sub;
+	if (!(sub = ndb_find_subscription(ndb, subid)))
+		return 0;
+
+	return prot_queue_pop_all(&sub->inbox, note_ids, note_id_capacity);
+}
+
+uint64_t ndb_subscribe(struct ndb *ndb, struct ndb_filter_group *group)
+{
+	static uint64_t subids = 0;
+	struct ndb_subscription *sub;
+	int index;
+	size_t buflen;
+	uint64_t subid;
+	char *buf;
+
+	if (ndb->monitor.num_subscriptions + 1 >= MAX_SUBSCRIPTIONS) {
+		fprintf(stderr, "too many subscriptions\n");
+		return 0;
+	}
+
+	index = ndb->monitor.num_subscriptions++;
+	sub = &ndb->monitor.subscriptions[index];
+	subid = ++subids;
+	sub->subid = subid;
+
+	memcpy(&sub->filter, group, sizeof(*group));
+
+	// 500k ought to be enough for anyone
+	buflen = sizeof(uint64_t) * 65536;
+	buf = malloc(buflen);
+
+	if (!prot_queue_init(&sub->inbox, buf, buflen, sizeof(uint64_t))) {
+		fprintf(stderr, "failed to push prot queue\n");
+		return 0;
+	}
+
+	return subid;
 }
