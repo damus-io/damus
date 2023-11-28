@@ -440,6 +440,18 @@
 		D74AAFC22B153395006CF0F4 /* HeadlessDamusState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFC12B153395006CF0F4 /* HeadlessDamusState.swift */; };
 		D74AAFC32B153395006CF0F4 /* HeadlessDamusState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFC12B153395006CF0F4 /* HeadlessDamusState.swift */; };
 		D74AAFC52B1538DF006CF0F4 /* NotificationExtensionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFC42B1538DE006CF0F4 /* NotificationExtensionState.swift */; };
+		D74AAFC62B155B8B006CF0F4 /* Zaps.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB883A72975FC1800DC99E7 /* Zaps.swift */; };
+		D74AAFC72B155BD0006CF0F4 /* Zap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC7AAE6297EFA7B00430951 /* Zap.swift */; };
+		D74AAFC82B155C9D006CF0F4 /* InsertSort.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363AA728297703006E126D /* InsertSort.swift */; };
+		D74AAFC92B155CA5006CF0F4 /* UpdateStatsNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA352A32A76AFF3003BB08B /* UpdateStatsNotify.swift */; };
+		D74AAFCC2B155D07006CF0F4 /* MakeZapRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFCB2B155D07006CF0F4 /* MakeZapRequest.swift */; };
+		D74AAFCD2B155D07006CF0F4 /* MakeZapRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFCB2B155D07006CF0F4 /* MakeZapRequest.swift */; };
+		D74AAFCF2B155D8C006CF0F4 /* ZapDataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFCE2B155D8C006CF0F4 /* ZapDataModel.swift */; };
+		D74AAFD02B155D8C006CF0F4 /* ZapDataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFCE2B155D8C006CF0F4 /* ZapDataModel.swift */; };
+		D74AAFD12B155DA4006CF0F4 /* RelayURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FF93FF2AC7AC5200FD969D /* RelayURL.swift */; };
+		D74AAFD22B155E78006CF0F4 /* WalletConnect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09612A098D0E00943473 /* WalletConnect.swift */; };
+		D74AAFD42B155ECB006CF0F4 /* Zaps+.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFD32B155ECB006CF0F4 /* Zaps+.swift */; };
+		D74AAFD62B155F0C006CF0F4 /* WalletConnect+.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFD52B155F0C006CF0F4 /* WalletConnect+.swift */; };
 		D76874F32AE3632B00FB0F68 /* ProfileZapLinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76874F22AE3632B00FB0F68 /* ProfileZapLinkView.swift */; };
 		D77BFA0B2AE3051200621634 /* ProfileActionSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77BFA0A2AE3051200621634 /* ProfileActionSheetView.swift */; };
 		D783A63F2AD4E53D00658DDA /* SuggestedHashtagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D783A63E2AD4E53D00658DDA /* SuggestedHashtagsView.swift */; };
@@ -1300,6 +1312,10 @@
 		D7315A2B2ACDF4DA0036E30A /* DamusCacheManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusCacheManagerTests.swift; sourceTree = "<group>"; };
 		D74AAFC12B153395006CF0F4 /* HeadlessDamusState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadlessDamusState.swift; sourceTree = "<group>"; };
 		D74AAFC42B1538DE006CF0F4 /* NotificationExtensionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationExtensionState.swift; sourceTree = "<group>"; };
+		D74AAFCB2B155D07006CF0F4 /* MakeZapRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MakeZapRequest.swift; sourceTree = "<group>"; };
+		D74AAFCE2B155D8C006CF0F4 /* ZapDataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapDataModel.swift; sourceTree = "<group>"; };
+		D74AAFD32B155ECB006CF0F4 /* Zaps+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Zaps+.swift"; sourceTree = "<group>"; };
+		D74AAFD52B155F0C006CF0F4 /* WalletConnect+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WalletConnect+.swift"; sourceTree = "<group>"; };
 		D76874F22AE3632B00FB0F68 /* ProfileZapLinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileZapLinkView.swift; sourceTree = "<group>"; };
 		D77BFA0A2AE3051200621634 /* ProfileActionSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileActionSheetView.swift; sourceTree = "<group>"; };
 		D783A63E2AD4E53D00658DDA /* SuggestedHashtagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedHashtagsView.swift; sourceTree = "<group>"; };
@@ -1958,6 +1974,7 @@
 				4C2B7BF12A71B6540049DEE7 /* Id.swift */,
 				D7FF93FF2AC7AC5200FD969D /* RelayURL.swift */,
 				D798D22B2B086C7400234419 /* NostrEvent+.swift */,
+				D74AAFCB2B155D07006CF0F4 /* MakeZapRequest.swift */,
 			);
 			path = Nostr;
 			sourceTree = "<group>";
@@ -2049,6 +2066,9 @@
 				50C3E0892AA8E3F7006A4BC0 /* AVPlayer+Additions.swift */,
 				D7EDED202B117DCA0018B19C /* SequenceUtils.swift */,
 				D7EDED2D2B128E8A0018B19C /* CollectionExtension.swift */,
+				D74AAFCE2B155D8C006CF0F4 /* ZapDataModel.swift */,
+				D74AAFD32B155ECB006CF0F4 /* Zaps+.swift */,
+				D74AAFD52B155F0C006CF0F4 /* WalletConnect+.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -2928,9 +2948,11 @@
 				4CF0ABF029857E9200D66079 /* Bech32Object.swift in Sources */,
 				4C3D52B8298DB5C6001C5831 /* TextEvent.swift in Sources */,
 				4C216F362870A9A700040376 /* InputDismissKeyboard.swift in Sources */,
+				D74AAFCF2B155D8C006CF0F4 /* ZapDataModel.swift in Sources */,
 				4C8D1A6F29F31E5000ACDF75 /* FriendsButton.swift in Sources */,
 				3A5E47C52A4A6CF400C0D090 /* Trie.swift in Sources */,
 				D7EDED2E2B128E8A0018B19C /* CollectionExtension.swift in Sources */,
+				D74AAFD62B155F0C006CF0F4 /* WalletConnect+.swift in Sources */,
 				4C216F382871EDE300040376 /* DirectMessageModel.swift in Sources */,
 				BA3759972ABCCF360018D73B /* CameraPreview.swift in Sources */,
 				4C75EFA627FF87A20006080F /* Nostr.swift in Sources */,
@@ -2980,6 +3002,7 @@
 				4C86F7C62A76C51100EC0817 /* AttachedWalletNotify.swift in Sources */,
 				4CF0ABE12981A83900D66079 /* MutelistView.swift in Sources */,
 				4CB883A82975FC1800DC99E7 /* Zaps.swift in Sources */,
+				D74AAFD42B155ECB006CF0F4 /* Zaps+.swift in Sources */,
 				4C75EFB128049D510006080F /* NostrResponse.swift in Sources */,
 				4C7D09592A05BEAD00943473 /* KeyboardVisible.swift in Sources */,
 				4CEE2AF7280B2DEA00AB5EEF /* ProfileName.swift in Sources */,
@@ -3203,6 +3226,7 @@
 				4C90BD1A283AA67F008EE7EF /* Bech32.swift in Sources */,
 				E990020F2955F837003BBC5A /* EditMetadataView.swift in Sources */,
 				4CB8FC232A41ABA800763C51 /* AboutView.swift in Sources */,
+				D74AAFCC2B155D07006CF0F4 /* MakeZapRequest.swift in Sources */,
 				5C513FBA297F72980072348F /* CustomPicker.swift in Sources */,
 				4C1253622A76D00B0004F4B8 /* PostNotify.swift in Sources */,
 				4CACA9D5280C31E100D9BBE8 /* ReplyView.swift in Sources */,
@@ -3322,9 +3346,11 @@
 				D7CE1B1F2B0BE1B8002EDAD4 /* damus.c in Sources */,
 				D7CE1B1B2B0BE144002EDAD4 /* emitter.c in Sources */,
 				D7EDED342B12ACAE0018B19C /* DamusUserDefaults.swift in Sources */,
+				D74AAFC72B155BD0006CF0F4 /* Zap.swift in Sources */,
 				D7CB5D562B11759900AD4105 /* MuteThreadNotify.swift in Sources */,
 				D7EDED182B1177A00018B19C /* LNUrlPayRequest.swift in Sources */,
 				D798D21C2B0857E400234419 /* Bech32Object.swift in Sources */,
+				D74AAFD02B155D8C006CF0F4 /* ZapDataModel.swift in Sources */,
 				D7CB5D572B11762900AD4105 /* UserStatus.swift in Sources */,
 				D7CE1B402B0BE719002EDAD4 /* FlatBufferObject.swift in Sources */,
 				D7CE1B442B0BE719002EDAD4 /* Mutable.swift in Sources */,
@@ -3334,14 +3360,18 @@
 				D7CB5D602B11770C00AD4105 /* FollowState.swift in Sources */,
 				D7CB5D402B116E8A00AD4105 /* UserSettingsStore.swift in Sources */,
 				D7CE1B1C2B0BE147002EDAD4 /* refmap.c in Sources */,
+				D74AAFC92B155CA5006CF0F4 /* UpdateStatsNotify.swift in Sources */,
 				D7CE1B242B0BE1F1002EDAD4 /* hash_u5.c in Sources */,
 				D79C4C172AFEB061003A41B4 /* NotificationService.swift in Sources */,
 				D7CB5D522B1174D100AD4105 /* FriendFilter.swift in Sources */,
 				D7CE1B362B0BE702002EDAD4 /* FbConstants.swift in Sources */,
+				D74AAFD12B155DA4006CF0F4 /* RelayURL.swift in Sources */,
 				D7EDED272B117FF10018B19C /* CompatibleAttribute.swift in Sources */,
 				D7CE1B222B0BE1EB002EDAD4 /* utf8.c in Sources */,
+				D74AAFCD2B155D07006CF0F4 /* MakeZapRequest.swift in Sources */,
 				D7CCFC072B05833200323D86 /* NdbNote.swift in Sources */,
 				D7CE1B3F2B0BE719002EDAD4 /* Enum.swift in Sources */,
+				D74AAFD22B155E78006CF0F4 /* WalletConnect.swift in Sources */,
 				D7EDED222B117DCA0018B19C /* SequenceUtils.swift in Sources */,
 				D7CE1B422B0BE719002EDAD4 /* Offset.swift in Sources */,
 				D7FB10A72B0C371A00FA8D42 /* Log.swift in Sources */,
@@ -3356,10 +3386,12 @@
 				D798D2242B0859C900234419 /* LocalizationUtil.swift in Sources */,
 				D7CE1B322B0BE6C3002EDAD4 /* NdbTxn.swift in Sources */,
 				D7CE1B372B0BE719002EDAD4 /* Verifier.swift in Sources */,
+				D74AAFC82B155C9D006CF0F4 /* InsertSort.swift in Sources */,
 				D7EDED292B1182060018B19C /* AttachMediaUtility.swift in Sources */,
 				D798D21A2B0856CC00234419 /* Mentions.swift in Sources */,
 				D7CE1B212B0BE1CB002EDAD4 /* wasm.c in Sources */,
 				D7CE1B3B2B0BE719002EDAD4 /* Int+extension.swift in Sources */,
+				D74AAFC62B155B8B006CF0F4 /* Zaps.swift in Sources */,
 				D7CCFC0B2B0585EA00323D86 /* nostrdb.c in Sources */,
 				D7CE1B252B0BE1F4002EDAD4 /* sha256.c in Sources */,
 				D7CE1B262B0BE1F8002EDAD4 /* bech32.c in Sources */,
