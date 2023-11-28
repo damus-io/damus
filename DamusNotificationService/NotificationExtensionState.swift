@@ -20,9 +20,13 @@ struct NotificationExtensionState: HeadlessDamusState {
     init?() {
         guard let ndb = try? Ndb(owns_db_file: false) else { return nil }
         self.ndb = ndb
-        self.settings = UserSettingsStore()
         
         guard let keypair = get_saved_keypair() else { return nil }
+        
+        // dumb stuff needed for property wrappers
+        UserSettingsStore.pubkey = keypair.pubkey
+        self.settings = UserSettingsStore()
+        
         self.contacts = Contacts(our_pubkey: keypair.pubkey)
         self.muted_threads = MutedThreadsManager(keypair: keypair)
         self.keypair = keypair
