@@ -42,6 +42,7 @@ enum ndb_dbs {
 	NDB_DB_PROFILE_SEARCH,
 	NDB_DB_PROFILE_LAST_FETCH,
 	NDB_DB_NOTE_KIND, // note kind index
+	NDB_DB_NOTE_TEXT, // note fulltext index
 	NDB_DBS,
 };
 
@@ -327,6 +328,10 @@ void ndb_filter_reset(struct ndb_filter *);
 void ndb_filter_end_field(struct ndb_filter *);
 void ndb_filter_free(struct ndb_filter *filter);
 
+
+// FULLTEXT SEARCH
+int ndb_text_search(struct ndb_txn *, const char *query);
+
 // stats
 int ndb_stat(struct ndb *ndb, struct ndb_stat *stat);
 void ndb_stat_counts_init(struct ndb_stat_counts *counts);
@@ -528,6 +533,8 @@ ndb_db_name(enum ndb_dbs db)
 			return "profile_last_fetch";
 		case NDB_DB_NOTE_KIND:
 			return "note_kind_index";
+		case NDB_DB_NOTE_TEXT:
+			return "note_fulltext";
 		case NDB_DBS:
 			return "count";
 	}
