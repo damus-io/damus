@@ -40,6 +40,11 @@ func should_display_notification(state: HeadlessDamusState, event ev: NostrEvent
         return false
     }
     
+    // Don't show notifications from muted users
+    if state.contacts.is_muted(ev.pubkey) {
+        return false
+    }
+    
     // Don't show notifications for old events
     guard ev.age < EVENT_MAX_AGE_FOR_NOTIFICATION else {
         return false
