@@ -369,6 +369,20 @@ static inline int push_sized_str(struct cursor *cursor, const char *str, int len
 	return cursor_push(cursor, (u8*)str, len);
 }
 
+static inline int cursor_push_lowercase(struct cursor *cur, const char *str, int len)
+{
+	int i;
+
+	if (unlikely(cur->p + len >= cur->end))
+		return 0;
+
+	for (i = 0; i < len; i++)
+		cur->p[i] = tolower(str[i]);
+
+	cur->p += len;
+	return 1;
+}
+
 static inline int cursor_push_str(struct cursor *cursor, const char *str)
 {
 	return cursor_push(cursor, (u8*)str, (int)strlen(str));

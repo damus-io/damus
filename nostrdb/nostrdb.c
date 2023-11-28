@@ -164,8 +164,8 @@ static int ndb_make_text_search_key(unsigned char *buf, int bufsize,
 	if (!push_varint(&cur, word_len))
 		return 0;
 
-	// non-null terminated string
-	if (!cursor_push(&cur, (unsigned char*)str, word_len))
+	// non-null terminated, lowercase string
+	if (!cursor_push_lowercase(&cur, str, word_len))
 		return 0;
 
 	// the index of the word in the content so that we can do more accurate
