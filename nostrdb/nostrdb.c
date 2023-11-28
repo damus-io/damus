@@ -1868,7 +1868,7 @@ static int ndb_write_note_kind_index(struct ndb_txn *txn, struct ndb_note *note,
 
 	kind_db = txn->lmdb->dbs[NDB_DB_NOTE_KIND];
 
-	if ((rc = mdb_put(txn->mdb_txn, id_db, &key, &val, 0))) {
+	if ((rc = mdb_put(txn->mdb_txn, kind_db, &key, &val, 0))) {
 		ndb_debug("write note kind index to db failed: %s\n",
 				mdb_strerror(rc));
 		return 0;
