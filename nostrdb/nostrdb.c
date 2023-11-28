@@ -23,6 +23,9 @@
 #include "secp256k1_ecdh.h"
 #include "secp256k1_schnorrsig.h"
 
+#define max(a,b) ((a) > (b) ? (a) : (b))
+#define min(a,b) ((a) < (b) ? (a) : (b))
+
 // the maximum number of things threads pop and push in bulk
 static const int THREAD_QUEUE_BATCH = 4096;
 
@@ -135,14 +138,39 @@ struct ndb_u64_tsid {
 	uint64_t timestamp;
 };
 
-// uncompressed form of the actual lmdb key
-struct ndb_text_search_key
-{
-	int str_len;
-	const char *str;
-	int word_index;
-	uint64_t timestamp;
+#define MAX_RESULTS_PER_WORD 32
+#define MAX_TEXT_SEARCH_WORDS 8
+
+// used mainly by ndb_text_search when collecting text search results
+struct ndb_keyed_text_search_result {
+	struct ndb_text_search_key key;
+	uint64_t note_id;
+	int prefix_chars;
 };
+
+struct ndb_keyed_text_search_resultset {
+	struct ndb_keyed_text_search_result results[MAX_RESULTS_PER_WORD];
+	int num_results;
+};
+
+struct ndb_word
+{
+	const char *word;
+	int word_len;
+};
+
+struct ndb_search_words
+{
+	struct ndb_word words[MAX_TEXT_SEARCH_WORDS];
+	int num_words;
+};
+
+// used mainly by ndb_text_search when collecting text search results
+struct ndb_keyed_text_search_results {
+	struct ndb_keyed_text_search_resultset results[MAX_TEXT_SEARCH_WORDS];
+	int num_words;
+};
+
 
 // ndb_text_search_key
 //
@@ -260,30 +288,59 @@ static int ndb_text_search_key_compare(const MDB_val *a, const MDB_val *b)
 	return 0;
 }
 
-/*
-static int ndb_decompress_text_search_key(unsigned char *p, int len,
-					  struct ndb_text_search_key *key)
+// faster peek of just the string instead of unpacking everything
+// this is used to quickly discard range query matches if there is no
+// common prefix
+static inline int ndb_unpack_text_search_key_string(struct cursor *cur,
+						    const char **str,
+						    int *str_len)
+{
+	if (!pull_varint(cur, str_len))
+		return 0;
+
+	*str = (const char *)cur->p;
+
+	if (!cursor_skip(cur, *str_len))
+		return 0;
+	
+	return 1;
+}
+
+// should be called after ndb_unpack_text_search_key_string. It continues
+// the unpacking of a text search key if we've already started it.
+static inline int
+ndb_unpack_remaining_text_search_key(struct cursor *cur,
+				     struct ndb_text_search_key *key)
+{
+	int timestamp;
+
+	if (!pull_varint(cur, &key->word_index))
+		return 0;
+
+	if (!pull_varint(cur, &timestamp))
+		return 0;
+
+	key->timestamp = timestamp;
+
+	return 1;
+}
+
+// unpack a fulltext search key
+//
+// full version of string + unpack remaining. This is split up because text
+// searching only requires to pull the string for prefix searching, and the
+// remaining is optional
+static inline int ndb_unpack_text_search_key(unsigned char *p, int len,
+				      struct ndb_text_search_key *key)
 {
 	struct cursor c;
-
 	make_cursor(p, p + len, &c);
 
-	if (!pull_varint(&c, &key->str_len))
+	if (!ndb_unpack_text_search_key_string(&c, &key->str, &key->str_len))
 		return 0;
 
-	key->str = cur->p;
-
-	if (!cursor_skip(&c, key->str_len))
-		return 0;
-
-	if (!pull_varint(&c, &key->word_index))
-		return 0;
-
-	if (!pull_varint(&c, &key->timestamp))
-		return 0;
-
+	return ndb_unpack_remaining_text_search_key(&c, key);
 }
-*/
 
 // Copies only lowercase characters to the destination string and fills the rest with null bytes.
 // `dst` and `src` are pointers to the destination and source strings, respectively.
@@ -2224,6 +2281,9 @@ static int ndb_write_word_to_index(struct ndb_txn *txn, const char *word,
 
 
 
+// break a string into individual words for querying or for building the
+// fulltext search index. This is callback based so we don't need to
+// build up an intermediate structure
 static int ndb_parse_words(struct cursor *cur, void *ctx, ndb_word_parser_fn fn)
 {
 	int word_len, words;
@@ -2305,26 +2365,12 @@ static int ndb_write_note_fulltext_index(struct ndb_txn *txn,
 	return 1;
 }
 
-struct ndb_word
-{
-	const char *word;
-	int word_len;
-};
-
-#define MAX_SEARCH_WORDS 16
-
-struct ndb_search_words
-{
-	struct ndb_word words[MAX_SEARCH_WORDS];
-	int num_words;
-};
-
 static int ndb_parse_search_words(void *ctx, const char *word_str, int word_len, int word_index)
 {
 	struct ndb_search_words *words = ctx;
 	struct ndb_word *word;
 
-	if (words->num_words + 1 > MAX_SEARCH_WORDS)
+	if (words->num_words + 1 > MAX_TEXT_SEARCH_WORDS)
 		return 0;
 
 	word = &words->words[words->num_words++];
@@ -2334,40 +2380,214 @@ static int ndb_parse_search_words(void *ctx, const char *word_str, int word_len,
 	return 1;
 }
 
-int ndb_text_search(struct ndb_txn *txn, const char *query)
+static void ndb_keyed_text_search_results_init(struct ndb_keyed_text_search_results *r)
+{
+	r->num_words = 0;
+}
+
+static void ndb_search_words_init(struct ndb_search_words *words)
+{
+	words->num_words = 0;
+}
+
+
+static int prefix_count(const char *str1, int len1, const char *str2, int len2) {
+	int i, count = 0;
+	int min_len = len1 < len2 ? len1 : len2;
+
+	for (i = 0; i < min_len; i++) {
+		// case insensitive
+		if (tolower(str1[i]) == tolower(str2[i]))
+			count++;
+		else
+			break;
+	}
+
+	return count;
+}
+
+
+// This is called when scanning the full text search index. Scanning stops
+// when we no longer have a prefix match for the word
+static int ndb_text_search_next_word(MDB_cursor *cursor, MDB_cursor_op op,
+	MDB_val *k, MDB_val *v, struct ndb_word *search_word,
+	struct ndb_keyed_text_search_resultset *results)
+{
+	struct ndb_keyed_text_search_result *result;
+	struct cursor key_cursor;
+
+	make_cursor(k->mv_data, k->mv_data + k->mv_size, &key_cursor);
+
+	// if we won't have enough to store the result, then bail
+	if (results->num_results + 1 > MAX_RESULTS_PER_WORD)
+		return 0;
+
+	// place to store the results if we get a successful one. num_results
+	// is incremented at the end if so
+	result = &results->results[results->num_results];
+
+	// When op is MDB_SET_RANGE, this initializes the search. Position
+	// the cursor at the next key greater than or equal to the specified
+	// key.
+	//
+	// Subsequent searches should use MDB_NEXT
+	if (mdb_cursor_get(cursor, k, v, op))
+		return 0;
+
+	result->note_id = *((uint64_t*)v->mv_data);
+
+	// On success, this could still be not related at all.
+	// It could just be adjacent to the word. Let's check
+	// if we have a matching prefix at least.
+
+	// Before we unpack the entire key, let's quickly
+	// unpack just the string to check the prefix. We don't
+	// need to unpack the entire key if the prefix doesn't
+	// match
+	make_cursor(k->mv_data, k->mv_data + k->mv_size, &key_cursor);
+	if (!ndb_unpack_text_search_key_string(&key_cursor,
+					       &result->key.str,
+					       &result->key.str_len)) {
+		// this should never happen
+		fprintf(stderr, "UNUSUAL: failed to unpack text search key string\n");
+		return 0;
+	}
+
+	// Empty strings shouldn't happen but let's
+	// protect against these cases
+	if (result->key.str_len < 1)
+		return 0;
+
+	// make sure we at least have a matching prefix. exact
+	// matches are nice but range searches allow us to
+	// match prefixes as well. A single-char prefix is
+	// suffient, but maybe we could up this in the future.
+	// 
+	// TODO: How are we handling utf-8 prefix matches like
+	// japanese?
+	//
+	if (result->key.str[0] != tolower(search_word->word[0]))
+		return 0;
+
+	// count the number of prefix-matched characters. This will be used
+	// for ranking search results
+	result->prefix_chars = prefix_count(result->key.str,
+					    result->key.str_len,
+					    search_word->word,
+					    search_word->word_len);
+
+	// Unpack the remaining text search key, we will need this information
+	// when building up our search results.
+	if (!ndb_unpack_remaining_text_search_key(&key_cursor, &result->key)) {
+		// This should never happen
+		fprintf(stderr, "UNUSUAL: failed to unpack text search key\n");
+		return 0;
+	}
+
+	// let's actually register this result now. the key has already been
+	// fully unpacked
+	results->num_results++;
+
+	return 1;
+}
+
+static void ndb_print_text_search_key(struct ndb_text_search_key *key)
+{
+	fprintf(stderr, "K<'%.*s' %d %" PRIu64 ">", key->str_len, key->str,
+						    key->word_index,
+						    key->timestamp);
+}
+
+static void ndb_print_keyed_text_search_result(struct ndb_keyed_text_search_result *r)
+{
+	ndb_print_text_search_key(&r->key);
+	fprintf(stderr, " note_id:%" PRIu64 "\n", r->note_id);
+}
+
+// convert the keyed results into actual results that include phrase results.
+// This works by looping over all of the results
+static int ndb_process_text_search_results(
+		struct ndb_keyed_text_search_results *keyed_results,
+		struct ndb_text_search_results *results)
+{
+	int i, j;
+	struct ndb_keyed_text_search_resultset *resultset;
+	struct ndb_keyed_text_search_result *result;
+
+	// Phrase search. Find keyed adjacent keyed search results
+	for (i = 0; i < keyed_results->num_words; i++) {
+		resultset = &keyed_results->results[i];
+		for (j = 0; j < resultset->num_results; j++) {
+			result = &resultset->results[j];
+			ndb_print_keyed_text_search_result(result);
+		}
+	}
+
+	return 1;
+}
+
+static void ndb_keyed_text_search_resultset_init(
+		struct ndb_keyed_text_search_resultset *resultset) {
+	resultset->num_results = 0;
+}
+
+static void ndb_text_search_results_init(struct ndb_text_search_results *res)
+{
+	res->num_phrase_results = 0;
+	res->num_other_results = 0;
+}
+
+int ndb_text_search(struct ndb_txn *txn, const char *query,
+		    struct ndb_text_search_results *results)
 {
 	unsigned char buffer[1024];
-	struct ndb_search_words words;
-	struct ndb_word *word;
+	struct ndb_keyed_text_search_results keyed_results;
+	struct ndb_keyed_text_search_resultset *keyed_resultset;
+	struct ndb_search_words search_words;
+	struct ndb_word *search_word;
 	struct cursor cur;
 	MDB_dbi text_db;
 	MDB_cursor *cursor;
 	MDB_val k, v;
-	int i, rc, keysize;
-	size_t len;
-	//uint64_t note_ids[32], note_id;
-	uint64_t note_id;
-	struct ndb_note *note;
+	int i, j, keysize, num_words;
+	MDB_cursor_op op = MDB_SET_RANGE;
 	//int num_note_ids;
+
+	ndb_keyed_text_search_results_init(&keyed_results);
+	ndb_text_search_results_init(results);
+	ndb_search_words_init(&search_words);
 	
 	//num_note_ids = 0;
 	text_db = txn->lmdb->dbs[NDB_DB_NOTE_TEXT];
 	make_cursor((unsigned char *)query, (unsigned char *)query + strlen(query), &cur);
-	words.num_words = 0;
 
-	ndb_parse_words(&cur, &words, ndb_parse_search_words);
+	ndb_parse_words(&cur, &search_words, ndb_parse_search_words);
 
-	if ((rc = mdb_cursor_open(txn->mdb_txn, text_db, &cursor))) {
-		fprintf(stderr, "nd_text_search: mdb_cursor_open failed, error %d\n", rc);
+	if ((i = mdb_cursor_open(txn->mdb_txn, text_db, &cursor))) {
+		fprintf(stderr, "nd_text_search: mdb_cursor_open failed, error %d\n", i);
 		return 0;
 	}
 
-	for (i = 0; i < words.num_words; i++) {
-		word = &words.words[i];
-		fprintf(stderr, "search word %.*s\n", word->word_len, word->word);
+	fprintf(stderr, "search query: '%s'\n", query);
 
+	// number of actual result words
+	// for every search word up to a max of MAX_TEXT_SEARCH_WORDS words (8)
+
+	num_words = min(search_words.num_words, MAX_TEXT_SEARCH_WORDS);
+
+	for (i = 0; i < num_words; i++) {
+		search_word = &search_words.words[i];
+
+		// shouldn't happen but let's be defensive a bit
+		if (search_word->word_len == 0)
+			continue;
+
+		// construct a packed fulltext search key using this word
+		// this key doesn't contain any timestamp or index info,
+		// so it should range match instead of exact match
 		if (!ndb_make_text_search_key_low(buffer, sizeof(buffer),
-						  word->word_len, word->word,
+						  search_word->word_len,
+						  search_word->word,
 						  &keysize)) {
 			// word is too big to fit in 1024-sized key
 			continue;
@@ -2375,21 +2595,40 @@ int ndb_text_search(struct ndb_txn *txn, const char *query)
 
 		k.mv_data = buffer;
 		k.mv_size = keysize;
+		op = MDB_SET_RANGE;
 
-		// Position cursor at the next key greater than or equal to the specified key
-		if (mdb_cursor_get(cursor, &k, &v, MDB_SET_RANGE)) {
-			continue;
-		} else {
-			//note_ids[num_note_ids++] = *((uint64_t*)v.mv_data);
-			note_id = *((uint64_t*)v.mv_data);
-			if ((note = ndb_get_note_by_key(txn, note_id, &len))) {
-				fprintf(stderr, "found note: '%s' for query word '%.*s'\n",
-					ndb_note_str(note, &note->content).str,
-					word->word_len, word->word);
+		keyed_resultset = &keyed_results.results[keyed_results.num_words];
+		ndb_keyed_text_search_resultset_init(keyed_resultset);
+
+		// try to match the word as many times as possible before
+		// moving on to the next word
+		for (j = 0; j < MAX_RESULTS_PER_WORD; j++)
+		{
+			if (!ndb_text_search_next_word(cursor, op, &k, &v,
+						       search_word,
+						       keyed_resultset)) {
+				break;
 			}
-			return 1;
+
+			op = MDB_NEXT;
 		}
+
+		if (keyed_resultset->num_results > 0)
+			keyed_results.num_words++;
+
+		/*
+		if ((note = ndb_get_note_by_key(txn, note_id, &len))) {
+			fprintf(stderr, "found note: '%s' for query word '%.*s'\n",
+				ndb_note_str(note, &note->content).str,
+				word->word_len, word->word);
+		}
+		*/
 	}
+
+	// convert our keyed results into 
+	ndb_process_text_search_results(&keyed_results, results);
+
+	mdb_cursor_close(cursor);
 
 	return 1;
 }
@@ -4025,3 +4264,5 @@ inline int ndb_builder_push_tag_str(struct ndb_builder *builder,
 		return 0;
 	return ndb_builder_finalize_tag(builder, pstr);
 }
+
+

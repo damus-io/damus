@@ -270,6 +270,26 @@ struct ndb_filter {
 	struct ndb_filter_elements *elements[NDB_NUM_FILTERS];
 };
 
+// unpacked form of the actual lmdb fulltext search key
+// see `ndb_make_text_search_key` for how the packed version is constructed
+struct ndb_text_search_key
+{
+	int str_len;
+	const char *str;
+	int word_index;
+	uint64_t timestamp;
+};
+
+// contains note ids of the searched notes from ndb_text_search
+struct ndb_text_search_results {
+	uint64_t phrase_results[32];
+	int num_phrase_results;
+
+	uint64_t other_results[32];
+	int num_other_results;
+};
+
+
 // HELPERS
 int ndb_calculate_id(struct ndb_note *note, unsigned char *buf, int buflen);
 int ndb_sign_id(struct ndb_keypair *keypair, unsigned char id[32], unsigned char sig[64]);
@@ -330,7 +350,7 @@ void ndb_filter_free(struct ndb_filter *filter);
 
 
 // FULLTEXT SEARCH
-int ndb_text_search(struct ndb_txn *, const char *query);
+int ndb_text_search(struct ndb_txn *txn, const char *query, struct ndb_text_search_results *);
 
 // stats
 int ndb_stat(struct ndb *ndb, struct ndb_stat *stat);
