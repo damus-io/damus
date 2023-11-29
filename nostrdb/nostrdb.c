@@ -3044,7 +3044,8 @@ static int ndb_init_lmdb(const char *filename, struct ndb_lmdb *lmdb, size_t map
 	}
 	mdb_set_compare(txn, lmdb->dbs[NDB_DB_NOTE_KIND], ndb_u64_tsid_compare);
 
-	if ((rc = mdb_dbi_open(txn, "note_text", tsid_flags, &lmdb->dbs[NDB_DB_NOTE_TEXT]))) {
+	if ((rc = mdb_dbi_open(txn, "note_text", MDB_CREATE | MDB_DUPSORT,
+			       &lmdb->dbs[NDB_DB_NOTE_TEXT]))) {
 		fprintf(stderr, "mdb_dbi_open id failed: %s\n", mdb_strerror(rc));
 		return 0;
 	}
