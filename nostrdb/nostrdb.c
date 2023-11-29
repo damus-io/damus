@@ -2081,7 +2081,7 @@ static inline int is_punctuation(unsigned int codepoint) {
 		return 0;
 
 	// Check for ASCII punctuation
-	if (ispunct(codepoint))
+	if (codepoint <= 128 && ispunct(codepoint))
 		return 1;
 
 	// Check for Unicode punctuation exceptions (punctuation allowed in hashtags)
