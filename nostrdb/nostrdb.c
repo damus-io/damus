@@ -2218,6 +2218,7 @@ static inline int consume_until_boundary(struct cursor *cur) {
 					// TODO: We should work towards
 					// handling all UTF-8 characters.
 					//printf("Invalid UTF-8 code point: %x\n", c);
+					return 0;
 				}
 			}
 		}
@@ -2304,6 +2305,14 @@ static int ndb_parse_words(struct cursor *cur, void *ctx, ndb_word_parser_fn fn)
 		word_len = cur->p - (unsigned char *)word;
 		if (word_len == 0 && cur->p >= cur->end)
 			break;
+
+		if (word_len == 0) {
+			if (!cursor_skip(cur, 1))
+				break;
+			continue;
+		}
+
+		//ndb_debug("writing word index '%.*s'\n", word_len, word);
 
 		if (!fn(ctx, word, word_len, words))
 			continue;
