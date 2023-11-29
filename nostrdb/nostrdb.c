@@ -2329,7 +2329,7 @@ static int ndb_fulltext_word_writer(void *ctx,
 	if (!ndb_write_word_to_index(wctx->txn, word, word_len, words,
 				     wctx->note->created_at, wctx->note_id)) {
 		// too big to write this one, just skip it
-		ndb_debug(stderr, "failed to write word '%.*s' to index\n", word_len, word);
+		ndb_debug("failed to write word '%.*s' to index\n", word_len, word);
 
 		return 0;
 	}
@@ -3236,7 +3236,9 @@ int _ndb_process_events(struct ndb *ndb, const char *ldjson, size_t json_len, in
 #endif
 	}
 
+#if DEBUG
 	ndb_debug("ndb_process_events: processed %d events\n", processed);
+#endif
 
 	return 1;
 }
