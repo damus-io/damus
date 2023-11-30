@@ -55,6 +55,10 @@ struct RelayDetailView: View {
 
             process_contact_event(state: state, ev: new_ev)
             state.postbox.send(new_ev)
+            
+            if let relay_metadata = make_relay_metadata(relays: state.pool.our_descriptors, keypair: keypair) {
+                state.postbox.send(relay_metadata)
+            }
             dismiss()
         }) {
             Text("Disconnect From Relay", comment: "Button to disconnect from the relay.")
@@ -78,6 +82,10 @@ struct RelayDetailView: View {
                             }
                             process_contact_event(state: state, ev: ev_after_add)
                             state.postbox.send(ev_after_add)
+                            
+                            if let relay_metadata = make_relay_metadata(relays: state.pool.our_descriptors, keypair: keypair) {
+                                state.postbox.send(relay_metadata)
+                            }
                             dismiss()
                         }) {
                             Text("Connect To Relay", comment: "Button to connect to the relay.")

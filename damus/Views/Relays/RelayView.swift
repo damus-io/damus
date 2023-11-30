@@ -102,6 +102,10 @@ struct RelayView: View {
             
             process_contact_event(state: state, ev: new_ev)
             state.postbox.send(new_ev)
+            
+            if let relay_metadata = make_relay_metadata(relays: state.pool.our_descriptors, keypair: keypair) {
+                state.postbox.send(relay_metadata)
+            }
         }) {
             if showText {
                 Text(NSLocalizedString("Disconnect", comment: "Button to disconnect from a relay server."))
