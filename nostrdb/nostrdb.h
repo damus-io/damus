@@ -163,6 +163,30 @@ struct ndb_keypair {
 	unsigned char pair[96];
 };
 
+#define MAX_TEXT_SEARCH_RESULTS 128
+#define MAX_TEXT_SEARCH_WORDS 8
+
+// unpacked form of the actual lmdb fulltext search key
+// see `ndb_make_text_search_key` for how the packed version is constructed
+struct ndb_text_search_key
+{
+	int str_len;
+	const char *str;
+	uint64_t timestamp;
+	uint64_t note_id;
+	int word_index;
+};
+
+struct ndb_text_search_result {
+	struct ndb_text_search_key key;
+	int prefix_chars;
+};
+
+struct ndb_text_search_results {
+	struct ndb_text_search_result results[MAX_TEXT_SEARCH_RESULTS];
+	int num_results;
+};
+
 // these must be byte-aligned, they are directly accessing the serialized data
 // representation
 #pragma pack(push, 1)
@@ -269,25 +293,6 @@ struct ndb_filter {
 	int num_elements;
 	struct ndb_filter_elements *current;
 	struct ndb_filter_elements *elements[NDB_NUM_FILTERS];
-};
-
-// unpacked form of the actual lmdb fulltext search key
-// see `ndb_make_text_search_key` for how the packed version is constructed
-struct ndb_text_search_key
-{
-	int str_len;
-	const char *str;
-	int word_index;
-	uint64_t timestamp;
-};
-
-// contains note ids of the searched notes from ndb_text_search
-struct ndb_text_search_results {
-	uint64_t phrase_results[32];
-	int num_phrase_results;
-
-	uint64_t other_results[32];
-	int num_other_results;
 };
 
 
