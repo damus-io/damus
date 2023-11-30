@@ -8,6 +8,7 @@
 #define NDB_PACKED_ID      0x2
 
 #define NDB_FLAG_NOMIGRATE (1 << 0)
+#define NDB_FLAG_SKIP_NOTE_VERIFY (1 << 1)
 
 //#define DEBUG 1
 

@@ -112,6 +112,7 @@ struct ndb_writer {
 };
 
 struct ndb_ingester {
+	uint32_t flags;
 	struct threadpool tp;
 	struct ndb_writer *writer;
 };
@@ -122,6 +123,7 @@ struct ndb {
 	struct ndb_ingester ingester;
 	struct ndb_writer writer;
 	int version;
+	uint32_t flags; // setting flags
 	// lmdb environ handles, etc
 };
 
@@ -1540,17 +1542,22 @@ int ndb_process_profile_note(struct ndb_note *note,
 static int ndb_ingester_process_note(secp256k1_context *ctx,
 				     struct ndb_note *note,
 				     size_t note_size,
-				     struct ndb_writer_msg *out)
+				     struct ndb_writer_msg *out,
+				     uint32_t flags)
 {
 	//printf("ndb_ingester_process_note ");
 	//print_hex(note->id, 32);
 	//printf("\n");
 
-	// Verify! If it's an invalid note we don't need to
-	// bother writing it to the database
-	if (!ndb_note_verify(ctx, note->pubkey, note->id, note->sig)) {
-		ndb_debug("signature verification failed\n");
-		return 0;
+	// some special situations we might want to skip sig validation,
+	// like during large imports
+	if (!(flags & NDB_FLAG_SKIP_NOTE_VERIFY)) {
+		// Verify! If it's an invalid note we don't need to
+		// bother writing it to the database
+		if (!ndb_note_verify(ctx, note->pubkey, note->id, note->sig)) {
+			ndb_debug("signature verification failed\n");
+			return 0;
+		}
 	}
 
 	// we didn't find anything. let's send it
@@ -1636,9 +1643,10 @@ static int ndb_ingester_process_event(secp256k1_context *ctx,
 				goto cleanup;
 			}
 
-			if (!ndb_ingester_process_note(ctx, note, note_size, out))
+			if (!ndb_ingester_process_note(ctx, note, note_size,
+						       out, ingester->flags)) {
 				goto cleanup;
-			else {
+			} else {
 				// we're done with the original json, free it
 				free(ev->json);
 				return 1;
@@ -1656,9 +1664,10 @@ static int ndb_ingester_process_event(secp256k1_context *ctx,
 				goto cleanup;
 			}
 
-			if (!ndb_ingester_process_note(ctx, note, note_size, out))
+			if (!ndb_ingester_process_note(ctx, note, note_size,
+						       out, ingester->flags)) {
 				goto cleanup;
-			else {
+			} else {
 				// we're done with the original json, free it
 				free(ev->json);
 				return 1;
@@ -2902,7 +2911,8 @@ static int ndb_writer_init(struct ndb_writer *writer, struct ndb_lmdb *lmdb)
 
 // initialize the ingester queue and then spawn the thread
 static int ndb_ingester_init(struct ndb_ingester *ingester,
-			     struct ndb_writer *writer, int num_threads)
+			     struct ndb_writer *writer, int num_threads,
+			     int flags)
 {
 	int elem_size, num_elems;
 	static struct ndb_ingester_msg quit_msg = { .type = NDB_INGEST_QUIT };
@@ -2912,6 +2922,7 @@ static int ndb_ingester_init(struct ndb_ingester *ingester,
 	num_elems = DEFAULT_QUEUE_SIZE;
 
 	ingester->writer = writer;
+	ingester->flags = flags;
 
 	if (!threadpool_init(&ingester->tp, num_threads, elem_size, num_elems,
 			     &quit_msg, ingester, ndb_ingester_thread))
@@ -3127,6 +3138,8 @@ int ndb_init(struct ndb **pndb, const char *filename, size_t mapsize, int ingest
 	//MDB_dbi ind_id; // TODO: ind_pk, etc
 
 	ndb = *pndb = calloc(1, sizeof(struct ndb));
+	ndb->flags = flags;
+
 	if (ndb == NULL) {
 		fprintf(stderr, "ndb_init: malloc failed\n");
 		return 0;
@@ -3140,7 +3153,8 @@ int ndb_init(struct ndb **pndb, const char *filename, size_t mapsize, int ingest
 		return 0;
 	}
 
-	if (!ndb_ingester_init(&ndb->ingester, &ndb->writer, ingester_threads)) {
+	if (!ndb_ingester_init(&ndb->ingester, &ndb->writer, ingester_threads,
+			       ndb->flags)) {
 		fprintf(stderr, "failed to initialize %d ingester thread(s)\n",
 				ingester_threads);
 		return 0;
