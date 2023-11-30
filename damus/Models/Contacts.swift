@@ -217,6 +217,20 @@ func add_relay(ev: NostrEvent, keypair: FullKeypair, current_relays: [RelayDescr
     return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 3, tags: ev.tags.strings())
 }
 
+func make_relay_metadata(relays: [RelayDescriptor], keypair: FullKeypair) -> NostrEvent? {
+    let tags = relays.compactMap { r -> [String]? in
+        var tag = ["r", r.url.id]
+        if (r.info.read ?? true) != (r.info.write ?? true) {
+            tag += r.info.read == true ? ["read"] : ["write"]
+        }
+        if ((r.info.read ?? true) || (r.info.write ?? true)) && r.variant == .regular {
+            return tag;
+        }
+        return nil
+    }
+    return NostrEvent(content: "", keypair: keypair.to_keypair(), kind: 10_002, tags: tags)
+}
+
 func ensure_relay_info(relays: [RelayDescriptor], content: String) -> [RelayURL: RelayInfo] {
     return decode_json_relays(content) ?? make_contact_relays(relays)
 }

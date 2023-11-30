@@ -113,6 +113,9 @@ struct AddRelayView: View {
 
                 state.pool.send(.event(new_ev))
 
+                if let relay_metadata = make_relay_metadata(relays: state.pool.our_descriptors, keypair: keypair) {
+                    state.postbox.send(relay_metadata)
+                }
                 new_relay = ""
 
                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)

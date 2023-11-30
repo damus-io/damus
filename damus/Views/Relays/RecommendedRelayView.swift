@@ -124,6 +124,10 @@ struct RecommendedRelayView: View {
         }
         process_contact_event(state: damus, ev: ev_after_add)
         damus.postbox.send(ev_after_add)
+        
+        if let relay_metadata = make_relay_metadata(relays: damus.pool.our_descriptors, keypair: keypair) {
+            damus.postbox.send(relay_metadata)
+        }
     }
 }
 
