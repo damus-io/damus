@@ -434,39 +434,6 @@ func fetch_zapper_from_lnurl(lnurls: LNUrls, pubkey: Pubkey, lnurl: String) asyn
     return pk
 }
 
-func decode_lnurl(_ lnurl: String) -> URL? {
-    guard let decoded = try? bech32_decode(lnurl) else {
-        return nil
-    }
-    guard decoded.hrp == "lnurl" else {
-        return nil
-    }
-    guard let url = URL(string: String(decoding: decoded.data, as: UTF8.self)) else {
-        return nil
-    }
-    return url
-}
-
-func fetch_static_payreq(_ lnurl: String) async -> LNUrlPayRequest? {
-    print("fetching static payreq \(lnurl)")
-
-    guard let url = decode_lnurl(lnurl) else {
-        return nil
-    }
-    
-    guard let ret = try? await URLSession.shared.data(from: url) else {
-        return nil
-    }
-    
-    let json_str = String(decoding: ret.0, as: UTF8.self)
-    
-    guard let endpoint: LNUrlPayRequest = decode_json(json_str) else {
-        return nil
-    }
-    
-    return endpoint
-}
-
 func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, msats: Int64, zap_type: ZapType, comment: String?) async -> String? {
     guard var base_url = payreq.callback.flatMap({ URLComponents(string: $0) }) else {
         return nil

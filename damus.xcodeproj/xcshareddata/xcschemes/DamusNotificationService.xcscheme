@@ -59,7 +59,7 @@
       <RemoteRunnable
          runnableDebuggingMode = "1"
          BundleIdentifier = "com.jb55.damus2"
-         RemotePath = "/Users/danielnogueira/Library/Developer/CoreSimulator/Devices/99E60B35-CE5D-4B45-AC35-00818C0AF3CB/data/Containers/Bundle/Application/5A083DD0-FDE2-43D7-9172-2F97FAD18F20/damus.app">
+         RemotePath = "/Users/danielnogueira/Library/Developer/CoreSimulator/Devices/99E60B35-CE5D-4B45-AC35-00818C0AF3CB/data/Containers/Bundle/Application/12BC3574-F80A-4852-869A-0D826412B040/damus.app">
       </RemoteRunnable>
       <MacroExpansion>
          <BuildableReference

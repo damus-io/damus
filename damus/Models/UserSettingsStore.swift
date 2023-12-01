@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 
 let fallback_zap_amount = 1000
+let default_emoji_reactions = ["🤣", "🤙", "⚡", "💜", "🔥", "😀", "😃", "😄", "🥶"]
 
 func setting_property_key(key: String) -> String {
     return pk_setting_key(UserSettingsStore.pubkey ?? .empty, key: key)

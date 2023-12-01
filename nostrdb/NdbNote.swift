@@ -48,6 +48,12 @@ class NdbNote: Encodable, Equatable, Hashable {
 
     // cached stuff (TODO: remove these)
     var decrypted_content: String? = nil
+    
+    private var inner_event: NdbNote? {
+        get {
+            return NdbNote.owned_from_json_cstr(json: content_raw, json_len: content_len)
+        }
+    }
 
     init(note: UnsafeMutablePointer<ndb_note>, size: Int, owned: Bool, key: NoteKey?) {
         self.note = note
@@ -261,6 +267,10 @@ class NdbNote: Encodable, Equatable, Hashable {
         let new_note = note_data.assumingMemoryBound(to: ndb_note.self)
 
         return NdbNote(note: new_note, size: Int(len), owned: true, key: nil)
+    }
+    
+    func get_inner_event() -> NdbNote? {
+        return self.inner_event
     }
 }
 

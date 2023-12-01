@@ -61,3 +61,36 @@ class LNUrls {
         return self.endpoints[pubkey] ?? .not_fetched
     }
 }
+
+func fetch_static_payreq(_ lnurl: String) async -> LNUrlPayRequest? {
+    print("fetching static payreq \(lnurl)")
+
+    guard let url = decode_lnurl(lnurl) else {
+        return nil
+    }
+    
+    guard let ret = try? await URLSession.shared.data(from: url) else {
+        return nil
+    }
+    
+    let json_str = String(decoding: ret.0, as: UTF8.self)
+    
+    guard let endpoint: LNUrlPayRequest = decode_json(json_str) else {
+        return nil
+    }
+    
+    return endpoint
+}
+
+func decode_lnurl(_ lnurl: String) -> URL? {
+    guard let decoded = try? bech32_decode(lnurl) else {
+        return nil
+    }
+    guard decoded.hrp == "lnurl" else {
+        return nil
+    }
+    guard let url = URL(string: String(decoding: decoded.data, as: UTF8.self)) else {
+        return nil
+    }
+    return url
+}

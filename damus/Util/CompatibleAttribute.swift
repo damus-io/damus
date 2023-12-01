@@ -101,3 +101,13 @@ extension CompatibleText {
         }
     }
 }
+
+
+func icon_attributed_string(img: UIImage) -> AttributedString {
+    let attachment = NSTextAttachment()
+    attachment.image = img
+    let attachmentString = NSAttributedString(attachment: attachment)
+    return AttributedString(attachmentString)
+}
+
+
