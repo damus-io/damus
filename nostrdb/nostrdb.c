@@ -3629,7 +3629,7 @@ static int ndb_event_commitment(struct ndb_note *ev, unsigned char *buf, int buf
 	struct cursor cur;
 	int ok;
 
-	if (!hex_encode(ev->pubkey, sizeof(ev->pubkey), pubkey, sizeof(pubkey)))
+	if (!hex_encode(ev->pubkey, sizeof(ev->pubkey), pubkey))
 		return 0;
 
 	make_cursor(buf, buf + buflen, &cur);
