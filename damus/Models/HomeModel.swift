@@ -602,7 +602,7 @@ class HomeModel {
         }
         
         if handle_last_event(ev: ev, timeline: .notifications) {
-            process_local_notification(damus_state: damus_state, event: ev)
+            process_local_notification(state: damus_state, event: ev)
         }
         
     }
@@ -644,11 +644,13 @@ class HomeModel {
     func got_new_dm(notifs: NewEventsBits, ev: NostrEvent) {
         notification_status.new_events = notifs
         
-        if damus_state.settings.dm_notification && ev.age < HomeModel.event_max_age_for_notification {
-            let convo = ev.decrypted(keypair: self.damus_state.keypair) ?? NSLocalizedString("New encrypted direct message", comment: "Notification that the user has received a new direct message")
-            let notify = LocalNotification(type: .dm, event: ev, target: ev, content: convo)
-            create_local_notification(profiles: damus_state.profiles, notify: notify)
+        guard should_display_notification(state: damus_state, event: ev),
+              let notification_object = generate_local_notification_object(from: ev, state: damus_state)
+        else {
+            return
         }
+        
+        create_local_notification(profiles: damus_state.profiles, notify: notification_object)
     }
     
     func handle_dm(_ ev: NostrEvent) {
@@ -1160,19 +1162,6 @@ func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: 
         }
     }
 }
-
-func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
-    process_local_notification(
-        ndb: damus_state.ndb,
-        settings: damus_state.settings,
-        contacts: damus_state.contacts,
-        muted_threads: damus_state.muted_threads,
-        user_keypair: damus_state.keypair,
-        profiles: damus_state.profiles,
-        event: ev
-    )
-}
-
 
 enum ProcessZapResult {
     case already_processed(Zap)
