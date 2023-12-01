@@ -4398,8 +4398,9 @@ inline int ndb_builder_push_tag_str(struct ndb_builder *builder,
 // 
 void ndb_default_config(struct ndb_config *config)
 {
+	int cores = get_physical_cores();
 	config->mapsize = 1024UL * 1024UL * 1024UL * 32UL; // 32 GiB
-	config->ingester_threads = 4; // TODO: figure this out from platform apis
+	config->ingester_threads = cores == -1 ? 4 : cores;
 	config->flags = 0;
 	config->ingest_filter = NULL;
 	config->filter_context = NULL;
@@ -4407,8 +4408,7 @@ void ndb_default_config(struct ndb_config *config)
 
 void ndb_config_set_ingest_threads(struct ndb_config *config, int threads)
 {
-	int cores = get_physical_cores();
-	config->ingester_threads = cores == -1 ? 4 : cores;
+	config->ingester_threads = threads;
 }
 
 void ndb_config_set_flags(struct ndb_config *config, int flags)
