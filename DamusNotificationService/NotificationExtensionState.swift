@@ -14,6 +14,8 @@ struct NotificationExtensionState: HeadlessDamusState {
     let muted_threads: MutedThreadsManager
     let keypair: Keypair
     let profiles: Profiles
+    let zaps: Zaps
+    let lnurls: LNUrls
     
     init?() {
         guard let ndb = try? Ndb(owns_db_file: false) else { return nil }
@@ -25,5 +27,15 @@ struct NotificationExtensionState: HeadlessDamusState {
         self.muted_threads = MutedThreadsManager(keypair: keypair)
         self.keypair = keypair
         self.profiles = Profiles(ndb: ndb)
+        self.zaps = Zaps(our_pubkey: keypair.pubkey)
+        self.lnurls = LNUrls()
+    }
+    
+    @discardableResult
+    func add_zap(zap: Zapping) -> Bool {
+        // store generic zap mapping
+        self.zaps.add_zap(zap: zap)
+        
+        return true
     }
 }

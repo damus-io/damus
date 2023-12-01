@@ -49,7 +49,7 @@ struct NotificationFormatter {
     
     // MARK: - Formatting with LocalNotification
     
-    func format_message(displayName: String, notify: LocalNotification) -> (content: UNMutableNotificationContent, identifier: String) {
+    func format_message(displayName: String, notify: LocalNotification) -> (content: UNMutableNotificationContent, identifier: String)? {
         let content = UNMutableNotificationContent()
         var title = ""
         var identifier = ""
@@ -68,8 +68,8 @@ struct NotificationFormatter {
                 title = displayName
                 identifier = "myDMNotification"
             case .zap, .profile_zap:
-                // not handled here
-                break
+                // not handled here. Try `format_message(displayName: String, notify: LocalNotification, state: HeadlessDamusState) async -> (content: UNMutableNotificationContent, identifier: String)?`
+                return nil
         }
         content.title = title
         content.body = notify.content
@@ -77,5 +77,60 @@ struct NotificationFormatter {
         content.userInfo = notify.to_lossy().to_user_info()
 
         return (content, identifier)
+    }
+    
+    func format_message(displayName: String, notify: LocalNotification, state: HeadlessDamusState) async -> (content: UNMutableNotificationContent, identifier: String)? {
+        // Try sync method first and return if it works
+        if let sync_formatted_message = self.format_message(displayName: displayName, notify: notify) {
+            return sync_formatted_message
+        }
+        
+        // If it does not work, try async formatting methods
+        let content = UNMutableNotificationContent()
+        
+        switch notify.type {
+            case .zap, .profile_zap:
+                guard let zap = await get_zap(from: notify.event, state: state) else {
+                    return nil
+                }
+                content.title = Self.zap_notification_title(zap)
+                content.body = Self.zap_notification_body(profiles: state.profiles, zap: zap)
+                content.sound = UNNotificationSound.default
+                content.userInfo = LossyLocalNotification(type: .zap, mention: .note(notify.event.id)).to_user_info()
+                return (content, "myZapNotification")
+            default:
+                // The sync method should have taken care of this.
+                return nil
+        }
+    }
+    
+    // MARK: - Formatting zap utility notifications
+
+    static func zap_notification_title(_ zap: Zap) -> String {
+        if zap.private_request != nil {
+            return NSLocalizedString("Private Zap", comment: "Title of notification when a private zap is received.")
+        } else {
+            return NSLocalizedString("Zap", comment: "Title of notification when a non-private zap is received.")
+        }
+    }
+
+    static func zap_notification_body(profiles: Profiles, zap: Zap, locale: Locale = Locale.current) -> String {
+        let src = zap.request.ev
+        let pk = zap.is_anon ? ANON_PUBKEY : src.pubkey
+
+        let name = profiles.lookup(id: pk).map { profile in
+            Profile.displayName(profile: profile, pubkey: pk).displayName.truncate(maxLength: 50)
+        }.value
+
+        let sats = NSNumber(value: (Double(zap.invoice.amount) / 1000.0))
+        let formattedSats = format_msats_abbrev(zap.invoice.amount)
+
+        if src.content.isEmpty {
+            let format = localizedStringFormat(key: "zap_notification_no_message", locale: locale)
+            return String(format: format, locale: locale, sats.decimalValue as NSDecimalNumber, formattedSats, name)
+        } else {
+            let format = localizedStringFormat(key: "zap_notification_with_message", locale: locale)
+            return String(format: format, locale: locale, sats.decimalValue as NSDecimalNumber, formattedSats, name, src.content)
+        }
     }
 }

@@ -57,21 +57,6 @@ struct TextEvent: View {
 
 }
 
-func event_has_tag(ev: NostrEvent, tag: String) -> Bool {
-    for t in ev.tags {
-        if t.count >= 1 && t[0].matches_str(tag) {
-            return true
-        }
-    }
-    
-    return false
-}
-
-
-func event_is_anonymous(ev: NostrEvent) -> Bool {
-    return ev.known_kind == .zap_request && event_has_tag(ev: ev, tag: "anon")
-}
-
 struct TextEvent_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: 20) {

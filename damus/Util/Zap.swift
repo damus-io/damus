@@ -336,6 +336,69 @@ struct Zap {
     }
 }
 
+func decrypt_private_zap(our_privkey: Privkey, zapreq: NostrEvent, target: ZapTarget) -> NostrEvent? {
+    guard let anon_tag = zapreq.tags.first(where: { t in
+        t.count >= 2 && t[0].matches_str("anon")
+    }) else {
+        return nil
+    }
+    
+    let enc_note = anon_tag[1].string()
+
+    var note = decrypt_note(our_privkey: our_privkey, their_pubkey: zapreq.pubkey, enc_note: enc_note, encoding: .bech32)
+    
+    // check to see if the private note was from us
+    if note == nil {
+        guard let our_private_keypair = generate_private_keypair(our_privkey: our_privkey, id: NoteId(target.id), created_at: zapreq.created_at) else {
+            return nil
+        }
+        // use our private keypair and their pubkey to get the shared secret
+        note = decrypt_note(our_privkey: our_private_keypair.privkey, their_pubkey: target.pubkey, enc_note: enc_note, encoding: .bech32)
+    }
+    
+    guard let note else {
+        return nil
+    }
+        
+    guard note.kind == 9733 else {
+        return nil
+    }
+    
+    let zr_etag = zapreq.referenced_ids.first
+    let note_etag = note.referenced_ids.first
+    
+    guard zr_etag == note_etag else {
+        return nil
+    }
+    
+    let zr_ptag = zapreq.referenced_pubkeys.first
+    let note_ptag = note.referenced_pubkeys.first
+    
+    guard let zr_ptag, let note_ptag, zr_ptag == note_ptag else {
+        return nil
+    }
+    
+    guard validate_event(ev: note) == .ok else {
+        return nil
+    }
+    
+    return note
+}
+
+func event_is_anonymous(ev: NostrEvent) -> Bool {
+    return ev.known_kind == .zap_request && event_has_tag(ev: ev, tag: "anon")
+}
+
+func event_has_tag(ev: NostrEvent, tag: String) -> Bool {
+    for t in ev.tags {
+        if t.count >= 1 && t[0].matches_str(tag) {
+            return true
+        }
+    }
+    
+    return false
+}
+
 /// Fetches the description from either the invoice, or tags, depending on the type of invoice
 func get_zap_description(_ ev: NostrEvent, inv_desc: InvoiceDescription) -> String? {
     switch inv_desc {

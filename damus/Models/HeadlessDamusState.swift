@@ -18,4 +18,9 @@ protocol HeadlessDamusState {
     var muted_threads: MutedThreadsManager { get }
     var keypair: Keypair { get }
     var profiles: Profiles { get }
+    var zaps: Zaps { get }
+    var lnurls: LNUrls { get }
+    
+    @discardableResult
+    func add_zap(zap: Zapping) -> Bool
 }

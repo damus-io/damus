@@ -62,11 +62,6 @@ func zap_target_to_tags(_ target: ZapTarget) -> [[String]] {
     }
 }
 
-struct PrivateZapRequest {
-    let req: ZapRequest
-    let enc: String
-}
-
 func make_private_zap_request_event(identity: FullKeypair, enc_key: FullKeypair, target: ZapTarget, message: String) -> PrivateZapRequest? {
     // target tags must be the same as zap request target tags
     let tags = zap_target_to_tags(target)
@@ -79,78 +74,6 @@ func make_private_zap_request_event(identity: FullKeypair, enc_key: FullKeypair,
     }
     
     return PrivateZapRequest(req: ZapRequest(ev: note), enc: enc)
-}
-
-func decrypt_private_zap(our_privkey: Privkey, zapreq: NostrEvent, target: ZapTarget) -> NostrEvent? {
-    guard let anon_tag = zapreq.tags.first(where: { t in
-        t.count >= 2 && t[0].matches_str("anon")
-    }) else {
-        return nil
-    }
-    
-    let enc_note = anon_tag[1].string()
-
-    var note = decrypt_note(our_privkey: our_privkey, their_pubkey: zapreq.pubkey, enc_note: enc_note, encoding: .bech32)
-    
-    // check to see if the private note was from us
-    if note == nil {
-        guard let our_private_keypair = generate_private_keypair(our_privkey: our_privkey, id: NoteId(target.id), created_at: zapreq.created_at) else {
-            return nil
-        }
-        // use our private keypair and their pubkey to get the shared secret
-        note = decrypt_note(our_privkey: our_private_keypair.privkey, their_pubkey: target.pubkey, enc_note: enc_note, encoding: .bech32)
-    }
-    
-    guard let note else {
-        return nil
-    }
-        
-    guard note.kind == 9733 else {
-        return nil
-    }
-    
-    let zr_etag = zapreq.referenced_ids.first
-    let note_etag = note.referenced_ids.first
-    
-    guard zr_etag == note_etag else {
-        return nil
-    }
-    
-    let zr_ptag = zapreq.referenced_pubkeys.first
-    let note_ptag = note.referenced_pubkeys.first
-    
-    guard let zr_ptag, let note_ptag, zr_ptag == note_ptag else {
-        return nil
-    }
-    
-    guard validate_event(ev: note) == .ok else {
-        return nil
-    }
-    
-    return note
-}
-
-enum MakeZapRequest {
-    case priv(ZapRequest, PrivateZapRequest)
-    case normal(ZapRequest)
-    
-    var private_inner_request: ZapRequest {
-        switch self {
-        case .priv(_, let pzr):
-            return pzr.req
-        case .normal(let zr):
-            return zr
-        }
-    }
-    
-    var potentially_anon_outer_request: ZapRequest {
-        switch self {
-        case .priv(let zr, _):
-            return zr
-        case .normal(let zr):
-            return zr
-        }
-    }
 }
 
 func make_first_contact_event(keypair: Keypair) -> NostrEvent? {

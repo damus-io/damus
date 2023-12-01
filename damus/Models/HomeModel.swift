@@ -239,7 +239,7 @@ class HomeModel {
 
     @MainActor
     func handle_zap_event(_ ev: NostrEvent) {
-        process_zap_event(damus_state: damus_state, ev: ev) { zapres in
+        process_zap_event(state: damus_state, ev: ev) { zapres in
             guard case .done(let zap) = zapres,
                   zap.target.pubkey == self.damus_state.keypair.pubkey,
                   should_show_event(keypair: self.damus_state.keypair, hellthreads: self.damus_state.muted_threads, contacts: self.damus_state.contacts, ev: zap.request.ev) else {
@@ -1093,39 +1093,11 @@ func zap_vibrate(zap_amount: Int64) {
     vibration_generator.impactOccurred()
 }
 
-func zap_notification_title(_ zap: Zap) -> String {
-    if zap.private_request != nil {
-        return NSLocalizedString("Private Zap", comment: "Title of notification when a private zap is received.")
-    } else {
-        return NSLocalizedString("Zap", comment: "Title of notification when a non-private zap is received.")
-    }
-}
-
-func zap_notification_body(profiles: Profiles, zap: Zap, locale: Locale = Locale.current) -> String {
-    let src = zap.request.ev
-    let pk = zap.is_anon ? ANON_PUBKEY : src.pubkey
-
-    let name = profiles.lookup(id: pk).map { profile in
-        Profile.displayName(profile: profile, pubkey: pk).displayName.truncate(maxLength: 50)
-    }.value
-
-    let sats = NSNumber(value: (Double(zap.invoice.amount) / 1000.0))
-    let formattedSats = format_msats_abbrev(zap.invoice.amount)
-
-    if src.content.isEmpty {
-        let format = localizedStringFormat(key: "zap_notification_no_message", locale: locale)
-        return String(format: format, locale: locale, sats.decimalValue as NSDecimalNumber, formattedSats, name)
-    } else {
-        let format = localizedStringFormat(key: "zap_notification_with_message", locale: locale)
-        return String(format: format, locale: locale, sats.decimalValue as NSDecimalNumber, formattedSats, name, src.content)
-    }
-}
-
 func create_in_app_profile_zap_notification(profiles: Profiles, zap: Zap, locale: Locale = Locale.current, profile_id: Pubkey) {
     let content = UNMutableNotificationContent()
 
-    content.title = zap_notification_title(zap)
-    content.body = zap_notification_body(profiles: profiles, zap: zap, locale: locale)
+    content.title = NotificationFormatter.zap_notification_title(zap)
+    content.body = NotificationFormatter.zap_notification_body(profiles: profiles, zap: zap, locale: locale)
     content.sound = UNNotificationSound.default
     content.userInfo = LossyLocalNotification(type: .profile_zap, mention: .pubkey(profile_id)).to_user_info()
 
@@ -1145,8 +1117,8 @@ func create_in_app_profile_zap_notification(profiles: Profiles, zap: Zap, locale
 func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: Locale = Locale.current, evId: NoteId) {
     let content = UNMutableNotificationContent()
 
-    content.title = zap_notification_title(zap)
-    content.body = zap_notification_body(profiles: profiles, zap: zap, locale: locale)
+    content.title = NotificationFormatter.zap_notification_title(zap)
+    content.body = NotificationFormatter.zap_notification_body(profiles: profiles, zap: zap, locale: locale)
     content.sound = UNNotificationSound.default
     content.userInfo = LossyLocalNotification(type: .zap, mention: .note(evId)).to_user_info()
 
@@ -1162,109 +1134,3 @@ func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: 
         }
     }
 }
-
-enum ProcessZapResult {
-    case already_processed(Zap)
-    case done(Zap)
-    case failed
-}
-
-// securely get the zap target's pubkey. this can be faked so we need to be
-// careful
-func get_zap_target_pubkey(ev: NostrEvent, events: EventCache) -> Pubkey? {
-    let etags = Array(ev.referenced_ids)
-
-    guard let etag = etags.first else {
-        // no etags, ptag-only case
-
-        guard let a = ev.referenced_pubkeys.just_one() else {
-            return nil
-        }
-
-        // TODO: just return data here
-        return a
-    }
-
-    // we have an e-tag
-
-    // ensure that there is only 1 etag to stop fake note zap attacks
-    guard etags.count == 1 else {
-        return nil
-    }
-
-    // we can't trust the p tag on note zaps because they can be faked
-    guard let pk = events.lookup(etag)?.pubkey else {
-        // We don't have the event in cache so we can't check the pubkey.
-
-        // We could return this as an invalid zap but that wouldn't be correct
-        // all of the time, and may reject valid zaps. What we need is a new
-        // unvalidated zap state, but for now we simply leak a bit of correctness...
-
-        return ev.referenced_pubkeys.just_one()
-    }
-
-    return pk
-}
-
-@MainActor
-func process_zap_event(damus_state: DamusState, ev: NostrEvent, completion: @escaping (ProcessZapResult) -> Void) {
-    // These are zap notifications
-    guard let ptag = get_zap_target_pubkey(ev: ev, events: damus_state.events) else {
-        completion(.failed)
-        return
-    }
-
-    // just return the zap if we already have it
-    if let zap = damus_state.zaps.zaps[ev.id], case .zap(let z) = zap {
-        completion(.already_processed(z))
-        return
-    }
-    
-    if let local_zapper = damus_state.profiles.lookup_zapper(pubkey: ptag) {
-        guard let zap = process_zap_event_with_zapper(damus_state: damus_state, ev: ev, zapper: local_zapper) else {
-            completion(.failed)
-            return
-        }
-        damus_state.add_zap(zap: .zap(zap))
-        completion(.done(zap))
-        return
-    }
-    
-    guard let lnurl = damus_state.profiles.lookup_with_timestamp(ptag)
-                        .map({ pr in pr?.lnurl }).value else {
-        completion(.failed)
-        return
-    }
-
-    Task { [lnurl] in
-        guard let zapper = await fetch_zapper_from_lnurl(lnurls: damus_state.lnurls, pubkey: ptag, lnurl: lnurl) else {
-            completion(.failed)
-            return
-        }
-        
-        DispatchQueue.main.async {
-            damus_state.profiles.profile_data(ptag).zapper = zapper
-            guard let zap = process_zap_event_with_zapper(damus_state: damus_state, ev: ev, zapper: zapper) else {
-                completion(.failed)
-                return
-            }
-            damus_state.add_zap(zap: .zap(zap))
-            completion(.done(zap))
-        }
-    }
-    
-       
-}
-
-fileprivate func process_zap_event_with_zapper(damus_state: DamusState, ev: NostrEvent, zapper: Pubkey) -> Zap? {
-    let our_keypair = damus_state.keypair
-    
-    guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper, our_privkey: our_keypair.privkey) else {
-        return nil
-    }
-    
-    damus_state.add_zap(zap: .zap(zap))
-    
-    return zap
-}
-

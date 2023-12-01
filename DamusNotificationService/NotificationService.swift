@@ -52,8 +52,11 @@ class NotificationService: UNNotificationServiceExtension {
             return
         }
         
-        let (improvedContent, _) = NotificationFormatter.shared.format_message(displayName: display_name, notify: notification_object)
-        contentHandler(improvedContent)
+        Task {
+            if let (improvedContent, _) = await NotificationFormatter.shared.format_message(displayName: display_name, notify: notification_object, state: state) {
+                contentHandler(improvedContent)
+            }
+        }
     }
     
     override func serviceExtensionTimeWillExpire() {

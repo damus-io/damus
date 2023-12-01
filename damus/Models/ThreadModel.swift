@@ -107,7 +107,7 @@ class ThreadModel: ObservableObject {
             }
             
             if ev.known_kind == .zap {
-                process_zap_event(damus_state: damus_state, ev: ev) { zap in
+                process_zap_event(state: damus_state, ev: ev) { zap in
                     
                 }
             } else if ev.is_textlike {
