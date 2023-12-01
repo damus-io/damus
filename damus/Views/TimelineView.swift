@@ -66,7 +66,7 @@ struct TimelineView<Content: View>: View {
 struct TimelineView_Previews: PreviewProvider {
     @StateObject static var events = test_event_holder
     static var previews: some View {
-        TimelineView<AnyView>(events: events, loading: .constant(true), damus: Constants.EXAMPLE_DEMOS, show_friend_icon: true, filter: { _ in true })
+        TimelineView<AnyView>(events: events, loading: .constant(true), damus: test_damus_state, show_friend_icon: true, filter: { _ in true })
     }
 }
 

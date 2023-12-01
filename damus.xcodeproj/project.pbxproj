@@ -533,6 +533,7 @@
 		D7CCFC152B05891000323D86 /* Referenced.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC14FF82A741939007AEB17 /* Referenced.swift */; };
 		D7CCFC162B05894300323D86 /* Pubkey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC14FF02A73FCDB007AEB17 /* Pubkey.swift */; };
 		D7CCFC192B058A3F00323D86 /* Block.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7527271D2A93FF0100214108 /* Block.swift */; };
+		D7CD35132B1A72B800D63139 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CAEC294FCCFC00EE4006 /* Constants.swift */; };
 		D7CE1B182B0BDFDD002EDAD4 /* mdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4793002A993B9A00489948 /* mdb.c */; };
 		D7CE1B192B0BE132002EDAD4 /* builder.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4792942A9939BD00489948 /* builder.c */; };
 		D7CE1B1A2B0BE135002EDAD4 /* json_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4792C82A9939BD00489948 /* json_parser.c */; };
@@ -3437,6 +3438,7 @@
 				D7CCFC072B05833200323D86 /* NdbNote.swift in Sources */,
 				D7CE1B3F2B0BE719002EDAD4 /* Enum.swift in Sources */,
 				D74AAFD22B155E78006CF0F4 /* WalletConnect.swift in Sources */,
+				D7CD35132B1A72B800D63139 /* Constants.swift in Sources */,
 				D7EDED222B117DCA0018B19C /* SequenceUtils.swift in Sources */,
 				D7CE1B422B0BE719002EDAD4 /* Offset.swift in Sources */,
 				D7FB10A72B0C371A00FA8D42 /* Log.swift in Sources */,
