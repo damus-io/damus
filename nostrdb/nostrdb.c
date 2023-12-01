@@ -2561,30 +2561,6 @@ static int ndb_text_search_next_word(MDB_cursor *cursor, MDB_cursor_op op,
 	return 1;
 }
 
-static void ndb_print_text_search_key(struct ndb_text_search_key *key)
-{
-	printf("K<'%.*s' %d %" PRIu64 " note_id:%" PRIu64 ">", key->str_len, key->str,
-						    key->word_index,
-						    key->timestamp,
-						    key->note_id);
-}
-
-static void ndb_print_text_search_result(struct ndb_txn *txn,
-		struct ndb_text_search_result *r)
-{
-	size_t len;
-	struct ndb_note *note;
-
-	ndb_print_text_search_key(&r->key);
-
-	if (!(note = ndb_get_note_by_key(txn, r->key.note_id, &len))) {
-		printf(": note not found");
-		return;
-	}
-
-	printf("\n%s\n\n---\n", ndb_note_str(note, &note->content).str);
-}
-
 static void ndb_text_search_results_init(
 		struct ndb_text_search_results *results) {
 	results->num_results = 0;
@@ -2624,9 +2600,6 @@ int ndb_text_search(struct ndb_txn *txn, const char *query,
 		return 0;
 	}
 
-	fprintf(stderr, "search query: '%s'\n", query);
-
-
 	// for each word, we recursively find all of the submatches
 	while (results->num_results < MAX_TEXT_SEARCH_RESULTS) {
 		last_result = NULL;
@@ -2635,13 +2608,6 @@ int ndb_text_search(struct ndb_txn *txn, const char *query,
 		// if we have saved, then we continue from the last root search
 		// sequence
 		if (saved) {
-			/*
-			fprintf(stderr, "continuing from ");
-			if (ndb_unpack_text_search_key(saved_buf, saved_size, &search_key)) {
-				ndb_print_text_search_key(&search_key);
-			}
-			fprintf(stderr, "\n");
-			*/
 			buf = saved_buf;
 			saved = NULL;
 			keysize = saved_size;
@@ -2736,13 +2702,6 @@ cont:
 			break;
 		}
 
-	}
-
-	// print results for now
-	for (j = 0; j < results->num_results; j++) {
-		result = &results->results[j];
-		printf("[%02d] ", j+1);
-		ndb_print_text_search_result(txn, result);
 	}
 
 	mdb_cursor_close(cursor);
