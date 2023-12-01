@@ -124,7 +124,7 @@ func privkey_to_pubkey(privkey: Privkey) -> Pubkey? {
 }
 
 func save_pubkey(pubkey: Pubkey) {
-    UserDefaults.standard.set(pubkey.hex(), forKey: "pubkey")
+    DamusUserDefaults.shared.set(pubkey.hex(), forKey: "pubkey")
 }
 
 enum Keys {
@@ -141,7 +141,7 @@ func clear_saved_privkey() throws {
 }
 
 func clear_saved_pubkey() {
-    UserDefaults.standard.removeObject(forKey: "pubkey")
+    DamusUserDefaults.shared.removeObject(forKey: "pubkey")
 }
 
 func save_keypair(pubkey: Pubkey, privkey: Privkey) throws {
@@ -175,7 +175,7 @@ func get_saved_keypair() -> Keypair? {
 }
 
 func get_saved_pubkey() -> String? {
-    return UserDefaults.standard.string(forKey: "pubkey")
+    return DamusUserDefaults.shared.string(forKey: "pubkey")
 }
 
 func get_saved_privkey() -> String? {
@@ -198,10 +198,10 @@ func contentContainsPrivateKey(_ content: String) -> Bool {
 }
 
 fileprivate func removePrivateKeyFromUserDefaults() throws {
-    guard let privkey_str = UserDefaults.standard.string(forKey: "privkey"),
+    guard let privkey_str = DamusUserDefaults.shared.string(forKey: "privkey"),
           let privkey = hex_decode_privkey(privkey_str)
     else { return }
 
     try save_privkey(privkey: privkey)
-    UserDefaults.standard.removeObject(forKey: "privkey")
+    DamusUserDefaults.shared.removeObject(forKey: "privkey")
 }

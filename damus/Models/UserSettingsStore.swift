@@ -16,13 +16,13 @@ func setting_property_key(key: String) -> String {
 }
 
 func setting_get_property_value<T>(key: String, scoped_key: String, default_value: T) -> T {
-    if let loaded = UserDefaults.standard.object(forKey: scoped_key) as? T {
+    if let loaded = DamusUserDefaults.shared.object(forKey: scoped_key) as? T {
         return loaded
-    } else if let loaded = UserDefaults.standard.object(forKey: key) as? T {
+    } else if let loaded = DamusUserDefaults.shared.object(forKey: key) as? T {
         // If pubkey-scoped setting does not exist but the deprecated non-pubkey-scoped setting does,
         // migrate the deprecated setting into the pubkey-scoped one and delete the deprecated one.
-        UserDefaults.standard.set(loaded, forKey: scoped_key)
-        UserDefaults.standard.removeObject(forKey: key)
+        DamusUserDefaults.shared.set(loaded, forKey: scoped_key)
+        DamusUserDefaults.shared.removeObject(forKey: key)
         return loaded
     } else {
         return default_value
@@ -31,7 +31,7 @@ func setting_get_property_value<T>(key: String, scoped_key: String, default_valu
 
 func setting_set_property_value<T: Equatable>(scoped_key: String, old_value: T, new_value: T) -> T? {
     guard old_value != new_value else { return nil }
-    UserDefaults.standard.set(new_value, forKey: scoped_key)
+    DamusUserDefaults.shared.set(new_value, forKey: scoped_key)
     UserSettingsStore.shared?.objectWillChange.send()
     return new_value
 }
@@ -65,14 +65,14 @@ func setting_set_property_value<T: Equatable>(scoped_key: String, old_value: T, 
     
     init(key: String, default_value: T) {
         self.key = pk_setting_key(UserSettingsStore.pubkey ?? .empty, key: key)
-        if let loaded = UserDefaults.standard.string(forKey: self.key), let val = T.init(from: loaded) {
+        if let loaded = DamusUserDefaults.shared.string(forKey: self.key), let val = T.init(from: loaded) {
             self.value = val
-        } else if let loaded = UserDefaults.standard.string(forKey: key), let val = T.init(from: loaded) {
+        } else if let loaded = DamusUserDefaults.shared.string(forKey: key), let val = T.init(from: loaded) {
             // If pubkey-scoped setting does not exist but the deprecated non-pubkey-scoped setting does,
             // migrate the deprecated setting into the pubkey-scoped one and delete the deprecated one.
             self.value = val
-            UserDefaults.standard.set(val.to_string(), forKey: self.key)
-            UserDefaults.standard.removeObject(forKey: key)
+            DamusUserDefaults.shared.set(val.to_string(), forKey: self.key)
+            DamusUserDefaults.shared.removeObject(forKey: key)
         } else {
             self.value = default_value
         }
@@ -85,7 +85,7 @@ func setting_set_property_value<T: Equatable>(scoped_key: String, old_value: T, 
                 return
             }
             self.value = newValue
-            UserDefaults.standard.set(newValue.to_string(), forKey: key)
+            DamusUserDefaults.shared.set(newValue.to_string(), forKey: key)
             UserSettingsStore.shared!.objectWillChange.send()
         }
     }
