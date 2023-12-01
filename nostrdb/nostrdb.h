@@ -105,6 +105,12 @@ enum tce_type {
 	NDB_TCE_EOSE   = 0x4,
 };
 
+enum ndb_ingest_filter_action {
+	NDB_INGEST_REJECT,
+	NDB_INGEST_ACCEPT,
+	NDB_INGEST_SKIP_VALIDATION
+};
+
 // function pointer for controlling what to do after we parse an id
 typedef enum ndb_idres (*ndb_id_fn)(void *, const char *);
 
@@ -233,6 +239,8 @@ struct ndb_note {
 
 #pragma pack(pop)
 
+typedef enum ndb_ingest_filter_action (*ndb_ingest_filter_fn)(void *, struct ndb_note *);
+
 struct ndb_builder {
 	struct cursor mem;
 	struct cursor note_cur;
@@ -295,6 +303,20 @@ struct ndb_filter {
 	struct ndb_filter_elements *elements[NDB_NUM_FILTERS];
 };
 
+struct ndb_config {
+	int flags;
+	int ingester_threads;
+	size_t mapsize;
+	void *filter_context;
+	ndb_ingest_filter_fn ingest_filter;
+};
+
+// CONFIG
+void ndb_default_config(struct ndb_config *);
+void ndb_config_set_ingest_threads(struct ndb_config *config, int threads);
+void ndb_config_set_flags(struct ndb_config *config, int flags);
+void ndb_config_set_mapsize(struct ndb_config *config, size_t mapsize);
+void ndb_config_set_ingest_filter(struct ndb_config *config, ndb_ingest_filter_fn fn, void *);
 
 // HELPERS
 int ndb_calculate_id(struct ndb_note *note, unsigned char *buf, int buflen);
@@ -304,7 +326,7 @@ int ndb_decode_key(const char *secstr, struct ndb_keypair *keypair);
 int ndb_note_verify(void *secp_ctx, unsigned char pubkey[32], unsigned char id[32], unsigned char signature[64]);
 
 // NDB
-int ndb_init(struct ndb **ndb, const char *dbdir, size_t mapsize, int ingester_threads, int flags);
+int ndb_init(struct ndb **ndb, const char *dbdir, struct ndb_config *);
 int ndb_db_version(struct ndb *ndb);
 int ndb_process_event(struct ndb *, const char *json, int len);
 int ndb_process_events(struct ndb *, const char *ldjson, size_t len);
@@ -353,7 +375,6 @@ int ndb_filter_matches(struct ndb_filter *, struct ndb_note *);
 void ndb_filter_reset(struct ndb_filter *);
 void ndb_filter_end_field(struct ndb_filter *);
 void ndb_filter_free(struct ndb_filter *filter);
-
 
 // FULLTEXT SEARCH
 int ndb_text_search(struct ndb_txn *txn, const char *query, struct ndb_text_search_results *);
