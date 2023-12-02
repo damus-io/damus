@@ -2473,6 +2473,38 @@ static void ndb_print_text_search_key(struct ndb_text_search_key *key)
 						    key->note_id);
 }
 
+static int ndb_prefix_matches(struct ndb_text_search_result *result,
+			      struct ndb_word *search_word)
+{
+	// Empty strings shouldn't happen but let's
+	if (result->key.str_len < 2 || search_word->word_len < 2)
+		return 0;
+
+	// make sure we at least have two matching prefix characters. exact
+	// matches are nice but range searches allow us to match prefixes as
+	// well. A double-char prefix is suffient, but maybe we could up this
+	// in the future.
+	// 
+	// TODO: How are we handling utf-8 prefix matches like
+	// japanese?
+	//
+	if (   result->key.str[0] != tolower(search_word->word[0])
+	    && result->key.str[1] != tolower(search_word->word[1])
+	    )
+		return 0;
+
+	// count the number of prefix-matched characters. This will be used
+	// for ranking search results
+	result->prefix_chars = prefix_count(result->key.str,
+					    result->key.str_len,
+					    search_word->word,
+					    search_word->word_len);
+
+	if (result->prefix_chars <= (int)((double)search_word->word_len / 1.5)) 
+		return 0;
+
+	return 1;
+}
 
 // This is called when scanning the full text search index. Scanning stops
 // when we no longer have a prefix match for the word
@@ -2483,7 +2515,10 @@ static int ndb_text_search_next_word(MDB_cursor *cursor, MDB_cursor_op op,
 	MDB_cursor_op order_op)
 {
 	struct cursor key_cursor;
+	//struct ndb_text_search_key search_key;
 	MDB_val v;
+	int retries;
+	retries = -1;
 
 	make_cursor(k->mv_data, k->mv_data + k->mv_size, &key_cursor);
 
@@ -2504,6 +2539,15 @@ static int ndb_text_search_next_word(MDB_cursor *cursor, MDB_cursor_op op,
 		}
 	}
 
+retry:
+	retries++;
+	/*
+	printf("continuing from ");
+	if (ndb_unpack_text_search_key(k->mv_data, k->mv_size, &search_key)) {
+		ndb_print_text_search_key(&search_key);
+	} else { printf("??"); }
+	printf("\n");
+	*/
 
 	make_cursor(k->mv_data, k->mv_data + k->mv_size, &key_cursor);
 
@@ -2533,32 +2577,17 @@ static int ndb_text_search_next_word(MDB_cursor *cursor, MDB_cursor_op op,
 		return 0;
 	}
 
-	// Empty strings shouldn't happen but let's
-	if (result->key.str_len < 2 || search_word->word_len < 2)
-		return 0;
-
-	// make sure we at least have two matching prefix characters. exact
-	// matches are nice but range searches allow us to match prefixes as
-	// well. A double-char prefix is suffient, but maybe we could up this
-	// in the future.
-	// 
-	// TODO: How are we handling utf-8 prefix matches like
-	// japanese?
-	//
-	if (   result->key.str[0] != tolower(search_word->word[0])
-	    && result->key.str[1] != tolower(search_word->word[1])
-	    )
-		return 0;
-
-	// count the number of prefix-matched characters. This will be used
-	// for ranking search results
-	result->prefix_chars = prefix_count(result->key.str,
-					    result->key.str_len,
-					    search_word->word,
-					    search_word->word_len);
-
-	if (result->prefix_chars <= (int)((double)search_word->word_len / 1.5)) 
-		return 0;
+	if (!ndb_prefix_matches(result, search_word)) {
+		// we should only do this if we're going in reverse
+		if (retries == 0 && op == MDB_SET_RANGE && order_op == MDB_PREV) {
+			// if set range worked and our key exists, it should be
+			// the one right before this one
+			if (mdb_cursor_get(cursor, k, &v, MDB_PREV))
+				goto retry;
+		} else {
+			return 0;
+		}
+	}
 
 	// Unpack the remaining text search key, we will need this information
 	// when building up our search results.
@@ -4438,4 +4467,31 @@ void ndb_config_set_ingest_filter(struct ndb_config *config,
 {
 	config->ingest_filter = fn;
 	config->filter_context = filter_ctx;
+}
+
+// used by ndb.c
+int ndb_print_search_keys(struct ndb_txn *txn)
+{
+	MDB_cursor *cur;
+	MDB_val k, v;
+	int i;
+	struct ndb_text_search_key search_key;
+
+	if (mdb_cursor_open(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_NOTE_TEXT], &cur))
+		return 0;
+
+	i = 1;
+	while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
+		if (!ndb_unpack_text_search_key(k.mv_data, k.mv_size, &search_key)) {
+			fprintf(stderr, "error decoding key %d\n", i);
+			continue;
+		}
+
+		ndb_print_text_search_key(&search_key);
+		printf("\n");
+
+		i++;
+	}
+
+	return 1;
 }
