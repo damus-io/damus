@@ -67,7 +67,8 @@ class Ndb {
         let ok = path.withCString { testdir in
             var ok = false
             while !ok && mapsize > 1024 * 1024 * 700 {
-                ok = ndb_init(&ndb_p, testdir, mapsize, ingest_threads, 0) != 0
+                var cfg = ndb_config(flags: 0, ingester_threads: ingest_threads, mapsize: mapsize, filter_context: nil, ingest_filter: nil)
+                ok = ndb_init(&ndb_p, testdir, &cfg) != 0
                 if !ok {
                     mapsize /= 2
                 }
