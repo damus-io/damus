@@ -377,7 +377,7 @@ void ndb_filter_end_field(struct ndb_filter *);
 void ndb_filter_free(struct ndb_filter *filter);
 
 // FULLTEXT SEARCH
-int ndb_text_search(struct ndb_txn *txn, const char *query, struct ndb_text_search_results *);
+int ndb_text_search(struct ndb_txn *txn, const char *query, struct ndb_text_search_results *, int limit);
 
 // stats
 int ndb_stat(struct ndb *ndb, struct ndb_stat *stat);

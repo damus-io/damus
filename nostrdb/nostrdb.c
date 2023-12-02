@@ -2567,7 +2567,7 @@ static void ndb_text_search_results_init(
 }
 
 int ndb_text_search(struct ndb_txn *txn, const char *query,
-		    struct ndb_text_search_results *results)
+		    struct ndb_text_search_results *results, int limit)
 {
 	unsigned char buffer[1024], *buf;
 	unsigned char saved_buf[1024], *saved;
@@ -2600,8 +2600,10 @@ int ndb_text_search(struct ndb_txn *txn, const char *query,
 		return 0;
 	}
 
+	limit = min(MAX_TEXT_SEARCH_RESULTS, limit);
+
 	// for each word, we recursively find all of the submatches
-	while (results->num_results < MAX_TEXT_SEARCH_RESULTS) {
+	while (results->num_results < limit) {
 		last_result = NULL;
 		result = &results->results[results->num_results];
 
