@@ -10,6 +10,11 @@ import OSLog
 
 fileprivate let APPLICATION_GROUP_IDENTIFIER = "group.com.damus"
 
+enum NdbSearchOrder {
+    case oldest_first
+    case newest_first
+}
+
 class Ndb {
     let ndb: ndb_t
     let owns_db_file: Bool  // Determines whether this class should be allowed to create or move the db file.
@@ -131,6 +136,45 @@ class Ndb {
             return nil
         }
         return NdbNote(note: note_p, owned_size: nil, key: key)
+    }
+
+    func text_search(query: String, limit: Int = 32, order: NdbSearchOrder = .newest_first) -> [NoteKey] {
+        let txn = NdbTxn(ndb: self)
+        var results = ndb_text_search_results()
+        let res = query.withCString { q in
+            let order = order == .newest_first ? NDB_ORDER_DESCENDING : NDB_ORDER_ASCENDING
+            var config = ndb_text_search_config(order: order, limit: Int32(limit))
+            return ndb_text_search(&txn.txn, q, &results, &config)
+        }
+
+        if res == 0 {
+            return []
+        }
+
+        var note_ids = [NoteKey]()
+        for i in 0..<results.num_results {
+            // seriously wtf
+            switch i {
+            case 0: note_ids.append(results.results.0.key.note_id)
+            case 1: note_ids.append(results.results.1.key.note_id)
+            case 2: note_ids.append(results.results.2.key.note_id)
+            case 3: note_ids.append(results.results.3.key.note_id)
+            case 4: note_ids.append(results.results.4.key.note_id)
+            case 5: note_ids.append(results.results.5.key.note_id)
+            case 6: note_ids.append(results.results.6.key.note_id)
+            case 7: note_ids.append(results.results.7.key.note_id)
+            case 8: note_ids.append(results.results.8.key.note_id)
+            case 9: note_ids.append(results.results.9.key.note_id)
+            case 10: note_ids.append(results.results.10.key.note_id)
+            case 11: note_ids.append(results.results.11.key.note_id)
+            case 12: note_ids.append(results.results.12.key.note_id)
+            case 13: note_ids.append(results.results.13.key.note_id)
+            default:
+                break
+            }
+        }
+
+        return note_ids
     }
 
     func lookup_note_by_key(_ key: NoteKey) -> NdbTxn<NdbNote?> {

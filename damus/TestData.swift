@@ -105,7 +105,11 @@ var test_damus_state: DamusState = ({
 let test_wire_events = """
 ["EVENT","s",{"id":"d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349","pubkey":"32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245","created_at":1650049978,"kind":0,"tags":[],"content":"{\\"name\\\":\\"jb55\\",\\"picture\\":\\\"http://cdn.jb55.com/img/red-me.jpg\\",\\"about\\":\\"bitcoin, lightning and nostr dev\\",\\"nip05\\":\\"jb55.com\\"}","sig":"1315045da793c4825de1517149172bf35a6da39d91b7787afb3263721e07bc816cb898996ed8d69af05d6efcd1c926a089bd66cad870bcc361405c11ba302c51"}]
 ["EVENT","s",{"id":"b2e03951843b191b5d9d1969f48db0156b83cc7dbd841f543f109362e24c4a9c","pubkey":"32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245","created_at":1650050002,"kind":1,"tags":[],"content":"hello, this is my new key","sig":"4342eff1d78a82b42522cd26ec66a5293eca997f81d4b80efd02230d3d27317fb63d42656e8f32383562f075a2b6d999b60dcf70e2df18cf5e8b3801faeb0bd6"}]
+["EVENT","s",{"id":"8f68cdc0c72dcf5c37868428cb477f28b13b1561e717f92053921b3b3c4ab712","pubkey":"ba4b26df771a0839d5a26550ada6ac19547e164136994951d2d5c5815993a28e","created_at":1701187327,"kind":1,"tags":[],"content":"a quick brown fox jumped over the lazy dog","sig":"3cca4157e92df32f42e3df5a63e2438676557e53d9136fedc6f3a23f6fad083748af19dfb3fa5949654c4b5623342e70cb74d56cf6e6e8a347a3ab2c3adf1654"}]
+["EVENT","s",{"id":"b17a540710fe8495b16bfbaf31c6962c4ba8387f3284a7973ad523988095417e","pubkey":"df51637b1a19115d6c532081461a3e24f19b02f15815771dd26de2617fe2ea90","created_at":1701187337,"kind":1,"tags":[],"content":"a quick brown fox barked at the lazy dog","sig":"e171df376d6efd3f8dc072715d14387c3446785d1b8c5809b4871a9dc925c39a7b475fcebc8c98bbd5363ba1ed0a7d6420ad796fcda24f3d6f820b433af92ee2"}]
+["EVENT","s",{"id":"35c717f1d905b05e16868107f78ec013399b01e9dcdd40fcaf8112b3d1f63ad4","pubkey":"381eac026b7d3053236eef30c1a3cd0674809d050b1ba9f05c694efb5ea002d4","created_at":1701188103,"kind":1,"tags":[],"content":"a quick brown fox jumped over the lazy cat","sig":"fed2e4c1d34ad79004468f676310d366c0104d2d01f1778fc7f308fca52892ad3b8f83d6e0219fcfbcc2d3123d4ad0a733b69123414ce4b117e44041600045a0"}]
 """
+
 
 let test_failing_nostr_report = """
 {
