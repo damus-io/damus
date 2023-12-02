@@ -277,6 +277,11 @@ enum ndb_generic_element_type {
 	NDB_ELEMENT_ID      = 2,
 };
 
+enum ndb_search_order {
+	NDB_ORDER_DESCENDING,
+	NDB_ORDER_ASCENDING,
+};
+
 union ndb_filter_element {
 	const char *string;
 	const unsigned char *id;
@@ -309,6 +314,11 @@ struct ndb_config {
 	size_t mapsize;
 	void *filter_context;
 	ndb_ingest_filter_fn ingest_filter;
+};
+
+struct ndb_text_search_config {
+	enum ndb_search_order order;
+	int limit;
 };
 
 // CONFIG
@@ -377,7 +387,10 @@ void ndb_filter_end_field(struct ndb_filter *);
 void ndb_filter_free(struct ndb_filter *filter);
 
 // FULLTEXT SEARCH
-int ndb_text_search(struct ndb_txn *txn, const char *query, struct ndb_text_search_results *, int limit);
+int ndb_text_search(struct ndb_txn *txn, const char *query, struct ndb_text_search_results *, struct ndb_text_search_config *);
+void ndb_default_text_search_config(struct ndb_text_search_config *);
+void ndb_text_search_config_set_order(struct ndb_text_search_config *, enum ndb_search_order);
+void ndb_text_search_config_set_limit(struct ndb_text_search_config *, int limit);
 
 // stats
 int ndb_stat(struct ndb *ndb, struct ndb_stat *stat);

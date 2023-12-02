@@ -177,7 +177,7 @@ static int ndb_make_text_search_key(unsigned char *buf, int bufsize,
 	// TODO: need update this to uint64_t
 	// we push this first because our query function can pull this off
 	// quicky to check matches
-	if (!push_varint(&cur, (int)note_id))
+	if (!push_varint(&cur, (int32_t)note_id))
 		return 0;
 
 	// string length
@@ -238,11 +238,13 @@ static int ndb_make_text_search_key_high(unsigned char *buf, int bufsize,
 					 int *keysize)
 {
 	uint64_t timestamp, note_id;
-	timestamp = UINT64_MAX;
-	note_id = UINT64_MAX;
+	timestamp = INT32_MAX;
+	note_id = INT32_MAX;
 	return ndb_make_text_search_key(buf, bufsize, 0, wordlen, word,
 					timestamp, note_id, keysize);
 }
+
+typedef int (*ndb_text_search_key_order_fn)(unsigned char *buf, int bufsize, int wordlen, const char *word, int *keysize);
 
 /** From LMDB: Compare two items lexically */
 static int mdb_cmp_memn(const MDB_val *a, const MDB_val *b) {
@@ -2469,7 +2471,8 @@ static int prefix_count(const char *str1, int len1, const char *str2, int len2) 
 static int ndb_text_search_next_word(MDB_cursor *cursor, MDB_cursor_op op,
 	MDB_val *k, struct ndb_word *search_word,
 	struct ndb_text_search_result *last_result,
-	struct ndb_text_search_result *result)
+	struct ndb_text_search_result *result,
+	MDB_cursor_op order_op)
 {
 	struct cursor key_cursor;
 	MDB_val v;
@@ -2481,8 +2484,18 @@ static int ndb_text_search_next_word(MDB_cursor *cursor, MDB_cursor_op op,
 	// key.
 	//
 	// Subsequent searches should use MDB_NEXT
-	if (mdb_cursor_get(cursor, k, &v, op))
-		return 0;
+	if (mdb_cursor_get(cursor, k, &v, op)) {
+		// we should only do this if we're going in reverse
+		if (op == MDB_SET_RANGE && order_op == MDB_PREV) {
+			// if set range worked and our key exists, it should be
+			// the one right before this one
+			if (mdb_cursor_get(cursor, k, &v, MDB_PREV))
+				return 0;
+		} else {
+			return 0;
+		}
+	}
+
 
 	make_cursor(k->mv_data, k->mv_data + k->mv_size, &key_cursor);
 
@@ -2566,28 +2579,68 @@ static void ndb_text_search_results_init(
 	results->num_results = 0;
 }
 
+static void ndb_print_text_search_key(struct ndb_text_search_key *key)
+{
+	printf("K<'%.*s' %d %" PRIu64 " note_id:%" PRIu64 ">", key->str_len, key->str,
+						    key->word_index,
+						    key->timestamp,
+						    key->note_id);
+}
+
+void ndb_default_text_search_config(struct ndb_text_search_config *cfg)
+{
+	cfg->order = NDB_ORDER_DESCENDING;
+	cfg->limit = MAX_TEXT_SEARCH_RESULTS;
+}
+
+void ndb_text_search_config_set_order(struct ndb_text_search_config *cfg,
+				     enum ndb_search_order order)
+{
+	cfg->order = order;
+}
+
+void ndb_text_search_config_set_limit(struct ndb_text_search_config *cfg, int limit)
+{
+	cfg->limit = limit;
+}
+
 int ndb_text_search(struct ndb_txn *txn, const char *query,
-		    struct ndb_text_search_results *results, int limit)
+		    struct ndb_text_search_results *results,
+		    struct ndb_text_search_config *config)
 {
 	unsigned char buffer[1024], *buf;
 	unsigned char saved_buf[1024], *saved;
 	struct ndb_text_search_result *result, *last_result;
 	struct ndb_text_search_result candidate, last_candidate;
 	struct ndb_search_words search_words;
+	//struct ndb_text_search_key search_key;
 	struct ndb_word *search_word;
 	struct cursor cur;
+	ndb_text_search_key_order_fn key_order_fn;
 	MDB_dbi text_db;
 	MDB_cursor *cursor;
 	MDB_val k, v;
-	int i, j, keysize, saved_size;
-	MDB_cursor_op op;
+	int i, j, keysize, saved_size, limit;
+	MDB_cursor_op op, order_op;
 	//int num_note_ids;
 
 	saved = NULL;
 	ndb_text_search_results_init(results);
 	ndb_search_words_init(&search_words);
+
+	// search config
+	limit = MAX_TEXT_SEARCH_RESULTS;
+	order_op = MDB_PREV;
+	key_order_fn = ndb_make_text_search_key_high;
+	if (config) {
+		if (config->order == NDB_ORDER_ASCENDING) {
+			order_op = MDB_NEXT;
+			key_order_fn = ndb_make_text_search_key_low;
+		}
+		limit = min(limit, config->limit);
+	}
+	// end search config
 	
-	//num_note_ids = 0;
 	text_db = txn->lmdb->dbs[NDB_DB_NOTE_TEXT];
 	make_cursor((unsigned char *)query, (unsigned char *)query + strlen(query), &cur);
 
@@ -2599,8 +2652,6 @@ int ndb_text_search(struct ndb_txn *txn, const char *query,
 		fprintf(stderr, "nd_text_search: mdb_cursor_open failed, error %d\n", i);
 		return 0;
 	}
-
-	limit = min(MAX_TEXT_SEARCH_RESULTS, limit);
 
 	// for each word, we recursively find all of the submatches
 	while (results->num_results < limit) {
@@ -2619,18 +2670,17 @@ int ndb_text_search(struct ndb_txn *txn, const char *query,
 
 			// reposition the cursor so we can continue
 			if (mdb_cursor_get(cursor, &k, &v, MDB_SET_RANGE))
-				break;
+				return 0;
 
-			op = MDB_NEXT;
+			op = order_op;
 		} else {
 			// construct a packed fulltext search key using this
 			// word this key doesn't contain any timestamp or index
 			// info, so it should range match instead of exact
 			// match
-			if (!ndb_make_text_search_key_low(
-				buffer, sizeof(buffer),
-				search_words.words[0].word_len,
-				search_words.words[0].word, &keysize))
+			if (!key_order_fn(buffer, sizeof(buffer),
+					  search_words.words[0].word_len,
+					  search_words.words[0].word, &keysize))
 			{
 				// word is too big to fit in 1024-sized key
 				continue;
@@ -2677,7 +2727,8 @@ int ndb_text_search(struct ndb_txn *txn, const char *query,
 			if (!ndb_text_search_next_word(cursor, op, &k,
 						       search_word,
 						       last_result,
-						       &candidate)) {
+						       &candidate,
+						       order_op)) {
 				break;
 			}
 
