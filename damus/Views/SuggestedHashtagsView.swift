@@ -24,6 +24,7 @@ struct SuggestedHashtagsView: View {
     
     let damus_state: DamusState
     @StateObject var events: EventHolder
+    @SceneStorage("SuggestedHashtagsView.show_suggested_hashtags") var show_suggested_hashtags : Bool = true
     var item_limit: Int?
     let suggested_hashtags: [String]
     var hashtags_with_count_to_display: [HashtagWithUserCount] {
@@ -55,19 +56,49 @@ struct SuggestedHashtagsView: View {
     var body: some View {
         VStack {
             HStack {
-                Image(systemName: "sparkles")
-                Text(NSLocalizedString("Suggested hashtags", comment: "A label indicating that the items below it are suggested hashtags"))
-                Spacer()
+                HStack {
+                    Image(systemName: "sparkles")
+                    Text(NSLocalizedString("Suggested hashtags", comment: "A label indicating that the items below it are suggested hashtags"))
+                    Spacer()
+                    Label("", systemImage: "ellipsis")
+                        .foregroundColor(Color.gray)
+                        .contentShape(Circle())
+                        // Add our Menu button inside an overlay modifier to avoid affecting the rest of the layout around us.
+                        .overlay(
+                            Menu {
+                                Button {
+                                    withAnimation(.easeOut(duration: 0.2)) {
+                                        show_suggested_hashtags.toggle()
+                                    }
+                                } label: {
+                                    if show_suggested_hashtags {
+                                        Label(NSLocalizedString("Hide", comment: "Context menu option for copying the text from an note."), image: "eye-off")
+                                    } else {
+                                        Label(NSLocalizedString("Show", comment: "Context menu option for copying the text from an note."), image: "eye")
+                                    }
+                                }
+                            } label: {
+                                Color.clear
+                            }
+                            // Hitbox frame size
+                            .frame(width: 50, height: 35)
+                        )
+                }
+                .padding([.bottom], 4)
+                .contentShape(Rectangle())
+                .onTapGesture {}
             }
             .foregroundColor(.secondary)
-            .padding(.bottom, 10)
+            .padding(.vertical, 10)
             
-            ForEach(hashtags_with_count_to_display,
-                    id: \.self) { hashtag_with_count in
-                SuggestedHashtagView(damus_state: damus_state, hashtag: hashtag_with_count.hashtag, count: hashtag_with_count.count)
+            if show_suggested_hashtags {
+                ForEach(hashtags_with_count_to_display,
+                        id: \.self) { hashtag_with_count in
+                    SuggestedHashtagView(damus_state: damus_state, hashtag: hashtag_with_count.hashtag, count: hashtag_with_count.count)
+                }
             }
         }
-        .padding()
+        .padding(.horizontal)
     }
     
     private struct SuggestedHashtagView: View { // Purposefully private to SuggestedHashtagsView because it assumes the same 24h window
