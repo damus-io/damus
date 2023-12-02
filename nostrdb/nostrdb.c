@@ -2411,12 +2411,17 @@ retry:
 	}
 
 	if (!ndb_prefix_matches(result, search_word)) {
+		/*
+		printf("result prefix '%.*s' didn't match search word '%.*s'\n",
+			result->key.str_len, result->key.str,
+			search_word->word_len, search_word->word);
+			*/
 		// we should only do this if we're going in reverse
 		if (retries == 0 && op == MDB_SET_RANGE && order_op == MDB_PREV) {
 			// if set range worked and our key exists, it should be
 			// the one right before this one
-			if (mdb_cursor_get(cursor, k, &v, MDB_PREV))
-				goto retry;
+			mdb_cursor_get(cursor, k, &v, MDB_PREV);
+			goto retry;
 		} else {
 			return 0;
 		}
