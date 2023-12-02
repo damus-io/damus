@@ -673,4 +673,17 @@ static inline int consume_until_non_alphanumeric(struct cursor *cur, int or_end)
     return or_end;
 }
 
+
+static inline int cursor_memset(struct cursor *cursor, unsigned char c, int n)
+{
+    if (cursor->p + n >= cursor->end)
+        return 0;
+
+    memset(cursor->p, c, n);
+    cursor->p += n;
+
+    return 1;
+}
+
+
 #endif
