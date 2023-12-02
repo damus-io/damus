@@ -2465,6 +2465,14 @@ static int prefix_count(const char *str1, int len1, const char *str2, int len2) 
 	return count;
 }
 
+static void ndb_print_text_search_key(struct ndb_text_search_key *key)
+{
+	printf("K<'%.*s' %d %" PRIu64 " note_id:%" PRIu64 ">", key->str_len, key->str,
+						    key->word_index,
+						    key->timestamp,
+						    key->note_id);
+}
+
 
 // This is called when scanning the full text search index. Scanning stops
 // when we no longer have a prefix match for the word
@@ -2577,14 +2585,6 @@ static int ndb_text_search_next_word(MDB_cursor *cursor, MDB_cursor_op op,
 static void ndb_text_search_results_init(
 		struct ndb_text_search_results *results) {
 	results->num_results = 0;
-}
-
-static void ndb_print_text_search_key(struct ndb_text_search_key *key)
-{
-	printf("K<'%.*s' %d %" PRIu64 " note_id:%" PRIu64 ">", key->str_len, key->str,
-						    key->word_index,
-						    key->timestamp,
-						    key->note_id);
 }
 
 void ndb_default_text_search_config(struct ndb_text_search_config *cfg)
