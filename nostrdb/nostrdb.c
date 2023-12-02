@@ -2670,7 +2670,7 @@ int ndb_text_search(struct ndb_txn *txn, const char *query,
 
 			// reposition the cursor so we can continue
 			if (mdb_cursor_get(cursor, &k, &v, MDB_SET_RANGE))
-				return 0;
+				break;
 
 			op = order_op;
 		} else {
