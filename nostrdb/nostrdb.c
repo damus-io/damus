@@ -2795,8 +2795,8 @@ static uint64_t ndb_write_note(struct ndb_txn *txn,
 	if (!ndb_write_note_kind_index(txn, note->note, note_key))
 		return 0;
 
-	// only do fulltext index on kind1 notes
-	if (note->note->kind == 1) {
+	// only do fulltext index on text and longform notes
+	if (note->note->kind == 1 || note->note->kind == 30023) {
 		if (!ndb_write_note_fulltext_index(txn, note->note, note_key))
 			return 0;
 	}
