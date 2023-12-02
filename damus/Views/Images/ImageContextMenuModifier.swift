@@ -16,6 +16,7 @@ struct ImageContextMenuModifier: ViewModifier {
     
     @State var qrCodeValue: String = ""
     @State var open_link_confirm: Bool = false
+    @State var open_wallet_confirm: Bool = false
     @State var not_found: Bool = false
     
     @Binding var showShareSheet: Bool
@@ -60,13 +61,9 @@ struct ImageContextMenuModifier: ViewModifier {
                     if qrCodeValue == "" {
                         not_found.toggle()
                     } else {
-                        if qrCodeValue.contains("lnurl") {
-                            do {
-                                try open_with_wallet(wallet: settings.default_wallet.model, invoice: qrCodeValue)
-                            }
-                            catch {
-                                present_sheet(.select_wallet(invoice: qrCodeValue))
-                            }
+                        if qrCodeValue.localizedCaseInsensitiveContains("lnurl") || qrCodeValue.localizedCaseInsensitiveContains("lnbc") {
+                            open_wallet_confirm.toggle()
+                            open_link_confirm.toggle()
                         } else if let _ = URL(string: qrCodeValue) {
                             open_link_confirm.toggle()
                         }
@@ -81,10 +78,21 @@ struct ImageContextMenuModifier: ViewModifier {
                 Label(NSLocalizedString("Share", comment: "Button to share an image."), image: "upload")
             }
         }
-        .alert(NSLocalizedString("Found\n \(qrCodeValue)", comment: "Alert message asking if the user wants to open the link."), isPresented: $open_link_confirm) {
-            Button(NSLocalizedString("Open in browser", comment: "Button to open the value found in browser."), role: .none) {
-                if let url = URL(string: qrCodeValue) {
-                    openURL(url)
+        .alert(NSLocalizedString("Found\n \(qrCodeValue)", comment: "Alert message asking if the user wants to open the link.").truncate(maxLength: 50), isPresented: $open_link_confirm) {
+            if open_wallet_confirm {
+                Button(NSLocalizedString("Open in wallet", comment: "Button to open the value found in browser."), role: .none) {
+                    do {
+                        try open_with_wallet(wallet: settings.default_wallet.model, invoice: qrCodeValue)
+                    }
+                    catch {
+                        present_sheet(.select_wallet(invoice: qrCodeValue))
+                    }
+                }
+            } else {
+                Button(NSLocalizedString("Open in browser", comment: "Button to open the value found in browser."), role: .none) {
+                    if let url = URL(string: qrCodeValue) {
+                        openURL(url)
+                    }
                 }
             }
             Button(NSLocalizedString("Copy", comment: "Button to copy the value found."), role: .none) {
