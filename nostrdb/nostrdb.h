@@ -341,6 +341,7 @@ int ndb_init(struct ndb **ndb, const char *dbdir, struct ndb_config *);
 int ndb_db_version(struct ndb *ndb);
 int ndb_process_event(struct ndb *, const char *json, int len);
 int ndb_process_events(struct ndb *, const char *ldjson, size_t len);
+int ndb_process_events_stream(struct ndb *, FILE* fp);
 int ndb_process_client_event(struct ndb *, const char *json, int len);
 int ndb_process_client_events(struct ndb *, const char *json, size_t len);
 int ndb_begin_query(struct ndb *, struct ndb_txn *);
