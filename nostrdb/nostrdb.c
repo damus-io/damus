@@ -3244,6 +3244,24 @@ int _ndb_process_events(struct ndb *ndb, const char *ldjson, size_t json_len, in
 	return 1;
 }
 
+int ndb_process_events_stream(struct ndb *ndb, FILE* fp)
+{
+	char *line = NULL;
+	size_t len = 0;
+	ssize_t nread;
+
+	while ((nread = getline(&line, &len, stdin)) != -1) {
+		if (line == NULL)
+			break;
+		ndb_process_event(ndb, line, len);
+	}
+
+	if (line)
+		free(line);
+
+	return 1;
+}
+
 int ndb_process_client_events(struct ndb *ndb, const char *ldjson, size_t json_len)
 {
 	return _ndb_process_events(ndb, ldjson, json_len, 1);
