@@ -10,7 +10,7 @@ import Security
 
 struct SaveKeysView: View {
     let account: CreateAccountModel
-    let pool: RelayPool = RelayPool(ndb: try! Ndb()!)
+    let pool: RelayPool = RelayPool(ndb: Ndb()!)
     @State var pub_copied: Bool = false
     @State var priv_copied: Bool = false
     @State var loading: Bool = false

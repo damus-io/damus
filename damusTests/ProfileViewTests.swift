@@ -27,7 +27,7 @@ final class ProfileViewTests: XCTestCase {
         let pk4 = Pubkey(hex: "cc590e46363d0fa66bb27081368d01f169b8ffc7c614629d4e9eef6c88b38670")!
         let pk5 = Pubkey(hex: "f2aa579bb998627e04a8f553842a09446360c9d708c6141dd119c479f6ab9d29")!
 
-        let ndb = try! Ndb(path: Ndb.db_path)!
+        let ndb = Ndb(path: Ndb.db_path)!
         let txn = NdbTxn(ndb: ndb)
 
         let damus_name = "17ldvg64:nq5mhr77"

@@ -17,8 +17,25 @@ enum NdbSearchOrder {
 
 class Ndb {
     let ndb: ndb_t
-    let owns_db_file: Bool  // Determines whether this class should be allowed to create or move the db file.
-    
+
+    static func safemode() -> Ndb? {
+        guard let path = db_path ?? old_db_path else { return nil }
+
+        // delete the database and start fresh
+        if Self.db_files_exist(path: path) {
+            let file_manager = FileManager.default
+            for db_file in db_files {
+                try? file_manager.removeItem(atPath: "\(path)/\(db_file)")
+            }
+        }
+
+        guard let ndb = Ndb(path: path) else {
+            return nil
+        }
+
+        return ndb
+    }
+
     // NostrDB used to be stored on the app container's document directory
     static private var old_db_path: String? {
         guard let path = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.absoluteString else {
@@ -42,7 +59,7 @@ class Ndb {
         Ndb(ndb: ndb_t(ndb: nil))
     }
 
-    init?(path: String? = nil, owns_db_file: Bool = true) throws {
+    init?(path: String? = nil, owns_db_file: Bool = true) {
         var ndb_p: OpaquePointer? = nil
 
         let ingest_threads: Int32 = 4
@@ -66,7 +83,7 @@ class Ndb {
         }
 
         guard let path = path.map(remove_file_prefix) ?? Ndb.db_path else {
-            throw Errors.cannot_find_db_path
+            return nil
         }
 
         let ok = path.withCString { testdir in
@@ -85,7 +102,6 @@ class Ndb {
             return nil
         }
 
-        self.owns_db_file = owns_db_file
         self.ndb = ndb_t(ndb: ndb_p)
     }
     
@@ -127,7 +143,6 @@ class Ndb {
     }
 
     init(ndb: ndb_t) {
-        self.owns_db_file = true
         self.ndb = ndb
     }
 

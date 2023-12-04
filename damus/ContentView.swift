@@ -602,7 +602,20 @@ struct ContentView: View {
 
     func connect() {
         // nostrdb
-        let ndb = try! Ndb()!
+        var mndb = Ndb()
+        if mndb == nil {
+            // try recovery
+            print("DB ISSUE! RECOVERING")
+            mndb = Ndb.safemode()
+
+            // out of space or something?? maybe we need a in-memory fallback
+            if mndb == nil {
+                notify(.logout)
+                return
+            }
+        }
+
+        guard let ndb = mndb else { return  }
 
         let pool = RelayPool(ndb: ndb)
         let model_cache = RelayModelCache()
