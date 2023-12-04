@@ -170,6 +170,13 @@ class Ndb {
             case 11: note_ids.append(results.results.11.key.note_id)
             case 12: note_ids.append(results.results.12.key.note_id)
             case 13: note_ids.append(results.results.13.key.note_id)
+            case 14: note_ids.append(results.results.14.key.note_id)
+            case 15: note_ids.append(results.results.15.key.note_id)
+            case 16: note_ids.append(results.results.16.key.note_id)
+            case 17: note_ids.append(results.results.17.key.note_id)
+            case 18: note_ids.append(results.results.18.key.note_id)
+            case 19: note_ids.append(results.results.19.key.note_id)
+            case 20: note_ids.append(results.results.10.key.note_id)
             default:
                 break
             }
