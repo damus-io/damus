@@ -16,22 +16,32 @@ class NdbTxn<T> {
     var txn: ndb_txn
     private var val: T!
     var moved: Bool
+    var inherited: Bool
 
     init(ndb: Ndb, with: (NdbTxn<T>) -> T = { _ in () }) {
-        self.txn = ndb_txn()
         #if TXNDEBUG
         txn_count += 1
         print("opening transaction \(txn_count)")
         #endif
-        let _ = ndb_begin_query(ndb.ndb.ndb, &self.txn)
+        if let active_txn = Thread.current.threadDictionary["ndb_txn"] as? ndb_txn {
+            // some parent thread is active, use that instead
+            self.txn = active_txn
+            self.inherited = true
+        } else {
+            self.txn = ndb_txn()
+            let _ = ndb_begin_query(ndb.ndb.ndb, &self.txn)
+            Thread.current.threadDictionary["ndb_txn"] = self.txn
+            self.inherited = false
+        }
         self.moved = false
         self.val = with(self)
     }
 
-    init(txn: ndb_txn, val: T) {
+    private init(txn: ndb_txn, val: T) {
         self.txn = txn
         self.val = val
         self.moved = false
+        self.inherited = false
     }
 
     /// Only access temporarily! Do not store database references for longterm use. If it's a primitive type you
@@ -42,13 +52,16 @@ class NdbTxn<T> {
     }
 
     deinit {
-        if !moved {
-            #if TXNDEBUG
-            txn_count -= 1;
-            print("closing transaction \(txn_count)")
-            #endif
-            ndb_end_query(&self.txn)
+        if moved || inherited {
+            return
         }
+
+        #if TXNDEBUG
+        txn_count -= 1;
+        print("closing transaction \(txn_count)")
+        #endif
+        ndb_end_query(&self.txn)
+        Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")
     }
 
     // functor

@@ -41,7 +41,7 @@ enum NdbData {
 
 class NdbNote: Encodable, Equatable, Hashable {
     // we can have owned notes, but we can also have lmdb virtual-memory mapped notes so its optional
-    private let owned: Bool
+    let owned: Bool
     let count: Int
     let key: NoteKey?
     let note: UnsafeMutablePointer<ndb_note>
