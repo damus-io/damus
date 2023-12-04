@@ -86,7 +86,7 @@ class SuggestedUsersViewModel: ObservableObject {
         }
 
         switch nev {
-        case .event(let sub_id, let ev):
+        case .event:
             break
 
         case .notice(let msg):
