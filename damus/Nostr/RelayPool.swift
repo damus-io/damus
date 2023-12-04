@@ -120,7 +120,7 @@ class RelayPool {
                   case .string(let str) = msg
             else { return }
 
-            self.ndb.process_event(str)
+            let _ = self.ndb.process_event(str)
         })
         let relay = Relay(descriptor: desc, connection: conn)
         self.relays.append(relay)
@@ -220,10 +220,10 @@ class RelayPool {
         switch req {
         case .typical(let r):
             if case .event = r, let rstr = make_nostr_req(r) {
-                ndb.process_client_event(rstr)
+                let _ = ndb.process_client_event(rstr)
             }
         case .custom(let string):
-            ndb.process_client_event(string)
+            let _ = ndb.process_client_event(string)
         }
 
         for relay in relays {

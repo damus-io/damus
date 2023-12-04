@@ -389,8 +389,7 @@ struct PostView: View {
         GeometryReader { (deviceSize: GeometryProxy) in
             VStack(alignment: .leading, spacing: 0) {
                 let searching = get_searching_string(focusWordAttributes.0)
-                let searchingIsNil = searching == nil
-                
+
                 TopBar
                 
                 ScrollViewReader { scroller in

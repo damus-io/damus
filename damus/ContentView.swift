@@ -635,8 +635,6 @@ struct ContentView: View {
             try? pool.add_relay(.nwc(url: nwc.relay))
         }
 
-
-        let user_search_cache = UserSearchCache()
         self.damus_state = DamusState(pool: pool,
                                       keypair: keypair,
                                       likes: EventCounter(our_pubkey: pubkey),

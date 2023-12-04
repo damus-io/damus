@@ -15,8 +15,6 @@ public struct RelayURL: Hashable, Equatable, Codable, CodingKeyRepresentable {
     }
     
     init?(_ str: String) {
-        guard let last = str.last else { return nil }
-
         guard let url = URL(string: str) else {
             return nil
         }
