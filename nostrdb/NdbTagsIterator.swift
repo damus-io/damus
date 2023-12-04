@@ -70,7 +70,7 @@ struct TagsSequence: Encodable, Sequence {
         }
         precondition(false, "sequence subscript oob")
         // it seems like the compiler needs this or it gets bitchy
-        return .init(note: .init(note: .allocate(capacity: 1), owned_size: nil, key: nil), tag: .allocate(capacity: 1))
+        return .init(note: .init(note: .allocate(capacity: 1), size: 0, owned: true, key: nil), tag: .allocate(capacity: 1))
     }
 
     func makeIterator() -> TagsIterator {

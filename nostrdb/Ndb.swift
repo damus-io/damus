@@ -132,10 +132,11 @@ class Ndb {
     }
 
     func lookup_note_by_key_with_txn<Y>(_ key: NoteKey, txn: NdbTxn<Y>) -> NdbNote? {
-        guard let note_p = ndb_get_note_by_key(&txn.txn, key, nil) else {
+        var size: Int = 0
+        guard let note_p = ndb_get_note_by_key(&txn.txn, key, &size) else {
             return nil
         }
-        return NdbNote(note: note_p, owned_size: nil, key: key)
+        return NdbNote(note: note_p, size: size, owned: false, key: key)
     }
 
     func text_search(query: String, limit: Int = 32, order: NdbSearchOrder = .newest_first) -> [NoteKey] {
@@ -207,11 +208,12 @@ class Ndb {
     private func lookup_note_with_txn_inner<Y>(id: NoteId, txn: NdbTxn<Y>) -> NdbNote? {
         return id.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> NdbNote? in
             var key: UInt64 = 0
+            var size: Int = 0
             guard let baseAddress = ptr.baseAddress,
-                  let note_p = ndb_get_note_by_id(&txn.txn, baseAddress, nil, &key) else {
+                  let note_p = ndb_get_note_by_id(&txn.txn, baseAddress, &size, &key) else {
                 return nil
             }
-            return NdbNote(note: note_p, owned_size: nil, key: key)
+            return NdbNote(note: note_p, size: size, owned: false, key: key)
         }
     }
 

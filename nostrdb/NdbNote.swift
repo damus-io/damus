@@ -49,10 +49,10 @@ class NdbNote: Encodable, Equatable, Hashable {
     // cached stuff (TODO: remove these)
     var decrypted_content: String? = nil
 
-    init(note: UnsafeMutablePointer<ndb_note>, owned_size: Int?, key: NoteKey?) {
+    init(note: UnsafeMutablePointer<ndb_note>, size: Int, owned: Bool, key: NoteKey?) {
         self.note = note
-        self.owned = owned_size != nil
-        self.count = owned_size ?? 0
+        self.owned = owned
+        self.count = size
         self.key = key
 
         #if DEBUG_NOTE_SIZE
@@ -64,6 +64,18 @@ class NdbNote: Encodable, Equatable, Hashable {
         }
         #endif
 
+    }
+
+    func to_owned() -> NdbNote {
+        if self.owned {
+            return self
+        }
+
+        let buf = malloc(self.count)!
+        memcpy(buf, &self.note.pointee, self.count)
+        let new_note = buf.assumingMemoryBound(to: ndb_note.self)
+
+        return NdbNote(note: new_note, size: self.count, owned: true, key: self.key)
     }
 
     var content: String {
@@ -248,7 +260,7 @@ class NdbNote: Encodable, Equatable, Hashable {
         guard let note_data = realloc(data, Int(len)) else { return nil }
         let new_note = note_data.assumingMemoryBound(to: ndb_note.self)
 
-        return NdbNote(note: new_note, owned_size: Int(len), key: nil)
+        return NdbNote(note: new_note, size: Int(len), owned: true, key: nil)
     }
 }
 

@@ -84,7 +84,7 @@ enum NostrResponse {
                     return nil
                 }
                 let new_note = note_data.assumingMemoryBound(to: ndb_note.self)
-                let note = NdbNote(note: new_note, owned_size: Int(len), key: nil)
+                let note = NdbNote(note: new_note, size: Int(len), owned: true, key: nil)
 
                 guard let subid = sized_cstr(cstr: tce.subid, len: tce.subid_len) else {
                     free(data)
