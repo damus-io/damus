@@ -1998,16 +1998,6 @@ void *ndb_get_note_meta(struct ndb_txn *txn, const unsigned char *id, size_t *le
 
 // When receiving a reaction note, look for the liked id and increase the
 // reaction counter in the note metadata database
-//
-// TODO: I found some bugs when implementing this feature. If the same note id
-// is processed multiple times in the same ingestion block, then it will count
-// the like twice. This is because it hasn't been written to the DB yet and the
-// ingestor doesn't know about notes that are being processed at the same time.
-// One fix for this is to maintain a hashtable in the ingestor and make sure
-// the same note is not processed twice.
-// 
-// I'm not sure how common this would be, so I'm not going to worry about it
-// for now, but it's something to keep in mind.
 static int ndb_write_reaction_stats(struct ndb_txn *txn, struct ndb_note *note)
 {
 	size_t len;
@@ -2636,6 +2626,10 @@ static uint64_t ndb_write_note(struct ndb_txn *txn,
 	uint64_t note_key;
 	MDB_dbi note_db;
 	MDB_val key, val;
+
+	// let's quickly sanity check if we already have this note
+	if (ndb_get_notekey_by_id(txn, note->note->id))
+		return 0;
 	
 	// get dbs
 	note_db = txn->lmdb->dbs[NDB_DB_NOTE];
