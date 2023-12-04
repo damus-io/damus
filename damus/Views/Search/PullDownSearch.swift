@@ -13,39 +13,47 @@ struct PullDownSearchView: View {
     @State private var search_text = ""
     @State private var results: [NostrEvent] = []
     @State private var is_active: Bool = false
+    let debouncer: Debouncer = Debouncer(interval: 0.25)
     let state: DamusState
     let on_cancel: () -> Void
+    
+    func do_search(query: String) {
+        let note_keys = state.ndb.text_search(query: query, limit: 16)
+        var res = [NostrEvent]()
+        // TODO: fix duplicate results from search
+        var keyset = Set<NoteKey>()
+        
+        do {
+            let txn = NdbTxn(ndb: state.ndb)
+            for note_key in note_keys {
+                guard let note = state.ndb.lookup_note_by_key_with_txn(note_key, txn: txn) else {
+                    continue
+                }
+
+                if !keyset.contains(note_key) {
+                    let owned_note = note.to_owned()
+                    res.append(owned_note)
+                    keyset.insert(note_key)
+                }
+            }
+        }
+
+        let res_ = res
+
+        Task { @MainActor [res_] in
+            results = res_
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
                 TextField("Search", text: $search_text)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .onChange(of: search_text) { newValue in
-                        Task.detached {
-                            let note_keys = state.ndb.text_search(query: newValue, limit: 16)
-                            var res = [NostrEvent]()
-                            // TODO: fix duplicate results from search
-                            var keyset = Set<NoteKey>()
-                            do {
-                                let txn = NdbTxn(ndb: state.ndb)
-                                for note_key in note_keys {
-                                    guard let note = state.ndb.lookup_note_by_key_with_txn(note_key, txn: txn) else {
-                                        continue
-                                    }
-
-                                    if !keyset.contains(note_key) {
-                                        let owned_note = note.to_owned()
-                                        res.append(owned_note)
-                                        keyset.insert(note_key)
-                                    }
-                                }
-                            }
-
-                            let res_ = res
-
-                            Task { @MainActor [res_] in
-                                results = res_
+                    .onChange(of: search_text) { query in
+                        debouncer.debounce {
+                            Task.detached {
+                                do_search(query: query)
                             }
                         }
                     }
