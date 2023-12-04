@@ -67,7 +67,7 @@ struct ContentView: View {
     @Environment(\.scenePhase) var scenePhase
     
     @State var active_sheet: Sheets? = nil
-    @State var damus_state: DamusState? = nil
+    @State var damus_state: DamusState!
     @SceneStorage("ContentView.selected_timeline") var selected_timeline: Timeline = .home
     @State var muting: Pubkey? = nil
     @State var confirm_mute: Bool = false
@@ -133,10 +133,8 @@ struct ContentView: View {
     }
     
     func contentTimelineView(filter: (@escaping (NostrEvent) -> Bool)) -> some View {
-        ZStack {
-            if let damus = self.damus_state {
-                TimelineView<AnyView>(events: home.events, loading: .constant(false), damus: damus, show_friend_icon: false, filter: filter)
-            }
+        TimelineView(events: home.events, loading: .constant(false), damus: damus_state, show_friend_icon: false, filter: filter) {
+            PullDownSearchView(state: damus_state, on_cancel: {})
         }
     }
     
@@ -202,12 +200,8 @@ struct ContentView: View {
     
     func MaybeReportView(target: ReportTarget) -> some View {
         Group {
-            if let damus_state {
-                if let keypair = damus_state.keypair.to_full() {
-                    ReportView(postbox: damus_state.postbox, target: target, keypair: keypair)
-                } else {
-                    EmptyView()
-                }
+            if let keypair = damus_state.keypair.to_full() {
+                ReportView(postbox: damus_state.postbox, target: target, keypair: keypair)
             } else {
                 EmptyView()
             }

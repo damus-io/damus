@@ -260,6 +260,7 @@
 		4C9B0DF32A65C46800CBDA21 /* ProfileEditButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9B0DF22A65C46800CBDA21 /* ProfileEditButton.swift */; };
 		4C9BB83129C0ED4F00FC4E37 /* DisplayName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9BB83029C0ED4F00FC4E37 /* DisplayName.swift */; };
 		4C9BB83429C12D9900FC4E37 /* EventProfileName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9BB83329C12D9900FC4E37 /* EventProfileName.swift */; };
+		4C9D6D1B2B1D35D7004E5CD9 /* PullDownSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9D6D1A2B1D35D7004E5CD9 /* PullDownSearch.swift */; };
 		4C9F18E229AA9B6C008C55EC /* CustomizeZapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9F18E129AA9B6C008C55EC /* CustomizeZapView.swift */; };
 		4C9F18E429ABDE6D008C55EC /* MaybeAnonPfpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9F18E329ABDE6D008C55EC /* MaybeAnonPfpView.swift */; };
 		4CA2EFA0280E37AC0044ACD8 /* TimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA2EF9F280E37AC0044ACD8 /* TimelineView.swift */; };
@@ -1057,6 +1058,7 @@
 		4C9B0DF22A65C46800CBDA21 /* ProfileEditButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditButton.swift; sourceTree = "<group>"; };
 		4C9BB83029C0ED4F00FC4E37 /* DisplayName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayName.swift; sourceTree = "<group>"; };
 		4C9BB83329C12D9900FC4E37 /* EventProfileName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventProfileName.swift; sourceTree = "<group>"; };
+		4C9D6D1A2B1D35D7004E5CD9 /* PullDownSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PullDownSearch.swift; sourceTree = "<group>"; };
 		4C9F18E129AA9B6C008C55EC /* CustomizeZapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomizeZapView.swift; sourceTree = "<group>"; };
 		4C9F18E329ABDE6D008C55EC /* MaybeAnonPfpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaybeAnonPfpView.swift; sourceTree = "<group>"; };
 		4CA2EF9F280E37AC0044ACD8 /* TimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineView.swift; sourceTree = "<group>"; };
@@ -2188,6 +2190,7 @@
 			children = (
 				4CCEB7AD29B53D260078AA28 /* SearchingEventView.swift */,
 				4CCEB7AF29B5415A0078AA28 /* SearchingProfileView.swift */,
+				4C9D6D1A2B1D35D7004E5CD9 /* PullDownSearch.swift */,
 			);
 			path = Search;
 			sourceTree = "<group>";
@@ -2867,7 +2870,6 @@
 				4C32B9582A9AD44700DC3548 /* VeriferOptions.swift in Sources */,
 				4CA2EFA0280E37AC0044ACD8 /* TimelineView.swift in Sources */,
 				4C30AC7629A5770900E2BD5A /* NotificationItemView.swift in Sources */,
-				BA3759972ABCCF360018D73B /* CameraPreview.swift in Sources */,
 				4C86F7C42A76C44C00EC0817 /* ZappingNotify.swift in Sources */,
 				4C363A8428233689006E126D /* Parser.swift in Sources */,
 				3AAA95CA298DF87B00F3D526 /* TranslationService.swift in Sources */,
@@ -2952,6 +2954,7 @@
 				4CACA9DC280C38C000D9BBE8 /* Profiles.swift in Sources */,
 				4CE879582996C45300F758CC /* ZapsView.swift in Sources */,
 				4C30AC7429A5680900E2BD5A /* EventGroupView.swift in Sources */,
+				4C9D6D1B2B1D35D7004E5CD9 /* PullDownSearch.swift in Sources */,
 				4C633352283D419F00B1C9C3 /* SignalModel.swift in Sources */,
 				4CFF8F6D29CD022E008DB934 /* WideEventView.swift in Sources */,
 				9609F058296E220800069BF3 /* BannerImageView.swift in Sources */,

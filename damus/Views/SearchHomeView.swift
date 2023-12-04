@@ -79,7 +79,7 @@ struct SearchHomeView: View {
                 AnyView(VStack {
                     SuggestedHashtagsView(damus_state: damus_state, max_items: 5, events: model.events)
                     HStack {
-                        Image(systemName: "bubble.fill")
+                        Image("notes.fill")
                         Text(NSLocalizedString("All recent notes", comment: "A label indicating that the notes being displayed below it are all recent notes"))
                         Spacer()
                     }
