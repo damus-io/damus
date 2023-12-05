@@ -18,11 +18,18 @@ struct PullDownSearchView: View {
     let on_cancel: () -> Void
     
     func do_search(query: String) {
-        let note_keys = state.ndb.text_search(query: query, limit: 16)
+        let limit = 16
+        var note_keys = state.ndb.text_search(query: query, limit: limit, order: .newest_first)
         var res = [NostrEvent]()
         // TODO: fix duplicate results from search
         var keyset = Set<NoteKey>()
-        
+
+        // try reverse because newest first is a bit buggy on partial searches
+        if note_keys.count == 0 {
+            // don't touch existing results if there are no new ones
+            return
+        }
+
         do {
             let txn = NdbTxn(ndb: state.ndb)
             for note_key in note_keys {
@@ -64,6 +71,7 @@ struct PullDownSearchView: View {
                 if is_active {
                     Button(action: {
                         search_text = ""
+                        results = []
                         end_editing()
                         on_cancel()
                     }, label: {
