@@ -188,7 +188,7 @@ struct NoteContentView: View {
                         .frame(height: 1)
                     switch artifacts.media[index] {
                     case .image(let url), .video(let url):
-                        Text("\(url)")
+                        Text(url.absoluteString)
                             .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
                             .foregroundStyle(DamusColors.neutral6)
                             .multilineTextAlignment(.leading)

@@ -361,7 +361,7 @@ struct SignInEntry: View {
                      shouldSaveKey: shouldSaveKey,
                      privKeyFound: $privKeyFound)
             if privKeyFound {
-                Toggle("Save Key in Secure Keychain", isOn: shouldSaveKey)
+                Toggle(NSLocalizedString("Save Key in Secure Keychain", comment: "Toggle to save private key to the Apple secure keychain."), isOn: shouldSaveKey)
             }
         }
     }
