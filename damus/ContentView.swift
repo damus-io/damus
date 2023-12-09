@@ -154,26 +154,25 @@ struct ContentView: View {
     }
     
     func MainContent(damus: DamusState) -> some View {
-        VStack {
-            switch selected_timeline {
-            case .search:
-                if #available(iOS 16.0, *) {
-                    SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
-                        .scrollDismissesKeyboard(.immediately)
-                } else {
-                    // Fallback on earlier versions
-                    SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
-                }
-                
-            case .home:
-                PostingTimelineView
-                
-            case .notifications:
-                NotificationsView(state: damus, notifications: home.notifications)
-                
-            case .dms:
-                DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms, settings: damus_state!.settings)
+        ZStack {
+            if #available(iOS 16.0, *) {
+                SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
+                    .scrollDismissesKeyboard(.immediately)
+                    .opacity(selected_timeline == .search ? 1 : 0)
+            } else {
+                // Fallback on earlier versions
+                SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
+                    .opacity(selected_timeline == .search ? 1 : 0)
             }
+
+            PostingTimelineView
+                .opacity(selected_timeline == .home ? 1 : 0)
+
+            NotificationsView(state: damus, notifications: home.notifications)
+                .opacity(selected_timeline == .notifications ? 1 : 0)
+
+            DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms, settings: damus_state!.settings)
+                .opacity(selected_timeline == .dms ? 1 : 0)
         }
         .navigationBarTitle(timeline_name(selected_timeline), displayMode: .inline)
         .toolbar {

@@ -56,7 +56,8 @@ struct NotificationsView: View {
     @ObservedObject var notifications: NotificationsModel
     @StateObject var filter = NotificationFilter()
     @SceneStorage("NotificationsView.filter_state") var filter_state: NotificationFilterState = .all
-    
+    @SceneStorage("ContentView.selected_timeline") var selected_timeline: Timeline = .home
+
     @Environment(\.colorScheme) var colorScheme
     
     var mystery: some View {

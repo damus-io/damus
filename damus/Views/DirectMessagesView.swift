@@ -18,6 +18,7 @@ struct DirectMessagesView: View {
     @State var dm_type: DMType = .friend
     @ObservedObject var model: DirectMessagesModel
     @ObservedObject var settings: UserSettingsStore
+    @SceneStorage("ContentView.selected_timeline") var selected_timeline: Timeline = .home
 
     func MainContent(requests: Bool) -> some View {
         ScrollView {
@@ -90,10 +91,12 @@ struct DirectMessagesView: View {
             .tabViewStyle(.page(indexDisplayMode: .never))
         }
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                if would_filter_non_friends_from_dms(contacts: damus_state.contacts, dms: self.model.dms) {
-                    
-                    FriendsButton(filter: $settings.friend_filter)
+            if selected_timeline == .dms {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if would_filter_non_friends_from_dms(contacts: damus_state.contacts, dms: self.model.dms) {
+
+                        FriendsButton(filter: $settings.friend_filter)
+                    }
                 }
             }
         }
