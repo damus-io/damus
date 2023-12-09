@@ -271,7 +271,7 @@
 			<key>one</key>
 			<string>%d Benutzer spricht darüber</string>
 			<key>other</key>
-			<string>%d Benutzer spricht darüber</string>
+			<string>%d Benutzer sprichen darüber</string>
 		</dict>
 	</dict>
 	<key>word_count</key>
