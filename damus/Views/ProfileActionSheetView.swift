@@ -58,7 +58,7 @@ struct ProfileActionSheetView: View {
                         .profile_button_style(scheme: colorScheme)
                 }
             )
-            .buttonStyle(NeutralCircleButtonStyle())
+            .buttonStyle(NeutralButtonShape.circle.style)
             Text(NSLocalizedString("Message", comment: "Button label that allows the user to start a direct message conversation with the user shown on-screen"))
                 .foregroundStyle(.secondary)
                 .font(.caption)
@@ -121,8 +121,7 @@ struct ProfileActionSheetView: View {
                     
                 }
             )
-            
-            .buttonStyle(NeutralCircleButtonStyle())
+            .buttonStyle(NeutralButtonShape.circle.style)
         }
         .padding()
         .padding(.top, 20)
@@ -165,7 +164,7 @@ fileprivate struct ProfileActionSheetFollowButton: View {
                     
                 }
             )
-            .buttonStyle(NeutralCircleButtonStyle())
+            .buttonStyle(NeutralButtonShape.circle.style)
             
             Text(verbatim: "\(follow_btn_txt(follow_state, follows_you: follows_you))")
             .foregroundStyle(.secondary)
@@ -292,7 +291,7 @@ fileprivate struct ProfileActionSheetZapButton: View {
                         return true
                 }
             }())
-            .buttonStyle(NeutralCircleButtonStyle())
+            .buttonStyle(NeutralButtonShape.circle.style)
             
             Text(button_label)
             .foregroundStyle(.secondary)

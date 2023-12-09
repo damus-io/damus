@@ -7,37 +7,49 @@
 
 import SwiftUI
 
+enum NeutralButtonShape {
+    case rounded, capsule, circle
+
+    var style: NeutralButtonStyle {
+        switch self {
+        case .rounded:
+            return NeutralButtonStyle(padding: EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10), cornerRadius: 12)
+        case .capsule:
+            return NeutralButtonStyle(padding: EdgeInsets(top: 5, leading: 15, bottom: 5, trailing: 15), cornerRadius: 20)
+        case .circle:
+            return NeutralButtonStyle(padding: EdgeInsets(top: 20, leading: 20, bottom: 20, trailing: 20), cornerRadius: 9999)
+        }
+    }
+}
+
 struct NeutralButtonStyle: ButtonStyle {
-    func makeBody(configuration: Self.Configuration) -> some View {
-        return configuration.label
+    let padding: EdgeInsets
+    let cornerRadius: CGFloat
+    let scaleEffect: CGFloat
+    
+    init(padding: EdgeInsets = EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0), cornerRadius: CGFloat = 15, scaleEffect: CGFloat = 0.95) {
+        self.padding = padding
+        self.cornerRadius = cornerRadius
+        self.scaleEffect = scaleEffect
+    }
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .padding(padding)
             .background(DamusColors.neutral1)
-            .cornerRadius(12)
+            .cornerRadius(cornerRadius)
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: cornerRadius)
                     .stroke(DamusColors.neutral3, lineWidth: 1)
             )
-            .scaleEffect(configuration.isPressed ? 0.95 : 1)
+            .scaleEffect(configuration.isPressed ? scaleEffect : 1)
     }
 }
-
-struct NeutralCircleButtonStyle: ButtonStyle {
-    func makeBody(configuration: Self.Configuration) -> some View {
-        return configuration.label
-            .padding(20)
-            .background(DamusColors.neutral1)
-            .cornerRadius(9999)
-            .overlay(
-                RoundedRectangle(cornerRadius: 9999)
-                    .stroke(DamusColors.neutral3, lineWidth: 1)
-            )
-            .scaleEffect(configuration.isPressed ? 0.95 : 1)
-    }
-}
-
 
 struct NeutralButtonStyle_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
+            
             Button(action: {
                 print("dynamic size")
             }) {
@@ -45,8 +57,7 @@ struct NeutralButtonStyle_Previews: PreviewProvider {
                     .padding()
             }
             .buttonStyle(NeutralButtonStyle())
-
-
+            
             Button(action: {
                 print("infinite width")
             }) {
@@ -58,6 +69,17 @@ struct NeutralButtonStyle_Previews: PreviewProvider {
             }
             .buttonStyle(NeutralButtonStyle())
             .padding()
+            
+            Button("Rounded Button", action: {})
+                .buttonStyle(NeutralButtonShape.rounded.style)
+                .padding()
+
+            Button("Capsule Button", action: {})
+                .buttonStyle(NeutralButtonShape.capsule.style)
+                .padding()
+
+            Button(action: {}, label: {Image("messages")})
+                .buttonStyle(NeutralButtonShape.circle.style)
         }
     }
 }
