@@ -2,6 +2,20 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>followed_by_three_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>other</key>
+			<string>Được theo dõi bởi %2$@, %3$@, %4$@ và %1$d những người khác </string>
+		</dict>
+	</dict>
 	<key>followers_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -28,6 +42,20 @@
 			<string>d</string>
 			<key>other</key>
 			<string>Đang theo dõi</string>
+		</dict>
+	</dict>
+	<key>imports_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@IMPORTS@</string>
+		<key>IMPORTS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>other</key>
+			<string>Nhập</string>
 		</dict>
 	</dict>
 	<key>reacted_tagged_in_3</key>
@@ -196,6 +224,34 @@
 			<string>@</string>
 			<key>other</key>
 			<string>%2$@ sats</string>
+		</dict>
+	</dict>
+	<key>users_talking_about_it</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@USERS@</string>
+		<key>USERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>other</key>
+			<string>%d người dùng đang nói về điều đó</string>
+		</dict>
+	</dict>
+	<key>word_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@WORDS@</string>
+		<key>WORDS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>other</key>
+			<string>%d Từ</string>
 		</dict>
 	</dict>
 	<key>zap_notification_no_message</key>
