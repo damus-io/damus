@@ -111,7 +111,7 @@
 			<key>one</key>
 			<string>%2$@ ja %1$d muu reagoivat profiiliisi</string>
 			<key>other</key>
-			<string>%2$@ ja %1$d muut reagoivat profiiliisi</string>
+			<string>%2$@ ja %1$d muuta reagoivat profiiliisi</string>
 		</dict>
 	</dict>
 	<key>reactions_count</key>
