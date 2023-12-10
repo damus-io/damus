@@ -15,7 +15,7 @@
 			<key>one</key>
 			<string>%2$@, %3$@, %4$@ &amp; %1$d muu seuraavat</string>
 			<key>other</key>
-			<string>%2$@, %3$@, %4$@ &amp; %1$d muut seuraavat</string>
+			<string>%2$@, %3$@, %4$@ &amp; %1$d muuta seuraavat</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
