@@ -95,7 +95,7 @@
 			<key>one</key>
 			<string>%2$@ ja %1$d muu reagoivat viestiisi</string>
 			<key>other</key>
-			<string>%2$@ ja %1$d muut reagoivat viestiisi</string>
+			<string>%2$@ ja %1$d muuta reagoivat viestiisi</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
