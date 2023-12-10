@@ -79,7 +79,7 @@
 			<key>one</key>
 			<string>%2$@ ja %1$d muu reagoivat viestiin, jossa olit mukana</string>
 			<key>other</key>
-			<string>%2$@ ja %1$d muut reagoivat viestiin, jossa olit mukana</string>
+			<string>%2$@ ja %1$d muuta reagoivat viestiin, jossa olit mukana</string>
 		</dict>
 	</dict>
 	<key>reacted_your_note_3</key>
