@@ -15,8 +15,23 @@ enum NdbSearchOrder {
     case newest_first
 }
 
+
+enum DatabaseError: Error {
+    case failed_open
+
+    var errorDescription: String? {
+        switch self {
+        case .failed_open:
+            return "Failed to open database"
+        }
+    }
+}
+
 class Ndb {
-    let ndb: ndb_t
+    var ndb: ndb_t
+    let path: String?
+    let owns_db: Bool
+    var closed: Bool
 
     static func safemode() -> Ndb? {
         guard let path = db_path ?? old_db_path else { return nil }
@@ -58,8 +73,8 @@ class Ndb {
     static var empty: Ndb {
         Ndb(ndb: ndb_t(ndb: nil))
     }
-
-    init?(path: String? = nil, owns_db_file: Bool = true) {
+    
+    static func open(path: String? = nil, owns_db_file: Bool = true) -> ndb_t? {
         var ndb_p: OpaquePointer? = nil
 
         let ingest_threads: Int32 = 4
@@ -102,7 +117,18 @@ class Ndb {
             return nil
         }
 
-        self.ndb = ndb_t(ndb: ndb_p)
+        return ndb_t(ndb: ndb_p)
+    }
+
+    init?(path: String? = nil, owns_db_file: Bool = true) {
+        guard let db = Self.open(path: path, owns_db_file: owns_db_file) else {
+            return nil
+        }
+
+        self.path = path
+        self.owns_db = owns_db_file
+        self.ndb = db
+        self.closed = false
     }
     
     private static func migrate_db_location_if_needed() throws {
@@ -144,6 +170,23 @@ class Ndb {
 
     init(ndb: ndb_t) {
         self.ndb = ndb
+        self.path = nil
+        self.owns_db = true
+        self.closed = false
+    }
+    
+    func close() {
+        self.closed = true
+        ndb_destroy(self.ndb.ndb)
+    }
+
+    func reopen() throws {
+        guard self.closed,
+              let db = Self.open(path: self.path, owns_db_file: self.owns_db) else {
+            throw DatabaseError.failed_open
+        }
+
+        self.ndb = db
     }
 
     func lookup_note_by_key_with_txn<Y>(_ key: NoteKey, txn: NdbTxn<Y>) -> NdbNote? {
@@ -344,12 +387,14 @@ class Ndb {
     }
 
     func process_event(_ str: String) -> Bool {
+        guard !closed else { return false }
         return str.withCString { cstr in
             return ndb_process_event(ndb.ndb, cstr, Int32(str.utf8.count)) != 0
         }
     }
 
     func process_events(_ str: String) -> Bool {
+        guard !closed else { return false }
         return str.withCString { cstr in
             return ndb_process_events(ndb.ndb, cstr, str.utf8.count) != 0
         }
@@ -387,7 +432,7 @@ class Ndb {
     }
 
     deinit {
-        ndb_destroy(ndb.ndb)
+        self.close()
     }
 }
 
