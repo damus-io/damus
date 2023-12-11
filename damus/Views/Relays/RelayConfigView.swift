@@ -23,7 +23,8 @@ struct RelayConfigView: View {
     
     var recommended: [RelayDescriptor] {
         let rs: [RelayDescriptor] = []
-        return BOOTSTRAP_RELAYS.reduce(into: rs) { xs, x in
+        let recommended_relay_addresses = get_default_bootstrap_relays()
+        return recommended_relay_addresses.reduce(into: rs) { xs, x in
             if state.pool.get_relay(x) == nil, let url = RelayURL(x) {
                 xs.append(RelayDescriptor(url: url, info: .rw))
             }
@@ -87,11 +88,29 @@ struct RelayConfigView: View {
                                 .stroke(DamusLightGradient.gradient)
                         }
                     
-                    HStack(spacing: 20) {
-                        ForEach(recommended, id: \.url) { r in
-                            RecommendedRelayView(damus: state, relay: r.url.id)
+                    ScrollView(.horizontal) {
+                        HStack(spacing: 20) {
+                            ForEach(recommended, id: \.url) { r in
+                                RecommendedRelayView(damus: state, relay: r.url.id)
+                            }
                         }
+                        .padding(.horizontal, 30)
+                        .padding(.vertical, 5)
                     }
+                    .scrollIndicators(.hidden)
+                    .mask(
+                        HStack(spacing: 0) {
+                            LinearGradient(gradient: Gradient(colors: [Color.clear, Color.white]), startPoint: .leading, endPoint: .trailing)
+                                .frame(width: 30)
+                            
+                            Rectangle()
+                                .fill(Color.white)
+                                .frame(maxWidth: .infinity)
+                            
+                            LinearGradient(gradient: Gradient(colors: [Color.white, Color.clear]), startPoint: .leading, endPoint: .trailing)
+                                .frame(width: 30)
+                        }
+                    )
                     .padding()
                 }
                 .frame(minWidth: 250, maxWidth: .infinity, minHeight: 250, alignment: .center)
