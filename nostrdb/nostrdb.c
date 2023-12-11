@@ -1671,7 +1671,7 @@ static int ndb_ingester_process_event(secp256k1_context *ctx,
 		ndb_client_event_from_json(ev->json, ev->len, &fce, buf, bufsize, &cb) :
 		ndb_ws_event_from_json(ev->json, ev->len, &tce, buf, bufsize, &cb);
 
-	if (note_size == -42) {
+	if ((int)note_size == -42) {
 		// we already have this!
 		//ndb_debug("already have id??\n");
 		goto cleanup;
@@ -2256,6 +2256,7 @@ static int ndb_write_note_fulltext_index(struct ndb_txn *txn,
 
 static int ndb_parse_search_words(void *ctx, const char *word_str, int word_len, int word_index)
 {
+	(void)word_index;
 	struct ndb_search_words *words = ctx;
 	struct ndb_word *word;
 
@@ -3066,7 +3067,7 @@ static int ndb_queue_write_version(struct ndb *ndb, uint64_t version)
 
 static int ndb_run_migrations(struct ndb *ndb)
 {
-	uint64_t version, latest_version, i;
+	int64_t version, latest_version, i;
 	
 	latest_version = sizeof(MIGRATIONS) / sizeof(MIGRATIONS[0]);
 
@@ -3259,7 +3260,7 @@ static inline int cursor_push_tag(struct cursor *cur, struct ndb_tag *tag)
 }
 
 int ndb_builder_init(struct ndb_builder *builder, unsigned char *buf,
-		     int bufsize)
+		     size_t bufsize)
 {
 	struct ndb_note *note;
 	int half, size, str_indices_size;
@@ -4240,7 +4241,7 @@ int ndb_stat(struct ndb *ndb, struct ndb_stat *stat)
 				common_kind = ndb_kind_to_common_kind(note->kind);
 
 				// uncommon kind? just count them in bulk
-				if (common_kind == -1) {
+				if ((int)common_kind == -1) {
 					stat->other_kinds.count++;
 					stat->other_kinds.key_size += k.mv_size;
 					stat->other_kinds.value_size += v.mv_size;
