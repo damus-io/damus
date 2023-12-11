@@ -864,7 +864,9 @@ static int _ndb_begin_query(struct ndb *ndb, struct ndb_txn *txn, int flags)
 {
 	txn->lmdb = &ndb->lmdb;
 	MDB_txn **mdb_txn = (MDB_txn **)&txn->mdb_txn;
-	return mdb_txn_begin(txn->lmdb->env, NULL, flags, mdb_txn) == 0;
+    if (!txn->lmdb->env)
+        return 0;
+    return mdb_txn_begin(txn->lmdb->env, NULL, flags, mdb_txn) == 0;
 }
 
 int ndb_begin_query(struct ndb *ndb, struct ndb_txn *txn)
