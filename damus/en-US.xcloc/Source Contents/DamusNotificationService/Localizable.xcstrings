@@ -1,0 +1,33 @@
+{
+  "sourceLanguage" : "en-US",
+  "strings" : {
+    "(Contents are encrypted)" : {
+      "comment" : "Label on push notification indicating that the contents of the message are encrypted"
+    },
+    "Anonymous" : {
+      "comment" : "Placeholder display name of anonymous user."
+    },
+    "Any" : {
+      "comment" : "Any amount of sats"
+    },
+    "New message" : {
+      "comment" : "Title label for push notifications where a direct message was sent to the user"
+    },
+    "New note reaction" : {
+      "comment" : "Title label for push notifications where someone reacted to the user's post with a specific emoji"
+    },
+    "Someone posted a note" : {
+      "comment" : "Title label for push notification where someone posted a note"
+    },
+    "Someone reacted to your note" : {
+      "comment" : "Generic title label for push notifications where someone reacted to the user's post"
+    },
+    "Someone reacted to your note with %@" : {
+      "comment" : "Body label for push notifications where someone reacted to the user's post with a specific emoji"
+    },
+    "Someone zapped you ⚡️" : {
+      "comment" : "Title label for a push notification where someone zapped the user"
+    }
+  },
+  "version" : "1.0"
+}

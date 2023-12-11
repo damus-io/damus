@@ -102,14 +102,11 @@ struct SuggestedHashtagsView: View {
                 SingleCharacterAvatar(character: "#")
                 
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("#\(hashtag)")
+                    Text(verbatim: "#\(hashtag)")
                         .bold()
                     
-                    Text(self.count != 1 ? String(
-                        format: NSLocalizedString("%d users talking about it", comment: "A label indicating how many users have been talking about a hashtag"),
-                        self.count
-                    ) : NSLocalizedString("1 user talking about it", comment: "A label indicating 1 user has been talking about a hashtag"))
-                    .foregroundStyle(.secondary)
+                    Text(pluralizedString(key: "users_talking_about_it", count: self.count))
+                        .foregroundStyle(.secondary)
                 }
                 
                 Spacer()

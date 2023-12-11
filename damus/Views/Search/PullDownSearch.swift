@@ -55,7 +55,7 @@ struct PullDownSearchView: View {
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
-                TextField("Search", text: $search_text)
+                TextField(NSLocalizedString("Search", comment: "Title of the text field for searching."), text: $search_text)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .onChange(of: search_text) { query in
                         debouncer.debounce {
@@ -75,7 +75,7 @@ struct PullDownSearchView: View {
                         end_editing()
                         on_cancel()
                     }, label: {
-                        Text("Cancel")
+                        Text("Cancel", comment: "Button to cancel out of search text entry mode.")
                     })
                 }
             }

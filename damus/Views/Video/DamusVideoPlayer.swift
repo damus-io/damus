@@ -100,7 +100,7 @@ struct DamusVideoPlayer: View {
     private var live_indicator: some View {
         VStack {
             HStack {
-                Text("LIVE")
+                Text("LIVE", comment: "Text indicator that the video is a livestream.")
                     .bold()
                     .foregroundColor(.red)
                     .padding(.horizontal)

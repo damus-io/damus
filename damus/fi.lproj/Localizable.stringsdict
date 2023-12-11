@@ -13,9 +13,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Seuraajina %2$@, %3$@, %4$@ &amp; %1$d muuta</string>
+			<string>%2$@, %3$@, %4$@ &amp; %1$d muu seuraavat</string>
 			<key>other</key>
-			<string>Seuraajina %2$@, %3$@, %4$@ &amp; %1$d muuta</string>
+			<string>%2$@, %3$@, %4$@ &amp; %1$d muuta seuraavat</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -45,9 +45,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Seuraa</string>
+			<string>Seurattava</string>
 			<key>other</key>
-			<string>Seuraa</string>
+			<string>Seurattavat</string>
 		</dict>
 	</dict>
 	<key>imports_count</key>
@@ -63,7 +63,7 @@
 			<key>one</key>
 			<string>Tuonti</string>
 			<key>other</key>
-			<string>Tuontia</string>
+			<string>Tuonnit</string>
 		</dict>
 	</dict>
 	<key>reacted_tagged_in_3</key>
@@ -77,9 +77,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ ja %1$d muu reagoi viestiin, johon sinut on merkitty</string>
+			<string>%2$@ ja %1$d muu reagoivat viestiin, jossa olit mukana</string>
 			<key>other</key>
-			<string>%2$@ ja %1$d muuta reagoi viestiin, johon sinut on merkitty</string>
+			<string>%2$@ ja %1$d muuta reagoivat viestiin, jossa olit mukana</string>
 		</dict>
 	</dict>
 	<key>reacted_your_note_3</key>
@@ -93,9 +93,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ ja %1$d muu reagoi viestiisi</string>
+			<string>%2$@ ja %1$d muu reagoivat viestiisi</string>
 			<key>other</key>
-			<string>%2$@ ja %1$d muuta reagoi viestiisi</string>
+			<string>%2$@ ja %1$d muuta reagoivat viestiisi</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -109,9 +109,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ ja %1$d muu reagoi profiiliisi</string>
+			<string>%2$@ ja %1$d muu reagoivat profiiliisi</string>
 			<key>other</key>
-			<string>%2$@ ja %1$d muuta reagoi profiiliisi</string>
+			<string>%2$@ ja %1$d muuta reagoivat profiiliisi</string>
 		</dict>
 	</dict>
 	<key>reactions_count</key>
@@ -141,7 +141,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Välittäjä</string>
+			<string>Välitin</string>
 			<key>other</key>
 			<string>Välittäjät</string>
 		</dict>
@@ -157,9 +157,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Vastaa käyttäjille %2$@, %3$@ &amp; %1$d muille</string>
+			<string>Vastaus %2$@, %3$@ &amp; %1$d ja muulle</string>
 			<key>other</key>
-			<string>Vastaa käyttäjille %2$@, %3$@ &amp; %1$d muille</string>
+			<string>Vastaus %2$@, %3$@ &amp; %1$d ja muille</string>
 		</dict>
 	</dict>
 	<key>reposted_tagged_in_3</key>
@@ -173,9 +173,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ ja %1$d muuta jakoivat uudelleen viestin, johon sinut on merkitty</string>
+			<string>%2$@ ja %1$d muu jakoivat uudelleen viestin, johon sinut oli merkitty.</string>
 			<key>other</key>
-			<string>%2$@ ja %1$d muuta jakoivat uudelleen viestin, johon sinut on merkitty</string>
+			<string>%2$@ ja %1$d muuta jakoivat uudelleen viestin, johon sinut oli merkitty.</string>
 		</dict>
 	</dict>
 	<key>reposted_your_note_3</key>
@@ -189,9 +189,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ ja %1$d muuta jakoivat uudelleen viestisi</string>
+			<string>%2$@ ja %1$d muu ovat lähettäneet viestisi uudelleen.</string>
 			<key>other</key>
-			<string>%2$@ ja %1$d muuta jakoivat uudelleen viestisi</string>
+			<string>%2$@ ja %1$d muuta ovat lähettäneet viestisi uudelleen.</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -205,9 +205,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ ja %1$d muuta jakoivat profiilisi</string>
+			<string>%2$@ ja %1$d muu ovat lähettäneet profiilisi uudelleen.</string>
 			<key>other</key>
-			<string>%2$@ ja %1$d muuta jakoivat profiilisi</string>
+			<string>%2$@ ja %1$d muuta ovat lähettäneet profiilisi uudelleen.</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -221,9 +221,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Jaettu uudelleen</string>
+			<string>Uudelleenjako</string>
 			<key>other</key>
-			<string>Jaettu uudelleen</string>
+			<string>Uudelleenjaot</string>
 		</dict>
 	</dict>
 	<key>sats</key>
@@ -237,9 +237,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>sat</string>
+			<string>sats</string>
 			<key>other</key>
-			<string>satsia</string>
+			<string>satsit</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -253,9 +253,41 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>%2$@ sat</string>
+			<string>%2$@ satsi</string>
 			<key>other</key>
 			<string>%2$@ satsia</string>
+		</dict>
+	</dict>
+	<key>users_talking_about_it</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@USERS@</string>
+		<key>USERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%d käyttäjä puhuu siitä</string>
+			<key>other</key>
+			<string>%d käyttäjää puhuu siitä</string>
+		</dict>
+	</dict>
+	<key>word_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@WORDS@</string>
+		<key>WORDS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%d sana</string>
+			<key>other</key>
+			<string>%d sanoja</string>
 		</dict>
 	</dict>
 	<key>zap_notification_no_message</key>
@@ -269,9 +301,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>Sait %2$@ satin käyttäjältä %3$@</string>
+			<string>Sait %2$@ satsin %3$@:lta.</string>
 			<key>other</key>
-			<string>Sait %2$@ satsia käyttäjältä %3$@</string>
+			<string>Sait %2$@ satsia %3$@:lta.</string>
 		</dict>
 	</dict>
 	<key>zap_notification_with_message</key>
@@ -285,9 +317,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>Sait %2$@ satin käyttäjältä %3$@: "%4$@"</string>
+			<string>Sait %2$@ satsin näiltä: %3$@: &quot;%4$@&quot;</string>
 			<key>other</key>
-			<string>Sait %2$@ satsia käyttäjältä %3$@: "%4$@"</string>
+			<string>Sait %2$@ satsia näiltä: %3$@: &quot;%4$@&quot;</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
@@ -301,9 +333,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ ja %1$d muuta zappasivat viestin, johon sinut on merkitty</string>
+			<string>%2$@ ja %1$d muu zappasivat viestin, johon olit merkitty</string>
 			<key>other</key>
-			<string>%2$@ ja %1$d muuta zappasivat viestin, johon sinut on merkitty</string>
+			<string>%2$@ ja %1$d muuta zappasivat viestin, johon olit merkitty</string>
 		</dict>
 	</dict>
 	<key>zapped_your_note_3</key>
@@ -317,13 +349,12 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ ja %1$d muuta zappasivat viestisi</string>
+			<string>%2$@ ja %1$d muu zappasivat viestisi.</string>
 			<key>other</key>
-			<string>%2$@ ja %1$d muuta zappasivat viestisi</string>
+			<string>%2$@ ja %1$d muuta zappasivat viestisi.</string>
 		</dict>
-	</dict
-
-<key>zapped_your_profile_3</key>
+	</dict>
+	<key>zapped_your_profile_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@ZAPPED@</string>
@@ -334,9 +365,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ ja %1$d muuta zappasivat profiiliasi</string>
+			<string>%2$@ ja %1$d muu zappasivat sinua.</string>
 			<key>other</key>
-			<string>%2$@ ja %1$d muuta zappasivat profiiliasi</string>
+			<string>%2$@ ja %1$d muuta zappasivat sinua.</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
@@ -350,7 +381,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Zap</string>
+			<string>Zappi</string>
 			<key>other</key>
 			<string>Zapit</string>
 		</dict>
