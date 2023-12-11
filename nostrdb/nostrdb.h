@@ -364,7 +364,7 @@ int ndb_parse_json_note(struct ndb_json_parser *, struct ndb_note **);
 int ndb_client_event_from_json(const char *json, int len, struct ndb_fce *fce, unsigned char *buf, int bufsize, struct ndb_id_cb *cb);
 int ndb_ws_event_from_json(const char *json, int len, struct ndb_tce *tce, unsigned char *buf, int bufsize, struct ndb_id_cb *);
 int ndb_note_from_json(const char *json, int len, struct ndb_note **, unsigned char *buf, int buflen);
-int ndb_builder_init(struct ndb_builder *builder, unsigned char *buf, int bufsize);
+int ndb_builder_init(struct ndb_builder *builder, unsigned char *buf, size_t bufsize);
 int ndb_builder_finalize(struct ndb_builder *builder, struct ndb_note **note, struct ndb_keypair *privkey);
 int ndb_builder_set_content(struct ndb_builder *builder, const char *content, int len);
 void ndb_builder_set_created_at(struct ndb_builder *builder, uint64_t created_at);
