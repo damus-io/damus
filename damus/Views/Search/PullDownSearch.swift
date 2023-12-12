@@ -31,7 +31,7 @@ struct PullDownSearchView: View {
         }
 
         do {
-            let txn = NdbTxn(ndb: state.ndb)
+            guard let txn = NdbTxn(ndb: state.ndb) else { return }
             for note_key in note_keys {
                 guard let note = state.ndb.lookup_note_by_key_with_txn(note_key, txn: txn) else {
                     continue

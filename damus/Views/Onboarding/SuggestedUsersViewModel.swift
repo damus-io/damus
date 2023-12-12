@@ -36,7 +36,7 @@ class SuggestedUsersViewModel: ObservableObject {
 
     func suggestedUser(pubkey: Pubkey) -> SuggestedUser? {
         let profile_txn = damus_state.profiles.lookup(id: pubkey)
-        if let profile = profile_txn.unsafeUnownedValue,
+        if let profile = profile_txn?.unsafeUnownedValue,
            let user = SuggestedUser(name: profile.name, about: profile.about, picture: profile.picture, pubkey: pubkey) {
             return user
         }

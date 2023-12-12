@@ -414,8 +414,10 @@ class HomeModel {
                 print(msg)
 
             case .eose(let sub_id):
-                
-                let txn = NdbTxn(ndb: damus_state.ndb)
+                guard let txn = NdbTxn(ndb: damus_state.ndb) else {
+                    return
+                }
+
                 if sub_id == dms_subid {
                     var dms = dms.dms.flatMap { $0.events }
                     dms.append(contentsOf: incoming_dms)

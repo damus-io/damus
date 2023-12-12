@@ -83,7 +83,7 @@ class SearchHomeModel: ObservableObject {
                 // global events are not realtime
                 unsubscribe(to: relay_id)
                 
-                let txn = NdbTxn(ndb: damus_state.ndb)
+                guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
                 load_profiles(context: "universe", profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(events.all_events), damus_state: damus_state, txn: txn)
             }
 

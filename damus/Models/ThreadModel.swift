@@ -120,7 +120,7 @@ class ThreadModel: ObservableObject {
         }
         
         if sub_id == self.base_subid {
-            let txn = NdbTxn(ndb: damus_state.ndb)
+            guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
             load_profiles(context: "thread", profiles_subid: self.profiles_subid, relay_id: relay_id, load: .from_events(Array(event_map)), damus_state: damus_state, txn: txn)
         }
     }

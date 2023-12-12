@@ -45,7 +45,7 @@ struct NIP05Badge: View {
     }
 
     var username_matches_nip05: Bool {
-        guard let name = profiles.lookup(id: pubkey).map({ p in p?.name }).value
+        guard let name = profiles.lookup(id: pubkey)?.map({ p in p?.name }).value
         else {
             return false
         }

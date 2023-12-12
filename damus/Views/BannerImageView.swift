@@ -78,11 +78,12 @@ struct BannerImageView: View {
     var body: some View {
         InnerBannerImageView(disable_animation: disable_animation, url: get_banner_url(banner: banner, pubkey: pubkey, profiles: profiles))
             .onReceive(handle_notify(.profile_updated)) { updated in
-                guard updated.pubkey == self.pubkey else {
+                guard updated.pubkey == self.pubkey,
+                      let profile_txn = profiles.lookup(id: updated.pubkey)
+                else {
                     return
                 }
 
-                let profile_txn = profiles.lookup(id: updated.pubkey)
                 let profile = profile_txn.unsafeUnownedValue
                 if let bannerImage = profile?.banner, bannerImage != self.banner {
                     self.banner = bannerImage
@@ -92,7 +93,7 @@ struct BannerImageView: View {
 }
 
 func get_banner_url(banner: String?, pubkey: Pubkey, profiles: Profiles) -> URL? {
-    let bannerUrlString = banner ?? profiles.lookup(id: pubkey).map({ p in p?.banner }).value ?? ""
+    let bannerUrlString = banner ?? profiles.lookup(id: pubkey)?.map({ p in p?.banner }).value ?? ""
     if let url = URL(string: bannerUrlString) {
         return url
     }

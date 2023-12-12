@@ -187,7 +187,7 @@ func mention_str(_ m: Mention<MentionRef>, profiles: Profiles) -> CompatibleText
     case .pubkey(let pk):
         let npub = bech32_pubkey(pk)
         let profile_txn = profiles.lookup(id: pk)
-        let profile = profile_txn.unsafeUnownedValue
+        let profile = profile_txn?.unsafeUnownedValue
         let disp = Profile.displayName(profile: profile, pubkey: pk).username.truncate(maxLength: 50)
         var attributedString = AttributedString(stringLiteral: "@\(disp)")
         attributedString.link = URL(string: "damus:nostr:\(npub)")

@@ -61,7 +61,7 @@ struct NotificationsView: View {
     
     var mystery: some View {
         let profile_txn = state.profiles.lookup(id: state.pubkey)
-        let profile = profile_txn.unsafeUnownedValue
+        let profile = profile_txn?.unsafeUnownedValue
         return VStack(spacing: 20) {
             Text("Wake up, \(Profile.displayName(profile: profile, pubkey: state.pubkey).displayName.truncate(maxLength: 50))", comment: "Text telling the user to wake up, where the argument is their display name.")
             Text("You are dreaming...", comment: "Text telling the user that they are dreaming.")

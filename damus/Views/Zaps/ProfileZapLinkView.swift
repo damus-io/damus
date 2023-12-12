@@ -34,7 +34,7 @@ struct ProfileZapLinkView<Content: View>: View {
         self.action = action
         
         let profile_txn = damus_state.profiles.lookup_with_timestamp(pubkey)
-        let record = profile_txn.unsafeUnownedValue
+        let record = profile_txn?.unsafeUnownedValue
         self.reactions_enabled = record?.profile?.reactions ?? true
         self.lud16 = record?.profile?.lud06
         self.lnurl = record?.lnurl

@@ -38,7 +38,9 @@ func reply_desc(ndb: Ndb, event: NostrEvent, replying_to: NostrEvent?, locale: L
         return NSLocalizedString("Replying to self", bundle: bundle, comment: "Label to indicate that the user is replying to themself.")
     }
 
-    let profile_txn = NdbTxn(ndb: ndb)
+    guard let profile_txn = NdbTxn(ndb: ndb) else  {
+        return ""
+    }
 
     let names: [String] = pubkeys.map { pk in
         let prof = ndb.lookup_profile_with_txn(pk, txn: profile_txn)

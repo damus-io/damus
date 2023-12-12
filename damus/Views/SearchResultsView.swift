@@ -108,11 +108,11 @@ struct SearchResultsView: View {
         }
         .frame(maxHeight: .infinity)
         .onAppear {
-            let txn = NdbTxn.init(ndb: damus_state.ndb)
+            guard let txn = NdbTxn.init(ndb: damus_state.ndb) else { return }
             self.result = search_for_string(profiles: damus_state.profiles, search: search, txn: txn)
         }
         .onChange(of: search) { new in
-            let txn = NdbTxn.init(ndb: damus_state.ndb)
+            guard let txn = NdbTxn.init(ndb: damus_state.ndb) else { return }
             self.result = search_for_string(profiles: damus_state.profiles, search: search, txn: txn)
         }
     }

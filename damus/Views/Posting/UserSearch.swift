@@ -17,7 +17,7 @@ struct UserSearch: View {
     @EnvironmentObject var tagModel: TagModel
     
     var users: [Pubkey] {
-        let txn = NdbTxn(ndb: damus_state.ndb)
+        guard let txn = NdbTxn(ndb: damus_state.ndb) else { return [] }
         return search_profiles(profiles: damus_state.profiles, search: search, txn: txn).sorted { a, b in
             let aFriendTypePriority = get_friend_type(contacts: damus_state.contacts, pubkey: a)?.priority ?? 0
             let bFriendTypePriority = get_friend_type(contacts: damus_state.contacts, pubkey: b)?.priority ?? 0
@@ -33,7 +33,7 @@ struct UserSearch: View {
     
     func on_user_tapped(pk: Pubkey) {
         let profile_txn = damus_state.profiles.lookup(id: pk)
-        let profile = profile_txn.unsafeUnownedValue
+        let profile = profile_txn?.unsafeUnownedValue
         let user_tag = user_tag_attr_string(profile: profile, pubkey: pk)
 
         appendUserTag(withTag: user_tag)

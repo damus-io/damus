@@ -24,11 +24,10 @@ struct ReplyView: View {
     var ReplyingToSection: some View {
         HStack {
             Group {
-                let txn = NdbTxn(ndb: damus.ndb)
                 let names = references
                     .map { pubkey in
                         let pk = pubkey
-                        let prof = damus.ndb.lookup_profile_with_txn(pk, txn: txn)?.profile
+                        let prof = damus.ndb.lookup_profile(pk)?.unsafeUnownedValue?.profile
                         return "@" + Profile.displayName(profile: prof, pubkey: pk).username.truncate(maxLength: 50)
                     }
                     .joined(separator: " ")

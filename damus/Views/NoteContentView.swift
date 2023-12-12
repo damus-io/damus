@@ -303,7 +303,7 @@ struct NoteContentView: View {
 class NoteArtifactsParts {
     var parts: [ArtifactPart]
     var words: Int
-    
+
     init(parts: [ArtifactPart], words: Int) {
         self.parts = parts
         self.words = words

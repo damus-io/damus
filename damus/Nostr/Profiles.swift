@@ -73,24 +73,27 @@ class Profiles {
         profile_data(pubkey).zapper
     }
 
-    func lookup_with_timestamp(_ pubkey: Pubkey) -> NdbTxn<ProfileRecord?> {
-        return ndb.lookup_profile(pubkey)
+    func lookup_with_timestamp(_ pubkey: Pubkey) -> NdbTxn<ProfileRecord?>? {
+        ndb.lookup_profile(pubkey)
     }
 
-    func lookup_by_key(key: ProfileKey) -> NdbTxn<ProfileRecord?> {
-        return ndb.lookup_profile_by_key(key: key)
+    func lookup_by_key(key: ProfileKey) -> NdbTxn<ProfileRecord?>? {
+        ndb.lookup_profile_by_key(key: key)
     }
 
     func search<Y>(_ query: String, limit: Int, txn: NdbTxn<Y>) -> [Pubkey] {
-        return ndb.search_profile(query, limit: limit, txn: txn)
+        ndb.search_profile(query, limit: limit, txn: txn)
     }
 
-    func lookup(id: Pubkey) -> NdbTxn<Profile?> {
-        return ndb.lookup_profile(id).map({ pr in pr?.profile })
+    func lookup(id: Pubkey) -> NdbTxn<Profile?>? {
+        guard let txn = ndb.lookup_profile(id) else {
+            return nil
+        }
+        return txn.map({ pr in pr?.profile })
     }
 
     func lookup_key_by_pubkey(_ pubkey: Pubkey) -> ProfileKey? {
-        return ndb.lookup_profile_key(pubkey)
+        ndb.lookup_profile_key(pubkey)
     }
 
     func has_fresh_profile<Y>(id: Pubkey, txn: NdbTxn<Y>) -> Bool {

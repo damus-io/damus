@@ -165,7 +165,7 @@ struct WalletView: View {
                 }
                 .onChange(of: settings.donation_percent) { p in
                     let profile_txn = damus_state.profiles.lookup(id: damus_state.pubkey)
-                    guard let profile = profile_txn.unsafeUnownedValue else {
+                    guard let profile = profile_txn?.unsafeUnownedValue else {
                         return
                     }
                     
@@ -177,7 +177,7 @@ struct WalletView: View {
                     let profile_txn = damus_state.profiles.lookup(id: damus_state.pubkey)
                     
                     guard let keypair = damus_state.keypair.to_full(),
-                          let profile = profile_txn.unsafeUnownedValue,
+                          let profile = profile_txn?.unsafeUnownedValue,
                           model.initial_percent != profile.damus_donation
                     else {
                         return

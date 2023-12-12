@@ -28,7 +28,7 @@ class NotificationService: UNNotificationServiceExtension {
         Log.debug("Got nostr event push notification from pubkey %s", for: .push_notifications, nostr_event.pubkey.hex())
         
         guard let state = NotificationExtensionState(),
-              let display_name = state.ndb.lookup_profile(nostr_event.pubkey).unsafeUnownedValue?.profile?.display_name  // We are not holding the txn here.
+              let display_name = state.ndb.lookup_profile(nostr_event.pubkey)?.unsafeUnownedValue?.profile?.display_name  // We are not holding the txn here.
         else {
             // Something failed to initialize so let's go for the next best thing
             guard let improved_content = NotificationFormatter.shared.format_message(event: nostr_event) else {

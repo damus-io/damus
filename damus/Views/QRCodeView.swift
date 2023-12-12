@@ -119,10 +119,11 @@ struct QRCodeView: View {
     var QRView: some View {
         VStack(alignment: .center) {
             let profile_txn = damus_state.profiles.lookup(id: pubkey)
-            let profile = profile_txn.unsafeUnownedValue
-            let our_profile = damus_state.ndb.lookup_profile_with_txn(damus_state.pubkey, txn: profile_txn)
+            let profile = profile_txn?.unsafeUnownedValue
+            let our_profile_txn = damus_state.profiles.lookup(id: damus_state.pubkey)
+            let our_profile = our_profile_txn?.unsafeUnownedValue
 
-            if our_profile?.profile?.picture != nil {
+            if our_profile?.picture != nil {
                 ProfilePicView(pubkey: pubkey, size: 90.0, highlight: .custom(DamusColors.white, 3.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                     .padding(.top, 50)
             } else {

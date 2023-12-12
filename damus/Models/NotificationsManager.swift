@@ -21,6 +21,7 @@ func process_local_notification(state: HeadlessDamusState, event ev: NostrEvent)
     guard let local_notification = generate_local_notification_object(from: ev, state: state) else {
         return
     }
+
     create_local_notification(profiles: state.profiles, notify: local_notification)
 }
 
@@ -76,7 +77,8 @@ func generate_local_notification_object(from ev: NostrEvent, state: HeadlessDamu
     } else if type == .like,
               state.settings.like_notification,
               let evid = ev.referenced_ids.last,
-              let liked_event = state.ndb.lookup_note(evid).unsafeUnownedValue   // We are only accessing it temporarily to generate notification content
+              let txn = state.ndb.lookup_note(evid),
+              let liked_event = txn.unsafeUnownedValue   // We are only accessing it temporarily to generate notification content
     {
         let content_preview = render_notification_content_preview(ev: liked_event, profiles: state.profiles, keypair: state.keypair)
         return LocalNotification(type: .like, event: ev, target: liked_event, content: content_preview)
@@ -135,9 +137,9 @@ func render_notification_content_preview(ev: NostrEvent, profiles: Profiles, key
 }
 
 func event_author_name(profiles: Profiles, pubkey: Pubkey) -> String {
-    return profiles.lookup(id: pubkey).map({ profile in
-        Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
-    }).value
+    let profile_txn = profiles.lookup(id: pubkey)
+    let profile = profile_txn?.unsafeUnownedValue
+    return Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
 }
 
 @MainActor
@@ -173,8 +175,8 @@ func process_zap_event(state: HeadlessDamusState, ev: NostrEvent, completion: @e
         return
     }
     
-    guard let lnurl = state.profiles.lookup_with_timestamp(ptag)
-                        .map({ pr in pr?.lnurl }).value else {
+    guard let txn = state.profiles.lookup_with_timestamp(ptag),
+          let lnurl = txn.map({ pr in pr?.lnurl }).value else {
         completion(.failed)
         return
     }
@@ -221,7 +223,8 @@ func get_zap_target_pubkey(ev: NostrEvent, ndb: Ndb) -> Pubkey? {
     }
 
     // we can't trust the p tag on note zaps because they can be faked
-    guard let pk = ndb.lookup_note(etag).unsafeUnownedValue?.pubkey else {
+    guard let txn = ndb.lookup_note(etag),
+          let pk = txn.unsafeUnownedValue?.pubkey else {
         // We don't have the event in cache so we can't check the pubkey.
 
         // We could return this as an invalid zap but that wouldn't be correct

@@ -30,7 +30,7 @@ struct ProfileActionSheetView: View {
     
     func profile_data() -> ProfileRecord? {
         let profile_txn = damus_state.profiles.lookup_with_timestamp(profile.pubkey)
-        return profile_txn.unsafeUnownedValue
+        return profile_txn?.unsafeUnownedValue
     }
     
     func get_profile() -> Profile? {

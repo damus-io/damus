@@ -24,10 +24,10 @@ func follow_btn_txt(_ fs: FollowState, follows_you: Bool) -> String {
     }
 }
 
-func followedByString<Y>(txn: NdbTxn<Y>, _ friend_intersection: [Pubkey], ndb: Ndb, locale: Locale = Locale.current) -> String {
+func followedByString(_ friend_intersection: [Pubkey], ndb: Ndb, locale: Locale = Locale.current) -> String {
     let bundle = bundleForLocale(locale: locale)
     let names: [String] = friend_intersection.prefix(3).map { pk in
-        let profile = ndb.lookup_profile_with_txn(pk, txn: txn)?.profile
+        let profile = ndb.lookup_profile(pk)?.unsafeUnownedValue?.profile
         return Profile.displayName(profile: profile, pubkey: pk).username.truncate(maxLength: 20)
     }
 
@@ -331,7 +331,7 @@ struct ProfileView: View {
     var aboutSection: some View {
         VStack(alignment: .leading, spacing: 8.0) {
             let profile_txn = damus_state.profiles.lookup_with_timestamp(profile.pubkey)
-            let profile_data = profile_txn.unsafeUnownedValue
+            let profile_data = profile_txn?.unsafeUnownedValue
 
             nameSection(profile_data: profile_data)
 
@@ -398,7 +398,7 @@ struct ProfileView: View {
                     NavigationLink(value: Route.FollowersYouKnow(friendedFollowers: friended_followers, followers: followers)) {
                         HStack {
                             CondensedProfilePicturesView(state: damus_state, pubkeys: friended_followers, maxPictures: 3)
-                            let followedByString = followedByString(txn: profile_txn, friended_followers, ndb: damus_state.ndb)
+                            let followedByString = followedByString(friended_followers, ndb: damus_state.ndb)
                             Text(followedByString)
                                 .font(.subheadline).foregroundColor(.gray)
                                 .multilineTextAlignment(.leading)
@@ -499,7 +499,7 @@ extension View {
 func check_nip05_validity(pubkey: Pubkey, profiles: Profiles) {
     let profile_txn = profiles.lookup(id: pubkey)
 
-    guard let profile = profile_txn.unsafeUnownedValue,
+    guard let profile = profile_txn?.unsafeUnownedValue,
           let nip05 = profile.nip05,
           profiles.is_validated(pubkey) == nil
     else {

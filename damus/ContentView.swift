@@ -370,14 +370,9 @@ struct ContentView: View {
             // wallet with an associated
             guard let ds = self.damus_state,
                   let lud16 = nwc.lud16,
-                  let keypair = ds.keypair.to_full()
-            else {
-                return
-            }
-
-            let profile_txn = ds.profiles.lookup(id: ds.pubkey)
-
-            guard let profile = profile_txn.unsafeUnownedValue,
+                  let keypair = ds.keypair.to_full(),
+                  let profile_txn = ds.profiles.lookup(id: ds.pubkey),
+                  let profile = profile_txn.unsafeUnownedValue,
                   lud16 != profile.lud16 else {
                 return
             }
@@ -514,10 +509,9 @@ struct ContentView: View {
         .onReceive(handle_notify(.onlyzaps_mode)) { hide in
             home.filter_events()
 
-            guard let ds = damus_state else { return }
-            let profile_txn = ds.profiles.lookup(id: ds.pubkey)
-
-            guard let profile = profile_txn.unsafeUnownedValue,
+            guard let ds = damus_state,
+                  let profile_txn = ds.profiles.lookup(id: ds.pubkey),
+                  let profile = profile_txn.unsafeUnownedValue,
                   let keypair = ds.keypair.to_full()
             else {
                 return
@@ -534,9 +528,9 @@ struct ContentView: View {
             }
         }, message: {
             if let pubkey = self.muting {
-                let name = damus_state!.profiles.lookup(id: pubkey).map { profile in
-                    Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
-                }.value
+                let profile_txn = damus_state!.profiles.lookup(id: pubkey)
+                let profile = profile_txn?.unsafeUnownedValue
+                let name = Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
                 Text("\(name) has been muted", comment: "Alert message that informs a user was muted.")
             } else {
                 Text("User has been muted", comment: "Alert message that informs a user was muted.")
@@ -595,9 +589,9 @@ struct ContentView: View {
             }
         }, message: {
             if let pubkey = muting {
-                let name = damus_state?.profiles.lookup(id: pubkey).map({ profile in
-                    Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
-                }).value ?? "unknown"
+                let profile_txn = damus_state?.profiles.lookup(id: pubkey)
+                let profile = profile_txn?.unsafeUnownedValue
+                let name = Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
                 Text("Mute \(name)?", comment: "Alert message prompt to ask if a user should be muted.")
             } else {
                 Text("Could not find user to mute...", comment: "Alert message to indicate that the muted user could not be found.")
@@ -865,7 +859,8 @@ func find_event_with_subid(state: DamusState, query query_: FindEvent, subid: St
     
     switch query {
     case .profile(let pubkey):
-        if let record = state.ndb.lookup_profile(pubkey).unsafeUnownedValue,
+        if let profile_txn = state.ndb.lookup_profile(pubkey),
+           let record = profile_txn.unsafeUnownedValue,
            record.profile != nil
         {
             callback(.profile(pubkey))

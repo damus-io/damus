@@ -30,7 +30,8 @@ struct EditMetadataView: View {
     
     init(damus_state: DamusState) {
         self.damus_state = damus_state
-        let data = damus_state.profiles.lookup(id: damus_state.pubkey).unsafeUnownedValue
+        let profile_txn = damus_state.profiles.lookup(id: damus_state.pubkey)
+        let data = profile_txn?.unsafeUnownedValue
 
         _name = State(initialValue: data?.name ?? "")
         _display_name = State(initialValue: data?.display_name ?? "")

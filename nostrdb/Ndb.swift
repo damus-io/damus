@@ -186,6 +186,7 @@ class Ndb {
             throw DatabaseError.failed_open
         }
 
+        self.closed = false
         self.ndb = db
     }
 
@@ -198,7 +199,7 @@ class Ndb {
     }
 
     func text_search(query: String, limit: Int = 32, order: NdbSearchOrder = .newest_first) -> [NoteKey] {
-        let txn = NdbTxn(ndb: self)
+        guard let txn = NdbTxn(ndb: self) else { return [] }
         var results = ndb_text_search_results()
         let res = query.withCString { q in
             let order = order == .newest_first ? NDB_ORDER_DESCENDING : NDB_ORDER_ASCENDING
@@ -243,7 +244,7 @@ class Ndb {
         return note_ids
     }
 
-    func lookup_note_by_key(_ key: NoteKey) -> NdbTxn<NdbNote?> {
+    func lookup_note_by_key(_ key: NoteKey) -> NdbTxn<NdbNote?>? {
         return NdbTxn(ndb: self) { txn in
             lookup_note_by_key_with_txn(key, txn: txn)
         }
@@ -301,7 +302,7 @@ class Ndb {
         lookup_profile_by_key_inner(key, txn: txn)
     }
 
-    func lookup_profile_by_key(key: ProfileKey) -> NdbTxn<ProfileRecord?> {
+    func lookup_profile_by_key(key: ProfileKey) -> NdbTxn<ProfileRecord?>? {
         return NdbTxn(ndb: self) { txn in
             lookup_profile_by_key_inner(key, txn: txn)
         }
@@ -312,9 +313,13 @@ class Ndb {
     }
 
     func lookup_profile_key(_ pubkey: Pubkey) -> ProfileKey? {
-        return NdbTxn(ndb: self) { txn in
+        guard let txn = NdbTxn(ndb: self, with: { txn in
             lookup_profile_key_with_txn(pubkey, txn: txn)
-        }.value
+        }) else {
+            return nil
+        }
+
+        return txn.value
     }
 
     func lookup_profile_key_with_txn<Y>(_ pubkey: Pubkey, txn: NdbTxn<Y>) -> ProfileKey? {
@@ -342,17 +347,23 @@ class Ndb {
     }
 
     func lookup_note_key(_ id: NoteId) -> NoteKey? {
-        NdbTxn(ndb: self, with: { txn in lookup_note_key_with_txn(id, txn: txn) }).value
+        guard let txn = NdbTxn(ndb: self, with: { txn in
+            lookup_note_key_with_txn(id, txn: txn)
+        }) else {
+            return nil
+        }
+
+        return txn.value
     }
 
-    func lookup_note(_ id: NoteId) -> NdbTxn<NdbNote?> {
-        return NdbTxn(ndb: self) { txn in
+    func lookup_note(_ id: NoteId) -> NdbTxn<NdbNote?>? {
+        NdbTxn(ndb: self) { txn in
             lookup_note_with_txn_inner(id: id, txn: txn)
         }
     }
 
-    func lookup_profile(_ pubkey: Pubkey) -> NdbTxn<ProfileRecord?> {
-        return NdbTxn(ndb: self) { txn in
+    func lookup_profile(_ pubkey: Pubkey) -> NdbTxn<ProfileRecord?>? {
+        NdbTxn(ndb: self) { txn in
             lookup_profile_with_txn_inner(pubkey: pubkey, txn: txn)
         }
     }

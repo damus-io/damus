@@ -18,8 +18,9 @@ class NdbTxn<T> {
     var moved: Bool
     var inherited: Bool
 
-    init(ndb: Ndb, with: (NdbTxn<T>) -> T = { _ in () }) {
-        #if TXNDEBUG
+    init?(ndb: Ndb, with: (NdbTxn<T>) -> T = { _ in () }) {
+        guard !ndb.closed else { return nil }
+#if TXNDEBUG
         txn_count += 1
         print("opening transaction \(txn_count)")
         #endif
@@ -31,11 +32,7 @@ class NdbTxn<T> {
             self.txn = ndb_txn()
             let ok = ndb_begin_query(ndb.ndb.ndb, &self.txn) != 0
             if !ok {
-                self.moved = false
-                self.txn = ndb_txn()
-                self.inherited = true
-                self.val = with(self)
-                return
+                return nil
             }
             Thread.current.threadDictionary["ndb_txn"] = self.txn
             self.inherited = false

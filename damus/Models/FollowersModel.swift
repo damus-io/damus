@@ -83,7 +83,7 @@ class FollowersModel: ObservableObject {
             
         case .eose(let sub_id):
             if sub_id == self.sub_id {
-                let txn = NdbTxn(ndb: self.damus_state.ndb)
+                guard let txn = NdbTxn(ndb: self.damus_state.ndb) else { return }
                 load_profiles(relay_id: relay_id, txn: txn)
             } else if sub_id == self.profiles_id {
                 damus_state.pool.unsubscribe(sub_id: profiles_id, to: [relay_id])
