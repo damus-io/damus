@@ -51,6 +51,52 @@ typedef int (*ndb_migrate_fn)(struct ndb *);
 typedef int (*ndb_word_parser_fn)(void *, const char *word, int word_len,
 				  int word_index);
 
+// these must be byte-aligned, they are directly accessing the serialized data
+// representation
+#pragma pack(push, 1)
+
+
+union ndb_packed_str {
+	struct {
+		char str[3];
+		// we assume little endian everywhere. sorry not sorry.
+		unsigned char flag; // NDB_PACKED_STR, etc
+	} packed;
+
+	uint32_t offset;
+	unsigned char bytes[4];
+};
+
+struct ndb_tag {
+	uint16_t count;
+	union ndb_packed_str strs[0];
+};
+
+struct ndb_tags {
+	uint16_t padding;
+	uint16_t count;
+	struct ndb_tag tag[0];
+};
+
+// v1
+struct ndb_note {
+	unsigned char version;    // v=1
+	unsigned char padding[3]; // keep things aligned
+	unsigned char id[32];
+	unsigned char pubkey[32];
+	unsigned char sig[64];
+
+	uint64_t created_at;
+	uint32_t kind;
+	uint32_t content_length;
+	union ndb_packed_str content;
+	uint32_t strings;
+	// nothing can come after tags since it contains variadic data
+	struct ndb_tags tags;
+};
+
+#pragma pack(pop)
+
 struct ndb_migration {
 	ndb_migrate_fn fn;
 };
@@ -674,7 +720,7 @@ static int ndb_generic_filter_matches(struct ndb_filter_elements *els,
 		if (it->tag->count < 2)
 			continue;
 
-		str = ndb_note_str(note, &it->tag->strs[0]);
+		str = ndb_tag_str(note, it->tag, 0);
 
 		// we only care about packed strings (single char, etc)
 		if (str.flag != NDB_PACKED_STR)
@@ -684,7 +730,7 @@ static int ndb_generic_filter_matches(struct ndb_filter_elements *els,
 		if (str.str[0] != els->field.generic || str.str[1] != 0)
 			continue;
 
-		str = ndb_note_str(note, &it->tag->strs[1]);
+		str = ndb_tag_str(note, it->tag, 1);
 
 		switch (els->field.elem_type) {
 		case NDB_ELEMENT_ID:
@@ -1966,11 +2012,11 @@ static unsigned char *ndb_note_last_id_tag(struct ndb_note *note, char type)
 		if (iter.tag->count < 2)
 			continue;
 
-		str = ndb_note_str(note, &iter.tag->strs[0]);
+		str = ndb_tag_str(note, iter.tag, 0);
 
 		// assign liked to the last e tag
 		if (str.flag == NDB_PACKED_STR && str.str[0] == type) {
-			str = ndb_note_str(note, &iter.tag->strs[1]);
+			str = ndb_tag_str(note, iter.tag, 1);
 			if (str.flag == NDB_PACKED_ID)
 				last = str.id;
 		}
@@ -3481,7 +3527,7 @@ static int cursor_push_json_tag(struct cursor *cur, struct ndb_note *note,
                 return 0;
 
         for (i = 0; i < tag->count; i++) {
-                if (!cursor_push_json_tag_str(cur, ndb_note_str(note, &tag->strs[i])))
+                if (!cursor_push_json_tag_str(cur, ndb_tag_str(note, tag, i)))
                         return 0;
                 if (i != tag->count-1 && !cursor_push_byte(cur, ','))
 			return 0;
@@ -3652,6 +3698,16 @@ struct ndb_note * ndb_builder_note(struct ndb_builder *builder)
 	return builder->note;
 }
 
+static union ndb_packed_str ndb_offset_str(uint32_t offset)
+{
+	// ensure accidents like -1 don't corrupt our packed_str
+	union ndb_packed_str str;
+	// most significant byte is reserved for ndb_packtype
+	str.offset = offset & 0xFFFFFF;
+	return str;
+}
+
+
 /// find an existing string via str_indices. these indices only exist in the
 /// builder phase just for this purpose.
 static inline int ndb_builder_find_str(struct ndb_builder *builder,
@@ -3713,6 +3769,25 @@ static int ndb_builder_push_packed_id(struct ndb_builder *builder,
 	}
 
 	return 0;
+}
+
+union ndb_packed_str ndb_chars_to_packed_str(char c1, char c2)
+{
+	union ndb_packed_str str;
+	str.packed.flag = NDB_PACKED_STR;
+	str.packed.str[0] = c1;
+	str.packed.str[1] = c2;
+	str.packed.str[2] = '\0';
+	return str;
+}
+
+static union ndb_packed_str ndb_char_to_packed_str(char c)
+{
+	union ndb_packed_str str;
+	str.packed.flag = NDB_PACKED_STR;
+	str.packed.str[0] = c;
+	str.packed.str[1] = '\0';
+	return str;
 }
 
 
@@ -4357,4 +4432,195 @@ int ndb_print_search_keys(struct ndb_txn *txn)
 	}
 
 	return 1;
+}
+
+struct ndb_tags *ndb_note_tags(struct ndb_note *note)
+{
+	return &note->tags;
+}
+
+struct ndb_str ndb_note_str(struct ndb_note *note, union ndb_packed_str *pstr)
+{
+	struct ndb_str str;
+	str.flag = pstr->packed.flag;
+
+	if (str.flag == NDB_PACKED_STR) {
+		str.str = pstr->packed.str;
+		return str;
+	}
+
+	str.str = ((const char *)note) + note->strings + (pstr->offset & 0xFFFFFF);
+	return str;
+}
+
+struct ndb_str ndb_tag_str(struct ndb_note *note, struct ndb_tag *tag, int ind)
+{
+	return ndb_note_str(note, &tag->strs[ind]);
+}
+
+struct ndb_str ndb_iter_tag_str(struct ndb_iterator *iter, int ind)
+{
+	return ndb_tag_str(iter->note, iter->tag, ind);
+}
+
+unsigned char * ndb_note_id(struct ndb_note *note)
+{
+	return note->id;
+}
+
+unsigned char * ndb_note_pubkey(struct ndb_note *note)
+{
+	return note->pubkey;
+}
+
+unsigned char * ndb_note_sig(struct ndb_note *note)
+{
+	return note->sig;
+}
+
+uint32_t ndb_note_created_at(struct ndb_note *note)
+{
+	return note->created_at;
+}
+
+uint32_t ndb_note_kind(struct ndb_note *note)
+{
+	return note->kind;
+}
+
+void _ndb_note_set_kind(struct ndb_note *note, uint32_t kind)
+{
+	note->kind = kind;
+}
+
+const char *ndb_note_content(struct ndb_note *note)
+{
+	return ndb_note_str(note, &note->content).str;
+}
+
+uint32_t ndb_note_content_length(struct ndb_note *note)
+{
+	return note->content_length;
+}
+
+struct ndb_note * ndb_note_from_bytes(unsigned char *bytes)
+{
+	struct ndb_note *note = (struct ndb_note *)bytes;
+	if (note->version != 1)
+		return 0;
+	return note;
+}
+
+void ndb_tags_iterate_start(struct ndb_note *note, struct ndb_iterator *iter)
+{
+	iter->note = note;
+	iter->tag = NULL;
+	iter->index = -1;
+}
+
+int ndb_tags_iterate_next(struct ndb_iterator *iter)
+{
+	if (iter->tag == NULL || iter->index == -1) {
+		iter->tag = iter->note->tags.tag;
+		iter->index = 0;
+		return iter->note->tags.count != 0;
+	}
+
+	struct ndb_tags *tags = &iter->note->tags;
+
+	if (++iter->index < tags->count) {
+		uint32_t tag_data_size = iter->tag->count * sizeof(iter->tag->strs[0]);
+		iter->tag = (struct ndb_tag *)(iter->tag->strs[0].bytes + tag_data_size);
+		return 1;
+	}
+
+	return 0;
+}
+
+uint16_t ndb_tags_count(struct ndb_tags *tags)
+{
+	return tags->count;
+}
+
+uint16_t ndb_tag_count(struct ndb_tag *tags)
+{
+	return tags->count;
+}
+
+enum ndb_common_kind ndb_kind_to_common_kind(int kind)
+{
+	switch (kind)
+	{
+		case 0:     return NDB_CKIND_PROFILE;
+		case 1:     return NDB_CKIND_TEXT;
+		case 3:     return NDB_CKIND_CONTACTS;
+		case 4:     return NDB_CKIND_DM;
+		case 5:     return NDB_CKIND_DELETE;
+		case 6:     return NDB_CKIND_REPOST;
+		case 7:     return NDB_CKIND_REACTION;
+		case 9735:  return NDB_CKIND_ZAP;
+		case 9734:  return NDB_CKIND_ZAP_REQUEST;
+		case 23194: return NDB_CKIND_NWC_REQUEST;
+		case 23195: return NDB_CKIND_NWC_RESPONSE;
+		case 27235: return NDB_CKIND_HTTP_AUTH;
+		case 30000: return NDB_CKIND_LIST;
+		case 30023: return NDB_CKIND_LONGFORM;
+		case 30315: return NDB_CKIND_STATUS;
+	}
+
+	return -1;
+}
+
+const char *ndb_kind_name(enum ndb_common_kind ck)
+{
+	switch (ck) {
+		case NDB_CKIND_PROFILE:      return "profile";
+		case NDB_CKIND_TEXT:         return "text";
+		case NDB_CKIND_CONTACTS:     return "contacts";
+		case NDB_CKIND_DM:           return "dm";
+		case NDB_CKIND_DELETE:       return "delete";
+		case NDB_CKIND_REPOST:       return "repost";
+		case NDB_CKIND_REACTION:     return "reaction";
+		case NDB_CKIND_ZAP:          return "zap";
+		case NDB_CKIND_ZAP_REQUEST:  return "zap_request";
+		case NDB_CKIND_NWC_REQUEST:  return "nwc_request";
+		case NDB_CKIND_NWC_RESPONSE: return "nwc_response";
+		case NDB_CKIND_HTTP_AUTH:    return "http_auth";
+		case NDB_CKIND_LIST:         return "list";
+		case NDB_CKIND_LONGFORM:     return "longform";
+		case NDB_CKIND_STATUS:       return "status";
+		case NDB_CKIND_COUNT:        return "unknown";
+	}
+
+	return "unknown";
+}
+
+const char *ndb_db_name(enum ndb_dbs db)
+{
+	switch (db) {
+		case NDB_DB_NOTE:
+			return "note";
+		case NDB_DB_META:
+			return "note_metadata";
+		case NDB_DB_PROFILE:
+			return "profile";
+		case NDB_DB_NOTE_ID:
+			return "note_index";
+		case NDB_DB_PROFILE_PK:
+			return "profile_pubkey_index";
+		case NDB_DB_NDB_META:
+			return "nostrdb_metadata";
+		case NDB_DB_PROFILE_SEARCH:
+			return "profile_search";
+		case NDB_DB_PROFILE_LAST_FETCH:
+			return "profile_last_fetch";
+		case NDB_DB_NOTE_KIND:
+			return "note_kind_index";
+		case NDB_DB_NOTE_TEXT:
+			return "note_fulltext";
+		case NDB_DBS:
+			return "count";
+	}
+
+	return "unknown";
 }
