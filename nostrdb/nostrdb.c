@@ -3250,7 +3250,7 @@ int ndb_process_events_stream(struct ndb *ndb, FILE* fp)
 	size_t len = 0;
 	ssize_t nread;
 
-	while ((nread = getline(&line, &len, stdin)) != -1) {
+	while ((nread = getline(&line, &len, fp)) != -1) {
 		if (line == NULL)
 			break;
 		ndb_process_event(ndb, line, len);
