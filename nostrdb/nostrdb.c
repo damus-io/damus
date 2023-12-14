@@ -3155,7 +3155,7 @@ static int ndb_run_migrations(struct ndb *ndb)
 	return 1;
 }
 
-int ndb_init(struct ndb **pndb, const char *filename, struct ndb_config *config)
+int ndb_init(struct ndb **pndb, const char *filename, const struct ndb_config *config)
 {
 	struct ndb *ndb;
 	//MDB_dbi ind_id; // TODO: ind_pk, etc
