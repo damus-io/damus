@@ -2932,7 +2932,7 @@ static int ndb_writer_init(struct ndb_writer *writer, struct ndb_lmdb *lmdb)
 // initialize the ingester queue and then spawn the thread
 static int ndb_ingester_init(struct ndb_ingester *ingester,
 			     struct ndb_writer *writer,
-			     struct ndb_config *config)
+			     const struct ndb_config *config)
 {
 	int elem_size, num_elems;
 	static struct ndb_ingester_msg quit_msg = { .type = NDB_INGEST_QUIT };
