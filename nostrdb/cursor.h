@@ -463,9 +463,8 @@ static inline int pull_bytes(struct cursor *cur, int count, const u8 **bytes) {
 }
 
 static inline int parse_str(struct cursor *cur, const char *str) {
-    int i;
     char c, cs;
-    unsigned long len;
+    unsigned long i, len;
     
     len = strlen(str);
     
