@@ -1,3 +1,13 @@
+## [1.6.1-30] - 2023-12-15
+
+### Fixed
+
+- Fix onboarding post view not being dismissed under certain conditions (Daniel D’Aquino)
+
+
+
+[1.6.1-30]: https://github.com/damus-io/damus/releases/tag/v1.6.1-30
+
 ## [1.6-25] - 2023-10-31
 
 ### Added
