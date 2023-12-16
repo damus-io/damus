@@ -38,9 +38,8 @@ class DamusPurple: StoreObserverDelegate {
     func account_exists(pubkey: Pubkey) async -> Bool? {
         guard let account_data = await self.get_account_data(pubkey: pubkey) else { return nil }
         
-        if let json = try? JSONSerialization.jsonObject(with: account_data, options: []) as? [String: Any],
-           let id = json["id"] as? String {
-            return id == pubkey.hex()
+        if let account_info = try? JSONDecoder().decode(AccountInfo.self, from: account_data) {
+            return account_info.pubkey == pubkey.hex()
         }
         
         return false
@@ -63,19 +62,27 @@ class DamusPurple: StoreObserverDelegate {
     
     func create_account(pubkey: Pubkey) async throws {
         let url = environment.get_base_url().appendingPathComponent("accounts")
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        
         let payload: [String: String] = [
             "pubkey": pubkey.hex()
         ]
+        let encoded_payload = try JSONEncoder().encode(payload)
         
-        request.httpBody = try JSONEncoder().encode(payload)
-        do {
-            let (_, _) = try await URLSession.shared.data(for: request)
-            return
-        } catch {
-            print("Failed to fetch data: \(error)")
+        Log.info("Creating account with Damus Purple server", for: .damus_purple)
+        
+        let (data, response) = try await make_nip98_authenticated_request(
+            method: .post,
+            url: url,
+            payload: encoded_payload,
+            auth_keypair: self.keypair
+        )
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            switch httpResponse.statusCode {
+                case 200:
+                    Log.info("Created an account with Damus Purple server", for: .damus_purple)
+                default:
+                    Log.error("Error in creating account with Damus Purple. HTTP status code: %d", for: .damus_purple, httpResponse.statusCode)
+            }
         }
         
         return
@@ -95,23 +102,42 @@ class DamusPurple: StoreObserverDelegate {
 
             do {
                 let receiptData = try Data(contentsOf: appStoreReceiptURL, options: .alwaysMapped)
-                print(receiptData)
-
                 let url = environment.get_base_url().appendingPathComponent("accounts/\(keypair.pubkey.hex())/app-store-receipt")
-                var request = URLRequest(url: url)
-                request.httpMethod = "POST"
-                request.httpBody = receiptData
                 
-                do {
-                    let (_, _) = try await URLSession.shared.data(for: request)
-                    print("Sent receipt")
-                } catch {
-                    print("Failed to fetch data: \(error)")
+                Log.info("Sending in-app purchase receipt to Damus Purple server", for: .damus_purple)
+                
+                let (data, response) = try await make_nip98_authenticated_request(
+                    method: .post,
+                    url: url,
+                    payload: receiptData,
+                    auth_keypair: self.keypair
+                )
+                
+                if let httpResponse = response as? HTTPURLResponse {
+                    switch httpResponse.statusCode {
+                        case 200:
+                            Log.info("Sent in-app purchase receipt to Damus Purple server successfully", for: .damus_purple)
+                        default:
+                            Log.error("Error in sending in-app purchase receipt to Damus Purple. HTTP status code: %d", for: .damus_purple, httpResponse.statusCode)
+                    }
                 }
                 
             }
-            catch { print("Couldn't read receipt data with error: " + error.localizedDescription) }
+            catch {
+                Log.error("Couldn't read receipt data with error: %s", for: .damus_purple, error.localizedDescription)
+            }
         }
+    }
+}
+
+// MARK: API types
+
+extension DamusPurple {
+    fileprivate struct AccountInfo: Codable {
+        let pubkey: String
+        let created_at: UInt64
+        let expiry: UInt64?
+        let active: Bool
     }
 }
 

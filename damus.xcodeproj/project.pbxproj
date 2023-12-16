@@ -472,6 +472,7 @@
 		D79C4C1B2AFEB061003A41B4 /* DamusNotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D79C4C142AFEB061003A41B4 /* DamusNotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D7A343EE2AD0D77C00CED48B /* InlineSnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = D7A343ED2AD0D77C00CED48B /* InlineSnapshotTesting */; };
 		D7A343F02AD0D77C00CED48B /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = D7A343EF2AD0D77C00CED48B /* SnapshotTesting */; };
+		D7C6787E2B2D34CC00BCEAFB /* NIP98AuthenticatedRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C6787D2B2D34CC00BCEAFB /* NIP98AuthenticatedRequest.swift */; };
 		D7CCFC072B05833200323D86 /* NdbNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90548A2A6AEDEE00811EEC /* NdbNote.swift */; };
 		D7CCFC082B05834500323D86 /* NoteId.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC14FF42A740BB7007AEB17 /* NoteId.swift */; };
 		D7CCFC0B2B0585EA00323D86 /* nostrdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CE9FBB82A6B3B26007E485C /* nostrdb.c */; settings = {COMPILER_FLAGS = "-w"; }; };
@@ -1273,6 +1274,7 @@
 		D79C4C162AFEB061003A41B4 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		D79C4C182AFEB061003A41B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D79C4C1C2AFEB061003A41B4 /* DamusNotificationService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DamusNotificationService.entitlements; sourceTree = "<group>"; };
+		D7C6787D2B2D34CC00BCEAFB /* NIP98AuthenticatedRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP98AuthenticatedRequest.swift; sourceTree = "<group>"; };
 		D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrEventTests.swift; sourceTree = "<group>"; };
 		D7FF93FF2AC7AC5200FD969D /* RelayURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayURL.swift; sourceTree = "<group>"; };
 		E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSettingsView.swift; sourceTree = "<group>"; };
@@ -1896,6 +1898,7 @@
 				4C2B7BF12A71B6540049DEE7 /* Id.swift */,
 				D7FF93FF2AC7AC5200FD969D /* RelayURL.swift */,
 				D798D22B2B086C7400234419 /* NostrEvent+.swift */,
+				D7C6787D2B2D34CC00BCEAFB /* NIP98AuthenticatedRequest.swift */,
 			);
 			path = Nostr;
 			sourceTree = "<group>";
@@ -3028,6 +3031,7 @@
 				4C75EFAF28049D350006080F /* NostrFilter.swift in Sources */,
 				4C3EA64C28FF59AC00C48A62 /* bech32_util.c in Sources */,
 				4CA9276C2A2910D10098A105 /* ReplyPart.swift in Sources */,
+				D7C6787E2B2D34CC00BCEAFB /* NIP98AuthenticatedRequest.swift in Sources */,
 				4CE1399029F0661A00AC6A0B /* RepostAction.swift in Sources */,
 				4CE1399229F0666100AC6A0B /* ShareActionButton.swift in Sources */,
 				4C42812C298C848200DBF26F /* TranslateView.swift in Sources */,
