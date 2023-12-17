@@ -109,5 +109,13 @@ enum RelayError: Error {
 }
 
 func get_relay_id(_ url: RelayURL) -> String {
-    return url.url.absoluteString
+    let trimTrailingSlashes: (String) -> String = { url in
+        var trimmedUrl = url
+        while trimmedUrl.hasSuffix("/") {
+            trimmedUrl.removeLast()
+        }
+        return trimmedUrl
+    }
+    
+    return trimTrailingSlashes(url.url.absoluteString)
 }
