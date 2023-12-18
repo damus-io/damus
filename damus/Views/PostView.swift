@@ -46,7 +46,6 @@ enum PostAction {
 struct PostView: View {
     @State var post: NSMutableAttributedString = NSMutableAttributedString()
     @FocusState var focus: Bool
-    @State var showPrivateKeyWarning: Bool = false
     @State var attach_media: Bool = false
     @State var attach_camera: Bool = false
     @State var error: String? = nil
@@ -159,11 +158,7 @@ struct PostView: View {
     
     var PostButton: some View {
         Button(NSLocalizedString("Post", comment: "Button to post a note.")) {
-            showPrivateKeyWarning = contentContainsPrivateKey(self.post.string)
-
-            if !showPrivateKeyWarning {
-                self.send_post()
-            }
+            self.send_post()
         }
         .disabled(posting_disabled)
         .opacity(posting_disabled ? 0.5 : 1.0)
@@ -480,14 +475,6 @@ struct PostView: View {
                     clear_draft()
                 }
             }
-            .alert(NSLocalizedString("Note contains \"nsec1\" private key. Are you sure?", comment: "Alert user that they might be attempting to paste a private key and ask them to confirm."), isPresented: $showPrivateKeyWarning, actions: {
-                Button(NSLocalizedString("No", comment: "Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key."), role: .cancel) {
-                    showPrivateKeyWarning = false
-                }
-                Button(NSLocalizedString("Yes, Post with Private Key", comment: "Button to proceed with posting a note even though it looks like they might be posting a private key."), role: .destructive) {
-                    self.send_post()
-                }
-            })
         }
     }
 }

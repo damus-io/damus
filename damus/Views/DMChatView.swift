@@ -11,7 +11,6 @@ import Combine
 struct DMChatView: View, KeyboardReadable {
     let damus_state: DamusState
     @ObservedObject var dms: DirectMessageModel
-    @State var showPrivateKeyWarning: Bool = false
     
     var pubkey: Pubkey {
         dms.pubkey
@@ -106,11 +105,7 @@ struct DMChatView: View, KeyboardReadable {
                 Button(
                     role: .none,
                     action: {
-                        showPrivateKeyWarning = contentContainsPrivateKey(dms.draft)
-
-                        if !showPrivateKeyWarning {
-                            send_message()
-                        }
+                        send_message()
                     }
                 ) {
                     Label("", image: "send")
@@ -165,14 +160,6 @@ struct DMChatView: View, KeyboardReadable {
                 dms.draft = ""
             }
         }
-        .alert(NSLocalizedString("Note contains \"nsec1\" private key. Are you sure?", comment: "Alert user that they might be attempting to paste a private key and ask them to confirm."), isPresented: $showPrivateKeyWarning, actions: {
-            Button(NSLocalizedString("No", comment: "Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key."), role: .cancel) {
-                showPrivateKeyWarning = false
-            }
-            Button(NSLocalizedString("Yes, Post with Private Key", comment: "Button to proceed with posting a note even though it looks like they might be posting a private key."), role: .destructive) {
-                send_message()
-            }
-        })
     }
 }
 
