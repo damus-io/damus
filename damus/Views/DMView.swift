@@ -45,7 +45,7 @@ struct DMView: View {
                 NoteContentView(damus_state: damus_state, event: event, blur_images: should_blur_img, size: .normal, options: dm_options)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding([.top, .leading, .trailing], 10)
-                    .padding([.bottom], 25)
+                    .padding([.bottom], 10)
                     .background(VisualEffectView(effect: UIBlurEffect(style: .prominent))
                         .background(is_ours ? Color.accentColor.opacity(0.9) : Color.secondary.opacity(0.15))
                     )
