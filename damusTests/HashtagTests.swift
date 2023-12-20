@@ -545,4 +545,15 @@ final class HashtagTests: XCTestCase {
         XCTAssertEqual(parsed[2].asText, " is allowed in hashtags")
     }
     
+    // Japanese: bai (倍) (U+500D) (allowed in hashtags)
+    func testHashtagWithBaiKanji() {
+        let parsed = parse_note_content(content: .content("pow! #10倍界王拳 is allowed in hashtags",nil)).blocks
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 3)
+        XCTAssertEqual(parsed[0].asText, "pow! ")
+        XCTAssertEqual(parsed[1].asHashtag, "10倍界王拳")
+        XCTAssertEqual(parsed[2].asText, " is allowed in hashtags")
+    }
+
 }
