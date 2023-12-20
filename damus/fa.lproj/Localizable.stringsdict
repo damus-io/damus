@@ -2,6 +2,22 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>followed_by_three_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>دنبال شده توسط %2$@, %3$@, %4$@ و  %1$d نفر دیگر</string>
+			<key>other</key>
+			<string>دنبال شده توسط %2$@, %3$@, %4$@ و  %1$d نفر دیگر</string>
+		</dict>
+	</dict>
 	<key>followers_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -34,6 +50,22 @@
 			<string>دنبال‌شوندگان</string>
 		</dict>
 	</dict>
+	<key>imports_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@IMPORTS@</string>
+		<key>IMPORTS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>ورودی ها</string>
+			<key>other</key>
+			<string>ورودی ها</string>
+		</dict>
+	</dict>
 	<key>reacted_tagged_in_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -45,12 +77,12 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ و %1$d نفر دیگر به یک مطلب که شما در آن تگ شده‌اید بازخورد داده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر به یادداشتی که نام شما را برده بود واکنش دادند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر به یک یادداشت که شما در آن تگ شده‌اید واکنش داده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر به یادداشتی که نام شما را برده بود واکنش دادند</string>
 		</dict>
 	</dict>
-	<key>reacted_your_post_3</key>
+	<key>reacted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REACTED@</string>
@@ -61,9 +93,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ و %1$d نفر دیگر به مطلب شما بازخورد داده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر به یادداشت شما واکنش دادند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر به یادداشت شما واکنش داده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر به یادداشت شما واکنش دادند</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -141,12 +173,12 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ و %1$d نفر دیگر یک مطلب که شما در آن تگ شده‌اید را بازنشر کرده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر یادداشتی را که نام شما را برده بود بازنشر کردند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر یک یادداشت که شما در آن تگ شده‌اید را بازنشر کرده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر یادداشتی را که نام شما را برده بود بازنشر کردند</string>
 		</dict>
 	</dict>
-	<key>reposted_your_post_3</key>
+	<key>reposted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REPOSTED@</string>
@@ -157,9 +189,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ و %1$d نفر دیگر مطلب شما را بازنشر کرده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر یادداشت شما را بازنشرکردند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر یادداشت شما را بازنشر کرده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر یادداشت شما را بازنشرکردند</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -226,6 +258,38 @@
 			<string>%2$@ ساتوشی</string>
 		</dict>
 	</dict>
+	<key>users_talking_about_it</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@USERS@</string>
+		<key>USERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%d کاربران درباره آن صحبت می کنند</string>
+			<key>other</key>
+			<string>%d کاربران درباره آن صحبت می کنند</string>
+		</dict>
+	</dict>
+	<key>word_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@WORDS@</string>
+		<key>WORDS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%d کلمه</string>
+			<key>other</key>
+			<string>%d کلمه</string>
+		</dict>
+	</dict>
 	<key>zap_notification_no_message</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -253,9 +317,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>%2$@ ساتوشی از %3$@ دریافت کردید: "%4$@"</string>
+			<string>شما %2$@ ساتوشی از %3$@: &quot;%4$@&quot; دریافت کردید</string>
 			<key>other</key>
-			<string>%2$@ ساتوشی از %3$@ دریافت کردید: "%4$@"</string>
+			<string>شما %2$@ ساتوشی از %3$@: &quot;%4$@&quot; دریافت کردید</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
@@ -269,12 +333,12 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ و %1$d نفر دیگر یک مطلب که شما در آن تگ شده‌اید را زپ کرده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر یادداشتی را که نام شما را برده بود زپ کردند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر یک یادداشت که شما در آن تگ شده‌اید را زپ کرده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر یادداشتی را که نام شما را برده بود زپ کردند</string>
 		</dict>
 	</dict>
-	<key>zapped_your_post_3</key>
+	<key>zapped_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@ZAPPED@</string>
@@ -285,9 +349,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ و %1$d نفر دیگر مطلب شما را زپ کرده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر یادداشت شما را زپ کردند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر یادداشت شما را زپ کرده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر یادداشت شما را زپ کردند</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
@@ -301,9 +365,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ و %1$d نفر دیگر نمایه‌ی شما را زپ کرده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر شما را زپ کردند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر نمایه‌ی شما را زپ کرده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر شما را زپ کردند</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
