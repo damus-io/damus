@@ -485,11 +485,11 @@ static inline int parse_str(struct cursor *cur, const char *str) {
     return 1;
 }
 
-static inline int is_whitespace(char c) {
+static inline int is_whitespace(int c) {
     return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r';
 }
 
-static inline int is_underscore(char c) {
+static inline int is_underscore(int c) {
     return c == '_';
 }
 
