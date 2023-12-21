@@ -226,6 +226,20 @@
 			<string>%2$@ 聰</string>
 		</dict>
 	</dict>
+	<key>users_talking_about_it</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@USERS@</string>
+		<key>USERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>other</key>
+			<string>%d 個用戶正在討論</string>
+		</dict>
+	</dict>
 	<key>word_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
