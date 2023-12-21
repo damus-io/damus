@@ -117,7 +117,7 @@ static int consume_url_fragment(struct cursor *cur)
 
     cur->p++;
 
-    return consume_until_whitespace(cur, 1);
+    return consume_until_end_url(cur, 1);
 }
 
 static int consume_url_path(struct cursor *cur)
@@ -134,7 +134,7 @@ static int consume_url_path(struct cursor *cur)
     while (cur->p < cur->end) {
         c = *cur->p;
 
-        if (c == '?' || c == '#' || is_whitespace(c)) {
+        if (c == '?' || c == '#' || is_final_url_char(cur->p, cur->end)) {
             return 1;
         }
 
@@ -152,7 +152,7 @@ static int consume_url_host(struct cursor *cur)
 	while (cur->p < cur->end) {
 		c = *cur->p;
 		// TODO: handle IDNs
-        if (is_alphanumeric(c) || c == '.' || c == '-')
+        if ((is_alphanumeric(c) || c == '.' || c == '-') && !is_final_url_char(cur->p, cur->end))
 		{
 			count++;
 			cur->p++;

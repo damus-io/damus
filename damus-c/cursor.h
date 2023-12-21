@@ -489,6 +489,32 @@ static inline int is_whitespace(int c) {
     return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r';
 }
 
+
+static inline int next_char_is_whitespace(unsigned char *curChar, unsigned char *endChar) {
+    unsigned char * next = curChar + 1;
+    if(next > endChar) return 0;
+    else if(next == endChar) return 1;
+    return is_whitespace(*next);
+}
+
+static int char_disallowed_at_end_url(char c){
+    return c == '.';
+}
+
+static inline int is_final_url_char(unsigned char *curChar, unsigned char *endChar){
+    if(is_whitespace(*curChar)){
+        return 1;
+    }
+    else if(next_char_is_whitespace(curChar, endChar)) {
+        // next char is whitespace so this char could be the final char in the url
+        return char_disallowed_at_end_url(*curChar);
+    }
+    else{
+        // next char isn't whitespace so it can't be a final char
+        return 0;
+    }
+}
+
 static inline int is_underscore(int c) {
     return c == '_';
 }
@@ -661,6 +687,23 @@ static inline int consume_until_whitespace(struct cursor *cur, int or_end) {
         c = *cur->p;
         
         if (is_whitespace(c))
+            return consumedAtLeastOne;
+        
+        cur->p++;
+        consumedAtLeastOne = 1;
+    }
+    
+    return or_end;
+}
+
+static inline int consume_until_end_url(struct cursor *cur, int or_end) {
+    char c;
+    int consumedAtLeastOne = 0;
+    
+    while (cur->p < cur->end) {
+        c = *cur->p;
+        
+        if (is_final_url_char(cur->p, cur->end))
             return consumedAtLeastOne;
         
         cur->p++;

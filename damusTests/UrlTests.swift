@@ -100,5 +100,63 @@ final class UrlTests: XCTestCase {
         XCTAssertEqual(blocks[1].asURL, testURL)
         XCTAssertEqual(blocks[2].asText, " this is not a hashtag!")
     }
+    
+    func testParseURL_OneURLEndPeriodSimple_RemovesPeriod(){
+        testParseURL(inputURLString: "http://example.com.", expectedURLs: "http://example.com")
+    }
+    
+    func testParseURL_OneURL_RemovesPeriod(){
+        testParseURL(inputURLString: "http://example.com/.test", expectedURLs: "http://example.com/.test")
+    }
+    
+    func testParseURL_OneURLEndPeriodAndSpaceSimple_RemovesPeriod(){
+        testParseURL(inputURLString: "http://example.com. ", expectedURLs: "http://example.com")
+    }
+    
+    func testParseURL_OneURLEndPeriodComplex_RemovesPeriod(){
+        testParseURL(inputURLString: "http://example.com/test.", expectedURLs: "http://example.com/test")
+    }
+    
+    func testParseURL_TwoURLEndPeriodSimple_RemovesPeriods(){
+        testParseURL(inputURLString: "http://example.com. http://example.com.", expectedURLs: "http://example.com", "http://example.com")
+    }
+    
+    func testParseURL_ThreeURLEndPeriodSimple_RemovesPeriods(){
+        testParseURL(inputURLString: "http://example.com. http://example.com. http://example.com.", expectedURLs: "http://example.com", "http://example.com", "http://example.com")
+    }
+    
+    func testParseURL_TwoURLEndPeriodFirstComplexSecondSimple_RemovesPeriods(){
+        testParseURL(inputURLString: "http://example.com/test. http://example.com.", expectedURLs: "http://example.com/test", "http://example.com")
+    }
+    
+    func testParseURL_TwoURLEndPeriodFirstSimpleSecondComplex_RemovesPeriods(){
+        testParseURL(inputURLString: "http://example.com. http://example.com/test.", expectedURLs: "http://example.com", "http://example.com/test")
+    }
+    
+    func testParseURL_TwoURLEndPeriodFirstComplexSecondComplex_RemovesPeriods(){
+        testParseURL(inputURLString: "http://example.com/test. http://example.com/test.", expectedURLs: "http://example.com/test", "http://example.com/test")
+    }
+    
+    func testParseURL_OneURLEndPeriodSerachQuery_RemovesPeriod(){
+        testParseURL(inputURLString: "https://www.example.com/search?q=test+query.", expectedURLs: "https://www.example.com/search?q=test+query")
+    }
+}
 
+func testParseURL(inputURLString: String, expectedURLs: String...) {
+    let parsedURL: [Block] = parse_note_content(content: .content(inputURLString, nil)).blocks.filter {
+        $0.isURL
+    }
+    
+    if(expectedURLs.count != parsedURL.count) {
+        XCTFail()
+    }
+    
+    for i in 0..<parsedURL.count {
+        guard let expectedURL = URL(string: expectedURLs[i]) else {
+            XCTFail()
+            return
+        }
+
+        XCTAssertEqual(parsedURL[i].asURL, expectedURL)
+    }
 }
