@@ -448,25 +448,18 @@ struct ContentView: View {
                 break
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { obj in
-            print("📙 DAMUS ACTIVE NOTIFY")
-            try? damus_state.ndb.reopen()
-        }
         .onChange(of: scenePhase) { (phase: ScenePhase) in
-            guard let damus_state else { return }
             switch phase {
             case .background:
                 print("📙 DAMUS BACKGROUNDED")
-                Task { @MainActor in
-                    damus_state.ndb.close()
-                }
                 break
             case .inactive:
                 print("📙 DAMUS INACTIVE")
                 break
             case .active:
                 print("📙 DAMUS ACTIVE")
-                damus_state.pool.ping()
+                guard let ds = damus_state else { return }
+                ds.pool.ping()
             @unknown default:
                 break
             }
