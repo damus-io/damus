@@ -297,11 +297,15 @@ struct NoteContentView: View {
 }
 
 func attributed_string_attach_icon(_ astr: inout AttributedString, img: UIImage) {
+    let wrapped = icon_attributed_string(img: img)
+    astr.append(wrapped)
+}
+
+func icon_attributed_string(img: UIImage) -> AttributedString {
     let attachment = NSTextAttachment()
     attachment.image = img
     let attachmentString = NSAttributedString(attachment: attachment)
-    let wrapped = AttributedString(attachmentString)
-    astr.append(wrapped)
+    return AttributedString(attachmentString)
 }
 
 func url_str(_ url: URL) -> CompatibleText {

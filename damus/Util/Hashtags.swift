@@ -43,28 +43,20 @@ let custom_hashtags: [String: CustomHashtag] = [
 func hashtag_str(_ htag: String) -> CompatibleText {
     var attributedString = AttributedString(stringLiteral: "#\(htag)")
     attributedString.link = URL(string: "damus:t:\(htag.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) ?? htag)")
-    
+
     let lowertag = htag.lowercased()
-    
-    var text = Text(attributedString)
+
     if let custom_hashtag = custom_hashtags[lowertag] {
         if let col = custom_hashtag.color {
             attributedString.foregroundColor = col
         }
-        
+
         let name = custom_hashtag.name
-        
-        if let img = UIImage(named: "\(name)-hashtag") {
-            attributedString = attributedString + " "
-            attributed_string_attach_icon(&attributedString, img: img)
-        }
-        text = Text(attributedString)
-        let img = Image("\(name)-hashtag")
-        text = text + Text(img).baselineOffset(custom_hashtag.offset ?? 0.0)
+
+        attributedString = attributedString + " "
+        return CompatibleText(items: [.attributed_string(attributedString), .icon(named: "\(name)-hashtag", offset: custom_hashtag.offset ?? 0.0)])
     } else {
         attributedString.foregroundColor = DamusColors.purple
+        return CompatibleText(items: [.attributed_string(attributedString)])
     }
-    
-    return CompatibleText(text: text, attributed: attributedString)
  }
-
