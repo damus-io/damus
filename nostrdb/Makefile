@@ -20,10 +20,10 @@ BIN=ndb
 
 CHECKDATA=testdata/db/v0/data.mdb
 
+all: lib ndb libnostrdb.a
+
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -c -o $@ $<
-
-all: lib ndb libnostrdb.a
 
 libnostrdb.a: $(OBJS)
 	ar rcs $@ $(OBJS)
@@ -108,11 +108,11 @@ deps/LMDB_$(LMDB_VER).tar.gz: deps/.dir
 deps/flatcc_$(FLATCC_VER).tar.gz: deps/.dir
 	curl -L https://github.com/jb55/flatcc/archive/$(FLATCC_VER).tar.gz -o $@
 
-deps/flatcc/src/runtime/json_parser.c: deps/flatcc_$(FLATCC_VER).tar.gz deps/.dir
-	tar xf $<
-	rm -rf deps/flatcc
-	mv flatcc-$(FLATCC_VER) deps/flatcc
-	touch $@
+#deps/flatcc/src/runtime/json_parser.c: deps/flatcc_$(FLATCC_VER).tar.gz deps/.dir
+#	tar xf $<
+#	rm -rf deps/flatcc
+#	mv flatcc-$(FLATCC_VER) deps/flatcc
+#	touch $@
 
 deps/lmdb/lmdb.h: deps/LMDB_$(LMDB_VER).tar.gz deps/.dir
 	tar xf $<
