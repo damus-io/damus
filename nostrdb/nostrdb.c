@@ -5,6 +5,8 @@
 #include "cursor.h"
 #include "random.h"
 #include "sha256.h"
+#include "bolt11/bolt11.h"
+#include "bolt11/amount.h"
 #include "lmdb.h"
 #include "util.h"
 #include "cpu.h"
