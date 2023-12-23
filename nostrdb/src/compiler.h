@@ -3,6 +3,12 @@
 #define CCAN_COMPILER_H
 #include "config.h"
 
+#if HAVE_UNALIGNED_ACCESS
+#define alignment_ok(p, n) 1
+#else
+#define alignment_ok(p, n) ((size_t)(p) % (n) == 0)
+#endif
+
 #ifndef COLD
 #if HAVE_ATTRIBUTE_COLD
 /**
