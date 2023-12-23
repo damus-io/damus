@@ -2,10 +2,10 @@
 #ifndef JB55_CURSOR_H
 #define JB55_CURSOR_H
 
-#include "typedefs.h"
 #include "bolt11/likely.h"
 
 #include <stdio.h>
+#include <inttypes.h>
 #include <ctype.h>
 #include <assert.h>
 #include <string.h>
@@ -32,14 +32,14 @@ static inline void wipe_cursor(struct cursor *cursor)
 	memset(cursor->start, 0, cursor->end - cursor->start);
 }
 
-static inline void make_cursor(u8 *start, u8 *end, struct cursor *cursor)
+static inline void make_cursor(unsigned char *start, unsigned char *end, struct cursor *cursor)
 {
 	cursor->start = start;
 	cursor->p = start;
 	cursor->end = end;
 }
 
-static inline void make_array(struct array *a, u8* start, u8 *end, unsigned int elem_size)
+static inline void make_array(struct array *a, unsigned char* start, unsigned char *end, unsigned int elem_size)
 {
 	make_cursor(start, end, &a->cur);
 	a->elem_size = elem_size;
@@ -77,7 +77,7 @@ static inline void *cursor_alloc(struct cursor *mem, unsigned long size)
 
 static inline int cursor_slice(struct cursor *mem, struct cursor *slice, size_t size)
 {
-	u8 *p;
+	unsigned char *p;
 	if (!(p = cursor_alloc(mem, size))) {
 		return 0;
 	}
@@ -103,7 +103,7 @@ static inline int cursor_skip(struct cursor *cursor, int n)
     return 1;
 }
 
-static inline int pull_byte(struct cursor *cursor, u8 *c)
+static inline int cursor_pull_byte(struct cursor *cursor, unsigned char *c)
 {
 	if (unlikely(cursor->p >= cursor->end))
 		return 0;
@@ -114,7 +114,7 @@ static inline int pull_byte(struct cursor *cursor, u8 *c)
 	return 1;
 }
 
-static inline int parse_byte(struct cursor *cursor, u8 *c)
+static inline int parse_byte(struct cursor *cursor, unsigned char *c)
 {
     if (unlikely(cursor->p >= cursor->end))
         return 0;
@@ -159,7 +159,7 @@ static inline int cursor_pull_c_str(struct cursor *cursor, const char **str)
 }
 
 
-static inline int cursor_push_byte(struct cursor *cursor, u8 c)
+static inline int cursor_push_byte(struct cursor *cursor, unsigned char c)
 {
 	if (unlikely(cursor->p + 1 > cursor->end)) {
 		return 0;
@@ -171,7 +171,7 @@ static inline int cursor_push_byte(struct cursor *cursor, u8 c)
 	return 1;
 }
 
-static inline int cursor_pull(struct cursor *cursor, u8 *data, int len)
+static inline int cursor_pull(struct cursor *cursor, unsigned char *data, int len)
 {
 	if (unlikely(cursor->p + len > cursor->end)) {
 		return 0;
@@ -241,7 +241,7 @@ static inline unsigned char *cursor_top(struct cursor *cur, int len)
 
 static inline int cursor_top_int(struct cursor *cur, int *i)
 {
-	u8 *p;
+	unsigned char *p;
 	if (unlikely(!(p = cursor_top(cur, sizeof(*i))))) {
 		return 0;
 	}
@@ -249,7 +249,7 @@ static inline int cursor_top_int(struct cursor *cur, int *i)
 	return 1;
 }
 
-static inline int cursor_pop(struct cursor *cur, u8 *data, int len)
+static inline int cursor_pop(struct cursor *cur, unsigned char *data, int len)
 {
 	if (unlikely(cur->p - len < cur->start)) {
 		return 0;
@@ -261,7 +261,7 @@ static inline int cursor_pop(struct cursor *cur, u8 *data, int len)
 	return 1;
 }
 
-static inline int cursor_push(struct cursor *cursor, u8 *data, int len)
+static inline int cursor_push(struct cursor *cursor, unsigned char *data, int len)
 {
 	if (unlikely(cursor->p + len >= cursor->end)) {
 		return 0;
@@ -277,7 +277,7 @@ static inline int cursor_push(struct cursor *cursor, u8 *data, int len)
 
 static inline int cursor_push_int(struct cursor *cursor, int i)
 {
-	return cursor_push(cursor, (u8*)&i, sizeof(i));
+	return cursor_push(cursor, (unsigned char*)&i, sizeof(i));
 }
 
 static inline size_t cursor_count(struct cursor *cursor, size_t elem_size)
@@ -285,73 +285,61 @@ static inline size_t cursor_count(struct cursor *cursor, size_t elem_size)
 	return (cursor->p - cursor->start)/elem_size;
 }
 
-/* TODO: push_varint */
-static inline int push_varint(struct cursor *cursor, int n)
+/* Encodes a 64-bit integer into a variable-length format and pushes it into a cursor.
+ * Returns the number of bytes used or -1 in case of an error. */
+static inline int cursor_push_varint(struct cursor *cursor, uint64_t n)
 {
-	int ok, len;
-	unsigned char b;
-	len = 0;
-
-	while (1) {
-		b = (n & 0xFF) | 0x80;
+	int len = 0;
+	do {
+		unsigned char b = (n & 0x7F) | (n > 0x7F ? 0x80 : 0);
 		n >>= 7;
-		if (n == 0) {
-			b &= 0x7F;
-			ok = cursor_push_byte(cursor, b);
-			len++;
-			if (!ok) return 0;
-			break;
-		}
-
-		ok = cursor_push_byte(cursor, b);
+		if (!cursor_push_byte(cursor, b))
+			return -1; // Error handling
 		len++;
-		if (!ok) return 0;
-	}
+	} while (n != 0);
 
 	return len;
 }
 
-/* TODO: pull_varint */
-static inline int pull_varint(struct cursor *cursor, int *n)
+static inline int cursor_pull_varint(struct cursor *cursor, uint64_t *n)
 {
 	int ok, i;
 	unsigned char b;
+
 	*n = 0;
 
-	for (i = 0;; i++) {
-		ok = pull_byte(cursor, &b);
+	for (i = 0; i < 10; i++) { // Loop up to 10 bytes for 64-bit
+		ok = cursor_pull_byte(cursor, &b);
 		if (!ok) return 0;
 
-		*n |= ((int)b & 0x7F) << (i * 7);
+		*n |= ((int64_t)b & 0x7F) << (i * 7);
 
-		/* is_last */
 		if ((b & 0x80) == 0) {
-			return i+1;
+			return i + 1; // Successfully read i+1 bytes
 		}
-
-		if (i == 4) return 0;
 	}
 
-	return 0;
+	return 10; // Successfully read 10 bytes for a full 64-bit integer
 }
+
 
 static inline int cursor_pull_int(struct cursor *cursor, int *i)
 {
-	return cursor_pull(cursor, (u8*)i, sizeof(*i));
+	return cursor_pull(cursor, (unsigned char*)i, sizeof(*i));
 }
 
 static inline int cursor_push_u32(struct cursor *cursor, uint32_t i) {
     return cursor_push(cursor, (unsigned char*)&i, sizeof(i));
 }
 
-static inline int cursor_push_u16(struct cursor *cursor, u16 i)
+static inline int cursor_push_u16(struct cursor *cursor, unsigned short i)
 {
-	return cursor_push(cursor, (u8*)&i, sizeof(i));
+	return cursor_push(cursor, (unsigned char*)&i, sizeof(i));
 }
 
 static inline void *index_cursor(struct cursor *cursor, unsigned int index, int elem_size)
 {
-	u8 *p;
+	unsigned char *p;
 	p = &cursor->start[elem_size * index];
 
 	if (unlikely(p >= cursor->end))
@@ -363,7 +351,7 @@ static inline void *index_cursor(struct cursor *cursor, unsigned int index, int 
 
 static inline int push_sized_str(struct cursor *cursor, const char *str, int len)
 {
-	return cursor_push(cursor, (u8*)str, len);
+	return cursor_push(cursor, (unsigned char*)str, len);
 }
 
 static inline int cursor_push_lowercase(struct cursor *cur, const char *str, int len)
@@ -382,7 +370,7 @@ static inline int cursor_push_lowercase(struct cursor *cur, const char *str, int
 
 static inline int cursor_push_str(struct cursor *cursor, const char *str)
 {
-	return cursor_push(cursor, (u8*)str, (int)strlen(str));
+	return cursor_push(cursor, (unsigned char*)str, (int)strlen(str));
 }
 
 static inline int cursor_push_c_str(struct cursor *cursor, const char *str)
@@ -393,30 +381,27 @@ static inline int cursor_push_c_str(struct cursor *cursor, const char *str)
 /* TODO: push varint size */
 static inline int push_prefixed_str(struct cursor *cursor, const char *str)
 {
-	int ok, len;
-	len = (int)strlen(str);
-	ok = push_varint(cursor, len);
-	if (!ok) return 0;
+	uint64_t len;
+	len = strlen(str);
+	if (!cursor_push_varint(cursor, len))
+		return 0;
 	return push_sized_str(cursor, str, len);
 }
 
 static inline int pull_prefixed_str(struct cursor *cursor, struct cursor *dest_buf, const char **str)
 {
-	int len, ok;
+	uint64_t len;
 
-	ok = pull_varint(cursor, &len);
-	if (!ok) return 0;
-
-	if (unlikely(dest_buf->p + len > dest_buf->end)) {
+	if (!cursor_pull_varint(cursor, &len))
 		return 0;
-	}
 
-	ok = pull_data_into_cursor(cursor, dest_buf, (unsigned char**)str, len);
-	if (!ok) return 0;
+	if (unlikely(dest_buf->p + len > dest_buf->end))
+		return 0;
 
-	ok = cursor_push_byte(dest_buf, 0);
+	if (!pull_data_into_cursor(cursor, dest_buf, (unsigned char**)str, len))
+		return 0;
 
-	return 1;
+	return cursor_push_byte(dest_buf, 0);
 }
 
 static inline int cursor_remaining_capacity(struct cursor *cursor)
@@ -450,7 +435,7 @@ static inline void cursor_print_around(struct cursor *cur, int range)
 }
 #undef max
 
-static inline int pull_bytes(struct cursor *cur, int count, const u8 **bytes) {
+static inline int pull_bytes(struct cursor *cur, int count, const unsigned char **bytes) {
     if (cur->p + count > cur->end)
         return 0;
     
@@ -489,13 +474,13 @@ static inline int is_underscore(char c) {
     return c == '_';
 }
 
-static inline int is_utf8_byte(u8 c) {
+static inline int is_utf8_byte(unsigned char c) {
     return c & 0x80;
 }
 
 static inline int parse_utf8_char(struct cursor *cursor, unsigned int *code_point, unsigned int *utf8_length)
 {
-    u8 first_byte;
+    unsigned char first_byte;
     if (!parse_byte(cursor, &first_byte))
         return 0; // Not enough data
 
