@@ -225,11 +225,11 @@ static int ndb_make_text_search_key(unsigned char *buf, int bufsize,
 	// TODO: need update this to uint64_t
 	// we push this first because our query function can pull this off
 	// quicky to check matches
-	if (!push_varint(&cur, (int32_t)note_id))
+	if (!cursor_push_varint(&cur, (int32_t)note_id))
 		return 0;
 
 	// string length
-	if (!push_varint(&cur, word_len))
+	if (!cursor_push_varint(&cur, word_len))
 		return 0;
 
 	// non-null terminated, lowercase string
@@ -237,12 +237,12 @@ static int ndb_make_text_search_key(unsigned char *buf, int bufsize,
 		return 0;
 
 	// TODO: need update this to uint64_t
-	if (!push_varint(&cur, (int)timestamp))
+	if (!cursor_push_varint(&cur, (int)timestamp))
 		return 0;
 
 	// the index of the word in the content so that we can do more accurate
 	// phrase searches
-	if (!push_varint(&cur, word_index))
+	if (!cursor_push_varint(&cur, word_index))
 		return 0;
 
 	size = cur.p - cur.start;
@@ -314,19 +314,18 @@ static int mdb_cmp_memn(const MDB_val *a, const MDB_val *b) {
 static int ndb_text_search_key_compare(const MDB_val *a, const MDB_val *b)
 {
 	struct cursor ca, cb;
-	int sa, sb;
-	int nid_a, nid_b;
+	uint64_t sa, sb, nid_a, nid_b;
 	MDB_val a2, b2;
 
 	make_cursor(a->mv_data, a->mv_data + a->mv_size, &ca);
 	make_cursor(b->mv_data, b->mv_data + b->mv_size, &cb);
 
 	// note_id
-	if (unlikely(!pull_varint(&ca, &nid_a) || !pull_varint(&cb, &nid_b)))
+	if (unlikely(!cursor_pull_varint(&ca, &nid_a) || !cursor_pull_varint(&cb, &nid_b)))
 		return 0;
 
 	// string size
-	if (unlikely(!pull_varint(&ca, &sa) || !pull_varint(&cb, &sb)))
+	if (unlikely(!cursor_pull_varint(&ca, &sa) || !cursor_pull_varint(&cb, &sb)))
 		return 0;
 
 	a2.mv_data = ca.p;
@@ -343,7 +342,7 @@ static int ndb_text_search_key_compare(const MDB_val *a, const MDB_val *b)
 	cb.p += sb;
 
 	// timestamp
-	if (unlikely(!pull_varint(&ca, &sa) || !pull_varint(&cb, &sb)))
+	if (unlikely(!cursor_pull_varint(&ca, &sa) || !cursor_pull_varint(&cb, &sb)))
 		return 0;
 
 	if      (sa < sb) return -1;
@@ -354,7 +353,7 @@ static int ndb_text_search_key_compare(const MDB_val *a, const MDB_val *b)
 	else if (nid_a > nid_b) return 1;
 
 	// word index
-	if (unlikely(!pull_varint(&ca, &sa) || !pull_varint(&cb, &sb)))
+	if (unlikely(!cursor_pull_varint(&ca, &sa) || !cursor_pull_varint(&cb, &sb)))
 		return 0;
 
 	if      (sa < sb) return -1;
@@ -366,11 +365,9 @@ static int ndb_text_search_key_compare(const MDB_val *a, const MDB_val *b)
 static inline int ndb_unpack_text_search_key_noteid(
 		struct cursor *cur, uint64_t *note_id)
 {
-	int inote_id;
-	if (!pull_varint(cur, &inote_id))
+	if (!cursor_pull_varint(cur, note_id))
 		return 0;
 
-	*note_id = inote_id;
 	return 1;
 }
 
@@ -381,8 +378,12 @@ static inline int ndb_unpack_text_search_key_string(struct cursor *cur,
 						    const char **str,
 						    int *str_len)
 {
-	if (!pull_varint(cur, str_len))
+	uint64_t len;
+
+	if (!cursor_pull_varint(cur, &len))
 		return 0;
+
+	*str_len = len;
 
 	*str = (const char *)cur->p;
 
@@ -398,15 +399,11 @@ static inline int
 ndb_unpack_remaining_text_search_key(struct cursor *cur,
 				     struct ndb_text_search_key *key)
 {
-	int timestamp;
-
-	if (!pull_varint(cur, &timestamp))
+	if (!cursor_pull_varint(cur, &key->timestamp))
 		return 0;
 
-	if (!pull_varint(cur, &key->word_index))
+	if (!cursor_pull_varint(cur, &key->word_index))
 		return 0;
-
-	key->timestamp = timestamp;
 
 	return 1;
 }
@@ -2331,7 +2328,7 @@ static int prefix_count(const char *str1, int len1, const char *str2, int len2) 
 
 static void ndb_print_text_search_key(struct ndb_text_search_key *key)
 {
-	printf("K<'%.*s' %d %" PRIu64 " note_id:%" PRIu64 ">", key->str_len, key->str,
+	printf("K<'%.*s' %" PRIu64 " %" PRIu64 " note_id:%" PRIu64 ">", key->str_len, key->str,
 						    key->word_index,
 						    key->timestamp,
 						    key->note_id);
