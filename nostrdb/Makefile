@@ -20,7 +20,10 @@ BIN=ndb
 
 CHECKDATA=testdata/db/v0/data.mdb
 
-all: lib ndb
+all: lib ndb libnostrdb.a
+
+libnostrdb.a: $(OBJS)
+	ar rcs $@ $(OBJS)
 
 lib: benches test
 
