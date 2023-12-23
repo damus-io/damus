@@ -4,6 +4,7 @@
 #include "short_types.h"
 #include "hash_u5.h"
 #include "list.h"
+#include "amount.h"
 #include "node_id.h"
 //#include <secp256k1_recovery.h>
 

@@ -2,7 +2,7 @@ CFLAGS = -Wall -Wno-misleading-indentation -Wno-unused-function -Werror -O2 -g -
 HEADERS = deps/lmdb/lmdb.h deps/secp256k1/include/secp256k1.h src/sha256.h src/nostrdb.h src/cursor.h src/hex.h src/jsmn.h src/config.h src/sha256.h src/random.h src/memchr.h src/cpu.h $(C_BINDINGS) 
 FLATCC_SRCS=deps/flatcc/src/runtime/json_parser.c deps/flatcc/src/runtime/verifier.c deps/flatcc/src/runtime/builder.c deps/flatcc/src/runtime/emitter.c deps/flatcc/src/runtime/refmap.c
 BOLT11_SRCS = src/bolt11/bolt11.c src/bolt11/bech32.c src/bolt11/tal.c src/bolt11/talstr.c src/bolt11/take.c src/bolt11/list.c src/bolt11/utf8.c src/bolt11/amount.c src/bolt11/hash_u5.c
-SRCS = src/nostrdb.c src/sha256.c $(BOLT11_SRCS) $(FLATCC_SRCS)
+SRCS = src/nostrdb.c src/sha256.c src/invoice.c $(BOLT11_SRCS) $(FLATCC_SRCS)
 LDS = $(OBJS) $(ARS) 
 OBJS = $(SRCS:.c=.o)
 DEPS = $(OBJS) $(HEADERS) $(ARS)
