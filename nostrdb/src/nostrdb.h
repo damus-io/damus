@@ -266,7 +266,7 @@ struct ndb_text_search_key
 	const char *str;
 	uint64_t timestamp;
 	uint64_t note_id;
-	int word_index;
+	uint64_t word_index;
 };
 
 struct ndb_text_search_result {
