@@ -1,8 +1,8 @@
 CFLAGS = -Wall -Wno-misleading-indentation -Wno-unused-function -Werror -O2 -g -Ideps/secp256k1/include -Ideps/lmdb -Ideps/flatcc/include
-HEADERS = sha256.h nostrdb.h cursor.h hex.h jsmn.h config.h sha256.h random.h memchr.h cpu.h $(C_BINDINGS)
+HEADERS = src/sha256.h src/nostrdb.h src/cursor.h src/hex.h src/jsmn.h src/config.h src/sha256.h src/random.h src/memchr.h src/cpu.h $(C_BINDINGS)
 FLATCC_SRCS=deps/flatcc/src/runtime/json_parser.c deps/flatcc/src/runtime/verifier.c deps/flatcc/src/runtime/builder.c deps/flatcc/src/runtime/emitter.c deps/flatcc/src/runtime/refmap.c
-BOLT11_SRCS = bolt11/bolt11.c bolt11/bech32.c bolt11/tal.c bolt11/talstr.c bolt11/take.c bolt11/list.c bolt11/utf8.c bolt11/amount.c bolt11/hash_u5.c
-SRCS = nostrdb.c sha256.c $(BOLT11_SRCS) $(FLATCC_SRCS)
+BOLT11_SRCS = src/bolt11/bolt11.c src/bolt11/bech32.c src/bolt11/tal.c src/bolt11/talstr.c src/bolt11/take.c src/bolt11/list.c src/bolt11/utf8.c src/bolt11/amount.c src/bolt11/hash_u5.c
+SRCS = src/nostrdb.c src/sha256.c $(BOLT11_SRCS) $(FLATCC_SRCS)
 LDS = $(OBJS) $(ARS) 
 OBJS = $(SRCS:.c=.o)
 DEPS = $(OBJS) $(HEADERS) $(ARS)
@@ -11,11 +11,11 @@ LMDB_VER=0.9.31
 FLATCC_VER=05dc16dc2b0316e61063bb1fc75426647badce48
 PREFIX ?= /usr/local
 SUBMODULES = deps/secp256k1
-C_BINDINGS_PROFILE=bindings/c/profile_builder.h bindings/c/profile_reader.h bindings/c/profile_verifier.h bindings/c/profile_json_parser.h
-C_BINDINGS_META=bindings/c/meta_builder.h bindings/c/meta_reader.h bindings/c/meta_verifier.h bindings/c/meta_json_parser.h
-C_BINDINGS_COMMON=bindings/c/flatbuffers_common_builder.h bindings/c/flatbuffers_common_reader.h
+BINDINGS=src/bindings
+C_BINDINGS_PROFILE=$(BINDINGS)/c/profile_builder.h $(BINDINGS)/c/profile_reader.h $(BINDINGS)/c/profile_verifier.h $(BINDINGS)/c/profile_json_parser.h
+C_BINDINGS_META=$(BINDINGS)/c/meta_builder.h $(BINDINGS)/c/meta_reader.h $(BINDINGS)/c/meta_verifier.h $(BINDINGS)/c/meta_json_parser.h
+C_BINDINGS_COMMON=$(BINDINGS)/c/flatbuffers_common_builder.h $(BINDINGS)/c/flatbuffers_common_reader.h
 C_BINDINGS=$(C_BINDINGS_COMMON) $(C_BINDINGS_PROFILE) $(C_BINDINGS_META)
-BINDINGS=bindings
 BIN=ndb
 
 CHECKDATA=testdata/db/v0/data.mdb
@@ -25,7 +25,7 @@ all: lib ndb
 lib: benches test
 
 ndb: ndb.c $(DEPS)
-	$(CC) $(CFLAGS) ndb.c $(LDS) -o $@
+	$(CC) -Isrc $(CFLAGS) ndb.c $(LDS) -o $@
 
 bindings: bindings-swift bindings-rust bindings-c
 
@@ -53,42 +53,42 @@ config.h: configurator
 
 bindings-c: $(C_BINDINGS)
 
-bindings/%/.dir:
+src/bindings/%/.dir:
 	mkdir -p $(shell dirname $@)
 	touch $@
 
-bindings/c/%_builder.h: schemas/%.fbs bindings/c/.dir
-	flatcc --builder $< -o bindings/c
+src/bindings/c/%_builder.h: schemas/%.fbs $(BINDINGS)/c/.dir
+	flatcc --builder $< -o $(BINDINGS)/c
 
-bindings/c/%_verifier.h bindings/c/%_reader.h: schemas/%.fbs bindings/c/.dir
-	flatcc --verifier -o bindings/c $<
+src/bindings/c/%_verifier.h bindings/c/%_reader.h: schemas/%.fbs $(BINDINGS)/c/.dir
+	flatcc --verifier -o $(BINDINGS)/c $<
 
-bindings/c/flatbuffers_common_reader.h: bindings/c/.dir
-	flatcc --common_reader -o bindings/c
+src/bindings/c/flatbuffers_common_reader.h: $(BINDINGS)/c/.dir
+	flatcc --common_reader -o $(BINDINGS)/c
 
-bindings/c/flatbuffers_common_builder.h: bindings/c/.dir
-	flatcc --common_builder -o bindings/c
+src/bindings/c/flatbuffers_common_builder.h: $(BINDINGS)/c/.dir
+	flatcc --common_builder -o $(BINDINGS)/c
 
-bindings/c/%_json_parser.h: schemas/%.fbs bindings/c/.dir
-	flatcc --json-parser $< -o bindings/c
+src/bindings/c/%_json_parser.h: schemas/%.fbs $(BINDINGS)/c/.dir
+	flatcc --json-parser $< -o $(BINDINGS)/c
 
-bindings-rust: bindings/rust/ndb_profile.rs bindings/rust/ndb_meta.rs
+bindings-rust: $(BINDINGS)/rust/ndb_profile.rs $(BINDINGS)/rust/ndb_meta.rs
 
-bindings/rust/ndb_profile.rs: schemas/profile.fbs bindings/rust
+$(BINDINGS)/rust/ndb_profile.rs: schemas/profile.fbs $(BINDINGS)/rust
 	flatc --gen-json-emit --rust $<
 	@mv profile_generated.rs $@
 
-bindings/rust/ndb_meta.rs: schemas/meta.fbs bindings/swift
+$(BINDINGS)/rust/ndb_meta.rs: schemas/meta.fbs $(BINDINGS)/swift
 	flatc --rust $< 
 	@mv meta_generated.rs $@
 
-bindings-swift: bindings/swift/NdbProfile.swift bindings/swift/NdbMeta.swift
+bindings-swift: $(BINDINGS)/swift/NdbProfile.swift $(BINDINGS)/swift/NdbMeta.swift
 
-bindings/swift/NdbProfile.swift: schemas/profile.fbs bindings/swift
+$(BINDINGS)/swift/NdbProfile.swift: schemas/profile.fbs $(BINDINGS)/swift
 	flatc --gen-json-emit --swift $<
 	@mv profile_generated.swift $@
 
-bindings/swift/NdbMeta.swift: schemas/meta.fbs bindings/swift
+$(BINDINGS)/swift/NdbMeta.swift: schemas/meta.fbs $(BINDINGS)/swift
 	flatc --swift $<
 	@mv meta_generated.swift $@
 
@@ -135,9 +135,6 @@ deps/secp256k1/config.log: deps/secp256k1/configure
 deps/lmdb/liblmdb.a: deps/lmdb/lmdb.h
 	$(MAKE) -C deps/lmdb liblmdb.a
 
-bench: bench.c $(DEPS)
-	$(CC) $(CFLAGS) bench.c $(LDS) -o $@
-
 testdata/db/ndb-v0.tar.zst:
 	curl https://cdn.jb55.com/s/ndb-v0.tar.zst -o $@
 
@@ -155,14 +152,14 @@ testdata/many-events.json.zst:
 testdata/many-events.json: testdata/many-events.json.zst
 	zstd -d $<
 
-bench-ingest-many: bench-ingest-many.c $(DEPS) testdata/many-events.json
-	$(CC) $(CFLAGS) $< $(LDS) -o $@
+bench: bench-ingest-many.c $(DEPS) testdata/many-events.json
+	$(CC) -Isrc $(CFLAGS) $< $(LDS) -o $@
 
 testdata/db/.dir:
 	@mkdir -p testdata/db
 	touch testdata/db/.dir
 
 test: test.c $(DEPS) testdata/db/.dir
-	$(CC) $(CFLAGS) test.c $(LDS) -o $@
+	$(CC) -Isrc $(CFLAGS) test.c $(LDS) -o $@
 
 .PHONY: tags clean
