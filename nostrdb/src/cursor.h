@@ -614,39 +614,38 @@ static inline int is_alphanumeric(char c) {
 }
 
 static inline int consume_until_boundary(struct cursor *cur) {
-    unsigned int c;
-    unsigned int char_length = 1;
-    unsigned int *utf8_char_length = &char_length;
-    
-    while (cur->p < cur->end) {
-        c = *cur->p;
-        
-        *utf8_char_length = 1;
-        
-        if (is_whitespace(c))
-            return 1;
-        
-        // Need to check for UTF-8 characters, which can be multiple bytes long
-        if (is_utf8_byte(c)) {
-            if (!parse_utf8_char(cur, &c, utf8_char_length)) {
-                if (!is_right_boundary(c)){
-                    // TODO: We should work towards handling all UTF-8 characters.
-                    //printf("Invalid UTF-8 code point: %x\n", c);
-                }
-            }
-        }
-        
-        if (is_right_boundary(c))
-            return 1;
-        
-        // Need to use a variable character byte length for UTF-8 (2-4 bytes)
-        if (cur->p + *utf8_char_length <= cur->end)
-            cur->p += *utf8_char_length;
-        else
-            cur->p++;
-    }
-    
-    return 1;
+	unsigned int c;
+	unsigned int char_length = 1;
+	unsigned int *utf8_char_length = &char_length;
+	
+	while (cur->p < cur->end) {
+		c = *cur->p;
+		
+		*utf8_char_length = 1;
+		
+		if (is_whitespace(c))
+			return 1;
+		
+		// Need to check for UTF-8 characters, which can be multiple bytes long
+		if (is_utf8_byte(c)) {
+			if (!parse_utf8_char(cur, &c, utf8_char_length)) {
+				if (!is_right_boundary(c)){
+					return 0;
+				}
+			}
+		}
+		
+		if (is_right_boundary(c))
+			return 1;
+		
+		// Need to use a variable character byte length for UTF-8 (2-4 bytes)
+		if (cur->p + *utf8_char_length <= cur->end)
+			cur->p += *utf8_char_length;
+		else
+			cur->p++;
+	}
+	
+	return 1;
 }
 
 static inline int consume_until_whitespace(struct cursor *cur, int or_end) {
