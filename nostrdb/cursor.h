@@ -3,14 +3,12 @@
 #define JB55_CURSOR_H
 
 #include "typedefs.h"
+#include "bolt11/likely.h"
 
 #include <stdio.h>
 #include <ctype.h>
 #include <assert.h>
 #include <string.h>
-
-#define unlikely(x) __builtin_expect((x),0)
-#define likely(x)   __builtin_expect((x),1)
 
 struct cursor {
 	unsigned char *start;
