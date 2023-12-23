@@ -20,7 +20,7 @@ BIN=ndb
 
 CHECKDATA=testdata/db/v0/data.mdb
 
-all: lib ndb libnostrdb.a
+all: $(BIN) lib bench
 
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -28,7 +28,7 @@ all: lib ndb libnostrdb.a
 libnostrdb.a: $(OBJS)
 	ar rcs $@ $(OBJS)
 
-lib: benches test
+lib: libnostrdb.a
 
 ndb: ndb.c $(DEPS)
 	$(CC) $(CFLAGS) ndb.c $(LDS) -o $@
@@ -42,8 +42,6 @@ check: test
 
 clean:
 	rm -rf test bench bench-ingest bench-ingest-many
-
-benches: bench
 
 distclean: clean
 	rm -rf deps
@@ -158,8 +156,11 @@ testdata/many-events.json.zst:
 testdata/many-events.json: testdata/many-events.json.zst
 	zstd -d $<
 
-bench: bench-ingest-many.c $(DEPS) testdata/many-events.json
+bench: bench-ingest-many.c $(DEPS) 
 	$(CC) $(CFLAGS) $< $(LDS) -o $@
+
+run-bench: testdata/many-events.json bench
+	./bench
 
 testdata/db/.dir:
 	@mkdir -p testdata/db
