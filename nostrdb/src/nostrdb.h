@@ -91,6 +91,7 @@ enum tce_type {
 	NDB_TCE_OK     = 0x2,
 	NDB_TCE_NOTICE = 0x3,
 	NDB_TCE_EOSE   = 0x4,
+	NDB_TCE_AUTH   = 0x5,
 };
 
 enum ndb_ingest_filter_action {
