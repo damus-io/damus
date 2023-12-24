@@ -4952,6 +4952,17 @@ int ndb_ws_event_from_json(const char *json, int len, struct ndb_tce *tce,
 		tce->command_result.msglen = toksize(tok);
 
 		return 1;
+	} else if (tok_len == 4 && !memcmp("AUTH", json + tok->start, 4)) {
+		tce->evtype = NDB_TCE_AUTH;
+
+		tok = &parser.toks[parser.i++];
+		if (tok->type != JSMN_STRING)
+			return 0;
+
+		tce->subid = json + tok->start;
+		tce->subid_len = toksize(tok);
+
+		return 1;
 	}
 
 	return 0;
