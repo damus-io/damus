@@ -130,6 +130,9 @@ func handle_subid_event(pool: RelayPool, relay_id: String, ev: NostrConnectionEv
             
         case .eose(let subid):
             return (subid, true)
+
+        case .auth:
+            return (nil, false)
         }
     }
 }

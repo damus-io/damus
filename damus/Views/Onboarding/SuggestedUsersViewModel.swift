@@ -97,6 +97,9 @@ class SuggestedUsersViewModel: ObservableObject {
 
         case .ok:
             break
+
+        case .auth:
+            break
         }
     }
 }

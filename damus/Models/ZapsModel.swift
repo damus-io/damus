@@ -66,6 +66,8 @@ class ZapsModel: ObservableObject {
             }
             
             self.state.add_zap(zap: .zap(zap))
+        case .auth:
+            break
         }
         
         

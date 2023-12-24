@@ -88,6 +88,8 @@ class SearchHomeModel: ObservableObject {
             }
 
             break
+        case .auth:
+            break
         }
     }
 }
@@ -158,6 +160,8 @@ func load_profiles<Y>(context: String, profiles_subid: String, relay_id: String,
             case .ok:
                 break
             case .notice:
+                break
+            case .auth:
                 break
             }
         }

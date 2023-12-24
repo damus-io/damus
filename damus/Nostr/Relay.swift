@@ -57,6 +57,25 @@ enum RelayFlags: Int {
     case broken = 1
 }
 
+enum RelayAuthenticationError {
+    /// Only a public key was provided in keypair to sign challenge.
+    ///
+    /// A private key is required to sign `auth` challenge.
+    case no_private_key
+    /// No keypair was provided to sign challenge.
+    case no_key
+}
+enum RelayAuthenticationState: Equatable {
+    /// No `auth` request has been made from this relay
+    case none
+    /// We have received an `auth` challenge, but have not yet replied to the challenge
+    case pending
+    /// We have received an `auth` challenge and replied with an `auth` event
+    case verified
+    /// We received an `auth` challenge but failed to reply to the challenge
+    case error(RelayAuthenticationError)
+}
+
 struct Limitations: Codable {
     let payment_required: Bool?
     
@@ -85,13 +104,15 @@ struct RelayMetadata: Codable {
 class Relay: Identifiable {
     let descriptor: RelayDescriptor
     let connection: RelayConnection
-    
+    var authentication_state: RelayAuthenticationState
+
     var flags: Int
     
     init(descriptor: RelayDescriptor, connection: RelayConnection) {
         self.flags = 0
         self.descriptor = descriptor
         self.connection = connection
+        self.authentication_state = RelayAuthenticationState.none
     }
     
     var is_broken: Bool {

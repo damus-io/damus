@@ -134,6 +134,8 @@ class ProfileModel: ObservableObject, Equatable {
                 }
                 progress += 1
                 break
+            case .auth:
+                break
             }
         }
     }

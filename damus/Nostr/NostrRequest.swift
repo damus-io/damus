@@ -38,7 +38,8 @@ enum NostrRequest {
     case subscribe(NostrSubscribe)
     case unsubscribe(String)
     case event(NostrEvent)
-    
+    case auth(NostrEvent)
+
     var is_write: Bool {
         switch self {
         case .subscribe:
@@ -47,6 +48,8 @@ enum NostrRequest {
             return false
         case .event:
             return true
+        case .auth:
+            return false
         }
     }
     

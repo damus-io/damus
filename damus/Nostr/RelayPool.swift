@@ -31,13 +31,17 @@ class RelayPool {
     var seen: Set<SeenEvent> = Set()
     var counts: [String: UInt64] = [:]
     var ndb: Ndb
+    var keypair: Keypair?
+    var message_received_function: (((String, RelayDescriptor)) -> Void)?
+    var message_sent_function: (((String, Relay)) -> Void)?
 
     private let network_monitor = NWPathMonitor()
     private let network_monitor_queue = DispatchQueue(label: "io.damus.network_monitor")
     private var last_network_status: NWPath.Status = .unsatisfied
 
-    init(ndb: Ndb) {
+    init(ndb: Ndb, keypair: Keypair? = nil) {
         self.ndb = ndb
+        self.keypair = keypair
 
         network_monitor.pathUpdateHandler = { [weak self] path in
             if (path.status == .satisfied || path.status == .requiresConnection) && self?.last_network_status != path.status {
@@ -121,6 +125,7 @@ class RelayPool {
             else { return }
 
             let _ = self.ndb.process_event(str)
+            self.message_received_function?((str, desc))
         })
         let relay = Relay(descriptor: desc, connection: conn)
         self.relays.append(relay)
@@ -244,7 +249,9 @@ class RelayPool {
                 continue
             }
             
-            relay.connection.send(req)
+            relay.connection.send(req, callback: { str in
+                self.message_sent_function?((str, relay))
+            })
         }
     }
     
@@ -298,7 +305,34 @@ class RelayPool {
                 run_queue(relay_id)
             }
         }
-        
+
+        // Handle auth
+        if case let .nostr_event(nostrResponse) = event,
+           case let .auth(challenge_string) = nostrResponse {
+            if let relay = get_relay(relay_id) {
+                print("received auth request from \(relay.descriptor.url.id)")
+                relay.authentication_state = .pending
+                if let keypair {
+                    if let fullKeypair = keypair.to_full() {
+                        if let authRequest = make_auth_request(keypair: fullKeypair, challenge_string: challenge_string, relay: relay) {
+                            send(.auth(authRequest), to: [relay_id], skip_ephemeral: false)
+                            relay.authentication_state = .verified
+                        } else {
+                            print("failed to make auth request")
+                        }
+                    } else {
+                        print("keypair provided did not contain private key, can not sign auth request")
+                        relay.authentication_state = .error(.no_private_key)
+                    }
+                } else {
+                    print("no keypair to reply to auth request")
+                    relay.authentication_state = .error(.no_key)
+                }
+            } else {
+                print("no relay found for \(relay_id)")
+            }
+        }
+
         for handler in handlers {
             handler.callback(relay_id, event)
         }

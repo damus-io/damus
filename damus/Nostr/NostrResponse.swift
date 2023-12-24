@@ -23,7 +23,11 @@ enum NostrResponse {
     case notice(String)
     case eose(String)
     case ok(CommandResult)
-    
+    /// An [NIP-42](https://github.com/nostr-protocol/nips/blob/master/42.md) `auth` challenge.
+    ///
+    /// The associated type of this case is the challenge string sent by the server.
+    case auth(String)
+
     var subid: String? {
         switch self {
         case .ok:
@@ -34,6 +38,8 @@ enum NostrResponse {
             return sub_id
         case .notice:
             return nil
+        case .auth(let challenge_string):
+            return challenge_string
         }
     }
 
@@ -94,6 +100,13 @@ enum NostrResponse {
             case NDB_TCE_NOTICE:
                 free(data)
                 return .notice("")
+            case NDB_TCE_AUTH:
+                defer { free(data) }
+
+                guard let challenge_string = sized_cstr(cstr: tce.subid, len: tce.subid_len) else {
+                    return nil
+                }
+                return .auth(challenge_string)
             default:
                 free(data)
                 return nil

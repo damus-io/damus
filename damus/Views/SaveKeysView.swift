@@ -165,6 +165,8 @@ struct SaveKeysView: View {
                 break
             case .ok:
                 break
+            case .auth:
+                break
             }
         }
     }
