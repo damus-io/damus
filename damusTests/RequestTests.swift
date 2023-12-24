@@ -16,7 +16,34 @@ final class RequestTests: XCTestCase {
         let expectedResult = "[\"CLOSE\",\"64FD064D-EB9E-4771-8255-8D16981B920B\"]"
         XCTAssertEqual(result, expectedResult)
     }
-    
+
+    func testMakeAuthRequest() {
+        let challenge_string = "8bc847dd-f2f6-4b3a-9c8a-71776ad9b071"
+        let url = RelayURL("wss://example.com")!
+        let relayInfo = RelayInfo(read: true, write: true)
+        let relayDescriptor = RelayDescriptor(url: url, info: relayInfo)
+        let relayConnection = RelayConnection(url: url) { _ in
+        } processEvent: { _ in
+        }
+
+        let relay = Relay(descriptor: relayDescriptor, connection: relayConnection)
+        let event = make_auth_request(keypair: FullKeypair.init(pubkey: Pubkey.empty, privkey: Privkey.empty), challenge_string: challenge_string, relay: relay)!
+
+        let result = make_nostr_auth_event(ev: event)
+        let json = try! JSONSerialization.jsonObject(with: result!.data(using: .utf8)!, options: []) as! [Any]
+
+        XCTAssertEqual(json[0] as! String, "AUTH")
+        let dictionary = json[1] as! [String: Any]
+        XCTAssertEqual(dictionary["content"] as! String, "")
+        XCTAssertEqual(dictionary["kind"] as! Int, 22242)
+        XCTAssertEqual(dictionary["sig"] as! String, String(repeating: "0", count: 128))
+        XCTAssertEqual(dictionary["pubkey"] as! String, String(repeating: "0", count: 64))
+        let tags = dictionary["tags"] as! [[String]]
+        XCTAssertEqual(tags.first { $0[0] == "relay" }![1], "wss://example.com")
+        XCTAssertEqual(tags.first { $0[0] == "challenge" }![1], challenge_string)
+        XCTAssertEqual(dictionary["id"] as! String, String(repeating: "0", count: 64))
+    }
+
     /* FIXME: these tests depend on order of json fields which is undefined
     func testMakePushEvent() {
         let now = Int64(Date().timeIntervalSince1970)

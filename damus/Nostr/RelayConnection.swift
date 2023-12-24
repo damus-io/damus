@@ -97,7 +97,7 @@ final class RelayConnection: ObservableObject {
         socket.send(.string(req))
     }
     
-    func send(_ req: NostrRequestType) {
+    func send(_ req: NostrRequestType, callback: ((String) -> Void)? = nil) {
         switch req {
         case .typical(let req):
             guard let req = make_nostr_req(req) else {
@@ -105,9 +105,11 @@ final class RelayConnection: ObservableObject {
                 return
             }
             send_raw(req)
+            callback?(req)
             
         case .custom(let req):
             send_raw(req)
+            callback?(req)
         }
     }
     
@@ -201,7 +203,18 @@ func make_nostr_req(_ req: NostrRequest) -> String? {
         return make_nostr_unsubscribe_req(sub_id)
     case .event(let ev):
         return make_nostr_push_event(ev: ev)
+    case .auth(let ev):
+        return make_nostr_auth_event(ev: ev)
     }
+}
+
+func make_nostr_auth_event(ev: NostrEvent) -> String? {
+    guard let event = encode_json(ev) else {
+        return nil
+    }
+    let encoded = "[\"AUTH\",\(event)]"
+    print(encoded)
+    return encoded
 }
 
 func make_nostr_push_event(ev: NostrEvent) -> String? {

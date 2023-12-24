@@ -92,7 +92,14 @@ struct RelayDetailView: View {
                         }
                     }
                 }
-                
+
+                if let authentication_state: RelayAuthenticationState = relay_object?.authentication_state,
+                   authentication_state != .none {
+                    Section(NSLocalizedString("Authentication", comment: "Header label to display authentication details for a given relay.")) {
+                        RelayAuthenticationDetail(state: authentication_state)
+                    }
+                }
+
                 if let pubkey = nip11?.pubkey {
                     Section(NSLocalizedString("Admin", comment: "Label to display relay contact user.")) {
                         UserViewRow(damus_state: state, pubkey: pubkey)
@@ -175,9 +182,13 @@ struct RelayDetailView: View {
         }
         return attrString
     }
-    
+
+    private var relay_object: Relay? {
+        state.pool.get_relay(relay)
+    }
+
     private var relay_connection: RelayConnection? {
-        state.pool.get_relay(relay)?.connection
+        relay_object?.connection
     }
 }
 

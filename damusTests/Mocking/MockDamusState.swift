@@ -13,18 +13,7 @@ func generate_test_damus_state(
     mock_profile_info: [Pubkey: Profile]?
 ) -> DamusState {
     // Create a unique temporary directory
-    var tempDir: String!
-    do {
-        let fileManager = FileManager.default
-        let temp = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        try fileManager.createDirectory(at: temp, withIntermediateDirectories: true, attributes: nil)
-        tempDir = temp.absoluteString
-    } catch {
-        tempDir = "."
-    }
-
-    print("opening \(tempDir!)")
-    let ndb = try! Ndb(path: tempDir)!
+    let ndb = Ndb.test
     let our_pubkey = test_pubkey
     let pool = RelayPool(ndb: ndb)
     let settings = UserSettingsStore()

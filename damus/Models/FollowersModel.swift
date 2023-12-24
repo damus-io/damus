@@ -91,6 +91,8 @@ class FollowersModel: ObservableObject {
             
         case .ok:
             break
+        case .auth:
+            break
         }
     }
 }

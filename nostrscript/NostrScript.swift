@@ -193,7 +193,8 @@ enum NScriptEventType: Int {
     case note = 2
     case notice = 3
     case eose = 4
-    
+    case auth = 5
+
     init(resp: NostrResponse) {
         switch resp {
         case .event:
@@ -204,6 +205,8 @@ enum NScriptEventType: Int {
             self = .eose
         case .ok:
             self = .ok
+        case .auth:
+            self = .auth
         }
     }
 }

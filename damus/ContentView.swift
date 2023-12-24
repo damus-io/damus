@@ -458,6 +458,9 @@ struct ContentView: View {
                 break
             }
         }
+        .onReceive(handle_notify(.disconnect_relays)) { () in
+            damus_state.pool.disconnect()
+        }
         .onChange(of: scenePhase) { (phase: ScenePhase) in
             switch phase {
             case .background:
@@ -627,7 +630,7 @@ struct ContentView: View {
 
         guard let ndb = mndb else { return  }
 
-        let pool = RelayPool(ndb: ndb)
+        let pool = RelayPool(ndb: ndb, keypair: keypair)
         let model_cache = RelayModelCache()
         let relay_filters = RelayFilters(our_pubkey: pubkey)
         let bootstrap_relays = load_bootstrap_relays(pubkey: pubkey)
@@ -913,6 +916,8 @@ func find_event_with_subid(state: DamusState, query query_: FindEvent, subid: St
                 state.pool.unsubscribe(sub_id: subid, to: [relay_id])
             }
         case .notice:
+            break
+        case .auth:
             break
         }
 

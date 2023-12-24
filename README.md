@@ -16,12 +16,14 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 - [NIP-08: Mentions][nip08]
 - [NIP-10: Reply conventions][nip10]
 - [NIP-12: Generic tag queries (hashtags)][nip12]
+- [NIP-42: Authentication of clients to relays][nip42]
 
 [nips]: https://github.com/nostr-protocol/nips
 [nip01]: https://github.com/nostr-protocol/nips/blob/master/01.md
 [nip08]: https://github.com/nostr-protocol/nips/blob/master/08.md
 [nip10]: https://github.com/nostr-protocol/nips/blob/master/10.md
 [nip12]: https://github.com/nostr-protocol/nips/blob/master/12.md
+[nip42]: https://github.com/nostr-protocol/nips/blob/master/42.md
 
 ## Getting Started on Damus 
 
