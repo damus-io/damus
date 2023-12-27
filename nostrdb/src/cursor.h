@@ -360,6 +360,11 @@ static inline int cursor_push_u16(struct cursor *cursor, unsigned short i)
 	return cursor_push(cursor, (unsigned char*)&i, sizeof(i));
 }
 
+static inline int cursor_pull_u16(struct cursor *cursor, uint16_t *i)
+{
+	return cursor_pull(cursor, (unsigned char*)i, sizeof(*i));
+}
+
 static inline void *index_cursor(struct cursor *cursor, unsigned int index, int elem_size)
 {
 	unsigned char *p;

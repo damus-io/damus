@@ -198,6 +198,12 @@ struct ndb_builder {
 	struct ndb_tag *current_tag;
 };
 
+/*
+struct ndb_block_iterator {
+	struct note_block block;
+};
+*/
+
 struct ndb_iterator {
 	struct ndb_note *note;
 	struct ndb_tag *tag;
@@ -389,5 +395,7 @@ enum ndb_common_kind ndb_kind_to_common_kind(int kind);
 int ndb_parse_content(unsigned char *buf, int buf_size,
 		      const char *content, int content_len,
 		      struct ndb_note_blocks **blocks_p);
+
+//int ndb_blocks_iterate_next(struct ndb_block_iterator *iter);
 
 #endif
