@@ -20,11 +20,13 @@
 
 struct ndb_json_parser;
 struct ndb;
+struct ndb_note_blocks;
 struct ndb_note;
 struct ndb_tag;
 struct ndb_tags;
 struct ndb_lmdb;
 union ndb_packed_str;
+struct bolt11;
 
 // sorry, swift needs help with forward declared pointers like this
 struct ndb_t {
@@ -382,5 +384,10 @@ struct ndb_str ndb_tag_str(struct ndb_note *note, struct ndb_tag *tag, int ind);
 const char *ndb_db_name(enum ndb_dbs db);
 const char *ndb_kind_name(enum ndb_common_kind ck);
 enum ndb_common_kind ndb_kind_to_common_kind(int kind);
+
+// CONTENT PARSER
+int ndb_parse_content(unsigned char *buf, int buf_size,
+		      const char *content, int content_len,
+		      struct ndb_note_blocks **blocks_p);
 
 #endif

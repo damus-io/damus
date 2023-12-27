@@ -3,6 +3,7 @@
 
 #include "short_types.h"
 #include "hash_u5.h"
+#include "amount.h"
 #include "list.h"
 #include "amount.h"
 #include "node_id.h"
