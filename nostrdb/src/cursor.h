@@ -332,6 +332,19 @@ static inline int cursor_pull_varint(struct cursor *cursor, uint64_t *n)
 	return 10; // Successfully read 10 bytes for a full 64-bit integer
 }
 
+static int cursor_pull_varint_u32(struct cursor *cursor, uint32_t *v)
+{
+	uint64_t bigval;
+
+	if (!cursor_pull_varint(cursor, &bigval))
+		return 0;
+
+	if (bigval > UINT32_MAX)
+		return 0;
+
+	*v = (uint32_t) bigval;
+	return 1;
+}
 
 static inline int cursor_pull_int(struct cursor *cursor, int *i)
 {
