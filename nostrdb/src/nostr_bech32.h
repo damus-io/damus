@@ -73,15 +73,19 @@ struct nostr_bech32 {
 		struct bech32_nprofile nprofile;
 		struct bech32_naddr naddr;
 		struct bech32_nrelay nrelay;
-	} data;
+	};
 };
 
 
-int parse_nostr_bech32_str(struct cursor *bech32);
+int parse_nostr_bech32_str(struct cursor *bech32, enum nostr_bech32_type *type);
 int parse_nostr_bech32_type(const char *prefix, enum nostr_bech32_type *type);
 
 int parse_nostr_bech32_buffer(struct cursor *cur, enum nostr_bech32_type type,
 			      struct nostr_bech32 *obj);
+
+int parse_nostr_bech32(unsigned char *buf, int buflen,
+		       const char *bech32_str, size_t bech32_len,
+		       struct nostr_bech32 *obj);
 
 /*
 int parse_nostr_bech32(const char *bech32, size_t input_len,
