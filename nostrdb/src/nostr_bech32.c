@@ -8,9 +8,9 @@
 #include "nostr_bech32.h"
 #include <stdlib.h>
 #include "cursor.h"
-#include "bech32.h"
+#include "bolt11/bech32.h"
 
-#define MAX_TLVS 16
+#define MAX_TLVS 32
 
 #define TLV_SPECIAL 0
 #define TLV_RELAY 1
@@ -19,9 +19,9 @@
 #define TLV_KNOWN_TLVS 4
 
 struct nostr_tlv {
-	u8 type;
-	u8 len;
-	const u8 *value;
+	unsigned char type;
+	unsigned char len;
+	const unsigned char *value;
 };
 
 struct nostr_tlvs {
@@ -70,7 +70,7 @@ static int parse_nostr_tlvs(struct cursor *cur, struct nostr_tlvs *tlvs) {
 	return 1;
 }
 
-static int find_tlv(struct nostr_tlvs *tlvs, u8 type, struct nostr_tlv **tlv) {
+static int find_tlv(struct nostr_tlvs *tlvs, unsigned char type, struct nostr_tlv **tlv) {
 	*tlv = NULL;
 	
 	for (int i = 0; i < tlvs->num_tlvs; i++) {
@@ -83,27 +83,27 @@ static int find_tlv(struct nostr_tlvs *tlvs, u8 type, struct nostr_tlv **tlv) {
 	return 0;
 }
 
-static int parse_nostr_bech32_type(const char *prefix, enum nostr_bech32_type *type) {
+int parse_nostr_bech32_type(const char *prefix, enum nostr_bech32_type *type) {
 	// Parse type
-	if (strcmp(prefix, "note") == 0) {
+	if (strncmp(prefix, "note", 4) == 0) {
 		*type = NOSTR_BECH32_NOTE;
 		return 1;
-	} else if (strcmp(prefix, "npub") == 0) {
+	} else if (strncmp(prefix, "npub", 4) == 0) {
 		*type = NOSTR_BECH32_NPUB;
 		return 1;
-	} else if (strcmp(prefix, "nsec") == 0) {
+	} else if (strncmp(prefix, "nsec", 4) == 0) {
 		*type = NOSTR_BECH32_NSEC;
 		return 1;
-	} else if (strcmp(prefix, "nprofile") == 0) {
+	} else if (strncmp(prefix, "nprofile", 8) == 0) {
 		*type = NOSTR_BECH32_NPROFILE;
 		return 1;
-	} else if (strcmp(prefix, "nevent") == 0) {
+	} else if (strncmp(prefix, "nevent", 6) == 0) {
 		*type = NOSTR_BECH32_NEVENT;
 		return 1;
-	} else if (strcmp(prefix, "nrelay") == 0) {
+	} else if (strncmp(prefix, "nrelay", 6) == 0) {
 		*type = NOSTR_BECH32_NRELAY;
 		return 1;
-	} else if (strcmp(prefix, "naddr") == 0) {
+	} else if (strncmp(prefix, "naddr", 5) == 0) {
 		*type = NOSTR_BECH32_NADDR;
 		return 1;
 	}
@@ -138,8 +138,8 @@ static int tlvs_to_relays(struct nostr_tlvs *tlvs, struct relays *relays) {
 			break;
 		
 		str = &relays->relays[relays->num_relays++];
-		str->start = (const char*)tlv->value;
-		str->end = (const char*)(tlv->value + tlv->len);
+		str->str = (const char*)tlv->value;
+		str->len = tlv->len;
 	}
 	
 	return 1;
@@ -179,8 +179,8 @@ static int parse_nostr_bech32_naddr(struct cursor *cur, struct bech32_naddr *nad
 	if (!find_tlv(&tlvs, TLV_SPECIAL, &tlv))
 		return 0;
 	
-	naddr->identifier.start = (const char*)tlv->value;
-	naddr->identifier.end = (const char*)tlv->value + tlv->len;
+	naddr->identifier.str = (const char*)tlv->value;
+	naddr->identifier.len = tlv->len;
 	
 	if (!find_tlv(&tlvs, TLV_AUTHOR, &tlv))
 		return 0;
@@ -218,89 +218,84 @@ static int parse_nostr_bech32_nrelay(struct cursor *cur, struct bech32_nrelay *n
 	if (!find_tlv(&tlvs, TLV_SPECIAL, &tlv))
 		return 0;
 	
-	nrelay->relay.start = (const char*)tlv->value;
-	nrelay->relay.end = (const char*)tlv->value + tlv->len;
+	nrelay->relay.str = (const char*)tlv->value;
+	nrelay->relay.len = tlv->len;
 	
 	return 1;
 }
 
-int parse_nostr_bech32(struct cursor *cur, struct nostr_bech32 *obj) {
-	u8 *start, *end;
-	
-	start = cur->p;
-	
-	if (!consume_until_non_alphanumeric(cur, 1)) {
-		cur->p = start;
-		return 0;
-	}
-	
-	end = cur->p;
-	
-	size_t data_len;
-	size_t input_len = end - start;
-	if (input_len < 10 || input_len > 10000) {
-		return 0;
-	}
-	
-	obj->buffer = malloc(input_len * 2);
-	if (!obj->buffer)
-		return 0;
-	
-	u8 data[input_len];
-	char prefix[input_len];
-	
-	if (bech32_decode_len(prefix, data, &data_len, (const char*)start, input_len) == BECH32_ENCODING_NONE) {
-		cur->p = start;
-		return 0;
-	}
-	
-	obj->buflen = 0;
-	if (!bech32_convert_bits(obj->buffer, &obj->buflen, 8, data, data_len, 5, 0)) {
-		goto fail;
-	}
-	
-	if (!parse_nostr_bech32_type(prefix, &obj->type)) {
-		goto fail;
-	}
-	
-	struct cursor bcur;
-	make_cursor(obj->buffer, obj->buffer + obj->buflen, &bcur);
+/*
+int parse_nostr_bech32_buffer(unsigned char *cur, int buflen,
+			      enum nostr_bech32_type type,
+			      struct nostr_bech32 *obj)
+{
+	obj->type = type;
 	
 	switch (obj->type) {
 		case NOSTR_BECH32_NOTE:
-			if (!parse_nostr_bech32_note(&bcur, &obj->data.note))
-				goto fail;
+			if (!parse_nostr_bech32_note(cur, &obj->data.note))
+				return 0;
 			break;
 		case NOSTR_BECH32_NPUB:
-			if (!parse_nostr_bech32_npub(&bcur, &obj->data.npub))
-				goto fail;
+			if (!parse_nostr_bech32_npub(cur, &obj->data.npub))
+				return 0;
 			break;
 		case NOSTR_BECH32_NSEC:
-			if (!parse_nostr_bech32_nsec(&bcur, &obj->data.nsec))
-				goto fail;
+			if (!parse_nostr_bech32_nsec(cur, &obj->data.nsec))
+				return 0;
 			break;
 		case NOSTR_BECH32_NEVENT:
-			if (!parse_nostr_bech32_nevent(&bcur, &obj->data.nevent))
-				goto fail;
+			if (!parse_nostr_bech32_nevent(cur, &obj->data.nevent))
+				return 0;
 			break;
 		case NOSTR_BECH32_NADDR:
-			if (!parse_nostr_bech32_naddr(&bcur, &obj->data.naddr))
-				goto fail;
+			if (!parse_nostr_bech32_naddr(cur, &obj->data.naddr))
+				return 0;
 			break;
 		case NOSTR_BECH32_NPROFILE:
-			if (!parse_nostr_bech32_nprofile(&bcur, &obj->data.nprofile))
-				goto fail;
+			if (!parse_nostr_bech32_nprofile(cur, &obj->data.nprofile))
+				return 0;
 			break;
 		case NOSTR_BECH32_NRELAY:
-			if (!parse_nostr_bech32_nrelay(&bcur, &obj->data.nrelay))
-				goto fail;
+			if (!parse_nostr_bech32_nrelay(cur, &obj->data.nrelay))
+				return 0;
 			break;
 	}
+
+	return 1;
+}
+*/
+
+int parse_nostr_bech32_str(struct cursor *bech32) {
+	enum nostr_bech32_type type;
 	
+	if (!parse_nostr_bech32_type((const char *)bech32->p, &type))
+		return 0;
+	
+	if (!consume_until_non_alphanumeric(bech32, 1))
+		return 0;
+
 	return 1;
 
-fail:
-	free(obj->buffer);
-	cur->p = start;
-	return 0;
+	/*
+	*parsed_len = bech32->p - start;
+
+	// some random sanity checking
+	if (*parsed_len < 10 || *parsed_len > 10000)
+		return 0;
+
+	const char u5[*parsed_len];
+	
+	if (bech32_decode_len(prefix, u5, &u5_out_len, (const char*)start,
+			      *parsed_len, MAX_PREFIX) == BECH32_ENCODING_NONE)
+	{
+		return 0;
+	}
+
+	if (!parse_nostr_bech32_type(prefix, type))
+		return 0;
+		*/
+
+	return 1;
 }
+
