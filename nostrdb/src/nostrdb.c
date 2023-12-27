@@ -57,7 +57,6 @@ typedef int (*ndb_word_parser_fn)(void *, const char *word, int word_len,
 // representation
 #pragma pack(push, 1)
 
-
 union ndb_packed_str {
 	struct {
 		char str[3];
@@ -98,6 +97,7 @@ struct ndb_note {
 };
 
 #pragma pack(pop)
+
 
 struct ndb_migration {
 	ndb_migrate_fn fn;

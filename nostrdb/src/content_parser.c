@@ -1,11 +1,22 @@
-#include "damus.h"
 #include "cursor.h"
-#include "bolt11.h"
-#include "bech32.h"
+#include "nostr_bech32.h"
+#include "block.h"
+#include "invoice.h"
+#include "bolt11/bolt11.h"
+#include "bolt11/bech32.h"
 #include <stdlib.h>
 #include <string.h>
 
 #include "cursor.h"
+#include "block.h"
+
+struct ndb_content_parser {
+	int bech32_strs;
+	struct cursor buffer;
+	struct cursor content;
+	struct ndb_note_blocks *blocks;
+};
+
 
 static int parse_digit(struct cursor *cur, int *digit) {
 	int c;
@@ -25,7 +36,7 @@ static int parse_digit(struct cursor *cur, int *digit) {
 
 static int parse_mention_index(struct cursor *cur, struct note_block *block) {
 	int d1, d2, d3, ind;
-	u8 *start = cur->p;
+	unsigned char *start = cur->p;
 	
 	if (!parse_str(cur, "#["))
 		return 0;
@@ -56,7 +67,7 @@ static int parse_mention_index(struct cursor *cur, struct note_block *block) {
 
 static int parse_hashtag(struct cursor *cur, struct note_block *block) {
 	int c;
-	u8 *start = cur->p;
+	unsigned char *start = cur->p;
 	
 	if (!parse_char(cur, '#'))
 		return 0;
@@ -70,22 +81,158 @@ static int parse_hashtag(struct cursor *cur, struct note_block *block) {
 	consume_until_boundary(cur);
 	
 	block->type = BLOCK_HASHTAG;
-	block->block.str.start = (const char*)(start + 1);
-	block->block.str.end = (const char*)cur->p;
+	block->block.str.str = (const char*)(start + 1);
+	block->block.str.len = cur->p - (start + 1);
 	
 	return 1;
 }
 
-static int add_block(struct note_blocks *blocks, struct note_block block)
-{
-	if (blocks->num_blocks + 1 >= MAX_BLOCKS)
+static int push_str_block(struct cursor *buf, const char *content, struct str_block *block) {
+	return cursor_push_varint(buf, block->str - content) &&
+	       cursor_push_varint(buf, block->len);
+}
+
+static int pull_str_block(struct cursor *buf, const char *content, struct str_block *block) {
+	uint32_t start;
+	if (!cursor_pull_varint_u32(buf, &start))
 		return 0;
+
+	block->str = content + start;
+
+	return cursor_pull_varint_u32(buf, &block->len);
+}
+
+//
+// decode and push a bech32 string into our blocks output buffer.
+//
+// bech32 blocks are stored as:
+//
+//     nostr_bech32_type  : varint
+//     bech32_buffer_size : u16
+//     bech32_data        : [u8]
+//
+// The TLV form is compact already, so we just use it directly
+//
+// This allows us to not duplicate all of the TLV encoding and decoding code
+// for our on-disk nostrdb format.
+//
+static int push_bech32_str(struct ndb_content_parser *p, struct str_block *bech32)
+{
+	// we decode the raw bech32 directly into the output buffer
+	struct cursor u8, u5;
+	unsigned char *start;
+	uint16_t *u8_size;
+	enum nostr_bech32_type type;
+	size_t u5_out_len, u8_out_len;
+	static const int MAX_PREFIX = 8;
+	char prefix[9] = {0};
+
+	start = p->buffer.p;
+
+	if (!parse_nostr_bech32_type(bech32->str, &type))
+		goto fail;
+
+	if (!cursor_push_varint(&p->buffer, type))
+		goto fail;
+
+	// save a spot for the raw bech32 buffer size
+	u8_size = (uint16_t*)p->buffer.p;
+	if (!cursor_skip(&p->buffer, 2))
+		goto fail;
+
+	if (!cursor_malloc_slice(&p->buffer, &u8, bech32->len))
+		goto fail;
+
+	if (!cursor_malloc_slice(&p->buffer, &u5, bech32->len))
+		goto fail;
 	
-	blocks->blocks[blocks->num_blocks++] = block;
+	if (bech32_decode_len(prefix, u5.p, &u5_out_len, bech32->str,
+			      bech32->len, MAX_PREFIX) == BECH32_ENCODING_NONE) {
+		goto fail;
+	}
+
+	u5.p += u5_out_len;
+
+	if (!bech32_convert_bits(u8.p, &u8_out_len, 8, u5.start, u5.p - u5.start, 5, 0))
+		goto fail;
+
+	u8.p += u8_out_len;
+
+	// move the out cursor to the end of the 8-bit buffer
+	p->buffer.p = u8.p;
+
+	if (u8_out_len > UINT16_MAX)
+		goto fail;
+
+	// mark the size of the bech32 buffer
+	*u8_size = (uint16_t)u8_out_len;
+
+	return 1;
+
+fail:
+	p->buffer.p = start;
+	return 0;
+}
+
+static int push_invoice_str(struct cursor *buf, struct str_block *str)
+{
+	unsigned char *start;
+	struct bolt11 *bolt11;
+	char *fail;
+
+	if (!(bolt11 = bolt11_decode(NULL, str->str, &fail)))
+		return 0;
+
+	start = buf->p;
+	if (!ndb_encode_invoice(buf, bolt11)) {
+		buf->p = start;
+		tal_free(bolt11);
+		return 0;
+	}
+
+	tal_free(bolt11);
 	return 1;
 }
 
-static int add_text_block(struct note_blocks *blocks, const u8 *start, const u8 *end)
+static int push_block(struct ndb_content_parser *p, struct note_block *block)
+{
+	// push the tag
+	if (!cursor_push_varint(&p->buffer, block->type))
+		return 0;
+
+	switch (block->type) {
+	case BLOCK_HASHTAG:
+	case BLOCK_TEXT:
+	case BLOCK_URL:
+		if (!push_str_block(&p->buffer, (const char*)p->content.start,
+			       &block->block.str))
+			return 0;
+		break;
+
+	case BLOCK_MENTION_INDEX:
+		if (!cursor_push_varint(&p->buffer, block->block.mention_index))
+			return 0;
+		break;
+	case BLOCK_MENTION_BECH32:
+		// we only push bech32 strs here
+		if (!push_bech32_str(p, &block->block.str))
+			return 0;
+		break;
+		
+	case BLOCK_INVOICE:
+		// we only push invoice strs here
+		if (!push_invoice_str(&p->buffer, &block->block.str))
+			return 0;
+		break;
+	}
+
+	p->blocks->num_blocks++;
+
+	return 1;
+}
+
+static int add_text_block(struct ndb_content_parser *p,
+			  const unsigned char *start, const unsigned char *end)
 {
 	struct note_block b;
 	
@@ -93,10 +240,10 @@ static int add_text_block(struct note_blocks *blocks, const u8 *start, const u8 
 		return 1;
 	
 	b.type = BLOCK_TEXT;
-	b.block.str.start = (const char*)start;
-	b.block.str.end = (const char*)end;
+	b.block.str.str = (const char*)start;
+	b.block.str.len = end - start;
 	
-	return add_block(blocks, b);
+	return push_block(p, &b);
 }
 
 static int consume_url_fragment(struct cursor *cur)
@@ -163,10 +310,12 @@ static int consume_url_host(struct cursor *cur)
 }
 
 static int parse_url(struct cursor *cur, struct note_block *block) {
-	u8 *start = cur->p;
-	u8 *host;
+	unsigned char *start = cur->p;
+	unsigned char *host;
+	unsigned char tmp[4096];
 	int host_len;
-	struct cursor path_cur;
+	struct cursor path_cur, tmp_cur;
+	make_cursor(tmp, tmp + sizeof(tmp), &tmp_cur);
 	
 	if (!parse_str(cur, "http"))
 		return 0;
@@ -222,29 +371,28 @@ static int parse_url(struct cursor *cur, struct note_block *block) {
 	}
 
 	// save the bech32 string pos in case we hit a damus.io link
-	block->block.str.start = (const char *)path_cur.p;
+	block->block.str.str = (const char *)path_cur.p;
 
 	// if we have a damus link, make it a mention
 	if (host_len == 8
 	&& !strncmp((const char *)host, "damus.io", 8)
-	&& parse_nostr_bech32(&path_cur, &block->block.mention_bech32.bech32))
+	&& parse_nostr_bech32_str(&path_cur))
 	{
-		block->block.str.end = (const char *)path_cur.p;
+		block->block.str.len = path_cur.p - path_cur.start;
 		block->type = BLOCK_MENTION_BECH32;
 		return 1;
 	}
 
 	block->type = BLOCK_URL;
-	block->block.str.start = (const char *)start;
-	block->block.str.end = (const char *)cur->p;
+	block->block.str.str = (const char *)start;
+	block->block.str.len = cur->p - start;
 	
 	return 1;
 }
 
 static int parse_invoice(struct cursor *cur, struct note_block *block) {
-	u8 *start, *end;
-	char *fail;
-	struct bolt11 *bolt11;
+	unsigned char *start, *end;
+
 	// optional
 	parse_str(cur, "lightning:");
 	
@@ -260,20 +408,10 @@ static int parse_invoice(struct cursor *cur, struct note_block *block) {
 	
 	end = cur->p;
 	
-	char str[end - start + 1];
-	str[end - start] = 0;
-	memcpy(str, start, end - start);
-	
-	if (!(bolt11 = bolt11_decode(NULL, str, &fail))) {
-		cur->p = start;
-		return 0;
-	}
-	
 	block->type = BLOCK_INVOICE;
 	
-	block->block.invoice.invstr.start = (const char*)start;
-	block->block.invoice.invstr.end = (const char*)end;
-	block->block.invoice.bolt11 = bolt11;
+	block->block.str.str = (const char*)start;
+	block->block.str.len = end - start;
 	
 	cur->p = end;
 	
@@ -282,107 +420,105 @@ static int parse_invoice(struct cursor *cur, struct note_block *block) {
 
 
 static int parse_mention_bech32(struct cursor *cur, struct note_block *block) {
-	u8 *start = cur->p;
+	unsigned char *start = cur->p;
 	
 	parse_char(cur, '@');
 	parse_str(cur, "nostr:");
 
-	block->block.str.start = (const char *)cur->p;
+	block->block.str.str = (const char *)cur->p;
 	
-	if (!parse_nostr_bech32(cur, &block->block.mention_bech32.bech32)) {
+	if (!parse_nostr_bech32_str(cur)) {
 		cur->p = start;
 		return 0;
 	}
 	
-	block->block.str.end = (const char *)cur->p;
-	
+	block->block.str.len = cur->p - start;
 	block->type = BLOCK_MENTION_BECH32;
 
 	return 1;
 }
 
-static int add_text_then_block(struct cursor *cur, struct note_blocks *blocks, struct note_block block, u8 **start, const u8 *pre_mention)
+static int add_text_then_block(struct ndb_content_parser *p,
+			       struct note_block *block,
+			       unsigned char **start,
+			       const unsigned char *pre_mention)
 {
-	if (!add_text_block(blocks, *start, pre_mention))
+	if (!add_text_block(p, *start, pre_mention))
 		return 0;
 	
-	*start = (u8*)cur->p;
+	*start = (unsigned char*)p->content.p;
 	
-	if (!add_block(blocks, block))
-		return 0;
-	
-	return 1;
+	return push_block(p, block);
 }
 
-int ndb_parse_content(struct note_blocks *blocks, const char *content) {
+int ndb_parse_content(unsigned char *buf, int buf_size,
+		      const char *content, int content_len,
+		      struct ndb_note_blocks **blocks_p)
+{
 	int cp, c;
-	struct cursor cur;
+	struct ndb_content_parser parser;
+
 	struct note_block block;
-	u8 *start, *pre_mention;
+	unsigned char *start, *pre_mention;
 	
-	blocks->words = 0;
-	blocks->num_blocks = 0;
-	make_cursor((u8*)content, (u8*)content + strlen(content), &cur);
-	
-	start = cur.p;
-	while (cur.p < cur.end && blocks->num_blocks < MAX_BLOCKS) {
-		cp = peek_char(&cur, -1);
-		c  = peek_char(&cur, 0);
+	make_cursor(buf, buf + buf_size, &parser.buffer);
+
+	// allocate some space for the blocks header
+	*blocks_p = parser.blocks = (struct ndb_note_blocks *)buf;
+	parser.buffer.p += sizeof(struct ndb_note_blocks);
+
+	make_cursor((unsigned char *)content,
+		    (unsigned char*)content + content_len, &parser.content);
+
+	parser.blocks->words = 0;
+	parser.blocks->num_blocks = 0;
+	parser.blocks->blocks_size = 0;
+
+	start = parser.content.p;
+	while (parser.content.p < parser.content.end) {
+		cp = peek_char(&parser.content, -1);
+		c  = peek_char(&parser.content, 0);
 		
 		// new word
-		if (is_whitespace(cp) && !is_whitespace(c)) {
-			blocks->words++;
-		}
+		if (is_whitespace(cp) && !is_whitespace(c))
+			parser.blocks->words++;
 		
-		pre_mention = cur.p;
+		pre_mention = parser.content.p;
 		if (cp == -1 || is_left_boundary(cp) || c == '#') {
-			if (c == '#' && (parse_mention_index(&cur, &block) || parse_hashtag(&cur, &block))) {
-				if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
+			if (c == '#' && (parse_mention_index(&parser.content, &block) || parse_hashtag(&parser.content, &block))) {
+				if (!add_text_then_block(&parser, &block, &start, pre_mention))
 					return 0;
 				continue;
-			} else if ((c == 'h' || c == 'H') && parse_url(&cur, &block)) {
-				if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
+			} else if ((c == 'h' || c == 'H') && parse_url(&parser.content, &block)) {
+				if (!add_text_then_block(&parser, &block, &start, pre_mention))
 					return 0;
 				continue;
-			} else if ((c == 'l' || c == 'L') && parse_invoice(&cur, &block)) {
-				if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
+			} else if ((c == 'l' || c == 'L') && parse_invoice(&parser.content, &block)) {
+				if (!add_text_then_block(&parser, &block, &start, pre_mention))
 					return 0;
 				continue;
-			} else if ((c == 'n' || c == '@') && parse_mention_bech32(&cur, &block)) {
-				if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
+			} else if ((c == 'n' || c == '@') && parse_mention_bech32(&parser.content, &block)) {
+				if (!add_text_then_block(&parser, &block, &start, pre_mention))
 					return 0;
 				continue;
 			}
 		}
 		
-		cur.p++;
+		parser.content.p++;
 	}
 	
-	if (cur.p - start > 0) {
-		if (!add_text_block(blocks, start, cur.p))
+	if (parser.content.p - start > 0) {
+		if (!add_text_block(&parser, start, parser.content.p))
 			return 0;
 	}
+
+	// pad to 8-byte alignment
+	if (!cursor_align(&parser.buffer, 8))
+		return 0;
+	assert((parser.buffer.p - parser.buffer.start) % 8 == 0);
+
+	parser.blocks->blocks_size = parser.buffer.p - parser.buffer.start;
 	
 	return 1;
 }
 
-void blocks_init(struct note_blocks *blocks) {
-	blocks->blocks = malloc(sizeof(struct note_block) * MAX_BLOCKS);
-	blocks->num_blocks = 0;
-}
-
-void blocks_free(struct note_blocks *blocks) {
-	if (!blocks->blocks) {
-		return;
-	}
-	
-	for (int i = 0; i < blocks->num_blocks; ++i) {
-		if (blocks->blocks[i].type == BLOCK_MENTION_BECH32) {
-			free(blocks->blocks[i].block.mention_bech32.bech32.buffer);
-			blocks->blocks[i].block.mention_bech32.bech32.buffer = NULL;
-		}
-	}
-
-	free(blocks->blocks);
-	blocks->num_blocks = 0;
-}

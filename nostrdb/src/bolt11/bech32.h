@@ -123,7 +123,8 @@ bech32_encoding bech32_decode_len(
     uint8_t *data,
     size_t *data_len,
     const char *input,
-    size_t input_len
+    size_t input_len,
+    int max_prefix_len
 );
 
 /* Helper from bech32: translates inbits-bit bytes to outbits-bit bytes.
