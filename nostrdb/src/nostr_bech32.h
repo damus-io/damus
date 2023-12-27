@@ -27,6 +27,7 @@ enum nostr_bech32_type {
 	NOSTR_BECH32_NADDR = 6,
 	NOSTR_BECH32_NSEC = 7,
 };
+#define NOSTR_BECH32_KNOWN_TYPES 7
 
 struct bech32_note {
 	const unsigned char *event_id;
@@ -79,11 +80,10 @@ struct nostr_bech32 {
 int parse_nostr_bech32_str(struct cursor *bech32);
 int parse_nostr_bech32_type(const char *prefix, enum nostr_bech32_type *type);
 
-/*
-int parse_nostr_bech32_buffer(unsigned char *buf, int buflen,
-			      enum nostr_bech32_type type,
+int parse_nostr_bech32_buffer(struct cursor *cur, enum nostr_bech32_type type,
 			      struct nostr_bech32 *obj);
 
+/*
 int parse_nostr_bech32(const char *bech32, size_t input_len,
 		       unsigned char *outbuf, size_t outlen,
 		       enum nostr_bech32_type *type);
