@@ -91,7 +91,7 @@ int bech32_encode(char *output, const char *hrp, const uint8_t *data, size_t dat
     return 1;
 }
 
-bech32_encoding bech32_decode_len(char* hrp, uint8_t *data, size_t *data_len, const char *input, size_t input_len) {
+bech32_encoding bech32_decode_len(char* hrp, uint8_t *data, size_t *data_len, const char *input, size_t input_len, int max_hrp_len) {
     uint32_t chk = 1;
     size_t i;
     size_t hrp_len;
@@ -104,6 +104,8 @@ bech32_encoding bech32_decode_len(char* hrp, uint8_t *data, size_t *data_len, co
         ++(*data_len);
     }
     hrp_len = input_len - (1 + *data_len);
+    if (hrp_len > max_hrp_len)
+	    return BECH32_ENCODING_NONE;
     if (1 + *data_len >= input_len || *data_len < 6) {
         return BECH32_ENCODING_NONE;
     }
@@ -158,13 +160,14 @@ bech32_encoding bech32_decode(char* hrp, uint8_t *data, size_t *data_len, const 
     if (len > max_input_len) {
         return BECH32_ENCODING_NONE;
     }
-    return bech32_decode_len(hrp, data, data_len, input, len);
+    return bech32_decode_len(hrp, data, data_len, input, len, 8);
 }
 
 int bech32_convert_bits(uint8_t* out, size_t* outlen, int outbits, const uint8_t* in, size_t inlen, int inbits, int pad) {
     uint32_t val = 0;
     int bits = 0;
     uint32_t maxv = (((uint32_t)1) << outbits) - 1;
+    *outlen = 0;
     while (inlen--) {
         val = (val << inbits) | *(in++);
         bits += inbits;
