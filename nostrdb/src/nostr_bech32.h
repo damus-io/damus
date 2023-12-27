@@ -11,8 +11,7 @@
 #include <stdio.h>
 #include "str_block.h"
 #include "cursor.h"
-typedef unsigned char u8;
-#define MAX_RELAYS 10
+#define MAX_RELAYS 24
 
 struct relays {
 	struct str_block relays[MAX_RELAYS];
@@ -30,42 +29,40 @@ enum nostr_bech32_type {
 };
 
 struct bech32_note {
-	const u8 *event_id;
+	const unsigned char *event_id;
 };
 
 struct bech32_npub {
-	const u8 *pubkey;
+	const unsigned char *pubkey;
 };
 
 struct bech32_nsec {
-	const u8 *nsec;
+	const unsigned char *nsec;
 };
 
 struct bech32_nevent {
 	struct relays relays;
-	const u8 *event_id;
-	const u8 *pubkey; // optional
+	const unsigned char *event_id;
+	const unsigned char *pubkey; // optional
 };
 
 struct bech32_nprofile {
 	struct relays relays;
-	const u8 *pubkey;
+	const unsigned char *pubkey;
 };
 
 struct bech32_naddr {
 	struct relays relays;
 	struct str_block identifier;
-	const u8 *pubkey;
+	const unsigned char *pubkey;
 };
 
 struct bech32_nrelay {
 	struct str_block relay;
 };
 
-typedef struct nostr_bech32 {
+struct nostr_bech32 {
 	enum nostr_bech32_type type;
-	u8 *buffer; // holds strings and tlv stuff
-	size_t buflen;
 	
 	union {
 		struct bech32_note note;
@@ -76,9 +73,20 @@ typedef struct nostr_bech32 {
 		struct bech32_naddr naddr;
 		struct bech32_nrelay nrelay;
 	} data;
-} nostr_bech32_t;
+};
 
 
-int parse_nostr_bech32(struct cursor *cur, struct nostr_bech32 *obj);
+int parse_nostr_bech32_str(struct cursor *bech32);
+int parse_nostr_bech32_type(const char *prefix, enum nostr_bech32_type *type);
+
+/*
+int parse_nostr_bech32_buffer(unsigned char *buf, int buflen,
+			      enum nostr_bech32_type type,
+			      struct nostr_bech32 *obj);
+
+int parse_nostr_bech32(const char *bech32, size_t input_len,
+		       unsigned char *outbuf, size_t outlen,
+		       enum nostr_bech32_type *type);
+		       */
 
 #endif /* nostr_bech32_h */
