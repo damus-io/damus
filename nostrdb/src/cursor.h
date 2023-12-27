@@ -714,4 +714,19 @@ static void consume_whitespace_or_punctuation(struct cursor *cur)
 	}
 }
 
+// pad cursor buffer to n-byte alignment
+static inline int cursor_align(struct cursor *cur, int bytes) {
+	size_t size = cur->p - cur->start;
+	int pad;
+
+	// pad to n-byte alignment
+	pad = ((size + (bytes-1)) & ~(bytes-1)) - size;
+
+	if (pad > 0 && !cursor_memset(cur, 0, pad))
+		return 0;
+
+	return 1;
+}
+
+
 #endif
