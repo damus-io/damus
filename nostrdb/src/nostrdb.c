@@ -219,7 +219,6 @@ static int ndb_make_text_search_key(unsigned char *buf, int bufsize,
 				    int *keysize)
 {
 	struct cursor cur;
-	int size, pad;
 	make_cursor(buf, buf + bufsize, &cur);
 
 	// TODO: need update this to uint64_t
@@ -245,15 +244,9 @@ static int ndb_make_text_search_key(unsigned char *buf, int bufsize,
 	if (!cursor_push_varint(&cur, word_index))
 		return 0;
 
-	size = cur.p - cur.start;
-
 	// pad to 8-byte alignment
-	pad = ((size + 7) & ~7) - size;
-	if (pad > 0) {
-		if (!cursor_memset(&cur, 0, pad)) {
-			return 0;
-		}
-	}
+	if (!cursor_align(&cur, 8))
+		return 0;
 
 	*keysize = cur.p - cur.start;
 	assert((*keysize % 8) == 0);
