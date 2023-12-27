@@ -24,17 +24,11 @@ struct nostr_tlv {
 	const unsigned char *value;
 };
 
-struct nostr_tlvs {
-	struct nostr_tlv tlvs[MAX_TLVS];
-	int num_tlvs;
-};
-
 static int parse_nostr_tlv(struct cursor *cur, struct nostr_tlv *tlv) {
 	// get the tlv tag
 	if (!cursor_pull_byte(cur, &tlv->type))
 		return 0;
-	
-	// unknown, fail!
+
 	if (tlv->type >= TLV_KNOWN_TLVS)
 		return 0;
 	
@@ -50,37 +44,6 @@ static int parse_nostr_tlv(struct cursor *cur, struct nostr_tlv *tlv) {
 	cur->p += tlv->len;
 	
 	return 1;
-}
-
-static int parse_nostr_tlvs(struct cursor *cur, struct nostr_tlvs *tlvs) {
-	int i;
-	tlvs->num_tlvs = 0;
-	
-	for (i = 0; i < MAX_TLVS; i++) {
-		if (parse_nostr_tlv(cur, &tlvs->tlvs[i])) {
-			tlvs->num_tlvs++;
-		} else {
-			break;
-		}
-	}
-	
-	if (tlvs->num_tlvs == 0)
-		return 0;
-	
-	return 1;
-}
-
-static int find_tlv(struct nostr_tlvs *tlvs, unsigned char type, struct nostr_tlv **tlv) {
-	*tlv = NULL;
-	
-	for (int i = 0; i < tlvs->num_tlvs; i++) {
-		if (tlvs->tlvs[i].type == type) {
-			*tlv = &tlvs->tlvs[i];
-			return 1;
-		}
-	}
-	
-	return 0;
 }
 
 int parse_nostr_bech32_type(const char *prefix, enum nostr_bech32_type *type) {
@@ -123,109 +86,129 @@ static int parse_nostr_bech32_nsec(struct cursor *cur, struct bech32_nsec *nsec)
 	return pull_bytes(cur, 32, &nsec->nsec);
 }
 
-static int tlvs_to_relays(struct nostr_tlvs *tlvs, struct relays *relays) {
-	struct nostr_tlv *tlv;
+static int add_relay(struct relays *relays, struct nostr_tlv *tlv)
+{
 	struct str_block *str;
+
+	if (relays->num_relays + 1 > MAX_RELAYS)
+		return 0;
 	
-	relays->num_relays = 0;
-	
-	for (int i = 0; i < tlvs->num_tlvs; i++) {
-		tlv = &tlvs->tlvs[i];
-		if (tlv->type != TLV_RELAY)
-			continue;
-		
-		if (relays->num_relays + 1 > MAX_RELAYS)
-			break;
-		
-		str = &relays->relays[relays->num_relays++];
-		str->str = (const char*)tlv->value;
-		str->len = tlv->len;
-	}
+	str = &relays->relays[relays->num_relays++];
+	str->str = (const char*)tlv->value;
+	str->len = tlv->len;
 	
 	return 1;
 }
 
 static int parse_nostr_bech32_nevent(struct cursor *cur, struct bech32_nevent *nevent) {
-	struct nostr_tlvs tlvs;
-	struct nostr_tlv *tlv;
-	
-	if (!parse_nostr_tlvs(cur, &tlvs))
-		return 0;
-	
-	if (!find_tlv(&tlvs, TLV_SPECIAL, &tlv))
-		return 0;
-	
-	if (tlv->len != 32)
-		return 0;
-	
-	nevent->event_id = tlv->value;
-	
-	if (find_tlv(&tlvs, TLV_AUTHOR, &tlv)) {
-		nevent->pubkey = tlv->value;
-	} else {
-		nevent->pubkey = NULL;
+	struct nostr_tlv tlv;
+	int i;
+
+	nevent->event_id = NULL;
+	nevent->pubkey = NULL;
+	nevent->relays.num_relays = 0;
+
+	for (i = 0; i < MAX_TLVS; i++) {
+		if (!parse_nostr_tlv(cur, &tlv))
+			break;
+
+		switch (tlv.type) {
+		case TLV_SPECIAL:
+			if (tlv.len != 32) return 0;
+			nevent->event_id = tlv.value;
+			break;
+		case TLV_AUTHOR:
+			if (tlv.len != 32) return 0;
+			nevent->pubkey = tlv.value;
+			break;
+		case TLV_RELAY:
+			add_relay(&nevent->relays, &tlv);
+			break;
+		}
 	}
-	
-	return tlvs_to_relays(&tlvs, &nevent->relays);
+
+	return nevent->event_id != NULL;
 }
 
 static int parse_nostr_bech32_naddr(struct cursor *cur, struct bech32_naddr *naddr) {
-	struct nostr_tlvs tlvs;
-	struct nostr_tlv *tlv;
-	
-	if (!parse_nostr_tlvs(cur, &tlvs))
-		return 0;
-	
-	if (!find_tlv(&tlvs, TLV_SPECIAL, &tlv))
-		return 0;
-	
-	naddr->identifier.str = (const char*)tlv->value;
-	naddr->identifier.len = tlv->len;
-	
-	if (!find_tlv(&tlvs, TLV_AUTHOR, &tlv))
-		return 0;
-	
-	naddr->pubkey = tlv->value;
-	
-	return tlvs_to_relays(&tlvs, &naddr->relays);
+	struct nostr_tlv tlv;
+	int i;
+
+	naddr->identifier.str = NULL;
+	naddr->identifier.len = 0;
+	naddr->pubkey = NULL;
+	naddr->relays.num_relays = 0;
+
+	for (i = 0; i < MAX_TLVS; i++) {
+		if (!parse_nostr_tlv(cur, &tlv))
+			break;
+
+		switch (tlv.type) {
+		case TLV_SPECIAL:
+			naddr->identifier.str = (const char*)tlv.value;
+			naddr->identifier.len = tlv.len;
+			break;
+		case TLV_AUTHOR:
+			if (tlv.len != 32) return 0;
+			naddr->pubkey = tlv.value;
+			break;
+		case TLV_RELAY:
+			add_relay(&naddr->relays, &tlv);
+			break;
+		}
+	}
+
+	return naddr->identifier.str != NULL;
 }
 
 static int parse_nostr_bech32_nprofile(struct cursor *cur, struct bech32_nprofile *nprofile) {
-	struct nostr_tlvs tlvs;
-	struct nostr_tlv *tlv;
-	
-	if (!parse_nostr_tlvs(cur, &tlvs))
-		return 0;
-	
-	if (!find_tlv(&tlvs, TLV_SPECIAL, &tlv))
-		return 0;
-	
-	if (tlv->len != 32)
-		return 0;
-	
-	nprofile->pubkey = tlv->value;
-	
-	return tlvs_to_relays(&tlvs, &nprofile->relays);
+	struct nostr_tlv tlv;
+	int i;
+
+	nprofile->pubkey = NULL;
+	nprofile->relays.num_relays = 0;
+
+	for (i = 0; i < MAX_TLVS; i++) {
+		if (!parse_nostr_tlv(cur, &tlv))
+			break;
+
+		switch (tlv.type) {
+		case TLV_SPECIAL:
+			if (tlv.len != 32) return 0;
+			nprofile->pubkey = tlv.value;
+			break;
+		case TLV_RELAY:
+			add_relay(&nprofile->relays, &tlv);
+			break;
+		}
+	}
+
+	return nprofile->pubkey != NULL;
 }
 
 static int parse_nostr_bech32_nrelay(struct cursor *cur, struct bech32_nrelay *nrelay) {
-	struct nostr_tlvs tlvs;
-	struct nostr_tlv *tlv;
+	struct nostr_tlv tlv;
+	int i;
+
+	nrelay->relay.str = NULL;
+	nrelay->relay.len = 0;
+
+	for (i = 0; i < MAX_TLVS; i++) {
+		if (!parse_nostr_tlv(cur, &tlv))
+			break;
+
+		switch (tlv.type) {
+		case TLV_SPECIAL:
+			nrelay->relay.str = (const char*)tlv.value;
+			nrelay->relay.len = tlv.len;
+			break;
+		}
+	}
 	
-	if (!parse_nostr_tlvs(cur, &tlvs))
-		return 0;
-	
-	if (!find_tlv(&tlvs, TLV_SPECIAL, &tlv))
-		return 0;
-	
-	nrelay->relay.str = (const char*)tlv->value;
-	nrelay->relay.len = tlv->len;
-	
-	return 1;
+	return nrelay->relay.str != NULL;
 }
 
-/*
-int parse_nostr_bech32_buffer(unsigned char *cur, int buflen,
+int parse_nostr_bech32_buffer(struct cursor *cur,
 			      enum nostr_bech32_type type,
 			      struct nostr_bech32 *obj)
 {
@@ -264,7 +247,6 @@ int parse_nostr_bech32_buffer(unsigned char *cur, int buflen,
 
 	return 1;
 }
-*/
 
 int parse_nostr_bech32_str(struct cursor *bech32) {
 	enum nostr_bech32_type type;
