@@ -85,6 +85,16 @@ static inline int cursor_slice(struct cursor *mem, struct cursor *slice, size_t 
 	return 1;
 }
 
+static inline int cursor_malloc_slice(struct cursor *mem, struct cursor *slice, size_t size)
+{
+	unsigned char *p;
+	if (!(p = cursor_malloc(mem, size))) {
+		return 0;
+	}
+	make_cursor(p, mem->p, slice);
+	return 1;
+}
+
 
 static inline void copy_cursor(struct cursor *src, struct cursor *dest)
 {
