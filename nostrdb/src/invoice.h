@@ -2,6 +2,9 @@
 #ifndef NDB_INVOICE_H
 #define NDB_INVOICE_H
 
+#include <inttypes.h>
+#include "cursor.h"
+
 struct bolt11;
 
 struct ndb_invoice {
