@@ -398,6 +398,8 @@ static inline int cursor_push_str(struct cursor *cursor, const char *str)
 
 static inline int cursor_push_c_str(struct cursor *cursor, const char *str)
 {
+	if (str == NULL)
+		return cursor_push_byte(cursor, 0);
 	return cursor_push_str(cursor, str) && cursor_push_byte(cursor, 0);
 }
 
