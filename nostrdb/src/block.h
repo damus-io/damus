@@ -38,19 +38,18 @@ struct ndb_mention_bech32_block {
 	struct nostr_bech32 bech32;
 };
 
-struct invoice_block {
+struct ndb_invoice_block {
 	struct str_block invstr;
 	struct ndb_invoice invoice;
-	struct bolt11 *bolt11;
 };
 
 struct note_block {
 	enum block_type type;
 	union {
 		struct str_block str;
-		struct invoice_block invoice;
+		struct ndb_invoice_block invoice;
 		struct ndb_mention_bech32_block mention_bech32;
-		int mention_index;
+		uint32_t mention_index;
 	} block;
 };
 

@@ -103,7 +103,7 @@ static int pull_str_block(struct cursor *buf, const char *content, struct str_bl
 }
 
 //
-// decode and push a bech32 string into our blocks output buffer.
+// decode and push a bech32 mention into our blocks output buffer.
 //
 // bech32 blocks are stored as:
 //
@@ -116,7 +116,7 @@ static int pull_str_block(struct cursor *buf, const char *content, struct str_bl
 // This allows us to not duplicate all of the TLV encoding and decoding code
 // for our on-disk nostrdb format.
 //
-static int push_bech32_str(struct ndb_content_parser *p, struct str_block *bech32)
+static int push_bech32_mention(struct ndb_content_parser *p, struct str_block *bech32)
 {
 	// we decode the raw bech32 directly into the output buffer
 	struct cursor u8, u5;
@@ -130,6 +130,10 @@ static int push_bech32_str(struct ndb_content_parser *p, struct str_block *bech3
 	start = p->buffer.p;
 
 	if (!parse_nostr_bech32_type(bech32->str, &type))
+		goto fail;
+
+	// make sure to push the str block!
+	if (!push_str_block(&p->buffer, (const char*)p->content.start, bech32))
 		goto fail;
 
 	if (!cursor_push_varint(&p->buffer, type))
@@ -174,7 +178,7 @@ fail:
 	return 0;
 }
 
-static int push_invoice_str(struct cursor *buf, struct str_block *str)
+static int push_invoice_str(struct ndb_content_parser *p, struct str_block *str)
 {
 	unsigned char *start;
 	struct bolt11 *bolt11;
@@ -183,9 +187,15 @@ static int push_invoice_str(struct cursor *buf, struct str_block *str)
 	if (!(bolt11 = bolt11_decode(NULL, str->str, &fail)))
 		return 0;
 
-	start = buf->p;
-	if (!ndb_encode_invoice(buf, bolt11)) {
-		buf->p = start;
+	start = p->buffer.p;
+
+	// push the text block just incase we don't care for the invoice
+	if (!push_str_block(&p->buffer, (const char*)p->content.start, str))
+		return 0;
+
+	// push decoded invoice data for quick access
+	if (!ndb_encode_invoice(&p->buffer, bolt11)) {
+		p->buffer.p = start;
 		tal_free(bolt11);
 		return 0;
 	}
@@ -194,8 +204,113 @@ static int push_invoice_str(struct cursor *buf, struct str_block *str)
 	return 1;
 }
 
-static int push_block(struct ndb_content_parser *p, struct note_block *block)
+static int pull_nostr_bech32_type(struct cursor *cur, enum nostr_bech32_type *type)
 {
+	uint64_t inttype;
+	if (!cursor_pull_varint(cur, &inttype))
+		return 0;
+
+	if (inttype > NOSTR_BECH32_KNOWN_TYPES)
+		return 0;
+
+	*type = inttype;
+	return 1;
+}
+
+static int pull_bech32_mention(const char *content, struct cursor *cur,
+			       struct ndb_mention_bech32_block *block) {
+	uint16_t size;
+	unsigned char *start;
+	enum nostr_bech32_type type;
+
+	start = cur->p;
+
+	if (!pull_str_block(cur, content, &block->str))
+		return 0;
+
+	if (!cursor_pull_u16(cur, &size))
+		return 0;
+
+	if (!pull_nostr_bech32_type(cur, &type))
+		return 0;
+
+	if (!parse_nostr_bech32_buffer(cur, type, &block->bech32))
+		return 0;
+
+	cur->p = start + size;
+	return 1;
+}
+
+static int pull_invoice(const char *content, struct cursor *cur,
+			struct ndb_invoice_block *block)
+{
+	if (!pull_str_block(cur, content, &block->invstr))
+		return 0;
+
+	return ndb_decode_invoice(cur, &block->invoice);
+}
+
+static int pull_block(const char *content, struct cursor *cur, struct note_block *block)
+{
+	unsigned char *start = cur->p;
+	uint32_t type;
+
+	if (!cursor_pull_varint_u32(cur, &type))
+		return 0;
+
+	block->type = type;
+
+	switch (block->type) {
+	case BLOCK_HASHTAG:
+	case BLOCK_TEXT:
+	case BLOCK_URL:
+		if (!pull_str_block(cur, content, &block->block.str))
+			goto fail;
+		break;
+
+	case BLOCK_MENTION_INDEX:
+		if (!cursor_pull_varint_u32(cur, &block->block.mention_index))
+			goto fail;
+		break;
+
+	case BLOCK_MENTION_BECH32:
+		if (!pull_bech32_mention(content, cur, &block->block.mention_bech32))
+			goto fail;
+		break;
+
+	case BLOCK_INVOICE:
+		// we only push invoice strs here
+		if (!pull_invoice(content, cur, &block->block.invoice))
+			goto fail;
+		break;
+	}
+
+	return 1;
+fail:
+	cur->p = start;
+	return 0;
+}
+
+int push_block(struct ndb_content_parser *p, struct note_block *block);
+static int add_text_block(struct ndb_content_parser *p, const char *start, const char *end)
+{
+	struct note_block b;
+	
+	if (start == end)
+		return 1;
+	
+	b.type = BLOCK_TEXT;
+	b.block.str.str = start;
+	b.block.str.len = end - start;
+	
+	return push_block(p, &b);
+}
+
+
+int push_block(struct ndb_content_parser *p, struct note_block *block)
+{
+	unsigned char *start = p->buffer.p;
+
 	// push the tag
 	if (!cursor_push_varint(&p->buffer, block->type))
 		return 0;
@@ -206,44 +321,46 @@ static int push_block(struct ndb_content_parser *p, struct note_block *block)
 	case BLOCK_URL:
 		if (!push_str_block(&p->buffer, (const char*)p->content.start,
 			       &block->block.str))
-			return 0;
+			goto fail;
 		break;
 
 	case BLOCK_MENTION_INDEX:
 		if (!cursor_push_varint(&p->buffer, block->block.mention_index))
-			return 0;
+			goto fail;
 		break;
 	case BLOCK_MENTION_BECH32:
 		// we only push bech32 strs here
-		if (!push_bech32_str(p, &block->block.str))
-			return 0;
+		if (!push_bech32_mention(p, &block->block.str)) {
+			// if we fail for some reason, try pushing just a text block
+			p->buffer.p = start;
+			if (!add_text_block(p, block->block.str.str,
+					       block->block.str.str +
+					       block->block.str.len)) {
+				goto fail;
+			}
+		}
 		break;
-		
+
 	case BLOCK_INVOICE:
 		// we only push invoice strs here
-		if (!push_invoice_str(&p->buffer, &block->block.str))
-			return 0;
+		if (!push_invoice_str(p, &block->block.str)) {
+			// if we fail for some reason, try pushing just a text block
+			p->buffer.p = start;
+			if (!add_text_block(p, block->block.str.str,
+					    block->block.str.str + block->block.str.len)) {
+				goto fail;
+			}
+		}
 		break;
 	}
 
 	p->blocks->num_blocks++;
 
 	return 1;
-}
 
-static int add_text_block(struct ndb_content_parser *p,
-			  const unsigned char *start, const unsigned char *end)
-{
-	struct note_block b;
-	
-	if (start == end)
-		return 1;
-	
-	b.type = BLOCK_TEXT;
-	b.block.str.str = (const char*)start;
-	b.block.str.len = end - start;
-	
-	return push_block(p, &b);
+fail:
+	p->buffer.p = start;
+	return 0;
 }
 
 static int consume_url_fragment(struct cursor *cur)
@@ -315,6 +432,7 @@ static int parse_url(struct cursor *cur, struct note_block *block) {
 	unsigned char tmp[4096];
 	int host_len;
 	struct cursor path_cur, tmp_cur;
+	enum nostr_bech32_type type;
 	make_cursor(tmp, tmp + sizeof(tmp), &tmp_cur);
 	
 	if (!parse_str(cur, "http"))
@@ -376,7 +494,7 @@ static int parse_url(struct cursor *cur, struct note_block *block) {
 	// if we have a damus link, make it a mention
 	if (host_len == 8
 	&& !strncmp((const char *)host, "damus.io", 8)
-	&& parse_nostr_bech32_str(&path_cur))
+	&& parse_nostr_bech32_str(&path_cur, &type))
 	{
 		block->block.str.len = path_cur.p - path_cur.start;
 		block->type = BLOCK_MENTION_BECH32;
@@ -421,13 +539,14 @@ static int parse_invoice(struct cursor *cur, struct note_block *block) {
 
 static int parse_mention_bech32(struct cursor *cur, struct note_block *block) {
 	unsigned char *start = cur->p;
+	enum nostr_bech32_type type;
 	
 	parse_char(cur, '@');
 	parse_str(cur, "nostr:");
 
 	block->block.str.str = (const char *)cur->p;
 	
-	if (!parse_nostr_bech32_str(cur)) {
+	if (!parse_nostr_bech32_str(cur, &type)) {
 		cur->p = start;
 		return 0;
 	}
@@ -443,7 +562,7 @@ static int add_text_then_block(struct ndb_content_parser *p,
 			       unsigned char **start,
 			       const unsigned char *pre_mention)
 {
-	if (!add_text_block(p, *start, pre_mention))
+	if (!add_text_block(p, (const char *)*start, (const char*)pre_mention))
 		return 0;
 	
 	*start = (unsigned char*)p->content.p;
@@ -457,8 +576,8 @@ int ndb_parse_content(unsigned char *buf, int buf_size,
 {
 	int cp, c;
 	struct ndb_content_parser parser;
-
 	struct note_block block;
+
 	unsigned char *start, *pre_mention;
 	
 	make_cursor(buf, buf + buf_size, &parser.buffer);
@@ -508,7 +627,7 @@ int ndb_parse_content(unsigned char *buf, int buf_size,
 	}
 	
 	if (parser.content.p - start > 0) {
-		if (!add_text_block(&parser, start, parser.content.p))
+		if (!add_text_block(&parser, (const char*)start, (const char *)parser.content.p))
 			return 0;
 	}
 
