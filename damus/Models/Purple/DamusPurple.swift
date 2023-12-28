@@ -62,17 +62,14 @@ class DamusPurple: StoreObserverDelegate {
     
     func create_account(pubkey: Pubkey) async throws {
         let url = environment.get_base_url().appendingPathComponent("accounts")
-        let payload: [String: String] = [
-            "pubkey": pubkey.hex()
-        ]
-        let encoded_payload = try JSONEncoder().encode(payload)
         
         Log.info("Creating account with Damus Purple server", for: .damus_purple)
         
         let (data, response) = try await make_nip98_authenticated_request(
             method: .post,
             url: url,
-            payload: encoded_payload,
+            payload: nil,
+            payload_type: nil,
             auth_keypair: self.keypair
         )
         
@@ -81,7 +78,7 @@ class DamusPurple: StoreObserverDelegate {
                 case 200:
                     Log.info("Created an account with Damus Purple server", for: .damus_purple)
                 default:
-                    Log.error("Error in creating account with Damus Purple. HTTP status code: %d", for: .damus_purple, httpResponse.statusCode)
+                    Log.error("Error in creating account with Damus Purple. HTTP status code: %d; Response: %s", for: .damus_purple, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
             }
         }
         
@@ -110,6 +107,7 @@ class DamusPurple: StoreObserverDelegate {
                     method: .post,
                     url: url,
                     payload: receiptData,
+                    payload_type: .binary,
                     auth_keypair: self.keypair
                 )
                 
@@ -118,7 +116,7 @@ class DamusPurple: StoreObserverDelegate {
                         case 200:
                             Log.info("Sent in-app purchase receipt to Damus Purple server successfully", for: .damus_purple)
                         default:
-                            Log.error("Error in sending in-app purchase receipt to Damus Purple. HTTP status code: %d", for: .damus_purple, httpResponse.statusCode)
+                            Log.error("Error in sending in-app purchase receipt to Damus Purple. HTTP status code: %d; Response: %s", for: .damus_purple, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
                     }
                 }
                 
