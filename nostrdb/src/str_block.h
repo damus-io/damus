@@ -4,7 +4,7 @@
 
 #include <inttypes.h>
 
-struct str_block {
+struct ndb_str_block {
 	const char *str;
 	uint32_t len;
 };

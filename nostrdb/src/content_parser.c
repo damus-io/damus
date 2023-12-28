@@ -1,6 +1,7 @@
 #include "cursor.h"
 #include "nostr_bech32.h"
 #include "block.h"
+#include "nostrdb.h"
 #include "invoice.h"
 #include "bolt11/bolt11.h"
 #include "bolt11/bech32.h"
@@ -8,15 +9,13 @@
 #include <string.h>
 
 #include "cursor.h"
-#include "block.h"
 
 struct ndb_content_parser {
 	int bech32_strs;
 	struct cursor buffer;
 	struct cursor content;
-	struct ndb_note_blocks *blocks;
+	struct ndb_blocks *blocks;
 };
-
 
 static int parse_digit(struct cursor *cur, int *digit) {
 	int c;
@@ -34,7 +33,7 @@ static int parse_digit(struct cursor *cur, int *digit) {
 }
 
 
-static int parse_mention_index(struct cursor *cur, struct note_block *block) {
+static int parse_mention_index(struct cursor *cur, struct ndb_block *block) {
 	int d1, d2, d3, ind;
 	unsigned char *start = cur->p;
 	
@@ -65,7 +64,7 @@ static int parse_mention_index(struct cursor *cur, struct note_block *block) {
 	return 1;
 }
 
-static int parse_hashtag(struct cursor *cur, struct note_block *block) {
+static int parse_hashtag(struct cursor *cur, struct ndb_block *block) {
 	int c;
 	unsigned char *start = cur->p;
 	
@@ -87,21 +86,6 @@ static int parse_hashtag(struct cursor *cur, struct note_block *block) {
 	return 1;
 }
 
-static int push_str_block(struct cursor *buf, const char *content, struct str_block *block) {
-	return cursor_push_varint(buf, block->str - content) &&
-	       cursor_push_varint(buf, block->len);
-}
-
-static int pull_str_block(struct cursor *buf, const char *content, struct str_block *block) {
-	uint32_t start;
-	if (!cursor_pull_varint_u32(buf, &start))
-		return 0;
-
-	block->str = content + start;
-
-	return cursor_pull_varint_u32(buf, &block->len);
-}
-
 //
 // decode and push a bech32 mention into our blocks output buffer.
 //
@@ -116,7 +100,7 @@ static int pull_str_block(struct cursor *buf, const char *content, struct str_bl
 // This allows us to not duplicate all of the TLV encoding and decoding code
 // for our on-disk nostrdb format.
 //
-static int push_bech32_mention(struct ndb_content_parser *p, struct str_block *bech32)
+static int push_bech32_mention(struct ndb_content_parser *p, struct ndb_str_block *bech32)
 {
 	// we decode the raw bech32 directly into the output buffer
 	struct cursor u8, u5;
@@ -178,7 +162,7 @@ fail:
 	return 0;
 }
 
-static int push_invoice_str(struct ndb_content_parser *p, struct str_block *str)
+static int push_invoice_str(struct ndb_content_parser *p, struct ndb_str_block *str)
 {
 	unsigned char *start;
 	struct bolt11 *bolt11;
@@ -204,97 +188,10 @@ static int push_invoice_str(struct ndb_content_parser *p, struct str_block *str)
 	return 1;
 }
 
-static int pull_nostr_bech32_type(struct cursor *cur, enum nostr_bech32_type *type)
-{
-	uint64_t inttype;
-	if (!cursor_pull_varint(cur, &inttype))
-		return 0;
-
-	if (inttype > NOSTR_BECH32_KNOWN_TYPES)
-		return 0;
-
-	*type = inttype;
-	return 1;
-}
-
-static int pull_bech32_mention(const char *content, struct cursor *cur,
-			       struct ndb_mention_bech32_block *block) {
-	uint16_t size;
-	unsigned char *start;
-	enum nostr_bech32_type type;
-
-	start = cur->p;
-
-	if (!pull_str_block(cur, content, &block->str))
-		return 0;
-
-	if (!cursor_pull_u16(cur, &size))
-		return 0;
-
-	if (!pull_nostr_bech32_type(cur, &type))
-		return 0;
-
-	if (!parse_nostr_bech32_buffer(cur, type, &block->bech32))
-		return 0;
-
-	cur->p = start + size;
-	return 1;
-}
-
-static int pull_invoice(const char *content, struct cursor *cur,
-			struct ndb_invoice_block *block)
-{
-	if (!pull_str_block(cur, content, &block->invstr))
-		return 0;
-
-	return ndb_decode_invoice(cur, &block->invoice);
-}
-
-static int pull_block(const char *content, struct cursor *cur, struct note_block *block)
-{
-	unsigned char *start = cur->p;
-	uint32_t type;
-
-	if (!cursor_pull_varint_u32(cur, &type))
-		return 0;
-
-	block->type = type;
-
-	switch (block->type) {
-	case BLOCK_HASHTAG:
-	case BLOCK_TEXT:
-	case BLOCK_URL:
-		if (!pull_str_block(cur, content, &block->block.str))
-			goto fail;
-		break;
-
-	case BLOCK_MENTION_INDEX:
-		if (!cursor_pull_varint_u32(cur, &block->block.mention_index))
-			goto fail;
-		break;
-
-	case BLOCK_MENTION_BECH32:
-		if (!pull_bech32_mention(content, cur, &block->block.mention_bech32))
-			goto fail;
-		break;
-
-	case BLOCK_INVOICE:
-		// we only push invoice strs here
-		if (!pull_invoice(content, cur, &block->block.invoice))
-			goto fail;
-		break;
-	}
-
-	return 1;
-fail:
-	cur->p = start;
-	return 0;
-}
-
-int push_block(struct ndb_content_parser *p, struct note_block *block);
+int push_block(struct ndb_content_parser *p, struct ndb_block *block);
 static int add_text_block(struct ndb_content_parser *p, const char *start, const char *end)
 {
-	struct note_block b;
+	struct ndb_block b;
 	
 	if (start == end)
 		return 1;
@@ -307,7 +204,7 @@ static int add_text_block(struct ndb_content_parser *p, const char *start, const
 }
 
 
-int push_block(struct ndb_content_parser *p, struct note_block *block)
+int push_block(struct ndb_content_parser *p, struct ndb_block *block)
 {
 	unsigned char *start = p->buffer.p;
 
@@ -473,7 +370,7 @@ static int consume_url_host(struct cursor *cur)
 	return count != 0;
 }
 
-static int parse_url(struct cursor *cur, struct note_block *block) {
+static int parse_url(struct cursor *cur, struct ndb_block *block) {
 	unsigned char *start = cur->p;
 	unsigned char *host;
 	unsigned char tmp[4096];
@@ -555,7 +452,7 @@ static int parse_url(struct cursor *cur, struct note_block *block) {
 	return 1;
 }
 
-static int parse_invoice(struct cursor *cur, struct note_block *block) {
+static int parse_invoice(struct cursor *cur, struct ndb_block *block) {
 	unsigned char *start, *end;
 
 	// optional
@@ -584,7 +481,7 @@ static int parse_invoice(struct cursor *cur, struct note_block *block) {
 }
 
 
-static int parse_mention_bech32(struct cursor *cur, struct note_block *block) {
+static int parse_mention_bech32(struct cursor *cur, struct ndb_block *block) {
 	unsigned char *start = cur->p;
 	enum nostr_bech32_type type;
 	
@@ -605,7 +502,7 @@ static int parse_mention_bech32(struct cursor *cur, struct note_block *block) {
 }
 
 static int add_text_then_block(struct ndb_content_parser *p,
-			       struct note_block *block,
+			       struct ndb_block *block,
 			       unsigned char **start,
 			       const unsigned char *pre_mention)
 {
@@ -619,19 +516,19 @@ static int add_text_then_block(struct ndb_content_parser *p,
 
 int ndb_parse_content(unsigned char *buf, int buf_size,
 		      const char *content, int content_len,
-		      struct ndb_note_blocks **blocks_p)
+		      struct ndb_blocks **blocks_p)
 {
 	int cp, c;
 	struct ndb_content_parser parser;
-	struct note_block block;
+	struct ndb_block block;
 
 	unsigned char *start, *pre_mention;
 	
 	make_cursor(buf, buf + buf_size, &parser.buffer);
 
 	// allocate some space for the blocks header
-	*blocks_p = parser.blocks = (struct ndb_note_blocks *)buf;
-	parser.buffer.p += sizeof(struct ndb_note_blocks);
+	*blocks_p = parser.blocks = (struct ndb_blocks *)buf;
+	parser.buffer.p += sizeof(struct ndb_blocks);
 
 	make_cursor((unsigned char *)content,
 		    (unsigned char*)content + content_len, &parser.content);
