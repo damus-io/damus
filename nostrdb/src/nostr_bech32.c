@@ -8,6 +8,8 @@
 #include "nostr_bech32.h"
 #include <stdlib.h>
 #include "cursor.h"
+#include "str_block.h"
+#include "nostrdb.h"
 #include "bolt11/bech32.h"
 
 #define MAX_TLVS 32
@@ -88,7 +90,7 @@ static int parse_nostr_bech32_nsec(struct cursor *cur, struct bech32_nsec *nsec)
 
 static int add_relay(struct relays *relays, struct nostr_tlv *tlv)
 {
-	struct str_block *str;
+	struct ndb_str_block *str;
 
 	if (relays->num_relays + 1 > MAX_RELAYS)
 		return 0;

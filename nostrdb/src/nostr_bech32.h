@@ -14,7 +14,7 @@
 #define MAX_RELAYS 24
 
 struct relays {
-	struct str_block relays[MAX_RELAYS];
+	struct ndb_str_block relays[MAX_RELAYS];
 	int num_relays;
 };
 
@@ -54,12 +54,12 @@ struct bech32_nprofile {
 
 struct bech32_naddr {
 	struct relays relays;
-	struct str_block identifier;
+	struct ndb_str_block identifier;
 	const unsigned char *pubkey;
 };
 
 struct bech32_nrelay {
-	struct str_block relay;
+	struct ndb_str_block relay;
 };
 
 struct nostr_bech32 {
