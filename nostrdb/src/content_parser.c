@@ -495,7 +495,7 @@ static int parse_mention_bech32(struct cursor *cur, struct ndb_block *block) {
 		return 0;
 	}
 	
-	block->block.str.len = cur->p - start;
+	block->block.str.len = cur->p - (unsigned char*)block->block.str.str;
 	block->type = BLOCK_MENTION_BECH32;
 
 	return 1;
