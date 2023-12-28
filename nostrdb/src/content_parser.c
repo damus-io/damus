@@ -363,6 +363,53 @@ fail:
 	return 0;
 }
 
+
+
+static inline int next_char_is_whitespace(unsigned char *cur, unsigned char *end) {
+	unsigned char *next = cur + 1;
+
+	if (next > end)
+		return 0;
+
+	if (next == end)
+		return 1;
+
+	return is_whitespace(*next);
+}
+
+static inline int char_disallowed_at_end_url(char c)
+{
+	return c == '.' || c == ',';
+ 
+}
+
+static int is_final_url_char(unsigned char *cur, unsigned char *end) 
+{
+	if (is_whitespace(*cur))
+		return 1;
+
+	if (next_char_is_whitespace(cur, end)) {
+		// next char is whitespace so this char could be the final char in the url
+		return char_disallowed_at_end_url(*cur);
+	}
+
+	// next char isn't whitespace so it can't be a final char
+	return 0;
+}
+
+static int consume_until_end_url(struct cursor *cur, int or_end) {
+	unsigned char *start = cur->p;
+
+	while (cur->p < cur->end) {
+		if (is_final_url_char(cur->p, cur->end))
+			return cur->p != start;
+
+		cur->p++;
+	}
+
+	return or_end;
+}
+
 static int consume_url_fragment(struct cursor *cur)
 {
 	int c;
@@ -376,7 +423,7 @@ static int consume_url_fragment(struct cursor *cur)
 
 	cur->p++;
 
-	return consume_until_whitespace(cur, 1);
+	return consume_until_end_url(cur, 1);
 }
 
 static int consume_url_path(struct cursor *cur)
@@ -393,7 +440,7 @@ static int consume_url_path(struct cursor *cur)
 	while (cur->p < cur->end) {
 		c = *cur->p;
 
-		if (c == '?' || c == '#' || is_whitespace(c)) {
+		if (c == '?' || c == '#' || is_final_url_char(cur->p, cur->end)) {
 			return 1;
 		}
 
@@ -411,7 +458,7 @@ static int consume_url_host(struct cursor *cur)
 	while (cur->p < cur->end) {
 		c = *cur->p;
 		// TODO: handle IDNs
-		if (is_alphanumeric(c) || c == '.' || c == '-')
+		if ((is_alphanumeric(c) || c == '.' || c == '-') && !is_final_url_char(cur->p, cur->end))
 		{
 			count++;
 			cur->p++;
