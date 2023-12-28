@@ -20,7 +20,8 @@
 
 struct ndb_json_parser;
 struct ndb;
-struct ndb_note_blocks;
+struct ndb_blocks;
+struct ndb_block;
 struct ndb_note;
 struct ndb_tag;
 struct ndb_tags;
@@ -197,12 +198,6 @@ struct ndb_builder {
 	struct ndb_note *note;
 	struct ndb_tag *current_tag;
 };
-
-/*
-struct ndb_block_iterator {
-	struct note_block block;
-};
-*/
 
 struct ndb_iterator {
 	struct ndb_note *note;
@@ -394,8 +389,30 @@ enum ndb_common_kind ndb_kind_to_common_kind(int kind);
 // CONTENT PARSER
 int ndb_parse_content(unsigned char *buf, int buf_size,
 		      const char *content, int content_len,
-		      struct ndb_note_blocks **blocks_p);
+		      struct ndb_blocks **blocks_p);
 
-//int ndb_blocks_iterate_next(struct ndb_block_iterator *iter);
+// BLOCKS
+enum ndb_block_type {
+    BLOCK_HASHTAG        = 1,
+    BLOCK_TEXT           = 2,
+    BLOCK_MENTION_INDEX  = 3,
+    BLOCK_MENTION_BECH32 = 4,
+    BLOCK_URL            = 5,
+    BLOCK_INVOICE        = 6,
+};
+#define NDB_NUM_BLOCK_TYPES 6
+
+enum ndb_block_type ndb_block_type(struct ndb_blocks *blocks);
+
+// BLOCK ITERATORS
+struct ndb_block_iterator *ndb_blocks_iterate_start(const char *, struct ndb_blocks *);
+void ndb_blocks_iterate_free(struct ndb_block_iterator *);
+struct ndb_block *ndb_blocks_iterate_next(struct ndb_block_iterator *);
+
+// STR BLOCKS
+enum ndb_block_type ndb_get_block_type(struct ndb_block *block);
+struct ndb_str_block *ndb_block_str(struct ndb_block *);
+const char *ndb_str_block_ptr(struct ndb_str_block *);
+uint32_t ndb_str_block_len(struct ndb_str_block *);
 
 #endif
