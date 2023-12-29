@@ -32,7 +32,7 @@ static int pull_nostr_bech32_type(struct cursor *cur, enum nostr_bech32_type *ty
 	if (!cursor_pull_varint(cur, &inttype))
 		return 0;
 
-	if (inttype > NOSTR_BECH32_KNOWN_TYPES)
+	if (inttype <= 0 || inttype > NOSTR_BECH32_KNOWN_TYPES)
 		return 0;
 
 	*type = inttype;
@@ -43,9 +43,7 @@ static int pull_nostr_bech32_type(struct cursor *cur, enum nostr_bech32_type *ty
 static int pull_bech32_mention(const char *content, struct cursor *cur, struct ndb_mention_bech32_block *block) {
 	uint16_t size;
 	unsigned char *start;
-	enum nostr_bech32_type type;
-
-	start = cur->p;
+	struct cursor bech32;
 
 	if (!pull_str_block(cur, content, &block->str))
 		return 0;
@@ -53,12 +51,17 @@ static int pull_bech32_mention(const char *content, struct cursor *cur, struct n
 	if (!cursor_pull_u16(cur, &size))
 		return 0;
 
-	if (!pull_nostr_bech32_type(cur, &type))
+	if (!pull_nostr_bech32_type(cur, &block->bech32.type))
 		return 0;
 
-	if (!parse_nostr_bech32_buffer(cur, type, &block->bech32))
+	make_cursor(cur->p, cur->p + size, &bech32);
+
+	start = cur->p;
+
+	if (!parse_nostr_bech32_buffer(&bech32, block->bech32.type, &block->bech32))
 		return 0;
 
+	//assert(bech32.p == start + size);
 	cur->p = start + size;
 	return 1;
 }
@@ -153,10 +156,11 @@ void ndb_blocks_iterate_free(struct ndb_block_iterator *iter)
 struct ndb_block *ndb_blocks_iterate_next(struct ndb_block_iterator *iter)
 {
 	while (iter->cur.p < iter->cur.end) {
-		if (!pull_block(iter->content, &iter->cur, &iter->block))
+		if (!pull_block(iter->content, &iter->cur, &iter->block)) {
 			return NULL;
-		else
+		} else {
 			return &iter->block;
+		}
 	}
 
 	return NULL;
@@ -180,5 +184,15 @@ struct ndb_str_block *ndb_block_str(struct ndb_block *block)
 
 	return NULL;
 }
-//const char *ndb_str_block_ptr(struct ndb_str_block *);
-//uint32_t ndb_str_block_len(struct ndb_str_block *);
+
+const char *ndb_str_block_ptr(struct ndb_str_block *str_block) {
+	return str_block->str;
+}
+
+uint32_t ndb_str_block_len(struct ndb_str_block *str_block) {
+	return str_block->len;
+}
+
+struct nostr_bech32 *ndb_bech32_block(struct ndb_block *block) {
+	return &block->block.mention_bech32.bech32;
+}
