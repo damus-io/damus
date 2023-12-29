@@ -168,6 +168,7 @@ enum ndb_dbs {
 	NDB_DB_PROFILE_LAST_FETCH,
 	NDB_DB_NOTE_KIND, // note kind index
 	NDB_DB_NOTE_TEXT, // note fulltext index
+	NDB_DB_NOTE_BLOCKS, // parsed note blocks for rendering
 	NDB_DBS,
 };
 
@@ -474,6 +475,8 @@ size_t ndb_blocks_total_size(struct ndb_blocks *blocks);
 /// Free blocks if they are owned, safe to call on unowned blocks as well.
 void ndb_blocks_free(struct ndb_blocks *blocks);
 
+// BLOCK DB
+struct ndb_blocks *ndb_get_blocks_by_key(struct ndb *ndb, struct ndb_txn *txn, uint64_t note_key);
 
 // BLOCK ITERATORS
 struct ndb_block_iterator *ndb_blocks_iterate_start(const char *, struct ndb_blocks *);
