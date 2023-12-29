@@ -119,13 +119,13 @@ static int push_bech32_mention(struct ndb_content_parser *p, struct ndb_str_bloc
 	// make sure to push the str block!
 	if (!push_str_block(&p->buffer, (const char*)p->content.start, bech32))
 		goto fail;
-
-	if (!cursor_push_varint(&p->buffer, type))
-		goto fail;
-
+	//
 	// save a spot for the raw bech32 buffer size
 	u8_size = (uint16_t*)p->buffer.p;
 	if (!cursor_skip(&p->buffer, 2))
+		goto fail;
+
+	if (!cursor_push_varint(&p->buffer, type))
 		goto fail;
 
 	if (!cursor_malloc_slice(&p->buffer, &u8, bech32->len))

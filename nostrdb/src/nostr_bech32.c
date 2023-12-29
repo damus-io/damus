@@ -88,11 +88,11 @@ static int parse_nostr_bech32_nsec(struct cursor *cur, struct bech32_nsec *nsec)
 	return pull_bytes(cur, 32, &nsec->nsec);
 }
 
-static int add_relay(struct relays *relays, struct nostr_tlv *tlv)
+static int add_relay(struct ndb_relays *relays, struct nostr_tlv *tlv)
 {
 	struct ndb_str_block *str;
 
-	if (relays->num_relays + 1 > MAX_RELAYS)
+	if (relays->num_relays + 1 > NDB_MAX_RELAYS)
 		return 0;
 	
 	str = &relays->relays[relays->num_relays++];
@@ -116,11 +116,13 @@ static int parse_nostr_bech32_nevent(struct cursor *cur, struct bech32_nevent *n
 
 		switch (tlv.type) {
 		case TLV_SPECIAL:
-			if (tlv.len != 32) return 0;
+			if (tlv.len != 32)
+				return 0;
 			nevent->event_id = tlv.value;
 			break;
 		case TLV_AUTHOR:
-			if (tlv.len != 32) return 0;
+			if (tlv.len != 32)
+				return 0;
 			nevent->pubkey = tlv.value;
 			break;
 		case TLV_RELAY:
@@ -269,7 +271,7 @@ int parse_nostr_bech32(unsigned char *buf, int buflen,
 	size_t parsed_len, u5_out_len, u8_out_len;
 	enum nostr_bech32_type type;
 	static const int MAX_PREFIX = 8;
-	struct cursor cur, bech32;
+	struct cursor cur, bech32, u8;
 
 	make_cursor(buf, buf + buflen, &cur);
 	make_cursor((unsigned char*)bech32_str, (unsigned char*)bech32_str + bech32_len, &bech32);
@@ -296,6 +298,8 @@ int parse_nostr_bech32(unsigned char *buf, int buflen,
 	if (!bech32_convert_bits(cur.p, &u8_out_len, 8, u5, u5_out_len, 5, 0))
 		return 0;
 
-	return parse_nostr_bech32_buffer(&cur, type, obj);
+	make_cursor(cur.p, cur.p + u8_out_len, &u8);
+
+	return parse_nostr_bech32_buffer(&u8, type, obj);
 }
 
