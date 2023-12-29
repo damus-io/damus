@@ -18,6 +18,8 @@
 #define ndb_debug(...) (void)0
 #endif
 
+#include "str_block.h"
+
 struct ndb_json_parser;
 struct ndb;
 struct ndb_blocks;
@@ -402,6 +404,72 @@ enum ndb_block_type {
 };
 #define NDB_NUM_BLOCK_TYPES 6
 
+#define NDB_MAX_RELAYS 24
+
+struct ndb_relays {
+	struct ndb_str_block relays[NDB_MAX_RELAYS];
+	int num_relays;
+};
+
+enum nostr_bech32_type {
+	NOSTR_BECH32_NOTE = 1,
+	NOSTR_BECH32_NPUB = 2,
+	NOSTR_BECH32_NPROFILE = 3,
+	NOSTR_BECH32_NEVENT = 4,
+	NOSTR_BECH32_NRELAY = 5,
+	NOSTR_BECH32_NADDR = 6,
+	NOSTR_BECH32_NSEC = 7,
+};
+#define NOSTR_BECH32_KNOWN_TYPES 7
+
+struct bech32_note {
+	const unsigned char *event_id;
+};
+
+struct bech32_npub {
+	const unsigned char *pubkey;
+};
+
+struct bech32_nsec {
+	const unsigned char *nsec;
+};
+
+struct bech32_nevent {
+	struct ndb_relays relays;
+	const unsigned char *event_id;
+	const unsigned char *pubkey; // optional
+};
+
+struct bech32_nprofile {
+	struct ndb_relays relays;
+	const unsigned char *pubkey;
+};
+
+struct bech32_naddr {
+	struct ndb_relays relays;
+	struct ndb_str_block identifier;
+	const unsigned char *pubkey;
+};
+
+struct bech32_nrelay {
+	struct ndb_str_block relay;
+};
+
+struct nostr_bech32 {
+	enum nostr_bech32_type type;
+	
+	union {
+		struct bech32_note note;
+		struct bech32_npub npub;
+		struct bech32_nsec nsec;
+		struct bech32_nevent nevent;
+		struct bech32_nprofile nprofile;
+		struct bech32_naddr naddr;
+		struct bech32_nrelay nrelay;
+	};
+};
+
+
 enum ndb_block_type ndb_block_type(struct ndb_blocks *blocks);
 
 // BLOCK ITERATORS
@@ -414,5 +482,8 @@ enum ndb_block_type ndb_get_block_type(struct ndb_block *block);
 struct ndb_str_block *ndb_block_str(struct ndb_block *);
 const char *ndb_str_block_ptr(struct ndb_str_block *);
 uint32_t ndb_str_block_len(struct ndb_str_block *);
+struct nostr_bech32 *ndb_bech32_block(struct ndb_block *block);
+
+// BECH32 BLOCKS
 
 #endif
