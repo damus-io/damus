@@ -11,8 +11,7 @@ int ndb_encode_invoice(struct cursor *cur, struct bolt11 *invoice) {
 	if (!cursor_push_byte(cur, 1))
 		return 0;
 
-	// TODO: make cursor_cursor_push_varint uint64_t
-	if (!cursor_push_varint(cur, invoice->msat->millisatoshis))
+	if (!cursor_push_varint(cur, invoice->msat == NULL ? 0 : invoice->msat->millisatoshis))
 		return 0;
 
 	if (!cursor_push_varint(cur, invoice->timestamp))
