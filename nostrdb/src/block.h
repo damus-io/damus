@@ -9,11 +9,14 @@
 #include "nostrdb.h"
 #include <inttypes.h>
 
+#define NDB_BLOCK_FLAG_OWNED 1
+
 #pragma pack(push, 1)
 
 struct ndb_blocks {
 	unsigned char version;
-	unsigned char padding[3];
+	unsigned char flags;
+	unsigned char padding[2];
 
 	uint32_t words;
 	uint32_t num_blocks;
