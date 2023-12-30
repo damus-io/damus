@@ -196,3 +196,8 @@ uint32_t ndb_str_block_len(struct ndb_str_block *str_block) {
 struct nostr_bech32 *ndb_bech32_block(struct ndb_block *block) {
 	return &block->block.mention_bech32.bech32;
 }
+
+// total size including padding
+size_t ndb_blocks_total_size(struct ndb_blocks *blocks) {
+	return blocks->total_size;
+}

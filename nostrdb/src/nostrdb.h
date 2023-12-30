@@ -469,6 +469,7 @@ int ndb_parse_content(unsigned char *buf, int buf_size,
 
 // BLOCKS
 enum ndb_block_type ndb_block_type(struct ndb_blocks *blocks);
+size_t ndb_blocks_total_size(struct ndb_blocks *blocks);
 
 
 

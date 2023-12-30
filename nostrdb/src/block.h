@@ -19,7 +19,8 @@ struct ndb_blocks {
 	uint32_t num_blocks;
 	uint32_t blocks_size;
 	// future expansion
-	uint32_t reserved[2];
+	uint32_t total_size;
+	uint32_t reserved;
 	unsigned char blocks[0]; // see ndb_block definition
 };
 
