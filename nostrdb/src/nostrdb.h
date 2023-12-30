@@ -471,6 +471,8 @@ int ndb_parse_content(unsigned char *buf, int buf_size,
 enum ndb_block_type ndb_block_type(struct ndb_blocks *blocks);
 size_t ndb_blocks_total_size(struct ndb_blocks *blocks);
 
+/// Free blocks if they are owned, safe to call on unowned blocks as well.
+void ndb_blocks_free(struct ndb_blocks *blocks);
 
 
 // BLOCK ITERATORS

@@ -201,3 +201,10 @@ struct nostr_bech32 *ndb_bech32_block(struct ndb_block *block) {
 size_t ndb_blocks_total_size(struct ndb_blocks *blocks) {
 	return blocks->total_size;
 }
+
+void ndb_blocks_free(struct ndb_blocks *blocks) {
+	if ((blocks->flags & NDB_BLOCK_FLAG_OWNED) != NDB_BLOCK_FLAG_OWNED)
+		return;
+
+	free(blocks);
+}
