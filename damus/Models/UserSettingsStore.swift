@@ -296,6 +296,8 @@ class UserSettingsStore: ObservableObject {
         switch translation_service {
         case .none:
             return false
+        case .purple:
+            return true
         case .libretranslate:
             return URLComponents(string: libretranslate_url) != nil
         case .deepl:

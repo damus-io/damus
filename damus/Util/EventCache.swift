@@ -306,7 +306,6 @@ func should_translate(event: NostrEvent, our_keypair: Keypair, settings: UserSet
 }
 
 func should_preload_translation(event: NostrEvent, our_keypair: Keypair, current_status: TranslateStatus, settings: UserSettingsStore, note_lang: String?) -> Bool {
-    
     switch current_status {
     case .havent_tried:
         return should_translate(event: event, our_keypair: our_keypair, settings: settings, note_lang: note_lang) && settings.auto_translate
@@ -445,7 +444,7 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
     // We have to recheck should_translate here now that we have note_language
     if plan.load_translations && should_translate(event: plan.event, our_keypair: our_keypair, settings: settings, note_lang: note_language) && settings.auto_translate
     {
-        translations = await translate_note(profiles: profiles, keypair: our_keypair, event: plan.event, settings: settings, note_lang: note_language)
+        translations = await translate_note(profiles: profiles, keypair: our_keypair, event: plan.event, settings: settings, note_lang: note_language, purple: state.purple)
     }
     
     let ts = translations

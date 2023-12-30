@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TranslationSettingsView: View {
     @ObservedObject var settings: UserSettingsStore
+    var damus_state: DamusState
     
     @Environment(\.dismiss) var dismiss
     
@@ -19,9 +20,15 @@ struct TranslationSettingsView: View {
                     .toggleStyle(.switch)
 
                 Picker(NSLocalizedString("Service", comment: "Prompt selection of translation service provider."), selection: $settings.translation_service) {
-                    ForEach(TranslationService.allCases, id: \.self) { server in
+                    ForEach(TranslationService.allCases.filter({ settings.enable_experimental_purple_api ? true : $0 != .purple }), id: \.self) { server in
                         Text(server.model.displayName)
                             .tag(server.model.tag)
+                    }
+                }
+                
+                if settings.translation_service == .purple && settings.enable_experimental_purple_api {
+                    NavigationLink(destination: DamusPurpleView(damus_state: damus_state)) {
+                        Text(NSLocalizedString("Configure Damus Purple", comment: "Button to allow Damus Purple to be configured"))
                     }
                 }
 
@@ -103,6 +110,6 @@ struct TranslationSettingsView: View {
 
 struct TranslationSettingsView_Previews: PreviewProvider {
     static var previews: some View {
-        TranslationSettingsView(settings: UserSettingsStore())
+        TranslationSettingsView(settings: UserSettingsStore(), damus_state: test_damus_state)
     }
 }

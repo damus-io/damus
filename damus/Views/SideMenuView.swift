@@ -55,7 +55,7 @@ struct SideMenuView: View {
             }
 
             if damus_state.settings.enable_experimental_purple_api {
-                NavigationLink(destination: DamusPurpleView(purple: damus_state.purple, keypair: damus_state.keypair)) {
+                NavigationLink(destination: DamusPurpleView(damus_state: damus_state)) {
                     HStack(spacing: 13) {
                         Image("nostr-hashtag")
                         Text("Purple")

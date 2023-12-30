@@ -64,7 +64,7 @@ struct TranslateView: View {
             guard let note_language = translations_model.note_language else {
                 return
             }
-            let res = await translate_note(profiles: damus_state.profiles, keypair: damus_state.keypair, event: event, settings: damus_state.settings, note_lang: note_language)
+            let res = await translate_note(profiles: damus_state.profiles, keypair: damus_state.keypair, event: event, settings: damus_state.settings, note_lang: note_language, purple: damus_state.purple)
             DispatchQueue.main.async {
                 self.translations_model.state = res
             }
@@ -125,10 +125,10 @@ struct TranslateView_Previews: PreviewProvider {
     }
 }
 
-func translate_note(profiles: Profiles, keypair: Keypair, event: NostrEvent, settings: UserSettingsStore, note_lang: String) async -> TranslateStatus {
+func translate_note(profiles: Profiles, keypair: Keypair, event: NostrEvent, settings: UserSettingsStore, note_lang: String, purple: DamusPurple) async -> TranslateStatus {
 
     // If the note language is different from our preferred languages, send a translation request.
-    let translator = Translator(settings)
+    let translator = Translator(settings, purple: purple)
     let originalContent = event.get_content(keypair)
     let translated_note = try? await translator.translate(originalContent, from: note_lang, to: current_language())
     

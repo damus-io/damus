@@ -42,7 +42,7 @@ struct PurchasedProduct {
 }
 
 struct DamusPurpleView: View {
-    let purple_api: DamusPurple
+    let damus_state: DamusState
     let keypair: Keypair
     
     @State var products: ProductState
@@ -50,13 +50,14 @@ struct DamusPurpleView: View {
     @State var selection: DamusPurpleType = .yearly
     @State var show_welcome_sheet: Bool = false
     @State var show_manage_subscriptions = false
+    @State var show_settings_change_confirmation_dialog = false
     
     @Environment(\.dismiss) var dismiss
     
-    init(purple: DamusPurple, keypair: Keypair) {
+    init(damus_state: DamusState) {
         self._products = State(wrappedValue: .loading)
-        self.purple_api = purple
-        self.keypair = keypair
+        self.damus_state = damus_state
+        self.keypair = damus_state.keypair
     }
     
     var body: some View {
@@ -94,10 +95,36 @@ struct DamusPurpleView: View {
             await load_products()
         }
         .ignoresSafeArea(.all)
-        .sheet(isPresented: $show_welcome_sheet, content: {
+        .sheet(isPresented: $show_welcome_sheet, onDismiss: {
+            update_user_settings_to_purple()
+        }, content: {
             DamusPurpleWelcomeView()
         })
+        .confirmationDialog(
+            NSLocalizedString("It seems that you already have a translation service configured. Would you like to switch to Damus Purple as your translator?", comment: "Confirmation dialog question asking users if they want their translation settings to be automatically switched to the Damus Purple translation service"),
+            isPresented: $show_settings_change_confirmation_dialog,
+            titleVisibility: .visible
+        ) {
+            Button("Yes") {
+                set_translation_settings_to_purple()
+            }.keyboardShortcut(.defaultAction)
+            Button("No", role: .cancel) {}
+        }
         .manageSubscriptionsSheet(isPresented: $show_manage_subscriptions)
+    }
+    
+    func update_user_settings_to_purple() {
+        if damus_state.settings.translation_service == .none {
+            set_translation_settings_to_purple()
+        }
+        else {
+            show_settings_change_confirmation_dialog = true
+        }
+    }
+    
+    func set_translation_settings_to_purple() {
+        damus_state.settings.translation_service = .purple
+        damus_state.settings.auto_translate = true
     }
     
     func handle_transactions(products: [Product]) async {
@@ -203,9 +230,9 @@ struct DamusPurpleView: View {
         
         switch result {
             case .success:
-                self.purple_api.starred_profiles_cache[keypair.pubkey] = nil
+                self.damus_state.purple.starred_profiles_cache[keypair.pubkey] = nil
                 Task {
-                    await self.purple_api.send_receipt()
+                    await self.damus_state.purple.send_receipt()
                 }
             default:
                 break
@@ -423,6 +450,6 @@ struct DamusPurpleView_Previews: PreviewProvider {
         ])
          */
         
-        DamusPurpleView(purple: test_damus_state.purple, keypair: test_damus_state.keypair)
+        DamusPurpleView(damus_state: test_damus_state)
     }
 }

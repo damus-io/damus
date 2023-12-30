@@ -126,6 +126,36 @@ class DamusPurple: StoreObserverDelegate {
             }
         }
     }
+    
+    func translate(text: String, source source_language: String, target target_language: String) async throws -> String {
+        var url = environment.get_base_url()
+        url.append(path: "/translate")
+        url.append(queryItems: [
+            .init(name: "source", value: source_language),
+            .init(name: "target", value: target_language),
+            .init(name: "q", value: text)
+        ])
+        let (data, response) = try await make_nip98_authenticated_request(
+            method: .get,
+            url: url,
+            payload: nil,
+            payload_type: nil,
+            auth_keypair: self.keypair
+        )
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            switch httpResponse.statusCode {
+                case 200:
+                    return try JSONDecoder().decode(TranslationResult.self, from: data).text
+                default:
+                    Log.error("Translation error with Damus Purple. HTTP status code: %d; Response: %s", for: .damus_purple, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
+                    throw PurpleError.translation_error(status_code: httpResponse.statusCode, response: data)
+            }
+        }
+        else {
+            throw PurpleError.translation_no_response
+        }
+    }
 }
 
 // MARK: API types
@@ -154,5 +184,14 @@ extension DamusPurple {
                     Constants.PURPLE_API_PRODUCTION_BASE_URL
             }
         }
+    }
+    
+    enum PurpleError: Error {
+        case translation_error(status_code: Int, response: Data)
+        case translation_no_response
+    }
+    
+    struct TranslationResult: Codable {
+        let text: String
     }
 }

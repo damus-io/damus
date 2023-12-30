@@ -12,16 +12,20 @@ import FoundationNetworking
 
 public struct Translator {
     private let userSettingsStore: UserSettingsStore
+    private let purple: DamusPurple
     private let session = URLSession.shared
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
 
-    init(_ userSettingsStore: UserSettingsStore) {
+    init(_ userSettingsStore: UserSettingsStore, purple: DamusPurple) {
         self.userSettingsStore = userSettingsStore
+        self.purple = purple
     }
 
     public func translate(_ text: String, from sourceLanguage: String, to targetLanguage: String) async throws -> String? {
         switch userSettingsStore.translation_service {
+        case .purple:
+            return try await translateWithPurple(text, from: sourceLanguage, to: targetLanguage)
         case .libretranslate:
             return try await translateWithLibreTranslate(text, from: sourceLanguage, to: targetLanguage)
         case .nokyctranslate:
@@ -88,6 +92,10 @@ public struct Translator {
 
         let response: Response = try await decodedData(for: request)
         return response.translations.map { $0.text }.joined(separator: " ")
+    }
+    
+    private func translateWithPurple(_ text: String, from sourceLanguage: String, to targetLanguage: String) async throws -> String? {
+        return try await self.purple.translate(text: text, source: sourceLanguage, target: targetLanguage)
     }
     
     private func translateWithNoKYCTranslate(_ text: String, from sourceLanguage: String, to targetLanguage: String) async throws -> String? {

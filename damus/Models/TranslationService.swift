@@ -29,6 +29,7 @@ enum TranslationService: String, CaseIterable, Identifiable, StringCodable {
     }
 
     case none
+    case purple
     case libretranslate
     case deepl
     case nokyctranslate
@@ -38,6 +39,8 @@ enum TranslationService: String, CaseIterable, Identifiable, StringCodable {
         switch self {
         case .none:
             return .init(tag: self.rawValue, displayName: NSLocalizedString("none_translation_service", value: "None", comment: "Dropdown option for selecting no translation service."))
+        case .purple:
+            return .init(tag: self.rawValue, displayName: NSLocalizedString("Damus Purple", comment: "Dropdown option for selecting Damus Purple as a translation service."))
         case .libretranslate:
             return .init(tag: self.rawValue, displayName: NSLocalizedString("LibreTranslate (Open Source)", comment: "Dropdown option for selecting LibreTranslate as the translation service."))
         case .deepl:

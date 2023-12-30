@@ -81,7 +81,7 @@ enum Route: Hashable {
         case .ZapSettings(let settings):
             ZapSettingsView(settings: settings)
         case .TranslationSettings(let settings):
-            TranslationSettingsView(settings: settings)
+            TranslationSettingsView(settings: settings, damus_state: damusState)
         case .ReactionsSettings(let settings):
             ReactionsSettingsView(settings: settings)
         case .SearchSettings(let settings):
