@@ -537,6 +537,7 @@ int ndb_parse_content(unsigned char *buf, int buf_size,
 	parser.blocks->num_blocks = 0;
 	parser.blocks->blocks_size = 0;
 	parser.blocks->flags = 0;
+	parser.blocks->version = 1;
 
 	blocks_start = start = parser.content.p;
 	while (parser.content.p < parser.content.end) {
