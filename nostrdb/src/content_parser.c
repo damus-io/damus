@@ -522,7 +522,7 @@ int ndb_parse_content(unsigned char *buf, int buf_size,
 	struct ndb_content_parser parser;
 	struct ndb_block block;
 
-	unsigned char *start, *pre_mention;
+	unsigned char *start, *pre_mention, *blocks_start;
 	
 	make_cursor(buf, buf + buf_size, &parser.buffer);
 
@@ -537,7 +537,7 @@ int ndb_parse_content(unsigned char *buf, int buf_size,
 	parser.blocks->num_blocks = 0;
 	parser.blocks->blocks_size = 0;
 
-	start = parser.content.p;
+	blocks_start = start = parser.content.p;
 	while (parser.content.p < parser.content.end) {
 		cp = peek_char(&parser.content, -1);
 		c  = peek_char(&parser.content, 0);
@@ -575,13 +575,16 @@ int ndb_parse_content(unsigned char *buf, int buf_size,
 			return 0;
 	}
 
+	parser.blocks->blocks_size = parser.buffer.p - blocks_start;
+
+	//
 	// pad to 8-byte alignment
+	//
 	if (!cursor_align(&parser.buffer, 8))
 		return 0;
 	assert((parser.buffer.p - parser.buffer.start) % 8 == 0);
+	parser.blocks->total_size = parser.buffer.p - parser.buffer.start;
 
-	parser.blocks->blocks_size = parser.buffer.p - parser.buffer.start;
-	
 	return 1;
 }
 
