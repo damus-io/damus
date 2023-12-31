@@ -194,3 +194,7 @@ void ndb_blocks_free(struct ndb_blocks *blocks) {
 
 	free(blocks);
 }
+
+int ndb_blocks_flags(struct ndb_blocks *blocks) {
+	return blocks->flags;
+}
