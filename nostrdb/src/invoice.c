@@ -1,6 +1,7 @@
 
 #include "cursor.h"
 #include "invoice.h"
+#include "nostrdb.h"
 #include "bolt11/bolt11.h"
 #include "bolt11/amount.h"
 
