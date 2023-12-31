@@ -29,26 +29,6 @@ struct ndb_blocks {
 
 #pragma pack(pop)
 
-struct ndb_mention_bech32_block {
-	struct ndb_str_block str;
-	struct nostr_bech32 bech32;
-};
-
-struct ndb_invoice_block {
-	struct ndb_str_block invstr;
-	struct ndb_invoice invoice;
-};
-
-struct ndb_block {
-	enum ndb_block_type type;
-	union {
-		struct ndb_str_block str;
-		struct ndb_invoice_block invoice;
-		struct ndb_mention_bech32_block mention_bech32;
-		uint32_t mention_index;
-	} block;
-};
-
 int push_str_block(struct cursor *buf, const char *content, struct ndb_str_block *block);
 int pull_str_block(struct cursor *buf, const char *content, struct ndb_str_block *block);
 

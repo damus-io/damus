@@ -360,6 +360,42 @@ struct nostr_bech32 {
 };
 
 
+struct ndb_mention_bech32_block {
+	struct ndb_str_block str;
+	struct nostr_bech32 bech32;
+};
+
+struct ndb_invoice {
+	unsigned char version;
+	uint64_t amount;
+	uint64_t timestamp;
+	uint64_t expiry;
+	char *description;
+	unsigned char *description_hash;
+};
+
+struct ndb_invoice_block {
+	struct ndb_str_block invstr;
+	struct ndb_invoice invoice;
+};
+
+struct ndb_block {
+	enum ndb_block_type type;
+	union {
+		struct ndb_str_block str;
+		struct ndb_invoice_block invoice;
+		struct ndb_mention_bech32_block mention_bech32;
+		uint32_t mention_index;
+	} block;
+};
+
+struct ndb_block_iterator {
+	const char *content;
+	struct ndb_blocks *blocks;
+	struct ndb_block block;
+	unsigned char *p;
+};
+
 // CONFIG
 void ndb_default_config(struct ndb_config *);
 void ndb_config_set_ingest_threads(struct ndb_config *config, int threads);
@@ -479,8 +515,7 @@ void ndb_blocks_free(struct ndb_blocks *blocks);
 struct ndb_blocks *ndb_get_blocks_by_key(struct ndb *ndb, struct ndb_txn *txn, uint64_t note_key);
 
 // BLOCK ITERATORS
-struct ndb_block_iterator *ndb_blocks_iterate_start(const char *, struct ndb_blocks *);
-void ndb_blocks_iterate_free(struct ndb_block_iterator *);
+void ndb_blocks_iterate_start(const char *, struct ndb_blocks *, struct ndb_block_iterator *);
 struct ndb_block *ndb_blocks_iterate_next(struct ndb_block_iterator *);
 
 // STR BLOCKS
