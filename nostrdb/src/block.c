@@ -4,13 +4,6 @@
 #include "block.h"
 #include <stdlib.h>
 
-struct ndb_block_iterator {
-	const char *content;
-	struct ndb_blocks *blocks;
-	struct ndb_block block;
-	struct cursor cur;
-};
-
 int push_str_block(struct cursor *buf, const char *content, struct ndb_str_block *block) {
 	return cursor_push_varint(buf, block->str - content) &&
 	       cursor_push_varint(buf, block->len);
@@ -133,32 +126,25 @@ enum ndb_block_type ndb_get_block_type(struct ndb_block *block) {
 }
 
 // BLOCK ITERATORS
-struct ndb_block_iterator *ndb_blocks_iterate_start(const char *content, struct ndb_blocks *blocks) {
-	struct ndb_block_iterator *iter = malloc(sizeof(*iter));
-	if (!iter)
-		return NULL;
-
+void ndb_blocks_iterate_start(const char *content, struct ndb_blocks *blocks, struct ndb_block_iterator *iter) {
 	iter->blocks = blocks;
 	iter->content = content;
-
-	make_cursor((unsigned char *)blocks->blocks,
-		    blocks->blocks + blocks->blocks_size, &iter->cur);
-
-	return iter;
-}
-
-void ndb_blocks_iterate_free(struct ndb_block_iterator *iter)
-{
-	if (iter)
-		free(iter);
+	iter->p = blocks->blocks;
 }
 
 struct ndb_block *ndb_blocks_iterate_next(struct ndb_block_iterator *iter)
 {
-	while (iter->cur.p < iter->cur.end) {
-		if (!pull_block(iter->content, &iter->cur, &iter->block)) {
+	struct cursor cur;
+	cur.start = iter->blocks->blocks;
+	cur.p = iter->p;
+	cur.end = iter->blocks->blocks + iter->blocks->blocks_size;
+
+	while (cur.p < cur.end) {
+		if (!pull_block(iter->content, &cur, &iter->block)) {
+			iter->p = cur.p;
 			return NULL;
 		} else {
+			iter->p = cur.p;
 			return &iter->block;
 		}
 	}
