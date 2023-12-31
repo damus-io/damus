@@ -505,7 +505,8 @@ int ndb_parse_content(unsigned char *buf, int buf_size,
 		      struct ndb_blocks **blocks_p);
 
 // BLOCKS
-enum ndb_block_type ndb_block_type(struct ndb_blocks *blocks);
+enum ndb_block_type ndb_get_block_type(struct ndb_block *block);
+int ndb_blocks_flags(struct ndb_blocks *block);
 size_t ndb_blocks_total_size(struct ndb_blocks *blocks);
 
 /// Free blocks if they are owned, safe to call on unowned blocks as well.
@@ -519,7 +520,6 @@ void ndb_blocks_iterate_start(const char *, struct ndb_blocks *, struct ndb_bloc
 struct ndb_block *ndb_blocks_iterate_next(struct ndb_block_iterator *);
 
 // STR BLOCKS
-enum ndb_block_type ndb_get_block_type(struct ndb_block *block);
 struct ndb_str_block *ndb_block_str(struct ndb_block *);
 const char *ndb_str_block_ptr(struct ndb_str_block *);
 uint32_t ndb_str_block_len(struct ndb_str_block *);
