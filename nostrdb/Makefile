@@ -112,12 +112,12 @@ deps/flatcc_$(FLATCC_VER).tar.gz: deps/.dir
 #	mv flatcc-$(FLATCC_VER) deps/flatcc
 #	touch $@
 
-deps/lmdb/lmdb.h: deps/LMDB_$(LMDB_VER).tar.gz deps/.dir
-	tar xf $<
-	rm -rf deps/lmdb
-	mv lmdb-LMDB_$(LMDB_VER)/libraries/liblmdb deps/lmdb
-	rm -rf lmdb-LMDB_$(LMDB_VER)
-	touch $@
+#deps/lmdb/lmdb.h: deps/LMDB_$(LMDB_VER).tar.gz deps/.dir
+#	tar xf $<
+#	rm -rf deps/lmdb
+#	mv lmdb-LMDB_$(LMDB_VER)/libraries/liblmdb deps/lmdb
+#	rm -rf lmdb-LMDB_$(LMDB_VER)
+#	touch $@
 
 deps/secp256k1/.git: deps/.dir
 	@devtools/refresh-submodules.sh $(SUBMODULES)
