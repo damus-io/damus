@@ -498,7 +498,7 @@ static inline int next_char_is_whitespace(unsigned char *curChar, unsigned char 
 }
 
 static int char_disallowed_at_end_url(char c){
-    return c == '.';
+    return c == '.' || c == ',';
 }
 
 static inline int is_final_url_char(unsigned char *curChar, unsigned char *endChar){

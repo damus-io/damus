@@ -140,6 +140,51 @@ final class UrlTests: XCTestCase {
     func testParseURL_OneURLEndPeriodSerachQuery_RemovesPeriod(){
         testParseURL(inputURLString: "https://www.example.com/search?q=test+query.", expectedURLs: "https://www.example.com/search?q=test+query")
     }
+    
+    func testParseURL_OneURLEndComma_RemovesComma(){
+        testParseURL(inputURLString: "http://example.com,", expectedURLs: "http://example.com")
+    }
+    
+    func testParseURL_OneURL_RemovesComma(){
+        testParseURL(inputURLString: "http://example.com/,test", expectedURLs: "http://example.com/,test")
+    }
+    
+    func testParseURL_OneURLEndCommaAndSpaceSimple_RemovesComma(){
+        testParseURL(inputURLString: "http://example.com, ", expectedURLs: "http://example.com")
+    }
+    
+    func testParseURL_OneURLEndCommaComplex_RemovesComma(){
+        testParseURL(inputURLString: "http://example.com/test,", expectedURLs: "http://example.com/test")
+    }
+    
+    func testParseURL_TwoURLEndCommaSimple_RemovesCommas(){
+        testParseURL(inputURLString: "http://example.com, http://example.com,", expectedURLs: "http://example.com", "http://example.com")
+    }
+    
+    func testParseURL_ThreeURLEndCommaSimple_RemovesCommas(){
+        testParseURL(inputURLString: "http://example.com, http://example.com, http://example.com,", expectedURLs: "http://example.com", "http://example.com", "http://example.com")
+    }
+    
+    func testParseURL_TwoURLEndCommaFirstComplexSecondSimple_RemovesCommas(){
+        testParseURL(inputURLString: "http://example.com/test, http://example.com,", expectedURLs: "http://example.com/test", "http://example.com")
+    }
+    
+    func testParseURL_TwoURLEndCommaFirstSimpleSecondComplex_RemovesCommas(){
+        testParseURL(inputURLString: "http://example.com, http://example.com/test,", expectedURLs: "http://example.com", "http://example.com/test")
+    }
+    
+    func testParseURL_TwoURLEndCommaFirstComplexSecondComplex_RemovesCommas(){
+        testParseURL(inputURLString: "http://example.com/test, http://example.com/test,", expectedURLs: "http://example.com/test", "http://example.com/test")
+    }
+    
+    func testParseURL_OneURLEndCommaSerachQuery_RemovesComma(){
+        testParseURL(inputURLString: "https://www.example.com/search?q=test+query,", expectedURLs: "https://www.example.com/search?q=test+query")
+    }
+    
+    func testParseURL_TwoURLFirstSimpleSecondSimpleNoSpace_RemovesCommas(){
+        testParseURL(inputURLString: "http://example.com,http://example.com,",
+        expectedURLs: "http://example.com", "http://example.com")
+    }
 }
 
 func testParseURL(inputURLString: String, expectedURLs: String...) {
