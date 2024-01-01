@@ -2665,6 +2665,9 @@ static void ndb_write_blocks(struct ndb_txn *txn, uint64_t note_key,
 	int rc;
 	MDB_val key, val;
 
+	// make sure we're not writing the owned flag to the db
+	blocks->flags &= ~NDB_BLOCK_FLAG_OWNED;
+
 	key.mv_data = &note_key;
 	key.mv_size = sizeof(note_key);
 	val.mv_data = blocks;
