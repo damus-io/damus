@@ -105,10 +105,10 @@ struct DamusPurpleView: View {
             isPresented: $show_settings_change_confirmation_dialog,
             titleVisibility: .visible
         ) {
-            Button("Yes") {
+            Button(NSLocalizedString("Yes", comment: "User confirm Yes")) {
                 set_translation_settings_to_purple()
             }.keyboardShortcut(.defaultAction)
-            Button("No", role: .cancel) {}
+            Button(NSLocalizedString("No", comment: "User confirm No"), role: .cancel) {}
         }
         .manageSubscriptionsSheet(isPresented: $show_manage_subscriptions)
     }
@@ -200,12 +200,12 @@ struct DamusPurpleView: View {
     }
     
     var ProductLoadError: some View {
-        Text("Ah dang there was an error loading subscription information from the AppStore. Please try again later :(")
+        Text(NSLocalizedString("Subscription Error", comment: "Ah dang there was an error loading subscription information from the AppStore. Please try again later :("))
             .foregroundColor(.white)
     }
     
     var SaveText: Text {
-        Text("Save 14%")
+        Text(NSLocalizedString("Save 14%", comment: "Percentage of purchase price the user will save"))
             .font(.callout)
             .italic()
             .foregroundColor(DamusColors.green)
@@ -250,7 +250,7 @@ struct DamusPurpleView: View {
             return (
                 AnyView(
                     HStack(spacing: 10) {
-                        Text("Anually")
+                        Text(NSLocalizedString("Annually", comment: "Annual renewal of purple subscription"))
                         Spacer()
                         Text(verbatim: non_discounted_price(product)).strikethrough().foregroundColor(DamusColors.white.opacity(0.5))
                         Text(verbatim: product.displayPrice).fontWeight(.bold)
@@ -261,7 +261,7 @@ struct DamusPurpleView: View {
             return (
                 AnyView(
                     HStack(spacing: 10) {
-                        Text("Monthly")
+                        Text(NSLocalizedString("Monthly", comment: "Monthly renewal of purple subscription"))
                         Spacer()
                         Text(verbatim: product.displayPrice).fontWeight(.bold)
                     }
@@ -272,7 +272,7 @@ struct DamusPurpleView: View {
     
     func ProductsView(_ products: [Product]) -> some View {
         VStack(spacing: 10) {
-            Text("Save 20% off on an annual subscription")
+            Text(NSLocalizedString("Save 20% off on an annual subscription", comment: "Savings for purchasing an annual subscription"))
                 .font(.callout.bold())
                 .foregroundColor(.white)
             ForEach(products) { product in
@@ -295,21 +295,21 @@ struct DamusPurpleView: View {
     
     func PurchasedView(_ purchased: PurchasedProduct) -> some View {
         VStack(spacing: 10) {
-            Text("Purchased!")
+            Text(NSLocalizedString("Purchased!", comment: "User purchased a subscription"))
                 .font(.title2)
                 .foregroundColor(.white)
             price_description(product: purchased.product)
                 .foregroundColor(.white)
                 .opacity(0.65)
                 .frame(width: 200)
-            Text("Purchased on")
+            Text(NSLocalizedString("Purchased on", comment: "Indicating when the user purchased the subscription"))
                 .font(.title2)
                 .foregroundColor(.white)
             Text(format_date(UInt32(purchased.tx.purchaseDate.timeIntervalSince1970)))
                 .foregroundColor(.white)
                 .opacity(0.65)
             if let expiry = purchased.tx.expirationDate {
-                Text("Renews on")
+                Text(NSLocalizedString("Renews on", comment: "Indicating when the subscription will renew"))
                     .font(.title2)
                     .foregroundColor(.white)
                 Text(format_date(UInt32(expiry.timeIntervalSince1970)))
@@ -319,7 +319,7 @@ struct DamusPurpleView: View {
             Button(action: {
                 show_manage_subscriptions = true
             }, label: {
-                Text("Manage")
+                Text(NSLocalizedString("Manage", comment: "Manage the damus subscription"))
             })
             .buttonStyle(GradientButtonStyle())
         }
@@ -360,7 +360,7 @@ struct DamusPurpleView: View {
                     .shadow(radius: 5)
                 
                 VStack(alignment: .leading) {
-                    Text("Purple")
+                    Text(NSLocalizedString("Purple", comment: "Subscription service name"))
                         .font(.system(size: 60.0).weight(.bold))
                         .foregroundStyle(
                             LinearGradient(
@@ -376,16 +376,16 @@ struct DamusPurpleView: View {
             .padding(.bottom, 30)
             
             VStack(alignment: .leading, spacing: 30) {
-                Subtitle("Help us stay independent in our mission for Freedom tech with our Purple subscription, and look cool doing it!")
+                Subtitle(NSLocalizedString("Help us stay independent in our mission for Freedom tech with our Purple subscription, and look cool doing it!", comment: "Damus purple subscription pitch"))
                     .multilineTextAlignment(.center)
                 
                 HStack(spacing: 20) {
                     IconOnBox("heart.fill")
                     
                     VStack(alignment: .leading) {
-                        Title("Help Build The Future")
+                        Title(NSLocalizedString("Help Build The Future", comment: "Title for funding future damus development"))
                         
-                        Subtitle("Support Damus development to help build the future of decentralized communication on the web.")
+                        Subtitle(NSLocalizedString("Support Damus development to help build the future of decentralized communication on the web.", comment: "Reason for supporting damus development"))
                     }
                 }
                 
@@ -393,7 +393,7 @@ struct DamusPurpleView: View {
                     IconOnBox("ai-3-stars.fill")
                     
                     VStack(alignment: .leading) {
-                        Title("Exclusive features")
+                        Title(NSLocalizedString("Exclusive features", comment: "Features only available on subscription service"))
                             .padding(.bottom, -3)
                         
                         HStack(spacing: 3) {
@@ -401,7 +401,7 @@ struct DamusPurpleView: View {
                                 .resizable()
                                 .frame(width: 15, height: 15)
                             
-                            Text("Coming soon")
+                            Text(NSLocalizedString("Coming soon", comment: "Feature is still in development and will be available soon"))
                                 .font(.caption)
                                 .bold()
                         }
@@ -411,7 +411,7 @@ struct DamusPurpleView: View {
                         .background(DamusColors.lightBackgroundPink)
                         .cornerRadius(30.0)
                         
-                        Subtitle("Be the first to access upcoming premium features: Automatic translations, longer note storage, and more")
+                        Subtitle(NSLocalizedString("Be the first to access upcoming premium features: Automatic translations, longer note storage, and more", comment: "Description of new features to be expected"))
                             .padding(.top, 3)
                     }
                 }
@@ -420,9 +420,9 @@ struct DamusPurpleView: View {
                     IconOnBox("badge")
                     
                     VStack(alignment: .leading) {
-                        Title("Supporter Badge")
+                        Title(NSLocalizedString("Supporter Badge", comment: "Title for supporter badge"))
                         
-                        Subtitle("Get a special badge on your profile to show everyone your contribution to Freedom tech")
+                        Subtitle(NSLocalizedString("Get a special badge on your profile to show everyone your contribution to Freedom tech", comment: "Supporter badge description"))
                     }
                 }
                 
