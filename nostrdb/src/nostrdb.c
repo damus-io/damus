@@ -2961,6 +2961,15 @@ static void *ndb_writer_thread(void *data)
 				note_nkey = 
 					ndb_write_note(&txn, &msg->note,
 						       scratch, scratch_size);
+				if (note_nkey > 0) {
+					written_notes[num_notes++] =
+					(struct written_note){
+						.note_id = note_nkey,
+						.note = &msg->note,
+					};
+				} else {
+					ndb_debug("failed to write note\n");
+				}
 				if (msg->profile.record.builder) {
 					// only write if parsing didn't fail
 					ndb_write_profile(&txn, &msg->profile,
