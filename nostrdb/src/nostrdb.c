@@ -1790,7 +1790,7 @@ static int ndb_ingester_process_event(secp256k1_context *ctx,
 
 	if ((int)note_size == -42) {
 		// we already have this!
-		//ndb_debug("already have id??\n");
+		ndb_debug("already have id??\n");
 		goto cleanup;
 	} else if (note_size == 0) {
 		ndb_debug("failed to parse '%.*s'\n", ev->len, ev->json);
@@ -1810,6 +1810,7 @@ static int ndb_ingester_process_event(secp256k1_context *ctx,
 
 			if (!ndb_ingester_process_note(ctx, note, note_size,
 						       out, ingester)) {
+				ndb_debug("failed to process note\n");
 				goto cleanup;
 			} else {
 				// we're done with the original json, free it
@@ -1831,6 +1832,7 @@ static int ndb_ingester_process_event(secp256k1_context *ctx,
 
 			if (!ndb_ingester_process_note(ctx, note, note_size,
 						       out, ingester)) {
+				ndb_debug("failed to process note\n");
 				goto cleanup;
 			} else {
 				// we're done with the original json, free it
@@ -2924,7 +2926,7 @@ static void *ndb_writer_thread(void *data)
 		txn.mdb_txn = NULL;
 		num_notes = 0;
 		popped = prot_queue_pop_all(&writer->inbox, msgs, THREAD_QUEUE_BATCH);
-		//ndb_debug("writer popped %d items\n", popped);
+		ndb_debug("writer popped %d items\n", popped);
 
 		any_note = 0;
 		for (i = 0 ; i < popped; i++) {
@@ -2970,7 +2972,6 @@ static void *ndb_writer_thread(void *data)
 							   scratch,
 							   scratch_size);
 
-				ndb_debug("note_nkey %" PRIu64 "\n", note_nkey);
 				if (note_nkey > 0) {
 					written_notes[num_notes++] = (struct written_note){
 						.note_id = note_nkey,
@@ -2999,7 +3000,7 @@ static void *ndb_writer_thread(void *data)
 			if (!ndb_end_query(&txn)) {
 				ndb_debug("writer thread txn commit failed\n");
 			} else {
-				ndb_debug("notifying subscriptions\n");
+				ndb_debug("notifying subscriptions, %d notes\n", num_notes);
 				ndb_notify_subscriptions(writer->monitor,
 							 written_notes,
 							 num_notes);
@@ -3047,7 +3048,7 @@ static void *ndb_ingester_thread(void *data)
 		any_event = 0;
 
 		popped = prot_queue_pop_all(&thread->inbox, msgs, THREAD_QUEUE_BATCH);
-		//ndb_debug("ingester popped %d items\n", popped);
+		ndb_debug("ingester popped %d items\n", popped);
 
 		for (i = 0; i < popped; i++) {
 			msg = &msgs[i];
@@ -3085,7 +3086,7 @@ static void *ndb_ingester_thread(void *data)
 			mdb_txn_abort(read_txn);
 
 		if (to_write > 0) {
-			//ndb_debug("pushing %d events to write queue\n", to_write); 
+			ndb_debug("pushing %d events to write queue\n", to_write);
 			if (!ndb_writer_queue_msgs(ingester->writer, outs, to_write)) {
 				ndb_debug("failed pushing %d events to write queue\n", to_write); 
 			}
