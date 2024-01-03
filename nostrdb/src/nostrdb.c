@@ -864,7 +864,7 @@ void ndb_filter_end_field(struct ndb_filter *filter)
 	filter->current = NULL;
 }
 
-static void ndb_filter_group_init(struct ndb_filter_group *group)
+void ndb_filter_group_init(struct ndb_filter_group *group)
 {
 	group->num_filters = 0;
 }
