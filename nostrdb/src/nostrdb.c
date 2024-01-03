@@ -869,12 +869,14 @@ static void ndb_filter_group_init(struct ndb_filter_group *group)
 	group->num_filters = 0;
 }
 
-static int ndb_filter_group_add(struct ndb_filter_group *group,
+int ndb_filter_group_add(struct ndb_filter_group *group,
 				struct ndb_filter *filter)
 {
-	if (group->num_filters + 1 >= NDB_MAX_FILTERS)
+	if (group->num_filters + 1 > NDB_MAX_FILTERS)
 		return 0;
+
 	group->filters[group->num_filters++] = filter;
+	return 1;
 }
 
 static int ndb_filter_group_matches(struct ndb_filter_group *group,
