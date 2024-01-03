@@ -4954,6 +4954,11 @@ int ndb_wait_for_notes(struct ndb *ndb, uint64_t subid, uint64_t *note_ids,
 		       int note_id_capacity)
 {
 	struct ndb_subscription *sub;
+
+	// this is not a valid subscription id
+	if (subid == 0)
+		return 0;
+
 	if (!(sub = ndb_find_subscription(ndb, subid)))
 		return 0;
 
