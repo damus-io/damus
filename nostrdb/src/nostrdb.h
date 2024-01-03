@@ -471,7 +471,7 @@ int ndb_filter_matches(struct ndb_filter *, struct ndb_note *);
 void ndb_filter_reset(struct ndb_filter *);
 void ndb_filter_end_field(struct ndb_filter *);
 int ndb_filter_group_add(struct ndb_filter_group *group, struct ndb_filter *f);
-void ndb_filter_free(struct ndb_filter *);
+void ndb_filter_destroy(struct ndb_filter *);
 
 // SUBSCRIPTIONS
 uint64_t ndb_subscribe(struct ndb *, struct ndb_filter_group *);
