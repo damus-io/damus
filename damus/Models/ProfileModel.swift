@@ -118,6 +118,11 @@ class ProfileModel: ObservableObject, Equatable {
             case .ok:
                 break
             case .event(_, let ev):
+                // Ensure the event public key matches this profiles public key
+                // This is done to protect against a relay not properly filtering events by the pubkey
+                // See https://github.com/damus-io/damus/issues/1846 for more information
+                guard self.pubkey == ev.pubkey else { break }
+
                 add_event(ev)
             case .notice:
                 break
