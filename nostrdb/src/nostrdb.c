@@ -35,6 +35,8 @@ static const int THREAD_QUEUE_BATCH = 4096;
 
 // maximum number of active subscriptions
 #define MAX_SUBSCRIPTIONS 32
+#define MAX_SCAN_CURSORS 12
+#define MAX_FILTERS    16
 
 // the maximum size of inbox queues
 static const int DEFAULT_QUEUE_SIZE = 1000000;
@@ -175,6 +177,11 @@ struct ndb_ingester {
 	ndb_ingest_filter_fn filter;
 };
 
+struct ndb_filter_group {
+	struct ndb_filter *filters[MAX_FILTERS];
+	int num_filters;
+};
+
 struct ndb_subscription {
 	uint64_t subid;
 	struct ndb_filter_group group;
@@ -213,7 +220,7 @@ struct ndb_scan_cursor {
 
 // same idea as DBScan in strfry
 struct ndb_dbscan {
-	struct ndb_scan_cursor cursors[12];
+	struct ndb_scan_cursor cursors[MAX_SCAN_CURSORS];
 	int num_cursors;
 };
 
@@ -916,15 +923,15 @@ void ndb_filter_end_field(struct ndb_filter *filter)
 
 }
 
-void ndb_filter_group_init(struct ndb_filter_group *group)
+static void ndb_filter_group_init(struct ndb_filter_group *group)
 {
 	group->num_filters = 0;
 }
 
-int ndb_filter_group_add(struct ndb_filter_group *group,
+static int ndb_filter_group_add(struct ndb_filter_group *group,
 				struct ndb_filter *filter)
 {
-	if (group->num_filters + 1 > NDB_MAX_FILTERS)
+	if (group->num_filters + 1 > MAX_FILTERS)
 		return 0;
 
 	group->filters[group->num_filters++] = filter;
@@ -5017,7 +5024,7 @@ int ndb_wait_for_notes(struct ndb *ndb, uint64_t subid, uint64_t *note_ids,
 	return prot_queue_pop_all(&sub->inbox, note_ids, note_id_capacity);
 }
 
-uint64_t ndb_subscribe(struct ndb *ndb, struct ndb_filter_group *group)
+uint64_t ndb_subscribe(struct ndb *ndb, struct ndb_filter *filters, int num_filters)
 {
 	static uint64_t subids = 0;
 	struct ndb_subscription *sub;
@@ -5036,8 +5043,12 @@ uint64_t ndb_subscribe(struct ndb *ndb, struct ndb_filter_group *group)
 	subid = ++subids;
 	sub->subid = subid;
 
-	memcpy(&sub->group, group, sizeof(*group));
-
+	ndb_filter_group_init(&sub->group);
+	for (index = 0; index < num_filters; index++) {
+		if (!ndb_filter_group_add(&sub->group, &filters[index]))
+			return 0;
+	}
+	
 	// 500k ought to be enough for anyone
 	buflen = sizeof(uint64_t) * 65536;
 	buf = malloc(buflen);
