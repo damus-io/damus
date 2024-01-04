@@ -16,11 +16,6 @@ struct cursor {
 	unsigned char *end;
 };
 
-struct array {
-	struct cursor cur;
-	unsigned int elem_size;
-};
-
 static inline void reset_cursor(struct cursor *cursor)
 {
 	cursor->p = cursor->start;
@@ -37,12 +32,6 @@ static inline void make_cursor(unsigned char *start, unsigned char *end, struct 
 	cursor->start = start;
 	cursor->p = start;
 	cursor->end = end;
-}
-
-static inline void make_array(struct array *a, unsigned char* start, unsigned char *end, unsigned int elem_size)
-{
-	make_cursor(start, end, &a->cur);
-	a->elem_size = elem_size;
 }
 
 static inline int cursor_eof(struct cursor *c)
