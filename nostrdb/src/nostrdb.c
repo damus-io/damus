@@ -741,7 +741,6 @@ int ndb_filter_add_id_element(struct ndb_filter *filter, const unsigned char *id
 	return ndb_filter_add_element(filter, el);
 }
 
-// TODO: build a hashtable so this is O(1)
 static int ndb_generic_filter_matches(struct ndb_filter_elements *els,
 				      struct ndb_note *note)
 {
@@ -840,6 +839,7 @@ static int compare_kinds(const void *pa, const void *pb)
 int ndb_filter_matches(struct ndb_filter *filter, struct ndb_note *note)
 {
 	int i, j;
+	unsigned char *id;
 	struct ndb_filter_elements *els;
 
 	for (i = 0; i < filter->num_elements; i++) {
@@ -853,17 +853,17 @@ int ndb_filter_matches(struct ndb_filter *filter, struct ndb_note *note)
 			}
 			break;
 		case NDB_FILTER_IDS:
-			unsigned char *id = note->id;
+			id = note->id;
 			if (bsearch(&id, &els->elements[0], els->count,
 				    sizeof(els->elements[0].id), compare_ids)) {
-				goto cont;
+				continue;
 			}
 			break;
 		case NDB_FILTER_AUTHORS:
-			unsigned char *pubkey = note->pubkey;
-			if (bsearch(&pubkey, &els->elements[0], els->count,
+			id = note->pubkey;
+			if (bsearch(&id, &els->elements[0], els->count,
 				    sizeof(els->elements[0].id), compare_ids)) {
-				goto cont;
+				continue;
 			}
 			break;
 		case NDB_FILTER_GENERIC:
