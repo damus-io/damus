@@ -262,7 +262,7 @@ static inline int cursor_pop(struct cursor *cur, unsigned char *data, int len)
 
 static inline int cursor_push(struct cursor *cursor, unsigned char *data, int len)
 {
-	if (unlikely(cursor->p + len >= cursor->end)) {
+	if (unlikely(cursor->p + len > cursor->end)) {
 		return 0;
 	}
 
