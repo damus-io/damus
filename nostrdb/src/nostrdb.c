@@ -804,6 +804,31 @@ static int ndb_generic_filter_matches(struct ndb_filter_elements *els,
 	return 0;
 }
 
+static int compare_ids(const void *pa, const void *pb)
+{
+	const unsigned char *a = *(const unsigned char **)pa;
+	const unsigned char *b = *(const unsigned char **)pb;
+
+	return memcmp(a, b, 32);
+}
+
+static int compare_kinds(const void *pa, const void *pb)
+{
+
+	// NOTE: this should match type in `union ndb_filter_element`
+	uint64_t a = *(uint64_t *)pa;
+	uint64_t b = *(uint64_t *)pb;
+
+	if (a < b) {
+		return -1;
+	} else if (a > b) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+
 // returns 1 if a filter matches a note
 int ndb_filter_matches(struct ndb_filter *filter, struct ndb_note *note)
 {
@@ -860,8 +885,34 @@ cont:
 
 void ndb_filter_end_field(struct ndb_filter *filter)
 {
-	filter->elements[filter->num_elements++] = filter->current;
+	struct ndb_filter_elements *cur;
+
+	cur = filter->current;
+	filter->elements[filter->num_elements++] = cur;
+
+	// sort elements for binary search
+	switch (cur->field.type) {
+	case NDB_FILTER_IDS:
+	case NDB_FILTER_AUTHORS:
+		qsort(&cur->elements[0], cur->count,
+		      sizeof(cur->elements[0].id), compare_ids);
+		break;
+	case NDB_FILTER_KINDS:
+		qsort(&cur->elements[0], cur->count,
+		      sizeof(cur->elements[0].integer), compare_kinds);
+		break;
+	case NDB_FILTER_GENERIC:
+		// TODO: generic tag search sorting
+		break;
+	case NDB_FILTER_SINCE:
+	case NDB_FILTER_UNTIL:
+	case NDB_FILTER_LIMIT:
+		// don't need to sort these
+		break;
+	}
+
 	filter->current = NULL;
+
 }
 
 void ndb_filter_group_init(struct ndb_filter_group *group)
