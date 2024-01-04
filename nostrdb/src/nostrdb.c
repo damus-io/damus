@@ -2552,16 +2552,16 @@ retry:
 		return 0;
 	}
 
+			/*
 	if (last_result) {
 		if (result->key.word_index < last_result->key.word_index) {
-			/*
 			fprintf(stderr, "skipping '%.*s' because it is before last result '%.*s'\n",
 					result->key.str_len, result->key.str,
 					last_result->key.str_len, last_result->key.str);
-					*/
 			return 0;
 		}
 	}
+					*/
 
 	return 1;
 }
