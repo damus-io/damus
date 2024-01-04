@@ -397,6 +397,10 @@ struct ndb_block_iterator {
 	unsigned char *p;
 };
 
+struct ndb_query_result {
+	struct ndb_note *note;
+};
+
 // CONFIG
 void ndb_default_config(struct ndb_config *);
 void ndb_config_set_ingest_threads(struct ndb_config *config, int threads);
@@ -476,7 +480,7 @@ void ndb_text_search_config_set_order(struct ndb_text_search_config *, enum ndb_
 void ndb_text_search_config_set_limit(struct ndb_text_search_config *, int limit);
 
 // QUERY
-void ndb_query(struct ndb_filter **, int num_filters);
+int ndb_query(struct ndb_txn *txn, struct ndb_filter *filters, int num_filters, struct ndb_query_result *results, int result_capacity, int *count);
 
 // STATS
 int ndb_stat(struct ndb *ndb, struct ndb_stat *stat);
