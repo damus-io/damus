@@ -724,10 +724,10 @@ int ndb_filter_add_id_element(struct ndb_filter *filter, const unsigned char *id
 	case NDB_FILTER_SINCE:
 	case NDB_FILTER_UNTIL:
 	case NDB_FILTER_LIMIT:
+	case NDB_FILTER_KINDS:
 		return 0;
 	case NDB_FILTER_IDS:
 	case NDB_FILTER_AUTHORS:
-	case NDB_FILTER_KINDS:
 	case NDB_FILTER_GENERIC:
 		break;
 	}
