@@ -1493,6 +1493,27 @@ int ndb_write_last_profile_fetch(struct ndb *ndb, const unsigned char *pubkey,
 	return ndb_writer_queue_msg(&ndb->writer, &msg);
 }
 
+
+// When doing cursor scans from greatest to lowest, this function positions the
+// cursor at the first element before descending. MDB_SET_RANGE puts us right
+// after the first element, so we have to go back one.
+static int ndb_cursor_start(MDB_cursor *cur, MDB_val *k, MDB_val *v)
+{
+	// Position cursor at the next key greater than or equal to the specified key
+	if (mdb_cursor_get(cur, k, v, MDB_SET_RANGE)) {
+		// Failed :(. It could be the last element?
+		if (mdb_cursor_get(cur, k, v, MDB_LAST))
+			return 0;
+	} else {
+		// if set range worked and our key exists, it should be
+		// the one right before this one
+		if (mdb_cursor_get(cur, k, v, MDB_PREV))
+			return 0;
+	}
+
+	return 1;
+}
+
 // get some value based on a clustered id key
 int ndb_get_tsid(struct ndb_txn *txn, enum ndb_dbs db, const unsigned char *id,
 		 MDB_val *val)
@@ -1513,17 +1534,8 @@ int ndb_get_tsid(struct ndb_txn *txn, enum ndb_dbs db, const unsigned char *id,
 		return 0;
 	}
 
-	// Position cursor at the next key greater than or equal to the specified key
-	if (mdb_cursor_get(cur, &k, &v, MDB_SET_RANGE)) {
-		// Failed :(. It could be the last element?
-		if (mdb_cursor_get(cur, &k, &v, MDB_LAST))
-			goto cleanup;
-	} else {
-		// if set range worked and our key exists, it should be
-		// the one right before this one
-		if (mdb_cursor_get(cur, &k, &v, MDB_PREV))
-			goto cleanup;
-	}
+	if (!ndb_cursor_start(cur, &k, &v))
+		goto cleanup;
 
 	if (memcmp(k.mv_data, id, 32) == 0) {
 		*val = v;
