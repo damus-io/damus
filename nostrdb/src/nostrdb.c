@@ -845,17 +845,18 @@ int ndb_filter_matches(struct ndb_filter *filter, struct ndb_note *note)
 					goto cont;
 			}
 			break;
-		// TODO: add filter hashtable for large id lists
 		case NDB_FILTER_IDS:
-			for (j = 0; j < els->count; j++) {
-				if (!memcmp(els->elements[j].id, note->id, 32))
-					goto cont;
+			unsigned char *id = note->id;
+			if (bsearch(&id, &els->elements[0], els->count,
+				    sizeof(els->elements[0].id), compare_ids)) {
+				goto cont;
 			}
 			break;
 		case NDB_FILTER_AUTHORS:
-			for (j = 0; j < els->count; j++) {
-				if (!memcmp(els->elements[j].id, note->pubkey, 32))
-					goto cont;
+			unsigned char *pubkey = note->pubkey;
+			if (bsearch(&pubkey, &els->elements[0], els->count,
+				    sizeof(els->elements[0].id), compare_ids)) {
+				goto cont;
 			}
 			break;
 		case NDB_FILTER_GENERIC:
