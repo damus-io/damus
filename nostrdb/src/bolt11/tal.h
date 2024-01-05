@@ -387,7 +387,7 @@ tal_t *tal_parent(const tal_t *ctx);
  * @type: the type (should match type of @p!)
  * @p: the tal array to copy (or resized & reparented if take())
  *
- * The comon case of duplicating an entire tal array.
+ * The common case of duplicating an entire tal array.
  */
 #define tal_dup_talarr(ctx, type, p)                    \
     ((type *)tal_dup_talarr_((ctx), tal_typechk_(p, type *),    \
@@ -418,7 +418,7 @@ tal_t *tal_parent(const tal_t *ctx);
  * @error_fn: called on errors or NULL (default is abort)
  *
  * The defaults are set up so tal functions never return NULL, but you
- * can override erorr_fn to change that.  error_fn can return, and is
+ * can override error_fn to change that.  error_fn can return, and is
  * called if alloc_fn or resize_fn fail.
  *
  * If any parameter is NULL, that function is unchanged.
