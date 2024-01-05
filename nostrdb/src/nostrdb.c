@@ -268,7 +268,7 @@ static int ndb_make_text_search_key(unsigned char *buf, int bufsize,
 
 	// TODO: need update this to uint64_t
 	// we push this first because our query function can pull this off
-	// quicky to check matches
+	// quickly to check matches
 	if (!cursor_push_varint(&cur, (int32_t)note_id))
 		return 0;
 
