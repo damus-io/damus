@@ -32,7 +32,7 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 - Relays: You can add more relays to send your notes to by tapping the "+". 
   - Find more relays to add: https://nostr.info/relays/ 
 - Public Key (pubkey): Your public, personal address and how people can find and tag you
- - Secret Key: Your *private* key unique to you. Never share your private key publically and share with other clients at your own risk!
+ - Secret Key: Your *private* key unique to you. Never share your private key publicly and share with other clients at your own risk!
    - Save your keys somewhere safe
  - Log out
 
@@ -46,7 +46,7 @@ damus implements the following [Nostr Implementation Possibilities][nips]
   1. Search their username in the search bar at the top of the 🔍 Global Feed and click their profile
   2. Tap the 🔑 icon which will copy their pubkey to your clipboard
   3. Go back to your 🏠 Personal Feed and tap the blue + button to compose your Note
-  4. Add @ direcly followed by the pubkey (e.g., `@npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s`)
+  4. Add @ directly followed by the pubkey (e.g., `@npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s`)
 - You can also long-press a Note to grab their User ID aka pubkey or Note ID to link directly to a Note.
 - Currently you can't delete your Notes in the iOS app
 - Share images by pasting the image url which you can grab from imgbb, imgur, etc. (i.e., `https://i.ibb.co/2SHZbwm/alpha60.jpg`). Currently images only load for people you follow in the 🏠 Personal Feed. Images are not automatically loaded in 🔍 Global Feed

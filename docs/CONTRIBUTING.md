@@ -336,7 +336,7 @@ Reviewed-by:, instead, indicates that the patch has been reviewed and found
 acceptable according to the Reviewer's Statement:
 
 A Reviewed-by tag is a statement of opinion that the patch is an
-appropriate modification of Damus and related libraies without any
+appropriate modification of Damus and related libraries without any
 remaining serious technical issues.  Any interested reviewer (who has
 done the work) can offer a Reviewed-by tag for a patch.  This tag serves
 to give credit to reviewers and to inform maintainers of the degree of
