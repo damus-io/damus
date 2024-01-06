@@ -1870,7 +1870,7 @@ static int ndb_ingester_process_event(secp256k1_context *ctx,
 
 	if ((int)note_size == -42) {
 		// we already have this!
-		ndb_debug("already have id??\n");
+		//ndb_debug("already have id??\n");
 		goto cleanup;
 	} else if (note_size == 0) {
 		ndb_debug("failed to parse '%.*s'\n", ev->len, ev->json);
@@ -2186,7 +2186,7 @@ void *ndb_get_note_meta(struct ndb_txn *txn, const unsigned char *id, size_t *le
 	k.mv_size = 32;
 
 	if (mdb_get(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_META], &k, &v)) {
-		ndb_debug("ndb_get_note_meta: mdb_get note failed\n");
+		//ndb_debug("ndb_get_note_meta: mdb_get note failed\n");
 		return NULL;
 	}
 
