@@ -2462,12 +2462,16 @@ static int ndb_query_plan_execute_kinds(struct ndb_txn *txn,
 	struct ndb_u64_tsid tsid, *ptsid;
 	struct ndb_filter_elements *kinds;
 	struct ndb_query_result res;
-	uint64_t kind, note_id;
+	uint64_t kind, note_id, until, *pint;
 	int i, rc;
 
 	// we should have kinds in a kinds filter!
 	if (!(kinds = ndb_filter_get_elems(filter, NDB_FILTER_KINDS)))
 		return 0;
+
+	until = UINT64_MAX;
+	if ((pint = ndb_filter_get_int(filter, NDB_FILTER_UNTIL)))
+		until = *pint;
 
 	db = txn->lmdb->dbs[NDB_DB_NOTE_KIND];
 
@@ -2480,7 +2484,7 @@ static int ndb_query_plan_execute_kinds(struct ndb_txn *txn,
 
 		kind = kinds->elements[i].integer;
 		ndb_debug("kind %" PRIu64 "\n", kind);
-		ndb_u64_tsid_init(&tsid, kind, UINT64_MAX);
+		ndb_u64_tsid_init(&tsid, kind, until);
 
 		k.mv_data = &tsid;
 		k.mv_size = sizeof(tsid);
