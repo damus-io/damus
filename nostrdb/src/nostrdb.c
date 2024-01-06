@@ -212,18 +212,6 @@ enum ndb_scan_cursor_type {
 	NDB_SCAN_ID,
 };
 
-// same idea as DBScan::ScanCursor in strfry
-struct ndb_scan_cursor {
-	enum ndb_scan_cursor_type type;
-	int outstanding;
-};
-
-// same idea as DBScan in strfry
-struct ndb_dbscan {
-	struct ndb_scan_cursor cursors[MAX_SCAN_CURSORS];
-	int num_cursors;
-};
-
 // A clustered key with an id and a timestamp
 struct ndb_tsid {
 	unsigned char id[32];
