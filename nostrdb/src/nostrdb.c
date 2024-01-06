@@ -3644,7 +3644,9 @@ static int ndb_init_lmdb(const char *filename, struct ndb_lmdb *lmdb, size_t map
 	}
 	mdb_set_compare(txn, lmdb->dbs[NDB_DB_PROFILE_PK], ndb_tsid_compare);
 
-	if ((rc = mdb_dbi_open(txn, "note_kind", tsid_flags, &lmdb->dbs[NDB_DB_NOTE_KIND]))) {
+	if ((rc = mdb_dbi_open(txn, "note_kind",
+			       MDB_CREATE | MDB_DUPSORT | MDB_INTEGERDUP | MDB_DUPFIXED,
+			       &lmdb->dbs[NDB_DB_NOTE_KIND]))) {
 		fprintf(stderr, "mdb_dbi_open note_kind failed: %s\n", mdb_strerror(rc));
 		return 0;
 	}
