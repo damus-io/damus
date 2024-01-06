@@ -529,7 +529,7 @@ static const char *ndb_filter_field_name(enum ndb_filter_fieldtype field)
 	case NDB_FILTER_IDS: return "ids";
 	case NDB_FILTER_AUTHORS: return "authors";
 	case NDB_FILTER_KINDS: return "kinds";
-	case NDB_FILTER_GENERIC: return "generic";
+	case NDB_FILTER_TAGS: return "tags";
 	case NDB_FILTER_SINCE: return "since";
 	case NDB_FILTER_UNTIL: return "until";
 	case NDB_FILTER_LIMIT: return "limit";
@@ -538,7 +538,7 @@ static const char *ndb_filter_field_name(enum ndb_filter_fieldtype field)
 	return "unknown";
 }
 
-static int ndb_filter_start_field_impl(struct ndb_filter *filter, enum ndb_filter_fieldtype field, char generic)
+static int ndb_filter_start_field_impl(struct ndb_filter *filter, enum ndb_filter_fieldtype field, char tag)
 {
 	int i;
 	struct ndb_filter_elements *els, *el;
@@ -569,7 +569,7 @@ static int ndb_filter_start_field_impl(struct ndb_filter *filter, enum ndb_filte
 	}
 
 	els->field.type = field;
-	els->field.generic = generic;
+	els->field.tag = tag;
 	els->field.elem_type = 0;
 	els->count = 0;
 
@@ -581,9 +581,9 @@ int ndb_filter_start_field(struct ndb_filter *filter, enum ndb_filter_fieldtype 
 	return ndb_filter_start_field_impl(filter, field, 0);
 }
 
-int ndb_filter_start_generic_field(struct ndb_filter *filter, char tag)
+int ndb_filter_start_tag_field(struct ndb_filter *filter, char tag)
 {
-	return ndb_filter_start_field_impl(filter, NDB_FILTER_GENERIC, tag);
+	return ndb_filter_start_field_impl(filter, NDB_FILTER_TAGS, tag);
 }
 
 static int ndb_filter_add_element(struct ndb_filter *filter, union ndb_filter_element el)
@@ -612,7 +612,7 @@ static int ndb_filter_add_element(struct ndb_filter *filter, union ndb_filter_el
 		if (filter->current->count != 0)
 			return 0;
 		break;
-	case NDB_FILTER_GENERIC:
+	case NDB_FILTER_TAGS:
 		str = (const char *)filter->data_buf.p;
 		if (!cursor_push_c_str(&filter->data_buf, el.string))
 			return 0;
@@ -666,7 +666,7 @@ int ndb_filter_add_str_element(struct ndb_filter *filter, const char *str)
 	case NDB_FILTER_AUTHORS:
 	case NDB_FILTER_KINDS:
 		return 0;
-	case NDB_FILTER_GENERIC:
+	case NDB_FILTER_TAGS:
 		break;
 	}
 
@@ -686,7 +686,7 @@ int ndb_filter_add_int_element(struct ndb_filter *filter, uint64_t integer)
 	switch (filter->current->field.type) {
 	case NDB_FILTER_IDS:
 	case NDB_FILTER_AUTHORS:
-	case NDB_FILTER_GENERIC:
+	case NDB_FILTER_TAGS:
 		return 0;
 	case NDB_FILTER_KINDS:
 	case NDB_FILTER_SINCE:
@@ -716,7 +716,7 @@ int ndb_filter_add_id_element(struct ndb_filter *filter, const unsigned char *id
 		return 0;
 	case NDB_FILTER_IDS:
 	case NDB_FILTER_AUTHORS:
-	case NDB_FILTER_GENERIC:
+	case NDB_FILTER_TAGS:
 		break;
 	}
 
@@ -729,8 +729,8 @@ int ndb_filter_add_id_element(struct ndb_filter *filter, const unsigned char *id
 	return ndb_filter_add_element(filter, el);
 }
 
-static int ndb_generic_filter_matches(struct ndb_filter_elements *els,
-				      struct ndb_note *note)
+static int ndb_tag_filter_matches(struct ndb_filter_elements *els,
+				  struct ndb_note *note)
 {
 	int i;
 	union ndb_filter_element el;
@@ -751,7 +751,7 @@ static int ndb_generic_filter_matches(struct ndb_filter_elements *els,
 			continue;
 
 		// do we have #e matching e (or p, etc)
-		if (str.str[0] != els->field.generic || str.str[1] != 0)
+		if (str.str[0] != els->field.tag || str.str[1] != 0)
 			continue;
 
 		str = ndb_tag_str(note, it->tag, 1);
@@ -774,7 +774,7 @@ static int ndb_generic_filter_matches(struct ndb_filter_elements *els,
 			// For some reason the element type is not set. It's
 			// possible nothing was added to the generic filter?
 			// Let's just fail here and log a note for debugging
-			fprintf(stderr, "UNUSUAL ndb_generic_filter_matches: have unknown element type %d\n", els->field.elem_type);
+			fprintf(stderr, "UNUSUAL ndb_tag_filter_matches: have unknown element type %d\n", els->field.elem_type);
 			return 0;
 		}
 
@@ -860,8 +860,8 @@ static int ndb_filter_matches_with(struct ndb_filter *filter,
 				continue;
 			}
 			break;
-		case NDB_FILTER_GENERIC:
-			if (ndb_generic_filter_matches(els, note))
+		case NDB_FILTER_TAGS:
+			if (ndb_tag_filter_matches(els, note))
 				continue;
 			break;
 		case NDB_FILTER_SINCE:
@@ -908,7 +908,7 @@ void ndb_filter_end_field(struct ndb_filter *filter)
 		qsort(&cur->elements[0], cur->count,
 		      sizeof(cur->elements[0].integer), compare_kinds);
 		break;
-	case NDB_FILTER_GENERIC:
+	case NDB_FILTER_TAGS:
 		// TODO: generic tag search sorting
 		break;
 	case NDB_FILTER_SINCE:
