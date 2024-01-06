@@ -5010,6 +5010,28 @@ void ndb_config_set_ingest_filter(struct ndb_config *config,
 	config->filter_context = filter_ctx;
 }
 
+int ndb_print_kind_keys(struct ndb_txn *txn)
+{
+	MDB_cursor *cur;
+	MDB_val k, v;
+	int i;
+	struct ndb_u64_tsid *tsid;
+
+	if (mdb_cursor_open(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_NOTE_KIND], &cur))
+		return 0;
+
+	i = 1;
+	while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
+		tsid = k.mv_data;
+		printf("%d note_kind %" PRIu64 " %" PRIu64 "\n",
+			i, tsid->u64, tsid->timestamp);
+
+		i++;
+	}
+
+	return 1;
+}
+
 // used by ndb.c
 int ndb_print_search_keys(struct ndb_txn *txn)
 {
