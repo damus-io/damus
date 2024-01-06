@@ -138,7 +138,7 @@ enum ndb_filter_fieldtype {
 	NDB_FILTER_IDS     = 1,
 	NDB_FILTER_AUTHORS = 2,
 	NDB_FILTER_KINDS   = 3,
-	NDB_FILTER_GENERIC = 4,
+	NDB_FILTER_TAGS    = 4,
 	NDB_FILTER_SINCE   = 5,
 	NDB_FILTER_UNTIL   = 6,
 	NDB_FILTER_LIMIT   = 7,
@@ -220,7 +220,7 @@ union ndb_filter_element {
 struct ndb_filter_field {
 	enum ndb_filter_fieldtype type;
 	enum ndb_generic_element_type elem_type;
-	char generic; // for generic queries like #t
+	char tag; // for generic queries like #t
 };
 
 struct ndb_filter_elements {
@@ -461,7 +461,7 @@ int ndb_filter_add_id_element(struct ndb_filter *, const unsigned char *id);
 int ndb_filter_add_int_element(struct ndb_filter *, uint64_t integer);
 int ndb_filter_add_str_element(struct ndb_filter *, const char *str);
 int ndb_filter_start_field(struct ndb_filter *, enum ndb_filter_fieldtype);
-int ndb_filter_start_generic_field(struct ndb_filter *, char tag);
+int ndb_filter_start_tag_field(struct ndb_filter *, char tag);
 int ndb_filter_matches(struct ndb_filter *, struct ndb_note *);
 void ndb_filter_reset(struct ndb_filter *);
 void ndb_filter_end_field(struct ndb_filter *);
