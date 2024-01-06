@@ -12,7 +12,7 @@
 #define HAVE_UNALIGNED_ACCESS 1
 #define HAVE_TYPEOF 1
 #define HAVE_BIG_ENDIAN 0
-#define HAVE_BYTESWAP_H 1
-#define HAVE_BSWAP_64 1
+#define HAVE_BYTESWAP_H 0
+#define HAVE_BSWAP_64 0
 #define HAVE_LITTLE_ENDIAN 1
 #endif /* CCAN_CONFIG_H */

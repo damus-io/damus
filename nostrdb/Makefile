@@ -49,10 +49,10 @@ distclean: clean
 tags:
 	find . -name '*.c' -or -name '*.h' | xargs ctags
 
-configurator: configurator.c
+configurator: src/configurator.c
 	$(CC) $< -o $@
 
-config.h: configurator
+src/config.h: configurator
 	./configurator > $@
 
 bindings-c: $(C_BINDINGS)
