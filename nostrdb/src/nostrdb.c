@@ -2351,7 +2351,7 @@ static int compare_query_results(const void *pa, const void *pb)
 	b = (struct ndb_query_result *)pb;
 
 	if (a->note->created_at == b->note->created_at) {
-		return memcmp(a->note->id, b->note->id, 32);
+		return 0;
 	} else if (a->note->created_at > b->note->created_at) {
 		return -1;
 	} else {
