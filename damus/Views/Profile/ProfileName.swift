@@ -10,6 +10,13 @@ import SwiftUI
 enum FriendType {
     case friend
     case fof
+
+    var priority: Int {
+        switch self {
+        case .friend: return 2
+        case .fof: return 1
+        }
+    }
 }
 
 func get_friend_type(contacts: Contacts, pubkey: Pubkey) -> FriendType? {

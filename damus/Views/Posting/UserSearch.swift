@@ -1,5 +1,5 @@
 //
-//  UserAutocompletion.swift
+//  UserSearch.swift
 //  damus
 //
 //  Created by William Casarin on 2023-01-28.
@@ -18,7 +18,17 @@ struct UserSearch: View {
     
     var users: [Pubkey] {
         let txn = NdbTxn(ndb: damus_state.ndb)
-        return search_profiles(profiles: damus_state.profiles, search: search, txn: txn)
+        return search_profiles(profiles: damus_state.profiles, search: search, txn: txn).sorted { a, b in
+            let aFriendTypePriority = get_friend_type(contacts: damus_state.contacts, pubkey: a)?.priority ?? 0
+            let bFriendTypePriority = get_friend_type(contacts: damus_state.contacts, pubkey: b)?.priority ?? 0
+
+            if aFriendTypePriority > bFriendTypePriority {
+                // `a` should be sorted before `b`
+                return true
+            } else {
+                return false
+            }
+        }
     }
     
     func on_user_tapped(pk: Pubkey) {
