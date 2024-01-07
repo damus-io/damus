@@ -105,13 +105,11 @@ struct AddRelayView: View {
 
                 state.pool.connect(to: [new_relay])
 
-                guard let new_ev = add_relay(ev: ev, keypair: keypair, current_relays: state.pool.our_descriptors, relay: url, info: info) else {
-                    return
+                if let new_ev = add_relay(ev: ev, keypair: keypair, current_relays: state.pool.our_descriptors, relay: url, info: info) {
+                    process_contact_event(state: state, ev: ev)
+
+                    state.pool.send(.event(new_ev))
                 }
-
-                process_contact_event(state: state, ev: ev)
-
-                state.pool.send(.event(new_ev))
 
                 if let relay_metadata = make_relay_metadata(relays: state.pool.our_descriptors, keypair: keypair) {
                     state.postbox.send(relay_metadata)

@@ -203,8 +203,8 @@ func remove_relay(ev: NostrEvent, current_relays: [RelayDescriptor], keypair: Fu
 func add_relay(ev: NostrEvent, keypair: FullKeypair, current_relays: [RelayDescriptor], relay: RelayURL, info: RelayInfo) -> NostrEvent? {
     var relays = ensure_relay_info(relays: current_relays, content: ev.content)
     
-    
-    guard relays.index(forKey: relay) == nil else {
+    // If kind:3 content is empty, or if the relay doesn't exist in the list, we want to create a kind:3 event with the new relay
+    guard ev.content.isEmpty || relays.index(forKey: relay) == nil else {
         return nil
     }
     
