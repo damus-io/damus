@@ -904,6 +904,10 @@ void ndb_filter_end_field(struct ndb_filter *filter)
 	struct ndb_filter_elements *cur;
 
 	cur = filter->current;
+
+	if (cur == NULL)
+		return;
+
 	filter->elements[filter->num_elements++] = cur;
 
 	// sort elements for binary search
