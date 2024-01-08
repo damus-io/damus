@@ -159,6 +159,18 @@ testdata/many-events.json: testdata/many-events.json.zst
 bench: bench-ingest-many.c $(DEPS) 
 	$(CC) $(CFLAGS) $< $(LDS) -o $@
 
+perf.out: fake
+	perf script > $@
+
+perf.folded: perf.out
+	stackcollapse-perf.pl $< > $@
+
+ndb.svg: perf.folded
+	flamegraph.pl $< > $@
+
+flamegraph: ndb.svg
+	browser $<
+
 run-bench: testdata/many-events.json bench
 	./bench
 
@@ -169,4 +181,4 @@ testdata/db/.dir:
 test: test.c $(DEPS) testdata/db/.dir
 	$(CC) $(CFLAGS) test.c $(LDS) -o $@
 
-.PHONY: tags clean
+.PHONY: tags clean fake
