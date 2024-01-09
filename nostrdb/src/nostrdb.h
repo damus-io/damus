@@ -170,6 +170,7 @@ enum ndb_dbs {
 	NDB_DB_NOTE_KIND, // note kind index
 	NDB_DB_NOTE_TEXT, // note fulltext index
 	NDB_DB_NOTE_BLOCKS, // parsed note blocks for rendering
+	NDB_DB_NOTE_TAGS,  // note tags index
 	NDB_DBS,
 };
 
@@ -502,6 +503,7 @@ unsigned char *ndb_note_pubkey(struct ndb_note *note);
 unsigned char *ndb_note_sig(struct ndb_note *note);
 void _ndb_note_set_kind(struct ndb_note *note, uint32_t kind);
 struct ndb_tags *ndb_note_tags(struct ndb_note *note);
+int ndb_str_len(struct ndb_str *str);
 
 // TAGS
 void ndb_tags_iterate_start(struct ndb_note *note, struct ndb_iterator *iter);
