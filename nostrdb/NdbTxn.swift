@@ -29,7 +29,14 @@ class NdbTxn<T> {
             self.inherited = true
         } else {
             self.txn = ndb_txn()
-            let _ = ndb_begin_query(ndb.ndb.ndb, &self.txn)
+            let ok = ndb_begin_query(ndb.ndb.ndb, &self.txn) != 0
+            if !ok {
+                self.moved = false
+                self.txn = ndb_txn()
+                self.inherited = true
+                self.val = with(self)
+                return
+            }
             Thread.current.threadDictionary["ndb_txn"] = self.txn
             self.inherited = false
         }
