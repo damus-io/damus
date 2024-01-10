@@ -54,6 +54,10 @@ find the patch description and put that into the patch. I.e., the patch
 the maintainers and reviewers.  Some reviewers probably didn't even
 receive earlier versions of the patch.
 
+When submitting a -v2 of more than one patch, ensure that you include all of
+the original patches, don't just send a v2 of one of the patches. If you
+are dropping a patch, mention it in the `patch changelog`.
+
 Describe your changes in imperative mood, e.g. "make xyzzy do frotz"
 instead of "[This patch] makes xyzzy do frotz" or "[I] changed xyzzy
 to do frotz", as if you are giving orders to the codebase to change
