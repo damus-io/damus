@@ -63,7 +63,7 @@ final class NdbTests: XCTestCase {
         do {
             let ndb = Ndb(path: db_dir)!
             let id = NoteId(hex: "d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349")!
-            let txn = NdbTxn(ndb: ndb)
+            guard let txn = NdbTxn(ndb: ndb) else { return XCTAssert(false) }
             let note = ndb.lookup_note_with_txn(id: id, txn: txn)
             XCTAssertNotNil(note)
             guard let note else { return }
@@ -93,7 +93,7 @@ final class NdbTests: XCTestCase {
             let note_ids = ndb.text_search(query: "barked")
             XCTAssertEqual(note_ids.count, 1)
             let expected_note_id = NoteId(hex: "b17a540710fe8495b16bfbaf31c6962c4ba8387f3284a7973ad523988095417e")!
-            let note_id = ndb.lookup_note_by_key(note_ids[0]).map({ n in n?.id }).value
+            let note_id = ndb.lookup_note_by_key(note_ids[0])?.map({ n in n?.id }).value
             XCTAssertEqual(note_id, .some(expected_note_id))
         }
     }
@@ -159,13 +159,13 @@ final class NdbTests: XCTestCase {
     func test_inherited_transactions() throws {
         let ndb = Ndb(path: db_dir)!
         do {
-            let txn1 = NdbTxn(ndb: ndb)
-            
+            guard let txn1 = NdbTxn(ndb: ndb) else { return XCTAssert(false) }
+
             let ntxn = (Thread.current.threadDictionary.value(forKey: "ndb_txn") as? ndb_txn)!
             XCTAssertEqual(txn1.txn.lmdb, ntxn.lmdb)
             XCTAssertEqual(txn1.txn.mdb_txn, ntxn.mdb_txn)
 
-            let txn2 = NdbTxn(ndb: ndb)
+            guard let txn2 = NdbTxn(ndb: ndb) else { return XCTAssert(false) }
 
             XCTAssertEqual(txn1.inherited, false)
             XCTAssertEqual(txn2.inherited, true)

@@ -20,7 +20,7 @@ class MockProfiles: Profiles {
         super.init(ndb: ndb)
     }
 
-    override func lookup(id: Pubkey) -> NdbTxn<Profile?> {
+    override func lookup(id: Pubkey) -> NdbTxn<Profile?>? {
         return NdbTxn(ndb: self.ndb) { txn in
             return self.mocked_profiles[id]
         }
