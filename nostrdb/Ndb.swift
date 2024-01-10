@@ -373,6 +373,7 @@ class Ndb {
     }
     
     func process_client_event(_ str: String) -> Bool {
+        guard !self.closed else { return false }
         return str.withCString { cstr in
             return ndb_process_client_event(ndb.ndb, cstr, Int32(str.utf8.count)) != 0
         }
