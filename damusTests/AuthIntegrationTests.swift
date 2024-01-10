@@ -51,7 +51,13 @@ final class AuthIntegrationTests: XCTestCase {
         XCTAssertEqual(pool.num_connected, 1)
         // Assert that AUTH message has been received
         XCTAssertTrue(received_messages.count >= 1, "expected recieved_messages to be >= 1")
-        let json_received = try! JSONSerialization.jsonObject(with: received_messages[0].data(using: .utf8)!, options: []) as! [Any]
+        guard let msg = received_messages[safe: 0],
+              let dat = msg.data(using: .utf8),
+              let json_received = try? JSONSerialization.jsonObject(with: dat, options: []) as? [Any]
+        else {
+            XCTAssert(false)
+            return
+        }
         XCTAssertEqual(json_received[0] as! String, "AUTH")
         // Assert that we've replied with the AUTH response
         XCTAssertEqual(sent_messages.count, 1)
