@@ -9,7 +9,11 @@ import Foundation
 
 // Extension to make NdbNote compatible with NostrEvent's original API
 extension NdbNote {
-    func get_inner_event(cache: EventCache) -> NdbNote? {
+    func parse_inner_event() -> NdbNote? {
+        return NdbNote.owned_from_json_cstr(json: content_raw, json_len: content_len)
+    }
+
+    func get_cached_inner_event(cache: EventCache) -> NdbNote? {
         guard self.known_kind == .boost else {
             return nil
         }
@@ -19,6 +23,13 @@ extension NdbNote {
             return cache.lookup(id)
         }
 
-        return self.get_inner_event()
+        return nil
+    }
+
+    func get_inner_event(cache: EventCache) -> NdbNote? {
+        if let ev = get_cached_inner_event(cache: cache) {
+            return ev
+        }
+        return self.parse_inner_event()
     }
 }

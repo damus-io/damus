@@ -31,7 +31,8 @@ func nsfw_tag_filter(ev: NostrEvent) -> Bool {
 func get_repost_of_muted_user_filter(damus_state: DamusState) -> ((_ ev: NostrEvent) -> Bool) {
     return { ev in
         guard ev.known_kind == .boost else { return true }
-        guard let inner_ev = ev.get_inner_event(cache: damus_state.events) else { return true }
+        // This needs to use cached because it can be way too slow otherwise
+        guard let inner_ev = ev.get_cached_inner_event(cache: damus_state.events) else { return true }
         return should_show_event(keypair: damus_state.keypair, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: inner_ev)
     }
 }
