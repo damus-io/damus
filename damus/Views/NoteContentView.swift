@@ -22,6 +22,7 @@ struct Blur: UIViewRepresentable {
     }
 }
 
+@MainActor
 struct NoteContentView: View {
     
     let damus_state: DamusState
@@ -34,7 +35,6 @@ struct NoteContentView: View {
 
     @ObservedObject var artifacts_model: NoteArtifactsModel
     @ObservedObject var preview_model: PreviewModel
-    @ObservedObject var settings: UserSettingsStore
 
     var note_artifacts: NoteArtifacts {
         return self.artifacts_model.state.artifacts ?? .separated(.just_content(event.get_content(damus_state.keypair)))
@@ -50,7 +50,6 @@ struct NoteContentView: View {
         let cached = damus_state.events.get_cache_data(event.id)
         self._preview_model = ObservedObject(wrappedValue: cached.preview_model)
         self._artifacts_model = ObservedObject(wrappedValue: cached.artifacts_model)
-        self._settings = ObservedObject(wrappedValue: damus_state.settings)
     }
     
     var truncate: Bool {

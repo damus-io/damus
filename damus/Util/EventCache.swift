@@ -70,7 +70,8 @@ class EventData {
     var relative_time: RelativeTimeModel = RelativeTimeModel()
     var validated: ValidationResult
     var media_metadata_model: MediaMetaModel
-    
+    var height: CGFloat?
+
     var translations: TranslateStatus {
         return translations_model.state
     }
@@ -84,6 +85,7 @@ class EventData {
     }
     
     init(zaps: [Zapping] = []) {
+        self.height = nil
         self.translations_model = .init(state: .havent_tried)
         self.artifacts_model = .init(state: .not_loaded)
         self.zaps_model = .init(zaps)
@@ -122,7 +124,15 @@ class EventCache {
         
         return data
     }
-    
+
+    func get_height(_ evid: NoteId) -> CGFloat? {
+        return get_cache_data(evid).height
+    }
+
+    func set_height(_ evid: NoteId, height: CGFloat) {
+        return get_cache_data(evid).height = height
+    }
+
     func is_event_valid(_ evid: NoteId) -> ValidationResult {
         return get_cache_data(evid).validated
     }

@@ -16,6 +16,32 @@ class Debouncer {
         self.interval = interval
     }
 
+    func debounce_immediate(action: @escaping () -> Void) {
+        guard self.workItem == nil else {
+            return
+        }
+
+        self.workItem = DispatchWorkItem(block: {
+            self.workItem = nil
+        })
+
+        action()
+        queue.asyncAfter(deadline: .now() + interval, execute: self.workItem!)
+    }
+
+    func debounce_once(action: @escaping () -> Void) {
+        guard self.workItem == nil else {
+            return
+        }
+
+        self.workItem = DispatchWorkItem(block: {
+            self.workItem = nil
+            action()
+        })
+
+        queue.asyncAfter(deadline: .now() + interval, execute: self.workItem!)
+    }
+
     func debounce(action: @escaping () -> Void) {
         // Cancel the previous work item if it hasn't yet executed
         workItem?.cancel()

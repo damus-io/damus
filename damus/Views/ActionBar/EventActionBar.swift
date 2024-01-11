@@ -48,7 +48,10 @@ struct EventActionBar: View {
                     EventActionButton(img: "bubble2", col: bar.replied ? DamusColors.purple : Color.gray) {
                         notify(.compose(.replying_to(event)))
                     }
+                    /*
                     .accessibilityLabel(NSLocalizedString("Reply", comment: "Accessibility label for reply button"))
+                     */
+
                     Text(verbatim: "\(bar.replies > 0 ? "\(bar.replies)" : "")")
                         .font(.footnote.weight(.medium))
                         .foregroundColor(bar.replied ? DamusColors.purple : Color.gray)
@@ -60,7 +63,9 @@ struct EventActionBar: View {
                 EventActionButton(img: "repost", col: bar.boosted ? Color.green : nil) {
                     self.show_repost_action = true
                 }
+                /*
                 .accessibilityLabel(NSLocalizedString("Reposts", comment: "Accessibility label for boosts button"))
+                 */
                 Text(verbatim: "\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
                     .font(.footnote.weight(.medium))
                     .foregroundColor(bar.boosted ? Color.green : Color.gray)
@@ -84,10 +89,12 @@ struct EventActionBar: View {
                 }
             }
 
+            /*
             if let lnurl = self.lnurl {
                 Spacer()
                 NoteZapButton(damus_state: damus_state, target: ZapTarget.note(id: event.id, author: event.pubkey), lnurl: lnurl, zaps: self.damus_state.events.get_cache_data(self.event.id).zaps_model)
             }
+             */
 
             Spacer()
             EventActionButton(img: "upload", col: Color.gray) {

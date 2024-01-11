@@ -23,6 +23,7 @@ struct EventViewOptions: OptionSet {
     static let embedded: EventViewOptions = [.no_action_bar, .small_pfp, .wide, .truncate_content, .nested]
 }
 
+@MainActor
 struct TextEvent: View {
     let damus: DamusState
     let event: NostrEvent

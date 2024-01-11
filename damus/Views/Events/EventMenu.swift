@@ -13,7 +13,7 @@ struct EventMenuContext: View {
     let target_pubkey: Pubkey
     let bookmarks: BookmarksManager
     let muted_threads: MutedThreadsManager
-    @ObservedObject var settings: UserSettingsStore
+    let settings: UserSettingsStore
     
     init(damus: DamusState, event: NostrEvent) {
         self.event = event
@@ -21,7 +21,7 @@ struct EventMenuContext: View {
         self.target_pubkey = event.pubkey
         self.bookmarks = damus.bookmarks
         self.muted_threads = damus.muted_threads
-        self._settings = ObservedObject(wrappedValue: damus.settings)
+        self.settings = damus.settings
     }
     
     var body: some View {
@@ -53,7 +53,7 @@ struct MenuItems: View {
     let bookmarks: BookmarksManager
     let muted_threads: MutedThreadsManager
 
-    @ObservedObject var settings: UserSettingsStore
+    let settings: UserSettingsStore
 
     @State private var isBookmarked: Bool = false
     @State private var isMutedThread: Bool = false

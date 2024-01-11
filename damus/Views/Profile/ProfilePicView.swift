@@ -109,6 +109,7 @@ struct ProfilePicView: View {
                     }
                 }
             
+            /*
             if self.zappability_indicator, let lnurl = self.get_lnurl(), lnurl != "" {
                 Image("zap.fill")
                     .resizable()
@@ -121,6 +122,7 @@ struct ProfilePicView: View {
                     .background(Color.orange)
                     .clipShape(Circle())
             }
+             */
         }
     }
 }

@@ -9,6 +9,10 @@ import Foundation
 
 class Constants {
     //static let EXAMPLE_DEMOS: DamusState = .empty
+    static let VSTACK_LIMIT: Int = 30
+    static let VSTACK_LIMIT_THRESHOLD: CGFloat = 900.0
+    static let VSTACK_LIMIT_EV_THRESHOLD: CGFloat = 1.2
+
     static let DAMUS_APP_GROUP_IDENTIFIER: String = "group.com.damus"
     static let DEVICE_TOKEN_RECEIVER_PRODUCTION_URL: URL = URL(string: "https://notify.damus.io:8000/user-info")!
     static let DEVICE_TOKEN_RECEIVER_TEST_URL: URL = URL(string: "http://localhost:8000/user-info")!

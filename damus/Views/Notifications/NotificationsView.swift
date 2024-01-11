@@ -139,12 +139,14 @@ struct NotificationsView: View {
     func NotificationTab(_ filter: NotificationFilter) -> some View {
         ScrollViewReader { scroller in
             ScrollView {
-                LazyVStack(alignment: .leading) {
+                VStack(alignment: .leading) {
                     Color.white.opacity(0)
                         .id("startblock")
                         .frame(height: 5)
-                    let notifs = Array(zip(1..., filter.filter(contacts: state.contacts, items: notifications.notifications)))
-                    ForEach(notifs, id: \.0) { zip in
+                    let filtered = filter.filter(contacts: state.contacts, items: notifications.notifications)
+                    let notifs = notifications.notifications
+                    let notif = Array(zip(1..., notifs.prefix(Constants.VSTACK_LIMIT)))
+                    ForEach(notif, id: \.0) { zip in
                         NotificationItemView(state: state, item: zip.1)
                     }
                 }
