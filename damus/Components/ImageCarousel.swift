@@ -52,6 +52,29 @@ enum ImageShape {
     }
 }
 
+class CarouselModel: ObservableObject {
+    var current_url: URL?
+    var fillHeight: CGFloat
+    var maxHeight: CGFloat
+    var firstImageHeight: CGFloat?
+
+    @Published var open_sheet: Bool
+    @Published var selectedIndex: Int
+    @Published var video_size: CGSize?
+    @Published var image_fill: ImageFill?
+
+    init(image_fill: ImageFill?) {
+        self.current_url = nil
+        self.fillHeight = 350
+        self.maxHeight = UIScreen.main.bounds.height * 1.2 // 1.2
+        self.firstImageHeight = nil
+        self.open_sheet = false
+        self.selectedIndex = 0
+        self.video_size = nil
+        self.image_fill = image_fill
+    }
+}
+
 // MARK: - Image Carousel
 @MainActor
 struct ImageCarousel: View {
@@ -60,34 +83,22 @@ struct ImageCarousel: View {
     let evid: NoteId
     
     let state: DamusState
-    
-    @State private var open_sheet: Bool = false
-    @State private var current_url: URL? = nil
-    @State private var image_fill: ImageFill? = nil
+    @ObservedObject var model: CarouselModel
 
-    @State private var fillHeight: CGFloat = 350
-    @State private var maxHeight: CGFloat = UIScreen.main.bounds.height * 1.2 // 1.2
-    @State private var firstImageHeight: CGFloat? = nil
-    @State private var currentImageHeight: CGFloat?
-    @State private var selectedIndex = 0
-    @State private var video_size: CGSize? = nil
-    
     init(state: DamusState, evid: NoteId, urls: [MediaUrl]) {
-        _open_sheet = State(initialValue: false)
-        _current_url = State(initialValue: nil)
-        let media_model = state.events.get_cache_data(evid).media_metadata_model
-        _image_fill = State(initialValue: media_model.fill)
         self.urls = urls
         self.evid = evid
         self.state = state
+        let media_model = state.events.get_cache_data(evid).media_metadata_model
+        self._model = ObservedObject(initialValue: CarouselModel(image_fill: media_model.fill))
     }
     
     var filling: Bool {
-        image_fill?.filling == true
+        model.image_fill?.filling == true
     }
     
     var height: CGFloat {
-        firstImageHeight ?? image_fill?.height ?? fillHeight
+        model.firstImageHeight ?? model.image_fill?.height ?? model.fillHeight
     }
     
     func Placeholder(url: URL, geo_size: CGSize, num_urls: Int) -> some View {
@@ -105,9 +116,9 @@ struct ImageCarousel: View {
             }
         }
         .onAppear {
-            if self.image_fill == nil, let size = state.video.size_for_url(url) {
-                let fill = ImageFill.calculate_image_fill(geo_size: geo_size, img_size: size, maxHeight: maxHeight, fillHeight: fillHeight)
-                self.image_fill = fill
+            if self.model.image_fill == nil, let size = state.video.size_for_url(url) {
+                let fill = ImageFill.calculate_image_fill(geo_size: geo_size, img_size: size, maxHeight: model.maxHeight, fillHeight: model.fillHeight)
+                self.model.image_fill = fill
             }
         }
     }
@@ -118,23 +129,23 @@ struct ImageCarousel: View {
             case .image(let url):
                 Img(geo: geo, url: url, index: index)
                     .onTapGesture {
-                        open_sheet = true
+                        model.open_sheet = true
                     }
             case .video(let url):
-                DamusVideoPlayer(url: url, video_size: $video_size, controller: state.video)
-                    .onChange(of: video_size) { size in
+                DamusVideoPlayer(url: url, video_size: $model.video_size, controller: state.video)
+                    .onChange(of: model.video_size) { size in
                         guard let size else { return }
                         
-                        let fill = ImageFill.calculate_image_fill(geo_size: geo.size, img_size: size, maxHeight: maxHeight, fillHeight: fillHeight)
-                        
+                        let fill = ImageFill.calculate_image_fill(geo_size: geo.size, img_size: size, maxHeight: model.maxHeight, fillHeight: model.fillHeight)
+
                         print("video_size changed \(size)")
-                        if self.image_fill == nil {
+                        if self.model.image_fill == nil {
                             print("video_size firstImageHeight \(fill.height)")
-                            firstImageHeight = fill.height
+                            self.model.firstImageHeight = fill.height
                             state.events.get_cache_data(evid).media_metadata_model.fill = fill
                         }
                         
-                        self.image_fill = fill
+                        self.model.image_fill = fill
                     }
             }
         }
@@ -150,7 +161,7 @@ struct ImageCarousel: View {
             .configure { view in
                 view.framePreloadCount = 3
             }
-            .imageFill(for: geo.size, max: maxHeight, fill: fillHeight) { fill in
+            .imageFill(for: geo.size, max: model.maxHeight, fill: model.fillHeight) { fill in
                 state.events.get_cache_data(evid).media_metadata_model.fill = fill
                 // blur hash can be discarded when we have the url
                 // NOTE: this is the wrong place for this... we need to remove
@@ -159,9 +170,9 @@ struct ImageCarousel: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                     state.events.lookup_img_metadata(url: url)?.state = .not_needed
                 }
-                image_fill = fill
+                self.model.image_fill = fill
                 if index == 0 {
-                    firstImageHeight = fill.height
+                    self.model.firstImageHeight = fill.height
                     //maxHeight = firstImageHeight ?? maxHeight
                 } else {
                     //maxHeight = firstImageHeight ?? fill.height
@@ -181,7 +192,7 @@ struct ImageCarousel: View {
     }
     
     var Medias: some View {
-        TabView(selection: $selectedIndex) {
+        TabView(selection: $model.selectedIndex) {
             ForEach(urls.indices, id: \.self) { index in
                 GeometryReader { geo in
                     Media(geo: geo, url: urls[index], index: index)
@@ -189,12 +200,12 @@ struct ImageCarousel: View {
             }
         }
         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-        .fullScreenCover(isPresented: $open_sheet) {
+        .fullScreenCover(isPresented: $model.open_sheet) {
             ImageView(video_controller: state.video, urls: urls, settings: state.settings)
         }
         .frame(height: height)
-        .onChange(of: selectedIndex) { value in
-            selectedIndex = value
+        .onChange(of: model.selectedIndex) { value in
+            model.selectedIndex = value
         }
         .tabViewStyle(PageTabViewStyle())
     }
@@ -205,7 +216,7 @@ struct ImageCarousel: View {
                 .onTapGesture { }
             
             // This is our custom carousel image indicator
-            CarouselDotsView(urls: urls, selectedIndex: $selectedIndex)
+            CarouselDotsView(urls: urls, selectedIndex: $model.selectedIndex)
         }
     }
 }
