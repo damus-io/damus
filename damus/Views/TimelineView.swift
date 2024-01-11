@@ -49,7 +49,7 @@ struct TimelineView<Content: View>: View {
                         return Color.clear
                     })
             }
-            .buttonStyle(BorderlessButtonStyle())
+            //.buttonStyle(BorderlessButtonStyle())
             .coordinateSpace(name: "scroll")
             .onReceive(handle_notify(.scroll_to_top)) { () in
                 events.flush()
