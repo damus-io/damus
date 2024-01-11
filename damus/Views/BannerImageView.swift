@@ -23,7 +23,7 @@ struct EditBannerImageView: View {
             KFAnimatedImage(get_banner_url(banner: banner_image?.absoluteString, pubkey: damus_state.pubkey, profiles: damus_state.profiles))
                 .imageContext(.banner, disable_animation: damus_state.settings.disable_animation)
                 .configure { view in
-                    view.framePreloadCount = 3
+                    view.framePreloadCount = .max
                 }
                 .placeholder { _ in
                     Color(uiColor: .secondarySystemBackground)
