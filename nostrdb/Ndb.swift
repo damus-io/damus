@@ -176,6 +176,7 @@ class Ndb {
     }
     
     func close() {
+        guard !self.closed else { return }
         self.closed = true
         ndb_destroy(self.ndb.ndb)
     }

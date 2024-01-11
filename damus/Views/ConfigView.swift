@@ -72,7 +72,7 @@ struct ConfigView: View {
                 Section(NSLocalizedString("Sign Out", comment: "Section title for signing out")) {
                     Button(action: {
                         if state.keypair.privkey == nil {
-                            notify(.logout)
+                            logout(state)
                         } else {
                             confirm_logout = true
                         }
@@ -130,7 +130,7 @@ struct ConfigView: View {
                     return
                 }
                 state.postbox.send(ev)
-                notify(.logout)
+                logout(state)
             }
         }
         .alert(NSLocalizedString("Logout", comment: "Alert for logging out the user."), isPresented: $confirm_logout) {
@@ -138,7 +138,7 @@ struct ConfigView: View {
                 confirm_logout = false
             }
             Button(NSLocalizedString("Logout", comment: "Button for logging out the user."), role: .destructive) {
-                notify(.logout)
+                logout(state)
             }
         } message: {
                 Text("Make sure your nsec account key is saved before you logout or you will lose access to this account", comment: "Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out.")

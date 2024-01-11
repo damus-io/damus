@@ -624,7 +624,7 @@ struct ContentView: View {
 
             // out of space or something?? maybe we need a in-memory fallback
             if mndb == nil {
-                notify(.logout)
+                logout(nil)
                 return
             }
         }
@@ -1080,5 +1080,12 @@ func on_open_url(state: DamusState, url: URL, result: @escaping (OpenResult?) ->
         result(.script(script))
         break
     }
+}
+
+
+func logout(_ state: DamusState?)
+{
+    state?.close()
+    notify(.logout)
 }
 

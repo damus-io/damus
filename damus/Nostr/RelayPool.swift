@@ -39,6 +39,16 @@ class RelayPool {
     private let network_monitor_queue = DispatchQueue(label: "io.damus.network_monitor")
     private var last_network_status: NWPath.Status = .unsatisfied
 
+    func close() {
+        disconnect()
+        relays = []
+        handlers = []
+        request_queue = []
+        seen.removeAll()
+        counts = [:]
+        keypair = nil
+    }
+
     init(ndb: Ndb, keypair: Keypair? = nil) {
         self.ndb = ndb
         self.keypair = keypair

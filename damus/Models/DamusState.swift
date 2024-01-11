@@ -92,7 +92,12 @@ struct DamusState: HeadlessDamusState {
     var is_privkey_user: Bool {
         keypair.privkey != nil
     }
-    
+
+    func close() {
+        pool.close()
+        ndb.close()
+    }
+
     static var empty: DamusState {
         let empty_pub: Pubkey = .empty
         let empty_sec: Privkey = .empty
