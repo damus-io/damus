@@ -7,28 +7,158 @@
 
 import Foundation
 
+fileprivate extension String {
+    /// Failable initializer to build a Swift.String from a C-backed `str_block_t`.
+    init?(_ s: str_block_t) {
+        let len = s.end - s.start
+        let bytes = Data(bytes: s.start, count: len)
+        self.init(bytes: bytes, encoding: .utf8)
+    }
+}
 
-enum Bech32Object {
+struct NEvent : Equatable {
+    let noteid: NoteId
+    let relays: [String]
+    let author: Pubkey?
+    let kind: UInt32?
+    
+    init(noteid: NoteId, relays: [String]) {
+        self.noteid = noteid
+        self.relays = relays
+        self.author = nil
+        self.kind = nil
+    }
+    
+    init(noteid: NoteId, relays: [String], author: Pubkey?) {
+        self.noteid = noteid
+        self.relays = relays
+        self.author = author
+        self.kind = nil
+    }
+    init(noteid: NoteId, relays: [String], kind: UInt32?) {
+        self.noteid = noteid
+        self.relays = relays
+        self.author = nil
+        self.kind = kind
+    }
+    init(noteid: NoteId, relays: [String], author: Pubkey?, kind: UInt32?) {
+        self.noteid = noteid
+        self.relays = relays
+        self.author = author
+        self.kind = kind
+    }
+}
+
+struct NProfile : Equatable {
+    let author: Pubkey
+    let relays: [String]
+}
+
+struct NAddr : Equatable {
+    let identifier: String
+    let author: Pubkey
+    let relays: [String]
+    let kind: UInt32
+}
+
+enum Bech32Object : Equatable {
     case nsec(Privkey)
     case npub(Pubkey)
     case note(NoteId)
     case nscript([UInt8])
+    case nevent(NEvent)
+    case nprofile(NProfile)
+    case nrelay(String)
+    case naddr(NAddr)
     
     static func parse(_ str: String) -> Bech32Object? {
-        guard let decoded = try? bech32_decode(str) else {
+        var b: nostr_bech32_t = nostr_bech32()
+        
+        let bytes = Array(str.utf8)
+        
+        bytes.withUnsafeBufferPointer { buffer in
+            guard let baseAddress = buffer.baseAddress else { return }
+            
+            var cursorInstance = cursor()
+            cursorInstance.start = UnsafeMutablePointer(mutating: baseAddress)
+            cursorInstance.p = UnsafeMutablePointer(mutating: baseAddress)
+            cursorInstance.end = cursorInstance.start.advanced(by: buffer.count)
+            
+            parse_nostr_bech32(&cursorInstance, &b)
+        }
+        
+        return decodeCBech32(b)
+    }
+}
+
+func decodeCBech32(_ b: nostr_bech32_t) -> Bech32Object? {
+    switch b.type {
+    case NOSTR_BECH32_NOTE:
+        let note = b.data.note;
+        let note_id = NoteId(Data(bytes: note.event_id, count: 32))
+        return .note(note_id)
+    case NOSTR_BECH32_NEVENT:
+        let nevent = b.data.nevent;
+        let note_id = NoteId(Data(bytes: nevent.event_id, count: 32))
+        let pubkey = nevent.pubkey != nil ? Pubkey(Data(bytes: nevent.pubkey, count: 32)) : nil
+        let kind: UInt32? = nevent.has_kind ? nevent.kind : nil
+        let relays = getRelayStrings(from: nevent.relays)
+        return .nevent(NEvent(noteid: note_id, relays: relays, author: pubkey, kind: kind))
+    case NOSTR_BECH32_NPUB:
+        let npub = b.data.npub
+        let pubkey = Pubkey(Data(bytes: npub.pubkey, count: 32))
+        return .npub(pubkey)
+    case NOSTR_BECH32_NSEC:
+        let nsec = b.data.nsec
+        let privkey = Privkey(Data(bytes: nsec.nsec, count: 32))
+        guard let pubkey = privkey_to_pubkey(privkey: privkey) else { return nil }
+        return .npub(pubkey)
+    case NOSTR_BECH32_NPROFILE:
+        let nprofile = b.data.nprofile
+        let pubkey = Pubkey(Data(bytes: nprofile.pubkey, count: 32))
+        return .nprofile(NProfile(author: pubkey, relays: getRelayStrings(from: nprofile.relays)))
+    case NOSTR_BECH32_NRELAY:
+        let nrelay = b.data.nrelay
+        let str_relay: str_block = nrelay.relay
+        guard let relay_str = String(str_relay) else {
             return nil
         }
-        
-        if decoded.hrp == "npub" {
-            return .npub(Pubkey(decoded.data))
-        } else if decoded.hrp == "nsec" {
-            return .nsec(Privkey(decoded.data))
-        } else if decoded.hrp == "note" {
-            return .note(NoteId(decoded.data))
-        } else if decoded.hrp == "nscript" {
-            return .nscript(decoded.data.bytes)
+        return .nrelay(relay_str)
+    case NOSTR_BECH32_NADDR:
+        let naddr = b.data.naddr
+        guard let identifier = String(naddr.identifier) else {
+            return nil
         }
+        let pubkey = Pubkey(Data(bytes: naddr.pubkey, count: 32))
+        let kind = naddr.kind
         
+        return .naddr(NAddr(identifier: identifier, author: pubkey, relays: getRelayStrings(from: naddr.relays), kind: kind))
+    default:
         return nil
     }
+}
+
+private func getRelayStrings(from relays: relays) -> [String] {
+    var result = [String]()
+    let numRelays = Int(relays.num_relays)
+
+    func processRelay(_ relay: str_block) {
+        if let string = String(relay) {
+            result.append(string)
+        }
+    }
+
+    // Since relays is a C tuple, the indexes can't be iterated through so they need to be manually processed
+    if numRelays > 0 { processRelay(relays.relays.0) }
+    if numRelays > 1 { processRelay(relays.relays.1) }
+    if numRelays > 2 { processRelay(relays.relays.2) }
+    if numRelays > 3 { processRelay(relays.relays.3) }
+    if numRelays > 4 { processRelay(relays.relays.4) }
+    if numRelays > 5 { processRelay(relays.relays.5) }
+    if numRelays > 6 { processRelay(relays.relays.6) }
+    if numRelays > 7 { processRelay(relays.relays.7) }
+    if numRelays > 8 { processRelay(relays.relays.8) }
+    if numRelays > 9 { processRelay(relays.relays.9) }
+
+    return result
 }

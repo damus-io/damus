@@ -60,20 +60,7 @@ func decode_universal_link(_ s: String) -> NostrLink? {
     uri = uri.replacingOccurrences(of: "https://damus.io/", with: "")
     uri = uri.replacingOccurrences(of: "/", with: "")
     
-    guard let decoded = try? bech32_decode(uri),
-          decoded.data.count == 32
-    else {
-        return nil
-    }
-
-    if decoded.hrp == "note" {
-        return .ref(.event(NoteId(decoded.data)))
-    } else if decoded.hrp == "npub" {
-        return .ref(.pubkey(Pubkey(decoded.data)))
-    }
-    // TODO: handle nprofile, etc
-    
-    return nil
+    return decode_nostr_bech32_uri(uri)
 }
 
 func decode_nostr_bech32_uri(_ s: String) -> NostrLink? {
@@ -82,16 +69,24 @@ func decode_nostr_bech32_uri(_ s: String) -> NostrLink? {
     }
     
     switch obj {
-    case .nsec(let privkey):
-        guard let pubkey = privkey_to_pubkey(privkey: privkey) else { return nil }
-        return .ref(.pubkey(pubkey))
-    case .npub(let pubkey):
-        return .ref(.pubkey(pubkey))
-    case .note(let id):
-        return .ref(.event(id))
-    case .nscript(let data):
-        return .script(data)
-    }
+        case .nsec(let privkey):
+            guard let pubkey = privkey_to_pubkey(privkey: privkey) else { return nil }
+            return .ref(.pubkey(pubkey))
+        case .npub(let pubkey):
+            return .ref(.pubkey(pubkey))
+        case .note(let id):
+            return .ref(.event(id))
+        case .nscript(let data):
+            return .script(data)
+        case .naddr(let naddr):
+            return .none // TODO: FIX
+        case .nevent(let nevent):
+            return .ref(.event(nevent.noteid))
+        case .nprofile(let nprofile):
+            return .ref(.pubkey(nprofile.author))
+        case .nrelay(_):
+            return .none
+        }
 }
 
 func decode_nostr_uri(_ s: String) -> NostrLink? {
