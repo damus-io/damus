@@ -89,6 +89,24 @@ enum Bech32Object : Equatable {
         
         return decodeCBech32(b)
     }
+    
+    static func encode(_ obj: Bech32Object) -> String {
+        switch(obj) {
+        case .note(let noteid):
+            return bech32_encode(hrp: "note", noteid.bytes)
+        case .nevent(let nevent): return bech32EncodeNevent(nevent)
+        case .nprofile(let nprofile): return bech32EncodeNprofile(nprofile)
+        case .nrelay(let relayURL): return bech32EncodeNrelay(relayURL: relayURL)
+        case .naddr(let naddr): return bech32EncodeNaddr(naddr)
+        case .npub(let pubkey):
+            return bech32_encode(hrp: "npub", pubkey.bytes)
+        case .nsec(let privkey):
+            guard let pubkey = privkey_to_pubkey(privkey: privkey) else { return "" }
+            return bech32_encode(hrp: "npub", pubkey.bytes)
+        case .nscript(let data):
+            return bech32_encode(hrp: "nscript", data)
+        }
+    }
 }
 
 func decodeCBech32(_ b: nostr_bech32_t) -> Bech32Object? {
@@ -161,4 +179,87 @@ private func getRelayStrings(from relays: relays) -> [String] {
     if numRelays > 9 { processRelay(relays.relays.9) }
 
     return result
+}
+
+private enum TLVType: UInt8 {
+    case SPECIAL
+    case RELAY
+    case AUTHOR
+    case KIND
+}
+
+private func writeBytesList(bytesList: inout [UInt8], tlvType: TLVType, data: [UInt8]){
+    bytesList.append(tlvType.rawValue)
+    bytesList.append(UInt8(data.bytes.count))
+    bytesList.append(contentsOf: data.bytes)
+}
+
+private func writeBytesRelays(bytesList: inout [UInt8], relays: [String]) {
+    for relay in relays where !relay.isEmpty {
+        guard let relayData = relay.data(using: .utf8) else {
+            continue // skip relay if can't read data
+        }
+        writeBytesList(bytesList: &bytesList, tlvType: .RELAY, data: relayData.bytes)
+    }
+}
+
+private func writeBytesKind(bytesList: inout [UInt8], kind: UInt32) {
+    bytesList.append(TLVType.KIND.rawValue)
+    bytesList.append(UInt8(4))
+
+    var bigEndianBytes = kind.bigEndian
+    let data = Data(bytes: &bigEndianBytes, count: MemoryLayout<UInt32>.size)
+
+    bytesList.append(contentsOf: data)
+}
+
+private func bech32EncodeNevent(_ nevent: NEvent) -> String {
+    var neventBytes = [UInt8]();
+    writeBytesList(bytesList: &neventBytes, tlvType: .SPECIAL, data: nevent.noteid.bytes)
+    
+    writeBytesRelays(bytesList: &neventBytes, relays: nevent.relays)
+    
+    if let eventPubkey = nevent.author {
+        writeBytesList(bytesList: &neventBytes, tlvType: .AUTHOR, data: eventPubkey.bytes)
+    }
+    
+    if let kind = nevent.kind {
+        writeBytesKind(bytesList: &neventBytes, kind: kind)
+    }
+    
+    return bech32_encode(hrp: "nevent", neventBytes.bytes)
+}
+
+private func bech32EncodeNprofile(_ nprofile: NProfile) -> String {
+    var nprofileBytes = [UInt8]();
+
+    writeBytesList(bytesList: &nprofileBytes, tlvType: .SPECIAL, data: nprofile.author.bytes)
+    writeBytesRelays(bytesList: &nprofileBytes, relays: nprofile.relays)
+    
+    return bech32_encode(hrp: "nprofile", nprofileBytes.bytes)
+}
+
+private func bech32EncodeNrelay(relayURL: String) -> String {
+    var nrelayBytes = [UInt8]();
+    
+    guard let relayURLBytes = relayURL.data(using: .ascii) else {
+        return ""
+    }
+    
+    writeBytesList(bytesList: &nrelayBytes, tlvType: .SPECIAL, data: relayURLBytes.bytes)
+    return bech32_encode(hrp: "nrelay", nrelayBytes.bytes)
+}
+
+private func bech32EncodeNaddr(_ naddr: NAddr) -> String {
+    var naddrBytes = [UInt8]();
+    
+    guard let identifierBytes = naddr.identifier.data(using: .utf8) else {
+        return ""
+    }
+    
+    writeBytesList(bytesList: &naddrBytes, tlvType: .SPECIAL, data: identifierBytes.bytes)
+    writeBytesRelays(bytesList: &naddrBytes, relays: naddr.relays)
+    writeBytesList(bytesList: &naddrBytes, tlvType: .AUTHOR, data: naddr.author.bytes)
+    writeBytesKind(bytesList: &naddrBytes, kind: naddr.kind)
+    return bech32_encode(hrp: "naddr", naddrBytes.bytes)
 }
