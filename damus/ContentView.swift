@@ -28,6 +28,7 @@ enum Sheets: Identifiable {
     case filter
     case user_status
     case onboardingSuggestions
+    case purple(DamusPurpleURL)
     
     static func zap(target: ZapTarget, lnurl: String) -> Sheets {
         return .zap(ZapSheet(target: target, lnurl: lnurl))
@@ -48,6 +49,7 @@ enum Sheets: Identifiable {
         case .select_wallet: return "select-wallet"
         case .filter: return "filter"
         case .onboardingSuggestions: return "onboarding-suggestions"
+        case .purple(let purple_url): return "purple" + purple_url.url_string()
         }
     }
 }
@@ -330,6 +332,8 @@ struct ContentView: View {
                     .presentationDragIndicator(.visible)
             case .onboardingSuggestions:
                 OnboardingSuggestionsView(model: SuggestedUsersViewModel(damus_state: damus_state!))
+            case .purple(let purple_url):
+                DamusPurpleURLSheetView(damus_state: damus_state!, purple_url: purple_url)
             }
         }
         .onOpenURL { url in
@@ -344,6 +348,7 @@ struct ContentView: View {
                 case .event(let ev):    self.open_event(ev: ev)
                 case .wallet_connect(let nwc): self.open_wallet(nwc: nwc)
                 case .script(let data): self.open_script(data)
+                case .purple(let purple_url): self.active_sheet = .purple(purple_url)
                 }
             }
         }
@@ -1043,9 +1048,15 @@ enum OpenResult {
     case event(NostrEvent)
     case wallet_connect(WalletConnectURL)
     case script([UInt8])
+    case purple(DamusPurpleURL)
 }
 
 func on_open_url(state: DamusState, url: URL, result: @escaping (OpenResult?) -> Void) {
+    if let purple_url = DamusPurpleURL.from_url(url: url) {
+        result(.purple(purple_url))
+        return
+    }
+    
     if let nwc = WalletConnectURL(str: url.absoluteString) {
         result(.wallet_connect(nwc))
         return

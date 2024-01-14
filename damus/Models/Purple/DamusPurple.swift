@@ -156,6 +156,30 @@ class DamusPurple: StoreObserverDelegate {
             throw PurpleError.translation_no_response
         }
     }
+    
+    func verify_npub_for_checkout(checkout_id: String) async throws {
+        var url = environment.get_base_url()
+        url.append(path: "/ln-checkout/\(checkout_id)/verify")
+        
+        let (data, response) = try await make_nip98_authenticated_request(
+            method: .put,
+            url: url,
+            payload: nil,
+            payload_type: nil,
+            auth_keypair: self.keypair
+        )
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            switch httpResponse.statusCode {
+                case 200:
+                    Log.info("Verified npub for checkout id `%s` with Damus Purple server", for: .damus_purple, checkout_id)
+                default:
+                    Log.error("Error in verifying npub with Damus Purple. HTTP status code: %d; Response: %s; Checkout id: ", for: .damus_purple, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown", checkout_id)
+                    throw PurpleError.checkout_npub_verification_error
+            }
+        }
+        
+    }
 }
 
 // MARK: API types
@@ -189,6 +213,7 @@ extension DamusPurple {
     enum PurpleError: Error {
         case translation_error(status_code: Int, response: Data)
         case translation_no_response
+        case checkout_npub_verification_error
     }
     
     struct TranslationResult: Codable {

@@ -345,35 +345,7 @@ struct DamusPurpleView: View {
     
     var MainContent: some View {
         VStack {
-            HStack(spacing: 20) {
-                Image("damus-dark-logo")
-                    .resizable()
-                    .frame(width: 60, height: 60)
-                    .clipShape(RoundedRectangle(cornerRadius: 15.0))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 15)
-                            .stroke(LinearGradient(
-                                colors: [DamusColors.lighterPink.opacity(0.8), .white.opacity(0), DamusColors.deepPurple.opacity(0.6)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing), lineWidth: 1)
-                    )
-                    .shadow(radius: 5)
-                
-                VStack(alignment: .leading) {
-                    Text(NSLocalizedString("Purple", comment: "Subscription service name"))
-                        .font(.system(size: 60.0).weight(.bold))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [DamusColors.lighterPink, DamusColors.deepPurple],
-                                startPoint: .bottomLeading,
-                                endPoint: .topTrailing
-                            )
-                        )
-                        .foregroundColor(.white)
-                        .tracking(-2)
-                }
-            }
-            .padding(.bottom, 30)
+            DamusPurpleLogoView()
             
             VStack(alignment: .leading, spacing: 30) {
                 Subtitle(NSLocalizedString("Help us stay independent in our mission for Freedom tech with our Purple subscription, and look cool doing it!", comment: "Damus purple subscription pitch"))
@@ -426,6 +398,17 @@ struct DamusPurpleView: View {
                     }
                 }
                 
+                HStack {
+                    Spacer()
+                    Link(
+                        NSLocalizedString("Learn more", comment: "Label for a link to the Damus Purple landing page"),
+                        destination: damus_state.settings.purple_api_local_test_mode ? Constants.PURPLE_LANDING_PAGE_TEST_URL : Constants.PURPLE_LANDING_PAGE_PRODUCTION_URL
+                    )
+                        .foregroundColor(DamusColors.pink)
+                        .padding()
+                    Spacer()
+                }
+                
             }
             .padding([.trailing, .leading], 30)
             .padding(.bottom, 20)
@@ -438,6 +421,40 @@ struct DamusPurpleView: View {
             
             Spacer()
         }
+    }
+}
+
+struct DamusPurpleLogoView: View {
+    var body: some View {
+        HStack(spacing: 20) {
+            Image("damus-dark-logo")
+                .resizable()
+                .frame(width: 60, height: 60)
+                .clipShape(RoundedRectangle(cornerRadius: 15.0))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 15)
+                        .stroke(LinearGradient(
+                            colors: [DamusColors.lighterPink.opacity(0.8), .white.opacity(0), DamusColors.deepPurple.opacity(0.6)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing), lineWidth: 1)
+                )
+                .shadow(radius: 5)
+            
+            VStack(alignment: .leading) {
+                Text(NSLocalizedString("Purple", comment: "Subscription service name"))
+                    .font(.system(size: 60.0).weight(.bold))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [DamusColors.lighterPink, DamusColors.deepPurple],
+                            startPoint: .bottomLeading,
+                            endPoint: .topTrailing
+                        )
+                    )
+                    .foregroundColor(.white)
+                    .tracking(-2)
+            }
+        }
+        .padding(.bottom, 30)
     }
 }
 
