@@ -15,6 +15,7 @@ struct TimelineView<Content: View>: View {
     let show_friend_icon: Bool
     let filter: (NostrEvent) -> Bool
     let content: Content?
+    let debouncer: Debouncer
 
     init(events: EventHolder, loading: Binding<Bool>, damus: DamusState, show_friend_icon: Bool, filter: @escaping (NostrEvent) -> Bool, content: (() -> Content)? = nil) {
         self.events = events
@@ -22,6 +23,7 @@ struct TimelineView<Content: View>: View {
         self.damus = damus
         self.show_friend_icon = show_friend_icon
         self.filter = filter
+        self.debouncer = Debouncer(interval: 0.5)
         self.content = content?()
     }
 
@@ -45,7 +47,9 @@ struct TimelineView<Content: View>: View {
                     .shimmer(loading)
                     .disabled(loading)
                     .background(GeometryReader { proxy -> Color in
-                        handle_scroll_queue(proxy, queue: self.events)
+                        debouncer.debounce_immediate {
+                            handle_scroll_queue(proxy, queue: self.events)
+                        }
                         return Color.clear
                     })
             }
