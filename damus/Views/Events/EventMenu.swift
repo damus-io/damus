@@ -111,6 +111,12 @@ struct MenuItems: View {
                 Label(isBookmarked ? removeBookmarkString : addBookmarkString, image: imageName)
             }
 
+            Button {
+                notify(.broadcast(event))
+            } label: {
+                Label(NSLocalizedString("Broadcast", comment: "Context menu option for broadcasting the user's note to all of the user's connected relay servers."), image: "globe")
+            }
+            // Mute thread - relocated to below Broadcast, as to move further away from Add Bookmark to prevent accidental muted threads
             if event.known_kind != .dm {
                 Button {
                     self.muted_threads.updateMutedThread(event)
@@ -123,13 +129,6 @@ struct MenuItems: View {
                     Label(isMutedThread ? unmuteThreadString : muteThreadString, image: imageName)
                 }
             }
-
-            Button {
-                notify(.broadcast(event))
-            } label: {
-                Label(NSLocalizedString("Broadcast", comment: "Context menu option for broadcasting the user's note to all of the user's connected relay servers."), image: "globe")
-            }
-            
             // Only allow reporting if logged in with private key and the currently viewed profile is not the logged in profile.
             if keypair.pubkey != target_pubkey && keypair.privkey != nil {
                 Button(role: .destructive) {
