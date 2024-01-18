@@ -17,7 +17,7 @@ struct MutelistView: View {
                   let keypair = damus_state.keypair.to_full(),
                   let new_ev = remove_from_mutelist(keypair: keypair,
                                                     prev: mutelist,
-                                                    to_remove: .pubkey(pubkey))
+                                                    to_remove: .user(pubkey, nil))
             else {
                 return
             }
