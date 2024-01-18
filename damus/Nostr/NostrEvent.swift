@@ -739,22 +739,30 @@ func validate_event(ev: NostrEvent) -> ValidationResult {
 
 func first_eref_mention(ev: NostrEvent, keypair: Keypair) -> Mention<NoteId>? {
     let blocks = ev.blocks(keypair).blocks.filter { block in
-        guard case .mention(let mention) = block,
-              case .note = mention.ref else {
+        guard case .mention(let mention) = block else {
+                return false
+            }
+
+        switch mention.ref {
+        case .note, .nevent:
+            return true
+        default:
             return false
         }
-        
-        return true
     }
     
     /// MARK: - Preview
     if let firstBlock = blocks.first,
-       case .mention(let mention) = firstBlock,
-       case .note(let note_id) = mention.ref
-    {
-        return .note(note_id)
+       case .mention(let mention) = firstBlock {
+        switch mention.ref {
+        case .note(let note_id):
+            return .note(note_id)
+        case .nevent(let nevent):
+            return .note(nevent.noteid)
+        default:
+            return nil
+        }
     }
-
     return nil
 }
 
