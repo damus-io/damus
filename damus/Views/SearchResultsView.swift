@@ -20,6 +20,9 @@ enum Search: Identifiable {
     case nip05(String)
     case hex(Data)
     case multi(MultiSearch)
+    case nevent(NEvent)
+    case naddr(NAddr)
+    case nprofile(NProfile)
     
     var id: String {
         switch self {
@@ -30,6 +33,9 @@ enum Search: Identifiable {
         case .nip05: return "nip05"
         case .hex: return "hex"
         case .multi: return "multi"
+        case .nevent: return "nevent"
+        case .naddr: return "naddr"
+        case .nprofile: return "nprofile"
         }
     }
 }
@@ -62,27 +68,25 @@ struct InnerSearchResults: View {
             switch search {
             case .profiles(let results):
                 ProfilesSearch(results)
-                
             case .hashtag(let ht):
                 HashtagSearch(ht)
-                
             case .nip05(let addr):
                 SearchingEventView(state: damus_state, search_type: .nip05(addr))
-
             case .profile(let pubkey):
                 SearchingEventView(state: damus_state, search_type: .profile(pubkey))
-
             case .hex(let h):
-
                 VStack(spacing: 10) {
                     SearchingEventView(state: damus_state, search_type: .event(NoteId(h)))
-
                     SearchingEventView(state: damus_state, search_type: .profile(Pubkey(h)))
-                }
-                
+                } 
             case .note(let nid):
                 SearchingEventView(state: damus_state, search_type: .event(nid))
-
+            case .nevent(let nevent):
+                SearchingEventView(state: damus_state, search_type: .event(nevent.noteid))
+            case .nprofile(let nprofile):
+                SearchingEventView(state: damus_state, search_type: .profile(nprofile.author))
+            case .naddr(let naddr):
+                SearchingEventView(state: damus_state, search_type: .naddr(naddr))
             case .multi(let multi):
                 VStack {
                     HashtagSearch(multi.hashtag)
@@ -142,21 +146,35 @@ func search_for_string<Y>(profiles: Profiles, search new: String, txn: NdbTxn<Y>
         return .hashtag(make_hashtagable(new))
     }
     
-    if let new = hex_decode_id(new) {
+    let searchQuery = remove_nostr_uri_prefix(new)
+    
+    if let new = hex_decode_id(searchQuery) {
         return .hex(new)
     }
 
-    if new.starts(with: "npub") {
-        if let decoded = bech32_pubkey_decode(new) {
+    if searchQuery.starts(with: "npub") {
+        if let decoded = bech32_pubkey_decode(searchQuery) {
             return .profile(decoded)
         }
     }
     
-    if new.starts(with: "note"), let decoded = try? bech32_decode(new) {
+    if searchQuery.starts(with: "note"), let decoded = try? bech32_decode(searchQuery) {
         return .note(NoteId(decoded.data))
     }
     
-    let multisearch = MultiSearch(hashtag: make_hashtagable(new), profiles: search_profiles(profiles: profiles, search: new, txn: txn))
+    if searchQuery.starts(with: "nevent"), case let .nevent(nevent) = Bech32Object.parse(searchQuery) {
+        return .nevent(nevent)
+    }
+    
+    if searchQuery.starts(with: "nprofile"), case let .nprofile(nprofile) = Bech32Object.parse(searchQuery) {
+        return .nprofile(nprofile)
+    }
+    
+    if searchQuery.starts(with: "naddr"), case let .naddr(naddr) = Bech32Object.parse(searchQuery) {
+        return .naddr(naddr)
+    }
+    
+    let multisearch = MultiSearch(hashtag: make_hashtagable(searchQuery), profiles: search_profiles(profiles: profiles, search: new, txn: txn))
     return .multi(multisearch)
 }
 

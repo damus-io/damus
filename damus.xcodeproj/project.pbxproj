@@ -614,6 +614,7 @@
 		D7FB10A72B0C371A00FA8D42 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2B10272A7B0F5C008AA43E /* Log.swift */; };
 		D7FF94002AC7AC5300FD969D /* RelayURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FF93FF2AC7AC5200FD969D /* RelayURL.swift */; };
 		E02B54182B4DFADA0077FF42 /* Bech32ObjectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E02B54172B4DFADA0077FF42 /* Bech32ObjectTests.swift */; };
+		E04A37C62B544F090029650D /* URIParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = E04A37C52B544F090029650D /* URIParsing.swift */; };
 		E4FA1C032A24BB7F00482697 /* SearchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */; };
 		E990020F2955F837003BBC5A /* EditMetadataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E990020E2955F837003BBC5A /* EditMetadataView.swift */; };
 		E9E4ED0B295867B900DD7078 /* ThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E4ED0A295867B900DD7078 /* ThreadView.swift */; };
@@ -1377,6 +1378,7 @@
 		D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusUserDefaults.swift; sourceTree = "<group>"; };
 		D7FF93FF2AC7AC5200FD969D /* RelayURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayURL.swift; sourceTree = "<group>"; };
 		E02B54172B4DFADA0077FF42 /* Bech32ObjectTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bech32ObjectTests.swift; sourceTree = "<group>"; };
+		E04A37C52B544F090029650D /* URIParsing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URIParsing.swift; sourceTree = "<group>"; };
 		E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSettingsView.swift; sourceTree = "<group>"; };
 		E990020E2955F837003BBC5A /* EditMetadataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditMetadataView.swift; sourceTree = "<group>"; };
 		E9E4ED0A295867B900DD7078 /* ThreadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadView.swift; sourceTree = "<group>"; };
@@ -2055,6 +2057,7 @@
 		4C7FF7D628233637009601DB /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				E04A37C52B544F090029650D /* URIParsing.swift */,
 				4C1D4FB02A7958E60024F453 /* VersionInfo.swift */,
 				4C7D09612A098D0E00943473 /* WalletConnect.swift */,
 				4C198DF329F88D23004C165C /* Images */,
@@ -3297,6 +3300,7 @@
 				50B5685329F97CB400A23243 /* CredentialHandler.swift in Sources */,
 				643EA5C8296B764E005081BB /* RelayFilterView.swift in Sources */,
 				F71694EC2A662292001F4053 /* SuggestedUsersViewModel.swift in Sources */,
+				E04A37C62B544F090029650D /* URIParsing.swift in Sources */,
 				4C3EA67D28FFBBA300C48A62 /* InvoicesView.swift in Sources */,
 				4C363A8E28236FE4006E126D /* NoteContentView.swift in Sources */,
 				4C2B10282A7B0F5C008AA43E /* Log.swift in Sources */,

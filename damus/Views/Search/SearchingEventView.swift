@@ -18,6 +18,7 @@ enum SearchType: Equatable {
     case event(NoteId)
     case profile(Pubkey)
     case nip05(String)
+    case naddr(NAddr)
 }
 
 @MainActor
@@ -35,6 +36,8 @@ struct SearchingEventView: View {
             return "Profile"
         case .event:
             return "Note"
+        case .naddr:
+            return "Naddr"
         }
     }
     
@@ -88,6 +91,14 @@ struct SearchingEventView: View {
                     return
                 }
                 self.search_state = .found_profile(pubkey)
+            }
+        case .naddr(let naddr):
+            naddrLookup(damus_state: state, naddr: naddr) { res in
+                guard let res = res else {
+                    self.search_state = .not_found
+                    return
+                }
+                self.search_state = .found(res)
             }
         }
     }

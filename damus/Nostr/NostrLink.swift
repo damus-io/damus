@@ -55,14 +55,6 @@ func parse_hexstr(_ p: Parser, len: Int) -> String? {
     return String(substring(p.str, start: start, end: p.pos))
 }
 
-func decode_universal_link(_ s: String) -> NostrLink? {
-    var uri = s.replacingOccurrences(of: "https://damus.io/r/", with: "")
-    uri = uri.replacingOccurrences(of: "https://damus.io/", with: "")
-    uri = uri.replacingOccurrences(of: "/", with: "")
-    
-    return decode_nostr_bech32_uri(uri)
-}
-
 func decode_nostr_bech32_uri(_ s: String) -> NostrLink? {
     guard let obj = Bech32Object.parse(s) else {
         return nil
@@ -90,19 +82,7 @@ func decode_nostr_bech32_uri(_ s: String) -> NostrLink? {
 }
 
 func decode_nostr_uri(_ s: String) -> NostrLink? {
-    if s.starts(with: "https://damus.io/") {
-        return decode_universal_link(s)
-    }
-
-    var uri = s
-    uri = uri.replacingOccurrences(of: "nostr://", with: "")
-    uri = uri.replacingOccurrences(of: "nostr:", with: "")
-
-    // Fix for non-latin characters resulting in second colon being encoded
-    uri = uri.replacingOccurrences(of: "damus:t%3A", with: "t:")
-    
-    uri = uri.replacingOccurrences(of: "damus://", with: "")
-    uri = uri.replacingOccurrences(of: "damus:", with: "")
+    let uri = remove_nostr_uri_prefix(s)
     
     let parts = uri.split(separator: ":")
         .reduce(into: Array<String>()) { acc, str in
