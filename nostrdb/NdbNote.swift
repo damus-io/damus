@@ -325,6 +325,10 @@ extension NdbNote {
         References<ReplaceableParam>(tags: self.tags)
     }
 
+    public var referenced_mute_items: References<MuteItem> {
+        References<MuteItem>(tags: self.tags)
+    }
+
     public var references: References<RefId> {
         References<RefId>(tags: self.tags)
     }
