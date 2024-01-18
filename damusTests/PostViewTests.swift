@@ -142,6 +142,28 @@ final class PostViewTests: XCTestCase {
         checkMentionLinkEditorHandling(content: content, replacementText: "", replacementRange: NSRange(location: 5, length: 28), shouldBeAbleToChangeAutomatically: true)
         
     }
+    
+    func testMentionLinkEditorHandling_noWhitespaceAfterLink1_addsWhitespace() {
+        var content: NSMutableAttributedString
+
+        content = NSMutableAttributedString(string: "Hello @user ")
+        content.addAttribute(.link, value: "damus:1234", range: NSRange(location: 6, length: 5))
+        checkMentionLinkEditorHandling(content: content, replacementText: "up", replacementRange: NSRange(location: 11, length: 1), shouldBeAbleToChangeAutomatically: true, expectedNewCursorIndex: 13, handleNewContent: { newManuallyEditedContent in
+            XCTAssertEqual(newManuallyEditedContent.string, "Hello @user up")
+            XCTAssertNil(newManuallyEditedContent.attribute(.link, at: 11, effectiveRange: nil))
+        })
+    }
+    
+    func testMentionLinkEditorHandling_noWhitespaceAfterLink2_addsWhitespace() {
+        var content: NSMutableAttributedString
+
+        content = NSMutableAttributedString(string: "Hello @user test")
+        content.addAttribute(.link, value: "damus:1234", range: NSRange(location: 6, length: 5))
+        checkMentionLinkEditorHandling(content: content, replacementText: "up", replacementRange: NSRange(location: 11, length: 1), shouldBeAbleToChangeAutomatically: true, expectedNewCursorIndex: 13, handleNewContent: { newManuallyEditedContent in
+            XCTAssertEqual(newManuallyEditedContent.string, "Hello @user uptest")
+            XCTAssertNil(newManuallyEditedContent.attribute(.link, at: 11, effectiveRange: nil))
+        })
+    }
 }
 
 func checkMentionLinkEditorHandling(

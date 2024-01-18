@@ -617,6 +617,13 @@ func load_draft_for_post(drafts: Drafts, action: PostAction) -> DraftArtifacts? 
 func build_post(state: DamusState, post: NSMutableAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], references: [RefId]) -> NostrPost {
     post.enumerateAttributes(in: NSRange(location: 0, length: post.length), options: []) { attributes, range, stop in
         if let link = attributes[.link] as? String {
+            let nextCharIndex = range.upperBound
+            if nextCharIndex < post.length,
+               let nextChar = post.attributedSubstring(from: NSRange(location: nextCharIndex, length: 1)).string.first,
+               !nextChar.isWhitespace {
+                post.insert(NSAttributedString(string: " "), at: nextCharIndex)
+            }
+
             let normalized_link: String
             if link.hasPrefix("damus:nostr:") {
                 // Replace damus:nostr: URI prefix with nostr: since the former is for internal navigation and not meant to be posted.
