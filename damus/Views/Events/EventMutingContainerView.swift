@@ -49,12 +49,13 @@ struct EventMutingContainerView<Content: View>: View {
             }
         }
         .onReceive(handle_notify(.new_mutes)) { mutes in
-            if mutes.contains(event.pubkey) {
+            let new_muted_event_reason = mutes.event_muted_reason(event)
+            if new_muted_event_reason != nil {
                 shown = false
             }
         }
         .onReceive(handle_notify(.new_unmutes)) { unmutes in
-            if unmutes.contains(event.pubkey) {
+            if unmutes.event_muted_reason(event) != nil {
                 shown = true
             }
         }

@@ -8,8 +8,8 @@
 import Foundation
 
 struct MuteNotify: Notify {
-    typealias Payload = Pubkey
-    var payload: Payload
+    typealias Payload = MuteItem
+    var payload: MuteItem
 }
 
 extension NotifyHandler {
@@ -19,7 +19,7 @@ extension NotifyHandler {
 }
 
 extension Notifications {
-    static func mute(_ target: Pubkey) -> Notifications<MuteNotify> {
+    static func mute(_ target: MuteItem) -> Notifications<MuteNotify> {
         .init(.init(payload: target))
     }
 }
