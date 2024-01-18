@@ -244,7 +244,7 @@ class HomeModel {
         process_zap_event(state: damus_state, ev: ev) { zapres in
             guard case .done(let zap) = zapres,
                   zap.target.pubkey == self.damus_state.keypair.pubkey,
-                  should_show_event(keypair: self.damus_state.keypair, hellthreads: self.damus_state.muted_threads, contacts: self.damus_state.contacts, ev: zap.request.ev) else {
+                  should_show_event(contacts: self.damus_state.contacts, ev: zap.request.ev) else {
                 return
             }
         
@@ -577,6 +577,8 @@ class HomeModel {
         }
 
         damus_state.contacts.set_mutelist(ev)
+
+        migrate_old_muted_threads_to_new_mutelist(keypair: damus_state.keypair, damus_state: damus_state)
     }
 
     func handle_old_list_event(_ ev: NostrEvent) {
@@ -597,6 +599,8 @@ class HomeModel {
         }
 
         damus_state.contacts.set_mutelist(ev)
+
+        migrate_old_muted_threads_to_new_mutelist(keypair: damus_state.keypair, damus_state: damus_state)
     }
     
     func get_last_event_of_kind(relay_id: String, kind: UInt32) -> NostrEvent? {
@@ -612,7 +616,7 @@ class HomeModel {
         // don't show notifications from ourselves
         guard ev.pubkey != damus_state.pubkey,
               event_has_our_pubkey(ev, our_pubkey: self.damus_state.pubkey),
-              should_show_event(keypair: self.damus_state.keypair, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: ev) else {
+              should_show_event(contacts: damus_state.contacts, ev: ev) else {
             return
         }
         
@@ -650,7 +654,7 @@ class HomeModel {
 
 
     func handle_text_event(sub_id: String, _ ev: NostrEvent) {
-        guard should_show_event(keypair: damus_state.keypair, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: ev) else {
+        guard should_show_event(contacts: damus_state.contacts, ev: ev) else {
             return
         }
         
@@ -679,7 +683,7 @@ class HomeModel {
     }
     
     func handle_dm(_ ev: NostrEvent) {
-        guard should_show_event(keypair: damus_state.keypair, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: ev) else {
+        guard should_show_event(contacts: damus_state.contacts, ev: ev) else {
             return
         }
         
@@ -1086,14 +1090,12 @@ func event_has_our_pubkey(_ ev: NostrEvent, our_pubkey: Pubkey) -> Bool {
 
 func should_show_event(event: NostrEvent, damus_state: DamusState) -> Bool {
     return should_show_event(
-        keypair: damus_state.keypair,
-        hellthreads: damus_state.muted_threads,
         contacts: damus_state.contacts,
         ev: event
     )
 }
 
-func should_show_event(keypair: Keypair, hellthreads: MutedThreadsManager, contacts: Contacts, ev: NostrEvent) -> Bool {
+func should_show_event(contacts: Contacts, ev: NostrEvent) -> Bool {
     let event_muted = contacts.mutelist?.mute_list?.event_muted_reason(ev) != nil
     if event_muted {
         return false

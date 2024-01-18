@@ -508,7 +508,6 @@
 		D7CB5D402B116E8A00AD4105 /* UserSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA693073295D649800ADDB87 /* UserSettingsStore.swift */; };
 		D7CB5D412B116F0900AD4105 /* StringCodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA5588229F33F5B00DC6A45 /* StringCodable.swift */; };
 		D7CB5D422B116F8900AD4105 /* Contacts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3AC79A28306D7B00E1F516 /* Contacts.swift */; };
-		D7CB5D432B116F9B00AD4105 /* MutedThreadsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A48E7AF29DFBE9D006E787E /* MutedThreadsManager.swift */; };
 		D7CB5D452B116FE800AD4105 /* Contacts+.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CB5D442B116FE800AD4105 /* Contacts+.swift */; };
 		D7CB5D462B11703D00AD4105 /* Notify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA3529F2A76AE80003BB08B /* Notify.swift */; };
 		D7CB5D472B11718700AD4105 /* Wallet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE60CDC295E1C5E00105A1F /* Wallet.swift */; };
@@ -3522,7 +3521,6 @@
 				D7CCFC0F2B0587F600323D86 /* Keys.swift in Sources */,
 				D7CB5D542B1174F700AD4105 /* NIP05.swift in Sources */,
 				D798D2232B0859B700234419 /* KeychainStorage.swift in Sources */,
-				D7CB5D432B116F9B00AD4105 /* MutedThreadsManager.swift in Sources */,
 				D74AAFC32B153395006CF0F4 /* HeadlessDamusState.swift in Sources */,
 				D7CE1B272B0BE224002EDAD4 /* bech32_util.c in Sources */,
 				D7CCFC102B05880F00323D86 /* Id.swift in Sources */,

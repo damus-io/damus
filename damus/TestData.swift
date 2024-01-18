@@ -87,7 +87,6 @@ var test_damus_state: DamusState = ({
                            postbox: .init(pool: pool),
                            bootstrap_relays: .init(),
                            replies: .init(our_pubkey: our_pubkey),
-                           muted_threads: .init(keypair: test_keypair),
                            wallet: .init(settings: settings),
                            nav: .init(),
                            music: .init(onChange: {_ in }),
