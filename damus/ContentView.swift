@@ -941,6 +941,34 @@ func find_event_with_subid(state: DamusState, query query_: FindEvent, subid: St
     }
 }
 
+func naddrLookup(damus_state: DamusState, naddr: NAddr, callback: @escaping (NostrEvent?) -> ()) {
+    var nostrKinds: [NostrKind]? = NostrKind(rawValue: naddr.kind).map { [$0] }
+
+    let filter = NostrFilter(kinds: nostrKinds, authors: [naddr.author])
+    
+    let subid = UUID().description
+    
+    damus_state.pool.subscribe_to(sub_id: subid, filters: [filter], to: nil) { relay_id, res  in
+        guard case .nostr_event(let ev) = res else {
+            damus_state.pool.unsubscribe(sub_id: subid, to: [relay_id])
+            return
+        }
+        
+        if case .event(_, let ev) = ev {
+            for tag in ev.tags {
+                if(tag.count >= 2 && tag[0].string() == "d"){
+                    if (tag[1].string() == naddr.identifier){
+                        damus_state.pool.unsubscribe(sub_id: subid, to: [relay_id])
+                        callback(ev)
+                        return
+                    }
+                }
+            }
+        }
+        damus_state.pool.unsubscribe(sub_id: subid, to: [relay_id])
+    }
+}
+
 func timeline_name(_ timeline: Timeline?) -> String {
     guard let timeline else {
         return ""
@@ -1093,7 +1121,10 @@ func on_open_url(state: DamusState, url: URL, result: @escaping (OpenResult?) ->
             // doesn't really make sense here
             break
         case .naddr(let naddr):
-            break // TODO: fix
+            naddrLookup(damus_state: state, naddr: naddr) { res in
+                guard let res = res else { return }
+                result(.event(res))
+            }
         }
     case .filter(let filt):
         result(.filter(filt))

@@ -79,7 +79,7 @@ func decode_nostr_bech32_uri(_ s: String) -> NostrLink? {
         case .nscript(let data):
             return .script(data)
         case .naddr(let naddr):
-            return .none // TODO: FIX
+            return .ref(.naddr(naddr))
         case .nevent(let nevent):
             return .ref(.event(nevent.noteid))
         case .nprofile(let nprofile):
