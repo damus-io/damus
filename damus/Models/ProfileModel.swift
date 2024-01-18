@@ -20,6 +20,7 @@ class ProfileModel: ObservableObject, Equatable {
     var seen_event: Set<NoteId> = Set()
     var sub_id = UUID().description
     var prof_subid = UUID().description
+    var findRelay_subid = UUID().description
     
     init(pubkey: Pubkey, damus: DamusState) {
         self.pubkey = pubkey
@@ -138,6 +139,27 @@ class ProfileModel: ObservableObject, Equatable {
                 break
             }
         }
+    }
+    
+    private func findRelaysHandler(relay_id: String, ev: NostrConnectionEvent) {
+        if case .nostr_event(let resp) = ev, case .event(_, let event) = resp, case .contacts = event.known_kind {
+            self.relays = decode_json_relays(event.content)
+        }
+    }
+    
+    func subscribeToFindRelays() {
+        var profile_filter = NostrFilter(kinds: [.contacts])
+        profile_filter.authors = [pubkey]
+        
+        damus.pool.subscribe(sub_id: findRelay_subid, filters: [profile_filter], handler: findRelaysHandler)
+    }
+    
+    func unsubscribeFindRelays() {
+        damus.pool.unsubscribe(sub_id: findRelay_subid)
+    }
+    
+    func getRelayStrings() -> [String] {
+        return relays?.keys.map {$0} ?? []
     }
 }
 

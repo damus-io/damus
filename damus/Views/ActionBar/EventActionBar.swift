@@ -13,6 +13,7 @@ struct EventActionBar: View {
     let damus_state: DamusState
     let event: NostrEvent
     let generator = UIImpactFeedbackGenerator(style: .medium)
+    let userProfile : ProfileModel
     
     // just used for previews
     @State var show_share_sheet: Bool = false
@@ -25,6 +26,7 @@ struct EventActionBar: View {
         self.damus_state = damus_state
         self.event = event
         _bar = ObservedObject(wrappedValue: bar ?? make_actionbar_model(ev: event.id, damus: damus_state))
+        self.userProfile = ProfileModel(pubkey: event.pubkey, damus: damus_state)
     }
     
     var lnurl: String? {
@@ -100,11 +102,11 @@ struct EventActionBar: View {
         }
         .sheet(isPresented: $show_share_action, onDismiss: { self.show_share_action = false }) {
             if #available(iOS 16.0, *) {
-                ShareAction(event: event, bookmarks: damus_state.bookmarks, show_share: $show_share_sheet)
+                ShareAction(event: event, bookmarks: damus_state.bookmarks, show_share: $show_share_sheet, userProfile: userProfile)
                     .presentationDetents([.height(300)])
                     .presentationDragIndicator(.visible)
             } else {
-                ShareAction(event: event, bookmarks: damus_state.bookmarks, show_share: $show_share_sheet)
+                ShareAction(event: event, bookmarks: damus_state.bookmarks, show_share: $show_share_sheet, userProfile: userProfile)
             }
         }
         .sheet(isPresented: $show_share_sheet, onDismiss: { self.show_share_sheet = false }) {

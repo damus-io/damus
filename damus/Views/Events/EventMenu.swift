@@ -13,6 +13,7 @@ struct EventMenuContext: View {
     let target_pubkey: Pubkey
     let bookmarks: BookmarksManager
     let muted_threads: MutedThreadsManager
+    let profileModel : ProfileModel
     @ObservedObject var settings: UserSettingsStore
     
     init(damus: DamusState, event: NostrEvent) {
@@ -22,6 +23,7 @@ struct EventMenuContext: View {
         self.bookmarks = damus.bookmarks
         self.muted_threads = damus.muted_threads
         self._settings = ObservedObject(wrappedValue: damus.settings)
+        self.profileModel = ProfileModel(pubkey: target_pubkey, damus: damus)
     }
     
     var body: some View {
@@ -32,7 +34,7 @@ struct EventMenuContext: View {
                 // Add our Menu button inside an overlay modifier to avoid affecting the rest of the layout around us.
                 .overlay(
                     Menu {
-                        MenuItems(event: event, keypair: keypair, target_pubkey: target_pubkey, bookmarks: bookmarks, muted_threads: muted_threads, settings: settings)
+                        MenuItems(event: event, keypair: keypair, target_pubkey: target_pubkey, bookmarks: bookmarks, muted_threads: muted_threads, settings: settings, profileModel: profileModel)
                     } label: {
                         Color.clear
                     }
@@ -52,13 +54,14 @@ struct MenuItems: View {
     let target_pubkey: Pubkey
     let bookmarks: BookmarksManager
     let muted_threads: MutedThreadsManager
+    let profileModel: ProfileModel
 
     @ObservedObject var settings: UserSettingsStore
 
     @State private var isBookmarked: Bool = false
     @State private var isMutedThread: Bool = false
     
-    init(event: NostrEvent, keypair: Keypair, target_pubkey: Pubkey, bookmarks: BookmarksManager, muted_threads: MutedThreadsManager, settings: UserSettingsStore) {
+    init(event: NostrEvent, keypair: Keypair, target_pubkey: Pubkey, bookmarks: BookmarksManager, muted_threads: MutedThreadsManager, settings: UserSettingsStore, profileModel: ProfileModel) {
         let bookmarked = bookmarks.isBookmarked(event)
         self._isBookmarked = State(initialValue: bookmarked)
 
@@ -71,6 +74,7 @@ struct MenuItems: View {
         self.keypair = keypair
         self.target_pubkey = target_pubkey
         self.settings = settings
+        self.profileModel = profileModel
     }
     
     var body: some View {
@@ -82,7 +86,7 @@ struct MenuItems: View {
             }
 
             Button {
-                UIPasteboard.general.string = target_pubkey.npub
+                UIPasteboard.general.string = Bech32Object.encode(.nprofile(NProfile(author: target_pubkey, relays: profileModel.getRelayStrings())))
             } label: {
                 Label(NSLocalizedString("Copy user public key", comment: "Context menu option for copying the ID of the user who created the note."), image: "user")
             }
@@ -143,6 +147,12 @@ struct MenuItems: View {
                     Label(NSLocalizedString("Mute user", comment: "Context menu option for muting users."), image: "mute")
                 }
             }
+        }
+        .onAppear() {
+            profileModel.subscribeToFindRelays()
+        }
+        .onDisappear() {
+            profileModel.unsubscribeFindRelays()
         }
     }
 }
