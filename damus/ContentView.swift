@@ -71,7 +71,7 @@ struct ContentView: View {
     @State var active_sheet: Sheets? = nil
     @State var damus_state: DamusState!
     @SceneStorage("ContentView.selected_timeline") var selected_timeline: Timeline = .home
-    @State var muting: Pubkey? = nil
+    @State var muting: MuteItem? = nil
     @State var confirm_mute: Bool = false
     @State var hide_bar: Bool = false
     @State var user_muted_confirm: Bool = false
@@ -366,8 +366,8 @@ struct ContentView: View {
         .onReceive(handle_notify(.report)) { target in
             self.active_sheet = .report(target)
         }
-        .onReceive(handle_notify(.mute)) { pubkey in
-            self.muting = pubkey
+        .onReceive(handle_notify(.mute)) { mute_item in
+            self.muting = mute_item
             self.confirm_mute = true
         }
         .onReceive(handle_notify(.attached_wallet)) { nwc in
@@ -526,7 +526,7 @@ struct ContentView: View {
                 user_muted_confirm = false
             }
         }, message: {
-            if let pubkey = self.muting {
+            if case let .user(pubkey, _) = self.muting {
                 let profile_txn = damus_state!.profiles.lookup(id: pubkey)
                 let profile = profile_txn?.unsafeUnownedValue
                 let name = Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
@@ -544,13 +544,13 @@ struct ContentView: View {
             Button(NSLocalizedString("Yes, Overwrite", comment: "Text of button that confirms to overwrite the existing mutelist.")) {
                 guard let ds = damus_state,
                       let keypair = ds.keypair.to_full(),
-                      let pubkey = muting,
-                      let mutelist = create_or_update_mutelist(keypair: keypair, mprev: nil, to_add: .user(pubkey, nil))
+                      let muting,
+                      let mutelist = create_or_update_mutelist(keypair: keypair, mprev: nil, to_add: muting)
                 else {
                     return
                 }
                 
-                damus_state?.contacts.set_mutelist(mutelist)
+                ds.contacts.set_mutelist(mutelist)
                 ds.postbox.send(mutelist)
 
                 confirm_overwrite_mutelist = false
@@ -573,21 +573,21 @@ struct ContentView: View {
                     confirm_overwrite_mutelist = true
                 } else {
                     guard let keypair = ds.keypair.to_full(),
-                          let pubkey = muting
+                          let muting
                     else {
                         return
                     }
 
-                    guard let ev = create_or_update_mutelist(keypair: keypair, mprev: ds.contacts.mutelist, to_add: .user(pubkey, nil)) else {
+                    guard let ev = create_or_update_mutelist(keypair: keypair, mprev: ds.contacts.mutelist, to_add: muting) else {
                         return
                     }
 
-                    damus_state?.contacts.set_mutelist(ev)
+                    ds.contacts.set_mutelist(ev)
                     ds.postbox.send(ev)
                 }
             }
         }, message: {
-            if let pubkey = muting {
+            if case let .user(pubkey, _) = muting {
                 let profile_txn = damus_state?.profiles.lookup(id: pubkey)
                 let profile = profile_txn?.unsafeUnownedValue
                 let name = Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
