@@ -8,21 +8,15 @@
 import SwiftUI
 
 struct EventMenuContext: View {
+    let damus_state: DamusState
     let event: NostrEvent
-    let keypair: Keypair
     let target_pubkey: Pubkey
-    let bookmarks: BookmarksManager
-    let muted_threads: MutedThreadsManager
     let profileModel : ProfileModel
-    @ObservedObject var settings: UserSettingsStore
     
     init(damus: DamusState, event: NostrEvent) {
+        self.damus_state = damus
         self.event = event
-        self.keypair = damus.keypair
         self.target_pubkey = event.pubkey
-        self.bookmarks = damus.bookmarks
-        self.muted_threads = damus.muted_threads
-        self._settings = ObservedObject(wrappedValue: damus.settings)
         self.profileModel = ProfileModel(pubkey: target_pubkey, damus: damus)
     }
     
@@ -34,7 +28,7 @@ struct EventMenuContext: View {
                 // Add our Menu button inside an overlay modifier to avoid affecting the rest of the layout around us.
                 .overlay(
                     Menu {
-                        MenuItems(event: event, keypair: keypair, target_pubkey: target_pubkey, bookmarks: bookmarks, muted_threads: muted_threads, settings: settings, profileModel: profileModel)
+                        MenuItems(damus_state: damus_state, event: event, target_pubkey: target_pubkey, profileModel: profileModel)
                     } label: {
                         Color.clear
                     }
@@ -49,38 +43,31 @@ struct EventMenuContext: View {
 }
 
 struct MenuItems: View {
+    let damus_state: DamusState
     let event: NostrEvent
-    let keypair: Keypair
     let target_pubkey: Pubkey
-    let bookmarks: BookmarksManager
-    let muted_threads: MutedThreadsManager
     let profileModel: ProfileModel
-
-    @ObservedObject var settings: UserSettingsStore
 
     @State private var isBookmarked: Bool = false
     @State private var isMutedThread: Bool = false
     
-    init(event: NostrEvent, keypair: Keypair, target_pubkey: Pubkey, bookmarks: BookmarksManager, muted_threads: MutedThreadsManager, settings: UserSettingsStore, profileModel: ProfileModel) {
-        let bookmarked = bookmarks.isBookmarked(event)
+    init(damus_state: DamusState, event: NostrEvent, target_pubkey: Pubkey, profileModel: ProfileModel) {
+        let bookmarked = damus_state.bookmarks.isBookmarked(event)
         self._isBookmarked = State(initialValue: bookmarked)
 
-        let muted_thread = muted_threads.isMutedThread(event, keypair: keypair)
+        let muted_thread = (damus_state.contacts.mutelist?.mute_list?.event_muted_reason(event) != nil)
         self._isMutedThread = State(initialValue: muted_thread)
         
-        self.bookmarks = bookmarks
-        self.muted_threads = muted_threads
+        self.damus_state = damus_state
         self.event = event
-        self.keypair = keypair
         self.target_pubkey = target_pubkey
-        self.settings = settings
         self.profileModel = profileModel
     }
     
     var body: some View {
         Group {
             Button {
-                UIPasteboard.general.string = event.get_content(keypair)
+                UIPasteboard.general.string = event.get_content(damus_state.keypair)
             } label: {
                 Label(NSLocalizedString("Copy text", comment: "Context menu option for copying the text from an note."), image: "copy2")
             }
@@ -97,7 +84,7 @@ struct MenuItems: View {
                 Label(NSLocalizedString("Copy note ID", comment: "Context menu option for copying the ID of the note."), image: "note-book")
             }
 
-            if settings.developer_mode {
+            if damus_state.settings.developer_mode {
                 Button {
                     UIPasteboard.general.string = event_to_json(ev: event)
                 } label: {
@@ -106,8 +93,8 @@ struct MenuItems: View {
             }
             
             Button {
-                self.bookmarks.updateBookmark(event)
-                isBookmarked = self.bookmarks.isBookmarked(event)
+                self.damus_state.bookmarks.updateBookmark(event)
+                isBookmarked = self.damus_state.bookmarks.isBookmarked(event)
             } label: {
                 let imageName = isBookmarked ? "bookmark.fill" : "bookmark"
                 let removeBookmarkString = NSLocalizedString("Remove bookmark", comment: "Context menu option for removing a note bookmark.")
@@ -122,9 +109,13 @@ struct MenuItems: View {
             }
             // Mute thread - relocated to below Broadcast, as to move further away from Add Bookmark to prevent accidental muted threads
             if event.known_kind != .dm {
-                Button {
-                    self.muted_threads.updateMutedThread(event)
-                    let muted = self.muted_threads.isMutedThread(event, keypair: self.keypair)
+                MuteDurationMenu { duration in
+                    if let full_keypair = self.damus_state.keypair.to_full(),
+                       let new_mutelist_ev = toggle_from_mutelist(keypair: full_keypair, prev: damus_state.contacts.mutelist, to_toggle: .thread(event.thread_id(keypair: damus_state.keypair), duration?.date_from_now)) {
+                        damus_state.contacts.set_mutelist(new_mutelist_ev)
+                        damus_state.postbox.send(new_mutelist_ev)
+                    }
+                    let muted = (damus_state.contacts.mutelist?.mute_list?.event_muted_reason(event) != nil)
                     isMutedThread = muted
                 } label: {
                     let imageName = isMutedThread ? "mute" : "mute"
@@ -134,15 +125,15 @@ struct MenuItems: View {
                 }
             }
             // Only allow reporting if logged in with private key and the currently viewed profile is not the logged in profile.
-            if keypair.pubkey != target_pubkey && keypair.privkey != nil {
+            if damus_state.keypair.pubkey != target_pubkey && damus_state.keypair.privkey != nil {
                 Button(role: .destructive) {
                     notify(.report(.note(ReportNoteTarget(pubkey: target_pubkey, note_id: event.id))))
                 } label: {
                     Label(NSLocalizedString("Report", comment: "Context menu option for reporting content."), image: "raising-hand")
                 }
                 
-                Button(role: .destructive) {
-                    notify(.mute(.user(target_pubkey, nil)))
+                MuteDurationMenu { duration in
+                    notify(.mute(.user(target_pubkey, duration?.date_from_now)))
                 } label: {
                     Label(NSLocalizedString("Mute user", comment: "Context menu option for muting users."), image: "mute")
                 }

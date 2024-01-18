@@ -66,7 +66,7 @@ struct SideMenuView: View {
                 }
             }
 
-            NavigationLink(value: Route.MuteList(users: get_mutelist_users(damus_state.contacts.mutelist))) {
+            NavigationLink(value: Route.MuteList(mutelist_items: damus_state.contacts.mutelist?.mute_list ?? Set<MuteItem>())) {
                 navLabel(title: NSLocalizedString("Muted", comment: "Sidebar menu label for muted users view."), img: "mute")
             }
 
