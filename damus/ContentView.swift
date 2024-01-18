@@ -674,7 +674,6 @@ struct ContentView: View {
                                       postbox: PostBox(pool: pool),
                                       bootstrap_relays: bootstrap_relays,
                                       replies: ReplyCounter(our_pubkey: pubkey),
-                                      muted_threads: MutedThreadsManager(keypair: keypair),
                                       wallet: WalletModel(settings: settings),
                                       nav: self.navigationCoordinator,
                                       music: MusicController(onChange: music_changed),

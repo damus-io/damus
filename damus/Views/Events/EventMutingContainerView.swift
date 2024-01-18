@@ -27,7 +27,7 @@ struct EventMutingContainerView<Content: View>: View {
         self.damus_state = damus_state
         self.event = event
         self.content = content()
-        self._shown = State(initialValue: should_show_event(keypair: damus_state.keypair, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: event))
+        self._shown = State(initialValue: should_show_event(contacts: damus_state.contacts, ev: event))
     }
     
     init(damus_state: DamusState, event: NostrEvent, muteBox: @escaping MuteBoxViewClosure, @ViewBuilder content: () -> Content) {
@@ -36,7 +36,7 @@ struct EventMutingContainerView<Content: View>: View {
     }
     
     var should_mute: Bool {
-        return !should_show_event(keypair: damus_state.keypair, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: event)
+        return !should_show_event(contacts: damus_state.contacts, ev: event)
     }
     
     var body: some View {

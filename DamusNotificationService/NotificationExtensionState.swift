@@ -11,7 +11,6 @@ struct NotificationExtensionState: HeadlessDamusState {
     let ndb: Ndb
     let settings: UserSettingsStore
     let contacts: Contacts
-    let muted_threads: MutedThreadsManager
     let keypair: Keypair
     let profiles: Profiles
     let zaps: Zaps
@@ -28,7 +27,6 @@ struct NotificationExtensionState: HeadlessDamusState {
         self.settings = UserSettingsStore()
         
         self.contacts = Contacts(our_pubkey: keypair.pubkey)
-        self.muted_threads = MutedThreadsManager(keypair: keypair)
         self.keypair = keypair
         self.profiles = Profiles(ndb: ndb)
         self.zaps = Zaps(our_pubkey: keypair.pubkey)

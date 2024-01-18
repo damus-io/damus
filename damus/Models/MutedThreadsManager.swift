@@ -11,7 +11,7 @@ fileprivate func getMutedThreadsKey(pubkey: Pubkey) -> String {
     pk_setting_key(pubkey, key: "muted_threads")
 }
 
-func loadMutedThreads(pubkey: Pubkey) -> [NoteId] {
+func loadOldMutedThreads(pubkey: Pubkey) -> [NoteId] {
     let key = getMutedThreadsKey(pubkey: pubkey)
     let xs = UserDefaults.standard.stringArray(forKey: key) ?? []
     return xs.reduce(into: [NoteId]()) { ids, k in
@@ -20,56 +20,20 @@ func loadMutedThreads(pubkey: Pubkey) -> [NoteId] {
     }
 }
 
-func saveMutedThreads(pubkey: Pubkey, currentValue: [NoteId], value: [NoteId]) -> Bool {
-    let uniqueMutedThreads = Array(Set(value))
-
-    if uniqueMutedThreads != currentValue {
-        let ids = uniqueMutedThreads.map { note_id in return note_id.hex() }
-        UserDefaults.standard.set(ids, forKey: getMutedThreadsKey(pubkey: pubkey))
-        return true
-    }
-
-    return false
-}
-
-class MutedThreadsManager: ObservableObject {
-
-    private let keypair: Keypair
-
-    private var _mutedThreadsSet: Set<NoteId>
-    private var _mutedThreads: [NoteId]
-    var mutedThreads: [NoteId] {
-        get {
-            return _mutedThreads
-        }
-        set {
-            if saveMutedThreads(pubkey: keypair.pubkey, currentValue: _mutedThreads, value: newValue) {
-                self._mutedThreads = newValue
-                self.objectWillChange.send()
-            }
-        }
-    }
-
-    init(keypair: Keypair) {
-        self._mutedThreads = loadMutedThreads(pubkey: keypair.pubkey)
-        self._mutedThreadsSet = Set(_mutedThreads)
-        self.keypair = keypair
-    }
-
-    func isMutedThread(_ ev: NostrEvent, keypair: Keypair) -> Bool {
-        return _mutedThreadsSet.contains(ev.thread_id(keypair: keypair))
-    }
-
-    func updateMutedThread(_ ev: NostrEvent) {
-        let threadId = ev.thread_id(keypair: keypair)
-        if isMutedThread(ev, keypair: keypair) {
-            mutedThreads = mutedThreads.filter { $0 != threadId }
-            _mutedThreadsSet.remove(threadId)
-            notify(.unmute_thread(ev))
-        } else {
-            mutedThreads.append(threadId)
-            _mutedThreadsSet.insert(threadId)
-            notify(.mute_thread(ev))
-        }
-    }
+// We need to still use it since existing users might have their muted threads stored in UserDefaults
+// So now all it's doing is moving a users muted threads to the new kind:10000 system
+// It should not be used for any purpose beyond that
+func migrate_old_muted_threads_to_new_mutelist(keypair: Keypair, damus_state: DamusState) {
+    // Ensure that keypair is fullkeypair
+    guard let fullKeypair = keypair.to_full() else { return }
+    // Load existing muted threads
+    let mutedThreads = loadOldMutedThreads(pubkey: fullKeypair.pubkey)
+    guard !mutedThreads.isEmpty else { return }
+    // Set new muted system for those existing threads
+    let previous_mute_list_event = damus_state.contacts.mutelist
+    guard let new_mutelist_event = create_or_update_mutelist(keypair: fullKeypair, mprev: previous_mute_list_event, to_add: Set(mutedThreads.map { MuteItem.thread($0, nil) })) else { return }
+    damus_state.contacts.set_mutelist(new_mutelist_event)
+    damus_state.postbox.send(new_mutelist_event)
+    // Set existing muted threads to an empty array
+    UserDefaults.standard.set([], forKey: getMutedThreadsKey(pubkey: keypair.pubkey))
 }
