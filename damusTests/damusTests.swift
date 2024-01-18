@@ -228,5 +228,47 @@ class damusTests: XCTestCase {
         
         XCTAssertEqual(txt, "there is no mention here")
     }
+    
+    func testTagGeneration_Nevent_ContainsETag() {
+        let ev = createEventFromContentString("nevent1qqstna2yrezu5wghjvswqqculvvwxsrcvu7uc0f78gan4xqhvz49d9spr3mhxue69uhkummnw3ez6un9d3shjtn4de6x2argwghx6egpr4mhxue69uhkummnw3ez6ur4vgh8wetvd3hhyer9wghxuet5nxnepm")
+        
+        XCTAssertEqual(ev.tags.count, 1)
+        XCTAssertEqual(ev.tags[0][0].string(), "e")
+        XCTAssertEqual(ev.tags[0][1].string(), "b9f5441e45ca39179320e0031cfb18e34078673dcc3d3e3a3b3a981760aa5696")
+    }
+    
+    func testTagGeneration_Nprofile_ContainsPTag() {
+        let ev = createEventFromContentString("nprofile1qqsrhuxx8l9ex335q7he0f09aej04zpazpl0ne2cgukyawd24mayt8gpp4mhxue69uhhytnc9e3k7mgpz4mhxue69uhkg6nzv9ejuumpv34kytnrdaksjlyr9p")
+        
+        XCTAssertEqual(ev.tags.count, 1)
+        XCTAssertEqual(ev.tags[0][0].string(), "p")
+        XCTAssertEqual(ev.tags[0][1].string(), "3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d")
+    }
+    
+    func testTagGeneration_Nrelay_ContainsRTag() {
+        let ev = createEventFromContentString("nrelay1qqt8wumn8ghj7un9d3shjtnwdaehgu3wvfskueq4r295t")
+        
+        XCTAssertEqual(ev.tags.count, 1)
+        XCTAssertEqual(ev.tags[0][0].string(), "r")
+        XCTAssertEqual(ev.tags[0][1].string(), "wss://relay.nostr.band")
+    }
+    
+    func testTagGeneration_Naddr_ContainsATag(){
+        let ev = createEventFromContentString("naddr1qqxnzdesxqmnxvpexqunzvpcqyt8wumn8ghj7un9d3shjtnwdaehgu3wvfskueqzypve7elhmamff3sr5mgxxms4a0rppkmhmn7504h96pfcdkpplvl2jqcyqqq823cnmhuld")
+        
+        XCTAssertEqual(ev.tags.count, 1)
+        XCTAssertEqual(ev.tags[0][0].string(), "a")
+        XCTAssertEqual(ev.tags[0][1].string(), "30023:599f67f7df7694c603a6d0636e15ebc610db77dcfd47d6e5d05386d821fb3ea9:1700730909108")
+    }
 
+}
+
+private func createEventFromContentString(_ content: String) -> NostrEvent {
+    let post = NostrPost(content: content, references: [])
+    guard let ev = post_to_event(post: post, keypair: test_keypair_full) else {
+        XCTFail("Could not create event")
+        return test_note
+    }
+    
+    return ev
 }

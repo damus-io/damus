@@ -492,21 +492,15 @@ struct ContentView: View {
                 open_profile(pubkey: pubkey)
 
             case .note(let noteId):
-                guard let target = damus_state.events.lookup(noteId) else {
-                    return
-                }
-
-                switch local.type {
-                case .dm:
-                    selected_timeline = .dms
-                    damus_state.dms.set_active_dm(target.pubkey)
-                    navigationCoordinator.push(route: Route.DMChat(dms: damus_state.dms.active_model))
-                case .like, .zap, .mention, .repost:
-                    open_event(ev: target)
-                case .profile_zap:
-                    // Handled separately above.
-                    break
-                }
+                openEvent(noteId: noteId, notificationType: local.type)
+            case .nevent(let nevent):
+                openEvent(noteId: nevent.noteid, notificationType: local.type)
+            case .nprofile(let nprofile):
+                open_profile(pubkey: nprofile.author)
+            case .nrelay(_):
+                break
+            case .naddr(let naddr):
+                break
             }
 
 
@@ -725,6 +719,22 @@ struct ContentView: View {
         }
     }
 
+    private func openEvent(noteId: NoteId, notificationType: LocalNotificationType) {
+        guard let target = damus_state.events.lookup(noteId) else {
+            return
+        }
+
+        switch notificationType {
+        case .dm:
+            selected_timeline = .dms
+            damus_state.dms.set_active_dm(target.pubkey)
+            navigationCoordinator.push(route: Route.DMChat(dms: damus_state.dms.active_model))
+        case .like, .zap, .mention, .repost:
+            open_event(ev: target)
+        case .profile_zap:
+            break
+        }
+    }
 }
 
 struct ContentView_Previews: PreviewProvider {
@@ -1082,6 +1092,8 @@ func on_open_url(state: DamusState, url: URL, result: @escaping (OpenResult?) ->
         case .param, .quote:
             // doesn't really make sense here
             break
+        case .naddr(let naddr):
+            break // TODO: fix
         }
     case .filter(let filt):
         result(.filter(filt))

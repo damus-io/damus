@@ -121,7 +121,8 @@ enum RefId: TagConvertible, TagKeys, Equatable, Hashable {
     case quote(QuoteId)
     case hashtag(TagElem)
     case param(TagElem)
-
+    case naddr(NAddr)
+    
     var key: RefKey {
         switch self {
         case .event:   return .e
@@ -129,11 +130,12 @@ enum RefId: TagConvertible, TagKeys, Equatable, Hashable {
         case .quote:   return .q
         case .hashtag: return .t
         case .param:   return .d
+        case .naddr:   return .a
         }
     }
 
     enum RefKey: AsciiCharacter, TagKey, CustomStringConvertible {
-        case e, p, t, d, q
+        case e, p, t, d, q, a
 
         var keychar: AsciiCharacter {
             self.rawValue
@@ -155,6 +157,8 @@ enum RefId: TagConvertible, TagKeys, Equatable, Hashable {
         case .quote(let quote): return quote.hex()
         case .hashtag(let string): return string.string()
         case .param(let string): return string.string()
+        case .naddr(let naddr):
+            return naddr.kind.description + ":" + naddr.author.hex() + ":" + naddr.identifier
         }
     }
 
@@ -174,6 +178,7 @@ enum RefId: TagConvertible, TagKeys, Equatable, Hashable {
         case .q: return t1.id().map({ .quote(QuoteId($0)) })
         case .t: return .hashtag(t1)
         case .d: return .param(t1)
+        case .a: return .naddr(NAddr(identifier: "", author: Pubkey(Data()), relays: [], kind: 0))
         }
     }
 }

@@ -16,7 +16,7 @@ fileprivate extension String {
     }
 }
 
-struct NEvent : Equatable {
+struct NEvent : Equatable, Hashable {
     let noteid: NoteId
     let relays: [String]
     let author: Pubkey?
@@ -49,12 +49,12 @@ struct NEvent : Equatable {
     }
 }
 
-struct NProfile : Equatable {
+struct NProfile : Equatable, Hashable {
     let author: Pubkey
     let relays: [String]
 }
 
-struct NAddr : Equatable {
+struct NAddr : Equatable, Hashable {
     let identifier: String
     let author: Pubkey
     let relays: [String]
@@ -107,6 +107,29 @@ enum Bech32Object : Equatable {
             return bech32_encode(hrp: "nscript", data)
         }
     }
+    
+    func toMentionRef() -> MentionRef? {
+        switch self {
+        case .nsec(let privkey):
+            guard let pubkey = privkey_to_pubkey(privkey: privkey) else { return nil }
+            return .pubkey(pubkey)
+        case .npub(let pubkey):
+            return .pubkey(pubkey)
+        case .note(let noteid):
+            return .note(noteid)
+        case .nscript(_):
+            return nil
+        case .nevent(let nevent):
+            return .nevent(nevent)
+        case .nprofile(let nprofile):
+            return .nprofile(nprofile)
+        case .nrelay(let relayURL):
+            return .nrelay(relayURL)
+        case .naddr(let naddr):
+            return .naddr(naddr)
+        }
+    }
+
 }
 
 func decodeCBech32(_ b: nostr_bech32_t) -> Bech32Object? {

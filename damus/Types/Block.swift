@@ -150,47 +150,18 @@ fileprivate extension Block {
         self = .invoice(Invoice(description: description, amount: amount, string: invstr, expiry: b11.expiry, payment_hash: payment_hash, created_at: created_at))
     }
 }
+
 fileprivate extension Block {
     /// Failable initializer for the C-backed type `mention_bech32_block_t`. This initializer will inspect the
     /// bech32 type code and build the appropriate enum type.
     init?(bech32 b: mention_bech32_block_t) {
-        switch b.bech32.type {
-        case NOSTR_BECH32_NOTE:
-            let note = b.bech32.data.note;
-            let note_id = NoteId(Data(bytes: note.event_id, count: 32))
-            self = .mention(.any(.note(note_id)))
-        case NOSTR_BECH32_NEVENT:
-            let nevent = b.bech32.data.nevent;
-            let note_id = NoteId(Data(bytes: nevent.event_id, count: 32))
-            self = .mention(.any(.note(note_id)))
-        case NOSTR_BECH32_NPUB:
-            let npub = b.bech32.data.npub
-            let pubkey = Pubkey(Data(bytes: npub.pubkey, count: 32))
-            self = .mention(.any(.pubkey(pubkey)))
-        case NOSTR_BECH32_NSEC:
-            let nsec = b.bech32.data.nsec
-            let privkey = Privkey(Data(bytes: nsec.nsec, count: 32))
-            guard let pubkey = privkey_to_pubkey(privkey: privkey) else { return nil }
-            self = .mention(.any(.pubkey(pubkey)))
-        case NOSTR_BECH32_NPROFILE:
-            let nprofile = b.bech32.data.nprofile
-            let pubkey = Pubkey(Data(bytes: nprofile.pubkey, count: 32))
-            self = .mention(.any(.pubkey(pubkey)))
-        case NOSTR_BECH32_NRELAY:
-            let nrelay = b.bech32.data.nrelay
-            guard let relay_str = String(nrelay.relay) else {
-                return nil
-            }
-            self = .relay(relay_str)
-        case NOSTR_BECH32_NADDR:
-            // TODO: wtf do I do with this
-            guard let naddr = String(b.str) else {
-                return nil
-            }
-            self = .text("nostr:" + naddr)
-        default:
+        guard let decoded = decodeCBech32(b.bech32) else {
             return nil
         }
+        guard let ref = decoded.toMentionRef() else {
+            return nil
+        }
+        self = .mention(.any(ref))
     }
 }
 extension Block {
@@ -201,10 +172,7 @@ extension Block {
                 return "#[\(idx)]"
             }
             
-            switch m.ref {
-            case .pubkey(let pk):    return "nostr:\(pk.npub)"
-            case .note(let note_id): return "nostr:\(note_id.bech32)"
-            }
+            return "nostr:" + Bech32Object.encode(m.ref.toBech32Object())
         case .relay(let relay):
             return relay
         case .text(let txt):

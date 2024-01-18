@@ -182,26 +182,31 @@ func attributed_string_attach_icon(_ astr: inout AttributedString, img: UIImage)
     astr.append(wrapped)
 }
 
-func mention_str(_ m: Mention<MentionRef>, profiles: Profiles) -> CompatibleText {
-    switch m.ref {
-    case .pubkey(let pk):
-        let npub = bech32_pubkey(pk)
-        let profile_txn = profiles.lookup(id: pk)
-        let profile = profile_txn?.unsafeUnownedValue
-        let disp = Profile.displayName(profile: profile, pubkey: pk).username.truncate(maxLength: 50)
-        var attributedString = AttributedString(stringLiteral: "@\(disp)")
-        attributedString.link = URL(string: "damus:nostr:\(npub)")
-        attributedString.foregroundColor = DamusColors.purple
-        
-        return CompatibleText(attributed: attributedString)
-    case .note(let note_id):
-        let bevid = bech32_note_id(note_id)
-        var attributedString = AttributedString(stringLiteral: "@\(abbrev_pubkey(bevid))")
-        attributedString.link = URL(string: "damus:nostr:\(bevid)")
-        attributedString.foregroundColor = DamusColors.purple
+func getDisplayName(pk: Pubkey, profiles: Profiles) -> String {
+    let profile_txn = profiles.lookup(id: pk)
+    let profile = profile_txn?.unsafeUnownedValue
+    return Profile.displayName(profile: profile, pubkey: pk).username.truncate(maxLength: 50)
+}
 
-        return CompatibleText(attributed: attributedString)
-    }
+func mention_str(_ m: Mention<MentionRef>, profiles: Profiles) -> CompatibleText {
+    let bech32String = Bech32Object.encode(m.ref.toBech32Object())
+    
+    let attributedStringLiteral: String = {
+        switch m.ref {
+        case .pubkey(let pk): return getDisplayName(pk: pk, profiles: profiles)
+        case .note: return "@\(abbrev_pubkey(bech32String))"
+        case .nevent: return "@\(abbrev_pubkey(bech32String))"
+        case .nprofile(let nprofile): return getDisplayName(pk: nprofile.author, profiles: profiles)
+        case .nrelay(let url): return url
+        case .naddr: return "@\(abbrev_pubkey(bech32String))"
+        }
+    }()
+    
+    var attributedString = AttributedString(stringLiteral: attributedStringLiteral)
+    attributedString.link = URL(string: "damus:nostr:\(bech32String)")
+    attributedString.foregroundColor = DamusColors.purple
+    
+    return CompatibleText(attributed: attributedString)
 }
 
 // trim suffix whitespace and newlines

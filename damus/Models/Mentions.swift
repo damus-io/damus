@@ -10,6 +10,8 @@ import Foundation
 enum MentionType: AsciiCharacter, TagKey {
     case p
     case e
+    case a
+    case r
 
     var keychar: AsciiCharacter {
         self.rawValue
@@ -17,21 +19,26 @@ enum MentionType: AsciiCharacter, TagKey {
 }
 
 enum MentionRef: TagKeys, TagConvertible, Equatable, Hashable {
-    case pubkey(Pubkey) // TODO: handle nprofile
+    case pubkey(Pubkey)
     case note(NoteId)
+    case nevent(NEvent)
+    case nprofile(NProfile)
+    case nrelay(String)
+    case naddr(NAddr)
 
     var key: MentionType {
         switch self {
         case .pubkey: return .p
         case .note: return .e
+        case .nevent: return .e
+        case .nprofile: return .p
+        case .nrelay: return .r
+        case .naddr: return .a
         }
     }
 
     var bech32: String {
-        switch self {
-        case .pubkey(let pubkey): return bech32_pubkey(pubkey)
-        case .note(let noteId):   return bech32_note_id(noteId)
-        }
+        return Bech32Object.encode(toBech32Object())
     }
 
     static func from_bech32(str: String) -> MentionRef? {
@@ -46,6 +53,10 @@ enum MentionRef: TagKeys, TagConvertible, Equatable, Hashable {
         switch self {
         case .pubkey(let pubkey): return pubkey
         case .note:              return nil
+        case .nevent(let nevent): return nevent.author
+        case .nprofile(let nprofile): return nprofile.author
+        case .nrelay: return nil
+        case .naddr: return nil
         }
     }
 
@@ -53,6 +64,10 @@ enum MentionRef: TagKeys, TagConvertible, Equatable, Hashable {
         switch self {
         case .pubkey(let pubkey): return ["p", pubkey.hex()]
         case .note(let noteId):   return ["e", noteId.hex()]
+        case .nevent(let nevent): return ["e", nevent.noteid.hex()]
+        case .nprofile(let nprofile): return ["p", nprofile.author.hex()]
+        case .nrelay(let url): return ["r", url]
+        case .naddr(let naddr): return ["a", naddr.kind.description + ":" + naddr.author.hex() + ":" + naddr.identifier.string()]
         }
     }
 
@@ -64,14 +79,45 @@ enum MentionRef: TagKeys, TagConvertible, Equatable, Hashable {
         guard let t0 = i.next(),
               let chr = t0.single_char,
               let mention_type = MentionType(rawValue: chr),
-              let id = i.next()?.id()
+              let element = i.next()
         else {
             return nil
         }
 
         switch mention_type {
-        case .p: return .pubkey(Pubkey(id))
-        case .e: return .note(NoteId(id))
+        case .p:
+            guard let data = element.id() else { return nil }
+            return .pubkey(Pubkey(data))
+        case .e:
+            guard let data = element.id() else { return nil }
+            return .note(NoteId(data))
+        case .a:
+            let str = element.string()
+            let data = str.split(separator: ":")
+            if(data.count != 3) { return nil }
+            
+            guard let pubkey = Pubkey(hex: String(data[1])) else { return nil }
+            guard let kind = UInt32(data[0]) else { return nil }
+            
+            return .naddr(NAddr(identifier: String(data[2]), author: pubkey, relays: [], kind: kind))
+        case .r: return .nrelay(element.string())
+        }
+    }
+    
+    func toBech32Object() -> Bech32Object {
+        switch self {
+        case .pubkey(let pk):
+            return .npub(pk)
+        case .note(let noteid):
+            return .note(noteid)
+        case .naddr(let naddr):
+            return .naddr(naddr)
+        case .nevent(let nevent):
+            return .nevent(nevent)
+        case .nprofile(let nprofile):
+            return .nprofile(nprofile)
+        case .nrelay(let url):
+            return .nrelay(url)
         }
     }
 }
@@ -251,4 +297,3 @@ func post_to_event(post: NostrPost, keypair: FullKeypair) -> NostrEvent? {
         .joined(separator: "")
     return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: post.kind.rawValue, tags: post_tags.tags)
 }
-
