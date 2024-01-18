@@ -1116,7 +1116,7 @@ func on_open_url(state: DamusState, url: URL, result: @escaping (OpenResult?) ->
                 result(.event(ev))
             }
         case .hashtag(let ht):
-            result(.filter(.filter_hashtag([ht.string()])))
+            result(.filter(.filter_hashtag([ht.hashtag])))
         case .param, .quote:
             // doesn't really make sense here
             break

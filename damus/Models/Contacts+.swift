@@ -109,7 +109,7 @@ func is_already_following(contacts: NostrEvent, follow: FollowRef) -> Bool {
     return contacts.references.contains { ref in
         switch (ref, follow) {
         case let (.hashtag(ht), .hashtag(follow_ht)):
-            return ht.string() == follow_ht
+            return ht.hashtag == follow_ht
         case let (.pubkey(pk), .pubkey(follow_pk)):
             return pk == follow_pk
         case (.hashtag, .pubkey), (.pubkey, .hashtag),
