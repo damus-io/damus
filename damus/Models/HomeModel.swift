@@ -158,10 +158,9 @@ class HomeModel {
             // profile metadata processing is handled by nostrdb
             break
         case .list_deprecated:
-            handle_list_event(ev)
+            handle_old_list_event(ev)
         case .mute_list:
-            // @TODO: this will be implemented in a future patch
-            break
+            handle_mute_list_event(ev)
         case .boost:
             handle_boost_event(sub_id: sub_id, ev)
         case .like:
@@ -464,10 +463,13 @@ class HomeModel {
         var our_contacts_filter = NostrFilter(kinds: [.contacts, .metadata])
         our_contacts_filter.authors = [damus_state.pubkey]
         
-        var our_blocklist_filter = NostrFilter(kinds: [.list_deprecated])
-        our_blocklist_filter.parameter = ["mute"]
+        var our_old_blocklist_filter = NostrFilter(kinds: [.list_deprecated])
+        our_old_blocklist_filter.parameter = ["mute"]
+        our_old_blocklist_filter.authors = [damus_state.pubkey]
+
+        var our_blocklist_filter = NostrFilter(kinds: [.mute_list])
         our_blocklist_filter.authors = [damus_state.pubkey]
-        
+
         var dms_filter = NostrFilter(kinds: [.dm])
 
         var our_dms_filter = NostrFilter(kinds: [.dm])
@@ -491,7 +493,7 @@ class HomeModel {
         notifications_filter.limit = 500
 
         var notifications_filters = [notifications_filter]
-        var contacts_filters = [contacts_filter, our_contacts_filter, our_blocklist_filter]
+        var contacts_filters = [contacts_filter, our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter]
         var dms_filters = [dms_filter, our_dms_filter]
         let last_of_kind = get_last_of_kind(relay_id: relay_id)
 
@@ -560,12 +562,29 @@ class HomeModel {
         pool.send(.subscribe(sub), to: relay_ids)
     }
 
-    func handle_list_event(_ ev: NostrEvent) {
+    func handle_mute_list_event(_ ev: NostrEvent) {
+        // we only care about our mutelist
+        guard ev.pubkey == damus_state.pubkey else {
+            return
+        }
+
+        // we only care about the most recent mutelist
+        if let mutelist = damus_state.contacts.mutelist {
+            if ev.created_at <= mutelist.created_at {
+                return
+            }
+        }
+
+        damus_state.contacts.set_mutelist(ev)
+    }
+
+    func handle_old_list_event(_ ev: NostrEvent) {
         // we only care about our lists
         guard ev.pubkey == damus_state.pubkey else {
             return
         }
         
+        // we only care about the most recent mutelist
         if let mutelist = damus_state.contacts.mutelist {
             if ev.created_at <= mutelist.created_at {
                 return
