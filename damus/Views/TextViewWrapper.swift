@@ -119,7 +119,7 @@ struct TextViewWrapper: UIViewRepresentable {
             
             guard let selectedRange = textView.selectedTextRange else { return }
             
-            let wordRange = textView.tokenizer.rangeEnclosingPosition(selectedRange.start, with: .word, inDirection: .init(rawValue: UITextLayoutDirection.left.rawValue))
+            let wordRange = rangeOfMention(in: textView, from: selectedRange.start)
             
             if let wordRange,
                let startPosition = textView.position(from: wordRange.start, offset: -1),
@@ -130,6 +130,27 @@ struct TextViewWrapper: UIViewRepresentable {
             }
             
             getFocusWordForMention?(val.0, val.1)
+        }
+        
+        func rangeOfMention(in textView: UITextView, from position: UITextPosition) -> UITextRange? {
+            var startPosition = position
+
+            while startPosition != textView.beginningOfDocument {
+                guard let previousPosition = textView.position(from: startPosition, offset: -1),
+                      let range = textView.textRange(from: previousPosition, to: startPosition),
+                      let text = textView.text(in: range), !text.isEmpty,
+                      let lastChar = text.last else {
+                    break
+                }
+
+                if [" ", "\n", "@"].contains(lastChar) {
+                    break
+                }
+
+                startPosition = previousPosition
+            }
+
+            return startPosition == position ? nil : textView.textRange(from: startPosition, to: position)
         }
 
         private func convertToNSRange( _ startPosition: UITextPosition, _ endPosition: UITextPosition, _ textView: UITextView) -> NSRange? {
