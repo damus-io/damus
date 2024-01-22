@@ -191,18 +191,20 @@ func getDisplayName(pk: Pubkey, profiles: Profiles) -> String {
 func mention_str(_ m: Mention<MentionRef>, profiles: Profiles) -> CompatibleText {
     let bech32String = Bech32Object.encode(m.ref.toBech32Object())
     
-    let attributedStringLiteral: String = {
+    let display_str: String = {
         switch m.ref {
         case .pubkey(let pk): return getDisplayName(pk: pk, profiles: profiles)
-        case .note: return "@\(abbrev_pubkey(bech32String))"
-        case .nevent: return "@\(abbrev_pubkey(bech32String))"
+        case .note: return abbrev_pubkey(bech32String)
+        case .nevent: return abbrev_pubkey(bech32String)
         case .nprofile(let nprofile): return getDisplayName(pk: nprofile.author, profiles: profiles)
         case .nrelay(let url): return url
-        case .naddr: return "@\(abbrev_pubkey(bech32String))"
+        case .naddr: return abbrev_pubkey(bech32String)
         }
     }()
-    
-    var attributedString = AttributedString(stringLiteral: attributedStringLiteral)
+
+    let display_str_with_at = "@\(display_str)"
+
+    var attributedString = AttributedString(stringLiteral: display_str_with_at)
     attributedString.link = URL(string: "damus:nostr:\(bech32String)")
     attributedString.foregroundColor = DamusColors.purple
     
