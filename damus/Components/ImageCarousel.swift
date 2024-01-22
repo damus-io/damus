@@ -201,7 +201,7 @@ struct ImageCarousel: View {
         }
         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
         .fullScreenCover(isPresented: $model.open_sheet) {
-            ImageView(video_controller: state.video, urls: urls, settings: state.settings)
+            ImageView(video_controller: state.video, urls: urls, settings: state.settings, selectedIndex: $model.selectedIndex)
         }
         .frame(height: height)
         .onChange(of: model.selectedIndex) { value in
