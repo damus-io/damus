@@ -51,6 +51,7 @@ struct DamusPurpleView: View {
     @State var show_welcome_sheet: Bool = false
     @State var show_manage_subscriptions = false
     @State var show_settings_change_confirmation_dialog = false
+    @State private var shouldDismissView = false
     
     @Environment(\.dismiss) var dismiss
     
@@ -61,27 +62,25 @@ struct DamusPurpleView: View {
     }
     
     var body: some View {
-        ZStack {
-            Rectangle()
-                .background(.black)
-            
-            ScrollView {
-                MainContent
-                    .padding(.top, 75)
-                    .background(content: {
-                        ZStack {
-                            Image("purple-blue-gradient-1")
-                                .offset(CGSize(width: 300.0, height: -0.0))
-                            Image("purple-blue-gradient-1")
-                                .offset(CGSize(width: 300.0, height: -0.0))
-                            
-                        }
-                    })
+        NavigationView {
+            ZStack {
+                Color.black
+                    .edgesIgnoringSafeArea(.all)
+
+                Image("purple-blue-gradient-1")
+                    .resizable()
+                    .edgesIgnoringSafeArea(.all)
+
+                ScrollView {
+                    MainContent
+                        .padding(.top, 75)
+                }
             }
+            .navigationBarHidden(true)
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden(true)
+            .navigationBarItems(leading: BackNav())
         }
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .navigationBarItems(leading: BackNav())
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()
         }
@@ -97,6 +96,7 @@ struct DamusPurpleView: View {
         .ignoresSafeArea(.all)
         .sheet(isPresented: $show_welcome_sheet, onDismiss: {
             update_user_settings_to_purple()
+            shouldDismissView = true
         }, content: {
             DamusPurpleWelcomeView()
         })
@@ -109,6 +109,16 @@ struct DamusPurpleView: View {
                 set_translation_settings_to_purple()
             }.keyboardShortcut(.defaultAction)
             Button(NSLocalizedString("No", comment: "User confirm No"), role: .cancel) {}
+        }
+        .onChange(of: shouldDismissView) { shouldDismissView in
+            if shouldDismissView && !show_settings_change_confirmation_dialog {
+                dismiss()
+            }
+        }
+        .onChange(of: show_settings_change_confirmation_dialog) { show_settings_change_confirmation_dialog in
+            if shouldDismissView && !show_settings_change_confirmation_dialog {
+                dismiss()
+            }
         }
         .manageSubscriptionsSheet(isPresented: $show_manage_subscriptions)
     }
