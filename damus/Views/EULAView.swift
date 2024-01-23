@@ -68,47 +68,6 @@ struct EULAView: View {
                 Markdown(eula)
                     .padding()
             }
-            .padding(EdgeInsets(top: 20, leading: 10, bottom: 60, trailing: 10))
-
-            VStack {
-                Spacer()
-
-                HStack {
-                    Spacer()
-
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        HStack {
-                            Text("Reject", comment:  "Button to reject the end user license agreement, which disallows the user from being let into the app.")
-                                .fontWeight(.semibold)
-                        }
-                        .frame(minWidth: 75, maxHeight: 12, alignment: .center)
-                        .padding()
-                        .foregroundColor(Color.white)
-                        .background {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(DamusColors.darkGrey, strokeBorder: DamusColors.mediumGrey, lineWidth: 1)
-                        }
-                    }
-
-                    Spacer()
-
-                    Button(action: {
-                        nav.push(route: Route.Login)
-                    }) {
-                        HStack {
-                            Text("Accept", comment:  "Button to accept the end user license agreement before being allowed into the app.")
-                                .fontWeight(.semibold)
-                        }
-                        .frame(minWidth: 75, maxHeight: 12, alignment: .center)
-                    }
-                    .buttonStyle(GradientButtonStyle())
-
-                    Spacer()
-                }
-            }
-            .padding(.bottom, 5)
         }
         .background(
             Image("eula-bg")

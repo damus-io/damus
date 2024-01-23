@@ -49,7 +49,7 @@ struct SetupView: View {
                     Spacer()
                     
                     Button(action: {
-                        navigationCoordinator.push(route: Route.EULA)
+                        navigationCoordinator.push(route: Route.Login)
                     }) {
                         HStack {
                             Text("Let's get started!", comment: "Button to continue to login page.")
@@ -104,6 +104,7 @@ struct WhatIsNostr: View {
                 LearnAboutNostrLink()
                     .padding(.top, 10)
             }
+            Spacer()
         }
     }
 }
@@ -120,6 +121,7 @@ struct WhyWeNeedNostr: View {
                 Text("Social media has developed into a key way information flows around the world. Unfortunately, our current social media systems are broken", comment: "Description about why Nostr is needed.")
                     .foregroundColor(DamusColors.mediumGrey)
             }
+            Spacer()
         }
     }
 }

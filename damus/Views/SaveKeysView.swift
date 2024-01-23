@@ -24,36 +24,30 @@ struct SaveKeysView: View {
     var body: some View {
         ZStack(alignment: .top) {
             VStack(alignment: .center) {
-                Text("Welcome, \(account.rendered_name)!", comment: "Text to welcome user.")
-                    .font(.title.bold())
-                    .padding(.bottom, 10)
+                if account.rendered_name.isEmpty {
+                    Text("Welcome!", comment: "Text to welcome user.")
+                        .font(.title.bold())
+                        .padding(.bottom, 10)
+                } else {
+                    Text("Welcome, \(account.rendered_name)!", comment: "Text to welcome user.")
+                        .font(.title.bold())
+                        .padding(.bottom, 10)
+                }
                 
                 Text("Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus.", comment: "Reminder to user that they should save their account information.")
                     .padding(.bottom, 10)
                 
-                Text("Public Key", comment: "Label to indicate that text below is the user's public key used by others to uniquely refer to the user.")
+                Text("Private Key", comment: "Label to indicate that the text below is the user's private key used by only the user themself as a secret to login to access their account.")
                     .font(.title2.bold())
                     .padding(.bottom, 10)
                 
-                Text("This is your account ID, you can give this to your friends so that they can follow you. Tap to copy.", comment: "Label to describe that a public key is the user's account ID and what they can do with it.")
+                Text("This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!", comment: "Label to describe that a private key is the user's secret account key and what they should do with it.")
                     .padding(.bottom, 10)
                 
-                SaveKeyView(text: account.pubkey.npub, textContentType: .username, is_copied: $pub_copied, focus: $pubkey_focused)
+                SaveKeyView(text: account.privkey.nsec, textContentType: .newPassword, is_copied: $priv_copied, focus: $privkey_focused)
                     .padding(.bottom, 10)
-                
-                if pub_copied {
-                    Text("Private Key", comment: "Label to indicate that the text below is the user's private key used by only the user themself as a secret to login to access their account.")
-                        .font(.title2.bold())
-                        .padding(.bottom, 10)
-                    
-                    Text("This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!", comment: "Label to describe that a private key is the user's secret account key and what they should do with it.")
-                        .padding(.bottom, 10)
-                    
-                    SaveKeyView(text: account.privkey.nsec, textContentType: .newPassword, is_copied: $priv_copied, focus: $privkey_focused)
-                        .padding(.bottom, 10)
-                }
-                
-                if pub_copied && priv_copied {
+
+                if priv_copied {
                     if loading {
                         ProgressView()
                             .progressViewStyle(.circular)

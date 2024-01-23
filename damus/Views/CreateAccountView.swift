@@ -41,7 +41,7 @@ struct CreateAccountView: View {
                             regen_key()
                         }
                 }
-                .frame(minWidth: 300, maxWidth: .infinity, minHeight: 300, alignment: .center)
+                .frame(minWidth: 300, maxWidth: .infinity, minHeight: 250, alignment: .center)
                 .background {
                     RoundedRectangle(cornerRadius: 12)
                         .fill(DamusColors.adaptableGrey, strokeBorder: .gray.opacity(0.5), lineWidth: 1)
@@ -70,8 +70,27 @@ struct CreateAccountView: View {
                 .disabled(profileUploadObserver.isLoading)
                 .opacity(profileUploadObserver.isLoading ? 0.5 : 1)
                 .padding(.top, 20)
+                
+                HStack(spacing: 0) {
+                    Text("By signing up, you agree to our ", comment: "Ask the user if they already have an account on Nostr")
+                        .font(.subheadline)
+                        .foregroundColor(Color("DamusMediumGrey"))
+
+                    Button(action: {
+                        nav.push(route: Route.EULA)
+                    }, label: {
+                        Text("EULA")
+                            .font(.subheadline)
+                    })
+                    .padding(.vertical, 5)
+
+                    Spacer()
+                }
 
                 LoginPrompt()
+                    .padding(.top)
+                
+                Spacer()
             }
             .padding()
         }

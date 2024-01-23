@@ -318,6 +318,7 @@ struct KeyInput: View {
                     is_secured.toggle()
                 }
         }
+        .padding(.vertical, 2)
         .padding(.horizontal, 10)
         .overlay {
             RoundedRectangle(cornerRadius: 12)
