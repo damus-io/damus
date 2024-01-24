@@ -76,5 +76,7 @@
 	<string>Damus needs access to your media library for playback statuses</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Damus needs access to your microphone for creating video recording posts</string>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 </dict>
 </plist>
