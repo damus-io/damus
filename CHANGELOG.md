@@ -1,3 +1,58 @@
+## [1.7-2] - 2024-01-24
+
+### Added
+
+- New fulltext search engine (William Casarin)
+
+- Add "Always show onboarding suggestions" developer setting (Daniel D’Aquino)
+- Add NIP-42 relay auth support (Charlie Fish)
+- Add ability to hide suggested hashtags (ericholguin)
+- Add ability to mute hashtag from SearchView (Charlie Fish)
+- Add ability to preview media taken with camera (Suhail Saqan)
+- Add ability to search for naddr, nprofiles, nevents (kernelkind)
+- Add experimental push notification support (Daniel D’Aquino)
+- Add naddr link support (kernelkind)
+- Add regional relay recommendations to Relay configuration view (currently for Japanese users only) (Daniel D’Aquino)
+- Add regional relays for Germany (Daniel D’Aquino)
+- Add regional relays for Thailand (Daniel D’Aquino)
+- Added a custom camera view (Suhail Saqan)
+- Always convert damus.io links to inline mentions (William Casarin)
+- Unfurl profile name on remote push notifications (Daniel D’Aquino)
+- Zap notification support for push notifications (Daniel D’Aquino)
+
+
+### Changed
+
+- Generate nprofile/nevent links in share menus (kernelkind)
+- Improve push notification support to match local notification support (Daniel D’Aquino)
+- Move mute thread in menu so it's not clicked by accident (alltheseas)
+- Prioritize friends when autocompleting (Charlie Fish)
+
+
+### Fixed
+
+- Add workaround to fix note language recognition and reduce wasteful translation requests (Terry Yiu)
+- Allow mentioning users with punctuation characters in their names (kernelkind)
+- Fix broken mentions when there is text is directly after (kernelkind)
+- Fix crash on very large notes (Daniel D’Aquino)
+- Fix crash when logging out and switching accounts (William Casarin)
+- Fix duplicate notes getting written to nostrdb (William Casarin)
+- Fix issue where adding relays might not work on corrupted contact lists (Charlie Fish)
+- Fix onboarding post view not being dismissed under certain conditions (Daniel D’Aquino)
+- Fix performance issue with gifs (William Casarin)
+- Fix persistent local notifications even after logout (William Casarin)
+- Fixed bug where sometimes notes from other profiles appear on profile pages (Charlie Fish)
+- Remove extra space at the end of DM messages (kernelkind)
+- Save current viewed image index when switching to fullscreen (kernelkind)
+
+
+### Removed
+
+- Removed old nsec key warning, nsec automatically convert to npub when posting (kernelkind)
+
+
+
+[1.7-2]: https://github.com/damus-io/damus/releases/tag/v1.7-2
 ## [1.6-25] - 2023-10-31
 
 ### Added
@@ -1651,4 +1706,5 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
+
 
