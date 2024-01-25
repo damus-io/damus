@@ -147,8 +147,56 @@ enum MuteItem: Hashable, Equatable {
 
 // - MARK: TagConvertible
 extension MuteItem: TagConvertible {
+    enum MuteKeys: String {
+        case p, t, word, e
+
+        init?(tag: NdbTagElem) {
+            let len = tag.count
+            if len == 1 {
+                switch tag.single_char {
+                case "p": self = .p
+                case "t": self = .t
+                case "e": self = .e
+                default: return nil
+                }
+            } else if len == 4 && tag.matches_str("word", tag_len: 4) {
+                self = .word
+            } else {
+                return nil
+            }
+        }
+
+        var description: String { self.rawValue }
+    }
+
     static func from_tag(tag: TagSequence) -> MuteItem? {
-        return MuteItem(tag.strings())
+        guard tag.count >= 2 else { return nil }
+
+        var i = tag.makeIterator()
+
+        guard let t0   = i.next(),
+              let mkey = MuteKeys(tag: t0),
+              let t1   = i.next()
+        else {
+            return nil
+        }
+
+        var expiry: Date? = nil
+        if let expiry_str = i.next(), let ts = expiry_str.u64() {
+            expiry = Date(timeIntervalSince1970: Double(ts))
+        }
+
+        switch mkey {
+        case .p:
+            return t1.id().map({ .user(Pubkey($0), expiry) })
+        case .t:
+            return .hashtag(Hashtag(hashtag: t1.string()), expiry)
+        case .word:
+            return .word(t1.string(), expiry)
+        case .e:
+            guard let id = t1.id() else { return nil }
+            return .thread(NoteId(id), expiry)
+        }
     }
 }
 
