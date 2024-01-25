@@ -60,8 +60,6 @@
 		4C06670128FC7C5900038D2A /* RelayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670028FC7C5900038D2A /* RelayView.swift */; };
 		4C06670428FC7EC500038D2A /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 4C06670328FC7EC500038D2A /* Kingfisher */; };
 		4C06670628FCB08600038D2A /* ImageCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670528FCB08600038D2A /* ImageCarousel.swift */; };
-		4C06670B28FDE64700038D2A /* damus.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670A28FDE64700038D2A /* damus.c */; };
-		4C06670E28FDEAA000038D2A /* utf8.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670D28FDEAA000038D2A /* utf8.c */; };
 		4C0A3F8F280F640A000448DE /* ThreadModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F8E280F640A000448DE /* ThreadModel.swift */; };
 		4C0A3F93280F66F5000448DE /* ReplyMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F92280F66F5000448DE /* ReplyMap.swift */; };
 		4C0C03992A61E27B0098B3B8 /* primal.wasm in Resources */ = {isa = PBXBuildFile; fileRef = 4C0C03972A61E27B0098B3B8 /* primal.wasm */; };
@@ -125,7 +123,6 @@
 		4C30AC7829A577AB00E2BD5A /* EventCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C30AC7729A577AB00E2BD5A /* EventCache.swift */; };
 		4C30AC8029A6A53F00E2BD5A /* ProfilePicturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C30AC7F29A6A53F00E2BD5A /* ProfilePicturesView.swift */; };
 		4C32B9332A99845B00DC3548 /* Ndb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C478E242A9932C100489948 /* Ndb.swift */; };
-		4C32B9342A9AD01A00DC3548 /* NdbProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C478E2C2A9935D300489948 /* NdbProfile.swift */; };
 		4C32B94C2A9AD44700DC3548 /* FbConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B9372A9AD44700DC3548 /* FbConstants.swift */; };
 		4C32B94D2A9AD44700DC3548 /* Offset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B9382A9AD44700DC3548 /* Offset.swift */; };
 		4C32B94E2A9AD44700DC3548 /* Mutable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B9392A9AD44700DC3548 /* Mutable.swift */; };
@@ -177,19 +174,6 @@
 		4C3D52B6298DB4E6001C5831 /* ZapEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3D52B5298DB4E6001C5831 /* ZapEvent.swift */; };
 		4C3D52B8298DB5C6001C5831 /* TextEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3D52B7298DB5C6001C5831 /* TextEvent.swift */; };
 		4C3DCC762A9FE9EC0091E592 /* NdbTxn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3DCC752A9FC2030091E592 /* NdbTxn.swift */; };
-		4C3EA63D28FF52D600C48A62 /* bolt11.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA63C28FF52D600C48A62 /* bolt11.c */; };
-		4C3EA64128FF553900C48A62 /* hash_u5.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64028FF553900C48A62 /* hash_u5.c */; };
-		4C3EA64428FF558100C48A62 /* sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64328FF558100C48A62 /* sha256.c */; };
-		4C3EA64928FF597700C48A62 /* bech32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64828FF597700C48A62 /* bech32.c */; };
-		4C3EA64C28FF59AC00C48A62 /* bech32_util.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64B28FF59AC00C48A62 /* bech32_util.c */; };
-		4C3EA64F28FF59F200C48A62 /* tal.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64E28FF59F200C48A62 /* tal.c */; };
-		4C3EA66028FF5E7700C48A62 /* node_id.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA65F28FF5E7700C48A62 /* node_id.c */; };
-		4C3EA66528FF5F6800C48A62 /* mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA66428FF5F6800C48A62 /* mem.c */; };
-		4C3EA66828FF5F9900C48A62 /* hex.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA66728FF5F9900C48A62 /* hex.c */; };
-		4C3EA66D28FF782800C48A62 /* amount.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA66C28FF782800C48A62 /* amount.c */; };
-		4C3EA67528FF7A5A00C48A62 /* take.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67428FF7A5A00C48A62 /* take.c */; };
-		4C3EA67728FF7A9800C48A62 /* talstr.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67628FF7A9800C48A62 /* talstr.c */; };
-		4C3EA67928FF7ABF00C48A62 /* list.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67828FF7ABF00C48A62 /* list.c */; };
 		4C3EA67B28FF7B3900C48A62 /* InvoiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67A28FF7B3900C48A62 /* InvoiceTests.swift */; };
 		4C3EA67D28FFBBA300C48A62 /* InvoicesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67C28FFBBA200C48A62 /* InvoicesView.swift */; };
 		4C3EA67F28FFC01D00C48A62 /* InvoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67E28FFC01D00C48A62 /* InvoiceView.swift */; };
@@ -261,7 +245,6 @@
 		4C8D00C829DF791C0036AF10 /* CompatibleAttribute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D00C729DF791C0036AF10 /* CompatibleAttribute.swift */; };
 		4C8D00CA29DF80350036AF10 /* TruncatedText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D00C929DF80350036AF10 /* TruncatedText.swift */; };
 		4C8D00CC29DF92DF0036AF10 /* Hashtags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D00CB29DF92DF0036AF10 /* Hashtags.swift */; };
-		4C8D00CF29E38B950036AF10 /* nostr_bech32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D00CE29E38B950036AF10 /* nostr_bech32.c */; };
 		4C8D00D429E3C5D40036AF10 /* NIP19Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D00D329E3C5D40036AF10 /* NIP19Tests.swift */; };
 		4C8D1A6C29F1DFC200ACDF75 /* FriendIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D1A6B29F1DFC200ACDF75 /* FriendIcon.swift */; };
 		4C8D1A6F29F31E5000ACDF75 /* FriendsButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */; };
@@ -271,9 +254,7 @@
 		4C90BD18283A9EE5008EE7EF /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD17283A9EE5008EE7EF /* LoginView.swift */; };
 		4C90BD1A283AA67F008EE7EF /* Bech32.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD19283AA67F008EE7EF /* Bech32.swift */; };
 		4C90BD1C283AC38E008EE7EF /* Bech32Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD1B283AC38E008EE7EF /* Bech32Tests.swift */; };
-		4C9146FD2A2A87C200DDEA40 /* wasm.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CA9276E2A2A5D110098A105 /* wasm.c */; };
 		4C9146FE2A2A87C200DDEA40 /* nostrscript.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4F14A92A2A71AB0045A0B9 /* nostrscript.c */; };
-		4C9147002A2A891E00DDEA40 /* error.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C9146FF2A2A891E00DDEA40 /* error.c */; };
 		4C94D6432BA5AEFE00C26EFF /* QuoteRepostsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C94D6422BA5AEFE00C26EFF /* QuoteRepostsView.swift */; };
 		4C987B57283FD07F0042CE38 /* FollowersModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C987B56283FD07F0042CE38 /* FollowersModel.swift */; };
 		4C9AA14A2A4587A6003F49FD /* NotificationStatusModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9AA1492A4587A6003F49FD /* NotificationStatusModel.swift */; };
@@ -369,6 +350,7 @@
 		4CE879582996C45300F758CC /* ZapsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE879572996C45300F758CC /* ZapsView.swift */; };
 		4CE8795B2996C47A00F758CC /* ZapsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE8795A2996C47A00F758CC /* ZapsModel.swift */; };
 		4CE9FBBA2A6B3C63007E485C /* nostrdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CE9FBB82A6B3B26007E485C /* nostrdb.c */; settings = {COMPILER_FLAGS = "-w"; }; };
+		4CED18FD2C84B28F006AF665 /* PostingTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */; };
 		4CEE2AED2805B22500AB5EEF /* NostrRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */; };
 		4CEE2AF1280B216B00AB5EEF /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF0280B216B00AB5EEF /* EventDetailView.swift */; };
 		4CEE2AF3280B25C500AB5EEF /* ProfilePicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF2280B25C500AB5EEF /* ProfilePicView.swift */; };
@@ -390,6 +372,34 @@
 		4CF0ABF029857E9200D66079 /* Bech32Object.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABEF29857E9200D66079 /* Bech32Object.swift */; };
 		4CF0ABF62985CD5500D66079 /* UserSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABF52985CD5500D66079 /* UserSearch.swift */; };
 		4CF38C882A9442DC00BE01B6 /* UserStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF38C872A9442DC00BE01B6 /* UserStatusView.swift */; };
+		4CF480382B631C0100F2B2C0 /* nostrdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FDE2B631C0100F2B2C0 /* nostrdb.c */; };
+		4CF480392B631C0100F2B2C0 /* block.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FDF2B631C0100F2B2C0 /* block.c */; };
+		4CF4803A2B631C0100F2B2C0 /* nostr_bech32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FE52B631C0100F2B2C0 /* nostr_bech32.c */; };
+		4CF4803B2B631C0100F2B2C0 /* configurator.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FEF2B631C0100F2B2C0 /* configurator.c */; };
+		4CF4803C2B631C0100F2B2C0 /* sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FF52B631C0100F2B2C0 /* sha256.c */; };
+		4CF4803D2B631C0100F2B2C0 /* content_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FF62B631C0100F2B2C0 /* content_parser.c */; };
+		4CF4803E2B631C0100F2B2C0 /* .dir in Resources */ = {isa = PBXBuildFile; fileRef = 4CF47FF92B631C0100F2B2C0 /* .dir */; };
+		4CF4803F2B631C0100F2B2C0 /* ndb_profile.rs in Resources */ = {isa = PBXBuildFile; fileRef = 4CF47FFA2B631C0100F2B2C0 /* ndb_profile.rs */; };
+		4CF480402B631C0100F2B2C0 /* ndb_meta.rs in Resources */ = {isa = PBXBuildFile; fileRef = 4CF47FFB2B631C0100F2B2C0 /* ndb_meta.rs */; };
+		4CF480412B631C0100F2B2C0 /* NdbMeta.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FFD2B631C0100F2B2C0 /* NdbMeta.swift */; };
+		4CF480422B631C0100F2B2C0 /* NdbProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FFE2B631C0100F2B2C0 /* NdbProfile.swift */; };
+		4CF480432B631C0100F2B2C0 /* .dir in Resources */ = {isa = PBXBuildFile; fileRef = 4CF480062B631C0100F2B2C0 /* .dir */; };
+		4CF480442B631C0100F2B2C0 /* bolt11.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480102B631C0100F2B2C0 /* bolt11.c */; };
+		4CF480452B631C0100F2B2C0 /* list.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480122B631C0100F2B2C0 /* list.c */; };
+		4CF480462B631C0100F2B2C0 /* mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480182B631C0100F2B2C0 /* mem.c */; };
+		4CF480472B631C0100F2B2C0 /* hash_u5.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF4801A2B631C0100F2B2C0 /* hash_u5.c */; };
+		4CF480482B631C0100F2B2C0 /* talstr.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF4801C2B631C0100F2B2C0 /* talstr.c */; };
+		4CF480492B631C0100F2B2C0 /* utf8.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF4801D2B631C0100F2B2C0 /* utf8.c */; };
+		4CF4804A2B631C0100F2B2C0 /* bech32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF4801E2B631C0100F2B2C0 /* bech32.c */; };
+		4CF4804B2B631C0100F2B2C0 /* tal.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF4801F2B631C0100F2B2C0 /* tal.c */; };
+		4CF4804C2B631C0100F2B2C0 /* take.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480232B631C0100F2B2C0 /* take.c */; };
+		4CF4804D2B631C0100F2B2C0 /* amount.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480252B631C0100F2B2C0 /* amount.c */; };
+		4CF4804E2B631C0100F2B2C0 /* error.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480262B631C0100F2B2C0 /* error.c */; };
+		4CF4804F2B631C0100F2B2C0 /* bech32_util.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480282B631C0100F2B2C0 /* bech32_util.c */; };
+		4CF480502B631C0100F2B2C0 /* libnostrdb.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CF4802A2B631C0100F2B2C0 /* libnostrdb.a */; };
+		4CF480512B631C0100F2B2C0 /* node_id.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480342B631C0100F2B2C0 /* node_id.c */; };
+		4CF480522B631C0100F2B2C0 /* invoice.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480372B631C0100F2B2C0 /* invoice.c */; };
+		4CF480552B631C4F00F2B2C0 /* wasm.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480532B631C4F00F2B2C0 /* wasm.c */; };
 		4CFD502F2A2DA45800A229DB /* MediaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFD502E2A2DA45800A229DB /* MediaView.swift */; };
 		4CFF8F5929C9FD1E008DB934 /* DamusPurpleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF8F5829C9FD1E008DB934 /* DamusPurpleView.swift */; };
 		4CFF8F6329CC9AD7008DB934 /* ImageContextMenuModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF8F6229CC9AD7008DB934 /* ImageContextMenuModifier.swift */; };
@@ -1629,28 +1639,9 @@
 		D7CE1B1C2B0BE147002EDAD4 /* refmap.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4792D12A9939BD00489948 /* refmap.c */; };
 		D7CE1B1D2B0BE14A002EDAD4 /* verifier.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4792D42A9939BD00489948 /* verifier.c */; };
 		D7CE1B1E2B0BE190002EDAD4 /* midl.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4793032A993DB900489948 /* midl.c */; };
-		D7CE1B1F2B0BE1B8002EDAD4 /* damus.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670A28FDE64700038D2A /* damus.c */; };
-		D7CE1B202B0BE1C8002EDAD4 /* error.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C9146FF2A2A891E00DDEA40 /* error.c */; };
-		D7CE1B212B0BE1CB002EDAD4 /* wasm.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CA9276E2A2A5D110098A105 /* wasm.c */; };
-		D7CE1B222B0BE1EB002EDAD4 /* utf8.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670D28FDEAA000038D2A /* utf8.c */; };
-		D7CE1B232B0BE1EE002EDAD4 /* bolt11.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA63C28FF52D600C48A62 /* bolt11.c */; };
-		D7CE1B242B0BE1F1002EDAD4 /* hash_u5.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64028FF553900C48A62 /* hash_u5.c */; };
-		D7CE1B252B0BE1F4002EDAD4 /* sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64328FF558100C48A62 /* sha256.c */; };
-		D7CE1B262B0BE1F8002EDAD4 /* bech32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64828FF597700C48A62 /* bech32.c */; };
-		D7CE1B272B0BE224002EDAD4 /* bech32_util.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64B28FF59AC00C48A62 /* bech32_util.c */; };
-		D7CE1B282B0BE226002EDAD4 /* tal.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64E28FF59F200C48A62 /* tal.c */; };
-		D7CE1B292B0BE239002EDAD4 /* node_id.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA65F28FF5E7700C48A62 /* node_id.c */; };
-		D7CE1B2A2B0BE23E002EDAD4 /* mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA66428FF5F6800C48A62 /* mem.c */; };
-		D7CE1B2B2B0BE243002EDAD4 /* hex.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA66728FF5F9900C48A62 /* hex.c */; };
-		D7CE1B2C2B0BE24B002EDAD4 /* amount.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA66C28FF782800C48A62 /* amount.c */; };
-		D7CE1B2D2B0BE250002EDAD4 /* take.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67428FF7A5A00C48A62 /* take.c */; };
-		D7CE1B2E2B0BE25C002EDAD4 /* talstr.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67628FF7A9800C48A62 /* talstr.c */; };
-		D7CE1B2F2B0BE260002EDAD4 /* list.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67828FF7ABF00C48A62 /* list.c */; };
-		D7CE1B302B0BE263002EDAD4 /* nostr_bech32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D00CE29E38B950036AF10 /* nostr_bech32.c */; };
 		D7CE1B312B0BE69D002EDAD4 /* Ndb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C478E242A9932C100489948 /* Ndb.swift */; };
 		D7CE1B322B0BE6C3002EDAD4 /* NdbTxn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3DCC752A9FC2030091E592 /* NdbTxn.swift */; };
 		D7CE1B332B0BE6DE002EDAD4 /* Nostr.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFA527FF87A20006080F /* Nostr.swift */; };
-		D7CE1B342B0BE6EE002EDAD4 /* NdbProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C478E2C2A9935D300489948 /* NdbProfile.swift */; };
 		D7CE1B352B0BE6FA002EDAD4 /* ByteBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B9402A9AD44700DC3548 /* ByteBuffer.swift */; };
 		D7CE1B362B0BE702002EDAD4 /* FbConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B9372A9AD44700DC3548 /* FbConstants.swift */; };
 		D7CE1B372B0BE719002EDAD4 /* Verifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B93E2A9AD44700DC3548 /* Verifier.swift */; };
@@ -1942,11 +1933,6 @@
 		4C011B602BD0B25C002F2F9B /* ReplyQuoteView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReplyQuoteView.swift; sourceTree = "<group>"; };
 		4C06670028FC7C5900038D2A /* RelayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayView.swift; sourceTree = "<group>"; };
 		4C06670528FCB08600038D2A /* ImageCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCarousel.swift; sourceTree = "<group>"; };
-		4C06670828FDE64700038D2A /* damus-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "damus-Bridging-Header.h"; sourceTree = "<group>"; };
-		4C06670928FDE64700038D2A /* damus.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = damus.h; sourceTree = "<group>"; };
-		4C06670A28FDE64700038D2A /* damus.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = damus.c; sourceTree = "<group>"; };
-		4C06670C28FDEAA000038D2A /* utf8.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = utf8.h; sourceTree = "<group>"; };
-		4C06670D28FDEAA000038D2A /* utf8.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = utf8.c; sourceTree = "<group>"; };
 		4C0A3F8E280F640A000448DE /* ThreadModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadModel.swift; sourceTree = "<group>"; };
 		4C0A3F92280F66F5000448DE /* ReplyMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyMap.swift; sourceTree = "<group>"; };
 		4C0C03972A61E27B0098B3B8 /* primal.wasm */ = {isa = PBXFileReference; lastKnownFileType = file; name = primal.wasm; path = nostrscript/primal.wasm; sourceTree = SOURCE_ROOT; };
@@ -2061,48 +2047,6 @@
 		4C3D52B5298DB4E6001C5831 /* ZapEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapEvent.swift; sourceTree = "<group>"; };
 		4C3D52B7298DB5C6001C5831 /* TextEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEvent.swift; sourceTree = "<group>"; };
 		4C3DCC752A9FC2030091E592 /* NdbTxn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbTxn.swift; sourceTree = "<group>"; };
-		4C3EA63B28FF52D600C48A62 /* bolt11.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bolt11.h; sourceTree = "<group>"; };
-		4C3EA63C28FF52D600C48A62 /* bolt11.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = bolt11.c; sourceTree = "<group>"; };
-		4C3EA63E28FF54BD00C48A62 /* short_types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = short_types.h; sourceTree = "<group>"; };
-		4C3EA63F28FF553900C48A62 /* hash_u5.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hash_u5.h; sourceTree = "<group>"; };
-		4C3EA64028FF553900C48A62 /* hash_u5.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = hash_u5.c; sourceTree = "<group>"; };
-		4C3EA64228FF558100C48A62 /* sha256.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sha256.h; sourceTree = "<group>"; };
-		4C3EA64328FF558100C48A62 /* sha256.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = sha256.c; sourceTree = "<group>"; };
-		4C3EA64528FF56D300C48A62 /* config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
-		4C3EA64628FF570F00C48A62 /* node_id.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = node_id.h; sourceTree = "<group>"; };
-		4C3EA64728FF597700C48A62 /* bech32.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bech32.h; sourceTree = "<group>"; };
-		4C3EA64828FF597700C48A62 /* bech32.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = bech32.c; sourceTree = "<group>"; };
-		4C3EA64A28FF59AC00C48A62 /* bech32_util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bech32_util.h; sourceTree = "<group>"; };
-		4C3EA64B28FF59AC00C48A62 /* bech32_util.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = bech32_util.c; sourceTree = "<group>"; };
-		4C3EA64D28FF59F200C48A62 /* tal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tal.h; sourceTree = "<group>"; };
-		4C3EA64E28FF59F200C48A62 /* tal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = tal.c; sourceTree = "<group>"; };
-		4C3EA65028FF5A5500C48A62 /* list.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = list.h; sourceTree = "<group>"; };
-		4C3EA65328FF5A8600C48A62 /* str.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = str.h; sourceTree = "<group>"; };
-		4C3EA65428FF5AAE00C48A62 /* container_of.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = container_of.h; sourceTree = "<group>"; };
-		4C3EA65528FF5AC300C48A62 /* check_type.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = check_type.h; sourceTree = "<group>"; };
-		4C3EA65628FF5B0200C48A62 /* compiler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = compiler.h; sourceTree = "<group>"; };
-		4C3EA65728FF5B1E00C48A62 /* likely.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = likely.h; sourceTree = "<group>"; };
-		4C3EA65828FF5B3700C48A62 /* typesafe_cb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = typesafe_cb.h; sourceTree = "<group>"; };
-		4C3EA65928FF5B5100C48A62 /* take.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = take.h; sourceTree = "<group>"; };
-		4C3EA65A28FF5BC900C48A62 /* alignof.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = alignof.h; sourceTree = "<group>"; };
-		4C3EA65B28FF5C7E00C48A62 /* str_debug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = str_debug.h; sourceTree = "<group>"; };
-		4C3EA65C28FF5CAF00C48A62 /* endian.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = endian.h; sourceTree = "<group>"; };
-		4C3EA65D28FF5CF300C48A62 /* talstr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = talstr.h; sourceTree = "<group>"; };
-		4C3EA65E28FF5DA400C48A62 /* amount.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = amount.h; sourceTree = "<group>"; };
-		4C3EA65F28FF5E7700C48A62 /* node_id.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = node_id.c; sourceTree = "<group>"; };
-		4C3EA66128FF5EA800C48A62 /* array_size.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = array_size.h; sourceTree = "<group>"; };
-		4C3EA66228FF5EBC00C48A62 /* build_assert.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = build_assert.h; sourceTree = "<group>"; };
-		4C3EA66328FF5F6800C48A62 /* mem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mem.h; sourceTree = "<group>"; };
-		4C3EA66428FF5F6800C48A62 /* mem.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mem.c; sourceTree = "<group>"; };
-		4C3EA66628FF5F9900C48A62 /* hex.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hex.h; sourceTree = "<group>"; };
-		4C3EA66728FF5F9900C48A62 /* hex.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = hex.c; sourceTree = "<group>"; };
-		4C3EA66C28FF782800C48A62 /* amount.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = amount.c; sourceTree = "<group>"; };
-		4C3EA66E28FF787100C48A62 /* overflows.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = overflows.h; sourceTree = "<group>"; };
-		4C3EA67228FF79F600C48A62 /* structeq.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = structeq.h; sourceTree = "<group>"; };
-		4C3EA67328FF7A2600C48A62 /* cppmagic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cppmagic.h; sourceTree = "<group>"; };
-		4C3EA67428FF7A5A00C48A62 /* take.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = take.c; sourceTree = "<group>"; };
-		4C3EA67628FF7A9800C48A62 /* talstr.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = talstr.c; sourceTree = "<group>"; };
-		4C3EA67828FF7ABF00C48A62 /* list.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = list.c; sourceTree = "<group>"; };
 		4C3EA67A28FF7B3900C48A62 /* InvoiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvoiceTests.swift; sourceTree = "<group>"; };
 		4C3EA67C28FFBBA200C48A62 /* InvoicesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvoicesView.swift; sourceTree = "<group>"; };
 		4C3EA67E28FFC01D00C48A62 /* InvoiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvoiceView.swift; sourceTree = "<group>"; };
@@ -2110,21 +2054,6 @@
 		4C45E5012BED4D000025A428 /* ThreadReply.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadReply.swift; sourceTree = "<group>"; };
 		4C463CBE2B960B96008A8C36 /* PurpleBackdrop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurpleBackdrop.swift; sourceTree = "<group>"; };
 		4C478E242A9932C100489948 /* Ndb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ndb.swift; sourceTree = "<group>"; };
-		4C478E262A99353500489948 /* threadpool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = threadpool.h; sourceTree = "<group>"; };
-		4C478E272A99354E00489948 /* protected_queue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = protected_queue.h; sourceTree = "<group>"; };
-		4C478E282A99357400489948 /* memchr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = memchr.h; sourceTree = "<group>"; };
-		4C478E292A99359900489948 /* util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
-		4C478E2C2A9935D300489948 /* NdbProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbProfile.swift; sourceTree = "<group>"; };
-		4C478E2E2A9935D300489948 /* profile_json_parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = profile_json_parser.h; sourceTree = "<group>"; };
-		4C478E2F2A9935D300489948 /* profile_reader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = profile_reader.h; sourceTree = "<group>"; };
-		4C478E302A9935D300489948 /* meta_json_parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = meta_json_parser.h; sourceTree = "<group>"; };
-		4C478E312A9935D300489948 /* profile_builder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = profile_builder.h; sourceTree = "<group>"; };
-		4C478E322A9935D300489948 /* meta_builder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = meta_builder.h; sourceTree = "<group>"; };
-		4C478E332A9935D300489948 /* profile_verifier.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = profile_verifier.h; sourceTree = "<group>"; };
-		4C478E352A9935D300489948 /* meta_reader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = meta_reader.h; sourceTree = "<group>"; };
-		4C478E362A9935D300489948 /* flatbuffers_common_reader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatbuffers_common_reader.h; sourceTree = "<group>"; };
-		4C478E372A9935D300489948 /* meta_verifier.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = meta_verifier.h; sourceTree = "<group>"; };
-		4C478E382A9935D300489948 /* flatbuffers_common_builder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatbuffers_common_builder.h; sourceTree = "<group>"; };
 		4C47928E2A9939BD00489948 /* flatcc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatcc.h; sourceTree = "<group>"; };
 		4C47928F2A9939BD00489948 /* flatcc_version.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatcc_version.h; sourceTree = "<group>"; };
 		4C4792902A9939BD00489948 /* flatcc_emitter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatcc_emitter.h; sourceTree = "<group>"; };
@@ -2245,7 +2174,6 @@
 		4C75EFB628049D990006080F /* RelayPool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayPool.swift; sourceTree = "<group>"; };
 		4C75EFB82804A2740006080F /* EventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventView.swift; sourceTree = "<group>"; };
 		4C75EFBA2804A34C0006080F /* ProofOfWork.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProofOfWork.swift; sourceTree = "<group>"; };
-		4C78EFD62A7078C5007E8197 /* random.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = random.h; sourceTree = "<group>"; };
 		4C78EFD72A707C4D007E8197 /* secp256k1_schnorrsig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = secp256k1_schnorrsig.h; sourceTree = "<group>"; };
 		4C78EFD82A707C4D007E8197 /* secp256k1_ecdh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = secp256k1_ecdh.h; sourceTree = "<group>"; };
 		4C78EFD92A707C4D007E8197 /* secp256k1.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = secp256k1.h; sourceTree = "<group>"; };
@@ -2269,11 +2197,6 @@
 		4C8D00C729DF791C0036AF10 /* CompatibleAttribute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompatibleAttribute.swift; sourceTree = "<group>"; };
 		4C8D00C929DF80350036AF10 /* TruncatedText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TruncatedText.swift; sourceTree = "<group>"; };
 		4C8D00CB29DF92DF0036AF10 /* Hashtags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hashtags.swift; sourceTree = "<group>"; };
-		4C8D00CD29E38B950036AF10 /* nostr_bech32.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nostr_bech32.h; sourceTree = "<group>"; };
-		4C8D00CE29E38B950036AF10 /* nostr_bech32.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nostr_bech32.c; sourceTree = "<group>"; };
-		4C8D00D029E38E4C0036AF10 /* cursor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cursor.h; sourceTree = "<group>"; };
-		4C8D00D129E397AD0036AF10 /* block.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = block.h; sourceTree = "<group>"; };
-		4C8D00D229E3C19F0036AF10 /* str_block.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = str_block.h; sourceTree = "<group>"; };
 		4C8D00D329E3C5D40036AF10 /* NIP19Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP19Tests.swift; sourceTree = "<group>"; };
 		4C8D1A6B29F1DFC200ACDF75 /* FriendIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendIcon.swift; sourceTree = "<group>"; };
 		4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsButton.swift; sourceTree = "<group>"; };
@@ -2284,7 +2207,6 @@
 		4C90BD17283A9EE5008EE7EF /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		4C90BD19283AA67F008EE7EF /* Bech32.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bech32.swift; sourceTree = "<group>"; };
 		4C90BD1B283AC38E008EE7EF /* Bech32Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bech32Tests.swift; sourceTree = "<group>"; };
-		4C9146FF2A2A891E00DDEA40 /* error.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = error.c; sourceTree = "<group>"; };
 		4C94D6422BA5AEFE00C26EFF /* QuoteRepostsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteRepostsView.swift; sourceTree = "<group>"; };
 		4C987B56283FD07F0042CE38 /* FollowersModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowersModel.swift; sourceTree = "<group>"; };
 		4C9AA1492A4587A6003F49FD /* NotificationStatusModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationStatusModel.swift; sourceTree = "<group>"; };
@@ -2314,13 +2236,6 @@
 		4CA927642A290F1A0098A105 /* TimeDot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeDot.swift; sourceTree = "<group>"; };
 		4CA927662A290F8B0098A105 /* RelativeTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelativeTime.swift; sourceTree = "<group>"; };
 		4CA9276B2A2910D10098A105 /* ReplyPart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyPart.swift; sourceTree = "<group>"; };
-		4CA9276D2A2A5D110098A105 /* wasm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wasm.h; sourceTree = "<group>"; };
-		4CA9276E2A2A5D110098A105 /* wasm.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wasm.c; sourceTree = "<group>"; };
-		4CA9276F2A2A5D470098A105 /* parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = parser.h; sourceTree = "<group>"; };
-		4CA927702A2A5D470098A105 /* debug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
-		4CA927712A2A5D480098A105 /* error.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = error.h; sourceTree = "<group>"; };
-		4CA927742A2A5E2F0098A105 /* varint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = varint.h; sourceTree = "<group>"; };
-		4CA927752A2A5E2F0098A105 /* typedefs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = typedefs.h; sourceTree = "<group>"; };
 		4CAAD8AC298851D000060CEA /* AccountDeletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDeletion.swift; sourceTree = "<group>"; };
 		4CAAD8AF29888AD200060CEA /* RelayConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayConfigView.swift; sourceTree = "<group>"; };
 		4CACA9D4280C31E100D9BBE8 /* ReplyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyView.swift; sourceTree = "<group>"; };
@@ -2362,7 +2277,6 @@
 		4CDA128B29EB19C40006FA5A /* LocalNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalNotification.swift; sourceTree = "<group>"; };
 		4CDD1ADF2A6B305F001CD4DF /* NdbTagElem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbTagElem.swift; sourceTree = "<group>"; };
 		4CDD1AE12A6B3074001CD4DF /* NdbTagsIterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbTagsIterator.swift; sourceTree = "<group>"; };
-		4CDD1AE72A6B3611001CD4DF /* jsmn.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = jsmn.h; sourceTree = "<group>"; };
 		4CE0E2AE29A2E82100DB4CA2 /* EventHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventHolder.swift; sourceTree = "<group>"; };
 		4CE0E2B529A3ED5500DB4CA2 /* InnerTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InnerTimelineView.swift; sourceTree = "<group>"; };
 		4CE1398F29F0661A00AC6A0B /* RepostAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepostAction.swift; sourceTree = "<group>"; };
@@ -2390,8 +2304,6 @@
 		4CE879542996BAB900F758CC /* RelayPaidDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayPaidDetail.swift; sourceTree = "<group>"; };
 		4CE879572996C45300F758CC /* ZapsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapsView.swift; sourceTree = "<group>"; };
 		4CE8795A2996C47A00F758CC /* ZapsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapsModel.swift; sourceTree = "<group>"; };
-		4CE9FBB82A6B3B26007E485C /* nostrdb.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nostrdb.c; sourceTree = "<group>"; };
-		4CE9FBB92A6B3B26007E485C /* nostrdb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nostrdb.h; sourceTree = "<group>"; };
 		4CEE2AE72804F57C00AB5EEF /* libsecp256k1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libsecp256k1.a; sourceTree = "<group>"; };
 		4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrRequest.swift; sourceTree = "<group>"; };
 		4CEE2AF0280B216B00AB5EEF /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
@@ -2413,6 +2325,95 @@
 		4CF0ABEF29857E9200D66079 /* Bech32Object.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bech32Object.swift; sourceTree = "<group>"; };
 		4CF0ABF52985CD5500D66079 /* UserSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSearch.swift; sourceTree = "<group>"; };
 		4CF38C872A9442DC00BE01B6 /* UserStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserStatusView.swift; sourceTree = "<group>"; };
+		4CF47FDA2B631BA500F2B2C0 /* damus-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "damus-Bridging-Header.h"; sourceTree = "<group>"; };
+		4CF47FDD2B631C0100F2B2C0 /* lmdb_util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lmdb_util.h; sourceTree = "<group>"; };
+		4CF47FDE2B631C0100F2B2C0 /* nostrdb.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = nostrdb.c; sourceTree = "<group>"; };
+		4CF47FDF2B631C0100F2B2C0 /* block.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = block.c; sourceTree = "<group>"; };
+		4CF47FE02B631C0100F2B2C0 /* str_block.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = str_block.h; sourceTree = "<group>"; };
+		4CF47FE12B631C0100F2B2C0 /* compiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = compiler.h; sourceTree = "<group>"; };
+		4CF47FE22B631C0100F2B2C0 /* threadpool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = threadpool.h; sourceTree = "<group>"; };
+		4CF47FE32B631C0100F2B2C0 /* typedefs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = typedefs.h; sourceTree = "<group>"; };
+		4CF47FE42B631C0100F2B2C0 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
+		4CF47FE52B631C0100F2B2C0 /* nostr_bech32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = nostr_bech32.c; sourceTree = "<group>"; };
+		4CF47FE62B631C0100F2B2C0 /* endian.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = endian.h; sourceTree = "<group>"; };
+		4CF47FE72B631C0100F2B2C0 /* jsmn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = jsmn.h; sourceTree = "<group>"; };
+		4CF47FE82B631C0100F2B2C0 /* memchr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = memchr.h; sourceTree = "<group>"; };
+		4CF47FE92B631C0100F2B2C0 /* sha256.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sha256.h; sourceTree = "<group>"; };
+		4CF47FEA2B631C0100F2B2C0 /* invoice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = invoice.h; sourceTree = "<group>"; };
+		4CF47FEB2B631C0100F2B2C0 /* cursor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cursor.h; sourceTree = "<group>"; };
+		4CF47FEC2B631C0100F2B2C0 /* nostrdb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nostrdb.h; sourceTree = "<group>"; };
+		4CF47FED2B631C0100F2B2C0 /* hex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hex.h; sourceTree = "<group>"; };
+		4CF47FEE2B631C0100F2B2C0 /* io.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = io.h; sourceTree = "<group>"; };
+		4CF47FEF2B631C0100F2B2C0 /* configurator.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = configurator.c; sourceTree = "<group>"; };
+		4CF47FF02B631C0100F2B2C0 /* nostr_bech32.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nostr_bech32.h; sourceTree = "<group>"; };
+		4CF47FF12B631C0100F2B2C0 /* cpu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpu.h; sourceTree = "<group>"; };
+		4CF47FF22B631C0100F2B2C0 /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
+		4CF47FF32B631C0100F2B2C0 /* print_util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = print_util.h; sourceTree = "<group>"; };
+		4CF47FF42B631C0100F2B2C0 /* block.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = block.h; sourceTree = "<group>"; };
+		4CF47FF52B631C0100F2B2C0 /* sha256.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sha256.c; sourceTree = "<group>"; };
+		4CF47FF62B631C0100F2B2C0 /* content_parser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = content_parser.c; sourceTree = "<group>"; };
+		4CF47FF92B631C0100F2B2C0 /* .dir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .dir; sourceTree = "<group>"; };
+		4CF47FFA2B631C0100F2B2C0 /* ndb_profile.rs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ndb_profile.rs; sourceTree = "<group>"; };
+		4CF47FFB2B631C0100F2B2C0 /* ndb_meta.rs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ndb_meta.rs; sourceTree = "<group>"; };
+		4CF47FFD2B631C0100F2B2C0 /* NdbMeta.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NdbMeta.swift; sourceTree = "<group>"; };
+		4CF47FFE2B631C0100F2B2C0 /* NdbProfile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NdbProfile.swift; sourceTree = "<group>"; };
+		4CF480002B631C0100F2B2C0 /* profile_json_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = profile_json_parser.h; sourceTree = "<group>"; };
+		4CF480012B631C0100F2B2C0 /* profile_reader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = profile_reader.h; sourceTree = "<group>"; };
+		4CF480022B631C0100F2B2C0 /* meta_json_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = meta_json_parser.h; sourceTree = "<group>"; };
+		4CF480032B631C0100F2B2C0 /* profile_builder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = profile_builder.h; sourceTree = "<group>"; };
+		4CF480042B631C0100F2B2C0 /* meta_builder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = meta_builder.h; sourceTree = "<group>"; };
+		4CF480052B631C0100F2B2C0 /* profile_verifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = profile_verifier.h; sourceTree = "<group>"; };
+		4CF480062B631C0100F2B2C0 /* .dir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .dir; sourceTree = "<group>"; };
+		4CF480072B631C0100F2B2C0 /* meta_reader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = meta_reader.h; sourceTree = "<group>"; };
+		4CF480082B631C0100F2B2C0 /* flatbuffers_common_reader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = flatbuffers_common_reader.h; sourceTree = "<group>"; };
+		4CF480092B631C0100F2B2C0 /* meta_verifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = meta_verifier.h; sourceTree = "<group>"; };
+		4CF4800A2B631C0100F2B2C0 /* flatbuffers_common_builder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = flatbuffers_common_builder.h; sourceTree = "<group>"; };
+		4CF4800C2B631C0100F2B2C0 /* amount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = amount.h; sourceTree = "<group>"; };
+		4CF4800D2B631C0100F2B2C0 /* cppmagic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cppmagic.h; sourceTree = "<group>"; };
+		4CF4800E2B631C0100F2B2C0 /* error.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = error.h; sourceTree = "<group>"; };
+		4CF4800F2B631C0100F2B2C0 /* take.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = take.h; sourceTree = "<group>"; };
+		4CF480102B631C0100F2B2C0 /* bolt11.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bolt11.c; sourceTree = "<group>"; };
+		4CF480112B631C0100F2B2C0 /* structeq.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = structeq.h; sourceTree = "<group>"; };
+		4CF480122B631C0100F2B2C0 /* list.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = list.c; sourceTree = "<group>"; };
+		4CF480132B631C0100F2B2C0 /* debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
+		4CF480142B631C0100F2B2C0 /* bech32_util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bech32_util.h; sourceTree = "<group>"; };
+		4CF480152B631C0100F2B2C0 /* alignof.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alignof.h; sourceTree = "<group>"; };
+		4CF480162B631C0100F2B2C0 /* typesafe_cb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = typesafe_cb.h; sourceTree = "<group>"; };
+		4CF480172B631C0100F2B2C0 /* overflows.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = overflows.h; sourceTree = "<group>"; };
+		4CF480182B631C0100F2B2C0 /* mem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mem.c; sourceTree = "<group>"; };
+		4CF480192B631C0100F2B2C0 /* container_of.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = container_of.h; sourceTree = "<group>"; };
+		4CF4801A2B631C0100F2B2C0 /* hash_u5.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hash_u5.c; sourceTree = "<group>"; };
+		4CF4801B2B631C0100F2B2C0 /* node_id.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = node_id.h; sourceTree = "<group>"; };
+		4CF4801C2B631C0100F2B2C0 /* talstr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = talstr.c; sourceTree = "<group>"; };
+		4CF4801D2B631C0100F2B2C0 /* utf8.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = utf8.c; sourceTree = "<group>"; };
+		4CF4801E2B631C0100F2B2C0 /* bech32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bech32.c; sourceTree = "<group>"; };
+		4CF4801F2B631C0100F2B2C0 /* tal.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tal.c; sourceTree = "<group>"; };
+		4CF480202B631C0100F2B2C0 /* list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = list.h; sourceTree = "<group>"; };
+		4CF480212B631C0100F2B2C0 /* str_debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = str_debug.h; sourceTree = "<group>"; };
+		4CF480222B631C0100F2B2C0 /* bolt11.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bolt11.h; sourceTree = "<group>"; };
+		4CF480232B631C0100F2B2C0 /* take.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = take.c; sourceTree = "<group>"; };
+		4CF480242B631C0100F2B2C0 /* likely.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = likely.h; sourceTree = "<group>"; };
+		4CF480252B631C0100F2B2C0 /* amount.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = amount.c; sourceTree = "<group>"; };
+		4CF480262B631C0100F2B2C0 /* error.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = error.c; sourceTree = "<group>"; };
+		4CF480272B631C0100F2B2C0 /* array_size.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = array_size.h; sourceTree = "<group>"; };
+		4CF480282B631C0100F2B2C0 /* bech32_util.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bech32_util.c; sourceTree = "<group>"; };
+		4CF480292B631C0100F2B2C0 /* str.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = str.h; sourceTree = "<group>"; };
+		4CF4802A2B631C0100F2B2C0 /* libnostrdb.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libnostrdb.a; sourceTree = "<group>"; };
+		4CF4802B2B631C0100F2B2C0 /* hash_u5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hash_u5.h; sourceTree = "<group>"; };
+		4CF4802C2B631C0100F2B2C0 /* mem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mem.h; sourceTree = "<group>"; };
+		4CF4802D2B631C0100F2B2C0 /* build_assert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = build_assert.h; sourceTree = "<group>"; };
+		4CF4802E2B631C0100F2B2C0 /* short_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = short_types.h; sourceTree = "<group>"; };
+		4CF4802F2B631C0100F2B2C0 /* tal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tal.h; sourceTree = "<group>"; };
+		4CF480302B631C0100F2B2C0 /* bech32.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bech32.h; sourceTree = "<group>"; };
+		4CF480312B631C0100F2B2C0 /* check_type.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = check_type.h; sourceTree = "<group>"; };
+		4CF480322B631C0100F2B2C0 /* utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utf8.h; sourceTree = "<group>"; };
+		4CF480332B631C0100F2B2C0 /* talstr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = talstr.h; sourceTree = "<group>"; };
+		4CF480342B631C0100F2B2C0 /* node_id.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = node_id.c; sourceTree = "<group>"; };
+		4CF480352B631C0100F2B2C0 /* protected_queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = protected_queue.h; sourceTree = "<group>"; };
+		4CF480362B631C0100F2B2C0 /* random.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = random.h; sourceTree = "<group>"; };
+		4CF480372B631C0100F2B2C0 /* invoice.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = invoice.c; sourceTree = "<group>"; };
+		4CF480532B631C4F00F2B2C0 /* wasm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = wasm.c; sourceTree = "<group>"; };
+		4CF480542B631C4F00F2B2C0 /* wasm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = wasm.h; sourceTree = "<group>"; };
 		4CFD502E2A2DA45800A229DB /* MediaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaView.swift; sourceTree = "<group>"; };
 		4CFF8F5829C9FD1E008DB934 /* DamusPurpleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleView.swift; sourceTree = "<group>"; };
 		4CFF8F6229CC9AD7008DB934 /* ImageContextMenuModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageContextMenuModifier.swift; sourceTree = "<group>"; };
@@ -2652,6 +2653,7 @@
 				D7C48C0B2D12DE0C00A3BACF /* SwiftyCrop in Frameworks */,
 				D78DB8592C1CE9CA00F0AB12 /* SwipeActions in Frameworks */,
 				4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */,
+				4CF480502B631C0100F2B2C0 /* libnostrdb.a in Frameworks */,
 				4C27C9322A64766F007DBC75 /* MarkdownUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2736,73 +2738,6 @@
 				4C94D6422BA5AEFE00C26EFF /* QuoteRepostsView.swift */,
 			);
 			path = Reposts;
-			sourceTree = "<group>";
-		};
-		4C06670728FDE62900038D2A /* damus-c */ = {
-			isa = PBXGroup;
-			children = (
-				4C9146FF2A2A891E00DDEA40 /* error.c */,
-				4CA927752A2A5E2F0098A105 /* typedefs.h */,
-				4CA927742A2A5E2F0098A105 /* varint.h */,
-				4CA927702A2A5D470098A105 /* debug.h */,
-				4CA927712A2A5D480098A105 /* error.h */,
-				4CA9276F2A2A5D470098A105 /* parser.h */,
-				4CA9276E2A2A5D110098A105 /* wasm.c */,
-				4CA9276D2A2A5D110098A105 /* wasm.h */,
-				4C06670928FDE64700038D2A /* damus.h */,
-				4C06670A28FDE64700038D2A /* damus.c */,
-				4C06670828FDE64700038D2A /* damus-Bridging-Header.h */,
-				4C06670C28FDEAA000038D2A /* utf8.h */,
-				4C06670D28FDEAA000038D2A /* utf8.c */,
-				4C3EA63B28FF52D600C48A62 /* bolt11.h */,
-				4C3EA63C28FF52D600C48A62 /* bolt11.c */,
-				4C3EA63E28FF54BD00C48A62 /* short_types.h */,
-				4C3EA63F28FF553900C48A62 /* hash_u5.h */,
-				4C3EA64028FF553900C48A62 /* hash_u5.c */,
-				4C3EA64228FF558100C48A62 /* sha256.h */,
-				4C3EA64328FF558100C48A62 /* sha256.c */,
-				4C3EA64528FF56D300C48A62 /* config.h */,
-				4C3EA64628FF570F00C48A62 /* node_id.h */,
-				4C3EA64728FF597700C48A62 /* bech32.h */,
-				4C3EA64828FF597700C48A62 /* bech32.c */,
-				4C3EA64A28FF59AC00C48A62 /* bech32_util.h */,
-				4C3EA64B28FF59AC00C48A62 /* bech32_util.c */,
-				4C3EA64D28FF59F200C48A62 /* tal.h */,
-				4C3EA64E28FF59F200C48A62 /* tal.c */,
-				4C3EA65028FF5A5500C48A62 /* list.h */,
-				4C3EA65328FF5A8600C48A62 /* str.h */,
-				4C3EA65428FF5AAE00C48A62 /* container_of.h */,
-				4C3EA65528FF5AC300C48A62 /* check_type.h */,
-				4C3EA65628FF5B0200C48A62 /* compiler.h */,
-				4C3EA65728FF5B1E00C48A62 /* likely.h */,
-				4C3EA65828FF5B3700C48A62 /* typesafe_cb.h */,
-				4C3EA65928FF5B5100C48A62 /* take.h */,
-				4C3EA65A28FF5BC900C48A62 /* alignof.h */,
-				4C3EA65B28FF5C7E00C48A62 /* str_debug.h */,
-				4C3EA65C28FF5CAF00C48A62 /* endian.h */,
-				4C3EA65D28FF5CF300C48A62 /* talstr.h */,
-				4C3EA65E28FF5DA400C48A62 /* amount.h */,
-				4C3EA65F28FF5E7700C48A62 /* node_id.c */,
-				4C3EA66128FF5EA800C48A62 /* array_size.h */,
-				4C3EA66228FF5EBC00C48A62 /* build_assert.h */,
-				4C3EA66328FF5F6800C48A62 /* mem.h */,
-				4C3EA66428FF5F6800C48A62 /* mem.c */,
-				4C3EA66628FF5F9900C48A62 /* hex.h */,
-				4C3EA66728FF5F9900C48A62 /* hex.c */,
-				4C3EA66C28FF782800C48A62 /* amount.c */,
-				4C3EA66E28FF787100C48A62 /* overflows.h */,
-				4C3EA67228FF79F600C48A62 /* structeq.h */,
-				4C3EA67328FF7A2600C48A62 /* cppmagic.h */,
-				4C3EA67428FF7A5A00C48A62 /* take.c */,
-				4C3EA67628FF7A9800C48A62 /* talstr.c */,
-				4C3EA67828FF7ABF00C48A62 /* list.c */,
-				4C8D00CD29E38B950036AF10 /* nostr_bech32.h */,
-				4C8D00CE29E38B950036AF10 /* nostr_bech32.c */,
-				4C8D00D029E38E4C0036AF10 /* cursor.h */,
-				4C8D00D129E397AD0036AF10 /* block.h */,
-				4C8D00D229E3C19F0036AF10 /* str_block.h */,
-			);
-			path = "damus-c";
 			sourceTree = "<group>";
 		};
 		4C0A3F8D280F63FF000448DE /* Models */ = {
@@ -3431,8 +3366,8 @@
 			isa = PBXGroup;
 			children = (
 				D733F9E42D92C75C00317B11 /* UnownedNdbNote.swift */,
+				4CF47FDC2B631C0100F2B2C0 /* src */,
 				4C47928D2A9939BD00489948 /* flatcc */,
-				4C478E2A2A9935D300489948 /* bindings */,
 				4CE9FBBB2A6B3D9C007E485C /* Test */,
 				4C9054882A6AED4700811EEC /* NdbTagIterator.swift */,
 				4C90548A2A6AEDEE00811EEC /* NdbNote.swift */,
@@ -3441,18 +3376,10 @@
 				4C478E242A9932C100489948 /* Ndb.swift */,
 				4CDD1AE12A6B3074001CD4DF /* NdbTagsIterator.swift */,
 				4C3DCC752A9FC2030091E592 /* NdbTxn.swift */,
-				4CE9FBB82A6B3B26007E485C /* nostrdb.c */,
 				4C4793032A993DB900489948 /* midl.c */,
 				4C4793002A993B9A00489948 /* mdb.c */,
 				4C4793022A993D9300489948 /* midl.h */,
 				4C4792FF2A993B9A00489948 /* lmdb.h */,
-				4CE9FBB92A6B3B26007E485C /* nostrdb.h */,
-				4C78EFD62A7078C5007E8197 /* random.h */,
-				4CDD1AE72A6B3611001CD4DF /* jsmn.h */,
-				4C478E292A99359900489948 /* util.h */,
-				4C478E282A99357400489948 /* memchr.h */,
-				4C478E272A99354E00489948 /* protected_queue.h */,
-				4C478E262A99353500489948 /* threadpool.h */,
 				4C78EFD82A707C4D007E8197 /* secp256k1_ecdh.h */,
 				4C78EFD72A707C4D007E8197 /* secp256k1_schnorrsig.h */,
 				4C78EFDA2A707C67007E8197 /* secp256k1_extrakeys.h */,
@@ -3689,11 +3616,11 @@
 			children = (
 				82D6FAA82CD982D500C925F4 /* share extension */,
 				D7FB14212BE5970000398331 /* PrivacyInfo.xcprivacy */,
+				4CF47FD82B631BA500F2B2C0 /* damus-c */,
 				4C32B9362A9AD44700DC3548 /* flatbuffers */,
 				4C9054862A6AEB4500811EEC /* nostrdb */,
 				4C19AE4A2A5CEF7C00C90DB7 /* nostrscript */,
 				4C8AE1182A0320BE00B944E6 /* Purple.storekit */,
-				4C06670728FDE62900038D2A /* damus-c */,
 				4CE6DEE527F7A08100C66700 /* damus */,
 				4CE6DEF627F7A08200C66700 /* damusTests */,
 				4CE6DF0027F7A08200C66700 /* damusUITests */,
@@ -3900,6 +3827,149 @@
 				4CF0ABF52985CD5500D66079 /* UserSearch.swift */,
 			);
 			path = Posting;
+			sourceTree = "<group>";
+		};
+		4CF47FD82B631BA500F2B2C0 /* damus-c */ = {
+			isa = PBXGroup;
+			children = (
+				4CF480532B631C4F00F2B2C0 /* wasm.c */,
+				4CF480542B631C4F00F2B2C0 /* wasm.h */,
+				4CF47FDA2B631BA500F2B2C0 /* damus-Bridging-Header.h */,
+			);
+			path = "damus-c";
+			sourceTree = "<group>";
+		};
+		4CF47FDC2B631C0100F2B2C0 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				4CF47FDD2B631C0100F2B2C0 /* lmdb_util.h */,
+				4CF47FDE2B631C0100F2B2C0 /* nostrdb.c */,
+				4CF47FDF2B631C0100F2B2C0 /* block.c */,
+				4CF47FE02B631C0100F2B2C0 /* str_block.h */,
+				4CF47FE12B631C0100F2B2C0 /* compiler.h */,
+				4CF47FE22B631C0100F2B2C0 /* threadpool.h */,
+				4CF47FE32B631C0100F2B2C0 /* typedefs.h */,
+				4CF47FE42B631C0100F2B2C0 /* config.h */,
+				4CF47FE52B631C0100F2B2C0 /* nostr_bech32.c */,
+				4CF47FE62B631C0100F2B2C0 /* endian.h */,
+				4CF47FE72B631C0100F2B2C0 /* jsmn.h */,
+				4CF47FE82B631C0100F2B2C0 /* memchr.h */,
+				4CF47FE92B631C0100F2B2C0 /* sha256.h */,
+				4CF47FEA2B631C0100F2B2C0 /* invoice.h */,
+				4CF47FEB2B631C0100F2B2C0 /* cursor.h */,
+				4CF47FEC2B631C0100F2B2C0 /* nostrdb.h */,
+				4CF47FED2B631C0100F2B2C0 /* hex.h */,
+				4CF47FEE2B631C0100F2B2C0 /* io.h */,
+				4CF47FEF2B631C0100F2B2C0 /* configurator.c */,
+				4CF47FF02B631C0100F2B2C0 /* nostr_bech32.h */,
+				4CF47FF12B631C0100F2B2C0 /* cpu.h */,
+				4CF47FF22B631C0100F2B2C0 /* util.h */,
+				4CF47FF32B631C0100F2B2C0 /* print_util.h */,
+				4CF47FF42B631C0100F2B2C0 /* block.h */,
+				4CF47FF52B631C0100F2B2C0 /* sha256.c */,
+				4CF47FF62B631C0100F2B2C0 /* content_parser.c */,
+				4CF47FF72B631C0100F2B2C0 /* bindings */,
+				4CF4800B2B631C0100F2B2C0 /* bolt11 */,
+				4CF480352B631C0100F2B2C0 /* protected_queue.h */,
+				4CF480362B631C0100F2B2C0 /* random.h */,
+				4CF480372B631C0100F2B2C0 /* invoice.c */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		4CF47FF72B631C0100F2B2C0 /* bindings */ = {
+			isa = PBXGroup;
+			children = (
+				4CF47FF82B631C0100F2B2C0 /* rust */,
+				4CF47FFC2B631C0100F2B2C0 /* swift */,
+				4CF47FFF2B631C0100F2B2C0 /* c */,
+			);
+			path = bindings;
+			sourceTree = "<group>";
+		};
+		4CF47FF82B631C0100F2B2C0 /* rust */ = {
+			isa = PBXGroup;
+			children = (
+				4CF47FF92B631C0100F2B2C0 /* .dir */,
+				4CF47FFA2B631C0100F2B2C0 /* ndb_profile.rs */,
+				4CF47FFB2B631C0100F2B2C0 /* ndb_meta.rs */,
+			);
+			path = rust;
+			sourceTree = "<group>";
+		};
+		4CF47FFC2B631C0100F2B2C0 /* swift */ = {
+			isa = PBXGroup;
+			children = (
+				4CF47FFD2B631C0100F2B2C0 /* NdbMeta.swift */,
+				4CF47FFE2B631C0100F2B2C0 /* NdbProfile.swift */,
+			);
+			path = swift;
+			sourceTree = "<group>";
+		};
+		4CF47FFF2B631C0100F2B2C0 /* c */ = {
+			isa = PBXGroup;
+			children = (
+				4CF480002B631C0100F2B2C0 /* profile_json_parser.h */,
+				4CF480012B631C0100F2B2C0 /* profile_reader.h */,
+				4CF480022B631C0100F2B2C0 /* meta_json_parser.h */,
+				4CF480032B631C0100F2B2C0 /* profile_builder.h */,
+				4CF480042B631C0100F2B2C0 /* meta_builder.h */,
+				4CF480052B631C0100F2B2C0 /* profile_verifier.h */,
+				4CF480062B631C0100F2B2C0 /* .dir */,
+				4CF480072B631C0100F2B2C0 /* meta_reader.h */,
+				4CF480082B631C0100F2B2C0 /* flatbuffers_common_reader.h */,
+				4CF480092B631C0100F2B2C0 /* meta_verifier.h */,
+				4CF4800A2B631C0100F2B2C0 /* flatbuffers_common_builder.h */,
+			);
+			path = c;
+			sourceTree = "<group>";
+		};
+		4CF4800B2B631C0100F2B2C0 /* bolt11 */ = {
+			isa = PBXGroup;
+			children = (
+				4CF4800C2B631C0100F2B2C0 /* amount.h */,
+				4CF4800D2B631C0100F2B2C0 /* cppmagic.h */,
+				4CF4800E2B631C0100F2B2C0 /* error.h */,
+				4CF4800F2B631C0100F2B2C0 /* take.h */,
+				4CF480102B631C0100F2B2C0 /* bolt11.c */,
+				4CF480112B631C0100F2B2C0 /* structeq.h */,
+				4CF480122B631C0100F2B2C0 /* list.c */,
+				4CF480132B631C0100F2B2C0 /* debug.h */,
+				4CF480142B631C0100F2B2C0 /* bech32_util.h */,
+				4CF480152B631C0100F2B2C0 /* alignof.h */,
+				4CF480162B631C0100F2B2C0 /* typesafe_cb.h */,
+				4CF480172B631C0100F2B2C0 /* overflows.h */,
+				4CF480182B631C0100F2B2C0 /* mem.c */,
+				4CF480192B631C0100F2B2C0 /* container_of.h */,
+				4CF4801A2B631C0100F2B2C0 /* hash_u5.c */,
+				4CF4801B2B631C0100F2B2C0 /* node_id.h */,
+				4CF4801C2B631C0100F2B2C0 /* talstr.c */,
+				4CF4801D2B631C0100F2B2C0 /* utf8.c */,
+				4CF4801E2B631C0100F2B2C0 /* bech32.c */,
+				4CF4801F2B631C0100F2B2C0 /* tal.c */,
+				4CF480202B631C0100F2B2C0 /* list.h */,
+				4CF480212B631C0100F2B2C0 /* str_debug.h */,
+				4CF480222B631C0100F2B2C0 /* bolt11.h */,
+				4CF480232B631C0100F2B2C0 /* take.c */,
+				4CF480242B631C0100F2B2C0 /* likely.h */,
+				4CF480252B631C0100F2B2C0 /* amount.c */,
+				4CF480262B631C0100F2B2C0 /* error.c */,
+				4CF480272B631C0100F2B2C0 /* array_size.h */,
+				4CF480282B631C0100F2B2C0 /* bech32_util.c */,
+				4CF480292B631C0100F2B2C0 /* str.h */,
+				4CF4802A2B631C0100F2B2C0 /* libnostrdb.a */,
+				4CF4802B2B631C0100F2B2C0 /* hash_u5.h */,
+				4CF4802C2B631C0100F2B2C0 /* mem.h */,
+				4CF4802D2B631C0100F2B2C0 /* build_assert.h */,
+				4CF4802E2B631C0100F2B2C0 /* short_types.h */,
+				4CF4802F2B631C0100F2B2C0 /* tal.h */,
+				4CF480302B631C0100F2B2C0 /* bech32.h */,
+				4CF480312B631C0100F2B2C0 /* check_type.h */,
+				4CF480322B631C0100F2B2C0 /* utf8.h */,
+				4CF480332B631C0100F2B2C0 /* talstr.h */,
+				4CF480342B631C0100F2B2C0 /* node_id.c */,
+			);
+			path = bolt11;
 			sourceTree = "<group>";
 		};
 		4CFF8F5729C9FD07008DB934 /* Purple */ = {
@@ -4444,13 +4514,17 @@
 			files = (
 				4C1D4FB42A7967990024F453 /* build-git-hash.txt in Resources */,
 				D7FB14222BE5970000398331 /* PrivacyInfo.xcprivacy in Resources */,
+				4CF480432B631C0100F2B2C0 /* .dir in Resources */,
 				3ACB685F297633BC00C46468 /* Localizable.strings in Resources */,
 				4CE6DEEE27F7A08200C66700 /* Preview Assets.xcassets in Resources */,
 				3ACB685C297633BC00C46468 /* InfoPlist.strings in Resources */,
 				50DA11262A16A23F00236234 /* Launch.storyboard in Resources */,
 				4CE6DEEB27F7A08200C66700 /* Assets.xcassets in Resources */,
 				4C198DF129F88C6B004C165C /* License.txt in Resources */,
+				4CF4803E2B631C0100F2B2C0 /* .dir in Resources */,
 				4C198DF029F88C6B004C165C /* Readme.md in Resources */,
+				4CF4803F2B631C0100F2B2C0 /* ndb_profile.rs in Resources */,
+				4CF480402B631C0100F2B2C0 /* ndb_meta.rs in Resources */,
 				F71694EE2A6624F9001F4053 /* suggested_users.json in Resources */,
 				3A4325A82961E11400BFCD9D /* Localizable.stringsdict in Resources */,
 			);
@@ -4535,7 +4609,6 @@
 			files = (
 				4C3DCC762A9FE9EC0091E592 /* NdbTxn.swift in Sources */,
 				4CEF958D2A9CE650000F901B /* verifier.c in Sources */,
-				4C32B9342A9AD01A00DC3548 /* NdbProfile.swift in Sources */,
 				D73BDB0E2D6FF5F600D69970 /* NostrNetworkManager.swift in Sources */,
 				4C32B9332A99845B00DC3548 /* Ndb.swift in Sources */,
 				D7ADD3E22B538E3500F104C4 /* DamusPurpleVerifyNpubView.swift in Sources */,
@@ -4547,7 +4620,6 @@
 				4C4793042A993DC000489948 /* midl.c in Sources */,
 				0E8A4BB72AE4359200065E81 /* NostrFilter+Hashable.swift in Sources */,
 				4C4793012A993CDA00489948 /* mdb.c in Sources */,
-				4CE9FBBA2A6B3C63007E485C /* nostrdb.c in Sources */,
 				ADFE73552AD4793100EC7326 /* QRScanNSECView.swift in Sources */,
 				4C3AC79D2833036D00E1F516 /* FollowingView.swift in Sources */,
 				5CF72FC229B9142F00124A13 /* ShareAction.swift in Sources */,
@@ -4561,8 +4633,8 @@
 				D7CB5D512B1174D100AD4105 /* FriendFilter.swift in Sources */,
 				D7CBD1D42B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift in Sources */,
 				4C32B9572A9AD44700DC3548 /* Root.swift in Sources */,
-				4C3EA64428FF558100C48A62 /* sha256.c in Sources */,
 				5C8498032D5D150000F74FEB /* ZapExplainer.swift in Sources */,
+				4CF4804B2B631C0100F2B2C0 /* tal.c in Sources */,
 				504323A72A34915F006AE6DC /* RelayModel.swift in Sources */,
 				3A2BAC5C2DD7E4C400EBB4CC /* NIP05DomainTimelineHeaderView.swift in Sources */,
 				4CF0ABF62985CD5500D66079 /* UserSearch.swift in Sources */,
@@ -4587,7 +4659,6 @@
 				B57B4C662B312C3700A232C0 /* NostrAuth.swift in Sources */,
 				D7DB930B2D69486700DA1EE5 /* NIP65.swift in Sources */,
 				4CB8838D296F710400DC99E7 /* Reposted.swift in Sources */,
-				4C3EA67728FF7A9800C48A62 /* talstr.c in Sources */,
 				4CE6DEE927F7A08100C66700 /* ContentView.swift in Sources */,
 				4CEE2AF5280B29E600AB5EEF /* TimeAgo.swift in Sources */,
 				4CC14FF12A73FCDB007AEB17 /* Pubkey.swift in Sources */,
@@ -4612,6 +4683,7 @@
 				4C285C8A2838B985008A31F1 /* ProfilePictureSelector.swift in Sources */,
 				4CFD502F2A2DA45800A229DB /* MediaView.swift in Sources */,
 				D7373BA62B688EA300F7783D /* DamusPurpleTranslationSetupView.swift in Sources */,
+				4CF480482B631C0100F2B2C0 /* talstr.c in Sources */,
 				4C9F18E429ABDE6D008C55EC /* MaybeAnonPfpView.swift in Sources */,
 				4CA5588329F33F5B00DC6A45 /* StringCodable.swift in Sources */,
 				4C75EFB92804A2740006080F /* EventView.swift in Sources */,
@@ -4622,10 +4694,13 @@
 				4C687C272A6039500092C550 /* TestData.swift in Sources */,
 				50C3E08A2AA8E3F7006A4BC0 /* AVPlayer+Additions.swift in Sources */,
 				4C198DF229F88C6B004C165C /* BlurHashDecode.swift in Sources */,
+				4CF480492B631C0100F2B2C0 /* utf8.c in Sources */,
 				F75BA12F29A18EF500E10810 /* BookmarksView.swift in Sources */,
 				5C0567552C8B60C20073F23A /* OffsetExtension.swift in Sources */,
 				4CB883B6297730E400DC99E7 /* LNUrls.swift in Sources */,
 				4C7FF7D52823313F009601DB /* Mentions.swift in Sources */,
+				4CF4803D2B631C0100F2B2C0 /* content_parser.c in Sources */,
+				BA4AB0AE2A63B9270070A32A /* AddEmojiView.swift in Sources */,
 				4C32B94D2A9AD44700DC3548 /* Offset.swift in Sources */,
 				4C633350283D40E500B1C9C3 /* HomeModel.swift in Sources */,
 				4C987B57283FD07F0042CE38 /* FollowersModel.swift in Sources */,
@@ -4635,6 +4710,7 @@
 				3AB72AB9298ECF30004BB58C /* Translator.swift in Sources */,
 				4C363A9028247A1D006E126D /* NostrLink.swift in Sources */,
 				4C3D52B6298DB4E6001C5831 /* ZapEvent.swift in Sources */,
+				4CF4804D2B631C0100F2B2C0 /* amount.c in Sources */,
 				647D9A8D2968520300A295DE /* SideMenuView.swift in Sources */,
 				F7F0BA272978E54D009531F3 /* ParticipantsView.swift in Sources */,
 				4CF0ABE32981BC7D00D66079 /* UserView.swift in Sources */,
@@ -4674,6 +4750,7 @@
 				D74AAFC22B153395006CF0F4 /* HeadlessDamusState.swift in Sources */,
 				4CA2EFA0280E37AC0044ACD8 /* TimelineView.swift in Sources */,
 				D73BDB1A2D71311900D69970 /* UserRelayListErrors.swift in Sources */,
+				4CF480512B631C0100F2B2C0 /* node_id.c in Sources */,
 				4C30AC7629A5770900E2BD5A /* NotificationItemView.swift in Sources */,
 				4C86F7C42A76C44C00EC0817 /* ZappingNotify.swift in Sources */,
 				4C363A8428233689006E126D /* Parser.swift in Sources */,
@@ -4690,6 +4767,7 @@
 				4CA3FA1029F593D000FDB3C3 /* ZapTypePicker.swift in Sources */,
 				4C32B95D2A9AD44700DC3548 /* Documentation.docc in Sources */,
 				4C3EA66828FF5F9900C48A62 /* hex.c in Sources */,
+				E9E4ED0B295867B900DD7078 /* ThreadView.swift in Sources */,
 				4CD348EF29C3659D00497EB2 /* ImageUploadModel.swift in Sources */,
 				4C3BEFDC281DCE6100B3DE84 /* Liked.swift in Sources */,
 				4CF0ABE7298444FD00D66079 /* EventMutingContainerView.swift in Sources */,
@@ -4701,6 +4779,7 @@
 				4C45E5022BED4D000025A428 /* ThreadReply.swift in Sources */,
 				D74AAFD42B155ECB006CF0F4 /* Zaps+.swift in Sources */,
 				4C75EFB128049D510006080F /* NostrResponse.swift in Sources */,
+				4CF480472B631C0100F2B2C0 /* hash_u5.c in Sources */,
 				4C7D09592A05BEAD00943473 /* KeyboardVisible.swift in Sources */,
 				4CEE2AF7280B2DEA00AB5EEF /* ProfileName.swift in Sources */,
 				4CC7AAEB297F0AEC00430951 /* BuilderEventView.swift in Sources */,
@@ -4721,6 +4800,7 @@
 				D71AC4CC2BA8E3480076268E /* VisibilityTracker.swift in Sources */,
 				4CE8794829941DA700F758CC /* RelayFilters.swift in Sources */,
 				4CEE2B02280B39E800AB5EEF /* EventActionBar.swift in Sources */,
+				4CF480522B631C0100F2B2C0 /* invoice.c in Sources */,
 				4C3BEFE0281DE1ED00B3DE84 /* DamusState.swift in Sources */,
 				D7DB93062D66A44100DA1EE5 /* Undistractor.swift in Sources */,
 				D72E12782BEED22500F4F781 /* Array.swift in Sources */,
@@ -4730,6 +4810,7 @@
 				BA3759932ABCCEBA0018D73B /* CameraModel.swift in Sources */,
 				D7FA46E72DBDAA7E002C9BB0 /* ImageCacheMigrations.swift in Sources */,
 				D7100C5A2B76FD5100C59298 /* LogoView.swift in Sources */,
+				4CF480442B631C0100F2B2C0 /* bolt11.c in Sources */,
 				4C0A3F8F280F640A000448DE /* ThreadModel.swift in Sources */,
 				4C3AC79F2833115300E1F516 /* FollowButtonView.swift in Sources */,
 				D7CB5D3B2B112FBB00AD4105 /* NotificationFormatter.swift in Sources */,
@@ -4741,18 +4822,22 @@
 				4CA352AA2A76BF3A003BB08B /* LocalNotificationNotify.swift in Sources */,
 				D7315A2A2ACDF3B70036E30A /* DamusCacheManager.swift in Sources */,
 				D7373BA82B68974500F7783D /* DamusPurpleNewUserOnboardingView.swift in Sources */,
+				4CF4804E2B631C0100F2B2C0 /* error.c in Sources */,
 				4C7D09682A0AE9B200943473 /* NWCScannerView.swift in Sources */,
 				D74E64152DC95CC7004C7892 /* HumanReadableErrors.swift in Sources */,
 				D7CB5D452B116FE800AD4105 /* Contacts+.swift in Sources */,
 				4CA352A42A76AFF3003BB08B /* UpdateStatsNotify.swift in Sources */,
 				D798D21E2B0858BB00234419 /* MigratedTypes.swift in Sources */,
+				4CF4803C2B631C0100F2B2C0 /* sha256.c in Sources */,
 				4C0A3F93280F66F5000448DE /* ReplyMap.swift in Sources */,
 				4C2B7BF22A71B6540049DEE7 /* Id.swift in Sources */,
 				7C95CAEE299DCEF1009DCB67 /* KFOptionSetter+.swift in Sources */,
 				4C7D09722A0AEF5E00943473 /* DamusGradient.swift in Sources */,
 				4C463CBF2B960B96008A8C36 /* PurpleBackdrop.swift in Sources */,
 				BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */,
+				4CF4804C2B631C0100F2B2C0 /* take.c in Sources */,
 				3169CAE6294E69C000EE4006 /* EmptyTimelineView.swift in Sources */,
+				4CF4803A2B631C0100F2B2C0 /* nostr_bech32.c in Sources */,
 				4C32B9602A9AD44700DC3548 /* Struct.swift in Sources */,
 				4CC7AAF0297F11C700430951 /* SelectedEventView.swift in Sources */,
 				4CC7AAF8297F1CEE00430951 /* EventProfile.swift in Sources */,
@@ -4762,13 +4847,11 @@
 				D7D2A3812BF815D000E4B42B /* PushNotificationClient.swift in Sources */,
 				4C1A9A2329DDDB8100516EAC /* IconLabel.swift in Sources */,
 				4CA352AC2A76C07F003BB08B /* NewUnmutesNotify.swift in Sources */,
-				4C3EA64928FF597700C48A62 /* bech32.c in Sources */,
 				D7870BC32AC47EBC0080BA88 /* EventLoaderView.swift in Sources */,
 				4CE879522996B68900F758CC /* RelayType.swift in Sources */,
 				4CE8795B2996C47A00F758CC /* ZapsModel.swift in Sources */,
 				4C3A1D3729637E0500558C0F /* PreviewCache.swift in Sources */,
 				D78F08142D7F78F900FC6C75 /* Response.swift in Sources */,
-				4C3EA67528FF7A5A00C48A62 /* take.c in Sources */,
 				4C3AC7A12835A81400E1F516 /* SetupView.swift in Sources */,
 				4C06670128FC7C5900038D2A /* RelayView.swift in Sources */,
 				4C285C8C28398BC7008A31F1 /* Keys.swift in Sources */,
@@ -4795,7 +4878,6 @@
 				4C54AA0A29A55429003E4487 /* EventGroup.swift in Sources */,
 				D73B74E12D8365BA0067BDBC /* ExtraFonts.swift in Sources */,
 				4C7D09622A098D0E00943473 /* WalletConnect.swift in Sources */,
-				4C3EA67928FF7ABF00C48A62 /* list.c in Sources */,
 				4C64987E286D082C00EAE2B3 /* DirectMessagesModel.swift in Sources */,
 				4C12535E2A76CA870004F4B8 /* SwitchedTimelineNotify.swift in Sources */,
 				D74F430A2B23F0BE00425B75 /* DamusPurple.swift in Sources */,
@@ -4814,6 +4896,7 @@
 				F71694F82A6983AF001F4053 /* GrayGradient.swift in Sources */,
 				4C1D4FB12A7958E60024F453 /* VersionInfo.swift in Sources */,
 				D7FF94002AC7AC5300FD969D /* RelayURL.swift in Sources */,
+				4CF480412B631C0100F2B2C0 /* NdbMeta.swift in Sources */,
 				4C64305C2A945AFF00B0C0E9 /* MusicController.swift in Sources */,
 				5053ACA72A56DF3B00851AE3 /* DeveloperSettingsView.swift in Sources */,
 				F79C7FAD29D5E9620000F946 /* EditPictureControl.swift in Sources */,
@@ -4829,7 +4912,7 @@
 				5CC8529D2BD741CD0039FFC5 /* HighlightEvent.swift in Sources */,
 				4C9146FD2A2A87C200DDEA40 /* wasm.c in Sources */,
 				4C75EFAF28049D350006080F /* NostrFilter.swift in Sources */,
-				4C3EA64C28FF59AC00C48A62 /* bech32_util.c in Sources */,
+				4CF480422B631C0100F2B2C0 /* NdbProfile.swift in Sources */,
 				4CA9276C2A2910D10098A105 /* ReplyPart.swift in Sources */,
 				D7C6787E2B2D34CC00BCEAFB /* NIP98AuthenticatedRequest.swift in Sources */,
 				5CB017252D42C5C400A9ED05 /* TransactionsView.swift in Sources */,
@@ -4841,7 +4924,6 @@
 				3AA24802297E3DC20090C62D /* RepostView.swift in Sources */,
 				5C6E1DAF2A194075008FC15A /* PinkGradient.swift in Sources */,
 				4CD7641B28A1641400B6928F /* EndBlock.swift in Sources */,
-				4C3EA66528FF5F6800C48A62 /* mem.c in Sources */,
 				4C198DEF29F88C6B004C165C /* BlurHashEncode.swift in Sources */,
 				4CF0ABE52981EE0C00D66079 /* EULAView.swift in Sources */,
 				4CBCA930297DB57F00EC6B2F /* WebsiteLink.swift in Sources */,
@@ -4855,10 +4937,12 @@
 				4C19AE512A5CEF7C00C90DB7 /* NostrScript.swift in Sources */,
 				4C32B95E2A9AD44700DC3548 /* FlatBufferObject.swift in Sources */,
 				D783A63F2AD4E53D00658DDA /* SuggestedHashtagsView.swift in Sources */,
-				4C3EA64F28FF59F200C48A62 /* tal.c in Sources */,
+				4CB88393296F798300DC99E7 /* ReactionsModel.swift in Sources */,
 				5C42E78C29DB76D90086AAC1 /* EmptyUserSearchView.swift in Sources */,
 				4CB88396296F7F8B00DC99E7 /* ReactionView.swift in Sources */,
 				50A16FFD2AA7525700DFEC1F /* DamusVideoPlayer.swift in Sources */,
+				4CF480552B631C4F00F2B2C0 /* wasm.c in Sources */,
+				50A16FFD2AA7525700DFEC1F /* DamusVideoPlayerViewModel.swift in Sources */,
 				4CFF8F6B29CD0079008DB934 /* RepostedEvent.swift in Sources */,
 				D78CD5982B8990300014D539 /* DamusAppNotificationView.swift in Sources */,
 				D724D8272B64B40B00ABE789 /* DamusPurpleAccountView.swift in Sources */,
@@ -4906,19 +4990,20 @@
 				4CEE2AF3280B25C500AB5EEF /* ProfilePicView.swift in Sources */,
 				4CC7AAF6297F1A6A00430951 /* EventBody.swift in Sources */,
 				D76556D62B1E6C08001B0CCC /* DamusPurpleWelcomeView.swift in Sources */,
+				4CF480452B631C0100F2B2C0 /* list.c in Sources */,
 				3165648B295B70D500C64604 /* LinkView.swift in Sources */,
-				4C8D00CF29E38B950036AF10 /* nostr_bech32.c in Sources */,
 				D7CB5D5C2B1176B200AD4105 /* MediaUploader.swift in Sources */,
 				4C1253562A76C8C60004F4B8 /* BroadcastNotify.swift in Sources */,
+				4CF480392B631C0100F2B2C0 /* block.c in Sources */,
 				4C3BEFD42819DE8F00B3DE84 /* NostrKind.swift in Sources */,
 				B533694E2B66D791008A805E /* MutelistManager.swift in Sources */,
 				4C32B9532A9AD44700DC3548 /* Verifier.swift in Sources */,
 				5C14C29D2BBBA40B00079FD2 /* RelayAdminDetail.swift in Sources */,
-				4C3EA66028FF5E7700C48A62 /* node_id.c in Sources */,
 				4C687C212A5F7ED00092C550 /* DamusBackground.swift in Sources */,
 				4CA352A02A76AE80003BB08B /* Notify.swift in Sources */,
 				4CF38C882A9442DC00BE01B6 /* UserStatusView.swift in Sources */,
 				4CE6DEE727F7A08100C66700 /* damusApp.swift in Sources */,
+				4CF480462B631C0100F2B2C0 /* mem.c in Sources */,
 				4C1253582A76C9060004F4B8 /* PresentSheetNotify.swift in Sources */,
 				D7D09AB52DADCA5C00AB170D /* CoinosDeterministicAccountClient.swift in Sources */,
 				D773BC5F2C6D538500349F0A /* CommentItem.swift in Sources */,
@@ -4927,8 +5012,6 @@
 				4C5F9116283D855D0052CD1C /* EventsModel.swift in Sources */,
 				4C32B94F2A9AD44700DC3548 /* Int+extension.swift in Sources */,
 				4CEE2AED2805B22500AB5EEF /* NostrRequest.swift in Sources */,
-				4C06670E28FDEAA000038D2A /* utf8.c in Sources */,
-				4C3EA66D28FF782800C48A62 /* amount.c in Sources */,
 				4C32B9562A9AD44700DC3548 /* TableVerifier.swift in Sources */,
 				5CF2DCCE2AABE1A500984B8D /* DamusLightGradient.swift in Sources */,
 				4C5E54062A9671F800FF6E60 /* UserStatusSheet.swift in Sources */,
@@ -4977,18 +5060,17 @@
 				E990020F2955F837003BBC5A /* EditMetadataView.swift in Sources */,
 				4CB8FC232A41ABA800763C51 /* AboutView.swift in Sources */,
 				D74AAFCC2B155D07006CF0F4 /* MakeZapRequest.swift in Sources */,
+				4CF480382B631C0100F2B2C0 /* nostrdb.c in Sources */,
 				5C513FBA297F72980072348F /* CustomPicker.swift in Sources */,
 				4C1253622A76D00B0004F4B8 /* PostNotify.swift in Sources */,
 				4CACA9D5280C31E100D9BBE8 /* ReplyView.swift in Sources */,
 				5CB017232D2D985E00A9ED05 /* CoinosButton.swift in Sources */,
 				F7908E92298B0F0700AB113A /* RelayDetailView.swift in Sources */,
-				4C9147002A2A891E00DDEA40 /* error.c in Sources */,
 				4CE879552996BAB900F758CC /* RelayPaidDetail.swift in Sources */,
 				5CB0172F2D42C76A00A9ED05 /* BalanceView.swift in Sources */,
 				4C1253602A76CF890004F4B8 /* ScrollToTopNotify.swift in Sources */,
 				4CA3529E2A76AE67003BB08B /* FollowNotify.swift in Sources */,
 				4CF0ABD42980996B00D66079 /* Report.swift in Sources */,
-				4C06670B28FDE64700038D2A /* damus.c in Sources */,
 				4C1253642A76D08F0004F4B8 /* ReportNotify.swift in Sources */,
 				4C1A9A2529DDDF2600516EAC /* ZapSettingsView.swift in Sources */,
 				4C2CDDF7299D4A5E00879FD5 /* Debouncer.swift in Sources */,
@@ -5001,6 +5083,7 @@
 				4CE879502996B2BD00F758CC /* RelayStatusView.swift in Sources */,
 				4CC7AAF4297F18B400430951 /* ReplyDescription.swift in Sources */,
 				4C75EFA427FA577B0006080F /* PostView.swift in Sources */,
+				4CF4804A2B631C0100F2B2C0 /* bech32.c in Sources */,
 				4C30AC7229A5677A00E2BD5A /* NotificationsView.swift in Sources */,
 				4C1A9A2129DDD3E100516EAC /* KeySettingsView.swift in Sources */,
 				D723C38E2AB8D83400065664 /* ContentFilters.swift in Sources */,
@@ -5026,6 +5109,7 @@
 				4C1A9A1F29DDD24B00516EAC /* AppearanceSettingsView.swift in Sources */,
 				3AA59D1D2999B0400061C48E /* DraftsModel.swift in Sources */,
 				3169CAED294FCCFC00EE4006 /* Constants.swift in Sources */,
+				4CF4804F2B631C0100F2B2C0 /* bech32_util.c in Sources */,
 				4C9AA14A2A4587A6003F49FD /* NotificationStatusModel.swift in Sources */,
 				D7100C5C2B77016700C59298 /* IAPProductStateView.swift in Sources */,
 				4CB9D4A72992D02B00A9A7E4 /* ProfileNameView.swift in Sources */,
@@ -6131,7 +6215,6 @@
 				D7CE1B1D2B0BE14A002EDAD4 /* verifier.c in Sources */,
 				D7CB5D4F2B11728000AD4105 /* NewEventsBits.swift in Sources */,
 				D7CB5D412B116F0900AD4105 /* StringCodable.swift in Sources */,
-				D7CE1B1F2B0BE1B8002EDAD4 /* damus.c in Sources */,
 				D7CE1B1B2B0BE144002EDAD4 /* emitter.c in Sources */,
 				D7EDED342B12ACAE0018B19C /* DamusUserDefaults.swift in Sources */,
 				D74AAFC72B155BD0006CF0F4 /* Zap.swift in Sources */,
@@ -6150,13 +6233,11 @@
 				D7CB5D402B116E8A00AD4105 /* UserSettingsStore.swift in Sources */,
 				D7CE1B1C2B0BE147002EDAD4 /* refmap.c in Sources */,
 				D74AAFC92B155CA5006CF0F4 /* UpdateStatsNotify.swift in Sources */,
-				D7CE1B242B0BE1F1002EDAD4 /* hash_u5.c in Sources */,
 				D79C4C172AFEB061003A41B4 /* NotificationService.swift in Sources */,
 				D7CB5D522B1174D100AD4105 /* FriendFilter.swift in Sources */,
 				D7CE1B362B0BE702002EDAD4 /* FbConstants.swift in Sources */,
 				D74AAFD12B155DA4006CF0F4 /* RelayURL.swift in Sources */,
 				D7EDED272B117FF10018B19C /* CompatibleAttribute.swift in Sources */,
-				D7CE1B222B0BE1EB002EDAD4 /* utf8.c in Sources */,
 				D74AAFCD2B155D07006CF0F4 /* MakeZapRequest.swift in Sources */,
 				D7CCFC072B05833200323D86 /* NdbNote.swift in Sources */,
 				D7CE1B3F2B0BE719002EDAD4 /* Enum.swift in Sources */,
@@ -6165,12 +6246,9 @@
 				D7EDED222B117DCA0018B19C /* SequenceUtils.swift in Sources */,
 				D7CE1B422B0BE719002EDAD4 /* Offset.swift in Sources */,
 				D7FB10A72B0C371A00FA8D42 /* Log.swift in Sources */,
-				D7CE1B232B0BE1EE002EDAD4 /* bolt11.c in Sources */,
 				D7CE1B182B0BDFDD002EDAD4 /* mdb.c in Sources */,
 				D7CCFC162B05894300323D86 /* Pubkey.swift in Sources */,
-				D7CE1B292B0BE239002EDAD4 /* node_id.c in Sources */,
 				D7EDED2C2B128CFA0018B19C /* DamusColors.swift in Sources */,
-				D7CE1B2E2B0BE25C002EDAD4 /* talstr.c in Sources */,
 				D74AAFC52B1538DF006CF0F4 /* NotificationExtensionState.swift in Sources */,
 				D798D2292B08686C00234419 /* ContentParsing.swift in Sources */,
 				D798D2242B0859C900234419 /* LocalizationUtil.swift in Sources */,
@@ -6180,20 +6258,13 @@
 				D723411A2B6864F200E1E135 /* DamusPurpleEnvironment.swift in Sources */,
 				D7EDED292B1182060018B19C /* AttachMediaUtility.swift in Sources */,
 				D798D21A2B0856CC00234419 /* Mentions.swift in Sources */,
-				D7CE1B212B0BE1CB002EDAD4 /* wasm.c in Sources */,
 				D7CE1B3B2B0BE719002EDAD4 /* Int+extension.swift in Sources */,
 				D74AAFC62B155B8B006CF0F4 /* Zaps.swift in Sources */,
-				D7CCFC0B2B0585EA00323D86 /* nostrdb.c in Sources */,
-				D7CE1B252B0BE1F4002EDAD4 /* sha256.c in Sources */,
-				D773BC612C6D58A700349F0A /* CommentItem.swift in Sources */,
-				D7CE1B262B0BE1F8002EDAD4 /* bech32.c in Sources */,
 				D7EDED232B117DFB0018B19C /* NoteContent.swift in Sources */,
 				D798D21B2B0856F200234419 /* NdbTagsIterator.swift in Sources */,
 				D7CE1B352B0BE6FA002EDAD4 /* ByteBuffer.swift in Sources */,
-				D7CE1B2F2B0BE260002EDAD4 /* list.c in Sources */,
 				D7CB5D422B116F8900AD4105 /* Contacts.swift in Sources */,
 				D7CB5D5D2B1176B200AD4105 /* MediaUploader.swift in Sources */,
-				D7CE1B342B0BE6EE002EDAD4 /* NdbProfile.swift in Sources */,
 				D7DBD41F2B02F15E002A6197 /* NostrKind.swift in Sources */,
 				D7CE1B3C2B0BE719002EDAD4 /* TableVerifier.swift in Sources */,
 				D7EDED2F2B128E8A0018B19C /* CollectionExtension.swift in Sources */,
@@ -6207,12 +6278,10 @@
 				D7CB5D542B1174F700AD4105 /* NIP05.swift in Sources */,
 				D798D2232B0859B700234419 /* KeychainStorage.swift in Sources */,
 				D74AAFC32B153395006CF0F4 /* HeadlessDamusState.swift in Sources */,
-				D7CE1B272B0BE224002EDAD4 /* bech32_util.c in Sources */,
 				D78F08122D7F78F900FC6C75 /* Response.swift in Sources */,
 				D7CCFC102B05880F00323D86 /* Id.swift in Sources */,
 				D7CB5D532B1174E900AD4105 /* DeepLPlan.swift in Sources */,
 				D7EDED282B1180940018B19C /* ImageUploadModel.swift in Sources */,
-				D7CE1B2A2B0BE23E002EDAD4 /* mem.c in Sources */,
 				D7CB5D4C2B11721600AD4105 /* ZapType.swift in Sources */,
 				D7EDED2B2B128CDB0018B19C /* Hashtags.swift in Sources */,
 				D7CE1B332B0BE6DE002EDAD4 /* Nostr.swift in Sources */,
@@ -6220,28 +6289,23 @@
 				D7CE1B382B0BE719002EDAD4 /* VeriferOptions.swift in Sources */,
 				D78F080F2D7F78EF00FC6C75 /* Request.swift in Sources */,
 				D7CCFC152B05891000323D86 /* Referenced.swift in Sources */,
-				D7CE1B2B2B0BE243002EDAD4 /* hex.c in Sources */,
 				D798D2222B08598A00234419 /* ReferencedId.swift in Sources */,
 				D78F081A2D7F803100FC6C75 /* NIP04.swift in Sources */,
 				D7B76C912C82507F003A16CB /* NIP98AuthenticatedRequest.swift in Sources */,
 				D7CE1B492B0BE729002EDAD4 /* DisplayName.swift in Sources */,
 				D7CE1B192B0BE132002EDAD4 /* builder.c in Sources */,
 				D7EDED1F2B11797D0018B19C /* LongformEvent.swift in Sources */,
-				D7CE1B282B0BE226002EDAD4 /* tal.c in Sources */,
 				D7CCFC122B05886D00323D86 /* IdType.swift in Sources */,
 				D7CE1B312B0BE69D002EDAD4 /* Ndb.swift in Sources */,
 				D7CE1B3A2B0BE719002EDAD4 /* Struct.swift in Sources */,
 				D70A3B172B02DCE5008BD568 /* NotificationFormatter.swift in Sources */,
 				D7CE1B462B0BE719002EDAD4 /* FlatBufferBuilder.swift in Sources */,
 				D7CE1B3E2B0BE719002EDAD4 /* FlatbuffersErrors.swift in Sources */,
-				D7CE1B2C2B0BE24B002EDAD4 /* amount.c in Sources */,
 				D7EDED152B11776B0018B19C /* LibreTranslateServer.swift in Sources */,
-				D7CE1B202B0BE1C8002EDAD4 /* error.c in Sources */,
 				D7CB5D582B11763C00AD4105 /* NewMutesNotify.swift in Sources */,
 				D798D22D2B086DC400234419 /* NostrEvent.swift in Sources */,
 				D798D22E2B086E4800234419 /* NostrResponse.swift in Sources */,
 				D7EDED162B1177840018B19C /* LNUrls.swift in Sources */,
-				D7CE1B302B0BE263002EDAD4 /* nostr_bech32.c in Sources */,
 				D7CCFC132B05887C00323D86 /* ProofOfWork.swift in Sources */,
 				D7CE1B392B0BE719002EDAD4 /* Table.swift in Sources */,
 				D7CE1B452B0BE719002EDAD4 /* Root.swift in Sources */,
@@ -6588,6 +6652,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/nostrdb/src/bolt11",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -6640,6 +6705,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/nostrdb/src/bolt11",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
