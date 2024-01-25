@@ -17,9 +17,11 @@ class NdbTxn<T> {
     private var val: T!
     var moved: Bool
     var inherited: Bool
+    var ndb: Ndb
 
     init?(ndb: Ndb, with: (NdbTxn<T>) -> T = { _ in () }) {
         guard !ndb.closed else { return nil }
+        self.ndb = ndb
 #if TXNDEBUG
         txn_count += 1
         print("opening transaction \(txn_count)")
@@ -41,11 +43,12 @@ class NdbTxn<T> {
         self.val = with(self)
     }
 
-    private init(txn: ndb_txn, val: T) {
+    private init(ndb: Ndb, txn: ndb_txn, val: T) {
         self.txn = txn
         self.val = val
         self.moved = false
         self.inherited = false
+        self.ndb = ndb
     }
 
     /// Only access temporarily! Do not store database references for longterm use. If it's a primitive type you
@@ -56,7 +59,7 @@ class NdbTxn<T> {
     }
 
     deinit {
-        if moved || inherited {
+        if moved || inherited || ndb.closed {
             return
         }
 
@@ -71,14 +74,14 @@ class NdbTxn<T> {
     // functor
     func map<Y>(_ transform: (T) -> Y) -> NdbTxn<Y> {
         self.moved = true
-        return .init(txn: self.txn, val: transform(val))
+        return .init(ndb: self.ndb, txn: self.txn, val: transform(val))
     }
 
     // comonad!?
     // useful for moving ownership of a transaction to another value
     func extend<Y>(_ with: (NdbTxn<T>) -> Y) -> NdbTxn<Y> {
         self.moved = true
-        return .init(txn: self.txn, val: with(self))
+        return .init(ndb: self.ndb, txn: self.txn, val: with(self))
     }
 }
 
@@ -101,7 +104,7 @@ extension NdbTxn where T: OptionalType {
             return nil
         }
         self.moved = true
-        return NdbTxn<T.Wrapped>(txn: self.txn, val: unwrappedVal)
+        return NdbTxn<T.Wrapped>(ndb: self.ndb, txn: self.txn, val: unwrappedVal)
     }
 }
 
