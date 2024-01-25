@@ -174,16 +174,7 @@ struct CameraView: View {
                         
                         HStack(alignment: .center) {
                             if !model.mediaItems.isEmpty {
-                                NavigationLink(destination: CameraMediaView(video_controller: damus_state.video, urls: model.mediaItems.map { mediaItem in
-                                    switch mediaItem.type {
-                                    case .image:
-                                        return .image(mediaItem.url)
-                                    case .video:
-                                        return .video(mediaItem.url)
-                                    }
-                                }, settings: damus_state.settings)
-                                    .navigationBarBackButtonHidden(true)
-                                ) {
+                                NavigationLink(destination: Text(model.mediaItems.map { $0.url.absoluteString }.joined(separator: ", "))) {
                                     capturedPhotoThumbnail
                                 }
                                 .frame(width: 100, alignment: .leading)
