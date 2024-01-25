@@ -164,6 +164,12 @@ final class PostViewTests: XCTestCase {
             XCTAssertNil(newManuallyEditedContent.attribute(.link, at: 11, effectiveRange: nil))
         })
     }
+    
+    func testMentionLinkEditorHandling_nonAlphanumericAfterLink_noWhitespaceAdded() {
+        let nonAlphaNumerics = [" ", "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/", ":", ";", "<", "=", ">", "?", "@", "[", "\\", "]", "^", "_", "`", "{", "|", "}", "~"]
+        
+        nonAlphaNumerics.forEach { testAddingStringAfterLink(str: $0)}
+    }
 }
 
 func checkMentionLinkEditorHandling(
@@ -189,5 +195,15 @@ func checkMentionLinkEditorHandling(
         XCTAssertEqual(coordinator.textView(textView, shouldChangeTextIn: replacementRange, replacementText: replacementText), shouldBeAbleToChangeAutomatically, "Expected shouldChangeTextIn to return \(shouldBeAbleToChangeAutomatically), but was \(!shouldBeAbleToChangeAutomatically)")
 }
 
+func testAddingStringAfterLink(str: String) {
+    var content: NSMutableAttributedString
+
+    content = NSMutableAttributedString(string: "Hello @user test")
+    content.addAttribute(.link, value: "damus:1234", range: NSRange(location: 6, length: 5))
+    checkMentionLinkEditorHandling(content: content, replacementText: str, replacementRange: NSRange(location: 11, length: 0), shouldBeAbleToChangeAutomatically: false, expectedNewCursorIndex: 12, handleNewContent: { newManuallyEditedContent in
+        XCTAssertEqual(newManuallyEditedContent.string, "Hello @user" + str + " test")
+        XCTAssertNil(newManuallyEditedContent.attribute(.link, at: 11, effectiveRange: nil))
+    })
+}
 
 

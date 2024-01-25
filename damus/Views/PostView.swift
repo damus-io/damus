@@ -613,6 +613,9 @@ func load_draft_for_post(drafts: Drafts, action: PostAction) -> DraftArtifacts? 
     }
 }
 
+private func isAlphanumeric(_ char: Character) -> Bool {
+    return char.isLetter || char.isNumber
+}
 
 func build_post(state: DamusState, post: NSMutableAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], references: [RefId]) -> NostrPost {
     post.enumerateAttributes(in: NSRange(location: 0, length: post.length), options: []) { attributes, range, stop in
@@ -620,7 +623,7 @@ func build_post(state: DamusState, post: NSMutableAttributedString, action: Post
             let nextCharIndex = range.upperBound
             if nextCharIndex < post.length,
                let nextChar = post.attributedSubstring(from: NSRange(location: nextCharIndex, length: 1)).string.first,
-               !nextChar.isWhitespace {
+               isAlphanumeric(nextChar) {
                 post.insert(NSAttributedString(string: " "), at: nextCharIndex)
             }
 
