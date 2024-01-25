@@ -3,7 +3,6 @@
 #define JB55_CURSOR_H
 
 #include "typedefs.h"
-#include "varint.h"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -484,37 +483,11 @@ static inline int parse_str(struct cursor *cur, const char *str) {
     return 1;
 }
 
-static inline int is_whitespace(int c) {
+static inline int is_whitespace(char c) {
     return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r';
 }
 
-
-static inline int next_char_is_whitespace(unsigned char *curChar, unsigned char *endChar) {
-    unsigned char * next = curChar + 1;
-    if(next > endChar) return 0;
-    else if(next == endChar) return 1;
-    return is_whitespace(*next);
-}
-
-static int char_disallowed_at_end_url(char c){
-    return c == '.' || c == ',';
-}
-
-static inline int is_final_url_char(unsigned char *curChar, unsigned char *endChar){
-    if(is_whitespace(*curChar)){
-        return 1;
-    }
-    else if(next_char_is_whitespace(curChar, endChar)) {
-        // next char is whitespace so this char could be the final char in the url
-        return char_disallowed_at_end_url(*curChar);
-    }
-    else{
-        // next char isn't whitespace so it can't be a final char
-        return 0;
-    }
-}
-
-static inline int is_underscore(int c) {
+static inline int is_underscore(char c) {
     return c == '_';
 }
 
@@ -549,7 +522,7 @@ static inline int parse_utf8_char(struct cursor *cursor, unsigned int *code_poin
         remaining_bytes = 0;
         *utf8_length = 1; // Assume 1 byte length for unrecognized UTF-8 characters
         // TODO: We need to gracefully handle unrecognized UTF-8 characters
-        printf("Invalid UTF-8 byte: %x\n", *code_point);
+        //printf("Invalid UTF-8 byte: %x\n", *code_point);
         *code_point = ((first_byte & 0xF0) << 6); // Prevent testing as punctuation
         return 0; // Invalid first byte
     }
@@ -660,7 +633,7 @@ static inline int consume_until_boundary(struct cursor *cur) {
             if (!parse_utf8_char(cur, &c, utf8_char_length)) {
                 if (!is_right_boundary(c)){
                     // TODO: We should work towards handling all UTF-8 characters.
-                    printf("Invalid UTF-8 code point: %x\n", c);
+                    //printf("Invalid UTF-8 code point: %x\n", c);
                 }
             }
         }
@@ -686,23 +659,6 @@ static inline int consume_until_whitespace(struct cursor *cur, int or_end) {
         c = *cur->p;
         
         if (is_whitespace(c))
-            return consumedAtLeastOne;
-        
-        cur->p++;
-        consumedAtLeastOne = 1;
-    }
-    
-    return or_end;
-}
-
-static inline int consume_until_end_url(struct cursor *cur, int or_end) {
-    char c;
-    int consumedAtLeastOne = 0;
-    
-    while (cur->p < cur->end) {
-        c = *cur->p;
-        
-        if (is_final_url_char(cur->p, cur->end))
             return consumedAtLeastOne;
         
         cur->p++;
@@ -741,5 +697,13 @@ static inline int cursor_memset(struct cursor *cursor, unsigned char c, int n)
     return 1;
 }
 
+static void consume_whitespace_or_punctuation(struct cursor *cur)
+{
+	while (cur->p < cur->end) {
+		if (!is_right_boundary(*cur->p))
+			return;
+		cur->p++;
+	}
+}
 
 #endif
