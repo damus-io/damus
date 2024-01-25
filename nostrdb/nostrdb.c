@@ -912,9 +912,9 @@ static int _ndb_begin_query(struct ndb *ndb, struct ndb_txn *txn, int flags)
 {
 	txn->lmdb = &ndb->lmdb;
 	MDB_txn **mdb_txn = (MDB_txn **)&txn->mdb_txn;
-    if (!txn->lmdb->env)
-        return 0;
-    return mdb_txn_begin(txn->lmdb->env, NULL, flags, mdb_txn) == 0;
+	if (!txn->lmdb->env)
+		return 0;
+	return mdb_txn_begin(txn->lmdb->env, NULL, flags, mdb_txn) == 0;
 }
 
 int ndb_begin_query(struct ndb *ndb, struct ndb_txn *txn)
@@ -2161,15 +2161,6 @@ static int ndb_write_note_kind_index(struct ndb_txn *txn, struct ndb_note *note,
 	}
 
 	return 1;
-}
-
-static void consume_whitespace_or_punctuation(struct cursor *cur)
-{
-	while (cur->p < cur->end) {
-		if (!is_right_boundary(*cur->p))
-			return;
-		cur->p++;
-	}
 }
 
 static int ndb_write_word_to_index(struct ndb_txn *txn, const char *word,
@@ -3570,7 +3561,7 @@ static int ndb_event_commitment(struct ndb_note *ev, unsigned char *buf, int buf
 	struct cursor cur;
 	int ok;
 
-	if (!hex_encode(ev->pubkey, sizeof(ev->pubkey), pubkey, sizeof(pubkey)))
+	if (!hex_encode(ev->pubkey, sizeof(ev->pubkey), pubkey))
 		return 0;
 
 	make_cursor(buf, buf + buflen, &cur);
@@ -4110,17 +4101,6 @@ int ndb_ws_event_from_json(const char *json, int len, struct ndb_tce *tce,
 
 		tce->command_result.msg = json + tok->start;
 		tce->command_result.msglen = toksize(tok);
-
-		return 1;
-	} else if (tok_len == 4 && !memcmp("AUTH", json + tok->start, 4)) {
-		tce->evtype = NDB_TCE_AUTH;
-
-		tok = &parser.toks[parser.i++];
-		if (tok->type != JSMN_STRING)
-			return 0;
-
-		tce->subid = json + tok->start;
-		tce->subid_len = toksize(tok);
 
 		return 1;
 	}
