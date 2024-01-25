@@ -28,6 +28,7 @@ struct DamusState: HeadlessDamusState {
     let postbox: PostBox
     let bootstrap_relays: [String]
     let replies: ReplyCounter
+    let muted_threads: MutedThreadsManager
     let wallet: WalletModel
     let nav: NavigationCoordinator
     let music: MusicController?
@@ -35,7 +36,7 @@ struct DamusState: HeadlessDamusState {
     let ndb: Ndb
     var purple: DamusPurple
     
-    init(pool: RelayPool, keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, postbox: PostBox, bootstrap_relays: [String], replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: VideoController, ndb: Ndb, purple: DamusPurple? = nil) {
+    init(pool: RelayPool, keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, postbox: PostBox, bootstrap_relays: [String], replies: ReplyCounter, muted_threads: MutedThreadsManager, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: VideoController, ndb: Ndb, purple: DamusPurple? = nil) {
         self.pool = pool
         self.keypair = keypair
         self.likes = likes
@@ -55,6 +56,7 @@ struct DamusState: HeadlessDamusState {
         self.postbox = postbox
         self.bootstrap_relays = bootstrap_relays
         self.replies = replies
+        self.muted_threads = muted_threads
         self.wallet = wallet
         self.nav = nav
         self.music = music
@@ -121,6 +123,7 @@ struct DamusState: HeadlessDamusState {
             postbox: PostBox(pool: RelayPool(ndb: .empty)),
             bootstrap_relays: [],
             replies: ReplyCounter(our_pubkey: empty_pub),
+            muted_threads: MutedThreadsManager(keypair: kp),
             wallet: WalletModel(settings: UserSettingsStore()),
             nav: NavigationCoordinator(),
             music: nil,

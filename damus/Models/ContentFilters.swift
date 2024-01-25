@@ -33,7 +33,7 @@ func get_repost_of_muted_user_filter(damus_state: DamusState) -> ((_ ev: NostrEv
         guard ev.known_kind == .boost else { return true }
         // This needs to use cached because it can be way too slow otherwise
         guard let inner_ev = ev.get_cached_inner_event(cache: damus_state.events) else { return true }
-        return should_show_event(contacts: damus_state.contacts, ev: inner_ev)
+        return should_show_event(keypair: damus_state.keypair, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: inner_ev)
     }
 }
 

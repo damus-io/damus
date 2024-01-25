@@ -59,8 +59,7 @@ struct SearchHomeView: View {
                     return false
                 }
                 
-                let event_muted = damus_state.contacts.mutelist?.mute_list?.event_muted_reason(ev) != nil
-                if event_muted {
+                if damus_state.muted_threads.isMutedThread(ev, keypair: self.damus_state.keypair) {
                     return false
                 }
 
