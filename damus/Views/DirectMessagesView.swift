@@ -39,7 +39,7 @@ struct DirectMessagesView: View {
     
     func filter_dms(dms: [DirectMessageModel]) -> [DirectMessageModel] {
         return dms.filter({ dm in
-            return damus_state.settings.friend_filter.filter(contacts: damus_state.contacts, pubkey: dm.pubkey) && !damus_state.contacts.is_muted(.user(dm.pubkey, nil))
+            return damus_state.settings.friend_filter.filter(contacts: damus_state.contacts, pubkey: dm.pubkey) && !damus_state.contacts.is_muted(dm.pubkey)
         })
     }
     

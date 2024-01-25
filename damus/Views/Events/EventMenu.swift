@@ -142,7 +142,7 @@ struct MenuItems: View {
                 }
                 
                 Button(role: .destructive) {
-                    notify(.mute(.user(target_pubkey, nil)))
+                    notify(.mute(target_pubkey))
                 } label: {
                     Label(NSLocalizedString("Mute user", comment: "Context menu option for muting users."), image: "mute")
                 }

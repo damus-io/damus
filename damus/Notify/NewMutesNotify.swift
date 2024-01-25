@@ -8,7 +8,7 @@
 import Foundation
 
 struct NewMutesNotify: Notify {
-    typealias Payload = Set<MuteItem>
+    typealias Payload = Set<Pubkey>
     var payload: Payload
 }
 
@@ -19,7 +19,7 @@ extension NotifyHandler {
 }
 
 extension Notifications {
-    static func new_mutes(_ pubkeys: Set<MuteItem>) -> Notifications<NewMutesNotify> {
+    static func new_mutes(_ pubkeys: Set<Pubkey>) -> Notifications<NewMutesNotify> {
         .init(.init(payload: pubkeys))
     }
 }

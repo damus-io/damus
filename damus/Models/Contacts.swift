@@ -13,7 +13,7 @@ class Contacts {
     private var friend_of_friends: Set<Pubkey> = Set()
     /// Tracks which friends are friends of a given pubkey.
     private var pubkey_to_our_friends = [Pubkey : Set<Pubkey>]()
-    private var muted: Set<MuteItem> = Set()
+    private var muted: Set<Pubkey> = Set()
 
     let our_pubkey: Pubkey
     var event: NostrEvent?
@@ -23,20 +23,20 @@ class Contacts {
         self.our_pubkey = our_pubkey
     }
     
-    func is_muted(_ item: MuteItem) -> Bool {
-        return muted.contains(item)
+    func is_muted(_ pk: Pubkey) -> Bool {
+        return muted.contains(pk)
     }
-
+    
     func set_mutelist(_ ev: NostrEvent) {
         let oldlist = self.mutelist
         self.mutelist = ev
 
-        let old: Set<MuteItem> = oldlist?.mute_list ?? Set<MuteItem>()
-        let new: Set<MuteItem> = ev.mute_list ?? Set<MuteItem>()
+        let old = oldlist.map({ ev in Set(ev.referenced_pubkeys) }) ?? Set<Pubkey>()
+        let new = Set(ev.referenced_pubkeys)
         let diff = old.symmetricDifference(new)
         
-        var new_mutes = Set<MuteItem>()
-        var new_unmutes = Set<MuteItem>()
+        var new_mutes = Set<Pubkey>()
+        var new_unmutes = Set<Pubkey>()
 
         for d in diff {
             if new.contains(d) {
@@ -47,7 +47,7 @@ class Contacts {
         }
 
         // TODO: set local mutelist here
-        self.muted = ev.mute_list ?? Set<MuteItem>()
+        self.muted = Set(ev.referenced_pubkeys)
 
         if new_mutes.count > 0 {
             notify(.new_mutes(new_mutes))

@@ -278,11 +278,11 @@ class HomeModel {
     
     func filter_events() {
         events.filter { ev in
-            !damus_state.contacts.is_muted(.user(ev.pubkey, nil))
+            !damus_state.contacts.is_muted(ev.pubkey)
         }
         
         self.dms.dms = dms.dms.filter { ev in
-            !damus_state.contacts.is_muted(.user(ev.pubkey, nil))
+            !damus_state.contacts.is_muted(ev.pubkey)
         }
         
         notifications.filter { ev in
@@ -290,8 +290,7 @@ class HomeModel {
                 return false
             }
 
-            let event_muted = damus_state.contacts.mutelist?.mute_list?.event_muted_reason(ev) != nil
-            return !event_muted
+            return !damus_state.contacts.is_muted(ev.pubkey) && !damus_state.muted_threads.isMutedThread(ev, keypair: damus_state.keypair)
         }
     }
     
@@ -1094,8 +1093,11 @@ func should_show_event(event: NostrEvent, damus_state: DamusState) -> Bool {
 }
 
 func should_show_event(keypair: Keypair, hellthreads: MutedThreadsManager, contacts: Contacts, ev: NostrEvent) -> Bool {
-    let event_muted = contacts.mutelist?.mute_list?.event_muted_reason(ev) != nil
-    if event_muted {
+    if contacts.is_muted(ev.pubkey) {
+        return false
+    }
+
+    if hellthreads.isMutedThread(ev, keypair: keypair) {
         return false
     }
 
