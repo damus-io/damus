@@ -1,8 +1,10 @@
-/* CC0 (Public domain) - see LICENSE file for details */
+/* CC0 (Public domain) */
 #ifndef CCAN_ENDIAN_H
 #define CCAN_ENDIAN_H
 #include <stdint.h>
+
 #include "config.h"
+#include "cursor.h"
 
 /**
  * BSWAP_16 - reverse bytes in a constant uint16_t value.
@@ -11,13 +13,13 @@
  * Designed to be usable in constant-requiring initializers.
  *
  * Example:
- *    struct mystruct {
- *        char buf[BSWAP_16(0x1234)];
- *    };
+ *	struct mystruct {
+ *		char buf[BSWAP_16(0x1234)];
+ *	};
  */
-#define BSWAP_16(val)                \
-    ((((uint16_t)(val) & 0x00ff) << 8)    \
-     | (((uint16_t)(val) & 0xff00) >> 8))
+#define BSWAP_16(val)				\
+	((((uint16_t)(val) & 0x00ff) << 8)	\
+	 | (((uint16_t)(val) & 0xff00) >> 8))
 
 /**
  * BSWAP_32 - reverse bytes in a constant uint32_t value.
@@ -26,15 +28,15 @@
  * Designed to be usable in constant-requiring initializers.
  *
  * Example:
- *    struct mystruct {
- *        char buf[BSWAP_32(0xff000000)];
- *    };
+ *	struct mystruct {
+ *		char buf[BSWAP_32(0xff000000)];
+ *	};
  */
-#define BSWAP_32(val)                    \
-    ((((uint32_t)(val) & 0x000000ff) << 24)        \
-     | (((uint32_t)(val) & 0x0000ff00) << 8)        \
-     | (((uint32_t)(val) & 0x00ff0000) >> 8)        \
-     | (((uint32_t)(val) & 0xff000000) >> 24))
+#define BSWAP_32(val)					\
+	((((uint32_t)(val) & 0x000000ff) << 24)		\
+	 | (((uint32_t)(val) & 0x0000ff00) << 8)		\
+	 | (((uint32_t)(val) & 0x00ff0000) >> 8)		\
+	 | (((uint32_t)(val) & 0xff000000) >> 24))
 
 /**
  * BSWAP_64 - reverse bytes in a constant uint64_t value.
@@ -43,19 +45,19 @@
  * Designed to be usable in constant-requiring initializers.
  *
  * Example:
- *    struct mystruct {
- *        char buf[BSWAP_64(0xff00000000000000ULL)];
- *    };
+ *	struct mystruct {
+ *		char buf[BSWAP_64(0xff00000000000000ULL)];
+ *	};
  */
-#define BSWAP_64(val)                        \
-    ((((uint64_t)(val) & 0x00000000000000ffULL) << 56)    \
-     | (((uint64_t)(val) & 0x000000000000ff00ULL) << 40)    \
-     | (((uint64_t)(val) & 0x0000000000ff0000ULL) << 24)    \
-     | (((uint64_t)(val) & 0x00000000ff000000ULL) << 8)    \
-     | (((uint64_t)(val) & 0x000000ff00000000ULL) >> 8)    \
-     | (((uint64_t)(val) & 0x0000ff0000000000ULL) >> 24)    \
-     | (((uint64_t)(val) & 0x00ff000000000000ULL) >> 40)    \
-     | (((uint64_t)(val) & 0xff00000000000000ULL) >> 56))
+#define BSWAP_64(val)						\
+	((((uint64_t)(val) & 0x00000000000000ffULL) << 56)	\
+	 | (((uint64_t)(val) & 0x000000000000ff00ULL) << 40)	\
+	 | (((uint64_t)(val) & 0x0000000000ff0000ULL) << 24)	\
+	 | (((uint64_t)(val) & 0x00000000ff000000ULL) << 8)	\
+	 | (((uint64_t)(val) & 0x000000ff00000000ULL) >> 8)	\
+	 | (((uint64_t)(val) & 0x0000ff0000000000ULL) >> 24)	\
+	 | (((uint64_t)(val) & 0x00ff000000000000ULL) >> 40)	\
+	 | (((uint64_t)(val) & 0xff00000000000000ULL) >> 56))
 
 #if HAVE_BYTESWAP_H
 #include <byteswap.h>
@@ -65,12 +67,12 @@
  * @val: value whose bytes to swap.
  *
  * Example:
- *    // Output contains "1024 is 4 as two bytes reversed"
- *    printf("1024 is %u as two bytes reversed\n", bswap_16(1024));
+ *	// Output contains "1024 is 4 as two bytes reversed"
+ *	printf("1024 is %u as two bytes reversed\n", bswap_16(1024));
  */
 static inline uint16_t bswap_16(uint16_t val)
 {
-    return BSWAP_16(val);
+	return BSWAP_16(val);
 }
 
 /**
@@ -78,12 +80,12 @@ static inline uint16_t bswap_16(uint16_t val)
  * @val: value whose bytes to swap.
  *
  * Example:
- *    // Output contains "1024 is 262144 as four bytes reversed"
- *    printf("1024 is %u as four bytes reversed\n", bswap_32(1024));
+ *	// Output contains "1024 is 262144 as four bytes reversed"
+ *	printf("1024 is %u as four bytes reversed\n", bswap_32(1024));
  */
 static inline uint32_t bswap_32(uint32_t val)
 {
-    return BSWAP_32(val);
+	return BSWAP_32(val);
 }
 #endif /* !HAVE_BYTESWAP_H */
 
@@ -93,19 +95,19 @@ static inline uint32_t bswap_32(uint32_t val)
  * @val: value whose bytes to swap.
  *
  * Example:
- *    // Output contains "1024 is 1125899906842624 as eight bytes reversed"
- *    printf("1024 is %llu as eight bytes reversed\n",
- *        (unsigned long long)bswap_64(1024));
+ *	// Output contains "1024 is 1125899906842624 as eight bytes reversed"
+ *	printf("1024 is %llu as eight bytes reversed\n",
+ *		(unsigned long long)bswap_64(1024));
  */
 static inline uint64_t bswap_64(uint64_t val)
 {
-    return BSWAP_64(val);
+	return BSWAP_64(val);
 }
 #endif
 
 /* Needed for Glibc like endiness check */
-#define    __LITTLE_ENDIAN    1234
-#define    __BIG_ENDIAN    4321
+#define	__LITTLE_ENDIAN	1234
+#define	__BIG_ENDIAN	4321
 
 /* Sanity check the defines.  We don't handle weird endianness. */
 #if !HAVE_LITTLE_ENDIAN && !HAVE_BIG_ENDIAN
@@ -114,13 +116,13 @@ static inline uint64_t bswap_64(uint64_t val)
 #error "Can't compile for both big and little endian."
 #elif HAVE_LITTLE_ENDIAN
 #ifndef __BYTE_ORDER
-#define __BYTE_ORDER    __LITTLE_ENDIAN
+#define __BYTE_ORDER	__LITTLE_ENDIAN
 #elif __BYTE_ORDER != __LITTLE_ENDIAN
 #error "__BYTE_ORDER already defined, but not equal to __LITTLE_ENDIAN"
 #endif
 #elif HAVE_BIG_ENDIAN
 #ifndef __BYTE_ORDER
-#define __BYTE_ORDER    __BIG_ENDIAN
+#define __BYTE_ORDER	__BIG_ENDIAN
 #elif __BYTE_ORDER != __BIG_ENDIAN
 #error "__BYTE_ORDER already defined, but not equal to __BIG_ENDIAN"
 #endif
@@ -242,7 +244,7 @@ typedef uint16_t ENDIAN_TYPE beint16_t;
  */
 static inline leint64_t cpu_to_le64(uint64_t native)
 {
-    return CPU_TO_LE64(native);
+	return CPU_TO_LE64(native);
 }
 
 /**
@@ -251,7 +253,7 @@ static inline leint64_t cpu_to_le64(uint64_t native)
  */
 static inline leint32_t cpu_to_le32(uint32_t native)
 {
-    return CPU_TO_LE32(native);
+	return CPU_TO_LE32(native);
 }
 
 /**
@@ -260,7 +262,7 @@ static inline leint32_t cpu_to_le32(uint32_t native)
  */
 static inline leint16_t cpu_to_le16(uint16_t native)
 {
-    return CPU_TO_LE16(native);
+	return CPU_TO_LE16(native);
 }
 
 /**
@@ -269,7 +271,7 @@ static inline leint16_t cpu_to_le16(uint16_t native)
  */
 static inline uint64_t le64_to_cpu(leint64_t le_val)
 {
-    return LE64_TO_CPU(le_val);
+	return LE64_TO_CPU(le_val);
 }
 
 /**
@@ -278,7 +280,7 @@ static inline uint64_t le64_to_cpu(leint64_t le_val)
  */
 static inline uint32_t le32_to_cpu(leint32_t le_val)
 {
-    return LE32_TO_CPU(le_val);
+	return LE32_TO_CPU(le_val);
 }
 
 /**
@@ -287,7 +289,7 @@ static inline uint32_t le32_to_cpu(leint32_t le_val)
  */
 static inline uint16_t le16_to_cpu(leint16_t le_val)
 {
-    return LE16_TO_CPU(le_val);
+	return LE16_TO_CPU(le_val);
 }
 
 /**
@@ -296,7 +298,7 @@ static inline uint16_t le16_to_cpu(leint16_t le_val)
  */
 static inline beint64_t cpu_to_be64(uint64_t native)
 {
-    return CPU_TO_BE64(native);
+	return CPU_TO_BE64(native);
 }
 
 /**
@@ -305,7 +307,7 @@ static inline beint64_t cpu_to_be64(uint64_t native)
  */
 static inline beint32_t cpu_to_be32(uint32_t native)
 {
-    return CPU_TO_BE32(native);
+	return CPU_TO_BE32(native);
 }
 
 /**
@@ -314,7 +316,7 @@ static inline beint32_t cpu_to_be32(uint32_t native)
  */
 static inline beint16_t cpu_to_be16(uint16_t native)
 {
-    return CPU_TO_BE16(native);
+	return CPU_TO_BE16(native);
 }
 
 /**
@@ -323,7 +325,7 @@ static inline beint16_t cpu_to_be16(uint16_t native)
  */
 static inline uint64_t be64_to_cpu(beint64_t be_val)
 {
-    return BE64_TO_CPU(be_val);
+	return BE64_TO_CPU(be_val);
 }
 
 /**
@@ -332,7 +334,7 @@ static inline uint64_t be64_to_cpu(beint64_t be_val)
  */
 static inline uint32_t be32_to_cpu(beint32_t be_val)
 {
-    return BE32_TO_CPU(be_val);
+	return BE32_TO_CPU(be_val);
 }
 
 /**
@@ -341,11 +343,9 @@ static inline uint32_t be32_to_cpu(beint32_t be_val)
  */
 static inline uint16_t be16_to_cpu(beint16_t be_val)
 {
-    return BE16_TO_CPU(be_val);
+	return BE16_TO_CPU(be_val);
 }
 
-/* Whichever they include first, they get these definitions. */
-#ifdef CCAN_SHORT_TYPES_H
 /**
  * be64/be32/be16 - 64/32/16 bit big-endian representation.
  */
@@ -359,5 +359,7 @@ typedef beint16_t be16;
 typedef leint64_t le64;
 typedef leint32_t le32;
 typedef leint16_t le16;
-#endif
+
+
 #endif /* CCAN_ENDIAN_H */
+

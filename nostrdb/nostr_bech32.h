@@ -11,8 +11,6 @@
 #include <stdio.h>
 #include "str_block.h"
 #include "cursor.h"
-#include <stdbool.h>
-
 typedef unsigned char u8;
 #define MAX_RELAYS 10
 
@@ -47,8 +45,6 @@ struct bech32_nevent {
     struct relays relays;
     const u8 *event_id;
     const u8 *pubkey; // optional
-    uint32_t kind;
-    bool has_kind;
 };
 
 struct bech32_nprofile {
@@ -60,7 +56,6 @@ struct bech32_naddr {
     struct relays relays;
     struct str_block identifier;
     const u8 *pubkey;
-    uint32_t kind;
 };
 
 struct bech32_nrelay {

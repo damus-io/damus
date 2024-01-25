@@ -7,10 +7,8 @@
 
 #include "nostr_bech32.h"
 #include <stdlib.h>
-#include "endian.h"
 #include "cursor.h"
 #include "bech32.h"
-#include <stdbool.h>
 
 #define MAX_TLVS 16
 
@@ -147,11 +145,6 @@ static int tlvs_to_relays(struct nostr_tlvs *tlvs, struct relays *relays) {
     return 1;
 }
 
-static uint32_t decode_tlv_u32(const uint8_t *bytes) {
-    beint32_t *be32_bytes = (beint32_t*)bytes;
-    return be32_to_cpu(*be32_bytes);
-}
-
 static int parse_nostr_bech32_nevent(struct cursor *cur, struct bech32_nevent *nevent) {
     struct nostr_tlvs tlvs;
     struct nostr_tlv *tlv;
@@ -171,13 +164,6 @@ static int parse_nostr_bech32_nevent(struct cursor *cur, struct bech32_nevent *n
         nevent->pubkey = tlv->value;
     } else {
         nevent->pubkey = NULL;
-    }
-    
-    if(find_tlv(&tlvs, TLV_KIND, &tlv)) {
-        nevent->kind = decode_tlv_u32(tlv->value);
-        nevent->has_kind = true;
-    } else {
-        nevent->has_kind = false;
     }
     
     return tlvs_to_relays(&tlvs, &nevent->relays);
@@ -200,11 +186,6 @@ static int parse_nostr_bech32_naddr(struct cursor *cur, struct bech32_naddr *nad
         return 0;
     
     naddr->pubkey = tlv->value;
-    
-    if(!find_tlv(&tlvs, TLV_KIND, &tlv)) {
-        return 0;
-    }
-    naddr->kind = decode_tlv_u32(tlv->value);
     
     return tlvs_to_relays(&tlvs, &naddr->relays);
 }
