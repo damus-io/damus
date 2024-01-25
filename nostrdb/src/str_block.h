@@ -4,9 +4,9 @@
 
 #include <inttypes.h>
 
-struct ndb_str_block {
+typedef struct ndb_str_block {
 	const char *str;
 	uint32_t len;
-};
+} str_block_t;
 
 #endif
