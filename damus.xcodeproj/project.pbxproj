@@ -375,15 +375,12 @@
 		4CF480382B631C0100F2B2C0 /* nostrdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FDE2B631C0100F2B2C0 /* nostrdb.c */; };
 		4CF480392B631C0100F2B2C0 /* block.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FDF2B631C0100F2B2C0 /* block.c */; };
 		4CF4803A2B631C0100F2B2C0 /* nostr_bech32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FE52B631C0100F2B2C0 /* nostr_bech32.c */; };
-		4CF4803B2B631C0100F2B2C0 /* configurator.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FEF2B631C0100F2B2C0 /* configurator.c */; };
 		4CF4803C2B631C0100F2B2C0 /* sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FF52B631C0100F2B2C0 /* sha256.c */; };
 		4CF4803D2B631C0100F2B2C0 /* content_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FF62B631C0100F2B2C0 /* content_parser.c */; };
-		4CF4803E2B631C0100F2B2C0 /* .dir in Resources */ = {isa = PBXBuildFile; fileRef = 4CF47FF92B631C0100F2B2C0 /* .dir */; };
 		4CF4803F2B631C0100F2B2C0 /* ndb_profile.rs in Resources */ = {isa = PBXBuildFile; fileRef = 4CF47FFA2B631C0100F2B2C0 /* ndb_profile.rs */; };
 		4CF480402B631C0100F2B2C0 /* ndb_meta.rs in Resources */ = {isa = PBXBuildFile; fileRef = 4CF47FFB2B631C0100F2B2C0 /* ndb_meta.rs */; };
 		4CF480412B631C0100F2B2C0 /* NdbMeta.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FFD2B631C0100F2B2C0 /* NdbMeta.swift */; };
 		4CF480422B631C0100F2B2C0 /* NdbProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FFE2B631C0100F2B2C0 /* NdbProfile.swift */; };
-		4CF480432B631C0100F2B2C0 /* .dir in Resources */ = {isa = PBXBuildFile; fileRef = 4CF480062B631C0100F2B2C0 /* .dir */; };
 		4CF480442B631C0100F2B2C0 /* bolt11.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480102B631C0100F2B2C0 /* bolt11.c */; };
 		4CF480452B631C0100F2B2C0 /* list.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480122B631C0100F2B2C0 /* list.c */; };
 		4CF480462B631C0100F2B2C0 /* mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480182B631C0100F2B2C0 /* mem.c */; };
@@ -2344,7 +2341,6 @@
 		4CF47FEC2B631C0100F2B2C0 /* nostrdb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nostrdb.h; sourceTree = "<group>"; };
 		4CF47FED2B631C0100F2B2C0 /* hex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hex.h; sourceTree = "<group>"; };
 		4CF47FEE2B631C0100F2B2C0 /* io.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = io.h; sourceTree = "<group>"; };
-		4CF47FEF2B631C0100F2B2C0 /* configurator.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = configurator.c; sourceTree = "<group>"; };
 		4CF47FF02B631C0100F2B2C0 /* nostr_bech32.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nostr_bech32.h; sourceTree = "<group>"; };
 		4CF47FF12B631C0100F2B2C0 /* cpu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpu.h; sourceTree = "<group>"; };
 		4CF47FF22B631C0100F2B2C0 /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
@@ -2352,7 +2348,6 @@
 		4CF47FF42B631C0100F2B2C0 /* block.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = block.h; sourceTree = "<group>"; };
 		4CF47FF52B631C0100F2B2C0 /* sha256.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sha256.c; sourceTree = "<group>"; };
 		4CF47FF62B631C0100F2B2C0 /* content_parser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = content_parser.c; sourceTree = "<group>"; };
-		4CF47FF92B631C0100F2B2C0 /* .dir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .dir; sourceTree = "<group>"; };
 		4CF47FFA2B631C0100F2B2C0 /* ndb_profile.rs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ndb_profile.rs; sourceTree = "<group>"; };
 		4CF47FFB2B631C0100F2B2C0 /* ndb_meta.rs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ndb_meta.rs; sourceTree = "<group>"; };
 		4CF47FFD2B631C0100F2B2C0 /* NdbMeta.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NdbMeta.swift; sourceTree = "<group>"; };
@@ -2363,7 +2358,6 @@
 		4CF480032B631C0100F2B2C0 /* profile_builder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = profile_builder.h; sourceTree = "<group>"; };
 		4CF480042B631C0100F2B2C0 /* meta_builder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = meta_builder.h; sourceTree = "<group>"; };
 		4CF480052B631C0100F2B2C0 /* profile_verifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = profile_verifier.h; sourceTree = "<group>"; };
-		4CF480062B631C0100F2B2C0 /* .dir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .dir; sourceTree = "<group>"; };
 		4CF480072B631C0100F2B2C0 /* meta_reader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = meta_reader.h; sourceTree = "<group>"; };
 		4CF480082B631C0100F2B2C0 /* flatbuffers_common_reader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = flatbuffers_common_reader.h; sourceTree = "<group>"; };
 		4CF480092B631C0100F2B2C0 /* meta_verifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = meta_verifier.h; sourceTree = "<group>"; };
@@ -3860,7 +3854,6 @@
 				4CF47FEC2B631C0100F2B2C0 /* nostrdb.h */,
 				4CF47FED2B631C0100F2B2C0 /* hex.h */,
 				4CF47FEE2B631C0100F2B2C0 /* io.h */,
-				4CF47FEF2B631C0100F2B2C0 /* configurator.c */,
 				4CF47FF02B631C0100F2B2C0 /* nostr_bech32.h */,
 				4CF47FF12B631C0100F2B2C0 /* cpu.h */,
 				4CF47FF22B631C0100F2B2C0 /* util.h */,
@@ -3890,7 +3883,6 @@
 		4CF47FF82B631C0100F2B2C0 /* rust */ = {
 			isa = PBXGroup;
 			children = (
-				4CF47FF92B631C0100F2B2C0 /* .dir */,
 				4CF47FFA2B631C0100F2B2C0 /* ndb_profile.rs */,
 				4CF47FFB2B631C0100F2B2C0 /* ndb_meta.rs */,
 			);
@@ -3915,7 +3907,6 @@
 				4CF480032B631C0100F2B2C0 /* profile_builder.h */,
 				4CF480042B631C0100F2B2C0 /* meta_builder.h */,
 				4CF480052B631C0100F2B2C0 /* profile_verifier.h */,
-				4CF480062B631C0100F2B2C0 /* .dir */,
 				4CF480072B631C0100F2B2C0 /* meta_reader.h */,
 				4CF480082B631C0100F2B2C0 /* flatbuffers_common_reader.h */,
 				4CF480092B631C0100F2B2C0 /* meta_verifier.h */,
@@ -4521,7 +4512,6 @@
 				50DA11262A16A23F00236234 /* Launch.storyboard in Resources */,
 				4CE6DEEB27F7A08200C66700 /* Assets.xcassets in Resources */,
 				4C198DF129F88C6B004C165C /* License.txt in Resources */,
-				4CF4803E2B631C0100F2B2C0 /* .dir in Resources */,
 				4C198DF029F88C6B004C165C /* Readme.md in Resources */,
 				4CF4803F2B631C0100F2B2C0 /* ndb_profile.rs in Resources */,
 				4CF480402B631C0100F2B2C0 /* ndb_meta.rs in Resources */,
