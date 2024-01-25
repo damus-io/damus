@@ -57,7 +57,7 @@ struct PostView: View {
     @State var newCursorIndex: Int?
     @State var textHeight: CGFloat? = nil
 
-    @State var mediaToUpload: [MediaUpload] = []
+    @State var mediaToUpload: MediaUpload? = nil
     
     @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
     @StateObject var tagModel: TagModel = TagModel()
@@ -379,15 +379,6 @@ struct PostView: View {
             pks.append(pk)
         }
     }
-    
-    func addToMediaToUpload(mediaItem: MediaItem) {
-        switch mediaItem.type {
-        case .image:
-            mediaToUpload.append(.image(mediaItem.url))
-        case .video:
-            mediaToUpload.append(.video(mediaItem.url))
-        }
-    }
 
     var body: some View {
         GeometryReader { (deviceSize: GeometryProxy) in
@@ -430,29 +421,36 @@ struct PostView: View {
             .background(DamusColors.adaptableWhite.edgesIgnoringSafeArea(.all))
             .sheet(isPresented: $attach_media) {
                 ImagePicker(uploader: damus_state.settings.default_media_uploader, sourceType: .photoLibrary, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
-                    self.mediaToUpload.append(.image(img))
+                    self.mediaToUpload = .image(img)
                 } onVideoPicked: { url in
-                    self.mediaToUpload.append(.video(url))
+                    self.mediaToUpload = .video(url)
                 }
                 .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $image_upload_confirm) {
                     Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
-                        if !mediaToUpload.isEmpty {
-                            self.handle_upload(media: mediaToUpload[0])
+                        if let mediaToUpload {
+                            self.handle_upload(media: mediaToUpload)
                             self.attach_media = false
                         }
                     }
                     Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
                 }
             }
-            .fullScreenCover(isPresented: $attach_camera) {
-                CameraView(damus_state: damus_state, action: { items in
-                    for item in items {
-                        addToMediaToUpload(mediaItem: item)
+            .sheet(isPresented: $attach_camera) {
+                
+                ImagePicker(uploader: damus_state.settings.default_media_uploader, sourceType: .camera, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
+                    self.mediaToUpload = .image(img)
+                } onVideoPicked: { url in
+                    self.mediaToUpload = .video(url)
+                }
+                .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $image_upload_confirm) {
+                    Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
+                        if let mediaToUpload {
+                            self.handle_upload(media: mediaToUpload)
+                            self.attach_camera = false
+                        }
                     }
-                    for media in mediaToUpload {
-                        self.handle_upload(media: media)
-                    }
-                })
+                    Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
+                }
             }
             .onAppear() {
                 let loaded_draft = load_draft()
