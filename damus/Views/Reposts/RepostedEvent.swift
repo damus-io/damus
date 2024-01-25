@@ -25,9 +25,9 @@ struct RepostedEvent: View {
             EventMutingContainerView(
                 damus_state: damus,
                 event: inner_ev,
-                muteBox: { event_shown, muted_reason in
+                muteBox: { event_shown in
                     AnyView(
-                        EventMutedBoxView(shown: event_shown, reason: muted_reason)
+                        EventMutedBoxView(shown: event_shown)
                             .padding(.horizontal, 5)    // Add a bit of horizontal padding to avoid the mute box from touching the edges of the screen
                     )
                 }) {

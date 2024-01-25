@@ -196,11 +196,8 @@ struct ProfileView: View {
                         damus_state.postbox.send(new_ev)
                     }
                 } else {
-                    MuteDurationMenu { duration in
-                        notify(.mute(.user(profile.pubkey, duration?.date_from_now)))
-                    } label: {
-                        Text(NSLocalizedString("Mute", comment: "Button to mute a profile."))
-                            .foregroundStyle(.red)
+                    Button(NSLocalizedString("Mute", comment: "Button to mute a profile."), role: .destructive) {
+                        notify(.mute(.user(profile.pubkey, nil)))
                     }
                 }
             }
