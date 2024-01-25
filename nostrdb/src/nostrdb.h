@@ -32,7 +32,13 @@ struct ndb_lmdb;
 union ndb_packed_str;
 struct bolt11;
 
-// sorry, swift needs help with forward declared pointers like this
+// some bindings like swift needs help with forward declared pointers
+struct ndb_tag_ptr { struct ndb_tag *ptr; };
+struct ndb_tags_ptr { struct ndb_tags *ptr; };
+struct ndb_block_ptr { struct ndb_block *ptr; };
+struct ndb_blocks_ptr { struct ndb_blocks *ptr; };
+struct ndb_note_ptr { struct ndb_note *ptr; };
+
 struct ndb_t {
 	struct ndb *ndb;
 };
