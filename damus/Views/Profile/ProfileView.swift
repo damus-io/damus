@@ -188,7 +188,7 @@ struct ProfileView: View {
                             return
                         }
 
-                        guard let new_ev = remove_from_mutelist(keypair: keypair, prev: mutelist, to_remove: .user(profile.pubkey, nil)) else {
+                        guard let new_ev = remove_from_mutelist(keypair: keypair, prev: mutelist, to_remove: .pubkey(profile.pubkey)) else {
                             return
                         }
 

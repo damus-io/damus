@@ -545,7 +545,7 @@ struct ContentView: View {
                 guard let ds = damus_state,
                       let keypair = ds.keypair.to_full(),
                       let pubkey = muting,
-                      let mutelist = create_or_update_mutelist(keypair: keypair, mprev: nil, to_add: .user(pubkey, nil))
+                      let mutelist = create_or_update_mutelist(keypair: keypair, mprev: nil, to_add: .pubkey(pubkey))
                 else {
                     return
                 }
@@ -578,7 +578,7 @@ struct ContentView: View {
                         return
                     }
 
-                    guard let ev = create_or_update_mutelist(keypair: keypair, mprev: ds.contacts.mutelist, to_add: .user(pubkey, nil)) else {
+                    guard let ev = create_or_update_mutelist(keypair: keypair, mprev: ds.contacts.mutelist, to_add: .pubkey(pubkey)) else {
                         return
                     }
 

@@ -157,11 +157,8 @@ class HomeModel {
         case .metadata:
             // profile metadata processing is handled by nostrdb
             break
-        case .list_deprecated:
+        case .list:
             handle_list_event(ev)
-        case .mute_list:
-            // @TODO: this will be implemented in a future patch
-            break
         case .boost:
             handle_boost_event(sub_id: sub_id, ev)
         case .like:
@@ -464,7 +461,7 @@ class HomeModel {
         var our_contacts_filter = NostrFilter(kinds: [.contacts, .metadata])
         our_contacts_filter.authors = [damus_state.pubkey]
         
-        var our_blocklist_filter = NostrFilter(kinds: [.list_deprecated])
+        var our_blocklist_filter = NostrFilter(kinds: [.list])
         our_blocklist_filter.parameter = ["mute"]
         our_blocklist_filter.authors = [damus_state.pubkey]
         

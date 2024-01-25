@@ -145,13 +145,6 @@ enum MuteItem: Hashable, Equatable {
     }
 }
 
-// - MARK: TagConvertible
-extension MuteItem: TagConvertible {
-    static func from_tag(tag: TagSequence) -> MuteItem? {
-        return MuteItem(tag.strings())
-    }
-}
-
 extension Collection where Element == MuteItem {
     /// Check if an event is muted given a collection of ``MutedItem``.
     ///

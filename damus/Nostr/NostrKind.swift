@@ -17,8 +17,7 @@ enum NostrKind: UInt32, Codable {
     case boost = 6
     case like = 7
     case chat = 42
-    case mute_list = 10000
-    case list_deprecated = 30000
+    case list = 30000
     case longform = 30023
     case zap = 9735
     case zap_request = 9734
