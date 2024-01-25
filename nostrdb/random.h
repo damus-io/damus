@@ -21,8 +21,7 @@
 #include <ntstatus.h>
 #include <bcrypt.h>
 #elif defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__)
-//#include <sys/random.h>
-#include <Security/SecRandom.h>
+#include <sys/random.h>
 #elif defined(__OpenBSD__)
 #include <unistd.h>
 #else
@@ -54,7 +53,7 @@ static int fill_random(unsigned char* data, size_t size) {
 #elif defined(__APPLE__) || defined(__OpenBSD__)
     /* If `getentropy(2)` is not available you should fallback to either
      * `SecRandomCopyBytes` or /dev/urandom */
-    int res = SecRandomCopyBytes(kSecRandomDefault, size, data);
+    int res = getentropy(data, size);
     if (res == 0) {
         return 1;
     } else {
