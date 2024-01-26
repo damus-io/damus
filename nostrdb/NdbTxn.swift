@@ -19,17 +19,16 @@ class NdbTxn<T> {
     var inherited: Bool
     var ndb: Ndb
     var generation: Int
+    var name: String
 
-    init?(ndb: Ndb, with: (NdbTxn<T>) -> T = { _ in () }) {
-        guard !ndb.closed else { return nil }
+    init?(ndb: Ndb, with: (NdbTxn<T>) -> T = { _ in () }, name: String? = nil) {
+        guard !ndb.is_closed else { return nil }
+        self.name = name ?? "txn"
         self.ndb = ndb
         self.generation = ndb.generation
-#if TXNDEBUG
-        txn_count += 1
-        print("opening transaction \(txn_count)")
-        #endif
         if let active_txn = Thread.current.threadDictionary["ndb_txn"] as? ndb_txn {
             // some parent thread is active, use that instead
+            print("txn: inherited txn")
             self.txn = active_txn
             self.inherited = true
             self.generation = Thread.current.threadDictionary["txn_generation"] as! Int
@@ -37,6 +36,9 @@ class NdbTxn<T> {
             self.txn = ndb_txn()
             guard !ndb.is_closed else { return nil }
             self.generation = ndb.generation
+            #if TXNDEBUG
+            txn_count += 1
+            #endif
             let ok = ndb_begin_query(ndb.ndb.ndb, &self.txn) != 0
             if !ok {
                 return nil
@@ -46,17 +48,21 @@ class NdbTxn<T> {
             Thread.current.threadDictionary["txn_generation"] = ndb.generation
             self.inherited = false
         }
+        #if TXNDEBUG
+        print("txn: open  gen\(self.generation) '\(self.name)' \(txn_count)")
+        #endif
         self.moved = false
         self.val = with(self)
     }
 
-    private init(ndb: Ndb, txn: ndb_txn, val: T) {
+    private init(ndb: Ndb, txn: ndb_txn, val: T, generation: Int, inherited: Bool, name: String) {
         self.txn = txn
         self.val = val
         self.moved = false
-        self.inherited = false
+        self.inherited = inherited
         self.ndb = ndb
-        self.generation = 0
+        self.generation = generation
+        self.name = name
     }
 
     /// Only access temporarily! Do not store database references for longterm use. If it's a primitive type you
@@ -68,32 +74,42 @@ class NdbTxn<T> {
 
     deinit {
         if self.generation != ndb.generation {
-            //print("txn: OLD GENERATION (\(self.generation) != \(ndb.generation)), IGNORING")
+            print("txn: OLD GENERATION (\(self.generation) != \(ndb.generation)), IGNORING")
             return
         }
-        if moved || inherited || ndb.closed {
+        if inherited {
+            print("txn: not closing. inherited ")
+            return
+        }
+        if moved {
+            //print("txn: not closing. moved")
+            return
+        }
+        if ndb.is_closed {
+            print("txn: not closing. db closed")
             return
         }
 
         #if TXNDEBUG
         txn_count -= 1;
-        print("txn: closing transaction \(txn_count)")
+        print("txn: close gen\(generation) '\(name)' \(txn_count)")
         #endif
         ndb_end_query(&self.txn)
+        //self.skip_close = true
         Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")
     }
 
     // functor
     func map<Y>(_ transform: (T) -> Y) -> NdbTxn<Y> {
         self.moved = true
-        return .init(ndb: self.ndb, txn: self.txn, val: transform(val))
+        return .init(ndb: self.ndb, txn: self.txn, val: transform(val), generation: generation, inherited: inherited, name: self.name)
     }
 
     // comonad!?
     // useful for moving ownership of a transaction to another value
     func extend<Y>(_ with: (NdbTxn<T>) -> Y) -> NdbTxn<Y> {
         self.moved = true
-        return .init(ndb: self.ndb, txn: self.txn, val: with(self))
+        return .init(ndb: self.ndb, txn: self.txn, val: with(self), generation: generation, inherited: inherited, name: self.name)
     }
 }
 
@@ -116,7 +132,7 @@ extension NdbTxn where T: OptionalType {
             return nil
         }
         self.moved = true
-        return NdbTxn<T.Wrapped>(ndb: self.ndb, txn: self.txn, val: unwrappedVal)
+        return NdbTxn<T.Wrapped>(ndb: self.ndb, txn: self.txn, val: unwrappedVal, generation: generation, inherited: inherited, name: name)
     }
 }
 

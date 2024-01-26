@@ -77,7 +77,7 @@ func generate_local_notification_object(from ev: NostrEvent, state: HeadlessDamu
     } else if type == .like,
               state.settings.like_notification,
               let evid = ev.referenced_ids.last,
-              let txn = state.ndb.lookup_note(evid),
+              let txn = state.ndb.lookup_note(evid, txn_name: "local_notification_like"),
               let liked_event = txn.unsafeUnownedValue?.to_owned()
     {
         let content_preview = render_notification_content_preview(ev: liked_event, profiles: state.profiles, keypair: state.keypair)

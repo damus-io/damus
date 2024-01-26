@@ -85,8 +85,8 @@ class Profiles {
         ndb.search_profile(query, limit: limit, txn: txn)
     }
 
-    func lookup(id: Pubkey) -> NdbTxn<Profile?>? {
-        guard let txn = ndb.lookup_profile(id) else {
+    func lookup(id: Pubkey, txn_name: String? = nil) -> NdbTxn<Profile?>? {
+        guard let txn = ndb.lookup_profile(id, txn_name: txn_name) else {
             return nil
         }
         return txn.map({ pr in pr?.profile })

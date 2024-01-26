@@ -76,7 +76,8 @@ class Ndb {
     static private var db_files: [String] = ["data.mdb", "lock.mdb"]
 
     static var empty: Ndb {
-        Ndb(ndb: ndb_t(ndb: nil))
+        print("txn: NOSTRDB EMPTY")
+        return Ndb(ndb: ndb_t(ndb: nil))
     }
     
     static func open(path: String? = nil, owns_db_file: Bool = true) -> ndb_t? {
@@ -187,6 +188,7 @@ class Ndb {
         self.closed = true
         print("txn: CLOSING NOSTRDB")
         ndb_destroy(self.ndb.ndb)
+        self.generation += 1
         print("txn: NOSTRDB CLOSED")
     }
 
@@ -195,8 +197,9 @@ class Ndb {
               let db = Self.open(path: self.path, owns_db_file: self.owns_db) else {
             return false
         }
+        
+        print("txn: NOSTRDB REOPENED (gen \(generation))")
 
-        self.generation += 1
         self.closed = false
         self.ndb = db
         return true
@@ -368,14 +371,14 @@ class Ndb {
         return txn.value
     }
 
-    func lookup_note(_ id: NoteId) -> NdbTxn<NdbNote?>? {
-        NdbTxn(ndb: self) { txn in
+    func lookup_note(_ id: NoteId, txn_name: String? = nil) -> NdbTxn<NdbNote?>? {
+        NdbTxn(ndb: self, name: txn_name) { txn in
             lookup_note_with_txn_inner(id: id, txn: txn)
         }
     }
 
-    func lookup_profile(_ pubkey: Pubkey) -> NdbTxn<ProfileRecord?>? {
-        NdbTxn(ndb: self) { txn in
+    func lookup_profile(_ pubkey: Pubkey, txn_name: String? = nil) -> NdbTxn<ProfileRecord?>? {
+        NdbTxn(ndb: self, name: txn_name) { txn in
             lookup_profile_with_txn_inner(pubkey: pubkey, txn: txn)
         }
     }
@@ -456,17 +459,8 @@ class Ndb {
     }
 
     deinit {
-        //print("txn: Ndb de-init close")
-        //
-        // DO NOT CLOSE IN DESTRUCTOR! Destructor deinit is clearly
-        // not reliable, since it seems to be getting called more than
-        // once when we have a few references to the database.
-        //
-        // Not sure if this is indicitable of a larger problem but I've
-        // experienced nothing but hell when relying on de-init for
-        // global resources. Free them manually.
-        //
-        // EVIL --> self.close() <-- EVIL
+        print("txn: Ndb de-init")
+        self.close()
     }
 }
 

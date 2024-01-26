@@ -126,7 +126,7 @@ struct ProfilePicView: View {
 }
 
 func get_profile_url(picture: String?, pubkey: Pubkey, profiles: Profiles) -> URL {
-    let pic = picture ?? profiles.lookup(id: pubkey)?.map({ $0?.picture }).value ?? robohash(pubkey)
+    let pic = picture ?? profiles.lookup(id: pubkey, txn_name: "get_profile_url")?.map({ $0?.picture }).value ?? robohash(pubkey)
     if let url = URL(string: pic) {
         return url
     }
