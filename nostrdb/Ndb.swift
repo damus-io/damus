@@ -448,7 +448,17 @@ class Ndb {
     }
 
     deinit {
-        self.close()
+        //print("txn: Ndb de-init close")
+        //
+        // DO NOT CLOSE IN DESTRUCTOR! Destructor deinit is clearly
+        // not reliable, since it seems to be getting called more than
+        // once when we have a few references to the database.
+        //
+        // Not sure if this is indicitable of a larger problem but I've
+        // experienced nothing but hell when relying on de-init for
+        // global resources. Free them manually.
+        //
+        // EVIL --> self.close() <-- EVIL
     }
 }
 
