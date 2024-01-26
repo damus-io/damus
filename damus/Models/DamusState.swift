@@ -8,7 +8,7 @@
 import Foundation
 import LinkPresentation
 
-struct DamusState: HeadlessDamusState {
+class DamusState: HeadlessDamusState {
     let pool: RelayPool
     let keypair: Keypair
     let likes: EventCounter

@@ -276,7 +276,7 @@ struct ContentView: View {
                     }
                     .tabViewStyle(.page(indexDisplayMode: .never))
                     .overlay(
-                        SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened.animation())
+                        SideMenuView(damus_state: damus_state!, isSidebarVisible: $isSideBarOpened.animation())
                     )
                     .navigationDestination(for: Route.self) { route in
                         route.view(navigationCoordinator: navigationCoordinator, damusState: damus_state!)
