@@ -171,9 +171,6 @@ int mdb_midl_append( MDB_IDL *idp, MDB_ID id )
 int mdb_midl_append_list( MDB_IDL *idp, MDB_IDL app )
 {
 	MDB_IDL ids = *idp;
-    
-    if (ids == 0)
-        return EINVAL;
 
 	/* Too big? */
 	if (ids[0] + app[0] >= ids[-1]) {
