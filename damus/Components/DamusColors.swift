@@ -16,6 +16,7 @@ class DamusColors {
     static let black = Color("DamusBlack")
     static let brown = Color("DamusBrown")
     static let yellow = Color("DamusYellow")
+    static let gold = hex_col(r: 226, g: 168, b: 0)
     static let lightGrey = Color("DamusLightGrey")
     static let mediumGrey = Color("DamusMediumGrey")
     static let darkGrey = Color("DamusDarkGrey")
@@ -46,3 +47,10 @@ class DamusColors {
     static let lightBackgroundPink = Color(red: 0xF8/255.0, green: 0xE7/255.0, blue: 0xF8/255.0)
 }
 
+func hex_col(r: UInt8, g: UInt8, b: UInt8) -> Color {
+    return Color(.sRGB,
+                 red: Double(r) / Double(0xff),
+                 green: Double(g) / Double(0xff),
+                 blue: Double(b) / Double(0xff),
+                 opacity: 1.0)
+}

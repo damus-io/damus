@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-fileprivate let gold_grad_c1 = hex_col(r: 226, g: 168, b: 0)
+fileprivate let gold_grad_c1 = DamusColors.gold
 fileprivate let gold_grad_c2 = hex_col(r: 249, g: 243, b: 100)
 
 fileprivate let gold_grad = [gold_grad_c2, gold_grad_c1]

@@ -41,12 +41,14 @@ struct ProfileName: View {
     @State var display_name: DisplayName?
     @State var nip05: NIP05?
     @State var donation: Int?
+    @State var purple_badge: DamusPurple.UserBadgeInfo?
     
     init(pubkey: Pubkey, prefix: String = "", damus: DamusState, show_nip5_domain: Bool = true) {
         self.pubkey = pubkey
         self.prefix = prefix
         self.damus_state = damus
         self.show_nip5_domain = show_nip5_domain
+        self.purple_badge = nil
     }
     
     var friend_type: FriendType? {
@@ -107,10 +109,15 @@ struct ProfileName: View {
                     .frame(width: 14, height: 14)
             }
 
-            if let supporter = supporter(profile: profile) {
-                SupporterBadge(percent: supporter)
-            }
+            SupporterBadge(percent: supporter(profile: profile), purple_badge_info: self.purple_badge, style: .full)
         }
+        .onAppear(perform: {
+            Task {
+                 if damus_state.settings.enable_experimental_purple_api {
+                    self.purple_badge = await damus_state.purple.profile_purple_badge_info(pubkey: pubkey)
+                 }
+             }
+        })
         .onReceive(handle_notify(.profile_updated)) { update in
             if update.pubkey != pubkey {
                 return

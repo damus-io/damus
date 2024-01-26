@@ -8,22 +8,52 @@
 import SwiftUI
 
 struct SupporterBadge: View {
-    let percent: Int
+    let percent: Int?
+    let purple_badge_info: DamusPurple.UserBadgeInfo?
+    let style: Style
+    
+    init(percent: Int?, purple_badge_info: DamusPurple.UserBadgeInfo? = nil, style: Style) {
+        self.percent = percent
+        self.purple_badge_info = purple_badge_info
+        self.style = style
+    }
     
     let size: CGFloat = 17
     
     var body: some View {
-        if percent < 100 {
-            Image("star.fill")
-                .resizable()
-                .frame(width:size, height:size)
-                .foregroundColor(support_level_color(percent))
-        } else {
-            Image("star.fill")
-                .resizable()
-                .frame(width:size, height:size)
-                .foregroundStyle(GoldGradient)
+        HStack {
+            if let purple_badge_info, purple_badge_info.active == true {
+                HStack(spacing: 1) {
+                    Image("star.fill")
+                        .resizable()
+                        .frame(width:size, height:size)
+                        .foregroundStyle(GoldGradient)
+                    if self.style == .full,
+                       let ordinal_number = self.purple_badge_info?.subscriber_number,
+                       let ordinal = self.purple_badge_info?.ordinal()  {
+                        Text(ordinal)
+                            .foregroundStyle(DamusColors.gold)
+                            .font(.caption)
+                    }
+                }
+            }
+            else if let percent, percent < 100 {
+                Image("star.fill")
+                    .resizable()
+                    .frame(width:size, height:size)
+                    .foregroundColor(support_level_color(percent))
+            } else if let percent, percent == 100 {
+                Image("star.fill")
+                    .resizable()
+                    .frame(width:size, height:size)
+                    .foregroundStyle(GoldGradient)
+            }
         }
+    }
+    
+    enum Style {
+        case full       // Shows the entire badge with a purple subscriber number if present
+        case compact    // Does not show purple subscriber number. Only shows the star (if applicable)
     }
 }
 
@@ -44,10 +74,21 @@ func support_level_color(_ percent: Int) -> Color {
 struct SupporterBadge_Previews: PreviewProvider {
     static func Level(_ p: Int) -> some View {
         HStack(alignment: .center) {
-            SupporterBadge(percent: p)
+            SupporterBadge(percent: p, style: .full)
                 .frame(width: 50)
             Text(verbatim: p.formatted())
                 .frame(width: 50)
+        }
+    }
+    
+    static func Purple(_ subscriber_number: Int) -> some View {
+        HStack(alignment: .center) {
+            SupporterBadge(
+                percent: nil,
+                purple_badge_info: DamusPurple.UserBadgeInfo(active: true, subscriber_number: subscriber_number),
+                style: .full
+            )
+                .frame(width: 100)
         }
     }
     
@@ -66,6 +107,12 @@ struct SupporterBadge_Previews: PreviewProvider {
             Level(80)
             Level(90)
             Level(100)
+            Purple(1)
+            Purple(2)
+            Purple(3)
+            Purple(99)
+            Purple(100)
+            Purple(1971)
         }
     }
 }

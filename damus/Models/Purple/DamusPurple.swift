@@ -10,7 +10,7 @@ import Foundation
 class DamusPurple: StoreObserverDelegate {
     let environment: ServerEnvironment
     let keypair: Keypair
-    var starred_profiles_cache: [Pubkey: Bool]
+    var starred_profiles_cache: [Pubkey: UserBadgeInfo]
     
     init(environment: ServerEnvironment, keypair: Keypair) {
         self.environment = environment
@@ -20,16 +20,23 @@ class DamusPurple: StoreObserverDelegate {
     
     // MARK: Functions
     func is_profile_subscribed_to_purple(pubkey: Pubkey) async -> Bool? {
+        return await self.profile_purple_badge_info(pubkey: pubkey)?.active
+    }
+    
+    func profile_purple_badge_info(pubkey: Pubkey) async -> UserBadgeInfo? {
         if let cached_result = self.starred_profiles_cache[pubkey] {
             return cached_result
         }
         
         guard let data = await self.get_account_data(pubkey: pubkey) else { return nil }
         
-        if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-           let active = json["active"] as? Bool {
-            self.starred_profiles_cache[pubkey] = active
-            return active
+        guard let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else { return nil }
+        
+        if let active = json["active"] as? Bool {
+            let subscriber_number: Int? = json["subscriber_number"] as? Int
+            let badge_info = UserBadgeInfo(active: active, subscriber_number: subscriber_number)
+            self.starred_profiles_cache[pubkey] = badge_info
+            return badge_info
         }
         
         return nil
@@ -179,6 +186,18 @@ class DamusPurple: StoreObserverDelegate {
             }
         }
         
+    }
+    
+    struct UserBadgeInfo {
+        var active: Bool
+        var subscriber_number: Int?
+        
+        func ordinal() -> String? {
+            guard let number = self.subscriber_number else { return nil }
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .ordinal
+            return formatter.string(from: NSNumber(integerLiteral: number))
+        }
     }
 }
 

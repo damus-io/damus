@@ -7,14 +7,6 @@
 
 import SwiftUI
 
-func hex_col(r: UInt8, g: UInt8, b: UInt8) -> Color {
-    return Color(.sRGB,
-                 red: Double(r) / Double(0xff),
-                 green: Double(g) / Double(0xff),
-                 blue: Double(b) / Double(0xff),
-                 opacity: 1.0)
-}
-
 
 struct SetupView: View {
     @StateObject var navigationCoordinator: NavigationCoordinator = NavigationCoordinator()
