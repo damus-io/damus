@@ -198,3 +198,7 @@ void ndb_blocks_free(struct ndb_blocks *blocks) {
 int ndb_blocks_flags(struct ndb_blocks *blocks) {
 	return blocks->flags;
 }
+
+int ndb_blocks_word_count(struct ndb_blocks *blocks) {
+	return blocks->words;
+}
