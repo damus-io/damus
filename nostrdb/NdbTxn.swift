@@ -65,7 +65,7 @@ class NdbTxn<T> {
 
         #if TXNDEBUG
         txn_count -= 1;
-        print("closing transaction \(txn_count)")
+        print("txn: closing transaction \(txn_count)")
         #endif
         ndb_end_query(&self.txn)
         Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")

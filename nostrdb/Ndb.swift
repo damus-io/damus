@@ -178,17 +178,20 @@ class Ndb {
     func close() {
         guard !self.closed else { return }
         self.closed = true
+        print("txn: CLOSING NOSTRDB")
         ndb_destroy(self.ndb.ndb)
+        print("txn: NOSTRDB CLOSED")
     }
 
-    func reopen() throws {
+    func reopen() -> Bool {
         guard self.closed,
               let db = Self.open(path: self.path, owns_db_file: self.owns_db) else {
-            throw DatabaseError.failed_open
+            return false
         }
 
         self.closed = false
         self.ndb = db
+        return true
     }
 
     func lookup_note_by_key_with_txn<Y>(_ key: NoteKey, txn: NdbTxn<Y>) -> NdbNote? {

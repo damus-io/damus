@@ -94,6 +94,7 @@ struct DamusState: HeadlessDamusState {
     }
 
     func close() {
+        print("txn: damus close")
         pool.close()
         ndb.close()
     }
