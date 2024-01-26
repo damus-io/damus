@@ -32,6 +32,7 @@ class NdbTxn<T> {
             self.inherited = true
         } else {
             self.txn = ndb_txn()
+            guard !ndb.closed else { return nil }
             let ok = ndb_begin_query(ndb.ndb.ndb, &self.txn) != 0
             if !ok {
                 return nil
