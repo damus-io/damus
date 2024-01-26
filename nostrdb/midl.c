@@ -171,6 +171,12 @@ int mdb_midl_append( MDB_IDL *idp, MDB_ID id )
 int mdb_midl_append_list( MDB_IDL *idp, MDB_IDL app )
 {
 	MDB_IDL ids = *idp;
+    
+    if (ids == 0) {
+        printf("txn: HITTING MDB_MIDL_APPEND NULL IDS\n");
+        return EINVAL;
+    }
+
 	/* Too big? */
 	if (ids[0] + app[0] >= ids[-1]) {
 		if (mdb_midl_grow(idp, app[0]))
