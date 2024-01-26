@@ -536,6 +536,7 @@ int ndb_parse_content(unsigned char *buf, int buf_size,
 enum ndb_block_type ndb_get_block_type(struct ndb_block *block);
 int ndb_blocks_flags(struct ndb_blocks *block);
 size_t ndb_blocks_total_size(struct ndb_blocks *blocks);
+int ndb_blocks_word_count(struct ndb_blocks *blocks);
 
 /// Free blocks if they are owned, safe to call on unowned blocks as well.
 void ndb_blocks_free(struct ndb_blocks *blocks);
