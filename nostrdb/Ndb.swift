@@ -32,7 +32,11 @@ class Ndb {
     let path: String?
     let owns_db: Bool
     var generation: Int
-    var closed: Bool
+    private var closed: Bool
+
+    var is_closed: Bool {
+        self.closed || self.ndb.ndb == nil
+    }
 
     static func safemode() -> Ndb? {
         guard let path = db_path ?? old_db_path else { return nil }
@@ -179,7 +183,7 @@ class Ndb {
     }
     
     func close() {
-        guard !self.closed else { return }
+        guard !self.is_closed else { return }
         self.closed = true
         print("txn: CLOSING NOSTRDB")
         ndb_destroy(self.ndb.ndb)
@@ -187,7 +191,7 @@ class Ndb {
     }
 
     func reopen() -> Bool {
-        guard self.closed,
+        guard self.is_closed,
               let db = Self.open(path: self.path, owns_db_file: self.owns_db) else {
             return false
         }
@@ -381,7 +385,7 @@ class Ndb {
     }
     
     func process_client_event(_ str: String) -> Bool {
-        guard !self.closed else { return false }
+        guard !self.is_closed else { return false }
         return str.withCString { cstr in
             return ndb_process_client_event(ndb.ndb, cstr, Int32(str.utf8.count)) != 0
         }
@@ -407,14 +411,14 @@ class Ndb {
     }
 
     func process_event(_ str: String) -> Bool {
-        guard !closed else { return false }
+        guard !is_closed else { return false }
         return str.withCString { cstr in
             return ndb_process_event(ndb.ndb, cstr, Int32(str.utf8.count)) != 0
         }
     }
 
     func process_events(_ str: String) -> Bool {
-        guard !closed else { return false }
+        guard !is_closed else { return false }
         return str.withCString { cstr in
             return ndb_process_events(ndb.ndb, cstr, str.utf8.count) != 0
         }

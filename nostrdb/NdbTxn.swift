@@ -35,7 +35,7 @@ class NdbTxn<T> {
             self.generation = Thread.current.threadDictionary["txn_generation"] as! Int
         } else {
             self.txn = ndb_txn()
-            guard !ndb.closed else { return nil }
+            guard !ndb.is_closed else { return nil }
             self.generation = ndb.generation
             let ok = ndb_begin_query(ndb.ndb.ndb, &self.txn) != 0
             if !ok {

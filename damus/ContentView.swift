@@ -466,7 +466,7 @@ struct ContentView: View {
             if damus_state.ndb.reopen() {
                 print("txn: NOSTRDB REOPENED")
             } else {
-                print("txn: NOSTRDB FAILED TO REOPEN closed:\(damus_state.ndb.closed)")
+                print("txn: NOSTRDB FAILED TO REOPEN closed:\(damus_state.ndb.is_closed)")
             }
         }
         .onChange(of: scenePhase) { (phase: ScenePhase) in
