@@ -18,10 +18,12 @@ class NdbTxn<T> {
     var moved: Bool
     var inherited: Bool
     var ndb: Ndb
+    var generation: Int
 
     init?(ndb: Ndb, with: (NdbTxn<T>) -> T = { _ in () }) {
         guard !ndb.closed else { return nil }
         self.ndb = ndb
+        self.generation = ndb.generation
 #if TXNDEBUG
         txn_count += 1
         print("opening transaction \(txn_count)")
@@ -30,14 +32,18 @@ class NdbTxn<T> {
             // some parent thread is active, use that instead
             self.txn = active_txn
             self.inherited = true
+            self.generation = Thread.current.threadDictionary["txn_generation"] as! Int
         } else {
             self.txn = ndb_txn()
             guard !ndb.closed else { return nil }
+            self.generation = ndb.generation
             let ok = ndb_begin_query(ndb.ndb.ndb, &self.txn) != 0
             if !ok {
                 return nil
             }
+            self.generation = ndb.generation
             Thread.current.threadDictionary["ndb_txn"] = self.txn
+            Thread.current.threadDictionary["txn_generation"] = ndb.generation
             self.inherited = false
         }
         self.moved = false
@@ -50,6 +56,7 @@ class NdbTxn<T> {
         self.moved = false
         self.inherited = false
         self.ndb = ndb
+        self.generation = 0
     }
 
     /// Only access temporarily! Do not store database references for longterm use. If it's a primitive type you
@@ -60,6 +67,10 @@ class NdbTxn<T> {
     }
 
     deinit {
+        if self.generation != ndb.generation {
+            //print("txn: OLD GENERATION (\(self.generation) != \(ndb.generation)), IGNORING")
+            return
+        }
         if moved || inherited || ndb.closed {
             return
         }

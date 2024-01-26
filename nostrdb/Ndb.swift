@@ -31,6 +31,7 @@ class Ndb {
     var ndb: ndb_t
     let path: String?
     let owns_db: Bool
+    var generation: Int
     var closed: Bool
 
     static func safemode() -> Ndb? {
@@ -124,7 +125,8 @@ class Ndb {
         guard let db = Self.open(path: path, owns_db_file: owns_db_file) else {
             return nil
         }
-
+        
+        self.generation = 0
         self.path = path
         self.owns_db = owns_db_file
         self.ndb = db
@@ -170,6 +172,7 @@ class Ndb {
 
     init(ndb: ndb_t) {
         self.ndb = ndb
+        self.generation = 0
         self.path = nil
         self.owns_db = true
         self.closed = false
@@ -189,6 +192,7 @@ class Ndb {
             return false
         }
 
+        self.generation += 1
         self.closed = false
         self.ndb = db
         return true
