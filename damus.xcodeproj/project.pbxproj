@@ -425,9 +425,6 @@
 		B57B4C642B312BFA00A232C0 /* RelayAuthenticationDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57B4C632B312BFA00A232C0 /* RelayAuthenticationDetail.swift */; };
 		B57B4C662B312C3700A232C0 /* NostrAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57B4C652B312C3700A232C0 /* NostrAuth.swift */; };
 		B5B4D1432B37D47600844320 /* NdbExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4D1422B37D47600844320 /* NdbExtensions.swift */; };
-		B5C60C202B530D5100C5ECA7 /* MuteItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C60C1F2B530D5100C5ECA7 /* MuteItem.swift */; };
-		B5C60C212B530D5600C5ECA7 /* MuteItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C60C1F2B530D5100C5ECA7 /* MuteItem.swift */; };
-		B5C60C232B532A8700C5ECA7 /* DamusDuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C60C222B532A8700C5ECA7 /* DamusDuration.swift */; };
 		BA37598A2ABCCDE40018D73B /* ImageResizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3759892ABCCDE30018D73B /* ImageResizer.swift */; };
 		BA37598D2ABCCE500018D73B /* PhotoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA37598B2ABCCE500018D73B /* PhotoCaptureProcessor.swift */; };
 		BA37598E2ABCCE500018D73B /* VideoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA37598C2ABCCE500018D73B /* VideoCaptureProcessor.swift */; };
@@ -1320,8 +1317,6 @@
 		B57B4C632B312BFA00A232C0 /* RelayAuthenticationDetail.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelayAuthenticationDetail.swift; sourceTree = "<group>"; };
 		B57B4C652B312C3700A232C0 /* NostrAuth.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NostrAuth.swift; sourceTree = "<group>"; };
 		B5B4D1422B37D47600844320 /* NdbExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbExtensions.swift; sourceTree = "<group>"; usesTabs = 0; };
-		B5C60C1F2B530D5100C5ECA7 /* MuteItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuteItem.swift; sourceTree = "<group>"; usesTabs = 0; };
-		B5C60C222B532A8700C5ECA7 /* DamusDuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusDuration.swift; sourceTree = "<group>"; usesTabs = 0; };
 		BA3759892ABCCDE30018D73B /* ImageResizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageResizer.swift; sourceTree = "<group>"; };
 		BA37598B2ABCCE500018D73B /* PhotoCaptureProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoCaptureProcessor.swift; sourceTree = "<group>"; };
 		BA37598C2ABCCE500018D73B /* VideoCaptureProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoCaptureProcessor.swift; sourceTree = "<group>"; };
