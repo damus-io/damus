@@ -1931,6 +1931,7 @@ static int ndb_ingester_process_event(secp256k1_context *ctx,
 		}
 	} else {
 		switch (tce.evtype) {
+		case NDB_TCE_AUTH:   goto cleanup;
 		case NDB_TCE_NOTICE: goto cleanup;
 		case NDB_TCE_EOSE:   goto cleanup;
 		case NDB_TCE_OK:     goto cleanup;
