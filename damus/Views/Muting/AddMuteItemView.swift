@@ -65,8 +65,7 @@ struct AddMuteItemView: View {
                         }
                     } else if new_text.starts(with: "#") {
                         // Remove the starting `#` character
-                        new_text.removeFirst()
-                        return .hashtag(Hashtag(hashtag: new_text), expiration_date)
+                        return .hashtag(Hashtag(hashtag: String("\(new_text)".dropFirst())), expiration_date)
                     } else {
                         return .word(new_text, expiration_date)
                     }
