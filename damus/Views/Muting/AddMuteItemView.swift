@@ -72,9 +72,10 @@ struct AddMuteItemView: View {
 
                 // Actually update & relay the new mute list
                 if let mute_item {
+                    let existing_mutelist = state.contacts.mutelist
+
                     guard
                         let full_keypair = state.keypair.to_full(),
-                        let existing_mutelist = state.contacts.mutelist,
                         let mutelist = create_or_update_mutelist(keypair: full_keypair, mprev: existing_mutelist, to_add: mute_item)
                     else {
                         return
