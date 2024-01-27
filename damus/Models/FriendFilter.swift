@@ -28,7 +28,7 @@ enum FriendFilter: String, StringCodable {
         case .all:
             return true
         case .friends:
-            return contacts.is_friend_or_self(pubkey)
+            return contacts.is_in_friendosphere(pubkey)
         }
     }
 }
