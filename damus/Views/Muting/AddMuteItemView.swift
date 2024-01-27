@@ -9,7 +9,7 @@ import SwiftUI
 struct AddMuteItemView: View {
     let state: DamusState
     @State var new_text: String = ""
-    @State var expiration: DamusDuration?
+    @State var expiration: DamusDuration = .indefinite
 
     @Environment(\.dismiss) var dismiss
 
@@ -23,7 +23,6 @@ struct AddMuteItemView: View {
                 .padding(.bottom)
 
             Picker(selection: $expiration) {
-                Text("Indefinite", comment: "Mute a given item indefinitly (until user unmutes it). As opposed to muting the item for a given period of time.")
                 ForEach(DamusDuration.allCases, id: \.self) { duration in
                     Text(duration.title).tag(duration)
                 }
@@ -55,7 +54,7 @@ struct AddMuteItemView: View {
             .cornerRadius(10)
 
             Button(action: {
-                let expiration_date: Date? = self.expiration?.date_from_now
+                let expiration_date: Date? = self.expiration.date_from_now
                 let mute_item: MuteItem? = {
                     if new_text.starts(with: "npub") {
                         if let pubkey: Pubkey = bech32_pubkey_decode(new_text) {

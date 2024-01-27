@@ -8,12 +8,15 @@
 import Foundation
 
 enum DamusDuration: CaseIterable {
+    case indefinite
     case day
     case week
     case month
 
     var title: String {
         switch self {
+        case .indefinite:
+            return NSLocalizedString("Indefinite", comment: "Mute a given item indefinitly (until user unmutes it). As opposed to muting the item for a given period of time.")
         case .day:
             return NSLocalizedString("24 hours", comment: "A duration of 24 hours/1 day to be shown to the user. Most likely in the context of how long they want to mute a piece of content for.")
         case .week:
@@ -27,6 +30,8 @@ enum DamusDuration: CaseIterable {
         let current_date = Date()
 
         switch self {
+        case .indefinite:
+            return nil
         case .day:
             return Calendar.current.date(byAdding: .day, value: 1, to: current_date)
         case .week:
