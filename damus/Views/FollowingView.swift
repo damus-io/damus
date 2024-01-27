@@ -157,7 +157,7 @@ struct FollowingView: View {
         .onDisappear {
             following.unsubscribe()
         }
-        .navigationBarTitle(NSLocalizedString("Following", comment: "Navigation bar title for view that shows who a user is following."))
+        .navigationBarTitle(NSLocalizedString("Frens", comment: "Navigation bar title for view that shows who a user is following."))
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 0) {
                 CustomPicker(selection: $tab_selection, content: {
