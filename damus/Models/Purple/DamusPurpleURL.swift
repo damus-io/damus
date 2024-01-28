@@ -17,10 +17,10 @@ enum DamusPurpleURL {
         guard components.scheme == "damus" else { return nil }
         switch components.path {
             case "purple:verify":
-                guard let checkout_id: String = components.queryItems?.first(where: { $0.name == "id" })?.value else { return nil }
+                guard let checkout_id = components.find("id") else { return nil }
                 return .verify_npub(checkout_id: checkout_id)
             case "purple:welcome":
-                guard let checkout_id: String = components.queryItems?.first(where: { $0.name == "id" })?.value else { return nil }
+                guard let checkout_id = components.find("id") else { return nil }
                 return .welcome(checkout_id: checkout_id)
             case "purple:landing":
                 return .landing
@@ -40,4 +40,10 @@ enum DamusPurpleURL {
         }
     }
     
+}
+
+extension URLComponents {
+    func find(_ name: String) -> String? {
+        self.queryItems?.first(where: { qi in qi.name == name })?.value
+    }
 }
