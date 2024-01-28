@@ -18,6 +18,24 @@ final class UrlTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
+    func testPurpleUrls() {
+        let landing_staging = DamusPurpleURL(is_staging: true, variant: .landing)
+        let welcome_staging = DamusPurpleURL(is_staging: true, variant: .welcome(checkout_id: "abc"))
+        let verify_staging  = DamusPurpleURL(is_staging: true, variant: .verify_npub(checkout_id: "abc"))
+
+        let landing = DamusPurpleURL(is_staging: false, variant: .landing)
+        let welcome = DamusPurpleURL(is_staging: false, variant: .welcome(checkout_id: "abc"))
+        let verify  = DamusPurpleURL(is_staging: false, variant: .verify_npub(checkout_id: "abc"))
+
+        XCTAssertEqual(landing_staging, .init(url: URL(string: landing_staging.url_string())!)!)
+        XCTAssertEqual(welcome_staging, .init(url: URL(string: welcome_staging.url_string())!)!)
+        XCTAssertEqual(verify_staging, .init(url: URL(string: verify_staging.url_string())!)!)
+
+        XCTAssertEqual(landing, .init(url: URL(string: landing.url_string())!)!)
+        XCTAssertEqual(welcome, .init(url: URL(string: welcome.url_string())!)!)
+        XCTAssertEqual(verify, .init(url: URL(string: verify.url_string())!)!)
+    }
+
     func testParseUrlTrailingParenthesis() {
         let testURL = URL(string: "https://en.m.wikipedia.org/wiki/Delicious_(website)")
         XCTAssertNotNil(testURL)

@@ -15,7 +15,7 @@ struct DamusPurpleURLSheetView: View {
     let purple_url: DamusPurpleURL
     
     var body: some View {
-        switch self.purple_url {
+        switch self.purple_url.variant {
             case .verify_npub(let checkout_id):
                 DamusPurpleVerifyNpubView(damus_state: damus_state, checkout_id: checkout_id)
             case .welcome(_):
@@ -28,7 +28,7 @@ struct DamusPurpleURLSheetView: View {
 
 struct DamusPurpleURLSheetView_Previews: PreviewProvider {
     static var previews: some View {
-        DamusPurpleURLSheetView(damus_state: test_damus_state, purple_url: .verify_npub(checkout_id: "123"))
+        DamusPurpleURLSheetView(damus_state: test_damus_state, purple_url: .init(is_staging: false, variant: .verify_npub(checkout_id: "123")))
     }
 }
 

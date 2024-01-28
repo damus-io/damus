@@ -1094,7 +1094,7 @@ enum OpenResult {
 }
 
 func on_open_url(state: DamusState, url: URL, result: @escaping (OpenResult?) -> Void) {
-    if let purple_url = DamusPurpleURL.from_url(url: url) {
+    if let purple_url = DamusPurpleURL(url: url) {
         result(.purple(purple_url))
         return
     }
