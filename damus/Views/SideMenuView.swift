@@ -89,21 +89,29 @@ struct SideMenuView: View {
     }
 
     var TopProfile: some View {
+        var name: String? = nil
+        var display_name: String? = nil
+
+        do {
+            let profile_txn = damus_state.ndb.lookup_profile(damus_state.pubkey, txn_name: "top_profile")
+            let profile = profile_txn?.unsafeUnownedValue?.profile
+            name = profile?.name
+            display_name = profile?.display_name
+        }
+
         return VStack(alignment: .leading, spacing: verticalSpacing) {
             HStack {
                 ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
 
                 VStack(alignment: .leading) {
-                    let profile_txn = damus_state.ndb.lookup_profile(damus_state.pubkey, txn_name: "top_profile")
-                    let profile = profile_txn?.nsafeUnownedValue?.profile
 
-                    if let display_name = profile?.display_name {
+                    if let display_name {
                         Text(display_name)
                             .foregroundColor(textColor())
                             .font(.title)
                             .lineLimit(1)
                     }
-                    if let name = profile?.name {
+                    if let name {
                         Text("@" + name)
                             .foregroundColor(DamusColors.mediumGrey)
                             .font(.body)
