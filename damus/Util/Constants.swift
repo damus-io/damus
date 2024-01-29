@@ -14,8 +14,8 @@ class Constants {
     static let DEVICE_TOKEN_RECEIVER_TEST_URL: URL = URL(string: "http://localhost:8000/user-info")!
     static let MAIN_APP_BUNDLE_IDENTIFIER: String = "com.jb55.damus2"
     static let NOTIFICATION_EXTENSION_BUNDLE_IDENTIFIER: String = "com.jb55.damus2.DamusNotificationService"
-    static let PURPLE_API_PRODUCTION_BASE_URL: URL = URL(string: "https://purple.damus.io")!
-    static let PURPLE_API_TEST_BASE_URL: URL = URL(string: "http://127.0.0.1:8989")!
-    static let PURPLE_LANDING_PAGE_TEST_URL: URL = URL(string: "http://localhost:3000/purple")!
+    static let PURPLE_API_PRODUCTION_BASE_URL: URL = URL(string: "https://api.damus.io")!
+    static let PURPLE_API_TEST_BASE_URL: URL = URL(string: "https://api-staging.damus.io")!
+    static let PURPLE_LANDING_PAGE_TEST_URL: URL = URL(string: "https://staging.damus.io/purple")!
     static let PURPLE_LANDING_PAGE_PRODUCTION_URL: URL = URL(string: "https://damus.io/purple")!
 }

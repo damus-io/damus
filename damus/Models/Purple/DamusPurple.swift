@@ -8,12 +8,12 @@
 import Foundation
 
 class DamusPurple: StoreObserverDelegate {
-    let environment: ServerEnvironment
+    let settings: UserSettingsStore
     let keypair: Keypair
     var starred_profiles_cache: [Pubkey: UserBadgeInfo]
     
-    init(environment: ServerEnvironment, keypair: Keypair) {
-        self.environment = environment
+    init(settings: UserSettingsStore, keypair: Keypair) {
+        self.settings = settings
         self.keypair = keypair
         self.starred_profiles_cache = [:]
     }
@@ -23,6 +23,10 @@ class DamusPurple: StoreObserverDelegate {
         return await self.profile_purple_badge_info(pubkey: pubkey)?.active
     }
     
+    var environment: ServerEnvironment {
+        self.settings.purple_api_staging ? .staging : .production
+    }
+
     func profile_purple_badge_info(pubkey: Pubkey) async -> UserBadgeInfo? {
         if let cached_result = self.starred_profiles_cache[pubkey] {
             return cached_result
@@ -216,12 +220,12 @@ extension DamusPurple {
 
 extension DamusPurple {
     enum ServerEnvironment {
-        case local_test
+        case staging
         case production
         
         func get_base_url() -> URL {
             switch self {
-                case .local_test:
+                case .staging:
                     Constants.PURPLE_API_TEST_BASE_URL
                 case .production:
                     Constants.PURPLE_API_PRODUCTION_BASE_URL

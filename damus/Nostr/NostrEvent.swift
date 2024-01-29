@@ -325,7 +325,13 @@ func decode_nostr_event(txt: String) -> NostrResponse? {
 func encode_json<T: Encodable>(_ val: T) -> String? {
     let encoder = JSONEncoder()
     encoder.outputFormatting = .withoutEscapingSlashes
-    return (try? encoder.encode(val)).map { String(decoding: $0, as: UTF8.self) }
+    return (try? encode_json_data(val)).map { String(decoding: $0, as: UTF8.self) }
+}
+
+func encode_json_data<T: Encodable>(_ val: T) throws -> Data {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = .withoutEscapingSlashes
+    return try encoder.encode(val)
 }
 
 func decode_nostr_event_json(json: String) -> NostrEvent? {

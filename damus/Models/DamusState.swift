@@ -63,7 +63,7 @@ class DamusState: HeadlessDamusState {
         self.video = video
         self.ndb = ndb
         self.purple = purple ?? DamusPurple(
-            environment: settings.purple_api_local_test_mode ? .local_test : .production,
+            settings: settings,
             keypair: keypair
         )
     }

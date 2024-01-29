@@ -43,7 +43,7 @@ func make_nip98_authenticated_request(method: HTTPMethod, url: URL, payload: Dat
         createdAt: UInt32(Date().timeIntervalSince1970)
     )
 
-    let auth_note_json_data: Data = try JSONEncoder().encode(auth_note)
+    let auth_note_json_data: Data = try encode_json_data(auth_note)
     let auth_note_base64: String = base64_encode(auth_note_json_data.bytes)
     
     request.setValue("Nostr " + auth_note_base64, forHTTPHeaderField: "Authorization")

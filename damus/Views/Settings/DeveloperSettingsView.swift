@@ -28,7 +28,7 @@ struct DeveloperSettingsView: View {
                     Toggle("Enable experimental Purple API support", isOn: $settings.enable_experimental_purple_api)
                         .toggleStyle(.switch)
 
-                    Toggle("Purple API localhost test mode", isOn: $settings.purple_api_local_test_mode)
+                    Toggle("Purple API staging mode", isOn: $settings.purple_api_staging)
                         .toggleStyle(.switch)
                 }
             }
