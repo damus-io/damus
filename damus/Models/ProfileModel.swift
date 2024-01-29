@@ -13,6 +13,8 @@ class ProfileModel: ObservableObject, Equatable {
     @Published var relays: [String: RelayInfo]? = nil
     @Published var progress: Int = 0
     
+    private let MAX_SHARE_RELAYS = 4
+    
     var events: EventHolder
     let pubkey: Pubkey
     let damus: DamusState
@@ -160,6 +162,10 @@ class ProfileModel: ObservableObject, Equatable {
     
     func getRelayStrings() -> [String] {
         return relays?.keys.map {$0} ?? []
+    }
+    
+    func getCappedRelayStrings() -> [String] {
+        return relays?.keys.prefix(MAX_SHARE_RELAYS).map { $0 } ?? []
     }
 }
 
