@@ -45,9 +45,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Frens</string>
+			<string>Following</string>
 			<key>other</key>
-			<string>Frens</string>
+			<string>Following</string>
 		</dict>
 	</dict>
 	<key>imports_count</key>

@@ -739,9 +739,9 @@ Sentence composed of 2 variables to describe how many reposts. In source English
         <target>Followers You Know</target>
         <note>Navigation bar title for view that shows who is following a user.</note>
       </trans-unit>
-      <trans-unit id="Frens" xml:space="preserve">
-        <source>Frens</source>
-        <target>Frens</target>
+      <trans-unit id="Following" xml:space="preserve">
+        <source>Following</source>
+        <target>Following</target>
         <note>Navigation bar title for view that shows who a user is following.</note>
       </trans-unit>
       <trans-unit id="Following..." xml:space="preserve">
@@ -2346,13 +2346,13 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <note/>
       </trans-unit>
       <trans-unit id="/following_count:dict/FOLLOWING:dict/one:dict/:string" xml:space="preserve">
-        <source>Frens</source>
-        <target>Frens</target>
+        <source>Following</source>
+        <target>Following</target>
         <note/>
       </trans-unit>
       <trans-unit id="/following_count:dict/FOLLOWING:dict/other:dict/:string" xml:space="preserve">
-        <source>Frens</source>
-        <target>Frens</target>
+        <source>Following</source>
+        <target>Following</target>
         <note/>
       </trans-unit>
       <trans-unit id="/following_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
