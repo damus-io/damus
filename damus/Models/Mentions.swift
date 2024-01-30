@@ -269,8 +269,11 @@ func make_post_tags(post_blocks: [Block], tags: [[String]]) -> PostTags {
     for post_block in post_blocks {
         switch post_block {
         case .mention(let mention):
-            if case .note = mention.ref {
+            switch(mention.ref) {
+            case .note, .nevent:
                 continue
+            default:
+                break
             }
 
             new_tags.append(mention.ref.tag)

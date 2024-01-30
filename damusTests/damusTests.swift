@@ -229,12 +229,24 @@ class damusTests: XCTestCase {
         XCTAssertEqual(txt, "there is no mention here")
     }
     
-    func testTagGeneration_Nevent_ContainsETag() {
+    func testTagGeneration_Note_ContainsNoTags() {
+        let ev = createEventFromContentString("note1h865g8j9egu30yequqp3e7ccudq8seeaes7nuw3m82vpwc9226tqtudlvp")
+        
+        XCTAssertEqual(ev.tags.count, 0)
+    }
+    
+    func testTagGeneration_Nevent_ContainsNoTags() {
         let ev = createEventFromContentString("nevent1qqstna2yrezu5wghjvswqqculvvwxsrcvu7uc0f78gan4xqhvz49d9spr3mhxue69uhkummnw3ez6un9d3shjtn4de6x2argwghx6egpr4mhxue69uhkummnw3ez6ur4vgh8wetvd3hhyer9wghxuet5nxnepm")
         
+        XCTAssertEqual(ev.tags.count, 0)
+    }
+    
+    func testTagGeneration_Npub_ContainsPTag() {
+        let ev = createEventFromContentString("npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6")
+        
         XCTAssertEqual(ev.tags.count, 1)
-        XCTAssertEqual(ev.tags[0][0].string(), "e")
-        XCTAssertEqual(ev.tags[0][1].string(), "b9f5441e45ca39179320e0031cfb18e34078673dcc3d3e3a3b3a981760aa5696")
+        XCTAssertEqual(ev.tags[0][0].string(), "p")
+        XCTAssertEqual(ev.tags[0][1].string(), "3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d")
     }
     
     func testTagGeneration_Nprofile_ContainsPTag() {
