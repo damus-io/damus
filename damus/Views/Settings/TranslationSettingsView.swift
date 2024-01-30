@@ -20,13 +20,13 @@ struct TranslationSettingsView: View {
                     .toggleStyle(.switch)
 
                 Picker(NSLocalizedString("Service", comment: "Prompt selection of translation service provider."), selection: $settings.translation_service) {
-                    ForEach(TranslationService.allCases.filter({ settings.enable_experimental_purple_api ? true : $0 != .purple }), id: \.self) { server in
+                    ForEach(TranslationService.allCases.filter({ damus_state.purple.enable_purple ? true : $0 != .purple }), id: \.self) { server in
                         Text(server.model.displayName)
                             .tag(server.model.tag)
                     }
                 }
                 
-                if settings.translation_service == .purple && settings.enable_experimental_purple_api {
+                if settings.translation_service == .purple && damus_state.purple.enable_purple {
                     NavigationLink(destination: DamusPurpleView(damus_state: damus_state)) {
                         Text(NSLocalizedString("Configure Damus Purple", comment: "Button to allow Damus Purple to be configured"))
                     }

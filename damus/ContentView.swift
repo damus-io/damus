@@ -688,7 +688,7 @@ struct ContentView: View {
         
         home.damus_state = self.damus_state!
         
-        if let damus_state, damus_state.settings.enable_experimental_purple_api {
+        if let damus_state, damus_state.purple.enable_purple {
             // Assign delegate so that we can send receipts to the Purple API server as soon as we get updates from user's purchases
             StoreObserver.standard.delegate = damus_state.purple
         }

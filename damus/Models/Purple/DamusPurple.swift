@@ -26,6 +26,11 @@ class DamusPurple: StoreObserverDelegate {
     var environment: DamusPurpleEnvironment {
         return self.settings.purple_enviroment
     }
+    
+    var enable_purple: Bool {
+        // TODO: On release, we could just replace this with `true` (or some other feature flag)
+        return self.settings.enable_experimental_purple_api
+    }
 
     func profile_purple_badge_info(pubkey: Pubkey) async -> UserBadgeInfo? {
         if let cached_result = self.starred_profiles_cache[pubkey] {

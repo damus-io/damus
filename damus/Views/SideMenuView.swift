@@ -54,7 +54,7 @@ struct SideMenuView: View {
                 navLabel(title: NSLocalizedString("Wallet", comment: "Sidebar menu label for Wallet view."), img: "wallet")
             }
 
-            if damus_state.settings.enable_experimental_purple_api {
+            if damus_state.purple.enable_purple {
                 NavigationLink(destination: DamusPurpleView(damus_state: damus_state)) {
                     HStack(spacing: 13) {
                         Image("nostr-hashtag")

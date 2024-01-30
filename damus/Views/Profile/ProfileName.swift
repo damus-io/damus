@@ -113,7 +113,7 @@ struct ProfileName: View {
         }
         .onAppear(perform: {
             Task {
-                 if damus_state.settings.enable_experimental_purple_api {
+                 if damus_state.purple.enable_purple {
                     self.purple_badge = await damus_state.purple.profile_purple_badge_info(pubkey: pubkey)
                  }
              }
