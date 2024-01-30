@@ -27,9 +27,13 @@ struct DeveloperSettingsView: View {
                     
                     Toggle("Enable experimental Purple API support", isOn: $settings.enable_experimental_purple_api)
                         .toggleStyle(.switch)
-
-                    Toggle("Purple API staging mode", isOn: $settings.purple_api_staging)
-                        .toggleStyle(.switch)
+                    
+                    Picker(NSLocalizedString("Damus Purple environment", comment: "Prompt selection of the Damus purple environment (Developer feature to switch between real/production mode to test modes)."), selection: $settings.purple_enviroment) {
+                        ForEach(DamusPurpleEnvironment.allCases, id: \.self) { purple_environment in
+                            Text(purple_environment.text_description())
+                                .tag(purple_environment.rawValue)
+                        }
+                    }
                 }
             }
         }

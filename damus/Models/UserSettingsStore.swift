@@ -205,8 +205,8 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "enable_experimental_purple_api", default_value: false)
     var enable_experimental_purple_api: Bool
     
-    @Setting(key: "purple_api_staging", default_value: false)
-    var purple_api_staging: Bool
+    @StringSetting(key: "purple_environment", default_value: .production)
+    var purple_enviroment: DamusPurpleEnvironment
 
     @Setting(key: "emoji_reactions", default_value: default_emoji_reactions)
     var emoji_reactions: [String]

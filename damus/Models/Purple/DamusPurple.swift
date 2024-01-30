@@ -23,8 +23,8 @@ class DamusPurple: StoreObserverDelegate {
         return await self.profile_purple_badge_info(pubkey: pubkey)?.active
     }
     
-    var environment: ServerEnvironment {
-        self.settings.purple_api_staging ? .staging : .production
+    var environment: DamusPurpleEnvironment {
+        return self.settings.purple_enviroment
     }
 
     func profile_purple_badge_info(pubkey: Pubkey) async -> UserBadgeInfo? {
@@ -57,7 +57,7 @@ class DamusPurple: StoreObserverDelegate {
     }
     
     func get_account_data(pubkey: Pubkey) async -> Data? {
-        let url = environment.get_base_url().appendingPathComponent("accounts/\(pubkey.hex())")
+        let url = environment.api_base_url().appendingPathComponent("accounts/\(pubkey.hex())")
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         
@@ -72,7 +72,7 @@ class DamusPurple: StoreObserverDelegate {
     }
     
     func create_account(pubkey: Pubkey) async throws {
-        let url = environment.get_base_url().appendingPathComponent("accounts")
+        let url = environment.api_base_url().appendingPathComponent("accounts")
         
         Log.info("Creating account with Damus Purple server", for: .damus_purple)
         
@@ -110,7 +110,7 @@ class DamusPurple: StoreObserverDelegate {
 
             do {
                 let receiptData = try Data(contentsOf: appStoreReceiptURL, options: .alwaysMapped)
-                let url = environment.get_base_url().appendingPathComponent("accounts/\(keypair.pubkey.hex())/app-store-receipt")
+                let url = environment.api_base_url().appendingPathComponent("accounts/\(keypair.pubkey.hex())/app-store-receipt")
                 
                 Log.info("Sending in-app purchase receipt to Damus Purple server", for: .damus_purple)
                 
@@ -139,7 +139,7 @@ class DamusPurple: StoreObserverDelegate {
     }
     
     func translate(text: String, source source_language: String, target target_language: String) async throws -> String {
-        var url = environment.get_base_url()
+        var url = environment.api_base_url()
         url.append(path: "/translate")
         url.append(queryItems: [
             .init(name: "source", value: source_language),
@@ -169,7 +169,7 @@ class DamusPurple: StoreObserverDelegate {
     }
     
     func verify_npub_for_checkout(checkout_id: String) async throws {
-        var url = environment.get_base_url()
+        var url = environment.api_base_url()
         url.append(path: "/ln-checkout/\(checkout_id)/verify")
         
         let (data, response) = try await make_nip98_authenticated_request(
@@ -219,20 +219,6 @@ extension DamusPurple {
 // MARK: Helper structures
 
 extension DamusPurple {
-    enum ServerEnvironment {
-        case staging
-        case production
-        
-        func get_base_url() -> URL {
-            switch self {
-                case .staging:
-                    Constants.PURPLE_API_TEST_BASE_URL
-                case .production:
-                    Constants.PURPLE_API_PRODUCTION_BASE_URL
-            }
-        }
-    }
-    
     enum PurpleError: Error {
         case translation_error(status_code: Int, response: Data)
         case translation_no_response

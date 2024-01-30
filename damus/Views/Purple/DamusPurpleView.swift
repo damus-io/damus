@@ -412,7 +412,7 @@ struct DamusPurpleView: View {
                     Spacer()
                     Link(
                         NSLocalizedString("Learn more", comment: "Label for a link to the Damus Purple landing page"),
-                        destination: damus_state.settings.purple_api_staging ? Constants.PURPLE_LANDING_PAGE_TEST_URL : Constants.PURPLE_LANDING_PAGE_PRODUCTION_URL
+                        destination: damus_state.purple.environment.purple_landing_page_url()
                     )
                         .foregroundColor(DamusColors.pink)
                         .padding()
