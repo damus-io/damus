@@ -362,18 +362,20 @@ struct DamusPurpleView: View {
     
     var ProductStateView: some View {
         Group {
-            switch self.products {
-                case .failed:
-                    ProductLoadError
-                case .loaded(let products):
-                    if let purchased {
-                        PurchasedView(purchased)
-                    } else {
-                        ProductsView(products)
-                    }
-                case .loading:
-                    ProgressView()
-                        .progressViewStyle(.circular)
+            if damus_state.purple.enable_purple_iap_support {
+                switch self.products {
+                    case .failed:
+                        ProductLoadError
+                    case .loaded(let products):
+                        if let purchased {
+                            PurchasedView(purchased)
+                        } else {
+                            ProductsView(products)
+                        }
+                    case .loading:
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                }
             }
         }
     }
@@ -457,8 +459,11 @@ struct DamusPurpleView: View {
                 HStack {
                     Spacer()
                     Link(
-                        NSLocalizedString("Learn more", comment: "Label for a link to the Damus Purple landing page"),
-                        destination: damus_state.purple.environment.purple_landing_page_url()
+                        damus_state.purple.enable_purple_iap_support ?
+                            NSLocalizedString("Learn more about the features", comment: "Label for a link to the Damus website, to allow the user to learn more about the features of Purple")
+                            :
+                            NSLocalizedString("Coming soon! Visit our website to learn more", comment: "Label announcing Purple, and inviting the user to learn more on the website"),
+                        destination: damus_state.purple.environment.damus_website_url()
                     )
                     .foregroundColor(DamusColors.pink)
                     .padding()

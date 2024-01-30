@@ -31,6 +31,12 @@ class DamusPurple: StoreObserverDelegate {
         // TODO: On release, we could just replace this with `true` (or some other feature flag)
         return self.settings.enable_experimental_purple_api
     }
+    
+    // Whether to enable Apple In-app purchase support
+    var enable_purple_iap_support: Bool {
+        // TODO: When we have full support for Apple In-app purchases, we can replace this with `true` (or another feature flag)
+        return self.settings.enable_experimental_purple_iap_support
+    }
 
     func profile_purple_badge_info(pubkey: Pubkey) async -> UserBadgeInfo? {
         if let cached_result = self.starred_profiles_cache[pubkey] {

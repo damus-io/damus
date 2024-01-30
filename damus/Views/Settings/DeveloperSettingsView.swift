@@ -34,6 +34,9 @@ struct DeveloperSettingsView: View {
                                 .tag(purple_environment.rawValue)
                         }
                     }
+
+                    Toggle("Enable experimental Purple In-app purchase support", isOn: $settings.enable_experimental_purple_iap_support)
+                        .toggleStyle(.switch)
                 }
             }
         }
