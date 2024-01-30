@@ -58,7 +58,6 @@ struct DamusPurpleView: View {
     @State var selection: DamusPurpleType = .yearly
     @State var show_welcome_sheet: Bool = false
     @State var show_manage_subscriptions = false
-    @State var show_settings_change_confirmation_dialog = false
     @State private var shouldDismissView = false
     
     @Environment(\.dismiss) var dismiss
@@ -101,6 +100,9 @@ struct DamusPurpleView: View {
         .onDisappear {
             notify(.display_tabbar(true))
         }
+        .onReceive(handle_notify(.purple_account_update), perform: { account in
+            self.my_account_info_state = .loaded(account: account)
+        })
         .task {
             await load_products()
         }
@@ -110,16 +112,6 @@ struct DamusPurpleView: View {
         }, content: {
             DamusPurpleNewUserOnboardingView(damus_state: damus_state)
         })
-        .onChange(of: shouldDismissView) { shouldDismissView in
-            if shouldDismissView && !show_settings_change_confirmation_dialog {
-                dismiss()
-            }
-        }
-        .onChange(of: show_settings_change_confirmation_dialog) { show_settings_change_confirmation_dialog in
-            if shouldDismissView && !show_settings_change_confirmation_dialog {
-                dismiss()
-            }
-        }
         .manageSubscriptionsSheet(isPresented: $show_manage_subscriptions)
     }
     

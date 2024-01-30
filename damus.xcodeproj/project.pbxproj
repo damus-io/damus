@@ -450,6 +450,7 @@
 		D7315A2C2ACDF4DA0036E30A /* DamusCacheManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7315A2B2ACDF4DA0036E30A /* DamusCacheManagerTests.swift */; };
 		D7373BA62B688EA300F7783D /* DamusPurpleTranslationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7373BA52B688EA200F7783D /* DamusPurpleTranslationSetupView.swift */; };
 		D7373BA82B68974500F7783D /* DamusPurpleNewUserOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7373BA72B68974500F7783D /* DamusPurpleNewUserOnboardingView.swift */; };
+		D7373BAA2B68A65A00F7783D /* PurpleAccountUpdateNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7373BA92B68A65A00F7783D /* PurpleAccountUpdateNotify.swift */; };
 		D74AAFC22B153395006CF0F4 /* HeadlessDamusState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFC12B153395006CF0F4 /* HeadlessDamusState.swift */; };
 		D74AAFC32B153395006CF0F4 /* HeadlessDamusState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFC12B153395006CF0F4 /* HeadlessDamusState.swift */; };
 		D74AAFC52B1538DF006CF0F4 /* NotificationExtensionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFC42B1538DE006CF0F4 /* NotificationExtensionState.swift */; };
@@ -1346,6 +1347,7 @@
 		D7315A2B2ACDF4DA0036E30A /* DamusCacheManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusCacheManagerTests.swift; sourceTree = "<group>"; };
 		D7373BA52B688EA200F7783D /* DamusPurpleTranslationSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleTranslationSetupView.swift; sourceTree = "<group>"; };
 		D7373BA72B68974500F7783D /* DamusPurpleNewUserOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleNewUserOnboardingView.swift; sourceTree = "<group>"; };
+		D7373BA92B68A65A00F7783D /* PurpleAccountUpdateNotify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurpleAccountUpdateNotify.swift; sourceTree = "<group>"; };
 		D74AAFC12B153395006CF0F4 /* HeadlessDamusState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadlessDamusState.swift; sourceTree = "<group>"; };
 		D74AAFC42B1538DE006CF0F4 /* NotificationExtensionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationExtensionState.swift; sourceTree = "<group>"; };
 		D74AAFCB2B155D07006CF0F4 /* MakeZapRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MakeZapRequest.swift; sourceTree = "<group>"; };
@@ -2209,6 +2211,7 @@
 				4C4E137A2A76D5FB00BDD832 /* MuteThreadNotify.swift */,
 				4C4E137C2A76D63600BDD832 /* UnmuteThreadNotify.swift */,
 				B57B4C612B312BD700A232C0 /* ReconnectRelaysNotify.swift */,
+				D7373BA92B68A65A00F7783D /* PurpleAccountUpdateNotify.swift */,
 			);
 			path = Notify;
 			sourceTree = "<group>";
@@ -3238,6 +3241,7 @@
 				F71694EA2A662232001F4053 /* OnboardingSuggestionsView.swift in Sources */,
 				4C12536A2A76D3850004F4B8 /* RelaysChangedNotify.swift in Sources */,
 				4C30AC8029A6A53F00E2BD5A /* ProfilePicturesView.swift in Sources */,
+				D7373BAA2B68A65A00F7783D /* PurpleAccountUpdateNotify.swift in Sources */,
 				5C6E1DAD2A193EC2008FC15A /* GradientButtonStyle.swift in Sources */,
 				3CCD1E6A2A874C4E0099A953 /* Nip98HTTPAuth.swift in Sources */,
 				4C8EC52529D1FA6C0085D9A8 /* DamusColors.swift in Sources */,
