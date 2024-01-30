@@ -96,11 +96,10 @@ struct DamusPurpleWelcomeView: View {
         }
         .background(content: {
             ZStack {
-                Rectangle()
-                    .background(.black)
                 Image("purple-blue-gradient-1")
                     .offset(CGSize(width: 300.0, height: -0.0))
                     .opacity(start ? 1.0 : 0.2)
+                    .background(.black)
                 Image("stars-bg")
                     .resizable(resizingMode: .stretch)
                     .frame(width: 500, height: 500)

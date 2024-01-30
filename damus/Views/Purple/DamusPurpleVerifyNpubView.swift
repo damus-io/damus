@@ -15,6 +15,7 @@ struct DamusPurpleVerifyNpubView: View {
     var body: some View {
         ZStack {
             Rectangle()
+                .foregroundStyle(Color.black)
                 .background(Color.black)
             
             VStack {
