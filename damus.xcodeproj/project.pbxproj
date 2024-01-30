@@ -442,6 +442,7 @@
 		D72341192B6864F200E1E135 /* DamusPurpleEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72341182B6864F200E1E135 /* DamusPurpleEnvironment.swift */; };
 		D723411A2B6864F200E1E135 /* DamusPurpleEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72341182B6864F200E1E135 /* DamusPurpleEnvironment.swift */; };
 		D723C38E2AB8D83400065664 /* ContentFilters.swift in Sources */ = {isa = PBXBuildFile; fileRef = D723C38D2AB8D83400065664 /* ContentFilters.swift */; };
+		D724D8272B64B40B00ABE789 /* DamusPurpleAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D724D8262B64B40B00ABE789 /* DamusPurpleAccountView.swift */; };
 		D72A2D022AD9C136002AFF62 /* EventViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2CFF2AD9B66B002AFF62 /* EventViewTests.swift */; };
 		D72A2D052AD9C1B5002AFF62 /* MockDamusState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2D042AD9C1B5002AFF62 /* MockDamusState.swift */; };
 		D72A2D072AD9C1FB002AFF62 /* MockProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2D062AD9C1FB002AFF62 /* MockProfiles.swift */; };
@@ -1335,6 +1336,7 @@
 		D71DC1EB2A9129C3006E207C /* PostViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostViewTests.swift; sourceTree = "<group>"; };
 		D72341182B6864F200E1E135 /* DamusPurpleEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleEnvironment.swift; sourceTree = "<group>"; };
 		D723C38D2AB8D83400065664 /* ContentFilters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentFilters.swift; sourceTree = "<group>"; };
+		D724D8262B64B40B00ABE789 /* DamusPurpleAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleAccountView.swift; sourceTree = "<group>"; };
 		D72A2CFF2AD9B66B002AFF62 /* EventViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventViewTests.swift; sourceTree = "<group>"; };
 		D72A2D042AD9C1B5002AFF62 /* MockDamusState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDamusState.swift; sourceTree = "<group>"; };
 		D72A2D062AD9C1FB002AFF62 /* MockProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockProfiles.swift; sourceTree = "<group>"; };
@@ -2576,6 +2578,7 @@
 				D76556D52B1E6C08001B0CCC /* DamusPurpleWelcomeView.swift */,
 				D7ADD3DF2B538D4200F104C4 /* DamusPurpleURLSheetView.swift */,
 				D7ADD3E12B538E3500F104C4 /* DamusPurpleVerifyNpubView.swift */,
+				D724D8262B64B40B00ABE789 /* DamusPurpleAccountView.swift */,
 			);
 			path = Purple;
 			sourceTree = "<group>";
@@ -3213,6 +3216,7 @@
 				4CB88396296F7F8B00DC99E7 /* ReactionView.swift in Sources */,
 				50A16FFD2AA7525700DFEC1F /* DamusVideoPlayerViewModel.swift in Sources */,
 				4CFF8F6B29CD0079008DB934 /* RepostedEvent.swift in Sources */,
+				D724D8272B64B40B00ABE789 /* DamusPurpleAccountView.swift in Sources */,
 				4C8682872814DE470026224F /* ProfileView.swift in Sources */,
 				5C0707D12A1ECB38004E7B51 /* DamusLogoGradient.swift in Sources */,
 				4CDD1AE02A6B305F001CD4DF /* NdbTagElem.swift in Sources */,

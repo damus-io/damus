@@ -27,6 +27,13 @@ enum ProductState {
     }
 }
 
+enum AccountInfoState {
+    case loading
+    case loaded(account: DamusPurple.Account)
+    case no_account
+    case error(message: String)
+}
+
 func non_discounted_price(_ product: Product) -> String {
     return (product.price * 1.1984569224).formatted(product.priceFormatStyle)
 }
@@ -45,6 +52,7 @@ struct DamusPurpleView: View {
     let damus_state: DamusState
     let keypair: Keypair
     
+    @State var my_account_info_state: AccountInfoState = .loading
     @State var products: ProductState
     @State var purchased: PurchasedProduct? = nil
     @State var selection: DamusPurpleType = .yearly
@@ -86,6 +94,9 @@ struct DamusPurpleView: View {
         }
         .onAppear {
             notify(.display_tabbar(false))
+            Task {
+                await self.load_account()
+            }
         }
         .onDisappear {
             notify(.display_tabbar(true))
@@ -121,6 +132,20 @@ struct DamusPurpleView: View {
             }
         }
         .manageSubscriptionsSheet(isPresented: $show_manage_subscriptions)
+    }
+    
+    func load_account() async {
+        do {
+            if let account = try await damus_state.purple.get_account(pubkey: damus_state.keypair.pubkey) {
+                self.my_account_info_state = .loaded(account: account)
+                return
+            }
+            self.my_account_info_state = .no_account
+            return
+        }
+        catch {
+            self.my_account_info_state = .error(message: NSLocalizedString("There was an error loading your account. Please try again later. If problem persists, please contact us at support@damus.io", comment: "Error label when Purple account information fails to load"))
+        }
     }
     
     func update_user_settings_to_purple() {
@@ -357,6 +382,27 @@ struct DamusPurpleView: View {
         VStack {
             DamusPurpleLogoView()
             
+            switch my_account_info_state {
+                case .loading:
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                case .loaded(let account):
+                    DamusPurpleAccountView(damus_state: damus_state, account: account)
+                case .no_account:
+                    MarketingContent
+                case .error(let message):
+                    Text(message)
+                        .foregroundStyle(.red)
+                        .multilineTextAlignment(.center)
+                        .padding()
+            }
+            
+            Spacer()
+        }
+    }
+    
+    var MarketingContent: some View {
+        VStack {
             VStack(alignment: .leading, spacing: 30) {
                 Subtitle(NSLocalizedString("Help us stay independent in our mission for Freedom tech with our Purple subscription, and look cool doing it!", comment: "Damus purple subscription pitch"))
                     .multilineTextAlignment(.center)
@@ -414,8 +460,8 @@ struct DamusPurpleView: View {
                         NSLocalizedString("Learn more", comment: "Label for a link to the Damus Purple landing page"),
                         destination: damus_state.purple.environment.purple_landing_page_url()
                     )
-                        .foregroundColor(DamusColors.pink)
-                        .padding()
+                    .foregroundColor(DamusColors.pink)
+                    .padding()
                     Spacer()
                 }
                 
@@ -427,9 +473,6 @@ struct DamusPurpleView: View {
                 ProductStateView
             }
             .padding([.top], 20)
-
-            
-            Spacer()
         }
     }
 }

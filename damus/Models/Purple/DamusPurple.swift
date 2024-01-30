@@ -37,7 +37,7 @@ class DamusPurple: StoreObserverDelegate {
             return cached_result
         }
         
-        guard let data = await self.get_account_data(pubkey: pubkey) else { return nil }
+        guard let data = try? await self.get_account_data(pubkey: pubkey) else { return nil }
         
         guard let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else { return nil }
         
@@ -52,7 +52,7 @@ class DamusPurple: StoreObserverDelegate {
     }
     
     func account_exists(pubkey: Pubkey) async -> Bool? {
-        guard let account_data = await self.get_account_data(pubkey: pubkey) else { return nil }
+        guard let account_data = try? await self.get_account_data(pubkey: pubkey) else { return nil }
         
         if let account_info = try? JSONDecoder().decode(AccountInfo.self, from: account_data) {
             return account_info.pubkey == pubkey.hex()
@@ -61,19 +61,33 @@ class DamusPurple: StoreObserverDelegate {
         return false
     }
     
-    func get_account_data(pubkey: Pubkey) async -> Data? {
+    func get_account(pubkey: Pubkey) async throws -> Account? {
+        guard let data = try await self.get_account_data(pubkey: pubkey) else { return nil }
+        return Account.from(json_data: data)
+    }
+    
+    func get_account_data(pubkey: Pubkey) async throws -> Data? {
         let url = environment.api_base_url().appendingPathComponent("accounts/\(pubkey.hex())")
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
         
-        do {
-            let (data, _) = try await URLSession.shared.data(for: request)
-            return data
-        } catch {
-            print("Failed to fetch data: \(error)")
+        let (data, response) = try await make_nip98_authenticated_request(
+            method: .get,
+            url: url,
+            payload: nil,
+            payload_type: nil,
+            auth_keypair: self.keypair
+        )
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            switch httpResponse.statusCode {
+                case 200:
+                    return data
+                case 404:
+                    return nil
+                default:
+                    throw PurpleError.http_response_error(status_code: httpResponse.statusCode, response: data)
+            }
         }
-        
-        return nil
+        throw PurpleError.error_processing_response
     }
     
     func create_account(pubkey: Pubkey) async throws {
@@ -207,6 +221,42 @@ class DamusPurple: StoreObserverDelegate {
             formatter.numberStyle = .ordinal
             return formatter.string(from: NSNumber(integerLiteral: number))
         }
+        
+        static func from(account: Account) -> Self {
+            return UserBadgeInfo(active: account.active, subscriber_number: Int(account.subscriber_number))
+        }
+    }
+    
+    struct Account {
+        let pubkey: Pubkey
+        let created_at: Date
+        let expiry: Date
+        let subscriber_number: UInt
+        let active: Bool
+        
+        static func from(json_data: Data) -> Self? {
+            guard let payload = try? JSONDecoder().decode(Payload.self, from: json_data) else { return nil }
+            return Self.from(payload: payload)
+        }
+        
+        static func from(payload: Payload) -> Self? {
+            guard let pubkey = Pubkey(hex: payload.pubkey) else { return nil }
+            return Self(
+                pubkey: pubkey,
+                created_at: Date.init(timeIntervalSince1970: TimeInterval(payload.created_at)),
+                expiry: Date.init(timeIntervalSince1970: TimeInterval(payload.expiry)),
+                subscriber_number: payload.subscriber_number,
+                active: payload.active
+            )
+        }
+        
+        struct Payload: Codable {
+            let pubkey: String              // Hex-encoded string
+            let created_at: UInt64          // Unix timestamp
+            let expiry: UInt64              // Unix timestamp
+            let subscriber_number: UInt
+            let active: Bool
+        }
     }
 }
 
@@ -226,6 +276,8 @@ extension DamusPurple {
 extension DamusPurple {
     enum PurpleError: Error {
         case translation_error(status_code: Int, response: Data)
+        case http_response_error(status_code: Int, response: Data)
+        case error_processing_response
         case translation_no_response
         case checkout_npub_verification_error
     }
