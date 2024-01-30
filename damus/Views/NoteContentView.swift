@@ -197,7 +197,7 @@ struct NoteContentView: View {
                 }
             }
             .background(DamusColors.neutral1)
-            .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
+            .frame(minWidth: 200, maxWidth: .infinity, alignment: .center)
             .cornerRadius(8)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
