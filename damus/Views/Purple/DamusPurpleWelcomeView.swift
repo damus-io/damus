@@ -17,6 +17,7 @@ fileprivate extension Animation {
 struct DamusPurpleWelcomeView: View {
     @Environment(\.dismiss) var dismiss
     @State var start = false
+    var next_page: () -> Void
     
     var body: some View {
         VStack {
@@ -80,7 +81,7 @@ struct DamusPurpleWelcomeView: View {
                 .animation(.content(), value: start)
             
             Button(action: {
-                dismiss()
+                self.next_page()
             }, label: {
                 HStack {
                     Spacer()
@@ -113,15 +114,20 @@ struct DamusPurpleWelcomeView: View {
             }
         })
         .onAppear(perform: {
-            withAnimation(.easeOut(duration: 6), {
-                start = true
+            // SwiftUI quirk #98332: If I try to trigger an immediate animation, the animation does not work when this view is placed under a TabView.
+            // Triggering the animation only after a slight delay makes it work.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+                withAnimation(.easeOut(duration: 6), {
+                    start = true
+                })
             })
+            
         })
     }
 }
 
 struct DamusPurpleWelcomeView_Previews: PreviewProvider {
     static var previews: some View {
-        DamusPurpleWelcomeView()
+        DamusPurpleWelcomeView(next_page: {})
     }
 }

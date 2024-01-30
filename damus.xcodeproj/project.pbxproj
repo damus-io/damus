@@ -448,6 +448,8 @@
 		D72A2D072AD9C1FB002AFF62 /* MockProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2D062AD9C1FB002AFF62 /* MockProfiles.swift */; };
 		D7315A2A2ACDF3B70036E30A /* DamusCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7315A292ACDF3B70036E30A /* DamusCacheManager.swift */; };
 		D7315A2C2ACDF4DA0036E30A /* DamusCacheManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7315A2B2ACDF4DA0036E30A /* DamusCacheManagerTests.swift */; };
+		D7373BA62B688EA300F7783D /* DamusPurpleTranslationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7373BA52B688EA200F7783D /* DamusPurpleTranslationSetupView.swift */; };
+		D7373BA82B68974500F7783D /* DamusPurpleNewUserOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7373BA72B68974500F7783D /* DamusPurpleNewUserOnboardingView.swift */; };
 		D74AAFC22B153395006CF0F4 /* HeadlessDamusState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFC12B153395006CF0F4 /* HeadlessDamusState.swift */; };
 		D74AAFC32B153395006CF0F4 /* HeadlessDamusState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFC12B153395006CF0F4 /* HeadlessDamusState.swift */; };
 		D74AAFC52B1538DF006CF0F4 /* NotificationExtensionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFC42B1538DE006CF0F4 /* NotificationExtensionState.swift */; };
@@ -1342,6 +1344,8 @@
 		D72A2D062AD9C1FB002AFF62 /* MockProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockProfiles.swift; sourceTree = "<group>"; };
 		D7315A292ACDF3B70036E30A /* DamusCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusCacheManager.swift; sourceTree = "<group>"; };
 		D7315A2B2ACDF4DA0036E30A /* DamusCacheManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusCacheManagerTests.swift; sourceTree = "<group>"; };
+		D7373BA52B688EA200F7783D /* DamusPurpleTranslationSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleTranslationSetupView.swift; sourceTree = "<group>"; };
+		D7373BA72B68974500F7783D /* DamusPurpleNewUserOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleNewUserOnboardingView.swift; sourceTree = "<group>"; };
 		D74AAFC12B153395006CF0F4 /* HeadlessDamusState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadlessDamusState.swift; sourceTree = "<group>"; };
 		D74AAFC42B1538DE006CF0F4 /* NotificationExtensionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationExtensionState.swift; sourceTree = "<group>"; };
 		D74AAFCB2B155D07006CF0F4 /* MakeZapRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MakeZapRequest.swift; sourceTree = "<group>"; };
@@ -2576,9 +2580,11 @@
 			children = (
 				4CFF8F5829C9FD1E008DB934 /* DamusPurpleView.swift */,
 				D76556D52B1E6C08001B0CCC /* DamusPurpleWelcomeView.swift */,
+				D7373BA52B688EA200F7783D /* DamusPurpleTranslationSetupView.swift */,
 				D7ADD3DF2B538D4200F104C4 /* DamusPurpleURLSheetView.swift */,
 				D7ADD3E12B538E3500F104C4 /* DamusPurpleVerifyNpubView.swift */,
 				D724D8262B64B40B00ABE789 /* DamusPurpleAccountView.swift */,
+				D7373BA72B68974500F7783D /* DamusPurpleNewUserOnboardingView.swift */,
 			);
 			path = Purple;
 			sourceTree = "<group>";
@@ -2996,6 +3002,7 @@
 				4CC6193A29DC777C006A86D1 /* RelayBootstrap.swift in Sources */,
 				4C285C8A2838B985008A31F1 /* ProfilePictureSelector.swift in Sources */,
 				4CFD502F2A2DA45800A229DB /* MediaView.swift in Sources */,
+				D7373BA62B688EA300F7783D /* DamusPurpleTranslationSetupView.swift in Sources */,
 				4C9F18E429ABDE6D008C55EC /* MaybeAnonPfpView.swift in Sources */,
 				4CA5588329F33F5B00DC6A45 /* StringCodable.swift in Sources */,
 				4C75EFB92804A2740006080F /* EventView.swift in Sources */,
@@ -3114,6 +3121,7 @@
 				4C3BEFD22819DB9B00B3DE84 /* ProfileModel.swift in Sources */,
 				4CA352AA2A76BF3A003BB08B /* LocalNotificationNotify.swift in Sources */,
 				D7315A2A2ACDF3B70036E30A /* DamusCacheManager.swift in Sources */,
+				D7373BA82B68974500F7783D /* DamusPurpleNewUserOnboardingView.swift in Sources */,
 				4C7D09682A0AE9B200943473 /* NWCScannerView.swift in Sources */,
 				D7CB5D452B116FE800AD4105 /* Contacts+.swift in Sources */,
 				4CA352A42A76AFF3003BB08B /* UpdateStatsNotify.swift in Sources */,

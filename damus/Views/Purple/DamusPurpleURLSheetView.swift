@@ -19,7 +19,10 @@ struct DamusPurpleURLSheetView: View {
             case .verify_npub(let checkout_id):
                 DamusPurpleVerifyNpubView(damus_state: damus_state, checkout_id: checkout_id)
             case .welcome(_):
-                DamusPurpleWelcomeView()
+                // Forcibly pass the dismiss environment object,
+                // because SwiftUI has a weird quirk that makes the `dismiss` Environment object unavailable in deeply nested views
+                // this problem only exists in real devices.
+                DamusPurpleNewUserOnboardingView(damus_state: damus_state, dismiss: _dismiss)
             case .landing:
                 DamusPurpleView(damus_state: damus_state)
         }

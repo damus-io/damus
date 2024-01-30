@@ -106,21 +106,10 @@ struct DamusPurpleView: View {
         }
         .ignoresSafeArea(.all)
         .sheet(isPresented: $show_welcome_sheet, onDismiss: {
-            update_user_settings_to_purple()
             shouldDismissView = true
         }, content: {
-            DamusPurpleWelcomeView()
+            DamusPurpleNewUserOnboardingView(damus_state: damus_state)
         })
-        .confirmationDialog(
-            NSLocalizedString("It seems that you already have a translation service configured. Would you like to switch to Damus Purple as your translator?", comment: "Confirmation dialog question asking users if they want their translation settings to be automatically switched to the Damus Purple translation service"),
-            isPresented: $show_settings_change_confirmation_dialog,
-            titleVisibility: .visible
-        ) {
-            Button(NSLocalizedString("Yes", comment: "User confirm Yes")) {
-                set_translation_settings_to_purple()
-            }.keyboardShortcut(.defaultAction)
-            Button(NSLocalizedString("No", comment: "User confirm No"), role: .cancel) {}
-        }
         .onChange(of: shouldDismissView) { shouldDismissView in
             if shouldDismissView && !show_settings_change_confirmation_dialog {
                 dismiss()
@@ -146,20 +135,6 @@ struct DamusPurpleView: View {
         catch {
             self.my_account_info_state = .error(message: NSLocalizedString("There was an error loading your account. Please try again later. If problem persists, please contact us at support@damus.io", comment: "Error label when Purple account information fails to load"))
         }
-    }
-    
-    func update_user_settings_to_purple() {
-        if damus_state.settings.translation_service == .none {
-            set_translation_settings_to_purple()
-        }
-        else {
-            show_settings_change_confirmation_dialog = true
-        }
-    }
-    
-    func set_translation_settings_to_purple() {
-        damus_state.settings.translation_service = .purple
-        damus_state.settings.auto_translate = true
     }
     
     func handle_transactions(products: [Product]) async {
