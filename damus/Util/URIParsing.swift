@@ -7,6 +7,8 @@
 
 import Foundation
 
+fileprivate let MAX_CHAR_URL = 80
+
 private func remove_damus_uri_prefix(_ s: String) -> String {
     var uri = s.replacingOccurrences(of: "https://damus.io/r/", with: "")
     uri = uri.replacingOccurrences(of: "https://damus.io/", with: "")
@@ -31,4 +33,13 @@ func remove_nostr_uri_prefix(_ s: String) -> String {
     uri = uri.replacingOccurrences(of: "damus:", with: "")
     
     return uri
+}
+
+func abbreviateURL(_ url: URL) -> String {
+    let urlString = url.absoluteString
+    
+    if urlString.count > MAX_CHAR_URL {
+        return String(urlString.prefix(MAX_CHAR_URL)) + "..."
+    }
+    return urlString
 }
