@@ -28,8 +28,9 @@ class DamusPurple: StoreObserverDelegate {
     }
     
     var enable_purple: Bool {
+        return true
         // TODO: On release, we could just replace this with `true` (or some other feature flag)
-        return self.settings.enable_experimental_purple_api
+        //return self.settings.enable_experimental_purple_api
     }
     
     // Whether to enable Apple In-app purchase support
