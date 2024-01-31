@@ -22,7 +22,7 @@ struct ProfileNameView: View {
                 switch Profile.displayName(profile: profile, pubkey: pubkey) {
                 case .one:
                     HStack(alignment: .center, spacing: spacing) {
-                        ProfileName(pubkey: pubkey, damus: damus)
+                        ProfileName(pubkey: pubkey, damus: damus, supporterBadgeStyle: .full)
                             .font(.title3.weight(.bold))
                     }
                 case .both(username: _, displayName: let displayName):
@@ -30,7 +30,7 @@ struct ProfileNameView: View {
                         .font(.title3.weight(.bold))
                     
                     HStack(alignment: .center, spacing: spacing) {
-                        ProfileName(pubkey: pubkey, prefix: "@", damus: damus)
+                        ProfileName(pubkey: pubkey, prefix: "@", damus: damus, supporterBadgeStyle: .full)
                             .font(.callout)
                             .foregroundColor(.gray)
                     }

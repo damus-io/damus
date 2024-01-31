@@ -37,17 +37,19 @@ struct ProfileName: View {
     let prefix: String
     
     let show_nip5_domain: Bool
+    private let supporterBadgeStyle: SupporterBadge.Style
     
     @State var display_name: DisplayName?
     @State var nip05: NIP05?
     @State var donation: Int?
     @State var purple_account: DamusPurple.Account?
 
-    init(pubkey: Pubkey, prefix: String = "", damus: DamusState, show_nip5_domain: Bool = true) {
+    init(pubkey: Pubkey, prefix: String = "", damus: DamusState, show_nip5_domain: Bool = true, supporterBadgeStyle: SupporterBadge.Style = .compact) {
         self.pubkey = pubkey
         self.prefix = prefix
         self.damus_state = damus
         self.show_nip5_domain = show_nip5_domain
+        self.supporterBadgeStyle = supporterBadgeStyle
         self.purple_account = nil
     }
     
@@ -109,7 +111,7 @@ struct ProfileName: View {
                     .frame(width: 14, height: 14)
             }
 
-            SupporterBadge(percent: supporter(profile: profile), purple_account: self.purple_account, style: .full)
+            SupporterBadge(percent: supporter(profile: profile), purple_account: self.purple_account, style: supporterBadgeStyle)
 
 
         }
