@@ -122,6 +122,7 @@ struct DamusPurpleWelcomeView: View {
             })
             
         })
+        .interactiveDismissDisabled()
     }
 }
 
