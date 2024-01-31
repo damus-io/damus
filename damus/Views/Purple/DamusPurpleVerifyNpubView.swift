@@ -12,6 +12,21 @@ struct DamusPurpleVerifyNpubView: View {
     let checkout_id: String
     @State var verified: Bool = false
     
+    let subtitle_height: CGFloat = 100.0
+
+    @Environment(\.openURL) var openURL
+
+    init(damus_state: DamusState, checkout_id: String, verified: Bool = false) {
+        self.damus_state = damus_state
+        self.checkout_id = checkout_id
+        self._verified = State(wrappedValue: verified)
+    }
+
+    var checkout_url: URL {
+        let page_url = damus_state.purple.environment.purple_landing_page_url()
+        return URL(string: "\(page_url)/checkout?id=\(checkout_id)")!
+    }
+
     var body: some View {
         ZStack {
             Rectangle()
@@ -20,12 +35,15 @@ struct DamusPurpleVerifyNpubView: View {
             
             VStack {
                 DamusPurpleLogoView()
-                
+
                 VStack(alignment: .center, spacing: 30) {
-                    Subtitle(NSLocalizedString("To continue your Purple subscription checkout, please verify your npub by clicking on the button below", comment: "Instruction on how to verify npub during Damus Purple checkout"))
-                        .multilineTextAlignment(.center)
-                    
+
                     if !verified {
+                        Subtitle(NSLocalizedString("To continue your Purple subscription checkout, please verify your npub by clicking on the button below", comment: "Instruction on how to verify npub during Damus Purple checkout"))
+
+                            .frame(height: subtitle_height)
+                            .multilineTextAlignment(.center)
+
                         Button(action: {
                             Task {
                                 try await damus_state.purple.verify_npub_for_checkout(checkout_id: checkout_id)
@@ -42,9 +60,22 @@ struct DamusPurpleVerifyNpubView: View {
                         .buttonStyle(GradientButtonStyle())
                     }
                     else {
-                        Text(NSLocalizedString("Verified! Please head back to the checkout page to continue", comment: "Instructions after the user has verified their npub for Damus Purple purchase checkout"))
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(.green)
+                        Text(NSLocalizedString("Verified!", comment: "Instructions after the user has verified their npub for Damus Purple purchase checkout"))
+                                .frame(height: subtitle_height)
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(.green)
+
+                        Button(action: {
+                            openURL(checkout_url)
+                        }, label: {
+                            HStack {
+                                Spacer()
+                                Text(NSLocalizedString("Continue", comment: "Prompt to user to continue"))
+                                Spacer()
+                            }
+                        })
+                        .padding(.horizontal, 30)
+                        .buttonStyle(GradientButtonStyle())
                     }
                     
                 }
@@ -61,5 +92,9 @@ struct DamusPurpleVerifyNpubView: View {
 }
 
 #Preview {
-    DamusPurpleVerifyNpubView(damus_state: test_damus_state, checkout_id: "123")
+    VStack(spacing: 0) {
+        DamusPurpleVerifyNpubView(damus_state: test_damus_state, checkout_id: "123")
+
+        DamusPurpleVerifyNpubView(damus_state: test_damus_state, checkout_id: "123", verified: true)
+    }
 }
