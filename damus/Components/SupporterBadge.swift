@@ -28,11 +28,9 @@ struct SupporterBadge: View {
                         .resizable()
                         .frame(width:size, height:size)
                         .foregroundStyle(GoldGradient)
-                    if self.style == .full,
-                       let ordinal_number = self.purple_account?.subscriber_number,
-                       let ordinal = self.purple_account?.ordinal()  {
-                        Text(ordinal)
-                            .foregroundStyle(DamusColors.gold)
+                    if self.style == .full {
+                        Text("\(format_date(date: purple_account.created_at, time_style: .none))")
+                            .foregroundStyle(.secondary)
                             .font(.caption)
                     }
                 }

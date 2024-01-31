@@ -109,7 +109,7 @@ struct ProfileName: View {
                     .frame(width: 14, height: 14)
             }
 
-            SupporterBadge(percent: supporter(profile: profile), purple_account: self.purple_account, style: .compact)
+            SupporterBadge(percent: supporter(profile: profile), purple_account: self.purple_account, style: .full)
 
 
         }
