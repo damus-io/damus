@@ -32,7 +32,7 @@ struct DamusPurpleNewUserOnboardingView: View {
             .ignoresSafeArea()  // Necessary to avoid weird white edges
         }
         .task {
-            guard let account = try? await damus_state.purple.get_account(pubkey: damus_state.pubkey), account.active else {
+            guard let account = try? await damus_state.purple.fetch_account(pubkey: damus_state.pubkey), account.active else {
                 return
             }
             // Let's notify other views across SwiftUI to update our user's Purple status.

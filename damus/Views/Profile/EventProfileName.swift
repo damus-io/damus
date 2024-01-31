@@ -16,8 +16,8 @@ struct EventProfileName: View {
     @State var display_name: DisplayName?
     @State var nip05: NIP05?
     @State var donation: Int?
-    @State var purple_badge: DamusPurple.UserBadgeInfo?
-    
+    @State var purple_account: DamusPurple.Account?
+
     let size: EventViewKind
     
     init(pubkey: Pubkey, damus: DamusState, size: EventViewKind = .normal) {
@@ -26,7 +26,7 @@ struct EventProfileName: View {
         self.size = size
         let donation = damus.ndb.lookup_profile(pubkey)?.map({ p in p?.profile?.damus_donation }).value
         self._donation = State(wrappedValue: donation)
-        self.purple_badge = nil
+        self.purple_account = nil
     }
     
     var friend_type: FriendType? {
@@ -94,7 +94,7 @@ struct EventProfileName: View {
                     .frame(width: 14, height: 14)
             }
             
-            SupporterBadge(percent: self.supporter_percentage(), purple_badge_info: self.purple_badge, style: .compact)
+            SupporterBadge(percent: self.supporter_percentage(), purple_account: self.purple_account, style: .compact)
         }
         .onReceive(handle_notify(.profile_updated)) { update in
             if update.pubkey != pubkey {
@@ -119,13 +119,11 @@ struct EventProfileName: View {
                 donation = profile.damus_donation
             }
         }
-        .onAppear(perform: {
-            Task {
-                if damus_state.purple.enable_purple {
-                    self.purple_badge = await damus_state.purple.profile_purple_badge_info(pubkey: pubkey)
-                }
+        .task {
+            if damus_state.purple.enable_purple {
+                self.purple_account = try? await damus_state.purple.get_maybe_cached_account(pubkey: pubkey)
             }
-        })
+        }
     }
 }
 

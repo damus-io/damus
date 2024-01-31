@@ -83,7 +83,7 @@ struct DamusPurpleAccountView: View {
             
             SupporterBadge(
                 percent: nil,
-                purple_badge_info: DamusPurple.UserBadgeInfo.from(account: account),
+                purple_account: account,
                 style: .full
             )
         }

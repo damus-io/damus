@@ -10,17 +10,17 @@ import Foundation
 class DamusPurple: StoreObserverDelegate {
     let settings: UserSettingsStore
     let keypair: Keypair
-    var starred_profiles_cache: [Pubkey: UserBadgeInfo]
-    
+    var account_cache: [Pubkey: Account]
+
     init(settings: UserSettingsStore, keypair: Keypair) {
         self.settings = settings
         self.keypair = keypair
-        self.starred_profiles_cache = [:]
+        self.account_cache = [:]
     }
     
     // MARK: Functions
     func is_profile_subscribed_to_purple(pubkey: Pubkey) async -> Bool? {
-        return await self.profile_purple_badge_info(pubkey: pubkey)?.active
+        return try? await self.get_maybe_cached_account(pubkey: pubkey)?.active
     }
     
     var environment: DamusPurpleEnvironment {
@@ -38,25 +38,6 @@ class DamusPurple: StoreObserverDelegate {
         return self.settings.enable_experimental_purple_iap_support
     }
 
-    func profile_purple_badge_info(pubkey: Pubkey) async -> UserBadgeInfo? {
-        if let cached_result = self.starred_profiles_cache[pubkey] {
-            return cached_result
-        }
-        
-        guard let data = try? await self.get_account_data(pubkey: pubkey) else { return nil }
-        
-        guard let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else { return nil }
-        
-        if let active = json["active"] as? Bool {
-            let subscriber_number: Int? = json["subscriber_number"] as? Int
-            let badge_info = UserBadgeInfo(active: active, subscriber_number: subscriber_number)
-            self.starred_profiles_cache[pubkey] = badge_info
-            return badge_info
-        }
-        
-        return nil
-    }
-    
     func account_exists(pubkey: Pubkey) async -> Bool? {
         guard let account_data = try? await self.get_account_data(pubkey: pubkey) else { return nil }
         
@@ -66,10 +47,21 @@ class DamusPurple: StoreObserverDelegate {
         
         return false
     }
-    
-    func get_account(pubkey: Pubkey) async throws -> Account? {
-        guard let data = try await self.get_account_data(pubkey: pubkey) else { return nil }
-        return Account.from(json_data: data)
+
+    func get_maybe_cached_account(pubkey: Pubkey) async throws -> Account? {
+        if let account = self.account_cache[pubkey] {
+            return account
+        }
+        return try await fetch_account(pubkey: pubkey)
+    }
+
+    func fetch_account(pubkey: Pubkey) async throws -> Account? {
+        guard let data = try await self.get_account_data(pubkey: pubkey) ,
+              let account = Account.from(json_data: data) else {
+            return nil
+        }
+        self.account_cache[pubkey] = account
+        return account
     }
     
     func get_account_data(pubkey: Pubkey) async throws -> Data? {
@@ -217,29 +209,20 @@ class DamusPurple: StoreObserverDelegate {
         
     }
     
-    struct UserBadgeInfo {
-        var active: Bool
-        var subscriber_number: Int?
-        
-        func ordinal() -> String? {
-            guard let number = self.subscriber_number else { return nil }
-            let formatter = NumberFormatter()
-            formatter.numberStyle = .ordinal
-            return formatter.string(from: NSNumber(integerLiteral: number))
-        }
-        
-        static func from(account: Account) -> Self {
-            return UserBadgeInfo(active: account.active, subscriber_number: Int(account.subscriber_number))
-        }
-    }
-    
     struct Account {
         let pubkey: Pubkey
         let created_at: Date
         let expiry: Date
-        let subscriber_number: UInt
+        let subscriber_number: Int
         let active: Bool
-        
+
+        func ordinal() -> String? {
+            let number = Int(self.subscriber_number)
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .ordinal
+            return formatter.string(from: NSNumber(integerLiteral: number))
+        }
+
         static func from(json_data: Data) -> Self? {
             guard let payload = try? JSONDecoder().decode(Payload.self, from: json_data) else { return nil }
             return Self.from(payload: payload)
@@ -251,7 +234,7 @@ class DamusPurple: StoreObserverDelegate {
                 pubkey: pubkey,
                 created_at: Date.init(timeIntervalSince1970: TimeInterval(payload.created_at)),
                 expiry: Date.init(timeIntervalSince1970: TimeInterval(payload.expiry)),
-                subscriber_number: payload.subscriber_number,
+                subscriber_number: Int(payload.subscriber_number),
                 active: payload.active
             )
         }

@@ -117,7 +117,7 @@ struct DamusPurpleView: View {
     
     func load_account() async {
         do {
-            if let account = try await damus_state.purple.get_account(pubkey: damus_state.keypair.pubkey) {
+            if let account = try await damus_state.purple.fetch_account(pubkey: damus_state.keypair.pubkey) {
                 self.my_account_info_state = .loaded(account: account)
                 return
             }
@@ -232,7 +232,8 @@ struct DamusPurpleView: View {
         
         switch result {
             case .success:
-                self.damus_state.purple.starred_profiles_cache[keypair.pubkey] = nil
+                // TODO (will): why do this here?
+                //self.damus_state.purple.starred_profiles_cache[keypair.pubkey] = nil
                 Task {
                     await self.damus_state.purple.send_receipt()
                 }
