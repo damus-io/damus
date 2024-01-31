@@ -308,14 +308,14 @@ struct DamusPurpleView: View {
             Text(NSLocalizedString("Purchased on", comment: "Indicating when the user purchased the subscription"))
                 .font(.title2)
                 .foregroundColor(.white)
-            Text(format_date(UInt32(purchased.tx.purchaseDate.timeIntervalSince1970)))
+            Text(format_date(date: purchased.tx.purchaseDate))
                 .foregroundColor(.white)
                 .opacity(0.65)
             if let expiry = purchased.tx.expirationDate {
                 Text(NSLocalizedString("Renews on", comment: "Indicating when the subscription will renew"))
                     .font(.title2)
                     .foregroundColor(.white)
-                Text(format_date(UInt32(expiry.timeIntervalSince1970)))
+                Text(format_date(date: expiry))
                     .foregroundColor(.white)
                     .opacity(0.65)
             }

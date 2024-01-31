@@ -76,10 +76,14 @@ func format_relative_time(_ created_at: UInt32) -> String
     return time_ago_since(Date(timeIntervalSince1970: Double(created_at)))
 }
 
-func format_date(_ created_at: UInt32) -> String {
+func format_date(created_at: UInt32) -> String {
     let date = Date(timeIntervalSince1970: TimeInterval(created_at))
+    return format_date(date: date)
+}
+
+func format_date(date: Date, time_style: DateFormatter.Style = .short) -> String {
     let dateFormatter = DateFormatter()
-    dateFormatter.timeStyle = .short
+    dateFormatter.timeStyle = time_style
     dateFormatter.dateStyle = .short
     return dateFormatter.string(from: date)
 }

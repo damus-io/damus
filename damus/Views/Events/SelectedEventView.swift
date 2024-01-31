@@ -57,7 +57,7 @@ struct SelectedEventView: View {
 
                 Mention
                 
-                Text(verbatim: "\(format_date(event.created_at))")
+                Text(verbatim: "\(format_date(created_at: event.created_at))")
                     .padding([.top, .leading, .trailing])
                     .font(.footnote)
                     .foregroundColor(.gray)
