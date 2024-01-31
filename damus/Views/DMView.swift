@@ -26,10 +26,12 @@ struct DMView: View {
     }
     
     var dm_options: EventViewOptions {
+        /*
         if self.damus_state.settings.translate_dms {
             return []
         }
-        
+         */
+
         return [.no_translate]
     }
     

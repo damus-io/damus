@@ -96,8 +96,10 @@ struct TranslationSettingsView: View {
                     Toggle(NSLocalizedString("Automatically translate notes", comment: "Toggle to automatically translate notes."), isOn: $settings.auto_translate)
                         .toggleStyle(.switch)
                     
+                    /*
                     Toggle(NSLocalizedString("Translate DMs", comment: "Toggle to translate direct messages."), isOn: $settings.translate_dms)
                         .toggleStyle(.switch)
+                     */
                 }
             }
         }

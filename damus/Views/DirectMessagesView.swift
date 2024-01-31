@@ -44,10 +44,12 @@ struct DirectMessagesView: View {
     }
     
     var options: EventViewOptions {
+        /*
         if self.damus_state.settings.translate_dms {
             return [.truncate_content, .no_action_bar]
         }
-        
+         */
+
         return [.truncate_content, .no_action_bar, .no_translate]
     }
     
