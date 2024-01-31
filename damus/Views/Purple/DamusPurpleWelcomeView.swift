@@ -92,7 +92,7 @@ struct DamusPurpleWelcomeView: View {
             .padding(.horizontal, 30)
             .buttonStyle(GradientButtonStyle())
             .opacity(start ? 1.0 : 0.0)
-            .animation(Animation.easeInOut(duration: 2).delay(5), value: start)
+            .animation(Animation.easeInOut(duration: 2).delay(3), value: start)
         }
         .background(content: {
             ZStack {
