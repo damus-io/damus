@@ -28,6 +28,7 @@ struct TextViewWrapper: UIViewRepresentable {
         textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         textView.setContentCompressionResistancePriority(.required, for: .vertical)
         
+        // Inline text suggestions interfere with mentions generation
         if #available(iOS 17.0, *) {
             textView.inlinePredictionType = .no
         }
