@@ -28,6 +28,10 @@ struct TextViewWrapper: UIViewRepresentable {
         textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         textView.setContentCompressionResistancePriority(.required, for: .vertical)
         
+        if #available(iOS 17.0, *) {
+            textView.inlinePredictionType = .no
+        }
+        
         TextViewWrapper.setTextProperties(textView)
         return textView
     }
