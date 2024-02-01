@@ -72,15 +72,7 @@ struct TranslateView: View {
             }
         }
     }
-    
-    func attempt_translation() {
-        guard should_translate(event: event, our_keypair: damus_state.keypair, settings: damus_state.settings, note_lang: self.translations_model.note_language), damus_state.settings.auto_translate else {
-            return
-        }
         
-        translate()
-    }
-    
     func should_transl(_ note_lang: String) -> Bool {
         should_translate(event: event, our_keypair: damus_state.keypair, settings: damus_state.settings, note_lang: note_lang)
     }
@@ -104,9 +96,6 @@ struct TranslateView: View {
             case .not_needed:
                 Text("")
             }
-        }
-        .task {
-            attempt_translation()
         }
     }
     
