@@ -102,6 +102,11 @@ static int add_relay(struct ndb_relays *relays, struct nostr_tlv *tlv)
 	return 1;
 }
 
+static uint32_t decode_tlv_u32(const uint8_t *bytes) {
+    beint32_t *be32_bytes = (beint32_t*)bytes;
+    return be32_to_cpu(*be32_bytes);
+}
+
 static int parse_nostr_bech32_nevent(struct cursor *cur, struct bech32_nevent *nevent) {
 	struct nostr_tlv tlv;
 	int i;
@@ -109,6 +114,7 @@ static int parse_nostr_bech32_nevent(struct cursor *cur, struct bech32_nevent *n
 	nevent->event_id = NULL;
 	nevent->pubkey = NULL;
 	nevent->relays.num_relays = 0;
+	nevent->has_kind = 0;
 
 	for (i = 0; i < MAX_TLVS; i++) {
 		if (!parse_nostr_tlv(cur, &tlv))
@@ -119,6 +125,12 @@ static int parse_nostr_bech32_nevent(struct cursor *cur, struct bech32_nevent *n
 			if (tlv.len != 32)
 				return 0;
 			nevent->event_id = tlv.value;
+			break;
+		case TLV_KIND:
+			if (tlv.len != 4)
+				return 0;
+			nevent->kind = decode_tlv-U32(tlv.value);
+			nevent->has_kind = 1;
 			break;
 		case TLV_AUTHOR:
 			if (tlv.len != 32)
@@ -141,6 +153,7 @@ static int parse_nostr_bech32_naddr(struct cursor *cur, struct bech32_naddr *nad
 	naddr->identifier.str = NULL;
 	naddr->identifier.len = 0;
 	naddr->pubkey = NULL;
+	naddr->has_kind = 0;
 	naddr->relays.num_relays = 0;
 
 	for (i = 0; i < MAX_TLVS; i++) {
@@ -155,6 +168,11 @@ static int parse_nostr_bech32_naddr(struct cursor *cur, struct bech32_naddr *nad
 		case TLV_AUTHOR:
 			if (tlv.len != 32) return 0;
 			naddr->pubkey = tlv.value;
+			break;
+		case TLV_KIND:
+			if (tlv.len != 4) return 0;
+			naddr->kind = decode_tlv_u32(tlv.value);
+			naddr->has_kind = 1;
 			break;
 		case TLV_RELAY:
 			add_relay(&naddr->relays, &tlv);
