@@ -337,6 +337,8 @@ struct bech32_nevent {
 	struct ndb_relays relays;
 	const unsigned char *event_id;
 	const unsigned char *pubkey; // optional
+	uint32_t kind;
+	int has_kind;
 };
 
 struct bech32_nprofile {
@@ -348,13 +350,15 @@ struct bech32_naddr {
 	struct ndb_relays relays;
 	struct ndb_str_block identifier;
 	const unsigned char *pubkey;
+	uint32_t kind;
+	int has_kind;
 };
 
 struct bech32_nrelay {
 	struct ndb_str_block relay;
 };
 
-struct nostr_bech32 {
+typedef struct nostr_bech32 {
 	enum nostr_bech32_type type;
 
 	union {
@@ -366,7 +370,7 @@ struct nostr_bech32 {
 		struct bech32_naddr naddr;
 		struct bech32_nrelay nrelay;
 	};
-};
+} nostr_bech32_t;
 
 
 struct ndb_mention_bech32_block {
