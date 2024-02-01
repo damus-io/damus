@@ -62,7 +62,7 @@ struct NoteContentView: View {
     }
     
     var preview: LinkViewRepresentable? {
-        guard blur_images,
+        guard !blur_images,
               case .loaded(let preview) = preview_model.state,
               case .value(let cached) = preview else {
             return nil
@@ -93,7 +93,7 @@ struct NoteContentView: View {
     
     func previewView(links: [URL]) -> some View {
         Group {
-            if let preview = self.preview, blur_images {
+            if let preview = self.preview, !blur_images {
                 if let preview_height {
                     preview
                         .frame(height: preview_height)
