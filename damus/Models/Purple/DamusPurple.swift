@@ -10,6 +10,8 @@ import Foundation
 class DamusPurple: StoreObserverDelegate {
     let settings: UserSettingsStore
     let keypair: Keypair
+
+    @MainActor
     var account_cache: [Pubkey: Account]
 
     init(settings: UserSettingsStore, keypair: Keypair) {
@@ -49,6 +51,7 @@ class DamusPurple: StoreObserverDelegate {
         return false
     }
 
+    @MainActor
     func get_maybe_cached_account(pubkey: Pubkey) async throws -> Account? {
         if let account = self.account_cache[pubkey] {
             return account
@@ -56,6 +59,7 @@ class DamusPurple: StoreObserverDelegate {
         return try await fetch_account(pubkey: pubkey)
     }
 
+    @MainActor
     func fetch_account(pubkey: Pubkey) async throws -> Account? {
         guard let data = try await self.get_account_data(pubkey: pubkey) ,
               let account = Account.from(json_data: data) else {
