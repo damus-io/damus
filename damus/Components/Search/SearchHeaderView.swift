@@ -35,7 +35,7 @@ struct SearchHeaderView: View {
     }
 
     var SearchText: Text {
-        Text(described.description)
+        Text(verbatim: described.description)
     }
 
     var body: some View {

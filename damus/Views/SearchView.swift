@@ -67,7 +67,7 @@ enum DescribedSearch: CustomStringConvertible {
         case .hashtag(let s):
             return "#" + s
         case .unknown:
-            return "Search"
+            return NSLocalizedString("Search", comment: "Default title for the search screen when it is in an unknown state.")
         }
     }
 }

@@ -56,7 +56,7 @@ struct DamusPurpleAccountView: View {
                 HStack {
                     Text(NSLocalizedString("Subscriber number", comment: "Label for Purple account subscriber number"))
                     Spacer()
-                    Text("#\(account.subscriber_number)")
+                    Text(verbatim: "#\(account.subscriber_number)")
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 20)
