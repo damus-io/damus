@@ -18,22 +18,38 @@ enum MentionType: AsciiCharacter, TagKey {
     }
 }
 
-enum MentionRef: TagKeys, TagConvertible, Equatable, Hashable {
-    case pubkey(Pubkey)
-    case note(NoteId)
-    case nevent(NEvent)
-    case nprofile(NProfile)
-    case nrelay(String)
-    case naddr(NAddr)
+extension UnsafePointer<UInt8> {
+    func as_data(size: Int) -> Data {
+        return Data(bytes: self, count: size)
+    }
+}
+
+struct MentionRef: TagKeys, TagConvertible, Equatable, Hashable {
+    let nip19: Bech32Object
+    
+    static func note(_ note_id: NoteId) -> MentionRef {
+        return self.init(nip19: .note(note_id))
+    }
+
+    init?(block: ndb_mention_bech32_block) {
+        guard let bech32_obj = Bech32Object.init(block: block) else {
+            return nil
+        }
+        self.nip19 = bech32_obj
+    }
+
+    init(nip19: Bech32Object) {
+        self.nip19 = nip19
+    }
 
     var key: MentionType {
-        switch self {
-        case .pubkey: return .p
-        case .note: return .e
-        case .nevent: return .e
-        case .nprofile: return .p
+        switch self.nip19 {
+        case .note, .nevent: return .e
+        case .nprofile, .npub: return .p
         case .nrelay: return .r
         case .naddr: return .a
+        case .nscript: return .a
+        case .nsec: return .p
         }
     }
 
@@ -41,33 +57,39 @@ enum MentionRef: TagKeys, TagConvertible, Equatable, Hashable {
         return Bech32Object.encode(toBech32Object())
     }
 
-    static func from_bech32(str: String) -> MentionRef? {
-        switch Bech32Object.parse(str) {
-        case .note(let noteid): return .note(noteid)
-        case .npub(let pubkey): return .pubkey(pubkey)
-        default: return nil
+    init?(bech32_str: String) {
+        guard let obj = Bech32Object.parse(bech32_str) else {
+            return nil
         }
+
+        self.nip19 = obj
     }
 
     var pubkey: Pubkey? {
-        switch self {
-        case .pubkey(let pubkey): return pubkey
+        switch self.nip19 {
+        case .npub(let pubkey): return pubkey
         case .note:              return nil
         case .nevent(let nevent): return nevent.author
         case .nprofile(let nprofile): return nprofile.author
         case .nrelay: return nil
         case .naddr: return nil
+        case .nsec(let prv): return privkey_to_pubkey(privkey: prv)
+        case .nscript(_): return nil
         }
     }
 
     var tag: [String] {
-        switch self {
-        case .pubkey(let pubkey): return ["p", pubkey.hex()]
+        switch self.nip19 {
+        case .npub(let pubkey): return ["p", pubkey.hex()]
         case .note(let noteId):   return ["e", noteId.hex()]
         case .nevent(let nevent): return ["e", nevent.noteid.hex()]
         case .nprofile(let nprofile): return ["p", nprofile.author.hex()]
         case .nrelay(let url): return ["r", url]
         case .naddr(let naddr): return ["a", naddr.kind.description + ":" + naddr.author.hex() + ":" + naddr.identifier.string()]
+        case .nsec(_):
+            return []
+        case .nscript(_):
+            return []
         }
     }
 
@@ -87,10 +109,10 @@ enum MentionRef: TagKeys, TagConvertible, Equatable, Hashable {
         switch mention_type {
         case .p:
             guard let data = element.id() else { return nil }
-            return .pubkey(Pubkey(data))
+            return .init(nip19: .npub(Pubkey(data)))
         case .e:
             guard let data = element.id() else { return nil }
-            return .note(NoteId(data))
+            return .init(nip19: .note(NoteId(data)))
         case .a:
             let str = element.string()
             let data = str.split(separator: ":")
@@ -99,26 +121,13 @@ enum MentionRef: TagKeys, TagConvertible, Equatable, Hashable {
             guard let pubkey = Pubkey(hex: String(data[1])) else { return nil }
             guard let kind = UInt32(data[0]) else { return nil }
             
-            return .naddr(NAddr(identifier: String(data[2]), author: pubkey, relays: [], kind: kind))
-        case .r: return .nrelay(element.string())
+            return .init(nip19: .naddr(NAddr(identifier: String(data[2]), author: pubkey, relays: [], kind: kind)))
+        case .r: return .init(nip19: .nrelay(element.string()))
         }
     }
     
     func toBech32Object() -> Bech32Object {
-        switch self {
-        case .pubkey(let pk):
-            return .npub(pk)
-        case .note(let noteid):
-            return .note(noteid)
-        case .naddr(let naddr):
-            return .naddr(naddr)
-        case .nevent(let nevent):
-            return .nevent(nevent)
-        case .nprofile(let nprofile):
-            return .nprofile(nprofile)
-        case .nrelay(let url):
-            return .nrelay(url)
-        }
+        self.nip19
     }
 }
 
@@ -160,7 +169,6 @@ struct LightningInvoice<T> {
     let amount: T
     let string: String
     let expiry: UInt64
-    let payment_hash: Data
     let created_at: UInt64
     
     var description_string: String {
@@ -173,8 +181,8 @@ struct LightningInvoice<T> {
     }
 }
 
-func maybe_pointee<T>(_ p: UnsafeMutablePointer<T>!) -> T? {
-    guard p != nil else {
+func maybe_pointee<T>(_ p: UnsafeMutablePointer<T>?) -> T? {
+    guard let p else {
         return nil
     }
     return p.pointee
@@ -235,7 +243,7 @@ func format_msats(_ msat: Int64, locale: Locale = Locale.current) -> String {
     return String(format: format, locale: locale, sats.decimalValue as NSDecimalNumber, formattedSats)
 }
 
-func convert_invoice_description(b11: bolt11) -> InvoiceDescription? {
+func convert_invoice_description(b11: ndb_invoice) -> InvoiceDescription? {
     if let desc = b11.description {
         return .description(String(cString: desc))
     }
@@ -259,4 +267,50 @@ func find_tag_ref(type: String, id: String, tags: [[String]]) -> Int? {
     }
     
     return nil
+}
+
+struct PostTags {
+    let blocks: [Block]
+    let tags: [[String]]
+}
+
+/// Convert
+func make_post_tags(post_blocks: [Block], tags: [[String]]) -> PostTags {
+    var new_tags = tags
+
+    for post_block in post_blocks {
+        switch post_block {
+        case .mention(let mention):
+            switch(mention.ref.nip19) {
+            case .note, .nevent:
+                continue
+            default:
+                break
+            }
+
+            new_tags.append(mention.ref.tag)
+        case .hashtag(let hashtag):
+            new_tags.append(["t", hashtag.lowercased()])
+        case .text: break
+        case .invoice: break
+        case .relay: break
+        case .url(let url):
+            new_tags.append(["r", url.absoluteString])
+            break
+        }
+    }
+    
+    return PostTags(blocks: post_blocks, tags: new_tags)
+}
+
+func post_to_event(post: NostrPost, keypair: FullKeypair) -> NostrEvent? {
+    let tags = post.references.map({ r in r.tag }) + post.tags
+    guard let post_blocks = parse_post_blocks(content: post.content)?.blocks else {
+        return nil
+    }
+    let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags)
+    let content = post_tags.blocks
+        .map({ b in b.asString })
+        .joined(separator: "")
+    return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: post.kind.rawValue, tags: post_tags.tags)
 }

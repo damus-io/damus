@@ -103,7 +103,7 @@ struct NotificationFormatter {
                 content.title = Self.zap_notification_title(zap)
                 content.body = Self.zap_notification_body(profiles: state.profiles, zap: zap)
                 content.sound = UNNotificationSound.default
-                content.userInfo = LossyLocalNotification(type: .zap, mention: .note(notify.event.id)).to_user_info()
+                content.userInfo = LossyLocalNotification(type: .zap, mention: .init(nip19: .note(notify.event.id))).to_user_info()
                 return (content, "myZapNotification")
             default:
                 // The sync method should have taken care of this.

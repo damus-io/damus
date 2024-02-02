@@ -5,8 +5,8 @@
 //	Created by William Casarin on 2023-04-09.
 //
 
-#include "nostr_bech32.h"
 #include <stdlib.h>
+#include "nostr_bech32.h"
 #include "cursor.h"
 #include "str_block.h"
 #include "ccan/endian/endian.h"
@@ -151,12 +151,12 @@ static int parse_nostr_bech32_nevent(struct cursor *cur, struct bech32_nevent *n
 
 static int parse_nostr_bech32_naddr(struct cursor *cur, struct bech32_naddr *naddr) {
 	struct nostr_tlv tlv;
-	int i;
+	int i, has_kind;
 
+    has_kind = 0;
 	naddr->identifier.str = NULL;
 	naddr->identifier.len = 0;
 	naddr->pubkey = NULL;
-	naddr->has_kind = 0;
 	naddr->relays.num_relays = 0;
 
 	for (i = 0; i < MAX_TLVS; i++) {
@@ -183,7 +183,7 @@ static int parse_nostr_bech32_naddr(struct cursor *cur, struct bech32_naddr *nad
 		}
 	}
 
-	return naddr->identifier.str != NULL;
+	return naddr->identifier.str != NULL && has_kind;
 }
 
 static int parse_nostr_bech32_nprofile(struct cursor *cur, struct bech32_nprofile *nprofile) {

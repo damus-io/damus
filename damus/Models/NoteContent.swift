@@ -66,25 +66,28 @@ func note_artifact_is_separated(kind: NostrKind?) -> Bool {
     return kind != .longform
 }
 
-func render_note_content(ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> NoteArtifacts {
-    let blocks = ev.blocks(keypair)
+func render_note_content(ndb: Ndb, ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> NoteArtifacts {
+    guard let blocks = ev.blocks(ndb: ndb) else {
+        return .separated(.just_content(ev.get_content(keypair)))
+    }
 
     if ev.known_kind == .longform {
         return .longform(LongformContent(ev.content))
     }
     
-    return .separated(render_blocks(blocks: blocks, profiles: profiles))
+    return .separated(render_blocks(blocks: blocks.unsafeUnownedValue, profiles: profiles, note: ev))
 }
 
-func render_blocks(blocks bs: Blocks, profiles: Profiles) -> NoteArtifactsSeparated {
+func render_blocks(blocks: NdbBlocks, profiles: Profiles, note: NdbNote) -> NoteArtifactsSeparated {
     var invoices: [Invoice] = []
     var urls: [UrlType] = []
-    let blocks = bs.blocks
-    
-    let one_note_ref = blocks
+
+    let ndb_blocks = blocks.iter(note: note).collect()
+    let one_note_ref = ndb_blocks
         .filter({
             if case .mention(let mention) = $0,
-               case .note = mention.ref {
+               let typ = mention.bech32_type,
+               typ.is_notelike {
                 return true
             }
             else {
@@ -94,57 +97,63 @@ func render_blocks(blocks bs: Blocks, profiles: Profiles) -> NoteArtifactsSepara
         .count == 1
     
     var ind: Int = -1
-    let txt: CompatibleText = blocks.reduce(CompatibleText()) { str, block in
+    let txt: CompatibleText = ndb_blocks.reduce(into: CompatibleText()) { str, block in
         ind = ind + 1
         
         switch block {
         case .mention(let m):
-            if case .note = m.ref, one_note_ref {
-                return str
+            if let typ = m.bech32_type, typ.is_notelike, one_note_ref {
+                return
             }
-            return str + mention_str(m, profiles: profiles)
+            guard let mention = MentionRef(block: m) else { return }
+            str = str + mention_str(.any(mention), profiles: profiles)
         case .text(let txt):
-            return str + CompatibleText(stringLiteral: reduce_text_block(blocks: blocks, ind: ind, txt: txt, one_note_ref: one_note_ref))
-
-        case .relay(let relay):
-            return str + CompatibleText(stringLiteral: relay)
-            
+            str = str + CompatibleText(stringLiteral: reduce_text_block(blocks: ndb_blocks, ind: ind, txt: txt.as_str(), one_note_ref: one_note_ref))
         case .hashtag(let htag):
-            return str + hashtag_str(htag)
+            str = str + hashtag_str(htag.as_str())
         case .invoice(let invoice):
-            invoices.append(invoice)
-            return str
+            guard let inv = invoice.as_invoice() else { return }
+            invoices.append(inv)
         case .url(let url):
+            guard let url = URL(string: url.as_str()) else { return }
             let url_type = classify_url(url)
             switch url_type {
             case .media:
                 urls.append(url_type)
-                return str
             case .link(let url):
                 urls.append(url_type)
-                return str + url_str(url)
+                str = str + url_str(url)
             }
+        case .mention_index:
+            return
         }
     }
 
-    return NoteArtifactsSeparated(content: txt, words: bs.words, urls: urls, invoices: invoices)
+    return NoteArtifactsSeparated(content: txt, words: blocks.words, urls: urls, invoices: invoices)
 }
 
-func reduce_text_block(blocks: [Block], ind: Int, txt: String, one_note_ref: Bool) -> String {
+func reduce_text_block(blocks: [NdbBlock], ind: Int, txt: String, one_note_ref: Bool) -> String {
     var trimmed = txt
     
     if let prev = blocks[safe: ind-1],
        case .url(let u) = prev,
-       classify_url(u).is_media != nil {
+       let url = URL(string: u.as_str()),
+       classify_url(url).is_media != nil
+    {
         trimmed = " " + trim_prefix(trimmed)
     }
     
     if let next = blocks[safe: ind+1] {
-        if case .url(let u) = next, classify_url(u).is_media != nil {
+        if case .url(let u) = next,
+           let url = URL(string: u.as_str()),
+           classify_url(url).is_media != nil
+        {
             trimmed = trim_suffix(trimmed)
         } else if case .mention(let m) = next,
-                  case .note = m.ref,
-                  one_note_ref {
+                  let typ = m.bech32_type,
+                  typ.is_notelike,
+                  one_note_ref
+        {
             trimmed = trim_suffix(trimmed)
         }
     }
@@ -192,13 +201,17 @@ func mention_str(_ m: Mention<MentionRef>, profiles: Profiles) -> CompatibleText
     let bech32String = Bech32Object.encode(m.ref.toBech32Object())
     
     let display_str: String = {
-        switch m.ref {
-        case .pubkey(let pk): return getDisplayName(pk: pk, profiles: profiles)
+        switch m.ref.nip19 {
+        case .npub(let pk): return getDisplayName(pk: pk, profiles: profiles)
         case .note: return abbrev_pubkey(bech32String)
         case .nevent: return abbrev_pubkey(bech32String)
         case .nprofile(let nprofile): return getDisplayName(pk: nprofile.author, profiles: profiles)
         case .nrelay(let url): return url
         case .naddr: return abbrev_pubkey(bech32String)
+        case .nsec(let prv): 
+            guard let npub = privkey_to_pubkey(privkey: prv)?.npub else { return "nsec..." }
+            return abbrev_pubkey(npub)
+        case .nscript(_): return bech32String
         }
     }()
 
