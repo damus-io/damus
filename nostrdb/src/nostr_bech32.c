@@ -11,6 +11,7 @@
 #include "str_block.h"
 #include "nostrdb.h"
 #include "bolt11/bech32.h"
+#include "endian.h"
 
 #define MAX_TLVS 32
 
@@ -129,7 +130,7 @@ static int parse_nostr_bech32_nevent(struct cursor *cur, struct bech32_nevent *n
 		case TLV_KIND:
 			if (tlv.len != 4)
 				return 0;
-			nevent->kind = decode_tlv-U32(tlv.value);
+			nevent->kind = decode_tlv_u32(tlv.value);
 			nevent->has_kind = 1;
 			break;
 		case TLV_AUTHOR:
@@ -148,12 +149,12 @@ static int parse_nostr_bech32_nevent(struct cursor *cur, struct bech32_nevent *n
 
 static int parse_nostr_bech32_naddr(struct cursor *cur, struct bech32_naddr *naddr) {
 	struct nostr_tlv tlv;
-	int i;
+	int i, has_kind;
 
+    has_kind = 0;
 	naddr->identifier.str = NULL;
 	naddr->identifier.len = 0;
 	naddr->pubkey = NULL;
-	naddr->has_kind = 0;
 	naddr->relays.num_relays = 0;
 
 	for (i = 0; i < MAX_TLVS; i++) {
@@ -172,7 +173,7 @@ static int parse_nostr_bech32_naddr(struct cursor *cur, struct bech32_naddr *nad
 		case TLV_KIND:
 			if (tlv.len != 4) return 0;
 			naddr->kind = decode_tlv_u32(tlv.value);
-			naddr->has_kind = 1;
+            has_kind = 1;
 			break;
 		case TLV_RELAY:
 			add_relay(&naddr->relays, &tlv);
@@ -180,7 +181,7 @@ static int parse_nostr_bech32_naddr(struct cursor *cur, struct bech32_naddr *nad
 		}
 	}
 
-	return naddr->identifier.str != NULL;
+	return naddr->identifier.str != NULL && has_kind;
 }
 
 static int parse_nostr_bech32_nprofile(struct cursor *cur, struct bech32_nprofile *nprofile) {

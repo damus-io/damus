@@ -385,10 +385,12 @@ struct ProfileView: View {
                         }
                         .buttonStyle(PlainButtonStyle())
                     } else {
+                        /*
                         NavigationLink(value: Route.UserRelays(relays: Array(relays.keys).sorted())) {
                             relay_text
                         }
                         .buttonStyle(PlainButtonStyle())
+                         */
                     }
                 }
             }

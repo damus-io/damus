@@ -524,8 +524,8 @@ struct ContentView: View {
         .onReceive(handle_notify(.local_notification)) { local in
             guard let damus_state else { return }
 
-            switch local.mention {
-            case .pubkey(let pubkey):
+            switch local.mention.nip19 {
+            case .npub(let pubkey):
                 open_profile(pubkey: pubkey)
 
             case .note(let noteId):
@@ -537,6 +537,10 @@ struct ContentView: View {
             case .nrelay(_):
                 break
             case .naddr(let naddr):
+                break
+            case .nsec(_):
+                break
+            case .nscript(_):
                 break
             }
 

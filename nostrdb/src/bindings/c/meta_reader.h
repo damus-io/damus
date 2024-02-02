@@ -6,11 +6,11 @@
 #ifndef FLATBUFFERS_COMMON_READER_H
 #include "flatbuffers_common_reader.h"
 #endif
-#include "flatcc/flatcc_flatbuffers.h"
+#include "flatcc_flatbuffers.h"
 #ifndef __alignas_is_defined
 #include <stdalign.h>
 #endif
-#include "flatcc/flatcc_prologue.h"
+#include "flatcc_prologue.h"
 #ifndef flatbuffers_identifier
 #define flatbuffers_identifier 0
 #endif
@@ -54,5 +54,5 @@ __flatbuffers_define_scalar_field(4, NdbEventMeta, zaps, flatbuffers_int32, int3
 __flatbuffers_define_scalar_field(5, NdbEventMeta, zap_total, flatbuffers_int64, int64_t, INT64_C(0))
 
 
-#include "flatcc/flatcc_epilogue.h"
+#include "flatcc_epilogue.h"
 #endif /* META_READER_H */

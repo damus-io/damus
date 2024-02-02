@@ -5,9 +5,9 @@
 
 /* Common FlatBuffers build functionality for C. */
 
-#include "flatcc/flatcc_prologue.h"
+#include "flatcc_prologue.h"
 #ifndef FLATBUILDER_H
-#include "flatcc/flatcc_builder.h"
+#include "flatcc_builder.h"
 #endif
 typedef flatcc_builder_t flatbuffers_builder_t;
 typedef flatcc_builder_ref_t flatbuffers_ref_t;
@@ -681,5 +681,5 @@ __flatbuffers_build_scalar(flatbuffers_, flatbuffers_double, double)
 __flatbuffers_build_string(flatbuffers_)
 
 __flatbuffers_build_buffer(flatbuffers_)
-#include "flatcc/flatcc_epilogue.h"
+#include "flatcc_epilogue.h"
 #endif /* FLATBUFFERS_COMMON_BUILDER_H */

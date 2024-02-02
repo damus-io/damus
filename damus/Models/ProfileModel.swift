@@ -10,7 +10,7 @@ import Foundation
 class ProfileModel: ObservableObject, Equatable {
     @Published var contacts: NostrEvent? = nil
     @Published var following: Int = 0
-    @Published var relays: [String: RelayInfo]? = nil
+    @Published var relays: [RelayURL: RelayInfo]? = nil
     @Published var progress: Int = 0
     
     private let MAX_SHARE_RELAYS = 4
@@ -160,11 +160,11 @@ class ProfileModel: ObservableObject, Equatable {
         damus.pool.unsubscribe(sub_id: findRelay_subid)
     }
     
-    func getRelayStrings() -> [String] {
+    func getRelayStrings() -> [RelayURL] {
         return relays?.keys.map {$0} ?? []
     }
     
-    func getCappedRelayStrings() -> [String] {
+    func getCappedRelayStrings() -> [RelayURL] {
         return relays?.keys.prefix(MAX_SHARE_RELAYS).map { $0 } ?? []
     }
 }
