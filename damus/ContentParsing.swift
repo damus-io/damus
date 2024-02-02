@@ -20,59 +20,12 @@ enum NoteContent {
     }
 }
 
-func parsed_blocks_finish(bs: inout note_blocks, tags: TagsSequence?) -> Blocks {
-    var out: [Block] = []
-
-    var i = 0
-    while (i < bs.num_blocks) {
-        let block = bs.blocks[i]
-
-        if let converted = Block(block, tags: tags) {
-            out.append(converted)
-        }
-
-        i += 1
-    }
-
-    let words = Int(bs.words)
-    blocks_free(&bs)
-
-    return Blocks(words: words, blocks: out)
-
-}
-
-func parse_note_content(content: NoteContent) -> Blocks {
-    var bs = note_blocks()
-    bs.num_blocks = 0;
-    
-    blocks_init(&bs)
-
-    switch content {
-    case .content(let s, let tags):
-        return s.withCString { cptr in
-            damus_parse_content(&bs, cptr)
-            return parsed_blocks_finish(bs: &bs, tags: tags)
-        }
-    case .note(let note):
-        damus_parse_content(&bs, note.content_raw)
-        return parsed_blocks_finish(bs: &bs, tags: note.tags)
-    }
-}
-
-func interpret_event_refs_ndb(blocks: [Block], tags: TagsSequence) -> [EventRef] {
+func interpret_event_refs_ndb(tags: TagsSequence) -> [EventRef] {
     if tags.count == 0 {
         return []
     }
     
-    /// build a set of indices for each event mention
-    let mention_indices = build_mention_indices(blocks, type: .e)
-
-    /// simpler case with no mentions
-    if mention_indices.count == 0 {
-        return interp_event_refs_without_mentions_ndb(tags.note.referenced_noterefs)
-    }
-    
-    return interp_event_refs_with_mentions_ndb(tags: tags, mention_indices: mention_indices)
+    return interp_event_refs_without_mentions_ndb(References<NoteRef>(tags: tags))
 }
 
 func interp_event_refs_without_mentions_ndb(_ ev_tags: References<NoteRef>) -> [EventRef] {
@@ -83,15 +36,25 @@ func interp_event_refs_without_mentions_ndb(_ ev_tags: References<NoteRef>) -> [
     var first_ref: NoteRef? = nil
 
     for ref in ev_tags {
-        if first {
-            first_ref = ref
-            evrefs.append(.thread_id(ref))
-            first = false
+        if let marker = ref.marker {
+            switch marker {
+            case .mention:
+                evrefs.append(.mention(.noteref(ref)))
+            case .reply:
+                evrefs.append(.reply(ref))
+            case .root:
+                evrefs.append(.reply_to_root(ref))
+            }
         } else {
-
-            evrefs.append(.reply(ref))
+            if first {
+                first_ref = ref
+                evrefs.append(.thread_id(ref))
+                first = false
+            } else {
+                evrefs.append(.reply(ref))
+            }
+            count += 1
         }
-        count += 1
     }
 
     if let first_ref, count == 1 {

@@ -6,8 +6,8 @@
 #ifndef PROFILE_READER_H
 #include "profile_reader.h"
 #endif
-#include "flatcc/flatcc_verifier.h"
-#include "flatcc/flatcc_prologue.h"
+#include "flatcc_verifier.h"
+#include "flatcc_prologue.h"
 
 static int NdbProfile_verify_table(flatcc_table_verifier_descriptor_t *td);
 static int NdbProfileRecord_verify_table(flatcc_table_verifier_descriptor_t *td);
@@ -80,5 +80,5 @@ static inline int NdbProfileRecord_verify_as_root_with_type_hash(const void *buf
     return flatcc_verify_table_as_typed_root(buf, bufsiz, thash, &NdbProfileRecord_verify_table);
 }
 
-#include "flatcc/flatcc_epilogue.h"
+#include "flatcc_epilogue.h"
 #endif /* PROFILE_VERIFIER_H */

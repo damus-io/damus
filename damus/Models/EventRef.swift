@@ -58,14 +58,12 @@ enum EventRef: Equatable {
     }
 }
 
-func build_mention_indices(_ blocks: [Block], type: MentionType) -> Set<Int> {
+func build_mention_indices(_ blocks: BlocksSequence, type: MentionType) -> Set<Int> {
     return blocks.reduce(into: []) { acc, block in
         switch block {
-        case .mention(let m):
-            if m.ref.key == type, let idx = m.index {
-                acc.insert(idx)
-            }
-        case .relay:
+        case .mention:
+            return
+        case .mention_index(let idx):
             return
         case .text:
             return
@@ -101,19 +99,14 @@ func interp_event_refs_without_mentions(_ refs: [NoteRef]) -> [EventRef] {
     return evrefs
 }
 
-func interp_event_refs_with_mentions(tags: Tags, mention_indices: Set<Int>) -> [EventRef] {
+func interp_event_refs_with_mentions(tags: Tags) -> [EventRef] {
     var mentions: [EventRef] = []
     var ev_refs: [NoteRef] = []
     var i: Int = 0
 
     for tag in tags {
         if let ref = NoteRef.from_tag(tag: tag) {
-            if mention_indices.contains(i) {
-                let mention = Mention<NoteRef>(index: i, ref: ref)
-                mentions.append(.mention(mention))
-            } else {
-                ev_refs.append(ref)
-            }
+            ev_refs.append(ref)
         }
         i += 1
     }
@@ -123,20 +116,20 @@ func interp_event_refs_with_mentions(tags: Tags, mention_indices: Set<Int>) -> [
     return replies
 }
 
-func interpret_event_refs(blocks: [Block], tags: Tags) -> [EventRef] {
+func interpret_event_refs(blocks: BlocksSequence, tags: Tags) -> [EventRef] {
     if tags.count == 0 {
         return []
     }
     
     /// build a set of indices for each event mention
-    let mention_indices = build_mention_indices(blocks, type: .e)
+    //let mention_indices = build_mention_indices(blocks, type: .e)
 
     /// simpler case with no mentions
-    if mention_indices.count == 0 {
-        return interp_event_refs_without_mentions_ndb(References<NoteRef>(tags: tags))
-    }
-    
-    return interp_event_refs_with_mentions(tags: tags, mention_indices: mention_indices)
+    //if mention_indices.count == 0 {
+        //return interp_event_refs_without_mentions_ndb(References<NoteRef>(tags: tags))
+    //}
+
+    return interp_event_refs_with_mentions(tags: tags)
 }
 
 

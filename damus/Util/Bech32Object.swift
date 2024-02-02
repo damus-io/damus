@@ -10,38 +10,18 @@ import Foundation
 fileprivate extension String {
     /// Failable initializer to build a Swift.String from a C-backed `str_block_t`.
     init?(_ s: str_block_t) {
-        let len = s.end - s.start
-        let bytes = Data(bytes: s.start, count: len)
+        let bytes = Data(bytes: s.str, count: Int(s.len))
         self.init(bytes: bytes, encoding: .utf8)
     }
 }
 
 struct NEvent : Equatable, Hashable {
     let noteid: NoteId
-    let relays: [String]
+    let relays: [RelayURL]
     let author: Pubkey?
     let kind: UInt32?
     
-    init(noteid: NoteId, relays: [String]) {
-        self.noteid = noteid
-        self.relays = relays
-        self.author = nil
-        self.kind = nil
-    }
-    
-    init(noteid: NoteId, relays: [String], author: Pubkey?) {
-        self.noteid = noteid
-        self.relays = relays
-        self.author = author
-        self.kind = nil
-    }
-    init(noteid: NoteId, relays: [String], kind: UInt32?) {
-        self.noteid = noteid
-        self.relays = relays
-        self.author = nil
-        self.kind = kind
-    }
-    init(noteid: NoteId, relays: [String], author: Pubkey?, kind: UInt32?) {
+    init(noteid: NoteId, relays: [RelayURL], author: Pubkey? = nil, kind: UInt32? = nil) {
         self.noteid = noteid
         self.relays = relays
         self.author = author
@@ -51,17 +31,64 @@ struct NEvent : Equatable, Hashable {
 
 struct NProfile : Equatable, Hashable {
     let author: Pubkey
-    let relays: [String]
+    let relays: [RelayURL]
 }
 
 struct NAddr : Equatable, Hashable {
     let identifier: String
     let author: Pubkey
-    let relays: [String]
+    let relays: [RelayURL]
     let kind: UInt32
 }
 
-enum Bech32Object : Equatable {
+extension ndb_relays {
+    func as_urls() -> [RelayURL] {
+        var urls = [RelayURL]()
+
+        //
+        // This is so incredibly dumb but it's just what the Swift <-> C bridge
+        // does and I don't have a better way that doesn't involve complicated 
+        // and slow stuff like reflection
+        //
+        let (r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16,r17,r18,r19,r20,r21,r22,r23) = self.relays
+
+        for i in 0..<self.num_relays {
+            switch i {
+            case 0:  if let relay = RelayURL(r0.as_str())  { urls.append(relay) }
+            case 1:  if let relay = RelayURL(r1.as_str())  { urls.append(relay) }
+            case 2:  if let relay = RelayURL(r2.as_str())  { urls.append(relay) }
+            case 3:  if let relay = RelayURL(r3.as_str())  { urls.append(relay) }
+            case 4:  if let relay = RelayURL(r4.as_str())  { urls.append(relay) }
+            case 5:  if let relay = RelayURL(r5.as_str())  { urls.append(relay) }
+            case 6:  if let relay = RelayURL(r6.as_str())  { urls.append(relay) }
+            case 7:  if let relay = RelayURL(r7.as_str())  { urls.append(relay) }
+            case 8:  if let relay = RelayURL(r8.as_str())  { urls.append(relay) }
+            case 9:  if let relay = RelayURL(r9.as_str())  { urls.append(relay) }
+            case 10: if let relay = RelayURL(r10.as_str()) { urls.append(relay) }
+            case 11: if let relay = RelayURL(r11.as_str()) { urls.append(relay) }
+            case 12: if let relay = RelayURL(r12.as_str()) { urls.append(relay) }
+            case 13: if let relay = RelayURL(r13.as_str()) { urls.append(relay) }
+            case 14: if let relay = RelayURL(r14.as_str()) { urls.append(relay) }
+            case 15: if let relay = RelayURL(r15.as_str()) { urls.append(relay) }
+            case 16: if let relay = RelayURL(r16.as_str()) { urls.append(relay) }
+            case 17: if let relay = RelayURL(r17.as_str()) { urls.append(relay) }
+            case 18: if let relay = RelayURL(r18.as_str()) { urls.append(relay) }
+            case 19: if let relay = RelayURL(r19.as_str()) { urls.append(relay) }
+            case 20: if let relay = RelayURL(r20.as_str()) { urls.append(relay) }
+            case 21: if let relay = RelayURL(r21.as_str()) { urls.append(relay) }
+            case 22: if let relay = RelayURL(r22.as_str()) { urls.append(relay) }
+            case 23: if let relay = RelayURL(r23.as_str()) { urls.append(relay) }
+            default:
+                break
+            }
+        }
+
+        return urls
+    }
+
+}
+
+enum Bech32Object : Equatable, Hashable {
     case nsec(Privkey)
     case npub(Pubkey)
     case note(NoteId)
@@ -71,26 +98,68 @@ enum Bech32Object : Equatable {
     case nrelay(String)
     case naddr(NAddr)
 
+    init?(block: ndb_mention_bech32_block) {
+        let b32 = block.bech32
+        switch block.bech32_type {
+        case .note:
+            let data = b32.note.event_id.as_data(size: 32)
+            self = .note(NoteId(data))
+        case .npub:
+            let data = b32.npub.pubkey.as_data(size: 32)
+            self = .npub(Pubkey(data))
+        case .nprofile:
+            let pk = b32.nprofile.pubkey.as_data(size: 32)
+            let relays = b32.nprofile.relays.as_urls()
+            self = .nprofile(NProfile(author: Pubkey(pk), relays: relays))
+        case .nevent:
+            let nevent = b32.nevent
+            let note_id = NoteId(nevent.event_id.as_data(size: 32))
+            let relays = nevent.relays.as_urls()
+            var author: Pubkey? = nil
+            if nevent.pubkey != nil {
+                author = Pubkey(nevent.pubkey.as_data(size: 32))
+            }
+            var kind: UInt32? = nil
+            if nevent.has_kind != 0 {
+                kind = nevent.kind
+            }
+
+            self = .nevent(NEvent(noteid: note_id, relays: relays, author: author, kind: kind))
+        case .nrelay:
+            self = .nrelay(b32.nrelay.relay.as_str())
+        case .naddr:
+            let identifier = b32.naddr.identifier.as_str()
+            let author = Pubkey(b32.naddr.pubkey.as_data(size: 32))
+            let relays = b32.naddr.relays.as_urls()
+            self = .naddr(NAddr(identifier: identifier, author: author, relays: relays, kind: b32.naddr.kind))
+        case .nsec:
+            return nil
+        case .none:
+            return nil
+        }
+    }
+
     static func parse(_ str: String) -> Bech32Object? {
         if str.starts(with: "nscript"), let decoded = try? bech32_decode(str) {
             return .nscript(decoded.data.bytes)
         }
 
         var b: nostr_bech32_t = nostr_bech32()
+        var bytes = Data(capacity: str.utf8.count)
 
-        let bytes = Array(str.utf8)
-        
-        bytes.withUnsafeBufferPointer { buffer in
-            guard let baseAddress = buffer.baseAddress else { return }
-            
-            var cursorInstance = cursor()
-            cursorInstance.start = UnsafeMutablePointer(mutating: baseAddress)
-            cursorInstance.p = UnsafeMutablePointer(mutating: baseAddress)
-            cursorInstance.end = cursorInstance.start.advanced(by: buffer.count)
-            
-            parse_nostr_bech32(&cursorInstance, &b)
+        let ok = str.withCString { cstr in
+            let ok = bytes.withUnsafeMutableBytes { buffer -> Int32 in
+                guard let addr = buffer.baseAddress?.assumingMemoryBound(to: UInt8.self) else {
+                    return 0
+                }
+                return parse_nostr_bech32(addr, Int32(buffer.count), cstr, str.utf8.count, &b)
+            }
+
+            return ok != 0
         }
-        
+
+        guard ok else { return nil }
+
         return decodeCBech32(b)
     }
     
@@ -113,25 +182,7 @@ enum Bech32Object : Equatable {
     }
     
     func toMentionRef() -> MentionRef? {
-        switch self {
-        case .nsec(let privkey):
-            guard let pubkey = privkey_to_pubkey(privkey: privkey) else { return nil }
-            return .pubkey(pubkey)
-        case .npub(let pubkey):
-            return .pubkey(pubkey)
-        case .note(let noteid):
-            return .note(noteid)
-        case .nscript(_):
-            return nil
-        case .nevent(let nevent):
-            return .nevent(nevent)
-        case .nprofile(let nprofile):
-            return .nprofile(nprofile)
-        case .nrelay(let relayURL):
-            return .nrelay(relayURL)
-        case .naddr(let naddr):
-            return .naddr(naddr)
-        }
+        MentionRef(nip19: self)
     }
 
 }
@@ -139,73 +190,35 @@ enum Bech32Object : Equatable {
 func decodeCBech32(_ b: nostr_bech32_t) -> Bech32Object? {
     switch b.type {
     case NOSTR_BECH32_NOTE:
-        let note = b.data.note;
-        let note_id = NoteId(Data(bytes: note.event_id, count: 32))
+        let note_id = NoteId(Data(bytes: b.note.event_id, count: 32))
         return .note(note_id)
     case NOSTR_BECH32_NEVENT:
-        let nevent = b.data.nevent;
-        let note_id = NoteId(Data(bytes: nevent.event_id, count: 32))
-        let pubkey = nevent.pubkey != nil ? Pubkey(Data(bytes: nevent.pubkey, count: 32)) : nil
-        let kind: UInt32? = nevent.has_kind ? nevent.kind : nil
-        let relays = getRelayStrings(from: nevent.relays)
+        let note_id = NoteId(Data(bytes: b.nevent.event_id, count: 32))
+        let pubkey = b.nevent.pubkey != nil ? Pubkey(Data(bytes: b.nevent.pubkey, count: 32)) : nil
+        let kind: UInt32? = b.nevent.has_kind == 0 ? nil : b.nevent.kind
+        let relays = b.nevent.relays.as_urls()
         return .nevent(NEvent(noteid: note_id, relays: relays, author: pubkey, kind: kind))
     case NOSTR_BECH32_NPUB:
-        let npub = b.data.npub
-        let pubkey = Pubkey(Data(bytes: npub.pubkey, count: 32))
+        let pubkey = Pubkey(Data(bytes: b.npub.pubkey, count: 32))
         return .npub(pubkey)
     case NOSTR_BECH32_NSEC:
-        let nsec = b.data.nsec
-        let privkey = Privkey(Data(bytes: nsec.nsec, count: 32))
+        let privkey = Privkey(Data(bytes: b.nsec.nsec, count: 32))
         guard let pubkey = privkey_to_pubkey(privkey: privkey) else { return nil }
         return .npub(pubkey)
     case NOSTR_BECH32_NPROFILE:
-        let nprofile = b.data.nprofile
-        let pubkey = Pubkey(Data(bytes: nprofile.pubkey, count: 32))
-        return .nprofile(NProfile(author: pubkey, relays: getRelayStrings(from: nprofile.relays)))
+        let pubkey = Pubkey(Data(bytes: b.nprofile.pubkey, count: 32))
+        return .nprofile(NProfile(author: pubkey, relays: b.nprofile.relays.as_urls()))
     case NOSTR_BECH32_NRELAY:
-        let nrelay = b.data.nrelay
-        let str_relay: str_block = nrelay.relay
-        guard let relay_str = String(str_relay) else {
-            return nil
-        }
-        return .nrelay(relay_str)
+        return .nrelay(b.nrelay.relay.as_str())
     case NOSTR_BECH32_NADDR:
-        let naddr = b.data.naddr
-        guard let identifier = String(naddr.identifier) else {
-            return nil
-        }
-        let pubkey = Pubkey(Data(bytes: naddr.pubkey, count: 32))
-        let kind = naddr.kind
-        
-        return .naddr(NAddr(identifier: identifier, author: pubkey, relays: getRelayStrings(from: naddr.relays), kind: kind))
+        let pubkey = Pubkey(Data(bytes: b.naddr.pubkey, count: 32))
+        let kind = b.naddr.kind
+        let identifier = b.naddr.identifier.as_str()
+
+        return .naddr(NAddr(identifier: identifier, author: pubkey, relays: b.naddr.relays.as_urls(), kind: kind))
     default:
         return nil
     }
-}
-
-private func getRelayStrings(from relays: relays) -> [String] {
-    var result = [String]()
-    let numRelays = Int(relays.num_relays)
-
-    func processRelay(_ relay: str_block) {
-        if let string = String(relay) {
-            result.append(string)
-        }
-    }
-
-    // Since relays is a C tuple, the indexes can't be iterated through so they need to be manually processed
-    if numRelays > 0 { processRelay(relays.relays.0) }
-    if numRelays > 1 { processRelay(relays.relays.1) }
-    if numRelays > 2 { processRelay(relays.relays.2) }
-    if numRelays > 3 { processRelay(relays.relays.3) }
-    if numRelays > 4 { processRelay(relays.relays.4) }
-    if numRelays > 5 { processRelay(relays.relays.5) }
-    if numRelays > 6 { processRelay(relays.relays.6) }
-    if numRelays > 7 { processRelay(relays.relays.7) }
-    if numRelays > 8 { processRelay(relays.relays.8) }
-    if numRelays > 9 { processRelay(relays.relays.9) }
-
-    return result
 }
 
 private enum TLVType: UInt8 {
@@ -221,9 +234,9 @@ private func writeBytesList(bytesList: inout [UInt8], tlvType: TLVType, data: [U
     bytesList.append(contentsOf: data.bytes)
 }
 
-private func writeBytesRelays(bytesList: inout [UInt8], relays: [String]) {
-    for relay in relays where !relay.isEmpty {
-        guard let relayData = relay.data(using: .utf8) else {
+private func writeBytesRelays(bytesList: inout [UInt8], relays: [RelayURL]) {
+    for relay in relays {
+        guard let relayData = relay.url.absoluteString.data(using: .utf8) else {
             continue // skip relay if can't read data
         }
         writeBytesList(bytesList: &bytesList, tlvType: .RELAY, data: relayData.bytes)

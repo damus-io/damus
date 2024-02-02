@@ -364,7 +364,7 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
     //print("Preloading event \(plan.event.content)")
 
     if artifacts == nil && plan.load_artifacts {
-        let arts = render_note_content(ev: plan.event, profiles: profiles, keypair: our_keypair)
+        let arts = render_note_content(ndb: state.ndb, ev: plan.event, profiles: profiles, keypair: our_keypair)
         artifacts = arts
         
         // we need these asap
@@ -385,7 +385,7 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
     }
     
     if plan.load_preview, note_artifact_is_separated(kind: plan.event.known_kind) {
-        let arts = artifacts ?? render_note_content(ev: plan.event, profiles: profiles, keypair: our_keypair)
+        let arts = artifacts ?? render_note_content(ndb: state.ndb, ev: plan.event, profiles: profiles, keypair: our_keypair)
 
         // only separated artifacts have previews
         if case .separated(let sep) = arts {
@@ -400,7 +400,7 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
         }
     }
     
-    let note_language = plan.data.translations_model.note_language ?? plan.event.note_language(our_keypair) ?? current_language()
+    let note_language = plan.data.translations_model.note_language ?? plan.event.note_language(ndb: state.ndb, our_keypair) ?? current_language()
 
     var translations: TranslateStatus? = nil
     // We have to recheck should_translate here now that we have note_language

@@ -9,7 +9,7 @@
 #ifndef FLATBUFFERS_COMMON_BUILDER_H
 #include "flatbuffers_common_builder.h"
 #endif
-#include "flatcc/flatcc_prologue.h"
+#include "flatcc_prologue.h"
 #ifndef flatbuffers_identifier
 #define flatbuffers_identifier 0
 #endif
@@ -65,5 +65,5 @@ static NdbEventMeta_ref_t NdbEventMeta_clone(flatbuffers_builder_t *B, NdbEventM
     __flatbuffers_memoize_end(B, t, NdbEventMeta_end(B));
 }
 
-#include "flatcc/flatcc_epilogue.h"
+#include "flatcc_epilogue.h"
 #endif /* META_BUILDER_H */
