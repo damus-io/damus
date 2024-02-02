@@ -1191,8 +1191,8 @@ extension LossyLocalNotification {
     /// Computes a view open action from a mention reference.
     /// Use this when opening a user-presentable interface to a specific mention reference.
     func toViewOpenAction() -> ContentView.ViewOpenAction {
-        switch self.mention {
-        case .pubkey(let pubkey):
+        switch self.mention.nip19 {
+        case .npub(let pubkey):
             return .route(.ProfileByKey(pubkey: pubkey))
         case .note(let noteId):
             return .route(.LoadableNostrEvent(note_reference: .note_id(noteId)))
@@ -1212,6 +1212,15 @@ extension LossyLocalNotification {
             )))
         case .naddr(let nAddr):
             return .route(.LoadableNostrEvent(note_reference: .naddr(nAddr)))
+        case .nsec(_):
+            // `nsec` urls are a terrible idea security-wise, so we should intentionally not support those — in order to discourage their use.
+            return .sheet(.error(ErrorView.UserPresentableError(
+                user_visible_description: NSLocalizedString("You opened an invalid link. The link you tried to open refers to \"nsec\", which is not supported.", comment: "User-visible error description for a user who tries to open an unsupported \"nsec\" link."),
+                tip: NSLocalizedString("Please contact the person who provided the link, and ask for another link. Also, this link may have sensitive information, please use caution before sharing it.", comment: "User-visible tip on what to do if a link contains an unsupported \"nsec\" reference."),
+                technical_info: "`MentionRef.toViewOpenAction` detected unsupported `nsec` contents"
+            )))
+        case .nscript(let script):
+            return .route(.Script(script: ScriptModel(data: script, state: .not_loaded)))
         }
     }
 }

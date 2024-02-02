@@ -23,6 +23,21 @@ struct Blur: UIViewRepresentable {
     }
 }
 
+extension bech32_nprofile {
+    func matches_pubkey(pk: Pubkey) -> Bool {
+        pk.id.withUnsafeBytes { bytes in
+            memcmp(self.pubkey, bytes, 32) == 0
+        }
+    }
+}
+
+extension bech32_npub {
+    func matches_pubkey(pk: Pubkey) -> Bool {
+        pk.id.withUnsafeBytes { bytes in
+            memcmp(self.pubkey, bytes, 32) == 0
+        }
+    }
+}
 
 struct NoteContentView: View {
     
@@ -255,7 +270,7 @@ struct NoteContentView: View {
                 }
                 await preload_event(plan: plan, state: damus_state)
             } else if force_artifacts {
-                let arts = render_note_content(ev: event, profiles: damus_state.profiles, keypair: damus_state.keypair)
+                let arts = render_note_content(ndb: damus_state.ndb, ev: event, profiles: damus_state.profiles, keypair: damus_state.keypair)
                 self.artifacts_model.state = .loaded(arts)
             }
         }
@@ -310,19 +325,36 @@ struct NoteContentView: View {
     var body: some View {
         ArtifactContent
             .onReceive(handle_notify(.profile_updated)) { profile in
-                let blocks = event.blocks(damus_state.keypair)
-                for block in blocks.blocks {
+                guard let blocks_txn = event.blocks(ndb: damus_state.ndb) else {
+                    return
+                }
+                let blocks = blocks_txn.unsafeUnownedValue
+                for block in blocks.iter(note: event) {
                     switch block {
                     case .mention(let m):
-                        if case .pubkey(let pk) = m.ref, pk == profile.pubkey {
-                            load(force_artifacts: true)
-                            return
+                        guard let typ = m.bech32_type else {
+                            continue
                         }
-                    case .relay: return
+                        switch typ {
+                        case .nprofile:
+                            if m.bech32.nprofile.matches_pubkey(pk: profile.pubkey) {
+                                load(force_artifacts: true)
+                            }
+                        case .npub:
+                            if m.bech32.npub.matches_pubkey(pk: profile.pubkey) {
+                                load(force_artifacts: true)
+                            }
+                        case .nevent: continue
+                        case .nrelay: continue
+                        case .nsec: continue
+                        case .note: continue
+                        case .naddr: continue
+                        }
                     case .text: return
                     case .hashtag: return
                     case .url: return
                     case .invoice: return
+                    case .mention_index(_): return
                     }
                 }
             }
@@ -478,13 +510,19 @@ struct NoteContentView_Previews: PreviewProvider {
     }
 }
 
-func separate_images(ev: NostrEvent, keypair: Keypair) -> [MediaUrl]? {
-    let urlBlocks: [URL] = ev.blocks(keypair).blocks.reduce(into: []) { urls, block in
-        guard case .url(let url) = block else {
+func separate_images(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> [MediaUrl]? {
+    guard let blocks_txn = ev.blocks(ndb: ndb) else {
+        return nil
+    }
+    let blocks = blocks_txn.unsafeUnownedValue
+    let urlBlocks: [URL] = blocks.iter(note: ev).reduce(into: []) { urls, block in
+        guard case .url(let url) = block,
+              let parsed_url = URL(string: url.as_str()) else {
             return
         }
-        if classify_url(url).is_img != nil {
-            urls.append(url)
+
+        if classify_url(parsed_url).is_img != nil {
+            urls.append(parsed_url)
         }
     }
     let mediaUrls = urlBlocks.map { MediaUrl.image($0) }

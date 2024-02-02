@@ -20,16 +20,13 @@ struct TagsIterator: IteratorProtocol {
             return nil
         }
 
-        return TagSequence(note: note, tag: self.iter.tag)
-    }
-
-    var count: UInt16 {
-        return note.note.pointee.tags.count
+        let tag_ptr = ndb_tag_ptr(ptr: self.iter.tag)
+        return TagSequence(note: note, tag: tag_ptr)
     }
 
     init(note: NdbNote) {
         self.iter = ndb_iterator()
-        ndb_tags_iterate_start(note.note, &self.iter)
+        ndb_tags_iterate_start(note.note.ptr, &self.iter)
         self.done = false
         self.note = note
     }
@@ -39,7 +36,8 @@ struct TagsSequence: Encodable, Sequence {
     let note: NdbNote
 
     var count: UInt16 {
-        note.note.pointee.tags.count
+        let tags_ptr = ndb_note_tags(note.note.ptr)
+        return ndb_tags_count(tags_ptr)
     }
 
     func strings() -> [[String]] {
@@ -70,7 +68,8 @@ struct TagsSequence: Encodable, Sequence {
         }
         precondition(false, "sequence subscript oob")
         // it seems like the compiler needs this or it gets bitchy
-        return .init(note: .init(note: .allocate(capacity: 1), size: 0, owned: true, key: nil), tag: .allocate(capacity: 1))
+        let nil_ptr = OpaquePointer(bitPattern: 0)
+        return .init(note: .init(note: .init(ptr: nil_ptr), size: 0, owned: true, key: nil), tag: .init(ptr: nil_ptr))
     }
 
     func makeIterator() -> TagsIterator {

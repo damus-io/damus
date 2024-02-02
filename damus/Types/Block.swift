@@ -2,22 +2,11 @@
 //  Block.swift
 //  damus
 //
-//  Created by Kyle Roucis on 2023-08-21.
-//
 
 import Foundation
 
 
-fileprivate extension String {
-    /// Failable initializer to build a Swift.String from a C-backed `str_block_t`.
-    init?(_ s: str_block_t) {
-        let len = s.end - s.start
-        let bytes = Data(bytes: s.start, count: len)
-        self.init(bytes: bytes, encoding: .utf8)
-    }
-}
-
-/// Represents a block of data stored by the NOSTR protocol. This can be
+/// Represents a block of data stored in nostrdb. This can be
 /// simple text, a hashtag, a url, a relay reference, a mention ref and
 /// potentially more in the future.
 enum Block: Equatable {
@@ -38,22 +27,6 @@ enum Block: Equatable {
         }
     }
 
-    var is_previewable: Bool {
-        switch self {
-        case .mention(let m):
-            switch m.ref {
-            case .note, .nevent: return true
-            default: return false
-            }
-        case .invoice:
-            return true
-        case .url:
-            return true
-        default:
-            return false
-        }
-    }
-
     case text(String)
     case mention(Mention<MentionRef>)
     case hashtag(String)
@@ -67,61 +40,56 @@ struct Blocks: Equatable {
     let blocks: [Block]
 }
 
+extension ndb_str_block {
+    func as_str() -> String {
+        let buf = UnsafeBufferPointer(start: self.str, count: Int(self.len))
+        let uint8Buf = buf.map { UInt8(bitPattern: $0) }
+        return String(decoding: uint8Buf, as: UTF8.self)
+    }
+}
+
+extension ndb_block_ptr {
+    func as_str() -> String {
+        guard let str_block = ndb_block_str(self.ptr) else {
+            return ""
+        }
+        return str_block.pointee.as_str()
+    }
+
+    var block: ndb_block.__Unnamed_union_block {
+        self.ptr.pointee.block
+    }
+}
+
 extension Block {
     /// Failable initializer for the C-backed type `block_t`. This initializer will inspect
     /// the underlying block type and build the appropriate enum value as needed.
-    init?(_ block: block_t, tags: TagsSequence? = nil) {
-        switch block.type {
+    init?(block: ndb_block_ptr, tags: TagsSequence?) {
+        switch ndb_get_block_type(block.ptr) {
         case BLOCK_HASHTAG:
-            guard let str = String(block.block.str) else {
-                return nil
-            }
-            self = .hashtag(str)
+            self = .hashtag(block.as_str())
         case BLOCK_TEXT:
-            guard let str = String(block.block.str) else {
-                return nil
-            }
-            self = .text(str)
+            self = .text(block.as_str())
         case BLOCK_MENTION_INDEX:
             guard let b = Block(index: Int(block.block.mention_index), tags: tags) else {
                 return nil
             }
             self = b
         case BLOCK_URL:
-            guard let b = Block(block.block.str) else {
-                return nil
-            }
-            self = b
+            guard let url = URL(string: block.as_str()) else { return nil }
+            self = .url(url)
         case BLOCK_INVOICE:
-            guard let b = Block(invoice: block.block.invoice) else {
-                return nil
-            }
+            guard let b = Block(invoice: block.block.invoice) else { return nil }
             self = b
         case BLOCK_MENTION_BECH32:
-            guard let b = Block(bech32: block.block.mention_bech32) else {
-                return nil
-            }
+            guard let b = Block(bech32: block.block.mention_bech32) else { return nil }
             self = b
         default:
             return nil
         }
     }
 }
-fileprivate extension Block {
-    /// Failable initializer for the C-backed type `str_block_t`.
-    init?(_ b: str_block_t) {
-        guard let str = String(b) else {
-            return nil
-        }
         
-        if let url = URL(string: str) {
-            self = .url(url)
-        }
-        else {
-            self = .text(str)
-        }
-    }
-}
 fileprivate extension Block {
     /// Failable initializer for a block index and a tag sequence.
     init?(index: Int, tags: TagsSequence? = nil) {
@@ -143,34 +111,19 @@ fileprivate extension Block {
         }
     }
 }
+
 fileprivate extension Block {
     /// Failable initializer for the C-backed type `invoice_block_t`.
-    init?(invoice: invoice_block_t) {
-        guard let invstr = String(invoice.invstr) else {
-            return nil
-        }
-        
-        guard var b11 = maybe_pointee(invoice.bolt11) else {
-            return nil
-        }
-        
-        guard let description = convert_invoice_description(b11: b11) else {
-            return nil
-        }
-        
-        let amount: Amount = maybe_pointee(b11.msat).map { .specific(Int64($0.millisatoshis)) } ?? .any
-        let payment_hash = Data(bytes: &b11.payment_hash, count: 32)
-        let created_at = b11.timestamp
-        
-        tal_free(invoice.bolt11)
-        self = .invoice(Invoice(description: description, amount: amount, string: invstr, expiry: b11.expiry, payment_hash: payment_hash, created_at: created_at))
+    init?(invoice: ndb_invoice_block) {
+        guard let invoice = invoice.as_invoice() else { return nil }
+        self = .invoice(invoice)
     }
 }
 
 fileprivate extension Block {
     /// Failable initializer for the C-backed type `mention_bech32_block_t`. This initializer will inspect the
     /// bech32 type code and build the appropriate enum type.
-    init?(bech32 b: mention_bech32_block_t) {
+    init?(bech32 b: ndb_mention_bech32_block) {
         guard let decoded = decodeCBech32(b.bech32) else {
             return nil
         }
@@ -180,6 +133,7 @@ fileprivate extension Block {
         self = .mention(.any(ref))
     }
 }
+
 extension Block {
     var asString: String {
         switch self {

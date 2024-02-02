@@ -18,7 +18,7 @@ func process_local_notification(state: HeadlessDamusState, event ev: NostrEvent)
         return
     }
 
-    guard let local_notification = generate_local_notification_object(from: ev, state: state) else {
+    guard let local_notification = generate_local_notification_object(ndb: state.ndb, from: ev, state: state) else {
         return
     }
 
@@ -65,19 +65,21 @@ func should_display_notification(state: HeadlessDamusState, event ev: NostrEvent
     return true
 }
 
-func generate_local_notification_object(from ev: NostrEvent, state: HeadlessDamusState) -> LocalNotification? {
+func generate_local_notification_object(ndb: Ndb, from ev: NostrEvent, state: HeadlessDamusState) -> LocalNotification? {
     guard let type = ev.known_kind else {
         return nil
     }
     
-    if type == .text, state.settings.mention_notification {
-        let blocks = ev.blocks(state.keypair).blocks
-
-        for case .mention(let mention) in blocks {
-            guard case .pubkey(let pk) = mention.ref, pk == state.keypair.pubkey else {
+    if type == .text,
+       state.settings.mention_notification,
+       let blocks = ev.blocks(ndb: ndb)?.unsafeUnownedValue
+    {
+        for case .mention(let mention) in blocks.iter(note: ev) {
+            guard case .npub = mention.bech32_type,
+                  (memcmp(state.keypair.pubkey.id.bytes, mention.bech32.npub.pubkey, 32) == 0) else {
                 continue
             }
-            let content_preview = render_notification_content_preview(ev: ev, profiles: state.profiles, keypair: state.keypair)
+            let content_preview = render_notification_content_preview(ndb: ndb, ev: ev, profiles: state.profiles, keypair: state.keypair)
             return LocalNotification(type: .mention, event: ev, target: .note(ev), content: content_preview)
         }
 
@@ -101,13 +103,13 @@ func generate_local_notification_object(from ev: NostrEvent, state: HeadlessDamu
               state.settings.repost_notification,
               let inner_ev = ev.get_inner_event()
     {
-        let content_preview = render_notification_content_preview(ev: inner_ev, profiles: state.profiles, keypair: state.keypair)
+        let content_preview = render_notification_content_preview(ndb: ndb, ev: inner_ev, profiles: state.profiles, keypair: state.keypair)
         return LocalNotification(type: .repost, event: ev, target: .note(inner_ev), content: content_preview)
     } else if type == .like, state.settings.like_notification, let evid = ev.referenced_ids.last {
         if let txn = state.ndb.lookup_note(evid, txn_name: "local_notification_like"),
            let liked_event = txn.unsafeUnownedValue
         {
-           let content_preview = render_notification_content_preview(ev: liked_event, profiles: state.profiles, keypair: state.keypair)
+           let content_preview = render_notification_content_preview(ndb: ndb, ev: liked_event, profiles: state.profiles, keypair: state.keypair)
             return LocalNotification(type: .like, event: ev, target: .note(liked_event), content: content_preview)
         } else {
             return LocalNotification(type: .like, event: ev, target: .note_id(evid), content: "")
@@ -144,10 +146,10 @@ func create_local_notification(profiles: Profiles, notify: LocalNotification) {
     }
 }
 
-func render_notification_content_preview(ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> String {
+func render_notification_content_preview(ndb: Ndb, ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> String {
 
     let prefix_len = 300
-    let artifacts = render_note_content(ev: ev, profiles: profiles, keypair: keypair)
+    let artifacts = render_note_content(ndb: ndb, ev: ev, profiles: profiles, keypair: keypair)
 
     // special case for longform events
     if ev.known_kind == .longform {

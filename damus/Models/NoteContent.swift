@@ -66,49 +66,66 @@ func note_artifact_is_separated(kind: NostrKind?) -> Bool {
     return kind != .longform
 }
 
-func render_note_content(ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> NoteArtifacts {
-    let blocks = ev.blocks(keypair)
+func render_note_content(ndb: Ndb, ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> NoteArtifacts {
+    guard let blocks = ev.blocks(ndb: ndb) else {
+        return .separated(.just_content(ev.get_content(keypair)))
+    }
 
     if ev.known_kind == .longform {
         return .longform(LongformContent(ev.content))
     }
     
-    return .separated(render_blocks(blocks: blocks, profiles: profiles, can_hide_last_previewable_refs: true))
+    return .separated(render_blocks(blocks: blocks.unsafeUnownedValue, profiles: profiles, note: ev, can_hide_last_previewable_refs: true))
 }
 
-func render_blocks(blocks bs: Blocks, profiles: Profiles, can_hide_last_previewable_refs: Bool = false) -> NoteArtifactsSeparated {
+func render_blocks(blocks: NdbBlocks, profiles: Profiles, note: NdbNote, can_hide_last_previewable_refs: Bool = false) -> NoteArtifactsSeparated {
     var invoices: [Invoice] = []
     var urls: [UrlType] = []
-    let blocks = bs.blocks
-
+    
     var end_mention_count = 0
     var end_url_count = 0
+    
+    let ndb_blocks = blocks.iter(note: note).collect()
+    let one_note_ref = ndb_blocks
+        .filter({
+            if case .mention(let mention) = $0,
+               let typ = mention.bech32_type,
+               typ.is_notelike {
+                return true
+            }
+            return false
+        })
+        .count == 1
 
     // Search backwards until we find the beginning index of the chain of previewables that reach the end of the content.
-    var hide_text_index = blocks.endIndex
+    var hide_text_index = ndb_blocks.endIndex
     if can_hide_last_previewable_refs {
-        outerLoop: for (i, block) in blocks.enumerated().reversed() {
+        outerLoop: for (i, block) in ndb_blocks.enumerated().reversed() {
             if block.is_previewable {
                 switch block {
                 case .mention:
                     end_mention_count += 1
-
+                    
                     // If there is more than one previewable mention,
                     // do not hide anything because we allow rich rendering of only one mention currently.
                     // This should be fixed in the future to show events inline instead.
                     if end_mention_count > 1 {
-                        hide_text_index = blocks.endIndex
+                        hide_text_index = ndb_blocks.endIndex
                         break outerLoop
                     }
-                case .url(let url):
+                case .url(let url_block):
+                    guard let url_string = NdbBlock.convertToStringCopy(from: url_block),
+                          let url = URL(string: url_string) else {
+                        continue    // We can't classify this, ignore and move on
+                    }
                     let url_type = classify_url(url)
                     if case .link = url_type {
                         end_url_count += 1
-
+                        
                         // If there is more than one link, do not hide anything because we allow rich rendering of only
                         // one link.
                         if end_url_count > 1 {
-                            hide_text_index = blocks.endIndex
+                            hide_text_index = ndb_blocks.endIndex
                             break outerLoop
                         }
                     }
@@ -116,7 +133,9 @@ func render_blocks(blocks bs: Blocks, profiles: Profiles, can_hide_last_previewa
                     break
                 }
                 hide_text_index = i
-            } else if case .text(let txt) = block, txt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            } else if case .text(let txt_block) = block,
+                      let txt = NdbBlock.convertToStringCopy(from: txt_block),
+                      txt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 // We should hide whitespace at the end sequence.
                 hide_text_index = i
             } else if case .hashtag = block {
@@ -129,16 +148,21 @@ func render_blocks(blocks bs: Blocks, profiles: Profiles, can_hide_last_previewa
     }
 
     var ind: Int = -1
-    let txt: CompatibleText = blocks.reduce(CompatibleText()) { str, block in
+    let txt: CompatibleText = ndb_blocks.reduce(into: CompatibleText()) { str, block in
         ind = ind + 1
 
         // Add the rendered previewable blocks to their type-specific lists.
         switch block {
-        case .invoice(let invoice):
-            invoices.append(invoice)
-        case .url(let url):
+        case .url(let url_block):
+            guard let url_string = NdbBlock.convertToStringCopy(from: url_block),
+                  let url = URL(string: url_string) else {
+                break    // We can't classify this, ignore and move on
+            }
             let url_type = classify_url(url)
             urls.append(url_type)
+        case .invoice(let invoice_block):
+            guard let invoice = invoice_block.as_invoice() else { break }
+            invoices.append(invoice)
         default:
             break
         }
@@ -147,7 +171,7 @@ func render_blocks(blocks bs: Blocks, profiles: Profiles, can_hide_last_previewa
             // If there are previewable blocks that occur before the consecutive sequence of them at the end of the content,
             // we should not hide the text representation of any previewable block to avoid altering the format of the note.
             if ind < hide_text_index && block.is_previewable {
-                hide_text_index = blocks.endIndex
+                hide_text_index = ndb_blocks.endIndex
             }
 
             // No need to show the text representation of the block if the only previewables are the sequence of them
@@ -156,34 +180,49 @@ func render_blocks(blocks bs: Blocks, profiles: Profiles, can_hide_last_previewa
             // The only exception is that if there are hashtags embedded in the end sequence, which is not uncommon,
             // then we still want to show those hashtags but hide everything else that is previewable in the end sequence.
             if ind >= hide_text_index {
-                if case .text(let txt) = block, txt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    if case .hashtag = blocks[safe: ind+1] {
-                        return str + CompatibleText(stringLiteral: reduce_text_block(ind: ind, hide_text_index: -1, txt: txt))
+                if case .text(let txt_block) = block,
+                          let txt = NdbBlock.convertToStringCopy(from: txt_block),
+                          txt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    if case .hashtag = ndb_blocks[safe: ind+1] {
+                        str = str + CompatibleText(stringLiteral: reduce_text_block(ind: ind, hide_text_index: hide_text_index, txt: txt))
                     }
                 } else if case .hashtag(let htag) = block {
-                    return str + hashtag_str(htag)
+                    str = str + hashtag_str(htag.as_str())
                 }
-                return str
+                return
             }
         }
 
         switch block {
         case .mention(let m):
-            return str + mention_str(m, profiles: profiles)
+            if let typ = m.bech32_type, typ.is_notelike, one_note_ref {
+                return
+            }
+            guard let mention = MentionRef(block: m) else { return }
+            str = str + mention_str(.any(mention), profiles: profiles)
         case .text(let txt):
-            return str + CompatibleText(stringLiteral: reduce_text_block(ind: ind, hide_text_index: hide_text_index, txt: txt))
-        case .relay(let relay):
-            return str + CompatibleText(stringLiteral: relay)
+            str = str + CompatibleText(stringLiteral: reduce_text_block(ind: ind, hide_text_index: hide_text_index, txt: txt.as_str()))
         case .hashtag(let htag):
-            return str + hashtag_str(htag)
+            str = str + hashtag_str(htag.as_str())
         case .invoice(let invoice):
-            return str + invoice_str(invoice)
+            guard let inv = invoice.as_invoice() else { return }
+            invoices.append(inv)
         case .url(let url):
-            return str + url_str(url)
+            guard let url = URL(string: url.as_str()) else { return }
+            let url_type = classify_url(url)
+            switch url_type {
+            case .media:
+                urls.append(url_type)
+            case .link(let url):
+                urls.append(url_type)
+                str = str + url_str(url)
+            }
+        case .mention_index:
+            return
         }
     }
 
-    return NoteArtifactsSeparated(content: txt, words: bs.words, urls: urls, invoices: invoices)
+    return NoteArtifactsSeparated(content: txt, words: blocks.words, urls: urls, invoices: invoices)
 }
 
 func reduce_text_block(ind: Int, hide_text_index: Int, txt: String) -> String {
@@ -249,13 +288,17 @@ func mention_str(_ m: Mention<MentionRef>, profiles: Profiles) -> CompatibleText
     let bech32String = Bech32Object.encode(m.ref.toBech32Object())
     
     let display_str: String = {
-        switch m.ref {
-        case .pubkey(let pk): return getDisplayName(pk: pk, profiles: profiles)
+        switch m.ref.nip19 {
+        case .npub(let pk): return getDisplayName(pk: pk, profiles: profiles)
         case .note: return abbrev_identifier(bech32String)
         case .nevent: return abbrev_identifier(bech32String)
         case .nprofile(let nprofile): return getDisplayName(pk: nprofile.author, profiles: profiles)
         case .nrelay(let url): return url
         case .naddr: return abbrev_identifier(bech32String)
+        case .nsec(let prv):
+            guard let npub = privkey_to_pubkey(privkey: prv)?.npub else { return "nsec..." }
+            return abbrev_identifier(npub)
+        case .nscript(_): return bech32String
         }
     }()
 

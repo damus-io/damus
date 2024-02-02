@@ -47,7 +47,7 @@ class NdbNote: Codable, Equatable, Hashable {
     private(set) var owned: Bool
     let count: Int
     let key: NoteKey?
-    let note: UnsafeMutablePointer<ndb_note>
+    let note: ndb_note_ptr
 
     // cached stuff (TODO: remove these)
     var decrypted_content: String? = nil
@@ -58,7 +58,7 @@ class NdbNote: Codable, Equatable, Hashable {
         }
     }
 
-    init(note: UnsafeMutablePointer<ndb_note>, size: Int, owned: Bool, key: NoteKey?) {
+    init(note: ndb_note_ptr, size: Int, owned: Bool, key: NoteKey?) {
         self.note = note
         self.owned = owned
         self.count = size
@@ -80,9 +80,9 @@ class NdbNote: Codable, Equatable, Hashable {
         }
 
         let buf = malloc(self.count)!
-        memcpy(buf, &self.note.pointee, self.count)
-        let new_note = buf.assumingMemoryBound(to: ndb_note.self)
+        memcpy(buf, UnsafeRawPointer(self.note.ptr), self.count)
 
+        let new_note = ndb_note_ptr(ptr: OpaquePointer(buf))
         return NdbNote(note: new_note, size: self.count, owned: true, key: self.key)
     }
     
@@ -95,16 +95,16 @@ class NdbNote: Codable, Equatable, Hashable {
     }
 
     var content_raw: UnsafePointer<CChar> {
-        ndb_note_content(note)
+        ndb_note_content(note.ptr)
     }
 
     var content_len: UInt32 {
-        ndb_note_content_length(note)
+        ndb_note_content_length(note.ptr)
     }
 
     /// NDBTODO: make this into data
     var id: NoteId {
-        .init(Data(bytes: ndb_note_id(note), count: 32))
+        .init(Data(bytes: ndb_note_id(note.ptr), count: 32))
     }
     
     var raw_note_id: UnsafeMutablePointer<UInt8> {
@@ -116,20 +116,20 @@ class NdbNote: Codable, Equatable, Hashable {
     }
 
     var sig: Signature {
-        .init(Data(bytes: ndb_note_sig(note), count: 64))
+        .init(Data(bytes: ndb_note_sig(note.ptr), count: 64))
     }
     
     /// NDBTODO: make this into data
     var pubkey: Pubkey {
-        .init(Data(bytes: ndb_note_pubkey(note), count: 32))
+        .init(Data(bytes: ndb_note_pubkey(note.ptr), count: 32))
     }
     
     var created_at: UInt32 {
-        ndb_note_created_at(note)
+        ndb_note_created_at(note.ptr)
     }
     
     var kind: UInt32 {
-        ndb_note_kind(note)
+        ndb_note_kind(note.ptr)
     }
 
     var tags: TagsSequence {
@@ -144,7 +144,7 @@ class NdbNote: Codable, Equatable, Hashable {
 
             print("\(NdbNote.notes_created) ndb_notes, \(NdbNote.total_ndb_size) bytes")
             #endif
-            free(note)
+            free(UnsafeMutableRawPointer(note.ptr))
         }
     }
 
@@ -234,7 +234,7 @@ class NdbNote: Codable, Equatable, Hashable {
         let buflen = MAX_NOTE_SIZE
         let buf = malloc(buflen)
 
-        ndb_builder_init(&builder, buf, Int32(buflen))
+        ndb_builder_init(&builder, buf, buflen)
 
         var pk_raw = noteConstructionMaterial.pubkey.bytes
 
@@ -262,9 +262,27 @@ class NdbNote: Codable, Equatable, Hashable {
             return nil
         }
 
-        var n = UnsafeMutablePointer<ndb_note>?(nil)
+        var n = ndb_note_ptr()
+
+        var the_kp: ndb_keypair? = nil
+
+        if let sec = keypair.privkey {
+            var kp = ndb_keypair()
+            memcpy(&kp.secret.0, sec.id.bytes, 32);
+
+            if ndb_create_keypair(&kp) <= 0 {
+                print("bad keypair")
+            } else {
+                the_kp = kp
+            }
+        }
 
         var len: Int32 = 0
+        if var the_kp {
+            len = ndb_builder_finalize(&builder, &n.ptr, &the_kp)
+        } else {
+            len = ndb_builder_finalize(&builder, &n.ptr, nil)
+        }
 
         switch noteConstructionMaterial {
         case .keypair(let keypair):
@@ -328,7 +346,7 @@ class NdbNote: Codable, Equatable, Hashable {
             return nil
         }
 
-        self.note = r.assumingMemoryBound(to: ndb_note.self)
+        self.note = ndb_note_ptr(ptr: OpaquePointer(r))
         self.key = nil
     }
 
@@ -352,9 +370,9 @@ class NdbNote: Codable, Equatable, Hashable {
         //guard var json_cstr = json.cString(using: .utf8) else { return nil }
 
         //json_cs
-        var note: UnsafeMutablePointer<ndb_note>?
-        
-        let len = ndb_note_from_json(json, Int32(json_len), &note, data, Int32(bufsize))
+        var note = ndb_note_ptr()
+
+        let len = ndb_note_from_json(json, Int32(json_len), &note.ptr, data, Int32(bufsize))
 
         if len == 0 {
             free(data)
@@ -362,10 +380,9 @@ class NdbNote: Codable, Equatable, Hashable {
         }
 
         // Create new Data with just the valid bytes
-        guard let note_data = realloc(data, Int(len)) else { return nil }
-        let new_note = note_data.assumingMemoryBound(to: ndb_note.self)
-
-        return NdbNote(note: new_note, size: Int(len), owned: true, key: nil)
+        guard let new_note = realloc(data, Int(len)) else { return nil }
+        let new_note_ptr = ndb_note_ptr(ptr: OpaquePointer(new_note))
+        return NdbNote(note: new_note_ptr, size: Int(len), owned: true, key: nil)
     }
     
     func get_inner_event() -> NdbNote? {
@@ -397,7 +414,7 @@ extension NdbNote {
     var should_show_event: Bool {
         return !too_big
     }
-
+    
     func is_hellthread(max_pubkeys: Int) -> Bool {
         switch known_kind {
         case .text, .boost, .like, .zap:
@@ -405,10 +422,6 @@ extension NdbNote {
         default:
             false
         }
-    }
-
-    func get_blocks(keypair: Keypair) -> Blocks {
-        return parse_note_content(content: .init(note: self, keypair: keypair))
     }
 
     // TODO: References iterator
@@ -451,7 +464,7 @@ extension NdbNote {
     public var references: References<RefId> {
         References<RefId>(tags: self.tags)
     }
-
+    
     func thread_reply() -> ThreadReply? {
         if self.known_kind != .highlight {
             return ThreadReply(tags: self.tags)
@@ -461,6 +474,21 @@ extension NdbNote {
     
     func highlighted_note_id() -> NoteId? {
         return ThreadReply(tags: self.tags)?.reply.note_id
+    }
+
+    func blocks(ndb: Ndb) -> NdbTxn<NdbBlocks>? {
+        let blocks_txn = NdbTxn<NdbBlocks?>(ndb: ndb) { txn in
+            guard let key = ndb.lookup_note_key_with_txn(self.id, txn: txn) else {
+                return nil
+            }
+            return ndb.lookup_blocks_by_key_with_txn(key, txn: txn)
+        }
+
+        guard let blocks_txn else {
+            return nil
+        }
+
+        return blocks_txn.collect()
     }
 
     func get_content(_ keypair: Keypair) -> String {
@@ -480,10 +508,6 @@ extension NdbNote {
         }
 
         return content
-    }
-
-    func blocks(_ keypair: Keypair) -> Blocks {
-        return get_blocks(keypair: keypair)
     }
 
     // NDBTODO: switch this to operating on bytes not strings
@@ -526,34 +550,22 @@ extension NdbNote {
         return self.referenced_ids.last
     }
 
-    // NDBTODO: id -> data
-    /*
-    public func references(id: String, key: AsciiCharacter) -> Bool {
-        var matcher: (Reference) -> Bool = { ref in ref.ref_id.matches_str(id) }
-        if id.count == 64, let decoded = hex_decode(id) {
-            matcher = { ref in ref.ref_id.matches_id(decoded) }
-        }
-        for ref in References(tags: self.tags) {
-            if ref.key == key && matcher(ref) {
-                return true
-            }
-        }
-
-        return false
-    }
-     */
-
     func is_reply() -> Bool {
         return thread_reply() != nil
     }
 
-    func note_language(_ keypair: Keypair) -> String? {
+    func note_language(ndb: Ndb, _ keypair: Keypair) -> String? {
         assert(!Thread.isMainThread, "This function must not be run on the main thread.")
 
         // Rely on Apple's NLLanguageRecognizer to tell us which language it thinks the note is in
         // and filter on only the text portions of the content as URLs and hashtags confuse the language recognizer.
-        let originalBlocks = self.blocks(keypair).blocks
-        let originalOnlyText = originalBlocks.compactMap {
+        /*
+        guard let blocks_txn = self.blocks(ndb: ndb) else {
+            return nil
+        }
+        let blocks = blocks_txn.unsafeUnownedValue
+
+        let originalOnlyText = blocks.blocks(note: self).compactMap {
                 if case .text(let txt) = $0 {
                     // Replacing right single quotation marks (’) with "typewriter or ASCII apostrophes" (')
                     // as a workaround to get Apple's language recognizer to predict language the correctly.
@@ -580,6 +592,9 @@ extension NdbNote {
                 }
             }
             .joined(separator: " ")
+         */
+        
+        let originalOnlyText = self.get_content(keypair)
 
         // If there is no text, there's nothing to use to detect language.
         guard !originalOnlyText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {

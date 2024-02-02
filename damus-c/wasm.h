@@ -27,6 +27,8 @@ static const unsigned char WASM_MAGIC[] = {0,'a','s','m'};
 #define interp_error(p, fmt, ...) note_error(&((p)->errors), interp_codeptr(p), fmt, ##__VA_ARGS__)
 #define parse_err(p, fmt, ...) note_error(&((p)->errs), &(p)->cur, fmt, ##__VA_ARGS__)
 
+#include "short_types.h"
+
 enum valtype {
 	val_i32 = 0x7F,
 	val_i64 = 0x7E,

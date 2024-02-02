@@ -133,7 +133,8 @@ static struct bolt11 *decode_fail(struct bolt11 *b11, char **fail,
     va_list ap;
 
     va_start(ap, fmt);
-    *fail = tal_vfmt(tal_parent(b11), fmt, ap);
+    if (fail)
+        *fail = tal_vfmt(tal_parent(b11), fmt, ap);
     va_end(ap);
     return tal_free(b11);
 }

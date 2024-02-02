@@ -760,13 +760,18 @@ func validate_event(ev: NostrEvent) -> ValidationResult {
     return ok ? .ok : .bad_sig
 }
 
-func first_eref_mention(ev: NostrEvent, keypair: Keypair) -> Mention<NoteId>? {
-    let blocks = ev.blocks(keypair).blocks.filter { block in
+func first_eref_mention(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> Mention<NoteId>? {
+    guard let blocks_txn = ev.blocks(ndb: ndb) else {
+        return nil
+    }
+
+    let ndb_blocks = blocks_txn.unsafeUnownedValue
+    let blocks = ndb_blocks.iter(note: ev).filter { block in
         guard case .mention(let mention) = block else {
                 return false
             }
 
-        switch mention.ref {
+        switch mention.bech32_type {
         case .note, .nevent:
             return true
         default:
@@ -777,11 +782,13 @@ func first_eref_mention(ev: NostrEvent, keypair: Keypair) -> Mention<NoteId>? {
     /// MARK: - Preview
     if let firstBlock = blocks.first,
        case .mention(let mention) = firstBlock {
-        switch mention.ref {
-        case .note(let note_id):
-            return .note(note_id)
-        case .nevent(let nevent):
-            return .note(nevent.noteid)
+        switch mention.bech32_type {
+        case .note:
+            let data = mention.bech32.note.event_id.as_data(size: 32)
+            return .note(NoteId(data))
+        case .nevent:
+            let data = mention.bech32.nevent.event_id.as_data(size: 32)
+            return .note(NoteId(data))
         default:
             return nil
         }
@@ -789,9 +796,15 @@ func first_eref_mention(ev: NostrEvent, keypair: Keypair) -> Mention<NoteId>? {
     return nil
 }
 
-func separate_invoices(ev: NostrEvent, keypair: Keypair) -> [Invoice]? {
-    let invoiceBlocks: [Invoice] = ev.blocks(keypair).blocks.reduce(into: []) { invoices, block in
-        guard case .invoice(let invoice) = block else {
+func separate_invoices(ndb: Ndb, ev: NostrEvent) -> [Invoice]? {
+    guard let blocks_txn = ev.blocks(ndb: ndb) else {
+        return nil
+    }
+    let ndb_blocks = blocks_txn.unsafeUnownedValue
+    let invoiceBlocks: [Invoice] = ndb_blocks.iter(note: ev).reduce(into: []) { invoices, block in
+        guard case .invoice(let invoice) = block,
+              let invoice = invoice.as_invoice()
+        else {
             return
         }
         invoices.append(invoice)

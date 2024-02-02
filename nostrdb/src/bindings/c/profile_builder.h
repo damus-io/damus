@@ -9,7 +9,7 @@
 #ifndef FLATBUFFERS_COMMON_BUILDER_H
 #include "flatbuffers_common_builder.h"
 #endif
-#include "flatcc/flatcc_prologue.h"
+#include "flatcc_prologue.h"
 #ifndef flatbuffers_identifier
 #define flatbuffers_identifier 0
 #endif
@@ -127,5 +127,5 @@ static NdbProfileRecord_ref_t NdbProfileRecord_clone(flatbuffers_builder_t *B, N
     __flatbuffers_memoize_end(B, t, NdbProfileRecord_end(B));
 }
 
-#include "flatcc/flatcc_epilogue.h"
+#include "flatcc_epilogue.h"
 #endif /* PROFILE_BUILDER_H */

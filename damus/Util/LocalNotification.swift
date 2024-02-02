@@ -25,7 +25,7 @@ struct LossyLocalNotification {
             return self.from(json_encoded_ndb_note: encoded_ndb_note)
         }
         guard let id = user_info["id"] as? String,
-              let target_id = MentionRef.from_bech32(str: id) else {
+              let target_id = MentionRef(bech32_str: id) else {
             return nil
         }
         let typestr = user_info["type"] as! String
@@ -42,8 +42,11 @@ struct LossyLocalNotification {
     }
     
     static func from(ndb_note: NdbNote) -> LossyLocalNotification? {
-        guard let known_kind = ndb_note.known_kind, let type = LocalNotificationType.from(nostr_kind: known_kind) else { return nil }
-        let target: MentionRef = .note(ndb_note.id)
+        guard let known_kind = ndb_note.known_kind,
+              let type = LocalNotificationType.from(nostr_kind: known_kind) else {
+            return nil
+        }
+        let target: MentionRef = .init(nip19: .note(ndb_note.id))
         return LossyLocalNotification(type: type, mention: target)
     }
 }
@@ -69,7 +72,7 @@ struct LocalNotification {
     let content: String
     
     func to_lossy() -> LossyLocalNotification {
-        return LossyLocalNotification(type: self.type, mention: .note(self.target.id))
+        return LossyLocalNotification(type: self.type, mention: .init(nip19: .note(self.target.id)))
     }
 }
 
