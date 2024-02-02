@@ -70,10 +70,14 @@ enum Bech32Object : Equatable {
     case nprofile(NProfile)
     case nrelay(String)
     case naddr(NAddr)
-    
+
     static func parse(_ str: String) -> Bech32Object? {
+        if str.starts(with: "nscript"), let decoded = try? bech32_decode(str) {
+            return .nscript(decoded.data.bytes)
+        }
+
         var b: nostr_bech32_t = nostr_bech32()
-        
+
         let bytes = Array(str.utf8)
         
         bytes.withUnsafeBufferPointer { buffer in
