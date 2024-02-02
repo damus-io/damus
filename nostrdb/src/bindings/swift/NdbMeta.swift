@@ -2,8 +2,6 @@
 // swiftlint:disable all
 // swiftformat:disable all
 
-import FlatBuffers
-
 public struct NdbEventMeta: FlatBufferObject, Verifiable {
 
   static func validateVersion() { FlatBuffersVersion_23_5_26() }

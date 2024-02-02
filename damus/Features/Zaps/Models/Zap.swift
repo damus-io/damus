@@ -408,7 +408,7 @@ func invoice_to_zap_invoice(_ invoice: Invoice) -> ZapInvoice? {
         return nil
     }
     
-    return ZapInvoice(description: invoice.description, amount: amt, string: invoice.string, expiry: invoice.expiry, payment_hash: invoice.payment_hash, created_at: invoice.created_at)
+    return ZapInvoice(description: invoice.description, amount: amt, string: invoice.string, expiry: invoice.expiry, created_at: invoice.created_at)
 }
 
 func determine_zap_target(_ ev: NostrEvent) -> ZapTarget? {
@@ -422,35 +422,44 @@ func determine_zap_target(_ ev: NostrEvent) -> ZapTarget? {
     
     return .profile(ptag)
 }
-                   
+
+extension UnsafePointer<CChar> {
+    func as_str() -> String {
+        String(cString: self)
+    }
+}
+
 func decode_bolt11(_ s: String) -> Invoice? {
-    var bs = note_blocks()
-    bs.num_blocks = 0
-    blocks_init(&bs)
-    
     let bytes = s.utf8CString
+    var bolt11_ptr: UnsafeMutablePointer<bolt11>?
+
     let _ = bytes.withUnsafeBufferPointer { p in
-        damus_parse_content(&bs, p.baseAddress)
+        bolt11_ptr = bolt11_decode(nil, p.baseAddress, nil)
     }
-    
-    guard bs.num_blocks == 1 else {
-        blocks_free(&bs)
+
+    guard let bolt11 = maybe_pointee(bolt11_ptr) else {
         return nil
     }
-    
-    let block = bs.blocks[0]
-    
-    guard let converted = Block(block) else {
-        blocks_free(&bs)
-        return nil
+
+    var amount: Amount = .any
+    var desc: InvoiceDescription = .description("")
+    if let amt = maybe_pointee(bolt11.msat) {
+        amount = .specific(Int64(amt.millisatoshis))
     }
-    
-    guard case .invoice(let invoice) = converted else {
-        blocks_free(&bs)
-        return nil
+    let expiry = bolt11.expiry
+    let created_at = bolt11.timestamp
+
+    if var deschash = maybe_pointee(bolt11.description_hash) {
+        let data = Data(bytes: &deschash.u, count: 32)
+        desc = .description_hash(data)
+    } else {
+        desc = .description(bolt11.description.as_str())
     }
-    
-    blocks_free(&bs)
+
+    let invoice = Invoice(description: desc, amount: amount, string: s, expiry: expiry, created_at: created_at)
+
+    tal_free(bolt11_ptr)
+
     return invoice
 }
 

@@ -6,11 +6,11 @@
 #ifndef FLATBUFFERS_COMMON_READER_H
 #include "flatbuffers_common_reader.h"
 #endif
-#include "flatcc/flatcc_flatbuffers.h"
+#include "flatcc_flatbuffers.h"
 #ifndef __alignas_is_defined
 #include <stdalign.h>
 #endif
-#include "flatcc/flatcc_prologue.h"
+#include "flatcc_prologue.h"
 #ifndef flatbuffers_identifier
 #define flatbuffers_identifier 0
 #endif
@@ -89,5 +89,5 @@ __flatbuffers_define_scalar_field(2, NdbProfileRecord, note_key, flatbuffers_uin
 __flatbuffers_define_string_field(3, NdbProfileRecord, lnurl, 0)
 
 
-#include "flatcc/flatcc_epilogue.h"
+#include "flatcc_epilogue.h"
 #endif /* PROFILE_READER_H */
