@@ -25,7 +25,7 @@ struct NdbStrIter: IteratorProtocol {
     }
 
     init(tag: NdbTagElem) {
-        self.str = ndb_tag_str(tag.note.note, tag.tag, tag.index)
+        self.str = ndb_tag_str(tag.note.note.ptr, tag.tag.ptr, tag.index)
         self.ind = 0
         self.tag = tag
     }
@@ -33,7 +33,7 @@ struct NdbStrIter: IteratorProtocol {
 
 struct NdbTagElem: Sequence, Hashable, Equatable {
     let note: NdbNote
-    let tag: UnsafeMutablePointer<ndb_tag>
+    let tag: ndb_tag_ptr
     let index: Int32
     let str: ndb_str
 
@@ -59,11 +59,11 @@ struct NdbTagElem: Sequence, Hashable, Equatable {
         return memcmp(lhs.str.str, rhs.str.str, r) == 0
     }
 
-    init(note: NdbNote, tag: UnsafeMutablePointer<ndb_tag>, index: Int32) {
+    init(note: NdbNote, tag: ndb_tag_ptr, index: Int32) {
         self.note = note
         self.tag = tag
         self.index = index
-        self.str = ndb_tag_str(note.note, tag, index)
+        self.str = ndb_tag_str(note.note.ptr, tag.ptr, index)
     }
 
     var is_id: Bool {
