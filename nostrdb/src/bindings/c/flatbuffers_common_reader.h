@@ -5,8 +5,8 @@
 
 /* Common FlatBuffers read functionality for C. */
 
-#include "flatcc/flatcc_prologue.h"
-#include "flatcc/flatcc_flatbuffers.h"
+#include "flatcc_prologue.h"
+#include "flatcc_flatbuffers.h"
 
 
 #define __flatbuffers_read_scalar_at_byteoffset(N, p, o) N ## _read_from_pe((uint8_t *)(p) + (o))
@@ -574,5 +574,5 @@ static inline N ## _ ## K ## t N ## _as_typed_root(const void *buffer__tmp)\
 #define __flatbuffers_struct_as_root(N) __flatbuffers_buffer_as_root(N, struct_)
 #define __flatbuffers_table_as_root(N) __flatbuffers_buffer_as_root(N, table_)
 
-#include "flatcc/flatcc_epilogue.h"
+#include "flatcc_epilogue.h"
 #endif /* FLATBUFFERS_COMMON_H */

@@ -384,7 +384,6 @@ struct bech32_naddr {
 	struct ndb_str_block identifier;
 	const unsigned char *pubkey;
 	uint32_t kind;
-	int has_kind;
 };
 
 struct bech32_nrelay {
