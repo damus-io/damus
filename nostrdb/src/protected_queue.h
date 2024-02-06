@@ -154,7 +154,9 @@ static int prot_queue_push_all(struct prot_queue* q, void *data, int count)
  * data - Pointer to where the popped data will be stored.
  * Returns 1 if successful, 0 if the queue is empty.
  */
-static inline int prot_queue_try_pop(struct prot_queue *q, void *data) {
+static inline int prot_queue_try_pop_all(struct prot_queue *q, void *data, int max_items) {
+	int items_to_pop, items_until_end;
+
 	pthread_mutex_lock(&q->mutex);
 
 	if (q->count == 0) {
@@ -162,9 +164,13 @@ static inline int prot_queue_try_pop(struct prot_queue *q, void *data) {
 		return 0;
 	}
 
-	memcpy(data, &q->buf[q->head * q->elem_size], q->elem_size);
-	q->head = (q->head + 1) % prot_queue_capacity(q);
-	q->count--;
+	items_until_end = (q->buflen - q->head * q->elem_size) / q->elem_size;
+	items_to_pop = min(q->count, max_items);
+	items_to_pop = min(items_to_pop, items_until_end);
+
+	memcpy(data, &q->buf[q->head * q->elem_size], items_to_pop * q->elem_size);
+	q->head = (q->head + items_to_pop) % prot_queue_capacity(q);
+	q->count -= items_to_pop;
 
 	pthread_mutex_unlock(&q->mutex);
 	return 1;
