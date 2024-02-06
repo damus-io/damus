@@ -17,9 +17,11 @@ You don't have to reveal sensitive personal information to sign up.\
 No email is required. \
 No phone number is required. 
 
-## If there are no ads, how does Damus make money?
+## If there are no ads, how is Damus funded?
 Damus offers a paid subscription 🟣 purple 🟣 https://damus.io/purple/. \
 Initial benefits include a unique subscriber number, subscriber badge, and auto-translate powered by DeepL.
+
+Damus has also graciously received donations or grants from hundreds of Damus users, [Opensats](https://opensats.org/), and the [Human Rights Foundation](https://hrf.org/).
 
 ## Spec Compliance
 
