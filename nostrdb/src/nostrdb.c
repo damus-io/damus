@@ -5614,6 +5614,20 @@ struct ndb_subscription *ndb_find_subscription(struct ndb *ndb, uint64_t subid)
 	return sub;
 }
 
+int ndb_poll_for_notes(struct ndb *ndb, uint64_t subid, uint64_t *note_ids,
+		       int note_id_capacity)
+{
+	struct ndb_subscription *sub;
+
+	if (subid == 0)
+		return 0;
+
+	if (!(sub = ndb_find_subscription(ndb, subid)))
+		return 0;
+
+	return prot_queue_try_pop_all(&sub->inbox, note_ids, note_id_capacity);
+}
+
 int ndb_wait_for_notes(struct ndb *ndb, uint64_t subid, uint64_t *note_ids,
 		       int note_id_capacity)
 {
