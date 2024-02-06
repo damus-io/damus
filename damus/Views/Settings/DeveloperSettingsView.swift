@@ -25,7 +25,7 @@ struct DeveloperSettingsView: View {
                     Toggle(NSLocalizedString("Send device token to localhost", comment: "Developer mode setting to send device token metadata to a local server instead of the damus.io server."), isOn: $settings.send_device_token_to_localhost)
                         .toggleStyle(.switch)
                     
-                    Toggle("Enable experimental Purple API support", isOn: $settings.enable_experimental_purple_api)
+                    Toggle(NSLocalizedString("Enable experimental Purple API support", comment: "Developer mode setting to enable experimental Purple API support."), isOn: $settings.enable_experimental_purple_api)
                         .toggleStyle(.switch)
                     
                     Picker(NSLocalizedString("Damus Purple environment", comment: "Prompt selection of the Damus purple environment (Developer feature to switch between real/production mode to test modes)."), selection: $settings.purple_enviroment) {
@@ -35,7 +35,7 @@ struct DeveloperSettingsView: View {
                         }
                     }
 
-                    Toggle("Enable experimental Purple In-app purchase support", isOn: $settings.enable_experimental_purple_iap_support)
+                    Toggle(NSLocalizedString("Enable experimental Purple In-app purchase support", comment: "Developer mode setting to enable experimental Purple In-app purchase support."), isOn: $settings.enable_experimental_purple_iap_support)
                         .toggleStyle(.switch)
                 }
             }

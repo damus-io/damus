@@ -70,11 +70,11 @@ struct NeutralButtonStyle_Previews: PreviewProvider {
             .buttonStyle(NeutralButtonStyle())
             .padding()
             
-            Button("Rounded Button", action: {})
+            Button(String(stringLiteral: "Rounded Button"), action: {})
                 .buttonStyle(NeutralButtonShape.rounded.style)
                 .padding()
 
-            Button("Capsule Button", action: {})
+            Button(String(stringLiteral: "Capsule Button"), action: {})
                 .buttonStyle(NeutralButtonShape.capsule.style)
                 .padding()
 

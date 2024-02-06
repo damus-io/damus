@@ -1,8 +1,22 @@
 {
   "sourceLanguage" : "en-US",
   "strings" : {
+    "" : {
+
+    },
     "(Contents are encrypted)" : {
       "comment" : "Label on push notification indicating that the contents of the message are encrypted"
+    },
+    "%@ reacted with %@" : {
+      "comment" : "Reacted by heading in local notification",
+      "localizations" : {
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ reacted with %2$@"
+          }
+        }
+      }
     },
     "Anonymous" : {
       "comment" : "Placeholder display name of anonymous user."
@@ -10,11 +24,62 @@
     "Any" : {
       "comment" : "Any amount of sats"
     },
+    "Custom" : {
+      "comment" : "Dropdown option for selecting a custom translation server."
+    },
+    "Damus Purple" : {
+      "comment" : "Dropdown option for selecting Damus Purple as a translation service."
+    },
+    "DeepL (Proprietary, Higher Accuracy)" : {
+      "comment" : "Dropdown option for selecting DeepL as the translation service."
+    },
+    "Free" : {
+      "comment" : "Dropdown option for selecting Free plan for DeepL translation service."
+    },
+    "LibreTranslate (Open Source)" : {
+      "comment" : "Dropdown option for selecting LibreTranslate as the translation service."
+    },
+    "Local default" : {
+      "comment" : "Dropdown option label for system default for Lightning wallet."
+    },
+    "Mentioned by %@" : {
+      "comment" : "Mentioned by heading in local notification"
+    },
+    "New encrypted direct message" : {
+      "comment" : "Notification that the user has received a new direct message"
+    },
     "New message" : {
       "comment" : "Title label for push notifications where a direct message was sent to the user"
     },
     "New note reaction" : {
       "comment" : "Title label for push notifications where someone reacted to the user's post with a specific emoji"
+    },
+    "NoKYCTranslate.com (Prepay with BTC)" : {
+      "comment" : "Dropdown option for selecting NoKYCTranslate.com as the translation service."
+    },
+    "none_translation_service" : {
+      "comment" : "Dropdown option for selecting no translation service.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "None"
+          }
+        }
+      }
+    },
+    "Private Zap" : {
+      "comment" : "Title of notification when a private zap is received."
+    },
+    "Pro" : {
+      "comment" : "Dropdown option for selecting Pro plan for DeepL translation service."
+    },
+    "Production" : {
+      "comment" : "Label indicating the production environment for Damus Purple"
+    },
+    "Reposted by %@" : {
+      "comment" : "Reposted by heading in local notification"
     },
     "Someone posted a note" : {
       "comment" : "Title label for push notification where someone posted a note"
@@ -27,6 +92,21 @@
     },
     "Someone zapped you ⚡️" : {
       "comment" : "Title label for a push notification where someone zapped the user"
+    },
+    "Staging" : {
+      "comment" : "Label indicating a staging test environment for Damus Purple functionality (Developer feature)"
+    },
+    "Test (localhost)" : {
+      "comment" : "Label indicating a localhost test environment for Damus Purple functionality (Developer feature)"
+    },
+    "This note contains too many items and cannot be rendered" : {
+      "comment" : "Error message indicating that a note is too big and cannot be rendered"
+    },
+    "translate.nostr.wine (DeepL, Pay with BTC)" : {
+      "comment" : "Dropdown option for selecting translate.nostr.wine as the translation service."
+    },
+    "Zap" : {
+      "comment" : "Title of notification when a non-private zap is received."
     }
   },
   "version" : "1.0"
