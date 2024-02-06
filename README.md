@@ -9,16 +9,16 @@ A twitter-like [nostr][nostr] client for iPhone, iPad and MacOS.
 [nostr]: https://github.com/fiatjaf/nostr
 
 ## How is Damus better than twitter?
-There are no toxic algorithms.
-You can send or receive zaps (satoshis) without asking for permission.
-[There is no central database](https://fiatjaf.com/nostr.html)). Therefore, Damus is censorship resistant.
-There are no ads.
-You don't have to reveal sensitive personal information to sign up.
-No email is required. 
+There are no toxic algorithms.\
+You can send or receive zaps (satoshis) without asking for permission.\
+[There is no central database](https://fiatjaf.com/nostr.html). Therefore, Damus is censorship resistant.\
+There are no ads.\
+You don't have to reveal sensitive personal information to sign up.\
+No email is required. \
 No phone number is required. 
 
 ## If there are no ads, how does Damus make money?
-Damus offers a paid subscription 🟣 purple 🟣 https://damus.io/purple/. 
+Damus offers a paid subscription 🟣 purple 🟣 https://damus.io/purple/. \
 Initial benefits include a unique subscriber number, subscriber badge, and auto-translate powered by DeepL.
 
 ## Spec Compliance
