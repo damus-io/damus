@@ -15,7 +15,9 @@ You can send or receive zaps (satoshis) without asking for permission.\
 There are no ads.\
 You don't have to reveal sensitive personal information to sign up.\
 No email is required. \
-No phone number is required. 
+No phone number is required. \
+Damus is free and open source software. \
+There is no Big Tech moat. Therefore, seamless interoperability with thousands or millions of other nostr apps is possible, and is how [Damus and nostr win](https://www.youtube.com/watch?v=qTixqS-W1yo).
 
 ## If there are no ads, how is Damus funded?
 Damus offers a paid subscription 🟣 purple 🟣 https://damus.io/purple/. \
