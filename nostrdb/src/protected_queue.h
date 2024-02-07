@@ -173,7 +173,7 @@ static inline int prot_queue_try_pop_all(struct prot_queue *q, void *data, int m
 	q->count -= items_to_pop;
 
 	pthread_mutex_unlock(&q->mutex);
-	return 1;
+	return items_to_pop;
 }
 
 /* 
