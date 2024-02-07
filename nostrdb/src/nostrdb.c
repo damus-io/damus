@@ -3482,7 +3482,7 @@ static void ndb_notify_subscriptions(struct ndb_monitor *monitor,
 			note = written->note->note;
 
 			if (ndb_filter_group_matches(&sub->group, note)) {
-				ndb_debug("pushing note\n");
+				//ndb_debug("pushing note\n");
 				if (!prot_queue_push(&sub->inbox, &written->note_id)) {
 					ndb_debug("couldn't push note to subscriber");
 				}
