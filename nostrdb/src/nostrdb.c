@@ -178,7 +178,7 @@ struct ndb_ingester {
 };
 
 struct ndb_filter_group {
-	struct ndb_filter *filters[MAX_FILTERS];
+	struct ndb_filter filters[MAX_FILTERS];
 	int num_filters;
 };
 
@@ -973,7 +973,7 @@ static int ndb_filter_group_add(struct ndb_filter_group *group,
 	if (group->num_filters + 1 > MAX_FILTERS)
 		return 0;
 
-	group->filters[group->num_filters++] = filter;
+	memcpy(&group->filters[group->num_filters++], filter, sizeof(*filter));
 	return 1;
 }
 
@@ -987,7 +987,7 @@ static int ndb_filter_group_matches(struct ndb_filter_group *group,
 		return 1;
 
 	for (i = 0; i < group->num_filters; i++) {
-		filter = group->filters[i];
+		filter = &group->filters[i];
 
 		if (ndb_filter_matches(filter, note))
 			return 1;
@@ -3975,7 +3975,7 @@ void ndb_filter_group_destroy(struct ndb_filter_group *group)
 	struct ndb_filter *filter;
 	int i;
 	for (i = 0; i < group->num_filters; i++) {
-		filter = group->filters[i];
+		filter = &group->filters[i];
 		ndb_filter_destroy(filter);
 	}
 }
@@ -5663,10 +5663,8 @@ uint64_t ndb_subscribe(struct ndb *ndb, struct ndb_filter *filters, int num_filt
 	sub->subid = subid;
 
 	ndb_filter_group_init(&sub->group);
-	for (index = 0; index < num_filters; index++) {
-		if (!ndb_filter_group_add(&sub->group, &filters[index]))
-			return 0;
-	}
+	if (!ndb_filter_group_add_filters(&sub->group, filters, num_filters))
+		return 0;
 	
 	// 500k ought to be enough for anyone
 	buflen = sizeof(uint64_t) * 65536;
