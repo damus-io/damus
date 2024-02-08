@@ -11,7 +11,7 @@ enum DamusPurpleEnvironment: String, CaseIterable, Codable, Identifiable, String
     case local_test
     case staging
     case production
-    
+
     func text_description() -> String {
         switch self {
             case .local_test:
@@ -22,7 +22,7 @@ enum DamusPurpleEnvironment: String, CaseIterable, Codable, Identifiable, String
                 return NSLocalizedString("Production", comment: "Label indicating the production environment for Damus Purple")
         }
     }
-    
+
     func api_base_url() -> URL {
         switch self {
             case .local_test:
@@ -33,7 +33,7 @@ enum DamusPurpleEnvironment: String, CaseIterable, Codable, Identifiable, String
                 Constants.PURPLE_API_PRODUCTION_BASE_URL
         }
     }
-    
+
     func purple_landing_page_url() -> URL {
         switch self {
             case .local_test:
@@ -44,7 +44,7 @@ enum DamusPurpleEnvironment: String, CaseIterable, Codable, Identifiable, String
                 Constants.PURPLE_LANDING_PAGE_PRODUCTION_URL
         }
     }
-    
+
     func damus_website_url() -> URL {
         switch self {
             case .local_test:
@@ -55,15 +55,15 @@ enum DamusPurpleEnvironment: String, CaseIterable, Codable, Identifiable, String
                 Constants.DAMUS_WEBSITE_PRODUCTION_URL
         }
     }
-    
+
     init?(from string: String) {
         guard let initialized = Self.init(rawValue: string) else { return nil }
         self = initialized
     }
-    
+
     func to_string() -> String {
         return self.rawValue
     }
-    
+
     var id: String { self.rawValue }
 }
