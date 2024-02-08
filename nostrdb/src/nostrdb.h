@@ -241,6 +241,7 @@ struct ndb_filter {
 	struct cursor elem_buf;
 	struct cursor data_buf;
 	int num_elements;
+	int finalized;
 	struct ndb_filter_elements *current;
 	struct ndb_filter_elements *elements[NDB_NUM_FILTERS];
 };
@@ -481,7 +482,7 @@ int ndb_filter_add_str_element(struct ndb_filter *, const char *str);
 int ndb_filter_start_field(struct ndb_filter *, enum ndb_filter_fieldtype);
 int ndb_filter_start_tag_field(struct ndb_filter *, char tag);
 int ndb_filter_matches(struct ndb_filter *, struct ndb_note *);
-void ndb_filter_reset(struct ndb_filter *);
+int ndb_filter_end(struct ndb_filter *);
 void ndb_filter_end_field(struct ndb_filter *);
 void ndb_filter_destroy(struct ndb_filter *);
 
