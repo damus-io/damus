@@ -28,11 +28,40 @@ struct DeveloperSettingsView: View {
                     Toggle(NSLocalizedString("Enable experimental Purple API support", comment: "Developer mode setting to enable experimental Purple API support."), isOn: $settings.enable_experimental_purple_api)
                         .toggleStyle(.switch)
                     
-                    Picker(NSLocalizedString("Damus Purple environment", comment: "Prompt selection of the Damus purple environment (Developer feature to switch between real/production mode to test modes)."), selection: $settings.purple_enviroment) {
+                    Picker(NSLocalizedString("Damus Purple environment", comment: "Prompt selection of the Damus purple environment (Developer feature to switch between real/production mode to test modes)."), 
+                           selection: Binding(
+                            get: { () -> DamusPurpleEnvironment in
+                                switch settings.purple_enviroment {
+                                    case .local_test(_):
+                                        return .local_test(host: nil)    // Avoid errors related to a value which is not a valid picker option
+                                    default:
+                                        return settings.purple_enviroment
+                                }
+                            },
+                            set: { new_value in
+                                settings.purple_enviroment = new_value
+                            }
+                           )
+                    ) {
                         ForEach(DamusPurpleEnvironment.allCases, id: \.self) { purple_environment in
                             Text(purple_environment.text_description())
-                                .tag(purple_environment.rawValue)
+                                .tag(purple_environment.to_string())
                         }
+                    }
+                    
+                    if case .local_test(_) = settings.purple_enviroment {
+                        TextField(
+                            NSLocalizedString("URL", comment: "Custom URL host for Damus Purple testing"),
+                            text: Binding.init(
+                                get: {
+                                    return settings.purple_enviroment.custom_host() ?? ""
+                                }, set: { new_host_value in
+                                    settings.purple_enviroment = .local_test(host: new_host_value)
+                                }
+                            )
+                        )
+                            .disableAutocorrection(true)
+                            .autocapitalization(UITextAutocapitalizationType.none)
                     }
 
                     Toggle(NSLocalizedString("Enable experimental Purple In-app purchase support", comment: "Developer mode setting to enable experimental Purple In-app purchase support."), isOn: $settings.enable_experimental_purple_iap_support)
