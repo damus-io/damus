@@ -2393,10 +2393,12 @@ static int compare_query_results(const void *pa, const void *pb)
 
 static void ndb_query_result_init(struct ndb_query_result *res,
 				  struct ndb_note *note,
+				  uint64_t note_size,
 				  uint64_t note_id)
 {
 	*res = (struct ndb_query_result){
 		.note_id = note_id,
+		.note_size = note_size,
 		.note = note,
 	};
 }
@@ -2424,6 +2426,7 @@ static int ndb_query_plan_execute_ids(struct ndb_txn *txn,
 	struct ndb_query_result res;
 	struct ndb_tsid tsid, *ptsid;
 	uint64_t note_id, until, *pint;
+	uint64_t note_size;
 	unsigned char *id;
 
 	matched = 0;
@@ -2462,7 +2465,7 @@ static int ndb_query_plan_execute_ids(struct ndb_txn *txn,
 			continue;
 
 		// get the note because we need it to match against the filter
-		if (!(note = ndb_get_note_by_key(txn, note_id, NULL)))
+		if (!(note = ndb_get_note_by_key(txn, note_id, &note_size)))
 			continue;
 
 		// Sure this particular lookup matched the index query, but
@@ -2473,7 +2476,7 @@ static int ndb_query_plan_execute_ids(struct ndb_txn *txn,
 		if (!ndb_filter_matches_with(filter, note, matched))
 			continue;
 
-		ndb_query_result_init(&res, note, note_id);
+		ndb_query_result_init(&res, note, note_size, note_id);
 		if (!push_query_result(results, &res))
 			break;
 	}
@@ -2528,7 +2531,7 @@ static int ndb_query_plan_execute_tags(struct ndb_txn *txn,
 	MDB_dbi db;
 	MDB_val k, v;
 	int len, taglen, rc, i;
-	uint64_t *pint, until, note_id;
+	uint64_t *pint, until, note_id, note_size;
 	unsigned char key_buffer[255];
 	struct ndb_note *note;
 	struct ndb_filter_elements *tags;
@@ -2579,13 +2582,13 @@ static int ndb_query_plan_execute_tags(struct ndb_txn *txn,
 
 			note_id = *(uint64_t*)v.mv_data;
 
-			if (!(note = ndb_get_note_by_key(txn, note_id, NULL)))
+			if (!(note = ndb_get_note_by_key(txn, note_id, &note_size)))
 				continue;
 
 			if (!ndb_filter_matches_with(filter, note, 1 << NDB_FILTER_TAGS))
 				goto next;
 
-			ndb_query_result_init(&res, note, note_id);
+			ndb_query_result_init(&res, note, note_size, note_id);
 			if (!push_query_result(results, &res))
 				break;
 
@@ -2611,7 +2614,7 @@ static int ndb_query_plan_execute_kinds(struct ndb_txn *txn,
 	struct ndb_u64_tsid tsid, *ptsid;
 	struct ndb_filter_elements *kinds;
 	struct ndb_query_result res;
-	uint64_t kind, note_id, until, *pint;
+	uint64_t kind, note_id, note_size, until, *pint;
 	int i, rc;
 
 	// we should have kinds in a kinds filter!
@@ -2648,13 +2651,13 @@ static int ndb_query_plan_execute_kinds(struct ndb_txn *txn,
 				break;
 
 			note_id = *(uint64_t*)v.mv_data;
-			if (!(note = ndb_get_note_by_key(txn, note_id, NULL)))
+			if (!(note = ndb_get_note_by_key(txn, note_id, &note_size)))
 				goto next;
 
 			if (!ndb_filter_matches_with(filter, note, 1 << NDB_FILTER_KINDS))
 				goto next;
 
-			ndb_query_result_init(&res, note, note_id);
+			ndb_query_result_init(&res, note, note_size, note_id);
 			if (!push_query_result(results, &res))
 				break;
 

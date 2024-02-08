@@ -411,6 +411,7 @@ struct ndb_block_iterator {
 
 struct ndb_query_result {
 	struct ndb_note *note;
+	uint64_t note_size;
 	uint64_t note_id;
 };
 
