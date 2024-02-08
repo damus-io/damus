@@ -509,6 +509,92 @@ static void lowercase_strncpy(char *dst, const char *src, int n) {
 	}
 }
 
+static inline int ndb_filter_elem_is_ptr(struct ndb_filter_field *field) {
+	return field->elem_type == NDB_ELEMENT_STRING || field->elem_type == NDB_ELEMENT_ID;
+}
+
+// "Finalize" the filter. This resizes the allocated heap buffers so that they
+// are as small as possible. This also prevents new fields from being added
+int ndb_filter_end(struct ndb_filter *filter)
+{
+	int i, k;
+#ifdef DEBUG
+	size_t orig_size;
+#endif
+	size_t data_len, elem_len;
+	struct ndb_filter_elements *els;
+	if (filter->finalized == 1)
+		return 0;
+
+	// move the data buffer to the end of the element buffer and update
+	// all of the element pointers accordingly
+	data_len = filter->data_buf.p - filter->data_buf.start;
+	elem_len = filter->elem_buf.p - filter->elem_buf.start;
+#ifdef DEBUG
+	orig_size = filter->data_buf.end - filter->elem_buf.start;
+#endif
+
+	// first we delta-ize the element pointers so that they are relative to
+	// the start of the delta buf. we will re-add these after we move the
+	// memory
+	for (i = 0; i < filter->num_elements; i++) {
+		els = filter->elements[i];
+
+		// realloc could move this whole thing, so subtract
+		// the element pointers as well
+		filter->elements[i] = (struct ndb_filter_elements *)
+			((unsigned char *)filter->elements[i] -
+			 filter->elem_buf.start);
+
+		if (!ndb_filter_elem_is_ptr(&els->field))
+			continue;
+
+		for (k = 0; k < els->count; k++) {
+			els->elements[k].id = (unsigned char *) 
+				((unsigned char *)els->elements[k].id -
+				filter->data_buf.start);
+		}
+	}
+
+	// cap the elem buff
+	filter->elem_buf.end = filter->elem_buf.p;
+
+	// move the data buffer to the end of the element buffer
+	memmove(filter->elem_buf.p, filter->data_buf.start, data_len);
+
+	// realloc the whole thing
+	filter->elem_buf.start = realloc(filter->elem_buf.start, elem_len + data_len);
+	filter->elem_buf.end = filter->elem_buf.start + elem_len;
+	filter->elem_buf.p = filter->elem_buf.end;
+
+	filter->data_buf.start = filter->elem_buf.end;
+	filter->data_buf.end = filter->data_buf.start + data_len;
+	filter->data_buf.p = filter->data_buf.end;
+
+	// un-deltaize the pointers
+	for (i = 0; i < filter->num_elements; i++) {
+		filter->elements[i] = (struct ndb_filter_elements *)
+				      ((unsigned char *)filter->elem_buf.start +
+				       (size_t)filter->elements[i]);
+		els = filter->elements[i];
+
+		if (!ndb_filter_elem_is_ptr(&els->field))
+			continue;
+
+		for (k = 0; k < els->count; k++) {
+			els->elements[k].id =
+				(size_t)els->elements[k].id +
+				filter->data_buf.start;
+		}
+	}
+
+	filter->finalized = 1;
+
+	ndb_debug("ndb_filter_end: %ld -> %ld\n", orig_size, elem_len + data_len);
+	
+	return 1;
+}
+
 int ndb_filter_init(struct ndb_filter *filter)
 {
 	struct cursor cur;
@@ -538,16 +624,9 @@ int ndb_filter_init(struct ndb_filter *filter)
 	filter->num_elements = 0;
 	filter->elements[0] = (struct ndb_filter_elements*) buf;
 	filter->current = NULL;
+	filter->finalized = 0;
 
 	return 1;
-}
-
-void ndb_filter_reset(struct ndb_filter *filter)
-{
-	filter->num_elements = 0;
-	filter->elem_buf.p = filter->elem_buf.start;
-	filter->data_buf.p = filter->data_buf.start;
-	filter->current = NULL;
 }
 
 void ndb_filter_destroy(struct ndb_filter *filter)
