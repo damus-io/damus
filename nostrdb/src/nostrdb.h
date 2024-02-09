@@ -488,6 +488,7 @@ struct ndb_filter_elements *ndb_filter_current_element(struct ndb_filter *);
 int ndb_filter_start_field(struct ndb_filter *, enum ndb_filter_fieldtype);
 int ndb_filter_start_tag_field(struct ndb_filter *, char tag);
 int ndb_filter_matches(struct ndb_filter *, struct ndb_note *);
+int ndb_filter_clone(struct ndb_filter *dst, struct ndb_filter *src);
 int ndb_filter_end(struct ndb_filter *);
 void ndb_filter_end_field(struct ndb_filter *);
 void ndb_filter_destroy(struct ndb_filter *);
