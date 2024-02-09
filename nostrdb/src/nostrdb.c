@@ -1156,8 +1156,7 @@ static int ndb_filter_group_add(struct ndb_filter_group *group,
 	if (group->num_filters + 1 > MAX_FILTERS)
 		return 0;
 
-	ndb_filter_clone(&group->filters[group->num_filters++], filter);
-	return 1;
+	return ndb_filter_clone(&group->filters[group->num_filters++], filter);
 }
 
 static int ndb_filter_group_matches(struct ndb_filter_group *group,
