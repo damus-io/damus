@@ -514,6 +514,35 @@ static inline int ndb_filter_elem_is_ptr(struct ndb_filter_field *field) {
 	return field->elem_type == NDB_ELEMENT_STRING || field->elem_type == NDB_ELEMENT_ID;
 }
 
+// Copy the filter
+int ndb_filter_clone(struct ndb_filter *dst, struct ndb_filter *src)
+{
+	size_t src_size, elem_size, data_size;
+
+	elem_size = src->elem_buf.end - src->elem_buf.start;
+	data_size = src->data_buf.end - src->data_buf.start;
+	src_size = data_size + elem_size;
+
+	// let's only allow finalized filters to be cloned 
+	if (!src || !src->finalized)
+		return 0;
+
+	dst->elem_buf.start = malloc(src_size);
+	dst->elem_buf.end = dst->elem_buf.start + elem_size;
+	dst->elem_buf.p = dst->elem_buf.end;
+
+	dst->data_buf.start = dst->elem_buf.start + elem_size;
+	dst->data_buf.end = dst->data_buf.start + data_size;
+	dst->data_buf.p = dst->data_buf.end;
+
+	if (dst->elem_buf.start == NULL)
+		return 0;
+
+	memcpy(dst->elem_buf.start, src->elem_buf.start, src_size);
+
+	return 1;
+}
+
 // "Finalize" the filter. This resizes the allocated heap buffers so that they
 // are as small as possible. This also prevents new fields from being added
 int ndb_filter_end(struct ndb_filter *filter)
@@ -1127,7 +1156,7 @@ static int ndb_filter_group_add(struct ndb_filter_group *group,
 	if (group->num_filters + 1 > MAX_FILTERS)
 		return 0;
 
-	memcpy(&group->filters[group->num_filters++], filter, sizeof(*filter));
+	ndb_filter_clone(&group->filters[group->num_filters++], filter);
 	return 1;
 }
 
