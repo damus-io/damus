@@ -234,7 +234,9 @@ struct ndb_filter_field {
 struct ndb_filter_elements {
 	struct ndb_filter_field field;
 	int count;
-	union ndb_filter_element elements[0];
+
+	// this needs to be pointer size for reasons
+	uint64_t elements[0];
 };
 
 struct ndb_filter {
@@ -242,8 +244,10 @@ struct ndb_filter {
 	struct cursor data_buf;
 	int num_elements;
 	int finalized;
-	struct ndb_filter_elements *current;
-	struct ndb_filter_elements *elements[NDB_NUM_FILTERS];
+	int current;
+
+	// struct ndb_filter_elements offsets into elem_buf
+	int elements[NDB_NUM_FILTERS]; 
 };
 
 struct ndb_config {
@@ -479,6 +483,8 @@ int ndb_filter_init(struct ndb_filter *);
 int ndb_filter_add_id_element(struct ndb_filter *, const unsigned char *id);
 int ndb_filter_add_int_element(struct ndb_filter *, uint64_t integer);
 int ndb_filter_add_str_element(struct ndb_filter *, const char *str);
+
+struct ndb_filter_elements *ndb_filter_current_element(struct ndb_filter *);
 int ndb_filter_start_field(struct ndb_filter *, enum ndb_filter_fieldtype);
 int ndb_filter_start_tag_field(struct ndb_filter *, char tag);
 int ndb_filter_matches(struct ndb_filter *, struct ndb_note *);
