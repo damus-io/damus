@@ -519,6 +519,8 @@ int ndb_filter_clone(struct ndb_filter *dst, struct ndb_filter *src)
 {
 	size_t src_size, elem_size, data_size;
 
+	memcpy(dst, src, sizeof(*src));
+
 	elem_size = src->elem_buf.end - src->elem_buf.start;
 	data_size = src->data_buf.end - src->data_buf.start;
 	src_size = data_size + elem_size;
