@@ -2,6 +2,26 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>followed_by_three_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Sledován %2$@, %3$@, %4$@ a %1$d dalším</string>
+			<key>few</key>
+			<string>Sledován %2$@, %3$@, %4$@ a %1$d dalšími</string>
+			<key>many</key>
+			<string>Sledován %2$@, %3$@, %4$@ a %1$d dalšími</string>
+			<key>other</key>
+			<string>Sledován %2$@, %3$@, %4$@ a %1$d dalšími</string>
+		</dict>
+	</dict>
 	<key>followers_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -42,6 +62,26 @@
 			<string>Sleduje</string>
 		</dict>
 	</dict>
+	<key>imports_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@IMPORTS@</string>
+		<key>IMPORTS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Import</string>
+			<key>few</key>
+			<string>Importy</string>
+			<key>many</key>
+			<string>Importy</string>
+			<key>other</key>
+			<string>Importy</string>
+		</dict>
+	</dict>
 	<key>reacted_tagged_in_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -53,16 +93,16 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ a další %1$d reagovali na příspěvek, ve kterém jste byli označeni</string>
+			<string>%2$@ a %1$d další reagovali na poznámku, ve které jste byli označeni</string>
 			<key>few</key>
-			<string>%2$@ a další %1$d reagovali na příspěvek, ve kterém jste byli označeni</string>
+			<string>%2$@ a %1$d dalších reagovali na poznámku, ve které jste byli označeni</string>
 			<key>many</key>
-			<string>%2$@ a další %1$d reagovali na příspěvek, ve kterém jste byli označeni</string>
+			<string>%2$@ a %1$d dalších reagovali na poznámku, ve které jste byli označeni</string>
 			<key>other</key>
-			<string>%2$@ a dalších %1$d reagovali na příspěvek, ve kterém jste byli označeni</string>
+			<string>%2$@ a %1$d dalších reagovali na poznámku, ve které jste byli označeni</string>
 		</dict>
 	</dict>
-	<key>reacted_your_post_3</key>
+	<key>reacted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REACTED@</string>
@@ -73,13 +113,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ a další %1$d zareagovali na váš příspěvek</string>
+			<string>%2$@ a další %1$d zareagovali na vaši poznámku</string>
 			<key>few</key>
-			<string>%2$@ a další %1$d zareagovali na váš příspěvek</string>
+			<string>%2$@ a další %1$d zareagovali na vaši poznámku</string>
 			<key>many</key>
-			<string>%2$@ a další %1$d zareagovali na váš příspěvek</string>
+			<string>%2$@ a dalších %1$d zareagovali na vaši poznámku</string>
 			<key>other</key>
-			<string>%2$@ a dalších %1$d zareagovali na váš příspěvek</string>
+			<string>%2$@ a dalších %1$d zareagovali na vaši poznámku</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -173,16 +213,16 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ a další %1$d přesdíleli příspěvek, ve kterém jste byli označeni</string>
+			<string>%2$@ a %1$d další přesdíleli poznámku, ve které jste byli označeni</string>
 			<key>few</key>
-			<string>%2$@ a další %1$d přesdíleli příspěvek, ve kterém jste byli označeni</string>
+			<string>%2$@ a %1$d dalších přesdíleli poznámku, ve které jste byli označeni</string>
 			<key>many</key>
-			<string>%2$@ a další %1$d přesdíleli příspěvek, ve kterém jste byli označeni</string>
+			<string>%2$@ a %1$d dalších přesdíleli poznámku, ve které jste byli označeni</string>
 			<key>other</key>
-			<string>%2$@ a dalších %1$d přesdíleli příspěvek, ve kterém jste byli označeni</string>
+			<string>%2$@ a %1$d dalších přesdíleli poznámku, ve které jste byli označeni</string>
 		</dict>
 	</dict>
-	<key>reposted_your_post_3</key>
+	<key>reposted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REPOSTED@</string>
@@ -193,13 +233,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ a další %1$d přesdíleli váš příspěvek</string>
+			<string>%2$@ a další %1$d přesdíleli vaši poznámku</string>
 			<key>few</key>
-			<string>%2$@ a další %1$d přesdíleli váš příspěvek</string>
+			<string>%2$@ a další %1$d přesdíleli vaši poznámku</string>
 			<key>many</key>
-			<string>%2$@ a další %1$d přesdíleli váš příspěvek</string>
+			<string>%2$@ a dalších %1$d přesdíleli vaši poznámku</string>
 			<key>other</key>
-			<string>%2$@ a dalších %1$d přesdíleli váš příspěvek</string>
+			<string>%2$@ a dalších %1$d přesdíleli vaši poznámku</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -275,11 +315,51 @@
 			<key>one</key>
 			<string>%2$@ sat</string>
 			<key>few</key>
-			<string>%2$@ sats</string>
+			<string>%2$@ saty</string>
 			<key>many</key>
-			<string>%2$@ sats</string>
+			<string>%2$@ satů</string>
 			<key>other</key>
 			<string>%2$@ satů</string>
+		</dict>
+	</dict>
+	<key>users_talking_about_it</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@USERS@</string>
+		<key>USERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%d uživatel o tom mluví</string>
+			<key>few</key>
+			<string>%d uživatelé o tom mluví</string>
+			<key>many</key>
+			<string>%d uživatelů o tom mluví</string>
+			<key>other</key>
+			<string>%d uživatelů o tom mluví</string>
+		</dict>
+	</dict>
+	<key>word_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@WORDS@</string>
+		<key>WORDS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%d Slovo</string>
+			<key>few</key>
+			<string>%d Slova</string>
+			<key>many</key>
+			<string>%d Slova</string>
+			<key>other</key>
+			<string>%d Slova</string>
 		</dict>
 	</dict>
 	<key>zap_notification_no_message</key>
@@ -313,13 +393,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>Dostal jsi %2$@ sat od %3$@: "%4$@"</string>
+			<string>Obdrželi jste %2$@ saty od %3$@: &quot;%4$@&quot</string>
 			<key>few</key>
-			<string>Dostal jsi %2$@ satů od %3$@: "%4$@"</string>
+			<string>Obdrželi jste %2$@ saty od %3$@: &quot;%4$@&quot;</string>
 			<key>many</key>
-			<string>Dostal jsi %2$@ satů od %3$@: "%4$@"</string>
+			<string>Obdrželi jste %2$@ satů od %3$@: &quot;%4$@&quot;</string>
 			<key>other</key>
-			<string>Dostal jsi %2$@ satů od %3$@: "%4$@"</string>
+			<string>Obdrželi jste %2$@ satů od %3$@: &quot;%4$@&quot;</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
@@ -333,16 +413,16 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ a další %1$d ZAP-nuli příspěvek, ve kterém jste byli označeni</string>
+			<string>%2$@ a %1$d další ZAP-nuli poznámku, ve které jste byli označeni</string>
 			<key>few</key>
-			<string>%2$@ a další %1$d ZAP-nuli příspěvek, ve kterém jste byli označeni</string>
+			<string>%2$@ a %1$d další ZAP-nuli poznámku, ve které jste byli označeni</string>
 			<key>many</key>
-			<string>%2$@ a další %1$d ZAP-nuli příspěvek, ve kterém jste byli označeni</string>
+			<string>%2$@ a %1$d dalších ZAP-nuli poznámku, ve které jste byli označeni</string>
 			<key>other</key>
-			<string>%2$@ a dalších %1$d ZAP-nuli příspěvek, ve kterém jste byli označeni</string>
+			<string>%2$@ a %1$d dalších ZAP-nuli poznámku, ve které jste byli označeni</string>
 		</dict>
 	</dict>
-	<key>zapped_your_post_3</key>
+	<key>zapped_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@ZAPPED@</string>
@@ -353,13 +433,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ a další %1$d ZAP-nuli váš příspěvek</string>
+			<string>%2$@ a %1$d další ZAP-nuli vaši poznámku</string>
 			<key>few</key>
-			<string>%2$@ a další %1$d ZAP-nuli váš příspěvek</string>
+			<string>%2$@ a další %1$d ZAP-nuli vaši poznámku</string>
 			<key>many</key>
-			<string>%2$@ a další %1$d ZAP-nuli váš příspěvek</string>
+			<string>%2$@ a dalších %1$d ZAP-nuli vaši poznámku</string>
 			<key>other</key>
-			<string>%2$@ a dalších %1$d ZAP-nuli váš příspěvek</string>
+			<string>%2$@ a dalších %1$d ZAP-nuli vaši poznámku</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
@@ -373,13 +453,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ a další %1$d ZAP-nuli váš profil</string>
+			<string>%2$@ a %1$d další vás ZAP-nuli </string>
 			<key>few</key>
-			<string>%2$@ a další %1$d ZAP-nuli váš profil</string>
+			<string>%2$@ a dalších %1$d vás ZAP-nuli </string>
 			<key>many</key>
-			<string>%2$@ a další %1$d ZAP-nuli váš profil</string>
+			<string>%2$@ a dalších %1$d vás ZAP-nuli </string>
 			<key>other</key>
-			<string>%2$@ a dalších %1$d ZAP-nuli váš profil</string>
+			<string>%2$@ a dalších %1$d vás ZAP-nuli </string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
@@ -395,9 +475,9 @@
 			<key>one</key>
 			<string>Zap</string>
 			<key>few</key>
-			<string>Zaps</string>
+			<string>Zapy</string>
 			<key>many</key>
-			<string>Zaps</string>
+			<string>Zapů</string>
 			<key>other</key>
 			<string>Zapů</string>
 		</dict>
