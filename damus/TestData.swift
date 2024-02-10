@@ -73,6 +73,7 @@ var test_damus_state: DamusState = ({
                            likes: .init(our_pubkey: our_pubkey),
                            boosts: .init(our_pubkey: our_pubkey),
                            contacts: .init(our_pubkey: our_pubkey),
+                           mutelist_manager: MutelistManager(),
                            profiles: .init(ndb: ndb),
                            dms: .init(our_pubkey: our_pubkey),
                            previews: .init(),

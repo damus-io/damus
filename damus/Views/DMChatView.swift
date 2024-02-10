@@ -20,7 +20,7 @@ struct DMChatView: View, KeyboardReadable {
         ScrollViewReader { scroller in
             ScrollView {
                 LazyVStack(alignment: .leading) {
-                    ForEach(Array(zip(dms.events, dms.events.indices)), id: \.0.id) { (ev, ind) in
+                    ForEach(Array(zip(dms.events, dms.events.indices)).filter { should_show_event(state: damus_state, ev: $0.0, keypair: damus_state.keypair)}, id: \.0.id) { (ev, ind) in
                         DMView(event: dms.events[ind], damus_state: damus_state)
                             .contextMenu{MenuItems(damus_state: damus_state, event: ev, target_pubkey: ev.pubkey, profileModel: ProfileModel(pubkey: ev.pubkey, damus: damus_state))}
                     }

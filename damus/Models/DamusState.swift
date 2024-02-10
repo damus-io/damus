@@ -14,6 +14,7 @@ struct DamusState: HeadlessDamusState {
     let likes: EventCounter
     let boosts: EventCounter
     let contacts: Contacts
+    let mutelist_manager: MutelistManager
     let profiles: Profiles
     let dms: DirectMessagesModel
     let previews: PreviewCache
@@ -34,13 +35,14 @@ struct DamusState: HeadlessDamusState {
     let video: VideoController
     let ndb: Ndb
     var purple: DamusPurple
-    
-    init(pool: RelayPool, keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, postbox: PostBox, bootstrap_relays: [String], replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: VideoController, ndb: Ndb, purple: DamusPurple? = nil) {
+
+    init(pool: RelayPool, keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, postbox: PostBox, bootstrap_relays: [String], replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: VideoController, ndb: Ndb, purple: DamusPurple? = nil) {
         self.pool = pool
         self.keypair = keypair
         self.likes = likes
         self.boosts = boosts
         self.contacts = contacts
+        self.mutelist_manager = mutelist_manager
         self.profiles = profiles
         self.dms = dms
         self.previews = previews
@@ -107,6 +109,7 @@ struct DamusState: HeadlessDamusState {
             likes: EventCounter(our_pubkey: empty_pub),
             boosts: EventCounter(our_pubkey: empty_pub),
             contacts: Contacts(our_pubkey: empty_pub),
+            mutelist_manager: MutelistManager(),
             profiles: Profiles(ndb: .empty),
             dms: DirectMessagesModel(our_pubkey: empty_pub),
             previews: PreviewCache(),

@@ -37,7 +37,7 @@ func should_display_notification(state: HeadlessDamusState, event ev: NostrEvent
     }
 
     // Don't show notifications that match mute list.
-    if state.contacts.mutelist?.mute_list?.event_muted_reason(ev) != nil {
+    if state.mutelist_manager.is_event_muted(ev, keypair: state.keypair) {
         return false
     }
 

@@ -550,7 +550,7 @@ struct ContentView: View {
                     return
                 }
                 
-                ds.contacts.set_mutelist(mutelist)
+                ds.mutelist_manager.set_mutelist(mutelist)
                 ds.postbox.send(mutelist)
 
                 confirm_overwrite_mutelist = false
@@ -569,7 +569,7 @@ struct ContentView: View {
                     return
                 }
 
-                if ds.contacts.mutelist == nil {
+                if ds.mutelist_manager.event == nil {
                     confirm_overwrite_mutelist = true
                 } else {
                     guard let keypair = ds.keypair.to_full(),
@@ -578,11 +578,11 @@ struct ContentView: View {
                         return
                     }
 
-                    guard let ev = create_or_update_mutelist(keypair: keypair, mprev: ds.contacts.mutelist, to_add: muting) else {
+                    guard let ev = create_or_update_mutelist(keypair: keypair, mprev: ds.mutelist_manager.event, to_add: muting) else {
                         return
                     }
 
-                    ds.contacts.set_mutelist(ev)
+                    ds.mutelist_manager.set_mutelist(ev)
                     ds.postbox.send(ev)
                 }
             }
@@ -660,6 +660,7 @@ struct ContentView: View {
                                       likes: EventCounter(our_pubkey: pubkey),
                                       boosts: EventCounter(our_pubkey: pubkey),
                                       contacts: Contacts(our_pubkey: pubkey),
+                                      mutelist_manager: MutelistManager(),
                                       profiles: Profiles(ndb: ndb),
                                       dms: home.dms,
                                       previews: PreviewCache(),

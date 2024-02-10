@@ -72,7 +72,7 @@ struct AddMuteItemView: View {
 
                 // Actually update & relay the new mute list
                 if let mute_item {
-                    let existing_mutelist = state.contacts.mutelist
+                    let existing_mutelist = state.mutelist_manager.event
 
                     guard
                         let full_keypair = state.keypair.to_full(),
@@ -81,7 +81,7 @@ struct AddMuteItemView: View {
                         return
                     }
 
-                    state.contacts.set_mutelist(mutelist)
+                    state.mutelist_manager.set_mutelist(mutelist)
                     state.postbox.send(mutelist)
                 }
 

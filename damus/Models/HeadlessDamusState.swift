@@ -15,6 +15,7 @@ protocol HeadlessDamusState {
     var ndb: Ndb { get }
     var settings: UserSettingsStore { get }
     var contacts: Contacts { get }
+    var mutelist_manager: MutelistManager { get }
     var keypair: Keypair { get }
     var profiles: Profiles { get }
     var zaps: Zaps { get }
