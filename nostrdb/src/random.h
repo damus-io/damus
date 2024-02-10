@@ -20,10 +20,16 @@
 #include <windows.h>
 #include <ntstatus.h>
 #include <bcrypt.h>
-#elif defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__)
+#elif defined(__ANDROID__)
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+#elif defined(__linux__) || defined(__FreeBSD__)
 #include <sys/random.h>
 #elif defined(__OpenBSD__)
 #include <unistd.h>
+#elif defined(__APPLE__)
+#include <Security/SecRandom.h>
 #else
 #error "Couldn't identify the OS"
 #endif
@@ -42,7 +48,27 @@ static int fill_random(unsigned char* data, size_t size) {
     } else {
         return 1;
     }
-#elif defined(__linux__) || defined(__FreeBSD__)
+#elif defined(__ANDROID__)
+    int fd = open("/dev/urandom", O_RDONLY);
+    if (fd < 0) {
+        return 0; // Failed to open /dev/urandom
+    }
+    ssize_t read_bytes = 0;
+    while (size > 0) {
+        read_bytes = read(fd, data, size);
+        if (read_bytes <= 0) {
+            if (errno == EINTR) {
+                continue; // If interrupted by signal, try again
+            }
+            close(fd);
+            return 0; // Failed to read
+        }
+        data += read_bytes;
+        size -= read_bytes;
+    }
+    close(fd);
+    return 1;
+#elif defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__)
     /* If `getrandom(2)` is not available you should fallback to /dev/urandom */
     ssize_t res = getrandom(data, size, 0);
     if (res < 0 || (size_t)res != size ) {
@@ -50,10 +76,10 @@ static int fill_random(unsigned char* data, size_t size) {
     } else {
         return 1;
     }
-#elif defined(__APPLE__) || defined(__OpenBSD__)
+#elif defined(__APPLE__) 
     /* If `getentropy(2)` is not available you should fallback to either
      * `SecRandomCopyBytes` or /dev/urandom */
-    int res = getentropy(data, size);
+    int res = SecRandomCopyBytes(kSecRandomDefault, size, data);
     if (res == 0) {
         return 1;
     } else {
