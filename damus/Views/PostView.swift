@@ -58,6 +58,7 @@ struct PostView: View {
     @State var textHeight: CGFloat? = nil
 
     @State var preUploadedMedia: PreUploadedMedia? = nil
+    @State var mediaToUpload: [MediaUpload] = []
     
     @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
     @StateObject var tagModel: TagModel = TagModel()
@@ -379,6 +380,15 @@ struct PostView: View {
             pks.append(pk)
         }
     }
+    
+    func addToMediaToUpload(mediaItem: MediaItem) {
+        switch mediaItem.type {
+        case .image:
+            mediaToUpload.append(.image(mediaItem.url))
+        case .video:
+            mediaToUpload.append(.video(mediaItem.url))
+        }
+    }
 
     var body: some View {
         GeometryReader { (deviceSize: GeometryProxy) in
@@ -433,11 +443,16 @@ struct PostView: View {
                     Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
                 }
             }
-            .sheet(isPresented: $attach_camera) {
-                CameraController(uploader: damus_state.settings.default_media_uploader) {
-                    self.attach_camera = false
-                    self.attach_media = true
-                }
+            .fullScreenCover(isPresented: $attach_camera) {
+                CameraView(damus_state: damus_state, action: { items in
+                    for item in items {
+                        addToMediaToUpload(mediaItem: item)
+                    }
+                    for media in mediaToUpload {
+                        self.handle_upload(media: media)
+                    }
+                    mediaToUpload = []
+                })
             }
             .onAppear() {
                 let loaded_draft = load_draft()

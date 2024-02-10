@@ -434,6 +434,8 @@
 		B5C60C202B530D5100C5ECA7 /* MuteItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C60C1F2B530D5100C5ECA7 /* MuteItem.swift */; };
 		B5C60C212B530D5600C5ECA7 /* MuteItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C60C1F2B530D5100C5ECA7 /* MuteItem.swift */; };
 		B5C60C232B532A8700C5ECA7 /* DamusDuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C60C222B532A8700C5ECA7 /* DamusDuration.swift */; };
+		BA15BB6B2B7833660045B913 /* CameraMediaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA15BB6A2B7833660045B913 /* CameraMediaView.swift */; };
+		BA15BB6D2B78336D0045B913 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA15BB6C2B78336D0045B913 /* CameraView.swift */; };
 		BA37598A2ABCCDE40018D73B /* ImageResizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3759892ABCCDE30018D73B /* ImageResizer.swift */; };
 		BA37598D2ABCCE500018D73B /* PhotoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA37598B2ABCCE500018D73B /* PhotoCaptureProcessor.swift */; };
 		BA37598E2ABCCE500018D73B /* VideoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA37598C2ABCCE500018D73B /* VideoCaptureProcessor.swift */; };
@@ -1353,6 +1355,8 @@
 		B5B4D1422B37D47600844320 /* NdbExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbExtensions.swift; sourceTree = "<group>"; usesTabs = 0; };
 		B5C60C1F2B530D5100C5ECA7 /* MuteItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuteItem.swift; sourceTree = "<group>"; usesTabs = 0; };
 		B5C60C222B532A8700C5ECA7 /* DamusDuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusDuration.swift; sourceTree = "<group>"; usesTabs = 0; };
+		BA15BB6A2B7833660045B913 /* CameraMediaView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraMediaView.swift; sourceTree = "<group>"; };
+		BA15BB6C2B78336D0045B913 /* CameraView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		BA3759892ABCCDE30018D73B /* ImageResizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageResizer.swift; sourceTree = "<group>"; };
 		BA37598B2ABCCE500018D73B /* PhotoCaptureProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoCaptureProcessor.swift; sourceTree = "<group>"; };
 		BA37598C2ABCCE500018D73B /* VideoCaptureProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoCaptureProcessor.swift; sourceTree = "<group>"; };
@@ -2688,8 +2692,10 @@
 		BA3759952ABCCF360018D73B /* Camera */ = {
 			isa = PBXGroup;
 			children = (
+				BA15BB6A2B7833660045B913 /* CameraMediaView.swift */,
 				BA3759962ABCCF360018D73B /* CameraPreview.swift */,
 				E02429942B7E97740088B16C /* CameraController.swift */,
+				BA15BB6C2B78336D0045B913 /* CameraView.swift */,
 			);
 			path = Camera;
 			sourceTree = "<group>";
@@ -3049,6 +3055,7 @@
 				4C4793042A993DC000489948 /* midl.c in Sources */,
 				0E8A4BB72AE4359200065E81 /* NostrFilter+Hashable.swift in Sources */,
 				4C4793012A993CDA00489948 /* mdb.c in Sources */,
+				BA15BB6D2B78336D0045B913 /* CameraView.swift in Sources */,
 				4CE9FBBA2A6B3C63007E485C /* nostrdb.c in Sources */,
 				ADFE73552AD4793100EC7326 /* QRScanNSECView.swift in Sources */,
 				4C3AC79D2833036D00E1F516 /* FollowingView.swift in Sources */,
@@ -3134,6 +3141,7 @@
 				647D9A8D2968520300A295DE /* SideMenuView.swift in Sources */,
 				F7F0BA272978E54D009531F3 /* ParticipantsView.swift in Sources */,
 				4CF0ABE32981BC7D00D66079 /* UserView.swift in Sources */,
+				BA15BB6B2B7833660045B913 /* CameraMediaView.swift in Sources */,
 				4CE0E2AF29A2E82100DB4CA2 /* EventHolder.swift in Sources */,
 				B51C1CEA2B55A60A00E312A9 /* AddMuteItemView.swift in Sources */,
 				4C5D5C992A6AF8F80024563C /* NdbNote.swift in Sources */,
