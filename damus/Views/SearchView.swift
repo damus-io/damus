@@ -62,13 +62,13 @@ struct SearchView: View {
                             Button {
                                 guard
                                     let full_keypair = appstate.keypair.to_full(),
-                                    let existing_mutelist = appstate.contacts.mutelist,
+                                    let existing_mutelist = appstate.mutelist_manager.event,
                                     let mutelist = remove_from_mutelist(keypair: full_keypair, prev: existing_mutelist, to_remove: .hashtag(Hashtag(hashtag: hashtag), nil))
                                 else {
                                     return
                                 }
 
-                                appstate.contacts.set_mutelist(mutelist)
+                                appstate.mutelist_manager.set_mutelist(mutelist)
                                 appstate.postbox.send(mutelist)
                             } label: {
                                 Text("Unmute Hashtag", comment: "Label represnting a button that the user can tap to unmute a given hashtag so they start seeing it in their feed again.")
@@ -88,7 +88,7 @@ struct SearchView: View {
         }
         .onAppear {
             if let hashtag_string = search.search.hashtag?.first {
-                is_hashtag_muted = (appstate.contacts.mutelist?.mute_list ?? []).contains(MuteItem.hashtag(Hashtag(hashtag: hashtag_string), nil))
+                is_hashtag_muted = (appstate.mutelist_manager.event?.mute_list ?? []).contains(MuteItem.hashtag(Hashtag(hashtag: hashtag_string), nil))
             }
         }
     }
@@ -96,13 +96,13 @@ struct SearchView: View {
     func mute_hashtag(hashtag_string: String, expiration_time: Date?) {
         guard
             let full_keypair = appstate.keypair.to_full(),
-            let existing_mutelist = appstate.contacts.mutelist,
+            let existing_mutelist = appstate.mutelist_manager.event,
             let mutelist = create_or_update_mutelist(keypair: full_keypair, mprev: existing_mutelist, to_add: .hashtag(Hashtag(hashtag: hashtag_string), expiration_time))
         else {
             return
         }
 
-        appstate.contacts.set_mutelist(mutelist)
+        appstate.mutelist_manager.set_mutelist(mutelist)
         appstate.postbox.send(mutelist)
     }
 

@@ -179,11 +179,11 @@ struct ProfileView: View {
                     notify(.report(.user(profile.pubkey)))
                 }
 
-                if damus_state.contacts.is_muted(.user(profile.pubkey, nil)) {
+                if damus_state.mutelist_manager.is_muted(.user(profile.pubkey, nil)) {
                     Button(NSLocalizedString("Unmute", comment: "Button to unmute a profile.")) {
                         guard
                             let keypair = damus_state.keypair.to_full(),
-                            let mutelist = damus_state.contacts.mutelist
+                            let mutelist = damus_state.mutelist_manager.event
                         else {
                             return
                         }
@@ -192,7 +192,7 @@ struct ProfileView: View {
                             return
                         }
 
-                        damus_state.contacts.set_mutelist(new_ev)
+                        damus_state.mutelist_manager.set_mutelist(new_ev)
                         damus_state.postbox.send(new_ev)
                     }
                 } else {

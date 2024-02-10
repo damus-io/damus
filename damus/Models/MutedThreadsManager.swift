@@ -30,9 +30,9 @@ func migrate_old_muted_threads_to_new_mutelist(keypair: Keypair, damus_state: Da
     let mutedThreads = loadOldMutedThreads(pubkey: fullKeypair.pubkey)
     guard !mutedThreads.isEmpty else { return }
     // Set new muted system for those existing threads
-    let previous_mute_list_event = damus_state.contacts.mutelist
+    let previous_mute_list_event = damus_state.mutelist_manager.event
     guard let new_mutelist_event = create_or_update_mutelist(keypair: fullKeypair, mprev: previous_mute_list_event, to_add: Set(mutedThreads.map { MuteItem.thread($0, nil) })) else { return }
-    damus_state.contacts.set_mutelist(new_mutelist_event)
+    damus_state.mutelist_manager.set_mutelist(new_mutelist_event)
     damus_state.postbox.send(new_mutelist_event)
     // Set existing muted threads to an empty array
     UserDefaults.standard.set([], forKey: getMutedThreadsKey(pubkey: keypair.pubkey))

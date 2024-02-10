@@ -55,7 +55,7 @@ struct MenuItems: View {
         let bookmarked = damus_state.bookmarks.isBookmarked(event)
         self._isBookmarked = State(initialValue: bookmarked)
 
-        let muted_thread = (damus_state.contacts.mutelist?.mute_list?.event_muted_reason(event) != nil)
+        let muted_thread = damus_state.mutelist_manager.is_event_muted(event)
         self._isMutedThread = State(initialValue: muted_thread)
         
         self.damus_state = damus_state
@@ -111,11 +111,11 @@ struct MenuItems: View {
             if event.known_kind != .dm {
                 MuteDurationMenu { duration in
                     if let full_keypair = self.damus_state.keypair.to_full(),
-                       let new_mutelist_ev = toggle_from_mutelist(keypair: full_keypair, prev: damus_state.contacts.mutelist, to_toggle: .thread(event.thread_id(keypair: damus_state.keypair), duration?.date_from_now)) {
-                        damus_state.contacts.set_mutelist(new_mutelist_ev)
+                       let new_mutelist_ev = toggle_from_mutelist(keypair: full_keypair, prev: damus_state.mutelist_manager.event, to_toggle: .thread(event.thread_id(keypair: damus_state.keypair), duration?.date_from_now)) {
+                        damus_state.mutelist_manager.set_mutelist(new_mutelist_ev)
                         damus_state.postbox.send(new_mutelist_ev)
                     }
-                    let muted = (damus_state.contacts.mutelist?.mute_list?.event_muted_reason(event) != nil)
+                    let muted = damus_state.mutelist_manager.is_event_muted(event)
                     isMutedThread = muted
                 } label: {
                     let imageName = isMutedThread ? "mute" : "mute"

@@ -244,7 +244,7 @@ class HomeModel {
         process_zap_event(state: damus_state, ev: ev) { zapres in
             guard case .done(let zap) = zapres,
                   zap.target.pubkey == self.damus_state.keypair.pubkey,
-                  should_show_event(contacts: self.damus_state.contacts, ev: zap.request.ev) else {
+                  should_show_event(state: self.damus_state, ev: zap.request.ev) else {
                 return
             }
         
@@ -278,11 +278,11 @@ class HomeModel {
     
     func filter_events() {
         events.filter { ev in
-            !damus_state.contacts.is_muted(.user(ev.pubkey, nil))
+            !damus_state.mutelist_manager.is_muted(.user(ev.pubkey, nil))
         }
         
         self.dms.dms = dms.dms.filter { ev in
-            !damus_state.contacts.is_muted(.user(ev.pubkey, nil))
+            !damus_state.mutelist_manager.is_muted(.user(ev.pubkey, nil))
         }
         
         notifications.filter { ev in
@@ -290,7 +290,7 @@ class HomeModel {
                 return false
             }
 
-            let event_muted = damus_state.contacts.mutelist?.mute_list?.event_muted_reason(ev) != nil
+            let event_muted = damus_state.mutelist_manager.is_event_muted(ev)
             return !event_muted
         }
     }
@@ -570,13 +570,13 @@ class HomeModel {
         }
 
         // we only care about the most recent mutelist
-        if let mutelist = damus_state.contacts.mutelist {
+        if let mutelist = damus_state.mutelist_manager.event {
             if ev.created_at <= mutelist.created_at {
                 return
             }
         }
 
-        damus_state.contacts.set_mutelist(ev)
+        damus_state.mutelist_manager.set_mutelist(ev)
 
         migrate_old_muted_threads_to_new_mutelist(keypair: damus_state.keypair, damus_state: damus_state)
     }
@@ -588,7 +588,7 @@ class HomeModel {
         }
         
         // we only care about the most recent mutelist
-        if let mutelist = damus_state.contacts.mutelist {
+        if let mutelist = damus_state.mutelist_manager.event {
             if ev.created_at <= mutelist.created_at {
                 return
             }
@@ -598,7 +598,7 @@ class HomeModel {
             return
         }
 
-        damus_state.contacts.set_mutelist(ev)
+        damus_state.mutelist_manager.set_mutelist(ev)
 
         migrate_old_muted_threads_to_new_mutelist(keypair: damus_state.keypair, damus_state: damus_state)
     }
@@ -616,7 +616,7 @@ class HomeModel {
         // don't show notifications from ourselves
         guard ev.pubkey != damus_state.pubkey,
               event_has_our_pubkey(ev, our_pubkey: self.damus_state.pubkey),
-              should_show_event(contacts: damus_state.contacts, ev: ev) else {
+              should_show_event(state: damus_state, ev: ev) else {
             return
         }
         
@@ -654,7 +654,7 @@ class HomeModel {
 
 
     func handle_text_event(sub_id: String, _ ev: NostrEvent) {
-        guard should_show_event(contacts: damus_state.contacts, ev: ev) else {
+        guard should_show_event(state: damus_state, ev: ev) else {
             return
         }
         
@@ -683,7 +683,7 @@ class HomeModel {
     }
     
     func handle_dm(_ ev: NostrEvent) {
-        guard should_show_event(contacts: damus_state.contacts, ev: ev) else {
+        guard should_show_event(state: damus_state, ev: ev) else {
             return
         }
         
@@ -1090,13 +1090,13 @@ func event_has_our_pubkey(_ ev: NostrEvent, our_pubkey: Pubkey) -> Bool {
 
 func should_show_event(event: NostrEvent, damus_state: DamusState) -> Bool {
     return should_show_event(
-        contacts: damus_state.contacts,
+        state: damus_state,
         ev: event
     )
 }
 
-func should_show_event(contacts: Contacts, ev: NostrEvent) -> Bool {
-    let event_muted = contacts.mutelist?.mute_list?.event_muted_reason(ev) != nil
+func should_show_event(state: DamusState, ev: NostrEvent, keypair: Keypair? = nil) -> Bool {
+    let event_muted = state.mutelist_manager.is_event_muted(ev, keypair: keypair)
     if event_muted {
         return false
     }

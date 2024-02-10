@@ -27,7 +27,7 @@ struct EventMutingContainerView<Content: View>: View {
         self.damus_state = damus_state
         self.event = event
         self.content = content()
-        self._shown = State(initialValue: should_show_event(contacts: damus_state.contacts, ev: event))
+        self._shown = State(initialValue: should_show_event(state: damus_state, ev: event))
     }
     
     init(damus_state: DamusState, event: NostrEvent, muteBox: @escaping MuteBoxViewClosure, @ViewBuilder content: () -> Content) {
@@ -36,7 +36,7 @@ struct EventMutingContainerView<Content: View>: View {
     }
     
     var should_mute: Bool {
-        return !should_show_event(contacts: damus_state.contacts, ev: event)
+        return !should_show_event(state: damus_state, ev: event)
     }
     
     var body: some View {
@@ -54,14 +54,14 @@ struct EventMutingContainerView<Content: View>: View {
             }
         }
         .onReceive(handle_notify(.new_mutes)) { mutes in
-            let new_muted_event_reason = mutes.event_muted_reason(event)
+            let new_muted_event_reason = damus_state.mutelist_manager.event_muted_reason(event)
             if new_muted_event_reason != nil {
                 shown = false
                 muted_reason = new_muted_event_reason
             }
         }
         .onReceive(handle_notify(.new_unmutes)) { unmutes in
-            if unmutes.event_muted_reason(event) != nil {
+            if damus_state.mutelist_manager.event_muted_reason(event) != nil {
                 shown = true
                 muted_reason = nil
             }

@@ -39,7 +39,7 @@ struct DirectMessagesView: View {
     
     func filter_dms(dms: [DirectMessageModel]) -> [DirectMessageModel] {
         return dms.filter({ dm in
-            return damus_state.settings.friend_filter.filter(contacts: damus_state.contacts, pubkey: dm.pubkey) && !damus_state.contacts.is_muted(.user(dm.pubkey, nil))
+            return damus_state.settings.friend_filter.filter(contacts: damus_state.contacts, pubkey: dm.pubkey) && !damus_state.mutelist_manager.is_muted(.user(dm.pubkey, nil))
         })
     }
     
@@ -53,7 +53,7 @@ struct DirectMessagesView: View {
     
     func MaybeEvent(_ model: DirectMessageModel) -> some View {
         Group {
-            if let ev = model.events.last {
+            if let ev = model.events.last(where: { should_show_event(state: damus_state, ev: $0, keypair: damus_state.keypair) }) {
                 EventView(damus: damus_state, event: ev, pubkey: model.pubkey, options: options)
                     .onTapGesture {
                         self.model.set_active_dm_model(model)
