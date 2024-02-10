@@ -423,9 +423,11 @@
 		B501062D2B363036003874F5 /* AuthIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B501062C2B363036003874F5 /* AuthIntegrationTests.swift */; };
 		B51C1CEA2B55A60A00E312A9 /* AddMuteItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51C1CE82B55A60A00E312A9 /* AddMuteItemView.swift */; };
 		B51C1CEB2B55A60A00E312A9 /* MuteDurationMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51C1CE92B55A60A00E312A9 /* MuteDurationMenu.swift */; };
+		B533694E2B66D791008A805E /* MutelistManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B533694D2B66D791008A805E /* MutelistManager.swift */; };
 		B57B4C622B312BD700A232C0 /* ReconnectRelaysNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57B4C612B312BD700A232C0 /* ReconnectRelaysNotify.swift */; };
 		B57B4C642B312BFA00A232C0 /* RelayAuthenticationDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57B4C632B312BFA00A232C0 /* RelayAuthenticationDetail.swift */; };
 		B57B4C662B312C3700A232C0 /* NostrAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57B4C652B312C3700A232C0 /* NostrAuth.swift */; };
+		B59CAD4D2B688D1000677E8B /* MutelistManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B533694D2B66D791008A805E /* MutelistManager.swift */; };
 		B5A75C2A2B546D94007AFBC0 /* MuteItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A75C292B546D94007AFBC0 /* MuteItemTests.swift */; };
 		B5B4D1432B37D47600844320 /* NdbExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4D1422B37D47600844320 /* NdbExtensions.swift */; };
 		BA0F0A6F2B36207E001641B2 /* CameraMediaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0F0A6E2B36207E001641B2 /* CameraMediaView.swift */; };
@@ -1322,6 +1324,7 @@
 		B501062C2B363036003874F5 /* AuthIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthIntegrationTests.swift; sourceTree = "<group>"; usesTabs = 0; };
 		B51C1CE82B55A60A00E312A9 /* AddMuteItemView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddMuteItemView.swift; sourceTree = "<group>"; };
 		B51C1CE92B55A60A00E312A9 /* MuteDurationMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MuteDurationMenu.swift; sourceTree = "<group>"; };
+		B533694D2B66D791008A805E /* MutelistManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutelistManager.swift; sourceTree = "<group>"; usesTabs = 0; };
 		B57B4C612B312BD700A232C0 /* ReconnectRelaysNotify.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReconnectRelaysNotify.swift; sourceTree = "<group>"; };
 		B57B4C632B312BFA00A232C0 /* RelayAuthenticationDetail.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelayAuthenticationDetail.swift; sourceTree = "<group>"; };
 		B57B4C652B312C3700A232C0 /* NostrAuth.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NostrAuth.swift; sourceTree = "<group>"; };
@@ -1602,6 +1605,7 @@
 				D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */,
 				D74AAFC12B153395006CF0F4 /* HeadlessDamusState.swift */,
 				B5C60C1F2B530D5100C5ECA7 /* MuteItem.swift */,
+				B533694D2B66D791008A805E /* MutelistManager.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -3274,6 +3278,7 @@
 				D7CB5D5C2B1176B200AD4105 /* MediaUploader.swift in Sources */,
 				4C1253562A76C8C60004F4B8 /* BroadcastNotify.swift in Sources */,
 				4C3BEFD42819DE8F00B3DE84 /* NostrKind.swift in Sources */,
+				B533694E2B66D791008A805E /* MutelistManager.swift in Sources */,
 				4C32B9532A9AD44700DC3548 /* Verifier.swift in Sources */,
 				BA10192F2B449556009C57DA /* CameraPreview.swift in Sources */,
 				4C3EA66028FF5E7700C48A62 /* node_id.c in Sources */,
@@ -3575,6 +3580,7 @@
 				D7CE1B1E2B0BE190002EDAD4 /* midl.c in Sources */,
 				D7CB5D3C2B1130C600AD4105 /* LocalNotification.swift in Sources */,
 				D7CE1B2D2B0BE250002EDAD4 /* take.c in Sources */,
+				B59CAD4D2B688D1000677E8B /* MutelistManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
