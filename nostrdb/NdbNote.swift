@@ -346,6 +346,14 @@ extension NdbNote {
         return content
     }
 
+    func maybe_get_content(_ keypair: Keypair) -> String? {
+        if known_kind == .dm {
+            return decrypted(keypair: keypair)
+        }
+
+        return content
+    }
+
     func blocks(_ keypair: Keypair) -> Blocks {
         return get_blocks(keypair: keypair)
     }
