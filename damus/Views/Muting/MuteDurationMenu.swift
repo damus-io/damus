@@ -13,11 +13,6 @@ struct MuteDurationMenu<T: View>: View {
 
     var body: some View {
         Menu {
-            Button {
-                action(nil)
-            } label: {
-                Text("Indefinite", comment: "Mute a given item indefinitly (until user unmutes it). As opposed to muting the item for a given period of time.")
-            }
             ForEach(DamusDuration.allCases, id: \.self) { duration in
                 Button {
                     action(duration)
