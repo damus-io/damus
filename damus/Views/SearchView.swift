@@ -94,9 +94,10 @@ struct SearchView: View {
     }
 
     func mute_hashtag(hashtag_string: String, expiration_time: Date?) {
+        let existing_mutelist = appstate.mutelist_manager.event
+
         guard
             let full_keypair = appstate.keypair.to_full(),
-            let existing_mutelist = appstate.mutelist_manager.event,
             let mutelist = create_or_update_mutelist(keypair: full_keypair, mprev: existing_mutelist, to_add: .hashtag(Hashtag(hashtag: hashtag_string), expiration_time))
         else {
             return
