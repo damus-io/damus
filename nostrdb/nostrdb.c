@@ -1934,7 +1934,6 @@ static int ndb_write_profile(struct ndb_txn *txn,
 	// write last fetched record
 	if (!ndb_maybe_write_last_profile_fetch(txn, note)) {
 		ndb_debug("failed to write last profile fetched record\n");
-		return 0;
 	}
 
 	// write profile pubkey index
