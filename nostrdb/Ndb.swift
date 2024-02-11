@@ -349,6 +349,7 @@ class Ndb {
     }
 
     func lookup_note_key_with_txn<Y>(_ id: NoteId, txn: NdbTxn<Y>) -> NoteKey? {
+        guard !closed else { return nil }
         return id.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> NoteKey? in
             guard let p = ptr.baseAddress else {
                 return nil
@@ -395,6 +396,7 @@ class Ndb {
     }
 
     func write_profile_last_fetched(pubkey: Pubkey, fetched_at: UInt64) {
+        guard !closed else { return }
         let _ = pubkey.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> () in
             guard let p = ptr.baseAddress else { return }
             ndb_write_last_profile_fetch(ndb.ndb, p, fetched_at)
@@ -402,6 +404,7 @@ class Ndb {
     }
 
     func read_profile_last_fetched<Y>(txn: NdbTxn<Y>, pubkey: Pubkey) -> UInt64? {
+        guard !closed else { return nil }
         return pubkey.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> UInt64? in
             guard let p = ptr.baseAddress else { return nil }
             let res = ndb_read_last_profile_fetch(&txn.txn, p)
