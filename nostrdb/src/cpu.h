@@ -27,7 +27,7 @@ static inline int get_cpu_cores() {
 		size_t size = sizeof(num_cores);
 		sysctlbyname("hw.physicalcpu", &num_cores, &size, NULL, 0);
 	#else
-		num_cores = -1; // Unsupported platform
+		num_cores = 2; // Unsupported platform
 	#endif
 
 	return num_cores;
