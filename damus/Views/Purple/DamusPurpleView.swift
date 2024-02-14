@@ -10,6 +10,8 @@ import StoreKit
 
 fileprivate let damus_products = ["purpleyearly","purple"]
 
+// MARK: - Helper structures
+
 enum ProductState {
     case loading
     case loaded([Product])
@@ -48,6 +50,8 @@ struct PurchasedProduct {
     let product: Product
 }
 
+// MARK: - Main view
+
 struct DamusPurpleView: View {
     let damus_state: DamusState
     let keypair: Keypair
@@ -67,6 +71,8 @@ struct DamusPurpleView: View {
         self.damus_state = damus_state
         self.keypair = damus_state.keypair
     }
+    
+    // MARK: - Top level view
     
     var body: some View {
         NavigationView {
@@ -115,238 +121,7 @@ struct DamusPurpleView: View {
         .manageSubscriptionsSheet(isPresented: $show_manage_subscriptions)
     }
     
-    func load_account() async {
-        do {
-            if let account = try await damus_state.purple.fetch_account(pubkey: damus_state.keypair.pubkey) {
-                self.my_account_info_state = .loaded(account: account)
-                return
-            }
-            self.my_account_info_state = .no_account
-            return
-        }
-        catch {
-            self.my_account_info_state = .error(message: NSLocalizedString("There was an error loading your account. Please try again later. If problem persists, please contact us at support@damus.io", comment: "Error label when Purple account information fails to load"))
-        }
-    }
-    
-    func handle_transactions(products: [Product]) async {
-        for await update in StoreKit.Transaction.updates {
-            switch update {
-                case .verified(let tx):
-                    let prod = products.filter({ prod in tx.productID == prod.id }).first
-                    
-                    if let prod,
-                       let expiration = tx.expirationDate,
-                       Date.now < expiration
-                    {
-                        self.purchased = PurchasedProduct(tx: tx, product: prod)
-                        break
-                    }
-                case .unverified:
-                    continue
-            }
-        }
-    }
-    
-    func load_products() async {
-        do {
-            let products = try await Product.products(for: damus_products)
-            self.products = .loaded(products)
-            await handle_transactions(products: products)
-
-            print("loaded products", products)
-        } catch {
-            self.products = .failed
-            print("Failed to fetch products: \(error.localizedDescription)")
-        }
-    }
-    
-    func IconOnBox(_ name: String) -> some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 20.0)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20.0))
-                .frame(width: 80, height: 80)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(LinearGradient(
-                            colors: [DamusColors.pink, .white.opacity(0), .white.opacity(0.5), .white.opacity(0)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing), lineWidth: 1)
-                )
-            
-            Image(name)
-                .resizable()
-                .frame(width: 50, height: 50)
-                .foregroundColor(.white)
-        }
-    }
-    
-    func Icon(_ name: String) -> some View {
-        Image(name)
-            .resizable()
-            .frame(width: 50, height: 50)
-            .foregroundColor(.white)
-    }
-    
-    func Title(_ txt: String) -> some View {
-        Text(txt)
-            .font(.title3)
-            .bold()
-            .foregroundColor(.white)
-            .padding(.bottom, 3)
-    }
-    
-    func Subtitle(_ txt: String) -> some View {
-        Text(txt)
-            .foregroundColor(.white.opacity(0.65))
-    }
-    
-    var ProductLoadError: some View {
-        Text(NSLocalizedString("Subscription Error", comment: "Ah dang there was an error loading subscription information from the AppStore. Please try again later :("))
-            .foregroundColor(.white)
-    }
-    
-    var SaveText: Text {
-        Text(NSLocalizedString("Save 14%", comment: "Percentage of purchase price the user will save"))
-            .font(.callout)
-            .italic()
-            .foregroundColor(DamusColors.green)
-    }
-     
-    func subscribe(_ product: Product) async throws {
-        let result = try await product.purchase()
-        switch result {
-            case .success(.verified(let tx)):
-                print("success \(tx.debugDescription)")
-                show_welcome_sheet = true
-            case .success(.unverified(let tx, let res)):
-                print("success unverified \(tx.debugDescription) \(res.localizedDescription)")
-                show_welcome_sheet = true
-            case .pending:
-                break
-            case .userCancelled:
-                break
-            @unknown default:
-                break
-        }
-        
-        switch result {
-            case .success:
-                // TODO (will): why do this here?
-                //self.damus_state.purple.starred_profiles_cache[keypair.pubkey] = nil
-                Task {
-                    await self.damus_state.purple.send_receipt()
-                }
-            default:
-                break
-        }
-    }
-    
-    var product: Product? {
-        return self.products.products?.filter({
-            prod in prod.id == selection.rawValue
-        }).first
-    }
-    
-    func price_description(product: Product) -> some View {
-        if product.id == "purpleyearly" {
-            return (
-                AnyView(
-                    HStack(spacing: 10) {
-                        Text(NSLocalizedString("Annually", comment: "Annual renewal of purple subscription"))
-                        Spacer()
-                        Text(verbatim: non_discounted_price(product)).strikethrough().foregroundColor(DamusColors.white.opacity(0.5))
-                        Text(verbatim: product.displayPrice).fontWeight(.bold)
-                    }
-                )
-            )
-        } else {
-            return (
-                AnyView(
-                    HStack(spacing: 10) {
-                        Text(NSLocalizedString("Monthly", comment: "Monthly renewal of purple subscription"))
-                        Spacer()
-                        Text(verbatim: product.displayPrice).fontWeight(.bold)
-                    }
-                )
-            )
-        }
-    }
-    
-    func ProductsView(_ products: [Product]) -> some View {
-        VStack(spacing: 10) {
-            Text(NSLocalizedString("Save 20% off on an annual subscription", comment: "Savings for purchasing an annual subscription"))
-                .font(.callout.bold())
-                .foregroundColor(.white)
-            ForEach(products) { product in
-                Button(action: {
-                    Task { @MainActor in
-                        do {
-                            try await subscribe(product)
-                        } catch {
-                            print(error.localizedDescription)
-                        }
-                    }
-                }, label: {
-                    price_description(product: product)
-                })
-                .buttonStyle(GradientButtonStyle())
-            }
-        }
-        .padding(.horizontal, 20)
-    }
-    
-    func PurchasedView(_ purchased: PurchasedProduct) -> some View {
-        VStack(spacing: 10) {
-            Text(NSLocalizedString("Purchased!", comment: "User purchased a subscription"))
-                .font(.title2)
-                .foregroundColor(.white)
-            price_description(product: purchased.product)
-                .foregroundColor(.white)
-                .opacity(0.65)
-                .frame(width: 200)
-            Text(NSLocalizedString("Purchased on", comment: "Indicating when the user purchased the subscription"))
-                .font(.title2)
-                .foregroundColor(.white)
-            Text(format_date(date: purchased.tx.purchaseDate))
-                .foregroundColor(.white)
-                .opacity(0.65)
-            if let expiry = purchased.tx.expirationDate {
-                Text(NSLocalizedString("Renews on", comment: "Indicating when the subscription will renew"))
-                    .font(.title2)
-                    .foregroundColor(.white)
-                Text(format_date(date: expiry))
-                    .foregroundColor(.white)
-                    .opacity(0.65)
-            }
-            Button(action: {
-                show_manage_subscriptions = true
-            }, label: {
-                Text(NSLocalizedString("Manage", comment: "Manage the damus subscription"))
-            })
-            .buttonStyle(GradientButtonStyle())
-        }
-    }
-    
-    var ProductStateView: some View {
-        Group {
-            if damus_state.purple.enable_purple_iap_support {
-                switch self.products {
-                    case .failed:
-                        ProductLoadError
-                    case .loaded(let products):
-                        if let purchased {
-                            PurchasedView(purchased)
-                        } else {
-                            ProductsView(products)
-                        }
-                    case .loading:
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                }
-            }
-        }
-    }
+    // MARK: - Complex subviews
     
     var MainContent: some View {
         VStack {
@@ -448,7 +223,246 @@ struct DamusPurpleView: View {
             .padding([.top], 20)
         }
     }
+    
+    var ProductStateView: some View {
+        Group {
+            if damus_state.purple.enable_purple_iap_support {
+                switch self.products {
+                    case .failed:
+                        ProductLoadError
+                    case .loaded(let products):
+                        if let purchased {
+                            PurchasedView(purchased)
+                        } else {
+                            ProductsView(products)
+                        }
+                    case .loading:
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                }
+            }
+        }
+    }
+    
+    func PurchasedView(_ purchased: PurchasedProduct) -> some View {
+        VStack(spacing: 10) {
+            Text(NSLocalizedString("Purchased!", comment: "User purchased a subscription"))
+                .font(.title2)
+                .foregroundColor(.white)
+            price_description(product: purchased.product)
+                .foregroundColor(.white)
+                .opacity(0.65)
+                .frame(width: 200)
+            Text(NSLocalizedString("Purchased on", comment: "Indicating when the user purchased the subscription"))
+                .font(.title2)
+                .foregroundColor(.white)
+            Text(format_date(date: purchased.tx.purchaseDate))
+                .foregroundColor(.white)
+                .opacity(0.65)
+            if let expiry = purchased.tx.expirationDate {
+                Text(NSLocalizedString("Renews on", comment: "Indicating when the subscription will renew"))
+                    .font(.title2)
+                    .foregroundColor(.white)
+                Text(format_date(date: expiry))
+                    .foregroundColor(.white)
+                    .opacity(0.65)
+            }
+            Button(action: {
+                show_manage_subscriptions = true
+            }, label: {
+                Text(NSLocalizedString("Manage", comment: "Manage the damus subscription"))
+            })
+            .buttonStyle(GradientButtonStyle())
+        }
+    }
+    
+    func ProductsView(_ products: [Product]) -> some View {
+        VStack(spacing: 10) {
+            Text(NSLocalizedString("Save 20% off on an annual subscription", comment: "Savings for purchasing an annual subscription"))
+                .font(.callout.bold())
+                .foregroundColor(.white)
+            ForEach(products) { product in
+                Button(action: {
+                    Task { @MainActor in
+                        do {
+                            try await subscribe(product)
+                        } catch {
+                            print(error.localizedDescription)
+                        }
+                    }
+                }, label: {
+                    price_description(product: product)
+                })
+                .buttonStyle(GradientButtonStyle())
+            }
+        }
+        .padding(.horizontal, 20)
+    }
+    
+    func price_description(product: Product) -> some View {
+        if product.id == "purpleyearly" {
+            return (
+                AnyView(
+                    HStack(spacing: 10) {
+                        Text(NSLocalizedString("Annually", comment: "Annual renewal of purple subscription"))
+                        Spacer()
+                        Text(verbatim: non_discounted_price(product)).strikethrough().foregroundColor(DamusColors.white.opacity(0.5))
+                        Text(verbatim: product.displayPrice).fontWeight(.bold)
+                    }
+                )
+            )
+        } else {
+            return (
+                AnyView(
+                    HStack(spacing: 10) {
+                        Text(NSLocalizedString("Monthly", comment: "Monthly renewal of purple subscription"))
+                        Spacer()
+                        Text(verbatim: product.displayPrice).fontWeight(.bold)
+                    }
+                )
+            )
+        }
+    }
+    
+    // MARK: - State management
+    
+    func load_account() async {
+        do {
+            if let account = try await damus_state.purple.fetch_account(pubkey: damus_state.keypair.pubkey) {
+                self.my_account_info_state = .loaded(account: account)
+                return
+            }
+            self.my_account_info_state = .no_account
+            return
+        }
+        catch {
+            self.my_account_info_state = .error(message: NSLocalizedString("There was an error loading your account. Please try again later. If problem persists, please contact us at support@damus.io", comment: "Error label when Purple account information fails to load"))
+        }
+    }
+    
+    func handle_transactions(products: [Product]) async {
+        for await update in StoreKit.Transaction.updates {
+            switch update {
+                case .verified(let tx):
+                    let prod = products.filter({ prod in tx.productID == prod.id }).first
+                    
+                    if let prod,
+                       let expiration = tx.expirationDate,
+                       Date.now < expiration
+                    {
+                        self.purchased = PurchasedProduct(tx: tx, product: prod)
+                        break
+                    }
+                case .unverified:
+                    continue
+            }
+        }
+    }
+    
+    func load_products() async {
+        do {
+            let products = try await Product.products(for: damus_products)
+            self.products = .loaded(products)
+            await handle_transactions(products: products)
+
+            print("loaded products", products)
+        } catch {
+            self.products = .failed
+            print("Failed to fetch products: \(error.localizedDescription)")
+        }
+    }
+    
+    func subscribe(_ product: Product) async throws {
+        let result = try await product.purchase()
+        switch result {
+            case .success(.verified(let tx)):
+                print("success \(tx.debugDescription)")
+                show_welcome_sheet = true
+            case .success(.unverified(let tx, let res)):
+                print("success unverified \(tx.debugDescription) \(res.localizedDescription)")
+                show_welcome_sheet = true
+            case .pending:
+                break
+            case .userCancelled:
+                break
+            @unknown default:
+                break
+        }
+        
+        switch result {
+            case .success:
+                // TODO (will): why do this here?
+                //self.damus_state.purple.starred_profiles_cache[keypair.pubkey] = nil
+                Task {
+                    await self.damus_state.purple.send_receipt()
+                }
+            default:
+                break
+        }
+    }
+    
+    var product: Product? {
+        return self.products.products?.filter({
+            prod in prod.id == selection.rawValue
+        }).first
+    }
+    
+    // MARK: - Small helper views
+    
+    func IconOnBox(_ name: String) -> some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 20.0)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20.0))
+                .frame(width: 80, height: 80)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(LinearGradient(
+                            colors: [DamusColors.pink, .white.opacity(0), .white.opacity(0.5), .white.opacity(0)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing), lineWidth: 1)
+                )
+            
+            Image(name)
+                .resizable()
+                .frame(width: 50, height: 50)
+                .foregroundColor(.white)
+        }
+    }
+    
+    func Icon(_ name: String) -> some View {
+        Image(name)
+            .resizable()
+            .frame(width: 50, height: 50)
+            .foregroundColor(.white)
+    }
+    
+    func Title(_ txt: String) -> some View {
+        Text(txt)
+            .font(.title3)
+            .bold()
+            .foregroundColor(.white)
+            .padding(.bottom, 3)
+    }
+    
+    func Subtitle(_ txt: String) -> some View {
+        Text(txt)
+            .foregroundColor(.white.opacity(0.65))
+    }
+    
+    var ProductLoadError: some View {
+        Text(NSLocalizedString("Subscription Error", comment: "Ah dang there was an error loading subscription information from the AppStore. Please try again later :("))
+            .foregroundColor(.white)
+    }
+    
+    var SaveText: Text {
+        Text(NSLocalizedString("Save 14%", comment: "Percentage of purchase price the user will save"))
+            .font(.callout)
+            .italic()
+            .foregroundColor(DamusColors.green)
+    }
 }
+
+// MARK: - More helper views
 
 struct DamusPurpleLogoView: View {
     var body: some View {
