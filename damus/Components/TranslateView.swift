@@ -21,6 +21,8 @@ enum TranslateStatus: Equatable {
     case not_needed
 }
 
+fileprivate let MIN_UNIQUE_CHARS = 2
+
 struct TranslateView: View {
     let damus_state: DamusState
     let event: NostrEvent
@@ -107,6 +109,10 @@ struct TranslateView: View {
             attempt_translation()
         }
     }
+    
+    func translationMeetsStringDistanceRequirements(original: String, translated: String) -> Bool {
+        return levenshteinDistanceIsGreaterThanOrEqualTo(from: original, to: translated, threshold: MIN_UNIQUE_CHARS)
+    }
 }
 
 extension View {
@@ -141,6 +147,10 @@ func translate_note(profiles: Profiles, keypair: Keypair, event: NostrEvent, set
         // if its the same, give up and don't retry
         return .not_needed
     }
+    
+    guard translationMeetsStringDistanceRequirements(original: originalContent, translated: translated_note) else {
+        return .not_needed
+    }
 
     // Render translated note
     let translated_blocks = parse_note_content(content: .content(translated_note, event.tags))
@@ -158,3 +168,50 @@ func current_language() -> String {
     }
 }
     
+func levenshteinDistanceIsGreaterThanOrEqualTo(from source: String, to target: String, threshold: Int) -> Bool {
+    let sourceCount = source.count
+    let targetCount = target.count
+    
+    // Early return if the difference in lengths is already greater than or equal to the threshold,
+    // indicating the edit distance meets the condition without further calculation.
+    if abs(sourceCount - targetCount) >= threshold {
+        return true
+    }
+    
+    var matrix = [[Int]](repeating: [Int](repeating: 0, count: targetCount + 1), count: sourceCount + 1)
+
+    for i in 0...sourceCount {
+        matrix[i][0] = i
+    }
+
+    for j in 0...targetCount {
+        matrix[0][j] = j
+    }
+
+    for i in 1...sourceCount {
+        var rowMin = Int.max
+        for j in 1...targetCount {
+            let sourceIndex = source.index(source.startIndex, offsetBy: i - 1)
+            let targetIndex = target.index(target.startIndex, offsetBy: j - 1)
+
+            let cost = source[sourceIndex] == target[targetIndex] ? 0 : 1
+            matrix[i][j] = min(
+                matrix[i - 1][j] + 1,    // Deletion
+                matrix[i][j - 1] + 1,    // Insertion
+                matrix[i - 1][j - 1] + cost  // Substitution
+            )
+            rowMin = min(rowMin, matrix[i][j])
+        }
+        // If the minimum edit distance found in any row is already greater than or equal to the threshold,
+        // you can conclude the edit distance meets the criteria.
+        if rowMin >= threshold {
+            return true
+        }
+    }
+
+    return matrix[sourceCount][targetCount] >= threshold
+}
+
+func translationMeetsStringDistanceRequirements(original: String, translated: String) -> Bool {
+    return levenshteinDistanceIsGreaterThanOrEqualTo(from: original, to: translated, threshold: MIN_UNIQUE_CHARS)
+}
