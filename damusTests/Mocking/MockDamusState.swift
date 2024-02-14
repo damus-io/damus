@@ -30,6 +30,7 @@ func generate_test_damus_state(
                            likes: .init(our_pubkey: our_pubkey),
                            boosts: .init(our_pubkey: our_pubkey),
                            contacts: .init(our_pubkey: our_pubkey),
+                           mutelist_manager: MutelistManager(),
                            profiles: profiles,
                            dms: .init(our_pubkey: our_pubkey),
                            previews: .init(),
