@@ -11,6 +11,8 @@ import StoreKit
 // MARK: - IAPProductStateView
 
 extension DamusPurpleView {
+    typealias PurchasedProduct = DamusPurple.StoreKitManager.PurchasedProduct
+    
     struct IAPProductStateView: View {
         let products: ProductState
         let purchased: PurchasedProduct?
@@ -82,28 +84,20 @@ extension DamusPurpleView {
         }
         
         func price_description(product: Product) -> some View {
-            if product.id == "purpleyearly" {
-                return (
-                    AnyView(
-                        HStack(spacing: 10) {
-                            Text(NSLocalizedString("Annually", comment: "Annual renewal of purple subscription"))
-                            Spacer()
-                            Text(verbatim: non_discounted_price(product)).strikethrough().foregroundColor(DamusColors.white.opacity(0.5))
-                            Text(verbatim: product.displayPrice).fontWeight(.bold)
-                        }
-                    )
-                )
-            } else {
-                return (
-                    AnyView(
-                        HStack(spacing: 10) {
-                            Text(NSLocalizedString("Monthly", comment: "Monthly renewal of purple subscription"))
-                            Spacer()
-                            Text(verbatim: product.displayPrice).fontWeight(.bold)
-                        }
-                    )
-                )
-            }
+            let purple_type = DamusPurple.StoreKitManager.DamusPurpleType(rawValue: product.id)
+            return (
+                HStack(spacing: 10) {
+                    Text(purple_type?.label() ?? product.displayName)
+                    Spacer()
+                    if let non_discounted_price = purple_type?.non_discounted_price(product: product) {
+                        Text(verbatim: non_discounted_price)
+                            .strikethrough()
+                            .foregroundColor(DamusColors.white.opacity(0.5))
+                    }
+                    Text(verbatim: product.displayPrice)
+                        .fontWeight(.bold)
+                }
+            )
         }
     }
 }
@@ -126,11 +120,6 @@ extension DamusPurpleView {
                     return nil
             }
         }
-    }
-    
-    struct PurchasedProduct {
-        let tx: StoreKit.Transaction
-        let product: Product
     }
 }
 

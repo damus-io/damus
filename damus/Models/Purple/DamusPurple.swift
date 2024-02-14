@@ -6,10 +6,12 @@
 //
 
 import Foundation
+import StoreKit
 
 class DamusPurple: StoreObserverDelegate {
     let settings: UserSettingsStore
     let keypair: Keypair
+    var storekit_manager: StoreKitManager
 
     @MainActor
     var account_cache: [Pubkey: Account]
@@ -18,6 +20,7 @@ class DamusPurple: StoreObserverDelegate {
         self.settings = settings
         self.keypair = keypair
         self.account_cache = [:]
+        self.storekit_manager = .init()
     }
     
     // MARK: Functions
@@ -121,6 +124,10 @@ class DamusPurple: StoreObserverDelegate {
     func create_account_if_not_existing(pubkey: Pubkey) async throws {
         guard await !(self.account_exists(pubkey: pubkey) ?? false) else { return }
         try await self.create_account(pubkey: pubkey)
+    }
+    
+    func make_iap_purchase(product: Product) async throws -> Product.PurchaseResult {
+        return try await self.storekit_manager.purchase(product: product)
     }
     
     func send_receipt() async {

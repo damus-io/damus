@@ -442,6 +442,7 @@
 		D7100C582B76FC8400C59298 /* MarketingContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7100C572B76FC8400C59298 /* MarketingContentView.swift */; };
 		D7100C5A2B76FD5100C59298 /* LogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7100C592B76FD5100C59298 /* LogoView.swift */; };
 		D7100C5C2B77016700C59298 /* IAPProductStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7100C5B2B77016700C59298 /* IAPProductStateView.swift */; };
+		D7100C5E2B7709ED00C59298 /* PurpleStoreKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7100C5D2B7709ED00C59298 /* PurpleStoreKitManager.swift */; };
 		D71DC1EC2A9129C3006E207C /* PostViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71DC1EB2A9129C3006E207C /* PostViewTests.swift */; };
 		D72341192B6864F200E1E135 /* DamusPurpleEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72341182B6864F200E1E135 /* DamusPurpleEnvironment.swift */; };
 		D723411A2B6864F200E1E135 /* DamusPurpleEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72341182B6864F200E1E135 /* DamusPurpleEnvironment.swift */; };
@@ -1344,6 +1345,7 @@
 		D7100C572B76FC8400C59298 /* MarketingContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketingContentView.swift; sourceTree = "<group>"; };
 		D7100C592B76FD5100C59298 /* LogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogoView.swift; sourceTree = "<group>"; };
 		D7100C5B2B77016700C59298 /* IAPProductStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAPProductStateView.swift; sourceTree = "<group>"; };
+		D7100C5D2B7709ED00C59298 /* PurpleStoreKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurpleStoreKitManager.swift; sourceTree = "<group>"; };
 		D71DC1EB2A9129C3006E207C /* PostViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostViewTests.swift; sourceTree = "<group>"; };
 		D72341182B6864F200E1E135 /* DamusPurpleEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleEnvironment.swift; sourceTree = "<group>"; };
 		D723C38D2AB8D83400065664 /* ContentFilters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentFilters.swift; sourceTree = "<group>"; };
@@ -2670,6 +2672,7 @@
 				D74F430B2B23FB9B00425B75 /* StoreObserver.swift */,
 				D7ADD3DD2B53854300F104C4 /* DamusPurpleURL.swift */,
 				D72341182B6864F200E1E135 /* DamusPurpleEnvironment.swift */,
+				D7100C5D2B7709ED00C59298 /* PurpleStoreKitManager.swift */,
 			);
 			path = Purple;
 			sourceTree = "<group>";
@@ -3370,6 +3373,7 @@
 				3AA247FF297E3D900090C62D /* RepostsView.swift in Sources */,
 				3AE45AF6297BB2E700C1D842 /* LibreTranslateServer.swift in Sources */,
 				4C5D5C9A2A6AF8F80024563C /* NdbTagIterator.swift in Sources */,
+				D7100C5E2B7709ED00C59298 /* PurpleStoreKitManager.swift in Sources */,
 				4CE879502996B2BD00F758CC /* RelayStatusView.swift in Sources */,
 				4CC7AAF4297F18B400430951 /* ReplyDescription.swift in Sources */,
 				4C75EFA427FA577B0006080F /* PostView.swift in Sources */,

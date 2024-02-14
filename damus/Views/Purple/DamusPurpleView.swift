@@ -8,8 +8,6 @@
 import SwiftUI
 import StoreKit
 
-fileprivate let damus_products = ["purpleyearly","purple"]
-
 // MARK: - Helper structures
 
 enum AccountInfoState {
@@ -19,25 +17,16 @@ enum AccountInfoState {
     case error(message: String)
 }
 
-func non_discounted_price(_ product: Product) -> String {
-    return (product.price * 1.1984569224).formatted(product.priceFormatStyle)
-}
-
-enum DamusPurpleType: String {
-    case yearly = "purpleyearly"
-    case monthly = "purple"
-}
-
 // MARK: - Main view
 
-struct DamusPurpleView: View {
+struct DamusPurpleView: View, DamusPurpleStoreKitManagerDelegate {
     let damus_state: DamusState
     let keypair: Keypair
     
     @State var my_account_info_state: AccountInfoState = .loading
     @State var products: ProductState
     @State var purchased: PurchasedProduct? = nil
-    @State var selection: DamusPurpleType = .yearly
+    @State var selection: DamusPurple.StoreKitManager.DamusPurpleType = .yearly
     @State var show_welcome_sheet: Bool = false
     @State var show_manage_subscriptions = false
     @State private var shouldDismissView = false
@@ -48,6 +37,7 @@ struct DamusPurpleView: View {
         self._products = State(wrappedValue: .loading)
         self.damus_state = damus_state
         self.keypair = damus_state.keypair
+        damus_state.purple.storekit_manager.delegate = self
     }
     
     // MARK: - Top level view
@@ -159,30 +149,10 @@ struct DamusPurpleView: View {
         }
     }
     
-    func handle_transactions(products: [Product]) async {
-        for await update in StoreKit.Transaction.updates {
-            switch update {
-                case .verified(let tx):
-                    let prod = products.filter({ prod in tx.productID == prod.id }).first
-                    
-                    if let prod,
-                       let expiration = tx.expirationDate,
-                       Date.now < expiration
-                    {
-                        self.purchased = PurchasedProduct(tx: tx, product: prod)
-                        break
-                    }
-                case .unverified:
-                    continue
-            }
-        }
-    }
-    
     func load_products() async {
         do {
-            let products = try await Product.products(for: damus_products)
+            let products = try await self.damus_state.purple.storekit_manager.get_products()
             self.products = .loaded(products)
-            await handle_transactions(products: products)
 
             print("loaded products", products)
         } catch {
@@ -191,8 +161,13 @@ struct DamusPurpleView: View {
         }
     }
     
+    // For DamusPurple.StoreKitManager.Delegate conformance. This gets called by the StoreKitManager when a new product was purchased
+    func product_was_purchased(product: DamusPurple.StoreKitManager.PurchasedProduct) {
+        self.purchased = product
+    }
+    
     func subscribe(_ product: Product) async throws {
-        let result = try await product.purchase()
+        let result = try await self.damus_state.purple.make_iap_purchase(product: product)
         switch result {
             case .success(.verified(let tx)):
                 print("success \(tx.debugDescription)")
@@ -218,12 +193,6 @@ struct DamusPurpleView: View {
             default:
                 break
         }
-    }
-    
-    var product: Product? {
-        return self.products.products?.filter({
-            prod in prod.id == selection.rawValue
-        }).first
     }
 }
 
