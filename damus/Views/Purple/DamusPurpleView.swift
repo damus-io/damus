@@ -149,24 +149,24 @@ struct DamusPurpleView: View {
     var MarketingContent: some View {
         VStack {
             VStack(alignment: .leading, spacing: 30) {
-                Subtitle(NSLocalizedString("Help us stay independent in our mission for Freedom tech with our Purple subscription, and look cool doing it!", comment: "Damus purple subscription pitch"))
+                PurpleViewPrimitives.SubtitleView(text: NSLocalizedString("Help us stay independent in our mission for Freedom tech with our Purple subscription, and look cool doing it!", comment: "Damus purple subscription pitch"))
                     .multilineTextAlignment(.center)
                 
                 HStack(spacing: 20) {
-                    IconOnBox("heart.fill")
+                    PurpleViewPrimitives.IconOnBoxView(name: "heart.fill")
                     
                     VStack(alignment: .leading) {
-                        Title(NSLocalizedString("Help Build The Future", comment: "Title for funding future damus development"))
+                        PurpleViewPrimitives.TitleView(text: NSLocalizedString("Help Build The Future", comment: "Title for funding future damus development"))
                         
-                        Subtitle(NSLocalizedString("Support Damus development to help build the future of decentralized communication on the web.", comment: "Reason for supporting damus development"))
+                        PurpleViewPrimitives.SubtitleView(text: NSLocalizedString("Support Damus development to help build the future of decentralized communication on the web.", comment: "Reason for supporting damus development"))
                     }
                 }
                 
                 HStack(spacing: 20) {
-                    IconOnBox("ai-3-stars.fill")
+                    PurpleViewPrimitives.IconOnBoxView(name: "ai-3-stars.fill")
                     
                     VStack(alignment: .leading) {
-                        Title(NSLocalizedString("Exclusive features", comment: "Features only available on subscription service"))
+                        PurpleViewPrimitives.TitleView(text: NSLocalizedString("Exclusive features", comment: "Features only available on subscription service"))
                             .padding(.bottom, -3)
                         
                         HStack(spacing: 3) {
@@ -184,18 +184,18 @@ struct DamusPurpleView: View {
                         .background(DamusColors.lightBackgroundPink)
                         .cornerRadius(30.0)
                         
-                        Subtitle(NSLocalizedString("Be the first to access upcoming premium features: Automatic translations, longer note storage, and more", comment: "Description of new features to be expected"))
+                        PurpleViewPrimitives.SubtitleView(text: NSLocalizedString("Be the first to access upcoming premium features: Automatic translations, longer note storage, and more", comment: "Description of new features to be expected"))
                             .padding(.top, 3)
                     }
                 }
                 
                 HStack(spacing: 20) {
-                    IconOnBox("badge")
+                    PurpleViewPrimitives.IconOnBoxView(name: "badge")
                     
                     VStack(alignment: .leading) {
-                        Title(NSLocalizedString("Supporter Badge", comment: "Title for supporter badge"))
+                        PurpleViewPrimitives.TitleView(text: NSLocalizedString("Supporter Badge", comment: "Title for supporter badge"))
                         
-                        Subtitle(NSLocalizedString("Get a special badge on your profile to show everyone your contribution to Freedom tech", comment: "Supporter badge description"))
+                        PurpleViewPrimitives.SubtitleView(text: NSLocalizedString("Get a special badge on your profile to show everyone your contribution to Freedom tech", comment: "Supporter badge description"))
                     }
                 }
                 
@@ -229,7 +229,7 @@ struct DamusPurpleView: View {
             if damus_state.purple.enable_purple_iap_support {
                 switch self.products {
                     case .failed:
-                        ProductLoadError
+                        PurpleViewPrimitives.ProductLoadErrorView()
                     case .loaded(let products):
                         if let purchased {
                             PurchasedView(purchased)
@@ -405,60 +405,6 @@ struct DamusPurpleView: View {
         return self.products.products?.filter({
             prod in prod.id == selection.rawValue
         }).first
-    }
-    
-    // MARK: - Small helper views
-    
-    func IconOnBox(_ name: String) -> some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 20.0)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20.0))
-                .frame(width: 80, height: 80)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(LinearGradient(
-                            colors: [DamusColors.pink, .white.opacity(0), .white.opacity(0.5), .white.opacity(0)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing), lineWidth: 1)
-                )
-            
-            Image(name)
-                .resizable()
-                .frame(width: 50, height: 50)
-                .foregroundColor(.white)
-        }
-    }
-    
-    func Icon(_ name: String) -> some View {
-        Image(name)
-            .resizable()
-            .frame(width: 50, height: 50)
-            .foregroundColor(.white)
-    }
-    
-    func Title(_ txt: String) -> some View {
-        Text(txt)
-            .font(.title3)
-            .bold()
-            .foregroundColor(.white)
-            .padding(.bottom, 3)
-    }
-    
-    func Subtitle(_ txt: String) -> some View {
-        Text(txt)
-            .foregroundColor(.white.opacity(0.65))
-    }
-    
-    var ProductLoadError: some View {
-        Text(NSLocalizedString("Subscription Error", comment: "Ah dang there was an error loading subscription information from the AppStore. Please try again later :("))
-            .foregroundColor(.white)
-    }
-    
-    var SaveText: Text {
-        Text(NSLocalizedString("Save 14%", comment: "Percentage of purchase price the user will save"))
-            .font(.callout)
-            .italic()
-            .foregroundColor(DamusColors.green)
     }
 }
 

@@ -438,6 +438,7 @@
 		BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */; };
 		D2277EEA2A089BD5006C3807 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2277EE92A089BD5006C3807 /* Router.swift */; };
 		D70A3B172B02DCE5008BD568 /* NotificationFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */; };
+		D7100C562B76F8E600C59298 /* PurpleViewPrimitives.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7100C552B76F8E600C59298 /* PurpleViewPrimitives.swift */; };
 		D71DC1EC2A9129C3006E207C /* PostViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71DC1EB2A9129C3006E207C /* PostViewTests.swift */; };
 		D72341192B6864F200E1E135 /* DamusPurpleEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72341182B6864F200E1E135 /* DamusPurpleEnvironment.swift */; };
 		D723411A2B6864F200E1E135 /* DamusPurpleEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72341182B6864F200E1E135 /* DamusPurpleEnvironment.swift */; };
@@ -1336,6 +1337,7 @@
 		BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectWalletView.swift; sourceTree = "<group>"; };
 		D2277EE92A089BD5006C3807 /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationFormatter.swift; sourceTree = "<group>"; };
+		D7100C552B76F8E600C59298 /* PurpleViewPrimitives.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurpleViewPrimitives.swift; sourceTree = "<group>"; };
 		D71DC1EB2A9129C3006E207C /* PostViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostViewTests.swift; sourceTree = "<group>"; };
 		D72341182B6864F200E1E135 /* DamusPurpleEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleEnvironment.swift; sourceTree = "<group>"; };
 		D723C38D2AB8D83400065664 /* ContentFilters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentFilters.swift; sourceTree = "<group>"; };
@@ -2581,6 +2583,7 @@
 		4CFF8F5729C9FD07008DB934 /* Purple */ = {
 			isa = PBXGroup;
 			children = (
+				D7100C542B76F8C200C59298 /* Detail */,
 				4CFF8F5829C9FD1E008DB934 /* DamusPurpleView.swift */,
 				D76556D52B1E6C08001B0CCC /* DamusPurpleWelcomeView.swift */,
 				D7373BA52B688EA200F7783D /* DamusPurpleTranslationSetupView.swift */,
@@ -2632,6 +2635,14 @@
 				BA3759962ABCCF360018D73B /* CameraPreview.swift */,
 			);
 			path = Camera;
+			sourceTree = "<group>";
+		};
+		D7100C542B76F8C200C59298 /* Detail */ = {
+			isa = PBXGroup;
+			children = (
+				D7100C552B76F8E600C59298 /* PurpleViewPrimitives.swift */,
+			);
+			path = Detail;
 			sourceTree = "<group>";
 		};
 		D72A2D032AD9C165002AFF62 /* Mocking */ = {
@@ -3040,6 +3051,7 @@
 				D74AAFCF2B155D8C006CF0F4 /* ZapDataModel.swift in Sources */,
 				4C8D1A6F29F31E5000ACDF75 /* FriendsButton.swift in Sources */,
 				3A5E47C52A4A6CF400C0D090 /* Trie.swift in Sources */,
+				D7100C562B76F8E600C59298 /* PurpleViewPrimitives.swift in Sources */,
 				B57B4C642B312BFA00A232C0 /* RelayAuthenticationDetail.swift in Sources */,
 				D7EDED2E2B128E8A0018B19C /* CollectionExtension.swift in Sources */,
 				D74AAFD62B155F0C006CF0F4 /* WalletConnect+.swift in Sources */,
