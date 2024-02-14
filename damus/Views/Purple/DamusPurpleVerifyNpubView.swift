@@ -34,7 +34,7 @@ struct DamusPurpleVerifyNpubView: View {
                 .background(Color.black)
             
             VStack {
-                DamusPurpleLogoView()
+                DamusPurpleView.LogoView()
 
                 VStack(alignment: .center, spacing: 30) {
 

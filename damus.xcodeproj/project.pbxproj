@@ -439,6 +439,9 @@
 		D2277EEA2A089BD5006C3807 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2277EE92A089BD5006C3807 /* Router.swift */; };
 		D70A3B172B02DCE5008BD568 /* NotificationFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */; };
 		D7100C562B76F8E600C59298 /* PurpleViewPrimitives.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7100C552B76F8E600C59298 /* PurpleViewPrimitives.swift */; };
+		D7100C582B76FC8400C59298 /* MarketingContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7100C572B76FC8400C59298 /* MarketingContentView.swift */; };
+		D7100C5A2B76FD5100C59298 /* LogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7100C592B76FD5100C59298 /* LogoView.swift */; };
+		D7100C5C2B77016700C59298 /* IAPProductStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7100C5B2B77016700C59298 /* IAPProductStateView.swift */; };
 		D71DC1EC2A9129C3006E207C /* PostViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71DC1EB2A9129C3006E207C /* PostViewTests.swift */; };
 		D72341192B6864F200E1E135 /* DamusPurpleEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72341182B6864F200E1E135 /* DamusPurpleEnvironment.swift */; };
 		D723411A2B6864F200E1E135 /* DamusPurpleEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72341182B6864F200E1E135 /* DamusPurpleEnvironment.swift */; };
@@ -1338,6 +1341,9 @@
 		D2277EE92A089BD5006C3807 /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationFormatter.swift; sourceTree = "<group>"; };
 		D7100C552B76F8E600C59298 /* PurpleViewPrimitives.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurpleViewPrimitives.swift; sourceTree = "<group>"; };
+		D7100C572B76FC8400C59298 /* MarketingContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketingContentView.swift; sourceTree = "<group>"; };
+		D7100C592B76FD5100C59298 /* LogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogoView.swift; sourceTree = "<group>"; };
+		D7100C5B2B77016700C59298 /* IAPProductStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAPProductStateView.swift; sourceTree = "<group>"; };
 		D71DC1EB2A9129C3006E207C /* PostViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostViewTests.swift; sourceTree = "<group>"; };
 		D72341182B6864F200E1E135 /* DamusPurpleEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleEnvironment.swift; sourceTree = "<group>"; };
 		D723C38D2AB8D83400065664 /* ContentFilters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentFilters.swift; sourceTree = "<group>"; };
@@ -2641,6 +2647,9 @@
 			isa = PBXGroup;
 			children = (
 				D7100C552B76F8E600C59298 /* PurpleViewPrimitives.swift */,
+				D7100C572B76FC8400C59298 /* MarketingContentView.swift */,
+				D7100C592B76FD5100C59298 /* LogoView.swift */,
+				D7100C5B2B77016700C59298 /* IAPProductStateView.swift */,
 			);
 			path = Detail;
 			sourceTree = "<group>";
@@ -3126,6 +3135,7 @@
 				4CCEB7AE29B53D260078AA28 /* SearchingEventView.swift in Sources */,
 				4CF0ABE929844AF100D66079 /* AnyCodable.swift in Sources */,
 				BA3759932ABCCEBA0018D73B /* CameraModel.swift in Sources */,
+				D7100C5A2B76FD5100C59298 /* LogoView.swift in Sources */,
 				4C0A3F8F280F640A000448DE /* ThreadModel.swift in Sources */,
 				4C3AC79F2833115300E1F516 /* FollowButtonView.swift in Sources */,
 				D7CB5D3B2B112FBB00AD4105 /* NotificationFormatter.swift in Sources */,
@@ -3179,6 +3189,7 @@
 				4C7D09782A0B0CC900943473 /* WalletModel.swift in Sources */,
 				4C1253522A76C6130004F4B8 /* ComposeNotify.swift in Sources */,
 				4C7D09662A0AE62100943473 /* AlbyButton.swift in Sources */,
+				D7100C582B76FC8400C59298 /* MarketingContentView.swift in Sources */,
 				4CAAD8AD298851D000060CEA /* AccountDeletion.swift in Sources */,
 				4CFF8F6329CC9AD7008DB934 /* ImageContextMenuModifier.swift in Sources */,
 				4C54AA0A29A55429003E4487 /* EventGroup.swift in Sources */,
@@ -3385,6 +3396,7 @@
 				3AA59D1D2999B0400061C48E /* DraftsModel.swift in Sources */,
 				3169CAED294FCCFC00EE4006 /* Constants.swift in Sources */,
 				4C9AA14A2A4587A6003F49FD /* NotificationStatusModel.swift in Sources */,
+				D7100C5C2B77016700C59298 /* IAPProductStateView.swift in Sources */,
 				4CB9D4A72992D02B00A9A7E4 /* ProfileNameView.swift in Sources */,
 				4CE4F0F429D779B5005914DB /* PostBox.swift in Sources */,
 				BA37598E2ABCCE500018D73B /* VideoCaptureProcessor.swift in Sources */,
