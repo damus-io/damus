@@ -28,7 +28,8 @@ struct DamusPurpleView: View, DamusPurpleStoreKitManagerDelegate {
     @State var purchased: PurchasedProduct? = nil
     @State var selection: DamusPurple.StoreKitManager.DamusPurpleType = .yearly
     @State var show_welcome_sheet: Bool = false
-    @State var show_manage_subscriptions = false
+    @State var account_uuid: UUID? = nil
+    @State var iap_error: String? = nil     // TODO: Display this error to the user in some way.
     @State private var shouldDismissView = false
     
     @Environment(\.dismiss) var dismiss
@@ -37,7 +38,6 @@ struct DamusPurpleView: View, DamusPurpleStoreKitManagerDelegate {
         self._products = State(wrappedValue: .loading)
         self.damus_state = damus_state
         self.keypair = damus_state.keypair
-        damus_state.purple.storekit_manager.delegate = self
     }
     
     // MARK: - Top level view
@@ -69,6 +69,10 @@ struct DamusPurpleView: View, DamusPurpleStoreKitManagerDelegate {
             notify(.display_tabbar(false))
             Task {
                 await self.load_account()
+                // Assign this view as the delegate for the storekit manager to receive purchase updates
+                damus_state.purple.storekit_manager.delegate = self
+                // Fetch the account UUID to use for IAP purchases and to check if an IAP purchase is associated with the account
+                self.account_uuid = try await damus_state.purple.get_maybe_cached_uuid_for_account()
             }
         }
         .onDisappear {
@@ -86,7 +90,6 @@ struct DamusPurpleView: View, DamusPurpleStoreKitManagerDelegate {
         }, content: {
             DamusPurpleNewUserOnboardingView(damus_state: damus_state)
         })
-        .manageSubscriptionsSheet(isPresented: $show_manage_subscriptions)
     }
     
     // MARK: - Complex subviews
@@ -100,7 +103,11 @@ struct DamusPurpleView: View, DamusPurpleStoreKitManagerDelegate {
                     ProgressView()
                         .progressViewStyle(.circular)
                 case .loaded(let account):
-                    DamusPurpleAccountView(damus_state: damus_state, account: account)
+                    Group {
+                        DamusPurpleAccountView(damus_state: damus_state, account: account)
+                        
+                        ProductStateView(account: account)
+                    }
                 case .no_account:
                     MarketingContent
                 case .error(let message):
@@ -119,18 +126,43 @@ struct DamusPurpleView: View, DamusPurpleStoreKitManagerDelegate {
             DamusPurpleView.MarketingContentView(purple: damus_state.purple)
             
             VStack(alignment: .center) {
-                ProductStateView
+                ProductStateView(account: nil)
             }
             .padding([.top], 20)
         }
     }
     
-    var ProductStateView: some View {
+    func ProductStateView(account: DamusPurple.Account?) -> some View {
         Group {
             if damus_state.purple.enable_purple_iap_support {
-                DamusPurpleView.IAPProductStateView(products: products, purchased: purchased, subscribe: subscribe)
+                if account?.active == true && purchased == nil {
+                    // Account active + no IAP purchases = Bought through Lightning.
+                    // Instruct the user to manage billing on the website
+                    ManageOnWebsiteNote
+                }
+                else {
+                    // If account is no longer active or was purchased via IAP, then show IAP purchase/manage options
+                    if let account_uuid {
+                        DamusPurpleView.IAPProductStateView(products: products, purchased: purchased, account_uuid: account_uuid, subscribe: subscribe)
+                    }
+                    else {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                    }
+                }
+                
+            }
+            else {
+                ManageOnWebsiteNote
             }
         }
+    }
+    
+    var ManageOnWebsiteNote: some View {
+        Text(NSLocalizedString("Visit the Damus website on a web browser to manage billing", comment: "Instruction on how to manage billing externally"))
+            .font(.caption)
+            .foregroundColor(.white.opacity(0.6))
+            .multilineTextAlignment(.center)
     }
     
     // MARK: - State management
@@ -167,31 +199,12 @@ struct DamusPurpleView: View, DamusPurpleStoreKitManagerDelegate {
     }
     
     func subscribe(_ product: Product) async throws {
-        let result = try await self.damus_state.purple.make_iap_purchase(product: product)
-        switch result {
-            case .success(.verified(let tx)):
-                print("success \(tx.debugDescription)")
-                show_welcome_sheet = true
-            case .success(.unverified(let tx, let res)):
-                print("success unverified \(tx.debugDescription) \(res.localizedDescription)")
-                show_welcome_sheet = true
-            case .pending:
-                break
-            case .userCancelled:
-                break
-            @unknown default:
-                break
+        do {
+            try await self.damus_state.purple.make_iap_purchase(product: product)
+            show_welcome_sheet = true
         }
-        
-        switch result {
-            case .success:
-                // TODO (will): why do this here?
-                //self.damus_state.purple.starred_profiles_cache[keypair.pubkey] = nil
-                Task {
-                    await self.damus_state.purple.send_receipt()
-                }
-            default:
-                break
+        catch(let error) {
+            self.iap_error = error.localizedDescription
         }
     }
 }

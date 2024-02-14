@@ -15,12 +15,15 @@ class DamusPurple: StoreObserverDelegate {
 
     @MainActor
     var account_cache: [Pubkey: Account]
+    @MainActor
+    var account_uuid_cache: [Pubkey: UUID]
 
     init(settings: UserSettingsStore, keypair: Keypair) {
         self.settings = settings
         self.keypair = keypair
         self.account_cache = [:]
-        self.storekit_manager = .init()
+        self.account_uuid_cache = [:]
+        self.storekit_manager = StoreKitManager.standard    // Use singleton to avoid losing local purchase data
     }
     
     // MARK: Functions
@@ -96,13 +99,35 @@ class DamusPurple: StoreObserverDelegate {
         throw PurpleError.error_processing_response
     }
     
-    func create_account(pubkey: Pubkey) async throws {
-        let url = environment.api_base_url().appendingPathComponent("accounts")
-        
-        Log.info("Creating account with Damus Purple server", for: .damus_purple)
-        
+    func make_iap_purchase(product: Product) async throws {
+        let account_uuid = try await self.get_maybe_cached_uuid_for_account()
+        let result = try await self.storekit_manager.purchase(product: product, id: account_uuid)
+        switch result {
+            case .success(.verified(let tx)):
+                // Record the purchase with the storekit manager, to make sure we have the update on the UIs as soon as possible.
+                // During testing I found that the purchase initiated via `purchase` was not emitted via the listener `StoreKit.Transaction.updates` until the app was restarted.
+                self.storekit_manager.record_purchased_product(StoreKitManager.PurchasedProduct(tx: tx, product: product))
+                // Send the receipt to the server
+                await self.send_receipt()
+            default:
+                // Any time we get a non-verified result, it means that the purchase was not successful, and thus we should throw an error.
+                throw PurpleError.iap_purchase_error(result: result)
+        }
+    }
+    
+    @MainActor
+    func get_maybe_cached_uuid_for_account() async throws -> UUID {
+        if let account_uuid = self.account_uuid_cache[self.keypair.pubkey] {
+            return account_uuid
+        }
+        return try await fetch_uuid_for_account()
+    }
+    
+    @MainActor
+    func fetch_uuid_for_account() async throws -> UUID {
+        let url = self.environment.api_base_url().appending(path: "/accounts/\(self.keypair.pubkey)/account-uuid")
         let (data, response) = try await make_nip98_authenticated_request(
-            method: .post,
+            method: .get,
             url: url,
             payload: nil,
             payload_type: nil,
@@ -112,22 +137,16 @@ class DamusPurple: StoreObserverDelegate {
         if let httpResponse = response as? HTTPURLResponse {
             switch httpResponse.statusCode {
                 case 200:
-                    Log.info("Created an account with Damus Purple server", for: .damus_purple)
+                    Log.info("Got user UUID from Damus Purple server", for: .damus_purple)
                 default:
-                    Log.error("Error in creating account with Damus Purple. HTTP status code: %d; Response: %s", for: .damus_purple, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
+                    Log.error("Error in getting user UUID with Damus Purple. HTTP status code: %d; Response: %s", for: .damus_purple, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
+                    throw PurpleError.http_response_error(status_code: httpResponse.statusCode, response: data)
             }
         }
         
-        return
-    }
-    
-    func create_account_if_not_existing(pubkey: Pubkey) async throws {
-        guard await !(self.account_exists(pubkey: pubkey) ?? false) else { return }
-        try await self.create_account(pubkey: pubkey)
-    }
-    
-    func make_iap_purchase(product: Product) async throws -> Product.PurchaseResult {
-        return try await self.storekit_manager.purchase(product: product)
+        let account_uuid_info = try JSONDecoder().decode(AccountUUIDInfo.self, from: data)
+        self.account_uuid_cache[self.keypair.pubkey] = account_uuid_info.account_uuid
+        return account_uuid_info.account_uuid
     }
     
     func send_receipt() async {
@@ -135,19 +154,22 @@ class DamusPurple: StoreObserverDelegate {
         if let appStoreReceiptURL = Bundle.main.appStoreReceiptURL,
             FileManager.default.fileExists(atPath: appStoreReceiptURL.path) {
 
-            try? await create_account_if_not_existing(pubkey: keypair.pubkey)
-
             do {
                 let receiptData = try Data(contentsOf: appStoreReceiptURL, options: .alwaysMapped)
-                let url = environment.api_base_url().appendingPathComponent("accounts/\(keypair.pubkey.hex())/app-store-receipt")
+                let receipt_base64_string = receiptData.base64EncodedString()
+                let account_uuid = try await self.get_maybe_cached_uuid_for_account()
+                let json_text: [String: String] = ["receipt": receipt_base64_string, "account_uuid": account_uuid.uuidString]
+                let json_data = try JSONSerialization.data(withJSONObject: json_text)
+                
+                let url = environment.api_base_url().appendingPathComponent("accounts/\(keypair.pubkey.hex())/apple-iap/app-store-receipt")
                 
                 Log.info("Sending in-app purchase receipt to Damus Purple server", for: .damus_purple)
                 
                 let (data, response) = try await make_nip98_authenticated_request(
                     method: .post,
                     url: url,
-                    payload: receiptData,
-                    payload_type: .binary,
+                    payload: json_data,
+                    payload_type: .json,
                     auth_keypair: self.keypair
                 )
                 
@@ -270,6 +292,10 @@ extension DamusPurple {
         let expiry: UInt64?
         let active: Bool
     }
+    
+    fileprivate struct AccountUUIDInfo: Codable {
+        let account_uuid: UUID
+    }
 }
 
 // MARK: Helper structures
@@ -279,6 +305,7 @@ extension DamusPurple {
         case translation_error(status_code: Int, response: Data)
         case http_response_error(status_code: Int, response: Data)
         case error_processing_response
+        case iap_purchase_error(result: Product.PurchaseResult)
         case translation_no_response
         case checkout_npub_verification_error
     }

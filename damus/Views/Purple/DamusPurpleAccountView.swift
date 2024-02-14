@@ -65,11 +65,6 @@ struct DamusPurpleAccountView: View {
             .preferredColorScheme(.dark)
             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             .padding()
-            
-            Text(NSLocalizedString("Visit the Damus website on a web browser to manage billing", comment: "Instruction on how to manage billing externally"))
-                .font(.caption)
-                .foregroundColor(.white.opacity(0.6))
-                .multilineTextAlignment(.center)
         }
     }
     

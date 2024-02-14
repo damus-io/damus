@@ -12,11 +12,15 @@ import StoreKit
 
 extension DamusPurpleView {
     typealias PurchasedProduct = DamusPurple.StoreKitManager.PurchasedProduct
+    static let SHOW_IAP_DEBUG_INFO = false
     
     struct IAPProductStateView: View {
-        let products: ProductState
-        let purchased: PurchasedProduct?
+        var products: ProductState
+        var purchased: PurchasedProduct?
+        let account_uuid: UUID
         let subscribe: (Product) async throws -> Void
+        
+        @State var show_manage_subscriptions = false
         
         var body: some View {
             switch self.products {
@@ -35,29 +39,63 @@ extension DamusPurpleView {
         }
         
         func PurchasedView(_ purchased: PurchasedProduct) -> some View {
-            VStack(spacing: 10) {
-                Text(NSLocalizedString("Purchased!", comment: "User purchased a subscription"))
-                    .font(.title2)
-                    .foregroundColor(.white)
-                price_description(product: purchased.product)
-                    .foregroundColor(.white)
-                    .opacity(0.65)
-                    .frame(width: 200)
-                Text(NSLocalizedString("Purchased on", comment: "Indicating when the user purchased the subscription"))
-                    .font(.title2)
-                    .foregroundColor(.white)
-                Text(format_date(date: purchased.tx.purchaseDate))
-                    .foregroundColor(.white)
-                    .opacity(0.65)
-                if let expiry = purchased.tx.expirationDate {
-                    Text(NSLocalizedString("Renews on", comment: "Indicating when the subscription will renew"))
-                        .font(.title2)
-                        .foregroundColor(.white)
-                    Text(format_date(date: expiry))
-                        .foregroundColor(.white)
-                        .opacity(0.65)
+            return Group {
+                if self.account_uuid == purchased.tx.appAccountToken {
+                    // If the In-app purchase is registered to this account, show options to manage the subscription
+                    PurchasedManageView(purchased)
+                }
+                else {
+                    // If the In-app purchase is registered to a different account, we cannot manage the subscription
+                    // This seems to be a limitation of StoreKit where we can only have one renewable subscription for a product at a time.
+                    // Therefore, instruct the user about this limitation, or to contact us if they believe this is a mistake.
+                    PurchasedUnmanageableView(purchased)
                 }
             }
+        }
+        
+        func PurchasedUnmanageableView(_ purchased: PurchasedProduct) -> some View {
+            Text(NSLocalizedString("This device's in-app purchase is registered to a different Nostr account. Unable to manage this Purple account. If you believe this was a mistake, please contact us via support@damus.io.", comment: "Notice label that user cannot manage their In-App purchases"))
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.6))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+        }
+        
+        func PurchasedManageView(_ purchased: PurchasedProduct) -> some View {
+            VStack(spacing: 10) {
+                if SHOW_IAP_DEBUG_INFO == true {
+                    Text(NSLocalizedString("Purchased!", comment: "User purchased a subscription"))
+                        .font(.title2)
+                        .foregroundColor(.white)
+                    price_description(product: purchased.product)
+                        .foregroundColor(.white)
+                        .opacity(0.65)
+                        .frame(width: 200)
+                    Text(NSLocalizedString("Purchased on", comment: "Indicating when the user purchased the subscription"))
+                        .font(.title2)
+                        .foregroundColor(.white)
+                    Text(format_date(date: purchased.tx.purchaseDate))
+                        .foregroundColor(.white)
+                        .opacity(0.65)
+                    if let expiry = purchased.tx.expirationDate {
+                        Text(NSLocalizedString("Renews on", comment: "Indicating when the subscription will renew"))
+                            .font(.title2)
+                            .foregroundColor(.white)
+                        Text(format_date(date: expiry))
+                            .foregroundColor(.white)
+                            .opacity(0.65)
+                    }
+                }
+                Button(action: {
+                    show_manage_subscriptions = true
+                }, label: {
+                    Text(NSLocalizedString("Manage", comment: "Manage the damus subscription"))
+                        .padding(.horizontal, 20)
+                })
+                .buttonStyle(GradientButtonStyle())
+            }
+            .manageSubscriptionsSheet(isPresented: $show_manage_subscriptions)
+            .padding()
         }
         
         func ProductsView(_ products: [Product]) -> some View {
@@ -80,7 +118,7 @@ extension DamusPurpleView {
                     .buttonStyle(GradientButtonStyle())
                 }
             }
-            .padding(.horizontal, 20)
+            .padding()
         }
         
         func price_description(product: Product) -> some View {
@@ -124,5 +162,5 @@ extension DamusPurpleView {
 }
 
 #Preview {
-    DamusPurpleView.IAPProductStateView(products: .loaded([]), purchased: nil, subscribe: {_ in })
+    DamusPurpleView.IAPProductStateView(products: .loaded([]), purchased: nil, account_uuid: UUID(), subscribe: {_ in })
 }
