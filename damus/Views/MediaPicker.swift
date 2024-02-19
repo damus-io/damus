@@ -9,7 +9,7 @@ import UIKit
 import SwiftUI
 import PhotosUI
 
-struct ImagePicker: UIViewControllerRepresentable {
+struct MediaPicker: UIViewControllerRepresentable {
 
     @Environment(\.presentationMode)
     @Binding private var presentationMode
@@ -19,9 +19,9 @@ struct ImagePicker: UIViewControllerRepresentable {
     let onMediaPicked: (MediaUpload) -> Void
 
     final class Coordinator: NSObject, PHPickerViewControllerDelegate {
-        let parent: ImagePicker
+        let parent: MediaPicker
 
-        init(_ parent: ImagePicker) {
+        init(_ parent: MediaPicker) {
             self.parent = parent
         }
         
