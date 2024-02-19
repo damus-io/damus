@@ -211,3 +211,31 @@ func process_image_metadatas(cache: EventCache, ev: NostrEvent) {
     }
 }
 
+func removeGPSDataFromImage(fromImageURL imageURL: URL) -> Bool {
+    guard let source = CGImageSourceCreateWithURL(imageURL as CFURL, nil) else {
+        print("Failed to create image source.")
+        return false
+    }
+    let data = NSMutableData()
+    guard let type = CGImageSourceGetType(source),
+          let destination = CGImageDestinationCreateWithData(data, type, 1, nil) else {
+        print("Failed to create image destination.")
+        return false
+    }
+    
+    let removeGPSProperties: CFDictionary = [kCGImagePropertyGPSDictionary as String: kCFNull] as CFDictionary
+    
+    CGImageDestinationAddImageFromSource(destination, source, 0, removeGPSProperties)
+    if CGImageDestinationFinalize(destination) {
+        do {
+            try data.write(to: imageURL, options: .atomic)
+            return true
+        } catch {
+            print("Failed to write image data: \(error)")
+            return false
+        }
+    } else {
+        print("Failed to finalize image destination.")
+        return false
+    }
+}
