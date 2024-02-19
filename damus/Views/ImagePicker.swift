@@ -7,61 +7,52 @@
 
 import UIKit
 import SwiftUI
+import PhotosUI
 
 struct ImagePicker: UIViewControllerRepresentable {
 
     @Environment(\.presentationMode)
-    private var presentationMode
+    @Binding private var presentationMode
 
-    let uploader: MediaUploader
-    let sourceType: UIImagePickerController.SourceType
-    let pubkey: Pubkey
     @Binding var image_upload_confirm: Bool
     var imagesOnly: Bool = false
-    let onImagePicked: (URL) -> Void
-    let onVideoPicked: (URL) -> Void
+    let onMediaPicked: (MediaUpload) -> Void
 
-    final class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
-        @Binding private var presentationMode: PresentationMode
-        private let onImagePicked: (URL) -> Void
-        private let onVideoPicked: (URL) -> Void
-        @Binding var image_upload_confirm: Bool
+    final class Coordinator: NSObject, PHPickerViewControllerDelegate {
+        let parent: ImagePicker
 
-        init(presentationMode: Binding<PresentationMode>,
-             onImagePicked: @escaping (URL) -> Void,
-             onVideoPicked: @escaping (URL) -> Void,
-             image_upload_confirm: Binding<Bool>) {
-            _presentationMode = presentationMode
-            self.onImagePicked = onImagePicked
-            self.onVideoPicked = onVideoPicked
-            self._image_upload_confirm = image_upload_confirm
+        init(_ parent: ImagePicker) {
+            self.parent = parent
         }
         
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            if let videoURL = info[UIImagePickerController.InfoKey.mediaURL] as? URL {
-                // Handle the selected video
-                onVideoPicked(videoURL)
-            } else if let imageURL = info[UIImagePickerController.InfoKey.imageURL] as? URL {
-                // Handle the selected image
-                onImagePicked(imageURL)
-            } else if let cameraImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-                let orientedImage = cameraImage.fixOrientation()
-                if let imageURL = saveImageToTemporaryFolder(image: orientedImage, imageType: "jpeg") {
-                    onImagePicked(imageURL)
-                }
-            } else if let editedImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage {
-                let orientedImage = editedImage.fixOrientation()
-                if let editedImageURL = saveImageToTemporaryFolder(image: orientedImage, imageType: "jpeg") {
-                    onImagePicked(editedImageURL)
+        func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+            if results.isEmpty {
+                self.parent.presentationMode.dismiss()
+            }
+            
+            for result in results {
+                if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
+                    result.itemProvider.loadObject(ofClass: UIImage.self) { (image, error) in
+                        guard let image = image as? UIImage, error == nil else { return }
+                        let fixedImage = image.fixOrientation()
+                        
+                        if let savedURL = self.saveImageToTemporaryFolder(image: fixedImage) {
+                            self.parent.onMediaPicked(.image(savedURL))
+                            self.parent.image_upload_confirm = true
+                        }
+                    }
+                } else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) {
+                    result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier) { (url, error) in
+                        guard let url, error == nil else { return }
+
+                        guard let url = self.saveVideoToTemporaryFolder(videoURL: url) else { return }
+                        self.parent.onMediaPicked(.video(url))
+                        self.parent.image_upload_confirm = true
+                    }
                 }
             }
-            image_upload_confirm = true
         }
 
-        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            presentationMode.dismiss()
-        }
-        
         func saveImageToTemporaryFolder(image: UIImage, imageType: String = "png") -> URL? {
             // Convert UIImage to Data
             let imageData: Data?
@@ -90,34 +81,38 @@ struct ImagePicker: UIViewControllerRepresentable {
                 return nil
             }
         }
+        
+        func saveVideoToTemporaryFolder(videoURL: URL) -> URL? {
+            let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+            let fileExtension = videoURL.pathExtension
+            let uniqueFileName = UUID().uuidString + (fileExtension.isEmpty ? "" : ".\(fileExtension)")
+            let destinationURL = temporaryDirectoryURL.appendingPathComponent(uniqueFileName)
+            
+            do {
+                try FileManager.default.copyItem(at: videoURL, to: destinationURL)
+                return destinationURL
+            } catch {
+                print("Error copying file: \(error.localizedDescription)")
+                return nil
+            }
+        }
     }
     
     func makeCoordinator() -> Coordinator {
-        return Coordinator(presentationMode: presentationMode,
-                           onImagePicked: { url in
-            // Handle the selected image URL
-            onImagePicked(url)
-        },
-                           onVideoPicked: { videoURL in
-            // Handle the selected video URL
-            onVideoPicked(videoURL)
-        }, image_upload_confirm: $image_upload_confirm)
-    }
-
-    func makeUIViewController(context: UIViewControllerRepresentableContext<ImagePicker>) -> UIImagePickerController {
-        let picker = UIImagePickerController()
-        picker.sourceType = sourceType
-        picker.mediaTypes = ["public.image", "com.compuserve.gif"]
-        if uploader.supportsVideo && !imagesOnly {
-            picker.mediaTypes.append("public.movie")
+            Coordinator(self)
         }
-        picker.delegate = context.coordinator
+    
+    func makeUIViewController(context: Context) -> PHPickerViewController {
+        var configuration = PHPickerConfiguration(photoLibrary: .shared())
+        configuration.selectionLimit = 1
+        configuration.filter = imagesOnly ? .images : .any(of: [.images, .videos])
+        
+        let picker = PHPickerViewController(configuration: configuration)
+        picker.delegate = context.coordinator as any PHPickerViewControllerDelegate
         return picker
     }
 
-    func updateUIViewController(_ uiViewController: UIImagePickerController,
-                                context: UIViewControllerRepresentableContext<ImagePicker>) {
-
+    func updateUIViewController(_ uiViewController: PHPickerViewController, context: Context) {
     }
 }
 

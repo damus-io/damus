@@ -420,10 +420,8 @@ struct PostView: View {
             }
             .background(DamusColors.adaptableWhite.edgesIgnoringSafeArea(.all))
             .sheet(isPresented: $attach_media) {
-                ImagePicker(uploader: damus_state.settings.default_media_uploader, sourceType: .photoLibrary, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
-                    self.mediaToUpload = .image(img)
-                } onVideoPicked: { url in
-                    self.mediaToUpload = .video(url)
+                ImagePicker(image_upload_confirm: $image_upload_confirm) { media in
+                    self.mediaToUpload = media
                 }
                 .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $image_upload_confirm) {
                     Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
@@ -436,20 +434,9 @@ struct PostView: View {
                 }
             }
             .sheet(isPresented: $attach_camera) {
-                
-                ImagePicker(uploader: damus_state.settings.default_media_uploader, sourceType: .camera, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
-                    self.mediaToUpload = .image(img)
-                } onVideoPicked: { url in
-                    self.mediaToUpload = .video(url)
-                }
-                .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $image_upload_confirm) {
-                    Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
-                        if let mediaToUpload {
-                            self.handle_upload(media: mediaToUpload)
-                            self.attach_camera = false
-                        }
-                    }
-                    Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
+                CameraController(uploader: damus_state.settings.default_media_uploader) {
+                    self.attach_camera = false
+                    self.attach_media = true
                 }
             }
             .onAppear() {

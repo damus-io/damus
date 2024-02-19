@@ -61,10 +61,8 @@ struct EditPictureControl: View {
         }
         .sheet(isPresented: $show_camera) {
             
-            ImagePicker(uploader: uploader, sourceType: .camera, pubkey: pubkey, image_upload_confirm: $image_upload_confirm, imagesOnly: true) { img in
-                self.mediaToUpload = .image(img)
-            } onVideoPicked: { url in
-                print("Cannot upload videos as profile image")
+            ImagePicker(image_upload_confirm: $image_upload_confirm, imagesOnly: true) { media in
+                self.mediaToUpload = media
             }
             .alert(NSLocalizedString("Are you sure you want to upload this image?", comment: "Alert message asking if the user wants to upload an image."), isPresented: $image_upload_confirm) {
                 Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
@@ -77,11 +75,12 @@ struct EditPictureControl: View {
             }
         }
         .sheet(isPresented: $show_library) {
-            ImagePicker(uploader: uploader, sourceType: .photoLibrary, pubkey: pubkey, image_upload_confirm: $image_upload_confirm, imagesOnly: true) { img in
-                self.mediaToUpload = .image(img)
-
-            } onVideoPicked: { url in
-                print("Cannot upload videos as profile image")
+            ImagePicker(image_upload_confirm: $image_upload_confirm, imagesOnly: true) { media in
+                if case .image = media {
+                    self.mediaToUpload = media
+                } else {
+                    print("Cannot upload videos as profile image")
+                }
             }
             .alert(NSLocalizedString("Are you sure you want to upload this image?", comment: "Alert message asking if the user wants to upload an image."), isPresented: $image_upload_confirm) {
                 Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
