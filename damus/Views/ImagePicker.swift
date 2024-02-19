@@ -36,7 +36,8 @@ struct ImagePicker: UIViewControllerRepresentable {
                         guard let image = image as? UIImage, error == nil else { return }
                         let fixedImage = image.fixOrientation()
                         
-                        if let savedURL = self.saveImageToTemporaryFolder(image: fixedImage) {
+                        if let savedURL = self.saveImageToTemporaryFolder(image: fixedImage),
+                           removeGPSDataFromImage(fromImageURL: savedURL) {
                             self.parent.onMediaPicked(.image(savedURL))
                             self.parent.image_upload_confirm = true
                         }
