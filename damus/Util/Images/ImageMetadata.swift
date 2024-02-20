@@ -211,21 +211,40 @@ func process_image_metadatas(cache: EventCache, ev: NostrEvent) {
     }
 }
 
+func canGetSourceTypeFromUrl(url: URL) -> Bool {
+    guard let source = CGImageSourceCreateWithURL(url as CFURL, nil) else {
+        print("Failed to create image source.")
+        return false
+    }
+    return CGImageSourceGetType(source) != nil
+}
+
 func removeGPSDataFromImage(fromImageURL imageURL: URL) -> Bool {
     guard let source = CGImageSourceCreateWithURL(imageURL as CFURL, nil) else {
         print("Failed to create image source.")
         return false
     }
     let data = NSMutableData()
+    
+    let totalCount = CGImageSourceGetCount(source)
+
+    guard totalCount > 0 else {
+        print("No images found.")
+        return false
+    }
+
     guard let type = CGImageSourceGetType(source),
-          let destination = CGImageDestinationCreateWithData(data, type, 1, nil) else {
+          let destination = CGImageDestinationCreateWithData(data, type, totalCount, nil) else {
         print("Failed to create image destination.")
         return false
     }
     
     let removeGPSProperties: CFDictionary = [kCGImagePropertyGPSDictionary as String: kCFNull] as CFDictionary
     
-    CGImageDestinationAddImageFromSource(destination, source, 0, removeGPSProperties)
+    for i in 0...totalCount {
+        CGImageDestinationAddImageFromSource(destination, source, i, removeGPSProperties)
+    }
+    
     if CGImageDestinationFinalize(destination) {
         do {
             try data.write(to: imageURL, options: .atomic)

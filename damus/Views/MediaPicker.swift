@@ -32,14 +32,24 @@ struct MediaPicker: UIViewControllerRepresentable {
             
             for result in results {
                 if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
-                    result.itemProvider.loadObject(ofClass: UIImage.self) { (image, error) in
-                        guard let image = image as? UIImage, error == nil else { return }
-                        let fixedImage = image.fixOrientation()
+                    result.itemProvider.loadItem(forTypeIdentifier: UTType.image.identifier, options: nil) { (item, error) in
+                        guard let url = item as? URL else { return }
                         
-                        if let savedURL = self.saveImageToTemporaryFolder(image: fixedImage),
-                           removeGPSDataFromImage(fromImageURL: savedURL) {
-                            self.parent.onMediaPicked(.image(savedURL))
-                            self.parent.image_upload_confirm = true
+                        if canGetSourceTypeFromUrl(url: url) {
+                            // Media was not taken from camera
+                            if let savedURL = self.saveImageToTemporaryFolder(from: url) {
+                                self.chooseImage(url: savedURL)
+                            }
+                        } else {
+                            // Media was taken from camera
+                            result.itemProvider.loadObject(ofClass: UIImage.self) { (image, error) in
+                                guard let image = image as? UIImage, error == nil else { return }
+                                let fixedImage = image.fixOrientation()
+                                
+                                if let savedURL = self.saveImageToTemporaryFolder(image: fixedImage) {
+                                    self.chooseImage(url: savedURL)
+                                }
+                            }
                         }
                     }
                 } else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) {
@@ -52,6 +62,23 @@ struct MediaPicker: UIViewControllerRepresentable {
                     }
                 }
             }
+        }
+        
+        func chooseImage(url: URL) {
+            if removeGPSDataFromImage(fromImageURL: url) {
+                self.parent.onMediaPicked(.image(url))
+                self.parent.image_upload_confirm = true
+            }
+        }
+        
+        func saveImageToTemporaryFolder(from imageUrl: URL) -> URL? {
+            let fileExtension = imageUrl.pathExtension
+            guard let imageData = try? Data(contentsOf: imageUrl) else {
+                print("Failed to load image data from URL.")
+                return nil
+            }
+            
+            return saveImageToTemporaryFolder(imageData: imageData, imageType: fileExtension)
         }
 
         func saveImageToTemporaryFolder(image: UIImage, imageType: String = "png") -> URL? {
@@ -68,6 +95,10 @@ struct MediaPicker: UIViewControllerRepresentable {
                 return nil
             }
             
+            return saveImageToTemporaryFolder(imageData: data, imageType: imageType)
+        }
+        
+        private func saveImageToTemporaryFolder(imageData: Data, imageType: String) -> URL? {
             // Generate a temporary URL with a unique filename
             let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
             let uniqueImageName = "\(UUID().uuidString).\(imageType)"
@@ -75,7 +106,7 @@ struct MediaPicker: UIViewControllerRepresentable {
             
             // Save the image data to the temporary URL
             do {
-                try data.write(to: temporaryImageURL)
+                try imageData.write(to: temporaryImageURL)
                 return temporaryImageURL
             } catch {
                 print("Error saving image data to temporary URL: \(error.localizedDescription)")
