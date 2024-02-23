@@ -21,20 +21,32 @@ extension DamusPurpleView {
         let subscribe: (Product) async throws -> Void
         
         @State var show_manage_subscriptions = false
+        @State var subscription_purchase_loading = false
         
         var body: some View {
-            switch self.products {
-                case .failed:
-                    PurpleViewPrimitives.ProductLoadErrorView()
-                case .loaded(let products):
-                    if let purchased {
-                        PurchasedView(purchased)
-                    } else {
-                        ProductsView(products)
-                    }
-                case .loading:
+            if subscription_purchase_loading {
+                HStack(spacing: 10) {
+                    Text(NSLocalizedString("Purchasing", comment: "Loading label indicating the purchase action is in progress"))
+                        .foregroundStyle(.white)
                     ProgressView()
                         .progressViewStyle(.circular)
+                        .tint(.white)
+                }
+            }
+            else {
+                switch self.products {
+                    case .failed:
+                        PurpleViewPrimitives.ProductLoadErrorView()
+                    case .loaded(let products):
+                        if let purchased {
+                            PurchasedView(purchased)
+                        } else {
+                            ProductsView(products)
+                        }
+                    case .loading:
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                }
             }
         }
         
@@ -107,7 +119,9 @@ extension DamusPurpleView {
                     Button(action: {
                         Task { @MainActor in
                             do {
+                                subscription_purchase_loading = true
                                 try await subscribe(product)
+                                subscription_purchase_loading = false
                             } catch {
                                 print(error.localizedDescription)
                             }
