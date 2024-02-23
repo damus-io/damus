@@ -47,6 +47,7 @@ struct DamusPurpleVerifyNpubView: View {
                         Button(action: {
                             Task {
                                 try await damus_state.purple.verify_npub_for_checkout(checkout_id: checkout_id)
+                                damus_state.purple.checkout_ids_in_progress.insert(checkout_id)
                                 verified = true
                             }
                         }, label: {
