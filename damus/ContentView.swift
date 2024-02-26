@@ -29,6 +29,7 @@ enum Sheets: Identifiable {
     case user_status
     case onboardingSuggestions
     case purple(DamusPurpleURL)
+    case purple_onboarding
     
     static func zap(target: ZapTarget, lnurl: String) -> Sheets {
         return .zap(ZapSheet(target: target, lnurl: lnurl))
@@ -50,6 +51,7 @@ enum Sheets: Identifiable {
         case .filter: return "filter"
         case .onboardingSuggestions: return "onboarding-suggestions"
         case .purple(let purple_url): return "purple" + purple_url.url_string()
+        case .purple_onboarding: return "purple_onboarding"
         }
     }
 }
@@ -334,6 +336,8 @@ struct ContentView: View {
                 OnboardingSuggestionsView(model: SuggestedUsersViewModel(damus_state: damus_state!))
             case .purple(let purple_url):
                 DamusPurpleURLSheetView(damus_state: damus_state!, purple_url: purple_url)
+            case .purple_onboarding:
+                DamusPurpleNewUserOnboardingView(damus_state: damus_state)
             }
         }
         .onOpenURL { url in
@@ -343,12 +347,26 @@ struct ContentView: View {
                 }
                 
                 switch res {
-                case .filter(let filt): self.open_search(filt: filt)
-                case .profile(let pk):  self.open_profile(pubkey: pk)
-                case .event(let ev):    self.open_event(ev: ev)
-                case .wallet_connect(let nwc): self.open_wallet(nwc: nwc)
-                case .script(let data): self.open_script(data)
-                case .purple(let purple_url): self.active_sheet = .purple(purple_url)
+                    case .filter(let filt): self.open_search(filt: filt)
+                    case .profile(let pk):  self.open_profile(pubkey: pk)
+                    case .event(let ev):    self.open_event(ev: ev)
+                    case .wallet_connect(let nwc): self.open_wallet(nwc: nwc)
+                    case .script(let data): self.open_script(data)
+                    case .purple(let purple_url):
+                        if case let .welcome(checkout_id) = purple_url.variant {
+                            // If this is a welcome link, do the following before showing the onboarding screen:
+                            // 1. Check if this is legitimate and good to go.
+                            // 2. Mark as complete if this is good to go.
+                            Task {
+                                let is_good_to_go = try? await damus_state.purple.check_and_mark_ln_checkout_is_good_to_go(checkout_id: checkout_id)
+                                if is_good_to_go == true {
+                                    self.active_sheet = .purple(purple_url)
+                                }
+                            }
+                        }
+                        else {
+                            self.active_sheet = .purple(purple_url)
+                        }
                 }
             }
         }
@@ -467,6 +485,21 @@ struct ContentView: View {
                 print("txn: NOSTRDB REOPENED")
             } else {
                 print("txn: NOSTRDB FAILED TO REOPEN closed:\(damus_state.ndb.is_closed)")
+            }
+            if damus_state.purple.checkout_ids_in_progress.count > 0 {
+                // For extra assurance, run this after one second, to avoid race conditions if the app is also handling a damus purple welcome url.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    Task {
+                        // TODO: Improve UX for renewals (#2013)
+                        let freshly_completed_checkout_ids = try? await damus_state.purple.check_status_of_checkouts_in_progress()
+                        let there_is_a_completed_checkout: Bool = (freshly_completed_checkout_ids?.count ?? 0) > 0
+                        let account_info = try await damus_state.purple.fetch_account(pubkey: self.keypair.pubkey)
+                        if there_is_a_completed_checkout == true && account_info?.active == true {
+                            // Show welcome sheet
+                            self.active_sheet = .purple_onboarding
+                        }
+                    }
+                }
             }
         }
         .onChange(of: scenePhase) { (phase: ScenePhase) in

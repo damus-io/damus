@@ -12,6 +12,7 @@ class DamusPurple: StoreObserverDelegate {
     let settings: UserSettingsStore
     let keypair: Keypair
     var storekit_manager: StoreKitManager
+    var checkout_ids_in_progress: Set<String> = []
 
     @MainActor
     var account_cache: [Pubkey: Account]
@@ -243,6 +244,65 @@ class DamusPurple: StoreObserverDelegate {
         
     }
     
+    @MainActor
+    func fetch_ln_checkout_object(checkout_id: String) async throws -> LNCheckoutInfo? {
+        let url = environment.api_base_url().appendingPathComponent("ln-checkout/\(checkout_id)")
+        
+        let (data, response) = try await make_nip98_authenticated_request(
+            method: .get,
+            url: url,
+            payload: nil,
+            payload_type: nil,
+            auth_keypair: self.keypair
+        )
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            switch httpResponse.statusCode {
+                case 200:
+                    return try JSONDecoder().decode(LNCheckoutInfo.self, from: data)
+                case 404:
+                    return nil
+                default:
+                    throw PurpleError.http_response_error(status_code: httpResponse.statusCode, response: data)
+            }
+        }
+        throw PurpleError.error_processing_response
+    }
+    
+    @MainActor
+    /// This function checks the status of all checkout objects in progress with the server, and it does two things:
+    /// - It returns the ones that were freshly completed
+    /// - It internally marks them as "completed"
+    /// Important note: If you call this function, you must use the result, as those checkouts will not be returned the next time you call this function
+    ///
+    /// - Returns: An array of checkout objects that have been successfully completed.
+    func check_status_of_checkouts_in_progress() async throws -> [String] {
+        var freshly_completed_checkouts: [String] = []
+        for checkout_id in self.checkout_ids_in_progress {
+            let checkout_info = try await self.fetch_ln_checkout_object(checkout_id: checkout_id)
+            if checkout_info?.is_all_good() == true {
+                freshly_completed_checkouts.append(checkout_id)
+            }
+            if checkout_info?.completed == true {
+                self.checkout_ids_in_progress.remove(checkout_id)
+            }
+        }
+        return freshly_completed_checkouts
+    }
+    
+    @MainActor
+    /// This function checks the status of a specific checkout id with the server
+    /// You should use this result immediately, since it will internally be marked as handled
+    ///
+    /// - Returns: true if this checkout is all good to go. false if not. nil if checkout was not found.
+    func check_and_mark_ln_checkout_is_good_to_go(checkout_id: String) async throws -> Bool? {
+        let checkout_info = try await self.fetch_ln_checkout_object(checkout_id: checkout_id)
+        if checkout_info?.completed == true {
+            self.checkout_ids_in_progress.remove(checkout_id)    // Remove if from the list of checkouts in progress
+        }
+        return checkout_info?.is_all_good()
+    }
+    
     struct Account {
         let pubkey: Pubkey
         let created_at: Date
@@ -291,6 +351,44 @@ extension DamusPurple {
         let created_at: UInt64
         let expiry: UInt64?
         let active: Bool
+    }
+    
+    struct LNCheckoutInfo: Codable {
+        // Note: Swift will decode a JSON full of extra fields into a Struct with only a subset of them, but not the other way around
+        // Therefore, to avoid compatibility concerns and complexity, we should only use the fields we need
+        // The ones we do not need yet will be left commented out until we need them.
+        let id: UUID
+        /*
+        let product_template_name: String
+        let verified_pubkey: String?
+        */
+        let invoice: Invoice?
+        let completed: Bool
+        
+        
+        struct Invoice: Codable {
+            /*
+            let bolt11: String
+            let label: String
+            let connection_params: ConnectionParams
+            */
+            let paid: Bool?
+            
+            /*
+            struct ConnectionParams: Codable {
+                let nodeid: String
+                let address: String
+                let rune: String
+            }
+            */
+        }
+        
+        /// Indicates whether this checkout is all good to go.
+        /// The checkout is good to go if it is marked as complete and the invoice has been successfully paid
+        /// - Returns: true if this checkout is all good to go. false otherwise
+        func is_all_good() -> Bool {
+            return self.completed == true && self.invoice?.paid == true
+        }
     }
     
     fileprivate struct AccountUUIDInfo: Codable {
