@@ -100,6 +100,14 @@ class NdbNote: Encodable, Equatable, Hashable {
     var id: NoteId {
         .init(Data(bytes: ndb_note_id(note), count: 32))
     }
+    
+    var raw_note_id: UnsafeMutablePointer<UInt8> {
+        ndb_note_id(note.ptr)
+    }
+
+    func id_matches(other: NdbNote) -> Bool {
+        memcmp(self.raw_note_id, other.raw_note_id, 32) == 0
+    }
 
     var sig: Signature {
         .init(Data(bytes: ndb_note_sig(note), count: 64))
