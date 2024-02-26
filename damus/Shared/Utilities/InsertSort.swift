@@ -59,7 +59,7 @@ func insert_uniq_sorted_event(events: inout [NostrEvent], new_ev: NostrEvent, cm
     
     for event in events {
         // don't insert duplicate events
-        if new_ev.id == event.id {
+        if new_ev.id_matches(other: event) {
             return false
         }
         
