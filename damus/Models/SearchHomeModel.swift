@@ -35,7 +35,7 @@ class SearchHomeModel: ObservableObject {
     }
     
     func filter_muted() {
-        events.filter { should_show_event(keypair: damus_state.keypair, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: $0) }
+        events.filter { should_show_event(state: damus_state, ev: $0) }
         self.objectWillChange.send()
     }
     
@@ -60,7 +60,7 @@ class SearchHomeModel: ObservableObject {
             guard sub_id == self.base_subid || sub_id == self.profiles_subid else {
                 return
             }
-            if ev.is_textlike && should_show_event(keypair: damus_state.keypair, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: ev) && !ev.is_reply(damus_state.keypair)
+            if ev.is_textlike && should_show_event(state: damus_state, ev: ev) && !ev.is_reply(damus_state.keypair)
             {
                 if !damus_state.settings.multiple_events_per_pubkey && seen_pubkey.contains(ev.pubkey) {
                     return

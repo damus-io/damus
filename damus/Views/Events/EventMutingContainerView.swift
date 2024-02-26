@@ -9,20 +9,25 @@ import SwiftUI
 
 /// A container view that shows or hides provided content based on whether the given event should be muted or not, with built-in user controls to show or hide content, and an option to customize the muted box
 struct EventMutingContainerView<Content: View>: View {
-    typealias MuteBoxViewClosure = ((_ shown: Binding<Bool>) -> AnyView)
-    
+    typealias MuteBoxViewClosure = ((_ shown: Binding<Bool>, _ mutedReason: MuteItem?) -> AnyView)
+
     let damus_state: DamusState
     let event: NostrEvent
     let content: Content
     var customMuteBox: MuteBoxViewClosure?
     
+    /// Represents if the note itself should be shown.
+    ///
+    /// By default this is the same as `should_show_event`. However, if the user taps the button to manually show a muted note, this can become out of sync with `should_show_event`.
     @State var shown: Bool
-    
+
+    @State var muted_reason: MuteItem?
+
     init(damus_state: DamusState, event: NostrEvent, @ViewBuilder content: () -> Content) {
         self.damus_state = damus_state
         self.event = event
         self.content = content()
-        self._shown = State(initialValue: should_show_event(keypair: damus_state.keypair, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: event))
+        self._shown = State(initialValue: should_show_event(state: damus_state, ev: event))
     }
     
     init(damus_state: DamusState, event: NostrEvent, muteBox: @escaping MuteBoxViewClosure, @ViewBuilder content: () -> Content) {
@@ -31,17 +36,17 @@ struct EventMutingContainerView<Content: View>: View {
     }
     
     var should_mute: Bool {
-        return !should_show_event(keypair: damus_state.keypair, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: event)
+        return !should_show_event(state: damus_state, ev: event)
     }
     
     var body: some View {
         Group {
             if should_mute {
                 if let customMuteBox {
-                    customMuteBox($shown)
+                    customMuteBox($shown, muted_reason)
                 }
                 else {
-                    EventMutedBoxView(shown: $shown)
+                    EventMutedBoxView(shown: $shown, reason: muted_reason)
                 }
             }
             if shown {
@@ -49,13 +54,16 @@ struct EventMutingContainerView<Content: View>: View {
             }
         }
         .onReceive(handle_notify(.new_mutes)) { mutes in
-            if mutes.contains(event.pubkey) {
+            let new_muted_event_reason = damus_state.mutelist_manager.event_muted_reason(event)
+            if new_muted_event_reason != nil {
                 shown = false
+                muted_reason = new_muted_event_reason
             }
         }
         .onReceive(handle_notify(.new_unmutes)) { unmutes in
-            if unmutes.contains(event.pubkey) {
+            if damus_state.mutelist_manager.event_muted_reason(event) != nil {
                 shown = true
+                muted_reason = nil
             }
         }
     }
@@ -64,16 +72,21 @@ struct EventMutingContainerView<Content: View>: View {
 /// A box that instructs the user about a content that has been muted.
 struct EventMutedBoxView: View {
     @Binding var shown: Bool
-    
+    var reason: MuteItem?
+
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 20)
                 .foregroundColor(DamusColors.adaptableGrey)
             
             HStack {
-                Text("Note from a user you've muted", comment: "Text to indicate that what is being shown is a note from a user who has been muted.")
+                if let reason {
+                    Text("Note from a \(reason.title) you've muted", comment: "Text to indicate that what is being shown is a note which has been muted.")
+                } else {
+                    Text("Note you've muted", comment: "Text to indicate that what is being shown is a note which has been muted.")
+                }
                 Spacer()
-                Button(shown ? NSLocalizedString("Hide", comment: "Button to hide a note from a user who has been muted.") : NSLocalizedString("Show", comment: "Button to show a note from a user who has been muted.")) {
+                Button(shown ? NSLocalizedString("Hide", comment: "Button to hide a note which has been muted.") : NSLocalizedString("Show", comment: "Button to show a note which has been muted.")) {
                     shown.toggle()
                 }
             }

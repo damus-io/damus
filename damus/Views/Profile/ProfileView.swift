@@ -179,25 +179,28 @@ struct ProfileView: View {
                     notify(.report(.user(profile.pubkey)))
                 }
 
-                if damus_state.contacts.is_muted(profile.pubkey) {
+                if damus_state.mutelist_manager.is_muted(.user(profile.pubkey, nil)) {
                     Button(NSLocalizedString("Unmute", comment: "Button to unmute a profile.")) {
                         guard
                             let keypair = damus_state.keypair.to_full(),
-                            let mutelist = damus_state.contacts.mutelist
+                            let mutelist = damus_state.mutelist_manager.event
                         else {
                             return
                         }
 
-                        guard let new_ev = remove_from_mutelist(keypair: keypair, prev: mutelist, to_remove: .pubkey(profile.pubkey)) else {
+                        guard let new_ev = remove_from_mutelist(keypair: keypair, prev: mutelist, to_remove: .user(profile.pubkey, nil)) else {
                             return
                         }
 
-                        damus_state.contacts.set_mutelist(new_ev)
+                        damus_state.mutelist_manager.set_mutelist(new_ev)
                         damus_state.postbox.send(new_ev)
                     }
                 } else {
-                    Button(NSLocalizedString("Mute", comment: "Button to mute a profile."), role: .destructive) {
-                        notify(.mute(profile.pubkey))
+                    MuteDurationMenu { duration in
+                        notify(.mute(.user(profile.pubkey, duration?.date_from_now)))
+                    } label: {
+                        Text(NSLocalizedString("Mute", comment: "Button to mute a profile."))
+                            .foregroundStyle(.red)
                     }
                 }
             }

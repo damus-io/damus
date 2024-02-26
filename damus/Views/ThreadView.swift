@@ -70,9 +70,9 @@ struct ThreadView: View {
                     EventMutingContainerView(
                         damus_state: state,
                         event: self.thread.event,
-                        muteBox: { event_shown in
+                        muteBox: { event_shown, muted_reason in
                             AnyView(
-                                EventMutedBoxView(shown: event_shown)
+                                EventMutedBoxView(shown: event_shown, reason: muted_reason)
                                 .padding(5)
                             )
                         }

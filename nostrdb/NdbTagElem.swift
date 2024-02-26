@@ -130,6 +130,22 @@ struct NdbTagElem: Sequence, Hashable, Equatable {
         return id.id
     }
 
+    func u64() -> UInt64? {
+        switch self.data() {
+        case .id:
+            return nil
+        case .str(let str):
+            var end_ptr = UnsafeMutablePointer<CChar>(nil as OpaquePointer?)
+            let res = strtoull(str.str, &end_ptr, 10)
+
+            if end_ptr?.pointee == 0 {
+                return res
+            } else {
+                return nil
+            }
+        }
+    }
+
     func string() -> String {
         switch self.data() {
         case .id(let id):

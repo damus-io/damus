@@ -804,3 +804,15 @@ func to_reaction_emoji(ev: NostrEvent) -> String? {
     }
 }
 
+extension NostrEvent {
+    /// The mutelist for a given event
+    ///
+    /// If the event is not a mutelist it will return `nil`.
+    var mute_list: Set<MuteItem>? {
+        if (self.kind == NostrKind.list_deprecated.rawValue && self.referenced_params.contains(where: { p in p.param.matches_str("mute") })) || self.kind == NostrKind.mute_list.rawValue {
+            return Set(self.referenced_mute_items)
+        } else {
+            return nil
+        }
+    }
+}

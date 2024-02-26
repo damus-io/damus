@@ -325,6 +325,10 @@ extension NdbNote {
         References<ReplaceableParam>(tags: self.tags)
     }
 
+    public var referenced_mute_items: References<MuteItem> {
+        References<MuteItem>(tags: self.tags)
+    }
+
     public var references: References<RefId> {
         References<RefId>(tags: self.tags)
     }
@@ -337,6 +341,14 @@ extension NdbNote {
     func get_content(_ keypair: Keypair) -> String {
         if known_kind == .dm {
             return decrypted(keypair: keypair) ?? "*failed to decrypt content*"
+        }
+
+        return content
+    }
+
+    func maybe_get_content(_ keypair: Keypair) -> String? {
+        if known_kind == .dm {
+            return decrypted(keypair: keypair)
         }
 
         return content

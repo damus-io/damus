@@ -13,51 +13,14 @@ class Contacts {
     private var friend_of_friends: Set<Pubkey> = Set()
     /// Tracks which friends are friends of a given pubkey.
     private var pubkey_to_our_friends = [Pubkey : Set<Pubkey>]()
-    private var muted: Set<Pubkey> = Set()
 
     let our_pubkey: Pubkey
     var event: NostrEvent?
-    var mutelist: NostrEvent?
-    
+
     init(our_pubkey: Pubkey) {
         self.our_pubkey = our_pubkey
     }
-    
-    func is_muted(_ pk: Pubkey) -> Bool {
-        return muted.contains(pk)
-    }
-    
-    func set_mutelist(_ ev: NostrEvent) {
-        let oldlist = self.mutelist
-        self.mutelist = ev
 
-        let old = oldlist.map({ ev in Set(ev.referenced_pubkeys) }) ?? Set<Pubkey>()
-        let new = Set(ev.referenced_pubkeys)
-        let diff = old.symmetricDifference(new)
-        
-        var new_mutes = Set<Pubkey>()
-        var new_unmutes = Set<Pubkey>()
-
-        for d in diff {
-            if new.contains(d) {
-                new_mutes.insert(d)
-            } else {
-                new_unmutes.insert(d)
-            }
-        }
-
-        // TODO: set local mutelist here
-        self.muted = Set(ev.referenced_pubkeys)
-
-        if new_mutes.count > 0 {
-            notify(.new_mutes(new_mutes))
-        }
-        
-        if new_unmutes.count > 0 {
-            notify(.new_unmutes(new_unmutes))
-        }
-    }
-    
     func remove_friend(_ pubkey: Pubkey) {
         friends.remove(pubkey)
 
