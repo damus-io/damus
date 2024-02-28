@@ -60,18 +60,9 @@ struct EditPictureControl: View {
             }
         }
         .sheet(isPresented: $show_camera) {
-            
-            MediaPicker(image_upload_confirm: $image_upload_confirm, imagesOnly: true) { media in
-                self.preUploadedMedia = media
-            }
-            .alert(NSLocalizedString("Are you sure you want to upload this image?", comment: "Alert message asking if the user wants to upload an image."), isPresented: $image_upload_confirm) {
-                Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
-                    if let mediaToUpload = generateMediaUpload(preUploadedMedia) {
-                        self.handle_upload(media: mediaToUpload)
-                        self.show_camera = false
-                    }
-                }
-                Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
+            CameraController(uploader: uploader) {
+                self.show_camera = false
+                self.show_library = true
             }
         }
         .sheet(isPresented: $show_library) {
