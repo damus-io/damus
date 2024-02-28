@@ -24,7 +24,7 @@ struct EditPictureControl: View {
     @State private var show_library = false
     @State var image_upload_confirm: Bool = false
 
-    @State var mediaToUpload: MediaUpload? = nil
+    @State var preUploadedMedia: PreUploadedMedia? = nil
 
     var body: some View {
         Menu {
@@ -62,11 +62,11 @@ struct EditPictureControl: View {
         .sheet(isPresented: $show_camera) {
             
             MediaPicker(image_upload_confirm: $image_upload_confirm, imagesOnly: true) { media in
-                self.mediaToUpload = media
+                self.preUploadedMedia = media
             }
             .alert(NSLocalizedString("Are you sure you want to upload this image?", comment: "Alert message asking if the user wants to upload an image."), isPresented: $image_upload_confirm) {
                 Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
-                    if let mediaToUpload {
+                    if let mediaToUpload = generateMediaUpload(preUploadedMedia) {
                         self.handle_upload(media: mediaToUpload)
                         self.show_camera = false
                     }
@@ -76,15 +76,11 @@ struct EditPictureControl: View {
         }
         .sheet(isPresented: $show_library) {
             MediaPicker(image_upload_confirm: $image_upload_confirm, imagesOnly: true) { media in
-                if case .image = media {
-                    self.mediaToUpload = media
-                } else {
-                    print("Cannot upload videos as profile image")
-                }
+                self.preUploadedMedia = media
             }
             .alert(NSLocalizedString("Are you sure you want to upload this image?", comment: "Alert message asking if the user wants to upload an image."), isPresented: $image_upload_confirm) {
                 Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
-                    if let mediaToUpload {
+                    if let mediaToUpload = generateMediaUpload(preUploadedMedia) {
                         self.handle_upload(media: mediaToUpload)
                         self.show_library = false
                     }

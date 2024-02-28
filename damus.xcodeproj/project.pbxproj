@@ -640,9 +640,10 @@
 		E02429952B7E97740088B16C /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E02429942B7E97740088B16C /* CameraController.swift */; };
 		E02B54182B4DFADA0077FF42 /* Bech32ObjectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E02B54172B4DFADA0077FF42 /* Bech32ObjectTests.swift */; };
 		E04A37C62B544F090029650D /* URIParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = E04A37C52B544F090029650D /* URIParsing.swift */; };
-		E0E024112B7C19C20075735D /* TranslationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E024102B7C19C20075735D /* TranslationTests.swift */; };
 		E06336AA2B75832100A88E6B /* ImageMetadataTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E06336A92B75832100A88E6B /* ImageMetadataTest.swift */; };
 		E06336AB2B75850100A88E6B /* img_with_location.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = E06336A82B7582E000A88E6B /* img_with_location.jpeg */; };
+		E0E024112B7C19C20075735D /* TranslationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E024102B7C19C20075735D /* TranslationTests.swift */; };
+		E0EE9DD42B8E5FEA00F3002D /* ImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0EE9DD32B8E5FEA00F3002D /* ImageProcessing.swift */; };
 		E4FA1C032A24BB7F00482697 /* SearchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */; };
 		E990020F2955F837003BBC5A /* EditMetadataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E990020E2955F837003BBC5A /* EditMetadataView.swift */; };
 		E9E4ED0B295867B900DD7078 /* ThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E4ED0A295867B900DD7078 /* ThreadView.swift */; };
@@ -1430,9 +1431,10 @@
 		E02429942B7E97740088B16C /* CameraController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraController.swift; sourceTree = "<group>"; };
 		E02B54172B4DFADA0077FF42 /* Bech32ObjectTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bech32ObjectTests.swift; sourceTree = "<group>"; };
 		E04A37C52B544F090029650D /* URIParsing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URIParsing.swift; sourceTree = "<group>"; };
-		E0E024102B7C19C20075735D /* TranslationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationTests.swift; sourceTree = "<group>"; };
 		E06336A82B7582E000A88E6B /* img_with_location.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = img_with_location.jpeg; sourceTree = "<group>"; };
 		E06336A92B75832100A88E6B /* ImageMetadataTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageMetadataTest.swift; sourceTree = "<group>"; };
+		E0E024102B7C19C20075735D /* TranslationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationTests.swift; sourceTree = "<group>"; };
+		E0EE9DD32B8E5FEA00F3002D /* ImageProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageProcessing.swift; sourceTree = "<group>"; };
 		E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSettingsView.swift; sourceTree = "<group>"; };
 		E990020E2955F837003BBC5A /* EditMetadataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditMetadataView.swift; sourceTree = "<group>"; };
 		E9E4ED0A295867B900DD7078 /* ThreadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadView.swift; sourceTree = "<group>"; };
@@ -1687,6 +1689,7 @@
 			isa = PBXGroup;
 			children = (
 				4C198DF429F88D2E004C165C /* ImageMetadata.swift */,
+				E0EE9DD32B8E5FEA00F3002D /* ImageProcessing.swift */,
 			);
 			path = Images;
 			sourceTree = "<group>";
@@ -3388,6 +3391,7 @@
 				4C5E54062A9671F800FF6E60 /* UserStatusSheet.swift in Sources */,
 				F71694F42A6732B7001F4053 /* GradientFollowButton.swift in Sources */,
 				4C3AC7A728369BA200E1F516 /* SearchHomeView.swift in Sources */,
+				E0EE9DD42B8E5FEA00F3002D /* ImageProcessing.swift in Sources */,
 				4CB883B0297705DD00DC99E7 /* NoteZapButton.swift in Sources */,
 				4C363A922825FCF2006E126D /* ProfileUpdate.swift in Sources */,
 				4C3BEFDA281DCA1400B3DE84 /* LikeCounter.swift in Sources */,

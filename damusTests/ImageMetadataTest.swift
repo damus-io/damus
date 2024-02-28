@@ -29,7 +29,7 @@ final class ImageMetadataTest : XCTestCase {
             return
         }
 
-        let removalSuccess = removeGPSDataFromImage(fromImageURL: testOutputURL)
+        let removalSuccess = removeGPSDataFromImageAndWrite(fromImageURL: testOutputURL)
 
         XCTAssertTrue(removalSuccess, "GPS data removal was not successful")
 

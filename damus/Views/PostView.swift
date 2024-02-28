@@ -57,7 +57,7 @@ struct PostView: View {
     @State var newCursorIndex: Int?
     @State var textHeight: CGFloat? = nil
 
-    @State var mediaToUpload: MediaUpload? = nil
+    @State var preUploadedMedia: PreUploadedMedia? = nil
     
     @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
     @StateObject var tagModel: TagModel = TagModel()
@@ -420,12 +420,12 @@ struct PostView: View {
             }
             .background(DamusColors.adaptableWhite.edgesIgnoringSafeArea(.all))
             .sheet(isPresented: $attach_media) {
-                MediaPicker(image_upload_confirm: $image_upload_confirm) { media in
-                    self.mediaToUpload = media
+                MediaPicker(image_upload_confirm: $image_upload_confirm){ media in
+                    self.preUploadedMedia = media
                 }
                 .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $image_upload_confirm) {
                     Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
-                        if let mediaToUpload {
+                        if let mediaToUpload = generateMediaUpload(preUploadedMedia) {
                             self.handle_upload(media: mediaToUpload)
                             self.attach_media = false
                         }

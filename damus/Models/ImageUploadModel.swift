@@ -8,6 +8,13 @@
 import Foundation
 import UIKit
 
+enum PreUploadedMedia {
+    case uiimage(UIImage)
+    case processed_image(URL)
+    case unprocessed_image(URL)
+    case processed_video(URL)
+    case unprocessed_video(URL)
+}
 
 enum MediaUpload {
     case image(URL)

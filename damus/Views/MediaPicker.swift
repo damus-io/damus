@@ -16,7 +16,8 @@ struct MediaPicker: UIViewControllerRepresentable {
 
     @Binding var image_upload_confirm: Bool
     var imagesOnly: Bool = false
-    let onMediaPicked: (MediaUpload) -> Void
+    let onMediaPicked: (PreUploadedMedia) -> Void
+    
 
     final class Coordinator: NSObject, PHPickerViewControllerDelegate {
         let parent: MediaPicker
@@ -37,17 +38,17 @@ struct MediaPicker: UIViewControllerRepresentable {
                         
                         if canGetSourceTypeFromUrl(url: url) {
                             // Media was not taken from camera
-                            if let savedURL = self.saveImageToTemporaryFolder(from: url) {
-                                self.chooseImage(url: savedURL)
-                            }
+                            self.attemptAcquireResourceAndChooseMedia(
+                                url: url,
+                                fallback: processImage,
+                                unprocessedEnum: {.unprocessed_image($0)},
+                                processedEnum: {.processed_image($0)}
+                            )
                         } else {
                             // Media was taken from camera
                             result.itemProvider.loadObject(ofClass: UIImage.self) { (image, error) in
-                                guard let image = image as? UIImage, error == nil else { return }
-                                let fixedImage = image.fixOrientation()
-                                
-                                if let savedURL = self.saveImageToTemporaryFolder(image: fixedImage) {
-                                    self.chooseImage(url: savedURL)
+                                if let image = image as? UIImage, error == nil {
+                                    self.chooseMedia(.uiimage(image))
                                 }
                             }
                         }
@@ -56,80 +57,36 @@ struct MediaPicker: UIViewControllerRepresentable {
                     result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier) { (url, error) in
                         guard let url, error == nil else { return }
 
-                        guard let url = self.saveVideoToTemporaryFolder(videoURL: url) else { return }
-                        self.parent.onMediaPicked(.video(url))
-                        self.parent.image_upload_confirm = true
+                        self.attemptAcquireResourceAndChooseMedia(
+                            url: url,
+                            fallback: processVideo,
+                            unprocessedEnum: {.unprocessed_video($0)},
+                            processedEnum: {.processed_video($0)}
+                        )
                     }
                 }
             }
         }
         
-        func chooseImage(url: URL) {
-            if removeGPSDataFromImage(fromImageURL: url) {
-                self.parent.onMediaPicked(.image(url))
-                self.parent.image_upload_confirm = true
-            }
+        private func chooseMedia(_ media: PreUploadedMedia) {
+            self.parent.onMediaPicked(media)
+            self.parent.image_upload_confirm = true
         }
         
-        func saveImageToTemporaryFolder(from imageUrl: URL) -> URL? {
-            let fileExtension = imageUrl.pathExtension
-            guard let imageData = try? Data(contentsOf: imageUrl) else {
-                print("Failed to load image data from URL.")
-                return nil
+        private func attemptAcquireResourceAndChooseMedia(url: URL, fallback: (URL) -> URL?, unprocessedEnum: (URL) -> PreUploadedMedia, processedEnum: (URL) -> PreUploadedMedia) {
+            if url.startAccessingSecurityScopedResource() {
+                // Have permission from system to use url out of scope
+                print("Acquired permission to security scoped resource")
+                self.chooseMedia(unprocessedEnum(url))
+            } else {
+                // Need to copy URL to non-security scoped location
+                guard let newUrl = fallback(url) else { return }
+                self.chooseMedia(processedEnum(newUrl))
             }
-            
-            return saveImageToTemporaryFolder(imageData: imageData, imageType: fileExtension)
         }
 
-        func saveImageToTemporaryFolder(image: UIImage, imageType: String = "png") -> URL? {
-            // Convert UIImage to Data
-            let imageData: Data?
-            if imageType.lowercased() == "jpeg" {
-                imageData = image.jpegData(compressionQuality: 1.0)
-            } else {
-                imageData = image.pngData()
-            }
-            
-            guard let data = imageData else {
-                print("Failed to convert UIImage to Data.")
-                return nil
-            }
-            
-            return saveImageToTemporaryFolder(imageData: data, imageType: imageType)
-        }
-        
-        private func saveImageToTemporaryFolder(imageData: Data, imageType: String) -> URL? {
-            // Generate a temporary URL with a unique filename
-            let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-            let uniqueImageName = "\(UUID().uuidString).\(imageType)"
-            let temporaryImageURL = temporaryDirectoryURL.appendingPathComponent(uniqueImageName)
-            
-            // Save the image data to the temporary URL
-            do {
-                try imageData.write(to: temporaryImageURL)
-                return temporaryImageURL
-            } catch {
-                print("Error saving image data to temporary URL: \(error.localizedDescription)")
-                return nil
-            }
-        }
-        
-        func saveVideoToTemporaryFolder(videoURL: URL) -> URL? {
-            let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-            let fileExtension = videoURL.pathExtension
-            let uniqueFileName = UUID().uuidString + (fileExtension.isEmpty ? "" : ".\(fileExtension)")
-            let destinationURL = temporaryDirectoryURL.appendingPathComponent(uniqueFileName)
-            
-            do {
-                try FileManager.default.copyItem(at: videoURL, to: destinationURL)
-                return destinationURL
-            } catch {
-                print("Error copying file: \(error.localizedDescription)")
-                return nil
-            }
-        }
     }
-    
+        
     func makeCoordinator() -> Coordinator {
             Coordinator(self)
         }
@@ -145,18 +102,5 @@ struct MediaPicker: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ uiViewController: PHPickerViewController, context: Context) {
-    }
-}
-
-extension UIImage {
-    func fixOrientation() -> UIImage {
-        guard imageOrientation != .up else { return self }
-        
-        UIGraphicsBeginImageContextWithOptions(size, false, scale)
-        draw(in: CGRect(origin: .zero, size: size))
-        let normalizedImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        
-        return normalizedImage ?? self
     }
 }
