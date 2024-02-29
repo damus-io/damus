@@ -13,6 +13,7 @@ class DamusPurple: StoreObserverDelegate {
     let keypair: Keypair
     var storekit_manager: StoreKitManager
     var checkout_ids_in_progress: Set<String> = []
+    var onboarding_status: OnboardingStatus
 
     @MainActor
     var account_cache: [Pubkey: Account]
@@ -25,6 +26,16 @@ class DamusPurple: StoreObserverDelegate {
         self.account_cache = [:]
         self.account_uuid_cache = [:]
         self.storekit_manager = StoreKitManager.standard    // Use singleton to avoid losing local purchase data
+        self.onboarding_status = OnboardingStatus()
+        Task {
+            let account: Account? = try await self.fetch_account(pubkey: self.keypair.pubkey)
+            if account == nil {
+                self.onboarding_status.account_existed_at_the_start = false
+            }
+            else {
+                self.onboarding_status.account_existed_at_the_start = true
+            }
+        }
     }
     
     // MARK: Functions
@@ -45,7 +56,8 @@ class DamusPurple: StoreObserverDelegate {
     // Whether to enable Apple In-app purchase support
     var enable_purple_iap_support: Bool {
         // TODO: When we have full support for Apple In-app purchases, we can replace this with `true` (or another feature flag)
-        return self.settings.enable_experimental_purple_iap_support
+        // return self.settings.enable_experimental_purple_iap_support
+        return true
     }
 
     func account_exists(pubkey: Pubkey) async -> Bool? {
@@ -109,7 +121,7 @@ class DamusPurple: StoreObserverDelegate {
                 // During testing I found that the purchase initiated via `purchase` was not emitted via the listener `StoreKit.Transaction.updates` until the app was restarted.
                 self.storekit_manager.record_purchased_product(StoreKitManager.PurchasedProduct(tx: tx, product: product))
                 // Send the receipt to the server
-                await self.send_receipt()
+                try await self.send_receipt()
             default:
                 // Any time we get a non-verified result, it means that the purchase was not successful, and thus we should throw an error.
                 throw PurpleError.iap_purchase_error(result: result)
@@ -150,42 +162,37 @@ class DamusPurple: StoreObserverDelegate {
         return account_uuid_info.account_uuid
     }
     
-    func send_receipt() async {
+    func send_receipt() async throws {
         // Get the receipt if it's available.
         if let appStoreReceiptURL = Bundle.main.appStoreReceiptURL,
             FileManager.default.fileExists(atPath: appStoreReceiptURL.path) {
 
-            do {
-                let receiptData = try Data(contentsOf: appStoreReceiptURL, options: .alwaysMapped)
-                let receipt_base64_string = receiptData.base64EncodedString()
-                let account_uuid = try await self.get_maybe_cached_uuid_for_account()
-                let json_text: [String: String] = ["receipt": receipt_base64_string, "account_uuid": account_uuid.uuidString]
-                let json_data = try JSONSerialization.data(withJSONObject: json_text)
-                
-                let url = environment.api_base_url().appendingPathComponent("accounts/\(keypair.pubkey.hex())/apple-iap/app-store-receipt")
-                
-                Log.info("Sending in-app purchase receipt to Damus Purple server", for: .damus_purple)
-                
-                let (data, response) = try await make_nip98_authenticated_request(
-                    method: .post,
-                    url: url,
-                    payload: json_data,
-                    payload_type: .json,
-                    auth_keypair: self.keypair
-                )
-                
-                if let httpResponse = response as? HTTPURLResponse {
-                    switch httpResponse.statusCode {
-                        case 200:
-                            Log.info("Sent in-app purchase receipt to Damus Purple server successfully", for: .damus_purple)
-                        default:
-                            Log.error("Error in sending in-app purchase receipt to Damus Purple. HTTP status code: %d; Response: %s", for: .damus_purple, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
-                    }
+            let receiptData = try Data(contentsOf: appStoreReceiptURL, options: .alwaysMapped)
+            let receipt_base64_string = receiptData.base64EncodedString()
+            let account_uuid = try await self.get_maybe_cached_uuid_for_account()
+            let json_text: [String: String] = ["receipt": receipt_base64_string, "account_uuid": account_uuid.uuidString]
+            let json_data = try JSONSerialization.data(withJSONObject: json_text)
+            
+            let url = environment.api_base_url().appendingPathComponent("accounts/\(keypair.pubkey.hex())/apple-iap/app-store-receipt")
+            
+            Log.info("Sending in-app purchase receipt to Damus Purple server", for: .damus_purple)
+            
+            let (data, response) = try await make_nip98_authenticated_request(
+                method: .post,
+                url: url,
+                payload: json_data,
+                payload_type: .json,
+                auth_keypair: self.keypair
+            )
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                switch httpResponse.statusCode {
+                    case 200:
+                        Log.info("Sent in-app purchase receipt to Damus Purple server successfully", for: .damus_purple)
+                    default:
+                        Log.error("Error in sending in-app purchase receipt to Damus Purple. HTTP status code: %d; Response: %s", for: .damus_purple, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
+                        throw DamusPurple.PurpleError.iap_receipt_verification_error(status: httpResponse.statusCode, response: data)
                 }
-                
-            }
-            catch {
-                Log.error("Couldn't read receipt data with error: %s", for: .damus_purple, error.localizedDescription)
             }
         }
     }
@@ -267,6 +274,44 @@ class DamusPurple: StoreObserverDelegate {
             }
         }
         throw PurpleError.error_processing_response
+    }
+    
+    @MainActor
+    func new_ln_checkout(product_template_name: String) async throws -> LNCheckoutInfo? {
+        let url = environment.api_base_url().appendingPathComponent("ln-checkout")
+        
+        let json_text: [String: String] = ["product_template_name": product_template_name]
+        let json_data = try JSONSerialization.data(withJSONObject: json_text)
+        
+        let (data, response) = try await make_nip98_authenticated_request(
+            method: .post,
+            url: url,
+            payload: json_data,
+            payload_type: .json,
+            auth_keypair: self.keypair
+        )
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            switch httpResponse.statusCode {
+                case 200:
+                    return try JSONDecoder().decode(LNCheckoutInfo.self, from: data)
+                case 404:
+                    return nil
+                default:
+                    throw PurpleError.http_response_error(status_code: httpResponse.statusCode, response: data)
+            }
+        }
+        throw PurpleError.error_processing_response
+    }
+    
+    @MainActor
+    func generate_verified_ln_checkout_link(product_template_name: String) async throws -> URL {
+        let checkout = try await self.new_ln_checkout(product_template_name: product_template_name)
+        guard let checkout_id = checkout?.id.uuidString.lowercased() else { throw PurpleError.error_processing_response }
+        try await self.verify_npub_for_checkout(checkout_id: checkout_id)
+        return self.environment.purple_landing_page_url()
+            .appendingPathComponent("checkout")
+            .appending(queryItems: [URLQueryItem(name: "id", value: checkout_id)])
     }
     
     @MainActor
@@ -404,11 +449,30 @@ extension DamusPurple {
         case http_response_error(status_code: Int, response: Data)
         case error_processing_response
         case iap_purchase_error(result: Product.PurchaseResult)
+        case iap_receipt_verification_error(status: Int, response: Data)
         case translation_no_response
         case checkout_npub_verification_error
     }
     
     struct TranslationResult: Codable {
         let text: String
+    }
+    
+    struct OnboardingStatus {
+        var account_existed_at_the_start: Bool? = nil
+        var onboarding_was_shown: Bool = false
+        
+        init() {
+            
+        }
+        
+        init(account_active_at_the_start: Bool, onboarding_was_shown: Bool) {
+            self.account_existed_at_the_start = account_active_at_the_start
+            self.onboarding_was_shown = onboarding_was_shown
+        }
+        
+        func user_has_never_seen_the_onboarding_before() -> Bool {
+            return onboarding_was_shown == false && account_existed_at_the_start == false
+        }
     }
 }

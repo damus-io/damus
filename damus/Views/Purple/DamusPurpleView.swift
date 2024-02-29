@@ -144,6 +144,12 @@ struct DamusPurpleView: View, DamusPurpleStoreKitManagerDelegate {
                     // If account is no longer active or was purchased via IAP, then show IAP purchase/manage options
                     if let account_uuid {
                         DamusPurpleView.IAPProductStateView(products: products, purchased: purchased, account_uuid: account_uuid, subscribe: subscribe)
+                        if let iap_error {
+                            Text(String(format: NSLocalizedString("There has been an unexpected error with the in-app purchase. Please try again later or contact support@damus.io. Error: %@", comment: "In-app purchase error message for the user"), iap_error))
+                                .foregroundStyle(.red)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                        }
                     }
                     else {
                         ProgressView()

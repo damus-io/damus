@@ -492,6 +492,7 @@
 		D7870BC12AC4750B0080BA88 /* MentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC02AC4750B0080BA88 /* MentionView.swift */; };
 		D7870BC32AC47EBC0080BA88 /* EventLoaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC22AC47EBC0080BA88 /* EventLoaderView.swift */; };
 		D789D1202AFEFBF20083A7AB /* secp256k1 in Frameworks */ = {isa = PBXBuildFile; productRef = D789D11F2AFEFBF20083A7AB /* secp256k1 */; };
+		D78CD5982B8990300014D539 /* DamusAppNotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78CD5972B8990300014D539 /* DamusAppNotificationView.swift */; };
 		D798D21A2B0856CC00234419 /* Mentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7FF7D42823313F009601DB /* Mentions.swift */; };
 		D798D21B2B0856F200234419 /* NdbTagsIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDD1AE12A6B3074001CD4DF /* NdbTagsIterator.swift */; };
 		D798D21C2B0857E400234419 /* Bech32Object.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABEF29857E9200D66079 /* Bech32Object.swift */; };
@@ -545,6 +546,8 @@
 		D7CB5D5D2B1176B200AD4105 /* MediaUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CB5D5B2B1176B200AD4105 /* MediaUploader.swift */; };
 		D7CB5D5F2B11770C00AD4105 /* FollowState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CB5D5E2B11770C00AD4105 /* FollowState.swift */; };
 		D7CB5D602B11770C00AD4105 /* FollowState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CB5D5E2B11770C00AD4105 /* FollowState.swift */; };
+		D7CBD1D42B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CBD1D32B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift */; };
+		D7CBD1D62B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CBD1D52B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift */; };
 		D7CCFC072B05833200323D86 /* NdbNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90548A2A6AEDEE00811EEC /* NdbNote.swift */; };
 		D7CCFC082B05834500323D86 /* NoteId.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC14FF42A740BB7007AEB17 /* NoteId.swift */; };
 		D7CCFC0B2B0585EA00323D86 /* nostrdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CE9FBB82A6B3B26007E485C /* nostrdb.c */; settings = {COMPILER_FLAGS = "-w"; }; };
@@ -1396,6 +1399,7 @@
 		D78525242A7B2EA4002FA637 /* NoteContentViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteContentViewTests.swift; sourceTree = "<group>"; };
 		D7870BC02AC4750B0080BA88 /* MentionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MentionView.swift; sourceTree = "<group>"; };
 		D7870BC22AC47EBC0080BA88 /* EventLoaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventLoaderView.swift; sourceTree = "<group>"; };
+		D78CD5972B8990300014D539 /* DamusAppNotificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusAppNotificationView.swift; sourceTree = "<group>"; };
 		D798D21D2B0858BB00234419 /* MigratedTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigratedTypes.swift; sourceTree = "<group>"; };
 		D798D2272B085CDA00234419 /* NdbNote+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NdbNote+.swift"; sourceTree = "<group>"; };
 		D798D22B2B086C7400234419 /* NostrEvent+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NostrEvent+.swift"; sourceTree = "<group>"; };
@@ -1414,6 +1418,8 @@
 		D7CB5D502B1174D100AD4105 /* FriendFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendFilter.swift; sourceTree = "<group>"; };
 		D7CB5D5B2B1176B200AD4105 /* MediaUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaUploader.swift; sourceTree = "<group>"; };
 		D7CB5D5E2B11770C00AD4105 /* FollowState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowState.swift; sourceTree = "<group>"; };
+		D7CBD1D32B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleNotificationManagement.swift; sourceTree = "<group>"; };
+		D7CBD1D52B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleImpendingExpirationTests.swift; sourceTree = "<group>"; };
 		D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrEventTests.swift; sourceTree = "<group>"; };
 		D7EDED1B2B1178FE0018B19C /* NoteContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteContent.swift; sourceTree = "<group>"; };
 		D7EDED1D2B11797D0018B19C /* LongformEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongformEvent.swift; sourceTree = "<group>"; };
@@ -1732,6 +1738,7 @@
 				4C30AC7329A5680900E2BD5A /* EventGroupView.swift */,
 				4C30AC7529A5770900E2BD5A /* NotificationItemView.swift */,
 				4C30AC7F29A6A53F00E2BD5A /* ProfilePicturesView.swift */,
+				D78CD5972B8990300014D539 /* DamusAppNotificationView.swift */,
 			);
 			path = Notifications;
 			sourceTree = "<group>";
@@ -2535,6 +2542,7 @@
 				B501062C2B363036003874F5 /* AuthIntegrationTests.swift */,
 				E0E024102B7C19C20075735D /* TranslationTests.swift */,
 				E06336A92B75832100A88E6B /* ImageMetadataTest.swift */,
+				D7CBD1D52B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift */,
 			);
 			path = damusTests;
 			sourceTree = "<group>";
@@ -2705,6 +2713,7 @@
 		D74F43082B23F09300425B75 /* Purple */ = {
 			isa = PBXGroup;
 			children = (
+				D7CBD1D22B8D21C100BFD889 /* Extensions */,
 				D74F43092B23F0BE00425B75 /* DamusPurple.swift */,
 				D74F430B2B23FB9B00425B75 /* StoreObserver.swift */,
 				D7ADD3DD2B53854300F104C4 /* DamusPurpleURL.swift */,
@@ -2732,6 +2741,14 @@
 				E06336A82B7582E000A88E6B /* img_with_location.jpeg */,
 			);
 			path = Assets;
+			sourceTree = "<group>";
+		};
+		D7CBD1D22B8D21C100BFD889 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				D7CBD1D32B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 		F71694E82A66221E001F4053 /* Onboarding */ = {
@@ -3031,6 +3048,7 @@
 				4CDD1AE22A6B3074001CD4DF /* NdbTagsIterator.swift in Sources */,
 				4C216F34286F5ACD00040376 /* DMView.swift in Sources */,
 				D7CB5D512B1174D100AD4105 /* FriendFilter.swift in Sources */,
+				D7CBD1D42B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift in Sources */,
 				4C32B9572A9AD44700DC3548 /* Root.swift in Sources */,
 				4C3EA64428FF558100C48A62 /* sha256.c in Sources */,
 				504323A72A34915F006AE6DC /* RelayModel.swift in Sources */,
@@ -3305,6 +3323,7 @@
 				4CB88396296F7F8B00DC99E7 /* ReactionView.swift in Sources */,
 				50A16FFD2AA7525700DFEC1F /* DamusVideoPlayerViewModel.swift in Sources */,
 				4CFF8F6B29CD0079008DB934 /* RepostedEvent.swift in Sources */,
+				D78CD5982B8990300014D539 /* DamusAppNotificationView.swift in Sources */,
 				D724D8272B64B40B00ABE789 /* DamusPurpleAccountView.swift in Sources */,
 				4C8682872814DE470026224F /* ProfileView.swift in Sources */,
 				5C0707D12A1ECB38004E7B51 /* DamusLogoGradient.swift in Sources */,
@@ -3475,6 +3494,7 @@
 				3A3040ED29A5CB86008A0F29 /* ReplyDescriptionTests.swift in Sources */,
 				D71DC1EC2A9129C3006E207C /* PostViewTests.swift in Sources */,
 				3AAC7A022A60FE72002B50DF /* LocalizationUtilTests.swift in Sources */,
+				D7CBD1D62B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift in Sources */,
 				D7DEEF2F2A8C021E00E0C99F /* NostrEventTests.swift in Sources */,
 				4C8D00D429E3C5D40036AF10 /* NIP19Tests.swift in Sources */,
 				3A30410129AB12AA008A0F29 /* EventGroupViewTests.swift in Sources */,
@@ -3931,6 +3951,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = damus/damus.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_ASSET_PATHS = "\"damus/Preview Content\"";
 				DEVELOPMENT_TEAM = XK7H4JAB3D;
 				ENABLE_PREVIEWS = YES;
@@ -3980,6 +4001,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = damus/damus.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_ASSET_PATHS = "\"damus/Preview Content\"";
 				DEVELOPMENT_TEAM = XK7H4JAB3D;
 				ENABLE_PREVIEWS = YES;

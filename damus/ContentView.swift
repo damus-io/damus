@@ -490,16 +490,23 @@ struct ContentView: View {
                 // For extra assurance, run this after one second, to avoid race conditions if the app is also handling a damus purple welcome url.
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     Task {
-                        // TODO: Improve UX for renewals (#2013)
                         let freshly_completed_checkout_ids = try? await damus_state.purple.check_status_of_checkouts_in_progress()
                         let there_is_a_completed_checkout: Bool = (freshly_completed_checkout_ids?.count ?? 0) > 0
                         let account_info = try await damus_state.purple.fetch_account(pubkey: self.keypair.pubkey)
                         if there_is_a_completed_checkout == true && account_info?.active == true {
-                            // Show welcome sheet
-                            self.active_sheet = .purple_onboarding
+                            if damus_state.purple.onboarding_status.user_has_never_seen_the_onboarding_before() {
+                                // Show welcome sheet
+                                self.active_sheet = .purple_onboarding
+                            }
+                            else {
+                                self.active_sheet = .purple(DamusPurpleURL.init(is_staging: damus_state.purple.environment == .staging, variant: .landing))
+                            }
                         }
                     }
                 }
+            }
+            Task {
+                await damus_state.purple.check_and_send_app_notifications_if_needed(handler: home.handle_damus_app_notification)
             }
         }
         .onChange(of: scenePhase) { (phase: ScenePhase) in
@@ -724,6 +731,9 @@ struct ContentView: View {
         if let damus_state, damus_state.purple.enable_purple {
             // Assign delegate so that we can send receipts to the Purple API server as soon as we get updates from user's purchases
             StoreObserver.standard.delegate = damus_state.purple
+            Task {
+                await damus_state.purple.check_and_send_app_notifications_if_needed(handler: home.handle_damus_app_notification)
+            }
         }
         else {
             // Purple API is an experimental feature. If not enabled, do not connect `StoreObserver` with Purple API to avoid leaking receipts
