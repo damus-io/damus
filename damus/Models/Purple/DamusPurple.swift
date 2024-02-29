@@ -56,7 +56,8 @@ class DamusPurple: StoreObserverDelegate {
     // Whether to enable Apple In-app purchase support
     var enable_purple_iap_support: Bool {
         // TODO: When we have full support for Apple In-app purchases, we can replace this with `true` (or another feature flag)
-        return self.settings.enable_experimental_purple_iap_support
+        // return self.settings.enable_experimental_purple_iap_support
+        return true
     }
 
     func account_exists(pubkey: Pubkey) async -> Bool? {
