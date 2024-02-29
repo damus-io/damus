@@ -35,6 +35,8 @@ struct DamusPurpleNewUserOnboardingView: View {
             guard let account = try? await damus_state.purple.fetch_account(pubkey: damus_state.pubkey), account.active else {
                 return
             }
+            // Let's mark onboarding as "shown"
+            damus_state.purple.onboarding_status.onboarding_was_shown = true
             // Let's notify other views across SwiftUI to update our user's Purple status.
             notify(.purple_account_update(account))
         }

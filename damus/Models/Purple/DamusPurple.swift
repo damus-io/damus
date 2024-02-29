@@ -13,6 +13,7 @@ class DamusPurple: StoreObserverDelegate {
     let keypair: Keypair
     var storekit_manager: StoreKitManager
     var checkout_ids_in_progress: Set<String> = []
+    var onboarding_status: OnboardingStatus
 
     @MainActor
     var account_cache: [Pubkey: Account]
@@ -25,6 +26,16 @@ class DamusPurple: StoreObserverDelegate {
         self.account_cache = [:]
         self.account_uuid_cache = [:]
         self.storekit_manager = StoreKitManager.standard    // Use singleton to avoid losing local purchase data
+        self.onboarding_status = OnboardingStatus()
+        Task {
+            let account: Account? = try await self.fetch_account(pubkey: self.keypair.pubkey)
+            if account == nil {
+                self.onboarding_status.account_existed_at_the_start = false
+            }
+            else {
+                self.onboarding_status.account_existed_at_the_start = true
+            }
+        }
     }
     
     // MARK: Functions
@@ -448,5 +459,23 @@ extension DamusPurple {
     
     struct TranslationResult: Codable {
         let text: String
+    }
+    
+    struct OnboardingStatus {
+        var account_existed_at_the_start: Bool? = nil
+        var onboarding_was_shown: Bool = false
+        
+        init() {
+            
+        }
+        
+        init(account_active_at_the_start: Bool, onboarding_was_shown: Bool) {
+            self.account_existed_at_the_start = account_active_at_the_start
+            self.onboarding_was_shown = onboarding_was_shown
+        }
+        
+        func user_has_never_seen_the_onboarding_before() -> Bool {
+            return onboarding_was_shown == false && account_existed_at_the_start == false
+        }
     }
 }

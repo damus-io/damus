@@ -490,13 +490,17 @@ struct ContentView: View {
                 // For extra assurance, run this after one second, to avoid race conditions if the app is also handling a damus purple welcome url.
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     Task {
-                        // TODO: Improve UX for renewals (#2013)
                         let freshly_completed_checkout_ids = try? await damus_state.purple.check_status_of_checkouts_in_progress()
                         let there_is_a_completed_checkout: Bool = (freshly_completed_checkout_ids?.count ?? 0) > 0
                         let account_info = try await damus_state.purple.fetch_account(pubkey: self.keypair.pubkey)
                         if there_is_a_completed_checkout == true && account_info?.active == true {
-                            // Show welcome sheet
-                            self.active_sheet = .purple_onboarding
+                            if damus_state.purple.onboarding_status.user_has_never_seen_the_onboarding_before() {
+                                // Show welcome sheet
+                                self.active_sheet = .purple_onboarding
+                            }
+                            else {
+                                self.active_sheet = .purple(DamusPurpleURL.init(is_staging: damus_state.purple.environment == .staging, variant: .landing))
+                            }
                         }
                     }
                 }
