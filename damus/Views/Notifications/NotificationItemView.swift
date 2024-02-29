@@ -10,6 +10,7 @@ import SwiftUI
 enum ShowItem {
     case show(NostrEvent?)
     case dontshow(NostrEvent?)
+    case show_damus_app_notification(DamusAppNotification)
 }
 
 func notification_item_event(events: EventCache, notif: NotificationItem) -> ShowItem {
@@ -24,6 +25,8 @@ func notification_item_event(events: EventCache, notif: NotificationItem) -> Sho
         return .dontshow(events.lookup(evid))
     case .profile_zap:
         return .show(nil)
+    case .damus_app_notification(let app_notification):
+        return .show_damus_app_notification(app_notification)
     }
 }
 
@@ -63,6 +66,8 @@ struct NotificationItemView: View {
                     EventView(damus: state, event: ev, options: options)
                 }
                 .buttonStyle(.plain)
+            case .damus_app_notification(let notification):
+                DamusAppNotificationView(damus_state: state, notification: notification)
             }
             
             ThiccDivider()
@@ -79,6 +84,8 @@ struct NotificationItemView: View {
                 if let ev {
                     Item(ev)
                 }
+            case .show_damus_app_notification(let notification):
+                DamusAppNotificationView(damus_state: state, notification: notification)
             }
         }
     }

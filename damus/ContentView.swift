@@ -501,6 +501,9 @@ struct ContentView: View {
                     }
                 }
             }
+            Task {
+                await damus_state.purple.check_and_send_app_notifications_if_needed(handler: home.handle_damus_app_notification)
+            }
         }
         .onChange(of: scenePhase) { (phase: ScenePhase) in
             guard let damus_state else { return }
@@ -724,6 +727,9 @@ struct ContentView: View {
         if let damus_state, damus_state.purple.enable_purple {
             // Assign delegate so that we can send receipts to the Purple API server as soon as we get updates from user's purchases
             StoreObserver.standard.delegate = damus_state.purple
+            Task {
+                await damus_state.purple.check_and_send_app_notifications_if_needed(handler: home.handle_damus_app_notification)
+            }
         }
         else {
             // Purple API is an experimental feature. If not enabled, do not connect `StoreObserver` with Purple API to avoid leaking receipts

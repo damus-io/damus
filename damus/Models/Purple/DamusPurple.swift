@@ -270,6 +270,44 @@ class DamusPurple: StoreObserverDelegate {
     }
     
     @MainActor
+    func new_ln_checkout(product_template_name: String) async throws -> LNCheckoutInfo? {
+        let url = environment.api_base_url().appendingPathComponent("ln-checkout")
+        
+        let json_text: [String: String] = ["product_template_name": product_template_name]
+        let json_data = try JSONSerialization.data(withJSONObject: json_text)
+        
+        let (data, response) = try await make_nip98_authenticated_request(
+            method: .post,
+            url: url,
+            payload: json_data,
+            payload_type: .json,
+            auth_keypair: self.keypair
+        )
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            switch httpResponse.statusCode {
+                case 200:
+                    return try JSONDecoder().decode(LNCheckoutInfo.self, from: data)
+                case 404:
+                    return nil
+                default:
+                    throw PurpleError.http_response_error(status_code: httpResponse.statusCode, response: data)
+            }
+        }
+        throw PurpleError.error_processing_response
+    }
+    
+    @MainActor
+    func generate_verified_ln_checkout_link(product_template_name: String) async throws -> URL {
+        let checkout = try await self.new_ln_checkout(product_template_name: product_template_name)
+        guard let checkout_id = checkout?.id.uuidString.lowercased() else { throw PurpleError.error_processing_response }
+        try await self.verify_npub_for_checkout(checkout_id: checkout_id)
+        return self.environment.purple_landing_page_url()
+            .appendingPathComponent("checkout")
+            .appending(queryItems: [URLQueryItem(name: "id", value: checkout_id)])
+    }
+    
+    @MainActor
     /// This function checks the status of all checkout objects in progress with the server, and it does two things:
     /// - It returns the ones that were freshly completed
     /// - It internally marks them as "completed"

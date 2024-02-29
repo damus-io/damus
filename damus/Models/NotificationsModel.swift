@@ -13,6 +13,7 @@ enum NotificationItem {
     case profile_zap(ZapGroup)
     case event_zap(NoteId, ZapGroup)
     case reply(NostrEvent)
+    case damus_app_notification(DamusAppNotification)
     
     var is_reply: NostrEvent? {
         if case .reply(let ev) = self {
@@ -33,6 +34,8 @@ enum NotificationItem {
             return nil
         case .repost:
             return nil
+        case .damus_app_notification(_):
+            return nil
         }
     }
 
@@ -48,6 +51,8 @@ enum NotificationItem {
             return zapgrp.last_event_at
         case .reply(let reply):
             return reply.created_at
+        case .damus_app_notification(let notification):
+            return notification.last_event_at
         }
     }
     
@@ -63,6 +68,8 @@ enum NotificationItem {
             return zapgrp.would_filter(isIncluded)
         case .reply(let ev):
             return !isIncluded(ev)
+        case .damus_app_notification(_):
+            return true
         }
     }
     
@@ -79,6 +86,8 @@ enum NotificationItem {
         case .reply(let ev):
             if isIncluded(ev) { return .reply(ev) }
             return nil
+        case .damus_app_notification(_):
+            return self
         }
     }
 }
@@ -94,6 +103,9 @@ class NotificationsModel: ObservableObject, ScrollQueue {
     var reactions: [NoteId: EventGroup] = [:]
     var reposts: [NoteId: EventGroup] = [:]
     var replies: [NostrEvent] = []
+    var incoming_app_notifications: [DamusAppNotification] = []
+    var app_notifications: [DamusAppNotification] = []
+    var has_app_notification = Set<DamusAppNotification.Content>()
     var has_reply = Set<NoteId>()
     var has_ev = Set<NoteId>()
 
@@ -158,6 +170,10 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         
         for reply in replies {
             notifs.append(.reply(reply))
+        }
+        
+        for app_notification in app_notifications {
+            notifs.append(.damus_app_notification(app_notification))
         }
         
         notifs.sort { $0.last_event_at > $1.last_event_at }
@@ -254,6 +270,33 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         return false
     }
     
+    func insert_app_notification(notification: DamusAppNotification) -> Bool {
+        if has_app_notification.contains(notification.content) {
+            return false
+        }
+        
+        if should_queue {
+            incoming_app_notifications.append(notification)
+            return true
+        }
+        
+        if insert_app_notification_immediate(notification: notification) {
+            self.notifications = build_notifications()
+            return true
+        }
+        
+        return false
+    }
+    
+    func insert_app_notification_immediate(notification: DamusAppNotification) -> Bool {
+        if has_app_notification.contains(notification.content) {
+            return false
+        }
+        self.app_notifications.append(notification)
+        has_app_notification.insert(notification.content)
+        return true
+    }
+    
     func insert_zap(_ zap: Zapping) -> Bool {
         if should_queue {
             return insert_uniq_sorted_zap_by_created(zaps: &incoming_zaps, new_zap: zap)
@@ -319,10 +362,30 @@ class NotificationsModel: ObservableObject, ScrollQueue {
             inserted = insert_event_immediate(event, cache: damus_state.events) || inserted
         }
         
+        for incoming_app_notification in incoming_app_notifications {
+            inserted = insert_app_notification_immediate(notification: incoming_app_notification) || inserted
+        }
+        
         if inserted {
             self.notifications = build_notifications()
         }
         
         return inserted
+    }
+}
+
+struct DamusAppNotification {
+    let notification_timestamp: Date
+    var last_event_at: UInt32 { UInt32(notification_timestamp.timeIntervalSince1970) }
+    let content: Content
+    
+    init(content: Content, timestamp: Date) {
+        self.notification_timestamp = timestamp
+        self.content = content
+    }
+    
+    enum Content: Hashable, Equatable {
+        case purple_impending_expiration(days_remaining: Int, expiry_date: UInt64)
+        case purple_expired(expiry_date: UInt64)
     }
 }
