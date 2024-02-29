@@ -23,11 +23,11 @@ class StoreObserver: NSObject, SKPaymentTransactionObserver {
         //Handle transaction states here.
         
         Task {
-            await self.delegate?.send_receipt()
+            try await self.delegate?.send_receipt()
         }
     }
 }
 
 protocol StoreObserverDelegate {
-    func send_receipt() async
+    func send_receipt() async throws
 }

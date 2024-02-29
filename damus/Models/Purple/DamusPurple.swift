@@ -120,7 +120,7 @@ class DamusPurple: StoreObserverDelegate {
                 // During testing I found that the purchase initiated via `purchase` was not emitted via the listener `StoreKit.Transaction.updates` until the app was restarted.
                 self.storekit_manager.record_purchased_product(StoreKitManager.PurchasedProduct(tx: tx, product: product))
                 // Send the receipt to the server
-                await self.send_receipt()
+                try await self.send_receipt()
             default:
                 // Any time we get a non-verified result, it means that the purchase was not successful, and thus we should throw an error.
                 throw PurpleError.iap_purchase_error(result: result)
@@ -161,42 +161,37 @@ class DamusPurple: StoreObserverDelegate {
         return account_uuid_info.account_uuid
     }
     
-    func send_receipt() async {
+    func send_receipt() async throws {
         // Get the receipt if it's available.
         if let appStoreReceiptURL = Bundle.main.appStoreReceiptURL,
             FileManager.default.fileExists(atPath: appStoreReceiptURL.path) {
 
-            do {
-                let receiptData = try Data(contentsOf: appStoreReceiptURL, options: .alwaysMapped)
-                let receipt_base64_string = receiptData.base64EncodedString()
-                let account_uuid = try await self.get_maybe_cached_uuid_for_account()
-                let json_text: [String: String] = ["receipt": receipt_base64_string, "account_uuid": account_uuid.uuidString]
-                let json_data = try JSONSerialization.data(withJSONObject: json_text)
-                
-                let url = environment.api_base_url().appendingPathComponent("accounts/\(keypair.pubkey.hex())/apple-iap/app-store-receipt")
-                
-                Log.info("Sending in-app purchase receipt to Damus Purple server", for: .damus_purple)
-                
-                let (data, response) = try await make_nip98_authenticated_request(
-                    method: .post,
-                    url: url,
-                    payload: json_data,
-                    payload_type: .json,
-                    auth_keypair: self.keypair
-                )
-                
-                if let httpResponse = response as? HTTPURLResponse {
-                    switch httpResponse.statusCode {
-                        case 200:
-                            Log.info("Sent in-app purchase receipt to Damus Purple server successfully", for: .damus_purple)
-                        default:
-                            Log.error("Error in sending in-app purchase receipt to Damus Purple. HTTP status code: %d; Response: %s", for: .damus_purple, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
-                    }
+            let receiptData = try Data(contentsOf: appStoreReceiptURL, options: .alwaysMapped)
+            let receipt_base64_string = receiptData.base64EncodedString()
+            let account_uuid = try await self.get_maybe_cached_uuid_for_account()
+            let json_text: [String: String] = ["receipt": receipt_base64_string, "account_uuid": account_uuid.uuidString]
+            let json_data = try JSONSerialization.data(withJSONObject: json_text)
+            
+            let url = environment.api_base_url().appendingPathComponent("accounts/\(keypair.pubkey.hex())/apple-iap/app-store-receipt")
+            
+            Log.info("Sending in-app purchase receipt to Damus Purple server", for: .damus_purple)
+            
+            let (data, response) = try await make_nip98_authenticated_request(
+                method: .post,
+                url: url,
+                payload: json_data,
+                payload_type: .json,
+                auth_keypair: self.keypair
+            )
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                switch httpResponse.statusCode {
+                    case 200:
+                        Log.info("Sent in-app purchase receipt to Damus Purple server successfully", for: .damus_purple)
+                    default:
+                        Log.error("Error in sending in-app purchase receipt to Damus Purple. HTTP status code: %d; Response: %s", for: .damus_purple, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
+                        throw DamusPurple.PurpleError.iap_receipt_verification_error(status: httpResponse.statusCode, response: data)
                 }
-                
-            }
-            catch {
-                Log.error("Couldn't read receipt data with error: %s", for: .damus_purple, error.localizedDescription)
             }
         }
     }
@@ -453,6 +448,7 @@ extension DamusPurple {
         case http_response_error(status_code: Int, response: Data)
         case error_processing_response
         case iap_purchase_error(result: Product.PurchaseResult)
+        case iap_receipt_verification_error(status: Int, response: Data)
         case translation_no_response
         case checkout_npub_verification_error
     }
