@@ -44,14 +44,7 @@ struct DamusPurpleView: View, DamusPurpleStoreKitManagerDelegate {
     
     var body: some View {
         NavigationView {
-            ZStack {
-                Color.black
-                    .edgesIgnoringSafeArea(.all)
-
-                Image("purple-blue-gradient-1")
-                    .resizable()
-                    .edgesIgnoringSafeArea(.all)
-
+            PurpleBackdrop {
                 ScrollView {
                     MainContent
                         .padding(.top, 75)

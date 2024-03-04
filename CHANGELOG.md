@@ -1,3 +1,40 @@
+## [1.7-rc2] - 2024-02-28
+
+### Added
+
+- Add support for Apple In-App purchases (Daniel D’Aquino)
+- Notification reminders for Damus Purple impending expiration (Daniel D’Aquino)
+- Damus Purple membership! (William Casarin)
+- Fixed minor spacing and padding issues in onboarding views (ericholguin)
+
+
+### Changed
+
+- Disable inline text suggestions on 17.0 as they interfere with mention generation (William Casarin)
+- EULA is not shown by default (ericholguin)
+
+
+### Fixed
+
+- Fix welcome screen not showing if the user enters the app directly after a successful checkout without going through the link (Daniel D’Aquino)
+- Fix profile not updating bug (William Casarin)
+- Fix nostrscripts not loading (William Casarin)
+- Fix crash when accessing cached purple accounts (William Casarin)
+- Hide member signup date on reposts (kernelkind)
+- Fixed previews not rendering (ericholguin)
+- Fix load media formatting on small screens (kernelkind)
+- Fix shared nevents that are too long (kernelkind)
+- Fix many nostrdb transaction related crashes (William Casarin)
+
+
+### Removed
+
+- Removed copying public key action (ericholguin)
+
+
+
+[1.7-rc2]: https://github.com/damus-io/damus/releases/tag/v1.7-rc2
+
 ## [1.7-2] - 2024-01-24
 
 ### Added
@@ -1706,5 +1743,3 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-
-

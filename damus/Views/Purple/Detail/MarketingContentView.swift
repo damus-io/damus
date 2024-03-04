@@ -85,5 +85,7 @@ extension DamusPurpleView {
 }
 
 #Preview {
-    DamusPurpleView.MarketingContentView(purple: test_damus_state.purple)
+    PurpleBackdrop {
+        DamusPurpleView.MarketingContentView(purple: test_damus_state.purple)
+    }
 }
