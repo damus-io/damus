@@ -176,5 +176,7 @@ extension DamusPurpleView {
 }
 
 #Preview {
-    DamusPurpleView.IAPProductStateView(products: .loaded([]), purchased: nil, account_uuid: UUID(), subscribe: {_ in })
+    PurpleBackdrop {
+        DamusPurpleView.IAPProductStateView(products: .loaded([]), purchased: nil, account_uuid: UUID(), subscribe: {_ in })
+    }
 }
