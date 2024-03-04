@@ -131,6 +131,12 @@ extension DamusPurpleView {
                     })
                     .buttonStyle(GradientButtonStyle())
                 }
+
+                Text("By subscribing to Damus Purple you are accepting our [privacy policy](https://damus.io/privacy-policy.txt) and Apple's Standard [EULA](https://www.apple.com/legal/internet-services/itunes/dev/stdeula/)")
+                .foregroundColor(.white.opacity(0.6))
+                .font(.caption)
+                .padding()
+
             }
             .padding()
         }
