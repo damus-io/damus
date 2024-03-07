@@ -288,7 +288,6 @@
 		4CAAD8B029888AD200060CEA /* RelayConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CAAD8AF29888AD200060CEA /* RelayConfigView.swift */; };
 		4CACA9D5280C31E100D9BBE8 /* ReplyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CACA9D4280C31E100D9BBE8 /* ReplyView.swift */; };
 		4CACA9DC280C38C000D9BBE8 /* Profiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CACA9DB280C38C000D9BBE8 /* Profiles.swift */; };
-		4CB55EF3295E5D59007FD187 /* RecommendedRelayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB55EF2295E5D59007FD187 /* RecommendedRelayView.swift */; };
 		4CB55EF5295E679D007FD187 /* UserRelaysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB55EF4295E679D007FD187 /* UserRelaysView.swift */; };
 		4CB8838629656C8B00DC99E7 /* NIP05.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB8838529656C8B00DC99E7 /* NIP05.swift */; };
 		4CB88389296AF99A00DC99E7 /* EventDetailBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB88388296AF99A00DC99E7 /* EventDetailBar.swift */; };
@@ -1205,7 +1204,6 @@
 		4CAAD8AF29888AD200060CEA /* RelayConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayConfigView.swift; sourceTree = "<group>"; };
 		4CACA9D4280C31E100D9BBE8 /* ReplyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyView.swift; sourceTree = "<group>"; };
 		4CACA9DB280C38C000D9BBE8 /* Profiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profiles.swift; sourceTree = "<group>"; };
-		4CB55EF2295E5D59007FD187 /* RecommendedRelayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendedRelayView.swift; sourceTree = "<group>"; };
 		4CB55EF4295E679D007FD187 /* UserRelaysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRelaysView.swift; sourceTree = "<group>"; };
 		4CB8838529656C8B00DC99E7 /* NIP05.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP05.swift; sourceTree = "<group>"; };
 		4CB88388296AF99A00DC99E7 /* EventDetailBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailBar.swift; sourceTree = "<group>"; };
@@ -2294,7 +2292,6 @@
 			isa = PBXGroup;
 			children = (
 				4CE879532996BA0000F758CC /* Detail */,
-				4CB55EF2295E5D59007FD187 /* RecommendedRelayView.swift */,
 				4C06670028FC7C5900038D2A /* RelayView.swift */,
 				4CAAD8AF29888AD200060CEA /* RelayConfigView.swift */,
 				F7908E91298B0F0700AB113A /* RelayDetailView.swift */,
@@ -3417,7 +3414,6 @@
 				7527271E2A93FF0100214108 /* Block.swift in Sources */,
 				4C54AA0729A540BA003E4487 /* NotificationsModel.swift in Sources */,
 				4C12536C2A76D4B00004F4B8 /* RepostedNotify.swift in Sources */,
-				4CB55EF3295E5D59007FD187 /* RecommendedRelayView.swift in Sources */,
 				4CE4F0F229D4FCFA005914DB /* DebouncedOnChange.swift in Sources */,
 				4C32B9592A9AD44700DC3548 /* Table.swift in Sources */,
 				4C5D5C9D2A6B2CB40024563C /* AsciiCharacter.swift in Sources */,

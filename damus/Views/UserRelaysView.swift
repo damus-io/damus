@@ -28,12 +28,9 @@ struct UserRelaysView: View {
     
     var body: some View {
         List(relay_state, id: \.0) { (r, add) in
-            RecommendedRelayView(damus: state, relay: r, add_button: add, user_recommended: true)
+            RelayView(state: state, relay: r, showActionButtons: .constant(true), recommended: true)
         }
         .listStyle(PlainListStyle())
-        .onReceive(handle_notify(.relays_changed)) { _ in
-            self.relay_state = UserRelaysView.make_relay_state(pool: state.pool, relays: self.relays)
-        }
         .navigationBarTitle(NSLocalizedString("Relays", comment: "Navigation bar title that shows the list of relays for a user."))
     }
 }

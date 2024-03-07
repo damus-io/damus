@@ -61,7 +61,7 @@ struct InnerRelayPicView: View {
         }
         .frame(width: size, height: size)
         .clipShape(RoundedRectangle(cornerRadius: 15))
-        .overlay(RoundedRectangle(cornerRadius: 15).stroke(failedImage ? .gray : highlight_color(highlight), lineWidth: failedImage ? 1 : pfp_line_width(highlight)))
+        .overlay(RoundedRectangle(cornerRadius: 15).stroke(.gray.opacity(0.5), lineWidth: 0.5))
     }
 }
 

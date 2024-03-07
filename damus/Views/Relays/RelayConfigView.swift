@@ -7,156 +7,83 @@
 
 import SwiftUI
 
+enum RelayTab: Int, CaseIterable{
+    case myRelays = 0
+    case recommended
+    
+    var title: String{
+        switch self {
+        case .myRelays:
+            return "My relays"
+        case .recommended:
+            return "Recommended"
+        }
+    }
+}
+
 struct RelayConfigView: View {
     let state: DamusState
     @State var relays: [RelayDescriptor]
     @State private var showActionButtons = false
     @State var show_add_relay: Bool = false
-    @SceneStorage("RelayConfigView.show_recommended") var show_recommended : Bool = true
+    @State var selectedTab = 0
     
     @Environment(\.dismiss) var dismiss
     
     init(state: DamusState) {
         self.state = state
         _relays = State(initialValue: state.pool.our_descriptors)
+        UITabBar.appearance().isHidden = true
     }
     
     var recommended: [RelayDescriptor] {
         let rs: [RelayDescriptor] = []
         let recommended_relay_addresses = get_default_bootstrap_relays()
         return recommended_relay_addresses.reduce(into: rs) { xs, x in
-            if state.pool.get_relay(x) == nil, let url = RelayURL(x) {
+            if let url = RelayURL(x) {
                 xs.append(RelayDescriptor(url: url, info: .rw))
             }
         }
     }
     
     var body: some View {
-        MainContent
-        .onReceive(handle_notify(.relays_changed)) { _ in
-            self.relays = state.pool.our_descriptors
-        }
-        .onReceive(handle_notify(.switched_timeline)) { _ in
-            dismiss()
-        }
-    }
-    
-    var MainContent: some View {
-        VStack {
-            Divider()
-            
-            if showActionButtons && !show_recommended {
-                VStack {
-                    Button(action: {
-                        withAnimation(.easeOut(duration: 0.2)) {
-                            show_recommended.toggle()
-                        }
-                    }) {
-                        Text("Show recommended relays", comment: "Button to show recommended relays.")
-                            .foregroundStyle(DamusLightGradient.gradient)
-                            .padding(10)
-                            .background {
-                                RoundedRectangle(cornerRadius: 15)
-                                    .stroke(DamusLightGradient.gradient)
-                            }
-                    }
-                    .padding(.top, 10)
-                }
-            }
-            
-            if recommended.count > 0 && show_recommended {
-                VStack {
-                    HStack(alignment: .top) {
-                        Spacer()
-                        Button(action: {
-                            withAnimation(.easeOut(duration: 0.2)) {
-                                show_recommended.toggle()
-                            }
-                        }) {
-                            Image(systemName: "xmark.circle")
-                                .font(.system(size: 18))
-                                .foregroundStyle(DamusLightGradient.gradient)
-                        }
-                        .padding([.top, .trailing], 8)
-                    }
-                    
-                    Text("Recommended relays", comment: "Title for view of recommended relays.")
-                        .foregroundStyle(DamusLightGradient.gradient)
-                        .padding(10)
-                        .background {
-                            RoundedRectangle(cornerRadius: 15)
-                                .stroke(DamusLightGradient.gradient)
-                        }
-                    
-                    ScrollView(.horizontal) {
-                        HStack(spacing: 20) {
-                            ForEach(recommended, id: \.url) { r in
-                                RecommendedRelayView(damus: state, relay: r.url.id)
-                            }
-                        }
-                        .padding(.horizontal, 30)
-                        .padding(.vertical, 5)
-                    }
-                    .scrollIndicators(.hidden)
-                    .mask(
-                        HStack(spacing: 0) {
-                            LinearGradient(gradient: Gradient(colors: [Color.clear, Color.white]), startPoint: .leading, endPoint: .trailing)
-                                .frame(width: 30)
-                            
-                            Rectangle()
-                                .fill(Color.white)
-                                .frame(maxWidth: .infinity)
-                            
-                            LinearGradient(gradient: Gradient(colors: [Color.white, Color.clear]), startPoint: .leading, endPoint: .trailing)
-                                .frame(width: 30)
-                        }
-                    )
-                    .padding()
-                }
-                .frame(minWidth: 250, maxWidth: .infinity, minHeight: 250, alignment: .center)
-                .background {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(DamusLightGradient.gradient.opacity(0.15), strokeBorder: DamusLightGradient.gradient, lineWidth: 1)
-                }
-                .padding(.horizontal)
-            }
-            
-            HStack {
-                Text(NSLocalizedString("My Relays", comment: "Section title for relay servers that the user is connected to."))
-                    .font(.system(size: 32, weight: .bold))
+        NavigationView {
+            ZStack(alignment: .bottom){
+                TabView(selection: $selectedTab) {
+                    RelayList(title: "My Relays", relayList: relays, recommended: false)
+                        .tag(0)
 
-                Spacer()
-                
-                Button(action: {
-                    show_add_relay.toggle()
-                }) {
-                    HStack {
-                        Text(verbatim: "Add relay")
-                            .padding(10)
+                    RelayList(title: "Recommended", relayList: recommended, recommended: true)
+                        .tag(1)
+                }
+                ZStack{
+                    HStack{
+                        ForEach((RelayTab.allCases), id: \.self){ item in
+                            Button{
+                                selectedTab = item.rawValue
+                            } label: {
+                                CustomTabItem(title: item.title, isActive: (selectedTab == item.rawValue))
+                            }
+                        }
                     }
                 }
-                .buttonStyle(NeutralButtonStyle())
+                .frame(width: 235, height: 35)
+                .background(.damusNeutral3)
+                .cornerRadius(30)
+                .padding(.horizontal, 26)
             }
-            .padding(25)
-            
-            List(Array(relays), id: \.url) { relay in
-                RelayView(state: state, relay: relay.url.id, showActionButtons: $showActionButtons)
-            }
-            .listStyle(PlainListStyle())
         }
         .navigationTitle(NSLocalizedString("Relays", comment: "Title of relays view"))
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .navigationBarItems(leading: BackNav())
         .sheet(isPresented: $show_add_relay, onDismiss: { self.show_add_relay = false }) {
-            if #available(iOS 16.0, *) {
-                AddRelayView(state: state)
-                    .presentationDetents([.height(300)])
-                    .presentationDragIndicator(.visible)
-            } else {
-                AddRelayView(state: state)
-            }
+            AddRelayView(state: state)
+                .presentationDetents([.height(300)])
+                .presentationDragIndicator(.visible)
         }
         .toolbar {
-            if state.keypair.privkey != nil {
+            if state.keypair.privkey != nil && selectedTab == 0 {
                 if showActionButtons {
                     Button("Done") {
                         withAnimation {
@@ -172,6 +99,65 @@ struct RelayConfigView: View {
                 }
             }
         }
+        .onReceive(handle_notify(.relays_changed)) { _ in
+            self.relays = state.pool.our_descriptors
+        }
+        .onAppear {
+            notify(.display_tabbar(false))
+        }
+        .onDisappear {
+            notify(.display_tabbar(true))
+        }
+        .ignoresSafeArea(.all)
+    }
+    
+    func RelayList(title: String, relayList: [RelayDescriptor], recommended: Bool) -> some View {
+        ScrollView(showsIndicators: false) {
+            HStack {
+                Text(NSLocalizedString(title, comment: "Section title for type of relay server list"))
+                    .font(.system(size: 32, weight: .bold))
+                
+                
+                Spacer()
+                
+                if state.keypair.privkey != nil {
+                    Button(action: {
+                        show_add_relay.toggle()
+                    }) {
+                        HStack {
+                            Text(verbatim: "Add relay")
+                                .padding(10)
+                        }
+                    }
+                    .buttonStyle(NeutralButtonStyle())
+                }
+            }
+            .padding(.top, 5)
+            
+            ForEach(relayList, id: \.url) { relay in
+                Group {
+                    RelayView(state: state, relay: relay.url.id, showActionButtons: $showActionButtons, recommended: recommended)
+                    Divider()
+                }
+            }
+            
+            Spacer()
+                .padding(25)
+        }
+        .padding(.horizontal)
+    }
+}
+
+extension RelayConfigView{
+    func CustomTabItem(title: String, isActive: Bool) -> some View {
+        HStack {
+            Text(title)
+                .font(.system(size: 12, weight: isActive ? .bold : .regular))
+                .foregroundColor(isActive ? .damusAdaptableBlack : .damusAdaptableBlack.opacity(0.7))
+        }
+        .frame(width: 110, height: 30)
+        .background(isActive ? .damusAdaptableWhite.opacity(0.9) : .clear)
+        .cornerRadius(30)
     }
 }
 

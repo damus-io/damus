@@ -51,7 +51,6 @@ struct RelayStatusView: View {
                     )
             }
         }
-        .padding(.trailing, 20)
     }
 }
 

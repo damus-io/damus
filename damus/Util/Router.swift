@@ -53,7 +53,7 @@ enum Route: Hashable {
         case .Followers(let followers):
             FollowersView(damus_state: damusState, followers: followers)
         case .Relay(let relay, let showActionButtons):
-            RelayView(state: damusState, relay: relay, showActionButtons: showActionButtons)
+            RelayView(state: damusState, relay: relay, showActionButtons: showActionButtons, recommended: false)
         case .RelayDetail(let relay, let metadata):
             RelayDetailView(state: damusState, relay: relay, nip11: metadata)
         case .Following(let following):
