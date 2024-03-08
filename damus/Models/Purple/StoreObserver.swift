@@ -21,7 +21,8 @@ class StoreObserver: NSObject, SKPaymentTransactionObserver {
     //Observe transaction updates.
     func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
         //Handle transaction states here.
-        
+        Log.info("StoreObserver received a transaction update. Notifying to delegate.", for: .damus_purple)
+
         Task {
             try await self.delegate?.send_receipt()
         }

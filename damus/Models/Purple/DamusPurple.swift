@@ -172,11 +172,11 @@ class DamusPurple: StoreObserverDelegate {
             let account_uuid = try await self.get_maybe_cached_uuid_for_account()
             let json_text: [String: String] = ["receipt": receipt_base64_string, "account_uuid": account_uuid.uuidString]
             let json_data = try JSONSerialization.data(withJSONObject: json_text)
-            
+
             let url = environment.api_base_url().appendingPathComponent("accounts/\(keypair.pubkey.hex())/apple-iap/app-store-receipt")
-            
-            Log.info("Sending in-app purchase receipt to Damus Purple server", for: .damus_purple)
-            
+
+            Log.info("Sending in-app purchase receipt to Damus Purple server: %s", for: .damus_purple, receipt_base64_string)
+
             let (data, response) = try await make_nip98_authenticated_request(
                 method: .post,
                 url: url,
