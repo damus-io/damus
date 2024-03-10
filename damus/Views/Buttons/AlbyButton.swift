@@ -23,16 +23,15 @@ struct AlbyButton: View {
             HStack {
                 Image("alby")
                 
-                Text("Attach Alby Wallet", comment:  "Button to attach an Alby Wallet, a service that provides a Lightning wallet for zapping sats. Alby is the name of the service and should not be translated.")
+                Text("Connect to Alby Wallet", comment:  "Button to attach an Alby Wallet, a service that provides a Lightning wallet for zapping sats. Alby is the name of the service and should not be translated.")
+                    .padding()
             }
-            .offset(x: -25)
-            .frame(minWidth: 300, maxWidth: .infinity, minHeight: 50, maxHeight: 50, alignment: .center)
+            .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
             .foregroundColor(DamusColors.black)
             .background {
-                RoundedRectangle(cornerRadius: 24)
-                    .fill(AlbyGradient, strokeBorder: colorScheme == .light ? DamusColors.black : DamusColors.white, lineWidth: 2)
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(AlbyGradient, strokeBorder: colorScheme == .light ? DamusColors.black.opacity(0.2) : DamusColors.white, lineWidth: 1)
             }
-            .padding(EdgeInsets(top: 10, leading: 50, bottom: 25, trailing: 50))
         }
     }
 }

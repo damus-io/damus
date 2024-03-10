@@ -403,6 +403,8 @@
 		5C6E1DAD2A193EC2008FC15A /* GradientButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C6E1DAC2A193EC2008FC15A /* GradientButtonStyle.swift */; };
 		5C6E1DAF2A194075008FC15A /* PinkGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C6E1DAE2A194075008FC15A /* PinkGradient.swift */; };
 		5C7389B12B6EFA7100781E0A /* ProxyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B02B6EFA7100781E0A /* ProxyView.swift */; };
+		5C7389B72B9E692E00781E0A /* MutinyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B62B9E692E00781E0A /* MutinyButton.swift */; };
+		5C7389B92B9E69ED00781E0A /* MutinyGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B82B9E69ED00781E0A /* MutinyGradient.swift */; };
 		5CC868DD2AA29B3200FB22BA /* NeutralButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC868DC2AA29B3200FB22BA /* NeutralButtonStyle.swift */; };
 		5CF2DCCC2AA3AF0B00984B8D /* RelayPicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF2DCCB2AA3AF0B00984B8D /* RelayPicView.swift */; };
 		5CF2DCCE2AABE1A500984B8D /* DamusLightGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF2DCCD2AABE1A500984B8D /* DamusLightGradient.swift */; };
@@ -1324,6 +1326,8 @@
 		5C6E1DAC2A193EC2008FC15A /* GradientButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientButtonStyle.swift; sourceTree = "<group>"; };
 		5C6E1DAE2A194075008FC15A /* PinkGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinkGradient.swift; sourceTree = "<group>"; };
 		5C7389B02B6EFA7100781E0A /* ProxyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyView.swift; sourceTree = "<group>"; };
+		5C7389B62B9E692E00781E0A /* MutinyButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutinyButton.swift; sourceTree = "<group>"; };
+		5C7389B82B9E69ED00781E0A /* MutinyGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutinyGradient.swift; sourceTree = "<group>"; };
 		5CC868DC2AA29B3200FB22BA /* NeutralButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeutralButtonStyle.swift; sourceTree = "<group>"; };
 		5CF2DCCB2AA3AF0B00984B8D /* RelayPicView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayPicView.swift; sourceTree = "<group>"; };
 		5CF2DCCD2AABE1A500984B8D /* DamusLightGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusLightGradient.swift; sourceTree = "<group>"; };
@@ -2110,6 +2114,7 @@
 				5C0707D02A1ECB38004E7B51 /* DamusLogoGradient.swift */,
 				4C687C202A5F7ED00092C550 /* DamusBackground.swift */,
 				5CF2DCCD2AABE1A500984B8D /* DamusLightGradient.swift */,
+				5C7389B82B9E69ED00781E0A /* MutinyGradient.swift */,
 			);
 			path = Gradients;
 			sourceTree = "<group>";
@@ -2180,6 +2185,7 @@
 				4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */,
 				F71694F32A6732B7001F4053 /* GradientFollowButton.swift */,
 				4C7D09652A0AE62100943473 /* AlbyButton.swift */,
+				5C7389B62B9E692E00781E0A /* MutinyButton.swift */,
 			);
 			path = Buttons;
 			sourceTree = "<group>";
@@ -3049,6 +3055,7 @@
 				4C30AC7829A577AB00E2BD5A /* EventCache.swift in Sources */,
 				4C285C8428385690008A31F1 /* CreateAccountView.swift in Sources */,
 				4CDD1AE22A6B3074001CD4DF /* NdbTagsIterator.swift in Sources */,
+				5C7389B72B9E692E00781E0A /* MutinyButton.swift in Sources */,
 				4C216F34286F5ACD00040376 /* DMView.swift in Sources */,
 				D7CB5D512B1174D100AD4105 /* FriendFilter.swift in Sources */,
 				D7CBD1D42B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift in Sources */,
@@ -3341,6 +3348,7 @@
 				4CF0ABD82981980C00D66079 /* Lists.swift in Sources */,
 				F71694EA2A662232001F4053 /* OnboardingSuggestionsView.swift in Sources */,
 				4C12536A2A76D3850004F4B8 /* RelaysChangedNotify.swift in Sources */,
+				5C7389B92B9E69ED00781E0A /* MutinyGradient.swift in Sources */,
 				4C30AC8029A6A53F00E2BD5A /* ProfilePicturesView.swift in Sources */,
 				D7373BAA2B68A65A00F7783D /* PurpleAccountUpdateNotify.swift in Sources */,
 				5C6E1DAD2A193EC2008FC15A /* GradientButtonStyle.swift in Sources */,

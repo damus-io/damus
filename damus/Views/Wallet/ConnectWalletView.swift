@@ -12,14 +12,15 @@ struct ConnectWalletView: View {
     @ObservedObject var model: WalletModel
     
     @State var scanning: Bool = false
+    @State private var showAlert = false
     @State var error: String? = nil
     @State var wallet_scan_result: WalletScanResult = .scanning
     var nav: NavigationCoordinator
     
     var body: some View {
         MainContent
-            .navigationTitle(NSLocalizedString("Attach a Wallet", comment: "Navigation title for attaching Nostr Wallet Connect lightning wallet."))
-            .navigationBarTitleDisplayMode(.large)
+            .navigationTitle(NSLocalizedString("Wallet", comment: "Navigation title for attaching Nostr Wallet Connect lightning wallet."))
+            .navigationBarTitleDisplayMode(.inline)
             .padding()
             .onChange(of: wallet_scan_result) { res in
                 scanning = false
@@ -30,18 +31,29 @@ struct ConnectWalletView: View {
                     self.model.new(url)
                     
                 case .failed:
-                    error = NSLocalizedString("Invalid Nostr wallet connection string", comment: "Error message when an invalid Nostr wallet connection string is provided.")
+                    showAlert.toggle()
                 
                 case .scanning:
                     error = nil
                 }
             }
+            .alert(isPresented: $showAlert) {
+                Alert(
+                    title: Text(NSLocalizedString("Invalid Nostr wallet connection string", comment: "Error message when an invalid Nostr wallet connection string is provided.")),
+                    message: Text("Make sure the wallet you are connecting to supports NWC."),
+                    dismissButton: .default(Text(NSLocalizedString("OK", comment: "Button label indicating user wants to proceed."))) {
+                        wallet_scan_result = .scanning
+                    }
+                )
+            }
     }
     
     func AreYouSure(nwc: WalletConnectURL) -> some View {
-        VStack {
-            Text("Are you sure you want to attach this wallet?", comment: "Prompt to ask user if they want to attach their Nostr Wallet Connect lightning wallet.")
-                .font(.title)
+        VStack(spacing: 25) {
+
+            Text("Are you sure you want to connect this wallet?", comment: "Prompt to ask user if they want to attach their Nostr Wallet Connect lightning wallet.")
+                .fontWeight(.bold)
+                .multilineTextAlignment(.center)
             
             Text(nwc.relay.id)
                 .font(.body)
@@ -53,25 +65,72 @@ struct ConnectWalletView: View {
                     .foregroundColor(.gray)
             }
             
-            BigButton(NSLocalizedString("Attach", comment: "Text for button to attach Nostr Wallet Connect lightning wallet.")) {
+            Button(action: {
                 model.connect(nwc)
+            }) {
+                HStack {
+                    Text("Connect", comment: "Text for button to conect to Nostr Wallet Connect lightning wallet.")
+                        .fontWeight(.semibold)
+                }
+                .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 18, alignment: .center)
             }
+            .buttonStyle(GradientButtonStyle())
             
-            BigButton(NSLocalizedString("Cancel", comment: "Text for button to cancel out of connecting Nostr Wallet Connect lightning ewallet.")) {
+            Button(action: {
                 model.cancel()
+            }) {
+                HStack {
+                    Text(NSLocalizedString("Cancel", comment: "Text for button to cancel out of connecting Nostr Wallet Connect lightning wallet."))
+                        .padding()
+                }
+                .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
             }
+            .buttonStyle(NeutralButtonStyle())
         }
     }
     
     var ConnectWallet: some View {
-        VStack {            
+        VStack(spacing: 25) {
+            
             AlbyButton() {
                 openURL(URL(string:"https://nwc.getalby.com/apps/new?c=Damus")!)
             }
             
-            BigButton(NSLocalizedString("Attach Wallet", comment: "Text for button to attach Nostr Wallet Connect lightning wallet.")) {
-                nav.push(route: Route.WalletScanner(result: $wallet_scan_result))
+            MutinyButton() {
+                openURL(URL(string:"https://app.mutinywallet.com/settings/connections")!)
             }
+            
+            Button(action: {
+                if let pasted_nwc = UIPasteboard.general.string {
+                    guard let url = WalletConnectURL(str: pasted_nwc) else {
+                        wallet_scan_result = .failed
+                        return
+                    }
+                    
+                    wallet_scan_result = .success(url)
+                }
+            }) {
+                HStack {
+                    Image("clipboard")
+                    Text("Paste NWC Address", comment: "Text for button to connect a lightning wallet.")
+                        .fontWeight(.semibold)
+                }
+                .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 18, alignment: .center)
+            }
+            .buttonStyle(GradientButtonStyle())
+            
+            Button(action: {
+                nav.push(route: Route.WalletScanner(result: $wallet_scan_result))
+            }) {
+                HStack {
+                    Image("qr-code")
+                    Text("Scan NWC Address", comment: "Text for button to connect a lightning wallet.")
+                        .fontWeight(.semibold)
+                }
+                .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 18, alignment: .center)
+            }
+            .buttonStyle(GradientButtonStyle())
+
             
             if let err = self.error {
                 Text(err)
@@ -80,14 +139,54 @@ struct ConnectWalletView: View {
         }
     }
     
+    var TopSection: some View {
+        HStack(spacing: 0) {
+            Button(action: {}, label: {
+                Image("damus-home")
+                    .resizable()
+                    .frame(width: 30, height: 30)
+            })
+            .buttonStyle(NeutralButtonStyle(padding: EdgeInsets(top: 15, leading: 15, bottom: 15, trailing: 15), cornerRadius: 9999))
+            .disabled(true)
+            .padding(.horizontal, 30)
+            
+            Image("chevron-double-right")
+                .resizable()
+                .frame(width: 25, height: 25)
+            
+            Button(action: {}, label: {
+                Image("wallet")
+                    .resizable()
+                    .frame(width: 30, height: 30)
+                    .foregroundStyle(LINEAR_GRADIENT)
+            })
+            .buttonStyle(NeutralButtonStyle(padding: EdgeInsets(top: 15, leading: 15, bottom: 15, trailing: 15), cornerRadius: 9999))
+            .disabled(true)
+            .padding(.horizontal, 30)
+        }
+    }
+    
+    var TitleSection: some View {
+        VStack(spacing: 25) {
+            Text("Damus Wallet")
+                .fontWeight(.bold)
+            
+            Text("Securely connect your Damus app to your wallet\nusing Nostr Wallet Connect")
+                .font(.caption)
+                .multilineTextAlignment(.center)
+        }
+    }
+    
     var MainContent: some View {
         Group {
+            TopSection
             switch model.connect_state {
             case .new(let nwc):
                 AreYouSure(nwc: nwc)
             case .existing:
                 Text(verbatim: "Shouldn't happen")
             case .none:
+                TitleSection
                 ConnectWallet
             }
         }

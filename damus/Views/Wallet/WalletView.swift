@@ -26,19 +26,58 @@ struct WalletView: View {
                 Spacer()
             }
             
-            Text(verbatim: nwc.relay.id)
-            
-            if let lud16 = nwc.lud16 {
-                Text(verbatim: lud16)
+            VStack(spacing: 5) {
+                VStack(spacing: 10) {
+                    Text("Wallet Relay")
+                        .fontWeight(.semibold)
+                        .padding(.top)
+                    
+                    Divider()
+                    
+                    RelayView(state: damus_state, relay: nwc.relay.id, showActionButtons: .constant(false))
+                }
+                .frame(maxWidth: .infinity, minHeight: 125, alignment: .top)
+                .padding(.horizontal, 10)
+                .background(DamusColors.neutral1)
+                .cornerRadius(10)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(DamusColors.neutral3, lineWidth: 1)
+                )
+                
+                if let lud16 = nwc.lud16 {
+                    VStack(spacing: 10) {
+                        Text("Wallet Address")
+                            .fontWeight(.semibold)
+                        
+                        Divider()
+                        
+                        Text(verbatim: lud16)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 75, alignment: .center)
+                    .padding(.horizontal, 10)
+                    .background(DamusColors.neutral1)
+                    .cornerRadius(10)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(DamusColors.neutral3, lineWidth: 1)
+                    )
+                }
             }
             
-            BigButton(NSLocalizedString("Disconnect Wallet", comment: "Text for button to disconnect from Nostr Wallet Connect lightning wallet.")) {
+            Button(action: {
                 self.model.disconnect()
+            }) {
+                HStack {
+                    Text(NSLocalizedString("Disconnect Wallet", comment: "Text for button to disconnect from Nostr Wallet Connect lightning wallet."))
+                }
+                .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 18, alignment: .center)
             }
+            .buttonStyle(GradientButtonStyle())
             
         }
         .navigationTitle(NSLocalizedString("Wallet", comment: "Navigation title for Wallet view"))
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
         .padding()
     }
     
