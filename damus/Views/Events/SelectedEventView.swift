@@ -52,7 +52,11 @@ struct SelectedEventView: View {
                     ReplyDescription(event: event, replying_to: replying_to, ndb: damus.ndb)
                         .padding(.horizontal)
                 }
-                
+
+                ProxyView(event: event)
+                    .padding(.top, 5)
+                    .padding(.horizontal)
+
                 EventBody(damus_state: damus, event: event, size: size, options: [.wide])
 
                 Mention
