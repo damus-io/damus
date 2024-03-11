@@ -120,8 +120,10 @@ class DamusPurple: StoreObserverDelegate {
                 // Record the purchase with the storekit manager, to make sure we have the update on the UIs as soon as possible.
                 // During testing I found that the purchase initiated via `purchase` was not emitted via the listener `StoreKit.Transaction.updates` until the app was restarted.
                 self.storekit_manager.record_purchased_product(StoreKitManager.PurchasedProduct(tx: tx, product: product))
-                // Send the receipt to the server
-                try await self.send_receipt()
+                await tx.finish()
+                // Send the transaction id to the server
+                try await self.send_transaction_id(transaction_id: tx.originalID)
+
             default:
                 // Any time we get a non-verified result, it means that the purchase was not successful, and thus we should throw an error.
                 throw PurpleError.iap_purchase_error(result: result)
@@ -172,11 +174,11 @@ class DamusPurple: StoreObserverDelegate {
             let account_uuid = try await self.get_maybe_cached_uuid_for_account()
             let json_text: [String: String] = ["receipt": receipt_base64_string, "account_uuid": account_uuid.uuidString]
             let json_data = try JSONSerialization.data(withJSONObject: json_text)
-            
+
             let url = environment.api_base_url().appendingPathComponent("accounts/\(keypair.pubkey.hex())/apple-iap/app-store-receipt")
-            
-            Log.info("Sending in-app purchase receipt to Damus Purple server", for: .damus_purple)
-            
+
+            Log.info("Sending in-app purchase receipt to Damus Purple server: %s", for: .damus_purple, receipt_base64_string)
+
             let (data, response) = try await make_nip98_authenticated_request(
                 method: .post,
                 url: url,
@@ -196,7 +198,33 @@ class DamusPurple: StoreObserverDelegate {
             }
         }
     }
-    
+
+    func send_transaction_id(transaction_id: UInt64) async throws {
+        let account_uuid = try await self.get_maybe_cached_uuid_for_account()
+        let json_text: [String: Any] = ["transaction_id": transaction_id, "account_uuid": account_uuid.uuidString]
+        let json_data = try JSONSerialization.data(withJSONObject: json_text)
+
+        let url = environment.api_base_url().appendingPathComponent("accounts/\(keypair.pubkey.hex())/apple-iap/transaction-id")
+
+        let (data, response) = try await make_nip98_authenticated_request(
+            method: .post,
+            url: url,
+            payload: json_data,
+            payload_type: .json,
+            auth_keypair: self.keypair
+        )
+
+        if let httpResponse = response as? HTTPURLResponse {
+            switch httpResponse.statusCode {
+                case 200:
+                    Log.info("Sent transaction ID to Damus Purple server and activated successfully", for: .damus_purple)
+                default:
+                    Log.error("Error in sending or verifying transaction ID with Damus Purple server. HTTP status code: %d; Response: %s", for: .damus_purple, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
+                    throw DamusPurple.PurpleError.iap_receipt_verification_error(status: httpResponse.statusCode, response: data)
+            }
+        }
+    }
+
     func translate(text: String, source source_language: String, target target_language: String) async throws -> String {
         var url = environment.api_base_url()
         url.append(path: "/translate")
