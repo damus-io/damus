@@ -31,10 +31,10 @@ struct WalletView: View {
                     Text("Wallet Relay")
                         .fontWeight(.semibold)
                         .padding(.top)
-                    
+
                     Divider()
-                    
-                    RelayView(state: damus_state, relay: nwc.relay.id, showActionButtons: .constant(false))
+
+                    RelayView(state: damus_state, relay: nwc.relay.id, showActionButtons: .constant(false), recommended: false)
                 }
                 .frame(maxWidth: .infinity, minHeight: 125, alignment: .top)
                 .padding(.horizontal, 10)
