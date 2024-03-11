@@ -123,7 +123,7 @@ class RelayPool {
     
     func add_relay(_ desc: RelayDescriptor) throws {
         let url = desc.url
-        let relay_id = get_relay_id(url)
+        let relay_id = url.id
         if get_relay(relay_id) != nil {
             throw RelayError.RelayAlreadyExists
         }
@@ -270,12 +270,23 @@ class RelayPool {
     }
     
     func get_relays(_ ids: [String]) -> [Relay] {
+        get_relays(ids.compactMap { RelayURL($0) })
+    }
+    
+    func get_relays(_ urls: [RelayURL]) -> [Relay] {
         // don't include ephemeral relays in the default list to query
-        relays.filter { ids.contains($0.id) }
+        relays.filter { urls.contains($0.descriptor.url) }
     }
     
     func get_relay(_ id: String) -> Relay? {
-        relays.first(where: { $0.id == id })
+        guard let url = RelayURL(id) else {
+            return nil
+        }
+        return get_relay(url)
+    }
+    
+    func get_relay(_ url: RelayURL) -> Relay? {
+        relays.first(where: { $0.descriptor.url == url })
     }
     
     func run_queue(_ relay_id: String) {

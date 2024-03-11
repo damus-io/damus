@@ -79,6 +79,20 @@ final class WalletConnectTests: XCTestCase {
         XCTAssertEqual(url_2.relay.id, relay_2)
     }
     
+    func testGetRelayWithTrailingSlashes() {
+        let sec = "8ba3a6b3b57d0f4211bb1ea4d8d1e351a367e9b4ea694746e0a4a452b2bc4d37"
+        let pk =  "89446b900c70d62438dcf66756405eea6225ad94dc61f3856f62f9699111a9a6"
+        let nwc = WalletConnectURL(str: "nostrwalletconnect://\(pk)?relay=ws://127.0.0.1/&secret=\(sec)&lud16=jb55@jb55.com")!
+
+        let pool = RelayPool(ndb: .empty)
+        let box = PostBox(pool: pool)
+
+        nwc_pay(url: nwc, pool: pool, post: box, invoice: "invoice")
+
+        XCTAssertNotNil(pool.get_relay(nwc.relay.id))
+        XCTAssertEqual(pool.get_relays([nwc.relay.id]).count, 1)
+    }
+
     func testNWCEphemeralRelay() {
         let sec = "8ba3a6b3b57d0f4211bb1ea4d8d1e351a367e9b4ea694746e0a4a452b2bc4d37"
         let pk =  "89446b900c70d62438dcf66756405eea6225ad94dc61f3856f62f9699111a9a6"

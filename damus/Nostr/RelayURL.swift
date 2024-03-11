@@ -15,7 +15,12 @@ public struct RelayURL: Hashable, Equatable, Codable, CodingKeyRepresentable {
     }
     
     init?(_ str: String) {
-        guard let url = URL(string: str) else {
+        var trimmedStr = str
+        while trimmedStr.hasSuffix("/") {
+            trimmedStr.removeLast()
+        }
+
+        guard let url = URL(string: trimmedStr) else {
             return nil
         }
         

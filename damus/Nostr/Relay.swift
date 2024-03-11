@@ -120,23 +120,10 @@ class Relay: Identifiable {
     }
     
     var id: String {
-        return get_relay_id(descriptor.url)
+        return descriptor.url.id
     }
-
 }
 
 enum RelayError: Error {
     case RelayAlreadyExists
-}
-
-func get_relay_id(_ url: RelayURL) -> String {
-    let trimTrailingSlashes: (String) -> String = { url in
-        var trimmedUrl = url
-        while trimmedUrl.hasSuffix("/") {
-            trimmedUrl.removeLast()
-        }
-        return trimmedUrl
-    }
-    
-    return trimTrailingSlashes(url.url.absoluteString)
 }
