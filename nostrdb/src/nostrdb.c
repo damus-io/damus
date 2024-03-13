@@ -2939,7 +2939,9 @@ static enum ndb_query_plan ndb_filter_plan(struct ndb_filter *filter)
 	if (ids) {
 		return NDB_PLAN_IDS;
 	} else if (authors && authors->count <= 5) {
-		return NDB_PLAN_AUTHORS;
+		// TODO: actually implment author plan and use it
+		//return NDB_PLAN_AUTHORS;
+		return NDB_PLAN_CREATED;
 	} else if (tags && tags->count <= 5) {
 		return NDB_PLAN_TAGS;
 	} else if (kinds) {
