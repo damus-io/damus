@@ -41,6 +41,7 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 
 [nips]: https://github.com/nostr-protocol/nips
 [nip01]: https://github.com/nostr-protocol/nips/blob/master/01.md
+[nip04]: https://github.com/nostr-protocol/nips/blob/master/04.md
 [nip08]: https://github.com/nostr-protocol/nips/blob/master/08.md
 [nip10]: https://github.com/nostr-protocol/nips/blob/master/10.md
 [nip12]: https://github.com/nostr-protocol/nips/blob/master/12.md
