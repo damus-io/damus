@@ -97,7 +97,7 @@ struct ConnectWalletView: View {
             }
             
             MutinyButton() {
-                openURL(URL(string:"https://app.mutinywallet.com/settings/connections")!)
+                openURL(URL(string:"https://app.mutinywallet.com/settings/connections?callbackUri=nostr%2bwalletconnect&name=Damus")!)
             }
             
             Button(action: {
