@@ -723,7 +723,8 @@ struct ContentView: View {
                                       nav: self.navigationCoordinator,
                                       music: MusicController(onChange: music_changed),
                                       video: VideoController(),
-                                      ndb: ndb
+                                      ndb: ndb,
+                                      quote_reposts: .init(our_pubkey: pubkey)
         )
         
         home.damus_state = self.damus_state!

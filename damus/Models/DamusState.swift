@@ -13,6 +13,7 @@ class DamusState: HeadlessDamusState {
     let keypair: Keypair
     let likes: EventCounter
     let boosts: EventCounter
+    let quote_reposts: EventCounter
     let contacts: Contacts
     let mutelist_manager: MutelistManager
     let profiles: Profiles
@@ -36,7 +37,7 @@ class DamusState: HeadlessDamusState {
     let ndb: Ndb
     var purple: DamusPurple
 
-    init(pool: RelayPool, keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, postbox: PostBox, bootstrap_relays: [String], replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: VideoController, ndb: Ndb, purple: DamusPurple? = nil) {
+    init(pool: RelayPool, keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, postbox: PostBox, bootstrap_relays: [String], replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: VideoController, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter) {
         self.pool = pool
         self.keypair = keypair
         self.likes = likes
@@ -66,6 +67,7 @@ class DamusState: HeadlessDamusState {
             settings: settings,
             keypair: keypair
         )
+        self.quote_reposts = quote_reposts
     }
 
     @discardableResult
@@ -129,7 +131,8 @@ class DamusState: HeadlessDamusState {
             nav: NavigationCoordinator(),
             music: nil,
             video: VideoController(),
-            ndb: .empty
+            ndb: .empty,
+            quote_reposts: .init(our_pubkey: empty_pub)
         )
     }
 }
