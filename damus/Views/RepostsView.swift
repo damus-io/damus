@@ -14,7 +14,7 @@ struct RepostsView: View {
     var body: some View {
         ScrollView {
             LazyVStack {
-                ForEach(model.events, id: \.id) { ev in
+                ForEach(model.events.events, id: \.id) { ev in
                     RepostView(damus_state: damus_state, repost: ev)
                 }
             }
