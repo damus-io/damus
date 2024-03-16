@@ -33,6 +33,15 @@ struct EventDetailBar: View {
                 .buttonStyle(PlainButtonStyle())
             }
 
+            if bar.quote_reposts > 0 {
+                NavigationLink(value: Route.QuoteReposts(quotes: .quotes(state: state, target: target))) {
+                    let nounString = pluralizedString(key: "quoted_reposts_count", count: bar.quote_reposts)
+                    let noun = Text(nounString).foregroundColor(.gray)
+                    Text("\(Text(verbatim: bar.quote_reposts.formatted()).font(.body.bold())) \(noun)", comment: "Sentence composed of 2 variables to describe how many quoted reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.")
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+
             if bar.likes > 0 && !state.settings.onlyzaps_mode {
                 NavigationLink(value: Route.Reactions(reactions: .likes(state: state, target: target))) {
                     let nounString = pluralizedString(key: "reactions_count", count: bar.likes)

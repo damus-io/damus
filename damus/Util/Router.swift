@@ -32,6 +32,7 @@ enum Route: Hashable {
     case DeveloperSettings(settings: UserSettingsStore)
     case Thread(thread: ThreadModel)
     case Reposts(reposts: EventsModel)
+    case QuoteReposts(quotes: EventsModel)
     case Reactions(reactions: EventsModel)
     case Zaps(target: ZapTarget)
     case Search(search: SearchModel)
@@ -92,6 +93,8 @@ enum Route: Hashable {
             ThreadView(state: damusState, thread: thread)
         case .Reposts(let reposts):
             RepostsView(damus_state: damusState, model: reposts)
+        case .QuoteReposts(let quote_reposts):
+            QuoteRepostsView(damus_state: damusState, model: quote_reposts)
         case .Reactions(let reactions):
             ReactionsView(damus_state: damusState, model: reactions)
         case .Zaps(let target):
@@ -178,6 +181,9 @@ enum Route: Hashable {
         case .Reposts(let reposts):
             hasher.combine("reposts")
             hasher.combine(reposts.target)
+        case .QuoteReposts(let evs_model):
+            hasher.combine("quote_reposts")
+            hasher.combine(evs_model.events.events.count)
         case .Zaps(let target):
             hasher.combine("zaps")
             hasher.combine(target.id)

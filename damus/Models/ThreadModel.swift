@@ -56,6 +56,7 @@ class ThreadModel: ObservableObject {
     
     func subscribe() {
         var meta_events = NostrFilter()
+        var quote_events = NostrFilter()
         var event_filter = NostrFilter()
         var ref_events = NostrFilter()
 
@@ -74,11 +75,14 @@ class ThreadModel: ObservableObject {
             kinds.append(.like)
         }
         meta_events.kinds = kinds
-
         meta_events.limit = 1000
-        
+
+        quote_events.kinds = [.text]
+        quote_events.quotes = [event.id]
+        quote_events.limit = 1000
+
         let base_filters = [event_filter, ref_events]
-        let meta_filters = [meta_events]
+        let meta_filters = [meta_events, quote_events]
 
         print("subscribing to thread \(event.id) with sub_id \(base_subid)")
         damus_state.pool.subscribe(sub_id: base_subid, filters: base_filters, handler: handle_event)
@@ -90,7 +94,7 @@ class ThreadModel: ObservableObject {
             return
         }
         
-        let the_ev = damus_state.events.upsert(ev)
+        damus_state.events.upsert(ev)
         damus_state.replies.count_replies(ev, keypair: keypair)
         damus_state.events.add_replies(ev: ev, keypair: keypair)
 
@@ -111,7 +115,13 @@ class ThreadModel: ObservableObject {
                     
                 }
             } else if ev.is_textlike {
-                self.add_event(ev, keypair: damus_state.keypair)
+                // handle thread quote reposts, we just count them instead of
+                // adding them to the thread
+                if let target = ev.is_quote_repost, target == self.event.id {
+                    //let _ = self.damus_state.quote_reposts.add_event(ev, target: target)
+                } else {
+                    self.add_event(ev, keypair: damus_state.keypair)
+                }
             }
         }
         

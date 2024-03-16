@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 class EventsModel: ObservableObject {
     let state: DamusState
     let target: NoteId
