@@ -18,6 +18,7 @@ struct NostrFilter: Codable, Equatable {
     var authors: [Pubkey]?
     var hashtag: [String]?
     var parameter: [String]?
+    var quotes: [NoteId]?
 
     private enum CodingKeys : String, CodingKey {
         case ids
@@ -26,13 +27,14 @@ struct NostrFilter: Codable, Equatable {
         case pubkeys = "#p"
         case hashtag = "#t"
         case parameter = "#d"
+        case quotes = "#q"
         case since
         case until
         case authors
         case limit
     }
     
-    init(ids: [NoteId]? = nil, kinds: [NostrKind]? = nil, referenced_ids: [NoteId]? = nil, pubkeys: [Pubkey]? = nil, since: UInt32? = nil, until: UInt32? = nil, limit: UInt32? = nil, authors: [Pubkey]? = nil, hashtag: [String]? = nil) {
+    init(ids: [NoteId]? = nil, kinds: [NostrKind]? = nil, referenced_ids: [NoteId]? = nil, pubkeys: [Pubkey]? = nil, since: UInt32? = nil, until: UInt32? = nil, limit: UInt32? = nil, authors: [Pubkey]? = nil, hashtag: [String]? = nil, quotes: [NoteId]? = nil) {
         self.ids = ids
         self.kinds = kinds
         self.referenced_ids = referenced_ids
@@ -42,6 +44,7 @@ struct NostrFilter: Codable, Equatable {
         self.limit = limit
         self.authors = authors
         self.hashtag = hashtag
+        self.quotes = quotes
     }
     
     public static func copy(from: NostrFilter) -> NostrFilter {
