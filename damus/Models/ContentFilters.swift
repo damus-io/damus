@@ -53,6 +53,10 @@ struct ContentFilters {
 }
 
 extension ContentFilters {
+    static func default_filters(damus_state: DamusState) -> ContentFilters {
+        return ContentFilters(filters: ContentFilters.defaults(damus_state: damus_state))
+    }
+
     static func defaults(damus_state: DamusState) -> [(NostrEvent) -> Bool] {
         var filters = Array<(NostrEvent) -> Bool>()
         if damus_state.settings.hide_nsfw_tagged_content {
