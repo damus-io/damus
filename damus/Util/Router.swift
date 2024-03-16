@@ -31,8 +31,8 @@ enum Route: Hashable {
     case SearchSettings(settings: UserSettingsStore)
     case DeveloperSettings(settings: UserSettingsStore)
     case Thread(thread: ThreadModel)
-    case Reposts(reposts: RepostsModel)
-    case Reactions(reactions: ReactionsModel)
+    case Reposts(reposts: EventsModel)
+    case Reactions(reactions: EventsModel)
     case Zaps(target: ZapTarget)
     case Search(search: SearchModel)
     case EULA

@@ -23,6 +23,14 @@ class EventsModel: ObservableObject {
         self.kind = kind
     }
     
+    public static func reposts(state: DamusState, target: NoteId) -> EventsModel {
+        EventsModel(state: state, target: target, kind: .boost)
+    }
+    
+    public static func likes(state: DamusState, target: NoteId) -> EventsModel {
+        EventsModel(state: state, target: target, kind: .like)
+    }
+
     private func get_filter() -> NostrFilter {
         var filter = NostrFilter(kinds: [kind])
         filter.referenced_ids = [target]

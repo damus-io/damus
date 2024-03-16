@@ -25,7 +25,7 @@ struct EventDetailBar: View {
     var body: some View {
         HStack {
             if bar.boosts > 0 {
-                NavigationLink(value: Route.Reposts(reposts: RepostsModel(state: state, target: target))) {
+                NavigationLink(value: Route.Reposts(reposts: .reposts(state: state, target: target))) {
                     let nounString = pluralizedString(key: "reposts_count", count: bar.boosts)
                     let noun = Text(nounString).foregroundColor(.gray)
                     Text("\(Text(verbatim: bar.boosts.formatted()).font(.body.bold())) \(noun)", comment: "Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.")
@@ -34,7 +34,7 @@ struct EventDetailBar: View {
             }
 
             if bar.likes > 0 && !state.settings.onlyzaps_mode {
-                NavigationLink(value: Route.Reactions(reactions: ReactionsModel(state: state, target: target))) {
+                NavigationLink(value: Route.Reactions(reactions: .likes(state: state, target: target))) {
                     let nounString = pluralizedString(key: "reactions_count", count: bar.likes)
                     let noun = Text(nounString).foregroundColor(.gray)
                     Text("\(Text(verbatim: bar.likes.formatted()).font(.body.bold())) \(noun)", comment: "Sentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.")
