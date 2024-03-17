@@ -49,7 +49,8 @@ func generate_test_damus_state(
                            nav: .init(),
                            music: .init(onChange: {_ in }),
                            video: .init(),
-                           ndb: ndb)
+                           ndb: ndb,
+                           quote_reposts: .init(our_pubkey: our_pubkey) )
 
     return damus
 }

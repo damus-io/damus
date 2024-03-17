@@ -92,7 +92,9 @@ var test_damus_state: DamusState = ({
                            nav: .init(),
                            music: .init(onChange: {_ in }),
                            video: .init(),
-                           ndb: ndb)
+                           ndb: ndb,
+                           quote_reposts: .init(our_pubkey: our_pubkey)
+    )
 
     /*
     let prof = Profile(name: "damus", display_name: "damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", banner: "", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol", nip05: "damus.io", damus_donation: nil)

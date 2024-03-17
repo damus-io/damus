@@ -280,6 +280,13 @@ extension NdbNote {
         return kind == 1 || kind == 42 || kind == 30023
     }
 
+    var is_quote_repost: NoteId? {
+        guard kind == 1, let quoted_note_id = referenced_quote_ids.first else {
+            return nil
+        }
+        return quoted_note_id.note_id
+    }
+
     var known_kind: NostrKind? {
         return NostrKind.init(rawValue: kind)
     }

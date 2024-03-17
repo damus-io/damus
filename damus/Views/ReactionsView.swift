@@ -9,14 +9,14 @@ import SwiftUI
 
 struct ReactionsView: View {
     let damus_state: DamusState
-    @StateObject var model: ReactionsModel
-    
+    @StateObject var model: EventsModel
+
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
         ScrollView {
             LazyVStack {
-                ForEach(model.events, id: \.id) { ev in
+                ForEach(model.events.events, id: \.id) { ev in
                     ReactionView(damus_state: damus_state, reaction: ev)
                 }
             }
@@ -38,6 +38,6 @@ struct ReactionsView: View {
 struct ReactionsView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state
-        ReactionsView(damus_state: state, model: ReactionsModel(state: state, target: test_note.id))
+        ReactionsView(damus_state: state, model: .likes(state: state, target: test_note.id))
     }
 }

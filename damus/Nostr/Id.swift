@@ -41,7 +41,7 @@ struct QuoteId: IdType, TagKey, TagConvertible {
         self.id = data
     }
     
-    /// Refer to this QuoteId as a NoteId
+    /// The note id being quoted
     var note_id: NoteId {
         NoteId(self.id)
     }

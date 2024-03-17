@@ -347,9 +347,16 @@ class HomeModel {
         case .already_counted:
             break
         case .success(let n):
-            let boosted = Counted(event: ev, id: e, total: n)
-            notify(.reposted(boosted))
             notify(.update_stats(note_id: e))
+        }
+    }
+
+    func handle_quote_repost_event(_ ev: NostrEvent, target: NoteId) {
+        switch damus_state.quote_reposts.add_event(ev, target: target) {
+        case .already_counted:
+            break
+        case .success(let n):
+            notify(.update_stats(note_id: target))
         }
     }
 
@@ -671,6 +678,10 @@ class HomeModel {
         process_image_metadatas(cache: damus_state.events, ev: ev)
         damus_state.replies.count_replies(ev, keypair: self.damus_state.keypair)
         damus_state.events.insert(ev)
+
+        if let quoted_event = ev.referenced_quote_ids.first {
+            handle_quote_repost_event(ev, target: quoted_event.note_id)
+        }
 
         if sub_id == home_subid {
             insert_home_event(ev)
