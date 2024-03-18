@@ -21,8 +21,10 @@ struct DamusVideoPlayer: View {
     @StateObject var model: DamusVideoPlayerViewModel
     @EnvironmentObject private var orientationTracker: OrientationTracker
     let style: Style
+    let visibility_tracking_method: VisibilityTrackingMethod
+    @State var isVisible: Bool = false
     
-    init(url: URL, video_size: Binding<CGSize?>, controller: VideoController, style: Style) {
+    init(url: URL, video_size: Binding<CGSize?>, controller: VideoController, style: Style, visibility_tracking_method: VisibilityTrackingMethod = .y_scroll) {
         self.url = url
         let mute: Bool?
         if case .full = style {
@@ -32,6 +34,7 @@ struct DamusVideoPlayer: View {
             mute = nil
         }
         _model = StateObject(wrappedValue: DamusVideoPlayerViewModel(url: url, video_size: video_size, controller: controller, mute: mute))
+        self.visibility_tracking_method = visibility_tracking_method
         self.style = style
     }
     
@@ -67,14 +70,25 @@ struct DamusVideoPlayer: View {
                 }
             }
             .onChange(of: centerY) { _ in
-                update_is_visible(centerY: centerY)
+                if case .y_scroll = visibility_tracking_method {
+                    update_is_visible(centerY: centerY)
+                }
             }
+            .on_visibility_change(perform: { new_visibility in
+                if case .generic = visibility_tracking_method {
+                    model.set_view_is_visible(new_visibility)
+                }
+            })
             .onAppear {
-                update_is_visible(centerY: centerY)
+                if case .y_scroll = visibility_tracking_method {
+                    update_is_visible(centerY: centerY)
+                }
             }
         }
         .onDisappear {
-            model.view_did_disappear()
+            if case .y_scroll = visibility_tracking_method {
+                model.view_did_disappear()
+            }
         }
     }
     
@@ -140,6 +154,13 @@ struct DamusVideoPlayer: View {
         case full
         /// A style suitable for muted, auto-playing videos on a feed
         case preview(on_tap: (() -> Void)?)
+    }
+    
+    enum VisibilityTrackingMethod {
+        /// Detects visibility based on its Y position relative to viewport. Ideal for long feeds
+        case y_scroll
+        /// Detects visibility based whether the view intersects with the viewport
+        case generic
     }
 }
 struct DamusVideoPlayer_Previews: PreviewProvider {
