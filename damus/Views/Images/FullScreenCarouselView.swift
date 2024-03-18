@@ -130,19 +130,42 @@ struct FullScreenCarouselView<Content: View>: View {
     }
 }
 
-fileprivate struct ImageViewPreview: View {
+fileprivate struct FullScreenCarouselPreviewView<Content: View>: View {
     @State var selectedIndex: Int = 0
     let url: MediaUrl = .image(URL(string: "https://jb55.com/red-me.jpg")!)
     let test_video_url: MediaUrl = .video(URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!)
+    let custom_content: (() -> Content)?
+    
+    init(content: (() -> Content)? = nil) {
+        self.custom_content = content
+    }
     
     var body: some View {
-        FullScreenCarouselView<AnyView>(video_controller: test_damus_state.video, urls: [test_video_url, url], settings: test_damus_state.settings, selectedIndex: $selectedIndex)
+        FullScreenCarouselView(video_controller: test_damus_state.video, urls: [test_video_url, url], settings: test_damus_state.settings, selectedIndex: $selectedIndex) {
+            self.custom_content?()
+        }
             .environmentObject(OrientationTracker())
     }
 }
 
-struct ImageView_Previews: PreviewProvider {
+struct FullScreenCarouselView_Previews: PreviewProvider {
     static var previews: some View {
-        ImageViewPreview()
+        Group {
+            FullScreenCarouselPreviewView<AnyView>()
+                .previewDisplayName("No custom content on overlay")
+            
+            FullScreenCarouselPreviewView(content: {
+                HStack {
+                    Spacer()
+                    
+                    Text("Some content")
+                        .padding()
+                        .foregroundColor(.white)
+                        
+                    Spacer()
+                }.background(.ultraThinMaterial)
+            })
+                .previewDisplayName("Custom content on overlay")
+        }
     }
 }
