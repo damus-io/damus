@@ -77,13 +77,14 @@ class CarouselModel: ObservableObject {
 
 // MARK: - Image Carousel
 @MainActor
-struct ImageCarousel: View {
+struct ImageCarousel<Content: View>: View {
     var urls: [MediaUrl]
     
     let evid: NoteId
     
     let state: DamusState
     @ObservedObject var model: CarouselModel
+    let content: ((_ dismiss: @escaping (() -> Void)) -> Content)?
 
     init(state: DamusState, evid: NoteId, urls: [MediaUrl]) {
         self.urls = urls
@@ -91,6 +92,16 @@ struct ImageCarousel: View {
         self.state = state
         let media_model = state.events.get_cache_data(evid).media_metadata_model
         self._model = ObservedObject(initialValue: CarouselModel(image_fill: media_model.fill))
+        self.content = nil
+    }
+    
+    init(state: DamusState, evid: NoteId, urls: [MediaUrl], @ViewBuilder content: @escaping (_ dismiss: @escaping (() -> Void)) -> Content) {
+        self.urls = urls
+        self.evid = evid
+        self.state = state
+        let media_model = state.events.get_cache_data(evid).media_metadata_model
+        self._model = ObservedObject(initialValue: CarouselModel(image_fill: media_model.fill))
+        self.content = content
     }
     
     var filling: Bool {
@@ -201,7 +212,16 @@ struct ImageCarousel: View {
         }
         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
         .fullScreenCover(isPresented: $model.open_sheet) {
-            FullScreenCarouselView(video_controller: state.video, urls: urls, settings: state.settings, selectedIndex: $model.selectedIndex)
+            if let content {
+                FullScreenCarouselView<Content>(video_controller: state.video, urls: urls, settings: state.settings, selectedIndex: $model.selectedIndex) {
+                    content({ // Dismiss closure
+                        model.open_sheet = false
+                    })
+                }
+            }
+            else {
+                FullScreenCarouselView<AnyView>(video_controller: state.video, urls: urls, settings: state.settings, selectedIndex: $model.selectedIndex)
+            }
         }
         .frame(height: height)
         .onChange(of: model.selectedIndex) { value in
@@ -297,7 +317,7 @@ struct ImageCarousel_Previews: PreviewProvider {
     static var previews: some View {
         let url: MediaUrl = .image(URL(string: "https://jb55.com/red-me.jpg")!)
         let test_video_url: MediaUrl = .video(URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!)
-        ImageCarousel(state: test_damus_state, evid: test_note.id, urls: [test_video_url, url])
+        ImageCarousel<AnyView>(state: test_damus_state, evid: test_note.id, urls: [test_video_url, url])
             .environmentObject(OrientationTracker())
     }
 }

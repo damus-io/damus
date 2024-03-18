@@ -9,7 +9,12 @@ import SwiftUI
 
 struct TruncatedText: View {
     let text: CompatibleText
-    let maxChars: Int = 280
+    let maxChars: Int
+    
+    init(text: CompatibleText, maxChars: Int = 280) {
+        self.text = text
+        self.maxChars = maxChars
+    }
     
     var body: some View {
         let truncatedAttributedString: AttributedString? = text.attributed.truncateOrNil(maxLength: maxChars)

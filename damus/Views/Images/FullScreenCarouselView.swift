@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct FullScreenCarouselView: View {
+struct FullScreenCarouselView<Content: View>: View {
     let video_controller: VideoController
     let urls: [MediaUrl]
     
@@ -17,6 +17,25 @@ struct FullScreenCarouselView: View {
     
     let settings: UserSettingsStore
     @Binding var selectedIndex: Int
+    let content: (() -> Content)?
+    
+    init(video_controller: VideoController, urls: [MediaUrl], showMenu: Bool = true, settings: UserSettingsStore, selectedIndex: Binding<Int>, @ViewBuilder content: @escaping () -> Content) {
+        self.video_controller = video_controller
+        self.urls = urls
+        self.showMenu = showMenu
+        self.settings = settings
+        _selectedIndex = selectedIndex
+        self.content = content
+    }
+    
+    init(video_controller: VideoController, urls: [MediaUrl], showMenu: Bool = true, settings: UserSettingsStore, selectedIndex: Binding<Int>) {
+        self.video_controller = video_controller
+        self.urls = urls
+        self.showMenu = showMenu
+        self.settings = settings
+        _selectedIndex = selectedIndex
+        self.content = nil
+    }
     
     var tabViewIndicator: some View {
         HStack(spacing: 10) {
@@ -99,6 +118,8 @@ struct FullScreenCarouselView: View {
                             if (urls.count > 1) {
                                 tabViewIndicator
                             }
+                            
+                            self.content?()
                         }
                     }
                     .animation(.easeInOut, value: showMenu)
@@ -115,7 +136,7 @@ fileprivate struct ImageViewPreview: View {
     let test_video_url: MediaUrl = .video(URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!)
     
     var body: some View {
-        FullScreenCarouselView(video_controller: test_damus_state.video, urls: [test_video_url, url], settings: test_damus_state.settings, selectedIndex: $selectedIndex)
+        FullScreenCarouselView<AnyView>(video_controller: test_damus_state.video, urls: [test_video_url, url], settings: test_damus_state.settings, selectedIndex: $selectedIndex)
             .environmentObject(OrientationTracker())
     }
 }

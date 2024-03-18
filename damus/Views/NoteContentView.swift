@@ -57,6 +57,10 @@ struct NoteContentView: View {
         return options.contains(.truncate_content)
     }
     
+    var truncate_very_short: Bool {
+        return options.contains(.truncate_content_very_short)
+    }
+    
     var with_padding: Bool {
         return options.contains(.wide)
     }
@@ -73,7 +77,11 @@ struct NoteContentView: View {
     
     func truncatedText(content: CompatibleText) -> some View {
         Group {
-            if truncate {
+            if truncate_very_short {
+                TruncatedText(text: content, maxChars: 140)
+                    .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
+            }
+            else if truncate {
                 TruncatedText(text: content)
                     .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
             } else {
@@ -107,6 +115,19 @@ struct NoteContentView: View {
         }
     }
     
+    func fullscreen_preview(dismiss: @escaping () -> Void) -> some View {
+        VStack {
+            EventView(damus: damus_state, event: self.event, options: .embedded_text_only)
+                .padding(.top)
+        }
+        .background(.thinMaterial)
+        .preferredColorScheme(.dark)
+        .onTapGesture(perform: {
+            damus_state.nav.push(route: Route.Thread(thread: .init(event: self.event, damus_state: damus_state)))
+            dismiss()
+        })
+    }
+    
     func MainContent(artifacts: NoteArtifactsSeparated) -> some View {
         VStack(alignment: .leading) {
             if size == .selected {
@@ -135,13 +156,19 @@ struct NoteContentView: View {
             }
 
             if artifacts.media.count > 0 {
-                if !damus_state.settings.media_previews && !load_media {
+                if (self.options.contains(.no_media)) {
+                    EmptyView()
+                } else if !damus_state.settings.media_previews && !load_media {
                     loadMediaButton(artifacts: artifacts)
                 } else if !blur_images || (!blur_images && !damus_state.settings.media_previews && load_media) {
-                    ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media)
+                    ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media) { dismiss in
+                        fullscreen_preview(dismiss: dismiss)
+                    }
                 } else if blur_images || (blur_images && !damus_state.settings.media_previews && load_media) {
                     ZStack {
-                        ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media)
+                        ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media) { dismiss in
+                            fullscreen_preview(dismiss: dismiss)
+                        }
                         Blur()
                             .onTapGesture {
                                 blur_images = false
