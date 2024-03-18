@@ -20,10 +20,19 @@ struct DamusVideoPlayer: View {
     let url: URL
     @StateObject var model: DamusVideoPlayerViewModel
     @EnvironmentObject private var orientationTracker: OrientationTracker
+    let style: Style
     
-    init(url: URL, video_size: Binding<CGSize?>, controller: VideoController) {
+    init(url: URL, video_size: Binding<CGSize?>, controller: VideoController, style: Style) {
         self.url = url
-        _model = StateObject(wrappedValue: DamusVideoPlayerViewModel(url: url, video_size: video_size, controller: controller))
+        let mute: Bool?
+        if case .full = style {
+            mute = false
+        }
+        else {
+            mute = nil
+        }
+        _model = StateObject(wrappedValue: DamusVideoPlayerViewModel(url: url, video_size: video_size, controller: controller, mute: mute))
+        self.style = style
     }
     
     var body: some View {
@@ -31,7 +40,15 @@ struct DamusVideoPlayer: View {
             let localFrame = geo.frame(in: .local)
             let centerY = globalCoordinate(localX: 0, localY: localFrame.midY, localGeometry: geo).y
             ZStack {
-                AVPlayerView(player: model.player)
+                if case .full = self.style {
+                    DamusAVPlayerView(player: model.player, controller: model.player_view_controller, show_playback_controls: true)
+                }
+                if case .preview(let on_tap) = self.style {
+                    DamusAVPlayerView(player: model.player, controller: model.player_view_controller, show_playback_controls: false)
+                        .simultaneousGesture(TapGesture().onEnded({
+                            on_tap?()
+                        }))
+                }
                 
                 if model.is_loading {
                     ProgressView()
@@ -40,8 +57,10 @@ struct DamusVideoPlayer: View {
                         .scaleEffect(CGSize(width: 1.5, height: 1.5))
                 }
                 
-                if model.has_audio {
-                    mute_button
+                if case .preview = self.style {
+                    if model.has_audio {
+                        mute_button
+                    }
                 }
                 if model.is_live {
                     live_indicator
@@ -115,9 +134,24 @@ struct DamusVideoPlayer: View {
             Spacer()
         }
     }
+    
+    enum Style {
+        /// A full video player with playback controls
+        case full
+        /// A style suitable for muted, auto-playing videos on a feed
+        case preview(on_tap: (() -> Void)?)
+    }
 }
 struct DamusVideoPlayer_Previews: PreviewProvider {
     static var previews: some View {
-        DamusVideoPlayer(url: URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!, video_size: .constant(nil), controller: VideoController())
+        Group {
+            DamusVideoPlayer(url: URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!, video_size: .constant(nil), controller: VideoController(), style: .full)
+                .environmentObject(OrientationTracker())
+                .previewDisplayName("Full video player")
+            
+            DamusVideoPlayer(url: URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!, video_size: .constant(nil), controller: VideoController(), style: .preview(on_tap: nil))
+                .environmentObject(OrientationTracker())
+                .previewDisplayName("Preview video player")
+        }
     }
 }

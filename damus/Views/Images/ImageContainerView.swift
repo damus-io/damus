@@ -43,19 +43,26 @@ struct ImageContainerView: View {
     var body: some View {
         Group {
             switch url {
-            case .image(let url):
-                Img(url: url)
-            case .video(let url):
-                DamusVideoPlayer(url: url, video_size: .constant(nil), controller: video_controller)
+                case .image(let url):
+                    Img(url: url)
+                case .video(let url):
+                    DamusVideoPlayer(url: url, video_size: .constant(nil), controller: video_controller, style: .full)
             }
         }
     }
 }
 
 let test_image_url = URL(string: "https://jb55.com/red-me.jpg")!
+fileprivate let test_video_url = URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!
 
 struct ImageContainerView_Previews: PreviewProvider {
     static var previews: some View {
-        ImageContainerView(video_controller: test_damus_state.video, url: .image(test_image_url), settings: test_damus_state.settings)
+        Group {
+            ImageContainerView(video_controller: test_damus_state.video, url: .image(test_image_url), settings: test_damus_state.settings)
+                .previewDisplayName("Image")
+            ImageContainerView(video_controller: test_damus_state.video, url: .video(test_video_url), settings: test_damus_state.settings)
+                .previewDisplayName("Video")
+        }
+        .environmentObject(OrientationTracker())
     }
 }

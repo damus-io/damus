@@ -6,6 +6,7 @@
 //
 
 import AVFoundation
+import AVKit
 import Combine
 import Foundation
 import SwiftUI
@@ -27,7 +28,8 @@ final class DamusVideoPlayerViewModel: ObservableObject {
     private let url: URL
     private let player_item: AVPlayerItem
     let player: AVPlayer
-    private let controller: VideoController
+    fileprivate let controller: VideoController
+    let player_view_controller = AVPlayerViewController()
     let id = UUID()
     
     @Published var has_audio = false
@@ -55,7 +57,7 @@ final class DamusVideoPlayerViewModel: ObservableObject {
         }
     }
     
-    init(url: URL, video_size: Binding<CGSize?>, controller: VideoController) {
+    init(url: URL, video_size: Binding<CGSize?>, controller: VideoController, mute: Bool? = nil) {
         self.url = url
         player_item = AVPlayerItem(url: url)
         player = AVPlayer(playerItem: player_item)
@@ -66,7 +68,7 @@ final class DamusVideoPlayerViewModel: ObservableObject {
             await load()
         }
         
-        is_muted = controller.should_mute_video(url: url)
+        is_muted = mute ?? controller.should_mute_video(url: url)
         player.isMuted = is_muted
         
         NotificationCenter.default.addObserver(

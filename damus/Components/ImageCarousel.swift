@@ -132,7 +132,7 @@ struct ImageCarousel: View {
                         model.open_sheet = true
                     }
             case .video(let url):
-                DamusVideoPlayer(url: url, video_size: $model.video_size, controller: state.video)
+                DamusVideoPlayer(url: url, video_size: $model.video_size, controller: state.video, style: .preview(on_tap: { model.open_sheet = true }))
                     .onChange(of: model.video_size) { size in
                         guard let size else { return }
                         
@@ -201,7 +201,7 @@ struct ImageCarousel: View {
         }
         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
         .fullScreenCover(isPresented: $model.open_sheet) {
-            ImageView(video_controller: state.video, urls: urls, settings: state.settings, selectedIndex: $model.selectedIndex)
+            FullScreenCarouselView(video_controller: state.video, urls: urls, settings: state.settings, selectedIndex: $model.selectedIndex)
         }
         .frame(height: height)
         .onChange(of: model.selectedIndex) { value in
@@ -296,7 +296,9 @@ public struct ImageFill {
 struct ImageCarousel_Previews: PreviewProvider {
     static var previews: some View {
         let url: MediaUrl = .image(URL(string: "https://jb55.com/red-me.jpg")!)
-        ImageCarousel(state: test_damus_state, evid: test_note.id, urls: [url, url])
+        let test_video_url: MediaUrl = .video(URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!)
+        ImageCarousel(state: test_damus_state, evid: test_note.id, urls: [test_video_url, url])
+            .environmentObject(OrientationTracker())
     }
 }
 

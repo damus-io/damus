@@ -1,0 +1,127 @@
+//
+//  FullScreenCarouselView.swift
+//  damus
+//
+//  Created by William Casarin on 2023-03-23.
+//
+
+import SwiftUI
+
+struct FullScreenCarouselView: View {
+    let video_controller: VideoController
+    let urls: [MediaUrl]
+    
+    @Environment(\.presentationMode) var presentationMode
+    
+    @State var showMenu = true
+    
+    let settings: UserSettingsStore
+    @Binding var selectedIndex: Int
+    
+    var tabViewIndicator: some View {
+        HStack(spacing: 10) {
+            ForEach(urls.indices, id: \.self) { index in
+                Capsule()
+                    .fill(index == selectedIndex ? Color.white : Color.damusMediumGrey)
+                    .frame(width: 7, height: 7)
+                    .onTapGesture {
+                        selectedIndex = index
+                    }
+            }
+        }
+        .padding()
+        .clipShape(Capsule())
+    }
+    
+    var background: some ShapeStyle {
+        if case .video = urls[safe: selectedIndex] {
+            return AnyShapeStyle(Color.black)
+        }
+        else {
+            return AnyShapeStyle(.regularMaterial)
+        }
+    }
+    
+    var background_color: UIColor {
+        return .black
+    }
+    
+    var body: some View {
+        ZStack {
+            Color(self.background_color)
+                .ignoresSafeArea()
+            
+            TabView(selection: $selectedIndex) {
+                ForEach(urls.indices, id: \.self) { index in
+                    VStack {
+                        if case .video = urls[safe: index] {
+                            ImageContainerView(video_controller: video_controller, url: urls[index], settings: settings)
+                                .clipped()  // SwiftUI hack from https://stackoverflow.com/a/74401288 to make playback controls show up within the TabView
+                                .aspectRatio(contentMode: .fit)
+                                .padding(.top, Theme.safeAreaInsets?.top)
+                                .padding(.bottom, Theme.safeAreaInsets?.bottom)
+                                .modifier(SwipeToDismissModifier(minDistance: 50, onDismiss: {
+                                    presentationMode.wrappedValue.dismiss()
+                                }))
+                                .ignoresSafeArea()
+                        }
+                        else {
+                            ZoomableScrollView {
+                                ImageContainerView(video_controller: video_controller, url: urls[index], settings: settings)
+                                    .aspectRatio(contentMode: .fit)
+                                    .padding(.top, Theme.safeAreaInsets?.top)
+                                    .padding(.bottom, Theme.safeAreaInsets?.bottom)
+                            }
+                            .modifier(SwipeToDismissModifier(minDistance: 50, onDismiss: {
+                                presentationMode.wrappedValue.dismiss()
+                            }))
+                            .ignoresSafeArea()
+                        }
+                    }.tag(index)
+                }
+            }
+            .ignoresSafeArea()
+            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+            .gesture(TapGesture(count: 2).onEnded {
+                // Prevents menu from hiding on double tap
+            })
+            .gesture(TapGesture(count: 1).onEnded {
+                showMenu.toggle()
+            })
+            .overlay(
+                GeometryReader { geo in
+                    VStack {
+                        if showMenu {
+                            NavDismissBarView(showBackgroundCircle: false)
+                                .foregroundColor(.white)
+                            Spacer()
+                            
+                            if (urls.count > 1) {
+                                tabViewIndicator
+                            }
+                        }
+                    }
+                    .animation(.easeInOut, value: showMenu)
+                    .padding(.bottom, geo.safeAreaInsets.bottom == 0 ? 12 : 0)
+                }
+            )
+        }
+    }
+}
+
+fileprivate struct ImageViewPreview: View {
+    @State var selectedIndex: Int = 0
+    let url: MediaUrl = .image(URL(string: "https://jb55.com/red-me.jpg")!)
+    let test_video_url: MediaUrl = .video(URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!)
+    
+    var body: some View {
+        FullScreenCarouselView(video_controller: test_damus_state.video, urls: [test_video_url, url], settings: test_damus_state.settings, selectedIndex: $selectedIndex)
+            .environmentObject(OrientationTracker())
+    }
+}
+
+struct ImageView_Previews: PreviewProvider {
+    static var previews: some View {
+        ImageViewPreview()
+    }
+}
