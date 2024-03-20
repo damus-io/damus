@@ -42,16 +42,27 @@ struct ProfileImageContainerView: View {
 struct NavDismissBarView: View {
     
     @Environment(\.presentationMode) var presentationMode
+    let showBackgroundCircle: Bool
+    
+    init(showBackgroundCircle: Bool = true) {
+        self.showBackgroundCircle = showBackgroundCircle
+    }
     
     var body: some View {
         HStack {
             Button(action: {
                 presentationMode.wrappedValue.dismiss()
             }, label: {
-                Image("close")
-                    .frame(width: 33, height: 33)
-                    .background(.regularMaterial)
-                    .clipShape(Circle())
+                if showBackgroundCircle {
+                    Image("close")
+                        .frame(width: 33, height: 33)
+                        .background(.regularMaterial)
+                        .clipShape(Circle())
+                }
+                else {
+                    Image("close")
+                        .frame(width: 33, height: 33)
+                }
             })
             
             Spacer()

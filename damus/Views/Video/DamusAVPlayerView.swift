@@ -9,12 +9,15 @@ import Foundation
 import AVKit
 import SwiftUI
 
-struct AVPlayerView: UIViewControllerRepresentable {
+struct DamusAVPlayerView: UIViewControllerRepresentable {
     
     let player: AVPlayer
+    var controller: AVPlayerViewController
+    let show_playback_controls: Bool
     
     func makeUIViewController(context: Context) -> AVPlayerViewController {
-        AVPlayerViewController()
+        self.controller.showsPlaybackControls = show_playback_controls
+        return self.controller
     }
     
     func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
