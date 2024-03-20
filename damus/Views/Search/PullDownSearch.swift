@@ -10,12 +10,12 @@ import Foundation
 import SwiftUI
 
 struct PullDownSearchView: View {
-    @State private var search_text = ""
-    @State private var results: [NostrEvent] = []
-    @State private var is_active: Bool = false
     let debouncer: Debouncer = Debouncer(interval: 0.25)
     let state: DamusState
-    let on_cancel: () -> Void
+    
+    @Binding var search_text: String
+    @Binding var results: [NostrEvent]
+    @FocusState private var isFocused: Bool
     
     func do_search(query: String) {
         let limit = 16
@@ -51,12 +51,16 @@ struct PullDownSearchView: View {
             results = res_
         }
     }
-
-    var body: some View {
-        VStack(alignment: .leading) {
-            HStack {
-                TextField(NSLocalizedString("Search", comment: "Title of the text field for searching."), text: $search_text)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+    
+    var SearchInput: some View {
+        HStack {
+            HStack{
+                Image("search")
+                    .foregroundColor(.gray)
+                TextField(NSLocalizedString("Search", comment: "Placeholder text to prompt entry of search query."), text: $search_text)
+                    .autocorrectionDisabled(true)
+                    .textInputAutocapitalization(.never)
+                    .focused($isFocused)
                     .onChange(of: search_text) { query in
                         debouncer.debounce {
                             Task.detached {
@@ -64,63 +68,33 @@ struct PullDownSearchView: View {
                             }
                         }
                     }
-                    .onTapGesture {
-                        is_active = true
-                    }
-
-                if is_active {
-                    Button(action: {
-                        search_text = ""
-                        results = []
-                        end_editing()
-                        on_cancel()
-                    }, label: {
-                        Text("Cancel", comment: "Button to cancel out of search text entry mode.")
-                    })
-                }
             }
-            .padding()
-
-            if results.count > 0 {
-                HStack {
-                    Image("search")
-                    Text(NSLocalizedString("Top hits", comment: "A label indicating that the notes being displayed below it are all top note search results"))
-                    Spacer()
-                }
-                .padding(.horizontal)
-                .foregroundColor(.secondary)
-
-                ForEach(results, id: \.self) { note in
-                    EventView(damus: state, event: note)
-                        .onTapGesture {
-                            let event = note.get_inner_event(cache: state.events) ?? note
-                            let thread = ThreadModel(event: event, damus_state: state)
-                            state.nav.push(route: Route.Thread(thread: thread))
-                        }
-                }
-                
-                HStack {
-                    Image("notes.fill")
-                    Text(NSLocalizedString("Notes", comment: "A label indicating that the notes being displayed below it are from a timeline, not search results"))
-                    Spacer()
-                }
-                .foregroundColor(.secondary)
-                .padding(.horizontal)
-            } else if results.count == 0 && !search_text.isEmpty {
-                HStack {
-                    Image("search")
-                    Text(NSLocalizedString("No results", comment: "A label indicating that note search resulted in no results"))
-                    Spacer()
-                }
-                .padding(.horizontal)
-                .foregroundColor(.secondary)
+            .padding(7)
+            .background(.secondary.opacity(0.2))
+            .cornerRadius(15)
+            
+            if(!search_text.isEmpty || isFocused) {
+                Button(action: {
+                    search_text = ""
+                    isFocused = false
+                    results = []
+                }, label: {
+                    Text("Cancel", comment: "Button to cancel out of search text entry mode.")
+                })
             }
+        }
+        .padding([.horizontal, .top], 10)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            SearchInput
         }
     }
 }
 
 struct PullDownSearchView_Previews: PreviewProvider {
     static var previews: some View {
-        PullDownSearchView(state: test_damus_state, on_cancel: {})
+        PullDownSearchView(state: test_damus_state, search_text: .constant(""), results: .constant([]))
     }
 }

@@ -90,59 +90,6 @@ struct ContentView: View {
     // connect retry timer
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
-    var mystery: some View {
-        Text("Are you lost?", comment: "Text asking the user if they are lost in the app.")
-        .id("what")
-    }
-
-    func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
-        var filters = ContentFilters.defaults(damus_state: damus_state!)
-        filters.append(fstate.filter)
-        return ContentFilters(filters: filters).filter
-    }
-
-    var PostingTimelineView: some View {
-        VStack {
-            ZStack {
-                TabView(selection: $filter_state) {
-                    // This is needed or else there is a bug when switching from the 3rd or 2nd tab to first. no idea why.
-                    mystery
-                    
-                    contentTimelineView(filter: content_filter(.posts))
-                        .tag(FilterState.posts)
-                        .id(FilterState.posts)
-                    contentTimelineView(filter: content_filter(.posts_and_replies))
-                        .tag(FilterState.posts_and_replies)
-                        .id(FilterState.posts_and_replies)
-                }
-                .tabViewStyle(.page(indexDisplayMode: .never))
-                
-                if privkey != nil {
-                    PostButtonContainer(is_left_handed: damus_state?.settings.left_handed ?? false) {
-                        self.active_sheet = .post(.posting(.none))
-                    }
-                }
-            }
-        }
-        .safeAreaInset(edge: .top, spacing: 0) {
-            VStack(spacing: 0) {
-                CustomPicker(selection: $filter_state, content: {
-                    Text("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies).").tag(FilterState.posts)
-                    Text("Notes & Replies", comment: "Label for filter for seeing notes and replies (instead of only notes).").tag(FilterState.posts_and_replies)
-                })
-                Divider()
-                    .frame(height: 1)
-            }
-            .background(colorScheme == .dark ? Color.black : Color.white)
-        }
-    }
-    
-    func contentTimelineView(filter: (@escaping (NostrEvent) -> Bool)) -> some View {
-        TimelineView(events: home.events, loading: .constant(false), damus: damus_state, show_friend_icon: false, filter: filter) {
-            PullDownSearchView(state: damus_state, on_cancel: {})
-        }
-    }
-    
     func navIsAtRoot() -> Bool {
         return navigationCoordinator.isAtRoot()
     }
@@ -170,7 +117,7 @@ struct ContentView: View {
                 }
                 
             case .home:
-                PostingTimelineView
+                PostingTimelineView(damus_state: damus_state!, home: home, active_sheet: $active_sheet)
                 
             case .notifications:
                 NotificationsView(state: damus, notifications: home.notifications)
