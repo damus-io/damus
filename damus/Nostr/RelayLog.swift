@@ -13,7 +13,7 @@ import UIKit
 /// will have information to help developers debug issues.
 final class RelayLog: ObservableObject {
     private static let line_limit = 250
-    private let relay_url: URL?
+    private let relay_url: RelayURL?
     private lazy var formatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .short
@@ -29,9 +29,9 @@ final class RelayLog: ObservableObject {
     /// - Parameter relay_url: the relay url the log represents. Pass nil for the url to create
     /// a RelayLog that does nothing. This is required to allow RelayLog to be used as a StateObject,
     /// because they cannot be Optional.
-    init(_ relay_url: URL? = nil) {
+    init(_ relay_url: RelayURL? = nil) {
         self.relay_url = relay_url
-        
+
         setUp()
     }
     

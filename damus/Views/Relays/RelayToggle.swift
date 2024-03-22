@@ -10,9 +10,9 @@ import SwiftUI
 struct RelayToggle: View {
     let state: DamusState
     let timeline: Timeline
-    let relay_id: String
-    
-    func toggle_binding(relay_id: String) -> Binding<Bool> {
+    let relay_id: RelayURL
+
+    func toggle_binding(relay_id: RelayURL) -> Binding<Bool> {
         return Binding(get: {
             !state.relay_filters.is_filtered(timeline: timeline, relay_id: relay_id)
         }, set: { on in
@@ -30,7 +30,7 @@ struct RelayToggle: View {
                 RelayStatusView(connection: relay_connection)
             }
             RelayType(is_paid: state.relay_model_cache.model(with_relay_id: relay_id)?.metadata.is_paid ?? false)
-            Toggle(relay_id, isOn: toggle_binding(relay_id: relay_id))
+            Toggle(relay_id.absoluteString, isOn: toggle_binding(relay_id: relay_id))
                 .toggleStyle(SwitchToggleStyle(tint: .accentColor))
         }
     }
@@ -42,7 +42,7 @@ struct RelayToggle: View {
 
 struct RelayToggle_Previews: PreviewProvider {
     static var previews: some View {
-        RelayToggle(state: test_damus_state, timeline: .search, relay_id: "wss://jb55.com")
+        RelayToggle(state: test_damus_state, timeline: .search, relay_id: RelayURL("wss://jb55.com")!)
             .padding()
     }
 }

@@ -103,7 +103,7 @@ struct AddRelayView: View {
                     return
                 }
 
-                state.pool.connect(to: [new_relay])
+                state.pool.connect(to: [url])
 
                 if let new_ev = add_relay(ev: ev, keypair: keypair, current_relays: state.pool.our_descriptors, relay: url, info: info) {
                     process_contact_event(state: state, ev: ev)

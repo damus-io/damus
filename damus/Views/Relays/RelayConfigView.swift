@@ -40,12 +40,10 @@ struct RelayConfigView: View {
         let rs: [RelayDescriptor] = []
         let recommended_relay_addresses = get_default_bootstrap_relays()
         return recommended_relay_addresses.reduce(into: rs) { xs, x in
-            if let url = RelayURL(x) {
-                xs.append(RelayDescriptor(url: url, info: .rw))
-            }
+            xs.append(RelayDescriptor(url: x, info: .rw))
         }
     }
-    
+
     var body: some View {
         NavigationView {
             ZStack(alignment: .bottom){
@@ -133,10 +131,10 @@ struct RelayConfigView: View {
                 }
             }
             .padding(.top, 5)
-            
+
             ForEach(relayList, id: \.url) { relay in
                 Group {
-                    RelayView(state: state, relay: relay.url.id, showActionButtons: $showActionButtons, recommended: recommended)
+                    RelayView(state: state, relay: relay.url, showActionButtons: $showActionButtons, recommended: recommended)
                     Divider()
                 }
             }

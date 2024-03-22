@@ -37,8 +37,8 @@ func subscribe_to_nwc(url: WalletConnectURL, pool: RelayPool) {
     filter.authors = [url.pubkey]
     filter.limit = 0
     let sub = NostrSubscribe(filters: [filter], sub_id: "nwc")
-    
-    pool.send(.subscribe(sub), to: [url.relay.id], skip_ephemeral: false)
+
+    pool.send(.subscribe(sub), to: [url.relay], skip_ephemeral: false)
 }
 
 @discardableResult
@@ -47,10 +47,10 @@ func nwc_pay(url: WalletConnectURL, pool: RelayPool, post: PostBox, invoice: Str
     guard let ev = make_wallet_connect_request(req: req, to_pk: url.pubkey, keypair: url.keypair) else {
         return nil
     }
-    
+
     try? pool.add_relay(.nwc(url: url.relay))
     subscribe_to_nwc(url: url, pool: pool)
-    post.send(ev, to: [url.relay.id], skip_ephemeral: false, delay: delay, on_flush: on_flush)
+    post.send(ev, to: [url.relay], skip_ephemeral: false, delay: delay, on_flush: on_flush)
     return ev
 }
 

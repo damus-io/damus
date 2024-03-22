@@ -10,9 +10,9 @@ import Foundation
 class ProfileModel: ObservableObject, Equatable {
     @Published var contacts: NostrEvent? = nil
     @Published var following: Int = 0
-    @Published var relays: [String: RelayInfo]? = nil
+    @Published var relays: [RelayURL: RelayInfo]? = nil
     @Published var progress: Int = 0
-    
+
     private let MAX_SHARE_RELAYS = 4
     
     var events: EventHolder
@@ -108,8 +108,8 @@ class ProfileModel: ObservableObject, Equatable {
         }
         seen_event.insert(ev.id)
     }
-    
-    private func handle_event(relay_id: String, ev: NostrConnectionEvent) {
+
+    private func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
         switch ev {
         case .ws_event:
             return
@@ -142,8 +142,8 @@ class ProfileModel: ObservableObject, Equatable {
             }
         }
     }
-    
-    private func findRelaysHandler(relay_id: String, ev: NostrConnectionEvent) {
+
+    private func findRelaysHandler(relay_id: RelayURL, ev: NostrConnectionEvent) {
         if case .nostr_event(let resp) = ev, case .event(_, let event) = resp, case .contacts = event.known_kind {
             self.relays = decode_json_relays(event.content)
         }
@@ -159,13 +159,9 @@ class ProfileModel: ObservableObject, Equatable {
     func unsubscribeFindRelays() {
         damus.pool.unsubscribe(sub_id: findRelay_subid)
     }
-    
-    func getRelayStrings() -> [String] {
-        return relays?.keys.map {$0} ?? []
-    }
-    
+
     func getCappedRelayStrings() -> [String] {
-        return relays?.keys.prefix(MAX_SHARE_RELAYS).map { $0 } ?? []
+        return relays?.keys.prefix(MAX_SHARE_RELAYS).map { $0.absoluteString } ?? []
     }
 }
 

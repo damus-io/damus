@@ -113,12 +113,12 @@ class damusTests: XCTestCase {
     
     func testSaveRelayFilters() {
         var filters = Set<RelayFilter>()
-        
-        let filter1 = RelayFilter(timeline: .search, relay_id: "wss://abc.com")
-        let filter2 = RelayFilter(timeline: .home, relay_id: "wss://abc.com")
+
+        let filter1 = RelayFilter(timeline: .search, relay_id: RelayURL("wss://abc.com")!)
+        let filter2 = RelayFilter(timeline: .home, relay_id: RelayURL("wss://abc.com")!)
         filters.insert(filter1)
         filters.insert(filter2)
-        
+
         save_relay_filters(test_pubkey, filters: filters)
         let loaded_filters = load_relay_filters(test_pubkey)!
 

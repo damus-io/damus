@@ -65,8 +65,8 @@ class SearchModel: ObservableObject {
             objectWillChange.send()
         }
     }
-    
-    func handle_event(relay_id: String, ev: NostrConnectionEvent) {
+
+    func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
         let (sub_id, done) = handle_subid_event(pool: state.pool, relay_id: relay_id, ev: ev) { sub_id, ev in
             if ev.is_textlike && ev.should_show_event {
                 self.add_event(ev)
@@ -107,7 +107,7 @@ func event_matches_filter(_ ev: NostrEvent, filter: NostrFilter) -> Bool {
     return true
 }
 
-func handle_subid_event(pool: RelayPool, relay_id: String, ev: NostrConnectionEvent, handle: (String, NostrEvent) -> ()) -> (String?, Bool) {
+func handle_subid_event(pool: RelayPool, relay_id: RelayURL, ev: NostrConnectionEvent, handle: (String, NostrEvent) -> ()) -> (String?, Bool) {
     switch ev {
     case .ws_event:
         return (nil, false)

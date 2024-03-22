@@ -115,8 +115,8 @@ struct SaveKeysView: View {
         
         self.pool.connect()
     }
-    
-    func handle_event(relay: String, ev: NostrConnectionEvent) {
+
+    func handle_event(relay: RelayURL, ev: NostrConnectionEvent) {
         switch ev {
         case .ws_event(let wsev):
             switch wsev {

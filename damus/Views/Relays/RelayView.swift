@@ -9,14 +9,14 @@ import SwiftUI
 
 struct RelayView: View {
     let state: DamusState
-    let relay: String
+    let relay: RelayURL
     let recommended: Bool
     @ObservedObject private var model_cache: RelayModelCache
-    
+
     @State var relay_state: Bool
     @Binding var showActionButtons: Bool
-    
-    init(state: DamusState, relay: String, showActionButtons: Binding<Bool>, recommended: Bool) {
+
+    init(state: DamusState, relay: RelayURL, showActionButtons: Binding<Bool>, recommended: Bool) {
         self.state = state
         self.relay = relay
         self.recommended = recommended
@@ -25,11 +25,11 @@ struct RelayView: View {
         let relay_state = RelayView.get_relay_state(pool: state.pool, relay: relay)
         self._relay_state = State(initialValue: relay_state)
     }
-    
-    static func get_relay_state(pool: RelayPool, relay: String) -> Bool {
+
+    static func get_relay_state(pool: RelayPool, relay: RelayURL) -> Bool {
         return pool.get_relay(relay) == nil
     }
-    
+
     var body: some View {
         Group {
             HStack {
@@ -42,22 +42,22 @@ struct RelayView: View {
                 let meta = model_cache.model(with_relay_id: relay)?.metadata
             
                 RelayPicView(relay: relay, icon: meta?.icon, size: 55, highlight: .none, disable_animation: false)
-                    
+
                 VStack(alignment: .leading) {
                     HStack {
-                        Text(meta?.name ?? relay)
+                        Text(meta?.name ?? relay.absoluteString)
                             .font(.headline)
                             .padding(.bottom, 2)
                             .lineLimit(1)
                         RelayType(is_paid: state.relay_model_cache.model(with_relay_id: relay)?.metadata.is_paid ?? false)
                     }
-                    Text(relay)
+                    Text(relay.absoluteString)
                         .font(.subheadline)
                         .foregroundColor(.gray)
                         .lineLimit(1)
                         .contextMenu {
-                            CopyAction(relay: relay)
-                            
+                            CopyAction(relay: relay.absoluteString)
+
                             if let privkey = state.keypair.privkey {
                                 RemoveButton(privkey: privkey, showText: true)
                             }
@@ -113,8 +113,7 @@ struct RelayView: View {
         guard let ev_before_add = state.contacts.event else {
             return
         }
-        guard let relay_url = RelayURL(relay),
-            let ev_after_add = add_relay(ev: ev_before_add, keypair: keypair, current_relays: state.pool.our_descriptors, relay: relay_url, info: .rw) else {
+        guard let ev_after_add = add_relay(ev: ev_before_add, keypair: keypair, current_relays: state.pool.our_descriptors, relay: relay, info: .rw) else {
             return
         }
         process_contact_event(state: state, ev: ev_after_add)
@@ -129,14 +128,13 @@ struct RelayView: View {
         guard let ev = state.contacts.event else {
             return
         }
-        
+
         let descriptors = state.pool.our_descriptors
         guard let keypair = state.keypair.to_full(),
-              let relay_url = RelayURL(relay),
-              let new_ev = remove_relay(ev: ev, current_relays: descriptors, keypair: keypair, relay: relay_url) else {
+              let new_ev = remove_relay(ev: ev, current_relays: descriptors, keypair: keypair, relay: relay) else {
             return
         }
-        
+
         process_contact_event(state: state, ev: new_ev)
         state.postbox.send(new_ev)
         
@@ -182,6 +180,6 @@ struct RelayView: View {
 
 struct RelayView_Previews: PreviewProvider {
     static var previews: some View {
-        RelayView(state: test_damus_state, relay: "wss://relay.damus.io", showActionButtons: .constant(false), recommended: false)
+        RelayView(state: test_damus_state, relay: RelayURL("wss://relay.damus.io")!, showActionButtons: .constant(false), recommended: false)
     }
 }

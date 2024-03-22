@@ -15,10 +15,10 @@ final class RelayModel: Hashable {
 
     init(_ url: RelayURL, metadata: RelayMetadata) {
         self.url = url
-        self.log = RelayLog(url.url)
+        self.log = RelayLog(url)
         self.metadata = metadata
     }
-    
+
     static func == (lhs: RelayModel, rhs: RelayModel) -> Bool {
         lhs.url == rhs.url
     }

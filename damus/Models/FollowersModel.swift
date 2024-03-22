@@ -52,8 +52,8 @@ class FollowersModel: ObservableObject {
         contacts?.append(ev.pubkey)
         has_contact.insert(ev.pubkey)
     }
-    
-    func load_profiles<Y>(relay_id: String, txn: NdbTxn<Y>) {
+
+    func load_profiles<Y>(relay_id: RelayURL, txn: NdbTxn<Y>) {
         let authors = find_profiles_to_fetch_from_keys(profiles: damus_state.profiles, pks: contacts ?? [], txn: txn)
         if authors.isEmpty {
             return
@@ -63,8 +63,8 @@ class FollowersModel: ObservableObject {
                                  authors: authors)
         damus_state.pool.subscribe_to(sub_id: profiles_id, filters: [filter], to: [relay_id], handler: handle_event)
     }
-    
-    func handle_event(relay_id: String, ev: NostrConnectionEvent) {
+
+    func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
         guard case .nostr_event(let nev) = ev else {
             return
         }

@@ -55,7 +55,7 @@ final class WalletConnectTests: XCTestCase {
         XCTAssertEqual(url.pubkey, pk)
         XCTAssertEqual(url.keypair.privkey, sec)
         XCTAssertEqual(url.keypair.pubkey, privkey_to_pubkey(privkey: sec))
-        XCTAssertEqual(url.relay.id, relay)
+        XCTAssertEqual(url.relay.url.absoluteString, relay)
         XCTAssertEqual(url.lud16, "jb55@jb55.com")
 
         // Test an NWC url format which is NIP-47 and RFC 3986 compliant
@@ -76,9 +76,9 @@ final class WalletConnectTests: XCTestCase {
         XCTAssertEqual(url_2.pubkey, pk_2)
         XCTAssertEqual(url_2.keypair.privkey, sec_2)
         XCTAssertEqual(url_2.keypair.pubkey, privkey_to_pubkey(privkey: sec_2))
-        XCTAssertEqual(url_2.relay.id, relay_2)
+        XCTAssertEqual(url_2.relay.url.absoluteString, relay_2)
     }
-    
+
     func testNWCEphemeralRelay() {
         let sec = "8ba3a6b3b57d0f4211bb1ea4d8d1e351a367e9b4ea694746e0a4a452b2bc4d37"
         let pk =  "89446b900c70d62438dcf66756405eea6225ad94dc61f3856f62f9699111a9a6"
@@ -92,12 +92,12 @@ final class WalletConnectTests: XCTestCase {
         XCTAssertEqual(pool.our_descriptors.count, 0)
         XCTAssertEqual(pool.all_descriptors.count, 1)
         XCTAssertEqual(pool.all_descriptors[0].variant, .nwc)
-        XCTAssertEqual(pool.all_descriptors[0].url.id, "ws://127.0.0.1")
+        XCTAssertEqual(pool.all_descriptors[0].url.url.absoluteString, "ws://127.0.0.1")
         XCTAssertEqual(box.events.count, 1)
         let ev = box.events.first!.value
         XCTAssertEqual(ev.skip_ephemeral, false)
         XCTAssertEqual(ev.remaining.count, 1)
-        XCTAssertEqual(ev.remaining[0].relay, "ws://127.0.0.1")
+        XCTAssertEqual(ev.remaining[0].relay.url.absoluteString, "ws://127.0.0.1")
     }
 
     func testPerformanceExample() throws {

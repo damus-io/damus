@@ -54,11 +54,11 @@ struct ConnectWalletView: View {
             Text("Are you sure you want to connect this wallet?", comment: "Prompt to ask user if they want to attach their Nostr Wallet Connect lightning wallet.")
                 .fontWeight(.bold)
                 .multilineTextAlignment(.center)
-            
-            Text(nwc.relay.id)
+
+            Text(nwc.relay.absoluteString)
                 .font(.body)
                 .foregroundColor(.gray)
-            
+
             if let lud16 = nwc.lud16 {
                 Text(lud16)
                     .font(.body)

@@ -9,14 +9,14 @@ import SwiftUI
 
 struct RelayDetailView: View {
     let state: DamusState
-    let relay: String
+    let relay: RelayURL
     let nip11: RelayMetadata?
-    
+
     @ObservedObject var log: RelayLog
-    
+
     @Environment(\.dismiss) var dismiss
-    
-    init(state: DamusState, relay: String, nip11: RelayMetadata?) {
+
+    init(state: DamusState, relay: RelayURL, nip11: RelayMetadata?) {
         self.state = state
         self.relay = relay
         self.nip11 = nip11
@@ -48,8 +48,7 @@ struct RelayDetailView: View {
             }
 
             let descriptors = state.pool.our_descriptors
-            guard let relay_url = RelayURL(relay),
-                let new_ev = remove_relay( ev: ev, current_relays: descriptors, keypair: keypair, relay: relay_url) else {
+            guard let new_ev = remove_relay( ev: ev, current_relays: descriptors, keypair: keypair, relay: relay) else {
                 return
             }
 
@@ -78,8 +77,7 @@ struct RelayDetailView: View {
                                     guard let ev_before_add = state.contacts.event else {
                                         return
                                     }
-                                    guard let relay_url = RelayURL(relay),
-                                          let ev_after_add = add_relay(ev: ev_before_add, keypair: keypair, current_relays: state.pool.our_descriptors, relay: relay_url, info: .rw) else {
+                                    guard let ev_after_add = add_relay(ev: ev_before_add, keypair: keypair, current_relays: state.pool.our_descriptors, relay: relay, info: .rw) else {
                                         return
                                     }
                                     process_contact_event(state: state, ev: ev_after_add)
@@ -114,7 +112,7 @@ struct RelayDetailView: View {
                         if let relay_connection {
                             Section(NSLocalizedString("Relay", comment: "Label to display relay address.")) {
                                 HStack {
-                                    Text(relay)
+                                    Text(relay.absoluteString)
                                     Spacer()
                                     RelayStatusView(connection: relay_connection)
                                 }
@@ -166,7 +164,7 @@ struct RelayDetailView: View {
         .onReceive(handle_notify(.switched_timeline)) { notif in
             dismiss()
         }
-        .navigationTitle(nip11?.name ?? relay)
+        .navigationTitle(nip11?.name ?? relay.absoluteString)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: BackNav())
@@ -202,6 +200,6 @@ struct RelayDetailView: View {
 struct RelayDetailView_Previews: PreviewProvider {
     static var previews: some View {
         let metadata = RelayMetadata(name: "name", description: "desc", pubkey: test_pubkey, contact: "contact", supported_nips: [1,2,3], software: "software", version: "version", limitation: Limitations.empty, payments_url: "https://jb55.com", icon: "")
-        RelayDetailView(state: test_damus_state, relay: "relay", nip11: metadata)
+        RelayDetailView(state: test_damus_state, relay: RelayURL("wss://relay.damus.io")!, nip11: metadata)
     }
 }

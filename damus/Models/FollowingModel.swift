@@ -52,8 +52,8 @@ class FollowingModel {
         print("unsubscribing from following \(sub_id)")
         self.damus_state.pool.unsubscribe(sub_id: sub_id)
     }
-    
-    func handle_event(relay_id: String, ev: NostrConnectionEvent) {
+
+    func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
         // don't need to do anything here really
     }
 }

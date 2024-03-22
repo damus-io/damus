@@ -56,7 +56,7 @@ struct RelayStatusView: View {
 
 struct RelayStatusView_Previews: PreviewProvider {
     static var previews: some View {
-        let connection = test_damus_state.pool.get_relay("wss://relay.damus.io")!.connection
+        let connection = test_damus_state.pool.get_relay(RelayURL("wss://relay.damus.io")!)!.connection
         RelayStatusView(connection: connection)
     }
 }

@@ -39,7 +39,7 @@ class ZapsModel: ObservableObject {
     }
 
     @MainActor
-    func handle_event(relay_id: String, conn_ev: NostrConnectionEvent) {
+    func handle_event(relay_id: RelayURL, conn_ev: NostrConnectionEvent) {
         guard case .nostr_event(let resp) = conn_ev else {
             return
         }

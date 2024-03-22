@@ -7,18 +7,31 @@
 
 import Foundation
 
-public struct RelayURL: Hashable, Equatable, Codable, CodingKeyRepresentable {
+public struct RelayURL: Hashable, Equatable, Codable, CodingKeyRepresentable, Identifiable, Comparable, CustomStringConvertible {
     private(set) var url: URL
-    
-    var id: String {
+
+    public var id: URL {
+        return url
+    }
+
+    public var description: String {
+        return self.absoluteString
+    }
+
+    public var absoluteString: String {
         return url.absoluteString
     }
-    
+
     init?(_ str: String) {
-        guard let url = URL(string: str) else {
+        var trimmed_url_str = str
+        while trimmed_url_str.hasSuffix("/") {
+            trimmed_url_str.removeLast()
+        }
+
+        guard let url = URL(string: trimmed_url_str) else {
             return nil
         }
-        
+
         guard let scheme = url.scheme else {
             return nil
         }
@@ -67,7 +80,12 @@ public struct RelayURL: Hashable, Equatable, Codable, CodingKeyRepresentable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(self.url)
     }
-    
+
+    // MARK: - Comparable
+    public static func < (lhs: RelayURL, rhs: RelayURL) -> Bool {
+        return lhs.url.absoluteString < rhs.url.absoluteString
+    }
+
 }
 
 private struct StringKey: CodingKey {

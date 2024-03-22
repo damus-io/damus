@@ -45,12 +45,12 @@ class SearchHomeModel: ObservableObject {
         damus_state.pool.subscribe(sub_id: base_subid, filters: [get_base_filter()], handler: handle_event, to: to_relays)
     }
 
-    func unsubscribe(to: String? = nil) {
+    func unsubscribe(to: RelayURL? = nil) {
         loading = false
         damus_state.pool.unsubscribe(sub_id: base_subid, to: to.map { [$0] })
     }
-    
-    func handle_event(relay_id: String, conn_ev: NostrConnectionEvent) {
+
+    func handle_event(relay_id: RelayURL, conn_ev: NostrConnectionEvent) {
         guard case .nostr_event(let event) = conn_ev else {
             return
         }
@@ -129,7 +129,7 @@ enum PubkeysToLoad {
     case from_keys([Pubkey])
 }
 
-func load_profiles<Y>(context: String, profiles_subid: String, relay_id: String, load: PubkeysToLoad, damus_state: DamusState, txn: NdbTxn<Y>) {
+func load_profiles<Y>(context: String, profiles_subid: String, relay_id: RelayURL, load: PubkeysToLoad, damus_state: DamusState, txn: NdbTxn<Y>) {
     let authors = find_profiles_to_fetch(profiles: damus_state.profiles, load: load, cache: damus_state.events, txn: txn)
 
     guard !authors.isEmpty else {

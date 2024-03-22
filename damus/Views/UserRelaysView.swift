@@ -9,18 +9,18 @@ import SwiftUI
 
 struct UserRelaysView: View {
     let state: DamusState
-    let relays: [String]
-    
-    @State var relay_state: [(String, Bool)]
-    
-    init(state: DamusState, relays: [String]) {
+    let relays: [RelayURL]
+
+    @State var relay_state: [(RelayURL, Bool)]
+
+    init(state: DamusState, relays: [RelayURL]) {
         self.state = state
         self.relays = relays
         let relay_state = UserRelaysView.make_relay_state(pool: state.pool, relays: relays)
         self._relay_state = State(initialValue: relay_state)
     }
-    
-    static func make_relay_state(pool: RelayPool, relays: [String]) -> [(String, Bool)] {
+
+    static func make_relay_state(pool: RelayPool, relays: [RelayURL]) -> [(RelayURL, Bool)] {
         return relays.map({ r in
             return (r, pool.get_relay(r) == nil)
         }).sorted { (a, b) in a.0 < b.0 }

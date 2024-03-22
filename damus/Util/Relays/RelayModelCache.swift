@@ -13,14 +13,11 @@ final class RelayModelCache: ObservableObject {
     func model(withURL url: RelayURL) -> RelayModel? {
         models[url]
     }
-    
-    func model(with_relay_id url_string: String) -> RelayModel? {
-        guard let url = RelayURL(url_string) else {
-            return nil
-        }
-        return model(withURL: url)
+
+    func model(with_relay_id url_string: RelayURL) -> RelayModel? {
+        return model(withURL: url_string)
     }
-    
+
     func insert(model: RelayModel) {
         models[model.url] = model
         objectWillChange.send()

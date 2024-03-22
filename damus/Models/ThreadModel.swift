@@ -103,8 +103,8 @@ class ThreadModel: ObservableObject {
     }
 
     @MainActor
-    func handle_event(relay_id: String, ev: NostrConnectionEvent) {
-        
+    func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
+
         let (sub_id, done) = handle_subid_event(pool: damus_state.pool, relay_id: relay_id, ev: ev) { sid, ev in
             guard subids.contains(sid) else {
                 return

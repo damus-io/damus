@@ -66,13 +66,13 @@ struct InnerRelayPicView: View {
 }
 
 struct RelayPicView: View {
-    let relay: String
+    let relay: RelayURL
     let icon: String?
     let size: CGFloat
     let highlight: Highlight
     let disable_animation: Bool
-    
-    init(relay: String, icon: String? = nil, size: CGFloat, highlight: Highlight, disable_animation: Bool) {
+
+    init(relay: RelayURL, icon: String? = nil, size: CGFloat, highlight: Highlight, disable_animation: Bool) {
         self.relay = relay
         self.icon = icon
         self.size = size
@@ -106,10 +106,10 @@ func extract_tld(_ host: String) -> String {
     return host
 }
 
-func get_relay_url(relay: String, icon: String?) -> URL? {
-    var favicon = relay + "/favicon.ico"
-    let tld = extract_tld(relay)
-    if tld != relay {
+func get_relay_url(relay: RelayURL, icon: String?) -> URL? {
+    var favicon = relay.absoluteString + "/favicon.ico"
+    let tld = extract_tld(relay.absoluteString)
+    if tld != relay.absoluteString {
         favicon = "https://" + tld + "/favicon.ico"
     }
     let pic = icon ?? favicon
@@ -119,10 +119,10 @@ func get_relay_url(relay: String, icon: String?) -> URL? {
 struct RelayPicView_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
-            RelayPicView(relay: "wss://relay.damus.io", size: 55, highlight: .none, disable_animation: false)
-            RelayPicView(relay: "wss://nostr.wine", size: 55, highlight: .none, disable_animation: false)
-            RelayPicView(relay: "wss://nos.lol", size: 55, highlight: .none, disable_animation: false)
-            RelayPicView(relay: "fail", size: 55, highlight: .none, disable_animation: false)
+            RelayPicView(relay: RelayURL("wss://relay.damus.io")!, size: 55, highlight: .none, disable_animation: false)
+            RelayPicView(relay: RelayURL("wss://nostr.wine")!, size: 55, highlight: .none, disable_animation: false)
+            RelayPicView(relay: RelayURL("wss://nos.lol")!, size: 55, highlight: .none, disable_animation: false)
+            RelayPicView(relay: RelayURL("wss://fail.com")!, size: 55, highlight: .none, disable_animation: false)
         }
     }
 }

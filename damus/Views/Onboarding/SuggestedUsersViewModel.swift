@@ -80,7 +80,7 @@ class SuggestedUsersViewModel: ObservableObject {
         damus_state.pool.subscribe(sub_id: sub_id, filters: [filter], handler: handle_event)
     }
 
-    func handle_event(relay_id: String, ev: NostrConnectionEvent) {
+    func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
         guard case .nostr_event(let nev) = ev else {
             return
         }

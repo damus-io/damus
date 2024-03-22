@@ -24,7 +24,7 @@ struct WalletConnectURL: Equatable {
         urlComponents.scheme = "nostrwalletconnect"
         urlComponents.host = pubkey.hex()
         urlComponents.queryItems = [
-            URLQueryItem(name: "relay", value: relay.id),
+            URLQueryItem(name: "relay", value: relay.absoluteString),
             URLQueryItem(name: "secret", value: keypair.privkey.hex())
         ]
 

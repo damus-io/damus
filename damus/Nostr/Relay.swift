@@ -118,25 +118,13 @@ class Relay: Identifiable {
     var is_broken: Bool {
         return (flags & RelayFlags.broken.rawValue) == RelayFlags.broken.rawValue
     }
-    
-    var id: String {
-        return get_relay_id(descriptor.url)
+
+    var id: RelayURL {
+        return descriptor.url
     }
 
 }
 
 enum RelayError: Error {
     case RelayAlreadyExists
-}
-
-func get_relay_id(_ url: RelayURL) -> String {
-    let trimTrailingSlashes: (String) -> String = { url in
-        var trimmedUrl = url
-        while trimmedUrl.hasSuffix("/") {
-            trimmedUrl.removeLast()
-        }
-        return trimmedUrl
-    }
-    
-    return trimTrailingSlashes(url.url.absoluteString)
 }

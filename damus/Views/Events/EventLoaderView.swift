@@ -31,8 +31,8 @@ struct EventLoaderView<Content: View>: View {
         damus_state.pool.register_handler(sub_id: subscription_uuid, handler: handle_event)
         damus_state.pool.send(.subscribe(.init(filters: filters, sub_id: subscription_uuid)))
     }
-    
-    func handle_event(relay_id: String, ev: NostrConnectionEvent) {
+
+    func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
         guard case .nostr_event(let nostr_response) = ev else {
             return
         }

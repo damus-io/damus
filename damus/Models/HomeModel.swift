@@ -50,7 +50,7 @@ class HomeModel {
     // NDBTODO: let's get rid of this entirely, let nostrdb handle it
     var has_event: [String: Set<NoteId>] = [:]
     var deleted_events: Set<NoteId> = Set()
-    var last_event_of_kind: [String: [UInt32: NostrEvent]] = [:]
+    var last_event_of_kind: [RelayURL: [UInt32: NostrEvent]] = [:]
     var done_init: Bool = false
     var incoming_dms: [NostrEvent] = []
     let dm_debouncer = Debouncer(interval: 0.5)
@@ -135,7 +135,7 @@ class HomeModel {
     }
 
     @MainActor
-    func process_event(sub_id: String, relay_id: String, ev: NostrEvent) {
+    func process_event(sub_id: String, relay_id: RelayURL, ev: NostrEvent) {
         if has_sub_id_event(sub_id: sub_id, ev_id: ev.id) {
             return
         }
@@ -211,7 +211,7 @@ class HomeModel {
         pdata.status.update_status(st)
     }
 
-    func handle_nwc_response(_ ev: NostrEvent, relay: String) {
+    func handle_nwc_response(_ ev: NostrEvent, relay: RelayURL) {
         Task { @MainActor in
             // TODO: Adapt KeychainStorage to StringCodable and instead of parsing to WalletConnectURL every time
             guard let nwc_str = damus_state.settings.nostr_wallet_connect,
@@ -219,10 +219,10 @@ class HomeModel {
                   let resp = await FullWalletResponse(from: ev, nwc: nwc) else {
                 return
             }
-            
+
             // since command results are not returned for ephemeral events,
             // remove the request from the postbox which is likely failing over and over
-            if damus_state.postbox.remove_relayer(relay_id: nwc.relay.id, event_id: resp.req_id) {
+            if damus_state.postbox.remove_relayer(relay_id: nwc.relay, event_id: resp.req_id) {
                 print("nwc: got response, removed \(resp.req_id) from the postbox [\(relay)]")
             } else {
                 print("nwc: \(resp.req_id) not found in the postbox, nothing to remove [\(relay)]")
@@ -308,7 +308,7 @@ class HomeModel {
         self.deleted_events.insert(ev.id)
     }
 
-    func handle_contact_event(sub_id: String, relay_id: String, ev: NostrEvent) {
+    func handle_contact_event(sub_id: String, relay_id: RelayURL, ev: NostrEvent) {
         process_contact_event(state: self.damus_state, ev: ev)
 
         if sub_id == init_subid {
@@ -382,7 +382,7 @@ class HomeModel {
     }
 
     @MainActor
-    func handle_event(relay_id: String, conn_event: NostrConnectionEvent) {
+    func handle_event(relay_id: RelayURL, conn_event: NostrConnectionEvent) {
         switch conn_event {
         case .ws_event(let ev):
             switch ev {
@@ -400,7 +400,7 @@ class HomeModel {
                    let r = pool.get_relay(relay_id),
                    r.descriptor.variant == .nwc,
                    let nwc = WalletConnectURL(str: nwc_str),
-                   nwc.relay.id == relay_id
+                   nwc.relay == relay_id
                 {
                     subscribe_to_nwc(url: nwc, pool: pool)
                 }
@@ -461,14 +461,14 @@ class HomeModel {
 
 
     /// Send the initial filters, just our contact list mostly
-    func send_initial_filters(relay_id: String) {
+    func send_initial_filters(relay_id: RelayURL) {
         let filter = NostrFilter(kinds: [.contacts], limit: 1, authors: [damus_state.pubkey])
         let subscription = NostrSubscribe(filters: [filter], sub_id: init_subid)
         pool.send(.subscribe(subscription), to: [relay_id])
     }
 
     /// After initial connection or reconnect, send subscription filters for the home timeline, DMs, and notifications
-    func send_home_filters(relay_id: String?) {
+    func send_home_filters(relay_id: RelayURL?) {
         // TODO: since times should be based on events from a specific relay
         // perhaps we could mark this in the relay pool somehow
 
@@ -529,7 +529,7 @@ class HomeModel {
         pool.send(.subscribe(.init(filters: dms_filters, sub_id: dms_subid)), to: relay_ids)
     }
 
-    func get_last_of_kind(relay_id: String?) -> [UInt32: NostrEvent] {
+    func get_last_of_kind(relay_id: RelayURL?) -> [UInt32: NostrEvent] {
         return relay_id.flatMap { last_event_of_kind[$0] } ?? [:]
     }
 
@@ -543,7 +543,7 @@ class HomeModel {
         return Array(friends)
     }
 
-    func subscribe_to_home_filters(friends fs: [Pubkey]? = nil, relay_id: String? = nil) {
+    func subscribe_to_home_filters(friends fs: [Pubkey]? = nil, relay_id: RelayURL? = nil) {
         // TODO: separate likes?
         var home_filter_kinds: [NostrKind] = [
             .text, .longform, .boost
@@ -618,8 +618,8 @@ class HomeModel {
 
         migrate_old_muted_threads_to_new_mutelist(keypair: damus_state.keypair, damus_state: damus_state)
     }
-    
-    func get_last_event_of_kind(relay_id: String, kind: UInt32) -> NostrEvent? {
+
+    func get_last_event_of_kind(relay_id: RelayURL, kind: UInt32) -> NostrEvent? {
         guard let m = last_event_of_kind[relay_id] else {
             last_event_of_kind[relay_id] = [:]
             return nil
@@ -883,23 +883,23 @@ func process_contact_event(state: DamusState, ev: NostrEvent) {
 }
 
 func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
-    let bootstrap_dict: [String: RelayInfo] = [:]
+    let bootstrap_dict: [RelayURL: RelayInfo] = [:]
     let old_decoded = m_old_ev.flatMap { decode_json_relays($0.content) } ?? state.bootstrap_relays.reduce(into: bootstrap_dict) { (d, r) in
         d[r] = .rw
     }
-    
-    guard let decoded: [String: RelayInfo] = decode_json_relays(ev.content) else {
+
+    guard let decoded: [RelayURL: RelayInfo] = decode_json_relays(ev.content) else {
         return
     }
-    
+
     var changed = false
-    
-    var new = Set<String>()
+
+    var new = Set<RelayURL>()
     for key in decoded.keys {
         new.insert(key)
     }
-    
-    var old = Set<String>()
+
+    var old = Set<RelayURL>()
     for key in old_decoded.keys {
         old.insert(key)
     }
@@ -910,10 +910,8 @@ func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
     for d in diff {
         changed = true
         if new.contains(d) {
-            if let url = RelayURL(d) {
-                let descriptor = RelayDescriptor(url: url, info: decoded[d] ?? .rw)
-                add_new_relay(model_cache: state.relay_model_cache, relay_filters: state.relay_filters, pool: state.pool, descriptor: descriptor, new_relay_filters: new_relay_filters, logging_enabled: state.settings.developer_mode)
-            }
+            let descriptor = RelayDescriptor(url: d, info: decoded[d] ?? .rw)
+            add_new_relay(model_cache: state.relay_model_cache, relay_filters: state.relay_filters, pool: state.pool, descriptor: descriptor, new_relay_filters: new_relay_filters, logging_enabled: state.settings.developer_mode)
         } else {
             state.pool.remove_relay(d)
         }
@@ -929,8 +927,8 @@ func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
 func add_new_relay(model_cache: RelayModelCache, relay_filters: RelayFilters, pool: RelayPool, descriptor: RelayDescriptor, new_relay_filters: Bool, logging_enabled: Bool) {
     try? pool.add_relay(descriptor)
     let url = descriptor.url
-    
-    let relay_id = url.id
+
+    let relay_id = url
     guard model_cache.model(withURL: url) == nil else {
         return
     }
@@ -956,10 +954,10 @@ func add_new_relay(model_cache: RelayModelCache, relay_filters: RelayFilters, po
     }
 }
 
-func fetch_relay_metadata(relay_id: String) async throws -> RelayMetadata? {
-    var urlString = relay_id.replacingOccurrences(of: "wss://", with: "https://")
+func fetch_relay_metadata(relay_id: RelayURL) async throws -> RelayMetadata? {
+    var urlString = relay_id.absoluteString.replacingOccurrences(of: "wss://", with: "https://")
     urlString = urlString.replacingOccurrences(of: "ws://", with: "http://")
-    
+
     guard let url = URL(string: urlString) else {
         return nil
     }

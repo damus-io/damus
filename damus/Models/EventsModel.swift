@@ -76,14 +76,14 @@ class EventsModel: ObservableObject {
     func unsubscribe() {
         state.pool.unsubscribe(sub_id: sub_id)
     }
-    
-    private func handle_event(relay_id: String, ev: NostrEvent) {
+
+    private func handle_event(relay_id: RelayURL, ev: NostrEvent) {
         if events.insert(ev) {
             objectWillChange.send()
         }
     }
-    
-    func handle_nostr_event(relay_id: String, ev: NostrConnectionEvent) {
+
+    func handle_nostr_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
         guard case .nostr_event(let nev) = ev, nev.subid == self.sub_id
         else {
             return

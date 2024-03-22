@@ -37,15 +37,15 @@ func bootstrap_relays_setting_key(pubkey: Pubkey) -> String {
     return pk_setting_key(pubkey, key: "bootstrap_relays")
 }
 
-func save_bootstrap_relays(pubkey: Pubkey, relays: [String])  {
+func save_bootstrap_relays(pubkey: Pubkey, relays: [RelayURL])  {
     let key = bootstrap_relays_setting_key(pubkey: pubkey)
-    
-    UserDefaults.standard.set(relays, forKey: key)
+
+    UserDefaults.standard.set(relays.map({ $0.absoluteString }), forKey: key)
 }
 
-func load_bootstrap_relays(pubkey: Pubkey) -> [String] {
+func load_bootstrap_relays(pubkey: Pubkey) -> [RelayURL] {
     let key = bootstrap_relays_setting_key(pubkey: pubkey)
-    
+
     guard let relays = UserDefaults.standard.stringArray(forKey: key) else {
         print("loading default bootstrap relays")
         return get_default_bootstrap_relays().map { $0 }
@@ -55,18 +55,20 @@ func load_bootstrap_relays(pubkey: Pubkey) -> [String] {
         print("loading default bootstrap relays")
         return get_default_bootstrap_relays().map { $0 }
     }
-    
-    let loaded_relays = Array(Set(relays + get_default_bootstrap_relays()))
+
+    let relay_urls = relays.compactMap({ RelayURL($0) })
+
+    let loaded_relays = Array(Set(relay_urls + get_default_bootstrap_relays()))
     print("Loading custom bootstrap relays: \(loaded_relays)")
     return loaded_relays
 }
 
-func get_default_bootstrap_relays() -> [String] {
-    var default_bootstrap_relays = BOOTSTRAP_RELAYS
-    
+func get_default_bootstrap_relays() -> [RelayURL] {
+    var default_bootstrap_relays: [RelayURL] = BOOTSTRAP_RELAYS.compactMap({ RelayURL($0) })
+
     if let user_region = Locale.current.region, let regional_bootstrap_relays = REGION_SPECIFIC_BOOTSTRAP_RELAYS[user_region] {
-        default_bootstrap_relays.append(contentsOf: regional_bootstrap_relays)
+        default_bootstrap_relays.append(contentsOf: regional_bootstrap_relays.compactMap({ RelayURL($0) }))
     }
-    
+
     return default_bootstrap_relays
 }

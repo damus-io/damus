@@ -335,18 +335,19 @@ public func nscript_set_bool(interp: UnsafeMutablePointer<wasm_interp>?, setting
 
 @_cdecl("nscript_pool_send_to")
 public func nscript_pool_send_to(interp: UnsafeMutablePointer<wasm_interp>?, preq: UnsafePointer<UInt16>, req_len: Int32, to: UnsafePointer<UInt16>, to_len: Int32) -> Int32 {
-    
+
     guard let script = interp_nostrscript(interp: interp),
           let req_str = asm_str(cstr: preq, len: req_len),
-          let to = asm_str(cstr: to, len: to_len)
+          let to = asm_str(cstr: to, len: to_len),
+          let to_relay_url = RelayURL(to)
     else {
         return 0
     }
-    
+
     DispatchQueue.main.async {
-        script.pool.send_raw(.custom(req_str), to: [to], skip_ephemeral: false)
+        script.pool.send_raw(.custom(req_str), to: [to_relay_url], skip_ephemeral: false)
     }
-    
+
     return 1;
 }
 

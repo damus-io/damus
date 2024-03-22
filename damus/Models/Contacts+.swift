@@ -63,10 +63,6 @@ func follow_user_event(our_contacts: NostrEvent?, keypair: FullKeypair, follow: 
 }
 
 
-func decode_json_relays(_ content: String) -> [String: RelayInfo]? {
-    return decode_json(content)
-}
-
 func decode_json_relays(_ content: String) -> [RelayURL: RelayInfo]? {
     return decode_json(content)
 }
@@ -140,7 +136,7 @@ func make_contact_relays(_ relays: [RelayDescriptor]) -> [RelayURL: RelayInfo] {
 
 func make_relay_metadata(relays: [RelayDescriptor], keypair: FullKeypair) -> NostrEvent? {
     let tags = relays.compactMap { r -> [String]? in
-        var tag = ["r", r.url.id]
+        var tag = ["r", r.url.absoluteString]
         if (r.info.read ?? true) != (r.info.write ?? true) {
             tag += r.info.read == true ? ["read"] : ["write"]
         }

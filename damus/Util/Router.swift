@@ -11,8 +11,8 @@ enum Route: Hashable {
     case ProfileByKey(pubkey: Pubkey)
     case Profile(profile: ProfileModel, followers: FollowersModel)
     case Followers(followers: FollowersModel)
-    case Relay(relay: String, showActionButtons: Binding<Bool>)
-    case RelayDetail(relay: String, metadata: RelayMetadata?)
+    case Relay(relay: RelayURL, showActionButtons: Binding<Bool>)
+    case RelayDetail(relay: RelayURL, metadata: RelayMetadata?)
     case Following(following: FollowingModel)
     case MuteList
     case RelayConfig
@@ -21,7 +21,7 @@ enum Route: Hashable {
     case Config
     case EditMetadata
     case DMChat(dms: DirectMessageModel)
-    case UserRelays(relays: [String])
+    case UserRelays(relays: [RelayURL])
     case KeySettings(keypair: Keypair)
     case AppearanceSettings(settings: UserSettingsStore)
     case NotificationSettings(settings: UserSettingsStore)

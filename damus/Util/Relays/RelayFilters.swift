@@ -9,9 +9,9 @@ import Foundation
 
 struct RelayFilter: Hashable {
     let timeline: Timeline
-    let relay_id: String
-    
-    init(timeline: Timeline, relay_id: String) {
+    let relay_id: RelayURL
+
+    init(timeline: Timeline, relay_id: RelayURL) {
         self.timeline = timeline
         self.relay_id = relay_id
     }
@@ -20,14 +20,14 @@ struct RelayFilter: Hashable {
 class RelayFilters {
     private let our_pubkey: Pubkey
     private var disabled: Set<RelayFilter>
-    
-    func is_filtered(timeline: Timeline, relay_id: String) -> Bool {
+
+    func is_filtered(timeline: Timeline, relay_id: RelayURL) -> Bool {
         let filter = RelayFilter(timeline: timeline, relay_id: relay_id)
         let contains = disabled.contains(filter)
         return contains
     }
-    
-    func remove(timeline: Timeline, relay_id: String) {
+
+    func remove(timeline: Timeline, relay_id: RelayURL) {
         let filter = RelayFilter(timeline: timeline, relay_id: relay_id)
         if !disabled.contains(filter) {
             return
@@ -36,8 +36,8 @@ class RelayFilters {
         disabled.remove(filter)
         save_relay_filters(our_pubkey, filters: disabled)
     }
-    
-    func insert(timeline: Timeline, relay_id: String) {
+
+    func insert(timeline: Timeline, relay_id: RelayURL) {
         let filter = RelayFilter(timeline: timeline, relay_id: relay_id)
         if disabled.contains(filter) {
             return
@@ -77,13 +77,16 @@ func load_relay_filters(_ pubkey: Pubkey) -> Set<RelayFilter>? {
         guard let timeline = Timeline.init(rawValue: parts[0]) else {
             return
         }
-        let filter = RelayFilter(timeline: timeline, relay_id: parts[1])
+        guard let relay_id = RelayURL(parts[1]) else {
+            return
+        }
+        let filter = RelayFilter(timeline: timeline, relay_id: relay_id)
         s.insert(filter)
     }
 }
 
-func determine_to_relays(pool: RelayPool, filters: RelayFilters) -> [String] {
+func determine_to_relays(pool: RelayPool, filters: RelayFilters) -> [RelayURL] {
     return pool.our_descriptors
-        .map { $0.url.url.absoluteString }
+        .map { $0.url }
         .filter { !filters.is_filtered(timeline: .search, relay_id: $0) }
 }

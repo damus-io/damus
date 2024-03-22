@@ -458,6 +458,7 @@
 		D723411A2B6864F200E1E135 /* DamusPurpleEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72341182B6864F200E1E135 /* DamusPurpleEnvironment.swift */; };
 		D723C38E2AB8D83400065664 /* ContentFilters.swift in Sources */ = {isa = PBXBuildFile; fileRef = D723C38D2AB8D83400065664 /* ContentFilters.swift */; };
 		D724D8272B64B40B00ABE789 /* DamusPurpleAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D724D8262B64B40B00ABE789 /* DamusPurpleAccountView.swift */; };
+		D72927AD2BAB515C00F93E90 /* RelayURLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72927AC2BAB515C00F93E90 /* RelayURLTests.swift */; };
 		D72A2D022AD9C136002AFF62 /* EventViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2CFF2AD9B66B002AFF62 /* EventViewTests.swift */; };
 		D72A2D052AD9C1B5002AFF62 /* MockDamusState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2D042AD9C1B5002AFF62 /* MockDamusState.swift */; };
 		D72A2D072AD9C1FB002AFF62 /* MockProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2D062AD9C1FB002AFF62 /* MockProfiles.swift */; };
@@ -1375,6 +1376,7 @@
 		D72341182B6864F200E1E135 /* DamusPurpleEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleEnvironment.swift; sourceTree = "<group>"; };
 		D723C38D2AB8D83400065664 /* ContentFilters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentFilters.swift; sourceTree = "<group>"; };
 		D724D8262B64B40B00ABE789 /* DamusPurpleAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleAccountView.swift; sourceTree = "<group>"; };
+		D72927AC2BAB515C00F93E90 /* RelayURLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayURLTests.swift; sourceTree = "<group>"; };
 		D72A2CFF2AD9B66B002AFF62 /* EventViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventViewTests.swift; sourceTree = "<group>"; };
 		D72A2D042AD9C1B5002AFF62 /* MockDamusState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDamusState.swift; sourceTree = "<group>"; };
 		D72A2D062AD9C1FB002AFF62 /* MockProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockProfiles.swift; sourceTree = "<group>"; };
@@ -2544,6 +2546,7 @@
 				E0E024102B7C19C20075735D /* TranslationTests.swift */,
 				E06336A92B75832100A88E6B /* ImageMetadataTest.swift */,
 				D7CBD1D52B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift */,
+				D72927AC2BAB515C00F93E90 /* RelayURLTests.swift */,
 			);
 			path = damusTests;
 			sourceTree = "<group>";
@@ -3503,6 +3506,7 @@
 				3A90B1832A4EA3C600000D94 /* UserSearchCacheTests.swift in Sources */,
 				4C9B0DEE2A65A75F00CBDA21 /* AttrStringTestExtensions.swift in Sources */,
 				4C19AE552A5D977400C90DB7 /* HashtagTests.swift in Sources */,
+				D72927AD2BAB515C00F93E90 /* RelayURLTests.swift in Sources */,
 				3A3040ED29A5CB86008A0F29 /* ReplyDescriptionTests.swift in Sources */,
 				D71DC1EC2A9129C3006E207C /* PostViewTests.swift in Sources */,
 				3AAC7A022A60FE72002B50DF /* LocalizationUtilTests.swift in Sources */,

@@ -21,19 +21,19 @@ final class RelayConnection: ObservableObject {
     private(set) var last_connection_attempt: TimeInterval = 0
     private(set) var last_pong: Date? = nil
     private(set) var backoff: TimeInterval = 1.0
-    private lazy var socket = WebSocket(url.url)
+    private lazy var socket = WebSocket(relay_url.url)
     private var subscriptionToken: AnyCancellable?
-    
+
     private var handleEvent: (NostrConnectionEvent) -> ()
     private var processEvent: (WebSocketEvent) -> ()
-    private let url: RelayURL
+    private let relay_url: RelayURL
     var log: RelayLog?
 
     init(url: RelayURL,
          handleEvent: @escaping (NostrConnectionEvent) -> (),
          processEvent: @escaping (WebSocketEvent) -> ())
     {
-        self.url = url
+        self.relay_url = url
         self.handleEvent = handleEvent
         self.processEvent = processEvent
     }
@@ -48,7 +48,7 @@ final class RelayConnection: ObservableObject {
                 self.last_pong = .now
                 self.log?.add("Successful ping")
             } else {
-                print("pong failed, reconnecting \(self.url.id)")
+                print("pong failed, reconnecting \(self.relay_url.id)")
                 self.isConnected = false
                 self.isConnecting = false
                 self.reconnect_with_backoff()
@@ -126,7 +126,7 @@ final class RelayConnection: ObservableObject {
             self.receive(message: message)
         case .disconnected(let closeCode, let reason):
             if closeCode != .normalClosure {
-                print("⚠️ Warning: RelayConnection (\(self.url)) closed with code \(closeCode), reason: \(String(describing: reason))")
+                print("⚠️ Warning: RelayConnection (\(self.relay_url)) closed with code \(closeCode), reason: \(String(describing: reason))")
             }
             DispatchQueue.main.async {
                 self.isConnected = false
@@ -134,7 +134,7 @@ final class RelayConnection: ObservableObject {
                 self.reconnect()
             }
         case .error(let error):
-            print("⚠️ Warning: RelayConnection (\(self.url)) error: \(error)")
+            print("⚠️ Warning: RelayConnection (\(self.relay_url)) error: \(error)")
             let nserr = error as NSError
             if nserr.domain == NSPOSIXErrorDomain && nserr.code == 57 {
                 // ignore socket not connected?
