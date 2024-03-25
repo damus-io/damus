@@ -285,8 +285,11 @@ struct PostView: View {
             }
             
             if let progress = image_upload.progress {
-                ProgressView(value: progress, total: 1.0)
-                    .progressViewStyle(.linear)
+                HStack {
+                    ProgressView(value: progress, total: 1.0)
+                        .progressViewStyle(.linear)
+                    Text("\(image_upload.currentImagesUploaded)/\(image_upload.totalImagesToUpload)")
+                }
             }
             
             Divider()
@@ -316,6 +319,7 @@ struct PostView: View {
                 let meta = blurhash.map { bh in calculate_image_metadata(url: url, img: img, blurhash: bh) }
                 let uploadedMedia = UploadedMedia(localURL: media.localURL, uploadedURL: url, representingImage: img, metadata: meta)
                 uploadedMedias.append(uploadedMedia)
+                image_upload.didFinishUpload()
                 
             case .failed(let error):
                 if let error {
@@ -325,6 +329,9 @@ struct PostView: View {
                 }
             }
             
+            if (image_upload.currentImagesUploaded + 1) == image_upload.totalImagesToUpload {
+                image_upload.resetProgress()
+            }
         }
     }
     

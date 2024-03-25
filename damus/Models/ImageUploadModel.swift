@@ -53,18 +53,37 @@ enum MediaUpload {
 
 class ImageUploadModel: NSObject, URLSessionTaskDelegate, ObservableObject {
     @Published var progress: Double? = nil
+    @Published var currentImagesUploaded: Int = 0
+    @Published var totalImagesToUpload: Int = 0
+    private var completedUploads: Int = 0
     
     func start(media: MediaUpload, uploader: MediaUploader, keypair: Keypair? = nil) async -> ImageUploadResult {
-        let res = await create_upload_request(mediaToUpload: media, mediaUploader: uploader, progress: self, keypair: keypair)
         DispatchQueue.main.async {
-            self.progress = nil
+            self.totalImagesToUpload += 1
         }
+        let res = await create_upload_request(mediaToUpload: media, mediaUploader: uploader, progress: self, keypair: keypair)
         return res
     }
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
         DispatchQueue.main.async {
             self.progress = Double(totalBytesSent) / Double(totalBytesExpectedToSend)
+        }
+    }
+    
+    func didFinishUpload() {
+        DispatchQueue.main.async {
+            self.completedUploads += 1
+            self.currentImagesUploaded = self.completedUploads
+        }
+    }
+    
+    func resetProgress() {
+        DispatchQueue.main.async {
+            self.progress = nil
+            self.currentImagesUploaded = 0
+            self.totalImagesToUpload = 0
+            self.completedUploads = 0
         }
     }
 }
