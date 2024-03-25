@@ -95,7 +95,7 @@ v2 version of the patch.
 ### Sign your work - the Developer's Certificate of Origin
 
 To improve tracking of who did what, especially with patches that can
-percolate to their final resting place in the kernel through several
+percolate to their final resting place in the Damus through several
 layers of maintainers, we've introduced a "sign-off" procedure on
 patches that are being emailed around.
 
