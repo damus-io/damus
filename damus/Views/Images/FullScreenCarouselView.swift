@@ -37,21 +37,6 @@ struct FullScreenCarouselView<Content: View>: View {
         self.content = nil
     }
     
-    var tabViewIndicator: some View {
-        HStack(spacing: 10) {
-            ForEach(urls.indices, id: \.self) { index in
-                Capsule()
-                    .fill(index == selectedIndex ? Color.white : Color.damusMediumGrey)
-                    .frame(width: 7, height: 7)
-                    .onTapGesture {
-                        selectedIndex = index
-                    }
-            }
-        }
-        .padding()
-        .clipShape(Capsule())
-    }
-    
     var background: some ShapeStyle {
         if case .video = urls[safe: selectedIndex] {
             return AnyShapeStyle(Color.black)
@@ -115,8 +100,10 @@ struct FullScreenCarouselView<Content: View>: View {
                                 .foregroundColor(.white)
                             Spacer()
                             
-                            if (urls.count > 1) {
-                                tabViewIndicator
+                            if urls.count > 1 {
+                                PageControlView(currentPage: $selectedIndex, numberOfPages: urls.count)
+                                    .frame(maxWidth: 0, maxHeight: 0)
+                                    .padding(.top, 5)
                             }
                             
                             self.content?()
