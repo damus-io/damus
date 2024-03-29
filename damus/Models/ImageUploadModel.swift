@@ -56,9 +56,20 @@ class ImageUploadModel: NSObject, URLSessionTaskDelegate, ObservableObject {
     
     func start(media: MediaUpload, uploader: MediaUploader, keypair: Keypair? = nil) async -> ImageUploadResult {
         let res = await create_upload_request(mediaToUpload: media, mediaUploader: uploader, progress: self, keypair: keypair)
-        DispatchQueue.main.async {
-            self.progress = nil
+                
+        switch res {
+        case .success(_):
+            DispatchQueue.main.async {
+                self.progress = nil
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            }
+        case .failed(_):
+            DispatchQueue.main.async {
+                self.progress = nil
+                UINotificationFeedbackGenerator().notificationOccurred(.error)
+            }
         }
+
         return res
     }
     
