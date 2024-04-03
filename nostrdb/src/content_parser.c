@@ -423,7 +423,7 @@ static int parse_url(struct cursor *cur, struct ndb_block *block) {
 	}
 
 	// smart parens
-	if (start - 1 >= 0 &&
+	if ((start - 1) >= cur->start &&
 		start < cur->end &&
 		*(start - 1) == '(' &&
 		(cur->p - 1) < cur->end &&
