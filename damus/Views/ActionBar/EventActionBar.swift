@@ -205,12 +205,12 @@ struct LikeButton: View {
         Group {
             if let liked_emoji {
                 buildMaskView(for: liked_emoji)
-                    .frame(width: 20, height: 20)
+                    .frame(width: 22, height: 20)
             } else {
                 Image("shaka")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 20, height: 20)
+                    .frame(width: 22, height: 20)
                     .foregroundColor(.gray)
             }
         }
