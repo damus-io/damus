@@ -28,7 +28,7 @@ struct NEvent : Equatable, Hashable {
         self.kind = kind
     }
 
-    init(event: NostrEvent, relays: [String]) {
+    init(event: NostrEvent, relays: [RelayURL]) {
         self.init(noteid: event.id, relays: relays, author: event.pubkey, kind: event.kind)
     }
 }

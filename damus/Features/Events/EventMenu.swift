@@ -64,13 +64,13 @@ struct MenuItems: View {
         self.profileModel = profileModel
     }
 
-    var event_relay_url_strings: [String] {
+    var event_relay_url_strings: [RelayURL] {
         let relays = damus_state.nostrNetwork.relaysForEvent(event: event)
         if !relays.isEmpty {
-            return relays.prefix(Constants.MAX_SHARE_RELAYS).map { $0.absoluteString }
+            return relays.prefix(Constants.MAX_SHARE_RELAYS).map { $0 }
         }
 
-        return profileModel.getCappedRelayStrings()
+        return profileModel.getCappedRelays()
     }
 
     var body: some View {
@@ -82,7 +82,7 @@ struct MenuItems: View {
             }
 
             Button {
-                UIPasteboard.general.string = Bech32Object.encode(.nprofile(NProfile(author: target_pubkey, relays: profileModel.getCappedRelayStrings())))
+                UIPasteboard.general.string = Bech32Object.encode(.nprofile(NProfile(author: target_pubkey, relays: profileModel.getCappedRelays())))
             } label: {
                 Label(NSLocalizedString("Copy user public key", comment: "Context menu option for copying the ID of the user who created the note."), image: "user")
             }

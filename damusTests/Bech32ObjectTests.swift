@@ -169,7 +169,8 @@ class Bech32ObjectTests: XCTestCase {
     }
 
     func testTLVEncoding_NeventFromNostrEvent_ValidContent() throws {
-        let relays = ["wss://relay.damus.io", "wss://relay.nostr.band"]
+        let relay_strings = ["wss://relay.damus.io", "wss://relay.nostr.band"]
+        let relays = relay_strings.map({ RelayURL($0)! })
         let nevent = NEvent(event: test_note, relays: relays)
 
         XCTAssertEqual(nevent.noteid, test_note.id)
