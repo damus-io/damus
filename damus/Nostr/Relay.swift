@@ -84,6 +84,33 @@ struct Limitations: Codable {
     }
 }
 
+struct Admission: Codable {
+    let amount: Int64
+    let unit: String
+}
+
+struct Subscription: Codable {
+    let amount: Int64
+    let unit: String
+    let period: Int
+}
+
+struct Publication: Codable {
+    let kinds: [Int]
+    let amount: Int64
+    let unit: String
+}
+
+struct Fees: Codable {
+    let admission: [Admission]?
+    let subscription: [Subscription]?
+    let publication: [Publication]?
+    
+    static var empty: Fees {
+        Fees(admission: nil, subscription: nil, publication: nil)
+    }
+}
+
 struct RelayMetadata: Codable {
     let name: String?
     let description: String?
@@ -95,6 +122,7 @@ struct RelayMetadata: Codable {
     let limitation: Limitations?
     let payments_url: String?
     let icon: String?
+    let fees: Fees?
     
     var is_paid: Bool {
         return limitation?.payment_required ?? false

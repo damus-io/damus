@@ -395,6 +395,9 @@
 		50C3E08A2AA8E3F7006A4BC0 /* AVPlayer+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C3E0892AA8E3F7006A4BC0 /* AVPlayer+Additions.swift */; };
 		50DA11262A16A23F00236234 /* Launch.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 50DA11252A16A23F00236234 /* Launch.storyboard */; };
 		5C0707D12A1ECB38004E7B51 /* DamusLogoGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0707D02A1ECB38004E7B51 /* DamusLogoGradient.swift */; };
+		5C14C29B2BBBA29C00079FD2 /* RelaySoftwareDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C14C29A2BBBA29C00079FD2 /* RelaySoftwareDetail.swift */; };
+		5C14C29D2BBBA40B00079FD2 /* RelayAdminDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C14C29C2BBBA40B00079FD2 /* RelayAdminDetail.swift */; };
+		5C14C29F2BBBA5C600079FD2 /* RelayNipList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C14C29E2BBBA5C600079FD2 /* RelayNipList.swift */; };
 		5C42E78C29DB76D90086AAC1 /* EmptyUserSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C42E78B29DB76D90086AAC1 /* EmptyUserSearchView.swift */; };
 		5C513FBA297F72980072348F /* CustomPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FB9297F72980072348F /* CustomPicker.swift */; };
 		5C513FCC2984ACA60072348F /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FCB2984ACA60072348F /* QRCodeView.swift */; };
@@ -1316,6 +1319,9 @@
 		50C3E0892AA8E3F7006A4BC0 /* AVPlayer+Additions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVPlayer+Additions.swift"; sourceTree = "<group>"; };
 		50DA11252A16A23F00236234 /* Launch.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Launch.storyboard; sourceTree = "<group>"; };
 		5C0707D02A1ECB38004E7B51 /* DamusLogoGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusLogoGradient.swift; sourceTree = "<group>"; };
+		5C14C29A2BBBA29C00079FD2 /* RelaySoftwareDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelaySoftwareDetail.swift; sourceTree = "<group>"; };
+		5C14C29C2BBBA40B00079FD2 /* RelayAdminDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayAdminDetail.swift; sourceTree = "<group>"; };
+		5C14C29E2BBBA5C600079FD2 /* RelayNipList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayNipList.swift; sourceTree = "<group>"; };
 		5C42E78B29DB76D90086AAC1 /* EmptyUserSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyUserSearchView.swift; sourceTree = "<group>"; };
 		5C513FB9297F72980072348F /* CustomPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomPicker.swift; sourceTree = "<group>"; };
 		5C513FCB2984ACA60072348F /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
@@ -2576,6 +2582,9 @@
 			children = (
 				4CE879542996BAB900F758CC /* RelayPaidDetail.swift */,
 				B57B4C632B312BFA00A232C0 /* RelayAuthenticationDetail.swift */,
+				5C14C29A2BBBA29C00079FD2 /* RelaySoftwareDetail.swift */,
+				5C14C29C2BBBA40B00079FD2 /* RelayAdminDetail.swift */,
+				5C14C29E2BBBA5C600079FD2 /* RelayNipList.swift */,
 			);
 			path = Detail;
 			sourceTree = "<group>";
@@ -3205,6 +3214,7 @@
 				4CC7AAEB297F0AEC00430951 /* BuilderEventView.swift in Sources */,
 				E02429952B7E97740088B16C /* CameraController.swift in Sources */,
 				31D2E847295218AF006D67F8 /* Shimmer.swift in Sources */,
+				5C14C29F2BBBA5C600079FD2 /* RelayNipList.swift in Sources */,
 				D7CB5D3E2B116DAD00AD4105 /* NotificationsManager.swift in Sources */,
 				50A16FFF2AA76A0900DFEC1F /* VideoController.swift in Sources */,
 				F7908E97298B1FDF00AB113A /* NIPURLBuilder.swift in Sources */,
@@ -3359,6 +3369,7 @@
 				3CCD1E6A2A874C4E0099A953 /* Nip98HTTPAuth.swift in Sources */,
 				4C8EC52529D1FA6C0085D9A8 /* DamusColors.swift in Sources */,
 				3A4647CF2A413ADC00386AD8 /* CondensedProfilePicturesView.swift in Sources */,
+				5C14C29B2BBBA29C00079FD2 /* RelaySoftwareDetail.swift in Sources */,
 				D2277EEA2A089BD5006C3807 /* Router.swift in Sources */,
 				3A90B1812A4EA3AF00000D94 /* UserSearchCache.swift in Sources */,
 				4C9D6D162B1AA9C6004E5CD9 /* DisplayTabBarNotify.swift in Sources */,
@@ -3386,6 +3397,7 @@
 				4C3BEFD42819DE8F00B3DE84 /* NostrKind.swift in Sources */,
 				B533694E2B66D791008A805E /* MutelistManager.swift in Sources */,
 				4C32B9532A9AD44700DC3548 /* Verifier.swift in Sources */,
+				5C14C29D2BBBA40B00079FD2 /* RelayAdminDetail.swift in Sources */,
 				4C3EA66028FF5E7700C48A62 /* node_id.c in Sources */,
 				4C687C212A5F7ED00092C550 /* DamusBackground.swift in Sources */,
 				4CA352A02A76AE80003BB08B /* Notify.swift in Sources */,

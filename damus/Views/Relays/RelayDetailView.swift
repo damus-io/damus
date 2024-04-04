@@ -32,14 +32,6 @@ struct RelayDetailView: View {
         }
         return false
     }
-    
-    func FieldText(_ str: String?) -> some View {
-        if let s = str {
-            return Text(verbatim: s)
-        } else {
-            return Text("No data available", comment: "Text indicating that there is no data available to show for specific metadata about a relay server.")
-        }
-    }
 
     func RemoveRelayButton(_ keypair: FullKeypair) -> some View {
         Button(action: {
@@ -60,104 +52,139 @@ struct RelayDetailView: View {
             }
             dismiss()
         }) {
-            Text("Disconnect From Relay", comment: "Button to disconnect from the relay.")
+            HStack {
+                Text("Disconnect", comment: "Button to disconnect from the relay.")
+                    .fontWeight(.semibold)
+            }
+            .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
+        }
+        .buttonStyle(NeutralButtonShape.rounded.style)
+    }
+    
+    func ConnectRelayButton(_ keypair: FullKeypair) -> some View {
+        Button(action: {
+            guard let ev_before_add = state.contacts.event else {
+                return
+            }
+            guard let ev_after_add = add_relay(ev: ev_before_add, keypair: keypair, current_relays: state.pool.our_descriptors, relay: relay, info: .rw) else {
+                return
+            }
+            process_contact_event(state: state, ev: ev_after_add)
+            state.postbox.send(ev_after_add)
+
+            if let relay_metadata = make_relay_metadata(relays: state.pool.our_descriptors, keypair: keypair) {
+                state.postbox.send(relay_metadata)
+            }
+            dismiss()
+        }) {
+            HStack {
+                Text("Connect", comment: "Button to connect to the relay.")
+                    .fontWeight(.semibold)
+            }
+            .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
+        }
+        .buttonStyle(NeutralButtonShape.rounded.style)
+    }
+    
+    var RelayInfo: some View {
+        ScrollView(.horizontal) {
+            Group {
+                HStack(spacing: 15) {
+                    
+                    RelayAdminDetail(state: state, nip11: nip11)
+                    
+                    Divider().frame(width: 1)
+                    
+                    RelaySoftwareDetail(nip11: nip11)
+                    
+                }
+            }
+        }
+        .scrollIndicators(.hidden)
+    }
+    
+    var RelayHeader: some View {
+        HStack(alignment: .top, spacing: 15) {
+            RelayPicView(relay: relay, icon: nip11?.icon, size: 90, highlight: .none, disable_animation: false)
+            
+            VStack(alignment: .leading) {
+                Text(nip11?.name ?? relay.absoluteString)
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .lineLimit(1)
+                
+                Text(relay.absoluteString)
+                    .font(.headline)
+                    .fontWeight(.regular)
+                    .foregroundColor(.gray)
+                
+                HStack {
+                    if nip11?.is_paid ?? false {
+                        RelayPaidDetail(payments_url: nip11?.payments_url, fees: nip11?.fees)
+                    }
+                    
+                    if let authentication_state: RelayAuthenticationState = relay_object?.authentication_state,
+                       authentication_state != .none {
+                        RelayAuthenticationDetail(state: authentication_state)
+                    }
+                }
+            }
         }
     }
+    
 
     var body: some View {
         NavigationView {
-            ZStack {
-                Group {
-                    Form {
+            Group {
+                ScrollView {
+                    Divider()
+                    VStack(alignment: .leading, spacing: 10) {
+
+                        RelayHeader
+                        
+                        Divider()
+                        
+                        Text("Description")
+                            .font(.subheadline)
+                            .foregroundColor(DamusColors.mediumGrey)
+
+                        Text(nip11?.description ?? "N/A")
+                            .font(.subheadline)
+                        
+                        Divider()
+                        
+                        RelayInfo
+                        
+                        Divider()
+                        
+                        if let nip11 {
+                            if let nips = nip11.supported_nips, nips.count > 0 {
+                                RelayNipList(nips: nips)
+                                Divider()
+                            }
+                        }
+                        
                         if let keypair = state.keypair.to_full() {
                             if check_connection() {
                                 RemoveRelayButton(keypair)
+                                    .padding(.top)
                             } else {
-                                Button(action: {
-                                    guard let ev_before_add = state.contacts.event else {
-                                        return
-                                    }
-                                    guard let ev_after_add = add_relay(ev: ev_before_add, keypair: keypair, current_relays: state.pool.our_descriptors, relay: relay, info: .rw) else {
-                                        return
-                                    }
-                                    process_contact_event(state: state, ev: ev_after_add)
-                                    state.postbox.send(ev_after_add)
-                                    
-                                    if let relay_metadata = make_relay_metadata(relays: state.pool.our_descriptors, keypair: keypair) {
-                                        state.postbox.send(relay_metadata)
-                                    }
-                                    dismiss()
-                                }) {
-                                    Text("Connect To Relay", comment: "Button to connect to the relay.")
-                                }
-                            }
-                        }
-                        
-                        if let authentication_state: RelayAuthenticationState = relay_object?.authentication_state,
-                           authentication_state != .none {
-                            Section(NSLocalizedString("Authentication", comment: "Header label to display authentication details for a given relay.")) {
-                                RelayAuthenticationDetail(state: authentication_state)
-                            }
-                        }
-                        
-                        if let pubkey = nip11?.pubkey {
-                            Section(NSLocalizedString("Admin", comment: "Label to display relay contact user.")) {
-                                UserViewRow(damus_state: state, pubkey: pubkey)
-                                    .onTapGesture {
-                                        state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))
-                                    }
-                            }
-                        }
-                        
-                        if let relay_connection {
-                            Section(NSLocalizedString("Relay", comment: "Label to display relay address.")) {
-                                HStack {
-                                    Text(relay.absoluteString)
-                                    Spacer()
-                                    RelayStatusView(connection: relay_connection)
-                                }
-                            }
-                        }
-                        
-                        if let nip11 {
-                            if nip11.is_paid {
-                                Section(content: {
-                                    RelayPaidDetail(payments_url: nip11.payments_url)
-                                }, header: {
-                                    Text("Paid Relay", comment: "Section header that indicates the relay server requires payment.")
-                                }, footer: {
-                                    Text("This is a paid relay, you must pay for notes to be accepted.", comment: "Footer description that explains that the relay server requires payment to post.")
-                                })
-                            }
-                            
-                            Section(NSLocalizedString("Description", comment: "Label to display relay description.")) {
-                                FieldText(nip11.description)
-                            }
-                            Section(NSLocalizedString("Contact", comment: "Label to display relay contact information.")) {
-                                FieldText(nip11.contact)
-                            }
-                            Section(NSLocalizedString("Software", comment: "Label to display relay software.")) {
-                                FieldText(nip11.software)
-                            }
-                            Section(NSLocalizedString("Version", comment: "Label to display relay software version.")) {
-                                FieldText(nip11.version)
-                            }
-                            if let nips = nip11.supported_nips, nips.count > 0 {
-                                Section(NSLocalizedString("Supported NIPs", comment: "Label to display relay's supported NIPs.")) {
-                                    Text(nipsList(nips: nips))
-                                }
+                                ConnectRelayButton(keypair)
+                                    .padding(.top)
                             }
                         }
                         
                         if state.settings.developer_mode {
-                            Section(NSLocalizedString("Log", comment: "Label to display developer mode logs.")) {
-                                Text(log.contents ?? NSLocalizedString("No logs to display", comment: "Label to indicate that there are no developer mode logs available to be displayed on the screen"))
-                                    .font(.system(size: 13))
-                                    .lineLimit(nil)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
+                            Text("Relay Logs")
+                                .padding(.top)
+                            Divider()
+                            Text(log.contents ?? NSLocalizedString("No logs to display", comment: "Label to indicate that there are no developer mode logs available to be displayed on the screen"))
+                                .font(.system(size: 13))
+                                .lineLimit(nil)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                     }
+                    .padding(.horizontal)
                 }
             }
         }
@@ -169,23 +196,11 @@ struct RelayDetailView: View {
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: BackNav())
         .ignoresSafeArea(.all)
-    }
-    
-    private func nipsList(nips: [Int]) -> AttributedString {
-        var attrString = AttributedString()
-        let lastNipIndex = nips.count - 1
-        for (index, nip) in nips.enumerated() {
-            if let link = NIPURLBuilder.url(forNIP: nip) {
-                let nipString = NIPURLBuilder.formatNipNumber(nip: nip)
-                var nipAttrString = AttributedString(stringLiteral: nipString)
-                nipAttrString.link = link
-                attrString = attrString + nipAttrString
-                if index < lastNipIndex {
-                    attrString = attrString + AttributedString(stringLiteral: ", ")
-                }
+        .toolbar {
+            if let relay_connection {
+                RelayStatusView(connection: relay_connection)
             }
         }
-        return attrString
     }
 
     private var relay_object: Relay? {
@@ -199,7 +214,11 @@ struct RelayDetailView: View {
 
 struct RelayDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        let metadata = RelayMetadata(name: "name", description: "desc", pubkey: test_pubkey, contact: "contact", supported_nips: [1,2,3], software: "software", version: "version", limitation: Limitations.empty, payments_url: "https://jb55.com", icon: "")
+        let admission = Admission(amount: 1000000, unit: "msats")
+        let sub = Subscription(amount: 5000000, unit: "msats", period: 2592000)
+        let pub = Publication(kinds: [4], amount: 100, unit: "msats")
+        let fees = Fees(admission: [admission], subscription: [sub], publication: [pub])
+        let metadata = RelayMetadata(name: "name", description: "Relay description", pubkey: test_pubkey, contact: "contact@mail.com", supported_nips: [1,2,3], software: "software", version: "version", limitation: Limitations.empty, payments_url: "https://jb55.com", icon: "", fees: fees)
         RelayDetailView(state: test_damus_state, relay: RelayURL("wss://relay.damus.io")!, nip11: metadata)
     }
 }
