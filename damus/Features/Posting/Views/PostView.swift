@@ -906,7 +906,7 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
 
     case .quoting(let ev):
         let relay_urls = state.nostrNetwork.relaysForEvent(event: ev)
-        let nevent = Bech32Object.encode(.nevent(NEvent(event: ev, relays: relay_urls.prefix(4).map { $0.absoluteString })))
+        let nevent = Bech32Object.encode(.nevent(NEvent(event: ev, relays: relay_urls.prefix(4).map { $0 })))
         content.append("\n\nnostr:\(nevent)")
 
         if let first_relay = relay_urls.first?.absoluteString {
