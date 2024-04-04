@@ -2719,7 +2719,8 @@ static int ndb_query_plan_execute_created_at(struct ndb_txn *txn,
 	int rc;
 	struct ndb_note *note;
 	struct ndb_tsid key, *pkey;
-	uint64_t *pint, until, since, note_id, note_size;
+	uint64_t *pint, until, since, note_id;
+	size_t note_size;
 	struct ndb_query_result res;
 	unsigned char high_key[32] = {0xFF};
 
@@ -2763,7 +2764,7 @@ static int ndb_query_plan_execute_created_at(struct ndb_txn *txn,
 		if (pkey->timestamp < since)
 			break;
 
-		ndb_query_result_init(&res, note, note_size, note_id);
+		ndb_query_result_init(&res, note, (uint64_t)note_size, note_id);
 		if (!push_query_result(results, &res))
 			break;
 next:
