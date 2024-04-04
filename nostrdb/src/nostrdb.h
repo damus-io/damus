@@ -64,6 +64,9 @@ struct ndb_keypair {
 // function pointer for controlling what to do after we parse an id
 typedef enum ndb_idres (*ndb_id_fn)(void *, const char *);
 
+// callback function for when we receive new subscription results
+typedef void (*ndb_sub_fn)(void *, uint64_t subid);
+
 // id callback + closure data
 struct ndb_id_cb {
 	ndb_id_fn fn;
@@ -256,6 +259,8 @@ struct ndb_config {
 	size_t mapsize;
 	void *filter_context;
 	ndb_ingest_filter_fn ingest_filter;
+	void *sub_cb_ctx;
+	ndb_sub_fn sub_cb;
 };
 
 struct ndb_text_search_config {
@@ -430,6 +435,7 @@ void ndb_config_set_ingest_threads(struct ndb_config *config, int threads);
 void ndb_config_set_flags(struct ndb_config *config, int flags);
 void ndb_config_set_mapsize(struct ndb_config *config, size_t mapsize);
 void ndb_config_set_ingest_filter(struct ndb_config *config, ndb_ingest_filter_fn fn, void *);
+void ndb_config_set_subscription_callback(struct ndb_config *config, ndb_sub_fn fn, void *ctx);
 
 // HELPERS
 int ndb_calculate_id(struct ndb_note *note, unsigned char *buf, int buflen);
