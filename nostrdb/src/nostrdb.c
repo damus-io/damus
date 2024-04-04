@@ -2611,7 +2611,7 @@ static int ndb_query_plan_execute_ids(struct ndb_txn *txn,
 	struct ndb_query_result res;
 	struct ndb_tsid tsid, *ptsid;
 	uint64_t note_id, until, *pint;
-	uint64_t note_size;
+	size_t note_size;
 	unsigned char *id;
 
 	matched = 0;
@@ -2716,7 +2716,8 @@ static int ndb_query_plan_execute_tags(struct ndb_txn *txn,
 	MDB_dbi db;
 	MDB_val k, v;
 	int len, taglen, rc, i;
-	uint64_t *pint, until, note_id, note_size;
+	uint64_t *pint, until, note_id;
+	size_t note_size;
 	unsigned char key_buffer[255];
 	struct ndb_note *note;
 	struct ndb_filter_elements *tags;
@@ -2799,7 +2800,8 @@ static int ndb_query_plan_execute_kinds(struct ndb_txn *txn,
 	struct ndb_u64_tsid tsid, *ptsid;
 	struct ndb_filter_elements *kinds;
 	struct ndb_query_result res;
-	uint64_t kind, note_id, note_size, until, *pint;
+	uint64_t kind, note_id, until, *pint;
+	size_t note_size;
 	int i, rc;
 
 	// we should have kinds in a kinds filter!
