@@ -21,6 +21,16 @@ struct NostrPost {
     }
 }
 
+/// This should only be used in tests, we don't use this anymore directly
+func parse_note_content(content: NoteContent) -> Blocks?
+{
+    switch content {
+    case .note(let note):
+        return parse_post_blocks(content: note.content)
+    case .content(let content, _):
+        return parse_post_blocks(content: content)
+    }
+}
 
 /// Return a list of tags
 func parse_post_blocks(content: String) -> Blocks? {

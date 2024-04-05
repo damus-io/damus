@@ -27,6 +27,10 @@ extension UnsafePointer<UInt8> {
 struct MentionRef: TagKeys, TagConvertible, Equatable, Hashable {
     let nip19: Bech32Object
     
+    static func pubkey(_ pubkey: Pubkey) -> MentionRef {
+        self.init(nip19: .npub(pubkey))
+    }
+
     static func note(_ note_id: NoteId) -> MentionRef {
         return self.init(nip19: .note(note_id))
     }
