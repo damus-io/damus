@@ -111,7 +111,8 @@ class Ndb {
             var ok = false
             while !ok && mapsize > 1024 * 1024 * 700 {
                 var cfg = ndb_config(flags: 0, ingester_threads: ingest_threads, mapsize: mapsize, filter_context: nil, ingest_filter: nil, sub_cb_ctx: nil, sub_cb: nil)
-                ok = ndb_init(&ndb_p, testdir, &cfg) != 0
+                let res = ndb_init(&ndb_p, testdir, &cfg);
+                let ok = res != 0;
                 if !ok {
                     Log.error("ndb_init failed: %d, reducing mapsize from %d to %d", for: .storage, res, mapsize, mapsize / 2)
                     mapsize /= 2

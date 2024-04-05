@@ -89,13 +89,13 @@ func generate_local_notification_object(ndb: Ndb, from ev: NostrEvent, state: He
             return true
         }) {
             // This is a reply to one of our posts
-            let content_preview = render_notification_content_preview(ev: ev, profiles: state.profiles, keypair: state.keypair)
+            let content_preview = render_notification_content_preview(ndb: state.ndb, ev: ev, profiles: state.profiles, keypair: state.keypair)
             return LocalNotification(type: .reply, event: ev, target: .note(ev), content: content_preview)
         }
 
         if ev.referenced_pubkeys.contains(state.keypair.pubkey) {
             // not mentioned or replied to, just tagged
-            let content_preview = render_notification_content_preview(ev: ev, profiles: state.profiles, keypair: state.keypair)
+            let content_preview = render_notification_content_preview(ndb: state.ndb, ev: ev, profiles: state.profiles, keypair: state.keypair)
             return LocalNotification(type: .tagged, event: ev, target: .note(ev), content: content_preview)
         }
 
