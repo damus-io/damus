@@ -27,6 +27,10 @@ extension UnsafePointer<UInt8> {
 struct MentionRef: TagKeys, TagConvertible, Equatable, Hashable {
     let nip19: Bech32Object
     
+    static func pubkey(_ pubkey: Pubkey) -> MentionRef {
+        self.init(nip19: .npub(pubkey))
+    }
+
     static func note(_ note_id: NoteId) -> MentionRef {
         return self.init(nip19: .note(note_id))
     }
@@ -303,14 +307,3 @@ func make_post_tags(post_blocks: [Block], tags: [[String]]) -> PostTags {
     return PostTags(blocks: post_blocks, tags: new_tags)
 }
 
-func post_to_event(post: NostrPost, keypair: FullKeypair) -> NostrEvent? {
-    let tags = post.references.map({ r in r.tag }) + post.tags
-    guard let post_blocks = parse_post_blocks(content: post.content)?.blocks else {
-        return nil
-    }
-    let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags)
-    let content = post_tags.blocks
-        .map({ b in b.asString })
-        .joined(separator: "")
-    return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: post.kind.rawValue, tags: post_tags.tags)
-}

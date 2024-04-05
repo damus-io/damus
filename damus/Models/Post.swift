@@ -38,7 +38,7 @@ struct NostrPost {
     
     func parse_blocks() -> [Block] {
         guard let content_for_parsing = self.default_content_for_block_parsing() else { return [] }
-        return parse_post_blocks(content: content_for_parsing)
+        return parse_post_blocks(content: content_for_parsing)?.blocks ?? []
     }
     
     private func default_content_for_block_parsing() -> String? {
@@ -56,33 +56,26 @@ struct NostrPost {
 
         for post_block in post_blocks {
             switch post_block {
-                case .mention(let mention):
-                    switch(mention.ref) {
-                    case .note, .nevent:
-                        continue
-                    default:
-                        break
-                    }
-                    
-                    if self.kind == .highlight, case .pubkey(_) = mention.ref {
-                        var new_tag = mention.ref.tag
-                        new_tag.append("mention")
-                        new_tags.append(new_tag)
-                    }
-                    else {
-                        new_tags.append(mention.ref.tag)
-                    }
-                case .hashtag(let hashtag):
-                    new_tags.append(["t", hashtag.lowercased()])
-                case .text: break
-                case .invoice: break
-                case .relay: break
-                case .url(let url):
-                    new_tags.append(self.kind == .highlight ? ["r", url.absoluteString, "mention"] : ["r", url.absoluteString])
+            case .mention(let mention):
+                switch(mention.ref.nip19) {
+                case .note, .nevent:
+                    continue
+                default:
                     break
+                }
+
+                new_tags.append(mention.ref.tag)
+            case .hashtag(let hashtag):
+                new_tags.append(["t", hashtag.lowercased()])
+            case .text: break
+            case .invoice: break
+            case .relay: break
+            case .url(let url):
+                new_tags.append(["r", url.absoluteString])
+                break
             }
         }
-        
+
         return PostTags(blocks: post_blocks, tags: new_tags)
     }
 }
@@ -94,6 +87,17 @@ extension NostrPost {
     struct PostTags {
         let blocks: [Block]
         let tags: [[String]]
+    }
+}
+
+/// This should only be used in tests, we don't use this anymore directly
+func parse_note_content(content: NoteContent) -> Blocks?
+{
+    switch content {
+    case .note(let note):
+        return parse_post_blocks(content: note.content)
+    case .content(let content, _):
+        return parse_post_blocks(content: content)
     }
 }
 

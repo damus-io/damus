@@ -162,7 +162,7 @@ static void Transform(uint32_t *s, const uint32_t *chunk)
 	s[2] += c;
 	s[3] += d;
 	s[4] += e;
-	s[5] nostrdb: += f;
+	s[5] += f;
 	s[6] += g;
 	s[7] += h;
 }

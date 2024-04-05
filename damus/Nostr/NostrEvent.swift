@@ -500,6 +500,15 @@ func uniq<T: Hashable>(_ xs: [T]) -> [T] {
     return ys
 }
 
+func gather_quote_ids(our_pubkey: Pubkey, from: NostrEvent) -> [RefId] {
+    var ids: [RefId] = [.quote(from.id.quote_id)]
+    if from.pubkey != our_pubkey {
+        ids.append(.pubkey(from.pubkey))
+    }
+    return ids
+}
+
+
 func gather_reply_ids(our_pubkey: Pubkey, from: NostrEvent) -> [RefId] {
     var ids: [RefId] = from.referenced_ids.first.map({ ref in [ .event(ref) ] }) ?? []
 
@@ -517,14 +526,6 @@ func gather_reply_ids(our_pubkey: Pubkey, from: NostrEvent) -> [RefId] {
         ids.append(.pubkey(from.pubkey))
     }
 
-    return ids
-}
-
-func gather_quote_ids(our_pubkey: Pubkey, from: NostrEvent) -> [RefId] {
-    var ids: [RefId] = [.quote(from.id.quote_id)]
-    if from.pubkey != our_pubkey {
-        ids.append(.pubkey(from.pubkey))
-    }
     return ids
 }
 
