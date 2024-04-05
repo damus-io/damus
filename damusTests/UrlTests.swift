@@ -42,7 +42,7 @@ final class UrlTests: XCTestCase {
         
         let testString = "https://en.m.wikipedia.org/wiki/Delicious_(website)"
         
-        let parsed = parse_note_content(content: .content(testString, nil)).blocks
+        let parsed = parse_note_content(content: .content(testString, nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed[0].asURL, testURL)
@@ -53,8 +53,8 @@ final class UrlTests: XCTestCase {
         XCTAssertNotNil(testURL)
         
         let testString = "( https://en.m.wikipedia.org/wiki/Delicious_(website)"
-        let parsed = parse_note_content(content: .content(testString, nil)).blocks
-        
+        let parsed = parse_note_content(content: .content(testString, nil))!.blocks
+
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed[1].asURL, testURL)
     }
@@ -64,7 +64,7 @@ final class UrlTests: XCTestCase {
         XCTAssertNotNil(testURL)
         
         let testString = "(https://jb55.com)"
-        let parsed = parse_note_content(content: .content(testString, nil)).blocks
+        let parsed = parse_note_content(content: .content(testString, nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed[1].asURL, testURL)
@@ -75,7 +75,7 @@ final class UrlTests: XCTestCase {
         XCTAssertNotNil(testURL)
         
         let testString = "(https://nostr-con.com/simplex)"
-        let parsed = parse_note_content(content: .content(testString, nil)).blocks
+        let parsed = parse_note_content(content: .content(testString, nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed[1].asURL, testURL)
@@ -87,7 +87,7 @@ final class UrlTests: XCTestCase {
         XCTAssertNotNil(testURL)
 
         let content = "my \(link) link"
-        let blocks = parse_post_blocks(content: content)
+        let blocks = parse_post_blocks(content: content)!.blocks
 
         XCTAssertEqual(blocks.count, 3)
         XCTAssertEqual(blocks[0].asText, "my ")
@@ -99,7 +99,7 @@ final class UrlTests: XCTestCase {
         let testURL = URL(string: "HTTPS://jb55.COM")
         XCTAssertNotNil(testURL)
         
-        let parsed = parse_note_content(content: .content("a HTTPS://jb55.COM b", nil)).blocks
+        let parsed = parse_note_content(content: .content("a HTTPS://jb55.COM b", nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -111,7 +111,7 @@ final class UrlTests: XCTestCase {
         XCTAssertNotNil(testURL)
         
         let content = "this is my link: https://jb55.com/index.html#buybitcoin this is not a hashtag!"
-        let blocks = parse_post_blocks(content: content)
+        let blocks = parse_post_blocks(content: content)!.blocks
 
         XCTAssertEqual(blocks.count, 3)
         XCTAssertEqual(blocks[0].asText, "this is my link: ")
@@ -206,7 +206,7 @@ final class UrlTests: XCTestCase {
 }
 
 func testParseURL(inputURLString: String, expectedURLs: String...) {
-    let parsedURL: [Block] = parse_note_content(content: .content(inputURLString, nil)).blocks.filter {
+    let parsedURL: [Block] = parse_note_content(content: .content(inputURLString, nil))!.blocks.filter {
         $0.isURL
     }
     

@@ -434,7 +434,7 @@ func decode_bolt11(_ s: String) -> Invoice? {
     var bolt11_ptr: UnsafeMutablePointer<bolt11>?
 
     let _ = bytes.withUnsafeBufferPointer { p in
-        bolt11_ptr = bolt11_decode(nil, p.baseAddress, nil)
+        bolt11_ptr = bolt11_decode_minimal(nil, p.baseAddress, nil)
     }
 
     guard let bolt11 = maybe_pointee(bolt11_ptr) else {

@@ -90,7 +90,7 @@ class NotificationService: UNNotificationServiceExtension {
             return
         }
 
-        guard let notification_object = generate_local_notification_object(from: nostr_event, state: state) else {
+        guard let notification_object = generate_local_notification_object(ndb: state.ndb, from: nostr_event, state: state) else {
             Log.debug("generate_local_notification_object failed", for: .push_notifications)
             // We could not process this notification. Probably an unsupported nostr event kind. Suppress.
             // contentHandler(UNNotificationContent())
