@@ -116,7 +116,23 @@ func interp_event_refs_with_mentions(tags: Tags) -> [EventRef] {
     return replies
 }
 
-func interpret_event_refs(blocks: BlocksSequence, tags: Tags) -> [EventRef] {
+func interpret_event_refs(tags: Tags) -> [EventRef] {
+    if tags.count == 0 {
+        return []
+    }
+    
+    /// build a set of indices for each event mention
+    //let mention_indices = build_mention_indices(blocks, type: .e)
+
+    /// simpler case with no mentions
+    //if mention_indices.count == 0 {
+        //return interp_event_refs_without_mentions_ndb(References<NoteRef>(tags: tags))
+    //}
+
+    return interp_event_refs_with_mentions(tags: tags)
+}
+
+func ndb_interpret_event_refs(tags: Tags) -> [EventRef] {
     if tags.count == 0 {
         return []
     }
