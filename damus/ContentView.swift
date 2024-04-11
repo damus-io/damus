@@ -516,6 +516,7 @@ struct ContentView: View {
                 print("txn: 📙 DAMUS BACKGROUNDED")
                 Task { @MainActor in
                     damus_state.ndb.close()
+                    VideoCache.standard?.periodic_purge()
                 }
                 break
             case .inactive:
