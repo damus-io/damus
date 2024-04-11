@@ -33,7 +33,7 @@ struct DamusVideoPlayer: View {
         else {
             mute = nil
         }
-        _model = StateObject(wrappedValue: DamusVideoPlayerViewModel(url: url, video_size: video_size, controller: controller, mute: mute))
+        _model = StateObject(wrappedValue: DamusVideoPlayerViewModel.cached_video_model(url: url, video_size: video_size, controller: controller, mute: mute))
         self.visibility_tracking_method = visibility_tracking_method
         self.style = style
     }

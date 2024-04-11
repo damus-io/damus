@@ -487,6 +487,7 @@
 		D76556D62B1E6C08001B0CCC /* DamusPurpleWelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76556D52B1E6C08001B0CCC /* DamusPurpleWelcomeView.swift */; };
 		D76874F32AE3632B00FB0F68 /* ProfileZapLinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76874F22AE3632B00FB0F68 /* ProfileZapLinkView.swift */; };
 		D77BFA0B2AE3051200621634 /* ProfileActionSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77BFA0A2AE3051200621634 /* ProfileActionSheetView.swift */; };
+		D7831AF82BBE11E2005DA780 /* VideoCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7831AF72BBE11E2005DA780 /* VideoCacheTests.swift */; };
 		D783A63F2AD4E53D00658DDA /* SuggestedHashtagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D783A63E2AD4E53D00658DDA /* SuggestedHashtagsView.swift */; };
 		D78525252A7B2EA4002FA637 /* NoteContentViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78525242A7B2EA4002FA637 /* NoteContentViewTests.swift */; };
 		D7870BC12AC4750B0080BA88 /* MentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC02AC4750B0080BA88 /* MentionView.swift */; };
@@ -517,6 +518,7 @@
 		D7ADD3DE2B53854300F104C4 /* DamusPurpleURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7ADD3DD2B53854300F104C4 /* DamusPurpleURL.swift */; };
 		D7ADD3E02B538D4200F104C4 /* DamusPurpleURLSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7ADD3DF2B538D4200F104C4 /* DamusPurpleURLSheetView.swift */; };
 		D7ADD3E22B538E3500F104C4 /* DamusPurpleVerifyNpubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7ADD3E12B538E3500F104C4 /* DamusPurpleVerifyNpubView.swift */; };
+		D7C28E3B2BBB4D0000EE459F /* VideoCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C28E3A2BBB4D0000EE459F /* VideoCache.swift */; };
 		D7C6787E2B2D34CC00BCEAFB /* NIP98AuthenticatedRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C6787D2B2D34CC00BCEAFB /* NIP98AuthenticatedRequest.swift */; };
 		D7CB5D3B2B112FBB00AD4105 /* NotificationFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */; };
 		D7CB5D3C2B1130C600AD4105 /* LocalNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDA128B29EB19C40006FA5A /* LocalNotification.swift */; };
@@ -1399,6 +1401,7 @@
 		D76556D52B1E6C08001B0CCC /* DamusPurpleWelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleWelcomeView.swift; sourceTree = "<group>"; };
 		D76874F22AE3632B00FB0F68 /* ProfileZapLinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileZapLinkView.swift; sourceTree = "<group>"; };
 		D77BFA0A2AE3051200621634 /* ProfileActionSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileActionSheetView.swift; sourceTree = "<group>"; };
+		D7831AF72BBE11E2005DA780 /* VideoCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCacheTests.swift; sourceTree = "<group>"; };
 		D783A63E2AD4E53D00658DDA /* SuggestedHashtagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedHashtagsView.swift; sourceTree = "<group>"; };
 		D78525242A7B2EA4002FA637 /* NoteContentViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteContentViewTests.swift; sourceTree = "<group>"; };
 		D7870BC02AC4750B0080BA88 /* MentionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MentionView.swift; sourceTree = "<group>"; };
@@ -1414,6 +1417,7 @@
 		D7ADD3DD2B53854300F104C4 /* DamusPurpleURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleURL.swift; sourceTree = "<group>"; };
 		D7ADD3DF2B538D4200F104C4 /* DamusPurpleURLSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleURLSheetView.swift; sourceTree = "<group>"; };
 		D7ADD3E12B538E3500F104C4 /* DamusPurpleVerifyNpubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleVerifyNpubView.swift; sourceTree = "<group>"; };
+		D7C28E3A2BBB4D0000EE459F /* VideoCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCache.swift; sourceTree = "<group>"; };
 		D7C6787D2B2D34CC00BCEAFB /* NIP98AuthenticatedRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP98AuthenticatedRequest.swift; sourceTree = "<group>"; };
 		D7CB5D3D2B116DAD00AD4105 /* NotificationsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsManager.swift; sourceTree = "<group>"; };
 		D7CB5D442B116FE800AD4105 /* Contacts+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Contacts+.swift"; sourceTree = "<group>"; };
@@ -1649,6 +1653,7 @@
 				D74AAFC12B153395006CF0F4 /* HeadlessDamusState.swift */,
 				B5C60C1F2B530D5100C5ECA7 /* MuteItem.swift */,
 				B533694D2B66D791008A805E /* MutelistManager.swift */,
+				D7C28E3A2BBB4D0000EE459F /* VideoCache.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -3285,6 +3290,7 @@
 				4C1253522A76C6130004F4B8 /* ComposeNotify.swift in Sources */,
 				4C7D09662A0AE62100943473 /* AlbyButton.swift in Sources */,
 				D7100C582B76FC8400C59298 /* MarketingContentView.swift in Sources */,
+				D7C28E3B2BBB4D0000EE459F /* VideoCache.swift in Sources */,
 				4CAAD8AD298851D000060CEA /* AccountDeletion.swift in Sources */,
 				4CFF8F6329CC9AD7008DB934 /* ImageContextMenuModifier.swift in Sources */,
 				4C54AA0A29A55429003E4487 /* EventGroup.swift in Sources */,
@@ -3541,6 +3547,7 @@
 				75AD872B2AA23A460085EF2C /* Block+Tests.swift in Sources */,
 				E0E024112B7C19C20075735D /* TranslationTests.swift in Sources */,
 				F944F56E29EA9CCC0067B3BF /* DamusParseContentTests.swift in Sources */,
+				D7831AF82BBE11E2005DA780 /* VideoCacheTests.swift in Sources */,
 				3A5E47C72A4A76C800C0D090 /* TrieTests.swift in Sources */,
 				B501062D2B363036003874F5 /* AuthIntegrationTests.swift in Sources */,
 				4CB883AE2976FA9300DC99E7 /* FormatTests.swift in Sources */,
