@@ -497,7 +497,8 @@ void ndb_filter_destroy(struct ndb_filter *);
 uint64_t ndb_subscribe(struct ndb *, struct ndb_filter *, int num_filters);
 int ndb_wait_for_notes(struct ndb *, uint64_t subid, uint64_t *note_ids, int note_id_capacity);
 int ndb_poll_for_notes(struct ndb *, uint64_t subid, uint64_t *note_ids, int note_id_capacity);
-int ndb_unsubscribe(int subid);
+int ndb_unsubscribe(struct ndb *, uint64_t subid);
+int ndb_num_subscriptions(struct ndb *);
 
 // FULLTEXT SEARCH
 int ndb_text_search(struct ndb_txn *txn, const char *query, struct ndb_text_search_results *, struct ndb_text_search_config *);
