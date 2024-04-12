@@ -12,6 +12,7 @@
 #include "cpu.h"
 #include "block.h"
 #include "threadpool.h"
+#include "thread.h"
 #include "protected_queue.h"
 #include "memchr.h"
 #include "print_util.h"
@@ -32,7 +33,7 @@
 #define min(a,b) ((a) < (b) ? (a) : (b))
 
 // the maximum number of things threads pop and push in bulk
-static const int THREAD_QUEUE_BATCH = 4096;
+#define THREAD_QUEUE_BATCH 4096
 
 // maximum number of active subscriptions
 #define MAX_SUBSCRIPTIONS 256
@@ -84,7 +85,6 @@ struct ndb_tag {
 struct ndb_tags {
 	uint16_t padding;
 	uint16_t count;
-	struct ndb_tag tag[0];
 };
 
 // v1
@@ -364,8 +364,8 @@ static int ndb_tag_key_compare(const MDB_val *a, const MDB_val *b)
 	if ((cmp = mdb_cmp_memn(&va, &vb)))
 		return cmp;
 
-	ts_a = *(uint64_t*)(va.mv_data + va.mv_size);
-	ts_b = *(uint64_t*)(vb.mv_data + vb.mv_size);
+	ts_a = *(uint64_t*)((unsigned char *)va.mv_data + va.mv_size);
+	ts_b = *(uint64_t*)((unsigned char *)vb.mv_data + vb.mv_size);
 
 	if (ts_a < ts_b)
 		return -1;
@@ -381,8 +381,8 @@ static int ndb_text_search_key_compare(const MDB_val *a, const MDB_val *b)
 	uint64_t sa, sb, nid_a, nid_b;
 	MDB_val a2, b2;
 
-	make_cursor(a->mv_data, a->mv_data + a->mv_size, &ca);
-	make_cursor(b->mv_data, b->mv_data + b->mv_size, &cb);
+	make_cursor(a->mv_data, (unsigned char *)a->mv_data + a->mv_size, &ca);
+	make_cursor(b->mv_data, (unsigned char *)b->mv_data + b->mv_size, &cb);
 
 	// note_id
 	if (unlikely(!cursor_pull_varint(&ca, &nid_a) || !cursor_pull_varint(&cb, &nid_b)))
@@ -3035,7 +3035,7 @@ static int ndb_query_plan_execute_tags(struct ndb_txn *txn,
 			if (taglen != k.mv_size - 9)
 				break;
 
-			if (memcmp(k.mv_data+1, tag, k.mv_size-9))
+			if (memcmp((unsigned char *)k.mv_data+1, tag, k.mv_size-9))
 				break;
 
 			note_id = *(uint64_t*)v.mv_data;
@@ -3538,7 +3538,7 @@ static int ndb_text_search_next_word(MDB_cursor *cursor, MDB_cursor_op op,
 	int retries;
 	retries = -1;
 
-	make_cursor(k->mv_data, k->mv_data + k->mv_size, &key_cursor);
+	make_cursor(k->mv_data, (unsigned char *)k->mv_data + k->mv_size, &key_cursor);
 
 	// When op is MDB_SET_RANGE, this initializes the search. Position
 	// the cursor at the next key greater than or equal to the specified
@@ -3567,7 +3567,7 @@ retry:
 	printf("\n");
 	*/
 
-	make_cursor(k->mv_data, k->mv_data + k->mv_size, &key_cursor);
+	make_cursor(k->mv_data, (unsigned char *)k->mv_data + k->mv_size, &key_cursor);
 
 	if (unlikely(!ndb_unpack_text_search_key_noteid(&key_cursor, &result->key.note_id))) {
 		fprintf(stderr, "UNUSUAL: failed to unpack text search key note_id\n");
@@ -4199,7 +4199,7 @@ static int ndb_writer_init(struct ndb_writer *writer, struct ndb_lmdb *lmdb,
 			writer->queue_buflen, sizeof(struct ndb_writer_msg));
 
 	// spin up the writer thread
-	if (pthread_create(&writer->thread_id, NULL, ndb_writer_thread, writer))
+	if (THREAD_CREATE(writer->thread_id, ndb_writer_thread, writer))
 	{
 		fprintf(stderr, "ndb writer thread failed to create\n");
 		return 0;
@@ -4244,9 +4244,9 @@ static int ndb_writer_destroy(struct ndb_writer *writer)
 	msg.type = NDB_WRITER_QUIT;
 	if (!prot_queue_push(&writer->inbox, &msg)) {
 		// queue is too full to push quit message. just kill it.
-		pthread_exit(&writer->thread_id);
+		THREAD_TERMINATE(writer->thread_id);
 	} else {
-		pthread_join(writer->thread_id, NULL);
+		THREAD_FINISH(writer->thread_id);
 	}
 
 	// cleanup
@@ -4588,6 +4588,8 @@ int _ndb_process_events(struct ndb *ndb, const char *ldjson, size_t json_len, in
 	return 1;
 }
 
+#ifndef _WIN32
+// TODO: windows
 int ndb_process_events_stream(struct ndb *ndb, FILE* fp)
 {
 	char *line = NULL;
@@ -4605,6 +4607,7 @@ int ndb_process_events_stream(struct ndb *ndb, FILE* fp)
 
 	return 1;
 }
+#endif
 
 int ndb_process_client_events(struct ndb *ndb, const char *ldjson, size_t json_len)
 {
@@ -6126,7 +6129,7 @@ int ndb_stat(struct ndb *ndb, struct ndb_stat *stat)
 /// Push an element to the current tag
 ///
 /// Basic idea is to call ndb_builder_new_tag
-inline int ndb_builder_push_tag_str(struct ndb_builder *builder,
+int ndb_builder_push_tag_str(struct ndb_builder *builder,
 				    const char *str, int len)
 {
 	union ndb_packed_str pstr;
@@ -6338,12 +6341,17 @@ void ndb_tags_iterate_start(struct ndb_note *note, struct ndb_iterator *iter)
 	iter->index = -1;
 }
 
+// Helper function to get a pointer to the nth tag
+static struct ndb_tag *ndb_tags_tag(struct ndb_tags *tags, size_t index) {
+    return (struct ndb_tag *)((uint8_t *)tags + sizeof(struct ndb_tags) + index * sizeof(struct ndb_tag));
+}
+
 int ndb_tags_iterate_next(struct ndb_iterator *iter)
 {
 	struct ndb_tags *tags;
 
 	if (iter->tag == NULL || iter->index == -1) {
-		iter->tag = iter->note->tags.tag;
+		iter->tag = ndb_tags_tag(&iter->note->tags, 0);
 		iter->index = 0;
 		return iter->note->tags.count != 0;
 	}
