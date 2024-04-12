@@ -12,12 +12,15 @@
 #ifndef PROT_QUEUE_H
 #define PROT_QUEUE_H
 
-#include <pthread.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
 #include "cursor.h"
 #include "util.h"
+#include "thread.h"
+
+#define max(a,b) ((a) > (b) ? (a) : (b))
+#define min(a,b) ((a) < (b) ? (a) : (b))
 
 /* 
  * The prot_queue structure represents a thread-safe queue that can hold

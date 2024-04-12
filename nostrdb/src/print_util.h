@@ -22,12 +22,12 @@ static void print_tag_kv(struct ndb_txn *txn, MDB_val *k, MDB_val *v)
 	struct ndb_note *note;
 	uint64_t ts;
 
-	ts = *(uint64_t*)(k->mv_data+(k->mv_size-8));
+	ts = *(uint64_t*)((uint8_t*)k->mv_data+(k->mv_size-8));
 
 	// TODO: p tags, etc
 	if (((const char*)k->mv_data)[0] == 'e' && k->mv_size == (1 + 32 + 8)) {
 		printf("note_tags 'e");
-		print_hex(k->mv_data+1, 32);
+		print_hex((uint8_t*)k->mv_data+1, 32);
 		printf("' %" PRIu64, ts);
 	} else {
 		printf("note_tags '%.*s' %" PRIu64, (int)k->mv_size-8,
