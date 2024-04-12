@@ -2,14 +2,6 @@
 #ifndef NDB_UTIL_H
 #define NDB_UTIL_H
 
-static inline int min(int a, int b) {
-    return a < b ? a : b;
-}
-
-static inline int max(int a, int b) {
-    return a > b ? a : b;
-}
-
 static inline void* memdup(const void* src, size_t size) {
 	void* dest = malloc(size);
 	if (dest == NULL) {

@@ -304,7 +304,7 @@ int parse_nostr_bech32(unsigned char *buf, int buflen,
 	unsigned char *start;
 	size_t parsed_len, u5_out_len, u8_out_len;
 	enum nostr_bech32_type type;
-	static const int MAX_PREFIX = 8;
+#define MAX_PREFIX 8
 	struct cursor cur, bech32, u8;
 
 	make_cursor(buf, buf + buflen, &cur);
@@ -320,7 +320,7 @@ int parse_nostr_bech32(unsigned char *buf, int buflen,
 	if (parsed_len < 10 || parsed_len > 10000)
 		return 0;
 
-	unsigned char u5[parsed_len];
+	unsigned char *u5 = malloc(parsed_len);
 	char prefix[MAX_PREFIX];
 	
 	if (bech32_decode_len(prefix, u5, &u5_out_len, (const char*)start,
@@ -331,6 +331,8 @@ int parse_nostr_bech32(unsigned char *buf, int buflen,
 
 	if (!bech32_convert_bits(cur.p, &u8_out_len, 8, u5, u5_out_len, 5, 0))
 		return 0;
+
+	free(u5);
 
 	make_cursor(cur.p, cur.p + u8_out_len, &u8);
 
