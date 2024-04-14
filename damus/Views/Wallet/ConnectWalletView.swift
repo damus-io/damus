@@ -96,9 +96,16 @@ struct ConnectWalletView: View {
                 openURL(URL(string:"https://nwc.getalby.com/apps/new?c=Damus")!)
             }
             
+            //
+            // Mutiny Wallet NWC is way too advanced to recommend for normal
+            // users until they have a way to do async receive.
+            //
+
+            /*
             MutinyButton() {
                 openURL(URL(string:"https://app.mutinywallet.com/settings/connections?callbackUri=nostr%2bwalletconnect&name=Damus")!)
             }
+            */
             
             Button(action: {
                 if let pasted_nwc = UIPasteboard.general.string {
