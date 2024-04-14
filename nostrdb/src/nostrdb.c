@@ -5959,7 +5959,7 @@ uint64_t ndb_subscribe(struct ndb *ndb, struct ndb_filter *filters, int num_filt
 	ndb_filter_group_init(&sub->group);
 	if (!ndb_filter_group_add_filters(&sub->group, filters, num_filters))
 		return 0;
-	
+
 	// 500k ought to be enough for anyone
 	buflen = sizeof(uint64_t) * 65536;
 	buf = malloc(buflen);

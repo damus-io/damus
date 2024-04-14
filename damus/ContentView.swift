@@ -661,22 +661,25 @@ struct ContentView: View {
         self.selected_timeline = timeline
     }
 
+    func on_local_sub(subid: UInt64) {
+    }
+
     func connect() {
         // nostrdb
-        var mndb = Ndb()
-        if mndb == nil {
+        var ndb: Ndb? = Ndb()
+        if ndb?.open() == nil {
             // try recovery
             print("DB ISSUE! RECOVERING")
-            mndb = Ndb.safemode()
+            ndb = Ndb.safemode()
 
             // out of space or something?? maybe we need a in-memory fallback
-            if mndb == nil {
+            if ndb == nil {
                 logout(nil)
                 return
             }
         }
 
-        guard let ndb = mndb else { return  }
+        guard let ndb else { return  }
 
         let pool = RelayPool(ndb: ndb, keypair: keypair)
         let model_cache = RelayModelCache()

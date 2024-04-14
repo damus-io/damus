@@ -111,7 +111,7 @@ enum Route: Hashable {
         case .CreateAccount:
             CreateAccountView(nav: navigationCoordinator)
         case .SaveKeys(let account):
-            SaveKeysView(account: account)
+            SaveKeysView(account: account, pool: damusState.pool)
         case .Wallet(let walletModel):
             WalletView(damus_state: damusState, model: walletModel)
         case .WalletScanner(let walletScanResult):

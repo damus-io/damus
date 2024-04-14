@@ -205,6 +205,8 @@
 		4C75EFB728049D990006080F /* RelayPool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFB628049D990006080F /* RelayPool.swift */; };
 		4C75EFB92804A2740006080F /* EventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFB82804A2740006080F /* EventView.swift */; };
 		4C75EFBB2804A34C0006080F /* ProofOfWork.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFBA2804A34C0006080F /* ProofOfWork.swift */; };
+		4C79A6DC2BC07FC6007B2D87 /* QueryResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C79A6DB2BC07FC6007B2D87 /* QueryResult.swift */; };
+		4C79A6DD2BC07FC6007B2D87 /* QueryResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C79A6DB2BC07FC6007B2D87 /* QueryResult.swift */; };
 		4C7D09592A05BEAD00943473 /* KeyboardVisible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09582A05BEAD00943473 /* KeyboardVisible.swift */; };
 		4C7D095F2A098C5D00943473 /* ConnectWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D095C2A098C5D00943473 /* ConnectWalletView.swift */; };
 		4C7D09602A098C5D00943473 /* WalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D095D2A098C5D00943473 /* WalletView.swift */; };
@@ -1072,6 +1074,7 @@
 		4C78EFD82A707C4D007E8197 /* secp256k1_ecdh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = secp256k1_ecdh.h; sourceTree = "<group>"; };
 		4C78EFD92A707C4D007E8197 /* secp256k1.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = secp256k1.h; sourceTree = "<group>"; };
 		4C78EFDA2A707C67007E8197 /* secp256k1_extrakeys.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = secp256k1_extrakeys.h; sourceTree = "<group>"; };
+		4C79A6DB2BC07FC6007B2D87 /* QueryResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueryResult.swift; sourceTree = "<group>"; };
 		4C7D09582A05BEAD00943473 /* KeyboardVisible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardVisible.swift; sourceTree = "<group>"; };
 		4C7D095C2A098C5D00943473 /* ConnectWalletView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectWalletView.swift; sourceTree = "<group>"; };
 		4C7D095D2A098C5D00943473 /* WalletView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WalletView.swift; sourceTree = "<group>"; };
@@ -2130,6 +2133,7 @@
 				D798D2272B085CDA00234419 /* NdbNote+.swift */,
 				4CF480562B633F2600F2B2C0 /* NdbBlocksIterator.swift */,
 				4CF480582B633F3800F2B2C0 /* NdbBlock.swift */,
+				4C79A6DB2BC07FC6007B2D87 /* QueryResult.swift */,
 			);
 			path = nostrdb;
 			sourceTree = "<group>";
@@ -3360,6 +3364,7 @@
 				4C363A8828236948006E126D /* BlocksView.swift in Sources */,
 				4C06670628FCB08600038D2A /* ImageCarousel.swift in Sources */,
 				3A23838E2A297DD200E5AA2E /* ZapButtonModel.swift in Sources */,
+				4C79A6DC2BC07FC6007B2D87 /* QueryResult.swift in Sources */,
 				F71694F82A6983AF001F4053 /* GrayGradient.swift in Sources */,
 				4C1D4FB12A7958E60024F453 /* VersionInfo.swift in Sources */,
 				D7FF94002AC7AC5300FD969D /* RelayURL.swift in Sources */,
@@ -3397,7 +3402,6 @@
 				4C19AE512A5CEF7C00C90DB7 /* NostrScript.swift in Sources */,
 				4C32B95E2A9AD44700DC3548 /* FlatBufferObject.swift in Sources */,
 				D783A63F2AD4E53D00658DDA /* SuggestedHashtagsView.swift in Sources */,
-				4CB88393296F798300DC99E7 /* ReactionsModel.swift in Sources */,
 				5C42E78C29DB76D90086AAC1 /* EmptyUserSearchView.swift in Sources */,
 				4CB88396296F7F8B00DC99E7 /* ReactionView.swift in Sources */,
 				4CF480552B631C4F00F2B2C0 /* wasm.c in Sources */,
@@ -3732,6 +3736,7 @@
 				D798D2222B08598A00234419 /* ReferencedId.swift in Sources */,
 				D7CE1B492B0BE729002EDAD4 /* DisplayName.swift in Sources */,
 				D7CE1B192B0BE132002EDAD4 /* builder.c in Sources */,
+				4C79A6DD2BC07FC6007B2D87 /* QueryResult.swift in Sources */,
 				D7EDED1F2B11797D0018B19C /* LongformEvent.swift in Sources */,
 				D7CCFC122B05886D00323D86 /* IdType.swift in Sources */,
 				D7CE1B312B0BE69D002EDAD4 /* Ndb.swift in Sources */,

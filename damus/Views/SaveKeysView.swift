@@ -10,7 +10,8 @@ import Security
 
 struct SaveKeysView: View {
     let account: CreateAccountModel
-    let pool: RelayPool = RelayPool(ndb: Ndb()!)
+    let pool: RelayPool
+
     @State var pub_copied: Bool = false
     @State var priv_copied: Bool = false
     @State var loading: Bool = false
@@ -23,7 +24,8 @@ struct SaveKeysView: View {
     
     let first_contact_event: NdbNote?
     
-    init(account: CreateAccountModel) {
+    init(account: CreateAccountModel, pool: RelayPool) {
+        self.pool = pool
         self.account = account
         self.first_contact_event = make_first_contact_event(keypair: account.keypair)
     }
@@ -252,7 +254,7 @@ struct SaveKeyView: View {
 struct SaveKeysView_Previews: PreviewProvider {
     static var previews: some View {
         let model = CreateAccountModel(real: "William", nick: "jb55", about: "I'm me")
-        SaveKeysView(account: model)
+        SaveKeysView(account: model, pool: RelayPool(ndb: test_damus_state.ndb))
     }
 }
 
