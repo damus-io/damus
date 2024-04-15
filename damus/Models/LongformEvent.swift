@@ -14,6 +14,7 @@ struct LongformEvent {
     var image: URL? = nil
     var summary: String? = nil
     var published_at: Date? = nil
+    var labels: [String]? = nil
     
     static func parse(from ev: NostrEvent) -> LongformEvent {
         var longform = LongformEvent(event: ev)
@@ -26,6 +27,10 @@ struct LongformEvent {
             case "summary": longform.summary = tag[1].string()
             case "published_at":
                 longform.published_at = Double(tag[1].string()).map { d in Date(timeIntervalSince1970: d) }
+            case "t":
+                if (longform.labels?.append(tag[1].string())) == nil {
+                    longform.labels = [tag[1].string()]
+                }
             default:
                 break
             }
