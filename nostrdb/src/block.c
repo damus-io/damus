@@ -185,6 +185,7 @@ struct nostr_bech32 *ndb_bech32_block(struct ndb_block *block) {
 
 // total size including padding
 size_t ndb_blocks_total_size(struct ndb_blocks *blocks) {
+	assert(blocks->total_size < 1000000);
 	return blocks->total_size;
 }
 
