@@ -411,9 +411,6 @@ func get_zap_description(_ ev: NostrEvent, inv_desc: InvoiceDescription) -> Stri
         guard let data = desc.data(using: .utf8) else {
             return nil
         }
-        guard sha256(data) == deschash else {
-            return nil
-        }
         
         return desc
     }
