@@ -12,9 +12,15 @@ struct FailedRelayImage: View {
     let url: URL?
 
     var body: some View {
-        let abbrv = String(url?.host()?.first?.uppercased() ?? "R")
-        Text(abbrv)
-            .font(.system(size: 40, weight: .bold))
+        if #available(iOS 16.0, *){
+            let abbrv = String(url?.host()?.first?.uppercased() ?? "R")
+            Text(abbrv)
+                .font(.system(size: 40, weight: .bold))
+        } else {
+            let abbrv: String = url?.host?.first?.uppercased() ?? "R"
+            Text(abbrv)
+                .font(.system(size: 40, weight: .bold))
+        }
     }
 }
 

@@ -134,11 +134,19 @@ struct UserStatusSheet: View {
                     
                     VStack(spacing: 0) {
                         HStack {
-                            TextField(NSLocalizedString("Staying humble...", comment: "Placeholder as an example of what the user could set as their profile status."), text: status_binding, axis: .vertical)
-                                .autocorrectionDisabled(true)
-                                .textInputAutocapitalization(.never)
-                                .lineLimit(3)
-                                .frame(width: 175)
+                            if #available(iOS 16.0, *){
+                                TextField(NSLocalizedString("Staying humble...", comment: "Placeholder as an example of what the user could set as their profile status."), text: status_binding, axis: .vertical)
+                                    .autocorrectionDisabled(true)
+                                    .textInputAutocapitalization(.never)
+                                    .lineLimit(3)
+                                    .frame(width: 175)
+                            } else {
+                                TextField(NSLocalizedString("Staying humble...", comment: "Placeholder as an example of what the user could set as their profile status."), text: status_binding)
+                                    .autocorrectionDisabled(true)
+                                    .textInputAutocapitalization(.never)
+                                    .lineLimit(3)
+                                    .frame(width: 175)
+                            }
                             
                         }
                         .padding(10)

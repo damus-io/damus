@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import NavigationBackport
 
 struct RepostedEvent: View {
     let damus: DamusState
@@ -15,7 +16,7 @@ struct RepostedEvent: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            NavigationLink(value: Route.ProfileByKey(pubkey: event.pubkey)) {
+            NBNavigationLink(value: Route.ProfileByKey(pubkey: event.pubkey)) {
                 Reposted(damus: damus, pubkey: event.pubkey)
                     .padding(.horizontal)
             }

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import NavigationBackport
 
 enum ShowItem {
     case show(NostrEvent?)
@@ -59,7 +60,7 @@ struct NotificationItemView: View {
                 EventGroupView(state: state, event: ev, group: .reaction(evgrp))
             
             case .reply(let ev):
-                NavigationLink(value: Route.Thread(thread: ThreadModel(event: ev, damus_state: state))) {
+                NBNavigationLink(value: Route.Thread(thread: ThreadModel(event: ev, damus_state: state))) {
                     EventView(damus: state, event: ev, options: options)
                 }
                 .buttonStyle(.plain)

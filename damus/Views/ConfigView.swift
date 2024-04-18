@@ -9,6 +9,7 @@ import Kingfisher
 import SwiftUI
 import LocalAuthentication
 import Combine
+import NavigationBackport
 
 struct ConfigView: View {
     let state: DamusState
@@ -36,35 +37,35 @@ struct ConfigView: View {
         ZStack(alignment: .leading) {
             Form {
                 Section {
-                    NavigationLink(value: Route.KeySettings(keypair: state.keypair)) {
+                    NBNavigationLink(value: Route.KeySettings(keypair: state.keypair)) {
                         IconLabel(NSLocalizedString("Keys", comment: "Settings section for managing keys"), img_name: "Key", color: .purple)
                     }
 
-                    NavigationLink(value: Route.AppearanceSettings(settings: settings)) {
+                    NBNavigationLink(value: Route.AppearanceSettings(settings: settings)) {
                         IconLabel(NSLocalizedString("Appearance and filters", comment: "Section header for text, appearance, and content filter settings"), img_name: "eye", color: .red)
                     }
 
-                    NavigationLink(value: Route.SearchSettings(settings: settings)) {
+                    NBNavigationLink(value: Route.SearchSettings(settings: settings)) {
                         IconLabel(NSLocalizedString("Search/Universe", comment: "Section header for search/universe settings"), img_name: "search", color: .red)
                     }
 
-                    NavigationLink(value: Route.NotificationSettings(settings: settings)) {
+                    NBNavigationLink(value: Route.NotificationSettings(settings: settings)) {
                         IconLabel(NSLocalizedString("Notifications", comment: "Section header for Damus notifications"), img_name: "notification-bell-on", color: .blue)
                     }
 
-                    NavigationLink(value: Route.ZapSettings(settings: settings)) {
+                    NBNavigationLink(value: Route.ZapSettings(settings: settings)) {
                         IconLabel(NSLocalizedString("Zaps", comment: "Section header for zap settings"), img_name: "zap.fill", color: .orange)
                     }
 
-                    NavigationLink(value: Route.TranslationSettings(settings: settings)) {
+                    NBNavigationLink(value: Route.TranslationSettings(settings: settings)) {
                         IconLabel(NSLocalizedString("Translation", comment: "Section header for text and appearance settings"), img_name: "globe", color: .green)
                     }
                     
-                    NavigationLink(value: Route.ReactionsSettings(settings: settings)) {
+                    NBNavigationLink(value: Route.ReactionsSettings(settings: settings)) {
                         IconLabel(NSLocalizedString("Reactions", comment: "Section header for reactions settings"), img_name: "shaka.fill", color: .purple)
                     }
                     
-                    NavigationLink(value: Route.DeveloperSettings(settings: settings)) {
+                    NBNavigationLink(value: Route.DeveloperSettings(settings: settings)) {
                         IconLabel(NSLocalizedString("Developer", comment: "Section header for developer settings"), img_name: "magic-stick2.fill", color: DamusColors.adaptableBlack)
                     }
                 }

@@ -133,7 +133,13 @@ struct ProfileActionSheetView: View {
         .onPreferenceChange(InnerHeightPreferenceKey.self) { newHeight in
             sheetHeight = newHeight
         }
-        .presentationDetents([.height(sheetHeight)])
+        .conditionalModifier { view in
+            if #available(iOS 16.0, *){
+                return AnyView(view.presentationDetents([.height(sheetHeight)]))
+            } else {
+                return view
+            }
+        }
     }
 }
 

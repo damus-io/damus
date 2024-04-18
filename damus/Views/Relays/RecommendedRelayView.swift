@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import NavigationBackport
 
 struct RecommendedRelayView: View {
     let damus: DamusState
@@ -66,7 +67,7 @@ struct RecommendedRelayView: View {
             VStack {
                 RelayPicView(relay: relay, icon: meta?.icon, size: 70, highlight: .none, disable_animation: false)
                 if let meta = damus.relay_model_cache.model(with_relay_id: relay)?.metadata {
-                    NavigationLink(value: Route.RelayDetail(relay: relay, metadata: meta)){
+                    NBNavigationLink(value: Route.RelayDetail(relay: relay, metadata: meta)){
                         EmptyView()
                     }
                     .opacity(0.0)

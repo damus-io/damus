@@ -6,13 +6,14 @@
 //
 
 import SwiftUI
+import NavigationBackport
 
 
 struct SetupView: View {
     @StateObject var navigationCoordinator: NavigationCoordinator = NavigationCoordinator()
     
     var body: some View {
-        NavigationStack(path: $navigationCoordinator.path) {
+        NBNavigationStack(path: $navigationCoordinator.path) {
             ZStack {
                 VStack(alignment: .center) {
                     Spacer()
@@ -54,7 +55,7 @@ struct SetupView: View {
                 }
             }
             .background(DamusBackground(maxHeight: 300), alignment: .top)
-            .navigationDestination(for: Route.self) { route in
+            .nbNavigationDestination(for: Route.self) { route in
                 route.view(navigationCoordinator: navigationCoordinator, damusState: DamusState.empty)
             }
         }

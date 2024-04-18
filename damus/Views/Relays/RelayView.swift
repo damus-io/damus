@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import NavigationBackport
 
 struct RelayView: View {
     let state: DamusState
@@ -51,7 +52,7 @@ struct RelayView: View {
                 if let relay_connection {
                     RelayStatusView(connection: relay_connection)
                         .background(
-                            NavigationLink(value: Route.RelayDetail(relay: relay, metadata: meta), label: {
+                            NBNavigationLink(value: Route.RelayDetail(relay: relay, metadata: meta), label: {
                                 EmptyView()
                             })
                             .buttonStyle(.plain)

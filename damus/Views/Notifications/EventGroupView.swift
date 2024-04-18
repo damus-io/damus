@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import NavigationBackport
 
 
 enum EventGroupType {
@@ -234,7 +235,7 @@ struct EventGroupView: View {
                 
                 if let event {
                     let thread = ThreadModel(event: event, damus_state: state)
-                    NavigationLink(value: Route.Thread(thread: thread)) {
+                    NBNavigationLink(value: Route.Thread(thread: thread)) {
                         VStack(alignment: .leading) {
                             GroupDescription(unique_pubkeys)
                             EventBody(damus_state: state, event: event, size: .normal, options: [.truncate_content])

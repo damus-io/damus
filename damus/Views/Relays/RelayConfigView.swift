@@ -97,7 +97,13 @@ struct RelayConfigView: View {
                         .padding(.horizontal, 30)
                         .padding(.vertical, 5)
                     }
-                    .scrollIndicators(.hidden)
+                    .conditionalModifier { view in
+                        if #available(iOS 16.0, *) {
+                            return AnyView(view.scrollIndicators(.hidden))
+                        } else {
+                            return view
+                        }
+                    }
                     .mask(
                         HStack(spacing: 0) {
                             LinearGradient(gradient: Gradient(colors: [Color.clear, Color.white]), startPoint: .leading, endPoint: .trailing)

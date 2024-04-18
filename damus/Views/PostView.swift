@@ -162,8 +162,14 @@ struct PostView: View {
         }
         .disabled(posting_disabled)
         .opacity(posting_disabled ? 0.5 : 1.0)
-        .bold()
         .buttonStyle(GradientButtonStyle(padding: 10))
+        .conditionalModifier { view in
+            if #available(iOS 16.0, *) {
+                AnyView(view.bold())
+            } else {
+                AnyView(view.font(.headline))
+            }
+        }
         
     }
     

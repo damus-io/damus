@@ -146,14 +146,25 @@ struct CustomizeZapView: View {
     
     var ZapReply: some View {
         HStack {
-            TextField(NSLocalizedString("Send a message with your zap...", comment: "Placeholder text for a comment to send as part of a zap to the user."), text: $model.comment, axis: .vertical)
-                .focused($focusedTextField, equals: ZapFields.comment)
-                .task {
-                            self.focusedTextField = .comment
-                }
-                .autocorrectionDisabled(true)
-                .textInputAutocapitalization(.never)
-                .lineLimit(5)
+            if #available(iOS 16.0, *) {
+                TextField(NSLocalizedString("Send a message with your zap...", comment: "Placeholder text for a comment to send as part of a zap to the user."), text: $model.comment, axis: .vertical)
+                    .focused($focusedTextField, equals: ZapFields.comment)
+                    .task {
+                        self.focusedTextField = .comment
+                    }
+                    .autocorrectionDisabled(true)
+                    .textInputAutocapitalization(.never)
+                    .lineLimit(5)
+            } else {
+                TextField(NSLocalizedString("Send a message with your zap...", comment: "Placeholder text for a comment to send as part of a zap to the user."), text: $model.comment)
+                    .focused($focusedTextField, equals: ZapFields.comment)
+                    .task {
+                        self.focusedTextField = .comment
+                    }
+                    .autocorrectionDisabled(true)
+                    .textInputAutocapitalization(.never)
+                    .lineLimit(5)
+            }
         }
         .frame(minHeight: 30)
         .padding(10)

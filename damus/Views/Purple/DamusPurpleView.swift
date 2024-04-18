@@ -477,7 +477,13 @@ struct DamusPurpleLogoView: View {
                         )
                     )
                     .foregroundColor(.white)
-                    .tracking(-2)
+                    .conditionalModifier { view in
+                        if #available(iOS 16.0, *){
+                            return AnyView(view.tracking(-2))
+                        } else {
+                            return view
+                        }
+                    }
             }
         }
         .padding(.bottom, 30)

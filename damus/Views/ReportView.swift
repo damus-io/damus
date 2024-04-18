@@ -109,7 +109,11 @@ struct ReportView: View {
                 })
 
                 Section(content: {
-                    TextField(NSLocalizedString("Optional", comment: "Prompt to enter optional additional information when reporting an account or content."), text: $report_message, axis: .vertical)
+                    if #available(iOS 16.0, *) {
+                        TextField(NSLocalizedString("Optional", comment: "Prompt to enter optional additional information when reporting an account or content."), text: $report_message, axis: .vertical)
+                    } else {
+                        TextField(NSLocalizedString("Optional", comment: "Prompt to enter optional additional information when reporting an account or content."), text: $report_message)
+                    }
                 }, header: {
                     Text("Additional information", comment: "Header text to prompt user to optionally provide additional information when reporting a user or note.")
                 })

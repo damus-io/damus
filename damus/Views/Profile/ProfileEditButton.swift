@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import NavigationBackport
 
 struct ProfileEditButton: View {
     let damus_state: DamusState
@@ -13,7 +14,7 @@ struct ProfileEditButton: View {
     @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
-        NavigationLink(value: Route.EditMetadata) {
+        NBNavigationLink(value: Route.EditMetadata) {
             Text("Edit", comment: "Button to edit user's profile.")
                 .frame(height: 30)
                 .padding(.horizontal,25)

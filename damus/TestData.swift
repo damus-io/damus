@@ -58,7 +58,11 @@ var test_damus_state: DamusState = ({
         let fileManager = FileManager.default
         let temp = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try fileManager.createDirectory(at: temp, withIntermediateDirectories: true, attributes: nil)
-        tempDir = temp.path(percentEncoded: false)
+        if #available(iOS 16.0, *) {
+            tempDir = temp.path(percentEncoded: false)
+        } else {
+            tempDir = temp.path
+        }
     } catch {
         tempDir = "."
     }

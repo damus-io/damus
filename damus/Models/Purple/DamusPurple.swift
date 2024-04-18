@@ -162,12 +162,39 @@ class DamusPurple: StoreObserverDelegate {
     
     func translate(text: String, source source_language: String, target target_language: String) async throws -> String {
         var url = environment.api_base_url()
-        url.append(path: "/translate")
-        url.append(queryItems: [
-            .init(name: "source", value: source_language),
-            .init(name: "target", value: target_language),
-            .init(name: "q", value: text)
-        ])
+        if #available(iOS 16.0, *) {
+            url.append(path: "/translate")
+            url.append(queryItems: [
+                .init(name: "source", value: source_language),
+                .init(name: "target", value: target_language),
+                .init(name: "q", value: text)
+            ])
+        } else {
+            // Prior to iOS 16
+            var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: true)
+            let queryItems = [
+                URLQueryItem(name: "source", value: source_language),
+                URLQueryItem(name: "target", value: target_language),
+                URLQueryItem(name: "q", value: text)
+            ]
+            
+            if urlComponents?.path.last != "/" {
+                urlComponents?.path.append("/translate")
+            } else {
+                urlComponents?.path += "translate"
+            }
+            
+            if urlComponents?.queryItems != nil {
+                urlComponents?.queryItems?.append(contentsOf: queryItems)
+            } else {
+                urlComponents?.queryItems = queryItems
+            }
+            
+            if let finalURL = urlComponents?.url {
+                url = finalURL
+            }
+        }
+
         let (data, response) = try await make_nip98_authenticated_request(
             method: .get,
             url: url,
@@ -192,7 +219,12 @@ class DamusPurple: StoreObserverDelegate {
     
     func verify_npub_for_checkout(checkout_id: String) async throws {
         var url = environment.api_base_url()
-        url.append(path: "/ln-checkout/\(checkout_id)/verify")
+        let path = "/ln-checkout/\(checkout_id)/verify"
+        if #available(iOS 16.0, *) {
+            url.append(path: path)
+        } else {
+            url = URL(string: path, relativeTo: url)!
+        }
         
         let (data, response) = try await make_nip98_authenticated_request(
             method: .put,

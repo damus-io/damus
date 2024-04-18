@@ -15,18 +15,25 @@ fileprivate let BOOTSTRAP_RELAYS = [
     "wss://nos.lol",
 ]
 
-fileprivate let REGION_SPECIFIC_BOOTSTRAP_RELAYS: [Locale.Region: [String]] = [
-    Locale.Region.japan: [
+
+fileprivate enum TmpRegion: String, Hashable {
+    case japan = "JP"
+    case thailand = "TH"
+    case germany = "DE"
+}
+
+fileprivate let REGION_SPECIFIC_BOOTSTRAP_RELAYS: [TmpRegion: [String]] = [
+    TmpRegion.japan: [
         "wss://relay-jp.nostr.wirednet.jp",
         "wss://yabu.me",
         "wss://r.kojira.io",
     ],
-    Locale.Region.thailand: [
+    TmpRegion.thailand: [
         "wss://relay.siamstr.com",
         "wss://relay.zerosatoshi.xyz",
         "wss://th2.nostr.earnkrub.xyz",
     ],
-    Locale.Region.germany: [
+    TmpRegion.germany: [
         "wss://nostr.einundzwanzig.space",
         "wss://nostr.cercatrova.me",
         "wss://nostr.bitcoinplebs.de",
@@ -64,7 +71,7 @@ func load_bootstrap_relays(pubkey: Pubkey) -> [String] {
 func get_default_bootstrap_relays() -> [String] {
     var default_bootstrap_relays = BOOTSTRAP_RELAYS
     
-    if let user_region = Locale.current.region, let regional_bootstrap_relays = REGION_SPECIFIC_BOOTSTRAP_RELAYS[user_region] {
+    if let user_region = TmpRegion(rawValue: Locale.current.identifier), let regional_bootstrap_relays = REGION_SPECIFIC_BOOTSTRAP_RELAYS[user_region] {
         default_bootstrap_relays.append(contentsOf: regional_bootstrap_relays)
     }
     

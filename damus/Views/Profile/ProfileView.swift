@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import NavigationBackport
 
 func follow_btn_txt(_ fs: FollowState, follows_you: Bool) -> String {
     switch fs {
@@ -225,7 +226,7 @@ struct ProfileView: View {
     
     var dmButton: some View {
         let dm_model = damus_state.dms.lookup_or_create(profile.pubkey)
-        return NavigationLink(value: Route.DMChat(dms: dm_model)) {
+        return NBNavigationLink(value: Route.DMChat(dms: dm_model)) {
             Image("messages")
                 .profile_button_style(scheme: colorScheme)
         }
@@ -262,7 +263,7 @@ struct ProfileView: View {
                     follow_state: damus_state.contacts.follow_state(profile.pubkey)
                 )
             } else if damus_state.keypair.privkey != nil {
-                NavigationLink(value: Route.EditMetadata) {
+                NBNavigationLink(value: Route.EditMetadata) {
                     ProfileEditButton(damus_state: damus_state)
                 }
             }
@@ -348,7 +349,7 @@ struct ProfileView: View {
                     let contacts = Array(contact.referenced_pubkeys)
                     let hashtags = Array(contact.referenced_hashtags)
                     let following_model = FollowingModel(damus_state: damus_state, contacts: contacts, hashtags: hashtags)
-                    NavigationLink(value: Route.Following(following: following_model)) {
+                    NBNavigationLink(value: Route.Following(following: following_model)) {
                         HStack {
                             let noun_text = Text(verbatim: "\(pluralizedString(key: "following_count", count: profile.following))").font(.subheadline).foregroundColor(.gray)
                             Text("\(Text(verbatim: profile.following.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
@@ -358,7 +359,7 @@ struct ProfileView: View {
                 }
 
                 if followers.contacts != nil {
-                    NavigationLink(value: Route.Followers(followers: followers)) {
+                    NBNavigationLink(value: Route.Followers(followers: followers)) {
                         followersCount
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -377,12 +378,12 @@ struct ProfileView: View {
                     let noun_text = Text(noun_string).font(.subheadline).foregroundColor(.gray)
                     let relay_text = Text("\(Text(verbatim: relays.keys.count.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
                     if profile.pubkey == damus_state.pubkey && damus_state.is_privkey_user {
-                        NavigationLink(value: Route.RelayConfig) {
+                        NBNavigationLink(value: Route.RelayConfig) {
                             relay_text
                         }
                         .buttonStyle(PlainButtonStyle())
                     } else {
-                        NavigationLink(value: Route.UserRelays(relays: Array(relays.keys).sorted())) {
+                        NBNavigationLink(value: Route.UserRelays(relays: Array(relays.keys).sorted())) {
                             relay_text
                         }
                         .buttonStyle(PlainButtonStyle())
@@ -395,7 +396,7 @@ struct ProfileView: View {
                 if !friended_followers.isEmpty {
                     Spacer()
 
-                    NavigationLink(value: Route.FollowersYouKnow(friendedFollowers: friended_followers, followers: followers)) {
+                    NBNavigationLink(value: Route.FollowersYouKnow(friendedFollowers: friended_followers, followers: followers)) {
                         HStack {
                             CondensedProfilePicturesView(state: damus_state, pubkeys: friended_followers, maxPictures: 3)
                             let followedByString = followedByString(friended_followers, ndb: damus_state.ndb)
@@ -449,7 +450,13 @@ struct ProfileView: View {
                     customNavbar
                 }
             }
-            .toolbarBackground(.hidden)
+            .conditionalModifier { view in
+                if #available(iOS 16.0, *) {
+                    return AnyView(view.toolbarBackground(.hidden))
+                } else {
+                    return AnyView(view.navigationBarHidden(true))
+                }
+            }
             .onReceive(handle_notify(.switched_timeline)) { _ in
                 dismiss()
             }

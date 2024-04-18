@@ -35,15 +35,21 @@ struct UserStatusView: View {
                 openURL(url)
             }
         }
-        .contextMenu(
-            menuItems: {
-                if let url = st.url {
-                    Button(url.absoluteString, action: { openURL(url) }) }
-            }, preview: {
-                if let url = st.url {
-                    URLPreview(url: url)
-                }
-            })
+        .conditionalModifier { view in
+            if #available(iOS 16.0, *){
+                return AnyView(view.contextMenu(
+                    menuItems: {
+                        if let url = st.url {
+                            Button(url.absoluteString, action: { openURL(url) }) }
+                    }, preview: {
+                        if let url = st.url {
+                            URLPreview(url: url)
+                        }
+                    }))
+            } else {
+                return view
+            }
+        }
     }
 
     var body: some View {

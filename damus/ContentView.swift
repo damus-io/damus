@@ -8,6 +8,7 @@
 import SwiftUI
 import AVKit
 import MediaPlayer
+import NavigationBackport
 
 struct ZapSheet {
     let target: ZapTarget
@@ -241,7 +242,7 @@ struct ContentView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let damus = self.damus_state {
-                NavigationStack(path: $navigationCoordinator.path) {
+                NBNavigationStack(path: $navigationCoordinator.path) {
                     TabView { // Prevents navbar appearance change on scroll
                         MainContent(damus: damus)
                             .toolbar() {
@@ -278,7 +279,7 @@ struct ContentView: View {
                     .overlay(
                         SideMenuView(damus_state: damus_state!, isSidebarVisible: $isSideBarOpened.animation())
                     )
-                    .navigationDestination(for: Route.self) { route in
+                    .nbNavigationDestination(for: Route.self) { route in
                         route.view(navigationCoordinator: navigationCoordinator, damusState: damus_state!)
                     }
                     .onReceive(handle_notify(.switched_timeline)) { _ in
@@ -316,7 +317,13 @@ struct ContentView: View {
                 PostView(action: action, damus_state: damus_state!)
             case .user_status:
                 UserStatusSheet(damus_state: damus_state!, postbox: damus_state!.postbox, keypair: damus_state!.keypair, status: damus_state!.profiles.profile_data(damus_state!.pubkey).status)
-                    .presentationDragIndicator(.visible)
+                    .conditionalModifier { view in
+                        if #available(iOS 16.0, *) {
+                            return AnyView(view.presentationDragIndicator(.visible))
+                        } else {
+                            return view
+                        }
+                    }
             case .event:
                 EventDetailView()
             case .profile_action(let pubkey):
@@ -327,9 +334,13 @@ struct ContentView: View {
                 SelectWalletView(default_wallet: damus_state!.settings.default_wallet, active_sheet: $active_sheet, our_pubkey: damus_state!.pubkey, invoice: select.invoice)
             case .filter:
                 let timeline = selected_timeline
-                RelayFilterView(state: damus_state!, timeline: timeline)
-                    .presentationDetents([.height(550)])
-                    .presentationDragIndicator(.visible)
+                if #available(iOS 16.0, *) {
+                    RelayFilterView(state: damus_state!, timeline: timeline)
+                        .presentationDetents([.height(550)])
+                        .presentationDragIndicator(.visible)
+                } else {
+                    RelayFilterView(state: damus_state!, timeline: timeline)
+                }
             case .onboardingSuggestions:
                 OnboardingSuggestionsView(model: SuggestedUsersViewModel(damus_state: damus_state!))
             case .purple(let purple_url):

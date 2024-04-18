@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import NavigationBackport
 
 enum SearchState {
     case searching
@@ -113,12 +114,12 @@ struct SearchingEventView: View {
                         .progressViewStyle(.circular)
                 }
             case .found(let ev):
-                NavigationLink(value: Route.Thread(thread: ThreadModel(event: ev, damus_state: state))) {
+                NBNavigationLink(value: Route.Thread(thread: ThreadModel(event: ev, damus_state: state))) {
                     EventView(damus: state, event: ev)
                 }
                 .buttonStyle(PlainButtonStyle())
             case .found_profile(let pk):
-                NavigationLink(value: Route.ProfileByKey(pubkey: pk)) {
+                NBNavigationLink(value: Route.ProfileByKey(pubkey: pk)) {
                     FollowUserView(target: .pubkey(pk), damus_state: state)
                 }
                 .buttonStyle(PlainButtonStyle())

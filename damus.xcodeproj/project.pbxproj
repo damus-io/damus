@@ -621,6 +621,8 @@
 		D7FF94002AC7AC5300FD969D /* RelayURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FF93FF2AC7AC5200FD969D /* RelayURL.swift */; };
 		E02B54182B4DFADA0077FF42 /* Bech32ObjectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E02B54172B4DFADA0077FF42 /* Bech32ObjectTests.swift */; };
 		E04A37C62B544F090029650D /* URIParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = E04A37C52B544F090029650D /* URIParsing.swift */; };
+		E06336A22B6D7B5800A88E6B /* NavigationBackport in Frameworks */ = {isa = PBXBuildFile; productRef = E06336A12B6D7B5800A88E6B /* NavigationBackport */; };
+		E06336A42B6D839A00A88E6B /* ConditionalModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = E06336A32B6D839A00A88E6B /* ConditionalModifier.swift */; };
 		E4FA1C032A24BB7F00482697 /* SearchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */; };
 		E990020F2955F837003BBC5A /* EditMetadataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E990020E2955F837003BBC5A /* EditMetadataView.swift */; };
 		E9E4ED0B295867B900DD7078 /* ThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E4ED0A295867B900DD7078 /* ThreadView.swift */; };
@@ -1390,6 +1392,7 @@
 		D7FF93FF2AC7AC5200FD969D /* RelayURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayURL.swift; sourceTree = "<group>"; };
 		E02B54172B4DFADA0077FF42 /* Bech32ObjectTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bech32ObjectTests.swift; sourceTree = "<group>"; };
 		E04A37C52B544F090029650D /* URIParsing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URIParsing.swift; sourceTree = "<group>"; };
+		E06336A32B6D839A00A88E6B /* ConditionalModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConditionalModifier.swift; sourceTree = "<group>"; };
 		E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSettingsView.swift; sourceTree = "<group>"; };
 		E990020E2955F837003BBC5A /* EditMetadataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditMetadataView.swift; sourceTree = "<group>"; };
 		E9E4ED0A295867B900DD7078 /* ThreadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadView.swift; sourceTree = "<group>"; };
@@ -1415,6 +1418,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E06336A22B6D7B5800A88E6B /* NavigationBackport in Frameworks */,
 				4C06670428FC7EC500038D2A /* Kingfisher in Frameworks */,
 				4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */,
 				4C27C9322A64766F007DBC75 /* MarkdownUI in Frameworks */,
@@ -2121,6 +2125,7 @@
 				D74AAFCE2B155D8C006CF0F4 /* ZapDataModel.swift */,
 				D74AAFD32B155ECB006CF0F4 /* Zaps+.swift */,
 				D74AAFD52B155F0C006CF0F4 /* WalletConnect+.swift */,
+				E06336A32B6D839A00A88E6B /* ConditionalModifier.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -2717,6 +2722,7 @@
 				4C649880286E0EE300EAE2B3 /* secp256k1 */,
 				4C06670328FC7EC500038D2A /* Kingfisher */,
 				4C27C9312A64766F007DBC75 /* MarkdownUI */,
+				E06336A12B6D7B5800A88E6B /* NavigationBackport */,
 			);
 			productName = damus;
 			productReference = 4CE6DEE327F7A08100C66700 /* damus.app */;
@@ -2854,6 +2860,7 @@
 				4CCF9AB02A1FE80B00E03CFB /* XCRemoteSwiftPackageReference "GSPlayer" */,
 				4C27C9302A64766F007DBC75 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 				D7A343EC2AD0D77C00CED48B /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
+				E06336A02B6D7B5800A88E6B /* XCRemoteSwiftPackageReference "NavigationBackport" */,
 			);
 			productRefGroup = 4CE6DEE427F7A08100C66700 /* Products */;
 			projectDirPath = "";
@@ -3327,6 +3334,7 @@
 				4C2B10282A7B0F5C008AA43E /* Log.swift in Sources */,
 				4C90BD1A283AA67F008EE7EF /* Bech32.swift in Sources */,
 				E990020F2955F837003BBC5A /* EditMetadataView.swift in Sources */,
+				E06336A42B6D839A00A88E6B /* ConditionalModifier.swift in Sources */,
 				4CB8FC232A41ABA800763C51 /* AboutView.swift in Sources */,
 				D74AAFCC2B155D07006CF0F4 /* MakeZapRequest.swift in Sources */,
 				5C513FBA297F72980072348F /* CustomPicker.swift in Sources */,
@@ -3761,7 +3769,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MACOSX_DEPLOYMENT_TARGET = 12.3;
 				MARKETING_VERSION = 1.7;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -3823,7 +3831,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MACOSX_DEPLOYMENT_TARGET = 12.3;
 				MARKETING_VERSION = 1.7;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -3862,7 +3870,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = Launch.storyboard;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -3911,7 +3919,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = Launch.storyboard;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -4164,6 +4172,14 @@
 				minimumVersion = 1.14.1;
 			};
 		};
+		E06336A02B6D7B5800A88E6B /* XCRemoteSwiftPackageReference "NavigationBackport" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/johnpatrickmorgan/NavigationBackport.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -4206,6 +4222,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4C27C9302A64766F007DBC75 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
 			productName = MarkdownUI;
+		};
+		E06336A12B6D7B5800A88E6B /* NavigationBackport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E06336A02B6D7B5800A88E6B /* XCRemoteSwiftPackageReference "NavigationBackport" */;
+			productName = NavigationBackport;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

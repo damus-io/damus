@@ -6,6 +6,7 @@
 //  Ref: https://blog.logrocket.com/create-custom-collapsible-sidebar-swiftui/
 
 import SwiftUI
+import NavigationBackport
 
 @MainActor
 struct SideMenuView: View {
@@ -46,11 +47,11 @@ struct SideMenuView: View {
 
     func SidemenuItems(profile_model: ProfileModel, followers: FollowersModel) -> some View {
         return VStack(spacing: verticalSpacing) {
-            NavigationLink(value: Route.Profile(profile: profile_model, followers: followers)) {
+            NBNavigationLink(value: Route.Profile(profile: profile_model, followers: followers)) {
                 navLabel(title: NSLocalizedString("Profile", comment: "Sidebar menu label for Profile view."), img: "user")
             }
 
-            NavigationLink(value: Route.Wallet(wallet: damus_state.wallet)) {
+            NBNavigationLink(value: Route.Wallet(wallet: damus_state.wallet)) {
                 navLabel(title: NSLocalizedString("Wallet", comment: "Sidebar menu label for Wallet view."), img: "wallet")
             }
 
@@ -66,15 +67,15 @@ struct SideMenuView: View {
                 }
             }
 
-            NavigationLink(value: Route.MuteList(users: get_mutelist_users(damus_state.contacts.mutelist))) {
+            NBNavigationLink(value: Route.MuteList(users: get_mutelist_users(damus_state.contacts.mutelist))) {
                 navLabel(title: NSLocalizedString("Muted", comment: "Sidebar menu label for muted users view."), img: "mute")
             }
 
-            NavigationLink(value: Route.RelayConfig) {
+            NBNavigationLink(value: Route.RelayConfig) {
                 navLabel(title: NSLocalizedString("Relays", comment: "Sidebar menu label for Relays view."), img: "world-relays")
             }
 
-            NavigationLink(value: Route.Bookmarks) {
+            NBNavigationLink(value: Route.Bookmarks) {
                 navLabel(title: NSLocalizedString("Bookmarks", comment: "Sidebar menu label for Bookmarks view."), img: "bookmark")
             }
 
@@ -82,7 +83,7 @@ struct SideMenuView: View {
                 navLabel(title: NSLocalizedString("Merch", comment: "Sidebar menu label for merch store link."), img: "basket")
             }
 
-            NavigationLink(value: Route.Config) {
+            NBNavigationLink(value: Route.Config) {
                 navLabel(title: NSLocalizedString("Settings", comment: "Sidebar menu label for accessing the app settings"), img: "settings")
             }
         }
@@ -139,7 +140,7 @@ struct SideMenuView: View {
             let followers = FollowersModel(damus_state: damus_state, target: damus_state.pubkey)
             let profile_model = ProfileModel(pubkey: damus_state.pubkey, damus: damus_state)
 
-            NavigationLink(value: Route.Profile(profile: profile_model, followers: followers), label: {
+            NBNavigationLink(value: Route.Profile(profile: profile_model, followers: followers), label: {
 
                 TopProfile
                     .padding(.bottom, verticalSpacing)

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Combine
+import NavigationBackport
 
 struct DMChatView: View, KeyboardReadable {
     let damus_state: DamusState
@@ -59,7 +60,7 @@ struct DMChatView: View, KeyboardReadable {
     }
 
     var Header: some View {
-        return NavigationLink(value: Route.ProfileByKey(pubkey: pubkey)) {
+        return NBNavigationLink(value: Route.ProfileByKey(pubkey: pubkey)) {
             HStack {
                 ProfilePicView(pubkey: pubkey, size: 24, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
 
