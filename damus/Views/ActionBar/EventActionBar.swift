@@ -6,8 +6,7 @@
 //
 
 import SwiftUI
-import UIKit
-
+import MCEmojiPicker
 
 struct EventActionBar: View {
     let damus_state: DamusState
@@ -19,6 +18,8 @@ struct EventActionBar: View {
     @State var show_share_sheet: Bool = false
     @State var show_share_action: Bool = false
     @State var show_repost_action: Bool = false
+
+    @State private var isOnTopHalfOfScreen: Bool = false
 
     @ObservedObject var bar: ActionBarModel
     
@@ -72,7 +73,7 @@ struct EventActionBar: View {
                 Spacer()
 
                 HStack(spacing: 4) {
-                    LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil) { emoji in
+                    LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil, isOnTopHalfOfScreen: $isOnTopHalfOfScreen) { emoji in
                         if bar.liked {
                             //notify(.delete, bar.our_like)
                         } else {
@@ -135,8 +136,22 @@ struct EventActionBar: View {
                 self.bar.our_like = liked.event
             }
         }
+        .background(
+            GeometryReader { geometry in
+                EmptyView()
+                    .onAppear {
+                        let eventActionBarY = geometry.frame(in: .global).midY
+                        let screenMidY = UIScreen.main.bounds.midY
+                        self.isOnTopHalfOfScreen = eventActionBarY > screenMidY
+                    }
+                    .onChange(of: geometry.frame(in: .global).midY) { newY in
+                        let screenMidY = UIScreen.main.bounds.midY
+                        self.isOnTopHalfOfScreen = newY > screenMidY
+                    }
+            }
+        )
     }
-    
+
     func send_like(emoji: String) {
         guard let keypair = damus_state.keypair.to_full(),
               let like_ev = make_like_event(keypair: keypair, liked: event, content: emoji) else {
@@ -168,14 +183,16 @@ struct LikeButton: View {
     let damus_state: DamusState
     let liked: Bool
     let liked_emoji: String?
+    @Binding var isOnTopHalfOfScreen: Bool
     let action: (_ emoji: String) -> Void
 
     // For reactions background
     @State private var showReactionsBG = 0
-    @State private var showEmojis: [Int] = []
     @State private var rotateThumb = -45
 
     @State private var isReactionsVisible = false
+
+    @State private var selectedEmoji: String = ""
 
     // Following four are Shaka animation properties
     let timer = Timer.publish(every: 0.10, on: .main, in: .common).autoconnect()
@@ -228,7 +245,15 @@ struct LikeButton: View {
                 amountOfAngleIncrease = 20.0
             }
         })
-        .overlay(reactionsOverlay())
+        .emojiPicker(
+            isPresented: $isReactionsVisible,
+            selectedEmoji: $selectedEmoji,
+            arrowDirection: isOnTopHalfOfScreen ? .down : .up,
+            isDismissAfterChoosing: true
+        )
+        .onChange(of: selectedEmoji) { newSelectedEmoji in
+            self.action(newSelectedEmoji)
+        }
     }
 
     func shakaAnimationLogic() {
@@ -251,110 +276,11 @@ struct LikeButton: View {
         }
     }
 
-    func reactionsOverlay() -> some View {
-        Group {
-            if isReactionsVisible {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 20)
-                        .frame(width: calculateOverlayWidth(), height: 50)
-                        .foregroundColor(DamusColors.black)
-                        .scaleEffect(Double(showReactionsBG), anchor: .topTrailing)
-                        .animation(
-                            .interpolatingSpring(stiffness: 170, damping: 15).delay(0.05),
-                            value: showReactionsBG
-                        )
-                        .overlay(
-                            Rectangle()
-                                .foregroundColor(Color.white.opacity(0.2))
-                                .frame(width: calculateOverlayWidth(), height: 50)
-                                .clipShape(
-                                    RoundedRectangle(cornerRadius: 20)
-                                )
-                        )
-                        .overlay(reactions())
-                }
-                .offset(y: -40)
-                .onTapGesture {
-                    withAnimation(.easeOut(duration: 0.2)) {
-                        isReactionsVisible = false
-                        showReactionsBG = 0
-                    }
-                    showEmojis = []
-                }
-            } else {
-                EmptyView()
-            }
-        }
-    }
-    
-    func calculateOverlayWidth() -> CGFloat {
-        let maxWidth: CGFloat = 250
-        let numberOfEmojis = emojis.count
-        let minimumWidth: CGFloat = 75
-        
-        if numberOfEmojis > 0 {
-            let emojiWidth: CGFloat = 25
-            let padding: CGFloat = 15
-            let buttonWidth: CGFloat = 18
-            let buttonPadding: CGFloat = 20
-            
-            let totalWidth = CGFloat(numberOfEmojis) * (emojiWidth + padding) + buttonWidth + buttonPadding
-            return min(maxWidth, max(minimumWidth, totalWidth))
-        } else {
-            return minimumWidth
-        }
-    }
-
-    func reactions() -> some View {
-        HStack {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 15) {
-                    ForEach(emojis, id: \.self) { emoji in
-                        if let index = emojis.firstIndex(of: emoji) {
-                            let scale = index < showEmojis.count ? showEmojis[index] : 0
-                            Text(emoji)
-                                .font(.system(size: 25))
-                                .scaleEffect(Double(scale))
-                                .onTapGesture {
-                                    emojiTapped(emoji)
-                                }
-                        }
-                    }
-                }
-                .padding(.leading, 10)
-            }
-            Button(action: {
-                withAnimation(.easeOut(duration: 0.2)) {
-                    isReactionsVisible = false
-                    showReactionsBG = 0
-                }
-                showEmojis = []
-            }) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 18))
-                    .foregroundColor(.gray)
-            }
-            .padding(.trailing, 7.5)
-        }
-    }
-
     // When reaction button is long pressed, it displays the multiple emojis overlay and displays the user's selected emojis with an animation
     private func reactionLongPressed() {
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-        showEmojis = Array(repeating: 0, count: emojis.count) // Initialize the showEmojis array
-        
-        for (index, _) in emojis.enumerated() {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1 * Double(index)) {
-                withAnimation(.interpolatingSpring(stiffness: 170, damping: 8)) {
-                    if index < showEmojis.count {
-                        showEmojis[index] = 1
-                    }
-                }
-            }
-        }
         
         isReactionsVisible = true
-        showReactionsBG = 1
     }
     
     private func emojiTapped(_ emoji: String) {
@@ -364,9 +290,7 @@ struct LikeButton: View {
 
         withAnimation(.easeOut(duration: 0.2)) {
             isReactionsVisible = false
-            showReactionsBG = 0
         }
-        showEmojis = []
         
         withAnimation(Animation.easeOut(duration: 0.15)) {
             shouldAnimate = true
