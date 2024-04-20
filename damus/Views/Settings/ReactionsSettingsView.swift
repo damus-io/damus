@@ -6,114 +6,31 @@
 //
 
 import SwiftUI
-import Combine
+import MCEmojiPicker
 
 struct ReactionsSettingsView: View {
     @ObservedObject var settings: UserSettingsStore
-    
-    @State var new_emoji: String = ""
-    @State private var showActionButtons = false
-    
-    @Environment(\.dismiss) var dismiss
-    
-    var recommended: [String] {
-        return getMissingRecommendedEmojis(added: settings.emoji_reactions)
-    }
-    
+    @State private var isReactionsVisible: Bool = false
+
     var body: some View {
         Form {
             Section {
-                AddEmojiView(emoji: $new_emoji)
+                Text(settings.default_emoji_reaction)
+                    .emojiPicker(
+                        isPresented: $isReactionsVisible,
+                        selectedEmoji: $settings.default_emoji_reaction,
+                        arrowDirection: .up,
+                        isDismissAfterChoosing: true
+                    )
+                    .onTapGesture {
+                        isReactionsVisible = true
+                    }
             } header: {
-                Text(NSLocalizedString("Add Emoji", comment: "Label for section for adding an emoji to the reactions list."))
-                    .font(.system(size: 18, weight: .heavy))
-                    .padding(.bottom, 5)
-            } footer: {
-                HStack {
-                    Spacer()
-                    if !new_emoji.isEmpty {
-                        Button(NSLocalizedString("Cancel", comment: "Button to cancel out of view adding user inputted emoji.")) {
-                            new_emoji = ""
-                        }
-                        .font(.system(size: 14, weight: .bold))
-                        .frame(width: 80, height: 30)
-                        .foregroundColor(.white)
-                        .background(LINEAR_GRADIENT)
-                        .clipShape(Capsule())
-                        .padding(EdgeInsets(top: 15, leading: 0, bottom: 0, trailing: 0))
-                        
-                        Button(NSLocalizedString("Add", comment: "Button to confirm adding user inputted emoji.")) {
-                            if isValidEmoji(new_emoji) {
-                                settings.emoji_reactions.append(new_emoji)
-                                new_emoji = ""
-                            }
-                        }
-                        .font(.system(size: 14, weight: .bold))
-                        .frame(width: 80, height: 30)
-                        .foregroundColor(.white)
-                        .background(LINEAR_GRADIENT)
-                        .clipShape(Capsule())
-                        .padding(EdgeInsets(top: 15, leading: 0, bottom: 0, trailing: 0))
-                    }
-                }
-            }
-            
-            Picker(NSLocalizedString("Select default emoji", comment: "Prompt selection of user's default emoji reaction"),
-                   selection: $settings.default_emoji_reaction) {
-                ForEach(settings.emoji_reactions, id: \.self) { emoji in
-                    Text(emoji)
-                }
-            }
-            
-            Section {
-                List {
-                    ForEach(Array(zip(settings.emoji_reactions, 1...)), id: \.1) { tup in
-                        EmojiListItemView(settings: settings, emoji: tup.0, recommended: false, showActionButtons: $showActionButtons)
-                    }
-                    .onMove(perform: showActionButtons ? move: nil)
-                }
-            } header: {
-                Text("Emoji Reactions", comment: "Section title for emoji reactions that are currently added.")
-                    .font(.system(size: 18, weight: .heavy))
-                    .padding(.bottom, 5)
-            }
-            
-            if recommended.count > 0 {
-                Section {
-                    List(Array(zip(recommended, 1...)), id: \.1) { tup in
-                        EmojiListItemView(settings: settings, emoji: tup.0, recommended: true, showActionButtons: $showActionButtons)
-                    }
-                } header: {
-                    Text("Recommended Emojis", comment: "Section title for recommend emojis")
-                        .font(.system(size: 18, weight: .heavy))
-                        .padding(.bottom, 5)
-                }
+                Text(NSLocalizedString("Select default emoji", comment: "Prompt selection of user's default emoji reaction"))
             }
         }
         .navigationTitle(NSLocalizedString("Reactions", comment: "Title of emoji reactions view"))
         .navigationBarTitleDisplayMode(.large)
-        .toolbar {
-            if showActionButtons {
-                Button("Done") {
-                    showActionButtons.toggle()
-                }
-            } else {
-                Button("Edit") {
-                    showActionButtons.toggle()
-                }
-            }
-        }
-    }
-    
-    private func move(from: IndexSet, to: Int) {
-        settings.emoji_reactions.move(fromOffsets: from, toOffset: to)
-    }
-    
-    // Returns the emojis that are in the recommended list but the user has not added yet
-    func getMissingRecommendedEmojis(added: [String], recommended: [String] = default_emoji_reactions) -> [String] {
-        let addedSet = Set(added)
-        let missingEmojis = recommended.filter { !addedSet.contains($0) }
-        return missingEmojis
     }
 }
 
