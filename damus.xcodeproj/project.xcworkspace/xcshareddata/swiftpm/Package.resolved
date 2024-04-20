@@ -1,4 +1,5 @@
 {
+  "originHash" : "c627e27ffbf9762282eabbfa1118e0c13a337c2492a58f81531aa396bcf2d440",
   "pins" : [
     {
       "identity" : "gsplayer",
@@ -16,6 +17,15 @@
       "state" : {
         "revision" : "415b1d97fb38bda1e5a6b2dde63354720832110b",
         "version" : "7.6.1"
+      }
+    },
+    {
+      "identity" : "mcemojipicker",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/izyumkin/MCEmojiPicker",
+      "state" : {
+        "revision" : "e0b4903b75ae1cc418d276d84d1cb946b8a1d73c",
+        "version" : "1.2.3"
       }
     },
     {
@@ -53,5 +63,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }
