@@ -67,6 +67,10 @@ struct ConfigView: View {
                     NavigationLink(value: Route.DeveloperSettings(settings: settings)) {
                         IconLabel(NSLocalizedString("Developer", comment: "Section header for developer settings"), img_name: "magic-stick2.fill", color: DamusColors.adaptableBlack)
                     }
+                    
+                    NavigationLink(value: Route.FirstAidSettings(settings: settings)) {
+                        IconLabel(NSLocalizedString("First Aid", comment: "Section header for first aid tools and settings"), img_name: "help2", color: .red)
+                    }
                 }
 
                 Section(NSLocalizedString("Sign Out", comment: "Section title for signing out")) {
