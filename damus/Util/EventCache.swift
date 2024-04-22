@@ -239,6 +239,11 @@ func should_translate(event: NostrEvent, our_keypair: Keypair, settings: UserSet
     guard settings.can_translate else {
         return false
     }
+
+    // don't translate reposts, longform, etc
+    if event.kind != 1 {
+        return false;
+    }
     
     // Do not translate self-authored notes if logged in with a private key
     // as we can assume the user can understand their own notes.
