@@ -312,6 +312,12 @@ class UserSettingsStore: ObservableObject {
             return internal_winetranslate_api_key != nil
         }
     }
+    
+    // MARK: Internal, hidden settings
+    
+    @Setting(key: "latest_contact_event_id", default_value: nil)
+    var latest_contact_event_id_hex: String?
+    
 }
 
 func pk_setting_key(_ pubkey: Pubkey, key: String) -> String {

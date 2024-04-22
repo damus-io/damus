@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 class Contacts {
     private var friends: Set<Pubkey> = Set()
     private var friend_of_friends: Set<Pubkey> = Set()
@@ -15,7 +14,13 @@ class Contacts {
     private var pubkey_to_our_friends = [Pubkey : Set<Pubkey>]()
 
     let our_pubkey: Pubkey
-    var event: NostrEvent?
+    var delegate: ContactsDelegate? = nil
+    var event: NostrEvent? {
+        didSet {
+            guard let event else { return }
+            self.delegate?.latest_contact_event_changed(new_event: event)
+        }
+    }
 
     init(our_pubkey: Pubkey) {
         self.our_pubkey = our_pubkey
@@ -87,4 +92,9 @@ class Contacts {
     func get_friended_followers(_ pubkey: Pubkey) -> [Pubkey] {
         return Array((pubkey_to_our_friends[pubkey] ?? Set()))
     }
+}
+
+/// Delegate protocol for `Contacts`. Use this to listen to significant updates from a `Contacts` instance
+protocol ContactsDelegate {
+    func latest_contact_event_changed(new_event: NostrEvent)
 }
