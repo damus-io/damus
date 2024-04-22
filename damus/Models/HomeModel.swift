@@ -41,11 +41,15 @@ enum HomeResubFilter {
     }
 }
 
-class HomeModel {
+class HomeModel: ContactsDelegate {
     // Don't trigger a user notification for events older than a certain age
     static let event_max_age_for_notification: TimeInterval = EVENT_MAX_AGE_FOR_NOTIFICATION
     
-    var damus_state: DamusState
+    var damus_state: DamusState {
+        didSet {
+            self.load_our_stuff_from_damus_state()
+        }
+    }
 
     // NDBTODO: let's get rid of this entirely, let nostrdb handle it
     var has_event: [String: Set<NoteId>] = [:]
@@ -108,6 +112,32 @@ class HomeModel {
             self.should_debounce_dms = false
         }
     }
+    
+    // MARK: - Loading items from DamusState
+    
+    /// This is called whenever DamusState gets set. This function is used to load or setup anything we need from the new DamusState
+    func load_our_stuff_from_damus_state() {
+        self.load_latest_contact_event_from_damus_state()
+    }
+    
+    /// This loads the latest contact event we have on file from NostrDB. This should be called as soon as we get the new DamusState
+    /// Loading the latest contact list event into our `Contacts` instance from storage is important to avoid getting into weird states when the network is unreliable or when relays delete such information
+    func load_latest_contact_event_from_damus_state() {
+        guard let latest_contact_event_id_hex = damus_state.settings.latest_contact_event_id_hex else { return }
+        guard let latest_contact_event_id = NoteId(hex: latest_contact_event_id_hex) else { return }
+        guard let latest_contact_event: NdbNote = damus_state.ndb.lookup_note( latest_contact_event_id)?.unsafeUnownedValue?.to_owned() else { return }
+        process_contact_event(state: damus_state, ev: latest_contact_event)
+        damus_state.contacts.delegate = self
+    }
+    
+    // MARK: - ContactsDelegate functions
+    
+    func latest_contact_event_changed(new_event: NostrEvent) {
+        // When the latest user contact event has changed, save its ID so we know exactly where to find it next time
+        damus_state.settings.latest_contact_event_id_hex = new_event.id.hex()
+    }
+    
+    // MARK: - Nostr event and subscription handling
 
     func resubscribe(_ resubbing: Resubscribe) {
         if self.should_debounce_dms {
