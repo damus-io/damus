@@ -679,10 +679,7 @@ struct ContentView: View {
         let relay_filters = RelayFilters(our_pubkey: pubkey)
         let bootstrap_relays = load_bootstrap_relays(pubkey: pubkey)
         
-        // dumb stuff needed for property wrappers
-        UserSettingsStore.pubkey = pubkey
-        let settings = UserSettingsStore()
-        UserSettingsStore.shared = settings
+        let settings = UserSettingsStore.globally_load_for(pubkey: pubkey)
 
         let new_relay_filters = load_relay_filters(pubkey) == nil
         for relay in bootstrap_relays {
