@@ -640,6 +640,7 @@
 		D7EDED332B12ACAE0018B19C /* DamusUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */; };
 		D7EDED342B12ACAE0018B19C /* DamusUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */; };
 		D7FB10A72B0C371A00FA8D42 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2B10272A7B0F5C008AA43E /* Log.swift */; };
+		D7FD12262BD345A700CF195B /* FirstAidSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FD12252BD345A700CF195B /* FirstAidSettingsView.swift */; };
 		D7FF94002AC7AC5300FD969D /* RelayURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FF93FF2AC7AC5200FD969D /* RelayURL.swift */; };
 		E02429952B7E97740088B16C /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E02429942B7E97740088B16C /* CameraController.swift */; };
 		E02B54182B4DFADA0077FF42 /* Bech32ObjectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E02B54172B4DFADA0077FF42 /* Bech32ObjectTests.swift */; };
@@ -1434,6 +1435,7 @@
 		D7EDED202B117DCA0018B19C /* SequenceUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SequenceUtils.swift; sourceTree = "<group>"; };
 		D7EDED2D2B128E8A0018B19C /* CollectionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionExtension.swift; sourceTree = "<group>"; };
 		D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusUserDefaults.swift; sourceTree = "<group>"; };
+		D7FD12252BD345A700CF195B /* FirstAidSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstAidSettingsView.swift; sourceTree = "<group>"; };
 		D7FF93FF2AC7AC5200FD969D /* RelayURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayURL.swift; sourceTree = "<group>"; };
 		E02429942B7E97740088B16C /* CameraController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraController.swift; sourceTree = "<group>"; };
 		E02B54172B4DFADA0077FF42 /* Bech32ObjectTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bech32ObjectTests.swift; sourceTree = "<group>"; };
@@ -1725,6 +1727,7 @@
 				4C1A9A2629DDE31900516EAC /* TranslationSettingsView.swift */,
 				E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */,
 				5053ACA62A56DF3B00851AE3 /* DeveloperSettingsView.swift */,
+				D7FD12252BD345A700CF195B /* FirstAidSettingsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -3110,6 +3113,7 @@
 				D7EDED1E2B11797D0018B19C /* LongformEvent.swift in Sources */,
 				504323A92A3495B6006AE6DC /* RelayModelCache.swift in Sources */,
 				3A8CC6CC2A2CFEF900940F5F /* StringUtil.swift in Sources */,
+				D7FD12262BD345A700CF195B /* FirstAidSettingsView.swift in Sources */,
 				D7870BC12AC4750B0080BA88 /* MentionView.swift in Sources */,
 				4CB55EF5295E679D007FD187 /* UserRelaysView.swift in Sources */,
 				4C363AA228296A7E006E126D /* SearchView.swift in Sources */,
