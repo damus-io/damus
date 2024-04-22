@@ -96,6 +96,14 @@ class UserSettingsStore: ObservableObject {
     static var shared: UserSettingsStore? = nil
     static var bool_options = Set<String>()
     
+    static func globally_load_for(pubkey: Pubkey) -> UserSettingsStore {
+        // dumb stuff needed for property wrappers
+        UserSettingsStore.pubkey = pubkey
+        let settings = UserSettingsStore()
+        UserSettingsStore.shared = settings
+        return settings
+    }
+    
     @StringSetting(key: "default_wallet", default_value: .system_default_wallet)
     var default_wallet: Wallet
     
