@@ -21,9 +21,10 @@ struct EventViewOptions: OptionSet {
     static let no_mentions = EventViewOptions(rawValue: 1 << 9)
     static let no_media = EventViewOptions(rawValue: 1 << 10)
     static let truncate_content_very_short = EventViewOptions(rawValue: 1 << 11)
+    static let no_previews = EventViewOptions(rawValue: 1 << 12)
 
     static let embedded: EventViewOptions = [.no_action_bar, .small_pfp, .wide, .truncate_content, .nested]
-    static let embedded_text_only: EventViewOptions = [.no_action_bar, .small_pfp, .wide, .truncate_content, .nested, .no_media, .truncate_content_very_short]
+    static let embedded_text_only: EventViewOptions = [.no_action_bar, .small_pfp, .wide, .truncate_content, .nested, .no_media, .truncate_content_very_short, .no_previews]
 }
 
 struct TextEvent: View {

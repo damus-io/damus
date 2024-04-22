@@ -185,18 +185,22 @@ struct NoteContentView: View {
                     invoicesView(invoices: artifacts.invoices)
                 }
             }
-            
-            if damus_state.settings.media_previews {
+
+            if damus_state.settings.media_previews, has_previews {
                 if with_padding {
                     previewView(links: artifacts.links).padding(.horizontal)
                 } else {
                     previewView(links: artifacts.links)
                 }
             }
-            
+
         }
     }
-    
+
+    var has_previews: Bool {
+        !options.contains(.no_previews)
+    }
+
     func loadMediaButton(artifacts: NoteArtifactsSeparated) -> some View {
         Button(action: {
             load_media = true

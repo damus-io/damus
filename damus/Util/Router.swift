@@ -90,7 +90,8 @@ enum Route: Hashable {
         case .DeveloperSettings(let settings):
             DeveloperSettingsView(settings: settings)
         case .Thread(let thread):
-            ThreadView(state: damusState, thread: thread)
+            ChatroomView(damus: damusState, thread: thread)
+            //ThreadView(state: damusState, thread: thread)
         case .Reposts(let reposts):
             RepostsView(damus_state: damusState, model: reposts)
         case .QuoteReposts(let quote_reposts):

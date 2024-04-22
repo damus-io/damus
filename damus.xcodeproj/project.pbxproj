@@ -37,6 +37,9 @@
 		3ACBCB78295FE5C70037388A /* TimeAgoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ACBCB77295FE5C70037388A /* TimeAgoTests.swift */; };
 		3AE45AF6297BB2E700C1D842 /* LibreTranslateServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE45AF5297BB2E700C1D842 /* LibreTranslateServer.swift */; };
 		3CCD1E6A2A874C4E0099A953 /* Nip98HTTPAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD1E692A874C4E0099A953 /* Nip98HTTPAuth.swift */; };
+		4C011B5E2BD0A56A002F2F9B /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C011B5C2BD0A56A002F2F9B /* ChatView.swift */; };
+		4C011B5F2BD0A56A002F2F9B /* ChatroomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C011B5D2BD0A56A002F2F9B /* ChatroomView.swift */; };
+		4C011B612BD0B25C002F2F9B /* ReplyQuoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C011B602BD0B25C002F2F9B /* ReplyQuoteView.swift */; };
 		4C06670128FC7C5900038D2A /* RelayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670028FC7C5900038D2A /* RelayView.swift */; };
 		4C06670428FC7EC500038D2A /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 4C06670328FC7EC500038D2A /* Kingfisher */; };
 		4C06670628FCB08600038D2A /* ImageCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670528FCB08600038D2A /* ImageCarousel.swift */; };
@@ -821,6 +824,9 @@
 		3AF6336929884C6B0005672A /* pt-PT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-PT"; path = "pt-PT.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		3AF6336A29884C6B0005672A /* pt-PT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = "pt-PT"; path = "pt-PT.lproj/Localizable.stringsdict"; sourceTree = "<group>"; };
 		3CCD1E692A874C4E0099A953 /* Nip98HTTPAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Nip98HTTPAuth.swift; sourceTree = "<group>"; };
+		4C011B5C2BD0A56A002F2F9B /* ChatView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		4C011B5D2BD0A56A002F2F9B /* ChatroomView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatroomView.swift; sourceTree = "<group>"; };
+		4C011B602BD0B25C002F2F9B /* ReplyQuoteView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReplyQuoteView.swift; sourceTree = "<group>"; };
 		4C06670028FC7C5900038D2A /* RelayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayView.swift; sourceTree = "<group>"; };
 		4C06670528FCB08600038D2A /* ImageCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCarousel.swift; sourceTree = "<group>"; };
 		4C06670828FDE64700038D2A /* damus-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "damus-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -1988,6 +1994,9 @@
 		4C75EFA227FA576C0006080F /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				4C011B602BD0B25C002F2F9B /* ReplyQuoteView.swift */,
+				4C011B5D2BD0A56A002F2F9B /* ChatroomView.swift */,
+				4C011B5C2BD0A56A002F2F9B /* ChatView.swift */,
 				D71AC4CA2BA8E3320076268E /* Extensions */,
 				BA3759952ABCCF360018D73B /* Camera */,
 				F71694E82A66221E001F4053 /* Onboarding */,
@@ -3229,6 +3238,7 @@
 				F75BA12D29A1855400E10810 /* BookmarksManager.swift in Sources */,
 				4CC14FEF2A73FCCB007AEB17 /* IdType.swift in Sources */,
 				4C3EA67F28FFC01D00C48A62 /* InvoiceView.swift in Sources */,
+				4C011B612BD0B25C002F2F9B /* ReplyQuoteView.swift in Sources */,
 				D71AC4CC2BA8E3480076268E /* VisibilityTracker.swift in Sources */,
 				4CE8794829941DA700F758CC /* RelayFilters.swift in Sources */,
 				4CEE2B02280B39E800AB5EEF /* EventActionBar.swift in Sources */,
@@ -3317,6 +3327,7 @@
 				4C64305C2A945AFF00B0C0E9 /* MusicController.swift in Sources */,
 				5053ACA72A56DF3B00851AE3 /* DeveloperSettingsView.swift in Sources */,
 				F79C7FAD29D5E9620000F946 /* EditPictureControl.swift in Sources */,
+				4C011B5F2BD0A56A002F2F9B /* ChatroomView.swift in Sources */,
 				4C9F18E229AA9B6C008C55EC /* CustomizeZapView.swift in Sources */,
 				4C2859602A12A2BE004746F7 /* SupporterBadge.swift in Sources */,
 				4C1A9A2A29DDF54400516EAC /* DamusVideoPlayer.swift in Sources */,
@@ -3487,6 +3498,7 @@
 				4C30AC7229A5677A00E2BD5A /* NotificationsView.swift in Sources */,
 				4C1A9A2129DDD3E100516EAC /* KeySettingsView.swift in Sources */,
 				D723C38E2AB8D83400065664 /* ContentFilters.swift in Sources */,
+				4C011B5E2BD0A56A002F2F9B /* ChatView.swift in Sources */,
 				4C32B95A2A9AD44700DC3548 /* Verifiable.swift in Sources */,
 				4C73C5142A4437C10062CAC0 /* ZapUserView.swift in Sources */,
 				501F8C802A0220E1001AFC1D /* KeychainStorage.swift in Sources */,
