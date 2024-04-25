@@ -5841,9 +5841,9 @@ static struct ndb_blocks *ndb_note_to_blocks(struct ndb_note *note)
 		return NULL;
 	}
 
-	blocks = realloc(blocks, ndb_blocks_total_size(blocks));
-	if (blocks == NULL)
-		return NULL;
+	//blocks = realloc(blocks, ndb_blocks_total_size(blocks));
+	//if (blocks == NULL)
+		//return NULL;
 
 	blocks->flags |= NDB_BLOCK_FLAG_OWNED;
 
