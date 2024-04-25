@@ -14,7 +14,7 @@ struct RelaySoftwareDetail: View {
     var body: some View {
         HStack(spacing: 15) {
             VStack {
-                Text("SOFTWARE")
+                Text("SOFTWARE", comment: "Text label indicating which relay software is used to run this Nostr relay.")
                     .font(.caption)
                     .fontWeight(.heavy)
                     .foregroundColor(DamusColors.mediumGrey)
@@ -24,26 +24,37 @@ struct RelaySoftwareDetail: View {
                 
                 let software = nip11?.software
                 let softwareSeparated = software?.components(separatedBy: "/")
-                let softwareShortened = softwareSeparated?.last
-                Text(softwareShortened ?? "N/A")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
+                if let softwareShortened = softwareSeparated?.last {
+                    Text(softwareShortened)
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                } else {
+                    Text("N/A", comment: "Text label indicating that there is no NIP-11 relay software information found. In English, N/A stands for not applicable.")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                }
             }
             
             Divider().frame(width: 1)
             
             VStack {
-                Text("VERSION")
+                Text("VERSION", comment: "Text label indicating which version of the relay software is being run for this Nostr relay.")
                     .font(.caption)
                     .fontWeight(.heavy)
                     .foregroundColor(DamusColors.mediumGrey)
                 
                 Image("branches")
                     .foregroundColor(.gray)
-                
-                Text(nip11?.version ?? "N/A")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
+
+                if let version = nip11?.version, !version.isEmpty {
+                    Text(version)
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                } else {
+                    Text("N/A", comment: "Text label indicating that there is no NIP-11 relay software version information found. In English, N/A stands for not applicable.")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                }
             }
         }
     }

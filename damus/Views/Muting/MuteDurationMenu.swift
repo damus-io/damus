@@ -17,7 +17,7 @@ struct MuteDurationMenu<T: View>: View {
                 Button {
                     action(duration)
                 } label: {
-                    Text("\(duration.title)")
+                    Text(duration.title)
                 }
             }
         } label: {
@@ -30,6 +30,6 @@ struct MuteDurationMenu<T: View>: View {
     MuteDurationMenu { _ in
 
     } label: {
-        Text("Mute hashtag")
+        Text(verbatim: "Mute hashtag")
     }
 }

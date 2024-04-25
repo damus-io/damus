@@ -31,9 +31,10 @@ struct DamusPurpleAccountView: View {
             // TODO: Generalize this view instead of setting up dividers and paddings manually
             VStack {
                 HStack {
-                    Text(NSLocalizedString("Expiry date", comment: "Label for Purple subscription expiry date"))
+                    Text("Expiry date", comment: "Label for Purple subscription expiry date")
                     Spacer()
-                    Text(DateFormatter.localizedString(from: account.expiry, dateStyle: .short, timeStyle: .none))
+                    let formattedDate = DateFormatter.localizedString(from: account.expiry, dateStyle: .short, timeStyle: .none)
+                    Text(formattedDate)
                 }
                 .padding(.horizontal)
                 .padding(.top, 20)
@@ -43,9 +44,10 @@ struct DamusPurpleAccountView: View {
                     .padding(.vertical, 10)
                 
                 HStack {
-                    Text(NSLocalizedString("Account creation", comment: "Label for Purple account creation date"))
+                    Text("Account creation", comment: "Label for Purple account creation date")
                     Spacer()
-                    Text(DateFormatter.localizedString(from: account.created_at, dateStyle: .short, timeStyle: .none))
+                    let formattedDate = DateFormatter.localizedString(from: account.created_at, dateStyle: .short, timeStyle: .none)
+                    Text(formattedDate)
                 }
                 .padding(.horizontal)
                 
@@ -54,7 +56,7 @@ struct DamusPurpleAccountView: View {
                     .padding(.vertical, 10)
                 
                 HStack {
-                    Text(NSLocalizedString("Subscriber number", comment: "Label for Purple account subscriber number"))
+                    Text("Subscriber number", comment: "Label for Purple account subscriber number")
                     Spacer()
                     Text(verbatim: "#\(account.subscriber_number)")
                 }
@@ -90,7 +92,7 @@ struct DamusPurpleAccountView: View {
                 .resizable()
                 .frame(width: 15, height: 15)
             
-            Text(NSLocalizedString("Active account", comment: "Badge indicating user has an active Damus Purple account"))
+            Text("Active account", comment: "Badge indicating user has an active Damus Purple account")
                 .font(.caption)
                 .bold()
         }
@@ -107,7 +109,7 @@ struct DamusPurpleAccountView: View {
                 .resizable()
                 .frame(width: 15, height: 15)
             
-            Text(NSLocalizedString("Expired account", comment: "Badge indicating user has an expired Damus Purple account"))
+            Text("Expired account", comment: "Badge indicating user has an expired Damus Purple account")
                 .font(.caption)
                 .bold()
         }

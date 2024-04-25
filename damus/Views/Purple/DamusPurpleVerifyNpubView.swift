@@ -53,7 +53,7 @@ struct DamusPurpleVerifyNpubView: View {
                         }, label: {
                             HStack {
                                 Spacer()
-                                Text(NSLocalizedString("Verify my npub", comment: "Button label to verify the user's npub for the purpose of Purple subscription checkout"))
+                                Text("Verify my npub", comment: "Button label to verify the user's npub for the purpose of Purple subscription checkout")
                                 Spacer()
                             }
                         })
@@ -61,7 +61,7 @@ struct DamusPurpleVerifyNpubView: View {
                         .buttonStyle(GradientButtonStyle())
                     }
                     else {
-                        Text(NSLocalizedString("Verified!", comment: "Instructions after the user has verified their npub for Damus Purple purchase checkout"))
+                        Text("Verified!", comment: "Instructions after the user has verified their npub for Damus Purple purchase checkout")
                                 .frame(height: subtitle_height)
                                 .multilineTextAlignment(.center)
                                 .foregroundColor(.green)
@@ -71,7 +71,7 @@ struct DamusPurpleVerifyNpubView: View {
                         }, label: {
                             HStack {
                                 Spacer()
-                                Text(NSLocalizedString("Continue", comment: "Prompt to user to continue"))
+                                Text("Continue", comment: "Prompt to user to continue")
                                 Spacer()
                             }
                         })

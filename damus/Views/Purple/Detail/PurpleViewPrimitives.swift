@@ -67,14 +67,14 @@ struct PurpleViewPrimitives {
 
     struct ProductLoadErrorView: View {
         var body: some View {
-            Text(NSLocalizedString("Subscription Error", comment: "Ah dang there was an error loading subscription information from the AppStore. Please try again later :("))
+            Text("Subscription Error", comment: "Ah dang there was an error loading subscription information from the AppStore. Please try again later :(")
                 .foregroundColor(.white)
         }
     }
 
     struct SaveTextView: View {
         var body: some View {
-            Text(NSLocalizedString("Save 14%", comment: "Percentage of purchase price the user will save"))
+            Text("Save 14%", comment: "Percentage of purchase price the user will save")
                 .font(.callout)
                 .italic()
                 .foregroundColor(DamusColors.green)

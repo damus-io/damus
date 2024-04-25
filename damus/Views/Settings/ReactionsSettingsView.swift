@@ -26,7 +26,7 @@ struct ReactionsSettingsView: View {
                         isReactionsVisible = true
                     }
             } header: {
-                Text(NSLocalizedString("Select default emoji", comment: "Prompt selection of user's default emoji reaction"))
+                Text("Select default emoji", comment: "Prompt selection of user's default emoji reaction")
             }
         }
         .navigationTitle(NSLocalizedString("Reactions", comment: "Title of emoji reactions view"))

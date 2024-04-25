@@ -138,7 +138,7 @@ struct DamusPurpleView: View, DamusPurpleStoreKitManagerDelegate {
                     if let account_uuid {
                         DamusPurpleView.IAPProductStateView(products: products, purchased: purchased, account_uuid: account_uuid, subscribe: subscribe)
                         if let iap_error {
-                            Text(String(format: NSLocalizedString("There has been an unexpected error with the in-app purchase. Please try again later or contact support@damus.io. Error: %@", comment: "In-app purchase error message for the user"), iap_error))
+                            Text("There has been an unexpected error with the in-app purchase. Please try again later or contact support@damus.io. Error: \(iap_error)", comment: "In-app purchase error message for the user")
                                 .foregroundStyle(.red)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal)
@@ -158,7 +158,7 @@ struct DamusPurpleView: View, DamusPurpleStoreKitManagerDelegate {
     }
     
     var ManageOnWebsiteNote: some View {
-        Text(NSLocalizedString("Visit the Damus website on a web browser to manage billing", comment: "Instruction on how to manage billing externally"))
+        Text("Visit the Damus website on a web browser to manage billing", comment: "Instruction on how to manage billing externally")
             .font(.caption)
             .foregroundColor(.white.opacity(0.6))
             .multilineTextAlignment(.center)

@@ -28,7 +28,7 @@ struct WalletView: View {
             
             VStack(spacing: 5) {
                 VStack(spacing: 10) {
-                    Text("Wallet Relay")
+                    Text("Wallet Relay", comment: "Label text indicating that below it is the information about the wallet relay.")
                         .fontWeight(.semibold)
                         .padding(.top)
 
@@ -47,12 +47,12 @@ struct WalletView: View {
                 
                 if let lud16 = nwc.lud16 {
                     VStack(spacing: 10) {
-                        Text("Wallet Address")
+                        Text("Wallet Address", comment: "Label text indicating that below it is the wallet address.")
                             .fontWeight(.semibold)
                         
                         Divider()
                         
-                        Text(verbatim: lud16)
+                        Text(lud16)
                     }
                     .frame(maxWidth: .infinity, minHeight: 75, alignment: .center)
                     .padding(.horizontal, 10)
@@ -69,7 +69,7 @@ struct WalletView: View {
                 self.model.disconnect()
             }) {
                 HStack {
-                    Text(NSLocalizedString("Disconnect Wallet", comment: "Text for button to disconnect from Nostr Wallet Connect lightning wallet."))
+                    Text("Disconnect Wallet", comment: "Text for button to disconnect from Nostr Wallet Connect lightning wallet.")
                 }
                 .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 18, alignment: .center)
             }
