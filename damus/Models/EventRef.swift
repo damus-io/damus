@@ -13,6 +13,15 @@ enum EventRef: Equatable {
     case reply(NoteRef)
     case reply_to_root(NoteRef)
 
+    var note_ref: NoteRef {
+        switch self {
+        case .mention(let mnref): return mnref.ref
+        case .thread_id(let ref): return ref
+        case .reply(let ref): return ref
+        case .reply_to_root(let ref): return ref
+        }
+    }
+
     var is_mention: NoteRef? {
         if case .mention(let m) = self { return m.ref }
         return nil

@@ -76,27 +76,33 @@ func interpret_event_refs_ndb(blocks: [Block], tags: TagsSequence) -> [EventRef]
 }
 
 func interp_event_refs_without_mentions_ndb(_ ev_tags: References<NoteRef>) -> [EventRef] {
-
-    var count = 0
     var evrefs: [EventRef] = []
     var first: Bool = true
-    var first_ref: NoteRef? = nil
+    var root_id: NoteRef? = nil
 
     for ref in ev_tags {
-        if first {
-            first_ref = ref
-            evrefs.append(.thread_id(ref))
-            first = false
+        if let marker = ref.marker {
+            switch marker {
+            case .root: root_id = ref
+            case .reply: evrefs.append(.reply(ref))
+            case .mention: evrefs.append(.mention(.noteref(ref)))
+            }
         } else {
-
-            evrefs.append(.reply(ref))
+            if first {
+                root_id = ref
+                first = false
+            } else {
+                evrefs.append(.reply(ref))
+            }
         }
-        count += 1
     }
 
-    if let first_ref, count == 1 {
-        let r = first_ref
-        return [.reply_to_root(r)]
+    if let root_id {
+        if evrefs.count == 0 {
+            return [.reply_to_root(root_id)]
+        } else {
+            evrefs.insert(.thread_id(root_id), at: 0)
+        }
     }
 
     return evrefs
