@@ -57,12 +57,6 @@ final class DamusVideoPlayerViewModel: ObservableObject {
         }
     }
     
-    static func cached_video_model(url: URL, video_size: Binding<CGSize?>, controller: VideoController, mute: Bool? = nil) -> Self {
-        let maybe_cached_url = (try? VideoCache.standard?.maybe_cached_url_for(video_url: url)) ?? url
-        Log.info("Loading video with URL: %s",for: .render, maybe_cached_url.absoluteString)
-        return Self.init(url: maybe_cached_url, video_size: video_size, controller: controller, mute: mute)
-    }
-    
     init(url: URL, video_size: Binding<CGSize?>, controller: VideoController, mute: Bool? = nil) {
         self.url = url
         player_item = AVPlayerItem(url: url)
