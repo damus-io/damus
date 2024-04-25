@@ -8,8 +8,8 @@ import Foundation
 import CryptoKit
 import AVKit
 
-// Default expiry time of only 1 day to prevent using too much storage
-fileprivate let DEFAULT_EXPIRY_TIME: TimeInterval = 60*60*24
+// Default expiry time of only 2 hours to prevent using too much storage
+fileprivate let DEFAULT_EXPIRY_TIME: TimeInterval = 60*60*2
 // Default cache directory is in the system-provided caches directory, so that the operating system can delete files when it needs storage space
 // (https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/FileSystemOverview/FileSystemOverview.html)
 fileprivate let DEFAULT_CACHE_DIRECTORY_PATH: URL? = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent("video_cache")
