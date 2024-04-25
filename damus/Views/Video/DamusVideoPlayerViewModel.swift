@@ -26,7 +26,6 @@ func video_has_audio(player: AVPlayer) async -> Bool {
 final class DamusVideoPlayerViewModel: ObservableObject {
     
     private let url: URL
-    private let maybe_cached_av_asset: VideoCache.MaybeCachedAVAsset?
     private let player_item: AVPlayerItem
     let player: AVPlayer
     fileprivate let controller: VideoController
@@ -66,14 +65,8 @@ final class DamusVideoPlayerViewModel: ObservableObject {
     
     init(url: URL, video_size: Binding<CGSize?>, controller: VideoController, mute: Bool? = nil) {
         self.url = url
-        let maybe_cached_av_asset = try? VideoCache.standard?.maybe_cached_asset_for(video_url: url)
-        if maybe_cached_av_asset == nil {
-            Log.info("Something went wrong when trying to load the video with the video cache. Gracefully downgrading to non-cache video loading", for: .storage)
-        }
-        self.maybe_cached_av_asset = maybe_cached_av_asset  // Save this wrapped asset to avoid having the loader delegate garbage collected while we still need it.
-        player_item = AVPlayerItem(asset: self.maybe_cached_av_asset?.av_asset ?? AVURLAsset(url: url))
+        player_item = AVPlayerItem(url: url)
         player = AVPlayer(playerItem: player_item)
-        player.automaticallyWaitsToMinimizeStalling = true
         self.controller = controller
         _video_size = video_size
         
