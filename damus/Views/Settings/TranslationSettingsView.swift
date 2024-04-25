@@ -28,7 +28,7 @@ struct TranslationSettingsView: View {
                 
                 if settings.translation_service == .purple && damus_state.purple.enable_purple {
                     NavigationLink(destination: DamusPurpleView(damus_state: damus_state)) {
-                        Text(NSLocalizedString("Configure Damus Purple", comment: "Button to allow Damus Purple to be configured"))
+                        Text("Configure Damus Purple", comment: "Button to allow Damus Purple to be configured")
                     }
                 }
 

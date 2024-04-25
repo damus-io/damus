@@ -28,7 +28,7 @@ struct CreateAccountView: View {
                 VStack(alignment: .center) {
                     EditPictureControl(uploader: .nostrBuild, pubkey: account.pubkey, image_url: $account.profile_image , uploadObserver: profileUploadObserver, callback: uploadedProfilePicture)
 
-                    Text(NSLocalizedString("Public Key", comment: "Label to indicate the public key of the account."))
+                    Text("Public Key", comment: "Label to indicate the public key of the account.")
                         .bold()
                         .padding()
                         .onTapGesture {

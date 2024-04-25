@@ -33,7 +33,7 @@ struct BookmarksView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 32.0, height: 32.0)
-                    Text(NSLocalizedString("You have no bookmarks yet, add them in the context menu", comment: "Text indicating that there are no bookmarks to be viewed"))
+                    Text("You have no bookmarks yet, add them in the context menu", comment: "Text indicating that there are no bookmarks to be viewed")
                 }
             } else {
                 ScrollView {

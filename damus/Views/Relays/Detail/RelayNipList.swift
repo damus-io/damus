@@ -47,7 +47,7 @@ struct RelayNipList: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             
-            Text(NSLocalizedString("Supported NIPs", comment: "Label to display relay's supported NIPs."))
+            Text("Supported NIPs", comment: "Label to display relay's supported NIPs.")
                 .font(.callout)
                 .fontWeight(.bold)
                 .foregroundColor(DamusColors.mediumGrey)

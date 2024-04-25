@@ -196,7 +196,7 @@ struct EventGroupView: View {
         return VStack(alignment: .center) {
             Image("zap.fill")
                 .foregroundColor(.orange)
-            Text(verbatim: fmt)
+            Text(fmt)
                 .foregroundColor(Color.orange)
         }
     }

@@ -57,7 +57,7 @@ struct PubkeyView: View {
                         .resizable()
                         .foregroundColor(DamusColors.green)
                         .frame(width: 20, height: 20)
-                    Text(NSLocalizedString("Copied", comment: "Label indicating that a user's key was copied."))
+                    Text("Copied", comment: "Label indicating that a user's key was copied.")
                         .font(.footnote)
                         .layoutPriority(1)
                         .foregroundColor(DamusColors.green)

@@ -36,7 +36,7 @@ struct OnboardingSuggestionsView: View {
                     .navigationBarItems(leading: Button(action: {
                         self.next_page()
                     }, label: {
-                        Text(NSLocalizedString("Skip", comment: "Button to dismiss the suggested users screen"))
+                        Text("Skip", comment: "Button to dismiss the suggested users screen")
                             .font(.subheadline.weight(.semibold))
                     }))
                     .tag(0)
@@ -48,7 +48,7 @@ struct OnboardingSuggestionsView: View {
                         AnyView(
                             HStack {
                                 Image(systemName: "sparkles")
-                                Text(NSLocalizedString("Add your first post", comment: "Prompt given to the user during onboarding, suggesting them to write their first post"))
+                                Text("Add your first post", comment: "Prompt given to the user during onboarding, suggesting them to write their first post")
                             }
                                 .foregroundColor(.secondary)
                                 .font(.callout)
@@ -97,7 +97,7 @@ fileprivate struct SuggestedUsersPageView: View {
             Button(action: {
                 self.next_page()
             }) {
-                Text(NSLocalizedString("Continue", comment: "Button to dismiss suggested users view and continue to the main app"))
+                Text("Continue", comment: "Button to dismiss suggested users view and continue to the main app")
                     .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
             }
             .buttonStyle(GradientButtonStyle())

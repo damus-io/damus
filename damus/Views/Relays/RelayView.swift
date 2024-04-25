@@ -75,7 +75,7 @@ struct RelayView: View {
                                 Button(action: {
                                     remove_action(privkey: keypair.privkey)
                                 }) {
-                                    Text(NSLocalizedString("Added", comment: "Button to show relay server is already added to list."))
+                                    Text("Added", comment: "Button to show relay server is already added to list.")
                                         .font(.caption)
                                 }
                                 .buttonStyle(NeutralButtonShape.capsule.style)
@@ -147,7 +147,7 @@ struct RelayView: View {
         Button(action: {
             add_action(keypair: keypair)
         }) {
-            Text(NSLocalizedString("Add", comment: "Button to add relay server to list."))
+            Text("Add", comment: "Button to add relay server to list.")
                 .font(.caption)
         }
         .buttonStyle(NeutralButtonShape.capsule.style)
@@ -166,7 +166,7 @@ struct RelayView: View {
             remove_action(privkey: privkey)
         }) {
             if showText {
-                Text(NSLocalizedString("Disconnect", comment: "Button to disconnect from a relay server."))
+                Text("Disconnect", comment: "Button to disconnect from a relay server.")
             }
             
             Image("minus-circle")

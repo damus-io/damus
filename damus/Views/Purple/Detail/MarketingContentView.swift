@@ -38,7 +38,7 @@ extension DamusPurpleView {
                                 .resizable()
                                 .frame(width: 15, height: 15)
                             
-                            Text(NSLocalizedString("Coming soon", comment: "Feature is still in development and will be available soon"))
+                            Text("Coming soon", comment: "Feature is still in development and will be available soon")
                                 .font(.caption)
                                 .bold()
                         }

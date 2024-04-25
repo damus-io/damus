@@ -15,7 +15,7 @@ struct RelayAdminDetail: View {
     var body: some View {
         HStack(spacing: 15) {
             VStack(spacing: 10) {
-                Text("ADMIN")
+                Text("ADMIN", comment: "Text label indicating the profile picture underneath it is the admin of the Nostr relay.")
                     .font(.caption)
                     .fontWeight(.heavy)
                     .foregroundColor(DamusColors.mediumGrey)
@@ -36,18 +36,18 @@ struct RelayAdminDetail: View {
             Divider().frame(width: 1)
             
             VStack {
-                Text("CONTACT")
+                Text("CONTACT", comment: "Text label indicating that the information below is the contact information of the admin of the Nostr relay.")
                     .font(.caption)
                     .fontWeight(.heavy)
                     .foregroundColor(DamusColors.mediumGrey)
                 Image("messages")
                     .foregroundColor(.gray)
-                if nip11?.contact == "" {
-                    Text("N/A")
+                if let contact = nip11?.contact, !contact.isEmpty {
+                    Text(contact)
                         .font(.subheadline)
                         .foregroundColor(.gray)
                 } else {
-                    Text(nip11?.contact ?? "N/A")
+                    Text("N/A", comment: "Text label indicating that there is no NIP-11 relay admin contact information found. In English, N/A stands for not applicable.")
                         .font(.subheadline)
                         .foregroundColor(.gray)
                 }
