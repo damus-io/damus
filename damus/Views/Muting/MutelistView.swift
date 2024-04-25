@@ -62,7 +62,7 @@ struct MutelistView: View {
             Section(NSLocalizedString("Hashtags", comment: "Section header title for a list of hashtags that are muted.")) {
                 ForEach(hashtags, id: \.self) { item in
                     if case let MuteItem.hashtag(hashtag, _) = item {
-                        Text("#\(hashtag.hashtag)")
+                        Text(verbatim: "#\(hashtag.hashtag)")
                             .id(hashtag.hashtag)
                             .swipeActions {
                                 RemoveAction(item: .hashtag(hashtag, nil))
@@ -76,7 +76,7 @@ struct MutelistView: View {
             Section(NSLocalizedString("Words", comment: "Section header title for a list of words that are muted.")) {
                 ForEach(words, id: \.self) { item in
                     if case let MuteItem.word(word, _) = item {
-                        Text("\(word)")
+                        Text(word)
                             .id(word)
                             .swipeActions {
                                 RemoveAction(item: .word(word, nil))
@@ -94,7 +94,7 @@ struct MutelistView: View {
                                     RemoveAction(item: .thread(note_id, nil))
                                 }
                         } else {
-                            Text(NSLocalizedString("Error retrieving muted event", comment: "Text for an item that application failed to retrieve the muted event for."))
+                            Text("Error retrieving muted event", comment: "Text for an item that application failed to retrieve the muted event for.")
                         }
                     }
                 }

@@ -268,7 +268,7 @@ struct PostView: View {
                 Button(action: {
                     self.cancel()
                 }, label: {
-                    Text(NSLocalizedString("Cancel", comment: "Button to cancel out of posting a note."))
+                    Text("Cancel", comment: "Button to cancel out of posting a note.")
                         .padding(10)
                 })
                 .buttonStyle(NeutralButtonStyle())

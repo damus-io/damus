@@ -29,7 +29,8 @@ struct SupporterBadge: View {
                         .frame(width:size, height:size)
                         .foregroundStyle(GoldGradient)
                     if self.style == .full {
-                        Text(verbatim: format_date(date: purple_account.created_at, time_style: .none))
+                        let date = format_date(date: purple_account.created_at, time_style: .none)
+                        Text(date)
                             .foregroundStyle(.secondary)
                             .font(.caption)
                     }

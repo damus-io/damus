@@ -39,9 +39,9 @@ struct ConnectWalletView: View {
             }
             .alert(isPresented: $showAlert) {
                 Alert(
-                    title: Text(NSLocalizedString("Invalid Nostr wallet connection string", comment: "Error message when an invalid Nostr wallet connection string is provided.")),
-                    message: Text("Make sure the wallet you are connecting to supports NWC."),
-                    dismissButton: .default(Text(NSLocalizedString("OK", comment: "Button label indicating user wants to proceed."))) {
+                    title: Text("Invalid Nostr wallet connection string", comment: "Error message when an invalid Nostr wallet connection string is provided."),
+                    message: Text("Make sure the wallet you are connecting to supports NWC.", comment: "Hint message when an invalid Nostr wallet connection string is provided."),
+                    dismissButton: .default(Text("OK", comment: "Button label indicating user wants to proceed.")) {
                         wallet_scan_result = .scanning
                     }
                 )
@@ -80,7 +80,7 @@ struct ConnectWalletView: View {
                 model.cancel()
             }) {
                 HStack {
-                    Text(NSLocalizedString("Cancel", comment: "Text for button to cancel out of connecting Nostr Wallet Connect lightning wallet."))
+                    Text("Cancel", comment: "Text for button to cancel out of connecting Nostr Wallet Connect lightning wallet.")
                         .padding()
                 }
                 .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
@@ -168,10 +168,10 @@ struct ConnectWalletView: View {
     
     var TitleSection: some View {
         VStack(spacing: 25) {
-            Text("Damus Wallet")
+            Text("Damus Wallet", comment: "Title text for Damus Wallet view.")
                 .fontWeight(.bold)
             
-            Text("Securely connect your Damus app to your wallet\nusing Nostr Wallet Connect")
+            Text("Securely connect your Damus app to your wallet using Nostr\u{00A0}Wallet\u{00A0}Connect", comment: "Text to prompt user to connect their wallet using 'Nostr Wallet Connect'.")
                 .font(.caption)
                 .multilineTextAlignment(.center)
         }

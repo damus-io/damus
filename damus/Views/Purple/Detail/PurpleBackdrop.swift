@@ -25,6 +25,6 @@ struct PurpleBackdrop<T: View>: View {
 
 #Preview {
     PurpleBackdrop {
-        Text("Hello, World")
+        Text(verbatim: "Hello, World")
     }
 }

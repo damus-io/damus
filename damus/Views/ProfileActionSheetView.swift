@@ -59,7 +59,7 @@ struct ProfileActionSheetView: View {
                 }
             )
             .buttonStyle(NeutralButtonShape.circle.style)
-            Text(NSLocalizedString("Message", comment: "Button label that allows the user to start a direct message conversation with the user shown on-screen"))
+            Text("Message", comment: "Button label that allows the user to start a direct message conversation with the user shown on-screen")
                 .foregroundStyle(.secondary)
                 .font(.caption)
         }
@@ -114,7 +114,7 @@ struct ProfileActionSheetView: View {
                 label: {
                     HStack {
                         Spacer()
-                        Text(NSLocalizedString("View full profile", comment: "A button label that allows the user to see the full profile of the profile they are previewing"))
+                        Text("View full profile", comment: "A button label that allows the user to see the full profile of the profile they are previewing")
                         Image(systemName: "arrow.up.right")
                         Spacer()
                     }
@@ -305,9 +305,9 @@ fileprivate struct ProfileActionSheetZapButton: View {
         })
         .alert(isPresented: $show_error_alert) {
             Alert(
-                title: Text(NSLocalizedString("Zap failed", comment: "Title of an alert indicating that a zap action failed")),
+                title: Text("Zap failed", comment: "Title of an alert indicating that a zap action failed"),
                 message: Text(zap_state.error_message() ?? ""),
-                dismissButton: .default(Text(NSLocalizedString("OK", comment: "Button label to dismiss an error dialog")))
+                dismissButton: .default(Text("OK", comment: "Button label to dismiss an error dialog"))
             )
         }
         .onChange(of: zap_state) { new_zap_state in

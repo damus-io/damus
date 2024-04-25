@@ -57,7 +57,7 @@ struct SuggestedHashtagsView: View {
         VStack {
             HStack {
                 Image(systemName: "sparkles")
-                Text(NSLocalizedString("Suggested hashtags", comment: "A label indicating that the items below it are suggested hashtags"))
+                Text("Suggested hashtags", comment: "A label indicating that the items below it are suggested hashtags")
                 Spacer()
                 Button(action: {
                     withAnimation(.easeOut(duration: 0.2)) {
@@ -105,7 +105,8 @@ struct SuggestedHashtagsView: View {
                     Text(verbatim: "#\(hashtag)")
                         .bold()
                     
-                    Text(pluralizedString(key: "users_talking_about_it", count: self.count))
+                    let pluralizedString = pluralizedString(key: "users_talking_about_it", count: self.count)
+                    Text(pluralizedString)
                         .foregroundStyle(.secondary)
                 }
                 

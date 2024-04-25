@@ -36,7 +36,7 @@ struct ShareActionButton: View {
                             .frame(width: 55.0, height: 55.0)
                     }
                     .frame(height: 25)
-                Text(verbatim: text)
+                Text(text)
                     .foregroundColor(col)
                     .font(.footnote)
                     .multilineTextAlignment(.center)

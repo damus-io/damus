@@ -26,7 +26,7 @@ struct NotificationSettingsView: View {
     
     var body: some View {
         Form {
-            Section(header: Text(NSLocalizedString("Local Notifications", comment: "Section header for damus local notifications user configuration"))) {
+            Section(header: Text("Local Notifications", comment: "Section header for damus local notifications user configuration")) {
                 Toggle(NSLocalizedString("Zaps", comment: "Setting to enable Zap Local Notification"), isOn: $settings.zap_notification)
                     .toggleStyle(.switch)
                 Toggle(NSLocalizedString("Mentions", comment: "Setting to enable Mention Local Notification"), isOn: $settings.mention_notification)
@@ -39,12 +39,12 @@ struct NotificationSettingsView: View {
                     .toggleStyle(.switch)
             }
 
-            Section(header: Text(NSLocalizedString("Notification Preference", comment: "Section header for Notification Preferences"))) {
+            Section(header: Text("Notification Preference", comment: "Section header for Notification Preferences")) {
                 Toggle(NSLocalizedString("Show only from users you follow", comment: "Setting to Show notifications only associated to users your follow"), isOn: $settings.notification_only_from_following)
                     .toggleStyle(.switch)
             }
             
-            Section(header: Text(NSLocalizedString("Notification Dots", comment: "Section header for notification indicator dot settings"))) {
+            Section(header: Text("Notification Dots", comment: "Section header for notification indicator dot settings")) {
                 Toggle(NSLocalizedString("Zaps", comment: "Setting to enable Zap Local Notification"), isOn: indicator_binding(.zaps))
                     .toggleStyle(.switch)
                 Toggle(NSLocalizedString("Mentions", comment: "Setting to enable Mention Local Notification"), isOn: indicator_binding(.mentions))

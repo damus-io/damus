@@ -27,7 +27,7 @@ extension DamusPurpleView {
                     .shadow(radius: 5)
                 
                 VStack(alignment: .leading) {
-                    Text(NSLocalizedString("Purple", comment: "Subscription service name"))
+                    Text("Purple", comment: "Subscription service name")
                         .font(.system(size: 60.0).weight(.bold))
                         .foregroundStyle(
                             LinearGradient(

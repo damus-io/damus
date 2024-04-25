@@ -88,7 +88,7 @@ struct ConfigView: View {
                 }
 
                 if state.is_privkey_user {
-                    Section(header: Text(NSLocalizedString("Permanently Delete Account", comment: "Section title for deleting the user"))) {
+                    Section(header: Text("Permanently Delete Account", comment: "Section title for deleting the user")) {
                         Button(action: {
                             delete_account_warning = true
                         }, label: {

@@ -144,13 +144,18 @@ struct RelayDetailView: View {
                         
                         Divider()
                         
-                        Text("Description")
+                        Text("Description", comment: "Description of the specific Nostr relay server.")
                             .font(.subheadline)
                             .foregroundColor(DamusColors.mediumGrey)
 
-                        Text(nip11?.description ?? "N/A")
-                            .font(.subheadline)
-                        
+                        if let description = nip11?.description, !description.isEmpty {
+                            Text(description)
+                                .font(.subheadline)
+                        } else {
+                            Text("N/A", comment: "Text label indicating that there is no NIP-11 relay description information found. In English, N/A stands for not applicable.")
+                                .font(.subheadline)
+                        }
+
                         Divider()
                         
                         RelayInfo
@@ -175,7 +180,7 @@ struct RelayDetailView: View {
                         }
                         
                         if state.settings.developer_mode {
-                            Text("Relay Logs")
+                            Text("Relay Logs", comment: "Text label indicating that the text below it are developer mode logs.")
                                 .padding(.top)
                             Divider()
                             Text(log.contents ?? NSLocalizedString("No logs to display", comment: "Label to indicate that there are no developer mode logs available to be displayed on the screen"))

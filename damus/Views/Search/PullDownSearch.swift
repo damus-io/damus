@@ -84,7 +84,7 @@ struct PullDownSearchView: View {
             if results.count > 0 {
                 HStack {
                     Image("search")
-                    Text(NSLocalizedString("Top hits", comment: "A label indicating that the notes being displayed below it are all top note search results"))
+                    Text("Top hits", comment: "A label indicating that the notes being displayed below it are all top note search results")
                     Spacer()
                 }
                 .padding(.horizontal)
@@ -101,7 +101,7 @@ struct PullDownSearchView: View {
                 
                 HStack {
                     Image("notes.fill")
-                    Text(NSLocalizedString("Notes", comment: "A label indicating that the notes being displayed below it are from a timeline, not search results"))
+                    Text("Notes", comment: "A label indicating that the notes being displayed below it are from a timeline, not search results")
                     Spacer()
                 }
                 .foregroundColor(.secondary)
@@ -109,7 +109,7 @@ struct PullDownSearchView: View {
             } else if results.count == 0 && !search_text.isEmpty {
                 HStack {
                     Image("search")
-                    Text(NSLocalizedString("No results", comment: "A label indicating that note search resulted in no results"))
+                    Text("No results", comment: "A label indicating that note search resulted in no results")
                     Spacer()
                 }
                 .padding(.horizontal)

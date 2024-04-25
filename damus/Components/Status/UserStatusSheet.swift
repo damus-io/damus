@@ -192,7 +192,7 @@ struct UserStatusSheet: View {
                     
                     Picker(NSLocalizedString("Duration", comment: "Label for profile status expiration duration picker."), selection: $duration) {
                         ForEach(StatusDuration.allCases, id: \.self) { d in
-                            Text(verbatim: d.description)
+                            Text(d.description)
                                 .tag(d)
                         }
                     }
