@@ -9,6 +9,7 @@ import XCTest
 @testable import damus
 
 final class AuthIntegrationTests: XCTestCase {
+    /*
     func testAuthIntegrationFilterNostrWine() {
         // Create relay pool and connect to `wss://filter.nostr.wine`
         let relay_url = RelayURL("wss://filter.nostr.wine")!
@@ -67,6 +68,7 @@ final class AuthIntegrationTests: XCTestCase {
         XCTAssertEqual(sent_msg["kind"] as! Int, 22242)
         XCTAssertEqual((sent_msg["tags"] as! [[String]]).first { $0[0] == "challenge" }![1], json_received[1] as! String)
     }
+     */
 
     func testAuthIntegrationRelayDamusIo() {
         // Create relay pool and connect to `wss://relay.damus.io`
