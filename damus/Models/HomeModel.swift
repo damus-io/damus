@@ -309,9 +309,14 @@ class HomeModel: ContactsDelegate {
     @MainActor
     func handle_damus_app_notification(_ notification: DamusAppNotification) async {
         if self.notifications.insert_app_notification(notification: notification) {
-            // If we successfully inserted a new Damus App notification, switch ON the Damus App notification bit on our NewsEventsBits
-            // This will cause the bell icon on the tab bar to display the purple dot indicating there is an unread notification
-            self.notification_status.new_events = NewEventsBits(rawValue: self.notification_status.new_events.rawValue | NewEventsBits.damus_app_notifications.rawValue)
+            let last_notification = get_last_event(.notifications)
+            if last_notification == nil || last_notification!.created_at < notification.last_event_at {
+                save_last_event(NoteId.empty, created_at: notification.last_event_at, timeline: .notifications)
+                // If we successfully inserted a new Damus App notification, switch ON the Damus App notification bit on our NewsEventsBits
+                // This will cause the bell icon on the tab bar to display the purple dot indicating there is an unread notification
+                self.notification_status.new_events = NewEventsBits(rawValue: self.notification_status.new_events.rawValue | NewEventsBits.damus_app_notifications.rawValue)
+            }
+            return
         }
     }
     

@@ -832,6 +832,12 @@ func save_last_event(_ ev: NostrEvent, timeline: Timeline) {
     UserDefaults.standard.set(String(ev.created_at), forKey: "last_\(str)_time")
 }
 
+func save_last_event(_ ev_id: NoteId, created_at: UInt32, timeline: Timeline) {
+    let str = timeline.rawValue
+    UserDefaults.standard.set(ev_id.hex(), forKey: "last_\(str)")
+    UserDefaults.standard.set(String(created_at), forKey: "last_\(str)_time")
+}
+
 func update_filters_with_since(last_of_kind: [UInt32: NostrEvent], filters: [NostrFilter]) -> [NostrFilter] {
 
     return filters.map { filter in
