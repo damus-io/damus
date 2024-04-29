@@ -36,7 +36,29 @@ struct MediaPicker: UIViewControllerRepresentable {
                     result.itemProvider.loadItem(forTypeIdentifier: UTType.image.identifier, options: nil) { (item, error) in
                         guard let url = item as? URL else { return }
                         
-                        if canGetSourceTypeFromUrl(url: url) {
+                        if(url.pathExtension == "gif") {
+                            // GIFs do not natively support location metadata (See https://superuser.com/a/556320 and https://www.w3.org/Graphics/GIF/spec-gif89a.txt)
+                            // It is better to avoid any GPS data processing at all, as it can cause the image to be converted to JPEG.
+                            // Therefore, we should load the file directtly and deliver it as "already processed".
+                            
+                            // Load the data for the GIF image
+                            // - Don't load it as an UIImage since that can only get exported into JPEG/PNG
+                            // - Don't load it as a file representation because it gets deleted before the upload can occur
+                            _ = result.itemProvider.loadDataRepresentation(for: .gif, completionHandler: { imageData, error in
+                                guard let imageData else { return }
+                                let destinationURL = generateUniqueTemporaryMediaURL(fileExtension: "gif")
+                                do {
+                                    try imageData.write(to: destinationURL)
+                                    Task {
+                                        await self.chooseMedia(.processed_image(destinationURL))
+                                    }
+                                }
+                                catch {
+                                    Log.error("Failed to write GIF image data from Photo picker into a local copy", for: .image_uploading)
+                                }
+                            })
+                        }
+                        else if canGetSourceTypeFromUrl(url: url) {
                             // Media was not taken from camera
                             self.attemptAcquireResourceAndChooseMedia(
                                 url: url,
