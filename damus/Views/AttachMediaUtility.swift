@@ -17,7 +17,7 @@ enum ImageUploadResult {
 
 fileprivate func create_upload_body(mediaData: Data, boundary: String, mediaUploader: MediaUploader, mediaToUpload: MediaUpload) -> Data {
         let body = NSMutableData();
-        let contentType = mediaToUpload.is_image ? "image/jpg" : "video/mp4"
+        let contentType = mediaToUpload.mime_type
         body.appendString(string: "Content-Type: multipart/form-data; boundary=\(boundary)\r\n\r\n")
         body.appendString(string: "--\(boundary)\r\n")
         body.appendString(string: "Content-Disposition: form-data; name=\(mediaUploader.nameParam); filename=\(mediaToUpload.genericFileName)\r\n")
