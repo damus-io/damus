@@ -4726,6 +4726,54 @@ static int ndb_event_commitment(struct ndb_note *ev, unsigned char *buf, int buf
 	return cur.p - cur.start;
 }
 
+static int cursor_push_hex(struct cursor *c, unsigned char *bytes, int len)
+{
+	int i;
+	unsigned char chr;
+	if (c->p + (len * 2) >= c->end)
+		return 0;
+
+	for (i = 0; i < len; i++) {
+		chr = bytes[i];
+
+		*(c->p++) = hexchar(chr >> 4);
+		*(c->p++) = hexchar(chr & 0xF);
+	}
+
+	return 1;
+}
+
+static int cursor_push_int_str(struct cursor *c, int num)
+{
+	char timebuf[16] = {0};
+	snprintf(timebuf, sizeof(timebuf), "%d", num);
+	return cursor_push_str(c, timebuf);
+}
+
+int ndb_note_json(struct ndb_note *note, char *buf, int buflen)
+{
+	struct cursor cur, *c = &cur;
+
+	make_cursor((unsigned char *)buf, (unsigned char*)buf + buflen, &cur);
+
+	return cursor_push_str(c, "{\"id\":\"") &&
+	       cursor_push_hex(c, ndb_note_id(note), 32) &&
+	       cursor_push_str(c, "\",\"pubkey\":\"") &&
+	       cursor_push_hex(c, ndb_note_pubkey(note), 32) &&
+	       cursor_push_str(c, "\",\"created_at\":") &&
+	       cursor_push_int_str(c, ndb_note_created_at(note)) &&
+	       cursor_push_str(c, ",\"kind\":") &&
+	       cursor_push_int_str(c, ndb_note_kind(note)) &&
+	       cursor_push_str(c, ",\"tags\":") &&
+	       cursor_push_json_tags(c, note) &&
+	       cursor_push_str(c, ",\"content\":") &&
+	       cursor_push_jsonstr(c, ndb_note_content(note)) &&
+	       cursor_push_str(c, ",\"sig\":\"") &&
+	       cursor_push_hex(c, ndb_note_sig(note), 64) &&
+	       cursor_push_c_str(c, "\"}");
+
+}
+
 int ndb_calculate_id(struct ndb_note *note, unsigned char *buf, int buflen) {
 	int len;
 

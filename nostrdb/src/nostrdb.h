@@ -532,6 +532,9 @@ void _ndb_note_set_kind(struct ndb_note *note, uint32_t kind);
 struct ndb_tags *ndb_note_tags(struct ndb_note *note);
 int ndb_str_len(struct ndb_str *str);
 
+/// write the note as json to a buffer
+int ndb_note_json(struct ndb_note *, char *buf, int buflen);
+
 // TAGS
 void ndb_tags_iterate_start(struct ndb_note *note, struct ndb_iterator *iter);
 uint16_t ndb_tags_count(struct ndb_tags *);
