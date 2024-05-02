@@ -113,11 +113,11 @@ struct SearchResultsView: View {
         .frame(maxHeight: .infinity)
         .onAppear {
             guard let txn = NdbTxn.init(ndb: damus_state.ndb) else { return }
-            self.result = search_for_string(profiles: damus_state.profiles, search: search, txn: txn)
+            self.result = search_for_string(profiles: damus_state.profiles, contacts: damus_state.contacts, search: search, txn: txn)
         }
         .onChange(of: search) { new in
             guard let txn = NdbTxn.init(ndb: damus_state.ndb) else { return }
-            self.result = search_for_string(profiles: damus_state.profiles, search: search, txn: txn)
+            self.result = search_for_string(profiles: damus_state.profiles, contacts: damus_state.contacts, search: search, txn: txn)
         }
     }
 }
@@ -131,7 +131,7 @@ struct SearchResultsView_Previews: PreviewProvider {
  */
 
 
-func search_for_string<Y>(profiles: Profiles, search new: String, txn: NdbTxn<Y>) -> Search? {
+func search_for_string<Y>(profiles: Profiles, contacts: Contacts, search new: String, txn: NdbTxn<Y>) -> Search? {
     guard new.count != 0 else {
         return nil
     }
@@ -174,7 +174,7 @@ func search_for_string<Y>(profiles: Profiles, search new: String, txn: NdbTxn<Y>
         return .naddr(naddr)
     }
     
-    let multisearch = MultiSearch(hashtag: make_hashtagable(searchQuery), profiles: search_profiles(profiles: profiles, search: new, txn: txn))
+    let multisearch = MultiSearch(hashtag: make_hashtagable(searchQuery), profiles: search_profiles(profiles: profiles, contacts: contacts, search: new, txn: txn))
     return .multi(multisearch)
 }
 
@@ -191,7 +191,7 @@ func make_hashtagable(_ str: String) -> String {
     return String(new.filter{$0 != " "})
 }
 
-func search_profiles<Y>(profiles: Profiles, search: String, txn: NdbTxn<Y>) -> [Pubkey] {
+func search_profiles<Y>(profiles: Profiles, contacts: Contacts, search: String, txn: NdbTxn<Y>) -> [Pubkey] {
     // Search by hex pubkey.
     if let pubkey = hex_decode_pubkey(search),
        profiles.lookup_key_by_pubkey(pubkey) != nil
@@ -208,8 +208,16 @@ func search_profiles<Y>(profiles: Profiles, search: String, txn: NdbTxn<Y>) -> [
         return [pk]
     }
 
-    let new = search.lowercased()
+    return profiles.search(search, limit: 10, txn: txn).sorted { a, b in
+        let aFriendTypePriority = get_friend_type(contacts: contacts, pubkey: a)?.priority ?? 0
+        let bFriendTypePriority = get_friend_type(contacts: contacts, pubkey: b)?.priority ?? 0
 
-    return profiles.search(search, limit: 10, txn: txn)
+        if aFriendTypePriority > bFriendTypePriority {
+            // `a` should be sorted before `b`
+            return true
+        } else {
+            return false
+        }
+    }
 }
 
