@@ -13,7 +13,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>被 %2$@、%3$@、%4$@ 和 %1$d 个其他用户关注</string>
+			<string>ผู้ติดตามโดย %2$@, %3$@, %4$@ & %1$d คนอื่นๆ</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -27,7 +27,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>粉丝</string>
+			<string>ผู้ติดตาม</string>
 		</dict>
 	</dict>
 	<key>following_count</key>
@@ -41,7 +41,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>已关注</string>
+			<string>กำลังติดตาม</string>
 		</dict>
 	</dict>
 	<key>imports_count</key>
@@ -55,7 +55,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>导入</string>
+			<string>นำเข้า</string>
 		</dict>
 	</dict>
 	<key>reacted_tagged_in_3</key>
@@ -69,7 +69,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@ 和%1$d个其他用户回应了提到你的笔记</string>
+			<string>%2$@ และอีก %1$d คน react ต่อโน้ตที่คุณถูกแท็ก</string>
 		</dict>
 	</dict>
 	<key>reacted_your_note_3</key>
@@ -83,7 +83,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@ 和%1$d个其他用户回应了你的笔记</string>
+			<string>%2$@ และอีก %1$d คน react ต่อโน้ตของคุณ</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -97,7 +97,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@ 和 %1$d 个其他用户回应了你的档案</string>
+			<string>%2$@ และอีก %1$d คน react ต่อโปรไฟล์ของคุณ</string>
 		</dict>
 	</dict>
 	<key>reactions_count</key>
@@ -111,7 +111,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>回应</string>
+			<string>Reactions</string>
 		</dict>
 	</dict>
 	<key>relays_count</key>
@@ -125,7 +125,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>中继器</string>
+			<string>รีเลย์</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
@@ -139,7 +139,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>正在回复%2$@, %3$@ 和 %1$d 个其他用户</string>
+			<string>ตอบกลับ %2$@, %3$@ & %1$d คนอื่นๆ</string>
 		</dict>
 	</dict>
 	<key>reposted_tagged_in_3</key>
@@ -153,7 +153,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@ 和%1$d个其他用户转发了提到你的笔记</string>
+			<string>%2$@ และอีก %1$d คนรีโพสต์โน้ตที่คุณถูกแท็ก</string>
 		</dict>
 	</dict>
 	<key>reposted_your_note_3</key>
@@ -167,7 +167,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@ 和%1$d个其他用户转发了你的笔记</string>
+			<string>%2$@ และอีก %1$d คนรีโพสต์โน้ตของคุณ</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -181,7 +181,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@ 和 %1$d 个其他用户转发了你的档案</string>
+			<string>%2$@ และอีก %1$d คนรีโพสต์โปรไฟล์ของคุณ</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -195,7 +195,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>转发</string>
+			<string>รีโพสต์</string>
 		</dict>
 	</dict>
 	<key>quoted_reposts_count</key>
@@ -209,7 +209,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>引用</string>
+			<string>คำพูด</string>
 		</dict>
 	</dict>
 	<key>sats</key>
@@ -223,7 +223,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>聪</string>
+			<string>sats</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -237,7 +237,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>other</key>
-			<string>%2$@ 聪</string>
+			<string>%2$@ sats</string>
 		</dict>
 	</dict>
 	<key>users_talking_about_it</key>
@@ -251,7 +251,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%d 个用户在讨论</string>
+			<string>%d ผู้ใช้กำลังพูดถึงเรื่องนี้</string>
 		</dict>
 	</dict>
 	<key>word_count</key>
@@ -265,7 +265,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%d 单词</string>
+			<string>%d คำ</string>
 		</dict>
 	</dict>
 	<key>zap_notification_no_message</key>
@@ -279,7 +279,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>other</key>
-			<string>你从 %3$@ 收到了 %2$@ 聪</string>
+			<string>คุณได้รับ %2$@ sats จาก %3$@</string>
 		</dict>
 	</dict>
 	<key>zap_notification_with_message</key>
@@ -293,7 +293,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>other</key>
-			<string>你从%3$@收到了 %2$@聪：&quot;%4$@&quot;</string>
+			<string>คุณได้รับ %2$@ sats จาก %3$@: "%4$@"</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
@@ -307,7 +307,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@ 和%1$d个其他用户打闪了提到你的笔记</string>
+			<string>%2$@ และอีก %1$d คน Zap โน้ตที่คุณถูกแท็ก</string>
 		</dict>
 	</dict>
 	<key>zapped_your_note_3</key>
@@ -321,7 +321,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@ 和%1$d个其他用户打闪了你的笔记</string>
+			<string>%2$@ และอีก %1$d คน Zap โน้ตของคุณ</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
@@ -335,7 +335,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@ 和%1$d个其他用户打闪了你</string>
+			<string>%2$@ และอีก %1$d คน Zap คุณ</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
@@ -349,7 +349,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>打闪</string>
+			<string>Zaps</string>
 		</dict>
 	</dict>
 </dict>
