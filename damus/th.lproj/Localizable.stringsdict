@@ -13,7 +13,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>ผู้ติดตามโดย %2$@, %3$@, %4$@ & %1$d คนอื่นๆ</string>
+			<string>ผู้ติดตามโดย %2$@, %3$@, %4$@ &amp; %1$d คนอื่นๆ</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -139,7 +139,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>ตอบกลับ %2$@, %3$@ & %1$d คนอื่นๆ</string>
+			<string>ตอบกลับ %2$@, %3$@ &amp; %1$d คนอื่นๆ</string>
 		</dict>
 	</dict>
 	<key>reposted_tagged_in_3</key>
