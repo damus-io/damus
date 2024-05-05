@@ -27,17 +27,24 @@ enum DatabaseError: Error {
     }
 }
 
+    
+func subscription_cb(ctx: UnsafeMutableRawPointer?, subid: UInt64) -> Void {
+    guard let ctx else { return }
+    let ndb = Unmanaged<Ndb>.fromOpaque(ctx).takeUnretainedValue()
+    ndb.sub_cb?(subid)
+}
+
 class Ndb {
     var ndb: ndb_t
     let path: String?
     let owns_db: Bool
     var generation: Int
+    let sub_cb: ((UInt64) -> ())?
     private var closed: Bool
 
     var is_closed: Bool {
         self.closed || self.ndb.ndb == nil
     }
-
     static func safemode() -> Ndb? {
         guard let path = db_path ?? old_db_path else { return nil }
 
@@ -49,7 +56,8 @@ class Ndb {
             }
         }
 
-        guard let ndb = Ndb(path: path) else {
+        let ndb = Ndb(path: path)
+        guard let _ = ndb.open() else {
             return nil
         }
 
@@ -79,14 +87,14 @@ class Ndb {
         print("txn: NOSTRDB EMPTY")
         return Ndb(ndb: ndb_t(ndb: nil))
     }
-    
-    static func open(path: String? = nil, owns_db_file: Bool = true) -> ndb_t? {
+
+    func open() -> ndb_t? {
         var ndb_p: OpaquePointer? = nil
 
         let ingest_threads: Int32 = 4
         var mapsize: Int = 1024 * 1024 * 1024 * 32
         
-        if path == nil && owns_db_file {
+        if path == nil && owns_db {
             // `nil` path indicates the default path will be used.
             // The default path changed over time, so migrate the database to the new location if needed
             do {
@@ -99,7 +107,7 @@ class Ndb {
         }
         
         guard let db_path = Self.db_path,
-              owns_db_file || Self.db_files_exist(path: db_path) else {
+              owns_db || Self.db_files_exist(path: db_path) else {
             return nil      // If the caller claims to not own the DB file, and the DB files do not exist, then we should not initialize Ndb
         }
 
@@ -109,8 +117,9 @@ class Ndb {
 
         let ok = path.withCString { testdir in
             var ok = false
+            let ctx = Unmanaged.passUnretained(self).toOpaque()
             while !ok && mapsize > 1024 * 1024 * 700 {
-                var cfg = ndb_config(flags: 0, ingester_threads: ingest_threads, mapsize: mapsize, filter_context: nil, ingest_filter: nil)
+                var cfg = ndb_config(flags: 0, ingester_threads: ingest_threads, mapsize: mapsize, filter_context: nil, ingest_filter: nil, sub_cb_ctx: ctx, sub_cb: subscription_cb)
                 ok = ndb_init(&ndb_p, testdir, &cfg) != 0
                 if !ok {
                     mapsize /= 2
@@ -123,19 +132,17 @@ class Ndb {
             return nil
         }
 
-        return ndb_t(ndb: ndb_p)
+        self.ndb = ndb_t(ndb: ndb_p)
+        return self.ndb
     }
 
-    init?(path: String? = nil, owns_db_file: Bool = true) {
-        guard let db = Self.open(path: path, owns_db_file: owns_db_file) else {
-            return nil
-        }
-        
+    init(path: String? = nil, owns_db_file: Bool = true, sub_cb: ((UInt64) -> ())? = nil) {
         self.generation = 0
         self.path = path
         self.owns_db = owns_db_file
-        self.ndb = db
         self.closed = false
+        self.sub_cb = sub_cb
+        self.ndb = ndb_t()
     }
     
     private static func migrate_db_location_if_needed() throws {
@@ -181,6 +188,7 @@ class Ndb {
         self.path = nil
         self.owns_db = true
         self.closed = false
+        self.sub_cb = nil
     }
     
     func close() {
@@ -193,8 +201,8 @@ class Ndb {
     }
 
     func reopen() -> Bool {
-        guard self.is_closed,
-              let db = Self.open(path: self.path, owns_db_file: self.owns_db) else {
+        let ctx = Unmanaged.passUnretained(self).toOpaque()
+        guard self.is_closed, let db = self.open() else {
             return false
         }
         
@@ -204,13 +212,42 @@ class Ndb {
         self.ndb = db
         return true
     }
+    
+    func poll_for_notes(subid: Int64, capacity: Int) -> [NoteKey] {
+        var buf = Array<UInt64>.init(repeating: 0, count: capacity)
+
+        let r = buf.withUnsafeMutableBufferPointer { bytes in
+            return ndb_poll_for_notes(self.ndb.ndb, UInt64(subid), bytes.baseAddress, Int32(capacity))
+        }
+        
+        guard r != 0 else {
+            return []
+        }
+
+        return Array(buf.prefix(Int(r)))
+    }
+
+    func lookup_blocks_by_key_with_txn<Y>(_ key: NoteKey, txn: NdbTxn<Y>) -> NdbBlocks? {
+        guard let blocks = ndb_get_blocks_by_key(self.ndb.ndb, &txn.txn, key) else {
+            return nil
+        }
+
+        return NdbBlocks(ptr: blocks)
+    }
+
+    func lookup_blocks_by_key(_ key: NoteKey) -> NdbTxn<NdbBlocks?>? {
+        NdbTxn(ndb: self) { txn in
+            lookup_blocks_by_key_with_txn(key, txn: txn)
+        }
+    }
 
     func lookup_note_by_key_with_txn<Y>(_ key: NoteKey, txn: NdbTxn<Y>) -> NdbNote? {
         var size: Int = 0
         guard let note_p = ndb_get_note_by_key(&txn.txn, key, &size) else {
             return nil
         }
-        return NdbNote(note: note_p, size: size, owned: false, key: key)
+        let ptr = ndb_note_ptr(ptr: note_p)
+        return NdbNote(note: ptr, size: size, owned: false, key: key)
     }
 
     func text_search(query: String, limit: Int = 32, order: NdbSearchOrder = .newest_first) -> [NoteKey] {
@@ -294,7 +331,8 @@ class Ndb {
                   let note_p = ndb_get_note_by_id(&txn.txn, baseAddress, &size, &key) else {
                 return nil
             }
-            return NdbNote(note: note_p, size: size, owned: false, key: key)
+            let ptr = ndb_note_ptr(ptr: note_p)
+            return NdbNote(note: ptr, size: size, owned: false, key: key)
         }
     }
 

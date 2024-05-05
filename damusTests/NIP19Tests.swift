@@ -29,22 +29,22 @@ final class NIP19Tests: XCTestCase {
      */
 
     func test_parse_npub() throws {
-        let res = parse_note_content(content: .content("nostr:npub10elfcs4fr0l0r8af98jlmgdh9c8tcxjvz9qkw038js35mp4dma8qzvjptg ",nil)).blocks
+        let res = parse_note_content(content: .content("nostr:npub10elfcs4fr0l0r8af98jlmgdh9c8tcxjvz9qkw038js35mp4dma8qzvjptg ",nil))!.blocks
         XCTAssertEqual(res.count, 2)
         let expected_ref = Pubkey(hex: "7e7e9c42a91bfef19fa929e5fda1b72e0ebc1a4c1141673e2794234d86addf4e")!
-        let expected_mention: Mention<MentionRef> = Mention(index: nil, ref: .pubkey(expected_ref))
+        let expected_mention: Mention<MentionRef> = .any(.init(bech32_str: "npub10elfcs4fr0l0r8af98jlmgdh9c8tcxjvz9qkw038js35mp4dma8qzvjptg")!)
         XCTAssertEqual(res[0], .mention(expected_mention))
     }
     
     func test_parse_note() throws {
-        let res = parse_note_content(content: .content(" nostr:note1s4p70596lv50x0zftuses32t6ck8x6wgd4edwacyetfxwns2jtysux7vep",nil)).blocks
+        let res = parse_note_content(content: .content(" nostr:note1s4p70596lv50x0zftuses32t6ck8x6wgd4edwacyetfxwns2jtysux7vep",nil))!.blocks
         XCTAssertEqual(res.count, 2)
         let note_id = NoteId(hex:"8543e7d0bafb28f33c495f2198454bd62c7369c86d72d77704cad2674e0a92c9")!
         XCTAssertEqual(res[1], .mention(.any(.note(note_id))))
     }
     
     func test_mention_with_adjacent() throws {
-        let res = parse_note_content(content: .content(" nostr:note1s4p70596lv50x0zftuses32t6ck8x6wgd4edwacyetfxwns2jtysux7vep?",nil)).blocks
+        let res = parse_note_content(content: .content(" nostr:note1s4p70596lv50x0zftuses32t6ck8x6wgd4edwacyetfxwns2jtysux7vep?",nil))!.blocks
         XCTAssertEqual(res.count, 3)
         let note_id = NoteId(hex: "8543e7d0bafb28f33c495f2198454bd62c7369c86d72d77704cad2674e0a92c9")!
         XCTAssertEqual(res[0], .text(" "))

@@ -39,7 +39,7 @@ let test_repost_2 = NostrEvent(content: test_encoded_post, keypair: test_keypair
 let test_reposts = [test_repost_1, test_repost_2]
 let test_event_group = EventGroup(events: test_reposts)
 
-let test_zap_invoice = ZapInvoice(description: .description("description"), amount: 10000, string: "lnbc1", expiry: 1000000, payment_hash: Data(), created_at: 1000000)
+let test_zap_invoice = ZapInvoice(description: .description("description"), amount: 10000, string: "lnbc1", expiry: 1000000, created_at: 1000000)
 let test_zap_request_ev = NostrEvent(content: "hi", keypair: test_keypair, kind: 9734)!
 let test_zap_request = ZapRequest(ev: test_zap_request_ev)
 let test_zap = Zap(event: test_note, invoice: test_zap_invoice, zapper: test_note.pubkey, target: .profile(test_pubkey), raw_request: test_zap_request, is_anon: false, private_request: nil)
@@ -64,7 +64,8 @@ var test_damus_state: DamusState = ({
     }
 
     print("opening \(tempDir!)")
-    let ndb = Ndb(path: tempDir)!
+    let ndb = Ndb(path: tempDir)
+    let _ = ndb.open()!
     let our_pubkey = test_pubkey
     let pool = RelayPool(ndb: ndb)
     let settings = UserSettingsStore()

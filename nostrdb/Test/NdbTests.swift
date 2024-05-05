@@ -202,6 +202,7 @@ final class NdbTests: XCTestCase {
         return opts
     }
 
+    /*
     func test_perf_interp_evrefs_old() {
         guard let event = decode_nostr_event_json(test_reply_json) else {
             return
@@ -247,6 +248,7 @@ final class NdbTests: XCTestCase {
 
         XCTAssertEqual(event_refs, note_refs)
     }
+     */
 
     func test_iteration_perf() throws {
         guard let note = NdbNote.owned_from_json(json: test_contact_list_json) else {
