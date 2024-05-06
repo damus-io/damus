@@ -97,10 +97,10 @@ class EventCache {
     // TODO: remove me and change code to use ndb directly
     private let ndb: Ndb
     private var events: [NoteId: NostrEvent] = [:]
-    private var replies = ReplyMap()
     private var cancellable: AnyCancellable?
     private var image_metadata: [String: ImageMetadataState] = [:] // lowercased URL key
     private var event_data: [NoteId: EventData] = [:]
+    var replies = ReplyMap()
 
     //private var thread_latest: [String: Int64]
     
@@ -187,7 +187,7 @@ class EventCache {
             replies.add(id: reply, reply_id: ev.id)
         }
     }
-    
+
     func child_events(event: NostrEvent) -> [NostrEvent] {
         guard let xs = replies.lookup(event.id) else {
             return []

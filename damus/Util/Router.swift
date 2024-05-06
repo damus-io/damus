@@ -93,7 +93,8 @@ enum Route: Hashable {
         case .FirstAidSettings(settings: let settings):
             FirstAidSettingsView(damus_state: damusState, settings: settings)
         case .Thread(let thread):
-            ThreadView(state: damusState, thread: thread)
+            ChatroomView(damus: damusState, thread: thread)
+            //ThreadView(state: damusState, thread: thread)
         case .Reposts(let reposts):
             RepostsView(damus_state: damusState, model: reposts)
         case .QuoteReposts(let quote_reposts):
