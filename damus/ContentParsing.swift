@@ -79,19 +79,21 @@ func interp_event_refs_without_mentions_ndb(_ ev_tags: References<NoteRef>) -> [
     var evrefs: [EventRef] = []
     var first: Bool = true
     var root_id: NoteRef? = nil
+    var any_marker: Bool = false
 
     for ref in ev_tags {
         if let marker = ref.marker {
+            any_marker = true
             switch marker {
             case .root: root_id = ref
             case .reply: evrefs.append(.reply(ref))
             case .mention: evrefs.append(.mention(.noteref(ref)))
             }
         } else {
-            if first {
+            if !any_marker && first {
                 root_id = ref
                 first = false
-            } else {
+            } else if !any_marker {
                 evrefs.append(.reply(ref))
             }
         }
