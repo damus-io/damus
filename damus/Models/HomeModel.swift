@@ -1148,8 +1148,8 @@ func should_show_event(event: NostrEvent, damus_state: DamusState) -> Bool {
     )
 }
 
-func should_show_event(state: DamusState, ev: NostrEvent, keypair: Keypair? = nil) -> Bool {
-    let event_muted = state.mutelist_manager.is_event_muted(ev, keypair: keypair)
+func should_show_event(state: DamusState, ev: NostrEvent) -> Bool {
+    let event_muted = state.mutelist_manager.is_event_muted(ev)
     if event_muted {
         return false
     }

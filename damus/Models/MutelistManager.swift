@@ -8,12 +8,17 @@
 import Foundation
 
 class MutelistManager {
+    let user_keypair: Keypair
     private(set) var event: NostrEvent? = nil
 
     var users: Set<MuteItem> = []
     var hashtags: Set<MuteItem> = []
     var threads: Set<MuteItem> = []
     var words: Set<MuteItem> = []
+    
+    init(user_keypair: Keypair) {
+        self.user_keypair = user_keypair
+    }
 
     func refresh_sets() {
         guard let referenced_mute_items = event?.referenced_mute_items else { return }
@@ -55,8 +60,8 @@ class MutelistManager {
         }
     }
 
-    func is_event_muted(_ ev: NostrEvent, keypair: Keypair? = nil) -> Bool {
-        return event_muted_reason(ev, keypair: keypair) != nil
+    func is_event_muted(_ ev: NostrEvent) -> Bool {
+        return self.event_muted_reason(ev) != nil
     }
 
     func set_mutelist(_ ev: NostrEvent) {
@@ -120,9 +125,9 @@ class MutelistManager {
     ///
     /// - Parameter ev: The ``NostrEvent`` that you want to check the muted reason for.
     /// - Returns: The ``MuteItem`` that matched the event. Or `nil` if the event is not muted.
-    func event_muted_reason(_ ev: NostrEvent, keypair: Keypair? = nil) -> MuteItem? {
+    func event_muted_reason(_ ev: NostrEvent) -> MuteItem? {
         // Events from the current user should not be muted.
-        guard keypair?.pubkey != ev.pubkey else { return nil }
+        guard self.user_keypair.pubkey != ev.pubkey else { return nil }
 
         // Check if user is muted
         let check_user_item = MuteItem.user(ev.pubkey, nil)
@@ -147,7 +152,7 @@ class MutelistManager {
         }
 
         // Check if word is muted
-        if let keypair, let content: String = ev.maybe_get_content(keypair)?.lowercased() {
+        if let content: String = ev.maybe_get_content(self.user_keypair)?.lowercased() {
             for word in words {
                 if case .word(let string, _) = word {
                     if content.contains(string.lowercased()) {

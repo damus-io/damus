@@ -25,7 +25,7 @@ func generate_test_damus_state(
         return profiles
     }()
     
-    let mutelist_manager = MutelistManager()
+    let mutelist_manager = MutelistManager(user_keypair: test_keypair)
     let damus = DamusState(pool: pool,
                            keypair: test_keypair,
                            likes: .init(our_pubkey: our_pubkey),
