@@ -11,10 +11,20 @@ class MutelistManager {
     let user_keypair: Keypair
     private(set) var event: NostrEvent? = nil
 
-    var users: Set<MuteItem> = []
-    var hashtags: Set<MuteItem> = []
-    var threads: Set<MuteItem> = []
-    var words: Set<MuteItem> = []
+    var users: Set<MuteItem> = [] {
+        didSet { self.reset_cache() }
+    }
+    var hashtags: Set<MuteItem> = [] {
+        didSet { self.reset_cache() }
+    }
+    var threads: Set<MuteItem> = [] {
+        didSet { self.reset_cache() }
+    }
+    var words: Set<MuteItem> = [] {
+        didSet { self.reset_cache() }
+    }
+    
+    var muted_notes_cache: [NoteId: EventMuteStatus] = [:]
     
     init(user_keypair: Keypair) {
         self.user_keypair = user_keypair
@@ -45,6 +55,10 @@ class MutelistManager {
         hashtags = new_hashtags
         threads = new_threads
         words = new_words
+    }
+    
+    func reset_cache() {
+        self.muted_notes_cache = [:]
     }
 
     func is_muted(_ item: MuteItem) -> Bool {
@@ -119,13 +133,25 @@ class MutelistManager {
             threads.remove(item)
         }
     }
+    
+    func event_muted_reason(_ ev: NostrEvent) -> MuteItem? {
+        if let cached_mute_status = self.muted_notes_cache[ev.id] {
+            return cached_mute_status.mute_reason()
+        }
+        if let reason = self.compute_event_muted_reason(ev) {
+            self.muted_notes_cache[ev.id] = .muted(reason: reason)
+            return reason
+        }
+        self.muted_notes_cache[ev.id] = .not_muted
+        return nil
+    }
 
 
     /// Check if an event is muted given a collection of ``MutedItem``.
     ///
     /// - Parameter ev: The ``NostrEvent`` that you want to check the muted reason for.
     /// - Returns: The ``MuteItem`` that matched the event. Or `nil` if the event is not muted.
-    func event_muted_reason(_ ev: NostrEvent) -> MuteItem? {
+    func compute_event_muted_reason(_ ev: NostrEvent) -> MuteItem? {
         // Events from the current user should not be muted.
         guard self.user_keypair.pubkey != ev.pubkey else { return nil }
 
@@ -163,5 +189,19 @@ class MutelistManager {
         }
 
         return nil
+    }
+    
+    enum EventMuteStatus {
+        case muted(reason: MuteItem)
+        case not_muted
+        
+        func mute_reason() -> MuteItem? {
+            switch self {
+                case .muted(reason: let reason):
+                    return reason
+                case .not_muted:
+                    return nil
+            }
+        }
     }
 }
