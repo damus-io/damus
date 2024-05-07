@@ -485,6 +485,7 @@
 		D74AAFD62B155F0C006CF0F4 /* WalletConnect+.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFD52B155F0C006CF0F4 /* WalletConnect+.swift */; };
 		D74F430A2B23F0BE00425B75 /* DamusPurple.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74F43092B23F0BE00425B75 /* DamusPurple.swift */; };
 		D74F430C2B23FB9B00425B75 /* StoreObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74F430B2B23FB9B00425B75 /* StoreObserver.swift */; };
+		D753CEAA2BE9DE04001C3A5D /* MutingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D753CEA92BE9DE04001C3A5D /* MutingTests.swift */; };
 		D76556D62B1E6C08001B0CCC /* DamusPurpleWelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76556D52B1E6C08001B0CCC /* DamusPurpleWelcomeView.swift */; };
 		D76874F32AE3632B00FB0F68 /* ProfileZapLinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76874F22AE3632B00FB0F68 /* ProfileZapLinkView.swift */; };
 		D77BFA0B2AE3051200621634 /* ProfileActionSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77BFA0A2AE3051200621634 /* ProfileActionSheetView.swift */; };
@@ -1403,6 +1404,7 @@
 		D74AAFD52B155F0C006CF0F4 /* WalletConnect+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WalletConnect+.swift"; sourceTree = "<group>"; };
 		D74F43092B23F0BE00425B75 /* DamusPurple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurple.swift; sourceTree = "<group>"; };
 		D74F430B2B23FB9B00425B75 /* StoreObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreObserver.swift; sourceTree = "<group>"; };
+		D753CEA92BE9DE04001C3A5D /* MutingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutingTests.swift; sourceTree = "<group>"; };
 		D76556D52B1E6C08001B0CCC /* DamusPurpleWelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleWelcomeView.swift; sourceTree = "<group>"; };
 		D76874F22AE3632B00FB0F68 /* ProfileZapLinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileZapLinkView.swift; sourceTree = "<group>"; };
 		D77BFA0A2AE3051200621634 /* ProfileActionSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileActionSheetView.swift; sourceTree = "<group>"; };
@@ -2559,6 +2561,7 @@
 				E06336A92B75832100A88E6B /* ImageMetadataTest.swift */,
 				D7CBD1D52B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift */,
 				D72927AC2BAB515C00F93E90 /* RelayURLTests.swift */,
+				D753CEA92BE9DE04001C3A5D /* MutingTests.swift */,
 				4C2D34402BDAF1B300F9FB44 /* NIP10Tests.swift */,
 			);
 			path = damusTests;
@@ -3565,6 +3568,7 @@
 				4C90BD1C283AC38E008EE7EF /* Bech32Tests.swift in Sources */,
 				50A50A8D29A09E1C00C01BE7 /* RequestTests.swift in Sources */,
 				4CE6DEF827F7A08200C66700 /* damusTests.swift in Sources */,
+				D753CEAA2BE9DE04001C3A5D /* MutingTests.swift in Sources */,
 				3A3040F329A91366008A0F29 /* ProfileViewTests.swift in Sources */,
 				4CF0ABDC2981A19E00D66079 /* ListTests.swift in Sources */,
 				4C684A552A7E91FE005E6031 /* LongPostTests.swift in Sources */,
