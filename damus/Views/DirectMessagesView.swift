@@ -55,7 +55,7 @@ struct DirectMessagesView: View {
     
     func MaybeEvent(_ model: DirectMessageModel) -> some View {
         Group {
-            if let ev = model.events.last(where: { should_show_event(state: damus_state, ev: $0, keypair: damus_state.keypair) }) {
+            if let ev = model.events.last(where: { should_show_event(state: damus_state, ev: $0) }) {
                 EventView(damus: damus_state, event: ev, pubkey: model.pubkey, options: options)
                     .onTapGesture {
                         self.model.set_active_dm_model(model)
