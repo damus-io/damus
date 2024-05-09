@@ -127,9 +127,92 @@ final class NIP10Tests: XCTestCase {
         XCTAssertEqual(refs.reduce(into: Array<NoteId>(), { xs, r in
             if let note_id = r.is_reply?.note_id { xs.append(note_id) }
         }), [root_note_id])
+
+        let nip10 = note.thread_reply(test_keypair)!
+        XCTAssertEqual(nip10.is_reply_to_root, true)
+        XCTAssertEqual(nip10.root.note_id, root_note_id)
+        XCTAssertEqual(nip10.reply!.note_id, root_note_id)
+    }
+    
+    // seen in the wild by the gleasonator
+    func test_single_marker() {
+        let root_note_id_hex = "7c7d37bc8c04d2ec65cbc7d9275253e6b5cc34b5d10439f158194a3feefa8d52"
+        let tags = [
+            ["e", root_note_id_hex, "", "reply"],
+        ]
+        
+        let root_note_id = NoteId(hex: root_note_id_hex)!
+        let note = NdbNote(content: "hi", keypair: test_keypair, kind: 1, tags: tags)!
+        let refs = interp_event_refs_without_mentions_ndb(note.referenced_noterefs)
+        let thread_reply = ThreadReply(event_refs: refs)!
+
+        XCTAssertEqual(refs.reduce(into: Array<NoteId>(), { xs, r in
+            if let note_id = r.is_thread_id?.note_id { xs.append(note_id) }
+        }), [root_note_id])
+        
+        XCTAssertEqual(refs.reduce(into: Array<NoteId>(), { xs, r in
+            if let note_id = r.is_direct_reply?.note_id { xs.append(note_id) }
+        }), [root_note_id])
+
+        XCTAssertEqual(refs.reduce(into: Array<NoteId>(), { xs, r in
+            if let note_id = r.is_reply?.note_id { xs.append(note_id) }
+        }), [root_note_id])
+        
+        XCTAssertEqual(thread_reply.mention, nil)
+        XCTAssertEqual(thread_reply.root.note_id, root_note_id)
+        XCTAssertEqual(thread_reply.reply!.note_id, root_note_id)
+        XCTAssertEqual(thread_reply.is_reply_to_root, true)
+    }
+
+    func test_marker_reply() {
+        let note_json = """
+        {
+          "pubkey": "5b0183ab6c3e322bf4d41c6b3aef98562a144847b7499543727c5539a114563e",
+          "content": "Can’t zap you btw",
+          "id": "a8dc8b74852d7ad114d5d650b2125459c0cba3c1fdcaaf527e03f24082e11ab3",
+          "created_at": 1715275773,
+          "sig": "4ee5d8f954c6c087ce51ad02d30dd226eea939cd9ef4e8a8ce4bfaf3aba0a852316cfda83ce3fc9a3d98392a738e7c6b036a3b2aced1392db1be3ca190835a17",
+          "kind": 1,
+          "tags": [
+            [
+              "e",
+              "1bb940ce0ba0d4a3b2a589355d908498dcd7452f941cf520072218f7e6ede75e",
+              "wss://relay.nostrplebs.com",
+              "reply"
+            ],
+            [
+              "p",
+              "6e75f7972397ca3295e0f4ca0fbc6eb9cc79be85bafdd56bd378220ca8eee74e"
+            ],
+            [
+              "e",
+              "00152d2945459fb394fed2ea95af879c903c4ec42d96327a739fa27c023f20e0",
+              "wss://nostr.mutinywallet.com/",
+              "root"
+            ]
+          ]
+        }
+        """;
+
+        let replying_to_hex = "a8dc8b74852d7ad114d5d650b2125459c0cba3c1fdcaaf527e03f24082e11ab3"
+        let pk = Pubkey(hex: "5b0183ab6c3e322bf4d41c6b3aef98562a144847b7499543727c5539a114563e")!
+        let last_reply_hex = "1bb940ce0ba0d4a3b2a589355d908498dcd7452f941cf520072218f7e6ede75e"
+        let note = decode_nostr_event_json(json: note_json)!
+        let reply = build_post(state: test_damus_state, post: .init(string: "hello"), action: .replying_to(note), uploadedMedias: [], pubkeys: [pk] + note.referenced_pubkeys.map({pk in pk}))
+        let root_hex = "00152d2945459fb394fed2ea95af879c903c4ec42d96327a739fa27c023f20e0"
+
+        XCTAssertEqual(reply.tags,
+            [
+                ["e", root_hex, "wss://nostr.mutinywallet.com/", "root"],
+                ["e", replying_to_hex, "", "reply"],
+                ["e", last_reply_hex, "wss://relay.nostrplebs.com"],
+                ["p", "5b0183ab6c3e322bf4d41c6b3aef98562a144847b7499543727c5539a114563e"],
+                ["p", "6e75f7972397ca3295e0f4ca0fbc6eb9cc79be85bafdd56bd378220ca8eee74e"],
+            ])
     }
 
     func test_mixed_nip10() {
+
         let root_note_id_hex = "27e71cf53299dafb5dc7bcc0a078357418a4375cb1097bf5184662493f79a627"
         let reply_hex = "1a616998552cf76e9786f76ac68f6104cdae46377330735c68bfe0b9426d2fa8"
 

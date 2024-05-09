@@ -123,7 +123,7 @@ class ReplyTests: XCTestCase {
         post.append(user_tag_attr_string(profile: profile, pubkey: pk))
         post.append(.init(string: "\n"))
 
-        let post_note = build_post(state: test_damus_state, post: post, action: .posting(.none), uploadedMedias: [], references: [.pubkey(pk)])
+        let post_note = build_post(state: test_damus_state, post: post, action: .posting(.none), uploadedMedias: [], pubkeys: [pk])
 
         let expected_render = "nostr:\(pk.npub)\nnostr:\(pk.npub)"
         XCTAssertEqual(post_note.content, expected_render)
@@ -315,7 +315,7 @@ class ReplyTests: XCTestCase {
         let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
         let content = "this is a @\(pk.npub) mention"
         let blocks = parse_post_blocks(content: content)
-        let post = NostrPost(content: content, references: [.event(evid)])
+        let post = NostrPost(content: content, tags: [["e", evid.hex()]])
         let ev = post_to_event(post: post, keypair: test_keypair_full)!
 
         XCTAssertEqual(ev.tags.count, 2)
@@ -330,7 +330,7 @@ class ReplyTests: XCTestCase {
         let nsec = "nsec1jmzdz7d0ldqctdxwm5fzue277ttng2pk28n2u8wntc2r4a0w96ssnyukg7"
         let content = "this is a @\(nsec) mention"
         let blocks = parse_post_blocks(content: content)
-        let post = NostrPost(content: content, references: [.event(evid)])
+        let post = NostrPost(content: content, tags: [["e", evid.hex()]])
         let ev = post_to_event(post: post, keypair: test_keypair_full)!
 
         XCTAssertEqual(ev.tags.count, 2)
@@ -344,13 +344,13 @@ class ReplyTests: XCTestCase {
         let thread_id = NoteId(hex: "a250fc93570c3e87f9c9b08d6b3ef7b8e05d346df8a52c69e30ffecdb178fb9e")!
         let reply_id = NoteId(hex: "9a180a10f16dac9566543ad1fc29616aab272b0cf123ab5d58843e16f4ef03a3")!
 
-        let refs: [RefId]  = [
-            .event(thread_id),
-            .event(reply_id),
-            .pubkey(pubkey)
+        let tags = [
+            ["e", thread_id.hex()],
+            ["e", reply_id.hex()],
+            ["p", pubkey.hex()]
         ]
 
-        let post = NostrPost(content: "this is a (@\(pubkey.npub)) mention", references: refs)
+        let post = NostrPost(content: "this is a (@\(pubkey.npub)) mention", tags: tags)
         let ev = post_to_event(post: post, keypair: test_keypair_full)!
         
         XCTAssertEqual(ev.content, "this is a (nostr:\(pubkey.npub)) mention")
