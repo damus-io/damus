@@ -341,8 +341,11 @@ extension NdbNote {
     }
 
     func event_refs(_ keypair: Keypair) -> [EventRef] {
-        let refs = interpret_event_refs_ndb(blocks: self.blocks(keypair).blocks, tags: self.tags)
-        return refs
+        return interpret_event_refs_ndb(blocks: self.blocks(keypair).blocks, tags: self.tags)
+    }
+
+    func thread_reply(_ keypair: Keypair) -> ThreadReply? {
+        ThreadReply(event_refs: event_refs(keypair))
     }
 
     func get_content(_ keypair: Keypair) -> String {
