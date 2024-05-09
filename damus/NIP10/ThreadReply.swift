@@ -48,6 +48,11 @@ struct ThreadReply {
             }
         }
 
+        // reply with no root should be considered reply-to-root
+        if root == nil && reply != nil {
+            root = reply
+        }
+
         // nip10 threads must have a root
         guard let root else {
             return nil
