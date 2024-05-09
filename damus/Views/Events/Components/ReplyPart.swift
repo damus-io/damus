@@ -13,18 +13,10 @@ struct ReplyPart: View {
     let keypair: Keypair
     let ndb: Ndb
 
-    var replying_to: NostrEvent? {
-        guard let note_ref = event.event_refs(keypair).first(where: { evref in evref.is_direct_reply != nil })?.is_direct_reply else {
-            return nil
-        }
-
-        return events.lookup(note_ref.note_id)
-    }
-
     var body: some View {
         Group {
-            if event_is_reply(event.event_refs(keypair)) {
-                ReplyDescription(event: event, replying_to: replying_to, ndb: ndb)
+            if let reply_ref = event.thread_reply(keypair)?.reply {
+                ReplyDescription(event: event, replying_to: events.lookup(reply_ref.note_id), ndb: ndb)
             } else {
                 EmptyView()
             }

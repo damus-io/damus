@@ -149,8 +149,3 @@ func interpret_event_refs(blocks: [Block], tags: Tags) -> [EventRef] {
 }
 
 
-func event_is_reply(_ refs: [EventRef]) -> Bool {
-    return refs.contains { evref in
-        return evref.is_reply != nil
-    }
-}

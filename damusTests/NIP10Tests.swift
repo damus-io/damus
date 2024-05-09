@@ -146,18 +146,6 @@ final class NIP10Tests: XCTestCase {
         let refs = interp_event_refs_without_mentions_ndb(note.referenced_noterefs)
         let thread_reply = ThreadReply(event_refs: refs)!
 
-        XCTAssertEqual(refs.reduce(into: Array<NoteId>(), { xs, r in
-            if let note_id = r.is_thread_id?.note_id { xs.append(note_id) }
-        }), [root_note_id])
-        
-        XCTAssertEqual(refs.reduce(into: Array<NoteId>(), { xs, r in
-            if let note_id = r.is_direct_reply?.note_id { xs.append(note_id) }
-        }), [root_note_id])
-
-        XCTAssertEqual(refs.reduce(into: Array<NoteId>(), { xs, r in
-            if let note_id = r.is_reply?.note_id { xs.append(note_id) }
-        }), [root_note_id])
-        
         XCTAssertEqual(thread_reply.mention, nil)
         XCTAssertEqual(thread_reply.root.note_id, root_note_id)
         XCTAssertEqual(thread_reply.reply!.note_id, root_note_id)
