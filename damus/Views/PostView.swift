@@ -624,15 +624,18 @@ func nip10_reply_tags(replying_to: NostrEvent, keypair: Keypair) -> [[String]] {
 
     // otherwise use the root tag from the parent's nip10 reply and include the note
     // that we are replying to's note id.
-    var tags = [
+    let tags = [
         ["e", nip10.root.note_id.hex(), nip10.root.relay ?? "", "root"],
         ["e", replying_to.id.hex(), "", "reply"]
     ]
 
     // we also add the parent's nip10 reply tag as an additional e tag for context
+    /* this is incorrect for deprecated nip 10, let's just not add it for now
     if let reply = nip10.reply {
         tags.append(["e", reply.note_id.hex(), reply.relay ?? ""])
     }
+     */
+
 
     return tags
 }

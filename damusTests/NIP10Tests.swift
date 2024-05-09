@@ -184,7 +184,7 @@ final class NIP10Tests: XCTestCase {
 
         let replying_to_hex = "a8dc8b74852d7ad114d5d650b2125459c0cba3c1fdcaaf527e03f24082e11ab3"
         let pk = Pubkey(hex: "5b0183ab6c3e322bf4d41c6b3aef98562a144847b7499543727c5539a114563e")!
-        let last_reply_hex = "1bb940ce0ba0d4a3b2a589355d908498dcd7452f941cf520072218f7e6ede75e"
+        //let last_reply_hex = "1bb940ce0ba0d4a3b2a589355d908498dcd7452f941cf520072218f7e6ede75e"
         let note = decode_nostr_event_json(json: note_json)!
         let reply = build_post(state: test_damus_state, post: .init(string: "hello"), action: .replying_to(note), uploadedMedias: [], pubkeys: [pk] + note.referenced_pubkeys.map({pk in pk}))
         let root_hex = "00152d2945459fb394fed2ea95af879c903c4ec42d96327a739fa27c023f20e0"
@@ -193,7 +193,7 @@ final class NIP10Tests: XCTestCase {
             [
                 ["e", root_hex, "wss://nostr.mutinywallet.com/", "root"],
                 ["e", replying_to_hex, "", "reply"],
-                ["e", last_reply_hex, "wss://relay.nostrplebs.com"],
+                //["e", last_reply_hex, "wss://relay.nostrplebs.com"],
                 ["p", "5b0183ab6c3e322bf4d41c6b3aef98562a144847b7499543727c5539a114563e"],
                 ["p", "6e75f7972397ca3295e0f4ca0fbc6eb9cc79be85bafdd56bd378220ca8eee74e"],
             ])
