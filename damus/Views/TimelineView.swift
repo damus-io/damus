@@ -15,7 +15,6 @@ struct TimelineView<Content: View>: View {
     let show_friend_icon: Bool
     let filter: (NostrEvent) -> Bool
     let content: Content?
-    let debouncer: Debouncer
     let apply_mute_rules: Bool
 
     init(events: EventHolder, loading: Binding<Bool>, damus: DamusState, show_friend_icon: Bool, filter: @escaping (NostrEvent) -> Bool, apply_mute_rules: Bool = true, content: (() -> Content)? = nil) {
@@ -25,7 +24,6 @@ struct TimelineView<Content: View>: View {
         self.show_friend_icon = show_friend_icon
         self.filter = filter
         self.apply_mute_rules = apply_mute_rules
-        self.debouncer = Debouncer(interval: 0.5)
         self.content = content?()
     }
 
@@ -49,9 +47,7 @@ struct TimelineView<Content: View>: View {
                     .shimmer(loading)
                     .disabled(loading)
                     .background(GeometryReader { proxy -> Color in
-                        debouncer.debounce_immediate {
-                            handle_scroll_queue(proxy, queue: self.events)
-                        }
+                        handle_scroll_queue(proxy, queue: self.events)
                         return Color.clear
                     })
             }
