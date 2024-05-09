@@ -218,7 +218,16 @@ class EventCache {
      */
 
     func lookup(_ evid: NoteId) -> NostrEvent? {
-        return events[evid]
+        if let ev = events[evid] {
+            return ev
+        }
+
+        if let ev = self.ndb.lookup_note(evid)?.unsafeUnownedValue?.to_owned() {
+            events[ev.id] = ev
+            return ev
+        }
+
+        return nil
     }
     
     func insert(_ ev: NostrEvent) {
