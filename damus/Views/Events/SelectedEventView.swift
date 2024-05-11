@@ -40,7 +40,7 @@ struct SelectedEventView: View {
                 .minimumScaleFactor(0.75)
                 .lineLimit(1)
 
-                if let reply_ref = event.thread_reply(damus.keypair)?.reply {
+                if let reply_ref = event.thread_reply()?.reply {
                     ReplyDescription(event: event, replying_to: damus.events.lookup(reply_ref.note_id), ndb: damus.ndb)
                         .padding(.horizontal)
                 }
