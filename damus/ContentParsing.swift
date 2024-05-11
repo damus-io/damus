@@ -59,26 +59,24 @@ func parse_note_content(content: NoteContent) -> Blocks {
     }
 }
 
-func interpret_event_refs_ndb(blocks: [Block], tags: TagsSequence) -> [EventRef] {
-    if tags.count == 0 {
-        return []
-    }
-    
-    /// build a set of indices for each event mention
-    let mention_indices = build_mention_indices(blocks, type: .e)
-
-    /// simpler case with no mentions
-    if mention_indices.count == 0 {
-        return interp_event_refs_without_mentions_ndb(tags.note.referenced_noterefs)
-    }
-    
-    return interp_event_refs_with_mentions_ndb(tags: tags, mention_indices: mention_indices)
+func interpret_event_refs(tags: TagsSequence) -> ThreadReply? {
+    // migration is long over, lets just do this to fix tests
+    return interpret_event_refs_ndb(tags: tags)
 }
 
-func interp_event_refs_without_mentions_ndb(_ ev_tags: References<NoteRef>) -> [EventRef] {
-    var evrefs: [EventRef] = []
+func interpret_event_refs_ndb(tags: TagsSequence) -> ThreadReply? {
+    if tags.count == 0 {
+        return nil
+    }
+
+    return interp_event_refs_without_mentions_ndb(References<NoteRef>(tags: tags))
+}
+
+func interp_event_refs_without_mentions_ndb(_ ev_tags: References<NoteRef>) -> ThreadReply? {
     var first: Bool = true
     var root_id: NoteRef? = nil
+    var reply_id: NoteRef? = nil
+    var mention: NoteRef? = nil
     var any_marker: Bool = false
 
     for ref in ev_tags {
@@ -86,47 +84,32 @@ func interp_event_refs_without_mentions_ndb(_ ev_tags: References<NoteRef>) -> [
             any_marker = true
             switch marker {
             case .root: root_id = ref
-            case .reply: evrefs.append(.reply(ref))
-            case .mention: evrefs.append(.mention(.noteref(ref)))
+            case .reply: reply_id = ref
+            case .mention: mention = ref
             }
-        } else {
-            if !any_marker && first {
+        // deprecated form, only activate if we don't have any markers set
+        } else if !any_marker {
+            if first {
                 root_id = ref
                 first = false
-            } else if !any_marker {
-                evrefs.append(.reply(ref))
-            }
-        }
-    }
-
-    if let root_id {
-        if evrefs.count == 0 {
-            return [.reply_to_root(root_id)]
-        } else {
-            evrefs.insert(.thread_id(root_id), at: 0)
-        }
-    }
-
-    return evrefs
-}
-
-func interp_event_refs_with_mentions_ndb(tags: TagsSequence, mention_indices: Set<Int>) -> [EventRef] {
-    var mentions: [EventRef] = []
-    var ev_refs: [NoteRef] = []
-    var i: Int = 0
-
-    for tag in tags {
-        if let note_id = NoteRef.from_tag(tag: tag) {
-            if mention_indices.contains(i) {
-                mentions.append(.mention(.noteref(note_id, index: i)))
             } else {
-                ev_refs.append(note_id)
+                reply_id = ref
             }
         }
-        i += 1
     }
-    
-    var replies = interp_event_refs_without_mentions(ev_refs)
-    replies.append(contentsOf: mentions)
-    return replies
+
+    // If either reply or root_id is blank while the other is not, then this is
+    // considered reply-to-root. We should always have a root and reply tag, if they
+    // are equal this is reply-to-root
+    if reply_id == nil && root_id != nil {
+        reply_id = root_id
+    } else if root_id == nil && reply_id != nil {
+        root_id = reply_id
+    }
+
+    guard let reply_id, let root_id else {
+        return nil
+    }
+
+    return ThreadReply(root: root_id, reply: reply_id, mention: mention.map { m in .noteref(m) })
 }

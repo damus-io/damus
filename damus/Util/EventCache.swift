@@ -169,7 +169,7 @@ class EventCache {
         var ev = event
         
         while true {
-            guard let direct_reply = ev.direct_replies(keypair),
+            guard let direct_reply = ev.direct_replies(),
                   let next_ev = lookup(direct_reply), next_ev != ev
             else {
                 break
@@ -183,7 +183,7 @@ class EventCache {
     }
     
     func add_replies(ev: NostrEvent, keypair: Keypair) {
-        if let reply = ev.direct_replies(keypair) {
+        if let reply = ev.direct_replies() {
             replies.add(id: reply, reply_id: ev.id)
         }
     }

@@ -340,8 +340,8 @@ extension NdbNote {
         References<RefId>(tags: self.tags)
     }
 
-    func thread_reply(_ keypair: Keypair) -> ThreadReply? {
-        ThreadReply(event_refs: interpret_event_refs_ndb(blocks: self.blocks(keypair).blocks, tags: self.tags))
+    func thread_reply() -> ThreadReply? {
+        ThreadReply(tags: self.tags)
     }
 
     func get_content(_ keypair: Keypair) -> String {
@@ -387,13 +387,13 @@ extension NdbNote {
         return dec
     }
 
-    public func direct_replies(_ keypair: Keypair) -> NoteId? {
-        return thread_reply(keypair)?.reply?.note_id
+    public func direct_replies() -> NoteId? {
+        return thread_reply()?.reply.note_id
     }
 
     // NDBTODO: just use Id
-    public func thread_id(keypair: Keypair) -> NoteId {
-        guard let root = self.thread_reply(keypair)?.root else {
+    public func thread_id() -> NoteId {
+        guard let root = self.thread_reply()?.root else {
             return self.id
         }
 
@@ -421,8 +421,8 @@ extension NdbNote {
     }
      */
 
-    func is_reply(_ keypair: Keypair) -> Bool {
-        return thread_reply(keypair)?.reply != nil
+    func is_reply() -> Bool {
+        return thread_reply() != nil
     }
 
     func note_language(_ keypair: Keypair) -> String? {

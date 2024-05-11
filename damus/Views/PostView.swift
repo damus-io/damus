@@ -616,7 +616,7 @@ private func isAlphanumeric(_ char: Character) -> Bool {
 }
 
 func nip10_reply_tags(replying_to: NostrEvent, keypair: Keypair) -> [[String]] {
-    guard let nip10 = replying_to.thread_reply(keypair) else {
+    guard let nip10 = replying_to.thread_reply() else {
         // we're replying to a post that isn't in a thread,
         // just add a single reply-to-root tag
         return [["e", replying_to.id.hex(), "", "root"]]
@@ -628,14 +628,6 @@ func nip10_reply_tags(replying_to: NostrEvent, keypair: Keypair) -> [[String]] {
         ["e", nip10.root.note_id.hex(), nip10.root.relay ?? "", "root"],
         ["e", replying_to.id.hex(), "", "reply"]
     ]
-
-    // we also add the parent's nip10 reply tag as an additional e tag for context
-    /* this is incorrect for deprecated nip 10, let's just not add it for now
-    if let reply = nip10.reply {
-        tags.append(["e", reply.note_id.hex(), reply.relay ?? ""])
-    }
-     */
-
 
     return tags
 }

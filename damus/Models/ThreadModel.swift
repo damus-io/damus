@@ -60,7 +60,7 @@ class ThreadModel: ObservableObject {
         var event_filter = NostrFilter()
         var ref_events = NostrFilter()
 
-        let thread_id = event.thread_id(keypair: .empty)
+        let thread_id = event.thread_id()
 
         ref_events.referenced_ids = [thread_id, event.id]
         ref_events.kinds = [.text]

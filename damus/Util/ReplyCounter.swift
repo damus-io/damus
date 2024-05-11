@@ -39,7 +39,7 @@ class ReplyCounter {
         
         counted.insert(event.id)
         
-        if let reply = event.direct_replies(keypair) {
+        if let reply = event.direct_replies() {
             if event.pubkey == our_pubkey {
                 self.our_replies[reply] = event
             }

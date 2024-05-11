@@ -15,7 +15,7 @@ struct ReplyPart: View {
 
     var body: some View {
         Group {
-            if let reply_ref = event.thread_reply(keypair)?.reply {
+            if let reply_ref = event.thread_reply()?.reply {
                 ReplyDescription(event: event, replying_to: events.lookup(reply_ref.note_id), ndb: ndb)
             } else {
                 EmptyView()
