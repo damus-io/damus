@@ -42,6 +42,10 @@ enum HomeResubFilter {
 }
 
 class HomeModel: ContactsDelegate {
+    // The maximum amount of contacts placed on a home feed subscription filter.
+    // If the user has more contacts, chunking or other techniques will be used to avoid sending huge filters
+    let MAX_CONTACTS_ON_FILTER = 500
+    
     // Don't trigger a user notification for events older than a certain age
     static let event_max_age_for_notification: TimeInterval = EVENT_MAX_AGE_FOR_NOTIFICATION
     
@@ -545,7 +549,8 @@ class HomeModel: ContactsDelegate {
         notifications_filter.limit = 500
 
         var notifications_filters = [notifications_filter]
-        var contacts_filters = [contacts_filter, our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter]
+        let contacts_filter_chunks = contacts_filter.chunked(on: .authors, into: MAX_CONTACTS_ON_FILTER)
+        var contacts_filters = contacts_filter_chunks + [our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter]
         var dms_filters = [dms_filter, our_dms_filter]
         let last_of_kind = get_last_of_kind(relay_id: relay_id)
 
@@ -598,7 +603,7 @@ class HomeModel: ContactsDelegate {
         home_filter.authors = friends
         home_filter.limit = 500
 
-        var home_filters = [home_filter]
+        var home_filters = home_filter.chunked(on: .authors, into: MAX_CONTACTS_ON_FILTER)
 
         let followed_hashtags = Array(damus_state.contacts.get_followed_hashtags())
         if followed_hashtags.count != 0 {
