@@ -112,7 +112,7 @@ class DamusState: HeadlessDamusState {
             likes: EventCounter(our_pubkey: empty_pub),
             boosts: EventCounter(our_pubkey: empty_pub),
             contacts: Contacts(our_pubkey: empty_pub),
-            mutelist_manager: MutelistManager(user_keypair: kp),
+            mutelist_manager: MutelistManager(user_keypair: kp, ndb: .empty),
             profiles: Profiles(ndb: .empty),
             dms: DirectMessagesModel(our_pubkey: empty_pub),
             previews: PreviewCache(),

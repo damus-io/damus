@@ -9,6 +9,7 @@ import Foundation
 
 class MutelistManager {
     let user_keypair: Keypair
+    let ndb: Ndb
     private(set) var event: NostrEvent? = nil
 
     var users: Set<MuteItem> = [] {
@@ -26,8 +27,9 @@ class MutelistManager {
     
     var muted_notes_cache: [NoteId: EventMuteStatus] = [:]
     
-    init(user_keypair: Keypair) {
+    init(user_keypair: Keypair, ndb: Ndb) {
         self.user_keypair = user_keypair
+        self.ndb = ndb
     }
 
     func refresh_sets() {

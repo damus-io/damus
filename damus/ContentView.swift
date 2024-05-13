@@ -699,7 +699,7 @@ struct ContentView: View {
                                       likes: EventCounter(our_pubkey: pubkey),
                                       boosts: EventCounter(our_pubkey: pubkey),
                                       contacts: Contacts(our_pubkey: pubkey),
-                                      mutelist_manager: MutelistManager(user_keypair: keypair),
+                                      mutelist_manager: MutelistManager(user_keypair: keypair, ndb: ndb),
                                       profiles: Profiles(ndb: ndb),
                                       dms: home.dms,
                                       previews: PreviewCache(),

@@ -28,7 +28,7 @@ struct NotificationExtensionState: HeadlessDamusState {
         self.settings = UserSettingsStore()
         
         self.contacts = Contacts(our_pubkey: keypair.pubkey)
-        self.mutelist_manager = MutelistManager(user_keypair: keypair)
+        self.mutelist_manager = MutelistManager(user_keypair: keypair, ndb: self.ndb)
         self.keypair = keypair
         self.profiles = Profiles(ndb: ndb)
         self.zaps = Zaps(our_pubkey: keypair.pubkey)
