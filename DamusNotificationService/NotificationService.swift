@@ -53,7 +53,7 @@ class NotificationService: UNNotificationServiceExtension {
             return
         }
         
-        guard should_display_notification(state: state, event: nostr_event) else {
+        guard should_display_notification(state: state, event: nostr_event, mode: .push) else {
             // We should not display notification for this event. Suppress notification.
             // contentHandler(UNNotificationContent())
             // TODO: We cannot really suppress until we have the notification supression entitlement. Show the raw notification

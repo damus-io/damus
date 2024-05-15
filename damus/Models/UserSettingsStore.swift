@@ -155,6 +155,9 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "like_notification", default_value: true)
     var like_notification: Bool
     
+    @StringSetting(key: "notifications_mode", default_value: .local)
+    var notifications_mode: NotificationsMode
+    
     @Setting(key: "notification_only_from_following", default_value: false)
     var notification_only_from_following: Bool
     
@@ -325,6 +328,36 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "latest_contact_event_id", default_value: nil)
     var latest_contact_event_id_hex: String?
+    
+    
+    // MARK: Helper types
+    
+    enum NotificationsMode: String, CaseIterable, Identifiable, StringCodable, Equatable {
+        var id: String { self.rawValue }
+
+        func to_string() -> String {
+            return rawValue
+        }
+        
+        init?(from string: String) {
+            guard let notifications_mode = NotificationsMode(rawValue: string) else {
+                return nil
+            }
+            self = notifications_mode
+        }
+        
+        func text_description() -> String {
+            switch self {
+                case .local:
+                    NSLocalizedString("Local", comment: "Option for notification mode setting: Local notification mode")
+                case .push:
+                    NSLocalizedString("Push", comment: "Option for notification mode setting: Push notification mode")
+            }
+        }
+        
+        case local
+        case push
+    }
     
 }
 

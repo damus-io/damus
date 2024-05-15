@@ -733,7 +733,7 @@ class HomeModel: ContactsDelegate {
     func got_new_dm(notifs: NewEventsBits, ev: NostrEvent) {
         notification_status.new_events = notifs
         
-        guard should_display_notification(state: damus_state, event: ev),
+        guard should_display_notification(state: damus_state, event: ev, mode: .local),
               let notification_object = generate_local_notification_object(from: ev, state: damus_state)
         else {
             return

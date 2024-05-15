@@ -73,7 +73,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         // Return if this feature is disabled
         guard let settings = self.settings else { return }
-        if !settings.enable_experimental_push_notifications {
+        if !settings.enable_experimental_push_notifications || settings.notifications_mode == .local {
             return
         }
         
