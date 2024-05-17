@@ -308,7 +308,7 @@ struct ContentView: View {
                 active_sheet = .onboardingSuggestions
                 hasSeenOnboardingSuggestions = true
             }
-            self.appDelegate?.settings = damus_state?.settings
+            self.appDelegate?.state = damus_state
         }
         .sheet(item: $active_sheet) { item in
             switch item {

@@ -615,6 +615,7 @@
 		D7CE1B472B0BE719002EDAD4 /* NativeObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B9462A9AD44700DC3548 /* NativeObject.swift */; };
 		D7CE1B482B0BE719002EDAD4 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B93D2A9AD44700DC3548 /* Message.swift */; };
 		D7CE1B492B0BE729002EDAD4 /* DisplayName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9BB83029C0ED4F00FC4E37 /* DisplayName.swift */; };
+		D7D2A3812BF815D000E4B42B /* PushNotificationClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D2A3802BF815D000E4B42B /* PushNotificationClient.swift */; };
 		D7DBD41F2B02F15E002A6197 /* NostrKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFD32819DE8F00B3DE84 /* NostrKind.swift */; };
 		D7DEEF2F2A8C021E00E0C99F /* NostrEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */; };
 		D7EDED152B11776B0018B19C /* LibreTranslateServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE45AF5297BB2E700C1D842 /* LibreTranslateServer.swift */; };
@@ -1437,6 +1438,7 @@
 		D7CB5D5E2B11770C00AD4105 /* FollowState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowState.swift; sourceTree = "<group>"; };
 		D7CBD1D32B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleNotificationManagement.swift; sourceTree = "<group>"; };
 		D7CBD1D52B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleImpendingExpirationTests.swift; sourceTree = "<group>"; };
+		D7D2A3802BF815D000E4B42B /* PushNotificationClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationClient.swift; sourceTree = "<group>"; };
 		D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrEventTests.swift; sourceTree = "<group>"; };
 		D7EDED1B2B1178FE0018B19C /* NoteContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteContent.swift; sourceTree = "<group>"; };
 		D7EDED1D2B11797D0018B19C /* LongformEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongformEvent.swift; sourceTree = "<group>"; };
@@ -1663,6 +1665,7 @@
 				D74AAFC12B153395006CF0F4 /* HeadlessDamusState.swift */,
 				B5C60C1F2B530D5100C5ECA7 /* MuteItem.swift */,
 				B533694D2B66D791008A805E /* MutelistManager.swift */,
+				D7D2A3802BF815D000E4B42B /* PushNotificationClient.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -3291,6 +3294,7 @@
 				5CF2DCCC2AA3AF0B00984B8D /* RelayPicView.swift in Sources */,
 				4C687C242A5FA86D0092C550 /* SearchHeaderView.swift in Sources */,
 				64FBD06F296255C400D9D3B2 /* Theme.swift in Sources */,
+				D7D2A3812BF815D000E4B42B /* PushNotificationClient.swift in Sources */,
 				4C1A9A2329DDDB8100516EAC /* IconLabel.swift in Sources */,
 				4CA352AC2A76C07F003BB08B /* NewUnmutesNotify.swift in Sources */,
 				4C3EA64928FF597700C48A62 /* bech32.c in Sources */,
