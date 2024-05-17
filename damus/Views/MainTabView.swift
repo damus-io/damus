@@ -83,6 +83,10 @@ struct TabBar: View {
                 TabButton(timeline: .search, img: "magnifyingglass.circle", selected: $selected, new_events: $new_events, isSidebarVisible: $isSidebarVisible, action: action).keyboardShortcut("3")
                 TabButton(timeline: .notifications, img: "bell", selected: $selected, new_events: $new_events, isSidebarVisible: $isSidebarVisible, action: action).keyboardShortcut("4")
             }
+            .accessibilityLabel(NSLocalizedString("home", comment: "Accessibility label for home button"))
+            .accessibilityLabel(NSLocalizedString("dms", comment: "Accessibility label for dms button"))
+            .accessibilityLabel(NSLocalizedString("search", comment: "Accessibility label for search button"))
+            .accessibilityLabel(NSLocalizedString("notifications", comment: "Accessibility label for notifications button"))
         }
     }
 }
