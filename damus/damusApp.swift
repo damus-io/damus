@@ -54,14 +54,12 @@ struct MainView: View {
         .onAppear {
             orientationTracker.setDeviceMajorAxis()
             keypair = get_saved_keypair()
-            appDelegate.keypair = keypair
         }
     }
 }
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
-    var keypair: Keypair? = nil
-    var settings: UserSettingsStore? = nil
+    var state: DamusState? = nil
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
@@ -71,51 +69,13 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     }
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        // Return if this feature is disabled
-        guard let settings = self.settings else { return }
-        if !settings.enable_experimental_push_notifications || settings.notifications_mode == .local {
+        guard let state else {
             return
         }
         
-        // Send the device token and pubkey to the server
-        let token = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
-        
-        print("Received device token: \(token)")
-
-        guard let pubkey = keypair?.pubkey else {
-            return
+        Task {
+            try await state.push_notification_client.set_device_token(new_device_token: deviceToken)
         }
-
-        // Send those as JSON to the server
-        let json: [String: Any] = ["deviceToken": token, "pubkey": pubkey.hex()]
-
-        // create post request
-        let url = settings.send_device_token_to_localhost ? Constants.DEVICE_TOKEN_RECEIVER_TEST_URL : Constants.DEVICE_TOKEN_RECEIVER_PRODUCTION_URL
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-
-        // insert json data to the request
-        request.httpBody = try? JSONSerialization.data(withJSONObject: json, options: [])
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let data = data, error == nil else {
-                print(error?.localizedDescription ?? "No data")
-                return
-            }
-
-            if let response = response as? HTTPURLResponse, !(200...299).contains(response.statusCode) {
-                print("Unexpected status code: \(response.statusCode)")
-                return
-            }
-
-            let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
-            if let responseJSON = responseJSON as? [String: Any] {
-                print(responseJSON)
-            }
-        }
-
-        task.resume()
     }
 
     // Handle the notification in the foreground state
