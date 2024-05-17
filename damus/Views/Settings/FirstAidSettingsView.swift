@@ -72,7 +72,7 @@ struct FirstAidSettingsView: View {
             }
             
             if damus_state.contacts.event != nil {
-                Text(NSLocalizedString("We did not detect any issues that we can automatically fix for you. If you are having issues, please contact Damus support", comment: "Message indicating that no First Aid actions are available."))
+                Text("We did not detect any issues that we can automatically fix for you. If you are having issues, please contact Damus support: [support@damus.io](mailto:support@damus.io)", comment: "Message indicating that no First Aid actions are available.")
             }
         }
         .navigationTitle(NSLocalizedString("First Aid", comment: "Navigation title for first aid settings and tools"))
