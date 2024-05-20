@@ -36,12 +36,16 @@ struct NotificationSettingsView: View {
                             if newValue == .push {
                                 Task { try await damus_state.push_notification_client.send_token() }
                             }
+                            else {
+                                Task { try await damus_state.push_notification_client.revoke_token() }
+                            }
                         }
                     )
                 ) {
                     ForEach(UserSettingsStore.NotificationsMode.allCases, id: \.self) { notification_mode in
                         Text(notification_mode.text_description())
                             .tag(notification_mode.rawValue)
+                        
                     }
                 }
             }
