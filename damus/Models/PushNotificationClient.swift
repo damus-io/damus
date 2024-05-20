@@ -33,30 +33,37 @@ struct PushNotificationClient {
 
         // create post request
         let url = self.settings.send_device_token_to_localhost ? Constants.DEVICE_TOKEN_RECEIVER_TEST_URL : Constants.DEVICE_TOKEN_RECEIVER_PRODUCTION_URL
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-
-        // insert json data to the request
-        request.httpBody = try? JSONSerialization.data(withJSONObject: json, options: [])
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let data = data, error == nil else {
-                print(error?.localizedDescription ?? "No data")
-                return
-            }
-
-            if let response = response as? HTTPURLResponse, !(200...299).contains(response.statusCode) {
-                print("Unexpected status code: \(response.statusCode)")
-                return
-            }
-
-            let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
-            if let responseJSON = responseJSON as? [String: Any] {
-                print(responseJSON)
+        let json_data = try JSONSerialization.data(withJSONObject: json)
+        
+        
+        let (data, response) = try await make_nip98_authenticated_request(
+            method: .post,
+            url: url,
+            payload: json_data,
+            payload_type: .json,
+            auth_keypair: self.keypair
+        )
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            switch httpResponse.statusCode {
+                case 200:
+                    Log.info("Sent device token to Damus push notification server successfully", for: .push_notifications)
+                default:
+                    Log.error("Error in sending device_token to Damus push notification server. HTTP status code: %d; Response: %s", for: .push_notifications, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
+                    throw ClientError.http_response_error(status_code: httpResponse.statusCode, response: data)
             }
         }
+        
+        return
+    }
+    
+    
+}
 
-        task.resume()
+// MARK: Helper structures
+
+extension PushNotificationClient {
+    enum ClientError: Error {
+        case http_response_error(status_code: Int, response: Data)
     }
 }
