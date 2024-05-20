@@ -80,6 +80,10 @@ struct EventActionBar: View {
                             send_like(emoji: emoji)
                         }
                     }
+                    .accessibilityLabel(Text("Likes", comment: "Accessibility label for like button"))
+                    .accessibilityHint(Text("When like button is long pressed, it displays the multiple emojis overlay."))
+
+
 
                     Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
                         .font(.footnote.weight(.medium))
