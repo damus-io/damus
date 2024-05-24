@@ -272,6 +272,19 @@ class NdbNote: Encodable, Equatable, Hashable {
     func get_inner_event() -> NdbNote? {
         return self.inner_event
     }
+    
+    func get_inner_event(ndb: Ndb) -> NdbTxn<NdbNote>? {
+        guard self.known_kind == .boost else {
+            return nil
+        }
+
+        if let id = self.referenced_ids.first {
+            guard let note_key = ndb.lookup_note_key(id) else { return nil }
+            return ndb.lookup_note_by_key(note_key)?.collect()
+        }
+
+        return nil
+    }
 }
 
 // Extension to make NdbNote compatible with NostrEvent's original API

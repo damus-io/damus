@@ -152,8 +152,9 @@ class MutelistManager {
     /// Check if an event is muted given a collection of ``MutedItem``.
     ///
     /// - Parameter ev: The ``NostrEvent`` that you want to check the muted reason for.
+    /// - Parameter max_recursive_depth: (Optional) The maximum depth for any recursive checks. We use unowned values in computation, so low values are recommended to avoid stability issues.
     /// - Returns: The ``MuteItem`` that matched the event. Or `nil` if the event is not muted.
-    func compute_event_muted_reason(_ ev: NostrEvent) -> MuteItem? {
+    func compute_event_muted_reason(_ ev: NostrEvent, max_recursive_depth: Int = 1) -> MuteItem? {
         // Events from the current user should not be muted.
         guard self.user_keypair.pubkey != ev.pubkey else { return nil }
 
@@ -188,6 +189,12 @@ class MutelistManager {
                     }
                 }
             }
+        }
+        
+        // Check if event is a repost of a muted event
+        if max_recursive_depth > 0, let inner_event = ev.get_inner_event(ndb: self.ndb) {
+            // We are only using the note for a short period to perform a calculation, so it is likely ok to use unowned value
+            return self.compute_event_muted_reason(inner_event.unsafeUnownedValue, max_recursive_depth: max_recursive_depth - 1)
         }
 
         return nil
