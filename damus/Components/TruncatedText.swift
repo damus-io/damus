@@ -10,10 +10,12 @@ import SwiftUI
 struct TruncatedText: View {
     let text: CompatibleText
     let maxChars: Int
+    let show_show_more_button: Bool
     
-    init(text: CompatibleText, maxChars: Int = 280) {
+    init(text: CompatibleText, maxChars: Int = 280, show_show_more_button: Bool) {
         self.text = text
         self.maxChars = maxChars
+        self.show_show_more_button = show_show_more_button
     }
     
     var body: some View {
@@ -29,8 +31,10 @@ struct TruncatedText: View {
         
         if truncatedAttributedString != nil {
             Spacer()
-            Button(NSLocalizedString("Show more", comment: "Button to show entire note.")) { }
-                .allowsHitTesting(false)
+            if self.show_show_more_button {
+                Button(NSLocalizedString("Show more", comment: "Button to show entire note.")) { }
+                    .allowsHitTesting(false)
+            }
         }
     }
 }
@@ -38,10 +42,10 @@ struct TruncatedText: View {
 struct TruncatedText_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: 100) {
-            TruncatedText(text: CompatibleText(stringLiteral: "hello\nthere\none\ntwo\nthree\nfour\nfive\nsix\nseven\neight\nnine\nten\neleven"))
+            TruncatedText(text: CompatibleText(stringLiteral: "hello\nthere\none\ntwo\nthree\nfour\nfive\nsix\nseven\neight\nnine\nten\neleven"), show_show_more_button: true)
                 .frame(width: 200, height: 200)
             
-            TruncatedText(text: CompatibleText(stringLiteral: "hello\nthere\none\ntwo\nthree\nfour"))
+            TruncatedText(text: CompatibleText(stringLiteral: "hello\nthere\none\ntwo\nthree\nfour"), show_show_more_button: true)
                 .frame(width: 200, height: 200)
         }
     }

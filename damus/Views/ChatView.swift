@@ -14,6 +14,8 @@ struct ChatView: View {
 
     let damus_state: DamusState
     var thread: ThreadModel
+    let scroll_to_event: ((_ id: NoteId) -> Void)?
+    let highlight_bubble: Bool
 
     @State var expand_reply: Bool = false
 
@@ -69,67 +71,110 @@ struct ChatView: View {
     }
 
     var options: EventViewOptions {
-        if expand_reply {
-            return [.no_previews, .no_action_bar]
-        } else {
-            return [.no_previews, .no_action_bar, .truncate_content]
+        return [.no_previews, .no_action_bar, .truncate_content_very_short, .no_show_more, .no_translate, .no_media]
+    }
+    
+    var profile_picture_view: some View {
+        VStack {
+            if is_active || just_started {
+                ProfilePicView(pubkey: event.pubkey, size: 32, highlight: .none, profiles: damus_state.profiles, disable_animation: disable_animation)
+                    .onTapGesture {
+                        show_profile_action_sheet_if_enabled(damus_state: damus_state, pubkey: event.pubkey)
+                    }
+            }
         }
+        .frame(maxWidth: 32)
+    }
+    
+    var by_other_user: Bool {
+        return event.pubkey != damus_state.pubkey
+    }
+    
+    var event_bubble: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                if by_other_user {
+                    HStack {
+                        ProfileName(pubkey: event.pubkey, damus: damus_state)
+                            .foregroundColor(id_to_color(event.pubkey))
+                            .onTapGesture {
+                                show_profile_action_sheet_if_enabled(damus_state: damus_state, pubkey: event.pubkey)
+                            }
+                        Text(verbatim: "\(format_relative_time(event.created_at))")
+                            .foregroundColor(.gray)
+                    }
+                }
+
+                if let replying_to = event.direct_replies(damus_state.keypair).first,
+                   let prev = self.prev_ev,
+                   replying_to != prev.id
+                {
+                    ReplyQuoteView(keypair: damus_state.keypair, quoter: event, event_id: replying_to, state: damus_state, thread: thread, options: options)
+                        .onTapGesture {
+                            self.scroll_to_event?(replying_to)
+                        }
+                        .foregroundColor(by_other_user ? nil : Color.white.opacity(0.9))
+                }
+                
+                HStack {
+                    let blur_images = should_blur_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
+                    NoteContentView(damus_state: damus_state, event: event, blur_images: blur_images, size: .normal, options: [])
+                    Spacer()
+                }
+            }
+        }
+        .padding(14)
+        .background(by_other_user ? Color.secondary.opacity(0.1) : Color.accentColor)
+        .foregroundColor(by_other_user ? nil : Color.white)
+        .cornerRadius(16)
+        .padding(4)
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(.accent, lineWidth: 4)
+                .opacity(highlight_bubble ? 1 : 0)
+        )
+    }
+    
+    var action_bar: some View {
+        let bar = make_actionbar_model(ev: event.id, damus: damus_state)
+        return HStack {
+            if by_other_user {
+                Spacer()
+            }
+            EventActionBar(damus_state: damus_state, event: event, bar: bar, spread: false)
+                .padding(10)
+                .background(.ultraThinMaterial)
+                .cornerRadius(100)
+                .shadow(color: Color.black.opacity(0.1),radius: 5, y: 5)
+            if !by_other_user {
+                Spacer()
+            }
+        }
+        .padding(.top, -20)
     }
 
     var body: some View {
-        HStack {
-            VStack {
-                if is_active || just_started {
-                    ProfilePicView(pubkey: event.pubkey, size: 32, highlight: is_active ? .main : .none, profiles: damus_state.profiles, disable_animation: disable_animation)
+        VStack {
+            HStack(alignment: .bottom, spacing: 4) {
+                if by_other_user {
+                    self.profile_picture_view
                 }
-
-                Spacer()
-            }
-            .frame(maxWidth: 32)
-
-            Group {
-                VStack(alignment: .leading) {
-                    HStack {
-                        ProfileName(pubkey: event.pubkey, damus: damus_state)
-                            .foregroundColor(colorScheme == .dark ?  id_to_color(event.pubkey) : Color.black)
-                            //.shadow(color: Color.black, radius: 2)
-                        Text(verbatim: "\(format_relative_time(event.created_at))")
-                                .foregroundColor(.gray)
+                
+                self.event_bubble
+                    .contextMenu{
+                        MenuItems(damus_state: damus_state, event: self.event, target_pubkey: event.pubkey, profileModel: ProfileModel(pubkey: event.pubkey, damus: damus_state))
                     }
-
-                    if let replying_to = event.direct_replies(damus_state.keypair).first,
-                       let prev = self.prev_ev,
-                       replying_to != prev.id
-                    {
-                        //if !is_reply_to_prev(ref_id) {
-                        ReplyQuoteView(keypair: damus_state.keypair, quoter: event, event_id: replying_to, state: damus_state, thread: thread, options: options)
-                            .onTapGesture {
-                                expand_reply = !expand_reply
-                            }
-                    }
-
-                    let blur_images = should_blur_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
-                    NoteContentView(damus_state: damus_state, event: event, blur_images: blur_images, size: .normal, options: [])
-
-                    if is_active || next_ev == nil || next_ev!.pubkey != event.pubkey {
-                        let bar = make_actionbar_model(ev: event.id, damus: damus_state)
-                        EventActionBar(damus_state: damus_state, event: event, bar: bar)
-                    }
-
-                    //Spacer()
+                
+                if !by_other_user {
+                    self.profile_picture_view
                 }
-                .padding(6)
             }
-            .background(Color.secondary.opacity(0.1))
-            .cornerRadius(8.0)
-
-            //.border(Color.red)
+            .contentShape(Rectangle())
+            .id(event.id)
+            .padding([.bottom], 6)
+            
+            self.action_bar
         }
-        .contentShape(Rectangle())
-        .id(event.id)
-        //.frame(minHeight: just_started ? PFP_SIZE : 0)
-        .padding([.bottom], 6)
-        //.border(Color.green)
 
     }
 }
@@ -139,16 +184,6 @@ extension Notification.Name {
         return Notification.Name("convert_to_thread")
     }
 }
-
-
-/*
-struct ChatView_Previews: PreviewProvider {
-    static var previews: some View {
-        ChatView()
-    }
-}
-
-*/
 
 
 func prev_reply_is_same(event: NostrEvent, prev_ev: NostrEvent?, replies: ReplyMap) -> NoteId? {
@@ -174,4 +209,16 @@ func id_to_color(_ pubkey: Pubkey) -> Color {
         opacity: 1
     )
 
+}
+
+#Preview {
+    ChatView(event: test_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, highlight_bubble: false, expand_reply: false)
+}
+
+#Preview {
+    ChatView(event: test_short_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, highlight_bubble: false, expand_reply: false)
+}
+
+#Preview {
+    ChatView(event: test_short_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, highlight_bubble: true, expand_reply: false)
 }

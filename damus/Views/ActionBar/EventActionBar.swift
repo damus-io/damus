@@ -14,6 +14,7 @@ struct EventActionBar: View {
     let event: NostrEvent
     let generator = UIImpactFeedbackGenerator(style: .medium)
     let userProfile : ProfileModel
+    let spread: Bool
     
     // just used for previews
     @State var show_share_sheet: Bool = false
@@ -22,11 +23,12 @@ struct EventActionBar: View {
 
     @ObservedObject var bar: ActionBarModel
     
-    init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel? = nil) {
+    init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel? = nil, spread: Bool = true) {
         self.damus_state = damus_state
         self.event = event
         _bar = ObservedObject(wrappedValue: bar ?? make_actionbar_model(ev: event.id, damus: damus_state))
         self.userProfile = ProfileModel(pubkey: event.pubkey, damus: damus_state)
+        self.spread = spread
     }
     
     var lnurl: String? {
@@ -43,8 +45,17 @@ struct EventActionBar: View {
         return true
     }
     
+    var space_if_spread: AnyView {
+        if spread {
+            return AnyView(Spacer())
+        }
+        else {
+            return AnyView(EmptyView())
+        }
+    }
+    
     var body: some View {
-        HStack {
+        HStack(spacing: spread ? 0 : 10) {
             if damus_state.keypair.privkey != nil {
                 HStack(spacing: 4) {
                     EventActionButton(img: "bubble2", col: bar.replied ? DamusColors.purple : Color.gray) {
@@ -56,7 +67,9 @@ struct EventActionBar: View {
                         .foregroundColor(bar.replied ? DamusColors.purple : Color.gray)
                 }
             }
-            Spacer()
+            
+            self.space_if_spread
+            
             HStack(spacing: 4) {
                 
                 EventActionButton(img: "repost", col: bar.boosted ? Color.green : nil) {
@@ -69,7 +82,7 @@ struct EventActionBar: View {
             }
 
             if show_like {
-                Spacer()
+                self.space_if_spread
 
                 HStack(spacing: 4) {
                     LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil) { emoji in
@@ -87,11 +100,11 @@ struct EventActionBar: View {
             }
 
             if let lnurl = self.lnurl {
-                Spacer()
+                self.space_if_spread
                 NoteZapButton(damus_state: damus_state, target: ZapTarget.note(id: event.id, author: event.pubkey), lnurl: lnurl, zaps: self.damus_state.events.get_cache_data(self.event.id).zaps_model)
             }
 
-            Spacer()
+            self.space_if_spread
             EventActionButton(img: "upload", col: Color.gray) {
                 show_share_action = true
             }
@@ -400,6 +413,8 @@ struct EventActionBar_Previews: PreviewProvider {
             EventActionBar(damus_state: ds, event: ev, bar: extra_max_bar)
 
             EventActionBar(damus_state: ds, event: ev, bar: mega_max_bar)
+            
+            EventActionBar(damus_state: ds, event: ev, bar: bar, spread: false)
         }
         .padding(20)
     }

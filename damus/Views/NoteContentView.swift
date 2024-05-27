@@ -78,11 +78,11 @@ struct NoteContentView: View {
     func truncatedText(content: CompatibleText) -> some View {
         Group {
             if truncate_very_short {
-                TruncatedText(text: content, maxChars: 140)
+                TruncatedText(text: content, maxChars: 140, show_show_more_button: !options.contains(.no_show_more))
                     .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
             }
             else if truncate {
-                TruncatedText(text: content)
+                TruncatedText(text: content, show_show_more_button: !options.contains(.no_show_more))
                     .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
             } else {
                 content.text
@@ -401,6 +401,14 @@ struct NoteContentView_Previews: PreviewProvider {
                     .border(Color.red)
             }
             .previewDisplayName("Long-form note")
+            
+            VStack {
+                NoteContentView(damus_state: state, event: test_note, blur_images: false, size: .small, options: [.no_previews, .no_action_bar, .truncate_content_very_short, .no_show_more])
+                    .font(.callout)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            }
+            .previewDisplayName("Small single-line note")
         }
     }
 }
