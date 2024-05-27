@@ -132,10 +132,10 @@ struct NoteContentView: View {
         VStack(alignment: .leading) {
             if size == .selected {
                 if with_padding {
-                    SelectableText(attributedString: artifacts.content.attributed, size: self.size)
+                    SelectableText(damus_state: damus_state, event: self.event, attributedString: artifacts.content.attributed, size: self.size)
                         .padding(.horizontal)
                 } else {
-                    SelectableText(attributedString: artifacts.content.attributed, size: self.size)
+                    SelectableText(damus_state: damus_state, event: self.event, attributedString: artifacts.content.attributed, size: self.size)
                 }
             } else {
                 if with_padding {

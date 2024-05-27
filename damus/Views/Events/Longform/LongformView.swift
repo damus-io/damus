@@ -21,10 +21,10 @@ struct LongformView: View {
     var options: EventViewOptions {
         return [.wide, .no_mentions, .no_replying_to]
     }
-    
+
     var body: some View {
         EventShell(state: state, event: event.event, options: options) {
-            SelectableText(attributedString: AttributedString(stringLiteral: event.title ?? "Untitled"), size: .title)
+            SelectableText(damus_state: state, event: event.event, attributedString: AttributedString(stringLiteral: event.title ?? "Untitled"), size: .title)
 
             NoteContentView(damus_state: state, event: event.event, blur_images: false, size: .selected, options: options)
         }
