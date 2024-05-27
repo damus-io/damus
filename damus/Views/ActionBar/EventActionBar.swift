@@ -14,6 +14,7 @@ struct EventActionBar: View {
     let event: NostrEvent
     let generator = UIImpactFeedbackGenerator(style: .medium)
     let userProfile : ProfileModel
+    let options: Options
     
     // just used for previews
     @State var show_share_sheet: Bool = false
@@ -22,11 +23,12 @@ struct EventActionBar: View {
 
     @ObservedObject var bar: ActionBarModel
     
-    init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel? = nil) {
+    init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel? = nil, options: Options = []) {
         self.damus_state = damus_state
         self.event = event
         _bar = ObservedObject(wrappedValue: bar ?? make_actionbar_model(ev: event.id, damus: damus_state))
         self.userProfile = ProfileModel(pubkey: event.pubkey, damus: damus_state)
+        self.options = options
     }
     
     var lnurl: String? {
@@ -43,60 +45,93 @@ struct EventActionBar: View {
         return true
     }
     
-    var body: some View {
-        HStack {
-            if damus_state.keypair.privkey != nil {
-                HStack(spacing: 4) {
-                    EventActionButton(img: "bubble2", col: bar.replied ? DamusColors.purple : Color.gray) {
-                        notify(.compose(.replying_to(event)))
-                    }
-                    .accessibilityLabel(NSLocalizedString("Reply", comment: "Accessibility label for reply button"))
-                    Text(verbatim: "\(bar.replies > 0 ? "\(bar.replies)" : "")")
-                        .font(.footnote.weight(.medium))
-                        .foregroundColor(bar.replied ? DamusColors.purple : Color.gray)
-                }
-            }
-            Spacer()
-            HStack(spacing: 4) {
-                
-                EventActionButton(img: "repost", col: bar.boosted ? Color.green : nil) {
-                    self.show_repost_action = true
-                }
-                .accessibilityLabel(NSLocalizedString("Reposts", comment: "Accessibility label for boosts button"))
-                Text(verbatim: "\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
-                    .font(.footnote.weight(.medium))
-                    .foregroundColor(bar.boosted ? Color.green : Color.gray)
-            }
-
-            if show_like {
-                Spacer()
-
-                HStack(spacing: 4) {
-                    LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil) { emoji in
-                        if bar.liked {
-                            //notify(.delete, bar.our_like)
-                        } else {
-                            send_like(emoji: emoji)
-                        }
-                    }
-
-                    Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
-                        .font(.footnote.weight(.medium))
-                        .nip05_colorized(gradient: bar.liked)
-                }
-            }
-
-            if let lnurl = self.lnurl {
-                Spacer()
-                NoteZapButton(damus_state: damus_state, target: ZapTarget.note(id: event.id, author: event.pubkey), lnurl: lnurl, zaps: self.damus_state.events.get_cache_data(self.event.id).zaps_model)
-            }
-
-            Spacer()
-            EventActionButton(img: "upload", col: Color.gray) {
-                show_share_action = true
-            }
-            .accessibilityLabel(NSLocalizedString("Share", comment: "Button to share a note"))
+    var space_if_spread: AnyView {
+        if options.contains(.no_spread) {
+            return AnyView(EmptyView())
         }
+        else {
+            return AnyView(Spacer())
+        }
+    }
+    
+    var content: some View {
+        let hide_items_without_activity = options.contains(.hide_items_without_activity)
+        let should_hide_chat_bubble = hide_items_without_activity && bar.replies == 0
+        let should_hide_repost = hide_items_without_activity && bar.boosts == 0
+        let should_hide_reactions = hide_items_without_activity && bar.likes == 0
+        let zap_model = self.damus_state.events.get_cache_data(self.event.id).zaps_model
+        let should_hide_zap = hide_items_without_activity && zap_model.zap_total > 0
+        let should_hide_share_button = hide_items_without_activity
+        
+        if should_hide_chat_bubble && should_hide_repost && should_hide_reactions && should_hide_zap && should_hide_share_button {
+            return AnyView(EmptyView())
+        }
+        else {
+            return AnyView(HStack(spacing: options.contains(.no_spread) ? 10 : 0) {
+                if damus_state.keypair.privkey != nil && !should_hide_chat_bubble {
+                    HStack(spacing: 4) {
+                        EventActionButton(img: "bubble2", col: bar.replied ? DamusColors.purple : Color.gray) {
+                            notify(.compose(.replying_to(event)))
+                        }
+                        .accessibilityLabel(NSLocalizedString("Reply", comment: "Accessibility label for reply button"))
+                        Text(verbatim: "\(bar.replies > 0 ? "\(bar.replies)" : "")")
+                            .font(.footnote.weight(.medium))
+                            .foregroundColor(bar.replied ? DamusColors.purple : Color.gray)
+                    }
+                }
+                
+                self.space_if_spread
+                
+                if !should_hide_repost {
+                    HStack(spacing: 4) {
+                        
+                        EventActionButton(img: "repost", col: bar.boosted ? Color.green : nil) {
+                            self.show_repost_action = true
+                        }
+                        .accessibilityLabel(NSLocalizedString("Reposts", comment: "Accessibility label for boosts button"))
+                        Text(verbatim: "\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
+                            .font(.footnote.weight(.medium))
+                            .foregroundColor(bar.boosted ? Color.green : Color.gray)
+                    }
+                }
+                
+                if show_like && !should_hide_reactions {
+                    self.space_if_spread
+                    
+                    HStack(spacing: 4) {
+                        LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil) { emoji in
+                            if bar.liked {
+                                //notify(.delete, bar.our_like)
+                            } else {
+                                send_like(emoji: emoji)
+                            }
+                        }
+                        
+                        Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
+                            .font(.footnote.weight(.medium))
+                            .nip05_colorized(gradient: bar.liked)
+                    }
+                }
+                
+                
+                if let lnurl = self.lnurl, !should_hide_zap {
+                    self.space_if_spread
+                    NoteZapButton(damus_state: damus_state, target: ZapTarget.note(id: event.id, author: event.pubkey), lnurl: lnurl, zaps: zap_model)
+                }
+                
+                if !should_hide_share_button {
+                    self.space_if_spread
+                    EventActionButton(img: "upload", col: Color.gray) {
+                        show_share_action = true
+                    }
+                    .accessibilityLabel(NSLocalizedString("Share", comment: "Button to share a note"))
+                }
+            })
+        }
+    }
+    
+    var body: some View {
+        self.content
         .onAppear {
             self.bar.update(damus: damus_state, evid: self.event.id)
         }
@@ -148,6 +183,15 @@ struct EventActionBar: View {
         generator.impactOccurred()
         
         damus_state.postbox.send(like_ev)
+    }
+    
+    // MARK: Helper structures
+    
+    struct Options: OptionSet {
+        let rawValue: UInt32
+        
+        static let no_spread = Options(rawValue: 1 << 0)
+        static let hide_items_without_activity = Options(rawValue: 1 << 1)
     }
 }
 
@@ -375,7 +419,6 @@ struct LikeButton: View {
     }
 }
 
-
 struct EventActionBar_Previews: PreviewProvider {
     static var previews: some View {
         let ds = test_damus_state
@@ -400,6 +443,8 @@ struct EventActionBar_Previews: PreviewProvider {
             EventActionBar(damus_state: ds, event: ev, bar: extra_max_bar)
 
             EventActionBar(damus_state: ds, event: ev, bar: mega_max_bar)
+            
+            EventActionBar(damus_state: ds, event: ev, bar: bar, options: [.no_spread])
         }
         .padding(20)
     }

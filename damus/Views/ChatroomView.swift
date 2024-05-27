@@ -12,37 +12,45 @@ struct ChatroomView: View {
     @State var once: Bool = false
     let damus: DamusState
     @ObservedObject var thread: ThreadModel
+    @State var selected_note_id: NoteId? = nil
+    
+    func go_to_event(scroller: ScrollViewProxy, note_id: NoteId) {
+        scroll_to_event(scroller: scroller, id: note_id, delay: 0, animate: true)
+        selected_note_id = note_id
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+            withAnimation {
+                selected_note_id = nil
+            }
+        })
+    }
 
     var body: some View {
         ScrollViewReader { scroller in
             ScrollView(.vertical) {
-                LazyVStack(alignment: .leading) {
+                LazyVStack(alignment: .leading, spacing: 20) {
                     let events = thread.events()
                     let count = events.count
                     ForEach(Array(zip(events, events.indices)), id: \.0.id) { (ev, ind) in
-                        ChatView(event: events[ind],
-                                 prev_ev: ind > 0 ? events[ind-1] : nil,
-                                 next_ev: ind == count-1 ? nil : events[ind+1],
-                                 damus_state: damus,
-                                 thread: thread
-                        )
-                        /*
-                        .contextMenu{MenuItems(event: ev, keypair: damus.keypair, target_pubkey: ev.pubkey, profileModel: ProfileModel(pubkey: ev.pubkey, damus: damus))}
-                         */
-                        .onTapGesture {
-                            if thread.event.id == ev.id {
-                                //dismiss()
-                                toggle_thread_view()
-                            } else {
-                                //thread.set_active_event(ev, privkey: damus.keypair.privkey)
-                            }
+                        if(thread.original_event.id == ev.id) {
+                            SelectedEventView(damus: damus, event: ev, size: .selected)
+                        }
+                        else {
+                            ChatView(event: events[ind],
+                                     prev_ev: ind > 0 ? events[ind-1] : nil,
+                                     next_ev: ind == count-1 ? nil : events[ind+1],
+                                     damus_state: damus,
+                                     thread: thread,
+                                     scroll_to_event: { note_id in
+                                self.go_to_event(scroller: scroller, note_id: note_id)
+                            },
+                                     highlight_bubble: selected_note_id == ev.id
+                            )
+                            .padding(.horizontal)
+                            
                         }
                     }
-
                 }
-                .padding(.horizontal)
                 .padding(.top)
-
                 EndBlock()
             }
             /*
