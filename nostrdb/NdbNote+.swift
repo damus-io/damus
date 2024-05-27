@@ -14,7 +14,7 @@ extension NdbNote {
     }
 
     func get_cached_inner_event(cache: EventCache) -> NdbNote? {
-        guard self.known_kind == .boost else {
+        guard self.known_kind == .boost || self.known_kind == .highlight else {
             return nil
         }
 

@@ -16,7 +16,15 @@ struct ReplyPart: View {
     var body: some View {
         Group {
             if let reply_ref = event.thread_reply()?.reply {
-                ReplyDescription(event: event, replying_to: events.lookup(reply_ref.note_id), ndb: ndb)
+                let replying_to = events.lookup(reply_ref.note_id)
+                if event.known_kind != .highlight {
+                    ReplyDescription(event: event, replying_to: replying_to, ndb: ndb)
+                } else if event.known_kind == .highlight {
+                    HighlightDescription(event: event, highlighted_event: replying_to, ndb: ndb)
+                }
+                else {
+                    EmptyView()
+                }
             } else {
                 EmptyView()
             }

@@ -28,6 +28,7 @@ class DamusColors {
     static let green = Color("DamusGreen")
     static let purple = Color("DamusPurple")
     static let deepPurple = Color("DamusDeepPurple")
+    static let highlight = Color("DamusHighlight")
     static let blue = Color("DamusBlue")
     static let bitcoin = Color("Bitcoin")
     static let success = Color("DamusSuccessPrimary")

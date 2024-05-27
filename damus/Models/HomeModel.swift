@@ -184,7 +184,7 @@ class HomeModel: ContactsDelegate {
         }
 
         switch kind {
-        case .chat, .longform, .text:
+        case .chat, .longform, .text, .highlight:
             handle_text_event(sub_id: sub_id, ev)
         case .contacts:
             handle_contact_event(sub_id: sub_id, relay_id: relay_id, ev: ev)
@@ -586,7 +586,7 @@ class HomeModel: ContactsDelegate {
     func subscribe_to_home_filters(friends fs: [Pubkey]? = nil, relay_id: RelayURL? = nil) {
         // TODO: separate likes?
         var home_filter_kinds: [NostrKind] = [
-            .text, .longform, .boost
+            .text, .longform, .boost, .highlight
         ]
         if !damus_state.settings.onlyzaps_mode {
             home_filter_kinds.append(.like)

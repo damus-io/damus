@@ -60,11 +60,11 @@ class ProfileModel: ObservableObject, Equatable {
         damus.pool.unsubscribe(sub_id: sub_id)
         damus.pool.unsubscribe(sub_id: prof_subid)
     }
-    
+
     func subscribe() {
-        var text_filter = NostrFilter(kinds: [.text, .longform])
+        var text_filter = NostrFilter(kinds: [.text, .longform, .highlight])
         var profile_filter = NostrFilter(kinds: [.contacts, .metadata, .boost])
-        
+
         profile_filter.authors = [pubkey]
         
         text_filter.authors = [pubkey]

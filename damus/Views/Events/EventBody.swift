@@ -35,6 +35,8 @@ struct EventBody: View {
             if !options.contains(.truncate_content) {
                 note_content
             }
+        } else if event.known_kind == .highlight {
+            HighlightBodyView(state: damus_state, ev: event, options: options)
         } else {
             note_content
         }

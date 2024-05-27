@@ -41,7 +41,16 @@ struct SelectedEventView: View {
                 .lineLimit(1)
 
                 if let reply_ref = event.thread_reply()?.reply {
-                    ReplyDescription(event: event, replying_to: damus.events.lookup(reply_ref.note_id), ndb: damus.ndb)
+                    let replying_to = damus.events.lookup(reply_ref.note_id)
+                    if event.known_kind == .highlight {
+                        HighlightDescription(event: event, highlighted_event: replying_to, ndb: damus.ndb)
+                            .padding(.horizontal)
+                    } else {
+                        ReplyDescription(event: event, replying_to: replying_to, ndb: damus.ndb)
+                            .padding(.horizontal)
+                    }
+                } else if event.known_kind == .highlight {
+                    HighlightDescription(event: event, highlighted_event: nil, ndb: damus.ndb)
                         .padding(.horizontal)
                 }
 
