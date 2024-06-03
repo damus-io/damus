@@ -166,7 +166,8 @@ struct ChatView: View {
                 Spacer()
             }
         }
-        .padding(.top, -20)
+        .padding(.top, -35)
+        .padding(.horizontal, 10)
     }
 
     var body: some View {
