@@ -92,6 +92,8 @@ struct ChatView: View {
         return event.pubkey != damus_state.pubkey
     }
     
+    var is_ours: Bool { return !by_other_user }
+    
     var event_bubble: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
@@ -112,22 +114,25 @@ struct ChatView: View {
                    replying_to != prev.id
                 {
                     ReplyQuoteView(keypair: damus_state.keypair, quoter: event, event_id: replying_to, state: damus_state, thread: thread, options: options)
+                        .background(is_ours ? DamusColors.adaptablePurpleBackground2 : DamusColors.adaptableGrey2)
+                        .foregroundColor(is_ours ? Color.damusAdaptablePurpleForeground : Color.damusAdaptableBlack)
+                        .cornerRadius(5)
                         .onTapGesture {
                             self.scroll_to_event?(replying_to)
                         }
-                        .foregroundColor(by_other_user ? nil : Color.white.opacity(0.9))
                 }
                 
                 HStack {
                     let blur_images = should_blur_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
                     NoteContentView(damus_state: damus_state, event: event, blur_images: blur_images, size: .normal, options: [])
+                        .padding(2)
                     Spacer()
                 }
             }
         }
-        .padding(14)
-        .background(by_other_user ? Color.secondary.opacity(0.1) : Color.accentColor)
-        .foregroundColor(by_other_user ? nil : Color.white)
+        .padding(10)
+        .background(by_other_user ? DamusColors.adaptableGrey : DamusColors.adaptablePurpleBackground)
+        .tint(is_ours ? Color.white : Color.accentColor)
         .cornerRadius(CORNER_RADIUS)
         .contextMenu(menuItems: {
             let bar = make_actionbar_model(ev: event.id, damus: damus_state)

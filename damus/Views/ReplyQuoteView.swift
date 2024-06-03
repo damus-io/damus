@@ -29,7 +29,6 @@ struct ReplyQuoteView: View {
             }
             .padding(5)
             .padding(.leading, 5+3)
-            .background(Color.black.opacity(0.1))
             .overlay(content: {
                 HStack {
                     Rectangle()
@@ -38,7 +37,6 @@ struct ReplyQuoteView: View {
                     Spacer()
                 }
             })
-            .cornerRadius(5)
         }
     }
 
