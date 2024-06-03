@@ -66,9 +66,24 @@ struct EventActionBar: View {
     
     var repost_menu_button: some View {
         Button {
-            self.show_repost_action = true
+            guard let keypair = self.damus_state.keypair.to_full(),
+                  let boost = make_boost_event(keypair: keypair, boosted: self.event) else {
+                return
+            }
+
+            damus_state.postbox.send(boost)
         } label: {
             Label(NSLocalizedString("Repost", comment: "Menu label for boosts button"), image: "repost")
+        }
+    }
+    
+    var quote_menu_button: some View {
+        Button {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                notify(.compose(.quoting(self.event)))
+            }
+        } label: {
+            Label(NSLocalizedString("Quote", comment: "Menu label for quote button"), systemImage: "quote.opening")
         }
     }
     
@@ -156,7 +171,8 @@ struct EventActionBar: View {
         Group {
             self.reply_menu_button
             self.repost_menu_button
-            self.like_menu_button
+            self.quote_menu_button
+            // self.like_menu_button
             self.zap_menu_button
             self.share_menu_button
         }
