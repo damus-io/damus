@@ -69,6 +69,11 @@ struct ChatroomView: View {
                 once = true
             }
              */
+            .onReceive(thread.objectWillChange) {
+                if let last_event = thread.events().last, last_event.pubkey == damus.pubkey {
+                    self.go_to_event(scroller: scroller, note_id: last_event.id)
+                }
+            }
             .onAppear() {
                 thread.subscribe()
                 scroll_to_event(scroller: scroller, id: thread.event.id, delay: 0.1, animate: false)
