@@ -127,6 +127,18 @@ struct ChatView: View {
         .background(by_other_user ? Color.secondary.opacity(0.1) : Color.accentColor)
         .foregroundColor(by_other_user ? nil : Color.white)
         .cornerRadius(16)
+        .contextMenu(menuItems: {
+            let bar = make_actionbar_model(ev: event.id, damus: damus_state)
+            Group {
+                EventActionBar(damus_state: damus_state, event: self.event, bar: bar, options: [.context_menu])
+                
+                Menu {
+                    MenuItems(damus_state: damus_state, event: self.event, target_pubkey: event.pubkey, profileModel: ProfileModel(pubkey: event.pubkey, damus: damus_state))
+                } label: {
+                    Text("More", comment: "Context menu option to show more options")
+                }
+            }
+        })
         .padding(4)
         .overlay(
             RoundedRectangle(cornerRadius: 18)
@@ -163,9 +175,6 @@ struct ChatView: View {
                 }
                 
                 self.event_bubble
-                    .contextMenu{
-                        MenuItems(damus_state: damus_state, event: self.event, target_pubkey: event.pubkey, profileModel: ProfileModel(pubkey: event.pubkey, damus: damus_state))
-                    }
                 
                 if !by_other_user {
                     self.profile_picture_view

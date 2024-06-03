@@ -54,7 +54,115 @@ struct EventActionBar: View {
         }
     }
     
-    var content: some View {
+    // MARK: Context menu buttons
+    
+    var reply_menu_button: some View {
+        Button {
+            notify(.compose(.replying_to(event)))
+        } label: {
+            Label(NSLocalizedString("Reply", comment: "Menu label for reply button"), image: "bubble2")
+        }
+    }
+    
+    var repost_menu_button: some View {
+        Button {
+            self.show_repost_action = true
+        } label: {
+            Label(NSLocalizedString("Repost", comment: "Menu label for boosts button"), image: "repost")
+        }
+    }
+    
+    var like_menu_button: some View {
+        LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil) { emoji in
+            if bar.liked {
+                //notify(.delete, bar.our_like)
+            } else {
+                send_like(emoji: emoji)
+            }
+        }
+    }
+    
+    var zap_menu_button: AnyView {
+        let zap_model = self.damus_state.events.get_cache_data(self.event.id).zaps_model
+        if let lnurl = self.lnurl {
+            return AnyView(NoteZapButton(damus_state: damus_state, target: ZapTarget.note(id: event.id, author: event.pubkey), lnurl: lnurl, zaps: zap_model))
+        }
+        else {
+            return AnyView(EmptyView())
+        }
+    }
+    
+    var share_menu_button: some View {
+        Button {
+            show_share_action = true
+        } label: {
+            Label(NSLocalizedString("Share", comment: "Button to share a note"), image: "upload")
+        }
+    }
+    
+    // MARK: Bar buttons
+    
+    var reply_button: some View {
+        HStack(spacing: 4) {
+            EventActionButton(img: "bubble2", col: bar.replied ? DamusColors.purple : Color.gray) {
+                notify(.compose(.replying_to(event)))
+            }
+            .accessibilityLabel(NSLocalizedString("Reply", comment: "Accessibility label for reply button"))
+            Text(verbatim: "\(bar.replies > 0 ? "\(bar.replies)" : "")")
+                .font(.footnote.weight(.medium))
+                .foregroundColor(bar.replied ? DamusColors.purple : Color.gray)
+        }
+    }
+    
+    var repost_button: some View {
+        HStack(spacing: 4) {
+            
+            EventActionButton(img: "repost", col: bar.boosted ? Color.green : nil) {
+                self.show_repost_action = true
+            }
+            .accessibilityLabel(NSLocalizedString("Reposts", comment: "Accessibility label for boosts button"))
+            Text(verbatim: "\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
+                .font(.footnote.weight(.medium))
+                .foregroundColor(bar.boosted ? Color.green : Color.gray)
+        }
+    }
+    
+    var like_button: some View {
+        HStack(spacing: 4) {
+            LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil) { emoji in
+                if bar.liked {
+                    //notify(.delete, bar.our_like)
+                } else {
+                    send_like(emoji: emoji)
+                }
+            }
+            
+            Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
+                .font(.footnote.weight(.medium))
+                .nip05_colorized(gradient: bar.liked)
+        }
+    }
+    
+    var share_button: some View {
+        EventActionButton(img: "upload", col: Color.gray) {
+            show_share_action = true
+        }
+        .accessibilityLabel(NSLocalizedString("Share", comment: "Button to share a note"))
+    }
+    
+    // MARK: Main views
+    
+    var context_menu_content: some View {
+        Group {
+            self.reply_menu_button
+            self.repost_menu_button
+            self.like_menu_button
+            self.zap_menu_button
+            self.share_menu_button
+        }
+    }
+    
+    var action_bar_content: some View {
         let hide_items_without_activity = options.contains(.hide_items_without_activity)
         let should_hide_chat_bubble = hide_items_without_activity && bar.replies == 0
         let should_hide_repost = hide_items_without_activity && bar.boosts == 0
@@ -62,71 +170,40 @@ struct EventActionBar: View {
         let zap_model = self.damus_state.events.get_cache_data(self.event.id).zaps_model
         let should_hide_zap = hide_items_without_activity && zap_model.zap_total > 0
         let should_hide_share_button = hide_items_without_activity
-        
-        if should_hide_chat_bubble && should_hide_repost && should_hide_reactions && should_hide_zap && should_hide_share_button {
-            return AnyView(EmptyView())
+
+        return HStack(spacing: options.contains(.no_spread) ? 10 : 0) {
+            if damus_state.keypair.privkey != nil && !should_hide_chat_bubble {
+                self.reply_button
+            }
+            
+            if !should_hide_repost {
+                self.space_if_spread
+                self.repost_button
+            }
+                
+            if show_like && !should_hide_reactions {
+                self.space_if_spread
+                self.like_button
+            }
+                
+            if let lnurl = self.lnurl, !should_hide_zap {
+                self.space_if_spread
+                NoteZapButton(damus_state: damus_state, target: ZapTarget.note(id: event.id, author: event.pubkey), lnurl: lnurl, zaps: zap_model)
+            }
+            
+            if !should_hide_share_button {
+                self.space_if_spread
+                self.share_button
+            }
+        }
+    }
+    
+    var content: some View {
+        if options.contains(.context_menu) {
+            AnyView(self.context_menu_content)
         }
         else {
-            return AnyView(HStack(spacing: options.contains(.no_spread) ? 10 : 0) {
-                if damus_state.keypair.privkey != nil && !should_hide_chat_bubble {
-                    HStack(spacing: 4) {
-                        EventActionButton(img: "bubble2", col: bar.replied ? DamusColors.purple : Color.gray) {
-                            notify(.compose(.replying_to(event)))
-                        }
-                        .accessibilityLabel(NSLocalizedString("Reply", comment: "Accessibility label for reply button"))
-                        Text(verbatim: "\(bar.replies > 0 ? "\(bar.replies)" : "")")
-                            .font(.footnote.weight(.medium))
-                            .foregroundColor(bar.replied ? DamusColors.purple : Color.gray)
-                    }
-                }
-                
-                self.space_if_spread
-                
-                if !should_hide_repost {
-                    HStack(spacing: 4) {
-                        
-                        EventActionButton(img: "repost", col: bar.boosted ? Color.green : nil) {
-                            self.show_repost_action = true
-                        }
-                        .accessibilityLabel(NSLocalizedString("Reposts", comment: "Accessibility label for boosts button"))
-                        Text(verbatim: "\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
-                            .font(.footnote.weight(.medium))
-                            .foregroundColor(bar.boosted ? Color.green : Color.gray)
-                    }
-                }
-                
-                if show_like && !should_hide_reactions {
-                    self.space_if_spread
-                    
-                    HStack(spacing: 4) {
-                        LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil) { emoji in
-                            if bar.liked {
-                                //notify(.delete, bar.our_like)
-                            } else {
-                                send_like(emoji: emoji)
-                            }
-                        }
-                        
-                        Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
-                            .font(.footnote.weight(.medium))
-                            .nip05_colorized(gradient: bar.liked)
-                    }
-                }
-                
-                
-                if let lnurl = self.lnurl, !should_hide_zap {
-                    self.space_if_spread
-                    NoteZapButton(damus_state: damus_state, target: ZapTarget.note(id: event.id, author: event.pubkey), lnurl: lnurl, zaps: zap_model)
-                }
-                
-                if !should_hide_share_button {
-                    self.space_if_spread
-                    EventActionButton(img: "upload", col: Color.gray) {
-                        show_share_action = true
-                    }
-                    .accessibilityLabel(NSLocalizedString("Share", comment: "Button to share a note"))
-                }
-            })
+            AnyView(self.action_bar_content)
         }
     }
     
@@ -192,6 +269,7 @@ struct EventActionBar: View {
         
         static let no_spread = Options(rawValue: 1 << 0)
         static let hide_items_without_activity = Options(rawValue: 1 << 1)
+        static let context_menu = Options(rawValue: 1 << 2)
     }
 }
 
@@ -315,7 +393,7 @@ struct LikeButton: View {
                                     RoundedRectangle(cornerRadius: 20)
                                 )
                         )
-                        .overlay(reactions())
+                        .overlay(Reactions(emojis: self.emojis, emojiTapped: self.emojiTapped, close: closeReactions))
                 }
                 .offset(y: -40)
                 .onTapGesture {
@@ -348,37 +426,49 @@ struct LikeButton: View {
             return minimumWidth
         }
     }
-
-    func reactions() -> some View {
-        HStack {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 15) {
-                    ForEach(emojis, id: \.self) { emoji in
-                        if let index = emojis.firstIndex(of: emoji) {
-                            let scale = index < showEmojis.count ? showEmojis[index] : 0
-                            Text(emoji)
-                                .font(.system(size: 25))
-                                .scaleEffect(Double(scale))
-                                .onTapGesture {
-                                    emojiTapped(emoji)
-                                }
+    
+    func closeReactions() {
+        isReactionsVisible = false
+        showReactionsBG = 0
+        return
+    }
+    
+    struct Reactions: View {
+        let emojis: [String]
+        @State private var showEmojis: [Int] = []
+        let emojiTapped: (String) -> Void
+        let close: () -> Void
+        
+        var body: some View {
+            HStack {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 15) {
+                        ForEach(emojis, id: \.self) { emoji in
+                            if let index = emojis.firstIndex(of: emoji) {
+                                let scale = index < showEmojis.count ? showEmojis[index] : 0
+                                Text(emoji)
+                                    .font(.system(size: 25))
+                                    .scaleEffect(Double(scale))
+                                    .onTapGesture {
+                                        emojiTapped(emoji)
+                                    }
+                            }
                         }
                     }
+                    .padding(.leading, 10)
                 }
-                .padding(.leading, 10)
-            }
-            Button(action: {
-                withAnimation(.easeOut(duration: 0.2)) {
-                    isReactionsVisible = false
-                    showReactionsBG = 0
+                Button(action: {
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        self.close()
+                    }
+                    showEmojis = []
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 18))
+                        .foregroundColor(.gray)
                 }
-                showEmojis = []
-            }) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 18))
-                    .foregroundColor(.gray)
+                .padding(.trailing, 7.5)
             }
-            .padding(.trailing, 7.5)
         }
     }
 
