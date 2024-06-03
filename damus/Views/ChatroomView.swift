@@ -28,7 +28,7 @@ struct ChatroomView: View {
     var body: some View {
         ScrollViewReader { scroller in
             ScrollView(.vertical) {
-                LazyVStack(alignment: .leading, spacing: 20) {
+                LazyVStack(alignment: .leading, spacing: 10) {
                     let events = thread.events()
                     let count = events.count
                     ForEach(Array(zip(events, events.indices)), id: \.0.id) { (ev, ind) in
