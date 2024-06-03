@@ -13,6 +13,7 @@ struct ChatroomView: View {
     let damus: DamusState
     @ObservedObject var thread: ThreadModel
     @State var selected_note_id: NoteId? = nil
+    @State var user_just_posted_flag: Bool = false
     
     func go_to_event(scroller: ScrollViewProxy, note_id: NoteId) {
         scroll_to_event(scroller: scroller, id: note_id, delay: 0, animate: true)
@@ -69,9 +70,18 @@ struct ChatroomView: View {
                 once = true
             }
              */
+            .onReceive(handle_notify(.post), perform: { notify in
+                switch notify {
+                    case .post(_):
+                        user_just_posted_flag = true
+                    case .cancel:
+                        return
+                }
+            })
             .onReceive(thread.objectWillChange) {
-                if let last_event = thread.events().last, last_event.pubkey == damus.pubkey {
+                if let last_event = thread.events().last, last_event.pubkey == damus.pubkey, user_just_posted_flag {
                     self.go_to_event(scroller: scroller, note_id: last_event.id)
+                    user_just_posted_flag = false
                 }
             }
             .onAppear() {
