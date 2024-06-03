@@ -18,12 +18,15 @@ struct ReplyQuoteView: View {
     func MainContent(event: NostrEvent) -> some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading) {
-                HStack(alignment: .top) {
+                HStack(alignment: .center) {
                     ProfilePicView(pubkey: event.pubkey, size: 14, highlight: .reply, profiles: state.profiles, disable_animation: false)
                     let blur_images = should_blur_images(settings: state.settings, contacts: state.contacts, ev: event, our_pubkey: state.pubkey)
                     NoteContentView(damus_state: state, event: event, blur_images: blur_images, size: .small, options: options)
                         .font(.callout)
                         .lineLimit(1)
+                        .padding(.bottom, -7)
+                        .frame(height: 20)
+                        .clipped()
                     Spacer()
                 }
             }
