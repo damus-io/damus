@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+fileprivate let CORNER_RADIUS: CGFloat = 10
+
 struct ChatView: View {
     let event: NostrEvent
     let prev_ev: NostrEvent?
@@ -126,7 +128,7 @@ struct ChatView: View {
         .padding(14)
         .background(by_other_user ? Color.secondary.opacity(0.1) : Color.accentColor)
         .foregroundColor(by_other_user ? nil : Color.white)
-        .cornerRadius(16)
+        .cornerRadius(CORNER_RADIUS)
         .contextMenu(menuItems: {
             let bar = make_actionbar_model(ev: event.id, damus: damus_state)
             Group {
@@ -141,7 +143,7 @@ struct ChatView: View {
         })
         .padding(4)
         .overlay(
-            RoundedRectangle(cornerRadius: 18)
+            RoundedRectangle(cornerRadius: CORNER_RADIUS+2)
                 .stroke(.accent, lineWidth: 4)
                 .opacity(highlight_bubble ? 1 : 0)
         )
