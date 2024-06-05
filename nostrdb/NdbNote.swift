@@ -280,6 +280,17 @@ extension NdbNote {
         return kind == 1 || kind == 42 || kind == 30023
     }
 
+    var is_non_parameterized_replaceable: Bool {
+        switch kind {
+        case 10000..<20000, 0, 3: return true
+        default: return false
+        }
+    }
+
+    var is_parameterized_replaceable: Bool {
+        (30000..<40000).contains(kind)
+    }
+
     var is_quote_repost: NoteId? {
         guard kind == 1, let quoted_note_id = referenced_quote_ids.first else {
             return nil

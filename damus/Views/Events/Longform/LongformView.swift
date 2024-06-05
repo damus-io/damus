@@ -36,6 +36,7 @@ let test_longform_event = LongformEvent.parse(from: NostrEvent(
     keypair: test_keypair,
     kind: NostrKind.longform.rawValue,
     tags: [
+        ["d", UUID().uuidString],
         ["title", "What is WASTOIDS?"],
         ["summary", "WASTOIDS is an audio/visual feed, created by Sam Means..."],
         ["published_at", "1685638715"],

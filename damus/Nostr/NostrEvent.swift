@@ -443,16 +443,17 @@ func make_boost_event(keypair: FullKeypair, boosted: NostrEvent) -> NostrEvent? 
 }
 
 func make_like_event(keypair: FullKeypair, liked: NostrEvent, content: String = "🤙") -> NostrEvent? {
-    var tags = liked.tags.reduce(into: [[String]]()) { ts, tag in
-        guard tag.count >= 2,
-              (tag[0].matches_char("e") || tag[0].matches_char("p")) else {
-            return
-        }
-        ts.append(tag.strings())
+    var tags: [[String]] = []
+
+    if liked.is_non_parameterized_replaceable {
+        tags.append(["a", "\(liked.kind.description):\(liked.pubkey.hex()):"])
+    } else if liked.is_parameterized_replaceable, let dTag = liked.tags.first(where: { $0.count >= 2 && $0[0].matches_char("d") }) {
+        tags.append(["a", "\(liked.kind.description):\(liked.pubkey.hex()):\(dTag[1])"])
     }
 
     tags.append(["e", liked.id.hex()])
     tags.append(["p", liked.pubkey.hex()])
+    tags.append(["k", liked.kind.description])
 
     return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 7, tags: tags)
 }
