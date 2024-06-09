@@ -99,6 +99,7 @@ class DamusState: HeadlessDamusState {
 
     func close() {
         print("txn: damus close")
+        wallet.disconnect()
         pool.close()
         ndb.close()
     }
