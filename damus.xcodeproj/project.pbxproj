@@ -20,11 +20,7 @@
 		3A4325A82961E11400BFCD9D /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = 3A4325AA2961E11400BFCD9D /* Localizable.stringsdict */; };
 		3A4647CF2A413ADC00386AD8 /* CondensedProfilePicturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A4647CE2A413ADC00386AD8 /* CondensedProfilePicturesView.swift */; };
 		3A48E7B029DFBE9D006E787E /* MutedThreadsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A48E7AF29DFBE9D006E787E /* MutedThreadsManager.swift */; };
-		3A5E47C52A4A6CF400C0D090 /* Trie.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A5E47C42A4A6CF400C0D090 /* Trie.swift */; };
-		3A5E47C72A4A76C800C0D090 /* TrieTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A5E47C62A4A76C800C0D090 /* TrieTests.swift */; };
 		3A8CC6CC2A2CFEF900940F5F /* StringUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A8CC6CB2A2CFEF900940F5F /* StringUtil.swift */; };
-		3A90B1812A4EA3AF00000D94 /* UserSearchCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A90B1802A4EA3AF00000D94 /* UserSearchCache.swift */; };
-		3A90B1832A4EA3C600000D94 /* UserSearchCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A90B1822A4EA3C600000D94 /* UserSearchCacheTests.swift */; };
 		3AA247FF297E3D900090C62D /* RepostsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA247FE297E3D900090C62D /* RepostsView.swift */; };
 		3AA24802297E3DC20090C62D /* RepostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA24801297E3DC20090C62D /* RepostView.swift */; };
 		3AA59D1D2999B0400061C48E /* DraftsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA59D1C2999B0400061C48E /* DraftsModel.swift */; };
@@ -753,8 +749,6 @@
 		3A5CAE1D298DC0DB00B5334F /* zh-CN */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-CN"; path = "zh-CN.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		3A5CAE1E298DC0DB00B5334F /* zh-CN */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-CN"; path = "zh-CN.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		3A5CAE1F298DC0DB00B5334F /* zh-CN */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = "zh-CN"; path = "zh-CN.lproj/Localizable.stringsdict"; sourceTree = "<group>"; };
-		3A5E47C42A4A6CF400C0D090 /* Trie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trie.swift; sourceTree = "<group>"; };
-		3A5E47C62A4A76C800C0D090 /* TrieTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrieTests.swift; sourceTree = "<group>"; };
 		3A66D927299472FA008B44F4 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		3A66D928299472FA008B44F4 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3A66D929299472FA008B44F4 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = ja; path = ja.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
@@ -768,8 +762,6 @@
 		3A8624DA299E82BE00BD8BE9 /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = cs; path = cs.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3A8624DB299E82BE00BD8BE9 /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = cs; path = cs.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		3A8CC6CB2A2CFEF900940F5F /* StringUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringUtil.swift; sourceTree = "<group>"; };
-		3A90B1802A4EA3AF00000D94 /* UserSearchCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSearchCache.swift; sourceTree = "<group>"; };
-		3A90B1822A4EA3C600000D94 /* UserSearchCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSearchCacheTests.swift; sourceTree = "<group>"; };
 		3A929C20297F2CF80090925E /* it-IT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "it-IT"; path = "it-IT.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		3A929C21297F2CF80090925E /* it-IT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "it-IT"; path = "it-IT.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		3A929C22297F2CF80090925E /* it-IT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = "it-IT"; path = "it-IT.lproj/Localizable.stringsdict"; sourceTree = "<group>"; };
@@ -1648,8 +1640,6 @@
 				3A48E7AF29DFBE9D006E787E /* MutedThreadsManager.swift */,
 				4C7D09772A0B0CC900943473 /* WalletModel.swift */,
 				3A23838D2A297DD200E5AA2E /* ZapButtonModel.swift */,
-				3A5E47C42A4A6CF400C0D090 /* Trie.swift */,
-				3A90B1802A4EA3AF00000D94 /* UserSearchCache.swift */,
 				D723C38D2AB8D83400065664 /* ContentFilters.swift */,
 				D7315A292ACDF3B70036E30A /* DamusCacheManager.swift */,
 				D7CB5D3D2B116DAD00AD4105 /* NotificationsManager.swift */,
@@ -2559,8 +2549,6 @@
 				3A30410029AB12AA008A0F29 /* EventGroupViewTests.swift */,
 				4C8D00D329E3C5D40036AF10 /* NIP19Tests.swift */,
 				501F8C812A0224EB001AFC1D /* KeychainStorageTests.swift */,
-				3A5E47C62A4A76C800C0D090 /* TrieTests.swift */,
-				3A90B1822A4EA3C600000D94 /* UserSearchCacheTests.swift */,
 				4C4F14A62A2A61A30045A0B9 /* NostrScriptTests.swift */,
 				4C19AE542A5D977400C90DB7 /* HashtagTests.swift */,
 				3AAC7A012A60FE72002B50DF /* LocalizationUtilTests.swift */,
@@ -3184,7 +3172,6 @@
 				4C216F362870A9A700040376 /* InputDismissKeyboard.swift in Sources */,
 				D74AAFCF2B155D8C006CF0F4 /* ZapDataModel.swift in Sources */,
 				4C8D1A6F29F31E5000ACDF75 /* FriendsButton.swift in Sources */,
-				3A5E47C52A4A6CF400C0D090 /* Trie.swift in Sources */,
 				D7100C562B76F8E600C59298 /* PurpleViewPrimitives.swift in Sources */,
 				B57B4C642B312BFA00A232C0 /* RelayAuthenticationDetail.swift in Sources */,
 				D7EDED2E2B128E8A0018B19C /* CollectionExtension.swift in Sources */,
@@ -3404,7 +3391,6 @@
 				3A4647CF2A413ADC00386AD8 /* CondensedProfilePicturesView.swift in Sources */,
 				5C14C29B2BBBA29C00079FD2 /* RelaySoftwareDetail.swift in Sources */,
 				D2277EEA2A089BD5006C3807 /* Router.swift in Sources */,
-				3A90B1812A4EA3AF00000D94 /* UserSearchCache.swift in Sources */,
 				4C9D6D162B1AA9C6004E5CD9 /* DisplayTabBarNotify.swift in Sources */,
 				4CC14FF92A741939007AEB17 /* Referenced.swift in Sources */,
 				4C5C7E6A284EDE2E00A22DF5 /* SearchResultsView.swift in Sources */,
@@ -3549,7 +3535,6 @@
 			files = (
 				4C2D34412BDAF1B300F9FB44 /* NIP10Tests.swift in Sources */,
 				4C684A572A7FFAE6005E6031 /* UrlTests.swift in Sources */,
-				3A90B1832A4EA3C600000D94 /* UserSearchCacheTests.swift in Sources */,
 				4C9B0DEE2A65A75F00CBDA21 /* AttrStringTestExtensions.swift in Sources */,
 				4C19AE552A5D977400C90DB7 /* HashtagTests.swift in Sources */,
 				D72927AD2BAB515C00F93E90 /* RelayURLTests.swift in Sources */,
@@ -3579,7 +3564,6 @@
 				75AD872B2AA23A460085EF2C /* Block+Tests.swift in Sources */,
 				E0E024112B7C19C20075735D /* TranslationTests.swift in Sources */,
 				F944F56E29EA9CCC0067B3BF /* DamusParseContentTests.swift in Sources */,
-				3A5E47C72A4A76C800C0D090 /* TrieTests.swift in Sources */,
 				B501062D2B363036003874F5 /* AuthIntegrationTests.swift in Sources */,
 				4CB883AE2976FA9300DC99E7 /* FormatTests.swift in Sources */,
 				D72A2D052AD9C1B5002AFF62 /* MockDamusState.swift in Sources */,
