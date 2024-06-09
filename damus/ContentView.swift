@@ -8,6 +8,7 @@
 import SwiftUI
 import AVKit
 import MediaPlayer
+import EmojiPicker
 
 struct ZapSheet {
     let target: ZapTarget
@@ -719,7 +720,8 @@ struct ContentView: View {
                                       music: MusicController(onChange: music_changed),
                                       video: VideoController(),
                                       ndb: ndb,
-                                      quote_reposts: .init(our_pubkey: pubkey)
+                                      quote_reposts: .init(our_pubkey: pubkey),
+                                      emoji_provider: DefaultEmojiProvider(showAllVariations: true)
         )
         
         home.damus_state = self.damus_state!

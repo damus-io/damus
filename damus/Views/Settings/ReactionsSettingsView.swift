@@ -6,22 +6,20 @@
 //
 
 import SwiftUI
-import MCEmojiPicker
+import EmojiPicker
+import EmojiKit
 
 struct ReactionsSettingsView: View {
     @ObservedObject var settings: UserSettingsStore
+    let damus_state: DamusState
     @State private var isReactionsVisible: Bool = false
+
+    @State private var selectedEmoji: Emoji? = nil
 
     var body: some View {
         Form {
             Section {
                 Text(settings.default_emoji_reaction)
-                    .emojiPicker(
-                        isPresented: $isReactionsVisible,
-                        selectedEmoji: $settings.default_emoji_reaction,
-                        arrowDirection: .up,
-                        isDismissAfterChoosing: true
-                    )
                     .onTapGesture {
                         isReactionsVisible = true
                     }
@@ -31,43 +29,23 @@ struct ReactionsSettingsView: View {
         }
         .navigationTitle(NSLocalizedString("Reactions", comment: "Title of emoji reactions view"))
         .navigationBarTitleDisplayMode(.large)
+        .sheet(isPresented: $isReactionsVisible) {
+            NavigationView {
+                EmojiPickerView(selectedEmoji: $selectedEmoji, emojiProvider: damus_state.emoji_provider)
+            }
+            .presentationDetents([.medium, .large])
+        }
+        .onChange(of: selectedEmoji) { newEmoji in
+            guard let newEmoji else {
+                return
+            }
+            settings.default_emoji_reaction = newEmoji.value
+        }
     }
-}
-
-/// From: https://stackoverflow.com/a/39425959
-extension Character {
-    /// A simple emoji is one scalar and presented to the user as an Emoji
-    var isSimpleEmoji: Bool {
-        guard let firstScalar = unicodeScalars.first else { return false }
-        return firstScalar.properties.isEmoji && firstScalar.value > 0x238C
-    }
-
-    /// Checks if the scalars will be merged into an emoji
-    var isCombinedIntoEmoji: Bool { unicodeScalars.count > 1 && unicodeScalars.first?.properties.isEmoji ?? false }
-
-    var isEmoji: Bool { isSimpleEmoji || isCombinedIntoEmoji }
-}
-
-extension String {
-    var isSingleEmoji: Bool { count == 1 && containsEmoji }
-
-    var containsEmoji: Bool { contains { $0.isEmoji } }
-
-    var containsOnlyEmoji: Bool { !isEmpty && !contains { !$0.isEmoji } }
-
-    var emojiString: String { emojis.map { String($0) }.reduce("", +) }
-
-    var emojis: [Character] { filter { $0.isEmoji } }
-
-    var emojiScalars: [UnicodeScalar] { filter { $0.isEmoji }.flatMap { $0.unicodeScalars } }
-}
-
-func isValidEmoji(_ string: String) -> Bool {
-    return string.isSingleEmoji
 }
 
 struct ReactionsSettingsView_Previews: PreviewProvider {
     static var previews: some View {
-        ReactionsSettingsView(settings: UserSettingsStore())
+        ReactionsSettingsView(settings: UserSettingsStore(), damus_state: test_damus_state)
     }
 }

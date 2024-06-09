@@ -7,6 +7,7 @@
 
 import Foundation
 import LinkPresentation
+import EmojiPicker
 
 class DamusState: HeadlessDamusState {
     let pool: RelayPool
@@ -37,8 +38,9 @@ class DamusState: HeadlessDamusState {
     let ndb: Ndb
     var purple: DamusPurple
     var push_notification_client: PushNotificationClient
+    let emoji_provider: EmojiProvider
 
-    init(pool: RelayPool, keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, postbox: PostBox, bootstrap_relays: [RelayURL], replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: VideoController, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter) {
+    init(pool: RelayPool, keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, postbox: PostBox, bootstrap_relays: [RelayURL], replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: VideoController, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider) {
         self.pool = pool
         self.keypair = keypair
         self.likes = likes
@@ -70,6 +72,7 @@ class DamusState: HeadlessDamusState {
         )
         self.quote_reposts = quote_reposts
         self.push_notification_client = PushNotificationClient(keypair: keypair, settings: settings)
+        self.emoji_provider = emoji_provider
     }
 
     @discardableResult
@@ -135,7 +138,8 @@ class DamusState: HeadlessDamusState {
             music: nil,
             video: VideoController(),
             ndb: .empty,
-            quote_reposts: .init(our_pubkey: empty_pub)
+            quote_reposts: .init(our_pubkey: empty_pub),
+            emoji_provider: DefaultEmojiProvider(showAllVariations: true)
         )
     }
 }
