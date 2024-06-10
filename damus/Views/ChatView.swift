@@ -19,7 +19,10 @@ struct ChatView: View {
     let scroll_to_event: ((_ id: NoteId) -> Void)?
     let highlight_bubble: Bool
 
+    let generator = UIImpactFeedbackGenerator(style: .medium)
+    
     @State var expand_reply: Bool = false
+    @State var isPopoverPresented: Bool = false
 
     var just_started: Bool {
         return prev_ev == nil || prev_ev!.pubkey != event.pubkey
@@ -135,16 +138,7 @@ struct ChatView: View {
         .tint(is_ours ? Color.white : Color.accentColor)
         .cornerRadius(CORNER_RADIUS)
         .contextMenu(menuItems: {
-            let bar = make_actionbar_model(ev: event.id, damus: damus_state)
-            Group {
-                EventActionBar(damus_state: damus_state, event: self.event, bar: bar, options: [.context_menu])
-                
-                Menu {
-                    MenuItems(damus_state: damus_state, event: self.event, target_pubkey: event.pubkey, profileModel: ProfileModel(pubkey: event.pubkey, damus: damus_state))
-                } label: {
-                    Text("More", comment: "Context menu option to show more options")
-                }
-            }
+            MenuItems(damus_state: damus_state, event: self.event, target_pubkey: event.pubkey, profileModel: ProfileModel(pubkey: event.pubkey, damus: damus_state))
         })
         .padding(4)
         .overlay(
@@ -152,6 +146,42 @@ struct ChatView: View {
                 .stroke(.accent, lineWidth: 4)
                 .opacity(highlight_bubble ? 1 : 0)
         )
+        .onTapGesture {
+            isPopoverPresented = true
+        }
+        .popover(isPresented: $isPopoverPresented) {
+            let bar = make_actionbar_model(ev: event.id, damus: damus_state)
+            if #available(iOS 16.4, *) {
+                VStack(spacing: 25) {
+                    LikeButton.Reactions(emojis: damus_state.settings.emoji_reactions, emojiTapped: { emoji in
+                        send_like(emoji: emoji)
+                    }, close: {
+                        // Nothing
+                    }, options: [.hide_close_button])
+                    EventActionBar(damus_state: damus_state, event: event, bar: bar, options: [])
+                        .frame(minWidth: 250)
+                        .padding(.horizontal, 5)
+                        .presentationCompactAdaptation(.popover)
+                }
+                .padding()
+            } else {
+                EmptyView()
+            }
+        }
+    }
+    
+    func send_like(emoji: String) {
+        let bar = make_actionbar_model(ev: event.id, damus: damus_state)
+        guard let keypair = damus_state.keypair.to_full(),
+              let like_ev = make_like_event(keypair: keypair, liked: event, content: emoji) else {
+            return
+        }
+
+        bar.our_like = like_ev
+
+        generator.impactOccurred()
+        
+        damus_state.postbox.send(like_ev)
     }
     
     var action_bar: some View {

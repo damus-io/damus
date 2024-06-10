@@ -410,7 +410,7 @@ struct LikeButton: View {
                                     RoundedRectangle(cornerRadius: 20)
                                 )
                         )
-                        .overlay(Reactions(emojis: self.emojis, emojiTapped: self.emojiTapped, close: closeReactions))
+                        .overlay(Reactions(emojis: self.emojis, emojiTapped: self.emojiTapped, close: closeReactions, options: []))
                 }
                 .offset(y: -40)
                 .onTapGesture {
@@ -452,9 +452,20 @@ struct LikeButton: View {
     
     struct Reactions: View {
         let emojis: [String]
-        @State private var showEmojis: [Int] = []
+        var showEmojis: [Int] {
+            get {
+                emojis.map({ _ in 1 })
+            }
+        }
         let emojiTapped: (String) -> Void
         let close: () -> Void
+        var options: Options
+        
+        struct Options: OptionSet {
+            let rawValue: UInt32
+            
+            static let hide_close_button = Options(rawValue: 1 << 0)
+        }
         
         var body: some View {
             HStack {
@@ -474,17 +485,18 @@ struct LikeButton: View {
                     }
                     .padding(.leading, 10)
                 }
-                Button(action: {
-                    withAnimation(.easeOut(duration: 0.2)) {
-                        self.close()
+                if !options.contains(.hide_close_button) {
+                    Button(action: {
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            self.close()
+                        }
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 18))
+                            .foregroundColor(.gray)
                     }
-                    showEmojis = []
-                }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 18))
-                        .foregroundColor(.gray)
+                    .padding(.trailing, 7.5)
                 }
-                .padding(.trailing, 7.5)
             }
         }
     }
