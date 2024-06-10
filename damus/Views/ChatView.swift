@@ -22,7 +22,22 @@ struct ChatView: View {
     let generator = UIImpactFeedbackGenerator(style: .medium)
     
     @State var expand_reply: Bool = false
-    @State var isPopoverPresented: Bool = false
+    @State var selected_emoji: String? = nil
+    @State var popover_state: PopoverState = .closed
+    
+    enum PopoverState {
+        case closed
+        case open
+        case open_emoji_selector
+        
+        func is_open() -> Bool {
+            return self != .closed
+        }
+        
+        mutating func set_open(_ is_open: Bool) {
+            self = is_open == true ? .open : .closed
+        }
+    }
 
     var just_started: Bool {
         return prev_ev == nil || prev_ev!.pubkey != event.pubkey
@@ -147,25 +162,34 @@ struct ChatView: View {
                 .opacity(highlight_bubble ? 1 : 0)
         )
         .onTapGesture {
-            isPopoverPresented = true
+            self.popover_state = .open
         }
-        .popover(isPresented: $isPopoverPresented) {
-            let bar = make_actionbar_model(ev: event.id, damus: damus_state)
-            if #available(iOS 16.4, *) {
-                VStack(spacing: 25) {
-                    LikeButton.Reactions(emojis: damus_state.settings.emoji_reactions, emojiTapped: { emoji in
-                        send_like(emoji: emoji)
-                    }, close: {
-                        // Nothing
-                    }, options: [.hide_close_button])
-                    EventActionBar(damus_state: damus_state, event: event, bar: bar, options: [])
-                        .frame(minWidth: 250)
-                        .padding(.horizontal, 5)
-                        .presentationCompactAdaptation(.popover)
-                }
-                .padding()
-            } else {
-                EmptyView()
+        .popover(isPresented: Binding(get: { popover_state.is_open() }, set: { popover_state.set_open($0) })) {
+            switch popover_state {
+                case .closed:
+                    EmptyView()
+                case .open:
+                    let bar = make_actionbar_model(ev: event.id, damus: damus_state)
+                    if #available(iOS 16.4, *) {
+                        VStack(spacing: 25) {
+                            LikeButton.Reactions(emojis: damus_state.settings.emoji_reactions, emojiTapped: { emoji in
+                                send_like(emoji: emoji)
+                            }, close: {
+                                // Nothing
+                            }, moreButtonTapped: {
+                                self.popover_state = .open_emoji_selector
+                            }, options: [.hide_close_button, .show_more_emoji_button])
+                            EventActionBar(damus_state: damus_state, event: event, bar: bar, options: [])
+                                .frame(minWidth: 250)
+                                .padding(.horizontal, 5)
+                                .presentationCompactAdaptation(.popover)
+                        }
+                        .padding()
+                    } else {
+                        EmptyView()
+                    }
+                case .open_emoji_selector:
+                    Text("Emoji picker not integrated")
             }
         }
     }

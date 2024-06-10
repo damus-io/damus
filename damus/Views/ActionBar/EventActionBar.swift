@@ -410,7 +410,7 @@ struct LikeButton: View {
                                     RoundedRectangle(cornerRadius: 20)
                                 )
                         )
-                        .overlay(Reactions(emojis: self.emojis, emojiTapped: self.emojiTapped, close: closeReactions, options: []))
+                        .overlay(Reactions(emojis: self.emojis, emojiTapped: self.emojiTapped, close: closeReactions, moreButtonTapped: { }, options: []))
                 }
                 .offset(y: -40)
                 .onTapGesture {
@@ -459,12 +459,14 @@ struct LikeButton: View {
         }
         let emojiTapped: (String) -> Void
         let close: () -> Void
+        let moreButtonTapped: () -> Void
         var options: Options
         
         struct Options: OptionSet {
             let rawValue: UInt32
             
             static let hide_close_button = Options(rawValue: 1 << 0)
+            static let show_more_emoji_button = Options(rawValue: 1 << 1)
         }
         
         var body: some View {
@@ -481,6 +483,18 @@ struct LikeButton: View {
                                         emojiTapped(emoji)
                                     }
                             }
+                        }
+                        if options.contains(.show_more_emoji_button) {
+                            Button(action: {
+                                withAnimation(.easeOut(duration: 0.2)) {
+                                    self.moreButtonTapped()
+                                }
+                            }) {
+                                Image("menu-circle-horizontal")
+                                    .font(.system(size: 18))
+                                    .foregroundColor(.gray)
+                            }
+                            .padding(.trailing, 7.5)
                         }
                     }
                     .padding(.leading, 10)
