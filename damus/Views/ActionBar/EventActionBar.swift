@@ -88,12 +88,13 @@ struct EventActionBar: View {
     }
     
     var like_menu_button: some View {
-        LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil) { emoji in
-            if bar.liked {
-                //notify(.delete, bar.our_like)
-            } else {
-                send_like(emoji: emoji)
-            }
+        Button {
+            send_like(emoji: "🤙")
+        } label: {
+            Label(NSLocalizedString("React", comment: "Button to react to a note"), image: "shaka")
+        }
+        .onLongPressGesture {
+            print("long press")
         }
     }
     
@@ -172,7 +173,7 @@ struct EventActionBar: View {
             self.reply_menu_button
             self.repost_menu_button
             self.quote_menu_button
-            // self.like_menu_button
+            self.like_menu_button
             self.zap_menu_button
             self.share_menu_button
         }
