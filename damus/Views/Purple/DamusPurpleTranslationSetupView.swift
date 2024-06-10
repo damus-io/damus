@@ -61,7 +61,7 @@ struct DamusPurpleTranslationSetupView: View {
                 .opacity(start ? 1.0 : 0.0)
                 .animation(.content(), value: start)
             
-            Text(NSLocalizedString("You unlocked", comment: "Part 1 of 2 in message 'You unlocked automatic translations' the user gets when they sign up for Damus Purple" ))
+            Text("You unlocked", comment: "Part 1 of 2 in message 'You unlocked automatic translations' the user gets when they sign up for Damus Purple" )
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundStyle(
@@ -95,7 +95,7 @@ struct DamusPurpleTranslationSetupView: View {
                 .opacity(start ? 1.0 : 0.0)
                 .animation(Animation.snappy(duration: 2).delay(0), value: start)
             
-            Text(NSLocalizedString("Automatic translations", comment: "Part 1 of 2 in message 'You unlocked automatic translations' the user gets when they sign up for Damus Purple"))
+            Text("Automatic translations", comment: "Part 1 of 2 in message 'You unlocked automatic translations' the user gets when they sign up for Damus Purple")
                 .font(.headline)
                 .fontWeight(.bold)
                 .foregroundStyle(
@@ -110,7 +110,7 @@ struct DamusPurpleTranslationSetupView: View {
                 .animation(.content(), value: start)
                 .padding(.top, 10)
             
-            Text(NSLocalizedString("As part of your Damus Purple membership, you get complimentary and automated translations. Would you like to enable Damus Purple translations?\n\nTip: You can always change this later in Settings → Translations", comment: "Message notifying the user that they get auto-translations as part of their service"))
+            Text("As part of your Damus Purple membership, you get complimentary and automated translations. Would you like to enable Damus Purple translations?\n\nTip: You can always change this later in Settings → Translations", comment: "Message notifying the user that they get auto-translations as part of their service")
                 .lineSpacing(5)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.white.opacity(0.8))
@@ -125,7 +125,7 @@ struct DamusPurpleTranslationSetupView: View {
             }, label: {
                 HStack {
                     Spacer()
-                    Text(NSLocalizedString("Enable Purple auto-translations", comment: "Label for button that allows users to enable Damus Purple translations"))
+                    Text("Enable Purple auto-translations", comment: "Label for button that allows users to enable Damus Purple translations")
                     Spacer()
                 }
             })
@@ -139,7 +139,7 @@ struct DamusPurpleTranslationSetupView: View {
             }, label: {
                 HStack {
                     Spacer()
-                    Text(NSLocalizedString("No, thanks", comment: "Label for button that allows users to reject enabling Damus Purple translations"))
+                    Text("No, thanks", comment: "Label for button that allows users to reject enabling Damus Purple translations")
                     Spacer()
                 }
             })

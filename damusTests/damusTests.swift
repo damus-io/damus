@@ -192,7 +192,7 @@ class damusTests: XCTestCase {
      */
 
     func testMakeHashtagPost() {
-        let post = NostrPost(content: "#damus some content #bitcoin derp #かっこいい wow", references: [])
+        let post = NostrPost(content: "#damus some content #bitcoin derp #かっこいい wow", tags: [])
         let ev = post_to_event(post: post, keypair: test_keypair_full)!
 
         XCTAssertEqual(ev.tags.count, 3)
@@ -269,7 +269,7 @@ class damusTests: XCTestCase {
 }
 
 private func createEventFromContentString(_ content: String) -> NostrEvent {
-    let post = NostrPost(content: content, references: [])
+    let post = NostrPost(content: content, tags: [])
     guard let ev = post_to_event(post: post, keypair: test_keypair_full) else {
         XCTFail("Could not create event")
         return test_note

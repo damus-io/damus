@@ -54,7 +54,7 @@ struct AppearanceSettingsView: View {
             }
 
             // MARK: - Text Truncation
-            Section(header: Text(NSLocalizedString("Text Truncation", comment: "Section header for damus text truncation user configuration"))) {
+            Section(header: Text("Text Truncation", comment: "Section header for damus text truncation user configuration")) {
                 Toggle(NSLocalizedString("Truncate timeline text", comment: "Setting to truncate text in timeline"), isOn: $settings.truncate_timeline_text)
                     .toggleStyle(.switch)
                 Toggle(NSLocalizedString("Truncate notification mention text", comment: "Setting to truncate text in mention notifications"), isOn: $settings.truncate_mention_text)
@@ -70,7 +70,7 @@ struct AppearanceSettingsView: View {
             }
 
             // MARK: - Accessibility
-            Section(header: Text(NSLocalizedString("Accessibility", comment: "Section header for accessibility settings"))) {
+            Section(header: Text("Accessibility", comment: "Section header for accessibility settings")) {
                 Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $settings.left_handed)
                     .toggleStyle(.switch)
             }
@@ -97,8 +97,8 @@ struct AppearanceSettingsView: View {
             
             // MARK: - Content filters and moderation
             Section(
-                header: Text(NSLocalizedString("Content filters", comment: "Section title for content filtering/moderation configuration.")),
-                footer: Text(NSLocalizedString("Notes with the #nsfw tag usually contains adult content or other \"Not safe for work\" content", comment: "Section footer clarifying what #nsfw (not safe for work) tags mean"))
+                header: Text("Content filters", comment: "Section title for content filtering/moderation configuration."),
+                footer: Text("Notes with the #nsfw tag usually contains adult content or other \"Not safe for work\" content", comment: "Section footer clarifying what #nsfw (not safe for work) tags mean")
             ) {
                 Toggle(NSLocalizedString("Hide notes with #nsfw tags", comment: "Setting to hide notes with the #nsfw (not safe for work) tags"), isOn: $settings.hide_nsfw_tagged_content)
                     .toggleStyle(.switch)
@@ -106,8 +106,8 @@ struct AppearanceSettingsView: View {
             
             // MARK: - Profiles
             Section(
-                header: Text(NSLocalizedString("Profiles", comment: "Section title for profile view configuration.")),
-                footer: Text(NSLocalizedString("Profile action sheets allow you to follow, zap, or DM profiles more quickly without having to view their full profile", comment: "Section footer clarifying what the profile action sheet feature does"))
+                header: Text("Profiles", comment: "Section title for profile view configuration."),
+                footer: Text("Profile action sheets allow you to follow, zap, or DM profiles more quickly without having to view their full profile", comment: "Section footer clarifying what the profile action sheet feature does")
             ) {
                 Toggle(NSLocalizedString("Show profile action sheets", comment: "Setting to show profile action sheets when clicking on a user's profile picture"), isOn: $settings.show_profile_action_sheet_on_pfp_click)
                     .toggleStyle(.switch)
@@ -157,9 +157,9 @@ struct AppearanceSettingsView: View {
                 }
             }
             .alert(isPresented: $showing_enable_animation_alert) {
-                Alert(title: Text(NSLocalizedString("Confirmation", comment: "Confirmation dialog title")),
-                      message: Text(NSLocalizedString("Changing this setting will cause the cache to be cleared. This will free space, but images may take longer to load again. Are you sure you want to proceed?", comment: "Message explaining consequences of changing the 'enable animation' setting")),
-                      primaryButton: .default(Text(NSLocalizedString("OK", comment: "Button label indicating user wants to proceed."))) {
+                Alert(title: Text("Confirmation", comment: "Confirmation dialog title"),
+                      message: Text("Changing this setting will cause the cache to be cleared. This will free space, but images may take longer to load again. Are you sure you want to proceed?", comment: "Message explaining consequences of changing the 'enable animation' setting"),
+                      primaryButton: .default(Text("OK", comment: "Button label indicating user wants to proceed.")) {
                           self.clear_cache_button_action()
                       },
                       secondaryButton: .cancel() {
@@ -176,22 +176,22 @@ struct AppearanceSettingsView: View {
             HStack(spacing: 6) {
                 switch cache_clearing_state {
                     case .not_cleared:
-                        Text(NSLocalizedString("Clear Cache", comment: "Button to clear image cache."))
+                        Text("Clear Cache", comment: "Button to clear image cache.")
                     case .clearing:
                         ProgressView()
-                        Text(NSLocalizedString("Clearing Cache", comment: "Loading message indicating that the cache is being cleared."))
+                        Text("Clearing Cache", comment: "Loading message indicating that the cache is being cleared.")
                     case .cleared:
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundColor(.green)
-                        Text(NSLocalizedString("Cache has been cleared", comment: "Message indicating that the cache was successfully cleared."))
+                        Text("Cache has been cleared", comment: "Message indicating that the cache was successfully cleared.")
                 }
             }
         })
         .disabled(self.cache_clearing_state != .not_cleared)
         .alert(isPresented: $showing_cache_clear_alert) {
-            Alert(title: Text(NSLocalizedString("Confirmation", comment: "Confirmation dialog title")),
-                  message: Text(NSLocalizedString("Are you sure you want to clear the cache? This will free space, but images may take longer to load again.", comment: "Message explaining what it means to clear the cache, asking if user wants to proceed.")),
-                  primaryButton: .default(Text(NSLocalizedString("OK", comment: "Button label indicating user wants to proceed."))) {
+            Alert(title: Text("Confirmation", comment: "Confirmation dialog title"),
+                  message: Text("Are you sure you want to clear the cache? This will free space, but images may take longer to load again.", comment: "Message explaining what it means to clear the cache, asking if user wants to proceed."),
+                  primaryButton: .default(Text("OK", comment: "Button label indicating user wants to proceed.")) {
                       self.clear_cache_button_action()
                   },
                   secondaryButton: .cancel())

@@ -36,6 +36,7 @@ class DamusState: HeadlessDamusState {
     let video: VideoController
     let ndb: Ndb
     var purple: DamusPurple
+    var push_notification_client: PushNotificationClient
 
     init(pool: RelayPool, keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, postbox: PostBox, bootstrap_relays: [RelayURL], replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: VideoController, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter) {
         self.pool = pool
@@ -68,6 +69,7 @@ class DamusState: HeadlessDamusState {
             keypair: keypair
         )
         self.quote_reposts = quote_reposts
+        self.push_notification_client = PushNotificationClient(keypair: keypair, settings: settings)
     }
 
     @discardableResult
@@ -112,7 +114,7 @@ class DamusState: HeadlessDamusState {
             likes: EventCounter(our_pubkey: empty_pub),
             boosts: EventCounter(our_pubkey: empty_pub),
             contacts: Contacts(our_pubkey: empty_pub),
-            mutelist_manager: MutelistManager(),
+            mutelist_manager: MutelistManager(user_keypair: kp),
             profiles: Profiles(ndb: .empty),
             dms: DirectMessagesModel(our_pubkey: empty_pub),
             previews: PreviewCache(),

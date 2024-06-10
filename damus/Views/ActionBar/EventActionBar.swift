@@ -6,8 +6,7 @@
 //
 
 import SwiftUI
-import UIKit
-
+import MCEmojiPicker
 
 struct EventActionBar: View {
     let damus_state: DamusState
@@ -20,6 +19,8 @@ struct EventActionBar: View {
     @State var show_share_sheet: Bool = false
     @State var show_share_action: Bool = false
     @State var show_repost_action: Bool = false
+
+    @State private var isOnTopHalfOfScreen: Bool = false
 
     @ObservedObject var bar: ActionBarModel
     
@@ -145,14 +146,14 @@ struct EventActionBar: View {
     
     var like_button: some View {
         HStack(spacing: 4) {
-            LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil) { emoji in
+            LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil, isOnTopHalfOfScreen: $isOnTopHalfOfScreen) { emoji in
                 if bar.liked {
                     //notify(.delete, bar.our_like)
                 } else {
                     send_like(emoji: emoji)
                 }
             }
-            
+
             Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
                 .font(.footnote.weight(.medium))
                 .nip05_colorized(gradient: bar.liked)
@@ -264,8 +265,22 @@ struct EventActionBar: View {
                 self.bar.our_like = liked.event
             }
         }
+        .background(
+            GeometryReader { geometry in
+                EmptyView()
+                    .onAppear {
+                        let eventActionBarY = geometry.frame(in: .global).midY
+                        let screenMidY = UIScreen.main.bounds.midY
+                        self.isOnTopHalfOfScreen = eventActionBarY > screenMidY
+                    }
+                    .onChange(of: geometry.frame(in: .global).midY) { newY in
+                        let screenMidY = UIScreen.main.bounds.midY
+                        self.isOnTopHalfOfScreen = newY > screenMidY
+                    }
+            }
+        )
     }
-    
+
     func send_like(emoji: String) {
         guard let keypair = damus_state.keypair.to_full(),
               let like_ev = make_like_event(keypair: keypair, liked: event, content: emoji) else {
@@ -307,14 +322,16 @@ struct LikeButton: View {
     let damus_state: DamusState
     let liked: Bool
     let liked_emoji: String?
+    @Binding var isOnTopHalfOfScreen: Bool
     let action: (_ emoji: String) -> Void
 
     // For reactions background
     @State private var showReactionsBG = 0
-    @State private var showEmojis: [Int] = []
     @State private var rotateThumb = -45
 
     @State private var isReactionsVisible = false
+
+    @State private var selectedEmoji: String = ""
 
     // Following four are Shaka animation properties
     let timer = Timer.publish(every: 0.10, on: .main, in: .common).autoconnect()
@@ -367,7 +384,15 @@ struct LikeButton: View {
                 amountOfAngleIncrease = 20.0
             }
         })
-        .overlay(reactionsOverlay())
+        .emojiPicker(
+            isPresented: $isReactionsVisible,
+            selectedEmoji: $selectedEmoji,
+            arrowDirection: isOnTopHalfOfScreen ? .down : .up,
+            isDismissAfterChoosing: true
+        )
+        .onChange(of: selectedEmoji) { newSelectedEmoji in
+            self.action(newSelectedEmoji)
+        }
     }
 
     func shakaAnimationLogic() {
@@ -514,24 +539,12 @@ struct LikeButton: View {
             }
         }
     }
-
+    
     // When reaction button is long pressed, it displays the multiple emojis overlay and displays the user's selected emojis with an animation
     private func reactionLongPressed() {
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-        showEmojis = Array(repeating: 0, count: emojis.count) // Initialize the showEmojis array
-        
-        for (index, _) in emojis.enumerated() {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1 * Double(index)) {
-                withAnimation(.interpolatingSpring(stiffness: 170, damping: 8)) {
-                    if index < showEmojis.count {
-                        showEmojis[index] = 1
-                    }
-                }
-            }
-        }
         
         isReactionsVisible = true
-        showReactionsBG = 1
     }
     
     private func emojiTapped(_ emoji: String) {
@@ -541,9 +554,7 @@ struct LikeButton: View {
 
         withAnimation(.easeOut(duration: 0.2)) {
             isReactionsVisible = false
-            showReactionsBG = 0
         }
-        showEmojis = []
         
         withAnimation(Animation.easeOut(duration: 0.15)) {
             shouldAnimate = true

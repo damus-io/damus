@@ -13,10 +13,10 @@ struct InnerTimelineView: View {
     let state: DamusState
     let filter: (NostrEvent) -> Bool
 
-    init(events: EventHolder, damus: DamusState, filter: @escaping (NostrEvent) -> Bool) {
+    init(events: EventHolder, damus: DamusState, filter: @escaping (NostrEvent) -> Bool, apply_mute_rules: Bool = true) {
         self.events = events
         self.state = damus
-        self.filter = filter
+        self.filter = apply_mute_rules ? { filter($0) && !damus.mutelist_manager.is_event_muted($0) } : filter
     }
     
     var event_options: EventViewOptions {

@@ -121,7 +121,7 @@ struct AddRelayView: View {
                 dismiss()
             }) {
                 HStack {
-                    Text(verbatim: "Add relay")
+                    Text("Add relay", comment: "Button to add a relay.")
                         .bold()
                 }
                 .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)

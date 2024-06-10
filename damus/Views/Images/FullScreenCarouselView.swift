@@ -145,7 +145,7 @@ struct FullScreenCarouselView_Previews: PreviewProvider {
                 HStack {
                     Spacer()
                     
-                    Text("Some content")
+                    Text(verbatim: "Some content")
                         .padding()
                         .foregroundColor(.white)
                         

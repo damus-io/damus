@@ -15,7 +15,7 @@ struct RelayAuthenticationDetail: View {
         case .none:
             EmptyView()
         case .pending:
-            Text(NSLocalizedString("Pending", comment: "Label to display that authentication to a server is pending."))
+            Text("Pending", comment: "Label to display that authentication to a server is pending.")
                 .font(.caption)
                 .frame(height: 20)
                 .padding(.horizontal, 10)
@@ -27,7 +27,7 @@ struct RelayAuthenticationDetail: View {
                         .stroke(DamusColors.warningBorder, lineWidth: 1)
                 )
         case .verified:
-            Text(NSLocalizedString("Authenticated", comment: "Label to display that authentication to a server has succeeded."))
+            Text("Authenticated", comment: "Label to display that authentication to a server has succeeded.")
                 .font(.caption)
                 .frame(height: 20)
                 .padding(.horizontal, 10)
@@ -39,7 +39,7 @@ struct RelayAuthenticationDetail: View {
                         .stroke(DamusColors.successBorder, lineWidth: 1)
                 )
         case .error:
-            Text(NSLocalizedString("Error", comment: "Label to display that authentication to a server has failed."))
+            Text("Error", comment: "Label to display that authentication to a server has failed.")
                 .font(.caption)
                 .frame(height: 20)
                 .padding(.horizontal, 10)

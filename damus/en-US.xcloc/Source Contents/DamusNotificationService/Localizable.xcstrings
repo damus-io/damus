@@ -96,8 +96,8 @@
     "Staging" : {
       "comment" : "Label indicating a staging test environment for Damus Purple functionality (Developer feature)"
     },
-    "Test (localhost)" : {
-      "comment" : "Label indicating a localhost test environment for Damus Purple functionality (Developer feature)"
+    "Test (local)" : {
+      "comment" : "Label indicating a local test environment for Damus Purple functionality (Developer feature)"
     },
     "This note contains too many items and cannot be rendered" : {
       "comment" : "Error message indicating that a note is too big and cannot be rendered"

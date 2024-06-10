@@ -15,15 +15,15 @@ struct TimelineView<Content: View>: View {
     let show_friend_icon: Bool
     let filter: (NostrEvent) -> Bool
     let content: Content?
-    let debouncer: Debouncer
+    let apply_mute_rules: Bool
 
-    init(events: EventHolder, loading: Binding<Bool>, damus: DamusState, show_friend_icon: Bool, filter: @escaping (NostrEvent) -> Bool, content: (() -> Content)? = nil) {
+    init(events: EventHolder, loading: Binding<Bool>, damus: DamusState, show_friend_icon: Bool, filter: @escaping (NostrEvent) -> Bool, apply_mute_rules: Bool = true, content: (() -> Content)? = nil) {
         self.events = events
         self._loading = loading
         self.damus = damus
         self.show_friend_icon = show_friend_icon
         self.filter = filter
-        self.debouncer = Debouncer(interval: 0.5)
+        self.apply_mute_rules = apply_mute_rules
         self.content = content?()
     }
 
@@ -42,14 +42,12 @@ struct TimelineView<Content: View>: View {
                     .id("startblock")
                     .frame(height: 1)
 
-                InnerTimelineView(events: events, damus: damus, filter: loading ? { _ in true } : filter)
+                InnerTimelineView(events: events, damus: damus, filter: loading ? { _ in true } : filter, apply_mute_rules: self.apply_mute_rules)
                     .redacted(reason: loading ? .placeholder : [])
                     .shimmer(loading)
                     .disabled(loading)
                     .background(GeometryReader { proxy -> Color in
-                        debouncer.debounce_immediate {
-                            handle_scroll_queue(proxy, queue: self.events)
-                        }
+                        handle_scroll_queue(proxy, queue: self.events)
                         return Color.clear
                     })
             }

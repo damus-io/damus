@@ -169,7 +169,7 @@ class EventCache {
         var ev = event
         
         while true {
-            guard let direct_reply = ev.direct_replies(keypair).last,
+            guard let direct_reply = ev.direct_replies(),
                   let next_ev = lookup(direct_reply), next_ev != ev
             else {
                 break
@@ -183,7 +183,7 @@ class EventCache {
     }
     
     func add_replies(ev: NostrEvent, keypair: Keypair) {
-        for reply in ev.direct_replies(keypair) {
+        if let reply = ev.direct_replies() {
             replies.add(id: reply, reply_id: ev.id)
         }
     }
@@ -218,7 +218,16 @@ class EventCache {
      */
 
     func lookup(_ evid: NoteId) -> NostrEvent? {
-        return events[evid]
+        if let ev = events[evid] {
+            return ev
+        }
+
+        if let ev = self.ndb.lookup_note(evid)?.unsafeUnownedValue?.to_owned() {
+            events[ev.id] = ev
+            return ev
+        }
+
+        return nil
     }
     
     func insert(_ ev: NostrEvent) {
@@ -238,6 +247,11 @@ class EventCache {
 func should_translate(event: NostrEvent, our_keypair: Keypair, settings: UserSettingsStore, note_lang: String?) -> Bool {
     guard settings.can_translate else {
         return false
+    }
+
+    // don't translate reposts, longform, etc
+    if event.kind != 1 {
+        return false;
     }
     
     // Do not translate self-authored notes if logged in with a private key
