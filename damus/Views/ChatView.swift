@@ -127,7 +127,7 @@ struct ChatView: View {
                     }
                 }
 
-                if let replying_to = event.direct_replies(damus_state.keypair).first,
+                if let replying_to = event.direct_replies(),
                    let prev = self.prev_ev,
                    replying_to != prev.id
                 {

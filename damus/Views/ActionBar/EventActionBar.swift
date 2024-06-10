@@ -415,41 +415,41 @@ struct LikeButton: View {
         }
     }
 
-    func reactionsOverlay() -> some View {
-        Group {
-            if isReactionsVisible {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 20)
-                        .frame(width: calculateOverlayWidth(), height: 50)
-                        .foregroundColor(DamusColors.black)
-                        .scaleEffect(Double(showReactionsBG), anchor: .topTrailing)
-                        .animation(
-                            .interpolatingSpring(stiffness: 170, damping: 15).delay(0.05),
-                            value: showReactionsBG
-                        )
-                        .overlay(
-                            Rectangle()
-                                .foregroundColor(Color.white.opacity(0.2))
-                                .frame(width: calculateOverlayWidth(), height: 50)
-                                .clipShape(
-                                    RoundedRectangle(cornerRadius: 20)
-                                )
-                        )
-                        .overlay(Reactions(emojis: self.emojis, emojiTapped: self.emojiTapped, close: closeReactions, moreButtonTapped: { }, options: []))
-                }
-                .offset(y: -40)
-                .onTapGesture {
-                    withAnimation(.easeOut(duration: 0.2)) {
-                        isReactionsVisible = false
-                        showReactionsBG = 0
-                    }
-                    showEmojis = []
-                }
-            } else {
-                EmptyView()
-            }
-        }
-    }
+//    func reactionsOverlay() -> some View {
+//        Group {
+//            if isReactionsVisible {
+//                ZStack {
+//                    RoundedRectangle(cornerRadius: 20)
+//                        .frame(width: calculateOverlayWidth(), height: 50)
+//                        .foregroundColor(DamusColors.black)
+//                        .scaleEffect(Double(showReactionsBG), anchor: .topTrailing)
+//                        .animation(
+//                            .interpolatingSpring(stiffness: 170, damping: 15).delay(0.05),
+//                            value: showReactionsBG
+//                        )
+//                        .overlay(
+//                            Rectangle()
+//                                .foregroundColor(Color.white.opacity(0.2))
+//                                .frame(width: calculateOverlayWidth(), height: 50)
+//                                .clipShape(
+//                                    RoundedRectangle(cornerRadius: 20)
+//                                )
+//                        )
+//                        .overlay(Reactions(emojis: self.emojis, emojiTapped: self.emojiTapped, close: closeReactions, moreButtonTapped: { }, options: []))
+//                }
+//                .offset(y: -40)
+//                .onTapGesture {
+//                    withAnimation(.easeOut(duration: 0.2)) {
+//                        isReactionsVisible = false
+//                        showReactionsBG = 0
+//                    }
+//                    showEmojis = []
+//                }
+//            } else {
+//                EmptyView()
+//            }
+//        }
+//    }
     
     func calculateOverlayWidth() -> CGFloat {
         let maxWidth: CGFloat = 250
