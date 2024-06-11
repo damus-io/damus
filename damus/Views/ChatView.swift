@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MCEmojiPicker
 
 fileprivate let CORNER_RADIUS: CGFloat = 10
 
@@ -22,16 +23,21 @@ struct ChatView: View {
     let generator = UIImpactFeedbackGenerator(style: .medium)
     
     @State var expand_reply: Bool = false
-    @State var selected_emoji: String? = nil
-    @State var popover_state: PopoverState = .closed
+    @State var selected_emoji: String = ""
+    @State var popover_state: PopoverState = .closed {
+        didSet {
+            print(popover_state)
+        }
+    }
+    @State private var isOnTopHalfOfScreen: Bool = false
     
-    enum PopoverState {
+    enum PopoverState: String {
         case closed
         case open
         case open_emoji_selector
         
         func is_open() -> Bool {
-            return self != .closed
+            return self == .open
         }
         
         mutating func set_open(_ is_open: Bool) {
@@ -164,7 +170,10 @@ struct ChatView: View {
         .onTapGesture {
             self.popover_state = .open
         }
-        .popover(isPresented: Binding(get: { popover_state.is_open() }, set: { popover_state.set_open($0) })) {
+        .popover(isPresented: Binding(get: { popover_state.is_open() }, set: {
+            print("popover state update: \($0.description)")
+            popover_state.set_open($0)
+        })) {
             switch popover_state {
                 case .closed:
                     EmptyView()
@@ -189,9 +198,28 @@ struct ChatView: View {
                         EmptyView()
                     }
                 case .open_emoji_selector:
-                    Text("Emoji picker not integrated")
+                    EmptyView()
             }
         }
+    }
+    
+    var event_bubble_wrapper: some View {
+        self.event_bubble
+            .emojiPicker(
+                isPresented: Binding(get: { popover_state == .open_emoji_selector }, set: {
+                    print("emoji picker presentation update: \($0.description)")
+                    popover_state = $0 == true ? .open_emoji_selector : .closed
+                }),
+                selectedEmoji: $selected_emoji,
+                arrowDirection: isOnTopHalfOfScreen ? .down : .up,
+                isDismissAfterChoosing: false
+            )
+            .onChange(of: selected_emoji) { newSelectedEmoji in
+                if newSelectedEmoji != "" {
+                    send_like(emoji: newSelectedEmoji)
+                    popover_state = .closed
+                }
+            }
     }
     
     func send_like(emoji: String) {
@@ -236,7 +264,21 @@ struct ChatView: View {
                     self.profile_picture_view
                 }
                 
-                self.event_bubble
+                self.event_bubble_wrapper
+                    .background(
+                        GeometryReader { geometry in
+                            EmptyView()
+                                .onAppear {
+                                    let eventActionBarY = geometry.frame(in: .global).midY
+                                    let screenMidY = UIScreen.main.bounds.midY
+                                    self.isOnTopHalfOfScreen = eventActionBarY > screenMidY
+                                }
+                                .onChange(of: geometry.frame(in: .global).midY) { newY in
+                                    let screenMidY = UIScreen.main.bounds.midY
+                                    self.isOnTopHalfOfScreen = newY > screenMidY
+                                }
+                        }
+                    )
                 
                 if !by_other_user {
                     self.profile_picture_view
