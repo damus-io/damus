@@ -213,7 +213,9 @@ struct ChatView: View {
                             }, moreButtonTapped: {
                                 self.popover_state = .open_emoji_selector
                             }, options: [.hide_close_button, .show_more_emoji_button])
-                            EventActionBar(damus_state: damus_state, event: event, bar: bar, options: [])
+                            EventActionBar(damus_state: damus_state, event: event, bar: bar, options: [.focus_button_instead_of_like_button], focus_action: {
+                                self.focus_event?()
+                            })
                                 .frame(minWidth: 250)
                                 .padding(.horizontal, 5)
                                 .presentationCompactAdaptation(.popover)

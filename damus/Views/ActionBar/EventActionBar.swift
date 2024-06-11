@@ -13,6 +13,7 @@ struct EventActionBar: View {
     let event: NostrEvent
     let generator = UIImpactFeedbackGenerator(style: .medium)
     let userProfile : ProfileModel
+    let focus_action: (() -> Void)?
     let options: Options
     
     // just used for previews
@@ -24,12 +25,13 @@ struct EventActionBar: View {
 
     @ObservedObject var bar: ActionBarModel
     
-    init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel? = nil, options: Options = []) {
+    init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel? = nil, options: Options = [], focus_action: (() -> Void)? = nil) {
         self.damus_state = damus_state
         self.event = event
         _bar = ObservedObject(wrappedValue: bar ?? make_actionbar_model(ev: event.id, damus: damus_state))
         self.userProfile = ProfileModel(pubkey: event.pubkey, damus: damus_state)
         self.options = options
+        self.focus_action = focus_action
     }
     
     var lnurl: String? {
@@ -160,6 +162,13 @@ struct EventActionBar: View {
         }
     }
     
+    var focus_button: some View {
+        EventActionButton(img: "corsor-click", col: Color.gray) {
+            self.focus_action?()
+        }
+        .accessibilityLabel(NSLocalizedString("Select this event on the thread", comment: "Button to select event on thread"))
+    }
+    
     var share_button: some View {
         EventActionButton(img: "upload", col: Color.gray) {
             show_share_action = true
@@ -198,10 +207,16 @@ struct EventActionBar: View {
                 self.space_if_spread
                 self.repost_button
             }
-                
-            if show_like && !should_hide_reactions {
+            
+            if options.contains(.focus_button_instead_of_like_button) {
                 self.space_if_spread
-                self.like_button
+                self.focus_button
+            }
+            else {
+                if show_like && !should_hide_reactions {
+                    self.space_if_spread
+                    self.like_button
+                }
             }
                 
             if let lnurl = self.lnurl, !should_hide_zap {
@@ -302,6 +317,7 @@ struct EventActionBar: View {
         static let no_spread = Options(rawValue: 1 << 0)
         static let hide_items_without_activity = Options(rawValue: 1 << 1)
         static let context_menu = Options(rawValue: 1 << 2)
+        static let focus_button_instead_of_like_button = Options(rawValue: 1 << 3)
     }
 }
 
