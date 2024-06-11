@@ -18,6 +18,7 @@ struct ChatView: View {
     let damus_state: DamusState
     var thread: ThreadModel
     let scroll_to_event: ((_ id: NoteId) -> Void)?
+    let focus_event: (() -> Void)?
     let highlight_bubble: Bool
 
     let generator = UIImpactFeedbackGenerator(style: .medium)
@@ -158,8 +159,32 @@ struct ChatView: View {
         .background(by_other_user ? DamusColors.adaptableGrey : DamusColors.adaptablePurpleBackground)
         .tint(is_ours ? Color.white : Color.accentColor)
         .cornerRadius(CORNER_RADIUS)
+//        .overlay(
+//            Group {
+//                if popover_state == .open {
+//                    ZStack {
+//                        Rectangle()
+//                            .background(Color.black.opacity(0.1))
+//                            .cornerRadius(CORNER_RADIUS)
+//                        Text("Tap here again to select this event on thread view", comment: "Label for focus")
+//                            .foregroundStyle(Color.white)
+//                            .multilineTextAlignment(.center)
+//                    }
+//                    .onTapGesture(perform: {
+//                        self.focus_event?()
+//                    })
+//                }
+//            }
+//        )
         .contextMenu(menuItems: {
-            MenuItems(damus_state: damus_state, event: self.event, target_pubkey: event.pubkey, profileModel: ProfileModel(pubkey: event.pubkey, damus: damus_state))
+            Group {
+                Button {
+                    self.focus_event?()
+                } label: {
+                    Label(NSLocalizedString("Select on thread", comment: "Context menu option for selecting an event on the thread view."), image: "corsor-click")
+                }
+                MenuItems(damus_state: damus_state, event: self.event, target_pubkey: event.pubkey, profileModel: ProfileModel(pubkey: event.pubkey, damus: damus_state))
+            }
         })
         .padding(4)
         .overlay(
@@ -327,13 +352,13 @@ func id_to_color(_ pubkey: Pubkey) -> Color {
 }
 
 #Preview {
-    ChatView(event: test_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, highlight_bubble: false, expand_reply: false)
+    ChatView(event: test_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, focus_event: nil, highlight_bubble: false, expand_reply: false)
 }
 
 #Preview {
-    ChatView(event: test_short_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, highlight_bubble: false, expand_reply: false)
+    ChatView(event: test_short_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, focus_event: nil, highlight_bubble: false, expand_reply: false)
 }
 
 #Preview {
-    ChatView(event: test_short_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, highlight_bubble: true, expand_reply: false)
+    ChatView(event: test_short_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, focus_event: nil, highlight_bubble: true, expand_reply: false)
 }
