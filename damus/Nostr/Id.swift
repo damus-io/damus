@@ -130,6 +130,29 @@ struct ReplaceableParam: TagConvertible {
     var keychar: AsciiCharacter { "d" }
 }
 
+struct ContentWarningTag: TagConvertible {
+    let reason: String?
+
+    static func from_tag(tag: TagSequence) -> ContentWarningTag? {
+        var i = tag.makeIterator()
+
+        guard tag.count >= 1,
+              let t0 = i.next(),
+              t0.matches_str("content-warning") else {
+            return nil
+        }
+        
+        guard let t1 = i.next() else {
+            return ContentWarningTag(reason: nil)
+        }
+
+        return ContentWarningTag(reason: t1.string())
+    }
+    var tag: [String] {
+        self.reason == nil ? ["content-warning"] : ["content-warning", self.reason!]
+    }
+}
+
 struct Signature: Hashable, Equatable {
     let data: Data
 
