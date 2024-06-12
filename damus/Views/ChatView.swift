@@ -44,6 +44,10 @@ struct ChatView: View {
         mutating func set_open(_ is_open: Bool) {
             self = is_open == true ? .open : .closed
         }
+        
+        mutating func flip() {
+            self.set_open(!self.is_open())
+        }
     }
 
     var just_started: Bool {
@@ -122,8 +126,8 @@ struct ChatView: View {
     var event_bubble: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                if by_other_user {
-                    HStack {
+                HStack {
+                    if by_other_user {
                         ProfileName(pubkey: event.pubkey, damus: damus_state)
                             .foregroundColor(id_to_color(event.pubkey))
                             .onTapGesture {
@@ -131,6 +135,10 @@ struct ChatView: View {
                             }
                         Text(verbatim: "\(format_relative_time(event.created_at))")
                             .foregroundColor(.gray)
+                    }
+                    Spacer()
+                    if popover_state == .open {
+                        EventMenuContext(damus: self.damus_state, event: self.event)
                     }
                 }
 
@@ -153,39 +161,14 @@ struct ChatView: View {
                         .padding(2)
                     Spacer()
                 }
+                
+                self.action_bar
             }
         }
         .padding(10)
         .background(by_other_user ? DamusColors.adaptableGrey : DamusColors.adaptablePurpleBackground)
         .tint(is_ours ? Color.white : Color.accentColor)
         .cornerRadius(CORNER_RADIUS)
-//        .overlay(
-//            Group {
-//                if popover_state == .open {
-//                    ZStack {
-//                        Rectangle()
-//                            .background(Color.black.opacity(0.1))
-//                            .cornerRadius(CORNER_RADIUS)
-//                        Text("Tap here again to select this event on thread view", comment: "Label for focus")
-//                            .foregroundStyle(Color.white)
-//                            .multilineTextAlignment(.center)
-//                    }
-//                    .onTapGesture(perform: {
-//                        self.focus_event?()
-//                    })
-//                }
-//            }
-//        )
-        .contextMenu(menuItems: {
-            Group {
-                Button {
-                    self.focus_event?()
-                } label: {
-                    Label(NSLocalizedString("Select on thread", comment: "Context menu option for selecting an event on the thread view."), image: "corsor-click")
-                }
-                MenuItems(damus_state: damus_state, event: self.event, target_pubkey: event.pubkey, profileModel: ProfileModel(pubkey: event.pubkey, damus: damus_state))
-            }
-        })
         .padding(4)
         .overlay(
             RoundedRectangle(cornerRadius: CORNER_RADIUS+2)
@@ -193,39 +176,8 @@ struct ChatView: View {
                 .opacity(highlight_bubble ? 1 : 0)
         )
         .onTapGesture {
-            self.popover_state = .open
-        }
-        .popover(isPresented: Binding(get: { popover_state.is_open() }, set: {
-            print("popover state update: \($0.description)")
-            popover_state.set_open($0)
-        })) {
-            switch popover_state {
-                case .closed:
-                    EmptyView()
-                case .open:
-                    let bar = make_actionbar_model(ev: event.id, damus: damus_state)
-                    if #available(iOS 16.4, *) {
-                        VStack(spacing: 25) {
-                            LikeButton.Reactions(emojis: damus_state.settings.emoji_reactions, emojiTapped: { emoji in
-                                send_like(emoji: emoji)
-                            }, close: {
-                                // Nothing
-                            }, moreButtonTapped: {
-                                self.popover_state = .open_emoji_selector
-                            }, options: [.hide_close_button, .show_more_emoji_button])
-                            EventActionBar(damus_state: damus_state, event: event, bar: bar, options: [.focus_button_instead_of_like_button], focus_action: {
-                                self.focus_event?()
-                            })
-                                .frame(minWidth: 250)
-                                .padding(.horizontal, 5)
-                                .presentationCompactAdaptation(.popover)
-                        }
-                        .padding()
-                    } else {
-                        EmptyView()
-                    }
-                case .open_emoji_selector:
-                    EmptyView()
+            withAnimation {
+                self.popover_state.flip()
             }
         }
     }
@@ -267,21 +219,24 @@ struct ChatView: View {
         let bar = make_actionbar_model(ev: event.id, damus: damus_state)
         return HStack {
             if by_other_user {
-                Spacer()
+                if popover_state == .closed {
+                    Spacer()
+                }
             }
-            if !bar.is_empty {
-                EventActionBar(damus_state: damus_state, event: event, bar: bar, options: [.no_spread, .hide_items_without_activity])
-                    .padding(10)
-                    .background(.ultraThinMaterial)
-                    .cornerRadius(100)
-                    .shadow(color: Color.black.opacity(0.1),radius: 5, y: 5)
-            }
+            EventActionBar(damus_state: damus_state, event: event, bar: bar, options: popover_state == .open ? [] : [.no_spread, .hide_items_without_activity])
+                .opacity(popover_state == .open ? 1 : 0.6)
+                .grayscale(popover_state == .open ? 0 : 1)
+                .foregroundColor(popover_state == .open ? nil : DamusColors.adaptableGrey2)
+                .disabled(popover_state == .open ? false : true)
+                .scaleEffect(popover_state == .open ? 1 : 0.8, anchor: is_ours ? .leading : .trailing)
+                .padding(5)
+                .padding(.vertical, popover_state == .open ? 5 : 2)
             if !by_other_user {
-                Spacer()
+                if popover_state == .closed {
+                    Spacer()
+                }
             }
         }
-        .padding(.top, -35)
-        .padding(.horizontal, 10)
     }
 
     var body: some View {
@@ -314,8 +269,6 @@ struct ChatView: View {
             .contentShape(Rectangle())
             .id(event.id)
             .padding([.bottom], 6)
-            
-            self.action_bar
         }
 
     }
