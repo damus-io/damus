@@ -12,6 +12,7 @@ fileprivate let CORNER_RADIUS: CGFloat = 10
 
 struct ChatView: View {
     let event: NostrEvent
+    let selected_event: NostrEvent
     let prev_ev: NostrEvent?
     let next_ev: NostrEvent?
 
@@ -136,9 +137,7 @@ struct ChatView: View {
                 }
 
                 if let replying_to = event.direct_replies(),
-                   let prev = self.prev_ev,
-                   replying_to != prev.id
-                {
+                   replying_to != selected_event.id {
                     ReplyQuoteView(keypair: damus_state.keypair, quoter: event, event_id: replying_to, state: damus_state, thread: thread, options: options)
                         .background(is_ours ? DamusColors.adaptablePurpleBackground2 : DamusColors.adaptableGrey2)
                         .foregroundColor(is_ours ? Color.damusAdaptablePurpleForeground : Color.damusAdaptableBlack)
@@ -297,13 +296,13 @@ func id_to_color(_ pubkey: Pubkey) -> Color {
 }
 
 #Preview {
-    ChatView(event: test_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, focus_event: nil, highlight_bubble: false, expand_reply: false)
+    ChatView(event: test_note, selected_event: test_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, focus_event: nil, highlight_bubble: false, expand_reply: false)
 }
 
 #Preview {
-    ChatView(event: test_short_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, focus_event: nil, highlight_bubble: false, expand_reply: false)
+    ChatView(event: test_short_note, selected_event: test_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, focus_event: nil, highlight_bubble: false, expand_reply: false)
 }
 
 #Preview {
-    ChatView(event: test_short_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, focus_event: nil, highlight_bubble: true, expand_reply: false)
+    ChatView(event: test_short_note, selected_event: test_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, focus_event: nil, highlight_bubble: true, expand_reply: false)
 }

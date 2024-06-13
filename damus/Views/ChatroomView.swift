@@ -126,6 +126,7 @@ struct ChatroomView: View {
                                 )
                             }) {
                                 ChatView(event: events[ind],
+                                         selected_event: self.thread.event,
                                          prev_ev: ind > 0 ? events[ind-1] : nil,
                                          next_ev: ind == count-1 ? nil : events[ind+1],
                                          damus_state: damus,
