@@ -45,10 +45,6 @@ struct ChatView: View {
         mutating func set_open(_ is_open: Bool) {
             self = is_open == true ? .open : .closed
         }
-        
-        mutating func flip() {
-            self.set_open(!self.is_open())
-        }
     }
 
     var just_started: Bool {
@@ -127,8 +123,8 @@ struct ChatView: View {
     var event_bubble: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    if by_other_user {
+                if by_other_user {
+                    HStack {
                         ProfileName(pubkey: event.pubkey, damus: damus_state)
                             .foregroundColor(id_to_color(event.pubkey))
                             .onTapGesture {
@@ -136,10 +132,6 @@ struct ChatView: View {
                             }
                         Text(verbatim: "\(format_relative_time(event.created_at))")
                             .foregroundColor(.gray)
-                    }
-                    Spacer()
-                    if popover_state == .open {
-                        EventMenuContext(damus: self.damus_state, event: self.event)
                     }
                 }
 
@@ -162,8 +154,6 @@ struct ChatView: View {
                         .padding(2)
                     Spacer()
                 }
-                
-                self.action_bar
             }
         }
         .padding(10)
@@ -177,28 +167,8 @@ struct ChatView: View {
                 .opacity(highlight_bubble ? 1 : 0)
         )
         .onTapGesture {
-//            withAnimation(.easeOut(duration: 0.1)) {
-//                self.popover_state.flip()
-//                let generator = UIImpactFeedbackGenerator(style: .light)
-//                generator.impactOccurred()
-//            }
             focus_event?()
         }
-        .scaleEffect(press ? 1.1 : 1)
-        .shadow(color: .black.opacity(0.1), radius: press ? 8 : 0, y: press ? 15 : 0)
-//        .onLongPressGesture(perform: {
-//            let generator = UIImpactFeedbackGenerator(style: .heavy)
-//            generator.impactOccurred()
-//            focus_event?()
-//        }, onPressingChanged: { is_pressing in
-//            withAnimation(is_pressing ? .easeIn(duration: 1) : .easeOut(duration: 0.1)) {
-//                press = is_pressing
-//                if is_pressing {
-//                    let generator = UIImpactFeedbackGenerator(style: .light)
-//                    generator.impactOccurred()
-//                }
-//            }
-//        })
     }
     
     var event_bubble_wrapper: some View {
@@ -238,24 +208,23 @@ struct ChatView: View {
         let bar = make_actionbar_model(ev: event.id, damus: damus_state)
         return HStack {
             if by_other_user {
-                if popover_state == .closed {
-                    Spacer()
-                }
+                Spacer()
             }
-            EventActionBar(damus_state: damus_state, event: event, bar: bar, options: popover_state == .open ? [] : [.no_spread, .hide_items_without_activity])
-                .opacity(popover_state == .open ? 1 : 0.6)
-                .grayscale(popover_state == .open ? 0 : 1)
-                .foregroundColor(popover_state == .open ? nil : DamusColors.adaptableGrey2)
-                .disabled(popover_state == .open ? false : true)
-                .scaleEffect(popover_state == .open ? 1 : 0.8, anchor: is_ours ? .leading : .trailing)
-                .padding(5)
-                .padding(.vertical, popover_state == .open ? 5 : 2)
+            if !bar.is_empty {
+                EventActionBar(damus_state: damus_state, event: event, bar: bar, options: [.no_spread, .hide_items_without_activity])
+                    .padding(10)
+                    .background(DamusColors.adaptableLighterGrey)
+                    .disabled(true)
+                    .cornerRadius(100)
+                    .shadow(color: Color.black.opacity(0.05),radius: 3, y: 3)
+                    .scaleEffect(0.7, anchor: .trailing)
+            }
             if !by_other_user {
-                if popover_state == .closed {
-                    Spacer()
-                }
+                Spacer()
             }
         }
+        .padding(.top, -35)
+        .padding(.horizontal, 10)
     }
 
     var body: some View {
@@ -288,6 +257,8 @@ struct ChatView: View {
             .contentShape(Rectangle())
             .id(event.id)
             .padding([.bottom], 6)
+            
+            self.action_bar
         }
 
     }
