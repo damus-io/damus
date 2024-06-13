@@ -14,6 +14,7 @@ struct ChatroomView: View {
     @ObservedObject var thread: ThreadModel
     @State var selected_note_id: NoteId? = nil
     @State var user_just_posted_flag: Bool = false
+    @Namespace private var animation
     
     var parent_events: [NostrEvent] {
         damus.events.parent_events(event: thread.event, keypair: damus.keypair)
@@ -47,13 +48,20 @@ struct ChatroomView: View {
     }
     
     func go_to_event(scroller: ScrollViewProxy, note_id: NoteId) {
-        scroll_to_event(scroller: scroller, id: note_id, delay: 0, animate: true)
+        scroll_to_event(scroller: scroller, id: note_id, delay: 0, animate: true, anchor: .top)
         selected_note_id = note_id
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
             withAnimation {
                 selected_note_id = nil
             }
         })
+    }
+    
+    func set_active_event(scroller: ScrollViewProxy, ev: NdbNote) {
+        withAnimation {
+            thread.set_active_event(ev, keypair: self.damus.keypair)
+            self.go_to_event(scroller: scroller, note_id: ev.id)
+        }
     }
 
     var body: some View {
@@ -67,9 +75,10 @@ struct ChatroomView: View {
                         }
                         .padding(.horizontal)
                         .onTapGesture {
-                            thread.set_active_event(parent_event, keypair: self.damus.keypair)
-                            self.go_to_event(scroller: scroller, note_id: parent_event.id)
+                            self.set_active_event(scroller: scroller, ev: parent_event)
                         }
+                        .id(parent_event.id)
+                        .matchedGeometryEffect(id: parent_event.id.hex(), in: animation)
                         
                         Divider()
                             .padding(.top, 4)
@@ -101,25 +110,38 @@ struct ChatroomView: View {
                         SelectedEventView(damus: damus, event: self.thread.event, size: .selected)
                     }
                     .id(self.thread.event.id)
+                    .matchedGeometryEffect(id: self.thread.event.id.hex(), in: animation)
                     
                     // MARK: - Children view
                     let events = sorted_child_events
                     let count = events.count
                     ForEach(Array(zip(events, events.indices)), id: \.0.id) { (ev, ind) in
-                        ChatView(event: events[ind],
-                                 prev_ev: ind > 0 ? events[ind-1] : nil,
-                                 next_ev: ind == count-1 ? nil : events[ind+1],
-                                 damus_state: damus,
-                                 thread: thread,
-                                 scroll_to_event: { note_id in
-                            self.go_to_event(scroller: scroller, note_id: note_id)
-                        },
-                        focus_event: {
-                            thread.set_active_event(ev, keypair: self.damus.keypair)
-                        },
-                                 highlight_bubble: selected_note_id == ev.id
-                        )
-                        .padding(.horizontal)
+                        EventMutingContainerView(
+                            damus_state: damus,
+                            event: ev,
+                            muteBox: { event_shown, muted_reason in
+                                AnyView(
+                                    EventMutedBoxView(shown: event_shown, reason: muted_reason)
+                                        .padding(5)
+                                )
+                            }) {
+                                ChatView(event: events[ind],
+                                         prev_ev: ind > 0 ? events[ind-1] : nil,
+                                         next_ev: ind == count-1 ? nil : events[ind+1],
+                                         damus_state: damus,
+                                         thread: thread,
+                                         scroll_to_event: { note_id in
+                                    self.go_to_event(scroller: scroller, note_id: note_id)
+                                },
+                                         focus_event: {
+                                    self.set_active_event(scroller: scroller, ev: ev)
+                                },
+                                         highlight_bubble: selected_note_id == ev.id
+                                )
+                                .padding(.horizontal)
+                        }
+                        .id(ev.id)
+                        .matchedGeometryEffect(id: ev.id.hex(), in: animation)
                     }
                 }
                 .padding(.top)

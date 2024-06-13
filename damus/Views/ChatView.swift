@@ -20,6 +20,7 @@ struct ChatView: View {
     let scroll_to_event: ((_ id: NoteId) -> Void)?
     let focus_event: (() -> Void)?
     let highlight_bubble: Bool
+    @State var press = false
 
     let generator = UIImpactFeedbackGenerator(style: .medium)
     
@@ -176,10 +177,28 @@ struct ChatView: View {
                 .opacity(highlight_bubble ? 1 : 0)
         )
         .onTapGesture {
-            withAnimation {
-                self.popover_state.flip()
-            }
+//            withAnimation(.easeOut(duration: 0.1)) {
+//                self.popover_state.flip()
+//                let generator = UIImpactFeedbackGenerator(style: .light)
+//                generator.impactOccurred()
+//            }
+            focus_event?()
         }
+        .scaleEffect(press ? 1.1 : 1)
+        .shadow(color: .black.opacity(0.1), radius: press ? 8 : 0, y: press ? 15 : 0)
+//        .onLongPressGesture(perform: {
+//            let generator = UIImpactFeedbackGenerator(style: .heavy)
+//            generator.impactOccurred()
+//            focus_event?()
+//        }, onPressingChanged: { is_pressing in
+//            withAnimation(is_pressing ? .easeIn(duration: 1) : .easeOut(duration: 0.1)) {
+//                press = is_pressing
+//                if is_pressing {
+//                    let generator = UIImpactFeedbackGenerator(style: .light)
+//                    generator.impactOccurred()
+//                }
+//            }
+//        })
     }
     
     var event_bubble_wrapper: some View {
