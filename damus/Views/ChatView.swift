@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MCEmojiPicker
+import SwipeActions
 
 fileprivate let CORNER_RADIUS: CGFloat = 10
 
@@ -225,8 +226,8 @@ struct ChatView: View {
         .padding(.top, -35)
         .padding(.horizontal, 10)
     }
-
-    var body: some View {
+    
+    var content: some View {
         VStack {
             HStack(alignment: .bottom, spacing: 4) {
                 if by_other_user {
@@ -259,7 +260,22 @@ struct ChatView: View {
             
             self.action_bar
         }
+    }
 
+    var body: some View {
+        SwipeView {
+            self.content
+        } trailingActions: { context in
+            SwipeAction(systemImage: "arrowshape.turn.up.left.fill", backgroundColor: DamusColors.adaptableGrey) {
+                notify(.compose(.replying_to(event)))
+                context.state.wrappedValue = .closed
+            }
+            .allowSwipeToTrigger()
+            .frame(width: 50, height: 50)
+            .clipShape(Circle())
+            .overlay(Circle().stroke(Color.damusAdaptableGrey2, lineWidth: 2))
+        }
+        .swipeActionsStyle(.mask)
     }
 }
 

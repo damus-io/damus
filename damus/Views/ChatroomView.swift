@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwipeActions
 
 struct ChatroomView: View {
     @Environment(\.dismiss) var dismiss
@@ -115,34 +116,36 @@ struct ChatroomView: View {
                     // MARK: - Children view
                     let events = sorted_child_events
                     let count = events.count
-                    ForEach(Array(zip(events, events.indices)), id: \.0.id) { (ev, ind) in
-                        EventMutingContainerView(
-                            damus_state: damus,
-                            event: ev,
-                            muteBox: { event_shown, muted_reason in
-                                AnyView(
-                                    EventMutedBoxView(shown: event_shown, reason: muted_reason)
-                                        .padding(5)
-                                )
-                            }) {
-                                ChatView(event: events[ind],
-                                         selected_event: self.thread.event,
-                                         prev_ev: ind > 0 ? events[ind-1] : nil,
-                                         next_ev: ind == count-1 ? nil : events[ind+1],
-                                         damus_state: damus,
-                                         thread: thread,
-                                         scroll_to_event: { note_id in
-                                    self.go_to_event(scroller: scroller, note_id: note_id)
-                                },
-                                         focus_event: {
-                                    self.set_active_event(scroller: scroller, ev: ev)
-                                },
-                                         highlight_bubble: selected_note_id == ev.id
-                                )
-                                .padding(.horizontal)
+                    SwipeViewGroup {
+                        ForEach(Array(zip(events, events.indices)), id: \.0.id) { (ev, ind) in
+                            EventMutingContainerView(
+                                damus_state: damus,
+                                event: ev,
+                                muteBox: { event_shown, muted_reason in
+                                    AnyView(
+                                        EventMutedBoxView(shown: event_shown, reason: muted_reason)
+                                            .padding(5)
+                                    )
+                                }) {
+                                    ChatView(event: events[ind],
+                                             selected_event: self.thread.event,
+                                             prev_ev: ind > 0 ? events[ind-1] : nil,
+                                             next_ev: ind == count-1 ? nil : events[ind+1],
+                                             damus_state: damus,
+                                             thread: thread,
+                                             scroll_to_event: { note_id in
+                                        self.go_to_event(scroller: scroller, note_id: note_id)
+                                    },
+                                             focus_event: {
+                                        self.set_active_event(scroller: scroller, ev: ev)
+                                    },
+                                             highlight_bubble: selected_note_id == ev.id
+                                    )
+                                    .padding(.horizontal)
+                                }
+                                .id(ev.id)
+                                .matchedGeometryEffect(id: ev.id.hex(), in: animation)
                         }
-                        .id(ev.id)
-                        .matchedGeometryEffect(id: ev.id.hex(), in: animation)
                     }
                 }
                 .padding(.top)
