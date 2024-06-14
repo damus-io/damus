@@ -25,12 +25,14 @@ struct ChatView: View {
     @State var press = false
 
     let generator = UIImpactFeedbackGenerator(style: .medium)
+    @State var work_item: DispatchWorkItem?
     
     @State var expand_reply: Bool = false
     @State var selected_emoji: String = ""
     @State var popover_state: PopoverState = .closed {
         didSet {
-            print(popover_state)
+            let generator = UIImpactFeedbackGenerator(style: popover_state == .open_emoji_selector ? .heavy : .light)
+            generator.impactOccurred()
         }
     }
     @State private var isOnTopHalfOfScreen: Bool = false
@@ -167,27 +169,64 @@ struct ChatView: View {
                 .opacity(highlight_bubble ? 1 : 0)
         )
         .onTapGesture {
-            focus_event?()
+            if popover_state == .closed {
+                focus_event?()
+            }
+            else {
+                popover_state = .closed
+                let generator = UIImpactFeedbackGenerator(style: .light)
+                generator.impactOccurred()
+            }
         }
     }
     
     var event_bubble_wrapper: some View {
-        self.event_bubble
-            .emojiPicker(
-                isPresented: Binding(get: { popover_state == .open_emoji_selector }, set: {
-                    print("emoji picker presentation update: \($0.description)")
-                    popover_state = $0 == true ? .open_emoji_selector : .closed
-                }),
-                selectedEmoji: $selected_emoji,
-                arrowDirection: isOnTopHalfOfScreen ? .down : .up,
-                isDismissAfterChoosing: false
-            )
-            .onChange(of: selected_emoji) { newSelectedEmoji in
-                if newSelectedEmoji != "" {
-                    send_like(emoji: newSelectedEmoji)
-                    popover_state = .closed
+        VStack {
+            self.event_bubble
+                .emojiPicker(
+                    isPresented: Binding(get: { popover_state == .open_emoji_selector }, set: { new_state in
+                        withAnimation(new_state == true ? .easeIn(duration: 0.5) : .easeOut(duration: 0.1)) {
+                            popover_state = new_state == true ? .open_emoji_selector : .closed
+                        }
+                    }),
+                    selectedEmoji: $selected_emoji,
+                    arrowDirection: isOnTopHalfOfScreen ? .down : .up,
+                    isDismissAfterChoosing: false
+                )
+                .onChange(of: selected_emoji) { newSelectedEmoji in
+                    if newSelectedEmoji != "" {
+                        send_like(emoji: newSelectedEmoji)
+                        popover_state = .closed
+                    }
+                }
+            self.action_bar
+        }
+        .scaleEffect(self.popover_state == .open_emoji_selector ? 1.08 : press ? 1.02 : 1)
+        .shadow(color: (press || self.popover_state == .open_emoji_selector) ? .black.opacity(0.1) : .black.opacity(0.3), radius: (press || self.popover_state == .open_emoji_selector) ? 8 : 0, y: (press || self.popover_state == .open_emoji_selector) ? 15 : 0)
+        .onLongPressGesture(minimumDuration: 0.5, maximumDistance: 10, perform: {
+            work_item?.cancel()
+        }, onPressingChanged: { is_pressing in
+            withAnimation(is_pressing ? .easeIn(duration: 0.5) : .easeOut(duration: 0.1)) {
+                press = is_pressing
+                if popover_state != .closed {
+                    return
+                }
+                if is_pressing {
+                    let generator = UIImpactFeedbackGenerator(style: .light)
+                    generator.impactOccurred()
+                    let item = DispatchWorkItem {
+                        // Ensure the action is performed only if the condition is still valid
+                        if press {
+                            withAnimation(.bouncy(duration: 0.2, extraBounce: 0.35)) {
+                                popover_state = .open_emoji_selector
+                            }
+                        }
+                    }
+                    work_item = item
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: item)
                 }
             }
+        })
     }
     
     func send_like(emoji: String) {
@@ -257,8 +296,6 @@ struct ChatView: View {
             .contentShape(Rectangle())
             .id(event.id)
             .padding([.bottom], 6)
-            
-            self.action_bar
         }
     }
 
