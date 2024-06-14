@@ -501,6 +501,7 @@
 		D7870BC32AC47EBC0080BA88 /* EventLoaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC22AC47EBC0080BA88 /* EventLoaderView.swift */; };
 		D789D1202AFEFBF20083A7AB /* secp256k1 in Frameworks */ = {isa = PBXBuildFile; productRef = D789D11F2AFEFBF20083A7AB /* secp256k1 */; };
 		D78CD5982B8990300014D539 /* DamusAppNotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78CD5972B8990300014D539 /* DamusAppNotificationView.swift */; };
+		D78DB8592C1CE9CA00F0AB12 /* SwipeActions in Frameworks */ = {isa = PBXBuildFile; productRef = D78DB8582C1CE9CA00F0AB12 /* SwipeActions */; };
 		D798D21A2B0856CC00234419 /* Mentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7FF7D42823313F009601DB /* Mentions.swift */; };
 		D798D21B2B0856F200234419 /* NdbTagsIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDD1AE12A6B3074001CD4DF /* NdbTagsIterator.swift */; };
 		D798D21C2B0857E400234419 /* Bech32Object.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABEF29857E9200D66079 /* Bech32Object.swift */; };
@@ -1488,6 +1489,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C06670428FC7EC500038D2A /* Kingfisher in Frameworks */,
+				D78DB8592C1CE9CA00F0AB12 /* SwipeActions in Frameworks */,
 				4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */,
 				4C27C9322A64766F007DBC75 /* MarkdownUI in Frameworks */,
 				3AFE89C32BD4156F00AD31EF /* MCEmojiPicker in Frameworks */,
@@ -2863,6 +2865,7 @@
 				4C06670328FC7EC500038D2A /* Kingfisher */,
 				4C27C9312A64766F007DBC75 /* MarkdownUI */,
 				3AFE89C22BD4156F00AD31EF /* MCEmojiPicker */,
+				D78DB8582C1CE9CA00F0AB12 /* SwipeActions */,
 			);
 			productName = damus;
 			productReference = 4CE6DEE327F7A08100C66700 /* damus.app */;
@@ -3003,6 +3006,7 @@
 				4C27C9302A64766F007DBC75 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 				D7A343EC2AD0D77C00CED48B /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
 				3AFE89C12BD4156F00AD31EF /* XCRemoteSwiftPackageReference "MCEmojiPicker" */,
+				D78DB8572C1CE9CA00F0AB12 /* XCRemoteSwiftPackageReference "SwipeActions" */,
 			);
 			productRefGroup = 4CE6DEE427F7A08100C66700 /* Products */;
 			projectDirPath = "";
@@ -4352,6 +4356,14 @@
 				minimumVersion = 0.2.26;
 			};
 		};
+		D78DB8572C1CE9CA00F0AB12 /* XCRemoteSwiftPackageReference "SwipeActions" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/aheze/SwipeActions";
+			requirement = {
+				kind = exactVersion;
+				version = 1.1.0;
+			};
+		};
 		D7A343EC2AD0D77C00CED48B /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing";
@@ -4387,6 +4399,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
 			productName = secp256k1;
+		};
+		D78DB8582C1CE9CA00F0AB12 /* SwipeActions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D78DB8572C1CE9CA00F0AB12 /* XCRemoteSwiftPackageReference "SwipeActions" */;
+			productName = SwipeActions;
 		};
 		D7A343ED2AD0D77C00CED48B /* InlineSnapshotTesting */ = {
 			isa = XCSwiftPackageProductDependency;
