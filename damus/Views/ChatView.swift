@@ -303,15 +303,10 @@ struct ChatView: View {
         SwipeView {
             self.content
         } trailingActions: { context in
-            SwipeAction(systemImage: "arrowshape.turn.up.left.fill", backgroundColor: DamusColors.adaptableGrey) {
-                notify(.compose(.replying_to(event)))
-                context.state.wrappedValue = .closed
-            }
-            .allowSwipeToTrigger()
-            .frame(width: 50, height: 50)
-            .clipShape(Circle())
-            .overlay(Circle().stroke(Color.damusAdaptableGrey2, lineWidth: 2))
+            let bar = make_actionbar_model(ev: event.id, damus: damus_state)
+            EventActionBar(damus_state: damus_state, event: event, bar: bar, options: [.swipe_action_menu], swipe_context: context)
         }
+        .swipeSpacing(-20)
         .swipeActionsStyle(.mask)
     }
 }

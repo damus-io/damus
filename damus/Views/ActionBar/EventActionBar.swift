@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MCEmojiPicker
+import SwipeActions
 
 struct EventActionBar: View {
     let damus_state: DamusState
@@ -14,6 +15,7 @@ struct EventActionBar: View {
     let generator = UIImpactFeedbackGenerator(style: .medium)
     let userProfile : ProfileModel
     let focus_action: (() -> Void)?
+    let swipe_context: SwipeContext?
     let options: Options
     
     // just used for previews
@@ -25,13 +27,14 @@ struct EventActionBar: View {
 
     @ObservedObject var bar: ActionBarModel
     
-    init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel? = nil, options: Options = [], focus_action: (() -> Void)? = nil) {
+    init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel? = nil, options: Options = [], focus_action: (() -> Void)? = nil, swipe_context: SwipeContext? = nil) {
         self.damus_state = damus_state
         self.event = event
         _bar = ObservedObject(wrappedValue: bar ?? make_actionbar_model(ev: event.id, damus: damus_state))
         self.userProfile = ProfileModel(pubkey: event.pubkey, damus: damus_state)
         self.options = options
         self.focus_action = focus_action
+        self.swipe_context = swipe_context
     }
     
     var lnurl: String? {
@@ -119,6 +122,53 @@ struct EventActionBar: View {
         }
     }
     
+    // MARK: Swipe action menu buttons
+    
+    var reply_swipe_button: some View {
+        SwipeAction(systemImage: "arrowshape.turn.up.left.fill", backgroundColor: DamusColors.adaptableGrey) {
+            notify(.compose(.replying_to(event)))
+            self.swipe_context?.state.wrappedValue = .closed
+        }
+        .allowSwipeToTrigger()
+        .frame(width: 50, height: 50)
+        .clipShape(Circle())
+        .overlay(Circle().stroke(Color.damusAdaptableGrey2, lineWidth: 2))
+        .accessibilityLabel(NSLocalizedString("Reply", comment: "Accessibility label for reply button"))
+    }
+    
+    var repost_swipe_button: some View {
+        SwipeAction(image: "repost", backgroundColor: DamusColors.adaptableGrey) {
+            self.show_repost_action = true
+            self.swipe_context?.state.wrappedValue = .closed
+        }
+        .frame(width: 50, height: 50)
+        .clipShape(Circle())
+        .overlay(Circle().stroke(Color.damusAdaptableGrey2, lineWidth: 2))
+        .accessibilityLabel(NSLocalizedString("Repost or quote this note", comment: "Accessibility label for repost/quote button"))
+    }
+    
+    var like_swipe_button: some View {
+        SwipeAction(image: "shaka", backgroundColor: DamusColors.adaptableGrey) {
+            send_like(emoji: damus_state.settings.default_emoji_reaction)
+            self.swipe_context?.state.wrappedValue = .closed
+        }
+        .frame(width: 50, height: 50)
+        .clipShape(Circle())
+        .overlay(Circle().stroke(Color.damusAdaptableGrey2, lineWidth: 2))
+        .accessibilityLabel(NSLocalizedString("React with default reaction emoji", comment: "Accessibility label for react button"))
+    }
+    
+    var share_swipe_button: some View {
+        SwipeAction(image: "upload", backgroundColor: DamusColors.adaptableGrey) {
+            show_share_action = true
+            self.swipe_context?.state.wrappedValue = .closed
+        }
+        .frame(width: 50, height: 50)
+        .clipShape(Circle())
+        .overlay(Circle().stroke(Color.damusAdaptableGrey2, lineWidth: 2))
+        .accessibilityLabel(NSLocalizedString("Share externally", comment: "Accessibility label for external share button"))
+    }
+    
     // MARK: Bar buttons
     
     var reply_button: some View {
@@ -189,6 +239,14 @@ struct EventActionBar: View {
         }
     }
     
+    var swipe_action_menu_content: some View {
+        Group {
+            self.like_swipe_button
+            self.repost_swipe_button
+            self.reply_swipe_button
+        }
+    }
+    
     var action_bar_content: some View {
         let hide_items_without_activity = options.contains(.hide_items_without_activity)
         let should_hide_chat_bubble = hide_items_without_activity && bar.replies == 0
@@ -234,6 +292,9 @@ struct EventActionBar: View {
     var content: some View {
         if options.contains(.context_menu) {
             AnyView(self.context_menu_content)
+        }
+        else if options.contains(.swipe_action_menu) {
+            AnyView(self.swipe_action_menu_content)
         }
         else {
             AnyView(self.action_bar_content)
@@ -318,6 +379,7 @@ struct EventActionBar: View {
         static let hide_items_without_activity = Options(rawValue: 1 << 1)
         static let context_menu = Options(rawValue: 1 << 2)
         static let focus_button_instead_of_like_button = Options(rawValue: 1 << 3)
+        static let swipe_action_menu = Options(rawValue: 1 << 4)
     }
 }
 
@@ -607,5 +669,21 @@ struct EventActionBar_Previews: PreviewProvider {
             EventActionBar(damus_state: ds, event: ev, bar: bar, options: [.no_spread])
         }
         .padding(20)
+    }
+}
+
+public extension SwipeAction where Label == Image, Background == Color {
+    init(
+        image: String,
+        backgroundColor: Color = Color.primary.opacity(0.1),
+        highlightOpacity: Double = 0.5,
+        action: @escaping () -> Void
+    ) {
+        self.init(action: action) { highlight in
+            Image(image)
+        } background: { highlight in
+            backgroundColor
+                .opacity(highlight ? highlightOpacity : 1)
+        }
     }
 }
