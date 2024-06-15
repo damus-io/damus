@@ -130,7 +130,6 @@ struct ChatView: View {
                 if by_other_user {
                     HStack {
                         ProfileName(pubkey: event.pubkey, damus: damus_state)
-                            .foregroundColor(id_to_color(event.pubkey))
                             .onTapGesture {
                                 show_profile_action_sheet_if_enabled(damus_state: damus_state, pubkey: event.pubkey)
                             }
