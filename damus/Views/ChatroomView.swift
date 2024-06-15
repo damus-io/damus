@@ -68,7 +68,7 @@ struct ChatroomView: View {
     var body: some View {
         ScrollViewReader { scroller in
             ScrollView(.vertical) {
-                LazyVStack(alignment: .leading, spacing: 10) {
+                LazyVStack(alignment: .leading, spacing: 16) {
                     // MARK: - Parents events view
                     ForEach(parent_events, id: \.id) { parent_event in
                         EventMutingContainerView(damus_state: damus, event: parent_event) {

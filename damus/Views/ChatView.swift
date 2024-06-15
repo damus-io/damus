@@ -108,12 +108,10 @@ struct ChatView: View {
     
     var profile_picture_view: some View {
         VStack {
-            if is_active || just_started {
-                ProfilePicView(pubkey: event.pubkey, size: 32, highlight: .none, profiles: damus_state.profiles, disable_animation: disable_animation)
-                    .onTapGesture {
-                        show_profile_action_sheet_if_enabled(damus_state: damus_state, pubkey: event.pubkey)
-                    }
-            }
+            ProfilePicView(pubkey: event.pubkey, size: 32, highlight: .none, profiles: damus_state.profiles, disable_animation: disable_animation)
+                .onTapGesture {
+                    show_profile_action_sheet_if_enabled(damus_state: damus_state, pubkey: event.pubkey)
+                }
         }
         .frame(maxWidth: 32)
     }
@@ -125,38 +123,34 @@ struct ChatView: View {
     var is_ours: Bool { return !by_other_user }
     
     var event_bubble: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                if by_other_user {
-                    HStack {
-                        ProfileName(pubkey: event.pubkey, damus: damus_state)
-                            .onTapGesture {
-                                show_profile_action_sheet_if_enabled(damus_state: damus_state, pubkey: event.pubkey)
-                            }
-                        Text(verbatim: "\(format_relative_time(event.created_at))")
-                            .foregroundColor(.gray)
-                    }
-                }
-
-                if let replying_to = event.direct_replies(),
-                   replying_to != selected_event.id {
-                    ReplyQuoteView(keypair: damus_state.keypair, quoter: event, event_id: replying_to, state: damus_state, thread: thread, options: options)
-                        .background(is_ours ? DamusColors.adaptablePurpleBackground2 : DamusColors.adaptableGrey2)
-                        .foregroundColor(is_ours ? Color.damusAdaptablePurpleForeground : Color.damusAdaptableBlack)
-                        .cornerRadius(5)
-                        .onTapGesture {
-                            self.scroll_to_event?(replying_to)
-                        }
-                }
-                
+        VStack(alignment: .leading, spacing: 4) {
+            if by_other_user {
                 HStack {
-                    let blur_images = should_blur_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
-                    NoteContentView(damus_state: damus_state, event: event, blur_images: blur_images, size: .normal, options: [])
-                        .padding(2)
-                    Spacer()
+                    ProfileName(pubkey: event.pubkey, damus: damus_state)
+                        .onTapGesture {
+                            show_profile_action_sheet_if_enabled(damus_state: damus_state, pubkey: event.pubkey)
+                        }
+                    Text(verbatim: "\(format_relative_time(event.created_at))")
+                        .foregroundColor(.gray)
                 }
             }
+            
+            if let replying_to = event.direct_replies(),
+               replying_to != selected_event.id {
+                ReplyQuoteView(keypair: damus_state.keypair, quoter: event, event_id: replying_to, state: damus_state, thread: thread, options: options)
+                    .background(is_ours ? DamusColors.adaptablePurpleBackground2 : DamusColors.adaptableGrey2)
+                    .foregroundColor(is_ours ? Color.damusAdaptablePurpleForeground : Color.damusAdaptableBlack)
+                    .cornerRadius(5)
+                    .onTapGesture {
+                        self.scroll_to_event?(replying_to)
+                    }
+            }
+            
+            let blur_images = should_blur_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
+            NoteContentView(damus_state: damus_state, event: event, blur_images: blur_images, size: .normal, options: [])
+                .padding(2)
         }
+        .frame(minWidth: 150, alignment: is_ours ? .trailing : .leading)
         .padding(10)
         .background(by_other_user ? DamusColors.adaptableGrey : DamusColors.adaptablePurpleBackground)
         .tint(is_ours ? Color.white : Color.accentColor)
@@ -166,6 +160,16 @@ struct ChatView: View {
             RoundedRectangle(cornerRadius: CORNER_RADIUS+2)
                 .stroke(.accent, lineWidth: 4)
                 .opacity(highlight_bubble ? 1 : 0)
+        )
+        .padding(-4)
+        .overlay(
+            ZStack(alignment: is_ours ? .bottomLeading : .bottomTrailing) {
+                VStack {
+                    Spacer()
+                    self.action_bar
+                        .padding(.horizontal, 5)
+                }
+            }
         )
         .onTapGesture {
             if popover_state == .closed {
@@ -180,7 +184,7 @@ struct ChatView: View {
     }
     
     var event_bubble_wrapper: some View {
-        VStack {
+        ZStack(alignment: is_ours ? .bottomLeading : .bottomTrailing) {
             self.event_bubble
                 .emojiPicker(
                     isPresented: Binding(get: { popover_state == .open_emoji_selector }, set: { new_state in
@@ -198,7 +202,6 @@ struct ChatView: View {
                         popover_state = .closed
                     }
                 }
-            self.action_bar
         }
         .scaleEffect(self.popover_state == .open_emoji_selector ? 1.08 : press ? 1.02 : 1)
         .shadow(color: (press || self.popover_state == .open_emoji_selector) ? .black.opacity(0.1) : .black.opacity(0.3), radius: (press || self.popover_state == .open_emoji_selector) ? 8 : 0, y: (press || self.popover_state == .open_emoji_selector) ? 15 : 0)
@@ -242,25 +245,54 @@ struct ChatView: View {
     
     var action_bar: some View {
         let bar = make_actionbar_model(ev: event.id, damus: damus_state)
-        return HStack {
-            if by_other_user {
-                Spacer()
-            }
+        return Group {
             if !bar.is_empty {
-                EventActionBar(damus_state: damus_state, event: event, bar: bar, options: [.no_spread, .hide_items_without_activity])
-                    .padding(10)
-                    .background(DamusColors.adaptableLighterGrey)
-                    .disabled(true)
-                    .cornerRadius(100)
-                    .shadow(color: Color.black.opacity(0.05),radius: 3, y: 3)
-                    .scaleEffect(0.7, anchor: .trailing)
-            }
-            if !by_other_user {
-                Spacer()
+                HStack {
+                    if by_other_user {
+                        Spacer()
+                    }
+                    EventActionBar(damus_state: damus_state, event: event, bar: bar, options: [.no_spread, .hide_items_without_activity])
+                        .padding(10)
+                        .background(DamusColors.adaptableLighterGrey)
+                        .disabled(true)
+                        .cornerRadius(100)
+                        .overlay(RoundedRectangle(cornerSize: CGSize(width: 100, height: 100)).stroke(DamusColors.adaptableWhite, lineWidth: 1))
+                        .shadow(color: Color.black.opacity(0.05),radius: 3, y: 3)
+                        .scaleEffect(0.7, anchor: is_ours ? .leading : .trailing)
+                    if !by_other_user {
+                        Spacer()
+                    }
+                }
+                .padding(.vertical, -20)
             }
         }
-        .padding(.top, -35)
-        .padding(.horizontal, 10)
+    }
+    
+    var event_bubble_swipe_wrapper: some View {
+        Group {
+            if !by_other_user {
+                SwipeView {
+                    self.event_bubble_wrapper
+                } trailingActions: { context in
+                    let bar = make_actionbar_model(ev: event.id, damus: damus_state)
+                    EventActionBar(damus_state: damus_state, event: event, bar: bar, options: [.swipe_action_menu_reverse], swipe_context: context)
+                }
+                .swipeSpacing(-20)
+                .swipeActionsStyle(.mask)
+                .swipeMinimumDistance(20)
+            }
+            else {
+                SwipeView {
+                    self.event_bubble_wrapper
+                } leadingActions: { context in
+                    let bar = make_actionbar_model(ev: event.id, damus: damus_state)
+                    EventActionBar(damus_state: damus_state, event: event, bar: bar, options: [.swipe_action_menu], swipe_context: context)
+                }
+                .swipeSpacing(-20)
+                .swipeActionsStyle(.mask)
+                .swipeMinimumDistance(20)
+            }
+        }
     }
     
     var content: some View {
@@ -269,8 +301,11 @@ struct ChatView: View {
                 if by_other_user {
                     self.profile_picture_view
                 }
+                else {
+                    Spacer()
+                }
                 
-                self.event_bubble_wrapper
+                self.event_bubble_swipe_wrapper
                     .background(
                         GeometryReader { geometry in
                             EmptyView()
@@ -289,6 +324,9 @@ struct ChatView: View {
                 if !by_other_user {
                     self.profile_picture_view
                 }
+                else {
+                    Spacer()
+                }
             }
             .contentShape(Rectangle())
             .id(event.id)
@@ -297,14 +335,7 @@ struct ChatView: View {
     }
 
     var body: some View {
-        SwipeView {
-            self.content
-        } trailingActions: { context in
-            let bar = make_actionbar_model(ev: event.id, damus: damus_state)
-            EventActionBar(damus_state: damus_state, event: event, bar: bar, options: [.swipe_action_menu], swipe_context: context)
-        }
-        .swipeSpacing(-20)
-        .swipeActionsStyle(.mask)
+        self.content
     }
 }
 

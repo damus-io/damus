@@ -241,6 +241,14 @@ struct EventActionBar: View {
     
     var swipe_action_menu_content: some View {
         Group {
+            self.reply_swipe_button
+            self.repost_swipe_button
+            self.like_swipe_button
+        }
+    }
+    
+    var swipe_action_menu_reverse_content: some View {
+        Group {
             self.like_swipe_button
             self.repost_swipe_button
             self.reply_swipe_button
@@ -295,6 +303,9 @@ struct EventActionBar: View {
         }
         else if options.contains(.swipe_action_menu) {
             AnyView(self.swipe_action_menu_content)
+        }
+        else if options.contains(.swipe_action_menu_reverse) {
+            AnyView(self.swipe_action_menu_reverse_content)
         }
         else {
             AnyView(self.action_bar_content)
@@ -380,6 +391,7 @@ struct EventActionBar: View {
         static let context_menu = Options(rawValue: 1 << 2)
         static let focus_button_instead_of_like_button = Options(rawValue: 1 << 3)
         static let swipe_action_menu = Options(rawValue: 1 << 4)
+        static let swipe_action_menu_reverse = Options(rawValue: 1 << 5)
     }
 }
 

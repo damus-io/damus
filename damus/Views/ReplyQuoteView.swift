@@ -14,9 +14,9 @@ struct ReplyQuoteView: View {
     let state: DamusState
     @ObservedObject var thread: ThreadModel
     let options: EventViewOptions
-
-    func MainContent(event: NostrEvent) -> some View {
-        HStack(alignment: .top) {
+    
+    func content(event: NdbNote) -> some View {
+        ZStack(alignment: .leading) {
             VStack(alignment: .leading) {
                 HStack(alignment: .center) {
                     ProfilePicView(pubkey: event.pubkey, size: 14, highlight: .reply, profiles: state.profiles, disable_animation: false)
@@ -25,32 +25,24 @@ struct ReplyQuoteView: View {
                         .font(.callout)
                         .lineLimit(1)
                         .padding(.bottom, -7)
+                        .padding(.top, -5)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .frame(height: 20)
                         .clipped()
-                    Spacer()
                 }
             }
             .padding(5)
             .padding(.leading, 5+3)
-            .overlay(content: {
-                HStack {
-                    Rectangle()
-                        .foregroundStyle(.accent)
-                        .frame(width: 3)
-                    Spacer()
-                }
-            })
+            Rectangle()
+                .foregroundStyle(.accent)
+                .frame(width: 3)
         }
     }
 
     var body: some View {
         Group {
             if let event = state.events.lookup(event_id) {
-                VStack {
-                    MainContent(event: event)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contentShape(Rectangle())
-                }
+                self.content(event: event)
             }
         }
     }
