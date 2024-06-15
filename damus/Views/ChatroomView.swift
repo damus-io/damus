@@ -201,7 +201,21 @@ struct ChatroomView: View {
 
 struct ChatroomView_Previews: PreviewProvider {
     static var previews: some View {
-        ChatroomView(damus: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state))
+        Group {
+            ChatroomView(damus: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state))
+                .previewDisplayName("Test note")
+            
+            let test_thread = ThreadModel(event: test_thread_note_1, damus_state: test_damus_state)
+            ChatroomView(damus: test_damus_state, thread: test_thread)
+                .onAppear {
+                    test_thread.add_event(test_thread_note_2, keypair: test_keypair)
+                    test_thread.add_event(test_thread_note_3, keypair: test_keypair)
+                    test_thread.add_event(test_thread_note_4, keypair: test_keypair)
+                    test_thread.add_event(test_thread_note_5, keypair: test_keypair)
+                    test_thread.add_event(test_thread_note_6, keypair: test_keypair)
+                    test_thread.add_event(test_thread_note_7, keypair: test_keypair)
+                }
+        }
     }
 }
 
