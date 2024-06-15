@@ -212,8 +212,6 @@ struct ChatView: View {
                     return
                 }
                 if is_pressing {
-                    let generator = UIImpactFeedbackGenerator(style: .light)
-                    generator.impactOccurred()
                     let item = DispatchWorkItem {
                         // Ensure the action is performed only if the condition is still valid
                         if press {
