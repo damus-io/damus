@@ -17,13 +17,14 @@ struct ChatroomView: View {
     @State var user_just_posted_flag: Bool = false
     @Namespace private var animation
     
-    var parent_events: [NostrEvent] {
-        damus.events.parent_events(event: thread.event, keypair: damus.keypair)
-    }
+    @State var parent_events: [NostrEvent] = []
+    @State var sorted_child_events: [NostrEvent] = []
     
-    var sorted_child_events: [NostrEvent] {
-        let all_recursive_child_events = self.recursive_child_events(event: thread.event)
-        return all_recursive_child_events.sorted(by: { a, b in
+    func compute_events(selected_event: NostrEvent? = nil) {
+        let selected_event = selected_event ?? thread.event
+        self.parent_events = damus.events.parent_events(event: selected_event, keypair: damus.keypair)
+        let all_recursive_child_events = self.recursive_child_events(event: selected_event)
+        self.sorted_child_events = all_recursive_child_events.sorted(by: { a, b in
             let a_is_muted = !should_show_event(event: a, damus_state: damus)
             let b_is_muted = !should_show_event(event: b, damus_state: damus)
             
@@ -60,6 +61,7 @@ struct ChatroomView: View {
     
     func set_active_event(scroller: ScrollViewProxy, ev: NdbNote) {
         withAnimation {
+            self.compute_events(selected_event: ev)
             thread.set_active_event(ev, keypair: self.damus.keypair)
             self.go_to_event(scroller: scroller, note_id: ev.id)
         }
@@ -73,13 +75,13 @@ struct ChatroomView: View {
                     ForEach(parent_events, id: \.id) { parent_event in
                         EventMutingContainerView(damus_state: damus, event: parent_event) {
                             EventView(damus: damus, event: parent_event)
+                                .matchedGeometryEffect(id: parent_event.id.hex(), in: animation)
                         }
                         .padding(.horizontal)
                         .onTapGesture {
                             self.set_active_event(scroller: scroller, ev: parent_event)
                         }
                         .id(parent_event.id)
-                        .matchedGeometryEffect(id: parent_event.id.hex(), in: animation)
                         
                         Divider()
                             .padding(.top, 4)
@@ -109,9 +111,10 @@ struct ChatroomView: View {
                         }
                     ) {
                         SelectedEventView(damus: damus, event: self.thread.event, size: .selected)
+                            .matchedGeometryEffect(id: self.thread.event.id.hex(), in: animation)
                     }
                     .id(self.thread.event.id)
-                    .matchedGeometryEffect(id: self.thread.event.id.hex(), in: animation)
+                    
                     
                     // MARK: - Children view
                     let events = sorted_child_events
@@ -176,6 +179,7 @@ struct ChatroomView: View {
                 }
             })
             .onReceive(thread.objectWillChange) {
+                self.compute_events()
                 if let last_event = thread.events().last, last_event.pubkey == damus.pubkey, user_just_posted_flag {
                     self.go_to_event(scroller: scroller, note_id: last_event.id)
                     user_just_posted_flag = false
@@ -183,6 +187,7 @@ struct ChatroomView: View {
             }
             .onAppear() {
                 thread.subscribe()
+                self.compute_events()
                 scroll_to_event(scroller: scroller, id: thread.event.id, delay: 0.1, animate: false)
             }
             .onDisappear() {
