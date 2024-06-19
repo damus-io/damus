@@ -8,12 +8,15 @@
 import SwiftUI
 import EmojiPicker
 import EmojiKit
+import SwipeActions
 
 struct EventActionBar: View {
     let damus_state: DamusState
     let event: NostrEvent
     let generator = UIImpactFeedbackGenerator(style: .medium)
     let userProfile : ProfileModel
+    let swipe_context: SwipeContext?
+    let options: Options
     
     // just used for previews
     @State var show_share_sheet: Bool = false
@@ -23,12 +26,14 @@ struct EventActionBar: View {
     @State private var selectedEmoji: Emoji? = nil
 
     @ObservedObject var bar: ActionBarModel
-
-    init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel? = nil) {
+    
+    init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel? = nil, options: Options = [], swipe_context: SwipeContext? = nil) {
         self.damus_state = damus_state
         self.event = event
         _bar = ObservedObject(wrappedValue: bar ?? make_actionbar_model(ev: event.id, damus: damus_state))
         self.userProfile = ProfileModel(pubkey: event.pubkey, damus: damus_state)
+        self.options = options
+        self.swipe_context = swipe_context
     }
     
     var lnurl: String? {
@@ -45,60 +50,176 @@ struct EventActionBar: View {
         return true
     }
     
-    var body: some View {
-        HStack {
-            if damus_state.keypair.privkey != nil {
-                HStack(spacing: 4) {
-                    EventActionButton(img: "bubble2", col: bar.replied ? DamusColors.purple : Color.gray) {
-                        notify(.compose(.replying_to(event)))
-                    }
-                    .accessibilityLabel(NSLocalizedString("Reply", comment: "Accessibility label for reply button"))
-                    Text(verbatim: "\(bar.replies > 0 ? "\(bar.replies)" : "")")
-                        .font(.footnote.weight(.medium))
-                        .foregroundColor(bar.replied ? DamusColors.purple : Color.gray)
-                }
-            }
-            Spacer()
-            HStack(spacing: 4) {
-                
-                EventActionButton(img: "repost", col: bar.boosted ? Color.green : nil) {
-                    self.show_repost_action = true
-                }
-                .accessibilityLabel(NSLocalizedString("Reposts", comment: "Accessibility label for boosts button"))
-                Text(verbatim: "\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
-                    .font(.footnote.weight(.medium))
-                    .foregroundColor(bar.boosted ? Color.green : Color.gray)
-            }
-
-            if show_like {
-                Spacer()
-
-                HStack(spacing: 4) {
-                    LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil) { emoji in
-                        if bar.liked {
-                            //notify(.delete, bar.our_like)
-                        } else {
-                            send_like(emoji: emoji)
-                        }
-                    }
-
-                    Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
-                        .font(.footnote.weight(.medium))
-                        .nip05_colorized(gradient: bar.liked)
-                }
-            }
-
-            if let lnurl = self.lnurl {
-                Spacer()
-                NoteZapButton(damus_state: damus_state, target: ZapTarget.note(id: event.id, author: event.pubkey), lnurl: lnurl, zaps: self.damus_state.events.get_cache_data(self.event.id).zaps_model)
-            }
-
-            Spacer()
-            EventActionButton(img: "upload", col: Color.gray) {
-                show_share_action = true
-            }
-            .accessibilityLabel(NSLocalizedString("Share", comment: "Button to share a note"))
+    var space_if_spread: AnyView {
+        if options.contains(.no_spread) {
+            return AnyView(EmptyView())
         }
+        else {
+            return AnyView(Spacer())
+        }
+    }
+    
+    // MARK: Swipe action menu buttons
+    
+    var reply_swipe_button: some View {
+        SwipeAction(systemImage: "arrowshape.turn.up.left.fill", backgroundColor: DamusColors.adaptableGrey) {
+            notify(.compose(.replying_to(event)))
+            self.swipe_context?.state.wrappedValue = .closed
+        }
+        .allowSwipeToTrigger()
+        .swipeButtonStyle()
+        .accessibilityLabel(NSLocalizedString("Reply", comment: "Accessibility label for reply button"))
+    }
+    
+    var repost_swipe_button: some View {
+        SwipeAction(image: "repost", backgroundColor: DamusColors.adaptableGrey) {
+            self.show_repost_action = true
+            self.swipe_context?.state.wrappedValue = .closed
+        }
+        .swipeButtonStyle()
+        .accessibilityLabel(NSLocalizedString("Repost or quote this note", comment: "Accessibility label for repost/quote button"))
+    }
+    
+    var like_swipe_button: some View {
+        SwipeAction(image: "shaka", backgroundColor: DamusColors.adaptableGrey) {
+            send_like(emoji: damus_state.settings.default_emoji_reaction)
+            self.swipe_context?.state.wrappedValue = .closed
+        }
+        .swipeButtonStyle()
+        .accessibilityLabel(NSLocalizedString("React with default reaction emoji", comment: "Accessibility label for react button"))
+    }
+    
+    var share_swipe_button: some View {
+        SwipeAction(image: "upload", backgroundColor: DamusColors.adaptableGrey) {
+            show_share_action = true
+            self.swipe_context?.state.wrappedValue = .closed
+        }
+        .swipeButtonStyle()
+        .accessibilityLabel(NSLocalizedString("Share externally", comment: "Accessibility label for external share button"))
+    }
+    
+    // MARK: Bar buttons
+    
+    var reply_button: some View {
+        HStack(spacing: 4) {
+            EventActionButton(img: "bubble2", col: bar.replied ? DamusColors.purple : Color.gray) {
+                notify(.compose(.replying_to(event)))
+            }
+            .accessibilityLabel(NSLocalizedString("Reply", comment: "Accessibility label for reply button"))
+            Text(verbatim: "\(bar.replies > 0 ? "\(bar.replies)" : "")")
+                .font(.footnote.weight(.medium))
+                .foregroundColor(bar.replied ? DamusColors.purple : Color.gray)
+        }
+    }
+    
+    var repost_button: some View {
+        HStack(spacing: 4) {
+            
+            EventActionButton(img: "repost", col: bar.boosted ? Color.green : nil) {
+                self.show_repost_action = true
+            }
+            .accessibilityLabel(NSLocalizedString("Reposts", comment: "Accessibility label for boosts button"))
+            Text(verbatim: "\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
+                .font(.footnote.weight(.medium))
+                .foregroundColor(bar.boosted ? Color.green : Color.gray)
+        }
+    }
+    
+    var like_button: some View {
+        HStack(spacing: 4) {
+            LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil) { emoji in
+                if bar.liked {
+                    //notify(.delete, bar.our_like)
+                } else {
+                    send_like(emoji: emoji)
+                }
+            }
+            
+            Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
+                .font(.footnote.weight(.medium))
+                .nip05_colorized(gradient: bar.liked)
+        }
+    }
+    
+    var share_button: some View {
+        EventActionButton(img: "upload", col: Color.gray) {
+            show_share_action = true
+        }
+        .accessibilityLabel(NSLocalizedString("Share", comment: "Button to share a note"))
+    }
+    
+    // MARK: Main views
+    
+    var swipe_action_menu_content: some View {
+        Group {
+            self.reply_swipe_button
+            self.repost_swipe_button
+            if show_like {
+                self.like_swipe_button
+            }
+        }
+    }
+    
+    var swipe_action_menu_reverse_content: some View {
+        Group {
+            if show_like {
+                self.like_swipe_button
+            }
+            self.repost_swipe_button
+            self.reply_swipe_button
+        }
+    }
+    
+    var action_bar_content: some View {
+        let hide_items_without_activity = options.contains(.hide_items_without_activity)
+        let should_hide_chat_bubble = hide_items_without_activity && bar.replies == 0
+        let should_hide_repost = hide_items_without_activity && bar.boosts == 0
+        let should_hide_reactions = hide_items_without_activity && bar.likes == 0
+        let zap_model = self.damus_state.events.get_cache_data(self.event.id).zaps_model
+        let should_hide_zap = hide_items_without_activity && zap_model.zap_total > 0
+        let should_hide_share_button = hide_items_without_activity
+
+        return HStack(spacing: options.contains(.no_spread) ? 10 : 0) {
+            if damus_state.keypair.privkey != nil && !should_hide_chat_bubble {
+                self.reply_button
+            }
+            
+            if !should_hide_repost {
+                self.space_if_spread
+                self.repost_button
+            }
+            
+            if show_like && !should_hide_reactions {
+                self.space_if_spread
+                self.like_button
+            }
+                
+            if let lnurl = self.lnurl, !should_hide_zap {
+                self.space_if_spread
+                NoteZapButton(damus_state: damus_state, target: ZapTarget.note(id: event.id, author: event.pubkey), lnurl: lnurl, zaps: zap_model)
+            }
+            
+            if !should_hide_share_button {
+                self.space_if_spread
+                self.share_button
+            }
+        }
+    }
+    
+    var content: some View {
+        if options.contains(.swipe_action_menu) {
+            AnyView(self.swipe_action_menu_content)
+        }
+        else if options.contains(.swipe_action_menu_reverse) {
+            AnyView(self.swipe_action_menu_reverse_content)
+        }
+        else {
+            AnyView(self.action_bar_content)
+        }
+    }
+    
+    var body: some View {
+        self.content
         .onAppear {
             self.bar.update(damus: damus_state, evid: self.event.id)
         }
@@ -151,6 +272,17 @@ struct EventActionBar: View {
         
         damus_state.postbox.send(like_ev)
     }
+    
+    // MARK: Helper structures
+    
+    struct Options: OptionSet {
+        let rawValue: UInt32
+        
+        static let no_spread = Options(rawValue: 1 << 0)
+        static let hide_items_without_activity = Options(rawValue: 1 << 1)
+        static let swipe_action_menu = Options(rawValue: 1 << 2)
+        static let swipe_action_menu_reverse = Options(rawValue: 1 << 3)
+    }
 }
 
 
@@ -178,7 +310,6 @@ struct LikeButton: View {
 
     @State private var isReactionsVisible = false
 
-//    @State private var selectedEmoji: String = ""
     @State private var selectedEmoji: Emoji?
 
     // Following four are Shaka animation properties
@@ -287,7 +418,6 @@ struct LikeButton: View {
     }
 }
 
-
 struct EventActionBar_Previews: PreviewProvider {
     static var previews: some View {
         let ds = test_damus_state
@@ -312,7 +442,44 @@ struct EventActionBar_Previews: PreviewProvider {
             EventActionBar(damus_state: ds, event: ev, bar: extra_max_bar)
 
             EventActionBar(damus_state: ds, event: ev, bar: mega_max_bar)
+            
+            EventActionBar(damus_state: ds, event: ev, bar: bar, options: [.no_spread])
         }
         .padding(20)
+    }
+}
+
+// MARK: Helpers
+
+fileprivate struct SwipeButtonStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .frame(width: 50, height: 50)
+            .clipShape(Circle())
+            .overlay(Circle().stroke(Color.damusAdaptableGrey2, lineWidth: 2))
+    }
+}
+
+fileprivate extension View {
+    func swipeButtonStyle() -> some View {
+        modifier(SwipeButtonStyle())
+    }
+}
+
+// MARK: Needed extensions for SwipeAction
+
+public extension SwipeAction where Label == Image, Background == Color {
+    init(
+        image: String,
+        backgroundColor: Color = Color.primary.opacity(0.1),
+        highlightOpacity: Double = 0.5,
+        action: @escaping () -> Void
+    ) {
+        self.init(action: action) { highlight in
+            Image(image)
+        } background: { highlight in
+            backgroundColor
+                .opacity(highlight ? highlightOpacity : 1)
+        }
     }
 }

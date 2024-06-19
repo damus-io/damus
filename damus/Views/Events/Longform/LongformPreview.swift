@@ -51,13 +51,13 @@ struct LongformPreviewBody: View {
     func truncatedText(content: CompatibleText) -> some View {
         Group {
             if truncate_very_short {
-                TruncatedText(text: content, maxChars: 140)
+                TruncatedText(text: content, maxChars: 140, show_show_more_button: !options.contains(.no_show_more))
                     .font(header ? .body : .caption)
                     .foregroundColor(.gray)
                     .padding(.horizontal, 10)
             }
             else if truncate {
-                TruncatedText(text: content)
+                TruncatedText(text: content, show_show_more_button: !options.contains(.no_show_more))
                     .font(header ? .body : .caption)
                     .foregroundColor(.gray)
                     .padding(.horizontal, 10)

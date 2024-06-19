@@ -1,5 +1,5 @@
 {
-  "originHash" : "8c4ef1768f3ccbc97566169b88ce1c3a482207b6d3e394f2584f8749d5314dc6",
+  "originHash" : "babaf4d5748afecf49bbb702530d8e9576460692f478b0a50ee43195dd4440e2",
   "pins" : [
     {
       "identity" : "emojikit",
@@ -87,6 +87,15 @@
       "state" : {
         "revision" : "4c50bff6c168f74425f70476be62a072980d2da7",
         "version" : "0.1.2"
+      }
+    },
+    {
+      "identity" : "swipeactions",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/aheze/SwipeActions",
+      "state" : {
+        "revision" : "41e6f6dce02d8cfa164f8c5461a41340850ca3ab",
+        "version" : "1.1.0"
       }
     }
   ],
