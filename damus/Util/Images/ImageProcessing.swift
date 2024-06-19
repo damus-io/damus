@@ -30,7 +30,7 @@ func processImage(image: UIImage) -> URL? {
 }
 
 fileprivate func processImage(source: CGImageSource, fileExtension: String) -> URL? {
-    let destinationURL = createMediaURL(fileExtension: fileExtension)
+    let destinationURL = generateUniqueTemporaryMediaURL(fileExtension: fileExtension)
     
     guard let destination = removeGPSDataFromImage(source: source, url: destinationURL) else { return nil }
     
@@ -45,7 +45,7 @@ func processVideo(videoURL: URL) -> URL? {
 }
 
 fileprivate func saveVideoToTemporaryFolder(videoURL: URL) -> URL? {
-    let destinationURL = createMediaURL(fileExtension: videoURL.pathExtension)
+    let destinationURL = generateUniqueTemporaryMediaURL(fileExtension: videoURL.pathExtension)
     
     do {
         try FileManager.default.copyItem(at: videoURL, to: destinationURL)
@@ -57,7 +57,7 @@ fileprivate func saveVideoToTemporaryFolder(videoURL: URL) -> URL? {
 }
 
 /// Generate a temporary URL with a unique filename
-fileprivate func createMediaURL(fileExtension: String) -> URL {
+func generateUniqueTemporaryMediaURL(fileExtension: String) -> URL {
     let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
     let uniqueMediaName = "\(UUID().uuidString).\(fileExtension)"
     let temporaryMediaURL = temporaryDirectoryURL.appendingPathComponent(uniqueMediaName)

@@ -20,7 +20,13 @@ class ThreadModel: ObservableObject {
         self.original_event = event
         add_event(event, keypair: damus_state.keypair)
     }
-    
+
+    func events() -> [NostrEvent] {
+        return Array(event_map).sorted(by: { a, b in
+            return a.created_at < b.created_at
+        })
+    }
+
     var is_original: Bool {
         return original_event.id == event.id
     }
@@ -60,7 +66,7 @@ class ThreadModel: ObservableObject {
         var event_filter = NostrFilter()
         var ref_events = NostrFilter()
 
-        let thread_id = event.thread_id(keypair: .empty)
+        let thread_id = event.thread_id()
 
         ref_events.referenced_ids = [thread_id, event.id]
         ref_events.kinds = [.text]

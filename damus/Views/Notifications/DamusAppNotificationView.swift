@@ -37,9 +37,9 @@ struct DamusAppNotificationView: View {
                         .shadow(radius: 5, y: 5)
                     VStack(alignment: .leading, spacing: 5) {
                         HStack(alignment: .center, spacing: 3) {
-                            Text(NSLocalizedString("Damus", comment: "Name of the app for the title of an internal notification"))
+                            Text("Damus", comment: "Name of the app for the title of an internal notification")
                                 .font(.body.weight(.bold))
-                            Text("·")
+                            Text(verbatim: "·")
                                 .foregroundStyle(.secondary)
                             Text(relative_date)
                                 .font(.system(size: 16))
@@ -49,7 +49,7 @@ struct DamusAppNotificationView: View {
                             Image("check-circle.fill")
                                 .resizable()
                                 .frame(width: 15, height: 15)
-                            Text(NSLocalizedString("Internal app notification", comment: "Badge indicating that a notification is an official internal app notification"))
+                            Text("Internal app notification", comment: "Badge indicating that a notification is an official internal app notification")
                                 .font(.caption2)
                                 .bold()
                         }

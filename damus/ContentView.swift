@@ -308,7 +308,7 @@ struct ContentView: View {
                 active_sheet = .onboardingSuggestions
                 hasSeenOnboardingSuggestions = true
             }
-            self.appDelegate?.settings = damus_state?.settings
+            self.appDelegate?.state = damus_state
         }
         .sheet(item: $active_sheet) { item in
             switch item {
@@ -679,10 +679,7 @@ struct ContentView: View {
         let relay_filters = RelayFilters(our_pubkey: pubkey)
         let bootstrap_relays = load_bootstrap_relays(pubkey: pubkey)
         
-        // dumb stuff needed for property wrappers
-        UserSettingsStore.pubkey = pubkey
-        let settings = UserSettingsStore()
-        UserSettingsStore.shared = settings
+        let settings = UserSettingsStore.globally_load_for(pubkey: pubkey)
 
         let new_relay_filters = load_relay_filters(pubkey) == nil
         for relay in bootstrap_relays {
@@ -702,7 +699,7 @@ struct ContentView: View {
                                       likes: EventCounter(our_pubkey: pubkey),
                                       boosts: EventCounter(our_pubkey: pubkey),
                                       contacts: Contacts(our_pubkey: pubkey),
-                                      mutelist_manager: MutelistManager(),
+                                      mutelist_manager: MutelistManager(user_keypair: keypair),
                                       profiles: Profiles(ndb: ndb),
                                       dms: home.dms,
                                       previews: PreviewCache(),
@@ -833,6 +830,12 @@ func save_last_event(_ ev: NostrEvent, timeline: Timeline) {
     let str = timeline.rawValue
     UserDefaults.standard.set(ev.id.hex(), forKey: "last_\(str)")
     UserDefaults.standard.set(String(ev.created_at), forKey: "last_\(str)_time")
+}
+
+func save_last_event(_ ev_id: NoteId, created_at: UInt32, timeline: Timeline) {
+    let str = timeline.rawValue
+    UserDefaults.standard.set(ev_id.hex(), forKey: "last_\(str)")
+    UserDefaults.standard.set(String(created_at), forKey: "last_\(str)_time")
 }
 
 func update_filters_with_since(last_of_kind: [UInt32: NostrEvent], filters: [NostrFilter]) -> [NostrFilter] {

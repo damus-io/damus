@@ -13,7 +13,7 @@ struct SearchSettingsView: View {
 
     var body: some View {
         Form {
-            Section(header: Text(NSLocalizedString("Spam", comment: "Section header for Universe/Search spam"))) {
+            Section(header: Text("Spam", comment: "Section header for Universe/Search spam")) {
                 Toggle(NSLocalizedString("View multiple events per user", comment: "Setting to only see 1 event per user (npub) in the search/universe"), isOn: $settings.multiple_events_per_pubkey)
                     .toggleStyle(.switch)
             }

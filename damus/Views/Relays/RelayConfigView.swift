@@ -112,7 +112,7 @@ struct RelayConfigView: View {
     func RelayList(title: String, relayList: [RelayDescriptor], recommended: Bool) -> some View {
         ScrollView(showsIndicators: false) {
             HStack {
-                Text(NSLocalizedString(title, comment: "Section title for type of relay server list"))
+                Text(title)
                     .font(.system(size: 32, weight: .bold))
                 
                 
@@ -123,7 +123,7 @@ struct RelayConfigView: View {
                         show_add_relay.toggle()
                     }) {
                         HStack {
-                            Text(verbatim: "Add relay")
+                            Text("Add relay", comment: "Button text to add a relay")
                                 .padding(10)
                         }
                     }

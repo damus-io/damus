@@ -17,7 +17,7 @@ class CompatibleText: Equatable {
             return AnyView(
                 VStack {
                     Image("warning")
-                    Text(NSLocalizedString("This note contains too many items and cannot be rendered", comment: "Error message indicating that a note is too big and cannot be rendered"))
+                    Text("This note contains too many items and cannot be rendered", comment: "Error message indicating that a note is too big and cannot be rendered")
                         .multilineTextAlignment(.center)
                 }
                 .foregroundColor(.secondary)

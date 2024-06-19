@@ -29,7 +29,7 @@ struct EventBody: View {
 
     var body: some View {
         if event.known_kind == .longform {
-            LongformPreviewBody(state: damus_state, ev: event, options: options)
+            LongformPreviewBody(state: damus_state, ev: event, options: options, header: true)
 
             // truncated longform bodies are just the preview
             if !options.contains(.truncate_content) {

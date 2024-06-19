@@ -21,6 +21,13 @@ struct SaveKeysView: View {
     @FocusState var pubkey_focused: Bool
     @FocusState var privkey_focused: Bool
     
+    let first_contact_event: NdbNote?
+    
+    init(account: CreateAccountModel) {
+        self.account = account
+        self.first_contact_event = make_first_contact_event(keypair: account.keypair)
+    }
+    
     var body: some View {
         ZStack(alignment: .top) {
             VStack(alignment: .center) {
@@ -102,6 +109,13 @@ struct SaveKeysView: View {
     }
     
     func complete_account_creation(_ account: CreateAccountModel) {
+        guard let first_contact_event else {
+            error = NSLocalizedString("Could not create your initial contact list event. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help.", comment: "Error message to the user indicating that the initial contact list failed to be created.")
+            return
+        }
+        // Save contact list to storage right away so that we don't need to depend on the network to complete this important step
+        self.save_to_storage(first_contact_event: first_contact_event, for: account)
+        
         let bootstrap_relays = load_bootstrap_relays(pubkey: account.pubkey)
         for relay in bootstrap_relays {
             add_rw_relay(self.pool, relay)
@@ -115,6 +129,15 @@ struct SaveKeysView: View {
         
         self.pool.connect()
     }
+    
+    func save_to_storage(first_contact_event: NdbNote, for account: CreateAccountModel) {
+        // Send to NostrDB so that we have a local copy in storage
+        self.pool.send_raw_to_local_ndb(.typical(.event(first_contact_event)))
+        
+        // Save the ID to user settings so that we can easily find it later.
+        let settings = UserSettingsStore.globally_load_for(pubkey: account.pubkey)
+        settings.latest_contact_event_id_hex = first_contact_event.id.hex()
+    }
 
     func handle_event(relay: RelayURL, ev: NostrConnectionEvent) {
         switch ev {
@@ -122,15 +145,14 @@ struct SaveKeysView: View {
             switch wsev {
             case .connected:
                 let metadata = create_account_to_metadata(account)
-                let contacts_ev = make_first_contact_event(keypair: account.keypair)
                 
                 if let keypair = account.keypair.to_full(),
                    let metadata_ev = make_metadata_event(keypair: keypair, metadata: metadata) {
                     self.pool.send(.event(metadata_ev))
                 }
                 
-                if let contacts_ev {
-                    self.pool.send(.event(contacts_ev))
+                if let first_contact_event {
+                    self.pool.send(.event(first_contact_event))
                 }
                 
                 do {

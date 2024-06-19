@@ -30,6 +30,7 @@ enum Route: Hashable {
     case ReactionsSettings(settings: UserSettingsStore)
     case SearchSettings(settings: UserSettingsStore)
     case DeveloperSettings(settings: UserSettingsStore)
+    case FirstAidSettings(settings: UserSettingsStore)
     case Thread(thread: ThreadModel)
     case Reposts(reposts: EventsModel)
     case QuoteReposts(quotes: EventsModel)
@@ -78,7 +79,7 @@ enum Route: Hashable {
         case .AppearanceSettings(let settings):
             AppearanceSettingsView(damus_state: damusState, settings: settings)
         case .NotificationSettings(let settings):
-            NotificationSettingsView(settings: settings)
+            NotificationSettingsView(damus_state: damusState, settings: settings)
         case .ZapSettings(let settings):
             ZapSettingsView(settings: settings)
         case .TranslationSettings(let settings):
@@ -89,8 +90,11 @@ enum Route: Hashable {
             SearchSettingsView(settings: settings)
         case .DeveloperSettings(let settings):
             DeveloperSettingsView(settings: settings)
+        case .FirstAidSettings(settings: let settings):
+            FirstAidSettingsView(damus_state: damusState, settings: settings)
         case .Thread(let thread):
-            ThreadView(state: damusState, thread: thread)
+            ChatroomThreadView(damus: damusState, thread: thread)
+            //ThreadView(state: damusState, thread: thread)
         case .Reposts(let reposts):
             RepostsView(damus_state: damusState, model: reposts)
         case .QuoteReposts(let quote_reposts):
@@ -175,6 +179,8 @@ enum Route: Hashable {
             hasher.combine("searchSettings")
         case .DeveloperSettings:
             hasher.combine("developerSettings")
+        case .FirstAidSettings:
+            hasher.combine("firstAidSettings")
         case .Thread(let threadModel):
             hasher.combine("thread")
             hasher.combine(threadModel.event.id)

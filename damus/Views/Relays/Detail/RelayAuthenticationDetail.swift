@@ -15,13 +15,42 @@ struct RelayAuthenticationDetail: View {
         case .none:
             EmptyView()
         case .pending:
-            Text(NSLocalizedString("Pending", comment: "Label to display that authentication to a server is pending."))
+            Text("Pending", comment: "Label to display that authentication to a server is pending.")
+                .font(.caption)
+                .frame(height: 20)
+                .padding(.horizontal, 10)
+                .foregroundColor(DamusColors.warning)
+                .background(DamusColors.warningQuaternary)
+                .cornerRadius(20)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(DamusColors.warningBorder, lineWidth: 1)
+                )
         case .verified:
-            Text(NSLocalizedString("Authenticated", comment: "Label to display that authentication to a server has succeeded."))
-                .foregroundStyle(DamusColors.success)
+            Text("Authenticated", comment: "Label to display that authentication to a server has succeeded.")
+                .font(.caption)
+                .frame(height: 20)
+                .padding(.horizontal, 10)
+                .foregroundColor(DamusColors.success)
+                .background(DamusColors.successQuaternary)
+                .cornerRadius(20)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(DamusColors.successBorder, lineWidth: 1)
+                )
         case .error:
-            Text(NSLocalizedString("Error", comment: "Label to display that authentication to a server has failed."))
-                .foregroundStyle(DamusColors.danger)
+            Text("Error", comment: "Label to display that authentication to a server has failed.")
+                .font(.caption)
+                .frame(height: 20)
+                .padding(.horizontal, 10)
+                .foregroundColor(DamusColors.danger)
+                .background(DamusColors.dangerQuaternary)
+                .border(DamusColors.dangerBorder)
+                .cornerRadius(20)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(DamusColors.dangerBorder, lineWidth: 1)
+                )
         }
     }
 }

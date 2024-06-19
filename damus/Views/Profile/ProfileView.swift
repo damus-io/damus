@@ -199,7 +199,7 @@ struct ProfileView: View {
                     MuteDurationMenu { duration in
                         notify(.mute(.user(profile.pubkey, duration?.date_from_now)))
                     } label: {
-                        Text(NSLocalizedString("Mute", comment: "Button to mute a profile."))
+                        Text("Mute", comment: "Button to mute a profile.")
                             .foregroundStyle(.red)
                     }
                 }

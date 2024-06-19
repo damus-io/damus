@@ -49,6 +49,32 @@ enum MediaUpload {
         
         return false
     }
+    
+    var mime_type: String {
+        switch self.file_extension {
+            case "jpg", "jpeg":
+                return "image/jpg"
+            case "png":
+                return "image/png"
+            case "gif":
+                return "image/gif"
+            case "tiff", "tif":
+                return "image/tiff"
+            case "mp4":
+                return "video/mp4"
+            case "ogg":
+                return "video/ogg"
+            case "webm":
+                return "video/webm"
+            default:
+                switch self {
+                    case .image:
+                        return "image/jpg"
+                    case .video:
+                        return "video/mp4"
+                }
+        }
+    }
 }
 
 class ImageUploadModel: NSObject, URLSessionTaskDelegate, ObservableObject {
@@ -62,6 +88,20 @@ class ImageUploadModel: NSObject, URLSessionTaskDelegate, ObservableObject {
             self.totalImagesToUpload += 1
         }
         let res = await create_upload_request(mediaToUpload: media, mediaUploader: uploader, progress: self, keypair: keypair)
+                
+        switch res {
+        case .success(_):
+            DispatchQueue.main.async {
+                self.progress = nil
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            }
+        case .failed(_):
+            DispatchQueue.main.async {
+                self.progress = nil
+                UINotificationFeedbackGenerator().notificationOccurred(.error)
+            }
+        }
+      
         return res
     }
     

@@ -10,7 +10,7 @@ import Foundation
 // This is `fileprivate` because external code should use the `get_default_bootstrap_relays` instead.
 fileprivate let BOOTSTRAP_RELAYS = [
     "wss://relay.damus.io",
-    "wss://eden.nostr.land",
+    "wss://nostr.land",
     "wss://nostr.wine",
     "wss://nos.lol",
 ]
@@ -58,7 +58,7 @@ func load_bootstrap_relays(pubkey: Pubkey) -> [RelayURL] {
 
     let relay_urls = relays.compactMap({ RelayURL($0) })
 
-    let loaded_relays = Array(Set(relay_urls + get_default_bootstrap_relays()))
+    let loaded_relays = Array(Set(relay_urls))
     print("Loading custom bootstrap relays: \(loaded_relays)")
     return loaded_relays
 }

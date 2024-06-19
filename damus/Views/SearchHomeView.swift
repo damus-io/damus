@@ -85,7 +85,7 @@ struct SearchHomeView: View {
                     
                     HStack {
                         Image("notes.fill")
-                        Text(NSLocalizedString("All recent notes", comment: "A label indicating that the notes being displayed below it are all recent notes"))
+                        Text("All recent notes", comment: "A label indicating that the notes being displayed below it are all recent notes")
                         Spacer()
                     }
                     .foregroundColor(.secondary)

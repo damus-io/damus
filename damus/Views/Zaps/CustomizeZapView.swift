@@ -173,7 +173,7 @@ struct CustomizeZapView: View {
                     model.zapping = true
                 }) {
                     HStack {
-                        Text(NSLocalizedString("Zap User", comment: "Button to send a zap."))
+                        Text("Zap User", comment: "Button to send a zap.")
                             .font(.system(size: 20, weight: .bold))
                     }
                     .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)

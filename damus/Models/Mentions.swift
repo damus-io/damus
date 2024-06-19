@@ -292,9 +292,8 @@ func make_post_tags(post_blocks: [Block], tags: [[String]]) -> PostTags {
 }
 
 func post_to_event(post: NostrPost, keypair: FullKeypair) -> NostrEvent? {
-    let tags = post.references.map({ r in r.tag }) + post.tags
     let post_blocks = parse_post_blocks(content: post.content)
-    let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags)
+    let post_tags = make_post_tags(post_blocks: post_blocks, tags: post.tags)
     let content = post_tags.blocks
         .map(\.asString)
         .joined(separator: "")

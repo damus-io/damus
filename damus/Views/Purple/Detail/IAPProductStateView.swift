@@ -26,7 +26,7 @@ extension DamusPurpleView {
         var body: some View {
             if subscription_purchase_loading {
                 HStack(spacing: 10) {
-                    Text(NSLocalizedString("Purchasing", comment: "Loading label indicating the purchase action is in progress"))
+                    Text("Purchasing", comment: "Loading label indicating the purchase action is in progress")
                         .foregroundStyle(.white)
                     ProgressView()
                         .progressViewStyle(.circular)
@@ -66,7 +66,7 @@ extension DamusPurpleView {
         }
         
         func PurchasedUnmanageableView(_ purchased: PurchasedProduct) -> some View {
-            Text(NSLocalizedString("This device's in-app purchase is registered to a different Nostr account. Unable to manage this Purple account. If you believe this was a mistake, please contact us via support@damus.io.", comment: "Notice label that user cannot manage their In-App purchases"))
+            Text("This device's in-app purchase is registered to a different Nostr account. Unable to manage this Purple account. If you believe this was a mistake, please contact us via support@damus.io.", comment: "Notice label that user cannot manage their In-App purchases")
                 .font(.caption)
                 .foregroundColor(.white.opacity(0.6))
                 .multilineTextAlignment(.center)
@@ -76,21 +76,21 @@ extension DamusPurpleView {
         func PurchasedManageView(_ purchased: PurchasedProduct) -> some View {
             VStack(spacing: 10) {
                 if SHOW_IAP_DEBUG_INFO == true {
-                    Text(NSLocalizedString("Purchased!", comment: "User purchased a subscription"))
+                    Text("Purchased!", comment: "User purchased a subscription")
                         .font(.title2)
                         .foregroundColor(.white)
                     price_description(product: purchased.product)
                         .foregroundColor(.white)
                         .opacity(0.65)
                         .frame(width: 200)
-                    Text(NSLocalizedString("Purchased on", comment: "Indicating when the user purchased the subscription"))
+                    Text("Purchased on", comment: "Indicating when the user purchased the subscription")
                         .font(.title2)
                         .foregroundColor(.white)
                     Text(format_date(date: purchased.tx.purchaseDate))
                         .foregroundColor(.white)
                         .opacity(0.65)
                     if let expiry = purchased.tx.expirationDate {
-                        Text(NSLocalizedString("Renews on", comment: "Indicating when the subscription will renew"))
+                        Text("Renews on", comment: "Indicating when the subscription will renew")
                             .font(.title2)
                             .foregroundColor(.white)
                         Text(format_date(date: expiry))
@@ -101,7 +101,7 @@ extension DamusPurpleView {
                 Button(action: {
                     show_manage_subscriptions = true
                 }, label: {
-                    Text(NSLocalizedString("Manage", comment: "Manage the damus subscription"))
+                    Text("Manage", comment: "Manage the damus subscription")
                         .padding(.horizontal, 20)
                 })
                 .buttonStyle(GradientButtonStyle())
@@ -112,7 +112,7 @@ extension DamusPurpleView {
         
         func ProductsView(_ products: [Product]) -> some View {
             VStack(spacing: 10) {
-                Text(NSLocalizedString("Save 20% off on an annual subscription", comment: "Savings for purchasing an annual subscription"))
+                Text("Save 20% off on an annual subscription", comment: "Savings for purchasing an annual subscription")
                     .font(.callout.bold())
                     .foregroundColor(.white)
                 ForEach(products) { product in
@@ -132,7 +132,7 @@ extension DamusPurpleView {
                     .buttonStyle(GradientButtonStyle())
                 }
 
-                Text("By subscribing to Damus Purple you are accepting our [privacy policy](https://damus.io/privacy-policy.txt) and Apple's Standard [EULA](https://www.apple.com/legal/internet-services/itunes/dev/stdeula/)")
+                Text("By subscribing to Damus Purple, you are accepting our [privacy policy](https://damus.io/privacy-policy.txt) and Apple's Standard [EULA](https://www.apple.com/legal/internet-services/itunes/dev/stdeula/)", comment: "Text explaining the terms and conditions of subscribing to Damus Purple. EULA stands for End User License Agreement.")
                 .foregroundColor(.white.opacity(0.6))
                 .font(.caption)
                 .padding()
@@ -148,11 +148,11 @@ extension DamusPurpleView {
                     Text(purple_type?.label() ?? product.displayName)
                     Spacer()
                     if let non_discounted_price = purple_type?.non_discounted_price(product: product) {
-                        Text(verbatim: non_discounted_price)
+                        Text(non_discounted_price)
                             .strikethrough()
                             .foregroundColor(DamusColors.white.opacity(0.5))
                     }
-                    Text(verbatim: product.displayPrice)
+                    Text(product.displayPrice)
                         .fontWeight(.bold)
                 }
             )

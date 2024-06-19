@@ -18,14 +18,6 @@ struct SelectedEventView: View {
     
     @StateObject var bar: ActionBarModel
 
-    var replying_to: NostrEvent? {
-        guard let note_ref = event.event_refs(damus.keypair).first(where: { evref in evref.is_direct_reply != nil })?.is_direct_reply else {
-            return nil
-        }
-
-        return damus.events.lookup(note_ref.note_id)
-    }
-    
     init(damus: DamusState, event: NostrEvent, size: EventViewKind) {
         self.damus = damus
         self.event = event
@@ -48,8 +40,8 @@ struct SelectedEventView: View {
                 .minimumScaleFactor(0.75)
                 .lineLimit(1)
 
-                if event_is_reply(event.event_refs(damus.keypair)) {
-                    ReplyDescription(event: event, replying_to: replying_to, ndb: damus.ndb)
+                if let reply_ref = event.thread_reply()?.reply {
+                    ReplyDescription(event: event, replying_to: damus.events.lookup(reply_ref.note_id), ndb: damus.ndb)
                         .padding(.horizontal)
                 }
 

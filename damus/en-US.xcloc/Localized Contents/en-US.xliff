@@ -2,7 +2,7 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
   <file original="damus/en-US.lproj/InfoPlist.strings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.2" build-num="15C500b"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.3" build-num="15E204a"/>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">
@@ -44,15 +44,25 @@
   </file>
   <file original="damus/en-US.lproj/Localizable.strings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.2" build-num="15C500b"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.3" build-num="15E204a"/>
     </header>
     <body>
       <trans-unit id="%@ %@" xml:space="preserve">
         <source>%@ %@</source>
         <target>%@ %@</target>
-        <note>Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.
+        <note>Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
 Sentence composed of 2 variables to describe how many imports were performed from loading a NostrScript. In source English, the first variable is the number of imports, and the second variable is 'Import' or 'Imports'.
-Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.</note>
+Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.</note>
+      </trans-unit>
+      <trans-unit id="%@ / %@" xml:space="preserve">
+        <source>%@ / %@</source>
+        <target>%@ / %@</target>
+        <note>Amount of money required to subscribe to the Nostr relay. In English, this would look something like '4,000 sats / 30 days', meaning it costs 4000 sats to subscribe to the Nostr relay for 30 days.</note>
+      </trans-unit>
+      <trans-unit id="%@ / event" xml:space="preserve">
+        <source>%@ / event</source>
+        <target>%@ / event</target>
+        <note>Amount of money required to publish to the Nostr relay. In English, this would look something like '10 sats / event', meaning it costs 10 sats to publish one event.</note>
       </trans-unit>
       <trans-unit id="%@ has been muted" xml:space="preserve">
         <source>%@ has been muted</source>
@@ -104,6 +114,26 @@ Sentence composed of 2 variables to describe how many reposts. In source English
         <target>(Contents are encrypted)</target>
         <note>Label on push notification indicating that the contents of the message are encrypted</note>
       </trans-unit>
+      <trans-unit id="1 month" xml:space="preserve">
+        <source>1 month</source>
+        <target>1 month</target>
+        <note>A duration of 1 month to be shown to the user. Most likely in the context of how long they want to mute a piece of content for.</note>
+      </trans-unit>
+      <trans-unit id="1 week" xml:space="preserve">
+        <source>1 week</source>
+        <target>1 week</target>
+        <note>A duration of 1 week to be shown to the user. Most likely in the context of how long they want to mute a piece of content for.</note>
+      </trans-unit>
+      <trans-unit id="24 hours" xml:space="preserve">
+        <source>24 hours</source>
+        <target>24 hours</target>
+        <note>A duration of 24 hours/1 day to be shown to the user. Most likely in the context of how long they want to mute a piece of content for.</note>
+      </trans-unit>
+      <trans-unit id="ADMIN" xml:space="preserve">
+        <source>ADMIN</source>
+        <target>ADMIN</target>
+        <note>Text label indicating the profile picture underneath it is the admin of the Nostr relay.</note>
+      </trans-unit>
       <trans-unit id="API Key (optional)" xml:space="preserve">
         <source>API Key (optional)</source>
         <target>API Key (optional)</target>
@@ -152,18 +182,12 @@ Sentence composed of 2 variables to describe how many reposts. In source English
       <trans-unit id="Add" xml:space="preserve">
         <source>Add</source>
         <target>Add</target>
-        <note>Button to add relay server to list.
-   Button to confirm adding user inputted emoji.</note>
+        <note>Button to add relay server to list.</note>
       </trans-unit>
       <trans-unit id="Add Bookmark" xml:space="preserve">
         <source>Add Bookmark</source>
         <target>Add Bookmark</target>
         <note>Button text to add bookmark to a note.</note>
-      </trans-unit>
-      <trans-unit id="Add Emoji" xml:space="preserve">
-        <source>Add Emoji</source>
-        <target>Add Emoji</target>
-        <note>Label for section for adding an emoji to the reactions list.</note>
       </trans-unit>
       <trans-unit id="Add all" xml:space="preserve">
         <source>Add all</source>
@@ -180,25 +204,31 @@ Sentence composed of 2 variables to describe how many reposts. In source English
         <target>Add bookmark</target>
         <note>Context menu option for adding a note bookmark.</note>
       </trans-unit>
+      <trans-unit id="Add mute item" xml:space="preserve">
+        <source>Add mute item</source>
+        <target>Add mute item</target>
+        <note>Title text to indicate user to an add an item to their mutelist.</note>
+      </trans-unit>
       <trans-unit id="Add relay" xml:space="preserve">
         <source>Add relay</source>
         <target>Add relay</target>
-        <note>Title text to indicate user to an add a relay.</note>
+        <note>Title text to indicate user to an add a relay.
+Button text to add a relay</note>
       </trans-unit>
       <trans-unit id="Add your first post" xml:space="preserve">
         <source>Add your first post</source>
         <target>Add your first post</target>
         <note>Prompt given to the user during onboarding, suggesting them to write their first post</note>
       </trans-unit>
+      <trans-unit id="Added" xml:space="preserve">
+        <source>Added</source>
+        <target>Added</target>
+        <note>Button to show relay server is already added to list.</note>
+      </trans-unit>
       <trans-unit id="Additional information" xml:space="preserve">
         <source>Additional information</source>
         <target>Additional information</target>
         <note>Header text to prompt user to optionally provide additional information when reporting a user or note.</note>
-      </trans-unit>
-      <trans-unit id="Admin" xml:space="preserve">
-        <source>Admin</source>
-        <target>Admin</target>
-        <note>Label to display relay contact user.</note>
       </trans-unit>
       <trans-unit id="All" xml:space="preserve">
         <source>All</source>
@@ -262,15 +292,15 @@ Sentence composed of 2 variables to describe how many reposts. In source English
         <target>Are you lost?</target>
         <note>Text asking the user if they are lost in the app.</note>
       </trans-unit>
-      <trans-unit id="Are you sure you want to attach this wallet?" xml:space="preserve">
-        <source>Are you sure you want to attach this wallet?</source>
-        <target>Are you sure you want to attach this wallet?</target>
-        <note>Prompt to ask user if they want to attach their Nostr Wallet Connect lightning wallet.</note>
-      </trans-unit>
       <trans-unit id="Are you sure you want to clear the cache? This will free space, but images may take longer to load again." xml:space="preserve">
         <source>Are you sure you want to clear the cache? This will free space, but images may take longer to load again.</source>
         <target>Are you sure you want to clear the cache? This will free space, but images may take longer to load again.</target>
         <note>Message explaining what it means to clear the cache, asking if user wants to proceed.</note>
+      </trans-unit>
+      <trans-unit id="Are you sure you want to connect this wallet?" xml:space="preserve">
+        <source>Are you sure you want to connect this wallet?</source>
+        <target>Are you sure you want to connect this wallet?</target>
+        <note>Prompt to ask user if they want to attach their Nostr Wallet Connect lightning wallet.</note>
       </trans-unit>
       <trans-unit id="Are you sure you want to delete all of your bookmarks?" xml:space="preserve">
         <source>Are you sure you want to delete all of your bookmarks?</source>
@@ -296,35 +326,10 @@ Tip: You can always change this later in Settings → Translations</source>
 Tip: You can always change this later in Settings → Translations</target>
         <note>Message notifying the user that they get auto-translations as part of their service</note>
       </trans-unit>
-      <trans-unit id="Attach" xml:space="preserve">
-        <source>Attach</source>
-        <target>Attach</target>
-        <note>Text for button to attach Nostr Wallet Connect lightning wallet.</note>
-      </trans-unit>
-      <trans-unit id="Attach Alby Wallet" xml:space="preserve">
-        <source>Attach Alby Wallet</source>
-        <target>Attach Alby Wallet</target>
-        <note>Button to attach an Alby Wallet, a service that provides a Lightning wallet for zapping sats. Alby is the name of the service and should not be translated.</note>
-      </trans-unit>
-      <trans-unit id="Attach Wallet" xml:space="preserve">
-        <source>Attach Wallet</source>
-        <target>Attach Wallet</target>
-        <note>Text for button to attach Nostr Wallet Connect lightning wallet.</note>
-      </trans-unit>
-      <trans-unit id="Attach a Wallet" xml:space="preserve">
-        <source>Attach a Wallet</source>
-        <target>Attach a Wallet</target>
-        <note>Navigation title for attaching Nostr Wallet Connect lightning wallet.</note>
-      </trans-unit>
       <trans-unit id="Authenticated" xml:space="preserve">
         <source>Authenticated</source>
         <target>Authenticated</target>
         <note>Label to display that authentication to a server has succeeded.</note>
-      </trans-unit>
-      <trans-unit id="Authentication" xml:space="preserve">
-        <source>Authentication</source>
-        <target>Authentication</target>
-        <note>Header label to display authentication details for a given relay.</note>
       </trans-unit>
       <trans-unit id="Automatic translations" xml:space="preserve">
         <source>Automatic translations</source>
@@ -383,6 +388,16 @@ Tip: You can always change this later in Settings → Translations</target>
         <target>By signing up, you agree to our </target>
         <note>Ask the user if they already have an account on Nostr</note>
       </trans-unit>
+      <trans-unit id="By subscribing to Damus Purple, you are accepting our [privacy policy](https://damus.io/privacy-policy.txt) and Apple's Standard [EULA](https://www.apple.com/legal/internet-services/itunes/dev/stdeula/)" xml:space="preserve">
+        <source>By subscribing to Damus Purple, you are accepting our [privacy policy](https://damus.io/privacy-policy.txt) and Apple's Standard [EULA](https://www.apple.com/legal/internet-services/itunes/dev/stdeula/)</source>
+        <target>By subscribing to Damus Purple, you are accepting our [privacy policy](https://damus.io/privacy-policy.txt) and Apple's Standard [EULA](https://www.apple.com/legal/internet-services/itunes/dev/stdeula/)</target>
+        <note>Text explaining the terms and conditions of subscribing to Damus Purple. EULA stands for End User License Agreement.</note>
+      </trans-unit>
+      <trans-unit id="CONTACT" xml:space="preserve">
+        <source>CONTACT</source>
+        <target>CONTACT</target>
+        <note>Text label indicating that the information below is the contact information of the admin of the Nostr relay.</note>
+      </trans-unit>
       <trans-unit id="Cache has been cleared" xml:space="preserve">
         <source>Cache has been cleared</source>
         <target>Cache has been cleared</target>
@@ -395,13 +410,10 @@ Tip: You can always change this later in Settings → Translations</target>
    Button to cancel a repost.
    Button to cancel any interaction with the QRCode link.
    Button to cancel out of alert that creates a new mutelist.
-   Button to cancel out of posting a note.
-   Button to cancel out of view adding user inputted emoji.
    Button to cancel the upload.
    Cancel deleting bookmarks.
    Cancel deleting the user.
-   Cancel out of logging out the user.
-   Text for button to cancel out of connecting Nostr Wallet Connect lightning ewallet.</note>
+   Cancel out of logging out the user.</note>
       </trans-unit>
       <trans-unit id="Changing this setting will cause the cache to be cleared. This will free space, but images may take longer to load again. Are you sure you want to proceed?" xml:space="preserve">
         <source>Changing this setting will cause the cache to be cleared. This will free space, but images may take longer to load again. Are you sure you want to proceed?</source>
@@ -453,20 +465,26 @@ Tip: You can always change this later in Settings → Translations</target>
         <target>Confirmation</target>
         <note>Confirmation dialog title</note>
       </trans-unit>
-      <trans-unit id="Connect To Relay" xml:space="preserve">
-        <source>Connect To Relay</source>
-        <target>Connect To Relay</target>
-        <note>Button to connect to the relay.</note>
+      <trans-unit id="Connect" xml:space="preserve">
+        <source>Connect</source>
+        <target>Connect</target>
+        <note>Text for button to conect to Nostr Wallet Connect lightning wallet.
+Button to connect to the relay.</note>
+      </trans-unit>
+      <trans-unit id="Connect to Alby Wallet" xml:space="preserve">
+        <source>Connect to Alby Wallet</source>
+        <target>Connect to Alby Wallet</target>
+        <note>Button to attach an Alby Wallet, a service that provides a Lightning wallet for zapping sats. Alby is the name of the service and should not be translated.</note>
+      </trans-unit>
+      <trans-unit id="Connect to Mutiny Wallet" xml:space="preserve">
+        <source>Connect to Mutiny Wallet</source>
+        <target>Connect to Mutiny Wallet</target>
+        <note>Button to attach an Mutiny Wallet, a service that provides a Lightning wallet for zapping sats. Mutiny is the name of the service and should not be translated.</note>
       </trans-unit>
       <trans-unit id="Connecting" xml:space="preserve">
         <source>Connecting</source>
         <target>Connecting</target>
         <note>Relay status label that indicates a relay is connecting.</note>
-      </trans-unit>
-      <trans-unit id="Contact" xml:space="preserve">
-        <source>Contact</source>
-        <target>Contact</target>
-        <note>Label to display relay contact information.</note>
       </trans-unit>
       <trans-unit id="Content filters" xml:space="preserve">
         <source>Content filters</source>
@@ -476,10 +494,8 @@ Tip: You can always change this later in Settings → Translations</target>
       <trans-unit id="Continue" xml:space="preserve">
         <source>Continue</source>
         <target>Continue</target>
-        <note>Button to dismiss suggested users view and continue to the main app
-   Continue with bookmarks.
-   Continue with deleting the user.
-   Prompt to user to continue</note>
+        <note>Continue with bookmarks.
+   Continue with deleting the user.</note>
       </trans-unit>
       <trans-unit id="Copied" xml:space="preserve">
         <source>Copied</source>
@@ -490,7 +506,6 @@ Tip: You can always change this later in Settings → Translations</target>
         <source>Copy</source>
         <target>Copy</target>
         <note>Button to copy a relay server address.
-   Button to copy an emoji reaction
    Button to copy the value found.
    Context menu option for copying the version of damus.</note>
       </trans-unit>
@@ -597,6 +612,11 @@ Tip: You can always change this later in Settings → Translations</target>
    Setting to enable DM Local Notification
    Toolbar label for DMs view, where DM is the English abbreviation for Direct Message.</note>
       </trans-unit>
+      <trans-unit id="Damus" xml:space="preserve">
+        <source>Damus</source>
+        <target>Damus</target>
+        <note>Name of the app for the title of an internal notification</note>
+      </trans-unit>
       <trans-unit id="Damus Purple" xml:space="preserve">
         <source>Damus Purple</source>
         <target>Damus Purple</target>
@@ -606,6 +626,11 @@ Tip: You can always change this later in Settings → Translations</target>
         <source>Damus Purple environment</source>
         <target>Damus Purple environment</target>
         <note>Prompt selection of the Damus purple environment (Developer feature to switch between real/production mode to test modes).</note>
+      </trans-unit>
+      <trans-unit id="Damus Wallet" xml:space="preserve">
+        <source>Damus Wallet</source>
+        <target>Damus Wallet</target>
+        <note>Title text for Damus Wallet view.</note>
       </trans-unit>
       <trans-unit id="DeepL (Proprietary, Higher Accuracy)" xml:space="preserve">
         <source>DeepL (Proprietary, Higher Accuracy)</source>
@@ -636,7 +661,7 @@ Tip: You can always change this later in Settings → Translations</target>
       <trans-unit id="Description" xml:space="preserve">
         <source>Description</source>
         <target>Description</target>
-        <note>Label to display relay description.</note>
+        <note>Description of the specific Nostr relay server.</note>
       </trans-unit>
       <trans-unit id="Developer" xml:space="preserve">
         <source>Developer</source>
@@ -657,12 +682,8 @@ Tip: You can always change this later in Settings → Translations</target>
       <trans-unit id="Disconnect" xml:space="preserve">
         <source>Disconnect</source>
         <target>Disconnect</target>
-        <note>Button to disconnect from a relay server.</note>
-      </trans-unit>
-      <trans-unit id="Disconnect From Relay" xml:space="preserve">
-        <source>Disconnect From Relay</source>
-        <target>Disconnect From Relay</target>
-        <note>Button to disconnect from the relay.</note>
+        <note>Button to disconnect from the relay.
+Button to disconnect from a relay server.</note>
       </trans-unit>
       <trans-unit id="Disconnect Wallet" xml:space="preserve">
         <source>Disconnect Wallet</source>
@@ -709,11 +730,6 @@ Tip: You can always change this later in Settings → Translations</target>
         <target>Edit</target>
         <note>Button to edit user's profile.</note>
       </trans-unit>
-      <trans-unit id="Emoji Reactions" xml:space="preserve">
-        <source>Emoji Reactions</source>
-        <target>Emoji Reactions</target>
-        <note>Section title for emoji reactions that are currently added.</note>
-      </trans-unit>
       <trans-unit id="Enable Purple auto-translations" xml:space="preserve">
         <source>Enable Purple auto-translations</source>
         <target>Enable Purple auto-translations</target>
@@ -747,12 +763,18 @@ Tip: You can always change this later in Settings → Translations</target>
       <trans-unit id="Error" xml:space="preserve">
         <source>Error</source>
         <target>Error</target>
-        <note>Label to display that authentication to a server has failed.</note>
+        <note>Label to display that authentication to a server has failed.
+Relay status label that indicates a relay had an error when connecting</note>
       </trans-unit>
       <trans-unit id="Error fetching lightning invoice" xml:space="preserve">
         <source>Error fetching lightning invoice</source>
         <target>Error fetching lightning invoice</target>
         <note>Message to display when there was an error fetching a lightning invoice while attempting to zap.</note>
+      </trans-unit>
+      <trans-unit id="Error retrieving muted event" xml:space="preserve">
+        <source>Error retrieving muted event</source>
+        <target>Error retrieving muted event</target>
+        <note>Text for an item that application failed to retrieve the muted event for.</note>
       </trans-unit>
       <trans-unit id="Error: %@" xml:space="preserve">
         <source>Error: %@</source>
@@ -904,7 +926,7 @@ My side interests include languages and I am striving to be a #polyglot - I am a
       <trans-unit id="Hashtags" xml:space="preserve">
         <source>Hashtags</source>
         <target>Hashtags</target>
-        <note>Label for filter for seeing only hashtag follows.</note>
+        <note>Section header title for a list of hashtags that are muted.</note>
       </trans-unit>
       <trans-unit id="Hello everybody!&#10;&#10;This is my first post on Damus, I am happy to meet you all 🤙. What’s up?&#10;&#10;#introductions" xml:space="preserve">
         <source>Hello everybody!
@@ -937,7 +959,7 @@ This is my first post on Damus, I am happy to meet you all 🤙. What’s up?
       <trans-unit id="Hide" xml:space="preserve">
         <source>Hide</source>
         <target>Hide</target>
-        <note>Button to hide a note from a user who has been muted.</note>
+        <note>Button to hide a note which has been muted.</note>
       </trans-unit>
       <trans-unit id="Hide all 🤙's" xml:space="preserve">
         <source>Hide all 🤙's</source>
@@ -982,6 +1004,16 @@ Hope to meet folks who are on their own journeys to a peaceful and free life!</t
         <source>Impersonation</source>
         <target>Impersonation</target>
         <note>Description of report type for impersonation.</note>
+      </trans-unit>
+      <trans-unit id="Indefinite" xml:space="preserve">
+        <source>Indefinite</source>
+        <target>Indefinite</target>
+        <note>Mute a given item indefinitly (until user unmutes it). As opposed to muting the item for a given period of time.</note>
+      </trans-unit>
+      <trans-unit id="Internal app notification" xml:space="preserve">
+        <source>Internal app notification</source>
+        <target>Internal app notification</target>
+        <note>Badge indicating that a notification is an official internal app notification</note>
       </trans-unit>
       <trans-unit id="Invalid Nostr wallet connection string" xml:space="preserve">
         <source>Invalid Nostr wallet connection string</source>
@@ -1089,11 +1121,6 @@ Hope to meet folks who are on their own journeys to a peaceful and free life!</t
         <target>Local default</target>
         <note>Dropdown option label for system default for Lightning wallet.</note>
       </trans-unit>
-      <trans-unit id="Log" xml:space="preserve">
-        <source>Log</source>
-        <target>Log</target>
-        <note>Label to display developer mode logs.</note>
-      </trans-unit>
       <trans-unit id="Login" xml:space="preserve">
         <source>Login</source>
         <target>Login</target>
@@ -1115,6 +1142,11 @@ Hope to meet folks who are on their own journeys to a peaceful and free life!</t
         <target>Make Default</target>
         <note>Button label to indicate that tapping it will make the selected zap type be the default for future zaps.</note>
       </trans-unit>
+      <trans-unit id="Make sure the wallet you are connecting to supports NWC." xml:space="preserve">
+        <source>Make sure the wallet you are connecting to supports NWC.</source>
+        <target>Make sure the wallet you are connecting to supports NWC.</target>
+        <note>Hint message when an invalid Nostr wallet connection string is provided.</note>
+      </trans-unit>
       <trans-unit id="Make sure your nsec account key is saved before you logout or you will lose access to this account" xml:space="preserve">
         <source>Make sure your nsec account key is saved before you logout or you will lose access to this account</source>
         <target>Make sure your nsec account key is saved before you logout or you will lose access to this account</target>
@@ -1124,6 +1156,11 @@ Hope to meet folks who are on their own journeys to a peaceful and free life!</t
         <source>Manage</source>
         <target>Manage</target>
         <note>Manage the damus subscription</note>
+      </trans-unit>
+      <trans-unit id="Manage subscription" xml:space="preserve">
+        <source>Manage subscription</source>
+        <target>Manage subscription</target>
+        <note>Button to take user to manage Damus Purple subscription</note>
       </trans-unit>
       <trans-unit id="Media previews" xml:space="preserve">
         <source>Media previews</source>
@@ -1158,13 +1195,17 @@ Hope to meet folks who are on their own journeys to a peaceful and free life!</t
       <trans-unit id="Mute" xml:space="preserve">
         <source>Mute</source>
         <target>Mute</target>
-        <note>Alert button to mute a user.
-   Button to mute a profile.</note>
+        <note>Alert button to mute a user.</note>
       </trans-unit>
       <trans-unit id="Mute %@?" xml:space="preserve">
         <source>Mute %@?</source>
         <target>Mute %@?</target>
         <note>Alert message prompt to ask if a user should be muted.</note>
+      </trans-unit>
+      <trans-unit id="Mute Hashtag" xml:space="preserve">
+        <source>Mute Hashtag</source>
+        <target>Mute Hashtag</target>
+        <note>Label represnting a button that the user can tap to mute a given hashtag so they don't see it in their feed anymore.</note>
       </trans-unit>
       <trans-unit id="Mute User" xml:space="preserve">
         <source>Mute User</source>
@@ -1184,17 +1225,15 @@ Hope to meet folks who are on their own journeys to a peaceful and free life!</t
       <trans-unit id="Muted" xml:space="preserve">
         <source>Muted</source>
         <target>Muted</target>
-        <note>Sidebar menu label for muted users view.</note>
+        <note>Navigation title of view to see list of muted users &amp; phrases.
+   Sidebar menu label for muted users view.</note>
       </trans-unit>
-      <trans-unit id="Muted Users" xml:space="preserve">
-        <source>Muted Users</source>
-        <target>Muted Users</target>
-        <note>Navigation title of view to see list of muted users.</note>
-      </trans-unit>
-      <trans-unit id="My Relays" xml:space="preserve">
-        <source>My Relays</source>
-        <target>My Relays</target>
-        <note>Section title for relay servers that the user is connected to.</note>
+      <trans-unit id="N/A" xml:space="preserve">
+        <source>N/A</source>
+        <target>N/A</target>
+        <note>Text label indicating that there is no NIP-11 relay admin contact information found. In English, N/A stands for not applicable.
+Text label indicating that there is no NIP-11 relay description information found. In English, N/A stands for not applicable.
+Text label indicating that there is no NIP-11 relay software information found. In English, N/A stands for not applicable.</note>
       </trans-unit>
       <trans-unit id="Never" xml:space="preserve">
         <source>Never</source>
@@ -1225,11 +1264,6 @@ Hope to meet folks who are on their own journeys to a peaceful and free life!</t
         <source>No</source>
         <target>No</target>
         <note>User confirm No</note>
-      </trans-unit>
-      <trans-unit id="No data available" xml:space="preserve">
-        <source>No data available</source>
-        <target>No data available</target>
-        <note>Text indicating that there is no data available to show for specific metadata about a relay server.</note>
       </trans-unit>
       <trans-unit id="No logs to display" xml:space="preserve">
         <source>No logs to display</source>
@@ -1291,21 +1325,28 @@ Hope to meet folks who are on their own journeys to a peaceful and free life!</t
         <target>NostrScript Error</target>
         <note>Text indicating that there was an error with loading NostrScript. There is a more descriptive error message shown separately underneath.</note>
       </trans-unit>
-      <trans-unit id="Note from a user you've muted" xml:space="preserve">
-        <source>Note from a user you've muted</source>
-        <target>Note from a user you've muted</target>
-        <note>Text to indicate that what is being shown is a note from a user who has been muted.</note>
+      <trans-unit id="Note from a %@ you've muted" xml:space="preserve">
+        <source>Note from a %@ you've muted</source>
+        <target>Note from a %@ you've muted</target>
+        <note>Text to indicate that what is being shown is a note which has been muted.</note>
+      </trans-unit>
+      <trans-unit id="Note you've muted" xml:space="preserve">
+        <source>Note you've muted</source>
+        <target>Note you've muted</target>
+        <note>Text to indicate that what is being shown is a note which has been muted.</note>
       </trans-unit>
       <trans-unit id="Notes" xml:space="preserve">
         <source>Notes</source>
         <target>Notes</target>
-        <note>A label indicating that the notes being displayed below it are from a timeline, not search results</note>
+        <note>Label for filter for seeing only notes (instead of notes and replies).
+Label for filter for seeing only your notes (instead of notes and replies).
+A label indicating that the notes being displayed below it are from a timeline, not search results</note>
       </trans-unit>
       <trans-unit id="Notes &amp; Replies" xml:space="preserve">
         <source>Notes &amp; Replies</source>
         <target>Notes &amp; Replies</target>
-        <note>Label for filter for seeing your notes and replies (instead of only your notes).
-Label for filter for seeing notes and replies (instead of only notes).</note>
+        <note>Label for filter for seeing notes and replies (instead of only notes).
+Label for filter for seeing your notes and replies (instead of only your notes).</note>
       </trans-unit>
       <trans-unit id="Notes with the #nsfw tag usually contains adult content or other &quot;Not safe for work&quot; content" xml:space="preserve">
         <source>Notes with the #nsfw tag usually contains adult content or other "Not safe for work" content</source>
@@ -1342,7 +1383,7 @@ Label for filter for seeing notes and replies (instead of only notes).</note>
         <source>OK</source>
         <target>OK</target>
         <note>Button label indicating user wants to proceed.
-   Button label to dismiss an error dialog</note>
+Button label to dismiss an error dialog</note>
       </trans-unit>
       <trans-unit id="Ok" xml:space="preserve">
         <source>Ok</source>
@@ -1392,12 +1433,12 @@ Label for filter for seeing notes and replies (instead of only notes).</note>
       <trans-unit id="Paid Relay" xml:space="preserve">
         <source>Paid Relay</source>
         <target>Paid Relay</target>
-        <note>Section header that indicates the relay server requires payment.</note>
+        <note>Text indicating that this is a paid relay.</note>
       </trans-unit>
-      <trans-unit id="Paste" xml:space="preserve">
-        <source>Paste</source>
-        <target>Paste</target>
-        <note>Button to paste a Nostr Wallet Connect string to connect the wallet for use in Damus for zaps.</note>
+      <trans-unit id="Paste NWC Address" xml:space="preserve">
+        <source>Paste NWC Address</source>
+        <target>Paste NWC Address</target>
+        <note>Text for button to connect a lightning wallet.</note>
       </trans-unit>
       <trans-unit id="Pay" xml:space="preserve">
         <source>Pay</source>
@@ -1422,8 +1463,7 @@ Label for filter for seeing notes and replies (instead of only notes).</note>
       <trans-unit id="Permanently Delete Account" xml:space="preserve">
         <source>Permanently Delete Account</source>
         <target>Permanently Delete Account</target>
-        <note>Alert for deleting the users account.
-   Section title for deleting the user</note>
+        <note>Alert for deleting the users account.</note>
       </trans-unit>
       <trans-unit id="Plan" xml:space="preserve">
         <source>Plan</source>
@@ -1520,6 +1560,11 @@ Label for filter for seeing notes and replies (instead of only notes).</note>
         <target>Purchased!</target>
         <note>User purchased a subscription</note>
       </trans-unit>
+      <trans-unit id="Purchasing" xml:space="preserve">
+        <source>Purchasing</source>
+        <target>Purchasing</target>
+        <note>Loading label indicating the purchase action is in progress</note>
+      </trans-unit>
       <trans-unit id="Purple" xml:space="preserve">
         <source>Purple</source>
         <target>Purple</target>
@@ -1535,6 +1580,11 @@ Label for filter for seeing notes and replies (instead of only notes).</note>
         <target>Quote</target>
         <note>Button to compose a quoted note</note>
       </trans-unit>
+      <trans-unit id="Quotes" xml:space="preserve">
+        <source>Quotes</source>
+        <target>Quotes</target>
+        <note>Navigation bar title for Quote Reposts view.</note>
+      </trans-unit>
       <trans-unit id="Ran to suspension." xml:space="preserve">
         <source>Ran to suspension.</source>
         <target>Ran to suspension.</target>
@@ -1547,20 +1597,10 @@ Label for filter for seeing notes and replies (instead of only notes).</note>
    Section header for reactions settings
    Title of emoji reactions view</note>
       </trans-unit>
-      <trans-unit id="Recommended Emojis" xml:space="preserve">
-        <source>Recommended Emojis</source>
-        <target>Recommended Emojis</target>
-        <note>Section title for recommend emojis</note>
-      </trans-unit>
-      <trans-unit id="Recommended relays" xml:space="preserve">
-        <source>Recommended relays</source>
-        <target>Recommended relays</target>
-        <note>Title for view of recommended relays.</note>
-      </trans-unit>
-      <trans-unit id="Relay" xml:space="preserve">
-        <source>Relay</source>
-        <target>Relay</target>
-        <note>Label to display relay address.</note>
+      <trans-unit id="Relay Logs" xml:space="preserve">
+        <source>Relay Logs</source>
+        <target>Relay Logs</target>
+        <note>Text label indicating that the text below it are developer mode logs.</note>
       </trans-unit>
       <trans-unit id="Relays" xml:space="preserve">
         <source>Relays</source>
@@ -1588,6 +1628,16 @@ Label for filter for seeing notes and replies (instead of only notes).</note>
         <source>Remove bookmark</source>
         <target>Remove bookmark</target>
         <note>Context menu option for removing a note bookmark.</note>
+      </trans-unit>
+      <trans-unit id="Renew (1 mo)" xml:space="preserve">
+        <source>Renew (1 mo)</source>
+        <target>Renew (1 mo)</target>
+        <note>Button to take user to renew subscription for one month</note>
+      </trans-unit>
+      <trans-unit id="Renew (1 yr)" xml:space="preserve">
+        <source>Renew (1 yr)</source>
+        <target>Renew (1 yr)</target>
+        <note>Button to take user to renew subscription for one year</note>
       </trans-unit>
       <trans-unit id="Renews on" xml:space="preserve">
         <source>Renews on</source>
@@ -1692,6 +1742,11 @@ Label for filter for seeing notes and replies (instead of only notes).</note>
         <target>Runtime error</target>
         <note>Indication that a runtime error occurred when running a NostrScript.</note>
       </trans-unit>
+      <trans-unit id="SOFTWARE" xml:space="preserve">
+        <source>SOFTWARE</source>
+        <target>SOFTWARE</target>
+        <note>Text label indicating which relay software is used to run this Nostr relay.</note>
+      </trans-unit>
       <trans-unit id="Satoshi Nakamoto" xml:space="preserve">
         <source>Satoshi Nakamoto</source>
         <target>Satoshi Nakamoto</target>
@@ -1726,6 +1781,11 @@ Label for filter for seeing notes and replies (instead of only notes).</note>
         <source>Scan Code</source>
         <target>Scan Code</target>
         <note>Button to switch to scan QR Code page.</note>
+      </trans-unit>
+      <trans-unit id="Scan NWC Address" xml:space="preserve">
+        <source>Scan NWC Address</source>
+        <target>Scan NWC Address</target>
+        <note>Text for button to connect a lightning wallet.</note>
       </trans-unit>
       <trans-unit id="Scan Your Private Key QR" xml:space="preserve">
         <source>Scan Your Private Key QR</source>
@@ -1773,6 +1833,11 @@ Label for filter for seeing notes and replies (instead of only notes).</note>
         <source>Secret Account Login Key</source>
         <target>Secret Account Login Key</target>
         <note>Section title for user's secret account login key.</note>
+      </trans-unit>
+      <trans-unit id="Securely connect your Damus app to your wallet using Nostr Wallet Connect" xml:space="preserve">
+        <source>Securely connect your Damus app to your wallet using Nostr Wallet Connect</source>
+        <target>Securely connect your Damus app to your wallet using Nostr Wallet Connect</target>
+        <note>Text to prompt user to connect their wallet using 'Nostr Wallet Connect'.</note>
       </trans-unit>
       <trans-unit id="Select a Lightning wallet" xml:space="preserve">
         <source>Select a Lightning wallet</source>
@@ -1845,7 +1910,7 @@ Label for filter for seeing notes and replies (instead of only notes).</note>
       <trans-unit id="Show" xml:space="preserve">
         <source>Show</source>
         <target>Show</target>
-        <note>Button to show a note from a user who has been muted.
+        <note>Button to show a note which has been muted.
    Toggle to show or hide user's secret account login key.</note>
       </trans-unit>
       <trans-unit id="Show general statuses" xml:space="preserve">
@@ -1884,11 +1949,6 @@ Label for filter for seeing notes and replies (instead of only notes).</note>
         <target>Show profile action sheets</target>
         <note>Setting to show profile action sheets when clicking on a user's profile picture</note>
       </trans-unit>
-      <trans-unit id="Show recommended relays" xml:space="preserve">
-        <source>Show recommended relays</source>
-        <target>Show recommended relays</target>
-        <note>Button to show recommended relays.</note>
-      </trans-unit>
       <trans-unit id="Show wallet selector" xml:space="preserve">
         <source>Show wallet selector</source>
         <target>Show wallet selector</target>
@@ -1919,11 +1979,6 @@ Label for filter for seeing notes and replies (instead of only notes).</note>
         <target>Social media has developed into a key way information flows around the world. Unfortunately, our current social media systems are broken</target>
         <note>Description about why Nostr is needed.</note>
       </trans-unit>
-      <trans-unit id="Software" xml:space="preserve">
-        <source>Software</source>
-        <target>Software</target>
-        <note>Label to display relay software.</note>
-      </trans-unit>
       <trans-unit id="Someone posted a note" xml:space="preserve">
         <source>Someone posted a note</source>
         <target>Someone posted a note</target>
@@ -1947,8 +2002,7 @@ Label for filter for seeing notes and replies (instead of only notes).</note>
       <trans-unit id="Spam" xml:space="preserve">
         <source>Spam</source>
         <target>Spam</target>
-        <note>Description of report type for spam.
-   Section header for Universe/Search spam</note>
+        <note>Description of report type for spam.</note>
       </trans-unit>
       <trans-unit id="Staging" xml:space="preserve">
         <source>Staging</source>
@@ -2000,23 +2054,23 @@ Label for filter for seeing notes and replies (instead of only notes).</note>
         <target>Take Photo</target>
         <note>Option to take a photo with the camera</note>
       </trans-unit>
-      <trans-unit id="Test (localhost)" xml:space="preserve">
-        <source>Test (localhost)</source>
-        <target>Test (localhost)</target>
-        <note>Label indicating a localhost test environment for Damus Purple functionality (Developer feature)</note>
+      <trans-unit id="Test (local)" xml:space="preserve">
+        <source>Test (local)</source>
+        <target>Test (local)</target>
+        <note>Label indicating a local test environment for Damus Purple functionality (Developer feature)</note>
       </trans-unit>
       <trans-unit id="Text Truncation" xml:space="preserve">
         <source>Text Truncation</source>
         <target>Text Truncation</target>
         <note>Section header for damus text truncation user configuration</note>
       </trans-unit>
-      <trans-unit id="Thank you very much for signing up for Damusu{00A0}Purple. Your contribution helps us continue our fight for a more Open and Freeu{00A0}internet.&#10;&#10;You will also get access to premium features, and a star badge on your profile.&#10;&#10;Enjoy!" xml:space="preserve">
-        <source>Thank you very much for signing up for Damusu{00A0}Purple. Your contribution helps us continue our fight for a more Open and Freeu{00A0}internet.
+      <trans-unit id="Thank you very much for signing up for Damus Purple. Your contribution helps us continue our fight for a more Open and Free internet.&#10;&#10;You will also get access to premium features, and a star badge on your profile.&#10;&#10;Enjoy!" xml:space="preserve">
+        <source>Thank you very much for signing up for Damus Purple. Your contribution helps us continue our fight for a more Open and Free internet.
 
 You will also get access to premium features, and a star badge on your profile.
 
 Enjoy!</source>
-        <target>Thank you very much for signing up for Damusu{00A0}Purple. Your contribution helps us continue our fight for a more Open and Freeu{00A0}internet.
+        <target>Thank you very much for signing up for Damus Purple. Your contribution helps us continue our fight for a more Open and Free internet.
 
 You will also get access to premium features, and a star badge on your profile.
 
@@ -2045,15 +2099,20 @@ You're all set!</source>
 You're all set!</target>
         <note>An error message that appears when the user attempts to add a relay that has already been added.</note>
       </trans-unit>
+      <trans-unit id="There has been an unexpected error with the in-app purchase. Please try again later or contact support@damus.io. Error: %@" xml:space="preserve">
+        <source>There has been an unexpected error with the in-app purchase. Please try again later or contact support@damus.io. Error: %@</source>
+        <target>There has been an unexpected error with the in-app purchase. Please try again later or contact support@damus.io. Error: %@</target>
+        <note>In-app purchase error message for the user</note>
+      </trans-unit>
       <trans-unit id="There was an error loading your account. Please try again later. If problem persists, please contact us at support@damus.io" xml:space="preserve">
         <source>There was an error loading your account. Please try again later. If problem persists, please contact us at support@damus.io</source>
         <target>There was an error loading your account. Please try again later. If problem persists, please contact us at support@damus.io</target>
         <note>Error label when Purple account information fails to load</note>
       </trans-unit>
-      <trans-unit id="This is a paid relay, you must pay for notes to be accepted." xml:space="preserve">
-        <source>This is a paid relay, you must pay for notes to be accepted.</source>
-        <target>This is a paid relay, you must pay for notes to be accepted.</target>
-        <note>Footer description that explains that the relay server requires payment to post.</note>
+      <trans-unit id="This device's in-app purchase is registered to a different Nostr account. Unable to manage this Purple account. If you believe this was a mistake, please contact us via support@damus.io." xml:space="preserve">
+        <source>This device's in-app purchase is registered to a different Nostr account. Unable to manage this Purple account. If you believe this was a mistake, please contact us via support@damus.io.</source>
+        <target>This device's in-app purchase is registered to a different Nostr account. Unable to manage this Purple account. If you believe this was a mistake, please contact us via support@damus.io.</target>
+        <note>Notice label that user cannot manage their In-App purchases</note>
       </trans-unit>
       <trans-unit id="This is a public key, you will not be able to make notes or interact in any way. This is used for viewing accounts from their perspective." xml:space="preserve">
         <source>This is a public key, you will not be able to make notes or interact in any way. This is used for viewing accounts from their perspective.</source>
@@ -2083,6 +2142,11 @@ Nice to meet you all! #introductions #plebchain </target>
         <source>Thread</source>
         <target>Thread</target>
         <note>Navigation bar title for note thread.</note>
+      </trans-unit>
+      <trans-unit id="Threads" xml:space="preserve">
+        <source>Threads</source>
+        <target>Threads</target>
+        <note>Section header title for a list of threads that are muted.</note>
       </trans-unit>
       <trans-unit id="To continue your Purple subscription checkout, please verify your npub by clicking on the button below" xml:space="preserve">
         <source>To continue your Purple subscription checkout, please verify your npub by clicking on the button below</source>
@@ -2148,7 +2212,8 @@ Nice to meet you all! #introductions #plebchain </target>
       <trans-unit id="URL" xml:space="preserve">
         <source>URL</source>
         <target>URL</target>
-        <note>Example URL to LibreTranslate server</note>
+        <note>Custom URL host for Damus Purple testing
+   Example URL to LibreTranslate server</note>
       </trans-unit>
       <trans-unit id="Unable to find a QR Code" xml:space="preserve">
         <source>Unable to find a QR Code</source>
@@ -2180,15 +2245,15 @@ Nice to meet you all! #introductions #plebchain </target>
         <target>Unmute</target>
         <note>Button to unmute a profile.</note>
       </trans-unit>
+      <trans-unit id="Unmute Hashtag" xml:space="preserve">
+        <source>Unmute Hashtag</source>
+        <target>Unmute Hashtag</target>
+        <note>Label represnting a button that the user can tap to unmute a given hashtag so they start seeing it in their feed again.</note>
+      </trans-unit>
       <trans-unit id="Unmute conversation" xml:space="preserve">
         <source>Unmute conversation</source>
         <target>Unmute conversation</target>
         <note>Context menu option for unmuting a conversation.</note>
-      </trans-unit>
-      <trans-unit id="Untitled" xml:space="preserve">
-        <source>Untitled</source>
-        <target>Untitled</target>
-        <note>Text indicating that the long-form note title is untitled.</note>
       </trans-unit>
       <trans-unit id="Upload" xml:space="preserve">
         <source>Upload</source>
@@ -2215,6 +2280,16 @@ Nice to meet you all! #introductions #plebchain </target>
         <target>Username</target>
         <note>Label for Username section of user profile form.</note>
       </trans-unit>
+      <trans-unit id="Users" xml:space="preserve">
+        <source>Users</source>
+        <target>Users</target>
+        <note>Section header title for a list of muted users.</note>
+      </trans-unit>
+      <trans-unit id="VERSION" xml:space="preserve">
+        <source>VERSION</source>
+        <target>VERSION</target>
+        <note>Text label indicating which version of the relay software is being run for this Nostr relay.</note>
+      </trans-unit>
       <trans-unit id="Verified!" xml:space="preserve">
         <source>Verified!</source>
         <target>Verified!</target>
@@ -2228,8 +2303,7 @@ Nice to meet you all! #introductions #plebchain </target>
       <trans-unit id="Version" xml:space="preserve">
         <source>Version</source>
         <target>Version</target>
-        <note>Label to display relay software version.
-   Section title for displaying the version number of the Damus app.</note>
+        <note>Section title for displaying the version number of the Damus app.</note>
       </trans-unit>
       <trans-unit id="View QR Code" xml:space="preserve">
         <source>View QR Code</source>
@@ -2276,9 +2350,20 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
       <trans-unit id="Wallet" xml:space="preserve">
         <source>Wallet</source>
         <target>Wallet</target>
-        <note>Navigation title for Wallet view
+        <note>Navigation title for attaching Nostr Wallet Connect lightning wallet.
+   Navigation title for Wallet view
    Sidebar menu label for Wallet view.
    Title for section in zap settings that controls the Lightning wallet selection.</note>
+      </trans-unit>
+      <trans-unit id="Wallet Address" xml:space="preserve">
+        <source>Wallet Address</source>
+        <target>Wallet Address</target>
+        <note>Label text indicating that below it is the wallet address.</note>
+      </trans-unit>
+      <trans-unit id="Wallet Relay" xml:space="preserve">
+        <source>Wallet Relay</source>
+        <target>Wallet Relay</target>
+        <note>Label text indicating that below it is the information about the wallet relay.</note>
       </trans-unit>
       <trans-unit id="Website" xml:space="preserve">
         <source>Website</source>
@@ -2335,6 +2420,11 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <target>Why we need Nostr?</target>
         <note>Heading text for section describing why Nostr is needed.</note>
       </trans-unit>
+      <trans-unit id="Words" xml:space="preserve">
+        <source>Words</source>
+        <target>Words</target>
+        <note>Section header title for a list of words that are muted.</note>
+      </trans-unit>
       <trans-unit id="Yes" xml:space="preserve">
         <source>Yes</source>
         <target>Yes</target>
@@ -2364,6 +2454,21 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <source>Your Name</source>
         <target>Your Name</target>
         <note>Label for Your Name section of user profile form.</note>
+      </trans-unit>
+      <trans-unit id="Your Purple subscription expires in %@ days. Renew?" xml:space="preserve">
+        <source>Your Purple subscription expires in %@ days. Renew?</source>
+        <target>Your Purple subscription expires in %@ days. Renew?</target>
+        <note>A notification message explaining to the user that their Damus Purple Subscription is expiring soon, prompting them to renew.</note>
+      </trans-unit>
+      <trans-unit id="Your Purple subscription expires in 1 day. Renew?" xml:space="preserve">
+        <source>Your Purple subscription expires in 1 day. Renew?</source>
+        <target>Your Purple subscription expires in 1 day. Renew?</target>
+        <note>A notification message explaining to the user that their Damus Purple Subscription is expiring in one day, prompting them to renew.</note>
+      </trans-unit>
+      <trans-unit id="Your Purple subscription has expired. Renew?" xml:space="preserve">
+        <source>Your Purple subscription has expired. Renew?</source>
+        <target>Your Purple subscription has expired. Renew?</target>
+        <note>A notification message explaining to the user that their Damus Purple Subscription has expired, prompting them to renew.</note>
       </trans-unit>
       <trans-unit id="Your report will be sent to the relays you are connected to" xml:space="preserve">
         <source>Your report will be sent to the relays you are connected to</source>
@@ -2400,8 +2505,7 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
       <trans-unit id="Zap failed" xml:space="preserve">
         <source>Zap failed</source>
         <target>Zap failed</target>
-        <note>Button label indicating that a zap action was unsuccessful (i.e. the user was unable to send a Bitcoin tip via the lightning network to the user shown on-screen) 
-   Title of an alert indicating that a zap action failed</note>
+        <note>Button label indicating that a zap action was unsuccessful (i.e. the user was unable to send a Bitcoin tip via the lightning network to the user shown on-screen)</note>
       </trans-unit>
       <trans-unit id="Zap type" xml:space="preserve">
         <source>Zap type</source>
@@ -2460,7 +2564,13 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
       <trans-unit id="now" xml:space="preserve">
         <source>now</source>
         <target>now</target>
-        <note>String indicating that a given timestamp just occurred</note>
+        <note>Relative time label that indicates a notification happened now
+   String indicating that a given timestamp just occurred</note>
+      </trans-unit>
+      <trans-unit id="npub, #hashtag, phrase" xml:space="preserve">
+        <source>npub, #hashtag, phrase</source>
+        <target>npub, #hashtag, phrase</target>
+        <note>Placeholder example for relay server address.</note>
       </trans-unit>
       <trans-unit id="nsec1..." xml:space="preserve">
         <source>nsec1...</source>
@@ -2587,16 +2697,11 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <target>%@ and %@ zapped you</target>
         <note>Notification that 2 users zapped the current user's profile</note>
       </trans-unit>
-      <trans-unit id="⚡" xml:space="preserve">
-        <source>⚡</source>
-        <target>⚡</target>
-        <note>Placeholder example for an emoji reaction</note>
-      </trans-unit>
     </body>
   </file>
   <file original="damus/en-US.lproj/Localizable.stringsdict" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.2" build-num="15C500b"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.3" build-num="15E204a"/>
     </header>
     <body>
       <trans-unit id="/followed_by_three_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
@@ -2657,6 +2762,21 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
       <trans-unit id="/imports_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@IMPORTS@</source>
         <target>%#@IMPORTS@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/quoted_reposts_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@QUOTE_REPOSTS@</source>
+        <target>%#@QUOTE_REPOSTS@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/quoted_reposts_count:dict/QUOTE_REPOSTS:dict/one:dict/:string" xml:space="preserve">
+        <source>Quote</source>
+        <target>Quote</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/quoted_reposts_count:dict/QUOTE_REPOSTS:dict/other:dict/:string" xml:space="preserve">
+        <source>Quotes</source>
+        <target>Quotes</target>
         <note/>
       </trans-unit>
       <trans-unit id="/reacted_tagged_in_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
@@ -2963,7 +3083,7 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
   </file>
   <file original="DamusNotificationService/InfoPlist.xcstrings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.2" build-num="15C500b"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.3" build-num="15E204a"/>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">
@@ -2985,7 +3105,7 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
   </file>
   <file original="DamusNotificationService/Localizable.xcstrings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.2" build-num="15C500b"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.3" build-num="15E204a"/>
     </header>
     <body>
       <trans-unit id="" xml:space="preserve">
@@ -3113,10 +3233,10 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <target state="new">Staging</target>
         <note>Label indicating a staging test environment for Damus Purple functionality (Developer feature)</note>
       </trans-unit>
-      <trans-unit id="Test (localhost)" xml:space="preserve">
-        <source>Test (localhost)</source>
-        <target state="new">Test (localhost)</target>
-        <note>Label indicating a localhost test environment for Damus Purple functionality (Developer feature)</note>
+      <trans-unit id="Test (local)" xml:space="preserve">
+        <source>Test (local)</source>
+        <target state="new">Test (local)</target>
+        <note>Label indicating a local test environment for Damus Purple functionality (Developer feature)</note>
       </trans-unit>
       <trans-unit id="This note contains too many items and cannot be rendered" xml:space="preserve">
         <source>This note contains too many items and cannot be rendered</source>

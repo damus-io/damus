@@ -15,6 +15,7 @@ enum LogCategory: String {
     case storage
     case push_notifications
     case damus_purple
+    case image_uploading
 }
 
 /// Damus structured logger

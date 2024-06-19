@@ -93,13 +93,24 @@ struct PostView: View {
     }
     
     func send_post() {
-        let refs = references.filter { ref in
-            if case .pubkey(let pk) = ref, filtered_pubkeys.contains(pk) {
-                return false
+        // don't add duplicate pubkeys but retain order
+        var pkset = Set<Pubkey>()
+
+        // we only want pubkeys really
+        let pks = references.reduce(into: Array<Pubkey>()) { acc, ref in
+            guard case .pubkey(let pk) = ref else {
+                return
             }
-            return true
+            
+            if pkset.contains(pk) || filtered_pubkeys.contains(pk) {
+                return
+            }
+
+            pkset.insert(pk)
+            acc.append(pk)
         }
-        let new_post = build_post(state: damus_state, post: self.post, action: action, uploadedMedias: uploadedMedias, references: refs)
+
+        let new_post = build_post(state: damus_state, post: self.post, action: action, uploadedMedias: uploadedMedias, pubkeys: pks)
 
         notify(.post(.post(new_post)))
 
@@ -269,7 +280,7 @@ struct PostView: View {
                 Button(action: {
                     self.cancel()
                 }, label: {
-                    Text(NSLocalizedString("Cancel", comment: "Button to cancel out of posting a note."))
+                    Text("Cancel", comment: "Button to cancel out of posting a note.")
                         .padding(10)
                 })
                 .buttonStyle(NeutralButtonStyle())
@@ -626,7 +637,24 @@ private func isAlphanumeric(_ char: Character) -> Bool {
     return char.isLetter || char.isNumber
 }
 
-func build_post(state: DamusState, post: NSMutableAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], references: [RefId]) -> NostrPost {
+func nip10_reply_tags(replying_to: NostrEvent, keypair: Keypair) -> [[String]] {
+    guard let nip10 = replying_to.thread_reply() else {
+        // we're replying to a post that isn't in a thread,
+        // just add a single reply-to-root tag
+        return [["e", replying_to.id.hex(), "", "root"]]
+    }
+
+    // otherwise use the root tag from the parent's nip10 reply and include the note
+    // that we are replying to's note id.
+    let tags = [
+        ["e", nip10.root.note_id.hex(), nip10.root.relay ?? "", "root"],
+        ["e", replying_to.id.hex(), "", "reply"]
+    ]
+
+    return tags
+}
+
+func build_post(state: DamusState, post: NSMutableAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], pubkeys: [Pubkey]) -> NostrPost {
     post.enumerateAttributes(in: NSRange(location: 0, length: post.length), options: []) { attributes, range, stop in
         if let link = attributes[.link] as? String {
             let nextCharIndex = range.upperBound
@@ -656,20 +684,35 @@ func build_post(state: DamusState, post: NSMutableAttributedString, action: Post
 
     let imagesString = uploadedMedias.map { $0.uploadedURL.absoluteString }.joined(separator: " ")
 
-    var tags = uploadedMedias.compactMap { $0.metadata?.to_tag() }
-
     if !imagesString.isEmpty {
         content.append(" " + imagesString + " ")
     }
 
-    if case .quoting(let ev) = action {
+    var tags: [[String]] = []
+
+    switch action {
+    case .replying_to(let replying_to):
+        // start off with the reply tags
+        tags = nip10_reply_tags(replying_to: replying_to, keypair: state.keypair)
+
+    case .quoting(let ev):
         content.append(" nostr:" + bech32_note_id(ev.id))
 
         if let quoted_ev = state.events.lookup(ev.id) {
             tags.append(["p", quoted_ev.pubkey.hex()])
         }
+    case .posting(let postTarget):
+        break
+    }
+    
+    // include pubkeys
+    tags += pubkeys.map { pk in
+        ["p", pk.hex()]
     }
 
-    return NostrPost(content: content, references: references, kind: .text, tags: tags)
+    // append additional tags
+    tags += uploadedMedias.compactMap { $0.metadata?.to_tag() }
+
+    return NostrPost(content: content, kind: .text, tags: tags)
 }
 

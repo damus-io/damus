@@ -41,11 +41,19 @@ enum HomeResubFilter {
     }
 }
 
-class HomeModel {
+class HomeModel: ContactsDelegate {
+    // The maximum amount of contacts placed on a home feed subscription filter.
+    // If the user has more contacts, chunking or other techniques will be used to avoid sending huge filters
+    let MAX_CONTACTS_ON_FILTER = 500
+    
     // Don't trigger a user notification for events older than a certain age
     static let event_max_age_for_notification: TimeInterval = EVENT_MAX_AGE_FOR_NOTIFICATION
     
-    var damus_state: DamusState
+    var damus_state: DamusState {
+        didSet {
+            self.load_our_stuff_from_damus_state()
+        }
+    }
 
     // NDBTODO: let's get rid of this entirely, let nostrdb handle it
     var has_event: [String: Set<NoteId>] = [:]
@@ -108,6 +116,32 @@ class HomeModel {
             self.should_debounce_dms = false
         }
     }
+    
+    // MARK: - Loading items from DamusState
+    
+    /// This is called whenever DamusState gets set. This function is used to load or setup anything we need from the new DamusState
+    func load_our_stuff_from_damus_state() {
+        self.load_latest_contact_event_from_damus_state()
+    }
+    
+    /// This loads the latest contact event we have on file from NostrDB. This should be called as soon as we get the new DamusState
+    /// Loading the latest contact list event into our `Contacts` instance from storage is important to avoid getting into weird states when the network is unreliable or when relays delete such information
+    func load_latest_contact_event_from_damus_state() {
+        guard let latest_contact_event_id_hex = damus_state.settings.latest_contact_event_id_hex else { return }
+        guard let latest_contact_event_id = NoteId(hex: latest_contact_event_id_hex) else { return }
+        guard let latest_contact_event: NdbNote = damus_state.ndb.lookup_note( latest_contact_event_id)?.unsafeUnownedValue?.to_owned() else { return }
+        process_contact_event(state: damus_state, ev: latest_contact_event)
+        damus_state.contacts.delegate = self
+    }
+    
+    // MARK: - ContactsDelegate functions
+    
+    func latest_contact_event_changed(new_event: NostrEvent) {
+        // When the latest user contact event has changed, save its ID so we know exactly where to find it next time
+        damus_state.settings.latest_contact_event_id_hex = new_event.id.hex()
+    }
+    
+    // MARK: - Nostr event and subscription handling
 
     func resubscribe(_ resubbing: Resubscribe) {
         if self.should_debounce_dms {
@@ -279,9 +313,14 @@ class HomeModel {
     @MainActor
     func handle_damus_app_notification(_ notification: DamusAppNotification) async {
         if self.notifications.insert_app_notification(notification: notification) {
-            // If we successfully inserted a new Damus App notification, switch ON the Damus App notification bit on our NewsEventsBits
-            // This will cause the bell icon on the tab bar to display the purple dot indicating there is an unread notification
-            self.notification_status.new_events = NewEventsBits(rawValue: self.notification_status.new_events.rawValue | NewEventsBits.damus_app_notifications.rawValue)
+            let last_notification = get_last_event(.notifications)
+            if last_notification == nil || last_notification!.created_at < notification.last_event_at {
+                save_last_event(NoteId.empty, created_at: notification.last_event_at, timeline: .notifications)
+                // If we successfully inserted a new Damus App notification, switch ON the Damus App notification bit on our NewsEventsBits
+                // This will cause the bell icon on the tab bar to display the purple dot indicating there is an unread notification
+                self.notification_status.new_events = NewEventsBits(rawValue: self.notification_status.new_events.rawValue | NewEventsBits.damus_app_notifications.rawValue)
+            }
+            return
         }
     }
     
@@ -510,7 +549,8 @@ class HomeModel {
         notifications_filter.limit = 500
 
         var notifications_filters = [notifications_filter]
-        var contacts_filters = [contacts_filter, our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter]
+        let contacts_filter_chunks = contacts_filter.chunked(on: .authors, into: MAX_CONTACTS_ON_FILTER)
+        var contacts_filters = contacts_filter_chunks + [our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter]
         var dms_filters = [dms_filter, our_dms_filter]
         let last_of_kind = get_last_of_kind(relay_id: relay_id)
 
@@ -563,7 +603,7 @@ class HomeModel {
         home_filter.authors = friends
         home_filter.limit = 500
 
-        var home_filters = [home_filter]
+        var home_filters = home_filter.chunked(on: .authors, into: MAX_CONTACTS_ON_FILTER)
 
         let followed_hashtags = Array(damus_state.contacts.get_followed_hashtags())
         if followed_hashtags.count != 0 {
@@ -693,7 +733,7 @@ class HomeModel {
     func got_new_dm(notifs: NewEventsBits, ev: NostrEvent) {
         notification_status.new_events = notifs
         
-        guard should_display_notification(state: damus_state, event: ev),
+        guard should_display_notification(state: damus_state, event: ev, mode: .local),
               let notification_object = generate_local_notification_object(from: ev, state: damus_state)
         else {
             return
@@ -1113,8 +1153,8 @@ func should_show_event(event: NostrEvent, damus_state: DamusState) -> Bool {
     )
 }
 
-func should_show_event(state: DamusState, ev: NostrEvent, keypair: Keypair? = nil) -> Bool {
-    let event_muted = state.mutelist_manager.is_event_muted(ev, keypair: keypair)
+func should_show_event(state: DamusState, ev: NostrEvent) -> Bool {
+    let event_muted = state.mutelist_manager.is_event_muted(ev)
     if event_muted {
         return false
     }

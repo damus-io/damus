@@ -99,12 +99,4 @@ final class WalletConnectTests: XCTestCase {
         XCTAssertEqual(ev.remaining.count, 1)
         XCTAssertEqual(ev.remaining[0].relay.url.absoluteString, "ws://127.0.0.1")
     }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
-
 }

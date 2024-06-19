@@ -10,12 +10,10 @@ import Foundation
 struct NostrPost {
     let kind: NostrKind
     let content: String
-    let references: [RefId]
     let tags: [[String]]
 
-    init(content: String, references: [RefId], kind: NostrKind = .text, tags: [[String]] = []) {
+    init(content: String, kind: NostrKind = .text, tags: [[String]] = []) {
         self.content = content
-        self.references = references
         self.kind = kind
         self.tags = tags
     }

@@ -18,17 +18,7 @@ struct UserSearch: View {
     
     var users: [Pubkey] {
         guard let txn = NdbTxn(ndb: damus_state.ndb) else { return [] }
-        return search_profiles(profiles: damus_state.profiles, search: search, txn: txn).sorted { a, b in
-            let aFriendTypePriority = get_friend_type(contacts: damus_state.contacts, pubkey: a)?.priority ?? 0
-            let bFriendTypePriority = get_friend_type(contacts: damus_state.contacts, pubkey: b)?.priority ?? 0
-
-            if aFriendTypePriority > bFriendTypePriority {
-                // `a` should be sorted before `b`
-                return true
-            } else {
-                return false
-            }
-        }
+        return search_profiles(profiles: damus_state.profiles, contacts: damus_state.contacts, search: search, txn: txn)
     }
     
     func on_user_tapped(pk: Pubkey) {

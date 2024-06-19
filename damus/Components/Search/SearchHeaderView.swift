@@ -35,7 +35,7 @@ struct SearchHeaderView: View {
     }
 
     var SearchText: Text {
-        Text(verbatim: described.description)
+        Text(described.description)
     }
 
     var body: some View {
@@ -83,9 +83,9 @@ struct SingleCharacterAvatar: View {
     
     var body: some View {
         NonImageAvatar {
-            Text(verbatim: character)
+            Text(character)
                 .font(.largeTitle.bold())
-                .mask(Text(verbatim: character)
+                .mask(Text(character)
                     .font(.largeTitle.bold()))
         }
     }

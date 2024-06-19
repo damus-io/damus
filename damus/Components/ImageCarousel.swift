@@ -31,6 +31,49 @@ struct ShareSheet: UIViewControllerRepresentable {
     }
 }
 
+//  Custom UIPageControl
+struct PageControlView: UIViewRepresentable {
+    @Binding var currentPage: Int
+    var numberOfPages: Int
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    func makeUIView(context: Context) -> UIPageControl {
+        let uiView = UIPageControl()
+        uiView.backgroundStyle = .minimal
+        uiView.currentPageIndicatorTintColor = UIColor(Color("DamusPurple"))
+        uiView.pageIndicatorTintColor = UIColor(Color("DamusLightGrey"))
+        uiView.currentPage = currentPage
+        uiView.numberOfPages = numberOfPages
+        uiView.addTarget(context.coordinator, action: #selector(Coordinator.valueChanged), for: .valueChanged)
+        return uiView
+    }
+
+    func updateUIView(_ uiView: UIPageControl, context: Context) {
+        uiView.currentPage = currentPage
+        uiView.numberOfPages = numberOfPages
+    }
+}
+
+extension PageControlView {
+    final class Coordinator: NSObject {
+        var parent: PageControlView
+        
+        init(_ parent: PageControlView) {
+            self.parent = parent
+        }
+        
+        @objc func valueChanged(sender: UIPageControl) {
+            let currentPage = sender.currentPage
+            withAnimation {
+                parent.currentPage = currentPage
+            }
+        }
+    }
+}
+
 
 enum ImageShape {
     case square
@@ -227,7 +270,6 @@ struct ImageCarousel<Content: View>: View {
         .onChange(of: model.selectedIndex) { value in
             model.selectedIndex = value
         }
-        .tabViewStyle(PageTabViewStyle())
     }
     
     var body: some View {
@@ -235,31 +277,11 @@ struct ImageCarousel<Content: View>: View {
             Medias
                 .onTapGesture { }
             
-            // This is our custom carousel image indicator
-            CarouselDotsView(urls: urls, selectedIndex: $model.selectedIndex)
-        }
-    }
-}
-
-// MARK: - Custom Carousel
-struct CarouselDotsView<T>: View {
-    let urls: [T]
-    @Binding var selectedIndex: Int
-
-    var body: some View {
-        if urls.count > 1 {
-            HStack {
-                ForEach(urls.indices, id: \.self) { index in
-                    Circle()
-                        .fill(index == selectedIndex ? Color("DamusPurple") : Color("DamusLightGrey"))
-                        .frame(width: 10, height: 10)
-                        .onTapGesture {
-                            selectedIndex = index
-                        }
-                }
+            if urls.count > 1 {
+                PageControlView(currentPage: $model.selectedIndex, numberOfPages: urls.count)
+                    .frame(maxWidth: 0, maxHeight: 0)
+                    .padding(.top, 5)
             }
-            .padding(.top, CGFloat(8))
-            .id(UUID())
         }
     }
 }

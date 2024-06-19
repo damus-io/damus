@@ -36,7 +36,7 @@ struct ProxyView: View {
                             HStack {
                                 let protocolLogo = get_protocol_image(protocolName: proxy.protocolName)
                                 if protocolLogo.isEmpty {
-                                    Text("\(proxy.protocolName)")
+                                    Text(proxy.protocolName)
                                         .font(.caption)
                                 } else {
                                     Image(protocolLogo)

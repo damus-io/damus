@@ -1,4 +1,5 @@
 {
+  "originHash" : "babaf4d5748afecf49bbb702530d8e9576460692f478b0a50ee43195dd4440e2",
   "pins" : [
     {
       "identity" : "gsplayer",
@@ -16,6 +17,15 @@
       "state" : {
         "revision" : "415b1d97fb38bda1e5a6b2dde63354720832110b",
         "version" : "7.6.1"
+      }
+    },
+    {
+      "identity" : "mcemojipicker",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/izyumkin/MCEmojiPicker",
+      "state" : {
+        "revision" : "e0b4903b75ae1cc418d276d84d1cb946b8a1d73c",
+        "version" : "1.2.3"
       }
     },
     {
@@ -51,7 +61,16 @@
         "revision" : "74203046135342e4a4a627476dd6caf8b28fe11b",
         "version" : "509.0.0"
       }
+    },
+    {
+      "identity" : "swipeactions",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/aheze/SwipeActions",
+      "state" : {
+        "revision" : "41e6f6dce02d8cfa164f8c5461a41340850ca3ab",
+        "version" : "1.1.0"
+      }
     }
   ],
-  "version" : 2
+  "version" : 3
 }
