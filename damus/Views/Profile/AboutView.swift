@@ -26,11 +26,7 @@ struct AboutView: View {
         Group {
             if let about_string {
                 let truncated_about = show_full_about ? about_string : about_string.truncateOrNil(maxLength: max_about_length)
-                SelectableText(damus_state: state, event: NostrEvent(
-                    content: "",
-                    keypair: jack_keypair,
-                    createdAt: UInt32(Date().timeIntervalSince1970 - 100)
-                )!, attributedString: truncated_about ?? about_string, textAlignment: self.text_alignment, size: .subheadline)
+                SelectableText(damus_state: state, event: nil, attributedString: truncated_about ?? about_string, textAlignment: self.text_alignment, size: .subheadline)
 
                 if truncated_about != nil {
                     if show_full_about {
