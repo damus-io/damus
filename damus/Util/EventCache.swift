@@ -244,16 +244,12 @@ class EventCache {
     }
 }
 
-func should_translate(event: NostrEvent, our_keypair: Keypair, settings: UserSettingsStore, note_lang: String?) -> Bool {
-    guard settings.can_translate else {
-        return false
-    }
-
+func should_translate(event: NostrEvent, our_keypair: Keypair, note_lang: String?) -> Bool {
     // don't translate reposts, longform, etc
     if event.kind != 1 {
         return false;
     }
-    
+
     // Do not translate self-authored notes if logged in with a private key
     // as we can assume the user can understand their own notes.
     // The detected language prediction could be incorrect and not in the list of preferred languages.
@@ -261,25 +257,33 @@ func should_translate(event: NostrEvent, our_keypair: Keypair, settings: UserSet
     if our_keypair.privkey != nil && our_keypair.pubkey == event.pubkey {
         return false
     }
-    
+
     if let note_lang {
         let preferredLanguages = Set(Locale.preferredLanguages.map { localeToLanguage($0) })
-        
+
         // Don't translate if its in our preferred languages
         guard !preferredLanguages.contains(note_lang) else {
             // if its the same, give up and don't retry
             return false
         }
     }
-    
+
     // we should start translating if we have auto_translate on
     return true
+}
+
+func can_and_should_translate(event: NostrEvent, our_keypair: Keypair, settings: UserSettingsStore, note_lang: String?) -> Bool {
+    guard settings.can_translate else {
+        return false
+    }
+
+    return should_translate(event: event, our_keypair: our_keypair, note_lang: note_lang)
 }
 
 func should_preload_translation(event: NostrEvent, our_keypair: Keypair, current_status: TranslateStatus, settings: UserSettingsStore, note_lang: String?) -> Bool {
     switch current_status {
     case .havent_tried:
-        return should_translate(event: event, our_keypair: our_keypair, settings: settings, note_lang: note_lang) && settings.auto_translate
+        return can_and_should_translate(event: event, our_keypair: our_keypair, settings: settings, note_lang: note_lang) && settings.auto_translate
     case .translating: return false
     case .translated: return false
     case .not_needed: return false
@@ -413,7 +417,7 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
 
     var translations: TranslateStatus? = nil
     // We have to recheck should_translate here now that we have note_language
-    if plan.load_translations && should_translate(event: plan.event, our_keypair: our_keypair, settings: settings, note_lang: note_language) && settings.auto_translate
+    if plan.load_translations && can_and_should_translate(event: plan.event, our_keypair: our_keypair, settings: settings, note_lang: note_language) && settings.auto_translate
     {
         translations = await translate_note(profiles: profiles, keypair: our_keypair, event: plan.event, settings: settings, note_lang: note_language, purple: state.purple)
     }
