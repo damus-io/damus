@@ -9,6 +9,7 @@ import SwiftUI
 import LinkPresentation
 import NaturalLanguage
 import MarkdownUI
+import Translation
 
 struct Blur: UIViewRepresentable {
     var style: UIBlurEffect.Style = .systemUltraThinMaterial
@@ -31,6 +32,8 @@ struct NoteContentView: View {
     let size: EventViewKind
     let preview_height: CGFloat?
     let options: EventViewOptions
+
+    @State var isOnDeviceTranslationPresented: Bool = false
 
     @ObservedObject var artifacts_model: NoteArtifactsModel
     @ObservedObject var preview_model: PreviewModel
@@ -96,7 +99,7 @@ struct NoteContentView: View {
     }
 
     var translateView: some View {
-        TranslateView(damus_state: damus_state, event: event, size: self.size)
+        TranslateView(damus_state: damus_state, event: event, size: self.size, isOnDeviceTranslationPresented: $isOnDeviceTranslationPresented)
     }
     
     func previewView(links: [URL]) -> some View {
@@ -299,7 +302,12 @@ struct NoteContentView: View {
                 Markdown(md.markdown)
                     .padding([.leading, .trailing, .top])
             case .separated(let separated):
-                MainContent(artifacts: separated)
+                if #available(iOS 17.4, macOS 14.4, *) {
+                    MainContent(artifacts: separated)
+                        .translationPresentation(isPresented: $isOnDeviceTranslationPresented, text: event.get_content(damus_state.keypair))
+                } else {
+                    MainContent(artifacts: separated)
+                }
             }
         }
         .fixedSize(horizontal: false, vertical: true)

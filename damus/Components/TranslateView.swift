@@ -27,19 +27,26 @@ struct TranslateView: View {
     let damus_state: DamusState
     let event: NostrEvent
     let size: EventViewKind
-    
+
+    @Binding var isOnDeviceTranslationPresented: Bool
+
     @ObservedObject var translations_model: TranslationModel
     
-    init(damus_state: DamusState, event: NostrEvent, size: EventViewKind) {
+    init(damus_state: DamusState, event: NostrEvent, size: EventViewKind, isOnDeviceTranslationPresented: Binding<Bool>) {
         self.damus_state = damus_state
         self.event = event
         self.size = size
+        self._isOnDeviceTranslationPresented = isOnDeviceTranslationPresented
         self._translations_model = ObservedObject(wrappedValue: damus_state.events.get_cache_data(event.id).translations_model)
     }
     
     var TranslateButton: some View {
         Button(NSLocalizedString("Translate Note", comment: "Button to translate note from different language.")) {
-            translate()
+            if damus_state.settings.translation_service == .none {
+                isOnDeviceTranslationPresented = true
+            } else {
+                translate()
+            }
         }
         .translate_button_style()
     }
@@ -74,7 +81,15 @@ struct TranslateView: View {
     }
         
     func should_transl(_ note_lang: String) -> Bool {
-        should_translate(event: event, our_keypair: damus_state.keypair, settings: damus_state.settings, note_lang: note_lang)
+        guard should_translate(event: event, our_keypair: damus_state.keypair, note_lang: note_lang) else {
+            return false
+        }
+
+        if TranslationService.isOfflineTranslationSupported {
+            return damus_state.settings.translation_service == .none || damus_state.settings.can_translate
+        } else {
+            return damus_state.settings.can_translate
+        }
     }
     
     var body: some View {
@@ -114,9 +129,11 @@ extension View {
 }
 
 struct TranslateView_Previews: PreviewProvider {
+    @State static var isOnDeviceTranslationPresented: Bool = false
+
     static var previews: some View {
         let ds = test_damus_state
-        TranslateView(damus_state: ds, event: test_note, size: .normal)
+        TranslateView(damus_state: ds, event: test_note, size: .normal, isOnDeviceTranslationPresented: $isOnDeviceTranslationPresented)
     }
 }
 
