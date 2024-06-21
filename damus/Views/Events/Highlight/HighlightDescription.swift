@@ -34,7 +34,7 @@ func highlight_desc(ndb: Ndb, event: NostrEvent, highlighted_event: NostrEvent?,
 
     let bundle = bundleForLocale(locale: locale)
 
-    if desc.pubkeys.count == 0 {
+    if pubkeys.count == 0 {
         return NSLocalizedString("Highlighted", bundle: bundle, comment: "Label to indicate that the user is highlighting their own post.")
     }
 
@@ -48,7 +48,6 @@ func highlight_desc(ndb: Ndb, event: NostrEvent, highlighted_event: NostrEvent?,
         return Profile.displayName(profile: prof?.profile, pubkey: pk).username.truncate(maxLength: 50)
     }
 
-    let uniqueNames = NSOrderedSet(array: names).array as! [String]
-
-    return String(format: NSLocalizedString("Highlighted %@", bundle: bundle, comment: "Label to indicate that the user is highlighting 1 user."), locale: locale, uniqueNames[0])
+    let uniqueNames: [String] = Array(Set(names))
+    return String(format: NSLocalizedString("Highlighted %@", bundle: bundle, comment: "Label to indicate that the user is highlighting 1 user."), locale: locale, uniqueNames.first ?? "")
 }
