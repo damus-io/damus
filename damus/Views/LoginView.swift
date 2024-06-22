@@ -62,8 +62,9 @@ struct LoginView: View {
     var body: some View {
         ZStack(alignment: .top) {
             VStack {
+                Spacer()
+                
                 SignInHeader()
-                    .padding(.top, 100)
                 
                 SignInEntry(key: $key, shouldSaveKey: $shouldSaveKey)
                 
@@ -112,8 +113,9 @@ struct LoginView: View {
                 Spacer()
             }
             .padding()
+            .padding(.bottom, 50)
         }
-        .background(DamusBackground(maxHeight: 350), alignment: .top)
+        .background(DamusBackground(maxHeight: UIScreen.main.bounds.size.height/2), alignment: .top)
         .onAppear {
             credential_handler.check_credentials()
         }
@@ -320,9 +322,13 @@ struct KeyInput: View {
         }
         .padding(.vertical, 2)
         .padding(.horizontal, 10)
-        .overlay {
+        .background {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(.gray, lineWidth: 1)
+                .background {
+                    RoundedRectangle(cornerRadius: 12)
+                        .foregroundColor(.damusAdaptableWhite)
+                }
         }
     }
 }
@@ -337,11 +343,12 @@ struct SignInHeader: View {
                 .padding(.bottom)
             
             Text("Sign in", comment: "Title of view to log into an account.")
+                .foregroundColor(DamusColors.neutral6)
                 .font(.system(size: 32, weight: .bold))
                 .padding(.bottom, 5)
             
             Text("Welcome to the social network you control", comment: "Welcome text")
-                .foregroundColor(Color("DamusMediumGrey"))
+                .foregroundColor(DamusColors.neutral6)
         }
     }
 }
@@ -353,6 +360,7 @@ struct SignInEntry: View {
     var body: some View {
         VStack(alignment: .leading) {
             Text("Enter your account key", comment: "Prompt for user to enter an account key to login.")
+                .foregroundColor(DamusColors.neutral6)
                 .fontWeight(.medium)
                 .padding(.top, 30)
             
@@ -444,7 +452,9 @@ struct LoginView_Previews: PreviewProvider {
         let bech32_pubkey = "KeyInput"
         Group {
             LoginView(key: pubkey, nav: .init())
+                .previewDevice(PreviewDevice(rawValue: "iPhone SE (3rd generation)"))
             LoginView(key: bech32_pubkey, nav: .init())
+                .previewDevice(PreviewDevice(rawValue: "iPhone 15 Pro Max"))
         }
     }
 }

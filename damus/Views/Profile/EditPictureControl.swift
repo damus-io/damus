@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Kingfisher
 
 class ImageUploadingObserver: ObservableObject {
     @Published var isLoading: Bool = false
@@ -14,6 +15,8 @@ class ImageUploadingObserver: ObservableObject {
 struct EditPictureControl: View {
     let uploader: MediaUploader
     let pubkey: Pubkey
+    var size: CGFloat? = 25
+    var setup: Bool? = false
     @Binding var image_url: URL?
     @ObservedObject var uploadObserver: ImageUploadingObserver
     let callback: (URL?) -> Void
@@ -43,20 +46,53 @@ struct EditPictureControl: View {
             if uploadObserver.isLoading {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: DamusColors.purple))
+                    .frame(width: size, height: size)
                     .padding(10)
                     .background(DamusColors.white.opacity(0.7))
                     .clipShape(Circle())
                     .shadow(color: DamusColors.purple, radius: 15, x: 0, y: 0)
+            } else if let url = image_url {
+                KFAnimatedImage(url)
+                    .imageContext(.pfp, disable_animation: false)
+                    .onFailure(fallbackUrl: URL(string: robohash(pubkey)), cacheKey: url.absoluteString)
+                    .cancelOnDisappear(true)
+                    .configure { view in
+                        view.framePreloadCount = 3
+                    }
+                    .scaledToFill()
+                    .frame(width: (size ?? 25) + 10, height: (size ?? 25) + 10)
+                    .foregroundColor(DamusColors.white)
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(.white, lineWidth: 4))
             } else {
-                Image("camera")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 25, height: 25)
-                    .foregroundColor(DamusColors.purple)
-                    .padding(10)
-                    .background(DamusColors.white.opacity(0.7))
-                    .clipShape(Circle())
-                    .shadow(color: DamusColors.purple, radius: 15, x: 0, y: 0)
+                if setup ?? false {
+                    Image(systemName: "person")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: size, height: size)
+                        .foregroundColor(DamusColors.white)
+                        .padding(20)
+                        .clipShape(Circle())
+                        .background {
+                            Circle()
+                                .fill(PinkGradient, strokeBorder: .white, lineWidth: 4)
+                        }
+                        
+                } else {
+                    Image("camera")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: size, height: size)
+                        .foregroundColor(DamusColors.purple)
+                        .padding(10)
+                        .background(DamusColors.white.opacity(0.7))
+                        .clipShape(Circle())
+                        .background {
+                            Circle()
+                                .fill(DamusColors.purple, strokeBorder: .white, lineWidth: 2)
+                        }
+                }
+                    
             }
         }
         .sheet(isPresented: $show_camera) {
@@ -110,7 +146,7 @@ struct EditPictureControl_Previews: PreviewProvider {
         let observer = ImageUploadingObserver()
         ZStack {
             Color.gray
-            EditPictureControl(uploader: .nostrBuild, pubkey: test_pubkey, image_url: url, uploadObserver: observer) { _ in
+            EditPictureControl(uploader: .nostrBuild, pubkey: test_pubkey, size: 100, setup: false, image_url: url, uploadObserver: observer) { _ in
                 //
             }
         }
