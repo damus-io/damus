@@ -70,6 +70,7 @@ struct ProfileView: View {
     @State var show_share_sheet: Bool = false
     @State var show_qr_code: Bool = false
     @State var action_sheet_presented: Bool = false
+    @State var mute_dialog_presented: Bool = false
     @State var filter_state : FilterState = .posts
     @State var yOffset: CGFloat = 0
 
@@ -162,7 +163,10 @@ struct ProfileView: View {
         Button(action: {
             action_sheet_presented = true
         }) {
-            navImage(img: "share3")
+            Image(systemName: "ellipsis")
+                .frame(width: 33, height: 33)
+                .background(Color.black.opacity(0.6))
+                .clipShape(Circle())
         }
         .confirmationDialog(NSLocalizedString("Actions", comment: "Title for confirmation dialog to either share, report, or mute a profile."), isPresented: $action_sheet_presented) {
             Button(NSLocalizedString("Share", comment: "Button to share the link to a profile.")) {
@@ -196,12 +200,18 @@ struct ProfileView: View {
                         damus_state.postbox.send(new_ev)
                     }
                 } else {
-                    MuteDurationMenu { duration in
-                        notify(.mute(.user(profile.pubkey, duration?.date_from_now)))
-                    } label: {
-                        Text("Mute", comment: "Button to mute a profile.")
-                            .foregroundStyle(.red)
+                    Button(NSLocalizedString("Mute", comment: "Button to mute a profile"), role: .destructive) {
+                        mute_dialog_presented = true
                     }
+                }
+            }
+        }
+        .confirmationDialog(NSLocalizedString("Mute", comment: "Title for confirmation dialog to mute a profile."), isPresented: $mute_dialog_presented) {
+            ForEach(DamusDuration.allCases, id: \.self) { duration in
+                Button {
+                    notify(.mute(.user(profile.pubkey, duration.date_from_now)))
+                } label: {
+                    Text(duration.title)
                 }
             }
         }
