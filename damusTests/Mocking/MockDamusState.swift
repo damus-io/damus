@@ -7,6 +7,7 @@
 
 import Foundation
 @testable import damus
+import EmojiPicker
 
 // Generates a test damus state with configurable mock parameters
 func generate_test_damus_state(
@@ -50,7 +51,9 @@ func generate_test_damus_state(
                            music: .init(onChange: {_ in }),
                            video: .init(),
                            ndb: ndb,
-                           quote_reposts: .init(our_pubkey: our_pubkey) )
+                           quote_reposts: .init(our_pubkey: our_pubkey),
+                           emoji_provider: DefaultEmojiProvider()
+    )
 
     return damus
 }

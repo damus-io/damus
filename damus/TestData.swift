@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import EmojiPicker
 
 
 let test_seckey = Privkey(Data([0xe0, 0xaa, 0x60, 0x26, 0x08, 0x18, 0xac, 0x10, 0x03, 0x86, 0x4d, 0x15, 0x24, 0x9a, 0xf7, 0xa3, 0x3e, 0x4f, 0x1f, 0xc9, 0x01, 0xcf, 0xee, 0xa9, 0xb4, 0x77, 0xc7, 0x07, 0x22, 0xb7, 0x25, 0xfd]))
@@ -100,7 +101,8 @@ var test_damus_state: DamusState = ({
                            music: .init(onChange: {_ in }),
                            video: .init(),
                            ndb: ndb,
-                           quote_reposts: .init(our_pubkey: our_pubkey)
+                           quote_reposts: .init(our_pubkey: our_pubkey),
+                           emoji_provider: DefaultEmojiProvider(showAllVariations: true)
     )
 
     /*

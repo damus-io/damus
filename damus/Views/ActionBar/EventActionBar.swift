@@ -6,7 +6,8 @@
 //
 
 import SwiftUI
-import MCEmojiPicker
+import EmojiPicker
+import EmojiKit
 import SwipeActions
 
 struct EventActionBar: View {
@@ -22,7 +23,7 @@ struct EventActionBar: View {
     @State var show_share_action: Bool = false
     @State var show_repost_action: Bool = false
 
-    @State private var isOnTopHalfOfScreen: Bool = false
+    @State private var selectedEmoji: Emoji? = nil
 
     @ObservedObject var bar: ActionBarModel
     
@@ -126,7 +127,7 @@ struct EventActionBar: View {
     
     var like_button: some View {
         HStack(spacing: 4) {
-            LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil, isOnTopHalfOfScreen: $isOnTopHalfOfScreen) { emoji in
+            LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil) { emoji in
                 if bar.liked {
                     //notify(.delete, bar.our_like)
                 } else {
@@ -257,20 +258,6 @@ struct EventActionBar: View {
                 self.bar.our_like = liked.event
             }
         }
-        .background(
-            GeometryReader { geometry in
-                EmptyView()
-                    .onAppear {
-                        let eventActionBarY = geometry.frame(in: .global).midY
-                        let screenMidY = UIScreen.main.bounds.midY
-                        self.isOnTopHalfOfScreen = eventActionBarY > screenMidY
-                    }
-                    .onChange(of: geometry.frame(in: .global).midY) { newY in
-                        let screenMidY = UIScreen.main.bounds.midY
-                        self.isOnTopHalfOfScreen = newY > screenMidY
-                    }
-            }
-        )
     }
 
     func send_like(emoji: String) {
@@ -315,7 +302,6 @@ struct LikeButton: View {
     let damus_state: DamusState
     let liked: Bool
     let liked_emoji: String?
-    @Binding var isOnTopHalfOfScreen: Bool
     let action: (_ emoji: String) -> Void
 
     // For reactions background
@@ -324,7 +310,7 @@ struct LikeButton: View {
 
     @State private var isReactionsVisible = false
 
-    @State private var selectedEmoji: String = ""
+    @State private var selectedEmoji: Emoji?
 
     // Following four are Shaka animation properties
     let timer = Timer.publish(every: 0.10, on: .main, in: .common).autoconnect()
@@ -363,6 +349,11 @@ struct LikeButton: View {
                     .foregroundColor(.gray)
             }
         }
+        .sheet(isPresented: $isReactionsVisible) {
+            NavigationView {
+                EmojiPickerView(selectedEmoji: $selectedEmoji, emojiProvider: damus_state.emoji_provider)
+            }.presentationDetents([.medium, .large])
+        }
         .accessibilityLabel(NSLocalizedString("Like", comment: "Accessibility Label for Like button"))
         .rotationEffect(Angle(degrees: shouldAnimate ? rotationAngle : 0))
         .onReceive(self.timer) { _ in
@@ -377,14 +368,10 @@ struct LikeButton: View {
                 amountOfAngleIncrease = 20.0
             }
         })
-        .emojiPicker(
-            isPresented: $isReactionsVisible,
-            selectedEmoji: $selectedEmoji,
-            arrowDirection: isOnTopHalfOfScreen ? .down : .up,
-            isDismissAfterChoosing: true
-        )
         .onChange(of: selectedEmoji) { newSelectedEmoji in
-            self.action(newSelectedEmoji)
+            if let newSelectedEmoji {
+                self.action(newSelectedEmoji.value)
+            }
         }
     }
 
