@@ -12,6 +12,7 @@
 		3169CAE6294E69C000EE4006 /* EmptyTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CAE5294E69C000EE4006 /* EmptyTimelineView.swift */; };
 		3169CAED294FCCFC00EE4006 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CAEC294FCCFC00EE4006 /* Constants.swift */; };
 		31D2E847295218AF006D67F8 /* Shimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D2E846295218AF006D67F8 /* Shimmer.swift */; };
+		3A0A30BB2C21397A00F8C9BC /* EmojiPicker in Frameworks */ = {isa = PBXBuildFile; productRef = 3A0A30BA2C21397A00F8C9BC /* EmojiPicker */; };
 		3A23838E2A297DD200E5AA2E /* ZapButtonModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A23838D2A297DD200E5AA2E /* ZapButtonModel.swift */; };
 		3A3040ED29A5CB86008A0F29 /* ReplyDescriptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A3040EC29A5CB86008A0F29 /* ReplyDescriptionTests.swift */; };
 		3A3040F129A8FF97008A0F29 /* LocalizationUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A3040F029A8FF97008A0F29 /* LocalizationUtil.swift */; };
@@ -32,7 +33,6 @@
 		3ACB685F297633BC00C46468 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3ACB685D297633BC00C46468 /* Localizable.strings */; };
 		3ACBCB78295FE5C70037388A /* TimeAgoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ACBCB77295FE5C70037388A /* TimeAgoTests.swift */; };
 		3AE45AF6297BB2E700C1D842 /* LibreTranslateServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE45AF5297BB2E700C1D842 /* LibreTranslateServer.swift */; };
-		3AFE89C32BD4156F00AD31EF /* MCEmojiPicker in Frameworks */ = {isa = PBXBuildFile; productRef = 3AFE89C22BD4156F00AD31EF /* MCEmojiPicker */; };
 		3CCD1E6A2A874C4E0099A953 /* Nip98HTTPAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD1E692A874C4E0099A953 /* Nip98HTTPAuth.swift */; };
 		4C011B5E2BD0A56A002F2F9B /* ChatEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C011B5C2BD0A56A002F2F9B /* ChatEventView.swift */; };
 		4C011B5F2BD0A56A002F2F9B /* ChatroomThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C011B5D2BD0A56A002F2F9B /* ChatroomThreadView.swift */; };
@@ -1497,10 +1497,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C06670428FC7EC500038D2A /* Kingfisher in Frameworks */,
+				3A0A30BB2C21397A00F8C9BC /* EmojiPicker in Frameworks */,
 				D78DB8592C1CE9CA00F0AB12 /* SwipeActions in Frameworks */,
 				4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */,
 				4C27C9322A64766F007DBC75 /* MarkdownUI in Frameworks */,
-				3AFE89C32BD4156F00AD31EF /* MCEmojiPicker in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2893,7 +2893,7 @@
 				4C649880286E0EE300EAE2B3 /* secp256k1 */,
 				4C06670328FC7EC500038D2A /* Kingfisher */,
 				4C27C9312A64766F007DBC75 /* MarkdownUI */,
-				3AFE89C22BD4156F00AD31EF /* MCEmojiPicker */,
+				3A0A30BA2C21397A00F8C9BC /* EmojiPicker */,
 				D78DB8582C1CE9CA00F0AB12 /* SwipeActions */,
 			);
 			productName = damus;
@@ -3034,7 +3034,7 @@
 				4CCF9AB02A1FE80B00E03CFB /* XCRemoteSwiftPackageReference "GSPlayer" */,
 				4C27C9302A64766F007DBC75 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 				D7A343EC2AD0D77C00CED48B /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
-				3AFE89C12BD4156F00AD31EF /* XCRemoteSwiftPackageReference "MCEmojiPicker" */,
+				3A0A30B92C21397A00F8C9BC /* XCRemoteSwiftPackageReference "EmojiPicker" */,
 				D78DB8572C1CE9CA00F0AB12 /* XCRemoteSwiftPackageReference "SwipeActions" */,
 			);
 			productRefGroup = 4CE6DEE427F7A08100C66700 /* Products */;
@@ -4349,12 +4349,12 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		3AFE89C12BD4156F00AD31EF /* XCRemoteSwiftPackageReference "MCEmojiPicker" */ = {
+		3A0A30B92C21397A00F8C9BC /* XCRemoteSwiftPackageReference "EmojiPicker" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/izyumkin/MCEmojiPicker";
+			repositoryURL = "https://github.com/tyiu/EmojiPicker.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.2.3;
+				minimumVersion = 0.1.1;
 			};
 		};
 		4C06670228FC7EC500038D2A /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
@@ -4408,10 +4408,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		3AFE89C22BD4156F00AD31EF /* MCEmojiPicker */ = {
+		3A0A30BA2C21397A00F8C9BC /* EmojiPicker */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3AFE89C12BD4156F00AD31EF /* XCRemoteSwiftPackageReference "MCEmojiPicker" */;
-			productName = MCEmojiPicker;
+			package = 3A0A30B92C21397A00F8C9BC /* XCRemoteSwiftPackageReference "EmojiPicker" */;
+			productName = EmojiPicker;
 		};
 		4C06670328FC7EC500038D2A /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;

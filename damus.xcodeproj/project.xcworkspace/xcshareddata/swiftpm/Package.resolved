@@ -2,6 +2,24 @@
   "originHash" : "babaf4d5748afecf49bbb702530d8e9576460692f478b0a50ee43195dd4440e2",
   "pins" : [
     {
+      "identity" : "emojikit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tyiu/EmojiKit",
+      "state" : {
+        "revision" : "05805f72d63a6d6a2d7dc7fe14abd37c1317b11a",
+        "version" : "0.1.2"
+      }
+    },
+    {
+      "identity" : "emojipicker",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tyiu/EmojiPicker.git",
+      "state" : {
+        "revision" : "0c28b4a1a6b8840cf2580bda59517f6d0a733dc8",
+        "version" : "0.1.1"
+      }
+    },
+    {
       "identity" : "gsplayer",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/wxxsw/GSPlayer",
@@ -20,20 +38,20 @@
       }
     },
     {
-      "identity" : "mcemojipicker",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/izyumkin/MCEmojiPicker",
-      "state" : {
-        "revision" : "e0b4903b75ae1cc418d276d84d1cb946b8a1d73c",
-        "version" : "1.2.3"
-      }
-    },
-    {
       "identity" : "secp256k1.swift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/jb55/secp256k1.swift",
       "state" : {
         "revision" : "40b4b38b3b1c83f7088c76189a742870e0ca06a9"
+      }
+    },
+    {
+      "identity" : "swift-collections",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-collections.git",
+      "state" : {
+        "revision" : "ee97538f5b81ae89698fd95938896dec5217b148",
+        "version" : "1.1.1"
       }
     },
     {
@@ -60,6 +78,15 @@
       "state" : {
         "revision" : "74203046135342e4a4a627476dd6caf8b28fe11b",
         "version" : "509.0.0"
+      }
+    },
+    {
+      "identity" : "swift-trie",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tyiu/swift-trie",
+      "state" : {
+        "revision" : "4c50bff6c168f74425f70476be62a072980d2da7",
+        "version" : "0.1.2"
       }
     },
     {

@@ -6,7 +6,8 @@
 //
 
 import SwiftUI
-import MCEmojiPicker
+import EmojiKit
+import EmojiPicker
 import SwipeActions
 
 fileprivate let CORNER_RADIUS: CGFloat = 10
@@ -34,8 +35,8 @@ struct ChatEventView: View {
             generator.impactOccurred()
         }
     }
-    @State var selected_emoji: String = ""
-    
+    @State var selected_emoji: Emoji?
+
     @State private var isOnTopHalfOfScreen: Bool = false
     @ObservedObject var bar: ActionBarModel
     
@@ -154,19 +155,18 @@ struct ChatEventView: View {
     var event_bubble_with_long_press_interaction: some View {
         ZStack(alignment: is_ours ? .bottomLeading : .bottomTrailing) {
             self.event_bubble
-                .emojiPicker(
-                    isPresented: Binding(get: { popover_state == .open_emoji_selector }, set: { new_state in
-                        withAnimation(new_state == true ? .easeIn(duration: 0.5) : .easeOut(duration: 0.1)) {
-                            popover_state = new_state == true ? .open_emoji_selector : .closed
-                        }
-                    }),
-                    selectedEmoji: $selected_emoji,
-                    arrowDirection: isOnTopHalfOfScreen ? .down : .up,
-                    isDismissAfterChoosing: false
-                )
+                .sheet(isPresented: Binding(get: { popover_state == .open_emoji_selector }, set: { new_state in
+                    withAnimation(new_state == true ? .easeIn(duration: 0.5) : .easeOut(duration: 0.1)) {
+                        popover_state = new_state == true ? .open_emoji_selector : .closed
+                    }
+                })) {
+                    NavigationView {
+                        EmojiPickerView(selectedEmoji: $selected_emoji, emojiProvider: damus_state.emoji_provider)
+                    }.presentationDetents([.medium, .large])
+                }
                 .onChange(of: selected_emoji) { newSelectedEmoji in
-                    if newSelectedEmoji != "" {
-                        send_like(emoji: newSelectedEmoji)
+                    if let newSelectedEmoji {
+                        send_like(emoji: newSelectedEmoji.value)
                         popover_state = .closed
                     }
                 }
