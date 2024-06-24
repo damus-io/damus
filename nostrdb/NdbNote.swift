@@ -277,7 +277,7 @@ class NdbNote: Encodable, Equatable, Hashable {
 // Extension to make NdbNote compatible with NostrEvent's original API
 extension NdbNote {
     var is_textlike: Bool {
-        return kind == 1 || kind == 42 || kind == 30023
+        return kind == 1 || kind == 42 || kind == 30023 || kind == 9802
     }
 
     var is_quote_repost: NoteId? {

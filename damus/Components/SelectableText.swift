@@ -9,16 +9,20 @@ import UIKit
 import SwiftUI
 
 struct SelectableText: View {
-    
+    let damus_state: DamusState
+    let event: NostrEvent?
     let attributedString: AttributedString
     let textAlignment: NSTextAlignment
-    
+    @State private var showHighlightPost = false
+    @State private var selectedText = ""
     @State private var selectedTextHeight: CGFloat = .zero
     @State private var selectedTextWidth: CGFloat = .zero
-    
+
     let size: EventViewKind
-    
-    init(attributedString: AttributedString, textAlignment: NSTextAlignment? = nil, size: EventViewKind) {
+
+    init(damus_state: DamusState, event: NostrEvent?, attributedString: AttributedString, textAlignment: NSTextAlignment? = nil, size: EventViewKind) {
+        self.damus_state = damus_state
+        self.event = event
         self.attributedString = attributedString
         self.textAlignment = textAlignment ?? NSTextAlignment.natural
         self.size = size
@@ -32,6 +36,9 @@ struct SelectableText: View {
                 font: eventviewsize_to_uifont(size),
                 fixedWidth: selectedTextWidth,
                 textAlignment: self.textAlignment,
+                enableHighlighting: self.enableHighlighting(),
+                showHighlightPost: $showHighlightPost,
+                selectedText: $selectedText,
                 height: $selectedTextHeight
             )
             .padding([.leading, .trailing], -1.0)
@@ -46,8 +53,48 @@ struct SelectableText: View {
                 self.selectedTextWidth = newSize.width
             }
         }
+        .sheet(isPresented: $showHighlightPost) {
+            if let event {
+                HighlightPostView(damus_state: damus_state, event: event, selectedText: $selectedText)
+                    .presentationDragIndicator(.visible)
+                    .presentationDetents([.height(selectedTextHeight + 150), .medium, .large])
+            }
+        }
         .frame(height: selectedTextHeight)
     }
+    
+    func enableHighlighting() -> Bool {
+        self.event != nil
+    }
+}
+
+fileprivate class TextView: UITextView {
+    @Binding var showHighlightPost: Bool
+    @Binding var selectedText: String
+
+    init(frame: CGRect, textContainer: NSTextContainer?, showHighlightPost: Binding<Bool>, selectedText: Binding<String>) {
+        self._showHighlightPost = showHighlightPost
+        self._selectedText = selectedText
+        super.init(frame: frame, textContainer: textContainer)
+    }
+
+    required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+
+    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        if action == #selector(highlightText(_:)) {
+            return true
+        }
+        return super.canPerformAction(action, withSender: sender)
+    }
+
+    @objc public func highlightText(_ sender: Any?) {
+        guard let selectedRange = self.selectedTextRange else { return }
+        selectedText = self.text(in: selectedRange) ?? ""
+        showHighlightPost.toggle()
+    }
+
 }
 
  fileprivate struct TextViewRepresentable: UIViewRepresentable {
@@ -57,11 +104,13 @@ struct SelectableText: View {
     let font: UIFont
     let fixedWidth: CGFloat
     let textAlignment: NSTextAlignment
-
+    let enableHighlighting: Bool
+    @Binding var showHighlightPost: Bool
+    @Binding var selectedText: String
     @Binding var height: CGFloat
 
-    func makeUIView(context: UIViewRepresentableContext<Self>) -> UITextView {
-        let view = UITextView()
+    func makeUIView(context: UIViewRepresentableContext<Self>) -> TextView {
+        let view = TextView(frame: .zero, textContainer: nil, showHighlightPost: $showHighlightPost, selectedText: $selectedText)
         view.isEditable = false
         view.dataDetectorTypes = .all
         view.isSelectable = true
@@ -71,10 +120,15 @@ struct SelectableText: View {
         view.textContainerInset.left = 1.0
         view.textContainerInset.right = 1.0
         view.textAlignment = textAlignment
+
+        let menuController = UIMenuController.shared
+        let highlightItem = UIMenuItem(title: "Highlight", action: #selector(view.highlightText(_:)))
+        menuController.menuItems = self.enableHighlighting ? [highlightItem] : []
+
         return view
     }
 
-    func updateUIView(_ uiView: UITextView, context: UIViewRepresentableContext<Self>) {
+    func updateUIView(_ uiView: TextView, context: UIViewRepresentableContext<Self>) {
         let mutableAttributedString = createNSAttributedString()
         uiView.attributedText = mutableAttributedString
         uiView.textAlignment = self.textAlignment

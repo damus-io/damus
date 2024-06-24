@@ -399,6 +399,7 @@
 		5C14C29D2BBBA40B00079FD2 /* RelayAdminDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C14C29C2BBBA40B00079FD2 /* RelayAdminDetail.swift */; };
 		5C14C29F2BBBA5C600079FD2 /* RelayNipList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C14C29E2BBBA5C600079FD2 /* RelayNipList.swift */; };
 		5C42E78C29DB76D90086AAC1 /* EmptyUserSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C42E78B29DB76D90086AAC1 /* EmptyUserSearchView.swift */; };
+		5C4D9EA72C042FA5005EA0F7 /* HighlightPostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C4D9EA62C042FA5005EA0F7 /* HighlightPostView.swift */; };
 		5C513FBA297F72980072348F /* CustomPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FB9297F72980072348F /* CustomPicker.swift */; };
 		5C513FCC2984ACA60072348F /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FCB2984ACA60072348F /* QRCodeView.swift */; };
 		5C6E1DAD2A193EC2008FC15A /* GradientButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C6E1DAC2A193EC2008FC15A /* GradientButtonStyle.swift */; };
@@ -406,6 +407,11 @@
 		5C7389B12B6EFA7100781E0A /* ProxyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B02B6EFA7100781E0A /* ProxyView.swift */; };
 		5C7389B72B9E692E00781E0A /* MutinyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B62B9E692E00781E0A /* MutinyButton.swift */; };
 		5C7389B92B9E69ED00781E0A /* MutinyGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B82B9E69ED00781E0A /* MutinyGradient.swift */; };
+		5CC8529D2BD741CD0039FFC5 /* HighlightEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC8529C2BD741CD0039FFC5 /* HighlightEvent.swift */; };
+		5CC8529F2BD744F60039FFC5 /* HighlightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC8529E2BD744F60039FFC5 /* HighlightView.swift */; };
+		5CC852A22BDED9B90039FFC5 /* HighlightDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC852A12BDED9B90039FFC5 /* HighlightDescription.swift */; };
+		5CC852A42BDF3CA10039FFC5 /* HighlightLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC852A32BDF3CA10039FFC5 /* HighlightLink.swift */; };
+		5CC852A62BE00F180039FFC5 /* HighlightEventRef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC852A52BE00F180039FFC5 /* HighlightEventRef.swift */; };
 		5CC868DD2AA29B3200FB22BA /* NeutralButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC868DC2AA29B3200FB22BA /* NeutralButtonStyle.swift */; };
 		5CF2DCCC2AA3AF0B00984B8D /* RelayPicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF2DCCB2AA3AF0B00984B8D /* RelayPicView.swift */; };
 		5CF2DCCE2AABE1A500984B8D /* DamusLightGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF2DCCD2AABE1A500984B8D /* DamusLightGradient.swift */; };
@@ -1334,6 +1340,7 @@
 		5C14C29C2BBBA40B00079FD2 /* RelayAdminDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayAdminDetail.swift; sourceTree = "<group>"; };
 		5C14C29E2BBBA5C600079FD2 /* RelayNipList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayNipList.swift; sourceTree = "<group>"; };
 		5C42E78B29DB76D90086AAC1 /* EmptyUserSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyUserSearchView.swift; sourceTree = "<group>"; };
+		5C4D9EA62C042FA5005EA0F7 /* HighlightPostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightPostView.swift; sourceTree = "<group>"; };
 		5C513FB9297F72980072348F /* CustomPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomPicker.swift; sourceTree = "<group>"; };
 		5C513FCB2984ACA60072348F /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		5C6E1DAC2A193EC2008FC15A /* GradientButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientButtonStyle.swift; sourceTree = "<group>"; };
@@ -1341,6 +1348,11 @@
 		5C7389B02B6EFA7100781E0A /* ProxyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyView.swift; sourceTree = "<group>"; };
 		5C7389B62B9E692E00781E0A /* MutinyButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutinyButton.swift; sourceTree = "<group>"; };
 		5C7389B82B9E69ED00781E0A /* MutinyGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutinyGradient.swift; sourceTree = "<group>"; };
+		5CC8529C2BD741CD0039FFC5 /* HighlightEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightEvent.swift; sourceTree = "<group>"; };
+		5CC8529E2BD744F60039FFC5 /* HighlightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightView.swift; sourceTree = "<group>"; };
+		5CC852A12BDED9B90039FFC5 /* HighlightDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightDescription.swift; sourceTree = "<group>"; };
+		5CC852A32BDF3CA10039FFC5 /* HighlightLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightLink.swift; sourceTree = "<group>"; };
+		5CC852A52BE00F180039FFC5 /* HighlightEventRef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightEventRef.swift; sourceTree = "<group>"; };
 		5CC868DC2AA29B3200FB22BA /* NeutralButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeutralButtonStyle.swift; sourceTree = "<group>"; };
 		5CF2DCCB2AA3AF0B00984B8D /* RelayPicView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayPicView.swift; sourceTree = "<group>"; };
 		5CF2DCCD2AABE1A500984B8D /* DamusLightGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusLightGradient.swift; sourceTree = "<group>"; };
@@ -1668,6 +1680,8 @@
 				B5C60C1F2B530D5100C5ECA7 /* MuteItem.swift */,
 				B533694D2B66D791008A805E /* MutelistManager.swift */,
 				D7D2A3802BF815D000E4B42B /* PushNotificationClient.swift */,
+				D7C28E3A2BBB4D0000EE459F /* VideoCache.swift */,
+				5CC8529C2BD741CD0039FFC5 /* HighlightEvent.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2402,6 +2416,7 @@
 		4CC7AAEE297F11B300430951 /* Events */ = {
 			isa = PBXGroup;
 			children = (
+				5CC852A02BDED9970039FFC5 /* Highlight */,
 				4CA927682A290F8F0098A105 /* Components */,
 				4CC7AAEF297F11C700430951 /* SelectedEventView.swift */,
 				4CC7AAF5297F1A6A00430951 /* EventBody.swift */,
@@ -2697,6 +2712,18 @@
 				4CFD502E2A2DA45800A229DB /* MediaView.swift */,
 			);
 			path = Images;
+			sourceTree = "<group>";
+		};
+		5CC852A02BDED9970039FFC5 /* Highlight */ = {
+			isa = PBXGroup;
+			children = (
+				5CC8529E2BD744F60039FFC5 /* HighlightView.swift */,
+				5CC852A12BDED9B90039FFC5 /* HighlightDescription.swift */,
+				5CC852A32BDF3CA10039FFC5 /* HighlightLink.swift */,
+				5CC852A52BE00F180039FFC5 /* HighlightEventRef.swift */,
+				5C4D9EA62C042FA5005EA0F7 /* HighlightPostView.swift */,
+			);
+			path = Highlight;
 			sourceTree = "<group>";
 		};
 		7C0F392D29B57C8F0039859C /* Extensions */ = {
@@ -3153,6 +3180,7 @@
 				4C75EFAD28049CFB0006080F /* PostButton.swift in Sources */,
 				D7EDED1E2B11797D0018B19C /* LongformEvent.swift in Sources */,
 				504323A92A3495B6006AE6DC /* RelayModelCache.swift in Sources */,
+				5C4D9EA72C042FA5005EA0F7 /* HighlightPostView.swift in Sources */,
 				3A8CC6CC2A2CFEF900940F5F /* StringUtil.swift in Sources */,
 				D7FD12262BD345A700CF195B /* FirstAidSettingsView.swift in Sources */,
 				D7870BC12AC4750B0080BA88 /* MentionView.swift in Sources */,
@@ -3183,6 +3211,7 @@
 				4C32B94D2A9AD44700DC3548 /* Offset.swift in Sources */,
 				4C633350283D40E500B1C9C3 /* HomeModel.swift in Sources */,
 				4C987B57283FD07F0042CE38 /* FollowersModel.swift in Sources */,
+				5CC852A42BDF3CA10039FFC5 /* HighlightLink.swift in Sources */,
 				4C32B9552A9AD44700DC3548 /* ByteBuffer.swift in Sources */,
 				4C32B95B2A9AD44700DC3548 /* NativeObject.swift in Sources */,
 				3AB72AB9298ECF30004BB58C /* Translator.swift in Sources */,
@@ -3322,6 +3351,7 @@
 				4C3AC7A12835A81400E1F516 /* SetupView.swift in Sources */,
 				4C06670128FC7C5900038D2A /* RelayView.swift in Sources */,
 				4C285C8C28398BC7008A31F1 /* Keys.swift in Sources */,
+				5CC852A22BDED9B90039FFC5 /* HighlightDescription.swift in Sources */,
 				4C94D6432BA5AEFE00C26EFF /* QuoteRepostsView.swift in Sources */,
 				D7EDED332B12ACAE0018B19C /* DamusUserDefaults.swift in Sources */,
 				4CA352AE2A76C1AC003BB08B /* FollowedNotify.swift in Sources */,
@@ -3365,7 +3395,9 @@
 				4C2859602A12A2BE004746F7 /* SupporterBadge.swift in Sources */,
 				4C1A9A2A29DDF54400516EAC /* DamusVideoPlayer.swift in Sources */,
 				4CA352A22A76AEC5003BB08B /* LikedNotify.swift in Sources */,
+				5CC8529F2BD744F60039FFC5 /* HighlightView.swift in Sources */,
 				BA37598D2ABCCE500018D73B /* PhotoCaptureProcessor.swift in Sources */,
+				5CC8529D2BD741CD0039FFC5 /* HighlightEvent.swift in Sources */,
 				4C9146FD2A2A87C200DDEA40 /* wasm.c in Sources */,
 				4C75EFAF28049D350006080F /* NostrFilter.swift in Sources */,
 				4C3EA64C28FF59AC00C48A62 /* bech32_util.c in Sources */,
@@ -3477,6 +3509,7 @@
 				B51C1CEB2B55A60A00E312A9 /* MuteDurationMenu.swift in Sources */,
 				4CB88389296AF99A00DC99E7 /* EventDetailBar.swift in Sources */,
 				4C32B9512A9AD44700DC3548 /* FlatbuffersErrors.swift in Sources */,
+				5CC852A62BE00F180039FFC5 /* HighlightEventRef.swift in Sources */,
 				4CE8794E2996B16A00F758CC /* RelayToggle.swift in Sources */,
 				4C3AC79B28306D7B00E1F516 /* Contacts.swift in Sources */,
 				4C3EA63D28FF52D600C48A62 /* bolt11.c in Sources */,

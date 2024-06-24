@@ -51,9 +51,9 @@ struct TranslateView: View {
                 .foregroundColor(.gray)
                 .font(.footnote)
                 .padding([.top, .bottom], 10)
-            
+
             if self.size == .selected {
-                SelectableText(attributedString: artifacts.content.attributed, size: self.size)
+                SelectableText(damus_state: damus_state, event: event, attributedString: artifacts.content.attributed, size: self.size)
             } else {
                 artifacts.content.text
                     .font(eventviewsize_to_font(self.size, font_size: font_size))
