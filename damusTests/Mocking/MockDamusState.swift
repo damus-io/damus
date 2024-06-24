@@ -52,7 +52,7 @@ func generate_test_damus_state(
                            video: .init(),
                            ndb: ndb,
                            quote_reposts: .init(our_pubkey: our_pubkey),
-                           emoji_provider: DefaultEmojiProvider()
+                           emoji_provider: DefaultEmojiProvider(showAllVariations: false)
     )
 
     return damus
