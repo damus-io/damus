@@ -4756,7 +4756,7 @@ int ndb_note_json(struct ndb_note *note, char *buf, int buflen)
 
 	make_cursor((unsigned char *)buf, (unsigned char*)buf + buflen, &cur);
 
-	return cursor_push_str(c, "{\"id\":\"") &&
+	int ok = cursor_push_str(c, "{\"id\":\"") &&
 	       cursor_push_hex(c, ndb_note_id(note), 32) &&
 	       cursor_push_str(c, "\",\"pubkey\":\"") &&
 	       cursor_push_hex(c, ndb_note_pubkey(note), 32) &&
@@ -4772,6 +4772,11 @@ int ndb_note_json(struct ndb_note *note, char *buf, int buflen)
 	       cursor_push_hex(c, ndb_note_sig(note), 64) &&
 	       cursor_push_c_str(c, "\"}");
 
+	if (!ok) {
+		return 0;
+	}
+
+	return cur.p - cur.start;
 }
 
 int ndb_calculate_id(struct ndb_note *note, unsigned char *buf, int buflen) {
