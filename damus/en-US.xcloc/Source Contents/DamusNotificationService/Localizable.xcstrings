@@ -39,11 +39,17 @@
     "LibreTranslate (Open Source)" : {
       "comment" : "Dropdown option for selecting LibreTranslate as the translation service."
     },
+    "Local" : {
+      "comment" : "Option for notification mode setting: Local notification mode"
+    },
     "Local default" : {
       "comment" : "Dropdown option label for system default for Lightning wallet."
     },
     "Mentioned by %@" : {
       "comment" : "Mentioned by heading in local notification"
+    },
+    "Muted event" : {
+      "comment" : "Title for a push notification which has been muted"
     },
     "New encrypted direct message" : {
       "comment" : "Notification that the user has received a new direct message"
@@ -78,6 +84,9 @@
     "Production" : {
       "comment" : "Label indicating the production environment for Damus Purple"
     },
+    "Push" : {
+      "comment" : "Option for notification mode setting: Push notification mode"
+    },
     "Reposted by %@" : {
       "comment" : "Reposted by heading in local notification"
     },
@@ -98,6 +107,9 @@
     },
     "Test (local)" : {
       "comment" : "Label indicating a local test environment for Damus Purple functionality (Developer feature)"
+    },
+    "This is an event that has been muted according to your mute list rules. We cannot suppress this notification, but we obscured the details to respect your preferences" : {
+      "comment" : "Description for a push notification which has been muted, and explanation that we cannot suppress it"
     },
     "This note contains too many items and cannot be rendered" : {
       "comment" : "Error message indicating that a note is too big and cannot be rendered"

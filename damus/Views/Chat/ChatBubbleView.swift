@@ -165,7 +165,7 @@ struct ChatBubble<T: View, U: ShapeStyle, V: View>: View {
             stroke_style: .init(lineWidth: 4),
             background_style: Color.accentColor
         ) {
-            Text("Hello there")
+            Text(verbatim: "Hello there")
                 .padding()
         }
         .foregroundColor(.white)
@@ -176,7 +176,7 @@ struct ChatBubble<T: View, U: ShapeStyle, V: View>: View {
             stroke_style: .init(lineWidth: 4),
             background_style: Color.accentColor
         ) {
-            Text("Hello there")
+            Text(verbatim: "Hello there")
                 .padding()
         }
         .foregroundColor(.white)

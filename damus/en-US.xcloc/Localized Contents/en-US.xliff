@@ -2,7 +2,7 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
   <file original="damus/en-US.lproj/InfoPlist.strings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.3" build-num="15E204a"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.4" build-num="15F31d"/>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">
@@ -44,7 +44,7 @@
   </file>
   <file original="damus/en-US.lproj/Localizable.strings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.3" build-num="15E204a"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.4" build-num="15F31d"/>
     </header>
     <body>
       <trans-unit id="%@ %@" xml:space="preserve">
@@ -255,6 +255,11 @@ Button text to add a relay</note>
         <target>An additional percentage of each zap will be sent to support Damus development</target>
         <note>Text indicating that they can contribute zaps to support Damus development.</note>
       </trans-unit>
+      <trans-unit id="An unexpected error happened while trying to create the new contact list. Please contact support." xml:space="preserve">
+        <source>An unexpected error happened while trying to create the new contact list. Please contact support.</source>
+        <target>An unexpected error happened while trying to create the new contact list. Please contact support.</target>
+        <note>Error message for a failed contact list reset operation</note>
+      </trans-unit>
       <trans-unit id="Animations" xml:space="preserve">
         <source>Animations</source>
         <target>Animations</target>
@@ -413,7 +418,8 @@ Tip: You can always change this later in Settings → Translations</target>
    Button to cancel the upload.
    Cancel deleting bookmarks.
    Cancel deleting the user.
-   Cancel out of logging out the user.</note>
+   Cancel out of logging out the user.
+   Cancel resetting the contact list.</note>
       </trans-unit>
       <trans-unit id="Changing this setting will cause the cache to be cleared. This will free space, but images may take longer to load again. Are you sure you want to proceed?" xml:space="preserve">
         <source>Changing this setting will cause the cache to be cleared. This will free space, but images may take longer to load again. Are you sure you want to proceed?</source>
@@ -486,6 +492,16 @@ Button to connect to the relay.</note>
         <target>Connecting</target>
         <note>Relay status label that indicates a relay is connecting.</note>
       </trans-unit>
+      <trans-unit id="Contact list (Follows + Relay list)" xml:space="preserve">
+        <source>Contact list (Follows + Relay list)</source>
+        <target>Contact list (Follows + Relay list)</target>
+        <note>Section title for Contact list first aid tools</note>
+      </trans-unit>
+      <trans-unit id="Contact list has been reset" xml:space="preserve">
+        <source>Contact list has been reset</source>
+        <target>Contact list has been reset</target>
+        <note>Message indicating that the contact list was successfully reset.</note>
+      </trans-unit>
       <trans-unit id="Content filters" xml:space="preserve">
         <source>Content filters</source>
         <target>Content filters</target>
@@ -495,7 +511,8 @@ Button to connect to the relay.</note>
         <source>Continue</source>
         <target>Continue</target>
         <note>Continue with bookmarks.
-   Continue with deleting the user.</note>
+   Continue with deleting the user.
+   Continue with resetting the contact list.</note>
       </trans-unit>
       <trans-unit id="Copied" xml:space="preserve">
         <source>Copied</source>
@@ -568,6 +585,11 @@ Button to connect to the relay.</note>
         <source>Copy user public key</source>
         <target>Copy user public key</target>
         <note>Context menu option for copying the ID of the user who created the note.</note>
+      </trans-unit>
+      <trans-unit id="Could not create your initial contact list event. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help." xml:space="preserve">
+        <source>Could not create your initial contact list event. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help.</source>
+        <target>Could not create your initial contact list event. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help.</target>
+        <note>Error message to the user indicating that the initial contact list failed to be created.</note>
       </trans-unit>
       <trans-unit id="Could not find the user you're looking for" xml:space="preserve">
         <source>Could not find the user you're looking for</source>
@@ -766,6 +788,16 @@ Button to disconnect from a relay server.</note>
         <note>Label to display that authentication to a server has failed.
 Relay status label that indicates a relay had an error when connecting</note>
       </trans-unit>
+      <trans-unit id="Error configuring push notifications with the server: %@" xml:space="preserve">
+        <source>Error configuring push notifications with the server: %@</source>
+        <target>Error configuring push notifications with the server: %@</target>
+        <note>Error label shown when user tries to enable push notifications but something fails</note>
+      </trans-unit>
+      <trans-unit id="Error disabling push notifications with the server: %@" xml:space="preserve">
+        <source>Error disabling push notifications with the server: %@</source>
+        <target>Error disabling push notifications with the server: %@</target>
+        <note>Error label shown when user tries to disable push notifications but something fails</note>
+      </trans-unit>
       <trans-unit id="Error fetching lightning invoice" xml:space="preserve">
         <source>Error fetching lightning invoice</source>
         <target>Error fetching lightning invoice</target>
@@ -815,6 +847,12 @@ Relay status label that indicates a relay had an error when connecting</note>
         <source>Failed to parse</source>
         <target>Failed to parse</target>
         <note>NostrScript error message when it fails to parse a script.</note>
+      </trans-unit>
+      <trans-unit id="First Aid" xml:space="preserve">
+        <source>First Aid</source>
+        <target>First Aid</target>
+        <note>Navigation title for first aid settings and tools
+   Section header for first aid tools and settings</note>
       </trans-unit>
       <trans-unit id="Follow" xml:space="preserve">
         <source>Follow</source>
@@ -907,6 +945,11 @@ My side interests include languages and I am striving to be a #polyglot - I am a
         <target>Free</target>
         <note>Dropdown option for selecting Free plan for DeepL translation service.</note>
       </trans-unit>
+      <trans-unit id="General" xml:space="preserve">
+        <source>General</source>
+        <target>General</target>
+        <note>Section header for general damus notifications user configuration</note>
+      </trans-unit>
       <trans-unit id="Get API Key" xml:space="preserve">
         <source>Get API Key</source>
         <target>Get API Key</target>
@@ -971,6 +1014,16 @@ This is my first post on Damus, I am happy to meet you all 🤙. What’s up?
         <target>Hide notes with #nsfw tags</target>
         <note>Setting to hide notes with the #nsfw (not safe for work) tags</note>
       </trans-unit>
+      <trans-unit id="Highlighted" xml:space="preserve">
+        <source>Highlighted</source>
+        <target>Highlighted</target>
+        <note>Label to indicate that the user is highlighting their own post.</note>
+      </trans-unit>
+      <trans-unit id="Highlighted %@" xml:space="preserve">
+        <source>Highlighted %@</source>
+        <target>Highlighted %@</target>
+        <note>Label to indicate that the user is highlighting 1 user.</note>
+      </trans-unit>
       <trans-unit id="Home" xml:space="preserve">
         <source>Home</source>
         <target>Home</target>
@@ -1004,6 +1057,11 @@ Hope to meet folks who are on their own journeys to a peaceful and free life!</t
         <source>Impersonation</source>
         <target>Impersonation</target>
         <note>Description of report type for impersonation.</note>
+      </trans-unit>
+      <trans-unit id="In progress…" xml:space="preserve">
+        <source>In progress…</source>
+        <target>In progress…</target>
+        <note>Loading message indicating that a contact list reset operation is in progress.</note>
       </trans-unit>
       <trans-unit id="Indefinite" xml:space="preserve">
         <source>Indefinite</source>
@@ -1105,6 +1163,11 @@ Hope to meet folks who are on their own journeys to a peaceful and free life!</t
         <source>Load media</source>
         <target>Load media</target>
         <note>Button to show media in note.</note>
+      </trans-unit>
+      <trans-unit id="Local" xml:space="preserve">
+        <source>Local</source>
+        <target>Local</target>
+        <note>Option for notification mode setting: Local notification mode</note>
       </trans-unit>
       <trans-unit id="Local Notifications" xml:space="preserve">
         <source>Local Notifications</source>
@@ -1265,6 +1328,11 @@ Text label indicating that there is no NIP-11 relay software information found. 
         <target>No</target>
         <note>User confirm No</note>
       </trans-unit>
+      <trans-unit id="No contact list was found. You might experience issues using the app. If you suspect you have permanently lost your contact list (or if you never had one), you can fix this by resetting it" xml:space="preserve">
+        <source>No contact list was found. You might experience issues using the app. If you suspect you have permanently lost your contact list (or if you never had one), you can fix this by resetting it</source>
+        <target>No contact list was found. You might experience issues using the app. If you suspect you have permanently lost your contact list (or if you never had one), you can fix this by resetting it</target>
+        <note>Section footer for Contact list first aid tools</note>
+      </trans-unit>
       <trans-unit id="No logs to display" xml:space="preserve">
         <source>No logs to display</source>
         <target>No logs to display</target>
@@ -1333,7 +1401,8 @@ Text label indicating that there is no NIP-11 relay software information found. 
       <trans-unit id="Note you've muted" xml:space="preserve">
         <source>Note you've muted</source>
         <target>Note you've muted</target>
-        <note>Text to indicate that what is being shown is a note which has been muted.</note>
+        <note>Text to indicate that what is being shown is a note which has been muted.
+Label indicating note has been muted</note>
       </trans-unit>
       <trans-unit id="Notes" xml:space="preserve">
         <source>Notes</source>
@@ -1373,6 +1442,11 @@ Label for filter for seeing your notes and replies (instead of only your notes).
         <target>Notifications</target>
         <note>Section header for Damus notifications
    Toolbar label for Notifications view.</note>
+      </trans-unit>
+      <trans-unit id="Notifications mode" xml:space="preserve">
+        <source>Notifications mode</source>
+        <target>Notifications mode</target>
+        <note>Prompt selection of the notification mode (Feature to switch between local notifications (generated from user's own phone) or push notifications (generated by Damus server).</note>
       </trans-unit>
       <trans-unit id="Nudity" xml:space="preserve">
         <source>Nudity</source>
@@ -1478,7 +1552,8 @@ Button label to dismiss an error dialog</note>
       <trans-unit id="Post" xml:space="preserve">
         <source>Post</source>
         <target>Post</target>
-        <note>Button to post a note.</note>
+        <note>Button to post a highlight.
+   Button to post a note.</note>
       </trans-unit>
       <trans-unit id="Private" xml:space="preserve">
         <source>Private</source>
@@ -1570,6 +1645,11 @@ Button label to dismiss an error dialog</note>
         <target>Purple</target>
         <note>Subscription service name</note>
       </trans-unit>
+      <trans-unit id="Push" xml:space="preserve">
+        <source>Push</source>
+        <target>Push</target>
+        <note>Option for notification mode setting: Push notification mode</note>
+      </trans-unit>
       <trans-unit id="QR Code" xml:space="preserve">
         <source>QR Code</source>
         <target>QR Code</target>
@@ -1589,6 +1669,11 @@ Button label to dismiss an error dialog</note>
         <source>Ran to suspension.</source>
         <target>Ran to suspension.</target>
         <note>Indication that a NostrScript was run until it reached a suspended state.</note>
+      </trans-unit>
+      <trans-unit id="React with default reaction emoji" xml:space="preserve">
+        <source>React with default reaction emoji</source>
+        <target>React with default reaction emoji</target>
+        <note>Accessibility label for react button</note>
       </trans-unit>
       <trans-unit id="Reactions" xml:space="preserve">
         <source>Reactions</source>
@@ -1700,6 +1785,11 @@ Button label to dismiss an error dialog</note>
         <target>Repost</target>
         <note>Button to repost a note</note>
       </trans-unit>
+      <trans-unit id="Repost or quote this note" xml:space="preserve">
+        <source>Repost or quote this note</source>
+        <target>Repost or quote this note</target>
+        <note>Accessibility label for repost/quote button</note>
+      </trans-unit>
       <trans-unit id="Reposted" xml:space="preserve">
         <source>Reposted</source>
         <target>Reposted</target>
@@ -1721,6 +1811,11 @@ Button label to dismiss an error dialog</note>
         <source>Requests</source>
         <target>Requests</target>
         <note>Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message.</note>
+      </trans-unit>
+      <trans-unit id="Reset contact list" xml:space="preserve">
+        <source>Reset contact list</source>
+        <target>Reset contact list</target>
+        <note>Button to reset contact list.</note>
       </trans-unit>
       <trans-unit id="Retry" xml:space="preserve">
         <source>Retry</source>
@@ -1906,6 +2001,11 @@ Button label to dismiss an error dialog</note>
         <source>Share Via...</source>
         <target>Share Via...</target>
         <note>Button to present iOS share sheet</note>
+      </trans-unit>
+      <trans-unit id="Share externally" xml:space="preserve">
+        <source>Share externally</source>
+        <target>Share externally</target>
+        <note>Accessibility label for external share button</note>
       </trans-unit>
       <trans-unit id="Show" xml:space="preserve">
         <source>Show</source>
@@ -2342,6 +2442,15 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
  ARE YOU SURE YOU WANT TO CONTINUE?</target>
         <note>Alert for deleting the users account.</note>
       </trans-unit>
+      <trans-unit id="WARNING:&#10;&#10;This will reset your contact list, including the list of everyone you follow and the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY." xml:space="preserve">
+        <source>WARNING:
+
+This will reset your contact list, including the list of everyone you follow and the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY.</source>
+        <target>WARNING:
+
+This will reset your contact list, including the list of everyone you follow and the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY.</target>
+        <note>Alert for resetting the user's contact list.</note>
+      </trans-unit>
       <trans-unit id="Wake up, %@" xml:space="preserve">
         <source>Wake up, %@</source>
         <target>Wake up, %@</target>
@@ -2364,6 +2473,11 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <source>Wallet Relay</source>
         <target>Wallet Relay</target>
         <note>Label text indicating that below it is the information about the wallet relay.</note>
+      </trans-unit>
+      <trans-unit id="We did not detect any issues that we can automatically fix for you. If you are having issues, please contact Damus support: [support@damus.io](mailto:support@damus.io)" xml:space="preserve">
+        <source>We did not detect any issues that we can automatically fix for you. If you are having issues, please contact Damus support: [support@damus.io](mailto:support@damus.io)</source>
+        <target>We did not detect any issues that we can automatically fix for you. If you are having issues, please contact Damus support: [support@damus.io](mailto:support@damus.io)</target>
+        <note>Message indicating that no First Aid actions are available.</note>
       </trans-unit>
       <trans-unit id="Website" xml:space="preserve">
         <source>Website</source>
@@ -2701,7 +2815,7 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
   </file>
   <file original="damus/en-US.lproj/Localizable.stringsdict" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.3" build-num="15E204a"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.4" build-num="15F31d"/>
     </header>
     <body>
       <trans-unit id="/followed_by_three_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
@@ -3083,7 +3197,7 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
   </file>
   <file original="DamusNotificationService/InfoPlist.xcstrings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.3" build-num="15E204a"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.4" build-num="15F31d"/>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">
@@ -3105,7 +3219,7 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
   </file>
   <file original="DamusNotificationService/Localizable.xcstrings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.3" build-num="15E204a"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.4" build-num="15F31d"/>
     </header>
     <body>
       <trans-unit id="" xml:space="preserve">
@@ -3158,6 +3272,11 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <target state="new">LibreTranslate (Open Source)</target>
         <note>Dropdown option for selecting LibreTranslate as the translation service.</note>
       </trans-unit>
+      <trans-unit id="Local" xml:space="preserve">
+        <source>Local</source>
+        <target state="new">Local</target>
+        <note>Option for notification mode setting: Local notification mode</note>
+      </trans-unit>
       <trans-unit id="Local default" xml:space="preserve">
         <source>Local default</source>
         <target state="new">Local default</target>
@@ -3167,6 +3286,11 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <source>Mentioned by %@</source>
         <target state="new">Mentioned by %@</target>
         <note>Mentioned by heading in local notification</note>
+      </trans-unit>
+      <trans-unit id="Muted event" xml:space="preserve">
+        <source>Muted event</source>
+        <target state="new">Muted event</target>
+        <note>Title for a push notification which has been muted</note>
       </trans-unit>
       <trans-unit id="New encrypted direct message" xml:space="preserve">
         <source>New encrypted direct message</source>
@@ -3203,6 +3327,11 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <target state="new">Production</target>
         <note>Label indicating the production environment for Damus Purple</note>
       </trans-unit>
+      <trans-unit id="Push" xml:space="preserve">
+        <source>Push</source>
+        <target state="new">Push</target>
+        <note>Option for notification mode setting: Push notification mode</note>
+      </trans-unit>
       <trans-unit id="Reposted by %@" xml:space="preserve">
         <source>Reposted by %@</source>
         <target state="new">Reposted by %@</target>
@@ -3237,6 +3366,11 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <source>Test (local)</source>
         <target state="new">Test (local)</target>
         <note>Label indicating a local test environment for Damus Purple functionality (Developer feature)</note>
+      </trans-unit>
+      <trans-unit id="This is an event that has been muted according to your mute list rules. We cannot suppress this notification, but we obscured the details to respect your preferences" xml:space="preserve">
+        <source>This is an event that has been muted according to your mute list rules. We cannot suppress this notification, but we obscured the details to respect your preferences</source>
+        <target state="new">This is an event that has been muted according to your mute list rules. We cannot suppress this notification, but we obscured the details to respect your preferences</target>
+        <note>Description for a push notification which has been muted, and explanation that we cannot suppress it</note>
       </trans-unit>
       <trans-unit id="This note contains too many items and cannot be rendered" xml:space="preserve">
         <source>This note contains too many items and cannot be rendered</source>
