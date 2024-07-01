@@ -25,7 +25,7 @@ enum FilterState : Int {
 
 /// Simple filter to determine whether to show posts with #nsfw tags
 func nsfw_tag_filter(ev: NostrEvent) -> Bool {
-    return ev.referenced_hashtags.first(where: { t in t.hashtag == "nsfw" }) == nil
+    return ev.referenced_hashtags.first(where: { t in t.hashtag == "nsfw" }) == nil && References<ContentWarningTag>(tags: ev.tags).first == nil
 }
 
 func get_repost_of_muted_user_filter(damus_state: DamusState) -> ((_ ev: NostrEvent) -> Bool) {
