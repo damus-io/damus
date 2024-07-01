@@ -80,6 +80,10 @@ struct TabBar: View {
                 TabButton(timeline: .search, img: "search", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("3")
                 TabButton(timeline: .notifications, img: "notification-bell", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("4")
             }
+            .accessibilityLabel(NSLocalizedString("home", comment: "Accessibility label for home button"))
+            .accessibilityLabel(NSLocalizedString("dms", comment: "Accessibility label for dms button"))
+            .accessibilityLabel(NSLocalizedString("search", comment: "Accessibility label for search button"))
+            .accessibilityLabel(NSLocalizedString("notifications", comment: "Accessibility label for notifications button"))
         }
     }
 }
