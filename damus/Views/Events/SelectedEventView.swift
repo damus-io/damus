@@ -39,21 +39,10 @@ struct SelectedEventView: View {
                 .padding(.horizontal)
                 .minimumScaleFactor(0.75)
                 .lineLimit(1)
-
-                if let reply_ref = event.thread_reply()?.reply {
-                    let replying_to = damus.events.lookup(reply_ref.note_id)
-                    if event.known_kind == .highlight {
-                        HighlightDescription(event: event, highlighted_event: replying_to, ndb: damus.ndb)
-                            .padding(.horizontal)
-                    } else {
-                        ReplyDescription(event: event, replying_to: replying_to, ndb: damus.ndb)
-                            .padding(.horizontal)
-                    }
-                } else if event.known_kind == .highlight {
-                    HighlightDescription(event: event, highlighted_event: nil, ndb: damus.ndb)
-                        .padding(.horizontal)
-                }
-
+                
+                ReplyPart(events: damus.events, event: event, keypair: damus.keypair, ndb: damus.ndb)
+                    .padding(.horizontal)
+                
                 ProxyView(event: event)
                     .padding(.top, 5)
                     .padding(.horizontal)

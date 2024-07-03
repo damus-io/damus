@@ -29,8 +29,7 @@ struct HighlightPostView: View {
                     Spacer()
 
                     Button(NSLocalizedString("Post", comment: "Button to post a highlight.")) {
-                        var tags: [[String]] = [ ["e", "\(self.event.id)"] ]
-                        tags.append(["context", self.event.content])
+                        let tags: [[String]] = [ ["e", "\(self.event.id)"] ]
 
                         let kind = NostrKind.highlight.rawValue
                         guard let ev = NostrEvent(content: selectedText, keypair: damus_state.keypair, kind: kind, tags: tags) else {
@@ -53,7 +52,7 @@ struct HighlightPostView: View {
 
             HStack {
                 var attributedString: AttributedString {
-                    var attributedString = AttributedString(self.event.content)
+                    var attributedString = AttributedString(selectedText)
 
                     if let range = attributedString.range(of: selectedText) {
                         attributedString[range].backgroundColor = DamusColors.highlight
