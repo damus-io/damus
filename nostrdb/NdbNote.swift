@@ -341,7 +341,14 @@ extension NdbNote {
     }
 
     func thread_reply() -> ThreadReply? {
-        ThreadReply(tags: self.tags)
+        if self.known_kind != .highlight {
+            return ThreadReply(tags: self.tags)
+        }
+        return nil
+    }
+    
+    func highlighted_note_id() -> NoteId? {
+        return ThreadReply(tags: self.tags)?.reply.note_id
     }
 
     func get_content(_ keypair: Keypair) -> String {

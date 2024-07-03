@@ -11,13 +11,15 @@ import Foundation
 class ThreadModel: ObservableObject {
     @Published var event: NostrEvent
     let original_event: NostrEvent
+    let highlight: String?
     var event_map: Set<NostrEvent>
     
-    init(event: NostrEvent, damus_state: DamusState) {
+    init(event: NostrEvent, damus_state: DamusState, highlight: String? = nil) {
         self.damus_state = damus_state
         self.event_map = Set()
         self.event = event
         self.original_event = event
+        self.highlight = highlight
         add_event(event, keypair: damus_state.keypair)
     }
 
