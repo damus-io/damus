@@ -50,6 +50,13 @@ struct RelayView: View {
                             .padding(.bottom, 2)
                             .lineLimit(1)
                         RelayType(is_paid: state.relay_model_cache.model(with_relay_id: relay)?.metadata.is_paid ?? false)
+                        
+                        if relay.absoluteString.hasSuffix(".onion") {
+                            Image("tor")
+                                .resizable()
+                                .interpolation(.none)
+                                .frame(width: 20, height: 20)
+                        }
                     }
                     Text(relay.absoluteString)
                         .font(.subheadline)
