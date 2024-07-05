@@ -28,93 +28,59 @@ struct SetupView: View {
                         .fontWeight(.heavy)
                         .foregroundStyle(DamusLogoGradient.gradient)
 
-                    Text("The go-to iOS Nostr client", comment: "Quick description of what Damus is")
-                        .foregroundColor(DamusColors.mediumGrey)
+                    Text("The social network you control", comment: "Quick description of what Damus is")
+                        .foregroundColor(DamusColors.neutral6)
                         .padding(.top, 10)
                     
-                    WhatIsNostr()
-                        .padding()
-                    
-                    WhyWeNeedNostr()
-                        .padding()
-                    
                     Spacer()
+                    
+                    Button(action: {
+                        navigationCoordinator.push(route: Route.CreateAccount)
+                    }) {
+                        HStack {
+                            Text("Create Account", comment: "Button to continue to the create account page.")
+                                .fontWeight(.semibold)
+                        }
+                        .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
+                    }
+                    .buttonStyle(GradientButtonStyle())
+                    .padding(.horizontal)
                     
                     Button(action: {
                         navigationCoordinator.push(route: Route.Login)
                     }) {
                         HStack {
-                            Text("Let's get started!", comment: "Button to continue to login page.")
+                            Text("Sign In", comment: "Button to continue to login page.")
                                 .fontWeight(.semibold)
                         }
                         .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
                     }
                     .buttonStyle(GradientButtonStyle())
                     .padding()
+                    
+                    HStack(spacing: 0) {
+                        Text("By continuing you agree to our ")
+                            .font(.subheadline)
+                            .foregroundColor(DamusColors.neutral6)
+
+                        Button(action: {
+                            navigationCoordinator.push(route: Route.EULA)
+                        }, label: {
+                            Text("EULA", comment: "End User License Agreement")
+                                .font(.subheadline)
+                        })
+                        .padding(.vertical, 5)
+                    }
+                    .padding(.bottom)
                 }
             }
-            .background(DamusBackground(maxHeight: 300), alignment: .top)
+            .background(DamusBackground(maxHeight: UIScreen.main.bounds.size.height/2), alignment: .top)
             .navigationDestination(for: Route.self) { route in
                 route.view(navigationCoordinator: navigationCoordinator, damusState: DamusState.empty)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationViewStyle(StackNavigationViewStyle())
-    }
-}
-
-struct LearnAboutNostrLink: View {
-    @Environment(\.openURL) var openURL
-    var body: some View {
-        HStack {
-            Button(action: {
-                openURL(URL(string: "https://nostr.com")!)
-            }, label: {
-                Text("Learn more about Nostr", comment: "Button that opens up a webpage where the user can learn more about Nostr.")
-                    .foregroundColor(.accentColor)
-            })
-            
-            Image(systemName: "arrow.up.right")
-                .font(.footnote)
-                .foregroundColor(.accentColor)
-        }
-    }
-}
-
-struct WhatIsNostr: View {
-    var body: some View {
-        HStack(alignment: .top) {
-            Image("nostr-logo")
-            VStack(alignment: .leading) {
-                Text("What is Nostr?", comment: "Heading text for section describing what is Nostr.")
-                    .fontWeight(.bold)
-                    .padding(.vertical, 10)
-                
-                Text("Nostr is a protocol, designed for simplicity, that aims to create a censorship-resistant global social network", comment: "Description about what is Nostr.")
-                    .foregroundColor(DamusColors.mediumGrey)
-                
-                LearnAboutNostrLink()
-                    .padding(.top, 10)
-            }
-            Spacer()
-        }
-    }
-}
-
-struct WhyWeNeedNostr: View {
-    var body: some View {
-        HStack(alignment: .top) {
-            Image("lightbulb")
-            VStack(alignment: .leading) {
-                Text("Why we need Nostr?", comment: "Heading text for section describing why Nostr is needed.")
-                    .fontWeight(.bold)
-                    .padding(.vertical, 10)
-                
-                Text("Social media has developed into a key way information flows around the world. Unfortunately, our current social media systems are broken", comment: "Description about why Nostr is needed.")
-                    .foregroundColor(DamusColors.mediumGrey)
-            }
-            Spacer()
-        }
     }
 }
 

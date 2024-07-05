@@ -11,8 +11,6 @@ import Security
 struct SaveKeysView: View {
     let account: CreateAccountModel
     let pool: RelayPool = RelayPool(ndb: Ndb()!)
-    @State var pub_copied: Bool = false
-    @State var priv_copied: Bool = false
     @State var loading: Bool = false
     @State var error: String? = nil
     
@@ -31,81 +29,98 @@ struct SaveKeysView: View {
     var body: some View {
         ZStack(alignment: .top) {
             VStack(alignment: .center) {
+
+                Spacer()
+                
+                Image("logo-nobg")
+                    .resizable()
+                    .shadow(color: DamusColors.purple, radius: 2)
+                    .frame(width: 56, height: 56, alignment: .center)
+                    .padding(.top, 20.0)
+                
                 if account.rendered_name.isEmpty {
                     Text("Welcome!", comment: "Text to welcome user.")
-                        .font(.title.bold())
-                        .padding(.bottom, 10)
+                        .font(.title)
+                        .fontWeight(.heavy)
+                        .foregroundStyle(DamusLogoGradient.gradient)
                 } else {
                     Text("Welcome, \(account.rendered_name)!", comment: "Text to welcome user.")
-                        .font(.title.bold())
-                        .padding(.bottom, 10)
+                        .font(.title)
+                        .fontWeight(.heavy)
+                        .foregroundStyle(DamusLogoGradient.gradient)
                 }
                 
-                Text("Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus.", comment: "Reminder to user that they should save their account information.")
-                    .padding(.bottom, 10)
+                Text("Save your login info?", comment: "Ask user if they want to save their account information.")
+                    .font(.title)
+                    .fontWeight(.heavy)
+                    .foregroundColor(DamusColors.neutral6)
+                    .padding(.top, 5)
                 
-                Text("Private Key", comment: "Label to indicate that the text below is the user's private key used by only the user themself as a secret to login to access their account.")
-                    .font(.title2.bold())
-                    .padding(.bottom, 10)
+                Text("We'll save your account key, so you won't need to enter it manually next time you log in.", comment: "Reminder to user that they should save their account information.")
+                    .font(.system(size: 14))
+                    .foregroundColor(DamusColors.neutral6)
+                    .padding(.top, 2)
+                    .padding(.bottom, 100)
+                    .multilineTextAlignment(.center)
                 
-                Text("This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!", comment: "Label to describe that a private key is the user's secret account key and what they should do with it.")
-                    .padding(.bottom, 10)
+                Spacer()
                 
-                SaveKeyView(text: account.privkey.nsec, textContentType: .newPassword, is_copied: $priv_copied, focus: $privkey_focused)
-                    .padding(.bottom, 10)
-
-                if priv_copied {
-                    if loading {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                    } else if let err = error {
-                        Text("Error: \(err)", comment: "Error message indicating why saving keys failed.")
-                            .foregroundColor(.red)
-
-                        Button(action: {
-                            complete_account_creation(account)
-                        }) {
-                            HStack {
-                                Text("Retry", comment:  "Button to retry completing account creation after an error occurred.")
-                                    .fontWeight(.semibold)
-                            }
-                            .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
+                if loading {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                } else if let err = error {
+                    Text("Error: \(err)", comment: "Error message indicating why saving keys failed.")
+                        .foregroundColor(.red)
+                    
+                    Button(action: {
+                        complete_account_creation(account)
+                    }) {
+                        HStack {
+                            Text("Retry", comment:  "Button to retry completing account creation after an error occurred.")
+                                .fontWeight(.semibold)
                         }
-                        .buttonStyle(GradientButtonStyle())
-                        .padding(.top, 20)
-                    } else {
-                        Button(action: {
-                            complete_account_creation(account)
-                        }) {
-                            HStack {
-                                Text("Let's go!", comment:  "Button to complete account creation and start using the app.")
-                                    .fontWeight(.semibold)
-                            }
-                            .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
-                        }
-                        .buttonStyle(GradientButtonStyle())
-                        .padding(.top, 20)
+                        .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
                     }
+                    .buttonStyle(GradientButtonStyle())
+                    .padding(.top, 20)
+                } else {
+                    
+                    Button(action: {
+                        save_key(account)
+                        complete_account_creation(account)
+                    }) {
+                        HStack {
+                            Text("Save", comment:  "Button to save key, complete account creation, and start using the app.")
+                                .fontWeight(.semibold)
+                        }
+                        .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
+                    }
+                    .buttonStyle(GradientButtonStyle())
+                    .padding(.top, 20)
+                    
+                    Button(action: {
+                        complete_account_creation(account)
+                    }) {
+                        HStack {
+                            Text("Not now", comment:  "Button to not save key, complete account creation, and start using the app.")
+                                .fontWeight(.semibold)
+                        }
+                        .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
+                    }
+                    .buttonStyle(NeutralButtonStyle(padding: EdgeInsets(top: 15, leading: 15, bottom: 15, trailing: 15), cornerRadius: 12))
+                    .padding(.top, 20)
                 }
             }
             .padding(20)
         }
-        .background(
-            Image("eula-bg")
-                .resizable()
-                .blur(radius: 70)
-                .ignoresSafeArea(),
-            alignment: .top
-        )
+        .background(DamusBackground(maxHeight: UIScreen.main.bounds.size.height/2), alignment: .top)
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: BackNav())
-        .onAppear {
-            // Hack to force keyboard to show up for a short moment and then hiding it to register password autofill flow.
-            pubkey_focused = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                pubkey_focused = false
-            }
-        }
+
+    }
+    
+    func save_key(_ account: CreateAccountModel) {
+        credential_handler.save_credential(pubkey: account.pubkey, privkey: account.privkey)
     }
     
     func complete_account_creation(_ account: CreateAccountModel) {
@@ -122,8 +137,6 @@ struct SaveKeysView: View {
         }
 
         self.pool.register_handler(sub_id: "signup", handler: handle_event)
-        
-        credential_handler.save_credential(pubkey: account.pubkey, privkey: account.privkey)
 
         self.loading = true
         
@@ -188,74 +201,13 @@ struct SaveKeysView: View {
     }
 }
 
-struct SaveKeyView: View {
-    let text: String
-    let textContentType: UITextContentType
-    @Binding var is_copied: Bool
-    var focus: FocusState<Bool>.Binding
-    
-    func copy_text() {
-        UIPasteboard.general.string = text
-        is_copied = true
-    }
-    
-    var body: some View {
-        HStack {
-            Spacer()
-            VStack {
-                spacerBlock(width: 0, height: 0)
-                Button(action: copy_text) {
-                    Label("", image: is_copied ? "check-circle.fill" : "copy2")
-                        .foregroundColor(is_copied ? .green : .gray)
-                        .background {
-                            if is_copied {
-                                Circle()
-                                    .foregroundColor(.white)
-                                    .frame(width: 25, height: 25, alignment: .center)
-                                    .padding(.leading, -8)
-                                    .padding(.top, 1)
-                            } else {
-                                EmptyView()
-                            }
-                        }
-                }
-            }
-
-            TextField("", text: .constant(text))
-                .padding(5)
-                .background {
-                    RoundedRectangle(cornerRadius: 4.0).opacity(0.1)
-                }
-                .textSelection(.enabled)
-                .font(.callout.monospaced())
-                .onTapGesture {
-                    copy_text()
-                    // Hack to force keyboard to hide. Showing keyboard on text field is necessary to register password autofill flow but the text itself should not be modified.
-                    DispatchQueue.main.async {
-                        end_editing()
-                    }
-                }
-                .textContentType(textContentType)
-                .deleteDisabled(true)
-                .focused(focus)
-            
-            spacerBlock(width: 0, height: 0) /// set a 'width' > 0 here to vary key Text's aspect ratio
-        }
-    }
-    
-    @ViewBuilder private func spacerBlock(width: CGFloat, height: CGFloat) -> some View {
-        Color.orange.opacity(1)
-            .frame(width: width, height: height)
-    }
-}
-
 struct SaveKeysView_Previews: PreviewProvider {
     static var previews: some View {
-        let model = CreateAccountModel(real: "William", nick: "jb55", about: "I'm me")
+        let model = CreateAccountModel(display_name: "William", name: "jb55", about: "I'm me")
         SaveKeysView(account: model)
     }
 }
 
 func create_account_to_metadata(_ model: CreateAccountModel) -> Profile {
-    return Profile(name: model.nick_name, display_name: model.real_name, about: model.about, picture: model.profile_image?.absoluteString, banner: nil, website: nil, lud06: nil, lud16: nil, nip05: nil, damus_donation: nil)
+    return Profile(name: model.name, display_name: model.display_name, about: model.about, picture: model.profile_image?.absoluteString, banner: nil, website: nil, lud06: nil, lud16: nil, nip05: nil, damus_donation: nil)
 }

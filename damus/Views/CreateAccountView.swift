@@ -25,68 +25,44 @@ struct CreateAccountView: View {
     var body: some View {
         ZStack(alignment: .top) {
             VStack {
+                Spacer()
                 VStack(alignment: .center) {
-                    EditPictureControl(uploader: .nostrBuild, pubkey: account.pubkey, image_url: $account.profile_image , uploadObserver: profileUploadObserver, callback: uploadedProfilePicture)
-
-                    Text("Public Key", comment: "Label to indicate the public key of the account.")
+                   
+                    EditPictureControl(uploader: .nostrBuild, pubkey: account.pubkey, size: 75, setup: true, image_url: $account.profile_image , uploadObserver: profileUploadObserver, callback: uploadedProfilePicture)
+                        .shadow(radius: 2)
+                        .padding(.top, 100)
+                    
+                    Text("Add Photo", comment: "Label to indicate user can add a photo.")
                         .bold()
-                        .padding()
-                        .onTapGesture {
-                            regen_key()
-                        }
-
-                    KeyText($account.pubkey)
-                        .padding(.horizontal, 20)
-                        .onTapGesture {
-                            regen_key()
-                        }
-                }
-                .frame(minWidth: 300, maxWidth: .infinity, minHeight: 250, alignment: .center)
-                .background {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(DamusColors.adaptableGrey, strokeBorder: .gray.opacity(0.5), lineWidth: 1)
+                        .foregroundColor(DamusColors.neutral6)
                 }
                 
                 SignupForm {
-                    FormLabel(NSLocalizedString("Display name", comment: "Label to prompt display name entry."), optional: true)
-                    FormTextInput(NSLocalizedString("Satoshi Nakamoto", comment: "Name of Bitcoin creator(s)."), text: $account.real_name)
+                    FormLabel(NSLocalizedString("Name", comment: "Label to prompt name entry."), optional: false)
+                        .foregroundColor(DamusColors.neutral6)
+                    FormTextInput(NSLocalizedString("Satoshi Nakamoto", comment: "Name of Bitcoin creator(s)."), text: $account.name)
                         .textInputAutocapitalization(.words)
 
-                    FormLabel(NSLocalizedString("About", comment: "Label to prompt for about text entry for user to describe about themself."), optional: true)
-                    FormTextInput(NSLocalizedString("Creator(s) of Bitcoin. Absolute legend.", comment: "Example description about Bitcoin creator(s), Satoshi Nakamoto."), text: $account.about)
+                    FormLabel(NSLocalizedString("Bio", comment: "Label to prompt bio entry for user to describe themself."), optional: true)
+                        .foregroundColor(DamusColors.neutral6)
+                    FormTextInput(NSLocalizedString("Absolute legend.", comment: "Example Bio"), text: $account.about)
                 }
-                .padding(.top, 10)
+                .padding(.top, 25)
 
                 Button(action: {
                     nav.push(route: Route.SaveKeys(account: account))
                 }) {
                     HStack {
-                        Text("Create account now", comment: "Button to create account.")
+                        Text("Next", comment: "Button to continue with account creation.")
                             .fontWeight(.semibold)
                     }
                     .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
                 }
                 .buttonStyle(GradientButtonStyle())
-                .disabled(profileUploadObserver.isLoading)
-                .opacity(profileUploadObserver.isLoading ? 0.5 : 1)
+                .disabled(profileUploadObserver.isLoading || account.name.isEmpty)
+                .opacity(profileUploadObserver.isLoading || account.name.isEmpty ? 0.5 : 1)
                 .padding(.top, 20)
                 
-                HStack(spacing: 0) {
-                    Text("By signing up, you agree to our ", comment: "Ask the user if they already have an account on Nostr")
-                        .font(.subheadline)
-                        .foregroundColor(Color("DamusMediumGrey"))
-
-                    Button(action: {
-                        nav.push(route: Route.EULA)
-                    }, label: {
-                        Text("EULA")
-                            .font(.subheadline)
-                    })
-                    .padding(.vertical, 5)
-
-                    Spacer()
-                }
-
                 LoginPrompt()
                     .padding(.top)
                 
@@ -94,8 +70,8 @@ struct CreateAccountView: View {
             }
             .padding()
         }
+        .background(DamusBackground(maxHeight: UIScreen.main.bounds.size.height/2), alignment: .top)
         .dismissKeyboardOnTap()
-        .navigationTitle("Create account")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: BackNav())
@@ -111,7 +87,7 @@ struct LoginPrompt: View {
     var body: some View {
         HStack {
             Text("Already on Nostr?", comment: "Ask the user if they already have an account on Nostr")
-                .foregroundColor(Color("DamusMediumGrey"))
+                .foregroundColor(DamusColors.neutral6)
 
             Button(NSLocalizedString("Login", comment: "Button to navigate to login view.")) {
                 self.dismiss()
@@ -127,8 +103,8 @@ struct BackNav: View {
     var body: some View {
         Image("chevron-left")
             .foregroundColor(DamusColors.adaptableBlack)
-        .onTapGesture {
-            self.dismiss()
+            .onTapGesture {
+                self.dismiss()
         }
     }
 }
@@ -148,18 +124,9 @@ extension View {
 
 struct CreateAccountView_Previews: PreviewProvider {
     static var previews: some View {
-        let model = CreateAccountModel(real: "", nick: "jb55", about: "")
+        let model = CreateAccountModel(display_name: "", name: "jb55", about: "")
         return CreateAccountView(account: model, nav: .init())
     }
-}
-
-func KeyText(_ pubkey: Binding<Pubkey>) -> some View {
-    let bechkey = bech32_encode(hrp: PUBKEY_HRP, pubkey.wrappedValue.bytes)
-    return Text(bechkey)
-        .textSelection(.enabled)
-        .multilineTextAlignment(.center)
-        .font(.callout.monospaced())
-        .foregroundStyle(DamusLogoGradient.gradient)
 }
 
 func FormTextInput(_ title: String, text: Binding<String>) -> some View {
@@ -171,6 +138,10 @@ func FormTextInput(_ title: String, text: Binding<String>) -> some View {
         .background {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(.gray.opacity(0.5), lineWidth: 1)
+                .background {
+                    RoundedRectangle(cornerRadius: 12)
+                        .foregroundColor(.damusAdaptableWhite)
+                }
         }
         .font(.body.bold())
 }
@@ -181,6 +152,10 @@ func FormLabel(_ title: String, optional: Bool = false) -> some View {
                 .bold()
         if optional {
             Text("optional", comment: "Label indicating that a form input is optional.")
+                .font(.callout)
+                .foregroundColor(DamusColors.mediumGrey)
+        } else {
+            Text("required", comment: "Label indicating that a form input is required.")
                 .font(.callout)
                 .foregroundColor(DamusColors.mediumGrey)
         }
