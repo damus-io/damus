@@ -16,7 +16,7 @@ struct ReactionsView: View {
     var body: some View {
         ScrollView {
             LazyVStack {
-                ForEach(model.events.events, id: \.id) { ev in
+                ForEach(model.events.events.filter { $0.last_refid() == model.target }, id: \.id) { ev in
                     ReactionView(damus_state: damus_state, reaction: ev)
                 }
             }
