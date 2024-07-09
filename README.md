@@ -39,6 +39,7 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 - [NIP-25: Reactions][NIP25]
 - [NIP-42: Authentication of clients to relays][nip42]
 - [NIP-56: Reporting][nip56]
+- [NIP-70: Protected Events][nip70]
 
 [nips]: https://github.com/nostr-protocol/nips
 [nip01]: https://github.com/nostr-protocol/nips/blob/master/01.md
@@ -51,7 +52,7 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 [nip25]: https://github.com/nostr-protocol/nips/blob/master/25.md
 [nip42]: https://github.com/nostr-protocol/nips/blob/master/42.md
 [nip56]: https://github.com/nostr-protocol/nips/blob/master/56.md
-
+[nip70]: https://github.com/nostr-protocol/nips/blob/protected-events-tag/70.md
 
 ## Getting Started on Damus 
 
