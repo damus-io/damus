@@ -124,13 +124,13 @@ struct ChatEventView: View {
                 }
                 
                 let blur_images = should_blur_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
-                NoteContentView(damus_state: damus_state, event: event, blur_images: blur_images, size: .normal, options: [])
+                NoteContentView(damus_state: damus_state, event: event, blur_images: blur_images, size: .normal, options: [.truncate_content])
                     .padding(2)
             }
             .frame(minWidth: 5, alignment: is_ours ? .trailing : .leading)
             .padding(10)
         }
-        .tint(is_ours ? Color.white : Color.accentColor)
+        .tint(Color.accentColor)
         .overlay(
             ZStack(alignment: is_ours ? .bottomLeading : .bottomTrailing) {
                 VStack {
