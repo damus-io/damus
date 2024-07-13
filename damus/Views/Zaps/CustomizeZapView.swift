@@ -295,6 +295,64 @@ struct CustomizeZapView: View {
     }
 }
 
+struct ZapSheetViewIfPossible: View {
+    let damus_state: DamusState
+    let target: ZapTarget
+    let lnurl: String?
+    var zap_sheet: ZapSheet? {
+        guard let lnurl else { return nil }
+        return ZapSheet(target: target, lnurl: lnurl)
+    }
+
+    @Environment(\.dismiss) var dismiss
+    @Environment(\.colorScheme) var colorScheme
+
+    var body: some View {
+        if let zap_sheet {
+            CustomizeZapView(state: damus_state, target: zap_sheet.target, lnurl: zap_sheet.lnurl)
+        }
+        else {
+            zap_sheet_not_possible
+        }
+    }
+
+    var zap_sheet_not_possible: some View {
+        VStack(alignment: .center, spacing: 20) {
+            Image(systemName: "bolt.trianglebadge.exclamationmark.fill")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 70)
+            Text("User not zappable", comment: "Headline indicating a user cannot be zapped")
+                .font(.headline)
+            Text("This user cannot be zapped because they have not configured zaps on their account yet. Time to orange-pill?", comment: "Comment explaining why a user cannot be zapped.")
+                .multilineTextAlignment(.center)
+                .opacity(0.6)
+            self.dm_button
+        }
+        .padding()
+    }
+
+    var dm_button: some View {
+        let dm_model = damus_state.dms.lookup_or_create(target.pubkey)
+        return VStack(alignment: .center, spacing: 10) {
+            Button(
+                action: {
+                    damus_state.nav.push(route: Route.DMChat(dms: dm_model))
+                    dismiss()
+                },
+                label: {
+                    Image("messages")
+                        .profile_button_style(scheme: colorScheme)
+                }
+            )
+            .buttonStyle(NeutralButtonShape.circle.style)
+            Text("Orange-pill", comment: "Button label that allows the user to start a direct message conversation with the user shown on-screen, to orange-pill them (i.e. help them to setup zaps)")
+                .foregroundStyle(.secondary)
+                .font(.caption)
+        }
+    }
+}
+
 extension View {
     func hideKeyboard() {
         let resign = #selector(UIResponder.resignFirstResponder)
@@ -302,9 +360,25 @@ extension View {
     }
 }
 
-struct CustomizeZapView_Previews: PreviewProvider {
-    static var previews: some View {
-        CustomizeZapView(state: test_damus_state, target: ZapTarget.note(id: test_note.id, author: test_note.pubkey), lnurl: "")
-            .frame(width: 400, height: 600)
-    }
+
+
+fileprivate func test_zap_sheet() -> ZapSheet {
+    let zap_target = ZapTarget.note(id: test_note.id, author: test_note.pubkey)
+    let lnurl = ""
+    return ZapSheet(target: zap_target, lnurl: lnurl)
+}
+
+#Preview {
+    CustomizeZapView(state: test_damus_state, target: test_zap_sheet().target, lnurl: test_zap_sheet().lnurl)
+        .frame(width: 400, height: 600)
+}
+
+#Preview {
+    ZapSheetViewIfPossible(damus_state: test_damus_state, target: test_zap_sheet().target, lnurl: test_zap_sheet().lnurl)
+        .frame(width: 400, height: 600)
+}
+
+#Preview {
+    ZapSheetViewIfPossible(damus_state: test_damus_state, target: test_zap_sheet().target, lnurl: nil)
+        .frame(width: 400, height: 600)
 }

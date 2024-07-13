@@ -31,7 +31,7 @@ struct ChatEventView: View {
     @State var long_press_bounce_work_item: DispatchWorkItem?
     @State var popover_state: PopoverState = .closed {
         didSet {
-            let generator = UIImpactFeedbackGenerator(style: popover_state == .open_emoji_selector ? .heavy : .light)
+            let generator = UIImpactFeedbackGenerator(style: popover_state.some_sheet_open() ? .heavy : .light)
             generator.impactOccurred()
         }
     }
@@ -43,6 +43,11 @@ struct ChatEventView: View {
     enum PopoverState: String {
         case closed
         case open_emoji_selector
+        case open_zap_sheet
+
+        func some_sheet_open() -> Bool {
+            return self == .open_zap_sheet || self == .open_emoji_selector
+        }
     }
 
     var just_started: Bool {
@@ -90,9 +95,22 @@ struct ChatEventView: View {
     var by_other_user: Bool {
         return event.pubkey != damus_state.pubkey
     }
-    
+
     var is_ours: Bool { return !by_other_user }
-    
+
+    // MARK: Zapping properties
+
+    var lnurl: String? {
+        damus_state.profiles.lookup_with_timestamp(event.pubkey)?.map({ pr in
+            pr?.lnurl
+        }).value
+    }
+    var zap_target: ZapTarget {
+        ZapTarget.note(id: event.id, author: event.pubkey)
+    }
+
+    // MARK: Views
+
     var event_bubble: some View {
         ChatBubble(
             direction: is_ours ? .right : .left,
@@ -170,6 +188,14 @@ struct ChatEventView: View {
                         EmojiPickerView(selectedEmoji: $selected_emoji, emojiProvider: damus_state.emoji_provider)
                     }.presentationDetents([.medium, .large])
                 }
+                .sheet(isPresented: Binding(get: { popover_state == .open_zap_sheet }, set: { new_state in
+                    withAnimation(new_state == true ? .easeIn(duration: 0.5) : .easeOut(duration: 0.1)) {
+                        popover_state = new_state == true ? .open_zap_sheet : .closed
+                    }
+                })) {
+                    ZapSheetViewIfPossible(damus_state: damus_state, target: zap_target, lnurl: lnurl)
+                        .presentationDetents([.medium, .large])
+                }
                 .onChange(of: selected_emoji) { newSelectedEmoji in
                     if let newSelectedEmoji {
                         send_like(emoji: newSelectedEmoji.value)
@@ -177,8 +203,8 @@ struct ChatEventView: View {
                     }
                 }
         }
-        .scaleEffect(self.popover_state == .open_emoji_selector ? 1.08 : is_pressing ? 1.02 : 1)
-        .shadow(color: (is_pressing || self.popover_state == .open_emoji_selector) ? .black.opacity(0.1) : .black.opacity(0.3), radius: (is_pressing || self.popover_state == .open_emoji_selector) ? 8 : 0, y: (is_pressing || self.popover_state == .open_emoji_selector) ? 15 : 0)
+        .scaleEffect(self.popover_state.some_sheet_open() ? 1.08 : is_pressing ? 1.02 : 1)
+        .shadow(color: (is_pressing || self.popover_state.some_sheet_open()) ? .black.opacity(0.1) : .black.opacity(0.3), radius: (is_pressing || self.popover_state.some_sheet_open()) ? 8 : 0, y: (is_pressing || self.popover_state.some_sheet_open()) ? 15 : 0)
         .onLongPressGesture(minimumDuration: 0.5, maximumDistance: 10, perform: {
             long_press_bounce_work_item?.cancel()
         }, onPressingChanged: { is_pressing in
@@ -192,7 +218,8 @@ struct ChatEventView: View {
                         // Ensure the action is performed only if the condition is still valid
                         if self.is_pressing {
                             withAnimation(.bouncy(duration: 0.2, extraBounce: 0.35)) {
-                                popover_state = .open_emoji_selector
+                                let should_show_zap_sheet = !damus_state.settings.nozaps && damus_state.settings.onlyzaps_mode
+                                popover_state = should_show_zap_sheet ? .open_zap_sheet : .open_emoji_selector
                             }
                         }
                     }
