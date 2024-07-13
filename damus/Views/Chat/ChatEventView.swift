@@ -127,7 +127,7 @@ struct ChatEventView: View {
                 NoteContentView(damus_state: damus_state, event: event, blur_images: blur_images, size: .normal, options: [])
                     .padding(2)
             }
-            .frame(minWidth: 150, alignment: is_ours ? .trailing : .leading)
+            .frame(minWidth: 5, alignment: is_ours ? .trailing : .leading)
             .padding(10)
         }
         .tint(is_ours ? Color.white : Color.accentColor)
@@ -254,13 +254,25 @@ struct ChatEventView: View {
             SwipeView {
                 self.event_bubble_with_long_press_interaction
             } leadingActions: { context in
-                EventActionBar(
-                    damus_state: damus_state,
-                    event: event,
-                    bar: bar,
-                    options: is_ours ? [.swipe_action_menu_reverse] : [.swipe_action_menu],
-                    swipe_context: context
-                )
+                if !is_ours {
+                    EventActionBar(
+                        damus_state: damus_state,
+                        event: event,
+                        bar: bar,
+                        options: is_ours ? [.swipe_action_menu_reverse] : [.swipe_action_menu],
+                        swipe_context: context
+                    )
+                }
+            } trailingActions: { context in
+                if is_ours {
+                    EventActionBar(
+                        damus_state: damus_state,
+                        event: event,
+                        bar: bar,
+                        options: is_ours ? [.swipe_action_menu_reverse] : [.swipe_action_menu],
+                        swipe_context: context
+                    )
+                }
             }
             .swipeSpacing(-20)
             .swipeActionsStyle(.mask)
@@ -321,4 +333,9 @@ extension Notification.Name {
 #Preview {
     let bar = make_actionbar_model(ev: test_note.id, damus: test_damus_state)
     return ChatEventView(event: test_short_note, selected_event: test_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, focus_event: nil, highlight_bubble: true, bar: bar)
+}
+
+#Preview {
+    let bar = make_actionbar_model(ev: test_note.id, damus: test_damus_state)
+    return ChatEventView(event: test_super_short_note, selected_event: test_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, focus_event: nil, highlight_bubble: false, bar: bar)
 }
