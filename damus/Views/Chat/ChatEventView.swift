@@ -126,6 +126,11 @@ struct ChatEventView: View {
                 let blur_images = should_blur_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
                 NoteContentView(damus_state: damus_state, event: event, blur_images: blur_images, size: .normal, options: [.truncate_content])
                     .padding(2)
+                if let mention = first_eref_mention(ev: event, keypair: damus_state.keypair) {
+                    MentionView(damus_state: damus_state, mention: mention)
+                        .background(DamusColors.adaptableWhite)
+                        .clipShape(RoundedRectangle(cornerSize: CGSize(width: 10, height: 10)))
+                }
             }
             .frame(minWidth: 5, alignment: is_ours ? .trailing : .leading)
             .padding(10)
