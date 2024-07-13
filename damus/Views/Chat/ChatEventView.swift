@@ -107,6 +107,7 @@ struct ChatEventView: View {
                             .onTapGesture {
                                 show_profile_action_sheet_if_enabled(damus_state: damus_state, pubkey: event.pubkey)
                             }
+                            .lineLimit(1)
                         Text(verbatim: "\(format_relative_time(event.created_at))")
                             .foregroundColor(.gray)
                     }
