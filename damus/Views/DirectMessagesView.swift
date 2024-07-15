@@ -72,13 +72,11 @@ struct DirectMessagesView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            CustomPicker(selection: $dm_type, content: {
-                Text("DMs", comment: "Picker option for DM selector for seeing only DMs that have been responded to. DM is the English abbreviation for Direct Message.")
-                    .tag(DMType.friend)
-                Text("Requests", comment: "Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message.")
-                    .tag(DMType.rando)
-            })
-            
+            CustomPicker(tabs: [
+                ("DMs", DMType.friend),
+                ("Requests", DMType.rando),
+            ], selection: $dm_type)
+
             Divider()
                 .frame(height: 1)
             

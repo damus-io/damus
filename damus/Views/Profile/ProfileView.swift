@@ -434,10 +434,10 @@ struct ProfileView: View {
                         aboutSection
 
                         VStack(spacing: 0) {
-                            CustomPicker(selection: $filter_state, content: {
-                                Text("Notes", comment: "Label for filter for seeing only your notes (instead of notes and replies).").tag(FilterState.posts)
-                                Text("Notes & Replies", comment: "Label for filter for seeing your notes and replies (instead of only your notes).").tag(FilterState.posts_and_replies)
-                            })
+                            CustomPicker(tabs: [
+                                ("Notes", FilterState.posts),
+                                ("Notes & Replies", FilterState.posts_and_replies)
+                            ], selection: $filter_state)
                             Divider()
                                 .frame(height: 1)
                         }

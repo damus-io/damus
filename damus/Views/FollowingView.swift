@@ -160,10 +160,10 @@ struct FollowingView: View {
         .navigationBarTitle(NSLocalizedString("Following", comment: "Navigation bar title for view that shows who a user is following."))
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 0) {
-                CustomPicker(selection: $tab_selection, content: {
-                    Text("People", comment: "Label for filter for seeing only people follows.").tag(FollowingViewTabSelection.people)
-                    Text("Hashtags", comment: "Label for filter for seeing only hashtag follows.").tag(FollowingViewTabSelection.hashtags)
-                })
+                CustomPicker(tabs: [
+                    ("People", FollowingViewTabSelection.people),
+                    ("Hashtags",FollowingViewTabSelection.hashtags)
+                ], selection: $tab_selection)
                 Divider()
                     .frame(height: 1)
             }
