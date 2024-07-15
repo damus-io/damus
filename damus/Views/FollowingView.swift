@@ -161,8 +161,8 @@ struct FollowingView: View {
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 0) {
                 CustomPicker(tabs: [
-                    ("People", FollowingViewTabSelection.people),
-                    ("Hashtags",FollowingViewTabSelection.hashtags)
+                    (NSLocalizedString("People", comment: "Label for filter for seeing only people follows."), FollowingViewTabSelection.people),
+                    (NSLocalizedString("Hashtags", comment: "Label for filter for seeing only hashtag follows."), FollowingViewTabSelection.hashtags)
                 ], selection: $tab_selection)
                 Divider()
                     .frame(height: 1)
