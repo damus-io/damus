@@ -111,12 +111,16 @@ class MutelistManager {
     private func add_mute_item(_ item: MuteItem) {
         switch item {
         case .user(_, _):
+            guard !users.contains(item) else { return }
             users.insert(item)
         case .hashtag(_, _):
+            guard !hashtags.contains(item) else { return }
             hashtags.insert(item)
         case .word(_, _):
+            guard !words.contains(item) else { return }
             words.insert(item)
         case .thread(_, _):
+            guard !threads.contains(item) else { return }
             threads.insert(item)
         }
     }
