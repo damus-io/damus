@@ -125,31 +125,33 @@ struct ProfileName: View {
                 return
             }
 
-            var profile: Profile!
-            var profile_txn: NdbTxn<Profile?>!
-
             switch update {
             case .remote(let pubkey):
-                profile_txn = damus_state.profiles.lookup(id: pubkey)
-                guard let prof = profile_txn.unsafeUnownedValue else { return }
-                profile = prof
+                guard let profile_txn = damus_state.profiles.lookup(id: pubkey),
+                      let prof = profile_txn.unsafeUnownedValue else {
+                    return
+                }
+                handle_profile_update(profile: prof)
             case .manual(_, let prof):
-                profile = prof
+                handle_profile_update(profile: prof)
             }
 
-            let display_name = Profile.displayName(profile: profile, pubkey: pubkey)
-            if self.display_name != display_name {
-                self.display_name = display_name
-            }
+        }
+    }
 
-            let nip05 = damus_state.profiles.is_validated(pubkey)
-            if nip05 != self.nip05 {
-                self.nip05 = nip05
-            }
+    func handle_profile_update(profile: Profile) {
+        let display_name = Profile.displayName(profile: profile, pubkey: pubkey)
+        if self.display_name != display_name {
+            self.display_name = display_name
+        }
 
-            if donation != profile.damus_donation {
-                donation = profile.damus_donation
-            }
+        let nip05 = damus_state.profiles.is_validated(pubkey)
+        if nip05 != self.nip05 {
+            self.nip05 = nip05
+        }
+
+        if donation != profile.damus_donation {
+            donation = profile.damus_donation
         }
     }
 }
