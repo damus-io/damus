@@ -127,10 +127,12 @@ struct ContentView: View {
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 0) {
-                CustomPicker(selection: $filter_state, content: {
-                    Text("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies).").tag(FilterState.posts)
-                    Text("Notes & Replies", comment: "Label for filter for seeing notes and replies (instead of only notes).").tag(FilterState.posts_and_replies)
-                })
+                CustomPicker(tabs:
+                  [("Notes", FilterState.posts),
+                   ("Notes & Replies", FilterState.posts_and_replies)
+                  ],
+                selection: $filter_state)
+
                 Divider()
                     .frame(height: 1)
             }

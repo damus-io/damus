@@ -12,31 +12,25 @@ let RECTANGLE_GRADIENT = LinearGradient(gradient: Gradient(colors: [
     DamusColors.blue
 ]), startPoint: .leading, endPoint: .trailing)
 
-struct CustomPicker<SelectionValue: Hashable, Content: View>: View {
+struct CustomPicker<SelectionValue: Hashable>: View {
     
+    let tabs: [(String, SelectionValue)]
     @Environment(\.colorScheme) var colorScheme
-    
+
     @Namespace var picker
     @Binding var selection: SelectionValue
-    @ViewBuilder let content: Content
-    
+
     public var body: some View {
-        let contentMirror = Mirror(reflecting: content)
-        let blocksCount = Mirror(reflecting: contentMirror.descendant("value")!).children.count
         HStack {
-            ForEach(0..<blocksCount, id: \.self) { index in
-                let tupleBlock = contentMirror.descendant("value", ".\(index)")
-                let text = Mirror(reflecting: tupleBlock!).descendant("content") as! Text
-                let tag = Mirror(reflecting: tupleBlock!).descendant("modifier", "value", "tagged") as! SelectionValue
-                
+            ForEach(tabs, id: \.1) { (text, tag) in
                 Button {
                     withAnimation(.spring()) {
                         selection = tag
                     }
                 } label: {
-                    text
-                        .padding(EdgeInsets(top: 15, leading: 0, bottom: 10, trailing: 0))
+                    Text(text).padding(EdgeInsets(top: 15, leading: 0, bottom: 10, trailing: 0))
                         .font(.system(size: 14, weight: .heavy))
+                        .tag(tag)
                 }
                 .background(
                     Group {
