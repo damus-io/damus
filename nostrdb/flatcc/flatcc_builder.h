@@ -82,7 +82,7 @@ extern "C" {
  * Note: some internal assertion will remain if disabled.
  */
 #ifndef FLATCC_BUILDER_ASSERT_ON_ERROR
-#define FLATCC_BUILDER_ASSERT_ON_ERROR 1
+#define FLATCC_BUILDER_ASSERT_ON_ERROR 0
 #endif
 
 /*
