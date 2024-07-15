@@ -435,8 +435,8 @@ struct ProfileView: View {
 
                         VStack(spacing: 0) {
                             CustomPicker(tabs: [
-                                ("Notes", FilterState.posts),
-                                ("Notes & Replies", FilterState.posts_and_replies)
+                                (NSLocalizedString("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies)."), FilterState.posts),
+                                (NSLocalizedString("Notes & Replies", comment: "Label for filter for seeing notes and replies (instead of only notes)."), FilterState.posts_and_replies)
                             ], selection: $filter_state)
                             Divider()
                                 .frame(height: 1)

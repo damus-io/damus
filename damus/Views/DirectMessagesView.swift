@@ -73,8 +73,8 @@ struct DirectMessagesView: View {
     var body: some View {
         VStack(spacing: 0) {
             CustomPicker(tabs: [
-                ("DMs", DMType.friend),
-                ("Requests", DMType.rando),
+                (NSLocalizedString("DMs", comment: "Picker option for DM selector for seeing only DMs that have been responded to. DM is the English abbreviation for Direct Message."), DMType.friend),
+                (NSLocalizedString("Requests", comment: "Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet"), DMType.rando),
             ], selection: $dm_type)
 
             Divider()
