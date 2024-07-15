@@ -118,9 +118,9 @@ struct NotificationsView: View {
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 0) {
                 CustomPicker(tabs: [
-                    ("All", NotificationFilterState.all),
-                    ("Zaps", NotificationFilterState.zaps),
-                    ("Mentions", NotificationFilterState.replies),
+                    (NSLocalizedString("All", comment: "Label for filter for all notifications."), NotificationFilterState.all),
+                    (NSLocalizedString("Zaps", comment: "Label for filter for zap notifications."), NotificationFilterState.zaps),
+                    (NSLocalizedString("Mentions", comment: "Label for filter for seeing mention notifications (replies, etc)."), NotificationFilterState.replies),
                 ], selection: $filter_state)
                 Divider()
                     .frame(height: 1)
