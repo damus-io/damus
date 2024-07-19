@@ -1,3 +1,79 @@
+## [1.9 (14)] - 2024-07-14
+
+### Added
+
+- Completely new threads experience that is easier and more pleasant to use (Daniel D’Aquino)
+- Add emoji search to emoji picker (Terry Yiu)
+
+
+### Changed
+
+- Added first aid contact damus support email (alltheseas)
+- Disable mutiny wallet button (William Casarin)
+- Make friends show up first when searching for profiles (Terry Yiu)
+
+
+### Fixed
+
+- Fix crash on profile page when there are profile updates (William Casarin)
+- Fix crash when adding duplicate mute items (William Casarin)
+- Fix pretty bad crash when building flatbuffer profiles (William Casarin)
+- Fix reactions view to not show reactions from replies on parent note (Terry Yiu)
+- Fix missing Mute button in profile view menu (Terry Yiu)
+- Fixed wallet not disconnecting when a user logs out (ericholguin)
+- Fix stale feed issue when follow list is too big (Daniel D’Aquino)
+
+[1.9 (14)]: https://github.com/damus-io/damus/releases/tag/v1.9-14
+
+## [1.8] - 2024-05-11
+
+### Added
+
+- Added nip10 marker replies (William Casarin)
+- Add marker nip10 support when reading notes (William Casarin)
+- Added title image and tags to longform events (ericholguin)
+- Add First Aid solution for users who do not have a contact list created for their account (Daniel D’Aquino)
+- Relay fees metadata (ericholguin)
+- Added callbackuri for a better ux when connecting mutiny wallet nwc (ericholguin)
+- Add event content preview to the full screen carousel (Daniel D’Aquino)
+- Show list of quoted reposts in threads (William Casarin)
+- Proxy Tags are now viewable on Selected Events (ericholguin)
+- Connect to Mutiny Wallet Button (ericholguin)
+- Add ability to mute words, add new mutelist interface (Charlie) (William Casarin)
+- Add ability to mute hashtag from SearchView (Charlie Fish)
+
+
+### Changed
+
+- Change reactions to use a native looking emoji picker (Terry Yiu)
+- Relay detail design (ericholguin)
+- Updated Zeus logo (ericholguin)
+- Improve UX around video playback (Daniel D’Aquino)
+- Moved paste nwc button to main wallet view (ericholguin)
+- Errors with an NWC will show as an alert (ericholguin)
+- Relay config view user interface (ericholguin)
+- Always strip GPS data from images (kernelkind)
+
+
+### Fixed
+
+- Fix thread bug where a quote isn't picked up as a reply (William Casarin)
+- Fixed threads not loading sometimes (William Casarin)
+- Fixed issue where some replies were including the q tag (William Casarin)
+- Fixed issue where timeline was scrolling when it isn't supposed to (William Casarin)
+- Fix issue where bootstrap relays would inadvertently be added to the user's list on connectivity issues (Daniel D’Aquino)
+- Fix broken GIF uploads (Daniel D’Aquino)
+- Fix ghost notifications caused by Purple impending expiration notifications (Daniel D’Aquino)
+- Improve reliability of contact list creation during onboarding (Daniel D’Aquino)
+- Fix emoji reactions being cut off (ericholguin)
+- Fix image indicators to limit number of dots to not spill screen beyond visible margins (ericholguin)
+- Fix bug that would cause connection issues with relays defined with a trailing slash URL, and an inability to delete them. (Daniel D’Aquino)
+- Issue where NWC Scanner view would not dismiss after a failed scan/paste (ericholguin)
+
+
+
+[1.8]: https://github.com/damus-io/damus/releases/tag/v1.8
+
 ## [1.7-rc2] - 2024-02-28
 
 ### Added
