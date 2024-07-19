@@ -15,18 +15,12 @@ struct ReplyPart: View {
 
     var body: some View {
         Group {
-            if let reply_ref = event.thread_reply()?.reply {
+            if event.known_kind == .highlight {
+                let highlighted_note = event.highlighted_note_id().flatMap { events.lookup($0) }
+                HighlightDescription(event: event, highlighted_event: highlighted_note, ndb: ndb)
+            } else if let reply_ref = event.thread_reply()?.reply {
                 let replying_to = events.lookup(reply_ref.note_id)
-                if event.known_kind != .highlight {
-                    ReplyDescription(event: event, replying_to: replying_to, ndb: ndb)
-                } else if event.known_kind == .highlight {
-                    HighlightDescription(event: event, highlighted_event: replying_to, ndb: ndb)
-                }
-                else {
-                    EmptyView()
-                }
-            } else {
-                EmptyView()
+                ReplyDescription(event: event, replying_to: replying_to, ndb: ndb)
             }
         }
     }
