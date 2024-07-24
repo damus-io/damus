@@ -407,6 +407,7 @@
 		5C7389B12B6EFA7100781E0A /* ProxyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B02B6EFA7100781E0A /* ProxyView.swift */; };
 		5C7389B72B9E692E00781E0A /* MutinyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B62B9E692E00781E0A /* MutinyButton.swift */; };
 		5C7389B92B9E69ED00781E0A /* MutinyGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B82B9E69ED00781E0A /* MutinyGradient.swift */; };
+		5C8711DE2C460C06007879C2 /* PostingTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */; };
 		5CC8529D2BD741CD0039FFC5 /* HighlightEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC8529C2BD741CD0039FFC5 /* HighlightEvent.swift */; };
 		5CC8529F2BD744F60039FFC5 /* HighlightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC8529E2BD744F60039FFC5 /* HighlightView.swift */; };
 		5CC852A22BDED9B90039FFC5 /* HighlightDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC852A12BDED9B90039FFC5 /* HighlightDescription.swift */; };
@@ -1348,6 +1349,7 @@
 		5C7389B02B6EFA7100781E0A /* ProxyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyView.swift; sourceTree = "<group>"; };
 		5C7389B62B9E692E00781E0A /* MutinyButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutinyButton.swift; sourceTree = "<group>"; };
 		5C7389B82B9E69ED00781E0A /* MutinyGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutinyGradient.swift; sourceTree = "<group>"; };
+		5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostingTimelineView.swift; sourceTree = "<group>"; };
 		5CC8529C2BD741CD0039FFC5 /* HighlightEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightEvent.swift; sourceTree = "<group>"; };
 		5CC8529E2BD744F60039FFC5 /* HighlightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightView.swift; sourceTree = "<group>"; };
 		5CC852A12BDED9B90039FFC5 /* HighlightDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightDescription.swift; sourceTree = "<group>"; };
@@ -2447,6 +2449,7 @@
 			isa = PBXGroup;
 			children = (
 				4CE0E2B529A3ED5500DB4CA2 /* InnerTimelineView.swift */,
+				5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */,
 			);
 			path = Timeline;
 			sourceTree = "<group>";
@@ -3175,6 +3178,7 @@
 				4CE6DEE927F7A08100C66700 /* ContentView.swift in Sources */,
 				4CEE2AF5280B29E600AB5EEF /* TimeAgo.swift in Sources */,
 				4CC14FF12A73FCDB007AEB17 /* Pubkey.swift in Sources */,
+				5C8711DE2C460C06007879C2 /* PostingTimelineView.swift in Sources */,
 				4CA9275D2A28FF630098A105 /* LongformView.swift in Sources */,
 				4C75EFAD28049CFB0006080F /* PostButton.swift in Sources */,
 				D7EDED1E2B11797D0018B19C /* LongformEvent.swift in Sources */,
