@@ -217,16 +217,6 @@ struct ProfileView: View {
         }
     }
 
-    var customNavbar: some View {
-        HStack {
-            navBackButton
-            Spacer()
-            navActionSheetButton
-        }
-        .padding(.top, 5)
-        .accentColor(DamusColors.white)
-    }
-
     func lnButton(unownedProfile: Profile?, record: ProfileRecord?) -> some View {
         return ProfileZapLinkView(unownedProfileRecord: record, profileModel: self.profile) { reactions_enabled, lud16, lnurl in
             Image(reactions_enabled ? "zap.fill" : "zap")
@@ -458,8 +448,15 @@ struct ProfileView: View {
             .navigationTitle("")
             .navigationBarBackButtonHidden()
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    customNavbar
+                ToolbarItem(placement: .topBarLeading) {
+                    navBackButton
+                        .padding(.top, 5)
+                        .accentColor(DamusColors.white)
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    navActionSheetButton
+                        .padding(.top, 5)
+                        .accentColor(DamusColors.white)
                 }
             }
             .toolbarBackground(.hidden)
