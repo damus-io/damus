@@ -77,7 +77,7 @@ struct EditMetadataView: View {
     var TopSection: some View {
         ZStack(alignment: .top) {
             GeometryReader { geo in
-                EditBannerImageView(damus_state: damus_state, viewModel: bannerUploadObserver, callback: uploadedBanner(image_url:))
+                EditBannerImageView(damus_state: damus_state, viewModel: bannerUploadObserver, callback: uploadedBanner(image_url:), banner_image: URL(string: banner))
                     .aspectRatio(contentMode: .fill)
                     .frame(width: geo.size.width, height: BANNER_HEIGHT)
                     .clipped()
@@ -86,7 +86,7 @@ struct EditMetadataView: View {
                 let pfp_size: CGFloat = 90.0
 
                 HStack(alignment: .center) {
-                    EditProfilePictureView(pubkey: damus_state.pubkey, damus_state: damus_state, size: pfp_size, uploadObserver: profileUploadObserver, callback: uploadedProfilePicture(image_url:))
+                    EditProfilePictureView(profile_url: URL(string: picture), pubkey: damus_state.pubkey, damus_state: damus_state, size: pfp_size, uploadObserver: profileUploadObserver, callback: uploadedProfilePicture(image_url:))
                         .offset(y: -(pfp_size/2.0)) // Increase if set a frame
 
                    Spacer()
@@ -116,17 +116,17 @@ struct EditMetadataView: View {
 
                 }
                 
-                Section (NSLocalizedString("Profile Picture", comment: "Label for Profile Picture section of user profile form.")) {
-                    TextField(NSLocalizedString("https://example.com/pic.jpg", comment: "Placeholder example text for profile picture URL."), text: $picture)
-                        .autocorrectionDisabled(true)
-                        .textInputAutocapitalization(.never)
-                }
-                
-                Section (NSLocalizedString("Banner Image", comment: "Label for Banner Image section of user profile form.")) {
-                                    TextField(NSLocalizedString("https://example.com/pic.jpg", comment: "Placeholder example text for profile picture URL."), text: $banner)
-                                        .autocorrectionDisabled(true)
-                                        .textInputAutocapitalization(.never)
-                                }
+//                Section (NSLocalizedString("Profile Picture", comment: "Label for Profile Picture section of user profile form.")) {
+//                    TextField(NSLocalizedString("https://example.com/pic.jpg", comment: "Placeholder example text for profile picture URL."), text: $picture)
+//                        .autocorrectionDisabled(true)
+//                        .textInputAutocapitalization(.never)
+//                }
+//                
+//                Section (NSLocalizedString("Banner Image", comment: "Label for Banner Image section of user profile form.")) {
+//                                    TextField(NSLocalizedString("https://example.com/pic.jpg", comment: "Placeholder example text for profile picture URL."), text: $banner)
+//                                        .autocorrectionDisabled(true)
+//                                        .textInputAutocapitalization(.never)
+//                                }
                 
                 Section(NSLocalizedString("Website", comment: "Label for Website section of user profile form.")) {
                     TextField(NSLocalizedString("https://jb55.com", comment: "Placeholder example text for website URL for user profile."), text: $website)
