@@ -21,12 +21,14 @@ struct EditMetadataView: View {
     @State var ln: String
     @State var website: String
 
-    @Environment(\.dismiss) var dismiss
-
     @State var confirm_ln_address: Bool = false
+    @State var confirm_save_alert: Bool = false
     
     @StateObject var profileUploadObserver = ImageUploadingObserver()
     @StateObject var bannerUploadObserver = ImageUploadingObserver()
+    
+    @Environment(\.dismiss) var dismiss
+    @Environment(\.presentationMode) var presentationMode
     
     init(damus_state: DamusState) {
         self.damus_state = damus_state
@@ -97,6 +99,28 @@ struct EditMetadataView: View {
         }
     }
     
+    func navImage(img: String) -> some View {
+        Image(img)
+            .frame(width: 33, height: 33)
+            .background(Color.black.opacity(0.6))
+            .clipShape(Circle())
+    }
+    
+    var navBackButton: some View {
+        HStack {
+            Button {
+                if didChange() {
+                    confirm_save_alert.toggle()
+                } else {
+                    presentationMode.wrappedValue.dismiss()
+                }
+            } label: {
+                navImage(img: "chevron-left")
+            }
+            Spacer()
+        }
+    }
+    
     var body: some View {
         VStack(alignment: .leading) {
             TopSection
@@ -116,18 +140,6 @@ struct EditMetadataView: View {
 
                 }
                 
-//                Section (NSLocalizedString("Profile Picture", comment: "Label for Profile Picture section of user profile form.")) {
-//                    TextField(NSLocalizedString("https://example.com/pic.jpg", comment: "Placeholder example text for profile picture URL."), text: $picture)
-//                        .autocorrectionDisabled(true)
-//                        .textInputAutocapitalization(.never)
-//                }
-//                
-//                Section (NSLocalizedString("Banner Image", comment: "Label for Banner Image section of user profile form.")) {
-//                                    TextField(NSLocalizedString("https://example.com/pic.jpg", comment: "Placeholder example text for profile picture URL."), text: $banner)
-//                                        .autocorrectionDisabled(true)
-//                                        .textInputAutocapitalization(.never)
-//                                }
-                
                 Section(NSLocalizedString("Website", comment: "Label for Website section of user profile form.")) {
                     TextField(NSLocalizedString("https://jb55.com", comment: "Placeholder example text for website URL for user profile."), text: $website)
                         .autocorrectionDisabled(true)
@@ -139,10 +151,10 @@ struct EditMetadataView: View {
                     ZStack(alignment: .topLeading) {
                         TextEditor(text: $about)
                             .textInputAutocapitalization(.sentences)
-                            .frame(minHeight: 20, alignment: .leading)
+                            .frame(minHeight: 45, alignment: .leading)
                             .multilineTextAlignment(.leading)
                         Text(about.isEmpty ? placeholder : about)
-                            .padding(.leading, 4)
+                            .padding(4)
                             .opacity(about.isEmpty ? 1 : 0)
                             .foregroundColor(Color(uiColor: .placeholderText))
                     }
@@ -175,25 +187,48 @@ struct EditMetadataView: View {
                     }
                 })
 
-                Button(NSLocalizedString("Save", comment: "Button for saving profile.")) {
-                    if !ln.isEmpty && !is_ln_valid(ln: ln) {
-                        confirm_ln_address = true
-                    } else {
-                        save()
-                        dismiss()
-                    }
+
+            }
+            
+            Button(action: {
+                if !ln.isEmpty && !is_ln_valid(ln: ln) {
+                    confirm_ln_address = true
+                } else {
+                    save()
+                    dismiss()
                 }
-                .disabled(profileUploadObserver.isLoading || bannerUploadObserver.isLoading)
-                .alert(NSLocalizedString("Invalid Tip Address", comment: "Title of alerting as invalid tip address."), isPresented: $confirm_ln_address) {
-                    Button(NSLocalizedString("Ok", comment: "Button to dismiss the alert.")) {
-                    }
-                } message: {
-                    Text("The address should either begin with LNURL or should look like an email address.", comment: "Giving the description of the alert message.")
+            }, label: {
+                Text(NSLocalizedString("Save", comment: "Button for saving profile."))
+                    .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
+            })
+            .buttonStyle(GradientButtonStyle(padding: 15))
+            .padding(.horizontal, 10)
+            .padding(.bottom, 10)
+            .disabled(!didChange())
+            .opacity(!didChange() ? 0.5 : 1)
+            .disabled(profileUploadObserver.isLoading || bannerUploadObserver.isLoading)
+            .alert(NSLocalizedString("Invalid Tip Address", comment: "Title of alerting as invalid tip address."), isPresented: $confirm_ln_address) {
+                Button(NSLocalizedString("Ok", comment: "Button to dismiss the alert.")) {
                 }
+            } message: {
+                Text("The address should either begin with LNURL or should look like an email address.", comment: "Giving the description of the alert message.")
             }
         }
         .ignoresSafeArea(edges: .top)
         .background(Color(.systemGroupedBackground))
+        .navigationBarBackButtonHidden()
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                navBackButton
+            }
+        }
+        .alert(NSLocalizedString("Discard changes?", comment: "Alert user that changes have been made."), isPresented: $confirm_save_alert) {
+            Button(NSLocalizedString("No", comment: "Do not discard changes."), role: .cancel) {
+            }
+            Button(NSLocalizedString("Yes", comment: "Agree to discard changes made to profile.")) {
+                dismiss()
+            }
+        }
     }
     
     func uploadedProfilePicture(image_url: URL?) {
@@ -202,6 +237,45 @@ struct EditMetadataView: View {
     
     func uploadedBanner(image_url: URL?) {
         banner = image_url?.absoluteString ?? ""
+    }
+    
+    func didChange() -> Bool {
+        let profile_txn = damus_state.profiles.lookup(id: damus_state.pubkey)
+        let data = profile_txn?.unsafeUnownedValue
+        
+        if data?.name ?? "" != name {
+            return true
+        }
+        
+        if data?.display_name ?? "" != display_name {
+            return true
+        }
+        
+        if data?.about ?? "" != about {
+            return true
+        }
+        
+        if data?.website ?? "" != website {
+            return true
+        }
+        
+        if data?.picture ?? "" != picture {
+            return true
+        }
+        
+        if data?.banner ?? "" != banner {
+            return true
+        }
+
+        if data?.nip05 ?? "" != nip05 {
+            return true
+        }
+        
+        if data?.lud16 ?? data?.lud06 ?? "" != ln {
+            return true
+        }
+        
+        return false
     }
 }
 

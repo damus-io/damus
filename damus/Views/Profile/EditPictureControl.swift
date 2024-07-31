@@ -18,6 +18,7 @@ struct EditPictureControl: View {
     var size: CGFloat? = 25
     var setup: Bool? = false
     @Binding var image_url: URL?
+    @State var image_url_temp: URL?
     @ObservedObject var uploadObserver: ImageUploadingObserver
     let callback: (URL?) -> Void
     
@@ -125,53 +126,65 @@ struct EditPictureControl: View {
             }
         }
         .sheet(isPresented: $show_url_sheet) {
-            VStack {
-                Text("Update image URL")
-                    .bold()
-                
-                HStack {
-                    Image(systemName: "doc.on.clipboard")
-                        .foregroundColor(.gray)
-                        .onTapGesture {
-                            if let pastedURL = UIPasteboard.general.string {
-                                image_url = URL(string: pastedURL)
-                            }
-                        }
-                    TextField(image_url?.absoluteString ?? "", text: Binding(
-                        get: { image_url?.absoluteString ?? "" },
-                        set: { image_url = URL(string: $0) }
-                    ))
-                }
-                .padding(15)
-                .background {
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(.gray.opacity(0.5), lineWidth: 1)
-                        .background {
-                            RoundedRectangle(cornerRadius: 12)
-                                .foregroundColor(.damusAdaptableWhite)
-                        }
-                }
-                .padding()
-                
-                Button(action: {
-                    dismiss()
-                }, label: {
-                    Text("Cancel", comment: "Cancel button text for dismissing updating image url.")
-                        .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
-                        .padding(10)
-                })
-                .buttonStyle(NeutralButtonStyle())
-                .padding(10)
-                
-                Button(action: {
+            ZStack {
+                DamusColors.adaptableWhite.edgesIgnoringSafeArea(.all)
+                VStack {
+                    Text("Image URL")
+                        .bold()
                     
-                    dismiss()
-                }, label: {
-                    Text("Update", comment: "Save button text for saving profile status settings.")
-                        .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
-                })
-                .buttonStyle(GradientButtonStyle())
-                .padding(10)
+                    Divider()
+                        .padding(.horizontal)
+                    
+                    HStack {
+                        Image(systemName: "doc.on.clipboard")
+                            .foregroundColor(.gray)
+                            .onTapGesture {
+                                if let pastedURL = UIPasteboard.general.string {
+                                    image_url_temp = URL(string: pastedURL)
+                                }
+                            }
+                        TextField(image_url_temp?.absoluteString ?? "", text: Binding(
+                            get: { image_url_temp?.absoluteString ?? "" },
+                            set: { image_url_temp = URL(string: $0) }
+                        ))
+                    }
+                    .padding(12)
+                    .background {
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(.gray.opacity(0.5), lineWidth: 1)
+                            .background {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .foregroundColor(.damusAdaptableWhite)
+                            }
+                    }
+                    .padding(10)
+                    
+                    Button(action: {
+                        show_url_sheet.toggle()
+                    }, label: {
+                        Text("Cancel", comment: "Cancel button text for dismissing updating image url.")
+                            .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
+                            .padding(10)
+                    })
+                    .buttonStyle(NeutralButtonStyle())
+                    .padding(10)
+                    
+                    Button(action: {
+                        image_url = image_url_temp
+                        callback(image_url)
+                        show_url_sheet.toggle()
+                    }, label: {
+                        Text("Update", comment: "Update button text for updating image url.")
+                            .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
+                    })
+                    .buttonStyle(GradientButtonStyle(padding: 10))
+                    .padding(.horizontal, 10)
+                    .disabled(image_url_temp == image_url)
+                    .opacity(image_url_temp == image_url ? 0.5 : 1)
+                }
+            }
+            .onAppear {
+                image_url_temp = image_url
             }
             .presentationDetents([.height(300)])
             .presentationDragIndicator(.visible)
