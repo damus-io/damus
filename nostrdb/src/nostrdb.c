@@ -784,8 +784,18 @@ static int ndb_filter_add_element(struct ndb_filter *filter, union ndb_filter_el
 		offset = el.integer;
 		break;
 	case NDB_FILTER_TAGS:
-		if (!cursor_push_c_str(&filter->data_buf, el.string))
+		switch (current->field.elem_type) {
+		case NDB_ELEMENT_ID:
+			if (!cursor_push(&filter->data_buf, (unsigned char *)el.id, 32))
+				return 0;
+			break;
+		case NDB_ELEMENT_STRING:
+			if (!cursor_push_c_str(&filter->data_buf, el.string))
+				return 0;
+			break;
+		case NDB_ELEMENT_UNKNOWN:
 			return 0;
+		}
 		// push a pointer of the string in the databuf as an element
 		break;
 	}
