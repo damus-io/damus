@@ -52,25 +52,25 @@ int parse_nostr_bech32_type(const char *prefix, enum nostr_bech32_type *type) {
 	// Parse type
 	if (strncmp(prefix, "note", 4) == 0) {
 		*type = NOSTR_BECH32_NOTE;
-		return 1;
+		return 4;
 	} else if (strncmp(prefix, "npub", 4) == 0) {
 		*type = NOSTR_BECH32_NPUB;
-		return 1;
+		return 4;
 	} else if (strncmp(prefix, "nsec", 4) == 0) {
 		*type = NOSTR_BECH32_NSEC;
-		return 1;
+		return 4;
 	} else if (strncmp(prefix, "nprofile", 8) == 0) {
 		*type = NOSTR_BECH32_NPROFILE;
-		return 1;
+		return 8;
 	} else if (strncmp(prefix, "nevent", 6) == 0) {
 		*type = NOSTR_BECH32_NEVENT;
-		return 1;
+		return 6;
 	} else if (strncmp(prefix, "nrelay", 6) == 0) {
 		*type = NOSTR_BECH32_NRELAY;
-		return 1;
+		return 6;
 	} else if (strncmp(prefix, "naddr", 5) == 0) {
 		*type = NOSTR_BECH32_NADDR;
-		return 1;
+		return 5;
 	}
 	
 	return 0;
@@ -272,11 +272,26 @@ int parse_nostr_bech32_buffer(struct cursor *cur,
 
 
 int parse_nostr_bech32_str(struct cursor *bech32, enum nostr_bech32_type *type) {
-	if (!parse_nostr_bech32_type((const char *)bech32->p, type))
+	unsigned char *start = bech32->p;
+	unsigned char *data_start;
+	int n;
+
+	if (!(n = parse_nostr_bech32_type((const char *)bech32->p, type))) {
+		bech32->p = start;
 		return 0;
+	}
 	
-	if (!consume_until_non_alphanumeric(bech32, 1))
+	data_start = start + n;
+	if (!consume_until_non_alphanumeric(bech32, 1)) {
+		bech32->p = start;
 		return 0;
+	}
+
+	// must be at least 60 chars for the data part
+	if (bech32->p - data_start < 60) {
+		bech32->p = start;
+		return 0;
+	}
 
 	return 1;
 }
