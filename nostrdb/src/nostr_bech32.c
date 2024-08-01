@@ -287,8 +287,9 @@ int parse_nostr_bech32_str(struct cursor *bech32, enum nostr_bech32_type *type) 
 		return 0;
 	}
 
-	// must be at least 60 chars for the data part
-	if (bech32->p - data_start < 60) {
+	// must be at least 59 chars for the data part
+	//ndb_debug("bech32_data_size %ld '%c' '%c' '%.*s'\n", bech32->p - data_start, *(bech32->p-1), *data_start, (int)(bech32->p - data_start), data_start);
+	if (bech32->p - data_start < 59) {
 		bech32->p = start;
 		return 0;
 	}
