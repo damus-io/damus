@@ -5598,7 +5598,7 @@ void ndb_config_set_ingest_filter(struct ndb_config *config,
 	config->filter_context = filter_ctx;
 }
 
-int ndb_print_tag_keys(struct ndb_txn *txn)
+int ndb_print_tag_index(struct ndb_txn *txn)
 {
 	MDB_cursor *cur;
 	MDB_val k, v;
@@ -5609,10 +5609,8 @@ int ndb_print_tag_keys(struct ndb_txn *txn)
 
 	i = 1;
 	while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
-		printf("%d note_tags '%.*s' %" PRIu64 "\n",
-			i, (int)k.mv_size-8, (const char *)k.mv_data,
-			*(uint64_t*)(k.mv_data+(k.mv_size-8)));
-
+		printf("%d ", i);
+		print_tag_kv(txn, &k, &v);
 		i++;
 	}
 
