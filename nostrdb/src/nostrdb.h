@@ -161,6 +161,7 @@ enum ndb_generic_element_type {
 	NDB_ELEMENT_UNKNOWN = 0,
 	NDB_ELEMENT_STRING  = 1,
 	NDB_ELEMENT_ID      = 2,
+	NDB_ELEMENT_INT     = 3,
 };
 
 enum ndb_search_order {
@@ -498,6 +499,7 @@ int ndb_filter_clone(struct ndb_filter *dst, struct ndb_filter *src);
 int ndb_filter_end(struct ndb_filter *);
 void ndb_filter_end_field(struct ndb_filter *);
 void ndb_filter_destroy(struct ndb_filter *);
+int ndb_filter_json(struct ndb_filter *, char *buf, int buflen);
 
 // SUBSCRIPTIONS
 uint64_t ndb_subscribe(struct ndb *, struct ndb_filter *, int num_filters);
