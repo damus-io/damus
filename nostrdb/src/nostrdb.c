@@ -649,6 +649,12 @@ ndb_filter_get_string_element(struct ndb_filter *filter, struct ndb_filter_eleme
 	return (const char *)ndb_filter_elements_data(filter, els->elements[index]);
 }
 
+static inline uint64_t
+ndb_filter_get_int_element(struct ndb_filter_elements *els, int index)
+{
+	return els->elements[index];
+}
+
 int ndb_filter_init(struct ndb_filter *filter)
 {
 	struct cursor cur;
@@ -793,6 +799,8 @@ static int ndb_filter_add_element(struct ndb_filter *filter, union ndb_filter_el
 			if (!cursor_push_c_str(&filter->data_buf, el.string))
 				return 0;
 			break;
+		case NDB_ELEMENT_INT:
+			// ints are not allowed in tag filters
 		case NDB_ELEMENT_UNKNOWN:
 			return 0;
 		}
@@ -878,6 +886,9 @@ int ndb_filter_add_int_element(struct ndb_filter *filter, uint64_t integer)
 	case NDB_FILTER_LIMIT:
 		break;
 	}
+
+	if (!ndb_filter_set_elem_type(filter, NDB_ELEMENT_INT))
+		return 0;
 
 	el.integer = integer;
 
@@ -978,6 +989,8 @@ static int ndb_tag_filter_matches(struct ndb_filter *filter,
 				if (!strcmp(el_str, str.str))
 					return 1;
 				break;
+			case NDB_ELEMENT_INT:
+				// int elements int tag queries are not supported
 			case NDB_ELEMENT_UNKNOWN:
 				return 0;
 			}
@@ -4753,10 +4766,10 @@ static int cursor_push_hex(struct cursor *c, unsigned char *bytes, int len)
 	return 1;
 }
 
-static int cursor_push_int_str(struct cursor *c, int num)
+static int cursor_push_int_str(struct cursor *c, uint64_t num)
 {
 	char timebuf[16] = {0};
-	snprintf(timebuf, sizeof(timebuf), "%d", num);
+	snprintf(timebuf, sizeof(timebuf), "%" PRIu64, num);
 	return cursor_push_str(c, timebuf);
 }
 
@@ -4785,6 +4798,134 @@ int ndb_note_json(struct ndb_note *note, char *buf, int buflen)
 	if (!ok) {
 		return 0;
 	}
+
+	return cur.p - cur.start;
+}
+
+static int cursor_push_json_elem_array(struct cursor *cur,
+				       struct ndb_filter *filter,
+				       struct ndb_filter_elements *elems)
+{
+	int i;
+	unsigned char *id;
+	const char *str;
+	uint64_t val;
+
+	if (!cursor_push_byte(cur, '['))
+		return 0;
+
+	for (i = 0; i < elems->count; i++) {
+
+		switch (elems->field.elem_type)  {
+		case NDB_ELEMENT_STRING:
+			str = ndb_filter_get_string_element(filter, elems, i);
+			if (!cursor_push_jsonstr(cur, str))
+				return 0;
+			break;
+		case NDB_ELEMENT_ID:
+			id = ndb_filter_get_id_element(filter, elems, i);
+			if (!cursor_push_hex_str(cur, id, 32))
+				return 0;
+			break;
+		case NDB_ELEMENT_INT:
+			val = ndb_filter_get_int_element(elems, i);
+			if (!cursor_push_int_str(cur, val))
+				return 0;
+			break;
+		case NDB_ELEMENT_UNKNOWN:
+			ndb_debug("unknown element in cursor_push_json_elem_array");
+			return 0;
+		}
+
+		if (i != elems->count-1) {
+			if (!cursor_push_byte(cur, ','))
+				return 0;
+		}
+	}
+
+	if (!cursor_push_str(cur, "]"))
+		return 0;
+
+	return 1;
+}
+
+int ndb_filter_json(struct ndb_filter *filter, char *buf, int buflen)
+{
+	struct cursor cur, *c = &cur;
+	struct ndb_filter_elements *elems;
+	int i;
+
+	if (!filter->finalized) {
+		ndb_debug("filter not finalized in ndb_filter_json\n");
+		return 0;
+	}
+
+	make_cursor((unsigned char *)buf, (unsigned char*)buf + buflen, c);
+
+	if (!cursor_push_str(c, "{"))
+		return 0;
+
+	for (i = 0; i < filter->num_elements; i++) {
+		elems = ndb_filter_get_elements(filter, i);
+		switch (elems->field.type) {
+		case NDB_FILTER_IDS:
+			if (!cursor_push_str(c, "\"ids\":"))
+				return 0;
+			if (!cursor_push_json_elem_array(c, filter, elems))
+				return 0;
+			break;
+		case NDB_FILTER_AUTHORS:
+			if (!cursor_push_str(c, "\"authors\":"))
+				return 0;
+			if (!cursor_push_json_elem_array(c, filter, elems))
+				return 0;
+			break;
+		case NDB_FILTER_KINDS:
+			if (!cursor_push_str(c, "\"kinds\":"))
+				return 0;
+			if (!cursor_push_json_elem_array(c, filter, elems))
+				return 0;
+			break;
+		case NDB_FILTER_TAGS:
+			if (!cursor_push_str(c, "\"#"))
+				return 0;
+			if (!cursor_push_byte(c, elems->field.tag))
+				return 0;
+			if (!cursor_push_str(c, "\":"))
+				return 0;
+			if (!cursor_push_json_elem_array(c, filter, elems))
+				return 0;
+			break;
+		case NDB_FILTER_SINCE:
+			if (!cursor_push_str(c, "\"since\":"))
+				return 0;
+			if (!cursor_push_int_str(c, ndb_filter_get_int_element(elems, 0)))
+				return 0;
+			break;
+		case NDB_FILTER_UNTIL:
+			if (!cursor_push_str(c, "\"until\":"))
+				return 0;
+			if (!cursor_push_int_str(c, ndb_filter_get_int_element(elems, 0)))
+				return 0;
+			break;
+		case NDB_FILTER_LIMIT:
+			if (!cursor_push_str(c, "\"limit\":"))
+				return 0;
+			if (!cursor_push_int_str(c, ndb_filter_get_int_element(elems, 0)))
+				return 0;
+			break;
+		}
+
+		if (i != filter->num_elements-1) {
+			if (!cursor_push_byte(c, ',')) {
+				return 0;
+			}
+		}
+
+	}
+
+	if (!cursor_push_c_str(c, "}"))
+		return 0;
 
 	return cur.p - cur.start;
 }
