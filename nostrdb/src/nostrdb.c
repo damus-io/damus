@@ -589,7 +589,7 @@ int ndb_filter_end(struct ndb_filter *filter)
 }
 
 static inline struct ndb_filter_elements *
-ndb_filter_get_elements_by_offset(struct ndb_filter *filter, int offset)
+ndb_filter_get_elements_by_offset(const struct ndb_filter *filter, int offset)
 {
 	struct ndb_filter_elements *els;
 
@@ -605,13 +605,13 @@ ndb_filter_get_elements_by_offset(struct ndb_filter *filter, int offset)
 }
 
 struct ndb_filter_elements *
-ndb_filter_current_element(struct ndb_filter *filter)
+ndb_filter_current_element(const struct ndb_filter *filter)
 {
 	return ndb_filter_get_elements_by_offset(filter, filter->current);
 }
 
 static inline struct ndb_filter_elements *
-ndb_filter_get_elements(struct ndb_filter *filter, int index)
+ndb_filter_get_elements(const struct ndb_filter *filter, int index)
 {
 	if (filter->num_elements <= 0)
 		return NULL;
@@ -623,7 +623,7 @@ ndb_filter_get_elements(struct ndb_filter *filter, int index)
 }
 
 static inline unsigned char *
-ndb_filter_elements_data(struct ndb_filter *filter, int offset)
+ndb_filter_elements_data(const struct ndb_filter *filter, int offset)
 {
 	unsigned char *data;
 
@@ -638,13 +638,13 @@ ndb_filter_elements_data(struct ndb_filter *filter, int offset)
 }
 
 static inline unsigned char *
-ndb_filter_get_id_element(struct ndb_filter *filter, struct ndb_filter_elements *els, int index)
+ndb_filter_get_id_element(const struct ndb_filter *filter, struct ndb_filter_elements *els, int index)
 {
 	return ndb_filter_elements_data(filter, els->elements[index]);
 }
 
 static inline const char *
-ndb_filter_get_string_element(struct ndb_filter *filter, struct ndb_filter_elements *els, int index)
+ndb_filter_get_string_element(const struct ndb_filter *filter, struct ndb_filter_elements *els, int index)
 {
 	return (const char *)ndb_filter_elements_data(filter, els->elements[index]);
 }
@@ -4803,7 +4803,7 @@ int ndb_note_json(struct ndb_note *note, char *buf, int buflen)
 }
 
 static int cursor_push_json_elem_array(struct cursor *cur,
-				       struct ndb_filter *filter,
+				       const struct ndb_filter *filter,
 				       struct ndb_filter_elements *elems)
 {
 	int i;
@@ -4849,7 +4849,7 @@ static int cursor_push_json_elem_array(struct cursor *cur,
 	return 1;
 }
 
-int ndb_filter_json(struct ndb_filter *filter, char *buf, int buflen)
+int ndb_filter_json(const struct ndb_filter *filter, char *buf, int buflen)
 {
 	struct cursor cur, *c = &cur;
 	struct ndb_filter_elements *elems;
