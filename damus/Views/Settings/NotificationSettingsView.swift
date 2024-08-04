@@ -7,10 +7,13 @@
 
 import SwiftUI
 
+let MINIMUM_PUSH_NOTIFICATION_SYNC_DELAY_IN_SECONDS = 0.25
+
 struct NotificationSettingsView: View {
     let damus_state: DamusState
     @ObservedObject var settings: UserSettingsStore
     @State var notification_mode_setting_error: String? = nil
+    @State var notification_preferences_sync_state: PreferencesSyncState = .undefined
     
     @Environment(\.dismiss) var dismiss
     
@@ -32,6 +35,7 @@ struct NotificationSettingsView: View {
             Task {
                 do {
                     try await damus_state.push_notification_client.send_token()
+                    await self.sync_up_remote_notification_settings()
                     settings.notifications_mode = new_value
                 }
                 catch {
@@ -44,6 +48,7 @@ struct NotificationSettingsView: View {
                 do {
                     try await damus_state.push_notification_client.revoke_token()
                     settings.notifications_mode = new_value
+                    notification_preferences_sync_state = .not_applicable
                 }
                 catch {
                     notification_mode_setting_error = String(format: NSLocalizedString("Error disabling push notifications with the server: %@", comment: "Error label shown when user tries to disable push notifications but something fails"), error.localizedDescription)
@@ -51,6 +56,61 @@ struct NotificationSettingsView: View {
             }
         }
     }
+    
+    // MARK: - Push notification preference sync management
+    
+    func notification_preference_binding<T>(_ raw_binding: Binding<T>) -> Binding<T> {
+        return Binding(
+            get: {
+                return raw_binding.wrappedValue
+            },
+            set: { new_value in
+                let old_value = raw_binding.wrappedValue
+                raw_binding.wrappedValue = new_value
+                if self.settings.notifications_mode == .push {
+                    Task {
+                        await self.send_push_notification_preferences(on_failure: {
+                            raw_binding.wrappedValue = old_value
+                        })
+                    }
+                }
+            }
+        )
+    }
+    
+    func sync_up_remote_notification_settings() async {
+        do {
+            notification_preferences_sync_state = .syncing
+            let remote_settings = try await damus_state.push_notification_client.get_settings()
+            let local_settings = PushNotificationClient.NotificationSettings.from(settings: settings)
+            if remote_settings != local_settings {
+                await self.send_push_notification_preferences(local_settings)
+            }
+            else {
+                notification_preferences_sync_state = .success
+            }
+        }
+        catch {
+            notification_preferences_sync_state = .failure(error: String(format: NSLocalizedString("Failed to get push notification preferences from the server", comment: "Error label indicating about a failure in fetching notification preferences"), error.localizedDescription))
+        }
+    }
+    
+    func send_push_notification_preferences(_ new_settings: PushNotificationClient.NotificationSettings? = nil, on_failure: (() -> Void)? = nil) async {
+        do {
+            notification_preferences_sync_state = .syncing
+            try await damus_state.push_notification_client.set_settings(new_settings)
+            // Make sync appear to take at least a few milliseconds or so to avoid issues with labor perception bias (https://growth.design/case-studies/labor-perception-bias)
+            DispatchQueue.main.asyncAfter(deadline: .now() + MINIMUM_PUSH_NOTIFICATION_SYNC_DELAY_IN_SECONDS) {
+                notification_preferences_sync_state = .success
+            }
+        }
+        catch {
+            notification_preferences_sync_state = .failure(error: String(format: NSLocalizedString("Error syncing up push notifications preferences with the server: %@", comment: "Error label shown when system tries to sync up notification preferences to the push notification server but something fails"), error.localizedDescription))
+            on_failure?()
+        }
+    }
+    
+    // MARK: - View layout
     
     var body: some View {
         Form {
@@ -80,21 +140,40 @@ struct NotificationSettingsView: View {
                 }
             }
             
-            Section(header: Text("Local Notifications", comment: "Section header for damus local notifications user configuration")) {
-                Toggle(NSLocalizedString("Zaps", comment: "Setting to enable Zap Local Notification"), isOn: $settings.zap_notification)
+            Section(
+                header: Text("Notification Preferences", comment: "Section header for Notification Preferences"),
+                footer: VStack {
+                    switch notification_preferences_sync_state {
+                        case .undefined, .not_applicable:
+                            EmptyView()
+                        case .success:
+                            HStack {
+                                Image("check-circle.fill")
+                                    .foregroundStyle(.damusGreen)
+                                Text("Successfully synced", comment: "Label indicating success in syncing notification preferences")
+                            }
+                        case .syncing:
+                            HStack(spacing: 10) {
+                                ProgressView()
+                                Text("Syncing", comment: "Label indicating success in syncing notification preferences")
+                            }
+                        case .failure(let error):
+                            Text(error)
+                                .foregroundStyle(.damusDangerPrimary)
+                    }
+                }
+            ) {
+                Toggle(NSLocalizedString("Zaps", comment: "Setting to enable Zap Local Notification"), isOn: self.notification_preference_binding($settings.zap_notification))
                     .toggleStyle(.switch)
-                Toggle(NSLocalizedString("Mentions", comment: "Setting to enable Mention Local Notification"), isOn: $settings.mention_notification)
+                Toggle(NSLocalizedString("Mentions", comment: "Setting to enable Mention Local Notification"), isOn: self.notification_preference_binding($settings.mention_notification))
                     .toggleStyle(.switch)
-                Toggle(NSLocalizedString("Reposts", comment: "Setting to enable Repost Local Notification"), isOn: $settings.repost_notification)
+                Toggle(NSLocalizedString("Reposts", comment: "Setting to enable Repost Local Notification"), isOn: self.notification_preference_binding($settings.repost_notification))
                     .toggleStyle(.switch)
-                Toggle(NSLocalizedString("Likes", comment: "Setting to enable Like Local Notification"), isOn: $settings.like_notification)
+                Toggle(NSLocalizedString("Likes", comment: "Setting to enable Like Local Notification"), isOn: self.notification_preference_binding($settings.like_notification))
                     .toggleStyle(.switch)
-                Toggle(NSLocalizedString("DMs", comment: "Setting to enable DM Local Notification"), isOn: $settings.dm_notification)
+                Toggle(NSLocalizedString("DMs", comment: "Setting to enable DM Local Notification"), isOn: self.notification_preference_binding($settings.dm_notification))
                     .toggleStyle(.switch)
-            }
-
-            Section(header: Text("Notification Preference", comment: "Section header for Notification Preferences")) {
-                Toggle(NSLocalizedString("Show only from users you follow", comment: "Setting to Show notifications only associated to users your follow"), isOn: $settings.notification_only_from_following)
+                Toggle(NSLocalizedString("Show only from users you follow", comment: "Setting to Show notifications only associated to users your follow"), isOn: self.notification_preference_binding($settings.notification_only_from_following))
                     .toggleStyle(.switch)
             }
             
@@ -113,6 +192,28 @@ struct NotificationSettingsView: View {
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()
         }
+        .onAppear(perform: {
+            Task {
+                if self.settings.notifications_mode == .push {
+                    await self.sync_up_remote_notification_settings()
+                }
+            }
+        })
+    }
+}
+
+extension NotificationSettingsView {
+    enum PreferencesSyncState {
+        /// State is unknown
+        case undefined
+        /// State is not applicable (e.g. Notifications are set to local)
+        case not_applicable
+        /// Preferences are successfully synced
+        case success
+        /// Preferences are being synced
+        case syncing
+        /// There was a failure during syncing
+        case failure(error: String)
     }
 }
 
