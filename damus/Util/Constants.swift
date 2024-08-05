@@ -10,12 +10,12 @@ import Foundation
 class Constants {
     //static let EXAMPLE_DEMOS: DamusState = .empty
     static let DAMUS_APP_GROUP_IDENTIFIER: String = "group.com.damus"
-    static let DEVICE_TOKEN_RECEIVER_PRODUCTION_URL: URL = URL(string: "http://45.33.32.5:8000/user-info")!
-    static let DEVICE_TOKEN_RECEIVER_TEST_URL: URL = URL(string: "http://localhost:8000/user-info")!
-    static let DEVICE_TOKEN_REVOKER_PRODUCTION_URL: URL = URL(string: "http://45.33.32.5:8000/user-info/remove")!
-    static let DEVICE_TOKEN_REVOKER_TEST_URL: URL = URL(string: "http://localhost:8000/user-info/remove")!
     static let MAIN_APP_BUNDLE_IDENTIFIER: String = "com.jb55.damus2"
     static let NOTIFICATION_EXTENSION_BUNDLE_IDENTIFIER: String = "com.jb55.damus2.DamusNotificationService"
+    
+    // MARK: Push notification server
+    static let PUSH_NOTIFICATION_SERVER_PRODUCTION_BASE_URL: URL = URL(string: "http://45.33.32.5:8000")!
+    static let PUSH_NOTIFICATION_SERVER_TEST_BASE_URL: URL = URL(string: "http://localhost:8000")!
     
     // MARK: Purple
     // API
