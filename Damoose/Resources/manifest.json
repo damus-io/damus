@@ -2,8 +2,8 @@
     "manifest_version": 3,
     "default_locale": "en",
 
-    "name": "__MSG_extension_name__",
-    "description": "__MSG_extension_description__",
+    "name": "Damoose",
+    "description": "The Damus nostr safari companion. Protect your key and create web highlights.",
     "version": "1.0",
 
     "icons": {
@@ -16,18 +16,36 @@
 
     "background": {
         "scripts": [ "background.js" ],
-        "type": "module"
+        "type": "module",
+        "run_at": "document_end"
     },
 
     "content_scripts": [{
         "js": [ "content.js" ],
-        "matches": [ "*://example.com/*" ]
+        "matches": [ "*://*/*" ]
     }],
+
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "nostr.js",
+                "popup.js",
+                "popup.html"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ],
+
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'"
+    },
 
     "action": {
         "default_popup": "popup.html",
         "default_icon": "images/toolbar-icon.svg"
     },
 
-    "permissions": [ ]
+    "permissions": [ "nativeMessaging" ]
 }
