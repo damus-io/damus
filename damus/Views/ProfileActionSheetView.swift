@@ -45,6 +45,21 @@ struct ProfileActionSheetView: View {
         )
     }
     
+    var muteButton: some View {
+        let target_pubkey = self.profile.pubkey
+        return VStack(alignment: .center, spacing: 10) {
+                MuteDurationMenu { duration in
+                    notify(.mute(.user(target_pubkey, duration?.date_from_now)))
+                } label: {
+                    Image("mute")
+                }
+            .buttonStyle(NeutralButtonShape.circle.style)
+            Text("Mute", comment: "Button label that allows the user to mute the user shown on-screen")
+                .foregroundStyle(.secondary)
+                .font(.caption)
+        }
+    }
+        
     var dmButton: some View {
         let dm_model = damus_state.dms.lookup_or_create(profile.pubkey)
         return VStack(alignment: .center, spacing: 10) {
@@ -103,6 +118,9 @@ struct ProfileActionSheetView: View {
                 self.followButton
                 self.zapButton
                 self.dmButton
+                if damus_state.keypair.pubkey != profile.pubkey && damus_state.keypair.privkey != nil {
+                    self.muteButton
+                }
             }
             .padding()
             
