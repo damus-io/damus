@@ -3,6 +3,18 @@ script.setAttribute('src', browser.runtime.getURL('nostr.js'));
 document.body.appendChild(script);
 console.log("Added Damoose the nostr helper to the page.")
 
+let host_state = {
+    requests: {},
+    reqids: 0,
+}
+
+function queue_request(d, message) {
+    d.requests[message.reqId] = message
+}
+
+function get_request(d, id) {
+    return d.requests[id]
+}
 
 function test_iframe() {
     const iframe = document.createElement('iframe');
@@ -24,12 +36,20 @@ function test_iframe() {
     // Append the iframe to the body
     document.body.appendChild(iframe);
 
+    function show_popup() {
+        iframe.style.display = 'block'
+    }
+
+    function hide_popup() {
+        iframe.style.display = 'none'
+    }
+
     // Function to show the iframe popup
     function toggle_popup() {
         if (iframe.style.display === 'block')
-            iframe.style.display = 'none';
+            hide_popup()
         else
-            iframe.style.display = 'block';
+            show_popup()
     }
 
     // Example trigger
@@ -50,41 +70,50 @@ function test_iframe() {
 
             // plugin stuff
             'popup_initialized',
+            'approve',
+            'deny',
         ];
         let { kind, reqId, payload } = message.data;
         if (!validEvents.includes(kind)) return;
 
         if (kind === 'popup_initialized') {
-            // get all the queued requests for this host from the extension
-            const requests = await browser.runtime.sendMessage({
-                kind: 'requests',
-                host: window.location.host,
-            });
-
             if (browser.runtime.lastError)
                 console.log(browser.runtime.lastError)
 
-            // send initial requests
-            iframe.contentWindow.postMessage({
-                kind: 'requests',
-                payload: requests,
-            }, '*')
-        } else {
-            // window.nostr stuff
-            const host = window.location.host
-            const msg = {kind, payload, host}
-            const result = await browser.runtime.sendMessage(msg)
+            if (Object.keys(host_state.requests).length !== 0) {
+                // send initial requests
 
+                iframe.contentWindow.postMessage({
+                    kind: 'requests',
+                    host: window.location.host,
+                    payload: host_state.requests,
+                }, '*')
+
+                show_popup()
+            }
+        } else if (kind === "approve" || kind === "deny") {
+            // response from the iframe that we're approving or denying
+            // a set of requests
+
+            hide_popup()
+
+            const result = await browser.runtime.sendMessage({ kind, reqId, payload})
+
+            console.log("%s %s result:", kind, payload.kind, result);
+
+            kind = `return_${payload.kind}`;
+            window.postMessage({kind, reqId: payload.reqId, payload: result}, '*');
+
+            console.log(`${kind} extension result: ${result}`)
+        } else {
+            queue_request(host_state, message.data)
             iframe.contentWindow.postMessage({
                 kind: 'request',
-                payload: msg,
+                payload: message.data,
+                host: window.location.host
             }, '*')
 
-            console.log(result);
-
-            kind = `return_${kind}`;
-
-            window.postMessage({ kind, reqId, payload: result }, '*');
+            show_popup()
         }
     });
 }
