@@ -107,8 +107,6 @@ func decode_damoose_request(_ message: Any) -> DamooseRequest? {
     return nil
 }
 
-generate_id
-
 func handle_request(_ req: DamooseRequest) -> DamooseResponse? {
     switch req {
     case .getPublicKey:
