@@ -13,7 +13,7 @@ struct EditBannerImageView: View {
     var damus_state: DamusState
     @ObservedObject var viewModel: ImageUploadingObserver
     let callback: (URL?) -> Void
-    let defaultImage = UIImage(named: "profile-banner") ?? UIImage()
+    let defaultImage = UIImage(named: "damoose") ?? UIImage()
     
     @State var banner_image: URL? = nil
 
@@ -38,7 +38,7 @@ struct EditBannerImageView: View {
 struct InnerBannerImageView: View {
     let disable_animation: Bool
     let url: URL?
-    let defaultImage = UIImage(named: "profile-banner") ?? UIImage()
+    let defaultImage = UIImage(named: "damoose") ?? UIImage()
 
     var body: some View {
         ZStack {
