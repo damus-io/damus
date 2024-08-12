@@ -18,6 +18,7 @@ struct EditPictureControl: View {
     var size: CGFloat? = 25
     var setup: Bool? = false
     @Binding var image_url: URL?
+    @State var image_url_temp: URL?
     @ObservedObject var uploadObserver: ImageUploadingObserver
     let callback: (URL?) -> Void
     
@@ -25,12 +26,21 @@ struct EditPictureControl: View {
     
     @State private var show_camera = false
     @State private var show_library = false
+    @State private var show_url_sheet = false
     @State var image_upload_confirm: Bool = false
 
     @State var preUploadedMedia: PreUploadedMedia? = nil
+    
+    @Environment(\.dismiss) var dismiss
 
     var body: some View {
         Menu {
+            Button(action: {
+                self.show_url_sheet = true
+            }) {
+                Text("Image URL", comment: "Option to enter a url")
+            }
+            
             Button(action: {
                 self.show_library = true
             }) {
@@ -51,7 +61,7 @@ struct EditPictureControl: View {
                     .background(DamusColors.white.opacity(0.7))
                     .clipShape(Circle())
                     .shadow(color: DamusColors.purple, radius: 15, x: 0, y: 0)
-            } else if let url = image_url {
+            } else if let url = image_url, setup ?? false {
                 KFAnimatedImage(url)
                     .imageContext(.pfp, disable_animation: false)
                     .onFailure(fallbackUrl: URL(string: robohash(pubkey)), cacheKey: url.absoluteString)
@@ -114,6 +124,70 @@ struct EditPictureControl: View {
                 }
                 Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
             }
+        }
+        .sheet(isPresented: $show_url_sheet) {
+            ZStack {
+                DamusColors.adaptableWhite.edgesIgnoringSafeArea(.all)
+                VStack {
+                    Text("Image URL")
+                        .bold()
+                    
+                    Divider()
+                        .padding(.horizontal)
+                    
+                    HStack {
+                        Image(systemName: "doc.on.clipboard")
+                            .foregroundColor(.gray)
+                            .onTapGesture {
+                                if let pastedURL = UIPasteboard.general.string {
+                                    image_url_temp = URL(string: pastedURL)
+                                }
+                            }
+                        TextField(image_url_temp?.absoluteString ?? "", text: Binding(
+                            get: { image_url_temp?.absoluteString ?? "" },
+                            set: { image_url_temp = URL(string: $0) }
+                        ))
+                    }
+                    .padding(12)
+                    .background {
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(.gray.opacity(0.5), lineWidth: 1)
+                            .background {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .foregroundColor(.damusAdaptableWhite)
+                            }
+                    }
+                    .padding(10)
+                    
+                    Button(action: {
+                        show_url_sheet.toggle()
+                    }, label: {
+                        Text("Cancel", comment: "Cancel button text for dismissing updating image url.")
+                            .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
+                            .padding(10)
+                    })
+                    .buttonStyle(NeutralButtonStyle())
+                    .padding(10)
+                    
+                    Button(action: {
+                        image_url = image_url_temp
+                        callback(image_url)
+                        show_url_sheet.toggle()
+                    }, label: {
+                        Text("Update", comment: "Update button text for updating image url.")
+                            .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
+                    })
+                    .buttonStyle(GradientButtonStyle(padding: 10))
+                    .padding(.horizontal, 10)
+                    .disabled(image_url_temp == image_url)
+                    .opacity(image_url_temp == image_url ? 0.5 : 1)
+                }
+            }
+            .onAppear {
+                image_url_temp = image_url
+            }
+            .presentationDetents([.height(300)])
+            .presentationDragIndicator(.visible)
         }
     }
     
