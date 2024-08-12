@@ -48,11 +48,11 @@ struct ProfileActionSheetView: View {
     var muteButton: some View {
         let target_pubkey = self.profile.pubkey
         return VStack(alignment: .center, spacing: 10) {
-                MuteDurationMenu { duration in
-                    notify(.mute(.user(target_pubkey, duration?.date_from_now)))
-                } label: {
-                    Image("mute")
-                }
+            MuteDurationMenu { duration in
+                notify(.mute(.user(target_pubkey, duration?.date_from_now)))
+            } label: {
+                Image("mute")
+            }
             .buttonStyle(NeutralButtonShape.circle.style)
             Text("Mute", comment: "Button label that allows the user to mute the user shown on-screen")
                 .foregroundStyle(.secondary)
