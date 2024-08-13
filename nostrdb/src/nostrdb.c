@@ -610,7 +610,7 @@ ndb_filter_current_element(const struct ndb_filter *filter)
 	return ndb_filter_get_elements_by_offset(filter, filter->current);
 }
 
-static inline struct ndb_filter_elements *
+struct ndb_filter_elements *
 ndb_filter_get_elements(const struct ndb_filter *filter, int index)
 {
 	if (filter->num_elements <= 0)
