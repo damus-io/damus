@@ -2,8 +2,8 @@
     "manifest_version": 3,
     "default_locale": "en",
 
-    "name": "Damoose",
-    "description": "The Damus nostr safari companion. Protect your key and create web highlights.",
+    "name": "__MSG_extension_name__",
+    "description": "__MSG_extension_description__",
     "version": "1.0",
 
     "icons": {
@@ -47,5 +47,5 @@
         "default_icon": "images/toolbar-icon.svg"
     },
 
-    "permissions": [ "nativeMessaging" ]
+    "permissions": [ "nativeMessaging", "contextMenus" ]
 }

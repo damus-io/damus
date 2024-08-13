@@ -1,11 +1,15 @@
-let script = document.createElement('script');
-script.setAttribute('src', browser.runtime.getURL('nostr.js'));
-document.body.appendChild(script);
-console.log("Added Damoose the nostr helper to the page.")
 
 let host_state = {
     requests: {},
     reqids: 0,
+    approved: {},
+}
+
+function setup_nip07() {
+    let script = document.createElement('script');
+    script.setAttribute('src', browser.runtime.getURL('nostr.js'));
+    document.body.appendChild(script);
+    console.log("Added Damoose the nostr helper to the page.")
 }
 
 function queue_request(d, message) {
@@ -16,7 +20,7 @@ function get_request(d, id) {
     return d.requests[id]
 }
 
-function test_iframe() {
+function setup_iframe() {
     const iframe = document.createElement('iframe');
     // Create an iframe for the secure popup
     iframe.src = browser.runtime.getURL('popup.html');  // Load the secure popup HTML
@@ -118,5 +122,9 @@ function test_iframe() {
     });
 }
 
-test_iframe()
+
+// signer
+//setup_nip07()
+//setup_iframe()
+setup_highlighter()
 
