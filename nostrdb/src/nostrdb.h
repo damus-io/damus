@@ -492,6 +492,7 @@ int ndb_filter_add_int_element(struct ndb_filter *, uint64_t integer);
 int ndb_filter_add_str_element(struct ndb_filter *, const char *str);
 
 struct ndb_filter_elements *ndb_filter_current_element(const struct ndb_filter *);
+struct ndb_filter_elements *ndb_filter_get_elements(const struct ndb_filter *, int);
 int ndb_filter_start_field(struct ndb_filter *, enum ndb_filter_fieldtype);
 int ndb_filter_start_tag_field(struct ndb_filter *, char tag);
 int ndb_filter_matches(struct ndb_filter *, struct ndb_note *);
