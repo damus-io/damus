@@ -491,6 +491,11 @@ int ndb_filter_add_id_element(struct ndb_filter *, const unsigned char *id);
 int ndb_filter_add_int_element(struct ndb_filter *, uint64_t integer);
 int ndb_filter_add_str_element(struct ndb_filter *, const char *str);
 
+// getting field elements
+unsigned char *ndb_filter_get_id_element(const struct ndb_filter *, const struct ndb_filter_elements *, int index);
+const char *ndb_filter_get_string_element(const struct ndb_filter *, const struct ndb_filter_elements *, int index);
+uint64_t ndb_filter_get_int_element(const struct ndb_filter_elements *, int index);
+
 struct ndb_filter_elements *ndb_filter_current_element(const struct ndb_filter *);
 struct ndb_filter_elements *ndb_filter_get_elements(const struct ndb_filter *, int);
 int ndb_filter_start_field(struct ndb_filter *, enum ndb_filter_fieldtype);
