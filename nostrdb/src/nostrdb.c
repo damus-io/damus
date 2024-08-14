@@ -637,20 +637,20 @@ ndb_filter_elements_data(const struct ndb_filter *filter, int offset)
 	return data;
 }
 
-static inline unsigned char *
-ndb_filter_get_id_element(const struct ndb_filter *filter, struct ndb_filter_elements *els, int index)
+unsigned char *
+ndb_filter_get_id_element(const struct ndb_filter *filter, const struct ndb_filter_elements *els, int index)
 {
 	return ndb_filter_elements_data(filter, els->elements[index]);
 }
 
-static inline const char *
-ndb_filter_get_string_element(const struct ndb_filter *filter, struct ndb_filter_elements *els, int index)
+const char *
+ndb_filter_get_string_element(const struct ndb_filter *filter, const struct ndb_filter_elements *els, int index)
 {
 	return (const char *)ndb_filter_elements_data(filter, els->elements[index]);
 }
 
-static inline uint64_t
-ndb_filter_get_int_element(struct ndb_filter_elements *els, int index)
+uint64_t
+ndb_filter_get_int_element(const struct ndb_filter_elements *els, int index)
 {
 	return els->elements[index];
 }
