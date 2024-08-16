@@ -726,7 +726,8 @@ static int ndb_filter_start_field_impl(struct ndb_filter *filter, enum ndb_filte
 	for (i = 0; i < filter->num_elements; i++) {
 		el = ndb_filter_get_elements(filter, i);
 		assert(el);
-		if (el->field.type == field) {
+		// TODO: fix this tags check to try to find matching tags
+		if (el->field.type == field && field != NDB_FILTER_TAGS) {
 			fprintf(stderr, "ndb_filter_start_field: field '%s' already exists\n",
 					ndb_filter_field_name(field));
 			return 0;
@@ -796,7 +797,9 @@ static int ndb_filter_add_element(struct ndb_filter *filter, union ndb_filter_el
 				return 0;
 			break;
 		case NDB_ELEMENT_STRING:
-			if (!cursor_push_c_str(&filter->data_buf, el.string))
+			if (!cursor_push(&filter->data_buf, (unsigned char *)el.string.string, el.string.len))
+				return 0;
+			if (!cursor_push_byte(&filter->data_buf, 0))
 				return 0;
 			break;
 		case NDB_ELEMENT_INT:
@@ -840,7 +843,8 @@ static int ndb_filter_set_elem_type(struct ndb_filter *filter,
 	return 1;
 }
 
-int ndb_filter_add_str_element(struct ndb_filter *filter, const char *str)
+
+int ndb_filter_add_str_element_len(struct ndb_filter *filter, const char *str, int len)
 {
 	union ndb_filter_element el;
 	struct ndb_filter_elements *current;
@@ -864,8 +868,15 @@ int ndb_filter_add_str_element(struct ndb_filter *filter, const char *str)
 	if (!ndb_filter_set_elem_type(filter, NDB_ELEMENT_STRING))
 		return 0;
 
-	el.string = str;
+	el.string.string = str;
+	el.string.len = len;
+
 	return ndb_filter_add_element(filter, el);
+}
+
+int ndb_filter_add_str_element(struct ndb_filter *filter, const char *str)
+{
+	return ndb_filter_add_str_element_len(filter, str, strlen(str));
 }
 
 int ndb_filter_add_int_element(struct ndb_filter *filter, uint64_t integer)
@@ -5460,6 +5471,260 @@ int ndb_ws_event_from_json(const char *json, int len, struct ndb_tce *tce,
 	return 0;
 }
 
+static enum ndb_filter_fieldtype
+ndb_filter_parse_field(const char *tok, int len, char *tagchar)
+{
+	*tagchar = 0;
+
+	if (len == 0)
+		return 0;
+
+	if (len == 7 && !strncmp(tok, "authors", 7)) {
+		return NDB_FILTER_AUTHORS;
+	} else if (len == 3 && !strncmp(tok, "ids", 3)) {
+		return NDB_FILTER_IDS;
+	} else if (len == 5 && !strncmp(tok, "kinds", 5)) {
+		return NDB_FILTER_KINDS;
+	} else if (len == 2 && tok[0] == '#') {
+		*tagchar = tok[1];
+		return NDB_FILTER_TAGS;
+	} else if (len == 5 && !strncmp(tok, "since", 5)) {
+		return NDB_FILTER_SINCE;
+	} else if (len == 5 && !strncmp(tok, "until", 5)) {
+		return NDB_FILTER_UNTIL;
+	} else if (len == 5 && !strncmp(tok, "limit", 5)) {
+		return NDB_FILTER_LIMIT;
+	}
+
+	return 0;
+}
+
+static int ndb_filter_parse_json_ids(struct ndb_json_parser *parser,
+				     struct ndb_filter *filter)
+{
+	jsmntok_t *tok;
+	const char *start;
+	unsigned char hexbuf[32];
+	int tok_len, i, size;
+
+	tok = &parser->toks[parser->i++];
+
+	if (tok->type != JSMN_ARRAY) {
+		ndb_debug("parse_json_ids: not an array\n");
+		return 0;
+	}
+
+	size = tok->size;
+
+	for (i = 0; i < size; parser->i++, i++) {
+		tok = &parser->toks[parser->i];
+		start = parser->json + tok->start;
+		tok_len = toksize(tok);
+
+		if (tok->type != JSMN_STRING) {
+			ndb_debug("parse_json_ids: not a string '%d'\n", tok->type);
+			return 0;
+		}
+
+		if (tok_len != 64) {
+			ndb_debug("parse_json_ids: not len 64: '%.*s'\n", tok_len, start);
+			return 0;
+		}
+
+		// id
+		if (!hex_decode(start, tok_len, hexbuf, sizeof(hexbuf))) {
+			ndb_debug("parse_json_ids: hex decode failed\n");
+			return 0;
+		}
+
+		ndb_debug("adding id elem\n");
+		if (!ndb_filter_add_id_element(filter, hexbuf)) {
+			ndb_debug("parse_json_ids: failed to add id element\n");
+			return 0;
+		}
+	}
+
+	parser->i--;
+	return 1;
+}
+
+static int ndb_filter_parse_json_elems(struct ndb_json_parser *parser,
+				       struct ndb_filter *filter)
+{
+	jsmntok_t *tok;
+	const char *start;
+	int tok_len;
+	unsigned char hexbuf[32];
+	enum ndb_generic_element_type typ;
+	tok = NULL;
+	int i, size;
+
+	tok = &parser->toks[parser->i++];
+
+	if (tok->type != JSMN_ARRAY)
+		return 0;
+
+	size = tok->size;
+
+	for (i = 0; i < size; i++, parser->i++) {
+		tok = &parser->toks[parser->i];
+		start = parser->json + tok->start;
+		tok_len = toksize(tok);
+
+		if (tok->type != JSMN_STRING)
+			return 0;
+
+		if (i == 0) {
+			if (tok_len == 64 && hex_decode(start, 64, hexbuf, sizeof(hexbuf))) {
+				typ = NDB_ELEMENT_ID;
+				if (!ndb_filter_add_id_element(filter, hexbuf)) {
+					ndb_debug("failed to push id elem\n");
+					return 0;
+				}
+			} else {
+				typ = NDB_ELEMENT_STRING;
+				if (!ndb_filter_add_str_element_len(filter, start, tok_len))
+					return 0;
+			}
+		} else if (typ == NDB_ELEMENT_ID) {
+			if (!hex_decode(start, 64, hexbuf, sizeof(hexbuf)))
+				return 0;
+			if (!ndb_filter_add_id_element(filter, hexbuf))
+				return 0;
+		} else if (typ == NDB_ELEMENT_STRING) {
+			if (!ndb_filter_add_str_element_len(filter, start, tok_len))
+				return 0;
+		} else {
+			// ???
+			return 0;
+		}
+	}
+
+	parser->i--;
+	return 1;
+}
+
+static int ndb_filter_parse_json_int(struct ndb_json_parser *parser,
+				     struct ndb_filter *filter)
+{
+	jsmntok_t *tok;
+	const char *start;
+	int tok_len;
+	unsigned int value;
+
+	tok = &parser->toks[parser->i];
+	start = parser->json + tok->start;
+	tok_len = toksize(tok);
+
+	if (tok->type != JSMN_PRIMITIVE)
+		return 0;
+
+	if (!parse_unsigned_int(start, tok_len, &value))
+		return 0;
+
+	if (!ndb_filter_add_int_element(filter, (uint64_t)value))
+		return 0;
+
+	ndb_debug("added int elem %d\n", value);
+
+	return 1;
+}
+
+
+static int ndb_filter_parse_json_ints(struct ndb_json_parser *parser,
+				      struct ndb_filter *filter)
+{
+	jsmntok_t *tok;
+	int size, i;
+
+	tok = &parser->toks[parser->i++];
+
+	if (tok->type != JSMN_ARRAY)
+		return 0;
+
+	size = tok->size;
+
+	for (i = 0; i < size; parser->i++, i++) {
+		if (!ndb_filter_parse_json_int(parser, filter))
+			return 0;
+	}
+
+	parser->i--;
+	return 1;
+}
+
+
+static int ndb_filter_parse_json(struct ndb_json_parser *parser,
+				 struct ndb_filter *filter)
+{
+	jsmntok_t *tok = NULL;
+	const char *json = parser->json;
+	const char *start;
+	char tag;
+	int tok_len;
+	enum ndb_filter_fieldtype field;
+
+	if (parser->toks[parser->i++].type != JSMN_OBJECT)
+		return 0;
+
+	for (; parser->i < parser->num_tokens; parser->i++) {
+		tok = &parser->toks[parser->i++];
+		start = json + tok->start;
+		tok_len = toksize(tok);
+
+		if (!(field = ndb_filter_parse_field(start, tok_len, &tag))) {
+			ndb_debug("failed field '%.*s'\n", tok_len, start);
+			continue;
+		}
+
+		if (tag) {
+			ndb_debug("starting tag field '%c'\n", tag);
+			if (!ndb_filter_start_tag_field(filter, tag)) {
+				ndb_debug("failed to start tag field '%c'\n", tag);
+				return 0;
+			}
+		} else if (!ndb_filter_start_field(filter, field)) {
+			ndb_debug("field already started\n");
+			return 0;
+		}
+
+		// we parsed a top-level field
+		switch(field) {
+		case NDB_FILTER_AUTHORS:
+		case NDB_FILTER_IDS:
+			if (!ndb_filter_parse_json_ids(parser, filter)) {
+				ndb_debug("failed to parse filter ids/authors\n");
+				return 0;
+			}
+			break;
+		case NDB_FILTER_SINCE:
+		case NDB_FILTER_UNTIL:
+		case NDB_FILTER_LIMIT:
+			if (!ndb_filter_parse_json_int(parser, filter)) {
+				ndb_debug("failed to parse filter since/until/limit\n");
+				return 0;
+			}
+			break;
+		case NDB_FILTER_KINDS:
+			if (!ndb_filter_parse_json_ints(parser, filter)) {
+				ndb_debug("failed to parse filter kinds\n");
+				return 0;
+			}
+			break;
+		case NDB_FILTER_TAGS:
+			if (!ndb_filter_parse_json_elems(parser, filter)) {
+				ndb_debug("failed to parse filter tags\n");
+				return 0;
+			}
+			break;
+		}
+
+		ndb_filter_end_field(filter);
+	}
+
+	return ndb_filter_end(filter);
+}
+
 int ndb_parse_json_note(struct ndb_json_parser *parser, struct ndb_note **note)
 {
 	jsmntok_t *tok = NULL;
@@ -5555,6 +5820,25 @@ int ndb_parse_json_note(struct ndb_json_parser *parser, struct ndb_note **note)
 		return 0;
 
 	return ndb_builder_finalize(&parser->builder, note, NULL);
+}
+
+int ndb_filter_from_json(const char *json, int len, struct ndb_filter *filter,
+			 unsigned char *buf, int bufsize)
+{
+	struct ndb_json_parser parser;
+	int res;
+
+	if (filter->finalized)
+		return 0;
+
+	ndb_json_parser_init(&parser, json, len, buf, bufsize);
+	if ((res = ndb_json_parser_parse(&parser, NULL)) < 0)
+		return res;
+
+	if (parser.num_tokens < 1)
+		return 0;
+
+	return ndb_filter_parse_json(&parser, filter);
 }
 
 int ndb_note_from_json(const char *json, int len, struct ndb_note **note,
