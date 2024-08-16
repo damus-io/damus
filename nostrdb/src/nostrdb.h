@@ -223,8 +223,13 @@ struct ndb_iterator {
 	int index;
 };
 
-union ndb_filter_element {
+struct ndb_filter_string {
 	const char *string;
+	int len;
+};
+
+union ndb_filter_element {
+	struct ndb_filter_string string;
 	const unsigned char *id;
 	uint64_t integer;
 };
@@ -490,6 +495,9 @@ int ndb_filter_init(struct ndb_filter *);
 int ndb_filter_add_id_element(struct ndb_filter *, const unsigned char *id);
 int ndb_filter_add_int_element(struct ndb_filter *, uint64_t integer);
 int ndb_filter_add_str_element(struct ndb_filter *, const char *str);
+
+// filters from json
+int ndb_filter_from_json(const char *, int len, struct ndb_filter *filter, unsigned char *buf, int bufsize);
 
 // getting field elements
 unsigned char *ndb_filter_get_id_element(const struct ndb_filter *, const struct ndb_filter_elements *, int index);
