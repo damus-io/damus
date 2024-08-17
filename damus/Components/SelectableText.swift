@@ -59,9 +59,12 @@ struct SelectableText: View {
             self.highlightPostingState = newValue ? .show_post_view(highlighted_text: self.highlightPostingState.highlighted_text() ?? "") : .hide
         })) {
             if let event, case .show_post_view(let highlighted_text) = self.highlightPostingState {
-                HighlightPostView(damus_state: damus_state, event: event, selectedText: .constant(highlighted_text))
-                    .presentationDragIndicator(.visible)
-                    .presentationDetents([.height(selectedTextHeight + 150), .medium, .large])
+                PostView(
+                    action: .highlighting(.init(selected_text: highlighted_text, source: .event(event))),
+                    damus_state: damus_state
+                )
+                .presentationDragIndicator(.visible)
+                .presentationDetents([.height(selectedTextHeight + 450), .medium, .large])
             }
         }
         .frame(height: selectedTextHeight)

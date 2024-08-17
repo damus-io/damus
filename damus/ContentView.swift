@@ -1051,7 +1051,7 @@ func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: Ev
         //let post = tup.0
         //let to_relays = tup.1
         print("post \(post.content)")
-        guard let new_ev = post_to_event(post: post, keypair: keypair) else {
+        guard let new_ev = post.to_event(keypair: keypair) else {
             return false
         }
         postbox.send(new_ev)
