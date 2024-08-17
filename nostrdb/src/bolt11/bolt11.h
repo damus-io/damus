@@ -1,10 +1,10 @@
 #ifndef LIGHTNING_COMMON_BOLT11_H
 #define LIGHTNING_COMMON_BOLT11_H
 
-#include "short_types.h"
+#include "ccan/short_types/short_types.h"
 #include "hash_u5.h"
 #include "amount.h"
-#include "list.h"
+#include "ccan/list/list.h"
 #include "amount.h"
 #include "node_id.h"
 //#include <secp256k1_recovery.h>
