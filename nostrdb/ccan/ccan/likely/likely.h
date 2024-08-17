@@ -1,7 +1,7 @@
 /* CC0 (Public domain) - see LICENSE file for details */
 #ifndef CCAN_LIKELY_H
 #define CCAN_LIKELY_H
-#include "../config.h"
+#include "config.h"
 #include <stdbool.h>
 
 #ifndef CCAN_LIKELY_DEBUG
@@ -17,17 +17,17 @@
  * 99%; marginal cases should not be marked either way.
  *
  * See Also:
- *    unlikely(), likely_stats()
+ *	unlikely(), likely_stats()
  *
  * Example:
- *    // Returns false if we overflow.
- *    static inline bool inc_int(unsigned int *val)
- *    {
- *        (*val)++;
- *        if (likely(*val))
- *            return true;
- *        return false;
- *    }
+ *	// Returns false if we overflow.
+ *	static inline bool inc_int(unsigned int *val)
+ *	{
+ *		(*val)++;
+ *		if (likely(*val))
+ *			return true;
+ *		return false;
+ *	}
  */
 #define likely(cond) __builtin_expect(!!(cond), 1)
 
@@ -39,37 +39,33 @@
  * code path and optimize appropriately; see likely() above.
  *
  * See Also:
- *    likely(), likely_stats(), COLD (compiler.h)
+ *	likely(), likely_stats(), COLD (compiler.h)
  *
  * Example:
- *    // Prints a warning if we overflow.
- *    static inline void inc_int(unsigned int *val)
- *    {
- *        (*val)++;
- *        if (unlikely(*val == 0))
- *            fprintf(stderr, "Overflow!");
- *    }
+ *	// Prints a warning if we overflow.
+ *	static inline void inc_int(unsigned int *val)
+ *	{
+ *		(*val)++;
+ *		if (unlikely(*val == 0))
+ *			fprintf(stderr, "Overflow!");
+ *	}
  */
 #define unlikely(cond) __builtin_expect(!!(cond), 0)
 #else
-#ifndef likely
 #define likely(cond) (!!(cond))
-#endif
-#ifndef unlikely
 #define unlikely(cond) (!!(cond))
-#endif
 #endif
 #else /* CCAN_LIKELY_DEBUG versions */
 #include <ccan/str/str.h>
 
 #define likely(cond) \
-    (_likely_trace(!!(cond), 1, stringify(cond), __FILE__, __LINE__))
+	(_likely_trace(!!(cond), 1, stringify(cond), __FILE__, __LINE__))
 #define unlikely(cond) \
-    (_likely_trace(!!(cond), 0, stringify(cond), __FILE__, __LINE__))
+	(_likely_trace(!!(cond), 0, stringify(cond), __FILE__, __LINE__))
 
 long _likely_trace(bool cond, bool expect,
-           const char *condstr,
-           const char *file, unsigned int line);
+		   const char *condstr,
+		   const char *file, unsigned int line);
 /**
  * likely_stats - return description of abused likely()/unlikely()
  * @min_hits: minimum number of hits
@@ -90,18 +86,18 @@ long _likely_trace(bool cond, bool expect,
  * return the next-worst likely()/unlikely() usage.
  *
  * Example:
- *    // Print every place hit more than twice which was wrong > 5%.
- *    static void report_stats(void)
- *    {
- *    #ifdef CCAN_LIKELY_DEBUG
- *        const char *bad;
+ *	// Print every place hit more than twice which was wrong > 5%.
+ *	static void report_stats(void)
+ *	{
+ *	#ifdef CCAN_LIKELY_DEBUG
+ *		const char *bad;
  *
- *        while ((bad = likely_stats(2, 95)) != NULL) {
- *            printf("Suspicious likely: %s", bad);
- *            free(bad);
- *        }
- *    #endif
- *    }
+ *		while ((bad = likely_stats(2, 95)) != NULL) {
+ *			printf("Suspicious likely: %s", bad);
+ *			free(bad);
+ *		}
+ *	#endif
+ *	}
  */
 char *likely_stats(unsigned int min_hits, unsigned int percent);
 

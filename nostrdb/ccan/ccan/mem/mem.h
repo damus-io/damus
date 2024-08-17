@@ -2,8 +2,8 @@
 #ifndef CCAN_MEM_H
 #define CCAN_MEM_H
 
-#include "../config.h"
-#include "ccan/compiler/compiler.h"
+#include "config.h"
+#include <ccan/compiler/compiler.h>
 
 #include <string.h>
 #include <stdbool.h>
@@ -11,7 +11,7 @@
 #if !HAVE_MEMMEM
 PURE_FUNCTION
 void *memmem(const void *haystack, size_t haystacklen,
-         const void *needle, size_t needlelen);
+	     const void *needle, size_t needlelen);
 #endif
 
 #if !HAVE_MEMRCHR
@@ -30,14 +30,14 @@ void *memrchr(const void *s, int c, size_t n);
  * @accept, or NULL if no such byte is found.
  *
  * Example:
- *    char otherbytes[] = "Hello \0world";
- *    size_t otherbytes_len = sizeof(otherbytes) - 1;
- *    char *r = mempbrkm(otherbytes, otherbytes_len, "\0b", 2);
- *    if (r) {
- *        printf("Found %c\n", *r);
- *    } else {
- *        printf("Nada\n");
- *    }
+ *	char otherbytes[] = "Hello \0world";
+ *	size_t otherbytes_len = sizeof(otherbytes) - 1;
+ *	char *r = mempbrkm(otherbytes, otherbytes_len, "\0b", 2);
+ *	if (r) {
+ *		printf("Found %c\n", *r);
+ *	} else {
+ *		printf("Nada\n");
+ *	}
  *
  */
 PURE_FUNCTION
@@ -54,21 +54,21 @@ void *mempbrkm(const void *data, size_t len, const void *accept, size_t accept_l
  *
  * Example:
  *
- *    r = mempbrk(otherbytes, otherbytes_len, "abcde");
- *    if (r) {
- *        printf("Found %c\n", *r);
- *    } else {
- *        printf("Nada\n");
- *    }
+ *	r = mempbrk(otherbytes, otherbytes_len, "abcde");
+ *	if (r) {
+ *		printf("Found %c\n", *r);
+ *	} else {
+ *		printf("Nada\n");
+ *	}
  */
 PURE_FUNCTION
 static inline char *mempbrk(const void *data, size_t len, const char *accept)
 {
-    return mempbrkm(data, len, accept, strlen(accept));
+	return mempbrkm(data, len, accept, strlen(accept));
 }
 
 /**
- * memcchr - scan memory until a character does _not_ match
+ * memcchr - scan memory until a character does _not_ match @c
  * @data: pointer to memory to scan
  * @data_len: length of data
  * @c: character to scan for
@@ -79,12 +79,12 @@ static inline char *mempbrk(const void *data, size_t len, const char *accept)
  * @data is @c, returns NULL.
  *
  * Example:
- *    char somebytes[] = "HI By\0e";
- *    size_t bytes_len = sizeof(somebytes) - 1;
- *    r = memcchr(somebytes, ' ', bytes_len);
- *    if (r) {
- *        printf("Found %c after trimming spaces\n", *r);
- *    }
+ *	char somebytes[] = "HI By\0e";
+ *	size_t bytes_len = sizeof(somebytes) - 1;
+ *	r = memcchr(somebytes, ' ', bytes_len);
+ *	if (r) {
+ *		printf("Found %c after trimming spaces\n", *r);
+ *	}
  */
 PURE_FUNCTION
 void *memcchr(void const *data, int c, size_t data_len);
@@ -97,14 +97,14 @@ void *memcchr(void const *data, int c, size_t data_len);
  * @bl: bytes in second array
  *
  * Example:
- *    if (memeq(somebytes, bytes_len, otherbytes, otherbytes_len)) {
- *        printf("memory blocks are the same!\n");
- *    }
+ *	if (memeq(somebytes, bytes_len, otherbytes, otherbytes_len)) {
+ *		printf("memory blocks are the same!\n");
+ *	}
  */
 PURE_FUNCTION
 static inline bool memeq(const void *a, size_t al, const void *b, size_t bl)
 {
-    return al == bl && !memcmp(a, b, bl);
+	return al == bl && (al == 0 || !memcmp(a, b, bl));
 }
 
 /**
@@ -117,17 +117,17 @@ static inline bool memeq(const void *a, size_t al, const void *b, size_t bl)
  * Returns true if @data starts with @prefix, otherwise return false.
  *
  * Example:
- *    if (memstarts(somebytes, bytes_len, otherbytes, otherbytes_len)) {
- *        printf("somebytes starts with otherbytes!\n");
- *    }
+ *	if (memstarts(somebytes, bytes_len, otherbytes, otherbytes_len)) {
+ *		printf("somebytes starts with otherbytes!\n");
+ *	}
  */
 PURE_FUNCTION
 static inline bool memstarts(void const *data, size_t data_len,
-        void const *prefix, size_t prefix_len)
+		void const *prefix, size_t prefix_len)
 {
-    if (prefix_len > data_len)
-        return false;
-    return memeq(data, prefix_len, prefix, prefix_len);
+	if (prefix_len > data_len)
+		return false;
+	return memeq(data, prefix_len, prefix, prefix_len);
 }
 
 /**
@@ -139,14 +139,14 @@ static inline bool memstarts(void const *data, size_t data_len,
  * The '\0' byte is ignored when checking if @bytes == @string.
  *
  * Example:
- *    if (memeqstr(somebytes, bytes_len, "foo")) {
- *        printf("somebytes == 'foo'!\n");
- *    }
+ *	if (memeqstr(somebytes, bytes_len, "foo")) {
+ *		printf("somebytes == 'foo'!\n");
+ *	}
  */
 PURE_FUNCTION
 static inline bool memeqstr(const void *data, size_t length, const char *string)
 {
-    return memeq(data, length, string, strlen(string));
+	return memeq(data, length, string, strlen(string));
 }
 
 /**
@@ -155,9 +155,9 @@ static inline bool memeqstr(const void *data, size_t length, const char *string)
  * @length: length of @data in bytes
  *
  * Example:
- *    if (memeqzero(somebytes, bytes_len)) {
- *        printf("somebytes == 0!\n");
- *    }
+ *	if (memeqzero(somebytes, bytes_len)) {
+ *		printf("somebytes == 0!\n");
+ *	}
  */
 PURE_FUNCTION
 bool memeqzero(const void *data, size_t length);
@@ -169,14 +169,14 @@ bool memeqzero(const void *data, size_t length);
  * @s: string prefix
  *
  * Example:
- *    if (memstarts_str(somebytes, bytes_len, "It")) {
- *        printf("somebytes starts with 'It'\n");
- *    }
+ *	if (memstarts_str(somebytes, bytes_len, "It")) {
+ *		printf("somebytes starts with 'It'\n");
+ *	}
  */
 PURE_FUNCTION
 static inline bool memstarts_str(const void *a, size_t al, const char *s)
 {
-    return memstarts(a, al, s, strlen(s));
+	return memstarts(a, al, s, strlen(s));
 }
 
 /**
@@ -192,8 +192,8 @@ static inline bool memstarts_str(const void *a, size_t al, const char *s)
 PURE_FUNCTION
 static inline bool memends(const void *s, size_t s_len, const void *suffix, size_t suffix_len)
 {
-    return (s_len >= suffix_len) && (memcmp((const char *)s + s_len - suffix_len,
-                        suffix, suffix_len) == 0);
+	return (s_len >= suffix_len) && (memcmp((const char *)s + s_len - suffix_len,
+						suffix, suffix_len) == 0);
 }
 
 /**
@@ -203,14 +203,14 @@ static inline bool memends(const void *s, size_t s_len, const void *suffix, size
  * @s: string suffix
  *
  * Example:
- *    if (memends_str(somebytes, bytes_len, "It")) {
- *        printf("somebytes ends with with 'It'\n");
- *    }
+ *	if (memends_str(somebytes, bytes_len, "It")) {
+ *		printf("somebytes ends with with 'It'\n");
+ *	}
  */
 PURE_FUNCTION
 static inline bool memends_str(const void *a, size_t al, const char *s)
 {
-    return memends(a, al, s, strlen(s));
+	return memends(a, al, s, strlen(s));
 }
 
 /**
@@ -222,12 +222,12 @@ static inline bool memends_str(const void *a, size_t al, const char *s)
  */
 CONST_FUNCTION
 static inline bool memoverlaps(const void *a_, size_t al,
-                   const void *b_, size_t bl)
+			       const void *b_, size_t bl)
 {
-    const char *a = a_;
-    const char *b = b_;
+	const char *a = a_;
+	const char *b = b_;
 
-    return (a < (b + bl)) && (b < (a + al));
+	return (a < (b + bl)) && (b < (a + al));
 }
 
 /*
@@ -244,14 +244,14 @@ void memswap(void *a, void *b, size_t n);
 #include <valgrind/memcheck.h>
 static inline void *memcheck_(const void *data, size_t len)
 {
-    VALGRIND_CHECK_MEM_IS_DEFINED(data, len);
-    return (void *)data;
+	VALGRIND_CHECK_MEM_IS_DEFINED(data, len);
+	return (void *)data;
 }
 #else
 static inline void *memcheck_(const void *data, size_t len)
 {
-    (void)len;
-    return (void *)data;
+	(void)len;
+	return (void *)data;
 }
 #endif
 
@@ -267,10 +267,10 @@ static inline void *memcheck_(const void *data, size_t len)
  * written out.
  *
  * Example:
- *    // Search for space, but make sure it's all initialized.
- *    if (memchr(memcheck(somebytes, bytes_len), ' ', bytes_len)) {
- *        printf("space was found!\n");
- *    }
+ *	// Search for space, but make sure it's all initialized.
+ *	if (memchr(memcheck(somebytes, bytes_len), ' ', bytes_len)) {
+ *		printf("space was found!\n");
+ *	}
  */
 #define memcheck(data, len) ((__typeof__((data)+0))memcheck_((data), (len)))
 #else
@@ -288,8 +288,8 @@ static inline void *memcheck_(const void *data, size_t len)
  * or written out (or passed to memcheck!) in future.
  *
  * Example:
- *    // We'll reuse this buffer later, but be sure we don't access it.
- *    memtaint(somebytes, bytes_len);
+ *	// We'll reuse this buffer later, but be sure we don't access it.
+ *	memtaint(somebytes, bytes_len);
  */
 void memtaint(void *data, size_t len);
 #endif /* CCAN_MEM_H */

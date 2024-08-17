@@ -3,8 +3,8 @@
 #define CCAN_CONTAINER_OF_H
 #include <stddef.h>
 
-#include "../config.h"
-#include "ccan/check_type/check_type.h"
+#include "config.h"
+#include <ccan/check_type/check_type.h>
 
 /**
  * container_of - get pointer to enclosing structure
@@ -16,25 +16,25 @@
  * subtraction to return the pointer to the enclosing type.
  *
  * Example:
- *    struct foo {
- *        int fielda, fieldb;
- *        // ...
- *    };
- *    struct info {
- *        int some_other_field;
- *        struct foo my_foo;
- *    };
+ *	struct foo {
+ *		int fielda, fieldb;
+ *		// ...
+ *	};
+ *	struct info {
+ *		int some_other_field;
+ *		struct foo my_foo;
+ *	};
  *
- *    static struct info *foo_to_info(struct foo *foo)
- *    {
- *        return container_of(foo, struct info, my_foo);
- *    }
+ *	static struct info *foo_to_info(struct foo *foo)
+ *	{
+ *		return container_of(foo, struct info, my_foo);
+ *	}
  */
-#define container_of(member_ptr, containing_type, member)        \
-     ((containing_type *)                        \
-      ((char *)(member_ptr)                        \
-       - container_off(containing_type, member))            \
-      + check_types_match(*(member_ptr), ((containing_type *)0)->member))
+#define container_of(member_ptr, containing_type, member)		\
+	 ((containing_type *)						\
+	  ((char *)(member_ptr)						\
+	   - container_off(containing_type, member))			\
+	  + check_types_match(*(member_ptr), ((containing_type *)0)->member))
 
 
 /**
@@ -48,29 +48,29 @@
  * is given NULL, in which case it also returns NULL.
  *
  * Example:
- *    struct foo {
- *        int fielda, fieldb;
- *        // ...
- *    };
- *    struct info {
- *        int some_other_field;
- *        struct foo my_foo;
- *    };
+ *	struct foo {
+ *		int fielda, fieldb;
+ *		// ...
+ *	};
+ *	struct info {
+ *		int some_other_field;
+ *		struct foo my_foo;
+ *	};
  *
- *    static struct info *foo_to_info_allowing_null(struct foo *foo)
- *    {
- *        return container_of_or_null(foo, struct info, my_foo);
- *    }
+ *	static struct info *foo_to_info_allowing_null(struct foo *foo)
+ *	{
+ *		return container_of_or_null(foo, struct info, my_foo);
+ *	}
  */
 static inline char *container_of_or_null_(void *member_ptr, size_t offset)
 {
-    return member_ptr ? (char *)member_ptr - offset : NULL;
+	return member_ptr ? (char *)member_ptr - offset : NULL;
 }
-#define container_of_or_null(member_ptr, containing_type, member)    \
-    ((containing_type *)                        \
-     container_of_or_null_(member_ptr,                \
-                   container_off(containing_type, member))    \
-     + check_types_match(*(member_ptr), ((containing_type *)0)->member))
+#define container_of_or_null(member_ptr, containing_type, member)	\
+	((containing_type *)						\
+	 container_of_or_null_(member_ptr,				\
+			       container_off(containing_type, member))	\
+	 + check_types_match(*(member_ptr), ((containing_type *)0)->member))
 
 /**
  * container_off - get offset to enclosing structure
@@ -81,23 +81,23 @@ static inline char *container_of_or_null_(void *member_ptr, size_t offset)
  * typechecking and figures out the offset to the enclosing type.
  *
  * Example:
- *    struct foo {
- *        int fielda, fieldb;
- *        // ...
- *    };
- *    struct info {
- *        int some_other_field;
- *        struct foo my_foo;
- *    };
+ *	struct foo {
+ *		int fielda, fieldb;
+ *		// ...
+ *	};
+ *	struct info {
+ *		int some_other_field;
+ *		struct foo my_foo;
+ *	};
  *
- *    static struct info *foo_to_info(struct foo *foo)
- *    {
- *        size_t off = container_off(struct info, my_foo);
- *        return (void *)((char *)foo - off);
- *    }
+ *	static struct info *foo_to_info(struct foo *foo)
+ *	{
+ *		size_t off = container_off(struct info, my_foo);
+ *		return (void *)((char *)foo - off);
+ *	}
  */
-#define container_off(containing_type, member)    \
-    offsetof(containing_type, member)
+#define container_off(containing_type, member)	\
+	offsetof(containing_type, member)
 
 /**
  * container_of_var - get pointer to enclosing structure using a variable
@@ -109,19 +109,19 @@ static inline char *container_of_or_null_(void *member_ptr, size_t offset)
  * subtraction to return the pointer to the enclosing type.
  *
  * Example:
- *    static struct info *foo_to_i(struct foo *foo)
- *    {
- *        struct info *i = container_of_var(foo, i, my_foo);
- *        return i;
- *    }
+ *	static struct info *foo_to_i(struct foo *foo)
+ *	{
+ *		struct info *i = container_of_var(foo, i, my_foo);
+ *		return i;
+ *	}
  */
 #if HAVE_TYPEOF
 #define container_of_var(member_ptr, container_var, member) \
-    container_of(member_ptr, typeof(*container_var), member)
+	container_of(member_ptr, typeof(*container_var), member)
 #else
-#define container_of_var(member_ptr, container_var, member)    \
-    ((void *)((char *)(member_ptr)    -            \
-          container_off_var(container_var, member)))
+#define container_of_var(member_ptr, container_var, member)	\
+	((void *)((char *)(member_ptr)	-			\
+		  container_off_var(container_var, member)))
 #endif
 
 /**
@@ -135,11 +135,11 @@ static inline char *container_of_or_null_(void *member_ptr, size_t offset)
  *
  */
 #if HAVE_TYPEOF
-#define container_off_var(var, member)        \
-    container_off(typeof(*var), member)
+#define container_off_var(var, member)		\
+	container_off(typeof(*var), member)
 #else
-#define container_off_var(var, member)            \
-    ((const char *)&(var)->member - (const char *)(var))
+#define container_off_var(var, member)			\
+	((const char *)&(var)->member - (const char *)(var))
 #endif
 
 #endif /* CCAN_CONTAINER_OF_H */
