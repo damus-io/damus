@@ -1170,7 +1170,7 @@ func on_open_url(state: DamusState, url: URL, result: @escaping (OpenResult?) ->
             }
         case .hashtag(let ht):
             result(.filter(.filter_hashtag([ht.hashtag])))
-        case .param, .quote:
+        case .param, .quote, .reference:
             // doesn't really make sense here
             break
         case .naddr(let naddr):
