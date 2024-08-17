@@ -1,8 +1,8 @@
 /* MIT (BSD) license - see LICENSE file for details */
 #ifndef CCAN_STRUCTEQ_H
 #define CCAN_STRUCTEQ_H
-#include "build_assert.h"
-#include "cppmagic.h"
+#include "ccan/build_assert/build_assert.h"
+#include "ccan/cppmagic/cppmagic.h"
 #include <string.h>
 #include <stdbool.h>
 

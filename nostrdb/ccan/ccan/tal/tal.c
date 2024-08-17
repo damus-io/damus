@@ -1,8 +1,8 @@
 /* Licensed under BSD-MIT - see LICENSE file for details */
 #include "tal.h"
-#include "../compiler.h"
-#include "list.h"
-#include "alignof.h"
+#include "ccan/compiler/compiler.h"
+#include "ccan/list/list.h"
+#include "ccan/alignof/alignof.h"
 
 #include <assert.h>
 #include <stdio.h>

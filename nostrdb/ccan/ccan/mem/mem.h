@@ -3,7 +3,7 @@
 #define CCAN_MEM_H
 
 #include "../config.h"
-#include "../compiler.h"
+#include "ccan/compiler/compiler.h"
 
 #include <string.h>
 #include <stdbool.h>

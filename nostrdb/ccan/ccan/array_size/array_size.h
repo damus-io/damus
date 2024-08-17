@@ -2,7 +2,7 @@
 #ifndef CCAN_ARRAY_SIZE_H
 #define CCAN_ARRAY_SIZE_H
 #include "../config.h"
-#include "build_assert.h"
+#include "ccan/build_assert/build_assert.h"
 
 /**
  * ARRAY_SIZE - get the number of elements in a visible array
