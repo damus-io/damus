@@ -74,6 +74,79 @@ class DamusState: HeadlessDamusState {
         self.push_notification_client = PushNotificationClient(keypair: keypair, settings: settings)
         self.emoji_provider = emoji_provider
     }
+    
+    @MainActor
+    convenience init?(keypair: Keypair) {
+        // nostrdb
+        var mndb = Ndb()
+        if mndb == nil {
+            // try recovery
+            print("DB ISSUE! RECOVERING")
+            mndb = Ndb.safemode()
+
+            // out of space or something?? maybe we need a in-memory fallback
+            if mndb == nil {
+                logout(nil)
+                return nil
+            }
+        }
+        
+        let navigationCoordinator: NavigationCoordinator = NavigationCoordinator()
+        let home: HomeModel = HomeModel()
+        let sub_id = UUID().uuidString
+
+        guard let ndb = mndb else { return nil }
+        let pubkey = keypair.pubkey
+
+        let pool = RelayPool(ndb: ndb, keypair: keypair)
+        let model_cache = RelayModelCache()
+        let relay_filters = RelayFilters(our_pubkey: pubkey)
+        let bootstrap_relays = load_bootstrap_relays(pubkey: pubkey)
+        
+        let settings = UserSettingsStore.globally_load_for(pubkey: pubkey)
+
+        let new_relay_filters = load_relay_filters(pubkey) == nil
+        for relay in bootstrap_relays {
+            let descriptor = RelayDescriptor(url: relay, info: .rw)
+            add_new_relay(model_cache: model_cache, relay_filters: relay_filters, pool: pool, descriptor: descriptor, new_relay_filters: new_relay_filters, logging_enabled: settings.developer_mode)
+        }
+
+        pool.register_handler(sub_id: sub_id, handler: home.handle_event)
+        
+        if let nwc_str = settings.nostr_wallet_connect,
+           let nwc = WalletConnectURL(str: nwc_str) {
+            try? pool.add_relay(.nwc(url: nwc.relay))
+        }
+        self.init(
+            pool: pool,
+            keypair: keypair,
+            likes: EventCounter(our_pubkey: pubkey),
+            boosts: EventCounter(our_pubkey: pubkey),
+            contacts: Contacts(our_pubkey: pubkey),
+            mutelist_manager: MutelistManager(user_keypair: keypair),
+            profiles: Profiles(ndb: ndb),
+            dms: home.dms,
+            previews: PreviewCache(),
+            zaps: Zaps(our_pubkey: pubkey),
+            lnurls: LNUrls(),
+            settings: settings,
+            relay_filters: relay_filters,
+            relay_model_cache: model_cache,
+            drafts: Drafts(),
+            events: EventCache(ndb: ndb),
+            bookmarks: BookmarksManager(pubkey: pubkey),
+            postbox: PostBox(pool: pool),
+            bootstrap_relays: bootstrap_relays,
+            replies: ReplyCounter(our_pubkey: pubkey),
+            wallet: WalletModel(settings: settings),
+            nav: navigationCoordinator,
+            music: MusicController(onChange: { _ in }),
+            video: VideoController(),
+            ndb: ndb,
+            quote_reposts: .init(our_pubkey: pubkey),
+            emoji_provider: DefaultEmojiProvider(showAllVariations: true)
+        )
+    }
 
     @discardableResult
     func add_zap(zap: Zapping) -> Bool {
