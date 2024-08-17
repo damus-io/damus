@@ -28,6 +28,5 @@ static inline char *strdupn(const char *src, size_t size) {
 	dest[size] = '\0';
 	return dest;
 }
-
 #endif // NDB_UTIL_H
 
