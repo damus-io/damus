@@ -1,7 +1,7 @@
 /* CC0 (Public domain) - see LICENSE file for details */
 #ifndef CCAN_CHECK_TYPE_H
 #define CCAN_CHECK_TYPE_H
-#include "../config.h"
+#include "config.h"
 
 /**
  * check_type - issue a warning or build failure if type is not correct.
@@ -18,9 +18,9 @@
  * to compile if the sizes of the types are unequal (a less complete check).
  *
  * Example:
- *    // They should always pass a 64-bit value to _set_some_value!
- *    #define set_some_value(expr)            \
- *        _set_some_value((check_type((expr), uint64_t), (expr)))
+ *	// They should always pass a 64-bit value to _set_some_value!
+ *	#define set_some_value(expr)			\
+ *		_set_some_value((check_type((expr), uint64_t), (expr)))
  */
 
 /**
@@ -38,27 +38,27 @@
  * to compile if the sizes of the types are unequal (a less complete check).
  *
  * Example:
- *    // Do subtraction to get to enclosing type, but make sure that
- *    // pointer is of correct type for that member.
- *    #define container_of(mbr_ptr, encl_type, mbr)            \
- *        (check_types_match((mbr_ptr), &((encl_type *)0)->mbr),    \
- *         ((encl_type *)                        \
- *          ((char *)(mbr_ptr) - offsetof(encl_type, mbr))))
+ *	// Do subtraction to get to enclosing type, but make sure that
+ *	// pointer is of correct type for that member.
+ *	#define container_of(mbr_ptr, encl_type, mbr)			\
+ *		(check_types_match((mbr_ptr), &((encl_type *)0)->mbr),	\
+ *		 ((encl_type *)						\
+ *		  ((char *)(mbr_ptr) - offsetof(encl_type, mbr))))
  */
 #if HAVE_TYPEOF
-#define check_type(expr, type)            \
-    ((typeof(expr) *)0 != (type *)0)
+#define check_type(expr, type)			\
+	((typeof(expr) *)0 != (type *)0)
 
-#define check_types_match(expr1, expr2)        \
-    ((typeof(expr1) *)0 != (typeof(expr2) *)0)
+#define check_types_match(expr1, expr2)		\
+	((typeof(expr1) *)0 != (typeof(expr2) *)0)
 #else
 #include <ccan/build_assert/build_assert.h>
 /* Without typeof, we can only test the sizes. */
-#define check_type(expr, type)                    \
-    BUILD_ASSERT_OR_ZERO(sizeof(expr) == sizeof(type))
+#define check_type(expr, type)					\
+	BUILD_ASSERT_OR_ZERO(sizeof(expr) == sizeof(type))
 
-#define check_types_match(expr1, expr2)                \
-    BUILD_ASSERT_OR_ZERO(sizeof(expr1) == sizeof(expr2))
+#define check_types_match(expr1, expr2)				\
+	BUILD_ASSERT_OR_ZERO(sizeof(expr1) == sizeof(expr2))
 #endif /* HAVE_TYPEOF */
 
 #endif /* CCAN_CHECK_TYPE_H */
