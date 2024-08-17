@@ -4,7 +4,7 @@
 #ifdef TAL_USE_TALLOC
 #include <ccan/tal/talloc/talloc.h>
 #else
-#include "ccan/tal/tal.h"
+#include <ccan/tal/tal.h>
 #endif
 #include <string.h>
 #include <stdbool.h>
@@ -30,7 +30,7 @@ char *tal_strdup_(const tal_t *ctx, const char *p TAKES, const char *label);
  */
 #define tal_strndup(ctx, p, n) tal_strndup_(ctx, p, n, TAL_LABEL(char, "[]"))
 char *tal_strndup_(const tal_t *ctx, const char *p TAKES, size_t n,
-           const char *label);
+		   const char *label);
 
 /**
  * tal_fmt - allocate a formatted string
@@ -39,10 +39,10 @@ char *tal_strndup_(const tal_t *ctx, const char *p TAKES, size_t n,
  *
  * The returned string will have tal_count() == strlen() + 1.
  */
-#define tal_fmt(ctx, ...)                 \
-    tal_fmt_(ctx, TAL_LABEL(char, "[]"), __VA_ARGS__)
+#define tal_fmt(ctx, ...)				 \
+	tal_fmt_(ctx, TAL_LABEL(char, "[]"), __VA_ARGS__)
 char *tal_fmt_(const tal_t *ctx, const char *label, const char *fmt TAKES,
-            ...) PRINTF_FMT(3,4);
+	        ...) PRINTF_FMT(3,4);
 
 /**
  * tal_vfmt - allocate a formatted string (va_list version)
@@ -52,11 +52,11 @@ char *tal_fmt_(const tal_t *ctx, const char *label, const char *fmt TAKES,
  *
  * The returned string will have tal_count() == strlen() + 1.
  */
-#define tal_vfmt(ctx, fmt, va)                \
-    tal_vfmt_(ctx, fmt, va, TAL_LABEL(char, "[]"))
+#define tal_vfmt(ctx, fmt, va)				\
+	tal_vfmt_(ctx, fmt, va, TAL_LABEL(char, "[]"))
 char *tal_vfmt_(const tal_t *ctx, const char *fmt TAKES, va_list ap,
-        const char *label)
-    PRINTF_FMT(2,0);
+		const char *label)
+	PRINTF_FMT(2,0);
 
 /**
  * tal_append_fmt - append a formatted string to a talloc string.
@@ -89,11 +89,11 @@ bool tal_append_vfmt(char **baseptr, const char *fmt TAKES, va_list ap);
  */
 #define tal_strcat(ctx, s1, s2) tal_strcat_(ctx, s1, s2, TAL_LABEL(char, "[]"))
 char *tal_strcat_(const tal_t *ctx, const char *s1 TAKES, const char *s2 TAKES,
-          const char *label);
+		  const char *label);
 
 enum strsplit {
-    STR_EMPTY_OK,
-    STR_NO_EMPTY
+	STR_EMPTY_OK,
+	STR_NO_EMPTY
 };
 
 /**
@@ -115,33 +115,33 @@ enum strsplit {
  * return the number of elements plus 1 (for that NULL).
  *
  * Example:
- *    #include <ccan/tal/str/str.h>
- *    ...
- *    static unsigned int count_long_lines(const char *string)
- *    {
- *        char **lines;
- *        unsigned int i, long_lines = 0;
+ *	#include <ccan/tal/str/str.h>
+ *	...
+ *	static unsigned int count_long_lines(const char *string)
+ *	{
+ *		char **lines;
+ *		unsigned int i, long_lines = 0;
  *
- *        // Can only fail on out-of-memory.
- *        lines = tal_strsplit(NULL, string, "\n", STR_NO_EMPTY);
- *        for (i = 0; lines[i] != NULL; i++)
- *            if (strlen(lines[i]) > 80)
- *                long_lines++;
- *        tal_free(lines);
- *        return long_lines;
- *    }
+ *		// Can only fail on out-of-memory.
+ *		lines = tal_strsplit(NULL, string, "\n", STR_NO_EMPTY);
+ *		for (i = 0; lines[i] != NULL; i++)
+ *			if (strlen(lines[i]) > 80)
+ *				long_lines++;
+ *		tal_free(lines);
+ *		return long_lines;
+ *	}
  */
-#define tal_strsplit(ctx, string, delims, flag)    \
-    tal_strsplit_(ctx, string, delims, flag, TAL_LABEL(char *, "[]"))
+#define tal_strsplit(ctx, string, delims, flag)	\
+	tal_strsplit_(ctx, string, delims, flag, TAL_LABEL(char *, "[]"))
 char **tal_strsplit_(const tal_t *ctx,
-             const char *string TAKES,
-             const char *delims TAKES,
-             enum strsplit flag,
-             const char *label);
+		     const char *string TAKES,
+		     const char *delims TAKES,
+		     enum strsplit flag,
+		     const char *label);
 
 enum strjoin {
-    STR_TRAIL,
-    STR_NO_TRAIL
+	STR_TRAIL,
+	STR_NO_TRAIL
 };
 
 /**
@@ -158,24 +158,24 @@ enum strjoin {
  * The returned string will have tal_count() == strlen() + 1.
  *
  * Example:
- *    // Append the string "--EOL" to each line.
- *    static char *append_to_all_lines(const char *string)
- *    {
- *        char **lines, *ret;
+ *	// Append the string "--EOL" to each line.
+ *	static char *append_to_all_lines(const char *string)
+ *	{
+ *		char **lines, *ret;
  *
- *        lines = tal_strsplit(NULL, string, "\n", STR_EMPTY_OK);
- *        ret = tal_strjoin(NULL, lines, "-- EOL\n", STR_TRAIL);
- *        tal_free(lines);
- *        return ret;
- *    }
+ *		lines = tal_strsplit(NULL, string, "\n", STR_EMPTY_OK);
+ *		ret = tal_strjoin(NULL, lines, "-- EOL\n", STR_TRAIL);
+ *		tal_free(lines);
+ *		return ret;
+ *	}
  */
-#define tal_strjoin(ctx, strings, delim, flags)                \
-    tal_strjoin_(ctx, strings, delim, flags, TAL_LABEL(char, "[]"))
+#define tal_strjoin(ctx, strings, delim, flags)				\
+	tal_strjoin_(ctx, strings, delim, flags, TAL_LABEL(char, "[]"))
 char *tal_strjoin_(const void *ctx,
-           char *strings[] TAKES,
-           const char *delim TAKES,
-           enum strjoin flags,
-           const char *label);
+		   char *strings[] TAKES,
+		   const char *delim TAKES,
+		   enum strjoin flags,
+		   const char *label);
 
 /**
  * tal_strreg - match/extract from a string via (extended) regular expressions.
@@ -196,30 +196,30 @@ char *tal_strjoin_(const void *ctx,
  * The allocated strings will have tal_count() == strlen() + 1.
  *
  * See Also:
- *    regcomp(3), regex(3).
+ *	regcomp(3), regex(3).
  *
  * Example:
- *    // Given "My name is Rusty" outputs "Hello Rusty!\n"
- *    // Given "my first name is Rusty Russell" outputs "Hello Rusty Russell!\n"
- *    // Given "My name isnt Rusty Russell" outputs "Hello there!\n"
- *    int main(int argc, char *argv[])
- *    {
- *        char *person, *input;
+ *	// Given "My name is Rusty" outputs "Hello Rusty!\n"
+ *	// Given "my first name is Rusty Russell" outputs "Hello Rusty Russell!\n"
+ *	// Given "My name isnt Rusty Russell" outputs "Hello there!\n"
+ *	int main(int argc, char *argv[])
+ *	{
+ *		char *person, *input;
  *
- *        (void)argc;
- *        // Join args and trim trailing space.
- *        input = tal_strjoin(NULL, argv+1, " ", STR_NO_TRAIL);
- *        if (tal_strreg(NULL, input,
- *                   "[Mm]y (first )?name is ([A-Za-z ]+)",
- *                   NULL, &person))
- *            printf("Hello %s!\n", person);
- *        else
- *            printf("Hello there!\n");
- *        return 0;
- *    }
+ *		(void)argc;
+ *		// Join args and trim trailing space.
+ *		input = tal_strjoin(NULL, argv+1, " ", STR_NO_TRAIL);
+ *		if (tal_strreg(NULL, input,
+ *			       "[Mm]y (first )?name is ([A-Za-z ]+)",
+ *			       NULL, &person))
+ *			printf("Hello %s!\n", person);
+ *		else
+ *			printf("Hello there!\n");
+ *		return 0;
+ *	}
  */
-#define tal_strreg(ctx, string, ...)                    \
-    tal_strreg_(ctx, string, TAL_LABEL(char, "[]"), __VA_ARGS__)
+#define tal_strreg(ctx, string, ...)					\
+	tal_strreg_(ctx, string, TAL_LABEL(char, "[]"), __VA_ARGS__)
 bool tal_strreg_(const void *ctx, const char *string TAKES,
-         const char *label, const char *regex, ...);
+		 const char *label, const char *regex, ...);
 #endif /* CCAN_STR_TAL_H */

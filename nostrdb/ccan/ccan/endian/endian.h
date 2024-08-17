@@ -1,10 +1,8 @@
-/* CC0 (Public domain) */
+/* CC0 (Public domain) - see LICENSE file for details */
 #ifndef CCAN_ENDIAN_H
 #define CCAN_ENDIAN_H
 #include <stdint.h>
-
 #include "config.h"
-#include "cursor.h"
 
 /**
  * BSWAP_16 - reverse bytes in a constant uint16_t value.
@@ -346,6 +344,8 @@ static inline uint16_t be16_to_cpu(beint16_t be_val)
 	return BE16_TO_CPU(be_val);
 }
 
+/* Whichever they include first, they get these definitions. */
+#ifdef CCAN_SHORT_TYPES_H
 /**
  * be64/be32/be16 - 64/32/16 bit big-endian representation.
  */
@@ -359,7 +359,5 @@ typedef beint16_t be16;
 typedef leint64_t le64;
 typedef leint32_t le32;
 typedef leint16_t le16;
-
-
+#endif
 #endif /* CCAN_ENDIAN_H */
-
