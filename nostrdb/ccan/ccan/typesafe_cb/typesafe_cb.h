@@ -1,7 +1,7 @@
 /* CC0 (Public domain) - see LICENSE file for details */
 #ifndef CCAN_TYPESAFE_CB_H
 #define CCAN_TYPESAFE_CB_H
-#include "../config.h"
+#include "config.h"
 
 #if HAVE_TYPEOF && HAVE_BUILTIN_CHOOSE_EXPR && HAVE_BUILTIN_TYPES_COMPATIBLE_P
 /**
@@ -24,16 +24,16 @@
  * "typeof": it will not be evaluated if typeof is not supported.
  *
  * Example:
- *    // We can take either an unsigned long or a void *.
- *    void _set_some_value(void *val);
- *    #define set_some_value(e)            \
- *        _set_some_value(typesafe_cb_cast(void *, unsigned long, (e)))
+ *	// We can take either an unsigned long or a void *.
+ *	void _set_some_value(void *val);
+ *	#define set_some_value(e)			\
+ *		_set_some_value(typesafe_cb_cast(void *, unsigned long, (e)))
  */
-#define typesafe_cb_cast(desttype, oktype, expr)            \
-    __builtin_choose_expr(                        \
-        __builtin_types_compatible_p(__typeof__(0?(expr):(expr)), \
-                         oktype),            \
-        (desttype)(expr), (expr))
+#define typesafe_cb_cast(desttype, oktype, expr)			\
+	__builtin_choose_expr(						\
+		__builtin_types_compatible_p(__typeof__(0?(expr):(expr)), \
+					     oktype),			\
+		(desttype)(expr), (expr))
 #else
 #define typesafe_cb_cast(desttype, oktype, expr) ((desttype)(expr))
 #endif
@@ -51,18 +51,18 @@
  * for expr) if you need more than 3 arguments.
  *
  * Example:
- *    // We can take either a long, unsigned long, void * or a const void *.
- *    void _set_some_value(void *val);
- *    #define set_some_value(expr)                    \
- *        _set_some_value(typesafe_cb_cast3(void *,,        \
- *                        long, unsigned long, const void *,\
- *                        (expr)))
+ *	// We can take either a long, unsigned long, void * or a const void *.
+ *	void _set_some_value(void *val);
+ *	#define set_some_value(expr)					\
+ *		_set_some_value(typesafe_cb_cast3(void *,,		\
+ *					    long, unsigned long, const void *,\
+ *					    (expr)))
  */
-#define typesafe_cb_cast3(desttype, ok1, ok2, ok3, expr)        \
-    typesafe_cb_cast(desttype, ok1,                    \
-             typesafe_cb_cast(desttype, ok2,        \
-                      typesafe_cb_cast(desttype, ok3, \
-                               (expr))))
+#define typesafe_cb_cast3(desttype, ok1, ok2, ok3, expr)		\
+	typesafe_cb_cast(desttype, ok1,					\
+			 typesafe_cb_cast(desttype, ok2,		\
+					  typesafe_cb_cast(desttype, ok3, \
+							   (expr))))
 
 /**
  * typesafe_cb - cast a callback function if it matches the arg
@@ -79,14 +79,14 @@
  * or assigned to a void * elsewhere anyway.
  *
  * Example:
- *    void _register_callback(void (*fn)(void *arg), void *arg);
- *    #define register_callback(fn, arg) \
- *        _register_callback(typesafe_cb(void, (fn), void*, (arg)), (arg))
+ *	void _register_callback(void (*fn)(void *arg), void *arg);
+ *	#define register_callback(fn, arg) \
+ *		_register_callback(typesafe_cb(void, (fn), void*, (arg)), (arg))
  */
-#define typesafe_cb(rtype, atype, fn, arg)            \
-    typesafe_cb_cast(rtype (*)(atype),            \
-             rtype (*)(__typeof__(arg)),        \
-             (fn))
+#define typesafe_cb(rtype, atype, fn, arg)			\
+	typesafe_cb_cast(rtype (*)(atype),			\
+			 rtype (*)(__typeof__(arg)),		\
+			 (fn))
 
 /**
  * typesafe_cb_preargs - cast a callback function if it matches the arg
@@ -99,16 +99,16 @@
  * before the @arg.
  *
  * Example:
- *    void _register_callback(void (*fn)(int, void *arg), void *arg);
- *    #define register_callback(fn, arg)                   \
- *        _register_callback(typesafe_cb_preargs(void, void *,       \
- *                   (fn), (arg), int),               \
- *                   (arg))
+ *	void _register_callback(void (*fn)(int, void *arg), void *arg);
+ *	#define register_callback(fn, arg)				   \
+ *		_register_callback(typesafe_cb_preargs(void, void *,	   \
+ *				   (fn), (arg), int),			   \
+ *				   (arg))
  */
-#define typesafe_cb_preargs(rtype, atype, fn, arg, ...)            \
-    typesafe_cb_cast(rtype (*)(__VA_ARGS__, atype),            \
-             rtype (*)(__VA_ARGS__, __typeof__(arg)),    \
-             (fn))
+#define typesafe_cb_preargs(rtype, atype, fn, arg, ...)			\
+	typesafe_cb_cast(rtype (*)(__VA_ARGS__, atype),			\
+			 rtype (*)(__VA_ARGS__, __typeof__(arg)),	\
+			 (fn))
 
 /**
  * typesafe_cb_postargs - cast a callback function if it matches the arg
@@ -121,14 +121,14 @@
  * after the @arg.
  *
  * Example:
- *    void _register_callback(void (*fn)(void *arg, int), void *arg);
- *    #define register_callback(fn, arg) \
- *        _register_callback(typesafe_cb_postargs(void, (fn), void *, \
- *                   (arg), int),                    \
- *                   (arg))
+ *	void _register_callback(void (*fn)(void *arg, int), void *arg);
+ *	#define register_callback(fn, arg) \
+ *		_register_callback(typesafe_cb_postargs(void, (fn), void *, \
+ *				   (arg), int),				    \
+ *				   (arg))
  */
-#define typesafe_cb_postargs(rtype, atype, fn, arg, ...)        \
-    typesafe_cb_cast(rtype (*)(atype, __VA_ARGS__),            \
-             rtype (*)(__typeof__(arg), __VA_ARGS__),    \
-             (fn))
+#define typesafe_cb_postargs(rtype, atype, fn, arg, ...)		\
+	typesafe_cb_cast(rtype (*)(atype, __VA_ARGS__),			\
+			 rtype (*)(__typeof__(arg), __VA_ARGS__),	\
+			 (fn))
 #endif /* CCAN_CAST_IF_TYPE_H */

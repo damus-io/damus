@@ -1,6 +1,5 @@
-/* MIT (BSD) license - see LICENSE file for details - taken from ccan. thanks rusty! */
-
-#include "utf8.h"
+/* MIT (BSD) license - see LICENSE file for details */
+#include <ccan/utf8/utf8.h>
 #include <errno.h>
 #include <stdlib.h>
 
@@ -33,10 +32,10 @@
 /*
  *    UTF-8 Encoding Form
  *
- *    U+0000..U+007F       0xxxxxxx                <= 7 bits
- *    U+0080..U+07FF       110xxxxx 10xxxxxx            <= 11 bits
- *    U+0800..U+FFFF       1110xxxx 10xxxxxx 10xxxxxx        <= 16 bits
- *   U+10000..U+10FFFF     11110xxx 10xxxxxx 10xxxxxx 10xxxxxx    <= 21 bits
+ *    U+0000..U+007F       0xxxxxxx				<= 7 bits
+ *    U+0080..U+07FF       110xxxxx 10xxxxxx			<= 11 bits
+ *    U+0800..U+FFFF       1110xxxx 10xxxxxx 10xxxxxx		<= 16 bits
+ *   U+10000..U+10FFFF     11110xxx 10xxxxxx 10xxxxxx 10xxxxxx	<= 21 bits
  *
  *
  *    U+0000..U+007F       00..7F
@@ -59,122 +58,121 @@
  */
 bool utf8_decode(struct utf8_state *utf8_state, char c)
 {
-    if (utf8_state->used_len == utf8_state->total_len) {
-        utf8_state->used_len = 1;
-        /* First character in sequence. */
-        if (((unsigned char)c & 0x80) == 0) {
-            /* ASCII, easy. */
-            if (c == 0)
-                goto bad_encoding;
-            utf8_state->total_len = 1;
-            utf8_state->c = c;
-            goto finished_decoding;
-        } else if (((unsigned char)c & 0xE0) == 0xC0) {
-            utf8_state->total_len = 2;
-            utf8_state->c = ((unsigned char)c & 0x1F);
-            return false;
-        } else if (((unsigned char)c & 0xF0) == 0xE0) {
-            utf8_state->total_len = 3;
-            utf8_state->c = ((unsigned char)c & 0x0F);
-            return false;
-        } else if (((unsigned char)c & 0xF8) == 0xF0) {
-            utf8_state->total_len = 4;
-            utf8_state->c = ((unsigned char)c & 0x07);
-            return false;
-        }
-        goto bad_encoding;
-    }
+	if (utf8_state->used_len == utf8_state->total_len) {
+		utf8_state->used_len = 1;
+		/* First character in sequence. */
+		if (((unsigned char)c & 0x80) == 0) {
+			/* ASCII, easy. */
+			if (c == 0)
+				goto bad_encoding;
+			utf8_state->total_len = 1;
+			utf8_state->c = c;
+			goto finished_decoding;
+		} else if (((unsigned char)c & 0xE0) == 0xC0) {
+			utf8_state->total_len = 2;
+			utf8_state->c = ((unsigned char)c & 0x1F);
+			return false;
+		} else if (((unsigned char)c & 0xF0) == 0xE0) {
+			utf8_state->total_len = 3;
+			utf8_state->c = ((unsigned char)c & 0x0F);
+			return false;
+		} else if (((unsigned char)c & 0xF8) == 0xF0) {
+			utf8_state->total_len = 4;
+			utf8_state->c = ((unsigned char)c & 0x07);
+			return false;
+		}
+		goto bad_encoding;
+	}
 
-    if (((unsigned char)c & 0xC0) != 0x80)
-        goto bad_encoding;
+	if (((unsigned char)c & 0xC0) != 0x80)
+		goto bad_encoding;
 
-    utf8_state->c <<= 6;
-    utf8_state->c |= ((unsigned char)c & 0x3F);
-    
-    utf8_state->used_len++;
-    if (utf8_state->used_len == utf8_state->total_len)
-        goto finished_decoding;
-    return false;
+	utf8_state->c <<= 6;
+	utf8_state->c |= ((unsigned char)c & 0x3F);
+	
+	utf8_state->used_len++;
+	if (utf8_state->used_len == utf8_state->total_len)
+		goto finished_decoding;
+	return false;
 
 finished_decoding:
-    if (utf8_state->c == 0 || utf8_state->c > 0x10FFFF)
-        errno = ERANGE;
-    /* The UTF-16 "surrogate range": illegal in UTF-8 */
-    else if (utf8_state->total_len == 3
-         && (utf8_state->c & 0xFFFFF800) == 0x0000D800)
-        errno = ERANGE;
-    else {
-        int min_bits;
-        switch (utf8_state->total_len) {
-        case 1:
-            min_bits = 0;
-            break;
-        case 2:
-            min_bits = 7;
-            break;
-        case 3:
-            min_bits = 11;
-            break;
-        case 4:
-            min_bits = 16;
-            break;
-        default:
-            abort();
-        }
-        if ((utf8_state->c >> min_bits) == 0)
-            errno = EFBIG;
-        else
-            errno = 0;
-    }
-    return true;
+	if (utf8_state->c == 0 || utf8_state->c > 0x10FFFF)
+		errno = ERANGE;
+	/* The UTF-16 "surrogate range": illegal in UTF-8 */
+	else if (utf8_state->total_len == 3
+		 && (utf8_state->c & 0xFFFFF800) == 0x0000D800)
+		errno = ERANGE;
+	else {
+		int min_bits;
+		switch (utf8_state->total_len) {
+		case 1:
+			min_bits = 0;
+			break;
+		case 2:
+			min_bits = 7;
+			break;
+		case 3:
+			min_bits = 11;
+			break;
+		case 4:
+			min_bits = 16;
+			break;
+		default:
+			abort();
+		}
+		if ((utf8_state->c >> min_bits) == 0)
+			errno = EFBIG;
+		else
+			errno = 0;
+	}
+	return true;
 
 bad_encoding:
-    utf8_state->total_len = utf8_state->used_len;
-    errno = EINVAL;
-    return true;
+	utf8_state->total_len = utf8_state->used_len;
+	errno = EINVAL;
+	return true;
 }
 
 size_t utf8_encode(uint32_t point, char dest[UTF8_MAX_LEN])
 {
-    if ((point >> 7) == 0) {
-        if (point == 0) {
-            errno = ERANGE;
-            return 0;
-        }
-        /* 0xxxxxxx */
-        dest[0] = point;
-        return 1;
-    }
+	if ((point >> 7) == 0) {
+		if (point == 0) {
+			errno = ERANGE;
+			return 0;
+		}
+		/* 0xxxxxxx */
+		dest[0] = point;
+		return 1;
+	}
 
-    if ((point >> 11) == 0) {
-        /* 110xxxxx 10xxxxxx */
-        dest[1] = 0x80 | (point & 0x3F);
-        dest[0] = 0xC0 | (point >> 6);
-        return 2;
-    }
+	if ((point >> 11) == 0) {
+		/* 110xxxxx 10xxxxxx */
+		dest[1] = 0x80 | (point & 0x3F);
+		dest[0] = 0xC0 | (point >> 6);
+		return 2;
+	}
 
-    if ((point >> 16) == 0) {
-        if (point >= 0xD800 && point <= 0xDFFF) {
-            errno = ERANGE;
-            return 0;
-        }
-        /* 1110xxxx 10xxxxxx 10xxxxxx */
-        dest[2] = 0x80 | (point & 0x3F);
-        dest[1] = 0x80 | ((point >> 6) & 0x3F);
-        dest[0] = 0xE0 | (point >> 12);
-        return 3;
-    }
+	if ((point >> 16) == 0) {
+		if (point >= 0xD800 && point <= 0xDFFF) {
+			errno = ERANGE;
+			return 0;
+		}
+		/* 1110xxxx 10xxxxxx 10xxxxxx */
+		dest[2] = 0x80 | (point & 0x3F);
+		dest[1] = 0x80 | ((point >> 6) & 0x3F);
+		dest[0] = 0xE0 | (point >> 12);
+		return 3;
+	}
 
-    if (point > 0x10FFFF) {
-        errno = ERANGE;
-        return 0;
-    }
+	if (point > 0x10FFFF) {
+		errno = ERANGE;
+		return 0;
+	}
 
-    /* 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx */
-    dest[3] = 0x80 | (point & 0x3F);
-    dest[2] = 0x80 | ((point >> 6) & 0x3F);
-    dest[1] = 0x80 | ((point >> 12) & 0x3F);
-    dest[0] = 0xF0 | (point >> 18);
-    return 4;
+	/* 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx */
+	dest[3] = 0x80 | (point & 0x3F);
+	dest[2] = 0x80 | ((point >> 6) & 0x3F);
+	dest[1] = 0x80 | ((point >> 12) & 0x3F);
+	dest[0] = 0xF0 | (point >> 18);
+	return 4;
 }
-

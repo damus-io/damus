@@ -1,13 +1,12 @@
 /* Licensed under BSD-MIT - see LICENSE file for details */
 #ifndef CCAN_TAL_H
 #define CCAN_TAL_H
-#include "../config.h"
-#include "ccan/compiler/compiler.h"
-#include "ccan/likely/likely.h"
-#include "ccan/typesafe_cb/typesafe_cb.h"
-#include "ccan/str/str.h"
-#include "ccan/take/take.h"
-
+#include "config.h"
+#include <ccan/compiler/compiler.h>
+#include <ccan/likely/likely.h>
+#include <ccan/typesafe_cb/typesafe_cb.h>
+#include <ccan/str/str.h>
+#include <ccan/take/take.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdarg.h>
@@ -32,11 +31,11 @@ typedef void tal_t;
  * tal_count() of the return will be 1.
  *
  * Example:
- *    int *p = tal(NULL, int);
- *    *p = 1;
+ *	int *p = tal(NULL, int);
+ *	*p = 1;
  */
-#define tal(ctx, type)                            \
-    tal_label(ctx, type, TAL_LABEL(type, ""))
+#define tal(ctx, type)							\
+	tal_label(ctx, type, TAL_LABEL(type, ""))
 
 /**
  * talz - zeroing allocator function
@@ -46,11 +45,11 @@ typedef void tal_t;
  * Equivalent to tal() followed by memset() to zero.
  *
  * Example:
- *    p = talz(NULL, int);
- *    assert(*p == 0);
+ *	p = talz(NULL, int);
+ *	assert(*p == 0);
  */
-#define talz(ctx, type)                            \
-    talz_label(ctx, type, TAL_LABEL(type, ""))
+#define talz(ctx, type)							\
+	talz_label(ctx, type, TAL_LABEL(type, ""))
 
 /**
  * tal_free - free a tal-allocated pointer.
@@ -64,7 +63,7 @@ typedef void tal_t;
  * for any destructors or notifiers.
  *
  * Example:
- *    p = tal_free(p);
+ *	p = tal_free(p);
  */
 void *tal_free(const tal_t *p);
 
@@ -77,12 +76,12 @@ void *tal_free(const tal_t *p);
  * tal_count() of the returned pointer will be @count.
  *
  * Example:
- *    p = tal_arr(NULL, int, 2);
- *    p[0] = 0;
- *    p[1] = 1;
+ *	p = tal_arr(NULL, int, 2);
+ *	p[0] = 0;
+ *	p[1] = 1;
  */
-#define tal_arr(ctx, type, count)                    \
-    tal_arr_label(ctx, type, count, TAL_LABEL(type, "[]"))
+#define tal_arr(ctx, type, count)					\
+	tal_arr_label(ctx, type, count, TAL_LABEL(type, "[]"))
 
 /**
  * tal_arrz - allocate an array of zeroed objects.
@@ -93,11 +92,11 @@ void *tal_free(const tal_t *p);
  * Equivalent to tal_arr() followed by memset() to zero.
  *
  * Example:
- *    p = tal_arrz(NULL, int, 2);
- *    assert(p[0] == 0 && p[1] == 0);
+ *	p = tal_arrz(NULL, int, 2);
+ *	assert(p[0] == 0 && p[1] == 0);
  */
 #define tal_arrz(ctx, type, count) \
-    tal_arrz_label(ctx, type, count, TAL_LABEL(type, "[]"))
+	tal_arrz_label(ctx, type, count, TAL_LABEL(type, "[]"))
 
 /**
  * tal_resize - enlarge or reduce a tal object.
@@ -111,10 +110,10 @@ void *tal_free(const tal_t *p);
  * has been moved.
  *
  * Example:
- *    tal_resize(&p, 100);
+ *	tal_resize(&p, 100);
  */
 #define tal_resize(p, count) \
-    tal_resize_((void **)(p), sizeof**(p), (count), false)
+	tal_resize_((void **)(p), sizeof**(p), (count), false)
 
 /**
  * tal_resizez - enlarge or reduce a tal object; zero out extra.
@@ -124,10 +123,10 @@ void *tal_free(const tal_t *p);
  * This returns true on success (and may move *@p), or false on failure.
  *
  * Example:
- *    tal_resizez(&p, 200);
+ *	tal_resizez(&p, 200);
  */
 #define tal_resizez(p, count) \
-    tal_resize_((void **)(p), sizeof**(p), (count), true)
+	tal_resize_((void **)(p), sizeof**(p), (count), true)
 
 /**
  * tal_steal - change the parent of a tal-allocated pointer.
@@ -141,10 +140,10 @@ void *tal_free(const tal_t *p);
 #if HAVE_STATEMENT_EXPR
 /* Weird macro avoids gcc's 'warning: value computed is not used'. */
 #define tal_steal(ctx, ptr) \
-    ({ (tal_typeof(ptr) tal_steal_((ctx),(ptr))); })
+	({ (tal_typeof(ptr) tal_steal_((ctx),(ptr))); })
 #else
 #define tal_steal(ctx, ptr) \
-    (tal_typeof(ptr) tal_steal_((ctx),(ptr)))
+	(tal_typeof(ptr) tal_steal_((ctx),(ptr)))
 #endif
 
 /**
@@ -157,8 +156,8 @@ void *tal_free(const tal_t *p);
  *
  * Note that this can only fail if your allocfn fails and your errorfn returns.
  */
-#define tal_add_destructor(ptr, function)                      \
-    tal_add_destructor_((ptr), typesafe_cb(void, void *, (function), (ptr)))
+#define tal_add_destructor(ptr, function)				      \
+	tal_add_destructor_((ptr), typesafe_cb(void, void *, (function), (ptr)))
 
 /**
  * tal_del_destructor - remove a destructor callback function.
@@ -169,8 +168,8 @@ void *tal_free(const tal_t *p);
  * false.  Note that if we're inside the destructor call itself, this will
  * return false.
  */
-#define tal_del_destructor(ptr, function)                      \
-    tal_del_destructor_((ptr), typesafe_cb(void, void *, (function), (ptr)))
+#define tal_del_destructor(ptr, function)				      \
+	tal_del_destructor_((ptr), typesafe_cb(void, void *, (function), (ptr)))
 
 /**
  * tal_add_destructor2 - add a 2-arg callback function when context is destroyed.
@@ -184,13 +183,13 @@ void *tal_free(const tal_t *p);
  *
  * Note that this can only fail if your allocfn fails and your errorfn returns.
  */
-#define tal_add_destructor2(ptr, function, arg)                \
-    tal_add_destructor2_((ptr),                    \
-                 typesafe_cb_cast(void (*)(tal_t *, void *), \
-                          void (*)(__typeof__(ptr), \
-                               __typeof__(arg)), \
-                          (function)),        \
-                 (arg))
+#define tal_add_destructor2(ptr, function, arg)				\
+	tal_add_destructor2_((ptr),					\
+			     typesafe_cb_cast(void (*)(tal_t *, void *), \
+					      void (*)(__typeof__(ptr), \
+						       __typeof__(arg)), \
+					      (function)),		\
+			     (arg))
 
 /**
  * tal_del_destructor - remove a destructor callback function.
@@ -201,8 +200,8 @@ void *tal_free(const tal_t *p);
  * false.  Note that if we're inside the destructor call itself, this will
  * return false.
  */
-#define tal_del_destructor(ptr, function)                      \
-    tal_del_destructor_((ptr), typesafe_cb(void, void *, (function), (ptr)))
+#define tal_del_destructor(ptr, function)				      \
+	tal_del_destructor_((ptr), typesafe_cb(void, void *, (function), (ptr)))
 
 /**
  * tal_del_destructor2 - remove 2-arg callback function.
@@ -213,23 +212,23 @@ void *tal_free(const tal_t *p);
  * If @function has not been successfully added as a destructor with
  * @arg, this returns false.
  */
-#define tal_del_destructor2(ptr, function, arg)                \
-    tal_del_destructor2_((ptr),                    \
-                 typesafe_cb_cast(void (*)(tal_t *, void *), \
-                          void (*)(__typeof__(ptr), \
-                               __typeof__(arg)), \
-                          (function)),        \
-                 (arg))
+#define tal_del_destructor2(ptr, function, arg)				\
+	tal_del_destructor2_((ptr),					\
+			     typesafe_cb_cast(void (*)(tal_t *, void *), \
+					      void (*)(__typeof__(ptr), \
+						       __typeof__(arg)), \
+					      (function)),		\
+			     (arg))
 enum tal_notify_type {
-    TAL_NOTIFY_FREE = 1,
-    TAL_NOTIFY_STEAL = 2,
-    TAL_NOTIFY_MOVE = 4,
-    TAL_NOTIFY_RESIZE = 8,
-    TAL_NOTIFY_RENAME = 16,
-    TAL_NOTIFY_ADD_CHILD = 32,
-    TAL_NOTIFY_DEL_CHILD = 64,
-    TAL_NOTIFY_ADD_NOTIFIER = 128,
-    TAL_NOTIFY_DEL_NOTIFIER = 256
+	TAL_NOTIFY_FREE = 1,
+	TAL_NOTIFY_STEAL = 2,
+	TAL_NOTIFY_MOVE = 4,
+	TAL_NOTIFY_RESIZE = 8,
+	TAL_NOTIFY_RENAME = 16,
+	TAL_NOTIFY_ADD_CHILD = 32,
+	TAL_NOTIFY_DEL_CHILD = 64,
+	TAL_NOTIFY_ADD_NOTIFIER = 128,
+	TAL_NOTIFY_DEL_NOTIFIER = 256
 };
 
 /**
@@ -270,23 +269,23 @@ enum tal_notify_type {
  * callback.  This is also called for tal_add_destructor and
  * tal_del_destructor.
  */
-#define tal_add_notifier(ptr, types, callback)                \
-    tal_add_notifier_((ptr), (types),                \
-              typesafe_cb_postargs(void, tal_t *, (callback), \
-                           (ptr),            \
-                           enum tal_notify_type, void *))
+#define tal_add_notifier(ptr, types, callback)				\
+	tal_add_notifier_((ptr), (types),				\
+			  typesafe_cb_postargs(void, tal_t *, (callback), \
+					       (ptr),			\
+					       enum tal_notify_type, void *))
 
 /**
  * tal_del_notifier - remove a notifier callback function.
  * @ptr: The tal allocated object.
  * @callback: the function to call.
  */
-#define tal_del_notifier(ptr, callback)                    \
-    tal_del_notifier_((ptr),                    \
-              typesafe_cb_postargs(void, void *, (callback), \
-                           (ptr),            \
-                           enum tal_notify_type, void *), \
-              false, NULL)
+#define tal_del_notifier(ptr, callback)					\
+	tal_del_notifier_((ptr),					\
+			  typesafe_cb_postargs(void, void *, (callback), \
+					       (ptr),			\
+					       enum tal_notify_type, void *), \
+			  false, NULL)
 
 /**
  * tal_set_name - attach a name to a tal pointer.
@@ -295,7 +294,7 @@ enum tal_notify_type {
  *
  * The name is copied, unless we're certain it's a string literal.
  */
-#define tal_set_name(ptr, name)                      \
+#define tal_set_name(ptr, name)				      \
     tal_set_name_((ptr), (name), TAL_IS_LITERAL(name))
 
 /**
@@ -355,8 +354,8 @@ tal_t *tal_parent(const tal_t *ctx);
  * @type: the type (should match type of @p!)
  * @p: the object to copy (or reparented if take()).  Must not be NULL.
  */
-#define tal_dup(ctx, type, p)                    \
-    tal_dup_label(ctx, type, p, TAL_LABEL(type, ""), false)
+#define tal_dup(ctx, type, p)					\
+	tal_dup_label(ctx, type, p, TAL_LABEL(type, ""), false)
 
 /**
  * tal_dup_or_null - duplicate an object, or just pass NULL.
@@ -366,8 +365,8 @@ tal_t *tal_parent(const tal_t *ctx);
  *
  * if @p is NULL, just return NULL, otherwise to tal_dup().
  */
-#define tal_dup_or_null(ctx, type, p)                    \
-    tal_dup_label(ctx, type, p, TAL_LABEL(type, ""), true)
+#define tal_dup_or_null(ctx, type, p)					\
+	tal_dup_label(ctx, type, p, TAL_LABEL(type, ""), true)
 
 /**
  * tal_dup_arr - duplicate an array.
@@ -377,8 +376,8 @@ tal_t *tal_parent(const tal_t *ctx);
  * @n: the number of sizeof(type) entries to copy.
  * @extra: the number of extra sizeof(type) entries to allocate.
  */
-#define tal_dup_arr(ctx, type, p, n, extra)            \
-    tal_dup_arr_label(ctx, type, p, n, extra, TAL_LABEL(type, "[]"))
+#define tal_dup_arr(ctx, type, p, n, extra)			\
+	tal_dup_arr_label(ctx, type, p, n, extra, TAL_LABEL(type, "[]"))
 
 
 /**
@@ -387,28 +386,28 @@ tal_t *tal_parent(const tal_t *ctx);
  * @type: the type (should match type of @p!)
  * @p: the tal array to copy (or resized & reparented if take())
  *
- * The common case of duplicating an entire tal array.
+ * The comon case of duplicating an entire tal array.
  */
-#define tal_dup_talarr(ctx, type, p)                    \
-    ((type *)tal_dup_talarr_((ctx), tal_typechk_(p, type *),    \
-                 TAL_LABEL(type, "[]")))
+#define tal_dup_talarr(ctx, type, p)					\
+	((type *)tal_dup_talarr_((ctx), tal_typechk_(p, type *),	\
+				 TAL_LABEL(type, "[]")))
 /* Lower-level interfaces, where you want to supply your own label string. */
-#define tal_label(ctx, type, label)                        \
-    ((type *)tal_alloc_((ctx), sizeof(type), false, label))
-#define talz_label(ctx, type, label)                        \
-    ((type *)tal_alloc_((ctx), sizeof(type), true, label))
-#define tal_arr_label(ctx, type, count, label)                    \
-    ((type *)tal_alloc_arr_((ctx), sizeof(type), (count), false, label))
-#define tal_arrz_label(ctx, type, count, label)                    \
-    ((type *)tal_alloc_arr_((ctx), sizeof(type), (count), true, label))
-#define tal_dup_label(ctx, type, p, label, nullok)            \
-    ((type *)tal_dup_((ctx), tal_typechk_(p, type *),    \
-              sizeof(type), 1, 0, nullok,        \
-              label))
-#define tal_dup_arr_label(ctx, type, p, n, extra, label)    \
-    ((type *)tal_dup_((ctx), tal_typechk_(p, type *),    \
-              sizeof(type), (n), (extra), false,    \
-              label))
+#define tal_label(ctx, type, label)						\
+	((type *)tal_alloc_((ctx), sizeof(type), false, label))
+#define talz_label(ctx, type, label)						\
+	((type *)tal_alloc_((ctx), sizeof(type), true, label))
+#define tal_arr_label(ctx, type, count, label)					\
+	((type *)tal_alloc_arr_((ctx), sizeof(type), (count), false, label))
+#define tal_arrz_label(ctx, type, count, label)					\
+	((type *)tal_alloc_arr_((ctx), sizeof(type), (count), true, label))
+#define tal_dup_label(ctx, type, p, label, nullok)			\
+	((type *)tal_dup_((ctx), tal_typechk_(p, type *),	\
+			  sizeof(type), 1, 0, nullok,		\
+			  label))
+#define tal_dup_arr_label(ctx, type, p, n, extra, label)	\
+	((type *)tal_dup_((ctx), tal_typechk_(p, type *),	\
+			  sizeof(type), (n), (extra), false,	\
+			  label))
 
 /**
  * tal_set_backend - set the allocation or error functions to use
@@ -418,15 +417,15 @@ tal_t *tal_parent(const tal_t *ctx);
  * @error_fn: called on errors or NULL (default is abort)
  *
  * The defaults are set up so tal functions never return NULL, but you
- * can override error_fn to change that.  error_fn can return, and is
+ * can override erorr_fn to change that.  error_fn can return, and is
  * called if alloc_fn or resize_fn fail.
  *
  * If any parameter is NULL, that function is unchanged.
  */
 void tal_set_backend(void *(*alloc_fn)(size_t size),
-             void *(*resize_fn)(void *, size_t size),
-             void (*free_fn)(void *),
-             void (*error_fn)(const char *msg));
+		     void *(*resize_fn)(void *, size_t size),
+		     void (*free_fn)(void *),
+		     void (*error_fn)(const char *msg));
 
 /**
  * tal_expand - expand a tal array with contents.
@@ -438,17 +437,17 @@ void tal_set_backend(void *(*alloc_fn)(size_t size),
  * be increased by @num2.
  *
  * Example:
- *    int *arr1 = tal_arrz(NULL, int, 2);
- *    int arr2[2] = { 1, 3 };
+ *	int *arr1 = tal_arrz(NULL, int, 2);
+ *	int arr2[2] = { 1, 3 };
  *
- *    tal_expand(&arr1, arr2, 2);
- *    assert(tal_count(arr1) == 4);
- *    assert(arr1[2] == 1);
- *    assert(arr1[3] == 3);
+ *	tal_expand(&arr1, arr2, 2);
+ *	assert(tal_count(arr1) == 4);
+ *	assert(arr1[2] == 1);
+ *	assert(arr1[3] == 3);
  */
-#define tal_expand(a1p, a2, num2)                \
-    tal_expand_((void **)(a1p), (a2), sizeof**(a1p),    \
-            (num2) + 0*sizeof(*(a1p) == (a2)))
+#define tal_expand(a1p, a2, num2)				\
+	tal_expand_((void **)(a1p), (a2), sizeof**(a1p),	\
+		    (num2) + 0*sizeof(*(a1p) == (a2)))
 
 /**
  * tal_cleanup - remove pointers from NULL node
@@ -472,7 +471,7 @@ void tal_cleanup(void);
  * when a problem is found, otherwise it is not.
  *
  * See also:
- *    tal_set_backend()
+ *	tal_set_backend()
  */
 bool tal_check(const tal_t *ctx, const char *errorstr);
 
@@ -493,7 +492,7 @@ void tal_dump(void);
 #else
 #ifdef CCAN_TAL_DEBUG
 #define TAL_LABEL(type, arr) \
-    __FILE__ ":" stringify(__LINE__) ":" stringify(type) arr
+	__FILE__ ":" stringify(__LINE__) ":" stringify(type) arr
 #else
 #define TAL_LABEL(type, arr) stringify(type) arr
 #endif /* CCAN_TAL_DEBUG */
@@ -524,12 +523,12 @@ bool tal_set_name_(tal_t *ctx, const char *name, bool literal);
 
 void *tal_alloc_(const tal_t *ctx, size_t bytes, bool clear, const char *label);
 void *tal_alloc_arr_(const tal_t *ctx, size_t bytes, size_t count, bool clear,
-             const char *label);
+		     const char *label);
 
 void *tal_dup_(const tal_t *ctx, const void *p TAKES, size_t size,
-           size_t n, size_t extra, bool nullok, const char *label);
+	       size_t n, size_t extra, bool nullok, const char *label);
 void *tal_dup_talarr_(const tal_t *ctx, const tal_t *src TAKES,
-              const char *label);
+		      const char *label);
 
 tal_t *tal_steal_(const tal_t *new_parent, const tal_t *t);
 
@@ -538,16 +537,16 @@ bool tal_expand_(tal_t **ctxp, const void *src TAKES, size_t size, size_t count)
 
 bool tal_add_destructor_(const tal_t *ctx, void (*destroy)(void *me));
 bool tal_add_destructor2_(const tal_t *ctx, void (*destroy)(void *me, void *arg),
-              void *arg);
+			  void *arg);
 bool tal_del_destructor_(const tal_t *ctx, void (*destroy)(void *me));
 bool tal_del_destructor2_(const tal_t *ctx, void (*destroy)(void *me, void *arg),
-              void *arg);
+			  void *arg);
 
 bool tal_add_notifier_(const tal_t *ctx, enum tal_notify_type types,
-               void (*notify)(tal_t *ctx, enum tal_notify_type,
-                      void *info));
+		       void (*notify)(tal_t *ctx, enum tal_notify_type,
+				      void *info));
 bool tal_del_notifier_(const tal_t *ctx,
-               void (*notify)(tal_t *ctx, enum tal_notify_type,
-                      void *info),
-               bool match_extra_arg, void *arg);
+		       void (*notify)(tal_t *ctx, enum tal_notify_type,
+				      void *info),
+		       bool match_extra_arg, void *arg);
 #endif /* CCAN_TAL_H */

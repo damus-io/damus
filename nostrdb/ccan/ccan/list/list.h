@@ -4,9 +4,9 @@
 //#define CCAN_LIST_DEBUG 1
 #include <stdbool.h>
 #include <assert.h>
-#include "str.h"
-#include "ccan/container_of/container_of.h"
-#include "ccan/check_type/check_type.h"
+#include <ccan/str/str.h>
+#include <ccan/container_of/container_of.h>
+#include <ccan/check_type/check_type.h>
 
 /**
  * struct list_node - an entry in a doubly-linked list
@@ -15,15 +15,15 @@
  *
  * This is used as an entry in a linked list.
  * Example:
- *    struct child {
- *        const char *name;
- *        // Linked list of all us children.
- *        struct list_node list;
- *    };
+ *	struct child {
+ *		const char *name;
+ *		// Linked list of all us children.
+ *		struct list_node list;
+ *	};
  */
 struct list_node
 {
-    struct list_node *next, *prev;
+	struct list_node *next, *prev;
 };
 
 /**
@@ -32,15 +32,15 @@ struct list_node
  *
  * This is used as the head of a linked list.
  * Example:
- *    struct parent {
- *        const char *name;
- *        struct list_head children;
- *        unsigned int num_children;
- *    };
+ *	struct parent {
+ *		const char *name;
+ *		struct list_head children;
+ *		unsigned int num_children;
+ *	};
  */
 struct list_head
 {
-    struct list_node n;
+	struct list_node n;
 };
 
 /**
@@ -59,15 +59,15 @@ struct list_head
  * See also: list_check_node()
  *
  * Example:
- *    static void dump_parent(struct parent *p)
- *    {
- *        struct child *c;
+ *	static void dump_parent(struct parent *p)
+ *	{
+ *		struct child *c;
  *
- *        printf("%s (%u children):\n", p->name, p->num_children);
- *        list_check(&p->children, "bad child list");
- *        list_for_each(&p->children, c, list)
- *            printf(" -> %s\n", c->name);
- *    }
+ *		printf("%s (%u children):\n", p->name, p->num_children);
+ *		list_check(&p->children, "bad child list");
+ *		list_for_each(&p->children, c, list)
+ *			printf(" -> %s\n", c->name);
+ *	}
  */
 struct list_head *list_check(const struct list_head *h, const char *abortstr);
 
@@ -81,14 +81,14 @@ struct list_head *list_check(const struct list_head *h, const char *abortstr);
  * See also: list_check()
  *
  * Example:
- *    static void dump_child(const struct child *c)
- *    {
- *        list_check_node(&c->list, "bad child list");
- *        printf("%s\n", c->name);
- *    }
+ *	static void dump_child(const struct child *c)
+ *	{
+ *		list_check_node(&c->list, "bad child list");
+ *		printf("%s\n", c->name);
+ *	}
  */
 struct list_node *list_check_node(const struct list_node *n,
-                  const char *abortstr);
+				  const char *abortstr);
 
 #define LIST_LOC __FILE__  ":" stringify(__LINE__)
 #ifdef CCAN_LIST_DEBUG
@@ -106,10 +106,10 @@ struct list_node *list_check_node(const struct list_node *n,
  * Explicit initializer for an empty list.
  *
  * See also:
- *    LIST_HEAD, list_head_init()
+ *	LIST_HEAD, list_head_init()
  *
  * Example:
- *    static struct list_head my_list = LIST_HEAD_INIT(my_list);
+ *	static struct list_head my_list = LIST_HEAD_INIT(my_list);
  */
 #define LIST_HEAD_INIT(name) { { &(name).n, &(name).n } }
 
@@ -121,28 +121,28 @@ struct list_node *list_check_node(const struct list_node *n,
  * list.  It can be prepended by "static" to define a static list_head.
  *
  * See also:
- *    LIST_HEAD_INIT, list_head_init()
+ *	LIST_HEAD_INIT, list_head_init()
  *
  * Example:
- *    static LIST_HEAD(my_global_list);
+ *	static LIST_HEAD(my_global_list);
  */
 #define LIST_HEAD(name) \
-    struct list_head name = LIST_HEAD_INIT(name)
+	struct list_head name = LIST_HEAD_INIT(name)
 
 /**
  * list_head_init - initialize a list_head
  * @h: the list_head to set to the empty list
  *
  * Example:
- *    ...
- *    struct parent *parent = malloc(sizeof(*parent));
+ *	...
+ *	struct parent *parent = malloc(sizeof(*parent));
  *
- *    list_head_init(&parent->children);
- *    parent->num_children = 0;
+ *	list_head_init(&parent->children);
+ *	parent->num_children = 0;
  */
 static inline void list_head_init(struct list_head *h)
 {
-    h->n.next = h->n.prev = &h->n;
+	h->n.next = h->n.prev = &h->n;
 }
 
 /**
@@ -154,7 +154,7 @@ static inline void list_head_init(struct list_head *h)
  */
 static inline void list_node_init(struct list_node *n)
 {
-    n->next = n->prev = n;
+	n->next = n->prev = n;
 }
 
 /**
@@ -167,24 +167,24 @@ static inline void list_node_init(struct list_node *n)
  * The new list_node does not need to be initialized; it will be overwritten.
  *
  * Example:
- *    struct child c1, c2, c3;
- *    LIST_HEAD(h);
+ *	struct child c1, c2, c3;
+ *	LIST_HEAD(h);
  *
- *    list_add_tail(&h, &c1.list);
- *    list_add_tail(&h, &c3.list);
- *    list_add_after(&h, &c1.list, &c2.list);
+ *	list_add_tail(&h, &c1.list);
+ *	list_add_tail(&h, &c3.list);
+ *	list_add_after(&h, &c1.list, &c2.list);
  */
 #define list_add_after(h, p, n) list_add_after_(h, p, n, LIST_LOC)
 static inline void list_add_after_(struct list_head *h,
-                   struct list_node *p,
-                   struct list_node *n,
-                   const char *abortstr)
+				   struct list_node *p,
+				   struct list_node *n,
+				   const char *abortstr)
 {
-    n->next = p->next;
-    n->prev = p;
-    p->next->prev = n;
-    p->next = n;
-    (void)list_debug(h, abortstr);
+	n->next = p->next;
+	n->prev = p;
+	p->next->prev = n;
+	p->next = n;
+	(void)list_debug(h, abortstr);
 }
 
 /**
@@ -194,18 +194,18 @@ static inline void list_add_after_(struct list_head *h,
  *
  * The list_node does not need to be initialized; it will be overwritten.
  * Example:
- *    struct child *child = malloc(sizeof(*child));
+ *	struct child *child = malloc(sizeof(*child));
  *
- *    child->name = "marvin";
- *    list_add(&parent->children, &child->list);
- *    parent->num_children++;
+ *	child->name = "marvin";
+ *	list_add(&parent->children, &child->list);
+ *	parent->num_children++;
  */
 #define list_add(h, n) list_add_(h, n, LIST_LOC)
 static inline void list_add_(struct list_head *h,
-                 struct list_node *n,
-                 const char *abortstr)
+			     struct list_node *n,
+			     const char *abortstr)
 {
-    list_add_after_(h, &h->n, n, abortstr);
+	list_add_after_(h, &h->n, n, abortstr);
 }
 
 /**
@@ -218,22 +218,22 @@ static inline void list_add_(struct list_head *h,
  * The new list_node does not need to be initialized; it will be overwritten.
  *
  * Example:
- *    list_head_init(&h);
- *    list_add_tail(&h, &c1.list);
- *    list_add_tail(&h, &c3.list);
- *    list_add_before(&h, &c3.list, &c2.list);
+ *	list_head_init(&h);
+ *	list_add_tail(&h, &c1.list);
+ *	list_add_tail(&h, &c3.list);
+ *	list_add_before(&h, &c3.list, &c2.list);
  */
 #define list_add_before(h, p, n) list_add_before_(h, p, n, LIST_LOC)
 static inline void list_add_before_(struct list_head *h,
-                    struct list_node *p,
-                    struct list_node *n,
-                    const char *abortstr)
+				    struct list_node *p,
+				    struct list_node *n,
+				    const char *abortstr)
 {
-    n->next = p;
-    n->prev = p->prev;
-    p->prev->next = n;
-    p->prev = n;
-    (void)list_debug(h, abortstr);
+	n->next = p;
+	n->prev = p->prev;
+	p->prev->next = n;
+	p->prev = n;
+	(void)list_debug(h, abortstr);
 }
 
 /**
@@ -243,15 +243,15 @@ static inline void list_add_before_(struct list_head *h,
  *
  * The list_node does not need to be initialized; it will be overwritten.
  * Example:
- *    list_add_tail(&parent->children, &child->list);
- *    parent->num_children++;
+ *	list_add_tail(&parent->children, &child->list);
+ *	parent->num_children++;
  */
 #define list_add_tail(h, n) list_add_tail_(h, n, LIST_LOC)
 static inline void list_add_tail_(struct list_head *h,
-                  struct list_node *n,
-                  const char *abortstr)
+				  struct list_node *n,
+				  const char *abortstr)
 {
-    list_add_before_(h, &h->n, n, abortstr);
+	list_add_before_(h, &h->n, n, abortstr);
 }
 
 /**
@@ -261,13 +261,13 @@ static inline void list_add_tail_(struct list_head *h,
  * If the list is empty, returns true.
  *
  * Example:
- *    assert(list_empty(&parent->children) == (parent->num_children == 0));
+ *	assert(list_empty(&parent->children) == (parent->num_children == 0));
  */
 #define list_empty(h) list_empty_(h, LIST_LOC)
 static inline bool list_empty_(const struct list_head *h, const char* abortstr)
 {
-    (void)list_debug(h, abortstr);
-    return h->n.next == &h->n;
+	(void)list_debug(h, abortstr);
+	return h->n.next == &h->n;
 }
 
 /**
@@ -280,14 +280,14 @@ static inline bool list_empty_(const struct list_head *h, const char* abortstr)
  * know what you're doing.
  *
  * Example:
- *    assert(list_empty_nodebug(&parent->children) == (parent->num_children == 0));
+ *	assert(list_empty_nodebug(&parent->children) == (parent->num_children == 0));
  */
 #ifndef CCAN_LIST_DEBUG
 #define list_empty_nodebug(h) list_empty(h)
 #else
 static inline bool list_empty_nodebug(const struct list_head *h)
 {
-    return h->n.next == &h->n;
+	return h->n.next == &h->n;
 }
 #endif
 
@@ -303,7 +303,7 @@ static inline bool list_empty_nodebug(const struct list_head *h)
  */
 static inline bool list_empty_nocheck(const struct list_head *h)
 {
-    return h->n.next == &h->n;
+	return h->n.next == &h->n;
 }
 
 /**
@@ -314,21 +314,21 @@ static inline bool list_empty_nocheck(const struct list_head *h)
  * another list, but not deleted again.
  *
  * See also:
- *    list_del_from(), list_del_init()
+ *	list_del_from(), list_del_init()
  *
  * Example:
- *    list_del(&child->list);
- *    parent->num_children--;
+ *	list_del(&child->list);
+ *	parent->num_children--;
  */
 #define list_del(n) list_del_(n, LIST_LOC)
 static inline void list_del_(struct list_node *n, const char* abortstr)
 {
-    (void)list_debug_node(n, abortstr);
-    n->next->prev = n->prev;
-    n->prev->next = n->next;
+	(void)list_debug_node(n, abortstr);
+	n->next->prev = n->prev;
+	n->prev->next = n->next;
 #ifdef CCAN_LIST_DEBUG
-    /* Catch use-after-del. */
-    n->next = n->prev = NULL;
+	/* Catch use-after-del. */
+	n->next = n->prev = NULL;
 #endif
 }
 
@@ -340,17 +340,17 @@ static inline void list_del_(struct list_node *n, const char* abortstr)
  * which can be useful in some cases.
  *
  * See also:
- *    list_del_from(), list_del()
+ *	list_del_from(), list_del()
  *
  * Example:
- *    list_del_init(&child->list);
- *    parent->num_children--;
+ *	list_del_init(&child->list);
+ *	parent->num_children--;
  */
 #define list_del_init(n) list_del_init_(n, LIST_LOC)
 static inline void list_del_init_(struct list_node *n, const char *abortstr)
 {
-    list_del_(n, abortstr);
-    list_node_init(n);
+	list_del_(n, abortstr);
+	list_node_init(n);
 }
 
 /**
@@ -364,23 +364,23 @@ static inline void list_del_init_(struct list_node *n, const char *abortstr)
  * See also: list_del()
  *
  * Example:
- *    list_del_from(&parent->children, &child->list);
- *    parent->num_children--;
+ *	list_del_from(&parent->children, &child->list);
+ *	parent->num_children--;
  */
 static inline void list_del_from(struct list_head *h, struct list_node *n)
 {
 #ifdef CCAN_LIST_DEBUG
-    {
-        /* Thorough check: make sure it was in list! */
-        struct list_node *i;
-        for (i = h->n.next; i != n; i = i->next)
-            assert(i != &h->n);
-    }
+	{
+		/* Thorough check: make sure it was in list! */
+		struct list_node *i;
+		for (i = h->n.next; i != n; i = i->next)
+			assert(i != &h->n);
+	}
 #endif /* CCAN_LIST_DEBUG */
 
-    /* Quick test that catches a surprising number of bugs. */
-    assert(!list_empty(h));
-    list_del(n);
+	/* Quick test that catches a surprising number of bugs. */
+	assert(!list_empty(h));
+	list_del(n);
 }
 
 /**
@@ -392,27 +392,27 @@ static inline void list_del_from(struct list_head *h, struct list_node *n)
  * another list, but not deleted/swapped again.
  *
  * See also:
- *    list_del()
+ *	list_del()
  *
  * Example:
- *    struct child x1, x2;
- *    LIST_HEAD(xh);
+ *	struct child x1, x2;
+ *	LIST_HEAD(xh);
  *
- *    list_add(&xh, &x1.list);
- *    list_swap(&x1.list, &x2.list);
+ *	list_add(&xh, &x1.list);
+ *	list_swap(&x1.list, &x2.list);
  */
 #define list_swap(o, n) list_swap_(o, n, LIST_LOC)
 static inline void list_swap_(struct list_node *o,
-                  struct list_node *n,
-                  const char* abortstr)
+			      struct list_node *n,
+			      const char* abortstr)
 {
-    (void)list_debug_node(o, abortstr);
-    *n = *o;
-    n->next->prev = n;
-    n->prev->next = n;
+	(void)list_debug_node(o, abortstr);
+	*n = *o;
+	n->next->prev = n;
+	n->prev->next = n;
 #ifdef CCAN_LIST_DEBUG
-    /* Catch use-after-del. */
-    o->next = o->prev = NULL;
+	/* Catch use-after-del. */
+	o->next = o->prev = NULL;
 #endif
 }
 
@@ -423,11 +423,11 @@ static inline void list_swap_(struct list_node *o,
  * @member: the list_node member of the type
  *
  * Example:
- *    // First list entry is children.next; convert back to child.
- *    child = list_entry(parent->children.n.next, struct child, list);
+ *	// First list entry is children.next; convert back to child.
+ *	child = list_entry(parent->children.n.next, struct child, list);
  *
  * See Also:
- *    list_top(), list_for_each()
+ *	list_top(), list_for_each()
  */
 #define list_entry(n, type, member) container_of(n, type, member)
 
@@ -440,19 +440,19 @@ static inline void list_swap_(struct list_node *o,
  * If the list is empty, returns NULL.
  *
  * Example:
- *    struct child *first;
- *    first = list_top(&parent->children, struct child, list);
- *    if (!first)
- *        printf("Empty list!\n");
+ *	struct child *first;
+ *	first = list_top(&parent->children, struct child, list);
+ *	if (!first)
+ *		printf("Empty list!\n");
  */
-#define list_top(h, type, member)                    \
-    ((type *)list_top_((h), list_off_(type, member)))
+#define list_top(h, type, member)					\
+	((type *)list_top_((h), list_off_(type, member)))
 
 static inline const void *list_top_(const struct list_head *h, size_t off)
 {
-    if (list_empty(h))
-        return NULL;
-    return (const char *)h->n.next - off;
+	if (list_empty(h))
+		return NULL;
+	return (const char *)h->n.next - off;
 }
 
 /**
@@ -464,23 +464,23 @@ static inline const void *list_top_(const struct list_head *h, size_t off)
  * If the list is empty, returns NULL.
  *
  * Example:
- *    struct child *one;
- *    one = list_pop(&parent->children, struct child, list);
- *    if (!one)
- *        printf("Empty list!\n");
+ *	struct child *one;
+ *	one = list_pop(&parent->children, struct child, list);
+ *	if (!one)
+ *		printf("Empty list!\n");
  */
-#define list_pop(h, type, member)                    \
-    ((type *)list_pop_((h), list_off_(type, member)))
+#define list_pop(h, type, member)					\
+	((type *)list_pop_((h), list_off_(type, member)))
 
 static inline const void *list_pop_(const struct list_head *h, size_t off)
 {
-    struct list_node *n;
+	struct list_node *n;
 
-    if (list_empty(h))
-        return NULL;
-    n = h->n.next;
-    list_del(n);
-    return (const char *)n - off;
+	if (list_empty(h))
+		return NULL;
+	n = h->n.next;
+	list_del(n);
+	return (const char *)n - off;
 }
 
 /**
@@ -492,19 +492,19 @@ static inline const void *list_pop_(const struct list_head *h, size_t off)
  * If the list is empty, returns NULL.
  *
  * Example:
- *    struct child *last;
- *    last = list_tail(&parent->children, struct child, list);
- *    if (!last)
- *        printf("Empty list!\n");
+ *	struct child *last;
+ *	last = list_tail(&parent->children, struct child, list);
+ *	if (!last)
+ *		printf("Empty list!\n");
  */
 #define list_tail(h, type, member) \
-    ((type *)list_tail_((h), list_off_(type, member)))
+	((type *)list_tail_((h), list_off_(type, member)))
 
 static inline const void *list_tail_(const struct list_head *h, size_t off)
 {
-    if (list_empty(h))
-        return NULL;
-    return (const char *)h->n.prev - off;
+	if (list_empty(h))
+		return NULL;
+	return (const char *)h->n.prev - off;
 }
 
 /**
@@ -517,11 +517,11 @@ static inline const void *list_tail_(const struct list_head *h, size_t off)
  * a for loop, so you can break and continue as normal.
  *
  * Example:
- *    list_for_each(&parent->children, child, list)
- *        printf("Name: %s\n", child->name);
+ *	list_for_each(&parent->children, child, list)
+ *		printf("Name: %s\n", child->name);
  */
-#define list_for_each(h, i, member)                    \
-    list_for_each_off(h, i, list_off_var_(i, member))
+#define list_for_each(h, i, member)					\
+	list_for_each_off(h, i, list_off_var_(i, member))
 
 /**
  * list_for_each_rev - iterate through a list backwards.
@@ -533,11 +533,11 @@ static inline const void *list_tail_(const struct list_head *h, size_t off)
  * a for loop, so you can break and continue as normal.
  *
  * Example:
- *    list_for_each_rev(&parent->children, child, list)
- *        printf("Name: %s\n", child->name);
+ *	list_for_each_rev(&parent->children, child, list)
+ *		printf("Name: %s\n", child->name);
  */
-#define list_for_each_rev(h, i, member)                    \
-    list_for_each_rev_off(h, i, list_off_var_(i, member))
+#define list_for_each_rev(h, i, member)					\
+	list_for_each_rev_off(h, i, list_off_var_(i, member))
 
 /**
  * list_for_each_rev_safe - iterate through a list backwards,
@@ -553,13 +553,13 @@ static inline const void *list_tail_(const struct list_head *h, size_t off)
  * from the list.
  *
  * Example:
- *    struct child *next;
- *    list_for_each_rev_safe(&parent->children, child, next, list) {
- *        printf("Name: %s\n", child->name);
- *    }
+ *	struct child *next;
+ *	list_for_each_rev_safe(&parent->children, child, next, list) {
+ *		printf("Name: %s\n", child->name);
+ *	}
  */
-#define list_for_each_rev_safe(h, i, nxt, member)            \
-    list_for_each_rev_safe_off(h, i, nxt, list_off_var_(i, member))
+#define list_for_each_rev_safe(h, i, nxt, member)			\
+	list_for_each_rev_safe_off(h, i, nxt, list_off_var_(i, member))
 
 /**
  * list_for_each_safe - iterate through a list, maybe during deletion
@@ -573,13 +573,13 @@ static inline const void *list_tail_(const struct list_head *h, size_t off)
  * @nxt is used to hold the next element, so you can delete @i from the list.
  *
  * Example:
- *    list_for_each_safe(&parent->children, child, next, list) {
- *        list_del(&child->list);
- *        parent->num_children--;
- *    }
+ *	list_for_each_safe(&parent->children, child, next, list) {
+ *		list_del(&child->list);
+ *		parent->num_children--;
+ *	}
  */
-#define list_for_each_safe(h, i, nxt, member)                \
-    list_for_each_safe_off(h, i, nxt, list_off_var_(i, member))
+#define list_for_each_safe(h, i, nxt, member)				\
+	list_for_each_safe_off(h, i, nxt, list_off_var_(i, member))
 
 /**
  * list_next - get the next entry in a list
@@ -590,16 +590,16 @@ static inline const void *list_tail_(const struct list_head *h, size_t off)
  * If @i was the last entry in the list, returns NULL.
  *
  * Example:
- *    struct child *second;
- *    second = list_next(&parent->children, first, list);
- *    if (!second)
- *        printf("No second child!\n");
+ *	struct child *second;
+ *	second = list_next(&parent->children, first, list);
+ *	if (!second)
+ *		printf("No second child!\n");
  */
-#define list_next(h, i, member)                        \
-    ((list_typeof(i))list_entry_or_null(list_debug(h,        \
-                        __FILE__ ":" stringify(__LINE__)), \
-                        (i)->member.next,        \
-                        list_off_var_((i), member)))
+#define list_next(h, i, member)						\
+	((list_typeof(i))list_entry_or_null(list_debug(h,		\
+					    __FILE__ ":" stringify(__LINE__)), \
+					    (i)->member.next,		\
+					    list_off_var_((i), member)))
 
 /**
  * list_prev - get the previous entry in a list
@@ -610,15 +610,15 @@ static inline const void *list_tail_(const struct list_head *h, size_t off)
  * If @i was the first entry in the list, returns NULL.
  *
  * Example:
- *    first = list_prev(&parent->children, second, list);
- *    if (!first)
- *        printf("Can't go back to first child?!\n");
+ *	first = list_prev(&parent->children, second, list);
+ *	if (!first)
+ *		printf("Can't go back to first child?!\n");
  */
-#define list_prev(h, i, member)                        \
-    ((list_typeof(i))list_entry_or_null(list_debug(h,        \
-                        __FILE__ ":" stringify(__LINE__)), \
-                        (i)->member.prev,        \
-                        list_off_var_((i), member)))
+#define list_prev(h, i, member)						\
+	((list_typeof(i))list_entry_or_null(list_debug(h,		\
+					    __FILE__ ":" stringify(__LINE__)), \
+					    (i)->member.prev,		\
+					    list_off_var_((i), member)))
 
 /**
  * list_append_list - empty one list onto the end of another.
@@ -629,30 +629,30 @@ static inline const void *list_tail_(const struct list_head *h, size_t off)
  * @to.  After this @from will be empty.
  *
  * Example:
- *    struct list_head adopter;
+ *	struct list_head adopter;
  *
- *    list_append_list(&adopter, &parent->children);
- *    assert(list_empty(&parent->children));
- *    parent->num_children = 0;
+ *	list_append_list(&adopter, &parent->children);
+ *	assert(list_empty(&parent->children));
+ *	parent->num_children = 0;
  */
-#define list_append_list(t, f) list_append_list_(t, f,            \
-                   __FILE__ ":" stringify(__LINE__))
+#define list_append_list(t, f) list_append_list_(t, f,			\
+				   __FILE__ ":" stringify(__LINE__))
 static inline void list_append_list_(struct list_head *to,
-                     struct list_head *from,
-                     const char *abortstr)
+				     struct list_head *from,
+				     const char *abortstr)
 {
-    struct list_node *from_tail = list_debug(from, abortstr)->n.prev;
-    struct list_node *to_tail = list_debug(to, abortstr)->n.prev;
+	struct list_node *from_tail = list_debug(from, abortstr)->n.prev;
+	struct list_node *to_tail = list_debug(to, abortstr)->n.prev;
 
-    /* Sew in head and entire list. */
-    to->n.prev = from_tail;
-    from_tail->next = &to->n;
-    to_tail->next = &from->n;
-    from->n.prev = to_tail;
+	/* Sew in head and entire list. */
+	to->n.prev = from_tail;
+	from_tail->next = &to->n;
+	to_tail->next = &from->n;
+	from->n.prev = to_tail;
 
-    /* Now remove head. */
-    list_del(&from->n);
-    list_head_init(from);
+	/* Now remove head. */
+	list_del(&from->n);
+	list_head_init(from);
 }
 
 /**
@@ -664,46 +664,46 @@ static inline void list_append_list_(struct list_head *to,
  * of @to.  After this @from will be empty.
  *
  * Example:
- *    list_prepend_list(&adopter, &parent->children);
- *    assert(list_empty(&parent->children));
- *    parent->num_children = 0;
+ *	list_prepend_list(&adopter, &parent->children);
+ *	assert(list_empty(&parent->children));
+ *	parent->num_children = 0;
  */
 #define list_prepend_list(t, f) list_prepend_list_(t, f, LIST_LOC)
 static inline void list_prepend_list_(struct list_head *to,
-                      struct list_head *from,
-                      const char *abortstr)
+				      struct list_head *from,
+				      const char *abortstr)
 {
-    struct list_node *from_tail = list_debug(from, abortstr)->n.prev;
-    struct list_node *to_head = list_debug(to, abortstr)->n.next;
+	struct list_node *from_tail = list_debug(from, abortstr)->n.prev;
+	struct list_node *to_head = list_debug(to, abortstr)->n.next;
 
-    /* Sew in head and entire list. */
-    to->n.next = &from->n;
-    from->n.prev = &to->n;
-    to_head->prev = from_tail;
-    from_tail->next = to_head;
+	/* Sew in head and entire list. */
+	to->n.next = &from->n;
+	from->n.prev = &to->n;
+	to_head->prev = from_tail;
+	from_tail->next = to_head;
 
-    /* Now remove head. */
-    list_del(&from->n);
-    list_head_init(from);
+	/* Now remove head. */
+	list_del(&from->n);
+	list_head_init(from);
 }
 
 /* internal macros, do not use directly */
-#define list_for_each_off_dir_(h, i, off, dir)                \
-    for (i = list_node_to_off_(list_debug(h, LIST_LOC)->n.dir,    \
-                   (off));                \
-    list_node_from_off_((void *)i, (off)) != &(h)->n;        \
-    i = list_node_to_off_(list_node_from_off_((void *)i, (off))->dir, \
-                  (off)))
+#define list_for_each_off_dir_(h, i, off, dir)				\
+	for (i = list_node_to_off_(list_debug(h, LIST_LOC)->n.dir,	\
+				   (off));				\
+	list_node_from_off_((void *)i, (off)) != &(h)->n;		\
+	i = list_node_to_off_(list_node_from_off_((void *)i, (off))->dir, \
+			      (off)))
 
-#define list_for_each_safe_off_dir_(h, i, nxt, off, dir)        \
-    for (i = list_node_to_off_(list_debug(h, LIST_LOC)->n.dir,    \
-                   (off)),                \
-    nxt = list_node_to_off_(list_node_from_off_(i, (off))->dir,    \
-                (off));                    \
-    list_node_from_off_(i, (off)) != &(h)->n;            \
-    i = nxt,                            \
-    nxt = list_node_to_off_(list_node_from_off_(i, (off))->dir,    \
-                (off)))
+#define list_for_each_safe_off_dir_(h, i, nxt, off, dir)		\
+	for (i = list_node_to_off_(list_debug(h, LIST_LOC)->n.dir,	\
+				   (off)),				\
+	nxt = list_node_to_off_(list_node_from_off_(i, (off))->dir,	\
+				(off));					\
+	list_node_from_off_(i, (off)) != &(h)->n;			\
+	i = nxt,							\
+	nxt = list_node_to_off_(list_node_from_off_(i, (off))->dir,	\
+				(off)))
 
 /**
  * list_for_each_off - iterate through a list of memory regions.
@@ -730,12 +730,12 @@ static inline void list_prepend_list_(struct list_head *to,
  * @i.
  *
  * Example:
- *    list_for_each_off(&parent->children, child,
- *                offsetof(struct child, list))
- *        printf("Name: %s\n", child->name);
+ *	list_for_each_off(&parent->children, child,
+ *				offsetof(struct child, list))
+ *		printf("Name: %s\n", child->name);
  */
 #define list_for_each_off(h, i, off)                                    \
-    list_for_each_off_dir_((h),(i),(off),next)
+	list_for_each_off_dir_((h),(i),(off),next)
 
 /**
  * list_for_each_rev_off - iterate through a list of memory regions backwards
@@ -746,7 +746,7 @@ static inline void list_prepend_list_(struct list_head *to,
  * See list_for_each_off for details
  */
 #define list_for_each_rev_off(h, i, off)                                    \
-    list_for_each_off_dir_((h),(i),(off),prev)
+	list_for_each_off_dir_((h),(i),(off),prev)
 
 /**
  * list_for_each_safe_off - iterate through a list of memory regions, maybe
@@ -760,12 +760,12 @@ static inline void list_prepend_list_(struct list_head *to,
  * descriptions.
  *
  * Example:
- *    list_for_each_safe_off(&parent->children, child,
- *        next, offsetof(struct child, list))
- *        printf("Name: %s\n", child->name);
+ *	list_for_each_safe_off(&parent->children, child,
+ *		next, offsetof(struct child, list))
+ *		printf("Name: %s\n", child->name);
  */
 #define list_for_each_safe_off(h, i, nxt, off)                          \
-    list_for_each_safe_off_dir_((h),(i),(nxt),(off),next)
+	list_for_each_safe_off_dir_((h),(i),(nxt),(off),next)
 
 /**
  * list_for_each_rev_safe_off - iterate backwards through a list of
@@ -779,50 +779,50 @@ static inline void list_prepend_list_(struct list_head *to,
  * descriptions.
  *
  * Example:
- *    list_for_each_rev_safe_off(&parent->children, child,
- *        next, offsetof(struct child, list))
- *        printf("Name: %s\n", child->name);
+ *	list_for_each_rev_safe_off(&parent->children, child,
+ *		next, offsetof(struct child, list))
+ *		printf("Name: %s\n", child->name);
  */
 #define list_for_each_rev_safe_off(h, i, nxt, off)                      \
-    list_for_each_safe_off_dir_((h),(i),(nxt),(off),prev)
+	list_for_each_safe_off_dir_((h),(i),(nxt),(off),prev)
 
 /* Other -off variants. */
-#define list_entry_off(n, type, off)        \
-    ((type *)list_node_from_off_((n), (off)))
+#define list_entry_off(n, type, off)		\
+	((type *)list_node_from_off_((n), (off)))
 
-#define list_head_off(h, type, off)        \
-    ((type *)list_head_off((h), (off)))
+#define list_head_off(h, type, off)		\
+	((type *)list_head_off((h), (off)))
 
-#define list_tail_off(h, type, off)        \
-    ((type *)list_tail_((h), (off)))
+#define list_tail_off(h, type, off)		\
+	((type *)list_tail_((h), (off)))
 
 #define list_add_off(h, n, off)                 \
-    list_add((h), list_node_from_off_((n), (off)))
+	list_add((h), list_node_from_off_((n), (off)))
 
 #define list_del_off(n, off)                    \
-    list_del(list_node_from_off_((n), (off)))
+	list_del(list_node_from_off_((n), (off)))
 
-#define list_del_from_off(h, n, off)            \
-    list_del_from(h, list_node_from_off_((n), (off)))
+#define list_del_from_off(h, n, off)			\
+	list_del_from(h, list_node_from_off_((n), (off)))
 
 /* Offset helper functions so we only single-evaluate. */
 static inline void *list_node_to_off_(struct list_node *node, size_t off)
 {
-    return (void *)((char *)node - off);
+	return (void *)((char *)node - off);
 }
 static inline struct list_node *list_node_from_off_(void *ptr, size_t off)
 {
-    return (struct list_node *)((char *)ptr + off);
+	return (struct list_node *)((char *)ptr + off);
 }
 
 /* Get the offset of the member, but make sure it's a list_node. */
-#define list_off_(type, member)                    \
-    (container_off(type, member) +                \
-     check_type(((type *)0)->member, struct list_node))
+#define list_off_(type, member)					\
+	(container_off(type, member) +				\
+	 check_type(((type *)0)->member, struct list_node))
 
-#define list_off_var_(var, member)            \
-    (container_off_var(var, member) +        \
-     check_type(var->member, struct list_node))
+#define list_off_var_(var, member)			\
+	(container_off_var(var, member) +		\
+	 check_type(var->member, struct list_node))
 
 #if HAVE_TYPEOF
 #define list_typeof(var) typeof(var)
@@ -832,11 +832,11 @@ static inline struct list_node *list_node_from_off_(void *ptr, size_t off)
 
 /* Returns member, or NULL if at end of list. */
 static inline void *list_entry_or_null(const struct list_head *h,
-                       const struct list_node *n,
-                       size_t off)
+				       const struct list_node *n,
+				       size_t off)
 {
-    if (n == &h->n)
-        return NULL;
-    return (char *)n - off;
+	if (n == &h->n)
+		return NULL;
+	return (char *)n - off;
 }
 #endif /* CCAN_LIST_H */

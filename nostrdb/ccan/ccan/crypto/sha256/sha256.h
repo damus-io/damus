@@ -1,14 +1,7 @@
-
 #ifndef CCAN_CRYPTO_SHA256_H
 #define CCAN_CRYPTO_SHA256_H
-
-
-/** Output length for `wally_sha256` */
-#define SHA256_LEN 32
-
-
 /* BSD-MIT - see LICENSE file for details */
-/* #include "config.h" */
+#include "config.h"
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -151,5 +144,4 @@ void sha256_le64(struct sha256_ctx *ctx, uint64_t v);
 void sha256_be16(struct sha256_ctx *ctx, uint16_t v);
 void sha256_be32(struct sha256_ctx *ctx, uint32_t v);
 void sha256_be64(struct sha256_ctx *ctx, uint64_t v);
-
 #endif /* CCAN_CRYPTO_SHA256_H */
