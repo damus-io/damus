@@ -109,7 +109,7 @@ func is_already_following(contacts: NostrEvent, follow: FollowRef) -> Bool {
         case let (.pubkey(pk), .pubkey(follow_pk)):
             return pk == follow_pk
         case (.hashtag, .pubkey), (.pubkey, .hashtag),
-            (.event, _), (.quote, _), (.param, _), (.naddr, _):
+            (.event, _), (.quote, _), (.param, _), (.naddr, _), (.reference(_), _):
             return false
         }
     }
