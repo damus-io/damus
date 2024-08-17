@@ -178,6 +178,24 @@ static void decode_p(struct bolt11 *b11,
     *have_p = true;
 }
 
+/* Check for valid UTF-8 */
+static bool utf8_check(const void *vbuf, size_t buflen)
+{
+	const u8 *buf = vbuf;
+	struct utf8_state utf8_state = UTF8_STATE_INIT;
+	bool need_more = false;
+
+	for (size_t i = 0; i < buflen; i++) {
+		if (!utf8_decode(&utf8_state, buf[i])) {
+			need_more = true;
+			continue;
+		}
+		need_more = false;
+		if (errno != 0)
+			return false;
+	}
+	return !need_more;
+}
 
 static char *utf8_str(const tal_t *ctx, const u8 *buf TAKES, size_t buflen)
 {
