@@ -32,3 +32,31 @@ struct HighlightEvent {
         return highlight
     }
 }
+
+struct HighlightContentDraft: Hashable {
+    let selected_text: String
+    let source: HighlightSource
+}
+
+enum HighlightSource: Hashable {
+    case event(NostrEvent)
+    case external_url(URL)
+    
+    func tags() -> [[String]] {
+        switch self {
+            case .event(let event):
+                return [ ["e", "\(event.id)"] ]
+            case .external_url(let url):
+                return [ ["r", "\(url)"] ]
+        }
+    }
+    
+    func ref() -> RefId {
+        switch self {
+            case .event(let event):
+                return .event(event.id)
+            case .external_url(let url):
+                return .reference(url.absoluteString)
+        }
+    }
+}

@@ -30,15 +30,18 @@ enum PostAction {
     case replying_to(NostrEvent)
     case quoting(NostrEvent)
     case posting(PostTarget)
+    case highlighting(HighlightContentDraft)
     
     var ev: NostrEvent? {
         switch self {
-        case .replying_to(let ev):
-            return ev
-        case .quoting(let ev):
-            return ev
-        case .posting:
-            return nil
+            case .replying_to(let ev):
+                return ev
+            case .quoting(let ev):
+                return ev
+            case .posting:
+                return nil
+            case .highlighting:
+                return nil
         }
     }
 }
@@ -128,7 +131,12 @@ struct PostView: View {
     }
 
     var posting_disabled: Bool {
-        return is_post_empty || uploading_disabled
+        switch action {
+            case .highlighting(_):
+                return false
+            default:
+                return is_post_empty || uploading_disabled
+        }
     }
     
     // Returns a valid height for the text box, even when textHeight is not a number
@@ -204,6 +212,8 @@ struct PostView: View {
                 damus_state.drafts.quotes.removeValue(forKey: quoting)
             case .posting:
                 damus_state.drafts.post = nil
+            case .highlighting(let draft):
+                damus_state.drafts.highlights.removeValue(forKey: draft.source)
         }
 
     }
@@ -371,6 +381,9 @@ struct PostView: View {
                 if case .quoting(let ev) = action {
                     BuilderEventView(damus: damus_state, event: ev)
                 }
+                else if case .highlighting(let draft) = action {
+                    HighlightDraftContentView(draft: draft)
+                }
             }
             .padding(.horizontal)
         }
@@ -454,14 +467,15 @@ struct PostView: View {
                 let loaded_draft = load_draft()
                 
                 switch action {
-                case .replying_to(let replying_to):
-                    references = gather_reply_ids(our_pubkey: damus_state.pubkey, from: replying_to)
-                case .quoting(let quoting):
-                    references = gather_quote_ids(our_pubkey: damus_state.pubkey, from: quoting)
-                case .posting(let target):
-                    guard !loaded_draft else { break }
-                    
-                    fill_target_content(target: target)
+                    case .replying_to(let replying_to):
+                        references = gather_reply_ids(our_pubkey: damus_state.pubkey, from: replying_to)
+                    case .quoting(let quoting):
+                        references = gather_quote_ids(our_pubkey: damus_state.pubkey, from: quoting)
+                    case .posting(let target):
+                        guard !loaded_draft else { break }
+                        fill_target_content(target: target)
+                    case .highlighting(let draft):
+                        references = [draft.source.ref()]
                 }
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -597,6 +611,8 @@ func set_draft_for_post(drafts: Drafts, action: PostAction, artifacts: DraftArti
         drafts.quotes[ev] = artifacts
     case .posting:
         drafts.post = artifacts
+    case .highlighting(let draft):
+        drafts.highlights[draft.source] = artifacts
     }
 }
 
@@ -608,6 +624,8 @@ func load_draft_for_post(drafts: Drafts, action: PostAction) -> DraftArtifacts? 
         return drafts.quotes[ev]
     case .posting:
         return drafts.post
+    case .highlighting(let draft):
+        return drafts.highlights[draft.source]
     }
 }
 
@@ -669,18 +687,20 @@ func build_post(state: DamusState, post: NSMutableAttributedString, action: Post
     var tags: [[String]] = []
 
     switch action {
-    case .replying_to(let replying_to):
-        // start off with the reply tags
-        tags = nip10_reply_tags(replying_to: replying_to, keypair: state.keypair)
+        case .replying_to(let replying_to):
+            // start off with the reply tags
+            tags = nip10_reply_tags(replying_to: replying_to, keypair: state.keypair)
 
-    case .quoting(let ev):
-        content.append(" nostr:" + bech32_note_id(ev.id))
+        case .quoting(let ev):
+            content.append(" nostr:" + bech32_note_id(ev.id))
 
-        if let quoted_ev = state.events.lookup(ev.id) {
-            tags.append(["p", quoted_ev.pubkey.hex()])
-        }
-    case .posting(let postTarget):
-        break
+            if let quoted_ev = state.events.lookup(ev.id) {
+                tags.append(["p", quoted_ev.pubkey.hex()])
+            }
+        case .posting(let postTarget):
+            break
+        case .highlighting(let draft):
+            break
     }
     
     // include pubkeys
@@ -690,6 +710,17 @@ func build_post(state: DamusState, post: NSMutableAttributedString, action: Post
 
     // append additional tags
     tags += uploadedMedias.compactMap { $0.metadata?.to_tag() }
+    
+    switch action {
+        case .highlighting(let draft):
+            tags.append(contentsOf: draft.source.tags())
+            if !(content.isEmpty || content.allSatisfy { $0.isWhitespace })  {
+                tags.append(["comment", content])
+            }
+            return NostrPost(content: draft.selected_text, kind: .highlight, tags: tags)
+        default:
+            break
+    }
 
     return NostrPost(content: content, kind: .text, tags: tags)
 }

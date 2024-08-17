@@ -290,12 +290,3 @@ func make_post_tags(post_blocks: [Block], tags: [[String]]) -> PostTags {
     
     return PostTags(blocks: post_blocks, tags: new_tags)
 }
-
-func post_to_event(post: NostrPost, keypair: FullKeypair) -> NostrEvent? {
-    let post_blocks = parse_post_blocks(content: post.content)
-    let post_tags = make_post_tags(post_blocks: post_blocks, tags: post.tags)
-    let content = post_tags.blocks
-        .map(\.asString)
-        .joined(separator: "")
-    return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: post.kind.rawValue, tags: post_tags.tags)
-}

@@ -399,7 +399,7 @@
 		5C14C29D2BBBA40B00079FD2 /* RelayAdminDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C14C29C2BBBA40B00079FD2 /* RelayAdminDetail.swift */; };
 		5C14C29F2BBBA5C600079FD2 /* RelayNipList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C14C29E2BBBA5C600079FD2 /* RelayNipList.swift */; };
 		5C42E78C29DB76D90086AAC1 /* EmptyUserSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C42E78B29DB76D90086AAC1 /* EmptyUserSearchView.swift */; };
-		5C4D9EA72C042FA5005EA0F7 /* HighlightPostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C4D9EA62C042FA5005EA0F7 /* HighlightPostView.swift */; };
+		5C4D9EA72C042FA5005EA0F7 /* HighlightDraftContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C4D9EA62C042FA5005EA0F7 /* HighlightDraftContentView.swift */; };
 		5C513FBA297F72980072348F /* CustomPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FB9297F72980072348F /* CustomPicker.swift */; };
 		5C513FCC2984ACA60072348F /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FCB2984ACA60072348F /* QRCodeView.swift */; };
 		5C6E1DAD2A193EC2008FC15A /* GradientButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C6E1DAC2A193EC2008FC15A /* GradientButtonStyle.swift */; };
@@ -1343,7 +1343,7 @@
 		5C14C29C2BBBA40B00079FD2 /* RelayAdminDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayAdminDetail.swift; sourceTree = "<group>"; };
 		5C14C29E2BBBA5C600079FD2 /* RelayNipList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayNipList.swift; sourceTree = "<group>"; };
 		5C42E78B29DB76D90086AAC1 /* EmptyUserSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyUserSearchView.swift; sourceTree = "<group>"; };
-		5C4D9EA62C042FA5005EA0F7 /* HighlightPostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightPostView.swift; sourceTree = "<group>"; };
+		5C4D9EA62C042FA5005EA0F7 /* HighlightDraftContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightDraftContentView.swift; sourceTree = "<group>"; };
 		5C513FB9297F72980072348F /* CustomPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomPicker.swift; sourceTree = "<group>"; };
 		5C513FCB2984ACA60072348F /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		5C6E1DAC2A193EC2008FC15A /* GradientButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientButtonStyle.swift; sourceTree = "<group>"; };
@@ -2725,7 +2725,7 @@
 				5CC852A12BDED9B90039FFC5 /* HighlightDescription.swift */,
 				5CC852A32BDF3CA10039FFC5 /* HighlightLink.swift */,
 				5CC852A52BE00F180039FFC5 /* HighlightEventRef.swift */,
-				5C4D9EA62C042FA5005EA0F7 /* HighlightPostView.swift */,
+				5C4D9EA62C042FA5005EA0F7 /* HighlightDraftContentView.swift */,
 			);
 			path = Highlight;
 			sourceTree = "<group>";
@@ -3184,7 +3184,7 @@
 				4C75EFAD28049CFB0006080F /* PostButton.swift in Sources */,
 				D7EDED1E2B11797D0018B19C /* LongformEvent.swift in Sources */,
 				504323A92A3495B6006AE6DC /* RelayModelCache.swift in Sources */,
-				5C4D9EA72C042FA5005EA0F7 /* HighlightPostView.swift in Sources */,
+				5C4D9EA72C042FA5005EA0F7 /* HighlightDraftContentView.swift in Sources */,
 				3A8CC6CC2A2CFEF900940F5F /* StringUtil.swift in Sources */,
 				D7FD12262BD345A700CF195B /* FirstAidSettingsView.swift in Sources */,
 				D7870BC12AC4750B0080BA88 /* MentionView.swift in Sources */,

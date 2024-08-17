@@ -240,7 +240,7 @@ class ReplyTests: XCTestCase {
         let content = "this is a @\(pk.npub) mention"
         let blocks = parse_post_blocks(content: content)
         let post = NostrPost(content: content, tags: [["e", evid.hex()]])
-        let ev = post_to_event(post: post, keypair: test_keypair_full)!
+        let ev = post.to_event(keypair: test_keypair_full)!
 
         XCTAssertEqual(ev.tags.count, 2)
         XCTAssertEqual(blocks.count, 3)
@@ -255,7 +255,7 @@ class ReplyTests: XCTestCase {
         let content = "this is a @\(nsec) mention"
         let blocks = parse_post_blocks(content: content)
         let post = NostrPost(content: content, tags: [["e", evid.hex()]])
-        let ev = post_to_event(post: post, keypair: test_keypair_full)!
+        let ev = post.to_event(keypair: test_keypair_full)!
 
         XCTAssertEqual(ev.tags.count, 2)
         XCTAssertEqual(blocks.count, 3)
@@ -275,7 +275,7 @@ class ReplyTests: XCTestCase {
         ]
 
         let post = NostrPost(content: "this is a (@\(pubkey.npub)) mention", tags: tags)
-        let ev = post_to_event(post: post, keypair: test_keypair_full)!
+        let ev = post.to_event(keypair: test_keypair_full)!
         
         XCTAssertEqual(ev.content, "this is a (nostr:\(pubkey.npub)) mention")
         XCTAssertEqual(ev.tags[2][1].string(), pubkey.description)

@@ -28,4 +28,5 @@ class Drafts: ObservableObject {
     @Published var post: DraftArtifacts? = nil
     @Published var replies: [NostrEvent: DraftArtifacts] = [:]
     @Published var quotes: [NostrEvent: DraftArtifacts] = [:]
+    @Published var highlights: [HighlightSource: DraftArtifacts] = [:]
 }
