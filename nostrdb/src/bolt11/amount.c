@@ -1,9 +1,9 @@
 #include "../config.h"
-#include <assert.h>
-#include "mem.h"
-#include "talstr.h"
+#include "ccan/mem/mem.h"
+#include "ccan/tal/str/str.h"
 #include "amount.h"
 #include "overflows.h"
+#include <assert.h>
 #include <inttypes.h>
 
 bool amount_sat_to_msat(struct amount_msat *msat,
