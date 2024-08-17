@@ -2,8 +2,8 @@
 #ifndef LIGHTNING_COMMON_NODE_ID_H
 #define LIGHTNING_COMMON_NODE_ID_H
 #include "../config.h"
-#include "short_types.h"
-#include "tal.h"
+#include "ccan/short_types/short_types.h"
+#include "ccan/tal/tal.h"
 
 struct node_id {
     u8 k[33];

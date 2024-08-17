@@ -4,7 +4,7 @@
 #include "hex.h"
 #include "cursor.h"
 #include "random.h"
-#include "sha256.h"
+#include "ccan/crypto/sha256/sha256.h"
 #include "bolt11/bolt11.h"
 #include "bolt11/amount.h"
 #include "lmdb.h"
