@@ -178,22 +178,3 @@ size_t utf8_encode(uint32_t point, char dest[UTF8_MAX_LEN])
     return 4;
 }
 
-/* Check for valid UTF-8 */
-bool utf8_check(const void *vbuf, size_t buflen)
-{
-    const unsigned char *buf = vbuf;
-    struct utf8_state utf8_state = UTF8_STATE_INIT;
-    bool need_more = false;
-
-    for (size_t i = 0; i < buflen; i++) {
-        if (!utf8_decode(&utf8_state, buf[i])) {
-            need_more = true;
-            continue;
-        }
-        need_more = false;
-        if (errno != 0)
-            return false;
-    }
-    return !need_more;
-}
-
