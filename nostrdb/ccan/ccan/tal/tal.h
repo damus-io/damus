@@ -2,11 +2,11 @@
 #ifndef CCAN_TAL_H
 #define CCAN_TAL_H
 #include "../config.h"
-#include "../compiler.h"
-#include "likely.h"
-#include "typesafe_cb.h"
-#include "str.h"
-#include "take.h"
+#include "ccan/compiler/compiler.h"
+#include "ccan/likely/likely.h"
+#include "ccan/typesafe_cb/typesafe_cb.h"
+#include "ccan/str/str.h"
+#include "ccan/take/take.h"
 
 #include <stdlib.h>
 #include <stdbool.h>

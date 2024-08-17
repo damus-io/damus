@@ -7,8 +7,8 @@
  * file COPYING or http://www.opensource.org/licenses/mit-license.php.
  */
 #include "sha256.h"
-#include "endian.h"
-#include "compiler.h"
+#include "ccan/endian/endian.h"
+#include "ccan/compiler/compiler.h"
 #include <stdbool.h>
 #include <assert.h>
 #include <string.h>

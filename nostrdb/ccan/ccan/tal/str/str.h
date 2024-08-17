@@ -4,7 +4,7 @@
 #ifdef TAL_USE_TALLOC
 #include <ccan/tal/talloc/talloc.h>
 #else
-#include "tal.h"
+#include "ccan/tal/tal.h"
 #endif
 #include <string.h>
 #include <stdbool.h>
