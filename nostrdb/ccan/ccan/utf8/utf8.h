@@ -6,22 +6,22 @@
 #include <string.h>
 
 /* Unicode is limited to 21 bits. */
-#define UTF8_MAX_LEN    4
+#define UTF8_MAX_LEN	4
 
 struct utf8_state {
-    /* How many characters we are expecting as part of this Unicode point */
-    uint16_t total_len;
-    /* How many characters we've already seen. */
-    uint16_t used_len;
-    /* Compound character, aka Unicode point. */
-    uint32_t c;
+	/* How many characters we are expecting as part of this Unicode point */
+	uint16_t total_len;
+	/* How many characters we've already seen. */
+	uint16_t used_len;
+	/* Compound character, aka Unicode point. */
+	uint32_t c;
 };
 
 #define UTF8_STATE_INIT { 0, 0, 0 }
 
 static inline void utf8_state_init(struct utf8_state *utf8_state)
 {
-    memset(utf8_state, 0, sizeof(*utf8_state));
+	memset(utf8_state, 0, sizeof(*utf8_state));
 }
 
 /**
@@ -51,5 +51,4 @@ bool utf8_decode(struct utf8_state *utf8_state, char c);
  * Sets errno to ERANGE if point was invalid.
  */
 size_t utf8_encode(uint32_t point, char dest[UTF8_MAX_LEN]);
-
 #endif /* CCAN_UTF8_H */

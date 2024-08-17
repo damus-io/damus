@@ -1,9 +1,9 @@
 /* CC0 (Public domain) - see LICENSE file for details */
 #ifndef CCAN_TAKE_H
 #define CCAN_TAKE_H
-#include "../config.h"
+#include "config.h"
 #include <stdbool.h>
-#include "str.h"
+#include <ccan/str/str.h>
 
 #ifdef CCAN_TAKE_DEBUG
 #define TAKE_LABEL(p) __FILE__ ":" stringify(__LINE__) ":" stringify(p)
@@ -17,8 +17,8 @@
  * This doesn't do anything, but useful for documentation.
  *
  * Example:
- *    void print_string(const char *str TAKES);
- *
+ *	void print_string(const char *str TAKES);
+ *	
  */
 #define TAKES
 
@@ -41,18 +41,18 @@
  * this only returns true once.
  *
  * Example:
- *    // Silly routine to add 1
- *    static int *add_one(const int *num TAKES)
- *    {
- *        int *ret;
- *        if (taken(num))
- *            ret = (int *)num;
- *        else
- *            ret = malloc(sizeof(int));
- *        if (ret)
- *            *ret = (*num) + 1;
- *        return ret;
- *    }
+ *	// Silly routine to add 1
+ *	static int *add_one(const int *num TAKES)
+ *	{
+ *		int *ret;
+ *		if (taken(num))
+ *			ret = (int *)num;
+ *		else
+ *			ret = malloc(sizeof(int));
+ *		if (ret)
+ *			*ret = (*num) + 1;
+ *		return ret;
+ *	}
  */
 bool taken(const void *p);
 
@@ -63,15 +63,15 @@ bool taken(const void *p);
  * This is like the above, but doesn't remove it from the taken list.
  *
  * Example:
- *    // Silly routine to add 1: doesn't handle taken args!
- *    static int *add_one_notake(const int *num)
- *    {
- *        int *ret = malloc(sizeof(int));
- *        assert(!is_taken(num));
- *        if (ret)
- *            *ret = (*num) + 1;
- *        return ret;
- *    }
+ *	// Silly routine to add 1: doesn't handle taken args!
+ *	static int *add_one_notake(const int *num)
+ *	{
+ *		int *ret = malloc(sizeof(int));
+ *		assert(!is_taken(num));
+ *		if (ret)
+ *			*ret = (*num) + 1;
+ *		return ret;
+ *	}
  */
 bool is_taken(const void *p);
 
@@ -83,10 +83,10 @@ bool is_taken(const void *p);
  * a static char buffer with the pointer value in it.  NULL if none are taken.
  *
  * Example:
- *    static void cleanup(void)
- *    {
- *        assert(!taken_any());
- *    }
+ *	static void cleanup(void)
+ *	{
+ *		assert(!taken_any());
+ *	}
  */
 const char *taken_any(void);
 
@@ -96,10 +96,10 @@ const char *taken_any(void);
  * This is useful in atexit() handlers for valgrind-style leak detection.
  *
  * Example:
- *    static void cleanup2(void)
- *    {
- *        take_cleanup();
- *    }
+ *	static void cleanup2(void)
+ *	{
+ *		take_cleanup();
+ *	}
  */
 void take_cleanup(void);
 
@@ -113,15 +113,15 @@ void take_cleanup(void);
  * it like any allocation failure.
  *
  * Example:
- *    static void free_on_fail(const void *p)
- *    {
- *        free((void *)p);
- *    }
+ *	static void free_on_fail(const void *p)
+ *	{
+ *		free((void *)p);
+ *	}
  *
- *    static void init(void)
- *    {
- *        take_allocfail(free_on_fail);
- *    }
+ *	static void init(void)
+ *	{
+ *		take_allocfail(free_on_fail);
+ *	}
  */
 void take_allocfail(void (*fn)(const void *p));
 

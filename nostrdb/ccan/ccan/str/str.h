@@ -1,7 +1,7 @@
 /* CC0 (Public domain) - see LICENSE file for details */
 #ifndef CCAN_STR_H
 #define CCAN_STR_H
-#include "../config.h"
+#include "config.h"
 #include <string.h>
 #include <stdbool.h>
 #include <limits.h>
@@ -15,8 +15,8 @@
  * This macro is arguably more readable than "!strcmp(a, b)".
  *
  * Example:
- *    if (streq(somestring, ""))
- *        printf("String is empty!\n");
+ *	if (streq(somestring, ""))
+ *		printf("String is empty!\n");
  */
 #define streq(a,b) (strcmp((a),(b)) == 0)
 
@@ -26,8 +26,8 @@
  * @prefix: prefix to look for at start of str
  *
  * Example:
- *    if (strstarts(somestring, "foo"))
- *        printf("String %s begins with 'foo'!\n", somestring);
+ *	if (strstarts(somestring, "foo"))
+ *		printf("String %s begins with 'foo'!\n", somestring);
  */
 #define strstarts(str,prefix) (strncmp((str),(prefix),strlen(prefix)) == 0)
 
@@ -37,15 +37,15 @@
  * @postfix: postfix to look for at end of str
  *
  * Example:
- *    if (strends(somestring, "foo"))
- *        printf("String %s end with 'foo'!\n", somestring);
+ *	if (strends(somestring, "foo"))
+ *		printf("String %s end with 'foo'!\n", somestring);
  */
 static inline bool strends(const char *str, const char *postfix)
 {
-    if (strlen(str) < strlen(postfix))
-        return false;
+	if (strlen(str) < strlen(postfix))
+		return false;
 
-    return streq(str + strlen(str) - strlen(postfix), postfix);
+	return streq(str + strlen(str) - strlen(postfix), postfix);
 }
 
 /**
@@ -53,12 +53,12 @@ static inline bool strends(const char *str, const char *postfix)
  * @expr: any C expression
  *
  * Example:
- *    #define PRINT_COND_IF_FALSE(cond) \
- *        ((cond) || printf("%s is false!", stringify(cond)))
+ *	#define PRINT_COND_IF_FALSE(cond) \
+ *		((cond) || printf("%s is false!", stringify(cond)))
  */
-#define stringify(expr)        stringify_1(expr)
+#define stringify(expr)		stringify_1(expr)
 /* Double-indirection required to stringify expansions */
-#define stringify_1(expr)    #expr
+#define stringify_1(expr)	#expr
 
 /**
  * strcount - Count number of (non-overlapping) occurrences of a substring.
@@ -83,18 +83,18 @@ size_t strcount(const char *haystack, const char *needle);
  * values will fit (eg. sprintf(... "%p"). )
  *
  * Example:
- *    char str[STR_MAX_CHARS(int)];
+ *	char str[STR_MAX_CHARS(int)];
  *
- *    sprintf(str, "%i", 7);
+ *	sprintf(str, "%i", 7);
  */
-#define STR_MAX_CHARS(type_or_expr)                \
-    ((sizeof(type_or_expr) * CHAR_BIT + 8) / 9 * 3 + 2    \
-     + STR_MAX_CHARS_TCHECK_(type_or_expr))
+#define STR_MAX_CHARS(type_or_expr)				\
+	((sizeof(type_or_expr) * CHAR_BIT + 8) / 9 * 3 + 2	\
+	 + STR_MAX_CHARS_TCHECK_(type_or_expr))
 
 #if HAVE_TYPEOF
 /* Only a simple type can have 0 assigned, so test that. */
-#define STR_MAX_CHARS_TCHECK_(type_or_expr)        \
-    (sizeof(({ typeof(type_or_expr) x = 0; x; }))*0)
+#define STR_MAX_CHARS_TCHECK_(type_or_expr)		\
+	(sizeof(({ typeof(type_or_expr) x = 0; x; }))*0)
 #else
 #define STR_MAX_CHARS_TCHECK_(type_or_expr) 0
 #endif
@@ -109,60 +109,60 @@ size_t strcount(const char *haystack, const char *needle);
  */
 static inline bool cisalnum(char c)
 {
-    return isalnum((unsigned char)c);
+	return isalnum((unsigned char)c);
 }
 static inline bool cisalpha(char c)
 {
-    return isalpha((unsigned char)c);
+	return isalpha((unsigned char)c);
 }
 static inline bool cisascii(char c)
 {
-    return isascii((unsigned char)c);
+	return isascii((unsigned char)c);
 }
 #if HAVE_ISBLANK
 static inline bool cisblank(char c)
 {
-    return isblank((unsigned char)c);
+	return isblank((unsigned char)c);
 }
 #endif
 static inline bool ciscntrl(char c)
 {
-    return iscntrl((unsigned char)c);
+	return iscntrl((unsigned char)c);
 }
 static inline bool cisdigit(char c)
 {
-    return isdigit((unsigned char)c);
+	return isdigit((unsigned char)c);
 }
 static inline bool cisgraph(char c)
 {
-    return isgraph((unsigned char)c);
+	return isgraph((unsigned char)c);
 }
 static inline bool cislower(char c)
 {
-    return islower((unsigned char)c);
+	return islower((unsigned char)c);
 }
 static inline bool cisprint(char c)
 {
-    return isprint((unsigned char)c);
+	return isprint((unsigned char)c);
 }
 static inline bool cispunct(char c)
 {
-    return ispunct((unsigned char)c);
+	return ispunct((unsigned char)c);
 }
 static inline bool cisspace(char c)
 {
-    return isspace((unsigned char)c);
+	return isspace((unsigned char)c);
 }
 static inline bool cisupper(char c)
 {
-    return isupper((unsigned char)c);
+	return isupper((unsigned char)c);
 }
 static inline bool cisxdigit(char c)
 {
-    return isxdigit((unsigned char)c);
+	return isxdigit((unsigned char)c);
 }
 
-#include "str_debug.h"
+#include <ccan/str/str_debug.h>
 
 /* These checks force things out of line, hence they are under DEBUG. */
 #ifdef CCAN_STR_DEBUG
@@ -185,10 +185,10 @@ static inline bool cisxdigit(char c)
 
 /* You can use a char if char is unsigned. */
 #if HAVE_BUILTIN_TYPES_COMPATIBLE_P && HAVE_TYPEOF
-#define str_check_arg_(i)                        \
-    ((i) + BUILD_ASSERT_OR_ZERO(!__builtin_types_compatible_p(typeof(i), \
-                                  char)    \
-                    || (char)255 > 0))
+#define str_check_arg_(i)						\
+	((i) + BUILD_ASSERT_OR_ZERO(!__builtin_types_compatible_p(typeof(i), \
+								  char)	\
+				    || (char)255 > 0))
 #else
 #define str_check_arg_(i) (i)
 #endif
@@ -216,12 +216,12 @@ static inline bool cisxdigit(char c)
 #undef strrchr
 
 /* + 0 is needed to decay array into pointer. */
-#define strstr(haystack, needle)                    \
-    ((typeof((haystack) + 0))str_strstr((haystack), (needle)))
-#define strchr(haystack, c)                    \
-    ((typeof((haystack) + 0))str_strchr((haystack), (c)))
-#define strrchr(haystack, c)                    \
-    ((typeof((haystack) + 0))str_strrchr((haystack), (c)))
+#define strstr(haystack, needle)					\
+	((typeof((haystack) + 0))str_strstr((haystack), (needle)))
+#define strchr(haystack, c)					\
+	((typeof((haystack) + 0))str_strchr((haystack), (c)))
+#define strrchr(haystack, c)					\
+	((typeof((haystack) + 0))str_strrchr((haystack), (c)))
 #endif
 #endif /* CCAN_STR_DEBUG */
 

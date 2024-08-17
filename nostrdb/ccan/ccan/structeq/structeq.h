@@ -1,8 +1,8 @@
 /* MIT (BSD) license - see LICENSE file for details */
 #ifndef CCAN_STRUCTEQ_H
 #define CCAN_STRUCTEQ_H
-#include "ccan/build_assert/build_assert.h"
-#include "ccan/cppmagic/cppmagic.h"
+#include <ccan/build_assert/build_assert.h>
+#include <ccan/cppmagic/cppmagic.h>
 #include <string.h>
 #include <stdbool.h>
 
@@ -19,24 +19,24 @@
  * "up to or equal to that amount of padding", as padding can be
  * platform dependent.
  */
-#define STRUCTEQ_DEF(sname, padbytes, ...)                \
+#define STRUCTEQ_DEF(sname, padbytes, ...)				\
 static inline bool CPPMAGIC_GLUE2(sname, _eq)(const struct sname *_a, \
-                          const struct sname *_b) \
-{                                    \
-    BUILD_ASSERT(((padbytes) < 0 &&                    \
-              CPPMAGIC_JOIN(+, CPPMAGIC_MAP(STRUCTEQ_MEMBER_SIZE_, \
-                            __VA_ARGS__))    \
-              - (padbytes) >= sizeof(*_a))            \
-             || CPPMAGIC_JOIN(+, CPPMAGIC_MAP(STRUCTEQ_MEMBER_SIZE_, \
-                              __VA_ARGS__))    \
-             + (padbytes) == sizeof(*_a));            \
-    if (CPPMAGIC_JOIN(+, CPPMAGIC_MAP(STRUCTEQ_MEMBER_SIZE_, __VA_ARGS__)) \
-        == sizeof(*_a))                        \
-        return memcmp(_a, _b, sizeof(*_a)) == 0;        \
-    else                                \
-        return CPPMAGIC_JOIN(&&,                \
-                     CPPMAGIC_MAP(STRUCTEQ_MEMBER_CMP_, \
-                          __VA_ARGS__));    \
+					      const struct sname *_b) \
+{									\
+	BUILD_ASSERT(((padbytes) < 0 &&					\
+		      CPPMAGIC_JOIN(+, CPPMAGIC_MAP(STRUCTEQ_MEMBER_SIZE_, \
+						    __VA_ARGS__))	\
+		      - (padbytes) >= sizeof(*_a))			\
+		     || CPPMAGIC_JOIN(+, CPPMAGIC_MAP(STRUCTEQ_MEMBER_SIZE_, \
+						      __VA_ARGS__))	\
+		     + (padbytes) == sizeof(*_a));			\
+	if (CPPMAGIC_JOIN(+, CPPMAGIC_MAP(STRUCTEQ_MEMBER_SIZE_, __VA_ARGS__)) \
+	    == sizeof(*_a))						\
+		return memcmp(_a, _b, sizeof(*_a)) == 0;		\
+	else								\
+		return CPPMAGIC_JOIN(&&,				\
+				     CPPMAGIC_MAP(STRUCTEQ_MEMBER_CMP_, \
+						  __VA_ARGS__));	\
 }
 
 /* Helpers */
