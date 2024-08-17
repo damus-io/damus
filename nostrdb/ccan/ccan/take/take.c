@@ -1,6 +1,6 @@
 /* CC0 (Public domain) - see LICENSE file for details */
 #include "take.h"
-#include "likely.h"
+#include "ccan/likely/likely.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
