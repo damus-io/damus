@@ -1,8 +1,8 @@
 /* bech32 (thus bolt11) deal in 5-bit values */
 #ifndef LIGHTNING_COMMON_HASH_U5_H
 #define LIGHTNING_COMMON_HASH_U5_H
-#include "../sha256.h"
-#include "short_types.h"
+#include "ccan/crypto/sha256/sha256.h"
+#include "ccan/short_types/short_types.h"
 
 /* Type to annotate a 5 bit value. */
 typedef unsigned char u5;

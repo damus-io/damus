@@ -2,7 +2,7 @@
 #define LIGHTNING_COMMON_BECH32_UTIL_H
 #include "../config.h"
 
-#include "tal.h"
+#include "ccan/tal/tal.h"
 #include "hash_u5.h"
 
 /**
