@@ -30,7 +30,7 @@ public struct DismissKeyboardOnTap: ViewModifier {
 }
 
 public func end_editing() {
-    UIApplication.shared.connectedScenes
+    this_app.connectedScenes
       .filter {$0.activationState == .foregroundActive}
       .map {$0 as? UIWindowScene}
       .compactMap({$0})

@@ -116,7 +116,7 @@ struct AddRelayView: View {
                 }
                 new_relay = ""
 
-                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                this_app.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                 
                 dismiss()
             }) {
