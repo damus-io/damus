@@ -52,6 +52,4 @@ bool utf8_decode(struct utf8_state *utf8_state, char c);
  */
 size_t utf8_encode(uint32_t point, char dest[UTF8_MAX_LEN]);
 
-/* Check for valid UTF-8 */
-bool utf8_check(const void *vbuf, size_t buflen);
 #endif /* CCAN_UTF8_H */
