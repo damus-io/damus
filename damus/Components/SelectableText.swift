@@ -13,8 +13,7 @@ struct SelectableText: View {
     let event: NostrEvent?
     let attributedString: AttributedString
     let textAlignment: NSTextAlignment
-    @State private var showHighlightPost = false
-    @State private var selectedText = ""
+    @State private var highlightPostingState: HighlightPostingState = .hide
     @State private var selectedTextHeight: CGFloat = .zero
     @State private var selectedTextWidth: CGFloat = .zero
 
@@ -37,8 +36,9 @@ struct SelectableText: View {
                 fixedWidth: selectedTextWidth,
                 textAlignment: self.textAlignment,
                 enableHighlighting: self.enableHighlighting(),
-                showHighlightPost: $showHighlightPost,
-                selectedText: $selectedText,
+                postHighlight: { selectedText in
+                    self.highlightPostingState = .show_post_view(highlighted_text: selectedText)
+                },
                 height: $selectedTextHeight
             )
             .padding([.leading, .trailing], -1.0)
@@ -53,9 +53,13 @@ struct SelectableText: View {
                 self.selectedTextWidth = newSize.width
             }
         }
-        .sheet(isPresented: $showHighlightPost) {
-            if let event {
-                HighlightPostView(damus_state: damus_state, event: event, selectedText: $selectedText)
+        .sheet(isPresented: Binding(get: {
+            return self.highlightPostingState.show()
+        }, set: { newValue in
+            self.highlightPostingState = newValue ? .show_post_view(highlighted_text: self.highlightPostingState.highlighted_text() ?? "") : .hide
+        })) {
+            if let event, case .show_post_view(let highlighted_text) = self.highlightPostingState {
+                HighlightPostView(damus_state: damus_state, event: event, selectedText: .constant(highlighted_text))
                     .presentationDragIndicator(.visible)
                     .presentationDetents([.height(selectedTextHeight + 150), .medium, .large])
             }
@@ -66,15 +70,34 @@ struct SelectableText: View {
     func enableHighlighting() -> Bool {
         self.event != nil
     }
+    
+    enum HighlightPostingState {
+        case hide
+        case show_post_view(highlighted_text: String)
+        
+        func show() -> Bool {
+            if case .show_post_view(let highlighted_text) = self {
+                return true
+            }
+            return false
+        }
+        
+        func highlighted_text() -> String? {
+            switch self {
+                case .hide:
+                    return nil
+                case .show_post_view(highlighted_text: let highlighted_text):
+                    return highlighted_text
+            }
+        }
+    }
 }
 
 fileprivate class TextView: UITextView {
-    @Binding var showHighlightPost: Bool
-    @Binding var selectedText: String
+    var postHighlight: (String) -> Void
 
-    init(frame: CGRect, textContainer: NSTextContainer?, showHighlightPost: Binding<Bool>, selectedText: Binding<String>) {
-        self._showHighlightPost = showHighlightPost
-        self._selectedText = selectedText
+    init(frame: CGRect, textContainer: NSTextContainer?, postHighlight: @escaping (String) -> Void) {
+        self.postHighlight = postHighlight
         super.init(frame: frame, textContainer: textContainer)
     }
 
@@ -91,8 +114,8 @@ fileprivate class TextView: UITextView {
 
     @objc public func highlightText(_ sender: Any?) {
         guard let selectedRange = self.selectedTextRange else { return }
-        selectedText = self.text(in: selectedRange) ?? ""
-        showHighlightPost.toggle()
+        guard let selectedText = self.text(in: selectedRange) else { return }
+        self.postHighlight(selectedText)
     }
 
 }
@@ -105,12 +128,11 @@ fileprivate class TextView: UITextView {
     let fixedWidth: CGFloat
     let textAlignment: NSTextAlignment
     let enableHighlighting: Bool
-    @Binding var showHighlightPost: Bool
-    @Binding var selectedText: String
+    let postHighlight: (String) -> Void
     @Binding var height: CGFloat
 
     func makeUIView(context: UIViewRepresentableContext<Self>) -> TextView {
-        let view = TextView(frame: .zero, textContainer: nil, showHighlightPost: $showHighlightPost, selectedText: $selectedText)
+        let view = TextView(frame: .zero, textContainer: nil, postHighlight: postHighlight)
         view.isEditable = false
         view.dataDetectorTypes = .all
         view.isSelectable = true
