@@ -57,6 +57,10 @@ enum Sheets: Identifiable {
     }
 }
 
+func present_sheet(_ sheet: Sheets) {
+    notify(.present_sheet(sheet))
+}
+
 struct ContentView: View {
     let keypair: Keypair
     let appDelegate: AppDelegate?
@@ -819,7 +823,7 @@ func update_filters_with_since(last_of_kind: [UInt32: NostrEvent], filters: [Nos
 
 
 func setup_notifications() {
-    UIApplication.shared.registerForRemoteNotifications()
+    this_app.registerForRemoteNotifications()
     let center = UNUserNotificationCenter.current()
     
     center.getNotificationSettings { settings in

@@ -11,8 +11,7 @@ import UIKit
 class Theme {
     
     static var safeAreaInsets: UIEdgeInsets? {
-        return UIApplication
-                .shared
+        return this_app
                 .connectedScenes
                 .flatMap { ($0 as? UIWindowScene)?.windows ?? [] }
                 .first { $0.isKeyWindow }?.safeAreaInsets
