@@ -28,10 +28,6 @@
 #include <inttypes.h>
 #include <assert.h>
 
-struct secret {
-	u8 data[32];
-};
-
 #define MSAT_PER_SAT ((u64)1000)
 #define SAT_PER_BTC ((u64)100000000)
 #define MSAT_PER_BTC (MSAT_PER_SAT * SAT_PER_BTC)
@@ -151,15 +147,9 @@ static const char *unknown_field(struct bolt11 *b11,
 				 const u5 **data, size_t *field_len,
 				 u5 type)
 {
-    struct bolt11_field *extra = tal(b11, struct bolt11_field);
     const char *err;
 
-    extra->tag = type;
-    /* FIXME: record u8 data here, not u5! */
-    extra->data = tal_dup_arr(extra, u5, *data, *field_len, 0);
-    list_add_tail(&b11->extra_fields, &extra->list);
-
-    tal_free(pull_all(extra, hu5, data, field_len, true, &err));
+    tal_free(pull_all(NULL, hu5, data, field_len, true, &err));
     return err;
 }
 
@@ -192,6 +182,7 @@ static const char *decode_p(struct bolt11 *b11,
 			    const u5 **data, size_t *field_len,
 			    bool *have_p)
 {
+    struct sha256 payment_hash;
     /* BOLT #11:
      *
      * A payer... SHOULD use the first `p` field that it did NOT
@@ -206,7 +197,7 @@ static const char *decode_p(struct bolt11 *b11,
      * NOT have `data_length`s of 52, 52, 52 or 53, respectively.
      */
     return pull_expected_length(b11, hu5, data, field_len, 52, 'p',
-                                have_p, &b11->payment_hash);
+                                have_p, &payment_hash);
 }
 
 /* Check for valid UTF-8 */
@@ -327,170 +318,15 @@ static const char *decode_x(struct bolt11 *b11,
     return NULL;
 }
 
-/* BOLT #11:
- *
- * `c` (24): `data_length` variable. `min_final_cltv_expiry_delta` to use for the
- * last HTLC in the route. Default is 18 if not specified.
- */
-static const char *decode_c(struct bolt11 *b11,
-			    const struct feature_set *our_features,
-			    struct hash_u5 *hu5,
-			    const u5 **data, size_t *field_len,
-			    bool *have_c)
-{
-    u64 c;
-    const char *err;
-
-    assert(!*have_c);
-
-    /* FIXME: Put upper limit in bolt 11 */
-    err = pull_uint(hu5, data, field_len, &c, *field_len * 5);
-    if (err)
-        return tal_fmt(b11, "c: %s", err);
-    b11->min_final_cltv_expiry = c;
-    /* Can overflow, since c is 64 bits but value must be < 32 bits */
-    if (b11->min_final_cltv_expiry != c)
-        return tal_fmt(b11, "c: %"PRIu64" is too large", c);
-
-    *have_c = true;
-    return NULL;
-}
-
-static const char *decode_n(struct bolt11 *b11,
-			    const struct feature_set *our_features,
-			    struct hash_u5 *hu5,
-			    const u5 **data, size_t *field_len,
-			    bool *have_n)
-{
-    const char *err;
-
-    assert(!*have_n);
-    /* BOLT #11:
-     *
-     * A reader... MUST skip over unknown fields, OR an `f` field
-     * with unknown `version`, OR `p`, `h`, `s` or `n` fields that do
-     * NOT have `data_length`s of 52, 52, 52 or 53, respectively. */
-    err = pull_expected_length(b11, hu5, data, field_len, 53, 'n', have_n,
-                               &b11->receiver_id.k);
-
-    return err;
-}
-
-/* BOLT #11:
- *
- * * `s` (16): `data_length` 52. This 256-bit secret prevents
- *    forwarding nodes from probing the payment recipient.
- */
-static const char *decode_s(struct bolt11 *b11,
-			    const struct feature_set *our_features,
-			    struct hash_u5 *hu5,
-			    const u5 **data, size_t *field_len,
-			    bool *have_s)
-{
-    const char *err;
-    struct secret secret;
-
-    assert(!*have_s);
-
-    /* BOLT #11:
-     *
-     * A reader... MUST skip over unknown fields, OR an `f` field
-     * with unknown `version`, OR `p`, `h`, `s` or `n` fields that do
-     * NOT have `data_length`s of 52, 52, 52 or 53, respectively. */
-    err = pull_expected_length(b11, hu5, data, field_len, 52, 's',
-                               have_s, &secret);
-    if (*have_s)
-        b11->payment_secret = tal_dup(b11, struct secret, &secret);
-    return err;
-}
-
-static void shift_bitmap_down(u8 *bitmap, size_t bits)
-{
-    u8 prev = 0;
-    assert(bits < CHAR_BIT);
-
-    for (size_t i = 0; i < tal_bytelen(bitmap); i++) {
-        /* Save top bits for next one */
-        u8 v = bitmap[i];
-        bitmap[i] = (prev | (v >> bits));
-        prev = (v << (8 - bits));
-    }
-    assert(prev == 0);
-}
-
-/* BOLT #11:
- *
- * `9` (5): `data_length` variable. One or more 5-bit values containing features
- *  supported or required for receiving this payment.
- *  See [Feature Bits](#feature-bits).
- */
-static const char *decode_9(struct bolt11 *b11,
-			    const struct feature_set *our_features,
-			    struct hash_u5 *hu5,
-			    const u5 **data, size_t *field_len,
-			    bool *have_9)
-{
-    size_t flen = (*field_len * 5 + 7) / 8;
-    size_t databits = *field_len * 5;
-    const char *err;
-
-    assert(!*have_9);
-
-    b11->features = pull_all(b11, hu5, data, field_len, true, &err);
-    if (!b11->features)
-        return err;
-
-    /* pull_bits pads with zero bits: we need to remove them. */
-    shift_bitmap_down(b11->features,
-                      flen * 8 - databits);
-
-    *have_9 = true;
-    return NULL;
-}
-
-/* BOLT #11:
- *
- * `m` (27): `data_length` variable. Additional metadata to attach to
- * the payment. Note that the size of this field is limited by the
- * maximum hop payload size. Long metadata fields reduce the maximum
- * route length.
- */
-static const char *decode_m(struct bolt11 *b11,
-			    const struct feature_set *our_features,
-			    struct hash_u5 *hu5,
-			    const u5 **data, size_t *field_len,
-			    bool *have_m)
-{
-    const char *err;
-
-    assert(!*have_m);
-
-    b11->metadata = pull_all(b11, hu5, data, field_len, false, &err);
-    if (!b11->metadata)
-        return err;
-
-    *have_m = true;
-    return NULL;
-}
-
 static struct bolt11 *new_bolt11(const tal_t *ctx,
                                  const struct amount_msat *msat TAKES)
 {
     struct bolt11 *b11 = tal(ctx, struct bolt11);
 
-    list_head_init(&b11->extra_fields);
     b11->description = NULL;
     b11->description_hash = NULL;
     b11->msat = NULL;
     b11->expiry = DEFAULT_X;
-    b11->features = tal_arr(b11, u8, 0);
-    /* BOLT #11:
-     *   - if the `c` field (`min_final_cltv_expiry_delta`) is not provided:
-     *     - MUST use an expiry delta of at least 18 when making the payment
-     */
-    b11->min_final_cltv_expiry = 18;
-    b11->payment_secret = NULL;
-    b11->metadata = NULL;
 
     if (msat)
         b11->msat = tal_dup(b11, struct amount_msat, msat);
@@ -522,11 +358,6 @@ static const struct decoder decoders[] = {
     { 'd', false, decode_d },
     { 'h', false, decode_h },
     { 'x', false, decode_x },
-    { 'c', false, decode_c },
-    { 'n', false, decode_n },
-    { 's', false, decode_s },
-    { '9', false, decode_9 },
-    { 'm', false, decode_m },
 };
 
 static const struct decoder *find_decoder(char c)
