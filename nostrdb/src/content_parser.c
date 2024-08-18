@@ -168,7 +168,7 @@ static int push_invoice_str(struct ndb_content_parser *p, struct ndb_str_block *
 	struct bolt11 *bolt11;
 	char *fail;
 
-	if (!(bolt11 = bolt11_decode(NULL, str->str, &fail)))
+	if (!(bolt11 = bolt11_decode_minimal(NULL, str->str, &fail)))
 		return 0;
 
 	start = p->buffer.p;
