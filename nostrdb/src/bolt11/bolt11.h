@@ -8,7 +8,6 @@
 #include "ccan/list/list.h"
 #include "amount.h"
 #include "node_id.h"
-//#include <secp256k1_recovery.h>
 
 /* We only have 10 bits for the field length, meaning < 640 bytes */
 #define BOLT11_FIELD_BYTE_LIMIT ((1 << 10) * 5 / 8)
@@ -33,28 +32,12 @@ struct bolt11 {
     u64 timestamp;
     struct amount_msat *msat; /* NULL if not specified. */
 
-    struct sha256 payment_hash;
-    struct node_id receiver_id;
-
     /* description_hash valid if and only if description is NULL. */
     const char *description;
     struct sha256 *description_hash;
 
     /* How many seconds to pay from @timestamp above. */
     u64 expiry;
-
-    /* How many blocks final hop requires. */
-    u32 min_final_cltv_expiry;
-
-    struct secret *payment_secret;
-
-    /* Features bitmap, if any. */
-    u8 *features;
-
-    /* Optional metadata to send with payment. */
-    u8 *metadata;
-
-    struct list_head extra_fields;
 };
 
 /* Does not check signature, nor extract node.  */
