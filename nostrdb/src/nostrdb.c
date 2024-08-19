@@ -650,9 +650,15 @@ ndb_filter_get_string_element(const struct ndb_filter *filter, const struct ndb_
 }
 
 uint64_t *
-ndb_filter_get_int_element(struct ndb_filter_elements *els, int index)
+ndb_filter_get_int_element_ptr(struct ndb_filter_elements *els, int index)
 {
 	return &els->elements[index];
+}
+
+uint64_t
+ndb_filter_get_int_element(const struct ndb_filter_elements *els, int index)
+{
+	return els->elements[index];
 }
 
 int ndb_filter_init(struct ndb_filter *filter)
@@ -4839,7 +4845,7 @@ static int cursor_push_json_elem_array(struct cursor *cur,
 				return 0;
 			break;
 		case NDB_ELEMENT_INT:
-			val = *ndb_filter_get_int_element(elems, i);
+			val = ndb_filter_get_int_element(elems, i);
 			if (!cursor_push_int_str(cur, val))
 				return 0;
 			break;
@@ -4910,19 +4916,19 @@ int ndb_filter_json(const struct ndb_filter *filter, char *buf, int buflen)
 		case NDB_FILTER_SINCE:
 			if (!cursor_push_str(c, "\"since\":"))
 				return 0;
-			if (!cursor_push_int_str(c, *ndb_filter_get_int_element(elems, 0)))
+			if (!cursor_push_int_str(c, ndb_filter_get_int_element(elems, 0)))
 				return 0;
 			break;
 		case NDB_FILTER_UNTIL:
 			if (!cursor_push_str(c, "\"until\":"))
 				return 0;
-			if (!cursor_push_int_str(c, *ndb_filter_get_int_element(elems, 0)))
+			if (!cursor_push_int_str(c, ndb_filter_get_int_element(elems, 0)))
 				return 0;
 			break;
 		case NDB_FILTER_LIMIT:
 			if (!cursor_push_str(c, "\"limit\":"))
 				return 0;
-			if (!cursor_push_int_str(c, *ndb_filter_get_int_element(elems, 0)))
+			if (!cursor_push_int_str(c, ndb_filter_get_int_element(elems, 0)))
 				return 0;
 			break;
 		}
