@@ -502,7 +502,7 @@ int ndb_filter_from_json(const char *, int len, struct ndb_filter *filter, unsig
 // getting field elements
 unsigned char *ndb_filter_get_id_element(const struct ndb_filter *, const struct ndb_filter_elements *, int index);
 const char *ndb_filter_get_string_element(const struct ndb_filter *, const struct ndb_filter_elements *, int index);
-uint64_t ndb_filter_get_int_element(const struct ndb_filter_elements *, int index);
+uint64_t *ndb_filter_get_int_element(struct ndb_filter_elements *, int index);
 
 struct ndb_filter_elements *ndb_filter_current_element(const struct ndb_filter *);
 struct ndb_filter_elements *ndb_filter_get_elements(const struct ndb_filter *, int);
