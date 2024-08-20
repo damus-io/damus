@@ -408,6 +408,8 @@
 		5C7389B72B9E692E00781E0A /* MutinyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B62B9E692E00781E0A /* MutinyButton.swift */; };
 		5C7389B92B9E69ED00781E0A /* MutinyGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B82B9E69ED00781E0A /* MutinyGradient.swift */; };
 		5C8711DE2C460C06007879C2 /* PostingTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */; };
+		5C8711E12C6D8912007879C2 /* NostrBuildGIF.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8711E02C6D8912007879C2 /* NostrBuildGIF.swift */; };
+		5C8711E42C6D8C86007879C2 /* NostrBuildGIFGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8711E32C6D8C86007879C2 /* NostrBuildGIFGrid.swift */; };
 		5CC8529D2BD741CD0039FFC5 /* HighlightEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC8529C2BD741CD0039FFC5 /* HighlightEvent.swift */; };
 		5CC8529F2BD744F60039FFC5 /* HighlightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC8529E2BD744F60039FFC5 /* HighlightView.swift */; };
 		5CC852A22BDED9B90039FFC5 /* HighlightDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC852A12BDED9B90039FFC5 /* HighlightDescription.swift */; };
@@ -1350,6 +1352,8 @@
 		5C7389B62B9E692E00781E0A /* MutinyButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutinyButton.swift; sourceTree = "<group>"; };
 		5C7389B82B9E69ED00781E0A /* MutinyGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutinyGradient.swift; sourceTree = "<group>"; };
 		5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostingTimelineView.swift; sourceTree = "<group>"; };
+		5C8711E02C6D8912007879C2 /* NostrBuildGIF.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrBuildGIF.swift; sourceTree = "<group>"; };
+		5C8711E32C6D8C86007879C2 /* NostrBuildGIFGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrBuildGIFGrid.swift; sourceTree = "<group>"; };
 		5CC8529C2BD741CD0039FFC5 /* HighlightEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightEvent.swift; sourceTree = "<group>"; };
 		5CC8529E2BD744F60039FFC5 /* HighlightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightView.swift; sourceTree = "<group>"; };
 		5CC852A12BDED9B90039FFC5 /* HighlightDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightDescription.swift; sourceTree = "<group>"; };
@@ -1623,6 +1627,7 @@
 		4C0A3F8D280F63FF000448DE /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				5C8711DF2C6D88F6007879C2 /* GIFs */,
 				D74F43082B23F09300425B75 /* Purple */,
 				BA3759882ABCCDE30018D73B /* Camera */,
 				4C190F1E2A535FC200027FD5 /* Zaps */,
@@ -2023,6 +2028,7 @@
 		4C75EFA227FA576C0006080F /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				5C8711E22C6D8C6E007879C2 /* GIFs */,
 				D78DB85D2C20FE9E00F0AB12 /* Chat */,
 				D71AC4CA2BA8E3320076268E /* Extensions */,
 				BA3759952ABCCF360018D73B /* Camera */,
@@ -2714,6 +2720,22 @@
 				4CFD502E2A2DA45800A229DB /* MediaView.swift */,
 			);
 			path = Images;
+			sourceTree = "<group>";
+		};
+		5C8711DF2C6D88F6007879C2 /* GIFs */ = {
+			isa = PBXGroup;
+			children = (
+				5C8711E02C6D8912007879C2 /* NostrBuildGIF.swift */,
+			);
+			path = GIFs;
+			sourceTree = "<group>";
+		};
+		5C8711E22C6D8C6E007879C2 /* GIFs */ = {
+			isa = PBXGroup;
+			children = (
+				5C8711E32C6D8C86007879C2 /* NostrBuildGIFGrid.swift */,
+			);
+			path = GIFs;
 			sourceTree = "<group>";
 		};
 		5CC852A02BDED9970039FFC5 /* Highlight */ = {
@@ -3426,6 +3448,7 @@
 				5C513FCC2984ACA60072348F /* QRCodeView.swift in Sources */,
 				4CC14FF52A740BB7007AEB17 /* NoteId.swift in Sources */,
 				4C19AE512A5CEF7C00C90DB7 /* NostrScript.swift in Sources */,
+				5C8711E42C6D8C86007879C2 /* NostrBuildGIFGrid.swift in Sources */,
 				4C32B95E2A9AD44700DC3548 /* FlatBufferObject.swift in Sources */,
 				D783A63F2AD4E53D00658DDA /* SuggestedHashtagsView.swift in Sources */,
 				4C3EA64F28FF59F200C48A62 /* tal.c in Sources */,
@@ -3477,6 +3500,7 @@
 				D76556D62B1E6C08001B0CCC /* DamusPurpleWelcomeView.swift in Sources */,
 				3165648B295B70D500C64604 /* LinkView.swift in Sources */,
 				4C8D00CF29E38B950036AF10 /* nostr_bech32.c in Sources */,
+				5C8711E12C6D8912007879C2 /* NostrBuildGIF.swift in Sources */,
 				D7CB5D5C2B1176B200AD4105 /* MediaUploader.swift in Sources */,
 				4C1253562A76C8C60004F4B8 /* BroadcastNotify.swift in Sources */,
 				4C3BEFD42819DE8F00B3DE84 /* NostrKind.swift in Sources */,

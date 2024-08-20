@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "nb-logo_nb-logo-color.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
