@@ -14,7 +14,7 @@ class Constants {
     static let NOTIFICATION_EXTENSION_BUNDLE_IDENTIFIER: String = "com.jb55.damus2.DamusNotificationService"
     
     // MARK: Push notification server
-    static let PUSH_NOTIFICATION_SERVER_PRODUCTION_BASE_URL: URL = URL(string: "http://45.33.32.5:8000")!
+    static let PUSH_NOTIFICATION_SERVER_PRODUCTION_BASE_URL: URL = URL(string: "https://notify.damus.io")!
     static let PUSH_NOTIFICATION_SERVER_TEST_BASE_URL: URL = URL(string: "http://localhost:8000")!
     
     // MARK: Purple
