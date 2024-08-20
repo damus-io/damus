@@ -220,7 +220,7 @@ extension PushNotificationClient {
                 case .local_test(let host):
                     URL(string: "http://\(host ?? "localhost:8000")") ?? Constants.PUSH_NOTIFICATION_SERVER_TEST_BASE_URL
                 case .production:
-                    Constants.PURPLE_API_PRODUCTION_BASE_URL
+                    Constants.PUSH_NOTIFICATION_SERVER_PRODUCTION_BASE_URL
                     
             }
         }
