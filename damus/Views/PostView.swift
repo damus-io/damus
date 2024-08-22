@@ -702,11 +702,6 @@ func build_post(state: DamusState, post: NSMutableAttributedString, action: Post
         case .highlighting(let draft):
             break
     }
-    
-    // include pubkeys
-    tags += pubkeys.map { pk in
-        ["p", pk.hex()]
-    }
 
     // append additional tags
     tags += uploadedMedias.compactMap { $0.metadata?.to_tag() }
@@ -717,9 +712,14 @@ func build_post(state: DamusState, post: NSMutableAttributedString, action: Post
             if !(content.isEmpty || content.allSatisfy { $0.isWhitespace })  {
                 tags.append(["comment", content])
             }
+            tags += pubkeys.map { pk in
+                ["p", pk.hex(), "mention"]
+            }
             return NostrPost(content: draft.selected_text, kind: .highlight, tags: tags)
         default:
-            break
+            tags += pubkeys.map { pk in
+                ["p", pk.hex()]
+            }
     }
 
     return NostrPost(content: content, kind: .text, tags: tags)

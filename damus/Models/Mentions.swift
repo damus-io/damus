@@ -256,37 +256,3 @@ func find_tag_ref(type: String, id: String, tags: [[String]]) -> Int? {
     
     return nil
 }
-
-struct PostTags {
-    let blocks: [Block]
-    let tags: [[String]]
-}
-
-/// Convert
-func make_post_tags(post_blocks: [Block], tags: [[String]]) -> PostTags {
-    var new_tags = tags
-
-    for post_block in post_blocks {
-        switch post_block {
-        case .mention(let mention):
-            switch(mention.ref) {
-            case .note, .nevent:
-                continue
-            default:
-                break
-            }
-
-            new_tags.append(mention.ref.tag)
-        case .hashtag(let hashtag):
-            new_tags.append(["t", hashtag.lowercased()])
-        case .text: break
-        case .invoice: break
-        case .relay: break
-        case .url(let url):
-            new_tags.append(["r", url.absoluteString])
-            break
-        }
-    }
-    
-    return PostTags(blocks: post_blocks, tags: new_tags)
-}
