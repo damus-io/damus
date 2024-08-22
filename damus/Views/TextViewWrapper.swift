@@ -90,6 +90,7 @@ struct TextViewWrapper: UIViewRepresentable {
         let updateCursorPosition: ((Int) -> Void)
         let initialTextSuffix: String?
         var initialTextSuffixWasAdded: Bool = false
+        static let ESCAPE_SEQUENCES = ["\n", "@", "  ", ", ", ". ", "! ", "? ", "; "]
 
         init(attributedText: Binding<NSMutableAttributedString>,
              getFocusWordForMention: ((String?, NSRange?) -> Void)?,
@@ -142,17 +143,27 @@ struct TextViewWrapper: UIViewRepresentable {
 
             while startPosition != textView.beginningOfDocument {
                 guard let previousPosition = textView.position(from: startPosition, offset: -1),
-                      let range = textView.textRange(from: previousPosition, to: startPosition),
-                      let text = textView.text(in: range), !text.isEmpty,
-                      let lastChar = text.last else {
+                      let range = textView.textRange(from: previousPosition, to: position),
+                      let text = textView.text(in: range), !text.isEmpty else {
                     break
                 }
-
-                if [" ", "\n", "@"].contains(lastChar) {
-                    break
-                }
-
+                
                 startPosition = previousPosition
+                
+                if let styling = textView.textStyling(at: previousPosition, in: .backward),
+                   styling[NSAttributedString.Key.link] != nil {
+                    break
+                }
+                
+                var found_escape_sequence = false
+                for escape_sequence in Self.ESCAPE_SEQUENCES {
+                    if text.contains(escape_sequence) {
+                        startPosition = textView.position(from: startPosition, offset: escape_sequence.count) ?? startPosition
+                        found_escape_sequence = true
+                        break
+                    }
+                }
+                if found_escape_sequence { break }
             }
 
             return startPosition == position ? nil : textView.textRange(from: startPosition, to: position)
