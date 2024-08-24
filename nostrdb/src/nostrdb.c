@@ -5071,7 +5071,7 @@ static inline int ndb_builder_find_str(struct ndb_builder *builder,
 		uint32_t index = ((uint32_t*)builder->str_indices.start)[i];
 		const char *some_str = (const char*)builder->strings.start + index;
 
-		if (!memcmp(some_str, str, len)) {
+		if (!memcmp(some_str, str, len) && some_str[len] == '\0') {
 			// found an existing matching str, use that index
 			*pstr = ndb_offset_str(index);
 			return 1;
