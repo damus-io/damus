@@ -91,8 +91,8 @@ static int parse_hashtag(struct cursor *cur, struct ndb_block *block) {
 //
 // bech32 blocks are stored as:
 //
-//     nostr_bech32_type  : varint
 //     bech32_buffer_size : u16
+//     nostr_bech32_type  : varint
 //     bech32_data        : [u8]
 //
 // The TLV form is compact already, so we just use it directly
