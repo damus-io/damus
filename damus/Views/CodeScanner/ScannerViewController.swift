@@ -182,25 +182,6 @@ extension CodeScannerView {
                 delegate?.didFail(reason: .badOutput)
                 return
             }
-        }
-
-        override public func viewWillLayoutSubviews() {
-            previewLayer?.frame = view.layer.bounds
-        }
-
-        @objc func updateOrientation() {
-            guard let orientation = view.window?.windowScene?.interfaceOrientation else { return }
-            guard let connection = captureSession.connections.last, connection.isVideoOrientationSupported else { return }
-            connection.videoOrientation = AVCaptureVideoOrientation(rawValue: orientation.rawValue) ?? .portrait
-        }
-
-        override public func viewDidAppear(_ animated: Bool) {
-            super.viewDidAppear(animated)
-            updateOrientation()
-        }
-
-        override public func viewWillAppear(_ animated: Bool) {
-            super.viewWillAppear(animated)
 
             if previewLayer == nil {
                 previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
@@ -218,6 +199,21 @@ extension CodeScannerView {
                     self.captureSession.startRunning()
                 }
             }
+        }
+
+        override public func viewWillLayoutSubviews() {
+            previewLayer?.frame = view.layer.bounds
+        }
+
+        @objc func updateOrientation() {
+            guard let orientation = view.window?.windowScene?.interfaceOrientation else { return }
+            guard let connection = captureSession.connections.last, connection.isVideoOrientationSupported else { return }
+            connection.videoOrientation = AVCaptureVideoOrientation(rawValue: orientation.rawValue) ?? .portrait
+        }
+
+        override public func viewDidAppear(_ animated: Bool) {
+            super.viewDidAppear(animated)
+            updateOrientation()
         }
 
         private func addviewfinder() {
