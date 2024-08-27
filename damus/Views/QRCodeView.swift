@@ -126,11 +126,11 @@ struct QRCodeView: View {
 
             if our_profile?.picture != nil {
                 ProfilePicView(pubkey: pubkey, size: 90.0, highlight: .custom(DamusColors.white, 3.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
-                    .padding(.top, 50)
+                    .padding(.top, 20)
             } else {
                 Image(systemName: "person.fill")
                     .font(.system(size: 60))
-                    .padding(.top, 50)
+                    .padding(.top, 20)
             }
             
             if let display_name = profile?.display_name {
@@ -150,17 +150,18 @@ struct QRCodeView: View {
                 .interpolation(.none)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 300, height: 300)
+                .frame(minWidth: 100, maxWidth: 300, minHeight: 100, maxHeight: 300)
                 .cornerRadius(10)
                 .overlay(RoundedRectangle(cornerRadius: 10)
-                    .stroke(DamusColors.white, lineWidth: 5.0))
+                    .stroke(DamusColors.white, lineWidth: 5.0)
+                    .scaledToFit())
                 .shadow(radius: 10)
 
             Spacer()
             
             Text("Follow me on Nostr", comment: "Text on QR code view to prompt viewer looking at screen to follow the user.")
                 .font(.system(size: 24, weight: .heavy))
-                .padding(.top)
+                .padding(.top, 10)
                 .foregroundColor(.white)
             
             Text("Scan the code", comment: "Text on QR code view to prompt viewer to scan the QR code on screen with their device camera.")
@@ -179,7 +180,7 @@ struct QRCodeView: View {
                 .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
             }
             .buttonStyle(GradientButtonStyle())
-            .padding(50)
+            .padding(20)
         }
     }
     
@@ -201,11 +202,11 @@ struct QRCodeView: View {
                 }
             }
             .scaledToFit()
-            .frame(width: 300, height: 300)
+            .frame(maxWidth: 300, maxHeight: 300)
             .cornerRadius(10)
-            .overlay(RoundedRectangle(cornerRadius: 10).stroke(DamusColors.white, lineWidth: 5.0))
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(DamusColors.white, lineWidth: 5.0).scaledToFit())
             .overlay(RoundedRectangle(cornerRadius: 10).trim(from: 0.0, to: outerTrimEnd).stroke(DamusColors.black, lineWidth: 5.5)
-            .rotationEffect(.degrees(-90)))
+                .rotationEffect(.degrees(-90)).scaledToFit())
             .shadow(radius: 10)
             
             Spacer()
