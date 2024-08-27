@@ -40,7 +40,7 @@ func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploa
     request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
     
     // If uploading to a media host that support NIP-98 authorization, add the header
-    if mediaUploader == .nostrBuild,
+    if mediaUploader == .nostrBuild || mediaUploader == .nostrcheck,
        let keypair,
         let method = request.httpMethod,
         let signature = create_nip98_signature(keypair: keypair, method: method, url: url) {
