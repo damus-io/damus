@@ -16,7 +16,39 @@ final class ZapTests: XCTestCase {
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
-    
+
+    func test_alby_zap() throws {
+        let zapjson = "eyJjb250ZW50Ijoi4pqhTm9uLWN1c3RvZGlhbCB6YXAgZnJvbSBteSBBbGJ5IEh1YiIsImNyZWF0ZWRfYXQiOjE3MjQ2ODUwNDcsImlkIjoiNGM3NWFiMWU3MDk4Y2NiN2FlYjhmZjdkNDIwMjM2ZDM1N2U1OGNjZmI3OWZiZTEwMTcwNGNiMzY0OTg3YjY4YSIsImtpbmQiOjk3MzUsInB1YmtleSI6Ijc5ZjAwZDNmNWExOWVjODA2MTg5ZmNhYjAzYzFiZTRmZjgxZDE4ZWU0ZjY1M2M4OGZhYzQxZmUwMzU3MGY0MzIiLCJzaWciOiI3OWM5ZDJjN2ExZWI1NmNhZjMyOTY1ZTRkMDJlYjJiYjFmYTY3NGViMDM4ZWE2MmFjZTg2YzBiMzA2OTJhMjU0YWU0M2JhNmMzNjcyMDJkZjgxNzQ5NGNhNTg4NzRkNWI1OWMxY2VhMDdjZTk5Mjk0MmIyOWYwZmVlZmJlM2FiZCIsInRhZ3MiOltbInAiLCIxNWI1Y2Y2Y2RmNGZkMWMwMmYyOGJjY2UwZjE5N2NhZmFlNGM4YzdjNjZhM2UyZTIzYWY5ZmU2MTA4NzUzMTVlIl0sWyJlIiwiYmNiMmZjZmUxYzQ2N2M1ZWM4Mjg1ZTM4NWMzNmVjMTM4Nzk3MDljZWQ5ZDg4MDBjYjM0MGViZjIxOGMzMjEwZCJdLFsiUCIsIjA1MjFkYjk1MzEwOTZkZmY3MDBkY2Y0MTBiMDFkYjQ3YWI2NTk4ZGU3ZTVlZjJjNWEyYmQ3ZTExNjAzMTViZjYiXSxbImJvbHQxMSIsImxuYmMxMHUxcG52ZXhoM2RwdXUyZDJ6bm4wZGNra3hhdG53M2hrZzZ0cGRzczg1Y3RzeXBuOHltbWR5cGtoamd6cGQzMzhqZ3pndzQzcW5wNHEyMjhhMnp0eGt3emF5cHZ6cnNoODIzcW5nbXY5N2YydjlwdXd2dHNhZGV0eXBtdXR5c2N3cHA1dmxjbGwwMHpwcGhoMzJ3OHV0NWpwcDVhMmZtcWg4c3o3bnUyaDd2MDdyMHU1bHN3ZzVsc3NwNXh2YXFlZnpsY2t6bXYwdzg5bHIwazB5dnI1eGQybmc1MmE1cmNkYXJmbTRmMGEwd2dwdXE5cXl5c2dxY3FwY3hxeXo1dnFlcHMzOXNleDUyc2ZtdHU5Z25tNWRhcGs1bGdsZDRwcDk2dXI1YTRhbTk0MHEyNXd6ZHNycmo1MjN4eWEwcnV4YTVscjk2M2cwMjk2cjZtZGZ5MjR2NjUzZXZjcHh5cjBtbWhnd21zcXh2cmhmZCJdLFsicHJlaW1hZ2UiLCJhZDA0N2MwMmZlNWYwNTljODA4NzdkNzk0YmU4OGU0N2M2NDRlYmVkZmRmZTY2M2IyODljOTMxNmRiNDk1ZjJkIl0sWyJkZXNjcmlwdGlvbiIsIntcImtpbmRcIjo5NzM0LFwiY3JlYXRlZF9hdFwiOjE3MjQ2ODUwMzgsXCJjb250ZW50XCI6XCLimqFOb24tY3VzdG9kaWFsIHphcCBmcm9tIG15IEFsYnkgSHViXCIsXCJ0YWdzXCI6W1tcInBcIixcIjE1YjVjZjZjZGY0ZmQxYzAyZjI4YmNjZTBmMTk3Y2FmYWU0YzhjN2M2NmEzZTJlMjNhZjlmZTYxMDg3NTMxNWVcIl0sW1wicmVsYXlzXCIsXCJ3c3M6Ly9wdXJwbGVwYWcuZXMvXCIsXCJ3c3M6Ly9yZWxheS5nZXRhbGJ5LmNvbS92MVwiLFwid3NzOi8vbm9zdHIubW9tL1wiLFwid3NzOi8vbm9zdHIub3h0ci5kZXYvXCIsXCJ3c3M6Ly9ub3MubG9sL1wiLFwid3NzOi8vbm9zdHIud2luZS9cIixcIndzczovL3JlbGF5LmRhbXVzLmlvL1wiLFwid3NzOi8vcmVsYXkubm90b3NoaS53aW4vXCIsXCJ3c3M6Ly9lZGVuLm5vc3RyLmxhbmQvXCJdLFtcImFtb3VudFwiLFwiMTAwMDAwMFwiXSxbXCJlXCIsXCJiY2IyZmNmZTFjNDY3YzVlYzgyODVlMzg1YzM2ZWMxMzg3OTcwOWNlZDlkODgwMGNiMzQwZWJmMjE4YzMyMTBkXCJdXSxcInB1YmtleVwiOlwiMDUyMWRiOTUzMTA5NmRmZjcwMGRjZjQxMGIwMWRiNDdhYjY1OThkZTdlNWVmMmM1YTJiZDdlMTE2MDMxNWJmNlwiLFwiaWRcIjpcIjU3ZDg2MTIwMDc1MjFjMGI1MzJiOTFhZjI0OTgwOTVhMjUxZTYzZjQyNTE4N2U2Yzk1NzAwZmQwYTZiYWI3ZDRcIixcInNpZ1wiOlwiNzk4ZDczNTExOGJjZDE0MjI4YTEyYjZkNTI0MjNmZjI1YmI0ZWQ4Y2Q1ZGFjZjJmNTk3MWVmNTczZmRjM2ZjMDVmYzc5MzE4NWU2OTY4MmNjYTI0M2Q2NGYxNDdhNDQ5ODk2OGEwYmMyODhhZTgzZTc1YzAzZTk5ZjkzNmE2MDNcIn0iXV19Cg=="
+
+        guard let json_data = Data(base64Encoded: zapjson) else {
+            XCTAssert(false)
+            return
+        }
+
+        let json_str = String(decoding: json_data, as: UTF8.self)
+
+        guard let ev = decode_nostr_event_json(json: json_str) else {
+            XCTAssert(false)
+            return
+        }
+
+        let zapper = Pubkey(hex: "79f00d3f5a19ec806189fcab03c1be4ff81d18ee4f653c88fac41fe03570f432")!
+        guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper, our_privkey: nil) else {
+            XCTAssert(false)
+            return
+        }
+
+        let note_id = NoteId(hex: "bcb2fcfe1c467c5ec8285e385c36ec13879709ced9d8800cb340ebf218c3210d")!
+        let author = Pubkey(hex: "15b5cf6cdf4fd1c02f28bcce0f197cafae4c8c7c66a3e2e23af9fe610875315e")!
+        XCTAssertEqual(zap.zapper, zapper)
+        XCTAssertEqual(zap.target, ZapTarget.note(id: note_id, author: author))
+
+        XCTAssertEqual(NotificationFormatter.zap_notification_title(zap), "Zap")
+        XCTAssertEqual(NotificationFormatter.zap_notification_body(profiles: Profiles(ndb: test_damus_state.ndb), zap: zap), "You received 1k sats from 1q5sah9f:mqzxky65: \"⚡Non-custodial zap from my Alby Hub\"")
+
+
+    }
+
     func test_private_zap() throws {
         let alice = generate_new_keypair()
         let bob = generate_new_keypair()
