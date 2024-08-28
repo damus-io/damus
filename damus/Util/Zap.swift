@@ -309,14 +309,10 @@ struct Zap {
             return nil
         }
          */
-        guard let desc = get_zap_description(zap_ev, inv_desc: zap_invoice.description) else {
+        guard let zap_req = get_zap_request(zap_ev) else {
             return nil
         }
 
-        guard let zap_req = decode_nostr_event_json(desc) else {
-            return nil
-        }
-        
         guard validate_event(ev: zap_req) == .ok else {
             return nil
         }
@@ -399,21 +395,12 @@ func event_has_tag(ev: NostrEvent, tag: String) -> Bool {
     return false
 }
 
-/// Fetches the description from either the invoice, or tags, depending on the type of invoice
-func get_zap_description(_ ev: NostrEvent, inv_desc: InvoiceDescription) -> String? {
-    switch inv_desc {
-    case .description(let string):
-        return string
-    case .description_hash(let deschash):
-        guard let desc = event_tag(ev, name: "description") else {
-            return nil
-        }
-        guard let data = desc.data(using: .utf8) else {
-            return nil
-        }
-        
-        return desc
+func get_zap_request(_ ev: NostrEvent) -> NostrEvent? {
+    guard let desc = event_tag(ev, name: "description") else {
+        return nil
     }
+
+    return decode_nostr_event_json(desc)
 }
 
 func invoice_to_zap_invoice(_ invoice: Invoice) -> ZapInvoice? {
