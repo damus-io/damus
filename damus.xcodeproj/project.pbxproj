@@ -1011,6 +1011,8 @@
 		D7ADD3DE2B53854300F104C4 /* DamusPurpleURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7ADD3DD2B53854300F104C4 /* DamusPurpleURL.swift */; };
 		D7ADD3E02B538D4200F104C4 /* DamusPurpleURLSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7ADD3DF2B538D4200F104C4 /* DamusPurpleURLSheetView.swift */; };
 		D7ADD3E22B538E3500F104C4 /* DamusPurpleVerifyNpubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7ADD3E12B538E3500F104C4 /* DamusPurpleVerifyNpubView.swift */; };
+		D7B76C902C825042003A16CB /* PushNotificationClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D2A3802BF815D000E4B42B /* PushNotificationClient.swift */; };
+		D7B76C912C82507F003A16CB /* NIP98AuthenticatedRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C6787D2B2D34CC00BCEAFB /* NIP98AuthenticatedRequest.swift */; };
 		D7C6787E2B2D34CC00BCEAFB /* NIP98AuthenticatedRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C6787D2B2D34CC00BCEAFB /* NIP98AuthenticatedRequest.swift */; };
 		D7CB5D3B2B112FBB00AD4105 /* NotificationFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */; };
 		D7CB5D3C2B1130C600AD4105 /* LocalNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDA128B29EB19C40006FA5A /* LocalNotification.swift */; };
@@ -4726,6 +4728,7 @@
 				D7CE1B402B0BE719002EDAD4 /* FlatBufferObject.swift in Sources */,
 				D7CE1B442B0BE719002EDAD4 /* Mutable.swift in Sources */,
 				D798D2212B08594800234419 /* NdbTagElem.swift in Sources */,
+				D7B76C902C825042003A16CB /* PushNotificationClient.swift in Sources */,
 				D7CE1B432B0BE719002EDAD4 /* String+extension.swift in Sources */,
 				D7CB5D3F2B116DAD00AD4105 /* NotificationsManager.swift in Sources */,
 				D7CB5D602B11770C00AD4105 /* FollowState.swift in Sources */,
@@ -4802,6 +4805,7 @@
 				D7CCFC152B05891000323D86 /* Referenced.swift in Sources */,
 				D7CE1B2B2B0BE243002EDAD4 /* hex.c in Sources */,
 				D798D2222B08598A00234419 /* ReferencedId.swift in Sources */,
+				D7B76C912C82507F003A16CB /* NIP98AuthenticatedRequest.swift in Sources */,
 				D7CE1B492B0BE729002EDAD4 /* DisplayName.swift in Sources */,
 				D7CE1B192B0BE132002EDAD4 /* builder.c in Sources */,
 				D7EDED1F2B11797D0018B19C /* LongformEvent.swift in Sources */,
