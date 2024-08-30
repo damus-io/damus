@@ -15,6 +15,7 @@ class Constants {
     
     // MARK: Push notification server
     static let PUSH_NOTIFICATION_SERVER_PRODUCTION_BASE_URL: URL = URL(string: "https://notify.damus.io")!
+    static let PUSH_NOTIFICATION_SERVER_STAGING_BASE_URL: URL = URL(string: "https://notify-staging.damus.io")!
     static let PUSH_NOTIFICATION_SERVER_TEST_BASE_URL: URL = URL(string: "http://localhost:8000")!
     
     // MARK: Purple

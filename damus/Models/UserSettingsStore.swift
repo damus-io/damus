@@ -210,8 +210,8 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "enable_experimental_push_notifications", default_value: false)
     var enable_experimental_push_notifications: Bool
     
-    @Setting(key: "send_device_token_to_localhost", default_value: false)
-    var send_device_token_to_localhost: Bool
+    @StringSetting(key: "push_notification_environment", default_value: .production)
+    var push_notification_environment: PushNotificationClient.Environment
     
     @Setting(key: "enable_experimental_purple_api", default_value: false)
     var enable_experimental_purple_api: Bool

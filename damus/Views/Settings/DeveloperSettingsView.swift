@@ -21,9 +21,42 @@ struct DeveloperSettingsView: View {
 
                     Toggle(NSLocalizedString("Enable experimental push notifications", comment: "Developer mode setting to enable experimental push notifications."), isOn: $settings.enable_experimental_push_notifications)
                         .toggleStyle(.switch)
-
-                    Toggle(NSLocalizedString("Send device token to localhost", comment: "Developer mode setting to send device token metadata to a local server instead of the damus.io server."), isOn: $settings.send_device_token_to_localhost)
-                        .toggleStyle(.switch)
+                    
+                    Picker(NSLocalizedString("Push notification environment", comment: "Prompt selection of the Push notification environment (Developer feature to switch between real/production mode to test modes)."),
+                           selection: Binding(
+                            get: { () -> PushNotificationClient.Environment in
+                                switch settings.push_notification_environment {
+                                    case .local_test(_):
+                                        return .local_test(host: nil)    // Avoid errors related to a value which is not a valid picker option
+                                    default:
+                                        return settings.push_notification_environment
+                                }
+                            },
+                            set: { new_value in
+                                settings.push_notification_environment = new_value
+                            }
+                           )
+                    ) {
+                        ForEach(PushNotificationClient.Environment.allCases, id: \.self) { push_notification_environment in
+                            Text(push_notification_environment.text_description())
+                                .tag(push_notification_environment.to_string())
+                        }
+                    }
+                    
+                    if case .local_test(_) = settings.push_notification_environment {
+                        TextField(
+                            NSLocalizedString("URL", comment: "Custom URL host for Damus push notification testing"),
+                            text: Binding.init(
+                                get: {
+                                    return settings.push_notification_environment.custom_host() ?? ""
+                                }, set: { new_host_value in
+                                    settings.push_notification_environment = .local_test(host: new_host_value)
+                                }
+                            )
+                        )
+                            .disableAutocorrection(true)
+                            .autocapitalization(UITextAutocapitalizationType.none)
+                    }
                     
                     Toggle(NSLocalizedString("Enable experimental Purple API support", comment: "Developer mode setting to enable experimental Purple API support."), isOn: $settings.enable_experimental_purple_api)
                         .toggleStyle(.switch)
