@@ -20,6 +20,8 @@ struct ShareExtensionView: View {
     @State private var selectedTextHeight: CGFloat = .zero
     @State private var selectedTextWidth: CGFloat = .zero
     
+    @Environment(\.scenePhase) var scenePhase
+    
     var body: some View {
         VStack(spacing: 15) {
             if let state {
@@ -145,6 +147,41 @@ struct ShareExtensionView: View {
                     self.post(post)
                 case .cancel:
                     self.highlighter_state = .cancelled
+            }
+        }
+        .onChange(of: scenePhase) { (phase: ScenePhase) in
+            guard let state else { return }
+            switch phase {
+            case .background:
+                print("txn: 📙 HIGHLIGHTER BACKGROUNDED")
+                Task { @MainActor in
+                    state.ndb.close()
+                }
+                break
+            case .inactive:
+                print("txn: 📙 HIGHLIGHTER INACTIVE")
+                break
+            case .active:
+                print("txn: 📙 HIGHLIGHTER ACTIVE")
+                state.pool.ping()
+            @unknown default:
+                break
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { obj in
+            guard let state else { return }
+            print("txn: 📙 HIGHLIGHTER ACTIVE NOTIFY")
+            if state.ndb.reopen() {
+                print("txn: HIGHLIGHTER NOSTRDB REOPENED")
+            } else {
+                print("txn: HIGHLIGHTER NOSTRDB FAILED TO REOPEN closed: \(state.ndb.is_closed)")
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { obj in
+            guard let state else { return }
+            print("txn: 📙 HIGHLIGHTER BACKGROUNDED")
+            Task { @MainActor in
+                state.ndb.close()
             }
         }
     }
