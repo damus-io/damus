@@ -3,7 +3,7 @@
 
 static void ndb_print_text_search_key(struct ndb_text_search_key *key)
 {
-	fprintf(stderr,"K<'%.*s' %" PRIu64 " %" PRIu64 " note_id:%" PRIu64 ">", key->str_len, key->str,
+	printf("K<'%.*s' %" PRIu64 " %" PRIu64 " note_id:%" PRIu64 ">", (int)key->str_len, key->str,
 						    key->word_index,
 						    key->timestamp,
 						    key->note_id);
