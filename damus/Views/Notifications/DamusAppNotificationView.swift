@@ -96,7 +96,7 @@ struct DamusAppNotificationView: View {
         
         @MainActor
         func open_url(url: URL) {
-            UIApplication.shared.open(url)
+            this_app.open(url)
         }
         
         var body: some View {

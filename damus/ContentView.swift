@@ -57,6 +57,10 @@ enum Sheets: Identifiable {
     }
 }
 
+func present_sheet(_ sheet: Sheets) {
+    notify(.present_sheet(sheet))
+}
+
 struct ContentView: View {
     let keypair: Keypair
     let appDelegate: AppDelegate?
@@ -819,7 +823,7 @@ func update_filters_with_since(last_of_kind: [UInt32: NostrEvent], filters: [Nos
 
 
 func setup_notifications() {
-    UIApplication.shared.registerForRemoteNotifications()
+    this_app.registerForRemoteNotifications()
     let center = UNUserNotificationCenter.current()
     
     center.getNotificationSettings { settings in
@@ -1051,7 +1055,7 @@ func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: Ev
         //let post = tup.0
         //let to_relays = tup.1
         print("post \(post.content)")
-        guard let new_ev = post_to_event(post: post, keypair: keypair) else {
+        guard let new_ev = post.to_event(keypair: keypair) else {
             return false
         }
         postbox.send(new_ev)
@@ -1112,7 +1116,7 @@ func on_open_url(state: DamusState, url: URL, result: @escaping (OpenResult?) ->
             }
         case .hashtag(let ht):
             result(.filter(.filter_hashtag([ht.hashtag])))
-        case .param, .quote:
+        case .param, .quote, .reference:
             // doesn't really make sense here
             break
         case .naddr(let naddr):

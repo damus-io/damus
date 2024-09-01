@@ -73,6 +73,16 @@ func should_blur_images(settings: UserSettingsStore, contacts: Contacts, ev: Nos
     return true
 }
 
+// blame the porn bots for this code too
+func should_blur_images(damus_state: DamusState, ev: NostrEvent) -> Bool {
+    return should_blur_images(
+        settings: damus_state.settings,
+        contacts: damus_state.contacts,
+        ev: ev,
+        our_pubkey: damus_state.pubkey
+    )
+}
+
 func format_relative_time(_ created_at: UInt32) -> String
 {
     return time_ago_since(Date(timeIntervalSince1970: Double(created_at)))

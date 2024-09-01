@@ -15,8 +15,6 @@ struct MutelistView: View {
     @State var hashtags: [MuteItem] = []
     @State var threads: [MuteItem] = []
     @State var words: [MuteItem] = []
-    
-    @State var new_text: String = ""
 
     func RemoveAction(item: MuteItem) -> some View {
         Button {
@@ -122,9 +120,13 @@ struct MutelistView: View {
             }
         }
         .sheet(isPresented: $show_add_muteitem, onDismiss: { self.show_add_muteitem = false }) {
-            AddMuteItemView(state: damus_state, new_text: $new_text)
-                .presentationDetents([.height(300)])
-                .presentationDragIndicator(.visible)
+            if #available(iOS 16.0, *) {
+                AddMuteItemView(state: damus_state)
+                    .presentationDetents([.height(300)])
+                    .presentationDragIndicator(.visible)
+            } else {
+                AddMuteItemView(state: damus_state)
+            }
         }
     }
 }
