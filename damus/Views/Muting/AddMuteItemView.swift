@@ -8,7 +8,7 @@ import SwiftUI
 
 struct AddMuteItemView: View {
     let state: DamusState
-    @Binding var new_text: String
+    @State var new_text: String = ""
     @State var expiration: DamusDuration = .indefinite
 
     @Environment(\.dismiss) var dismiss
@@ -108,6 +108,6 @@ struct AddMuteItemView: View {
 
 struct AddMuteItemView_Previews: PreviewProvider {
     static var previews: some View {
-        AddMuteItemView(state: test_damus_state, new_text: .constant(""))
+        AddMuteItemView(state: test_damus_state)
     }
 }

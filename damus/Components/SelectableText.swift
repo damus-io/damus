@@ -14,7 +14,6 @@ struct SelectableText: View {
     let attributedString: AttributedString
     let textAlignment: NSTextAlignment
     @State private var showHighlightPost = false
-    @State private var showMutePost = false
     @State private var selectedText = ""
     @State private var selectedTextHeight: CGFloat = .zero
     @State private var selectedTextWidth: CGFloat = .zero
@@ -39,7 +38,6 @@ struct SelectableText: View {
                 textAlignment: self.textAlignment,
                 enableHighlighting: self.enableHighlighting(),
                 showHighlightPost: $showHighlightPost,
-                showMutePost: $showMutePost,
                 selectedText: $selectedText,
                 height: $selectedTextHeight
             )
@@ -62,11 +60,6 @@ struct SelectableText: View {
                     .presentationDetents([.height(selectedTextHeight + 150), .medium, .large])
             }
         }
-        .sheet(isPresented: $showMutePost) {
-            AddMuteItemView(state: damus_state, new_text: $selectedText)
-                .presentationDragIndicator(.visible)
-                .presentationDetents([.height(300), .medium, .large])
-        }
         .frame(height: selectedTextHeight)
     }
     
@@ -77,12 +70,10 @@ struct SelectableText: View {
 
 fileprivate class TextView: UITextView {
     @Binding var showHighlightPost: Bool
-    @Binding var showMutePost: Bool
     @Binding var selectedText: String
 
-    init(frame: CGRect, textContainer: NSTextContainer?, showHighlightPost: Binding<Bool>, showMutePost: Binding<Bool>, selectedText: Binding<String>) {
+    init(frame: CGRect, textContainer: NSTextContainer?, showHighlightPost: Binding<Bool>, selectedText: Binding<String>) {
         self._showHighlightPost = showHighlightPost
-        self._showMutePost = showMutePost
         self._selectedText = selectedText
         super.init(frame: frame, textContainer: textContainer)
     }
@@ -95,11 +86,6 @@ fileprivate class TextView: UITextView {
         if action == #selector(highlightText(_:)) {
             return true
         }
-        
-        if action == #selector(muteText(_:)) {
-            return true
-        }
-        
         return super.canPerformAction(action, withSender: sender)
     }
 
@@ -107,12 +93,6 @@ fileprivate class TextView: UITextView {
         guard let selectedRange = self.selectedTextRange else { return }
         selectedText = self.text(in: selectedRange) ?? ""
         showHighlightPost.toggle()
-    }
-    
-    @objc public func muteText(_ sender: Any?) {
-        guard let selectedRange = self.selectedTextRange else { return }
-        selectedText = self.text(in: selectedRange) ?? ""
-        showMutePost.toggle()
     }
 
 }
@@ -126,12 +106,11 @@ fileprivate class TextView: UITextView {
     let textAlignment: NSTextAlignment
     let enableHighlighting: Bool
     @Binding var showHighlightPost: Bool
-    @Binding var showMutePost: Bool
     @Binding var selectedText: String
     @Binding var height: CGFloat
 
     func makeUIView(context: UIViewRepresentableContext<Self>) -> TextView {
-        let view = TextView(frame: .zero, textContainer: nil, showHighlightPost: $showHighlightPost, showMutePost: $showMutePost, selectedText: $selectedText)
+        let view = TextView(frame: .zero, textContainer: nil, showHighlightPost: $showHighlightPost, selectedText: $selectedText)
         view.isEditable = false
         view.dataDetectorTypes = .all
         view.isSelectable = true
@@ -144,8 +123,7 @@ fileprivate class TextView: UITextView {
 
         let menuController = UIMenuController.shared
         let highlightItem = UIMenuItem(title: "Highlight", action: #selector(view.highlightText(_:)))
-        let muteItem = UIMenuItem(title: "Mute", action: #selector(view.muteText(_:)))
-        menuController.menuItems = self.enableHighlighting ? [highlightItem, muteItem] : []
+        menuController.menuItems = self.enableHighlighting ? [highlightItem] : []
 
         return view
     }
