@@ -17,7 +17,8 @@ struct ReplyPart: View {
         Group {
             if event.known_kind == .highlight {
                 let highlighted_note = event.highlighted_note_id().flatMap { events.lookup($0) }
-                HighlightDescription(event: event, highlighted_event: highlighted_note, ndb: ndb)
+                let highlight_note = HighlightEvent.parse(from: event)
+                HighlightDescription(highlight_event: highlight_note, highlighted_event: highlighted_note, ndb: ndb)
             } else if let reply_ref = event.thread_reply()?.reply {
                 let replying_to = events.lookup(reply_ref.note_id)
                 ReplyDescription(event: event, replying_to: replying_to, ndb: ndb)

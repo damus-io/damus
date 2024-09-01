@@ -151,7 +151,7 @@ public class CameraService: NSObject, Identifiable {
 
             DispatchQueue.main.async {
                 self.alertError = AlertError(title: "Camera Access", message: "Damus needs camera and microphone access. Enable in settings.", primaryButtonTitle: "Go to settings", secondaryButtonTitle: nil, primaryAction: {
-                        UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!,
+                        this_app.open(URL(string: UIApplication.openSettingsURLString)!,
                                                   options: [:], completionHandler: nil)
 
                 }, secondaryAction: nil)

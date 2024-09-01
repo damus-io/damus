@@ -94,8 +94,8 @@ enum OpenWalletError: Error {
 }
 
 func open_with_wallet(wallet: Wallet.Model, invoice: String) throws {
-    if let url = URL(string: "\(wallet.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
-        UIApplication.shared.open(url)
+    if let url = URL(string: "\(wallet.link)\(invoice)"), this_app.canOpenURL(url) {
+        this_app.open(url)
     } else {
         guard let store_link = wallet.appStoreLink else {
             throw OpenWalletError.no_wallet_to_open
@@ -105,11 +105,11 @@ func open_with_wallet(wallet: Wallet.Model, invoice: String) throws {
             throw OpenWalletError.store_link_invalid
         }
         
-        guard UIApplication.shared.canOpenURL(url) else {
+        guard this_app.canOpenURL(url) else {
             throw OpenWalletError.system_cannot_open_store_link
         }
         
-        UIApplication.shared.open(url)
+        this_app.open(url)
     }
 }
 
@@ -121,9 +121,4 @@ struct InvoiceView_Previews: PreviewProvider {
         InvoiceView(our_pubkey: .empty, invoice: test_invoice, settings: test_damus_state.settings)
             .frame(width: 300, height: 200)
     }
-}
-
-
-func present_sheet(_ sheet: Sheets) {
-    notify(.present_sheet(sheet))
 }
