@@ -6,8 +6,13 @@
 	<dict>
 		<key>NSExtensionAttributes</key>
 		<dict>
+			<key>NSExtensionServiceRoleType</key>
+			<string>NSExtensionServiceRoleTypeViewer</string>
 			<key>NSExtensionActivationRule</key>
-			<string>TRUEPREDICATE</string>
+			<dict>
+				<key>NSExtensionActivationRuleSupportsText</key>
+				<true/>
+			</dict>
 			<key>NSExtensionJavaScriptPreprocessingFile</key>
 			<string>getSelection</string>
 			<key>NSExtensionServiceAllowsFinderPreviewItem</key>
