@@ -4893,8 +4893,17 @@ mdb_env_setup_locks(MDB_env *env, MDB_name *fname, int mode, int *excl)
 #ifdef MDB_SHORT_SEMNAMES
 		encbuf[9] = '\0';	/* drop name from 15 chars to 14 chars */
 #endif
-		sprintf(env->me_txns->mti_rmname, "/MDBr%s", encbuf);
-		sprintf(env->me_txns->mti_wmname, "/MDBw%s", encbuf);
+
+#define DEF_STR(x) #x
+#define DEF_TO_STRING(x) DEF_STR(x)
+        sprintf(env->me_txns->mti_rmname, DEF_TO_STRING(MDB_SEM_NAME_PREFIX) "/MDBr%s", encbuf);
+        sprintf(env->me_txns->mti_wmname, DEF_TO_STRING(MDB_SEM_NAME_PREFIX) "/MDBw%s", encbuf);
+#undef DEF_STR
+#undef DEF_TO_STRING
+
+		printf("mdb_env_setup_locks: using semnames '%s' (%d), '%s' (%d)\n",
+		       env->me_txns->mti_rmname, strlen(env->me_txns->mti_rmname),
+		       env->me_txns->mti_wmname, strlen(env->me_txns->mti_wmname));
 		/* Clean up after a previous run, if needed:  Try to
 		 * remove both semaphores before doing anything else.
 		 */
