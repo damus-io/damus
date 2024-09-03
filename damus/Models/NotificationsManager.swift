@@ -68,6 +68,15 @@ func generate_local_notification_object(from ev: NostrEvent, state: HeadlessDamu
             let content_preview = render_notification_content_preview(ev: ev, profiles: state.profiles, keypair: state.keypair)
             return LocalNotification(type: .mention, event: ev, target: ev, content: content_preview)
         }
+        if ev.referenced_ids.contains(where: { note_id in
+            guard let note_author: Pubkey = state.ndb.lookup_note(note_id)?.unsafeUnownedValue?.pubkey else { return false }
+            guard note_author == state.keypair.pubkey else { return false }
+            return true
+        }) {
+            // This is a reply to one of our posts
+            let content_preview = render_notification_content_preview(ev: ev, profiles: state.profiles, keypair: state.keypair)
+            return LocalNotification(type: .reply, event: ev, target: ev, content: content_preview)
+        }
     } else if type == .boost,
               state.settings.repost_notification,
               let inner_ev = ev.get_inner_event()

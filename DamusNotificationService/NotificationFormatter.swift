@@ -70,6 +70,9 @@ struct NotificationFormatter {
             case .zap, .profile_zap:
                 // not handled here. Try `format_message(displayName: String, notify: LocalNotification, state: HeadlessDamusState) async -> (content: UNMutableNotificationContent, identifier: String)?`
                 return nil
+            case .reply:
+                title = String(format: NSLocalizedString("%@ replied to your note", comment: "Heading for local notification indicating a new reply"), displayName)
+                identifier = "myReplyNotification"
         }
         content.title = title
         content.body = notify.content
