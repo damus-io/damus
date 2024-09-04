@@ -13,7 +13,7 @@ struct SelectableText: View {
     let event: NostrEvent?
     let attributedString: AttributedString
     let textAlignment: NSTextAlignment
-    @State private var highlightPostingState: HighlightPostingState = .hide
+    @State private var selectedTextActionState: SelectedTextActionState = .hide
     @State private var selectedTextHeight: CGFloat = .zero
     @State private var selectedTextWidth: CGFloat = .zero
 
@@ -37,7 +37,10 @@ struct SelectableText: View {
                 textAlignment: self.textAlignment,
                 enableHighlighting: self.enableHighlighting(),
                 postHighlight: { selectedText in
-                    self.highlightPostingState = .show_post_view(highlighted_text: selectedText)
+                    self.selectedTextActionState = .show_highlight_post_view(highlighted_text: selectedText)
+                },
+                muteWord: { selectedText in
+                    self.selectedTextActionState = .show_mute_word_view(highlighted_text: selectedText)
                 },
                 height: $selectedTextHeight
             )
@@ -54,17 +57,28 @@ struct SelectableText: View {
             }
         }
         .sheet(isPresented: Binding(get: {
-            return self.highlightPostingState.show()
+            return self.selectedTextActionState.should_show_highlight_post_view()
         }, set: { newValue in
-            self.highlightPostingState = newValue ? .show_post_view(highlighted_text: self.highlightPostingState.highlighted_text() ?? "") : .hide
+            self.selectedTextActionState = newValue ? .show_highlight_post_view(highlighted_text: self.selectedTextActionState.highlighted_text() ?? "") : .hide
         })) {
-            if let event, case .show_post_view(let highlighted_text) = self.highlightPostingState {
+            if let event, case .show_highlight_post_view(let highlighted_text) = self.selectedTextActionState {
                 PostView(
                     action: .highlighting(.init(selected_text: highlighted_text, source: .event(event))),
                     damus_state: damus_state
                 )
                 .presentationDragIndicator(.visible)
                 .presentationDetents([.height(selectedTextHeight + 450), .medium, .large])
+            }
+        }
+        .sheet(isPresented: Binding(get: {
+            return self.selectedTextActionState.should_show_mute_word_view()
+        }, set: { newValue in
+            self.selectedTextActionState = newValue ? .show_mute_word_view(highlighted_text: self.selectedTextActionState.highlighted_text() ?? "") : .hide
+        })) {
+            if case .show_mute_word_view(let highlighted_text) = selectedTextActionState {
+                AddMuteItemView(state: damus_state, new_text: .constant(highlighted_text))
+                    .presentationDragIndicator(.visible)
+                    .presentationDetents([.height(300), .medium, .large])
             }
         }
         .frame(height: selectedTextHeight)
@@ -74,22 +88,28 @@ struct SelectableText: View {
         self.event != nil
     }
     
-    enum HighlightPostingState {
+    enum SelectedTextActionState {
         case hide
-        case show_post_view(highlighted_text: String)
+        case show_highlight_post_view(highlighted_text: String)
+        case show_mute_word_view(highlighted_text: String)
         
-        func show() -> Bool {
-            if case .show_post_view(let highlighted_text) = self {
-                return true
-            }
-            return false
+        func should_show_highlight_post_view() -> Bool {
+            guard case .show_highlight_post_view(let highlighted_text) = self else { return false }
+            return true
+        }
+        
+        func should_show_mute_word_view() -> Bool {
+            guard case .show_mute_word_view(let highlighted_text) = self else { return false }
+            return true
         }
         
         func highlighted_text() -> String? {
             switch self {
                 case .hide:
                     return nil
-                case .show_post_view(highlighted_text: let highlighted_text):
+                case .show_mute_word_view(highlighted_text: let highlighted_text):
+                    return highlighted_text
+                case .show_highlight_post_view(highlighted_text: let highlighted_text):
                     return highlighted_text
             }
         }
@@ -98,9 +118,11 @@ struct SelectableText: View {
 
 fileprivate class TextView: UITextView {
     var postHighlight: (String) -> Void
+    var muteWord: (String) -> Void
 
-    init(frame: CGRect, textContainer: NSTextContainer?, postHighlight: @escaping (String) -> Void) {
+    init(frame: CGRect, textContainer: NSTextContainer?, postHighlight: @escaping (String) -> Void, muteWord: @escaping (String) -> Void) {
         self.postHighlight = postHighlight
+        self.muteWord = muteWord
         super.init(frame: frame, textContainer: textContainer)
     }
 
@@ -112,18 +134,32 @@ fileprivate class TextView: UITextView {
         if action == #selector(highlightText(_:)) {
             return true
         }
+        
+        if action == #selector(muteText(_:)) {
+            return true
+        }
+        
         return super.canPerformAction(action, withSender: sender)
+    }
+    
+    func getSelectedText() -> String? {
+        guard let selectedRange = self.selectedTextRange else { return nil }
+        return self.text(in: selectedRange)
     }
 
     @objc public func highlightText(_ sender: Any?) {
-        guard let selectedRange = self.selectedTextRange else { return }
-        guard let selectedText = self.text(in: selectedRange) else { return }
+        guard let selectedText = self.getSelectedText() else { return }
         self.postHighlight(selectedText)
+    }
+    
+    @objc public func muteText(_ sender: Any?) {
+        guard let selectedText = self.getSelectedText() else { return }
+        self.muteWord(selectedText)
     }
 
 }
 
- fileprivate struct TextViewRepresentable: UIViewRepresentable {
+fileprivate struct TextViewRepresentable: UIViewRepresentable {
 
     let attributedString: AttributedString
     let textColor: UIColor
@@ -132,10 +168,11 @@ fileprivate class TextView: UITextView {
     let textAlignment: NSTextAlignment
     let enableHighlighting: Bool
     let postHighlight: (String) -> Void
+    let muteWord: (String) -> Void
     @Binding var height: CGFloat
 
     func makeUIView(context: UIViewRepresentableContext<Self>) -> TextView {
-        let view = TextView(frame: .zero, textContainer: nil, postHighlight: postHighlight)
+        let view = TextView(frame: .zero, textContainer: nil, postHighlight: postHighlight, muteWord: muteWord)
         view.isEditable = false
         view.dataDetectorTypes = .all
         view.isSelectable = true
@@ -148,7 +185,8 @@ fileprivate class TextView: UITextView {
 
         let menuController = UIMenuController.shared
         let highlightItem = UIMenuItem(title: "Highlight", action: #selector(view.highlightText(_:)))
-        menuController.menuItems = self.enableHighlighting ? [highlightItem] : []
+        let muteItem = UIMenuItem(title: "Mute", action: #selector(view.muteText(_:)))
+        menuController.menuItems = self.enableHighlighting ? [highlightItem, muteItem] : []
 
         return view
     }
