@@ -63,6 +63,7 @@ enum LocalNotificationType: String {
     case dm
     case like
     case mention
+    case reply
     case repost
     case zap
     case profile_zap

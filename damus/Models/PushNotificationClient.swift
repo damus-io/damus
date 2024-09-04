@@ -160,7 +160,7 @@ struct PushNotificationClient {
     }
     
     func current_push_notification_environment() -> Environment {
-        return self.settings.send_device_token_to_localhost ? .local_test(host: nil) : .production
+        return self.settings.push_notification_environment
     }
 }
 
@@ -201,9 +201,10 @@ extension PushNotificationClient {
     }
     
     enum Environment: CaseIterable, Codable, Identifiable, StringCodable, Equatable, Hashable {
-        static var allCases: [Environment] = [.local_test(host: nil), .production]
+        static var allCases: [Environment] = [.local_test(host: nil), .staging, .production]
         
         case local_test(host: String?)
+        case staging
         case production
 
         func text_description() -> String {
@@ -212,6 +213,8 @@ extension PushNotificationClient {
                     return NSLocalizedString("Test (local)", comment: "Label indicating a local test environment for Push notification functionality (Developer feature)")
                 case .production:
                     return NSLocalizedString("Production", comment: "Label indicating the production environment for Push notification functionality")
+                case .staging:
+                    return NSLocalizedString("Staging (for dev builds)", comment: "Label indicating the staging environment for Push notification functionality")
             }
         }
 
@@ -221,7 +224,8 @@ extension PushNotificationClient {
                     URL(string: "http://\(host ?? "localhost:8000")") ?? Constants.PUSH_NOTIFICATION_SERVER_TEST_BASE_URL
                 case .production:
                     Constants.PUSH_NOTIFICATION_SERVER_PRODUCTION_BASE_URL
-                    
+                case .staging:
+                    Constants.PUSH_NOTIFICATION_SERVER_STAGING_BASE_URL
             }
         }
         
@@ -240,6 +244,8 @@ extension PushNotificationClient {
                     self = .local_test(host: nil)
                 case "production":
                     self = .production
+                case "staging":
+                    self = .staging
                 default:
                     let components = string.split(separator: ":", maxSplits: 1, omittingEmptySubsequences: false)
                     if components.count == 2 && components[0] == "local_test" {
@@ -257,6 +263,8 @@ extension PushNotificationClient {
                         return "local_test:\(host)"
                     }
                     return "local_test"
+                case .staging:
+                    return "staging"
                 case .production:
                     return "production"
             }
@@ -273,6 +281,8 @@ extension PushNotificationClient {
                     }
                 case .production:
                     return "production"
+                case .staging:
+                    return "staging"
             }
         }
     }
