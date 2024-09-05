@@ -58,6 +58,7 @@ class NotificationService: UNNotificationServiceExtension {
         }
         
         guard should_display_notification(state: state, event: nostr_event, mode: .push) else {
+            Log.debug("should_display_notification failed", for: .push_notifications)
             // We should not display notification for this event. Suppress notification.
             // contentHandler(UNNotificationContent())
             // TODO: We cannot really suppress until we have the notification supression entitlement. Show the raw notification
@@ -66,6 +67,7 @@ class NotificationService: UNNotificationServiceExtension {
         }
         
         guard let notification_object = generate_local_notification_object(from: nostr_event, state: state) else {
+            Log.debug("generate_local_notification_object failed", for: .push_notifications)
             // We could not process this notification. Probably an unsupported nostr event kind. Suppress.
             // contentHandler(UNNotificationContent())
             // TODO: We cannot really suppress until we have the notification supression entitlement. Show the raw notification
@@ -74,9 +76,13 @@ class NotificationService: UNNotificationServiceExtension {
         }
         
         Task {
-            if let (improvedContent, _) = await NotificationFormatter.shared.format_message(displayName: display_name, notify: notification_object, state: state) {
-                contentHandler(improvedContent)
+            guard let (improvedContent, _) = await NotificationFormatter.shared.format_message(displayName: name, notify: notification_object, state: state) else {
+
+                Log.debug("NotificationFormatter.format_message failed", for: .push_notifications)
+                return
             }
+
+            contentHandler(improvedContent)
         }
     }
     
