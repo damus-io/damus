@@ -780,7 +780,7 @@ struct ContentView: View {
             selected_timeline = .dms
             damus_state.dms.set_active_dm(target.pubkey)
             navigationCoordinator.push(route: Route.DMChat(dms: damus_state.dms.active_model))
-        case .like, .zap, .mention, .repost, .reply:
+        case .like, .zap, .mention, .repost, .reply, .tagged:
             open_event(ev: target)
         case .profile_zap:
             break
