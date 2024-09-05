@@ -48,10 +48,24 @@ struct LossyLocalNotification {
     }
 }
 
+enum NotificationTarget {
+    case note(NostrEvent)
+    case note_id(NoteId)
+
+    var id: NoteId {
+        switch self {
+        case .note(let note):
+            return note.id
+        case .note_id(let id):
+            return id
+        }
+    }
+}
+
 struct LocalNotification {
     let type: LocalNotificationType
     let event: NostrEvent
-    let target: NostrEvent
+    let target: NotificationTarget
     let content: String
     
     func to_lossy() -> LossyLocalNotification {
@@ -64,6 +78,7 @@ enum LocalNotificationType: String {
     case like
     case mention
     case reply
+    case tagged
     case repost
     case zap
     case profile_zap

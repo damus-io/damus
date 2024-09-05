@@ -61,13 +61,15 @@ func generate_local_notification_object(from ev: NostrEvent, state: HeadlessDamu
     
     if type == .text, state.settings.mention_notification {
         let blocks = ev.blocks(state.keypair).blocks
+
         for case .mention(let mention) in blocks {
             guard case .pubkey(let pk) = mention.ref, pk == state.keypair.pubkey else {
                 continue
             }
             let content_preview = render_notification_content_preview(ev: ev, profiles: state.profiles, keypair: state.keypair)
-            return LocalNotification(type: .mention, event: ev, target: ev, content: content_preview)
+            return LocalNotification(type: .mention, event: ev, target: .note(ev), content: content_preview)
         }
+
         if ev.referenced_ids.contains(where: { note_id in
             guard let note_author: Pubkey = state.ndb.lookup_note(note_id)?.unsafeUnownedValue?.pubkey else { return false }
             guard note_author == state.keypair.pubkey else { return false }
@@ -75,31 +77,39 @@ func generate_local_notification_object(from ev: NostrEvent, state: HeadlessDamu
         }) {
             // This is a reply to one of our posts
             let content_preview = render_notification_content_preview(ev: ev, profiles: state.profiles, keypair: state.keypair)
-            return LocalNotification(type: .reply, event: ev, target: ev, content: content_preview)
+            return LocalNotification(type: .reply, event: ev, target: .note(ev), content: content_preview)
         }
+
+        if ev.referenced_pubkeys.contains(state.keypair.pubkey) {
+            // not mentioned or replied to, just tagged
+            let content_preview = render_notification_content_preview(ev: ev, profiles: state.profiles, keypair: state.keypair)
+            return LocalNotification(type: .tagged, event: ev, target: .note(ev), content: content_preview)
+        }
+
     } else if type == .boost,
               state.settings.repost_notification,
               let inner_ev = ev.get_inner_event()
     {
         let content_preview = render_notification_content_preview(ev: inner_ev, profiles: state.profiles, keypair: state.keypair)
-        return LocalNotification(type: .repost, event: ev, target: inner_ev, content: content_preview)
-    } else if type == .like,
-              state.settings.like_notification,
-              let evid = ev.referenced_ids.last,
-              let txn = state.ndb.lookup_note(evid, txn_name: "local_notification_like"),
-              let liked_event = txn.unsafeUnownedValue?.to_owned()
-    {
-        let content_preview = render_notification_content_preview(ev: liked_event, profiles: state.profiles, keypair: state.keypair)
-        return LocalNotification(type: .like, event: ev, target: liked_event, content: content_preview)
+        return LocalNotification(type: .repost, event: ev, target: .note(inner_ev), content: content_preview)
+    } else if type == .like, state.settings.like_notification, let evid = ev.referenced_ids.last {
+        if let txn = state.ndb.lookup_note(evid, txn_name: "local_notification_like"),
+           let liked_event = txn.unsafeUnownedValue
+        {
+           let content_preview = render_notification_content_preview(ev: liked_event, profiles: state.profiles, keypair: state.keypair)
+            return LocalNotification(type: .like, event: ev, target: .note(liked_event), content: content_preview)
+        } else {
+            return LocalNotification(type: .like, event: ev, target: .note_id(evid), content: "")
+        }
     }
     else if type == .dm,
             state.settings.dm_notification {
         let convo = ev.decrypted(keypair: state.keypair) ?? NSLocalizedString("New encrypted direct message", comment: "Notification that the user has received a new direct message")
-        return LocalNotification(type: .dm, event: ev, target: ev, content: convo)
+        return LocalNotification(type: .dm, event: ev, target: .note(ev), content: convo)
     }
     else if type == .zap,
             state.settings.zap_notification {
-        return LocalNotification(type: .zap, event: ev, target: ev, content: ev.content)
+        return LocalNotification(type: .zap, event: ev, target: .note(ev), content: ev.content)
     }
     
     return nil

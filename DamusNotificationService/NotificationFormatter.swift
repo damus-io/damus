@@ -55,6 +55,9 @@ struct NotificationFormatter {
         var identifier = ""
         
         switch notify.type {
+            case .tagged:
+                title = String(format: NSLocalizedString("Tagged by %@", comment: "Tagged by heading in local notification"), displayName)
+                identifier = "myMentionNotification"
             case .mention:
                 title = String(format: NSLocalizedString("Mentioned by %@", comment: "Mentioned by heading in local notification"), displayName)
                 identifier = "myMentionNotification"
