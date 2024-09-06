@@ -135,6 +135,9 @@ struct ChatroomThreadView: View {
                 }
                 .padding(.top)
                 EndBlock()
+                
+                HStack {}
+                .frame(height: tabHeight + getSafeAreaBottom())
             }
             .onReceive(handle_notify(.post), perform: { notify in
                 switch notify {

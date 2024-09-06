@@ -61,6 +61,8 @@ func present_sheet(_ sheet: Sheets) {
     notify(.present_sheet(sheet))
 }
 
+var tabHeight: CGFloat = 0.0
+
 struct ContentView: View {
     let keypair: Keypair
     let appDelegate: AppDelegate?
@@ -89,6 +91,7 @@ struct ContentView: View {
     @State var user_muted_confirm: Bool = false
     @State var confirm_overwrite_mutelist: Bool = false
     @State private var isSideBarOpened = false
+    @State var headerOffset: CGFloat = 0.0
     var home: HomeModel = HomeModel()
     @StateObject var navigationCoordinator: NavigationCoordinator = NavigationCoordinator()
     @AppStorage("has_seen_suggested_users") private var hasSeenOnboardingSuggestions = false
@@ -131,7 +134,7 @@ struct ContentView: View {
                 }
                 
             case .home:
-                PostingTimelineView(damus_state: damus_state!, home: home, active_sheet: $active_sheet)
+                PostingTimelineView(damus_state: damus_state!, home: home, isSideBarOpened: $isSideBarOpened, active_sheet: $active_sheet, headerOffset: $headerOffset)
                 
             case .notifications:
                 NotificationsView(state: damus, notifications: home.notifications, subtitle: $menu_subtitle)
@@ -140,25 +143,16 @@ struct ContentView: View {
                 DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms, settings: damus_state!.settings)
             }
         }
+        .background(DamusColors.adaptableWhite)
+        .edgesIgnoringSafeArea(selected_timeline != .home ? [] : [.top, .bottom])
         .navigationBarTitle(timeline_name(selected_timeline), displayMode: .inline)
+        .toolbar(selected_timeline != .home ? .visible : .hidden)
         .toolbar {
             ToolbarItem(placement: .principal) {
                 VStack {
-                    if selected_timeline == .home {
-                        Image("damus-home")
-                            .resizable()
-                            .frame(width:30,height:30)
-                            .shadow(color: DamusColors.purple, radius: 2)
-                            .opacity(isSideBarOpened ? 0 : 1)
-                            .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
-                            .onTapGesture {
-                                isSideBarOpened.toggle()
-                            }
-                    } else {
-                        timelineNavItem
-                            .opacity(isSideBarOpened ? 0 : 1)
-                            .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
-                    }
+                    timelineNavItem
+                        .opacity(isSideBarOpened ? 0 : 1)
+                        .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
                 }
             }
         }
@@ -237,9 +231,11 @@ struct ContentView: View {
                                 }
                             }
                     }
+                    .background(DamusColors.adaptableWhite)
+                    .edgesIgnoringSafeArea(selected_timeline != .home ? [] : [.top, .bottom])
                     .tabViewStyle(.page(indexDisplayMode: .never))
                     .overlay(
-                        SideMenuView(damus_state: damus_state!, isSidebarVisible: $isSideBarOpened.animation())
+                        SideMenuView(damus_state: damus_state!, isSidebarVisible: $isSideBarOpened.animation(), selected: $selected_timeline)
                     )
                     .navigationDestination(for: Route.self) { route in
                         route.view(navigationCoordinator: navigationCoordinator, damusState: damus_state!)
@@ -249,13 +245,25 @@ struct ContentView: View {
                     }
                 }
                 .navigationViewStyle(.stack)
-            
-                if !hide_bar {
-                    TabBar(nstatus: home.notification_status, selected: $selected_timeline, settings: damus.settings, action: switch_timeline)
-                        .padding([.bottom], 8)
-                        .background(Color(uiColor: .systemBackground).ignoresSafeArea())
-                } else {
-                    Text("")
+                .overlay(alignment: .bottom) {
+                    if !hide_bar {
+                        if !isSideBarOpened {
+                            TabBar(nstatus: home.notification_status, navIsAtRoot: navIsAtRoot(), selected: $selected_timeline, headerOffset: $headerOffset, settings: damus.settings, action: switch_timeline)
+                                .padding([.bottom], 8)
+                                .background(selected_timeline != .home || (selected_timeline == .home && !self.navIsAtRoot()) ? DamusColors.adaptableWhite : DamusColors.adaptableWhite.opacity(abs(1.25 - (abs(headerOffset/100.0)))))
+                                .anchorPreference(key: HeaderBoundsKey.self, value: .bounds){$0}
+                                .overlayPreferenceValue(HeaderBoundsKey.self) { value in
+                                    GeometryReader{ proxy in
+                                        if let anchor = value{
+                                            Color.clear
+                                                .onAppear {
+                                                    tabHeight = proxy[anchor].height
+                                                }
+                                        }
+                                    }
+                                }
+                        }
+                    }
                 }
             }
         }

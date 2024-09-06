@@ -99,7 +99,10 @@ struct ConfigView: View {
                     }
                 }
                 
-                Section(NSLocalizedString("Version", comment: "Section title for displaying the version number of the Damus app.")) {
+                Section(
+                    header: Text(NSLocalizedString("Version", comment: "Section title for displaying the version number of the Damus app.")),
+                    footer: Text("").padding(.bottom, tabHeight + getSafeAreaBottom())
+                ) {
                     Text(verbatim: VersionInfo.version)
                         .contextMenu {
                             Button {
