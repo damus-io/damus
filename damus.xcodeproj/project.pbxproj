@@ -1014,6 +1014,10 @@
 		D7B76C902C825042003A16CB /* PushNotificationClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D2A3802BF815D000E4B42B /* PushNotificationClient.swift */; };
 		D7B76C912C82507F003A16CB /* NIP98AuthenticatedRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C6787D2B2D34CC00BCEAFB /* NIP98AuthenticatedRequest.swift */; };
 		D7C6787E2B2D34CC00BCEAFB /* NIP98AuthenticatedRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C6787D2B2D34CC00BCEAFB /* NIP98AuthenticatedRequest.swift */; };
+		D7C9701E2C890FC500C56602 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3ACB685D297633BC00C46468 /* Localizable.strings */; };
+		D7C9701F2C890FEB00C56602 /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = 3A4325AA2961E11400BFCD9D /* Localizable.stringsdict */; };
+		D7C970202C89100200C56602 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3ACB685D297633BC00C46468 /* Localizable.strings */; };
+		D7C970212C89100200C56602 /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = 3A4325AA2961E11400BFCD9D /* Localizable.stringsdict */; };
 		D7CB5D3B2B112FBB00AD4105 /* NotificationFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */; };
 		D7CB5D3C2B1130C600AD4105 /* LocalNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDA128B29EB19C40006FA5A /* LocalNotification.swift */; };
 		D7CB5D3E2B116DAD00AD4105 /* NotificationsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CB5D3D2B116DAD00AD4105 /* NotificationsManager.swift */; };
@@ -3650,6 +3654,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D7C970202C89100200C56602 /* Localizable.strings in Resources */,
+				D7C970212C89100200C56602 /* Localizable.stringsdict in Resources */,
 				D73E5F982C6AA847007EB227 /* Assets.xcassets in Resources */,
 				D703D72B2C66F29500A400EA /* getSelection.js in Resources */,
 				D703D71C2C66E47100A400EA /* Media.xcassets in Resources */,
@@ -3660,6 +3666,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D7C9701F2C890FEB00C56602 /* Localizable.stringsdict in Resources */,
+				D7C9701E2C890FC500C56602 /* Localizable.strings in Resources */,
 				D7FB14252BE5A9A800398331 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
