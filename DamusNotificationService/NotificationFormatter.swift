@@ -55,6 +55,9 @@ struct NotificationFormatter {
         var identifier = ""
         
         switch notify.type {
+            case .tagged:
+                title = String(format: NSLocalizedString("Tagged by %@", comment: "Tagged by heading in local notification"), displayName)
+                identifier = "myMentionNotification"
             case .mention:
                 title = String(format: NSLocalizedString("Mentioned by %@", comment: "Mentioned by heading in local notification"), displayName)
                 identifier = "myMentionNotification"
@@ -90,10 +93,11 @@ struct NotificationFormatter {
         
         // If it does not work, try async formatting methods
         let content = UNMutableNotificationContent()
-        
+
         switch notify.type {
             case .zap, .profile_zap:
                 guard let zap = await get_zap(from: notify.event, state: state) else {
+                    Log.debug("format_message: async get_zap failed", for: .push_notifications)
                     return nil
                 }
                 content.title = Self.zap_notification_title(zap)

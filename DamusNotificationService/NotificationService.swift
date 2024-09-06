@@ -27,9 +27,9 @@ class NotificationService: UNNotificationServiceExtension {
         // Log that we got a push notification
         Log.debug("Got nostr event push notification from pubkey %s", for: .push_notifications, nostr_event.pubkey.hex())
         
-        guard let state = NotificationExtensionState(),
-              let display_name = state.ndb.lookup_profile(nostr_event.pubkey)?.unsafeUnownedValue?.profile?.display_name  // We are not holding the txn here.
-        else {
+        guard let state = NotificationExtensionState() else {
+            Log.debug("Failed to open nostrdb", for: .push_notifications)
+
             // Something failed to initialize so let's go for the next best thing
             guard let improved_content = NotificationFormatter.shared.format_message(event: nostr_event) else {
                 // We cannot format this nostr event. Suppress notification.
@@ -39,7 +39,11 @@ class NotificationService: UNNotificationServiceExtension {
             contentHandler(improved_content)
             return
         }
-        
+
+        let txn = state.ndb.lookup_profile(nostr_event.pubkey)
+        let profile = txn?.unsafeUnownedValue?.profile
+        let name = Profile.displayName(profile: profile, pubkey: nostr_event.pubkey).displayName
+
         // Don't show notification details that match mute list.
         // TODO: Remove this code block once we get notification suppression entitlement from Apple. It will be covered by the `guard should_display_notification` block
         if state.mutelist_manager.is_event_muted(nostr_event) {
@@ -54,6 +58,7 @@ class NotificationService: UNNotificationServiceExtension {
         }
         
         guard should_display_notification(state: state, event: nostr_event, mode: .push) else {
+            Log.debug("should_display_notification failed", for: .push_notifications)
             // We should not display notification for this event. Suppress notification.
             // contentHandler(UNNotificationContent())
             // TODO: We cannot really suppress until we have the notification supression entitlement. Show the raw notification
@@ -62,6 +67,7 @@ class NotificationService: UNNotificationServiceExtension {
         }
         
         guard let notification_object = generate_local_notification_object(from: nostr_event, state: state) else {
+            Log.debug("generate_local_notification_object failed", for: .push_notifications)
             // We could not process this notification. Probably an unsupported nostr event kind. Suppress.
             // contentHandler(UNNotificationContent())
             // TODO: We cannot really suppress until we have the notification supression entitlement. Show the raw notification
@@ -70,9 +76,13 @@ class NotificationService: UNNotificationServiceExtension {
         }
         
         Task {
-            if let (improvedContent, _) = await NotificationFormatter.shared.format_message(displayName: display_name, notify: notification_object, state: state) {
-                contentHandler(improvedContent)
+            guard let (improvedContent, _) = await NotificationFormatter.shared.format_message(displayName: name, notify: notification_object, state: state) else {
+
+                Log.debug("NotificationFormatter.format_message failed", for: .push_notifications)
+                return
             }
+
+            contentHandler(improvedContent)
         }
     }
     
