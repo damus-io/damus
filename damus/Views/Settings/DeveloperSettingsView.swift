@@ -18,10 +18,6 @@ struct DeveloperSettingsView: View {
                     .toggleStyle(.switch)
                 if settings.developer_mode {
                     Toggle(NSLocalizedString("Always show onboarding", comment: "Developer mode setting to always show onboarding suggestions."), isOn: $settings.always_show_onboarding_suggestions)
-
-                    Toggle(NSLocalizedString("Enable experimental push notifications", comment: "Developer mode setting to enable experimental push notifications."), isOn: $settings.enable_experimental_push_notifications)
-                        .toggleStyle(.switch)
-                    
                     Picker(NSLocalizedString("Push notification environment", comment: "Prompt selection of the Push notification environment (Developer feature to switch between real/production mode to test modes)."),
                            selection: Binding(
                             get: { () -> PushNotificationClient.Environment in
