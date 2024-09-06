@@ -31,7 +31,8 @@ enum Sheets: Identifiable {
     case onboardingSuggestions
     case purple(DamusPurpleURL)
     case purple_onboarding
-    
+    case error(ErrorView.UserPresentableError)
+
     static func zap(target: ZapTarget, lnurl: String) -> Sheets {
         return .zap(ZapSheet(target: target, lnurl: lnurl))
     }
@@ -53,6 +54,7 @@ enum Sheets: Identifiable {
         case .onboardingSuggestions: return "onboarding-suggestions"
         case .purple(let purple_url): return "purple" + purple_url.url_string()
         case .purple_onboarding: return "purple_onboarding"
+        case .error(_): return "error"
         }
     }
 }
@@ -339,36 +341,14 @@ struct ContentView: View {
                 DamusPurpleURLSheetView(damus_state: damus_state!, purple_url: purple_url)
             case .purple_onboarding:
                 DamusPurpleNewUserOnboardingView(damus_state: damus_state)
+            case .error(let error):
+                ErrorView(damus_state: damus_state!, error: error)
             }
         }
         .onOpenURL { url in
-            on_open_url(state: damus_state!, url: url) { res in
-                guard let res else {
-                    return
-                }
-                
-                switch res {
-                    case .filter(let filt): self.open_search(filt: filt)
-                    case .profile(let pk):  self.open_profile(pubkey: pk)
-                    case .event(let ev):    self.open_event(ev: ev)
-                    case .wallet_connect(let nwc): self.open_wallet(nwc: nwc)
-                    case .script(let data): self.open_script(data)
-                    case .purple(let purple_url):
-                        if case let .welcome(checkout_id) = purple_url.variant {
-                            // If this is a welcome link, do the following before showing the onboarding screen:
-                            // 1. Check if this is legitimate and good to go.
-                            // 2. Mark as complete if this is good to go.
-                            Task {
-                                let is_good_to_go = try? await damus_state.purple.check_and_mark_ln_checkout_is_good_to_go(checkout_id: checkout_id)
-                                if is_good_to_go == true {
-                                    self.active_sheet = .purple(purple_url)
-                                }
-                            }
-                        }
-                        else {
-                            self.active_sheet = .purple(purple_url)
-                        }
-                }
+            Task {
+                let open_action = await DamusURLHandler.handle_opening_url_and_compute_view_action(damus_state: self.damus_state, url: url)
+                self.execute_open_action(open_action)
             }
         }
         .onReceive(handle_notify(.compose)) { action in
@@ -783,6 +763,39 @@ struct ContentView: View {
             break
         }
     }
+    
+    /// An open action within the app
+    /// This is used to model, store, and communicate a desired view action to be taken as a result of opening an object,
+    /// for example a URL
+    ///
+    /// ## Implementation notes
+    ///
+    /// - The reason this was created was to separate URL parsing logic, the underlying actions that mutate the state of the app, and the action to be taken on the view layer as a result. This makes it easier to test, to read the URL handling code, and to add new functionality in between the two (e.g. a confirmation screen before proceeding with a given open action)
+    enum ViewOpenAction {
+        /// Open a page route
+        case route(Route)
+        /// Open a sheet
+        case sheet(Sheets)
+        /// Do nothing.
+        ///
+        /// ## Implementation notes
+        /// - This is used here instead of Optional values to make semantics explicit and force better programming intent, instead of accidentally doing nothing because of Swift's syntax sugar.
+        case no_action
+    }
+    
+    /// Executes an action to open something in the app view
+    ///
+    /// - Parameter open_action: The action to perform
+    func execute_open_action(_ open_action: ViewOpenAction) {
+        switch open_action {
+        case .route(let route):
+            navigationCoordinator.push(route: route)
+        case .sheet(let sheet):
+            self.active_sheet = sheet
+        case .no_action:
+            return
+        }
+    }
 }
 
 struct TopbarSideMenuButton: View {
@@ -934,8 +947,36 @@ enum FoundEvent {
     case event(NostrEvent)
 }
 
+/// Finds an event from NostrDB if it exists, or from the network
+///
+/// This is the callback version. There is also an asyc/await version of this function.
+///
+/// - Parameters:
+///   - state: Damus state
+///   - query_: The query, including the event being looked for, and the relays to use when looking
+///   - callback: The function to call with results
 func find_event(state: DamusState, query query_: FindEvent, callback: @escaping (FoundEvent?) -> ()) {
     return find_event_with_subid(state: state, query: query_, subid: UUID().description, callback: callback)
+}
+
+/// Finds an event from NostrDB if it exists, or from the network
+///
+/// This is a the async/await version of `find_event`. Use this when using callbacks is impossible or cumbersome.
+///
+/// - Parameters:
+///   - state: Damus state
+///   - query_: The query, including the event being looked for, and the relays to use when looking
+///   - callback: The function to call with results
+func find_event(state: DamusState, query query_: FindEvent) async -> FoundEvent? {
+    await withCheckedContinuation { continuation in
+        find_event(state: state, query: query_) { event in
+            var already_resumed = false
+            if !already_resumed {   // Ensure we do not resume twice, as it causes a crash
+                continuation.resume(returning: event)
+                already_resumed = true
+            }
+        }
+    }
 }
 
 func find_event_with_subid(state: DamusState, query query_: FindEvent, subid: String, callback: @escaping (FoundEvent?) -> ()) {
@@ -1008,6 +1049,15 @@ func find_event_with_subid(state: DamusState, query query_: FindEvent, subid: St
     }
 }
 
+
+/// Finds a replaceable event based on an `naddr` address.
+///
+/// This is the callback version of the function. There is another function that makes use of async/await
+///
+/// - Parameters:
+///   - damus_state: The Damus state
+///   - naddr: the `naddr` address
+///   - callback: A function to handle the found event
 func naddrLookup(damus_state: DamusState, naddr: NAddr, callback: @escaping (NostrEvent?) -> ()) {
     var nostrKinds: [NostrKind]? = NostrKind(rawValue: naddr.kind).map { [$0] }
 
@@ -1033,6 +1083,26 @@ func naddrLookup(damus_state: DamusState, naddr: NAddr, callback: @escaping (Nos
             }
         }
         damus_state.pool.unsubscribe(sub_id: subid, to: [relay_id])
+    }
+}
+
+/// Finds a replaceable event based on an `naddr` address.
+///
+/// This is the async/await version of the function. Another version of this function which makes use of callback functions also exists .
+///
+/// - Parameters:
+///   - damus_state: The Damus state
+///   - naddr: the `naddr` address
+///   - callback: A function to handle the found event
+func naddrLookup(damus_state: DamusState, naddr: NAddr) async -> NostrEvent? {
+    await withCheckedContinuation { continuation in
+        var already_resumed = false
+        naddrLookup(damus_state: damus_state, naddr: naddr) { event in
+            if !already_resumed {   // Ensure we do not resume twice, as it causes a crash
+                continuation.resume(returning: event)
+                already_resumed = true
+            }
+        }
     }
 }
 
@@ -1143,63 +1213,6 @@ func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: Ev
     case .cancel:
         print("post cancelled")
         return false
-    }
-}
-
-
-enum OpenResult {
-    case profile(Pubkey)
-    case filter(NostrFilter)
-    case event(NostrEvent)
-    case wallet_connect(WalletConnectURL)
-    case script([UInt8])
-    case purple(DamusPurpleURL)
-}
-
-func on_open_url(state: DamusState, url: URL, result: @escaping (OpenResult?) -> Void) {
-    if let purple_url = DamusPurpleURL(url: url) {
-        result(.purple(purple_url))
-        return
-    }
-    
-    if let nwc = WalletConnectURL(str: url.absoluteString) {
-        result(.wallet_connect(nwc))
-        return
-    }
-    
-    guard let link = decode_nostr_uri(url.absoluteString) else {
-        result(nil)
-        return
-    }
-    
-    switch link {
-    case .ref(let ref):
-        switch ref {
-        case .pubkey(let pk):
-            result(.profile(pk))
-        case .event(let noteid):
-            find_event(state: state, query: .event(evid: noteid)) { res in
-                guard let res, case .event(let ev) = res else { return }
-                result(.event(ev))
-            }
-        case .hashtag(let ht):
-            result(.filter(.filter_hashtag([ht.hashtag])))
-        case .param, .quote, .reference:
-            // doesn't really make sense here
-            break
-        case .naddr(let naddr):
-            naddrLookup(damus_state: state, naddr: naddr) { res in
-                guard let res = res else { return }
-                result(.event(res))
-            }
-        }
-    case .filter(let filt):
-        result(.filter(filt))
-        break
-        // TODO: handle filter searches?
-    case .script(let script):
-        result(.script(script))
-        break
     }
 }
 

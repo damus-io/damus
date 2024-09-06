@@ -7,6 +7,10 @@
 
 import Foundation
 
+/// General app-wide constants
+///
+/// ## Implementation notes:
+/// - Force unwrapping in this class is generally ok, because the contents are static, and so we can easily provide guarantees that they will not crash the app.
 class Constants {
     //static let EXAMPLE_DEMOS: DamusState = .empty
     static let DAMUS_APP_GROUP_IDENTIFIER: String = "group.com.damus"
@@ -31,6 +35,9 @@ class Constants {
     static let DAMUS_WEBSITE_LOCAL_TEST_URL: URL = URL(string: "http://localhost:3000")!
     static let DAMUS_WEBSITE_STAGING_URL: URL = URL(string: "https://staging.damus.io")!
     static let DAMUS_WEBSITE_PRODUCTION_URL: URL = URL(string: "https://damus.io")!
+    
+    // MARK: Damus Company Info
+    static let SUPPORT_PUBKEY: Pubkey = Pubkey(hex: "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681")!
     
     // MARK: General constants
     static let GIF_IMAGE_TYPE: String = "com.compuserve.gif"

@@ -2,7 +2,7 @@
 //  LongformEvent.swift
 //  damus
 //
-//  Created by Daniel Nogueira on 2023-11-24.
+//  Created by Daniel D'Aquino on 2023-11-24.
 //
 
 import Foundation

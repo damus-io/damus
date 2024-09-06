@@ -2,7 +2,7 @@
 //  DamusPurpleURL.swift
 //  damus
 //
-//  Created by Daniel Nogueira on 2024-01-13.
+//  Created by Daniel D'Aquino on 2024-01-13.
 //
 
 import Foundation

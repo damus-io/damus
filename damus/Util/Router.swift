@@ -32,6 +32,7 @@ enum Route: Hashable {
     case DeveloperSettings(settings: UserSettingsStore)
     case FirstAidSettings(settings: UserSettingsStore)
     case Thread(thread: ThreadModel)
+    case ThreadFromReference(note_reference: LoadableThreadModel.NoteReference)
     case Reposts(reposts: EventsModel)
     case QuoteReposts(quotes: EventsModel)
     case Reactions(reactions: EventsModel)
@@ -96,6 +97,8 @@ enum Route: Hashable {
         case .Thread(let thread):
             ChatroomThreadView(damus: damusState, thread: thread)
             //ThreadView(state: damusState, thread: thread)
+        case .ThreadFromReference(let note_reference):
+            LoadableThreadView(state: damusState, note_reference: note_reference)
         case .Reposts(let reposts):
             RepostsView(damus_state: damusState, model: reposts)
         case .QuoteReposts(let quote_reposts):
@@ -187,6 +190,9 @@ enum Route: Hashable {
         case .Thread(let threadModel):
             hasher.combine("thread")
             hasher.combine(threadModel.event.id)
+        case .ThreadFromReference(note_reference: let note_reference):
+            hasher.combine("thread_from_reference")
+            hasher.combine(note_reference)
         case .Reposts(let reposts):
             hasher.combine("reposts")
             hasher.combine(reposts.target)

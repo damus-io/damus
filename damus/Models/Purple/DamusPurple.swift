@@ -363,6 +363,42 @@ class DamusPurple: StoreObserverDelegate {
         return freshly_completed_checkouts
     }
     
+    /// Handles a Purple URL
+    /// - Parameter purple_url: The Purple URL being opened
+    /// - Returns: A view to be shown in the UI
+    @MainActor
+    func handle(purple_url: DamusPurpleURL) async -> ContentView.ViewOpenAction {
+        if case let .welcome(checkout_id) = purple_url.variant {
+            // If this is a welcome link, do the following before showing the onboarding screen:
+            // 1. Check if this is legitimate and good to go.
+            // 2. Mark as complete if this is good to go.
+            let is_good_to_go = try? await check_and_mark_ln_checkout_is_good_to_go(checkout_id: checkout_id)
+            switch is_good_to_go {
+            case .some(let is_good_to_go):
+                if is_good_to_go {
+                    return .sheet(.purple(purple_url))  // ALL GOOD, SHOW WELCOME SHEET
+                }
+                else {
+                    return .sheet(.error(.init(
+                        user_visible_description: NSLocalizedString("You clicked on a Purple welcome link, but it does not look like the checkout is completed yet. This is likely a bug.", comment: "Error label upon continuing in the app from a Damus Purple purchase"),
+                        tip: NSLocalizedString("Please double-check the checkout web page, or go to the Side Menu → \"Purple\" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue.", comment: "User-facing tips on what to do if a Purple welcome link doesn't work"),
+                        technical_info: "Handling Purple URL \"\(purple_url)\" failed, the `is_good_to_go` result was `\(is_good_to_go)`"
+                    )))
+                }
+            case .none:
+                return .sheet(.error(.init(
+                    user_visible_description: NSLocalizedString("You clicked on a Purple welcome link, but we could not find your checkout. This is likely a bug.", comment: "Error label upon continuing in the app from a Damus Purple purchase"),
+                    tip: NSLocalizedString("Please double-check the checkout web page, or go to the Side Menu → \"Purple\" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue", comment: "User-facing tips on what to do if a Purple welcome link doesn't work"),
+                    technical_info: "Handling Purple URL \"\(purple_url)\" failed, the `is_good_to_go` result was `\(String(describing: is_good_to_go))`"
+                )))
+            }
+        }
+        else {
+            // Show the purple url contents
+            return .sheet(.purple(purple_url))
+        }
+    }
+    
     @MainActor
     /// This function checks the status of a specific checkout id with the server
     /// You should use this result immediately, since it will internally be marked as handled
