@@ -67,6 +67,7 @@ struct TabButton: View {
 struct TabBar: View {
     var nstatus: NotificationStatusModel
     @Binding var selected: Timeline
+    @Binding var headerOffset: CGFloat
     
     let settings: UserSettingsStore
     let action: (Timeline) -> ()
@@ -81,5 +82,6 @@ struct TabBar: View {
                 TabButton(timeline: .notifications, img: "notification-bell", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("4")
             }
         }
+        .opacity(selected != .home ? 1.0 : (1.0 - (abs(headerOffset/100.0))))
     }
 }
