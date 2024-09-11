@@ -127,11 +127,11 @@ class HomeModel: ContactsDelegate {
     /// This loads the latest contact event we have on file from NostrDB. This should be called as soon as we get the new DamusState
     /// Loading the latest contact list event into our `Contacts` instance from storage is important to avoid getting into weird states when the network is unreliable or when relays delete such information
     func load_latest_contact_event_from_damus_state() {
+        damus_state.contacts.delegate = self
         guard let latest_contact_event_id_hex = damus_state.settings.latest_contact_event_id_hex else { return }
         guard let latest_contact_event_id = NoteId(hex: latest_contact_event_id_hex) else { return }
         guard let latest_contact_event: NdbNote = damus_state.ndb.lookup_note( latest_contact_event_id)?.unsafeUnownedValue?.to_owned() else { return }
         process_contact_event(state: damus_state, ev: latest_contact_event)
-        damus_state.contacts.delegate = self
     }
     
     // MARK: - ContactsDelegate functions
