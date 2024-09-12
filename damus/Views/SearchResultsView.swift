@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct MultiSearch {
+    let text: String
     let hashtag: String
     let profiles: [Pubkey]
 }
@@ -43,6 +44,7 @@ enum Search: Identifiable {
 struct InnerSearchResults: View {
     let damus_state: DamusState
     let search: Search?
+    @Binding var results: [NostrEvent]
     
     func ProfileSearchResult(pk: Pubkey) -> some View {
         FollowUserView(target: .pubkey(pk), damus_state: damus_state)
@@ -51,7 +53,35 @@ struct InnerSearchResults: View {
     func HashtagSearch(_ ht: String) -> some View {
         let search_model = SearchModel(state: damus_state, search: .filter_hashtag([ht]))
         return NavigationLink(value: Route.Search(search: search_model)) {
-            Text("Search hashtag: #\(ht)", comment: "Navigation link to search hashtag.")
+            HStack {
+                Image("search")
+                Text("#\(ht)", comment: "Navigation link to search hashtag.")
+            }
+            .padding(.horizontal, 15)
+            .padding(.vertical, 5)
+            .background(DamusColors.neutral1)
+            .cornerRadius(20)
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(DamusColors.neutral3, lineWidth: 1)
+            )
+        }
+    }
+    
+    func TextSearch(_ txt: String) -> some View {
+        return NavigationLink(value: Route.NDBSearch(results: $results)) {
+            HStack {
+                Image("search")
+                Text("Notes", comment: "Navigation link to search text.")
+            }
+            .padding(.horizontal, 15)
+            .padding(.vertical, 5)
+            .background(DamusColors.neutral1)
+            .cornerRadius(20)
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(DamusColors.neutral3, lineWidth: 1)
+            )
         }
     }
     
@@ -88,8 +118,11 @@ struct InnerSearchResults: View {
             case .naddr(let naddr):
                 SearchingEventView(state: damus_state, search_type: .naddr(naddr))
             case .multi(let multi):
-                VStack {
-                    HashtagSearch(multi.hashtag)
+                VStack(alignment: .leading) {
+                    HStack {
+                        HashtagSearch(multi.hashtag)
+                        TextSearch(multi.text)
+                    }
                     ProfilesSearch(multi.profiles)
                 }
                 
@@ -104,10 +137,47 @@ struct SearchResultsView: View {
     let damus_state: DamusState
     @Binding var search: String
     @State var result: Search? = nil
+    @State var results: [NostrEvent] = []
+    let debouncer: Debouncer = Debouncer(interval: 0.25)
+    
+    func do_search(query: String) {
+        let limit = 16
+        var note_keys = damus_state.ndb.text_search(query: query, limit: limit, order: .newest_first)
+        var res = [NostrEvent]()
+        // TODO: fix duplicate results from search
+        var keyset = Set<NoteKey>()
+
+        // try reverse because newest first is a bit buggy on partial searches
+        if note_keys.count == 0 {
+            // don't touch existing results if there are no new ones
+            return
+        }
+
+        do {
+            guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
+            for note_key in note_keys {
+                guard let note = damus_state.ndb.lookup_note_by_key_with_txn(note_key, txn: txn) else {
+                    continue
+                }
+
+                if !keyset.contains(note_key) {
+                    let owned_note = note.to_owned()
+                    res.append(owned_note)
+                    keyset.insert(note_key)
+                }
+            }
+        }
+
+        let res_ = res
+
+        Task { @MainActor [res_] in
+            results = res_
+        }
+    }
     
     var body: some View {
         ScrollView {
-            InnerSearchResults(damus_state: damus_state, search: result)
+            InnerSearchResults(damus_state: damus_state, search: result, results: $results)
                 .padding()
         }
         .frame(maxHeight: .infinity)
@@ -118,6 +188,13 @@ struct SearchResultsView: View {
         .onChange(of: search) { new in
             guard let txn = NdbTxn.init(ndb: damus_state.ndb) else { return }
             self.result = search_for_string(profiles: damus_state.profiles, contacts: damus_state.contacts, search: search, txn: txn)
+        }
+        .onChange(of: search) { query in
+            debouncer.debounce {
+                Task.detached {
+                    do_search(query: query)
+                }
+            }
         }
     }
 }
@@ -174,7 +251,7 @@ func search_for_string<Y>(profiles: Profiles, contacts: Contacts, search new: St
         return .naddr(naddr)
     }
     
-    let multisearch = MultiSearch(hashtag: make_hashtagable(searchQuery), profiles: search_profiles(profiles: profiles, contacts: contacts, search: new, txn: txn))
+    let multisearch = MultiSearch(text: new, hashtag: make_hashtagable(searchQuery), profiles: search_profiles(profiles: profiles, contacts: contacts, search: new, txn: txn))
     return .multi(multisearch)
 }
 

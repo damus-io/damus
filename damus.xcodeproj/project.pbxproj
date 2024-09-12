@@ -395,6 +395,9 @@
 		50B5685329F97CB400A23243 /* CredentialHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B5685229F97CB400A23243 /* CredentialHandler.swift */; };
 		50C3E08A2AA8E3F7006A4BC0 /* AVPlayer+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C3E0892AA8E3F7006A4BC0 /* AVPlayer+Additions.swift */; };
 		50DA11262A16A23F00236234 /* Launch.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 50DA11252A16A23F00236234 /* Launch.storyboard */; };
+		5C0567582C8FBC560073F23A /* NDBSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567572C8FBC560073F23A /* NDBSearchView.swift */; };
+		5C0567592C8FBDE30073F23A /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2277EE92A089BD5006C3807 /* Router.swift */; };
+		5C05675A2C8FBDE70073F23A /* NDBSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567572C8FBC560073F23A /* NDBSearchView.swift */; };
 		5C0707D12A1ECB38004E7B51 /* DamusLogoGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0707D02A1ECB38004E7B51 /* DamusLogoGradient.swift */; };
 		5C14C29B2BBBA29C00079FD2 /* RelaySoftwareDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C14C29A2BBBA29C00079FD2 /* RelaySoftwareDetail.swift */; };
 		5C14C29D2BBBA40B00079FD2 /* RelayAdminDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C14C29C2BBBA40B00079FD2 /* RelayAdminDetail.swift */; };
@@ -928,7 +931,6 @@
 		D73E5F782C6A9A5C007EB227 /* NdbNote+.swift in Sources */ = {isa = PBXBuildFile; fileRef = D798D2272B085CDA00234419 /* NdbNote+.swift */; };
 		D73E5F792C6A9C4C007EB227 /* HomeModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C63334F283D40E500B1C9C3 /* HomeModel.swift */; };
 		D73E5F7A2C6A9C55007EB227 /* NotificationFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */; };
-		D73E5F7B2C6A9D0F007EB227 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2277EE92A089BD5006C3807 /* Router.swift */; };
 		D73E5F7C2C6A9D4F007EB227 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DEE827F7A08100C66700 /* ContentView.swift */; };
 		D73E5F7F2C6AA066007EB227 /* DamusAliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = D73E5F7E2C6AA066007EB227 /* DamusAliases.swift */; };
 		D73E5F812C6AA07A007EB227 /* HighlighterExtensionAliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = D73E5F802C6AA07A007EB227 /* HighlighterExtensionAliases.swift */; };
@@ -1832,6 +1834,7 @@
 		50B5685229F97CB400A23243 /* CredentialHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialHandler.swift; sourceTree = "<group>"; };
 		50C3E0892AA8E3F7006A4BC0 /* AVPlayer+Additions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVPlayer+Additions.swift"; sourceTree = "<group>"; };
 		50DA11252A16A23F00236234 /* Launch.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Launch.storyboard; sourceTree = "<group>"; };
+		5C0567572C8FBC560073F23A /* NDBSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NDBSearchView.swift; sourceTree = "<group>"; };
 		5C0707D02A1ECB38004E7B51 /* DamusLogoGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusLogoGradient.swift; sourceTree = "<group>"; };
 		5C14C29A2BBBA29C00079FD2 /* RelaySoftwareDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelaySoftwareDetail.swift; sourceTree = "<group>"; };
 		5C14C29C2BBBA40B00079FD2 /* RelayAdminDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayAdminDetail.swift; sourceTree = "<group>"; };
@@ -2962,6 +2965,7 @@
 			children = (
 				4CCEB7AD29B53D260078AA28 /* SearchingEventView.swift */,
 				4C9D6D1A2B1D35D7004E5CD9 /* PullDownSearch.swift */,
+				5C0567572C8FBC560073F23A /* NDBSearchView.swift */,
 			);
 			path = Search;
 			sourceTree = "<group>";
@@ -4021,6 +4025,7 @@
 				5C0707D12A1ECB38004E7B51 /* DamusLogoGradient.swift in Sources */,
 				4CDD1AE02A6B305F001CD4DF /* NdbTagElem.swift in Sources */,
 				4C5F9114283D694D0052CD1C /* FollowTarget.swift in Sources */,
+				5C0567582C8FBC560073F23A /* NDBSearchView.swift in Sources */,
 				D72341192B6864F200E1E135 /* DamusPurpleEnvironment.swift in Sources */,
 				4CF0ABD629817F5B00D66079 /* ReportView.swift in Sources */,
 				4C1A9A2729DDE31900516EAC /* TranslationSettingsView.swift in Sources */,
@@ -4338,6 +4343,7 @@
 				D73E5E7A2C6A97F4007EB227 /* EventCache.swift in Sources */,
 				D73E5E7B2C6A97F4007EB227 /* DebouncedOnChange.swift in Sources */,
 				D73E5E7C2C6A97F4007EB227 /* ReplyCounter.swift in Sources */,
+				5C0567592C8FBDE30073F23A /* Router.swift in Sources */,
 				D73E5E7D2C6A97F4007EB227 /* CompatibleAttribute.swift in Sources */,
 				D73E5E7E2C6A97F4007EB227 /* Hashtags.swift in Sources */,
 				D73E5E7F2C6A97F4007EB227 /* LocalNotification.swift in Sources */,
@@ -4622,7 +4628,6 @@
 				D73E5E1B2C6A9672007EB227 /* LikeCounter.swift in Sources */,
 				D703D7A92C670E5A00A400EA /* refmap.c in Sources */,
 				D703D77B2C670BF000A400EA /* TableVerifier.swift in Sources */,
-				D73E5F7B2C6A9D0F007EB227 /* Router.swift in Sources */,
 				D703D76D2C670B4500A400EA /* ZapDataModel.swift in Sources */,
 				D703D79D2C670E0700A400EA /* node_id.c in Sources */,
 				D703D79B2C670E0000A400EA /* bech32_util.c in Sources */,
@@ -4633,6 +4638,7 @@
 				D703D76B2C670B3100A400EA /* Referenced.swift in Sources */,
 				D703D7952C670DE600A400EA /* hash_u5.c in Sources */,
 				D703D7582C670A6000A400EA /* Id.swift in Sources */,
+				5C05675A2C8FBDE70073F23A /* NDBSearchView.swift in Sources */,
 				D703D76E2C670B4900A400EA /* NdbTagsIterator.swift in Sources */,
 				D703D7A02C670E1500A400EA /* take.c in Sources */,
 				D703D7692C670B2600A400EA /* Block.swift in Sources */,
