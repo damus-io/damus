@@ -64,7 +64,6 @@ struct DamusPurpleAccountView: View {
                 .padding(.bottom, 20)
             }
             .foregroundColor(.white.opacity(0.8))
-            .preferredColorScheme(.dark)
             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             .padding()
         }
@@ -81,7 +80,8 @@ struct DamusPurpleAccountView: View {
             SupporterBadge(
                 percent: nil,
                 purple_account: account,
-                style: .full
+                style: .full,
+                text_color: .white
             )
         }
     }

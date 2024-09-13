@@ -120,8 +120,7 @@ struct NoteContentView: View {
             EventView(damus: damus_state, event: self.event, options: .embedded_text_only)
                 .padding(.top)
         }
-        .background(.thinMaterial)
-        .preferredColorScheme(.dark)
+        .background(.thickMaterial)
         .onTapGesture(perform: {
             damus_state.nav.push(route: Route.Thread(thread: .init(event: self.event, damus_state: damus_state)))
             dismiss()
