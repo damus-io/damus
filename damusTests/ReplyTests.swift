@@ -57,7 +57,8 @@ class ReplyTests: XCTestCase {
         let ev = NostrEvent(content: content, keypair: test_keypair, tags: [])!
         let blocks = parse_note_content(content: .init(note: ev, keypair: test_keypair)).blocks
         let post_blocks = parse_post_blocks(content: content)
-        let post_tags = make_post_tags(post_blocks: post_blocks, tags: [])
+        let post = NostrPost(content: content, kind: NostrKind.text, tags: [])
+        let post_tags = post.make_post_tags(post_blocks: post_blocks, tags: [])
         let tr = interpret_event_refs(tags: ev.tags)
 
         XCTAssertNil(tr)
