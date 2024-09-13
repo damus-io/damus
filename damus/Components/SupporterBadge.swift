@@ -11,11 +11,13 @@ struct SupporterBadge: View {
     let percent: Int?
     let purple_account: DamusPurple.Account?
     let style: Style
+    let text_color: Color
     
-    init(percent: Int?, purple_account: DamusPurple.Account? = nil, style: Style) {
+    init(percent: Int?, purple_account: DamusPurple.Account? = nil, style: Style, text_color: Color = .secondary) {
         self.percent = percent
         self.purple_account = purple_account
         self.style = style
+        self.text_color = text_color
     }
     
     let size: CGFloat = 17
@@ -31,7 +33,7 @@ struct SupporterBadge: View {
                     if self.style == .full {
                         let date = format_date(date: purple_account.created_at, time_style: .none)
                         Text(date)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(text_color)
                             .font(.caption)
                     }
                 }
