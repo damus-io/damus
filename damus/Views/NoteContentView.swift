@@ -121,7 +121,6 @@ struct NoteContentView: View {
                 .padding(.top)
         }
         .background(.thinMaterial)
-        .preferredColorScheme(.dark)
         .onTapGesture(perform: {
             damus_state.nav.push(route: Route.Thread(thread: .init(event: self.event, damus_state: damus_state)))
             dismiss()
