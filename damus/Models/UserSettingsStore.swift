@@ -161,6 +161,9 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "notification_only_from_following", default_value: false)
     var notification_only_from_following: Bool
     
+    @Setting(key: "never_show_match_friends_filter_with_notification_only_from_following_suggestion", default_value: false)
+    var never_show_match_friends_filter_with_notification_only_from_following_suggestion: Bool
+    
     @Setting(key: "translate_dms", default_value: false)
     var translate_dms: Bool
     

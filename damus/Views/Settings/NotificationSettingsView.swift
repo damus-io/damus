@@ -14,6 +14,7 @@ struct NotificationSettingsView: View {
     @ObservedObject var settings: UserSettingsStore
     @State var notification_mode_setting_error: String? = nil
     @State var notification_preferences_sync_state: PreferencesSyncState = .undefined
+    @State var show_miscellaneous_settings: Bool = false
     
     @Environment(\.dismiss) var dismiss
     
@@ -187,6 +188,13 @@ struct NotificationSettingsView: View {
                 Toggle(NSLocalizedString("Likes", comment: "Setting to enable Like Local Notification"), isOn: indicator_binding(.likes))
                     .toggleStyle(.switch)
             }
+            
+            if show_miscellaneous_settings {    // Bind this visibility to a state that is updated only once per visit, to avoid having this section suddenly disappear.
+                Section(header: Text("Miscellaneous", comment: "Section header for miscellaneous notification settings")) {
+                    Toggle(NSLocalizedString("Never ask to match notification preferences with friends filter on notification view", comment: "Notification setting label"), isOn: $settings.never_show_match_friends_filter_with_notification_only_from_following_suggestion)
+                        .toggleStyle(.switch)
+                }
+            }
         }
         .navigationTitle("Notifications")
         .onReceive(handle_notify(.switched_timeline)) { _ in
@@ -197,6 +205,12 @@ struct NotificationSettingsView: View {
                 if self.settings.notification_mode == .push {
                     await self.sync_up_remote_notification_settings()
                 }
+            }
+            
+            // Only show these miscellaneous settings if they have been modified by the user in their proper context, to provide a mechanism to revert
+            // We don't want to show them all the time because they are very contextual and would likely confuse the user otherwise.
+            if self.settings.never_show_match_friends_filter_with_notification_only_from_following_suggestion {
+                self.show_miscellaneous_settings = true
             }
         })
     }
