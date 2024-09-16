@@ -28,7 +28,7 @@ struct FriendsButton: View {
                 Image("user-added")
                     .resizable()
                     .frame(width: 28, height: 28)
-                    .foregroundColor(DamusColors.adaptableGrey)
+                    .foregroundColor(.gray)
             }
         }
         .buttonStyle(.plain)
