@@ -56,6 +56,7 @@ struct NotificationsView: View {
     @ObservedObject var notifications: NotificationsModel
     @StateObject var filter = NotificationFilter()
     @SceneStorage("NotificationsView.filter_state") var filter_state: NotificationFilterState = .all
+    @Binding var subtitle: String?
     
     @Environment(\.colorScheme) var colorScheme
     
@@ -100,6 +101,15 @@ struct NotificationsView: View {
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
+                Button(
+                    action: { state.nav.push(route: Route.NotificationSettings(settings: state.settings)) },
+                    label: {
+                        Image("settings")
+                            .foregroundColor(.gray)
+                    }
+                )
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
                 if would_filter_non_friends_from_notifications(contacts: state.contacts, state: filter_state, items: self.notifications.notifications) {
                     FriendsButton(filter: $filter.fine_filter)
                 }
@@ -107,12 +117,14 @@ struct NotificationsView: View {
         }
         .onChange(of: filter.fine_filter) { val in
             state.settings.friend_filter = val
+            self.subtitle = filter.fine_filter.description()
         }
         .onChange(of: filter_state) { val in
             filter.state = val
         }
         .onAppear {
             self.filter.fine_filter = state.settings.friend_filter
+            self.subtitle = filter.fine_filter.description()
             filter.state = filter_state
         }
         .safeAreaInset(edge: .top, spacing: 0) {
@@ -163,7 +175,7 @@ struct NotificationsView: View {
 
 struct NotificationsView_Previews: PreviewProvider {
     static var previews: some View {
-        NotificationsView(state: test_damus_state, notifications: NotificationsModel(), filter: NotificationFilter())
+        NotificationsView(state: test_damus_state, notifications: NotificationsModel(), filter: NotificationFilter(), subtitle: .constant(nil))
     }
 }
 
@@ -174,7 +186,7 @@ func would_filter_non_friends_from_notifications(contacts: Contacts, state: Noti
             continue
         }
         
-        if item.would_filter({ ev in FriendFilter.friends.filter(contacts: contacts, pubkey: ev.pubkey) }) {
+        if item.would_filter({ ev in FriendFilter.friends_of_friends.filter(contacts: contacts, pubkey: ev.pubkey) }) {
             return true
         }
     }
