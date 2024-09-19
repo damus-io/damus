@@ -155,8 +155,8 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "like_notification", default_value: true)
     var like_notification: Bool
     
-    @StringSetting(key: "notifications_mode", default_value: .local)
-    var notifications_mode: NotificationsMode
+    @StringSetting(key: "notification_mode", default_value: .push)
+    var notification_mode: NotificationsMode
     
     @Setting(key: "notification_only_from_following", default_value: false)
     var notification_only_from_following: Bool
@@ -207,8 +207,9 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "always_show_onboarding_suggestions", default_value: false)
     var always_show_onboarding_suggestions: Bool
 
-    @Setting(key: "enable_experimental_push_notifications", default_value: false)
-    var enable_experimental_push_notifications: Bool
+    // @Setting(key: "enable_experimental_push_notifications", default_value: false)
+    // This was a feature flag setting during early development, but now this is enabled for everyone.
+    var enable_push_notifications: Bool = true
     
     @StringSetting(key: "push_notification_environment", default_value: .production)
     var push_notification_environment: PushNotificationClient.Environment

@@ -77,7 +77,12 @@ struct ContentView: View {
     
     @State var active_sheet: Sheets? = nil
     @State var damus_state: DamusState!
-    @SceneStorage("ContentView.selected_timeline") var selected_timeline: Timeline = .home
+    @State var menu_subtitle: String? = nil
+    @SceneStorage("ContentView.selected_timeline") var selected_timeline: Timeline = .home {
+        willSet {
+            self.menu_subtitle = nil
+        }
+    }
     @State var muting: MuteItem? = nil
     @State var confirm_mute: Bool = false
     @State var hide_bar: Bool = false
@@ -101,9 +106,16 @@ struct ContentView: View {
         isSideBarOpened = false
     }
     
-    var timelineNavItem: Text {
-        return Text(timeline_name(selected_timeline))
-            .bold()
+    var timelineNavItem: some View {
+        VStack {
+            Text(timeline_name(selected_timeline))
+                .bold()
+            if let menu_subtitle {
+                Text(menu_subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
     }
     
     func MainContent(damus: DamusState) -> some View {
@@ -122,7 +134,7 @@ struct ContentView: View {
                 PostingTimelineView(damus_state: damus_state!, home: home, active_sheet: $active_sheet)
                 
             case .notifications:
-                NotificationsView(state: damus, notifications: home.notifications)
+                NotificationsView(state: damus, notifications: home.notifications, subtitle: $menu_subtitle)
                 
             case .dms:
                 DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms, settings: damus_state!.settings)

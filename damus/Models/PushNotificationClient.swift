@@ -18,7 +18,7 @@ struct PushNotificationClient {
     
     mutating func set_device_token(new_device_token: Data) async throws {
         self.device_token = new_device_token
-        if settings.enable_experimental_push_notifications && settings.notifications_mode == .push {
+        if settings.enable_push_notifications && settings.notification_mode == .push {
             try await self.send_token()
         }
     }

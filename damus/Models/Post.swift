@@ -51,7 +51,7 @@ struct NostrPost {
     }
     
     /// Parse the post's contents to find more tags to apply to the final nostr event
-    private func make_post_tags(post_blocks: [Block], tags: [[String]]) -> PostTags {
+    func make_post_tags(post_blocks: [Block], tags: [[String]]) -> PostTags {
         var new_tags = tags
 
         for post_block in post_blocks {
@@ -89,10 +89,12 @@ struct NostrPost {
 
 // MARK: - Helper structures and functions
 
-/// A struct used for temporarily holding tag information that was parsed from a post contents to aid in building a nostr event
-fileprivate struct PostTags {
-    let blocks: [Block]
-    let tags: [[String]]
+extension NostrPost {
+    /// A struct used for temporarily holding tag information that was parsed from a post contents to aid in building a nostr event
+    struct PostTags {
+        let blocks: [Block]
+        let tags: [[String]]
+    }
 }
 
 func parse_post_blocks(content: String) -> [Block] {

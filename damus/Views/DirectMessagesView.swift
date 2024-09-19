@@ -103,7 +103,7 @@ struct DirectMessagesView: View {
 
 func would_filter_non_friends_from_dms(contacts: Contacts, dms: [DirectMessageModel]) -> Bool {
     for dm in dms {
-        if !FriendFilter.friends.filter(contacts: contacts, pubkey: dm.pubkey) {
+        if !FriendFilter.friends_of_friends.filter(contacts: contacts, pubkey: dm.pubkey) {
             return true
         }
     }

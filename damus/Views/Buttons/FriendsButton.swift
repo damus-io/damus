@@ -14,12 +14,12 @@ struct FriendsButton: View {
         Button(action: {
             switch self.filter {
             case .all:
-                self.filter = .friends
-            case .friends:
+                self.filter = .friends_of_friends
+            case .friends_of_friends:
                 self.filter = .all
             }
         }) {
-            if filter == .friends {
+            if filter == .friends_of_friends {
                 LINEAR_GRADIENT
                     .mask(Image("user-added")
                         .resizable()
@@ -28,7 +28,7 @@ struct FriendsButton: View {
                 Image("user-added")
                     .resizable()
                     .frame(width: 28, height: 28)
-                    .foregroundColor(DamusColors.adaptableGrey)
+                    .foregroundColor(.gray)
             }
         }
         .buttonStyle(.plain)

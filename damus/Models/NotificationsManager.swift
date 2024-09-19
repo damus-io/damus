@@ -27,7 +27,7 @@ func process_local_notification(state: HeadlessDamusState, event ev: NostrEvent)
 
 func should_display_notification(state: HeadlessDamusState, event ev: NostrEvent, mode: UserSettingsStore.NotificationsMode) -> Bool {
     // Do not show notification if it's coming from a mode different from the one selected by our user
-    guard state.settings.notifications_mode == mode else {
+    guard state.settings.notification_mode == mode else {
         return false
     }
     
