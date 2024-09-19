@@ -141,6 +141,10 @@ final class RelayConnection: ObservableObject {
                 // ignore socket not connected?
                 return
             }
+            if nserr.domain == NSURLErrorDomain && nserr.code == -999 {
+                // these aren't real error, it just means task was cancelled
+                return
+            }
             DispatchQueue.main.async {
                 self.isConnected = false
                 self.isConnecting = false
@@ -157,14 +161,21 @@ final class RelayConnection: ObservableObject {
     }
     
     func reconnect_with_backoff() {
-        self.backoff *= 1.5
+        self.backoff *= 2.0
         self.reconnect_in(after: self.backoff)
     }
     
     func reconnect() {
         guard !isConnecting && !isDisabled else {
+            self.log?.add("Cancelling reconnect, already connecting")
             return  // we're already trying to connect or we're disabled
         }
+
+        guard !self.isConnected else {
+            self.log?.add("Cancelling reconnect, already connected")
+            return
+        }
+
         disconnect()
         connect()
         log?.add("Reconnecting...")
