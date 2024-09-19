@@ -13,6 +13,7 @@ enum LogCategory: String {
     case nav
     case render
     case storage
+    case networking
     case push_notifications
     case damus_purple
     case image_uploading
