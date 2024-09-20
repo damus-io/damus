@@ -61,6 +61,7 @@ struct HighlightLink: View {
                                 .background(DamusColors.adaptableWhite)
                         }
                         .frame(width: 35, height: 35)
+                        .kfClickable()
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                         .scaledToFit()
                 } else {

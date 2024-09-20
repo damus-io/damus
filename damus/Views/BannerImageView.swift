@@ -29,6 +29,7 @@ struct EditBannerImageView: View {
                     Color(uiColor: .secondarySystemBackground)
                 }
                 .onFailureImage(defaultImage)
+                .kfClickable()
             
             EditPictureControl(uploader: damus_state.settings.default_media_uploader, pubkey: damus_state.pubkey, image_url: $banner_image, uploadObserver: viewModel, callback: callback)
         }
@@ -54,6 +55,7 @@ struct InnerBannerImageView: View {
                         Color(uiColor: .secondarySystemBackground)
                     }
                     .onFailureImage(defaultImage)
+                    .kfClickable()
             } else {
                 Image(uiImage: defaultImage).resizable()
             }
