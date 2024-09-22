@@ -33,6 +33,7 @@ struct ProfileImageContainerView: View {
             .imageModifier(ImageHandler(handler: $image))
             .clipShape(Circle())
             .modifier(ImageContextMenuModifier(url: url, image: image, settings: settings, showShareSheet: $showShareSheet))
+            .kfClickable()
             .sheet(isPresented: $showShareSheet) {
                 ShareSheet(activityItems: [url])
             }

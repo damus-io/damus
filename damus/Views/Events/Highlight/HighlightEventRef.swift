@@ -50,6 +50,7 @@ struct HighlightEventRef: View {
                                     FailedImage()
                                 }
                                 .frame(width: 35, height: 35)
+                                .kfClickable()
                                 .clipShape(RoundedRectangle(cornerRadius: 10))
                                 .overlay(RoundedRectangle(cornerRadius: 10).stroke(.gray.opacity(0.5), lineWidth: 0.5))
                                 .scaledToFit()

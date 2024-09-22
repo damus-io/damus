@@ -71,6 +71,7 @@ struct EditPictureControl: View {
                     }
                     .scaledToFill()
                     .frame(width: (size ?? 25) + 10, height: (size ?? 25) + 10)
+                    .kfClickable()
                     .foregroundColor(DamusColors.white)
                     .clipShape(Circle())
                     .overlay(Circle().stroke(.white, lineWidth: 4))

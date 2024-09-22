@@ -236,6 +236,7 @@ struct ImageCarousel<Content: View>: View {
                 Placeholder(url: url, geo_size: geo.size, num_urls: urls.count)
             }
             .aspectRatio(contentMode: filling ? .fill : .fit)
+            .kfClickable()
             .position(x: geo.size.width / 2, y: geo.size.height / 2)
             .tabItem {
                 Text(url.absoluteString)
@@ -274,8 +275,14 @@ struct ImageCarousel<Content: View>: View {
     
     var body: some View {
         VStack {
-            Medias
-                .onTapGesture { }
+            if #available(iOS 18.0, *) {
+                Medias
+            } else {
+                // An empty tap gesture recognizer is needed on iOS 17 and below to suppress other overlapping tap recognizers
+                // Otherwise it will both open the carousel and go to a note at the same time
+                Medias.onTapGesture { }
+            }
+            
             
             if urls.count > 1 {
                 PageControlView(currentPage: $model.selectedIndex, numberOfPages: urls.count)

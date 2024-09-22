@@ -57,6 +57,7 @@ struct InnerProfilePicView: View {
             }
             .scaledToFill()
         .frame(width: size, height: size)
+        .kfClickable()
         .clipShape(Circle())
         .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
     }

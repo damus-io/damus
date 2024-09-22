@@ -98,6 +98,7 @@ struct LongformPreviewBody: View {
             }
             .aspectRatio(contentMode: .fill)
             .frame(maxWidth: .infinity, maxHeight: header ? .infinity : 150)
+            .kfClickable()
             .cornerRadius(1)
     }
 

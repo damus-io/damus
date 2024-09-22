@@ -1111,6 +1111,8 @@
 		D7CE1B482B0BE719002EDAD4 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B93D2A9AD44700DC3548 /* Message.swift */; };
 		D7CE1B492B0BE729002EDAD4 /* DisplayName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9BB83029C0ED4F00FC4E37 /* DisplayName.swift */; };
 		D7D2A3812BF815D000E4B42B /* PushNotificationClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D2A3802BF815D000E4B42B /* PushNotificationClient.swift */; };
+		D7D68FF92C9E01BE0015A515 /* KFClickable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D68FF82C9E01B60015A515 /* KFClickable.swift */; };
+		D7D68FFA2C9E01BE0015A515 /* KFClickable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D68FF82C9E01B60015A515 /* KFClickable.swift */; };
 		D7DBD41F2B02F15E002A6197 /* NostrKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFD32819DE8F00B3DE84 /* NostrKind.swift */; };
 		D7DEEF2F2A8C021E00E0C99F /* NostrEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */; };
 		D7EDED152B11776B0018B19C /* LibreTranslateServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE45AF5297BB2E700C1D842 /* LibreTranslateServer.swift */; };
@@ -1959,6 +1961,7 @@
 		D7CBD1D32B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleNotificationManagement.swift; sourceTree = "<group>"; };
 		D7CBD1D52B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleImpendingExpirationTests.swift; sourceTree = "<group>"; };
 		D7D2A3802BF815D000E4B42B /* PushNotificationClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationClient.swift; sourceTree = "<group>"; };
+		D7D68FF82C9E01B60015A515 /* KFClickable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KFClickable.swift; sourceTree = "<group>"; };
 		D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrEventTests.swift; sourceTree = "<group>"; };
 		D7EDED1B2B1178FE0018B19C /* NoteContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteContent.swift; sourceTree = "<group>"; };
 		D7EDED1D2B11797D0018B19C /* LongformEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongformEvent.swift; sourceTree = "<group>"; };
@@ -2540,6 +2543,7 @@
 		4C75EFA227FA576C0006080F /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				D7D68FF72C9E01A80015A515 /* Utils */,
 				D78DB85D2C20FE9E00F0AB12 /* Chat */,
 				D71AC4CA2BA8E3320076268E /* Extensions */,
 				BA3759952ABCCF360018D73B /* Camera */,
@@ -3368,6 +3372,14 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		D7D68FF72C9E01A80015A515 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				D7D68FF82C9E01B60015A515 /* KFClickable.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
 		E06336A72B7582D600A88E6B /* Assets */ = {
 			isa = PBXGroup;
 			children = (
@@ -3803,6 +3815,7 @@
 				B51C1CEA2B55A60A00E312A9 /* AddMuteItemView.swift in Sources */,
 				4C5D5C992A6AF8F80024563C /* NdbNote.swift in Sources */,
 				4CF0ABF029857E9200D66079 /* Bech32Object.swift in Sources */,
+				D7D68FFA2C9E01BE0015A515 /* KFClickable.swift in Sources */,
 				4C3D52B8298DB5C6001C5831 /* TextEvent.swift in Sources */,
 				4C216F362870A9A700040376 /* InputDismissKeyboard.swift in Sources */,
 				D74AAFCF2B155D8C006CF0F4 /* ZapDataModel.swift in Sources */,
@@ -4517,6 +4530,7 @@
 				D73E5F332C6A97F4007EB227 /* ZapEvent.swift in Sources */,
 				D73E5F342C6A97F4007EB227 /* TextEvent.swift in Sources */,
 				D73E5F352C6A97F4007EB227 /* WideEventView.swift in Sources */,
+				D7D68FF92C9E01BE0015A515 /* KFClickable.swift in Sources */,
 				D73E5F8A2C6AA69C007EB227 /* SideMenuView.swift in Sources */,
 				D73E5F362C6A97F4007EB227 /* LongformView.swift in Sources */,
 				D73E5F372C6A97F4007EB227 /* LongformPreview.swift in Sources */,

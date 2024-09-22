@@ -31,6 +31,7 @@ struct EditProfilePictureView: View {
                     view.framePreloadCount = 3
                 }
                 .scaledToFill()
+                .kfClickable()
     
             EditPictureControl(uploader: damus_state?.settings.default_media_uploader ?? .nostrBuild, pubkey: pubkey, image_url: $profile_url, uploadObserver: uploadObserver, callback: callback)
         }
