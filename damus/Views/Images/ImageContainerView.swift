@@ -33,6 +33,7 @@ struct ImageContainerView: View {
                 view.framePreloadCount = 3
             }
             .imageModifier(ImageHandler(handler: $image))
+            .kfClickable()
             .clipped()
             .modifier(ImageContextMenuModifier(url: url, image: image, settings: settings, showShareSheet: $showShareSheet))
             .sheet(isPresented: $showShareSheet) {

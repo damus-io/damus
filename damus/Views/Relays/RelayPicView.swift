@@ -55,6 +55,7 @@ struct InnerRelayPicView: View {
                         Placeholder(url: url)
                     }
                     .scaledToFit()
+                    .kfClickable()
             } else {
                 FailedRelayImage(url: nil)
             }

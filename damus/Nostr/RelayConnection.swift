@@ -46,9 +46,10 @@ final class RelayConnection: ObservableObject {
             
             if err == nil {
                 self.last_pong = .now
+                Log.info("Got pong from '%s'", for: .networking, self.relay_url.absoluteString)
                 self.log?.add("Successful ping")
             } else {
-                print("pong failed, reconnecting \(self.relay_url.id)")
+                Log.info("Ping failed, reconnecting to '%s'", for: .networking, self.relay_url.absoluteString)
                 self.isConnected = false
                 self.isConnecting = false
                 self.reconnect_with_backoff()
@@ -126,7 +127,7 @@ final class RelayConnection: ObservableObject {
             self.receive(message: message)
         case .disconnected(let closeCode, let reason):
             if closeCode != .normalClosure {
-                print("⚠️ Warning: RelayConnection (\(self.relay_url)) closed with code \(closeCode), reason: \(String(describing: reason))")
+                Log.error("⚠️ Warning: RelayConnection (%d) closed with code: %s", for: .networking, String(describing: closeCode), String(describing: reason))
             }
             DispatchQueue.main.async {
                 self.isConnected = false
@@ -134,10 +135,14 @@ final class RelayConnection: ObservableObject {
                 self.reconnect()
             }
         case .error(let error):
-            print("⚠️ Warning: RelayConnection (\(self.relay_url)) error: \(error)")
+            Log.error("⚠️ Warning: RelayConnection (%s) error: %s", for: .networking, self.relay_url.absoluteString, error.localizedDescription)
             let nserr = error as NSError
             if nserr.domain == NSPOSIXErrorDomain && nserr.code == 57 {
                 // ignore socket not connected?
+                return
+            }
+            if nserr.domain == NSURLErrorDomain && nserr.code == -999 {
+                // these aren't real error, it just means task was cancelled
                 return
             }
             DispatchQueue.main.async {
@@ -156,14 +161,21 @@ final class RelayConnection: ObservableObject {
     }
     
     func reconnect_with_backoff() {
-        self.backoff *= 1.5
+        self.backoff *= 2.0
         self.reconnect_in(after: self.backoff)
     }
     
     func reconnect() {
         guard !isConnecting && !isDisabled else {
+            self.log?.add("Cancelling reconnect, already connecting")
             return  // we're already trying to connect or we're disabled
         }
+
+        guard !self.isConnected else {
+            self.log?.add("Cancelling reconnect, already connected")
+            return
+        }
+
         disconnect()
         connect()
         log?.add("Reconnecting...")

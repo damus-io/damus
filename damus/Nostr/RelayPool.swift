@@ -89,6 +89,7 @@ class RelayPool {
     }
     
     func ping() {
+        Log.info("Pinging %d relays", for: .networking, relays.count)
         for relay in relays {
             relay.connection.ping()
         }
