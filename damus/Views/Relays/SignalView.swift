@@ -13,15 +13,14 @@ struct SignalView: View {
     
     var body: some View {
         Group {
-            if signal.signal != signal.max_signal {
-                NavigationLink(value: Route.RelayConfig) {
-                    Text("\(signal.signal)/\(signal.max_signal)", comment: "Fraction of how many of the user's relay servers that are operational.")
-                        .font(.callout)
-                        .foregroundColor(.gray)
-                }
-            } else {
-                Text("")
+            NavigationLink(value: Route.RelayConfig) {
+                Text("\(signal.signal)/\(signal.max_signal)", comment: "Fraction of how many of the user's relay servers that are operational.")
+                    .font(.callout)
+                    .foregroundColor(.gray)
             }
+            .frame(width:50,height:30)
+            .opacity(signal.signal != signal.max_signal ? 1 : 0)
+            .disabled(signal.signal == signal.max_signal)
         }
                                         
     }

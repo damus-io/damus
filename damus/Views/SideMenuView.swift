@@ -11,6 +11,7 @@ import SwiftUI
 struct SideMenuView: View {
     let damus_state: DamusState
     @Binding var isSidebarVisible: Bool
+    @Binding var selected: Timeline
     @State var confirm_logout: Bool = false
     @State private var showQRCode = false
     
@@ -200,7 +201,7 @@ struct SideMenuView: View {
                     }
                     .padding(.top, verticalSpacing)
                 }
-                .padding(.top, -(padding / 2.0))
+                .padding(.top, selected != .home ?  -(padding / 2.0) : 30)
                 .padding([.leading, .trailing, .bottom], padding)
             }
             .frame(width: sideBarWidth)
@@ -249,6 +250,6 @@ struct SideMenuView: View {
 struct Previews_SideMenuView_Previews: PreviewProvider {
     static var previews: some View {
         let ds = test_damus_state
-        SideMenuView(damus_state: ds, isSidebarVisible: .constant(true))
+        SideMenuView(damus_state: ds, isSidebarVisible: .constant(true), selected: .constant(.home))
     }
 }

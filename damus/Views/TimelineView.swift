@@ -10,6 +10,11 @@ import SwiftUI
 struct TimelineView<Content: View>: View {
     @ObservedObject var events: EventHolder
     @Binding var loading: Bool
+    @Binding var headerHeight: CGFloat
+    @Binding var headerOffset: CGFloat
+    @State var shiftOffset: CGFloat = 0
+    @State var lastHeaderOffset: CGFloat = 0
+    @State var direction: SwipeDirection = .none
 
     let damus: DamusState
     let show_friend_icon: Bool
@@ -17,9 +22,23 @@ struct TimelineView<Content: View>: View {
     let content: Content?
     let apply_mute_rules: Bool
 
+    init(events: EventHolder, loading: Binding<Bool>, headerHeight: Binding<CGFloat>, headerOffset: Binding<CGFloat>, damus: DamusState, show_friend_icon: Bool, filter: @escaping (NostrEvent) -> Bool, apply_mute_rules: Bool = true, content: (() -> Content)? = nil) {
+        self.events = events
+        self._loading = loading
+        self._headerHeight = headerHeight
+        self._headerOffset = headerOffset
+        self.damus = damus
+        self.show_friend_icon = show_friend_icon
+        self.filter = filter
+        self.apply_mute_rules = apply_mute_rules
+        self.content = content?()
+    }
+    
     init(events: EventHolder, loading: Binding<Bool>, damus: DamusState, show_friend_icon: Bool, filter: @escaping (NostrEvent) -> Bool, apply_mute_rules: Bool = true, content: (() -> Content)? = nil) {
         self.events = events
         self._loading = loading
+        self._headerHeight = .constant(0.0)
+        self._headerOffset = .constant(0.0)
         self.damus = damus
         self.show_friend_icon = show_friend_icon
         self.filter = filter
@@ -38,20 +57,43 @@ struct TimelineView<Content: View>: View {
                     content
                 }
 
-                Color.white.opacity(0)
+                Color.clear
                     .id("startblock")
-                    .frame(height: 1)
+                    .frame(height: 0)
 
                 InnerTimelineView(events: events, damus: damus, filter: loading ? { _ in true } : filter, apply_mute_rules: self.apply_mute_rules)
                     .redacted(reason: loading ? .placeholder : [])
                     .shimmer(loading)
                     .disabled(loading)
-                    .background(GeometryReader { proxy -> Color in
-                        handle_scroll_queue(proxy, queue: self.events)
-                        return Color.clear
-                    })
+                    .padding(.top, headerHeight - getSafeAreaTop())
+                    .offsetY { previous, current in
+                        if previous > current{
+                            if direction != .up && current < 0 {
+                                shiftOffset = current - headerOffset
+                                direction = .up
+                                lastHeaderOffset = headerOffset
+                            }
+                            
+                            let offset = current < 0 ? (current - shiftOffset) : 0
+                            headerOffset = (-offset < headerHeight ? (offset < 0 ? offset : 0) : -headerHeight)
+                        }else {
+                            if direction != .down {
+                                shiftOffset = current
+                                direction = .down
+                                lastHeaderOffset = headerOffset
+                            }
+                            
+                            let offset = lastHeaderOffset + (current - shiftOffset)
+                            headerOffset = (offset > 0 ? 0 : offset)
+                        }
+                    }
+                    .background {
+                        GeometryReader { proxy -> Color in
+                            handle_scroll_queue(proxy, queue: self.events)
+                            return Color.clear
+                        }
+                    }
             }
-            //.buttonStyle(BorderlessButtonStyle())
             .coordinateSpace(name: "scroll")
             .onReceive(handle_notify(.scroll_to_top)) { () in
                 events.flush()
