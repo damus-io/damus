@@ -18,8 +18,8 @@ struct PullDownSearchView: View {
     let on_cancel: () -> Void
     
     func do_search(query: String) {
-        let limit = 16
-        var note_keys = state.ndb.text_search(query: query, limit: limit, order: .newest_first)
+        let limit = 128
+        let note_keys = state.ndb.text_search(query: query, limit: limit, order: .newest_first)
         var res = [NostrEvent]()
         // TODO: fix duplicate results from search
         var keyset = Set<NoteKey>()
