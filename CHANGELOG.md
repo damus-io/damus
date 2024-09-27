@@ -1,3 +1,53 @@
+## [1.10.1] - 2024-09-22
+
+### Added
+
+- Push notification support (Daniel D’Aquino)
+- Added profile edit safe guards (Eric Holguin)
+- Tor relay icon (ericholguin)
+- Add highlighter for web pages (Daniel D’Aquino)
+- Add support for adding comments when creating a highlight (Daniel D’Aquino)
+- Add support for rendering highlights with comments (Daniel D’Aquino)
+- Ability to create highlights (ericholguin)
+- Highlights (NIP-84) (ericholguin)
+- Revamp emoji picker to be less error-prone and add search, frequently used, and multiple skin tone support capabilities (Terry Yiu)
+
+
+### Changed
+
+- Improve notification view filtering UX (Daniel D’Aquino)
+- Improve visibility of friends filter button (Daniel D’Aquino)
+- Changed the default banner from ostriches to damoose (Eric Holguin)
+- Changed image and banner url text fields to new sheet view (Eric Holguin)
+- Onboarding design (ericholguin)
+
+
+### Fixed
+
+- Fix items that became unclickable on iOS 18 (Daniel D’Aquino)
+- Fix many reconnection issues (William Casarin)
+- Fixed issue where theme would be changed to black and can't be switched back on iOS 18 (cr0bar)
+- Fixed some scenarios where the contact list would never be saved locally and cause issues when switching relays. (Daniel D’Aquino)
+- Fix albyhub zaps not appearing (William Casarin)
+- Fix inadvertent escape from mention suggestion menu when typing a space character (Daniel D’Aquino)
+- Fix profile view toolbar alignment bug in iOS 18 (Terry Yiu)
+- Create Account model now uses correct metadata (ericholguin)
+- Restore localization for custom tabs (William Casarin)
+- Fix iOS 18 reflection runtime error for custom picker (William Casarin)
+
+
+[1.10.1]: https://github.com/damus-io/damus/releases/tag/v1.10.1
+
+
+## [1.9.1 (4)] - 2024-08-13
+
+### Fixed
+
+- Fix crash when viewing notes with invalid image dimension metadata (Daniel D’Aquino)
+
+[1.9.1 (4)]: https://github.com/damus-io/damus/releases/tag/v1.9.1-4
+
+
 ## [1.9 (14)] - 2024-07-14
 
 ### Added
