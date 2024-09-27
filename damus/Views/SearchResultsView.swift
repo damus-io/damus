@@ -285,7 +285,7 @@ func search_profiles<Y>(profiles: Profiles, contacts: Contacts, search: String, 
         return [pk]
     }
 
-    return profiles.search(search, limit: 10, txn: txn).sorted { a, b in
+    return profiles.search(search, limit: 500, txn: txn).sorted { a, b in
         let aFriendTypePriority = get_friend_type(contacts: contacts, pubkey: a)?.priority ?? 0
         let bFriendTypePriority = get_friend_type(contacts: contacts, pubkey: b)?.priority ?? 0
 
