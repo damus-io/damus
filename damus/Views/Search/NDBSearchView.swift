@@ -23,19 +23,21 @@ struct NDBSearchView: View {
                 }
                 .padding()
                 .foregroundColor(.secondary)
-                
-                ForEach(results, id: \.self) { note in
-                    EventView(damus: damus_state, event: note)
-                        .onTapGesture {
-                            let event = note.get_inner_event(cache: damus_state.events) ?? note
-                            let thread = ThreadModel(event: event, damus_state: damus_state)
-                            damus_state.nav.push(route: Route.Thread(thread: thread))
-                        }
-                        .padding(.horizontal)
-                    
-                    ThiccDivider()
+
+                LazyVStack {
+                    ForEach(results, id: \.self) { note in
+                        EventView(damus: damus_state, event: note)
+                            .onTapGesture {
+                                let event = note.get_inner_event(cache: damus_state.events) ?? note
+                                let thread = ThreadModel(event: event, damus_state: damus_state)
+                                damus_state.nav.push(route: Route.Thread(thread: thread))
+                            }
+                            .padding(.horizontal)
+
+                        ThiccDivider()
+                    }
                 }
-                
+
             } else if results.count == 0 {
                 HStack {
                     Spacer()
