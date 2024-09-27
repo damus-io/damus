@@ -141,7 +141,7 @@ struct SearchResultsView: View {
     let debouncer: Debouncer = Debouncer(interval: 0.25)
     
     func do_search(query: String) {
-        let limit = 16
+        let limit = 128
         var note_keys = damus_state.ndb.text_search(query: query, limit: limit, order: .newest_first)
         var res = [NostrEvent]()
         // TODO: fix duplicate results from search
