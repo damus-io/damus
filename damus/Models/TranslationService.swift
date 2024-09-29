@@ -59,10 +59,14 @@ enum TranslationService: String, CaseIterable, Identifiable, StringCodable {
     }
 
     static var isAppleTranslationPopoverSupported: Bool {
+#if targetEnvironment(macCatalyst)
+        return false
+#else
         if #available(iOS 17.4, macOS 14.4, *) {
             return true
         } else {
             return false
         }
+#endif
     }
 }

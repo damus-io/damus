@@ -78,7 +78,7 @@ struct ImageContextMenuModifier: ViewModifier {
                 Label(NSLocalizedString("Share", comment: "Button to share an image."), image: "upload")
             }
         }
-        .alert(NSLocalizedString("Found\n \(qrCodeValue)", comment: "Alert message asking if the user wants to open the link.").truncate(maxLength: 50), isPresented: $open_link_confirm) {
+        .alert(String(format: NSLocalizedString("Found\n %@", comment: "Alert message asking if the user wants to open the link."), qrCodeValue).truncate(maxLength: 50), isPresented: $open_link_confirm) {
             if open_wallet_confirm {
                 Button(NSLocalizedString("Open in wallet", comment: "Button to open the value found in browser."), role: .none) {
                     do {
