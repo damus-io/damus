@@ -303,7 +303,9 @@ struct NoteContentView: View {
             case .separated(let separated):
                 if #available(iOS 17.4, macOS 14.4, *) {
                     MainContent(artifacts: separated)
+#if !targetEnvironment(macCatalyst)
                         .translationPresentation(isPresented: $isAppleTranslationPopoverPresented, text: event.get_content(damus_state.keypair))
+#endif
                 } else {
                     MainContent(artifacts: separated)
                 }
