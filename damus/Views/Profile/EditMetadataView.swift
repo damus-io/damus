@@ -218,7 +218,7 @@ struct EditMetadataView: View {
         .background(Color(.systemGroupedBackground))
         .navigationBarBackButtonHidden()
         .toolbar {
-            ToolbarItem(placement: .principal) {
+            ToolbarItem(placement: .topBarLeading) {
                 navBackButton
             }
         }
