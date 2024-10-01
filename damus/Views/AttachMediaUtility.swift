@@ -16,38 +16,38 @@ enum ImageUploadResult {
 }
 
 fileprivate func create_upload_body(mediaData: Data, boundary: String, mediaUploader: MediaUploader, mediaToUpload: MediaUpload) -> Data {
-        let body = NSMutableData();
-        let contentType = mediaToUpload.mime_type
-        body.appendString(string: "Content-Type: multipart/form-data; boundary=\(boundary)\r\n\r\n")
-        body.appendString(string: "--\(boundary)\r\n")
-        body.appendString(string: "Content-Disposition: form-data; name=\(mediaUploader.nameParam); filename=\(mediaToUpload.genericFileName)\r\n")
-        body.appendString(string: "Content-Type: \(contentType)\r\n\r\n")
-        body.append(mediaData as Data)
-        body.appendString(string: "\r\n")
-        body.appendString(string: "--\(boundary)--\r\n")
-        return body as Data
-    }
+    let body = NSMutableData()
+    let contentType = mediaToUpload.mime_type
+    body.appendString(string: "Content-Type: multipart/form-data; boundary=\(boundary)\r\n\r\n")
+    body.appendString(string: "--\(boundary)\r\n")
+    body.appendString(string: "Content-Disposition: form-data; name=\(mediaUploader.nameParam); filename=\(mediaToUpload.genericFileName)\r\n")
+    body.appendString(string: "Content-Type: \(contentType)\r\n\r\n")
+    body.append(mediaData as Data)
+    body.appendString(string: "\r\n")
+    body.appendString(string: "--\(boundary)--\r\n")
+    return body as Data
+}
 
 func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploader, progress: URLSessionTaskDelegate, keypair: Keypair? = nil) async -> ImageUploadResult {
     var mediaData: Data?
     guard let url = URL(string: mediaUploader.postAPI) else {
         return .failed(nil)
     }
-    
+
     var request = URLRequest(url: url)
-    request.httpMethod = "POST";
+    request.httpMethod = "POST"
     let boundary = "Boundary-\(UUID().description)"
     request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-    
-    // If uploading to a media host that support NIP-98 authorization, add the header
-    if mediaUploader == .nostrBuild || mediaUploader == .nostrcheck,
-       let keypair,
-        let method = request.httpMethod,
-        let signature = create_nip98_signature(keypair: keypair, method: method, url: url) {
 
-         request.setValue(signature, forHTTPHeaderField: "Authorization")
+    // If uploading to a media host that supports NIP-98 authorization, add the header
+    if mediaUploader == .nostrBuild || mediaUploader == .nostrcheck || mediaUploader == .nostrMedia,
+       let keypair,
+       let method = request.httpMethod,
+       let signature = create_nip98_signature(keypair: keypair, method: method, url: url) {
+
+        request.setValue(signature, forHTTPHeaderField: "Authorization")
     }
-    
+
     switch mediaToUpload {
     case .image(let url):
         do {
@@ -68,7 +68,7 @@ func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploa
     }
 
     request.httpBody = create_upload_body(mediaData: mediaData, boundary: boundary, mediaUploader: mediaUploader, mediaToUpload: mediaToUpload)
-    
+
     do {
         let (data, _) = try await URLSession.shared.data(for: request, delegate: progress)
 
@@ -76,9 +76,9 @@ func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploa
             print("Upload failed getting media url")
             return .failed(nil)
         }
-        
+
         return .success(url)
-        
+
     } catch {
         return .failed(error)
     }
