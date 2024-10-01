@@ -9,6 +9,7 @@ import SwiftUI
 
 struct PubkeyView: View {
     let pubkey: Pubkey
+    var sidemenu: Bool = false
     
     @Environment(\.colorScheme) var colorScheme
     
@@ -45,20 +46,21 @@ struct PubkeyView: View {
         let bech32 = pubkey.npub
         
         HStack {
-            Text(verbatim: "\(abbrev_pubkey(bech32, amount: 16))")
-                .font(.footnote)
+            Text(verbatim: "\(abbrev_pubkey(bech32, amount: sidemenu ? 12 : 16))")
+                .font(sidemenu ? .system(size: 10) : .footnote)
                 .foregroundColor(keyColor())
                 .padding(5)
                 .padding([.leading], 5)
-            
+                .lineLimit(1)
+
             HStack {
                 if isCopied {
                     Image("check-circle")
                         .resizable()
                         .foregroundColor(DamusColors.green)
-                        .frame(width: 20, height: 20)
+                        .frame(width: sidemenu ? 15 : 20, height: sidemenu ? 15 : 20)
                     Text("Copied", comment: "Label indicating that a user's key was copied.")
-                        .font(.footnote)
+                        .font(sidemenu ? .system(size: 10) : .footnote)
                         .layoutPriority(1)
                         .foregroundColor(DamusColors.green)
                 } else {
@@ -72,7 +74,7 @@ struct PubkeyView: View {
                                 .resizable()
                                 .contentShape(Rectangle())
                                 .foregroundColor(colorScheme == .light ? DamusColors.darkGrey : DamusColors.lightGrey)
-                                .frame(width: 20, height: 20)
+                                .frame(width: sidemenu ? 15 : 20, height: sidemenu ? 15 : 20)
                         }
                         .labelStyle(IconOnlyLabelStyle())
                         .symbolRenderingMode(.hierarchical)

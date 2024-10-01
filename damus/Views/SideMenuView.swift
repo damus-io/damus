@@ -14,20 +14,10 @@ struct SideMenuView: View {
     @Binding var selected: Timeline
     @State var confirm_logout: Bool = false
     @State private var showQRCode = false
-    
-    @Environment(\.colorScheme) var colorScheme
 
     var sideBarWidth = min(UIScreen.main.bounds.size.width * 0.65, 400.0)
-    let verticalSpacing: CGFloat = 20
+    let verticalSpacing: CGFloat = 25
     let padding: CGFloat = 30
-
-    func fillColor() -> Color {
-        colorScheme == .light ? DamusColors.white : DamusColors.black
-    }
-
-    func textColor() -> Color {
-        colorScheme == .light ? DamusColors.black : DamusColors.white
-    }
 
     var body: some View {
         ZStack {
@@ -57,7 +47,7 @@ struct SideMenuView: View {
 
             if damus_state.purple.enable_purple {
                 NavigationLink(destination: DamusPurpleView(damus_state: damus_state)) {
-                    HStack(spacing: 13) {
+                    HStack(spacing: 23) {
                         Image("nostr-hashtag")
                         Text("Purple")
                             .foregroundColor(DamusColors.purple)
@@ -80,12 +70,22 @@ struct SideMenuView: View {
             }
 
             Link(destination: URL(string: "https://store.damus.io/?ref=damus_ios_app")!) {
-                navLabel(title: NSLocalizedString("Merch", comment: "Sidebar menu label for merch store link."), img: "basket")
+                navLabel(title: NSLocalizedString("Merch", comment: "Sidebar menu label for merch store link."), img: "shop")
             }
 
             NavigationLink(value: Route.Config) {
                 navLabel(title: NSLocalizedString("Settings", comment: "Sidebar menu label for accessing the app settings"), img: "settings")
             }
+            
+            Button(action: {
+                if damus_state.keypair.privkey == nil {
+                    logout(damus_state)
+                } else {
+                    confirm_logout = true
+                }
+            }, label: {
+                navLabel(title: NSLocalizedString("Logout", comment: "Sidebar menu label to sign out of the account."), img: "logout")
+            })
         }
     }
 
@@ -100,38 +100,68 @@ struct SideMenuView: View {
             display_name = profile?.display_name
         }
 
-        return VStack(alignment: .leading, spacing: verticalSpacing) {
-            HStack {
-                ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
-
-                VStack(alignment: .leading) {
-
-                    if let display_name {
-                        Text(display_name)
-                            .foregroundColor(textColor())
-                            .font(.title)
-                            .lineLimit(1)
-                    }
-                    if let name {
+        return VStack(alignment: .leading) {
+            HStack(spacing: 10) {
+                
+                ProfilePicView(pubkey: damus_state.pubkey, size: 50, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                
+                Spacer()
+                
+                Button(action: {
+                    present_sheet(.user_status)
+                    isSidebarVisible = false
+                }, label: {
+                    Image("add-reaction")
+                        .resizable()
+                        .frame(width: 25, height: 25)
+                        .padding(5)
+                        .foregroundColor(DamusColors.adaptableBlack)
+                        .background {
+                            Circle()
+                                .foregroundColor(DamusColors.neutral3)
+                        }
+                })
+                
+                Button(action: {
+                    showQRCode.toggle()
+                    isSidebarVisible = false
+                }, label: {
+                    Image("qr-code")
+                        .resizable()
+                        .frame(width: 25, height: 25)
+                        .padding(5)
+                        .foregroundColor(DamusColors.adaptableBlack)
+                        .background {
+                            Circle()
+                                .foregroundColor(DamusColors.neutral3)
+                        }
+                }).fullScreenCover(isPresented: $showQRCode) {
+                    QRCodeView(damus_state: damus_state, pubkey: damus_state.pubkey)
+                }
+            }
+            
+            VStack(alignment: .leading) {
+                
+                if let display_name {
+                    Text(display_name)
+                        .font(.title2.weight(.bold))
+                        .foregroundColor(DamusColors.adaptableBlack)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .dynamicTypeSize(.xSmall)
+                        .lineLimit(1)
+                }
+                if let name {
+                    if !name.isEmpty {
                         Text("@" + name)
                             .foregroundColor(DamusColors.mediumGrey)
                             .font(.body)
                             .lineLimit(1)
                     }
                 }
+                
+                PubkeyView(pubkey: damus_state.pubkey, sidemenu: true)
+                    .pubkey_context_menu(pubkey: damus_state.pubkey)
             }
-
-            navLabel(title: NSLocalizedString("Set Status", comment: "Sidebar menu label to set user status"), img: "add-reaction")
-                .font(.title2)
-                .foregroundColor(textColor())
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .dynamicTypeSize(.xSmall)
-                .onTapGesture {
-                    present_sheet(.user_status)
-                }
-
-            UserStatusView(status: damus_state.profiles.profile_data(damus_state.pubkey).status, show_general: true, show_music: true)
-                .dynamicTypeSize(.xSmall)
         }
     }
 
@@ -141,68 +171,28 @@ struct SideMenuView: View {
             let profile_model = ProfileModel(pubkey: damus_state.pubkey, damus: damus_state)
 
             NavigationLink(value: Route.Profile(profile: profile_model, followers: followers), label: {
-
                 TopProfile
                     .padding(.bottom, verticalSpacing)
             })
 
-            Divider()
-
             ScrollView {
                 SidemenuItems(profile_model: profile_model, followers: followers)
-                    .labelStyle(SideMenuLabelStyle())
-                    .padding([.top, .bottom], verticalSpacing)
+                    .simultaneousGesture(TapGesture().onEnded {
+                        isSidebarVisible = false
+                    })
             }
+            .scrollIndicators(.hidden)
         }
     }
 
     var content: some View {
         HStack(alignment: .top) {
             ZStack(alignment: .top) {
-                fillColor()
+                DamusColors.adaptableWhite
                     .ignoresSafeArea()
 
-                VStack(alignment: .leading, spacing: 0) {
-                    MainSidemenu
-                    .simultaneousGesture(TapGesture().onEnded {
-                        isSidebarVisible = false
-                    })
-
-                    Divider()
-
-                    HStack() {
-                        Button(action: {
-                            //ConfigView(state: damus_state)
-                            if damus_state.keypair.privkey == nil {
-                                logout(damus_state)
-                            } else {
-                                confirm_logout = true
-                            }
-                        }, label: {
-                            Label(NSLocalizedString("Sign out", comment: "Sidebar menu label to sign out of the account."), image: "logout")
-                                .font(.title3)
-                                .foregroundColor(textColor())
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .dynamicTypeSize(.xSmall)
-                        })
-
-                        Spacer()
-
-                        Button(action: {
-                            showQRCode.toggle()
-                        }, label: {
-                            Image("qr-code")
-                                .font(.title)
-                                .foregroundColor(textColor())
-                                .dynamicTypeSize(.xSmall)
-                        }).fullScreenCover(isPresented: $showQRCode) {
-                            QRCodeView(damus_state: damus_state, pubkey: damus_state.pubkey)
-                        }
-                    }
-                    .padding(.top, verticalSpacing)
-                }
-                .padding(.top, selected != .home ?  -(padding / 2.0) : 30)
-                .padding([.leading, .trailing, .bottom], padding)
+                MainSidemenu
+                    .padding([.leading, .trailing], padding)
             }
             .frame(width: sideBarWidth)
             .offset(x: isSidebarVisible ? 0 : -(sideBarWidth + padding))
@@ -223,26 +213,15 @@ struct SideMenuView: View {
     }
 
     func navLabel(title: String, img: String) -> some View {
-        HStack {
+        HStack(spacing: 20) {
             Image(img)
                 .tint(DamusColors.adaptableBlack)
             
             Text(title)
-                .font(.title2)
-                .foregroundColor(textColor())
+                .font(.title2.weight(.bold))
+                .foregroundColor(DamusColors.adaptableBlack)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .dynamicTypeSize(.xSmall)
-        }
-    }
-
-    struct SideMenuLabelStyle: LabelStyle {
-        func makeBody(configuration: Configuration) -> some View {
-            HStack(alignment: .center, spacing: 8) {
-                configuration.icon
-                    .frame(width: 24, height: 24)
-                    .aspectRatio(contentMode: .fit)
-                configuration.title
-            }
         }
     }
 }
