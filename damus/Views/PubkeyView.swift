@@ -45,20 +45,22 @@ struct PubkeyView: View {
         let bech32 = pubkey.npub
         
         HStack {
-            Text(verbatim: "\(abbrev_pubkey(bech32, amount: 16))")
-                .font(.footnote)
+            Text(verbatim: "\(abbrev_pubkey(bech32, amount: 12))")
+                .font(.system(size: 10))
                 .foregroundColor(keyColor())
                 .padding(5)
                 .padding([.leading], 5)
-            
+                .lineLimit(1)
+                //.opacity(isCopied ? 0 : 1)
+
             HStack {
                 if isCopied {
                     Image("check-circle")
                         .resizable()
                         .foregroundColor(DamusColors.green)
-                        .frame(width: 20, height: 20)
+                        .frame(width: 15, height: 15)
                     Text("Copied", comment: "Label indicating that a user's key was copied.")
-                        .font(.footnote)
+                        .font(.system(size: 10))
                         .layoutPriority(1)
                         .foregroundColor(DamusColors.green)
                 } else {
@@ -72,7 +74,7 @@ struct PubkeyView: View {
                                 .resizable()
                                 .contentShape(Rectangle())
                                 .foregroundColor(colorScheme == .light ? DamusColors.darkGrey : DamusColors.lightGrey)
-                                .frame(width: 20, height: 20)
+                                .frame(width: 15, height: 15)
                         }
                         .labelStyle(IconOnlyLabelStyle())
                         .symbolRenderingMode(.hierarchical)
