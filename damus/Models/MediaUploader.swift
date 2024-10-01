@@ -11,6 +11,7 @@ enum MediaUploader: String, CaseIterable, Identifiable, StringCodable {
     var id: String { self.rawValue }
     case nostrBuild
     case nostrcheck
+    case nostrMedia  // New case for nostrMedia
     
     init?(from string: String) {
         guard let mu = MediaUploader(rawValue: string) else {
@@ -35,9 +36,7 @@ enum MediaUploader: String, CaseIterable, Identifiable, StringCodable {
     
     var supportsVideo: Bool {
         switch self {
-        case .nostrBuild:
-            return true
-        case .nostrcheck:
+        case .nostrBuild, .nostrcheck, .nostrMedia:
             return true
         }
     }
@@ -55,6 +54,8 @@ enum MediaUploader: String, CaseIterable, Identifiable, StringCodable {
             return .init(index: -1, tag: "nostrBuild", displayName: "nostr.build")
         case .nostrcheck:
             return .init(index: 0, tag: "nostrcheck", displayName: "nostrcheck.me")
+        case .nostrMedia:
+            return .init(index: 1, tag: "nostrMedia", displayName: "NostrMedia.com")
         }
     }
     
@@ -64,6 +65,8 @@ enum MediaUploader: String, CaseIterable, Identifiable, StringCodable {
             return "https://nostr.build/api/v2/nip96/upload"
         case .nostrcheck:
             return "https://nostrcheck.me/api/v2/media"
+        case .nostrMedia:
+            return "https://nostrmedia.com/upload"
         }
     }
     
