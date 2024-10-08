@@ -18,7 +18,6 @@ enum PreUploadedMedia {
 
 enum MediaUpload {
     case image(URL)
-    case uiImage(UIImage)
     case video(URL)
 
     var genericFileName: String {
@@ -31,8 +30,6 @@ enum MediaUpload {
             return url.pathExtension
         case .video(let url):
             return url.pathExtension
-        case .uiImage(_):
-            return "jpeg"
         }
     }
 
@@ -42,8 +39,6 @@ enum MediaUpload {
             return url
         case .video(let url):
             return url
-        case .uiImage(_):
-            return URL(string: "about:blank")! // Safe placeholder URL
         }
     }
     
@@ -77,8 +72,6 @@ enum MediaUpload {
                         return "image/jpg"
                     case .video:
                         return "video/mp4"
-                case .uiImage(_):
-                    return "image/jpg"
                 }
         }
     }

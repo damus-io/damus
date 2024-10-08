@@ -61,8 +61,6 @@ func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploa
         } catch {
             return .failed(error)
         }
-    case .uiImage(_):
-        return .failed(nil) // no need to handle for uiimage case
     }
 
     guard let mediaData else {
