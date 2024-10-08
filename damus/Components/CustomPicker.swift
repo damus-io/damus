@@ -46,7 +46,6 @@ struct CustomPicker<SelectionValue: Hashable>: View {
                 .accentColor(tag == selection ? textColor() : .gray)
             }
         }
-        .background(Color(UIColor.systemBackground))
     }
     
     func textColor() -> Color {

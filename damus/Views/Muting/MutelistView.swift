@@ -86,7 +86,10 @@ struct MutelistView: View {
                     }
                 }
             }
-            Section(NSLocalizedString("Threads", comment: "Section header title for a list of threads that are muted.")) {
+            Section(
+                header: Text(NSLocalizedString("Threads", comment: "Section header title for a list of threads that are muted.")),
+                footer: Text("").padding(.bottom, 10 + tabHeight + getSafeAreaBottom())
+            ) {
                 ForEach(threads, id: \.self) { item in
                     if case let MuteItem.thread(note_id, _) = item {
                         if let event = damus_state.events.lookup(note_id) {

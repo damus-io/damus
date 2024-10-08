@@ -177,7 +177,10 @@ struct NotificationSettingsView: View {
                     .toggleStyle(.switch)
             }
             
-            Section(header: Text("Notification Dots", comment: "Section header for notification indicator dot settings")) {
+            Section(
+                header: Text("Notification Dots", comment: "Section header for notification indicator dot settings"),
+                footer: Text("").padding(.bottom, tabHeight + getSafeAreaBottom())
+            ) {
                 Toggle(NSLocalizedString("Zaps", comment: "Setting to enable Zap Local Notification"), isOn: indicator_binding(.zaps))
                     .toggleStyle(.switch)
                 Toggle(NSLocalizedString("Mentions", comment: "Setting to enable Mention Local Notification"), isOn: indicator_binding(.mentions))

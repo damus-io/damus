@@ -28,6 +28,7 @@ struct ZapsView: View {
                 }
             }
         }
+        .padding(.bottom, tabHeight + getSafeAreaBottom())
         .navigationBarTitle(NSLocalizedString("Zaps", comment: "Navigation bar title for the Zaps view."))
         .onAppear {
             model.subscribe()

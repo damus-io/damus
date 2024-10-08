@@ -108,6 +108,7 @@ struct AppearanceSettingsView: View {
             Section(
                 header: Text("Profiles", comment: "Section title for profile view configuration."),
                 footer: Text("Profile action sheets allow you to follow, zap, or DM profiles more quickly without having to view their full profile", comment: "Section footer clarifying what the profile action sheet feature does")
+                    .padding(.bottom, tabHeight + getSafeAreaBottom())
             ) {
                 Toggle(NSLocalizedString("Show profile action sheets", comment: "Setting to show profile action sheets when clicking on a user's profile picture"), isOn: $settings.show_profile_action_sheet_on_pfp_click)
                     .toggleStyle(.switch)
