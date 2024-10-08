@@ -467,6 +467,7 @@ struct PostView: View {
                     self.attach_media = true
                 }
             }
+            // This alert seeks confirmation about Image-upload when user taps Paste option
             .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $imageUploadConfirmPasteboard) {
                 Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
                     if let image = imagePastedFromPasteboard,
