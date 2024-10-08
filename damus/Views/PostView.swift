@@ -54,6 +54,8 @@ struct PostView: View {
     @State var error: String? = nil
     @State var uploadedMedias: [UploadedMedia] = []
     @State var image_upload_confirm: Bool = false
+    @State var imagePastedFromPasteboard: UIImage? = nil
+    @State var imageUploadConfirmPasteboard: Bool = false
     @State var references: [RefId] = []
     @State var filtered_pubkeys: Set<Pubkey> = []
     @State var focusWordAttributes: (String?, NSRange?) = (nil, nil)
@@ -246,7 +248,9 @@ struct PostView: View {
             TextViewWrapper(
                 attributedText: $post,
                 textHeight: $textHeight,
-                initialTextSuffix: initial_text_suffix, 
+                initialTextSuffix: initial_text_suffix,
+                imagePastedFromPasteboard: $imagePastedFromPasteboard,
+                imageUploadConfirmPasteboard: $imageUploadConfirmPasteboard,
                 cursorIndex: newCursorIndex,
                 getFocusWordForMention: { word, range in
                     focusWordAttributes = (word, range)
@@ -462,6 +466,15 @@ struct PostView: View {
                     self.attach_camera = false
                     self.attach_media = true
                 }
+            }
+            .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $imageUploadConfirmPasteboard) {
+                Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
+                    if let image = imagePastedFromPasteboard,
+                       let mediaToUpload = generateMediaUpload(PreUploadedMedia.uiimage(image)) {
+                        self.handle_upload(media: mediaToUpload)
+                    }
+                }
+                Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
             }
             .onAppear() {
                 let loaded_draft = load_draft()
