@@ -12,13 +12,16 @@ struct TextViewWrapper: UIViewRepresentable {
     @EnvironmentObject var tagModel: TagModel
     @Binding var textHeight: CGFloat?
     let initialTextSuffix: String?
+    @Binding var imagePastedFromPasteboard: UIImage?
+    @Binding var imageUploadConfirmPasteboard: Bool
     
     let cursorIndex: Int?
     var getFocusWordForMention: ((String?, NSRange?) -> Void)? = nil
     let updateCursorPosition: ((Int) -> Void)
     
     func makeUIView(context: Context) -> UITextView {
-        let textView = UITextView()
+        let textView = CustomPostTextView(imagePastedFromPasteboard: $imagePastedFromPasteboard,
+                                          imageUploadConfirm: $imageUploadConfirmPasteboard)
         textView.backgroundColor = UIColor(DamusColors.adaptableWhite)
         textView.delegate = context.coordinator
         
@@ -240,3 +243,36 @@ struct TextViewWrapper: UIViewRepresentable {
     }
 }
 
+class CustomPostTextView: UITextView {
+    @Binding var imagePastedFromPasteboard: UIImage?
+    @Binding var imageUploadConfirm: Bool
+    
+    // Custom initializer
+    init(imagePastedFromPasteboard: Binding<UIImage?>, imageUploadConfirm: Binding<Bool>) {
+        self._imagePastedFromPasteboard = imagePastedFromPasteboard
+        self._imageUploadConfirm = imageUploadConfirm
+        super.init(frame: .zero, textContainer: nil)
+    }
+    
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    // Override canPerformAction to enable image pasting
+    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        if action == #selector(UIResponderStandardEditActions.paste(_:)),
+           UIPasteboard.general.image != nil {
+            return true // Show `Paste` option while long-pressing if there is an image present in the clipboard
+        }
+        return super.canPerformAction(action, withSender: sender) // Default behavior for other actions
+    }
+
+    // Override paste to handle image pasting
+    override func paste(_ sender: Any?) {
+        if let image = UIPasteboard.general.image {
+            imagePastedFromPasteboard = image
+            // Show alert view in PostView for Confirming upload
+            imageUploadConfirm = true
+        } else {
+            super.paste(sender) // Fall back to default paste behavior if no image
+        }
+    }
+}
