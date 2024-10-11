@@ -60,7 +60,7 @@ struct PostView: View {
     @State var newCursorIndex: Int?
     @State var textHeight: CGFloat? = nil
 
-    @State var preUploadedMedia: PreUploadedMedia? = nil
+    @State var preUploadedMedia: [PreUploadedMedia] = []
     
     @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
     @StateObject var tagModel: TagModel = TagModel()
@@ -151,6 +151,7 @@ struct PostView: View {
     
     var ImageButton: some View {
         Button(action: {
+            preUploadedMedia.removeAll()
             attach_media = true
         }, label: {
             Image("images")
@@ -445,16 +446,20 @@ struct PostView: View {
             .background(DamusColors.adaptableWhite.edgesIgnoringSafeArea(.all))
             .sheet(isPresented: $attach_media) {
                 MediaPicker(image_upload_confirm: $image_upload_confirm){ media in
-                    self.preUploadedMedia = media
+                    self.preUploadedMedia.append(media)
                 }
-                .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $image_upload_confirm) {
+                .alert(NSLocalizedString("Are you sure you want to upload the selected media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $image_upload_confirm) {
                     Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
-                        if let mediaToUpload = generateMediaUpload(preUploadedMedia) {
-                            self.handle_upload(media: mediaToUpload)
-                            self.attach_media = false
+                        for media in preUploadedMedia {
+                           if let mediaToUpload = generateMediaUpload(media) {
+                               self.handle_upload(media: mediaToUpload)
+                            }
                         }
+                        self.attach_media = false
                     }
-                    Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
+                    Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {
+                        preUploadedMedia.removeAll()
+                    }
                 }
             }
             .sheet(isPresented: $attach_camera) {
@@ -486,6 +491,7 @@ struct PostView: View {
                 if isEmpty() {
                     clear_draft()
                 }
+                preUploadedMedia.removeAll()
             }
         }
     }
