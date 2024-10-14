@@ -26,7 +26,7 @@ struct NDBSearchView: View {
 
                 LazyVStack {
                     ForEach(results, id: \.self) { note in
-                        EventView(damus: damus_state, event: note)
+                        EventView(damus: damus_state, event: note, options: [.truncate_content])
                             .onTapGesture {
                                 let event = note.get_inner_event(cache: damus_state.events) ?? note
                                 let thread = ThreadModel(event: event, damus_state: damus_state)
