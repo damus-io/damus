@@ -452,6 +452,7 @@ struct PostView: View {
                 }
                 .alert(NSLocalizedString("Are you sure you want to upload the selected media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $image_upload_confirm) {
                     Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
+                        // initiate asynchronous uploading Task for multiple-images 
                         Task {
                             for media in preUploadedMedia {
                                 if let mediaToUpload = generateMediaUpload(media) {
