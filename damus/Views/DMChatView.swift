@@ -10,6 +10,7 @@ import Combine
 
 struct DMChatView: View, KeyboardReadable {
     let damus_state: DamusState
+    @FocusState private var isTextFieldFocused: Bool
     @ObservedObject var dms: DirectMessageModel
     
     var pubkey: Pubkey {
@@ -46,6 +47,7 @@ struct DMChatView: View, KeyboardReadable {
                     }
                 }
         }
+        .padding(.bottom, isTextFieldFocused ? 0 : tabHeight)
     }
     
     func scroll_to_end(_ scroller: ScrollViewProxy, animated: Bool = false) {
@@ -74,6 +76,7 @@ struct DMChatView: View, KeyboardReadable {
             .textEditorBackground {
                 InputBackground()
             }
+            .focused($isTextFieldFocused)
             .cornerRadius(8)
             .background(
                 RoundedRectangle(cornerRadius: 8)

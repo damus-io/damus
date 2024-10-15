@@ -35,6 +35,7 @@ struct DirectMessagesView: View {
             }
             .padding(.horizontal)
         }
+        .padding(.bottom, tabHeight)
     }
     
     func filter_dms(dms: [DirectMessageModel]) -> [DirectMessageModel] {
