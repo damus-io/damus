@@ -5564,10 +5564,10 @@
 		};
 		D78DB8572C1CE9CA00F0AB12 /* XCRemoteSwiftPackageReference "SwipeActions" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/aheze/SwipeActions";
+			repositoryURL = "https://github.com/damus-io/SwipeActions.git";
 			requirement = {
-				kind = exactVersion;
-				version = 1.1.0;
+				kind = revision;
+				revision = 33d99756c3112e1a07c1732e3cddc5ad5bd0c5f4;
 			};
 		};
 		D7A343EC2AD0D77C00CED48B /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {

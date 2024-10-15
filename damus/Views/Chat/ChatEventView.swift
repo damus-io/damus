@@ -27,8 +27,6 @@ struct ChatEventView: View {
     // MARK: long-press reaction control objects
     /// Whether the user is actively pressing the view
     @State var is_pressing = false
-    /// The dispatched work item scheduled by a timer to bounce the event bubble and show the emoji selector
-    @State var long_press_bounce_work_item: DispatchWorkItem?
     @State var popover_state: PopoverState = .closed {
         didSet {
             let generator = UIImpactFeedbackGenerator(style: popover_state.some_sheet_open() ? .heavy : .light)
@@ -39,6 +37,7 @@ struct ChatEventView: View {
 
     @State private var isOnTopHalfOfScreen: Bool = false
     @ObservedObject var bar: ActionBarModel
+    @Environment(\.swipeViewGroupSelection) var swipeViewGroupSelection
     
     enum PopoverState: String {
         case closed
@@ -206,28 +205,18 @@ struct ChatEventView: View {
         .scaleEffect(self.popover_state.some_sheet_open() ? 1.08 : is_pressing ? 1.02 : 1)
         .shadow(color: (is_pressing || self.popover_state.some_sheet_open()) ? .black.opacity(0.1) : .black.opacity(0.3), radius: (is_pressing || self.popover_state.some_sheet_open()) ? 8 : 0, y: (is_pressing || self.popover_state.some_sheet_open()) ? 15 : 0)
         .onLongPressGesture(minimumDuration: 0.5, maximumDistance: 10, perform: {
-            long_press_bounce_work_item?.cancel()
+            withAnimation(.bouncy(duration: 0.2, extraBounce: 0.35)) {
+                let should_show_zap_sheet = !damus_state.settings.nozaps && damus_state.settings.onlyzaps_mode
+                popover_state = should_show_zap_sheet ? .open_zap_sheet : .open_emoji_selector
+            }
         }, onPressingChanged: { is_pressing in
             withAnimation(is_pressing ? .easeIn(duration: 0.5) : .easeOut(duration: 0.1)) {
                 self.is_pressing = is_pressing
-                if popover_state != .closed {
-                    return
-                }
-                if self.is_pressing {
-                    let item = DispatchWorkItem {
-                        // Ensure the action is performed only if the condition is still valid
-                        if self.is_pressing {
-                            withAnimation(.bouncy(duration: 0.2, extraBounce: 0.35)) {
-                                let should_show_zap_sheet = !damus_state.settings.nozaps && damus_state.settings.onlyzaps_mode
-                                popover_state = should_show_zap_sheet ? .open_zap_sheet : .open_emoji_selector
-                            }
-                        }
-                    }
-                    long_press_bounce_work_item = item
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: item)
-                }
             }
         })
+        .onChange(of: swipeViewGroupSelection.wrappedValue) { newValue in
+            self.is_pressing = false
+        }
         .background(
             GeometryReader { geometry in
                 EmptyView()
@@ -310,6 +299,7 @@ struct ChatEventView: View {
             .swipeSpacing(-20)
             .swipeActionsStyle(.mask)
             .swipeMinimumDistance(20)
+            .swipeDragGesturePriority(.normal)
         }
     }
     
