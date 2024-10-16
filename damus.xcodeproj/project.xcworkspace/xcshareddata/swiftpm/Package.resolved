@@ -1,5 +1,5 @@
 {
-  "originHash" : "babaf4d5748afecf49bbb702530d8e9576460692f478b0a50ee43195dd4440e2",
+  "originHash" : "1b14e62192b3fa4b04a57cb4601d175b325dc16cb5f22c4c8eb975a675328637",
   "pins" : [
     {
       "identity" : "emojikit",
@@ -92,10 +92,9 @@
     {
       "identity" : "swipeactions",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/aheze/SwipeActions",
+      "location" : "https://github.com/damus-io/SwipeActions.git",
       "state" : {
-        "revision" : "41e6f6dce02d8cfa164f8c5461a41340850ca3ab",
-        "version" : "1.1.0"
+        "revision" : "33d99756c3112e1a07c1732e3cddc5ad5bd0c5f4"
       }
     }
   ],
