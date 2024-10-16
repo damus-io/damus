@@ -22,7 +22,7 @@ struct ReactionsView: View {
             }
             .padding()
         }
-        .padding(.bottom, tabHeight + getSafeAreaBottom())
+        .padding(.bottom, tabHeight)
         .navigationBarTitle(NSLocalizedString("Reactions", comment: "Navigation bar title for Reactions view."))
         .onAppear {
             model.subscribe()

@@ -13,6 +13,7 @@ struct QuoteRepostsView: View {
 
     var body: some View {
         TimelineView<AnyView>(events: model.events, loading: $model.loading, damus: damus_state, show_friend_icon: true, filter: ContentFilters.default_filters(damus_state: damus_state).filter(ev:))
+        .padding(.bottom, tabHeight)
         .navigationBarTitle(NSLocalizedString("Quotes", comment: "Navigation bar title for Quote Reposts view."))
         .onAppear {
             model.subscribe()

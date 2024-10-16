@@ -203,7 +203,7 @@ struct EditMetadataView: View {
             })
             .buttonStyle(GradientButtonStyle(padding: 15))
             .padding(.horizontal, 10)
-            .padding(.bottom, 10 + tabHeight + getSafeAreaBottom())
+            .padding(.bottom, 10 + tabHeight)
             .disabled(!didChange())
             .opacity(!didChange() ? 0.5 : 1)
             .disabled(profileUploadObserver.isLoading || bannerUploadObserver.isLoading)

@@ -20,7 +20,7 @@ struct RepostsView: View {
             }
             .padding()
         }
-        .padding(.bottom, tabHeight + getSafeAreaBottom())
+        .padding(.bottom, tabHeight)
         .navigationBarTitle(NSLocalizedString("Reposts", comment: "Navigation bar title for Reposts view."))
         .onAppear {
             model.subscribe()
