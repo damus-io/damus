@@ -62,7 +62,7 @@ struct PostView: View {
     @State var newCursorIndex: Int?
     @State var textHeight: CGFloat? = nil
 
-    @State var preUploadedMedia: PreUploadedMedia? = nil
+    @State var preUploadedMedia: [PreUploadedMedia] = []
     
     @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
     @StateObject var tagModel: TagModel = TagModel()
@@ -153,6 +153,7 @@ struct PostView: View {
     
     var ImageButton: some View {
         Button(action: {
+            preUploadedMedia.removeAll()
             attach_media = true
         }, label: {
             Image("images")
@@ -321,34 +322,36 @@ struct PostView: View {
         .padding()
         .padding(.top, 15)
     }
-    
-    func handle_upload(media: MediaUpload) {
+
+    @discardableResult
+    func handle_upload(media: MediaUpload) async -> Bool {
         let uploader = damus_state.settings.default_media_uploader
-        Task {
-            let img = getImage(media: media)
-            print("img size w:\(img.size.width) h:\(img.size.height)")
-            async let blurhash = calculate_blurhash(img: img)
-            let res = await image_upload.start(media: media, uploader: uploader, keypair: damus_state.keypair)
-            
-            switch res {
-            case .success(let url):
-                guard let url = URL(string: url) else {
-                    self.error = "Error uploading image :("
-                    return
-                }
-                let blurhash = await blurhash
-                let meta = blurhash.map { bh in calculate_image_metadata(url: url, img: img, blurhash: bh) }
-                let uploadedMedia = UploadedMedia(localURL: media.localURL, uploadedURL: url, representingImage: img, metadata: meta)
-                uploadedMedias.append(uploadedMedia)
-                
-            case .failed(let error):
-                if let error {
-                    self.error = error.localizedDescription
-                } else {
-                    self.error = "Error uploading image :("
-                }
+        
+        let img = getImage(media: media)
+        print("img size w:\(img.size.width) h:\(img.size.height)")
+        
+        async let blurhash = calculate_blurhash(img: img)
+        let res = await image_upload.start(media: media, uploader: uploader, keypair: damus_state.keypair)
+        
+        switch res {
+        case .success(let url):
+            guard let url = URL(string: url) else {
+                self.error = "Error uploading image :("
+                return false
             }
+            let blurhash = await blurhash
+            let meta = blurhash.map { bh in calculate_image_metadata(url: url, img: img, blurhash: bh) }
+            let uploadedMedia = UploadedMedia(localURL: media.localURL, uploadedURL: url, representingImage: img, metadata: meta)
+            uploadedMedias.append(uploadedMedia)
+            return true
             
+        case .failed(let error):
+            if let error {
+                self.error = error.localizedDescription
+            } else {
+                self.error = "Error uploading image :("
+            }
+            return false
         }
     }
     
@@ -449,16 +452,23 @@ struct PostView: View {
             .background(DamusColors.adaptableWhite.edgesIgnoringSafeArea(.all))
             .sheet(isPresented: $attach_media) {
                 MediaPicker(image_upload_confirm: $image_upload_confirm){ media in
-                    self.preUploadedMedia = media
+                    self.preUploadedMedia.append(media)
                 }
-                .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $image_upload_confirm) {
+                .alert(NSLocalizedString("Are you sure you want to upload the selected media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $image_upload_confirm) {
                     Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
-                        if let mediaToUpload = generateMediaUpload(preUploadedMedia) {
-                            self.handle_upload(media: mediaToUpload)
-                            self.attach_media = false
+                        // initiate asynchronous uploading Task for multiple-images 
+                        Task {
+                            for media in preUploadedMedia {
+                                if let mediaToUpload = generateMediaUpload(media) {
+                                    await self.handle_upload(media: mediaToUpload)
+                                }
+                            }
                         }
+                        self.attach_media = false
                     }
-                    Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
+                    Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {
+                        preUploadedMedia.removeAll()
+                    }
                 }
             }
             .sheet(isPresented: $attach_camera) {
@@ -472,7 +482,9 @@ struct PostView: View {
                 Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
                     if let image = imagePastedFromPasteboard,
                        let mediaToUpload = generateMediaUpload(PreUploadedMedia.uiimage(image)) {
-                        self.handle_upload(media: mediaToUpload)
+                        Task {
+                            await self.handle_upload(media: mediaToUpload)
+                        }
                     }
                 }
                 Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
@@ -500,6 +512,7 @@ struct PostView: View {
                 if isEmpty() {
                     clear_draft()
                 }
+                preUploadedMedia.removeAll()
             }
         }
     }
