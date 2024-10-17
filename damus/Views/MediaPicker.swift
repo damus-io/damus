@@ -20,7 +20,11 @@ struct MediaPicker: UIViewControllerRepresentable {
     
 
     final class Coordinator: NSObject, PHPickerViewControllerDelegate {
-        let parent: MediaPicker
+        var parent: MediaPicker
+        
+        let dispatchGroup: DispatchGroup = DispatchGroup()
+        var orderIds: [String] = []
+        var orderMap: [String: PreUploadedMedia] = [:]
 
         init(_ parent: MediaPicker) {
             self.parent = parent
@@ -32,6 +36,11 @@ struct MediaPicker: UIViewControllerRepresentable {
             }
             
             for result in results {
+                
+                let orderId = result.assetIdentifier ?? UUID().uuidString
+                orderIds.append(orderId)
+                dispatchGroup.enter()
+                
                 if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
                     result.itemProvider.loadItem(forTypeIdentifier: UTType.image.identifier, options: nil) { (item, error) in
                         guard let url = item as? URL else { return }
@@ -50,7 +59,7 @@ struct MediaPicker: UIViewControllerRepresentable {
                                 do {
                                     try imageData.write(to: destinationURL)
                                     Task {
-                                        await self.chooseMedia(.processed_image(destinationURL))
+                                        await self.chooseMedia(.processed_image(destinationURL), orderId: orderId)
                                     }
                                 }
                                 catch {
@@ -64,13 +73,13 @@ struct MediaPicker: UIViewControllerRepresentable {
                                 url: url,
                                 fallback: processImage,
                                 unprocessedEnum: {.unprocessed_image($0)},
-                                processedEnum: {.processed_image($0)}
-                            )
+                                processedEnum: {.processed_image($0)},
+                                orderId: orderId)
                         } else {
                             // Media was taken from camera
                             result.itemProvider.loadObject(ofClass: UIImage.self) { (image, error) in
                                 if let image = image as? UIImage, error == nil {
-                                    self.chooseMedia(.uiimage(image))
+                                    self.chooseMedia(.uiimage(image), orderId: orderId)
                                 }
                             }
                         }
@@ -83,35 +92,48 @@ struct MediaPicker: UIViewControllerRepresentable {
                             url: url,
                             fallback: processVideo,
                             unprocessedEnum: {.unprocessed_video($0)},
-                            processedEnum: {.processed_video($0)}
+                            processedEnum: {.processed_video($0)}, orderId: orderId
                         )
+                    }
+                }
+            }
+            
+            dispatchGroup.notify(queue: .main) { [weak self] in
+                guard let self = self else { return }
+                var arrMedia: [PreUploadedMedia] = []
+                for id in self.orderIds {
+                    if let media = self.orderMap[id] {
+                        arrMedia.append(media)
+                        self.parent.onMediaPicked(media)
                     }
                 }
             }
         }
         
-        private func chooseMedia(_ media: PreUploadedMedia) {
-            self.parent.onMediaPicked(media)
+        
+        private func chooseMedia(_ media: PreUploadedMedia, orderId: String) {
             self.parent.image_upload_confirm = true
+            self.orderMap[orderId] = media
+            self.dispatchGroup.leave()
         }
         
-        private func attemptAcquireResourceAndChooseMedia(url: URL, fallback: (URL) -> URL?, unprocessedEnum: (URL) -> PreUploadedMedia, processedEnum: (URL) -> PreUploadedMedia) {
+        private func attemptAcquireResourceAndChooseMedia(url: URL, fallback: (URL) -> URL?, unprocessedEnum: (URL) -> PreUploadedMedia, processedEnum: (URL) -> PreUploadedMedia, orderId: String) {
             if url.startAccessingSecurityScopedResource() {
                 // Have permission from system to use url out of scope
                 print("Acquired permission to security scoped resource")
-                self.chooseMedia(unprocessedEnum(url))
+                self.chooseMedia(unprocessedEnum(url), orderId: orderId)
             } else {
                 // Need to copy URL to non-security scoped location
                 guard let newUrl = fallback(url) else { return }
-                self.chooseMedia(processedEnum(newUrl))
+                self.chooseMedia(processedEnum(newUrl), orderId: orderId)
             }
         }
 
     }
         
     func makeCoordinator() -> Coordinator {
-            Coordinator(self)
-        }
+        Coordinator(self)
+    }
     
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var configuration = PHPickerConfiguration(photoLibrary: .shared())
