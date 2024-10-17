@@ -22,6 +22,7 @@ struct MediaPicker: UIViewControllerRepresentable {
     final class Coordinator: NSObject, PHPickerViewControllerDelegate {
         var parent: MediaPicker
         
+        // properties used for returning medias in the same order as picking
         let dispatchGroup: DispatchGroup = DispatchGroup()
         var orderIds: [String] = []
         var orderMap: [String: PreUploadedMedia] = [:]
