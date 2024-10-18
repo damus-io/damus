@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct FullScreenCarouselView<Content: View>: View {
-    let video_controller: VideoController
+    let video_coordinator: DamusVideoCoordinator
     let urls: [MediaUrl]
     
     @Environment(\.presentationMode) var presentationMode
@@ -19,8 +19,8 @@ struct FullScreenCarouselView<Content: View>: View {
     @Binding var selectedIndex: Int
     let content: (() -> Content)?
     
-    init(video_controller: VideoController, urls: [MediaUrl], showMenu: Bool = true, settings: UserSettingsStore, selectedIndex: Binding<Int>, @ViewBuilder content: @escaping () -> Content) {
-        self.video_controller = video_controller
+    init(video_coordinator: DamusVideoCoordinator, urls: [MediaUrl], showMenu: Bool = true, settings: UserSettingsStore, selectedIndex: Binding<Int>, @ViewBuilder content: @escaping () -> Content) {
+        self.video_coordinator = video_coordinator
         self.urls = urls
         self._showMenu = State(initialValue: showMenu)
         self.settings = settings
@@ -28,8 +28,8 @@ struct FullScreenCarouselView<Content: View>: View {
         self.content = content
     }
     
-    init(video_controller: VideoController, urls: [MediaUrl], showMenu: Bool = true, settings: UserSettingsStore, selectedIndex: Binding<Int>) {
-        self.video_controller = video_controller
+    init(video_coordinator: DamusVideoCoordinator, urls: [MediaUrl], showMenu: Bool = true, settings: UserSettingsStore, selectedIndex: Binding<Int>) {
+        self.video_coordinator = video_coordinator
         self.urls = urls
         self._showMenu = State(initialValue: showMenu)
         self.settings = settings
@@ -59,7 +59,7 @@ struct FullScreenCarouselView<Content: View>: View {
                 ForEach(urls.indices, id: \.self) { index in
                     VStack {
                         if case .video = urls[safe: index] {
-                            ImageContainerView(video_controller: video_controller, url: urls[index], settings: settings, imageDict: $imageDict)
+                            ImageContainerView(video_coordinator: video_coordinator, url: urls[index], settings: settings, imageDict: $imageDict)
                                 .clipped()  // SwiftUI hack from https://stackoverflow.com/a/74401288 to make playback controls show up within the TabView
                                 .aspectRatio(contentMode: .fit)
                                 .padding(.top, Theme.safeAreaInsets?.top)
@@ -71,7 +71,7 @@ struct FullScreenCarouselView<Content: View>: View {
                         }
                         else {
                             ZoomableScrollView {
-                                ImageContainerView(video_controller: video_controller, url: urls[index], settings: settings, imageDict: $imageDict)
+                                ImageContainerView(video_coordinator: video_coordinator, url: urls[index], settings: settings, imageDict: $imageDict)
                                     .aspectRatio(contentMode: .fit)
                                     .padding(.top, Theme.safeAreaInsets?.top)
                                     .padding(.bottom, Theme.safeAreaInsets?.bottom)
@@ -148,7 +148,7 @@ fileprivate struct FullScreenCarouselPreviewView<Content: View>: View {
     }
     
     var body: some View {
-        FullScreenCarouselView(video_controller: test_damus_state.video, urls: [test_video_url, url], settings: test_damus_state.settings, selectedIndex: $selectedIndex) {
+        FullScreenCarouselView(video_coordinator: test_damus_state.video, urls: [test_video_url, url], settings: test_damus_state.settings, selectedIndex: $selectedIndex) {
             self.custom_content?()
         }
             .environmentObject(OrientationTracker())

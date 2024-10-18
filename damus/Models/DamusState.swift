@@ -34,13 +34,13 @@ class DamusState: HeadlessDamusState {
     let wallet: WalletModel
     let nav: NavigationCoordinator
     let music: MusicController?
-    let video: VideoController
+    let video: DamusVideoCoordinator
     let ndb: Ndb
     var purple: DamusPurple
     var push_notification_client: PushNotificationClient
     let emoji_provider: EmojiProvider
 
-    init(pool: RelayPool, keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, postbox: PostBox, bootstrap_relays: [RelayURL], replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: VideoController, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider) {
+    init(pool: RelayPool, keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, postbox: PostBox, bootstrap_relays: [RelayURL], replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: DamusVideoCoordinator, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider) {
         self.pool = pool
         self.keypair = keypair
         self.likes = likes
@@ -141,7 +141,7 @@ class DamusState: HeadlessDamusState {
             wallet: WalletModel(settings: settings),
             nav: navigationCoordinator,
             music: MusicController(onChange: { _ in }),
-            video: VideoController(),
+            video: DamusVideoCoordinator(),
             ndb: ndb,
             quote_reposts: .init(our_pubkey: pubkey),
             emoji_provider: DefaultEmojiProvider(showAllVariations: true)
@@ -209,7 +209,7 @@ class DamusState: HeadlessDamusState {
             wallet: WalletModel(settings: UserSettingsStore()),
             nav: NavigationCoordinator(),
             music: nil,
-            video: VideoController(),
+            video: DamusVideoCoordinator(),
             ndb: .empty,
             quote_reposts: .init(our_pubkey: empty_pub),
             emoji_provider: DefaultEmojiProvider(showAllVariations: true)

@@ -10,7 +10,7 @@ import Kingfisher
 
     
 struct ImageContainerView: View {
-    let video_controller: VideoController
+    let video_coordinator: DamusVideoCoordinator
     let url: MediaUrl
     let settings: UserSettingsStore
     
@@ -51,7 +51,7 @@ struct ImageContainerView: View {
                 case .image(let url):
                     Img(url: url)
                 case .video(let url):
-                    DamusVideoPlayer(url: url, video_size: .constant(nil), controller: video_controller, style: .full, visibility_tracking_method: .generic)
+                    DamusVideoPlayer(url: url, video_size: .constant(nil), coordinator: video_coordinator, style: .full, visibility_tracking_method: .generic)
             }
         }
     }
@@ -64,9 +64,9 @@ struct ImageContainerView_Previews: PreviewProvider {
     static var previews: some View {
         @State var imageDict: [URL: UIImage] = [:]
         Group {
-            ImageContainerView(video_controller: test_damus_state.video, url: .image(test_image_url), settings: test_damus_state.settings, imageDict: $imageDict)
+            ImageContainerView(video_coordinator: test_damus_state.video, url: .image(test_image_url), settings: test_damus_state.settings, imageDict: $imageDict)
                 .previewDisplayName("Image")
-            ImageContainerView(video_controller: test_damus_state.video, url: .video(test_video_url), settings: test_damus_state.settings, imageDict: $imageDict)
+            ImageContainerView(video_coordinator: test_damus_state.video, url: .video(test_video_url), settings: test_damus_state.settings, imageDict: $imageDict)
                 .previewDisplayName("Video")
         }
         .environmentObject(OrientationTracker())
