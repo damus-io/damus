@@ -686,7 +686,7 @@ struct ContentView: View {
                                       wallet: WalletModel(settings: settings),
                                       nav: self.navigationCoordinator,
                                       music: MusicController(onChange: music_changed),
-                                      video: VideoController(),
+                                      video: DamusVideoCoordinator(),
                                       ndb: ndb,
                                       quote_reposts: .init(our_pubkey: pubkey),
                                       emoji_provider: DefaultEmojiProvider(showAllVariations: true)
