@@ -26,7 +26,14 @@ final class DamusVideoCoordinator: ObservableObject {
     private var mute_states: [URL: Bool] = [:]
     private var metadatas: [URL: VideoMetadata] = [:]
     
-    @Published var focused_model_id: UUID?
+    @Published var focused_video: DamusVideoPlayerViewModel? {
+        didSet {
+            DispatchQueue.main.async { [self] in
+                oldValue?.pause()
+                focused_video?.play()
+            }
+        }
+    }
     
     func toggle_should_mute_video(url: URL) {
         let state = mute_states[url] ?? true

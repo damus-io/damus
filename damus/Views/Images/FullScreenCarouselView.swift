@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct FullScreenCarouselView<Content: View>: View {
-    let video_coordinator: DamusVideoCoordinator
+    @ObservedObject var video_coordinator: DamusVideoCoordinator
     let urls: [MediaUrl]
     
     @Environment(\.presentationMode) var presentationMode
@@ -96,17 +96,36 @@ struct FullScreenCarouselView<Content: View>: View {
                 GeometryReader { geo in
                     VStack {
                         if showMenu {
-                            NavDismissBarView(showBackgroundCircle: false)
-                                .foregroundColor(.white)
+                            HStack {
+                                Button(action: {
+                                    presentationMode.wrappedValue.dismiss()
+                                }, label: {
+                                    Image(systemName: "xmark")
+                                        .frame(width: 30, height: 30)
+                                })
+                                .buttonStyle(PlayerCircleButtonStyle())
+                                
+                                Spacer()
+                            }
+                            .padding()
+                            
                             Spacer()
                             
-                            if urls.count > 1 {
-                                PageControlView(currentPage: $selectedIndex, numberOfPages: urls.count)
-                                    .frame(maxWidth: 0, maxHeight: 0)
-                                    .padding(.top, 5)
+                            VStack {
+                                if urls.count > 1 {
+                                    PageControlView(currentPage: $selectedIndex, numberOfPages: urls.count)
+                                        .frame(maxWidth: 0, maxHeight: 0)
+                                        .padding(.top, 5)
+                                }
+                                
+                                if let focused_video = video_coordinator.focused_video {
+                                    DamusVideoControlsView(video: focused_video)
+                                }
+                                
+                                self.content?()
                             }
-                            
-                            self.content?()
+                            .padding(.top, 5)
+                            .background(Color.black.opacity(0.7))
                         }
                     }
                     .animation(.easeInOut, value: showMenu)

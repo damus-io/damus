@@ -27,11 +27,11 @@ struct DamusVideoPlayer: View {
     init(url: URL, video_size: Binding<CGSize?>, coordinator: DamusVideoCoordinator, style: Style, visibility_tracking_method: VisibilityTrackingMethod = .y_scroll) {
         self.url = url
         let mute: Bool?
-        if case .full = style {
-            mute = false
-        }
-        else {
-            mute = nil
+        switch style {
+            case .full, .no_controls:
+                mute = false
+            case .preview:
+                mute = nil
         }
         _model = StateObject(wrappedValue: DamusVideoPlayerViewModel(url: url, video_size: video_size, coordinator: coordinator, mute: mute))
         self.visibility_tracking_method = visibility_tracking_method
@@ -43,14 +43,19 @@ struct DamusVideoPlayer: View {
             let localFrame = geo.frame(in: .local)
             let centerY = globalCoordinate(localX: 0, localY: localFrame.midY, localGeometry: geo).y
             ZStack {
-                if case .full = self.style {
-                    DamusAVPlayerView(player: model.player, controller: model.player_view_controller, show_playback_controls: true)
-                }
-                if case .preview(let on_tap) = self.style {
-                    DamusAVPlayerView(player: model.player, controller: model.player_view_controller, show_playback_controls: false)
-                        .simultaneousGesture(TapGesture().onEnded({
-                            on_tap?()
-                        }))
+                switch self.style {
+                    case .full:
+                        DamusAVPlayerView(player: model.player, controller: model.player_view_controller, show_playback_controls: true)
+                    case .preview(on_tap: let on_tap):
+                        DamusAVPlayerView(player: model.player, controller: model.player_view_controller, show_playback_controls: false)
+                            .simultaneousGesture(TapGesture().onEnded({
+                                on_tap?()
+                            }))
+                    case .no_controls(on_tap: let on_tap):
+                        DamusAVPlayerView(player: model.player, controller: model.player_view_controller, show_playback_controls: false)
+                            .simultaneousGesture(TapGesture().onEnded({
+                                on_tap?()
+                            }))
                 }
                 
                 if model.is_loading {
@@ -113,7 +118,7 @@ struct DamusVideoPlayer: View {
                 Spacer()
                 
                 Button {
-                    model.did_tap_mute_button()
+                    model.is_muted.toggle()
                 } label: {
                     ZStack {
                         Circle()
@@ -154,6 +159,8 @@ struct DamusVideoPlayer: View {
         case full
         /// A style suitable for muted, auto-playing videos on a feed
         case preview(on_tap: (() -> Void)?)
+        /// A video player without any playback controls, suitable if using custom controls elsewhere.
+        case no_controls(on_tap: (() -> Void)?)
     }
     
     enum VisibilityTrackingMethod {
