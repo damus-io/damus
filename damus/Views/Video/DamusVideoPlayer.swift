@@ -24,7 +24,7 @@ struct DamusVideoPlayer: View {
     let visibility_tracking_method: VisibilityTrackingMethod
     @State var isVisible: Bool = false
     
-    init(url: URL, video_size: Binding<CGSize?>, controller: VideoController, style: Style, visibility_tracking_method: VisibilityTrackingMethod = .y_scroll) {
+    init(url: URL, video_size: Binding<CGSize?>, coordinator: DamusVideoCoordinator, style: Style, visibility_tracking_method: VisibilityTrackingMethod = .y_scroll) {
         self.url = url
         let mute: Bool?
         if case .full = style {
@@ -33,7 +33,7 @@ struct DamusVideoPlayer: View {
         else {
             mute = nil
         }
-        _model = StateObject(wrappedValue: DamusVideoPlayerViewModel(url: url, video_size: video_size, controller: controller, mute: mute))
+        _model = StateObject(wrappedValue: DamusVideoPlayerViewModel(url: url, video_size: video_size, coordinator: coordinator, mute: mute))
         self.visibility_tracking_method = visibility_tracking_method
         self.style = style
     }
@@ -166,11 +166,11 @@ struct DamusVideoPlayer: View {
 struct DamusVideoPlayer_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            DamusVideoPlayer(url: URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!, video_size: .constant(nil), controller: VideoController(), style: .full)
+            DamusVideoPlayer(url: URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!, video_size: .constant(nil), coordinator: DamusVideoCoordinator(), style: .full)
                 .environmentObject(OrientationTracker())
                 .previewDisplayName("Full video player")
             
-            DamusVideoPlayer(url: URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!, video_size: .constant(nil), controller: VideoController(), style: .preview(on_tap: nil))
+            DamusVideoPlayer(url: URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!, video_size: .constant(nil), coordinator: DamusVideoCoordinator(), style: .preview(on_tap: nil))
                 .environmentObject(OrientationTracker())
                 .previewDisplayName("Preview video player")
         }

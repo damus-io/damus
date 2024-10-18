@@ -28,7 +28,7 @@ final class DamusVideoPlayerViewModel: ObservableObject {
     private let url: URL
     private let player_item: AVPlayerItem
     let player: AVPlayer
-    fileprivate let controller: VideoController
+    fileprivate let coordinator: DamusVideoCoordinator
     let player_view_controller = AVPlayerViewController()
     let id = UUID()
     
@@ -47,28 +47,28 @@ final class DamusVideoPlayerViewModel: ObservableObject {
         didSet {
             if is_scrolled_into_view && !oldValue {
                 // we have just scrolled from out of view into view
-                controller.focused_model_id = id
+                coordinator.focused_model_id = id
             } else if !is_scrolled_into_view && oldValue {
                 // we have just scrolled from in view to out of view
-                if controller.focused_model_id == id {
-                    controller.focused_model_id = nil
+                if coordinator.focused_model_id == id {
+                    coordinator.focused_model_id = nil
                 }
             }
         }
     }
     
-    init(url: URL, video_size: Binding<CGSize?>, controller: VideoController, mute: Bool? = nil) {
+    init(url: URL, video_size: Binding<CGSize?>, coordinator: DamusVideoCoordinator, mute: Bool? = nil) {
         self.url = url
         player_item = AVPlayerItem(url: url)
         player = AVPlayer(playerItem: player_item)
-        self.controller = controller
+        self.coordinator = coordinator
         _video_size = video_size
         
         Task {
             await load()
         }
         
-        is_muted = mute ?? controller.should_mute_video(url: url)
+        is_muted = mute ?? coordinator.should_mute_video(url: url)
         player.isMuted = is_muted
         
         NotificationCenter.default.addObserver(
@@ -78,7 +78,7 @@ final class DamusVideoPlayerViewModel: ObservableObject {
             object: player_item
         )
         
-        controller.$focused_model_id
+        coordinator.$focused_model_id
             .sink { [weak self] model_id in
                 model_id == self?.id ? self?.player.play() : self?.player.pause()
             }
@@ -111,7 +111,7 @@ final class DamusVideoPlayerViewModel: ObservableObject {
     }
     
     private func load() async {
-        if let meta = controller.metadata(for: url) {
+        if let meta = coordinator.metadata(for: url) {
             has_audio = meta.has_audio
             video_size = meta.size
         } else {
@@ -124,7 +124,7 @@ final class DamusVideoPlayerViewModel: ObservableObject {
     func did_tap_mute_button() {
         is_muted.toggle()
         player.isMuted = is_muted
-        controller.toggle_should_mute_video(url: url)
+        coordinator.toggle_should_mute_video(url: url)
     }
     
     func set_view_is_visible(_ is_visible: Bool) {
