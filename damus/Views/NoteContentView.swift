@@ -119,15 +119,7 @@ struct NoteContentView: View {
     }
     
     func fullscreen_preview(dismiss: @escaping () -> Void) -> some View {
-        VStack {
-            EventView(damus: damus_state, event: self.event, options: .embedded_text_only)
-                .padding(.top)
-        }
-        .background(.thickMaterial)
-        .onTapGesture(perform: {
-            damus_state.nav.push(route: Route.Thread(thread: .init(event: self.event, damus_state: damus_state)))
-            dismiss()
-        })
+        EmptyView()
     }
     
     func MainContent(artifacts: NoteArtifactsSeparated) -> some View {
