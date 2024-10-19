@@ -60,10 +60,6 @@ struct FullScreenCarouselView<Content: View>: View {
                     VStack {
                         if case .video = urls[safe: index] {
                             ImageContainerView(video_coordinator: video_coordinator, url: urls[index], settings: settings, imageDict: $imageDict)
-                                .clipped()  // SwiftUI hack from https://stackoverflow.com/a/74401288 to make playback controls show up within the TabView
-                                .aspectRatio(contentMode: .fit)
-                                .padding(.top, Theme.safeAreaInsets?.top)
-                                .padding(.bottom, Theme.safeAreaInsets?.bottom)
                                 .modifier(SwipeToDismissModifier(minDistance: 50, onDismiss: {
                                     presentationMode.wrappedValue.dismiss()
                                 }))
