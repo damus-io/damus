@@ -401,7 +401,7 @@ struct PostView: View {
         GeometryReader { (deviceSize: GeometryProxy) in
             VStack(alignment: .leading, spacing: 0) {
                 let searching = get_searching_string(focusWordAttributes.0)
-
+                let searchingHashTag = get_searching_hashTag(focusWordAttributes.0)
                 TopBar
                 
                 ScrollViewReader { scroller in
@@ -415,7 +415,7 @@ struct PostView: View {
                                 .padding(.top, 5)
                         }
                     }
-                    .frame(maxHeight: searching == nil ? deviceSize.size.height : 70)
+                    .frame(maxHeight: searching == nil && searchingHashTag == nil ? deviceSize.size.height : 70)
                     .onAppear {
                         scroll_to_event(scroller: scroller, id: "post", delay: 1.0, animate: true, anchor: .top)
                     }
@@ -426,7 +426,17 @@ struct PostView: View {
                     UserSearch(damus_state: damus_state, search: searching, focusWordAttributes: $focusWordAttributes, newCursorIndex: $newCursorIndex, post: $post)
                         .frame(maxHeight: .infinity)
                         .environmentObject(tagModel)
-                } else {
+                // This else observes '#' for hash-tag suggestions and creates SuggestedHashtagsView
+                } else if let searchingHashTag {
+                        SuggestedHashtagsView(damus_state: damus_state,
+                                              events: SearchHomeModel(damus_state: damus_state).events,
+                                              isFromPostView: true,
+                                              queryHashTag: searchingHashTag,
+                                              focusWordAttributes: $focusWordAttributes,
+                                              newCursorIndex: $newCursorIndex,
+                                              post: $post)
+                        .environmentObject(tagModel)
+               } else {
                     Divider()
                     VStack(alignment: .leading) {
                         AttachmentBar
@@ -520,6 +530,17 @@ func get_searching_string(_ word: String?) -> String? {
     
     // don't include @npub... strings
     guard word.count != 64 else {
+        return nil
+    }
+    
+    return String(word.dropFirst())
+}
+
+fileprivate func get_searching_hashTag(_ word: String?) -> String? {
+    guard let word,
+          word.count >= 2,
+          let first_char = word.first,
+          first_char == "#" else {
         return nil
     }
     
