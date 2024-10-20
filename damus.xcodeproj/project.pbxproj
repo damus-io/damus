@@ -394,12 +394,12 @@
 		50B5685329F97CB400A23243 /* CredentialHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B5685229F97CB400A23243 /* CredentialHandler.swift */; };
 		50C3E08A2AA8E3F7006A4BC0 /* AVPlayer+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C3E0892AA8E3F7006A4BC0 /* AVPlayer+Additions.swift */; };
 		50DA11262A16A23F00236234 /* Launch.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 50DA11252A16A23F00236234 /* Launch.storyboard */; };
-		5C0567582C8FBC560073F23A /* NDBSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567572C8FBC560073F23A /* NDBSearchView.swift */; };
-		5C0567592C8FBDE30073F23A /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2277EE92A089BD5006C3807 /* Router.swift */; };
-		5C05675A2C8FBDE70073F23A /* NDBSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567572C8FBC560073F23A /* NDBSearchView.swift */; };
 		5C0567532C8B5F9C0073F23A /* PostingTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */; };
 		5C0567552C8B60C20073F23A /* OffsetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567542C8B60C20073F23A /* OffsetExtension.swift */; };
 		5C0567562C8B60E60073F23A /* OffsetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567542C8B60C20073F23A /* OffsetExtension.swift */; };
+		5C0567582C8FBC560073F23A /* NDBSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567572C8FBC560073F23A /* NDBSearchView.swift */; };
+		5C0567592C8FBDE30073F23A /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2277EE92A089BD5006C3807 /* Router.swift */; };
+		5C05675A2C8FBDE70073F23A /* NDBSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567572C8FBC560073F23A /* NDBSearchView.swift */; };
 		5C0707D12A1ECB38004E7B51 /* DamusLogoGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0707D02A1ECB38004E7B51 /* DamusLogoGradient.swift */; };
 		5C14C29B2BBBA29C00079FD2 /* RelaySoftwareDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C14C29A2BBBA29C00079FD2 /* RelaySoftwareDetail.swift */; };
 		5C14C29D2BBBA40B00079FD2 /* RelayAdminDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C14C29C2BBBA40B00079FD2 /* RelayAdminDetail.swift */; };
@@ -1838,8 +1838,8 @@
 		50B5685229F97CB400A23243 /* CredentialHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialHandler.swift; sourceTree = "<group>"; };
 		50C3E0892AA8E3F7006A4BC0 /* AVPlayer+Additions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVPlayer+Additions.swift"; sourceTree = "<group>"; };
 		50DA11252A16A23F00236234 /* Launch.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Launch.storyboard; sourceTree = "<group>"; };
-		5C0567572C8FBC560073F23A /* NDBSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NDBSearchView.swift; sourceTree = "<group>"; };
 		5C0567542C8B60C20073F23A /* OffsetExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OffsetExtension.swift; sourceTree = "<group>"; };
+		5C0567572C8FBC560073F23A /* NDBSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NDBSearchView.swift; sourceTree = "<group>"; };
 		5C0707D02A1ECB38004E7B51 /* DamusLogoGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusLogoGradient.swift; sourceTree = "<group>"; };
 		5C14C29A2BBBA29C00079FD2 /* RelaySoftwareDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelaySoftwareDetail.swift; sourceTree = "<group>"; };
 		5C14C29C2BBBA40B00079FD2 /* RelayAdminDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayAdminDetail.swift; sourceTree = "<group>"; };
