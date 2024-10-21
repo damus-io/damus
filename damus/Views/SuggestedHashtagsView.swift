@@ -202,6 +202,7 @@ struct SuggestedHashtagsView: View {
                 
                 Spacer()
             }
+            .contentShape(Rectangle()) // make the entire row/rectangle tappable
             .onTapGesture {
                 if isFromPostView {
                     let hashTag = NSMutableAttributedString(string: "#\(returnFirstWordOnly(hashTag: hashtag))",
