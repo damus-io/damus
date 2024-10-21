@@ -93,7 +93,7 @@ struct TextViewWrapper: UIViewRepresentable {
         let updateCursorPosition: ((Int) -> Void)
         let initialTextSuffix: String?
         var initialTextSuffixWasAdded: Bool = false
-        static let ESCAPE_SEQUENCES = ["\n", "@", "  ", ", ", ". ", "! ", "? ", "; "]
+        static let ESCAPE_SEQUENCES = ["\n", "@", "  ", ", ", ". ", "! ", "? ", "; ", "#"]
 
         init(attributedText: Binding<NSMutableAttributedString>,
              getFocusWordForMention: ((String?, NSRange?) -> Void)?,

@@ -44,6 +44,7 @@ struct MainView: View {
         .onReceive(handle_notify(.logout)) { () in
             try? clear_keypair()
             keypair = nil
+            SuggestedHashtagsView.lastRefresh_hashtags.removeAll()
             // We need to disconnect and reconnect to all relays when the user signs out
             // This is to conform to NIP-42 and ensure we aren't persisting old connections
             notify(.disconnect_relays)
