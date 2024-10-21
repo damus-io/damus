@@ -24,7 +24,7 @@ struct LongformView: View {
 
     var body: some View {
         EventShell(state: state, event: event.event, options: options) {
-            SelectableText(damus_state: state, event: event.event, attributedString: AttributedString(stringLiteral: event.title ?? "Untitled"), size: .title)
+            SelectableText(damus_state: state, event: event.event, attributedString: AttributedString(stringLiteral: event.title ?? NSLocalizedString("Untitled", comment: "Title of longform event if it is untitled.")), size: .title)
 
             NoteContentView(damus_state: state, event: event.event, blur_images: false, size: .selected, options: options)
         }

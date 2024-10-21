@@ -152,7 +152,7 @@ struct SideMenuView: View {
                 }
                 if let name {
                     if !name.isEmpty {
-                        Text("@" + name)
+                        Text(verbatim: "@" + name)
                             .foregroundColor(DamusColors.mediumGrey)
                             .font(.body)
                             .lineLimit(1)
