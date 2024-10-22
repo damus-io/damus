@@ -91,7 +91,7 @@ struct SearchHomeView: View {
                     .foregroundColor(.secondary)
                     .padding(.top, 20)
                     .padding(.horizontal)
-                })
+                }.padding(.bottom, 50))
             }
         )
         .refreshable {
