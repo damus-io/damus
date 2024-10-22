@@ -69,6 +69,9 @@ struct PostView: View {
     
     @State private var current_placeholder_index = 0
 
+    @State private var fmplayer: AVPlayer?
+    @State private var fmIsPlaying: Bool = false
+    
     let action: PostAction
     let damus_state: DamusState
     let prompt_view: (() -> AnyView)?
@@ -174,6 +177,9 @@ struct PostView: View {
         HStack(alignment: .center, spacing: 15) {
             ImageButton
             CameraButton
+            if let streamLink = damus_state.settings.default_fm_station.radioStreamLink {
+                RadioPlayerView(player: $fmplayer, isPlaying: $fmIsPlaying, streamLink: streamLink)
+            }
         }
         .disabled(uploading_disabled)
     }
@@ -513,6 +519,44 @@ struct PostView: View {
                     clear_draft()
                 }
                 preUploadedMedia.removeAll()
+                fmplayer?.pause()
+                fmIsPlaying = false
+            }
+        }
+    }
+    
+    private struct RadioPlayerView: View {
+        @Binding var player: AVPlayer?
+        @Binding var isPlaying: Bool
+        let streamLink: String
+        
+        var body: some View {
+            VStack {
+                Button(action: {
+                    if player == nil {
+                        // Initialize the player with the radio stream URL
+                        if let url = URL(string: streamLink) {
+                            player = AVPlayer(url: url)
+                            player?.play()
+                            isPlaying = true
+                        }
+                    } else {
+                        // Pause or play based on the current state
+                        if player?.timeControlStatus == .playing {
+                            player?.pause()
+                            isPlaying = false
+                        } else {
+                            player?.play()
+                            isPlaying = true
+                        }
+                    }
+                }) {
+                    Image(systemName: isPlaying ? "pause.circle" : "play.circle")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 20, height: 20)
+                }
+                .padding()
             }
         }
     }

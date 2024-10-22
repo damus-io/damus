@@ -110,6 +110,9 @@ class UserSettingsStore: ObservableObject {
     @StringSetting(key: "default_media_uploader", default_value: .nostrBuild)
     var default_media_uploader: MediaUploader
     
+    @StringSetting(key: "default_fm_station", default_value: .radioParadise)
+    var default_fm_station: FMStation
+    
     @Setting(key: "show_wallet_selector", default_value: false)
     var show_wallet_selector: Bool
     

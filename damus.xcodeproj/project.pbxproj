@@ -394,12 +394,12 @@
 		50B5685329F97CB400A23243 /* CredentialHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B5685229F97CB400A23243 /* CredentialHandler.swift */; };
 		50C3E08A2AA8E3F7006A4BC0 /* AVPlayer+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C3E0892AA8E3F7006A4BC0 /* AVPlayer+Additions.swift */; };
 		50DA11262A16A23F00236234 /* Launch.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 50DA11252A16A23F00236234 /* Launch.storyboard */; };
-		5C0567582C8FBC560073F23A /* NDBSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567572C8FBC560073F23A /* NDBSearchView.swift */; };
-		5C0567592C8FBDE30073F23A /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2277EE92A089BD5006C3807 /* Router.swift */; };
-		5C05675A2C8FBDE70073F23A /* NDBSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567572C8FBC560073F23A /* NDBSearchView.swift */; };
 		5C0567532C8B5F9C0073F23A /* PostingTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */; };
 		5C0567552C8B60C20073F23A /* OffsetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567542C8B60C20073F23A /* OffsetExtension.swift */; };
 		5C0567562C8B60E60073F23A /* OffsetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567542C8B60C20073F23A /* OffsetExtension.swift */; };
+		5C0567582C8FBC560073F23A /* NDBSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567572C8FBC560073F23A /* NDBSearchView.swift */; };
+		5C0567592C8FBDE30073F23A /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2277EE92A089BD5006C3807 /* Router.swift */; };
+		5C05675A2C8FBDE70073F23A /* NDBSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567572C8FBC560073F23A /* NDBSearchView.swift */; };
 		5C0707D12A1ECB38004E7B51 /* DamusLogoGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0707D02A1ECB38004E7B51 /* DamusLogoGradient.swift */; };
 		5C14C29B2BBBA29C00079FD2 /* RelaySoftwareDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C14C29A2BBBA29C00079FD2 /* RelaySoftwareDetail.swift */; };
 		5C14C29D2BBBA40B00079FD2 /* RelayAdminDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C14C29C2BBBA40B00079FD2 /* RelayAdminDetail.swift */; };
@@ -433,6 +433,9 @@
 		7C902AE32981D55B002AB16E /* ZoomableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C902AE22981D55B002AB16E /* ZoomableScrollView.swift */; };
 		7C95CAEE299DCEF1009DCB67 /* KFOptionSetter+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C95CAED299DCEF1009DCB67 /* KFOptionSetter+.swift */; };
 		7CFF6317299FEFE5005D382A /* SelectableText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CFF6316299FEFE5005D382A /* SelectableText.swift */; };
+		82CC862C2CC7E27200D79651 /* FMStation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82CC862B2CC7E26600D79651 /* FMStation.swift */; };
+		82CC862D2CC7E27200D79651 /* FMStation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82CC862B2CC7E26600D79651 /* FMStation.swift */; };
+		82CC862E2CC7E49800D79651 /* FMStation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82CC862B2CC7E26600D79651 /* FMStation.swift */; };
 		9609F058296E220800069BF3 /* BannerImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9609F057296E220800069BF3 /* BannerImageView.swift */; };
 		9C83F89329A937B900136C08 /* TextViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C83F89229A937B900136C08 /* TextViewWrapper.swift */; };
 		9CA876E229A00CEA0003B9A3 /* AttachMediaUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */; };
@@ -1838,8 +1841,8 @@
 		50B5685229F97CB400A23243 /* CredentialHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialHandler.swift; sourceTree = "<group>"; };
 		50C3E0892AA8E3F7006A4BC0 /* AVPlayer+Additions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVPlayer+Additions.swift"; sourceTree = "<group>"; };
 		50DA11252A16A23F00236234 /* Launch.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Launch.storyboard; sourceTree = "<group>"; };
-		5C0567572C8FBC560073F23A /* NDBSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NDBSearchView.swift; sourceTree = "<group>"; };
 		5C0567542C8B60C20073F23A /* OffsetExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OffsetExtension.swift; sourceTree = "<group>"; };
+		5C0567572C8FBC560073F23A /* NDBSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NDBSearchView.swift; sourceTree = "<group>"; };
 		5C0707D02A1ECB38004E7B51 /* DamusLogoGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusLogoGradient.swift; sourceTree = "<group>"; };
 		5C14C29A2BBBA29C00079FD2 /* RelaySoftwareDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelaySoftwareDetail.swift; sourceTree = "<group>"; };
 		5C14C29C2BBBA40B00079FD2 /* RelayAdminDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayAdminDetail.swift; sourceTree = "<group>"; };
@@ -1873,6 +1876,7 @@
 		7C902AE22981D55B002AB16E /* ZoomableScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableScrollView.swift; sourceTree = "<group>"; };
 		7C95CAED299DCEF1009DCB67 /* KFOptionSetter+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KFOptionSetter+.swift"; sourceTree = "<group>"; };
 		7CFF6316299FEFE5005D382A /* SelectableText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectableText.swift; sourceTree = "<group>"; };
+		82CC862B2CC7E26600D79651 /* FMStation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FMStation.swift; sourceTree = "<group>"; };
 		9609F057296E220800069BF3 /* BannerImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerImageView.swift; sourceTree = "<group>"; };
 		9C83F89229A937B900136C08 /* TextViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextViewWrapper.swift; sourceTree = "<group>"; };
 		9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachMediaUtility.swift; sourceTree = "<group>"; };
@@ -2202,6 +2206,7 @@
 				D7CB5D4D2B11728000AD4105 /* NewEventsBits.swift */,
 				D7CB5D502B1174D100AD4105 /* FriendFilter.swift */,
 				D7CB5D5B2B1176B200AD4105 /* MediaUploader.swift */,
+				82CC862B2CC7E26600D79651 /* FMStation.swift */,
 				D7CB5D5E2B11770C00AD4105 /* FollowState.swift */,
 				D7EDED1B2B1178FE0018B19C /* NoteContent.swift */,
 				D7EDED1D2B11797D0018B19C /* LongformEvent.swift */,
@@ -4150,6 +4155,7 @@
 				5C513FBA297F72980072348F /* CustomPicker.swift in Sources */,
 				4C1253622A76D00B0004F4B8 /* PostNotify.swift in Sources */,
 				4CACA9D5280C31E100D9BBE8 /* ReplyView.swift in Sources */,
+				82CC862C2CC7E27200D79651 /* FMStation.swift in Sources */,
 				F7908E92298B0F0700AB113A /* RelayDetailView.swift in Sources */,
 				4C9147002A2A891E00DDEA40 /* error.c in Sources */,
 				4CE879552996BAB900F758CC /* RelayPaidDetail.swift in Sources */,
@@ -4428,6 +4434,7 @@
 				D73E5EBC2C6A97F4007EB227 /* Relay.swift in Sources */,
 				D73E5EBD2C6A97F4007EB227 /* NostrRequest.swift in Sources */,
 				D73E5EBE2C6A97F4007EB227 /* NostrLink.swift in Sources */,
+				82CC862D2CC7E27200D79651 /* FMStation.swift in Sources */,
 				D73E5EBF2C6A97F4007EB227 /* WebSocket.swift in Sources */,
 				D73E5F812C6AA07A007EB227 /* HighlighterExtensionAliases.swift in Sources */,
 				D73E5EC02C6A97F4007EB227 /* NostrEvent+.swift in Sources */,
@@ -4825,6 +4832,7 @@
 				D7CCFC082B05834500323D86 /* NoteId.swift in Sources */,
 				D7CE1B1A2B0BE135002EDAD4 /* json_parser.c in Sources */,
 				D7EDED2A2B128CB40018B19C /* Nip98HTTPAuth.swift in Sources */,
+				82CC862E2CC7E49800D79651 /* FMStation.swift in Sources */,
 				D7CB5D592B11764000AD4105 /* NewUnmutesNotify.swift in Sources */,
 				D798D2252B0859D700234419 /* Post.swift in Sources */,
 				D7EDED172B1177960018B19C /* TranslationService.swift in Sources */,

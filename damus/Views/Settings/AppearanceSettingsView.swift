@@ -91,6 +91,13 @@ struct AppearanceSettingsView: View {
                             .tag(uploader.model.tag)
                     }
                 }
+                
+                Picker(NSLocalizedString("FM Station", comment: "Prompt selection of FM Stations"),
+                       selection: $settings.default_fm_station) {
+                    ForEach(FMStation.allCases, id: \.self) { station in
+                        Text(station.displayStreamLink)
+                    }
+                }
 
                 self.ClearCacheButton
             }
