@@ -57,20 +57,19 @@ struct SetupView: View {
                     }
                     .buttonStyle(GradientButtonStyle())
                     .padding()
-                    
-                    HStack(spacing: 0) {
-                        Text("By continuing you agree to our ")
-                            .font(.subheadline)
-                            .foregroundColor(DamusColors.neutral6)
 
-                        Button(action: {
-                            navigationCoordinator.push(route: Route.EULA)
-                        }, label: {
-                            Text("EULA", comment: "End User License Agreement")
+                    Button(action: {
+                        navigationCoordinator.push(route: Route.EULA)
+                    }, label: {
+                        HStack {
+                            Text("By continuing, you agree to our EULA", comment: "Disclaimer to user that they are agreeing to the End User License Agreement if they create an account or sign in.")
                                 .font(.subheadline)
-                        })
-                        .padding(.vertical, 5)
-                    }
+                                .foregroundColor(DamusColors.neutral6)
+
+                            Image(systemName: "arrow.forward")
+                        }
+                    })
+                    .padding(.vertical, 5)
                     .padding(.bottom)
                 }
             }

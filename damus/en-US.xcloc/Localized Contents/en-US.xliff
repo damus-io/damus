@@ -340,6 +340,11 @@ Section header for text and appearance settings</note>
         <target>Are you sure you want to delete all of your bookmarks?</target>
         <note>Alert for deleting all of the bookmarks.</note>
       </trans-unit>
+      <trans-unit id="Are you sure you want to upload the selected media?" xml:space="preserve">
+        <source>Are you sure you want to upload the selected media?</source>
+        <target>Are you sure you want to upload the selected media?</target>
+        <note>Alert message asking if the user wants to upload media.</note>
+      </trans-unit>
       <trans-unit id="Are you sure you want to upload this image?" xml:space="preserve">
         <source>Are you sure you want to upload this image?</source>
         <target>Are you sure you want to upload this image?</target>
@@ -411,10 +416,10 @@ Context menu option for broadcasting the user's note to all of the user's connec
         <target>Broadcast music playing on Apple Music</target>
         <note>Toggle to enable or disable broadcasting what music is being played on Apple Music in their profile status.</note>
       </trans-unit>
-      <trans-unit id="By continuing you agree to our " xml:space="preserve">
-        <source>By continuing you agree to our </source>
-        <target>By continuing you agree to our </target>
-        <note>No comment provided by engineer.</note>
+      <trans-unit id="By continuing, you agree to our EULA" xml:space="preserve">
+        <source>By continuing, you agree to our EULA</source>
+        <target>By continuing, you agree to our EULA</target>
+        <note>Disclaimer to user that they are agreeing to the End User License Agreement if they create an account or sign in.</note>
       </trans-unit>
       <trans-unit id="By subscribing to Damus Purple, you are accepting our [privacy policy](https://damus.io/privacy-policy.txt) and Apple's Standard [EULA](https://www.apple.com/legal/internet-services/itunes/dev/stdeula/)" xml:space="preserve">
         <source>By subscribing to Damus Purple, you are accepting our [privacy policy](https://damus.io/privacy-policy.txt) and Apple's Standard [EULA](https://www.apple.com/legal/internet-services/itunes/dev/stdeula/)</source>
@@ -779,8 +784,7 @@ The duration in which to mute the given item.</note>
       <trans-unit id="EULA" xml:space="preserve">
         <source>EULA</source>
         <target>EULA</target>
-        <note>End User License Agreement
-Navigation title of view that shows the EULA, an acronym for End User License Agreement.</note>
+        <note>Navigation title of view that shows the EULA, an acronym for End User License Agreement.</note>
       </trans-unit>
       <trans-unit id="Earn Money" xml:space="preserve">
         <source>Earn Money</source>
@@ -1237,7 +1241,8 @@ Button to navigate to login view.</note>
         <source>Logout</source>
         <target>Logout</target>
         <note>Alert for logging out the user.
-Button for logging out the user.</note>
+Button for logging out the user.
+Sidebar menu label to sign out of the account.</note>
       </trans-unit>
       <trans-unit id="Looking for %@..." xml:space="preserve">
         <source>Looking for %@...</source>
@@ -2062,11 +2067,6 @@ Section header for search/universe settings</note>
         <target>Service</target>
         <note>Prompt selection of translation service provider.</note>
       </trans-unit>
-      <trans-unit id="Set Status" xml:space="preserve">
-        <source>Set Status</source>
-        <target>Set Status</target>
-        <note>Sidebar menu label to set user status</note>
-      </trans-unit>
       <trans-unit id="Settings" xml:space="preserve">
         <source>Settings</source>
         <target>Settings</target>
@@ -2471,6 +2471,11 @@ Example URL to LibreTranslate server</note>
         <source>Unmute conversation</source>
         <target>Unmute conversation</target>
         <note>Context menu option for unmuting a conversation.</note>
+      </trans-unit>
+      <trans-unit id="Untitled" xml:space="preserve">
+        <source>Untitled</source>
+        <target>Untitled</target>
+        <note>Title of longform event if it is untitled.</note>
       </trans-unit>
       <trans-unit id="Update" xml:space="preserve">
         <source>Update</source>

@@ -139,7 +139,7 @@ struct QRCodeView: View {
                     .foregroundColor(.white)
             }
             if let name = profile?.name {
-                Text("@" + name)
+                Text(verbatim: "@" + name)
                     .font(.body)
                     .foregroundColor(.white)
             }
