@@ -13,9 +13,17 @@ struct ImageContainerView: View {
     let video_coordinator: DamusVideoCoordinator
     let url: MediaUrl
     let settings: UserSettingsStore
+    let video_focus_context: DamusVideoPlayerViewModel.FocusContext?
     
     @State private var image: UIImage?
     @State private var showShareSheet = false
+    
+    init(video_coordinator: DamusVideoCoordinator, url: MediaUrl, settings: UserSettingsStore, video_focus_context: DamusVideoPlayerViewModel.FocusContext? = nil) {
+        self.video_coordinator = video_coordinator
+        self.url = url
+        self.settings = settings
+        self.video_focus_context = video_focus_context
+    }
     
     private struct ImageHandler: ImageModifier {
         @Binding var handler: UIImage?
@@ -47,7 +55,7 @@ struct ImageContainerView: View {
                 case .image(let url):
                     Img(url: url)
                 case .video(let url):
-                    DamusVideoPlayer(url: url, video_size: .constant(nil), coordinator: video_coordinator, style: .no_controls(on_tap: nil), visibility_tracking_method: .generic)
+                    DamusVideoPlayer(url: url, video_size: .constant(nil), coordinator: video_coordinator, style: .no_controls(on_tap: nil), focus_context: video_focus_context ?? .scroll_view_item)
             }
         }
     }

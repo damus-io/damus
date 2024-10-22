@@ -59,11 +59,17 @@ struct FullScreenCarouselView<Content: View>: View {
                 ForEach(urls.indices, id: \.self) { index in
                     VStack {
                         if case .video = urls[safe: index] {
-                            ImageContainerView(video_coordinator: video_coordinator, url: urls[index], settings: settings)
-                                .modifier(SwipeToDismissModifier(minDistance: 50, onDismiss: {
-                                    presentationMode.wrappedValue.dismiss()
-                                }))
-                                .ignoresSafeArea()
+                            ImageContainerView(
+                                video_coordinator: video_coordinator,
+                                url: urls[index],
+                                settings: settings,
+                                video_focus_context: .full_screen
+                            )
+                            .environment(\.video_focus_context, .full_screen)
+                            .modifier(SwipeToDismissModifier(minDistance: 50, onDismiss: {
+                                presentationMode.wrappedValue.dismiss()
+                            }))
+                            .ignoresSafeArea()
                         }
                         else {
                             ZoomableScrollView {

@@ -30,6 +30,8 @@ final class DamusVideoPlayerViewModel: ObservableObject {
     fileprivate let coordinator: DamusVideoCoordinator
     let player_view_controller = AVPlayerViewController()
     let id = UUID()
+    /// The context this video player is in.
+    let focus_context: FocusContext
     
     @Published var has_audio = false
     @Published var is_live = false
@@ -73,27 +75,26 @@ final class DamusVideoPlayerViewModel: ObservableObject {
     private var videoCurrentTimeObserver: Any?
     private var videoIsPlayingObserver: NSKeyValueObservation?
     
-    private var is_scrolled_into_view = false {
+    private var is_video_visible_on_screen = false {
         didSet {
-            if is_scrolled_into_view && !oldValue {
+            if is_video_visible_on_screen && !oldValue {
                 // we have just scrolled from out of view into view
-                coordinator.focused_video = self
-            } else if !is_scrolled_into_view && oldValue {
+                coordinator.register_visible_player(self)
+            } else if !is_video_visible_on_screen && oldValue {
                 // we have just scrolled from in view to out of view
-                if coordinator.focused_video?.id == id {
-                    coordinator.focused_video = nil
-                }
+                coordinator.register_player_is_out_of_view(self)
             }
         }
     }
     
     // MARK: - Initialization
     
-    init(url: URL, video_size: Binding<CGSize?>, coordinator: DamusVideoCoordinator, mute: Bool? = nil) {
+    init(url: URL, video_size: Binding<CGSize?>, coordinator: DamusVideoCoordinator, mute: Bool? = nil, focus_context: FocusContext) {
         self.url = url
         player_item = AVPlayerItem(url: url)
         player = AVPlayer(playerItem: player_item)
         self.coordinator = coordinator
+        self.focus_context = focus_context
         _video_size = video_size
         
         Task {
@@ -178,7 +179,7 @@ final class DamusVideoPlayerViewModel: ObservableObject {
     // MARK: - Handling events
     
     func set_view_is_visible(_ is_visible: Bool) {
-        is_scrolled_into_view = is_visible
+        is_video_visible_on_screen = is_visible
     }
     
     func view_did_disappear() {
@@ -193,6 +194,7 @@ final class DamusVideoPlayerViewModel: ObservableObject {
     // MARK: - Deinit
     
     deinit {
+        coordinator.register_player_is_out_of_view(self)
         videoSizeObserver?.invalidate()
         videoDurationObserver?.invalidate()
         videoIsPlayingObserver?.invalidate()
@@ -207,5 +209,21 @@ final class DamusVideoPlayerViewModel: ObservableObject {
     func pause() {
         self.is_playing = false
     }
+    
+    // MARK: - Helper structures
+    
+    /// The context of the video placement
+    /// This communicates to the video player when and how the it should request the coordinator for "main stage" focus
+    enum FocusContext {
+        /// This is used for video players placed in a scroll view, such as on a timeline or a thread view.
+        /// It uses Y coordinates to help determine when to request the coordinator for focus, and has a normal priority in getting the focus
+        case scroll_view_item
+        /// This is used for video players being displayed full screen
+        /// It uses a normal appear/disappear mechanism for better stability accross device orientation changes, and has a higher priority to get focus than other items.
+        case full_screen
+    }
 }
 
+extension EnvironmentValues {
+    @Entry var video_focus_context: DamusVideoPlayerViewModel.FocusContext = .scroll_view_item
+}
