@@ -124,14 +124,8 @@ struct QRCodeView: View {
                 damus_state.ndb.lookup_profile_with_txn(damus_state.pubkey, txn: ptxn)?.profile
             })
 
-            if our_profile?.picture != nil {
-                ProfilePicView(pubkey: pubkey, size: 90.0, highlight: .custom(DamusColors.white, 3.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+            ProfilePicView(pubkey: pubkey, size: 90.0, highlight: .custom(DamusColors.white, 3.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                     .padding(.top, 20)
-            } else {
-                Image(systemName: "person.fill")
-                    .font(.system(size: 60))
-                    .padding(.top, 20)
-            }
             
             if let display_name = profile?.display_name {
                 Text(display_name)
