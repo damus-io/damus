@@ -96,7 +96,7 @@ struct FullScreenCarouselView<Content: View>: View {
                 GeometryReader { geo in
                     VStack {
                         if showMenu {
-                            NavDismissBarView(showBackgroundCircle: false)
+                            NavDismissBarView(navDismissBarContainer: .fullScreenCarousel)
                                 .foregroundColor(.white)
                             Spacer()
                             
