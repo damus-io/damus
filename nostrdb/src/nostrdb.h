@@ -521,6 +521,7 @@ int ndb_wait_for_notes(struct ndb *, uint64_t subid, uint64_t *note_ids, int not
 int ndb_poll_for_notes(struct ndb *, uint64_t subid, uint64_t *note_ids, int note_id_capacity);
 int ndb_unsubscribe(struct ndb *, uint64_t subid);
 int ndb_num_subscriptions(struct ndb *);
+struct ndb_filter *ndb_subscription_filters(struct ndb *, uint64_t subid, int *filters);
 
 // FULLTEXT SEARCH
 int ndb_text_search(struct ndb_txn *txn, const char *query, struct ndb_text_search_results *, struct ndb_text_search_config *);
