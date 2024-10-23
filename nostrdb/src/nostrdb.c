@@ -6467,6 +6467,20 @@ int ndb_unsubscribe(struct ndb *ndb, uint64_t subid)
 	return 1;
 }
 
+struct ndb_filter *ndb_subscription_filters(struct ndb *ndb, uint64_t subid, int *filters)
+{
+	struct ndb_subscription *sub;
+
+	sub = ndb_find_subscription(ndb, subid, NULL);
+	if (sub) {
+		*filters = sub->group.num_filters;
+		return sub->group.filters;
+	}
+
+	*filters = 0;
+	return NULL;
+}
+
 int ndb_num_subscriptions(struct ndb *ndb)
 {
 	return ndb->monitor.num_subscriptions;
