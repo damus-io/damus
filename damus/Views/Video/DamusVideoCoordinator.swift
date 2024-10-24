@@ -24,6 +24,7 @@ struct VideoMetadata {
 /// A good analogy here is that video players and their models/states are like individual car drivers, and this coordinator is like a traffic control person that ensures cars don't crash each other.
 final class DamusVideoCoordinator: ObservableObject {
     private var mute_states: [URL: Bool] = [:]
+    private var current_time_states: [URL: TimeInterval] = [:]
     private var metadatas: [URL: VideoMetadata] = [:]
     private var visible_players_stack: [DamusVideoPlayerViewModel] = []
     private var visible_high_priority_players_stack: [DamusVideoPlayerViewModel] = []
@@ -41,15 +42,22 @@ final class DamusVideoCoordinator: ObservableObject {
         }
     }
     
-    func toggle_should_mute_video(url: URL) {
-        let state = mute_states[url] ?? true
-        mute_states[url] = !state
+    func set_should_mute_video(url: URL, state: Bool) {
+        mute_states[url] = state
         
         objectWillChange.send()
     }
     
     func should_mute_video(url: URL) -> Bool {
         mute_states[url] ?? true
+    }
+    
+    func current_time(for url: URL) -> TimeInterval? {
+        return current_time_states[url]
+    }
+    
+    func set_current_time(for url: URL, time: TimeInterval) {
+        current_time_states[url] = time
     }
     
     func set_metadata(_ metadata: VideoMetadata, url: URL) {

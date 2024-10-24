@@ -40,15 +40,27 @@ final class DamusVideoPlayerViewModel: ObservableObject {
         didSet {
             if oldValue == is_muted { return }
             player.isMuted = is_muted
-            coordinator.toggle_should_mute_video(url: url)
+            if focus_context == .scroll_view_item {
+                coordinator.set_should_mute_video(url: self.url, state: is_muted)
+            }
         }
     }
     @Published var is_loading = true
-    @Published var current_time: TimeInterval = .zero
+    @Published var current_time: TimeInterval = .zero {
+        didSet {
+            if oldValue == current_time { return }
+            if is_editing_current_time { return }
+            coordinator.set_current_time(for: self.url, time: current_time)
+        }
+    }
     @Published var is_playing = false {
         didSet {
             if oldValue == is_playing { return }
             if is_playing {
+                if let coordinator_time = coordinator.current_time(for: self.url), coordinator_time != current_time {
+                    player.seek(to: CMTime(seconds: coordinator_time, preferredTimescale: 60))
+                    // Note: current_time will update automatically from our observer.
+                }
                 player.play()
             }
             else {
