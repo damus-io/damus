@@ -34,13 +34,13 @@ struct DamusVideoControlsView: View {
                 })
                 .buttonStyle(PlayerCircleButtonStyle())
                 
-                Button(action: {
-                    print("airplay")
-                }, label: {
-                    Image(systemName: "airplay.video")
-                        .frame(width: 30, height: 30)
-                })
-                .buttonStyle(PlayerCircleButtonStyle())
+//                Button(action: {
+//                    print("airplay")
+//                }, label: {
+//                    Image(systemName: "airplay.video")
+//                        .frame(width: 30, height: 30)
+//                })
+//                .buttonStyle(PlayerCircleButtonStyle())
             }
             HStack {
                 Button(action: {
