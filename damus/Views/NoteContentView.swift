@@ -119,11 +119,7 @@ struct NoteContentView: View {
     }
     
     func fullscreen_preview(dismiss: @escaping () -> Void) -> some View {
-        VStack {
-            EventActionBar(damus_state: damus_state, event: self.event)
-                .colorScheme(.dark)
-                .padding(20)
-        }
+        EmptyView()
     }
     
     func MainContent(artifacts: NoteArtifactsSeparated) -> some View {
