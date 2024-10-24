@@ -484,34 +484,6 @@ func uniq<T: Hashable>(_ xs: [T]) -> [T] {
     return ys
 }
 
-func gather_reply_ids(our_pubkey: Pubkey, from: NostrEvent) -> [RefId] {
-    var ids: [RefId] = from.referenced_ids.first.map({ ref in [ .event(ref) ] }) ?? []
-
-    let pks = from.referenced_pubkeys.reduce(into: [RefId]()) { rs, pk in
-        if pk == our_pubkey {
-            return
-        }
-        rs.append(.pubkey(pk))
-    }
-
-    ids.append(.event(from.id))
-    ids.append(contentsOf: uniq(pks))
-
-    if from.pubkey != our_pubkey {
-        ids.append(.pubkey(from.pubkey))
-    }
-
-    return ids
-}
-
-func gather_quote_ids(our_pubkey: Pubkey, from: NostrEvent) -> [RefId] {
-    var ids: [RefId] = [.quote(from.id.quote_id)]
-    if from.pubkey != our_pubkey {
-        ids.append(.pubkey(from.pubkey))
-    }
-    return ids
-}
-
 func event_from_json(dat: String) -> NostrEvent? {
     return NostrEvent.owned_from_json(json: dat)
 }
