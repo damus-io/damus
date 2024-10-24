@@ -31,7 +31,7 @@ struct EditBannerImageView: View {
                 .onFailureImage(defaultImage)
                 .kfClickable()
             
-            EditPictureControl(uploader: damus_state.settings.default_media_uploader, pubkey: damus_state.pubkey, image_url: $banner_image, uploadObserver: viewModel, callback: callback)
+            EditPictureControl(uploader: damus_state.settings.default_media_uploader, keypair: damus_state.keypair, pubkey: damus_state.pubkey, image_url: $banner_image, uploadObserver: viewModel, callback: callback)
         }
     }
 }
