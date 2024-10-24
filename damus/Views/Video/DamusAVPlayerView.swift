@@ -23,7 +23,7 @@ struct DamusAVPlayerView: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
         if uiViewController.player == nil {
             uiViewController.player = player
-            player.play()
+            player.pause()
         }
     }
     

@@ -19,83 +19,69 @@ func globalCoordinate(localX x: CGFloat, localY y: CGFloat,
 struct DamusVideoPlayer: View {
     let url: URL
     @StateObject var model: DamusVideoPlayerViewModel
-    @EnvironmentObject private var orientationTracker: OrientationTracker
     let style: Style
-    let visibility_tracking_method: VisibilityTrackingMethod
     @State var isVisible: Bool = false
+    /// The context this video player is in.
+    @Environment(\.video_focus_context) var focus_context
     
-    init(url: URL, video_size: Binding<CGSize?>, controller: VideoController, style: Style, visibility_tracking_method: VisibilityTrackingMethod = .y_scroll) {
+    init(url: URL, video_size: Binding<CGSize?>, coordinator: DamusVideoCoordinator, style: Style, focus_context: DamusVideoPlayerViewModel.FocusContext = .scroll_view_item) {
         self.url = url
         let mute: Bool?
-        if case .full = style {
-            mute = false
+        switch style {
+            case .full, .no_controls:
+                mute = false
+            case .preview:
+                mute = nil
         }
-        else {
-            mute = nil
-        }
-        _model = StateObject(wrappedValue: DamusVideoPlayerViewModel(url: url, video_size: video_size, controller: controller, mute: mute))
-        self.visibility_tracking_method = visibility_tracking_method
+        _model = StateObject(wrappedValue: DamusVideoPlayerViewModel(url: url, video_size: video_size, coordinator: coordinator, mute: mute, focus_context: focus_context))
         self.style = style
     }
     
     var body: some View {
-        GeometryReader { geo in
-            let localFrame = geo.frame(in: .local)
-            let centerY = globalCoordinate(localX: 0, localY: localFrame.midY, localGeometry: geo).y
-            ZStack {
-                if case .full = self.style {
+        ZStack {
+            switch self.style {
+                case .full:
                     DamusAVPlayerView(player: model.player, controller: model.player_view_controller, show_playback_controls: true)
-                }
-                if case .preview(let on_tap) = self.style {
+                case .preview(on_tap: let on_tap):
                     DamusAVPlayerView(player: model.player, controller: model.player_view_controller, show_playback_controls: false)
                         .simultaneousGesture(TapGesture().onEnded({
                             on_tap?()
                         }))
-                }
-                
-                if model.is_loading {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .tint(.white)
-                        .scaleEffect(CGSize(width: 1.5, height: 1.5))
-                }
-                
-                if case .preview = self.style {
-                    if model.has_audio {
-                        mute_button
-                    }
-                }
-                if model.is_live {
-                    live_indicator
+                case .no_controls(on_tap: let on_tap):
+                    DamusAVPlayerView(player: model.player, controller: model.player_view_controller, show_playback_controls: false)
+                        .simultaneousGesture(TapGesture().onEnded({
+                            on_tap?()
+                        }))
+            }
+            
+            if model.is_loading {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .tint(.white)
+                    .scaleEffect(CGSize(width: 1.5, height: 1.5))
+            }
+            
+            if case .preview = self.style {
+                if model.has_audio {
+                    mute_button
                 }
             }
-            .onChange(of: centerY) { _ in
-                if case .y_scroll = visibility_tracking_method {
-                    update_is_visible(centerY: centerY)
-                }
-            }
-            .on_visibility_change(perform: { new_visibility in
-                if case .generic = visibility_tracking_method {
-                    model.set_view_is_visible(new_visibility)
-                }
-            })
-            .onAppear {
-                if case .y_scroll = visibility_tracking_method {
-                    update_is_visible(centerY: centerY)
-                }
+            if model.is_live {
+                live_indicator
             }
         }
-        .onDisappear {
-            if case .y_scroll = visibility_tracking_method {
-                model.view_did_disappear()
-            }
-        }
+        .on_visibility_change(perform: { new_visibility in
+            model.set_view_is_visible(new_visibility)
+        }, method: self.visibility_tracking_method)
     }
     
-    private func update_is_visible(centerY: CGFloat) {
-        let isBelowTop = centerY > 100, /// 100 =~ approx. bottom (y) of ContentView's TabView
-            isAboveBottom = centerY < orientationTracker.deviceMajorAxis
-        model.set_view_is_visible(isBelowTop && isAboveBottom)
+    private var visibility_tracking_method: VisibilityTracker.Method {
+        switch self.focus_context {
+            case .scroll_view_item:
+                return .standard
+            case .full_screen:
+                return .no_y_scroll_detection
+        }
     }
     
     private var mute_icon: String {
@@ -110,10 +96,8 @@ struct DamusVideoPlayer: View {
         HStack {
             Spacer()
             VStack {
-                Spacer()
-                
                 Button {
-                    model.did_tap_mute_button()
+                    model.is_muted.toggle()
                 } label: {
                     ZStack {
                         Circle()
@@ -126,6 +110,7 @@ struct DamusVideoPlayer: View {
                             .foregroundColor(mute_icon_color)
                     }
                 }
+                Spacer()
             }
         }
     }
@@ -154,23 +139,18 @@ struct DamusVideoPlayer: View {
         case full
         /// A style suitable for muted, auto-playing videos on a feed
         case preview(on_tap: (() -> Void)?)
-    }
-    
-    enum VisibilityTrackingMethod {
-        /// Detects visibility based on its Y position relative to viewport. Ideal for long feeds
-        case y_scroll
-        /// Detects visibility based whether the view intersects with the viewport
-        case generic
+        /// A video player without any playback controls, suitable if using custom controls elsewhere.
+        case no_controls(on_tap: (() -> Void)?)
     }
 }
 struct DamusVideoPlayer_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            DamusVideoPlayer(url: URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!, video_size: .constant(nil), controller: VideoController(), style: .full)
+            DamusVideoPlayer(url: URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!, video_size: .constant(nil), coordinator: DamusVideoCoordinator(), style: .full)
                 .environmentObject(OrientationTracker())
                 .previewDisplayName("Full video player")
             
-            DamusVideoPlayer(url: URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!, video_size: .constant(nil), controller: VideoController(), style: .preview(on_tap: nil))
+            DamusVideoPlayer(url: URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!, video_size: .constant(nil), coordinator: DamusVideoCoordinator(), style: .preview(on_tap: nil))
                 .environmentObject(OrientationTracker())
                 .previewDisplayName("Preview video player")
         }
