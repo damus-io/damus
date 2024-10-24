@@ -28,7 +28,7 @@ struct CreateAccountView: View {
                 Spacer()
                 VStack(alignment: .center) {
                    
-                    EditPictureControl(uploader: .nostrBuild, pubkey: account.pubkey, size: 75, setup: true, image_url: $account.profile_image , uploadObserver: profileUploadObserver, callback: uploadedProfilePicture)
+                    EditPictureControl(uploader: .nostrBuild, keypair: account.keypair, pubkey: account.pubkey, size: 75, setup: true, image_url: $account.profile_image , uploadObserver: profileUploadObserver, callback: uploadedProfilePicture)
                         .shadow(radius: 2)
                         .padding(.top, 100)
                     
