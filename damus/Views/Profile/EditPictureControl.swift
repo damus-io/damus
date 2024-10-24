@@ -114,7 +114,7 @@ struct EditPictureControl: View {
             }
         }
         .sheet(isPresented: $show_library) {
-            MediaPicker(image_upload_confirm: $image_upload_confirm, imagesOnly: true) { media in
+            MediaPicker(mediaPickerEntry: .editPictureControl, image_upload_confirm: $image_upload_confirm) { media in
                 self.preUploadedMedia = media
             }
             .alert(NSLocalizedString("Are you sure you want to upload this image?", comment: "Alert message asking if the user wants to upload an image."), isPresented: $image_upload_confirm) {

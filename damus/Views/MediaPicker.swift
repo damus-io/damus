@@ -9,15 +9,19 @@ import UIKit
 import SwiftUI
 import PhotosUI
 
+enum MediaPickerEntry {
+    case editPictureControl
+    case postView
+}
+
 struct MediaPicker: UIViewControllerRepresentable {
 
     @Environment(\.presentationMode)
     @Binding private var presentationMode
+    let mediaPickerEntry: MediaPickerEntry
 
     @Binding var image_upload_confirm: Bool
-    var imagesOnly: Bool = false
     let onMediaPicked: (PreUploadedMedia) -> Void
-    
 
     final class Coordinator: NSObject, PHPickerViewControllerDelegate {
         let parent: MediaPicker
@@ -115,9 +119,14 @@ struct MediaPicker: UIViewControllerRepresentable {
     
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var configuration = PHPickerConfiguration(photoLibrary: .shared())
-        configuration.selectionLimit = 0 // Allows multiple media selection
-        configuration.filter = imagesOnly ? .images : .any(of: [.images, .videos])
-        configuration.selection = .ordered // images are returned in the order they were selected + numbered badge displayed
+        if case .postView = mediaPickerEntry {
+            configuration.selectionLimit = 0 // Allows multiple media selection
+            configuration.filter = .any(of: [.images, .videos])
+            configuration.selection = .ordered // images are returned in the order they were selected + numbered badge displayed
+        } else if case .editPictureControl = mediaPickerEntry {
+            configuration.selectionLimit = 1 // Allows one media selection
+            configuration.filter = .images
+        }
         let picker = PHPickerViewController(configuration: configuration)
         picker.delegate = context.coordinator as any PHPickerViewControllerDelegate
         return picker
