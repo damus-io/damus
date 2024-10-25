@@ -59,13 +59,14 @@ struct NavDismissBarView: View {
             Button(action: {
                 presentationMode.wrappedValue.dismiss()
             }, label: {
-                if case .profilePicImageView = navDismissBarContainer {
+                switch navDismissBarContainer {
+                case .profilePicImageView:
                     Image("close")
                         .frame(width: 33, height: 33)
                         .background(.regularMaterial)
                         .clipShape(Circle())
-                }
-                else if case .fullScreenCarousel = navDismissBarContainer {
+                    
+                case .fullScreenCarousel:
                     Image("close")
                         .frame(width: 33, height: 33)
                         .background(.damusBlack)
