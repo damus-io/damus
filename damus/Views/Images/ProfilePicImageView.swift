@@ -40,13 +40,18 @@ struct ProfileImageContainerView: View {
     }
 }
 
+enum NavDismissBarContainer {
+    case fullScreenCarousel
+    case profilePicImageView
+}
+
 struct NavDismissBarView: View {
     
     @Environment(\.presentationMode) var presentationMode
-    let showBackgroundCircle: Bool
+    let navDismissBarContainer: NavDismissBarContainer
     
-    init(showBackgroundCircle: Bool = true) {
-        self.showBackgroundCircle = showBackgroundCircle
+    init(navDismissBarContainer: NavDismissBarContainer) {
+        self.navDismissBarContainer = navDismissBarContainer
     }
     
     var body: some View {
@@ -54,15 +59,18 @@ struct NavDismissBarView: View {
             Button(action: {
                 presentationMode.wrappedValue.dismiss()
             }, label: {
-                if showBackgroundCircle {
+                switch navDismissBarContainer {
+                case .profilePicImageView:
                     Image("close")
                         .frame(width: 33, height: 33)
                         .background(.regularMaterial)
                         .clipShape(Circle())
-                }
-                else {
+                    
+                case .fullScreenCarousel:
                     Image("close")
                         .frame(width: 33, height: 33)
+                        .background(.damusBlack)
+                        .clipShape(Circle())
                 }
             })
             
@@ -96,7 +104,7 @@ struct ProfilePicImageView: View {
                 presentationMode.wrappedValue.dismiss()
             }))
         }
-        .overlay(NavDismissBarView(), alignment: .top)
+        .overlay(NavDismissBarView(navDismissBarContainer: .profilePicImageView), alignment: .top)
     }
 }
 
