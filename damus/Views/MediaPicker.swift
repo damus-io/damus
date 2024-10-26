@@ -119,13 +119,14 @@ struct MediaPicker: UIViewControllerRepresentable {
     
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var configuration = PHPickerConfiguration(photoLibrary: .shared())
-        if case .postView = mediaPickerEntry {
-            configuration.selectionLimit = 0 // Allows multiple media selection
+        switch mediaPickerEntry {
+        case .postView:
+            configuration.selectionLimit = 0 // allows multiple media selection
             configuration.filter = .any(of: [.images, .videos])
             configuration.selection = .ordered // images are returned in the order they were selected + numbered badge displayed
-        } else if case .editPictureControl = mediaPickerEntry {
-            configuration.selectionLimit = 1 // Allows one media selection
-            configuration.filter = .images
+        case .editPictureControl:
+            configuration.selectionLimit = 1 // allows one media selection
+            configuration.filter = .images // allows image only
         }
         let picker = PHPickerViewController(configuration: configuration)
         picker.delegate = context.coordinator as any PHPickerViewControllerDelegate
