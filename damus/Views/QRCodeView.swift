@@ -150,13 +150,17 @@ struct QRCodeView: View {
 
             Spacer()
             
-            
-            Text(verbatim: "Follow " +
-                            ((damus_state.pubkey.npub == pubkey.npub) ? "me" : "\(profile?.display_name ?? "")") +
-                             " on Nostr")
-                .font(.system(size: 24, weight: .heavy))
-                .padding(.top, 10)
-                .foregroundColor(.white)
+            // apply the same styling to both text-views without code duplication
+            Group {
+                if damus_state.pubkey.npub == pubkey.npub {
+                    Text("Follow me on Nostr", comment: "Text on QR code view to prompt viewer looking at screen to follow the user.")
+                } else {
+                    Text("Follow \(profile?.display_name ?? profile?.name ?? "") on Nostr", comment: "Text on QR code view to prompt viewer looking at screen to follow the user.")
+                }
+            }
+            .font(.system(size: 24, weight: .heavy))
+            .padding(.top, 10)
+            .foregroundColor(.white)
             
             Text("Scan the code", comment: "Text on QR code view to prompt viewer to scan the QR code on screen with their device camera.")
                 .font(.system(size: 18, weight: .ultraLight))
