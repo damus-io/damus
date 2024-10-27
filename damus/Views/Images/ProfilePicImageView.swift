@@ -10,8 +10,7 @@ import Kingfisher
 struct ProfileImageContainerView: View {
     let url: URL?
     let settings: UserSettingsStore
-    
-    @State private var image: UIImage?
+    @Binding var image: UIImage?
     @State private var showShareSheet = false
     
     private struct ImageHandler: ImageModifier {
@@ -84,6 +83,10 @@ struct ProfilePicImageView: View {
     let pubkey: Pubkey
     let profiles: Profiles
     let settings: UserSettingsStore
+    let nav: NavigationCoordinator
+    let shouldShowEditButton: Bool
+    @State var image: UIImage?
+    @State var showMenu = true
     
     @Environment(\.presentationMode) var presentationMode
 
@@ -93,18 +96,57 @@ struct ProfilePicImageView: View {
                 .ignoresSafeArea()
             
             ZoomableScrollView {
-                ProfileImageContainerView(url: get_profile_url(picture: nil, pubkey: pubkey, profiles: profiles), settings: settings)
+                ProfileImageContainerView(url: get_profile_url(picture: nil, pubkey: pubkey, profiles: profiles), settings: settings, image: $image)
                     .aspectRatio(contentMode: .fit)
                     .padding(.top, Theme.safeAreaInsets?.top)
                     .padding(.bottom, Theme.safeAreaInsets?.bottom)
                     .padding(.horizontal)
+                    .allowsHitTesting(false)
             }
             .ignoresSafeArea()
             .modifier(SwipeToDismissModifier(minDistance: 50, onDismiss: {
                 presentationMode.wrappedValue.dismiss()
             }))
         }
-        .overlay(NavDismissBarView(navDismissBarContainer: .profilePicImageView), alignment: .top)
+        .overlay(
+            Group {
+                if showMenu {
+                    HStack {
+                        NavDismissBarView(navDismissBarContainer: .profilePicImageView)
+                        if let image = image {
+                            ShareLink(item: Image(uiImage: image),
+                                      preview: SharePreview(NSLocalizedString("Damus Profile", comment: "Label for the preview of the profile picture"), image: Image(uiImage: image))) {
+                                Image(systemName: "ellipsis")
+                                    .frame(width: 33, height: 33)
+                                    .background(.regularMaterial)
+                                    .clipShape(Circle())
+                            }
+                            .padding(20)
+                        }
+                    }
+                }
+            },
+            alignment: .top
+        )
+        .overlay(
+            shouldShowEditButton && showMenu ?
+                Button(action: {
+                    presentationMode.wrappedValue.dismiss()
+                    nav.push(route: Route.EditMetadata)
+                }) {
+                    Text("Edit", comment: "Edit Button for editing profile")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(Color("DamusPurple"))
+                    Spacer()
+                }
+                .padding([.vertical, .leading], 20)
+            : nil,
+            alignment: .bottomLeading
+        )
+        .gesture(TapGesture(count: 1).onEnded {
+            showMenu.toggle()
+        })
+        .animation(.easeInOut, value: showMenu)
     }
 }
 
@@ -113,7 +155,6 @@ struct ProfileZoomView_Previews: PreviewProvider {
         ProfilePicImageView(
             pubkey: test_pubkey,
             profiles: make_preview_profiles(test_pubkey),
-            settings: test_damus_state.settings
-        )
+            settings: test_damus_state.settings, nav: test_damus_state.nav, shouldShowEditButton: true)
     }
 }
