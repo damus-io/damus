@@ -130,7 +130,7 @@ struct LongformPreviewBody: View {
                 }
             }
             
-            Text(event.title ?? "Untitled")
+            Text(event.title ?? NSLocalizedString("Untitled", comment: "Title of longform event if it is untitled."))
                 .font(header ? .title : .headline)
                 .padding(.horizontal, 10)
                 .padding(.top, 5)

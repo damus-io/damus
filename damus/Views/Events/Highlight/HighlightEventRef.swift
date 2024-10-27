@@ -59,7 +59,7 @@ struct HighlightEventRef: View {
                         }
 
                         VStack(alignment: .leading, spacing: 5) {
-                            Text(longform_event.title ?? "Untitled")
+                            Text(longform_event.title ?? NSLocalizedString("Untitled", comment: "Title of longform event if it is untitled."))
                                 .font(.system(size: 14, weight: .bold))
                                 .lineLimit(1)
 
