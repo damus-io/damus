@@ -54,7 +54,6 @@ struct InnerSearchResults: View {
         let search_model = SearchModel(state: damus_state, search: .filter_hashtag([ht]))
         return NavigationLink(value: Route.Search(search: search_model)) {
             HStack {
-                Image("search")
                 Text("#\(ht)", comment: "Navigation link to search hashtag.")
             }
             .padding(.horizontal, 15)
@@ -71,8 +70,7 @@ struct InnerSearchResults: View {
     func TextSearch(_ txt: String) -> some View {
         return NavigationLink(value: Route.NDBSearch(results: $results)) {
             HStack {
-                Image("search")
-                Text("Notes", comment: "Navigation link to search text.")
+                Text("\(txt)", comment: "Navigation link to search text.")
             }
             .padding(.horizontal, 15)
             .padding(.vertical, 5)
@@ -119,10 +117,12 @@ struct InnerSearchResults: View {
                 SearchingEventView(state: damus_state, search_type: .naddr(naddr))
             case .multi(let multi):
                 VStack(alignment: .leading) {
-                    HStack {
+                    HStack(spacing: 20) {
                         HashtagSearch(multi.hashtag)
                         TextSearch(multi.text)
                     }
+                    .padding(.bottom, 10)
+                    
                     ProfilesSearch(multi.profiles)
                 }
                 
