@@ -551,16 +551,10 @@ func get_searching_string(_ word: String?) -> String? {
 }
 
 fileprivate func get_searching_hashTag(_ word: String?) -> String? {
-    guard let word = word else {
-        return nil
-    }
-
-    guard word.count >= 2 else {
-        return nil
-    }
-    
-    guard let firstCharacter = word.first,
-          firstCharacter == "#" else {
+    guard let word,
+          word.count >= 2,
+          let first_char = word.first,
+          first_char == "#" else {
         return nil
     }
     
