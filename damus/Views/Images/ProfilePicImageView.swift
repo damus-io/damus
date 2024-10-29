@@ -112,10 +112,10 @@ struct ProfilePicImageView: View {
             Group {
                 if showMenu {
                     HStack {
-                        NavDismissBarView()
+                        NavDismissBarView(navDismissBarContainer: .profilePicImageView)
                         if let image = image {
                             ShareLink(item: Image(uiImage: image),
-                                      preview: SharePreview("Damus Profile", image: Image(uiImage: image))) {
+                                      preview: SharePreview(NSLocalizedString("Damus Profile", comment: "Label for the preview of the profile picture"), image: Image(uiImage: image))) {
                                 Image(systemName: "ellipsis")
                                     .frame(width: 33, height: 33)
                                     .background(.regularMaterial)
