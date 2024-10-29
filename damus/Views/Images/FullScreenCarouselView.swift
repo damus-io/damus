@@ -96,8 +96,24 @@ struct FullScreenCarouselView<Content: View>: View {
                 GeometryReader { geo in
                     VStack {
                         if showMenu {
-                            NavDismissBarView(navDismissBarContainer: .fullScreenCarousel)
-                                .foregroundColor(.white)
+                            
+                            HStack {
+                                NavDismissBarView(navDismissBarContainer: .fullScreenCarousel)
+                                    .foregroundColor(.white)
+                                
+                                if let url = urls[safe: selectedIndex],
+                                   case .image = url {
+                                    ShareLink(item: url.url) {
+                                        Image(systemName: "ellipsis")
+                                            .foregroundColor(.white)
+                                            .frame(width: 33, height: 33)
+                                            .background(.damusBlack)
+                                            .clipShape(Circle())
+                                    }
+                                    .padding(20)
+                                }
+                            }
+                            
                             Spacer()
                             
                             if urls.count > 1 {
