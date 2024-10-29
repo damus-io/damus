@@ -14,7 +14,7 @@ struct FullScreenCarouselView<Content: View>: View {
     @Environment(\.presentationMode) var presentationMode
     
     @State var showMenu = true
-    
+    @State private var imageDict: [URL: UIImage] = [:]
     let settings: UserSettingsStore
     @Binding var selectedIndex: Int
     let content: (() -> Content)?
@@ -59,7 +59,7 @@ struct FullScreenCarouselView<Content: View>: View {
                 ForEach(urls.indices, id: \.self) { index in
                     VStack {
                         if case .video = urls[safe: index] {
-                            ImageContainerView(video_controller: video_controller, url: urls[index], settings: settings)
+                            ImageContainerView(video_controller: video_controller, url: urls[index], settings: settings, imageDict: $imageDict)
                                 .clipped()  // SwiftUI hack from https://stackoverflow.com/a/74401288 to make playback controls show up within the TabView
                                 .aspectRatio(contentMode: .fit)
                                 .padding(.top, Theme.safeAreaInsets?.top)
@@ -71,7 +71,7 @@ struct FullScreenCarouselView<Content: View>: View {
                         }
                         else {
                             ZoomableScrollView {
-                                ImageContainerView(video_controller: video_controller, url: urls[index], settings: settings)
+                                ImageContainerView(video_controller: video_controller, url: urls[index], settings: settings, imageDict: $imageDict)
                                     .aspectRatio(contentMode: .fit)
                                     .padding(.top, Theme.safeAreaInsets?.top)
                                     .padding(.bottom, Theme.safeAreaInsets?.bottom)
@@ -102,8 +102,12 @@ struct FullScreenCarouselView<Content: View>: View {
                                     .foregroundColor(.white)
                                 
                                 if let url = urls[safe: selectedIndex],
-                                   case .image = url {
-                                    ShareLink(item: url.url) {
+                                   let image = imageDict[url.url] {
+                                    
+                                    ShareLink(item: Image(uiImage: image),
+                                              preview: SharePreview(NSLocalizedString("Shared Picture",
+                                                                                      comment: "Label for the preview of the image being picture"),
+                                                                    image: Image(uiImage: image))) {
                                         Image(systemName: "ellipsis")
                                             .foregroundColor(.white)
                                             .frame(width: 33, height: 33)
