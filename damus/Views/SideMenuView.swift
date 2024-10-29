@@ -51,7 +51,7 @@ struct SideMenuView: View {
                         Image("nostr-hashtag")
                         Text("Purple")
                             .foregroundColor(DamusColors.purple)
-                            .font(.title2.weight(.bold))
+                            .font(.title2.weight(.semibold))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -218,7 +218,7 @@ struct SideMenuView: View {
                 .tint(DamusColors.adaptableBlack)
             
             Text(title)
-                .font(.title2.weight(.bold))
+                .font(.title2.weight(.semibold))
                 .foregroundColor(DamusColors.adaptableBlack)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .dynamicTypeSize(.xSmall)

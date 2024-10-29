@@ -120,18 +120,9 @@ struct QRCodeView: View {
         VStack(alignment: .center) {
             let profile_txn = damus_state.profiles.lookup(id: pubkey, txn_name: "qrview-profile")
             let profile = profile_txn?.unsafeUnownedValue
-            let our_profile = profile_txn.flatMap({ ptxn in
-                damus_state.ndb.lookup_profile_with_txn(damus_state.pubkey, txn: ptxn)?.profile
-            })
 
-            if our_profile?.picture != nil {
-                ProfilePicView(pubkey: pubkey, size: 90.0, highlight: .custom(DamusColors.white, 3.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+            ProfilePicView(pubkey: pubkey, size: 90.0, highlight: .custom(DamusColors.white, 3.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                     .padding(.top, 20)
-            } else {
-                Image(systemName: "person.fill")
-                    .font(.system(size: 60))
-                    .padding(.top, 20)
-            }
             
             if let display_name = profile?.display_name {
                 Text(display_name)
@@ -159,10 +150,17 @@ struct QRCodeView: View {
 
             Spacer()
             
-            Text("Follow me on Nostr", comment: "Text on QR code view to prompt viewer looking at screen to follow the user.")
-                .font(.system(size: 24, weight: .heavy))
-                .padding(.top, 10)
-                .foregroundColor(.white)
+            // apply the same styling to both text-views without code duplication
+            Group {
+                if damus_state.pubkey.npub == pubkey.npub {
+                    Text("Follow me on Nostr", comment: "Text on QR code view to prompt viewer looking at screen to follow the user.")
+                } else {
+                    Text("Follow \(profile?.display_name ?? profile?.name ?? "") on Nostr", comment: "Text on QR code view to prompt viewer looking at screen to follow the user.")
+                }
+            }
+            .font(.system(size: 24, weight: .heavy))
+            .padding(.top, 10)
+            .foregroundColor(.white)
             
             Text("Scan the code", comment: "Text on QR code view to prompt viewer to scan the QR code on screen with their device camera.")
                 .font(.system(size: 18, weight: .ultraLight))

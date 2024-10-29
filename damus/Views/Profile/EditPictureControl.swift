@@ -14,6 +14,7 @@ class ImageUploadingObserver: ObservableObject {
 
 struct EditPictureControl: View {
     let uploader: MediaUploader
+    let keypair: Keypair?
     let pubkey: Pubkey
     var size: CGFloat? = 25
     var setup: Bool? = false
@@ -113,7 +114,7 @@ struct EditPictureControl: View {
             }
         }
         .sheet(isPresented: $show_library) {
-            MediaPicker(image_upload_confirm: $image_upload_confirm, imagesOnly: true) { media in
+            MediaPicker(mediaPickerEntry: .editPictureControl, image_upload_confirm: $image_upload_confirm) { media in
                 self.preUploadedMedia = media
             }
             .alert(NSLocalizedString("Are you sure you want to upload this image?", comment: "Alert message asking if the user wants to upload an image."), isPresented: $image_upload_confirm) {
@@ -195,7 +196,7 @@ struct EditPictureControl: View {
     private func handle_upload(media: MediaUpload) {
         uploadObserver.isLoading = true
         Task {
-            let res = await image_upload.start(media: media, uploader: uploader)
+            let res = await image_upload.start(media: media, uploader: uploader, keypair: keypair)
             
             switch res {
             case .success(let urlString):
@@ -221,7 +222,7 @@ struct EditPictureControl_Previews: PreviewProvider {
         let observer = ImageUploadingObserver()
         ZStack {
             Color.gray
-            EditPictureControl(uploader: .nostrBuild, pubkey: test_pubkey, size: 100, setup: false, image_url: url, uploadObserver: observer) { _ in
+            EditPictureControl(uploader: .nostrBuild, keypair: test_keypair, pubkey: test_pubkey, size: 100, setup: false, image_url: url, uploadObserver: observer) { _ in
                 //
             }
         }
