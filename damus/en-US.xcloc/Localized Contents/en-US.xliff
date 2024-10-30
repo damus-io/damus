@@ -2,7 +2,7 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
   <file original="damus/en-US.lproj/InfoPlist.strings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.0" build-num="16A242d"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.1" build-num="16B40"/>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">
@@ -44,7 +44,7 @@
   </file>
   <file original="damus/en-US.lproj/Localizable.strings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.0" build-num="16A242d"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.1" build-num="16B40"/>
     </header>
     <body>
       <trans-unit id="#%@" xml:space="preserve">
@@ -909,6 +909,11 @@ Section header for first aid tools and settings</note>
         <target>Follow</target>
         <note>Button to follow a user.</note>
       </trans-unit>
+      <trans-unit id="Follow %@ on Nostr" xml:space="preserve">
+        <source>Follow %@ on Nostr</source>
+        <target>Follow %@ on Nostr</target>
+        <note>Text on QR code view to prompt viewer looking at screen to follow the user.</note>
+      </trans-unit>
       <trans-unit id="Follow All" xml:space="preserve">
         <source>Follow All</source>
         <target>Follow All</target>
@@ -1489,8 +1494,7 @@ Text to indicate that what is being shown is a note which has been muted.</note>
         <source>Notes</source>
         <target>Notes</target>
         <note>A label indicating that the notes being displayed below it are from a timeline, not search results
-Label for filter for seeing only notes (instead of notes and replies).
-Navigation link to search text.</note>
+Label for filter for seeing only notes (instead of notes and replies).</note>
       </trans-unit>
       <trans-unit id="Notes &amp; Replies" xml:space="preserve">
         <source>Notes &amp; Replies</source>
@@ -2966,7 +2970,7 @@ String indicating that a given timestamp just occurred</note>
   </file>
   <file original="damus/en-US.lproj/Localizable.stringsdict" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.0" build-num="16A242d"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.1" build-num="16B40"/>
     </header>
     <body>
       <trans-unit id="/followed_by_three_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
@@ -3348,7 +3352,7 @@ String indicating that a given timestamp just occurred</note>
   </file>
   <file original="damus/InfoPlist.xcstrings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.0" build-num="16A242d"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.1" build-num="16B40"/>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">
@@ -3370,7 +3374,7 @@ String indicating that a given timestamp just occurred</note>
   </file>
   <file original="highlighter action extension/InfoPlist.xcstrings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.0" build-num="16A242d"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.1" build-num="16B40"/>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">
