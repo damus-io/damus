@@ -56,7 +56,7 @@ struct PostView: View {
     @State var image_upload_confirm: Bool = false
     @State var imagePastedFromPasteboard: UIImage? = nil
     @State var imageUploadConfirmPasteboard: Bool = false
-    @State var pubkeys: [Pubkey] = []
+    @State var references: [RefId] = []
     @State var filtered_pubkeys: Set<Pubkey> = []
     @State var focusWordAttributes: (String?, NSRange?) = (nil, nil)
     @State var newCursorIndex: Int?
@@ -100,8 +100,12 @@ struct PostView: View {
         // don't add duplicate pubkeys but retain order
         var pkset = Set<Pubkey>()
 
-        // only unique and non-filtered pubkeys
-        let pks = pubkeys.reduce(into: Array<Pubkey>()) { acc, pk in
+        // we only want pubkeys really
+        let pks = references.reduce(into: Array<Pubkey>()) { acc, ref in
+            guard case .pubkey(let pk) = ref else {
+                return
+            }
+            
             if pkset.contains(pk) || filtered_pubkeys.contains(pk) {
                 return
             }
@@ -397,6 +401,16 @@ struct PostView: View {
         self.tagModel.diff = post.string.count
     }
 
+    var pubkeys: [Pubkey] {
+        self.references.reduce(into: [Pubkey]()) { pks, ref in
+            guard case .pubkey(let pk) = ref else {
+                return
+            }
+
+            pks.append(pk)
+        }
+    }
+
     var body: some View {
         GeometryReader { (deviceSize: GeometryProxy) in
             VStack(alignment: .leading, spacing: 0) {
@@ -490,14 +504,14 @@ struct PostView: View {
                 
                 switch action {
                     case .replying_to(let replying_to):
-                        break
+                        references = gather_reply_ids(our_pubkey: damus_state.pubkey, from: replying_to)
                     case .quoting(let quoting):
-                        break
+                        references = gather_quote_ids(our_pubkey: damus_state.pubkey, from: quoting)
                     case .posting(let target):
                         guard !loaded_draft else { break }
                         fill_target_content(target: target)
                     case .highlighting(let draft):
-                        break
+                        references = [draft.source.ref()]
                 }
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -727,8 +741,6 @@ func build_post(state: DamusState, post: NSMutableAttributedString, action: Post
 
         case .quoting(let ev):
             content.append(" nostr:" + bech32_note_id(ev.id))
-
-            tags.append(["q", ev.id.hex()]);
 
             if let quoted_ev = state.events.lookup(ev.id) {
                 tags.append(["p", quoted_ev.pubkey.hex()])
