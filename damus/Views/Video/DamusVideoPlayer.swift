@@ -39,63 +39,36 @@ struct DamusVideoPlayer: View {
     }
     
     var body: some View {
-        GeometryReader { geo in
-            let localFrame = geo.frame(in: .local)
-            let centerY = globalCoordinate(localX: 0, localY: localFrame.midY, localGeometry: geo).y
-            ZStack {
-                if case .full = self.style {
-                    DamusAVPlayerView(player: model.player, controller: model.player_view_controller, show_playback_controls: true)
-                }
-                if case .preview(let on_tap) = self.style {
-                    DamusAVPlayerView(player: model.player, controller: model.player_view_controller, show_playback_controls: false)
-                        .simultaneousGesture(TapGesture().onEnded({
-                            on_tap?()
-                        }))
-                }
-                
-                if model.is_loading {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .tint(.white)
-                        .scaleEffect(CGSize(width: 1.5, height: 1.5))
-                }
-                
-                if case .preview = self.style {
-                    if model.has_audio {
-                        mute_button
-                    }
-                }
-                if model.is_live {
-                    live_indicator
+        ZStack {
+            if case .full = self.style {
+                DamusAVPlayerView(player: model.player, controller: model.player_view_controller, show_playback_controls: true)
+            }
+            if case .preview(let on_tap) = self.style {
+                DamusAVPlayerView(player: model.player, controller: model.player_view_controller, show_playback_controls: false)
+                    .simultaneousGesture(TapGesture().onEnded({
+                        on_tap?()
+                    }))
+            }
+            
+            if model.is_loading {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .tint(.white)
+                    .scaleEffect(CGSize(width: 1.5, height: 1.5))
+            }
+            
+            if case .preview = self.style {
+                if model.has_audio {
+                    mute_button
                 }
             }
-            .onChange(of: centerY) { _ in
-                if case .y_scroll = visibility_tracking_method {
-                    update_is_visible(centerY: centerY)
-                }
-            }
-            .on_visibility_change(perform: { new_visibility in
-                if case .generic = visibility_tracking_method {
-                    model.set_view_is_visible(new_visibility)
-                }
-            })
-            .onAppear {
-                if case .y_scroll = visibility_tracking_method {
-                    update_is_visible(centerY: centerY)
-                }
+            if model.is_live {
+                live_indicator
             }
         }
-        .onDisappear {
-            if case .y_scroll = visibility_tracking_method {
-                model.view_did_disappear()
-            }
-        }
-    }
-    
-    private func update_is_visible(centerY: CGFloat) {
-        let isBelowTop = centerY > 100, /// 100 =~ approx. bottom (y) of ContentView's TabView
-            isAboveBottom = centerY < orientationTracker.deviceMajorAxis
-        model.set_view_is_visible(isBelowTop && isAboveBottom)
+        .on_visibility_change(perform: { new_visibility in
+            model.set_view_is_visible(new_visibility)
+        }, method: self.visibility_tracking_method == .generic ? .no_y_scroll_detection : .standard)
     }
     
     private var mute_icon: String {
