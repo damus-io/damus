@@ -58,6 +58,22 @@ extension KFOptionSetter {
         
         return self
     }
+    
+    /// This allows you to observe the size of the image, and get a callback when the size changes
+    /// This is useful for when you need to layout views based on the size of the image
+    /// - Parameter size_changed: A callback that will be called when the size of the image changes
+    /// - Returns: The same KFOptionSetter instance
+    func observe_image_size(size_changed: @escaping (CGSize) -> Void) -> Self {
+        let modifier = AnyImageModifier { image -> KFCrossPlatformImage in
+            let image_size = image.size
+            DispatchQueue.main.async { [size_changed, image_size] in
+                size_changed(image_size)
+            }
+            return image
+        }
+        options.imageModifier = modifier
+        return self
+    }
 }
 
 let MAX_FILE_SIZE = 20_971_520 // 20MiB
