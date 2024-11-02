@@ -297,7 +297,7 @@ struct ProfileView: View {
                     .onTapGesture {
                         is_zoomed.toggle()
                     }
-                    .fullScreenCover(isPresented: $is_zoomed) {
+                    .damus_full_screen_cover($is_zoomed, damus_state: damus_state) {
                         ProfilePicImageView(pubkey: profile.pubkey, profiles: damus_state.profiles, settings: damus_state.settings, nav: damus_state.nav, shouldShowEditButton: damus_state.pubkey == profile.pubkey)
                     }
 
@@ -478,7 +478,7 @@ struct ProfileView: View {
                 let url = URL(string: "https://damus.io/" + profile.pubkey.npub)!
                 ShareSheet(activityItems: [url])
             }
-            .fullScreenCover(isPresented: $show_qr_code) {
+            .damus_full_screen_cover($show_qr_code, damus_state: damus_state) {
                 QRCodeView(damus_state: damus_state, pubkey: profile.pubkey)
             }
 

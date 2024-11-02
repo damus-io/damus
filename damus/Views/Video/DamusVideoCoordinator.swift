@@ -26,6 +26,14 @@ final class DamusVideoCoordinator: ObservableObject {
     private var mute_states: [URL: Bool] = [:]
     private var metadatas: [URL: VideoMetadata] = [:]
     
+    // MARK: Coordinator state
+    // Members representing the state of the coordinator itself
+    
+    private var full_screen_mode: Bool = false {
+        didSet {
+        }
+    }
+    
     @Published var focused_model_id: UUID?
     
     func toggle_should_mute_video(url: URL) {
@@ -45,6 +53,12 @@ final class DamusVideoCoordinator: ObservableObject {
     
     func metadata(for url: URL) -> VideoMetadata? {
         metadatas[url]
+    }
+     
+    // MARK: - Additional interface to help with video coordination
+    
+    func set_full_screen_mode(_ is_full_screen: Bool) {
+        full_screen_mode = is_full_screen
     }
     
     func size_for_url(_ url: URL) -> CGSize? {
