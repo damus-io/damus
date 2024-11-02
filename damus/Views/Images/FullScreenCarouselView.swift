@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct FullScreenCarouselView<Content: View>: View {
-    let video_coordinator: DamusVideoCoordinator
+    @ObservedObject var video_coordinator: DamusVideoCoordinator
     let urls: [MediaUrl]
     
     @Environment(\.presentationMode) var presentationMode
@@ -59,11 +59,16 @@ struct FullScreenCarouselView<Content: View>: View {
                 ForEach(urls.indices, id: \.self) { index in
                     VStack {
                         if case .video = urls[safe: index] {
-                            ImageContainerView(video_coordinator: video_coordinator, url: urls[index], settings: settings, imageDict: $imageDict)
-                                .modifier(SwipeToDismissModifier(minDistance: 50, onDismiss: {
-                                    presentationMode.wrappedValue.dismiss()
-                                }))
-                                .ignoresSafeArea()
+                            ImageContainerView(
+                                video_coordinator: video_coordinator,
+                                url: urls[index],
+                                settings: settings,
+                                imageDict: $imageDict
+                            )
+                            .modifier(SwipeToDismissModifier(minDistance: 50, onDismiss: {
+                                presentationMode.wrappedValue.dismiss()
+                            }))
+                            .ignoresSafeArea()
                         }
                         else {
                             ZoomableScrollView {
@@ -92,11 +97,17 @@ struct FullScreenCarouselView<Content: View>: View {
                 GeometryReader { geo in
                     VStack {
                         if showMenu {
-                            
                             HStack {
-                                NavDismissBarView(navDismissBarContainer: .fullScreenCarousel)
-                                    .foregroundColor(.white)
+                                Button(action: {
+                                    presentationMode.wrappedValue.dismiss()
+                                }, label: {
+                                    Image(systemName: "xmark")
+                                        .frame(width: 30, height: 30)
+                                })
+                                .buttonStyle(PlayerCircleButtonStyle())
                                 
+                                Spacer()
+
                                 if let url = urls[safe: selectedIndex],
                                    let image = imageDict[url.url] {
                                     
@@ -105,24 +116,30 @@ struct FullScreenCarouselView<Content: View>: View {
                                                                                       comment: "Label for the preview of the image being picture"),
                                                                     image: Image(uiImage: image))) {
                                         Image(systemName: "ellipsis")
-                                            .foregroundColor(.white)
-                                            .frame(width: 33, height: 33)
-                                            .background(.damusBlack)
-                                            .clipShape(Circle())
+                                            .frame(width: 30, height: 30)
                                     }
-                                    .padding(20)
+                                    .buttonStyle(PlayerCircleButtonStyle())
                                 }
                             }
+                            .padding()
                             
                             Spacer()
                             
-                            if urls.count > 1 {
-                                PageControlView(currentPage: $selectedIndex, numberOfPages: urls.count)
-                                    .frame(maxWidth: 0, maxHeight: 0)
-                                    .padding(.top, 5)
+                            VStack {
+                                if urls.count > 1 {
+                                    PageControlView(currentPage: $selectedIndex, numberOfPages: urls.count)
+                                        .frame(maxWidth: 0, maxHeight: 0)
+                                        .padding(.top, 5)
+                                }
+                                
+                                if let focused_video = video_coordinator.focused_video {
+                                    DamusVideoControlsView(video: focused_video)
+                                }
+                                
+                                self.content?()
                             }
-                            
-                            self.content?()
+                            .padding(.top, 5)
+                            .background(Color.black.opacity(0.7))
                         }
                     }
                     .animation(.easeInOut, value: showMenu)

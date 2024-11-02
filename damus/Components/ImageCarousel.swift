@@ -169,12 +169,6 @@ struct ImageCarousel<Content: View>: View {
                 Color.clear
             }
         }
-        .onAppear {
-            if self.model.image_fill == nil, let size = state.video.size_for_url(url) {
-                let fill = ImageFill.calculate_image_fill(geo_size: geo_size, img_size: size, maxHeight: model.maxHeight, fillHeight: model.fillHeight)
-                self.model.image_fill = fill
-            }
-        }
     }
     
     func Media(geo: GeometryProxy, url: MediaUrl, index: Int) -> some View {
@@ -186,7 +180,7 @@ struct ImageCarousel<Content: View>: View {
                         model.open_sheet = true
                     }
             case .video(let url):
-                DamusVideoPlayer(url: url, video_size: $model.video_size, coordinator: state.video, style: .preview(on_tap: { model.open_sheet = true }))
+                DamusVideoPlayerView(url: url, coordinator: state.video, style: .preview(on_tap: { model.open_sheet = true }))
                     .onChange(of: model.video_size) { size in
                         guard let size else { return }
                         
