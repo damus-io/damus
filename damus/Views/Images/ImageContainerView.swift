@@ -18,6 +18,13 @@ struct ImageContainerView: View {
     @State private var image: UIImage?
     @State private var showShareSheet = false
     
+    init(video_coordinator: DamusVideoCoordinator, url: MediaUrl, settings: UserSettingsStore, imageDict: Binding<[URL: UIImage]>) {
+        self.video_coordinator = video_coordinator
+        self.url = url
+        self.settings = settings
+        self._imageDict = imageDict
+    }
+    
     private struct ImageHandler: ImageModifier {
         @Binding var handler: UIImage?
         @Binding var imageDict: [URL: UIImage]
@@ -51,7 +58,7 @@ struct ImageContainerView: View {
                 case .image(let url):
                     Img(url: url)
                 case .video(let url):
-                    DamusVideoPlayer(url: url, video_size: .constant(nil), coordinator: video_coordinator, style: .full, visibility_tracking_method: .generic)
+                    DamusVideoPlayerView(url: url, coordinator: video_coordinator, style: .no_controls(on_tap: nil))
             }
         }
     }

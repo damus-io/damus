@@ -77,7 +77,7 @@
 		4C1A9A2329DDDB8100516EAC /* IconLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2229DDDB8100516EAC /* IconLabel.swift */; };
 		4C1A9A2529DDDF2600516EAC /* ZapSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2429DDDF2600516EAC /* ZapSettingsView.swift */; };
 		4C1A9A2729DDE31900516EAC /* TranslationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2629DDE31900516EAC /* TranslationSettingsView.swift */; };
-		4C1A9A2A29DDF54400516EAC /* DamusVideoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2929DDF54400516EAC /* DamusVideoPlayer.swift */; };
+		4C1A9A2A29DDF54400516EAC /* DamusVideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2929DDF54400516EAC /* DamusVideoPlayerView.swift */; };
 		4C1D4FB12A7958E60024F453 /* VersionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1D4FB02A7958E60024F453 /* VersionInfo.swift */; };
 		4C1D4FB42A7967990024F453 /* build-git-hash.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4C1D4FB32A7967990024F453 /* build-git-hash.txt */; };
 		4C216F32286E388800040376 /* DMChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F31286E388800040376 /* DMChatView.swift */; };
@@ -386,8 +386,7 @@
 		504323A72A34915F006AE6DC /* RelayModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504323A62A34915F006AE6DC /* RelayModel.swift */; };
 		504323A92A3495B6006AE6DC /* RelayModelCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504323A82A3495B6006AE6DC /* RelayModelCache.swift */; };
 		5053ACA72A56DF3B00851AE3 /* DeveloperSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5053ACA62A56DF3B00851AE3 /* DeveloperSettingsView.swift */; };
-		50A16FFB2AA6C06600DFEC1F /* DamusAVPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFA2AA6C06600DFEC1F /* DamusAVPlayerView.swift */; };
-		50A16FFD2AA7525700DFEC1F /* DamusVideoPlayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFC2AA7525700DFEC1F /* DamusVideoPlayerViewModel.swift */; };
+		50A16FFD2AA7525700DFEC1F /* DamusVideoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFC2AA7525700DFEC1F /* DamusVideoPlayer.swift */; };
 		50A16FFF2AA76A0900DFEC1F /* DamusVideoCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFE2AA76A0900DFEC1F /* DamusVideoCoordinator.swift */; };
 		50A50A8D29A09E1C00C01BE7 /* RequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */; };
 		50A60D142A28BEEE00186190 /* RelayLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A60D132A28BEEE00186190 /* RelayLog.swift */; };
@@ -784,10 +783,9 @@
 		D73E5ED52C6A97F4007EB227 /* GradientFollowButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694F32A6732B7001F4053 /* GradientFollowButton.swift */; };
 		D73E5ED62C6A97F4007EB227 /* AlbyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09652A0AE62100943473 /* AlbyButton.swift */; };
 		D73E5ED72C6A97F4007EB227 /* MutinyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B62B9E692E00781E0A /* MutinyButton.swift */; };
-		D73E5ED82C6A97F4007EB227 /* DamusVideoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2929DDF54400516EAC /* DamusVideoPlayer.swift */; };
-		D73E5ED92C6A97F4007EB227 /* DamusVideoPlayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFC2AA7525700DFEC1F /* DamusVideoPlayerViewModel.swift */; };
+		D73E5ED82C6A97F4007EB227 /* DamusVideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2929DDF54400516EAC /* DamusVideoPlayerView.swift */; };
+		D73E5ED92C6A97F4007EB227 /* DamusVideoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFC2AA7525700DFEC1F /* DamusVideoPlayer.swift */; };
 		D73E5EDA2C6A97F4007EB227 /* DamusVideoCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFE2AA76A0900DFEC1F /* DamusVideoCoordinator.swift */; };
-		D73E5EDB2C6A97F4007EB227 /* DamusAVPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFA2AA6C06600DFEC1F /* DamusAVPlayerView.swift */; };
 		D73E5EDC2C6A97F4007EB227 /* ReactionsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C15C7142A55DE7A00D0A0DB /* ReactionsSettingsView.swift */; };
 		D73E5EDD2C6A97F4007EB227 /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A1C29DDCF9B00516EAC /* NotificationSettingsView.swift */; };
 		D73E5EDE2C6A97F4007EB227 /* AppearanceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A1E29DDD24B00516EAC /* AppearanceSettingsView.swift */; };
@@ -1147,6 +1145,8 @@
 		D7EDED312B1290B80018B19C /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = D7EDED302B1290B80018B19C /* MarkdownUI */; };
 		D7EDED332B12ACAE0018B19C /* DamusUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */; };
 		D7EDED342B12ACAE0018B19C /* DamusUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */; };
+		D7EFBA372CC322F300F45588 /* DamusVideoControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EFBA362CC322F300F45588 /* DamusVideoControlsView.swift */; };
+		D7EFBA382CC322F300F45588 /* DamusVideoControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EFBA362CC322F300F45588 /* DamusVideoControlsView.swift */; };
 		D7FB10A72B0C371A00FA8D42 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2B10272A7B0F5C008AA43E /* Log.swift */; };
 		D7FB14222BE5970000398331 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D7FB14212BE5970000398331 /* PrivacyInfo.xcprivacy */; };
 		D7FB14252BE5A9A800398331 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D7FB14242BE5A9A800398331 /* PrivacyInfo.xcprivacy */; };
@@ -1388,7 +1388,7 @@
 		4C1A9A2229DDDB8100516EAC /* IconLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconLabel.swift; sourceTree = "<group>"; };
 		4C1A9A2429DDDF2600516EAC /* ZapSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapSettingsView.swift; sourceTree = "<group>"; };
 		4C1A9A2629DDE31900516EAC /* TranslationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationSettingsView.swift; sourceTree = "<group>"; };
-		4C1A9A2929DDF54400516EAC /* DamusVideoPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusVideoPlayer.swift; sourceTree = "<group>"; };
+		4C1A9A2929DDF54400516EAC /* DamusVideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusVideoPlayerView.swift; sourceTree = "<group>"; };
 		4C1D4FB02A7958E60024F453 /* VersionInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VersionInfo.swift; sourceTree = "<group>"; };
 		4C1D4FB32A7967990024F453 /* build-git-hash.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "build-git-hash.txt"; sourceTree = SOURCE_ROOT; };
 		4C216F31286E388800040376 /* DMChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMChatView.swift; sourceTree = "<group>"; };
@@ -1834,8 +1834,7 @@
 		504323A62A34915F006AE6DC /* RelayModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayModel.swift; sourceTree = "<group>"; };
 		504323A82A3495B6006AE6DC /* RelayModelCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayModelCache.swift; sourceTree = "<group>"; };
 		5053ACA62A56DF3B00851AE3 /* DeveloperSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperSettingsView.swift; sourceTree = "<group>"; };
-		50A16FFA2AA6C06600DFEC1F /* DamusAVPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusAVPlayerView.swift; sourceTree = "<group>"; };
-		50A16FFC2AA7525700DFEC1F /* DamusVideoPlayerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusVideoPlayerViewModel.swift; sourceTree = "<group>"; };
+		50A16FFC2AA7525700DFEC1F /* DamusVideoPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusVideoPlayer.swift; sourceTree = "<group>"; };
 		50A16FFE2AA76A0900DFEC1F /* DamusVideoCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusVideoCoordinator.swift; sourceTree = "<group>"; };
 		50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestTests.swift; sourceTree = "<group>"; };
 		50A60D132A28BEEE00186190 /* RelayLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayLog.swift; sourceTree = "<group>"; };
@@ -1983,6 +1982,7 @@
 		D7EDED202B117DCA0018B19C /* SequenceUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SequenceUtils.swift; sourceTree = "<group>"; };
 		D7EDED2D2B128E8A0018B19C /* CollectionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionExtension.swift; sourceTree = "<group>"; };
 		D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusUserDefaults.swift; sourceTree = "<group>"; };
+		D7EFBA362CC322F300F45588 /* DamusVideoControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusVideoControlsView.swift; sourceTree = "<group>"; };
 		D7FB14212BE5970000398331 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		D7FB14242BE5A9A800398331 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		D7FD12252BD345A700CF195B /* FirstAidSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstAidSettingsView.swift; sourceTree = "<group>"; };
@@ -2298,10 +2298,10 @@
 		4C1A9A2829DDF53B00516EAC /* Video */ = {
 			isa = PBXGroup;
 			children = (
-				4C1A9A2929DDF54400516EAC /* DamusVideoPlayer.swift */,
-				50A16FFC2AA7525700DFEC1F /* DamusVideoPlayerViewModel.swift */,
+				4C1A9A2929DDF54400516EAC /* DamusVideoPlayerView.swift */,
+				50A16FFC2AA7525700DFEC1F /* DamusVideoPlayer.swift */,
 				50A16FFE2AA76A0900DFEC1F /* DamusVideoCoordinator.swift */,
-				50A16FFA2AA6C06600DFEC1F /* DamusAVPlayerView.swift */,
+				D7EFBA362CC322F300F45588 /* DamusVideoControlsView.swift */,
 			);
 			path = Video;
 			sourceTree = "<group>";
@@ -4010,7 +4010,7 @@
 				4C9F18E229AA9B6C008C55EC /* CustomizeZapView.swift in Sources */,
 				4C2859602A12A2BE004746F7 /* SupporterBadge.swift in Sources */,
 				D73E5F7F2C6AA066007EB227 /* DamusAliases.swift in Sources */,
-				4C1A9A2A29DDF54400516EAC /* DamusVideoPlayer.swift in Sources */,
+				4C1A9A2A29DDF54400516EAC /* DamusVideoPlayerView.swift in Sources */,
 				4CA352A22A76AEC5003BB08B /* LikedNotify.swift in Sources */,
 				5CC8529F2BD744F60039FFC5 /* HighlightView.swift in Sources */,
 				BA37598D2ABCCE500018D73B /* PhotoCaptureProcessor.swift in Sources */,
@@ -4045,7 +4045,7 @@
 				4C3EA64F28FF59F200C48A62 /* tal.c in Sources */,
 				5C42E78C29DB76D90086AAC1 /* EmptyUserSearchView.swift in Sources */,
 				4CB88396296F7F8B00DC99E7 /* ReactionView.swift in Sources */,
-				50A16FFD2AA7525700DFEC1F /* DamusVideoPlayerViewModel.swift in Sources */,
+				50A16FFD2AA7525700DFEC1F /* DamusVideoPlayer.swift in Sources */,
 				4CFF8F6B29CD0079008DB934 /* RepostedEvent.swift in Sources */,
 				D78CD5982B8990300014D539 /* DamusAppNotificationView.swift in Sources */,
 				D724D8272B64B40B00ABE789 /* DamusPurpleAccountView.swift in Sources */,
@@ -4076,6 +4076,7 @@
 				4CC14FF92A741939007AEB17 /* Referenced.swift in Sources */,
 				4C5C7E6A284EDE2E00A22DF5 /* SearchResultsView.swift in Sources */,
 				4CE1399429F0669900AC6A0B /* BigButton.swift in Sources */,
+				D7EFBA372CC322F300F45588 /* DamusVideoControlsView.swift in Sources */,
 				7C60CAEF298471A1009C80D6 /* CoreSVG.swift in Sources */,
 				6439E014296790CF0020672B /* ProfilePicImageView.swift in Sources */,
 				4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */,
@@ -4134,7 +4135,6 @@
 				4C3EA63D28FF52D600C48A62 /* bolt11.c in Sources */,
 				4C9BB83129C0ED4F00FC4E37 /* DisplayName.swift in Sources */,
 				7CFF6317299FEFE5005D382A /* SelectableText.swift in Sources */,
-				50A16FFB2AA6C06600DFEC1F /* DamusAVPlayerView.swift in Sources */,
 				4CA352A82A76B37E003BB08B /* NewMutesNotify.swift in Sources */,
 				4CFF8F6929CC9ED1008DB934 /* ImageContainerView.swift in Sources */,
 				7527271E2A93FF0100214108 /* Block.swift in Sources */,
@@ -4460,10 +4460,9 @@
 				D73E5ED52C6A97F4007EB227 /* GradientFollowButton.swift in Sources */,
 				D73E5ED62C6A97F4007EB227 /* AlbyButton.swift in Sources */,
 				D73E5ED72C6A97F4007EB227 /* MutinyButton.swift in Sources */,
-				D73E5ED82C6A97F4007EB227 /* DamusVideoPlayer.swift in Sources */,
-				D73E5ED92C6A97F4007EB227 /* DamusVideoPlayerViewModel.swift in Sources */,
+				D73E5ED82C6A97F4007EB227 /* DamusVideoPlayerView.swift in Sources */,
+				D73E5ED92C6A97F4007EB227 /* DamusVideoPlayer.swift in Sources */,
 				D73E5EDA2C6A97F4007EB227 /* DamusVideoCoordinator.swift in Sources */,
-				D73E5EDB2C6A97F4007EB227 /* DamusAVPlayerView.swift in Sources */,
 				D73E5EDC2C6A97F4007EB227 /* ReactionsSettingsView.swift in Sources */,
 				D73E5EDD2C6A97F4007EB227 /* NotificationSettingsView.swift in Sources */,
 				D73E5EDE2C6A97F4007EB227 /* AppearanceSettingsView.swift in Sources */,
@@ -4602,6 +4601,7 @@
 				D73E5F572C6A97F5007EB227 /* PostButton.swift in Sources */,
 				D73E5F582C6A97F5007EB227 /* MediaPicker.swift in Sources */,
 				D73E5F592C6A97F5007EB227 /* TextViewWrapper.swift in Sources */,
+				D7EFBA382CC322F300F45588 /* DamusVideoControlsView.swift in Sources */,
 				D73E5F5A2C6A97F5007EB227 /* MainTabView.swift in Sources */,
 				D73E5F5B2C6A97F5007EB227 /* PubkeyView.swift in Sources */,
 				D73E5F5C2C6A97F5007EB227 /* ReplyView.swift in Sources */,
