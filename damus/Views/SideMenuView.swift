@@ -135,7 +135,7 @@ struct SideMenuView: View {
                             Circle()
                                 .foregroundColor(DamusColors.neutral3)
                         }
-                }).fullScreenCover(isPresented: $showQRCode) {
+                }).damus_full_screen_cover($showQRCode, damus_state: damus_state) {
                     QRCodeView(damus_state: damus_state, pubkey: damus_state.pubkey)
                 }
             }
