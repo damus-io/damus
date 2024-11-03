@@ -497,10 +497,10 @@ int ndb_filter_init(struct ndb_filter *);
 int ndb_filter_add_id_element(struct ndb_filter *, const unsigned char *id);
 int ndb_filter_add_int_element(struct ndb_filter *, uint64_t integer);
 int ndb_filter_add_str_element(struct ndb_filter *, const char *str);
-int ndb_filter_eq(struct ndb_filter *, struct ndb_filter *);
+int ndb_filter_eq(const struct ndb_filter *, const struct ndb_filter *);
 
 /// is `a` a subset of `b`
-int ndb_filter_is_subset_of(struct ndb_filter *a, struct ndb_filter *b);
+int ndb_filter_is_subset_of(const struct ndb_filter *a, const struct ndb_filter *b);
 
 // filters from json
 int ndb_filter_from_json(const char *, int len, struct ndb_filter *filter, unsigned char *buf, int bufsize);

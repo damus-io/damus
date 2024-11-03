@@ -2672,7 +2672,7 @@ ndb_filter_find_elements(struct ndb_filter *filter, enum ndb_filter_fieldtype ty
 	return NULL;
 }
 
-int ndb_filter_is_subset_of(struct ndb_filter *a, struct ndb_filter *b)
+int ndb_filter_is_subset_of(const struct ndb_filter *a, const struct ndb_filter *b)
 {
 	int i;
 	struct ndb_filter_elements *b_field, *a_field;
@@ -2700,20 +2700,22 @@ int ndb_filter_is_subset_of(struct ndb_filter *a, struct ndb_filter *b)
         // A is a subset of B because `k:1` and `a:b` both exist in A
 
 	for (i = 0; i < b->num_elements; i++) {
-		b_field = ndb_filter_get_elements(b, i);
-		a_field = ndb_filter_find_elements(a, b_field->field.type);
+		b_field = ndb_filter_get_elements((struct ndb_filter*)b, i);
+		a_field = ndb_filter_find_elements((struct ndb_filter*)a,
+						   b_field->field.type);
 
 		if (a_field == NULL)
 			return 0;
 
-		if (!ndb_filter_field_eq(a, a_field, b, b_field))
+		if (!ndb_filter_field_eq((struct ndb_filter*)a, a_field,
+					 (struct ndb_filter*)b, b_field))
 			return 0;
 	}
 
 	return 1;
 }
 
-int ndb_filter_eq(struct ndb_filter *a, struct ndb_filter *b)
+int ndb_filter_eq(const struct ndb_filter *a, const struct ndb_filter *b)
 {
 	int i;
 	struct ndb_filter_elements *a_els, *b_els;
@@ -2722,13 +2724,15 @@ int ndb_filter_eq(struct ndb_filter *a, struct ndb_filter *b)
 		return 0;
 
 	for (i = 0; i < a->num_elements; i++) {
-		a_els = ndb_filter_get_elements(a, i);
-		b_els = ndb_filter_find_elements(b, a_els->field.type);
+		a_els = ndb_filter_get_elements((struct ndb_filter*)a, i);
+		b_els = ndb_filter_find_elements((struct ndb_filter *)b,
+						 a_els->field.type);
 
 		if (b_els == NULL)
 			return 0;
 
-		if (!ndb_filter_field_eq(a, a_els, b, b_els))
+		if (!ndb_filter_field_eq((struct ndb_filter*)a, a_els,
+					 (struct ndb_filter*)b, b_els))
 			return 0;
 	}
 
