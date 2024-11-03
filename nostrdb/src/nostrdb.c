@@ -2672,6 +2672,47 @@ ndb_filter_find_elements(struct ndb_filter *filter, enum ndb_filter_fieldtype ty
 	return NULL;
 }
 
+int ndb_filter_is_subset_of(struct ndb_filter *a, struct ndb_filter *b)
+{
+	int i;
+	struct ndb_filter_elements *b_field, *a_field;
+
+        // Everything is always a subset of {}
+	if (b->num_elements == 0)
+		return 1;
+
+        // We can't be a subset if the number of elements in the other
+        // filter is larger then the number of elements we have.
+	if (b->num_elements > a->num_elements)
+		return 0;
+
+        // If our filter count matches, we can only be a subset if we are
+        // equal
+	if (b->num_elements == a->num_elements)
+		return ndb_filter_eq(a, b);
+
+        // If our element count is larger than the other filter, then we
+        // must see if every element in the other filter exists in ours. If
+        // so, then we are a subset of the other.
+        //
+        // eg: B={k:1, a:b} <- A={t:x, k:1, a:b}
+        //
+        // A is a subset of B because `k:1` and `a:b` both exist in A
+
+	for (i = 0; i < b->num_elements; i++) {
+		b_field = ndb_filter_get_elements(b, i);
+		a_field = ndb_filter_find_elements(a, b_field->field.type);
+
+		if (a_field == NULL)
+			return 0;
+
+		if (!ndb_filter_field_eq(a, a_field, b, b_field))
+			return 0;
+	}
+
+	return 1;
+}
+
 int ndb_filter_eq(struct ndb_filter *a, struct ndb_filter *b)
 {
 	int i;
