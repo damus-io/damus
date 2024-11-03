@@ -1154,6 +1154,62 @@ static void sort_filter_elements(struct ndb_filter *filter,
 		els->elements[i] -= (uint64_t)filter->data_buf.start;
 }
 
+static int ndb_filter_field_eq(struct ndb_filter *a_filt,
+			       struct ndb_filter_elements *a_field,
+			       struct ndb_filter *b_filt,
+			       struct ndb_filter_elements *b_field)
+{
+	int i;
+	const char *a_str, *b_str;
+	unsigned char *a_id, *b_id;
+	uint64_t a_int, b_int;
+
+	if (a_field->count != b_field->count)
+		return 0;
+
+	if (a_field->field.type != b_field->field.type) {
+		ndb_debug("UNUSUAL: field types do not match in ndb_filter_field_eq\n");
+		return 0;
+	}
+
+	if (a_field->field.elem_type != b_field->field.elem_type) {
+		ndb_debug("UNUSUAL: field element types do not match in ndb_filter_field_eq\n");
+		return 0;
+	}
+
+	if (a_field->field.elem_type == NDB_ELEMENT_UNKNOWN) {
+		ndb_debug("UNUSUAL: field element types are unknown\n");
+		return 0;
+	}
+
+	for (i = 0; i < a_field->count; i++) {
+		switch (a_field->field.elem_type) {
+		case NDB_ELEMENT_UNKNOWN:
+			return 0;
+		case NDB_ELEMENT_STRING:
+			a_str = ndb_filter_get_string_element(a_filt, a_field, i);
+			b_str = ndb_filter_get_string_element(b_filt, b_field, i);
+			if (strcmp(a_str, b_str))
+				return 0;
+			break;
+		case NDB_ELEMENT_ID:
+			a_id = ndb_filter_get_id_element(a_filt, a_field, i);
+			b_id = ndb_filter_get_id_element(b_filt, b_field, i);
+			if (memcmp(a_id, b_id, 32))
+				return 0;
+			break;
+		case NDB_ELEMENT_INT:
+			a_int = ndb_filter_get_int_element(a_field, i);
+			b_int = ndb_filter_get_int_element(b_field, i);
+			if (a_int != b_int)
+				return 0;
+			break;
+		}
+	}
+
+	return 1;
+}
+
 void ndb_filter_end_field(struct ndb_filter *filter)
 {
 	int cur_offset;
@@ -2615,6 +2671,29 @@ ndb_filter_find_elements(struct ndb_filter *filter, enum ndb_filter_fieldtype ty
 
 	return NULL;
 }
+
+int ndb_filter_eq(struct ndb_filter *a, struct ndb_filter *b)
+{
+	int i;
+	struct ndb_filter_elements *a_els, *b_els;
+
+	if (a->num_elements != b->num_elements)
+		return 0;
+
+	for (i = 0; i < a->num_elements; i++) {
+		a_els = ndb_filter_get_elements(a, i);
+		b_els = ndb_filter_find_elements(b, a_els->field.type);
+
+		if (b_els == NULL)
+			return 0;
+
+		if (!ndb_filter_field_eq(a, a_els, b, b_els))
+			return 0;
+	}
+
+	return 1;
+}
+
 
 static uint64_t *
 ndb_filter_get_elem(struct ndb_filter *filter, enum ndb_filter_fieldtype typ)
