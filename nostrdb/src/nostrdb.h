@@ -257,6 +257,9 @@ struct ndb_filter {
 	int current;
 
 	// struct ndb_filter_elements offsets into elem_buf
+	//
+	// TODO(jb55): this should probably be called fields. elements are
+	// the things within fields
 	int elements[NDB_NUM_FILTERS]; 
 };
 
@@ -494,6 +497,7 @@ int ndb_filter_init(struct ndb_filter *);
 int ndb_filter_add_id_element(struct ndb_filter *, const unsigned char *id);
 int ndb_filter_add_int_element(struct ndb_filter *, uint64_t integer);
 int ndb_filter_add_str_element(struct ndb_filter *, const char *str);
+int ndb_filter_eq(struct ndb_filter *, struct ndb_filter *);
 
 // filters from json
 int ndb_filter_from_json(const char *, int len, struct ndb_filter *filter, unsigned char *buf, int bufsize);
