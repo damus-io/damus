@@ -2600,7 +2600,7 @@ static int ndb_filter_group_add_filters(struct ndb_filter_group *group,
 
 
 static struct ndb_filter_elements *
-ndb_filter_get_elems(struct ndb_filter *filter, enum ndb_filter_fieldtype typ)
+ndb_filter_find_elements(struct ndb_filter *filter, enum ndb_filter_fieldtype typ)
 {
 	int i;
 	struct ndb_filter_elements *els;
@@ -2620,7 +2620,7 @@ static uint64_t *
 ndb_filter_get_elem(struct ndb_filter *filter, enum ndb_filter_fieldtype typ)
 {
 	struct ndb_filter_elements *els;
-	if ((els = ndb_filter_get_elems(filter, typ)))
+	if ((els = ndb_filter_find_elements(filter, typ)))
 		return &els->elements[0];
 	return NULL;
 }
@@ -2697,7 +2697,7 @@ static int ndb_query_plan_execute_ids(struct ndb_txn *txn,
 	matched = 0;
 	until = UINT64_MAX;
 
-	if (!(ids = ndb_filter_get_elems(filter, NDB_FILTER_IDS)))
+	if (!(ids = ndb_filter_find_elements(filter, NDB_FILTER_IDS)))
 		return 0;
 
 	if ((pint = ndb_filter_get_int(filter, NDB_FILTER_UNTIL)))
@@ -2874,7 +2874,7 @@ static int ndb_query_plan_execute_tags(struct ndb_txn *txn,
 
 	db = txn->lmdb->dbs[NDB_DB_NOTE_TAGS];
 
-	if (!(tags = ndb_filter_get_elems(filter, NDB_FILTER_TAGS)))
+	if (!(tags = ndb_filter_find_elements(filter, NDB_FILTER_TAGS)))
 		return 0;
 
 	until = UINT64_MAX;
@@ -2953,7 +2953,7 @@ static int ndb_query_plan_execute_kinds(struct ndb_txn *txn,
 	int i, rc;
 
 	// we should have kinds in a kinds filter!
-	if (!(kinds = ndb_filter_get_elems(filter, NDB_FILTER_KINDS)))
+	if (!(kinds = ndb_filter_find_elements(filter, NDB_FILTER_KINDS)))
 		return 0;
 
 	until = UINT64_MAX;
@@ -3010,10 +3010,10 @@ static enum ndb_query_plan ndb_filter_plan(struct ndb_filter *filter)
 {
 	struct ndb_filter_elements *ids, *kinds, *authors, *tags;
 
-	ids = ndb_filter_get_elems(filter, NDB_FILTER_IDS);
-	kinds = ndb_filter_get_elems(filter, NDB_FILTER_KINDS);
-	authors = ndb_filter_get_elems(filter, NDB_FILTER_AUTHORS);
-	tags = ndb_filter_get_elems(filter, NDB_FILTER_TAGS);
+	ids = ndb_filter_find_elements(filter, NDB_FILTER_IDS);
+	kinds = ndb_filter_find_elements(filter, NDB_FILTER_KINDS);
+	authors = ndb_filter_find_elements(filter, NDB_FILTER_AUTHORS);
+	tags = ndb_filter_find_elements(filter, NDB_FILTER_TAGS);
 
 	// this is rougly similar to the heuristic in strfry's dbscan
 	if (ids) {
