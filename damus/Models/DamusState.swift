@@ -173,8 +173,9 @@ class DamusState: HeadlessDamusState {
         keypair.privkey != nil
     }
 
-    func close() {
+    func close() async throws {
         print("txn: damus close")
+        try await self.push_notification_client.revoke_token()
         wallet.disconnect()
         pool.close()
         ndb.close()
