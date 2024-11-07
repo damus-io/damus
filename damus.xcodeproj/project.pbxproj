@@ -227,9 +227,6 @@
 		4C7D09622A098D0E00943473 /* WalletConnect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09612A098D0E00943473 /* WalletConnect.swift */; };
 		4C7D09662A0AE62100943473 /* AlbyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09652A0AE62100943473 /* AlbyButton.swift */; };
 		4C7D09682A0AE9B200943473 /* NWCScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09672A0AE9B200943473 /* NWCScannerView.swift */; };
-		4C7D096D2A0AEA0400943473 /* CodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D096A2A0AEA0400943473 /* CodeScanner.swift */; };
-		4C7D096E2A0AEA0400943473 /* ScannerCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D096B2A0AEA0400943473 /* ScannerCoordinator.swift */; };
-		4C7D096F2A0AEA0400943473 /* ScannerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D096C2A0AEA0400943473 /* ScannerViewController.swift */; };
 		4C7D09722A0AEF5E00943473 /* DamusGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09712A0AEF5E00943473 /* DamusGradient.swift */; };
 		4C7D09742A0AEF9000943473 /* AlbyGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09732A0AEF9000943473 /* AlbyGradient.swift */; };
 		4C7D09762A0AF19E00943473 /* FillAndStroke.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09752A0AF19E00943473 /* FillAndStroke.swift */; };
@@ -579,6 +576,8 @@
 		D703D7B72C67118F00A400EA /* StringUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A8CC6CB2A2CFEF900940F5F /* StringUtil.swift */; };
 		D703D7B82C6711A000A400EA /* NativeObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B9462A9AD44700DC3548 /* NativeObject.swift */; };
 		D70A3B172B02DCE5008BD568 /* NotificationFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */; };
+		D70D90982CDED61800CD0534 /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = D70D90972CDED61800CD0534 /* CodeScanner */; };
+		D70D909C2CDED7B200CD0534 /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = D70D909B2CDED7B200CD0534 /* CodeScanner */; };
 		D7100C562B76F8E600C59298 /* PurpleViewPrimitives.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7100C552B76F8E600C59298 /* PurpleViewPrimitives.swift */; };
 		D7100C582B76FC8400C59298 /* MarketingContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7100C572B76FC8400C59298 /* MarketingContentView.swift */; };
 		D7100C5A2B76FD5100C59298 /* LogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7100C592B76FD5100C59298 /* LogoView.swift */; };
@@ -774,9 +773,6 @@
 		D73E5ECA2C6A97F4007EB227 /* OnboardingSuggestionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694E92A662232001F4053 /* OnboardingSuggestionsView.swift */; };
 		D73E5ECB2C6A97F4007EB227 /* SuggestedUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694F12A67314D001F4053 /* SuggestedUserView.swift */; };
 		D73E5ECC2C6A97F4007EB227 /* SuggestedUsersViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694EB2A662292001F4053 /* SuggestedUsersViewModel.swift */; };
-		D73E5ECE2C6A97F4007EB227 /* CodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D096A2A0AEA0400943473 /* CodeScanner.swift */; };
-		D73E5ECF2C6A97F4007EB227 /* ScannerCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D096B2A0AEA0400943473 /* ScannerCoordinator.swift */; };
-		D73E5ED02C6A97F4007EB227 /* ScannerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D096C2A0AEA0400943473 /* ScannerViewController.swift */; };
 		D73E5ED22C6A97F4007EB227 /* WalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D095D2A098C5D00943473 /* WalletView.swift */; };
 		D73E5ED32C6A97F4007EB227 /* NWCScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09672A0AE9B200943473 /* NWCScannerView.swift */; };
 		D73E5ED42C6A97F4007EB227 /* FriendsButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */; };
@@ -1659,9 +1655,6 @@
 		4C7D09612A098D0E00943473 /* WalletConnect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WalletConnect.swift; sourceTree = "<group>"; };
 		4C7D09652A0AE62100943473 /* AlbyButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbyButton.swift; sourceTree = "<group>"; };
 		4C7D09672A0AE9B200943473 /* NWCScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NWCScannerView.swift; sourceTree = "<group>"; };
-		4C7D096A2A0AEA0400943473 /* CodeScanner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CodeScanner.swift; sourceTree = "<group>"; };
-		4C7D096B2A0AEA0400943473 /* ScannerCoordinator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScannerCoordinator.swift; sourceTree = "<group>"; };
-		4C7D096C2A0AEA0400943473 /* ScannerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScannerViewController.swift; sourceTree = "<group>"; };
 		4C7D09712A0AEF5E00943473 /* DamusGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusGradient.swift; sourceTree = "<group>"; };
 		4C7D09732A0AEF9000943473 /* AlbyGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbyGradient.swift; sourceTree = "<group>"; };
 		4C7D09752A0AF19E00943473 /* FillAndStroke.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FillAndStroke.swift; sourceTree = "<group>"; };
@@ -2021,6 +2014,7 @@
 			files = (
 				4C06670428FC7EC500038D2A /* Kingfisher in Frameworks */,
 				3A0A30BB2C21397A00F8C9BC /* EmojiPicker in Frameworks */,
+				D70D90982CDED61800CD0534 /* CodeScanner in Frameworks */,
 				D78DB8592C1CE9CA00F0AB12 /* SwipeActions in Frameworks */,
 				4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */,
 				4C27C9322A64766F007DBC75 /* MarkdownUI in Frameworks */,
@@ -2052,6 +2046,7 @@
 				D73E5F762C6A997E007EB227 /* EmojiPicker in Frameworks */,
 				D703D7192C66E47100A400EA /* UniformTypeIdentifiers.framework in Frameworks */,
 				D703D7492C6709B100A400EA /* secp256k1 in Frameworks */,
+				D70D909C2CDED7B200CD0534 /* CodeScanner in Frameworks */,
 				D73E5F9B2C6AA8B0007EB227 /* Kingfisher in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2564,7 +2559,6 @@
 				BA3759952ABCCF360018D73B /* Camera */,
 				F71694E82A66221E001F4053 /* Onboarding */,
 				4C190F232A547D1700027FD5 /* NostrScript */,
-				4C7D09692A0AEA0400943473 /* CodeScanner */,
 				4C7D095A2A098C5C00943473 /* Wallet */,
 				4C8D1A6D29F31E4100ACDF75 /* Buttons */,
 				4C1A9A2829DDF53B00516EAC /* Video */,
@@ -2670,16 +2664,6 @@
 				4C7D09672A0AE9B200943473 /* NWCScannerView.swift */,
 			);
 			path = Wallet;
-			sourceTree = "<group>";
-		};
-		4C7D09692A0AEA0400943473 /* CodeScanner */ = {
-			isa = PBXGroup;
-			children = (
-				4C7D096A2A0AEA0400943473 /* CodeScanner.swift */,
-				4C7D096B2A0AEA0400943473 /* ScannerCoordinator.swift */,
-				4C7D096C2A0AEA0400943473 /* ScannerViewController.swift */,
-			);
-			path = CodeScanner;
 			sourceTree = "<group>";
 		};
 		4C7D09702A0AEF4C00943473 /* Gradients */ = {
@@ -3463,6 +3447,7 @@
 				4C27C9312A64766F007DBC75 /* MarkdownUI */,
 				3A0A30BA2C21397A00F8C9BC /* EmojiPicker */,
 				D78DB8582C1CE9CA00F0AB12 /* SwipeActions */,
+				D70D90972CDED61800CD0534 /* CodeScanner */,
 			);
 			productName = damus;
 			productReference = 4CE6DEE327F7A08100C66700 /* damus.app */;
@@ -3519,6 +3504,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				D70D909A2CDED78400CD0534 /* PBXTargetDependency */,
 				D703D7AD2C670FA700A400EA /* PBXTargetDependency */,
 			);
 			name = HighlighterActionExtension;
@@ -3528,6 +3514,7 @@
 				D73E5F752C6A997E007EB227 /* EmojiPicker */,
 				D73E5F9A2C6AA8B0007EB227 /* Kingfisher */,
 				D73E5F9C2C6AA8E3007EB227 /* SwipeActions */,
+				D70D909B2CDED7B200CD0534 /* CodeScanner */,
 			);
 			productName = "highlighter action extension";
 			productReference = D703D7172C66E47100A400EA /* HighlighterActionExtension.appex */;
@@ -3632,6 +3619,7 @@
 				D7A343EC2AD0D77C00CED48B /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
 				3A0A30B92C21397A00F8C9BC /* XCRemoteSwiftPackageReference "EmojiPicker" */,
 				D78DB8572C1CE9CA00F0AB12 /* XCRemoteSwiftPackageReference "SwipeActions" */,
+				D70D90962CDED61800CD0534 /* XCRemoteSwiftPackageReference "CodeScanner" */,
 			);
 			productRefGroup = 4CE6DEE427F7A08100C66700 /* Products */;
 			projectDirPath = "";
@@ -3851,7 +3839,6 @@
 				4C75EFA627FF87A20006080F /* Nostr.swift in Sources */,
 				4CA927672A290F8B0098A105 /* RelativeTime.swift in Sources */,
 				4CB883A62975F83C00DC99E7 /* LNUrlPayRequest.swift in Sources */,
-				4C7D096D2A0AEA0400943473 /* CodeScanner.swift in Sources */,
 				D7CB5D4B2B11721600AD4105 /* ZapType.swift in Sources */,
 				4CE4F9DE2852768D00C00DD9 /* ConfigView.swift in Sources */,
 				3A48E7B029DFBE9D006E787E /* MutedThreadsManager.swift in Sources */,
@@ -3888,7 +3875,6 @@
 				4C3EA66828FF5F9900C48A62 /* hex.c in Sources */,
 				E9E4ED0B295867B900DD7078 /* ThreadView.swift in Sources */,
 				4CD348EF29C3659D00497EB2 /* ImageUploadModel.swift in Sources */,
-				4C7D096E2A0AEA0400943473 /* ScannerCoordinator.swift in Sources */,
 				4C3BEFDC281DCE6100B3DE84 /* Liked.swift in Sources */,
 				4CF0ABE7298444FD00D66079 /* EventMutingContainerView.swift in Sources */,
 				9C83F89329A937B900136C08 /* TextViewWrapper.swift in Sources */,
@@ -4087,7 +4073,6 @@
 				4CA927612A290E340098A105 /* EventShell.swift in Sources */,
 				4C363AA428296DEE006E126D /* SearchModel.swift in Sources */,
 				4C8D00CC29DF92DF0036AF10 /* Hashtags.swift in Sources */,
-				4C7D096F2A0AEA0400943473 /* ScannerViewController.swift in Sources */,
 				4CEE2AF3280B25C500AB5EEF /* ProfilePicView.swift in Sources */,
 				4CC7AAF6297F1A6A00430951 /* EventBody.swift in Sources */,
 				D76556D62B1E6C08001B0CCC /* DamusPurpleWelcomeView.swift in Sources */,
@@ -4451,9 +4436,6 @@
 				D73E5ECA2C6A97F4007EB227 /* OnboardingSuggestionsView.swift in Sources */,
 				D73E5ECB2C6A97F4007EB227 /* SuggestedUserView.swift in Sources */,
 				D73E5ECC2C6A97F4007EB227 /* SuggestedUsersViewModel.swift in Sources */,
-				D73E5ECE2C6A97F4007EB227 /* CodeScanner.swift in Sources */,
-				D73E5ECF2C6A97F4007EB227 /* ScannerCoordinator.swift in Sources */,
-				D73E5ED02C6A97F4007EB227 /* ScannerViewController.swift in Sources */,
 				D73E5ED22C6A97F4007EB227 /* WalletView.swift in Sources */,
 				D73E5ED32C6A97F4007EB227 /* NWCScannerView.swift in Sources */,
 				D73E5ED42C6A97F4007EB227 /* FriendsButton.swift in Sources */,
@@ -4915,6 +4897,10 @@
 		D703D7AD2C670FA700A400EA /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			productRef = D703D7AC2C670FA700A400EA /* MarkdownUI */;
+		};
+		D70D909A2CDED78400CD0534 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = D70D90992CDED78400CD0534 /* CodeScanner */;
 		};
 		D79C4C1A2AFEB061003A41B4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -5580,6 +5566,14 @@
 				minimumVersion = 0.2.26;
 			};
 		};
+		D70D90962CDED61800CD0534 /* XCRemoteSwiftPackageReference "CodeScanner" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/twostraws/CodeScanner.git";
+			requirement = {
+				kind = revision;
+				revision = 9fa582f4b36c69c2a55bff5fb3377eb170ae273c;
+			};
+		};
 		D78DB8572C1CE9CA00F0AB12 /* XCRemoteSwiftPackageReference "SwipeActions" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/damus-io/SwipeActions.git";
@@ -5633,6 +5627,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4C27C9302A64766F007DBC75 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
 			productName = MarkdownUI;
+		};
+		D70D90972CDED61800CD0534 /* CodeScanner */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D70D90962CDED61800CD0534 /* XCRemoteSwiftPackageReference "CodeScanner" */;
+			productName = CodeScanner;
+		};
+		D70D90992CDED78400CD0534 /* CodeScanner */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D70D90962CDED61800CD0534 /* XCRemoteSwiftPackageReference "CodeScanner" */;
+			productName = CodeScanner;
+		};
+		D70D909B2CDED7B200CD0534 /* CodeScanner */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D70D90962CDED61800CD0534 /* XCRemoteSwiftPackageReference "CodeScanner" */;
+			productName = CodeScanner;
 		};
 		D73E5F752C6A997E007EB227 /* EmojiPicker */ = {
 			isa = XCSwiftPackageProductDependency;

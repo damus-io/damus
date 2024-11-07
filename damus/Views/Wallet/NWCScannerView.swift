@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CodeScanner
 
 enum WalletScanResult: Equatable {
     static func == (lhs: WalletScanResult, rhs: WalletScanResult) -> Bool {
