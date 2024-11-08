@@ -90,6 +90,9 @@ Sentence composed of 2 variables to describe how many relay servers a user is co
 /* Dropdown option label for Lightning wallet, Blixt Wallet */
 "Blixt Wallet" = "Blixt Wallet";
 
+/* Dropdown option label for Lightning wallet, Alby Go */
+"Alby Go" = "Alby Go";
+
 /* Alert button to block a user.
    Button to block a profile.
    Context menu option for blocking users. */

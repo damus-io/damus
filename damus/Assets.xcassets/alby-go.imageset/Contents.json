@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "alby-go.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

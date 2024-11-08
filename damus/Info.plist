@@ -48,6 +48,8 @@
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>river</string>
+		<string>alby</string>
+		<string>albygo</string>
 		<string>bitcoinbeach</string>
 		<string>breez</string>
 		<string>muun</string>
