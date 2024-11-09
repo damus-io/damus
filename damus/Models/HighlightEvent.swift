@@ -213,3 +213,27 @@ enum HighlightSource: Hashable {
         }
     }
 }
+
+struct ShareContent {
+    let title: String
+    let content: ContentType
+    
+    enum ContentType {
+        case link(URL)
+        case media([PreUploadedMedia])
+    }
+    
+    func getLinkURL() -> URL? {
+        if case let .link(url) = content {
+            return url
+        }
+        return nil
+    }
+        
+    func getMediaArray() -> [PreUploadedMedia] {
+        if case let .media(mediaArray) = content {
+            return mediaArray
+        }
+        return []
+    }
+}
