@@ -14,14 +14,18 @@ struct ImageContainerView: View {
     let url: MediaUrl
     let settings: UserSettingsStore
     
+    @Binding var imageDict: [URL: UIImage]
     @State private var image: UIImage?
     @State private var showShareSheet = false
     
     private struct ImageHandler: ImageModifier {
         @Binding var handler: UIImage?
+        @Binding var imageDict: [URL: UIImage]
+        let url: URL
         
         func modify(_ image: UIImage) -> UIImage {
             handler = image
+            imageDict[url] = image
             return image
         }
     }
@@ -32,7 +36,7 @@ struct ImageContainerView: View {
             .configure { view in
                 view.framePreloadCount = 3
             }
-            .imageModifier(ImageHandler(handler: $image))
+            .imageModifier(ImageHandler(handler: $image, imageDict: $imageDict, url: url))
             .kfClickable()
             .clipped()
             .modifier(ImageContextMenuModifier(url: url, image: image, settings: settings, showShareSheet: $showShareSheet))
@@ -58,10 +62,11 @@ fileprivate let test_video_url = URL(string: "http://cdn.jb55.com/s/zaps-build.m
 
 struct ImageContainerView_Previews: PreviewProvider {
     static var previews: some View {
+        @State var imageDict: [URL: UIImage] = [:]
         Group {
-            ImageContainerView(video_controller: test_damus_state.video, url: .image(test_image_url), settings: test_damus_state.settings)
+            ImageContainerView(video_controller: test_damus_state.video, url: .image(test_image_url), settings: test_damus_state.settings, imageDict: $imageDict)
                 .previewDisplayName("Image")
-            ImageContainerView(video_controller: test_damus_state.video, url: .video(test_video_url), settings: test_damus_state.settings)
+            ImageContainerView(video_controller: test_damus_state.video, url: .video(test_video_url), settings: test_damus_state.settings, imageDict: $imageDict)
                 .previewDisplayName("Video")
         }
         .environmentObject(OrientationTracker())
