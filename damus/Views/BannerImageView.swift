@@ -14,6 +14,7 @@ struct EditBannerImageView: View {
     @ObservedObject var viewModel: ImageUploadingObserver
     let callback: (URL?) -> Void
     let defaultImage = UIImage(named: "damoose") ?? UIImage()
+    let safeAreaInsets: EdgeInsets
     
     @State var banner_image: URL? = nil
 
@@ -31,7 +32,15 @@ struct EditBannerImageView: View {
                 .onFailureImage(defaultImage)
                 .kfClickable()
             
-            EditPictureControl(uploader: damus_state.settings.default_media_uploader, keypair: damus_state.keypair, pubkey: damus_state.pubkey, image_url: $banner_image, uploadObserver: viewModel, callback: callback)
+            if #available(iOS 17.0, *) {
+                EditPictureControl(uploader: damus_state.settings.default_media_uploader, keypair: damus_state.keypair, pubkey: damus_state.pubkey, image_url: $banner_image, uploadObserver: viewModel, callback: callback)
+                    .padding(10)
+                    .safeAreaPadding(self.safeAreaInsets)
+            } else {
+                EditPictureControl(uploader: damus_state.settings.default_media_uploader, keypair: damus_state.keypair, pubkey: damus_state.pubkey, image_url: $banner_image, uploadObserver: viewModel, callback: callback)
+                    .padding(10)
+                    .padding(.top, self.safeAreaInsets.top)
+            }
         }
     }
 }
