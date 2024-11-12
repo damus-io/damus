@@ -76,10 +76,10 @@ struct EditMetadataView: View {
         return NIP05.parse(nip05)
     }
     
-    var TopSection: some View {
+    func topSection(topLevelGeo: GeometryProxy) -> some View {
         ZStack(alignment: .top) {
             GeometryReader { geo in
-                EditBannerImageView(damus_state: damus_state, viewModel: bannerUploadObserver, callback: uploadedBanner(image_url:), banner_image: URL(string: banner))
+                EditBannerImageView(damus_state: damus_state, viewModel: bannerUploadObserver, callback: uploadedBanner(image_url:), safeAreaInsets: topLevelGeo.safeAreaInsets, banner_image: URL(string: banner))
                     .aspectRatio(contentMode: .fill)
                     .frame(width: geo.size.width, height: BANNER_HEIGHT)
                     .clipped()
@@ -122,8 +122,14 @@ struct EditMetadataView: View {
     }
     
     var body: some View {
+        GeometryReader { proxy in
+            self.content(topLevelGeo: proxy)
+        }
+    }
+    
+    func content(topLevelGeo: GeometryProxy) -> some View {
         VStack(alignment: .leading) {
-            TopSection
+            self.topSection(topLevelGeo: topLevelGeo)
             Form {
                 Section(NSLocalizedString("Your Name", comment: "Label for Your Name section of user profile form.")) {
                     let display_name_placeholder = "Satoshi Nakamoto"
