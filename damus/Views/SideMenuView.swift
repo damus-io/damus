@@ -174,6 +174,9 @@ struct SideMenuView: View {
                 TopProfile
                     .padding(.bottom, verticalSpacing)
             })
+            .simultaneousGesture(TapGesture().onEnded {
+                isSidebarVisible = false
+            })
 
             ScrollView {
                 SidemenuItems(profile_model: profile_model, followers: followers)
