@@ -1,3 +1,57 @@
+## [v1.11(10)] - 2024-11-18
+
+### Added
+
+- Add Damus Share Feature (Swift)
+- Added new easy to use video controls for full screen video (Daniel D’Aquino)
+- Add Edit, Share, and Tap-gesture in Profile pic image viewer (Swift Coder)
+- Disappearing header, tabbar, and post button on scroll (ericholguin)
+- Add Apple translation popovers for notes for iOS 17.4+ and macOS 14.4+ (Terry Yiu)
+- Added NDB search functionality to the universe view (ericholguin)
+- Added mute button to ProfileActionSheet (chungwwei)
+- Added mute action to selected text menu (ericholguin)
+- Added support for pasting images from the clipboard to the post composer (Swift Coder)
+
+### Changed
+
+- Improved image carousel image fill behavior (Daniel D’Aquino)
+- Improved video syncing and bandwidth usage when switching between timeline video and full screen mode (Daniel D’Aquino)
+- Swipe to dismiss on full screen carousel now shows an opacity effect for improved UX (Daniel D’Aquino)
+- Removed event contents from full screen media carousel for cleaner view (Daniel D’Aquino)
+- Add share button for images on full screen image carousel view (Swift)
+- Changed boldness of font in side menu labels. (ericholguin)
+- Changed search notes button with searched keyword (ericholguin)
+- Changed opacity of tabbar and post button (ericholguin)
+- Allow multiple images to be uploaded at the same time (swiftcoder) (William Casarin)
+- Changed side menu design (ericholguin)
+- Truncate fulltext search results (William Casarin)
+- Expanded profile search results to 128 (William Casarin)
+- Expand nostrdb text search results to 128 items (William Casarin)
+- Use LazyVStack in text search results (William Casarin)
+
+### Fixed
+
+- Fixed missing tab bar on navigation (Swift Coder)
+- Fixed some issues where QR code would not work, and improved UX (Daniel D’Aquino)
+- Fixed iOS 18 gesture issues that would take user to the thread view when clicking on a video or unmuting it (Daniel D’Aquino)
+- Fixed several issues that would cause video to automatically play or pause incorrectly (Daniel D’Aquino)
+- Fixed issue where full screen video would disappear when going to landscape mode (Daniel D’Aquino)
+- Fixed portrait video size on full screen carousel (Daniel D’Aquino)
+- Fix avatar image on qrcode view (Swift Coder)
+- Fix banner image upload (Swift Coder)
+- Fix dismiss button visibility (Swift Coder)
+- Fix quote repost counting (William Casarin)
+- Fixed overlapping text in Universe View (ericholguin)
+- Fixed localization issues and exported strings (Terry Yiu)
+- Fix sensitive long-press gesture on event chat bubble in iOS 18 (Daniel D’Aquino)
+- Fixed bottom padding for tabbar (ericholguin)
+- Fixed localization build failures (Terry Yiu)
+- Fixed back nav button placement in profile edit view (ericholguin)
+- Friend profiles will now more likely show up in profile search (William Casarin)
+- Fix broken QR code scanner and fix landscape mode (Terry Yiu)
+
+[1.11(10)]: https://github.com/damus-io/damus/releases/tag/v1.11-10
+
 ## [1.10.1] - 2024-09-22
 
 ### Added
