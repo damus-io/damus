@@ -31,6 +31,7 @@ enum PostAction {
     case quoting(NostrEvent)
     case posting(PostTarget)
     case highlighting(HighlightContentDraft)
+    case sharing(ShareContent)
     
     var ev: NostrEvent? {
         switch self {
@@ -41,6 +42,8 @@ enum PostAction {
             case .posting:
                 return nil
             case .highlighting:
+                return nil
+            case .sharing(_):
                 return nil
         }
     }
@@ -57,6 +60,7 @@ struct PostView: View {
     @State var imagePastedFromPasteboard: UIImage? = nil
     @State var imageUploadConfirmPasteboard: Bool = false
     @State var references: [RefId] = []
+    @State var imageUploadConfirmDamusShare: Bool = false
     @State var filtered_pubkeys: Set<Pubkey> = []
     @State var focusWordAttributes: (String?, NSRange?) = (nil, nil)
     @State var newCursorIndex: Int?
@@ -217,6 +221,8 @@ struct PostView: View {
                 damus_state.drafts.post = nil
             case .highlighting(let draft):
                 damus_state.drafts.highlights.removeValue(forKey: draft.source)
+            case .sharing(_):
+                damus_state.drafts.post = nil
         }
 
     }
@@ -391,6 +397,11 @@ struct PostView: View {
                 else if case .highlighting(let draft) = action {
                     HighlightDraftContentView(draft: draft)
                 }
+                else if case .sharing(let draft) = action,
+                        let url = draft.getLinkURL() {
+                    LinkViewRepresentable(meta: .url(url))
+                        .frame(height: 50)
+                }
             }
             .padding(.horizontal)
         }
@@ -499,6 +510,19 @@ struct PostView: View {
                 }
                 Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
             }
+            // This alert seeks confirmation about media-upload from Damus Share Extension
+            .alert(NSLocalizedString("Are you sure you want to upload the selected media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $imageUploadConfirmDamusShare) {
+                Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
+                    Task {
+                        for media in preUploadedMedia {
+                            if let mediaToUpload = generateMediaUpload(media) {
+                                await self.handle_upload(media: mediaToUpload)
+                            }
+                        }
+                    }
+                }
+                Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
+            }
             .onAppear() {
                 let loaded_draft = load_draft()
                 
@@ -512,6 +536,15 @@ struct PostView: View {
                         fill_target_content(target: target)
                     case .highlighting(let draft):
                         references = [draft.source.ref()]
+                    case .sharing(let content):
+                        if let url = content.getLinkURL() {
+                            self.post = NSMutableAttributedString(string: "\(content.title)\n\(String(url.absoluteString))")
+                        } else {
+                            self.preUploadedMedia = content.getMediaArray()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                self.imageUploadConfirmDamusShare = true // display Confirm Sheet after 1 sec
+                            }
+                        }
                 }
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -661,6 +694,8 @@ func set_draft_for_post(drafts: Drafts, action: PostAction, artifacts: DraftArti
         drafts.post = artifacts
     case .highlighting(let draft):
         drafts.highlights[draft.source] = artifacts
+    case .sharing(_):
+        drafts.post = artifacts
     }
 }
 
@@ -674,6 +709,8 @@ func load_draft_for_post(drafts: Drafts, action: PostAction) -> DraftArtifacts? 
         return drafts.post
     case .highlighting(let draft):
         return drafts.highlights[draft.source]
+    case .sharing(_):
+        return drafts.post
     }
 }
 
@@ -748,6 +785,8 @@ func build_post(state: DamusState, post: NSMutableAttributedString, action: Post
         case .posting(let postTarget):
             break
         case .highlighting(let draft):
+            break
+        case .sharing(_):
             break
     }
 
