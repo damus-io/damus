@@ -20,6 +20,7 @@ struct DamusBackground: View {
             .resizable()
             .frame(maxWidth: .infinity, maxHeight: maxHeight, alignment: .center)
             .ignoresSafeArea()
+            .accessibilityHidden(true)
     }
 }
 

@@ -40,6 +40,7 @@ struct SideMenuView: View {
             NavigationLink(value: Route.Profile(profile: profile_model, followers: followers)) {
                 navLabel(title: NSLocalizedString("Profile", comment: "Sidebar menu label for Profile view."), img: "user")
             }
+            .accessibilityIdentifier(AppAccessibilityIdentifiers.side_menu_profile_button.rawValue)
 
             NavigationLink(value: Route.Wallet(wallet: damus_state.wallet)) {
                 navLabel(title: NSLocalizedString("Wallet", comment: "Sidebar menu label for Wallet view."), img: "wallet")

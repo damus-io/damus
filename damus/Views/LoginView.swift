@@ -104,6 +104,7 @@ struct LoginView: View {
                         }
                         .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
                     }
+                    .accessibilityIdentifier(AppAccessibilityIdentifiers.sign_in_confirm_button.rawValue)
                     .buttonStyle(GradientButtonStyle())
                     .padding(.top, 10)
                 }
@@ -299,27 +300,35 @@ struct KeyInput: View {
 
     var body: some View {
         HStack {
-            Image(systemName: "doc.on.clipboard")
-                .foregroundColor(.gray)
-                .onTapGesture {
-                    if let pastedkey = UIPasteboard.general.string {
-                        self.key.wrappedValue = pastedkey
-                    }
+            Button(action: {
+                if let pastedkey = UIPasteboard.general.string {
+                    self.key.wrappedValue = pastedkey
                 }
+            }, label: {
+                Image(systemName: "doc.on.clipboard")
+            })
+            .foregroundColor(.gray)
+            .accessibilityLabel(NSLocalizedString("Paste private key", comment: "Accessibility label for the private key paste button"))
+            
             SignInScan(shouldSaveKey: shouldSaveKey, loginKey: key, privKeyFound: privKeyFound)
 
             if is_secured  {
-                     SecureField("", text: key)
-                         .nsecLoginStyle(key: key.wrappedValue, title: title)
-                 } else {
-                     TextField("", text: key)
-                         .nsecLoginStyle(key: key.wrappedValue, title: title)
-                 }
-            Image(systemName: "eye.slash")
-                .foregroundColor(.gray)
-                .onTapGesture {
-                    is_secured.toggle()
-                }
+                 SecureField("", text: key)
+                     .nsecLoginStyle(key: key.wrappedValue, title: title)
+                     .accessibilityLabel(NSLocalizedString("Account private key", comment: "Accessibility label for the private key input field"))
+             } else {
+                 TextField("", text: key)
+                     .nsecLoginStyle(key: key.wrappedValue, title: title)
+                     .accessibilityLabel(NSLocalizedString("Account private key", comment: "Accessibility label for the private key input field"))
+             }
+            
+            Button(action: {
+                is_secured.toggle()
+            }, label: {
+                Image(systemName: "eye.slash")
+            })
+            .foregroundColor(.gray)
+            .accessibilityLabel(NSLocalizedString("Toggle key visibility", comment: "Accessibility label for toggling the visibility of the private key input field"))
         }
         .padding(.vertical, 2)
         .padding(.horizontal, 10)
@@ -342,6 +351,7 @@ struct SignInHeader: View {
                 .frame(width: 56, height: 56, alignment: .center)
                 .shadow(color: DamusColors.purple, radius: 2)
                 .padding(.bottom)
+                .accessibilityLabel(NSLocalizedString("Damus logo", comment: "Accessibility label for damus logo"))
             
             Text("Sign in", comment: "Title of view to log into an account.")
                 .foregroundColor(DamusColors.neutral6)
@@ -365,10 +375,12 @@ struct SignInEntry: View {
                 .fontWeight(.medium)
                 .padding(.top, 30)
             
-            KeyInput(NSLocalizedString("nsec1...", comment: "Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key."),
+            KeyInput(NSLocalizedString("nsec1…", comment: "Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key."),
                      key: key,
                      shouldSaveKey: shouldSaveKey,
                      privKeyFound: $privKeyFound)
+            .accessibilityIdentifier(AppAccessibilityIdentifiers.sign_in_nsec_key_entry_field.rawValue)
+            
             if privKeyFound {
                 Toggle(NSLocalizedString("Save Key in Secure Keychain", comment: "Toggle to save private key to the Apple secure keychain."), isOn: shouldSaveKey)
             }
@@ -389,7 +401,7 @@ struct SignInScan: View {
             Button(action: { showQR.toggle() }, label: {
                 Image(systemName: "qrcode.viewfinder")})
             .foregroundColor(.gray)
-
+            .accessibilityLabel(NSLocalizedString("Scan QR code", comment: "Accessibility label for a button that scans a private key QR code"))
         }
         .sheet(isPresented: $showQR, onDismiss: {
             if qrkey == nil { resetView() }}

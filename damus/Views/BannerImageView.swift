@@ -32,15 +32,21 @@ struct EditBannerImageView: View {
                 .onFailureImage(defaultImage)
                 .kfClickable()
             
-            if #available(iOS 17.0, *) {
-                EditPictureControl(uploader: damus_state.settings.default_media_uploader, keypair: damus_state.keypair, pubkey: damus_state.pubkey, image_url: $banner_image, uploadObserver: viewModel, callback: callback)
-                    .padding(10)
-                    .safeAreaPadding(self.safeAreaInsets)
-            } else {
-                EditPictureControl(uploader: damus_state.settings.default_media_uploader, keypair: damus_state.keypair, pubkey: damus_state.pubkey, image_url: $banner_image, uploadObserver: viewModel, callback: callback)
-                    .padding(10)
-                    .padding(.top, self.safeAreaInsets.top)
-            }
+            EditPictureControl(uploader: damus_state.settings.default_media_uploader, keypair: damus_state.keypair, pubkey: damus_state.pubkey, image_url: $banner_image, uploadObserver: viewModel, callback: callback)
+                .padding(10)
+                .backwardsCompatibleSafeAreaPadding(self.safeAreaInsets)
+                .accessibilityLabel(NSLocalizedString("Edit banner image", comment: "Accessibility label for edit banner image button"))
+                .accessibilityIdentifier(AppAccessibilityIdentifiers.own_profile_banner_image_edit_button.rawValue)
+        }
+    }
+}
+
+extension View {
+    fileprivate func backwardsCompatibleSafeAreaPadding(_ insets: EdgeInsets) -> some View {
+        if #available(iOS 17.0, *) {
+            return self.safeAreaPadding(insets)
+        } else {
+            return self.padding(.top, insets.top)
         }
     }
 }
