@@ -49,14 +49,7 @@ struct PostingTimelineView: View {
                 .frame(height: getSafeAreaTop())
                 
                 HStack(alignment: .top) {
-                    Button {
-                        isSideBarOpened.toggle()
-                    } label: {
-                        ProfilePicView(pubkey: damus_state.pubkey, size: 32, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
-                            .opacity(isSideBarOpened ? 0 : 1)
-                            .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
-                    }
-                    .disabled(isSideBarOpened)
+                    TopbarSideMenuButton(damus_state: damus_state, isSideBarOpened: $isSideBarOpened)
                     
                     Spacer()
                     

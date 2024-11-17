@@ -239,14 +239,7 @@ struct ContentView: View {
                         MainContent(damus: damus)
                             .toolbar() {
                                 ToolbarItem(placement: .navigationBarLeading) {
-                                    Button {
-                                        isSideBarOpened.toggle()
-                                    } label: {
-                                        ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, disable_animation: damus_state!.settings.disable_animation)
-                                            .opacity(isSideBarOpened ? 0 : 1)
-                                            .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
-                                    }
-                                    .disabled(isSideBarOpened)
+                                    TopbarSideMenuButton(damus_state: damus, isSideBarOpened: $isSideBarOpened)
                                 }
                                 
                                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -789,6 +782,25 @@ struct ContentView: View {
         case .profile_zap:
             break
         }
+    }
+}
+
+struct TopbarSideMenuButton: View {
+    let damus_state: DamusState
+    @Binding var isSideBarOpened: Bool
+    
+    var body: some View {
+        Button {
+            isSideBarOpened.toggle()
+        } label: {
+            ProfilePicView(pubkey: damus_state.pubkey, size: 32, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                .opacity(isSideBarOpened ? 0 : 1)
+                .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
+                .accessibilityHidden(true)  // Knowing there is a profile picture here leads to no actionable outcome to VoiceOver users, so it is best not to show it
+        }
+        .accessibilityIdentifier(AppAccessibilityIdentifiers.main_side_menu_button.rawValue)
+        .accessibilityLabel(NSLocalizedString("Side menu", comment: "Accessibility label for the side menu button at the topbar"))
+        .disabled(isSideBarOpened)
     }
 }
 

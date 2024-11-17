@@ -41,6 +41,7 @@ struct EditPictureControl: View {
             }) {
                 Text("Image URL", comment: "Option to enter a url")
             }
+            .accessibilityIdentifier(AppAccessibilityIdentifiers.own_profile_banner_image_edit_from_url.rawValue)
             
             Button(action: {
                 self.show_library = true

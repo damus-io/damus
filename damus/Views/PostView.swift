@@ -304,6 +304,7 @@ struct PostView: View {
                         .padding(10)
                 })
                 .buttonStyle(NeutralButtonStyle())
+                .accessibilityIdentifier(AppAccessibilityIdentifiers.post_composer_cancel_button.rawValue)
                 
                 if let error {
                     Text(error)

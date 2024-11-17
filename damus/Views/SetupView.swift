@@ -56,6 +56,7 @@ struct SetupView: View {
                         .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
                     }
                     .buttonStyle(GradientButtonStyle())
+                    .accessibilityIdentifier(AppAccessibilityIdentifiers.sign_in_option_button.rawValue)
                     .padding()
 
                     Button(action: {
