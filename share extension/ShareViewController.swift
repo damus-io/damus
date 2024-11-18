@@ -58,7 +58,7 @@ struct ShareExtensionView: View {
                     ProgressView()
                 case .no_content:
                     Group {
-                        Text("No content availabe to share", comment: "Title indicating that there was no available content to share")
+                        Text("No content available to share", comment: "Title indicating that there was no available content to share")
                             .font(.largeTitle)
                             .multilineTextAlignment(.center)
                             .padding()
