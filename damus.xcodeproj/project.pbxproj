@@ -728,9 +728,6 @@
 		82D6FBCF2CD99F7900C925F4 /* SuggestedUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694F12A67314D001F4053 /* SuggestedUserView.swift */; };
 		82D6FBD02CD99F7900C925F4 /* SuggestedUsersViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694EB2A662292001F4053 /* SuggestedUsersViewModel.swift */; };
 		82D6FBD12CD99F7900C925F4 /* LoadScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C190F242A547D2000027FD5 /* LoadScript.swift */; };
-		82D6FBD22CD99F7900C925F4 /* CodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D096A2A0AEA0400943473 /* CodeScanner.swift */; };
-		82D6FBD32CD99F7900C925F4 /* ScannerCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D096B2A0AEA0400943473 /* ScannerCoordinator.swift */; };
-		82D6FBD42CD99F7900C925F4 /* ScannerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D096C2A0AEA0400943473 /* ScannerViewController.swift */; };
 		82D6FBD52CD99F7900C925F4 /* ConnectWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D095C2A098C5D00943473 /* ConnectWalletView.swift */; };
 		82D6FBD62CD99F7900C925F4 /* WalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D095D2A098C5D00943473 /* WalletView.swift */; };
 		82D6FBD72CD99F7900C925F4 /* NWCScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09672A0AE9B200943473 /* NWCScannerView.swift */; };
@@ -738,10 +735,9 @@
 		82D6FBD92CD99F7900C925F4 /* GradientFollowButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694F32A6732B7001F4053 /* GradientFollowButton.swift */; };
 		82D6FBDA2CD99F7900C925F4 /* AlbyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09652A0AE62100943473 /* AlbyButton.swift */; };
 		82D6FBDB2CD99F7900C925F4 /* MutinyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B62B9E692E00781E0A /* MutinyButton.swift */; };
-		82D6FBDC2CD99F7900C925F4 /* DamusVideoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2929DDF54400516EAC /* DamusVideoPlayer.swift */; };
-		82D6FBDD2CD99F7900C925F4 /* DamusVideoPlayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFC2AA7525700DFEC1F /* DamusVideoPlayerViewModel.swift */; };
-		82D6FBDE2CD99F7900C925F4 /* VideoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFE2AA76A0900DFEC1F /* VideoController.swift */; };
-		82D6FBDF2CD99F7900C925F4 /* DamusAVPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFA2AA6C06600DFEC1F /* DamusAVPlayerView.swift */; };
+		82D6FBDC2CD99F7900C925F4 /* DamusVideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2929DDF54400516EAC /* DamusVideoPlayerView.swift */; };
+		82D6FBDD2CD99F7900C925F4 /* DamusVideoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFC2AA7525700DFEC1F /* DamusVideoPlayer.swift */; };
+		82D6FBDE2CD99F7900C925F4 /* DamusVideoCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFE2AA76A0900DFEC1F /* DamusVideoCoordinator.swift */; };
 		82D6FBE02CD99F7900C925F4 /* ReactionsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C15C7142A55DE7A00D0A0DB /* ReactionsSettingsView.swift */; };
 		82D6FBE12CD99F7900C925F4 /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A1C29DDCF9B00516EAC /* NotificationSettingsView.swift */; };
 		82D6FBE22CD99F7900C925F4 /* AppearanceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A1E29DDD24B00516EAC /* AppearanceSettingsView.swift */; };
@@ -1620,6 +1616,10 @@
 		D7EDED342B12ACAE0018B19C /* DamusUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */; };
 		D7EFBA372CC322F300F45588 /* DamusVideoControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EFBA362CC322F300F45588 /* DamusVideoControlsView.swift */; };
 		D7EFBA382CC322F300F45588 /* DamusVideoControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EFBA362CC322F300F45588 /* DamusVideoControlsView.swift */; };
+		D7F360252CEBBD7E009D34DA /* DamusFullScreenCover.swift in Sources */ = {isa = PBXBuildFile; fileRef = D734B1442CCC19B1000B5C97 /* DamusFullScreenCover.swift */; };
+		D7F360262CEBBD8B009D34DA /* PresentFullScreenItemNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EB00AF2CD59C8300660C07 /* PresentFullScreenItemNotify.swift */; };
+		D7F360272CEBBDC0009D34DA /* DamusVideoControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EFBA362CC322F300F45588 /* DamusVideoControlsView.swift */; };
+		D7F360292CEBBE34009D34DA /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = D7F360282CEBBE34009D34DA /* CodeScanner */; };
 		D7FB10A72B0C371A00FA8D42 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2B10272A7B0F5C008AA43E /* Log.swift */; };
 		D7FB14222BE5970000398331 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D7FB14212BE5970000398331 /* PrivacyInfo.xcprivacy */; };
 		D7FB14252BE5A9A800398331 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D7FB14242BE5A9A800398331 /* PrivacyInfo.xcprivacy */; };
@@ -2532,6 +2532,7 @@
 			files = (
 				82D6FC862CD9A4A600C925F4 /* MarkdownUI in Frameworks */,
 				82D6FC8A2CD9A54600C925F4 /* SwipeActions in Frameworks */,
+				D7F360292CEBBE34009D34DA /* CodeScanner in Frameworks */,
 				82D6FC882CD9A4DE00C925F4 /* EmojiPicker in Frameworks */,
 				82D6FC842CD9A48500C925F4 /* Kingfisher in Frameworks */,
 				82D6FC812CD99FC500C925F4 /* secp256k1 in Frameworks */,
@@ -4026,6 +4027,7 @@
 				82D6FC852CD9A4A600C925F4 /* MarkdownUI */,
 				82D6FC872CD9A4DE00C925F4 /* EmojiPicker */,
 				82D6FC892CD9A54600C925F4 /* SwipeActions */,
+				D7F360282CEBBE34009D34DA /* CodeScanner */,
 			);
 			productName = "share extension";
 			productReference = 82D6FA972CD9820500C925F4 /* ShareExtension.appex */;
@@ -4812,6 +4814,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D7F360262CEBBD8B009D34DA /* PresentFullScreenItemNotify.swift in Sources */,
 				82D6FA9A2CD9820500C925F4 /* ShareViewController.swift in Sources */,
 				82D6FAA92CD99F7900C925F4 /* FbConstants.swift in Sources */,
 				82D6FAAA2CD99F7900C925F4 /* Offset.swift in Sources */,
@@ -5110,9 +5113,6 @@
 				82D6FBCF2CD99F7900C925F4 /* SuggestedUserView.swift in Sources */,
 				82D6FBD02CD99F7900C925F4 /* SuggestedUsersViewModel.swift in Sources */,
 				82D6FBD12CD99F7900C925F4 /* LoadScript.swift in Sources */,
-				82D6FBD22CD99F7900C925F4 /* CodeScanner.swift in Sources */,
-				82D6FBD32CD99F7900C925F4 /* ScannerCoordinator.swift in Sources */,
-				82D6FBD42CD99F7900C925F4 /* ScannerViewController.swift in Sources */,
 				82D6FBD52CD99F7900C925F4 /* ConnectWalletView.swift in Sources */,
 				82D6FBD62CD99F7900C925F4 /* WalletView.swift in Sources */,
 				82D6FBD72CD99F7900C925F4 /* NWCScannerView.swift in Sources */,
@@ -5120,10 +5120,9 @@
 				82D6FBD92CD99F7900C925F4 /* GradientFollowButton.swift in Sources */,
 				82D6FBDA2CD99F7900C925F4 /* AlbyButton.swift in Sources */,
 				82D6FBDB2CD99F7900C925F4 /* MutinyButton.swift in Sources */,
-				82D6FBDC2CD99F7900C925F4 /* DamusVideoPlayer.swift in Sources */,
-				82D6FBDD2CD99F7900C925F4 /* DamusVideoPlayerViewModel.swift in Sources */,
-				82D6FBDE2CD99F7900C925F4 /* VideoController.swift in Sources */,
-				82D6FBDF2CD99F7900C925F4 /* DamusAVPlayerView.swift in Sources */,
+				82D6FBDC2CD99F7900C925F4 /* DamusVideoPlayerView.swift in Sources */,
+				82D6FBDD2CD99F7900C925F4 /* DamusVideoPlayer.swift in Sources */,
+				82D6FBDE2CD99F7900C925F4 /* DamusVideoCoordinator.swift in Sources */,
 				82D6FBE02CD99F7900C925F4 /* ReactionsSettingsView.swift in Sources */,
 				82D6FBE12CD99F7900C925F4 /* NotificationSettingsView.swift in Sources */,
 				82D6FBE22CD99F7900C925F4 /* AppearanceSettingsView.swift in Sources */,
@@ -5135,6 +5134,7 @@
 				82D6FBE82CD99F7900C925F4 /* FirstAidSettingsView.swift in Sources */,
 				82D6FBE92CD99F7900C925F4 /* ImageContextMenuModifier.swift in Sources */,
 				82D6FBEA2CD99F7900C925F4 /* FullScreenCarouselView.swift in Sources */,
+				D7F360272CEBBDC0009D34DA /* DamusVideoControlsView.swift in Sources */,
 				82D6FBEB2CD99F7900C925F4 /* ProfilePicImageView.swift in Sources */,
 				82D6FBEC2CD99F7900C925F4 /* ImageContainerView.swift in Sources */,
 				82D6FBED2CD99F7900C925F4 /* MediaView.swift in Sources */,
@@ -5255,6 +5255,7 @@
 				82D6FC602CD99F7900C925F4 /* TextViewWrapper.swift in Sources */,
 				82D6FC612CD99F7900C925F4 /* MainTabView.swift in Sources */,
 				82D6FC622CD99F7900C925F4 /* PubkeyView.swift in Sources */,
+				D7F360252CEBBD7E009D34DA /* DamusFullScreenCover.swift in Sources */,
 				82D6FC632CD99F7900C925F4 /* ReplyView.swift in Sources */,
 				82D6FC642CD99F7900C925F4 /* ParticipantsView.swift in Sources */,
 				82D6FC652CD99F7900C925F4 /* SaveKeysView.swift in Sources */,
@@ -6824,6 +6825,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4C27C9302A64766F007DBC75 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
 			productName = MarkdownUI;
+		};
+		D7F360282CEBBE34009D34DA /* CodeScanner */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D70D90962CDED61800CD0534 /* XCRemoteSwiftPackageReference "CodeScanner" */;
+			productName = CodeScanner;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
