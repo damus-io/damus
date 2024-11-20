@@ -276,15 +276,7 @@ struct ShareExtensionView: View {
         
         // Iterate through all attachments to handle multiple images
         for itemProvider in extensionItem.attachments ?? [] {
-            if itemProvider.hasItemConformingToTypeIdentifier(UTType.url.identifier) {
-                itemProvider.loadItem(forTypeIdentifier: UTType.url.identifier, options: nil) { (item, error) in
-                    if let url = item as? URL {
-                        self.share_state = .loaded(ShareContent(title: title, content: .link(url)))
-                    } else {
-                        self.share_state = .failed(error: "Failed to load text content")
-                    }
-                }
-            } else if itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
+            if itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
                 itemProvider.loadItem(forTypeIdentifier: UTType.image.identifier, options: nil) { (item, error) in
                     if let url = item as? URL {
                         
@@ -294,7 +286,9 @@ struct ShareExtensionView: View {
                             unprocessedEnum: {.unprocessed_image($0)},
                             processedEnum: {.processed_image($0)})
                         
-                        
+                    } else if let image = item as? UIImage {
+                        // process it directly if shared item is uiimage (example: image shared from Facebook, Signal apps)
+                        chooseMedia(PreUploadedMedia.uiimage(image))
                     } else {
                         self.share_state = .failed(error: "Failed to load image content")
                     }
@@ -311,6 +305,14 @@ struct ShareExtensionView: View {
                         
                     } else {
                         self.share_state = .failed(error: "Failed to load video content")
+                    }
+                }
+            } else if itemProvider.hasItemConformingToTypeIdentifier(UTType.url.identifier) {
+                itemProvider.loadItem(forTypeIdentifier: UTType.url.identifier, options: nil) { (item, error) in
+                    if let url = item as? URL {
+                        self.share_state = .loaded(ShareContent(title: title, content: .link(url)))
+                    } else {
+                        self.share_state = .failed(error: "Failed to load text content")
                     }
                 }
             } else {
