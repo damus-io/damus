@@ -1212,7 +1212,9 @@ func on_open_url(state: DamusState, url: URL, result: @escaping (OpenResult?) ->
 
 func logout(_ state: DamusState?)
 {
-    state?.close()
-    notify(.logout)
+    Task {
+        try await state?.close()
+        notify(.logout)
+    }
 }
 
