@@ -16,7 +16,7 @@ struct FullScreenCarouselView<Content: View>: View {
     @State var showMenu = true
     @State private var imageDict: [URL: UIImage] = [:]
     let settings: UserSettingsStore
-    @Binding var selectedIndex: Int
+    @ObservedObject var carouselSelection: CarouselSelection
     let content: (() -> Content)?
     
     init(video_coordinator: DamusVideoCoordinator, urls: [MediaUrl], showMenu: Bool = true, settings: UserSettingsStore, selectedIndex: Binding<Int>, @ViewBuilder content: @escaping () -> Content) {
@@ -24,7 +24,7 @@ struct FullScreenCarouselView<Content: View>: View {
         self.urls = urls
         self._showMenu = State(initialValue: showMenu)
         self.settings = settings
-        _selectedIndex = selectedIndex
+        self._carouselSelection = ObservedObject(initialValue: CarouselSelection(index: selectedIndex.wrappedValue))
         self.content = content
     }
     
@@ -33,12 +33,12 @@ struct FullScreenCarouselView<Content: View>: View {
         self.urls = urls
         self._showMenu = State(initialValue: showMenu)
         self.settings = settings
-        _selectedIndex = selectedIndex
+        self._carouselSelection = ObservedObject(initialValue: CarouselSelection(index: selectedIndex.wrappedValue))
         self.content = nil
     }
     
     var background: some ShapeStyle {
-        if case .video = urls[safe: selectedIndex] {
+        if case .video = urls[safe: carouselSelection.index] {
             return AnyShapeStyle(Color.black)
         }
         else {
@@ -55,7 +55,7 @@ struct FullScreenCarouselView<Content: View>: View {
             Color(self.background_color)
                 .ignoresSafeArea()
             
-            TabView(selection: $selectedIndex) {
+            TabView(selection: $carouselSelection.index) {
                 ForEach(urls.indices, id: \.self) { index in
                     VStack {
                         if case .video = urls[safe: index] {
@@ -108,7 +108,7 @@ struct FullScreenCarouselView<Content: View>: View {
                                 
                                 Spacer()
 
-                                if let url = urls[safe: selectedIndex],
+                                if let url = urls[safe: carouselSelection.index],
                                    let image = imageDict[url.url] {
                                     
                                     ShareLink(item: Image(uiImage: image),
@@ -127,7 +127,7 @@ struct FullScreenCarouselView<Content: View>: View {
                             
                             VStack {
                                 if urls.count > 1 {
-                                    PageControlView(currentPage: $selectedIndex, numberOfPages: urls.count)
+                                    PageControlView(currentPage: $carouselSelection.index, numberOfPages: urls.count)
                                         .frame(maxWidth: 0, maxHeight: 0)
                                         .padding(.top, 5)
                                 }
@@ -187,5 +187,13 @@ struct FullScreenCarouselView_Previews: PreviewProvider {
             })
                 .previewDisplayName("Custom content on overlay")
         }
+    }
+}
+
+/// Class to define object for monitoring selectedIndex and updating mutlples views
+final class CarouselSelection: ObservableObject {
+    @Published var index: Int
+    init(index: Int) {
+        self.index = index
     }
 }
