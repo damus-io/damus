@@ -1,4 +1,4 @@
-## [v1.11(10)] - 2024-11-18
+## [v1.11(10)](https://github.com/damus-io/damus/releases/tag/v1.11-10) - 2024-11-18
 
 ### Added
 
@@ -50,7 +50,7 @@
 - Friend profiles will now more likely show up in profile search (William Casarin)
 - Fix broken QR code scanner and fix landscape mode (Terry Yiu)
 
-[1.11(10)]: https://github.com/damus-io/damus/releases/tag/v1.11-10
+[1.11(10)](https://github.com/damus-io/damus/releases/tag/v1.11-10): https://github.com/damus-io/damus/releases/tag/v1.11-10
 
 ## [1.10.1] - 2024-09-22
 
