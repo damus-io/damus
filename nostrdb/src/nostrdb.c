@@ -4101,7 +4101,7 @@ static void *ndb_writer_thread(void *data)
 				free(msg->note.note);
 			} else if (msg->type == NDB_WRITER_PROFILE) {
 				free(msg->profile.note.note);
-				ndb_profile_record_builder_free(&msg->profile.record);
+				//ndb_profile_record_builder_free(&msg->profile.record);
 			}  else if (msg->type == NDB_WRITER_BLOCKS) {
 				ndb_blocks_free(msg->blocks.blocks);
 			}
