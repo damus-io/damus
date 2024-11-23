@@ -3980,6 +3980,7 @@ static void ndb_notify_subscriptions(struct ndb_monitor *monitor,
 
 static void *ndb_writer_thread(void *data)
 {
+	ndb_debug("started writer thread\n");
 	struct ndb_writer *writer = data;
 	struct ndb_writer_msg msgs[THREAD_QUEUE_BATCH], *msg;
 	struct written_note written_notes[THREAD_QUEUE_BATCH];
@@ -3999,6 +4000,7 @@ static void *ndb_writer_thread(void *data)
 	while (!done) {
 		txn.mdb_txn = NULL;
 		num_notes = 0;
+		ndb_debug("writer waiting for items\n");
 		popped = prot_queue_pop_all(&writer->inbox, msgs, THREAD_QUEUE_BATCH);
 		ndb_debug("writer popped %d items\n", popped);
 
@@ -4029,6 +4031,7 @@ static void *ndb_writer_thread(void *data)
 			switch (msg->type) {
 			case NDB_WRITER_QUIT:
 				// quits are handled before this
+				ndb_debug("writer thread got quit message\n");
 				done = 1;
 				continue;
 			case NDB_WRITER_PROFILE:
@@ -4242,14 +4245,18 @@ static int ndb_writer_destroy(struct ndb_writer *writer)
 
 	// kill thread
 	msg.type = NDB_WRITER_QUIT;
+	ndb_debug("writer: pushing quit message\n");
 	if (!prot_queue_push(&writer->inbox, &msg)) {
 		// queue is too full to push quit message. just kill it.
+		ndb_debug("writer: terminating thread\n");
 		THREAD_TERMINATE(writer->thread_id);
 	} else {
+		ndb_debug("writer: joining thread\n");
 		THREAD_FINISH(writer->thread_id);
 	}
 
 	// cleanup
+	ndb_debug("writer: cleaning up protected queue\n");
 	prot_queue_destroy(&writer->inbox);
 
 	free(writer->queue_buf);
@@ -4515,12 +4522,17 @@ void ndb_destroy(struct ndb *ndb)
 		return;
 
 	// ingester depends on writer and must be destroyed first
+	ndb_debug("destroying ingester\n");
 	ndb_ingester_destroy(&ndb->ingester);
+	ndb_debug("destroying writer\n");
 	ndb_writer_destroy(&ndb->writer);
+	ndb_debug("destroying monitor\n");
 	ndb_monitor_destroy(&ndb->monitor);
 
+	ndb_debug("closing env\n");
 	mdb_env_close(ndb->lmdb.env);
 
+	ndb_debug("ndb destroyed\n");
 	free(ndb);
 }
 
