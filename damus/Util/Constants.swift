@@ -31,4 +31,7 @@ class Constants {
     static let DAMUS_WEBSITE_LOCAL_TEST_URL: URL = URL(string: "http://localhost:3000")!
     static let DAMUS_WEBSITE_STAGING_URL: URL = URL(string: "https://staging.damus.io")!
     static let DAMUS_WEBSITE_PRODUCTION_URL: URL = URL(string: "https://damus.io")!
+    
+    // MARK: General constants
+    static let GIF_IMAGE_TYPE: String = "com.compuserve.gif"
 }

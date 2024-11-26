@@ -57,7 +57,7 @@ struct PostView: View {
     @State var error: String? = nil
     @State var uploadedMedias: [UploadedMedia] = []
     @State var image_upload_confirm: Bool = false
-    @State var imagePastedFromPasteboard: UIImage? = nil
+    @State var imagePastedFromPasteboard: PreUploadedMedia? = nil
     @State var imageUploadConfirmPasteboard: Bool = false
     @State var references: [RefId] = []
     @State var imageUploadConfirmDamusShare: Bool = false
@@ -503,7 +503,7 @@ struct PostView: View {
             .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $imageUploadConfirmPasteboard) {
                 Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
                     if let image = imagePastedFromPasteboard,
-                       let mediaToUpload = generateMediaUpload(PreUploadedMedia.uiimage(image)) {
+                       let mediaToUpload = generateMediaUpload(image) {
                         Task {
                             await self.handle_upload(media: mediaToUpload)
                         }
