@@ -14,9 +14,9 @@ enum RelayTab: Int, CaseIterable{
     var title: String{
         switch self {
         case .myRelays:
-            return "My relays"
+            return NSLocalizedString("My Relays", comment: "Title of the tab that shows the user's list of their own relays.")
         case .recommended:
-            return "Recommended"
+            return NSLocalizedString("Recommended", comment: "Title of the tab that shows the list of relays recommended by Damus.")
         }
     }
 }
@@ -48,10 +48,10 @@ struct RelayConfigView: View {
         NavigationView {
             ZStack(alignment: .bottom){
                 TabView(selection: $selectedTab) {
-                    RelayList(title: "My Relays", relayList: relays, recommended: false)
+                    RelayList(title: RelayTab.myRelays.title, relayList: relays, recommended: false)
                         .tag(0)
 
-                    RelayList(title: "Recommended", relayList: recommended, recommended: true)
+                    RelayList(title: RelayTab.recommended.title, relayList: recommended, recommended: true)
                         .tag(1)
                 }
                 ZStack{
@@ -83,13 +83,13 @@ struct RelayConfigView: View {
         .toolbar {
             if state.keypair.privkey != nil && selectedTab == 0 {
                 if showActionButtons {
-                    Button("Done") {
+                    Button(NSLocalizedString("Done", comment: "Button to leave edit mode for modifying the list of relays.")) {
                         withAnimation {
                             showActionButtons.toggle()
                         }
                     }
                 } else {
-                    Button("Edit") {
+                    Button(NSLocalizedString("Edit", comment: "Button to enter edit mode for modifying the list of relays.")) {
                         withAnimation {
                             showActionButtons.toggle()
                         }
