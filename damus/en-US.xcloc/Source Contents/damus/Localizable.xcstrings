@@ -1,0 +1,1742 @@
+{
+  "sourceLanguage" : "en-US",
+  "strings" : {
+    "" : {
+
+    },
+    "'%@' is an invalid Nostr address. It should look like an email address." : {
+      "comment" : "Description of why the Nostr address is invalid."
+    },
+    "(Contents are encrypted)" : {
+      "comment" : "Label on push notification indicating that the contents of the message are encrypted"
+    },
+    "#%@" : {
+      "comment" : "Navigation link to search hashtag."
+    },
+    "%@ / %@" : {
+      "comment" : "Amount of money required to subscribe to the Nostr relay. In English, this would look something like '4,000 sats / 30 days', meaning it costs 4000 sats to subscribe to the Nostr relay for 30 days.",
+      "localizations" : {
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ / %2$@"
+          }
+        }
+      }
+    },
+    "%@ / event" : {
+      "comment" : "Amount of money required to publish to the Nostr relay. In English, this would look something like '10 sats / event', meaning it costs 10 sats to publish one event."
+    },
+    "%@ %@" : {
+      "comment" : "Sentence composed of 2 variables to describe how many imports were performed from loading a NostrScript. In source English, the first variable is the number of imports, and the second variable is 'Import' or 'Imports'.\nSentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.\nSentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.\nSentence composed of 2 variables to describe how many quoted reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.\nSentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.\nSentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.\nSentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.\nSentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.",
+      "localizations" : {
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@"
+          }
+        }
+      }
+    },
+    "%@ has been muted" : {
+      "comment" : "Alert message that informs a user was muted."
+    },
+    "%@ not found" : {
+      "comment" : "When a note or profile is not found when searching for it via its note id"
+    },
+    "%@ reacted with %@" : {
+      "comment" : "Reacted by heading in local notification",
+      "localizations" : {
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ reacted with %2$@"
+          }
+        }
+      }
+    },
+    "%@ replied to your note" : {
+      "comment" : "Heading for local notification indicating a new reply"
+    },
+    "%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." : {
+      "comment" : "Explanation of what is done to keep personally identifiable information private. There is a heading that precedes this explanation which is a variable to this string."
+    },
+    "%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" : {
+      "comment" : "Explanation of what is done to keep private data encrypted. There is a heading that precedes this explanation which is a variable to this string."
+    },
+    "%@. Tip your friends and stack sats with Bitcoin⚡️, the native currency of the internet." : {
+      "comment" : "Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string."
+    },
+    "%lld/%lld" : {
+      "comment" : "Fraction of how many of the user's relay servers that are operational.",
+      "localizations" : {
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld"
+          }
+        }
+      }
+    },
+    "%lld%%" : {
+      "comment" : "Percentage of additional zap that should be sent to support Damus development."
+    },
+    "1 month" : {
+      "comment" : "A duration of 1 month to be shown to the user. Most likely in the context of how long they want to mute a piece of content for."
+    },
+    "1 week" : {
+      "comment" : "A duration of 1 week to be shown to the user. Most likely in the context of how long they want to mute a piece of content for."
+    },
+    "24 hours" : {
+      "comment" : "A duration of 24 hours/1 day to be shown to the user. Most likely in the context of how long they want to mute a piece of content for."
+    },
+    "About Me" : {
+      "comment" : "Label for About Me section of user profile form."
+    },
+    "Absolute Boss" : {
+      "comment" : "Placeholder text for About Me description."
+    },
+    "Absolute legend." : {
+      "comment" : "Example Bio"
+    },
+    "Accessibility" : {
+      "comment" : "Section header for accessibility settings"
+    },
+    "Account creation" : {
+      "comment" : "Label for Purple account creation date"
+    },
+    "Account private key" : {
+      "comment" : "Accessibility label for the private key input field"
+    },
+    "Actions" : {
+      "comment" : "Title for confirmation dialog to either share, report, or mute a profile."
+    },
+    "Active account" : {
+      "comment" : "Badge indicating user has an active Damus Purple account"
+    },
+    "Add" : {
+      "comment" : "Button to add relay server to list."
+    },
+    "Add all" : {
+      "comment" : "Button label to re-add all original participants as profiles to reply to in a note"
+    },
+    "Add an external link" : {
+      "comment" : "Placeholder as an example of what the user could set so that the link is opened when the status is tapped."
+    },
+    "Add bookmark" : {
+      "comment" : "Context menu option for adding a note bookmark."
+    },
+    "Add Bookmark" : {
+      "comment" : "Button text to add bookmark to a note."
+    },
+    "Add mute item" : {
+      "comment" : "Title text to indicate user to an add an item to their mutelist."
+    },
+    "Add Photo" : {
+      "comment" : "Label to indicate user can add a photo."
+    },
+    "Add relay" : {
+      "comment" : "Button text to add a relay\nButton to add a relay.\nTitle text to indicate user to an add a relay."
+    },
+    "Add your first post" : {
+      "comment" : "Prompt given to the user during onboarding, suggesting them to write their first post"
+    },
+    "Added" : {
+      "comment" : "Button to show relay server is already added to list."
+    },
+    "Additional information" : {
+      "comment" : "Header text to prompt user to optionally provide additional information when reporting a user or note."
+    },
+    "ADMIN" : {
+      "comment" : "Text label indicating the profile picture underneath it is the admin of the Nostr relay."
+    },
+    "All" : {
+      "comment" : "Human-readable short description of the 'friends filter' when it is set to 'all'\nLabel for filter for all notifications."
+    },
+    "All recent notes" : {
+      "comment" : "A label indicating that the notes being displayed below it are all recent notes"
+    },
+    "Already on Nostr?" : {
+      "comment" : "Ask the user if they already have an account on Nostr"
+    },
+    "Always show onboarding" : {
+      "comment" : "Developer mode setting to always show onboarding suggestions."
+    },
+    "An additional percentage of each zap will be sent to support Damus development" : {
+      "comment" : "Text indicating that they can contribute zaps to support Damus development."
+    },
+    "An unexpected error happened while trying to create the new contact list. Please contact support." : {
+      "comment" : "Error message for a failed contact list reset operation"
+    },
+    "An unexpected error occurred. Please contact Damus support via [Nostr](damus:npub18m76awca3y37hkvuneavuw6pjj4525fw90necxmadrvjg0sdy6qsngq955) or [email](support@damus.io) with the error message below." : {
+      "comment" : "Label explaining there was an error, and suggesting next steps"
+    },
+    "Animations" : {
+      "comment" : "Toggle to enable or disable image animation"
+    },
+    "Annually" : {
+      "comment" : "Annual renewal of purple subscription"
+    },
+    "Anonymous" : {
+      "comment" : "Button text to indicate that the zap type is a anonymous zap.\nPicker option to indicate that a zap should be sent anonymously and not identify the user as who sent it.\nPlaceholder display name of anonymous user."
+    },
+    "Any" : {
+      "comment" : "Any amount of sats"
+    },
+    "API Key (optional)" : {
+      "comment" : "Prompt for optional entry of API Key to use translation server."
+    },
+    "API Key (required)" : {
+      "comment" : "Prompt for required entry of API Key to use translation server."
+    },
+    "Appearance" : {
+      "comment" : "Navigation title for text and appearance settings.\nSection header for text and appearance settings"
+    },
+    "Appearance and filters" : {
+      "comment" : "Section header for text, appearance, and content filter settings"
+    },
+    "apple_translation_service" : {
+      "comment" : "Dropdown option for selecting Apple as a translation service.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Apple"
+          }
+        }
+      }
+    },
+    "Are you lost?" : {
+      "comment" : "Text asking the user if they are lost in the app."
+    },
+    "Are you sure you want to clear the cache? This will free space, but images may take longer to load again." : {
+      "comment" : "Message explaining what it means to clear the cache, asking if user wants to proceed."
+    },
+    "Are you sure you want to connect this wallet?" : {
+      "comment" : "Prompt to ask user if they want to attach their Nostr Wallet Connect lightning wallet."
+    },
+    "Are you sure you want to delete all of your bookmarks?" : {
+      "comment" : "Alert for deleting all of the bookmarks."
+    },
+    "Are you sure you want to upload the selected media?" : {
+      "comment" : "Alert message asking if the user wants to upload media."
+    },
+    "Are you sure you want to upload this image?" : {
+      "comment" : "Alert message asking if the user wants to upload an image."
+    },
+    "Are you sure you want to upload this media?" : {
+      "comment" : "Alert message asking if the user wants to upload media."
+    },
+    "As part of your Damus Purple membership, you get complimentary and automated translations. Would you like to enable Damus Purple translations?\n\nTip: You can always change this later in Settings → Translations" : {
+      "comment" : "Message notifying the user that they get auto-translations as part of their service"
+    },
+    "Authenticated" : {
+      "comment" : "Label to display that authentication to a server has succeeded."
+    },
+    "Automatic translations" : {
+      "comment" : "Part 1 of 2 in message 'You unlocked automatic translations' the user gets when they sign up for Damus Purple"
+    },
+    "Automatically translate notes" : {
+      "comment" : "Toggle to automatically translate notes."
+    },
+    "Be the first to access upcoming premium features: Automatic translations, longer note storage, and more" : {
+      "comment" : "Description of new features to be expected"
+    },
+    "Bio" : {
+      "comment" : "Label to prompt bio entry for user to describe themself."
+    },
+    "Bitcoin Lightning Tips" : {
+      "comment" : "Label for Bitcoin Lightning Tips section of user profile form."
+    },
+    "Blur images" : {
+      "comment" : "Setting to blur images"
+    },
+    "Bookmarks" : {
+      "comment" : "Sidebar menu label for Bookmarks view.\nTitle of bookmarks view"
+    },
+    "Broadcast" : {
+      "comment" : "Button to broadcast note to all your relays\nContext menu option for broadcasting the user's note to all of the user's connected relay servers."
+    },
+    "Broadcast music playing on Apple Music" : {
+      "comment" : "Toggle to enable or disable broadcasting what music is being played on Apple Music in their profile status."
+    },
+    "By continuing, you agree to our EULA" : {
+      "comment" : "Disclaimer to user that they are agreeing to the End User License Agreement if they create an account or sign in."
+    },
+    "By subscribing to Damus Purple, you are accepting our [privacy policy](https://damus.io/privacy-policy.txt) and Apple's Standard [EULA](https://www.apple.com/legal/internet-services/itunes/dev/stdeula/)" : {
+      "comment" : "Text explaining the terms and conditions of subscribing to Damus Purple. EULA stands for End User License Agreement."
+    },
+    "Cache has been cleared" : {
+      "comment" : "Message indicating that the cache was successfully cleared."
+    },
+    "Camera's permission was denied. You can change this in iOS settings." : {
+      "comment" : "Camera's permission denied error label"
+    },
+    "Cancel" : {
+      "comment" : "Alert button to cancel out of alert for muting a user.\nButton to cancel a repost.\nButton to cancel any interaction with the QRCode link.\nButton to cancel out of alert that creates a new mutelist.\nButton to cancel out of posting a note.\nButton to cancel out of search text entry mode.\nButton to cancel the upload.\nCancel button text for dismissing profile status settings view.\nCancel button text for dismissing updating image url.\nCancel deleting bookmarks.\nCancel deleting the user.\nCancel out of logging out the user.\nCancel out of search view.\nCancel resetting the contact list.\nText for button to cancel out of connecting Nostr Wallet Connect lightning wallet."
+    },
+    "Cancelled" : {
+      "comment" : "Title indicating that the user has cancelled."
+    },
+    "Changing this setting will cause the cache to be cleared. This will free space, but images may take longer to load again. Are you sure you want to proceed?" : {
+      "comment" : "Message explaining consequences of changing the 'enable animation' setting"
+    },
+    "Choose from Library" : {
+      "comment" : "Option to select photo from library"
+    },
+    "Clear All" : {
+      "comment" : "Button for clearing bookmarks data."
+    },
+    "Clear Cache" : {
+      "comment" : "Button to clear image cache."
+    },
+    "Clear status" : {
+      "comment" : "Label to prompt user to select an expiration time for the profile status to clear."
+    },
+    "Clearing Cache" : {
+      "comment" : "Loading message indicating that the cache is being cleared."
+    },
+    "Close" : {
+      "comment" : "Button label giving the user the option to close the sheet due to not being logged in.\nButton label giving the user the option to close the sheet from which they shared content\nButton label giving the user the option to close the sheet from which they were trying share.\nButton label giving the user the option to close the sheet from which they were trying to share.\nButton label giving the user the option to close the view when no content is available to share"
+    },
+    "Coming soon" : {
+      "comment" : "Feature is still in development and will be available soon"
+    },
+    "Coming soon! Visit our website to learn more" : {
+      "comment" : "Label announcing Purple, and inviting the user to learn more on the website"
+    },
+    "Configure Damus Purple" : {
+      "comment" : "Button to allow Damus Purple to be configured"
+    },
+    "Confirmation" : {
+      "comment" : "Confirmation dialog title"
+    },
+    "Connect" : {
+      "comment" : "Button to connect to the relay.\nText for button to conect to Nostr Wallet Connect lightning wallet."
+    },
+    "Connect to Alby Wallet" : {
+      "comment" : "Button to attach an Alby Wallet, a service that provides a Lightning wallet for zapping sats. Alby is the name of the service and should not be translated."
+    },
+    "Connect to Mutiny Wallet" : {
+      "comment" : "Button to attach an Mutiny Wallet, a service that provides a Lightning wallet for zapping sats. Mutiny is the name of the service and should not be translated."
+    },
+    "Connecting" : {
+      "comment" : "Relay status label that indicates a relay is connecting."
+    },
+    "CONTACT" : {
+      "comment" : "Text label indicating that the information below is the contact information of the admin of the Nostr relay."
+    },
+    "Contact list (Follows + Relay list)" : {
+      "comment" : "Section title for Contact list first aid tools"
+    },
+    "Contact list has been reset" : {
+      "comment" : "Message indicating that the contact list was successfully reset."
+    },
+    "Content filters" : {
+      "comment" : "Section title for content filtering/moderation configuration."
+    },
+    "Continue" : {
+      "comment" : "Button to dismiss suggested users view and continue to the main app\nContinue with bookmarks.\nContinue with deleting the user.\nContinue with resetting the contact list.\nPrompt to user to continue"
+    },
+    "Copied" : {
+      "comment" : "Label indicating that a user's key was copied."
+    },
+    "Copy" : {
+      "comment" : "Button to copy a relay server address.\nButton to copy the value found.\nContext menu option for copying the version of damus."
+    },
+    "Copy Account ID" : {
+      "comment" : "Context menu option for copying the ID of the account that created the note."
+    },
+    "Copy Image" : {
+      "comment" : "Context menu option to copy an image into clipboard."
+    },
+    "Copy Image URL" : {
+      "comment" : "Context menu option to copy the URL of an image into clipboard."
+    },
+    "Copy invoice" : {
+      "comment" : "Title of section for copying a Lightning invoice identifier."
+    },
+    "Copy Link" : {
+      "comment" : "Button to copy link to note"
+    },
+    "Copy LNURL" : {
+      "comment" : "Context menu option for copying a user's Lightning URL."
+    },
+    "Copy note ID" : {
+      "comment" : "Context menu option for copying the ID of the note."
+    },
+    "Copy note JSON" : {
+      "comment" : "Context menu option for copying the JSON text from the note."
+    },
+    "Copy Report ID" : {
+      "comment" : "Button to copy report ID."
+    },
+    "Copy text" : {
+      "comment" : "Context menu option for copying the text from an note."
+    },
+    "Copy URL" : {
+      "comment" : "Label for button in context menu to copy URL of the selected uploaded media asset."
+    },
+    "Copy user public key" : {
+      "comment" : "Context menu option for copying the ID of the user who created the note."
+    },
+    "Could not create your initial contact list event. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help." : {
+      "comment" : "Error message to the user indicating that the initial contact list failed to be created."
+    },
+    "Could not find the user you're looking for" : {
+      "comment" : "Indicates that there are no users found."
+    },
+    "Could not find user to mute..." : {
+      "comment" : "Alert message to indicate that the muted user could not be found."
+    },
+    "Create account" : {
+      "comment" : "Button to navigate to create account view."
+    },
+    "Create Account" : {
+      "comment" : "Button to continue to the create account page."
+    },
+    "Create new mutelist" : {
+      "comment" : "Title of alert prompting the user to create a new mutelist."
+    },
+    "Custom" : {
+      "comment" : "Dropdown option for selecting a custom translation server."
+    },
+    "Damus" : {
+      "comment" : "Name of the app for the title of an internal notification"
+    },
+    "Damus logo" : {
+      "comment" : "Accessibility label for damus logo"
+    },
+    "Damus Profile" : {
+      "comment" : "Label for the preview of the profile picture"
+    },
+    "Damus Purple" : {
+      "comment" : "Dropdown option for selecting Damus Purple as a translation service."
+    },
+    "Damus Purple environment" : {
+      "comment" : "Prompt selection of the Damus purple environment (Developer feature to switch between real/production mode to test modes)."
+    },
+    "Damus Wallet" : {
+      "comment" : "Title text for Damus Wallet view."
+    },
+    "DeepL (Proprietary, Higher Accuracy)" : {
+      "comment" : "Dropdown option for selecting DeepL as the translation service."
+    },
+    "Default Wallet" : {
+      "comment" : "Button to pay a Lightning invoice with the user's default Lightning wallet."
+    },
+    "Default Zap Amount in sats" : {
+      "comment" : "Title for section in zap settings that controls the default zap amount in sats."
+    },
+    "Delete" : {
+      "comment" : "Button for deleting the users account.\nButton to remove a user from their mutelist."
+    },
+    "Delete Account" : {
+      "comment" : "Button to delete the user's account."
+    },
+    "Description" : {
+      "comment" : "Description of the specific Nostr relay server."
+    },
+    "Developer" : {
+      "comment" : "Navigation title for developer settings\nSection header for developer settings"
+    },
+    "Developer Mode" : {
+      "comment" : "Setting to enable developer mode"
+    },
+    "Developer Mode enables features and options that may help developers diagnose issues and improve this app. Most users will not need Developer Mode." : {
+      "comment" : "Section header for Developer Settings view"
+    },
+    "Discard changes?" : {
+      "comment" : "Alert user that changes have been made."
+    },
+    "Disconnect" : {
+      "comment" : "Button to disconnect from a relay server.\nButton to disconnect from the relay."
+    },
+    "Disconnect Wallet" : {
+      "comment" : "Text for button to disconnect from Nostr Wallet Connect lightning wallet."
+    },
+    "Dismiss" : {
+      "comment" : "Button to dismiss alert"
+    },
+    "DMs" : {
+      "comment" : "Navigation title for DMs view, where DM is the English abbreviation for Direct Message.\nNavigation title for view of DMs, where DM is an English abbreviation for Direct Message.\nPicker option for DM selector for seeing only DMs that have been responded to. DM is the English abbreviation for Direct Message.\nSetting to enable DM Local Notification\nToolbar label for DMs view, where DM is the English abbreviation for Direct Message."
+    },
+    "Done" : {
+      "comment" : "Button to dismiss wallet selection view for paying Lightning invoice.\nButton to leave edit mode for modifying the list of relays."
+    },
+    "Duplicate relay" : {
+      "comment" : "Title of the duplicate relay error message."
+    },
+    "Duration" : {
+      "comment" : "Label for profile status expiration duration picker.\nThe duration in which to mute the given item."
+    },
+    "Earn Money" : {
+      "comment" : "Heading indicating that this application allows users to earn money."
+    },
+    "Edit" : {
+      "comment" : "Button to edit user's profile.\nButton to enter edit mode for modifying the list of relays.\nEdit Button for editing profile"
+    },
+    "Edit banner image" : {
+      "comment" : "Accessibility label for edit banner image button"
+    },
+    "Enable experimental Purple API support" : {
+      "comment" : "Developer mode setting to enable experimental Purple API support."
+    },
+    "Enable experimental Purple In-app purchase support" : {
+      "comment" : "Developer mode setting to enable experimental Purple In-app purchase support."
+    },
+    "Enable Purple auto-translations" : {
+      "comment" : "Label for button that allows users to enable Damus Purple translations"
+    },
+    "Encrypted" : {
+      "comment" : "Heading indicating that this application keeps private messaging end-to-end encrypted."
+    },
+    "Enter your account key" : {
+      "comment" : "Prompt for user to enter an account key to login."
+    },
+    "Error" : {
+      "comment" : "Headline label for an error sheet on the QR code scanner\nLabel to display that authentication to a server has failed.\nRelay status label that indicates a relay had an error when connecting\nTitle indicating that an error has occurred."
+    },
+    "Error configuring push notifications with the server: %@" : {
+      "comment" : "Error label shown when user tries to enable push notifications but something fails"
+    },
+    "Error disabling push notifications with the server: %@" : {
+      "comment" : "Error label shown when user tries to disable push notifications but something fails"
+    },
+    "Error fetching lightning invoice" : {
+      "comment" : "Message to display when there was an error fetching a lightning invoice while attempting to zap."
+    },
+    "Error retrieving muted event" : {
+      "comment" : "Text for an item that application failed to retrieve the muted event for."
+    },
+    "Error syncing up push notifications preferences with the server: %@" : {
+      "comment" : "Error label shown when system tries to sync up notification preferences to the push notification server but something fails"
+    },
+    "Error, please try again" : {
+      "comment" : "Text on QR code camera view indicating an error"
+    },
+    "Error: %@" : {
+      "comment" : "Error message indicating why saving keys failed."
+    },
+    "EULA" : {
+      "comment" : "Navigation title of view that shows the EULA, an acronym for End User License Agreement."
+    },
+    "Everyone will see that you zapped" : {
+      "comment" : "Description of public zap type where the zap is sent publicly and identifies the user who sent it."
+    },
+    "Exclusive features" : {
+      "comment" : "Features only available on subscription service"
+    },
+    "Executed successfully, returned with code %@" : {
+      "comment" : "Indication that the execution of running a NostrScript finished successfully, while providing a numeric return code."
+    },
+    "Expired account" : {
+      "comment" : "Badge indicating user has an expired Damus Purple account"
+    },
+    "Expiry date" : {
+      "comment" : "Label for Purple subscription expiry date"
+    },
+    "Failed to get push notification preferences from the server" : {
+      "comment" : "Error label indicating about a failure in fetching notification preferences"
+    },
+    "Failed to initialize" : {
+      "comment" : "NostrScript error message when it fails to initialize a module."
+    },
+    "Failed to parse" : {
+      "comment" : "NostrScript error message when it fails to parse a script."
+    },
+    "First Aid" : {
+      "comment" : "Navigation title for first aid settings and tools\nSection header for first aid tools and settings"
+    },
+    "Follow" : {
+      "comment" : "Button to follow a user."
+    },
+    "Follow %@ on Nostr" : {
+      "comment" : "Text on QR code view to prompt viewer looking at screen to follow the user."
+    },
+    "Follow All" : {
+      "comment" : "Button to follow all users in this section"
+    },
+    "Follow Back" : {
+      "comment" : "Button to follow a user back."
+    },
+    "Follow hashtag" : {
+      "comment" : "Button to follow a given hashtag."
+    },
+    "Follow me on Nostr" : {
+      "comment" : "Text on QR code view to prompt viewer looking at screen to follow the user."
+    },
+    "Followed by %@" : {
+      "comment" : "Text to indicate that the user is followed by one of our follows."
+    },
+    "Followed by %@ & %@" : {
+      "comment" : "Text to indicate that the user is followed by two of our follows.",
+      "localizations" : {
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Followed by %1$@ & %2$@"
+          }
+        }
+      }
+    },
+    "Followed by %@, %@ & %@" : {
+      "comment" : "Text to indicate that the user is followed by three of our follows.",
+      "localizations" : {
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Followed by %1$@, %2$@ & %3$@"
+          }
+        }
+      }
+    },
+    "Followers" : {
+      "comment" : "Label describing followers of a user.\nNavigation bar title for view that shows who is following a user."
+    },
+    "Followers You Know" : {
+      "comment" : "Navigation bar title for view that shows who is following a user."
+    },
+    "Following" : {
+      "comment" : "Navigation bar title for view that shows who a user is following."
+    },
+    "Following..." : {
+      "comment" : "Label to indicate that the user is in the process of following another user."
+    },
+    "Follows you" : {
+      "comment" : "Text to indicate that a user is following your profile."
+    },
+    "Font Size" : {
+      "comment" : "Section label for font size settings."
+    },
+    "For #Introductions! I’m a software developer.\n\nMy side interests include languages and I am striving to be a #polyglot - I am a native English speaker and can speak French, German and Japanese." : {
+      "comment" : "First post example given to the user during onboarding, as a suggestion as to what they could post first"
+    },
+    "Found\n %@" : {
+      "comment" : "Alert message asking if the user wants to open the link."
+    },
+    "Found profile!" : {
+      "comment" : "Text on QR code camera view telling user that profile scan was successful."
+    },
+    "Free" : {
+      "comment" : "Dropdown option for selecting Free plan for DeepL translation service."
+    },
+    "Friends of friends" : {
+      "comment" : "Human-readable short description of the 'friends filter' when it is set to 'friends-of-friends'"
+    },
+    "General" : {
+      "comment" : "Section header for general damus notifications user configuration"
+    },
+    "Get a special badge on your profile to show everyone your contribution to Freedom tech" : {
+      "comment" : "Supporter badge description"
+    },
+    "Get API Key" : {
+      "comment" : "Button to navigate to DeepL website to get a translation API key."
+    },
+    "Get API Key with BTC/Lightning" : {
+      "comment" : "Button to navigate to nokyctranslate website to get a translation API key.\nButton to navigate to translate.nostr.wine to get a translation API key."
+    },
+    "Go to the app" : {
+      "comment" : "Button label giving the user the option to go to the app after sharing content"
+    },
+    "Hashtags" : {
+      "comment" : "Label for filter for seeing only hashtag follows.\nSection header title for a list of hashtags that are muted."
+    },
+    "Hello everybody!\n\nThis is my first post on Damus, I am happy to meet you all 🤙. What’s up?\n\n#introductions" : {
+      "comment" : "First post example given to the user during onboarding, as a suggestion as to what they could post first"
+    },
+    "Help Build The Future" : {
+      "comment" : "Title for funding future damus development"
+    },
+    "Help build the future of decentralized communication on the web." : {
+      "comment" : "Text indicating the goal of developing Damus which the user can help with."
+    },
+    "Help us stay independent in our mission for Freedom tech with our Purple subscription, and look cool doing it!" : {
+      "comment" : "Damus purple subscription pitch"
+    },
+    "Hide" : {
+      "comment" : "Button to hide a note which has been muted."
+    },
+    "Hide all 🤙's" : {
+      "comment" : "Section footer describing OnlyZaps mode"
+    },
+    "Hide notes with #nsfw tags" : {
+      "comment" : "Setting to hide notes with the #nsfw (not safe for work) tags"
+    },
+    "Highlighted" : {
+      "comment" : "Label to indicate that the user is highlighting their own post."
+    },
+    "Highlighted %@" : {
+      "comment" : "Label to indicate that the user is highlighting 1 user."
+    },
+    "Home" : {
+      "comment" : "Navigation bar title for Home view where notes and replies appear from those who the user is following."
+    },
+    "Howdy! I’m a graphic designer during the day and coder at night, but I’m also trying to spend more time outdoors.\n\nHope to meet folks who are on their own journeys to a peaceful and free life!" : {
+      "comment" : "First post example given to the user during onboarding, as a suggestion as to what they could post first"
+    },
+    "https://jb55.com" : {
+      "comment" : "Placeholder example text for website URL for user profile."
+    },
+    "Illegal Content" : {
+      "comment" : "Description of report type for illegal content."
+    },
+    "Image uploader" : {
+      "comment" : "Prompt selection of user's image uploader"
+    },
+    "Image URL" : {
+      "comment" : "Option to enter a url"
+    },
+    "Images" : {
+      "comment" : "Section title for images configuration."
+    },
+    "Impersonation" : {
+      "comment" : "Description of report type for impersonation."
+    },
+    "In progress…" : {
+      "comment" : "Loading message indicating that a contact list reset operation is in progress."
+    },
+    "Indefinite" : {
+      "comment" : "Mute a given item indefinitly (until user unmutes it). As opposed to muting the item for a given period of time."
+    },
+    "Internal app notification" : {
+      "comment" : "Badge indicating that a notification is an official internal app notification"
+    },
+    "Invalid key" : {
+      "comment" : "Error message indicating that an invalid account key was entered for login."
+    },
+    "Invalid lightning address" : {
+      "comment" : "Message to display when there was an error attempting to zap due to an invalid lightning address."
+    },
+    "Invalid Nostr wallet connection string" : {
+      "comment" : "Error message when an invalid Nostr wallet connection string is provided."
+    },
+    "Invalid Tip Address" : {
+      "comment" : "Title of alerting as invalid tip address."
+    },
+    "It seems that you already have a translation service configured. Would you like to switch to Damus Purple as your translator?" : {
+      "comment" : "Confirmation dialog question asking users if they want their translation settings to be automatically switched to the Damus Purple translation service"
+    },
+    "jb55@jb55.com" : {
+      "comment" : "Placeholder example text for identifier used for Nostr addresses."
+    },
+    "Keys" : {
+      "comment" : "Navigation title for managing keys.\nSettings section for managing keys"
+    },
+    "Learn more about the features" : {
+      "comment" : "Label for a link to the Damus website, to allow the user to learn more about the features of Purple"
+    },
+    "Left Handed" : {
+      "comment" : "Moves the post button to the left side of the screen"
+    },
+    "LibreTranslate (Open Source)" : {
+      "comment" : "Dropdown option for selecting LibreTranslate as the translation service."
+    },
+    "Lightning Address or LNURL" : {
+      "comment" : "Placeholder text for entry of Lightning Address or LNURL."
+    },
+    "Lightning Invoice" : {
+      "comment" : "Indicates that the view is for paying a Lightning invoice."
+    },
+    "Like" : {
+      "comment" : "Accessibility Label for Like button"
+    },
+    "Likes" : {
+      "comment" : "Setting to enable Like Local Notification"
+    },
+    "LIVE" : {
+      "comment" : "Text indicator that the video is a livestream."
+    },
+    "Load media" : {
+      "comment" : "Button to show media in note."
+    },
+    "Local" : {
+      "comment" : "Option for notification mode setting: Local notification mode"
+    },
+    "Local authentication to access private key" : {
+      "comment" : "Face ID usage description shown when trying to access private key"
+    },
+    "Local default" : {
+      "comment" : "Dropdown option label for system default for Lightning wallet."
+    },
+    "Login" : {
+      "comment" : "Button to log into account.\nButton to navigate to login view."
+    },
+    "Logout" : {
+      "comment" : "Alert for logging out the user.\nButton for logging out the user.\nSidebar menu label to sign out of the account."
+    },
+    "Looking for %@..." : {
+      "comment" : "Label that appears when searching for note or profile"
+    },
+    "Make Default" : {
+      "comment" : "Button label to indicate that tapping it will make the selected zap type be the default for future zaps."
+    },
+    "Make sure the wallet you are connecting to supports NWC." : {
+      "comment" : "Hint message when an invalid Nostr wallet connection string is provided."
+    },
+    "Make sure your nsec account key is saved before you logout or you will lose access to this account" : {
+      "comment" : "Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out."
+    },
+    "Manage" : {
+      "comment" : "Manage the damus subscription"
+    },
+    "Manage subscription" : {
+      "comment" : "Button to take user to manage Damus Purple subscription"
+    },
+    "Media previews" : {
+      "comment" : "Setting to show media"
+    },
+    "Mentioned by %@" : {
+      "comment" : "Mentioned by heading in local notification"
+    },
+    "Mentions" : {
+      "comment" : "Label for filter for seeing mention notifications (replies, etc).\nSetting to enable Mention Local Notification"
+    },
+    "Merch" : {
+      "comment" : "Sidebar menu label for merch store link."
+    },
+    "Message" : {
+      "comment" : "Button label that allows the user to start a direct message conversation with the user shown on-screen"
+    },
+    "Monthly" : {
+      "comment" : "Monthly renewal of purple subscription"
+    },
+    "Mute" : {
+      "comment" : "Alert button to mute a user.\nButton label that allows the user to mute the user shown on-screen\nButton to mute a profile\nTitle for confirmation dialog to mute a profile."
+    },
+    "Mute %@?" : {
+      "comment" : "Alert message prompt to ask if a user should be muted."
+    },
+    "Mute conversation" : {
+      "comment" : "Context menu option for muting a conversation."
+    },
+    "Mute Hashtag" : {
+      "comment" : "Label represnting a button that the user can tap to mute a given hashtag so they don't see it in their feed anymore."
+    },
+    "Mute user" : {
+      "comment" : "Context menu option for muting users."
+    },
+    "Mute User" : {
+      "comment" : "Title of alert for muting a user."
+    },
+    "Muted" : {
+      "comment" : "Navigation title of view to see list of muted users & phrases.\nSidebar menu label for muted users view."
+    },
+    "My Relays" : {
+      "comment" : "Title of the tab that shows the user's list of their own relays."
+    },
+    "N/A" : {
+      "comment" : "Text label indicating that there is no NIP-11 relay admin contact information found. In English, N/A stands for not applicable.\nText label indicating that there is no NIP-11 relay description information found. In English, N/A stands for not applicable.\nText label indicating that there is no NIP-11 relay software information found. In English, N/A stands for not applicable.\nText label indicating that there is no NIP-11 relay software version information found. In English, N/A stands for not applicable."
+    },
+    "Name" : {
+      "comment" : "Label to prompt name entry."
+    },
+    "Never" : {
+      "comment" : "Profile status duration setting of never expiring."
+    },
+    "New encrypted direct message" : {
+      "comment" : "Notification that the user has received a new direct message"
+    },
+    "New message" : {
+      "comment" : "Title label for push notifications where a direct message was sent to the user"
+    },
+    "New note reaction" : {
+      "comment" : "Title label for push notifications where someone reacted to the user's post with a specific emoji"
+    },
+    "New to Nostr?" : {
+      "comment" : "Ask the user if they are new to Nostr"
+    },
+    "Next" : {
+      "comment" : "Button to continue with account creation."
+    },
+    "No" : {
+      "comment" : "Do not discard changes.\nUser confirm No"
+    },
+    "No contact list was found. You might experience issues using the app. If you suspect you have permanently lost your contact list (or if you never had one), you can fix this by resetting it" : {
+      "comment" : "Section footer for Contact list first aid tools"
+    },
+    "No content available to share" : {
+      "comment" : "Title indicating that there was no available content to share"
+    },
+    "No logs to display" : {
+      "comment" : "Label to indicate that there are no developer mode logs available to be displayed on the screen"
+    },
+    "No mute list found, create a new one? This will overwrite any previous mute lists." : {
+      "comment" : "Alert message prompt that asks if the user wants to create a new mute list, overwriting previous mute lists."
+    },
+    "No one will see that you zapped" : {
+      "comment" : "Description of anonymous zap type where the zap is sent anonymously and does not identify the user who sent it."
+    },
+    "No results" : {
+      "comment" : "A label indicating that note search resulted in no results"
+    },
+    "No zaps will be sent, only a lightning payment." : {
+      "comment" : "Description of non-zap type where sats are sent to the user's wallet as a regular Lightning payment, not as a zap."
+    },
+    "No, thanks" : {
+      "comment" : "Label for button that allows users to reject enabling Damus Purple translations"
+    },
+    "NoKYCTranslate.com (Prepay with BTC)" : {
+      "comment" : "Dropdown option for selecting NoKYCTranslate.com as the translation service."
+    },
+    "none" : {
+      "comment" : "No search results."
+    },
+    "None" : {
+      "comment" : "Button text to indicate that the zap type is a private zap.\nPicker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap."
+    },
+    "none_translation_service" : {
+      "comment" : "Dropdown option for selecting no translation service.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "None"
+          }
+        }
+      }
+    },
+    "Nostr Address" : {
+      "comment" : "Label for the Nostr Address section of user profile form."
+    },
+    "NostrScript" : {
+      "comment" : "Navigation title for the view showing NostrScript."
+    },
+    "NostrScript Error" : {
+      "comment" : "Text indicating that there was an error with loading NostrScript. There is a more descriptive error message shown separately underneath."
+    },
+    "Not Logged In" : {
+      "comment" : "Title indicating that sharing cannot proceed because the user is not logged in."
+    },
+    "Not now" : {
+      "comment" : "Button to not save key, complete account creation, and start using the app."
+    },
+    "Note from a %@ you've muted" : {
+      "comment" : "Text to indicate that what is being shown is a note which has been muted."
+    },
+    "Note you've muted" : {
+      "comment" : "Label indicating note has been muted\nText to indicate that what is being shown is a note which has been muted."
+    },
+    "Notes" : {
+      "comment" : "A label indicating that the notes being displayed below it are from a timeline, not search results\nLabel for filter for seeing only notes (instead of notes and replies)."
+    },
+    "Notes & Replies" : {
+      "comment" : "Label for filter for seeing notes and replies (instead of only notes)."
+    },
+    "Notes with the #nsfw tag usually contains adult content or other \"Not safe for work\" content" : {
+      "comment" : "Section footer clarifying what #nsfw (not safe for work) tags mean"
+    },
+    "Nothing to see here. Check back later!" : {
+      "comment" : "Indicates that there are no notes in the timeline to view."
+    },
+    "Notification Dots" : {
+      "comment" : "Section header for notification indicator dot settings"
+    },
+    "Notification Preferences" : {
+      "comment" : "Section header for Notification Preferences"
+    },
+    "Notifications" : {
+      "comment" : "Section header for Damus notifications\nToolbar label for Notifications view."
+    },
+    "Notifications mode" : {
+      "comment" : "Prompt selection of the notification mode (Feature to switch between local notifications (generated from user's own phone) or push notifications (generated by Damus server)."
+    },
+    "now" : {
+      "comment" : "Relative time label that indicates a notification happened now\nString indicating that a given timestamp just occurred"
+    },
+    "npub, #hashtag, phrase" : {
+      "comment" : "Placeholder example for relay server address."
+    },
+    "nsec1…" : {
+      "comment" : "Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key."
+    },
+    "Nudity" : {
+      "comment" : "Description of report type for nudity."
+    },
+    "Ok" : {
+      "comment" : "Button to dismiss the alert."
+    },
+    "OK" : {
+      "comment" : "Button label indicating user wants to proceed.\nButton label to dismiss an error dialog"
+    },
+    "Online" : {
+      "comment" : "Relay status label that indicates a relay is connected."
+    },
+    "Only you can see this message and who sent it." : {
+      "comment" : "Help text on green lock icon that explains that only the current user can see the message of a zap event and who sent the zap."
+    },
+    "OnlyZaps" : {
+      "comment" : "Section header for enabling OnlyZaps mode (hide reactions)"
+    },
+    "OnlyZaps Enabled" : {
+      "comment" : "Non-tappable text in context menu that shows up when the zap button on profile is long pressed to indicate that the user has enabled OnlyZaps, meaning that they would like to be only zapped and not accept reactions to their notes."
+    },
+    "OnlyZaps mode" : {
+      "comment" : "Setting toggle to hide reactions."
+    },
+    "Open in browser" : {
+      "comment" : "Button to open the value found in browser."
+    },
+    "Open in wallet" : {
+      "comment" : "Button to open the value found in browser."
+    },
+    "optional" : {
+      "comment" : "Label indicating that a form input is optional."
+    },
+    "Optional" : {
+      "comment" : "Prompt to enter optional additional information when reporting an account or content."
+    },
+    "Orange-pill" : {
+      "comment" : "Button label that allows the user to start a direct message conversation with the user shown on-screen, to orange-pill them (i.e. help them to setup zaps)"
+    },
+    "Paid Relay" : {
+      "comment" : "Text indicating that this is a paid relay."
+    },
+    "Paste NWC Address" : {
+      "comment" : "Text for button to connect a lightning wallet."
+    },
+    "Paste private key" : {
+      "comment" : "Accessibility label for the private key paste button"
+    },
+    "Pay" : {
+      "comment" : "Button to pay a Lightning invoice."
+    },
+    "Pay the Lightning invoice" : {
+      "comment" : "Navigation bar title for view to pay Lightning invoice."
+    },
+    "Pending" : {
+      "comment" : "Label to display that authentication to a server is pending."
+    },
+    "People" : {
+      "comment" : "Label for filter for seeing only people follows."
+    },
+    "Permanently Delete Account" : {
+      "comment" : "Alert for deleting the users account.\nSection title for deleting the user"
+    },
+    "Plan" : {
+      "comment" : "Prompt selection of DeepL subscription plan to perform machine translations on notes"
+    },
+    "Please choose relays from the list below to filter the current feed:" : {
+      "comment" : "Instructions on how to filter a specific timeline feed by choosing relay servers to filter on."
+    },
+    "Point your camera to a QR code…" : {
+      "comment" : "Text on QR code camera view instructing user to point to QR code"
+    },
+    "Post" : {
+      "comment" : "Button to post a note."
+    },
+    "Private" : {
+      "comment" : "Button text to indicate that the zap type is a private zap.\nHeading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading.\nPicker option to indicate that a zap should be sent privately and not identify the user to the public."
+    },
+    "Private Key" : {
+      "comment" : "Title of the secure field that holds the user's private key."
+    },
+    "Private Zap" : {
+      "comment" : "Title of notification when a private zap is received."
+    },
+    "private_zap_description" : {
+      "comment" : "Description of private zap type where the zap is sent privately and does not identify the user to the public.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Only '%@' will see that you zapped them"
+          }
+        }
+      }
+    },
+    "Pro" : {
+      "comment" : "Dropdown option for selecting Pro plan for DeepL translation service."
+    },
+    "Production" : {
+      "comment" : "Label indicating the production environment for Damus Purple\nLabel indicating the production environment for Push notification functionality"
+    },
+    "Profanity" : {
+      "comment" : "Description of report type for profanity."
+    },
+    "Profile" : {
+      "comment" : "Sidebar menu label for Profile view."
+    },
+    "Profile action sheets allow you to follow, zap, or DM profiles more quickly without having to view their full profile" : {
+      "comment" : "Section footer clarifying what the profile action sheet feature does"
+    },
+    "Profiles" : {
+      "comment" : "Section title for profile view configuration."
+    },
+    "Public" : {
+      "comment" : "Button text to indicate that the zap type is a public zap.\nPicker option to indicate that a zap should be sent publicly and identify the user as who sent it."
+    },
+    "Public Account ID" : {
+      "comment" : "Section title for the user's public account ID."
+    },
+    "Public key" : {
+      "comment" : "Label indicating that the text is a user's public account key."
+    },
+    "Purchased on" : {
+      "comment" : "Indicating when the user purchased the subscription"
+    },
+    "Purchased!" : {
+      "comment" : "User purchased a subscription"
+    },
+    "Purchasing" : {
+      "comment" : "Loading label indicating the purchase action is in progress"
+    },
+    "Purple" : {
+      "comment" : "Subscription service name"
+    },
+    "Push" : {
+      "comment" : "Option for notification mode setting: Push notification mode"
+    },
+    "Push notification environment" : {
+      "comment" : "Prompt selection of the Push notification environment (Developer feature to switch between real/production mode to test modes)."
+    },
+    "QR Code" : {
+      "comment" : "Button to view profile's qr code."
+    },
+    "Quote" : {
+      "comment" : "Button to compose a quoted note"
+    },
+    "Quotes" : {
+      "comment" : "Navigation bar title for Quote Reposts view."
+    },
+    "Ran to suspension." : {
+      "comment" : "Indication that a NostrScript was run until it reached a suspended state."
+    },
+    "React with default reaction emoji" : {
+      "comment" : "Accessibility label for react button"
+    },
+    "Reactions" : {
+      "comment" : "Navigation bar title for Reactions view.\nSection header for reactions settings\nTitle of emoji reactions view"
+    },
+    "Recommended" : {
+      "comment" : "Title of the tab that shows the list of relays recommended by Damus."
+    },
+    "Relay Logs" : {
+      "comment" : "Text label indicating that the text below it are developer mode logs."
+    },
+    "Relays" : {
+      "comment" : "Navigation bar title that shows the list of relays for a user.\nSidebar menu label for Relays view.\nTitle of relays view"
+    },
+    "Relays have been notified and clients will be able to use this information to filter content. Thank you!" : {
+      "comment" : "Description of what was done as a result of sending a report to relay servers."
+    },
+    "Remove all" : {
+      "comment" : "Button label to remove all participants from a note reply."
+    },
+    "Remove bookmark" : {
+      "comment" : "Context menu option for removing a note bookmark."
+    },
+    "Remove Bookmark" : {
+      "comment" : "Button text to remove bookmark from a note."
+    },
+    "Renew (1 mo)" : {
+      "comment" : "Button to take user to renew subscription for one month"
+    },
+    "Renew (1 yr)" : {
+      "comment" : "Button to take user to renew subscription for one year"
+    },
+    "Renews on" : {
+      "comment" : "Indicating when the subscription will renew"
+    },
+    "Reply" : {
+      "comment" : "Accessibility label for reply button"
+    },
+    "Replying to" : {
+      "comment" : "Text indicating that the view is used for editing which participants are replied to in a note."
+    },
+    "Replying to %@" : {
+      "comment" : "Indicating that the user is replying to the following listed people.\nIndicating that the user is replying to the themself and no one else, where the parameter is 'self' in US English.\nLabel to indicate that the user is replying to 1 user."
+    },
+    "Replying to %@ & %@" : {
+      "comment" : "Label to indicate that the user is replying to 2 users.",
+      "localizations" : {
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Replying to %1$@ & %2$@"
+          }
+        }
+      }
+    },
+    "Replying to self" : {
+      "comment" : "Label to indicate that the user is replying to themself."
+    },
+    "Report" : {
+      "comment" : "Button to report a profile.\nContext menu option for reporting content.\nLabel indicating that the current view is for the user to report content."
+    },
+    "Report ID:" : {
+      "comment" : "Label indicating that the text underneath is the identifier of the report that was sent to relay servers."
+    },
+    "Report Note" : {
+      "comment" : "Button to report a note."
+    },
+    "Report sent!" : {
+      "comment" : "Message indicating that a report was successfully sent to relay servers."
+    },
+    "Report User" : {
+      "comment" : "Button to report a user."
+    },
+    "Repost" : {
+      "comment" : "Button to repost a note"
+    },
+    "Repost or quote this note" : {
+      "comment" : "Accessibility label for repost/quote button"
+    },
+    "Reposted" : {
+      "comment" : "Text indicating that the note was reposted (i.e. re-shared)."
+    },
+    "Reposted by %@" : {
+      "comment" : "Reposted by heading in local notification"
+    },
+    "Reposts" : {
+      "comment" : "Accessibility label for boosts button\nNavigation bar title for Reposts view.\nSetting to enable Repost Local Notification"
+    },
+    "Requests" : {
+      "comment" : "Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet"
+    },
+    "required" : {
+      "comment" : "Label indicating that a form input is required."
+    },
+    "Reset contact list" : {
+      "comment" : "Button to reset contact list."
+    },
+    "Retry" : {
+      "comment" : "Button to retry completing account creation after an error occurred."
+    },
+    "Run" : {
+      "comment" : "Button that runs a NostrScript."
+    },
+    "Running..." : {
+      "comment" : "Indication that the execution of a NostrScript is running."
+    },
+    "Runtime error" : {
+      "comment" : "Indication that a runtime error occurred when running a NostrScript."
+    },
+    "Satoshi Nakamoto" : {
+      "comment" : "Name of Bitcoin creator(s)."
+    },
+    "Save" : {
+      "comment" : "Button for saving profile.\nButton to save key, complete account creation, and start using the app."
+    },
+    "Save 14%" : {
+      "comment" : "Percentage of purchase price the user will save"
+    },
+    "Save 20% off on an annual subscription" : {
+      "comment" : "Savings for purchasing an annual subscription"
+    },
+    "Save Image" : {
+      "comment" : "Context menu option to save an image."
+    },
+    "Save Key in Secure Keychain" : {
+      "comment" : "Toggle to save private key to the Apple secure keychain."
+    },
+    "Save your login info?" : {
+      "comment" : "Ask user if they want to save their account information."
+    },
+    "Scan a user's pubkey" : {
+      "comment" : "Text to prompt scanning a QR code of a user's pubkey to open their profile."
+    },
+    "Scan Code" : {
+      "comment" : "Button to switch to scan QR Code page."
+    },
+    "Scan for QR Code" : {
+      "comment" : "Context menu option to scan image for a QR Code."
+    },
+    "Scan NWC Address" : {
+      "comment" : "Text for button to connect a lightning wallet."
+    },
+    "Scan QR code" : {
+      "comment" : "Accessibility label for a button that scans a private key QR code"
+    },
+    "Scan the code" : {
+      "comment" : "Text on QR code view to prompt viewer to scan the QR code on screen with their device camera."
+    },
+    "Scan Your Private Key QR" : {
+      "comment" : "Text to prompt scanning a QR code of a user's privkey to login to their profile."
+    },
+    "Search" : {
+      "comment" : "Default title for the search screen when it is in an unknown state.\nTitle of the text field for searching."
+    },
+    "Search..." : {
+      "comment" : "Placeholder text to prompt entry of search query."
+    },
+    "Search/Universe" : {
+      "comment" : "Navigation title for universe/search settings.\nSection header for search/universe settings"
+    },
+    "Secret Account Login Key" : {
+      "comment" : "Section title for user's secret account login key."
+    },
+    "Securely connect your Damus app to your wallet using Nostr Wallet Connect" : {
+      "comment" : "Text to prompt user to connect their wallet using 'Nostr Wallet Connect'."
+    },
+    "Select a Lightning wallet" : {
+      "comment" : "Title of section for selecting a Lightning wallet to pay a Lightning invoice."
+    },
+    "Select default emoji" : {
+      "comment" : "Prompt selection of user's default emoji reaction"
+    },
+    "Select default wallet" : {
+      "comment" : "Prompt selection of user's default wallet"
+    },
+    "self" : {
+      "comment" : "Part of a larger sentence 'Replying to self' in US English. 'self' indicates that the user is replying to themself and no one else."
+    },
+    "Send a message to start the conversation..." : {
+      "comment" : "Text prompt for user to send a message to the other user."
+    },
+    "Send a message with your zap..." : {
+      "comment" : "Placeholder text for a comment to send as part of a zap to the user."
+    },
+    "Server" : {
+      "comment" : "Prompt selection of LibreTranslate server to perform machine translations on notes"
+    },
+    "Service" : {
+      "comment" : "Prompt selection of translation service provider."
+    },
+    "Settings" : {
+      "comment" : "Navigation title for Settings view.\nSidebar menu label for accessing the app settings"
+    },
+    "Share" : {
+      "comment" : "Button to share a note\nButton to share an image.\nButton to share the link to a profile.\nSave button text for saving profile status settings."
+    },
+    "Share externally" : {
+      "comment" : "Accessibility label for external share button"
+    },
+    "Share Note" : {
+      "comment" : "Title text to indicate that the buttons below are meant to be used to share a note with others."
+    },
+    "Share Via..." : {
+      "comment" : "Button to present iOS share sheet"
+    },
+    "Shared" : {
+      "comment" : "Title indicating that the user has shared content successfully"
+    },
+    "Shared Picture" : {
+      "comment" : "Label for the preview of the image being picture"
+    },
+    "Sharing" : {
+      "comment" : "Title indicating that the content is being published to the network"
+    },
+    "Show" : {
+      "comment" : "Button to show a note which has been muted.\nToggle to show or hide user's secret account login key."
+    },
+    "Show general statuses" : {
+      "comment" : "Settings toggle for enabling general user statuses"
+    },
+    "Show less" : {
+      "comment" : "Button to show less of a long profile description."
+    },
+    "Show more" : {
+      "comment" : "Button to show entire note.\nButton to show more of a long profile description."
+    },
+    "Show music statuses" : {
+      "comment" : "Settings toggle for enabling now playing music statuses"
+    },
+    "Show only from users you follow" : {
+      "comment" : "Setting to Show notifications only associated to users your follow"
+    },
+    "Show only preferred languages on Universe feed" : {
+      "comment" : "Toggle to show notes that are only in the device's preferred languages on the Universe feed and hide notes that are in other languages."
+    },
+    "Show profile action sheets" : {
+      "comment" : "Setting to show profile action sheets when clicking on a user's profile picture"
+    },
+    "Show wallet selector" : {
+      "comment" : "Toggle to show or hide selection of wallet."
+    },
+    "Side menu" : {
+      "comment" : "Accessibility label for the side menu button at the topbar"
+    },
+    "Sign in" : {
+      "comment" : "Title of view to log into an account."
+    },
+    "Sign In" : {
+      "comment" : "Button to continue to login page."
+    },
+    "Sign out" : {
+      "comment" : "Sidebar menu label to sign out of the account."
+    },
+    "Sign Out" : {
+      "comment" : "Section title for signing out"
+    },
+    "Skip" : {
+      "comment" : "Button to dismiss the suggested users screen"
+    },
+    "SOFTWARE" : {
+      "comment" : "Text label indicating which relay software is used to run this Nostr relay."
+    },
+    "Someone posted a note" : {
+      "comment" : "Title label for push notification where someone posted a note"
+    },
+    "Someone reacted to your note" : {
+      "comment" : "Generic title label for push notifications where someone reacted to the user's post"
+    },
+    "Someone reacted to your note with %@" : {
+      "comment" : "Body label for push notifications where someone reacted to the user's post with a specific emoji"
+    },
+    "Someone zapped you ⚡️" : {
+      "comment" : "Title label for a push notification where someone zapped the user"
+    },
+    "Sorry, this QR code looks incompatible with Damus. Please try another one." : {
+      "comment" : "Text on QR code camera view telling the user a QR is incompatible"
+    },
+    "Spam" : {
+      "comment" : "Description of report type for spam.\nSection header for Universe/Search spam"
+    },
+    "Staging" : {
+      "comment" : "Label indicating a staging test environment for Damus Purple functionality (Developer feature)"
+    },
+    "Staging (for dev builds)" : {
+      "comment" : "Label indicating the staging environment for Push notification functionality"
+    },
+    "Staying humble..." : {
+      "comment" : "Placeholder as an example of what the user could set as their profile status."
+    },
+    "Subscriber number" : {
+      "comment" : "Label for Purple account subscriber number"
+    },
+    "Subscription Error" : {
+      "comment" : "Ah dang there was an error loading subscription information from the AppStore. Please try again later :("
+    },
+    "Successfully synced" : {
+      "comment" : "Label indicating success in syncing notification preferences"
+    },
+    "Suggested hashtags" : {
+      "comment" : "A label indicating that the items below it are suggested hashtags"
+    },
+    "Support Damus" : {
+      "comment" : "Text calling for the user to support Damus through zaps"
+    },
+    "Support Damus development to help build the future of decentralized communication on the web." : {
+      "comment" : "Reason for supporting damus development"
+    },
+    "Supported NIPs" : {
+      "comment" : "Label to display relay's supported NIPs."
+    },
+    "Supporter Badge" : {
+      "comment" : "Title for supporter badge"
+    },
+    "Syncing" : {
+      "comment" : "Label indicating success in syncing notification preferences"
+    },
+    "Tagged by %@" : {
+      "comment" : "Tagged by heading in local notification"
+    },
+    "Take Photo" : {
+      "comment" : "Option to take a photo with the camera"
+    },
+    "Test (local)" : {
+      "comment" : "Label indicating a local test environment for Damus Purple functionality (Developer feature)\nLabel indicating a local test environment for Push notification functionality (Developer feature)"
+    },
+    "Text Truncation" : {
+      "comment" : "Section header for damus text truncation user configuration"
+    },
+    "Thank you very much for signing up for Damus Purple. Your contribution helps us continue our fight for a more Open and Free internet.\n\nYou will also get access to premium features, and a star badge on your profile.\n\nEnjoy!" : {
+      "comment" : "Appreciation to user for purchasing subscription service"
+    },
+    "Thanks!" : {
+      "comment" : "Button to close out of alert that informs that the action to muted a user was successful."
+    },
+    "The address should either begin with LNURL or should look like an email address." : {
+      "comment" : "Giving the description of the alert message."
+    },
+    "The camera could not be accessed." : {
+      "comment" : "Camera's bad input error label"
+    },
+    "The camera was not capable of scanning the requested codes." : {
+      "comment" : "Camera's bad output error label"
+    },
+    "The relay you are trying to add is already added.\nYou're all set!" : {
+      "comment" : "An error message that appears when the user attempts to add a relay that has already been added."
+    },
+    "The social network you control" : {
+      "comment" : "Quick description of what Damus is"
+    },
+    "There has been an unexpected error with the in-app purchase. Please try again later or contact support@damus.io. Error: %@" : {
+      "comment" : "In-app purchase error message for the user"
+    },
+    "There is no content available to share at this time. Please close this view and try again." : {
+      "comment" : "Label explaining that no content is available to share and instructing the user to close the view and try again."
+    },
+    "There was an error loading your account. Please try again later. If problem persists, please contact us at support@damus.io" : {
+      "comment" : "Error label when Purple account information fails to load"
+    },
+    "There was an unexpected error in initializing the camera." : {
+      "comment" : "Camera's initialization error label"
+    },
+    "This device's in-app purchase is registered to a different Nostr account. Unable to manage this Purple account. If you believe this was a mistake, please contact us via support@damus.io." : {
+      "comment" : "Notice label that user cannot manage their In-App purchases"
+    },
+    "This is a public key, you will not be able to make notes or interact in any way. This is used for viewing accounts from their perspective." : {
+      "comment" : "Warning that the inputted account key is a public key and the result of what happens because of it."
+    },
+    "This is my first post on Nostr 💜. I love drawing and folding Origami!\n\nNice to meet you all! #introductions #plebchain " : {
+      "comment" : "First post example given to the user during onboarding, as a suggestion as to what they could post first"
+    },
+    "This note contains too many items and cannot be rendered" : {
+      "comment" : "Error message indicating that a note is too big and cannot be rendered"
+    },
+    "This user cannot be zapped because they have not configured zaps on their account yet. Time to orange-pill?" : {
+      "comment" : "Comment explaining why a user cannot be zapped."
+    },
+    "Thread" : {
+      "comment" : "Navigation bar title for note thread."
+    },
+    "Threads" : {
+      "comment" : "Section header title for a list of threads that are muted."
+    },
+    "To continue your Purple subscription checkout, please verify your npub by clicking on the button below" : {
+      "comment" : "Instruction on how to verify npub during Damus Purple checkout"
+    },
+    "Toggle key visibility" : {
+      "comment" : "Accessibility label for toggling the visibility of the private key input field"
+    },
+    "Top hits" : {
+      "comment" : "A label indicating that the notes being displayed below it are all top note search results"
+    },
+    "Top Zap" : {
+      "comment" : "Text indicating that this zap is the one with the highest amount of sats."
+    },
+    "Translate DMs" : {
+      "comment" : "Toggle to translate direct messages."
+    },
+    "Translate Note" : {
+      "comment" : "Button to translate note from different language."
+    },
+    "translate.nostr.wine (DeepL, Pay with BTC)" : {
+      "comment" : "Dropdown option for selecting translate.nostr.wine as the translation service."
+    },
+    "Translated from %@" : {
+      "comment" : "Button to indicate that the note has been translated from a different language."
+    },
+    "Translation" : {
+      "comment" : "Navigation title for translation settings.\nSection header for text and appearance settings"
+    },
+    "Translations" : {
+      "comment" : "Section title for selecting the translation service."
+    },
+    "Truncate notification mention text" : {
+      "comment" : "Setting to truncate text in mention notifications"
+    },
+    "Truncate timeline text" : {
+      "comment" : "Setting to truncate text in timeline"
+    },
+    "Type %@ to delete" : {
+      "comment" : "Text field prompt asking user to type DELETE in all caps to confirm that they want to proceed with deleting their account."
+    },
+    "Type your note here..." : {
+      "comment" : "Text box prompt to ask user to type their note."
+    },
+    "Unable to find a QR Code" : {
+      "comment" : "Alert message letting user know a QR Code was not found."
+    },
+    "Unfollow" : {
+      "comment" : "Button to unfollow a user."
+    },
+    "Unfollow hashtag" : {
+      "comment" : "Button to unfollow a given hashtag."
+    },
+    "Unfollowing..." : {
+      "comment" : "Label to indicate that the user is in the process of unfollowing another user."
+    },
+    "Universe 🛸" : {
+      "comment" : "Toolbar label for the universal view where notes from all connected relay servers appear."
+    },
+    "Unmute" : {
+      "comment" : "Button to unmute a profile."
+    },
+    "Unmute conversation" : {
+      "comment" : "Context menu option for unmuting a conversation."
+    },
+    "Unmute Hashtag" : {
+      "comment" : "Label represnting a button that the user can tap to unmute a given hashtag so they start seeing it in their feed again."
+    },
+    "Untitled" : {
+      "comment" : "Title of longform event if it is untitled."
+    },
+    "Update" : {
+      "comment" : "Update button text for updating image url."
+    },
+    "Upload" : {
+      "comment" : "Button to proceed with uploading."
+    },
+    "URL" : {
+      "comment" : "Custom URL host for Damus Purple testing\nCustom URL host for Damus push notification testing\nExample URL to LibreTranslate server"
+    },
+    "User has been muted" : {
+      "comment" : "Alert message that informs a user was muted."
+    },
+    "User muted" : {
+      "comment" : "Alert message to indicate the user has been muted"
+    },
+    "User not zappable" : {
+      "comment" : "Headline indicating a user cannot be zapped"
+    },
+    "User Statuses" : {
+      "comment" : "Section header for user profile status settings."
+    },
+    "Username" : {
+      "comment" : "Label for Username section of user profile form."
+    },
+    "Users" : {
+      "comment" : "Section header title for a list of muted users."
+    },
+    "Verified!" : {
+      "comment" : "Instructions after the user has verified their npub for Damus Purple purchase checkout"
+    },
+    "Verify my npub" : {
+      "comment" : "Button label to verify the user's npub for the purpose of Purple subscription checkout"
+    },
+    "Version" : {
+      "comment" : "Section title for displaying the version number of the Damus app."
+    },
+    "VERSION" : {
+      "comment" : "Text label indicating which version of the relay software is being run for this Nostr relay."
+    },
+    "View full profile" : {
+      "comment" : "A button label that allows the user to see the full profile of the profile they are previewing"
+    },
+    "View multiple events per user" : {
+      "comment" : "Setting to only see 1 event per user (npub) in the search/universe"
+    },
+    "View QR Code" : {
+      "comment" : "Button to switch to view users QR Code"
+    },
+    "Visit the Damus website on a web browser to manage billing" : {
+      "comment" : "Instruction on how to manage billing externally"
+    },
+    "Wake up, %@" : {
+      "comment" : "Text telling the user to wake up, where the argument is their display name."
+    },
+    "Wallet" : {
+      "comment" : "Navigation title for Wallet view\nNavigation title for attaching Nostr Wallet Connect lightning wallet.\nSidebar menu label for Wallet view.\nTitle for section in zap settings that controls the Lightning wallet selection."
+    },
+    "Wallet Address" : {
+      "comment" : "Label text indicating that below it is the wallet address."
+    },
+    "Wallet Relay" : {
+      "comment" : "Label text indicating that below it is the information about the wallet relay."
+    },
+    "WARNING:\n\nThis will reset your contact list, including the list of everyone you follow and the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY." : {
+      "comment" : "Alert for resetting the user's contact list."
+    },
+    "WARNING:\n\nTHIS WILL SIGN AN EVENT THAT DELETES THIS ACCOUNT.\n\nYOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.\n\n ARE YOU SURE YOU WANT TO CONTINUE?" : {
+      "comment" : "Alert for deleting the users account."
+    },
+    "We did not detect any issues that we can automatically fix for you. If you are having issues, please contact Damus support: [support@damus.io](mailto:support@damus.io)" : {
+      "comment" : "Message indicating that no First Aid actions are available."
+    },
+    "We'll save your account key, so you won't need to enter it manually next time you log in." : {
+      "comment" : "Reminder to user that they should save their account information."
+    },
+    "Website" : {
+      "comment" : "Label for Website section of user profile form."
+    },
+    "Welcome to Damus" : {
+      "comment" : "Welcome text shown on the first screen when user is not logged in."
+    },
+    "Welcome to Purple" : {
+      "comment" : "Greeting to subscription service"
+    },
+    "Welcome to the social network %@ control." : {
+      "comment" : "Welcoming message to the reader. The variable is 'you', the reader."
+    },
+    "Welcome to the social network you control" : {
+      "comment" : "Welcome text"
+    },
+    "Welcome, %@!" : {
+      "comment" : "Text to welcome user."
+    },
+    "Welcome!" : {
+      "comment" : "Text to welcome user."
+    },
+    "What do you want to report?" : {
+      "comment" : "Header text to prompt user what issue they want to report."
+    },
+    "Who to Follow" : {
+      "comment" : "Title for a screen displaying suggestions of who to follow"
+    },
+    "Words" : {
+      "comment" : "Section header title for a list of words that are muted."
+    },
+    "wss://some.relay.com" : {
+      "comment" : "Placeholder example for relay server address."
+    },
+    "Yes" : {
+      "comment" : "Agree to discard changes made to profile.\nUser confirm Yes"
+    },
+    "Yes, Overwrite" : {
+      "comment" : "Text of button that confirms to overwrite the existing mutelist."
+    },
+    "you" : {
+      "comment" : "You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself."
+    },
+    "You are dreaming..." : {
+      "comment" : "Text telling the user that they are dreaming."
+    },
+    "You cannot share content because you are not logged in. Please close this view, log in to your account, and try again." : {
+      "comment" : "Label explaining that sharing cannot proceed because the user is not logged in."
+    },
+    "You have no bookmarks yet, add them in the context menu" : {
+      "comment" : "Text indicating that there are no bookmarks to be viewed"
+    },
+    "You unlocked" : {
+      "comment" : "Part 1 of 2 in message 'You unlocked automatic translations' the user gets when they sign up for Damus Purple"
+    },
+    "Your content is being broadcasted to the network. Please wait." : {
+      "comment" : "Label explaining that their content sharing action is in progress"
+    },
+    "Your Name" : {
+      "comment" : "Label for Your Name section of user profile form."
+    },
+    "Your Purple subscription expires in %@ days. Renew?" : {
+      "comment" : "A notification message explaining to the user that their Damus Purple Subscription is expiring soon, prompting them to renew."
+    },
+    "Your Purple subscription expires in 1 day. Renew?" : {
+      "comment" : "A notification message explaining to the user that their Damus Purple Subscription is expiring in one day, prompting them to renew."
+    },
+    "Your Purple subscription has expired. Renew?" : {
+      "comment" : "A notification message explaining to the user that their Damus Purple Subscription has expired, prompting them to renew."
+    },
+    "Your report will be sent to the relays you are connected to" : {
+      "comment" : "Footer text to inform user what will happen when the report is submitted."
+    },
+    "Zap" : {
+      "comment" : "Accessibility label for zap button\nButton label that allows the user to zap (i.e. send a Bitcoin tip via the lightning network) the user shown on-screen\nText underneath the number of sats indicating that it's the amount used for zaps.\nTitle of notification when a non-private zap is received."
+    },
+    "Zap attempt from connected wallet failed." : {
+      "comment" : "Message to display when sending a zap from the user's connected wallet failed."
+    },
+    "Zap attempt from connected wallet was canceled." : {
+      "comment" : "Message to display when a zap from the user's connected wallet was canceled."
+    },
+    "Zap failed" : {
+      "comment" : "Button label indicating that a zap action was unsuccessful (i.e. the user was unable to send a Bitcoin tip via the lightning network to the user shown on-screen) \nTitle of an alert indicating that a zap action failed"
+    },
+    "Zap type" : {
+      "comment" : "Text to indicate that the buttons below it is for choosing the type of zap to send."
+    },
+    "Zap User" : {
+      "comment" : "Button to send a zap."
+    },
+    "Zap Vibration" : {
+      "comment" : "Setting to enable vibration on zap"
+    },
+    "Zapped!" : {
+      "comment" : "Button label indicating that a zap action was successful (i.e. the user is successfully sent a Bitcoin tip via the lightning network to the user shown on-screen) "
+    },
+    "Zapping" : {
+      "comment" : "Button label indicating that a zap action is in progress (i.e. the user is currently sending a Bitcoin tip via the lightning network to the user shown on-screen) "
+    },
+    "Zapping..." : {
+      "comment" : "Text to indicate that the app is in the process of sending a zap."
+    },
+    "Zaps" : {
+      "comment" : "Label for filter for zap notifications.\nNavigation bar title for the Zaps view.\nNavigation title for zap settings.\nSection header for zap settings\nSetting to enable Zap Local Notification\nTitle for section in zap settings that controls general zap preferences."
+    }
+  },
+  "version" : "1.0"
+}
