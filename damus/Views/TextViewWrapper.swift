@@ -12,7 +12,7 @@ struct TextViewWrapper: UIViewRepresentable {
     @EnvironmentObject var tagModel: TagModel
     @Binding var textHeight: CGFloat?
     let initialTextSuffix: String?
-    @Binding var imagePastedFromPasteboard: UIImage?
+    @Binding var imagePastedFromPasteboard: PreUploadedMedia?
     @Binding var imageUploadConfirmPasteboard: Bool
     
     let cursorIndex: Int?
@@ -244,11 +244,11 @@ struct TextViewWrapper: UIViewRepresentable {
 }
 
 class CustomPostTextView: UITextView {
-    @Binding var imagePastedFromPasteboard: UIImage?
+    @Binding var imagePastedFromPasteboard: PreUploadedMedia?
     @Binding var imageUploadConfirm: Bool
     
     // Custom initializer
-    init(imagePastedFromPasteboard: Binding<UIImage?>, imageUploadConfirm: Binding<Bool>) {
+    init(imagePastedFromPasteboard: Binding<PreUploadedMedia?>, imageUploadConfirm: Binding<Bool>) {
         self._imagePastedFromPasteboard = imagePastedFromPasteboard
         self._imageUploadConfirm = imageUploadConfirm
         super.init(frame: .zero, textContainer: nil)
@@ -267,12 +267,31 @@ class CustomPostTextView: UITextView {
 
     // Override paste to handle image pasting
     override func paste(_ sender: Any?) {
-        if let image = UIPasteboard.general.image {
-            imagePastedFromPasteboard = image
+        let pasteboard = UIPasteboard.general
+
+        if let data = pasteboard.data(forPasteboardType: Constants.GIF_IMAGE_TYPE),
+           let url = saveGIFToTemporaryDirectory(data) {
+            imagePastedFromPasteboard = PreUploadedMedia.unprocessed_image(url)
+            imageUploadConfirm = true
+        } else if let image = pasteboard.image {
+            // handle .png, .jpeg files here
+            imagePastedFromPasteboard = PreUploadedMedia.uiimage(image)
             // Show alert view in PostView for Confirming upload
             imageUploadConfirm = true
         } else {
-            super.paste(sender) // Fall back to default paste behavior if no image
+            // fall back to default paste behavior if no image or gif file found
+            super.paste(sender)
+        }
+    }
+
+    private func saveGIFToTemporaryDirectory(_ data: Data) -> URL? {
+        let tempDirectory = FileManager.default.temporaryDirectory
+        let gifURL = tempDirectory.appendingPathComponent("pasted_image.gif")
+        do {
+            try data.write(to: gifURL)
+            return gifURL
+        } catch {
+            return nil
         }
     }
 }
