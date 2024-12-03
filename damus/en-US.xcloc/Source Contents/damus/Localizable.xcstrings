@@ -130,7 +130,7 @@
       "comment" : "Button text to add bookmark to a note."
     },
     "Add mute item" : {
-      "comment" : "Title text to indicate user to an add an item to their mutelist."
+      "comment" : "Button to an add an item to the user's mutelist.\nTitle text to indicate user to an add an item to their mutelist."
     },
     "Add Photo" : {
       "comment" : "Label to indicate user can add a photo."
