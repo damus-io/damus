@@ -70,7 +70,7 @@ struct DamusPurpleWelcomeView: View {
                 .opacity(start ? 1.0 : 0.0)
                 .animation(Animation.snappy(duration: 2).delay(0), value: start)
             
-            Text("Thank you very much for signing up for Damus\u{00A0}Purple. Your contribution helps us continue our fight for a more Open and Free\u{00A0}internet.\n\nYou will also get access to premium features, and a star badge on your profile.\n\nEnjoy!", comment: "Appreciation to user for purchasing subscription service")
+            Text("Thank you very much for signing up for Damus Purple. Your contribution helps us continue our fight for a more Open and Free internet.\n\nYou will also get access to premium features, and a star badge on your profile.\n\nEnjoy!", comment: "Appreciation to user for purchasing subscription service")
                 .lineSpacing(5)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.white.opacity(0.8))
