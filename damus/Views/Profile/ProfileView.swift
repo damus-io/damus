@@ -51,13 +51,17 @@ func followedByString(_ friend_intersection: [Pubkey], ndb: Ndb, locale: Locale 
 
 struct VisualEffectView: UIViewRepresentable {
     var effect: UIVisualEffect?
+    var darkeningOpacity: CGFloat = 0.3 // degree of darkening
 
     func makeUIView(context: UIViewRepresentableContext<Self>) -> UIVisualEffectView {
-        UIVisualEffectView()
+        let effectView = UIVisualEffectView()
+        effectView.backgroundColor = UIColor.black.withAlphaComponent(darkeningOpacity)
+        return effectView
     }
 
     func updateUIView(_ uiView: UIVisualEffectView, context: UIViewRepresentableContext<Self>) {
         uiView.effect = effect
+        uiView.backgroundColor = UIColor.black.withAlphaComponent(darkeningOpacity)
     }
 }
 
@@ -101,6 +105,18 @@ struct ProfileView: View {
     func bannerBlurViewOpacity() -> Double  {
         let progress = -(yOffset + navbarHeight) / 100
         return Double(-yOffset > navbarHeight ? progress : 0)
+    }
+    
+    func getProfileInfo() -> (String, String) {
+        let profile_txn = self.damus_state.profiles.lookup(id: profile.pubkey)
+        let ndbprofile = profile_txn?.unsafeUnownedValue
+        let displayName = Profile.displayName(profile: ndbprofile, pubkey: profile.pubkey).displayName.truncate(maxLength: 25)
+        let userName = Profile.displayName(profile: ndbprofile, pubkey: profile.pubkey).username.truncate(maxLength: 25)
+        return (displayName, "@\(userName)")
+    }
+    
+    func showFollowBtnInBlurrBanner() -> Bool {
+        damus_state.contacts.follow_state(profile.pubkey) == .unfollows && bannerBlurViewOpacity() > 1.0
     }
     
     func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
@@ -450,14 +466,38 @@ struct ProfileView: View {
             .navigationBarBackButtonHidden()
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    navBackButton
-                        .padding(.top, 5)
-                        .accentColor(DamusColors.white)
+                    HStack(spacing: 8) {
+                        navBackButton
+                            .padding(.top, 5)
+                            .accentColor(DamusColors.white)
+                        VStack(alignment: .leading, spacing: -4.5) {
+                            Text(getProfileInfo().0) // Display name
+                                .font(.headline)
+                                .foregroundColor(.white)
+                            Text(getProfileInfo().1) // Username
+                                .font(.subheadline)
+                                .foregroundColor(.white.opacity(0.8))
+                        }
+                        .opacity(bannerBlurViewOpacity())
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.top, max(5, 15 + (yOffset / 30)))
+                    }
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    navActionSheetButton
-                        .padding(.top, 5)
-                        .accentColor(DamusColors.white)
+                if showFollowBtnInBlurrBanner() {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        FollowButtonView(
+                            target: profile.get_follow_target(),
+                            follows_you: profile.follows(pubkey: damus_state.pubkey),
+                            follow_state: damus_state.contacts.follow_state(profile.pubkey)
+                        )
+                        .padding(.top, 8)
+                    }
+                } else {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        navActionSheetButton
+                            .padding(.top, 5)
+                            .accentColor(DamusColors.white)
+                    }
                 }
             }
             .toolbarBackground(.hidden)
