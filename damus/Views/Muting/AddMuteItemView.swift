@@ -92,7 +92,7 @@ struct AddMuteItemView: View {
                 dismiss()
             }) {
                 HStack {
-                    Text(verbatim: "Add mute item")
+                    Text("Add mute item", comment: "Button to an add an item to the user's mutelist.")
                         .bold()
                 }
                 .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)

@@ -232,7 +232,8 @@ Sentence composed of 2 variables to describe how many zap payments there are on 
       <trans-unit id="Add mute item" xml:space="preserve">
         <source>Add mute item</source>
         <target>Add mute item</target>
-        <note>Title text to indicate user to an add an item to their mutelist.</note>
+        <note>Button to an add an item to the user's mutelist.
+Title text to indicate user to an add an item to their mutelist.</note>
       </trans-unit>
       <trans-unit id="Add relay" xml:space="preserve">
         <source>Add relay</source>
@@ -2095,9 +2096,9 @@ Section header for search/universe settings</note>
         <target>Secret Account Login Key</target>
         <note>Section title for user's secret account login key.</note>
       </trans-unit>
-      <trans-unit id="Securely connect your Damus app to your wallet using Nostr Wallet Connect" xml:space="preserve">
-        <source>Securely connect your Damus app to your wallet using Nostr Wallet Connect</source>
-        <target>Securely connect your Damus app to your wallet using Nostr Wallet Connect</target>
+      <trans-unit id="Securely connect your Damus app to your wallet using Nostr Wallet Connect" xml:space="preserve">
+        <source>Securely connect your Damus app to your wallet using Nostr Wallet Connect</source>
+        <target>Securely connect your Damus app to your wallet using Nostr Wallet Connect</target>
         <note>Text to prompt user to connect their wallet using 'Nostr Wallet Connect'.</note>
       </trans-unit>
       <trans-unit id="Select a Lightning wallet" xml:space="preserve">
@@ -2358,13 +2359,13 @@ Label indicating a local test environment for Push notification functionality (D
         <target>Text Truncation</target>
         <note>Section header for damus text truncation user configuration</note>
       </trans-unit>
-      <trans-unit id="Thank you very much for signing up for Damus Purple. Your contribution helps us continue our fight for a more Open and Free internet.&#10;&#10;You will also get access to premium features, and a star badge on your profile.&#10;&#10;Enjoy!" xml:space="preserve">
-        <source>Thank you very much for signing up for Damus Purple. Your contribution helps us continue our fight for a more Open and Free internet.
+      <trans-unit id="Thank you very much for signing up for Damus Purple. Your contribution helps us continue our fight for a more Open and Free internet.&#10;&#10;You will also get access to premium features, and a star badge on your profile.&#10;&#10;Enjoy!" xml:space="preserve">
+        <source>Thank you very much for signing up for Damus Purple. Your contribution helps us continue our fight for a more Open and Free internet.
 
 You will also get access to premium features, and a star badge on your profile.
 
 Enjoy!</source>
-        <target>Thank you very much for signing up for Damus Purple. Your contribution helps us continue our fight for a more Open and Free internet.
+        <target>Thank you very much for signing up for Damus Purple. Your contribution helps us continue our fight for a more Open and Free internet.
 
 You will also get access to premium features, and a star badge on your profile.
 
@@ -3666,7 +3667,8 @@ Sentence composed of 2 variables to describe how many zap payments there are on 
       <trans-unit id="Add mute item" xml:space="preserve">
         <source>Add mute item</source>
         <target state="new">Add mute item</target>
-        <note>Title text to indicate user to an add an item to their mutelist.</note>
+        <note>Button to an add an item to the user's mutelist.
+Title text to indicate user to an add an item to their mutelist.</note>
       </trans-unit>
       <trans-unit id="Add relay" xml:space="preserve">
         <source>Add relay</source>
@@ -5517,9 +5519,9 @@ Section header for search/universe settings</note>
         <target state="new">Secret Account Login Key</target>
         <note>Section title for user's secret account login key.</note>
       </trans-unit>
-      <trans-unit id="Securely connect your Damus app to your wallet using Nostr Wallet Connect" xml:space="preserve">
-        <source>Securely connect your Damus app to your wallet using Nostr Wallet Connect</source>
-        <target state="new">Securely connect your Damus app to your wallet using Nostr Wallet Connect</target>
+      <trans-unit id="Securely connect your Damus app to your wallet using Nostr Wallet Connect" xml:space="preserve">
+        <source>Securely connect your Damus app to your wallet using Nostr Wallet Connect</source>
+        <target state="new">Securely connect your Damus app to your wallet using Nostr Wallet Connect</target>
         <note>Text to prompt user to connect their wallet using 'Nostr Wallet Connect'.</note>
       </trans-unit>
       <trans-unit id="Select a Lightning wallet" xml:space="preserve">
@@ -5790,13 +5792,13 @@ Label indicating a local test environment for Push notification functionality (D
         <target state="new">Text Truncation</target>
         <note>Section header for damus text truncation user configuration</note>
       </trans-unit>
-      <trans-unit id="Thank you very much for signing up for Damus Purple. Your contribution helps us continue our fight for a more Open and Free internet.&#10;&#10;You will also get access to premium features, and a star badge on your profile.&#10;&#10;Enjoy!" xml:space="preserve">
-        <source>Thank you very much for signing up for Damus Purple. Your contribution helps us continue our fight for a more Open and Free internet.
+      <trans-unit id="Thank you very much for signing up for Damus Purple. Your contribution helps us continue our fight for a more Open and Free internet.&#10;&#10;You will also get access to premium features, and a star badge on your profile.&#10;&#10;Enjoy!" xml:space="preserve">
+        <source>Thank you very much for signing up for Damus Purple. Your contribution helps us continue our fight for a more Open and Free internet.
 
 You will also get access to premium features, and a star badge on your profile.
 
 Enjoy!</source>
-        <target state="new">Thank you very much for signing up for Damus Purple. Your contribution helps us continue our fight for a more Open and Free internet.
+        <target state="new">Thank you very much for signing up for Damus Purple. Your contribution helps us continue our fight for a more Open and Free internet.
 
 You will also get access to premium features, and a star badge on your profile.
 

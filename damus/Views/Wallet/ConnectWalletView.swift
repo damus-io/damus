@@ -178,7 +178,7 @@ struct ConnectWalletView: View {
             Text("Damus Wallet", comment: "Title text for Damus Wallet view.")
                 .fontWeight(.bold)
             
-            Text("Securely connect your Damus app to your wallet using Nostr Wallet Connect", comment: "Text to prompt user to connect their wallet using 'Nostr Wallet Connect'.")
+            Text("Securely connect your Damus app to your wallet using Nostr Wallet Connect", comment: "Text to prompt user to connect their wallet using 'Nostr Wallet Connect'.")
                 .font(.caption)
                 .multilineTextAlignment(.center)
         }
