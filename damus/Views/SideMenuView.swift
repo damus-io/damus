@@ -226,6 +226,8 @@ struct SideMenuView: View {
                 .foregroundColor(DamusColors.adaptableBlack)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .dynamicTypeSize(.xSmall)
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
         }
     }
 }
