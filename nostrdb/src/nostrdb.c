@@ -41,8 +41,7 @@
 #define MAX_FILTERS    16
 
 // the maximum size of inbox queues
-static const int DEFAULT_QUEUE_SIZE = 1000000;
-
+static const int DEFAULT_QUEUE_SIZE = 32768;
 
 // increase if we need bigger filters
 #define NDB_FILTER_PAGES 64
@@ -6654,7 +6653,7 @@ uint64_t ndb_subscribe(struct ndb *ndb, struct ndb_filter *filters, int num_filt
 		return 0;
 
 	// 500k ought to be enough for anyone
-	buflen = sizeof(uint64_t) * 65536;
+	buflen = sizeof(uint64_t) * DEFAULT_QUEUE_SIZE;
 	buf = malloc(buflen);
 
 	if (!prot_queue_init(&sub->inbox, buf, buflen, sizeof(uint64_t))) {
