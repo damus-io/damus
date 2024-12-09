@@ -13,6 +13,10 @@ struct AddMuteItemView: View {
 
     @Environment(\.dismiss) var dismiss
 
+    var trimmedText: String {
+        new_text.trimmingCharacters(in: .whitespaces)
+    }
+
     var body: some View {
         VStack {
             Text("Add mute item", comment: "Title text to indicate user to an add an item to their mutelist.")
@@ -30,12 +34,13 @@ struct AddMuteItemView: View {
                 Text("Duration", comment: "The duration in which to mute the given item.")
             }
 
+            let trimmedText = self.trimmedText
 
             HStack {
                 Label("", image: "copy2")
                     .onTapGesture {
                     if let pasted_text = UIPasteboard.general.string {
-                        self.new_text = pasted_text
+                        self.new_text = pasted_text.trimmingCharacters(in: .whitespaces)
                     }
                 }
                 TextField(NSLocalizedString("npub, #hashtag, phrase", comment: "Placeholder example for relay server address."), text: $new_text)
@@ -44,7 +49,7 @@ struct AddMuteItemView: View {
 
                 Label("", image: "close-circle")
                     .foregroundColor(.accentColor)
-                    .opacity((new_text == "") ? 0.0 : 1.0)
+                    .opacity(trimmedText.isEmpty ? 0.0 : 1.0)
                     .onTapGesture {
                         self.new_text = ""
                     }
@@ -56,17 +61,17 @@ struct AddMuteItemView: View {
             Button(action: {
                 let expiration_date: Date? = self.expiration.date_from_now
                 let mute_item: MuteItem? = {
-                    if new_text.starts(with: "npub") {
-                        if let pubkey: Pubkey = bech32_pubkey_decode(new_text) {
+                    if trimmedText.starts(with: "npub") {
+                        if let pubkey: Pubkey = bech32_pubkey_decode(trimmedText) {
                             return .user(pubkey, expiration_date)
                         } else {
                             return nil
                         }
-                    } else if new_text.starts(with: "#") {
+                    } else if trimmedText.starts(with: "#") {
                         // Remove the starting `#` character
-                        return .hashtag(Hashtag(hashtag: String("\(new_text)".dropFirst())), expiration_date)
+                        return .hashtag(Hashtag(hashtag: String("\(trimmedText)".dropFirst())), expiration_date)
                     } else {
-                        return .word(new_text, expiration_date)
+                        return .word(trimmedText, expiration_date)
                     }
                 }()
 
@@ -99,6 +104,8 @@ struct AddMuteItemView: View {
             }
             .buttonStyle(GradientButtonStyle(padding: 10))
             .padding(.vertical)
+            .opacity(trimmedText.isEmpty ? 0.5 : 1.0)
+            .disabled(trimmedText.isEmpty)
 
             Spacer()
         }
