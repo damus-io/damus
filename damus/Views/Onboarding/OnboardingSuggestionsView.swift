@@ -114,7 +114,10 @@ struct SuggestedUsersSectionHeader: View {
     let model: SuggestedUsersViewModel
     var body: some View {
         HStack {
-            Text(group.title.uppercased())
+            let locale = Locale.current
+            let format = localizedStringFormat(key: group.category, locale: locale)
+            let categoryName = String(format: format, locale: locale)
+            Text(categoryName)
             Spacer()
             Button(NSLocalizedString("Follow All", comment: "Button to follow all users in this section")) {
                 model.follow(pubkeys: group.users)

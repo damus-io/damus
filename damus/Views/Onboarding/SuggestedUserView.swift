@@ -48,7 +48,10 @@ struct SuggestedUserView: View {
                     .foregroundColor(.gray)
                     .font(.caption)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
             Spacer()
+
             GradientFollowButton(target: target, follows_you: false, follow_state: damus_state.contacts.follow_state(target.pubkey))
         }
     }

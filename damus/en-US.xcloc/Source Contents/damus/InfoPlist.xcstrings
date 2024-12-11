@@ -8,7 +8,7 @@
         "en-US" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "share extension"
+            "value" : "DamusNotificationService"
           }
         }
       }
@@ -20,7 +20,7 @@
         "en-US" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "ShareExtension"
+            "value" : "DamusNotificationService"
           }
         }
       }

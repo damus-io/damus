@@ -10,11 +10,11 @@ import Combine
 
 struct SuggestedUserGroup: Identifiable, Codable {
     let id = UUID()
-    let title: String
+    let category: String
     let users: [Pubkey]
 
     enum CodingKeys: String, CodingKey {
-        case title, users
+        case category, users
     }
 }
 
