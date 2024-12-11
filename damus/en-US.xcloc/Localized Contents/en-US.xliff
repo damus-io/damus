@@ -3021,6 +3021,46 @@ String indicating that a given timestamp just occurred</note>
         <target>self</target>
         <note>Part of a larger sentence 'Replying to self' in US English. 'self' indicates that the user is replying to themself and no one else.</note>
       </trans-unit>
+      <trans-unit id="suggested_users_ai_art" xml:space="preserve">
+        <source>AI ART</source>
+        <target>AI ART</target>
+        <note>Suggested users category for users who may post content about AI art</note>
+      </trans-unit>
+      <trans-unit id="suggested_users_art_photography" xml:space="preserve">
+        <source>ART &amp; PHOTOGRAPHY</source>
+        <target>ART &amp; PHOTOGRAPHY</target>
+        <note>Suggested users category for users who may post content about art and photography</note>
+      </trans-unit>
+      <trans-unit id="suggested_users_books" xml:space="preserve">
+        <source>BOOKS</source>
+        <target>BOOKS</target>
+        <note>Suggested users category for users who may post content about books</note>
+      </trans-unit>
+      <trans-unit id="suggested_users_food" xml:space="preserve">
+        <source>FOOD</source>
+        <target>FOOD</target>
+        <note>Suggested users category for users who may post content about food</note>
+      </trans-unit>
+      <trans-unit id="suggested_users_music" xml:space="preserve">
+        <source>MUSIC</source>
+        <target>MUSIC</target>
+        <note>Suggested users category for users who may post content about music</note>
+      </trans-unit>
+      <trans-unit id="suggested_users_nostr" xml:space="preserve">
+        <source>NOSTR</source>
+        <target>NOSTR</target>
+        <note>Suggested users category for users who may post content about Nostr</note>
+      </trans-unit>
+      <trans-unit id="suggested_users_parenting" xml:space="preserve">
+        <source>PARENTING</source>
+        <target>PARENTING</target>
+        <note>Suggested users category for users who may post content about parenting</note>
+      </trans-unit>
+      <trans-unit id="suggested_users_permaculture_livestock_gardening" xml:space="preserve">
+        <source>PERMACULTURE, LIVESTOCK &amp; GARDENING</source>
+        <target>PERMACULTURE, LIVESTOCK &amp; GARDENING</target>
+        <note>Suggested users category for users who may post content about permaculture, livestock, and gardening</note>
+      </trans-unit>
       <trans-unit id="translate.nostr.wine (DeepL, Pay with BTC)" xml:space="preserve">
         <source>translate.nostr.wine (DeepL, Pay with BTC)</source>
         <target>translate.nostr.wine (DeepL, Pay with BTC)</target>
@@ -3456,6 +3496,28 @@ String indicating that a given timestamp just occurred</note>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">
+        <source>DamusNotificationService</source>
+        <target state="new">DamusNotificationService</target>
+        <note>Bundle display name</note>
+      </trans-unit>
+      <trans-unit id="CFBundleName" xml:space="preserve">
+        <source>DamusNotificationService</source>
+        <target state="new">DamusNotificationService</target>
+        <note>Bundle name</note>
+      </trans-unit>
+      <trans-unit id="NSHumanReadableCopyright" xml:space="preserve">
+        <source/>
+        <target state="new"/>
+        <note>Copyright (human-readable)</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="damus/Resources/InfoPlist.xcstrings" source-language="en-US" target-language="en-US" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.1" build-num="16B40"/>
+    </header>
+    <body>
+      <trans-unit id="CFBundleDisplayName" xml:space="preserve">
         <source>share extension</source>
         <target state="new">share extension</target>
         <note>Bundle display name</note>
@@ -3472,7 +3534,7 @@ String indicating that a given timestamp just occurred</note>
       </trans-unit>
     </body>
   </file>
-  <file original="damus/Localizable.xcstrings" source-language="en-US" target-language="en-US" datatype="plaintext">
+  <file original="damus/Resources/Localizable.xcstrings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.1" build-num="16B40"/>
     </header>
@@ -6403,28 +6465,6 @@ String indicating that a given timestamp just occurred</note>
         <source>you</source>
         <target state="new">you</target>
         <note>You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself.</note>
-      </trans-unit>
-    </body>
-  </file>
-  <file original="damus/Resources/InfoPlist.xcstrings" source-language="en-US" target-language="en-US" datatype="plaintext">
-    <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.1" build-num="16B40"/>
-    </header>
-    <body>
-      <trans-unit id="CFBundleDisplayName" xml:space="preserve">
-        <source>DamusNotificationService</source>
-        <target state="new">DamusNotificationService</target>
-        <note>Bundle display name</note>
-      </trans-unit>
-      <trans-unit id="CFBundleName" xml:space="preserve">
-        <source>DamusNotificationService</source>
-        <target state="new">DamusNotificationService</target>
-        <note>Bundle name</note>
-      </trans-unit>
-      <trans-unit id="NSHumanReadableCopyright" xml:space="preserve">
-        <source/>
-        <target state="new"/>
-        <note>Copyright (human-readable)</note>
       </trans-unit>
     </body>
   </file>
