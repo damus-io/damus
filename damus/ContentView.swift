@@ -931,7 +931,6 @@ enum FindEventType {
 
 enum FoundEvent {
     case profile(Pubkey)
-    case invalid_profile(NostrEvent)
     case event(NostrEvent)
 }
 
@@ -988,10 +987,6 @@ func find_event_with_subid(state: DamusState, query query_: FindEvent, subid: St
             switch query {
             case .profile:
                 if ev.known_kind == .metadata {
-                    guard state.ndb.lookup_profile_key(ev.pubkey) != nil else {
-                        callback(.invalid_profile(ev))
-                        return
-                    }
                     callback(.profile(ev.pubkey))
                 }
             case .event:
@@ -1000,17 +995,16 @@ func find_event_with_subid(state: DamusState, query query_: FindEvent, subid: St
         case .eose:
             if !has_event {
                 attempts += 1
-                if attempts == state.pool.our_descriptors.count / 2 {
-                    callback(nil)
+                if attempts >= state.pool.our_descriptors.count {
+                    callback(nil)   // If we could not find any events in any of the relays we are connected to, send back nil
                 }
-                state.pool.unsubscribe(sub_id: subid, to: [relay_id])
             }
+            state.pool.unsubscribe(sub_id: subid, to: [relay_id])   // We are only finding an event once, so close subscription on eose
         case .notice:
             break
         case .auth:
             break
         }
-
     }
 }
 
