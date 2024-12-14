@@ -1511,7 +1511,7 @@ static int ndb_rebuild_note_indices(struct ndb_txn *txn, enum ndb_dbs *indices, 
 	for (i = 0; i < num_indices; i++) {
 		if (!ndb_db_is_index(indices[i])) {
 			fprintf(stderr, "ndb_rebuild_note_index: %s is not an index db\n", ndb_db_name(index));
-			return 0;
+			return -1;
 		}
 	}
 
@@ -1520,13 +1520,13 @@ static int ndb_rebuild_note_indices(struct ndb_txn *txn, enum ndb_dbs *indices, 
 		index = indices[i];
 		if (mdb_drop(txn->mdb_txn, index, drop_dbi)) {
 			fprintf(stderr, "ndb_rebuild_pubkey_index: mdb_drop failed for %s\n", ndb_db_name(index));
-			return 0;
+			return -1;
 		}
 	}
 
 	if ((rc = mdb_cursor_open(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_NOTE], &cur))) {
 		fprintf(stderr, "ndb_migrate_user_search_indices: mdb_cursor_open failed, error %d\n", rc);
-		return 0;
+		return -1;
 	}
 
 	count = 0;
@@ -1549,7 +1549,7 @@ static int ndb_rebuild_note_indices(struct ndb_txn *txn, enum ndb_dbs *indices, 
 			case NDB_DBS:
 				// this should never happen since we check at
 				// the start
-				count = 0;
+				count = -1;
 				goto cleanup;
 			case NDB_DB_PROFILE_PK:
 			case NDB_DB_NOTE_KIND:
@@ -1557,17 +1557,17 @@ static int ndb_rebuild_note_indices(struct ndb_txn *txn, enum ndb_dbs *indices, 
 			case NDB_DB_NOTE_BLOCKS:
 			case NDB_DB_NOTE_TAGS:
 				fprintf(stderr, "%s index rebuild not supported yet. sorry.\n", ndb_db_name(index));
-				count = 0;
+				count = -1;
 				goto cleanup;
 			case NDB_DB_NOTE_PUBKEY:
 				if (!ndb_write_note_pubkey_index(txn, note, note_key)) {
-					count = 0;
+					count = -1;
 					goto cleanup;
 				}
 				break;
 			case NDB_DB_NOTE_PUBKEY_KIND:
 				if (!ndb_write_note_pubkey_kind_index(txn, note, note_key)) {
-					count = 0;
+					count = -1;
 					goto cleanup;
 				}
 				break;
@@ -1599,15 +1599,15 @@ static int ndb_migrate_profile_indices(struct ndb *ndb)
 	}
 
 	enum ndb_dbs indices[] = {NDB_DB_NOTE_PUBKEY, NDB_DB_NOTE_PUBKEY_KIND};
-	if ((count = ndb_rebuild_note_indices(&txn, indices, 2))) {
+	if ((count = ndb_rebuild_note_indices(&txn, indices, 2)) != -1) {
 		fprintf(stderr, "migrated %d notes to have pubkey and pubkey_kind indices\n", count);
 		ndb_end_query(&txn);
+		return 1;
 	} else {
 		fprintf(stderr, "error migrating notes to have pubkey and pubkey_kind indices, aborting.\n");
 		mdb_txn_abort(txn.mdb_txn);
+		return 0;
 	}
-
-	return count;
 }
 
 static int ndb_migrate_user_search_indices(struct ndb *ndb)
