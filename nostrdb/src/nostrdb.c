@@ -3139,6 +3139,85 @@ static int ndb_encode_tag_key(unsigned char *buf, int buf_size,
 	return writer.p - writer.start;
 }
 
+static int ndb_query_plan_execute_authors(struct ndb_txn *txn,
+					  struct ndb_filter *filter,
+					  struct ndb_query_results *results,
+					  int limit)
+{
+	MDB_val k, v;
+	MDB_cursor *cur;
+	int rc, i;
+	uint64_t *pint, until, since, note_key;
+	unsigned char *author;
+	struct ndb_note *note;
+	size_t note_size;
+	struct ndb_filter_elements *authors;
+	struct ndb_query_result res;
+	struct ndb_tsid tsid, *ptsid;
+	enum ndb_dbs db;
+
+	db = txn->lmdb->dbs[NDB_DB_NOTE_PUBKEY];
+
+	if (!(authors = ndb_filter_find_elements(filter, NDB_FILTER_AUTHORS)))
+		return 0;
+
+	until = UINT64_MAX;
+	if ((pint = ndb_filter_get_int(filter, NDB_FILTER_UNTIL)))
+		until = *pint;
+
+	since = 0;
+	if ((pint = ndb_filter_get_int(filter, NDB_FILTER_SINCE)))
+		since = *pint;
+
+	if ((rc = mdb_cursor_open(txn->mdb_txn, db, &cur)))
+		return 0;
+
+	for (i = 0; i < authors->count; i++) {
+		author = ndb_filter_get_id_element(filter, authors, i);
+
+		ndb_tsid_init(&tsid, author, until);
+
+		k.mv_data = &tsid;
+		k.mv_size = sizeof(tsid);
+
+		if (!ndb_cursor_start(cur, &k, &v))
+			continue;
+
+		// for each id in our ids filter, find in the db
+		while (!query_is_full(results, limit)) {
+			ptsid = (struct ndb_tsid *)k.mv_data;
+			note_key = *(uint64_t*)v.mv_data;
+
+			// don't continue the scan if we're below `since`
+			if (ptsid->timestamp < since)
+				break;
+
+			// our author should match, if not bail
+			if (memcmp(author, ptsid->id, 32))
+				break;
+
+			// fetch the note, we need it for our query results
+			// and to match further against the filter
+			if (!(note = ndb_get_note_by_key(txn, note_key, &note_size)))
+				goto next;
+
+			if (!ndb_filter_matches_with(filter, note, 1 << NDB_FILTER_AUTHORS))
+				goto next;
+
+			ndb_query_result_init(&res, note, note_size, note_key);
+			if (!push_query_result(results, &res))
+				break;
+
+next:
+			if (mdb_cursor_get(cur, &k, &v, MDB_PREV))
+				break;
+		}
+	}
+
+	mdb_cursor_close(cur);
+	return 1;
+}
+
 static int ndb_query_plan_execute_created_at(struct ndb_txn *txn,
 					     struct ndb_filter *filter,
 					     struct ndb_query_results *results,
@@ -3367,11 +3446,11 @@ static enum ndb_query_plan ndb_filter_plan(struct ndb_filter *filter)
 	// this is rougly similar to the heuristic in strfry's dbscan
 	if (ids) {
 		return NDB_PLAN_IDS;
-	} else if (authors && authors->count <= 5) {
-		// TODO: actually implment author plan and use it
-		//return NDB_PLAN_AUTHORS;
-		return NDB_PLAN_CREATED;
-	} else if (tags && tags->count <= 5) {
+	} else if (kinds && authors && authors->count <= 10) {
+		return NDB_PLAN_AUTHOR_KINDS;
+	} else if (authors && authors->count <= 10) {
+		return NDB_PLAN_AUTHORS;
+	} else if (tags && tags->count <= 10) {
 		return NDB_PLAN_TAGS;
 	} else if (kinds) {
 		return NDB_PLAN_KINDS;
@@ -3434,8 +3513,17 @@ static int ndb_query_filter(struct ndb_txn *txn, struct ndb_filter *filter,
 			return 0;
 		break;
 	case NDB_PLAN_AUTHORS:
-		// TODO: finish authors query plan
-		return 0;
+		if (!ndb_query_plan_execute_authors(txn, filter, &results, limit))
+			return 0;
+		break;
+	case NDB_PLAN_AUTHOR_KINDS:
+		/* TODO: author kinds
+		if (!ndb_query_plan_execute_author_kinds(txn, filter, &results, limit))
+			return 0;
+			*/
+		if (!ndb_query_plan_execute_authors(txn, filter, &results, limit))
+			return 0;
+		break;
 	}
 
 	*results_out = cursor_count(&results.cur, sizeof(*res));
