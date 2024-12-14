@@ -1586,6 +1586,29 @@ cleanup:
 // Migrations
 //
 
+// This was before we had note_profile_pubkey{,_kind} indices. Let's create them.
+static int ndb_migrate_profile_indices(struct ndb *ndb)
+{
+	struct ndb_txn txn;
+	int count;
+
+	if (!ndb_begin_rw_query(ndb, &txn)) {
+		fprintf(stderr, "ndb_migrate_profile_indices: ndb_begin_rw_query failed\n");
+		return 0;
+	}
+
+	enum ndb_dbs indices[] = {NDB_DB_NOTE_PUBKEY, NDB_DB_NOTE_PUBKEY_KIND};
+	if ((count = ndb_rebuild_note_indices(&txn, indices, 2))) {
+		fprintf(stderr, "migrated %d notes to have pubkey and pubkey_kind indices\n", count);
+		ndb_end_query(&txn);
+	} else {
+		fprintf(stderr, "error migrating notes to have pubkey and pubkey_kind indices, aborting.\n");
+		mdb_txn_abort(txn.mdb_txn);
+	}
+
+	return count;
+}
+
 static int ndb_migrate_user_search_indices(struct ndb *ndb)
 {
 	int rc;
@@ -1908,7 +1931,8 @@ static int ndb_migrate_utf8_profile_names(struct ndb *ndb)
 static struct ndb_migration MIGRATIONS[] = {
 	{ .fn = ndb_migrate_user_search_indices },
 	{ .fn = ndb_migrate_lower_user_search_indices },
-	{ .fn = ndb_migrate_utf8_profile_names }
+	{ .fn = ndb_migrate_utf8_profile_names },
+	{ .fn = ndb_migrate_profile_indices },
 };
 
 
