@@ -183,6 +183,8 @@ enum ndb_dbs {
 	NDB_DB_NOTE_TEXT, // note fulltext index
 	NDB_DB_NOTE_BLOCKS, // parsed note blocks for rendering
 	NDB_DB_NOTE_TAGS,  // note tags index
+	NDB_DB_NOTE_PUBKEY, // note pubkey index
+	NDB_DB_NOTE_PUBKEY_KIND, // note pubkey kind index
 	NDB_DBS,
 };
 
