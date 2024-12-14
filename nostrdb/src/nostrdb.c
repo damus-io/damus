@@ -4683,7 +4683,7 @@ static int ndb_run_migrations(struct ndb *ndb)
 	}
 
 	if (version < latest_version)
-		ndb_debug("nostrdb: migrating v%d -> v%d\n",
+		fprintf(stderr, "nostrdb: migrating v%d -> v%d\n",
 				(int)version, (int)latest_version);
 
 	for (i = version; i < latest_version; i++) {
