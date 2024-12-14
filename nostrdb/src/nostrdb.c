@@ -1355,6 +1355,32 @@ static int ndb_write_profile_search_indices(struct ndb_txn *txn,
 	return 1;
 }
 
+static inline void ndb_tsid_init(struct ndb_tsid *key, unsigned char *id,
+				 uint64_t timestamp)
+{
+	memcpy(key->id, id, 32);
+	key->timestamp = timestamp;
+}
+
+static inline void ndb_tsid_low(struct ndb_tsid *key, unsigned char *id)
+{
+	memcpy(key->id, id, 32);
+	key->timestamp = 0;
+}
+
+static inline void ndb_u64_ts_init(struct ndb_u64_ts *key, uint64_t integer,
+				     uint64_t timestamp)
+{
+	key->u64 = integer;
+	key->timestamp = timestamp;
+}
+
+// useful for range-searching for the latest key with a clustered created_at timen
+static inline void ndb_tsid_high(struct ndb_tsid *key, const unsigned char *id)
+{
+	memcpy(key->id, id, 32);
+	key->timestamp = UINT64_MAX;
+}
 
 static int _ndb_begin_query(struct ndb *ndb, struct ndb_txn *txn, int flags)
 {
@@ -1530,33 +1556,6 @@ static int ndb_tsid_compare(const MDB_val *a, const MDB_val *b)
 	else if (tsa->timestamp > tsb->timestamp)
 		return 1;
 	return 0;
-}
-
-static inline void ndb_tsid_low(struct ndb_tsid *key, unsigned char *id)
-{
-	memcpy(key->id, id, 32);
-	key->timestamp = 0;
-}
-
-static inline void ndb_tsid_init(struct ndb_tsid *key, unsigned char *id,
-				 uint64_t timestamp)
-{
-	memcpy(key->id, id, 32);
-	key->timestamp = timestamp;
-}
-
-static inline void ndb_u64_ts_init(struct ndb_u64_ts *key, uint64_t integer,
-				     uint64_t timestamp)
-{
-	key->u64 = integer;
-	key->timestamp = timestamp;
-}
-
-// useful for range-searching for the latest key with a clustered created_at timen
-static inline void ndb_tsid_high(struct ndb_tsid *key, const unsigned char *id)
-{
-	memcpy(key->id, id, 32);
-	key->timestamp = UINT64_MAX;
 }
 
 enum ndb_ingester_msgtype {
