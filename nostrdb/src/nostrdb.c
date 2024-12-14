@@ -3079,7 +3079,7 @@ static int ndb_query_plan_execute_ids(struct ndb_txn *txn,
 		note_id = *(uint64_t*)v.mv_data;
 
 		if (memcmp(id, ptsid->id, 32) == 0)
-			matched |= 1 << NDB_FILTER_AUTHORS;
+			matched |= 1 << NDB_FILTER_IDS;
 		else
 			continue;
 
