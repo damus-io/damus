@@ -229,6 +229,13 @@ enum ndb_query_plan {
 	NDB_PLAN_TAGS,
 };
 
+// A id + u64 + timestamp
+struct ndb_id_u64_ts {
+	unsigned char id[32]; // pubkey, id, etc
+	uint64_t u64; // kind, etc
+	uint64_t timestamp;
+};
+
 // A clustered key with an id and a timestamp
 struct ndb_tsid {
 	unsigned char id[32];
@@ -1402,6 +1409,14 @@ static int ndb_begin_rw_query(struct ndb *ndb, struct ndb_txn *txn)
 	return _ndb_begin_query(ndb, txn, 0);
 }
 
+static inline void ndb_id_u64_ts_init(struct ndb_id_u64_ts *key,
+				      unsigned char *id, uint64_t iu64,
+				      uint64_t timestamp)
+{
+	memcpy(key->id, id, 32);
+	key->u64 = iu64;
+	key->timestamp = timestamp;
+}
 
 // Migrations
 //
@@ -1514,6 +1529,35 @@ int ndb_db_version(struct ndb *ndb)
 
 	mdb_txn_abort(txn);
 	return version;
+}
+
+// custom pubkey+kind+timestamp comparison function. This is used by lmdb to
+// perform b+ tree searches over the pubkey+kind+timestamp index
+static int ndb_id_u64_ts_compare(const MDB_val *a, const MDB_val *b)
+{
+	struct ndb_id_u64_ts *tsa, *tsb;
+	MDB_val a2 = *a, b2 = *b;
+
+	a2.mv_size = sizeof(tsa->id);
+	b2.mv_size = sizeof(tsb->id);
+
+	int cmp = mdb_cmp_memn(&a2, &b2);
+	if (cmp) return cmp;
+
+	tsa = a->mv_data;
+	tsb = b->mv_data;
+
+	if (tsa->u64 < tsb->u64)
+		return -1;
+	else if (tsa->u64 > tsb->u64)
+		return 1;
+
+	if (tsa->timestamp < tsb->timestamp)
+		return -1;
+	else if (tsa->timestamp > tsb->timestamp)
+		return 1;
+
+	return 0;
 }
 
 // custom kind+timestamp comparison function. This is used by lmdb to perform
