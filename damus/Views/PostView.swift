@@ -72,6 +72,7 @@ struct PostView: View {
     @StateObject var tagModel: TagModel = TagModel()
     
     @State private var current_placeholder_index = 0
+    @State private var uploadTask: Task<Void, Never>?
 
     let action: PostAction
     let damus_state: DamusState
@@ -97,6 +98,7 @@ struct PostView: View {
 
     func cancel() {
         notify(.post(.cancel))
+        uploadTask?.cancel()
         dismiss()
     }
     
@@ -478,8 +480,8 @@ struct PostView: View {
                 }
                 .alert(NSLocalizedString("Are you sure you want to upload the selected media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $image_upload_confirm) {
                     Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
-                        // initiate asynchronous uploading Task for multiple-images 
-                        Task {
+                        // initiate asynchronous uploading Task for multiple-images
+                        uploadTask = Task {
                             for media in preUploadedMedia {
                                 if let mediaToUpload = generateMediaUpload(media) {
                                     await self.handle_upload(media: mediaToUpload)
@@ -504,7 +506,7 @@ struct PostView: View {
                 Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
                     if let image = imagePastedFromPasteboard,
                        let mediaToUpload = generateMediaUpload(image) {
-                        Task {
+                        uploadTask = Task {
                             await self.handle_upload(media: mediaToUpload)
                         }
                     }
@@ -514,7 +516,7 @@ struct PostView: View {
             // This alert seeks confirmation about media-upload from Damus Share Extension
             .alert(NSLocalizedString("Are you sure you want to upload the selected media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $imageUploadConfirmDamusShare) {
                 Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
-                    Task {
+                    uploadTask = Task {
                         for media in preUploadedMedia {
                             if let mediaToUpload = generateMediaUpload(media) {
                                 await self.handle_upload(media: mediaToUpload)
