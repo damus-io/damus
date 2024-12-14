@@ -1443,6 +1443,146 @@ static inline void ndb_id_u64_ts_init(struct ndb_id_u64_ts *key,
 	key->timestamp = timestamp;
 }
 
+static int ndb_write_note_pubkey_index(struct ndb_txn *txn, struct ndb_note *note,
+				       uint64_t note_key)
+{
+	int rc;
+	struct ndb_tsid key;
+	MDB_val k, v;
+
+	ndb_tsid_init(&key, ndb_note_pubkey(note), ndb_note_created_at(note));
+
+	k.mv_data = &key;
+	k.mv_size = sizeof(key);
+
+	v.mv_data = &note_key;
+	v.mv_size = sizeof(note_key);
+
+	if ((rc = mdb_put(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_NOTE_PUBKEY], &k, &v, 0))) {
+		fprintf(stderr, "write note pubkey index failed: %s\n",
+			  mdb_strerror(rc));
+		return 0;
+	}
+
+	return 1;
+}
+
+static int ndb_write_note_pubkey_kind_index(struct ndb_txn *txn,
+					    struct ndb_note *note,
+					    uint64_t note_key)
+{
+	int rc;
+	struct ndb_id_u64_ts key;
+	MDB_val k, v;
+
+	ndb_id_u64_ts_init(&key, ndb_note_pubkey(note), ndb_note_kind(note),
+			   ndb_note_created_at(note));
+
+	k.mv_data = &key;
+	k.mv_size = sizeof(key);
+
+	v.mv_data = &note_key;
+	v.mv_size = sizeof(note_key);
+
+	if ((rc = mdb_put(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_NOTE_PUBKEY_KIND], &k, &v, 0))) {
+		fprintf(stderr, "write note pubkey_kind index failed: %s\n",
+			  mdb_strerror(rc));
+		return 0;
+	}
+
+	return 1;
+}
+
+
+static int ndb_rebuild_note_indices(struct ndb_txn *txn, enum ndb_dbs *indices, int num_indices)
+{
+	MDB_val k, v;
+	MDB_cursor *cur;
+	int i, drop_dbi, count, rc;
+	uint64_t note_key;
+	struct ndb_note *note;
+	enum ndb_dbs index;
+
+	// 0 means empty, not delete the dbi
+	drop_dbi = 0;
+
+	// ensure they are all index dbs
+	for (i = 0; i < num_indices; i++) {
+		if (!ndb_db_is_index(indices[i])) {
+			fprintf(stderr, "ndb_rebuild_note_index: %s is not an index db\n", ndb_db_name(index));
+			return 0;
+		}
+	}
+
+	// empty the index dbs before we rebuild
+	for (i = 0; i < num_indices; i++) {
+		index = indices[i];
+		if (mdb_drop(txn->mdb_txn, index, drop_dbi)) {
+			fprintf(stderr, "ndb_rebuild_pubkey_index: mdb_drop failed for %s\n", ndb_db_name(index));
+			return 0;
+		}
+	}
+
+	if ((rc = mdb_cursor_open(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_NOTE], &cur))) {
+		fprintf(stderr, "ndb_migrate_user_search_indices: mdb_cursor_open failed, error %d\n", rc);
+		return 0;
+	}
+
+	count = 0;
+
+	// loop through all notes and write search indices
+	while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
+		note = v.mv_data;
+		note_key = *((uint64_t*)k.mv_data);
+
+		for (i = 0; i < num_indices; i++) {
+			index = indices[i];
+			switch (index) {
+			case NDB_DB_NOTE:
+			case NDB_DB_META:
+			case NDB_DB_PROFILE:
+			case NDB_DB_NOTE_ID:
+			case NDB_DB_NDB_META:
+			case NDB_DB_PROFILE_SEARCH:
+			case NDB_DB_PROFILE_LAST_FETCH:
+			case NDB_DBS:
+				// this should never happen since we check at
+				// the start
+				count = 0;
+				goto cleanup;
+			case NDB_DB_PROFILE_PK:
+			case NDB_DB_NOTE_KIND:
+			case NDB_DB_NOTE_TEXT:
+			case NDB_DB_NOTE_BLOCKS:
+			case NDB_DB_NOTE_TAGS:
+				fprintf(stderr, "%s index rebuild not supported yet. sorry.\n", ndb_db_name(index));
+				count = 0;
+				goto cleanup;
+			case NDB_DB_NOTE_PUBKEY:
+				if (!ndb_write_note_pubkey_index(txn, note, note_key)) {
+					count = 0;
+					goto cleanup;
+				}
+				break;
+			case NDB_DB_NOTE_PUBKEY_KIND:
+				if (!ndb_write_note_pubkey_kind_index(txn, note, note_key)) {
+					count = 0;
+					goto cleanup;
+				}
+				break;
+			}
+		}
+
+		count++;
+	}
+
+cleanup:
+	mdb_cursor_close(cur);
+
+	return count;
+}
+
+
 // Migrations
 //
 
@@ -3954,6 +4094,8 @@ static uint64_t ndb_write_note(struct ndb_txn *txn,
 	ndb_write_note_id_index(txn, note->note, note_key);
 	ndb_write_note_kind_index(txn, note->note, note_key);
 	ndb_write_note_tag_index(txn, note->note, note_key);
+	ndb_write_note_pubkey_index(txn, note->note, note_key);
+	ndb_write_note_pubkey_kind_index(txn, note->note, note_key);
 
 	// only parse content and do fulltext index on text and longform notes
 	if (note->note->kind == 1 || note->note->kind == 30023) {
@@ -4441,6 +4583,22 @@ static int ndb_init_lmdb(const char *filename, struct ndb_lmdb *lmdb, size_t map
 		return 0;
 	}
 	mdb_set_compare(txn, lmdb->dbs[NDB_DB_NOTE_KIND], ndb_u64_ts_compare);
+
+	if ((rc = mdb_dbi_open(txn, "note_pubkey",
+			       MDB_CREATE | MDB_DUPSORT | MDB_INTEGERDUP | MDB_DUPFIXED,
+			       &lmdb->dbs[NDB_DB_NOTE_PUBKEY]))) {
+		fprintf(stderr, "mdb_dbi_open note_pubkey failed: %s\n", mdb_strerror(rc));
+		return 0;
+	}
+	mdb_set_compare(txn, lmdb->dbs[NDB_DB_NOTE_PUBKEY], ndb_tsid_compare);
+
+	if ((rc = mdb_dbi_open(txn, "note_pubkey_kind",
+			       MDB_CREATE | MDB_DUPSORT | MDB_INTEGERDUP | MDB_DUPFIXED,
+			       &lmdb->dbs[NDB_DB_NOTE_PUBKEY_KIND]))) {
+		fprintf(stderr, "mdb_dbi_open note_pubkey_kind failed: %s\n", mdb_strerror(rc));
+		return 0;
+	}
+	mdb_set_compare(txn, lmdb->dbs[NDB_DB_NOTE_PUBKEY_KIND], ndb_id_u64_ts_compare);
 
 	if ((rc = mdb_dbi_open(txn, "note_text", MDB_CREATE | MDB_DUPSORT,
 			       &lmdb->dbs[NDB_DB_NOTE_TEXT]))) {
@@ -6545,6 +6703,10 @@ const char *ndb_db_name(enum ndb_dbs db)
 			return "note_blocks";
 		case NDB_DB_NOTE_TAGS:
 			return "note_tags";
+		case NDB_DB_NOTE_PUBKEY:
+			return "note_pubkey_index";
+		case NDB_DB_NOTE_PUBKEY_KIND:
+			return "note_pubkey_kind_index";
 		case NDB_DBS:
 			return "count";
 	}
