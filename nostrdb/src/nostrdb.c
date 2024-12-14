@@ -3181,19 +3181,16 @@ static int ndb_query_plan_execute_created_at(struct ndb_txn *txn,
 		note_id = *(uint64_t*)v.mv_data;
 		assert(v.mv_size == 8);
 
-		// TODO(perf): if we are only looking for IDs and have no other
-		// condition, then we can use the ID in the index without
-		// looking up the note. For now we always look up the note
+		// don't continue the scan if we're below `since`
+		if (pkey->timestamp < since)
+			break;
+
 		if (!(note = ndb_get_note_by_key(txn, note_id, &note_size)))
 			goto next;
 
 		// does this entry match our filter?
 		if (!ndb_filter_matches_with(filter, note, 0))
 			goto next;
-
-		// don't continue the scan if we're below `since`
-		if (pkey->timestamp < since)
-			break;
 
 		ndb_query_result_init(&res, note, (uint64_t)note_size, note_id);
 		if (!push_query_result(results, &res))
