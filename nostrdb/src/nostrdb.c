@@ -1409,6 +1409,31 @@ static int ndb_begin_rw_query(struct ndb *ndb, struct ndb_txn *txn)
 	return _ndb_begin_query(ndb, txn, 0);
 }
 
+static int ndb_db_is_index(enum ndb_dbs index)
+{
+	switch (index) {
+		case NDB_DB_NOTE:
+		case NDB_DB_META:
+		case NDB_DB_PROFILE:
+		case NDB_DB_NOTE_ID:
+		case NDB_DB_NDB_META:
+		case NDB_DB_PROFILE_SEARCH:
+		case NDB_DB_PROFILE_LAST_FETCH:
+		case NDB_DBS:
+			return 0;
+		case NDB_DB_PROFILE_PK:
+		case NDB_DB_NOTE_KIND:
+		case NDB_DB_NOTE_TEXT:
+		case NDB_DB_NOTE_BLOCKS:
+		case NDB_DB_NOTE_TAGS:
+		case NDB_DB_NOTE_PUBKEY:
+		case NDB_DB_NOTE_PUBKEY_KIND:
+			return 1;
+	}
+
+	return 0;
+}
+
 static inline void ndb_id_u64_ts_init(struct ndb_id_u64_ts *key,
 				      unsigned char *id, uint64_t iu64,
 				      uint64_t timestamp)
