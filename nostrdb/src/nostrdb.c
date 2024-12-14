@@ -236,7 +236,7 @@ struct ndb_tsid {
 };
 
 // A u64 + timestamp id. Just using this for kinds at the moment.
-struct ndb_u64_tsid {
+struct ndb_u64_ts {
 	uint64_t u64; // kind, etc
 	uint64_t timestamp;
 };
@@ -1492,9 +1492,9 @@ int ndb_db_version(struct ndb *ndb)
 
 // custom kind+timestamp comparison function. This is used by lmdb to perform
 // b+ tree searches over the kind+timestamp index
-static int ndb_u64_tsid_compare(const MDB_val *a, const MDB_val *b)
+static int ndb_u64_ts_compare(const MDB_val *a, const MDB_val *b)
 {
-	struct ndb_u64_tsid *tsa, *tsb;
+	struct ndb_u64_ts *tsa, *tsb;
 	tsa = a->mv_data;
 	tsb = b->mv_data;
 
@@ -1545,7 +1545,7 @@ static inline void ndb_tsid_init(struct ndb_tsid *key, unsigned char *id,
 	key->timestamp = timestamp;
 }
 
-static inline void ndb_u64_tsid_init(struct ndb_u64_tsid *key, uint64_t integer,
+static inline void ndb_u64_ts_init(struct ndb_u64_ts *key, uint64_t integer,
 				     uint64_t timestamp)
 {
 	key->u64 = integer;
@@ -3067,7 +3067,7 @@ static int ndb_query_plan_execute_kinds(struct ndb_txn *txn,
 	MDB_dbi db;
 	MDB_val k, v;
 	struct ndb_note *note;
-	struct ndb_u64_tsid tsid, *ptsid;
+	struct ndb_u64_ts tsid, *ptsid;
 	struct ndb_filter_elements *kinds;
 	struct ndb_query_result res;
 	uint64_t kind, note_id, until, *pint;
@@ -3093,7 +3093,7 @@ static int ndb_query_plan_execute_kinds(struct ndb_txn *txn,
 
 		kind = kinds->elements[i];
 		ndb_debug("kind %" PRIu64 "\n", kind);
-		ndb_u64_tsid_init(&tsid, kind, until);
+		ndb_u64_ts_init(&tsid, kind, until);
 
 		k.mv_data = &tsid;
 		k.mv_size = sizeof(tsid);
@@ -3103,7 +3103,7 @@ static int ndb_query_plan_execute_kinds(struct ndb_txn *txn,
 
 		// for each id in our ids filter, find in the db
 		while (!query_is_full(results, limit)) {
-			ptsid = (struct ndb_u64_tsid *)k.mv_data;
+			ptsid = (struct ndb_u64_ts *)k.mv_data;
 			if (ptsid->u64 != kind)
 				break;
 
@@ -3300,12 +3300,12 @@ static int ndb_write_note_tag_index(struct ndb_txn *txn, struct ndb_note *note,
 static int ndb_write_note_kind_index(struct ndb_txn *txn, struct ndb_note *note,
 				     uint64_t note_key)
 {
-	struct ndb_u64_tsid tsid;
+	struct ndb_u64_ts tsid;
 	int rc;
 	MDB_val key, val;
 	MDB_dbi kind_db;
 
-	ndb_u64_tsid_init(&tsid, note->kind, note->created_at);
+	ndb_u64_ts_init(&tsid, note->kind, note->created_at);
 
 	key.mv_data = &tsid;
 	key.mv_size = sizeof(tsid);
@@ -4372,7 +4372,7 @@ static int ndb_init_lmdb(const char *filename, struct ndb_lmdb *lmdb, size_t map
 		fprintf(stderr, "mdb_dbi_open note_kind failed: %s\n", mdb_strerror(rc));
 		return 0;
 	}
-	mdb_set_compare(txn, lmdb->dbs[NDB_DB_NOTE_KIND], ndb_u64_tsid_compare);
+	mdb_set_compare(txn, lmdb->dbs[NDB_DB_NOTE_KIND], ndb_u64_ts_compare);
 
 	if ((rc = mdb_dbi_open(txn, "note_text", MDB_CREATE | MDB_DUPSORT,
 			       &lmdb->dbs[NDB_DB_NOTE_TEXT]))) {
@@ -6231,7 +6231,7 @@ int ndb_print_kind_keys(struct ndb_txn *txn)
 	MDB_cursor *cur;
 	MDB_val k, v;
 	int i;
-	struct ndb_u64_tsid *tsid;
+	struct ndb_u64_ts *tsid;
 
 	if (mdb_cursor_open(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_NOTE_KIND], &cur))
 		return 0;
