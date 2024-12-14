@@ -225,6 +225,7 @@ enum ndb_query_plan {
 	NDB_PLAN_KINDS,
 	NDB_PLAN_IDS,
 	NDB_PLAN_AUTHORS,
+	NDB_PLAN_AUTHOR_KINDS,
 	NDB_PLAN_CREATED,
 	NDB_PLAN_TAGS,
 };
@@ -3039,7 +3040,7 @@ static int ndb_query_plan_execute_ids(struct ndb_txn *txn,
 	MDB_cursor *cur;
 	MDB_dbi db;
 	MDB_val k, v;
-	int matched, rc, i;
+	int rc, i;
 	struct ndb_filter_elements *ids;
 	struct ndb_note *note;
 	struct ndb_query_result res;
@@ -3048,7 +3049,6 @@ static int ndb_query_plan_execute_ids(struct ndb_txn *txn,
 	size_t note_size;
 	unsigned char *id;
 
-	matched = 0;
 	until = UINT64_MAX;
 
 	if (!(ids = ndb_filter_find_elements(filter, NDB_FILTER_IDS)))
@@ -3078,9 +3078,7 @@ static int ndb_query_plan_execute_ids(struct ndb_txn *txn,
 		ptsid = (struct ndb_tsid *)k.mv_data;
 		note_id = *(uint64_t*)v.mv_data;
 
-		if (memcmp(id, ptsid->id, 32) == 0)
-			matched |= 1 << NDB_FILTER_IDS;
-		else
+		if (memcmp(id, ptsid->id, 32))
 			continue;
 
 		// get the note because we need it to match against the filter
@@ -3092,7 +3090,7 @@ static int ndb_query_plan_execute_ids(struct ndb_txn *txn,
 		// things we've already matched via the filter so we don't have
 		// to check again. This can be pretty important for filters
 		// with a large number of entries.
-		if (!ndb_filter_matches_with(filter, note, matched))
+		if (!ndb_filter_matches_with(filter, note, 1 << NDB_FILTER_IDS))
 			continue;
 
 		ndb_query_result_init(&res, note, note_size, note_id);
