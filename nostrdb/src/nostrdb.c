@@ -162,6 +162,7 @@ struct ndb_writer {
 	struct ndb_lmdb *lmdb;
 	struct ndb_monitor *monitor;
 
+	uint32_t ndb_flags;
 	void *queue_buf;
 	int queue_buflen;
 	pthread_t thread_id;
@@ -4171,7 +4172,8 @@ static int ndb_write_new_blocks(struct ndb_txn *txn, struct ndb_note *note,
 
 static uint64_t ndb_write_note(struct ndb_txn *txn,
 			       struct ndb_writer_note *note,
-			       unsigned char *scratch, size_t scratch_size)
+			       unsigned char *scratch, size_t scratch_size,
+			       uint32_t ndb_flags)
 {
 	int rc;
 	uint64_t note_key;
@@ -4207,15 +4209,18 @@ static uint64_t ndb_write_note(struct ndb_txn *txn,
 
 	// only parse content and do fulltext index on text and longform notes
 	if (note->note->kind == 1 || note->note->kind == 30023) {
-		if (!ndb_write_note_fulltext_index(txn, note->note, note_key))
-			return 0;
+		if (!ndb_flag_set(ndb_flags, NDB_FLAG_NO_FULLTEXT)) {
+			if (!ndb_write_note_fulltext_index(txn, note->note, note_key))
+				return 0;
+		}
 
 		// write note blocks
-		ndb_write_new_blocks(txn, note->note, note_key, scratch,
-				     scratch_size);
+		if (!ndb_flag_set(ndb_flags, NDB_FLAG_NO_NOTE_BLOCKS)) {
+			ndb_write_new_blocks(txn, note->note, note_key, scratch, scratch_size);
+		}
 	}
 
-	if (note->note->kind == 7) {
+	if (note->note->kind == 7 && !ndb_flag_set(ndb_flags, NDB_FLAG_NO_STATS)) {
 		ndb_write_reaction_stats(txn, note->note);
 	}
 
@@ -4365,7 +4370,8 @@ static void *ndb_writer_thread(void *data)
 			case NDB_WRITER_PROFILE:
 				note_nkey =
 					ndb_write_note(&txn, &msg->note,
-						       scratch, scratch_size);
+						       scratch, scratch_size,
+						       writer->ndb_flags);
 				if (note_nkey > 0) {
 					written_notes[num_notes++] =
 					(struct written_note){
@@ -4384,7 +4390,8 @@ static void *ndb_writer_thread(void *data)
 			case NDB_WRITER_NOTE:
 				note_nkey = ndb_write_note(&txn, &msg->note,
 							   scratch,
-							   scratch_size);
+							   scratch_size,
+							   writer->ndb_flags);
 
 				if (note_nkey > 0) {
 					written_notes[num_notes++] = (struct written_note){
@@ -4514,10 +4521,11 @@ static void *ndb_ingester_thread(void *data)
 
 
 static int ndb_writer_init(struct ndb_writer *writer, struct ndb_lmdb *lmdb,
-			   struct ndb_monitor *monitor)
+			   struct ndb_monitor *monitor, uint32_t ndb_flags)
 {
 	writer->lmdb = lmdb;
 	writer->monitor = monitor;
+	writer->ndb_flags = ndb_flags;
 	writer->queue_buflen = sizeof(struct ndb_writer_msg) * DEFAULT_QUEUE_SIZE;
 	writer->queue_buf = malloc(writer->queue_buflen);
 	if (writer->queue_buf == NULL) {
@@ -4842,7 +4850,7 @@ int ndb_init(struct ndb **pndb, const char *filename, const struct ndb_config *c
 
 	ndb_monitor_init(&ndb->monitor, config->sub_cb, config->sub_cb_ctx);
 
-	if (!ndb_writer_init(&ndb->writer, &ndb->lmdb, &ndb->monitor)) {
+	if (!ndb_writer_init(&ndb->writer, &ndb->lmdb, &ndb->monitor, ndb->flags)) {
 		fprintf(stderr, "ndb_writer_init failed\n");
 		return 0;
 	}
