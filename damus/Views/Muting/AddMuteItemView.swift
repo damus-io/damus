@@ -97,6 +97,8 @@ struct AddMuteItemView: View {
                 }
                 .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
             }
+            .disabled(new_text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            .opacity(new_text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.60 : 1.0)
             .buttonStyle(GradientButtonStyle(padding: 10))
             .padding(.vertical)
 
