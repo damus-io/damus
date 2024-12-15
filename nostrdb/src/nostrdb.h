@@ -9,8 +9,11 @@
 #define NDB_PACKED_STR     0x1
 #define NDB_PACKED_ID      0x2
 
-#define NDB_FLAG_NOMIGRATE (1 << 0)
+#define NDB_FLAG_NOMIGRATE        (1 << 0)
 #define NDB_FLAG_SKIP_NOTE_VERIFY (1 << 1)
+#define NDB_FLAG_NO_FULLTEXT      (1 << 2)
+#define NDB_FLAG_NO_NOTE_BLOCKS   (1 << 3)
+#define NDB_FLAG_NO_STATS         (1 << 4)
 
 //#define DEBUG 1
 
