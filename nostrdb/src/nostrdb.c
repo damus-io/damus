@@ -4313,7 +4313,7 @@ static void *ndb_writer_thread(void *data)
 	struct ndb_writer_msg msgs[THREAD_QUEUE_BATCH], *msg;
 	struct written_note written_notes[THREAD_QUEUE_BATCH];
 	size_t scratch_size;
-	int i, popped, done, any_note, num_notes;
+	int i, popped, done, needs_commit, num_notes;
 	uint64_t note_nkey;
 	struct ndb_txn txn;
 	unsigned char *scratch;
@@ -4332,20 +4332,20 @@ static void *ndb_writer_thread(void *data)
 		popped = prot_queue_pop_all(&writer->inbox, msgs, THREAD_QUEUE_BATCH);
 		ndb_debug("writer popped %d items\n", popped);
 
-		any_note = 0;
+		needs_commit = 0;
 		for (i = 0 ; i < popped; i++) {
 			msg = &msgs[i];
 			switch (msg->type) {
-			case NDB_WRITER_NOTE: any_note = 1; break;
-			case NDB_WRITER_PROFILE: any_note = 1; break;
-			case NDB_WRITER_DBMETA: any_note = 1; break;
-			case NDB_WRITER_PROFILE_LAST_FETCH: any_note = 1; break;
-			case NDB_WRITER_BLOCKS: any_note = 1; break;
+			case NDB_WRITER_NOTE: needs_commit = 1; break;
+			case NDB_WRITER_PROFILE: needs_commit = 1; break;
+			case NDB_WRITER_DBMETA: needs_commit = 1; break;
+			case NDB_WRITER_PROFILE_LAST_FETCH: needs_commit = 1; break;
+			case NDB_WRITER_BLOCKS: needs_commit = 1; break;
 			case NDB_WRITER_QUIT: break;
 			}
 		}
 
-		if (any_note && mdb_txn_begin(txn.lmdb->env, NULL, 0, (MDB_txn **)&txn.mdb_txn))
+		if (needs_commit && mdb_txn_begin(txn.lmdb->env, NULL, 0, (MDB_txn **)&txn.mdb_txn))
 		{
 			fprintf(stderr, "writer thread txn_begin failed");
 			// should definitely not happen unless DB is full
@@ -4410,7 +4410,7 @@ static void *ndb_writer_thread(void *data)
 		}
 
 		// commit writes
-		if (any_note) {
+		if (needs_commit) {
 			if (!ndb_end_query(&txn)) {
 				ndb_debug("writer thread txn commit failed\n");
 			} else {
