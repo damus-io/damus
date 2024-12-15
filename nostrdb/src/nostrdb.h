@@ -460,7 +460,7 @@ int ndb_note_verify(void *secp_ctx, unsigned char pubkey[32], unsigned char id[3
 
 // NDB
 int ndb_init(struct ndb **ndb, const char *dbdir, const struct ndb_config *);
-int ndb_db_version(struct ndb *ndb);
+int ndb_db_version(struct ndb_txn *txn);
 int ndb_process_event(struct ndb *, const char *json, int len);
 int ndb_process_events(struct ndb *, const char *ldjson, size_t len);
 #ifndef _WIN32
