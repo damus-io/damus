@@ -19,42 +19,24 @@ struct WalletView: View {
     }
     
     func MainWalletView(nwc: WalletConnectURL) -> some View {
-        VStack {
-            if !damus_state.settings.nozaps {
-                SupportDamus
-                
-                Spacer()
-            }
-            
-            VStack(spacing: 5) {
-                VStack(spacing: 10) {
-                    Text("Wallet Relay", comment: "Label text indicating that below it is the information about the wallet relay.")
-                        .fontWeight(.semibold)
-                        .padding(.top)
-
-                    Divider()
-
-                    RelayView(state: damus_state, relay: nwc.relay, showActionButtons: .constant(false), recommended: false)
+        ScrollView {
+            VStack(spacing: 35) {
+                if !damus_state.settings.nozaps {
+                    SupportDamus
+                        .padding(.vertical, 20)
                 }
-                .frame(maxWidth: .infinity, minHeight: 125, alignment: .top)
-                .padding(.horizontal, 10)
-                .background(DamusColors.neutral1)
-                .cornerRadius(10)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(DamusColors.neutral3, lineWidth: 1)
-                )
                 
-                if let lud16 = nwc.lud16 {
+                VStack(spacing: 5) {
                     VStack(spacing: 10) {
-                        Text("Wallet Address", comment: "Label text indicating that below it is the wallet address.")
+                        Text("Wallet Relay", comment: "Label text indicating that below it is the information about the wallet relay.")
                             .fontWeight(.semibold)
+                            .padding(.top)
                         
                         Divider()
                         
-                        Text(lud16)
+                        RelayView(state: damus_state, relay: nwc.relay, showActionButtons: .constant(false), recommended: false)
                     }
-                    .frame(maxWidth: .infinity, minHeight: 75, alignment: .center)
+                    .frame(maxWidth: .infinity, minHeight: 125, alignment: .top)
                     .padding(.horizontal, 10)
                     .background(DamusColors.neutral1)
                     .cornerRadius(10)
@@ -62,23 +44,43 @@ struct WalletView: View {
                         RoundedRectangle(cornerRadius: 10)
                             .stroke(DamusColors.neutral3, lineWidth: 1)
                     )
+                    
+                    if let lud16 = nwc.lud16 {
+                        VStack(spacing: 10) {
+                            Text("Wallet Address", comment: "Label text indicating that below it is the wallet address.")
+                                .fontWeight(.semibold)
+                            
+                            Divider()
+                            
+                            Text(lud16)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 75, alignment: .center)
+                        .padding(.horizontal, 10)
+                        .background(DamusColors.neutral1)
+                        .cornerRadius(10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(DamusColors.neutral3, lineWidth: 1)
+                        )
+                    }
                 }
-            }
-            
-            Button(action: {
-                self.model.disconnect()
-            }) {
-                HStack {
-                    Text("Disconnect Wallet", comment: "Text for button to disconnect from Nostr Wallet Connect lightning wallet.")
+                
+                Button(action: {
+                    self.model.disconnect()
+                }) {
+                    HStack {
+                        Text("Disconnect Wallet", comment: "Text for button to disconnect from Nostr Wallet Connect lightning wallet.")
+                    }
+                    .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 18, alignment: .center)
                 }
-                .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 18, alignment: .center)
+                .buttonStyle(GradientButtonStyle())
+                .padding(.bottom, 50) // Bottom padding while Scrolling
+                
             }
-            .buttonStyle(GradientButtonStyle())
-            
+            .navigationTitle(NSLocalizedString("Wallet", comment: "Navigation title for Wallet view"))
+            .navigationBarTitleDisplayMode(.inline)
+            .padding()
         }
-        .navigationTitle(NSLocalizedString("Wallet", comment: "Navigation title for Wallet view"))
-        .navigationBarTitleDisplayMode(.inline)
-        .padding()
     }
     
     func donation_binding() -> Binding<Double> {
