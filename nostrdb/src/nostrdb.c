@@ -4415,6 +4415,7 @@ static void *ndb_writer_thread(void *data)
 				} else {
 					ndb_debug("failed to write note\n");
 				}
+				break;
 			case NDB_WRITER_NOTE:
 				note_nkey = ndb_write_note(&txn, &msg->note,
 							   scratch,
