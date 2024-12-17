@@ -4811,6 +4811,8 @@ void ndb_filter_group_destroy(struct ndb_filter_group *group)
 static void ndb_subscription_destroy(struct ndb_subscription *sub)
 {
 	ndb_filter_group_destroy(&sub->group);
+	// this was malloc'd inside ndb_subscribe
+	free(sub->inbox.buf);
 	prot_queue_destroy(&sub->inbox);
 	sub->subid = 0;
 }
