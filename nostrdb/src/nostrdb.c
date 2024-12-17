@@ -4821,9 +4821,17 @@ static void ndb_monitor_destroy(struct ndb_monitor *monitor)
 {
 	int i;
 
+	ndb_monitor_lock(monitor);
+
 	for (i = 0; i < monitor->num_subscriptions; i++) {
 		ndb_subscription_destroy(&monitor->subscriptions[i]);
 	}
+
+	monitor->num_subscriptions = 0;
+
+	ndb_monitor_unlock(monitor);
+
+	pthread_mutex_destroy(&monitor->mutex);
 }
 
 int ndb_init(struct ndb **pndb, const char *filename, const struct ndb_config *config)
