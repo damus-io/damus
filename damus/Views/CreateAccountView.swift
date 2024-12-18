@@ -6,11 +6,14 @@
 //
 
 import SwiftUI
+import Combine
 
-struct CreateAccountView: View {
+struct CreateAccountView: View, KeyboardReadable {
     @StateObject var account: CreateAccountModel = CreateAccountModel()
     @StateObject var profileUploadObserver = ImageUploadingObserver()
     var nav: NavigationCoordinator
+    @State var keyboardVisible: Bool = false
+    let maxViewportHeightForAdaptiveContentSize: CGFloat = 975 // 956px height = iPhone 16 Pro Max
     
     func SignupForm<FormContent: View>(@ViewBuilder content: () -> FormContent) -> some View {
         return VStack(alignment: .leading, spacing: 10.0, content: content)
@@ -26,15 +29,12 @@ struct CreateAccountView: View {
         ZStack(alignment: .top) {
             VStack {
                 Spacer()
+
                 VStack(alignment: .center) {
-                   
-                    EditPictureControl(uploader: .nostrBuild, keypair: account.keypair, pubkey: account.pubkey, size: 75, setup: true, image_url: $account.profile_image , uploadObserver: profileUploadObserver, callback: uploadedProfilePicture)
+                    let screenHeight = UIScreen.main.bounds.height
+
+                    EditPictureControl(uploader: .nostrBuild, keypair: account.keypair, pubkey: account.pubkey, size: keyboardVisible && screenHeight < maxViewportHeightForAdaptiveContentSize ? 25 : 75, setup: true, image_url: $account.profile_image , uploadObserver: profileUploadObserver, callback: uploadedProfilePicture)
                         .shadow(radius: 2)
-                        .padding(.top, 100)
-                    
-                    Text("Add Photo", comment: "Label to indicate user can add a photo.")
-                        .bold()
-                        .foregroundColor(DamusColors.neutral6)
                 }
                 
                 SignupForm {
@@ -42,13 +42,13 @@ struct CreateAccountView: View {
                         .foregroundColor(DamusColors.neutral6)
                     FormTextInput(NSLocalizedString("Satoshi Nakamoto", comment: "Name of Bitcoin creator(s)."), text: $account.name)
                         .textInputAutocapitalization(.words)
-
+                    
                     FormLabel(NSLocalizedString("Bio", comment: "Label to prompt bio entry for user to describe themself."), optional: true)
                         .foregroundColor(DamusColors.neutral6)
                     FormTextInput(NSLocalizedString("Absolute legend.", comment: "Example Bio"), text: $account.about)
                 }
                 .padding(.top, 25)
-
+                
                 Button(action: {
                     nav.push(route: Route.SaveKeys(account: account))
                 }) {
@@ -72,6 +72,11 @@ struct CreateAccountView: View {
         }
         .background(DamusBackground(maxHeight: UIScreen.main.bounds.size.height/2), alignment: .top)
         .dismissKeyboardOnTap()
+        .onReceive(keyboardPublisher) { visible in
+            withAnimation {
+                self.keyboardVisible = visible
+            }
+        }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: BackNav())

@@ -72,14 +72,14 @@ struct EditPictureControl: View {
                         view.framePreloadCount = 3
                     }
                     .scaledToFill()
-                    .frame(width: (size ?? 25) + 10, height: (size ?? 25) + 10)
+                    .frame(width: (size ?? 25) + 30, height: (size ?? 25) + 30)
                     .kfClickable()
                     .foregroundColor(DamusColors.white)
                     .clipShape(Circle())
                     .overlay(Circle().stroke(.white, lineWidth: 4))
             } else {
                 if setup ?? false {
-                    Image(systemName: "person")
+                    Image(systemName: "person.fill")
                         .resizable()
                         .scaledToFit()
                         .frame(width: size, height: size)
@@ -90,6 +90,20 @@ struct EditPictureControl: View {
                             Circle()
                                 .fill(PinkGradient, strokeBorder: .white, lineWidth: 4)
                         }
+                        .overlay(
+                            Image(systemName: "plus.circle.fill")
+                                .resizable()
+                                .frame(
+                                    width: max((size ?? 30)/3, 20),
+                                    height: max((size ?? 30)/3, 20)
+                                )
+                                .background(.damusDeepPurple)
+                                .clipShape(Circle())
+                                .padding(.leading, -10)
+                                .padding(.top, -10)
+                                .foregroundStyle(.white)
+                                .shadow(color: .black.opacity(0.2), radius: 4)
+                        , alignment: .bottomTrailing)
                         
                 } else {
                     Image("camera")
