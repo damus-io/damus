@@ -309,8 +309,27 @@ struct ShareExtensionView: View {
                 }
             } else if itemProvider.hasItemConformingToTypeIdentifier(UTType.url.identifier) {
                 itemProvider.loadItem(forTypeIdentifier: UTType.url.identifier, options: nil) { (item, error) in
+                    // Sharing URLs from iPhone/Safari to Damus also follows this pathway
+                    // Sharing Photos or Links from macOS/Finder or macOS/Safari to Damus sets item-provider conforming to UTType.url.identifier and therefore takes this pathway
+                    
                     if let url = item as? URL {
-                        self.share_state = .loaded(ShareContent(title: title, content: .link(url)))
+                        // Sharing Photos from macOS/Finder
+                        if url.absoluteString.hasPrefix("file:///") {
+                            attemptAcquireResourceAndChooseMedia(
+                                url: url,
+                                fallback: processImage,
+                                unprocessedEnum: {.unprocessed_image($0)},
+                                processedEnum: {.processed_image($0)})
+                            
+                        } else {
+                            // Sharing URLs from iPhone/Safari to Damus
+                            self.share_state = .loaded(ShareContent(title: title, content: .link(url)))
+                        }
+                    } else if let data = item as? Data,
+                              let string = String(data: data, encoding: .utf8),
+                              let url = URL(string: string)  {
+                            // Sharing Links from macOS/Safari, does not provide title
+                            self.share_state = .loaded(ShareContent(title: "", content: .link(url)))
                     } else {
                         self.share_state = .failed(error: "Failed to load text content")
                     }
