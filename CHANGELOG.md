@@ -1,3 +1,42 @@
+## [1.12](https://github.com/damus-io/damus/releases/tag/v1.12) - 2024-12-20
+
+### Added
+
+- Render Gif and video files while composing posts (Swift Coder)
+- Add profile info text in stretchable banner with follow button (Swift Coder)
+- Paste Gif image similar to jpeg and png files (Swift Coder)
+
+
+### Changed
+
+- Improved UX around the label for searching words (Daniel D’Aquino)
+- Improved accessibility support on some elements (Daniel D’Aquino)
+
+
+### Fixed
+
+- Fixed issue where the "next" button would appear hidden and hard to click on the create account view (Daniel D’Aquino)
+- Fix non scrollable wallet screen (Swift Coder)
+- Fixed suggested users category titles to be localizable (Terry Yiu)
+- Fixed GradientFollowButton to have consistent width and autoscale text limited to 1 line (Terry Yiu)
+- Fixed right-to-left localization issues (Terry Yiu)
+- Fixed AddMuteItemView to trim leading and trailing whitespaces from mute text and disallow adding text with only whitespaces (Terry Yiu)
+- Fixed SideMenuView text to autoscale and limit to 1 line (Terry Yiu)
+- Fixed an issue where a profile would need to be input twice in the search to be found (Daniel D’Aquino)
+- Fixed non-breaking spaces in localized strings (Terry Yiu)
+- Fixed localization issue on Add mute item button (Terry Yiu)
+- Replace non-breaking spaces with regular spaces as Apple's NSLocalizedString macro does not seem to work with it (Terry Yiu)
+- Fixed localization issues in RelayConfigView (Terry Yiu)
+- Fix duplicate uploads (Swift Coder)
+- Remove duplicate pubkey from Follow Suggestion list (Swift Coder)
+- Fix Page control indicator (Swift Coder)
+- Fix damus sharing issues (Swift Coder)
+- Fixed issue where banner edit button is unclickable (Daniel D’Aquino)
+- Handle empty notification pages by displaying suitable text (Swift Coder)
+
+[v1.12](https://github.com/damus-io/damus/releases/tag/v1.12): [https://github.com/damus-io/damus/releases/tag/v1.12]
+
+
 ## [v1.11(10)](https://github.com/damus-io/damus/releases/tag/v1.11-10) - 2024-11-18
 
 ### Added
