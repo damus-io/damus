@@ -89,10 +89,17 @@ class ImageUploadModel: NSObject, URLSessionTaskDelegate, ObservableObject {
                 self.progress = nil
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
             }
-        case .failed(_):
+        case .failed(let error):
             DispatchQueue.main.async {
                 self.progress = nil
-                UINotificationFeedbackGenerator().notificationOccurred(.error)
+                if let nsError = error as NSError?,
+                   nsError.domain == NSURLErrorDomain,
+                   nsError.code == NSURLErrorCancelled {
+                    print("Upload forced cancelled by user after Cancelling the Post, no feedback triggered.")
+                } else {
+                    // Trigger feedback for all other errors
+                    UINotificationFeedbackGenerator().notificationOccurred(.error)
+                }
             }
         }
 
