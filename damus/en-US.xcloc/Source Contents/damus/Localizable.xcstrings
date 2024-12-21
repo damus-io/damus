@@ -132,9 +132,6 @@
     "Add mute item" : {
       "comment" : "Button to an add an item to the user's mutelist.\nTitle text to indicate user to an add an item to their mutelist."
     },
-    "Add Photo" : {
-      "comment" : "Label to indicate user can add a photo."
-    },
     "Add relay" : {
       "comment" : "Button text to add a relay\nButton to add a relay.\nTitle text to indicate user to an add a relay."
     },
@@ -376,7 +373,7 @@
       "comment" : "Context menu option for copying the text from an note."
     },
     "Copy URL" : {
-      "comment" : "Label for button in context menu to copy URL of the selected uploaded media asset."
+      "comment" : "Copy URL of the selected uploaded media asset."
     },
     "Copy user public key" : {
       "comment" : "Context menu option for copying the ID of the user who created the note."
@@ -1259,6 +1256,9 @@
     },
     "Search" : {
       "comment" : "Default title for the search screen when it is in an unknown state.\nTitle of the text field for searching."
+    },
+    "Search word: %@" : {
+      "comment" : "Navigation link to search for a word."
     },
     "Search..." : {
       "comment" : "Placeholder text to prompt entry of search query."
