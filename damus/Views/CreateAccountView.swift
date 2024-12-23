@@ -32,8 +32,21 @@ struct CreateAccountView: View, KeyboardReadable {
 
                 VStack(alignment: .center) {
                     let screenHeight = UIScreen.main.bounds.height
+                    let style = EditPictureControl.Style(
+                        size: keyboardVisible && screenHeight < maxViewportHeightForAdaptiveContentSize ? 25 : 75,
+                        first_time_setup: true
+                    )
 
-                    EditPictureControl(uploader: .nostrBuild, keypair: account.keypair, pubkey: account.pubkey, size: keyboardVisible && screenHeight < maxViewportHeightForAdaptiveContentSize ? 25 : 75, setup: true, image_url: $account.profile_image , uploadObserver: profileUploadObserver, callback: uploadedProfilePicture)
+                    EditPictureControl(
+                        uploader: MediaUploader.nostrBuild,
+                        context: .profile_picture,
+                        keypair: account.keypair,
+                        pubkey: account.pubkey,
+                        style: style,
+                        current_image_url: $account.profile_image,
+                        upload_observer: profileUploadObserver,
+                        callback: uploadedProfilePicture
+                    )
                         .shadow(radius: 2)
                 }
                 

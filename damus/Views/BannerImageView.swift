@@ -32,7 +32,15 @@ struct EditBannerImageView: View {
                 .onFailureImage(defaultImage)
                 .kfClickable()
             
-            EditPictureControl(uploader: damus_state.settings.default_media_uploader, keypair: damus_state.keypair, pubkey: damus_state.pubkey, image_url: $banner_image, uploadObserver: viewModel, callback: callback)
+            EditPictureControl(
+                uploader: damus_state.settings.default_media_uploader,
+                context: .normal,
+                keypair: damus_state.keypair,
+                pubkey: damus_state.pubkey,
+                current_image_url: $banner_image,
+                upload_observer: viewModel,
+                callback: callback
+            )
                 .padding(10)
                 .backwardsCompatibleSafeAreaPadding(self.safeAreaInsets)
                 .accessibilityLabel(NSLocalizedString("Edit banner image", comment: "Accessibility label for edit banner image button"))

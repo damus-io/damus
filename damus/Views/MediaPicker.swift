@@ -20,8 +20,14 @@ struct MediaPicker: UIViewControllerRepresentable {
     @Binding private var presentationMode
     let mediaPickerEntry: MediaPickerEntry
 
-    @Binding var image_upload_confirm: Bool
+    let onMediaSelected: (() -> Void)?
     let onMediaPicked: (PreUploadedMedia) -> Void
+    
+    init(mediaPickerEntry: MediaPickerEntry, onMediaSelected: (() -> Void)? = nil, onMediaPicked: @escaping (PreUploadedMedia) -> Void) {
+        self.mediaPickerEntry = mediaPickerEntry
+        self.onMediaSelected = onMediaSelected
+        self.onMediaPicked = onMediaPicked
+    }
 
     final class Coordinator: NSObject, PHPickerViewControllerDelegate {
         var parent: MediaPicker
@@ -121,7 +127,7 @@ struct MediaPicker: UIViewControllerRepresentable {
         
         
         private func chooseMedia(_ media: PreUploadedMedia, orderId: String) {
-            self.parent.image_upload_confirm = true
+            self.parent.onMediaSelected?()
             self.orderMap[orderId] = media
             self.dispatchGroup.leave()
         }

@@ -339,7 +339,7 @@ struct PostView: View {
         print("img size w:\(img.size.width) h:\(img.size.height)")
         
         async let blurhash = calculate_blurhash(img: img)
-        let res = await image_upload.start(media: media, uploader: uploader, keypair: damus_state.keypair)
+        let res = await image_upload.start(media: media, uploader: uploader, mediaType: .normal, keypair: damus_state.keypair)
         
         switch res {
         case .success(let url):
@@ -474,7 +474,7 @@ struct PostView: View {
             }
             .background(DamusColors.adaptableWhite.edgesIgnoringSafeArea(.all))
             .sheet(isPresented: $attach_media) {
-                MediaPicker(mediaPickerEntry: .postView, image_upload_confirm: $image_upload_confirm){ media in
+                MediaPicker(mediaPickerEntry: .postView, onMediaSelected: { image_upload_confirm = true }) { media in
                     self.preUploadedMedia.append(media)
                 }
                 .alert(NSLocalizedString("Are you sure you want to upload the selected media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $image_upload_confirm) {
@@ -495,10 +495,10 @@ struct PostView: View {
                 }
             }
             .sheet(isPresented: $attach_camera) {
-                CameraController(uploader: damus_state.settings.default_media_uploader) {
+                CameraController(uploader: damus_state.settings.default_media_uploader, mode: .save_to_library(when_done: {
                     self.attach_camera = false
                     self.attach_media = true
-                }
+                }))
             }
             // This alert seeks confirmation about Image-upload when user taps Paste option
             .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $imageUploadConfirmPasteboard) {

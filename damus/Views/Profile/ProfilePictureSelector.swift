@@ -33,7 +33,15 @@ struct EditProfilePictureView: View {
                 .scaledToFill()
                 .kfClickable()
     
-            EditPictureControl(uploader: damus_state?.settings.default_media_uploader ?? .nostrBuild, keypair: damus_state?.keypair, pubkey: pubkey, image_url: $profile_url, uploadObserver: uploadObserver, callback: callback)
+            EditPictureControl(
+                uploader: damus_state?.settings.default_media_uploader ?? .nostrBuild,
+                context: .profile_picture,
+                keypair: damus_state?.keypair,
+                pubkey: pubkey,
+                current_image_url: $profile_url,
+                upload_observer: uploadObserver,
+                callback: callback
+            )
         }
         .frame(width: size, height: size)
         .clipShape(Circle())

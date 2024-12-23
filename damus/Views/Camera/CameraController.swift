@@ -13,9 +13,14 @@ struct CameraController: UIViewControllerRepresentable {
     @Environment(\.presentationMode)
     @Binding private var presentationMode
 
-    let uploader: MediaUploader
-    let done: () -> Void
+    let uploader: any MediaUploaderProtocol
     var imagesOnly: Bool = false
+    var mode: Mode
+    
+    enum Mode {
+        case save_to_library(when_done: () -> Void)
+        case handle_image(handler: (UIImage) -> Void)
+    }
 
     final class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
         let parent: CameraController
@@ -25,18 +30,29 @@ struct CameraController: UIViewControllerRepresentable {
         }
         
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            if !parent.imagesOnly, let videoURL = info[UIImagePickerController.InfoKey.mediaURL] as? URL {
-                // Handle the selected video
-                UISaveVideoAtPathToSavedPhotosAlbum(videoURL.relativePath, nil, nil, nil)
-            } else if let cameraImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-                let orientedImage = cameraImage.fixOrientation()
-                UIImageWriteToSavedPhotosAlbum(orientedImage, nil, nil, nil)
-            } else if let editedImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage {
-                let orientedImage = editedImage.fixOrientation()
-                UIImageWriteToSavedPhotosAlbum(orientedImage, nil, nil, nil)
+            switch parent.mode {
+            case .save_to_library(when_done: let done):
+                if !parent.imagesOnly, let videoURL = info[UIImagePickerController.InfoKey.mediaURL] as? URL {
+                    // Handle the selected video
+                    UISaveVideoAtPathToSavedPhotosAlbum(videoURL.relativePath, nil, nil, nil)
+                } else if let cameraImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
+                    let orientedImage = cameraImage.fixOrientation()
+                    UIImageWriteToSavedPhotosAlbum(orientedImage, nil, nil, nil)
+                } else if let editedImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage {
+                    let orientedImage = editedImage.fixOrientation()
+                    UIImageWriteToSavedPhotosAlbum(orientedImage, nil, nil, nil)
+                }
+                done()
+            case .handle_image(handler: let handler):
+                if let cameraImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
+                    let orientedImage = cameraImage.fixOrientation()
+                    handler(orientedImage)
+                } else if let editedImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage {
+                    let orientedImage = editedImage.fixOrientation()
+                    handler(orientedImage)
+                }
             }
             
-            parent.done()
         }
 
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
