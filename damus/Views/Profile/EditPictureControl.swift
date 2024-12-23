@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Kingfisher
+import SwiftyCrop
 
 class ImageUploadingObserver: ObservableObject {
     @Published var isLoading: Bool = false
@@ -14,6 +15,7 @@ class ImageUploadingObserver: ObservableObject {
 
 struct EditPictureControl: View {
     let uploader: MediaUploader
+    let context: Context
     let keypair: Keypair?
     let pubkey: Pubkey
     var size: CGFloat? = 25
@@ -23,34 +25,120 @@ struct EditPictureControl: View {
     @ObservedObject var uploadObserver: ImageUploadingObserver
     let callback: (URL?) -> Void
     
-    @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
-    
-    @State private var show_camera = false
-    @State private var show_library = false
-    @State private var show_url_sheet = false
-    @State var image_upload_confirm: Bool = false
-
-    @State var preUploadedMedia: PreUploadedMedia? = nil
+    @State var state: PictureControlState = .no_picture
     
     @Environment(\.dismiss) var dismiss
+    
+    enum PictureControlState {
+        case no_picture
+        case selecting_picture_from_library
+        case selecting_picture_from_url
+        case selecting_picture_from_camera
+        case confirming_upload(PreUploadedMedia)
+        case cropping(PreUploadedMedia)
+        case uploading(media: MediaUpload, upload: ImageUploadModel)
+        case failed
+        
+        var is_confirming_upload: Bool {
+            guard case .confirming_upload = self else { return false }
+            return true
+        }
+        
+        var show_image_cropper: Bool {
+            guard case .cropping = self else { return false }
+            return true
+        }
+        
+        var show_library: Bool {
+            guard case .selecting_picture_from_library = self else { return false }
+            return true
+        }
+        
+        var show_camera: Bool {
+            guard case .selecting_picture_from_camera = self else { return false }
+            return true
+        }
+        
+        var show_url_sheet: Bool {
+            guard case .selecting_picture_from_camera = self else { return false }
+            return true
+        }
+    }
+    
+    var show_camera: Binding<Bool> {
+        Binding(get: {
+            return self.state.show_camera
+        }, set: { newShowCamera in
+            if newShowCamera {
+                self.state = .selecting_picture_from_camera
+            }
+            else {
+                self.state = .no_picture
+            }
+        })
+    }
+    
+    var show_library: Binding<Bool> {
+        Binding(get: {
+            return self.state.show_library
+        }, set: { newValue in
+            if newValue {
+                self.state = .selecting_picture_from_library
+            }
+            else {
+                self.state = .no_picture
+            }
+        })
+    }
+    
+    var show_url_sheet: Binding<Bool> {
+        Binding(get: {
+            return self.state.show_url_sheet
+        }, set: { newValue in
+            if newValue {
+                self.state = .selecting_picture_from_url
+            }
+            else {
+                self.state = .no_picture
+            }
+        })
+    }
+    
+    var crop_configuration: SwiftyCropConfiguration {
+        return SwiftyCropConfiguration(rotateImage: false, zoomSensitivity: 5)
+    }
+    
+    enum Context {
+        case normal
+        case profile_picture
+        
+        var mediaType: ImageUploadMediaType {
+            switch self {
+                case .normal:
+                    .normal
+                case .profile_picture:
+                    .profile_picture
+            }
+        }
+    }
 
     var body: some View {
         Menu {
             Button(action: {
-                self.show_url_sheet = true
+                self.state = .selecting_picture_from_url
             }) {
                 Text("Image URL", comment: "Option to enter a url")
             }
             .accessibilityIdentifier(AppAccessibilityIdentifiers.own_profile_banner_image_edit_from_url.rawValue)
             
             Button(action: {
-                self.show_library = true
+                self.state = .selecting_picture_from_library
             }) {
                 Text("Choose from Library", comment: "Option to select photo from library")
             }
             
             Button(action: {
-                self.show_camera = true
+                self.state = .selecting_picture_from_camera
             }) {
                 Text("Take Photo", comment: "Option to take a photo with the camera")
             }
@@ -122,27 +210,72 @@ struct EditPictureControl: View {
                     
             }
         }
-        .sheet(isPresented: $show_camera) {
+        .sheet(isPresented: self.show_camera) {
             CameraController(uploader: uploader) {
-                self.show_camera = false
-                self.show_library = true
+                self.state = .selecting_picture_from_library
             }
         }
-        .sheet(isPresented: $show_library) {
-            MediaPicker(mediaPickerEntry: .editPictureControl, image_upload_confirm: $image_upload_confirm) { media in
-                self.preUploadedMedia = media
+        .sheet(isPresented: Binding.constant(self.state.show_library)) {
+            MediaPicker(mediaPickerEntry: .editPictureControl) { media in
+                self.state = .confirming_upload(media)
             }
-            .alert(NSLocalizedString("Are you sure you want to upload this image?", comment: "Alert message asking if the user wants to upload an image."), isPresented: $image_upload_confirm) {
-                Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
-                    if let mediaToUpload = generateMediaUpload(preUploadedMedia) {
-                        self.handle_upload(media: mediaToUpload)
-                        self.show_library = false
-                    }
+        }
+        .alert(NSLocalizedString("Are you sure you want to upload this image?", comment: "Alert message asking if the user wants to upload an image."),
+               isPresented: Binding.constant(self.state.is_confirming_upload)) {
+            Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
+                if case .confirming_upload(let preUploadedMedia) = state {
+                    self.state = .cropping(preUploadedMedia)
                 }
-                Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
+            }
+            Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
+        }
+        .fullScreenCover(isPresented: Binding.constant(self.state.show_image_cropper)) {
+            if case .cropping(let preUploadedMedia) = state {
+                switch preUploadedMedia {
+                case .uiimage(let image):
+                    SwiftyCropView(
+                        imageToCrop: image,
+                        maskShape: .circle
+                    ) { croppedImage in
+                        guard let croppedImage else { return }
+                        let newPreUploadedMedia: PreUploadedMedia = .uiimage(croppedImage)
+                        if let mediaToUpload = generateMediaUpload(newPreUploadedMedia) {
+                            self.handle_upload(media: mediaToUpload)
+                        }
+                        else {
+                            self.state = .failed
+                        }
+                    }
+                case .unprocessed_image(let url), .processed_image(let url):
+                    if let image = try? UIImage.from(url: url) {
+                        SwiftyCropView(
+                            imageToCrop: image,
+                            maskShape: .circle,
+                            configuration: crop_configuration
+                        ) { croppedImage in
+                            guard let croppedImage else { return }
+                            guard let resizedCroppedImage = resizeImage(image: croppedImage, targetSize: CGSize(width: 400, height: 400)) else { return }
+                            let newPreUploadedMedia: PreUploadedMedia = .uiimage(croppedImage)
+                            if let mediaToUpload = generateMediaUpload(newPreUploadedMedia) {
+                                self.handle_upload(media: mediaToUpload)
+                            }
+                            else {
+                                self.state = .failed
+                            }
+                        }
+                    }
+                    else {
+                        Text("Error loading image")
+                    }
+                default:
+                    Text("Nothing to crop?")
+                }
+            }
+            else {
+                Text("Nothing to crop?")
             }
         }
-        .sheet(isPresented: $show_url_sheet) {
+        .sheet(isPresented: self.show_url_sheet) {
             ZStack {
                 DamusColors.adaptableWhite.edgesIgnoringSafeArea(.all)
                 VStack {
@@ -177,7 +310,7 @@ struct EditPictureControl: View {
                     .padding(10)
                     
                     Button(action: {
-                        show_url_sheet.toggle()
+                        self.state = .no_picture
                     }, label: {
                         Text("Cancel", comment: "Cancel button text for dismissing updating image url.")
                             .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
@@ -189,7 +322,7 @@ struct EditPictureControl: View {
                     Button(action: {
                         image_url = image_url_temp
                         callback(image_url)
-                        show_url_sheet.toggle()
+                        self.state = .no_picture
                     }, label: {
                         Text("Update", comment: "Update button text for updating image url.")
                             .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
@@ -209,9 +342,11 @@ struct EditPictureControl: View {
     }
     
     private func handle_upload(media: MediaUpload) {
+        let image_upload = ImageUploadModel()
+        self.state = .uploading(media: media, upload: image_upload)
         uploadObserver.isLoading = true
         Task {
-            let res = await image_upload.start(media: media, uploader: uploader, keypair: keypair)
+            let res = await image_upload.start(media: media, uploader: uploader, mediaType: self.context.mediaType, keypair: keypair)
             
             switch res {
             case .success(let urlString):
@@ -237,9 +372,39 @@ struct EditPictureControl_Previews: PreviewProvider {
         let observer = ImageUploadingObserver()
         ZStack {
             Color.gray
-            EditPictureControl(uploader: .nostrBuild, keypair: test_keypair, pubkey: test_pubkey, size: 100, setup: false, image_url: url, uploadObserver: observer) { _ in
+            EditPictureControl(uploader: .nostrBuild, context: .profile_picture, keypair: test_keypair, pubkey: test_pubkey, size: 100, setup: false, image_url: url, uploadObserver: observer) { _ in
                 //
             }
         }
+    }
+}
+
+func resizeImage(image: UIImage, targetSize: CGSize) -> UIImage? {
+    let size = image.size
+
+    let widthRatio  = targetSize.width  / size.width
+    let heightRatio = targetSize.height / size.height
+
+    // Determine the scale factor that preserves aspect ratio
+    let scaleFactor = min(widthRatio, heightRatio)
+    
+    let scaledImageSize = CGSize(
+        width: size.width * scaleFactor,
+        height: size.height * scaleFactor
+    )
+
+    let renderer = UIGraphicsImageRenderer(size: scaledImageSize)
+    
+    let scaledImage = renderer.image { _ in
+        image.draw(in: CGRect(origin: .zero, size: scaledImageSize))
+    }
+
+    return scaledImage
+}
+
+extension UIImage {
+    static func from(url: URL) throws -> UIImage? {
+        let data = try Data(contentsOf: url)
+        return UIImage(data: data)
     }
 }

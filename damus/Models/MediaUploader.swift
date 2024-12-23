@@ -33,6 +33,19 @@ enum MediaUploader: String, CaseIterable, Identifiable, StringCodable {
         }
     }
     
+    var mediaTypeParam: String {
+        return "media_type"
+    }
+    
+    func mediaTypeValue(for mediaType: ImageUploadMediaType) -> String? {
+        switch mediaType {
+        case .normal:
+            return nil
+        case .profile_picture:
+            return "avatar"
+        }
+    }
+    
     var supportsVideo: Bool {
         switch self {
         case .nostrBuild:

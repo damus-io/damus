@@ -15,20 +15,33 @@ enum ImageUploadResult {
     case failed(Error?)
 }
 
-fileprivate func create_upload_body(mediaData: Data, boundary: String, mediaUploader: MediaUploader, mediaToUpload: MediaUpload) -> Data {
-        let body = NSMutableData();
-        let contentType = mediaToUpload.mime_type
-        body.appendString(string: "Content-Type: multipart/form-data; boundary=\(boundary)\r\n\r\n")
-        body.appendString(string: "--\(boundary)\r\n")
-        body.appendString(string: "Content-Disposition: form-data; name=\(mediaUploader.nameParam); filename=\(mediaToUpload.genericFileName)\r\n")
-        body.appendString(string: "Content-Type: \(contentType)\r\n\r\n")
-        body.append(mediaData as Data)
-        body.appendString(string: "\r\n")
-        body.appendString(string: "--\(boundary)--\r\n")
-        return body as Data
-    }
+enum ImageUploadMediaType {
+    case normal
+    case profile_picture
+}
 
-func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploader, progress: URLSessionTaskDelegate, keypair: Keypair? = nil) async -> ImageUploadResult {
+fileprivate func create_upload_body(mediaData: Data, boundary: String, mediaUploader: MediaUploader, mediaToUpload: MediaUpload, mediaType: ImageUploadMediaType) -> Data {
+    let mediaTypeFieldValue = mediaUploader.mediaTypeValue(for: mediaType)
+    let mediaTypeFieldEntry: String?
+    if let mediaTypeFieldValue {
+        mediaTypeFieldEntry = "; \(mediaUploader.mediaTypeParam)=\(mediaTypeFieldValue)"
+    }
+    else {
+        mediaTypeFieldEntry = nil
+    }
+    let body = NSMutableData();
+    let contentType = mediaToUpload.mime_type
+    body.appendString(string: "Content-Type: multipart/form-data; boundary=\(boundary)\r\n\r\n")
+    body.appendString(string: "--\(boundary)\r\n")
+    body.appendString(string: "Content-Disposition: form-data; name=\(mediaUploader.nameParam); filename=\(mediaToUpload.genericFileName)\(mediaTypeFieldEntry ?? "")\r\n")
+    body.appendString(string: "Content-Type: \(contentType)\r\n\r\n")
+    body.append(mediaData as Data)
+    body.appendString(string: "\r\n")
+    body.appendString(string: "--\(boundary)--\r\n")
+    return body as Data
+}
+
+func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploader, mediaType: ImageUploadMediaType, progress: URLSessionTaskDelegate, keypair: Keypair? = nil) async -> ImageUploadResult {
     var mediaData: Data?
     guard let url = URL(string: mediaUploader.postAPI) else {
         return .failed(nil)
@@ -67,7 +80,7 @@ func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploa
         return .failed(nil)
     }
 
-    request.httpBody = create_upload_body(mediaData: mediaData, boundary: boundary, mediaUploader: mediaUploader, mediaToUpload: mediaToUpload)
+    request.httpBody = create_upload_body(mediaData: mediaData, boundary: boundary, mediaUploader: mediaUploader, mediaToUpload: mediaToUpload, mediaType: mediaType)
     
     do {
         let (data, _) = try await URLSession.shared.data(for: request, delegate: progress)

@@ -80,8 +80,8 @@ enum MediaUpload {
 class ImageUploadModel: NSObject, URLSessionTaskDelegate, ObservableObject {
     @Published var progress: Double? = nil
     
-    func start(media: MediaUpload, uploader: MediaUploader, keypair: Keypair? = nil) async -> ImageUploadResult {
-        let res = await create_upload_request(mediaToUpload: media, mediaUploader: uploader, progress: self, keypair: keypair)
+    func start(media: MediaUpload, uploader: MediaUploader, mediaType: ImageUploadMediaType, keypair: Keypair? = nil) async -> ImageUploadResult {
+        let res = await create_upload_request(mediaToUpload: media, mediaUploader: uploader, mediaType: mediaType, progress: self, keypair: keypair)
                 
         switch res {
         case .success(_):
