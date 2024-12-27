@@ -495,10 +495,10 @@ struct PostView: View {
                 }
             }
             .sheet(isPresented: $attach_camera) {
-                CameraController(uploader: damus_state.settings.default_media_uploader) {
+                CameraController(uploader: damus_state.settings.default_media_uploader, mode: .save_to_library(when_done: {
                     self.attach_camera = false
                     self.attach_media = true
-                }
+                }))
             }
             // This alert seeks confirmation about Image-upload when user taps Paste option
             .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $imageUploadConfirmPasteboard) {

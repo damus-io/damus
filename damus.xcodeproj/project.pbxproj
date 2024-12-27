@@ -682,7 +682,7 @@
 		82D6FBA22CD99F7900C925F4 /* ZapType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CB5D4A2B11721600AD4105 /* ZapType.swift */; };
 		82D6FBA32CD99F7900C925F4 /* NewEventsBits.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CB5D4D2B11728000AD4105 /* NewEventsBits.swift */; };
 		82D6FBA42CD99F7900C925F4 /* FriendFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CB5D502B1174D100AD4105 /* FriendFilter.swift */; };
-		82D6FBA52CD99F7900C925F4 /* MediaUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CB5D5B2B1176B200AD4105 /* MediaUploader.swift */; };
+		82D6FBA52CD99F7900C925F4 /* MediaUploaderProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CB5D5B2B1176B200AD4105 /* MediaUploaderProtocol.swift */; };
 		82D6FBA62CD99F7900C925F4 /* FollowState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CB5D5E2B11770C00AD4105 /* FollowState.swift */; };
 		82D6FBA72CD99F7900C925F4 /* NoteContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EDED1B2B1178FE0018B19C /* NoteContent.swift */; };
 		82D6FBA82CD99F7900C925F4 /* LongformEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EDED1D2B11797D0018B19C /* LongformEvent.swift */; };
@@ -949,7 +949,7 @@
 		D703D7512C6709FB00A400EA /* Nostr.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFA527FF87A20006080F /* Nostr.swift */; };
 		D703D7522C670A1400A400EA /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2B10272A7B0F5C008AA43E /* Log.swift */; };
 		D703D7532C670A2600A400EA /* Wallet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE60CDC295E1C5E00105A1F /* Wallet.swift */; };
-		D703D7542C670A2A00A400EA /* MediaUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CB5D5B2B1176B200AD4105 /* MediaUploader.swift */; };
+		D703D7542C670A2A00A400EA /* MediaUploaderProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CB5D5B2B1176B200AD4105 /* MediaUploaderProtocol.swift */; };
 		D703D7552C670A3700A400EA /* DamusUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */; };
 		D703D7562C670A4C00A400EA /* TranslationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AAA95C9298DF87B00F3D526 /* TranslationService.swift */; };
 		D703D7572C670A5A00A400EA /* IdType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC14FEE2A73FCCB007AEB17 /* IdType.swift */; };
@@ -1485,6 +1485,7 @@
 		D798D22E2B086E4800234419 /* NostrResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFB028049D510006080F /* NostrResponse.swift */; };
 		D79C4C172AFEB061003A41B4 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79C4C162AFEB061003A41B4 /* NotificationService.swift */; };
 		D79C4C1B2AFEB061003A41B4 /* DamusNotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D79C4C142AFEB061003A41B4 /* DamusNotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		D7A0D8752D1FE67900DCBE59 /* EditPictureControlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A0D8742D1FE66A00DCBE59 /* EditPictureControlTests.swift */; };
 		D7A343EE2AD0D77C00CED48B /* InlineSnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = D7A343ED2AD0D77C00CED48B /* InlineSnapshotTesting */; };
 		D7A343F02AD0D77C00CED48B /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = D7A343EF2AD0D77C00CED48B /* SnapshotTesting */; };
 		D7ADD3DE2B53854300F104C4 /* DamusPurpleURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7ADD3DD2B53854300F104C4 /* DamusPurpleURL.swift */; };
@@ -1524,8 +1525,8 @@
 		D7CB5D572B11762900AD4105 /* UserStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5E54022A9522F600FF6E60 /* UserStatus.swift */; };
 		D7CB5D582B11763C00AD4105 /* NewMutesNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA352A72A76B37E003BB08B /* NewMutesNotify.swift */; };
 		D7CB5D592B11764000AD4105 /* NewUnmutesNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA352AB2A76C07F003BB08B /* NewUnmutesNotify.swift */; };
-		D7CB5D5C2B1176B200AD4105 /* MediaUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CB5D5B2B1176B200AD4105 /* MediaUploader.swift */; };
-		D7CB5D5D2B1176B200AD4105 /* MediaUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CB5D5B2B1176B200AD4105 /* MediaUploader.swift */; };
+		D7CB5D5C2B1176B200AD4105 /* MediaUploaderProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CB5D5B2B1176B200AD4105 /* MediaUploaderProtocol.swift */; };
+		D7CB5D5D2B1176B200AD4105 /* MediaUploaderProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CB5D5B2B1176B200AD4105 /* MediaUploaderProtocol.swift */; };
 		D7CB5D5F2B11770C00AD4105 /* FollowState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CB5D5E2B11770C00AD4105 /* FollowState.swift */; };
 		D7CB5D602B11770C00AD4105 /* FollowState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CB5D5E2B11770C00AD4105 /* FollowState.swift */; };
 		D7CBD1D42B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CBD1D32B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift */; };
@@ -2449,6 +2450,7 @@
 		D79C4C162AFEB061003A41B4 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		D79C4C182AFEB061003A41B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D79C4C1C2AFEB061003A41B4 /* DamusNotificationService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DamusNotificationService.entitlements; sourceTree = "<group>"; };
+		D7A0D8742D1FE66A00DCBE59 /* EditPictureControlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditPictureControlTests.swift; sourceTree = "<group>"; };
 		D7ADD3DD2B53854300F104C4 /* DamusPurpleURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleURL.swift; sourceTree = "<group>"; };
 		D7ADD3DF2B538D4200F104C4 /* DamusPurpleURLSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleURLSheetView.swift; sourceTree = "<group>"; };
 		D7ADD3E12B538E3500F104C4 /* DamusPurpleVerifyNpubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleVerifyNpubView.swift; sourceTree = "<group>"; };
@@ -2458,7 +2460,7 @@
 		D7CB5D4A2B11721600AD4105 /* ZapType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapType.swift; sourceTree = "<group>"; };
 		D7CB5D4D2B11728000AD4105 /* NewEventsBits.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewEventsBits.swift; sourceTree = "<group>"; };
 		D7CB5D502B1174D100AD4105 /* FriendFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendFilter.swift; sourceTree = "<group>"; };
-		D7CB5D5B2B1176B200AD4105 /* MediaUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaUploader.swift; sourceTree = "<group>"; };
+		D7CB5D5B2B1176B200AD4105 /* MediaUploaderProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaUploaderProtocol.swift; sourceTree = "<group>"; };
 		D7CB5D5E2B11770C00AD4105 /* FollowState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowState.swift; sourceTree = "<group>"; };
 		D7CBD1D32B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleNotificationManagement.swift; sourceTree = "<group>"; };
 		D7CBD1D52B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleImpendingExpirationTests.swift; sourceTree = "<group>"; };
@@ -2714,7 +2716,7 @@
 				D7CB5D4A2B11721600AD4105 /* ZapType.swift */,
 				D7CB5D4D2B11728000AD4105 /* NewEventsBits.swift */,
 				D7CB5D502B1174D100AD4105 /* FriendFilter.swift */,
-				D7CB5D5B2B1176B200AD4105 /* MediaUploader.swift */,
+				D7CB5D5B2B1176B200AD4105 /* MediaUploaderProtocol.swift */,
 				D7CB5D5E2B11770C00AD4105 /* FollowState.swift */,
 				D7EDED1B2B1178FE0018B19C /* NoteContent.swift */,
 				D7EDED1D2B11797D0018B19C /* LongformEvent.swift */,
@@ -3596,6 +3598,7 @@
 		4CE6DEF627F7A08200C66700 /* damusTests */ = {
 			isa = PBXGroup;
 			children = (
+				D7A0D8742D1FE66A00DCBE59 /* EditPictureControlTests.swift */,
 				E06336A72B7582D600A88E6B /* Assets */,
 				D72A2D032AD9C165002AFF62 /* Mocking */,
 				4C9B0DEC2A65A74000CBDA21 /* Util */,
@@ -4644,7 +4647,7 @@
 				D76556D62B1E6C08001B0CCC /* DamusPurpleWelcomeView.swift in Sources */,
 				3165648B295B70D500C64604 /* LinkView.swift in Sources */,
 				4C8D00CF29E38B950036AF10 /* nostr_bech32.c in Sources */,
-				D7CB5D5C2B1176B200AD4105 /* MediaUploader.swift in Sources */,
+				D7CB5D5C2B1176B200AD4105 /* MediaUploaderProtocol.swift in Sources */,
 				4C1253562A76C8C60004F4B8 /* BroadcastNotify.swift in Sources */,
 				4C3BEFD42819DE8F00B3DE84 /* NostrKind.swift in Sources */,
 				B533694E2B66D791008A805E /* MutelistManager.swift in Sources */,
@@ -4805,6 +4808,7 @@
 				D72A2D052AD9C1B5002AFF62 /* MockDamusState.swift in Sources */,
 				E06336AA2B75832100A88E6B /* ImageMetadataTest.swift in Sources */,
 				4C363AA02828A8DD006E126D /* LikeTests.swift in Sources */,
+				D7A0D8752D1FE67900DCBE59 /* EditPictureControlTests.swift in Sources */,
 				4C90BD1C283AC38E008EE7EF /* Bech32Tests.swift in Sources */,
 				50A50A8D29A09E1C00C01BE7 /* RequestTests.swift in Sources */,
 				4CE6DEF827F7A08200C66700 /* damusTests.swift in Sources */,
@@ -5083,7 +5087,7 @@
 				82D6FBA22CD99F7900C925F4 /* ZapType.swift in Sources */,
 				82D6FBA32CD99F7900C925F4 /* NewEventsBits.swift in Sources */,
 				82D6FBA42CD99F7900C925F4 /* FriendFilter.swift in Sources */,
-				82D6FBA52CD99F7900C925F4 /* MediaUploader.swift in Sources */,
+				82D6FBA52CD99F7900C925F4 /* MediaUploaderProtocol.swift in Sources */,
 				82D6FBA62CD99F7900C925F4 /* FollowState.swift in Sources */,
 				82D6FBA72CD99F7900C925F4 /* NoteContent.swift in Sources */,
 				82D6FBA82CD99F7900C925F4 /* LongformEvent.swift in Sources */,
@@ -5657,7 +5661,7 @@
 				D703D7932C670DAF00A400EA /* mem.c in Sources */,
 				D703D7732C670B8500A400EA /* Offset.swift in Sources */,
 				D703D7572C670A5A00A400EA /* IdType.swift in Sources */,
-				D703D7542C670A2A00A400EA /* MediaUploader.swift in Sources */,
+				D703D7542C670A2A00A400EA /* MediaUploaderProtocol.swift in Sources */,
 				D703D7B72C67118F00A400EA /* StringUtil.swift in Sources */,
 				D73E5E1A2C6A9665007EB227 /* RelayPool.swift in Sources */,
 				D703D74C2C6709CE00A400EA /* Zaps.swift in Sources */,
@@ -5857,7 +5861,7 @@
 				D7CE1B352B0BE6FA002EDAD4 /* ByteBuffer.swift in Sources */,
 				D7CE1B2F2B0BE260002EDAD4 /* list.c in Sources */,
 				D7CB5D422B116F8900AD4105 /* Contacts.swift in Sources */,
-				D7CB5D5D2B1176B200AD4105 /* MediaUploader.swift in Sources */,
+				D7CB5D5D2B1176B200AD4105 /* MediaUploaderProtocol.swift in Sources */,
 				D7CE1B342B0BE6EE002EDAD4 /* NdbProfile.swift in Sources */,
 				D7DBD41F2B02F15E002A6197 /* NostrKind.swift in Sources */,
 				D7CE1B3C2B0BE719002EDAD4 /* TableVerifier.swift in Sources */,

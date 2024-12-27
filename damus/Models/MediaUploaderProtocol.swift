@@ -7,7 +7,18 @@
 
 import Foundation
 
-enum MediaUploader: String, CaseIterable, Identifiable, StringCodable {
+protocol MediaUploaderProtocol: Identifiable {    
+    var nameParam: String { get }
+    var mediaTypeParam: String { get }
+    var supportsVideo: Bool { get }
+    var requiresNip98: Bool { get }
+    var postAPI: String { get }
+    
+    func getMediaURL(from data: Data) -> String?
+    func mediaTypeValue(for mediaType: ImageUploadMediaType) -> String?
+}
+
+enum MediaUploader: String, CaseIterable, MediaUploaderProtocol, StringCodable {
     var id: String { self.rawValue }
     case nostrBuild
     case nostrcheck
@@ -47,6 +58,15 @@ enum MediaUploader: String, CaseIterable, Identifiable, StringCodable {
     }
     
     var supportsVideo: Bool {
+        switch self {
+        case .nostrBuild:
+            return true
+        case .nostrcheck:
+            return true
+        }
+    }
+    
+    var requiresNip98: Bool {
         switch self {
         case .nostrBuild:
             return true
