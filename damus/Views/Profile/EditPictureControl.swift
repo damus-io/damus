@@ -74,6 +74,9 @@ struct EditPictureControl: View {
                 self.default_view
             }
         }
+        .accessibilityLabel(self.accessibility_label)
+        .accessibilityHint(self.accessibility_hint)
+        .maybeAccessibilityValue(self.accessibility_value)
         .sheet(isPresented: self.model.show_camera) {
             CameraController(uploader: model.uploader, mode: .handle_image(handler: { image in
                 self.model.request_upload_authorization(PreUploadedMedia.uiimage(image))
@@ -263,6 +266,46 @@ struct EditPictureControl: View {
             Button(action: { self.model.cancel() }, label: {
                 Text("Dismiss", comment: "Button to dismiss error")
             })
+        }
+    }
+    
+    
+    // MARK: Accesibility helpers
+    
+    var accessibility_label: String {
+        switch self.model.context {
+        case .normal:
+            return NSLocalizedString("Edit Image", comment: "Accessibility label for a button that edits an image")
+        case .profile_picture:
+            return NSLocalizedString("Edit profile picture", comment: "Accessibility label for a button that edits a profile picture")
+        }
+    }
+    
+    var accessibility_hint: String {
+        return NSLocalizedString("Shows options to edit the image", comment: "Accessibility hint for a button that edits an image")
+    }
+    
+    var accessibility_value: String? {
+        if style.first_time_setup {
+            if let current_image_url = model.current_image_url {
+                switch self.model.context {
+                case .normal:
+                    return NSLocalizedString("Image is setup", comment: "Accessibility value on image control")
+                case .profile_picture:
+                    return NSLocalizedString("Profile picture is setup", comment: "Accessibility value on profile picture image control")
+                }
+            }
+            else {
+                switch self.model.context {
+                case .normal:
+                    return NSLocalizedString("No image is currently setup", comment: "Accessibility value on image control")
+                case .profile_picture:
+                    return NSLocalizedString("No profile picture is currently setup", comment: "Accessibility value on profile picture image control")
+                }
+            }
+        }
+        else {
+            return nil  // Image is shown outside this control and will have its accessibility defined outside this view.
         }
     }
 }
@@ -690,6 +733,14 @@ fileprivate extension UIImage {
     static func from(url: URL) throws -> UIImage? {
         let data = try Data(contentsOf: url)
         return UIImage(data: data)
+    }
+}
+
+fileprivate extension View {
+    func maybeAccessibilityValue(_ value: String?) -> some View {
+        Group {
+            if let value { self.accessibilityValue(value) } else { self }
+        }
     }
 }
 
