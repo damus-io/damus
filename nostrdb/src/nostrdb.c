@@ -3343,7 +3343,7 @@ static int ndb_query_plan_execute_kinds(struct ndb_txn *txn,
 	struct ndb_u64_ts tsid, *ptsid;
 	struct ndb_filter_elements *kinds;
 	struct ndb_query_result res;
-	uint64_t kind, note_id, until, *pint;
+	uint64_t kind, note_id, until, since, *pint;
 	size_t note_size;
 	int i, rc;
 
@@ -3354,6 +3354,10 @@ static int ndb_query_plan_execute_kinds(struct ndb_txn *txn,
 	until = UINT64_MAX;
 	if ((pint = ndb_filter_get_int(filter, NDB_FILTER_UNTIL)))
 		until = *pint;
+
+	since = 0;
+	if ((pint = ndb_filter_get_int(filter, NDB_FILTER_SINCE)))
+		since = *pint;
 
 	db = txn->lmdb->dbs[NDB_DB_NOTE_KIND];
 
@@ -3378,6 +3382,10 @@ static int ndb_query_plan_execute_kinds(struct ndb_txn *txn,
 		while (!query_is_full(results, limit)) {
 			ptsid = (struct ndb_u64_ts *)k.mv_data;
 			if (ptsid->u64 != kind)
+				break;
+
+			// don't continue the scan if we're below `since`
+			if (ptsid->timestamp < since)
 				break;
 
 			note_id = *(uint64_t*)v.mv_data;
