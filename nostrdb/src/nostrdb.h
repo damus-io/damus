@@ -17,7 +17,7 @@
 
 //#define DEBUG 1
 
-#ifdef DEBUG
+#ifdef NDB_LOG
 #define ndb_debug(...) printf(__VA_ARGS__)
 #else
 #define ndb_debug(...) (void)0
