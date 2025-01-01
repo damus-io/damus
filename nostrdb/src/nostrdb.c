@@ -1512,7 +1512,7 @@ static int ndb_rebuild_note_indices(struct ndb_txn *txn, enum ndb_dbs *indices, 
 	// ensure they are all index dbs
 	for (i = 0; i < num_indices; i++) {
 		if (!ndb_db_is_index(indices[i])) {
-			fprintf(stderr, "ndb_rebuild_note_index: %s is not an index db\n", ndb_db_name(index));
+			fprintf(stderr, "ndb_rebuild_note_index: %s is not an index db\n", ndb_db_name(indices[i]));
 			return -1;
 		}
 	}
