@@ -92,8 +92,8 @@ enum Wallet: String, CaseIterable, Identifiable, StringCodable {
             return .init(index: 12, tag: "river", displayName: "River", link: "river://",
                          appStoreLink: "https://apps.apple.com/us/app/river-buy-mine-bitcoin/id1536176542", image: "river")
         case .albygo:
-            return .init(index: 13, tag: "albygo", displayName: "Alby Go", link: "albygo:lightning:",
-                         appStoreLink: "https://apps.apple.com/us/app/alby-go/id6471335774", image: "albygo")
+            return .init(index: 13, tag: "albygo", displayName: "Alby Go", link: "alby://",
+                         appStoreLink: "https://apps.apple.com/us/app/alby-go/id6471335774", image: "alby-go")
             
         }
     }
