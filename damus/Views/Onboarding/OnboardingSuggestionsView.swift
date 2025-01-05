@@ -38,7 +38,9 @@ struct OnboardingSuggestionsView: View {
                     }, label: {
                         Text("Skip", comment: "Button to dismiss the suggested users screen")
                             .font(.subheadline.weight(.semibold))
-                    }))
+                    })
+                    .accessibilityIdentifier(AppAccessibilityIdentifiers.onboarding_sheet_skip_button.rawValue)
+                    )
                     .tag(0)
                 
                 PostView(
@@ -112,7 +114,10 @@ struct SuggestedUsersSectionHeader: View {
     let model: SuggestedUsersViewModel
     var body: some View {
         HStack {
-            Text(group.title.uppercased())
+            let locale = Locale.current
+            let format = localizedStringFormat(key: group.category, locale: locale)
+            let categoryName = String(format: format, locale: locale)
+            Text(categoryName)
             Spacer()
             Button(NSLocalizedString("Follow All", comment: "Button to follow all users in this section")) {
                 model.follow(pubkeys: group.users)

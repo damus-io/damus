@@ -6,7 +6,8 @@
 //
 
 import SwiftUI
-import AVFoundation
+import AVKit
+import Kingfisher
 
 enum NostrPostResult {
     case post(NostrPost)
@@ -31,6 +32,7 @@ enum PostAction {
     case quoting(NostrEvent)
     case posting(PostTarget)
     case highlighting(HighlightContentDraft)
+    case sharing(ShareContent)
     
     var ev: NostrEvent? {
         switch self {
@@ -41,6 +43,8 @@ enum PostAction {
             case .posting:
                 return nil
             case .highlighting:
+                return nil
+            case .sharing(_):
                 return nil
         }
     }
@@ -54,9 +58,10 @@ struct PostView: View {
     @State var error: String? = nil
     @State var uploadedMedias: [UploadedMedia] = []
     @State var image_upload_confirm: Bool = false
-    @State var imagePastedFromPasteboard: UIImage? = nil
+    @State var imagePastedFromPasteboard: PreUploadedMedia? = nil
     @State var imageUploadConfirmPasteboard: Bool = false
     @State var references: [RefId] = []
+    @State var imageUploadConfirmDamusShare: Bool = false
     @State var filtered_pubkeys: Set<Pubkey> = []
     @State var focusWordAttributes: (String?, NSRange?) = (nil, nil)
     @State var newCursorIndex: Int?
@@ -217,6 +222,8 @@ struct PostView: View {
                 damus_state.drafts.post = nil
             case .highlighting(let draft):
                 damus_state.drafts.highlights.removeValue(forKey: draft.source)
+            case .sharing(_):
+                damus_state.drafts.post = nil
         }
 
     }
@@ -298,6 +305,7 @@ struct PostView: View {
                         .padding(10)
                 })
                 .buttonStyle(NeutralButtonStyle())
+                .accessibilityIdentifier(AppAccessibilityIdentifiers.post_composer_cancel_button.rawValue)
                 
                 if let error {
                     Text(error)
@@ -390,6 +398,11 @@ struct PostView: View {
                 }
                 else if case .highlighting(let draft) = action {
                     HighlightDraftContentView(draft: draft)
+                }
+                else if case .sharing(let draft) = action,
+                        let url = draft.getLinkURL() {
+                    LinkViewRepresentable(meta: .url(url))
+                        .frame(height: 50)
                 }
             }
             .padding(.horizontal)
@@ -491,9 +504,22 @@ struct PostView: View {
             .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $imageUploadConfirmPasteboard) {
                 Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
                     if let image = imagePastedFromPasteboard,
-                       let mediaToUpload = generateMediaUpload(PreUploadedMedia.uiimage(image)) {
+                       let mediaToUpload = generateMediaUpload(image) {
                         Task {
                             await self.handle_upload(media: mediaToUpload)
+                        }
+                    }
+                }
+                Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
+            }
+            // This alert seeks confirmation about media-upload from Damus Share Extension
+            .alert(NSLocalizedString("Are you sure you want to upload the selected media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $imageUploadConfirmDamusShare) {
+                Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
+                    Task {
+                        for media in preUploadedMedia {
+                            if let mediaToUpload = generateMediaUpload(media) {
+                                await self.handle_upload(media: mediaToUpload)
+                            }
                         }
                     }
                 }
@@ -512,6 +538,15 @@ struct PostView: View {
                         fill_target_content(target: target)
                     case .highlighting(let draft):
                         references = [draft.source.ref()]
+                    case .sharing(let content):
+                        if let url = content.getLinkURL() {
+                            self.post = NSMutableAttributedString(string: "\(content.title)\n\(String(url.absoluteString))")
+                        } else {
+                            self.preUploadedMedia = content.getMediaArray()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                self.imageUploadConfirmDamusShare = true // display Confirm Sheet after 1 sec
+                            }
+                        }
                 }
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -575,37 +610,78 @@ struct PVImageCarouselView: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack {
-                ForEach(media.map({$0.representingImage}), id: \.self) { image in
-                    ZStack(alignment: .topTrailing) {
-                        Image(uiImage: image)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: media.count == 1 ? deviceWidth*0.8 : 250, height: media.count == 1 ? 400 : 250)
-                            .cornerRadius(10)
-                            .padding()
-                            .contextMenu {
-                                if let uploadedURL = media.first(where: { $0.representingImage == image })?.uploadedURL {
-                                    Button(action: {
-                                        UIPasteboard.general.string = uploadedURL.absoluteString
-                                    }) {
-                                        Label(NSLocalizedString("Copy URL", comment: "Label for button in context menu to copy URL of the selected uploaded media asset."), image: "copy")
-                                    }
+                ForEach(media.indices, id: \.self) { index in
+                    ZStack(alignment: .topLeading) {
+                        if isSupportedVideo(url: media[index].uploadedURL) {
+                            VideoPlayer(player: configurePlayer(with: media[index].localURL))
+                                .frame(width: media.count == 1 ? deviceWidth * 0.8 : 250, height: media.count == 1 ? 400 : 250)
+                                .cornerRadius(10)
+                                .padding()
+                                .contextMenu { contextMenuContent(for: media[index]) }
+                        } else if is_animated_image(url: media[index].uploadedURL) {
+                            KFAnimatedImage(media[index].uploadedURL)
+                                .imageContext(.note, disable_animation: false)
+                                .configure { view in
+                                    view.framePreloadCount = 3
                                 }
-                            }
-                        Image("close-circle")
-                            .foregroundColor(.white)
-                            .padding(20)
-                            .shadow(radius: 5)
-                            .onTapGesture {
-                                if let index = media.map({$0.representingImage}).firstIndex(of: image) {
-                                    media.remove(at: index)
+                                .frame(width: media.count == 1 ? deviceWidth * 0.8 : 250, height: media.count == 1 ? 400 : 250)
+                                .cornerRadius(10)
+                                .padding()
+                                .contextMenu { contextMenuContent(for: media[index]) }
+                        } else {
+                            Image(uiImage: media[index].representingImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: media.count == 1 ? deviceWidth * 0.8 : 250, height: media.count == 1 ? 400 : 250)
+                                .cornerRadius(10)
+                                .padding()
+                                .contextMenu { contextMenuContent(for: media[index]) }
+                        }
+                        
+                        VStack {  // Set spacing to 0 to remove the gap between items
+                            Image("close-circle")
+                                .foregroundColor(.white)
+                                .padding(20)
+                                .shadow(radius: 5)
+                                .onTapGesture {
+                                    media.remove(at: index) // Direct removal using index
                                 }
-                            }
+                            
+                            if isSupportedVideo(url: media[index].uploadedURL) {
+                                Spacer()
+                                    Image(systemName: "video")
+                                        .foregroundColor(.white)
+                                        .padding(10)
+                                        .shadow(radius: 5)
+                                        .opacity(0.6)
+                                }
+                        }
+                        .padding(.bottom, 35)
                     }
                 }
             }
             .padding()
         }
+    }
+    
+    // Helper Function for Context Menu
+    @ViewBuilder
+    private func contextMenuContent(for mediaItem: UploadedMedia) -> some View {
+        Button(action: {
+            UIPasteboard.general.string = mediaItem.uploadedURL.absoluteString
+        }) {
+            Label(
+                NSLocalizedString("Copy URL", comment: "Copy URL of the selected uploaded media asset."),
+                systemImage: "doc.on.doc"
+            )
+        }
+    }
+    
+    private func configurePlayer(with url: URL) -> AVPlayer {
+        let player = AVPlayer(url: url)
+        player.allowsExternalPlayback = false
+        player.usesExternalPlaybackWhileExternalScreenIsActive = false
+        return player
     }
 }
 
@@ -661,6 +737,8 @@ func set_draft_for_post(drafts: Drafts, action: PostAction, artifacts: DraftArti
         drafts.post = artifacts
     case .highlighting(let draft):
         drafts.highlights[draft.source] = artifacts
+    case .sharing(_):
+        drafts.post = artifacts
     }
 }
 
@@ -674,6 +752,8 @@ func load_draft_for_post(drafts: Drafts, action: PostAction) -> DraftArtifacts? 
         return drafts.post
     case .highlighting(let draft):
         return drafts.highlights[draft.source]
+    case .sharing(_):
+        return drafts.post
     }
 }
 
@@ -749,6 +829,8 @@ func build_post(state: DamusState, post: NSMutableAttributedString, action: Post
             break
         case .highlighting(let draft):
             break
+        case .sharing(_):
+            break
     }
 
     // append additional tags
@@ -773,3 +855,14 @@ func build_post(state: DamusState, post: NSMutableAttributedString, action: Post
     return NostrPost(content: content, kind: .text, tags: tags)
 }
 
+func isSupportedVideo(url: URL?) -> Bool {
+    guard let url = url else { return false }
+    let fileExtension = url.pathExtension.lowercased()
+    let supportedUTIs = AVURLAsset.audiovisualTypes().map { $0.rawValue }
+    return supportedUTIs.contains { utiString in
+        if let utType = UTType(utiString), let fileUTType = UTType(filenameExtension: fileExtension) {
+            return fileUTType.conforms(to: utType)
+        }
+        return false
+    }
+}

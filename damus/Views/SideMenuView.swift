@@ -40,6 +40,7 @@ struct SideMenuView: View {
             NavigationLink(value: Route.Profile(profile: profile_model, followers: followers)) {
                 navLabel(title: NSLocalizedString("Profile", comment: "Sidebar menu label for Profile view."), img: "user")
             }
+            .accessibilityIdentifier(AppAccessibilityIdentifiers.side_menu_profile_button.rawValue)
 
             NavigationLink(value: Route.Wallet(wallet: damus_state.wallet)) {
                 navLabel(title: NSLocalizedString("Wallet", comment: "Sidebar menu label for Wallet view."), img: "wallet")
@@ -135,7 +136,7 @@ struct SideMenuView: View {
                             Circle()
                                 .foregroundColor(DamusColors.neutral3)
                         }
-                }).fullScreenCover(isPresented: $showQRCode) {
+                }).damus_full_screen_cover($showQRCode, damus_state: damus_state) {
                     QRCodeView(damus_state: damus_state, pubkey: damus_state.pubkey)
                 }
             }
@@ -173,6 +174,9 @@ struct SideMenuView: View {
             NavigationLink(value: Route.Profile(profile: profile_model, followers: followers), label: {
                 TopProfile
                     .padding(.bottom, verticalSpacing)
+            })
+            .simultaneousGesture(TapGesture().onEnded {
+                isSidebarVisible = false
             })
 
             ScrollView {
@@ -222,6 +226,8 @@ struct SideMenuView: View {
                 .foregroundColor(DamusColors.adaptableBlack)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .dynamicTypeSize(.xSmall)
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
         }
     }
 }

@@ -8,37 +8,37 @@
 import SwiftUI
 
 struct FullScreenCarouselView<Content: View>: View {
-    let video_controller: VideoController
+    @ObservedObject var video_coordinator: DamusVideoCoordinator
     let urls: [MediaUrl]
     
     @Environment(\.presentationMode) var presentationMode
     
     @State var showMenu = true
-    
+    @State private var imageDict: [URL: UIImage] = [:]
     let settings: UserSettingsStore
-    @Binding var selectedIndex: Int
+    @ObservedObject var carouselSelection: CarouselSelection
     let content: (() -> Content)?
     
-    init(video_controller: VideoController, urls: [MediaUrl], showMenu: Bool = true, settings: UserSettingsStore, selectedIndex: Binding<Int>, @ViewBuilder content: @escaping () -> Content) {
-        self.video_controller = video_controller
+    init(video_coordinator: DamusVideoCoordinator, urls: [MediaUrl], showMenu: Bool = true, settings: UserSettingsStore, selectedIndex: Binding<Int>, @ViewBuilder content: @escaping () -> Content) {
+        self.video_coordinator = video_coordinator
         self.urls = urls
         self._showMenu = State(initialValue: showMenu)
         self.settings = settings
-        _selectedIndex = selectedIndex
+        self._carouselSelection = ObservedObject(initialValue: CarouselSelection(index: selectedIndex.wrappedValue))
         self.content = content
     }
     
-    init(video_controller: VideoController, urls: [MediaUrl], showMenu: Bool = true, settings: UserSettingsStore, selectedIndex: Binding<Int>) {
-        self.video_controller = video_controller
+    init(video_coordinator: DamusVideoCoordinator, urls: [MediaUrl], showMenu: Bool = true, settings: UserSettingsStore, selectedIndex: Binding<Int>) {
+        self.video_coordinator = video_coordinator
         self.urls = urls
         self._showMenu = State(initialValue: showMenu)
         self.settings = settings
-        _selectedIndex = selectedIndex
+        self._carouselSelection = ObservedObject(initialValue: CarouselSelection(index: selectedIndex.wrappedValue))
         self.content = nil
     }
     
     var background: some ShapeStyle {
-        if case .video = urls[safe: selectedIndex] {
+        if case .video = urls[safe: carouselSelection.index] {
             return AnyShapeStyle(Color.black)
         }
         else {
@@ -55,23 +55,24 @@ struct FullScreenCarouselView<Content: View>: View {
             Color(self.background_color)
                 .ignoresSafeArea()
             
-            TabView(selection: $selectedIndex) {
+            TabView(selection: $carouselSelection.index) {
                 ForEach(urls.indices, id: \.self) { index in
                     VStack {
                         if case .video = urls[safe: index] {
-                            ImageContainerView(video_controller: video_controller, url: urls[index], settings: settings)
-                                .clipped()  // SwiftUI hack from https://stackoverflow.com/a/74401288 to make playback controls show up within the TabView
-                                .aspectRatio(contentMode: .fit)
-                                .padding(.top, Theme.safeAreaInsets?.top)
-                                .padding(.bottom, Theme.safeAreaInsets?.bottom)
-                                .modifier(SwipeToDismissModifier(minDistance: 50, onDismiss: {
-                                    presentationMode.wrappedValue.dismiss()
-                                }))
-                                .ignoresSafeArea()
+                            ImageContainerView(
+                                video_coordinator: video_coordinator,
+                                url: urls[index],
+                                settings: settings,
+                                imageDict: $imageDict
+                            )
+                            .modifier(SwipeToDismissModifier(minDistance: 50, onDismiss: {
+                                presentationMode.wrappedValue.dismiss()
+                            }))
+                            .ignoresSafeArea()
                         }
                         else {
                             ZoomableScrollView {
-                                ImageContainerView(video_controller: video_controller, url: urls[index], settings: settings)
+                                ImageContainerView(video_coordinator: video_coordinator, url: urls[index], settings: settings, imageDict: $imageDict)
                                     .aspectRatio(contentMode: .fit)
                                     .padding(.top, Theme.safeAreaInsets?.top)
                                     .padding(.bottom, Theme.safeAreaInsets?.bottom)
@@ -96,17 +97,49 @@ struct FullScreenCarouselView<Content: View>: View {
                 GeometryReader { geo in
                     VStack {
                         if showMenu {
-                            NavDismissBarView(navDismissBarContainer: .fullScreenCarousel)
-                                .foregroundColor(.white)
+                            HStack {
+                                Button(action: {
+                                    presentationMode.wrappedValue.dismiss()
+                                }, label: {
+                                    Image(systemName: "xmark")
+                                        .frame(width: 30, height: 30)
+                                })
+                                .buttonStyle(PlayerCircleButtonStyle())
+                                
+                                Spacer()
+
+                                if let url = urls[safe: carouselSelection.index],
+                                   let image = imageDict[url.url] {
+                                    
+                                    ShareLink(item: Image(uiImage: image),
+                                              preview: SharePreview(NSLocalizedString("Shared Picture",
+                                                                                      comment: "Label for the preview of the image being picture"),
+                                                                    image: Image(uiImage: image))) {
+                                        Image(systemName: "ellipsis")
+                                            .frame(width: 30, height: 30)
+                                    }
+                                    .buttonStyle(PlayerCircleButtonStyle())
+                                }
+                            }
+                            .padding()
+                            
                             Spacer()
                             
-                            if urls.count > 1 {
-                                PageControlView(currentPage: $selectedIndex, numberOfPages: urls.count)
-                                    .frame(maxWidth: 0, maxHeight: 0)
-                                    .padding(.top, 5)
+                            VStack {
+                                if urls.count > 1 {
+                                    PageControlView(currentPage: $carouselSelection.index, numberOfPages: urls.count)
+                                        .frame(maxWidth: 0, maxHeight: 0)
+                                        .padding(.top, 5)
+                                }
+                                
+                                if let focused_video = video_coordinator.focused_video {
+                                    DamusVideoControlsView(video: focused_video)
+                                }
+                                
+                                self.content?()
                             }
-                            
-                            self.content?()
+                            .padding(.top, 5)
+                            .background(Color.black.opacity(0.7))
                         }
                     }
                     .animation(.easeInOut, value: showMenu)
@@ -128,7 +161,7 @@ fileprivate struct FullScreenCarouselPreviewView<Content: View>: View {
     }
     
     var body: some View {
-        FullScreenCarouselView(video_controller: test_damus_state.video, urls: [test_video_url, url], settings: test_damus_state.settings, selectedIndex: $selectedIndex) {
+        FullScreenCarouselView(video_coordinator: test_damus_state.video, urls: [test_video_url, url], settings: test_damus_state.settings, selectedIndex: $selectedIndex) {
             self.custom_content?()
         }
             .environmentObject(OrientationTracker())
@@ -154,5 +187,13 @@ struct FullScreenCarouselView_Previews: PreviewProvider {
             })
                 .previewDisplayName("Custom content on overlay")
         }
+    }
+}
+
+/// Class to define object for monitoring selectedIndex and updating mutlples views
+final class CarouselSelection: ObservableObject {
+    @Published var index: Int
+    init(index: Int) {
+        self.index = index
     }
 }

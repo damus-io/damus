@@ -29,13 +29,18 @@ struct GradientFollowButton: View {
                     .fontWeight(.medium)
                     .padding([.top, .bottom], 10)
                     .padding([.leading, .trailing], 12)
-                    .background(follow_state == .unfollows ? PinkGradient : GrayGradient)
-                    .cornerRadius(12)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(grayBorder, lineWidth: follow_state == .unfollows ? 0 : 1)
+                            .frame(width: 100)
                     )
+                    .frame(width: 100)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
         }
+        .background(follow_state == .unfollows ? PinkGradient : GrayGradient)
+        .cornerRadius(12)
+        .frame(width: 100)
         .onReceive(handle_notify(.followed)) { ref in
             guard target.follow_ref == ref else { return }
             self.follow_state = .follows

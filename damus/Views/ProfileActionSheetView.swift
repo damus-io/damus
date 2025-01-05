@@ -19,9 +19,12 @@ struct ProfileActionSheetView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.presentationMode) var presentationMode
     
-    init(damus_state: DamusState, pubkey: Pubkey) {
+    var navigationHandler: (() -> Void)?
+    
+    init(damus_state: DamusState, pubkey: Pubkey, onNavigate navigationHandler: (() -> Void)? = nil) {
         self.damus_state = damus_state
         self._profile = StateObject(wrappedValue: ProfileModel(pubkey: pubkey, damus: damus_state))
+        self.navigationHandler = navigationHandler
     }
 
     func imageBorderColor() -> Color {
@@ -35,6 +38,12 @@ struct ProfileActionSheetView: View {
     
     func get_profile() -> Profile? {
         return self.profile_data()?.profile
+    }
+    
+    func navigate(route: Route) {
+        damus_state.nav.push(route: route)
+        self.navigationHandler?()
+        dismiss()
     }
     
     var followButton: some View {
@@ -65,8 +74,7 @@ struct ProfileActionSheetView: View {
         return VStack(alignment: .center, spacing: 10) {
             Button(
                 action: {
-                    damus_state.nav.push(route: Route.DMChat(dms: dm_model))
-                    dismiss()
+                    self.navigate(route: Route.DMChat(dms: dm_model))
                 },
                 label: {
                     Image("messages")
@@ -126,8 +134,7 @@ struct ProfileActionSheetView: View {
             
             Button(
                 action: {
-                    damus_state.nav.push(route: Route.ProfileByKey(pubkey: profile.pubkey))
-                    dismiss()
+                    self.navigate(route: Route.ProfileByKey(pubkey: profile.pubkey))
                 },
                 label: {
                     HStack {

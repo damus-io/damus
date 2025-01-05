@@ -27,6 +27,7 @@ struct ProfileEditButton: View {
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
         }
+        .accessibilityIdentifier(AppAccessibilityIdentifiers.own_profile_edit_button.rawValue)
     }
 
     func fillColor() -> Color {

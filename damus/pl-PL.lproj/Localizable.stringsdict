@@ -15,11 +15,11 @@
 			<key>one</key>
 			<string>Obserwowany przez %2$@, %3$@, %4$@ i %1$d inną osobę</string>
 			<key>few</key>
-			<string>Obserwowany przez %2$@, %3$@, %4$@ i %1$d innych osób</string>
+			<string>Obserwowany przez %2$@, %3$@, %4$@ i %1$d inne osoby</string>
 			<key>many</key>
 			<string>Obserwowany przez %2$@, %3$@, %4$@ i %1$d innych osób</string>
 			<key>other</key>
-			<string>Obserwowany przez %2$@, %3$@, %4$@ i %1$d innej osób</string>
+			<string>Obserwowany przez %2$@, %3$@, %4$@ i %1$d innej osoby</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -113,13 +113,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ i %1$d inna osoba zareagowała na Twoją notatkę</string>
+			<string>%2$@ i %1$d inna osoba zareagowała na twoją notatkę</string>
 			<key>few</key>
-			<string>%2$@ i %1$d inne osoby zareagowały na Twoją notatkę</string>
+			<string>%2$@ i %1$d inne osoby zareagowały na twoją notatkę</string>
 			<key>many</key>
-			<string>%2$@ i %1$d innych osób zareagowało na Twoją notatkę</string>
+			<string>%2$@ i %1$d innych osób zareagowało na twoją notatkę</string>
 			<key>other</key>
-			<string>%2$@ i %1$d innej osoby zareagowało na Twoją notatkę</string>
+			<string>%2$@ i %1$d innej osoby zareagowało na twoją notatkę</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -133,13 +133,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ i %1$d inna osoba zareagowała na Twój profil</string>
+			<string>%2$@ i %1$d inna osoba zareagowała na twój profil</string>
 			<key>few</key>
-			<string>%2$@ i %1$d innych osób zareagowało na Twój profil</string>
+			<string>%2$@ i %1$d innych osób zareagowało na twój profil</string>
 			<key>many</key>
-			<string>%2$@ i %1$d inne osoby zareagowało na Twój profil</string>
+			<string>%2$@ i %1$d inne osoby zareagowało na twój profil</string>
 			<key>other</key>
-			<string>%2$@ i %1$d inne osoby zareagowało na Twój profil</string>
+			<string>%2$@ i %1$d inne osoby zareagowało na twój profil</string>
 		</dict>
 	</dict>
 	<key>reactions_count</key>
@@ -233,13 +233,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ i %1$d inna osoba opublikowała Twoją notatkę</string>
+			<string>%2$@ i %1$d inna osoba opublikowała twoją notatkę</string>
 			<key>few</key>
-			<string>%2$@ i %1$d inne osoby opublikowały Twoją notatkę</string>
+			<string>%2$@ i %1$d inne osoby opublikowały twoją notatkę</string>
 			<key>many</key>
-			<string>%2$@ i %1$d innych osób opublikowały Twoją notatkę</string>
+			<string>%2$@ i %1$d innych osób opublikowały twoją notatkę</string>
 			<key>other</key>
-			<string>%2$@ i %1$d innej osoby opublikowało Twoją notatkę</string>
+			<string>%2$@ i %1$d innej osoby opublikowało twoją notatkę</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -253,13 +253,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ i %1$d inna osoba opublikowała Twój profil</string>
+			<string>%2$@ i %1$d inna osoba opublikowała twój profil</string>
 			<key>few</key>
-			<string>%2$@ i %1$d inne osoby opublikowały Twój profil</string>
+			<string>%2$@ i %1$d inne osoby opublikowały twój profil</string>
 			<key>many</key>
-			<string>%2$@ i %1$d innych osób opublikowało Twój profil</string>
+			<string>%2$@ i %1$d innych osób opublikowało twój profil</string>
 			<key>other</key>
-			<string>%2$@ i %1$d innych osób opublikowało Twój profil</string>
+			<string>%2$@ i %1$d innych osób opublikowało twój profil</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -280,6 +280,26 @@
 			<string>Podanych dalej</string>
 			<key>other</key>
 			<string>Podanych dalej</string>
+		</dict>
+	</dict>
+	<key>quoted_reposts_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@QUOTE_REPOSTS@</string>
+		<key>QUOTE_REPOSTS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Cytowanie</string>
+			<key>few</key>
+			<string>Cytowania</string>
+			<key>many</key>
+			<string>Cytowań</string>
+			<key>other</key>
+			<string>Cytowania</string>
 		</dict>
 	</dict>
 	<key>sats</key>
@@ -433,13 +453,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ i %1$d inna osoba zapuje Twoją notatkę</string>
+			<string>%2$@ i %1$d inna osoba zapuje twoją notatkę</string>
 			<key>few</key>
-			<string>%2$@ i %1$d inne osoby zapują Twoją notatkę</string>
+			<string>%2$@ i %1$d inne osoby zapują twoją notatkę</string>
 			<key>many</key>
-			<string>%2$@ i %1$d innych osób zapuje Twoją notatkę</string>
+			<string>%2$@ i %1$d innych osób zapuje twoją notatkę</string>
 			<key>other</key>
-			<string>%2$@ i %1$d innych osób zapuje Twoją wiadomość</string>
+			<string>%2$@ i %1$d innych osób zapuje twoją wiadomość</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>

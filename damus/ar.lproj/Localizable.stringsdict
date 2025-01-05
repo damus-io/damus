@@ -2,6 +2,30 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>followed_by_three_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>متابع من قبل %2$@, %3$@, %4$@ &amp; %1$d وآخرين</string>
+			<key>one</key>
+			<string>متابع من قبل %2$@, %3$@, %4$@ &amp; %1$d آخر</string>
+			<key>two</key>
+			<string>متابع من قبل %2$@, %3$@, %4$@ &amp; %1$d وآخرين</string>
+			<key>few</key>
+			<string>متابع من قبل %2$@, %3$@, %4$@ &amp; %1$d وآخرين</string>
+			<key>many</key>
+			<string>متابع من قبل %2$@, %3$@, %4$@ &amp; %1$d وآخرين</string>
+			<key>other</key>
+			<string>متابع من قبل %2$@, %3$@, %4$@ &amp; %1$d وآخرين</string>
+		</dict>
+	</dict>
 	<key>followers_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -50,6 +74,30 @@
 			<string>المتابَعون</string>
 		</dict>
 	</dict>
+	<key>imports_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@IMPORTS@</string>
+		<key>IMPORTS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>المستوردات</string>
+			<key>one</key>
+			<string>استورد</string>
+			<key>two</key>
+			<string>المستوردات</string>
+			<key>few</key>
+			<string>المستوردات</string>
+			<key>many</key>
+			<string>المستوردات</string>
+			<key>other</key>
+			<string>المستوردات</string>
+		</dict>
+	</dict>
 	<key>reacted_tagged_in_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -61,20 +109,20 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>zero</key>
-			<string>%2$@ و %1$d مستخدم آخر تفاعل مع منشور تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$ وغيرهم تفاعلوا مع منشور تم ذكر حسابك فيه</string>
 			<key>one</key>
-			<string>%2$@ و %1$d مستخدم آخر تفاعل مع منشور تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$ تفاعل مع منشور تم ذكر حسابك فيه</string>
 			<key>two</key>
-			<string>%2$@ و %1$d آخران تفاعلوا مع منشور تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$ تفاعلا مع منشور تم ذكر حسابك فيه</string>
 			<key>few</key>
-			<string>%2$@ و %1$d آخرون تفاعلوا مع منشور تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$ تفاعلا مع منشور تم ذكر حسابك فيه</string>
 			<key>many</key>
-			<string>%2$@ و %1$d مستخدم آخر تفاعلوا مع منشور تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$ وغيرهم تفاعلوا مع منشور تم ذكر حسابك فيه</string>
 			<key>other</key>
-			<string>%2$@ و %1$d مستخدم آخر تفاعلوا مع منشور تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$ وغيرهم تفاعلوا مع منشور تم ذكر حسابك فيه</string>
 		</dict>
 	</dict>
-	<key>reacted_your_post_3</key>
+	<key>reacted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REACTED@</string>
@@ -85,17 +133,17 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>zero</key>
-			<string>%2$@ و %1$d مستخدم آخر تفاعل مع منشورك</string>
+			<string>%2$@ و %1$d وغيرهم تفاعلوا مع منشورك</string>
 			<key>one</key>
-			<string>%2$@ و %1$d مستخدم آخر تفاعل مع منشورك</string>
+			<string>%2$@ و %1$d أخر تفاعل مع منشورك</string>
 			<key>two</key>
-			<string>%2$@ و %1$d آخران تفاعلا مع منشورك</string>
+			<string>%2$@ و %1$d غيرهم تفاعلا مع منشورك</string>
 			<key>few</key>
-			<string>%2$@ و %1$d آخرون تفاعلوا مع منشورك</string>
+			<string>%2$@ و %1$d غيرهم تفاعلوا مع منشورك</string>
 			<key>many</key>
-			<string>%2$@ و %1$d مستخدم آخر تفاعلوا مع منشورك</string>
+			<string>%2$@ و %1$d غيرهم تفاعلوا مع منشورك</string>
 			<key>other</key>
-			<string>%2$@ و %1$d مستخدم آخر تفاعلوا مع منشورك</string>
+			<string>%2$@ و %1$d غيرهم تفاعلوا مع منشورك</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -205,20 +253,20 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>zero</key>
-			<string>%2$@ و %1$d مستخدم آخر نشر منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d غيرهم أعادوا مشاركة منشور تم ذكر حسابك فيه</string>
 			<key>one</key>
-			<string>%2$@ و %1$d مستخدم آخر نشر منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d أخر أعاد مشاركة منشور تم ذكر حسابك فيه</string>
 			<key>two</key>
-			<string>%2$@ و %1$d آخران نشروا منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d غيرهم أعادا مشاركة منشور تم ذكر حسابك فيه</string>
 			<key>few</key>
-			<string>%2$@ و %1$d آخرون نشروا منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d غيرهم أعادوا مشاركة منشور تم ذكر حسابك فيه</string>
 			<key>many</key>
-			<string>%2$@ و %1$d مستخدم آخر نشروا منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d غيرهم أعادوا مشاركة منشور تم ذكر حسابك فيه</string>
 			<key>other</key>
-			<string>%2$@ و %1$d مستخدم آخر نشروا منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d غيرهم أعادوا مشاركة منشور تم ذكر حسابك فيه</string>
 		</dict>
 	</dict>
-	<key>reposted_your_post_3</key>
+	<key>reposted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REPOSTED@</string>
@@ -229,17 +277,17 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>zero</key>
-			<string>%2$@ و %1$d مستخدم آخر نشر منشورك</string>
+			<string>%2$@ و %1$d أعاد مشاركة منشورك</string>
 			<key>one</key>
-			<string>%2$@ و %1$d مستخدم آخر نشر منشورك</string>
+			<string>%2$@ و %1$d أعاد مشاركة منشورك</string>
 			<key>two</key>
-			<string>%2$@ و %1$d آخران نشروا منشورك</string>
+			<string>%2$@ و %1$d أعادا مشاركة منشورك</string>
 			<key>few</key>
-			<string>%2$@ و %1$d آخرون نشروا منشورك</string>
+			<string>%2$@ و %1$d أعادوا مشاركة منشورك</string>
 			<key>many</key>
-			<string>%2$@ و %1$d مستخدم آخر نشروا منشورك</string>
+			<string>%2$@ و %1$d أعادوا مشاركة منشورك</string>
 			<key>other</key>
-			<string>%2$@ و %1$d مستخدم آخر نشروا منشورك</string>
+			<string>%2$@ و %1$d أعادوا مشاركة منشورك</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -290,6 +338,30 @@
 			<string>اعادة نشر</string>
 		</dict>
 	</dict>
+	<key>quoted_reposts_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@QUOTE_REPOSTS@</string>
+		<key>QUOTE_REPOSTS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>اقتباسات</string>
+			<key>one</key>
+			<string>اقتباس</string>
+			<key>two</key>
+			<string>اقتباسات</string>
+			<key>few</key>
+			<string>اقتباسات</string>
+			<key>many</key>
+			<string>اقتباسات</string>
+			<key>other</key>
+			<string>اقتباسات</string>
+		</dict>
+	</dict>
 	<key>sats</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -338,6 +410,54 @@
 			<string>%2$@ ساتوشي</string>
 		</dict>
 	</dict>
+	<key>users_talking_about_it</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@USERS@</string>
+		<key>USERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>%d يتكلم عنك</string>
+			<key>one</key>
+			<string>%d يتكلم عنك</string>
+			<key>two</key>
+			<string>%d يتكلمون عنك</string>
+			<key>few</key>
+			<string>%d يتكلمون عنك</string>
+			<key>many</key>
+			<string>%d يتكلمون عنك</string>
+			<key>other</key>
+			<string>%d يتكلمون عنك</string>
+		</dict>
+	</dict>
+	<key>word_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@WORDS@</string>
+		<key>WORDS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>%d كلمة</string>
+			<key>one</key>
+			<string>%d كلمة</string>
+			<key>two</key>
+			<string>%d كلمتان</string>
+			<key>few</key>
+			<string>%d من الكلمات</string>
+			<key>many</key>
+			<string>%d من الكلمات</string>
+			<key>other</key>
+			<string>%d من الكلمات</string>
+		</dict>
+	</dict>
 	<key>zap_notification_no_message</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -373,17 +493,17 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>zero</key>
-			<string>تم استلام %2$@ من %3$@: "%4$@"</string>
+			<string>لقد وصلك %2$@ سات من %3$@: &quot;%4$@&quot;</string>
 			<key>one</key>
-			<string>تم استلام %2$@ من %3$@: "%4$@"</string>
+			<string>لقد وصلك %2$@ سات من %3$@: &quot;%4$@&quot;</string>
 			<key>two</key>
-			<string>تم استلام %2$@ من %3$@: "%4$@"</string>
+			<string>لقد وصلك %2$@ ساتس من %3$@: &quot;%4$@&quot;</string>
 			<key>few</key>
-			<string>تم استلام %2$@ من %3$@: "%4$@"</string>
+			<string>لقد وصلك %2$@ ساتس من %3$@: &quot;%4$@&quot;</string>
 			<key>many</key>
-			<string>تم استلام %2$@ من %3$@: "%4$@"</string>
+			<string>لقد وصلك %2$@ ساتس من %3$@: &quot;%4$@&quot;</string>
 			<key>other</key>
-			<string>تم استلام %2$@ من %3$@: "%4$@"</string>
+			<string>لقد وصلك %2$@ ساتس من %3$@: &quot;%4$@&quot;</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
@@ -397,20 +517,20 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>zero</key>
-			<string>%2$@ و %1$d مستخدم آخر ومّض منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d غيرهم ومضوا منشور تم ذكر حستبك فيه</string>
 			<key>one</key>
-			<string>%2$@ و %1$d مستخدم آخر ومّض منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d آخر ومض منشور تم ذكر حستبك فيه</string>
 			<key>two</key>
-			<string>%2$@ و %1$d آخران ومّضوا منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d آخرين ومضوا منشور تم ذكر حستبك فيه</string>
 			<key>few</key>
-			<string>%2$@ و %1$d آخررن ومّضوا منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d آخرين ومضوا منشور تم ذكر حستبك فيه</string>
 			<key>many</key>
-			<string>%2$@ و %1$d مستخدم آخر ومّضوا منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d آخرين ومضوا منشور تم ذكر حستبك فيه</string>
 			<key>other</key>
-			<string>%2$@ و %1$d مستخدم آخر ومّضوا منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d آخرين ومضوا منشور تم ذكر حستبك فيه</string>
 		</dict>
 	</dict>
-	<key>zapped_your_post_3</key>
+	<key>zapped_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@ZAPPED@</string>
@@ -421,13 +541,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>zero</key>
-			<string>%2$@ و %1$d مستخدم آخر ومّض منشورك</string>
+			<string>%2$@ و %1$d مستخدم آخر ومّضوا منشورك</string>
 			<key>one</key>
-			<string>%2$@ و %1$d مستخدم آخر ومّض منشورك</string>
+			<string>%2$@ و %1$d مستخدم آخر ومّضوا منشورك</string>
 			<key>two</key>
-			<string>%2$@ و %1$d آخران ومّضوا منشورك</string>
+			<string>%2$@ و %1$d مستخدم آخر ومّضوا منشورك</string>
 			<key>few</key>
-			<string>%2$@ و %1$d آخرون ومّضوا منشورك</string>
+			<string>%2$@ و %1$d مستخدم آخر ومّضوا منشورك</string>
 			<key>many</key>
 			<string>%2$@ و %1$d مستخدم آخر ومّضوا منشورك</string>
 			<key>other</key>
@@ -445,17 +565,17 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>zero</key>
-			<string>%2$@ و %1$d مستخدم آخر ومّض حسابك</string>
+			<string>%2$@ و %1$d مستخدم آخر ومضوا حسابك</string>
 			<key>one</key>
-			<string>%2$@ و %1$d مستخدم آخر ومّض حسابك</string>
+			<string>%2$@ و %1$d مستخدم آخر ومضوا حسابك</string>
 			<key>two</key>
-			<string>%2$@ و %1$d آخران ومّضوا حسابك</string>
+			<string>%2$@ و %1$d مستخدم آخر ومضوا حسابك</string>
 			<key>few</key>
-			<string>%2$@ و %1$d آخرون ومّضوا حسابك</string>
+			<string>%2$@ و %1$d مستخدم آخر ومضوا حسابك</string>
 			<key>many</key>
-			<string>%2$@ و %1$d مستخدم آخر ومّضوا حسابك</string>
+			<string>%2$@ و %1$d مستخدم آخر ومضوا حسابك</string>
 			<key>other</key>
-			<string>%2$@ و %1$d مستخدم آخر ومّضوا حسابك</string>
+			<string>%2$@ و %1$d مستخدم آخر ومضوا حسابك</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>

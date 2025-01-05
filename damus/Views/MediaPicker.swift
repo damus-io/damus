@@ -40,6 +40,10 @@ struct MediaPicker: UIViewControllerRepresentable {
                 self.parent.presentationMode.dismiss()
             }
             
+            // When user dismiss the upload confirmation and re-adds again, reset orderIds and orderMap
+            orderIds.removeAll()
+            orderMap.removeAll()
+            
             for result in results {
                 
                 let orderId = result.assetIdentifier ?? UUID().uuidString

@@ -5,6 +5,7 @@
 //  Created by Jericho Hasselbush on 9/29/23.
 //
 
+import CodeScanner
 import SwiftUI
 import VisionKit
 

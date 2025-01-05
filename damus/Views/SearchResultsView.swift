@@ -70,7 +70,7 @@ struct InnerSearchResults: View {
     func TextSearch(_ txt: String) -> some View {
         return NavigationLink(value: Route.NDBSearch(results: $results)) {
             HStack {
-                Text("\(txt)", comment: "Navigation link to search text.")
+                Text("Search word: \(txt)", comment: "Navigation link to search for a word.")
             }
             .padding(.horizontal, 15)
             .padding(.vertical, 5)

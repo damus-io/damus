@@ -144,21 +144,25 @@ struct NotificationsView: View {
     func NotificationTab(_ filter: NotificationFilter) -> some View {
         ScrollViewReader { scroller in
             ScrollView {
-                LazyVStack(alignment: .leading) {
-                    Color.white.opacity(0)
-                        .id("startblock")
-                        .frame(height: 5)
-                    let notifs = Array(zip(1..., filter.filter(contacts: state.contacts, items: notifications.notifications)))
-                    ForEach(notifs, id: \.0) { zip in
-                        NotificationItemView(state: state, item: zip.1)
+                let notifs = Array(zip(1..., filter.filter(contacts: state.contacts, items: notifications.notifications)))
+                if notifs.isEmpty {
+                    EmptyTimelineView()
+                } else {
+                    LazyVStack(alignment: .leading) {
+                        Color.white.opacity(0)
+                            .id("startblock")
+                            .frame(height: 5)
+                        ForEach(notifs, id: \.0) { zip in
+                            NotificationItemView(state: state, item: zip.1)
+                        }
                     }
+                    .background(GeometryReader { proxy -> Color in
+                        DispatchQueue.main.async {
+                            handle_scroll_queue(proxy, queue: self.notifications)
+                        }
+                        return Color.clear
+                    })
                 }
-                .background(GeometryReader { proxy -> Color in
-                    DispatchQueue.main.async {
-                        handle_scroll_queue(proxy, queue: self.notifications)
-                    }
-                    return Color.clear
-                })
             }
             .coordinateSpace(name: "scroll")
             .onReceive(handle_notify(.scroll_to_top)) { notif in

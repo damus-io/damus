@@ -14,6 +14,7 @@ struct EditBannerImageView: View {
     @ObservedObject var viewModel: ImageUploadingObserver
     let callback: (URL?) -> Void
     let defaultImage = UIImage(named: "damoose") ?? UIImage()
+    let safeAreaInsets: EdgeInsets
     
     @State var banner_image: URL? = nil
 
@@ -32,6 +33,20 @@ struct EditBannerImageView: View {
                 .kfClickable()
             
             EditPictureControl(uploader: damus_state.settings.default_media_uploader, keypair: damus_state.keypair, pubkey: damus_state.pubkey, image_url: $banner_image, uploadObserver: viewModel, callback: callback)
+                .padding(10)
+                .backwardsCompatibleSafeAreaPadding(self.safeAreaInsets)
+                .accessibilityLabel(NSLocalizedString("Edit banner image", comment: "Accessibility label for edit banner image button"))
+                .accessibilityIdentifier(AppAccessibilityIdentifiers.own_profile_banner_image_edit_button.rawValue)
+        }
+    }
+}
+
+extension View {
+    fileprivate func backwardsCompatibleSafeAreaPadding(_ insets: EdgeInsets) -> some View {
+        if #available(iOS 17.0, *) {
+            return self.safeAreaPadding(insets)
+        } else {
+            return self.padding(.top, insets.top)
         }
     }
 }
