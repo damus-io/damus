@@ -406,9 +406,10 @@
 		5C6E1DAD2A193EC2008FC15A /* GradientButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C6E1DAC2A193EC2008FC15A /* GradientButtonStyle.swift */; };
 		5C6E1DAF2A194075008FC15A /* PinkGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C6E1DAE2A194075008FC15A /* PinkGradient.swift */; };
 		5C7389B12B6EFA7100781E0A /* ProxyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B02B6EFA7100781E0A /* ProxyView.swift */; };
-		5C7389B72B9E692E00781E0A /* MutinyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B62B9E692E00781E0A /* MutinyButton.swift */; };
-		5C7389B92B9E69ED00781E0A /* MutinyGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B82B9E69ED00781E0A /* MutinyGradient.swift */; };
 		5C8711DE2C460C06007879C2 /* PostingTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */; };
+		5CB017212D2D985E00A9ED05 /* CoinosButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017202D2D985800A9ED05 /* CoinosButton.swift */; };
+		5CB017222D2D985E00A9ED05 /* CoinosButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017202D2D985800A9ED05 /* CoinosButton.swift */; };
+		5CB017232D2D985E00A9ED05 /* CoinosButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017202D2D985800A9ED05 /* CoinosButton.swift */; };
 		5CC8529D2BD741CD0039FFC5 /* HighlightEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC8529C2BD741CD0039FFC5 /* HighlightEvent.swift */; };
 		5CC8529F2BD744F60039FFC5 /* HighlightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC8529E2BD744F60039FFC5 /* HighlightView.swift */; };
 		5CC852A22BDED9B90039FFC5 /* HighlightDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC852A12BDED9B90039FFC5 /* HighlightDescription.swift */; };
@@ -535,7 +536,6 @@
 		82D6FB0F2CD99F7900C925F4 /* DamusLogoGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0707D02A1ECB38004E7B51 /* DamusLogoGradient.swift */; };
 		82D6FB102CD99F7900C925F4 /* DamusBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C687C202A5F7ED00092C550 /* DamusBackground.swift */; };
 		82D6FB112CD99F7900C925F4 /* DamusLightGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF2DCCD2AABE1A500984B8D /* DamusLightGradient.swift */; };
-		82D6FB122CD99F7900C925F4 /* MutinyGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B82B9E69ED00781E0A /* MutinyGradient.swift */; };
 		82D6FB132CD99F7900C925F4 /* Shimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D2E846295218AF006D67F8 /* Shimmer.swift */; };
 		82D6FB142CD99F7900C925F4 /* EndBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD7641A28A1641400B6928F /* EndBlock.swift */; };
 		82D6FB152CD99F7900C925F4 /* ImageCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670528FCB08600038D2A /* ImageCarousel.swift */; };
@@ -733,7 +733,6 @@
 		82D6FBD82CD99F7900C925F4 /* FriendsButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */; };
 		82D6FBD92CD99F7900C925F4 /* GradientFollowButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694F32A6732B7001F4053 /* GradientFollowButton.swift */; };
 		82D6FBDA2CD99F7900C925F4 /* AlbyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09652A0AE62100943473 /* AlbyButton.swift */; };
-		82D6FBDB2CD99F7900C925F4 /* MutinyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B62B9E692E00781E0A /* MutinyButton.swift */; };
 		82D6FBDC2CD99F7900C925F4 /* DamusVideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2929DDF54400516EAC /* DamusVideoPlayerView.swift */; };
 		82D6FBDD2CD99F7900C925F4 /* DamusVideoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFC2AA7525700DFEC1F /* DamusVideoPlayer.swift */; };
 		82D6FBDE2CD99F7900C925F4 /* DamusVideoCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFE2AA76A0900DFEC1F /* DamusVideoCoordinator.swift */; };
@@ -1127,7 +1126,6 @@
 		D73E5E442C6A97F4007EB227 /* DamusLogoGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0707D02A1ECB38004E7B51 /* DamusLogoGradient.swift */; };
 		D73E5E452C6A97F4007EB227 /* DamusBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C687C202A5F7ED00092C550 /* DamusBackground.swift */; };
 		D73E5E462C6A97F4007EB227 /* DamusLightGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF2DCCD2AABE1A500984B8D /* DamusLightGradient.swift */; };
-		D73E5E472C6A97F4007EB227 /* MutinyGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B82B9E69ED00781E0A /* MutinyGradient.swift */; };
 		D73E5E482C6A97F4007EB227 /* Shimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D2E846295218AF006D67F8 /* Shimmer.swift */; };
 		D73E5E492C6A97F4007EB227 /* EndBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD7641A28A1641400B6928F /* EndBlock.swift */; };
 		D73E5E4D2C6A97F4007EB227 /* NIP05Badge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB8838A296F6E1E00DC99E7 /* NIP05Badge.swift */; };
@@ -1255,7 +1253,6 @@
 		D73E5ED42C6A97F4007EB227 /* FriendsButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */; };
 		D73E5ED52C6A97F4007EB227 /* GradientFollowButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694F32A6732B7001F4053 /* GradientFollowButton.swift */; };
 		D73E5ED62C6A97F4007EB227 /* AlbyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09652A0AE62100943473 /* AlbyButton.swift */; };
-		D73E5ED72C6A97F4007EB227 /* MutinyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B62B9E692E00781E0A /* MutinyButton.swift */; };
 		D73E5ED82C6A97F4007EB227 /* DamusVideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2929DDF54400516EAC /* DamusVideoPlayerView.swift */; };
 		D73E5ED92C6A97F4007EB227 /* DamusVideoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFC2AA7525700DFEC1F /* DamusVideoPlayer.swift */; };
 		D73E5EDA2C6A97F4007EB227 /* DamusVideoCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFE2AA76A0900DFEC1F /* DamusVideoCoordinator.swift */; };
@@ -2339,9 +2336,8 @@
 		5C6E1DAC2A193EC2008FC15A /* GradientButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientButtonStyle.swift; sourceTree = "<group>"; };
 		5C6E1DAE2A194075008FC15A /* PinkGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinkGradient.swift; sourceTree = "<group>"; };
 		5C7389B02B6EFA7100781E0A /* ProxyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyView.swift; sourceTree = "<group>"; };
-		5C7389B62B9E692E00781E0A /* MutinyButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutinyButton.swift; sourceTree = "<group>"; };
-		5C7389B82B9E69ED00781E0A /* MutinyGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutinyGradient.swift; sourceTree = "<group>"; };
 		5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostingTimelineView.swift; sourceTree = "<group>"; };
+		5CB017202D2D985800A9ED05 /* CoinosButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinosButton.swift; sourceTree = "<group>"; };
 		5CC8529C2BD741CD0039FFC5 /* HighlightEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightEvent.swift; sourceTree = "<group>"; };
 		5CC8529E2BD744F60039FFC5 /* HighlightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightView.swift; sourceTree = "<group>"; };
 		5CC852A12BDED9B90039FFC5 /* HighlightDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightDescription.swift; sourceTree = "<group>"; };
@@ -3192,7 +3188,6 @@
 				5C0707D02A1ECB38004E7B51 /* DamusLogoGradient.swift */,
 				4C687C202A5F7ED00092C550 /* DamusBackground.swift */,
 				5CF2DCCD2AABE1A500984B8D /* DamusLightGradient.swift */,
-				5C7389B82B9E69ED00781E0A /* MutinyGradient.swift */,
 			);
 			path = Gradients;
 			sourceTree = "<group>";
@@ -3261,10 +3256,10 @@
 		4C8D1A6D29F31E4100ACDF75 /* Buttons */ = {
 			isa = PBXGroup;
 			children = (
+				5CB017202D2D985800A9ED05 /* CoinosButton.swift */,
 				4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */,
 				F71694F32A6732B7001F4053 /* GradientFollowButton.swift */,
 				4C7D09652A0AE62100943473 /* AlbyButton.swift */,
-				5C7389B62B9E692E00781E0A /* MutinyButton.swift */,
 			);
 			path = Buttons;
 			sourceTree = "<group>";
@@ -4312,7 +4307,6 @@
 				4C30AC7829A577AB00E2BD5A /* EventCache.swift in Sources */,
 				4C285C8428385690008A31F1 /* CreateAccountView.swift in Sources */,
 				4CDD1AE22A6B3074001CD4DF /* NdbTagsIterator.swift in Sources */,
-				5C7389B72B9E692E00781E0A /* MutinyButton.swift in Sources */,
 				4C216F34286F5ACD00040376 /* DMView.swift in Sources */,
 				D7CB5D512B1174D100AD4105 /* FriendFilter.swift in Sources */,
 				D7CBD1D42B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift in Sources */,
@@ -4617,7 +4611,6 @@
 				4CF0ABD82981980C00D66079 /* Lists.swift in Sources */,
 				F71694EA2A662232001F4053 /* OnboardingSuggestionsView.swift in Sources */,
 				4C12536A2A76D3850004F4B8 /* RelaysChangedNotify.swift in Sources */,
-				5C7389B92B9E69ED00781E0A /* MutinyGradient.swift in Sources */,
 				4C30AC8029A6A53F00E2BD5A /* ProfilePicturesView.swift in Sources */,
 				D7373BAA2B68A65A00F7783D /* PurpleAccountUpdateNotify.swift in Sources */,
 				5C6E1DAD2A193EC2008FC15A /* GradientButtonStyle.swift in Sources */,
@@ -4715,6 +4708,7 @@
 				5C513FBA297F72980072348F /* CustomPicker.swift in Sources */,
 				4C1253622A76D00B0004F4B8 /* PostNotify.swift in Sources */,
 				4CACA9D5280C31E100D9BBE8 /* ReplyView.swift in Sources */,
+				5CB017232D2D985E00A9ED05 /* CoinosButton.swift in Sources */,
 				F7908E92298B0F0700AB113A /* RelayDetailView.swift in Sources */,
 				4C9147002A2A891E00DDEA40 /* error.c in Sources */,
 				4CE879552996BAB900F758CC /* RelayPaidDetail.swift in Sources */,
@@ -4940,7 +4934,6 @@
 				82D6FB0F2CD99F7900C925F4 /* DamusLogoGradient.swift in Sources */,
 				82D6FB102CD99F7900C925F4 /* DamusBackground.swift in Sources */,
 				82D6FB112CD99F7900C925F4 /* DamusLightGradient.swift in Sources */,
-				82D6FB122CD99F7900C925F4 /* MutinyGradient.swift in Sources */,
 				82D6FB132CD99F7900C925F4 /* Shimmer.swift in Sources */,
 				82D6FB142CD99F7900C925F4 /* EndBlock.swift in Sources */,
 				82D6FB152CD99F7900C925F4 /* ImageCarousel.swift in Sources */,
@@ -5138,7 +5131,6 @@
 				82D6FBD82CD99F7900C925F4 /* FriendsButton.swift in Sources */,
 				82D6FBD92CD99F7900C925F4 /* GradientFollowButton.swift in Sources */,
 				82D6FBDA2CD99F7900C925F4 /* AlbyButton.swift in Sources */,
-				82D6FBDB2CD99F7900C925F4 /* MutinyButton.swift in Sources */,
 				82D6FBDC2CD99F7900C925F4 /* DamusVideoPlayerView.swift in Sources */,
 				82D6FBDD2CD99F7900C925F4 /* DamusVideoPlayer.swift in Sources */,
 				82D6FBDE2CD99F7900C925F4 /* DamusVideoCoordinator.swift in Sources */,
@@ -5193,6 +5185,7 @@
 				82D6FC0E2CD99F7900C925F4 /* ProfilePicView.swift in Sources */,
 				82D6FC0F2CD99F7900C925F4 /* ProfileView.swift in Sources */,
 				82D6FC102CD99F7900C925F4 /* ProfileNameView.swift in Sources */,
+				5CB017212D2D985E00A9ED05 /* CoinosButton.swift in Sources */,
 				82D6FC112CD99F7900C925F4 /* MaybeAnonPfpView.swift in Sources */,
 				82D6FC122CD99F7900C925F4 /* EventProfileName.swift in Sources */,
 				82D6FC132CD99F7900C925F4 /* FriendIcon.swift in Sources */,
@@ -5351,7 +5344,6 @@
 				D73E5E442C6A97F4007EB227 /* DamusLogoGradient.swift in Sources */,
 				D73E5E452C6A97F4007EB227 /* DamusBackground.swift in Sources */,
 				D73E5E462C6A97F4007EB227 /* DamusLightGradient.swift in Sources */,
-				D73E5E472C6A97F4007EB227 /* MutinyGradient.swift in Sources */,
 				D73E5E482C6A97F4007EB227 /* Shimmer.swift in Sources */,
 				D73E5E492C6A97F4007EB227 /* EndBlock.swift in Sources */,
 				D73E5E4D2C6A97F4007EB227 /* NIP05Badge.swift in Sources */,
@@ -5471,6 +5463,7 @@
 				D73E5EBB2C6A97F4007EB227 /* Nip98HTTPAuth.swift in Sources */,
 				D73E5EBC2C6A97F4007EB227 /* Relay.swift in Sources */,
 				D73E5EBD2C6A97F4007EB227 /* NostrRequest.swift in Sources */,
+				5CB017222D2D985E00A9ED05 /* CoinosButton.swift in Sources */,
 				D73E5EBE2C6A97F4007EB227 /* NostrLink.swift in Sources */,
 				D73E5EBF2C6A97F4007EB227 /* WebSocket.swift in Sources */,
 				D73E5F812C6AA07A007EB227 /* HighlighterExtensionAliases.swift in Sources */,
@@ -5490,7 +5483,6 @@
 				D73E5ED42C6A97F4007EB227 /* FriendsButton.swift in Sources */,
 				D73E5ED52C6A97F4007EB227 /* GradientFollowButton.swift in Sources */,
 				D73E5ED62C6A97F4007EB227 /* AlbyButton.swift in Sources */,
-				D73E5ED72C6A97F4007EB227 /* MutinyButton.swift in Sources */,
 				D73E5ED82C6A97F4007EB227 /* DamusVideoPlayerView.swift in Sources */,
 				D73E5ED92C6A97F4007EB227 /* DamusVideoPlayer.swift in Sources */,
 				D73E5EDA2C6A97F4007EB227 /* DamusVideoCoordinator.swift in Sources */,
