@@ -875,7 +875,6 @@
 		82D6FC682CD99F7900C925F4 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363AA128296A7E006E126D /* SearchView.swift */; };
 		82D6FC692CD99F7900C925F4 /* SelectWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */; };
 		82D6FC6A2CD99F7900C925F4 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3AC7A02835A81400E1F516 /* SetupView.swift */; };
-		82D6FC6B2CD99F7900C925F4 /* ThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E4ED0A295867B900DD7078 /* ThreadView.swift */; };
 		82D6FC6C2CD99F7900C925F4 /* TimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA2EF9F280E37AC0044ACD8 /* TimelineView.swift */; };
 		82D6FC6D2CD99F7900C925F4 /* UserRelaysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB55EF4295E679D007FD187 /* UserRelaysView.swift */; };
 		82D6FC6E2CD99F7900C925F4 /* SideMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 647D9A8C2968520300A295DE /* SideMenuView.swift */; };
@@ -1388,7 +1387,6 @@
 		D73E5F602C6A97F5007EB227 /* SearchResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5C7E69284EDE2E00A22DF5 /* SearchResultsView.swift */; };
 		D73E5F612C6A97F5007EB227 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363AA128296A7E006E126D /* SearchView.swift */; };
 		D73E5F622C6A97F5007EB227 /* SelectWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */; };
-		D73E5F642C6A97F5007EB227 /* ThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E4ED0A295867B900DD7078 /* ThreadView.swift */; };
 		D73E5F652C6A97F5007EB227 /* TimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA2EF9F280E37AC0044ACD8 /* TimelineView.swift */; };
 		D73E5F662C6A97F5007EB227 /* UserRelaysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB55EF4295E679D007FD187 /* UserRelaysView.swift */; };
 		D73E5F682C6A97F5007EB227 /* BannerImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9609F057296E220800069BF3 /* BannerImageView.swift */; };
@@ -1648,7 +1646,6 @@
 		E0EE9DD42B8E5FEA00F3002D /* ImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0EE9DD32B8E5FEA00F3002D /* ImageProcessing.swift */; };
 		E4FA1C032A24BB7F00482697 /* SearchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */; };
 		E990020F2955F837003BBC5A /* EditMetadataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E990020E2955F837003BBC5A /* EditMetadataView.swift */; };
-		E9E4ED0B295867B900DD7078 /* ThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E4ED0A295867B900DD7078 /* ThreadView.swift */; };
 		F71694EA2A662232001F4053 /* OnboardingSuggestionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694E92A662232001F4053 /* OnboardingSuggestionsView.swift */; };
 		F71694EC2A662292001F4053 /* SuggestedUsersViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694EB2A662292001F4053 /* SuggestedUsersViewModel.swift */; };
 		F71694EE2A6624F9001F4053 /* suggested_users.json in Resources */ = {isa = PBXBuildFile; fileRef = F71694ED2A6624F9001F4053 /* suggested_users.json */; };
@@ -2495,7 +2492,6 @@
 		E0EE9DD32B8E5FEA00F3002D /* ImageProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageProcessing.swift; sourceTree = "<group>"; };
 		E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSettingsView.swift; sourceTree = "<group>"; };
 		E990020E2955F837003BBC5A /* EditMetadataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditMetadataView.swift; sourceTree = "<group>"; };
-		E9E4ED0A295867B900DD7078 /* ThreadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadView.swift; sourceTree = "<group>"; };
 		F71694E92A662232001F4053 /* OnboardingSuggestionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingSuggestionsView.swift; sourceTree = "<group>"; };
 		F71694EB2A662292001F4053 /* SuggestedUsersViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedUsersViewModel.swift; sourceTree = "<group>"; };
 		F71694ED2A6624F9001F4053 /* suggested_users.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = suggested_users.json; sourceTree = "<group>"; };
@@ -3133,7 +3129,6 @@
 				4C363AA128296A7E006E126D /* SearchView.swift */,
 				BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */,
 				4C3AC7A02835A81400E1F516 /* SetupView.swift */,
-				E9E4ED0A295867B900DD7078 /* ThreadView.swift */,
 				4CA2EF9F280E37AC0044ACD8 /* TimelineView.swift */,
 				4CB55EF4295E679D007FD187 /* UserRelaysView.swift */,
 				647D9A8C2968520300A295DE /* SideMenuView.swift */,
@@ -4459,7 +4454,6 @@
 				4CA3FA1029F593D000FDB3C3 /* ZapTypePicker.swift in Sources */,
 				4C32B95D2A9AD44700DC3548 /* Documentation.docc in Sources */,
 				4C3EA66828FF5F9900C48A62 /* hex.c in Sources */,
-				E9E4ED0B295867B900DD7078 /* ThreadView.swift in Sources */,
 				4CD348EF29C3659D00497EB2 /* ImageUploadModel.swift in Sources */,
 				4C3BEFDC281DCE6100B3DE84 /* Liked.swift in Sources */,
 				4CF0ABE7298444FD00D66079 /* EventMutingContainerView.swift in Sources */,
@@ -5306,7 +5300,6 @@
 				82D6FC682CD99F7900C925F4 /* SearchView.swift in Sources */,
 				82D6FC692CD99F7900C925F4 /* SelectWalletView.swift in Sources */,
 				82D6FC6A2CD99F7900C925F4 /* SetupView.swift in Sources */,
-				82D6FC6B2CD99F7900C925F4 /* ThreadView.swift in Sources */,
 				82D6FC6C2CD99F7900C925F4 /* TimelineView.swift in Sources */,
 				82D6FC6D2CD99F7900C925F4 /* UserRelaysView.swift in Sources */,
 				82D6FC6E2CD99F7900C925F4 /* SideMenuView.swift in Sources */,
@@ -5665,7 +5658,6 @@
 				D73E5F602C6A97F5007EB227 /* SearchResultsView.swift in Sources */,
 				D73E5F612C6A97F5007EB227 /* SearchView.swift in Sources */,
 				D73E5F622C6A97F5007EB227 /* SelectWalletView.swift in Sources */,
-				D73E5F642C6A97F5007EB227 /* ThreadView.swift in Sources */,
 				D73E5F652C6A97F5007EB227 /* TimelineView.swift in Sources */,
 				D73E5F662C6A97F5007EB227 /* UserRelaysView.swift in Sources */,
 				D73E5F682C6A97F5007EB227 /* BannerImageView.swift in Sources */,

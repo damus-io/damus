@@ -189,7 +189,7 @@ enum Route: Hashable {
             hasher.combine("firstAidSettings")
         case .Thread(let threadModel):
             hasher.combine("thread")
-            hasher.combine(threadModel.event.id)
+            hasher.combine(threadModel.original_event.id)
         case .ThreadFromReference(note_reference: let note_reference):
             hasher.combine("thread_from_reference")
             hasher.combine(note_reference)

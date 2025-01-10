@@ -49,10 +49,10 @@ class LoadableThreadModel: ObservableObject {
         case .note_id(let note_id):
             let res = await find_event(state: damus_state, query: .event(evid: note_id))
             guard let res, case .event(let ev) = res else { return .not_found }
-            return .loaded(model: ThreadModel(event: ev, damus_state: damus_state))
+            return .loaded(model: await ThreadModel(event: ev, damus_state: damus_state))
         case .naddr(let naddr):
             guard let event = await naddrLookup(damus_state: damus_state, naddr: naddr) else { return .not_found }
-            return .loaded(model: ThreadModel(event: event, damus_state: damus_state))
+            return .loaded(model: await ThreadModel(event: event, damus_state: damus_state))
         }
     }
     

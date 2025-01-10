@@ -31,7 +31,7 @@ struct DamusURLHandler {
             let search = SearchModel(state: damus_state, search: nostrFilter)
             return .route(.Search(search: search))
         case .event(let nostrEvent):
-            let thread = ThreadModel(event: nostrEvent, damus_state: damus_state)
+            let thread = await ThreadModel(event: nostrEvent, damus_state: damus_state)
             return .route(.Thread(thread: thread))
         case .event_reference(let event_reference):
             return .route(.ThreadFromReference(note_reference: event_reference))

@@ -39,7 +39,7 @@ struct EventBody: View {
             HighlightBodyView(state: damus_state, ev: event, options: options)
                 .onTapGesture {
                     if let highlighted_note = event.highlighted_note_id().flatMap({ damus_state.events.lookup($0) }) {
-                        let thread = ThreadModel(event: highlighted_note, damus_state: damus_state, highlight: event.content)
+                        let thread = ThreadModel(event: highlighted_note, damus_state: damus_state)
                         damus_state.nav.push(route: Route.Thread(thread: thread))
                     }
                 }
