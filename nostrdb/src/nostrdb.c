@@ -676,15 +676,15 @@ ndb_filter_get_int_element(const struct ndb_filter_elements *els, int index)
 	return els->elements[index];
 }
 
-int ndb_filter_init(struct ndb_filter *filter)
+static int ndb_filter_init_with(struct ndb_filter *filter, int pages)
 {
 	struct cursor cur;
 	int page_size, elem_pages, data_pages, buf_size;
 
 	page_size = 4096; // assuming this, not a big deal if we're wrong
-	elem_pages = NDB_FILTER_PAGES / 4;
-	data_pages = NDB_FILTER_PAGES - elem_pages;
-	buf_size = page_size * NDB_FILTER_PAGES;
+	elem_pages = pages / 4;
+	data_pages = pages - elem_pages;
+	buf_size = page_size * pages;
 
 	unsigned char *buf = malloc(buf_size);
 	if (!buf)
@@ -708,6 +708,10 @@ int ndb_filter_init(struct ndb_filter *filter)
 	filter->finalized = 0;
 
 	return 1;
+}
+
+int ndb_filter_init(struct ndb_filter *filter) {
+	return ndb_filter_init_with(filter, NDB_FILTER_PAGES);
 }
 
 void ndb_filter_destroy(struct ndb_filter *filter)
