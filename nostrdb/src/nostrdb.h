@@ -503,6 +503,12 @@ int ndb_builder_push_tag_str(struct ndb_builder *builder, const char *str, int l
 
 // FILTERS
 int ndb_filter_init(struct ndb_filter *);
+
+/// Allocate a filter with a fixed sized buffer (where pages is number of 4096-byte sized blocks)
+/// You can set pages to 1 if you know you are constructing small filters
+// TODO: replace this with passed-in buffers
+int ndb_filter_init_with(struct ndb_filter *filter, int pages);
+
 int ndb_filter_add_id_element(struct ndb_filter *, const unsigned char *id);
 int ndb_filter_add_int_element(struct ndb_filter *, uint64_t integer);
 int ndb_filter_add_str_element(struct ndb_filter *, const char *str);

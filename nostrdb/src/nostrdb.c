@@ -685,15 +685,16 @@ ndb_filter_get_int_element(const struct ndb_filter_elements *els, int index)
 	return els->elements[index];
 }
 
-static int ndb_filter_init_with(struct ndb_filter *filter, int pages)
+int ndb_filter_init_with(struct ndb_filter *filter, int pages)
 {
 	struct cursor cur;
-	int page_size, elem_pages, data_pages, buf_size;
+	int page_size, elem_size, data_size, buf_size;
 
 	page_size = 4096; // assuming this, not a big deal if we're wrong
-	elem_pages = pages / 4;
-	data_pages = pages - elem_pages;
+
 	buf_size = page_size * pages;
+	elem_size = buf_size / 4;
+	data_size = buf_size - elem_size;
 
 	unsigned char *buf = malloc(buf_size);
 	if (!buf)
@@ -702,8 +703,8 @@ static int ndb_filter_init_with(struct ndb_filter *filter, int pages)
 	// init memory arena for the cursor
 	make_cursor(buf, buf + buf_size, &cur);
 
-	cursor_slice(&cur, &filter->elem_buf, page_size * elem_pages);
-	cursor_slice(&cur, &filter->data_buf, page_size * data_pages);
+	cursor_slice(&cur, &filter->elem_buf, elem_size);
+	cursor_slice(&cur, &filter->data_buf, data_size);
 
 	// make sure we are fully allocated
 	assert(cur.p == cur.end);
