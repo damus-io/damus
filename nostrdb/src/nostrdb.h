@@ -156,6 +156,7 @@ enum ndb_filter_fieldtype {
 	NDB_FILTER_SINCE   = 5,
 	NDB_FILTER_UNTIL   = 6,
 	NDB_FILTER_LIMIT   = 7,
+	NDB_FILTER_SEARCH  = 8,
 };
 #define NDB_NUM_FILTERS 7
 
