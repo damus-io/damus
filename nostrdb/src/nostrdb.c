@@ -263,6 +263,15 @@ struct ndb_search_words
 	int num_words;
 };
 
+
+static inline int is_replaceable_kind(uint64_t kind)
+{
+	return kind == 0 || kind == 3
+		|| (10000 <= kind && kind < 20000)
+		|| (30000 <= kind && kind < 40000);
+}
+
+
 // ndb_text_search_key
 //
 // This is compressed when in lmdb:
