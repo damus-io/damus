@@ -1930,18 +1930,6 @@ int ndb_note_verify(void *ctx, unsigned char pubkey[32], unsigned char id[32],
 	return 1;
 }
 
-static int ndb_writer_queue_note(struct ndb_writer *writer,
-				 struct ndb_note *note, size_t note_len)
-{
-	struct ndb_writer_msg msg;
-	msg.type = NDB_WRITER_NOTE;
-
-	msg.note.note = note;
-	msg.note.note_len = note_len;
-
-	return prot_queue_push(&writer->inbox, &msg);
-}
-
 static void ndb_writer_last_profile_fetch(struct ndb_txn *txn,
 					  const unsigned char *pubkey,
 					  uint64_t fetched_at)
