@@ -4141,9 +4141,11 @@ static uint64_t ndb_write_note(struct ndb_txn *txn,
 			       uint32_t ndb_flags)
 {
 	int rc;
-	uint64_t note_key;
+	uint64_t note_key, kind;
 	MDB_dbi note_db;
 	MDB_val key, val;
+
+	kind = note->note->kind;
 
 	// let's quickly sanity check if we already have this note
 	if (ndb_get_notekey_by_id(txn, note->note->id))
@@ -4173,7 +4175,7 @@ static uint64_t ndb_write_note(struct ndb_txn *txn,
 	ndb_write_note_pubkey_kind_index(txn, note->note, note_key);
 
 	// only parse content and do fulltext index on text and longform notes
-	if (note->note->kind == 1 || note->note->kind == 30023) {
+	if (kind == 1 || kind == 30023) {
 		if (!ndb_flag_set(ndb_flags, NDB_FLAG_NO_FULLTEXT)) {
 			if (!ndb_write_note_fulltext_index(txn, note->note, note_key))
 				return 0;
@@ -4183,9 +4185,7 @@ static uint64_t ndb_write_note(struct ndb_txn *txn,
 		if (!ndb_flag_set(ndb_flags, NDB_FLAG_NO_NOTE_BLOCKS)) {
 			ndb_write_new_blocks(txn, note->note, note_key, scratch, scratch_size);
 		}
-	}
-
-	if (note->note->kind == 7 && !ndb_flag_set(ndb_flags, NDB_FLAG_NO_STATS)) {
+	} else if (kind == 7 && !ndb_flag_set(ndb_flags, NDB_FLAG_NO_STATS)) {
 		ndb_write_reaction_stats(txn, note->note);
 	}
 
