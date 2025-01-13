@@ -742,6 +742,7 @@ static const char *ndb_filter_field_name(enum ndb_filter_fieldtype field)
 	case NDB_FILTER_SINCE: return "since";
 	case NDB_FILTER_UNTIL: return "until";
 	case NDB_FILTER_LIMIT: return "limit";
+	case NDB_FILTER_SEARCH: return "search";
 	}
 
 	return "unknown";
@@ -825,6 +826,15 @@ static int ndb_filter_add_element(struct ndb_filter *filter, union ndb_filter_el
 			return 0;
 		offset = el.integer;
 		break;
+	case NDB_FILTER_SEARCH:
+		if (current->field.elem_type != NDB_ELEMENT_STRING) {
+			return 0;
+		}
+		if (!cursor_push(&filter->data_buf, (unsigned char *)el.string.string, el.string.len))
+			return 0;
+		if (!cursor_push_byte(&filter->data_buf, 0))
+			return 0;
+		break;
 	case NDB_FILTER_TAGS:
 		switch (current->field.elem_type) {
 		case NDB_ELEMENT_ID:
@@ -887,7 +897,7 @@ int ndb_filter_add_str_element_len(struct ndb_filter *filter, const char *str, i
 	if (!(current = ndb_filter_current_element(filter)))
 		return 0;
 
-	// only generic queries are allowed to have strings
+	// only generic tags and search queries are allowed to have strings
 	switch (current->field.type) {
 	case NDB_FILTER_SINCE:
 	case NDB_FILTER_UNTIL:
@@ -896,6 +906,12 @@ int ndb_filter_add_str_element_len(struct ndb_filter *filter, const char *str, i
 	case NDB_FILTER_AUTHORS:
 	case NDB_FILTER_KINDS:
 		return 0;
+	case NDB_FILTER_SEARCH:
+		if (current->count == 1) {
+			// you can't add more than one string to a search
+			return 0;
+		}
+		break;
 	case NDB_FILTER_TAGS:
 		break;
 	}
@@ -925,6 +941,7 @@ int ndb_filter_add_int_element(struct ndb_filter *filter, uint64_t integer)
 	case NDB_FILTER_IDS:
 	case NDB_FILTER_AUTHORS:
 	case NDB_FILTER_TAGS:
+	case NDB_FILTER_SEARCH:
 		return 0;
 	case NDB_FILTER_KINDS:
 	case NDB_FILTER_SINCE:
@@ -955,6 +972,7 @@ int ndb_filter_add_id_element(struct ndb_filter *filter, const unsigned char *id
 	case NDB_FILTER_UNTIL:
 	case NDB_FILTER_LIMIT:
 	case NDB_FILTER_KINDS:
+	case NDB_FILTER_SEARCH:
 		return 0;
 	case NDB_FILTER_IDS:
 	case NDB_FILTER_AUTHORS:
@@ -1146,6 +1164,21 @@ static int ndb_filter_matches_with(struct ndb_filter *filter,
 			assert(els->count == 1);
 			if (note->created_at < els->elements[0])
 				continue;
+			break;
+		case NDB_FILTER_SEARCH:
+			// TODO: matching search filters will need an accelerated
+			// data structure, like our minimal perfect hashmap
+			// idea for mutewords.
+			//
+			// We'll also want to store tokenized words in the filter
+			// itself, so that we can walk over each word and check
+			// the hashmap to see if the note contains at least
+			// one word.
+			//
+			// For now we always return true, since we assume
+			// the search index will be walked for these kinds
+			// of queries.
+			continue;
 		case NDB_FILTER_LIMIT:
 cont:
 			continue;
@@ -1267,6 +1300,7 @@ void ndb_filter_end_field(struct ndb_filter *filter)
 	case NDB_FILTER_SINCE:
 	case NDB_FILTER_UNTIL:
 	case NDB_FILTER_LIMIT:
+	case NDB_FILTER_SEARCH:
 		// don't need to sort these
 		break;
 	}
@@ -5377,6 +5411,7 @@ static int cursor_push_json_elem_array(struct cursor *cur,
 
 int ndb_filter_json(const struct ndb_filter *filter, char *buf, int buflen)
 {
+	const char *str;
 	struct cursor cur, *c = &cur;
 	struct ndb_filter_elements *elems;
 	int i;
@@ -5398,6 +5433,14 @@ int ndb_filter_json(const struct ndb_filter *filter, char *buf, int buflen)
 			if (!cursor_push_str(c, "\"ids\":"))
 				return 0;
 			if (!cursor_push_json_elem_array(c, filter, elems))
+				return 0;
+			break;
+		case NDB_FILTER_SEARCH:
+			if (!cursor_push_str(c, "\"search\":"))
+				return 0;
+			if (!(str = ndb_filter_get_string_element(filter, elems, 0)))
+				return 0;
+			if (!cursor_push_jsonstr(c, str))
 				return 0;
 			break;
 		case NDB_FILTER_AUTHORS:
@@ -6021,6 +6064,8 @@ ndb_filter_parse_field(const char *tok, int len, char *tagchar)
 		return NDB_FILTER_UNTIL;
 	} else if (len == 5 && !strncmp(tok, "limit", 5)) {
 		return NDB_FILTER_LIMIT;
+	} else if (len == 6 && !strncmp(tok, "search", 6)) {
+		return NDB_FILTER_SEARCH;
 	}
 
 	return 0;
@@ -6131,6 +6176,28 @@ static int ndb_filter_parse_json_elems(struct ndb_json_parser *parser,
 	return 1;
 }
 
+static int ndb_filter_parse_json_str(struct ndb_json_parser *parser,
+				     struct ndb_filter *filter)
+{
+	jsmntok_t *tok;
+	const char *start;
+	int tok_len;
+
+	tok = &parser->toks[parser->i];
+	start = parser->json + tok->start;
+	tok_len = toksize(tok);
+
+	if (tok->type != JSMN_STRING)
+		return 0;
+
+	if (!ndb_filter_add_str_element_len(filter, start, tok_len))
+		return 0;
+
+	ndb_debug("added str elem '%.*s'\n", tok_len, start);
+
+	return 1;
+}
+
 static int ndb_filter_parse_json_int(struct ndb_json_parser *parser,
 				     struct ndb_filter *filter)
 {
@@ -6221,6 +6288,12 @@ static int ndb_filter_parse_json(struct ndb_json_parser *parser,
 		case NDB_FILTER_IDS:
 			if (!ndb_filter_parse_json_ids(parser, filter)) {
 				ndb_debug("failed to parse filter ids/authors\n");
+				return 0;
+			}
+			break;
+		case NDB_FILTER_SEARCH:
+			if (!ndb_filter_parse_json_str(parser, filter)) {
+				ndb_debug("failed to parse filter search str\n");
 				return 0;
 			}
 			break;
