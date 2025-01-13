@@ -575,7 +575,7 @@ int ndb_filter_clone(struct ndb_filter *dst, struct ndb_filter *src)
 // are as small as possible. This also prevents new fields from being added
 int ndb_filter_end(struct ndb_filter *filter)
 {
-#ifdef DEBUG
+#ifdef NDB_LOG
 	size_t orig_size;
 #endif
 	size_t data_len, elem_len;
@@ -586,7 +586,7 @@ int ndb_filter_end(struct ndb_filter *filter)
 	// all of the element pointers accordingly
 	data_len = filter->data_buf.p - filter->data_buf.start;
 	elem_len = filter->elem_buf.p - filter->elem_buf.start;
-#ifdef DEBUG
+#ifdef NDB_LOG
 	orig_size = filter->data_buf.end - filter->elem_buf.start;
 #endif
 
