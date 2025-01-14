@@ -2906,6 +2906,16 @@ ndb_filter_find_elements(struct ndb_filter *filter, enum ndb_filter_fieldtype ty
 	return NULL;
 }
 
+static const char *ndb_filter_find_search(struct ndb_filter *filter)
+{
+	struct ndb_filter_elements *els;
+
+	if (!(els = ndb_filter_find_elements(filter, NDB_FILTER_SEARCH)))
+		return NULL;
+
+	return ndb_filter_get_string_element(filter, els, 0);
+}
+
 int ndb_filter_is_subset_of(const struct ndb_filter *a, const struct ndb_filter *b)
 {
 	int i;
