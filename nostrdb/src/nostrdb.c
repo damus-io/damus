@@ -3047,8 +3047,7 @@ static int query_is_full(struct ndb_query_results *results, int limit)
 static int ndb_query_plan_execute_ids(struct ndb_txn *txn,
 				      struct ndb_filter *filter,
 				      struct ndb_query_results *results,
-				      int limit
-				      )
+				      int limit)
 {
 	MDB_cursor *cur;
 	MDB_dbi db;
@@ -3908,9 +3907,10 @@ retry:
 		return 0;
 	}
 
-	if (last_result) {
-		if (last_result->key.note_id != result->key.note_id)
-			return 0;
+	// if the note id doesn't match the last result, then we stop trying
+	// each search word
+	if (last_result && last_result->key.note_id != result->key.note_id) {
+		return 0;
 	}
 
 	// On success, this could still be not related at all.
