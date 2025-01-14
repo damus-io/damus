@@ -314,6 +314,10 @@ struct ndb_text_search_key
 struct ndb_text_search_result {
 	struct ndb_text_search_key key;
 	int prefix_chars;
+
+	// This is only set if we passed a filter for nip50 searches
+	struct ndb_note *note;
+	uint64_t note_size;
 };
 
 struct ndb_text_search_results {
