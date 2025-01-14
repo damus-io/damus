@@ -3990,6 +3990,32 @@ void ndb_text_search_config_set_limit(struct ndb_text_search_config *cfg, int li
 	cfg->limit = limit;
 }
 
+static int compare_search_words(const void *pa, const void *pb)
+{
+	struct ndb_word *a, *b;
+
+	a = (struct ndb_word *)pa;
+	b = (struct ndb_word *)pb;
+
+	if (a->word_len == b->word_len) {
+		return 0;
+	} else if (a->word_len > b->word_len) {
+		// biggest words should be at the front of the list,
+		// so we say it's "smaller" here
+		return -1;
+	} else {
+		return 1;
+	}
+}
+
+// Sort search words from largest to smallest. Larger words are less likely
+// in the index, allowing our scan to walk fewer words at the root when
+// recursively matching.
+void sort_largest_to_smallest(struct ndb_search_words *words)
+{
+	qsort(words->words, words->num_words, sizeof(words->words[0]), compare_search_words);
+}
+
 int ndb_text_search(struct ndb_txn *txn, const char *query,
 		    struct ndb_text_search_results *results,
 		    struct ndb_text_search_config *config)
@@ -4037,6 +4063,11 @@ int ndb_text_search(struct ndb_txn *txn, const char *query,
 		fprintf(stderr, "nd_text_search: mdb_cursor_open failed, error %d\n", i);
 		return 0;
 	}
+
+	// TODO: sort words from largest to smallest. This should complete the
+	// query quicker because the larger words are likely to have fewer
+	// entries in the search index.
+	sort_largest_to_smallest(&search_words);
 
 	// for each word, we recursively find all of the submatches
 	while (results->num_results < limit) {
