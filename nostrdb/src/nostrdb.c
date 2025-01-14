@@ -230,6 +230,7 @@ enum ndb_query_plan {
 	NDB_PLAN_AUTHOR_KINDS,
 	NDB_PLAN_CREATED,
 	NDB_PLAN_TAGS,
+	NDB_PLAN_SEARCH,
 };
 
 // A id + u64 + timestamp
@@ -334,27 +335,27 @@ static int ndb_make_noted_text_search_key(unsigned char *buf, int bufsize,
 
 static int ndb_make_text_search_key_low(unsigned char *buf, int bufsize,
 					int wordlen, const char *word,
+					uint64_t since,
 					int *keysize)
 {
-	uint64_t timestamp, note_id;
-	timestamp = 0;
+	uint64_t note_id;
 	note_id = 0;
 	return ndb_make_text_search_key(buf, bufsize, 0, wordlen, word,
-					timestamp, note_id, keysize);
+					since, note_id, keysize);
 }
 
 static int ndb_make_text_search_key_high(unsigned char *buf, int bufsize,
 					 int wordlen, const char *word,
+					 uint64_t until,
 					 int *keysize)
 {
-	uint64_t timestamp, note_id;
-	timestamp = INT32_MAX;
+	uint64_t note_id;
 	note_id = INT32_MAX;
 	return ndb_make_text_search_key(buf, bufsize, 0, wordlen, word,
-					timestamp, note_id, keysize);
+					until, note_id, keysize);
 }
 
-typedef int (*ndb_text_search_key_order_fn)(unsigned char *buf, int bufsize, int wordlen, const char *word, int *keysize);
+typedef int (*ndb_text_search_key_order_fn)(unsigned char *buf, int bufsize, int wordlen, const char *word, uint64_t timestamp, int *keysize);
 
 /** From LMDB: Compare two items lexically */
 static int mdb_cmp_memn(const MDB_val *a, const MDB_val *b) {
@@ -3044,6 +3045,43 @@ static int query_is_full(struct ndb_query_results *results, int limit)
 	return cursor_count(&results->cur, sizeof(struct ndb_query_result)) >= limit;
 }
 
+static int ndb_query_plan_execute_search(struct ndb_txn *txn,
+					 struct ndb_filter *filter,
+					 struct ndb_query_results *results,
+					 int limit)
+{
+	const char *search;
+	int i;
+	struct ndb_text_search_results text_results;
+	struct ndb_text_search_result *text_result;
+	struct ndb_text_search_config config;
+	struct ndb_query_result result;
+
+	ndb_default_text_search_config(&config);
+
+	if (!(search = ndb_filter_find_search(filter)))
+		return 0;
+
+	if (!ndb_text_search_with(txn, search, &text_results, &config, filter))
+		return 0;
+
+	for (i = 0; i < text_results.num_results; i++) {
+		if (query_is_full(results, limit))
+			break;
+
+		text_result = &text_results.results[i];
+
+		result.note = text_result->note;
+		result.note_size = text_result->note_size;
+		result.note_id = text_result->key.note_id;
+
+		if (!push_query_result(results, &result))
+			break;
+	}
+
+	return 1;
+}
+
 static int ndb_query_plan_execute_ids(struct ndb_txn *txn,
 				      struct ndb_filter *filter,
 				      struct ndb_query_results *results,
@@ -3456,15 +3494,18 @@ next:
 
 static enum ndb_query_plan ndb_filter_plan(struct ndb_filter *filter)
 {
-	struct ndb_filter_elements *ids, *kinds, *authors, *tags;
+	struct ndb_filter_elements *ids, *kinds, *authors, *tags, *search;
 
 	ids = ndb_filter_find_elements(filter, NDB_FILTER_IDS);
+	search = ndb_filter_find_elements(filter, NDB_FILTER_SEARCH);
 	kinds = ndb_filter_find_elements(filter, NDB_FILTER_KINDS);
 	authors = ndb_filter_find_elements(filter, NDB_FILTER_AUTHORS);
 	tags = ndb_filter_find_elements(filter, NDB_FILTER_TAGS);
 
 	// this is rougly similar to the heuristic in strfry's dbscan
-	if (ids) {
+	if (search) {
+		return NDB_PLAN_SEARCH;
+	} else if (ids) {
 		return NDB_PLAN_IDS;
 	} else if (kinds && authors && authors->count <= 10) {
 		return NDB_PLAN_AUTHOR_KINDS;
@@ -3483,6 +3524,7 @@ static const char *ndb_query_plan_name(int plan_id)
 {
 	switch (plan_id) {
 		case NDB_PLAN_IDS:     return "ids";
+		case NDB_PLAN_SEARCH:  return "search";
 		case NDB_PLAN_KINDS:   return "kinds";
 		case NDB_PLAN_TAGS:    return "tags";
 		case NDB_PLAN_CREATED: return "created";
@@ -3515,6 +3557,11 @@ static int ndb_query_filter(struct ndb_txn *txn, struct ndb_filter *filter,
 	// We have a list of ids, just open a cursor and jump to each once
 	case NDB_PLAN_IDS:
 		if (!ndb_query_plan_execute_ids(txn, filter, &results, limit))
+			return 0;
+		break;
+
+	case NDB_PLAN_SEARCH:
+		if (!ndb_query_plan_execute_search(txn, filter, &results, limit))
 			return 0;
 		break;
 
@@ -4031,6 +4078,7 @@ int ndb_text_search_with(struct ndb_txn *txn, const char *query,
 	struct ndb_word *search_word;
 	struct ndb_note *note;
 	struct cursor cur;
+	uint64_t since, until, timestamp_op, *pint, note_size;
 	ndb_text_search_key_order_fn key_order_fn;
 	MDB_dbi text_db;
 	MDB_cursor *cursor;
@@ -4038,17 +4086,36 @@ int ndb_text_search_with(struct ndb_txn *txn, const char *query,
 	int i, j, keysize, saved_size, limit;
 	MDB_cursor_op op, order_op;
 
+	note_size = 0;
+	note = 0;
 	saved = NULL;
 	ndb_text_search_results_init(results);
 	ndb_search_words_init(&search_words);
 
-	// search config
+	until = UINT64_MAX;
+	since = 0;
 	limit = MAX_TEXT_SEARCH_RESULTS;
+
+	// until, since from filter
+	if (filter != NULL) {
+		if ((pint = ndb_filter_get_int(filter, NDB_FILTER_UNTIL)))
+			until = *pint;
+
+		if ((pint = ndb_filter_get_int(filter, NDB_FILTER_SINCE)))
+			since = *pint;
+
+		if ((pint = ndb_filter_get_int(filter, NDB_FILTER_LIMIT)))
+			limit = *pint;
+	}
+
 	order_op = MDB_PREV;
 	key_order_fn = ndb_make_text_search_key_high;
+	timestamp_op = until;
 	if (config) {
 		if (config->order == NDB_ORDER_ASCENDING) {
 			order_op = MDB_NEXT;
+			// set the min timestamp value to since when ascending
+			timestamp_op = since;
 			key_order_fn = ndb_make_text_search_key_low;
 		}
 		limit = min(limit, config->limit);
@@ -4067,9 +4134,11 @@ int ndb_text_search_with(struct ndb_txn *txn, const char *query,
 		return 0;
 	}
 
-	// TODO: sort words from largest to smallest. This should complete the
-	// query quicker because the larger words are likely to have fewer
-	// entries in the search index.
+	// This should complete the query quicker because the larger words are
+	// likely to have fewer entries in the search index. This is not always
+	// true. Words with higher frequency (like bitcoin on nostr in 2024)
+	// may be slower. TODO: Skip word recursion by leveraging a minimal
+	// perfect hashmap of parsed words on a note
 	sort_largest_to_smallest(&search_words);
 
 	// for each word, we recursively find all of the submatches
@@ -4099,7 +4168,9 @@ int ndb_text_search_with(struct ndb_txn *txn, const char *query,
 			// match
 			if (!key_order_fn(buffer, sizeof(buffer),
 					  search_words.words[0].word_len,
-					  search_words.words[0].word, &keysize))
+					  search_words.words[0].word,
+					  timestamp_op,
+					  &keysize))
 			{
 				// word is too big to fit in 1024-sized key
 				continue;
@@ -4172,10 +4243,12 @@ int ndb_text_search_with(struct ndb_txn *txn, const char *query,
 
 			// save the first key match, since we will continue from
 			// this on the next root word result
-			if (j == 0 && !saved) {
-				memcpy(saved_buf, k.mv_data, k.mv_size);
-				saved = saved_buf;
-				saved_size = k.mv_size;
+			if (j == 0) {
+				if (!saved) {
+					memcpy(saved_buf, k.mv_data, k.mv_size);
+					saved = saved_buf;
+					saved_size = k.mv_size;
+				}
 
 				// since we will be trying to match the same
 				// note_id on all subsequent word matches,
@@ -4185,15 +4258,20 @@ int ndb_text_search_with(struct ndb_txn *txn, const char *query,
 				// remaining word queries
 				if (filter) {
 					if ((note = ndb_get_note_by_key(txn,
-						result->key.note_id, NULL)))
+							result->key.note_id,
+							&note_size)))
 					{
 						if (!ndb_filter_matches(filter, note)) {
 							break;
 						}
+						result->note = note;
+						result->note_size = note_size;
 					}
 				}
 			}
 
+			result->note = note;
+			result->note_size = note_size;
 			last_candidate = *result;
 			last_result = &last_candidate;
 		}
