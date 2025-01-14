@@ -547,6 +547,7 @@ int ndb_num_subscriptions(struct ndb *);
 
 // FULLTEXT SEARCH
 int ndb_text_search(struct ndb_txn *txn, const char *query, struct ndb_text_search_results *, struct ndb_text_search_config *);
+int ndb_text_search_with(struct ndb_txn *txn, const char *query, struct ndb_text_search_results *, struct ndb_text_search_config *, struct ndb_filter *filter);
 void ndb_default_text_search_config(struct ndb_text_search_config *);
 void ndb_text_search_config_set_order(struct ndb_text_search_config *, enum ndb_search_order);
 void ndb_text_search_config_set_limit(struct ndb_text_search_config *, int limit);
