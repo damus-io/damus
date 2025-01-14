@@ -4016,9 +4016,11 @@ void sort_largest_to_smallest(struct ndb_search_words *words)
 	qsort(words->words, words->num_words, sizeof(words->words[0]), compare_search_words);
 }
 
-int ndb_text_search(struct ndb_txn *txn, const char *query,
+
+int ndb_text_search_with(struct ndb_txn *txn, const char *query,
 		    struct ndb_text_search_results *results,
-		    struct ndb_text_search_config *config)
+		    struct ndb_text_search_config *config,
+		    struct ndb_filter *filter)
 {
 	unsigned char buffer[1024], *buf;
 	unsigned char saved_buf[1024], *saved;
@@ -4027,6 +4029,7 @@ int ndb_text_search(struct ndb_txn *txn, const char *query,
 	struct ndb_search_words search_words;
 	//struct ndb_text_search_key search_key;
 	struct ndb_word *search_word;
+	struct ndb_note *note;
 	struct cursor cur;
 	ndb_text_search_key_order_fn key_order_fn;
 	MDB_dbi text_db;
@@ -4091,7 +4094,7 @@ int ndb_text_search(struct ndb_txn *txn, const char *query,
 			op = order_op;
 		} else {
 			// construct a packed fulltext search key using this
-			// word this key doesn't contain any timestamp or index
+			// word. This key doesn't contain any timestamp or index
 			// info, so it should range match instead of exact
 			// match
 			if (!key_order_fn(buffer, sizeof(buffer),
@@ -4120,6 +4123,9 @@ int ndb_text_search(struct ndb_txn *txn, const char *query,
 				// if we already have this note id, just continue
 				for (i = 0; i < results->num_results; i++) {
 					if (results->results[i].key.note_id == last_result->key.note_id)
+						// we can't break here to
+						// leave the word loop so
+						// have to use a goto
 						goto cont;
 				}
 
@@ -4140,12 +4146,25 @@ int ndb_text_search(struct ndb_txn *txn, const char *query,
 			k.mv_data = buf;
 			k.mv_size = keysize;
 
+			// TODO: we can speed this up with the minimal perfect
+			// hashmap by quickly rejecting the remaining words
+			// by looking in the word hashmap on the note. This
+			// would allow us to skip the recursive word lookup
+			// thing
 			if (!ndb_text_search_next_word(cursor, op, &k,
 						       search_word,
 						       last_result,
 						       &candidate,
 						       order_op)) {
-				break;
+				// we didn't find a match for this note_id
+				if (j == 0)
+					// if we're at one of the root words,
+					// this means that there are no further
+					// root word matches for any note, so
+					// we know we're done
+					goto done;
+				else
+					break;
 			}
 
 			*result = candidate;
@@ -4157,25 +4176,47 @@ int ndb_text_search(struct ndb_txn *txn, const char *query,
 				memcpy(saved_buf, k.mv_data, k.mv_size);
 				saved = saved_buf;
 				saved_size = k.mv_size;
+
+				// since we will be trying to match the same
+				// note_id on all subsequent word matches,
+				// let's lookup this note and make sure it
+				// matches the filter if we have one. If it
+				// doesn't match, we can quickly skip the
+				// remaining word queries
+				if (filter) {
+					if ((note = ndb_get_note_by_key(txn,
+						result->key.note_id, NULL)))
+					{
+						if (!ndb_filter_matches(filter, note)) {
+							break;
+						}
+					}
+				}
 			}
 
 			last_candidate = *result;
 			last_result = &last_candidate;
 		}
 
-cont:
 		// we matched all of the queries!
 		if (j == search_words.num_words) {
 			results->num_results++;
-		} else if (j == 0) {
-			break;
 		}
 
+cont:
 	}
 
+done:
 	mdb_cursor_close(cursor);
 
 	return 1;
+}
+
+int ndb_text_search(struct ndb_txn *txn, const char *query,
+		    struct ndb_text_search_results *results,
+		    struct ndb_text_search_config *config)
+{
+	return ndb_text_search_with(txn, query, results, config, NULL);
 }
 
 static void ndb_write_blocks(struct ndb_txn *txn, uint64_t note_key,
