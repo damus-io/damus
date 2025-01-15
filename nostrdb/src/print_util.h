@@ -1,19 +1,22 @@
 #include "hex.h"
 #include "lmdb.h"
 
-static void ndb_print_text_search_key(struct ndb_text_search_key *key)
-{
-	printf("K<'%.*s' %" PRIu64 " %" PRIu64 " note_id:%" PRIu64 ">", (int)key->str_len, key->str,
-						    key->word_index,
-						    key->timestamp,
-						    key->note_id);
-}
-
 static void print_hex(unsigned char* data, size_t size) {
 	size_t i;
 	for (i = 0; i < size; i++) {
 		printf("%02x", data[i]);
 	}
+}
+
+static void ndb_print_text_search_key(int bytes_size, struct ndb_text_search_key *key)
+{
+	printf("K<'%.*s' %" PRIu64 " %" PRIu64 " note_id:%" PRIu64 " bytes:%d>", (int)key->str_len, key->str,
+						    key->word_index,
+						    key->timestamp,
+						    key->note_id,
+						    bytes_size
+						    );
+
 }
 
 static void print_tag_kv(struct ndb_txn *txn, MDB_val *k, MDB_val *v)
