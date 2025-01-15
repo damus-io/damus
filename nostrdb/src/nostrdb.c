@@ -6854,7 +6854,7 @@ int ndb_print_search_keys(struct ndb_txn *txn)
 			continue;
 		}
 
-		ndb_print_text_search_key(&search_key);
+		ndb_print_text_search_key(k.mv_size, &search_key);
 		printf("\n");
 
 		i++;
