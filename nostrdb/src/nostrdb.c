@@ -4078,7 +4078,8 @@ int ndb_text_search_with(struct ndb_txn *txn, const char *query,
 	struct ndb_word *search_word;
 	struct ndb_note *note;
 	struct cursor cur;
-	uint64_t since, until, timestamp_op, *pint, note_size;
+	uint64_t since, until, timestamp_op, *pint;
+	size_t note_size;
 	ndb_text_search_key_order_fn key_order_fn;
 	MDB_dbi text_db;
 	MDB_cursor *cursor;
@@ -4282,6 +4283,7 @@ int ndb_text_search_with(struct ndb_txn *txn, const char *query,
 		}
 
 cont:
+		;
 	}
 
 done:
