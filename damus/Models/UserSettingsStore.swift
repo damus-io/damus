@@ -324,9 +324,13 @@ class UserSettingsStore: ObservableObject {
     
     // MARK: Internal, hidden settings
     
+    // TODO: Get rid of this once we have NostrDB query capabilities integrated
     @Setting(key: "latest_contact_event_id", default_value: nil)
     var latest_contact_event_id_hex: String?
     
+    // TODO: Get rid of this once we have NostrDB query capabilities integrated
+    @Setting(key: "draft_event_ids", default_value: nil)
+    var draft_event_ids: [String]?
     
     // MARK: Helper types
     

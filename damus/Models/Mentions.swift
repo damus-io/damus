@@ -122,6 +122,10 @@ enum MentionRef: TagKeys, TagConvertible, Equatable, Hashable {
     }
 }
 
+protocol URLEncodable {
+    func url() -> URL?
+}
+
 struct Mention<T: Equatable>: Equatable {
     let index: Int?
     let ref: T

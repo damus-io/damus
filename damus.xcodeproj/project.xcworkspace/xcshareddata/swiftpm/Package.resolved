@@ -1,5 +1,5 @@
 {
-  "originHash" : "0d806129a33991730dd1aa3d38c47a745f9e9e6ff44999f4a7f28b695f024832",
+  "originHash" : "cc593053634546d736b9cbddccd9952f1f568c97012df5400d99fa313a1100d2",
   "pins" : [
     {
       "identity" : "codescanner",
@@ -43,6 +43,14 @@
       "state" : {
         "revision" : "415b1d97fb38bda1e5a6b2dde63354720832110b",
         "version" : "7.6.1"
+      }
+    },
+    {
+      "identity" : "nostr-sdk-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/rust-nostr/nostr-sdk-swift",
+      "state" : {
+        "revision" : "999316a0962d49ad8b7b98d214b9ee6eea694149"
       }
     },
     {

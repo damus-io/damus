@@ -188,17 +188,29 @@ extension HighlightEvent {
 struct HighlightContentDraft: Hashable {
     let selected_text: String
     let source: HighlightSource
+    
+    
+    init(selected_text: String, source: HighlightSource) {
+        self.selected_text = selected_text
+        self.source = source
+    }
+    
+    init?(from note: NdbNote) {
+        guard let source = HighlightSource.from(tags: note.tags.strings()) else { return nil }
+        self.source = source
+        self.selected_text = note.content
+    }
 }
 
 enum HighlightSource: Hashable {
     static let TAG_SOURCE_ELEMENT = "source"
-    case event(NostrEvent)
+    case event(NoteId)
     case external_url(URL)
     
     func tags() -> [[String]] {
         switch self {
-            case .event(let event):
-                return [ ["e", "\(event.id)", HighlightSource.TAG_SOURCE_ELEMENT] ]
+            case .event(let event_id):
+                return [ ["e", "\(event_id)", HighlightSource.TAG_SOURCE_ELEMENT] ]
             case .external_url(let url):
                 return [ ["r", "\(url)", HighlightSource.TAG_SOURCE_ELEMENT] ]
         }
@@ -206,11 +218,25 @@ enum HighlightSource: Hashable {
     
     func ref() -> RefId {
         switch self {
-            case .event(let event):
-                return .event(event.id)
+            case .event(let event_id):
+                return .event(event_id)
             case .external_url(let url):
                 return .reference(url.absoluteString)
         }
+    }
+    
+    static func from(tags: [[String]]) -> HighlightSource? {
+        for tag in tags {
+            if tag.count == 3 && tag[0] == "e" && tag[2] == HighlightSource.TAG_SOURCE_ELEMENT {
+                guard let event_id = NoteId(hex: tag[1]) else { continue }
+                return .event(event_id)
+            }
+            if tag.count == 3 && tag[0] == "r" && tag[2] == HighlightSource.TAG_SOURCE_ELEMENT {
+                guard let url = URL(string: tag[1]) else { continue }
+                return .external_url(url)
+            }
+        }
+        return nil
     }
 }
 

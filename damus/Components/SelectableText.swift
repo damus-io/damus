@@ -63,7 +63,7 @@ struct SelectableText: View {
         })) {
             if let event, case .show_highlight_post_view(let highlighted_text) = self.selectedTextActionState {
                 PostView(
-                    action: .highlighting(.init(selected_text: highlighted_text, source: .event(event))),
+                    action: .highlighting(.init(selected_text: highlighted_text, source: .event(event.id))),
                     damus_state: damus_state
                 )
                 .presentationDragIndicator(.visible)

@@ -122,6 +122,7 @@ class HomeModel: ContactsDelegate {
     /// This is called whenever DamusState gets set. This function is used to load or setup anything we need from the new DamusState
     func load_our_stuff_from_damus_state() {
         self.load_latest_contact_event_from_damus_state()
+        self.load_drafts_from_damus_state()
     }
     
     /// This loads the latest contact event we have on file from NostrDB. This should be called as soon as we get the new DamusState
@@ -132,6 +133,10 @@ class HomeModel: ContactsDelegate {
         guard let latest_contact_event_id = NoteId(hex: latest_contact_event_id_hex) else { return }
         guard let latest_contact_event: NdbNote = damus_state.ndb.lookup_note( latest_contact_event_id)?.unsafeUnownedValue?.to_owned() else { return }
         process_contact_event(state: damus_state, ev: latest_contact_event)
+    }
+    
+    func load_drafts_from_damus_state() {
+        damus_state.drafts.load(from: damus_state)
     }
     
     // MARK: - ContactsDelegate functions
@@ -215,6 +220,10 @@ class HomeModel: ContactsDelegate {
             break
         case .status:
             handle_status_event(ev)
+        case .draft:
+            // TODO: Implement draft syncing with relays. We intentionally do not support that as of writing. See `DraftsModel.swift` for other details
+            // try? damus_state.drafts.load(wrapped_draft_note: ev, with: damus_state)
+            break
         }
     }
 

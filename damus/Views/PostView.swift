@@ -51,21 +51,29 @@ enum PostAction {
 }
 
 struct PostView: View {
+    
     @State var post: NSMutableAttributedString = NSMutableAttributedString()
+    @State var uploadedMedias: [UploadedMedia] = []
+    @State var references: [RefId] = []
+    /// Pubkeys that should be filtered out from the references
+    ///
+    /// For example, when replying to an event, the user can select which pubkey mentions they want to keep, and which ones to remove.
+    @State var filtered_pubkeys: Set<Pubkey> = []
+    
     @FocusState var focus: Bool
     @State var attach_media: Bool = false
     @State var attach_camera: Bool = false
     @State var error: String? = nil
-    @State var uploadedMedias: [UploadedMedia] = []
     @State var image_upload_confirm: Bool = false
     @State var imagePastedFromPasteboard: PreUploadedMedia? = nil
     @State var imageUploadConfirmPasteboard: Bool = false
-    @State var references: [RefId] = []
     @State var imageUploadConfirmDamusShare: Bool = false
-    @State var filtered_pubkeys: Set<Pubkey> = []
     @State var focusWordAttributes: (String?, NSRange?) = (nil, nil)
     @State var newCursorIndex: Int?
     @State var textHeight: CGFloat? = nil
+    @State var saved_state: SaveState = .needs_saving()
+    /// A timer that helps us add a delay between when changes occur and when they are saved persistently (to avoid too many disk writes and a jittery save indicator)
+    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     @State var preUploadedMedia: [PreUploadedMedia] = []
     
@@ -80,6 +88,16 @@ struct PostView: View {
     let prompt_view: (() -> AnyView)?
     let placeholder_messages: [String]
     let initial_text_suffix: String?
+    
+    enum SaveState: Equatable {
+        /// The draft has been modified and needs saving.
+        /// Saving should occur in N seconds
+        case needs_saving(seconds_remaining: Int = 3)
+        /// A saving operation is in progress
+        case saving
+        /// The draft has been saved to disk.
+        case saved
+    }
     
     init(
         action: PostAction,
@@ -109,24 +127,7 @@ struct PostView: View {
     }
     
     func send_post() {
-        // don't add duplicate pubkeys but retain order
-        var pkset = Set<Pubkey>()
-
-        // we only want pubkeys really
-        let pks = references.reduce(into: Array<Pubkey>()) { acc, ref in
-            guard case .pubkey(let pk) = ref else {
-                return
-            }
-            
-            if pkset.contains(pk) || filtered_pubkeys.contains(pk) {
-                return
-            }
-
-            pkset.insert(pk)
-            acc.append(pk)
-        }
-
-        let new_post = build_post(state: damus_state, post: self.post, action: action, uploadedMedias: uploadedMedias, pubkeys: pks)
+        let new_post = build_post(state: self.damus_state, post: self.post, action: action, uploadedMedias: uploadedMedias, references: self.references, filtered_pubkeys: filtered_pubkeys)
 
         notify(.post(.post(new_post)))
 
@@ -182,10 +183,33 @@ struct PostView: View {
         })
     }
     
+    var save_state_indicator: some View {
+        HStack {
+            switch saved_state {
+            case .needs_saving:
+                EmptyView()
+                    .accessibilityHidden(true)  // Probably no need to show this to visually impaired users, might be too noisy
+            case .saving:
+                ProgressView()
+                    .accessibilityHidden(true)  // Probably no need to show this to visually impaired users, might be too noisy
+            case .saved:
+                Image(systemName: "checkmark")
+                    .accessibilityHidden(true)
+                Text("Saved", comment: "Small label indicating that the user's draft has been saved to storage")
+                    .accessibilityLabel(NSLocalizedString("Your draft has been saved to storage", comment: "Accessibility label indicating that a user's post draft has been saved, meant only for visually impaired users"))
+                    .font(.caption)
+            }
+        }
+        .padding(6)
+        .foregroundStyle(.secondary)
+    }
+    
     var AttachmentBar: some View {
         HStack(alignment: .center, spacing: 15) {
             ImageButton
             CameraButton
+            Spacer()
+            self.save_state_indicator
         }
         .disabled(uploading_disabled)
     }
@@ -222,13 +246,13 @@ struct PostView: View {
     func clear_draft() {
         switch action {
             case .replying_to(let replying_to):
-                damus_state.drafts.replies.removeValue(forKey: replying_to)
+                damus_state.drafts.replies.removeValue(forKey: replying_to.id)
             case .quoting(let quoting):
-                damus_state.drafts.quotes.removeValue(forKey: quoting)
+                damus_state.drafts.quotes.removeValue(forKey: quoting.id)
             case .posting:
                 damus_state.drafts.post = nil
             case .highlighting(let draft):
-                damus_state.drafts.highlights.removeValue(forKey: draft.source)
+                damus_state.drafts.highlights.removeValue(forKey: draft)
             case .sharing(_):
                 damus_state.drafts.post = nil
         }
@@ -239,23 +263,31 @@ struct PostView: View {
         guard let draft = load_draft_for_post(drafts: self.damus_state.drafts, action: self.action) else {
             self.post = NSMutableAttributedString("")
             self.uploadedMedias = []
-            
+            self.saved_state = .needs_saving()
             return false
         }
         
         self.uploadedMedias = draft.media
         self.post = draft.content
+        self.saved_state = .saved
         return true
     }
-
+    
+    /// Use this to signal that the post contents have changed. This will do two things:
+    /// 
+    /// 1. Save the new contents into our in-memory drafts
+    /// 2. Signal that we need to save drafts persistently, which will happen after a certain wait period
     func post_changed(post: NSMutableAttributedString, media: [UploadedMedia]) {
         if let draft = load_draft_for_post(drafts: damus_state.drafts, action: action) {
             draft.content = post
-            draft.media = media
+            draft.media = uploadedMedias
+            draft.references = references
+            draft.filtered_pubkeys = filtered_pubkeys
         } else {
-            let artifacts = DraftArtifacts(content: post, media: media)
+            let artifacts = DraftArtifacts(content: post, media: uploadedMedias, references: references, id: UUID().uuidString)
             set_draft_for_post(drafts: damus_state.drafts, action: action, artifacts: artifacts)
         }
+        self.saved_state = .needs_saving()
     }
     
     var TextEntry: some View {
@@ -356,7 +388,7 @@ struct PostView: View {
             }
             let blurhash = await blurhash
             let meta = blurhash.map { bh in calculate_image_metadata(url: url, img: img, blurhash: bh) }
-            let uploadedMedia = UploadedMedia(localURL: media.localURL, uploadedURL: url, representingImage: img, metadata: meta)
+            let uploadedMedia = UploadedMedia(localURL: media.localURL, uploadedURL: url, metadata: meta)
             uploadedMedias.append(uploadedMedia)
             return true
             
@@ -570,6 +602,21 @@ struct PostView: View {
                 preUploadedMedia.removeAll()
             }
         }
+        .onReceive(timer) { time in
+            switch self.saved_state {
+            case .needs_saving(seconds_remaining: let seconds_remaining):
+                if seconds_remaining <= 0 {
+                    self.saved_state = .saving
+                    damus_state.drafts.save(damus_state: damus_state)
+                    self.saved_state = .saved
+                }
+                else {
+                    self.saved_state = .needs_saving(seconds_remaining: seconds_remaining - 1)
+                }
+            case .saving, .saved:
+                break
+            }
+        }
     }
 }
 
@@ -628,20 +675,12 @@ struct PVImageCarouselView: View {
                                 .cornerRadius(10)
                                 .padding()
                                 .contextMenu { contextMenuContent(for: media[index]) }
-                        } else if is_animated_image(url: media[index].uploadedURL) {
+                        } else {
                             KFAnimatedImage(media[index].uploadedURL)
                                 .imageContext(.note, disable_animation: false)
                                 .configure { view in
                                     view.framePreloadCount = 3
                                 }
-                                .frame(width: media.count == 1 ? deviceWidth * 0.8 : 250, height: media.count == 1 ? 400 : 250)
-                                .cornerRadius(10)
-                                .padding()
-                                .contextMenu { contextMenuContent(for: media[index]) }
-                        } else {
-                            Image(uiImage: media[index].representingImage)
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
                                 .frame(width: media.count == 1 ? deviceWidth * 0.8 : 250, height: media.count == 1 ? 400 : 250)
                                 .cornerRadius(10)
                                 .padding()
@@ -732,7 +771,6 @@ fileprivate func getImage(media: MediaUpload) -> UIImage {
 struct UploadedMedia: Equatable {
     let localURL: URL
     let uploadedURL: URL
-    let representingImage: UIImage
     let metadata: ImageMetadata?
 }
 
@@ -740,13 +778,13 @@ struct UploadedMedia: Equatable {
 func set_draft_for_post(drafts: Drafts, action: PostAction, artifacts: DraftArtifacts) {
     switch action {
     case .replying_to(let ev):
-        drafts.replies[ev] = artifacts
+        drafts.replies[ev.id] = artifacts
     case .quoting(let ev):
-        drafts.quotes[ev] = artifacts
+        drafts.quotes[ev.id] = artifacts
     case .posting:
         drafts.post = artifacts
     case .highlighting(let draft):
-        drafts.highlights[draft.source] = artifacts
+        drafts.highlights[draft] = artifacts
     case .sharing(_):
         drafts.post = artifacts
     }
@@ -755,13 +793,21 @@ func set_draft_for_post(drafts: Drafts, action: PostAction, artifacts: DraftArti
 func load_draft_for_post(drafts: Drafts, action: PostAction) -> DraftArtifacts? {
     switch action {
     case .replying_to(let ev):
-        return drafts.replies[ev]
+        return drafts.replies[ev.id]
     case .quoting(let ev):
-        return drafts.quotes[ev]
+        return drafts.quotes[ev.id]
     case .posting:
         return drafts.post
-    case .highlighting(let draft):
-        return drafts.highlights[draft.source]
+    case .highlighting(let highlight):
+        if let exact_match = drafts.highlights[highlight] {
+            return exact_match  // Always prefer to return the draft for that exact same highlight
+        }
+        // If there are no exact matches to the highlight, try to load a draft for the same highlight source
+        // We do this to improve UX, because we don't want to leave the post view blank if they only selected a slightly different piece of text from before.
+        var other_matches = drafts.highlights
+            .filter { $0.key.source == highlight.source }
+        // It's not an exact match, so there is no way of telling which one is the preferred draft. So just load the first one we found.
+        return other_matches.first?.value
     case .sharing(_):
         return drafts.post
     }
@@ -788,7 +834,53 @@ func nip10_reply_tags(replying_to: NostrEvent, keypair: Keypair) -> [[String]] {
     return tags
 }
 
-func build_post(state: DamusState, post: NSMutableAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], pubkeys: [Pubkey]) -> NostrPost {
+func build_post(state: DamusState, action: PostAction, draft: DraftArtifacts) -> NostrPost {
+    return build_post(
+        state: state,
+        post: draft.content,
+        action: action,
+        uploadedMedias: draft.media,
+        references: draft.references,
+        filtered_pubkeys: draft.filtered_pubkeys
+    )
+}
+
+func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], references: [RefId], filtered_pubkeys: Set<Pubkey>) -> NostrPost {
+    // don't add duplicate pubkeys but retain order
+    var pkset = Set<Pubkey>()
+
+    // we only want pubkeys really
+    let pks = references.reduce(into: Array<Pubkey>()) { acc, ref in
+        guard case .pubkey(let pk) = ref else {
+            return
+        }
+        
+        if pkset.contains(pk) || filtered_pubkeys.contains(pk) {
+            return
+        }
+
+        pkset.insert(pk)
+        acc.append(pk)
+    }
+    
+    return build_post(state: state, post: post, action: action, uploadedMedias: uploadedMedias, pubkeys: pks)
+}
+
+/// This builds a Nostr post from draft data from `PostView` or other draft-related classes
+///
+/// ## Implementation notes
+///
+/// - This function _likely_ causes no side-effects, and _should not_ cause side-effects to any of the inputs.
+///
+/// - Parameters:
+///   - state: The damus state, needed to fetch more Nostr data to form this event
+///   - post: The text content from `PostView`.
+///   - action: The intended action of the post (highlighting? replying?)
+///   - uploadedMedias: The medias attached to this post
+///   - pubkeys: The referenced pubkeys
+/// - Returns: A NostrPost, which can then be signed into an event.
+func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], pubkeys: [Pubkey]) -> NostrPost {
+    let post = NSMutableAttributedString(attributedString: post)
     post.enumerateAttributes(in: NSRange(location: 0, length: post.length), options: []) { attributes, range, stop in
         if let link = attributes[.link] as? String {
             let nextCharIndex = range.upperBound
@@ -876,3 +968,11 @@ func isSupportedVideo(url: URL?) -> Bool {
         return false
     }
 }
+
+func isSupportedImage(url: URL) -> Bool {
+    let fileExtension = url.pathExtension.lowercased()
+    // It would be better to pull this programmatically from Apple's APIs, but there seems to be no such call
+    let supportedTypes = ["jpg", "png", "gif"]
+    return supportedTypes.contains(fileExtension)
+}
+
