@@ -175,6 +175,9 @@ class DamusState: HeadlessDamusState {
 
     func close() {
         print("txn: damus close")
+        Task {
+            try await self.push_notification_client.revoke_token()
+        }
         wallet.disconnect()
         pool.close()
         ndb.close()
