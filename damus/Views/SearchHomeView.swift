@@ -62,18 +62,7 @@ struct SearchHomeView: View {
                     return false
                 }
 
-                if damus_state.settings.show_only_preferred_languages == false {
-                    return true
-                }
-
-                // If we can't determine the note's language with 50%+ confidence, lean on the side of caution and show it anyway.
-                let note_lang = damus_state.events.get_cache_data(ev.id).translations_model.note_language
-                guard let note_lang else {
-                    return true
-                }
-
-                let currentLanguage = localeToLanguage(Locale.current.identifier)
-                return currentLanguage == note_lang
+                return true
             },
             content: {
                 AnyView(VStack {

@@ -16,9 +16,6 @@ struct TranslationSettingsView: View {
     var body: some View {
         Form {
             Section(NSLocalizedString("Translations", comment: "Section title for selecting the translation service.")) {
-                Toggle(NSLocalizedString("Show only preferred languages on Universe feed", comment: "Toggle to show notes that are only in the device's preferred languages on the Universe feed and hide notes that are in other languages."), isOn: $settings.show_only_preferred_languages)
-                    .toggleStyle(.switch)
-
                 Picker(NSLocalizedString("Service", comment: "Prompt selection of translation service provider."), selection: $settings.translation_service) {
                     ForEach(TranslationService.allCases.filter({ damus_state.purple.enable_purple ? true : $0 != .purple }), id: \.self) { server in
                         Text(server.model.displayName)
