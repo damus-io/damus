@@ -259,11 +259,10 @@ func should_translate(event: NostrEvent, our_keypair: Keypair, note_lang: String
     }
 
     if let note_lang {
-        let preferredLanguages = Set(Locale.preferredLanguages.map { localeToLanguage($0) })
+        let currentLanguage = localeToLanguage(Locale.current.identifier)
 
-        // Don't translate if its in our preferred languages
-        guard !preferredLanguages.contains(note_lang) else {
-            // if its the same, give up and don't retry
+        // Don't translate if the note is in our current language
+        guard currentLanguage != note_lang else {
             return false
         }
     }
