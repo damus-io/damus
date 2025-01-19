@@ -185,9 +185,6 @@ class UserSettingsStore: ObservableObject {
 
     @Setting(key: "show_music_statuses", default_value: true)
     var show_music_statuses: Bool
-
-    @Setting(key: "show_only_preferred_languages", default_value: false)
-    var show_only_preferred_languages: Bool
     
     @Setting(key: "multiple_events_per_pubkey", default_value: false)
     var multiple_events_per_pubkey: Bool
