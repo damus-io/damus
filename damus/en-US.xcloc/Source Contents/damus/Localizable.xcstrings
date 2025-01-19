@@ -315,8 +315,8 @@
     "Connect to Alby Wallet" : {
       "comment" : "Button to attach an Alby Wallet, a service that provides a Lightning wallet for zapping sats. Alby is the name of the service and should not be translated."
     },
-    "Connect to Mutiny Wallet" : {
-      "comment" : "Button to attach an Mutiny Wallet, a service that provides a Lightning wallet for zapping sats. Mutiny is the name of the service and should not be translated."
+    "Connect to Coinos" : {
+      "comment" : "Button to attach a Coinos Wallet, a service that provides a Lightning wallet for zapping sats. Coinos is the name of the service and should not be translated."
     },
     "Connecting" : {
       "comment" : "Relay status label that indicates a relay is connecting."
@@ -454,7 +454,7 @@
       "comment" : "Text for button to disconnect from Nostr Wallet Connect lightning wallet."
     },
     "Dismiss" : {
-      "comment" : "Button to dismiss alert"
+      "comment" : "Button to dismiss alert\nButton to dismiss error"
     },
     "DMs" : {
       "comment" : "Navigation title for DMs view, where DM is the English abbreviation for Direct Message.\nNavigation title for view of DMs, where DM is an English abbreviation for Direct Message.\nPicker option for DM selector for seeing only DMs that have been responded to. DM is the English abbreviation for Direct Message.\nSetting to enable DM Local Notification\nToolbar label for DMs view, where DM is the English abbreviation for Direct Message."
@@ -476,6 +476,12 @@
     },
     "Edit banner image" : {
       "comment" : "Accessibility label for edit banner image button"
+    },
+    "Edit Image" : {
+      "comment" : "Accessibility label for a button that edits an image"
+    },
+    "Edit profile picture" : {
+      "comment" : "Accessibility label for a button that edits a profile picture"
     },
     "Enable experimental Purple API support" : {
       "comment" : "Developer mode setting to enable experimental Purple API support."
@@ -510,6 +516,12 @@
     "Error syncing up push notifications preferences with the server: %@" : {
       "comment" : "Error label shown when system tries to sync up notification preferences to the push notification server but something fails"
     },
+    "Error uploading profile image. Please check your internet connection and try again. If error persists, please contact Damus support (support@damus.io)." : {
+      "comment" : "Error label when uploading profile image"
+    },
+    "Error while cropping image" : {
+      "comment" : "Heading on cropping error page"
+    },
     "Error, please try again" : {
       "comment" : "Text on QR code camera view indicating an error"
     },
@@ -533,6 +545,9 @@
     },
     "Expiry date" : {
       "comment" : "Label for Purple subscription expiry date"
+    },
+    "Failed to generate media for upload. Please try again. If error persists, please contact Damus support at support@damus.io" : {
+      "comment" : "Error label forming media for upload after user crops the image."
     },
     "Failed to get push notification preferences from the server" : {
       "comment" : "Error label indicating about a failure in fetching notification preferences"
@@ -679,11 +694,14 @@
     "Illegal Content" : {
       "comment" : "Description of report type for illegal content."
     },
+    "Image is setup" : {
+      "comment" : "Accessibility value on image control"
+    },
     "Image uploader" : {
       "comment" : "Prompt selection of user's image uploader"
     },
     "Image URL" : {
-      "comment" : "Option to enter a url"
+      "comment" : "Label for image url text field\nOption to enter a url"
     },
     "Images" : {
       "comment" : "Section title for images configuration."
@@ -711,6 +729,9 @@
     },
     "Invalid Tip Address" : {
       "comment" : "Title of alerting as invalid tip address."
+    },
+    "Invalid URL" : {
+      "comment" : "Error label when user enters an invalid URL"
     },
     "It seems that you already have a translation service configured. Would you like to switch to Damus Purple as your translator?" : {
       "comment" : "Confirmation dialog question asking users if they want their translation settings to be automatically switched to the Damus Purple translation service"
@@ -856,6 +877,9 @@
     "No content available to share" : {
       "comment" : "Title indicating that there was no available content to share"
     },
+    "No image is currently setup" : {
+      "comment" : "Accessibility value on image control"
+    },
     "No logs to display" : {
       "comment" : "Label to indicate that there are no developer mode logs available to be displayed on the screen"
     },
@@ -864,6 +888,9 @@
     },
     "No one will see that you zapped" : {
       "comment" : "Description of anonymous zap type where the zap is sent anonymously and does not identify the user who sent it."
+    },
+    "No profile picture is currently setup" : {
+      "comment" : "Accessibility value on profile picture image control"
     },
     "No results" : {
       "comment" : "A label indicating that note search resulted in no results"
@@ -1059,6 +1086,9 @@
     },
     "Profile action sheets allow you to follow, zap, or DM profiles more quickly without having to view their full profile" : {
       "comment" : "Section footer clarifying what the profile action sheet feature does"
+    },
+    "Profile picture is setup" : {
+      "comment" : "Accessibility value on profile picture image control"
     },
     "Profiles" : {
       "comment" : "Section title for profile view configuration."
@@ -1347,6 +1377,9 @@
     "Show wallet selector" : {
       "comment" : "Toggle to show or hide selection of wallet."
     },
+    "Shows options to edit the image" : {
+      "comment" : "Accessibility hint for a button that edits an image"
+    },
     "Side menu" : {
       "comment" : "Accessibility label for the side menu button at the topbar"
     },
@@ -1379,6 +1412,9 @@
     },
     "Someone zapped you ⚡️" : {
       "comment" : "Title label for a push notification where someone zapped the user"
+    },
+    "Sorry, but for some reason there has been an issue while trying to crop this image. Please try again later. If the error persists, please contact [Damus support](mailto:support@damus.io)" : {
+      "comment" : "Cropping error message"
     },
     "Sorry, this QR code looks incompatible with Damus. Please try another one." : {
       "comment" : "Text on QR code camera view telling the user a QR is incompatible"
