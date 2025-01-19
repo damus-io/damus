@@ -20,8 +20,6 @@ struct SearchHomeView: View {
         return ContentFilters(filters: filters).filter
     }
 
-    let preferredLanguages = Set(Locale.preferredLanguages.map { localeToLanguage($0) })
-    
     var SearchInput: some View {
         HStack {
             HStack{
@@ -74,7 +72,8 @@ struct SearchHomeView: View {
                     return true
                 }
 
-                return preferredLanguages.contains(note_lang)
+                let currentLanguage = localeToLanguage(Locale.current.identifier)
+                return currentLanguage == note_lang
             },
             content: {
                 AnyView(VStack {
