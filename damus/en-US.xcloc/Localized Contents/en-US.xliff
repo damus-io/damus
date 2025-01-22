@@ -533,10 +533,10 @@ Text for button to conect to Nostr Wallet Connect lightning wallet.</note>
         <target>Connect to Alby Wallet</target>
         <note>Button to attach an Alby Wallet, a service that provides a Lightning wallet for zapping sats. Alby is the name of the service and should not be translated.</note>
       </trans-unit>
-      <trans-unit id="Connect to Mutiny Wallet" xml:space="preserve">
-        <source>Connect to Mutiny Wallet</source>
-        <target>Connect to Mutiny Wallet</target>
-        <note>Button to attach an Mutiny Wallet, a service that provides a Lightning wallet for zapping sats. Mutiny is the name of the service and should not be translated.</note>
+      <trans-unit id="Connect to Coinos" xml:space="preserve">
+        <source>Connect to Coinos</source>
+        <target>Connect to Coinos</target>
+        <note>Button to attach a Coinos Wallet, a service that provides a Lightning wallet for zapping sats. Coinos is the name of the service and should not be translated.</note>
       </trans-unit>
       <trans-unit id="Connecting" xml:space="preserve">
         <source>Connecting</source>
@@ -779,7 +779,8 @@ Button to disconnect from the relay.</note>
       <trans-unit id="Dismiss" xml:space="preserve">
         <source>Dismiss</source>
         <target>Dismiss</target>
-        <note>Button to dismiss alert</note>
+        <note>Button to dismiss alert
+Button to dismiss error</note>
       </trans-unit>
       <trans-unit id="Done" xml:space="preserve">
         <source>Done</source>
@@ -815,10 +816,20 @@ The duration in which to mute the given item.</note>
 Button to enter edit mode for modifying the list of relays.
 Edit Button for editing profile</note>
       </trans-unit>
+      <trans-unit id="Edit Image" xml:space="preserve">
+        <source>Edit Image</source>
+        <target>Edit Image</target>
+        <note>Accessibility label for a button that edits an image</note>
+      </trans-unit>
       <trans-unit id="Edit banner image" xml:space="preserve">
         <source>Edit banner image</source>
         <target>Edit banner image</target>
         <note>Accessibility label for edit banner image button</note>
+      </trans-unit>
+      <trans-unit id="Edit profile picture" xml:space="preserve">
+        <source>Edit profile picture</source>
+        <target>Edit profile picture</target>
+        <note>Accessibility label for a button that edits a profile picture</note>
       </trans-unit>
       <trans-unit id="Enable Purple auto-translations" xml:space="preserve">
         <source>Enable Purple auto-translations</source>
@@ -878,6 +889,16 @@ Title indicating that an error has occurred.</note>
         <target>Error syncing up push notifications preferences with the server: %@</target>
         <note>Error label shown when system tries to sync up notification preferences to the push notification server but something fails</note>
       </trans-unit>
+      <trans-unit id="Error uploading profile image. Please check your internet connection and try again. If error persists, please contact Damus support (support@damus.io)." xml:space="preserve">
+        <source>Error uploading profile image. Please check your internet connection and try again. If error persists, please contact Damus support (support@damus.io).</source>
+        <target>Error uploading profile image. Please check your internet connection and try again. If error persists, please contact Damus support (support@damus.io).</target>
+        <note>Error label when uploading profile image</note>
+      </trans-unit>
+      <trans-unit id="Error while cropping image" xml:space="preserve">
+        <source>Error while cropping image</source>
+        <target>Error while cropping image</target>
+        <note>Heading on cropping error page</note>
+      </trans-unit>
       <trans-unit id="Error, please try again" xml:space="preserve">
         <source>Error, please try again</source>
         <target>Error, please try again</target>
@@ -912,6 +933,11 @@ Title indicating that an error has occurred.</note>
         <source>Expiry date</source>
         <target>Expiry date</target>
         <note>Label for Purple subscription expiry date</note>
+      </trans-unit>
+      <trans-unit id="Failed to generate media for upload. Please try again. If error persists, please contact Damus support at support@damus.io" xml:space="preserve">
+        <source>Failed to generate media for upload. Please try again. If error persists, please contact Damus support at support@damus.io</source>
+        <target>Failed to generate media for upload. Please try again. If error persists, please contact Damus support at support@damus.io</target>
+        <note>Error label forming media for upload after user crops the image.</note>
       </trans-unit>
       <trans-unit id="Failed to get push notification preferences from the server" xml:space="preserve">
         <source>Failed to get push notification preferences from the server</source>
@@ -1148,7 +1174,13 @@ Hope to meet folks who are on their own journeys to a peaceful and free life!</t
       <trans-unit id="Image URL" xml:space="preserve">
         <source>Image URL</source>
         <target>Image URL</target>
-        <note>Option to enter a url</note>
+        <note>Label for image url text field
+Option to enter a url</note>
+      </trans-unit>
+      <trans-unit id="Image is setup" xml:space="preserve">
+        <source>Image is setup</source>
+        <target>Image is setup</target>
+        <note>Accessibility value on image control</note>
       </trans-unit>
       <trans-unit id="Image uploader" xml:space="preserve">
         <source>Image uploader</source>
@@ -1189,6 +1221,11 @@ Hope to meet folks who are on their own journeys to a peaceful and free life!</t
         <source>Invalid Tip Address</source>
         <target>Invalid Tip Address</target>
         <note>Title of alerting as invalid tip address.</note>
+      </trans-unit>
+      <trans-unit id="Invalid URL" xml:space="preserve">
+        <source>Invalid URL</source>
+        <target>Invalid URL</target>
+        <note>Error label when user enters an invalid URL</note>
       </trans-unit>
       <trans-unit id="Invalid key" xml:space="preserve">
         <source>Invalid key</source>
@@ -1448,6 +1485,11 @@ User confirm No</note>
         <target>No contact list was found. You might experience issues using the app. If you suspect you have permanently lost your contact list (or if you never had one), you can fix this by resetting it</target>
         <note>Section footer for Contact list first aid tools</note>
       </trans-unit>
+      <trans-unit id="No image is currently setup" xml:space="preserve">
+        <source>No image is currently setup</source>
+        <target>No image is currently setup</target>
+        <note>Accessibility value on image control</note>
+      </trans-unit>
       <trans-unit id="No logs to display" xml:space="preserve">
         <source>No logs to display</source>
         <target>No logs to display</target>
@@ -1462,6 +1504,11 @@ User confirm No</note>
         <source>No one will see that you zapped</source>
         <target>No one will see that you zapped</target>
         <note>Description of anonymous zap type where the zap is sent anonymously and does not identify the user who sent it.</note>
+      </trans-unit>
+      <trans-unit id="No profile picture is currently setup" xml:space="preserve">
+        <source>No profile picture is currently setup</source>
+        <target>No profile picture is currently setup</target>
+        <note>Accessibility value on profile picture image control</note>
       </trans-unit>
       <trans-unit id="No results" xml:space="preserve">
         <source>No results</source>
@@ -1746,6 +1793,11 @@ Label indicating the production environment for Push notification functionality<
         <source>Profile action sheets allow you to follow, zap, or DM profiles more quickly without having to view their full profile</source>
         <target>Profile action sheets allow you to follow, zap, or DM profiles more quickly without having to view their full profile</target>
         <note>Section footer clarifying what the profile action sheet feature does</note>
+      </trans-unit>
+      <trans-unit id="Profile picture is setup" xml:space="preserve">
+        <source>Profile picture is setup</source>
+        <target>Profile picture is setup</target>
+        <note>Accessibility value on profile picture image control</note>
       </trans-unit>
       <trans-unit id="Profiles" xml:space="preserve">
         <source>Profiles</source>
@@ -2217,6 +2269,11 @@ Button to show more of a long profile description.</note>
         <target>Show wallet selector</target>
         <note>Toggle to show or hide selection of wallet.</note>
       </trans-unit>
+      <trans-unit id="Shows options to edit the image" xml:space="preserve">
+        <source>Shows options to edit the image</source>
+        <target>Shows options to edit the image</target>
+        <note>Accessibility hint for a button that edits an image</note>
+      </trans-unit>
       <trans-unit id="Side menu" xml:space="preserve">
         <source>Side menu</source>
         <target>Side menu</target>
@@ -2266,6 +2323,11 @@ Button to show more of a long profile description.</note>
         <source>Someone zapped you ⚡️</source>
         <target>Someone zapped you ⚡️</target>
         <note>Title label for a push notification where someone zapped the user</note>
+      </trans-unit>
+      <trans-unit id="Sorry, but for some reason there has been an issue while trying to crop this image. Please try again later. If the error persists, please contact [Damus support](mailto:support@damus.io)" xml:space="preserve">
+        <source>Sorry, but for some reason there has been an issue while trying to crop this image. Please try again later. If the error persists, please contact [Damus support](mailto:support@damus.io)</source>
+        <target>Sorry, but for some reason there has been an issue while trying to crop this image. Please try again later. If the error persists, please contact [Damus support](mailto:support@damus.io)</target>
+        <note>Cropping error message</note>
       </trans-unit>
       <trans-unit id="Sorry, this QR code looks incompatible with Damus. Please try another one." xml:space="preserve">
         <source>Sorry, this QR code looks incompatible with Damus. Please try another one.</source>
@@ -4011,10 +4073,10 @@ Text for button to conect to Nostr Wallet Connect lightning wallet.</note>
         <target state="new">Connect to Alby Wallet</target>
         <note>Button to attach an Alby Wallet, a service that provides a Lightning wallet for zapping sats. Alby is the name of the service and should not be translated.</note>
       </trans-unit>
-      <trans-unit id="Connect to Mutiny Wallet" xml:space="preserve">
-        <source>Connect to Mutiny Wallet</source>
-        <target state="new">Connect to Mutiny Wallet</target>
-        <note>Button to attach an Mutiny Wallet, a service that provides a Lightning wallet for zapping sats. Mutiny is the name of the service and should not be translated.</note>
+      <trans-unit id="Connect to Coinos" xml:space="preserve">
+        <source>Connect to Coinos</source>
+        <target state="new">Connect to Coinos</target>
+        <note>Button to attach a Coinos Wallet, a service that provides a Lightning wallet for zapping sats. Coinos is the name of the service and should not be translated.</note>
       </trans-unit>
       <trans-unit id="Connecting" xml:space="preserve">
         <source>Connecting</source>
@@ -4257,7 +4319,8 @@ Button to disconnect from the relay.</note>
       <trans-unit id="Dismiss" xml:space="preserve">
         <source>Dismiss</source>
         <target state="new">Dismiss</target>
-        <note>Button to dismiss alert</note>
+        <note>Button to dismiss alert
+Button to dismiss error</note>
       </trans-unit>
       <trans-unit id="Done" xml:space="preserve">
         <source>Done</source>
@@ -4293,10 +4356,20 @@ The duration in which to mute the given item.</note>
 Button to enter edit mode for modifying the list of relays.
 Edit Button for editing profile</note>
       </trans-unit>
+      <trans-unit id="Edit Image" xml:space="preserve">
+        <source>Edit Image</source>
+        <target state="new">Edit Image</target>
+        <note>Accessibility label for a button that edits an image</note>
+      </trans-unit>
       <trans-unit id="Edit banner image" xml:space="preserve">
         <source>Edit banner image</source>
         <target state="new">Edit banner image</target>
         <note>Accessibility label for edit banner image button</note>
+      </trans-unit>
+      <trans-unit id="Edit profile picture" xml:space="preserve">
+        <source>Edit profile picture</source>
+        <target state="new">Edit profile picture</target>
+        <note>Accessibility label for a button that edits a profile picture</note>
       </trans-unit>
       <trans-unit id="Enable Purple auto-translations" xml:space="preserve">
         <source>Enable Purple auto-translations</source>
@@ -4356,6 +4429,16 @@ Title indicating that an error has occurred.</note>
         <target state="new">Error syncing up push notifications preferences with the server: %@</target>
         <note>Error label shown when system tries to sync up notification preferences to the push notification server but something fails</note>
       </trans-unit>
+      <trans-unit id="Error uploading profile image. Please check your internet connection and try again. If error persists, please contact Damus support (support@damus.io)." xml:space="preserve">
+        <source>Error uploading profile image. Please check your internet connection and try again. If error persists, please contact Damus support (support@damus.io).</source>
+        <target state="new">Error uploading profile image. Please check your internet connection and try again. If error persists, please contact Damus support (support@damus.io).</target>
+        <note>Error label when uploading profile image</note>
+      </trans-unit>
+      <trans-unit id="Error while cropping image" xml:space="preserve">
+        <source>Error while cropping image</source>
+        <target state="new">Error while cropping image</target>
+        <note>Heading on cropping error page</note>
+      </trans-unit>
       <trans-unit id="Error, please try again" xml:space="preserve">
         <source>Error, please try again</source>
         <target state="new">Error, please try again</target>
@@ -4390,6 +4473,11 @@ Title indicating that an error has occurred.</note>
         <source>Expiry date</source>
         <target state="new">Expiry date</target>
         <note>Label for Purple subscription expiry date</note>
+      </trans-unit>
+      <trans-unit id="Failed to generate media for upload. Please try again. If error persists, please contact Damus support at support@damus.io" xml:space="preserve">
+        <source>Failed to generate media for upload. Please try again. If error persists, please contact Damus support at support@damus.io</source>
+        <target state="new">Failed to generate media for upload. Please try again. If error persists, please contact Damus support at support@damus.io</target>
+        <note>Error label forming media for upload after user crops the image.</note>
       </trans-unit>
       <trans-unit id="Failed to get push notification preferences from the server" xml:space="preserve">
         <source>Failed to get push notification preferences from the server</source>
@@ -4626,7 +4714,13 @@ Hope to meet folks who are on their own journeys to a peaceful and free life!</t
       <trans-unit id="Image URL" xml:space="preserve">
         <source>Image URL</source>
         <target state="new">Image URL</target>
-        <note>Option to enter a url</note>
+        <note>Label for image url text field
+Option to enter a url</note>
+      </trans-unit>
+      <trans-unit id="Image is setup" xml:space="preserve">
+        <source>Image is setup</source>
+        <target state="new">Image is setup</target>
+        <note>Accessibility value on image control</note>
       </trans-unit>
       <trans-unit id="Image uploader" xml:space="preserve">
         <source>Image uploader</source>
@@ -4667,6 +4761,11 @@ Hope to meet folks who are on their own journeys to a peaceful and free life!</t
         <source>Invalid Tip Address</source>
         <target state="new">Invalid Tip Address</target>
         <note>Title of alerting as invalid tip address.</note>
+      </trans-unit>
+      <trans-unit id="Invalid URL" xml:space="preserve">
+        <source>Invalid URL</source>
+        <target state="new">Invalid URL</target>
+        <note>Error label when user enters an invalid URL</note>
       </trans-unit>
       <trans-unit id="Invalid key" xml:space="preserve">
         <source>Invalid key</source>
@@ -4926,6 +5025,11 @@ User confirm No</note>
         <target state="new">No content available to share</target>
         <note>Title indicating that there was no available content to share</note>
       </trans-unit>
+      <trans-unit id="No image is currently setup" xml:space="preserve">
+        <source>No image is currently setup</source>
+        <target state="new">No image is currently setup</target>
+        <note>Accessibility value on image control</note>
+      </trans-unit>
       <trans-unit id="No logs to display" xml:space="preserve">
         <source>No logs to display</source>
         <target state="new">No logs to display</target>
@@ -4940,6 +5044,11 @@ User confirm No</note>
         <source>No one will see that you zapped</source>
         <target state="new">No one will see that you zapped</target>
         <note>Description of anonymous zap type where the zap is sent anonymously and does not identify the user who sent it.</note>
+      </trans-unit>
+      <trans-unit id="No profile picture is currently setup" xml:space="preserve">
+        <source>No profile picture is currently setup</source>
+        <target state="new">No profile picture is currently setup</target>
+        <note>Accessibility value on profile picture image control</note>
       </trans-unit>
       <trans-unit id="No results" xml:space="preserve">
         <source>No results</source>
@@ -5209,6 +5318,11 @@ Label indicating the production environment for Push notification functionality<
         <source>Profile action sheets allow you to follow, zap, or DM profiles more quickly without having to view their full profile</source>
         <target state="new">Profile action sheets allow you to follow, zap, or DM profiles more quickly without having to view their full profile</target>
         <note>Section footer clarifying what the profile action sheet feature does</note>
+      </trans-unit>
+      <trans-unit id="Profile picture is setup" xml:space="preserve">
+        <source>Profile picture is setup</source>
+        <target state="new">Profile picture is setup</target>
+        <note>Accessibility value on profile picture image control</note>
       </trans-unit>
       <trans-unit id="Profiles" xml:space="preserve">
         <source>Profiles</source>
@@ -5690,6 +5804,11 @@ Button to show more of a long profile description.</note>
         <target state="new">Show wallet selector</target>
         <note>Toggle to show or hide selection of wallet.</note>
       </trans-unit>
+      <trans-unit id="Shows options to edit the image" xml:space="preserve">
+        <source>Shows options to edit the image</source>
+        <target state="new">Shows options to edit the image</target>
+        <note>Accessibility hint for a button that edits an image</note>
+      </trans-unit>
       <trans-unit id="Side menu" xml:space="preserve">
         <source>Side menu</source>
         <target state="new">Side menu</target>
@@ -5739,6 +5858,11 @@ Button to show more of a long profile description.</note>
         <source>Someone zapped you ⚡️</source>
         <target state="new">Someone zapped you ⚡️</target>
         <note>Title label for a push notification where someone zapped the user</note>
+      </trans-unit>
+      <trans-unit id="Sorry, but for some reason there has been an issue while trying to crop this image. Please try again later. If the error persists, please contact [Damus support](mailto:support@damus.io)" xml:space="preserve">
+        <source>Sorry, but for some reason there has been an issue while trying to crop this image. Please try again later. If the error persists, please contact [Damus support](mailto:support@damus.io)</source>
+        <target state="new">Sorry, but for some reason there has been an issue while trying to crop this image. Please try again later. If the error persists, please contact [Damus support](mailto:support@damus.io)</target>
+        <note>Cropping error message</note>
       </trans-unit>
       <trans-unit id="Sorry, this QR code looks incompatible with Damus. Please try another one." xml:space="preserve">
         <source>Sorry, this QR code looks incompatible with Damus. Please try another one.</source>
