@@ -209,7 +209,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>คำพูด</string>
+			<string>อ้างอิง</string>
 		</dict>
 	</dict>
 	<key>sats</key>
