@@ -13,6 +13,7 @@ fileprivate let BOOTSTRAP_RELAYS = [
     "wss://nostr.land",
     "wss://nostr.wine",
     "wss://nos.lol",
+    "wss://relay.chakany.systems",
 ]
 
 fileprivate let REGION_SPECIFIC_BOOTSTRAP_RELAYS: [Locale.Region: [String]] = [
