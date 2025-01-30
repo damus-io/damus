@@ -382,6 +382,13 @@ class DamusPurple: StoreObserverDelegate {
         let expiry: Date
         let subscriber_number: Int
         let active: Bool
+        let attributes: PurpleAccountAttributes
+        
+        struct PurpleAccountAttributes: OptionSet {
+            let rawValue: Int
+            
+            static let memberForMoreThanOneYear = PurpleAccountAttributes(rawValue: 1 << 0)
+        }
 
         func ordinal() -> String? {
             let number = Int(self.subscriber_number)
@@ -402,7 +409,8 @@ class DamusPurple: StoreObserverDelegate {
                 created_at: Date.init(timeIntervalSince1970: TimeInterval(payload.created_at)),
                 expiry: Date.init(timeIntervalSince1970: TimeInterval(payload.expiry)),
                 subscriber_number: Int(payload.subscriber_number),
-                active: payload.active
+                active: payload.active,
+                attributes: (payload.attributes?.member_for_more_than_one_year ?? false) ? [.memberForMoreThanOneYear] : []
             )
         }
         
@@ -412,6 +420,11 @@ class DamusPurple: StoreObserverDelegate {
             let expiry: UInt64              // Unix timestamp
             let subscriber_number: UInt
             let active: Bool
+            let attributes: Attributes?
+            
+            struct Attributes: Codable {
+                let member_for_more_than_one_year: Bool
+            }
         }
     }
 }
