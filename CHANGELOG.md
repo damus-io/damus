@@ -1,3 +1,17 @@
+## [1.12.3] - 2025-02-06
+
+### Added
+
+- Purple members who have been active for more than a year now get a special badge (Daniel D’Aquino)
+
+### Changed
+
+- Improved clarity of the mute button to indicate it can be used for blocking a user (Daniel D’Aquino)
+- Made the microphone access request message more clear to users (Daniel D’Aquino)
+
+[v1.12.3]: https://github.com/damus-io/damus/releases/tag/v1.12.3
+
+
 ## [1.12](https://github.com/damus-io/damus/releases/tag/v1.12) - 2024-12-20
 
 ### Added
