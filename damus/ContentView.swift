@@ -588,7 +588,7 @@ struct ContentView: View {
         }, message: {
             Text("No mute list found, create a new one? This will overwrite any previous mute lists.", comment: "Alert message prompt that asks if the user wants to create a new mute list, overwriting previous mute lists.")
         })
-        .alert(NSLocalizedString("Mute User", comment: "Title of alert for muting a user."), isPresented: $confirm_mute, actions: {
+        .alert(NSLocalizedString("Mute/Block User", comment: "Title of alert for muting/blocking a user."), isPresented: $confirm_mute, actions: {
             Button(NSLocalizedString("Cancel", comment: "Alert button to cancel out of alert for muting a user."), role: .cancel) {
                 confirm_mute = false
             }

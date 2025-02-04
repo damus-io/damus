@@ -135,7 +135,7 @@ struct MenuItems: View {
                 MuteDurationMenu { duration in
                     notify(.mute(.user(target_pubkey, duration?.date_from_now)))
                 } label: {
-                    Label(NSLocalizedString("Mute user", comment: "Context menu option for muting users."), image: "mute")
+                    Label(NSLocalizedString("Mute/Block user", comment: "Context menu option for muting/blocking users."), image: "mute")
                 }
             }
         }
