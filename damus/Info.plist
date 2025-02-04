@@ -73,6 +73,6 @@
 	<key>NSAppleMusicUsageDescription</key>
 	<string>Damus needs access to your media library for playback statuses</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Damus needs access to your microphone for creating video recording posts</string>
+	<string>Damus needs access to your microphone to allow you to create video recordings that you can choose to post publicly on the network</string>
 </dict>
 </plist>
