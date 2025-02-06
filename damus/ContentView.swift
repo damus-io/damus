@@ -367,7 +367,9 @@ struct ContentView: View {
             self.confirm_mute = true
         }
         .onReceive(handle_notify(.attached_wallet)) { nwc in
+            // Ensure to add NWC relay to the pool and connect it.
             try? damus_state.pool.add_relay(.nwc(url: nwc.relay))
+            damus_state.pool.connect(to: [nwc.relay])
 
             // update the lightning address on our profile when we attach a
             // wallet with an associated

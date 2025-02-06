@@ -68,7 +68,7 @@ func make_private_zap_request_event(identity: FullKeypair, enc_key: FullKeypair,
     
     guard let note = NostrEvent(content: message, keypair: identity.to_keypair(), kind: 9733, tags: tags),
           let note_json = encode_json(note),
-          let enc = encrypt_message(message: note_json, privkey: enc_key.privkey, to_pk: target.pubkey, encoding: .bech32)
+          let enc = NIP04.encrypt_message(message: note_json, privkey: enc_key.privkey, to_pk: target.pubkey, encoding: .bech32)
     else {
         return nil
     }

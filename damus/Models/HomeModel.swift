@@ -260,7 +260,7 @@ class HomeModel: ContactsDelegate {
             // TODO: Adapt KeychainStorage to StringCodable and instead of parsing to WalletConnectURL every time
             guard let nwc_str = damus_state.settings.nostr_wallet_connect,
                   let nwc = WalletConnectURL(str: nwc_str),
-                  let resp = await FullWalletResponse(from: ev, nwc: nwc) else {
+                  let resp = await WalletConnect.FullWalletResponse(from: ev, nwc: nwc) else {
                 return
             }
 
@@ -274,12 +274,24 @@ class HomeModel: ContactsDelegate {
             
             guard resp.response.error == nil else {
                 print("nwc error: \(resp.response)")
-                nwc_error(zapcache: self.damus_state.zaps, evcache: self.damus_state.events, resp: resp)
+                WalletConnect.handle_error(zapcache: self.damus_state.zaps, evcache: self.damus_state.events, resp: resp)
                 return
             }
             
+            if resp.response.result_type == .list_transactions {
+                Log.info("Received NWC transaction list from %s", for: .nwc, relay.absoluteString)
+                damus_state.wallet.handle_nwc_response(response: resp)
+                return
+            }
+            
+            if resp.response.result_type == .get_balance {
+                Log.info("Received NWC balance information from %s", for: .nwc, relay.absoluteString)
+                damus_state.wallet.handle_nwc_response(response: resp)
+                return
+            }
+
             print("nwc success: \(resp.response.result.debugDescription) [\(relay)]")
-            nwc_success(state: self.damus_state, resp: resp)
+            WalletConnect.handle_zap_success(state: self.damus_state, resp: resp)
         }
     }
 
@@ -453,7 +465,7 @@ class HomeModel: ContactsDelegate {
                    let nwc = WalletConnectURL(str: nwc_str),
                    nwc.relay == relay_id
                 {
-                    subscribe_to_nwc(url: nwc, pool: pool)
+                    WalletConnect.subscribe(url: nwc, pool: pool)
                 }
             case .error(let merr):
                 let desc = String(describing: merr)

@@ -87,7 +87,7 @@ final class WalletConnectTests: XCTestCase {
         let pool = RelayPool(ndb: .empty)
         let box = PostBox(pool: pool)
         
-        nwc_pay(url: nwc, pool: pool, post: box, invoice: "invoice")
+        WalletConnect.pay(url: nwc, pool: pool, post: box, invoice: "invoice")
         
         XCTAssertEqual(pool.our_descriptors.count, 0)
         XCTAssertEqual(pool.all_descriptors.count, 1)
