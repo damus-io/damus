@@ -232,7 +232,7 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
                 flusher = .once({ pe in
                     // send donation zap when the pending zap is flushed, this allows user to cancel and not send a donation
                     Task { @MainActor in
-                        await send_donation_zap(pool: damus_state.pool, postbox: damus_state.postbox, nwc: nwc_state.url, percent: damus_state.settings.donation_percent, base_msats: amount_msat)
+                        await WalletConnect.send_donation_zap(pool: damus_state.pool, postbox: damus_state.postbox, nwc: nwc_state.url, percent: damus_state.settings.donation_percent, base_msats: amount_msat)
                     }
                 })
             }
@@ -240,7 +240,7 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
             // we don't have a delay on one-tap nozaps (since this will be from customize zap view)
             let delay = damus_state.settings.nozaps ? nil : 5.0
 
-            let nwc_req = nwc_pay(url: nwc_state.url, pool: damus_state.pool, post: damus_state.postbox, invoice: inv, delay: delay, on_flush: flusher)
+            let nwc_req = WalletConnect.pay(url: nwc_state.url, pool: damus_state.pool, post: damus_state.postbox, invoice: inv, delay: delay, on_flush: flusher)
 
             guard let nwc_req, case .nwc(let pzap_state) = pending_zap_state else {
                 print("nwc: failed to send nwc request for zapreq \(reqid.reqid)")

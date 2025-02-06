@@ -45,7 +45,7 @@ enum NostrResponse {
 
     static func owned_from_json(json: String) -> NostrResponse? {
         return json.withCString{ cstr in
-            let bufsize: Int = max(Int(Double(json.utf8.count) * 4.0), Int(getpagesize()))
+            let bufsize: Int = max(Int(Double(json.utf8.count) * 8.0), Int(getpagesize()))
             let data = malloc(bufsize)
 
             if data == nil {
