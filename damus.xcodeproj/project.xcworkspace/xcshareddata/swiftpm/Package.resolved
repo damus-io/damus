@@ -1,5 +1,5 @@
 {
-  "originHash" : "fa2b0ad84b4bd1a962ffbe49810548db7c9d7131f4a1fd4b4af06ff4c6de0a44",
+  "originHash" : "085cf0f645323bf77edb52886489bf77b309a0a2d2b78a54beaf8520b540d596",
   "pins" : [
     {
       "identity" : "codescanner",
@@ -7,6 +7,14 @@
       "location" : "https://github.com/twostraws/CodeScanner.git",
       "state" : {
         "revision" : "9fa582f4b36c69c2a55bff5fb3377eb170ae273c"
+      }
+    },
+    {
+      "identity" : "cryptoswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/krzyzanowskim/CryptoSwift.git",
+      "state" : {
+        "revision" : "e74bbbfbef939224b242ae7c342a90e60b88b5ce"
       }
     },
     {
@@ -43,14 +51,6 @@
       "state" : {
         "revision" : "415b1d97fb38bda1e5a6b2dde63354720832110b",
         "version" : "7.6.1"
-      }
-    },
-    {
-      "identity" : "nostr-sdk-swift",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/rust-nostr/nostr-sdk-swift",
-      "state" : {
-        "revision" : "27711a03ea7d977162595eea1d9b2d5a45f0b628"
       }
     },
     {

@@ -1500,9 +1500,6 @@
 		D7ADD3E22B538E3500F104C4 /* DamusPurpleVerifyNpubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7ADD3E12B538E3500F104C4 /* DamusPurpleVerifyNpubView.swift */; };
 		D7B76C902C825042003A16CB /* PushNotificationClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D2A3802BF815D000E4B42B /* PushNotificationClient.swift */; };
 		D7B76C912C82507F003A16CB /* NIP98AuthenticatedRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C6787D2B2D34CC00BCEAFB /* NIP98AuthenticatedRequest.swift */; };
-		D7BEE6F32D37AE1B00CF659F /* NostrSDK in Frameworks */ = {isa = PBXBuildFile; productRef = D7BEE6F22D37AE1B00CF659F /* NostrSDK */; };
-		D7BEE6F52D37B20400CF659F /* NostrSDK in Frameworks */ = {isa = PBXBuildFile; productRef = D7BEE6F42D37B20400CF659F /* NostrSDK */; };
-		D7BEE6F72D37B21400CF659F /* NostrSDK in Frameworks */ = {isa = PBXBuildFile; productRef = D7BEE6F62D37B21400CF659F /* NostrSDK */; };
 		D7BEE6F92D37B37400CF659F /* DraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7BEE6F82D37B37400CF659F /* DraftTests.swift */; };
 		D7C48C0B2D12DE0C00A3BACF /* SwiftyCrop in Frameworks */ = {isa = PBXBuildFile; productRef = D7C48C0A2D12DE0C00A3BACF /* SwiftyCrop */; };
 		D7C48C0D2D12E34900A3BACF /* SwiftyCrop in Frameworks */ = {isa = PBXBuildFile; productRef = D7C48C0C2D12E34900A3BACF /* SwiftyCrop */; };
@@ -1607,6 +1604,16 @@
 		D7D2A3812BF815D000E4B42B /* PushNotificationClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D2A3802BF815D000E4B42B /* PushNotificationClient.swift */; };
 		D7D68FF92C9E01BE0015A515 /* KFClickable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D68FF82C9E01B60015A515 /* KFClickable.swift */; };
 		D7D68FFA2C9E01BE0015A515 /* KFClickable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D68FF82C9E01B60015A515 /* KFClickable.swift */; };
+		D7DB1FDE2D5A78CE00CF06DA /* NIP44.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DB1FDD2D5A78CE00CF06DA /* NIP44.swift */; };
+		D7DB1FDF2D5A78CE00CF06DA /* NIP44.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DB1FDD2D5A78CE00CF06DA /* NIP44.swift */; };
+		D7DB1FE02D5A78CE00CF06DA /* NIP44.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DB1FDD2D5A78CE00CF06DA /* NIP44.swift */; };
+		D7DB1FE42D5A9AC900CF06DA /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = D7DB1FE32D5A9AC900CF06DA /* CryptoSwift */; };
+		D7DB1FE82D5A9F5300CF06DA /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = D7DB1FE72D5A9F5300CF06DA /* CryptoSwift */; };
+		D7DB1FEA2D5A9F5A00CF06DA /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = D7DB1FE92D5A9F5A00CF06DA /* CryptoSwift */; };
+		D7DB1FEC2D5A9F6500CF06DA /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = D7DB1FEB2D5A9F6500CF06DA /* CryptoSwift */; };
+		D7DB1FEE2D5AC51B00CF06DA /* NIP44v2EncryptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DB1FED2D5AC50F00CF06DA /* NIP44v2EncryptionTests.swift */; };
+		D7DB1FF12D5AC5D700CF06DA /* nip44.vectors.json in Resources */ = {isa = PBXBuildFile; fileRef = D7DB1FF02D5AC5D700CF06DA /* nip44.vectors.json */; };
+		D7DB1FF32D5AC5EA00CF06DA /* LICENSES in Resources */ = {isa = PBXBuildFile; fileRef = D7DB1FF22D5AC5E400CF06DA /* LICENSES */; };
 		D7DBD41F2B02F15E002A6197 /* NostrKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFD32819DE8F00B3DE84 /* NostrKind.swift */; };
 		D7DEEF2F2A8C021E00E0C99F /* NostrEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */; };
 		D7EB00B02CD59C8D00660C07 /* PresentFullScreenItemNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EB00AF2CD59C8300660C07 /* PresentFullScreenItemNotify.swift */; };
@@ -2480,6 +2487,10 @@
 		D7CBD1D52B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleImpendingExpirationTests.swift; sourceTree = "<group>"; };
 		D7D2A3802BF815D000E4B42B /* PushNotificationClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationClient.swift; sourceTree = "<group>"; };
 		D7D68FF82C9E01B60015A515 /* KFClickable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KFClickable.swift; sourceTree = "<group>"; };
+		D7DB1FDD2D5A78CE00CF06DA /* NIP44.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP44.swift; sourceTree = "<group>"; };
+		D7DB1FED2D5AC50F00CF06DA /* NIP44v2EncryptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP44v2EncryptionTests.swift; sourceTree = "<group>"; };
+		D7DB1FF02D5AC5D700CF06DA /* nip44.vectors.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = nip44.vectors.json; sourceTree = "<group>"; };
+		D7DB1FF22D5AC5E400CF06DA /* LICENSES */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSES; sourceTree = "<group>"; };
 		D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrEventTests.swift; sourceTree = "<group>"; };
 		D7EB00AF2CD59C8300660C07 /* PresentFullScreenItemNotify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentFullScreenItemNotify.swift; sourceTree = "<group>"; };
 		D7EDED1B2B1178FE0018B19C /* NoteContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteContent.swift; sourceTree = "<group>"; };
@@ -2523,8 +2534,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D7BEE6F32D37AE1B00CF659F /* NostrSDK in Frameworks */,
 				4C06670428FC7EC500038D2A /* Kingfisher in Frameworks */,
+				D7DB1FE42D5A9AC900CF06DA /* CryptoSwift in Frameworks */,
 				3A0A30BB2C21397A00F8C9BC /* EmojiPicker in Frameworks */,
 				D70D90982CDED61800CD0534 /* CodeScanner in Frameworks */,
 				D7C48C0B2D12DE0C00A3BACF /* SwiftyCrop in Frameworks */,
@@ -2554,8 +2565,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D7BEE6F52D37B20400CF659F /* NostrSDK in Frameworks */,
 				82D6FC862CD9A4A600C925F4 /* MarkdownUI in Frameworks */,
+				D7DB1FEC2D5A9F6500CF06DA /* CryptoSwift in Frameworks */,
 				82D6FC8A2CD9A54600C925F4 /* SwipeActions in Frameworks */,
 				D7F360292CEBBE34009D34DA /* CodeScanner in Frameworks */,
 				D7C48C0D2D12E34900A3BACF /* SwiftyCrop in Frameworks */,
@@ -2571,7 +2582,7 @@
 			files = (
 				D703D7AF2C670FB700A400EA /* MarkdownUI in Frameworks */,
 				D73E5F9D2C6AA8E3007EB227 /* SwipeActions in Frameworks */,
-				D7BEE6F72D37B21400CF659F /* NostrSDK in Frameworks */,
+				D7DB1FE82D5A9F5300CF06DA /* CryptoSwift in Frameworks */,
 				D73E5F762C6A997E007EB227 /* EmojiPicker in Frameworks */,
 				D703D7192C66E47100A400EA /* UniformTypeIdentifiers.framework in Frameworks */,
 				D7C48C0F2D12E35600A3BACF /* SwiftyCrop in Frameworks */,
@@ -2587,6 +2598,7 @@
 			files = (
 				D789D1202AFEFBF20083A7AB /* secp256k1 in Frameworks */,
 				D7EDED312B1290B80018B19C /* MarkdownUI in Frameworks */,
+				D7DB1FEA2D5A9F5A00CF06DA /* CryptoSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2753,6 +2765,8 @@
 			children = (
 				4C0C03982A61E27B0098B3B8 /* bool_setting.wasm */,
 				4C0C03972A61E27B0098B3B8 /* primal.wasm */,
+				D7DB1FF22D5AC5E400CF06DA /* LICENSES */,
+				D7DB1FF02D5AC5D700CF06DA /* nip44.vectors.json */,
 			);
 			name = Fixtures;
 			sourceTree = "<group>";
@@ -3579,6 +3593,7 @@
 		4CE6DEE527F7A08100C66700 /* damus */ = {
 			isa = PBXGroup;
 			children = (
+				D7DB1FDC2D5A77E500CF06DA /* NIP44 */,
 				D755B28B2D3E7D6500BBEEFA /* NIP37 */,
 				4C45E5002BED4CE10025A428 /* NIP10 */,
 				4C1D4FB32A7967990024F453 /* build-git-hash.txt */,
@@ -3616,6 +3631,7 @@
 		4CE6DEF627F7A08200C66700 /* damusTests */ = {
 			isa = PBXGroup;
 			children = (
+				D7DB1FED2D5AC50F00CF06DA /* NIP44v2EncryptionTests.swift */,
 				D7A0D8742D1FE66A00DCBE59 /* EditPictureControlTests.swift */,
 				E06336A72B7582D600A88E6B /* Assets */,
 				D72A2D032AD9C165002AFF62 /* Mocking */,
@@ -3946,6 +3962,14 @@
 			path = Utils;
 			sourceTree = "<group>";
 		};
+		D7DB1FDC2D5A77E500CF06DA /* NIP44 */ = {
+			isa = PBXGroup;
+			children = (
+				D7DB1FDD2D5A78CE00CF06DA /* NIP44.swift */,
+			);
+			path = NIP44;
+			sourceTree = "<group>";
+		};
 		E06336A72B7582D600A88E6B /* Assets */ = {
 			isa = PBXGroup;
 			children = (
@@ -4012,7 +4036,7 @@
 				D78DB8582C1CE9CA00F0AB12 /* SwipeActions */,
 				D70D90972CDED61800CD0534 /* CodeScanner */,
 				D7C48C0A2D12DE0C00A3BACF /* SwiftyCrop */,
-				D7BEE6F22D37AE1B00CF659F /* NostrSDK */,
+				D7DB1FE32D5A9AC900CF06DA /* CryptoSwift */,
 			);
 			productName = damus;
 			productReference = 4CE6DEE327F7A08100C66700 /* damus.app */;
@@ -4079,7 +4103,7 @@
 				82D6FC892CD9A54600C925F4 /* SwipeActions */,
 				D7F360282CEBBE34009D34DA /* CodeScanner */,
 				D7C48C0C2D12E34900A3BACF /* SwiftyCrop */,
-				D7BEE6F42D37B20400CF659F /* NostrSDK */,
+				D7DB1FEB2D5A9F6500CF06DA /* CryptoSwift */,
 			);
 			productName = "share extension";
 			productReference = 82D6FA972CD9820500C925F4 /* ShareExtension.appex */;
@@ -4108,7 +4132,7 @@
 				D73E5F9C2C6AA8E3007EB227 /* SwipeActions */,
 				D70D909B2CDED7B200CD0534 /* CodeScanner */,
 				D7C48C0E2D12E35600A3BACF /* SwiftyCrop */,
-				D7BEE6F62D37B21400CF659F /* NostrSDK */,
+				D7DB1FE72D5A9F5300CF06DA /* CryptoSwift */,
 			);
 			productName = "highlighter action extension";
 			productReference = D703D7172C66E47100A400EA /* HighlighterActionExtension.appex */;
@@ -4131,6 +4155,7 @@
 			packageProductDependencies = (
 				D789D11F2AFEFBF20083A7AB /* secp256k1 */,
 				D7EDED302B1290B80018B19C /* MarkdownUI */,
+				D7DB1FE92D5A9F5A00CF06DA /* CryptoSwift */,
 			);
 			productName = DamusNotificationService;
 			productReference = D79C4C142AFEB061003A41B4 /* DamusNotificationService.appex */;
@@ -4218,7 +4243,7 @@
 				D78DB8572C1CE9CA00F0AB12 /* XCRemoteSwiftPackageReference "SwipeActions" */,
 				D70D90962CDED61800CD0534 /* XCRemoteSwiftPackageReference "CodeScanner" */,
 				D7C48C092D12DE0C00A3BACF /* XCRemoteSwiftPackageReference "SwiftyCrop" */,
-				D7BEE6F12D37AE1B00CF659F /* XCRemoteSwiftPackageReference "nostr-sdk-swift" */,
+				D7DB1FE22D5A9AC900CF06DA /* XCRemoteSwiftPackageReference "CryptoSwift" */,
 			);
 			productRefGroup = 4CE6DEE427F7A08100C66700 /* Products */;
 			projectDirPath = "";
@@ -4258,7 +4283,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				E06336AB2B75850100A88E6B /* img_with_location.jpeg in Resources */,
+				D7DB1FF12D5AC5D700CF06DA /* nip44.vectors.json in Resources */,
 				4C0C039A2A61E27B0098B3B8 /* bool_setting.wasm in Resources */,
+				D7DB1FF32D5AC5EA00CF06DA /* LICENSES in Resources */,
 				4C0C03992A61E27B0098B3B8 /* primal.wasm in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4718,6 +4745,7 @@
 				50A60D142A28BEEE00186190 /* RelayLog.swift in Sources */,
 				D7EDED212B117DCA0018B19C /* SequenceUtils.swift in Sources */,
 				BA37598A2ABCCDE40018D73B /* ImageResizer.swift in Sources */,
+				D7DB1FDE2D5A78CE00CF06DA /* NIP44.swift in Sources */,
 				B51C1CEB2B55A60A00E312A9 /* MuteDurationMenu.swift in Sources */,
 				4CB88389296AF99A00DC99E7 /* EventDetailBar.swift in Sources */,
 				4C32B9512A9AD44700DC3548 /* FlatbuffersErrors.swift in Sources */,
@@ -4831,6 +4859,7 @@
 				3ACBCB78295FE5C70037388A /* TimeAgoTests.swift in Sources */,
 				D72A2D072AD9C1FB002AFF62 /* MockProfiles.swift in Sources */,
 				B5A75C2A2B546D94007AFBC0 /* MuteItemTests.swift in Sources */,
+				D7DB1FEE2D5AC51B00CF06DA /* NIP44v2EncryptionTests.swift in Sources */,
 				4C4F14A72A2A61A30045A0B9 /* NostrScriptTests.swift in Sources */,
 				D78525252A7B2EA4002FA637 /* NoteContentViewTests.swift in Sources */,
 				4C3EA67B28FF7B3900C48A62 /* InvoiceTests.swift in Sources */,
@@ -5036,6 +5065,7 @@
 				82D6FB452CD99F7900C925F4 /* InputDismissKeyboard.swift in Sources */,
 				82D6FB462CD99F7900C925F4 /* Constants.swift in Sources */,
 				82D6FB472CD99F7900C925F4 /* LinkView.swift in Sources */,
+				D7DB1FDF2D5A78CE00CF06DA /* NIP44.swift in Sources */,
 				82D6FB482CD99F7900C925F4 /* PreviewCache.swift in Sources */,
 				82D6FB492CD99F7900C925F4 /* Theme.swift in Sources */,
 				82D6FB4A2CD99F7900C925F4 /* NIP05.swift in Sources */,
@@ -5767,6 +5797,7 @@
 				D703D7712C670B6D00A400EA /* NdbProfile.swift in Sources */,
 				D703D7A22C670E1A00A400EA /* list.c in Sources */,
 				D703D7A42C670E3C00A400EA /* midl.c in Sources */,
+				D7DB1FE02D5A78CE00CF06DA /* NIP44.swift in Sources */,
 				D703D7982C670DF200A400EA /* utf8.c in Sources */,
 				D703D78B2C670C9500A400EA /* MakeZapRequest.swift in Sources */,
 				D703D7862C670C6500A400EA /* NewUnmutesNotify.swift in Sources */,
@@ -6777,20 +6808,20 @@
 				minimumVersion = 1.14.1;
 			};
 		};
-		D7BEE6F12D37AE1B00CF659F /* XCRemoteSwiftPackageReference "nostr-sdk-swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/rust-nostr/nostr-sdk-swift";
-			requirement = {
-				kind = revision;
-				revision = 27711a03ea7d977162595eea1d9b2d5a45f0b628;
-			};
-		};
 		D7C48C092D12DE0C00A3BACF /* XCRemoteSwiftPackageReference "SwiftyCrop" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/benedom/SwiftyCrop";
 			requirement = {
 				kind = revision;
 				revision = 454d0a0d4faf6f3a19c8d817ab9d7d27524bd79f;
+			};
+		};
+		D7DB1FE22D5A9AC900CF06DA /* XCRemoteSwiftPackageReference "CryptoSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/krzyzanowskim/CryptoSwift.git";
+			requirement = {
+				kind = revision;
+				revision = e74bbbfbef939224b242ae7c342a90e60b88b5ce;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -6906,21 +6937,6 @@
 			package = D7A343EC2AD0D77C00CED48B /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
 			productName = SnapshotTesting;
 		};
-		D7BEE6F22D37AE1B00CF659F /* NostrSDK */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = D7BEE6F12D37AE1B00CF659F /* XCRemoteSwiftPackageReference "nostr-sdk-swift" */;
-			productName = NostrSDK;
-		};
-		D7BEE6F42D37B20400CF659F /* NostrSDK */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = D7BEE6F12D37AE1B00CF659F /* XCRemoteSwiftPackageReference "nostr-sdk-swift" */;
-			productName = NostrSDK;
-		};
-		D7BEE6F62D37B21400CF659F /* NostrSDK */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = D7BEE6F12D37AE1B00CF659F /* XCRemoteSwiftPackageReference "nostr-sdk-swift" */;
-			productName = NostrSDK;
-		};
 		D7C48C0A2D12DE0C00A3BACF /* SwiftyCrop */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = D7C48C092D12DE0C00A3BACF /* XCRemoteSwiftPackageReference "SwiftyCrop" */;
@@ -6935,6 +6951,26 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D7C48C092D12DE0C00A3BACF /* XCRemoteSwiftPackageReference "SwiftyCrop" */;
 			productName = SwiftyCrop;
+		};
+		D7DB1FE32D5A9AC900CF06DA /* CryptoSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D7DB1FE22D5A9AC900CF06DA /* XCRemoteSwiftPackageReference "CryptoSwift" */;
+			productName = CryptoSwift;
+		};
+		D7DB1FE72D5A9F5300CF06DA /* CryptoSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D7DB1FE22D5A9AC900CF06DA /* XCRemoteSwiftPackageReference "CryptoSwift" */;
+			productName = CryptoSwift;
+		};
+		D7DB1FE92D5A9F5A00CF06DA /* CryptoSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D7DB1FE22D5A9AC900CF06DA /* XCRemoteSwiftPackageReference "CryptoSwift" */;
+			productName = CryptoSwift;
+		};
+		D7DB1FEB2D5A9F6500CF06DA /* CryptoSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D7DB1FE22D5A9AC900CF06DA /* XCRemoteSwiftPackageReference "CryptoSwift" */;
+			productName = CryptoSwift;
 		};
 		D7EDED242B117F7C0018B19C /* MarkdownUI */ = {
 			isa = XCSwiftPackageProductDependency;

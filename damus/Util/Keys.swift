@@ -21,6 +21,17 @@ let ANON_PUBKEY = Pubkey(Data([
 struct FullKeypair: Equatable {
     let pubkey: Pubkey
     let privkey: Privkey
+    
+    init(pubkey: Pubkey, privkey: Privkey) {
+        self.pubkey = pubkey
+        self.privkey = privkey
+    }
+    
+    init?(privkey: Privkey) {
+        self.privkey = privkey
+        guard let pubkey = privkey_to_pubkey_raw(sec: privkey.bytes) else { return nil }
+        self.pubkey = pubkey
+    }
 
     func to_keypair() -> Keypair {
         return Keypair(pubkey: pubkey, privkey: privkey)
