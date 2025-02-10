@@ -147,6 +147,9 @@
     "ADMIN" : {
       "comment" : "Text label indicating the profile picture underneath it is the admin of the Nostr relay."
     },
+    "Advice" : {
+      "comment" : "Heading for some advice text to help the user with an error"
+    },
     "All" : {
       "comment" : "Human-readable short description of the 'friends filter' when it is set to 'all'\nLabel for filter for all notifications."
     },
@@ -330,6 +333,12 @@
     "Contact list has been reset" : {
       "comment" : "Message indicating that the contact list was successfully reset."
     },
+    "Contact support via DMs" : {
+      "comment" : "Button label to contact support from an error screen"
+    },
+    "Contact support via email at [support@damus.io](mailto:support@damus.io)" : {
+      "comment" : "Text to contact support via email"
+    },
     "Content filters" : {
       "comment" : "Section title for content filtering/moderation configuration."
     },
@@ -386,6 +395,9 @@
     },
     "Could not find user to mute..." : {
       "comment" : "Alert message to indicate that the muted user could not be found."
+    },
+    "Could not parse the URL you are trying to open." : {
+      "comment" : "User visible error description"
     },
     "Create account" : {
       "comment" : "Button to navigate to create account view."
@@ -769,6 +781,9 @@
     "Load media" : {
       "comment" : "Button to show media in note."
     },
+    "Loading thread" : {
+      "comment" : "Accessibility label for the thread view when it is loading"
+    },
     "Local" : {
       "comment" : "Option for notification mode setting: Local notification mode"
     },
@@ -832,11 +847,11 @@
     "Mute Hashtag" : {
       "comment" : "Label represnting a button that the user can tap to mute a given hashtag so they don't see it in their feed anymore."
     },
-    "Mute user" : {
-      "comment" : "Context menu option for muting users."
+    "Mute/Block user" : {
+      "comment" : "Context menu option for muting/blocking users."
     },
-    "Mute User" : {
-      "comment" : "Title of alert for muting a user."
+    "Mute/Block User" : {
+      "comment" : "Title of alert for muting/blocking a user."
     },
     "Muted" : {
       "comment" : "Navigation title of view to see list of muted users & phrases.\nSidebar menu label for muted users view."
@@ -925,6 +940,9 @@
     "Nostr Address" : {
       "comment" : "Label for the Nostr Address section of user profile form."
     },
+    "Nostr is the super app. Because it’s actually an ecosystem of apps, all of which make each other better. People haven’t grasped that yet. They will when it’s more accessible and onboarding is more straightforward and intuitive." : {
+
+    },
     "NostrScript" : {
       "comment" : "Navigation title for the view showing NostrScript."
     },
@@ -939,6 +957,9 @@
     },
     "Note from a %@ you've muted" : {
       "comment" : "Text to indicate that what is being shown is a note which has been muted."
+    },
+    "Note not found" : {
+      "comment" : "Heading for the thread view in a not found error state"
     },
     "Note you've muted" : {
       "comment" : "Label indicating note has been muted\nText to indicate that what is being shown is a note which has been muted."
@@ -1000,6 +1021,9 @@
     "OnlyZaps mode" : {
       "comment" : "Setting toggle to hide reactions."
     },
+    "Oops!" : {
+      "comment" : "Heading for an error screen"
+    },
     "Open in browser" : {
       "comment" : "Button to open the value found in browser."
     },
@@ -1044,6 +1068,15 @@
     },
     "Please choose relays from the list below to filter the current feed:" : {
       "comment" : "Instructions on how to filter a specific timeline feed by choosing relay servers to filter on."
+    },
+    "Please double-check the checkout web page, or go to the Side Menu → \"Purple\" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue" : {
+      "comment" : "User-facing tips on what to do if a Purple welcome link doesn't work"
+    },
+    "Please double-check the checkout web page, or go to the Side Menu → \"Purple\" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue." : {
+      "comment" : "User-facing tips on what to do if a Purple welcome link doesn't work"
+    },
+    "Please try again, check the URL for typos, or contact support for further help." : {
+      "comment" : "User visible error tips"
     },
     "Point your camera to a QR code…" : {
       "comment" : "Text on QR code camera view instructing user to point to QR code"
@@ -1263,6 +1296,9 @@
     "Save your login info?" : {
       "comment" : "Ask user if they want to save their account information."
     },
+    "Saved" : {
+      "comment" : "Small label indicating that the user's draft has been saved to storage"
+    },
     "Scan a user's pubkey" : {
       "comment" : "Text to prompt scanning a QR code of a user's pubkey to open their profile."
     },
@@ -1367,9 +1403,6 @@
     },
     "Show only from users you follow" : {
       "comment" : "Setting to Show notifications only associated to users your follow"
-    },
-    "Show only preferred languages on Universe feed" : {
-      "comment" : "Toggle to show notes that are only in the device's preferred languages on the Universe feed and hide notes that are in other languages."
     },
     "Show profile action sheets" : {
       "comment" : "Setting to show profile action sheets when clicking on a user's profile picture"
@@ -1518,9 +1551,6 @@
     "This user cannot be zapped because they have not configured zaps on their account yet. Time to orange-pill?" : {
       "comment" : "Comment explaining why a user cannot be zapped."
     },
-    "Thread" : {
-      "comment" : "Navigation bar title for note thread."
-    },
     "Threads" : {
       "comment" : "Section header title for a list of threads that are muted."
     },
@@ -1559,6 +1589,9 @@
     },
     "Truncate timeline text" : {
       "comment" : "Setting to truncate text in timeline"
+    },
+    "Try checking the link again, your internet connection, whether you need to connect to a specific relay to access this content." : {
+      "comment" : "Tips on what to do if a note cannot be found."
     },
     "Type %@ to delete" : {
       "comment" : "Text field prompt asking user to type DELETE in all caps to confirm that they want to proceed with deleting their account."
@@ -1665,6 +1698,9 @@
     "We did not detect any issues that we can automatically fix for you. If you are having issues, please contact Damus support: [support@damus.io](mailto:support@damus.io)" : {
       "comment" : "Message indicating that no First Aid actions are available."
     },
+    "We were unable to find the note you were looking for." : {
+      "comment" : "Text for the thread view when it is unable to find the note the user is looking for"
+    },
     "We'll save your account key, so you won't need to enter it manually next time you log in." : {
       "comment" : "Reminder to user that they should save their account information."
     },
@@ -1716,6 +1752,12 @@
     "You cannot share content because you are not logged in. Please close this view, log in to your account, and try again." : {
       "comment" : "Label explaining that sharing cannot proceed because the user is not logged in."
     },
+    "You clicked on a Purple welcome link, but it does not look like the checkout is completed yet. This is likely a bug." : {
+      "comment" : "Error label upon continuing in the app from a Damus Purple purchase"
+    },
+    "You clicked on a Purple welcome link, but we could not find your checkout. This is likely a bug." : {
+      "comment" : "Error label upon continuing in the app from a Damus Purple purchase"
+    },
     "You have no bookmarks yet, add them in the context menu" : {
       "comment" : "Text indicating that there are no bookmarks to be viewed"
     },
@@ -1724,6 +1766,9 @@
     },
     "Your content is being broadcasted to the network. Please wait." : {
       "comment" : "Label explaining that their content sharing action is in progress"
+    },
+    "Your draft has been saved to storage" : {
+      "comment" : "Accessibility label indicating that a user's post draft has been saved, meant only for visually impaired users"
     },
     "Your Name" : {
       "comment" : "Label for Your Name section of user profile form."
