@@ -4,7 +4,6 @@
 //
 //  Created by Daniel D’Aquino on 2025-01-20.
 //
-import NostrSDK
 import Foundation
 
 /// This models a NIP-37 draft.
@@ -77,13 +76,7 @@ struct NIP37Draft {
         guard let note_json_string = String(data: note_json_data, encoding: .utf8) else {
             throw NIP37DraftEventError.encoding_error
         }
-        guard let secret_key = SecretKey.from(privkey: keypair.privkey) else {
-            throw NIP37DraftEventError.invalid_keypair
-        }
-        guard let pubkey = PublicKey.from(pubkey: keypair.pubkey) else {
-            throw NIP37DraftEventError.invalid_keypair
-        }
-        guard let contents = try? nip44Encrypt(secretKey: secret_key, publicKey: pubkey, content: note_json_string, version: Nip44Version.v2) else {
+        guard let contents = try? NIP44v2Encryption.encrypt(plaintext: note_json_string, privateKeyA: keypair.privkey, publicKeyB: keypair.pubkey) else {
             return nil
         }
         var tags = [
@@ -111,16 +104,10 @@ struct NIP37Draft {
     static func unwrap(note: NdbNote, keypair: FullKeypair) throws -> NdbNote? {
         let wrapped_note = note
         guard wrapped_note.known_kind == .draft else { return nil }
-        guard let private_key = SecretKey.from(privkey: keypair.privkey) else {
-            throw NIP37DraftEventError.invalid_keypair
-        }
-        guard let pubkey = PublicKey.from(pubkey: keypair.pubkey) else {
-            throw NIP37DraftEventError.invalid_keypair
-        }
-        guard let draft_event_json = try? nip44Decrypt(
-            secretKey: private_key,
-            publicKey: pubkey,
-            payload: wrapped_note.content
+        guard let draft_event_json = try? NIP44v2Encryption.decrypt(
+            payload: wrapped_note.content,
+            privateKeyA: keypair.privkey,
+            publicKeyB: keypair.pubkey
         ) else { return nil }
         return NdbNote.owned_from_json(json: draft_event_json)
     }
@@ -128,19 +115,5 @@ struct NIP37Draft {
     enum NIP37DraftEventError: Error {
         case invalid_keypair
         case encoding_error
-    }
-}
-
-// MARK: - Convenience extensions
-
-fileprivate extension PublicKey {
-    static func from(pubkey: Pubkey) -> PublicKey? {
-        return try? PublicKey.parse(publicKey: pubkey.hex())
-    }
-}
-
-fileprivate extension SecretKey {
-    static func from(privkey: Privkey) -> SecretKey? {
-        return try? SecretKey.parse(secretKey: privkey.hex())
     }
 }
