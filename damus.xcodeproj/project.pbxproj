@@ -6782,7 +6782,7 @@
 			repositoryURL = "https://github.com/rust-nostr/nostr-sdk-swift";
 			requirement = {
 				kind = revision;
-				revision = 999316a0962d49ad8b7b98d214b9ee6eea694149;
+				revision = 27711a03ea7d977162595eea1d9b2d5a45f0b628;
 			};
 		};
 		D7C48C092D12DE0C00A3BACF /* XCRemoteSwiftPackageReference "SwiftyCrop" */ = {
