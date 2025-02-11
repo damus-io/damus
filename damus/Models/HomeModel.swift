@@ -375,6 +375,8 @@ class HomeModel: ContactsDelegate {
             boost_ev_id = inner_ev.id
 
             Task {
+                // NOTE (jb55): remove this after nostrdb update, since nostrdb
+                // processess reposts when note is ingested
                 guard validate_event(ev: inner_ev) == .ok else {
                     return
                 }
@@ -394,7 +396,7 @@ class HomeModel: ContactsDelegate {
         switch self.damus_state.boosts.add_event(ev, target: e) {
         case .already_counted:
             break
-        case .success(let n):
+        case .success(_):
             notify(.update_stats(note_id: e))
         }
     }
@@ -403,7 +405,7 @@ class HomeModel: ContactsDelegate {
         switch damus_state.quote_reposts.add_event(ev, target: target) {
         case .already_counted:
             break
-        case .success(let n):
+        case .success(_):
             notify(.update_stats(note_id: target))
         }
     }
