@@ -388,7 +388,7 @@ class DamusPurple: StoreObserverDelegate {
             case .none:
                 return .sheet(.error(.init(
                     user_visible_description: NSLocalizedString("You clicked on a Purple welcome link, but we could not find your checkout. This is likely a bug.", comment: "Error label upon continuing in the app from a Damus Purple purchase"),
-                    tip: NSLocalizedString("Please double-check the checkout web page, or go to the Side Menu → \"Purple\" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue", comment: "User-facing tips on what to do if a Purple welcome link doesn't work"),
+                    tip: NSLocalizedString("Please double-check the checkout web page, or go to the Side Menu → \"Purple\" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue.", comment: "User-facing tips on what to do if a Purple welcome link doesn't work"),
                     technical_info: "Handling Purple URL \"\(purple_url)\" failed, the `is_good_to_go` result was `\(String(describing: is_good_to_go))`"
                 )))
             }

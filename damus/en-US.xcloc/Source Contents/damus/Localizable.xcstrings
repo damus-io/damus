@@ -1069,9 +1069,6 @@
     "Please choose relays from the list below to filter the current feed:" : {
       "comment" : "Instructions on how to filter a specific timeline feed by choosing relay servers to filter on."
     },
-    "Please double-check the checkout web page, or go to the Side Menu → \"Purple\" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue" : {
-      "comment" : "User-facing tips on what to do if a Purple welcome link doesn't work"
-    },
     "Please double-check the checkout web page, or go to the Side Menu → \"Purple\" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue." : {
       "comment" : "User-facing tips on what to do if a Purple welcome link doesn't work"
     },

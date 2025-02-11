@@ -1771,11 +1771,6 @@ Section title for deleting the user</note>
         <target>Please choose relays from the list below to filter the current feed:</target>
         <note>Instructions on how to filter a specific timeline feed by choosing relay servers to filter on.</note>
       </trans-unit>
-      <trans-unit id="Please double-check the checkout web page, or go to the Side Menu → &quot;Purple&quot; to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue" xml:space="preserve">
-        <source>Please double-check the checkout web page, or go to the Side Menu → "Purple" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue</source>
-        <target>Please double-check the checkout web page, or go to the Side Menu → "Purple" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue</target>
-        <note>User-facing tips on what to do if a Purple welcome link doesn't work</note>
-      </trans-unit>
       <trans-unit id="Please double-check the checkout web page, or go to the Side Menu → &quot;Purple&quot; to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue." xml:space="preserve">
         <source>Please double-check the checkout web page, or go to the Side Menu → "Purple" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue.</source>
         <target>Please double-check the checkout web page, or go to the Side Menu → "Purple" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue.</target>
@@ -5380,11 +5375,6 @@ Section title for deleting the user</note>
         <source>Please choose relays from the list below to filter the current feed:</source>
         <target state="new">Please choose relays from the list below to filter the current feed:</target>
         <note>Instructions on how to filter a specific timeline feed by choosing relay servers to filter on.</note>
-      </trans-unit>
-      <trans-unit id="Please double-check the checkout web page, or go to the Side Menu → &quot;Purple&quot; to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue" xml:space="preserve">
-        <source>Please double-check the checkout web page, or go to the Side Menu → "Purple" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue</source>
-        <target state="new">Please double-check the checkout web page, or go to the Side Menu → "Purple" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue</target>
-        <note>User-facing tips on what to do if a Purple welcome link doesn't work</note>
       </trans-unit>
       <trans-unit id="Please double-check the checkout web page, or go to the Side Menu → &quot;Purple&quot; to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue." xml:space="preserve">
         <source>Please double-check the checkout web page, or go to the Side Menu → "Purple" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue.</source>
