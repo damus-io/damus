@@ -14,6 +14,7 @@ enum LogCategory: String {
     case render
     case storage
     case networking
+    case timeline
     case push_notifications
     case damus_purple
     case image_uploading

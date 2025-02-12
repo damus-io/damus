@@ -79,6 +79,7 @@ class HomeModel: ContactsDelegate {
     var notifications = NotificationsModel()
     var notification_status = NotificationStatusModel()
     var events: EventHolder = EventHolder()
+    var already_reposted: Set<NoteId> = Set()
     var zap_button: ZapButtonModel = ZapButtonModel()
     
     init() {
@@ -732,6 +733,16 @@ class HomeModel: ContactsDelegate {
 
         if let quoted_event = ev.referenced_quote_ids.first {
             handle_quote_repost_event(ev, target: quoted_event.note_id)
+        }
+
+        // don't add duplicate reposts to home
+        if ev.known_kind == .boost, let target = ev.get_inner_event()?.id {
+            if already_reposted.contains(target) {
+                Log.info("Skipping duplicate repost for event %s", for: .timeline, target.hex())
+                return
+            } else {
+                already_reposted.insert(target)
+            }
         }
 
         if sub_id == home_subid {
