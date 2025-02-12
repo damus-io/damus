@@ -8,7 +8,7 @@ A twitter-like [nostr][nostr] client for iPhone, iPad and MacOS.
 
 [nostr]: https://github.com/fiatjaf/nostr
 
-## How is Damus better than twitter?
+## How is Damus better than X/Twitter?
 There are no toxic algorithms.\
 You can send or receive zaps (satoshis) without asking for permission.\
 [There is no central database](https://fiatjaf.com/nostr.html). Therefore, Damus is censorship resistant.\
