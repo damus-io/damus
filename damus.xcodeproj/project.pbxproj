@@ -1045,6 +1045,9 @@
 		D703D7B62C67118200A400EA /* String+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B9472A9AD44700DC3548 /* String+extension.swift */; };
 		D703D7B72C67118F00A400EA /* StringUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A8CC6CB2A2CFEF900940F5F /* StringUtil.swift */; };
 		D703D7B82C6711A000A400EA /* NativeObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B9462A9AD44700DC3548 /* NativeObject.swift */; };
+		D706C5AF2D5D31C20027C627 /* AutoSaveIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D706C5AE2D5D31B20027C627 /* AutoSaveIndicatorView.swift */; };
+		D706C5B02D5D31C20027C627 /* AutoSaveIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D706C5AE2D5D31B20027C627 /* AutoSaveIndicatorView.swift */; };
+		D706C5B12D5D31C20027C627 /* AutoSaveIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D706C5AE2D5D31B20027C627 /* AutoSaveIndicatorView.swift */; };
 		D70A3B172B02DCE5008BD568 /* NotificationFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */; };
 		D70D90982CDED61800CD0534 /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = D70D90972CDED61800CD0534 /* CodeScanner */; };
 		D70D909C2CDED7B200CD0534 /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = D70D909B2CDED7B200CD0534 /* CodeScanner */; };
@@ -2413,6 +2416,7 @@
 		D703D7222C66E47100A400EA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D703D7262C66E47100A400EA /* highlighter action extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "highlighter action extension.entitlements"; sourceTree = "<group>"; };
 		D703D72A2C66F29500A400EA /* getSelection.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = getSelection.js; sourceTree = "<group>"; };
+		D706C5AE2D5D31B20027C627 /* AutoSaveIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoSaveIndicatorView.swift; sourceTree = "<group>"; };
 		D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationFormatter.swift; sourceTree = "<group>"; };
 		D7100C552B76F8E600C59298 /* PurpleViewPrimitives.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurpleViewPrimitives.swift; sourceTree = "<group>"; };
 		D7100C572B76FC8400C59298 /* MarketingContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketingContentView.swift; sourceTree = "<group>"; };
@@ -3762,6 +3766,7 @@
 		4CF0ABF42985CD4200D66079 /* Posting */ = {
 			isa = PBXGroup;
 			children = (
+				D706C5AE2D5D31B20027C627 /* AutoSaveIndicatorView.swift */,
 				4CF0ABF52985CD5500D66079 /* UserSearch.swift */,
 			);
 			path = Posting;
@@ -4697,6 +4702,7 @@
 				4CE1399429F0669900AC6A0B /* BigButton.swift in Sources */,
 				D7EFBA372CC322F300F45588 /* DamusVideoControlsView.swift in Sources */,
 				7C60CAEF298471A1009C80D6 /* CoreSVG.swift in Sources */,
+				D706C5AF2D5D31C20027C627 /* AutoSaveIndicatorView.swift in Sources */,
 				6439E014296790CF0020672B /* ProfilePicImageView.swift in Sources */,
 				4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */,
 				4C1253682A76D2470004F4B8 /* MuteNotify.swift in Sources */,
@@ -4970,6 +4976,7 @@
 				82D6FAE62CD99F7900C925F4 /* LocalNotificationNotify.swift in Sources */,
 				82D6FAE72CD99F7900C925F4 /* LoginNotify.swift in Sources */,
 				82D6FAE82CD99F7900C925F4 /* LogoutNotify.swift in Sources */,
+				D706C5B12D5D31C20027C627 /* AutoSaveIndicatorView.swift in Sources */,
 				82D6FAE92CD99F7900C925F4 /* NewMutesNotify.swift in Sources */,
 				82D6FAEA2CD99F7900C925F4 /* NewUnmutesNotify.swift in Sources */,
 				82D6FAEB2CD99F7900C925F4 /* Notify.swift in Sources */,
@@ -5798,6 +5805,7 @@
 				D703D7A22C670E1A00A400EA /* list.c in Sources */,
 				D703D7A42C670E3C00A400EA /* midl.c in Sources */,
 				D7DB1FE02D5A78CE00CF06DA /* NIP44.swift in Sources */,
+				D706C5B02D5D31C20027C627 /* AutoSaveIndicatorView.swift in Sources */,
 				D703D7982C670DF200A400EA /* utf8.c in Sources */,
 				D703D78B2C670C9500A400EA /* MakeZapRequest.swift in Sources */,
 				D703D7862C670C6500A400EA /* NewUnmutesNotify.swift in Sources */,

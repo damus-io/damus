@@ -71,9 +71,12 @@ struct PostView: View {
     @State var focusWordAttributes: (String?, NSRange?) = (nil, nil)
     @State var newCursorIndex: Int?
     @State var textHeight: CGFloat? = nil
-    @State var saved_state: SaveState = .needs_saving()
-    /// A timer that helps us add a delay between when changes occur and when they are saved persistently (to avoid too many disk writes and a jittery save indicator)
-    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    /// Manages the auto-save logic for drafts.
+    ///
+    /// ## Implementation notes
+    ///
+    /// - This intentionally does _not_ use `@ObservedObject` or `@StateObject` because observing changes causes unwanted automatic scrolling to the text cursor on each save state update.
+    var autoSaveModel: AutoSaveIndicatorView.AutoSaveViewModel
 
     @State var preUploadedMedia: [PreUploadedMedia] = []
     
@@ -89,16 +92,6 @@ struct PostView: View {
     let placeholder_messages: [String]
     let initial_text_suffix: String?
     
-    enum SaveState: Equatable {
-        /// The draft has been modified and needs saving.
-        /// Saving should occur in N seconds
-        case needs_saving(seconds_remaining: Int = 3)
-        /// A saving operation is in progress
-        case saving
-        /// The draft has been saved to disk.
-        case saved
-    }
-    
     init(
         action: PostAction,
         damus_state: DamusState,
@@ -111,6 +104,7 @@ struct PostView: View {
         self.prompt_view = prompt_view
         self.placeholder_messages = placeholder_messages ?? [POST_PLACEHOLDER]
         self.initial_text_suffix = initial_text_suffix
+        self.autoSaveModel = AutoSaveIndicatorView.AutoSaveViewModel(save: { damus_state.drafts.save(damus_state: damus_state) })
     }
 
     @Environment(\.dismiss) var dismiss
@@ -183,33 +177,12 @@ struct PostView: View {
         })
     }
     
-    var save_state_indicator: some View {
-        HStack {
-            switch saved_state {
-            case .needs_saving:
-                EmptyView()
-                    .accessibilityHidden(true)  // Probably no need to show this to visually impaired users, might be too noisy
-            case .saving:
-                ProgressView()
-                    .accessibilityHidden(true)  // Probably no need to show this to visually impaired users, might be too noisy
-            case .saved:
-                Image(systemName: "checkmark")
-                    .accessibilityHidden(true)
-                Text("Saved", comment: "Small label indicating that the user's draft has been saved to storage")
-                    .accessibilityLabel(NSLocalizedString("Your draft has been saved to storage", comment: "Accessibility label indicating that a user's post draft has been saved, meant only for visually impaired users"))
-                    .font(.caption)
-            }
-        }
-        .padding(6)
-        .foregroundStyle(.secondary)
-    }
-    
     var AttachmentBar: some View {
         HStack(alignment: .center, spacing: 15) {
             ImageButton
             CameraButton
             Spacer()
-            self.save_state_indicator
+            AutoSaveIndicatorView(saveViewModel: self.autoSaveModel)
         }
         .disabled(uploading_disabled)
     }
@@ -263,13 +236,13 @@ struct PostView: View {
         guard let draft = load_draft_for_post(drafts: self.damus_state.drafts, action: self.action) else {
             self.post = NSMutableAttributedString("")
             self.uploadedMedias = []
-            self.saved_state = .needs_saving()
+            self.autoSaveModel.markNothingToSave()   // We should not save empty drafts.
             return false
         }
         
         self.uploadedMedias = draft.media
         self.post = draft.content
-        self.saved_state = .saved
+        self.autoSaveModel.markSaved()  // The draft we just loaded is saved to memory. Mark it as such.
         return true
     }
     
@@ -287,7 +260,7 @@ struct PostView: View {
             let artifacts = DraftArtifacts(content: post, media: uploadedMedias, references: references, id: UUID().uuidString)
             set_draft_for_post(drafts: damus_state.drafts, action: action, artifacts: artifacts)
         }
-        self.saved_state = .needs_saving()
+        self.autoSaveModel.needsSaving()
     }
     
     var TextEntry: some View {
@@ -600,21 +573,6 @@ struct PostView: View {
                     clear_draft()
                 }
                 preUploadedMedia.removeAll()
-            }
-        }
-        .onReceive(timer) { time in
-            switch self.saved_state {
-            case .needs_saving(seconds_remaining: let seconds_remaining):
-                if seconds_remaining <= 0 {
-                    self.saved_state = .saving
-                    damus_state.drafts.save(damus_state: damus_state)
-                    self.saved_state = .saved
-                }
-                else {
-                    self.saved_state = .needs_saving(seconds_remaining: seconds_remaining - 1)
-                }
-            case .saving, .saved:
-                break
             }
         }
     }
