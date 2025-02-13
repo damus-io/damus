@@ -1,6 +1,5 @@
 #ifndef LIGHTNING_COMMON_BOLT11_H
 #define LIGHTNING_COMMON_BOLT11_H
-/* Borrowed from CLN's common/bolt11.[ch] implementation as of v24.08rc1 */
 
 #include "ccan/short_types/short_types.h"
 #include "hash_u5.h"
@@ -8,6 +7,7 @@
 #include "ccan/list/list.h"
 #include "amount.h"
 #include "node_id.h"
+//#include <secp256k1_recovery.h>
 
 /* We only have 10 bits for the field length, meaning < 640 bytes */
 #define BOLT11_FIELD_BYTE_LIMIT ((1 << 10) * 5 / 8)
@@ -28,9 +28,30 @@ struct bolt11_field {
     u5 *data;
 };
 
+/* BOLT #11:
+ *   * `pubkey` (264 bits)
+ *   * `short_channel_id` (64 bits)
+ *   * `fee_base_msat` (32 bits, big-endian)
+ *   * `fee_proportional_millionths` (32 bits, big-endian)
+ *   * `cltv_expiry_delta` (16 bits, big-endian)
+ */
+
+/*
+struct route_info {
+    struct node_id pubkey;
+    u16 cltv_expiry_delta;
+    struct short_channel_id short_channel_id;
+    u32 fee_base_msat, fee_proportional_millionths;
+};
+ */
+
 struct bolt11 {
+    const struct chainparams *chain;
     u64 timestamp;
     struct amount_msat *msat; /* NULL if not specified. */
+
+    struct sha256 payment_hash;
+    struct node_id receiver_id;
 
     /* description_hash valid if and only if description is NULL. */
     const char *description;
@@ -38,9 +59,48 @@ struct bolt11 {
 
     /* How many seconds to pay from @timestamp above. */
     u64 expiry;
+
+    /* How many blocks final hop requires. */
+    u32 min_final_cltv_expiry;
+
+    /* If non-NULL, indicates fallback addresses to pay to. */
+    const u8 **fallbacks;
+
+    /* If non-NULL: array of route arrays */
+    //struct route_info **routes;
+
+    /* signature of sha256 of entire thing. */
+    //secp256k1_ecdsa_signature sig;
+
+    /* payment secret, if any. */
+    //struct secret *payment_secret;
+
+    /* Features bitmap, if any. */
+    u8 *features;
+
+    /* Optional metadata to send with payment. */
+    u8 *metadata;
+
+    struct list_head extra_fields;
 };
 
-/* Does not check signature, nor extract node.  */
-struct bolt11 *bolt11_decode_minimal(const tal_t *ctx, const char *str, char **fail);
+/* Decodes and checks signature; returns NULL on error; description is
+ * (optional) out-of-band description of payment, for `h` field.
+ * fset is NULL to accept any features (usually not desirable!).
+ *
+ * if @must_be_chain is not NULL, fails unless it's this chain.
+ */
+struct bolt11 *bolt11_decode(const tal_t *ctx, const char *str, char **fail);
+
+/* Extracts signature but does not check it. */
+struct bolt11 *bolt11_decode_nosig(const tal_t *ctx, const char *str, u5 **sigdata, char **fail);
+
+/* Initialize an empty bolt11 struct with optional amount */
+struct bolt11 *new_bolt11(const tal_t *ctx);
+
+#if DEVELOPER
+/* Flag for tests to suppress `min_final_cltv_expiry` field generation, to match test vectors */
+extern bool dev_bolt11_no_c_generation;
+#endif
 
 #endif /* LIGHTNING_COMMON_BOLT11_H */
