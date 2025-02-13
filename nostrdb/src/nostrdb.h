@@ -368,11 +368,15 @@ struct bech32_nevent {
 	struct ndb_relays relays;
 	const unsigned char *event_id;
 	const unsigned char *pubkey; // optional
+	uint32_t kind;
+	bool has_kind;
 };
 
 struct bech32_nprofile {
 	struct ndb_relays relays;
 	const unsigned char *pubkey;
+	uint32_t kind;
+	bool has_kind;
 };
 
 struct bech32_naddr {
