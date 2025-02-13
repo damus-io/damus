@@ -91,8 +91,8 @@ static int parse_hashtag(struct cursor *cur, struct ndb_block *block) {
 //
 // bech32 blocks are stored as:
 //
-//     bech32_buffer_size : u16
 //     nostr_bech32_type  : varint
+//     bech32_buffer_size : u16
 //     bech32_data        : [u8]
 //
 // The TLV form is compact already, so we just use it directly
@@ -168,7 +168,7 @@ static int push_invoice_str(struct ndb_content_parser *p, struct ndb_str_block *
 	struct bolt11 *bolt11;
 	char *fail;
 
-	if (!(bolt11 = bolt11_decode_minimal(NULL, str->str, &fail)))
+	if (!(bolt11 = bolt11_decode(NULL, str->str, &fail)))
 		return 0;
 
 	start = p->buffer.p;
@@ -522,7 +522,7 @@ int ndb_parse_content(unsigned char *buf, int buf_size,
 	struct ndb_content_parser parser;
 	struct ndb_block block;
 
-	unsigned char *start, *pre_mention;
+	unsigned char *start, *pre_mention, *blocks_start;
 	
 	make_cursor(buf, buf + buf_size, &parser.buffer);
 
@@ -539,7 +539,7 @@ int ndb_parse_content(unsigned char *buf, int buf_size,
 	parser.blocks->flags = 0;
 	parser.blocks->version = 1;
 
-	start = parser.content.p;
+	blocks_start = start = parser.content.p;
 	while (parser.content.p < parser.content.end) {
 		cp = peek_char(&parser.content, -1);
 		c  = peek_char(&parser.content, 0);
@@ -577,7 +577,7 @@ int ndb_parse_content(unsigned char *buf, int buf_size,
 			return 0;
 	}
 
-	parser.blocks->blocks_size = parser.buffer.p - parser.buffer.start;
+	parser.blocks->blocks_size = parser.buffer.p - blocks_start;
 
 	//
 	// pad to 8-byte alignment
