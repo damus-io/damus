@@ -98,6 +98,19 @@ enum Bech32Object : Equatable, Hashable {
     case nrelay(String)
     case naddr(NAddr)
 
+    func pubkey() -> Pubkey? {
+        switch self {
+        case .nprofile(let nprofile): return nprofile.author
+        case .npub(let pubkey): return pubkey
+        case .nevent(let ev): return ev.author
+        case .naddr(let naddr): return naddr.author
+        case .nscript: return nil
+        case .nsec: return nil // TODO privkey_to_pubkey ?
+        case .note: return nil
+        case .nrelay: return nil
+        }
+    }
+
     init?(block: ndb_mention_bech32_block) {
         let b32 = block.bech32
         switch block.bech32_type {
@@ -120,7 +133,7 @@ enum Bech32Object : Equatable, Hashable {
                 author = Pubkey(nevent.pubkey.as_data(size: 32))
             }
             var kind: UInt32? = nil
-            if nevent.has_kind != 0 {
+            if nevent.has_kind {
                 kind = nevent.kind
             }
 
@@ -195,7 +208,7 @@ func decodeCBech32(_ b: nostr_bech32_t) -> Bech32Object? {
     case NOSTR_BECH32_NEVENT:
         let note_id = NoteId(Data(bytes: b.nevent.event_id, count: 32))
         let pubkey = b.nevent.pubkey != nil ? Pubkey(Data(bytes: b.nevent.pubkey, count: 32)) : nil
-        let kind: UInt32? = b.nevent.has_kind == 0 ? nil : b.nevent.kind
+        let kind: UInt32? = !b.nevent.has_kind ? nil : b.nevent.kind
         let relays = b.nevent.relays.as_urls()
         return .nevent(NEvent(noteid: note_id, relays: relays, author: pubkey, kind: kind))
     case NOSTR_BECH32_NPUB:
