@@ -144,6 +144,40 @@
 		4C32B95E2A9AD44700DC3548 /* FlatBufferObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B9492A9AD44700DC3548 /* FlatBufferObject.swift */; };
 		4C32B95F2A9AD44700DC3548 /* Enum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B94A2A9AD44700DC3548 /* Enum.swift */; };
 		4C32B9602A9AD44700DC3548 /* Struct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B94B2A9AD44700DC3548 /* Struct.swift */; };
+		4C36245B2D5E9B2F00DD066E /* NdbProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FFE2B631C0100F2B2C0 /* NdbProfile.swift */; };
+		4C36245C2D5E9B4400DD066E /* NdbBlocksIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480562B633F2600F2B2C0 /* NdbBlocksIterator.swift */; };
+		4C36245D2D5E9B4400DD066E /* NdbBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480582B633F3800F2B2C0 /* NdbBlock.swift */; };
+		4C36245E2D5E9B5F00DD066E /* NdbBlocksIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480562B633F2600F2B2C0 /* NdbBlocksIterator.swift */; };
+		4C36245F2D5E9B5F00DD066E /* NdbBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480582B633F3800F2B2C0 /* NdbBlock.swift */; };
+		4C3624602D5E9EB800DD066E /* NdbProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FFE2B631C0100F2B2C0 /* NdbProfile.swift */; };
+		4C3624612D5E9FFD00DD066E /* wasm.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480532B631C4F00F2B2C0 /* wasm.c */; };
+		4C3624622D5EA00300DD066E /* nostrdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FDE2B631C0100F2B2C0 /* nostrdb.c */; };
+		4C3624632D5EA01100DD066E /* block.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FDF2B631C0100F2B2C0 /* block.c */; };
+		4C3624642D5EA01600DD066E /* tal.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CC6A9E72CAB688500989CEF /* tal.c */; };
+		4C3624652D5EA06400DD066E /* bech32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF4801E2B631C0100F2B2C0 /* bech32.c */; };
+		4C3624662D5EA07000DD066E /* sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CC6A9A42CAB688500989CEF /* sha256.c */; };
+		4C3624672D5EA0B100DD066E /* take.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CC6A9D82CAB688500989CEF /* take.c */; };
+		4C3624682D5EA0BC00DD066E /* nostr_bech32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FE52B631C0100F2B2C0 /* nostr_bech32.c */; };
+		4C3624692D5EA0C200DD066E /* list.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CC6A9BF2CAB688500989CEF /* list.c */; };
+		4C36246A2D5EA0CB00DD066E /* content_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FF62B631C0100F2B2C0 /* content_parser.c */; };
+		4C36246B2D5EA0D700DD066E /* invoice.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480372B631C0100F2B2C0 /* invoice.c */; };
+		4C36246C2D5EA0E500DD066E /* bolt11.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480102B631C0100F2B2C0 /* bolt11.c */; };
+		4C36246E2D5EA10400DD066E /* hash_u5.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF4801A2B631C0100F2B2C0 /* hash_u5.c */; };
+		4C36246F2D5EA16A00DD066E /* str.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CC6A9E22CAB688500989CEF /* str.c */; };
+		4C3624702D5EA17700DD066E /* utf8.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CC6A9F02CAB688500989CEF /* utf8.c */; };
+		4C3624712D5EA18300DD066E /* error.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480262B631C0100F2B2C0 /* error.c */; };
+		4C3624722D5EA18E00DD066E /* amount.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480252B631C0100F2B2C0 /* amount.c */; };
+		4C3624732D5EA1BE00DD066E /* nostrdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FDE2B631C0100F2B2C0 /* nostrdb.c */; };
+		4C3624742D5EA1D700DD066E /* wasm.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480532B631C4F00F2B2C0 /* wasm.c */; };
+		4C3624752D5EA1E000DD066E /* block.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FDF2B631C0100F2B2C0 /* block.c */; };
+		4C3624762D5EA1F600DD066E /* content_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FF62B631C0100F2B2C0 /* content_parser.c */; };
+		4C3624772D5EA1FA00DD066E /* nostr_bech32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FE52B631C0100F2B2C0 /* nostr_bech32.c */; };
+		4C3624782D5EA1FE00DD066E /* error.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480262B631C0100F2B2C0 /* error.c */; };
+		4C3624792D5EA20200DD066E /* bolt11.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480102B631C0100F2B2C0 /* bolt11.c */; };
+		4C36247A2D5EA20C00DD066E /* bech32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF4801E2B631C0100F2B2C0 /* bech32.c */; };
+		4C36247B2D5EA21200DD066E /* hash_u5.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF4801A2B631C0100F2B2C0 /* hash_u5.c */; };
+		4C36247C2D5EA21F00DD066E /* amount.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480252B631C0100F2B2C0 /* amount.c */; };
+		4C36247D2D5EA22300DD066E /* invoice.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480372B631C0100F2B2C0 /* invoice.c */; };
 		4C363A8428233689006E126D /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A8328233689006E126D /* Parser.swift */; };
 		4C363A8828236948006E126D /* BlocksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A8728236948006E126D /* BlocksView.swift */; };
 		4C363A8C28236B92006E126D /* PubkeyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A8B28236B92006E126D /* PubkeyView.swift */; };
@@ -337,10 +371,6 @@
 		4CC6AA0E2CAB688500989CEF /* debug.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CC6A9CB2CAB688500989CEF /* debug.c */; };
 		4CC6AA0F2CAB688500989CEF /* str.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CC6A9CE2CAB688500989CEF /* str.c */; };
 		4CC6AA122CAB688500989CEF /* take.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CC6A9D82CAB688500989CEF /* take.c */; };
-		4CC6AA302CAB688500989CEF /* _info in Resources */ = {isa = PBXBuildFile; fileRef = 4CC6A9DF2CAB688500989CEF /* _info */; };
-		4CC6AA362CAB688500989CEF /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 4CC6A9E02CAB688500989CEF /* LICENSE */; };
-		4CC6AA612CAB688500989CEF /* _info in Resources */ = {isa = PBXBuildFile; fileRef = 4CC6A9DF2CAB688500989CEF /* _info */; };
-		4CC6AA672CAB688500989CEF /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 4CC6A9E02CAB688500989CEF /* LICENSE */; };
 		4CC6AA752CAB688500989CEF /* str.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CC6A9E22CAB688500989CEF /* str.c */; };
 		4CC6AA762CAB688500989CEF /* tal.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CC6A9E72CAB688500989CEF /* tal.c */; };
 		4CC6AA782CAB688500989CEF /* mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CC6A9C42CAB688500989CEF /* mem.c */; };
@@ -352,8 +382,6 @@
 		4CC6AA892CAB688500989CEF /* debug.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CC6A9CB2CAB688500989CEF /* debug.c */; };
 		4CC6AA8A2CAB688500989CEF /* str.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CC6A9CE2CAB688500989CEF /* str.c */; };
 		4CC6AA8D2CAB688500989CEF /* take.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CC6A9D82CAB688500989CEF /* take.c */; };
-		4CC6AAAB2CAB688500989CEF /* _info in Resources */ = {isa = PBXBuildFile; fileRef = 4CC6A9DF2CAB688500989CEF /* _info */; };
-		4CC6AAB12CAB688500989CEF /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 4CC6A9E02CAB688500989CEF /* LICENSE */; };
 		4CC6AABF2CAB688500989CEF /* str.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CC6A9E22CAB688500989CEF /* str.c */; };
 		4CC6AAC02CAB688500989CEF /* tal.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CC6A9E72CAB688500989CEF /* tal.c */; };
 		4CC6AAC22CAB688500989CEF /* mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CC6A9C42CAB688500989CEF /* mem.c */; };
@@ -404,8 +432,6 @@
 		4CE879552996BAB900F758CC /* RelayPaidDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE879542996BAB900F758CC /* RelayPaidDetail.swift */; };
 		4CE879582996C45300F758CC /* ZapsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE879572996C45300F758CC /* ZapsView.swift */; };
 		4CE8795B2996C47A00F758CC /* ZapsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE8795A2996C47A00F758CC /* ZapsModel.swift */; };
-		4CE9FBBA2A6B3C63007E485C /* nostrdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CE9FBB82A6B3B26007E485C /* nostrdb.c */; settings = {COMPILER_FLAGS = "-w"; }; };
-		4CED18FD2C84B28F006AF665 /* PostingTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */; };
 		4CEE2AED2805B22500AB5EEF /* NostrRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */; };
 		4CEE2AF1280B216B00AB5EEF /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF0280B216B00AB5EEF /* EventDetailView.swift */; };
 		4CEE2AF3280B25C500AB5EEF /* ProfilePicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF2280B25C500AB5EEF /* ProfilePicView.swift */; };
@@ -437,11 +463,7 @@
 		4CF480422B631C0100F2B2C0 /* NdbProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF47FFE2B631C0100F2B2C0 /* NdbProfile.swift */; };
 		4CF480442B631C0100F2B2C0 /* bolt11.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480102B631C0100F2B2C0 /* bolt11.c */; };
 		4CF480472B631C0100F2B2C0 /* hash_u5.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF4801A2B631C0100F2B2C0 /* hash_u5.c */; };
-		4CF480482B631C0100F2B2C0 /* talstr.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF4801C2B631C0100F2B2C0 /* talstr.c */; };
-		4CF480492B631C0100F2B2C0 /* utf8.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF4801D2B631C0100F2B2C0 /* utf8.c */; };
 		4CF4804A2B631C0100F2B2C0 /* bech32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF4801E2B631C0100F2B2C0 /* bech32.c */; };
-		4CF4804B2B631C0100F2B2C0 /* tal.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF4801F2B631C0100F2B2C0 /* tal.c */; };
-		4CF4804C2B631C0100F2B2C0 /* take.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480232B631C0100F2B2C0 /* take.c */; };
 		4CF4804D2B631C0100F2B2C0 /* amount.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480252B631C0100F2B2C0 /* amount.c */; };
 		4CF4804E2B631C0100F2B2C0 /* error.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480262B631C0100F2B2C0 /* error.c */; };
 		4CF4804F2B631C0100F2B2C0 /* bech32_util.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CF480282B631C0100F2B2C0 /* bech32_util.c */; };
@@ -544,7 +566,6 @@
 		82D6FABB2CD99F7900C925F4 /* emitter.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4792CF2A9939BD00489948 /* emitter.c */; };
 		82D6FABC2CD99F7900C925F4 /* refmap.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4792D12A9939BD00489948 /* refmap.c */; };
 		82D6FABD2CD99F7900C925F4 /* verifier.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4792D42A9939BD00489948 /* verifier.c */; };
-		82D6FABE2CD99F7900C925F4 /* NdbProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C478E2C2A9935D300489948 /* NdbProfile.swift */; };
 		82D6FABF2CD99F7900C925F4 /* NdbTagIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9054882A6AED4700811EEC /* NdbTagIterator.swift */; };
 		82D6FAC02CD99F7900C925F4 /* NdbNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90548A2A6AEDEE00811EEC /* NdbNote.swift */; };
 		82D6FAC12CD99F7900C925F4 /* AsciiCharacter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5D5C9C2A6B2CB40024563C /* AsciiCharacter.swift */; };
@@ -552,30 +573,11 @@
 		82D6FAC32CD99F7900C925F4 /* Ndb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C478E242A9932C100489948 /* Ndb.swift */; };
 		82D6FAC42CD99F7900C925F4 /* NdbTagsIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDD1AE12A6B3074001CD4DF /* NdbTagsIterator.swift */; };
 		82D6FAC52CD99F7900C925F4 /* NdbTxn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3DCC752A9FC2030091E592 /* NdbTxn.swift */; };
-		82D6FAC62CD99F7900C925F4 /* nostrdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CE9FBB82A6B3B26007E485C /* nostrdb.c */; };
 		82D6FAC72CD99F7900C925F4 /* midl.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4793032A993DB900489948 /* midl.c */; };
 		82D6FAC82CD99F7900C925F4 /* mdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4793002A993B9A00489948 /* mdb.c */; };
 		82D6FAC92CD99F7900C925F4 /* NdbNote+.swift in Sources */ = {isa = PBXBuildFile; fileRef = D798D2272B085CDA00234419 /* NdbNote+.swift */; };
 		82D6FACA2CD99F7900C925F4 /* NostrScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C19AE4C2A5CEF7C00C90DB7 /* NostrScript.swift */; };
 		82D6FACB2CD99F7900C925F4 /* nostrscript.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4F14A92A2A71AB0045A0B9 /* nostrscript.c */; };
-		82D6FACC2CD99F7900C925F4 /* error.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C9146FF2A2A891E00DDEA40 /* error.c */; };
-		82D6FACD2CD99F7900C925F4 /* wasm.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CA9276E2A2A5D110098A105 /* wasm.c */; };
-		82D6FACE2CD99F7900C925F4 /* damus.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670A28FDE64700038D2A /* damus.c */; };
-		82D6FACF2CD99F7900C925F4 /* utf8.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670D28FDEAA000038D2A /* utf8.c */; };
-		82D6FAD02CD99F7900C925F4 /* bolt11.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA63C28FF52D600C48A62 /* bolt11.c */; };
-		82D6FAD12CD99F7900C925F4 /* hash_u5.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64028FF553900C48A62 /* hash_u5.c */; };
-		82D6FAD22CD99F7900C925F4 /* sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64328FF558100C48A62 /* sha256.c */; };
-		82D6FAD32CD99F7900C925F4 /* bech32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64828FF597700C48A62 /* bech32.c */; };
-		82D6FAD42CD99F7900C925F4 /* bech32_util.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64B28FF59AC00C48A62 /* bech32_util.c */; };
-		82D6FAD52CD99F7900C925F4 /* tal.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64E28FF59F200C48A62 /* tal.c */; };
-		82D6FAD62CD99F7900C925F4 /* node_id.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA65F28FF5E7700C48A62 /* node_id.c */; };
-		82D6FAD72CD99F7900C925F4 /* mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA66428FF5F6800C48A62 /* mem.c */; };
-		82D6FAD82CD99F7900C925F4 /* hex.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA66728FF5F9900C48A62 /* hex.c */; };
-		82D6FAD92CD99F7900C925F4 /* amount.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA66C28FF782800C48A62 /* amount.c */; };
-		82D6FADA2CD99F7900C925F4 /* take.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67428FF7A5A00C48A62 /* take.c */; };
-		82D6FADB2CD99F7900C925F4 /* talstr.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67628FF7A9800C48A62 /* talstr.c */; };
-		82D6FADC2CD99F7900C925F4 /* list.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67828FF7ABF00C48A62 /* list.c */; };
-		82D6FADD2CD99F7900C925F4 /* nostr_bech32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D00CE29E38B950036AF10 /* nostr_bech32.c */; };
 		82D6FADE2CD99F7900C925F4 /* ThreadReply.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C45E5012BED4D000025A428 /* ThreadReply.swift */; };
 		82D6FADF2CD99F7900C925F4 /* AttachedWalletNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C86F7C52A76C51100EC0817 /* AttachedWalletNotify.swift */; };
 		82D6FAE02CD99F7900C925F4 /* DisplayTabBarNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9D6D152B1AA9C6004E5CD9 /* DisplayTabBarNotify.swift */; };
@@ -1032,7 +1034,6 @@
 		D703D74C2C6709CE00A400EA /* Zaps.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB883A72975FC1800DC99E7 /* Zaps.swift */; };
 		D703D74D2C6709D400A400EA /* Zap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC7AAE6297EFA7B00430951 /* Zap.swift */; };
 		D703D74E2C6709DA00A400EA /* Pubkey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC14FF02A73FCDB007AEB17 /* Pubkey.swift */; };
-		D703D74F2C6709ED00A400EA /* (null) in Sources */ = {isa = PBXBuildFile; };
 		D703D7502C6709F500A400EA /* NdbTxn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3DCC752A9FC2030091E592 /* NdbTxn.swift */; };
 		D703D7512C6709FB00A400EA /* Nostr.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFA527FF87A20006080F /* Nostr.swift */; };
 		D703D7522C670A1400A400EA /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2B10272A7B0F5C008AA43E /* Log.swift */; };
@@ -1066,7 +1067,6 @@
 		D703D76E2C670B4900A400EA /* NdbTagsIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDD1AE12A6B3074001CD4DF /* NdbTagsIterator.swift */; };
 		D703D76F2C670B5200A400EA /* NostrResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFB028049D510006080F /* NostrResponse.swift */; };
 		D703D7702C670B5F00A400EA /* UserStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5E54022A9522F600FF6E60 /* UserStatus.swift */; };
-		D703D7712C670B6D00A400EA /* (null) in Sources */ = {isa = PBXBuildFile; };
 		D703D7722C670B8000A400EA /* FlatBufferBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B93B2A9AD44700DC3548 /* FlatBufferBuilder.swift */; };
 		D703D7732C670B8500A400EA /* Offset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B9382A9AD44700DC3548 /* Offset.swift */; };
 		D703D7742C670B8A00A400EA /* FbConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B9372A9AD44700DC3548 /* FbConstants.swift */; };
@@ -1084,7 +1084,6 @@
 		D703D7802C670C2500A400EA /* NIP05.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB8838529656C8B00DC99E7 /* NIP05.swift */; };
 		D703D7812C670C2B00A400EA /* Bech32.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD19283AA67F008EE7EF /* Bech32.swift */; };
 		D703D7822C670C3400A400EA /* InsertSort.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363AA728297703006E126D /* InsertSort.swift */; };
-		D703D7832C670C3900A400EA /* (null) in Sources */ = {isa = PBXBuildFile; };
 		D703D7842C670C4700A400EA /* SequenceUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EDED202B117DCA0018B19C /* SequenceUtils.swift */; };
 		D703D7852C670C6100A400EA /* Notify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA3529F2A76AE80003BB08B /* Notify.swift */; };
 		D703D7862C670C6500A400EA /* NewUnmutesNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA352AB2A76C07F003BB08B /* NewUnmutesNotify.swift */; };
@@ -1100,23 +1099,6 @@
 		D703D7902C670D1600A400EA /* NewEventsBits.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CB5D4D2B11728000AD4105 /* NewEventsBits.swift */; };
 		D703D7912C670D1E00A400EA /* DisplayName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9BB83029C0ED4F00FC4E37 /* DisplayName.swift */; };
 		D703D7922C670D2900A400EA /* RelayURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FF93FF2AC7AC5200FD969D /* RelayURL.swift */; };
-		D703D7932C670DAF00A400EA /* (null) in Sources */ = {isa = PBXBuildFile; };
-		D703D7942C670DE300A400EA /* (null) in Sources */ = {isa = PBXBuildFile; };
-		D703D7952C670DE600A400EA /* (null) in Sources */ = {isa = PBXBuildFile; };
-		D703D7962C670DEA00A400EA /* (null) in Sources */ = {isa = PBXBuildFile; };
-		D703D7972C670DED00A400EA /* (null) in Sources */ = {isa = PBXBuildFile; };
-		D703D7982C670DF200A400EA /* (null) in Sources */ = {isa = PBXBuildFile; };
-		D703D7992C670DF900A400EA /* (null) in Sources */ = {isa = PBXBuildFile; };
-		D703D79A2C670DFD00A400EA /* (null) in Sources */ = {isa = PBXBuildFile; };
-		D703D79B2C670E0000A400EA /* (null) in Sources */ = {isa = PBXBuildFile; };
-		D703D79C2C670E0300A400EA /* (null) in Sources */ = {isa = PBXBuildFile; };
-		D703D79D2C670E0700A400EA /* (null) in Sources */ = {isa = PBXBuildFile; };
-		D703D79E2C670E0F00A400EA /* (null) in Sources */ = {isa = PBXBuildFile; };
-		D703D79F2C670E1200A400EA /* (null) in Sources */ = {isa = PBXBuildFile; };
-		D703D7A02C670E1500A400EA /* (null) in Sources */ = {isa = PBXBuildFile; };
-		D703D7A12C670E1700A400EA /* (null) in Sources */ = {isa = PBXBuildFile; };
-		D703D7A22C670E1A00A400EA /* (null) in Sources */ = {isa = PBXBuildFile; };
-		D703D7A32C670E1D00A400EA /* (null) in Sources */ = {isa = PBXBuildFile; };
 		D703D7A42C670E3C00A400EA /* midl.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4793032A993DB900489948 /* midl.c */; };
 		D703D7A52C670E3E00A400EA /* mdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4793002A993B9A00489948 /* mdb.c */; };
 		D703D7A62C670E5200A400EA /* builder.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4792942A9939BD00489948 /* builder.c */; };
@@ -2336,8 +2318,6 @@
 		4CC6A9D32CAB688500989CEF /* structeq.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = structeq.h; sourceTree = "<group>"; };
 		4CC6A9D72CAB688500989CEF /* take.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = take.h; sourceTree = "<group>"; };
 		4CC6A9D82CAB688500989CEF /* take.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = take.c; sourceTree = "<group>"; };
-		4CC6A9DF2CAB688500989CEF /* _info */ = {isa = PBXFileReference; lastKnownFileType = text; path = _info; sourceTree = "<group>"; };
-		4CC6A9E02CAB688500989CEF /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		4CC6A9E12CAB688500989CEF /* str.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = str.h; sourceTree = "<group>"; };
 		4CC6A9E22CAB688500989CEF /* str.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = str.c; sourceTree = "<group>"; };
 		4CC6A9E62CAB688500989CEF /* tal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tal.h; sourceTree = "<group>"; };
@@ -2413,15 +2393,12 @@
 		4CF47FDE2B631C0100F2B2C0 /* nostrdb.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = nostrdb.c; sourceTree = "<group>"; };
 		4CF47FDF2B631C0100F2B2C0 /* block.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = block.c; sourceTree = "<group>"; };
 		4CF47FE02B631C0100F2B2C0 /* str_block.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = str_block.h; sourceTree = "<group>"; };
-		4CF47FE12B631C0100F2B2C0 /* compiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = compiler.h; sourceTree = "<group>"; };
 		4CF47FE22B631C0100F2B2C0 /* threadpool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = threadpool.h; sourceTree = "<group>"; };
 		4CF47FE32B631C0100F2B2C0 /* typedefs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = typedefs.h; sourceTree = "<group>"; };
 		4CF47FE42B631C0100F2B2C0 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		4CF47FE52B631C0100F2B2C0 /* nostr_bech32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = nostr_bech32.c; sourceTree = "<group>"; };
-		4CF47FE62B631C0100F2B2C0 /* endian.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = endian.h; sourceTree = "<group>"; };
 		4CF47FE72B631C0100F2B2C0 /* jsmn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = jsmn.h; sourceTree = "<group>"; };
 		4CF47FE82B631C0100F2B2C0 /* memchr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = memchr.h; sourceTree = "<group>"; };
-		4CF47FE92B631C0100F2B2C0 /* sha256.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sha256.h; sourceTree = "<group>"; };
 		4CF47FEA2B631C0100F2B2C0 /* invoice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = invoice.h; sourceTree = "<group>"; };
 		4CF47FEB2B631C0100F2B2C0 /* cursor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cursor.h; sourceTree = "<group>"; };
 		4CF47FEC2B631C0100F2B2C0 /* nostrdb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nostrdb.h; sourceTree = "<group>"; };
@@ -2432,7 +2409,6 @@
 		4CF47FF22B631C0100F2B2C0 /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
 		4CF47FF32B631C0100F2B2C0 /* print_util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = print_util.h; sourceTree = "<group>"; };
 		4CF47FF42B631C0100F2B2C0 /* block.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = block.h; sourceTree = "<group>"; };
-		4CF47FF52B631C0100F2B2C0 /* sha256.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sha256.c; sourceTree = "<group>"; };
 		4CF47FF62B631C0100F2B2C0 /* content_parser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = content_parser.c; sourceTree = "<group>"; };
 		4CF47FFA2B631C0100F2B2C0 /* ndb_profile.rs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ndb_profile.rs; sourceTree = "<group>"; };
 		4CF47FFB2B631C0100F2B2C0 /* ndb_meta.rs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ndb_meta.rs; sourceTree = "<group>"; };
@@ -2457,22 +2433,12 @@
 		4CF4801A2B631C0100F2B2C0 /* hash_u5.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hash_u5.c; sourceTree = "<group>"; };
 		4CF4801B2B631C0100F2B2C0 /* node_id.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = node_id.h; sourceTree = "<group>"; };
 		4CF4801E2B631C0100F2B2C0 /* bech32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bech32.c; sourceTree = "<group>"; };
-		4CF4801F2B631C0100F2B2C0 /* tal.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tal.c; sourceTree = "<group>"; };
-		4CF480202B631C0100F2B2C0 /* list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = list.h; sourceTree = "<group>"; };
-		4CF480212B631C0100F2B2C0 /* str_debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = str_debug.h; sourceTree = "<group>"; };
 		4CF480222B631C0100F2B2C0 /* bolt11.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bolt11.h; sourceTree = "<group>"; };
 		4CF480252B631C0100F2B2C0 /* amount.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = amount.c; sourceTree = "<group>"; };
 		4CF480262B631C0100F2B2C0 /* error.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = error.c; sourceTree = "<group>"; };
 		4CF480282B631C0100F2B2C0 /* bech32_util.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bech32_util.c; sourceTree = "<group>"; };
 		4CF4802B2B631C0100F2B2C0 /* hash_u5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hash_u5.h; sourceTree = "<group>"; };
-		4CF4802C2B631C0100F2B2C0 /* mem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mem.h; sourceTree = "<group>"; };
-		4CF4802D2B631C0100F2B2C0 /* build_assert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = build_assert.h; sourceTree = "<group>"; };
-		4CF4802E2B631C0100F2B2C0 /* short_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = short_types.h; sourceTree = "<group>"; };
-		4CF4802F2B631C0100F2B2C0 /* tal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tal.h; sourceTree = "<group>"; };
 		4CF480302B631C0100F2B2C0 /* bech32.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bech32.h; sourceTree = "<group>"; };
-		4CF480312B631C0100F2B2C0 /* check_type.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = check_type.h; sourceTree = "<group>"; };
-		4CF480322B631C0100F2B2C0 /* utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utf8.h; sourceTree = "<group>"; };
-		4CF480332B631C0100F2B2C0 /* talstr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = talstr.h; sourceTree = "<group>"; };
 		4CF480342B631C0100F2B2C0 /* node_id.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = node_id.c; sourceTree = "<group>"; };
 		4CF480352B631C0100F2B2C0 /* protected_queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = protected_queue.h; sourceTree = "<group>"; };
 		4CF480362B631C0100F2B2C0 /* random.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = random.h; sourceTree = "<group>"; };
@@ -3731,8 +3697,6 @@
 		4CC6A9E32CAB688500989CEF /* str */ = {
 			isa = PBXGroup;
 			children = (
-				4CC6A9DF2CAB688500989CEF /* _info */,
-				4CC6A9E02CAB688500989CEF /* LICENSE */,
 				4CC6A9E12CAB688500989CEF /* str.h */,
 				4CC6A9E22CAB688500989CEF /* str.c */,
 			);
@@ -4109,15 +4073,12 @@
 				4CF47FDE2B631C0100F2B2C0 /* nostrdb.c */,
 				4CF47FDF2B631C0100F2B2C0 /* block.c */,
 				4CF47FE02B631C0100F2B2C0 /* str_block.h */,
-				4CF47FE12B631C0100F2B2C0 /* compiler.h */,
 				4CF47FE22B631C0100F2B2C0 /* threadpool.h */,
 				4CF47FE32B631C0100F2B2C0 /* typedefs.h */,
 				4CF47FE42B631C0100F2B2C0 /* config.h */,
 				4CF47FE52B631C0100F2B2C0 /* nostr_bech32.c */,
-				4CF47FE62B631C0100F2B2C0 /* endian.h */,
 				4CF47FE72B631C0100F2B2C0 /* jsmn.h */,
 				4CF47FE82B631C0100F2B2C0 /* memchr.h */,
-				4CF47FE92B631C0100F2B2C0 /* sha256.h */,
 				4CF47FEA2B631C0100F2B2C0 /* invoice.h */,
 				4CF47FEB2B631C0100F2B2C0 /* cursor.h */,
 				4CF47FEC2B631C0100F2B2C0 /* nostrdb.h */,
@@ -4128,7 +4089,6 @@
 				4CF47FF22B631C0100F2B2C0 /* util.h */,
 				4CF47FF32B631C0100F2B2C0 /* print_util.h */,
 				4CF47FF42B631C0100F2B2C0 /* block.h */,
-				4CF47FF52B631C0100F2B2C0 /* sha256.c */,
 				4CF47FF62B631C0100F2B2C0 /* content_parser.c */,
 				4CF47FF72B631C0100F2B2C0 /* bindings */,
 				4CF4800B2B631C0100F2B2C0 /* bolt11 */,
@@ -4196,22 +4156,12 @@
 				4CF4801A2B631C0100F2B2C0 /* hash_u5.c */,
 				4CF4801B2B631C0100F2B2C0 /* node_id.h */,
 				4CF4801E2B631C0100F2B2C0 /* bech32.c */,
-				4CF4801F2B631C0100F2B2C0 /* tal.c */,
-				4CF480202B631C0100F2B2C0 /* list.h */,
-				4CF480212B631C0100F2B2C0 /* str_debug.h */,
 				4CF480222B631C0100F2B2C0 /* bolt11.h */,
 				4CF480252B631C0100F2B2C0 /* amount.c */,
 				4CF480262B631C0100F2B2C0 /* error.c */,
 				4CF480282B631C0100F2B2C0 /* bech32_util.c */,
 				4CF4802B2B631C0100F2B2C0 /* hash_u5.h */,
-				4CF4802C2B631C0100F2B2C0 /* mem.h */,
-				4CF4802D2B631C0100F2B2C0 /* build_assert.h */,
-				4CF4802E2B631C0100F2B2C0 /* short_types.h */,
-				4CF4802F2B631C0100F2B2C0 /* tal.h */,
 				4CF480302B631C0100F2B2C0 /* bech32.h */,
-				4CF480312B631C0100F2B2C0 /* check_type.h */,
-				4CF480322B631C0100F2B2C0 /* utf8.h */,
-				4CF480332B631C0100F2B2C0 /* talstr.h */,
 				4CF480342B631C0100F2B2C0 /* node_id.c */,
 			);
 			path = bolt11;
@@ -4760,8 +4710,6 @@
 				4C1D4FB42A7967990024F453 /* build-git-hash.txt in Resources */,
 				D7FB14222BE5970000398331 /* PrivacyInfo.xcprivacy in Resources */,
 				3ACB685F297633BC00C46468 /* Localizable.strings in Resources */,
-				4CC6AA612CAB688500989CEF /* _info in Resources */,
-				4CC6AA672CAB688500989CEF /* LICENSE in Resources */,
 				4CE6DEEE27F7A08200C66700 /* Preview Assets.xcassets in Resources */,
 				3ACB685C297633BC00C46468 /* InfoPlist.strings in Resources */,
 				50DA11262A16A23F00236234 /* Launch.storyboard in Resources */,
@@ -4807,8 +4755,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D7C970202C89100200C56602 /* Localizable.strings in Resources */,
-				4CC6AA302CAB688500989CEF /* _info in Resources */,
-				4CC6AA362CAB688500989CEF /* LICENSE in Resources */,
 				D7C970212C89100200C56602 /* Localizable.stringsdict in Resources */,
 				D73E5F982C6AA847007EB227 /* Assets.xcassets in Resources */,
 				D703D72B2C66F29500A400EA /* getSelection.js in Resources */,
@@ -4823,8 +4769,6 @@
 				D7C9701F2C890FEB00C56602 /* Localizable.stringsdict in Resources */,
 				D7C9701E2C890FC500C56602 /* Localizable.strings in Resources */,
 				D7FB14252BE5A9A800398331 /* PrivacyInfo.xcprivacy in Resources */,
-				4CC6AAAB2CAB688500989CEF /* _info in Resources */,
-				4CC6AAB12CAB688500989CEF /* LICENSE in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4884,7 +4828,6 @@
 				D7CBD1D42B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift in Sources */,
 				4C32B9572A9AD44700DC3548 /* Root.swift in Sources */,
 				5C8498032D5D150000F74FEB /* ZapExplainer.swift in Sources */,
-				4CF4804B2B631C0100F2B2C0 /* tal.c in Sources */,
 				504323A72A34915F006AE6DC /* RelayModel.swift in Sources */,
 				3A2BAC5C2DD7E4C400EBB4CC /* NIP05DomainTimelineHeaderView.swift in Sources */,
 				4CF0ABF62985CD5500D66079 /* UserSearch.swift in Sources */,
@@ -4944,7 +4887,6 @@
 				4C285C8A2838B985008A31F1 /* ProfilePictureSelector.swift in Sources */,
 				4CFD502F2A2DA45800A229DB /* MediaView.swift in Sources */,
 				D7373BA62B688EA300F7783D /* DamusPurpleTranslationSetupView.swift in Sources */,
-				4CF480482B631C0100F2B2C0 /* talstr.c in Sources */,
 				4C9F18E429ABDE6D008C55EC /* MaybeAnonPfpView.swift in Sources */,
 				4CA5588329F33F5B00DC6A45 /* StringCodable.swift in Sources */,
 				4C75EFB92804A2740006080F /* EventView.swift in Sources */,
@@ -4955,7 +4897,6 @@
 				4C687C272A6039500092C550 /* TestData.swift in Sources */,
 				50C3E08A2AA8E3F7006A4BC0 /* AVPlayer+Additions.swift in Sources */,
 				4C198DF229F88C6B004C165C /* BlurHashDecode.swift in Sources */,
-				4CF480492B631C0100F2B2C0 /* utf8.c in Sources */,
 				F75BA12F29A18EF500E10810 /* BookmarksView.swift in Sources */,
 				5C0567552C8B60C20073F23A /* OffsetExtension.swift in Sources */,
 				4CB883B6297730E400DC99E7 /* LNUrls.swift in Sources */,
@@ -5025,8 +4966,6 @@
 				4CB8838B296F6E1E00DC99E7 /* NIP05Badge.swift in Sources */,
 				4CA3FA1029F593D000FDB3C3 /* ZapTypePicker.swift in Sources */,
 				4C32B95D2A9AD44700DC3548 /* Documentation.docc in Sources */,
-				4C3EA66828FF5F9900C48A62 /* hex.c in Sources */,
-				E9E4ED0B295867B900DD7078 /* ThreadView.swift in Sources */,
 				4CD348EF29C3659D00497EB2 /* ImageUploadModel.swift in Sources */,
 				4C3BEFDC281DCE6100B3DE84 /* Liked.swift in Sources */,
 				4CF0ABE7298444FD00D66079 /* EventMutingContainerView.swift in Sources */,
@@ -5094,7 +5033,6 @@
 				4C7D09722A0AEF5E00943473 /* DamusGradient.swift in Sources */,
 				4C463CBF2B960B96008A8C36 /* PurpleBackdrop.swift in Sources */,
 				BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */,
-				4CF4804C2B631C0100F2B2C0 /* take.c in Sources */,
 				3169CAE6294E69C000EE4006 /* EmptyTimelineView.swift in Sources */,
 				4CF4803A2B631C0100F2B2C0 /* nostr_bech32.c in Sources */,
 				4C32B9602A9AD44700DC3548 /* Struct.swift in Sources */,
@@ -5198,7 +5136,7 @@
 				4CB88396296F7F8B00DC99E7 /* ReactionView.swift in Sources */,
 				50A16FFD2AA7525700DFEC1F /* DamusVideoPlayer.swift in Sources */,
 				4CF480552B631C4F00F2B2C0 /* wasm.c in Sources */,
-				50A16FFD2AA7525700DFEC1F /* DamusVideoPlayerViewModel.swift in Sources */,
+				50A16FFD2AA7525700DFEC1F /* DamusVideoPlayer.swift in Sources */,
 				4CFF8F6B29CD0079008DB934 /* RepostedEvent.swift in Sources */,
 				D78CD5982B8990300014D539 /* DamusAppNotificationView.swift in Sources */,
 				D724D8272B64B40B00ABE789 /* DamusPurpleAccountView.swift in Sources */,
@@ -5287,7 +5225,6 @@
 				4CE8794E2996B16A00F758CC /* RelayToggle.swift in Sources */,
 				4C3AC79B28306D7B00E1F516 /* Contacts.swift in Sources */,
 				D71AD8FF2CEC176A002E2C3C /* AppAccessibilityIdentifiers.swift in Sources */,
-				4C3EA63D28FF52D600C48A62 /* bolt11.c in Sources */,
 				4C9BB83129C0ED4F00FC4E37 /* DisplayName.swift in Sources */,
 				7CFF6317299FEFE5005D382A /* SelectableText.swift in Sources */,
 				4CA352A82A76B37E003BB08B /* NewMutesNotify.swift in Sources */,
@@ -5447,6 +5384,26 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C3624722D5EA18E00DD066E /* amount.c in Sources */,
+				4C3624712D5EA18300DD066E /* error.c in Sources */,
+				4C3624702D5EA17700DD066E /* utf8.c in Sources */,
+				4C36246F2D5EA16A00DD066E /* str.c in Sources */,
+				4C36246E2D5EA10400DD066E /* hash_u5.c in Sources */,
+				4C36246C2D5EA0E500DD066E /* bolt11.c in Sources */,
+				4C36246B2D5EA0D700DD066E /* invoice.c in Sources */,
+				4C36246A2D5EA0CB00DD066E /* content_parser.c in Sources */,
+				4C3624692D5EA0C200DD066E /* list.c in Sources */,
+				4C3624682D5EA0BC00DD066E /* nostr_bech32.c in Sources */,
+				4C3624672D5EA0B100DD066E /* take.c in Sources */,
+				4C3624662D5EA07000DD066E /* sha256.c in Sources */,
+				4C3624652D5EA06400DD066E /* bech32.c in Sources */,
+				4C3624642D5EA01600DD066E /* tal.c in Sources */,
+				4C3624632D5EA01100DD066E /* block.c in Sources */,
+				4C3624622D5EA00300DD066E /* nostrdb.c in Sources */,
+				4C3624612D5E9FFD00DD066E /* wasm.c in Sources */,
+				4C36245C2D5E9B4400DD066E /* NdbBlocksIterator.swift in Sources */,
+				4C36245D2D5E9B4400DD066E /* NdbBlock.swift in Sources */,
+				4C36245B2D5E9B2F00DD066E /* NdbProfile.swift in Sources */,
 				D7F360262CEBBD8B009D34DA /* PresentFullScreenItemNotify.swift in Sources */,
 				82D6FA9A2CD9820500C925F4 /* ShareViewController.swift in Sources */,
 				82D6FAA92CD99F7900C925F4 /* FbConstants.swift in Sources */,
@@ -5470,7 +5427,6 @@
 				82D6FABB2CD99F7900C925F4 /* emitter.c in Sources */,
 				82D6FABC2CD99F7900C925F4 /* refmap.c in Sources */,
 				82D6FABD2CD99F7900C925F4 /* verifier.c in Sources */,
-				82D6FABE2CD99F7900C925F4 /* NdbProfile.swift in Sources */,
 				D78F08112D7F78F900FC6C75 /* Response.swift in Sources */,
 				82D6FABF2CD99F7900C925F4 /* NdbTagIterator.swift in Sources */,
 				82D6FAC02CD99F7900C925F4 /* NdbNote.swift in Sources */,
@@ -5479,30 +5435,11 @@
 				82D6FAC32CD99F7900C925F4 /* Ndb.swift in Sources */,
 				82D6FAC42CD99F7900C925F4 /* NdbTagsIterator.swift in Sources */,
 				82D6FAC52CD99F7900C925F4 /* NdbTxn.swift in Sources */,
-				82D6FAC62CD99F7900C925F4 /* nostrdb.c in Sources */,
 				82D6FAC72CD99F7900C925F4 /* midl.c in Sources */,
 				82D6FAC82CD99F7900C925F4 /* mdb.c in Sources */,
 				82D6FAC92CD99F7900C925F4 /* NdbNote+.swift in Sources */,
 				82D6FACA2CD99F7900C925F4 /* NostrScript.swift in Sources */,
 				82D6FACB2CD99F7900C925F4 /* nostrscript.c in Sources */,
-				82D6FACC2CD99F7900C925F4 /* error.c in Sources */,
-				82D6FACD2CD99F7900C925F4 /* wasm.c in Sources */,
-				82D6FACE2CD99F7900C925F4 /* damus.c in Sources */,
-				82D6FACF2CD99F7900C925F4 /* utf8.c in Sources */,
-				82D6FAD02CD99F7900C925F4 /* bolt11.c in Sources */,
-				82D6FAD12CD99F7900C925F4 /* hash_u5.c in Sources */,
-				82D6FAD22CD99F7900C925F4 /* sha256.c in Sources */,
-				82D6FAD32CD99F7900C925F4 /* bech32.c in Sources */,
-				82D6FAD42CD99F7900C925F4 /* bech32_util.c in Sources */,
-				82D6FAD52CD99F7900C925F4 /* tal.c in Sources */,
-				82D6FAD62CD99F7900C925F4 /* node_id.c in Sources */,
-				82D6FAD72CD99F7900C925F4 /* mem.c in Sources */,
-				82D6FAD82CD99F7900C925F4 /* hex.c in Sources */,
-				82D6FAD92CD99F7900C925F4 /* amount.c in Sources */,
-				82D6FADA2CD99F7900C925F4 /* take.c in Sources */,
-				82D6FADB2CD99F7900C925F4 /* talstr.c in Sources */,
-				82D6FADC2CD99F7900C925F4 /* list.c in Sources */,
-				82D6FADD2CD99F7900C925F4 /* nostr_bech32.c in Sources */,
 				82D6FADE2CD99F7900C925F4 /* ThreadReply.swift in Sources */,
 				82D6FADF2CD99F7900C925F4 /* AttachedWalletNotify.swift in Sources */,
 				82D6FAE02CD99F7900C925F4 /* DisplayTabBarNotify.swift in Sources */,
@@ -5951,6 +5888,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C36247D2D5EA22300DD066E /* invoice.c in Sources */,
+				4C36247C2D5EA21F00DD066E /* amount.c in Sources */,
+				4C36247B2D5EA21200DD066E /* hash_u5.c in Sources */,
+				4C36247A2D5EA20C00DD066E /* bech32.c in Sources */,
+				4C3624792D5EA20200DD066E /* bolt11.c in Sources */,
+				4C3624782D5EA1FE00DD066E /* error.c in Sources */,
+				4C3624772D5EA1FA00DD066E /* nostr_bech32.c in Sources */,
+				4C3624762D5EA1F600DD066E /* content_parser.c in Sources */,
+				4C3624752D5EA1E000DD066E /* block.c in Sources */,
+				4C3624742D5EA1D700DD066E /* wasm.c in Sources */,
+				4C3624732D5EA1BE00DD066E /* nostrdb.c in Sources */,
+				4C3624602D5E9EB800DD066E /* NdbProfile.swift in Sources */,
+				4C36245E2D5E9B5F00DD066E /* NdbBlocksIterator.swift in Sources */,
+				4C36245F2D5E9B5F00DD066E /* NdbBlock.swift in Sources */,
 				D73E5E202C6A97F4007EB227 /* AttachedWalletNotify.swift in Sources */,
 				D73E5E212C6A97F4007EB227 /* DisplayTabBarNotify.swift in Sources */,
 				D73E5E222C6A97F4007EB227 /* BroadcastNotify.swift in Sources */,
@@ -6327,9 +6278,7 @@
 				D703D7602C670AAB00A400EA /* MigratedTypes.swift in Sources */,
 				D73E5F742C6A9890007EB227 /* damusApp.swift in Sources */,
 				D73E5E192C6A965A007EB227 /* DamusState.swift in Sources */,
-				D703D74F2C6709ED00A400EA /* (null) in Sources */,
 				D73E5F872C6AA639007EB227 /* ImageCarousel.swift in Sources */,
-				D703D7932C670DAF00A400EA /* (null) in Sources */,
 				D703D7732C670B8500A400EA /* Offset.swift in Sources */,
 				D703D7572C670A5A00A400EA /* IdType.swift in Sources */,
 				D703D7542C670A2A00A400EA /* MediaUploader.swift in Sources */,
@@ -6338,14 +6287,10 @@
 				D703D74C2C6709CE00A400EA /* Zaps.swift in Sources */,
 				D703D7552C670A3700A400EA /* DamusUserDefaults.swift in Sources */,
 				5C8498042D5D150000F74FEB /* ZapExplainer.swift in Sources */,
-				D703D7A32C670E1D00A400EA /* (null) in Sources */,
-				D703D7992C670DF900A400EA /* (null) in Sources */,
-				D703D7972C670DED00A400EA /* (null) in Sources */,
 				D703D7842C670C4700A400EA /* SequenceUtils.swift in Sources */,
 				D703D7912C670D1E00A400EA /* DisplayName.swift in Sources */,
 				D703D7B02C6710A500A400EA /* Root.swift in Sources */,
 				D703D7822C670C3400A400EA /* InsertSort.swift in Sources */,
-				D703D79E2C670E0F00A400EA /* (null) in Sources */,
 				D703D7B12C6710AB00A400EA /* LocalizationUtil.swift in Sources */,
 				D703D74D2C6709D400A400EA /* Zap.swift in Sources */,
 				D73E5E1C2C6A9677007EB227 /* DirectMessagesModel.swift in Sources */,
@@ -6358,26 +6303,21 @@
 				D703D77E2C670C1100A400EA /* NostrKind.swift in Sources */,
 				D73E5F972C6AA7B7007EB227 /* SuggestedHashtagsView.swift in Sources */,
 				D703D7B22C6710AF00A400EA /* ContentParsing.swift in Sources */,
-				D703D79F2C670E1200A400EA /* (null) in Sources */,
 				D703D7522C670A1400A400EA /* Log.swift in Sources */,
 				D73E5E1B2C6A9672007EB227 /* LikeCounter.swift in Sources */,
 				D703D7A92C670E5A00A400EA /* refmap.c in Sources */,
 				D703D77B2C670BF000A400EA /* TableVerifier.swift in Sources */,
 				3ACF94442DA9FCAB00971A4E /* NIP05DomainTimelineView.swift in Sources */,
 				D703D76D2C670B4500A400EA /* ZapDataModel.swift in Sources */,
-				D703D79D2C670E0700A400EA /* (null) in Sources */,
-				D703D79B2C670E0000A400EA /* (null) in Sources */,
 				D703D75D2C670A8E00A400EA /* ReferencedId.swift in Sources */,
 				D703D7772C670BCE00A400EA /* Verifiable.swift in Sources */,
 				D703D7642C670AE300A400EA /* StringCodable.swift in Sources */,
 				D703D7A52C670E3E00A400EA /* mdb.c in Sources */,
 				D703D76B2C670B3100A400EA /* Referenced.swift in Sources */,
 				D73BDB192D71311900D69970 /* UserRelayListErrors.swift in Sources */,
-				D703D7952C670DE600A400EA /* (null) in Sources */,
 				D703D7582C670A6000A400EA /* Id.swift in Sources */,
 				5C05675A2C8FBDE70073F23A /* NDBSearchView.swift in Sources */,
 				D703D76E2C670B4900A400EA /* NdbTagsIterator.swift in Sources */,
-				D703D7A02C670E1500A400EA /* (null) in Sources */,
 				D703D7692C670B2600A400EA /* Block.swift in Sources */,
 				D703D77D2C670C0300A400EA /* FlatbuffersErrors.swift in Sources */,
 				D703D7A62C670E5200A400EA /* builder.c in Sources */,
@@ -6393,13 +6333,9 @@
 				D703D7882C670C8200A400EA /* FriendFilter.swift in Sources */,
 				D703D7562C670A4C00A400EA /* TranslationService.swift in Sources */,
 				D703D7A72C670E5500A400EA /* json_parser.c in Sources */,
-				D703D79C2C670E0300A400EA /* (null) in Sources */,
-				D703D7712C670B6D00A400EA /* (null) in Sources */,
-				D703D7A22C670E1A00A400EA /* (null) in Sources */,
 				D703D7A42C670E3C00A400EA /* midl.c in Sources */,
 				D7DB1FE02D5A78CE00CF06DA /* NIP44.swift in Sources */,
 				D706C5B02D5D31C20027C627 /* AutoSaveIndicatorView.swift in Sources */,
-				D703D7982C670DF200A400EA /* utf8.c in Sources */,
 				D703D78B2C670C9500A400EA /* MakeZapRequest.swift in Sources */,
 				D703D7862C670C6500A400EA /* NewUnmutesNotify.swift in Sources */,
 				D703D7662C670AFC00A400EA /* AsciiCharacter.swift in Sources */,
@@ -6407,17 +6343,14 @@
 				D703D7432C67084F00A400EA /* Ndb.swift in Sources */,
 				D703D7B32C6710BF00A400EA /* NewMutesNotify.swift in Sources */,
 				D703D78C2C670CAB00A400EA /* ProofOfWork.swift in Sources */,
-				D703D7A12C670E1700A400EA /* (null) in Sources */,
 				D703D7782C670BD900A400EA /* LNUrlPayRequest.swift in Sources */,
 				D703D7612C670AC000A400EA /* FlatBufferObject.swift in Sources */,
-				D703D7942C670DE300A400EA /* (null) in Sources */,
 				D703D74A2C6709C200A400EA /* MuteItem.swift in Sources */,
 				D703D77C2C670BFB00A400EA /* Enum.swift in Sources */,
 				D73E5E1F2C6A969E007EB227 /* RelayModelCache.swift in Sources */,
 				D703D7AB2C670F6900A400EA /* UnmuteThreadNotify.swift in Sources */,
 				D703D7702C670B5F00A400EA /* UserStatus.swift in Sources */,
 				D703D7752C670BBF00A400EA /* Constants.swift in Sources */,
-				D703D7832C670C3900A400EA /* (null) in Sources */,
 				D73E5E172C6A962A007EB227 /* ImageUploadModel.swift in Sources */,
 				D703D76A2C670B2C00A400EA /* Bech32Object.swift in Sources */,
 				D73E5E162C6A9619007EB227 /* PostView.swift in Sources */,
@@ -6437,10 +6370,8 @@
 				D703D7A82C670E5800A400EA /* emitter.c in Sources */,
 				D703D76F2C670B5200A400EA /* NostrResponse.swift in Sources */,
 				D703D7902C670D1600A400EA /* NewEventsBits.swift in Sources */,
-				D703D7962C670DEA00A400EA /* (null) in Sources */,
 				D703D75E2C670A9A00A400EA /* NdbTagElem.swift in Sources */,
 				D703D7622C670ACB00A400EA /* ByteBuffer.swift in Sources */,
-				D703D79A2C670DFD00A400EA /* (null) in Sources */,
 				D703D7B62C67118200A400EA /* String+extension.swift in Sources */,
 				D74EA08A2D2BF2A7002290DD /* URLHandler.swift in Sources */,
 				D703D76C2C670B3900A400EA /* Post.swift in Sources */,
