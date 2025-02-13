@@ -222,12 +222,6 @@ struct ContentView: View {
         navigationCoordinator.push(route: Route.Script(script: model))
     }
     
-    func open_profile(pubkey: Pubkey) {
-        let profile_model = ProfileModel(pubkey: pubkey, damus: damus_state!)
-        let followers = FollowersModel(damus_state: damus_state!, target: pubkey)
-        navigationCoordinator.push(route: Route.Profile(profile: profile_model, followers: followers))
-    }
-    
     func open_search(filt: NostrFilter) {
         let search = SearchModel(state: damus_state!, search: filt)
         navigationCoordinator.push(route: Route.Search(search: search))
@@ -312,6 +306,9 @@ struct ContentView: View {
                 hasSeenOnboardingSuggestions = true
             }
             self.appDelegate?.state = damus_state
+            Task {  // We probably don't need this to be a detached task. According to https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/#Defining-and-Calling-Asynchronous-Functions, awaits are only suspension points that do not block the thread.
+                await self.listenAndHandleLocalNotifications()
+            }
         }
         .sheet(item: $active_sheet) { item in
             switch item {
@@ -512,27 +509,6 @@ struct ContentView: View {
                 break
             }
         }
-        .onReceive(handle_notify(.local_notification)) { local in
-            guard let damus_state else { return }
-
-            switch local.mention {
-            case .pubkey(let pubkey):
-                open_profile(pubkey: pubkey)
-
-            case .note(let noteId):
-                openEvent(noteId: noteId, notificationType: local.type)
-            case .nevent(let nevent):
-                openEvent(noteId: nevent.noteid, notificationType: local.type)
-            case .nprofile(let nprofile):
-                open_profile(pubkey: nprofile.author)
-            case .nrelay(_):
-                break
-            case .naddr(let naddr):
-                break
-            }
-
-
-        }
         .onReceive(handle_notify(.onlyzaps_mode)) { hide in
             home.filter_events()
 
@@ -641,6 +617,28 @@ struct ContentView: View {
         self.selected_timeline = timeline
     }
 
+    /// Listens to requests to open a push/local user notification
+    ///
+    /// This function never returns, it just keeps streaming
+    func listenAndHandleLocalNotifications() async {
+        for await notification in await QueueableNotify<LossyLocalNotification>.shared.stream {
+            self.handleNotification(notification: notification)
+        }
+    }
+
+    func handleNotification(notification: LossyLocalNotification) {
+        Log.info("ContentView is handling a notification", for: .push_notifications)
+        guard let damus_state else {
+            // This should never happen because `listenAndHandleLocalNotifications` is called after damus state is initialized in `onAppear`
+            assertionFailure("DamusState not loaded when ContentView (new handler) was handling a notification")
+            Log.error("DamusState not loaded when ContentView (new handler) was handling a notification", for: .push_notifications)
+            return
+        }
+        let local = notification
+        let openAction = local.toViewOpenAction()
+        self.execute_open_action(openAction)
+    }
+
     func connect() {
         // nostrdb
         var mndb = Ndb()
@@ -744,23 +742,6 @@ struct ContentView: View {
 
             guard let ev = music.to_note(keypair: kp) else { return }
             damus_state.postbox.send(ev)
-        }
-    }
-
-    private func openEvent(noteId: NoteId, notificationType: LocalNotificationType) {
-        guard let target = damus_state.events.lookup(noteId) else {
-            return
-        }
-
-        switch notificationType {
-        case .dm:
-            selected_timeline = .dms
-            damus_state.dms.set_active_dm(target.pubkey)
-            navigationCoordinator.push(route: Route.DMChat(dms: damus_state.dms.active_model))
-        case .like, .zap, .mention, .repost, .reply, .tagged:
-            open_event(ev: target)
-        case .profile_zap:
-            break
         }
     }
     
@@ -1213,6 +1194,35 @@ func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: Ev
     case .cancel:
         print("post cancelled")
         return false
+    }
+}
+
+extension LossyLocalNotification {
+    /// Computes a view open action from a mention reference.
+    /// Use this when opening a user-presentable interface to a specific mention reference.
+    func toViewOpenAction() -> ContentView.ViewOpenAction {
+        switch self.mention {
+        case .pubkey(let pubkey):
+            return .route(.ProfileByKey(pubkey: pubkey))
+        case .note(let noteId):
+            return .route(.LoadableNostrEvent(note_reference: .note_id(noteId)))
+        case .nevent(let nEvent):
+            // TODO: Improve this by implementing a route that handles nevents with their relay hints.
+            return .route(.LoadableNostrEvent(note_reference: .note_id(nEvent.noteid)))
+        case .nprofile(let nProfile):
+            // TODO: Improve this by implementing a profile route that handles nprofiles with their relay hints.
+            return .route(.ProfileByKey(pubkey: nProfile.author))
+        case .nrelay(let string):
+            // We do not need to implement `nrelay` support, it has been deprecated.
+            // See https://github.com/nostr-protocol/nips/blob/6e7a618e7f873bb91e743caacc3b09edab7796a0/BREAKING.md?plain=1#L21
+            return .sheet(.error(ErrorView.UserPresentableError(
+                user_visible_description: NSLocalizedString("You opened an invalid link. The link you tried to open refers to \"nrelay\", which has been deprecated and is not supported.", comment: "User-visible error description for a user who tries to open a deprecated \"nrelay\" link."),
+                tip: NSLocalizedString("Please contact the person who provided the link, and ask for another link.", comment: "User-visible tip on what to do if a link contains a deprecated \"nrelay\" reference."),
+                technical_info: "`MentionRef.toViewOpenAction` detected deprecated `nrelay` contents"
+            )))
+        case .naddr(let nAddr):
+            return .route(.LoadableNostrEvent(note_reference: .naddr(nAddr)))
+        }
     }
 }
 
