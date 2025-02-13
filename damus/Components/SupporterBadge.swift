@@ -245,7 +245,7 @@ struct SupporterBadge_Previews: PreviewProvider {
                 .frame(width: 100)
         }
         
-        Text("Double star (just shape itself, with alt background color, to show it adapts to background well)")
+        Text(verbatim: "Double star (just shape itself, with alt background color, to show it adapts to background well)")
             .multilineTextAlignment(.center)
         
         if #available(iOS 17.0, *) {
@@ -257,13 +257,13 @@ struct SupporterBadge_Previews: PreviewProvider {
             .background(Color.blue)
         }
         
-        Text("Double star (fallback for iOS 16 and below)")
-        
+        Text(verbatim: "Double star (fallback for iOS 16 and below)")
+
         HStack(alignment: .center) {
             DoubleStar.Fallback(size: 17, starOffset: 5)
         }
         
-        Text("Double star (fallback for iOS 16 and below, with alt color limitation shown)")
+        Text(verbatim: "Double star (fallback for iOS 16 and below, with alt color limitation shown)")
             .multilineTextAlignment(.center)
         
         HStack(alignment: .center) {

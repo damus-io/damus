@@ -31,8 +31,8 @@
         <note>Privacy - Face ID Usage Description</note>
       </trans-unit>
       <trans-unit id="NSMicrophoneUsageDescription" xml:space="preserve">
-        <source>Damus needs access to your microphone for creating video recording posts</source>
-        <target>Damus needs access to your microphone for creating video recording posts</target>
+        <source>Damus needs access to your microphone to allow you to create video recordings that you can choose to post publicly on the network</source>
+        <target>Damus needs access to your microphone to allow you to create video recordings that you can choose to post publicly on the network</target>
         <note>Privacy - Microphone Usage Description</note>
       </trans-unit>
       <trans-unit id="NSPhotoLibraryAddUsageDescription" xml:space="preserve">
@@ -251,6 +251,11 @@ Title text to indicate user to an add a relay.</note>
         <source>Additional information</source>
         <target>Additional information</target>
         <note>Header text to prompt user to optionally provide additional information when reporting a user or note.</note>
+      </trans-unit>
+      <trans-unit id="Advice" xml:space="preserve">
+        <source>Advice</source>
+        <target>Advice</target>
+        <note>Heading for some advice text to help the user with an error</note>
       </trans-unit>
       <trans-unit id="All" xml:space="preserve">
         <source>All</source>
@@ -553,6 +558,16 @@ Text for button to conect to Nostr Wallet Connect lightning wallet.</note>
         <target>Contact list has been reset</target>
         <note>Message indicating that the contact list was successfully reset.</note>
       </trans-unit>
+      <trans-unit id="Contact support via DMs" xml:space="preserve">
+        <source>Contact support via DMs</source>
+        <target>Contact support via DMs</target>
+        <note>Button label to contact support from an error screen</note>
+      </trans-unit>
+      <trans-unit id="Contact support via email at [support@damus.io](mailto:support@damus.io)" xml:space="preserve">
+        <source>Contact support via email at [support@damus.io](mailto:support@damus.io)</source>
+        <target>Contact support via email at [support@damus.io](mailto:support@damus.io)</target>
+        <note>Text to contact support via email</note>
+      </trans-unit>
       <trans-unit id="Content filters" xml:space="preserve">
         <source>Content filters</source>
         <target>Content filters</target>
@@ -653,6 +668,11 @@ Context menu option for copying the version of damus.</note>
         <source>Could not find user to mute...</source>
         <target>Could not find user to mute...</target>
         <note>Alert message to indicate that the muted user could not be found.</note>
+      </trans-unit>
+      <trans-unit id="Could not parse the URL you are trying to open." xml:space="preserve">
+        <source>Could not parse the URL you are trying to open.</source>
+        <target>Could not parse the URL you are trying to open.</target>
+        <note>User visible error description</note>
       </trans-unit>
       <trans-unit id="Create Account" xml:space="preserve">
         <source>Create Account</source>
@@ -1293,6 +1313,11 @@ Settings section for managing keys</note>
         <target>Load media</target>
         <note>Button to show media in note.</note>
       </trans-unit>
+      <trans-unit id="Loading thread" xml:space="preserve">
+        <source>Loading thread</source>
+        <target>Loading thread</target>
+        <note>Accessibility label for the thread view when it is loading</note>
+      </trans-unit>
       <trans-unit id="Local" xml:space="preserve">
         <source>Local</source>
         <target>Local</target>
@@ -1400,20 +1425,20 @@ Title for confirmation dialog to mute a profile.</note>
         <target>Mute Hashtag</target>
         <note>Label represnting a button that the user can tap to mute a given hashtag so they don't see it in their feed anymore.</note>
       </trans-unit>
-      <trans-unit id="Mute User" xml:space="preserve">
-        <source>Mute User</source>
-        <target>Mute User</target>
-        <note>Title of alert for muting a user.</note>
-      </trans-unit>
       <trans-unit id="Mute conversation" xml:space="preserve">
         <source>Mute conversation</source>
         <target>Mute conversation</target>
         <note>Context menu option for muting a conversation.</note>
       </trans-unit>
-      <trans-unit id="Mute user" xml:space="preserve">
-        <source>Mute user</source>
-        <target>Mute user</target>
-        <note>Context menu option for muting users.</note>
+      <trans-unit id="Mute/Block User" xml:space="preserve">
+        <source>Mute/Block User</source>
+        <target>Mute/Block User</target>
+        <note>Title of alert for muting/blocking a user.</note>
+      </trans-unit>
+      <trans-unit id="Mute/Block user" xml:space="preserve">
+        <source>Mute/Block user</source>
+        <target>Mute/Block user</target>
+        <note>Context menu option for muting/blocking users.</note>
       </trans-unit>
       <trans-unit id="Muted" xml:space="preserve">
         <source>Muted</source>
@@ -1546,6 +1571,11 @@ Picker option to indicate that sats should be sent to the user's wallet as a reg
         <target>Nostr Address</target>
         <note>Label for the Nostr Address section of user profile form.</note>
       </trans-unit>
+      <trans-unit id="Nostr is the super app. Because it’s actually an ecosystem of apps, all of which make each other better. People haven’t grasped that yet. They will when it’s more accessible and onboarding is more straightforward and intuitive." xml:space="preserve">
+        <source>Nostr is the super app. Because it’s actually an ecosystem of apps, all of which make each other better. People haven’t grasped that yet. They will when it’s more accessible and onboarding is more straightforward and intuitive.</source>
+        <target>Nostr is the super app. Because it’s actually an ecosystem of apps, all of which make each other better. People haven’t grasped that yet. They will when it’s more accessible and onboarding is more straightforward and intuitive.</target>
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
       <trans-unit id="NostrScript" xml:space="preserve">
         <source>NostrScript</source>
         <target>NostrScript</target>
@@ -1570,6 +1600,11 @@ Picker option to indicate that sats should be sent to the user's wallet as a reg
         <source>Note from a %@ you've muted</source>
         <target>Note from a %@ you've muted</target>
         <note>Text to indicate that what is being shown is a note which has been muted.</note>
+      </trans-unit>
+      <trans-unit id="Note not found" xml:space="preserve">
+        <source>Note not found</source>
+        <target>Note not found</target>
+        <note>Heading for the thread view in a not found error state</note>
       </trans-unit>
       <trans-unit id="Note you've muted" xml:space="preserve">
         <source>Note you've muted</source>
@@ -1660,6 +1695,11 @@ Button label to dismiss an error dialog</note>
         <target>OnlyZaps mode</target>
         <note>Setting toggle to hide reactions.</note>
       </trans-unit>
+      <trans-unit id="Oops!" xml:space="preserve">
+        <source>Oops!</source>
+        <target>Oops!</target>
+        <note>Heading for an error screen</note>
+      </trans-unit>
       <trans-unit id="Open in browser" xml:space="preserve">
         <source>Open in browser</source>
         <target>Open in browser</target>
@@ -1730,6 +1770,16 @@ Section title for deleting the user</note>
         <source>Please choose relays from the list below to filter the current feed:</source>
         <target>Please choose relays from the list below to filter the current feed:</target>
         <note>Instructions on how to filter a specific timeline feed by choosing relay servers to filter on.</note>
+      </trans-unit>
+      <trans-unit id="Please double-check the checkout web page, or go to the Side Menu → &quot;Purple&quot; to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue." xml:space="preserve">
+        <source>Please double-check the checkout web page, or go to the Side Menu → "Purple" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue.</source>
+        <target>Please double-check the checkout web page, or go to the Side Menu → "Purple" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue.</target>
+        <note>User-facing tips on what to do if a Purple welcome link doesn't work</note>
+      </trans-unit>
+      <trans-unit id="Please try again, check the URL for typos, or contact support for further help." xml:space="preserve">
+        <source>Please try again, check the URL for typos, or contact support for further help.</source>
+        <target>Please try again, check the URL for typos, or contact support for further help.</target>
+        <note>User visible error tips</note>
       </trans-unit>
       <trans-unit id="Point your camera to a QR code…" xml:space="preserve">
         <source>Point your camera to a QR code…</source>
@@ -2086,6 +2136,11 @@ Button to save key, complete account creation, and start using the app.</note>
         <target>Save your login info?</target>
         <note>Ask user if they want to save their account information.</note>
       </trans-unit>
+      <trans-unit id="Saved" xml:space="preserve">
+        <source>Saved</source>
+        <target>Saved</target>
+        <note>Small label indicating that the user's draft has been saved to storage</note>
+      </trans-unit>
       <trans-unit id="Scan Code" xml:space="preserve">
         <source>Scan Code</source>
         <target>Scan Code</target>
@@ -2253,11 +2308,6 @@ Button to show more of a long profile description.</note>
         <source>Show only from users you follow</source>
         <target>Show only from users you follow</target>
         <note>Setting to Show notifications only associated to users your follow</note>
-      </trans-unit>
-      <trans-unit id="Show only preferred languages on Universe feed" xml:space="preserve">
-        <source>Show only preferred languages on Universe feed</source>
-        <target>Show only preferred languages on Universe feed</target>
-        <note>Toggle to show notes that are only in the device's preferred languages on the Universe feed and hide notes that are in other languages.</note>
       </trans-unit>
       <trans-unit id="Show profile action sheets" xml:space="preserve">
         <source>Show profile action sheets</source>
@@ -2515,11 +2565,6 @@ Nice to meet you all! #introductions #plebchain </target>
         <target>This user cannot be zapped because they have not configured zaps on their account yet. Time to orange-pill?</target>
         <note>Comment explaining why a user cannot be zapped.</note>
       </trans-unit>
-      <trans-unit id="Thread" xml:space="preserve">
-        <source>Thread</source>
-        <target>Thread</target>
-        <note>Navigation bar title for note thread.</note>
-      </trans-unit>
       <trans-unit id="Threads" xml:space="preserve">
         <source>Threads</source>
         <target>Threads</target>
@@ -2580,6 +2625,11 @@ Section header for text and appearance settings</note>
         <source>Truncate timeline text</source>
         <target>Truncate timeline text</target>
         <note>Setting to truncate text in timeline</note>
+      </trans-unit>
+      <trans-unit id="Try checking the link again, your internet connection, whether you need to connect to a specific relay to access this content." xml:space="preserve">
+        <source>Try checking the link again, your internet connection, whether you need to connect to a specific relay to access this content.</source>
+        <target>Try checking the link again, your internet connection, whether you need to connect to a specific relay to access this content.</target>
+        <note>Tips on what to do if a note cannot be found.</note>
       </trans-unit>
       <trans-unit id="Type %@ to delete" xml:space="preserve">
         <source>Type %@ to delete</source>
@@ -2777,6 +2827,11 @@ Title for section in zap settings that controls the Lightning wallet selection.<
         <target>We did not detect any issues that we can automatically fix for you. If you are having issues, please contact Damus support: [support@damus.io](mailto:support@damus.io)</target>
         <note>Message indicating that no First Aid actions are available.</note>
       </trans-unit>
+      <trans-unit id="We were unable to find the note you were looking for." xml:space="preserve">
+        <source>We were unable to find the note you were looking for.</source>
+        <target>We were unable to find the note you were looking for.</target>
+        <note>Text for the thread view when it is unable to find the note the user is looking for</note>
+      </trans-unit>
       <trans-unit id="We'll save your account key, so you won't need to enter it manually next time you log in." xml:space="preserve">
         <source>We'll save your account key, so you won't need to enter it manually next time you log in.</source>
         <target>We'll save your account key, so you won't need to enter it manually next time you log in.</target>
@@ -2858,6 +2913,16 @@ User confirm Yes</note>
         <target>You cannot post a highlight because you have selected no text on the page! Please close this, select some text, and try again.</target>
         <note>Label explaining a highlight cannot be made because there was no selected text, and some instructions on how to resolve the issue</note>
       </trans-unit>
+      <trans-unit id="You clicked on a Purple welcome link, but it does not look like the checkout is completed yet. This is likely a bug." xml:space="preserve">
+        <source>You clicked on a Purple welcome link, but it does not look like the checkout is completed yet. This is likely a bug.</source>
+        <target>You clicked on a Purple welcome link, but it does not look like the checkout is completed yet. This is likely a bug.</target>
+        <note>Error label upon continuing in the app from a Damus Purple purchase</note>
+      </trans-unit>
+      <trans-unit id="You clicked on a Purple welcome link, but we could not find your checkout. This is likely a bug." xml:space="preserve">
+        <source>You clicked on a Purple welcome link, but we could not find your checkout. This is likely a bug.</source>
+        <target>You clicked on a Purple welcome link, but we could not find your checkout. This is likely a bug.</target>
+        <note>Error label upon continuing in the app from a Damus Purple purchase</note>
+      </trans-unit>
       <trans-unit id="You have no bookmarks yet, add them in the context menu" xml:space="preserve">
         <source>You have no bookmarks yet, add them in the context menu</source>
         <target>You have no bookmarks yet, add them in the context menu</target>
@@ -2887,6 +2952,11 @@ User confirm Yes</note>
         <source>Your Purple subscription has expired. Renew?</source>
         <target>Your Purple subscription has expired. Renew?</target>
         <note>A notification message explaining to the user that their Damus Purple Subscription has expired, prompting them to renew.</note>
+      </trans-unit>
+      <trans-unit id="Your draft has been saved to storage" xml:space="preserve">
+        <source>Your draft has been saved to storage</source>
+        <target>Your draft has been saved to storage</target>
+        <note>Accessibility label indicating that a user's post draft has been saved, meant only for visually impaired users</note>
       </trans-unit>
       <trans-unit id="Your highlight is being broadcasted to the network. Please wait." xml:space="preserve">
         <source>Your highlight is being broadcasted to the network. Please wait.</source>
@@ -3789,6 +3859,11 @@ Title text to indicate user to an add a relay.</note>
         <target state="new">Additional information</target>
         <note>Header text to prompt user to optionally provide additional information when reporting a user or note.</note>
       </trans-unit>
+      <trans-unit id="Advice" xml:space="preserve">
+        <source>Advice</source>
+        <target state="new">Advice</target>
+        <note>Heading for some advice text to help the user with an error</note>
+      </trans-unit>
       <trans-unit id="All" xml:space="preserve">
         <source>All</source>
         <target state="new">All</target>
@@ -4093,6 +4168,16 @@ Text for button to conect to Nostr Wallet Connect lightning wallet.</note>
         <target state="new">Contact list has been reset</target>
         <note>Message indicating that the contact list was successfully reset.</note>
       </trans-unit>
+      <trans-unit id="Contact support via DMs" xml:space="preserve">
+        <source>Contact support via DMs</source>
+        <target state="new">Contact support via DMs</target>
+        <note>Button label to contact support from an error screen</note>
+      </trans-unit>
+      <trans-unit id="Contact support via email at [support@damus.io](mailto:support@damus.io)" xml:space="preserve">
+        <source>Contact support via email at [support@damus.io](mailto:support@damus.io)</source>
+        <target state="new">Contact support via email at [support@damus.io](mailto:support@damus.io)</target>
+        <note>Text to contact support via email</note>
+      </trans-unit>
       <trans-unit id="Content filters" xml:space="preserve">
         <source>Content filters</source>
         <target state="new">Content filters</target>
@@ -4193,6 +4278,11 @@ Context menu option for copying the version of damus.</note>
         <source>Could not find user to mute...</source>
         <target state="new">Could not find user to mute...</target>
         <note>Alert message to indicate that the muted user could not be found.</note>
+      </trans-unit>
+      <trans-unit id="Could not parse the URL you are trying to open." xml:space="preserve">
+        <source>Could not parse the URL you are trying to open.</source>
+        <target state="new">Could not parse the URL you are trying to open.</target>
+        <note>User visible error description</note>
       </trans-unit>
       <trans-unit id="Create Account" xml:space="preserve">
         <source>Create Account</source>
@@ -4833,6 +4923,11 @@ Settings section for managing keys</note>
         <target state="new">Load media</target>
         <note>Button to show media in note.</note>
       </trans-unit>
+      <trans-unit id="Loading thread" xml:space="preserve">
+        <source>Loading thread</source>
+        <target state="new">Loading thread</target>
+        <note>Accessibility label for the thread view when it is loading</note>
+      </trans-unit>
       <trans-unit id="Local" xml:space="preserve">
         <source>Local</source>
         <target state="new">Local</target>
@@ -4940,20 +5035,20 @@ Title for confirmation dialog to mute a profile.</note>
         <target state="new">Mute Hashtag</target>
         <note>Label represnting a button that the user can tap to mute a given hashtag so they don't see it in their feed anymore.</note>
       </trans-unit>
-      <trans-unit id="Mute User" xml:space="preserve">
-        <source>Mute User</source>
-        <target state="new">Mute User</target>
-        <note>Title of alert for muting a user.</note>
-      </trans-unit>
       <trans-unit id="Mute conversation" xml:space="preserve">
         <source>Mute conversation</source>
         <target state="new">Mute conversation</target>
         <note>Context menu option for muting a conversation.</note>
       </trans-unit>
-      <trans-unit id="Mute user" xml:space="preserve">
-        <source>Mute user</source>
-        <target state="new">Mute user</target>
-        <note>Context menu option for muting users.</note>
+      <trans-unit id="Mute/Block User" xml:space="preserve">
+        <source>Mute/Block User</source>
+        <target state="new">Mute/Block User</target>
+        <note>Title of alert for muting/blocking a user.</note>
+      </trans-unit>
+      <trans-unit id="Mute/Block user" xml:space="preserve">
+        <source>Mute/Block user</source>
+        <target state="new">Mute/Block user</target>
+        <note>Context menu option for muting/blocking users.</note>
       </trans-unit>
       <trans-unit id="Muted" xml:space="preserve">
         <source>Muted</source>
@@ -5081,6 +5176,11 @@ Picker option to indicate that sats should be sent to the user's wallet as a reg
         <target state="new">Nostr Address</target>
         <note>Label for the Nostr Address section of user profile form.</note>
       </trans-unit>
+      <trans-unit id="Nostr is the super app. Because it’s actually an ecosystem of apps, all of which make each other better. People haven’t grasped that yet. They will when it’s more accessible and onboarding is more straightforward and intuitive." xml:space="preserve">
+        <source>Nostr is the super app. Because it’s actually an ecosystem of apps, all of which make each other better. People haven’t grasped that yet. They will when it’s more accessible and onboarding is more straightforward and intuitive.</source>
+        <target state="new">Nostr is the super app. Because it’s actually an ecosystem of apps, all of which make each other better. People haven’t grasped that yet. They will when it’s more accessible and onboarding is more straightforward and intuitive.</target>
+        <note/>
+      </trans-unit>
       <trans-unit id="NostrScript" xml:space="preserve">
         <source>NostrScript</source>
         <target state="new">NostrScript</target>
@@ -5105,6 +5205,11 @@ Picker option to indicate that sats should be sent to the user's wallet as a reg
         <source>Note from a %@ you've muted</source>
         <target state="new">Note from a %@ you've muted</target>
         <note>Text to indicate that what is being shown is a note which has been muted.</note>
+      </trans-unit>
+      <trans-unit id="Note not found" xml:space="preserve">
+        <source>Note not found</source>
+        <target state="new">Note not found</target>
+        <note>Heading for the thread view in a not found error state</note>
       </trans-unit>
       <trans-unit id="Note you've muted" xml:space="preserve">
         <source>Note you've muted</source>
@@ -5195,6 +5300,11 @@ Button label to dismiss an error dialog</note>
         <target state="new">OnlyZaps mode</target>
         <note>Setting toggle to hide reactions.</note>
       </trans-unit>
+      <trans-unit id="Oops!" xml:space="preserve">
+        <source>Oops!</source>
+        <target state="new">Oops!</target>
+        <note>Heading for an error screen</note>
+      </trans-unit>
       <trans-unit id="Open in browser" xml:space="preserve">
         <source>Open in browser</source>
         <target state="new">Open in browser</target>
@@ -5265,6 +5375,16 @@ Section title for deleting the user</note>
         <source>Please choose relays from the list below to filter the current feed:</source>
         <target state="new">Please choose relays from the list below to filter the current feed:</target>
         <note>Instructions on how to filter a specific timeline feed by choosing relay servers to filter on.</note>
+      </trans-unit>
+      <trans-unit id="Please double-check the checkout web page, or go to the Side Menu → &quot;Purple&quot; to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue." xml:space="preserve">
+        <source>Please double-check the checkout web page, or go to the Side Menu → "Purple" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue.</source>
+        <target state="new">Please double-check the checkout web page, or go to the Side Menu → "Purple" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue.</target>
+        <note>User-facing tips on what to do if a Purple welcome link doesn't work</note>
+      </trans-unit>
+      <trans-unit id="Please try again, check the URL for typos, or contact support for further help." xml:space="preserve">
+        <source>Please try again, check the URL for typos, or contact support for further help.</source>
+        <target state="new">Please try again, check the URL for typos, or contact support for further help.</target>
+        <note>User visible error tips</note>
       </trans-unit>
       <trans-unit id="Point your camera to a QR code…" xml:space="preserve">
         <source>Point your camera to a QR code…</source>
@@ -5611,6 +5731,11 @@ Button to save key, complete account creation, and start using the app.</note>
         <target state="new">Save your login info?</target>
         <note>Ask user if they want to save their account information.</note>
       </trans-unit>
+      <trans-unit id="Saved" xml:space="preserve">
+        <source>Saved</source>
+        <target state="new">Saved</target>
+        <note>Small label indicating that the user's draft has been saved to storage</note>
+      </trans-unit>
       <trans-unit id="Scan Code" xml:space="preserve">
         <source>Scan Code</source>
         <target state="new">Scan Code</target>
@@ -5788,11 +5913,6 @@ Button to show more of a long profile description.</note>
         <source>Show only from users you follow</source>
         <target state="new">Show only from users you follow</target>
         <note>Setting to Show notifications only associated to users your follow</note>
-      </trans-unit>
-      <trans-unit id="Show only preferred languages on Universe feed" xml:space="preserve">
-        <source>Show only preferred languages on Universe feed</source>
-        <target state="new">Show only preferred languages on Universe feed</target>
-        <note>Toggle to show notes that are only in the device's preferred languages on the Universe feed and hide notes that are in other languages.</note>
       </trans-unit>
       <trans-unit id="Show profile action sheets" xml:space="preserve">
         <source>Show profile action sheets</source>
@@ -6050,11 +6170,6 @@ Nice to meet you all! #introductions #plebchain </target>
         <target state="new">This user cannot be zapped because they have not configured zaps on their account yet. Time to orange-pill?</target>
         <note>Comment explaining why a user cannot be zapped.</note>
       </trans-unit>
-      <trans-unit id="Thread" xml:space="preserve">
-        <source>Thread</source>
-        <target state="new">Thread</target>
-        <note>Navigation bar title for note thread.</note>
-      </trans-unit>
       <trans-unit id="Threads" xml:space="preserve">
         <source>Threads</source>
         <target state="new">Threads</target>
@@ -6115,6 +6230,11 @@ Section header for text and appearance settings</note>
         <source>Truncate timeline text</source>
         <target state="new">Truncate timeline text</target>
         <note>Setting to truncate text in timeline</note>
+      </trans-unit>
+      <trans-unit id="Try checking the link again, your internet connection, whether you need to connect to a specific relay to access this content." xml:space="preserve">
+        <source>Try checking the link again, your internet connection, whether you need to connect to a specific relay to access this content.</source>
+        <target state="new">Try checking the link again, your internet connection, whether you need to connect to a specific relay to access this content.</target>
+        <note>Tips on what to do if a note cannot be found.</note>
       </trans-unit>
       <trans-unit id="Type %@ to delete" xml:space="preserve">
         <source>Type %@ to delete</source>
@@ -6312,6 +6432,11 @@ Title for section in zap settings that controls the Lightning wallet selection.<
         <target state="new">We did not detect any issues that we can automatically fix for you. If you are having issues, please contact Damus support: [support@damus.io](mailto:support@damus.io)</target>
         <note>Message indicating that no First Aid actions are available.</note>
       </trans-unit>
+      <trans-unit id="We were unable to find the note you were looking for." xml:space="preserve">
+        <source>We were unable to find the note you were looking for.</source>
+        <target state="new">We were unable to find the note you were looking for.</target>
+        <note>Text for the thread view when it is unable to find the note the user is looking for</note>
+      </trans-unit>
       <trans-unit id="We'll save your account key, so you won't need to enter it manually next time you log in." xml:space="preserve">
         <source>We'll save your account key, so you won't need to enter it manually next time you log in.</source>
         <target state="new">We'll save your account key, so you won't need to enter it manually next time you log in.</target>
@@ -6388,6 +6513,16 @@ User confirm Yes</note>
         <target state="new">You cannot share content because you are not logged in. Please close this view, log in to your account, and try again.</target>
         <note>Label explaining that sharing cannot proceed because the user is not logged in.</note>
       </trans-unit>
+      <trans-unit id="You clicked on a Purple welcome link, but it does not look like the checkout is completed yet. This is likely a bug." xml:space="preserve">
+        <source>You clicked on a Purple welcome link, but it does not look like the checkout is completed yet. This is likely a bug.</source>
+        <target state="new">You clicked on a Purple welcome link, but it does not look like the checkout is completed yet. This is likely a bug.</target>
+        <note>Error label upon continuing in the app from a Damus Purple purchase</note>
+      </trans-unit>
+      <trans-unit id="You clicked on a Purple welcome link, but we could not find your checkout. This is likely a bug." xml:space="preserve">
+        <source>You clicked on a Purple welcome link, but we could not find your checkout. This is likely a bug.</source>
+        <target state="new">You clicked on a Purple welcome link, but we could not find your checkout. This is likely a bug.</target>
+        <note>Error label upon continuing in the app from a Damus Purple purchase</note>
+      </trans-unit>
       <trans-unit id="You have no bookmarks yet, add them in the context menu" xml:space="preserve">
         <source>You have no bookmarks yet, add them in the context menu</source>
         <target state="new">You have no bookmarks yet, add them in the context menu</target>
@@ -6422,6 +6557,11 @@ User confirm Yes</note>
         <source>Your content is being broadcasted to the network. Please wait.</source>
         <target state="new">Your content is being broadcasted to the network. Please wait.</target>
         <note>Label explaining that their content sharing action is in progress</note>
+      </trans-unit>
+      <trans-unit id="Your draft has been saved to storage" xml:space="preserve">
+        <source>Your draft has been saved to storage</source>
+        <target state="new">Your draft has been saved to storage</target>
+        <note>Accessibility label indicating that a user's post draft has been saved, meant only for visually impaired users</note>
       </trans-unit>
       <trans-unit id="Your report will be sent to the relays you are connected to" xml:space="preserve">
         <source>Your report will be sent to the relays you are connected to</source>
