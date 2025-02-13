@@ -245,6 +245,7 @@ struct ndb_filter_elements {
 	int count;
 
 	// this needs to be pointer size for reasons
+	// FIXME: what about on 32bit systems??
 	uint64_t elements[0];
 };
 
@@ -353,8 +354,6 @@ struct bech32_nevent {
 	struct ndb_relays relays;
 	const unsigned char *event_id;
 	const unsigned char *pubkey; // optional
-	uint32_t kind;
-	int has_kind;
 };
 
 struct bech32_nprofile {
@@ -374,7 +373,7 @@ struct bech32_nrelay {
 	struct ndb_str_block relay;
 };
 
-typedef struct nostr_bech32 {
+struct nostr_bech32 {
 	enum nostr_bech32_type type;
 
 	union {
@@ -386,7 +385,7 @@ typedef struct nostr_bech32 {
 		struct bech32_naddr naddr;
 		struct bech32_nrelay nrelay;
 	};
-} nostr_bech32_t;
+};
 
 
 struct ndb_mention_bech32_block {
@@ -503,7 +502,6 @@ int ndb_filter_from_json(const char *, int len, struct ndb_filter *filter, unsig
 unsigned char *ndb_filter_get_id_element(const struct ndb_filter *, const struct ndb_filter_elements *, int index);
 const char *ndb_filter_get_string_element(const struct ndb_filter *, const struct ndb_filter_elements *, int index);
 uint64_t ndb_filter_get_int_element(const struct ndb_filter_elements *, int index);
-uint64_t *ndb_filter_get_int_element_ptr(struct ndb_filter_elements *, int index);
 
 struct ndb_filter_elements *ndb_filter_current_element(const struct ndb_filter *);
 struct ndb_filter_elements *ndb_filter_get_elements(const struct ndb_filter *, int);
