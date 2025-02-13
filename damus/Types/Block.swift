@@ -115,9 +115,24 @@ fileprivate extension Block {
 fileprivate extension Block {
     /// Failable initializer for the C-backed type `invoice_block_t`.
     init?(invoice: ndb_invoice_block) {
-        guard let invoice = invoice.as_invoice() else { return nil }
+
+        guard let invoice = invoice_block_as_invoice(invoice) else { return nil }
         self = .invoice(invoice)
     }
+}
+
+func invoice_block_as_invoice(_ invoice: ndb_invoice_block) -> Invoice? {
+    let invstr = invoice.invstr.as_str()
+    let b11 = invoice.invoice
+
+    guard let description = convert_invoice_description(b11: b11) else {
+        return nil
+    }
+
+    let amount: Amount = b11.amount == 0 ? .any : .specific(Int64(b11.amount))
+
+    return Invoice(description: description, amount: amount, string: invstr, expiry: b11.expiry, created_at: b11.timestamp)
+
 }
 
 fileprivate extension Block {
