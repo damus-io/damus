@@ -7,19 +7,11 @@
 
 import Foundation
 
-struct LocalNotificationNotify: Notify {
-    typealias Payload = LossyLocalNotification
-    var payload: Payload
-}
-
-extension NotifyHandler {
-    static var local_notification: NotifyHandler<LocalNotificationNotify> {
-        .init()
-    }
-}
-
-extension Notifications {
-    static func local_notification(_ payload: LossyLocalNotification) -> Notifications<LocalNotificationNotify> {
-        .init(.init(payload: payload))
-    }
+extension QueueableNotify<LossyLocalNotification> {
+    /// A shared singleton for opening local and push user notifications
+    ///
+    /// ## Implementation notes
+    ///
+    /// - The queue can only hold one element. This is done because if the user hypothetically opened 10 push notifications and there was a lag, we wouldn't want the app to suddenly open 10 different things.
+    static let shared = QueueableNotify(maxQueueItems: 1)
 }
