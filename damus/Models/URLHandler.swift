@@ -99,7 +99,7 @@ struct DamusURLHandler {
         case profile(Pubkey)
         case filter(NostrFilter)
         case event(NostrEvent)
-        case event_reference(LoadableThreadModel.NoteReference)
+        case event_reference(LoadableNostrEventViewModel.NoteReference)
         case wallet_connect(WalletConnectURL)
         case script([UInt8])
         case purple(DamusPurpleURL)
