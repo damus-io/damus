@@ -9,12 +9,13 @@
 import XCTest
 @testable import damus
 
+
 final class HashtagTests: XCTestCase {
     
     // Basic hashtag tests
     
     func testParseHashtag() {
-        let parsed = parse_note_content(content: .content("some hashtag #bitcoin derp",nil)).blocks
+        let parsed = parse_note_content(content: .content("some hashtag #bitcoin derp",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -24,7 +25,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testParseHashtagEnd() {
-        let parsed = parse_note_content(content: .content("some hashtag #bitcoin",nil)).blocks
+        let parsed = parse_note_content(content: .content("some hashtag #bitcoin",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 2)
@@ -40,7 +41,7 @@ final class HashtagTests: XCTestCase {
     
     // Underscores are allowed in hashtags
     func testHashtagWithUnderscore() {
-        let parsed = parse_note_content(content: .content("the #under_score is allowed in hashtags",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #under_score is allowed in hashtags",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -52,7 +53,7 @@ final class HashtagTests: XCTestCase {
     // Test ASCII punctuation (not allowed in hashtags)
     
     func testHashtagWithComma() {
-        let parsed = parse_note_content(content: .content("the #comma, is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #comma, is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -62,7 +63,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithPeriod() {
-        let parsed = parse_note_content(content: .content("the #period. is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #period. is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -72,7 +73,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithQuestionMark() {
-        let parsed = parse_note_content(content: .content("the #question?mark is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #question?mark is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -82,7 +83,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithGraveAccent() {
-        let parsed = parse_note_content(content: .content("the #grave`accent is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #grave`accent is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -92,7 +93,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithTilde() {
-        let parsed = parse_note_content(content: .content("the #tilde~ is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #tilde~ is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -102,7 +103,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithExclamationPoint() {
-        let parsed = parse_note_content(content: .content("the #exclamation!point is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #exclamation!point is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -112,7 +113,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithAtSign() {
-        let parsed = parse_note_content(content: .content("the #at@sign is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #at@sign is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -122,7 +123,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithDollarSign() {
-        let parsed = parse_note_content(content: .content("the #dollar$sign is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #dollar$sign is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -132,7 +133,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithPercentSign() {
-        let parsed = parse_note_content(content: .content("the #percent%sign is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #percent%sign is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -142,7 +143,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithCaret() {
-        let parsed = parse_note_content(content: .content("the #caret^ is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #caret^ is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -152,7 +153,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithAmpersand() {
-        let parsed = parse_note_content(content: .content("the #ampersand& is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #ampersand& is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -162,7 +163,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithAsterisk() {
-        let parsed = parse_note_content(content: .content("the #asterisk* is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #asterisk* is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -172,7 +173,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithLeftParenthesis() {
-        let parsed = parse_note_content(content: .content("the #left(parenthesis is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #left(parenthesis is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -182,7 +183,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithRightParenthesis() {
-        let parsed = parse_note_content(content: .content("the #right)parenthesis is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #right)parenthesis is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -192,7 +193,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithDash() {
-        let parsed = parse_note_content(content: .content("the #dash- is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #dash- is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -202,7 +203,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithPlusSign() {
-        let parsed = parse_note_content(content: .content("the #plus+sign is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #plus+sign is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -212,7 +213,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithEqualsSign() {
-        let parsed = parse_note_content(content: .content("the #equals=sign is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #equals=sign is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -222,7 +223,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithLeftBracket() {
-        let parsed = parse_note_content(content: .content("the #left[bracket is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #left[bracket is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -232,7 +233,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithRightBracket() {
-        let parsed = parse_note_content(content: .content("the #right]bracket is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #right]bracket is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -242,7 +243,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithLeftBrace() {
-        let parsed = parse_note_content(content: .content("the #left{brace is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #left{brace is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -252,7 +253,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithRightBrace() {
-        let parsed = parse_note_content(content: .content("the #right}brace is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #right}brace is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -262,7 +263,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithBackslash() {
-        let parsed = parse_note_content(content: .content("the #back\\slash is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #back\\slash is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -272,7 +273,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithVerticalLine() {
-        let parsed = parse_note_content(content: .content("the #vertical|line is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #vertical|line is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -282,7 +283,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithSemicolon() {
-        let parsed = parse_note_content(content: .content("the #semicolon; is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #semicolon; is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -292,7 +293,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithColon() {
-        let parsed = parse_note_content(content: .content("the #colon: is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #colon: is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -302,7 +303,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithApostrophe() {
-        let parsed = parse_note_content(content: .content("the #apostrophe' is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #apostrophe' is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -312,7 +313,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithQuotationMark() {
-        let parsed = parse_note_content(content: .content("the #quotation\"mark is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #quotation\"mark is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -322,7 +323,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithLessThanSign() {
-        let parsed = parse_note_content(content: .content("the #lessthan<sign is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #lessthan<sign is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -332,7 +333,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithGreaterThanSign() {
-        let parsed = parse_note_content(content: .content("the #greaterthan>sign is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #greaterthan>sign is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -349,7 +350,7 @@ final class HashtagTests: XCTestCase {
     
     // Test pound sign (£) (U+00A3)
     func testHashtagWithPoundSign() {
-        let parsed = parse_note_content(content: .content("the #pound£sign is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #pound£sign is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -360,7 +361,7 @@ final class HashtagTests: XCTestCase {
     
     // Test yen sign (¥) (U+00A5)
     func testHashtagWithYenSign() {
-        let parsed = parse_note_content(content: .content("the #yen¥sign is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #yen¥sign is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -371,7 +372,7 @@ final class HashtagTests: XCTestCase {
     
     // Test section sign (§) (U+00A7)
     func testHashtagWithSectionSign() {
-        let parsed = parse_note_content(content: .content("the #section§sign is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #section§sign is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -382,7 +383,7 @@ final class HashtagTests: XCTestCase {
     
     // Test plus-minus sign (±) (U+00B1)
     func testHashtagWithPlusMinusSign() {
-        let parsed = parse_note_content(content: .content("the #plusminus±sign is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #plusminus±sign is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -393,7 +394,7 @@ final class HashtagTests: XCTestCase {
     
     // Test inverted question mark (¿) (U+00BF)
     func testHashtagWithInvertedQuestionMark() {
-        let parsed = parse_note_content(content: .content("the #invertedquestion¿mark is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #invertedquestion¿mark is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -406,7 +407,7 @@ final class HashtagTests: XCTestCase {
     
     // Test Latin small letter u with diaeresis (ü) (U+00FC) (allowed in hashtags)
     func testHashtagWithAccents() {
-        let parsed = parse_note_content(content: .content("hello from #türkiye",nil)).blocks
+        let parsed = parse_note_content(content: .content("hello from #türkiye",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 2)
@@ -418,7 +419,7 @@ final class HashtagTests: XCTestCase {
     
     // Test en dash (–) (U+2013)
     func testHashtagWithEnDash() {
-        let parsed = parse_note_content(content: .content("the #en–dash is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #en–dash is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -429,7 +430,7 @@ final class HashtagTests: XCTestCase {
     
     // Test em dash (—) (U+2014)
     func testHashtagWithEmDash() {
-        let parsed = parse_note_content(content: .content("the #em—dash is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #em—dash is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -440,7 +441,7 @@ final class HashtagTests: XCTestCase {
     
     // Test horizontal bar (―) (U+2015)
     func testHashtagWithHorizontalBar() {
-        let parsed = parse_note_content(content: .content("the #horizontal―bar is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #horizontal―bar is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -451,7 +452,7 @@ final class HashtagTests: XCTestCase {
     
     // Test horizontal ellipsis (…) (U+2026)
     func testHashtagWithHorizontalEllipsis() {
-        let parsed = parse_note_content(content: .content("the #horizontal…ellipsis is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #horizontal…ellipsis is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -464,7 +465,7 @@ final class HashtagTests: XCTestCase {
     
     // Test euro sign (€) (U+20AC)
     func testHashtagWithEuroSign() {
-        let parsed = parse_note_content(content: .content("the #euro€sign is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #euro€sign is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -475,7 +476,7 @@ final class HashtagTests: XCTestCase {
     
     // Test Bitcoin sign (₿) (U+20BF)
     func testHashtagWithBitcoinSign() {
-        let parsed = parse_note_content(content: .content("the #bitcoin₿sign is not allowed",nil)).blocks
+        let parsed = parse_note_content(content: .content("the #bitcoin₿sign is not allowed",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -489,8 +490,8 @@ final class HashtagTests: XCTestCase {
     // Emojis such as ☕️ (U+2615) are allowed in hashtags
     func testHashtagWithEmoji() {
         let content = "some hashtag #bitcoin☕️ cool"
-        let parsed = parse_note_content(content: .content(content, nil)).blocks
-        let post_blocks = parse_post_blocks(content: content)
+        let parsed = parse_note_content(content: .content(content, nil))!.blocks
+        let post_blocks = parse_post_blocks(content: content)!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -509,8 +510,8 @@ final class HashtagTests: XCTestCase {
     // Japanese: wave dash (〜) (U+301C) (allowed in hashtags)
     func testPowHashtag() {
         let content = "pow! #ぽわ〜"
-        let parsed = parse_note_content(content: .content(content,nil)).blocks
-        let post_blocks = parse_post_blocks(content: content)
+        let parsed = parse_note_content(content: .content(content,nil))!.blocks
+        let post_blocks = parse_post_blocks(content: content)!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 2)
@@ -525,7 +526,7 @@ final class HashtagTests: XCTestCase {
     // Hangul: Hangul Syllable Si (시) (U+C2DC) and
     // Hangul Syllable Heom (험) (U+D5D8) (allowed in hashtags)
     func testHashtagWithNonLatinCharacters() {
-        let parsed = parse_note_content(content: .content("this is a #시험 hope it works",nil)).blocks
+        let parsed = parse_note_content(content: .content("this is a #시험 hope it works",nil))!.blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -536,8 +537,8 @@ final class HashtagTests: XCTestCase {
     
     // Japanese: fullwidth tilde (～) (U+FF5E) (allowed in hashtags)
     func testHashtagWithFullwidthTilde() {
-        let parsed = parse_note_content(content: .content("pow! the fullwidth tilde #ぽわ～ is allowed in hashtags",nil)).blocks
-        
+        let parsed = parse_note_content(content: .content("pow! the fullwidth tilde #ぽわ～ is allowed in hashtags",nil))!.blocks
+
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
         XCTAssertEqual(parsed[0].asText, "pow! the fullwidth tilde ")
@@ -547,7 +548,7 @@ final class HashtagTests: XCTestCase {
     
     // Japanese: bai (倍) (U+500D) (allowed in hashtags)
     func testHashtagWithBaiKanji() {
-        let parsed = parse_note_content(content: .content("pow! #10倍界王拳 is allowed in hashtags",nil)).blocks
+        let parsed = parse_note_content(content: .content("pow! #10倍界王拳 is allowed in hashtags",nil))!.blocks
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)

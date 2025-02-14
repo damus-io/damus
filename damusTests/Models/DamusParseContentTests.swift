@@ -24,7 +24,7 @@ class ContentParserTests: XCTestCase {
         let url = "https://media.tenor.com/5MibLt95scAAAAAC/%ED%98%BC%ED%8C%8C%EB%A7%9D-%ED%94%BC%EC%9E%90.gif"
         let content = "gm 🤙\(url)"
 
-        let blocks = parse_note_content(content: .content(content,nil)).blocks
+        let blocks = parse_note_content(content: .content(content,nil))!.blocks
         XCTAssertEqual(blocks.count, 2)
         XCTAssertEqual(blocks[0], .text("gm 🤙"))
         XCTAssertEqual(blocks[1], .url(URL(string: url)!))

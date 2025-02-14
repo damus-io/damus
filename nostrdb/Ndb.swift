@@ -110,8 +110,8 @@ class Ndb {
         let ok = path.withCString { testdir in
             var ok = false
             while !ok && mapsize > 1024 * 1024 * 700 {
-                var cfg = ndb_config(flags: 0, ingester_threads: ingest_threads, mapsize: mapsize, filter_context: nil, ingest_filter: nil)
-                let res = ndb_init(&ndb_p, testdir, &cfg)
+                var cfg = ndb_config(flags: 0, ingester_threads: ingest_threads, mapsize: mapsize, filter_context: nil, ingest_filter: nil, sub_cb_ctx: nil, sub_cb: nil)
+                let res = ndb_init(&ndb_p, testdir, &cfg);
                 ok = res != 0;
                 if !ok {
                     Log.error("ndb_init failed: %d, reducing mapsize from %d to %d", for: .storage, res, mapsize, mapsize / 2)
@@ -206,13 +206,28 @@ class Ndb {
         self.ndb = db
         return true
     }
+    
+    func lookup_blocks_by_key_with_txn<Y>(_ key: NoteKey, txn: NdbTxn<Y>) -> NdbBlocks? {
+        guard let blocks = ndb_get_blocks_by_key(self.ndb.ndb, &txn.txn, key) else {
+            return nil
+        }
+
+        return NdbBlocks(ptr: blocks)
+    }
+
+    func lookup_blocks_by_key(_ key: NoteKey) -> NdbTxn<NdbBlocks?>? {
+        NdbTxn(ndb: self) { txn in
+            lookup_blocks_by_key_with_txn(key, txn: txn)
+        }
+    }
 
     func lookup_note_by_key_with_txn<Y>(_ key: NoteKey, txn: NdbTxn<Y>) -> NdbNote? {
         var size: Int = 0
         guard let note_p = ndb_get_note_by_key(&txn.txn, key, &size) else {
             return nil
         }
-        return NdbNote(note: note_p, size: size, owned: false, key: key)
+        let ptr = ndb_note_ptr(ptr: note_p)
+        return NdbNote(note: ptr, size: size, owned: false, key: key)
     }
 
     func text_search(query: String, limit: Int = 128, order: NdbSearchOrder = .newest_first) -> [NoteKey] {
@@ -403,7 +418,8 @@ class Ndb {
                   let note_p = ndb_get_note_by_id(&txn.txn, baseAddress, &size, &key) else {
                 return nil
             }
-            return NdbNote(note: note_p, size: size, owned: false, key: key)
+            let ptr = ndb_note_ptr(ptr: note_p)
+            return NdbNote(note: ptr, size: size, owned: false, key: key)
         }
     }
 

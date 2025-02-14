@@ -47,8 +47,9 @@ struct AboutView: View {
             }
         }
         .onAppear {
-            let blocks = parse_note_content(content: .content(about, nil))
-            about_string = render_blocks(blocks: blocks, profiles: state.profiles).content.attributed
+            // TODO: Fix about content
+            //let blocks = ndb_parse_content(content: .content(about, nil))
+            //about_string = render_blocks(blocks: blocks, profiles: state.profiles).content.attributed
         }
         
     }

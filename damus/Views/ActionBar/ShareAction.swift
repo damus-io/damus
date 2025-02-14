@@ -40,7 +40,7 @@ struct ShareAction: View {
                 
                 ShareActionButton(img: "link", text: NSLocalizedString("Copy Link", comment: "Button to copy link to note")) {
                     dismiss()
-                    UIPasteboard.general.string = "https://damus.io/" + Bech32Object.encode(.nevent(NEvent(noteid: event.id, relays: userProfile.getCappedRelayStrings())))
+                    UIPasteboard.general.string = "https://damus.io/" + Bech32Object.encode(.nevent(NEvent(noteid: event.id, relays: userProfile.getCappedRelays())))
                 }
                 
                 let bookmarkImg = isBookmarked ? "bookmark.fill" : "bookmark"
