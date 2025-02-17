@@ -1,0 +1,5 @@
+CCAN imported from https://github.com/rustyrussell/ccan
+
+Use "make update-ccan" at top level to refresh from ../ccan.
+
+CCAN version: init-2587-gf927e4be

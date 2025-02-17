@@ -1179,7 +1179,7 @@ static INLINE int parse_i64(struct cursor *read, uint64_t *val)
 	shift = 0;
 
 	do {
-		if (!pull_byte(read, &byte))
+		if (!cursor_pull_byte(read, &byte))
 			return 0;
 		*val |= (byte & 0x7FULL) << shift;
 		shift += 7;
@@ -1199,7 +1199,7 @@ static INLINE int uleb128_read(struct cursor *read, unsigned int *val)
 	*val = 0;
 
 	for (;;) {
-		if (!pull_byte(read, &byte))
+		if (!cursor_pull_byte(read, &byte))
 			return 0;
 
 		*val |= (0x7F & byte) << shift;
@@ -1222,7 +1222,7 @@ static INLINE int sleb128_read(struct cursor *read, signed int *val)
 	shift = 0;
 
 	do {
-		if (!pull_byte(read, &byte))
+		if (!cursor_pull_byte(read, &byte))
 			return 0;
 		*val |= ((byte & 0x7F) << shift);
 		shift += 7;
@@ -1241,21 +1241,21 @@ static INLINE int uleb128_read(struct cursor *read, unsigned int *val)
 	unsigned char p[6] = {0};
 	*val = 0;
 
-	if (pull_byte(read, &p[0]) && (p[0] & 0x80) == 0) {
+	if (cursor_pull_byte(read, &p[0]) && (p[0] & 0x80) == 0) {
 		*val = LEB128_1(unsigned int);
 		if (p[0] == 0x7F)
 			assert((int)*val == -1);
 		return 1;
-	} else if (pull_byte(read, &p[1]) && (p[1] & 0x80) == 0) {
+	} else if (cursor_pull_byte(read, &p[1]) && (p[1] & 0x80) == 0) {
 		*val = LEB128_2(unsigned int);
 		return 2;
-	} else if (pull_byte(read, &p[2]) && (p[2] & 0x80) == 0) {
+	} else if (cursor_pull_byte(read, &p[2]) && (p[2] & 0x80) == 0) {
 		*val = LEB128_3(unsigned int);
 		return 3;
-	} else if (pull_byte(read, &p[3]) && (p[3] & 0x80) == 0) {
+	} else if (cursor_pull_byte(read, &p[3]) && (p[3] & 0x80) == 0) {
 		*val = LEB128_4(unsigned int);
 		return 4;
-	} else if (pull_byte(read, &p[4]) && (p[4] & 0x80) == 0) {
+	} else if (cursor_pull_byte(read, &p[4]) && (p[4] & 0x80) == 0) {
 		if (!(p[4] & 0xF0)) {
 			*val = LEB128_5(unsigned int);
 			return 5;
@@ -1296,7 +1296,7 @@ static int parse_section_tag(struct cursor *cur, enum section_tag *section)
 
 	start = cur->p;
 
-	if (!pull_byte(cur, &byte)) {
+	if (!cursor_pull_byte(cur, &byte)) {
 		return 0;
 	}
 
@@ -1315,7 +1315,7 @@ static int parse_valtype(struct wasm_parser *p, enum valtype *valtype)
 
 	start = p->cur.p;
 
-	if (unlikely(!pull_byte(&p->cur, (unsigned char*)valtype))) {
+	if (unlikely(!cursor_pull_byte(&p->cur, (unsigned char*)valtype))) {
 		return parse_err(p, "valtype tag oob");
 	}
 
@@ -1416,7 +1416,7 @@ static int parse_export_desc(struct wasm_parser *p, enum exportdesc *desc)
 {
 	unsigned char byte;
 
-	if (!pull_byte(&p->cur, &byte)) {
+	if (!cursor_pull_byte(&p->cur, &byte)) {
 		parse_err(p, "export desc byte eof");
 		return 0;
 	}
@@ -1523,7 +1523,7 @@ static int parse_name_subsection(struct wasm_parser *p, struct namesec *sec, u32
 	u8 tag;
 	u8 *start = p->cur.p;
 
-	if (!pull_byte(&p->cur, &tag))
+	if (!cursor_pull_byte(&p->cur, &tag))
 		return parse_err(p, "name subsection tag oob?");
 
 	if (!is_valid_name_subsection(tag))
@@ -1676,7 +1676,7 @@ static int parse_reftype(struct wasm_parser *p, enum reftype *reftype)
 {
 	u8 tag;
 
-	if (!pull_byte(&p->cur, &tag)) {
+	if (!cursor_pull_byte(&p->cur, &tag)) {
 		parse_err(p, "reftype");
 		return 0;
 	}
@@ -1720,7 +1720,7 @@ static int parse_export_section(struct wasm_parser *p,
 static int parse_limits(struct wasm_parser *p, struct limits *limits)
 {
 	unsigned char tag;
-	if (!pull_byte(&p->cur, &tag)) {
+	if (!cursor_pull_byte(&p->cur, &tag)) {
 		return parse_err(p, "oob");
 	}
 
@@ -1803,7 +1803,7 @@ static void print_code(u8 *code, int code_len)
 	make_cursor(code, code + code_len, &c);
 
 	for (;;) {
-		if (!pull_byte(&c, &tag)) {
+		if (!cursor_pull_byte(&c, &tag)) {
 			break;
 		}
 
@@ -2169,7 +2169,7 @@ static int parse_const_expr(struct expr_parser *p, struct expr *expr)
 	expr->code = p->code->p;
 
 	while (1) {
-		if (unlikely(!pull_byte(p->code, &tag))) {
+		if (unlikely(!cursor_pull_byte(p->code, &tag))) {
 			return note_error(p->errs, p->code, "oob");
 		}
 
@@ -2332,7 +2332,7 @@ static int parse_instrs_until_at(struct expr_parser *p, u8 stop_instr,
 		       p->code->p - p->code->start,
 		       dbg_inst, instr_name(stop_instr));
        for (;;) {
-               if (!pull_byte(p->code, &tag))
+               if (!cursor_pull_byte(p->code, &tag))
                        return note_error(p->errs, p->code, "oob");
 
 	       if ((tag != i_if && tag == stop_instr) ||
@@ -2413,7 +2413,7 @@ static int parse_element(struct wasm_parser *p, struct elem *elem)
 
 	make_expr_parser(&p->errs, &p->cur, &expr_parser);
 
-	if (!pull_byte(&p->cur, &tag))
+	if (!cursor_pull_byte(&p->cur, &tag))
 		return parse_err(p, "tag");
 
 	if (tag > 7)
@@ -2545,7 +2545,7 @@ static int parse_wdata(struct wasm_parser *p, struct wdata *data)
 	struct expr_parser parser;
 	u8 tag;
 
-	if (!pull_byte(&p->cur, &tag)) {
+	if (!cursor_pull_byte(&p->cur, &tag)) {
 		return parse_err(p, "tag");
 	}
 
@@ -2700,7 +2700,7 @@ static int parse_importdesc(struct wasm_parser *p, struct importdesc *desc)
 {
 	u8 tag;
 
-	if (!pull_byte(&p->cur, &tag)) {
+	if (!cursor_pull_byte(&p->cur, &tag)) {
 		parse_err(p, "oom");
 		return 0;
 	}
@@ -4134,7 +4134,7 @@ static int parse_blocktype(struct cursor *cur, struct errors *errs, struct block
 {
 	unsigned char byte;
 
-	if (unlikely(!pull_byte(cur, &byte))) {
+	if (unlikely(!cursor_pull_byte(cur, &byte))) {
 		return note_error(errs, cur, "parse_blocktype: oob\n");
 	}
 
@@ -4656,7 +4656,7 @@ static int parse_bulk_op(struct cursor *code, struct errors *errs,
 {
 	u8 tag;
 
-	if (unlikely(!pull_byte(code, &tag)))
+	if (unlikely(!cursor_pull_byte(code, &tag)))
 		return note_error(errs, code, "oob");
 
 	if (unlikely(tag < 10 || tag > 17))
@@ -6552,7 +6552,7 @@ static INLINE int interp_parse_instr(struct wasm_interp *interp,
 {
 	u8 tag;
 
-	if (unlikely(!pull_byte(code, &tag))) {
+	if (unlikely(!cursor_pull_byte(code, &tag))) {
 		return interp_error(interp, "no more instrs to pull");
 	}
 
