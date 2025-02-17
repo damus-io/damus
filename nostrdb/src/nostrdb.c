@@ -2342,6 +2342,12 @@ static int ndb_ingester_queue_event(struct ndb_ingester *ingester,
 static int ndb_ingest_event(struct ndb_ingester *ingester, const char *json,
 			    int len, unsigned client)
 {
+	// Without this, we get bus errors in the json parser inside when
+	// trying to ingest empty kind 6 reposts... we should probably do fuzz
+	// testing on inputs to the json parser
+	if (len == 0)
+		return 0;
+
 	// Since we need to return as soon as possible, and we're not
 	// making any assumptions about the lifetime of the string, we
 	// definitely need to copy the json here. In the future once we
