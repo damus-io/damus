@@ -170,6 +170,9 @@ struct EditMetadataView: View {
                     TextField(NSLocalizedString("Lightning Address or LNURL", comment: "Placeholder text for entry of Lightning Address or LNURL."), text: $ln)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
+                        .onReceive(Just(ln)) { newValue in
+                            self.ln = newValue.trimmingCharacters(in: .whitespaces)
+                        }
                 }
                                 
                 Section(content: {
