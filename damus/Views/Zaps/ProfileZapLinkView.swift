@@ -24,8 +24,8 @@ struct ProfileZapLinkView<Content: View>: View {
         self.label = label
         self.action = action
         self.reactions_enabled = reactions_enabled
-        self.lud16 = lud16
-        self.lnurl = lnurl
+        self.lud16 = lud16?.trimmingCharacters(in: .whitespaces)
+        self.lnurl = lnurl?.trimmingCharacters(in: .whitespaces)
     }
     
     init(damus_state: DamusState, pubkey: Pubkey, action: ActionFunction? = nil, @ViewBuilder label: @escaping ContentViewFunction) {
@@ -36,8 +36,8 @@ struct ProfileZapLinkView<Content: View>: View {
         let profile_txn = damus_state.profiles.lookup_with_timestamp(pubkey)
         let record = profile_txn?.unsafeUnownedValue
         self.reactions_enabled = record?.profile?.reactions ?? true
-        self.lud16 = record?.profile?.lud06
-        self.lnurl = record?.lnurl
+        self.lud16 = record?.profile?.lud06?.trimmingCharacters(in: .whitespaces)
+        self.lnurl = record?.lnurl?.trimmingCharacters(in: .whitespaces)
     }
     
     init(unownedProfileRecord: ProfileRecord?, profileModel: ProfileModel, action: ActionFunction? = nil, @ViewBuilder label: @escaping ContentViewFunction) {
@@ -46,8 +46,8 @@ struct ProfileZapLinkView<Content: View>: View {
         self.action = action
         
         self.reactions_enabled = unownedProfileRecord?.profile?.reactions ?? true
-        self.lud16 = unownedProfileRecord?.profile?.lud16
-        self.lnurl = unownedProfileRecord?.lnurl
+        self.lud16 = unownedProfileRecord?.profile?.lud16?.trimmingCharacters(in: .whitespaces)
+        self.lnurl = unownedProfileRecord?.lnurl?.trimmingCharacters(in: .whitespaces)
     }
     
     var body: some View {
@@ -81,12 +81,13 @@ struct ProfileZapLinkView<Content: View>: View {
                 }
             }
         }
-        .disabled(lnurl == nil)
+        .disabled(lnurl == nil && lud16 == nil)
     }
 }
 
 #Preview {
-    ProfileZapLinkView(pubkey: test_pubkey, reactions_enabled: true, lud16: make_test_profile().lud16, lnurl: "test@sendzaps.lol", label: { reactions_enabled, lud16, lnurl in
+    let profile = make_test_profile()
+    ProfileZapLinkView(pubkey: test_pubkey, reactions_enabled: true, lud16: profile.lud16, lnurl: profile.lud06, label: { reactions_enabled, lud16, lnurl in
         Image("zap.fill")
     })
 }

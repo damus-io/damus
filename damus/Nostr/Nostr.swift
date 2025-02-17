@@ -31,7 +31,8 @@ class ProfileRecord {
         }
         
         guard let profile = data.profile,
-              let addr = profile.lud16 ?? profile.lud06 else {
+              let addr = (profile.lud16 ?? profile.lud06)?.trimmingCharacters(in: .whitespaces)
+        else {
             return nil;
         }
         
@@ -301,7 +302,7 @@ class Profile: Codable {
 */
 
 func make_test_profile() -> Profile {
-    return Profile(name: "jb55", display_name: "Will", about: "Its a me", picture: "https://cdn.jb55.com/img/red-me.jpg", banner: "https://pbs.twimg.com/profile_banners/9918032/1531711830/600x200",  website: "jb55.com", lud06: "jb55@jb55.com", lud16: nil, nip05: "jb55@jb55.com", damus_donation: 1)
+    return Profile(name: "jb55", display_name: "Will", about: "Its a me", picture: "https://cdn.jb55.com/img/red-me.jpg", banner: "https://pbs.twimg.com/profile_banners/9918032/1531711830/600x200", website: "jb55.com", lud06: nil, lud16: "jb55@jb55.com", nip05: "jb55@jb55.com", damus_donation: 1)
 }
 
 func make_ln_url(_ str: String?) -> URL? {
