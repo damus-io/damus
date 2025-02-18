@@ -34,7 +34,7 @@ struct DamusURLHandler {
             let thread = await ThreadModel(event: nostrEvent, damus_state: damus_state)
             return .route(.Thread(thread: thread))
         case .event_reference(let event_reference):
-            return .route(.ThreadFromReference(note_reference: event_reference))
+            return .route(.LoadableNostrEvent(note_reference: event_reference))
         case .wallet_connect(let walletConnectURL):
             damus_state.wallet.new(walletConnectURL)
             return .route(.Wallet(wallet: damus_state.wallet))
@@ -99,7 +99,7 @@ struct DamusURLHandler {
         case profile(Pubkey)
         case filter(NostrFilter)
         case event(NostrEvent)
-        case event_reference(LoadableThreadModel.NoteReference)
+        case event_reference(LoadableNostrEventViewModel.NoteReference)
         case wallet_connect(WalletConnectURL)
         case script([UInt8])
         case purple(DamusPurpleURL)

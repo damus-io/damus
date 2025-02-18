@@ -86,11 +86,14 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        Log.info("App delegate is handling a push notification", for: .push_notifications)
         let userInfo = response.notification.request.content.userInfo
         guard let notification = LossyLocalNotification.from_user_info(user_info: userInfo) else {
+            Log.error("App delegate could not decode notification information", for: .push_notifications)
             return
         }
-        notify(.local_notification(notification))
+        Log.info("App delegate notifying the app about the received push notification", for: .push_notifications)
+        Task { await QueueableNotify<LossyLocalNotification>.shared.add(item: notification) }
         completionHandler()
     }
 }
