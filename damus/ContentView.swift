@@ -370,6 +370,8 @@ struct ContentView: View {
             self.confirm_mute = true
         }
         .onReceive(handle_notify(.attached_wallet)) { nwc in
+            try? damus_state.pool.add_relay(.nwc(url: nwc.relay))
+
             // update the lightning address on our profile when we attach a
             // wallet with an associated
             guard let ds = self.damus_state,
