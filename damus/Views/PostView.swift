@@ -230,6 +230,7 @@ struct PostView: View {
                 damus_state.drafts.post = nil
         }
 
+        damus_state.drafts.save(damus_state: damus_state)
     }
     
     func load_draft() -> Bool {
