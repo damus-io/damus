@@ -201,6 +201,10 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "developer_mode", default_value: false)
     var developer_mode: Bool
     
+    /// Makes all post content gibberish and blurhashes images, to avoid distractions when developers are working.
+    @Setting(key: "undistract_mode", default_value: false)
+    var undistractMode: Bool
+    
     @Setting(key: "always_show_onboarding_suggestions", default_value: false)
     var always_show_onboarding_suggestions: Bool
 

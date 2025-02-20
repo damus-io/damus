@@ -57,6 +57,10 @@ struct EventView: View {
 
 // blame the porn bots for this code
 func should_blur_images(settings: UserSettingsStore, contacts: Contacts, ev: NostrEvent, our_pubkey: Pubkey, booster_pubkey: Pubkey? = nil) -> Bool {
+    if settings.undistractMode {
+        return true
+    }
+    
     if !settings.blur_images {
         return false
     }
