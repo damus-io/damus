@@ -79,9 +79,9 @@ struct MenuItems: View {
             }
 
             Button {
-                UIPasteboard.general.string = event.id.bech32
+                UIPasteboard.general.string = Bech32Object.encode(.nevent(NEvent(noteid: event.id, relays: userProfile.getCappedRelayStrings())))
             } label: {
-                Label(NSLocalizedString("Copy note ID", comment: "Context menu option for copying the ID of the note."), image: "note-book")
+                Label(NSLocalizedString("Copy event ID", comment: "Context menu option for copying the event ID of the note."), image: "note-book")
             }
 
             if damus_state.settings.developer_mode {
