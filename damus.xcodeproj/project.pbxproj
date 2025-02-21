@@ -1617,6 +1617,9 @@
 		D7DB1FEE2D5AC51B00CF06DA /* NIP44v2EncryptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DB1FED2D5AC50F00CF06DA /* NIP44v2EncryptionTests.swift */; };
 		D7DB1FF12D5AC5D700CF06DA /* nip44.vectors.json in Resources */ = {isa = PBXBuildFile; fileRef = D7DB1FF02D5AC5D700CF06DA /* nip44.vectors.json */; };
 		D7DB1FF32D5AC5EA00CF06DA /* LICENSES in Resources */ = {isa = PBXBuildFile; fileRef = D7DB1FF22D5AC5E400CF06DA /* LICENSES */; };
+		D7DB93052D66A44100DA1EE5 /* Undistractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DB93042D66A43B00DA1EE5 /* Undistractor.swift */; };
+		D7DB93062D66A44100DA1EE5 /* Undistractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DB93042D66A43B00DA1EE5 /* Undistractor.swift */; };
+		D7DB93072D66A44100DA1EE5 /* Undistractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DB93042D66A43B00DA1EE5 /* Undistractor.swift */; };
 		D7DBD41F2B02F15E002A6197 /* NostrKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFD32819DE8F00B3DE84 /* NostrKind.swift */; };
 		D7DEEF2F2A8C021E00E0C99F /* NostrEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */; };
 		D7EB00B02CD59C8D00660C07 /* PresentFullScreenItemNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EB00AF2CD59C8300660C07 /* PresentFullScreenItemNotify.swift */; };
@@ -2495,6 +2498,7 @@
 		D7DB1FED2D5AC50F00CF06DA /* NIP44v2EncryptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP44v2EncryptionTests.swift; sourceTree = "<group>"; };
 		D7DB1FF02D5AC5D700CF06DA /* nip44.vectors.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = nip44.vectors.json; sourceTree = "<group>"; };
 		D7DB1FF22D5AC5E400CF06DA /* LICENSES */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSES; sourceTree = "<group>"; };
+		D7DB93042D66A43B00DA1EE5 /* Undistractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Undistractor.swift; sourceTree = "<group>"; };
 		D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrEventTests.swift; sourceTree = "<group>"; };
 		D7EB00AF2CD59C8300660C07 /* PresentFullScreenItemNotify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentFullScreenItemNotify.swift; sourceTree = "<group>"; };
 		D7EDED1B2B1178FE0018B19C /* NoteContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteContent.swift; sourceTree = "<group>"; };
@@ -3235,6 +3239,7 @@
 		4C7FF7D628233637009601DB /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				D7DB93042D66A43B00DA1EE5 /* Undistractor.swift */,
 				D73E5F7E2C6AA066007EB227 /* DamusAliases.swift */,
 				E04A37C52B544F090029650D /* URIParsing.swift */,
 				4C1D4FB02A7958E60024F453 /* VersionInfo.swift */,
@@ -4543,6 +4548,7 @@
 				4CE8794829941DA700F758CC /* RelayFilters.swift in Sources */,
 				4CEE2B02280B39E800AB5EEF /* EventActionBar.swift in Sources */,
 				4C3BEFE0281DE1ED00B3DE84 /* DamusState.swift in Sources */,
+				D7DB93062D66A44100DA1EE5 /* Undistractor.swift in Sources */,
 				D72E12782BEED22500F4F781 /* Array.swift in Sources */,
 				4C198DF529F88D2E004C165C /* ImageMetadata.swift in Sources */,
 				4CCEB7AE29B53D260078AA28 /* SearchingEventView.swift in Sources */,
@@ -5012,6 +5018,7 @@
 				82D6FB082CD99F7900C925F4 /* UserStatusSheet.swift in Sources */,
 				82D6FB092CD99F7900C925F4 /* SearchHeaderView.swift in Sources */,
 				82D6FB0A2CD99F7900C925F4 /* DamusGradient.swift in Sources */,
+				D7DB93052D66A44100DA1EE5 /* Undistractor.swift in Sources */,
 				82D6FB0B2CD99F7900C925F4 /* AlbyGradient.swift in Sources */,
 				82D6FB0C2CD99F7900C925F4 /* GoldSupportGradient.swift in Sources */,
 				82D6FB0D2CD99F7900C925F4 /* PinkGradient.swift in Sources */,
@@ -5430,6 +5437,7 @@
 				D73E5E412C6A97F4007EB227 /* GoldSupportGradient.swift in Sources */,
 				D73E5E422C6A97F4007EB227 /* PinkGradient.swift in Sources */,
 				D73E5E432C6A97F4007EB227 /* GrayGradient.swift in Sources */,
+				D7DB93072D66A44100DA1EE5 /* Undistractor.swift in Sources */,
 				D73E5E442C6A97F4007EB227 /* DamusLogoGradient.swift in Sources */,
 				D73E5E452C6A97F4007EB227 /* DamusBackground.swift in Sources */,
 				D73E5E462C6A97F4007EB227 /* DamusLightGradient.swift in Sources */,

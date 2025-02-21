@@ -40,6 +40,9 @@ struct NoteContentView: View {
     @ObservedObject var settings: UserSettingsStore
 
     var note_artifacts: NoteArtifacts {
+        if damus_state.settings.undistractMode {
+            return .separated(.just_content(Undistractor.makeGibberish(text: event.get_content(damus_state.keypair))))
+        }
         return self.artifacts_model.state.artifacts ?? .separated(.just_content(event.get_content(damus_state.keypair)))
     }
     

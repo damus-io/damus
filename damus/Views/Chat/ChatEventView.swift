@@ -298,7 +298,7 @@ struct ChatEventView: View {
             }
             .swipeSpacing(-20)
             .swipeActionsStyle(.mask)
-            .swipeMinimumDistance(20)
+            .swipeMinimumDistance(40)
             .swipeDragGesturePriority(.normal)
         }
     }

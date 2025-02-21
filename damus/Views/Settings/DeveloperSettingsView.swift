@@ -17,6 +17,7 @@ struct DeveloperSettingsView: View {
                 Toggle(NSLocalizedString("Developer Mode", comment: "Setting to enable developer mode"), isOn: $settings.developer_mode)
                     .toggleStyle(.switch)
                 if settings.developer_mode {
+                    Toggle(NSLocalizedString("Undistract mode", comment: "Developer mode setting to scramble text and images to avoid distractions during development."), isOn: $settings.undistractMode)
                     Toggle(NSLocalizedString("Always show onboarding", comment: "Developer mode setting to always show onboarding suggestions."), isOn: $settings.always_show_onboarding_suggestions)
                     Picker(NSLocalizedString("Push notification environment", comment: "Prompt selection of the Push notification environment (Developer feature to switch between real/production mode to test modes)."),
                            selection: Binding(
