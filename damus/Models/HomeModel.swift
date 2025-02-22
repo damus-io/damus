@@ -957,12 +957,12 @@ func process_contact_event(state: DamusState, ev: NostrEvent) {
 }
 
 func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
-    let bootstrap_dict: [RelayURL: RelayInfo] = [:]
+    let bootstrap_dict: [RelayURL: LegacyKind3RelayRWConfiguration] = [:]
     let old_decoded = m_old_ev.flatMap { decode_json_relays($0.content) } ?? state.bootstrap_relays.reduce(into: bootstrap_dict) { (d, r) in
         d[r] = .rw
     }
 
-    guard let decoded: [RelayURL: RelayInfo] = decode_json_relays(ev.content) else {
+    guard let decoded: [RelayURL: LegacyKind3RelayRWConfiguration] = decode_json_relays(ev.content) else {
         return
     }
 

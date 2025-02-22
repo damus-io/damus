@@ -10,7 +10,7 @@ import Foundation
 class ProfileModel: ObservableObject, Equatable {
     @Published var contacts: NostrEvent? = nil
     @Published var following: Int = 0
-    @Published var relays: [RelayURL: RelayInfo]? = nil
+    @Published var relays: [RelayURL: LegacyKind3RelayRWConfiguration]? = nil
     @Published var progress: Int = 0
 
     private let MAX_SHARE_RELAYS = 4
