@@ -7,16 +7,16 @@
 
 import Foundation
 
-public struct RelayInfo: Codable {
-    let read: Bool?
-    let write: Bool?
+public struct LegacyKind3RelayRWConfiguration: Codable, Sendable {
+    public let read: Bool?
+    public let write: Bool?
     
     init(read: Bool, write: Bool) {
         self.read = read
         self.write = write
     }
 
-    static let rw = RelayInfo(read: true, write: true)
+    static let rw = LegacyKind3RelayRWConfiguration(read: true, write: true)
 }
 
 enum RelayVariant {
@@ -27,10 +27,10 @@ enum RelayVariant {
 
 public struct RelayDescriptor {
     let url: RelayURL
-    let info: RelayInfo
+    let info: LegacyKind3RelayRWConfiguration
     let variant: RelayVariant
     
-    init(url: RelayURL, info: RelayInfo, variant: RelayVariant = .regular) {
+    init(url: RelayURL, info: LegacyKind3RelayRWConfiguration, variant: RelayVariant = .regular) {
         self.url = url
         self.info = info
         self.variant = variant
