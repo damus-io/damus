@@ -79,7 +79,8 @@ func remove_relay(ev: NostrEvent, current_relays: [RelayDescriptor], keypair: Fu
     return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 3, tags: ev.tags.strings())
 }
 
-func add_relay(ev: NostrEvent, keypair: FullKeypair, current_relays: [RelayDescriptor], relay: RelayURL, info: RelayInfo) -> NostrEvent? {
+/// Handles the creation of a new `kind:3` contact list based on a previous contact list, with the specified relays
+func add_relay(ev: NostrEvent, keypair: FullKeypair, current_relays: [RelayDescriptor], relay: RelayURL, info: RelayRWConfiguration) -> NostrEvent? {
     var relays = ensure_relay_info(relays: current_relays, content: ev.content)
     
     // If kind:3 content is empty, or if the relay doesn't exist in the list,
