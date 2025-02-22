@@ -7,6 +7,18 @@
 
 import Foundation
 
+
+/// The sequence of strings in a single nostr event tag
+///
+/// Example 1:
+/// ```json
+///   ["r", "wss://nostr-relay.example.com", "read"]
+/// ```
+///
+/// Example 2:
+/// ```json
+///   ["p", "8b2be0a0ad34805d76679272c28a77dbede9adcbfdca48c681ec8b624a1208a6"]
+/// ```
 struct TagSequence: Sequence {
     let note: NdbNote
     let tag: UnsafeMutablePointer<ndb_tag>

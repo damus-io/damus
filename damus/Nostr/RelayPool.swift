@@ -24,6 +24,7 @@ struct SeenEvent: Hashable {
     let evid: NoteId
 }
 
+/// Establishes and manages connections and subscriptions to a list of relays.
 class RelayPool {
     var relays: [Relay] = []
     var handlers: [RelayHandler] = []
@@ -31,6 +32,7 @@ class RelayPool {
     var seen: Set<SeenEvent> = Set()
     var counts: [RelayURL: UInt64] = [:]
     var ndb: Ndb
+    /// The keypair used to authenticate with relays
     var keypair: Keypair?
     var message_received_function: (((String, RelayDescriptor)) -> Void)?
     var message_sent_function: (((String, Relay)) -> Void)?
@@ -243,19 +245,19 @@ class RelayPool {
     func send_raw(_ req: NostrRequestType, to: [RelayURL]? = nil, skip_ephemeral: Bool = true) {
         let relays = to.map{ get_relays($0) } ?? self.relays
 
-        self.send_raw_to_local_ndb(req)
+        self.send_raw_to_local_ndb(req)     // Always send Nostr events and data to NostrDB for a local copy
 
         for relay in relays {
             if req.is_read && !(relay.descriptor.info.read ?? true) {
-                continue
+                continue    // Do not send read requests to relays that are not READ relays
             }
             
             if req.is_write && !(relay.descriptor.info.write ?? true) {
-                continue
+                continue    // Do not send write requests to relays that are not WRITE relays
             }
             
             if relay.descriptor.ephemeral && skip_ephemeral {
-                continue
+                continue    // Do not send requests to ephemeral relays if we want to skip them
             }
             
             guard relay.connection.isConnected else {
