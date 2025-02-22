@@ -8,6 +8,7 @@
 import Foundation
 
 
+/// A known Nostr event kind, addressable by name, with the actual number assigned by the protocol as the value
 enum NostrKind: UInt32, Codable {
     case metadata = 0
     case text = 1
