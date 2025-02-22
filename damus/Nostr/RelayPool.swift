@@ -34,6 +34,13 @@ class RelayPool {
     var keypair: Keypair?
     var message_received_function: (((String, RelayDescriptor)) -> Void)?
     var message_sent_function: (((String, Relay)) -> Void)?
+    var delegate: Delegate?
+    var nip65RelayListEvent: NostrEvent? {
+        didSet {
+            guard let nip65RelayListEvent else { return }
+            self.delegate?.latestRelayListChanged(nip65RelayListEvent)
+        }
+    }
 
     private let network_monitor = NWPathMonitor()
     private let network_monitor_queue = DispatchQueue(label: "io.damus.network_monitor")
@@ -355,6 +362,13 @@ class RelayPool {
 
 func add_rw_relay(_ pool: RelayPool, _ url: RelayURL) {
     try? pool.add_relay(RelayDescriptor(url: url, info: .rw))
+}
+
+
+extension RelayPool {
+    protocol Delegate {
+        func latestRelayListChanged(_ newEvent: NdbNote)
+    }
 }
 
 

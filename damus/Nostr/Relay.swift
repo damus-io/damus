@@ -16,6 +16,8 @@ public struct RelayRWConfiguration: Codable {
         self.write = write
     }
 
+    static let r = RelayRWConfiguration(read: true, write: false)
+    static let w = RelayRWConfiguration(read: false, write: true)
     static let rw = RelayRWConfiguration(read: true, write: true)
 }
 
@@ -155,4 +157,14 @@ class Relay: Identifiable {
 
 enum RelayError: Error {
     case RelayAlreadyExists
+}
+
+extension NIP65.RelayList.RelayItem.RWConfiguration {
+    func relayRWConfiguration() -> RelayRWConfiguration {
+        switch self {
+        case .read: RelayRWConfiguration.r
+        case .write: RelayRWConfiguration.w
+        case .readWrite: RelayRWConfiguration.rw
+        }
+    }
 }
