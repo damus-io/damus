@@ -88,7 +88,7 @@ struct AddRelayView: View {
                     return
                 }
 
-                let info = RelayInfo.rw
+                let info = RelayRWConfiguration.rw
                 let descriptor = RelayDescriptor(url: url, info: info)
 
                 do {

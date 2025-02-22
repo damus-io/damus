@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct RelayInfo: Codable {
+public struct RelayRWConfiguration: Codable {
     let read: Bool?
     let write: Bool?
     
@@ -16,7 +16,7 @@ public struct RelayInfo: Codable {
         self.write = write
     }
 
-    static let rw = RelayInfo(read: true, write: true)
+    static let rw = RelayRWConfiguration(read: true, write: true)
 }
 
 enum RelayVariant {
@@ -27,10 +27,10 @@ enum RelayVariant {
 
 public struct RelayDescriptor {
     let url: RelayURL
-    let info: RelayInfo
+    let info: RelayRWConfiguration
     let variant: RelayVariant
     
-    init(url: RelayURL, info: RelayInfo, variant: RelayVariant = .regular) {
+    init(url: RelayURL, info: RelayRWConfiguration, variant: RelayVariant = .regular) {
         self.url = url
         self.info = info
         self.variant = variant
