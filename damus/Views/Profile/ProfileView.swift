@@ -122,6 +122,9 @@ struct ProfileView: View {
     func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
         var filters = ContentFilters.defaults(damus_state: damus_state)
         filters.append(fstate.filter)
+        if fstate == .conversations {
+            filters.append({ profile.conversation_events.contains($0.id) } )
+        }
         return ContentFilters(filters: filters).filter
     }
 
@@ -429,6 +432,17 @@ struct ProfileView: View {
         .padding(.horizontal)
     }
 
+    var tabs: [(String, FilterState)] {
+        var tabs = [
+            (NSLocalizedString("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies)."), FilterState.posts),
+            (NSLocalizedString("Notes & Replies", comment: "Label for filter for seeing notes and replies (instead of only notes)."), FilterState.posts_and_replies)
+        ]
+        if profile.pubkey != damus_state.pubkey && !profile.conversation_events.isEmpty {
+            tabs.append((NSLocalizedString("Conversations", comment: "Label for filter for seeing notes and replies that involve conversations between the signed in user and the current profile."), FilterState.conversations))
+        }
+        return tabs
+    }
+
     var body: some View {
         ZStack {
             ScrollView(.vertical) {
@@ -440,10 +454,7 @@ struct ProfileView: View {
                         aboutSection
 
                         VStack(spacing: 0) {
-                            CustomPicker(tabs: [
-                                (NSLocalizedString("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies)."), FilterState.posts),
-                                (NSLocalizedString("Notes & Replies", comment: "Label for filter for seeing notes and replies (instead of only notes)."), FilterState.posts_and_replies)
-                            ], selection: $filter_state)
+                            CustomPicker(tabs: tabs, selection: $filter_state)
                             Divider()
                                 .frame(height: 1)
                         }
@@ -454,6 +465,9 @@ struct ProfileView: View {
                         }
                         if filter_state == FilterState.posts_and_replies {
                             InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.posts_and_replies))
+                        }
+                        if filter_state == FilterState.conversations && !profile.conversation_events.isEmpty {
+                            InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.conversations))
                         }
                     }
                     .padding(.horizontal, Theme.safeAreaInsets?.left)

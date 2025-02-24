@@ -22,8 +22,10 @@ class ProfileModel: ObservableObject, Equatable {
     var seen_event: Set<NoteId> = Set()
     var sub_id = UUID().description
     var prof_subid = UUID().description
+    var conversations_subid = UUID().description
     var findRelay_subid = UUID().description
-    
+    var conversation_events: Set<NoteId> = Set()
+
     init(pubkey: Pubkey, damus: DamusState) {
         self.pubkey = pubkey
         self.damus = damus
@@ -59,6 +61,9 @@ class ProfileModel: ObservableObject, Equatable {
         print("unsubscribing from profile \(pubkey) with sub_id \(sub_id)")
         damus.pool.unsubscribe(sub_id: sub_id)
         damus.pool.unsubscribe(sub_id: prof_subid)
+        if pubkey != damus.pubkey {
+            damus.pool.unsubscribe(sub_id: conversations_subid)
+        }
     }
 
     func subscribe() {
@@ -69,13 +74,29 @@ class ProfileModel: ObservableObject, Equatable {
         
         text_filter.authors = [pubkey]
         text_filter.limit = 500
-        
-        print("subscribing to profile \(pubkey) with sub_id \(sub_id)")
+
+        print("subscribing to textlike events from profile \(pubkey) with sub_id \(sub_id)")
         //print_filters(relay_id: "profile", filters: [[text_filter], [profile_filter]])
         damus.pool.subscribe(sub_id: sub_id, filters: [text_filter], handler: handle_event)
         damus.pool.subscribe(sub_id: prof_subid, filters: [profile_filter], handler: handle_event)
+
+        subscribe_to_conversations()
     }
-    
+
+    private func subscribe_to_conversations() {
+        // Only subscribe to conversation events if the profile is not us.
+        guard pubkey != damus.pubkey else {
+            return
+        }
+
+        let conversation_kinds: [NostrKind] = [.text, .longform, .highlight]
+        let limit: UInt32 = 500
+        let conversations_filter_them = NostrFilter(kinds: conversation_kinds, pubkeys: [damus.pubkey], limit: limit, authors: [pubkey])
+        let conversations_filter_us = NostrFilter(kinds: conversation_kinds, pubkeys: [pubkey], limit: limit, authors: [damus.pubkey])
+        print("subscribing to conversation events from and to profile \(pubkey) with sub_id \(conversations_subid)")
+        damus.pool.subscribe(sub_id: conversations_subid, filters: [conversations_filter_them, conversations_filter_us], handler: handle_event)
+    }
+
     func handle_profile_contact_event(_ ev: NostrEvent) {
         process_contact_event(state: damus, ev: ev)
         
@@ -90,15 +111,8 @@ class ProfileModel: ObservableObject, Equatable {
         self.following = count_pubkeys(ev.tags)
         self.relays = decode_json_relays(ev.content)
     }
-    
-    func add_event(_ ev: NostrEvent) {
-        guard ev.should_show_event else {
-            return
-        }
 
-        if seen_event.contains(ev.id) {
-            return
-        }
+    private func add_event(_ ev: NostrEvent) {
         if ev.is_textlike || ev.known_kind == .boost {
             if self.events.insert(ev) {
                 self.objectWillChange.send()
@@ -109,24 +123,57 @@ class ProfileModel: ObservableObject, Equatable {
         seen_event.insert(ev.id)
     }
 
+    // Ensure the event public key matches the public key(s) we are querying.
+    // This is done to protect against a relay not properly filtering events by the pubkey
+    // See https://github.com/damus-io/damus/issues/1846 for more information
+    private func relay_filtered_correctly(_ ev: NostrEvent, subid: String?) -> Bool {
+        if subid == self.conversations_subid {
+            switch ev.pubkey {
+            case self.pubkey:
+                return ev.referenced_pubkeys.contains(damus.pubkey)
+            case damus.pubkey:
+                return ev.referenced_pubkeys.contains(self.pubkey)
+            default:
+                return false
+            }
+        }
+
+        return self.pubkey == ev.pubkey
+    }
+
     private func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
         switch ev {
         case .ws_event:
             return
         case .nostr_event(let resp):
-            guard resp.subid == self.sub_id || resp.subid == self.prof_subid else {
+            guard resp.subid == self.sub_id || resp.subid == self.prof_subid || resp.subid == self.conversations_subid else {
                 return
             }
             switch resp {
             case .ok:
                 break
             case .event(_, let ev):
-                // Ensure the event public key matches this profiles public key
-                // This is done to protect against a relay not properly filtering events by the pubkey
-                // See https://github.com/damus-io/damus/issues/1846 for more information
-                guard self.pubkey == ev.pubkey else { break }
+                guard ev.should_show_event else {
+                    break
+                }
 
-                add_event(ev)
+                if !seen_event.contains(ev.id) {
+                    guard relay_filtered_correctly(ev, subid: resp.subid) else {
+                        break
+                    }
+
+                    add_event(ev)
+
+                    if resp.subid == self.conversations_subid {
+                        conversation_events.insert(ev.id)
+                    }
+                } else if resp.subid == self.conversations_subid && !conversation_events.contains(ev.id) {
+                    guard relay_filtered_correctly(ev, subid: resp.subid) else {
+                        break
+                    }
+
+                    conversation_events.insert(ev.id)
+                }
             case .notice:
                 break
                 //notify(.notice, notice)

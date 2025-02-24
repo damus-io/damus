@@ -10,14 +10,17 @@ import Foundation
 
 /// Simple filter to determine whether to show posts or all posts and replies.
 enum FilterState : Int {
-    case posts_and_replies = 1
     case posts = 0
+    case posts_and_replies = 1
+    case conversations = 2
 
     func filter(ev: NostrEvent) -> Bool {
         switch self {
         case .posts:
             return ev.known_kind == .boost || ev.known_kind == .highlight || !ev.is_reply()
         case .posts_and_replies:
+            return true
+        case .conversations:
             return true
         }
     }
