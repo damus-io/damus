@@ -16,7 +16,7 @@ struct RepostedEvent: View {
     var body: some View {
         VStack(alignment: .leading) {
             NavigationLink(value: Route.ProfileByKey(pubkey: event.pubkey)) {
-                Reposted(damus: damus, pubkey: event.pubkey, target: inner_ev.id)
+                Reposted(damus: damus, pubkey: event.pubkey, target: inner_ev)
                     .padding(.horizontal)
             }
            .buttonStyle(PlainButtonStyle())
