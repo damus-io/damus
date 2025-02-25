@@ -6,6 +6,7 @@ _[Please provide a summary of the changes in this PR.]_
 
 - [ ] I have read (or I am familiar with) the [Contribution Guidelines](../docs/CONTRIBUTING.md)
 - [ ] I have tested the changes in this PR
+- [ ] I have opened or referred to an existing github issue related to this change.
 - [ ] My PR is either small, or I have split it into smaller logical commits that are easier to review
 - [ ] I have added the signoff line to all my commits. See [Signing off your work](../docs/CONTRIBUTING.md#sign-your-work---the-developers-certificate-of-origin)
 - [ ] I have added appropriate changelog entries for the changes in this PR. See [Adding changelog entries](../docs/CONTRIBUTING.md#add-changelog-changed-changelog-fixed-etc)
