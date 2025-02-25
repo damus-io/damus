@@ -58,6 +58,9 @@
     "%@ replied to your note" : {
       "comment" : "Heading for local notification indicating a new reply"
     },
+    "%@ reposted" : {
+      "comment" : "Text indicating that the note was reposted (i.e. re-shared)."
+    },
     "%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." : {
       "comment" : "Explanation of what is done to keep personally identifiable information private. There is a heading that precedes this explanation which is a variable to this string."
     },
@@ -207,9 +210,6 @@
         }
       }
     },
-    "Are you lost?" : {
-      "comment" : "Text asking the user if they are lost in the app."
-    },
     "Are you sure you want to clear the cache? This will free space, but images may take longer to load again." : {
       "comment" : "Message explaining what it means to clear the cache, asking if user wants to proceed."
     },
@@ -272,6 +272,9 @@
     },
     "Camera's permission was denied. You can change this in iOS settings." : {
       "comment" : "Camera's permission denied error label"
+    },
+    "Can’t display note" : {
+      "comment" : "User-visible heading for an error message indicating a note has an unknown kind or is unsupported for viewing."
     },
     "Cancel" : {
       "comment" : "Alert button to cancel out of alert for muting a user.\nButton to cancel a repost.\nButton to cancel any interaction with the QRCode link.\nButton to cancel out of alert that creates a new mutelist.\nButton to cancel out of posting a note.\nButton to cancel out of search text entry mode.\nButton to cancel the upload.\nCancel button text for dismissing profile status settings view.\nCancel button text for dismissing updating image url.\nCancel deleting bookmarks.\nCancel deleting the user.\nCancel out of logging out the user.\nCancel out of search view.\nCancel resetting the contact list.\nText for button to cancel out of connecting Nostr Wallet Connect lightning wallet."
@@ -344,6 +347,9 @@
     },
     "Continue" : {
       "comment" : "Button to dismiss suggested users view and continue to the main app\nContinue with bookmarks.\nContinue with deleting the user.\nContinue with resetting the contact list.\nPrompt to user to continue"
+    },
+    "Conversations" : {
+      "comment" : "Label for filter for seeing notes and replies that involve conversations between the signed in user and the current profile."
     },
     "Copied" : {
       "comment" : "Label indicating that a user's key was copied."
@@ -940,9 +946,6 @@
     "Nostr Address" : {
       "comment" : "Label for the Nostr Address section of user profile form."
     },
-    "Nostr is the super app. Because it’s actually an ecosystem of apps, all of which make each other better. People haven’t grasped that yet. They will when it’s more accessible and onboarding is more straightforward and intuitive." : {
-
-    },
     "NostrScript" : {
       "comment" : "Navigation title for the view showing NostrScript."
     },
@@ -959,7 +962,7 @@
       "comment" : "Text to indicate that what is being shown is a note which has been muted."
     },
     "Note not found" : {
-      "comment" : "Heading for the thread view in a not found error state"
+      "comment" : "Heading for the thread view in a not found error state."
     },
     "Note you've muted" : {
       "comment" : "Label indicating note has been muted\nText to indicate that what is being shown is a note which has been muted."
@@ -1069,11 +1072,17 @@
     "Please choose relays from the list below to filter the current feed:" : {
       "comment" : "Instructions on how to filter a specific timeline feed by choosing relay servers to filter on."
     },
+    "Please contact the person who provided the link, and ask for another link." : {
+      "comment" : "User-visible tip on what to do if a link contains a deprecated \"nrelay\" reference."
+    },
     "Please double-check the checkout web page, or go to the Side Menu → \"Purple\" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue." : {
       "comment" : "User-facing tips on what to do if a Purple welcome link doesn't work"
     },
     "Please try again, check the URL for typos, or contact support for further help." : {
       "comment" : "User visible error tips"
+    },
+    "Please try opening this content on another Nostr app that supports this type of content." : {
+      "comment" : "User-visible advice on what to do if they see the error indicating a note has an unknown kind or is unsupported for viewing."
     },
     "Point your camera to a QR code…" : {
       "comment" : "Text on QR code camera view instructing user to point to QR code"
@@ -1242,9 +1251,6 @@
     "Repost or quote this note" : {
       "comment" : "Accessibility label for repost/quote button"
     },
-    "Reposted" : {
-      "comment" : "Text indicating that the note was reposted (i.e. re-shared)."
-    },
     "Reposted by %@" : {
       "comment" : "Reposted by heading in local notification"
     },
@@ -1294,7 +1300,7 @@
       "comment" : "Ask user if they want to save their account information."
     },
     "Saved" : {
-      "comment" : "Small label indicating that the user's draft has been saved to storage"
+      "comment" : "Small label indicating that the user's draft has been saved to storage."
     },
     "Scan a user's pubkey" : {
       "comment" : "Text to prompt scanning a QR code of a user's pubkey to open their profile."
@@ -1587,7 +1593,7 @@
     "Truncate timeline text" : {
       "comment" : "Setting to truncate text in timeline"
     },
-    "Try checking the link again, your internet connection, whether you need to connect to a specific relay to access this content." : {
+    "Try checking the link again, your internet connection, or contact the person who provided you the link for help." : {
       "comment" : "Tips on what to do if a note cannot be found."
     },
     "Type %@ to delete" : {
@@ -1598,6 +1604,9 @@
     },
     "Unable to find a QR Code" : {
       "comment" : "Alert message letting user know a QR Code was not found."
+    },
+    "Undistract mode" : {
+      "comment" : "Developer mode setting to scramble text and images to avoid distractions during development."
     },
     "Unfollow" : {
       "comment" : "Button to unfollow a user."
@@ -1674,9 +1683,6 @@
     "Visit the Damus website on a web browser to manage billing" : {
       "comment" : "Instruction on how to manage billing externally"
     },
-    "Wake up, %@" : {
-      "comment" : "Text telling the user to wake up, where the argument is their display name."
-    },
     "Wallet" : {
       "comment" : "Navigation title for Wallet view\nNavigation title for attaching Nostr Wallet Connect lightning wallet.\nSidebar menu label for Wallet view.\nTitle for section in zap settings that controls the Lightning wallet selection."
     },
@@ -1694,6 +1700,9 @@
     },
     "We did not detect any issues that we can automatically fix for you. If you are having issues, please contact Damus support: [support@damus.io](mailto:support@damus.io)" : {
       "comment" : "Message indicating that no First Aid actions are available."
+    },
+    "We do not yet support viewing this type of content." : {
+      "comment" : "User-visible description of an error indicating a note has an unknown kind or is unsupported for viewing."
     },
     "We were unable to find the note you were looking for." : {
       "comment" : "Text for the thread view when it is unable to find the note the user is looking for"
@@ -1743,9 +1752,6 @@
     "you" : {
       "comment" : "You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself."
     },
-    "You are dreaming..." : {
-      "comment" : "Text telling the user that they are dreaming."
-    },
     "You cannot share content because you are not logged in. Please close this view, log in to your account, and try again." : {
       "comment" : "Label explaining that sharing cannot proceed because the user is not logged in."
     },
@@ -1758,14 +1764,17 @@
     "You have no bookmarks yet, add them in the context menu" : {
       "comment" : "Text indicating that there are no bookmarks to be viewed"
     },
+    "You opened an invalid link. The link you tried to open refers to \"nrelay\", which has been deprecated and is not supported." : {
+      "comment" : "User-visible error description for a user who tries to open a deprecated \"nrelay\" link."
+    },
     "You unlocked" : {
       "comment" : "Part 1 of 2 in message 'You unlocked automatic translations' the user gets when they sign up for Damus Purple"
     },
     "Your content is being broadcasted to the network. Please wait." : {
       "comment" : "Label explaining that their content sharing action is in progress"
     },
-    "Your draft has been saved to storage" : {
-      "comment" : "Accessibility label indicating that a user's post draft has been saved, meant only for visually impaired users"
+    "Your draft has been saved to storage." : {
+      "comment" : "Accessibility label indicating that a user's post draft has been saved, meant to be read by screen reading technology."
     },
     "Your Name" : {
       "comment" : "Label for Your Name section of user profile form."
