@@ -15,6 +15,7 @@ struct ConnectWalletView: View {
     @State private var showAlert = false
     @State var error: String? = nil
     @State var wallet_scan_result: WalletScanResult = .scanning
+    @State var show_introduction: Bool = true
     var nav: NavigationCoordinator
     
     var body: some View {
@@ -48,98 +49,7 @@ struct ConnectWalletView: View {
             }
     }
     
-    func AreYouSure(nwc: WalletConnectURL) -> some View {
-        VStack(spacing: 25) {
-
-            Text("Are you sure you want to connect this wallet?", comment: "Prompt to ask user if they want to attach their Nostr Wallet Connect lightning wallet.")
-                .fontWeight(.bold)
-                .multilineTextAlignment(.center)
-
-            Text(nwc.relay.absoluteString)
-                .font(.body)
-                .foregroundColor(.gray)
-
-            if let lud16 = nwc.lud16 {
-                Text(lud16)
-                    .font(.body)
-                    .foregroundColor(.gray)
-            }
-            
-            Button(action: {
-                model.connect(nwc)
-            }) {
-                HStack {
-                    Text("Connect", comment: "Text for button to conect to Nostr Wallet Connect lightning wallet.")
-                        .fontWeight(.semibold)
-                }
-                .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 18, alignment: .center)
-            }
-            .buttonStyle(GradientButtonStyle())
-            
-            Button(action: {
-                model.cancel()
-            }) {
-                HStack {
-                    Text("Cancel", comment: "Text for button to cancel out of connecting Nostr Wallet Connect lightning wallet.")
-                        .padding()
-                }
-                .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
-            }
-            .buttonStyle(NeutralButtonStyle())
-        }
-    }
-    
-    var ConnectWallet: some View {
-        VStack(spacing: 25) {
-            
-            AlbyButton() {
-                openURL(URL(string:"https://nwc.getalby.com/apps/new?c=Damus")!)
-            }
-            
-            CoinosButton() {
-                openURL(URL(string:"https://coinos.io/settings/nostr")!)
-            }
-            
-            Button(action: {
-                if let pasted_nwc = UIPasteboard.general.string {
-                    guard let url = WalletConnectURL(str: pasted_nwc) else {
-                        wallet_scan_result = .failed
-                        return
-                    }
-                    
-                    wallet_scan_result = .success(url)
-                }
-            }) {
-                HStack {
-                    Image("clipboard")
-                    Text("Paste NWC Address", comment: "Text for button to connect a lightning wallet.")
-                        .fontWeight(.semibold)
-                }
-                .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 18, alignment: .center)
-            }
-            .buttonStyle(GradientButtonStyle())
-            
-            Button(action: {
-                nav.push(route: Route.WalletScanner(result: $wallet_scan_result))
-            }) {
-                HStack {
-                    Image("qr-code")
-                    Text("Scan NWC Address", comment: "Text for button to connect a lightning wallet.")
-                        .fontWeight(.semibold)
-                }
-                .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 18, alignment: .center)
-            }
-            .buttonStyle(GradientButtonStyle())
-
-            
-            if let err = self.error {
-                Text(err)
-                    .foregroundColor(.red)
-            }
-        }
-    }
-    
-    var TopSection: some View {
+    var ConnectGraphic: some View {
         HStack(spacing: 0) {
             Button(action: {}, label: {
                 Image("damus-home")
@@ -166,30 +76,218 @@ struct ConnectWalletView: View {
         }
     }
     
-    var TitleSection: some View {
+    func AreYouSure(nwc: WalletConnectURL) -> some View {
         VStack(spacing: 25) {
-            Text("Damus Wallet", comment: "Title text for Damus Wallet view.")
+            
+            Text("Setup Wallet")
+                .font(.system(size: 48))
+                .fontWeight(.bold)
+                .multilineTextAlignment(.center)
+            
+            Spacer()
+            
+            ConnectGraphic
+            
+            Spacer()
+            
+            VStack(alignment: .leading) {
+                
+                Text("Account details", comment: "Prompt to ask user if they want to attach their Nostr Wallet Connect lightning wallet.")
+                    .font(.system(size: 32))
+                    .fontWeight(.bold)
+                    .multilineTextAlignment(.center)
+                    .padding(.bottom)
+                
+                Text("Routing")
+                    .font(.system(size: 24))
+                
+                Text(nwc.relay.absoluteString)
+                    .font(.system(size: 24))
+                    .fontWeight(.bold)
+                    .foregroundColor(.gray)
+                    .padding(.bottom)
+                
+                if let lud16 = nwc.lud16 {
+                    Text("Account")
+                        .font(.system(size: 24))
+                    
+                    Text(lud16)
+                        .font(.system(size: 24))
+                        .fontWeight(.bold)
+                        .foregroundColor(.gray)
+                }
+            }
+            .frame(maxWidth: .infinity, minHeight: 250, alignment: .leading)
+            .padding(.horizontal, 20)
+            .cornerRadius(10)
+            .overlay(
+                RoundedRectangle(cornerRadius: 25)
+                    .stroke(DamusColors.neutral3, lineWidth: 2)
+            )
+            
+            Spacer()
+            
+            Button(action: {
+                model.connect(nwc)
+                show_introduction = false
+            }) {
+                HStack {
+                    Text("Connect", comment: "Text for button to conect to Nostr Wallet Connect lightning wallet.")
+                        .fontWeight(.semibold)
+                }
+                .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 18, alignment: .center)
+            }
+            .buttonStyle(GradientButtonStyle())
+            
+            Button(action: {
+                model.cancel()
+                show_introduction = true
+            }) {
+                HStack {
+                    Text("Cancel", comment: "Text for button to cancel out of connecting Nostr Wallet Connect lightning wallet.")
+                        .padding()
+                }
+                .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
+            }
+            .buttonStyle(NeutralButtonStyle())
+        }
+        .padding(.bottom, 50)
+    }
+    
+    var AutomaticSetup: some View {
+        VStack(spacing: 10) {
+            Text("AUTOMATIC SETUP")
+                .font(.system(size: 12))
+                .padding(.top)
+                .foregroundStyle(PinkGradient)
+            
+            Text("Create new wallet")
+                .font(.system(size: 28))
                 .fontWeight(.bold)
             
-            Text("Securely connect your Damus app to your wallet using Nostr Wallet Connect", comment: "Text to prompt user to connect their wallet using 'Nostr Wallet Connect'.")
-                .font(.caption)
+            Text("Easily create a new wallet and attach it to your account.")
+                .font(.system(size: 18))
                 .multilineTextAlignment(.center)
+            
+            Spacer()
+            
+            CoinosButton() {
+                show_introduction = false
+                openURL(URL(string:"https://coinos.io/settings/nostr")!)
+            }
+            .padding()
         }
+        .frame(minHeight: 250)
+        .padding(10)
+        .cornerRadius(10)
+        .overlay(
+            RoundedRectangle(cornerRadius: 25)
+                .stroke(DamusColors.neutral3, lineWidth: 2)
+        )
+        .padding(.top, 20)
+    }
+    
+    var ManualSetup: some View {
+        VStack(spacing: 10) {
+            Text("MANUAL SETUP")
+                .font(.system(size: 12))
+                .padding(.top)
+                .foregroundStyle(PinkGradient)
+            
+            Text("Use existing")
+                .font(.system(size: 28))
+                .fontWeight(.bold)
+            
+            Text("Attach to any third party provider you already use.")
+                .font(.system(size: 18))
+                .multilineTextAlignment(.center)
+            
+            Spacer()
+            
+            Button(action: {
+                if let pasted_nwc = UIPasteboard.general.string {
+                    guard let url = WalletConnectURL(str: pasted_nwc) else {
+                        wallet_scan_result = .failed
+                        return
+                    }
+                    
+                    wallet_scan_result = .success(url)
+                }
+            }) {
+                HStack {
+                    Image("clipboard")
+                    Text("Paste NWC Address", comment: "Text for button to connect a lightning wallet.")
+                        .fontWeight(.semibold)
+                }
+                .frame(minWidth: 250, maxWidth: .infinity, maxHeight: 15, alignment: .center)
+            }
+            .buttonStyle(GradientButtonStyle())
+            .padding(.horizontal)
+            
+            Button(action: {
+                nav.push(route: Route.WalletScanner(result: $wallet_scan_result))
+            }) {
+                HStack {
+                    Image("qr-code")
+                    Text("Scan NWC Address", comment: "Text for button to connect a lightning wallet.")
+                        .fontWeight(.semibold)
+                }
+                .frame(minWidth: 250, maxWidth: .infinity, maxHeight: 15, alignment: .center)
+            }
+            .buttonStyle(GradientButtonStyle())
+            .padding(.horizontal)
+            .padding(.bottom)
+        }
+        .frame(minHeight: 300)
+        .padding(10)
+        .cornerRadius(10)
+        .overlay(
+            RoundedRectangle(cornerRadius: 25)
+                .stroke(DamusColors.neutral3, lineWidth: 2)
+        )
+        .padding(.top, 20)
+    }
+    
+    var ConnectWallet: some View {
+        ScrollView {
+            VStack(spacing: 25) {
+                
+                Text("Setup Wallet")
+                    .font(.system(size: 48))
+                    .fontWeight(.bold)
+                    .multilineTextAlignment(.center)
+                
+                AutomaticSetup
+                
+                ManualSetup
+                
+                if let err = self.error {
+                    Text(err)
+                        .foregroundColor(.red)
+                }
+            }
+            .padding(.bottom, 50)
+        }
+        .scrollIndicators(.hidden)
     }
     
     var MainContent: some View {
         Group {
-            TopSection
             switch model.connect_state {
             case .new(let nwc):
                 AreYouSure(nwc: nwc)
+                    .onAppear() {
+                        show_introduction = false
+                    }
             case .existing:
                 Text(verbatim: "Shouldn't happen")
             case .none:
-                TitleSection
                 ConnectWallet
             }
         }
+        .fullScreenCover(isPresented: $show_introduction, content: {
+            ZapExplainerView(show_introduction: $show_introduction, nav: nav)
+        })
     }
 }
 

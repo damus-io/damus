@@ -278,6 +278,18 @@ class HomeModel: ContactsDelegate {
                 return
             }
             
+            if resp.response.result_type == .list_transactions {
+                print("nwc transaction success: \(resp.response.result.debugDescription) [\(relay)]")
+                nwc_info_success(state: self.damus_state, resp: resp)
+                return
+            }
+            
+            if resp.response.result_type == .get_balance {
+                print("nwc balance success: \(resp.response.result.debugDescription) [\(relay)]")
+                nwc_info_success(state: self.damus_state, resp: resp)
+                return
+            }
+
             print("nwc success: \(resp.response.result.debugDescription) [\(relay)]")
             nwc_success(state: self.damus_state, resp: resp)
         }
