@@ -79,7 +79,7 @@
 			<key>one</key>
 			<string>Geteilt von %2$@ und %1$d ein weiters Profil</string>
 			<key>other</key>
-			<string>Geteilt von %2$@ und %1$d weitere Profile</string>
+			<string>%2$@ und %1$d weitere teilten</string>
 		</dict>
 	</dict>
 	<key>reacted_tagged_in_3</key>
