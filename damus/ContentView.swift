@@ -199,7 +199,7 @@ struct ContentView: View {
     func MaybeReportView(target: ReportTarget) -> some View {
         Group {
             if let keypair = damus_state.keypair.to_full() {
-                ReportView(postbox: damus_state.postbox, target: target, keypair: keypair)
+                ReportView(postbox: damus_state.networkManager.postbox, target: target, keypair: keypair)
             } else {
                 EmptyView()
             }
@@ -317,7 +317,7 @@ struct ContentView: View {
             case .post(let action):
                 PostView(action: action, damus_state: damus_state!)
             case .user_status:
-                UserStatusSheet(damus_state: damus_state!, postbox: damus_state!.postbox, keypair: damus_state!.keypair, status: damus_state!.profiles.profile_data(damus_state!.pubkey).status)
+                UserStatusSheet(damus_state: damus_state!, postbox: damus_state!.networkManager.postbox, keypair: damus_state!.keypair, status: damus_state!.profiles.profile_data(damus_state!.pubkey).status)
                     .presentationDragIndicator(.visible)
             case .event:
                 EventDetailView()
@@ -356,7 +356,7 @@ struct ContentView: View {
             self.hide_bar = !show
         }
         .onReceive(timer) { n in
-            self.damus_state?.postbox.try_flushing_events()
+            self.damus_state?.networkManager.postbox.try_flushing_events()
             self.damus_state!.profiles.profile_data(self.damus_state!.pubkey).status.try_expire()
         }
         .onReceive(handle_notify(.report)) { target in
@@ -367,7 +367,7 @@ struct ContentView: View {
             self.confirm_mute = true
         }
         .onReceive(handle_notify(.attached_wallet)) { nwc in
-            try? damus_state.pool.add_relay(.nwc(url: nwc.relay))
+            try? damus_state.networkManager.userRelayList.load()    // Reload relay list to apply changes
 
             // update the lightning address on our profile when we attach a
             // wallet with an associated
@@ -389,12 +389,12 @@ struct ContentView: View {
             let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: lud16, nip05: profile.nip05, damus_donation: profile.damus_donation, reactions: profile.reactions)
 
             guard let ev = make_metadata_event(keypair: keypair, metadata: prof) else { return }
-            ds.postbox.send(ev)
+            ds.networkManager.postbox.send(ev)
         }
         .onReceive(handle_notify(.broadcast)) { ev in
             guard let ds = self.damus_state else { return }
 
-            ds.postbox.send(ev)
+            ds.networkManager.postbox.send(ev)
         }
         .onReceive(handle_notify(.unfollow)) { target in
             guard let state = self.damus_state else { return }
@@ -416,7 +416,7 @@ struct ContentView: View {
                       return
             }
 
-            if !handle_post_notification(keypair: keypair, postbox: state.postbox, events: state.events, post: post) {
+            if !handle_post_notification(keypair: keypair, postbox: state.networkManager.postbox, events: state.events, post: post) {
                 self.active_sheet = nil
             }
         }
@@ -460,7 +460,7 @@ struct ContentView: View {
             }
         }
         .onReceive(handle_notify(.disconnect_relays)) { () in
-            damus_state.pool.disconnect()
+            damus_state.networkManager.disconnect()
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { obj in
             print("txn: 📙 DAMUS ACTIVE NOTIFY")
@@ -506,7 +506,7 @@ struct ContentView: View {
                 break
             case .active:
                 print("txn: 📙 DAMUS ACTIVE")
-                damus_state.pool.ping()
+                damus_state.networkManager.ping()
             @unknown default:
                 break
             }
@@ -525,7 +525,7 @@ struct ContentView: View {
             let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: profile.lud16, nip05: profile.nip05, damus_donation: profile.damus_donation, reactions: !hide)
 
             guard let profile_ev = make_metadata_event(keypair: keypair, metadata: prof) else { return }
-            ds.postbox.send(profile_ev)
+            ds.networkManager.postbox.send(profile_ev)
         }
         .alert(NSLocalizedString("User muted", comment: "Alert message to indicate the user has been muted"), isPresented: $user_muted_confirm, actions: {
             Button(NSLocalizedString("Thanks!", comment: "Button to close out of alert that informs that the action to muted a user was successful.")) {
@@ -557,7 +557,7 @@ struct ContentView: View {
                 }
                 
                 ds.mutelist_manager.set_mutelist(mutelist)
-                ds.postbox.send(mutelist)
+                ds.networkManager.postbox.send(mutelist)
 
                 confirm_overwrite_mutelist = false
                 confirm_mute = false
@@ -589,7 +589,7 @@ struct ContentView: View {
                     }
 
                     ds.mutelist_manager.set_mutelist(ev)
-                    ds.postbox.send(ev)
+                    ds.networkManager.postbox.send(ev)
                 }
             }
         }, message: {
@@ -658,28 +658,14 @@ struct ContentView: View {
 
         guard let ndb = mndb else { return  }
 
-        let pool = RelayPool(ndb: ndb, keypair: keypair)
         let model_cache = RelayModelCache()
         let relay_filters = RelayFilters(our_pubkey: pubkey)
-        let bootstrap_relays = load_bootstrap_relays(pubkey: pubkey)
         
         let settings = UserSettingsStore.globally_load_for(pubkey: pubkey)
 
         let new_relay_filters = load_relay_filters(pubkey) == nil
-        for relay in bootstrap_relays {
-            let descriptor = RelayDescriptor(url: relay, info: .rw)
-            add_new_relay(model_cache: model_cache, relay_filters: relay_filters, pool: pool, descriptor: descriptor, new_relay_filters: new_relay_filters, logging_enabled: settings.developer_mode)
-        }
 
-        pool.register_handler(sub_id: sub_id, handler: home.handle_event)
-        
-        if let nwc_str = settings.nostr_wallet_connect,
-           let nwc = WalletConnectURL(str: nwc_str) {
-            try? pool.add_relay(.nwc(url: nwc.relay))
-        }
-
-        self.damus_state = DamusState(pool: pool,
-                                      keypair: keypair,
+        self.damus_state = DamusState(keypair: keypair,
                                       likes: EventCounter(our_pubkey: pubkey),
                                       boosts: EventCounter(our_pubkey: pubkey),
                                       contacts: Contacts(our_pubkey: pubkey),
@@ -695,8 +681,6 @@ struct ContentView: View {
                                       drafts: Drafts(),
                                       events: EventCache(ndb: ndb),
                                       bookmarks: BookmarksManager(pubkey: pubkey),
-                                      postbox: PostBox(pool: pool),
-                                      bootstrap_relays: bootstrap_relays,
                                       replies: ReplyCounter(our_pubkey: pubkey),
                                       wallet: WalletModel(settings: settings),
                                       nav: self.navigationCoordinator,
@@ -720,7 +704,11 @@ struct ContentView: View {
             // Purple API is an experimental feature. If not enabled, do not connect `StoreObserver` with Purple API to avoid leaking receipts
         }
         
-        pool.connect()
+        damus_state.networkManager.connect()
+        // TODO: Move this to a better spot. Not sure what is the best signal to listen to for sending initial filters
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: {
+            self.home.send_initial_filters()
+        })
     }
 
     func music_changed(_ state: MusicState) {
@@ -743,7 +731,7 @@ struct ContentView: View {
             pdata.status.music = music
 
             guard let ev = music.to_note(keypair: kp) else { return }
-            damus_state.postbox.send(ev)
+            damus_state.networkManager.postbox.send(ev)
         }
     }
     
@@ -926,167 +914,9 @@ enum FindEventType {
 }
 
 enum FoundEvent {
+    // TODO: Why not return the profile record itself? Right now the code probably just wants to trigger ndb to ingest the profile record and be available at ndb in parallel, but it would be cleaner if the function that uses this simply does that ndb query on their behalf.
     case profile(Pubkey)
     case event(NostrEvent)
-}
-
-/// Finds an event from NostrDB if it exists, or from the network
-///
-/// This is the callback version. There is also an asyc/await version of this function.
-///
-/// - Parameters:
-///   - state: Damus state
-///   - query_: The query, including the event being looked for, and the relays to use when looking
-///   - callback: The function to call with results
-func find_event(state: DamusState, query query_: FindEvent, callback: @escaping (FoundEvent?) -> ()) {
-    return find_event_with_subid(state: state, query: query_, subid: UUID().description, callback: callback)
-}
-
-/// Finds an event from NostrDB if it exists, or from the network
-///
-/// This is a the async/await version of `find_event`. Use this when using callbacks is impossible or cumbersome.
-///
-/// - Parameters:
-///   - state: Damus state
-///   - query_: The query, including the event being looked for, and the relays to use when looking
-///   - callback: The function to call with results
-func find_event(state: DamusState, query query_: FindEvent) async -> FoundEvent? {
-    await withCheckedContinuation { continuation in
-        find_event(state: state, query: query_) { event in
-            var already_resumed = false
-            if !already_resumed {   // Ensure we do not resume twice, as it causes a crash
-                continuation.resume(returning: event)
-                already_resumed = true
-            }
-        }
-    }
-}
-
-func find_event_with_subid(state: DamusState, query query_: FindEvent, subid: String, callback: @escaping (FoundEvent?) -> ()) {
-
-    var filter: NostrFilter? = nil
-    let find_from = query_.find_from
-    let query = query_.type
-    
-    switch query {
-    case .profile(let pubkey):
-        if let profile_txn = state.ndb.lookup_profile(pubkey),
-           let record = profile_txn.unsafeUnownedValue,
-           record.profile != nil
-        {
-            callback(.profile(pubkey))
-            return
-        }
-        filter = NostrFilter(kinds: [.metadata], limit: 1, authors: [pubkey])
-        
-    case .event(let evid):
-        if let ev = state.events.lookup(evid) {
-            callback(.event(ev))
-            return
-        }
-    
-        filter = NostrFilter(ids: [evid], limit: 1)
-    }
-    
-    var attempts: Int = 0
-    var has_event = false
-    guard let filter else { return }
-    
-    state.pool.subscribe_to(sub_id: subid, filters: [filter], to: find_from) { relay_id, res  in
-        guard case .nostr_event(let ev) = res else {
-            return
-        }
-        
-        guard ev.subid == subid else {
-            return
-        }
-        
-        switch ev {
-        case .ok:
-            break
-        case .event(_, let ev):
-            has_event = true
-            state.pool.unsubscribe(sub_id: subid)
-            
-            switch query {
-            case .profile:
-                if ev.known_kind == .metadata {
-                    callback(.profile(ev.pubkey))
-                }
-            case .event:
-                callback(.event(ev))
-            }
-        case .eose:
-            if !has_event {
-                attempts += 1
-                if attempts >= state.pool.our_descriptors.count {
-                    callback(nil)   // If we could not find any events in any of the relays we are connected to, send back nil
-                }
-            }
-            state.pool.unsubscribe(sub_id: subid, to: [relay_id])   // We are only finding an event once, so close subscription on eose
-        case .notice:
-            break
-        case .auth:
-            break
-        }
-    }
-}
-
-
-/// Finds a replaceable event based on an `naddr` address.
-///
-/// This is the callback version of the function. There is another function that makes use of async/await
-///
-/// - Parameters:
-///   - damus_state: The Damus state
-///   - naddr: the `naddr` address
-///   - callback: A function to handle the found event
-func naddrLookup(damus_state: DamusState, naddr: NAddr, callback: @escaping (NostrEvent?) -> ()) {
-    var nostrKinds: [NostrKind]? = NostrKind(rawValue: naddr.kind).map { [$0] }
-
-    let filter = NostrFilter(kinds: nostrKinds, authors: [naddr.author])
-    
-    let subid = UUID().description
-    
-    damus_state.pool.subscribe_to(sub_id: subid, filters: [filter], to: nil) { relay_id, res  in
-        guard case .nostr_event(let ev) = res else {
-            damus_state.pool.unsubscribe(sub_id: subid, to: [relay_id])
-            return
-        }
-        
-        if case .event(_, let ev) = ev {
-            for tag in ev.tags {
-                if(tag.count >= 2 && tag[0].string() == "d"){
-                    if (tag[1].string() == naddr.identifier){
-                        damus_state.pool.unsubscribe(sub_id: subid, to: [relay_id])
-                        callback(ev)
-                        return
-                    }
-                }
-            }
-        }
-        damus_state.pool.unsubscribe(sub_id: subid, to: [relay_id])
-    }
-}
-
-/// Finds a replaceable event based on an `naddr` address.
-///
-/// This is the async/await version of the function. Another version of this function which makes use of callback functions also exists .
-///
-/// - Parameters:
-///   - damus_state: The Damus state
-///   - naddr: the `naddr` address
-///   - callback: A function to handle the found event
-func naddrLookup(damus_state: DamusState, naddr: NAddr) async -> NostrEvent? {
-    await withCheckedContinuation { continuation in
-        var already_resumed = false
-        naddrLookup(damus_state: damus_state, naddr: naddr) { event in
-            if !already_resumed {   // Ensure we do not resume twice, as it causes a crash
-                continuation.resume(returning: event)
-                already_resumed = true
-            }
-        }
-    }
 }
 
 func timeline_name(_ timeline: Timeline?) -> String {
@@ -1113,7 +943,7 @@ func handle_unfollow(state: DamusState, unfollow: FollowRef) -> Bool {
 
     let old_contacts = state.contacts.event
 
-    guard let ev = unfollow_reference(postbox: state.postbox, our_contacts: old_contacts, keypair: keypair, unfollow: unfollow)
+    guard let ev = unfollow_reference(postbox: state.networkManager.postbox, our_contacts: old_contacts, keypair: keypair, unfollow: unfollow)
     else {
         return false
     }
@@ -1139,7 +969,7 @@ func handle_follow(state: DamusState, follow: FollowRef) -> Bool {
         return false
     }
 
-    guard let ev = follow_reference(box: state.postbox, our_contacts: state.contacts.event, keypair: keypair, follow: follow)
+    guard let ev = follow_reference(box: state.networkManager.postbox, our_contacts: state.contacts.event, keypair: keypair, follow: follow)
     else {
         return false
     }

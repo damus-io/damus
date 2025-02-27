@@ -1083,6 +1083,15 @@
 		D7373BA62B688EA300F7783D /* DamusPurpleTranslationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7373BA52B688EA200F7783D /* DamusPurpleTranslationSetupView.swift */; };
 		D7373BA82B68974500F7783D /* DamusPurpleNewUserOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7373BA72B68974500F7783D /* DamusPurpleNewUserOnboardingView.swift */; };
 		D7373BAA2B68A65A00F7783D /* PurpleAccountUpdateNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7373BA92B68A65A00F7783D /* PurpleAccountUpdateNotify.swift */; };
+		D73BDB0D2D6FF5F600D69970 /* NostrNetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D73BDB0C2D6FF58600D69970 /* NostrNetworkManager.swift */; };
+		D73BDB0E2D6FF5F600D69970 /* NostrNetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D73BDB0C2D6FF58600D69970 /* NostrNetworkManager.swift */; };
+		D73BDB102D6FF5F600D69970 /* NostrNetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D73BDB0C2D6FF58600D69970 /* NostrNetworkManager.swift */; };
+		D73BDB142D71216500D69970 /* UserRelayListManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D73BDB132D71215F00D69970 /* UserRelayListManager.swift */; };
+		D73BDB152D71216500D69970 /* UserRelayListManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D73BDB132D71215F00D69970 /* UserRelayListManager.swift */; };
+		D73BDB162D71216500D69970 /* UserRelayListManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D73BDB132D71215F00D69970 /* UserRelayListManager.swift */; };
+		D73BDB182D71311900D69970 /* UserRelayListErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = D73BDB172D71310C00D69970 /* UserRelayListErrors.swift */; };
+		D73BDB192D71311900D69970 /* UserRelayListErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = D73BDB172D71310C00D69970 /* UserRelayListErrors.swift */; };
+		D73BDB1A2D71311900D69970 /* UserRelayListErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = D73BDB172D71310C00D69970 /* UserRelayListErrors.swift */; };
 		D73E5E162C6A9619007EB227 /* PostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFA327FA577B0006080F /* PostView.swift */; };
 		D73E5E172C6A962A007EB227 /* ImageUploadModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD348EE29C3659D00497EB2 /* ImageUploadModel.swift */; };
 		D73E5E182C6A963D007EB227 /* AttachMediaUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */; };
@@ -1434,6 +1443,9 @@
 		D73E5F9B2C6AA8B0007EB227 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = D73E5F9A2C6AA8B0007EB227 /* Kingfisher */; };
 		D73E5F9D2C6AA8E3007EB227 /* SwipeActions in Frameworks */ = {isa = PBXBuildFile; productRef = D73E5F9C2C6AA8E3007EB227 /* SwipeActions */; };
 		D73E5F9E2C6AA9F7007EB227 /* nostrscript.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4F14A92A2A71AB0045A0B9 /* nostrscript.c */; };
+		D7460D2A2D78E8790091E024 /* NWCManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7460D292D78E8700091E024 /* NWCManager.swift */; };
+		D7460D2B2D78E8790091E024 /* NWCManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7460D292D78E8700091E024 /* NWCManager.swift */; };
+		D7460D2C2D78E8790091E024 /* NWCManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7460D292D78E8700091E024 /* NWCManager.swift */; };
 		D74AAFC22B153395006CF0F4 /* HeadlessDamusState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFC12B153395006CF0F4 /* HeadlessDamusState.swift */; };
 		D74AAFC32B153395006CF0F4 /* HeadlessDamusState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFC12B153395006CF0F4 /* HeadlessDamusState.swift */; };
 		D74AAFC52B1538DF006CF0F4 /* NotificationExtensionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74AAFC42B1538DE006CF0F4 /* NotificationExtensionState.swift */; };
@@ -2451,8 +2463,12 @@
 		D7373BA52B688EA200F7783D /* DamusPurpleTranslationSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleTranslationSetupView.swift; sourceTree = "<group>"; };
 		D7373BA72B68974500F7783D /* DamusPurpleNewUserOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleNewUserOnboardingView.swift; sourceTree = "<group>"; };
 		D7373BA92B68A65A00F7783D /* PurpleAccountUpdateNotify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurpleAccountUpdateNotify.swift; sourceTree = "<group>"; };
+		D73BDB0C2D6FF58600D69970 /* NostrNetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrNetworkManager.swift; sourceTree = "<group>"; };
+		D73BDB132D71215F00D69970 /* UserRelayListManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRelayListManager.swift; sourceTree = "<group>"; };
+		D73BDB172D71310C00D69970 /* UserRelayListErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRelayListErrors.swift; sourceTree = "<group>"; };
 		D73E5F7E2C6AA066007EB227 /* DamusAliases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusAliases.swift; sourceTree = "<group>"; };
 		D73E5F802C6AA07A007EB227 /* HighlighterExtensionAliases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlighterExtensionAliases.swift; sourceTree = "<group>"; };
+		D7460D292D78E8700091E024 /* NWCManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NWCManager.swift; sourceTree = "<group>"; };
 		D74AAFC12B153395006CF0F4 /* HeadlessDamusState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadlessDamusState.swift; sourceTree = "<group>"; };
 		D74AAFC42B1538DE006CF0F4 /* NotificationExtensionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationExtensionState.swift; sourceTree = "<group>"; };
 		D74AAFCB2B155D07006CF0F4 /* MakeZapRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MakeZapRequest.swift; sourceTree = "<group>"; };
@@ -2710,6 +2726,7 @@
 		4C0A3F8D280F63FF000448DE /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				D73BDB122D71212600D69970 /* NostrNetworkManager */,
 				D74F43082B23F09300425B75 /* Purple */,
 				BA3759882ABCCDE30018D73B /* Camera */,
 				4C190F1E2A535FC200027FD5 /* Zaps */,
@@ -3913,6 +3930,17 @@
 			path = Mocking;
 			sourceTree = "<group>";
 		};
+		D73BDB122D71212600D69970 /* NostrNetworkManager */ = {
+			isa = PBXGroup;
+			children = (
+				D7460D292D78E8700091E024 /* NWCManager.swift */,
+				D73BDB172D71310C00D69970 /* UserRelayListErrors.swift */,
+				D73BDB132D71215F00D69970 /* UserRelayListManager.swift */,
+				D73BDB0C2D6FF58600D69970 /* NostrNetworkManager.swift */,
+			);
+			path = NostrNetworkManager;
+			sourceTree = "<group>";
+		};
 		D74EA08C2D2E26E6002290DD /* ErrorHandling */ = {
 			isa = PBXGroup;
 			children = (
@@ -4386,6 +4414,7 @@
 				4C3DCC762A9FE9EC0091E592 /* NdbTxn.swift in Sources */,
 				4CEF958D2A9CE650000F901B /* verifier.c in Sources */,
 				4C32B9342A9AD01A00DC3548 /* NdbProfile.swift in Sources */,
+				D73BDB0E2D6FF5F600D69970 /* NostrNetworkManager.swift in Sources */,
 				4C32B9332A99845B00DC3548 /* Ndb.swift in Sources */,
 				D7ADD3E22B538E3500F104C4 /* DamusPurpleVerifyNpubView.swift in Sources */,
 				4C4793082A993E8900489948 /* refmap.c in Sources */,
@@ -4519,6 +4548,7 @@
 				4C32B9582A9AD44700DC3548 /* VeriferOptions.swift in Sources */,
 				D74AAFC22B153395006CF0F4 /* HeadlessDamusState.swift in Sources */,
 				4CA2EFA0280E37AC0044ACD8 /* TimelineView.swift in Sources */,
+				D73BDB1A2D71311900D69970 /* UserRelayListErrors.swift in Sources */,
 				4C30AC7629A5770900E2BD5A /* NotificationItemView.swift in Sources */,
 				4C86F7C42A76C44C00EC0817 /* ZappingNotify.swift in Sources */,
 				4C363A8428233689006E126D /* Parser.swift in Sources */,
@@ -4624,6 +4654,7 @@
 				4C9D6D1B2B1D35D7004E5CD9 /* PullDownSearch.swift in Sources */,
 				4C633352283D419F00B1C9C3 /* SignalModel.swift in Sources */,
 				D7EB00B12CD59C8D00660C07 /* PresentFullScreenItemNotify.swift in Sources */,
+				D7460D2B2D78E8790091E024 /* NWCManager.swift in Sources */,
 				4CFF8F6D29CD022E008DB934 /* WideEventView.swift in Sources */,
 				9609F058296E220800069BF3 /* BannerImageView.swift in Sources */,
 				4C363A94282704FA006E126D /* Post.swift in Sources */,
@@ -4662,6 +4693,7 @@
 				4C2859602A12A2BE004746F7 /* SupporterBadge.swift in Sources */,
 				D73E5F7F2C6AA066007EB227 /* DamusAliases.swift in Sources */,
 				4C1A9A2A29DDF54400516EAC /* DamusVideoPlayerView.swift in Sources */,
+				D73BDB152D71216500D69970 /* UserRelayListManager.swift in Sources */,
 				4CA352A22A76AEC5003BB08B /* LikedNotify.swift in Sources */,
 				5CC8529F2BD744F60039FFC5 /* HighlightView.swift in Sources */,
 				BA37598D2ABCCE500018D73B /* PhotoCaptureProcessor.swift in Sources */,
@@ -5077,6 +5109,7 @@
 				82D6FB2F2CD99F7900C925F4 /* BlurHashDecode.swift in Sources */,
 				82D6FB302CD99F7900C925F4 /* PostBox.swift in Sources */,
 				82D6FB312CD99F7900C925F4 /* KFOptionSetter+.swift in Sources */,
+				D73BDB162D71216500D69970 /* UserRelayListManager.swift in Sources */,
 				82D6FB322CD99F7900C925F4 /* FillAndStroke.swift in Sources */,
 				82D6FB332CD99F7900C925F4 /* Array.swift in Sources */,
 				82D6FB342CD99F7900C925F4 /* VectorMath.swift in Sources */,
@@ -5199,6 +5232,7 @@
 				82D6FBA62CD99F7900C925F4 /* FollowState.swift in Sources */,
 				82D6FBA72CD99F7900C925F4 /* NoteContent.swift in Sources */,
 				82D6FBA82CD99F7900C925F4 /* LongformEvent.swift in Sources */,
+				D7460D2C2D78E8790091E024 /* NWCManager.swift in Sources */,
 				82D6FBA92CD99F7900C925F4 /* DamusUserDefaults.swift in Sources */,
 				82D6FBAA2CD99F7900C925F4 /* HeadlessDamusState.swift in Sources */,
 				82D6FBAB2CD99F7900C925F4 /* MuteItem.swift in Sources */,
@@ -5307,6 +5341,7 @@
 				82D6FC132CD99F7900C925F4 /* FriendIcon.swift in Sources */,
 				82D6FC142CD99F7900C925F4 /* CondensedProfilePicturesView.swift in Sources */,
 				82D6FC152CD99F7900C925F4 /* ProfileEditButton.swift in Sources */,
+				D73BDB102D6FF5F600D69970 /* NostrNetworkManager.swift in Sources */,
 				82D6FC162CD99F7900C925F4 /* RelayPaidDetail.swift in Sources */,
 				82D6FC172CD99F7900C925F4 /* RelayAuthenticationDetail.swift in Sources */,
 				82D6FC182CD99F7900C925F4 /* RelaySoftwareDetail.swift in Sources */,
@@ -5359,6 +5394,7 @@
 				82D6FC472CD99F7900C925F4 /* RepostAction.swift in Sources */,
 				82D6FC482CD99F7900C925F4 /* ShareActionButton.swift in Sources */,
 				82D6FC492CD99F7900C925F4 /* BigButton.swift in Sources */,
+				D73BDB182D71311900D69970 /* UserRelayListErrors.swift in Sources */,
 				82D6FC4A2CD99F7900C925F4 /* AddRelayView.swift in Sources */,
 				82D6FC4B2CD99F7900C925F4 /* BlocksView.swift in Sources */,
 				D74EA0912D2E3464002290DD /* URLHandler.swift in Sources */,
@@ -5431,6 +5467,7 @@
 				D73E5F8B2C6AA6A2007EB227 /* UserStatusSheet.swift in Sources */,
 				D73E5E282C6A97F4007EB227 /* LoginNotify.swift in Sources */,
 				D73E5E292C6A97F4007EB227 /* LogoutNotify.swift in Sources */,
+				D7460D2A2D78E8790091E024 /* NWCManager.swift in Sources */,
 				D73E5E2A2C6A97F4007EB227 /* OnlyZapsNotify.swift in Sources */,
 				D73E5E2B2C6A97F4007EB227 /* PostNotify.swift in Sources */,
 				D73E5E2C2C6A97F4007EB227 /* PresentSheetNotify.swift in Sources */,
@@ -5691,6 +5728,7 @@
 				D73E5F272C6A97F4007EB227 /* TimeDot.swift in Sources */,
 				D73E5F282C6A97F4007EB227 /* EventTop.swift in Sources */,
 				D73E5F292C6A97F4007EB227 /* ReplyDescription.swift in Sources */,
+				D73BDB0D2D6FF5F600D69970 /* NostrNetworkManager.swift in Sources */,
 				D73E5F2A2C6A97F4007EB227 /* RelativeTime.swift in Sources */,
 				D73E5F732C6A9885007EB227 /* TestData.swift in Sources */,
 				D73E5F2B2C6A97F4007EB227 /* ReplyPart.swift in Sources */,
@@ -5763,6 +5801,7 @@
 				D73E5F6A2C6A97F5007EB227 /* ReportView.swift in Sources */,
 				D73E5F6C2C6A97F5007EB227 /* RepostsView.swift in Sources */,
 				D734B1462CCC19B1000B5C97 /* DamusFullScreenCover.swift in Sources */,
+				D73BDB142D71216500D69970 /* UserRelayListManager.swift in Sources */,
 				D73E5F6D2C6A97F5007EB227 /* Launch.storyboard in Sources */,
 				D73E5F6F2C6A97F5007EB227 /* RelayFilterView.swift in Sources */,
 				D703D78A2C670C8A00A400EA /* LibreTranslateServer.swift in Sources */,
@@ -5813,6 +5852,7 @@
 				D703D7A52C670E3E00A400EA /* mdb.c in Sources */,
 				D703D76B2C670B3100A400EA /* Referenced.swift in Sources */,
 				D703D7952C670DE600A400EA /* hash_u5.c in Sources */,
+				D73BDB192D71311900D69970 /* UserRelayListErrors.swift in Sources */,
 				D703D7582C670A6000A400EA /* Id.swift in Sources */,
 				5C05675A2C8FBDE70073F23A /* NDBSearchView.swift in Sources */,
 				D703D76E2C670B4900A400EA /* NdbTagsIterator.swift in Sources */,

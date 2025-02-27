@@ -22,6 +22,7 @@ struct FirstAidSettingsView: View {
     
     
     var body: some View {
+        // TODO: ADD NIP-65 RELAY LIST RESET AS WELL
         Form {
             if damus_state.contacts.event == nil {
                 Section(
@@ -65,7 +66,7 @@ struct FirstAidSettingsView: View {
                                    reset_contact_list_state = .error(NSLocalizedString("An unexpected error happened while trying to create the new contact list. Please contact support.", comment: "Error message for a failed contact list reset operation"))
                                    return
                                }
-                               damus_state.pool.send(.event(new_contact_list_event))
+                               damus_state.networkManager.send(event: new_contact_list_event)
                                reset_contact_list_state = .completed
                            }
                        }

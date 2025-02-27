@@ -13,6 +13,14 @@ import CryptoKit
 import NaturalLanguage
 
 
+protocol NostrEventConvertible {
+    associatedtype E: Error
+    
+    init(event: NostrEvent) throws(E)
+    func toNostrEvent(keypair: FullKeypair, timestamp: UInt32?) -> NostrEvent?
+}
+
+
 enum ValidationResult: Decodable {
     case unknown
     case ok

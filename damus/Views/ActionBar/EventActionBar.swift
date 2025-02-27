@@ -270,7 +270,7 @@ struct EventActionBar: View {
 
         generator.impactOccurred()
         
-        damus_state.postbox.send(like_ev)
+        damus_state.networkManager.postbox.send(like_ev)
     }
     
     // MARK: Helper structures

@@ -10,7 +10,7 @@ import Foundation
 class ProfileModel: ObservableObject, Equatable {
     @Published var contacts: NostrEvent? = nil
     @Published var following: Int = 0
-    @Published var relays: [RelayURL: RelayRWConfiguration]? = nil
+    @Published var relays: [RelayURL: LegacyKind3RelayRWConfiguration]? = nil
     @Published var progress: Int = 0
 
     private let MAX_SHARE_RELAYS = 4
@@ -20,9 +20,10 @@ class ProfileModel: ObservableObject, Equatable {
     let damus: DamusState
     
     var seen_event: Set<NoteId> = Set()
-    var sub_id = UUID().description
-    var prof_subid = UUID().description
-    var findRelay_subid = UUID().description
+    
+    var findRelaysListener: Task<Void, Never>? = nil
+    var listener: Task<Void, Never>? = nil
+    var profileListener: Task<Void, Never>? = nil
     
     init(pubkey: Pubkey, damus: DamusState) {
         self.pubkey = pubkey
@@ -54,26 +55,43 @@ class ProfileModel: ObservableObject, Equatable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(pubkey)
     }
-    
-    func unsubscribe() {
-        print("unsubscribing from profile \(pubkey) with sub_id \(sub_id)")
-        damus.pool.unsubscribe(sub_id: sub_id)
-        damus.pool.unsubscribe(sub_id: prof_subid)
-    }
 
     func subscribe() {
-        var text_filter = NostrFilter(kinds: [.text, .longform, .highlight])
-        var profile_filter = NostrFilter(kinds: [.contacts, .metadata, .boost])
-
-        profile_filter.authors = [pubkey]
-        
-        text_filter.authors = [pubkey]
-        text_filter.limit = 500
-        
-        print("subscribing to profile \(pubkey) with sub_id \(sub_id)")
-        //print_filters(relay_id: "profile", filters: [[text_filter], [profile_filter]])
-        damus.pool.subscribe(sub_id: sub_id, filters: [text_filter], handler: handle_event)
-        damus.pool.subscribe(sub_id: prof_subid, filters: [profile_filter], handler: handle_event)
+        print("subscribing to profile \(pubkey)")
+        listener?.cancel()
+        listener = Task {
+            var text_filter = NostrFilter(kinds: [.text, .longform, .highlight])
+            text_filter.authors = [pubkey]
+            text_filter.limit = 500
+            for await item in await damus.networkManager.subscribe(filters: [text_filter]) {
+                switch item {
+                case .event(let event): handleNostrEvent(event)
+                case .eose: break
+                }
+            }
+            guard let txn = NdbTxn(ndb: damus.ndb) else { return }
+            load_profiles(context: "profile", load: .from_events(events.events), damus_state: damus, txn: txn)
+            progress += 1
+        }
+        profileListener?.cancel()
+        profileListener = Task {
+            var profile_filter = NostrFilter(kinds: [.contacts, .metadata, .boost])
+            profile_filter.authors = [pubkey]
+            for await item in await damus.networkManager.subscribe(filters: [profile_filter]) {
+                switch item {
+                case .event(let event): handleNostrEvent(event)
+                case .eose: break
+                }
+            }
+            progress += 1
+        }
+    }
+    
+    func unsubscribe() {
+        listener?.cancel()
+        listener = nil
+        profileListener?.cancel()
+        profileListener = nil
     }
     
     func handle_profile_contact_event(_ ev: NostrEvent) {
@@ -91,6 +109,7 @@ class ProfileModel: ObservableObject, Equatable {
         self.relays = decode_json_relays(ev.content)
     }
     
+    @MainActor
     func add_event(_ ev: NostrEvent) {
         guard ev.should_show_event else {
             return
@@ -108,39 +127,13 @@ class ProfileModel: ObservableObject, Equatable {
         }
         seen_event.insert(ev.id)
     }
-
-    private func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
-        switch ev {
-        case .ws_event:
-            return
-        case .nostr_event(let resp):
-            guard resp.subid == self.sub_id || resp.subid == self.prof_subid else {
-                return
-            }
-            switch resp {
-            case .ok:
-                break
-            case .event(_, let ev):
-                // Ensure the event public key matches this profiles public key
-                // This is done to protect against a relay not properly filtering events by the pubkey
-                // See https://github.com/damus-io/damus/issues/1846 for more information
-                guard self.pubkey == ev.pubkey else { break }
-
-                add_event(ev)
-            case .notice:
-                break
-                //notify(.notice, notice)
-            case .eose:
-                guard let txn = NdbTxn(ndb: damus.ndb) else { return }
-                if resp.subid == sub_id {
-                    load_profiles(context: "profile", profiles_subid: prof_subid, relay_id: relay_id, load: .from_events(events.events), damus_state: damus, txn: txn)
-                }
-                progress += 1
-                break
-            case .auth:
-                break
-            }
-        }
+    
+    private func handleNostrEvent(_ ev: NostrEvent) {
+        // Ensure the event public key matches this profiles public key
+        // This is done to protect against a relay not properly filtering events by the pubkey
+        // See https://github.com/damus-io/damus/issues/1846 for more information
+        guard self.pubkey == ev.pubkey else { return }
+        Task { await add_event(ev) }
     }
 
     private func findRelaysHandler(relay_id: RelayURL, ev: NostrConnectionEvent) {
@@ -152,12 +145,24 @@ class ProfileModel: ObservableObject, Equatable {
     func subscribeToFindRelays() {
         var profile_filter = NostrFilter(kinds: [.contacts])
         profile_filter.authors = [pubkey]
-        
-        damus.pool.subscribe(sub_id: findRelay_subid, filters: [profile_filter], handler: findRelaysHandler)
+        self.findRelaysListener?.cancel()
+        self.findRelaysListener = Task {
+            for await item in await damus.networkManager.subscribe(filters: [profile_filter]) {
+                switch item {
+                case .event(let event):
+                    if case .contacts = event.known_kind {
+                        self.relays = decode_json_relays(event.content)
+                    }
+                case .eose:
+                    break
+                }
+            }
+        }
     }
     
     func unsubscribeFindRelays() {
-        damus.pool.unsubscribe(sub_id: findRelay_subid)
+        self.findRelaysListener?.cancel()
+        self.findRelaysListener = nil
     }
 
     func getCappedRelayStrings() -> [String] {

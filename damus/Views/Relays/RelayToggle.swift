@@ -36,7 +36,7 @@ struct RelayToggle: View {
     }
     
     private var relay_connection: RelayConnection? {
-        state.pool.get_relay(relay_id)?.connection
+        state.networkManager.getRelay(relay_id)?.connection
     }
 }
 

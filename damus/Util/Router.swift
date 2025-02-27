@@ -126,7 +126,7 @@ enum Route: Hashable {
         case .FollowersYouKnow(let friendedFollowers, let followers):
             FollowersYouKnowView(damus_state: damusState, friended_followers: friendedFollowers, followers: followers)
         case .Script(let load_model):
-            LoadScript(pool: damusState.pool, model: load_model)
+            LoadScript(pool: RelayPool(ndb: damusState.ndb, keypair: damusState.keypair), model: load_model)
         }
     }
 
@@ -227,7 +227,6 @@ enum Route: Hashable {
         case .FollowersYouKnow(let friendedFollowers, let followers):
             hasher.combine("followersYouKnow")
             hasher.combine(friendedFollowers)
-            hasher.combine(followers.sub_id)
         case .Script(let model):
             hasher.combine("script")
             hasher.combine(model.data.count)

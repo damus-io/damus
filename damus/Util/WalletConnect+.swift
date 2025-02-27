@@ -41,19 +41,6 @@ func subscribe_to_nwc(url: WalletConnectURL, pool: RelayPool) {
     pool.send(.subscribe(sub), to: [url.relay], skip_ephemeral: false)
 }
 
-@discardableResult
-func nwc_pay(url: WalletConnectURL, pool: RelayPool, post: PostBox, invoice: String, delay: TimeInterval? = 5.0, on_flush: OnFlush? = nil) -> NostrEvent? {
-    let req = make_wallet_pay_invoice_request(invoice: invoice)
-    guard let ev = make_wallet_connect_request(req: req, to_pk: url.pubkey, keypair: url.keypair) else {
-        return nil
-    }
-
-    try? pool.add_relay(.nwc(url: url.relay))
-    subscribe_to_nwc(url: url, pool: pool)
-    post.send(ev, to: [url.relay], skip_ephemeral: false, delay: delay, on_flush: on_flush)
-    return ev
-}
-
 
 func nwc_success(state: DamusState, resp: FullWalletResponse) {
     // find the pending zap and mark it as pending-confirmed
@@ -80,7 +67,7 @@ func nwc_success(state: DamusState, resp: FullWalletResponse) {
     }
 }
 
-func send_donation_zap(pool: RelayPool, postbox: PostBox, nwc: WalletConnectURL, percent: Int, base_msats: Int64) async {
+func send_donation_zap(damus_state: DamusState, postbox: PostBox, nwc: WalletConnectURL, percent: Int, base_msats: Int64) async {
     let percent_f = Double(percent) / 100.0
     let donations_msats = Int64(percent_f * Double(base_msats))
     
@@ -92,7 +79,7 @@ func send_donation_zap(pool: RelayPool, postbox: PostBox, nwc: WalletConnectURL,
     }
     
     print("damus-donation donating...")
-    nwc_pay(url: nwc, pool: pool, post: postbox, invoice: invoice, delay: nil)
+    await damus_state.networkManager.nwcPay(url: nwc, post: postbox, invoice: invoice)
 }
 
 func nwc_error(zapcache: Zaps, evcache: EventCache, resp: FullWalletResponse) {

@@ -7,11 +7,12 @@
 //  Some text excerpts taken from the Nostr Protocol itself (which are public domain)
 
 import OrderedCollections
+import Foundation
 
 struct NIP65: Sendable {}
 
 extension NIP65 {
-    struct RelayList {
+    struct RelayList: NostrEventConvertible, Sendable {
         let relays: OrderedDictionary<RelayURL, RelayItem>
 
         init(event: NdbNote) throws(NIP65Error) {
@@ -41,6 +42,16 @@ extension NIP65 {
         private static func relayOrderedDictionary(from relayList: [RelayItem]) -> OrderedDictionary<RelayURL, RelayItem> {
             OrderedDictionary(uniqueKeysWithValues: relayList.map({ ($0.url, $0) }))
         }
+        
+        func toNostrEvent(keypair: FullKeypair, timestamp: UInt32? = nil) -> NostrEvent? {
+            return NdbNote(
+                content: "",
+                keypair: keypair.to_keypair(),
+                kind: NostrKind.relay_list.rawValue,
+                tags: self.relays.values.map({ $0.tag }),
+                createdAt: timestamp ?? UInt32(Date.now.timeIntervalSince1970)
+            )
+        }
     }
 }
 
@@ -53,7 +64,7 @@ extension NIP65 {
 }
 
 extension NIP65.RelayList {
-    struct RelayItem: ThrowingTagConvertible {
+    struct RelayItem: ThrowingTagConvertible, Sendable {
         typealias E = NIP65.NIP65Error
         
         let url: RelayURL
@@ -100,6 +111,20 @@ extension NIP65.RelayList.RelayItem {
         
         static let READ_MARKER: String = "read"
         static let WRITE_MARKER: String = "write"
+        
+        var canRead: Bool {
+            switch self {
+            case .read, .readWrite: return true
+            case .write: return false
+            }
+        }
+        
+        var canWrite: Bool {
+            switch self {
+            case .write, .readWrite: return true
+            case .read: return false
+            }
+        }
         
         var tagItem: String? {
             switch self {

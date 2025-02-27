@@ -15,6 +15,8 @@ struct AddRelayView: View {
     
     @Environment(\.dismiss) var dismiss
     
+    typealias UpdateError = NostrNetworkManager.UserRelayListManager.UpdateError
+    
     var body: some View {
         VStack {
             Text("Add relay", comment: "Title text to indicate user to an add a relay.")
@@ -87,33 +89,35 @@ struct AddRelayView: View {
                       let keypair = state.keypair.to_full() else {
                     return
                 }
-
-                let info = RelayRWConfiguration.rw
-                let descriptor = RelayDescriptor(url: url, info: info)
-
+                
                 do {
-                    try state.pool.add_relay(descriptor)
+                    try state.networkManager.userRelayList.insert(relay: NIP65.RelayList.RelayItem(url: url, rwConfiguration: .readWrite))
                     relayAddErrorTitle = nil      // Clear error title
                     relayAddErrorMessage = nil    // Clear error message
-                } catch RelayError.RelayAlreadyExists {
-                    relayAddErrorTitle = NSLocalizedString("Duplicate relay", comment: "Title of the duplicate relay error message.")
-                    relayAddErrorMessage = NSLocalizedString("The relay you are trying to add is already added.\nYou're all set!", comment: "An error message that appears when the user attempts to add a relay that has already been added.")
-                    return
-                } catch {
-                    return
+                }
+                catch {
+                    guard let error = error as? UpdateError else {
+                        present_sheet(.error(.init(
+                            user_visible_description: NSLocalizedString("An unknown error occurred while adding a relay.", comment: "Title of an unknown relay error message."),
+                            tip: NSLocalizedString("Please contact support.", comment: "Tip for an unknown relay error message."),
+                            technical_info: error.localizedDescription
+                        )))
+                        return
+                    }
+                    switch error {
+                    case UpdateError.relayAlreadyExists:
+                        relayAddErrorTitle = NSLocalizedString("Duplicate relay", comment: "Title of the duplicate relay error message.")
+                        relayAddErrorMessage = NSLocalizedString("The relay you are trying to add is already added.\nYou're all set!", comment: "An error message that appears when the user attempts to add a relay that has already been added.")
+                        return
+                    case UpdateError.notAuthorizedToChangeRelayList:
+                        relayAddErrorTitle = NSLocalizedString("Not authorized to add relay", comment: "Title of the non-authorized relay error message.")
+                        relayAddErrorMessage = NSLocalizedString("You do not have the permissions to add relays to this list. Please ensure you are signed in with a private key (nsec)", comment: "An error message that appears when the user attempts to add a relay when they are signed in with a public key.")
+                        return
+                    default:
+                        present_sheet(.error(error.humanReadableError))
+                    }
                 }
 
-                state.pool.connect(to: [url])
-
-                if let new_ev = add_relay(ev: ev, keypair: keypair, current_relays: state.pool.our_descriptors, relay: url, info: info) {
-                    process_contact_event(state: state, ev: ev)
-
-                    state.pool.send(.event(new_ev))
-                }
-
-                if let relay_metadata = make_relay_metadata(relays: state.pool.our_descriptors, keypair: keypair) {
-                    state.postbox.send(relay_metadata)
-                }
                 new_relay = ""
 
                 this_app.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)

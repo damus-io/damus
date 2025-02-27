@@ -63,44 +63,25 @@ func follow_user_event(our_contacts: NostrEvent?, keypair: FullKeypair, follow: 
 }
 
 
-func decode_json_relays(_ content: String) -> [RelayURL: RelayRWConfiguration]? {
+func decode_json_relays(_ content: String) -> [RelayURL: LegacyKind3RelayRWConfiguration]? {
     return decode_json(content)
 }
 
-func remove_relay(ev: NostrEvent, current_relays: [RelayDescriptor], keypair: FullKeypair, relay: RelayURL) -> NostrEvent?{
-    var relays = ensure_relay_info(relays: current_relays, content: ev.content)
-    
-    relays.removeValue(forKey: relay)
-    
-    guard let content = encode_json(relays) else {
-        return nil
-    }
-    
-    return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 3, tags: ev.tags.strings())
-}
+//func remove_relay(ev: NostrEvent, current_relays: [RelayPool.RelayDescriptor], keypair: FullKeypair, relay: RelayURL) -> NostrEvent?{
+//    var relays = ensure_relay_info(relays: current_relays, content: ev.content)
+//    
+//    relays.removeValue(forKey: relay)
+//    
+//    guard let content = encode_json(relays) else {
+//        return nil
+//    }
+//    
+//    return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 3, tags: ev.tags.strings())
+//}
 
-/// Handles the creation of a new `kind:3` contact list based on a previous contact list, with the specified relays
-func add_relay(ev: NostrEvent, keypair: FullKeypair, current_relays: [RelayDescriptor], relay: RelayURL, info: RelayRWConfiguration) -> NostrEvent? {
-    var relays = ensure_relay_info(relays: current_relays, content: ev.content)
-    
-    // If kind:3 content is empty, or if the relay doesn't exist in the list,
-    // we want to create a kind:3 event with the new relay
-    guard ev.content.isEmpty || relays.index(forKey: relay) == nil else {
-        return nil
-    }
-    
-    relays[relay] = info
-    
-    guard let content = encode_json(relays) else {
-        return nil
-    }
-    
-    return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 3, tags: ev.tags.strings())
-}
-
-func ensure_relay_info(relays: [RelayDescriptor], content: String) -> [RelayURL: RelayRWConfiguration] {
-    return decode_json_relays(content) ?? make_contact_relays(relays)
-}
+//func ensure_relay_info(relays: [RelayPool.RelayDescriptor], content: String) -> [RelayURL: RelayRWConfiguration] {
+//    return decode_json_relays(content) ?? make_contact_relays(relays)
+//}
 
 func is_already_following(contacts: NostrEvent, follow: FollowRef) -> Bool {
     return contacts.references.contains { ref in
@@ -129,22 +110,22 @@ func follow_with_existing_contacts(keypair: FullKeypair, our_contacts: NostrEven
     return NostrEvent(content: our_contacts.content, keypair: keypair.to_keypair(), kind: kind, tags: tags)
 }
 
-func make_contact_relays(_ relays: [RelayDescriptor]) -> [RelayURL: RelayRWConfiguration] {
-    return relays.reduce(into: [:]) { acc, relay in
-        acc[relay.url] = relay.info
-    }
-}
-
-func make_relay_metadata(relays: [RelayDescriptor], keypair: FullKeypair) -> NostrEvent? {
-    let tags = relays.compactMap { r -> [String]? in
-        var tag = ["r", r.url.absoluteString]
-        if (r.info.read ?? true) != (r.info.write ?? true) {
-            tag += r.info.read == true ? ["read"] : ["write"]
-        }
-        if ((r.info.read ?? true) || (r.info.write ?? true)) && r.variant == .regular {
-            return tag;
-        }
-        return nil
-    }
-    return NostrEvent(content: "", keypair: keypair.to_keypair(), kind: 10_002, tags: tags)
-}
+//func make_contact_relays(_ relays: [RelayPool.RelayDescriptor]) -> [RelayURL: RelayRWConfiguration] {
+//    return relays.reduce(into: [:]) { acc, relay in
+//        acc[relay.url] = relay.info
+//    }
+//}
+//
+//func make_relay_metadata(relays: [RelayPool.RelayDescriptor], keypair: FullKeypair) -> NostrEvent? {
+//    let tags = relays.compactMap { r -> [String]? in
+//        var tag = ["r", r.url.absoluteString]
+//        if (r.info.read ?? true) != (r.info.write ?? true) {
+//            tag += r.info.read == true ? ["read"] : ["write"]
+//        }
+//        if ((r.info.read ?? true) || (r.info.write ?? true)) && r.variant == .regular {
+//            return tag;
+//        }
+//        return nil
+//    }
+//    return NostrEvent(content: "", keypair: keypair.to_keypair(), kind: 10_002, tags: tags)
+//}

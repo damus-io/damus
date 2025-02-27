@@ -18,8 +18,8 @@ struct RelayFilterView: View {
         //_relays = State(initialValue: state.pool.descriptors)
     }
     
-    var relays: [RelayDescriptor] {
-        return state.pool.our_descriptors
+    var relays: [RelayPool.RelayDescriptor] {
+        return state.networkManager.ourRelayDescriptors
     }
     
     var body: some View {

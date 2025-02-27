@@ -132,9 +132,9 @@ struct ReportView_Previews: PreviewProvider {
         let ds = test_damus_state
         VStack {
         
-            ReportView(postbox: ds.postbox, target: ReportTarget.user(test_pubkey), keypair: test_keypair.to_full()!)
+            ReportView(postbox: ds.networkManager.postbox, target: ReportTarget.user(test_pubkey), keypair: test_keypair.to_full()!)
 
-            ReportView(postbox: ds.postbox, target: ReportTarget.user(test_pubkey), keypair: test_keypair.to_full()!, report_sent: true, report_id: "report_id")
+            ReportView(postbox: ds.networkManager.postbox, target: ReportTarget.user(test_pubkey), keypair: test_keypair.to_full()!, report_sent: true, report_id: "report_id")
 
         }
     }

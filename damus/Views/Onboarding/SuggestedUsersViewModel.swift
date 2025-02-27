@@ -26,6 +26,7 @@ class SuggestedUsersViewModel: ObservableObject {
     @Published var groups: [SuggestedUserGroup] = []
 
     private let sub_id = UUID().uuidString
+    private var listener: Task<Void, Never>?
 
     init(damus_state: DamusState) {
         self.damus_state = damus_state
@@ -77,29 +78,16 @@ class SuggestedUsersViewModel: ObservableObject {
 
     private func subscribeToSuggestedProfiles(pubkeys: [Pubkey]) {
         let filter = NostrFilter(kinds: [.metadata], authors: pubkeys)
-        damus_state.pool.subscribe(sub_id: sub_id, filters: [filter], handler: handle_event)
-    }
-
-    func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
-        guard case .nostr_event(let nev) = ev else {
-            return
-        }
-
-        switch nev {
-        case .event:
-            break
-
-        case .notice(let msg):
-            print("suggested user profiles notice: \(msg)")
-
-        case .eose:
-            self.objectWillChange.send()
-
-        case .ok:
-            break
-
-        case .auth:
-            break
+        self.listener?.cancel()
+        self.listener = Task {
+            for await item in await damus_state.networkManager.subscribe(filters: [filter]) {
+                switch item {
+                case .event(let event):
+                    continue    // Older implementation ignores the event, so we also ignore it here. Why does it ignore? I do not know.
+                case .eose:
+                    self.objectWillChange.send()
+                }
+            }
         }
     }
 }

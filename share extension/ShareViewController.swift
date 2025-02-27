@@ -193,7 +193,7 @@ struct ShareExtensionView: View {
                 break
             case .active:
                 print("txn: 📙 SHARE ACTIVE")
-                state.pool.ping()
+                state.networkManager.ping()
             @unknown default:
                 break
             }
@@ -230,7 +230,7 @@ struct ShareExtensionView: View {
             self.share_state = .failed(error: "Cannot convert post data into a nostr event")
             return
         }
-        state.postbox.send(posted_event, on_flush: .once({ flushed_event in
+        state.networkManager.postbox.send(posted_event, on_flush: .once({ flushed_event in
             if flushed_event.event.id == posted_event.id {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {  // Offset labor perception bias
                     self.share_state = .posted(event: flushed_event.event)

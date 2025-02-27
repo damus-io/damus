@@ -24,10 +24,7 @@ struct SeenEvent: Hashable {
     let evid: NoteId
 }
 
-/// Manages communication with:
-/// - user-selected relays.
-/// - ephemeral relays.
-/// - NWC relays.
+/// Establishes and manages connections and subscriptions to a list of relays.
 class RelayPool {
     var relays: [Relay] = []
     var handlers: [RelayHandler] = []
@@ -40,12 +37,7 @@ class RelayPool {
     var message_received_function: (((String, RelayDescriptor)) -> Void)?
     var message_sent_function: (((String, Relay)) -> Void)?
     var delegate: Delegate?
-    var nip65RelayListEvent: NostrEvent? {
-        didSet {
-            guard let nip65RelayListEvent else { return }
-            self.delegate?.latestRelayListChanged(nip65RelayListEvent)
-        }
-    }
+    private(set) var signal: SignalModel = SignalModel()
 
     private let network_monitor = NWPathMonitor()
     private let network_monitor_queue = DispatchQueue(label: "io.damus.network_monitor")
@@ -134,7 +126,7 @@ class RelayPool {
         }
     }
 
-    func add_relay(_ desc: RelayDescriptor) throws {
+    func add_relay(_ desc: RelayDescriptor) throws(RelayError) {
         let relay_id = desc.url
         if get_relay(relay_id) != nil {
             throw RelayError.RelayAlreadyExists
@@ -212,6 +204,68 @@ class RelayPool {
         register_handler(sub_id: sub_id, handler: handler)
         send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to)
     }
+    
+    func subscribe(filters: [NostrFilter], to: [RelayURL]? = nil) -> AsyncStream<StreamItem> {
+        return AsyncStream<StreamItem> { continuation in
+            let sub_id = UUID().uuidString
+            // TODO: Do "last_event_of_kind" optimization?
+            self.subscribe(sub_id: sub_id, filters: filters, handler: { (relayUrl, connectionEvent) in
+                switch connectionEvent {
+                case .ws_event(let ev):
+                    switch ev {
+                    case .connected:
+                        break
+                    case .error(let merr):
+                        let desc = String(describing: merr)
+                        if desc.contains("Software caused connection abort") {
+                            self.reconnect(to: [relayUrl])
+                            break
+                        }
+                        break
+                    case .disconnected(let closeCode, let string):
+                        self.reconnect(to: [relayUrl])
+                        break
+                    case .message(_):
+                        break
+                    }
+                    
+                    update_signal_from_pool(signal: self.signal, pool: self)
+                    // TODO: HomeModel used to do some handling here to reconnect to relay, etc. Do that here?
+                    // TODO: Resend the same filters if connection is lost, etc.
+                    break    // Caller should not have to handle these, it is the Relay pool's responsibility to maintain connectivity.
+                case .nostr_event(let nostrResponse):
+                    guard nostrResponse.subid == sub_id else { return } // Do not stream items that do not belong in this subscription
+                    switch nostrResponse {
+                    case .event(_, let nostrEvent):
+                        // TODO: De-duplicate events. Don't send two of the same events.
+                        continuation.yield(with: .success(.event(nostrEvent)))
+                    case .notice(let note):
+                        // TODO: Taken from `SearchModel`. Double-check correctness
+                        if note.contains("Too many subscription filters") {
+                            // TODO: resend filters?
+                            self.reconnect(to: [relayUrl])
+                        }
+                    case .eose(_):
+                        // TODO: We should only send EOSE when we get an EOSE from every relay (or timeout)
+                        continuation.yield(with: .success(.eose))
+                    case .ok(_):
+                        break    // TODO: Handled elsewhere?
+                    case .auth(_):
+                        break    // TODO: Handled elsewhere?
+                    }
+                }
+            })
+            continuation.onTermination = { @Sendable _ in
+                self.unsubscribe(sub_id: sub_id, to: to)
+                self.remove_handler(sub_id: sub_id)
+            }
+        }
+    }
+    
+    enum StreamItem {
+        case event(NostrEvent)
+        case eose
+    }
 
     func subscribe_to(sub_id: String, filters: [NostrFilter], to: [RelayURL]?, handler: @escaping (RelayURL, NostrConnectionEvent) -> ()) {
         register_handler(sub_id: sub_id, handler: handler)
@@ -258,11 +312,11 @@ class RelayPool {
         self.send_raw_to_local_ndb(req)     // Always send Nostr events and data to NostrDB for a local copy
 
         for relay in relays {
-            if req.is_read && !(relay.descriptor.info.read ?? true) {
+            if req.is_read && !(relay.descriptor.info.canRead) {
                 continue    // Do not send read requests to relays that are not READ relays
             }
             
-            if req.is_write && !(relay.descriptor.info.write ?? true) {
+            if req.is_write && !(relay.descriptor.info.canWrite) {
                 continue    // Do not send write requests to relays that are not WRITE relays
             }
             
@@ -366,7 +420,7 @@ class RelayPool {
 }
 
 func add_rw_relay(_ pool: RelayPool, _ url: RelayURL) {
-    try? pool.add_relay(RelayDescriptor(url: url, info: .rw))
+    try? pool.add_relay(RelayPool.RelayDescriptor(url: url, info: .readWrite))
 }
 
 

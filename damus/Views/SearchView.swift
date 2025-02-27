@@ -69,7 +69,7 @@ struct SearchView: View {
                                 }
 
                                 appstate.mutelist_manager.set_mutelist(mutelist)
-                                appstate.postbox.send(mutelist)
+                                appstate.networkManager.postbox.send(mutelist)
                             } label: {
                                 Text("Unmute Hashtag", comment: "Label represnting a button that the user can tap to unmute a given hashtag so they start seeing it in their feed again.")
                             }
@@ -104,7 +104,7 @@ struct SearchView: View {
         }
 
         appstate.mutelist_manager.set_mutelist(mutelist)
-        appstate.postbox.send(mutelist)
+        appstate.networkManager.postbox.send(mutelist)
     }
 
     var described_search: DescribedSearch {
