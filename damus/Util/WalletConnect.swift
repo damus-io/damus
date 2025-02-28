@@ -81,12 +81,39 @@ struct PayInvoiceResponse: Decodable {
     let preimage: String
 }
 
+struct GetBalanceResponse: Decodable {
+    let balance: Int64
+}
+
+struct NWCTransaction: Decodable, Equatable, Hashable {
+    let type: String
+    let invoice: String?
+    let description: String?
+    let description_hash: String?
+    let preimage: String?
+    let payment_hash: String?
+    let amount: Int64
+    let fees_paid: Int64?
+    let created_at: UInt64 // unixtimestamp, // invoice/payment creation time
+    let expires_at: UInt64?  // unixtimestamp, // invoice expiration time, optional if not applicable
+    let settled_at: UInt64? // unixtimestamp, // invoice/payment settlement time, optional if unpaid
+    //"metadata": {} // generic metadata that can be used to add things like zap/boostagram details for a payer name/comment/etc.
+}
+
+struct ListTransactionsResponse: Decodable {
+    let transactions: [NWCTransaction]
+}
+
 enum WalletResponseResultType: String {
     case pay_invoice
+    case get_balance
+    case list_transactions
 }
 
 enum WalletResponseResult {
     case pay_invoice(PayInvoiceResponse)
+    case get_balance(GetBalanceResponse)
+    case list_transactions(ListTransactionsResponse)
 }
 
 struct FullWalletResponse {
@@ -149,6 +176,12 @@ struct WalletResponse: Decodable {
         case .pay_invoice:
             let res = try container.decode(PayInvoiceResponse.self, forKey: .result)
             self.result = .pay_invoice(res)
+        case .get_balance:
+            let res = try container.decode(GetBalanceResponse.self, forKey: .result)
+            self.result = .get_balance(res)
+        case .list_transactions:
+            let res = try container.decode(ListTransactionsResponse.self, forKey: .result)
+            self.result = .list_transactions(res)
         }
     }
 }

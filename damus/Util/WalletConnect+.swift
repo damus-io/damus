@@ -16,11 +16,25 @@ func make_wallet_balance_request() -> WalletRequest<EmptyRequest> {
     return WalletRequest(method: "get_balance", params: nil)
 }
 
+func make_wallet_transactions_request() -> WalletRequest<TransactionRequest> {
+    let data = TransactionRequest(from: nil, until: nil, limit: 10, offset: 0, unpaid: false, type: "")
+    return WalletRequest(method: "list_transactions", params: data)
+}
+
 struct EmptyRequest: Codable {
 }
 
 struct PayInvoiceRequest: Codable {
     let invoice: String
+}
+
+struct TransactionRequest: Codable {
+    let from: UInt64? // starting timestamp in seconds since epoch (inclusive), optional
+    let until: UInt64? // ending timestamp in seconds since epoch (inclusive), optional
+    let limit: Int? // maximum number of invoices to return, optional
+    let offset: Int? // offset of the first invoice to return, optional
+    let unpaid: Bool? // include unpaid invoices, optional, default false
+    let type: String? // "incoming" for invoices, "outgoing" for payments, undefined for both
 }
 
 func make_wallet_connect_request<T>(req: WalletRequest<T>, to_pk: Pubkey, keypair: FullKeypair) -> NostrEvent? {
@@ -44,6 +58,32 @@ func subscribe_to_nwc(url: WalletConnectURL, pool: RelayPool) {
 @discardableResult
 func nwc_pay(url: WalletConnectURL, pool: RelayPool, post: PostBox, invoice: String, delay: TimeInterval? = 5.0, on_flush: OnFlush? = nil) -> NostrEvent? {
     let req = make_wallet_pay_invoice_request(invoice: invoice)
+    guard let ev = make_wallet_connect_request(req: req, to_pk: url.pubkey, keypair: url.keypair) else {
+        return nil
+    }
+
+    try? pool.add_relay(.nwc(url: url.relay))
+    subscribe_to_nwc(url: url, pool: pool)
+    post.send(ev, to: [url.relay], skip_ephemeral: false, delay: delay, on_flush: on_flush)
+    return ev
+}
+
+@discardableResult
+func nwc_balance(url: WalletConnectURL, pool: RelayPool, post: PostBox, delay: TimeInterval? = 5.0, on_flush: OnFlush? = nil) -> NostrEvent? {
+    let req = make_wallet_balance_request()
+    guard let ev = make_wallet_connect_request(req: req, to_pk: url.pubkey, keypair: url.keypair) else {
+        return nil
+    }
+
+    try? pool.add_relay(.nwc(url: url.relay))
+    subscribe_to_nwc(url: url, pool: pool)
+    post.send(ev, to: [url.relay], skip_ephemeral: false, delay: delay, on_flush: on_flush)
+    return ev
+}
+
+@discardableResult
+func nwc_transactions(url: WalletConnectURL, pool: RelayPool, post: PostBox, delay: TimeInterval? = 5.0, on_flush: OnFlush? = nil) -> NostrEvent? {
+    let req = make_wallet_transactions_request()
     guard let ev = make_wallet_connect_request(req: req, to_pk: url.pubkey, keypair: url.keypair) else {
         return nil
     }
