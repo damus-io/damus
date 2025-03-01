@@ -115,7 +115,7 @@ class DraftArtifacts: Equatable {
                 if case .pubkey(let pubkey) = mention.ref {
                     // A profile reference, format things properly.
                     let profile = damus_state.ndb.lookup_profile(pubkey)?.unsafeUnownedValue?.profile
-                    let profile_name = parse_display_name(profile: profile, pubkey: pubkey).username
+                    let profile_name = DisplayName(profile: profile, pubkey: pubkey).username
                     guard let url_address = URL(string: block.asString) else {
                         rich_text_content.append(.init(string: block.asString))
                         continue
