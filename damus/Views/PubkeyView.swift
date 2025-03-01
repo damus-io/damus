@@ -46,7 +46,7 @@ struct PubkeyView: View {
         let bech32 = pubkey.npub
         
         HStack {
-            Text(verbatim: "\(abbrev_pubkey(bech32, amount: sidemenu ? 12 : 16))")
+            Text(verbatim: "\(abbrev_identifier(bech32, amount: sidemenu ? 12 : 16))")
                 .font(sidemenu ? .system(size: 10) : .footnote)
                 .foregroundColor(keyColor())
                 .padding(5)

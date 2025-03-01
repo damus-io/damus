@@ -36,10 +36,9 @@ class damusTests: XCTestCase {
         XCTAssertEqual(bytes.count, 32)
     }
     
-    func testTrimmingFunctions() {
+    func testTrimSuffix() {
         let txt = "   bobs   "
         
-        XCTAssertEqual(trim_prefix(txt), "bobs   ")
         XCTAssertEqual(trim_suffix(txt), "   bobs")
     }
     

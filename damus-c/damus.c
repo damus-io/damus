@@ -328,7 +328,12 @@ int damus_parse_content(struct note_blocks *blocks, const char *content) {
     blocks->words = 0;
     blocks->num_blocks = 0;
     make_cursor((u8*)content, (u8*)content + strlen(content), &cur);
-    
+
+    // **Skip leading whitespace**
+    while (cur.p < cur.end && is_whitespace(*cur.p)) {
+        cur.p++;
+    }
+
     start = cur.p;
     while (cur.p < cur.end && blocks->num_blocks < MAX_BLOCKS) {
         cp = peek_char(&cur, -1);
@@ -362,7 +367,12 @@ int damus_parse_content(struct note_blocks *blocks, const char *content) {
         
         cur.p++;
     }
-    
+
+    // **Trim trailing whitespace**
+    while (cur.p > start && is_whitespace(*(cur.p - 1))) {
+        cur.p--;
+    }
+
     if (cur.p - start > 0) {
         if (!add_text_block(blocks, start, cur.p))
             return 0;
