@@ -73,83 +73,127 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, keypair: Keypair) -
         return .longform(LongformContent(ev.content))
     }
     
-    return .separated(render_blocks(blocks: blocks, profiles: profiles))
+    return .separated(render_blocks(blocks: blocks, profiles: profiles, can_hide_last_previewable_refs: true))
 }
 
-func render_blocks(blocks bs: Blocks, profiles: Profiles) -> NoteArtifactsSeparated {
+func render_blocks(blocks bs: Blocks, profiles: Profiles, can_hide_last_previewable_refs: Bool = false) -> NoteArtifactsSeparated {
     var invoices: [Invoice] = []
     var urls: [UrlType] = []
     let blocks = bs.blocks
-    
-    let one_note_ref = blocks
-        .filter({
-            if case .mention(let mention) = $0,
-               case .note = mention.ref {
-                return true
+
+    var end_mention_count = 0
+    var end_url_count = 0
+
+    // Search backwards until we find the beginning index of the chain of previewables that reach the end of the content.
+    var hide_text_index = blocks.endIndex
+    if can_hide_last_previewable_refs {
+        outerLoop: for (i, block) in blocks.enumerated().reversed() {
+            if block.is_previewable {
+                switch block {
+                case .mention:
+                    end_mention_count += 1
+
+                    // If there is more than one previewable mention,
+                    // do not hide anything because we allow rich rendering of only one mention currently.
+                    // This should be fixed in the future to show events inline instead.
+                    if end_mention_count > 1 {
+                        hide_text_index = blocks.endIndex
+                        break outerLoop
+                    }
+                case .url(let url):
+                    let url_type = classify_url(url)
+                    if case .link = url_type {
+                        end_url_count += 1
+
+                        // If there is more than one link, do not hide anything because we allow rich rendering of only
+                        // one link.
+                        if end_url_count > 1 {
+                            hide_text_index = blocks.endIndex
+                            break outerLoop
+                        }
+                    }
+                default:
+                    break
+                }
+                hide_text_index = i
+            } else if case .text(let txt) = block, txt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                hide_text_index = i
+            } else {
+                break
             }
-            else {
-                return false
-            }
-        })
-        .count == 1
-    
+        }
+    }
+
     var ind: Int = -1
     let txt: CompatibleText = blocks.reduce(CompatibleText()) { str, block in
         ind = ind + 1
-        
+
+        // Add the rendered previewable blocks to their type-specific lists.
         switch block {
-        case .mention(let m):
-            if case .note = m.ref, one_note_ref {
+        case .invoice(let invoice):
+            invoices.append(invoice)
+        case .url(let url):
+            let url_type = classify_url(url)
+            urls.append(url_type)
+        default:
+            break
+        }
+
+        if can_hide_last_previewable_refs {
+            // If there are previewable blocks that occur before the consecutive sequence of them at the end of the content,
+            // we should not hide the text representation of any previewable block to avoid altering the format of the note.
+            if ind < hide_text_index && block.is_previewable {
+                hide_text_index = blocks.endIndex
+            }
+
+            // No need to show the text representation of the block if the only previewables are the sequence of them
+            // found at the end of the content.
+            // This is to save unnecessary use of screen space.
+            if ind >= hide_text_index {
                 return str
             }
+        }
+
+        switch block {
+        case .mention(let m):
             return str + mention_str(m, profiles: profiles)
         case .text(let txt):
-            return str + CompatibleText(stringLiteral: reduce_text_block(blocks: blocks, ind: ind, txt: txt, one_note_ref: one_note_ref))
-
+            return str + CompatibleText(stringLiteral: reduce_text_block(ind: ind, hide_text_index: hide_text_index, txt: txt))
         case .relay(let relay):
             return str + CompatibleText(stringLiteral: relay)
-            
         case .hashtag(let htag):
             return str + hashtag_str(htag)
         case .invoice(let invoice):
-            invoices.append(invoice)
-            return str
+            return str + invoice_str(invoice)
         case .url(let url):
-            let url_type = classify_url(url)
-            switch url_type {
-            case .media:
-                urls.append(url_type)
-                return str
-            case .link(let url):
-                urls.append(url_type)
-                return str + url_str(url)
-            }
+            return str + url_str(url)
         }
     }
 
     return NoteArtifactsSeparated(content: txt, words: bs.words, urls: urls, invoices: invoices)
 }
 
-func reduce_text_block(blocks: [Block], ind: Int, txt: String, one_note_ref: Bool) -> String {
+func reduce_text_block(ind: Int, hide_text_index: Int, txt: String) -> String {
     var trimmed = txt
-    
-    if let prev = blocks[safe: ind-1],
-       case .url(let u) = prev,
-       classify_url(u).is_media != nil {
-        trimmed = " " + trim_prefix(trimmed)
+
+    // Trim leading whitespaces.
+    if ind == 0 {
+        trimmed = trim_prefix(trimmed)
     }
-    
-    if let next = blocks[safe: ind+1] {
-        if case .url(let u) = next, classify_url(u).is_media != nil {
-            trimmed = trim_suffix(trimmed)
-        } else if case .mention(let m) = next,
-                  case .note = m.ref,
-                  one_note_ref {
-            trimmed = trim_suffix(trimmed)
-        }
+
+    // Trim trailing whitespaces if the following blocks will be hidden or if this is the last block.
+    if ind == hide_text_index - 1 {
+        trimmed = trim_suffix(trimmed)
     }
-    
+
     return trimmed
+}
+
+func invoice_str(_ invoice: Invoice) -> CompatibleText {
+    var attributedString = AttributedString(stringLiteral: abbrev_identifier(invoice.string))
+    attributedString.foregroundColor = DamusColors.purple
+
+    return CompatibleText(attributed: attributedString)
 }
 
 func url_str(_ url: URL) -> CompatibleText {
@@ -194,11 +238,11 @@ func mention_str(_ m: Mention<MentionRef>, profiles: Profiles) -> CompatibleText
     let display_str: String = {
         switch m.ref {
         case .pubkey(let pk): return getDisplayName(pk: pk, profiles: profiles)
-        case .note: return abbrev_pubkey(bech32String)
-        case .nevent: return abbrev_pubkey(bech32String)
+        case .note: return abbrev_identifier(bech32String)
+        case .nevent: return abbrev_identifier(bech32String)
         case .nprofile(let nprofile): return getDisplayName(pk: nprofile.author, profiles: profiles)
         case .nrelay(let url): return url
-        case .naddr: return abbrev_pubkey(bech32String)
+        case .naddr: return abbrev_identifier(bech32String)
         }
     }()
 

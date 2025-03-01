@@ -10,28 +10,290 @@ import SwiftUI
 @testable import damus
 
 class NoteContentViewTests: XCTestCase {
-    func testRenderBlocksWithNonLatinHashtags() {
+    func testRenderBlocksWithNonLatinHashtags() throws {
         let content = "Damusはかっこいいです #cool #かっこいい"
-        let note = NostrEvent(content: content, keypair: test_keypair, tags: [["t", "かっこいい"]])!
+        let note = try XCTUnwrap(NostrEvent(content: content, keypair: test_keypair, tags: [["t", "かっこいい"]]))
         let parsed: Blocks = parse_note_content(content: .init(note: note, keypair: test_keypair))
 
         let testState = test_damus_state
         
-        let text: NoteArtifactsSeparated = render_blocks(blocks: parsed, profiles: testState.profiles)
+        let text: NoteArtifactsSeparated = render_blocks(blocks: parsed, profiles: testState.profiles, can_hide_last_previewable_refs: true)
         let attributedText: AttributedString = text.content.attributed
         
         let runs: AttributedString.Runs = attributedText.runs
         let runArray: [AttributedString.Runs.Run] = Array(runs)
         print(runArray.description)
         XCTAssertEqual(runArray[1].link?.absoluteString, "damus:t:cool", "Latin-character hashtag is missing. Runs description :\(runArray.description)")
-        XCTAssertEqual(runArray[3].link?.absoluteString.removingPercentEncoding!, "damus:t:かっこいい", "Non-latin-character hashtag is missing. Runs description :\(runArray.description)")
+        XCTAssertEqual(runArray[3].link?.absoluteString.removingPercentEncoding, "damus:t:かっこいい", "Non-latin-character hashtag is missing. Runs description :\(runArray.description)")
     }
-    
+
+    func testRenderBlocksWithLeadingAndTrailingWhitespacesTrimmed() throws {
+        let content = "  \n\n  Hello, \nworld! \n\n   "
+        let note = try XCTUnwrap(NostrEvent(content: content, keypair: test_keypair))
+        let parsed: Blocks = parse_note_content(content: .init(note: note, keypair: test_keypair))
+
+        let testState = test_damus_state
+
+        let noteArtifactsSeparated: NoteArtifactsSeparated = render_blocks(blocks: parsed, profiles: testState.profiles, can_hide_last_previewable_refs: true)
+        let attributedText: AttributedString = noteArtifactsSeparated.content.attributed
+        let text = attributedText.description
+
+        let runs: AttributedString.Runs = attributedText.runs
+        let runArray: [AttributedString.Runs.Run] = Array(runs)
+
+        XCTAssertEqual(runArray.count, 1)
+        XCTAssertTrue(text.contains("Hello, \nworld!"))
+        XCTAssertFalse(text.contains(content))
+    }
+
+    func testRenderBlocksWithMediaBlockInMiddleRendered() throws {
+        let content = "    Check this out: https://damus.io/image.png Isn't this cool?    "
+        let note = try XCTUnwrap(NostrEvent(content: content, keypair: test_keypair))
+        let parsed: Blocks = parse_note_content(content: .init(note: note, keypair: test_keypair))
+
+        let testState = test_damus_state
+
+        let noteArtifactsSeparated: NoteArtifactsSeparated = render_blocks(blocks: parsed, profiles: testState.profiles)
+        let attributedText: AttributedString = noteArtifactsSeparated.content.attributed
+
+        let runs: AttributedString.Runs = attributedText.runs
+        let runArray: [AttributedString.Runs.Run] = Array(runs)
+        XCTAssertEqual(runArray.count, 3)
+        XCTAssertTrue(runArray[0].description.contains("Check this out: "))
+        XCTAssertTrue(runArray[1].description.contains("https://damus.io/image.png "))
+        XCTAssertEqual(runArray[1].link?.absoluteString, "https://damus.io/image.png")
+        XCTAssertTrue(runArray[2].description.contains(" Isn't this cool?"))
+
+        XCTAssertEqual(noteArtifactsSeparated.images.count, 1)
+        XCTAssertEqual(noteArtifactsSeparated.images[0].absoluteString, "https://damus.io/image.png")
+    }
+
+    func testRenderBlocksWithInvoiceInMiddleAbbreviated() throws {
+        let invoiceString = "lnbc100n1p357sl0sp5t9n56wdztun39lgdqlr30xqwksg3k69q4q2rkr52aplujw0esn0qpp5mrqgljk62z20q4nvgr6lzcyn6fhylzccwdvu4k77apg3zmrkujjqdpzw35xjueqd9ejqcfqv3jhxcmjd9c8g6t0dcxqyjw5qcqpjrzjqt56h4gvp5yx36u2uzqa6qwcsk3e2duunfxppzj9vhypc3wfe2wswz607uqq3xqqqsqqqqqqqqqqqlqqyg9qyysgqagx5h20aeulj3gdwx3kxs8u9f4mcakdkwuakasamm9562ffyr9en8yg20lg0ygnr9zpwp68524kmda0t5xp2wytex35pu8hapyjajxqpsql29r"
+        let content = "    Donations appreciated: \(invoiceString) Pura Vida    "
+        let note = try XCTUnwrap(NostrEvent(content: content, keypair: test_keypair))
+        let parsed: Blocks = parse_note_content(content: .init(note: note, keypair: test_keypair))
+
+        let testState = test_damus_state
+
+        let noteArtifactsSeparated: NoteArtifactsSeparated = render_blocks(blocks: parsed, profiles: testState.profiles)
+        let attributedText: AttributedString = noteArtifactsSeparated.content.attributed
+
+        let runs: AttributedString.Runs = attributedText.runs
+        let runArray: [AttributedString.Runs.Run] = Array(runs)
+        XCTAssertEqual(runArray.count, 3)
+        XCTAssertTrue(runArray[0].description.contains("Donations appreciated: "))
+        XCTAssertTrue(runArray[1].description.contains("lnbc100n:qpsql29r"))
+        XCTAssertTrue(runArray[2].description.contains(" Pura Vida"))
+    }
+
+    func testRenderBlocksWithNoteIdInMiddleAreRendered() throws {
+        let noteId = test_note.id.bech32
+        let content = "    Check this out: nostr:\(noteId) Pura Vida    "
+        let note = try XCTUnwrap(NostrEvent(content: content, keypair: test_keypair))
+        let parsed: Blocks = parse_note_content(content: .init(note: note, keypair: test_keypair))
+
+        let testState = test_damus_state
+
+        let noteArtifactsSeparated: NoteArtifactsSeparated = render_blocks(blocks: parsed, profiles: testState.profiles)
+        let attributedText: AttributedString = noteArtifactsSeparated.content.attributed
+
+        let runs: AttributedString.Runs = attributedText.runs
+        let runArray: [AttributedString.Runs.Run] = Array(runs)
+        XCTAssertEqual(runArray.count, 3)
+        XCTAssertTrue(runArray[0].description.contains("Check this out: "))
+        XCTAssertTrue(runArray[1].description.contains("note1qqq:qqn2l0z3"))
+        XCTAssertEqual(runArray[1].link?.absoluteString, "damus:nostr:\(noteId)")
+        XCTAssertTrue(runArray[2].description.contains(" Pura Vida"))
+    }
+
+    func testRenderBlocksWithNeventInMiddleAreRendered() throws {
+        let nevent = "nevent1qqstna2yrezu5wghjvswqqculvvwxsrcvu7uc0f78gan4xqhvz49d9spr3mhxue69uhkummnw3ez6un9d3shjtn4de6x2argwghx6egpr4mhxue69uhkummnw3ez6ur4vgh8wetvd3hhyer9wghxuet5nxnepm"
+        let content = "    Check this out: nostr:\(nevent) Pura Vida    "
+        let note = try XCTUnwrap(NostrEvent(content: content, keypair: test_keypair))
+        let parsed: Blocks = parse_note_content(content: .init(note: note, keypair: test_keypair))
+
+        let testState = test_damus_state
+
+        let noteArtifactsSeparated: NoteArtifactsSeparated = render_blocks(blocks: parsed, profiles: testState.profiles)
+        let attributedText: AttributedString = noteArtifactsSeparated.content.attributed
+
+        let runs: AttributedString.Runs = attributedText.runs
+        let runArray: [AttributedString.Runs.Run] = Array(runs)
+        XCTAssertEqual(runArray.count, 3)
+        XCTAssertTrue(runArray[0].description.contains("Check this out: "))
+        XCTAssertTrue(runArray[1].description.contains("nevent1q:t5nxnepm"))
+        XCTAssertEqual(runArray[1].link?.absoluteString, "damus:nostr:\(nevent)")
+        XCTAssertTrue(runArray[2].description.contains(" Pura Vida"))
+    }
+
+    func testRenderBlocksWithPreviewableBlocksAtEndAreHidden() throws {
+        let noteId = test_note.id.bech32
+        let invoiceString = "lnbc100n1p357sl0sp5t9n56wdztun39lgdqlr30xqwksg3k69q4q2rkr52aplujw0esn0qpp5mrqgljk62z20q4nvgr6lzcyn6fhylzccwdvu4k77apg3zmrkujjqdpzw35xjueqd9ejqcfqv3jhxcmjd9c8g6t0dcxqyjw5qcqpjrzjqt56h4gvp5yx36u2uzqa6qwcsk3e2duunfxppzj9vhypc3wfe2wswz607uqq3xqqqsqqqqqqqqqqqlqqyg9qyysgqagx5h20aeulj3gdwx3kxs8u9f4mcakdkwuakasamm9562ffyr9en8yg20lg0ygnr9zpwp68524kmda0t5xp2wytex35pu8hapyjajxqpsql29r"
+        let content = "    Check this out.   \nhttps://hidden.tld/\nhttps://damus.io/hidden1.png\n\(invoiceString)\nhttps://damus.io/hidden2.png\nnostr:\(noteId) "
+        let note = try XCTUnwrap(NostrEvent(content: content, keypair: test_keypair))
+        let parsed: Blocks = parse_note_content(content: .init(note: note, keypair: test_keypair))
+
+        let testState = test_damus_state
+
+        let noteArtifactsSeparated: NoteArtifactsSeparated = render_blocks(blocks: parsed, profiles: testState.profiles, can_hide_last_previewable_refs: true)
+        let attributedText: AttributedString = noteArtifactsSeparated.content.attributed
+
+        let runs: AttributedString.Runs = attributedText.runs
+        let runArray: [AttributedString.Runs.Run] = Array(runs)
+        XCTAssertEqual(runArray.count, 1)
+        XCTAssertTrue(runArray[0].description.contains("Check this out."))
+        XCTAssertFalse(runArray[0].description.contains("https://hidden.tld/"))
+        XCTAssertFalse(runArray[0].description.contains("https://damus.io/hidden1.png"))
+        XCTAssertFalse(runArray[0].description.contains("lnbc100n:qpsql29r"))
+        XCTAssertFalse(runArray[0].description.contains("https://damus.io/hidden2.png"))
+        XCTAssertFalse(runArray[0].description.contains("note1qqq:qqn2l0z3"))
+
+        XCTAssertEqual(noteArtifactsSeparated.images.count, 2)
+        XCTAssertEqual(noteArtifactsSeparated.images[0].absoluteString, "https://damus.io/hidden1.png")
+        XCTAssertEqual(noteArtifactsSeparated.images[1].absoluteString, "https://damus.io/hidden2.png")
+
+        XCTAssertEqual(noteArtifactsSeparated.media.count, 2)
+        XCTAssertEqual(noteArtifactsSeparated.media[0].url.absoluteString, "https://damus.io/hidden1.png")
+        XCTAssertEqual(noteArtifactsSeparated.media[1].url.absoluteString, "https://damus.io/hidden2.png")
+
+        XCTAssertEqual(noteArtifactsSeparated.links.count, 1)
+        XCTAssertEqual(noteArtifactsSeparated.links[0].absoluteString, "https://hidden.tld/")
+
+        XCTAssertEqual(noteArtifactsSeparated.invoices.count, 1)
+        XCTAssertEqual(noteArtifactsSeparated.invoices[0].string, invoiceString)
+    }
+
+    func testRenderBlocksWithMultipleLinksAtEndAreNotHidden() throws {
+        let noteId = test_note.id.bech32
+        let invoiceString = "lnbc100n1p357sl0sp5t9n56wdztun39lgdqlr30xqwksg3k69q4q2rkr52aplujw0esn0qpp5mrqgljk62z20q4nvgr6lzcyn6fhylzccwdvu4k77apg3zmrkujjqdpzw35xjueqd9ejqcfqv3jhxcmjd9c8g6t0dcxqyjw5qcqpjrzjqt56h4gvp5yx36u2uzqa6qwcsk3e2duunfxppzj9vhypc3wfe2wswz607uqq3xqqqsqqqqqqqqqqqlqqyg9qyysgqagx5h20aeulj3gdwx3kxs8u9f4mcakdkwuakasamm9562ffyr9en8yg20lg0ygnr9zpwp68524kmda0t5xp2wytex35pu8hapyjajxqpsql29r"
+        let content = "    Check this out.   \nhttps://nothidden1.tld/\nhttps://nothidden2.tld/\nhttps://damus.io/nothidden1.png\n\(invoiceString)\nhttps://damus.io/nothidden2.png\nnostr:\(noteId) "
+        let note = try XCTUnwrap(NostrEvent(content: content, keypair: test_keypair))
+        let parsed: Blocks = parse_note_content(content: .init(note: note, keypair: test_keypair))
+
+        let testState = test_damus_state
+
+        let noteArtifactsSeparated: NoteArtifactsSeparated = render_blocks(blocks: parsed, profiles: testState.profiles, can_hide_last_previewable_refs: true)
+        let attributedText: AttributedString = noteArtifactsSeparated.content.attributed
+
+        let runs: AttributedString.Runs = attributedText.runs
+        let runArray: [AttributedString.Runs.Run] = Array(runs)
+        XCTAssertEqual(runArray.count, 12)
+        XCTAssertTrue(runArray[0].description.contains("Check this out."))
+        XCTAssertTrue(runArray[1].description.contains("https://nothidden1.tld/"))
+        XCTAssertTrue(runArray[3].description.contains("https://nothidden2.tld/"))
+        XCTAssertTrue(runArray[5].description.contains("https://damus.io/nothidden1.png"))
+        XCTAssertTrue(runArray[7].description.contains("lnbc100n:qpsql29r"))
+        XCTAssertTrue(runArray[9].description.contains("https://damus.io/nothidden2.png"))
+        XCTAssertTrue(runArray[11].description.contains("note1qqq:qqn2l0z3"))
+
+        XCTAssertEqual(noteArtifactsSeparated.images.count, 2)
+        XCTAssertEqual(noteArtifactsSeparated.images[0].absoluteString, "https://damus.io/nothidden1.png")
+        XCTAssertEqual(noteArtifactsSeparated.images[1].absoluteString, "https://damus.io/nothidden2.png")
+
+        XCTAssertEqual(noteArtifactsSeparated.media.count, 2)
+        XCTAssertEqual(noteArtifactsSeparated.media[0].url.absoluteString, "https://damus.io/nothidden1.png")
+        XCTAssertEqual(noteArtifactsSeparated.media[1].url.absoluteString, "https://damus.io/nothidden2.png")
+
+        XCTAssertEqual(noteArtifactsSeparated.links.count, 2)
+        XCTAssertEqual(noteArtifactsSeparated.links[0].absoluteString, "https://nothidden1.tld/")
+        XCTAssertEqual(noteArtifactsSeparated.links[1].absoluteString, "https://nothidden2.tld/")
+
+        XCTAssertEqual(noteArtifactsSeparated.invoices.count, 1)
+        XCTAssertEqual(noteArtifactsSeparated.invoices[0].string, invoiceString)
+    }
+
+    func testRenderBlocksWithMultipleEventsAtEndAreNotHidden() throws {
+        let noteId = test_note.id.bech32
+        let nevent = "nevent1qqstna2yrezu5wghjvswqqculvvwxsrcvu7uc0f78gan4xqhvz49d9spr3mhxue69uhkummnw3ez6un9d3shjtn4de6x2argwghx6egpr4mhxue69uhkummnw3ez6ur4vgh8wetvd3hhyer9wghxuet5nxnepm"
+        let invoiceString = "lnbc100n1p357sl0sp5t9n56wdztun39lgdqlr30xqwksg3k69q4q2rkr52aplujw0esn0qpp5mrqgljk62z20q4nvgr6lzcyn6fhylzccwdvu4k77apg3zmrkujjqdpzw35xjueqd9ejqcfqv3jhxcmjd9c8g6t0dcxqyjw5qcqpjrzjqt56h4gvp5yx36u2uzqa6qwcsk3e2duunfxppzj9vhypc3wfe2wswz607uqq3xqqqsqqqqqqqqqqqlqqyg9qyysgqagx5h20aeulj3gdwx3kxs8u9f4mcakdkwuakasamm9562ffyr9en8yg20lg0ygnr9zpwp68524kmda0t5xp2wytex35pu8hapyjajxqpsql29r"
+        let content = "    Check this out.   \nnostr:\(noteId)\nnostr:\(nevent)\nhttps://damus.io/nothidden1.png\n\(invoiceString)\nhttps://damus.io/nothidden2.png "
+        let note = try XCTUnwrap(NostrEvent(content: content, keypair: test_keypair))
+        let parsed: Blocks = parse_note_content(content: .init(note: note, keypair: test_keypair))
+
+        let testState = test_damus_state
+
+        let noteArtifactsSeparated: NoteArtifactsSeparated = render_blocks(blocks: parsed, profiles: testState.profiles, can_hide_last_previewable_refs: true)
+        let attributedText: AttributedString = noteArtifactsSeparated.content.attributed
+
+        let runs: AttributedString.Runs = attributedText.runs
+        let runArray: [AttributedString.Runs.Run] = Array(runs)
+        XCTAssertEqual(runArray.count, 10)
+        XCTAssertTrue(runArray[0].description.contains("Check this out."))
+        XCTAssertTrue(runArray[1].description.contains("note1qqq:qqn2l0z3"))
+        XCTAssertTrue(runArray[3].description.contains("nevent1q:t5nxnepm"))
+        XCTAssertTrue(runArray[5].description.contains("https://damus.io/nothidden1.png"))
+        XCTAssertTrue(runArray[7].description.contains("lnbc100n:qpsql29r"))
+        XCTAssertTrue(runArray[9].description.contains("https://damus.io/nothidden2.png"))
+
+        XCTAssertEqual(noteArtifactsSeparated.images.count, 2)
+        XCTAssertEqual(noteArtifactsSeparated.images[0].absoluteString, "https://damus.io/nothidden1.png")
+        XCTAssertEqual(noteArtifactsSeparated.images[1].absoluteString, "https://damus.io/nothidden2.png")
+
+        XCTAssertEqual(noteArtifactsSeparated.media.count, 2)
+        XCTAssertEqual(noteArtifactsSeparated.media[0].url.absoluteString, "https://damus.io/nothidden1.png")
+        XCTAssertEqual(noteArtifactsSeparated.media[1].url.absoluteString, "https://damus.io/nothidden2.png")
+
+        XCTAssertEqual(noteArtifactsSeparated.links.count, 0)
+
+        XCTAssertEqual(noteArtifactsSeparated.invoices.count, 1)
+        XCTAssertEqual(noteArtifactsSeparated.invoices[0].string, invoiceString)
+    }
+
+    func testRenderBlocksWithPreviewableBlocksAtEndAreNotHiddenWhenMediaBlockPrecedesThem() throws {
+        let content = "    Check this out: https://damus.io/image.png Isn't this cool?   \nhttps://damus.io/nothidden.png "
+        let note = try XCTUnwrap(NostrEvent(content: content, keypair: test_keypair))
+        let parsed: Blocks = parse_note_content(content: .init(note: note, keypair: test_keypair))
+
+        let testState = test_damus_state
+
+        let noteArtifactsSeparated: NoteArtifactsSeparated = render_blocks(blocks: parsed, profiles: testState.profiles, can_hide_last_previewable_refs: true)
+        let attributedText: AttributedString = noteArtifactsSeparated.content.attributed
+
+        let runs: AttributedString.Runs = attributedText.runs
+        let runArray: [AttributedString.Runs.Run] = Array(runs)
+        XCTAssertEqual(runArray.count, 4)
+        XCTAssertTrue(runArray[0].description.contains("Check this out: "))
+        XCTAssertTrue(runArray[1].description.contains("https://damus.io/image.png "))
+        XCTAssertEqual(runArray[1].link?.absoluteString, "https://damus.io/image.png")
+        XCTAssertTrue(runArray[2].description.contains(" Isn't this cool?"))
+        XCTAssertTrue(runArray[3].description.contains("https://damus.io/nothidden.png"))
+        XCTAssertEqual(runArray[3].link?.absoluteString, "https://damus.io/nothidden.png")
+
+        XCTAssertEqual(noteArtifactsSeparated.images.count, 2)
+        XCTAssertEqual(noteArtifactsSeparated.images[0].absoluteString, "https://damus.io/image.png")
+        XCTAssertEqual(noteArtifactsSeparated.images[1].absoluteString, "https://damus.io/nothidden.png")
+    }
+
+    func testRenderBlocksWithPreviewableBlocksAtEndAreNotHiddenWhenInvoicePrecedesThem() throws {
+        let invoiceString = "lnbc100n1p357sl0sp5t9n56wdztun39lgdqlr30xqwksg3k69q4q2rkr52aplujw0esn0qpp5mrqgljk62z20q4nvgr6lzcyn6fhylzccwdvu4k77apg3zmrkujjqdpzw35xjueqd9ejqcfqv3jhxcmjd9c8g6t0dcxqyjw5qcqpjrzjqt56h4gvp5yx36u2uzqa6qwcsk3e2duunfxppzj9vhypc3wfe2wswz607uqq3xqqqsqqqqqqqqqqqlqqyg9qyysgqagx5h20aeulj3gdwx3kxs8u9f4mcakdkwuakasamm9562ffyr9en8yg20lg0ygnr9zpwp68524kmda0t5xp2wytex35pu8hapyjajxqpsql29r"
+        let content = "    Donations appreciated: \(invoiceString) Pura Vida   \nhttps://damus.io/nothidden.png "
+        let note = try XCTUnwrap(NostrEvent(content: content, keypair: test_keypair))
+        let parsed: Blocks = parse_note_content(content: .init(note: note, keypair: test_keypair))
+
+        let testState = test_damus_state
+
+        let noteArtifactsSeparated: NoteArtifactsSeparated = render_blocks(blocks: parsed, profiles: testState.profiles, can_hide_last_previewable_refs: true)
+        let attributedText: AttributedString = noteArtifactsSeparated.content.attributed
+
+        let runs: AttributedString.Runs = attributedText.runs
+        let runArray: [AttributedString.Runs.Run] = Array(runs)
+        XCTAssertEqual(runArray.count, 4)
+        XCTAssertTrue(runArray[0].description.contains("Donations appreciated: "))
+        XCTAssertTrue(runArray[1].description.contains("lnbc100n:qpsql29r"))
+        XCTAssertTrue(runArray[2].description.contains(" Pura Vida"))
+        XCTAssertTrue(runArray[3].description.contains("https://damus.io/nothidden.png"))
+        XCTAssertEqual(runArray[3].link?.absoluteString, "https://damus.io/nothidden.png")
+
+        XCTAssertEqual(noteArtifactsSeparated.images.count, 1)
+        XCTAssertEqual(noteArtifactsSeparated.images[0].absoluteString, "https://damus.io/nothidden.png")
+    }
+
     /// Based on https://github.com/damus-io/damus/issues/1468
     /// Tests whether a note content view correctly parses an image block when url in JSON content contains optional escaped slashes
-    func testParseImageBlockInContentWithEscapedSlashes() {
+    func testParseImageBlockInContentWithEscapedSlashes() throws {
         let testJSONWithEscapedSlashes = "{\"tags\":[],\"pubkey\":\"f8e6c64342f1e052480630e27e1016dce35fc3a614e60434fef4aa2503328ca9\",\"content\":\"https:\\/\\/cdn.nostr.build\\/i\\/5c1d3296f66c2630131bf123106486aeaf051ed8466031c0e0532d70b33cddb2.jpg\",\"created_at\":1691864981,\"kind\":1,\"sig\":\"fc0033aa3d4df50b692a5b346fa816fdded698de2045e36e0642a021391468c44ca69c2471adc7e92088131872d4aaa1e90ea6e1ad97f3cc748f4aed96dfae18\",\"id\":\"e8f6eca3b161abba034dac9a02bb6930ecde9fd2fb5d6c5f22a05526e11382cb\"}"
-        let testNote = NostrEvent.owned_from_json(json: testJSONWithEscapedSlashes)!
+        let testNote = try XCTUnwrap(NostrEvent.owned_from_json(json: testJSONWithEscapedSlashes))
         let parsed = parse_note_content(content: .init(note: testNote, keypair: test_keypair))
         
         XCTAssertTrue((parsed.blocks[0].asURL != nil), "NoteContentView does not correctly parse an image block when url in JSON content contains optional escaped slashes.")
@@ -69,9 +331,9 @@ class NoteContentViewTests: XCTestCase {
     }
     
     func testMentionStr_Note_ContainsFullBech32() {
-        let compatableText = createCompatibleText(test_note.id.bech32)
+        let compatibleText = createCompatibleText(test_note.id.bech32)
 
-        assertCompatibleTextHasExpectedString(compatibleText: compatableText, expected: test_note.id.bech32)
+        assertCompatibleTextHasExpectedString(compatibleText: compatibleText, expected: test_note.id.bech32)
     }
     
     func testMentionStr_Nevent_ContainsAbbreviated() {
