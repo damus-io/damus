@@ -58,7 +58,7 @@ extension NdbProfile {
     }
 
     static func displayName(profile: Profile?, pubkey: Pubkey) -> DisplayName {
-        return parse_display_name(profile: profile, pubkey: pubkey)
+        return DisplayName(name: profile?.name, display_name: profile?.display_name, pubkey: pubkey)
     }
 
     var damus_donation: Int? {

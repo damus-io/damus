@@ -189,6 +189,7 @@
 		4C54AA0729A540BA003E4487 /* NotificationsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C54AA0629A540BA003E4487 /* NotificationsModel.swift */; };
 		4C54AA0A29A55429003E4487 /* EventGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C54AA0929A55429003E4487 /* EventGroup.swift */; };
 		4C54AA0C29A5543C003E4487 /* ZapGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C54AA0B29A5543C003E4487 /* ZapGroup.swift */; };
+		4C5726BA2D72C6FA00E7FF82 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 4C5726B92D72C6FA00E7FF82 /* Kingfisher */; };
 		4C59B98C2A76C2550032FFEB /* ProfileUpdatedNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C59B98B2A76C2550032FFEB /* ProfileUpdatedNotify.swift */; };
 		4C5C7E68284ED36500A22DF5 /* SearchHomeModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5C7E67284ED36500A22DF5 /* SearchHomeModel.swift */; };
 		4C5C7E6A284EDE2E00A22DF5 /* SearchResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5C7E69284EDE2E00A22DF5 /* SearchResultsView.swift */; };
@@ -2610,6 +2611,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C5726BA2D72C6FA00E7FF82 /* Kingfisher in Frameworks */,
 				D789D1202AFEFBF20083A7AB /* secp256k1 in Frameworks */,
 				D7EDED312B1290B80018B19C /* MarkdownUI in Frameworks */,
 				D7DB1FEA2D5A9F5A00CF06DA /* CryptoSwift in Frameworks */,
@@ -4174,6 +4176,7 @@
 				D789D11F2AFEFBF20083A7AB /* secp256k1 */,
 				D7EDED302B1290B80018B19C /* MarkdownUI */,
 				D7DB1FE92D5A9F5A00CF06DA /* CryptoSwift */,
+				4C5726B92D72C6FA00E7FF82 /* Kingfisher */,
 			);
 			productName = DamusNotificationService;
 			productReference = D79C4C142AFEB061003A41B4 /* DamusNotificationService.appex */;
@@ -6332,6 +6335,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = damus/damus.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"damus/Preview Content\"";
@@ -6363,6 +6367,7 @@
 				MARKETING_VERSION = 1.13;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = YES;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
@@ -6384,6 +6389,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = damus/damus.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"damus/Preview Content\"";
@@ -6415,6 +6421,7 @@
 				MARKETING_VERSION = 1.13;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = YES;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
@@ -6869,6 +6876,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4C27C9302A64766F007DBC75 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
 			productName = MarkdownUI;
+		};
+		4C5726B92D72C6FA00E7FF82 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4C06670228FC7EC500038D2A /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
 		};
 		4C649880286E0EE300EAE2B3 /* secp256k1 */ = {
 			isa = XCSwiftPackageProductDependency;
