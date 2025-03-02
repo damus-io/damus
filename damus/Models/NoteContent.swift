@@ -152,6 +152,7 @@ func render_blocks(blocks bs: Blocks, profiles: Profiles, can_hide_last_previewa
 func invoice_str(_ invoice: Invoice) -> CompatibleText {
     // Add foreground color to Lightning invoice but no need to link to anything as the attached preview is sufficient.
     var attributedString = AttributedString(stringLiteral: abbrev_identifier(invoice.string))
+    attributedString.link = URL(string: "damus:lightning:\(invoice.string)")
     attributedString.foregroundColor = DamusColors.purple
 
     return CompatibleText(attributed: attributedString)
