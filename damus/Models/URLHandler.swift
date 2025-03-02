@@ -43,6 +43,18 @@ struct DamusURLHandler {
             return .route(.Script(script: model))
         case .purple(let purple_url):
             return await damus_state.purple.handle(purple_url: purple_url)
+        case .invoice(let invoice):
+            if damus_state.settings.show_wallet_selector {
+                return .sheet(.select_wallet(invoice: invoice.string))
+            } else {
+                do {
+                    try open_with_wallet(wallet: damus_state.settings.default_wallet.model, invoice: invoice.string)
+                    return .no_action
+                }
+                catch {
+                    return .sheet(.select_wallet(invoice: invoice.string))
+                }
+            }
         case nil:
             break
         }
@@ -91,6 +103,11 @@ struct DamusURLHandler {
             return .filter(filt)
         case .script(let script):
             return .script(script)
+        case .invoice(let bolt11):
+            if let invoice = decode_bolt11(bolt11) {
+                return .invoice(invoice)
+            }
+            return nil
         }
         return nil
     }
@@ -103,5 +120,6 @@ struct DamusURLHandler {
         case wallet_connect(WalletConnectURL)
         case script([UInt8])
         case purple(DamusPurpleURL)
+        case invoice(Invoice)
     }
 }
