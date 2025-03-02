@@ -84,6 +84,7 @@ class NoteContentViewTests: XCTestCase {
         XCTAssertEqual(runArray.count, 3)
         XCTAssertTrue(runArray[0].description.contains("Donations appreciated: "))
         XCTAssertTrue(runArray[1].description.contains("lnbc100n:qpsql29r"))
+        XCTAssertEqual(runArray[1].link?.absoluteString, "damus:lightning:\(invoiceString)")
         XCTAssertTrue(runArray[2].description.contains(" Pura Vida"))
     }
 
@@ -281,6 +282,7 @@ class NoteContentViewTests: XCTestCase {
         XCTAssertEqual(runArray.count, 4)
         XCTAssertTrue(runArray[0].description.contains("Donations appreciated: "))
         XCTAssertTrue(runArray[1].description.contains("lnbc100n:qpsql29r"))
+        XCTAssertEqual(runArray[1].link?.absoluteString, "damus:lightning:\(invoiceString)")
         XCTAssertTrue(runArray[2].description.contains(" Pura Vida"))
         XCTAssertTrue(runArray[3].description.contains("https://damus.io/nothidden.png"))
         XCTAssertEqual(runArray[3].link?.absoluteString, "https://damus.io/nothidden.png")

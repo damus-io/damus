@@ -12,6 +12,7 @@ enum NostrLink: Equatable {
     case ref(RefId)
     case filter(NostrFilter)
     case script([UInt8])
+    case invoice(String)
 }
 
 func encode_pubkey_uri(_ pubkey: Pubkey) -> String {
@@ -93,8 +94,15 @@ func decode_nostr_uri(_ s: String) -> NostrLink? {
             return
         }
 
-    if parts.count >= 2 && parts[0] == "t" {
-        return .filter(NostrFilter(hashtag: [parts[1].lowercased()]))
+    if parts.count >= 2 {
+        switch parts[0] {
+        case "t":
+            return .filter(NostrFilter(hashtag: [parts[1].lowercased()]))
+        case "lightning":
+            return .invoice(parts[1])
+        default:
+            break
+        }
     }
 
     guard parts.count == 1 else {

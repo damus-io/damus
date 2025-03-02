@@ -191,6 +191,7 @@ func reduce_text_block(ind: Int, hide_text_index: Int, txt: String) -> String {
 
 func invoice_str(_ invoice: Invoice) -> CompatibleText {
     var attributedString = AttributedString(stringLiteral: abbrev_identifier(invoice.string))
+    attributedString.link = URL(string: "damus:lightning:\(invoice.string)")
     attributedString.foregroundColor = DamusColors.purple
 
     return CompatibleText(attributed: attributedString)
