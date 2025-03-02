@@ -865,33 +865,29 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
 
 
     var content = post.string
-        .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        .trimmingCharacters(in: .whitespacesAndNewlines)
 
-    let imagesString = uploadedMedias.map { $0.uploadedURL.absoluteString }.joined(separator: " ")
+    let imagesString = uploadedMedias.map { $0.uploadedURL.absoluteString }.joined(separator: "\n")
 
     if !imagesString.isEmpty {
-        content.append(" " + imagesString + " ")
+        content.append("\n\n" + imagesString)
     }
 
     var tags: [[String]] = []
 
     switch action {
-        case .replying_to(let replying_to):
-            // start off with the reply tags
-            tags = nip10_reply_tags(replying_to: replying_to, keypair: state.keypair)
+    case .replying_to(let replying_to):
+        // start off with the reply tags
+        tags = nip10_reply_tags(replying_to: replying_to, keypair: state.keypair)
 
-        case .quoting(let ev):
-            content.append(" nostr:" + bech32_note_id(ev.id))
+    case .quoting(let ev):
+        content.append("\n\nnostr:" + bech32_note_id(ev.id))
 
-            if let quoted_ev = state.events.lookup(ev.id) {
-                tags.append(["p", quoted_ev.pubkey.hex()])
-            }
-        case .posting(let postTarget):
-            break
-        case .highlighting(let draft):
-            break
-        case .sharing(_):
-            break
+        if let quoted_ev = state.events.lookup(ev.id) {
+            tags.append(["p", quoted_ev.pubkey.hex()])
+        }
+    case .posting, .highlighting, .sharing:
+        break
     }
 
     // append additional tags
@@ -913,7 +909,7 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
             }
     }
 
-    return NostrPost(content: content, kind: .text, tags: tags)
+    return NostrPost(content: content.trimmingCharacters(in: .whitespacesAndNewlines), kind: .text, tags: tags)
 }
 
 func isSupportedVideo(url: URL?) -> Bool {
