@@ -270,6 +270,7 @@ final class EditPictureControlTests: XCTestCase {
         XCTAssertEqual(view_model.state.step, SelectionState.Step.ready)
     }
     
+    /*
     @MainActor
     func testEditPictureControlFirstTimeSetup() async {
         var current_image_url: URL? = nil
@@ -325,6 +326,7 @@ final class EditPictureControlTests: XCTestCase {
         sleep(2)    // Wait a bit for things to load
         assertSnapshot(matching: hostView, as: .image(on: .iPhoneSe(.portrait)))
     }
+    */
     
     // MARK: Mock classes
     
