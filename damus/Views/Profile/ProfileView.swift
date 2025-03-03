@@ -122,7 +122,10 @@ struct ProfileView: View {
     func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
         var filters = ContentFilters.defaults(damus_state: damus_state)
         filters.append(fstate.filter)
-        if fstate == .conversations {
+        switch fstate {
+        case .posts, .posts_and_replies:
+            filters.append({ profile.pubkey == $0.pubkey })
+        case .conversations:
             filters.append({ profile.conversation_events.contains($0.id) } )
         }
         return ContentFilters(filters: filters).filter
