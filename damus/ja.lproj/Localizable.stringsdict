@@ -58,6 +58,20 @@
 			<string>インポート</string>
 		</dict>
 	</dict>
+	<key>people_reposted_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>other</key>
+			<string>%2$@と他%1$d人がリポストしました</string>
+		</dict>
+	</dict>
 	<key>reacted_tagged_in_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
