@@ -14,6 +14,7 @@ import Foundation
 class Constants {
     //static let EXAMPLE_DEMOS: DamusState = .empty
     static let DAMUS_APP_GROUP_IDENTIFIER: String = "group.com.damus"
+    static let IMAGE_CACHE_DIRNAME: String = "ImageCache"
     static let MAIN_APP_BUNDLE_IDENTIFIER: String = "com.jb55.damus2"
     static let NOTIFICATION_EXTENSION_BUNDLE_IDENTIFIER: String = "com.jb55.damus2.DamusNotificationService"
     
