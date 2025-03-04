@@ -37,7 +37,23 @@ enum Block: Equatable {
             return false
         }
     }
-    
+
+    var is_previewable: Bool {
+        switch self {
+        case .mention(let m):
+            switch m.ref {
+            case .note, .nevent: return true
+            default: return false
+            }
+        case .invoice:
+            return true
+        case .url:
+            return true
+        default:
+            return false
+        }
+    }
+
     case text(String)
     case mention(Mention<MentionRef>)
     case hashtag(String)
