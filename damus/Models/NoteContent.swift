@@ -213,12 +213,20 @@ func mention_str(_ m: Mention<MentionRef>, profiles: Profiles) -> CompatibleText
 
 // trim suffix whitespace and newlines
 func trim_suffix(_ str: String) -> String {
-    return str.replacingOccurrences(of: "\\s+$", with: "", options: .regularExpression)
+    var result = str
+    while result.last?.isWhitespace == true {
+        result.removeLast()
+    }
+    return result
 }
 
 // trim prefix whitespace and newlines
 func trim_prefix(_ str: String) -> String {
-    return str.replacingOccurrences(of: "^\\s+", with: "", options: .regularExpression)
+    var result = str
+    while result.first?.isWhitespace == true {
+        result.removeFirst()
+    }
+    return result
 }
 
 struct LongformContent {
