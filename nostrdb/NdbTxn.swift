@@ -21,6 +21,10 @@ class NdbTxn<T> {
     var generation: Int
     var name: String
 
+    static func pure(ndb: Ndb, val: T) -> NdbTxn<T> {
+        .init(ndb: ndb, txn: ndb_txn(), val: val, generation: ndb.generation, inherited: true, name: "pure_txn")
+    }
+
     init?(ndb: Ndb, with: (NdbTxn<T>) -> T = { _ in () }, name: String? = nil) {
         guard !ndb.is_closed else { return nil }
         self.name = name ?? "txn"

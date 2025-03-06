@@ -165,8 +165,8 @@ class ProfileModel: ObservableObject, Equatable {
         self.findRelaysListener = nil
     }
 
-    func getCappedRelayStrings() -> [String] {
-        return relays?.keys.prefix(MAX_SHARE_RELAYS).map { $0.absoluteString } ?? []
+    func getCappedRelays() -> [RelayURL] {
+        return relays?.keys.prefix(MAX_SHARE_RELAYS).map { $0 } ?? []
     }
 }
 
