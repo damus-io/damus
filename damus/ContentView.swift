@@ -1033,8 +1033,8 @@ extension LossyLocalNotification {
     /// Computes a view open action from a mention reference.
     /// Use this when opening a user-presentable interface to a specific mention reference.
     func toViewOpenAction() -> ContentView.ViewOpenAction {
-        switch self.mention {
-        case .pubkey(let pubkey):
+        switch self.mention.nip19 {
+        case .npub(let pubkey):
             return .route(.ProfileByKey(pubkey: pubkey))
         case .note(let noteId):
             return .route(.LoadableNostrEvent(note_reference: .note_id(noteId)))
@@ -1044,16 +1044,24 @@ extension LossyLocalNotification {
         case .nprofile(let nProfile):
             // TODO: Improve this by implementing a profile route that handles nprofiles with their relay hints.
             return .route(.ProfileByKey(pubkey: nProfile.author))
-        case .nrelay(let string):
+        case .nrelay(_):
             // We do not need to implement `nrelay` support, it has been deprecated.
             // See https://github.com/nostr-protocol/nips/blob/6e7a618e7f873bb91e743caacc3b09edab7796a0/BREAKING.md?plain=1#L21
             return .sheet(.error(ErrorView.UserPresentableError(
                 user_visible_description: NSLocalizedString("You opened an invalid link. The link you tried to open refers to \"nrelay\", which has been deprecated and is not supported.", comment: "User-visible error description for a user who tries to open a deprecated \"nrelay\" link."),
                 tip: NSLocalizedString("Please contact the person who provided the link, and ask for another link.", comment: "User-visible tip on what to do if a link contains a deprecated \"nrelay\" reference."),
-                technical_info: "`MentionRef.toViewOpenAction` detected deprecated `nrelay` contents"
+                technical_info: "`MentionRef.toViewOpenAction` detected non-supported contents"
             )))
         case .naddr(let nAddr):
             return .route(.LoadableNostrEvent(note_reference: .naddr(nAddr)))
+        case .nscript(let data):
+            return .route(.Script(script: .init(data: data, state: .not_loaded)))
+        case .nsec(let nsec):
+            return .sheet(.error(ErrorView.UserPresentableError(
+                user_visible_description: NSLocalizedString("You opened an invalid link. The link you tried to open refers to an nsec, which cannot be opened.", comment: "User-visible error description for a user who tries to open an \"nsec\" link."),
+                tip: NSLocalizedString("Please contact the person who provided the link, and ask for another link.", comment: "User-visible tip on what to do if a link contains an unsupported \"nsec\" reference."),
+                technical_info: "`MentionRef.toViewOpenAction` detected non-supported contents"
+            )))
         }
     }
 }
