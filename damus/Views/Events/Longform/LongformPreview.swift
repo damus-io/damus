@@ -122,10 +122,7 @@ struct LongformPreviewBody: View {
                 } else if blur_images || (blur_images && !state.settings.media_previews) {
                     ZStack {
                         titleImage(url: url)
-                        Blur()
-                            .onTapGesture {
-                                blur_images = false
-                            }
+                        BlurOverlayView(blur_images: $blur_images, artifacts: nil, size: nil, damus_state: nil, parentView: .longFormView)
                     }
                 }
             }

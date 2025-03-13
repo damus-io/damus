@@ -35,11 +35,11 @@ func remove_nostr_uri_prefix(_ s: String) -> String {
     return uri
 }
 
-func abbreviateURL(_ url: URL) -> String {
+func abbreviateURL(_ url: URL, maxLength: Int = MAX_CHAR_URL) -> String {
     let urlString = url.absoluteString
     
-    if urlString.count > MAX_CHAR_URL {
-        return String(urlString.prefix(MAX_CHAR_URL)) + "..."
+    if urlString.count > maxLength {
+        return String(urlString.prefix(maxLength)) + "…"
     }
     return urlString
 }

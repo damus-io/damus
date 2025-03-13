@@ -23,6 +23,7 @@ struct Blur: UIViewRepresentable {
     }
 }
 
+
 struct NoteContentView: View {
     
     let damus_state: DamusState
@@ -166,10 +167,7 @@ struct NoteContentView: View {
                         ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media) { dismiss in
                             fullscreen_preview(dismiss: dismiss)
                         }
-                        Blur()
-                            .onTapGesture {
-                                blur_images = false
-                            }
+                        BlurOverlayView(blur_images: $blur_images, artifacts: artifacts, size: size, damus_state: damus_state, parentView: .noteContentView)
                     }
                 }
             }
@@ -384,6 +382,64 @@ func lookup_cached_preview_size(previews: PreviewCache, evid: NoteId) -> CGFloat
     return height
 }
 
+struct BlurOverlayView: View {
+    @Binding var blur_images: Bool
+    let artifacts: NoteArtifactsSeparated?
+    let size: EventViewKind?
+    let damus_state: DamusState?
+    let parentView: ParentViewType
+    var body: some View {
+        ZStack {
+            
+            Color.black
+                .opacity(0.54)
+            
+            Blur()
+            
+            VStack(alignment: .center) {
+                Image(systemName: "eye.slash")
+                    .foregroundStyle(.white)
+                    .bold()
+                    .padding(EdgeInsets(top: 5, leading: 10, bottom: 0, trailing: 10))
+                Text(NSLocalizedString("Media from someone you \n don't follow", comment: "Label on the image blur mask"))
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(Color.white)
+                    .font(.title2)
+                    .padding(EdgeInsets(top: 5, leading: 10, bottom: 0, trailing: 10))
+                Button(NSLocalizedString("Tap to load", comment: "Label for button that allows user to dismiss media content warning and unblur the image")) {
+                    blur_images = false
+                }
+                .buttonStyle(.bordered)
+                .fontWeight(.bold)
+                .foregroundStyle(.white)
+                .padding(EdgeInsets(top: 5, leading: 10, bottom: 0, trailing: 10))
+                
+                if parentView == .noteContentView,
+                   let artifacts = artifacts,
+                   let size = size,
+                   let damus_state = damus_state
+                {
+                    switch artifacts.media[0] {
+                    case .image(let url), .video(let url):
+                        Text(abbreviateURL(url, maxLength: 30))
+                            .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size * 0.8))
+                            .foregroundStyle(.white)
+                            .multilineTextAlignment(.center)
+                            .padding(EdgeInsets(top: 20, leading: 10, bottom: 5, trailing: 10))
+                    }
+                }
+            }
+        }
+        .onTapGesture {
+            blur_images = false
+        }
+    }
+    
+    enum ParentViewType {
+        case noteContentView, longFormView
+    }
+}
+
 struct NoteContentView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state
@@ -401,7 +457,7 @@ struct NoteContentView_Previews: PreviewProvider {
             .previewDisplayName("Super short note")
 
             VStack {
-                NoteContentView(damus_state: state, event: test_encoded_note_with_image!, blur_images: false, size: .normal, options: [])
+                NoteContentView(damus_state: state, event: test_encoded_note_with_image!, blur_images: true, size: .normal, options: [])
             }
             .previewDisplayName("Note with image")
 
@@ -434,4 +490,3 @@ func separate_images(ev: NostrEvent, keypair: Keypair) -> [MediaUrl]? {
     let mediaUrls = urlBlocks.map { MediaUrl.image($0) }
     return mediaUrls.isEmpty ? nil : mediaUrls
 }
-
