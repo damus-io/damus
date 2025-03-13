@@ -166,10 +166,20 @@ struct NoteContentView: View {
                         ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media) { dismiss in
                             fullscreen_preview(dismiss: dismiss)
                         }
-                        Blur()
-                            .onTapGesture {
-                                blur_images = false
+                        ZStack {
+                            
+                            Blur()
+                            
+                            VStack(alignment: .center) {
+                                Text(NSLocalizedString("Non-following user media. Tap to open", comment: "Non-following user media. Tap to open."))
+                                    .foregroundStyle(Color.white)
+                                    .font(.title2)
+                                    .padding(8)
                             }
+                        }
+                        .onTapGesture {
+                            blur_images = false
+                        }
                     }
                 }
             }
@@ -401,7 +411,7 @@ struct NoteContentView_Previews: PreviewProvider {
             .previewDisplayName("Super short note")
 
             VStack {
-                NoteContentView(damus_state: state, event: test_encoded_note_with_image!, blur_images: false, size: .normal, options: [])
+                NoteContentView(damus_state: state, event: test_encoded_note_with_image!, blur_images: true, size: .normal, options: [])
             }
             .previewDisplayName("Note with image")
 
