@@ -6768,7 +6768,7 @@
 			repositoryURL = "https://github.com/tyiu/EmojiPicker.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.1.1;
+				minimumVersion = 0.2.0;
 			};
 		};
 		4C06670228FC7EC500038D2A /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
