@@ -82,6 +82,26 @@
 			<string>Importa</string>
 		</dict>
 	</dict>
+	<key>people_reposted_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ i %1$d inna osoba udostępniła ponownie.</string>
+			<key>few</key>
+			<string>%2$@ i %1$d inne osoby udostępniły ponownie.</string>
+			<key>many</key>
+			<string>%2$@ i %1$d innych osób udostępniło ponownie.</string>
+			<key>other</key>
+			<string>%2$@ i %1$d innej osoby udostępniło ponownie.</string>
+		</dict>
+	</dict>
 	<key>reacted_tagged_in_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
