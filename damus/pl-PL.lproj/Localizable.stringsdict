@@ -237,7 +237,7 @@
 			<key>few</key>
 			<string>%2$@ i %1$d inne osoby podały dalej notatkę, w której cię oznaczono</string>
 			<key>many</key>
-			<string>%2$@ i %1$d innych osób opublikowało notatkę, w której Cię oznaczono</string>
+			<string>%2$@ i %1$d innych osób podało dalej notatkę, w której cię oznaczono</string>
 			<key>other</key>
 			<string>%2$@ i %1$d innej osoby opublikowało wiadomość, w której jesteś oznaczony</string>
 		</dict>
