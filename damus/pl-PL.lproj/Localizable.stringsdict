@@ -99,7 +99,7 @@
 			<key>many</key>
 			<string>%2$@ i %1$d innych osób udostępniło ponownie.</string>
 			<key>other</key>
-			<string>%2$@ i %1$d innej osoby udostępniło ponownie.</string>
+			<string>%2$@ i %1$d innej osoby podało dalej</string>
 		</dict>
 	</dict>
 	<key>reacted_tagged_in_3</key>
