@@ -275,7 +275,7 @@
 			<key>one</key>
 			<string>%2$@ i %1$d inna osoba podała dalej twój profil</string>
 			<key>few</key>
-			<string>%2$@ i %1$d inne osoby opublikowały twój profil</string>
+			<string>%2$@ i %1$d inne osoby podały dalej twój profil</string>
 			<key>many</key>
 			<string>%2$@ i %1$d innych osób opublikowało twój profil</string>
 			<key>other</key>
