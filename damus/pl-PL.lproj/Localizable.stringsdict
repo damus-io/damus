@@ -95,7 +95,7 @@
 			<key>one</key>
 			<string>%2$@ i %1$d inna osoba udostępniła ponownie.</string>
 			<key>few</key>
-			<string>%2$@ i %1$d inne osoby udostępniły ponownie.</string>
+			<string>%2$@ i %1$d inne osoby podały dalej</string>
 			<key>many</key>
 			<string>%2$@ i %1$d innych osób podało dalej</string>
 			<key>other</key>
