@@ -299,7 +299,7 @@
 			<key>many</key>
 			<string>Podanych dalej</string>
 			<key>other</key>
-			<string>Podanych dalej</string>
+			<string>Podane dalej</string>
 		</dict>
 	</dict>
 	<key>quoted_reposts_count</key>
