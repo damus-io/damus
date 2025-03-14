@@ -279,7 +279,7 @@
 			<key>many</key>
 			<string>%2$@ i %1$d innych osób opublikowało twój profil</string>
 			<key>other</key>
-			<string>%2$@ i %1$d innych osób opublikowało twój profil</string>
+			<string>%2$@ i %1$d innych osoby podało dalej twój profil</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
