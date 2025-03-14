@@ -273,7 +273,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ i %1$d inna osoba opublikowała twój profil</string>
+			<string>%2$@ i %1$d inna osoba podała dalej twój profil</string>
 			<key>few</key>
 			<string>%2$@ i %1$d inne osoby opublikowały twój profil</string>
 			<key>many</key>
