@@ -239,7 +239,7 @@
 			<key>many</key>
 			<string>%2$@ i %1$d innych osób podało dalej notatkę, w której cię oznaczono</string>
 			<key>other</key>
-			<string>%2$@ i %1$d innej osoby opublikowało wiadomość, w której jesteś oznaczony</string>
+			<string>%2$@ i %1$d innej osoby podało dalej notatkę, w której cię oznaczono</string>
 		</dict>
 	</dict>
 	<key>reposted_your_note_3</key>
