@@ -257,7 +257,7 @@
 			<key>few</key>
 			<string>%2$@ i %1$d inne osoby opublikowały twoją notatkę</string>
 			<key>many</key>
-			<string>%2$@ i %1$d innych osób opublikowały twoją notatkę</string>
+			<string>%2$@ i %1$d innych osób podało dalej twoją notatkę</string>
 			<key>other</key>
 			<string>%2$@ i %1$d innej osoby opublikowało twoją notatkę</string>
 		</dict>
