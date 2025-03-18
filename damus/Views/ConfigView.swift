@@ -21,8 +21,22 @@ struct ConfigView: View {
     @State private var searchText: String = ""
 
     @ObservedObject var settings: UserSettingsStore
-
+    
+    // String constants
     private let DELETE_KEYWORD = "DELETE"
+    private let keysTitle = NSLocalizedString("Keys", comment: "Settings section for managing keys")
+    private let appearanceTitle = NSLocalizedString("Appearance and filters", comment: "Section header for text, appearance, and content filter settings")
+     private let searchUniverseTitle = NSLocalizedString("Search / Universe", comment: "Section header for search/universe settings")
+     private let notificationsTitle = NSLocalizedString("Notifications", comment: "Section header for Damus notifications")
+     private let zapsTitle = NSLocalizedString("Zaps", comment: "Section header for zap settings")
+     private let translationTitle = NSLocalizedString("Translation", comment: "Section header for text and appearance settings")
+     private let reactionsTitle = NSLocalizedString("Reactions", comment: "Section header for reactions settings")
+     private let developerTitle = NSLocalizedString("Developer", comment: "Section header for developer settings")
+     private let firstAidTitle = NSLocalizedString("First Aid", comment: "Section header for first aid tools and settings")
+     private let signOutTitle = NSLocalizedString("Sign out", comment: "Sidebar menu label to sign out of the account.")
+     private let deleteAccountTitle = NSLocalizedString("Delete Account", comment: "Button to delete the user's account.")
+     private let versionTitle = NSLocalizedString("Version", comment: "Section title for displaying the version number of the Damus app.")
+     private let copyString = NSLocalizedString("Copy", comment: "Context menu option for copying the version of damus.")
 
     
     init(state: DamusState) {
@@ -33,99 +47,107 @@ struct ConfigView: View {
     func textColor() -> Color {
         colorScheme == .light ? DamusColors.black : DamusColors.white
     }
-
+    
+    func showSettingsButton(title : String)->Bool{
+        return searchText.isEmpty || title.lowercased().contains(searchText.lowercased())
+    }
+    
     var body: some View {
         ZStack(alignment: .leading) {
             Form {
                 Section {
                     // Keys
-                    if searchText.isEmpty || NSLocalizedString("Keys", comment: "Settings section for managing keys").lowercased().contains(searchText.lowercased()){
-                        NavigationLink(value: Route.KeySettings(keypair: state.keypair)) {
-                            IconLabel(NSLocalizedString("Keys", comment: "Settings section for managing keys"), img_name: "Key", color: .purple)
+                    if showSettingsButton(title: keysTitle){
+                        NavigationLink(value:Route.KeySettings(keypair: state.keypair)){
+                            IconLabel(keysTitle,img_name:"Key",color:.purple)
                         }
                     }
                     // Appearance and filters
-                    if searchText.isEmpty || NSLocalizedString("Appearance and filters", comment: "Settings section for managing keys").lowercased().contains(searchText.lowercased()){
-                        NavigationLink(value: Route.AppearanceSettings(settings: settings)) {
-                            IconLabel(NSLocalizedString("Appearance and filters", comment: "Section header for text, appearance, and content filter settings"), img_name: "eye", color: .red)
+                    if showSettingsButton(title: appearanceTitle){
+                        NavigationLink(value:Route.AppearanceSettings(settings: settings)){
+                            IconLabel(appearanceTitle,img_name:"eye",color:.red)
                         }
                     }
                     // Search/Universe
-                    if searchText.isEmpty || NSLocalizedString("Search Universe", comment: "Settings section for managing keys").lowercased().contains(searchText.lowercased()){
-                        NavigationLink(value: Route.SearchSettings(settings: settings)) {
-                            IconLabel(NSLocalizedString("Search/Universe", comment: "Section header for search/universe settings"), img_name: "search", color: .red)
+                    if showSettingsButton(title: searchUniverseTitle){
+                        NavigationLink(value: Route.SearchSettings(settings: settings)){
+                            IconLabel(searchUniverseTitle,img_name:"search",color:.red)
                         }
                     }
+
                     //Notifications
-                    if searchText.isEmpty || NSLocalizedString("Notifications", comment: "Settings section for managing keys").lowercased().contains(searchText.lowercased()){
-                        NavigationLink(value: Route.NotificationSettings(settings: settings)) {
-                            IconLabel(NSLocalizedString("Notifications", comment: "Section header for Damus notifications"), img_name: "notification-bell-on", color: .blue)
+                    if showSettingsButton(title: notificationsTitle){
+                        NavigationLink(value: Route.NotificationSettings(settings: settings)){
+                            IconLabel(notificationsTitle,img_name:"notification-bell-on",color:.blue)
                         }
                     }
                     //Zaps
-                    if searchText.isEmpty || NSLocalizedString("Zaps", comment: "Settings section for managing keys").lowercased().contains(searchText.lowercased()){
-                        NavigationLink(value: Route.ZapSettings(settings: settings)) {
-                            IconLabel(NSLocalizedString("Zaps", comment: "Section header for zap settings"), img_name: "zap.fill", color: .orange)
+                    if showSettingsButton(title: zapsTitle){
+                        NavigationLink(value: Route.ZapSettings(settings: settings)){
+                            IconLabel(zapsTitle,img_name:"zap.fill",color:.orange)
                         }
                     }
                     //Translation
-                    if searchText.isEmpty || NSLocalizedString("Translation", comment: "Settings section for managing keys").lowercased().contains(searchText.lowercased()){
-                        NavigationLink(value: Route.TranslationSettings(settings: settings)) {
-                            IconLabel(NSLocalizedString("Translation", comment: "Section header for text and appearance settings"), img_name: "globe", color: .green)
+                    if showSettingsButton(title: translationTitle){
+                        NavigationLink(value: Route.TranslationSettings(settings: settings)){
+                            IconLabel(translationTitle,img_name:"globe",color:.green)
                         }
                     }
                     //Reactions
-                    if searchText.isEmpty || NSLocalizedString("Reactions", comment: "Settings section for managing keys").lowercased().contains(searchText.lowercased()){
-                        NavigationLink(value: Route.ReactionsSettings(settings: settings)) {
-                            IconLabel(NSLocalizedString("Reactions", comment: "Section header for reactions settings"), img_name: "shaka.fill", color: .purple)
+                    if showSettingsButton(title: reactionsTitle){
+                        NavigationLink(value: Route.ReactionsSettings(settings: settings)){
+                            IconLabel(reactionsTitle,img_name:"shaka.fill",color:.purple)
                         }
                     }
                     //Developer
-                    if searchText.isEmpty || NSLocalizedString("Developer", comment: "Settings section for managing keys").lowercased().contains(searchText.lowercased()){
-                        NavigationLink(value: Route.DeveloperSettings(settings: settings)) {
-                            IconLabel(NSLocalizedString("Developer", comment: "Section header for developer settings"), img_name: "magic-stick2.fill", color: DamusColors.adaptableBlack)
+                    if showSettingsButton(title: developerTitle){
+                        NavigationLink(value: Route.DeveloperSettings(settings: settings)){
+                            IconLabel(developerTitle,img_name:"magic-stick2.fill",color:DamusColors.adaptableBlack)
                         }
                     }
                     //First Aid
-                    if searchText.isEmpty || NSLocalizedString("First Aid", comment: "Settings section for managing keys").lowercased().contains(searchText.lowercased()){
-                        NavigationLink(value: Route.FirstAidSettings(settings: settings)) {
-                            IconLabel(NSLocalizedString("First Aid", comment: "Section header for first aid tools and settings"), img_name: "help2", color: .red)
+                    if showSettingsButton(title: firstAidTitle){
+                        NavigationLink(value: Route.FirstAidSettings(settings: settings)){
+                            IconLabel(firstAidTitle,img_name:"help2",color: .red)
                         }
                     }
                 }
-                //Sign out
-                if searchText.isEmpty || NSLocalizedString("Sign out ", comment: "Settings section for managing keys").lowercased().contains(searchText.lowercased()){
-                    Section(NSLocalizedString("Sign Out", comment: "Section title for signing out")) {
+                //Sign out Section
+                if showSettingsButton(title: signOutTitle){
+                    Section(signOutTitle){
                         Button(action: {
-                            if state.keypair.privkey == nil {
-                                logout(state)
-                            } else {
-                                confirm_logout = true
-                            }
+                            state.keypair.privkey == nil ? logout(state) : (confirm_logout=true)
+//                            if state.keypair.privkey == nil {
+//                                logout(state)
+//                            } else {
+//                                confirm_logout = true
+//                            }
                         }, label: {
-                            Label(NSLocalizedString("Sign out", comment: "Sidebar menu label to sign out of the account."), image: "logout")
+                            Label(signOutTitle, image: "logout")
                                 .foregroundColor(textColor())
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         })
                     }
                 }
+
                 // Delete Account
-                if searchText.isEmpty || NSLocalizedString("Delete Account", comment: "Settings section for managing keys").lowercased().contains(searchText.lowercased()){
+                if showSettingsButton(title: deleteAccountTitle){
                     if state.is_privkey_user {
                         Section(header: Text("Permanently Delete Account", comment: "Section title for deleting the user")) {
                             Button(action: {
                                 delete_account_warning = true
                             }, label: {
-                                Label(NSLocalizedString("Delete Account", comment: "Button to delete the user's account."), image: "delete")
+                                Label(deleteAccountTitle, image: "delete")
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .foregroundColor(.red)
                             })
                         }
                     }
                 }
-                if searchText.isEmpty || NSLocalizedString("Version", comment: "Settings section for managing keys").lowercased().contains(searchText.lowercased()){
+                // Version info
+                if showSettingsButton(title: versionTitle) {
                     Section(
-                        header: Text(NSLocalizedString("Version", comment: "Section title for displaying the version number of the Damus app.")),
+                        header: Text(versionTitle),
                         footer: Text("").padding(.bottom, tabHeight + getSafeAreaBottom())
                     ) {
                         Text(verbatim: VersionInfo.version)
@@ -133,7 +155,7 @@ struct ConfigView: View {
                                 Button {
                                     UIPasteboard.general.string = VersionInfo.version
                                 } label: {
-                                    Label(NSLocalizedString("Copy", comment: "Context menu option for copying the version of damus."), image: "copy2")
+                                    Label(copyString, image: "copy2")
                                 }
                             }
                     }
