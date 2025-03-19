@@ -43,6 +43,9 @@
 // the maximum size of inbox queues
 static const int DEFAULT_QUEUE_SIZE = 32768;
 
+// 2mb scratch size for the writer thread
+static const int DEFAULT_WRITER_SCRATCH_SIZE = 2097152;
+
 // increase if we need bigger filters
 #define NDB_FILTER_PAGES 64
 
@@ -163,6 +166,7 @@ struct ndb_writer {
 	struct ndb_lmdb *lmdb;
 	struct ndb_monitor *monitor;
 
+	int scratch_size;
 	uint32_t ndb_flags;
 	void *queue_buf;
 	int queue_buflen;
@@ -4558,15 +4562,13 @@ static void *ndb_writer_thread(void *data)
 	struct ndb_writer *writer = data;
 	struct ndb_writer_msg msgs[THREAD_QUEUE_BATCH], *msg;
 	struct written_note written_notes[THREAD_QUEUE_BATCH];
-	size_t scratch_size;
 	int i, popped, done, needs_commit, num_notes;
 	uint64_t note_nkey;
 	struct ndb_txn txn;
 	unsigned char *scratch;
 
-	// 8mb scratch buffer for parsing note content
-	scratch_size = 8 * 1024 * 1024;
-	scratch = malloc(scratch_size);
+	// 2MB scratch buffer for parsing note content
+	scratch = malloc(writer->scratch_size);
 	MDB_txn *mdb_txn = NULL;
 	ndb_txn_from_mdb(&txn, writer->lmdb, mdb_txn);
 
@@ -4615,7 +4617,7 @@ static void *ndb_writer_thread(void *data)
 						&txn,
 						&msg->profile,
 						scratch,
-						scratch_size,
+						writer->scratch_size,
 						writer->ndb_flags);
 
 				if (note_nkey > 0) {
@@ -4631,7 +4633,7 @@ static void *ndb_writer_thread(void *data)
 			case NDB_WRITER_NOTE:
 				note_nkey = ndb_write_note(&txn, &msg->note,
 							   scratch,
-							   scratch_size,
+							   writer->scratch_size,
 							   writer->ndb_flags);
 
 				if (note_nkey > 0) {
@@ -4769,11 +4771,13 @@ static void *ndb_ingester_thread(void *data)
 
 
 static int ndb_writer_init(struct ndb_writer *writer, struct ndb_lmdb *lmdb,
-			   struct ndb_monitor *monitor, uint32_t ndb_flags)
+			   struct ndb_monitor *monitor, uint32_t ndb_flags,
+			   int scratch_size)
 {
 	writer->lmdb = lmdb;
 	writer->monitor = monitor;
 	writer->ndb_flags = ndb_flags;
+	writer->scratch_size = scratch_size;
 	writer->queue_buflen = sizeof(struct ndb_writer_msg) * DEFAULT_QUEUE_SIZE;
 	writer->queue_buf = malloc(writer->queue_buflen);
 	if (writer->queue_buf == NULL) {
@@ -5064,7 +5068,8 @@ int ndb_init(struct ndb **pndb, const char *filename, const struct ndb_config *c
 
 	ndb_monitor_init(&ndb->monitor, config->sub_cb, config->sub_cb_ctx);
 
-	if (!ndb_writer_init(&ndb->writer, &ndb->lmdb, &ndb->monitor, ndb->flags)) {
+	if (!ndb_writer_init(&ndb->writer, &ndb->lmdb, &ndb->monitor, ndb->flags,
+			     config->writer_scratch_buffer_size)) {
 		fprintf(stderr, "ndb_writer_init failed\n");
 		return 0;
 	}
@@ -6771,12 +6776,18 @@ void ndb_default_config(struct ndb_config *config)
 	config->filter_context = NULL;
 	config->sub_cb_ctx = NULL;
 	config->sub_cb = NULL;
+	config->writer_scratch_buffer_size = DEFAULT_WRITER_SCRATCH_SIZE;
 }
 
 void ndb_config_set_subscription_callback(struct ndb_config *config, ndb_sub_fn fn, void *context)
 {
 	config->sub_cb_ctx = context;
 	config->sub_cb = fn;
+}
+
+void ndb_config_set_writer_scratch_buffer_size(struct ndb_config *config, int scratch_size)
+{
+	config->writer_scratch_buffer_size = scratch_size;
 }
 
 void ndb_config_set_ingest_threads(struct ndb_config *config, int threads)
