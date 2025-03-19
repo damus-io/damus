@@ -273,6 +273,7 @@ struct ndb_filter {
 struct ndb_config {
 	int flags;
 	int ingester_threads;
+	int writer_scratch_buffer_size;
 	size_t mapsize;
 	void *filter_context;
 	ndb_ingest_filter_fn ingest_filter;
@@ -458,6 +459,11 @@ void ndb_config_set_flags(struct ndb_config *config, int flags);
 void ndb_config_set_mapsize(struct ndb_config *config, size_t mapsize);
 void ndb_config_set_ingest_filter(struct ndb_config *config, ndb_ingest_filter_fn fn, void *);
 void ndb_config_set_subscription_callback(struct ndb_config *config, ndb_sub_fn fn, void *ctx);
+
+/// Configurable scratch buffer size for the writer thread. Default is 2MB. If you have smaller notes
+/// you can decrease this to reduce memory usage. If you have bigger notes you should increase this so
+/// that the writer thread can properly parse larger notes.
+void ndb_config_set_writer_scratch_buffer_size(struct ndb_config *config, int scratch_size);
 
 // HELPERS
 int ndb_calculate_id(struct ndb_note *note, unsigned char *buf, int buflen);
