@@ -55,6 +55,11 @@ struct ndb_str {
 	};
 };
 
+struct ndb_ingest_meta {
+	unsigned client;
+	const char *relay;
+};
+
 struct ndb_keypair {
 	unsigned char pubkey[32];
 	unsigned char secret[32];
@@ -189,6 +194,8 @@ enum ndb_dbs {
 	NDB_DB_NOTE_TAGS,  // note tags index
 	NDB_DB_NOTE_PUBKEY, // note pubkey index
 	NDB_DB_NOTE_PUBKEY_KIND, // note pubkey kind index
+	NDB_DB_NOTE_RELAY_KIND, // relay+kind+created -> note_id
+	NDB_DB_NOTE_RELAYS, // note_id -> relays
 	NDB_DBS,
 };
 
@@ -475,14 +482,23 @@ int ndb_note_verify(void *secp_ctx, unsigned char pubkey[32], unsigned char id[3
 // NDB
 int ndb_init(struct ndb **ndb, const char *dbdir, const struct ndb_config *);
 int ndb_db_version(struct ndb_txn *txn);
+
+// NOTE PROCESSING
 int ndb_process_event(struct ndb *, const char *json, int len);
+void ndb_ingest_meta_init(struct ndb_ingest_meta *meta, unsigned client, const char *relay);
+// Process an event, recording the relay where it came from.
+int ndb_process_event_with(struct ndb *, const char *json, int len, struct ndb_ingest_meta *meta);
 int ndb_process_events(struct ndb *, const char *ldjson, size_t len);
+int ndb_process_events_with(struct ndb *ndb, const char *ldjson, size_t json_len, struct ndb_ingest_meta *meta);
 #ifndef _WIN32
 // TODO: fix on windows
 int ndb_process_events_stream(struct ndb *, FILE* fp);
 #endif
+// deprecated: use ndb_ingest_event_with
 int ndb_process_client_event(struct ndb *, const char *json, int len);
+// deprecated: use ndb_ingest_events_with
 int ndb_process_client_events(struct ndb *, const char *json, size_t len);
+
 int ndb_begin_query(struct ndb *, struct ndb_txn *);
 int ndb_search_profile(struct ndb_txn *txn, struct ndb_search *search, const char *query);
 int ndb_search_profile_next(struct ndb_search *search);
@@ -497,6 +513,7 @@ uint64_t ndb_get_profilekey_by_pubkey(struct ndb_txn *txn, const unsigned char *
 struct ndb_note *ndb_get_note_by_id(struct ndb_txn *txn, const unsigned char *id, size_t *len, uint64_t *primkey);
 struct ndb_note *ndb_get_note_by_key(struct ndb_txn *txn, uint64_t key, size_t *len);
 void *ndb_get_note_meta(struct ndb_txn *txn, const unsigned char *id, size_t *len);
+int ndb_note_seen_on_relay(struct ndb_txn *txn, uint64_t note_key, const char *relay);
 void ndb_destroy(struct ndb *);
 
 // BUILDER
