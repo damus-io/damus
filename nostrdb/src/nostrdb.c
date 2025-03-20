@@ -7179,6 +7179,7 @@ void ndb_config_set_ingest_filter(struct ndb_config *config,
 int ndb_print_relay_kind_index(struct ndb_txn *txn)
 {
 	MDB_cursor *cur;
+	unsigned char *d;
 	MDB_val k, v;
 	int i;
 
@@ -7188,10 +7189,11 @@ int ndb_print_relay_kind_index(struct ndb_txn *txn)
 	i = 1;
 	printf("relay\tkind\tcreated_at\tnote_id\n");
 	while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
-		printf("%s\t", (const char *)(k.mv_data + 25));
-		printf("%" PRIu64 "\t", *(uint64_t*)(k.mv_data + 8));
-		printf("%" PRIu64 "\t", *(uint64_t*)(k.mv_data + 16));
-		printf("%" PRIu64 "\n", *(uint64_t*)(k.mv_data + 0));
+		d = (unsigned char *)k.mv_data;
+		printf("%s\t", (const char *)(d + 25));
+		printf("%" PRIu64 "\t", *(uint64_t*)(d + 8));
+		printf("%" PRIu64 "\t", *(uint64_t*)(d + 16));
+		printf("%" PRIu64 "\n", *(uint64_t*)(d + 0));
 		i++;
 	}
 
