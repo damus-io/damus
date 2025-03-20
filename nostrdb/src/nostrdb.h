@@ -229,6 +229,13 @@ struct ndb_builder {
 	struct ndb_tag *current_tag;
 };
 
+struct ndb_note_relay_iterator {
+	struct ndb_txn *txn;
+	uint64_t note_key;
+	int cursor_op;
+	void *mdb_cur;
+};
+
 struct ndb_iterator {
 	struct ndb_note *note;
 	struct ndb_tag *tag;
@@ -614,6 +621,11 @@ uint16_t ndb_tag_count(struct ndb_tag *);
 int ndb_tags_iterate_next(struct ndb_iterator *iter);
 struct ndb_str ndb_iter_tag_str(struct ndb_iterator *iter, int ind);
 struct ndb_str ndb_tag_str(struct ndb_note *note, struct ndb_tag *tag, int ind);
+
+// RELAY ITER
+int ndb_note_relay_iterate_start(struct ndb_txn *txn, struct ndb_note_relay_iterator *iter, uint64_t note_key);
+const char *ndb_note_relay_iterate_next(struct ndb_note_relay_iterator *iter);
+void ndb_note_relay_iterate_close(struct ndb_note_relay_iterator *iter);
 
 // NAMES
 const char *ndb_db_name(enum ndb_dbs db);

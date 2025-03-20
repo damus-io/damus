@@ -7328,6 +7328,57 @@ struct ndb_note * ndb_note_from_bytes(unsigned char *bytes)
 	return note;
 }
 
+int ndb_note_relay_iterate_start(struct ndb_txn *txn,
+				 struct ndb_note_relay_iterator *iter,
+				 uint64_t note_key)
+{
+	if (mdb_cursor_open(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_NOTE_RELAYS],
+			    (MDB_cursor**)&iter->mdb_cur)) {
+		return 0;
+	}
+
+	iter->txn = txn;
+	iter->cursor_op = MDB_SET_KEY;
+	iter->note_key = note_key;
+
+	return 1;
+}
+
+const char *ndb_note_relay_iterate_next(struct ndb_note_relay_iterator *iter)
+{
+	int rc;
+	MDB_val k, v;
+
+	if (iter->mdb_cur == NULL)
+		return NULL;
+
+	k.mv_data = &iter->note_key;
+	k.mv_size = sizeof(iter->note_key);
+
+	if ((rc = mdb_cursor_get((MDB_cursor *)iter->mdb_cur, &k, &v,
+				 (MDB_cursor_op)iter->cursor_op)))
+	{
+		//fprintf(stderr, "autoclosing %d '%s'\n", iter->cursor_op, mdb_strerror(rc));
+		// autoclose
+		ndb_note_relay_iterate_close(iter);
+		return NULL;
+	}
+
+	iter->cursor_op = MDB_NEXT_DUP;
+
+	return (const char*)v.mv_data;
+}
+
+void ndb_note_relay_iterate_close(struct ndb_note_relay_iterator *iter)
+{
+	if (!iter || iter->mdb_cur == NULL)
+		return;
+
+	mdb_cursor_close((MDB_cursor*)iter->mdb_cur);
+
+	iter->mdb_cur = NULL;
+}
+
 void ndb_tags_iterate_start(struct ndb_note *note, struct ndb_iterator *iter)
 {
 	iter->note = note;
