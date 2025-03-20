@@ -13,24 +13,47 @@ struct ChatroomThreadView: View {
     @State var once: Bool = false
     let damus: DamusState
     @ObservedObject var thread: ThreadModel
-    @State var highlighted_note_id: NoteId? = nil
+    @State var selected_note_id: NoteId? = nil
     @State var user_just_posted_flag: Bool = false
     @Namespace private var animation
     
+    @State var parent_events: [NostrEvent] = []
+    @State var sorted_child_events: [NostrEvent] = []
+    
+    func compute_events(selected_event: NostrEvent? = nil) {
+        let selected_event = selected_event ?? thread.event
+        self.parent_events = damus.events.parent_events(event: selected_event, keypair: damus.keypair)
+        let all_recursive_child_events = self.recursive_child_events(event: selected_event)
+        self.sorted_child_events = all_recursive_child_events.filter({
+            should_show_event(event: $0, damus_state: damus)    // Hide muted events from chatroom conversation
+        }).sorted(by: { a, b in
+            return a.created_at < b.created_at
+        })
+    }
+    
+    func recursive_child_events(event: NdbNote) -> [NdbNote] {
+        let immediate_children = damus.events.child_events(event: event)
+        var indirect_children: [NdbNote] = []
+        for immediate_child in immediate_children {
+            indirect_children.append(contentsOf: self.recursive_child_events(event: immediate_child))
+        }
+        return immediate_children + indirect_children
+    }
     
     func go_to_event(scroller: ScrollViewProxy, note_id: NoteId) {
         scroll_to_event(scroller: scroller, id: note_id, delay: 0, animate: true, anchor: .top)
-        highlighted_note_id = note_id
+        selected_note_id = note_id
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
             withAnimation {
-                highlighted_note_id = nil
+                selected_note_id = nil
             }
         })
     }
     
     func set_active_event(scroller: ScrollViewProxy, ev: NdbNote) {
         withAnimation {
-            self.thread.select(event: ev)
+            self.compute_events(selected_event: ev)
+            thread.set_active_event(ev, keypair: self.damus.keypair)
             self.go_to_event(scroller: scroller, note_id: ev.id)
         }
     }
@@ -40,7 +63,7 @@ struct ChatroomThreadView: View {
             ScrollView(.vertical) {
                 LazyVStack(alignment: .leading, spacing: 8) {
                     // MARK: - Parents events view
-                    ForEach(thread.parent_events, id: \.id) { parent_event in
+                    ForEach(parent_events, id: \.id) { parent_event in
                         EventMutingContainerView(damus_state: damus, event: parent_event) {
                             EventView(damus: damus, event: parent_event)
                                 .matchedGeometryEffect(id: parent_event.id.hex(), in: animation, anchor: .center)
@@ -70,7 +93,7 @@ struct ChatroomThreadView: View {
                     // MARK: - Actual event view
                     EventMutingContainerView(
                         damus_state: damus,
-                        event: self.thread.selected_event,
+                        event: self.thread.event,
                         muteBox: { event_shown, muted_reason in
                             AnyView(
                                 EventMutedBoxView(shown: event_shown, reason: muted_reason)
@@ -78,19 +101,19 @@ struct ChatroomThreadView: View {
                             )
                         }
                     ) {
-                        SelectedEventView(damus: damus, event: self.thread.selected_event, size: .selected)
-                            .matchedGeometryEffect(id: self.thread.selected_event.id.hex(), in: animation, anchor: .center)
+                        SelectedEventView(damus: damus, event: self.thread.event, size: .selected)
+                            .matchedGeometryEffect(id: self.thread.event.id.hex(), in: animation, anchor: .center)
                     }
-                    .id(self.thread.selected_event.id)
+                    .id(self.thread.event.id)
                     
                     
                     // MARK: - Children view
-                    let events = thread.sorted_child_events
+                    let events = sorted_child_events
                     let count = events.count
                     SwipeViewGroup {
                         ForEach(Array(zip(events, events.indices)), id: \.0.id) { (ev, ind) in
                             ChatEventView(event: events[ind],
-                                     selected_event: self.thread.selected_event,
+                                     selected_event: self.thread.event,
                                      prev_ev: ind > 0 ? events[ind-1] : nil,
                                      next_ev: ind == count-1 ? nil : events[ind+1],
                                      damus_state: damus,
@@ -101,7 +124,7 @@ struct ChatroomThreadView: View {
                                      focus_event: {
                                 self.set_active_event(scroller: scroller, ev: ev)
                             },
-                                     highlight_bubble: highlighted_note_id == ev.id,
+                                     highlight_bubble: selected_note_id == ev.id,
                                      bar: make_actionbar_model(ev: ev.id, damus: damus)
                             )
                             .padding(.horizontal)
@@ -125,14 +148,16 @@ struct ChatroomThreadView: View {
                 }
             })
             .onReceive(thread.objectWillChange) {
-                if let last_event = thread.events.last, last_event.pubkey == damus.pubkey, user_just_posted_flag {
+                self.compute_events()
+                if let last_event = thread.events().last, last_event.pubkey == damus.pubkey, user_just_posted_flag {
                     self.go_to_event(scroller: scroller, note_id: last_event.id)
                     user_just_posted_flag = false
                 }
             }
             .onAppear() {
                 thread.subscribe()
-                scroll_to_event(scroller: scroller, id: thread.selected_event.id, delay: 0.1, animate: false)
+                self.compute_events()
+                scroll_to_event(scroller: scroller, id: thread.event.id, delay: 0.1, animate: false)
             }
             .onDisappear() {
                 thread.unsubscribe()
@@ -168,7 +193,6 @@ struct ChatroomView_Previews: PreviewProvider {
     }
 }
 
-@MainActor
 func scroll_after_load(thread: ThreadModel, proxy: ScrollViewProxy) {
-    scroll_to_event(scroller: proxy, id: thread.selected_event.id, delay: 0.1, animate: false)
+    scroll_to_event(scroller: proxy, id: thread.event.id, delay: 0.1, animate: false)
 }
