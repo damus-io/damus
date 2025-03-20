@@ -7176,6 +7176,28 @@ void ndb_config_set_ingest_filter(struct ndb_config *config,
 	config->filter_context = filter_ctx;
 }
 
+int ndb_print_relay_kind_index(struct ndb_txn *txn)
+{
+	MDB_cursor *cur;
+	MDB_val k, v;
+	int i;
+
+	if (mdb_cursor_open(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_NOTE_RELAY_KIND], &cur))
+		return 0;
+
+	i = 1;
+	printf("relay\tkind\tcreated_at\tnote_id\n");
+	while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
+		printf("%s\t", (const char *)(k.mv_data + 25));
+		printf("%" PRIu64 "\t", *(uint64_t*)(k.mv_data + 8));
+		printf("%" PRIu64 "\t", *(uint64_t*)(k.mv_data + 16));
+		printf("%" PRIu64 "\n", *(uint64_t*)(k.mv_data + 0));
+		i++;
+	}
+
+	return i;
+}
+
 int ndb_print_tag_index(struct ndb_txn *txn)
 {
 	MDB_cursor *cur;
