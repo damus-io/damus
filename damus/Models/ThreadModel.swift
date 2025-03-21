@@ -136,6 +136,16 @@ class ThreadModel: ObservableObject {
 
         event_map.add(event: ev)
         
+        // Add all parent events that we have on EventCache (and subsequently on NostrDB)
+        // This helps ensure we include as many locally-stored notes as possible — even on poor networking conditions
+        damus_state.events.parent_events(event: ev, keypair: damus_state.keypair).forEach {
+            // Note: Nostr threads are cryptographically guaranteeed to be acyclic graphs, which means there is no risk of infinite recursion in this call
+            add_event(
+                $0,  // The `lookup` function in `parent_events` turns the event into an "owned" object, so we do not need to clone here
+                keypair: damus_state.keypair
+            )
+        }
+
         // Publish changes
         objectWillChange.send()
     }
