@@ -1973,6 +1973,13 @@ struct ndb_writer_note {
 	const char *relay;
 };
 
+static void ndb_writer_note_init(struct ndb_writer_note *writer_note, struct ndb_note *note, size_t note_len, const char *relay)
+{
+	writer_note->note = note;
+	writer_note->note_len = note_len;
+	writer_note->relay = relay;
+}
+
 struct ndb_writer_profile {
 	struct ndb_writer_note note;
 	struct ndb_profile_record_builder record;
@@ -2073,8 +2080,7 @@ static int ndb_migrate_utf8_profile_names(struct ndb_txn *txn)
 		copied_note = malloc(len);
 		memcpy(copied_note, note, len);
 
-		profile.note.note = copied_note;
-		profile.note.note_len = len;
+		ndb_writer_note_init(&profile.note, copied_note, len, NULL);
 
 		// we don't pass in flags when migrating... a bit sketchy but
 		// whatever. noone is using this to customize nostrdb atm
@@ -2573,8 +2579,7 @@ static int ndb_ingester_process_note(secp256k1_context *ctx,
 		ndb_process_profile_note(note, b);
 
 		out->type = NDB_WRITER_PROFILE;
-		out->profile.note.note = note;
-		out->profile.note.note_len = note_size;
+		ndb_writer_note_init(&out->profile.note, note, note_size, relay);
 		return 1;
 	} else if (note->kind == 6) {
 		// process the repost if we have a repost event
@@ -2587,9 +2592,7 @@ static int ndb_ingester_process_note(secp256k1_context *ctx,
 	}
 
 	out->type = NDB_WRITER_NOTE;
-	out->note.note = note;
-	out->note.note_len = note_size;
-	out->note.relay = relay;
+	ndb_writer_note_init(&out->note, note, note_size, relay);
 
 	return 1;
 }
