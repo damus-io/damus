@@ -2642,6 +2642,7 @@ static int ndb_process_note_relay(struct ndb_txn *txn, struct ndb_writer_msg *ou
 	// if not, tell the writer thread to emit a NOTE_RELAY event
 	out->type = NDB_WRITER_NOTE_RELAY;
 
+	ndb_debug("pushing NDB_WRITER_NOTE_RELAY with note_key %" PRIu64 "\n", note_key);
 	out->note_relay.relay = relay;
 	out->note_relay.note_key = note_key;
 	out->note_relay.kind = ndb_note_kind(note);
