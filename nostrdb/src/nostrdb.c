@@ -4679,7 +4679,7 @@ static uint64_t ndb_write_note(struct ndb_txn *txn,
 		relay_len = strlen(note->relay);
 
 	// let's quickly sanity check if we already have this note
-	if (ndb_get_notekey_by_id(txn, note->note->id)) {
+	if ((note_key = ndb_get_notekey_by_id(txn, note->note->id))) {
 		// even if we do we still need to write relay index
 		ndb_write_note_relay_kind_index(txn, kind, note_key,
 						ndb_note_created_at(note->note),
