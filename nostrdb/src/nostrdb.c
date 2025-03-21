@@ -1541,8 +1541,12 @@ static int ndb_write_note_relay(struct ndb_txn *txn, uint64_t note_key,
 	int rc, len;
 	MDB_val k, v;
 
-	if (relay == NULL || relay_len == 0)
+	if (relay == NULL || relay_len == 0) {
+		ndb_debug("relay is NULL in ndb_write_note_relay? '%s' %d\n", relay, relay_len);
 		return 0;
+	}
+
+	ndb_debug("writing note_relay '%s' for notekey:%" PRIu64 "\n", relay, note_key);
 
 	if (!(len = prepare_relay_buf(relay_buf, sizeof(relay_buf), relay, relay_len))) {
 		fprintf(stderr, "relay url '%s' too large when writing note relay index\n", relay);
@@ -1565,6 +1569,8 @@ static int ndb_write_note_relay(struct ndb_txn *txn, uint64_t note_key,
 		ndb_debug("ndb_write_note_relay failed: %s\n", mdb_strerror(rc));
 		return 0;
 	}
+
+	ndb_debug("wrote %d bytes to note relay: '%s'\n", len, relay_buf);
 
 	return 1;
 }
@@ -1597,6 +1603,8 @@ static int ndb_write_note_relay_kind_index(struct ndb_txn *txn,
 	if (relay == NULL || relay_len == 0)
 		return 0;
 
+	ndb_debug("writing note_relay_kind_index '%s' for notekey:%" PRIu64 "\n", relay, note_key);
+
 	make_cursor(buf, buf + sizeof(buf), &cur);
 
 	if (!cursor_push(&cur, (unsigned char *)&note_key, 8))   return 0;
@@ -1604,6 +1612,7 @@ static int ndb_write_note_relay_kind_index(struct ndb_txn *txn,
 	if (!cursor_push(&cur, (unsigned char *)&created_at, 8)) return 0;
 	if (!cursor_push_byte(&cur, (uint8_t)relay_len)) return 0;
 	if (!cursor_push(&cur, (unsigned char *)relay, relay_len)) return 0;
+	if (!cursor_push_byte(&cur, 0)) return 0;
 	if (!cursor_align(&cur, 8)) return 0;
 
 	assert(((cur.p-cur.start)%8) == 0);
@@ -2612,6 +2621,7 @@ int ndb_note_seen_on_relay(struct ndb_txn *txn, uint64_t note_key, const char *r
 		return 0;
 
 	rc = mdb_cursor_get(cur, &k, &v, MDB_GET_BOTH);
+	ndb_debug("seen_on_relay result: %s\n", mdb_strerror(rc));
 	mdb_cursor_close(cur);
 
 	return rc == MDB_SUCCESS;
@@ -4664,6 +4674,9 @@ static uint64_t ndb_write_note(struct ndb_txn *txn,
 
 	kind = note->note->kind;
 
+	if (note->relay != NULL)
+		relay_len = strlen(note->relay);
+
 	// let's quickly sanity check if we already have this note
 	if (ndb_get_notekey_by_id(txn, note->note->id)) {
 		// even if we do we still need to write relay index
@@ -4690,9 +4703,6 @@ static uint64_t ndb_write_note(struct ndb_txn *txn,
 		ndb_debug("write note to db failed: %s\n", mdb_strerror(rc));
 		return 0;
 	}
-
-	if (note->relay != NULL)
-		relay_len = strlen(note->relay);
 
 	ndb_write_note_id_index(txn, note->note, note_key);
 	ndb_write_note_kind_index(txn, note->note, note_key);
@@ -5270,7 +5280,7 @@ static int ndb_init_lmdb(const char *filename, struct ndb_lmdb *lmdb, size_t map
 	mdb_set_compare(txn, lmdb->dbs[NDB_DB_NOTE_RELAY_KIND], ndb_relay_kind_cmp);
 
 	// note_id -> relay index
-	if ((rc = mdb_dbi_open(txn, "note_relays", MDB_CREATE | MDB_DUPSORT | MDB_DUPFIXED, &lmdb->dbs[NDB_DB_NOTE_RELAYS]))) {
+	if ((rc = mdb_dbi_open(txn, "note_relays", MDB_CREATE | MDB_DUPSORT, &lmdb->dbs[NDB_DB_NOTE_RELAYS]))) {
 		fprintf(stderr, "mdb_dbi_open profile last fetch, error %d\n", rc);
 		return 0;
 	}
@@ -7196,7 +7206,7 @@ int ndb_print_relay_kind_index(struct ndb_txn *txn)
 	printf("relay\tkind\tcreated_at\tnote_id\n");
 	while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
 		d = (unsigned char *)k.mv_data;
-		printf("%s\t", (const char *)(d + 25));
+		printf("'%s'\t", (const char *)(d + 25));
 		printf("%" PRIu64 "\t", *(uint64_t*)(d + 8));
 		printf("%" PRIu64 "\t", *(uint64_t*)(d + 16));
 		printf("%" PRIu64 "\n", *(uint64_t*)(d + 0));
