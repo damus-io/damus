@@ -1,3 +1,13 @@
+## [1.13.1] - 2025-03-21
+
+### Fixed
+
+- Fixed an issue where threads would not load properly (Daniel D’Aquino)
+
+
+[1.13.1]: https://github.com/damus-io/damus/releases/tag/v1.13.1
+
+
 ## [1.13] - 2025-03-14
 
 ### Added
