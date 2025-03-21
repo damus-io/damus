@@ -4665,8 +4665,14 @@ static uint64_t ndb_write_note(struct ndb_txn *txn,
 	kind = note->note->kind;
 
 	// let's quickly sanity check if we already have this note
-	if (ndb_get_notekey_by_id(txn, note->note->id))
+	if (ndb_get_notekey_by_id(txn, note->note->id)) {
+		// even if we do we still need to write relay index
+		ndb_write_note_relay_kind_index(txn, kind, note_key,
+						ndb_note_created_at(note->note),
+						note->relay, relay_len);
+		ndb_write_note_relay(txn, note_key, note->relay, relay_len);
 		return 0;
+	}
 
 	// get dbs
 	note_db = txn->lmdb->dbs[NDB_DB_NOTE];
