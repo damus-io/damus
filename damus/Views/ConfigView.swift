@@ -26,18 +26,17 @@ struct ConfigView: View {
     private let DELETE_KEYWORD = "DELETE"
     private let keysTitle = NSLocalizedString("Keys", comment: "Settings section for managing keys")
     private let appearanceTitle = NSLocalizedString("Appearance and filters", comment: "Section header for text, appearance, and content filter settings")
-     private let searchUniverseTitle = NSLocalizedString("Search / Universe", comment: "Section header for search/universe settings")
-     private let notificationsTitle = NSLocalizedString("Notifications", comment: "Section header for Damus notifications")
-     private let zapsTitle = NSLocalizedString("Zaps", comment: "Section header for zap settings")
-     private let translationTitle = NSLocalizedString("Translation", comment: "Section header for text and appearance settings")
-     private let reactionsTitle = NSLocalizedString("Reactions", comment: "Section header for reactions settings")
-     private let developerTitle = NSLocalizedString("Developer", comment: "Section header for developer settings")
-     private let firstAidTitle = NSLocalizedString("First Aid", comment: "Section header for first aid tools and settings")
-     private let signOutTitle = NSLocalizedString("Sign out", comment: "Sidebar menu label to sign out of the account.")
-     private let deleteAccountTitle = NSLocalizedString("Delete Account", comment: "Button to delete the user's account.")
-     private let versionTitle = NSLocalizedString("Version", comment: "Section title for displaying the version number of the Damus app.")
-     private let copyString = NSLocalizedString("Copy", comment: "Context menu option for copying the version of damus.")
-
+    private let searchUniverseTitle = NSLocalizedString("Search / Universe", comment: "Section header for search/universe settings")
+    private let notificationsTitle = NSLocalizedString("Notifications", comment: "Section header for Damus notifications")
+    private let zapsTitle = NSLocalizedString("Zaps", comment: "Section header for zap settings")
+    private let translationTitle = NSLocalizedString("Translation", comment: "Section header for text and appearance settings")
+    private let reactionsTitle = NSLocalizedString("Reactions", comment: "Section header for reactions settings")
+    private let developerTitle = NSLocalizedString("Developer", comment: "Section header for developer settings")
+    private let firstAidTitle = NSLocalizedString("First Aid", comment: "Section header for first aid tools and settings")
+    private let signOutTitle = NSLocalizedString("Sign out", comment: "Sidebar menu label to sign out of the account.")
+    private let deleteAccountTitle = NSLocalizedString("Delete Account", comment: "Button to delete the user's account.")
+    private let versionTitle = NSLocalizedString("Version", comment: "Section title for displaying the version number of the Damus app.")
+    private let copyString = NSLocalizedString("Copy", comment: "Context menu option for copying the version of damus.")
     
     init(state: DamusState) {
         self.state = state
@@ -116,12 +115,11 @@ struct ConfigView: View {
                 if showSettingsButton(title: signOutTitle){
                     Section(signOutTitle){
                         Button(action: {
-                            state.keypair.privkey == nil ? logout(state) : (confirm_logout=true)
-//                            if state.keypair.privkey == nil {
-//                                logout(state)
-//                            } else {
-//                                confirm_logout = true
-//                            }
+                            if state.keypair.privkey == nil {
+                                logout(state)
+                            } else {
+                                confirm_logout = true
+                            }
                         }, label: {
                             Label(signOutTitle, image: "logout")
                                 .foregroundColor(textColor())
@@ -129,7 +127,6 @@ struct ConfigView: View {
                         })
                     }
                 }
-
                 // Delete Account
                 if showSettingsButton(title: deleteAccountTitle){
                     if state.is_privkey_user {
@@ -203,7 +200,6 @@ struct ConfigView: View {
             dismiss()
         }
     }
-
 }
 
 struct ConfigView_Previews: PreviewProvider {
