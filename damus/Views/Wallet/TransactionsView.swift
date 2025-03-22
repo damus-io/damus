@@ -13,9 +13,10 @@ struct TransactionView: View {
     var transaction: WalletConnect.Transaction
     
     var body: some View {
-        let txType = transaction.type == "incoming" ? "arrow-bottom-left" : "arrow-top-right"
-        let txColor = transaction.type == "incoming" ? DamusColors.success : Color.gray
-        let txOp = transaction.type == "incoming" ? "+" : "-"
+        let isIncomingTransaction = transaction.type == "incoming"
+        let txType = isIncomingTransaction ? "arrow-bottom-left" : "arrow-top-right"
+        let txColor = isIncomingTransaction ? DamusColors.success : Color.gray
+        let txOp = isIncomingTransaction ? "+" : "-"
         let created_at = Date.init(timeIntervalSince1970: TimeInterval(transaction.created_at))
         let formatter = RelativeDateTimeFormatter()
         let relativeDate = formatter.localizedString(for: created_at, relativeTo: Date.now)
@@ -46,7 +47,7 @@ struct TransactionView: View {
                         .bold()
                         .foregroundColor(DamusColors.adaptableBlack)
                     
-                    Text("\(relativeDate)")
+                    Text(relativeDate)
                         .font(.caption)
                         .foregroundColor(Color.gray)
                 }
@@ -54,7 +55,7 @@ struct TransactionView: View {
                 
                 Spacer()
 
-                Text("\(txOp) \(transaction.amount/1000) sats")
+                Text(verbatim: "\(txOp) \(format_msats(transaction.amount))")
                     .font(.headline)
                     .foregroundColor(txColor)
                     .bold()
