@@ -162,6 +162,7 @@ enum ndb_filter_fieldtype {
 	NDB_FILTER_UNTIL   = 6,
 	NDB_FILTER_LIMIT   = 7,
 	NDB_FILTER_SEARCH  = 8,
+	NDB_FILTER_RELAYS  = 9,
 };
 #define NDB_NUM_FILTERS 7
 
@@ -569,6 +570,7 @@ struct ndb_filter_elements *ndb_filter_get_elements(const struct ndb_filter *, i
 int ndb_filter_start_field(struct ndb_filter *, enum ndb_filter_fieldtype);
 int ndb_filter_start_tag_field(struct ndb_filter *, char tag);
 int ndb_filter_matches(struct ndb_filter *, struct ndb_note *);
+int ndb_filter_matches_with_relay(struct ndb_filter *, struct ndb_note *, struct ndb_note_relay_iterator *iter);
 int ndb_filter_clone(struct ndb_filter *dst, struct ndb_filter *src);
 int ndb_filter_end(struct ndb_filter *);
 void ndb_filter_end_field(struct ndb_filter *);
