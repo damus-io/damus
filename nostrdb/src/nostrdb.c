@@ -2356,6 +2356,7 @@ static int ndb_cursor_start(MDB_cursor *cur, MDB_val *k, MDB_val *v)
 	// specified key
 
 	if ((rc = mdb_cursor_get(cur, k, v, MDB_SET_RANGE))) {
+		ndb_debug("MDB_SET_RANGE failed: '%s'\n", mdb_strerror(rc));
 		// Failed :(. It could be the last element?
 		if ((rc = mdb_cursor_get(cur, k, v, MDB_LAST))) {
 			ndb_debug("MDB_LAST failed: '%s'\n", mdb_strerror(rc));
@@ -3919,6 +3920,113 @@ next:
 	return 1;
 }
 
+static int ndb_query_plan_execute_author_kinds(
+		struct ndb_txn *txn,
+		struct ndb_filter *filter,
+		struct ndb_query_results *results,
+		int limit)
+{
+	MDB_cursor *cur;
+	MDB_dbi db;
+	MDB_val k, v;
+	struct ndb_note *note;
+	struct ndb_filter_elements *kinds, *relays, *authors;
+	struct ndb_query_result res;
+	uint64_t kind, note_id, until, since, *pint;
+	size_t note_size;
+	unsigned char *author;
+	int i, j, rc;
+	struct ndb_id_u64_ts key, *pkey;
+	struct ndb_note_relay_iterator note_relay_iter;
+
+	// we should have kinds in a kinds filter!
+	if (!(kinds = ndb_filter_find_elements(filter, NDB_FILTER_KINDS)))
+		return 0;
+	//
+	// we should have kinds in a kinds filter!
+	if (!(authors = ndb_filter_find_elements(filter, NDB_FILTER_AUTHORS)))
+		return 0;
+
+	relays = ndb_filter_find_elements(filter, NDB_FILTER_RELAYS);
+
+	until = UINT64_MAX;
+	if ((pint = ndb_filter_get_int(filter, NDB_FILTER_UNTIL)))
+		until = *pint;
+
+	since = 0;
+	if ((pint = ndb_filter_get_int(filter, NDB_FILTER_SINCE)))
+		since = *pint;
+
+	db = txn->lmdb->dbs[NDB_DB_NOTE_PUBKEY_KIND];
+
+	if ((rc = mdb_cursor_open(txn->mdb_txn, db, &cur)))
+		return 0;
+
+	for (j = 0; j < authors->count; j++) {
+		if (query_is_full(results, limit))
+			break;
+
+		if (!(author = ndb_filter_get_id_element(filter, authors, j)))
+			continue;
+
+	for (i = 0; i < kinds->count; i++) {
+		if (query_is_full(results, limit))
+			break;
+
+		kind = kinds->elements[i];
+
+		ndb_debug("finding kind %"PRIu64"\n", kind);
+
+		ndb_id_u64_ts_init(&key, author, kind, until);
+		
+		k.mv_data = &key;
+		k.mv_size = sizeof(key);
+
+		if (!ndb_cursor_start(cur, &k, &v))
+			continue;
+
+		// scan the kind subindex
+		while (!query_is_full(results, limit)) {
+			pkey = (struct ndb_id_u64_ts*)k.mv_data;
+
+			ndb_debug("scanning subindex kind:%"PRIu64" created_at:%"PRIu64" pubkey:",
+					pkey->u64,
+					pkey->timestamp);
+
+			if (pkey->u64 != kind)
+				break;
+
+			// don't continue the scan if we're below `since`
+			if (pkey->timestamp < since)
+				break;
+
+			note_id = *(uint64_t*)v.mv_data;
+			if (!(note = ndb_get_note_by_key(txn, note_id, &note_size)))
+				goto next;
+
+			if (relays)
+				ndb_note_relay_iterate_start(txn, &note_relay_iter, note_id);
+
+			if (!ndb_filter_matches_with(filter, note,
+						     (1 << NDB_FILTER_KINDS) | (1 << NDB_FILTER_AUTHORS),
+						     relays? &note_relay_iter : NULL))
+				goto next;
+
+			ndb_query_result_init(&res, note, note_size, note_id);
+			if (!push_query_result(results, &res))
+				break;
+
+next:
+			if (mdb_cursor_get(cur, &k, &v, MDB_PREV))
+				break;
+		}
+	}
+	}
+
+	mdb_cursor_close(cur);
+	return 1;
+}
+
 static int ndb_query_plan_execute_relay_kinds(
 		struct ndb_txn *txn,
 		struct ndb_filter *filter,
@@ -4218,11 +4326,7 @@ static int ndb_query_filter(struct ndb_txn *txn, struct ndb_filter *filter,
 			return 0;
 		break;
 	case NDB_PLAN_AUTHOR_KINDS:
-		/* TODO: author kinds
 		if (!ndb_query_plan_execute_author_kinds(txn, filter, &results, limit))
-			return 0;
-			*/
-		if (!ndb_query_plan_execute_authors(txn, filter, &results, limit))
 			return 0;
 		break;
 	}
@@ -7501,6 +7605,29 @@ void ndb_config_set_ingest_filter(struct ndb_config *config,
 {
 	config->ingest_filter = fn;
 	config->filter_context = filter_ctx;
+}
+
+int ndb_print_author_kind_index(struct ndb_txn *txn)
+{
+	MDB_cursor *cur;
+	struct ndb_id_u64_ts *key;
+	MDB_val k, v;
+	int i;
+
+	if (mdb_cursor_open(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_NOTE_PUBKEY_KIND], &cur))
+		return 0;
+
+	i = 1;
+	printf("author\tkind\tcreated_at\tnote_id\n");
+	while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
+		key = (struct ndb_id_u64_ts *)k.mv_data;
+		print_hex(key->id, 32);
+		printf("\t%" PRIu64 "\t%" PRIu64 "\t%" PRIu64 "\n",
+				key->u64, key->timestamp, *(uint64_t*)v.mv_data);
+		i++;
+	}
+
+	return i;
 }
 
 int ndb_print_relay_kind_index(struct ndb_txn *txn)
