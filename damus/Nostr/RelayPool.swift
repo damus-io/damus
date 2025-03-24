@@ -356,7 +356,7 @@ class RelayPool {
 }
 
 func add_rw_relay(_ pool: RelayPool, _ url: RelayURL) {
-    try? pool.add_relay(RelayDescriptor(url: url, info: .rw))
+    try? pool.add_relay(RelayPool.RelayDescriptor(url: url, info: .rw))
 }
 
 
