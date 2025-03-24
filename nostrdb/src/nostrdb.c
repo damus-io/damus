@@ -5301,6 +5301,7 @@ static void *ndb_writer_thread(void *data)
 	uint64_t note_nkey;
 	struct ndb_txn txn;
 	unsigned char *scratch;
+	struct ndb_relay_kind_key relay_key;
 
 	// 2MB scratch buffer for parsing note content
 	scratch = malloc(writer->scratch_size);
@@ -5380,7 +5381,6 @@ static void *ndb_writer_thread(void *data)
 				}
 				break;
 			case NDB_WRITER_NOTE_RELAY:
-				struct ndb_relay_kind_key relay_key;
 				if (ndb_relay_kind_key_init(&relay_key,
 							    msg->note_relay.note_key,
 							    msg->note_relay.kind,
