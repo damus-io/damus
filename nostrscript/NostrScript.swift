@@ -309,7 +309,7 @@ public func nscript_nostr_cmd(interp: UnsafeMutablePointer<wasm_interp>?, cmd: I
 
 func nscript_add_relay(script: NostrScript, relay: String) -> Bool {
     guard let url = RelayURL(relay) else { return false }
-    let desc = RelayPool.RelayDescriptor(url: url, info: .rw, variant: .ephemeral)
+    let desc = RelayPool.RelayDescriptor(url: url, info: .readWrite, variant: .ephemeral)
     return (try? script.pool.add_relay(desc)) != nil
 }
 

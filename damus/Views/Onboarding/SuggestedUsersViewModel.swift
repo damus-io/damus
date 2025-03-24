@@ -77,7 +77,7 @@ class SuggestedUsersViewModel: ObservableObject {
 
     private func subscribeToSuggestedProfiles(pubkeys: [Pubkey]) {
         let filter = NostrFilter(kinds: [.metadata], authors: pubkeys)
-        damus_state.pool.subscribe(sub_id: sub_id, filters: [filter], handler: handle_event)
+        damus_state.nostrNetwork.pool.subscribe(sub_id: sub_id, filters: [filter], handler: handle_event)
     }
 
     func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
