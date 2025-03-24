@@ -7,7 +7,7 @@
 
 import Foundation
 
-func make_zap_request_event(keypair: FullKeypair, content: String, relays: [RelayDescriptor], target: ZapTarget, zap_type: ZapType) -> MakeZapRequest? {
+func make_zap_request_event(keypair: FullKeypair, content: String, relays: [RelayPool.RelayDescriptor], target: ZapTarget, zap_type: ZapType) -> MakeZapRequest? {
     var tags = zap_target_to_tags(target)
     var relay_tag = ["relays"]
     relay_tag.append(contentsOf: relays.map { $0.url.absoluteString })

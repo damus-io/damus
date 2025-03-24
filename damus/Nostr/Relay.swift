@@ -25,30 +25,33 @@ enum RelayVariant {
     case nwc
 }
 
-public struct RelayDescriptor {
-    let url: RelayURL
-    let info: LegacyKind3RelayRWConfiguration
-    let variant: RelayVariant
-    
-    init(url: RelayURL, info: LegacyKind3RelayRWConfiguration, variant: RelayVariant = .regular) {
-        self.url = url
-        self.info = info
-        self.variant = variant
-    }
-    
-    var ephemeral: Bool {
-        switch variant {
-        case .regular:
-            return false
-        case .ephemeral:
-            return true
-        case .nwc:
-            return true
+extension RelayPool {
+    /// Describes a relay for use in `RelayPool`
+    public struct RelayDescriptor {
+        let url: RelayURL
+        var info: LegacyKind3RelayRWConfiguration
+        let variant: RelayVariant
+        
+        init(url: RelayURL, info: LegacyKind3RelayRWConfiguration, variant: RelayVariant = .regular) {
+            self.url = url
+            self.info = info
+            self.variant = variant
         }
-    }
-    
-    static func nwc(url: RelayURL) -> RelayDescriptor {
-        return RelayDescriptor(url: url, info: .rw, variant: .nwc)
+        
+        var ephemeral: Bool {
+            switch variant {
+            case .regular:
+                return false
+            case .ephemeral:
+                return true
+            case .nwc:
+                return true
+            }
+        }
+        
+        static func nwc(url: RelayURL) -> RelayDescriptor {
+            return RelayDescriptor(url: url, info: .rw, variant: .nwc)
+        }
     }
 }
 
@@ -129,30 +132,33 @@ struct RelayMetadata: Codable {
     }
 }
 
-class Relay: Identifiable {
-    let descriptor: RelayDescriptor
-    let connection: RelayConnection
-    var authentication_state: RelayAuthenticationState
-
-    var flags: Int
-    
-    init(descriptor: RelayDescriptor, connection: RelayConnection) {
-        self.flags = 0
-        self.descriptor = descriptor
-        self.connection = connection
-        self.authentication_state = RelayAuthenticationState.none
+extension RelayPool {
+    class Relay: Identifiable {
+        var descriptor: RelayDescriptor
+        let connection: RelayConnection
+        var authentication_state: RelayAuthenticationState
+        
+        var flags: Int
+        
+        init(descriptor: RelayDescriptor, connection: RelayConnection) {
+            self.flags = 0
+            self.descriptor = descriptor
+            self.connection = connection
+            self.authentication_state = RelayAuthenticationState.none
+        }
+        
+        var is_broken: Bool {
+            return (flags & RelayFlags.broken.rawValue) == RelayFlags.broken.rawValue
+        }
+        
+        var id: RelayURL {
+            return descriptor.url
+        }
     }
-    
-    var is_broken: Bool {
-        return (flags & RelayFlags.broken.rawValue) == RelayFlags.broken.rawValue
-    }
-
-    var id: RelayURL {
-        return descriptor.url
-    }
-
 }
 
-enum RelayError: Error {
-    case RelayAlreadyExists
+extension RelayPool {
+    enum RelayError: Error {
+        case RelayAlreadyExists
+    }
 }

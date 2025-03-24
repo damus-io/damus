@@ -208,7 +208,7 @@ struct RelayDetailView: View {
         }
     }
 
-    private var relay_object: Relay? {
+    private var relay_object: RelayPool.Relay? {
         state.pool.get_relay(relay)
     }
 

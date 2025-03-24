@@ -89,13 +89,13 @@ struct AddRelayView: View {
                 }
 
                 let info = LegacyKind3RelayRWConfiguration.rw
-                let descriptor = RelayDescriptor(url: url, info: info)
+                let descriptor = RelayPool.RelayDescriptor(url: url, info: info)
 
                 do {
                     try state.pool.add_relay(descriptor)
                     relayAddErrorTitle = nil      // Clear error title
                     relayAddErrorMessage = nil    // Clear error message
-                } catch RelayError.RelayAlreadyExists {
+                } catch RelayPool.RelayError.RelayAlreadyExists {
                     relayAddErrorTitle = NSLocalizedString("Duplicate relay", comment: "Title of the duplicate relay error message.")
                     relayAddErrorMessage = NSLocalizedString("The relay you are trying to add is already added.\nYou're all set!", comment: "An error message that appears when the user attempts to add a relay that has already been added.")
                     return
