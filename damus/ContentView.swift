@@ -669,7 +669,7 @@ struct ContentView: View {
 
         let new_relay_filters = load_relay_filters(pubkey) == nil
         for relay in bootstrap_relays {
-            let descriptor = RelayDescriptor(url: relay, info: .rw)
+            let descriptor = RelayPool.RelayDescriptor(url: relay, info: .rw)
             add_new_relay(model_cache: model_cache, relay_filters: relay_filters, pool: pool, descriptor: descriptor, new_relay_filters: new_relay_filters, logging_enabled: settings.developer_mode)
         }
 

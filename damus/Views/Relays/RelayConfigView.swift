@@ -23,7 +23,7 @@ enum RelayTab: Int, CaseIterable{
 
 struct RelayConfigView: View {
     let state: DamusState
-    @State var relays: [RelayDescriptor]
+    @State var relays: [RelayPool.RelayDescriptor]
     @State private var showActionButtons = false
     @State var show_add_relay: Bool = false
     @State var selectedTab = 0
@@ -36,11 +36,11 @@ struct RelayConfigView: View {
         UITabBar.appearance().isHidden = true
     }
     
-    var recommended: [RelayDescriptor] {
-        let rs: [RelayDescriptor] = []
+    var recommended: [RelayPool.RelayDescriptor] {
+        let rs: [RelayPool.RelayDescriptor] = []
         let recommended_relay_addresses = get_default_bootstrap_relays()
         return recommended_relay_addresses.reduce(into: rs) { xs, x in
-            xs.append(RelayDescriptor(url: x, info: .rw))
+            xs.append(RelayPool.RelayDescriptor(url: x, info: .rw))
         }
     }
 
@@ -109,7 +109,7 @@ struct RelayConfigView: View {
         .ignoresSafeArea(.all)
     }
     
-    func RelayList(title: String, relayList: [RelayDescriptor], recommended: Bool) -> some View {
+    func RelayList(title: String, relayList: [RelayPool.RelayDescriptor], recommended: Bool) -> some View {
         ScrollView(showsIndicators: false) {
             HStack {
                 Text(title)
