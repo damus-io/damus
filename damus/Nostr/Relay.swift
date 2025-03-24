@@ -17,6 +17,15 @@ public struct LegacyKind3RelayRWConfiguration: Codable, Sendable {
     }
 
     static let rw = LegacyKind3RelayRWConfiguration(read: true, write: true)
+    
+    func toNIP65RWConfiguration() -> NIP65.RelayList.RelayItem.RWConfiguration? {
+        switch (self.read, self.write) {
+        case (false, true): return .write
+        case (true, false): return .read
+        case (true, true): return .readWrite
+        default: return nil
+        }
+    }
 }
 
 enum RelayVariant {
@@ -162,3 +171,26 @@ extension RelayPool {
         case RelayAlreadyExists
     }
 }
+
+
+// MARK: - Extension to bridge NIP-65 relay list structs with app-native objects
+
+extension NIP65.RelayList {
+    static func fromLegacyContactList(_ contactList: NdbNote) throws(BridgeError) -> Self {
+        guard let relayListInfo = decode_json_relays(contactList.content) else { throw .couldNotDecodeRelayListInfo }
+        let relayItems = relayListInfo.map({ url, rwConfiguration in
+            return RelayItem(url: url, rwConfiguration: rwConfiguration.toNIP65RWConfiguration() ?? .readWrite)
+        })
+        return NIP65.RelayList(relays: relayItems)
+    }
+    
+    static func fromLegacyContactList(_ contactList: NdbNote?) throws(BridgeError) -> Self? {
+        guard let contactList = contactList else { return nil }
+        return try fromLegacyContactList(contactList)
+    }
+    
+    enum BridgeError: Error {
+        case couldNotDecodeRelayListInfo
+    }
+}
+

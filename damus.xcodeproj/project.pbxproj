@@ -1649,6 +1649,9 @@
 		D7DB93052D66A44100DA1EE5 /* Undistractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DB93042D66A43B00DA1EE5 /* Undistractor.swift */; };
 		D7DB93062D66A44100DA1EE5 /* Undistractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DB93042D66A43B00DA1EE5 /* Undistractor.swift */; };
 		D7DB93072D66A44100DA1EE5 /* Undistractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DB93042D66A43B00DA1EE5 /* Undistractor.swift */; };
+		D7DB930A2D69486700DA1EE5 /* NIP65.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DB93092D69485A00DA1EE5 /* NIP65.swift */; };
+		D7DB930B2D69486700DA1EE5 /* NIP65.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DB93092D69485A00DA1EE5 /* NIP65.swift */; };
+		D7DB930C2D69486700DA1EE5 /* NIP65.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DB93092D69485A00DA1EE5 /* NIP65.swift */; };
 		D7DBD41F2B02F15E002A6197 /* NostrKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFD32819DE8F00B3DE84 /* NostrKind.swift */; };
 		D7DEEF2F2A8C021E00E0C99F /* NostrEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */; };
 		D7EB00B02CD59C8D00660C07 /* PresentFullScreenItemNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EB00AF2CD59C8300660C07 /* PresentFullScreenItemNotify.swift */; };
@@ -2537,6 +2540,7 @@
 		D7DB1FF02D5AC5D700CF06DA /* nip44.vectors.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = nip44.vectors.json; sourceTree = "<group>"; };
 		D7DB1FF22D5AC5E400CF06DA /* LICENSES */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSES; sourceTree = "<group>"; };
 		D7DB93042D66A43B00DA1EE5 /* Undistractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Undistractor.swift; sourceTree = "<group>"; };
+		D7DB93092D69485A00DA1EE5 /* NIP65.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP65.swift; sourceTree = "<group>"; };
 		D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrEventTests.swift; sourceTree = "<group>"; };
 		D7EB00AF2CD59C8300660C07 /* PresentFullScreenItemNotify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentFullScreenItemNotify.swift; sourceTree = "<group>"; };
 		D7EDED1B2B1178FE0018B19C /* NoteContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteContent.swift; sourceTree = "<group>"; };
@@ -3646,6 +3650,7 @@
 		4CE6DEE527F7A08100C66700 /* damus */ = {
 			isa = PBXGroup;
 			children = (
+				D7DB93082D69478400DA1EE5 /* NIP65 */,
 				D7DB1FDC2D5A77E500CF06DA /* NIP44 */,
 				D755B28B2D3E7D6500BBEEFA /* NIP37 */,
 				D78F08152D7F7F5F00FC6C75 /* NIP04 */,
@@ -4042,6 +4047,14 @@
 				D7DB1FDD2D5A78CE00CF06DA /* NIP44.swift */,
 			);
 			path = NIP44;
+			sourceTree = "<group>";
+		};
+		D7DB93082D69478400DA1EE5 /* NIP65 */ = {
+			isa = PBXGroup;
+			children = (
+				D7DB93092D69485A00DA1EE5 /* NIP65.swift */,
+			);
+			path = NIP65;
 			sourceTree = "<group>";
 		};
 		E06336A72B7582D600A88E6B /* Assets */ = {
@@ -4480,6 +4493,7 @@
 				F757933A29D7AECD007DEAC1 /* MediaPicker.swift in Sources */,
 				4CF0ABEE29844B5500D66079 /* AnyEncodable.swift in Sources */,
 				B57B4C662B312C3700A232C0 /* NostrAuth.swift in Sources */,
+				D7DB930B2D69486700DA1EE5 /* NIP65.swift in Sources */,
 				4CB8838D296F710400DC99E7 /* Reposted.swift in Sources */,
 				4C3EA67728FF7A9800C48A62 /* talstr.c in Sources */,
 				4CE6DEE927F7A08100C66700 /* ContentView.swift in Sources */,
@@ -5311,6 +5325,7 @@
 				82D6FBE02CD99F7900C925F4 /* ReactionsSettingsView.swift in Sources */,
 				82D6FBE12CD99F7900C925F4 /* NotificationSettingsView.swift in Sources */,
 				82D6FBE22CD99F7900C925F4 /* AppearanceSettingsView.swift in Sources */,
+				D7DB930A2D69486700DA1EE5 /* NIP65.swift in Sources */,
 				82D6FBE32CD99F7900C925F4 /* KeySettingsView.swift in Sources */,
 				82D6FBE42CD99F7900C925F4 /* ZapSettingsView.swift in Sources */,
 				82D6FBE52CD99F7900C925F4 /* TranslationSettingsView.swift in Sources */,
@@ -5715,6 +5730,7 @@
 				D73E5F012C6A97F4007EB227 /* ZapTypePicker.swift in Sources */,
 				D73E5F022C6A97F4007EB227 /* ZapUserView.swift in Sources */,
 				D73E5F032C6A97F4007EB227 /* ProfileZapLinkView.swift in Sources */,
+				D7DB930C2D69486700DA1EE5 /* NIP65.swift in Sources */,
 				D73E5F042C6A97F4007EB227 /* AboutView.swift in Sources */,
 				D73E5F052C6A97F4007EB227 /* ProfileName.swift in Sources */,
 				D73E5F062C6A97F4007EB227 /* ProfilePictureSelector.swift in Sources */,
