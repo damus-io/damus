@@ -59,10 +59,10 @@ class ProfileModel: ObservableObject, Equatable {
     
     func unsubscribe() {
         print("unsubscribing from profile \(pubkey) with sub_id \(sub_id)")
-        damus.pool.unsubscribe(sub_id: sub_id)
-        damus.pool.unsubscribe(sub_id: prof_subid)
+        damus.nostrNetwork.pool.unsubscribe(sub_id: sub_id)
+        damus.nostrNetwork.pool.unsubscribe(sub_id: prof_subid)
         if pubkey != damus.pubkey {
-            damus.pool.unsubscribe(sub_id: conversations_subid)
+            damus.nostrNetwork.pool.unsubscribe(sub_id: conversations_subid)
         }
     }
 
@@ -77,8 +77,8 @@ class ProfileModel: ObservableObject, Equatable {
 
         print("subscribing to textlike events from profile \(pubkey) with sub_id \(sub_id)")
         //print_filters(relay_id: "profile", filters: [[text_filter], [profile_filter]])
-        damus.pool.subscribe(sub_id: sub_id, filters: [text_filter], handler: handle_event)
-        damus.pool.subscribe(sub_id: prof_subid, filters: [profile_filter], handler: handle_event)
+        damus.nostrNetwork.pool.subscribe(sub_id: sub_id, filters: [text_filter], handler: handle_event)
+        damus.nostrNetwork.pool.subscribe(sub_id: prof_subid, filters: [profile_filter], handler: handle_event)
 
         subscribe_to_conversations()
     }
@@ -94,7 +94,7 @@ class ProfileModel: ObservableObject, Equatable {
         let conversations_filter_them = NostrFilter(kinds: conversation_kinds, pubkeys: [damus.pubkey], limit: limit, authors: [pubkey])
         let conversations_filter_us = NostrFilter(kinds: conversation_kinds, pubkeys: [pubkey], limit: limit, authors: [damus.pubkey])
         print("subscribing to conversation events from and to profile \(pubkey) with sub_id \(conversations_subid)")
-        damus.pool.subscribe(sub_id: conversations_subid, filters: [conversations_filter_them, conversations_filter_us], handler: handle_event)
+        damus.nostrNetwork.pool.subscribe(sub_id: conversations_subid, filters: [conversations_filter_them, conversations_filter_us], handler: handle_event)
     }
 
     func handle_profile_contact_event(_ ev: NostrEvent) {
@@ -200,11 +200,11 @@ class ProfileModel: ObservableObject, Equatable {
         var profile_filter = NostrFilter(kinds: [.contacts])
         profile_filter.authors = [pubkey]
         
-        damus.pool.subscribe(sub_id: findRelay_subid, filters: [profile_filter], handler: findRelaysHandler)
+        damus.nostrNetwork.pool.subscribe(sub_id: findRelay_subid, filters: [profile_filter], handler: findRelaysHandler)
     }
     
     func unsubscribeFindRelays() {
-        damus.pool.unsubscribe(sub_id: findRelay_subid)
+        damus.nostrNetwork.pool.unsubscribe(sub_id: findRelay_subid)
     }
 
     func getCappedRelayStrings() -> [String] {

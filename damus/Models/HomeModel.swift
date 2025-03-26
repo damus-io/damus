@@ -95,13 +95,13 @@ class HomeModel: ContactsDelegate {
     }
     
     var pool: RelayPool {
-        return damus_state.pool
+        self.damus_state.nostrNetwork.pool
     }
     
     var dms: DirectMessagesModel {
         return damus_state.dms
     }
-
+    
     func has_sub_id_event(sub_id: String, ev_id: NoteId) -> Bool {
         if !has_event.keys.contains(sub_id) {
             has_event[sub_id] = Set()
@@ -268,7 +268,7 @@ class HomeModel: ContactsDelegate {
 
             // since command results are not returned for ephemeral events,
             // remove the request from the postbox which is likely failing over and over
-            if damus_state.postbox.remove_relayer(relay_id: nwc.relay, event_id: resp.req_id) {
+            if damus_state.nostrNetwork.postbox.remove_relayer(relay_id: nwc.relay, event_id: resp.req_id) {
                 print("nwc: got response, removed \(resp.req_id) from the postbox [\(relay)]")
             } else {
                 print("nwc: \(resp.req_id) not found in the postbox, nothing to remove [\(relay)]")
@@ -480,7 +480,7 @@ class HomeModel: ContactsDelegate {
                 break
             }
             
-            update_signal_from_pool(signal: self.signal, pool: damus_state.pool)
+            update_signal_from_pool(signal: self.signal, pool: damus_state.nostrNetwork.pool)
         case .nostr_event(let ev):
             switch ev {
             case .event(let sub_id, let ev):
@@ -950,84 +950,11 @@ func load_our_stuff(state: DamusState, ev: NostrEvent) {
     state.contacts.event = ev
 
     load_our_contacts(state: state, m_old_ev: m_old_ev, ev: ev)
-    load_our_relays(state: state, m_old_ev: m_old_ev, ev: ev)
 }
 
 func process_contact_event(state: DamusState, ev: NostrEvent) {
     load_our_stuff(state: state, ev: ev)
     add_contact_if_friend(contacts: state.contacts, ev: ev)
-}
-
-func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
-    let bootstrap_dict: [RelayURL: LegacyKind3RelayRWConfiguration] = [:]
-    let old_decoded = m_old_ev.flatMap { decode_json_relays($0.content) } ?? state.bootstrap_relays.reduce(into: bootstrap_dict) { (d, r) in
-        d[r] = .rw
-    }
-
-    guard let decoded: [RelayURL: LegacyKind3RelayRWConfiguration] = decode_json_relays(ev.content) else {
-        return
-    }
-
-    var changed = false
-
-    var new = Set<RelayURL>()
-    for key in decoded.keys {
-        new.insert(key)
-    }
-
-    var old = Set<RelayURL>()
-    for key in old_decoded.keys {
-        old.insert(key)
-    }
-    
-    let diff = old.symmetricDifference(new)
-    
-    let new_relay_filters = load_relay_filters(state.pubkey) == nil
-    for d in diff {
-        changed = true
-        if new.contains(d) {
-            let descriptor = RelayPool.RelayDescriptor(url: d, info: decoded[d] ?? .rw)
-            add_new_relay(model_cache: state.relay_model_cache, relay_filters: state.relay_filters, pool: state.pool, descriptor: descriptor, new_relay_filters: new_relay_filters, logging_enabled: state.settings.developer_mode)
-        } else {
-            state.pool.remove_relay(d)
-        }
-    }
-    
-    if changed {
-        save_bootstrap_relays(pubkey: state.pubkey, relays: Array(new))
-        state.pool.connect()
-        notify(.relays_changed)
-    }
-}
-
-func add_new_relay(model_cache: RelayModelCache, relay_filters: RelayFilters, pool: RelayPool, descriptor: RelayPool.RelayDescriptor, new_relay_filters: Bool, logging_enabled: Bool) {
-    try? pool.add_relay(descriptor)
-    let url = descriptor.url
-
-    let relay_id = url
-    guard model_cache.model(withURL: url) == nil else {
-        return
-    }
-    
-    Task.detached(priority: .background) {
-        guard let meta = try? await fetch_relay_metadata(relay_id: relay_id) else {
-            return
-        }
-        
-        await MainActor.run {
-            let model = RelayModel(url, metadata: meta)
-            model_cache.insert(model: model)
-            
-            if logging_enabled {
-                pool.setLog(model.log, for: relay_id)
-            }
-            
-            // if this is the first time adding filters, we should filter non-paid relays
-            if new_relay_filters && !meta.is_paid {
-                relay_filters.insert(timeline: .search, relay_id: relay_id)
-            }
-        }
-    }
 }
 
 func fetch_relay_metadata(relay_id: RelayURL) async throws -> RelayMetadata? {
@@ -1252,3 +1179,4 @@ func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: 
         }
     }
 }
+

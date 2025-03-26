@@ -65,7 +65,7 @@ struct EditMetadataView: View {
             return
         }
 
-        damus_state.postbox.send(metadata_ev)
+        damus_state.nostrNetwork.postbox.send(metadata_ev)
     }
 
     func is_ln_valid(ln: String) -> Bool {

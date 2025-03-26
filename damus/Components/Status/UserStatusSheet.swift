@@ -213,6 +213,6 @@ struct UserStatusSheet: View {
 
 struct UserStatusSheet_Previews: PreviewProvider {
     static var previews: some View {
-        UserStatusSheet(damus_state: test_damus_state, postbox: test_damus_state.postbox, keypair: test_keypair, status: .init())
+        UserStatusSheet(damus_state: test_damus_state, postbox: test_damus_state.nostrNetwork.postbox, keypair: test_keypair, status: .init())
     }
 }

@@ -35,7 +35,7 @@ final class MutingTests: XCTestCase {
         }
 
         test_damus_state.mutelist_manager.set_mutelist(mutelist)
-        test_damus_state.postbox.send(mutelist)
+        test_damus_state.nostrNetwork.postbox.send(mutelist)
         
         XCTAssert(test_damus_state.mutelist_manager.is_event_muted(spammy_test_note))
         XCTAssertFalse(test_damus_state.mutelist_manager.is_event_muted(test_note))

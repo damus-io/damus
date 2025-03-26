@@ -38,10 +38,10 @@ extension RelayPool {
     /// Describes a relay for use in `RelayPool`
     public struct RelayDescriptor {
         let url: RelayURL
-        var info: LegacyKind3RelayRWConfiguration
+        var info: NIP65.RelayList.RelayItem.RWConfiguration
         let variant: RelayVariant
         
-        init(url: RelayURL, info: LegacyKind3RelayRWConfiguration, variant: RelayVariant = .regular) {
+        init(url: RelayURL, info: NIP65.RelayList.RelayItem.RWConfiguration, variant: RelayVariant = .regular) {
             self.url = url
             self.info = info
             self.variant = variant
@@ -59,7 +59,7 @@ extension RelayPool {
         }
         
         static func nwc(url: RelayURL) -> RelayDescriptor {
-            return RelayDescriptor(url: url, info: .rw, variant: .nwc)
+            return RelayDescriptor(url: url, info: .readWrite, variant: .nwc)
         }
     }
 }

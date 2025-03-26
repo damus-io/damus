@@ -27,6 +27,10 @@ class CreateAccountModel: ObservableObject {
         return Keypair(pubkey: self.pubkey, privkey: self.privkey)
     }
     
+    var full_keypair: FullKeypair {
+        return FullKeypair(pubkey: self.pubkey, privkey: self.privkey)
+    }
+    
     init(display_name: String = "", name: String = "", about: String = "") {
         let keypair = generate_new_keypair()
         self.pubkey = keypair.pubkey

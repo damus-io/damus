@@ -41,13 +41,13 @@ class SearchModel: ObservableObject {
         //likes_filter.ids = ref_events.referenced_ids!
 
         print("subscribing to search '\(search)' with sub_id \(sub_id)")
-        state.pool.register_handler(sub_id: sub_id, handler: handle_event)
+        state.nostrNetwork.pool.register_handler(sub_id: sub_id, handler: handle_event)
         loading = true
-        state.pool.send(.subscribe(.init(filters: [search], sub_id: sub_id)))
+        state.nostrNetwork.pool.send(.subscribe(.init(filters: [search], sub_id: sub_id)))
     }
     
     func unsubscribe() {
-        state.pool.unsubscribe(sub_id: sub_id)
+        state.nostrNetwork.pool.unsubscribe(sub_id: sub_id)
         loading = false
         print("unsubscribing from search '\(search)' with sub_id \(sub_id)")
     }
@@ -67,7 +67,7 @@ class SearchModel: ObservableObject {
     }
 
     func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
-        let (sub_id, done) = handle_subid_event(pool: state.pool, relay_id: relay_id, ev: ev) { sub_id, ev in
+        let (sub_id, done) = handle_subid_event(pool: state.nostrNetwork.pool, relay_id: relay_id, ev: ev) { sub_id, ev in
             if ev.is_textlike && ev.should_show_event {
                 self.add_event(ev)
             }
