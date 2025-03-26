@@ -98,7 +98,7 @@ final class AuthIntegrationTests: XCTestCase {
             sent_messages.append(str)
         }
         XCTAssertEqual(pool.relays.count, 0)
-        let relay_descriptor = RelayPool.RelayDescriptor.init(url: relay_url, info: .rw)
+        let relay_descriptor = RelayPool.RelayDescriptor.init(url: relay_url, info: .readWrite)
         try! pool.add_relay(relay_descriptor)
         XCTAssertEqual(pool.relays.count, 1)
         let connection_expectation = XCTestExpectation(description: "Waiting for connection")
@@ -142,7 +142,7 @@ final class AuthIntegrationTests: XCTestCase {
             sent_messages.append(str)
         }
         XCTAssertEqual(pool.relays.count, 0)
-        let relay_descriptor = RelayPool.RelayDescriptor.init(url: relay_url, info: .rw)
+        let relay_descriptor = RelayPool.RelayDescriptor.init(url: relay_url, info: .readWrite)
         try! pool.add_relay(relay_descriptor)
         XCTAssertEqual(pool.relays.count, 1)
         let connection_expectation = XCTestExpectation(description: "Waiting for connection")

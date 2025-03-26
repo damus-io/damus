@@ -20,10 +20,12 @@ struct SaveKeysView: View {
     @FocusState var privkey_focused: Bool
     
     let first_contact_event: NdbNote?
+    let first_relay_list_event: NdbNote?
     
     init(account: CreateAccountModel) {
         self.account = account
         self.first_contact_event = make_first_contact_event(keypair: account.keypair)
+        self.first_relay_list_event = NIP65.RelayList(relays: get_default_bootstrap_relays()).toNostrEvent(keypair: account.full_keypair)
     }
     
     var body: some View {
@@ -128,8 +130,12 @@ struct SaveKeysView: View {
             error = NSLocalizedString("Could not create your initial contact list event. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help.", comment: "Error message to the user indicating that the initial contact list failed to be created.")
             return
         }
+        guard let first_relay_list_event else {
+            error = NSLocalizedString("Could not create your initial relay list. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help.", comment: "Error message to the user indicating that the initial relay list failed to be created.")
+            return
+        }
         // Save contact list to storage right away so that we don't need to depend on the network to complete this important step
-        self.save_to_storage(first_contact_event: first_contact_event, for: account)
+        self.save_to_storage(first_contact_event: first_contact_event, first_relay_list_event: first_relay_list_event, for: account)
         
         let bootstrap_relays = load_bootstrap_relays(pubkey: account.pubkey)
         for relay in bootstrap_relays {
@@ -143,13 +149,15 @@ struct SaveKeysView: View {
         self.pool.connect()
     }
     
-    func save_to_storage(first_contact_event: NdbNote, for account: CreateAccountModel) {
+    func save_to_storage(first_contact_event: NdbNote, first_relay_list_event: NdbNote, for account: CreateAccountModel) {
         // Send to NostrDB so that we have a local copy in storage
         self.pool.send_raw_to_local_ndb(.typical(.event(first_contact_event)))
+        self.pool.send_raw_to_local_ndb(.typical(.event(first_relay_list_event)))
         
         // Save the ID to user settings so that we can easily find it later.
         let settings = UserSettingsStore.globally_load_for(pubkey: account.pubkey)
         settings.latest_contact_event_id_hex = first_contact_event.id.hex()
+        settings.latestRelayListEventIdHex = first_relay_list_event.id.hex()
     }
 
     func handle_event(relay: RelayURL, ev: NostrConnectionEvent) {
@@ -166,6 +174,10 @@ struct SaveKeysView: View {
                 
                 if let first_contact_event {
                     self.pool.send(.event(first_contact_event))
+                }
+                
+                if let first_relay_list_event {
+                    self.pool.send(.event(first_relay_list_event))
                 }
                 
                 do {
