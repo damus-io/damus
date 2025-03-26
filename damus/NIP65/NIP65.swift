@@ -20,6 +20,10 @@ extension NIP65 {
         // MARK: - Initialization
 
         init(event: NdbNote) throws(NIP65DecodingError) {
+            try self.init(event: UnownedNdbNote(event))
+        }
+        
+        init(event: borrowing UnownedNdbNote) throws(NIP65DecodingError) {
             guard event.known_kind == .relay_list else { throw .notRelayList }
             var relays: [RelayItem] = []
             for tag in event.tags {

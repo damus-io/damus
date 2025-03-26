@@ -1090,6 +1090,10 @@
 		D72E127A2BEEEED000F4F781 /* NostrFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72E12792BEEEED000F4F781 /* NostrFilterTests.swift */; };
 		D7315A2A2ACDF3B70036E30A /* DamusCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7315A292ACDF3B70036E30A /* DamusCacheManager.swift */; };
 		D7315A2C2ACDF4DA0036E30A /* DamusCacheManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7315A2B2ACDF4DA0036E30A /* DamusCacheManagerTests.swift */; };
+		D733F9E52D92C76100317B11 /* UnownedNdbNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = D733F9E42D92C75C00317B11 /* UnownedNdbNote.swift */; };
+		D733F9E62D92C76100317B11 /* UnownedNdbNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = D733F9E42D92C75C00317B11 /* UnownedNdbNote.swift */; };
+		D733F9E72D92C76100317B11 /* UnownedNdbNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = D733F9E42D92C75C00317B11 /* UnownedNdbNote.swift */; };
+		D733F9E82D92C76100317B11 /* UnownedNdbNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = D733F9E42D92C75C00317B11 /* UnownedNdbNote.swift */; };
 		D734B1452CCC19B1000B5C97 /* DamusFullScreenCover.swift in Sources */ = {isa = PBXBuildFile; fileRef = D734B1442CCC19B1000B5C97 /* DamusFullScreenCover.swift */; };
 		D734B1462CCC19B1000B5C97 /* DamusFullScreenCover.swift in Sources */ = {isa = PBXBuildFile; fileRef = D734B1442CCC19B1000B5C97 /* DamusFullScreenCover.swift */; };
 		D7373BA62B688EA300F7783D /* DamusPurpleTranslationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7373BA52B688EA200F7783D /* DamusPurpleTranslationSetupView.swift */; };
@@ -2477,6 +2481,7 @@
 		D72E12792BEEEED000F4F781 /* NostrFilterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrFilterTests.swift; sourceTree = "<group>"; };
 		D7315A292ACDF3B70036E30A /* DamusCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusCacheManager.swift; sourceTree = "<group>"; };
 		D7315A2B2ACDF4DA0036E30A /* DamusCacheManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusCacheManagerTests.swift; sourceTree = "<group>"; };
+		D733F9E42D92C75C00317B11 /* UnownedNdbNote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnownedNdbNote.swift; sourceTree = "<group>"; };
 		D734B1442CCC19B1000B5C97 /* DamusFullScreenCover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusFullScreenCover.swift; sourceTree = "<group>"; };
 		D7373BA52B688EA200F7783D /* DamusPurpleTranslationSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleTranslationSetupView.swift; sourceTree = "<group>"; };
 		D7373BA72B68974500F7783D /* DamusPurpleNewUserOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleNewUserOnboardingView.swift; sourceTree = "<group>"; };
@@ -3359,6 +3364,7 @@
 		4C9054862A6AEB4500811EEC /* nostrdb */ = {
 			isa = PBXGroup;
 			children = (
+				D733F9E42D92C75C00317B11 /* UnownedNdbNote.swift */,
 				4C47928D2A9939BD00489948 /* flatcc */,
 				4C478E2A2A9935D300489948 /* bindings */,
 				4CE9FBBB2A6B3D9C007E485C /* Test */,
@@ -4927,6 +4933,7 @@
 				4C9AA14A2A4587A6003F49FD /* NotificationStatusModel.swift in Sources */,
 				D7100C5C2B77016700C59298 /* IAPProductStateView.swift in Sources */,
 				4CB9D4A72992D02B00A9A7E4 /* ProfileNameView.swift in Sources */,
+				D733F9E82D92C76100317B11 /* UnownedNdbNote.swift in Sources */,
 				D74EA0902D2E271E002290DD /* ErrorView.swift in Sources */,
 				4CE4F0F429D779B5005914DB /* PostBox.swift in Sources */,
 				BA37598E2ABCCE500018D73B /* VideoCaptureProcessor.swift in Sources */,
@@ -5292,6 +5299,7 @@
 				82D6FBBA2CD99F7900C925F4 /* NostrRequest.swift in Sources */,
 				82D6FBBB2CD99F7900C925F4 /* Profiles.swift in Sources */,
 				82D6FBBC2CD99F7900C925F4 /* NostrKind.swift in Sources */,
+				D733F9E62D92C76100317B11 /* UnownedNdbNote.swift in Sources */,
 				82D6FBBD2CD99F7900C925F4 /* NostrLink.swift in Sources */,
 				82D6FBBE2CD99F7900C925F4 /* WebSocket.swift in Sources */,
 				82D6FBBF2CD99F7900C925F4 /* ReferencedId.swift in Sources */,
@@ -5604,6 +5612,7 @@
 				D73E5E882C6A97F4007EB227 /* StoreObserver.swift in Sources */,
 				D73E5E892C6A97F4007EB227 /* DamusPurpleURL.swift in Sources */,
 				D73E5E8A2C6A97F4007EB227 /* PurpleStoreKitManager.swift in Sources */,
+				D733F9E72D92C76100317B11 /* UnownedNdbNote.swift in Sources */,
 				D73E5E8E2C6A97F4007EB227 /* ImageResizer.swift in Sources */,
 				D78F080E2D7F78EF00FC6C75 /* Request.swift in Sources */,
 				D73E5E8F2C6A97F4007EB227 /* PhotoCaptureProcessor.swift in Sources */,
@@ -5989,6 +5998,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C8FA7242BED58A900798A6A /* ThreadReply.swift in Sources */,
+				D733F9E52D92C76100317B11 /* UnownedNdbNote.swift in Sources */,
 				D798D21F2B0858D600234419 /* MigratedTypes.swift in Sources */,
 				D7CE1B472B0BE719002EDAD4 /* NativeObject.swift in Sources */,
 				D71AD9002CEC176A002E2C3C /* AppAccessibilityIdentifiers.swift in Sources */,
