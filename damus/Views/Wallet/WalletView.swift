@@ -84,8 +84,8 @@ struct WalletView: View {
         
         let delay = 0.0     // We don't need a delay when fetching a transaction list or balance
 
-        WalletConnect.request_transaction_list(url: nwc, pool: damus_state.pool, post: damus_state.postbox, delay: delay, on_flush: flusher)
-        WalletConnect.request_balance_information(url: nwc, pool: damus_state.pool, post: damus_state.postbox, delay: delay, on_flush: flusher)
+        WalletConnect.request_transaction_list(url: nwc, pool: damus_state.nostrNetwork.pool, post: damus_state.nostrNetwork.postbox, delay: delay, on_flush: flusher)
+        WalletConnect.request_balance_information(url: nwc, pool: damus_state.nostrNetwork.pool, post: damus_state.nostrNetwork.postbox, delay: delay, on_flush: flusher)
         return
     }
 }

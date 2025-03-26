@@ -25,32 +25,12 @@ struct RelayDetailView: View {
     }
     
     func check_connection() -> Bool {
-        for relay in state.pool.relays {
-            if relay.id == self.relay {
-                return true
-            }
-        }
-        return false
+        return state.nostrNetwork.userRelayList.getUserCurrentRelayList()?.relays.keys.contains(self.relay) == true
     }
 
     func RemoveRelayButton(_ keypair: FullKeypair) -> some View {
         Button(action: {
-            guard let ev = state.contacts.event else {
-                return
-            }
-
-            let descriptors = state.pool.our_descriptors
-            guard let new_ev = remove_relay( ev: ev, current_relays: descriptors, keypair: keypair, relay: relay) else {
-                return
-            }
-
-            process_contact_event(state: state, ev: new_ev)
-            state.postbox.send(new_ev)
-            
-            if let relay_metadata = make_relay_metadata(relays: state.pool.our_descriptors, keypair: keypair) {
-                state.postbox.send(relay_metadata)
-            }
-            dismiss()
+            self.removeRelay()
         }) {
             HStack {
                 Text("Disconnect", comment: "Button to disconnect from the relay.")
@@ -63,19 +43,7 @@ struct RelayDetailView: View {
     
     func ConnectRelayButton(_ keypair: FullKeypair) -> some View {
         Button(action: {
-            guard let ev_before_add = state.contacts.event else {
-                return
-            }
-            guard let ev_after_add = add_relay(ev: ev_before_add, keypair: keypair, current_relays: state.pool.our_descriptors, relay: relay, info: .rw) else {
-                return
-            }
-            process_contact_event(state: state, ev: ev_after_add)
-            state.postbox.send(ev_after_add)
-
-            if let relay_metadata = make_relay_metadata(relays: state.pool.our_descriptors, keypair: keypair) {
-                state.postbox.send(relay_metadata)
-            }
-            dismiss()
+            self.connectRelay()
         }) {
             HStack {
                 Text("Connect", comment: "Button to connect to the relay.")
@@ -209,11 +177,31 @@ struct RelayDetailView: View {
     }
 
     private var relay_object: RelayPool.Relay? {
-        state.pool.get_relay(relay)
+        state.nostrNetwork.pool.get_relay(relay)
     }
 
     private var relay_connection: RelayConnection? {
         relay_object?.connection
+    }
+    
+    func removeRelay() {
+        do {
+            try state.nostrNetwork.userRelayList.remove(relayURL: self.relay)
+            dismiss()
+        }
+        catch {
+            present_sheet(.error(error.humanReadableError))
+        }
+    }
+    
+    func connectRelay() {
+        do {
+            try state.nostrNetwork.userRelayList.insert(relay: NIP65.RelayList.RelayItem(url: relay, rwConfiguration: .readWrite))
+            dismiss()
+        }
+        catch {
+            present_sheet(.error(error.humanReadableError))
+        }
     }
 }
 

@@ -26,7 +26,7 @@ struct SeenEvent: Hashable {
 
 /// Establishes and manages connections and subscriptions to a list of relays.
 class RelayPool {
-    var relays: [Relay] = []
+    private(set) var relays: [Relay] = []
     var handlers: [RelayHandler] = []
     var request_queue: [QueuedRequest] = []
     var seen: Set<SeenEvent> = Set()
@@ -124,7 +124,7 @@ class RelayPool {
         }
     }
 
-    func add_relay(_ desc: RelayDescriptor) throws {
+    func add_relay(_ desc: RelayDescriptor) throws(RelayError) {
         let relay_id = desc.url
         if get_relay(relay_id) != nil {
             throw RelayError.RelayAlreadyExists
@@ -306,11 +306,11 @@ class RelayPool {
         self.send_raw_to_local_ndb(req)     // Always send Nostr events and data to NostrDB for a local copy
 
         for relay in relays {
-            if req.is_read && !(relay.descriptor.info.read ?? true) {
+            if req.is_read && !(relay.descriptor.info.canRead) {
                 continue    // Do not send read requests to relays that are not READ relays
             }
             
-            if req.is_write && !(relay.descriptor.info.write ?? true) {
+            if req.is_write && !(relay.descriptor.info.canWrite) {
                 continue    // Do not send write requests to relays that are not WRITE relays
             }
             
@@ -414,7 +414,7 @@ class RelayPool {
 }
 
 func add_rw_relay(_ pool: RelayPool, _ url: RelayURL) {
-    try? pool.add_relay(RelayPool.RelayDescriptor(url: url, info: .rw))
+    try? pool.add_relay(RelayPool.RelayDescriptor(url: url, info: .readWrite))
 }
 
 

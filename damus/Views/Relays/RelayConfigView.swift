@@ -32,7 +32,7 @@ struct RelayConfigView: View {
     
     init(state: DamusState) {
         self.state = state
-        _relays = State(initialValue: state.pool.our_descriptors)
+        _relays = State(initialValue: state.nostrNetwork.pool.our_descriptors)
         UITabBar.appearance().isHidden = true
     }
     
@@ -40,7 +40,7 @@ struct RelayConfigView: View {
         let rs: [RelayPool.RelayDescriptor] = []
         let recommended_relay_addresses = get_default_bootstrap_relays()
         return recommended_relay_addresses.reduce(into: rs) { xs, x in
-            xs.append(RelayPool.RelayDescriptor(url: x, info: .rw))
+            xs.append(RelayPool.RelayDescriptor(url: x, info: .readWrite))
         }
     }
 
@@ -98,7 +98,7 @@ struct RelayConfigView: View {
             }
         }
         .onReceive(handle_notify(.relays_changed)) { _ in
-            self.relays = state.pool.our_descriptors
+            self.relays = state.nostrNetwork.pool.our_descriptors
         }
         .onAppear {
             notify(.display_tabbar(false))

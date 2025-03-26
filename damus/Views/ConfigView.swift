@@ -136,7 +136,7 @@ struct ConfigView: View {
                       let ev = created_deleted_account_profile(keypair: keypair) else {
                     return
                 }
-                state.postbox.send(ev)
+                state.nostrNetwork.postbox.send(ev)
                 logout(state)
             }
         }

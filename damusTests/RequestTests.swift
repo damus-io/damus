@@ -20,7 +20,7 @@ final class RequestTests: XCTestCase {
     func testMakeAuthRequest() {
         let challenge_string = "8bc847dd-f2f6-4b3a-9c8a-71776ad9b071"
         let url = RelayURL("wss://example.com")!
-        let relayDescriptor = RelayPool.RelayDescriptor(url: url, info: .rw)
+        let relayDescriptor = RelayPool.RelayDescriptor(url: url, info: .readWrite)
         let relayConnection = RelayConnection(url: url) { _ in
         } processEvent: { _ in
         }
