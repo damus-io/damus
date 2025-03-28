@@ -396,18 +396,18 @@ struct ProfileView: View {
                         }
                 }
 
-                if let relays = profile.relays {
+                if let relays = profile.relay_urls {
                     // Only open relay config view if the user is logged in with private key and they are looking at their own profile.
-                    let noun_string = pluralizedString(key: "relays_count", count: relays.keys.count)
+                    let noun_string = pluralizedString(key: "relays_count", count: relays.count)
                     let noun_text = Text(noun_string).font(.subheadline).foregroundColor(.gray)
-                    let relay_text = Text("\(Text(verbatim: relays.keys.count.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
+                    let relay_text = Text("\(Text(verbatim: relays.count.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
                     if profile.pubkey == damus_state.pubkey && damus_state.is_privkey_user {
                         NavigationLink(value: Route.RelayConfig) {
                             relay_text
                         }
                         .buttonStyle(PlainButtonStyle())
                     } else {
-                        NavigationLink(value: Route.UserRelays(relays: Array(relays.keys).sorted())) {
+                        NavigationLink(value: Route.UserRelays(relays: relays.sorted())) {
                             relay_text
                         }
                         .buttonStyle(PlainButtonStyle())
