@@ -10,8 +10,18 @@ import Foundation
 class ProfileModel: ObservableObject, Equatable {
     @Published var contacts: NostrEvent? = nil
     @Published var following: Int = 0
-    @Published var relays: [RelayURL: LegacyKind3RelayRWConfiguration]? = nil
+    @Published var relay_list: NIP65.RelayList? = nil
+    @Published var legacy_relay_list: [RelayURL: LegacyKind3RelayRWConfiguration]? = nil
     @Published var progress: Int = 0
+    var relay_urls: [RelayURL]? {
+        if let relay_list {
+            return relay_list.relays.values.map({ $0.url })
+        }
+        if let legacy_relay_list {
+            return Array(legacy_relay_list.keys)
+        }
+        return nil
+    }
 
     private let MAX_SHARE_RELAYS = 4
     
@@ -69,6 +79,7 @@ class ProfileModel: ObservableObject, Equatable {
     func subscribe() {
         var text_filter = NostrFilter(kinds: [.text, .longform, .highlight])
         var profile_filter = NostrFilter(kinds: [.contacts, .metadata, .boost])
+        var relay_list_filter = NostrFilter(kinds: [.relay_list], authors: [pubkey])
 
         profile_filter.authors = [pubkey]
         
@@ -78,7 +89,7 @@ class ProfileModel: ObservableObject, Equatable {
         print("subscribing to textlike events from profile \(pubkey) with sub_id \(sub_id)")
         //print_filters(relay_id: "profile", filters: [[text_filter], [profile_filter]])
         damus.nostrNetwork.pool.subscribe(sub_id: sub_id, filters: [text_filter], handler: handle_event)
-        damus.nostrNetwork.pool.subscribe(sub_id: prof_subid, filters: [profile_filter], handler: handle_event)
+        damus.nostrNetwork.pool.subscribe(sub_id: prof_subid, filters: [profile_filter, relay_list_filter], handler: handle_event)
 
         subscribe_to_conversations()
     }
@@ -109,7 +120,7 @@ class ProfileModel: ObservableObject, Equatable {
         
         self.contacts = ev
         self.following = count_pubkeys(ev.tags)
-        self.relays = decode_json_relays(ev.content)
+        self.legacy_relay_list = decode_json_relays(ev.content)
     }
 
     private func add_event(_ ev: NostrEvent) {
@@ -119,6 +130,9 @@ class ProfileModel: ObservableObject, Equatable {
             }
         } else if ev.known_kind == .contacts {
             handle_profile_contact_event(ev)
+        }
+        else if ev.known_kind == .relay_list {
+            self.relay_list = try? NIP65.RelayList(event: ev) // Whether another user's list is malformatted is something beyond our control. Probably best to suppress errors
         }
         seen_event.insert(ev.id)
     }
@@ -192,7 +206,7 @@ class ProfileModel: ObservableObject, Equatable {
 
     private func findRelaysHandler(relay_id: RelayURL, ev: NostrConnectionEvent) {
         if case .nostr_event(let resp) = ev, case .event(_, let event) = resp, case .contacts = event.known_kind {
-            self.relays = decode_json_relays(event.content)
+            self.legacy_relay_list = decode_json_relays(event.content)
         }
     }
     
@@ -208,7 +222,7 @@ class ProfileModel: ObservableObject, Equatable {
     }
 
     func getCappedRelayStrings() -> [String] {
-        return relays?.keys.prefix(MAX_SHARE_RELAYS).map { $0.absoluteString } ?? []
+        return self.relay_urls?.prefix(MAX_SHARE_RELAYS).map { $0.absoluteString } ?? []
     }
 }
 
