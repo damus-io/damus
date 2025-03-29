@@ -175,13 +175,14 @@ extension PushNotificationClient {
     }
     
     struct NotificationSettings: Codable, Equatable {
-        let zap_notifications_enabled: Bool
-        let mention_notifications_enabled: Bool
-        let repost_notifications_enabled: Bool
-        let reaction_notifications_enabled: Bool
-        let dm_notifications_enabled: Bool
-        let only_notifications_from_following_enabled: Bool
-        
+        let zap_notifications_enabled: Bool?
+        let mention_notifications_enabled: Bool?
+        let repost_notifications_enabled: Bool?
+        let reaction_notifications_enabled: Bool?
+        let dm_notifications_enabled: Bool?
+        let only_notifications_from_following_enabled: Bool?
+        let hellthread_notifications_enabled: Bool?
+
         static func from(json_data: Data) -> Self? {
             guard let decoded = try? JSONDecoder().decode(Self.self, from: json_data) else { return nil }
             return decoded
@@ -194,7 +195,8 @@ extension PushNotificationClient {
                 repost_notifications_enabled: settings.repost_notification,
                 reaction_notifications_enabled: settings.like_notification,
                 dm_notifications_enabled: settings.dm_notification,
-                only_notifications_from_following_enabled: settings.notification_only_from_following
+                only_notifications_from_following_enabled: settings.notification_only_from_following,
+                hellthread_notifications_enabled: settings.hellthread_notification
             )
         }
         

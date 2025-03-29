@@ -41,6 +41,10 @@ func should_display_notification(state: HeadlessDamusState, event ev: NostrEvent
         return false
     }
 
+    if !state.settings.hellthread_notification && ev.is_hellthread {
+        return false
+    }
+
     // Don't show notifications that match mute list.
     if state.mutelist_manager.is_event_muted(ev) {
         return false
