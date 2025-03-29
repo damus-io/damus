@@ -16,7 +16,9 @@ struct NotificationSettingsView: View {
     @State var notification_preferences_sync_state: PreferencesSyncState = .undefined
     
     @Environment(\.dismiss) var dismiss
-    
+
+    let hellthread_notification_settings_text = pluralizedString(key: "hellthread_notification_settings", count: MIN_HELLTHREAD_PUBKEYS - 1)
+
     func indicator_binding(_ val: NewEventsBits) -> Binding<Bool> {
         return Binding.init(get: {
             (settings.notification_indicators & val.rawValue) > 0
@@ -174,6 +176,8 @@ struct NotificationSettingsView: View {
                 Toggle(NSLocalizedString("DMs", comment: "Setting to enable DM Local Notification"), isOn: self.notification_preference_binding($settings.dm_notification))
                     .toggleStyle(.switch)
                 Toggle(NSLocalizedString("Show only from users you follow", comment: "Setting to Show notifications only associated to users your follow"), isOn: self.notification_preference_binding($settings.notification_only_from_following))
+                    .toggleStyle(.switch)
+                Toggle(hellthread_notification_settings_text, isOn: $settings.hellthread_notification)
                     .toggleStyle(.switch)
             }
             

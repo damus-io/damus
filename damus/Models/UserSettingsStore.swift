@@ -160,7 +160,10 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "notification_only_from_following", default_value: false)
     var notification_only_from_following: Bool
-    
+
+    @Setting(key: "hellthread_notification", default_value: false)
+    var hellthread_notification: Bool
+
     @Setting(key: "translate_dms", default_value: false)
     var translate_dms: Bool
     

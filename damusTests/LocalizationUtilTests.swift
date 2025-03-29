@@ -18,12 +18,15 @@ final class LocalizationUtilTests: XCTestCase {
             ["followers_count", "Followers", "Follower", "Followers"],
             ["following_count", "Following", "Following", "Following"],
             ["imports_count", "Imports", "Import", "Imports"],
+            ["hellthread_notification_settings", "Show notifications that mention more than 0 profiles", "Show notifications that mention more than 1 profile", "Show notifications that mention more than 2 profiles"],
+            ["quoted_reposts_count", "Quotes", "Quote", "Quotes"],
             ["reactions_count", "Reactions", "Reaction", "Reactions"],
             ["relays_count", "Relays", "Relay", "Relays"],
             ["reposts_count", "Reposts", "Repost", "Reposts"],
             ["sats", "sats", "sat", "sats"],
-            ["zaps_count", "Zaps", "Zap", "Zaps"],
-            ["word_count", "0 Words", "1 Word", "2 Words"]
+            ["users_talking_about_it", "0 users talking about it", "1 user talking about it", "2 users talking about it"],
+            ["word_count", "0 Words", "1 Word", "2 Words"],
+            ["zaps_count", "Zaps", "Zap", "Zaps"]
         ]
 
         for key in keys {

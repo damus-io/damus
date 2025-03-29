@@ -13,6 +13,7 @@ import secp256k1_implementation
 import CryptoKit
 
 let MAX_NOTE_SIZE: Int = 2 << 18
+let MIN_HELLTHREAD_PUBKEYS = 11
 
 struct NdbStr {
     let note: NdbNote
@@ -297,6 +298,15 @@ extension NdbNote {
 
     var should_show_event: Bool {
         return !too_big
+    }
+
+    var is_hellthread: Bool {
+        switch known_kind {
+        case .text, .boost, .like, .zap:
+            Set(referenced_pubkeys).count >= MIN_HELLTHREAD_PUBKEYS
+        default:
+            false
+        }
     }
 
     func get_blocks(keypair: Keypair) -> Blocks {
