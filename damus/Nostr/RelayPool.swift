@@ -24,13 +24,15 @@ struct SeenEvent: Hashable {
     let evid: NoteId
 }
 
+/// Establishes and manages connections and subscriptions to a list of relays.
 class RelayPool {
-    var relays: [Relay] = []
+    private(set) var relays: [Relay] = []
     var handlers: [RelayHandler] = []
     var request_queue: [QueuedRequest] = []
     var seen: Set<SeenEvent> = Set()
     var counts: [RelayURL: UInt64] = [:]
     var ndb: Ndb
+    /// The keypair used to authenticate with relays
     var keypair: Keypair?
     var message_received_function: (((String, RelayDescriptor)) -> Void)?
     var message_sent_function: (((String, Relay)) -> Void)?
@@ -122,7 +124,7 @@ class RelayPool {
         }
     }
 
-    func add_relay(_ desc: RelayDescriptor) throws {
+    func add_relay(_ desc: RelayDescriptor) throws(RelayError) {
         let relay_id = desc.url
         if get_relay(relay_id) != nil {
             throw RelayError.RelayAlreadyExists
@@ -200,6 +202,64 @@ class RelayPool {
         register_handler(sub_id: sub_id, handler: handler)
         send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to)
     }
+    
+    /// Subscribes to data from the `RelayPool` based on a filter and a list of desired relays.
+    /// 
+    /// - Parameters:
+    ///   - filters: The filters specifying the desired content.
+    ///   - desiredRelays: The desired relays which to subsctibe to. If `nil`, it defaults to the `RelayPool`'s default list
+    ///   - eoseTimeout: The maximum timeout which to give up waiting for the eoseSignal, in seconds
+    /// - Returns: Returns an async stream that callers can easily consume via a for-loop
+    func subscribe(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, eoseTimeout: TimeInterval = 10) -> AsyncStream<StreamItem> {
+        let desiredRelays = desiredRelays ?? self.relays.map({ $0.descriptor.url })
+        return AsyncStream<StreamItem> { continuation in
+            let sub_id = UUID().uuidString
+            var seenEvents: Set<NoteId> = []
+            var relaysWhoFinishedInitialResults: Set<RelayURL> = []
+            var eoseSent = false
+            self.subscribe(sub_id: sub_id, filters: filters, handler: { (relayUrl, connectionEvent) in
+                switch connectionEvent {
+                case .ws_event(let ev):
+                    // Websocket events such as connect/disconnect/error are already handled in `RelayConnection`. Do not perform any handling here.
+                    // For the future, perhaps we should abstract away `.ws_event` in `RelayPool`? Seems like something to be handled on the `RelayConnection` layer.
+                    break
+                case .nostr_event(let nostrResponse):
+                    guard nostrResponse.subid == sub_id else { return } // Do not stream items that do not belong in this subscription
+                    switch nostrResponse {
+                    case .event(_, let nostrEvent):
+                        if seenEvents.contains(nostrEvent.id) { break } // Don't send two of the same events.
+                        continuation.yield(with: .success(.event(nostrEvent)))
+                        seenEvents.insert(nostrEvent.id)
+                    case .notice(let note):
+                        break   // We do not support handling these yet
+                    case .eose(_):
+                        relaysWhoFinishedInitialResults.insert(relayUrl)
+                        if relaysWhoFinishedInitialResults == Set(desiredRelays) {
+                            continuation.yield(with: .success(.eose))
+                            eoseSent = true
+                        }
+                    case .ok(_): break    // No need to handle this, we are not sending an event to the relay
+                    case .auth(_): break    // Handled in a separate function in RelayPool
+                    }
+                }
+            }, to: desiredRelays)
+            Task {
+                try? await Task.sleep(nanoseconds: 1_000_000_000 * UInt64(eoseTimeout))
+                if !eoseSent { continuation.yield(with: .success(.eose)) }
+            }
+            continuation.onTermination = { @Sendable _ in
+                self.unsubscribe(sub_id: sub_id, to: desiredRelays)
+                self.remove_handler(sub_id: sub_id)
+            }
+        }
+    }
+    
+    enum StreamItem {
+        /// A Nostr event
+        case event(NostrEvent)
+        /// The "end of stored events" signal
+        case eose
+    }
 
     func subscribe_to(sub_id: String, filters: [NostrFilter], to: [RelayURL]?, handler: @escaping (RelayURL, NostrConnectionEvent) -> ()) {
         register_handler(sub_id: sub_id, handler: handler)
@@ -243,19 +303,19 @@ class RelayPool {
     func send_raw(_ req: NostrRequestType, to: [RelayURL]? = nil, skip_ephemeral: Bool = true) {
         let relays = to.map{ get_relays($0) } ?? self.relays
 
-        self.send_raw_to_local_ndb(req)
+        self.send_raw_to_local_ndb(req)     // Always send Nostr events and data to NostrDB for a local copy
 
         for relay in relays {
-            if req.is_read && !(relay.descriptor.info.read ?? true) {
-                continue
+            if req.is_read && !(relay.descriptor.info.canRead) {
+                continue    // Do not send read requests to relays that are not READ relays
             }
             
-            if req.is_write && !(relay.descriptor.info.write ?? true) {
-                continue
+            if req.is_write && !(relay.descriptor.info.canWrite) {
+                continue    // Do not send write requests to relays that are not WRITE relays
             }
             
             if relay.descriptor.ephemeral && skip_ephemeral {
-                continue
+                continue    // Do not send requests to ephemeral relays if we want to skip them
             }
             
             guard relay.connection.isConnected else {
@@ -354,7 +414,7 @@ class RelayPool {
 }
 
 func add_rw_relay(_ pool: RelayPool, _ url: RelayURL) {
-    try? pool.add_relay(RelayDescriptor(url: url, info: .rw))
+    try? pool.add_relay(RelayPool.RelayDescriptor(url: url, info: .readWrite))
 }
 
 

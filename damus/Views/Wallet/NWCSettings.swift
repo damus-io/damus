@@ -173,7 +173,7 @@ struct NWCSettings: View {
             guard let meta = make_metadata_event(keypair: keypair, metadata: prof) else {
                 return
             }
-            damus_state.postbox.send(meta)
+            damus_state.nostrNetwork.postbox.send(meta)
         }
     }
     

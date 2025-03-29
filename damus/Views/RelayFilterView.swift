@@ -15,11 +15,11 @@ struct RelayFilterView: View {
         self.state = state
         self.timeline = timeline
         
-        //_relays = State(initialValue: state.pool.descriptors)
+        //_relays = State(initialValue: state.networkManager.pool.descriptors)
     }
     
-    var relays: [RelayDescriptor] {
-        return state.pool.our_descriptors
+    var relays: [RelayPool.RelayDescriptor] {
+        return state.nostrNetwork.pool.our_descriptors
     }
     
     var body: some View {

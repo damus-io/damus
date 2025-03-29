@@ -24,12 +24,12 @@ struct EventLoaderView<Content: View>: View {
     }
     
     func unsubscribe() {
-        damus_state.pool.unsubscribe(sub_id: subscription_uuid)
+        damus_state.nostrNetwork.pool.unsubscribe(sub_id: subscription_uuid)
     }
     
     func subscribe(filters: [NostrFilter]) {
-        damus_state.pool.register_handler(sub_id: subscription_uuid, handler: handle_event)
-        damus_state.pool.send(.subscribe(.init(filters: filters, sub_id: subscription_uuid)))
+        damus_state.nostrNetwork.pool.register_handler(sub_id: subscription_uuid, handler: handle_event)
+        damus_state.nostrNetwork.pool.send(.subscribe(.init(filters: filters, sub_id: subscription_uuid)))
     }
 
     func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {

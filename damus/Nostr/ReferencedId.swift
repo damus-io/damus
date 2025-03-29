@@ -115,6 +115,19 @@ enum FollowRef: TagKeys, Hashable, TagConvertible, Equatable {
     }
 }
 
+/// Models common tag references defined by the Nostr protocol, and their associated values.
+///
+/// For example, this raw JSON tag sequence:
+/// ```json
+///   ["p", "8b2be0a0ad34805d76679272c28a77dbede9adcbfdca48c681ec8b624a1208a6"]
+/// ```
+///
+/// would be parsed into something equivalent to `.pubkey(Pubkey(hex: "8b2be0a0ad34805d76679272c28a77dbede9adcbfdca48c681ec8b624a1208a6"))`
+///
+/// ## Notes
+///
+/// - Not all tag information from all NIPs can be modelled using this alone, as some NIPs may define extra associated values for specific event types. You may need to use a specialized type for some event kinds
+///
 enum RefId: TagConvertible, TagKeys, Equatable, Hashable {
     case event(NoteId)
     case pubkey(Pubkey)
@@ -124,6 +137,7 @@ enum RefId: TagConvertible, TagKeys, Equatable, Hashable {
     case naddr(NAddr)
     case reference(String)
     
+    /// The key that defines the type of reference being made
     var key: RefKey {
         switch self {
         case .event:        return .e
@@ -136,6 +150,14 @@ enum RefId: TagConvertible, TagKeys, Equatable, Hashable {
         }
     }
 
+    /// Defines the type of reference being made on a Nostr event tag
+    ///
+    /// Example:
+    /// ```json
+    ///   ["p", "8b2be0a0ad34805d76679272c28a77dbede9adcbfdca48c681ec8b624a1208a6"]
+    /// ```
+    ///
+    /// The `RefKey` is "p"
     enum RefKey: AsciiCharacter, TagKey, CustomStringConvertible {
         case e, p, t, d, q, a, r
 
@@ -148,10 +170,12 @@ enum RefId: TagConvertible, TagKeys, Equatable, Hashable {
         }
     }
 
+    /// A raw nostr-style tag sequence representation of this object
     var tag: [String] {
         [self.key.description, self.description]
     }
-
+    
+    /// Describes what is being referenced, as a `String`
     var description: String {
         switch self {
         case .event(let noteId): return noteId.hex()
@@ -166,6 +190,7 @@ enum RefId: TagConvertible, TagKeys, Equatable, Hashable {
         }
     }
 
+    /// Parses a raw tag sequence
     static func from_tag(tag: TagSequence) -> RefId? {
         var i = tag.makeIterator()
 

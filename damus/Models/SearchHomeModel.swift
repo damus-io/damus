@@ -41,13 +41,13 @@ class SearchHomeModel: ObservableObject {
     
     func subscribe() {
         loading = true
-        let to_relays = determine_to_relays(pool: damus_state.pool, filters: damus_state.relay_filters)
-        damus_state.pool.subscribe(sub_id: base_subid, filters: [get_base_filter()], handler: handle_event, to: to_relays)
+        let to_relays = determine_to_relays(pool: damus_state.nostrNetwork.pool, filters: damus_state.relay_filters)
+        damus_state.nostrNetwork.pool.subscribe(sub_id: base_subid, filters: [get_base_filter()], handler: handle_event, to: to_relays)
     }
 
     func unsubscribe(to: RelayURL? = nil) {
         loading = false
-        damus_state.pool.unsubscribe(sub_id: base_subid, to: to.map { [$0] })
+        damus_state.nostrNetwork.pool.unsubscribe(sub_id: base_subid, to: to.map { [$0] })
     }
 
     func handle_event(relay_id: RelayURL, conn_ev: NostrConnectionEvent) {
@@ -140,7 +140,7 @@ func load_profiles<Y>(context: String, profiles_subid: String, relay_id: RelayUR
 
     let filter = NostrFilter(kinds: [.metadata], authors: authors)
 
-    damus_state.pool.subscribe_to(sub_id: profiles_subid, filters: [filter], to: [relay_id]) { rid, conn_ev in
+    damus_state.nostrNetwork.pool.subscribe_to(sub_id: profiles_subid, filters: [filter], to: [relay_id]) { rid, conn_ev in
         
         let now = UInt64(Date.now.timeIntervalSince1970)
         switch conn_ev {
@@ -156,7 +156,7 @@ func load_profiles<Y>(context: String, profiles_subid: String, relay_id: RelayUR
                 }
             case .eose:
                 print("load_profiles[\(context)]: done loading \(authors.count) profiles from \(relay_id)")
-                damus_state.pool.unsubscribe(sub_id: profiles_subid, to: [relay_id])
+                damus_state.nostrNetwork.pool.unsubscribe(sub_id: profiles_subid, to: [relay_id])
             case .ok:
                 break
             case .notice:

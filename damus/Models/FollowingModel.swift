@@ -42,7 +42,7 @@ class FollowingModel {
         }
         let filters = [filter]
         //print_filters(relay_id: "following", filters: [filters])
-        self.damus_state.pool.subscribe(sub_id: sub_id, filters: filters, handler: handle_event)
+        self.damus_state.nostrNetwork.pool.subscribe(sub_id: sub_id, filters: filters, handler: handle_event)
     }
     
     func unsubscribe() {
@@ -50,7 +50,7 @@ class FollowingModel {
             return
         }
         print("unsubscribing from following \(sub_id)")
-        self.damus_state.pool.unsubscribe(sub_id: sub_id)
+        self.damus_state.nostrNetwork.pool.unsubscribe(sub_id: sub_id)
     }
 
     func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {

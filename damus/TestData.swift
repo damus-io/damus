@@ -83,8 +83,7 @@ var test_damus_state: DamusState = ({
     let our_pubkey = test_pubkey
     let pool = RelayPool(ndb: ndb)
     let settings = UserSettingsStore()
-    let damus = DamusState(pool: pool,
-                           keypair: test_keypair,
+    let damus = DamusState(keypair: test_keypair,
                            likes: .init(our_pubkey: our_pubkey),
                            boosts: .init(our_pubkey: our_pubkey),
                            contacts: .init(our_pubkey: our_pubkey),
@@ -100,8 +99,6 @@ var test_damus_state: DamusState = ({
                            drafts: .init(),
                            events: .init(ndb: ndb),
                            bookmarks: .init(pubkey: our_pubkey),
-                           postbox: .init(pool: pool),
-                           bootstrap_relays: .init(),
                            replies: .init(our_pubkey: our_pubkey),
                            wallet: .init(settings: settings),
                            nav: .init(),

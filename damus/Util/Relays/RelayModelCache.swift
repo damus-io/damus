@@ -7,6 +7,13 @@
 
 import Foundation
 
+/// Stores information, metadata, and logs about different relays. Generally used as a singleton.
+///
+/// # Discussion
+///
+/// This class is primarily used as a shared singleton in `DamusState`, to allow other parts of the app to access information, metadata, and logs about relays without having to fetch it themselves.
+///
+/// For example, it is used by `RelayView` to supplement information about the relay without having to fetch those again from the network, as well as to display logs collected throughout the use of the app.
 final class RelayModelCache: ObservableObject {
     private var models = [RelayURL: RelayModel]()
     

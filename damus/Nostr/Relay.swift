@@ -7,16 +7,25 @@
 
 import Foundation
 
-public struct RelayInfo: Codable {
-    let read: Bool?
-    let write: Bool?
+public struct LegacyKind3RelayRWConfiguration: Codable, Sendable {
+    public let read: Bool?
+    public let write: Bool?
     
     init(read: Bool, write: Bool) {
         self.read = read
         self.write = write
     }
 
-    static let rw = RelayInfo(read: true, write: true)
+    static let rw = LegacyKind3RelayRWConfiguration(read: true, write: true)
+    
+    func toNIP65RWConfiguration() -> NIP65.RelayList.RelayItem.RWConfiguration? {
+        switch (self.read, self.write) {
+        case (false, true): return .write
+        case (true, false): return .read
+        case (true, true): return .readWrite
+        default: return nil
+        }
+    }
 }
 
 enum RelayVariant {
@@ -25,30 +34,33 @@ enum RelayVariant {
     case nwc
 }
 
-public struct RelayDescriptor {
-    let url: RelayURL
-    let info: RelayInfo
-    let variant: RelayVariant
-    
-    init(url: RelayURL, info: RelayInfo, variant: RelayVariant = .regular) {
-        self.url = url
-        self.info = info
-        self.variant = variant
-    }
-    
-    var ephemeral: Bool {
-        switch variant {
-        case .regular:
-            return false
-        case .ephemeral:
-            return true
-        case .nwc:
-            return true
+extension RelayPool {
+    /// Describes a relay for use in `RelayPool`
+    public struct RelayDescriptor {
+        let url: RelayURL
+        var info: NIP65.RelayList.RelayItem.RWConfiguration
+        let variant: RelayVariant
+        
+        init(url: RelayURL, info: NIP65.RelayList.RelayItem.RWConfiguration, variant: RelayVariant = .regular) {
+            self.url = url
+            self.info = info
+            self.variant = variant
         }
-    }
-    
-    static func nwc(url: RelayURL) -> RelayDescriptor {
-        return RelayDescriptor(url: url, info: .rw, variant: .nwc)
+        
+        var ephemeral: Bool {
+            switch variant {
+            case .regular:
+                return false
+            case .ephemeral:
+                return true
+            case .nwc:
+                return true
+            }
+        }
+        
+        static func nwc(url: RelayURL) -> RelayDescriptor {
+            return RelayDescriptor(url: url, info: .readWrite, variant: .nwc)
+        }
     }
 }
 
@@ -129,30 +141,56 @@ struct RelayMetadata: Codable {
     }
 }
 
-class Relay: Identifiable {
-    let descriptor: RelayDescriptor
-    let connection: RelayConnection
-    var authentication_state: RelayAuthenticationState
-
-    var flags: Int
-    
-    init(descriptor: RelayDescriptor, connection: RelayConnection) {
-        self.flags = 0
-        self.descriptor = descriptor
-        self.connection = connection
-        self.authentication_state = RelayAuthenticationState.none
+extension RelayPool {
+    class Relay: Identifiable {
+        var descriptor: RelayDescriptor
+        let connection: RelayConnection
+        var authentication_state: RelayAuthenticationState
+        
+        var flags: Int
+        
+        init(descriptor: RelayDescriptor, connection: RelayConnection) {
+            self.flags = 0
+            self.descriptor = descriptor
+            self.connection = connection
+            self.authentication_state = RelayAuthenticationState.none
+        }
+        
+        var is_broken: Bool {
+            return (flags & RelayFlags.broken.rawValue) == RelayFlags.broken.rawValue
+        }
+        
+        var id: RelayURL {
+            return descriptor.url
+        }
     }
-    
-    var is_broken: Bool {
-        return (flags & RelayFlags.broken.rawValue) == RelayFlags.broken.rawValue
-    }
-
-    var id: RelayURL {
-        return descriptor.url
-    }
-
 }
 
-enum RelayError: Error {
-    case RelayAlreadyExists
+extension RelayPool {
+    enum RelayError: Error {
+        case RelayAlreadyExists
+    }
 }
+
+
+// MARK: - Extension to bridge NIP-65 relay list structs with app-native objects
+
+extension NIP65.RelayList {
+    static func fromLegacyContactList(_ contactList: NdbNote) throws(BridgeError) -> Self {
+        guard let relayListInfo = decode_json_relays(contactList.content) else { throw .couldNotDecodeRelayListInfo }
+        let relayItems = relayListInfo.map({ url, rwConfiguration in
+            return RelayItem(url: url, rwConfiguration: rwConfiguration.toNIP65RWConfiguration() ?? .readWrite)
+        })
+        return NIP65.RelayList(relays: relayItems)
+    }
+    
+    static func fromLegacyContactList(_ contactList: NdbNote?) throws(BridgeError) -> Self? {
+        guard let contactList = contactList else { return nil }
+        return try fromLegacyContactList(contactList)
+    }
+    
+    enum BridgeError: Error {
+        case couldNotDecodeRelayListInfo
+    }
+}
+

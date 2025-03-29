@@ -138,7 +138,7 @@ struct DMChatView: View, KeyboardReadable {
 
         dms.draft = ""
 
-        damus_state.postbox.send(dm)
+        damus_state.nostrNetwork.postbox.send(dm)
         
         handle_incoming_dm(ev: dm, our_pubkey: damus_state.pubkey, dms: damus_state.dms, prev_events: NewEventsBits())
 

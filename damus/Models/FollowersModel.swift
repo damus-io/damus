@@ -37,11 +37,11 @@ class FollowersModel: ObservableObject {
         let filter = get_filter()
         let filters = [filter]
         //print_filters(relay_id: "following", filters: [filters])
-        self.damus_state.pool.subscribe(sub_id: sub_id, filters: filters, handler: handle_event)
+        self.damus_state.nostrNetwork.pool.subscribe(sub_id: sub_id, filters: filters, handler: handle_event)
     }
     
     func unsubscribe() {
-        self.damus_state.pool.unsubscribe(sub_id: sub_id)
+        self.damus_state.nostrNetwork.pool.unsubscribe(sub_id: sub_id)
     }
     
     func handle_contact_event(_ ev: NostrEvent) {
@@ -61,7 +61,7 @@ class FollowersModel: ObservableObject {
         
         let filter = NostrFilter(kinds: [.metadata],
                                  authors: authors)
-        damus_state.pool.subscribe_to(sub_id: profiles_id, filters: [filter], to: [relay_id], handler: handle_event)
+        damus_state.nostrNetwork.pool.subscribe_to(sub_id: profiles_id, filters: [filter], to: [relay_id], handler: handle_event)
     }
 
     func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
@@ -86,7 +86,7 @@ class FollowersModel: ObservableObject {
                 guard let txn = NdbTxn(ndb: self.damus_state.ndb) else { return }
                 load_profiles(relay_id: relay_id, txn: txn)
             } else if sub_id == self.profiles_id {
-                damus_state.pool.unsubscribe(sub_id: profiles_id, to: [relay_id])
+                damus_state.nostrNetwork.pool.unsubscribe(sub_id: profiles_id, to: [relay_id])
             }
             
         case .ok:

@@ -16,13 +16,13 @@ struct UserRelaysView: View {
     init(state: DamusState, relays: [RelayURL]) {
         self.state = state
         self.relays = relays
-        let relay_state = UserRelaysView.make_relay_state(pool: state.pool, relays: relays)
+        let relay_state = UserRelaysView.make_relay_state(state: state, relays: relays)
         self._relay_state = State(initialValue: relay_state)
     }
 
-    static func make_relay_state(pool: RelayPool, relays: [RelayURL]) -> [(RelayURL, Bool)] {
+    static func make_relay_state(state: DamusState, relays: [RelayURL]) -> [(RelayURL, Bool)] {
         return relays.map({ r in
-            return (r, pool.get_relay(r) == nil)
+            return (r, state.nostrNetwork.pool.get_relay(r) == nil)
         }).sorted { (a, b) in a.0 < b.0 }
     }
     

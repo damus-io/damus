@@ -251,7 +251,7 @@ class Drafts: ObservableObject {
             // TODO: Once it is time to implement draft syncing with relays, please consider the following:
             // - Privacy: Sending drafts to the network leaks metadata about app activity, and may break user expectations
             // - Down-sync conflict resolution: Consider how to solve conflicts for different draft versions holding the same ID (e.g. edited in Damus, then another client, then Damus again)
-            damus_state.pool.send_raw_to_local_ndb(.typical(.event(draft_event)))
+            damus_state.nostrNetwork.pool.send_raw_to_local_ndb(.typical(.event(draft_event)))
         }
         
         damus_state.settings.draft_event_ids = draft_events.map({ $0.id.hex() })

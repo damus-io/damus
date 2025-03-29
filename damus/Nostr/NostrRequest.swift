@@ -12,11 +12,14 @@ struct NostrSubscribe {
     let sub_id: String
 }
 
-
+/// Models a request/message that is sent to a Nostr relay
 enum NostrRequestType {
+    /// A standard nostr request
     case typical(NostrRequest)
+    /// A customized nostr request. Generally used in the context of a nostrscript.
     case custom(String)
     
+    /// Whether this request is meant to write data to a relay
     var is_write: Bool {
         guard case .typical(let req) = self else {
             return true
@@ -25,6 +28,7 @@ enum NostrRequestType {
         return req.is_write
     }
     
+    /// Whether this request is meant to read data from a relay
     var is_read: Bool {
         guard case .typical(let req) = self else {
             return true
@@ -34,12 +38,18 @@ enum NostrRequestType {
     }
 }
 
+/// Models a standard request/message that is sent to a Nostr relay.
 enum NostrRequest {
+    /// Subscribes to receive information from the relay
     case subscribe(NostrSubscribe)
+    /// Unsubscribes from an existing subscription, addressed by its id
     case unsubscribe(String)
+    /// Posts an event
     case event(NostrEvent)
+    /// Authenticate with the relay
     case auth(NostrEvent)
 
+    /// Whether this request is meant to write data to a relay
     var is_write: Bool {
         switch self {
         case .subscribe:
@@ -53,6 +63,7 @@ enum NostrRequest {
         }
     }
     
+    /// Whether this request is meant to read data from a relay
     var is_read: Bool {
         return !is_write
     }

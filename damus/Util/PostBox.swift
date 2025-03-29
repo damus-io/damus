@@ -54,7 +54,7 @@ enum CancelSendErr {
 }
 
 class PostBox {
-    let pool: RelayPool
+    private let pool: RelayPool
     var events: [NoteId: PostedEvent]
 
     init(pool: RelayPool) {
