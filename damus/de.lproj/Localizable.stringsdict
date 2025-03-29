@@ -77,7 +77,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ und %1$d teilten</string>
+			<string>%2$@ und %1$d weiteres Profil teilten</string>
 			<key>other</key>
 			<string>%2$@ und %1$d weitere teilten</string>
 		</dict>
