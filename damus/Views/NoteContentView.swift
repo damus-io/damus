@@ -171,10 +171,30 @@ struct NoteContentView: View {
                             Blur()
                             
                             VStack(alignment: .center) {
-                                Text(NSLocalizedString("Non-following user media. Tap to open", comment: "Non-following user media. Tap to open."))
+                                Image(systemName: "eye.slash")
+                                    .foregroundStyle(.white)
+                                    .bold()
+                                    .padding(EdgeInsets(top: 5, leading: 10, bottom: 0, trailing: 10))
+                                Text(NSLocalizedString("Media from someone you \n dont follow", comment: "Media from someone you dont follow"))
+                                    .multilineTextAlignment(.center)
                                     .foregroundStyle(Color.white)
                                     .font(.title2)
-                                    .padding(8)
+                                    .padding(EdgeInsets(top: 5, leading: 10, bottom: 0, trailing: 10))
+                                Button(NSLocalizedString("Tap to load", comment: "Tap to load")){
+                                    blur_images = false
+                                }
+                                .buttonStyle(.bordered)
+                                .fontWeight(.bold)
+                                .foregroundStyle(.white)
+                                .padding(EdgeInsets(top: 5, leading: 10, bottom: 0, trailing: 10))
+                                switch artifacts.media[0] {
+                                case .image(let url), .video(let url):
+                                    Text(abbreviateURL(url))
+                                        .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
+                                        .foregroundStyle(.white)
+                                        .multilineTextAlignment(.center)
+                                        .padding(EdgeInsets(top: 0, leading: 10, bottom: 5, trailing: 10))
+                                }
                             }
                         }
                         .onTapGesture {
