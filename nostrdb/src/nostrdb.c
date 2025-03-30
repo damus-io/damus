@@ -239,6 +239,7 @@ enum ndb_query_plan {
 	NDB_PLAN_TAGS,
 	NDB_PLAN_SEARCH,
 	NDB_PLAN_RELAY_KINDS,
+	NDB_PLAN_PROFILE_SEARCH,
 };
 
 // A id + u64 + timestamp
@@ -4027,6 +4028,67 @@ next:
 	return 1;
 }
 
+static int ndb_query_plan_execute_profile_search(
+		struct ndb_txn *txn,
+		struct ndb_filter *filter,
+		struct ndb_query_results *results,
+		int limit)
+{
+	const char *search;
+	int i;
+
+	// The filter pubkey is updated inplace for each note search
+	unsigned char *filter_pubkey;
+	unsigned char pubkey[32] = {0};
+	struct ndb_filter_elements *els;
+	struct ndb_search profile_search;
+	struct ndb_filter note_filter, *f = &note_filter;
+
+	if (!(search = ndb_filter_find_search(filter)))
+		return 0;
+
+	if (!ndb_filter_init_with(f, 1))
+		return 0;
+
+	ndb_filter_start_field(f, NDB_FILTER_KINDS);
+	ndb_filter_add_int_element(f, 0);
+	ndb_filter_end_field(f);
+
+	ndb_filter_start_field(f, NDB_FILTER_AUTHORS);
+	ndb_filter_add_id_element(f, pubkey);
+	ndb_filter_end_field(f);
+	ndb_filter_end(f);
+
+	// get the authors element after we finalize the filter, since
+	// the data could have moved
+	if (!(els = ndb_filter_find_elements(f, NDB_FILTER_AUTHORS)))
+		return 0;
+
+	// grab pointer to pubkey in the filter so that we can
+	// update the filter as we go
+	if (!(filter_pubkey = ndb_filter_get_id_element(f, els, 0)))
+		return 0;
+
+	for (i = 0; !query_is_full(results, limit); i++) {
+		if (i == 0) {
+			if (!ndb_search_profile(txn, &profile_search, search))
+				break;
+		} else {
+			if (!ndb_search_profile_next(&profile_search))
+				break;
+		}
+
+		// Copy pubkey into filter
+		memcpy(filter_pubkey, profile_search.key->id, 32);
+
+		// Look up the corresponding note associated with that pubkey
+		if (!ndb_query_plan_execute_author_kinds(txn, f, results, limit))
+			return 0;
+	}
+
+	return 1;
+}
+
 static int ndb_query_plan_execute_relay_kinds(
 		struct ndb_txn *txn,
 		struct ndb_filter *filter,
@@ -4239,6 +4301,11 @@ static enum ndb_query_plan ndb_filter_plan(struct ndb_filter *filter)
 	tags = ndb_filter_find_elements(filter, NDB_FILTER_TAGS);
 	relays = ndb_filter_find_elements(filter, NDB_FILTER_RELAYS);
 
+	// profile search
+	if (kinds && kinds->count == 1 && kinds->elements[0] == 0 && search) {
+		return NDB_PLAN_PROFILE_SEARCH;
+	}
+
 	// this is rougly similar to the heuristic in strfry's dbscan
 	if (search) {
 		return NDB_PLAN_SEARCH;
@@ -4270,6 +4337,7 @@ static const char *ndb_query_plan_name(enum ndb_query_plan plan_id)
 		case NDB_PLAN_AUTHORS: return "authors";
 		case NDB_PLAN_RELAY_KINDS: return "relay_kinds";
 		case NDB_PLAN_AUTHOR_KINDS: return "author_kinds";
+		case NDB_PLAN_PROFILE_SEARCH: return "profile_search";
 	}
 
 	return "unknown";
@@ -4308,6 +4376,12 @@ static int ndb_query_filter(struct ndb_txn *txn, struct ndb_filter *filter,
 		if (!ndb_query_plan_execute_search(txn, filter, &results, limit))
 			return 0;
 		break;
+
+	case NDB_PLAN_PROFILE_SEARCH:
+		if (!ndb_query_plan_execute_profile_search(txn, filter, &results, limit))
+			return 0;
+		break;
+
 	// We have just kinds, just scan the kind index
 	case NDB_PLAN_KINDS:
 		if (!ndb_query_plan_execute_kinds(txn, filter, &results, limit))
