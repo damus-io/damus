@@ -431,7 +431,7 @@ public struct ImageFill {
 // MARK: - Preview Provider
 struct ImageCarousel_Previews: PreviewProvider {
     static var previews: some View {
-        let url: MediaUrl = .image(URL(string: "https://jb55.com/red-me.jpg")!)
+        let url: MediaUrl = .image(URL(string: "https://i.imgflip.com/95b6nm.jpg")!)
         let test_video_url: MediaUrl = .video(URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!)
         ImageCarousel<AnyView>(state: test_damus_state, evid: test_note.id, urls: [test_video_url, url])
             .environmentObject(OrientationTracker())

@@ -1,5 +1,5 @@
 {
-  "originHash" : "06318d35ee2e6bd681b95591e67da33a9461b48a3c652e58bd9d1a6f0d82bdac",
+  "originHash" : "085cf0f645323bf77edb52886489bf77b309a0a2d2b78a54beaf8520b540d596",
   "pins" : [
     {
       "identity" : "codescanner",
@@ -22,8 +22,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tyiu/EmojiKit",
       "state" : {
-        "revision" : "47a4b1402de26be0299dcb4d667c1faaf21a7874",
-        "version" : "0.2.0"
+        "revision" : "05805f72d63a6d6a2d7dc7fe14abd37c1317b11a",
+        "version" : "0.1.2"
       }
     },
     {
@@ -31,8 +31,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tyiu/EmojiPicker.git",
       "state" : {
-        "revision" : "3f48903721eae223238ff0af17c22d6373d33813",
-        "version" : "0.2.0"
+        "revision" : "0c28b4a1a6b8840cf2580bda59517f6d0a733dc8",
+        "version" : "0.1.1"
       }
     },
     {

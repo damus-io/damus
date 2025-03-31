@@ -105,14 +105,8 @@
     "Accessibility" : {
       "comment" : "Section header for accessibility settings"
     },
-    "Account" : {
-      "comment" : "Label for the user account information with the Nostr Wallet Connect wallet provider."
-    },
     "Account creation" : {
       "comment" : "Label for Purple account creation date"
-    },
-    "Account details" : {
-      "comment" : "Prompt to ask user if they want to attach their Nostr Wallet Connect lightning wallet."
     },
     "Account private key" : {
       "comment" : "Accessibility label for the private key input field"
@@ -219,6 +213,9 @@
     "Are you sure you want to clear the cache? This will free space, but images may take longer to load again." : {
       "comment" : "Message explaining what it means to clear the cache, asking if user wants to proceed."
     },
+    "Are you sure you want to connect this wallet?" : {
+      "comment" : "Prompt to ask user if they want to attach their Nostr Wallet Connect lightning wallet."
+    },
     "Are you sure you want to delete all of your bookmarks?" : {
       "comment" : "Alert for deleting all of the bookmarks."
     },
@@ -234,14 +231,8 @@
     "As part of your Damus Purple membership, you get complimentary and automated translations. Would you like to enable Damus Purple translations?\n\nTip: You can always change this later in Settings → Translations" : {
       "comment" : "Message notifying the user that they get auto-translations as part of their service"
     },
-    "Attach to any third party provider you already use." : {
-      "comment" : "Information text guiding users on attaching existing provider."
-    },
     "Authenticated" : {
       "comment" : "Label to display that authentication to a server has succeeded."
-    },
-    "AUTOMATIC SETUP" : {
-      "comment" : "Heading for the section that performs an automatic wallet connection setup."
     },
     "Automatic translations" : {
       "comment" : "Part 1 of 2 in message 'You unlocked automatic translations' the user gets when they sign up for Damus Purple"
@@ -296,9 +287,6 @@
     },
     "Choose from Library" : {
       "comment" : "Option to select photo from library"
-    },
-    "Choose the third-party payment provider you'd like to use." : {
-      "comment" : "The description for one of the \"Why add Zaps?\" boxes"
     },
     "Clear All" : {
       "comment" : "Button for clearing bookmarks data."
@@ -426,12 +414,6 @@
     "Create new mutelist" : {
       "comment" : "Title of alert prompting the user to create a new mutelist."
     },
-    "Create new wallet" : {
-      "comment" : "Button text for creating a new wallet."
-    },
-    "Current balance" : {
-      "comment" : "Label for displaying current wallet balance"
-    },
     "Custom" : {
       "comment" : "Dropdown option for selecting a custom translation server."
     },
@@ -449,6 +431,9 @@
     },
     "Damus Purple environment" : {
       "comment" : "Prompt selection of the Damus purple environment (Developer feature to switch between real/production mode to test modes)."
+    },
+    "Damus Wallet" : {
+      "comment" : "Title text for Damus Wallet view."
     },
     "DeepL (Proprietary, Higher Accuracy)" : {
       "comment" : "Dropdown option for selecting DeepL as the translation service."
@@ -503,9 +488,6 @@
     },
     "Earn Money" : {
       "comment" : "Heading indicating that this application allows users to earn money."
-    },
-    "Easily create a new wallet and attach it to your account." : {
-      "comment" : "Description for the create new wallet feature."
     },
     "Edit" : {
       "comment" : "Button to edit user's profile.\nButton to enter edit mode for modifying the list of relays.\nEdit Button for editing profile"
@@ -593,9 +575,6 @@
     },
     "Failed to parse" : {
       "comment" : "NostrScript error message when it fails to parse a script."
-    },
-    "Find a Wallet" : {
-      "comment" : "The heading for one of the \"Why add Zaps?\" boxes"
     },
     "First Aid" : {
       "comment" : "Navigation title for first aid settings and tools\nSection header for first aid tools and settings"
@@ -687,15 +666,6 @@
     },
     "Get API Key with BTC/Lightning" : {
       "comment" : "Button to navigate to nokyctranslate website to get a translation API key.\nButton to navigate to translate.nostr.wine to get a translation API key."
-    },
-    "Get cash instantly from your followers" : {
-      "comment" : "Feature description for receiving money instantly."
-    },
-    "Get paid for being you" : {
-      "comment" : "Description for monetizing one's presence."
-    },
-    "Give thanks" : {
-      "comment" : "Heading explaining a benefit of connecting a lightning wallet."
     },
     "Go to the app" : {
       "comment" : "Button label giving the user the option to go to the app after sharing content"
@@ -790,17 +760,11 @@
     "Keys" : {
       "comment" : "Navigation title for managing keys.\nSettings section for managing keys"
     },
-    "Latest transactions" : {
-      "comment" : "Heading for latest wallet transactions list"
-    },
     "Learn more about the features" : {
       "comment" : "Label for a link to the Damus website, to allow the user to learn more about the features of Purple"
     },
     "Left Handed" : {
       "comment" : "Moves the post button to the left side of the screen"
-    },
-    "Let your fans show their support" : {
-      "comment" : "Heading pointing out a benefit of connecting a lightning wallet."
     },
     "LibreTranslate (Open Source)" : {
       "comment" : "Dropdown option for selecting LibreTranslate as the translation service."
@@ -816,12 +780,6 @@
     },
     "Likes" : {
       "comment" : "Setting to enable Like Local Notification"
-    },
-    "Link to services that support Nostr Wallet Connect like Alby, Coinos and more." : {
-      "comment" : "The description for one of the \"Why add Zaps?\" boxes"
-    },
-    "Link your account" : {
-      "comment" : "The heading for one of the \"Why add Zaps?\" boxes"
     },
     "LIVE" : {
       "comment" : "Text indicator that the video is a livestream."
@@ -864,12 +822,6 @@
     },
     "Manage subscription" : {
       "comment" : "Button to take user to manage Damus Purple subscription"
-    },
-    "MANUAL SETUP" : {
-      "comment" : "Label for manual wallet setup."
-    },
-    "Maybe later" : {
-      "comment" : "Text for button to disconnect from Nostr Wallet Connect lightning wallet."
     },
     "Media previews" : {
       "comment" : "Setting to show media"
@@ -963,9 +915,6 @@
     },
     "No results" : {
       "comment" : "A label indicating that note search resulted in no results"
-    },
-    "No transactions yet" : {
-      "comment" : "Message shown when no transactions are available"
     },
     "No zaps will be sent, only a lightning payment." : {
       "comment" : "Description of non-zap type where sats are sent to the user's wallet as a regular Lightning payment, not as a zap."
@@ -1113,9 +1062,6 @@
     },
     "People" : {
       "comment" : "Label for filter for seeing only people follows."
-    },
-    "People will be able to send you cash from your profile. No money goes to Damus." : {
-      "comment" : "The description for one of the \"Why add Zaps?\" boxes"
     },
     "Permanently Delete Account" : {
       "comment" : "Alert for deleting the users account.\nSection title for deleting the user"
@@ -1323,9 +1269,6 @@
     "Retry" : {
       "comment" : "Button to retry completing account creation after an error occurred."
     },
-    "Routing" : {
-      "comment" : "Label indicating the routing address for Nostr Wallet Connect payments. In other words, the relay used by the NWC wallet provider"
-    },
     "Run" : {
       "comment" : "Button that runs a NostrScript."
     },
@@ -1337,9 +1280,6 @@
     },
     "Satoshi Nakamoto" : {
       "comment" : "Name of Bitcoin creator(s)."
-    },
-    "SATS" : {
-      "comment" : "Abbreviation for Satoshis, smallest bitcoin unit"
     },
     "Save" : {
       "comment" : "Button for saving profile.\nButton to save key, complete account creation, and start using the app."
@@ -1398,6 +1338,9 @@
     "Secret Account Login Key" : {
       "comment" : "Section title for user's secret account login key."
     },
+    "Securely connect your Damus app to your wallet using Nostr Wallet Connect" : {
+      "comment" : "Text to prompt user to connect their wallet using 'Nostr Wallet Connect'."
+    },
     "Select a Lightning wallet" : {
       "comment" : "Title of section for selecting a Lightning wallet to pay a Lightning invoice."
     },
@@ -1422,17 +1365,8 @@
     "Service" : {
       "comment" : "Prompt selection of translation service provider."
     },
-    "Set up wallet" : {
-      "comment" : "Text for button to disconnect from Nostr Wallet Connect lightning wallet."
-    },
-    "Setting up Zaps lets people know you're ready to start receiving money." : {
-      "comment" : "Information about enabling payments."
-    },
     "Settings" : {
       "comment" : "Navigation title for Settings view.\nSidebar menu label for accessing the app settings"
-    },
-    "Setup Wallet" : {
-      "comment" : "Heading for Nostr Wallet Connect setup screen\nHeading for wallet setup confirmation screen"
     },
     "Share" : {
       "comment" : "Button to share a note\nButton to share an image.\nButton to share the link to a profile.\nSave button text for saving profile status settings."
@@ -1529,9 +1463,6 @@
     },
     "Staging (for dev builds)" : {
       "comment" : "Label indicating the staging environment for Push notification functionality"
-    },
-    "Start receiving money" : {
-      "comment" : "The heading for one of the \"Why add Zaps?\" boxes"
     },
     "Staying humble..." : {
       "comment" : "Placeholder as an example of what the user could set as their profile status."
@@ -1689,9 +1620,6 @@
     "Universe 🛸" : {
       "comment" : "Toolbar label for the universal view where notes from all connected relay servers appear."
     },
-    "Unknown" : {
-      "comment" : "A name label for an unknown user"
-    },
     "Unmute" : {
       "comment" : "Button to unmute a profile."
     },
@@ -1712,9 +1640,6 @@
     },
     "URL" : {
       "comment" : "Custom URL host for Damus Purple testing\nCustom URL host for Damus push notification testing\nExample URL to LibreTranslate server"
-    },
-    "Use existing" : {
-      "comment" : "Button text to use an existing wallet."
     },
     "User has been muted" : {
       "comment" : "Alert message that informs a user was muted."
@@ -1761,6 +1686,12 @@
     "Wallet" : {
       "comment" : "Navigation title for Wallet view\nNavigation title for attaching Nostr Wallet Connect lightning wallet.\nSidebar menu label for Wallet view.\nTitle for section in zap settings that controls the Lightning wallet selection."
     },
+    "Wallet Address" : {
+      "comment" : "Label text indicating that below it is the wallet address."
+    },
+    "Wallet Relay" : {
+      "comment" : "Label text indicating that below it is the information about the wallet relay."
+    },
     "WARNING:\n\nThis will reset your contact list, including the list of everyone you follow and the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY." : {
       "comment" : "Alert for resetting the user's contact list."
     },
@@ -1803,14 +1734,8 @@
     "What do you want to report?" : {
       "comment" : "Header text to prompt user what issue they want to report."
     },
-    "When supporters tip with Zaps, they can add a note and we can make it easy for you to instantly reply to show your gratitude." : {
-      "comment" : "Description explaining a benefit of connecting a lightning wallet."
-    },
     "Who to Follow" : {
       "comment" : "Title for a screen displaying suggestions of who to follow"
-    },
-    "Why add Zaps?" : {
-      "comment" : "Heading to explain the benefits of zaps."
     },
     "Words" : {
       "comment" : "Section header title for a list of words that are muted."
@@ -1835,9 +1760,6 @@
     },
     "You clicked on a Purple welcome link, but we could not find your checkout. This is likely a bug." : {
       "comment" : "Error label upon continuing in the app from a Damus Purple purchase"
-    },
-    "You drive the conversation and we want to make it easier for people to support your work beyond follows, reposts, and likes." : {
-      "comment" : "Text explaining the benefit of connecting a lightning wallet for content creators."
     },
     "You have no bookmarks yet, add them in the context menu" : {
       "comment" : "Text indicating that there are no bookmarks to be viewed"
@@ -1901,9 +1823,6 @@
     },
     "Zaps" : {
       "comment" : "Label for filter for zap notifications.\nNavigation bar title for the Zaps view.\nNavigation title for zap settings.\nSection header for zap settings\nSetting to enable Zap Local Notification\nTitle for section in zap settings that controls general zap preferences."
-    },
-    "Zaps are an easy way to support the incredible\nvoices that make up the conversation on nostr.\nHere's how it works" : {
-      "comment" : "Describing the functional benefits of Zaps."
     }
   },
   "version" : "1.0"

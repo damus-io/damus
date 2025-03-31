@@ -162,9 +162,6 @@ struct SideMenuView: View {
                 
                 PubkeyView(pubkey: damus_state.pubkey, sidemenu: true)
                     .pubkey_context_menu(pubkey: damus_state.pubkey)
-                    .simultaneousGesture(TapGesture().onEnded{
-                        isSidebarVisible = true
-                    })
             }
         }
     }

@@ -29,18 +29,7 @@ class ThreadModel: ObservableObject {
     ///
     /// This is a computed property because we then don't need to worry about keeping things in sync
     var parent_events: [NostrEvent] {
-        // This block of code helps ensure `ThreadEventMap` stays in sync with `EventCache`
-        let parent_events_from_cache = damus_state.events.parent_events(event: selected_event, keypair: damus_state.keypair)
-        for parent_event in parent_events_from_cache {
-            add_event(
-                parent_event,
-                keypair: damus_state.keypair,
-                look_for_parent_events: false,   // We have all parents we need for now
-                publish_changes: false           // Publishing changes during a view render is problematic
-            )
-        }
-        
-        return parent_events_from_cache
+        return event_map.parent_events(of: selected_event)
     }
     /// All of the direct and indirect replies of `selected_event` in the thread. sorted chronologically
     ///
@@ -136,13 +125,7 @@ class ThreadModel: ObservableObject {
     /// Adds an event to this thread.
     /// Normally this does not need to be called externally because it is the responsibility of this class to load the events, not the view's.
     /// However, this can be called externally for testing purposes (e.g. injecting events for testing)
-    /// 
-    /// - Parameters:
-    ///   - ev: The event to add into the thread event map
-    ///   - keypair: The user's keypair
-    ///   - look_for_parent_events: Whether to search for parent events of the input event in NostrDB
-    ///   - publish_changes: Whether to publish changes at the end
-    func add_event(_ ev: NostrEvent, keypair: Keypair, look_for_parent_events: Bool = true, publish_changes: Bool = true) {
+    func add_event(_ ev: NostrEvent, keypair: Keypair) {
         if event_map.contains(id: ev.id) {
             return
         }
@@ -153,22 +136,8 @@ class ThreadModel: ObservableObject {
 
         event_map.add(event: ev)
         
-        if look_for_parent_events {
-            // Add all parent events that we have on EventCache (and subsequently on NostrDB)
-            // This helps ensure we include as many locally-stored notes as possible — even on poor networking conditions
-            damus_state.events.parent_events(event: ev, keypair: damus_state.keypair).forEach {
-                add_event(
-                    $0,  // The `lookup` function in `parent_events` turns the event into an "owned" object, so we do not need to clone here
-                    keypair: damus_state.keypair,
-                    look_for_parent_events: false,   // We do not need deep recursion
-                    publish_changes: false           // Do not publish changes multiple times
-                )
-            }
-        }
-        
-        if publish_changes {
-            objectWillChange.send()
-        }
+        // Publish changes
+        objectWillChange.send()
     }
     
     /// Handles an incoming event from a relay pool

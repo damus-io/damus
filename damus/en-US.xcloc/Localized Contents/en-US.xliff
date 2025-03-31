@@ -164,11 +164,6 @@ Sentence composed of 2 variables to describe how many zap payments there are on 
         <target>API Key (required)</target>
         <note>Prompt for required entry of API Key to use translation server.</note>
       </trans-unit>
-      <trans-unit id="AUTOMATIC SETUP" xml:space="preserve">
-        <source>AUTOMATIC SETUP</source>
-        <target>AUTOMATIC SETUP</target>
-        <note>Heading for the section that performs an automatic wallet connection setup.</note>
-      </trans-unit>
       <trans-unit id="About Me" xml:space="preserve">
         <source>About Me</source>
         <target>About Me</target>
@@ -189,20 +184,10 @@ Sentence composed of 2 variables to describe how many zap payments there are on 
         <target>Accessibility</target>
         <note>Section header for accessibility settings</note>
       </trans-unit>
-      <trans-unit id="Account" xml:space="preserve">
-        <source>Account</source>
-        <target>Account</target>
-        <note>Label for the user account information with the Nostr Wallet Connect wallet provider.</note>
-      </trans-unit>
       <trans-unit id="Account creation" xml:space="preserve">
         <source>Account creation</source>
         <target>Account creation</target>
         <note>Label for Purple account creation date</note>
-      </trans-unit>
-      <trans-unit id="Account details" xml:space="preserve">
-        <source>Account details</source>
-        <target>Account details</target>
-        <note>Prompt to ask user if they want to attach their Nostr Wallet Connect lightning wallet.</note>
       </trans-unit>
       <trans-unit id="Account private key" xml:space="preserve">
         <source>Account private key</source>
@@ -351,6 +336,11 @@ Section header for text and appearance settings</note>
         <target>Are you sure you want to clear the cache? This will free space, but images may take longer to load again.</target>
         <note>Message explaining what it means to clear the cache, asking if user wants to proceed.</note>
       </trans-unit>
+      <trans-unit id="Are you sure you want to connect this wallet?" xml:space="preserve">
+        <source>Are you sure you want to connect this wallet?</source>
+        <target>Are you sure you want to connect this wallet?</target>
+        <note>Prompt to ask user if they want to attach their Nostr Wallet Connect lightning wallet.</note>
+      </trans-unit>
       <trans-unit id="Are you sure you want to delete all of your bookmarks?" xml:space="preserve">
         <source>Are you sure you want to delete all of your bookmarks?</source>
         <target>Are you sure you want to delete all of your bookmarks?</target>
@@ -379,11 +369,6 @@ Tip: You can always change this later in Settings → Translations</source>
 
 Tip: You can always change this later in Settings → Translations</target>
         <note>Message notifying the user that they get auto-translations as part of their service</note>
-      </trans-unit>
-      <trans-unit id="Attach to any third party provider you already use." xml:space="preserve">
-        <source>Attach to any third party provider you already use.</source>
-        <target>Attach to any third party provider you already use.</target>
-        <note>Information text guiding users on attaching existing provider.</note>
       </trans-unit>
       <trans-unit id="Authenticated" xml:space="preserve">
         <source>Authenticated</source>
@@ -500,11 +485,6 @@ Text for button to cancel out of connecting Nostr Wallet Connect lightning walle
         <source>Choose from Library</source>
         <target>Choose from Library</target>
         <note>Option to select photo from library</note>
-      </trans-unit>
-      <trans-unit id="Choose the third-party payment provider you'd like to use." xml:space="preserve">
-        <source>Choose the third-party payment provider you'd like to use.</source>
-        <target>Choose the third-party payment provider you'd like to use.</target>
-        <note>The description for one of the "Why add Zaps?" boxes</note>
       </trans-unit>
       <trans-unit id="Clear All" xml:space="preserve">
         <source>Clear All</source>
@@ -719,16 +699,6 @@ Context menu option for copying the version of damus.</note>
         <target>Create new mutelist</target>
         <note>Title of alert prompting the user to create a new mutelist.</note>
       </trans-unit>
-      <trans-unit id="Create new wallet" xml:space="preserve">
-        <source>Create new wallet</source>
-        <target>Create new wallet</target>
-        <note>Button text for creating a new wallet.</note>
-      </trans-unit>
-      <trans-unit id="Current balance" xml:space="preserve">
-        <source>Current balance</source>
-        <target>Current balance</target>
-        <note>Label for displaying current wallet balance</note>
-      </trans-unit>
       <trans-unit id="Custom" xml:space="preserve">
         <source>Custom</source>
         <target>Custom</target>
@@ -762,6 +732,11 @@ Toolbar label for DMs view, where DM is the English abbreviation for Direct Mess
         <source>Damus Purple environment</source>
         <target>Damus Purple environment</target>
         <note>Prompt selection of the Damus purple environment (Developer feature to switch between real/production mode to test modes).</note>
+      </trans-unit>
+      <trans-unit id="Damus Wallet" xml:space="preserve">
+        <source>Damus Wallet</source>
+        <target>Damus Wallet</target>
+        <note>Title text for Damus Wallet view.</note>
       </trans-unit>
       <trans-unit id="Damus logo" xml:space="preserve">
         <source>Damus logo</source>
@@ -863,11 +838,6 @@ The duration in which to mute the given item.</note>
         <source>Earn Money</source>
         <target>Earn Money</target>
         <note>Heading indicating that this application allows users to earn money.</note>
-      </trans-unit>
-      <trans-unit id="Easily create a new wallet and attach it to your account." xml:space="preserve">
-        <source>Easily create a new wallet and attach it to your account.</source>
-        <target>Easily create a new wallet and attach it to your account.</target>
-        <note>Description for the create new wallet feature.</note>
       </trans-unit>
       <trans-unit id="Edit" xml:space="preserve">
         <source>Edit</source>
@@ -1014,11 +984,6 @@ Title indicating that an error has occurred.</note>
         <target>Failed to parse</target>
         <note>NostrScript error message when it fails to parse a script.</note>
       </trans-unit>
-      <trans-unit id="Find a Wallet" xml:space="preserve">
-        <source>Find a Wallet</source>
-        <target>Find a Wallet</target>
-        <note>The heading for one of the "Why add Zaps?" boxes</note>
-      </trans-unit>
       <trans-unit id="First Aid" xml:space="preserve">
         <source>First Aid</source>
         <target>First Aid</target>
@@ -1152,21 +1117,6 @@ Button to navigate to translate.nostr.wine to get a translation API key.</note>
         <source>Get a special badge on your profile to show everyone your contribution to Freedom tech</source>
         <target>Get a special badge on your profile to show everyone your contribution to Freedom tech</target>
         <note>Supporter badge description</note>
-      </trans-unit>
-      <trans-unit id="Get cash instantly from your followers" xml:space="preserve">
-        <source>Get cash instantly from your followers</source>
-        <target>Get cash instantly from your followers</target>
-        <note>Feature description for receiving money instantly.</note>
-      </trans-unit>
-      <trans-unit id="Get paid for being you" xml:space="preserve">
-        <source>Get paid for being you</source>
-        <target>Get paid for being you</target>
-        <note>Description for monetizing one's presence.</note>
-      </trans-unit>
-      <trans-unit id="Give thanks" xml:space="preserve">
-        <source>Give thanks</source>
-        <target>Give thanks</target>
-        <note>Heading explaining a benefit of connecting a lightning wallet.</note>
       </trans-unit>
       <trans-unit id="Go to the app" xml:space="preserve">
         <source>Go to the app</source>
@@ -1333,11 +1283,6 @@ Settings section for managing keys</note>
         <target>LIVE</target>
         <note>Text indicator that the video is a livestream.</note>
       </trans-unit>
-      <trans-unit id="Latest transactions" xml:space="preserve">
-        <source>Latest transactions</source>
-        <target>Latest transactions</target>
-        <note>Heading for latest wallet transactions list</note>
-      </trans-unit>
       <trans-unit id="Learn more about the features" xml:space="preserve">
         <source>Learn more about the features</source>
         <target>Learn more about the features</target>
@@ -1347,11 +1292,6 @@ Settings section for managing keys</note>
         <source>Left Handed</source>
         <target>Left Handed</target>
         <note>Moves the post button to the left side of the screen</note>
-      </trans-unit>
-      <trans-unit id="Let your fans show their support" xml:space="preserve">
-        <source>Let your fans show their support</source>
-        <target>Let your fans show their support</target>
-        <note>Heading pointing out a benefit of connecting a lightning wallet.</note>
       </trans-unit>
       <trans-unit id="LibreTranslate (Open Source)" xml:space="preserve">
         <source>LibreTranslate (Open Source)</source>
@@ -1377,16 +1317,6 @@ Settings section for managing keys</note>
         <source>Likes</source>
         <target>Likes</target>
         <note>Setting to enable Like Local Notification</note>
-      </trans-unit>
-      <trans-unit id="Link to services that support Nostr Wallet Connect like Alby, Coinos and more." xml:space="preserve">
-        <source>Link to services that support Nostr Wallet Connect like Alby, Coinos and more.</source>
-        <target>Link to services that support Nostr Wallet Connect like Alby, Coinos and more.</target>
-        <note>The description for one of the "Why add Zaps?" boxes</note>
-      </trans-unit>
-      <trans-unit id="Link your account" xml:space="preserve">
-        <source>Link your account</source>
-        <target>Link your account</target>
-        <note>The heading for one of the "Why add Zaps?" boxes</note>
       </trans-unit>
       <trans-unit id="Load media" xml:space="preserve">
         <source>Load media</source>
@@ -1431,11 +1361,6 @@ Sidebar menu label to sign out of the account.</note>
         <target>Looking for %@...</target>
         <note>Label that appears when searching for note or profile</note>
       </trans-unit>
-      <trans-unit id="MANUAL SETUP" xml:space="preserve">
-        <source>MANUAL SETUP</source>
-        <target>MANUAL SETUP</target>
-        <note>Label for manual wallet setup.</note>
-      </trans-unit>
       <trans-unit id="Make Default" xml:space="preserve">
         <source>Make Default</source>
         <target>Make Default</target>
@@ -1460,11 +1385,6 @@ Sidebar menu label to sign out of the account.</note>
         <source>Manage subscription</source>
         <target>Manage subscription</target>
         <note>Button to take user to manage Damus Purple subscription</note>
-      </trans-unit>
-      <trans-unit id="Maybe later" xml:space="preserve">
-        <source>Maybe later</source>
-        <target>Maybe later</target>
-        <note>Text for button to disconnect from Nostr Wallet Connect lightning wallet.</note>
       </trans-unit>
       <trans-unit id="Media previews" xml:space="preserve">
         <source>Media previews</source>
@@ -1634,11 +1554,6 @@ User confirm No</note>
         <source>No text selected</source>
         <target>No text selected</target>
         <note>Title indicating that a highlight cannot be posted because no text was selected.</note>
-      </trans-unit>
-      <trans-unit id="No transactions yet" xml:space="preserve">
-        <source>No transactions yet</source>
-        <target>No transactions yet</target>
-        <note>Message shown when no transactions are available</note>
       </trans-unit>
       <trans-unit id="No zaps will be sent, only a lightning payment." xml:space="preserve">
         <source>No zaps will be sent, only a lightning payment.</source>
@@ -1844,11 +1759,6 @@ Button label to dismiss an error dialog</note>
         <source>People</source>
         <target>People</target>
         <note>Label for filter for seeing only people follows.</note>
-      </trans-unit>
-      <trans-unit id="People will be able to send you cash from your profile. No money goes to Damus." xml:space="preserve">
-        <source>People will be able to send you cash from your profile. No money goes to Damus.</source>
-        <target>People will be able to send you cash from your profile. No money goes to Damus.</target>
-        <note>The description for one of the "Why add Zaps?" boxes</note>
       </trans-unit>
       <trans-unit id="Permanently Delete Account" xml:space="preserve">
         <source>Permanently Delete Account</source>
@@ -2180,11 +2090,6 @@ Setting to enable Repost Local Notification</note>
         <target>Retry</target>
         <note>Button to retry completing account creation after an error occurred.</note>
       </trans-unit>
-      <trans-unit id="Routing" xml:space="preserve">
-        <source>Routing</source>
-        <target>Routing</target>
-        <note>Label indicating the routing address for Nostr Wallet Connect payments. In other words, the relay used by the NWC wallet provider</note>
-      </trans-unit>
       <trans-unit id="Run" xml:space="preserve">
         <source>Run</source>
         <target>Run</target>
@@ -2199,11 +2104,6 @@ Setting to enable Repost Local Notification</note>
         <source>Runtime error</source>
         <target>Runtime error</target>
         <note>Indication that a runtime error occurred when running a NostrScript.</note>
-      </trans-unit>
-      <trans-unit id="SATS" xml:space="preserve">
-        <source>SATS</source>
-        <target>SATS</target>
-        <note>Abbreviation for Satoshis, smallest bitcoin unit</note>
       </trans-unit>
       <trans-unit id="SOFTWARE" xml:space="preserve">
         <source>SOFTWARE</source>
@@ -2313,6 +2213,11 @@ Section header for search/universe settings</note>
         <target>Secret Account Login Key</target>
         <note>Section title for user's secret account login key.</note>
       </trans-unit>
+      <trans-unit id="Securely connect your Damus app to your wallet using Nostr Wallet Connect" xml:space="preserve">
+        <source>Securely connect your Damus app to your wallet using Nostr Wallet Connect</source>
+        <target>Securely connect your Damus app to your wallet using Nostr Wallet Connect</target>
+        <note>Text to prompt user to connect their wallet using 'Nostr Wallet Connect'.</note>
+      </trans-unit>
       <trans-unit id="Select a Lightning wallet" xml:space="preserve">
         <source>Select a Lightning wallet</source>
         <target>Select a Lightning wallet</target>
@@ -2348,27 +2253,11 @@ Section header for search/universe settings</note>
         <target>Service</target>
         <note>Prompt selection of translation service provider.</note>
       </trans-unit>
-      <trans-unit id="Set up wallet" xml:space="preserve">
-        <source>Set up wallet</source>
-        <target>Set up wallet</target>
-        <note>Text for button to disconnect from Nostr Wallet Connect lightning wallet.</note>
-      </trans-unit>
-      <trans-unit id="Setting up Zaps lets people know you're ready to start receiving money." xml:space="preserve">
-        <source>Setting up Zaps lets people know you're ready to start receiving money.</source>
-        <target>Setting up Zaps lets people know you're ready to start receiving money.</target>
-        <note>Information about enabling payments.</note>
-      </trans-unit>
       <trans-unit id="Settings" xml:space="preserve">
         <source>Settings</source>
         <target>Settings</target>
         <note>Navigation title for Settings view.
 Sidebar menu label for accessing the app settings</note>
-      </trans-unit>
-      <trans-unit id="Setup Wallet" xml:space="preserve">
-        <source>Setup Wallet</source>
-        <target>Setup Wallet</target>
-        <note>Heading for Nostr Wallet Connect setup screen
-Heading for wallet setup confirmation screen</note>
       </trans-unit>
       <trans-unit id="Share" xml:space="preserve">
         <source>Share</source>
@@ -2520,11 +2409,6 @@ Section header for Universe/Search spam</note>
         <source>Staging (for dev builds)</source>
         <target>Staging (for dev builds)</target>
         <note>Label indicating the staging environment for Push notification functionality</note>
-      </trans-unit>
-      <trans-unit id="Start receiving money" xml:space="preserve">
-        <source>Start receiving money</source>
-        <target>Start receiving money</target>
-        <note>The heading for one of the "Why add Zaps?" boxes</note>
       </trans-unit>
       <trans-unit id="Staying humble..." xml:space="preserve">
         <source>Staying humble...</source>
@@ -2804,11 +2688,6 @@ Example URL to LibreTranslate server</note>
         <target>Universe 🛸</target>
         <note>Toolbar label for the universal view where notes from all connected relay servers appear.</note>
       </trans-unit>
-      <trans-unit id="Unknown" xml:space="preserve">
-        <source>Unknown</source>
-        <target>Unknown</target>
-        <note>A name label for an unknown user</note>
-      </trans-unit>
       <trans-unit id="Unmute" xml:space="preserve">
         <source>Unmute</source>
         <target>Unmute</target>
@@ -2838,11 +2717,6 @@ Example URL to LibreTranslate server</note>
         <source>Upload</source>
         <target>Upload</target>
         <note>Button to proceed with uploading.</note>
-      </trans-unit>
-      <trans-unit id="Use existing" xml:space="preserve">
-        <source>Use existing</source>
-        <target>Use existing</target>
-        <note>Button text to use an existing wallet.</note>
       </trans-unit>
       <trans-unit id="User Statuses" xml:space="preserve">
         <source>User Statuses</source>
@@ -2948,6 +2822,16 @@ Navigation title for attaching Nostr Wallet Connect lightning wallet.
 Sidebar menu label for Wallet view.
 Title for section in zap settings that controls the Lightning wallet selection.</note>
       </trans-unit>
+      <trans-unit id="Wallet Address" xml:space="preserve">
+        <source>Wallet Address</source>
+        <target>Wallet Address</target>
+        <note>Label text indicating that below it is the wallet address.</note>
+      </trans-unit>
+      <trans-unit id="Wallet Relay" xml:space="preserve">
+        <source>Wallet Relay</source>
+        <target>Wallet Relay</target>
+        <note>Label text indicating that below it is the information about the wallet relay.</note>
+      </trans-unit>
       <trans-unit id="We did not detect any issues that we can automatically fix for you. If you are having issues, please contact Damus support: [support@damus.io](mailto:support@damus.io)" xml:space="preserve">
         <source>We did not detect any issues that we can automatically fix for you. If you are having issues, please contact Damus support: [support@damus.io](mailto:support@damus.io)</source>
         <target>We did not detect any issues that we can automatically fix for you. If you are having issues, please contact Damus support: [support@damus.io](mailto:support@damus.io)</target>
@@ -3008,20 +2892,10 @@ Title for section in zap settings that controls the Lightning wallet selection.<
         <target>What do you want to report?</target>
         <note>Header text to prompt user what issue they want to report.</note>
       </trans-unit>
-      <trans-unit id="When supporters tip with Zaps, they can add a note and we can make it easy for you to instantly reply to show your gratitude." xml:space="preserve">
-        <source>When supporters tip with Zaps, they can add a note and we can make it easy for you to instantly reply to show your gratitude.</source>
-        <target>When supporters tip with Zaps, they can add a note and we can make it easy for you to instantly reply to show your gratitude.</target>
-        <note>Description explaining a benefit of connecting a lightning wallet.</note>
-      </trans-unit>
       <trans-unit id="Who to Follow" xml:space="preserve">
         <source>Who to Follow</source>
         <target>Who to Follow</target>
         <note>Title for a screen displaying suggestions of who to follow</note>
-      </trans-unit>
-      <trans-unit id="Why add Zaps?" xml:space="preserve">
-        <source>Why add Zaps?</source>
-        <target>Why add Zaps?</target>
-        <note>Heading to explain the benefits of zaps.</note>
       </trans-unit>
       <trans-unit id="Words" xml:space="preserve">
         <source>Words</source>
@@ -3058,11 +2932,6 @@ User confirm Yes</note>
         <source>You clicked on a Purple welcome link, but we could not find your checkout. This is likely a bug.</source>
         <target>You clicked on a Purple welcome link, but we could not find your checkout. This is likely a bug.</target>
         <note>Error label upon continuing in the app from a Damus Purple purchase</note>
-      </trans-unit>
-      <trans-unit id="You drive the conversation and we want to make it easier for people to support your work beyond follows, reposts, and likes." xml:space="preserve">
-        <source>You drive the conversation and we want to make it easier for people to support your work beyond follows, reposts, and likes.</source>
-        <target>You drive the conversation and we want to make it easier for people to support your work beyond follows, reposts, and likes.</target>
-        <note>Text explaining the benefit of connecting a lightning wallet for content creators.</note>
       </trans-unit>
       <trans-unit id="You have no bookmarks yet, add them in the context menu" xml:space="preserve">
         <source>You have no bookmarks yet, add them in the context menu</source>
@@ -3177,15 +3046,6 @@ Navigation title for zap settings.
 Section header for zap settings
 Setting to enable Zap Local Notification
 Title for section in zap settings that controls general zap preferences.</note>
-      </trans-unit>
-      <trans-unit id="Zaps are an easy way to support the incredible&#10;voices that make up the conversation on nostr.&#10;Here's how it works" xml:space="preserve">
-        <source>Zaps are an easy way to support the incredible
-voices that make up the conversation on nostr.
-Here's how it works</source>
-        <target>Zaps are an easy way to support the incredible
-voices that make up the conversation on nostr.
-Here's how it works</target>
-        <note>Describing the functional benefits of Zaps.</note>
       </trans-unit>
       <trans-unit id="apple_translation_service" xml:space="preserve">
         <source>Apple</source>
@@ -3941,11 +3801,6 @@ Sentence composed of 2 variables to describe how many zap payments there are on 
         <target state="new">API Key (required)</target>
         <note>Prompt for required entry of API Key to use translation server.</note>
       </trans-unit>
-      <trans-unit id="AUTOMATIC SETUP" xml:space="preserve">
-        <source>AUTOMATIC SETUP</source>
-        <target state="new">AUTOMATIC SETUP</target>
-        <note>Heading for the section that performs an automatic wallet connection setup.</note>
-      </trans-unit>
       <trans-unit id="About Me" xml:space="preserve">
         <source>About Me</source>
         <target state="new">About Me</target>
@@ -3966,20 +3821,10 @@ Sentence composed of 2 variables to describe how many zap payments there are on 
         <target state="new">Accessibility</target>
         <note>Section header for accessibility settings</note>
       </trans-unit>
-      <trans-unit id="Account" xml:space="preserve">
-        <source>Account</source>
-        <target state="new">Account</target>
-        <note>Label for the user account information with the Nostr Wallet Connect wallet provider.</note>
-      </trans-unit>
       <trans-unit id="Account creation" xml:space="preserve">
         <source>Account creation</source>
         <target state="new">Account creation</target>
         <note>Label for Purple account creation date</note>
-      </trans-unit>
-      <trans-unit id="Account details" xml:space="preserve">
-        <source>Account details</source>
-        <target state="new">Account details</target>
-        <note>Prompt to ask user if they want to attach their Nostr Wallet Connect lightning wallet.</note>
       </trans-unit>
       <trans-unit id="Account private key" xml:space="preserve">
         <source>Account private key</source>
@@ -4128,6 +3973,11 @@ Section header for text and appearance settings</note>
         <target state="new">Are you sure you want to clear the cache? This will free space, but images may take longer to load again.</target>
         <note>Message explaining what it means to clear the cache, asking if user wants to proceed.</note>
       </trans-unit>
+      <trans-unit id="Are you sure you want to connect this wallet?" xml:space="preserve">
+        <source>Are you sure you want to connect this wallet?</source>
+        <target state="new">Are you sure you want to connect this wallet?</target>
+        <note>Prompt to ask user if they want to attach their Nostr Wallet Connect lightning wallet.</note>
+      </trans-unit>
       <trans-unit id="Are you sure you want to delete all of your bookmarks?" xml:space="preserve">
         <source>Are you sure you want to delete all of your bookmarks?</source>
         <target state="new">Are you sure you want to delete all of your bookmarks?</target>
@@ -4156,11 +4006,6 @@ Tip: You can always change this later in Settings → Translations</source>
 
 Tip: You can always change this later in Settings → Translations</target>
         <note>Message notifying the user that they get auto-translations as part of their service</note>
-      </trans-unit>
-      <trans-unit id="Attach to any third party provider you already use." xml:space="preserve">
-        <source>Attach to any third party provider you already use.</source>
-        <target state="new">Attach to any third party provider you already use.</target>
-        <note>Information text guiding users on attaching existing provider.</note>
       </trans-unit>
       <trans-unit id="Authenticated" xml:space="preserve">
         <source>Authenticated</source>
@@ -4277,11 +4122,6 @@ Text for button to cancel out of connecting Nostr Wallet Connect lightning walle
         <source>Choose from Library</source>
         <target state="new">Choose from Library</target>
         <note>Option to select photo from library</note>
-      </trans-unit>
-      <trans-unit id="Choose the third-party payment provider you'd like to use." xml:space="preserve">
-        <source>Choose the third-party payment provider you'd like to use.</source>
-        <target state="new">Choose the third-party payment provider you'd like to use.</target>
-        <note>The description for one of the "Why add Zaps?" boxes</note>
       </trans-unit>
       <trans-unit id="Clear All" xml:space="preserve">
         <source>Clear All</source>
@@ -4499,16 +4339,6 @@ Context menu option for copying the version of damus.</note>
         <target state="new">Create new mutelist</target>
         <note>Title of alert prompting the user to create a new mutelist.</note>
       </trans-unit>
-      <trans-unit id="Create new wallet" xml:space="preserve">
-        <source>Create new wallet</source>
-        <target state="new">Create new wallet</target>
-        <note>Button text for creating a new wallet.</note>
-      </trans-unit>
-      <trans-unit id="Current balance" xml:space="preserve">
-        <source>Current balance</source>
-        <target state="new">Current balance</target>
-        <note>Label for displaying current wallet balance</note>
-      </trans-unit>
       <trans-unit id="Custom" xml:space="preserve">
         <source>Custom</source>
         <target state="new">Custom</target>
@@ -4542,6 +4372,11 @@ Toolbar label for DMs view, where DM is the English abbreviation for Direct Mess
         <source>Damus Purple environment</source>
         <target state="new">Damus Purple environment</target>
         <note>Prompt selection of the Damus purple environment (Developer feature to switch between real/production mode to test modes).</note>
+      </trans-unit>
+      <trans-unit id="Damus Wallet" xml:space="preserve">
+        <source>Damus Wallet</source>
+        <target state="new">Damus Wallet</target>
+        <note>Title text for Damus Wallet view.</note>
       </trans-unit>
       <trans-unit id="Damus logo" xml:space="preserve">
         <source>Damus logo</source>
@@ -4643,11 +4478,6 @@ The duration in which to mute the given item.</note>
         <source>Earn Money</source>
         <target state="new">Earn Money</target>
         <note>Heading indicating that this application allows users to earn money.</note>
-      </trans-unit>
-      <trans-unit id="Easily create a new wallet and attach it to your account." xml:space="preserve">
-        <source>Easily create a new wallet and attach it to your account.</source>
-        <target state="new">Easily create a new wallet and attach it to your account.</target>
-        <note>Description for the create new wallet feature.</note>
       </trans-unit>
       <trans-unit id="Edit" xml:space="preserve">
         <source>Edit</source>
@@ -4794,11 +4624,6 @@ Title indicating that an error has occurred.</note>
         <target state="new">Failed to parse</target>
         <note>NostrScript error message when it fails to parse a script.</note>
       </trans-unit>
-      <trans-unit id="Find a Wallet" xml:space="preserve">
-        <source>Find a Wallet</source>
-        <target state="new">Find a Wallet</target>
-        <note>The heading for one of the "Why add Zaps?" boxes</note>
-      </trans-unit>
       <trans-unit id="First Aid" xml:space="preserve">
         <source>First Aid</source>
         <target state="new">First Aid</target>
@@ -4932,21 +4757,6 @@ Button to navigate to translate.nostr.wine to get a translation API key.</note>
         <source>Get a special badge on your profile to show everyone your contribution to Freedom tech</source>
         <target state="new">Get a special badge on your profile to show everyone your contribution to Freedom tech</target>
         <note>Supporter badge description</note>
-      </trans-unit>
-      <trans-unit id="Get cash instantly from your followers" xml:space="preserve">
-        <source>Get cash instantly from your followers</source>
-        <target state="new">Get cash instantly from your followers</target>
-        <note>Feature description for receiving money instantly.</note>
-      </trans-unit>
-      <trans-unit id="Get paid for being you" xml:space="preserve">
-        <source>Get paid for being you</source>
-        <target state="new">Get paid for being you</target>
-        <note>Description for monetizing one's presence.</note>
-      </trans-unit>
-      <trans-unit id="Give thanks" xml:space="preserve">
-        <source>Give thanks</source>
-        <target state="new">Give thanks</target>
-        <note>Heading explaining a benefit of connecting a lightning wallet.</note>
       </trans-unit>
       <trans-unit id="Go to the app" xml:space="preserve">
         <source>Go to the app</source>
@@ -5113,11 +4923,6 @@ Settings section for managing keys</note>
         <target state="new">LIVE</target>
         <note>Text indicator that the video is a livestream.</note>
       </trans-unit>
-      <trans-unit id="Latest transactions" xml:space="preserve">
-        <source>Latest transactions</source>
-        <target state="new">Latest transactions</target>
-        <note>Heading for latest wallet transactions list</note>
-      </trans-unit>
       <trans-unit id="Learn more about the features" xml:space="preserve">
         <source>Learn more about the features</source>
         <target state="new">Learn more about the features</target>
@@ -5127,11 +4932,6 @@ Settings section for managing keys</note>
         <source>Left Handed</source>
         <target state="new">Left Handed</target>
         <note>Moves the post button to the left side of the screen</note>
-      </trans-unit>
-      <trans-unit id="Let your fans show their support" xml:space="preserve">
-        <source>Let your fans show their support</source>
-        <target state="new">Let your fans show their support</target>
-        <note>Heading pointing out a benefit of connecting a lightning wallet.</note>
       </trans-unit>
       <trans-unit id="LibreTranslate (Open Source)" xml:space="preserve">
         <source>LibreTranslate (Open Source)</source>
@@ -5157,16 +4957,6 @@ Settings section for managing keys</note>
         <source>Likes</source>
         <target state="new">Likes</target>
         <note>Setting to enable Like Local Notification</note>
-      </trans-unit>
-      <trans-unit id="Link to services that support Nostr Wallet Connect like Alby, Coinos and more." xml:space="preserve">
-        <source>Link to services that support Nostr Wallet Connect like Alby, Coinos and more.</source>
-        <target state="new">Link to services that support Nostr Wallet Connect like Alby, Coinos and more.</target>
-        <note>The description for one of the "Why add Zaps?" boxes</note>
-      </trans-unit>
-      <trans-unit id="Link your account" xml:space="preserve">
-        <source>Link your account</source>
-        <target state="new">Link your account</target>
-        <note>The heading for one of the "Why add Zaps?" boxes</note>
       </trans-unit>
       <trans-unit id="Load media" xml:space="preserve">
         <source>Load media</source>
@@ -5211,11 +5001,6 @@ Sidebar menu label to sign out of the account.</note>
         <target state="new">Looking for %@...</target>
         <note>Label that appears when searching for note or profile</note>
       </trans-unit>
-      <trans-unit id="MANUAL SETUP" xml:space="preserve">
-        <source>MANUAL SETUP</source>
-        <target state="new">MANUAL SETUP</target>
-        <note>Label for manual wallet setup.</note>
-      </trans-unit>
       <trans-unit id="Make Default" xml:space="preserve">
         <source>Make Default</source>
         <target state="new">Make Default</target>
@@ -5240,11 +5025,6 @@ Sidebar menu label to sign out of the account.</note>
         <source>Manage subscription</source>
         <target state="new">Manage subscription</target>
         <note>Button to take user to manage Damus Purple subscription</note>
-      </trans-unit>
-      <trans-unit id="Maybe later" xml:space="preserve">
-        <source>Maybe later</source>
-        <target state="new">Maybe later</target>
-        <note>Text for button to disconnect from Nostr Wallet Connect lightning wallet.</note>
       </trans-unit>
       <trans-unit id="Media previews" xml:space="preserve">
         <source>Media previews</source>
@@ -5409,11 +5189,6 @@ User confirm No</note>
         <source>No results</source>
         <target state="new">No results</target>
         <note>A label indicating that note search resulted in no results</note>
-      </trans-unit>
-      <trans-unit id="No transactions yet" xml:space="preserve">
-        <source>No transactions yet</source>
-        <target state="new">No transactions yet</target>
-        <note>Message shown when no transactions are available</note>
       </trans-unit>
       <trans-unit id="No zaps will be sent, only a lightning payment." xml:space="preserve">
         <source>No zaps will be sent, only a lightning payment.</source>
@@ -5619,11 +5394,6 @@ Button label to dismiss an error dialog</note>
         <source>People</source>
         <target state="new">People</target>
         <note>Label for filter for seeing only people follows.</note>
-      </trans-unit>
-      <trans-unit id="People will be able to send you cash from your profile. No money goes to Damus." xml:space="preserve">
-        <source>People will be able to send you cash from your profile. No money goes to Damus.</source>
-        <target state="new">People will be able to send you cash from your profile. No money goes to Damus.</target>
-        <note>The description for one of the "Why add Zaps?" boxes</note>
       </trans-unit>
       <trans-unit id="Permanently Delete Account" xml:space="preserve">
         <source>Permanently Delete Account</source>
@@ -5945,11 +5715,6 @@ Setting to enable Repost Local Notification</note>
         <target state="new">Retry</target>
         <note>Button to retry completing account creation after an error occurred.</note>
       </trans-unit>
-      <trans-unit id="Routing" xml:space="preserve">
-        <source>Routing</source>
-        <target state="new">Routing</target>
-        <note>Label indicating the routing address for Nostr Wallet Connect payments. In other words, the relay used by the NWC wallet provider</note>
-      </trans-unit>
       <trans-unit id="Run" xml:space="preserve">
         <source>Run</source>
         <target state="new">Run</target>
@@ -5964,11 +5729,6 @@ Setting to enable Repost Local Notification</note>
         <source>Runtime error</source>
         <target state="new">Runtime error</target>
         <note>Indication that a runtime error occurred when running a NostrScript.</note>
-      </trans-unit>
-      <trans-unit id="SATS" xml:space="preserve">
-        <source>SATS</source>
-        <target state="new">SATS</target>
-        <note>Abbreviation for Satoshis, smallest bitcoin unit</note>
       </trans-unit>
       <trans-unit id="SOFTWARE" xml:space="preserve">
         <source>SOFTWARE</source>
@@ -6078,6 +5838,11 @@ Section header for search/universe settings</note>
         <target state="new">Secret Account Login Key</target>
         <note>Section title for user's secret account login key.</note>
       </trans-unit>
+      <trans-unit id="Securely connect your Damus app to your wallet using Nostr Wallet Connect" xml:space="preserve">
+        <source>Securely connect your Damus app to your wallet using Nostr Wallet Connect</source>
+        <target state="new">Securely connect your Damus app to your wallet using Nostr Wallet Connect</target>
+        <note>Text to prompt user to connect their wallet using 'Nostr Wallet Connect'.</note>
+      </trans-unit>
       <trans-unit id="Select a Lightning wallet" xml:space="preserve">
         <source>Select a Lightning wallet</source>
         <target state="new">Select a Lightning wallet</target>
@@ -6113,27 +5878,11 @@ Section header for search/universe settings</note>
         <target state="new">Service</target>
         <note>Prompt selection of translation service provider.</note>
       </trans-unit>
-      <trans-unit id="Set up wallet" xml:space="preserve">
-        <source>Set up wallet</source>
-        <target state="new">Set up wallet</target>
-        <note>Text for button to disconnect from Nostr Wallet Connect lightning wallet.</note>
-      </trans-unit>
-      <trans-unit id="Setting up Zaps lets people know you're ready to start receiving money." xml:space="preserve">
-        <source>Setting up Zaps lets people know you're ready to start receiving money.</source>
-        <target state="new">Setting up Zaps lets people know you're ready to start receiving money.</target>
-        <note>Information about enabling payments.</note>
-      </trans-unit>
       <trans-unit id="Settings" xml:space="preserve">
         <source>Settings</source>
         <target state="new">Settings</target>
         <note>Navigation title for Settings view.
 Sidebar menu label for accessing the app settings</note>
-      </trans-unit>
-      <trans-unit id="Setup Wallet" xml:space="preserve">
-        <source>Setup Wallet</source>
-        <target state="new">Setup Wallet</target>
-        <note>Heading for Nostr Wallet Connect setup screen
-Heading for wallet setup confirmation screen</note>
       </trans-unit>
       <trans-unit id="Share" xml:space="preserve">
         <source>Share</source>
@@ -6295,11 +6044,6 @@ Section header for Universe/Search spam</note>
         <source>Staging (for dev builds)</source>
         <target state="new">Staging (for dev builds)</target>
         <note>Label indicating the staging environment for Push notification functionality</note>
-      </trans-unit>
-      <trans-unit id="Start receiving money" xml:space="preserve">
-        <source>Start receiving money</source>
-        <target state="new">Start receiving money</target>
-        <note>The heading for one of the "Why add Zaps?" boxes</note>
       </trans-unit>
       <trans-unit id="Staying humble..." xml:space="preserve">
         <source>Staying humble...</source>
@@ -6579,11 +6323,6 @@ Example URL to LibreTranslate server</note>
         <target state="new">Universe 🛸</target>
         <note>Toolbar label for the universal view where notes from all connected relay servers appear.</note>
       </trans-unit>
-      <trans-unit id="Unknown" xml:space="preserve">
-        <source>Unknown</source>
-        <target state="new">Unknown</target>
-        <note>A name label for an unknown user</note>
-      </trans-unit>
       <trans-unit id="Unmute" xml:space="preserve">
         <source>Unmute</source>
         <target state="new">Unmute</target>
@@ -6613,11 +6352,6 @@ Example URL to LibreTranslate server</note>
         <source>Upload</source>
         <target state="new">Upload</target>
         <note>Button to proceed with uploading.</note>
-      </trans-unit>
-      <trans-unit id="Use existing" xml:space="preserve">
-        <source>Use existing</source>
-        <target state="new">Use existing</target>
-        <note>Button text to use an existing wallet.</note>
       </trans-unit>
       <trans-unit id="User Statuses" xml:space="preserve">
         <source>User Statuses</source>
@@ -6723,6 +6457,16 @@ Navigation title for attaching Nostr Wallet Connect lightning wallet.
 Sidebar menu label for Wallet view.
 Title for section in zap settings that controls the Lightning wallet selection.</note>
       </trans-unit>
+      <trans-unit id="Wallet Address" xml:space="preserve">
+        <source>Wallet Address</source>
+        <target state="new">Wallet Address</target>
+        <note>Label text indicating that below it is the wallet address.</note>
+      </trans-unit>
+      <trans-unit id="Wallet Relay" xml:space="preserve">
+        <source>Wallet Relay</source>
+        <target state="new">Wallet Relay</target>
+        <note>Label text indicating that below it is the information about the wallet relay.</note>
+      </trans-unit>
       <trans-unit id="We did not detect any issues that we can automatically fix for you. If you are having issues, please contact Damus support: [support@damus.io](mailto:support@damus.io)" xml:space="preserve">
         <source>We did not detect any issues that we can automatically fix for you. If you are having issues, please contact Damus support: [support@damus.io](mailto:support@damus.io)</source>
         <target state="new">We did not detect any issues that we can automatically fix for you. If you are having issues, please contact Damus support: [support@damus.io](mailto:support@damus.io)</target>
@@ -6783,20 +6527,10 @@ Title for section in zap settings that controls the Lightning wallet selection.<
         <target state="new">What do you want to report?</target>
         <note>Header text to prompt user what issue they want to report.</note>
       </trans-unit>
-      <trans-unit id="When supporters tip with Zaps, they can add a note and we can make it easy for you to instantly reply to show your gratitude." xml:space="preserve">
-        <source>When supporters tip with Zaps, they can add a note and we can make it easy for you to instantly reply to show your gratitude.</source>
-        <target state="new">When supporters tip with Zaps, they can add a note and we can make it easy for you to instantly reply to show your gratitude.</target>
-        <note>Description explaining a benefit of connecting a lightning wallet.</note>
-      </trans-unit>
       <trans-unit id="Who to Follow" xml:space="preserve">
         <source>Who to Follow</source>
         <target state="new">Who to Follow</target>
         <note>Title for a screen displaying suggestions of who to follow</note>
-      </trans-unit>
-      <trans-unit id="Why add Zaps?" xml:space="preserve">
-        <source>Why add Zaps?</source>
-        <target state="new">Why add Zaps?</target>
-        <note>Heading to explain the benefits of zaps.</note>
       </trans-unit>
       <trans-unit id="Words" xml:space="preserve">
         <source>Words</source>
@@ -6828,11 +6562,6 @@ User confirm Yes</note>
         <source>You clicked on a Purple welcome link, but we could not find your checkout. This is likely a bug.</source>
         <target state="new">You clicked on a Purple welcome link, but we could not find your checkout. This is likely a bug.</target>
         <note>Error label upon continuing in the app from a Damus Purple purchase</note>
-      </trans-unit>
-      <trans-unit id="You drive the conversation and we want to make it easier for people to support your work beyond follows, reposts, and likes." xml:space="preserve">
-        <source>You drive the conversation and we want to make it easier for people to support your work beyond follows, reposts, and likes.</source>
-        <target state="new">You drive the conversation and we want to make it easier for people to support your work beyond follows, reposts, and likes.</target>
-        <note>Text explaining the benefit of connecting a lightning wallet for content creators.</note>
       </trans-unit>
       <trans-unit id="You have no bookmarks yet, add them in the context menu" xml:space="preserve">
         <source>You have no bookmarks yet, add them in the context menu</source>
@@ -6947,15 +6676,6 @@ Navigation title for zap settings.
 Section header for zap settings
 Setting to enable Zap Local Notification
 Title for section in zap settings that controls general zap preferences.</note>
-      </trans-unit>
-      <trans-unit id="Zaps are an easy way to support the incredible&#10;voices that make up the conversation on nostr.&#10;Here's how it works" xml:space="preserve">
-        <source>Zaps are an easy way to support the incredible
-voices that make up the conversation on nostr.
-Here's how it works</source>
-        <target state="new">Zaps are an easy way to support the incredible
-voices that make up the conversation on nostr.
-Here's how it works</target>
-        <note>Describing the functional benefits of Zaps.</note>
       </trans-unit>
       <trans-unit id="apple_translation_service" xml:space="preserve">
         <source>Apple</source>
