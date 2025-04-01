@@ -189,11 +189,11 @@ struct NoteContentView: View {
                                 .padding(EdgeInsets(top: 5, leading: 10, bottom: 0, trailing: 10))
                                 switch artifacts.media[0] {
                                 case .image(let url), .video(let url):
-                                    Text(abbreviateURL(url))
+                                    Text(abbreviateURL(url).prefix(20))
                                         .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size*0.8))
                                         .foregroundStyle(.white)
                                         .multilineTextAlignment(.center)
-                                        .padding(EdgeInsets(top: 0, leading: 10, bottom: 5, trailing: 10))
+                                        .padding(EdgeInsets(top: 20, leading: 10, bottom: 5, trailing: 10))
                                 }
                             }
                         }
