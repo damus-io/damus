@@ -190,7 +190,7 @@ struct NoteContentView: View {
                                 switch artifacts.media[0] {
                                 case .image(let url), .video(let url):
                                     Text(abbreviateURL(url))
-                                        .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
+                                        .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size*0.8))
                                         .foregroundStyle(.white)
                                         .multilineTextAlignment(.center)
                                         .padding(EdgeInsets(top: 0, leading: 10, bottom: 5, trailing: 10))
