@@ -68,13 +68,13 @@ class EventsModel: ObservableObject {
     }
     
     func subscribe() {
-        state.pool.subscribe(sub_id: sub_id,
+        state.nostrNetwork.pool.subscribe(sub_id: sub_id,
                              filters: [get_filter()],
                              handler: handle_nostr_event)
     }
     
     func unsubscribe() {
-        state.pool.unsubscribe(sub_id: sub_id)
+        state.nostrNetwork.pool.unsubscribe(sub_id: sub_id)
     }
 
     private func handle_event(relay_id: RelayURL, ev: NostrEvent) {

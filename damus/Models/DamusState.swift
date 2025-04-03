@@ -10,7 +10,6 @@ import LinkPresentation
 import EmojiPicker
 
 class DamusState: HeadlessDamusState {
-    let pool: RelayPool
     let keypair: Keypair
     let likes: EventCounter
     let boosts: EventCounter
@@ -28,8 +27,6 @@ class DamusState: HeadlessDamusState {
     let drafts: Drafts
     let events: EventCache
     let bookmarks: BookmarksManager
-    let postbox: PostBox
-    let bootstrap_relays: [RelayURL]
     let replies: ReplyCounter
     let wallet: WalletModel
     let nav: NavigationCoordinator
@@ -39,9 +36,9 @@ class DamusState: HeadlessDamusState {
     var purple: DamusPurple
     var push_notification_client: PushNotificationClient
     let emoji_provider: EmojiProvider
+    private(set) var nostrNetwork: NostrNetworkManager
 
-    init(pool: RelayPool, keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, postbox: PostBox, bootstrap_relays: [RelayURL], replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: DamusVideoCoordinator, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider) {
-        self.pool = pool
+    init(keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: DamusVideoCoordinator, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider) {
         self.keypair = keypair
         self.likes = likes
         self.boosts = boosts
@@ -58,8 +55,6 @@ class DamusState: HeadlessDamusState {
         self.drafts = drafts
         self.events = events
         self.bookmarks = bookmarks
-        self.postbox = postbox
-        self.bootstrap_relays = bootstrap_relays
         self.replies = replies
         self.wallet = wallet
         self.nav = nav
@@ -73,6 +68,9 @@ class DamusState: HeadlessDamusState {
         self.quote_reposts = quote_reposts
         self.push_notification_client = PushNotificationClient(keypair: keypair, settings: settings)
         self.emoji_provider = emoji_provider
+        
+        let networkManagerDelegate = NostrNetworkManagerDelegate(settings: settings, contacts: contacts, ndb: ndb, keypair: keypair, relayModelCache: relay_model_cache, relayFilters: relay_filters)
+        self.nostrNetwork = NostrNetworkManager(delegate: networkManagerDelegate)
     }
     
     @MainActor
@@ -98,27 +96,13 @@ class DamusState: HeadlessDamusState {
         guard let ndb = mndb else { return nil }
         let pubkey = keypair.pubkey
 
-        let pool = RelayPool(ndb: ndb, keypair: keypair)
         let model_cache = RelayModelCache()
         let relay_filters = RelayFilters(our_pubkey: pubkey)
         let bootstrap_relays = load_bootstrap_relays(pubkey: pubkey)
         
         let settings = UserSettingsStore.globally_load_for(pubkey: pubkey)
 
-        let new_relay_filters = load_relay_filters(pubkey) == nil
-        for relay in bootstrap_relays {
-            let descriptor = RelayDescriptor(url: relay, info: .rw)
-            add_new_relay(model_cache: model_cache, relay_filters: relay_filters, pool: pool, descriptor: descriptor, new_relay_filters: new_relay_filters, logging_enabled: settings.developer_mode)
-        }
-
-        pool.register_handler(sub_id: sub_id, handler: home.handle_event)
-        
-        if let nwc_str = settings.nostr_wallet_connect,
-           let nwc = WalletConnectURL(str: nwc_str) {
-            try? pool.add_relay(.nwc(url: nwc.relay))
-        }
         self.init(
-            pool: pool,
             keypair: keypair,
             likes: EventCounter(our_pubkey: pubkey),
             boosts: EventCounter(our_pubkey: pubkey),
@@ -135,8 +119,6 @@ class DamusState: HeadlessDamusState {
             drafts: Drafts(),
             events: EventCache(ndb: ndb),
             bookmarks: BookmarksManager(pubkey: pubkey),
-            postbox: PostBox(pool: pool),
-            bootstrap_relays: bootstrap_relays,
             replies: ReplyCounter(our_pubkey: pubkey),
             wallet: WalletModel(settings: settings),
             nav: navigationCoordinator,
@@ -179,7 +161,7 @@ class DamusState: HeadlessDamusState {
             try await self.push_notification_client.revoke_token()
         }
         wallet.disconnect()
-        pool.close()
+        nostrNetwork.pool.close()
         ndb.close()
     }
 
@@ -189,7 +171,6 @@ class DamusState: HeadlessDamusState {
         let kp = Keypair(pubkey: empty_pub, privkey: nil)
         
         return DamusState.init(
-            pool: RelayPool(ndb: .empty),
             keypair: Keypair(pubkey: empty_pub, privkey: empty_sec),
             likes: EventCounter(our_pubkey: empty_pub),
             boosts: EventCounter(our_pubkey: empty_pub),
@@ -206,8 +187,6 @@ class DamusState: HeadlessDamusState {
             drafts: Drafts(),
             events: EventCache(ndb: .empty),
             bookmarks: BookmarksManager(pubkey: empty_pub),
-            postbox: PostBox(pool: RelayPool(ndb: .empty)),
-            bootstrap_relays: [],
             replies: ReplyCounter(our_pubkey: empty_pub),
             wallet: WalletModel(settings: UserSettingsStore()),
             nav: NavigationCoordinator(),
@@ -217,5 +196,31 @@ class DamusState: HeadlessDamusState {
             quote_reposts: .init(our_pubkey: empty_pub),
             emoji_provider: DefaultEmojiProvider(showAllVariations: true)
         )
+    }
+}
+
+fileprivate extension DamusState {
+    struct NostrNetworkManagerDelegate: NostrNetworkManager.Delegate {
+        let settings: UserSettingsStore
+        let contacts: Contacts
+        
+        var ndb: Ndb
+        var keypair: Keypair
+        
+        var latestRelayListEventIdHex: String? {
+            get { self.settings.latestRelayListEventIdHex }
+            set { self.settings.latestRelayListEventIdHex = newValue }
+        }
+        
+        var latestContactListEvent: NostrEvent? { self.contacts.event }
+        var bootstrapRelays: [RelayURL] { get_default_bootstrap_relays() }
+        var developerMode: Bool { self.settings.developer_mode }
+        var relayModelCache: RelayModelCache
+        var relayFilters: RelayFilters
+        
+        var nwcWallet: WalletConnectURL? {
+            guard let nwcString = self.settings.nostr_wallet_connect else { return nil }
+            return WalletConnectURL(str: nwcString)
+        }
     }
 }

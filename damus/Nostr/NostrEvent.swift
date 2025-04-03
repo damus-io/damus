@@ -13,6 +13,18 @@ import CryptoKit
 import NaturalLanguage
 
 
+/// A protocol for structs and classes that can convert themselves from/to a NostrEvent
+protocol NostrEventConvertible {
+    associatedtype E: Error
+    
+    /// Iniitialize this type from a NostrEvent
+    init(event: NostrEvent) throws(E)
+    
+    /// Convert this type into a Nostr Event, using a keypair for signing and a specific timestamp
+    func toNostrEvent(keypair: FullKeypair, timestamp: UInt32?) -> NostrEvent?
+}
+
+
 enum ValidationResult: Decodable {
     case unknown
     case ok
