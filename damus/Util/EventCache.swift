@@ -354,7 +354,7 @@ func preload_image(url: URL) {
     
     //print("Preloading image \(url.absoluteString)")
 
-    KingfisherManager.shared.retrieveImage(with: Kingfisher.ImageResource(downloadURL: url)) { val in
+    KingfisherManager.shared.retrieveImage(with: Kingfisher.KF.ImageResource(downloadURL: url)) { val in
         //print("Preloaded image \(url.absoluteString)")
     }
 }
