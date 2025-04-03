@@ -52,7 +52,7 @@ extension KFOptionSetter {
     
     func onFailure(fallbackUrl: URL?, cacheKey: String?) -> Self {
         guard let url = fallbackUrl, let key = cacheKey else { return self }
-        let imageResource = Kingfisher.ImageResource(downloadURL: url, cacheKey: key)
+        let imageResource = Kingfisher.KF.ImageResource(downloadURL: url, cacheKey: key)
         let source = imageResource.convertToSource()
         options.alternativeSources = [source]
         
@@ -159,20 +159,25 @@ struct CustomCacheSerializer: CacheSerializer {
     }
 }
 
-class CustomSessionDelegate: SessionDelegate {
-    override func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
+class CustomSessionDelegate: SessionDelegate, @unchecked Sendable {
+    override func urlSession(
+        _ session: URLSession,
+        dataTask: URLSessionDataTask,
+        didReceive response: URLResponse
+    ) async -> URLSession.ResponseDisposition {
         let contentLength = response.expectedContentLength
         
         // Content-Length header is optional (-1 when missing)
         if (contentLength != -1 && contentLength > MAX_FILE_SIZE) {
-            return super.urlSession(session, dataTask: dataTask, didReceive: URLResponse(), completionHandler: completionHandler)
+            return await super.urlSession(session, dataTask: dataTask, didReceive: URLResponse())
         }
         
-        super.urlSession(session, dataTask: dataTask, didReceive: response, completionHandler: completionHandler)
+        return await super.urlSession(session, dataTask: dataTask, didReceive: response)
     }
 }
 
-class CustomImageDownloader: ImageDownloader {
+
+class CustomImageDownloader: ImageDownloader, @unchecked Sendable {
     
     static let shared = CustomImageDownloader(name: "shared")
     
