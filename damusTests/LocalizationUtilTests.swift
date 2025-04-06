@@ -17,8 +17,8 @@ final class LocalizationUtilTests: XCTestCase {
         let keys = [
             ["followers_count", "Followers", "Follower", "Followers"],
             ["following_count", "Following", "Following", "Following"],
+            ["hellthread_notifications_disabled", "Hide notifications that tag more than 0 profiles", "Hide notifications that tag more than 1 profile", "Hide notifications that tag more than 2 profiles"],
             ["imports_count", "Imports", "Import", "Imports"],
-            ["hellthread_notification_settings", "Show notifications that mention more than 0 profiles", "Show notifications that mention more than 1 profile", "Show notifications that mention more than 2 profiles"],
             ["quoted_reposts_count", "Quotes", "Quote", "Quotes"],
             ["reactions_count", "Reactions", "Reaction", "Reactions"],
             ["relays_count", "Relays", "Relay", "Relays"],

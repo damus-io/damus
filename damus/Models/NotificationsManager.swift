@@ -41,7 +41,7 @@ func should_display_notification(state: HeadlessDamusState, event ev: NostrEvent
         return false
     }
 
-    if !state.settings.hellthread_notification && ev.is_hellthread {
+    if state.settings.hellthread_notifications_disabled && ev.is_hellthread(max_pubkeys: state.settings.hellthread_notification_max_pubkeys) {
         return false
     }
 

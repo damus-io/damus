@@ -13,7 +13,9 @@ import secp256k1_implementation
 import CryptoKit
 
 let MAX_NOTE_SIZE: Int = 2 << 18
-let MIN_HELLTHREAD_PUBKEYS = 11
+
+// Default threshold of the hellthread pubkey tag count setting if it is not set.
+let DEFAULT_HELLTHREAD_MAX_PUBKEYS: Int = 10
 
 struct NdbStr {
     let note: NdbNote
@@ -300,10 +302,10 @@ extension NdbNote {
         return !too_big
     }
 
-    var is_hellthread: Bool {
+    func is_hellthread(max_pubkeys: Int) -> Bool {
         switch known_kind {
         case .text, .boost, .like, .zap:
-            Set(referenced_pubkeys).count >= MIN_HELLTHREAD_PUBKEYS
+            Set(referenced_pubkeys).count > max_pubkeys
         default:
             false
         }

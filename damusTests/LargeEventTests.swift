@@ -43,7 +43,7 @@ final class LargeEventTests: XCTestCase {
 
         XCTAssertEqual(subid, "subid")
         XCTAssertTrue(ev.should_show_event)
-        XCTAssertTrue(ev.is_hellthread)
+        XCTAssertTrue(ev.is_hellthread(max_pubkeys: 10))
         XCTAssertTrue(validate_event(ev: ev) == .ok)
     }
 
