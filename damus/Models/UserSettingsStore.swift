@@ -161,8 +161,11 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "notification_only_from_following", default_value: false)
     var notification_only_from_following: Bool
 
-    @Setting(key: "hellthread_notification", default_value: false)
-    var hellthread_notification: Bool
+    @Setting(key: "hellthread_notifications_disabled", default_value: false)
+    var hellthread_notifications_disabled: Bool
+
+    @Setting(key: "hellthread_notification_max_pubkeys", default_value: DEFAULT_HELLTHREAD_MAX_PUBKEYS)
+    var hellthread_notification_max_pubkeys: Int
 
     @Setting(key: "translate_dms", default_value: false)
     var translate_dms: Bool
