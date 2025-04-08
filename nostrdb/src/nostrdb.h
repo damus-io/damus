@@ -2,6 +2,7 @@
 #define NOSTRDB_H
 
 #include <inttypes.h>
+#include <stdbool.h>
 #include "win.h"
 #include "cursor.h"
 
@@ -48,6 +49,7 @@ struct ndb_t {
 };
 
 struct ndb_str {
+	// NDB_PACKED_STR, NDB_PACKED_ID
 	unsigned char flag;
 	union {
 		const char *str;
@@ -163,8 +165,9 @@ enum ndb_filter_fieldtype {
 	NDB_FILTER_LIMIT   = 7,
 	NDB_FILTER_SEARCH  = 8,
 	NDB_FILTER_RELAYS  = 9,
+	NDB_FILTER_CUSTOM  = 10,
 };
-#define NDB_NUM_FILTERS 7
+#define NDB_NUM_FILTERS 10
 
 // when matching generic tags, we need to know if we're dealing with
 // a pointer to a 32-byte ID or a null terminated string
@@ -173,6 +176,7 @@ enum ndb_generic_element_type {
 	NDB_ELEMENT_STRING  = 1,
 	NDB_ELEMENT_ID      = 2,
 	NDB_ELEMENT_INT     = 3,
+	NDB_ELEMENT_CUSTOM  = 4,
 };
 
 enum ndb_search_order {
@@ -250,10 +254,18 @@ struct ndb_filter_string {
 	int len;
 };
 
+typedef bool ndb_filter_callback_fn(void *, struct ndb_note *);
+
+struct ndb_filter_custom {
+	void *ctx;
+	ndb_filter_callback_fn *cb;
+};
+
 union ndb_filter_element {
 	struct ndb_filter_string string;
 	const unsigned char *id;
 	uint64_t integer;
+	struct ndb_filter_custom custom_filter;
 };
 
 struct ndb_filter_field {
@@ -551,6 +563,7 @@ int ndb_filter_init_with(struct ndb_filter *filter, int pages);
 int ndb_filter_add_id_element(struct ndb_filter *, const unsigned char *id);
 int ndb_filter_add_int_element(struct ndb_filter *, uint64_t integer);
 int ndb_filter_add_str_element(struct ndb_filter *, const char *str);
+int ndb_filter_add_custom_filter_element(struct ndb_filter *filter, ndb_filter_callback_fn *cb, void *ctx);
 int ndb_filter_eq(const struct ndb_filter *, const struct ndb_filter *);
 
 /// is `a` a subset of `b`
