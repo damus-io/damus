@@ -40,6 +40,12 @@ func get_repost_of_muted_user_filter(damus_state: DamusState) -> ((_ ev: NostrEv
     }
 }
 
+func timestamp_filter(ev: NostrEvent) -> Bool {
+    // Allow notes that are created no more than 3 seconds in the future
+    // to account for natural clock skew between sender and receiver.
+    ev.age >= -3
+}
+
 /// Generic filter with various tweakable settings
 struct ContentFilters {
     var filters: [(NostrEvent) -> Bool]
@@ -66,6 +72,7 @@ extension ContentFilters {
             filters.append(nsfw_tag_filter)
         }
         filters.append(get_repost_of_muted_user_filter(damus_state: damus_state))
+        filters.append(timestamp_filter)
         return filters
     }
 }

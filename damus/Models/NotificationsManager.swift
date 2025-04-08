@@ -54,7 +54,14 @@ func should_display_notification(state: HeadlessDamusState, event ev: NostrEvent
     guard ev.age < EVENT_MAX_AGE_FOR_NOTIFICATION else {
         return false
     }
-    
+
+    // Don't show notifications for future events.
+    // Allow notes that are created no more than 3 seconds in the future
+    // to account for natural clock skew between sender and receiver.
+    guard ev.age >= -3 else {
+        return false
+    }
+
     return true
 }
 
