@@ -41,7 +41,10 @@ class NotificationFilter: ObservableObject, Equatable {
 
             if let item = item.filter({ ev in
                 self.friend_filter.filter(contacts: contacts, pubkey: ev.pubkey) &&
-                (!hellthread_notifications_disabled || !ev.is_hellthread(max_pubkeys: hellthread_notification_max_pubkeys))
+                (!hellthread_notifications_disabled || !ev.is_hellthread(max_pubkeys: hellthread_notification_max_pubkeys)) &&
+                // Allow notes that are created no more than 3 seconds in the future
+                // to account for natural clock skew between sender and receiver.
+                ev.age >= -3
             }) {
                 acc.append(item)
             }
