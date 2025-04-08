@@ -939,6 +939,9 @@
 		BA3759972ABCCF360018D73B /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3759962ABCCF360018D73B /* CameraPreview.swift */; };
 		BA693074295D649800ADDB87 /* UserSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA693073295D649800ADDB87 /* UserSettingsStore.swift */; };
 		BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */; };
+		C6391DBA2DA542D100F5B388 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6391DB92DA542D100F5B388 /* ToastView.swift */; };
+		C6391DBB2DA542D100F5B388 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6391DB92DA542D100F5B388 /* ToastView.swift */; };
+		C6391DBC2DA542D100F5B388 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6391DB92DA542D100F5B388 /* ToastView.swift */; };
 		D2277EEA2A089BD5006C3807 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2277EE92A089BD5006C3807 /* Router.swift */; };
 		D703D7192C66E47100A400EA /* UniformTypeIdentifiers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D703D7182C66E47100A400EA /* UniformTypeIdentifiers.framework */; };
 		D703D71C2C66E47100A400EA /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D703D71B2C66E47100A400EA /* Media.xcassets */; };
@@ -2448,6 +2451,7 @@
 		BA3759962ABCCF360018D73B /* CameraPreview.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraPreview.swift; sourceTree = "<group>"; };
 		BA693073295D649800ADDB87 /* UserSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettingsStore.swift; sourceTree = "<group>"; };
 		BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectWalletView.swift; sourceTree = "<group>"; };
+		C6391DB92DA542D100F5B388 /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 		D2277EE92A089BD5006C3807 /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		D703D7172C66E47100A400EA /* HighlighterActionExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HighlighterActionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D703D7182C66E47100A400EA /* UniformTypeIdentifiers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UniformTypeIdentifiers.framework; path = System/Library/Frameworks/UniformTypeIdentifiers.framework; sourceTree = SDKROOT; };
@@ -3608,6 +3612,7 @@
 				4C28595F2A12A2BE004746F7 /* SupporterBadge.swift */,
 				5C6E1DAC2A193EC2008FC15A /* GradientButtonStyle.swift */,
 				5CC868DC2AA29B3200FB22BA /* NeutralButtonStyle.swift */,
+				C6391DB92DA542D100F5B388 /* ToastView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -4579,6 +4584,7 @@
 				BA3759922ABCCEBA0018D73B /* CameraService+Extensions.swift in Sources */,
 				D74F430C2B23FB9B00425B75 /* StoreObserver.swift in Sources */,
 				4C363A9A28283854006E126D /* Reply.swift in Sources */,
+				C6391DBC2DA542D100F5B388 /* ToastView.swift in Sources */,
 				BA693074295D649800ADDB87 /* UserSettingsStore.swift in Sources */,
 				D7ADD3E02B538D4200F104C4 /* DamusPurpleURLSheetView.swift in Sources */,
 				4CFF8F6729CC9E3A008DB934 /* FullScreenCarouselView.swift in Sources */,
@@ -5205,6 +5211,7 @@
 				82D6FB6C2CD99F7900C925F4 /* DamusPurpleURL.swift in Sources */,
 				82D6FB6D2CD99F7900C925F4 /* DamusPurpleEnvironment.swift in Sources */,
 				82D6FB6E2CD99F7900C925F4 /* PurpleStoreKitManager.swift in Sources */,
+				C6391DBB2DA542D100F5B388 /* ToastView.swift in Sources */,
 				82D6FB6F2CD99F7900C925F4 /* CameraService+Extensions.swift in Sources */,
 				82D6FB702CD99F7900C925F4 /* ImageResizer.swift in Sources */,
 				82D6FB712CD99F7900C925F4 /* PhotoCaptureProcessor.swift in Sources */,
@@ -5973,6 +5980,7 @@
 				D703D75B2C670A7F00A400EA /* Contacts.swift in Sources */,
 				D703D7812C670C2B00A400EA /* Bech32.swift in Sources */,
 				D73E5E1E2C6A9694007EB227 /* RelayFilters.swift in Sources */,
+				C6391DBA2DA542D100F5B388 /* ToastView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
