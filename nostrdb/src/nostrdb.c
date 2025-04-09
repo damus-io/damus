@@ -1382,6 +1382,7 @@ static int ndb_filter_field_eq(struct ndb_filter *a_filt,
 			b_custom = ndb_filter_get_custom_element(b_filt, b_field);
 			if (memcmp(a_custom, b_custom, sizeof(*a_custom)))
 				return 0;
+			break;
 		case NDB_ELEMENT_UNKNOWN:
 			return 0;
 		case NDB_ELEMENT_STRING:
