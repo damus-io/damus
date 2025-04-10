@@ -33,11 +33,12 @@ class Ndb {
     let owns_db: Bool
     var generation: Int
     private var closed: Bool
+    private var callbackHandler: Ndb.CallbackHandler
 
     var is_closed: Bool {
         self.closed || self.ndb.ndb == nil
     }
-
+    
     static func safemode() -> Ndb? {
         guard let path = db_path ?? old_db_path else { return nil }
 
@@ -80,7 +81,7 @@ class Ndb {
         return Ndb(ndb: ndb_t(ndb: nil))
     }
     
-    static func open(path: String? = nil, owns_db_file: Bool = true) -> ndb_t? {
+    static func open(path: String? = nil, owns_db_file: Bool = true, callbackHandler: Ndb.CallbackHandler) -> ndb_t? {
         var ndb_p: OpaquePointer? = nil
 
         let ingest_threads: Int32 = 4
@@ -111,6 +112,19 @@ class Ndb {
             var ok = false
             while !ok && mapsize > 1024 * 1024 * 700 {
                 var cfg = ndb_config(flags: 0, ingester_threads: ingest_threads, mapsize: mapsize, filter_context: nil, ingest_filter: nil, sub_cb_ctx: nil, sub_cb: nil)
+                
+                // Here we hook up the global callback function for subscription callbacks.
+                // We do an "unretained" pass here because the lifetime of the callback handler is larger than the lifetime of the nostrdb monitor in the C code.
+                // The NostrDB monitor that makes the callbacks should in theory _never_ outlive the callback handler.
+                //
+                // This means that:
+                // - for as long as the nostrdb is running, its parent Ndb instance will be alive, keeping the callback handler alive.
+                // - when the Ndb instance is deinitialized — and the callback handler comes down with it — the `deinit` function will destroy the nostrdb monitor, preventing it from accessing freed memory.
+                //
+                // Therefore, we do not need to increase reference count to callbackHandler. The tightly coupled lifetimes will ensure that it is always alive when the ndb_monitor is alive.
+                let ctx: UnsafeMutableRawPointer = Unmanaged.passUnretained(callbackHandler).toOpaque()
+                ndb_config_set_subscription_callback(&cfg, subscription_callback, ctx)
+                
                 let res = ndb_init(&ndb_p, testdir, &cfg);
                 ok = res != 0;
                 if !ok {
@@ -124,12 +138,15 @@ class Ndb {
         if !ok {
             return nil
         }
-
-        return ndb_t(ndb: ndb_p)
+        
+        let ndb_instance = ndb_t(ndb: ndb_p)
+        callbackHandler.ndb = ndb_instance
+        return ndb_instance
     }
 
     init?(path: String? = nil, owns_db_file: Bool = true) {
-        guard let db = Self.open(path: path, owns_db_file: owns_db_file) else {
+        let callbackHandler = Ndb.CallbackHandler()
+        guard let db = Self.open(path: path, owns_db_file: owns_db_file, callbackHandler: callbackHandler) else {
             return nil
         }
         
@@ -138,6 +155,7 @@ class Ndb {
         self.owns_db = owns_db_file
         self.ndb = db
         self.closed = false
+        self.callbackHandler = callbackHandler
     }
     
     private static func migrate_db_location_if_needed() throws {
@@ -183,6 +201,8 @@ class Ndb {
         self.path = nil
         self.owns_db = true
         self.closed = false
+        // This simple initialization will cause subscriptions not to be ever called. Probably fine because this initializer is used only for empty example ndb instances.
+        self.callbackHandler = Ndb.CallbackHandler()
     }
     
     func close() {
@@ -196,7 +216,7 @@ class Ndb {
 
     func reopen() -> Bool {
         guard self.is_closed,
-              let db = Self.open(path: self.path, owns_db_file: self.owns_db) else {
+              let db = Self.open(path: self.path, owns_db_file: self.owns_db, callbackHandler: self.callbackHandler) else {
             return false
         }
         
@@ -581,6 +601,13 @@ class Ndb {
         }
     }
     
+    internal func setCallback(for subscriptionId: UInt64, callback: @escaping (NoteKey) -> Void) {
+        self.callbackHandler.subscriptionCallbackMap[subscriptionId] = callback
+    }
+    
+    internal func unsetCallback(subscriptionId: UInt64) {
+        self.callbackHandler.subscriptionCallbackMap[subscriptionId] = nil
+    }
     enum Errors: Error {
         case cannot_find_db_path
         case db_file_migration_error
@@ -590,6 +617,73 @@ class Ndb {
         print("txn: Ndb de-init")
         self.close()
     }
+}
+
+
+// MARK: - Extensions and helper structures and functions
+
+extension Ndb {
+    /// A class that is used to handles callbacks from nostrdb
+    ///
+    /// This is a separate class from `Ndb` because it simplifies the initialization logic
+    class CallbackHandler {
+        /// Holds the ndb instance in the C codebase. Should be shared with `Ndb`
+        var ndb: ndb_t? = nil
+        /// A map from nostrdb subscription ids to callbacks
+        var subscriptionCallbackMap: [UInt64: (NoteKey) -> Void] = [:]
+        
+        /// Handles callbacks from nostrdb subscriptions, and routes them to the correct callback
+        func handleSubscriptionCallback(subId: UInt64, maxCapacity: Int32 = 1000) {
+            if let callback = subscriptionCallbackMap[subId] {
+                let result = UnsafeMutablePointer<UInt64>.allocate(capacity: Int(maxCapacity))
+                if let ndb {
+                    let numberOfNotes = ndb_poll_for_notes(ndb.ndb, subId, result, maxCapacity)
+                    for i in 0..<numberOfNotes {
+                        callback(result.advanced(by: Int(i)).pointee)
+                    }
+                }
+                result.deallocate() // Ensure we deallocate memory before leaving the function to avoid memory leaks
+            }
+        }
+    }
+    
+    /// An item that comes out of a subscription stream
+    enum StreamItem {
+        /// End of currently stored events
+        case eose
+        /// An event in NostrDB available at the given note key
+        case event(NoteKey)
+    }
+    
+    /// An error that may happen during nostrdb streaming
+    enum NdbStreamError: Error {
+        case cannotOpenTransaction
+        case cannotConvertFilter(NostrFilter.NdbFilterConversionError)
+        case initialQueryFailed
+        case timeout
+    }
+    
+    /// An error that may happen when looking something up
+    enum NdbLookupError: Error {
+        case cannotOpenTransaction
+        case streamError(NdbStreamError)
+        case internalInconsistency
+        case timeout
+    }
+}
+
+/// This callback "trampoline" function will be called when new notes arrive for NostrDB subscriptions.
+///
+/// This is needed as a separate global function in order to allow us to pass it to the C code as a callback (We can't pass native Swift fuctions directly as callbacks.
+///
+/// - Parameters:
+///   - ctx: A pointer to a context object setup during initialization. This allows this function to "find" the correct place to call. MUST be a pointer to a `CallbackHandler`, otherwise this will trigger a crash
+///   - subid: The NostrDB subscription ID, which identifies the subscription that is being called back
+@_cdecl("subscription_callback")
+public func subscription_callback(ctx: UnsafeMutableRawPointer?, subid: UInt64) {
+    guard let ctx else { return }
+    let handler = Unmanaged<Ndb.CallbackHandler>.fromOpaque(ctx).takeUnretainedValue()
+    handler.handleSubscriptionCallback(subId: subid)
 }
 
 #if DEBUG
