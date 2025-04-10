@@ -270,7 +270,7 @@ struct NoteContentView: View {
                 }
                 await preload_event(plan: plan, state: damus_state)
             } else if force_artifacts {
-                let arts = render_note_content(ndb: damus_state.ndb, ev: event, profiles: damus_state.profiles, keypair: damus_state.keypair)
+                let arts = await ContentRenderer().render_note_content(ndb: damus_state.ndb, ev: event, profiles: damus_state.profiles, keypair: damus_state.keypair)
                 self.artifacts_model.state = .loaded(arts)
             }
         }
