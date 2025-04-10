@@ -149,7 +149,7 @@ func create_local_notification(profiles: Profiles, notify: LocalNotification) {
 func render_notification_content_preview(ndb: Ndb, ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> String {
 
     let prefix_len = 300
-    let artifacts = render_note_content(ndb: ndb, ev: ev, profiles: profiles, keypair: keypair)
+    let artifacts = render_immediately_available_note_content(ndb: ndb, ev: ev, profiles: profiles, keypair: keypair)
 
     // special case for longform events
     if ev.known_kind == .longform {
