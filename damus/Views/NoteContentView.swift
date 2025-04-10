@@ -168,6 +168,9 @@ struct NoteContentView: View {
                         }
                         ZStack {
                             
+                            Color.black
+                                .opacity(0.54)
+                            
                             Blur()
                             
                             VStack(alignment: .center) {
@@ -175,12 +178,12 @@ struct NoteContentView: View {
                                     .foregroundStyle(.white)
                                     .bold()
                                     .padding(EdgeInsets(top: 5, leading: 10, bottom: 0, trailing: 10))
-                                Text(NSLocalizedString("Media from someone you \n dont follow", comment: "Media from someone you dont follow"))
+                                Text(NSLocalizedString("Media from someone you \n don't follow", comment: "Label on the image blur mask"))
                                     .multilineTextAlignment(.center)
                                     .foregroundStyle(Color.white)
                                     .font(.title2)
                                     .padding(EdgeInsets(top: 5, leading: 10, bottom: 0, trailing: 10))
-                                Button(NSLocalizedString("Tap to load", comment: "Tap to load")){
+                                Button(NSLocalizedString("Tap to load", comment: "Label for button that allows user to dismiss media content warning and unblur the image")){
                                     blur_images = false
                                 }
                                 .buttonStyle(.bordered)
