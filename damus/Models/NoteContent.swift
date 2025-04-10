@@ -66,7 +66,7 @@ func note_artifact_is_separated(kind: NostrKind?) -> Bool {
     return kind != .longform
 }
 
-func render_note_content(ndb: Ndb, ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> NoteArtifacts {
+func render_immediately_available_note_content(ndb: Ndb, ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> NoteArtifacts {
     guard let blocks = ev.blocks(ndb: ndb) else {
         return .separated(.just_content(ev.get_content(keypair)))
     }
@@ -76,6 +76,15 @@ func render_note_content(ndb: Ndb, ev: NostrEvent, profiles: Profiles, keypair: 
     }
     
     return .separated(render_blocks(blocks: blocks.unsafeUnownedValue, profiles: profiles, note: ev, can_hide_last_previewable_refs: true))
+}
+
+actor ContentRenderer {
+    func render_note_content(ndb: Ndb, ev: NostrEvent, profiles: Profiles, keypair: Keypair) async -> NoteArtifacts {
+        guard let result = try? await ndb.waitFor(noteId: ev.id, timeout: 10) else {
+            return .separated(.just_content(ev.get_content(keypair)))
+        }
+        return render_immediately_available_note_content(ndb: ndb, ev: ev, profiles: profiles, keypair: keypair)
+    }
 }
 
 func render_blocks(blocks: NdbBlocks, profiles: Profiles, note: NdbNote, can_hide_last_previewable_refs: Bool = false) -> NoteArtifactsSeparated {
