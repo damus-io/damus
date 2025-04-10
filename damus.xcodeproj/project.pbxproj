@@ -1542,6 +1542,12 @@
 		D74E64132DC95CC7004C7892 /* HumanReadableErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74E64112DC95CBE004C7892 /* HumanReadableErrors.swift */; };
 		D74E64142DC95CC7004C7892 /* HumanReadableErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74E64112DC95CBE004C7892 /* HumanReadableErrors.swift */; };
 		D74E64152DC95CC7004C7892 /* HumanReadableErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74E64112DC95CBE004C7892 /* HumanReadableErrors.swift */; };
+		D74DEC8A2DA0A19B00E69FA6 /* Ndb+.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74DEC892DA0A19800E69FA6 /* Ndb+.swift */; };
+		D74DEC8B2DA0A19B00E69FA6 /* Ndb+.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74DEC892DA0A19800E69FA6 /* Ndb+.swift */; };
+		D74DEC8C2DA0A19B00E69FA6 /* Ndb+.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74DEC892DA0A19800E69FA6 /* Ndb+.swift */; };
+		D74DEC8F2DA0C65F00E69FA6 /* Ndb+.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74DEC892DA0A19800E69FA6 /* Ndb+.swift */; };
+		D74DEC902DA0C6B500E69FA6 /* NostrFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFAE28049D340006080F /* NostrFilter.swift */; };
+		D74DEC912DA0CA2400E69FA6 /* Array.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72E12772BEED22400F4F781 /* Array.swift */; };
 		D74EA08A2D2BF2A7002290DD /* URLHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = D767066E2C8BB3CE00F09726 /* URLHandler.swift */; };
 		D74EA08E2D2E271E002290DD /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74EA08D2D2E271E002290DD /* ErrorView.swift */; };
 		D74EA08F2D2E271E002290DD /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74EA08D2D2E271E002290DD /* ErrorView.swift */; };
@@ -1748,6 +1754,10 @@
 		D7FA46E52DBDAA7E002C9BB0 /* ImageCacheMigrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FA46E42DBDAA75002C9BB0 /* ImageCacheMigrations.swift */; };
 		D7FA46E62DBDAA7E002C9BB0 /* ImageCacheMigrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FA46E42DBDAA75002C9BB0 /* ImageCacheMigrations.swift */; };
 		D7FA46E72DBDAA7E002C9BB0 /* ImageCacheMigrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FA46E42DBDAA75002C9BB0 /* ImageCacheMigrations.swift */; };
+		D7F563102DEE71C0008509DE /* NdbFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F5630F2DEE71BB008509DE /* NdbFilter.swift */; };
+		D7F563112DEE71C0008509DE /* NdbFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F5630F2DEE71BB008509DE /* NdbFilter.swift */; };
+		D7F563122DEE71C0008509DE /* NdbFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F5630F2DEE71BB008509DE /* NdbFilter.swift */; };
+		D7F563132DEE71C0008509DE /* NdbFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F5630F2DEE71BB008509DE /* NdbFilter.swift */; };
 		D7FB10A72B0C371A00FA8D42 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2B10272A7B0F5C008AA43E /* Log.swift */; };
 		D7FB14222BE5970000398331 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D7FB14212BE5970000398331 /* PrivacyInfo.xcprivacy */; };
 		D7FB14252BE5A9A800398331 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D7FB14242BE5A9A800398331 /* PrivacyInfo.xcprivacy */; };
@@ -2582,6 +2592,7 @@
 		D74AAFD32B155ECB006CF0F4 /* Zaps+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Zaps+.swift"; sourceTree = "<group>"; };
 		D74AAFD52B155F0C006CF0F4 /* WalletConnect+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WalletConnect+.swift"; sourceTree = "<group>"; };
 		D74E64112DC95CBE004C7892 /* HumanReadableErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HumanReadableErrors.swift; sourceTree = "<group>"; };
+		D74DEC892DA0A19800E69FA6 /* Ndb+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Ndb+.swift"; sourceTree = "<group>"; };
 		D74EA08D2D2E271E002290DD /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
 		D74EA0922D2E77B9002290DD /* LoadableNostrEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadableNostrEventView.swift; sourceTree = "<group>"; };
 		D74F43092B23F0BE00425B75 /* DamusPurple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurple.swift; sourceTree = "<group>"; };
@@ -2643,6 +2654,7 @@
 		D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusUserDefaults.swift; sourceTree = "<group>"; };
 		D7EFBA362CC322F300F45588 /* DamusVideoControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusVideoControlsView.swift; sourceTree = "<group>"; };
 		D7FA46E42DBDAA75002C9BB0 /* ImageCacheMigrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCacheMigrations.swift; sourceTree = "<group>"; };
+		D7F5630F2DEE71BB008509DE /* NdbFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbFilter.swift; sourceTree = "<group>"; };
 		D7FB14212BE5970000398331 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		D7FB14242BE5A9A800398331 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		D7FD12252BD345A700CF195B /* FirstAidSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstAidSettingsView.swift; sourceTree = "<group>"; };
@@ -3364,6 +3376,8 @@
 			isa = PBXGroup;
 			children = (
 				D733F9E42D92C75C00317B11 /* UnownedNdbNote.swift */,
+				D7F5630F2DEE71BB008509DE /* NdbFilter.swift */,
+				D74DEC892DA0A19800E69FA6 /* Ndb+.swift */,
 				4CC6A9F92CAB688500989CEF /* ccan */,
 				4C15224A2B8D499F007CDC17 /* parser.h */,
 				4CF47FDC2B631C0100F2B2C0 /* src */,
@@ -4825,6 +4839,7 @@
 				4CDD1AE22A6B3074001CD4DF /* NdbTagsIterator.swift in Sources */,
 				4C216F34286F5ACD00040376 /* DMView.swift in Sources */,
 				D7CB5D512B1174D100AD4105 /* FriendFilter.swift in Sources */,
+				D74DEC8C2DA0A19B00E69FA6 /* Ndb+.swift in Sources */,
 				D7CBD1D42B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift in Sources */,
 				4C32B9572A9AD44700DC3548 /* Root.swift in Sources */,
 				5C8498032D5D150000F74FEB /* ZapExplainer.swift in Sources */,
@@ -5118,6 +5133,7 @@
 				4C5E54032A9522F600FF6E60 /* UserStatus.swift in Sources */,
 				4C7D095F2A098C5D00943473 /* ConnectWalletView.swift in Sources */,
 				3AA24802297E3DC20090C62D /* RepostView.swift in Sources */,
+				D7F563122DEE71C0008509DE /* NdbFilter.swift in Sources */,
 				5C6E1DAF2A194075008FC15A /* PinkGradient.swift in Sources */,
 				4CD7641B28A1641400B6928F /* EndBlock.swift in Sources */,
 				4C198DEF29F88C6B004C165C /* BlurHashEncode.swift in Sources */,
@@ -5618,6 +5634,7 @@
 				82D6FB7E2CD99F7900C925F4 /* Mentions.swift in Sources */,
 				82D6FB7F2CD99F7900C925F4 /* ProfileUpdate.swift in Sources */,
 				82D6FB802CD99F7900C925F4 /* Post.swift in Sources */,
+				D7F563132DEE71C0008509DE /* NdbFilter.swift in Sources */,
 				82D6FB812CD99F7900C925F4 /* PostBlock.swift in Sources */,
 				82D6FB822CD99F7900C925F4 /* Reply.swift in Sources */,
 				82D6FB832CD99F7900C925F4 /* SearchModel.swift in Sources */,
@@ -5732,6 +5749,7 @@
 				3A2BAC602DE02E8600EBB4CC /* NIP05DomainPubkeysView.swift in Sources */,
 				82D6FBF02CD99F7900C925F4 /* LogoView.swift in Sources */,
 				82D6FBF12CD99F7900C925F4 /* IAPProductStateView.swift in Sources */,
+				D74DEC8B2DA0A19B00E69FA6 /* Ndb+.swift in Sources */,
 				82D6FBF22CD99F7900C925F4 /* PurpleBackdrop.swift in Sources */,
 				82D6FBF32CD99F7900C925F4 /* DamusPurpleView.swift in Sources */,
 				82D6FBF42CD99F7900C925F4 /* DamusPurpleWelcomeView.swift in Sources */,
@@ -6026,6 +6044,7 @@
 				D73E5E952C6A97F4007EB227 /* ThreadModel.swift in Sources */,
 				D73E5E962C6A97F4007EB227 /* ReplyMap.swift in Sources */,
 				D73E5E972C6A97F4007EB227 /* ProfileModel.swift in Sources */,
+				D74DEC8A2DA0A19B00E69FA6 /* Ndb+.swift in Sources */,
 				D73E5E982C6A97F4007EB227 /* ActionBarModel.swift in Sources */,
 				D73E5E992C6A97F4007EB227 /* Liked.swift in Sources */,
 				D73E5E9A2C6A97F4007EB227 /* ProfileUpdate.swift in Sources */,
@@ -6052,6 +6071,7 @@
 				4CC6A9FA2CAB688500989CEF /* str.c in Sources */,
 				4CC6A9FB2CAB688500989CEF /* tal.c in Sources */,
 				4CC6A9FD2CAB688500989CEF /* mem.c in Sources */,
+				D7F563102DEE71C0008509DE /* NdbFilter.swift in Sources */,
 				4CC6A9FE2CAB688500989CEF /* sha256.c in Sources */,
 				4CC6AA002CAB688500989CEF /* likely.c in Sources */,
 				4CC6AA042CAB688500989CEF /* htable.c in Sources */,
@@ -6416,6 +6436,7 @@
 				4CBB6F682B72B5F0000477A4 /* NdbProfile.swift in Sources */,
 				4CBB6F672B72B5E8000477A4 /* NdbBlock.swift in Sources */,
 				4CBB6F662B72B5DD000477A4 /* NdbBlocksIterator.swift in Sources */,
+				D74DEC8F2DA0C65F00E69FA6 /* Ndb+.swift in Sources */,
 				D798D21F2B0858D600234419 /* MigratedTypes.swift in Sources */,
 				D7CE1B472B0BE719002EDAD4 /* NativeObject.swift in Sources */,
 				D71AD9002CEC176A002E2C3C /* AppAccessibilityIdentifiers.swift in Sources */,
@@ -6440,6 +6461,7 @@
 				D7B76C902C825042003A16CB /* PushNotificationClient.swift in Sources */,
 				D7CE1B432B0BE719002EDAD4 /* String+extension.swift in Sources */,
 				D7CB5D3F2B116DAD00AD4105 /* NotificationsManager.swift in Sources */,
+				D74DEC912DA0CA2400E69FA6 /* Array.swift in Sources */,
 				D7CB5D602B11770C00AD4105 /* FollowState.swift in Sources */,
 				D7CB5D402B116E8A00AD4105 /* UserSettingsStore.swift in Sources */,
 				D7CE1B1C2B0BE147002EDAD4 /* refmap.c in Sources */,
@@ -6459,6 +6481,7 @@
 				D7CB5D522B1174D100AD4105 /* FriendFilter.swift in Sources */,
 				D7CE1B362B0BE702002EDAD4 /* FbConstants.swift in Sources */,
 				D74AAFD12B155DA4006CF0F4 /* RelayURL.swift in Sources */,
+				D74DEC902DA0C6B500E69FA6 /* NostrFilter.swift in Sources */,
 				D7EDED272B117FF10018B19C /* CompatibleAttribute.swift in Sources */,
 				D74AAFCD2B155D07006CF0F4 /* MakeZapRequest.swift in Sources */,
 				D7CCFC072B05833200323D86 /* NdbNote.swift in Sources */,
@@ -6468,6 +6491,7 @@
 				D7EDED222B117DCA0018B19C /* SequenceUtils.swift in Sources */,
 				D7CE1B422B0BE719002EDAD4 /* Offset.swift in Sources */,
 				D7FB10A72B0C371A00FA8D42 /* Log.swift in Sources */,
+				D7F563112DEE71C0008509DE /* NdbFilter.swift in Sources */,
 				D7CE1B182B0BDFDD002EDAD4 /* mdb.c in Sources */,
 				D7CCFC162B05894300323D86 /* Pubkey.swift in Sources */,
 				D7EDED2C2B128CFA0018B19C /* DamusColors.swift in Sources */,

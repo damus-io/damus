@@ -263,27 +263,8 @@ class NdbNote: Codable, Equatable, Hashable {
         }
 
         var n = ndb_note_ptr()
-
-        var the_kp: ndb_keypair? = nil
-
-        if let sec = keypair.privkey {
-            var kp = ndb_keypair()
-            memcpy(&kp.secret.0, sec.id.bytes, 32);
-
-            if ndb_create_keypair(&kp) <= 0 {
-                print("bad keypair")
-            } else {
-                the_kp = kp
-            }
-        }
-
         var len: Int32 = 0
-        if var the_kp {
-            len = ndb_builder_finalize(&builder, &n.ptr, &the_kp)
-        } else {
-            len = ndb_builder_finalize(&builder, &n.ptr, nil)
-        }
-
+        
         switch noteConstructionMaterial {
         case .keypair(let keypair):
             var the_kp: ndb_keypair? = nil
@@ -300,9 +281,9 @@ class NdbNote: Codable, Equatable, Hashable {
             }
             
             if var the_kp {
-                len = ndb_builder_finalize(&builder, &n, &the_kp)
+                len = ndb_builder_finalize(&builder, &n.ptr, &the_kp)
             } else {
-                len = ndb_builder_finalize(&builder, &n, nil)
+                len = ndb_builder_finalize(&builder, &n.ptr, nil)
             }
             
             if len <= 0 {
@@ -315,7 +296,7 @@ class NdbNote: Codable, Equatable, Hashable {
             
             do {
                 // Finalize note, save length, and ensure it is higher than zero (which signals finalization has succeeded)
-                len = ndb_builder_finalize(&builder, &n, nil)
+                len = ndb_builder_finalize(&builder, &n.ptr, nil)
                 guard len > 0 else { throw InitError.generic }
                 
                 let scratch_buf_len = MAX_NOTE_SIZE
@@ -323,11 +304,11 @@ class NdbNote: Codable, Equatable, Hashable {
                 defer { free(scratch_buf) }  // Ensure we deallocate as soon as we leave this scope, regardless of the outcome
                 
                 // Calculate the ID based on the content
-                guard ndb_calculate_id(n, scratch_buf, Int32(scratch_buf_len)) == 1 else { throw InitError.generic }
+                guard ndb_calculate_id(n.ptr, scratch_buf, Int32(scratch_buf_len)) == 1 else { throw InitError.generic }
                 
                 // Verify the signature against the pubkey and the computed ID, to verify the validity of the whole note
                 var ctx = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_VERIFY))
-                guard ndb_note_verify(&ctx, ndb_note_pubkey(n), ndb_note_id(n), ndb_note_sig(n)) == 1 else { throw InitError.generic }
+                guard ndb_note_verify(&ctx, ndb_note_pubkey(n.ptr), ndb_note_id(n.ptr), ndb_note_sig(n.ptr)) == 1 else { throw InitError.generic }
             }
             catch {
                 free(buf)
