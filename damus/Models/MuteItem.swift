@@ -47,16 +47,16 @@ enum MuteItem: Hashable, Equatable {
         // rhs is the item we want to check against (ie. the item in the mute list)
 
         switch (lhs, rhs) {
-            case (.user(let lhs_pubkey, _), .user(let rhs_pubkey, let rhs_expiration_date)):
-                return lhs_pubkey == rhs_pubkey && !rhs.is_expired()
-            case (.hashtag(let lhs_hashtag, _), .hashtag(let rhs_hashtag, let rhs_expiration_date)):
-                return lhs_hashtag == rhs_hashtag && !rhs.is_expired()
-            case (.word(let lhs_word, _), .word(let rhs_word, let rhs_expiration_date)):
-                return lhs_word == rhs_word && !rhs.is_expired()
-            case (.thread(let lhs_thread, _), .thread(let rhs_thread, let rhs_expiration_date)):
-                return lhs_thread == rhs_thread && !rhs.is_expired()
-            default:
-                return false
+        case (.user(let lhs_pubkey, _), .user(let rhs_pubkey, _)):
+            return lhs_pubkey == rhs_pubkey && !rhs.is_expired()
+        case (.hashtag(let lhs_hashtag, _), .hashtag(let rhs_hashtag, _)):
+            return lhs_hashtag == rhs_hashtag && !rhs.is_expired()
+        case (.word(let lhs_word, _), .word(let rhs_word, _)):
+            return lhs_word == rhs_word && !rhs.is_expired()
+        case (.thread(let lhs_thread, _), .thread(let rhs_thread, _)):
+            return lhs_thread == rhs_thread && !rhs.is_expired()
+        default:
+            return false
         }
     }
 

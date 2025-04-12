@@ -287,7 +287,7 @@ struct EditPictureControl: View {
     
     var accessibility_value: String? {
         if style.first_time_setup {
-            if let current_image_url = model.current_image_url {
+            if model.current_image_url != nil {
                 switch self.model.context {
                 case .normal:
                     return NSLocalizedString("Image is setup", comment: "Accessibility value on image control")

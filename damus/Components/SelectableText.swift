@@ -94,12 +94,12 @@ struct SelectableText: View {
         case show_mute_word_view(highlighted_text: String)
         
         func should_show_highlight_post_view() -> Bool {
-            guard case .show_highlight_post_view(let highlighted_text) = self else { return false }
+            guard case .show_highlight_post_view = self else { return false }
             return true
         }
         
         func should_show_mute_word_view() -> Bool {
-            guard case .show_mute_word_view(let highlighted_text) = self else { return false }
+            guard case .show_mute_word_view = self else { return false }
             return true
         }
         

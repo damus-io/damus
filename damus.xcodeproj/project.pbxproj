@@ -642,7 +642,6 @@
 		82D6FB6C2CD99F7900C925F4 /* DamusPurpleURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7ADD3DD2B53854300F104C4 /* DamusPurpleURL.swift */; };
 		82D6FB6D2CD99F7900C925F4 /* DamusPurpleEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72341182B6864F200E1E135 /* DamusPurpleEnvironment.swift */; };
 		82D6FB6E2CD99F7900C925F4 /* PurpleStoreKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7100C5D2B7709ED00C59298 /* PurpleStoreKitManager.swift */; };
-		82D6FB6F2CD99F7900C925F4 /* CameraService+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA37598F2ABCCEBA0018D73B /* CameraService+Extensions.swift */; };
 		82D6FB702CD99F7900C925F4 /* ImageResizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3759892ABCCDE30018D73B /* ImageResizer.swift */; };
 		82D6FB712CD99F7900C925F4 /* PhotoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA37598B2ABCCE500018D73B /* PhotoCaptureProcessor.swift */; };
 		82D6FB722CD99F7900C925F4 /* VideoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA37598C2ABCCE500018D73B /* VideoCaptureProcessor.swift */; };
@@ -933,7 +932,6 @@
 		BA37598A2ABCCDE40018D73B /* ImageResizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3759892ABCCDE30018D73B /* ImageResizer.swift */; };
 		BA37598D2ABCCE500018D73B /* PhotoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA37598B2ABCCE500018D73B /* PhotoCaptureProcessor.swift */; };
 		BA37598E2ABCCE500018D73B /* VideoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA37598C2ABCCE500018D73B /* VideoCaptureProcessor.swift */; };
-		BA3759922ABCCEBA0018D73B /* CameraService+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA37598F2ABCCEBA0018D73B /* CameraService+Extensions.swift */; };
 		BA3759932ABCCEBA0018D73B /* CameraModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3759902ABCCEBA0018D73B /* CameraModel.swift */; };
 		BA3759942ABCCEBA0018D73B /* CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3759912ABCCEBA0018D73B /* CameraService.swift */; };
 		BA3759972ABCCF360018D73B /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3759962ABCCF360018D73B /* CameraPreview.swift */; };
@@ -1209,7 +1207,6 @@
 		D73E5E882C6A97F4007EB227 /* StoreObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74F430B2B23FB9B00425B75 /* StoreObserver.swift */; };
 		D73E5E892C6A97F4007EB227 /* DamusPurpleURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7ADD3DD2B53854300F104C4 /* DamusPurpleURL.swift */; };
 		D73E5E8A2C6A97F4007EB227 /* PurpleStoreKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7100C5D2B7709ED00C59298 /* PurpleStoreKitManager.swift */; };
-		D73E5E8D2C6A97F4007EB227 /* CameraService+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA37598F2ABCCEBA0018D73B /* CameraService+Extensions.swift */; };
 		D73E5E8E2C6A97F4007EB227 /* ImageResizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3759892ABCCDE30018D73B /* ImageResizer.swift */; };
 		D73E5E8F2C6A97F4007EB227 /* PhotoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA37598B2ABCCE500018D73B /* PhotoCaptureProcessor.swift */; };
 		D73E5E902C6A97F4007EB227 /* VideoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA37598C2ABCCE500018D73B /* VideoCaptureProcessor.swift */; };
@@ -2442,7 +2439,6 @@
 		BA3759892ABCCDE30018D73B /* ImageResizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageResizer.swift; sourceTree = "<group>"; };
 		BA37598B2ABCCE500018D73B /* PhotoCaptureProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoCaptureProcessor.swift; sourceTree = "<group>"; };
 		BA37598C2ABCCE500018D73B /* VideoCaptureProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoCaptureProcessor.swift; sourceTree = "<group>"; };
-		BA37598F2ABCCEBA0018D73B /* CameraService+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CameraService+Extensions.swift"; sourceTree = "<group>"; };
 		BA3759902ABCCEBA0018D73B /* CameraModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraModel.swift; sourceTree = "<group>"; };
 		BA3759912ABCCEBA0018D73B /* CameraService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraService.swift; sourceTree = "<group>"; };
 		BA3759962ABCCF360018D73B /* CameraPreview.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraPreview.swift; sourceTree = "<group>"; };
@@ -3893,7 +3889,6 @@
 			children = (
 				BA3759902ABCCEBA0018D73B /* CameraModel.swift */,
 				BA3759912ABCCEBA0018D73B /* CameraService.swift */,
-				BA37598F2ABCCEBA0018D73B /* CameraService+Extensions.swift */,
 				BA3759892ABCCDE30018D73B /* ImageResizer.swift */,
 				BA37598B2ABCCE500018D73B /* PhotoCaptureProcessor.swift */,
 				BA37598C2ABCCE500018D73B /* VideoCaptureProcessor.swift */,
@@ -4576,7 +4571,6 @@
 				4C363A8428233689006E126D /* Parser.swift in Sources */,
 				3AAA95CA298DF87B00F3D526 /* TranslationService.swift in Sources */,
 				4CE4F9E328528C5200C00DD9 /* AddRelayView.swift in Sources */,
-				BA3759922ABCCEBA0018D73B /* CameraService+Extensions.swift in Sources */,
 				D74F430C2B23FB9B00425B75 /* StoreObserver.swift in Sources */,
 				4C363A9A28283854006E126D /* Reply.swift in Sources */,
 				BA693074295D649800ADDB87 /* UserSettingsStore.swift in Sources */,
@@ -5205,7 +5199,6 @@
 				82D6FB6C2CD99F7900C925F4 /* DamusPurpleURL.swift in Sources */,
 				82D6FB6D2CD99F7900C925F4 /* DamusPurpleEnvironment.swift in Sources */,
 				82D6FB6E2CD99F7900C925F4 /* PurpleStoreKitManager.swift in Sources */,
-				82D6FB6F2CD99F7900C925F4 /* CameraService+Extensions.swift in Sources */,
 				82D6FB702CD99F7900C925F4 /* ImageResizer.swift in Sources */,
 				82D6FB712CD99F7900C925F4 /* PhotoCaptureProcessor.swift in Sources */,
 				82D6FB722CD99F7900C925F4 /* VideoCaptureProcessor.swift in Sources */,
@@ -5596,7 +5589,6 @@
 				D73E5E882C6A97F4007EB227 /* StoreObserver.swift in Sources */,
 				D73E5E892C6A97F4007EB227 /* DamusPurpleURL.swift in Sources */,
 				D73E5E8A2C6A97F4007EB227 /* PurpleStoreKitManager.swift in Sources */,
-				D73E5E8D2C6A97F4007EB227 /* CameraService+Extensions.swift in Sources */,
 				D73E5E8E2C6A97F4007EB227 /* ImageResizer.swift in Sources */,
 				D78F080E2D7F78EF00FC6C75 /* Request.swift in Sources */,
 				D73E5E8F2C6A97F4007EB227 /* PhotoCaptureProcessor.swift in Sources */,
