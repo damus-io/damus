@@ -632,7 +632,7 @@ struct ContentView: View {
 
     func handleNotification(notification: LossyLocalNotification) {
         Log.info("ContentView is handling a notification", for: .push_notifications)
-        guard let damus_state else {
+        guard damus_state != nil else {
             // This should never happen because `listenAndHandleLocalNotifications` is called after damus state is initialized in `onAppear`
             assertionFailure("DamusState not loaded when ContentView (new handler) was handling a notification")
             Log.error("DamusState not loaded when ContentView (new handler) was handling a notification", for: .push_notifications)
@@ -1044,7 +1044,7 @@ func find_event_with_subid(state: DamusState, query query_: FindEvent, subid: St
 ///   - naddr: the `naddr` address
 ///   - callback: A function to handle the found event
 func naddrLookup(damus_state: DamusState, naddr: NAddr, callback: @escaping (NostrEvent?) -> ()) {
-    var nostrKinds: [NostrKind]? = NostrKind(rawValue: naddr.kind).map { [$0] }
+    let nostrKinds: [NostrKind]? = NostrKind(rawValue: naddr.kind).map { [$0] }
 
     let filter = NostrFilter(kinds: nostrKinds, authors: [naddr.author])
     
@@ -1216,7 +1216,7 @@ extension LossyLocalNotification {
         case .nprofile(let nProfile):
             // TODO: Improve this by implementing a profile route that handles nprofiles with their relay hints.
             return .route(.ProfileByKey(pubkey: nProfile.author))
-        case .nrelay(let string):
+        case .nrelay:
             // We do not need to implement `nrelay` support, it has been deprecated.
             // See https://github.com/nostr-protocol/nips/blob/6e7a618e7f873bb91e743caacc3b09edab7796a0/BREAKING.md?plain=1#L21
             return .sheet(.error(ErrorView.UserPresentableError(

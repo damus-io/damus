@@ -86,10 +86,10 @@ struct DamusAppNotificationView: View {
             Task {
                 do {
                     let url = try await damus_state.purple.generate_verified_ln_checkout_link(product_template_name: product_template_name)
-                    await self.open_url(url: url)
+                    self.open_url(url: url)
                 }
                 catch {
-                    await self.open_url(url: damus_state.purple.environment.purple_landing_page_url().appendingPathComponent("checkout"))
+                    self.open_url(url: damus_state.purple.environment.purple_landing_page_url().appendingPathComponent("checkout"))
                 }
             }
         }

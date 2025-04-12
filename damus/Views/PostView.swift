@@ -763,7 +763,7 @@ func load_draft_for_post(drafts: Drafts, action: PostAction) -> DraftArtifacts? 
         }
         // If there are no exact matches to the highlight, try to load a draft for the same highlight source
         // We do this to improve UX, because we don't want to leave the post view blank if they only selected a slightly different piece of text from before.
-        var other_matches = drafts.highlights
+        let other_matches = drafts.highlights
             .filter { $0.key.source == highlight.source }
         // It's not an exact match, so there is no way of telling which one is the preferred draft. So just load the first one we found.
         return other_matches.first?.value

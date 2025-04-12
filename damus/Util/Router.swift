@@ -209,7 +209,7 @@ enum Route: Hashable {
         case .Search(let search):
             hasher.combine("search")
             hasher.combine(search.search)
-        case .NDBSearch(let results):
+        case .NDBSearch:
             hasher.combine("results")
         case .EULA:
             hasher.combine("eula")
