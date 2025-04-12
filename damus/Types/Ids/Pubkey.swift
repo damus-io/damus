@@ -44,5 +44,13 @@ struct Pubkey: IdType, TagKey, TagConvertible, Identifiable {
         return pubkey
     }
     
+    var unsafePointer: UnsafePointer<UInt8>? {
+        return self.id.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) in
+            guard let baseAddress = bytes.baseAddress else { return nil }
+            return baseAddress.withMemoryRebound(to: UInt8.self, capacity: bytes.count) { ptr in
+                return ptr
+            }
+        }
+    }
 }
 

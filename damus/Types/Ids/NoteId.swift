@@ -51,4 +51,13 @@ struct NoteId: IdType, TagKey, TagConvertible {
 
         return note_id
     }
+    
+    var unsafePointer: UnsafePointer<UInt8>? {
+        return self.id.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) in
+            guard let baseAddress = bytes.baseAddress else { return nil }
+            return baseAddress.withMemoryRebound(to: UInt8.self, capacity: bytes.count) { ptr in
+                return ptr
+            }
+        }
+    }
 }
