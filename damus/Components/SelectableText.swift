@@ -119,16 +119,23 @@ struct SelectableText: View {
 fileprivate class TextView: UITextView {
     var postHighlight: (String) -> Void
     var muteWord: (String) -> Void
+    private let enableHighlighting: Bool
 
-    init(frame: CGRect, textContainer: NSTextContainer?, postHighlight: @escaping (String) -> Void, muteWord: @escaping (String) -> Void) {
+    init(frame: CGRect, textContainer: NSTextContainer?, postHighlight: @escaping (String) -> Void, muteWord: @escaping (String) -> Void, enableHighlighting: Bool) {
         self.postHighlight = postHighlight
         self.muteWord = muteWord
+        self.enableHighlighting = enableHighlighting
+
         super.init(frame: frame, textContainer: textContainer)
+
+        if enableHighlighting {
+            self.delegate = self
+        }
     }
 
     required init?(coder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
-        }
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
         if action == #selector(highlightText(_:)) {
@@ -142,21 +149,42 @@ fileprivate class TextView: UITextView {
         return super.canPerformAction(action, withSender: sender)
     }
     
-    func getSelectedText() -> String? {
+    private func getSelectedText() -> String? {
         guard let selectedRange = self.selectedTextRange else { return nil }
         return self.text(in: selectedRange)
     }
 
-    @objc public func highlightText(_ sender: Any?) {
+    @objc private func highlightText(_ sender: Any?) {
         guard let selectedText = self.getSelectedText() else { return }
         self.postHighlight(selectedText)
     }
     
-    @objc public func muteText(_ sender: Any?) {
+    @objc private func muteText(_ sender: Any?) {
         guard let selectedText = self.getSelectedText() else { return }
         self.muteWord(selectedText)
     }
 
+}
+
+extension TextView: UITextViewDelegate {
+    func textView(_ textView: UITextView, editMenuForTextIn range: NSRange, suggestedActions: [UIMenuElement]) -> UIMenu? {
+        guard enableHighlighting,
+              let selectedTextRange = self.selectedTextRange,
+              let selectedText = self.text(in: selectedTextRange),
+              !selectedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return nil
+        }
+
+        let highlightAction = UIAction(title: NSLocalizedString("Highlight", comment: "Context menu action to highlight the selected text as context to draft a new note."), image: UIImage(systemName: "highlighter")) { [weak self] _ in
+            self?.postHighlight(selectedText)
+        }
+
+        let muteAction = UIAction(title: NSLocalizedString("Mute", comment: "Context menu action to mute the selected word."), image: UIImage(systemName: "speaker.slash")) { [weak self] _ in
+            self?.muteWord(selectedText)
+        }
+
+        return UIMenu(children: suggestedActions + [highlightAction, muteAction])
+    }
 }
 
 fileprivate struct TextViewRepresentable: UIViewRepresentable {
@@ -172,7 +200,7 @@ fileprivate struct TextViewRepresentable: UIViewRepresentable {
     @Binding var height: CGFloat
 
     func makeUIView(context: UIViewRepresentableContext<Self>) -> TextView {
-        let view = TextView(frame: .zero, textContainer: nil, postHighlight: postHighlight, muteWord: muteWord)
+        let view = TextView(frame: .zero, textContainer: nil, postHighlight: postHighlight, muteWord: muteWord, enableHighlighting: enableHighlighting)
         view.isEditable = false
         view.dataDetectorTypes = .all
         view.isSelectable = true
@@ -182,11 +210,6 @@ fileprivate struct TextViewRepresentable: UIViewRepresentable {
         view.textContainerInset.left = 1.0
         view.textContainerInset.right = 1.0
         view.textAlignment = textAlignment
-
-        let menuController = UIMenuController.shared
-        let highlightItem = UIMenuItem(title: "Highlight", action: #selector(view.highlightText(_:)))
-        let muteItem = UIMenuItem(title: "Mute", action: #selector(view.muteText(_:)))
-        menuController.menuItems = self.enableHighlighting ? [highlightItem, muteItem] : []
 
         return view
     }
