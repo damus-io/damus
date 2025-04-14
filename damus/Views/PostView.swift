@@ -883,6 +883,8 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
     case .quoting(let ev):
         content.append("\n\nnostr:" + bech32_note_id(ev.id))
 
+        tags.append(["q", ev.id.hex()]);
+
         if let quoted_ev = state.events.lookup(ev.id) {
             tags.append(["p", quoted_ev.pubkey.hex()])
         }
