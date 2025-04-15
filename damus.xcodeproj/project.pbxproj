@@ -1649,6 +1649,9 @@
 		D7CE1B472B0BE719002EDAD4 /* NativeObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B9462A9AD44700DC3548 /* NativeObject.swift */; };
 		D7CE1B482B0BE719002EDAD4 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B93D2A9AD44700DC3548 /* Message.swift */; };
 		D7CE1B492B0BE729002EDAD4 /* DisplayName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9BB83029C0ED4F00FC4E37 /* DisplayName.swift */; };
+		D7D09AB52DADCA5C00AB170D /* CoinosDeterministicAccountClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D09AB42DADCA5600AB170D /* CoinosDeterministicAccountClient.swift */; };
+		D7D09AB62DADCA5C00AB170D /* CoinosDeterministicAccountClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D09AB42DADCA5600AB170D /* CoinosDeterministicAccountClient.swift */; };
+		D7D09AB72DADCA5C00AB170D /* CoinosDeterministicAccountClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D09AB42DADCA5600AB170D /* CoinosDeterministicAccountClient.swift */; };
 		D7D2A3812BF815D000E4B42B /* PushNotificationClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D2A3802BF815D000E4B42B /* PushNotificationClient.swift */; };
 		D7D68FF92C9E01BE0015A515 /* KFClickable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D68FF82C9E01B60015A515 /* KFClickable.swift */; };
 		D7D68FFA2C9E01BE0015A515 /* KFClickable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D68FF82C9E01B60015A515 /* KFClickable.swift */; };
@@ -2554,6 +2557,7 @@
 		D7CB5D5E2B11770C00AD4105 /* FollowState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowState.swift; sourceTree = "<group>"; };
 		D7CBD1D32B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleNotificationManagement.swift; sourceTree = "<group>"; };
 		D7CBD1D52B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleImpendingExpirationTests.swift; sourceTree = "<group>"; };
+		D7D09AB42DADCA5600AB170D /* CoinosDeterministicAccountClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinosDeterministicAccountClient.swift; sourceTree = "<group>"; };
 		D7D2A3802BF815D000E4B42B /* PushNotificationClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationClient.swift; sourceTree = "<group>"; };
 		D7D68FF82C9E01B60015A515 /* KFClickable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KFClickable.swift; sourceTree = "<group>"; };
 		D7DB1FDD2D5A78CE00CF06DA /* NIP44.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP44.swift; sourceTree = "<group>"; };
@@ -3363,6 +3367,7 @@
 				D7EDED2D2B128E8A0018B19C /* CollectionExtension.swift */,
 				D74AAFCE2B155D8C006CF0F4 /* ZapDataModel.swift */,
 				D74AAFD32B155ECB006CF0F4 /* Zaps+.swift */,
+				D7D09AB42DADCA5600AB170D /* CoinosDeterministicAccountClient.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -4859,6 +4864,7 @@
 				4CF38C882A9442DC00BE01B6 /* UserStatusView.swift in Sources */,
 				4CE6DEE727F7A08100C66700 /* damusApp.swift in Sources */,
 				4C1253582A76C9060004F4B8 /* PresentSheetNotify.swift in Sources */,
+				D7D09AB52DADCA5C00AB170D /* CoinosDeterministicAccountClient.swift in Sources */,
 				D773BC5F2C6D538500349F0A /* CommentItem.swift in Sources */,
 				4C363A962827096D006E126D /* PostBlock.swift in Sources */,
 				4CA9275F2A2902B20098A105 /* LongformPreview.swift in Sources */,
@@ -5247,6 +5253,7 @@
 				82D6FB652CD99F7900C925F4 /* CollectionExtension.swift in Sources */,
 				82D6FB662CD99F7900C925F4 /* ZapDataModel.swift in Sources */,
 				82D6FB672CD99F7900C925F4 /* Zaps+.swift in Sources */,
+				D7D09AB72DADCA5C00AB170D /* CoinosDeterministicAccountClient.swift in Sources */,
 				82D6FB682CD99F7900C925F4 /* WalletConnect+.swift in Sources */,
 				82D6FB692CD99F7900C925F4 /* DamusPurpleNotificationManagement.swift in Sources */,
 				82D6FB6A2CD99F7900C925F4 /* DamusPurple.swift in Sources */,
@@ -5996,6 +6003,7 @@
 				D73E5E182C6A963D007EB227 /* AttachMediaUtility.swift in Sources */,
 				D73E5F852C6AA628007EB227 /* LoadScript.swift in Sources */,
 				D703D74E2C6709DA00A400EA /* Pubkey.swift in Sources */,
+				D7D09AB62DADCA5C00AB170D /* CoinosDeterministicAccountClient.swift in Sources */,
 				D703D7802C670C2500A400EA /* NIP05.swift in Sources */,
 				D703D7AA2C670E5D00A400EA /* verifier.c in Sources */,
 				D73E5E1D2C6A9680007EB227 /* PreviewCache.swift in Sources */,
