@@ -39,9 +39,9 @@ struct WalletView: View {
     var body: some View {
         switch model.connect_state {
         case .new:
-            ConnectWalletView(model: model, nav: damus_state.nav)
+            ConnectWalletView(model: model, nav: damus_state.nav, userKeypair: self.damus_state.keypair)
         case .none:
-            ConnectWalletView(model: model, nav: damus_state.nav)
+            ConnectWalletView(model: model, nav: damus_state.nav, userKeypair: self.damus_state.keypair)
         case .existing(let nwc):
             MainWalletView(nwc: nwc)
                 .toolbar {

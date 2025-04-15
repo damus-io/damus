@@ -16,7 +16,9 @@ struct ConnectWalletView: View {
     @State var error: String? = nil
     @State var wallet_scan_result: WalletScanResult = .scanning
     @State var show_introduction: Bool = true
+    @State var show_coinos_options: Bool = false
     var nav: NavigationCoordinator
+    let userKeypair: Keypair
     
     var body: some View {
         MainContent
@@ -147,8 +149,7 @@ struct ConnectWalletView: View {
             Spacer()
             
             CoinosButton() {
-                show_introduction = false
-                openURL(URL(string:"https://coinos.io/settings/nostr")!)
+                self.show_coinos_options = true
             }
             .padding()
         }
@@ -161,6 +162,110 @@ struct ConnectWalletView: View {
                 .padding(2) // Avoids border clipping on the sides
         )
         .padding(.top, 20)
+        .sheet(isPresented: $show_coinos_options, content: {
+            CoinosConnectionOptionsSheet
+        })
+    }
+    
+    var CoinosConnectionOptionsSheet: some View {
+        VStack(spacing: 20) {
+            Text("How would you like to connect to your Coinos wallet?", comment: "Question for the user when connecting a Coinos wallet.")
+                .font(.title3)
+                .bold()
+                .multilineTextAlignment(.center)
+                .padding(.bottom, 10)
+                .lineLimit(2)
+            
+            Spacer()
+            
+            VStack(spacing: 5) {
+                Button(
+                    action: { self.oneClickSetup() },
+                    label: {
+                        HStack {
+                            Spacer()
+                            VStack {
+                                HStack {
+                                    Image(systemName: "wand.and.sparkles")
+                                    Text("One-click setup", comment: "Button label for users to do a one-click Coinos wallet setup.")
+                                }
+                                // I have to hide this on npub logins, because otherwise SwiftUI will start truncating text
+                                if self.userKeypair.privkey != nil {
+                                    Text("Also click here if you had a one-click setup before.", comment: "Button description hint for users who may want to do a one-click setup.")
+                                        .font(.caption)
+                                }
+                            }
+                            Spacer()
+                        }
+                    }
+                )
+                .frame(maxWidth: .infinity)
+                .buttonStyle(GradientButtonStyle())
+                .opacity(self.userKeypair.privkey == nil ? 0.5 : 1.0)
+                .disabled(self.userKeypair.privkey == nil)
+                
+                if self.userKeypair.privkey == nil {
+                    Text("You must be logged in with your nsec to use this option.", comment: "Warning text for users who cannot create a Coinos account via the one-click setup without being logged in with their nsec.")
+                        .font(.caption)
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.secondary)
+                    
+                    Text("Your profile will not be shared with Coinos.", comment: "Label text for users to reassure them that their nsec is not shared with a third party.")
+                        .font(.caption)
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            
+            Button(
+                action: {
+                    show_introduction = false
+                    show_coinos_options = false
+                    openURL(URL(string:"https://coinos.io/settings/nostr")!)
+                },
+                label: {
+                    HStack {
+                        Spacer()
+                        
+                        VStack {
+                            HStack {
+                                Image(systemName: "arrow.up.right")
+                                Text("Connect via the website", comment: "Button label for users who are setting up a Coinos wallet and would like to connect via the website")
+                            }
+                            Text("Click here if you have a Coinos username and password.", comment: "Button description hint for users who may want to connect via the website.")
+                                .font(.caption)
+                        }
+                        
+                        Spacer()
+                    }
+                }
+            )
+            .frame(maxWidth: .infinity)
+        }
+        .padding()
+        .presentationDetents([.height(300)])
+    }
+    
+    func oneClickSetup() {
+        Task {
+            show_coinos_options = false
+            do {
+                guard let fullKeypair = self.userKeypair.to_full() else {
+                    throw CoinosDeterministicAccountClient.ClientError.errorFormingRequest
+                }
+                let client = CoinosDeterministicAccountClient(userKeypair: fullKeypair)
+                try await client.loginOrRegister()
+                let nwcURL = try await client.createNWCConnection()
+                model.connect(nwcURL)   // Connect directly, to make it a true one-click setup
+            }
+            catch {
+                present_sheet(.error(.init(
+                    user_visible_description: NSLocalizedString("Something went wrong when performing the one-click Coinos wallet setup.", comment: "Error label when user tries the one-click Coinos wallet setup but fails for some generic reason."),
+                    tip: NSLocalizedString("Check your internet connection and try again. If the error persists, contact support.", comment: "Error tip when user tries to create the one-click Coinos wallet setup but fails for a generic reason."),
+                    technical_info: error.localizedDescription
+                )))
+            }
+        }
     }
     
     var ManualSetup: some View {
@@ -270,7 +375,7 @@ struct ConnectWalletView: View {
 
 struct ConnectWalletView_Previews: PreviewProvider {
     static var previews: some View {
-        ConnectWalletView(model: WalletModel(settings: UserSettingsStore()), nav: .init())
+        ConnectWalletView(model: WalletModel(settings: UserSettingsStore()), nav: .init(), userKeypair: test_keypair)
             .previewDisplayName("Main Wallet Connect View")
         ConnectWalletView.AreYouSure(nwc: get_test_nwc(), show_introduction: .constant(false), model: WalletModel(settings: test_damus_state.settings))
             .previewDisplayName("Are you sure screen")
