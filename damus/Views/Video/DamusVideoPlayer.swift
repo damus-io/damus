@@ -25,10 +25,14 @@ import SwiftUI
     
     /// The URL of the video
     let url: URL
+    
+    
+    // MARK: Internal state
+    
     /// The underlying AVPlayer that we are wrapping.
     /// This is not public because we don't want any callers of this class controlling the `AVPlayer` directly, we want them to go through our interface
     /// This measure helps avoid state inconsistencies and other flakiness. DO NOT USE THIS OUTSIDE `DamusVideoPlayer`
-    private let player: AVPlayer
+    private var player: AVPlayer
     
     
     // MARK: SwiftUI-friendly interface
@@ -100,15 +104,38 @@ import SwiftUI
     private var videoIsPlayingObserver: NSKeyValueObservation?
     
     
-    // MARK: - Initialization
+    // MARK: - Initialization, deinitialization and reinitialization
     
     public init(url: URL) {
         self.url = url
         self.player = AVPlayer(playerItem: AVPlayerItem(url: url))
         self.video_size = nil
         
+        Task { await self.load() }
+    }
+    
+    func reinitializePlayer() {
+        Log.info("DamusVideoPlayer: Reinitializing internal player…", for: .video_coordination)
+        
+        // Tear down
+        videoSizeObserver?.invalidate()
+        videoDurationObserver?.invalidate()
+        videoIsPlayingObserver?.invalidate()
+        
+        // Reset player
+        self.player = AVPlayer(playerItem: AVPlayerItem(url: url))
+        
+        // Load once again
         Task {
             await load()
+        }
+    }
+    
+    /// Internally loads this class
+    private func load() async {
+        Task {
+            has_audio = await self.video_has_audio()
+            is_loading = false
         }
         
         player.isMuted = is_muted
@@ -124,6 +151,13 @@ import SwiftUI
         observeDuration()
         observeCurrentTime()
         observeVideoIsPlaying()
+    }
+    
+    deinit {
+        // These cannot be moved into their own functions due to contraints on structured concurrency
+        videoSizeObserver?.invalidate()
+        videoDurationObserver?.invalidate()
+        videoIsPlayingObserver?.invalidate()
     }
     
     // MARK: - Observers
@@ -175,11 +209,6 @@ import SwiftUI
     
     // MARK: - Other internal logic functions
     
-    private func load() async {
-        has_audio = await self.video_has_audio()
-        is_loading = false
-    }
-    
     private func video_has_audio() async -> Bool {
         do {
             let hasAudibleTracks = ((try await player.currentItem?.asset.loadMediaSelectionGroup(for: .audible)) != nil)
@@ -196,17 +225,16 @@ import SwiftUI
         player.play()
     }
     
-    // MARK: - Deinit
-    
-    deinit {
-        videoSizeObserver?.invalidate()
-        videoDurationObserver?.invalidate()
-        videoIsPlayingObserver?.invalidate()
-    }
-    
     // MARK: - Convenience interface functions
     
     func play() {
+        switch self.player.status {
+        case .failed:
+            Log.error("DamusVideoPlayer: Failed to play video. Error: '%s'", for: .video_coordination, self.player.error?.localizedDescription ?? "no error")
+            self.reinitializePlayer()
+        default:
+            break
+        }
         self.is_playing = true
     }
     
@@ -236,9 +264,9 @@ extension DamusVideoPlayer {
         }
         
         func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
-            if uiViewController.player == nil {
-                uiViewController.player = player.player
-            }
+            /// - If `player.player` is changed (e.g. `DamusVideoPlayer` gets reinitialized), this will refresh the video player to the new working one.
+            /// - If `player.player` is unchanged, this is basically a very low cost no-op (Because `AVPlayer` is a class type, this assignment only copies a pointer, not a large structure)
+            uiViewController.player = player.player
         }
         
         static func dismantleUIViewController(_ uiViewController: AVPlayerViewController, coordinator: ()) {
