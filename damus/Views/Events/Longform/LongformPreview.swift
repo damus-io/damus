@@ -122,19 +122,7 @@ struct LongformPreviewBody: View {
                 } else if blur_images || (blur_images && !state.settings.media_previews) {
                     ZStack {
                         titleImage(url: url)
-                        ZStack {
-                            Blur()
-                            
-                            VStack(alignment: .center) {
-                                Text(NSLocalizedString("Non-following user media. Tap to open", comment: "Non-following user media. Tap to open."))
-                                    .foregroundStyle(Color.white)
-                                    .font(.title2)
-                                    .padding(8)
-                            }
-                        }
-                        .onTapGesture {
-                            blur_images = false
-                        }
+                        BlurOverlayView(blur_images: $blur_images, artifacts: nil, size: nil, damus_state: nil, parentView: .longFormView)
                     }
                 }
             }
