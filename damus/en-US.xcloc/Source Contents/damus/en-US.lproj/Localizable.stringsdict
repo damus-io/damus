@@ -50,6 +50,22 @@
 			<string>Following</string>
 		</dict>
 	</dict>
+	<key>hellthread_notifications_disabled</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@HELLTHREAD_PROFILES@</string>
+		<key>HELLTHREAD_PROFILES</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Hide notifications that tag more than %d profile</string>
+			<key>other</key>
+			<string>Hide notifications that tag more than %d profiles</string>
+		</dict>
+	</dict>
 	<key>imports_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -80,6 +96,22 @@
 			<string>%2$@ and %1$d other reposted</string>
 			<key>other</key>
 			<string>%2$@ and %1$d others reposted</string>
+		</dict>
+	</dict>
+	<key>quoted_reposts_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@QUOTE_REPOSTS@</string>
+		<key>QUOTE_REPOSTS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Quote</string>
+			<key>other</key>
+			<string>Quotes</string>
 		</dict>
 	</dict>
 	<key>reacted_tagged_in_3</key>
@@ -240,22 +272,6 @@
 			<string>Repost</string>
 			<key>other</key>
 			<string>Reposts</string>
-		</dict>
-	</dict>
-	<key>quoted_reposts_count</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@QUOTE_REPOSTS@</string>
-		<key>QUOTE_REPOSTS</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>Quote</string>
-			<key>other</key>
-			<string>Quotes</string>
 		</dict>
 	</dict>
 	<key>sats</key>
