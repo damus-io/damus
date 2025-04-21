@@ -174,11 +174,14 @@
     "An additional percentage of each zap will be sent to support Damus development" : {
       "comment" : "Text indicating that they can contribute zaps to support Damus development."
     },
-    "An unexpected error happened while trying to create the new contact list. Please contact support." : {
-      "comment" : "Error message for a failed contact list reset operation"
+    "An unexpected error happened while trying to perform this action. Please contact support." : {
+      "comment" : "Error message for a failed reset/repair operation"
     },
     "An unexpected error occurred. Please contact Damus support via [Nostr](damus:npub18m76awca3y37hkvuneavuw6pjj4525fw90necxmadrvjg0sdy6qsngq955) or [email](support@damus.io) with the error message below." : {
       "comment" : "Label explaining there was an error, and suggesting next steps"
+    },
+    "An unknown error occurred while adding a relay." : {
+      "comment" : "Title of an unknown relay error message."
     },
     "Animations" : {
       "comment" : "Toggle to enable or disable image animation"
@@ -286,13 +289,16 @@
       "comment" : "User-visible heading for an error message indicating a note has an unknown kind or is unsupported for viewing."
     },
     "Cancel" : {
-      "comment" : "Alert button to cancel out of alert for muting a user.\nButton to cancel a repost.\nButton to cancel any interaction with the QRCode link.\nButton to cancel out of alert that creates a new mutelist.\nButton to cancel out of posting a note.\nButton to cancel out of search text entry mode.\nButton to cancel the upload.\nCancel button text for dismissing profile status settings view.\nCancel button text for dismissing updating image url.\nCancel deleting bookmarks.\nCancel deleting the user.\nCancel out of logging out the user.\nCancel out of search view.\nCancel resetting the contact list.\nText for button to cancel out of connecting Nostr Wallet Connect lightning wallet."
+      "comment" : "Alert button to cancel out of alert for muting a user.\nButton to cancel a repost.\nButton to cancel any interaction with the QRCode link.\nButton to cancel out of alert that creates a new mutelist.\nButton to cancel out of posting a note.\nButton to cancel out of search text entry mode.\nButton to cancel the upload.\nCancel button text for dismissing profile status settings view.\nCancel button text for dismissing updating image url.\nCancel deleting bookmarks.\nCancel deleting the user.\nCancel out of logging out the user.\nCancel out of search view.\nCancel the user-requested operation.\nText for button to cancel out of connecting Nostr Wallet Connect lightning wallet."
     },
     "Cancelled" : {
       "comment" : "Title indicating that the user has cancelled."
     },
     "Changing this setting will cause the cache to be cleared. This will free space, but images may take longer to load again. Are you sure you want to proceed?" : {
       "comment" : "Message explaining consequences of changing the 'enable animation' setting"
+    },
+    "Check the address and/or the relay list." : {
+      "comment" : "Human readable tip for error"
     },
     "Choose from Library" : {
       "comment" : "Option to select photo from library"
@@ -342,7 +348,7 @@
     "CONTACT" : {
       "comment" : "Text label indicating that the information below is the contact information of the admin of the Nostr relay."
     },
-    "Contact list (Follows + Relay list)" : {
+    "Contact list" : {
       "comment" : "Section title for Contact list first aid tools"
     },
     "Contact list has been reset" : {
@@ -358,7 +364,7 @@
       "comment" : "Section title for content filtering/moderation configuration."
     },
     "Continue" : {
-      "comment" : "Button to dismiss suggested users view and continue to the main app\nContinue with bookmarks.\nContinue with deleting the user.\nContinue with resetting the contact list.\nPrompt to user to continue"
+      "comment" : "Button to dismiss suggested users view and continue to the main app\nContinue with bookmarks.\nContinue with deleting the user.\nContinue with the user-requested operation.\nPrompt to user to continue"
     },
     "Conversations" : {
       "comment" : "Label for filter for seeing notes and replies that involve conversations between the signed in user and the current profile."
@@ -407,6 +413,9 @@
     },
     "Could not create your initial contact list event. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help." : {
       "comment" : "Error message to the user indicating that the initial contact list failed to be created."
+    },
+    "Could not create your initial relay list. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help." : {
+      "comment" : "Error message to the user indicating that the initial relay list failed to be created."
     },
     "Could not find the user you're looking for" : {
       "comment" : "Indicates that there are no users found."
@@ -494,9 +503,6 @@
     },
     "Done" : {
       "comment" : "Button to dismiss wallet selection view for paying Lightning invoice.\nButton to leave edit mode for modifying the list of relays."
-    },
-    "Duplicate relay" : {
-      "comment" : "Title of the duplicate relay error message."
     },
     "Duration" : {
       "comment" : "Label for profile status expiration duration picker.\nThe duration in which to mute the given item."
@@ -724,6 +730,12 @@
     "Hide notes with #nsfw tags" : {
       "comment" : "Setting to hide notes with the #nsfw (not safe for work) tags"
     },
+    "Hide notifications that tag many profiles" : {
+      "comment" : "Label for notification settings toggle that hides notifications that tag many people."
+    },
+    "Highlight" : {
+      "comment" : "Context menu action to highlight the selected text as context to draft a new note."
+    },
     "Highlighted" : {
       "comment" : "Label to indicate that the user is highlighting their own post."
     },
@@ -758,7 +770,7 @@
       "comment" : "Description of report type for impersonation."
     },
     "In progress…" : {
-      "comment" : "Loading message indicating that a contact list reset operation is in progress."
+      "comment" : "Loading message indicating that a first aid operation is in progress."
     },
     "Indefinite" : {
       "comment" : "Mute a given item indefinitly (until user unmutes it). As opposed to muting the item for a given period of time."
@@ -774,6 +786,9 @@
     },
     "Invalid Nostr wallet connection string" : {
       "comment" : "Error message when an invalid Nostr wallet connection string is provided."
+    },
+    "Invalid relay address" : {
+      "comment" : "Heading for an error when adding a relay"
     },
     "Invalid Tip Address" : {
       "comment" : "Title of alerting as invalid tip address."
@@ -890,7 +905,7 @@
       "comment" : "Monthly renewal of purple subscription"
     },
     "Mute" : {
-      "comment" : "Alert button to mute a user.\nButton label that allows the user to mute the user shown on-screen\nButton to mute a profile\nTitle for confirmation dialog to mute a profile."
+      "comment" : "Alert button to mute a user.\nButton label that allows the user to mute the user shown on-screen\nButton to mute a profile\nContext menu action to mute the selected word.\nTitle for confirmation dialog to mute a profile."
     },
     "Mute %@?" : {
       "comment" : "Alert message prompt to ask if a user should be muted."
@@ -949,6 +964,9 @@
     "No image is currently setup" : {
       "comment" : "Accessibility value on image control"
     },
+    "No initial relay list available to update." : {
+      "comment" : "Human readable error description"
+    },
     "No logs to display" : {
       "comment" : "Label to indicate that there are no developer mode logs available to be displayed on the screen"
     },
@@ -960,6 +978,9 @@
     },
     "No profile picture is currently setup" : {
       "comment" : "Accessibility value on profile picture image control"
+    },
+    "No relay list was found. You might experience issues using the app. If you suspect you have permanently lost your relay list (or if you never had one), you can fix this by resetting it" : {
+      "comment" : "Section footer for relay list first aid tools"
     },
     "No results" : {
       "comment" : "A label indicating that note search resulted in no results"
@@ -1123,14 +1144,32 @@
     "Plan" : {
       "comment" : "Prompt selection of DeepL subscription plan to perform machine translations on notes"
     },
+    "Please check the address and try again" : {
+      "comment" : "Tip for an error where the relay address being added is invalid"
+    },
     "Please choose relays from the list below to filter the current feed:" : {
       "comment" : "Instructions on how to filter a specific timeline feed by choosing relay servers to filter on."
+    },
+    "Please contact support for further help." : {
+      "comment" : "Human readable tips for what to do for a failure to find the relay list"
+    },
+    "Please contact support." : {
+      "comment" : "Tip for an unknown relay error message."
     },
     "Please contact the person who provided the link, and ask for another link." : {
       "comment" : "User-visible tip on what to do if a link contains a deprecated \"nrelay\" reference."
     },
     "Please double-check the checkout web page, or go to the Side Menu → \"Purple\" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue." : {
       "comment" : "User-facing tips on what to do if a Purple welcome link doesn't work"
+    },
+    "Please go to Settings > First Aid > Repair relay list, or contact support." : {
+      "comment" : "Human readable tip for error"
+    },
+    "Please make sure you have logged-in with your private key." : {
+      "comment" : "Human readable tip for error"
+    },
+    "Please try again later or contact support if the issue persists." : {
+      "comment" : "Human readable tip for error"
     },
     "Please try again, check the URL for typos, or contact support for further help." : {
       "comment" : "User visible error tips"
@@ -1234,6 +1273,12 @@
     "Recommended" : {
       "comment" : "Title of the tab that shows the list of relays recommended by Damus."
     },
+    "Relay list" : {
+      "comment" : "Section title for Relay list first aid tools"
+    },
+    "Relay list has been repaired" : {
+      "comment" : "Message indicating that the relay list was successfully repaired."
+    },
     "Relay Logs" : {
       "comment" : "Text label indicating that the text below it are developer mode logs."
     },
@@ -1260,6 +1305,9 @@
     },
     "Renews on" : {
       "comment" : "Indicating when the subscription will renew"
+    },
+    "Repair relay list" : {
+      "comment" : "Button to repair relay list."
     },
     "Reply" : {
       "comment" : "Accessibility label for reply button"
@@ -1593,17 +1641,20 @@
     "The camera was not capable of scanning the requested codes." : {
       "comment" : "Camera's bad output error label"
     },
-    "The relay you are trying to add is already added.\nYou're all set!" : {
-      "comment" : "An error message that appears when the user attempts to add a relay that has already been added."
-    },
     "The social network you control" : {
       "comment" : "Quick description of what Damus is"
+    },
+    "The specified relay that you are trying to udpate was not found in your relay list." : {
+      "comment" : "Human readable error description"
     },
     "There has been an unexpected error with the in-app purchase. Please try again later or contact support@damus.io. Error: %@" : {
       "comment" : "In-app purchase error message for the user"
     },
     "There is no content available to share at this time. Please close this view and try again." : {
       "comment" : "Label explaining that no content is available to share and instructing the user to close the view and try again."
+    },
+    "There was a problem creating the relay list event." : {
+      "comment" : "Human readable error description"
     },
     "There was an error loading your account. Please try again later. If problem persists, please contact us at support@damus.io" : {
       "comment" : "Error label when Purple account information fails to load"
@@ -1617,11 +1668,17 @@
     "This is a public key, you will not be able to make notes or interact in any way. This is used for viewing accounts from their perspective." : {
       "comment" : "Warning that the inputted account key is a public key and the result of what happens because of it."
     },
+    "This is an unexpected error, please contact support." : {
+      "comment" : "Human readable tip for error"
+    },
     "This is my first post on Nostr 💜. I love drawing and folding Origami!\n\nNice to meet you all! #introductions #plebchain " : {
       "comment" : "First post example given to the user during onboarding, as a suggestion as to what they could post first"
     },
     "This note contains too many items and cannot be rendered" : {
       "comment" : "Error message indicating that a note is too big and cannot be rendered"
+    },
+    "This relay is already in your list." : {
+      "comment" : "Human readable tip for error"
     },
     "This user cannot be zapped because they have not configured zaps on their account yet. Time to orange-pill?" : {
       "comment" : "Comment explaining why a user cannot be zapped."
@@ -1764,7 +1821,10 @@
     "Wallet" : {
       "comment" : "Navigation title for Wallet view\nNavigation title for attaching Nostr Wallet Connect lightning wallet.\nSidebar menu label for Wallet view.\nTitle for section in zap settings that controls the Lightning wallet selection."
     },
-    "WARNING:\n\nThis will reset your contact list, including the list of everyone you follow and the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY." : {
+    "WARNING:\n\nThis will attempt to repair your relay list based on other information we have. You may lose any relays you have added manually. Only proceed if you have lost your relay list beyond recoverability or if you are ok with losing any manually added relays." : {
+      "comment" : "Alert for repairing the user's relay list."
+    },
+    "WARNING:\n\nThis will reset your contact list, including the list of everyone you follow and potentially the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY." : {
       "comment" : "Alert for resetting the user's contact list."
     },
     "WARNING:\n\nTHIS WILL SIGN AN EVENT THAT DELETES THIS ACCOUNT.\n\nYOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.\n\n ARE YOU SURE YOU WANT TO CONTINUE?" : {
@@ -1839,6 +1899,9 @@
     "You clicked on a Purple welcome link, but we could not find your checkout. This is likely a bug." : {
       "comment" : "Error label upon continuing in the app from a Damus Purple purchase"
     },
+    "You do not have permission to alter this relay list." : {
+      "comment" : "Human readable error description"
+    },
     "You drive the conversation and we want to make it easier for people to support your work beyond follows, reposts, and likes." : {
       "comment" : "Text explaining the benefit of connecting a lightning wallet for content creators."
     },
@@ -1868,6 +1931,9 @@
     },
     "Your Purple subscription has expired. Renew?" : {
       "comment" : "A notification message explaining to the user that their Damus Purple Subscription has expired, prompting them to renew."
+    },
+    "Your relay list appears to be broken, so we cannot connect you to your Nostr network." : {
+      "comment" : "Human readable error description for a failure to parse the relay list due to a bad relay list"
     },
     "Your report will be sent to the relays you are connected to" : {
       "comment" : "Footer text to inform user what will happen when the report is submitted."

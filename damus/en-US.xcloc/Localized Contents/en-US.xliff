@@ -303,15 +303,20 @@ Label for filter for all notifications.</note>
         <target>An additional percentage of each zap will be sent to support Damus development</target>
         <note>Text indicating that they can contribute zaps to support Damus development.</note>
       </trans-unit>
-      <trans-unit id="An unexpected error happened while trying to create the new contact list. Please contact support." xml:space="preserve">
-        <source>An unexpected error happened while trying to create the new contact list. Please contact support.</source>
-        <target>An unexpected error happened while trying to create the new contact list. Please contact support.</target>
-        <note>Error message for a failed contact list reset operation</note>
+      <trans-unit id="An unexpected error happened while trying to perform this action. Please contact support." xml:space="preserve">
+        <source>An unexpected error happened while trying to perform this action. Please contact support.</source>
+        <target>An unexpected error happened while trying to perform this action. Please contact support.</target>
+        <note>Error message for a failed reset/repair operation</note>
       </trans-unit>
       <trans-unit id="An unexpected error occurred. Please contact Damus support via [Nostr](damus:npub18m76awca3y37hkvuneavuw6pjj4525fw90necxmadrvjg0sdy6qsngq955) or [email](support@damus.io) with the error message below." xml:space="preserve">
         <source>An unexpected error occurred. Please contact Damus support via [Nostr](damus:npub18m76awca3y37hkvuneavuw6pjj4525fw90necxmadrvjg0sdy6qsngq955) or [email](support@damus.io) with the error message below.</source>
         <target>An unexpected error occurred. Please contact Damus support via [Nostr](damus:npub18m76awca3y37hkvuneavuw6pjj4525fw90necxmadrvjg0sdy6qsngq955) or [email](support@damus.io) with the error message below.</target>
         <note>Label explaining there was an error, and suggesting next steps</note>
+      </trans-unit>
+      <trans-unit id="An unknown error occurred while adding a relay." xml:space="preserve">
+        <source>An unknown error occurred while adding a relay.</source>
+        <target>An unknown error occurred while adding a relay.</target>
+        <note>Title of an unknown relay error message.</note>
       </trans-unit>
       <trans-unit id="Animations" xml:space="preserve">
         <source>Animations</source>
@@ -478,7 +483,7 @@ Cancel deleting bookmarks.
 Cancel deleting the user.
 Cancel out of logging out the user.
 Cancel out of search view.
-Cancel resetting the contact list.
+Cancel the user-requested operation.
 Text for button to cancel out of connecting Nostr Wallet Connect lightning wallet.</note>
       </trans-unit>
       <trans-unit id="Cancelled" xml:space="preserve">
@@ -495,6 +500,11 @@ Text for button to cancel out of connecting Nostr Wallet Connect lightning walle
         <source>Changing this setting will cause the cache to be cleared. This will free space, but images may take longer to load again. Are you sure you want to proceed?</source>
         <target>Changing this setting will cause the cache to be cleared. This will free space, but images may take longer to load again. Are you sure you want to proceed?</target>
         <note>Message explaining consequences of changing the 'enable animation' setting</note>
+      </trans-unit>
+      <trans-unit id="Check the address and/or the relay list." xml:space="preserve">
+        <source>Check the address and/or the relay list.</source>
+        <target>Check the address and/or the relay list.</target>
+        <note>Human readable tip for error</note>
       </trans-unit>
       <trans-unit id="Choose from Library" xml:space="preserve">
         <source>Choose from Library</source>
@@ -573,9 +583,9 @@ Text for button to conect to Nostr Wallet Connect lightning wallet.</note>
         <target>Connecting</target>
         <note>Relay status label that indicates a relay is connecting.</note>
       </trans-unit>
-      <trans-unit id="Contact list (Follows + Relay list)" xml:space="preserve">
-        <source>Contact list (Follows + Relay list)</source>
-        <target>Contact list (Follows + Relay list)</target>
+      <trans-unit id="Contact list" xml:space="preserve">
+        <source>Contact list</source>
+        <target>Contact list</target>
         <note>Section title for Contact list first aid tools</note>
       </trans-unit>
       <trans-unit id="Contact list has been reset" xml:space="preserve">
@@ -604,7 +614,7 @@ Text for button to conect to Nostr Wallet Connect lightning wallet.</note>
         <note>Button to dismiss suggested users view and continue to the main app
 Continue with bookmarks.
 Continue with deleting the user.
-Continue with resetting the contact list.
+Continue with the user-requested operation.
 Prompt to user to continue</note>
       </trans-unit>
       <trans-unit id="Conversations" xml:space="preserve">
@@ -688,6 +698,11 @@ Context menu option for copying the version of damus.</note>
         <source>Could not create your initial contact list event. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help.</source>
         <target>Could not create your initial contact list event. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help.</target>
         <note>Error message to the user indicating that the initial contact list failed to be created.</note>
+      </trans-unit>
+      <trans-unit id="Could not create your initial relay list. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help." xml:space="preserve">
+        <source>Could not create your initial relay list. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help.</source>
+        <target>Could not create your initial relay list. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help.</target>
+        <note>Error message to the user indicating that the initial relay list failed to be created.</note>
       </trans-unit>
       <trans-unit id="Could not find the user you're looking for" xml:space="preserve">
         <source>Could not find the user you're looking for</source>
@@ -842,11 +857,6 @@ Button to dismiss error</note>
         <target>Done</target>
         <note>Button to dismiss wallet selection view for paying Lightning invoice.
 Button to leave edit mode for modifying the list of relays.</note>
-      </trans-unit>
-      <trans-unit id="Duplicate relay" xml:space="preserve">
-        <source>Duplicate relay</source>
-        <target>Duplicate relay</target>
-        <note>Title of the duplicate relay error message.</note>
       </trans-unit>
       <trans-unit id="Duration" xml:space="preserve">
         <source>Duration</source>
@@ -1222,6 +1232,16 @@ This is my first post on Damus, I am happy to meet you all 🤙. What’s up?
         <target>Hide notes with #nsfw tags</target>
         <note>Setting to hide notes with the #nsfw (not safe for work) tags</note>
       </trans-unit>
+      <trans-unit id="Hide notifications that tag many profiles" xml:space="preserve">
+        <source>Hide notifications that tag many profiles</source>
+        <target>Hide notifications that tag many profiles</target>
+        <note>Label for notification settings toggle that hides notifications that tag many people.</note>
+      </trans-unit>
+      <trans-unit id="Highlight" xml:space="preserve">
+        <source>Highlight</source>
+        <target>Highlight</target>
+        <note>Context menu action to highlight the selected text as context to draft a new note.</note>
+      </trans-unit>
       <trans-unit id="Highlighted" xml:space="preserve">
         <source>Highlighted</source>
         <target>Highlighted</target>
@@ -1280,7 +1300,7 @@ Option to enter a url</note>
       <trans-unit id="In progress…" xml:space="preserve">
         <source>In progress…</source>
         <target>In progress…</target>
-        <note>Loading message indicating that a contact list reset operation is in progress.</note>
+        <note>Loading message indicating that a first aid operation is in progress.</note>
       </trans-unit>
       <trans-unit id="Indefinite" xml:space="preserve">
         <source>Indefinite</source>
@@ -1316,6 +1336,11 @@ Option to enter a url</note>
         <source>Invalid lightning address</source>
         <target>Invalid lightning address</target>
         <note>Message to display when there was an error attempting to zap due to an invalid lightning address.</note>
+      </trans-unit>
+      <trans-unit id="Invalid relay address" xml:space="preserve">
+        <source>Invalid relay address</source>
+        <target>Invalid relay address</target>
+        <note>Heading for an error when adding a relay</note>
       </trans-unit>
       <trans-unit id="It seems that you already have a translation service configured. Would you like to switch to Damus Purple as your translator?" xml:space="preserve">
         <source>It seems that you already have a translation service configured. Would you like to switch to Damus Purple as your translator?</source>
@@ -1503,6 +1528,7 @@ Setting to enable Mention Local Notification</note>
         <note>Alert button to mute a user.
 Button label that allows the user to mute the user shown on-screen
 Button to mute a profile
+Context menu action to mute the selected word.
 Title for confirmation dialog to mute a profile.</note>
       </trans-unit>
       <trans-unit id="Mute %@?" xml:space="preserve">
@@ -1605,6 +1631,11 @@ User confirm No</note>
         <target>No image is currently setup</target>
         <note>Accessibility value on image control</note>
       </trans-unit>
+      <trans-unit id="No initial relay list available to update." xml:space="preserve">
+        <source>No initial relay list available to update.</source>
+        <target>No initial relay list available to update.</target>
+        <note>Human readable error description</note>
+      </trans-unit>
       <trans-unit id="No logs to display" xml:space="preserve">
         <source>No logs to display</source>
         <target>No logs to display</target>
@@ -1624,6 +1655,11 @@ User confirm No</note>
         <source>No profile picture is currently setup</source>
         <target>No profile picture is currently setup</target>
         <note>Accessibility value on profile picture image control</note>
+      </trans-unit>
+      <trans-unit id="No relay list was found. You might experience issues using the app. If you suspect you have permanently lost your relay list (or if you never had one), you can fix this by resetting it" xml:space="preserve">
+        <source>No relay list was found. You might experience issues using the app. If you suspect you have permanently lost your relay list (or if you never had one), you can fix this by resetting it</source>
+        <target>No relay list was found. You might experience issues using the app. If you suspect you have permanently lost your relay list (or if you never had one), you can fix this by resetting it</target>
+        <note>Section footer for relay list first aid tools</note>
       </trans-unit>
       <trans-unit id="No results" xml:space="preserve">
         <source>No results</source>
@@ -1861,10 +1897,25 @@ Section title for deleting the user</note>
         <target>Plan</target>
         <note>Prompt selection of DeepL subscription plan to perform machine translations on notes</note>
       </trans-unit>
+      <trans-unit id="Please check the address and try again" xml:space="preserve">
+        <source>Please check the address and try again</source>
+        <target>Please check the address and try again</target>
+        <note>Tip for an error where the relay address being added is invalid</note>
+      </trans-unit>
       <trans-unit id="Please choose relays from the list below to filter the current feed:" xml:space="preserve">
         <source>Please choose relays from the list below to filter the current feed:</source>
         <target>Please choose relays from the list below to filter the current feed:</target>
         <note>Instructions on how to filter a specific timeline feed by choosing relay servers to filter on.</note>
+      </trans-unit>
+      <trans-unit id="Please contact support for further help." xml:space="preserve">
+        <source>Please contact support for further help.</source>
+        <target>Please contact support for further help.</target>
+        <note>Human readable tips for what to do for a failure to find the relay list</note>
+      </trans-unit>
+      <trans-unit id="Please contact support." xml:space="preserve">
+        <source>Please contact support.</source>
+        <target>Please contact support.</target>
+        <note>Tip for an unknown relay error message.</note>
       </trans-unit>
       <trans-unit id="Please contact the person who provided the link, and ask for another link." xml:space="preserve">
         <source>Please contact the person who provided the link, and ask for another link.</source>
@@ -1875,6 +1926,21 @@ Section title for deleting the user</note>
         <source>Please double-check the checkout web page, or go to the Side Menu → "Purple" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue.</source>
         <target>Please double-check the checkout web page, or go to the Side Menu → "Purple" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue.</target>
         <note>User-facing tips on what to do if a Purple welcome link doesn't work</note>
+      </trans-unit>
+      <trans-unit id="Please go to Settings &gt; First Aid &gt; Repair relay list, or contact support." xml:space="preserve">
+        <source>Please go to Settings &gt; First Aid &gt; Repair relay list, or contact support.</source>
+        <target>Please go to Settings &gt; First Aid &gt; Repair relay list, or contact support.</target>
+        <note>Human readable tip for error</note>
+      </trans-unit>
+      <trans-unit id="Please make sure you have logged-in with your private key." xml:space="preserve">
+        <source>Please make sure you have logged-in with your private key.</source>
+        <target>Please make sure you have logged-in with your private key.</target>
+        <note>Human readable tip for error</note>
+      </trans-unit>
+      <trans-unit id="Please try again later or contact support if the issue persists." xml:space="preserve">
+        <source>Please try again later or contact support if the issue persists.</source>
+        <target>Please try again later or contact support if the issue persists.</target>
+        <note>Human readable tip for error</note>
       </trans-unit>
       <trans-unit id="Please try again, check the URL for typos, or contact support for further help." xml:space="preserve">
         <source>Please try again, check the URL for typos, or contact support for further help.</source>
@@ -2047,6 +2113,16 @@ Title of emoji reactions view</note>
         <target>Relay Logs</target>
         <note>Text label indicating that the text below it are developer mode logs.</note>
       </trans-unit>
+      <trans-unit id="Relay list" xml:space="preserve">
+        <source>Relay list</source>
+        <target>Relay list</target>
+        <note>Section title for Relay list first aid tools</note>
+      </trans-unit>
+      <trans-unit id="Relay list has been repaired" xml:space="preserve">
+        <source>Relay list has been repaired</source>
+        <target>Relay list has been repaired</target>
+        <note>Message indicating that the relay list was successfully repaired.</note>
+      </trans-unit>
       <trans-unit id="Relays" xml:space="preserve">
         <source>Relays</source>
         <target>Relays</target>
@@ -2088,6 +2164,11 @@ Title of relays view</note>
         <source>Renews on</source>
         <target>Renews on</target>
         <note>Indicating when the subscription will renew</note>
+      </trans-unit>
+      <trans-unit id="Repair relay list" xml:space="preserve">
+        <source>Repair relay list</source>
+        <target>Repair relay list</target>
+        <note>Button to repair relay list.</note>
       </trans-unit>
       <trans-unit id="Reply" xml:space="preserve">
         <source>Reply</source>
@@ -2634,22 +2715,25 @@ Enjoy!</target>
         <target>The camera was not capable of scanning the requested codes.</target>
         <note>Camera's bad output error label</note>
       </trans-unit>
-      <trans-unit id="The relay you are trying to add is already added.&#10;You're all set!" xml:space="preserve">
-        <source>The relay you are trying to add is already added.
-You're all set!</source>
-        <target>The relay you are trying to add is already added.
-You're all set!</target>
-        <note>An error message that appears when the user attempts to add a relay that has already been added.</note>
-      </trans-unit>
       <trans-unit id="The social network you control" xml:space="preserve">
         <source>The social network you control</source>
         <target>The social network you control</target>
         <note>Quick description of what Damus is</note>
       </trans-unit>
+      <trans-unit id="The specified relay that you are trying to udpate was not found in your relay list." xml:space="preserve">
+        <source>The specified relay that you are trying to udpate was not found in your relay list.</source>
+        <target>The specified relay that you are trying to udpate was not found in your relay list.</target>
+        <note>Human readable error description</note>
+      </trans-unit>
       <trans-unit id="There has been an unexpected error with the in-app purchase. Please try again later or contact support@damus.io. Error: %@" xml:space="preserve">
         <source>There has been an unexpected error with the in-app purchase. Please try again later or contact support@damus.io. Error: %@</source>
         <target>There has been an unexpected error with the in-app purchase. Please try again later or contact support@damus.io. Error: %@</target>
         <note>In-app purchase error message for the user</note>
+      </trans-unit>
+      <trans-unit id="There was a problem creating the relay list event." xml:space="preserve">
+        <source>There was a problem creating the relay list event.</source>
+        <target>There was a problem creating the relay list event.</target>
+        <note>Human readable error description</note>
       </trans-unit>
       <trans-unit id="There was an error loading your account. Please try again later. If problem persists, please contact us at support@damus.io" xml:space="preserve">
         <source>There was an error loading your account. Please try again later. If problem persists, please contact us at support@damus.io</source>
@@ -2676,6 +2760,11 @@ You're all set!</target>
         <target>This is an event that has been muted according to your mute list rules. We cannot suppress this notification, but we obscured the details to respect your preferences</target>
         <note>Description for a push notification which has been muted, and explanation that we cannot suppress it</note>
       </trans-unit>
+      <trans-unit id="This is an unexpected error, please contact support." xml:space="preserve">
+        <source>This is an unexpected error, please contact support.</source>
+        <target>This is an unexpected error, please contact support.</target>
+        <note>Human readable tip for error</note>
+      </trans-unit>
       <trans-unit id="This is my first post on Nostr 💜. I love drawing and folding Origami!&#10;&#10;Nice to meet you all! #introductions #plebchain " xml:space="preserve">
         <source>This is my first post on Nostr 💜. I love drawing and folding Origami!
 
@@ -2689,6 +2778,11 @@ Nice to meet you all! #introductions #plebchain </target>
         <source>This note contains too many items and cannot be rendered</source>
         <target>This note contains too many items and cannot be rendered</target>
         <note>Error message indicating that a note is too big and cannot be rendered</note>
+      </trans-unit>
+      <trans-unit id="This relay is already in your list." xml:space="preserve">
+        <source>This relay is already in your list.</source>
+        <target>This relay is already in your list.</target>
+        <note>Human readable tip for error</note>
       </trans-unit>
       <trans-unit id="This user cannot be zapped because they have not configured zaps on their account yet. Time to orange-pill?" xml:space="preserve">
         <source>This user cannot be zapped because they have not configured zaps on their account yet. Time to orange-pill?</source>
@@ -2935,13 +3029,22 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
  ARE YOU SURE YOU WANT TO CONTINUE?</target>
         <note>Alert for deleting the users account.</note>
       </trans-unit>
-      <trans-unit id="WARNING:&#10;&#10;This will reset your contact list, including the list of everyone you follow and the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY." xml:space="preserve">
+      <trans-unit id="WARNING:&#10;&#10;This will attempt to repair your relay list based on other information we have. You may lose any relays you have added manually. Only proceed if you have lost your relay list beyond recoverability or if you are ok with losing any manually added relays." xml:space="preserve">
         <source>WARNING:
 
-This will reset your contact list, including the list of everyone you follow and the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY.</source>
+This will attempt to repair your relay list based on other information we have. You may lose any relays you have added manually. Only proceed if you have lost your relay list beyond recoverability or if you are ok with losing any manually added relays.</source>
         <target>WARNING:
 
-This will reset your contact list, including the list of everyone you follow and the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY.</target>
+This will attempt to repair your relay list based on other information we have. You may lose any relays you have added manually. Only proceed if you have lost your relay list beyond recoverability or if you are ok with losing any manually added relays.</target>
+        <note>Alert for repairing the user's relay list.</note>
+      </trans-unit>
+      <trans-unit id="WARNING:&#10;&#10;This will reset your contact list, including the list of everyone you follow and potentially the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY." xml:space="preserve">
+        <source>WARNING:
+
+This will reset your contact list, including the list of everyone you follow and potentially the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY.</source>
+        <target>WARNING:
+
+This will reset your contact list, including the list of everyone you follow and potentially the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY.</target>
         <note>Alert for resetting the user's contact list.</note>
       </trans-unit>
       <trans-unit id="Wallet" xml:space="preserve">
@@ -3063,6 +3166,11 @@ User confirm Yes</note>
         <target>You clicked on a Purple welcome link, but we could not find your checkout. This is likely a bug.</target>
         <note>Error label upon continuing in the app from a Damus Purple purchase</note>
       </trans-unit>
+      <trans-unit id="You do not have permission to alter this relay list." xml:space="preserve">
+        <source>You do not have permission to alter this relay list.</source>
+        <target>You do not have permission to alter this relay list.</target>
+        <note>Human readable error description</note>
+      </trans-unit>
       <trans-unit id="You drive the conversation and we want to make it easier for people to support your work beyond follows, reposts, and likes." xml:space="preserve">
         <source>You drive the conversation and we want to make it easier for people to support your work beyond follows, reposts, and likes.</source>
         <target>You drive the conversation and we want to make it easier for people to support your work beyond follows, reposts, and likes.</target>
@@ -3112,6 +3220,11 @@ User confirm Yes</note>
         <source>Your highlight is being broadcasted to the network. Please wait.</source>
         <target>Your highlight is being broadcasted to the network. Please wait.</target>
         <note>Label explaining there their highlight publishing action is in progress</note>
+      </trans-unit>
+      <trans-unit id="Your relay list appears to be broken, so we cannot connect you to your Nostr network." xml:space="preserve">
+        <source>Your relay list appears to be broken, so we cannot connect you to your Nostr network.</source>
+        <target>Your relay list appears to be broken, so we cannot connect you to your Nostr network.</target>
+        <note>Human readable error description for a failure to parse the relay list due to a bad relay list</note>
       </trans-unit>
       <trans-unit id="Your report will be sent to the relays you are connected to" xml:space="preserve">
         <source>Your report will be sent to the relays you are connected to</source>
@@ -3447,6 +3560,21 @@ String indicating that a given timestamp just occurred</note>
       <trans-unit id="/following_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@FOLLOWING@</source>
         <target>%#@FOLLOWING@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/hellthread_notifications_disabled:dict/HELLTHREAD_PROFILES:dict/one:dict/:string" xml:space="preserve">
+        <source>Hide notifications that tag more than %d profile</source>
+        <target>Hide notifications that tag more than %d profile</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/hellthread_notifications_disabled:dict/HELLTHREAD_PROFILES:dict/other:dict/:string" xml:space="preserve">
+        <source>Hide notifications that tag more than %d profiles</source>
+        <target>Hide notifications that tag more than %d profiles</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/hellthread_notifications_disabled:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@HELLTHREAD_PROFILES@</source>
+        <target>%#@HELLTHREAD_PROFILES@</target>
         <note/>
       </trans-unit>
       <trans-unit id="/imports_count:dict/IMPORTS:dict/one:dict/:string" xml:space="preserve">
@@ -4084,15 +4212,20 @@ Label for filter for all notifications.</note>
         <target state="new">An additional percentage of each zap will be sent to support Damus development</target>
         <note>Text indicating that they can contribute zaps to support Damus development.</note>
       </trans-unit>
-      <trans-unit id="An unexpected error happened while trying to create the new contact list. Please contact support." xml:space="preserve">
-        <source>An unexpected error happened while trying to create the new contact list. Please contact support.</source>
-        <target state="new">An unexpected error happened while trying to create the new contact list. Please contact support.</target>
-        <note>Error message for a failed contact list reset operation</note>
+      <trans-unit id="An unexpected error happened while trying to perform this action. Please contact support." xml:space="preserve">
+        <source>An unexpected error happened while trying to perform this action. Please contact support.</source>
+        <target state="new">An unexpected error happened while trying to perform this action. Please contact support.</target>
+        <note>Error message for a failed reset/repair operation</note>
       </trans-unit>
       <trans-unit id="An unexpected error occurred. Please contact Damus support via [Nostr](damus:npub18m76awca3y37hkvuneavuw6pjj4525fw90necxmadrvjg0sdy6qsngq955) or [email](support@damus.io) with the error message below." xml:space="preserve">
         <source>An unexpected error occurred. Please contact Damus support via [Nostr](damus:npub18m76awca3y37hkvuneavuw6pjj4525fw90necxmadrvjg0sdy6qsngq955) or [email](support@damus.io) with the error message below.</source>
         <target state="new">An unexpected error occurred. Please contact Damus support via [Nostr](damus:npub18m76awca3y37hkvuneavuw6pjj4525fw90necxmadrvjg0sdy6qsngq955) or [email](support@damus.io) with the error message below.</target>
         <note>Label explaining there was an error, and suggesting next steps</note>
+      </trans-unit>
+      <trans-unit id="An unknown error occurred while adding a relay." xml:space="preserve">
+        <source>An unknown error occurred while adding a relay.</source>
+        <target state="new">An unknown error occurred while adding a relay.</target>
+        <note>Title of an unknown relay error message.</note>
       </trans-unit>
       <trans-unit id="Animations" xml:space="preserve">
         <source>Animations</source>
@@ -4259,7 +4392,7 @@ Cancel deleting bookmarks.
 Cancel deleting the user.
 Cancel out of logging out the user.
 Cancel out of search view.
-Cancel resetting the contact list.
+Cancel the user-requested operation.
 Text for button to cancel out of connecting Nostr Wallet Connect lightning wallet.</note>
       </trans-unit>
       <trans-unit id="Cancelled" xml:space="preserve">
@@ -4276,6 +4409,11 @@ Text for button to cancel out of connecting Nostr Wallet Connect lightning walle
         <source>Changing this setting will cause the cache to be cleared. This will free space, but images may take longer to load again. Are you sure you want to proceed?</source>
         <target state="new">Changing this setting will cause the cache to be cleared. This will free space, but images may take longer to load again. Are you sure you want to proceed?</target>
         <note>Message explaining consequences of changing the 'enable animation' setting</note>
+      </trans-unit>
+      <trans-unit id="Check the address and/or the relay list." xml:space="preserve">
+        <source>Check the address and/or the relay list.</source>
+        <target state="new">Check the address and/or the relay list.</target>
+        <note>Human readable tip for error</note>
       </trans-unit>
       <trans-unit id="Choose from Library" xml:space="preserve">
         <source>Choose from Library</source>
@@ -4357,9 +4495,9 @@ Text for button to conect to Nostr Wallet Connect lightning wallet.</note>
         <target state="new">Connecting</target>
         <note>Relay status label that indicates a relay is connecting.</note>
       </trans-unit>
-      <trans-unit id="Contact list (Follows + Relay list)" xml:space="preserve">
-        <source>Contact list (Follows + Relay list)</source>
-        <target state="new">Contact list (Follows + Relay list)</target>
+      <trans-unit id="Contact list" xml:space="preserve">
+        <source>Contact list</source>
+        <target state="new">Contact list</target>
         <note>Section title for Contact list first aid tools</note>
       </trans-unit>
       <trans-unit id="Contact list has been reset" xml:space="preserve">
@@ -4388,7 +4526,7 @@ Text for button to conect to Nostr Wallet Connect lightning wallet.</note>
         <note>Button to dismiss suggested users view and continue to the main app
 Continue with bookmarks.
 Continue with deleting the user.
-Continue with resetting the contact list.
+Continue with the user-requested operation.
 Prompt to user to continue</note>
       </trans-unit>
       <trans-unit id="Conversations" xml:space="preserve">
@@ -4472,6 +4610,11 @@ Context menu option for copying the version of damus.</note>
         <source>Could not create your initial contact list event. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help.</source>
         <target state="new">Could not create your initial contact list event. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help.</target>
         <note>Error message to the user indicating that the initial contact list failed to be created.</note>
+      </trans-unit>
+      <trans-unit id="Could not create your initial relay list. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help." xml:space="preserve">
+        <source>Could not create your initial relay list. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help.</source>
+        <target state="new">Could not create your initial relay list. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help.</target>
+        <note>Error message to the user indicating that the initial relay list failed to be created.</note>
       </trans-unit>
       <trans-unit id="Could not find the user you're looking for" xml:space="preserve">
         <source>Could not find the user you're looking for</source>
@@ -4626,11 +4769,6 @@ Button to dismiss error</note>
         <target state="new">Done</target>
         <note>Button to dismiss wallet selection view for paying Lightning invoice.
 Button to leave edit mode for modifying the list of relays.</note>
-      </trans-unit>
-      <trans-unit id="Duplicate relay" xml:space="preserve">
-        <source>Duplicate relay</source>
-        <target state="new">Duplicate relay</target>
-        <note>Title of the duplicate relay error message.</note>
       </trans-unit>
       <trans-unit id="Duration" xml:space="preserve">
         <source>Duration</source>
@@ -5006,6 +5144,16 @@ This is my first post on Damus, I am happy to meet you all 🤙. What’s up?
         <target state="new">Hide notes with #nsfw tags</target>
         <note>Setting to hide notes with the #nsfw (not safe for work) tags</note>
       </trans-unit>
+      <trans-unit id="Hide notifications that tag many profiles" xml:space="preserve">
+        <source>Hide notifications that tag many profiles</source>
+        <target state="new">Hide notifications that tag many profiles</target>
+        <note>Label for notification settings toggle that hides notifications that tag many people.</note>
+      </trans-unit>
+      <trans-unit id="Highlight" xml:space="preserve">
+        <source>Highlight</source>
+        <target state="new">Highlight</target>
+        <note>Context menu action to highlight the selected text as context to draft a new note.</note>
+      </trans-unit>
       <trans-unit id="Highlighted" xml:space="preserve">
         <source>Highlighted</source>
         <target state="new">Highlighted</target>
@@ -5064,7 +5212,7 @@ Option to enter a url</note>
       <trans-unit id="In progress…" xml:space="preserve">
         <source>In progress…</source>
         <target state="new">In progress…</target>
-        <note>Loading message indicating that a contact list reset operation is in progress.</note>
+        <note>Loading message indicating that a first aid operation is in progress.</note>
       </trans-unit>
       <trans-unit id="Indefinite" xml:space="preserve">
         <source>Indefinite</source>
@@ -5100,6 +5248,11 @@ Option to enter a url</note>
         <source>Invalid lightning address</source>
         <target state="new">Invalid lightning address</target>
         <note>Message to display when there was an error attempting to zap due to an invalid lightning address.</note>
+      </trans-unit>
+      <trans-unit id="Invalid relay address" xml:space="preserve">
+        <source>Invalid relay address</source>
+        <target state="new">Invalid relay address</target>
+        <note>Heading for an error when adding a relay</note>
       </trans-unit>
       <trans-unit id="It seems that you already have a translation service configured. Would you like to switch to Damus Purple as your translator?" xml:space="preserve">
         <source>It seems that you already have a translation service configured. Would you like to switch to Damus Purple as your translator?</source>
@@ -5287,6 +5440,7 @@ Setting to enable Mention Local Notification</note>
         <note>Alert button to mute a user.
 Button label that allows the user to mute the user shown on-screen
 Button to mute a profile
+Context menu action to mute the selected word.
 Title for confirmation dialog to mute a profile.</note>
       </trans-unit>
       <trans-unit id="Mute %@?" xml:space="preserve">
@@ -5389,6 +5543,11 @@ User confirm No</note>
         <target state="new">No image is currently setup</target>
         <note>Accessibility value on image control</note>
       </trans-unit>
+      <trans-unit id="No initial relay list available to update." xml:space="preserve">
+        <source>No initial relay list available to update.</source>
+        <target state="new">No initial relay list available to update.</target>
+        <note>Human readable error description</note>
+      </trans-unit>
       <trans-unit id="No logs to display" xml:space="preserve">
         <source>No logs to display</source>
         <target state="new">No logs to display</target>
@@ -5408,6 +5567,11 @@ User confirm No</note>
         <source>No profile picture is currently setup</source>
         <target state="new">No profile picture is currently setup</target>
         <note>Accessibility value on profile picture image control</note>
+      </trans-unit>
+      <trans-unit id="No relay list was found. You might experience issues using the app. If you suspect you have permanently lost your relay list (or if you never had one), you can fix this by resetting it" xml:space="preserve">
+        <source>No relay list was found. You might experience issues using the app. If you suspect you have permanently lost your relay list (or if you never had one), you can fix this by resetting it</source>
+        <target state="new">No relay list was found. You might experience issues using the app. If you suspect you have permanently lost your relay list (or if you never had one), you can fix this by resetting it</target>
+        <note>Section footer for relay list first aid tools</note>
       </trans-unit>
       <trans-unit id="No results" xml:space="preserve">
         <source>No results</source>
@@ -5640,10 +5804,25 @@ Section title for deleting the user</note>
         <target state="new">Plan</target>
         <note>Prompt selection of DeepL subscription plan to perform machine translations on notes</note>
       </trans-unit>
+      <trans-unit id="Please check the address and try again" xml:space="preserve">
+        <source>Please check the address and try again</source>
+        <target state="new">Please check the address and try again</target>
+        <note>Tip for an error where the relay address being added is invalid</note>
+      </trans-unit>
       <trans-unit id="Please choose relays from the list below to filter the current feed:" xml:space="preserve">
         <source>Please choose relays from the list below to filter the current feed:</source>
         <target state="new">Please choose relays from the list below to filter the current feed:</target>
         <note>Instructions on how to filter a specific timeline feed by choosing relay servers to filter on.</note>
+      </trans-unit>
+      <trans-unit id="Please contact support for further help." xml:space="preserve">
+        <source>Please contact support for further help.</source>
+        <target state="new">Please contact support for further help.</target>
+        <note>Human readable tips for what to do for a failure to find the relay list</note>
+      </trans-unit>
+      <trans-unit id="Please contact support." xml:space="preserve">
+        <source>Please contact support.</source>
+        <target state="new">Please contact support.</target>
+        <note>Tip for an unknown relay error message.</note>
       </trans-unit>
       <trans-unit id="Please contact the person who provided the link, and ask for another link." xml:space="preserve">
         <source>Please contact the person who provided the link, and ask for another link.</source>
@@ -5654,6 +5833,21 @@ Section title for deleting the user</note>
         <source>Please double-check the checkout web page, or go to the Side Menu → "Purple" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue.</source>
         <target state="new">Please double-check the checkout web page, or go to the Side Menu → "Purple" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue.</target>
         <note>User-facing tips on what to do if a Purple welcome link doesn't work</note>
+      </trans-unit>
+      <trans-unit id="Please go to Settings &gt; First Aid &gt; Repair relay list, or contact support." xml:space="preserve">
+        <source>Please go to Settings &gt; First Aid &gt; Repair relay list, or contact support.</source>
+        <target state="new">Please go to Settings &gt; First Aid &gt; Repair relay list, or contact support.</target>
+        <note>Human readable tip for error</note>
+      </trans-unit>
+      <trans-unit id="Please make sure you have logged-in with your private key." xml:space="preserve">
+        <source>Please make sure you have logged-in with your private key.</source>
+        <target state="new">Please make sure you have logged-in with your private key.</target>
+        <note>Human readable tip for error</note>
+      </trans-unit>
+      <trans-unit id="Please try again later or contact support if the issue persists." xml:space="preserve">
+        <source>Please try again later or contact support if the issue persists.</source>
+        <target state="new">Please try again later or contact support if the issue persists.</target>
+        <note>Human readable tip for error</note>
       </trans-unit>
       <trans-unit id="Please try again, check the URL for typos, or contact support for further help." xml:space="preserve">
         <source>Please try again, check the URL for typos, or contact support for further help.</source>
@@ -5816,6 +6010,16 @@ Title of emoji reactions view</note>
         <target state="new">Relay Logs</target>
         <note>Text label indicating that the text below it are developer mode logs.</note>
       </trans-unit>
+      <trans-unit id="Relay list" xml:space="preserve">
+        <source>Relay list</source>
+        <target state="new">Relay list</target>
+        <note>Section title for Relay list first aid tools</note>
+      </trans-unit>
+      <trans-unit id="Relay list has been repaired" xml:space="preserve">
+        <source>Relay list has been repaired</source>
+        <target state="new">Relay list has been repaired</target>
+        <note>Message indicating that the relay list was successfully repaired.</note>
+      </trans-unit>
       <trans-unit id="Relays" xml:space="preserve">
         <source>Relays</source>
         <target state="new">Relays</target>
@@ -5857,6 +6061,11 @@ Title of relays view</note>
         <source>Renews on</source>
         <target state="new">Renews on</target>
         <note>Indicating when the subscription will renew</note>
+      </trans-unit>
+      <trans-unit id="Repair relay list" xml:space="preserve">
+        <source>Repair relay list</source>
+        <target state="new">Repair relay list</target>
+        <note>Button to repair relay list.</note>
       </trans-unit>
       <trans-unit id="Reply" xml:space="preserve">
         <source>Reply</source>
@@ -6413,17 +6622,15 @@ Enjoy!</target>
         <target state="new">The camera was not capable of scanning the requested codes.</target>
         <note>Camera's bad output error label</note>
       </trans-unit>
-      <trans-unit id="The relay you are trying to add is already added.&#10;You're all set!" xml:space="preserve">
-        <source>The relay you are trying to add is already added.
-You're all set!</source>
-        <target state="new">The relay you are trying to add is already added.
-You're all set!</target>
-        <note>An error message that appears when the user attempts to add a relay that has already been added.</note>
-      </trans-unit>
       <trans-unit id="The social network you control" xml:space="preserve">
         <source>The social network you control</source>
         <target state="new">The social network you control</target>
         <note>Quick description of what Damus is</note>
+      </trans-unit>
+      <trans-unit id="The specified relay that you are trying to udpate was not found in your relay list." xml:space="preserve">
+        <source>The specified relay that you are trying to udpate was not found in your relay list.</source>
+        <target state="new">The specified relay that you are trying to udpate was not found in your relay list.</target>
+        <note>Human readable error description</note>
       </trans-unit>
       <trans-unit id="There has been an unexpected error with the in-app purchase. Please try again later or contact support@damus.io. Error: %@" xml:space="preserve">
         <source>There has been an unexpected error with the in-app purchase. Please try again later or contact support@damus.io. Error: %@</source>
@@ -6434,6 +6641,11 @@ You're all set!</target>
         <source>There is no content available to share at this time. Please close this view and try again.</source>
         <target state="new">There is no content available to share at this time. Please close this view and try again.</target>
         <note>Label explaining that no content is available to share and instructing the user to close the view and try again.</note>
+      </trans-unit>
+      <trans-unit id="There was a problem creating the relay list event." xml:space="preserve">
+        <source>There was a problem creating the relay list event.</source>
+        <target state="new">There was a problem creating the relay list event.</target>
+        <note>Human readable error description</note>
       </trans-unit>
       <trans-unit id="There was an error loading your account. Please try again later. If problem persists, please contact us at support@damus.io" xml:space="preserve">
         <source>There was an error loading your account. Please try again later. If problem persists, please contact us at support@damus.io</source>
@@ -6455,6 +6667,11 @@ You're all set!</target>
         <target state="new">This is a public key, you will not be able to make notes or interact in any way. This is used for viewing accounts from their perspective.</target>
         <note>Warning that the inputted account key is a public key and the result of what happens because of it.</note>
       </trans-unit>
+      <trans-unit id="This is an unexpected error, please contact support." xml:space="preserve">
+        <source>This is an unexpected error, please contact support.</source>
+        <target state="new">This is an unexpected error, please contact support.</target>
+        <note>Human readable tip for error</note>
+      </trans-unit>
       <trans-unit id="This is my first post on Nostr 💜. I love drawing and folding Origami!&#10;&#10;Nice to meet you all! #introductions #plebchain " xml:space="preserve">
         <source>This is my first post on Nostr 💜. I love drawing and folding Origami!
 
@@ -6468,6 +6685,11 @@ Nice to meet you all! #introductions #plebchain </target>
         <source>This note contains too many items and cannot be rendered</source>
         <target state="new">This note contains too many items and cannot be rendered</target>
         <note>Error message indicating that a note is too big and cannot be rendered</note>
+      </trans-unit>
+      <trans-unit id="This relay is already in your list." xml:space="preserve">
+        <source>This relay is already in your list.</source>
+        <target state="new">This relay is already in your list.</target>
+        <note>Human readable tip for error</note>
       </trans-unit>
       <trans-unit id="This user cannot be zapped because they have not configured zaps on their account yet. Time to orange-pill?" xml:space="preserve">
         <source>This user cannot be zapped because they have not configured zaps on their account yet. Time to orange-pill?</source>
@@ -6714,13 +6936,22 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
  ARE YOU SURE YOU WANT TO CONTINUE?</target>
         <note>Alert for deleting the users account.</note>
       </trans-unit>
-      <trans-unit id="WARNING:&#10;&#10;This will reset your contact list, including the list of everyone you follow and the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY." xml:space="preserve">
+      <trans-unit id="WARNING:&#10;&#10;This will attempt to repair your relay list based on other information we have. You may lose any relays you have added manually. Only proceed if you have lost your relay list beyond recoverability or if you are ok with losing any manually added relays." xml:space="preserve">
         <source>WARNING:
 
-This will reset your contact list, including the list of everyone you follow and the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY.</source>
+This will attempt to repair your relay list based on other information we have. You may lose any relays you have added manually. Only proceed if you have lost your relay list beyond recoverability or if you are ok with losing any manually added relays.</source>
         <target state="new">WARNING:
 
-This will reset your contact list, including the list of everyone you follow and the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY.</target>
+This will attempt to repair your relay list based on other information we have. You may lose any relays you have added manually. Only proceed if you have lost your relay list beyond recoverability or if you are ok with losing any manually added relays.</target>
+        <note>Alert for repairing the user's relay list.</note>
+      </trans-unit>
+      <trans-unit id="WARNING:&#10;&#10;This will reset your contact list, including the list of everyone you follow and potentially the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY." xml:space="preserve">
+        <source>WARNING:
+
+This will reset your contact list, including the list of everyone you follow and potentially the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY.</source>
+        <target state="new">WARNING:
+
+This will reset your contact list, including the list of everyone you follow and potentially the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY.</target>
         <note>Alert for resetting the user's contact list.</note>
       </trans-unit>
       <trans-unit id="Wallet" xml:space="preserve">
@@ -6837,6 +7068,11 @@ User confirm Yes</note>
         <target state="new">You clicked on a Purple welcome link, but we could not find your checkout. This is likely a bug.</target>
         <note>Error label upon continuing in the app from a Damus Purple purchase</note>
       </trans-unit>
+      <trans-unit id="You do not have permission to alter this relay list." xml:space="preserve">
+        <source>You do not have permission to alter this relay list.</source>
+        <target state="new">You do not have permission to alter this relay list.</target>
+        <note>Human readable error description</note>
+      </trans-unit>
       <trans-unit id="You drive the conversation and we want to make it easier for people to support your work beyond follows, reposts, and likes." xml:space="preserve">
         <source>You drive the conversation and we want to make it easier for people to support your work beyond follows, reposts, and likes.</source>
         <target state="new">You drive the conversation and we want to make it easier for people to support your work beyond follows, reposts, and likes.</target>
@@ -6886,6 +7122,11 @@ User confirm Yes</note>
         <source>Your draft has been saved to storage.</source>
         <target state="new">Your draft has been saved to storage.</target>
         <note>Accessibility label indicating that a user's post draft has been saved, meant to be read by screen reading technology.</note>
+      </trans-unit>
+      <trans-unit id="Your relay list appears to be broken, so we cannot connect you to your Nostr network." xml:space="preserve">
+        <source>Your relay list appears to be broken, so we cannot connect you to your Nostr network.</source>
+        <target state="new">Your relay list appears to be broken, so we cannot connect you to your Nostr network.</target>
+        <note>Human readable error description for a failure to parse the relay list due to a bad relay list</note>
       </trans-unit>
       <trans-unit id="Your report will be sent to the relays you are connected to" xml:space="preserve">
         <source>Your report will be sent to the relays you are connected to</source>
