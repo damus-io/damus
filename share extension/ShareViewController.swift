@@ -250,6 +250,7 @@ struct ShareExtensionView: View {
             return false
         }
         state = DamusState(keypair: keypair)
+        state?.nostrNetwork.connect()
         return true
     }
     

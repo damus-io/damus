@@ -135,6 +135,7 @@ struct ShareExtensionView: View {
                 return
             }
             self.state = DamusState(keypair: keypair)
+            self.state?.nostrNetwork.connect()
         })
         .onChange(of: self.highlighter_state) {
             if case .cancelled = highlighter_state {
