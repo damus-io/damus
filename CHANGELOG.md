@@ -1,3 +1,51 @@
+## [1.14] - 2025-05-25
+
+### Added
+
+- Added safety reminder to wallets with higher balance (Daniel D’Aquino)
+- Added one-click Coinos wallet setup (Daniel D’Aquino)
+- Add notification setting to hide hellthreads (Terry Yiu)
+- Added separated first aid option for relay lists that does not need a contact list reset (Daniel D’Aquino)
+- Added NIP-65 relay list support (Daniel D’Aquino)
+- Added Unicode 16 emoji reactions for iOS 18.4+ by upgrading EmojiPicker (Terry Yiu)
+- Added a search interface to the settings screen (SanjaySiddharth)
+- Added view introducing users to Zaps (ericholguin)
+- Added new wallet view with balance and transactions list (ericholguin)
+- Added copy technical info button to user visible errors, so that users can more easily share errors with developers (Daniel D’Aquino)
+- Add dismiss button to wallet high balance reminders (Daniel D’Aquino)
+- Zap receiver information now included for outgoing zaps (Daniel D’Aquino)
+- Added inline note rendering of invoices to pull up wallet selector sheet (Terry Yiu)
+- Added route to profile page from wallet tx list (ericholguin)
+
+
+### Changed
+
+- Added additional information on top of blurred images (SanjaySiddharth)
+- Improved robustness of relay list handling (Daniel D’Aquino)
+- Updated image cache for better stability (Daniel D’Aquino)
+- Improved integration with Nostr Wallet Connect wallets (ericholguin)
+- Added relay connectivity information to NWC settings (Daniel D’Aquino)
+- Improved handling around NWC responses (Daniel D’Aquino)
+- Added more human visible errors on NWC wallets to aid with troubleshooting (Daniel D’Aquino)
+- Re-enabled note zaps as permitted by the new App Store guidelines (Daniel D’Aquino)
+
+
+
+### Fixed
+
+- Hide future notes from timeline (Terry Yiu)
+- Fixed issue where profiles with a NIP-65 relay list would not display on Damus (Daniel D’Aquino)
+- Fix quote notes to include missing q tag (Terry Yiu)
+- Fixed issue where the side menu would close when copying the npub (SanjaySiddharth)
+- Fixed issue where cached images would be backed up to iCloud (Daniel D’Aquino)
+- Optimized classify_url function (Terry Yiu)
+- Fixed note rendering for those that contain previewable items or leading and trailing whitespaces (Terry Yiu)
+- Fixed issue where some videos would become unplayable after some time using the app (Daniel D’Aquino)
+
+
+[1.14]: https://github.com/damus-io/damus/releases/tag/v1.14
+
+
 ## [1.13.1] - 2025-03-21
 
 ### Fixed
