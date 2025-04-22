@@ -1,3 +1,37 @@
+## [1.14] - 2025-04-21
+
+### Added
+
+- Added safety reminder to wallets with higher balance (Daniel D’Aquino)
+- Added one-click Coinos wallet setup (Daniel D’Aquino)
+- Add notification setting to hide hellthreads (Terry Yiu)
+- Added separated first aid option for relay lists that does not need a contact list reset (Daniel D’Aquino)
+- Added NIP-65 relay list support (Daniel D’Aquino)
+- Added Unicode 16 emoji reactions for iOS 18.4+ by upgrading EmojiPicker (Terry Yiu)
+- Added a search interface to the settings screen (SanjaySiddharth)
+- Added view introducing users to Zaps (ericholguin)
+- Added new wallet view with balance and transactions list (ericholguin)
+
+
+### Changed
+
+- Added additional information on top of blurred images (SanjaySiddharth)
+- Improved robustness of relay list handling (Daniel D’Aquino)
+- Updated image cache for better stability (Daniel D’Aquino)
+- Improved integration with Nostr Wallet Connect wallets (ericholguin)
+
+
+### Fixed
+
+- Hide future notes from timeline (Terry Yiu)
+- Fixed issue where profiles with a NIP-65 relay list would not display on Damus (Daniel D’Aquino)
+- Fix quote notes to include missing q tag (Terry Yiu)
+- Fixed issue where the side menu would close when copying the npub (SanjaySiddharth)
+
+
+[1.14]: https://github.com/damus-io/damus/releases/tag/v1.14
+
+
 ## [1.13.1] - 2025-03-21
 
 ### Fixed
