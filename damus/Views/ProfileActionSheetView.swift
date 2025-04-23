@@ -297,7 +297,7 @@ fileprivate struct ProfileActionSheetZapButton: View {
                                 .foregroundColor(Color.primary)
                                 .profile_button_style(scheme: colorScheme)
                         case .zap_success:
-                            Image("checkmark")
+                            Image("checkmark-damus")
                                 .foregroundColor(Color.green)
                                 .profile_button_style(scheme: colorScheme)
                         case .zap_failure:

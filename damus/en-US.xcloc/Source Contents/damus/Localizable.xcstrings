@@ -1386,6 +1386,12 @@
     "Search" : {
       "comment" : "Default title for the search screen when it is in an unknown state.\nTitle of the text field for searching."
     },
+    "Search / Universe" : {
+      "comment" : "Section header for search/universe settings"
+    },
+    "Search within settings" : {
+      "comment" : "Text to prompt the user to search settings."
+    },
     "Search word: %@" : {
       "comment" : "Navigation link to search for a word."
     },
@@ -1393,7 +1399,7 @@
       "comment" : "Placeholder text to prompt entry of search query."
     },
     "Search/Universe" : {
-      "comment" : "Navigation title for universe/search settings.\nSection header for search/universe settings"
+      "comment" : "Navigation title for universe/search settings."
     },
     "Secret Account Login Key" : {
       "comment" : "Section title for user's secret account login key."
@@ -1493,9 +1499,6 @@
     },
     "Sign out" : {
       "comment" : "Sidebar menu label to sign out of the account."
-    },
-    "Sign Out" : {
-      "comment" : "Section title for signing out"
     },
     "Skip" : {
       "comment" : "Button to dismiss the suggested users screen"

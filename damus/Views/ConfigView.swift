@@ -161,7 +161,7 @@ struct ConfigView: View {
         }
         .navigationTitle(NSLocalizedString("Settings", comment: "Navigation title for Settings view."))
         .navigationBarTitleDisplayMode(.large)
-        .searchable(text: $searchText,prompt: "Search within settings")
+        .searchable(text: $searchText, prompt: NSLocalizedString("Search within settings", comment: "Text to prompt the user to search settings."))
         .alert(NSLocalizedString("WARNING:\n\nTHIS WILL SIGN AN EVENT THAT DELETES THIS ACCOUNT.\n\nYOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.\n\n ARE YOU SURE YOU WANT TO CONTINUE?", comment: "Alert for deleting the users account."), isPresented: $delete_account_warning) {
 
             Button(NSLocalizedString("Cancel", comment: "Cancel deleting the user."), role: .cancel) {
@@ -182,7 +182,7 @@ struct ConfigView: View {
                       let ev = created_deleted_account_profile(keypair: keypair) else {
                     return
                 }
-                state.postbox.send(ev)
+                state.nostrNetwork.postbox.send(ev)
                 logout(state)
             }
         }

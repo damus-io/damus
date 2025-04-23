@@ -160,7 +160,13 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "notification_only_from_following", default_value: false)
     var notification_only_from_following: Bool
-    
+
+    @Setting(key: "hellthread_notifications_disabled", default_value: false)
+    var hellthread_notifications_disabled: Bool
+
+    @Setting(key: "hellthread_notification_max_pubkeys", default_value: DEFAULT_HELLTHREAD_MAX_PUBKEYS)
+    var hellthread_notification_max_pubkeys: Int
+
     @Setting(key: "translate_dms", default_value: false)
     var translate_dms: Bool
     
@@ -335,6 +341,10 @@ class UserSettingsStore: ObservableObject {
     // TODO: Get rid of this once we have NostrDB query capabilities integrated
     @Setting(key: "draft_event_ids", default_value: nil)
     var draft_event_ids: [String]?
+    
+    // TODO: Get rid of this once we have NostrDB query capabilities integrated
+    @Setting(key: "latest_relay_list_event_id", default_value: nil)
+    var latestRelayListEventIdHex: String?
     
     // MARK: Helper types
     

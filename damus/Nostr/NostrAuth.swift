@@ -7,7 +7,7 @@
 
 import Foundation
 
-func make_auth_request(keypair: FullKeypair, challenge_string: String, relay: Relay) -> NostrEvent? {
+func make_auth_request(keypair: FullKeypair, challenge_string: String, relay: RelayPool.Relay) -> NostrEvent? {
     let tags: [[String]] = [["relay", relay.descriptor.url.absoluteString],["challenge", challenge_string]]
     let event = NostrEvent(content: "", keypair: keypair.to_keypair(), kind: 22242, tags: tags)
     return event

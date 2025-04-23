@@ -9,15 +9,27 @@ import SwiftUI
 
 class NotificationFilter: ObservableObject, Equatable {
     @Published var state: NotificationFilterState
-    @Published var fine_filter: FriendFilter
-    
+    @Published var friend_filter: FriendFilter
+    @Published var hellthread_notifications_disabled: Bool
+    @Published var hellthread_notification_max_pubkeys: Int
+
     static func == (lhs: NotificationFilter, rhs: NotificationFilter) -> Bool {
-        return lhs.state == rhs.state && lhs.fine_filter == rhs.fine_filter
+        return lhs.state == rhs.state
+            && lhs.friend_filter == rhs.friend_filter
+            && lhs.hellthread_notifications_disabled == rhs.hellthread_notifications_disabled
+            && lhs.hellthread_notification_max_pubkeys == rhs.hellthread_notification_max_pubkeys
     }
     
-    init(state: NotificationFilterState = .all, fine_filter: FriendFilter = .all) {
+    init(
+        state: NotificationFilterState = .all,
+        friend_filter: FriendFilter = .all,
+        hellthread_notifications_disabled: Bool = false,
+        hellthread_notification_max_pubkeys: Int = DEFAULT_HELLTHREAD_MAX_PUBKEYS
+    ) {
         self.state = state
-        self.fine_filter = fine_filter
+        self.friend_filter = friend_filter
+        self.hellthread_notifications_disabled = hellthread_notifications_disabled
+        self.hellthread_notification_max_pubkeys = hellthread_notification_max_pubkeys
     }
     
     func filter(contacts: Contacts, items: [NotificationItem]) -> [NotificationItem] {
@@ -26,8 +38,14 @@ class NotificationFilter: ObservableObject, Equatable {
             if !self.state.filter(item) {
                 return
             }
-            
-            if let item = item.filter({ self.fine_filter.filter(contacts: contacts, pubkey: $0.pubkey) }) {
+
+            if let item = item.filter({ ev in
+                self.friend_filter.filter(contacts: contacts, pubkey: ev.pubkey) &&
+                (!hellthread_notifications_disabled || !ev.is_hellthread(max_pubkeys: hellthread_notification_max_pubkeys)) &&
+                // Allow notes that are created no more than 3 seconds in the future
+                // to account for natural clock skew between sender and receiver.
+                ev.age >= -3
+            }) {
                 acc.append(item)
             }
         }
@@ -65,7 +83,9 @@ struct NotificationsView: View {
             NotificationTab(
                 NotificationFilter(
                     state: .all,
-                    fine_filter: filter.fine_filter
+                    friend_filter: filter.friend_filter,
+                    hellthread_notifications_disabled: state.settings.hellthread_notifications_disabled,
+                    hellthread_notification_max_pubkeys: state.settings.hellthread_notification_max_pubkeys
                 )
             )
             .tag(NotificationFilterState.all)
@@ -73,7 +93,9 @@ struct NotificationsView: View {
             NotificationTab(
                 NotificationFilter(
                     state: .zaps,
-                    fine_filter: filter.fine_filter
+                    friend_filter: filter.friend_filter,
+                    hellthread_notifications_disabled: state.settings.hellthread_notifications_disabled,
+                    hellthread_notification_max_pubkeys: state.settings.hellthread_notification_max_pubkeys
                 )
             )
             .tag(NotificationFilterState.zaps)
@@ -81,7 +103,9 @@ struct NotificationsView: View {
             NotificationTab(
                 NotificationFilter(
                     state: .replies,
-                    fine_filter: filter.fine_filter
+                    friend_filter: filter.friend_filter,
+                    hellthread_notifications_disabled: state.settings.hellthread_notifications_disabled,
+                    hellthread_notification_max_pubkeys: state.settings.hellthread_notification_max_pubkeys
                 )
             )
             .tag(NotificationFilterState.replies)
@@ -98,20 +122,20 @@ struct NotificationsView: View {
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 if would_filter_non_friends_from_notifications(contacts: state.contacts, state: filter_state, items: self.notifications.notifications) {
-                    FriendsButton(filter: $filter.fine_filter)
+                    FriendsButton(filter: $filter.friend_filter)
                 }
             }
         }
-        .onChange(of: filter.fine_filter) { val in
+        .onChange(of: filter.friend_filter) { val in
             state.settings.friend_filter = val
-            self.subtitle = filter.fine_filter.description()
+            self.subtitle = filter.friend_filter.description()
         }
         .onChange(of: filter_state) { val in
             filter.state = val
         }
         .onAppear {
-            self.filter.fine_filter = state.settings.friend_filter
-            self.subtitle = filter.fine_filter.description()
+            self.filter.friend_filter = state.settings.friend_filter
+            self.subtitle = filter.friend_filter.description()
             filter.state = filter_state
         }
         .safeAreaInset(edge: .top, spacing: 0) {

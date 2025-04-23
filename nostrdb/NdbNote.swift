@@ -14,6 +14,9 @@ import CryptoKit
 
 let MAX_NOTE_SIZE: Int = 2 << 18
 
+// Default threshold of the hellthread pubkey tag count setting if it is not set.
+let DEFAULT_HELLTHREAD_MAX_PUBKEYS: Int = 10
+
 struct NdbStr {
     let note: NdbNote
     let str: UnsafePointer<CChar>
@@ -297,6 +300,15 @@ extension NdbNote {
 
     var should_show_event: Bool {
         return !too_big
+    }
+
+    func is_hellthread(max_pubkeys: Int) -> Bool {
+        switch known_kind {
+        case .text, .boost, .like, .zap:
+            Set(referenced_pubkeys).count > max_pubkeys
+        default:
+            false
+        }
     }
 
     func get_blocks(keypair: Keypair) -> Blocks {

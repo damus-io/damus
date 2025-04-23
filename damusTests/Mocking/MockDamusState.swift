@@ -27,8 +27,7 @@ func generate_test_damus_state(
     }()
     
     let mutelist_manager = MutelistManager(user_keypair: test_keypair)
-    let damus = DamusState(pool: pool,
-                           keypair: test_keypair,
+    let damus = DamusState(keypair: test_keypair,
                            likes: .init(our_pubkey: our_pubkey),
                            boosts: .init(our_pubkey: our_pubkey),
                            contacts: .init(our_pubkey: our_pubkey), mutelist_manager: mutelist_manager,
@@ -43,8 +42,6 @@ func generate_test_damus_state(
                            drafts: .init(),
                            events: .init(ndb: ndb),
                            bookmarks: .init(pubkey: our_pubkey),
-                           postbox: .init(pool: pool),
-                           bootstrap_relays: .init(),
                            replies: .init(our_pubkey: our_pubkey),
                            wallet: .init(settings: settings),
                            nav: .init(),

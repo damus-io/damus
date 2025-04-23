@@ -67,7 +67,9 @@ struct ProfileName: View {
     }
     
     func name_choice(profile: Profile?) -> String {
-        return prefix == "@" ? current_display_name(profile: profile).username.truncate(maxLength: 50) : current_display_name(profile: profile).displayName.truncate(maxLength: 50)
+        let displayName = current_display_name(profile: profile)
+        let untruncatedName = prefix == "@" ? displayName.username : displayName.displayName
+        return untruncatedName.truncate(maxLength: 50)
     }
     
     func onlyzapper(profile: Profile?) -> Bool {

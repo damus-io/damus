@@ -18,7 +18,7 @@ struct NotificationExtensionState: HeadlessDamusState {
     let lnurls: LNUrls
     
     init?() {
-        guard let ndb = try? Ndb(owns_db_file: false) else { return nil }
+        guard let ndb = Ndb(owns_db_file: false) else { return nil }
         self.ndb = ndb
         
         guard let keypair = get_saved_keypair() else { return nil }

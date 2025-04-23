@@ -34,6 +34,19 @@ protocol TagConvertible {
     static func from_tag(tag: TagSequence) -> Self?
 }
 
+/// Protocol for types that can be converted from/to a tag sequence with the possibilty of an error
+protocol ThrowingTagConvertible {
+    associatedtype E: Error
+    var tag: [String] { get }
+    static func fromTag(tag: TagSequence) throws(E) -> Self?
+}
+
+/// Protocol for types that can be converted from/to a tag item
+protocol TagItemConvertible {
+    var tagItem: String? { get }
+    static func fromTagItem(_ item: String?) -> Self?
+}
+
 struct QuoteId: IdType, TagKey, TagConvertible {
     let id: Data
     

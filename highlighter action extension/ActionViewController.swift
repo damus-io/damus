@@ -135,6 +135,7 @@ struct ShareExtensionView: View {
                 return
             }
             self.state = DamusState(keypair: keypair)
+            self.state?.nostrNetwork.connect()
         })
         .onChange(of: self.highlighter_state) {
             if case .cancelled = highlighter_state {
@@ -163,7 +164,7 @@ struct ShareExtensionView: View {
                 break
             case .active:
                 print("txn: 📙 HIGHLIGHTER ACTIVE")
-                state.pool.ping()
+                state.nostrNetwork.pool.ping()
             @unknown default:
                 break
             }
@@ -238,7 +239,7 @@ struct ShareExtensionView: View {
             self.highlighter_state = .failed(error: "Cannot convert post data into a nostr event")
             return
         }
-        state.postbox.send(posted_event, on_flush: .once({ flushed_event in
+        state.nostrNetwork.postbox.send(posted_event, on_flush: .once({ flushed_event in
             if flushed_event.event.id == posted_event.id {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {  // Offset labor perception bias
                     self.highlighter_state = .posted(event: flushed_event.event)

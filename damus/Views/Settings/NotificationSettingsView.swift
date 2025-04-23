@@ -16,7 +16,7 @@ struct NotificationSettingsView: View {
     @State var notification_preferences_sync_state: PreferencesSyncState = .undefined
     
     @Environment(\.dismiss) var dismiss
-    
+
     func indicator_binding(_ val: NewEventsBits) -> Binding<Bool> {
         return Binding.init(get: {
             (settings.notification_indicators & val.rawValue) > 0
@@ -28,7 +28,15 @@ struct NotificationSettingsView: View {
             }
         })
     }
-    
+
+    var hellthread_notification_max_pubkeys_binding: Binding<Double> {
+        Binding<Double>(get: {
+            return Double(settings.hellthread_notification_max_pubkeys)
+        }, set: {
+            settings.hellthread_notification_max_pubkeys = Int($0)
+        })
+    }
+
     func try_to_set_notifications_mode(new_value: UserSettingsStore.NotificationsMode) {
         notification_mode_setting_error = nil
         if new_value == .push {
@@ -111,7 +119,24 @@ struct NotificationSettingsView: View {
     }
     
     // MARK: - View layout
-    
+
+    func hellthread_notification_settings_text() -> String {
+        if !settings.hellthread_notifications_disabled {
+            return NSLocalizedString("Hide notifications that tag many profiles", comment: "Label for notification settings toggle that hides notifications that tag many people.")
+        }
+        return pluralizedString(key: "hellthread_notifications_disabled", count: $settings.hellthread_notification_max_pubkeys.wrappedValue)
+    }
+
+    var hellthread_notifications_max_pubkeys_view: some View {
+        VStack(alignment: .leading) {
+            Slider(
+                value: self.notification_preference_binding(hellthread_notification_max_pubkeys_binding),
+                in: Double(HELLTHREAD_MIN_PUBKEYS)...Double(HELLTHREAD_MAX_PUBKEYS),
+                step: 1
+            )
+        }
+    }
+
     var body: some View {
         Form {
             if settings.enable_push_notifications {
@@ -175,6 +200,13 @@ struct NotificationSettingsView: View {
                     .toggleStyle(.switch)
                 Toggle(NSLocalizedString("Show only from users you follow", comment: "Setting to Show notifications only associated to users your follow"), isOn: self.notification_preference_binding($settings.notification_only_from_following))
                     .toggleStyle(.switch)
+                VStack {
+                    Toggle(hellthread_notification_settings_text(), isOn: self.notification_preference_binding($settings.hellthread_notifications_disabled))
+                        .toggleStyle(.switch)
+                    if settings.hellthread_notifications_disabled {
+                        hellthread_notifications_max_pubkeys_view
+                    }
+                }
             }
             
             Section(

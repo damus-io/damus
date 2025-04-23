@@ -14,6 +14,8 @@ struct NWCSettings: View {
     @ObservedObject var model: WalletModel
     @ObservedObject var settings: UserSettingsStore
     
+    @Environment(\.dismiss) var dismiss
+    
     
     func donation_binding() -> Binding<Double> {
         return Binding(get: {
@@ -136,6 +138,7 @@ struct NWCSettings: View {
             
             Button(action: {
                 self.model.disconnect()
+                dismiss()
             }) {
                 HStack {
                     Text("Disconnect Wallet", comment: "Text for button to disconnect from Nostr Wallet Connect lightning wallet.")
@@ -173,7 +176,7 @@ struct NWCSettings: View {
             guard let meta = make_metadata_event(keypair: keypair, metadata: prof) else {
                 return
             }
-            damus_state.postbox.send(meta)
+            damus_state.nostrNetwork.postbox.send(meta)
         }
     }
     

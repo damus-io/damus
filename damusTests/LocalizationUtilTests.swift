@@ -17,13 +17,16 @@ final class LocalizationUtilTests: XCTestCase {
         let keys = [
             ["followers_count", "Followers", "Follower", "Followers"],
             ["following_count", "Following", "Following", "Following"],
+            ["hellthread_notifications_disabled", "Hide notifications that tag more than 0 profiles", "Hide notifications that tag more than 1 profile", "Hide notifications that tag more than 2 profiles"],
             ["imports_count", "Imports", "Import", "Imports"],
+            ["quoted_reposts_count", "Quotes", "Quote", "Quotes"],
             ["reactions_count", "Reactions", "Reaction", "Reactions"],
             ["relays_count", "Relays", "Relay", "Relays"],
             ["reposts_count", "Reposts", "Repost", "Reposts"],
             ["sats", "sats", "sat", "sats"],
-            ["zaps_count", "Zaps", "Zap", "Zaps"],
-            ["word_count", "0 Words", "1 Word", "2 Words"]
+            ["users_talking_about_it", "0 users talking about it", "1 user talking about it", "2 users talking about it"],
+            ["word_count", "0 Words", "1 Word", "2 Words"],
+            ["zaps_count", "Zaps", "Zap", "Zaps"]
         ]
 
         for key in keys {

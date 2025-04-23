@@ -2,7 +2,7 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
   <file original="damus/en-US.lproj/InfoPlist.strings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.3" build-num="16E140"/>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">
@@ -44,7 +44,7 @@
   </file>
   <file original="damus/en-US.lproj/Localizable.strings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.3" build-num="16E140"/>
     </header>
     <body>
       <trans-unit id="#%@" xml:space="preserve">
@@ -2292,6 +2292,16 @@ Button to save key, complete account creation, and start using the app.</note>
         <note>Default title for the search screen when it is in an unknown state.
 Title of the text field for searching.</note>
       </trans-unit>
+      <trans-unit id="Search / Universe" xml:space="preserve">
+        <source>Search / Universe</source>
+        <target>Search / Universe</target>
+        <note>Section header for search/universe settings</note>
+      </trans-unit>
+      <trans-unit id="Search within settings" xml:space="preserve">
+        <source>Search within settings</source>
+        <target>Search within settings</target>
+        <note>Text to prompt the user to search settings.</note>
+      </trans-unit>
       <trans-unit id="Search word: %@" xml:space="preserve">
         <source>Search word: %@</source>
         <target>Search word: %@</target>
@@ -2305,8 +2315,7 @@ Title of the text field for searching.</note>
       <trans-unit id="Search/Universe" xml:space="preserve">
         <source>Search/Universe</source>
         <target>Search/Universe</target>
-        <note>Navigation title for universe/search settings.
-Section header for search/universe settings</note>
+        <note>Navigation title for universe/search settings.</note>
       </trans-unit>
       <trans-unit id="Secret Account Login Key" xml:space="preserve">
         <source>Secret Account Login Key</source>
@@ -2454,11 +2463,6 @@ Button to show more of a long profile description.</note>
         <source>Sign In</source>
         <target>Sign In</target>
         <note>Button to continue to login page.</note>
-      </trans-unit>
-      <trans-unit id="Sign Out" xml:space="preserve">
-        <source>Sign Out</source>
-        <target>Sign Out</target>
-        <note>Section title for signing out</note>
       </trans-unit>
       <trans-unit id="Sign in" xml:space="preserve">
         <source>Sign in</source>
@@ -3397,7 +3401,7 @@ String indicating that a given timestamp just occurred</note>
   </file>
   <file original="damus/en-US.lproj/Localizable.stringsdict" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.3" build-num="16E140"/>
     </header>
     <body>
       <trans-unit id="/followed_by_three_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
@@ -3794,7 +3798,7 @@ String indicating that a given timestamp just occurred</note>
   </file>
   <file original="damus/InfoPlist.xcstrings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.3" build-num="16E140"/>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">
@@ -3816,7 +3820,7 @@ String indicating that a given timestamp just occurred</note>
   </file>
   <file original="damus/Localizable.xcstrings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.3" build-num="16E140"/>
     </header>
     <body>
       <trans-unit id="" xml:space="preserve">
@@ -6057,6 +6061,16 @@ Button to save key, complete account creation, and start using the app.</note>
         <note>Default title for the search screen when it is in an unknown state.
 Title of the text field for searching.</note>
       </trans-unit>
+      <trans-unit id="Search / Universe" xml:space="preserve">
+        <source>Search / Universe</source>
+        <target state="new">Search / Universe</target>
+        <note>Section header for search/universe settings</note>
+      </trans-unit>
+      <trans-unit id="Search within settings" xml:space="preserve">
+        <source>Search within settings</source>
+        <target state="new">Search within settings</target>
+        <note>Text to prompt the user to search settings.</note>
+      </trans-unit>
       <trans-unit id="Search word: %@" xml:space="preserve">
         <source>Search word: %@</source>
         <target state="new">Search word: %@</target>
@@ -6070,8 +6084,7 @@ Title of the text field for searching.</note>
       <trans-unit id="Search/Universe" xml:space="preserve">
         <source>Search/Universe</source>
         <target state="new">Search/Universe</target>
-        <note>Navigation title for universe/search settings.
-Section header for search/universe settings</note>
+        <note>Navigation title for universe/search settings.</note>
       </trans-unit>
       <trans-unit id="Secret Account Login Key" xml:space="preserve">
         <source>Secret Account Login Key</source>
@@ -6229,11 +6242,6 @@ Button to show more of a long profile description.</note>
         <source>Sign In</source>
         <target state="new">Sign In</target>
         <note>Button to continue to login page.</note>
-      </trans-unit>
-      <trans-unit id="Sign Out" xml:space="preserve">
-        <source>Sign Out</source>
-        <target state="new">Sign Out</target>
-        <note>Section title for signing out</note>
       </trans-unit>
       <trans-unit id="Sign in" xml:space="preserve">
         <source>Sign in</source>
@@ -7037,7 +7045,7 @@ String indicating that a given timestamp just occurred</note>
   </file>
   <file original="damus/Resources/InfoPlist.xcstrings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.3" build-num="16E140"/>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">
@@ -7059,7 +7067,7 @@ String indicating that a given timestamp just occurred</note>
   </file>
   <file original="highlighter action extension/InfoPlist.xcstrings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.3" build-num="16E140"/>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">

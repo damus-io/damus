@@ -170,6 +170,12 @@ final class PostViewTests: XCTestCase {
         
         nonAlphaNumerics.forEach { testAddingStringAfterLink(str: $0)}
     }
+
+    func testQuoteRepost() {
+        let post = build_post(state: test_damus_state, post: .init(), action: .quoting(test_note), uploadedMedias: [], pubkeys: [])
+
+        XCTAssertEqual(post.tags, [["q", test_note.id.hex()]])
+    }
 }
 
 func checkMentionLinkEditorHandling(

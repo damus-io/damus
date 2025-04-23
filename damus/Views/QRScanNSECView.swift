@@ -57,11 +57,14 @@ struct QRScanNSECView: View {
     }
 }
 
-#Preview {
-    @State var showQR  = true
-    @State var privKeyFound = false
-    @State var shouldSaveKey = true
-    return QRScanNSECView(showQR: $showQR,
-                          privKeyFound: $privKeyFound,
-                          codeScannerCompletion: { _ in })
+struct QRScanNSECView_Previews: PreviewProvider {
+    @State static var showQR  = true
+    @State static var privKeyFound = false
+    @State static var shouldSaveKey = true
+
+    static var previews: some View {
+        QRScanNSECView(showQR: $showQR,
+                       privKeyFound: $privKeyFound,
+                       codeScannerCompletion: { _ in })
+    }
 }

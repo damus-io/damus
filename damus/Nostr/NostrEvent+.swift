@@ -7,7 +7,7 @@
 
 import Foundation
 
-func make_zap_request_event(keypair: FullKeypair, content: String, relays: [RelayDescriptor], target: ZapTarget, zap_type: ZapType) -> MakeZapRequest? {
+func make_zap_request_event(keypair: FullKeypair, content: String, relays: [RelayPool.RelayDescriptor], target: ZapTarget, zap_type: ZapType) -> MakeZapRequest? {
     var tags = zap_target_to_tags(target)
     var relay_tag = ["relays"]
     relay_tag.append(contentsOf: relays.map { $0.url.absoluteString })
@@ -78,8 +78,8 @@ func make_private_zap_request_event(identity: FullKeypair, enc_key: FullKeypair,
 
 func make_first_contact_event(keypair: Keypair) -> NostrEvent? {
     let bootstrap_relays = load_bootstrap_relays(pubkey: keypair.pubkey)
-    let rw_relay_info = RelayInfo(read: true, write: true)
-    var relays: [RelayURL: RelayInfo] = [:]
+    let rw_relay_info = LegacyKind3RelayRWConfiguration(read: true, write: true)
+    var relays: [RelayURL: LegacyKind3RelayRWConfiguration] = [:]
 
     for relay in bootstrap_relays {
         relays[relay] = rw_relay_info

@@ -7,6 +7,12 @@
 
 import Foundation
 
+// Minimum threshold the hellthread pubkey tag count setting can go down to.
+let HELLTHREAD_MIN_PUBKEYS: Int = 6
+
+// Maximum threshold the hellthread pubkey tag count setting can go up to.
+let HELLTHREAD_MAX_PUBKEYS: Int = 24
+
 struct PushNotificationClient {
     let keypair: Keypair
     let settings: UserSettingsStore
@@ -175,15 +181,33 @@ extension PushNotificationClient {
     }
     
     struct NotificationSettings: Codable, Equatable {
-        let zap_notifications_enabled: Bool
-        let mention_notifications_enabled: Bool
-        let repost_notifications_enabled: Bool
-        let reaction_notifications_enabled: Bool
-        let dm_notifications_enabled: Bool
-        let only_notifications_from_following_enabled: Bool
-        
+        let zap_notifications_enabled: Bool?
+        let mention_notifications_enabled: Bool?
+        let repost_notifications_enabled: Bool?
+        let reaction_notifications_enabled: Bool?
+        let dm_notifications_enabled: Bool?
+        let only_notifications_from_following_enabled: Bool?
+        let hellthread_notifications_disabled: Bool?
+        let hellthread_notifications_max_pubkeys: Int?
+
         static func from(json_data: Data) -> Self? {
             guard let decoded = try? JSONDecoder().decode(Self.self, from: json_data) else { return nil }
+
+            // Normalize hellthread_notifications_max_pubkeys in case
+            // it goes beyond the expected range supported on the client.
+            if let max_pubkeys = decoded.hellthread_notifications_max_pubkeys, max_pubkeys < HELLTHREAD_MIN_PUBKEYS || max_pubkeys > HELLTHREAD_MAX_PUBKEYS {
+                return NotificationSettings(
+                    zap_notifications_enabled: decoded.zap_notifications_enabled,
+                    mention_notifications_enabled: decoded.mention_notifications_enabled,
+                    repost_notifications_enabled: decoded.repost_notifications_enabled,
+                    reaction_notifications_enabled: decoded.reaction_notifications_enabled,
+                    dm_notifications_enabled: decoded.dm_notifications_enabled,
+                    only_notifications_from_following_enabled: decoded.only_notifications_from_following_enabled,
+                    hellthread_notifications_disabled: decoded.hellthread_notifications_disabled,
+                    hellthread_notifications_max_pubkeys: max(min(HELLTHREAD_MAX_PUBKEYS, max_pubkeys), HELLTHREAD_MIN_PUBKEYS)
+                )
+            }
+
             return decoded
         }
         
@@ -194,7 +218,9 @@ extension PushNotificationClient {
                 repost_notifications_enabled: settings.repost_notification,
                 reaction_notifications_enabled: settings.like_notification,
                 dm_notifications_enabled: settings.dm_notification,
-                only_notifications_from_following_enabled: settings.notification_only_from_following
+                only_notifications_from_following_enabled: settings.notification_only_from_following,
+                hellthread_notifications_disabled: settings.hellthread_notifications_disabled,
+                hellthread_notifications_max_pubkeys: settings.hellthread_notification_max_pubkeys
             )
         }
         

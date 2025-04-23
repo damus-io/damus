@@ -1,14 +1,21 @@
 /* Bundle display name */
 "CFBundleDisplayName" = "Damus";
+
 /* Bundle name */
 "CFBundleName" = "damus";
+
 /* Privacy - Media Library Usage Description */
 "NSAppleMusicUsageDescription" = "Damus needs access to your media library for playback statuses";
+
 /* Privacy - Camera Usage Description */
 "NSCameraUsageDescription" = "Damus needs access to your camera in order to upload photos and scan QR codes.";
+
 /* Privacy - Face ID Usage Description */
 "NSFaceIDUsageDescription" = "Local authentication to access private key";
+
 /* Privacy - Microphone Usage Description */
 "NSMicrophoneUsageDescription" = "Damus needs access to your microphone to allow you to create video recordings that you can choose to post publicly on the network";
+
 /* Privacy - Photo Library Additions Usage Description */
 "NSPhotoLibraryAddUsageDescription" = "Granting Damus access to your photos allows you to save images.";
+
