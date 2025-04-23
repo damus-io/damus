@@ -34,7 +34,7 @@ class PostedEvent {
     let flush_after: Date?
     var flushed_once: Bool
     let on_flush: OnFlush?
-
+    let totalRelays: Int
     init(event: NostrEvent, remaining: [RelayURL], skip_ephemeral: Bool, flush_after: Date?, on_flush: OnFlush?) {
         self.event = event
         self.skip_ephemeral = skip_ephemeral
@@ -44,6 +44,7 @@ class PostedEvent {
         self.remaining = remaining.map {
             Relayer(relay: $0, attempts: 0, retry_after: 10.0)
         }
+        self.totalRelays = remaining.count
     }
 }
 
@@ -52,6 +53,8 @@ enum CancelSendErr {
     case not_delayed
     case too_late
 }
+
+let relayNotification = QueueableNotify<(PostedEvent, RelayURL)>(maxQueueItems: 100)
 
 class PostBox {
     let pool: RelayPool
@@ -136,6 +139,11 @@ class PostBox {
         let after_count = ev.remaining.count
         if ev.remaining.count == 0 {
             self.events.removeValue(forKey: event_id)
+        }
+        print("Toatl Relays : \(ev.totalRelays)")
+        
+        Task{
+            await relayNotification.add(item: (ev,relay_id))
         }
         return prev_count != after_count
     }

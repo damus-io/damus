@@ -297,6 +297,11 @@ struct ContentView: View {
         }
         .ignoresSafeArea(.keyboard)
         .edgesIgnoringSafeArea(hide_bar ? [.bottom] : [])
+        .task {
+                for await (event, relayID) in relayNotification.stream {
+                    print("Rithi Event: Posted to \(event.totalRelays-event.remaining.count) out of \(event.totalRelays) relays")
+                    }
+        }
         .onAppear() {
             self.connect()
             try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default, options: .mixWithOthers)
@@ -421,6 +426,11 @@ struct ContentView: View {
             if !handle_post_notification(keypair: keypair, postbox: state.postbox, events: state.events, post: post) {
                 self.active_sheet = nil
             }
+//            Task {
+//                for await (event, relayID) in relayNotification.stream {
+//                    print("Rithi Event: Posted to \(event.totalRelays-event.remaining.count) out of \(event.totalRelays) relays")
+//                }
+//            }
         }
         .onReceive(handle_notify(.new_mutes)) { _ in
             home.filter_events()
