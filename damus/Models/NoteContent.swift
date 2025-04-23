@@ -162,7 +162,13 @@ func url_str(_ url: URL) -> CompatibleText {
 
 func classify_url(_ url: URL) -> UrlType {
     let str = url.lastPathComponent.lowercased()
-    
+    let urlString = url.absoluteString.lowercased()
+    let prefix = "https://imgflip.com/i/"
+    if urlString.contains(prefix) {
+        let uniqueID = urlString.replacingOccurrences(of: prefix, with: "")
+        let imgUrl = URL(string: "https://i.imgflip.com/\(uniqueID).jpg") ?? url
+        return .media(.image(imgUrl))
+    }
     if str.hasSuffix(".png") || str.hasSuffix(".jpg") || str.hasSuffix(".jpeg") || str.hasSuffix(".gif") || str.hasSuffix(".webp") {
         return .media(.image(url))
     }
