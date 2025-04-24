@@ -40,8 +40,9 @@ extension WalletConnect {
     ///   - on_flush: A callback to call after the event has been flushed to the network
     /// - Returns: The Nostr Event that was sent to the network, representing the request that was made
     @discardableResult
-    static func pay(url: WalletConnectURL, pool: RelayPool, post: PostBox, invoice: String, delay: TimeInterval? = 5.0, on_flush: OnFlush? = nil) -> NostrEvent? {
-        let req = WalletConnect.Request.payInvoice(invoice: invoice)
+    static func pay(url: WalletConnectURL, pool: RelayPool, post: PostBox, invoice: String, zap_request: NostrEvent?, delay: TimeInterval? = 5.0, on_flush: OnFlush? = nil) -> NostrEvent? {
+        
+        let req = WalletConnect.Request.payZapRequest(invoice: invoice, zapRequest: zap_request)
         guard let ev = req.to_nostr_event(to_pk: url.pubkey, keypair: url.keypair) else {
             return nil
         }
@@ -142,7 +143,7 @@ extension WalletConnect {
         }
         
         print("damus-donation donating...")
-        WalletConnect.pay(url: nwc, pool: pool, post: postbox, invoice: invoice, delay: nil)
+        WalletConnect.pay(url: nwc, pool: pool, post: postbox, invoice: invoice, zap_request: nil, delay: nil)
     }
 
     /// Handles a received Nostr Wallet Connect error

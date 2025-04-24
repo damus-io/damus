@@ -263,6 +263,7 @@ class HomeModel: ContactsDelegate {
             guard let nwc_str = damus_state.settings.nostr_wallet_connect,
                   let nwc = WalletConnectURL(str: nwc_str),
                   let resp = await WalletConnect.FullWalletResponse(from: ev, nwc: nwc) else {
+                Log.error("HomeModel: Received NWC response I do not understand", for: .nwc)
                 return
             }
 
