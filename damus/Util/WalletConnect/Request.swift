@@ -13,7 +13,11 @@ extension WalletConnect {
         /// Pay an invoice
         case payInvoice(
             /// bolt-11 invoice string
-            invoice: String
+            invoice: String,
+            /// The full description of the invoice (If description does not fit in the BOLT-11 invoice, this is the pre-image of the description hash)
+            description: String?,
+            /// Optional metadata object containing more information
+            metadata: Metadata?
         )
         /// Get the current wallet balance
         case getBalance
@@ -33,6 +37,38 @@ extension WalletConnect {
             type: String?
         )
         
+        static func payZapRequest(invoice: String, zapRequest: NostrEvent?) -> Self {
+            guard let zapRequest, let zapRequestEncoded = encode_json(zapRequest) else {
+                return WalletConnect.Request.payInvoice(
+                    invoice: invoice,
+                    description: nil,
+                    metadata: nil
+                )
+            }
+            return WalletConnect.Request.payInvoice(
+                invoice: invoice,
+                description: zapRequestEncoded,
+                metadata: .init(nostr: zapRequest)
+            )
+        }
+        
+        struct Metadata: Codable, Equatable, Hashable {
+            /// NIP-57-compliant `kind:9734` zap request event
+            let nostr: NostrEvent?
+            
+            init(nostr: NostrEvent?) {
+                self.nostr = nostr
+            }
+            
+            init(from decoder: any Decoder) throws {
+                let container: KeyedDecodingContainer<WalletConnect.Request.Metadata.CodingKeys> = try decoder.container(keyedBy: WalletConnect.Request.Metadata.CodingKeys.self)
+                guard let decodedZapRequest = try? container.decodeIfPresent(NostrEvent.self, forKey: WalletConnect.Request.Metadata.CodingKeys.nostr) else {
+                    self.nostr = nil    // Be lenient and fallback to nil if the NWC provider provided something invalid, since metadata is not strictly spec'd yet.
+                    return
+                }
+                self.nostr = decodedZapRequest
+            }
+        }
         
         // MARK: - Interface
         
@@ -61,7 +97,7 @@ extension WalletConnect {
         
         /// Keys for the JSON inside the "params" object
         private enum ParamKeys: String, CodingKey {
-            case invoice
+            case invoice, description, metadata
             case from, until, limit, offset, unpaid, type
         }
         
@@ -82,7 +118,9 @@ extension WalletConnect {
             case Method.payInvoice.rawValue:
                 let paramsContainer = try container.nestedContainer(keyedBy: ParamKeys.self, forKey: .params)
                 let invoice = try paramsContainer.decode(String.self, forKey: .invoice)
-                self = .payInvoice(invoice: invoice)
+                let description: String? = try paramsContainer.decodeIfPresent(String.self, forKey: .description)
+                let metadata: Metadata? = try paramsContainer.decodeIfPresent(Metadata.self, forKey: .metadata)
+                self = .payInvoice(invoice: invoice, description: description, metadata: metadata)
                 
             case Method.getBalance.rawValue:
                 // No params to decode
@@ -112,10 +150,12 @@ extension WalletConnect {
             var container = encoder.container(keyedBy: CodingKeys.self)
             
             switch self {
-            case .payInvoice(let invoice):
+            case .payInvoice(let invoice, let description, let metadata):
                 try container.encode(Method.payInvoice.rawValue, forKey: .method)
                 var paramsContainer = container.nestedContainer(keyedBy: ParamKeys.self, forKey: .params)
                 try paramsContainer.encode(invoice, forKey: .invoice)
+                try paramsContainer.encodeIfPresent(description, forKey: .description)
+                try paramsContainer.encodeIfPresent(metadata, forKey: .metadata)
                 
             case .getBalance:
                 try container.encode(Method.getBalance.rawValue, forKey: .method)
