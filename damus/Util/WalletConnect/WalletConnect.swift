@@ -86,7 +86,7 @@ extension WalletConnect {
         let created_at: UInt64 // unixtimestamp, // invoice/payment creation time
         let expires_at: UInt64?  // unixtimestamp, // invoice expiration time, optional if not applicable
         let settled_at: UInt64? // unixtimestamp, // invoice/payment settlement time, optional if unpaid
-        //"metadata": {} // generic metadata that can be used to add things like zap/boostagram details for a payer name/comment/etc.
+        let metadata: WalletConnect.Request.Metadata?    // generic metadata that can be used to add things like zap/boostagram details for a payer name/comment/etc.
     }
 }
 
