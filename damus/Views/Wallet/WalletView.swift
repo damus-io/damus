@@ -45,7 +45,7 @@ struct WalletView: View {
                     )
                 }
                 
-                VStack(spacing: 5) {
+                VStack(spacing: 10) {
                     
                     BalanceView(balance: model.balance)
                     

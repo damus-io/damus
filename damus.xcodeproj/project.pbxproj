@@ -403,6 +403,9 @@
 		5C14C29F2BBBA5C600079FD2 /* RelayNipList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C14C29E2BBBA5C600079FD2 /* RelayNipList.swift */; };
 		5C42E78C29DB76D90086AAC1 /* EmptyUserSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C42E78B29DB76D90086AAC1 /* EmptyUserSearchView.swift */; };
 		5C4D9EA72C042FA5005EA0F7 /* HighlightDraftContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C4D9EA62C042FA5005EA0F7 /* HighlightDraftContentView.swift */; };
+		5C4FA7C52DBA9D5C00CE658C /* CoinbaseModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C4FA7C42DBA9D5800CE658C /* CoinbaseModel.swift */; };
+		5C4FA7C62DBA9D5C00CE658C /* CoinbaseModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C4FA7C42DBA9D5800CE658C /* CoinbaseModel.swift */; };
+		5C4FA7C72DBA9D5C00CE658C /* CoinbaseModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C4FA7C42DBA9D5800CE658C /* CoinbaseModel.swift */; };
 		5C513FBA297F72980072348F /* CustomPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FB9297F72980072348F /* CustomPicker.swift */; };
 		5C513FCC2984ACA60072348F /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FCB2984ACA60072348F /* QRCodeView.swift */; };
 		5C6E1DAD2A193EC2008FC15A /* GradientButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C6E1DAC2A193EC2008FC15A /* GradientButtonStyle.swift */; };
@@ -2409,6 +2412,7 @@
 		5C14C29E2BBBA5C600079FD2 /* RelayNipList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayNipList.swift; sourceTree = "<group>"; };
 		5C42E78B29DB76D90086AAC1 /* EmptyUserSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyUserSearchView.swift; sourceTree = "<group>"; };
 		5C4D9EA62C042FA5005EA0F7 /* HighlightDraftContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightDraftContentView.swift; sourceTree = "<group>"; };
+		5C4FA7C42DBA9D5800CE658C /* CoinbaseModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinbaseModel.swift; sourceTree = "<group>"; };
 		5C513FB9297F72980072348F /* CustomPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomPicker.swift; sourceTree = "<group>"; };
 		5C513FCB2984ACA60072348F /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		5C6E1DAC2A193EC2008FC15A /* GradientButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientButtonStyle.swift; sourceTree = "<group>"; };
@@ -2770,6 +2774,7 @@
 		4C0A3F8D280F63FF000448DE /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				5C4FA7C42DBA9D5800CE658C /* CoinbaseModel.swift */,
 				D73BDB122D71212600D69970 /* NostrNetworkManager */,
 				D74F43082B23F09300425B75 /* Purple */,
 				BA3759882ABCCDE30018D73B /* Camera */,
@@ -4512,6 +4517,7 @@
 				4C32B9572A9AD44700DC3548 /* Root.swift in Sources */,
 				4C3EA64428FF558100C48A62 /* sha256.c in Sources */,
 				5C8498032D5D150000F74FEB /* ZapExplainer.swift in Sources */,
+				5C4FA7C72DBA9D5C00CE658C /* CoinbaseModel.swift in Sources */,
 				504323A72A34915F006AE6DC /* RelayModel.swift in Sources */,
 				4CF0ABF62985CD5500D66079 /* UserSearch.swift in Sources */,
 				4C32B9542A9AD44700DC3548 /* FlatBuffersUtils.swift in Sources */,
@@ -5283,6 +5289,7 @@
 				82D6FB832CD99F7900C925F4 /* SearchModel.swift in Sources */,
 				82D6FB842CD99F7900C925F4 /* NostrFilter+Hashable.swift in Sources */,
 				82D6FB852CD99F7900C925F4 /* Contacts.swift in Sources */,
+				5C4FA7C62DBA9D5C00CE658C /* CoinbaseModel.swift in Sources */,
 				82D6FB862CD99F7900C925F4 /* CreateAccountModel.swift in Sources */,
 				82D6FB872CD99F7900C925F4 /* HomeModel.swift in Sources */,
 				82D6FB882CD99F7900C925F4 /* SignalModel.swift in Sources */,
@@ -5777,6 +5784,7 @@
 				D73E5EFD2C6A97F4007EB227 /* InnerTimelineView.swift in Sources */,
 				D73E5EFE2C6A97F4007EB227 /* (null) in Sources */,
 				D7EB00B02CD59C8D00660C07 /* PresentFullScreenItemNotify.swift in Sources */,
+				5C4FA7C52DBA9D5C00CE658C /* CoinbaseModel.swift in Sources */,
 				D73E5EFF2C6A97F4007EB227 /* ZapsView.swift in Sources */,
 				D73E5F002C6A97F4007EB227 /* CustomizeZapView.swift in Sources */,
 				D73E5F012C6A97F4007EB227 /* ZapTypePicker.swift in Sources */,
