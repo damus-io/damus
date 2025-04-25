@@ -134,6 +134,7 @@ struct ContentView: View {
     @StateObject var navigationCoordinator: NavigationCoordinator = NavigationCoordinator()
     @AppStorage("has_seen_suggested_users") private var hasSeenOnboardingSuggestions = false
     let sub_id = UUID().description
+    @State var postConfirmationToastMessage: String?
     
     // connect retry timer
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -297,9 +298,10 @@ struct ContentView: View {
         }
         .ignoresSafeArea(.keyboard)
         .edgesIgnoringSafeArea(hide_bar ? [.bottom] : [])
+        .postConfirmationToast(message: $postConfirmationToastMessage, style: .success)
         .task {
                 for await (event, relayID) in relayNotification.stream {
-                    print("Rithi Event: Posted to \(event.totalRelays-event.remaining.count) out of \(event.totalRelays) relays")
+                    postConfirmationToastMessage = "Your note has been posted to \(event.totalRelays-event.remaining.count) out of \(event.totalRelays) relays"
                     }
         }
         .onAppear() {

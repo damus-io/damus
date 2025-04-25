@@ -30,7 +30,8 @@ struct ToastView: View {
                 .shadow(color: .purple.opacity(0.35), radius: 6)
         )
         .padding()
-        
+        .transition(.opacity.combined(with: .move(edge: .top)))
+        .animation(.easeInOut(duration: 0.3), value: message)
     }
 }
 
@@ -40,7 +41,34 @@ struct ToastView: View {
 
 }
 
-
+struct ToastModifier: ViewModifier {
+    @Binding var message: String?
+    @State var timer: Timer?
+    let style: ToastStyle
+    
+    func body(content: Content) -> some View {
+        ZStack(alignment: .top){
+            content
+            
+            if let message = message {
+                ToastView(style: style, message: message)
+                    .padding(.top, 50)
+                    .onChange(of: message){ _ in
+                        restartTimer()
+                    }
+                    .onAppear{
+                        restartTimer()
+                    }
+            }
+        }
+    }
+    private func restartTimer(){
+        timer?.invalidate()
+        timer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
+            message = nil
+        }
+    }
+}
 
 struct Toast: Equatable {
     var style: ToastStyle
@@ -71,5 +99,11 @@ extension ToastStyle{
             return Color.green
         }
         
+    }
+}
+
+extension View{
+    func postConfirmationToast(message: Binding<String?>, style: ToastStyle) -> some View {
+        self.modifier(ToastModifier(message: message, style: style))
     }
 }
