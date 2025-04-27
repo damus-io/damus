@@ -80,7 +80,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         UNUserNotificationCenter.current().delegate = self
         SKPaymentQueue.default().add(StoreObserver.standard)
         registerNotificationCategories()
-        migrateKingfisherCacheIfNeeded()
+        ImageCacheMigrations.migrateKingfisherCacheIfNeeded()
         configureKingfisherCache()
         return true
     }
@@ -113,50 +113,8 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         completionHandler()
     }
 
-    private func migrateKingfisherCacheIfNeeded() {
-        let fileManager = FileManager.default
-        let defaults = UserDefaults.standard
-        let migrationKey = "KingfisherCacheMigrated"
-
-        // Check if migration has already been done
-        guard !defaults.bool(forKey: migrationKey) else { return }
-
-        // Get the default Kingfisher cache (before we override it)
-        let defaultCache = ImageCache.default
-        let oldCachePath = defaultCache.diskStorage.directoryURL.path
-
-        // New shared cache location
-        guard let groupURL = fileManager.containerURL(forSecurityApplicationGroupIdentifier: Constants.DAMUS_APP_GROUP_IDENTIFIER) else { return }
-        let newCachePath = groupURL.appendingPathComponent(Constants.IMAGE_CACHE_DIRNAME).path
-
-        // Check if the old cache exists
-        if fileManager.fileExists(atPath: oldCachePath) {
-            do {
-                // Move the old cache to the new location
-                try fileManager.moveItem(atPath: oldCachePath, toPath: newCachePath)
-                print("Successfully migrated Kingfisher cache to \(newCachePath)")
-            } catch {
-                print("Failed to migrate cache: \(error)")
-                // Optionally, copy instead of move if you want to preserve the old cache as a fallback
-                do {
-                    try fileManager.copyItem(atPath: oldCachePath, toPath: newCachePath)
-                    print("Copied cache instead due to error")
-                } catch {
-                    print("Failed to copy cache: \(error)")
-                }
-            }
-        }
-
-        // Mark migration as complete
-        defaults.set(true, forKey: migrationKey)
-    }
-
     private func configureKingfisherCache() {
-        guard let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Constants.DAMUS_APP_GROUP_IDENTIFIER) else {
-            return
-        }
-
-        let cachePath = groupURL.appendingPathComponent(Constants.IMAGE_CACHE_DIRNAME)
+        let cachePath = ImageCacheMigrations.kingfisherCachePath()
         if let cache = try? ImageCache(name: "sharedCache", cacheDirectoryURL: cachePath) {
             KingfisherManager.shared.cache = cache
         }
