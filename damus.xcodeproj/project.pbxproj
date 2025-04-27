@@ -1703,6 +1703,9 @@
 		D7F360262CEBBD8B009D34DA /* PresentFullScreenItemNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EB00AF2CD59C8300660C07 /* PresentFullScreenItemNotify.swift */; };
 		D7F360272CEBBDC0009D34DA /* DamusVideoControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EFBA362CC322F300F45588 /* DamusVideoControlsView.swift */; };
 		D7F360292CEBBE34009D34DA /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = D7F360282CEBBE34009D34DA /* CodeScanner */; };
+		D7FA46E52DBDAA7E002C9BB0 /* ImageCacheMigrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FA46E42DBDAA75002C9BB0 /* ImageCacheMigrations.swift */; };
+		D7FA46E62DBDAA7E002C9BB0 /* ImageCacheMigrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FA46E42DBDAA75002C9BB0 /* ImageCacheMigrations.swift */; };
+		D7FA46E72DBDAA7E002C9BB0 /* ImageCacheMigrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FA46E42DBDAA75002C9BB0 /* ImageCacheMigrations.swift */; };
 		D7FB10A72B0C371A00FA8D42 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2B10272A7B0F5C008AA43E /* Log.swift */; };
 		D7FB14222BE5970000398331 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D7FB14212BE5970000398331 /* PrivacyInfo.xcprivacy */; };
 		D7FB14252BE5A9A800398331 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D7FB14242BE5A9A800398331 /* PrivacyInfo.xcprivacy */; };
@@ -2574,6 +2577,7 @@
 		D7EDED2D2B128E8A0018B19C /* CollectionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionExtension.swift; sourceTree = "<group>"; };
 		D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusUserDefaults.swift; sourceTree = "<group>"; };
 		D7EFBA362CC322F300F45588 /* DamusVideoControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusVideoControlsView.swift; sourceTree = "<group>"; };
+		D7FA46E42DBDAA75002C9BB0 /* ImageCacheMigrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCacheMigrations.swift; sourceTree = "<group>"; };
 		D7FB14212BE5970000398331 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		D7FB14242BE5A9A800398331 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		D7FD12252BD345A700CF195B /* FirstAidSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstAidSettingsView.swift; sourceTree = "<group>"; };
@@ -3312,6 +3316,7 @@
 		4C7FF7D628233637009601DB /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				D7FA46E42DBDAA75002C9BB0 /* ImageCacheMigrations.swift */,
 				D73B74E02D8365B40067BDBC /* ExtraFonts.swift */,
 				D7DB93042D66A43B00DA1EE5 /* Undistractor.swift */,
 				D73E5F7E2C6AA066007EB227 /* DamusAliases.swift */,
@@ -4675,6 +4680,7 @@
 				4CCEB7AE29B53D260078AA28 /* SearchingEventView.swift in Sources */,
 				4CF0ABE929844AF100D66079 /* AnyCodable.swift in Sources */,
 				BA3759932ABCCEBA0018D73B /* CameraModel.swift in Sources */,
+				D7FA46E72DBDAA7E002C9BB0 /* ImageCacheMigrations.swift in Sources */,
 				D7100C5A2B76FD5100C59298 /* LogoView.swift in Sources */,
 				4C0A3F8F280F640A000448DE /* ThreadModel.swift in Sources */,
 				4C3AC79F2833115300E1F516 /* FollowButtonView.swift in Sources */,
@@ -5217,6 +5223,7 @@
 				82D6FB432CD99F7900C925F4 /* KeychainStorage.swift in Sources */,
 				82D6FB442CD99F7900C925F4 /* Bech32.swift in Sources */,
 				82D6FB452CD99F7900C925F4 /* InputDismissKeyboard.swift in Sources */,
+				D7FA46E62DBDAA7E002C9BB0 /* ImageCacheMigrations.swift in Sources */,
 				82D6FB462CD99F7900C925F4 /* Constants.swift in Sources */,
 				82D6FB472CD99F7900C925F4 /* LinkView.swift in Sources */,
 				D7DB1FDF2D5A78CE00CF06DA /* NIP44.swift in Sources */,
@@ -5681,6 +5688,7 @@
 				D73E5E9F2C6A97F4007EB227 /* CreateAccountModel.swift in Sources */,
 				D73E5EA12C6A97F4007EB227 /* SignalModel.swift in Sources */,
 				5CB017272D42C5C400A9ED05 /* TransactionsView.swift in Sources */,
+				D7FA46E52DBDAA7E002C9BB0 /* ImageCacheMigrations.swift in Sources */,
 				D73E5EA22C6A97F4007EB227 /* FollowTarget.swift in Sources */,
 				D73E5EA32C6A97F4007EB227 /* BookmarksManager.swift in Sources */,
 				D73E5EA42C6A97F4007EB227 /* EventsModel.swift in Sources */,
