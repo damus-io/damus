@@ -4372,18 +4372,18 @@ static enum ndb_query_plan ndb_filter_plan(struct ndb_filter *filter)
 		return NDB_PLAN_PROFILE_SEARCH;
 	}
 
-	// this is rougly similar to the heuristic in strfry's dbscan
+	// TODO: fix multi-author queries
 	if (search) {
 		return NDB_PLAN_SEARCH;
 	} else if (ids) {
 		return NDB_PLAN_IDS;
 	} else if (relays && kinds && !authors) {
 		return NDB_PLAN_RELAY_KINDS;
-	} else if (kinds && authors && authors->count <= 10) {
+	} else if (kinds && authors && authors->count == 1) {
 		return NDB_PLAN_AUTHOR_KINDS;
-	} else if (authors && authors->count <= 10) {
+	} else if (authors && authors->count == 1) {
 		return NDB_PLAN_AUTHORS;
-	} else if (tags && tags->count <= 10) {
+	} else if (tags && tags->count == 1) {
 		return NDB_PLAN_TAGS;
 	} else if (kinds) {
 		return NDB_PLAN_KINDS;
