@@ -27,6 +27,9 @@ struct TransactionView: View {
             HStack(alignment: .center) {
                 ZStack {
                     ProfilePicView(pubkey: pubkey, size: 45, highlight: .custom(.damusAdaptableBlack, 0.1), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                        .onTapGesture {
+                            damus_state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))
+                        }
                     
                     Image(txType)
                         .resizable()
