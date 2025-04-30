@@ -143,8 +143,16 @@ struct ReplaceableParam: TagConvertible {
     var keychar: AsciiCharacter { "d" }
 }
 
-struct Signature: Hashable, Equatable {
+struct Signature: Codable, Hashable, Equatable {
     let data: Data
+    
+    init(from decoder: Decoder) throws {
+        self.init(try hex_decoder(decoder, expected_len: 64))
+    }
+
+    func encode(to encoder: Encoder) throws {
+        try hex_encoder(to: encoder, data: self.data)
+    }
 
     init(_ p: Data) {
         self.data = p
