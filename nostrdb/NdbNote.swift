@@ -42,9 +42,9 @@ enum NdbData {
     }
 }
 
-class NdbNote: Encodable, Equatable, Hashable {
+class NdbNote: Codable, Equatable, Hashable {
     // we can have owned notes, but we can also have lmdb virtual-memory mapped notes so its optional
-    let owned: Bool
+    private(set) var owned: Bool
     let count: Int
     let key: NoteKey?
     let note: UnsafeMutablePointer<ndb_note>
@@ -72,7 +72,6 @@ class NdbNote: Encodable, Equatable, Hashable {
             print("\(NdbNote.notes_created) ndb_notes, \(NdbNote.total_ndb_size) bytes")
         }
         #endif
-
     }
 
     func to_owned() -> NdbNote {
@@ -85,6 +84,10 @@ class NdbNote: Encodable, Equatable, Hashable {
         let new_note = buf.assumingMemoryBound(to: ndb_note.self)
 
         return NdbNote(note: new_note, size: self.count, owned: true, key: self.key)
+    }
+    
+    func mark_ownership_moved() {
+        self.owned = false
     }
 
     var content: String {
@@ -161,13 +164,63 @@ class NdbNote: Encodable, Equatable, Hashable {
         try container.encode(content, forKey: .content)
         try container.encode(tags, forKey: .tags)
     }
+    
+    required init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        let content = try container.decode(String.self, forKey: .content)
+        let pubkey = try container.decode(Pubkey.self, forKey: .pubkey)
+        let kind = try container.decode(UInt32.self, forKey: .kind)
+        let tags = try container.decode([[String]].self, forKey: .tags)
+        let createdAt = try container.decode(UInt32.self, forKey: .created_at)
+        let noteId = try container.decode(NoteId.self, forKey: .id)
+        let signature = try container.decode(Signature.self, forKey: .sig)
+        
+        guard let note = NdbNote.init(content: content, author: pubkey, kind: kind, tags: tags, createdAt: createdAt, id: noteId, sig: signature) else {
+            throw DecodingError.initializationFailed
+        }
+        
+        self.note = note.note
+        self.owned = note.owned
+        note.mark_ownership_moved() // This is done to prevent a double-free error when both `self` and `note` get deinitialized.
+        self.count = note.count
+        self.key = note.key
+        
+    }
+    
+    enum DecodingError: Error {
+        case initializationFailed
+    }
 
     #if DEBUG_NOTE_SIZE
     static var total_ndb_size: Int = 0
     static var notes_created: Int = 0
     #endif
-
-    init?(content: String, keypair: Keypair, kind: UInt32 = 1, tags: [[String]] = [], createdAt: UInt32 = UInt32(Date().timeIntervalSince1970)) {
+    
+    fileprivate enum NoteConstructionMaterial {
+        case keypair(Keypair)
+        case manual(Pubkey, Signature, NoteId)
+        
+        var pubkey: Pubkey {
+            switch self {
+            case .keypair(let keypair):
+                return keypair.pubkey
+            case .manual(let pubkey, _, _):
+                return pubkey
+            }
+        }
+        
+        var privkey: Privkey? {
+            switch self {
+            case .keypair(let kp):
+                return kp.privkey
+            case .manual(_, _, _):
+                return nil
+            }
+        }
+    }
+    
+    fileprivate init?(content: String, noteConstructionMaterial: NoteConstructionMaterial, kind: UInt32 = 1, tags: [[String]] = [], createdAt: UInt32 = UInt32(Date().timeIntervalSince1970)) {
 
         var builder = ndb_builder()
         let buflen = MAX_NOTE_SIZE
@@ -175,7 +228,7 @@ class NdbNote: Encodable, Equatable, Hashable {
 
         ndb_builder_init(&builder, buf, Int32(buflen))
 
-        var pk_raw = keypair.pubkey.bytes
+        var pk_raw = noteConstructionMaterial.pubkey.bytes
 
         ndb_builder_set_pubkey(&builder, &pk_raw)
         ndb_builder_set_kind(&builder, UInt32(kind))
@@ -203,25 +256,34 @@ class NdbNote: Encodable, Equatable, Hashable {
 
         var n = UnsafeMutablePointer<ndb_note>?(nil)
 
-
-        var the_kp: ndb_keypair? = nil
-
-        if let sec = keypair.privkey {
-            var kp = ndb_keypair()
-            memcpy(&kp.secret.0, sec.id.bytes, 32);
-
-            if ndb_create_keypair(&kp) <= 0 {
-                print("bad keypair")
-            } else {
-                the_kp = kp
-            }
-        }
-
         var len: Int32 = 0
-        if var the_kp {
-            len = ndb_builder_finalize(&builder, &n, &the_kp)
-        } else {
-            len = ndb_builder_finalize(&builder, &n, nil)
+
+        switch noteConstructionMaterial {
+        case .keypair(let keypair):
+            var the_kp: ndb_keypair? = nil
+
+            if let sec = noteConstructionMaterial.privkey {
+                var kp = ndb_keypair()
+                memcpy(&kp.secret.0, sec.id.bytes, 32);
+
+                if ndb_create_keypair(&kp) <= 0 {
+                    print("bad keypair")
+                } else {
+                    the_kp = kp
+                }
+            }
+            
+            if var the_kp {
+                len = ndb_builder_finalize(&builder, &n, &the_kp)
+            } else {
+                len = ndb_builder_finalize(&builder, &n, nil)
+            }
+        case .manual(_, let signature, _):
+            var rawSignature = signature.data.bytes
+            ndb_builder_set_sig(&builder, &rawSignature)
+            
+            // Finalize and verify note.
+            len = ndb_builder_finalize_verify(&builder, &n)
         }
 
         if len <= 0 {
@@ -242,6 +304,14 @@ class NdbNote: Encodable, Equatable, Hashable {
 
         self.note = r.assumingMemoryBound(to: ndb_note.self)
         self.key = nil
+    }
+
+    convenience init?(content: String, keypair: Keypair, kind: UInt32 = 1, tags: [[String]] = [], createdAt: UInt32 = UInt32(Date().timeIntervalSince1970)) {
+        self.init(content: content, noteConstructionMaterial: .keypair(keypair), kind: kind, tags: tags, createdAt: createdAt)
+    }
+    
+    convenience init?(content: String, author: Pubkey, kind: UInt32 = 1, tags: [[String]] = [], createdAt: UInt32 = UInt32(Date().timeIntervalSince1970), id: NoteId, sig: Signature) {
+        self.init(content: content, noteConstructionMaterial: .manual(author, sig, id), kind: kind, tags: tags, createdAt: createdAt)
     }
 
     static func owned_from_json(json: String, bufsize: Int = 2 << 18) -> NdbNote? {
