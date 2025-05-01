@@ -168,6 +168,9 @@
     "Already on Nostr?" : {
       "comment" : "Ask the user if they already have an account on Nostr"
     },
+    "Also click here if you had a one-click setup before." : {
+      "comment" : "Button description hint for users who may want to do a one-click setup."
+    },
     "Always show onboarding" : {
       "comment" : "Developer mode setting to always show onboarding suggestions."
     },
@@ -300,6 +303,9 @@
     "Check the address and/or the relay list." : {
       "comment" : "Human readable tip for error"
     },
+    "Check your internet connection and try again. If the error persists, contact support." : {
+      "comment" : "Error tip when user tries to create the one-click Coinos wallet setup but fails for a generic reason."
+    },
     "Choose from Library" : {
       "comment" : "Option to select photo from library"
     },
@@ -318,8 +324,14 @@
     "Clearing Cache" : {
       "comment" : "Loading message indicating that the cache is being cleared."
     },
+    "Click here if you have a Coinos username and password." : {
+      "comment" : "Button description hint for users who may want to connect via the website."
+    },
     "Close" : {
       "comment" : "Button label giving the user the option to close the sheet due to not being logged in.\nButton label giving the user the option to close the sheet from which they shared content\nButton label giving the user the option to close the sheet from which they were trying share.\nButton label giving the user the option to close the sheet from which they were trying to share.\nButton label giving the user the option to close the view when no content is available to share"
+    },
+    "Coinos is a service operated by a third-party. We have no access to your Coinos wallet." : {
+      "comment" : "Small caption with a disclaimer that Damus does not own or have access to Coinos wallets, Coinos is a third-party service."
     },
     "Coming soon" : {
       "comment" : "Feature is still in development and will be available soon"
@@ -341,6 +353,9 @@
     },
     "Connect to Coinos" : {
       "comment" : "Button to attach a Coinos Wallet, a service that provides a Lightning wallet for zapping sats. Coinos is the name of the service and should not be translated."
+    },
+    "Connect via the website" : {
+      "comment" : "Button label for users who are setting up a Coinos wallet and would like to connect via the website"
     },
     "Connecting" : {
       "comment" : "Relay status label that indicates a relay is connecting."
@@ -745,11 +760,17 @@
     "Home" : {
       "comment" : "Navigation bar title for Home view where notes and replies appear from those who the user is following."
     },
+    "How would you like to connect to your Coinos wallet?" : {
+      "comment" : "Question for the user when connecting a Coinos wallet."
+    },
     "Howdy! I’m a graphic designer during the day and coder at night, but I’m also trying to spend more time outdoors.\n\nHope to meet folks who are on their own journeys to a peaceful and free life!" : {
       "comment" : "First post example given to the user during onboarding, as a suggestion as to what they could post first"
     },
     "https://jb55.com" : {
       "comment" : "Placeholder example text for website URL for user profile."
+    },
+    "If your wallet balance is getting high, it's important to understand how to keep your funds secure. Please consider learning the best practices to ensure your assets remain safe. [Click here](https://damus.io/docs/wallet/high-balance-safety-reminder/) to learn more." : {
+      "comment" : "Text reminding the user has a high balance, recommending them to learn about self-custody"
     },
     "Illegal Content" : {
       "comment" : "Description of report type for illegal content."
@@ -885,6 +906,9 @@
     },
     "Maybe later" : {
       "comment" : "Text for button to disconnect from Nostr Wallet Connect lightning wallet."
+    },
+    "Media from someone you don't follow" : {
+      "comment" : "Label on the image blur mask"
     },
     "Media previews" : {
       "comment" : "Setting to show media"
@@ -1080,6 +1104,9 @@
     },
     "OK" : {
       "comment" : "Button label indicating user wants to proceed.\nButton label to dismiss an error dialog"
+    },
+    "One-click setup" : {
+      "comment" : "Button label for users to do a one-click Coinos wallet setup."
     },
     "Online" : {
       "comment" : "Relay status label that indicates a relay is connected."
@@ -1383,6 +1410,9 @@
     "Runtime error" : {
       "comment" : "Indication that a runtime error occurred when running a NostrScript."
     },
+    "Safety Reminder" : {
+      "comment" : "Heading for a safety reminder that appears when the user has too many funds, recommending them to learn about safeguarding their funds."
+    },
     "Satoshi Nakamoto" : {
       "comment" : "Name of Bitcoin creator(s)."
     },
@@ -1566,6 +1596,9 @@
     "Someone zapped you ⚡️" : {
       "comment" : "Title label for a push notification where someone zapped the user"
     },
+    "Something went wrong when performing the one-click Coinos wallet setup." : {
+      "comment" : "Error label when user tries the one-click Coinos wallet setup but fails for some generic reason."
+    },
     "Sorry, but for some reason there has been an issue while trying to crop this image. Please try again later. If the error persists, please contact [Damus support](mailto:support@damus.io)" : {
       "comment" : "Cropping error message"
     },
@@ -1619,6 +1652,9 @@
     },
     "Take Photo" : {
       "comment" : "Option to take a photo with the camera"
+    },
+    "Tap to load" : {
+      "comment" : "Label for button that allows user to dismiss media content warning and unblur the image"
     },
     "Test (local)" : {
       "comment" : "Label indicating a local test environment for Damus Purple functionality (Developer feature)\nLabel indicating a local test environment for Push notification functionality (Developer feature)"
@@ -1908,6 +1944,9 @@
     "You have no bookmarks yet, add them in the context menu" : {
       "comment" : "Text indicating that there are no bookmarks to be viewed"
     },
+    "You must be logged in with your nsec to use this option." : {
+      "comment" : "Warning text for users who cannot create a Coinos account via the one-click setup without being logged in with their nsec."
+    },
     "You opened an invalid link. The link you tried to open refers to \"nrelay\", which has been deprecated and is not supported." : {
       "comment" : "User-visible error description for a user who tries to open a deprecated \"nrelay\" link."
     },
@@ -1922,6 +1961,9 @@
     },
     "Your Name" : {
       "comment" : "Label for Your Name section of user profile form."
+    },
+    "Your profile will not be shared with Coinos." : {
+      "comment" : "Label text for users to reassure them that their nsec is not shared with a third party."
     },
     "Your Purple subscription expires in %@ days. Renew?" : {
       "comment" : "A notification message explaining to the user that their Damus Purple Subscription is expiring soon, prompting them to renew."

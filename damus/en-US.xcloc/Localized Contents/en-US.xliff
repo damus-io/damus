@@ -293,6 +293,11 @@ Label for filter for all notifications.</note>
         <target>Already on Nostr?</target>
         <note>Ask the user if they already have an account on Nostr</note>
       </trans-unit>
+      <trans-unit id="Also click here if you had a one-click setup before." xml:space="preserve">
+        <source>Also click here if you had a one-click setup before.</source>
+        <target>Also click here if you had a one-click setup before.</target>
+        <note>Button description hint for users who may want to do a one-click setup.</note>
+      </trans-unit>
       <trans-unit id="Always show onboarding" xml:space="preserve">
         <source>Always show onboarding</source>
         <target>Always show onboarding</target>
@@ -506,6 +511,11 @@ Text for button to cancel out of connecting Nostr Wallet Connect lightning walle
         <target>Check the address and/or the relay list.</target>
         <note>Human readable tip for error</note>
       </trans-unit>
+      <trans-unit id="Check your internet connection and try again. If the error persists, contact support." xml:space="preserve">
+        <source>Check your internet connection and try again. If the error persists, contact support.</source>
+        <target>Check your internet connection and try again. If the error persists, contact support.</target>
+        <note>Error tip when user tries to create the one-click Coinos wallet setup but fails for a generic reason.</note>
+      </trans-unit>
       <trans-unit id="Choose from Library" xml:space="preserve">
         <source>Choose from Library</source>
         <target>Choose from Library</target>
@@ -536,11 +546,21 @@ Text for button to cancel out of connecting Nostr Wallet Connect lightning walle
         <target>Clearing Cache</target>
         <note>Loading message indicating that the cache is being cleared.</note>
       </trans-unit>
+      <trans-unit id="Click here if you have a Coinos username and password." xml:space="preserve">
+        <source>Click here if you have a Coinos username and password.</source>
+        <target>Click here if you have a Coinos username and password.</target>
+        <note>Button description hint for users who may want to connect via the website.</note>
+      </trans-unit>
       <trans-unit id="Close" xml:space="preserve">
         <source>Close</source>
         <target>Close</target>
         <note>Button label giving the user the option to close the sheet from which they posted a highlight
 Button label giving the user the option to close the sheet from which they were trying to post a highlight</note>
+      </trans-unit>
+      <trans-unit id="Coinos is a service operated by a third-party. We have no access to your Coinos wallet." xml:space="preserve">
+        <source>Coinos is a service operated by a third-party. We have no access to your Coinos wallet.</source>
+        <target>Coinos is a service operated by a third-party. We have no access to your Coinos wallet.</target>
+        <note>Small caption with a disclaimer that Damus does not own or have access to Coinos wallets, Coinos is a third-party service.</note>
       </trans-unit>
       <trans-unit id="Coming soon" xml:space="preserve">
         <source>Coming soon</source>
@@ -577,6 +597,11 @@ Text for button to conect to Nostr Wallet Connect lightning wallet.</note>
         <source>Connect to Coinos</source>
         <target>Connect to Coinos</target>
         <note>Button to attach a Coinos Wallet, a service that provides a Lightning wallet for zapping sats. Coinos is the name of the service and should not be translated.</note>
+      </trans-unit>
+      <trans-unit id="Connect via the website" xml:space="preserve">
+        <source>Connect via the website</source>
+        <target>Connect via the website</target>
+        <note>Button label for users who are setting up a Coinos wallet and would like to connect via the website</note>
       </trans-unit>
       <trans-unit id="Connecting" xml:space="preserve">
         <source>Connecting</source>
@@ -1257,6 +1282,11 @@ This is my first post on Damus, I am happy to meet you all 🤙. What’s up?
         <target>Home</target>
         <note>Navigation bar title for Home view where notes and replies appear from those who the user is following.</note>
       </trans-unit>
+      <trans-unit id="How would you like to connect to your Coinos wallet?" xml:space="preserve">
+        <source>How would you like to connect to your Coinos wallet?</source>
+        <target>How would you like to connect to your Coinos wallet?</target>
+        <note>Question for the user when connecting a Coinos wallet.</note>
+      </trans-unit>
       <trans-unit id="Howdy! I’m a graphic designer during the day and coder at night, but I’m also trying to spend more time outdoors.&#10;&#10;Hope to meet folks who are on their own journeys to a peaceful and free life!" xml:space="preserve">
         <source>Howdy! I’m a graphic designer during the day and coder at night, but I’m also trying to spend more time outdoors.
 
@@ -1265,6 +1295,11 @@ Hope to meet folks who are on their own journeys to a peaceful and free life!</s
 
 Hope to meet folks who are on their own journeys to a peaceful and free life!</target>
         <note>First post example given to the user during onboarding, as a suggestion as to what they could post first</note>
+      </trans-unit>
+      <trans-unit id="If your wallet balance is getting high, it's important to understand how to keep your funds secure. Please consider learning the best practices to ensure your assets remain safe. [Click here](https://damus.io/docs/wallet/high-balance-safety-reminder/) to learn more." xml:space="preserve">
+        <source>If your wallet balance is getting high, it's important to understand how to keep your funds secure. Please consider learning the best practices to ensure your assets remain safe. [Click here](https://damus.io/docs/wallet/high-balance-safety-reminder/) to learn more.</source>
+        <target>If your wallet balance is getting high, it's important to understand how to keep your funds secure. Please consider learning the best practices to ensure your assets remain safe. [Click here](https://damus.io/docs/wallet/high-balance-safety-reminder/) to learn more.</target>
+        <note>Text reminding the user has a high balance, recommending them to learn about self-custody</note>
       </trans-unit>
       <trans-unit id="Illegal Content" xml:space="preserve">
         <source>Illegal Content</source>
@@ -1490,6 +1525,11 @@ Sidebar menu label to sign out of the account.</note>
         <source>Maybe later</source>
         <target>Maybe later</target>
         <note>Text for button to disconnect from Nostr Wallet Connect lightning wallet.</note>
+      </trans-unit>
+      <trans-unit id="Media from someone you don't follow" xml:space="preserve">
+        <source>Media from someone you don't follow</source>
+        <target>Media from someone you don't follow</target>
+        <note>Label on the image blur mask</note>
       </trans-unit>
       <trans-unit id="Media previews" xml:space="preserve">
         <source>Media previews</source>
@@ -1795,6 +1835,11 @@ Button label to dismiss an error dialog</note>
         <source>Ok</source>
         <target>Ok</target>
         <note>Button to dismiss the alert.</note>
+      </trans-unit>
+      <trans-unit id="One-click setup" xml:space="preserve">
+        <source>One-click setup</source>
+        <target>One-click setup</target>
+        <note>Button label for users to do a one-click Coinos wallet setup.</note>
       </trans-unit>
       <trans-unit id="Online" xml:space="preserve">
         <source>Online</source>
@@ -2291,6 +2336,11 @@ Setting to enable Repost Local Notification</note>
         <target>SOFTWARE</target>
         <note>Text label indicating which relay software is used to run this Nostr relay.</note>
       </trans-unit>
+      <trans-unit id="Safety Reminder" xml:space="preserve">
+        <source>Safety Reminder</source>
+        <target>Safety Reminder</target>
+        <note>Heading for a safety reminder that appears when the user has too many funds, recommending them to learn about safeguarding their funds.</note>
+      </trans-unit>
       <trans-unit id="Satoshi Nakamoto" xml:space="preserve">
         <source>Satoshi Nakamoto</source>
         <target>Satoshi Nakamoto</target>
@@ -2580,6 +2630,11 @@ Button to show more of a long profile description.</note>
         <target>Someone zapped you ⚡️</target>
         <note>Title label for a push notification where someone zapped the user</note>
       </trans-unit>
+      <trans-unit id="Something went wrong when performing the one-click Coinos wallet setup." xml:space="preserve">
+        <source>Something went wrong when performing the one-click Coinos wallet setup.</source>
+        <target>Something went wrong when performing the one-click Coinos wallet setup.</target>
+        <note>Error label when user tries the one-click Coinos wallet setup but fails for some generic reason.</note>
+      </trans-unit>
       <trans-unit id="Sorry, but for some reason there has been an issue while trying to crop this image. Please try again later. If the error persists, please contact [Damus support](mailto:support@damus.io)" xml:space="preserve">
         <source>Sorry, but for some reason there has been an issue while trying to crop this image. Please try again later. If the error persists, please contact [Damus support](mailto:support@damus.io)</source>
         <target>Sorry, but for some reason there has been an issue while trying to crop this image. Please try again later. If the error persists, please contact [Damus support](mailto:support@damus.io)</target>
@@ -2670,6 +2725,11 @@ Section header for Universe/Search spam</note>
         <source>Take Photo</source>
         <target>Take Photo</target>
         <note>Option to take a photo with the camera</note>
+      </trans-unit>
+      <trans-unit id="Tap to load" xml:space="preserve">
+        <source>Tap to load</source>
+        <target>Tap to load</target>
+        <note>Label for button that allows user to dismiss media content warning and unblur the image</note>
       </trans-unit>
       <trans-unit id="Test (local)" xml:space="preserve">
         <source>Test (local)</source>
@@ -3181,6 +3241,11 @@ User confirm Yes</note>
         <target>You have no bookmarks yet, add them in the context menu</target>
         <note>Text indicating that there are no bookmarks to be viewed</note>
       </trans-unit>
+      <trans-unit id="You must be logged in with your nsec to use this option." xml:space="preserve">
+        <source>You must be logged in with your nsec to use this option.</source>
+        <target>You must be logged in with your nsec to use this option.</target>
+        <note>Warning text for users who cannot create a Coinos account via the one-click setup without being logged in with their nsec.</note>
+      </trans-unit>
       <trans-unit id="You opened an invalid link. The link you tried to open refers to &quot;nrelay&quot;, which has been deprecated and is not supported." xml:space="preserve">
         <source>You opened an invalid link. The link you tried to open refers to "nrelay", which has been deprecated and is not supported.</source>
         <target>You opened an invalid link. The link you tried to open refers to "nrelay", which has been deprecated and is not supported.</target>
@@ -3220,6 +3285,11 @@ User confirm Yes</note>
         <source>Your highlight is being broadcasted to the network. Please wait.</source>
         <target>Your highlight is being broadcasted to the network. Please wait.</target>
         <note>Label explaining there their highlight publishing action is in progress</note>
+      </trans-unit>
+      <trans-unit id="Your profile will not be shared with Coinos." xml:space="preserve">
+        <source>Your profile will not be shared with Coinos.</source>
+        <target>Your profile will not be shared with Coinos.</target>
+        <note>Label text for users to reassure them that their nsec is not shared with a third party.</note>
       </trans-unit>
       <trans-unit id="Your relay list appears to be broken, so we cannot connect you to your Nostr network." xml:space="preserve">
         <source>Your relay list appears to be broken, so we cannot connect you to your Nostr network.</source>
@@ -4202,6 +4272,11 @@ Label for filter for all notifications.</note>
         <target state="new">Already on Nostr?</target>
         <note>Ask the user if they already have an account on Nostr</note>
       </trans-unit>
+      <trans-unit id="Also click here if you had a one-click setup before." xml:space="preserve">
+        <source>Also click here if you had a one-click setup before.</source>
+        <target state="new">Also click here if you had a one-click setup before.</target>
+        <note>Button description hint for users who may want to do a one-click setup.</note>
+      </trans-unit>
       <trans-unit id="Always show onboarding" xml:space="preserve">
         <source>Always show onboarding</source>
         <target state="new">Always show onboarding</target>
@@ -4415,6 +4490,11 @@ Text for button to cancel out of connecting Nostr Wallet Connect lightning walle
         <target state="new">Check the address and/or the relay list.</target>
         <note>Human readable tip for error</note>
       </trans-unit>
+      <trans-unit id="Check your internet connection and try again. If the error persists, contact support." xml:space="preserve">
+        <source>Check your internet connection and try again. If the error persists, contact support.</source>
+        <target state="new">Check your internet connection and try again. If the error persists, contact support.</target>
+        <note>Error tip when user tries to create the one-click Coinos wallet setup but fails for a generic reason.</note>
+      </trans-unit>
       <trans-unit id="Choose from Library" xml:space="preserve">
         <source>Choose from Library</source>
         <target state="new">Choose from Library</target>
@@ -4445,6 +4525,11 @@ Text for button to cancel out of connecting Nostr Wallet Connect lightning walle
         <target state="new">Clearing Cache</target>
         <note>Loading message indicating that the cache is being cleared.</note>
       </trans-unit>
+      <trans-unit id="Click here if you have a Coinos username and password." xml:space="preserve">
+        <source>Click here if you have a Coinos username and password.</source>
+        <target state="new">Click here if you have a Coinos username and password.</target>
+        <note>Button description hint for users who may want to connect via the website.</note>
+      </trans-unit>
       <trans-unit id="Close" xml:space="preserve">
         <source>Close</source>
         <target state="new">Close</target>
@@ -4453,6 +4538,11 @@ Button label giving the user the option to close the sheet from which they share
 Button label giving the user the option to close the sheet from which they were trying share.
 Button label giving the user the option to close the sheet from which they were trying to share.
 Button label giving the user the option to close the view when no content is available to share</note>
+      </trans-unit>
+      <trans-unit id="Coinos is a service operated by a third-party. We have no access to your Coinos wallet." xml:space="preserve">
+        <source>Coinos is a service operated by a third-party. We have no access to your Coinos wallet.</source>
+        <target state="new">Coinos is a service operated by a third-party. We have no access to your Coinos wallet.</target>
+        <note>Small caption with a disclaimer that Damus does not own or have access to Coinos wallets, Coinos is a third-party service.</note>
       </trans-unit>
       <trans-unit id="Coming soon" xml:space="preserve">
         <source>Coming soon</source>
@@ -4489,6 +4579,11 @@ Text for button to conect to Nostr Wallet Connect lightning wallet.</note>
         <source>Connect to Coinos</source>
         <target state="new">Connect to Coinos</target>
         <note>Button to attach a Coinos Wallet, a service that provides a Lightning wallet for zapping sats. Coinos is the name of the service and should not be translated.</note>
+      </trans-unit>
+      <trans-unit id="Connect via the website" xml:space="preserve">
+        <source>Connect via the website</source>
+        <target state="new">Connect via the website</target>
+        <note>Button label for users who are setting up a Coinos wallet and would like to connect via the website</note>
       </trans-unit>
       <trans-unit id="Connecting" xml:space="preserve">
         <source>Connecting</source>
@@ -5169,6 +5264,11 @@ This is my first post on Damus, I am happy to meet you all 🤙. What’s up?
         <target state="new">Home</target>
         <note>Navigation bar title for Home view where notes and replies appear from those who the user is following.</note>
       </trans-unit>
+      <trans-unit id="How would you like to connect to your Coinos wallet?" xml:space="preserve">
+        <source>How would you like to connect to your Coinos wallet?</source>
+        <target state="new">How would you like to connect to your Coinos wallet?</target>
+        <note>Question for the user when connecting a Coinos wallet.</note>
+      </trans-unit>
       <trans-unit id="Howdy! I’m a graphic designer during the day and coder at night, but I’m also trying to spend more time outdoors.&#10;&#10;Hope to meet folks who are on their own journeys to a peaceful and free life!" xml:space="preserve">
         <source>Howdy! I’m a graphic designer during the day and coder at night, but I’m also trying to spend more time outdoors.
 
@@ -5177,6 +5277,11 @@ Hope to meet folks who are on their own journeys to a peaceful and free life!</s
 
 Hope to meet folks who are on their own journeys to a peaceful and free life!</target>
         <note>First post example given to the user during onboarding, as a suggestion as to what they could post first</note>
+      </trans-unit>
+      <trans-unit id="If your wallet balance is getting high, it's important to understand how to keep your funds secure. Please consider learning the best practices to ensure your assets remain safe. [Click here](https://damus.io/docs/wallet/high-balance-safety-reminder/) to learn more." xml:space="preserve">
+        <source>If your wallet balance is getting high, it's important to understand how to keep your funds secure. Please consider learning the best practices to ensure your assets remain safe. [Click here](https://damus.io/docs/wallet/high-balance-safety-reminder/) to learn more.</source>
+        <target state="new">If your wallet balance is getting high, it's important to understand how to keep your funds secure. Please consider learning the best practices to ensure your assets remain safe. [Click here](https://damus.io/docs/wallet/high-balance-safety-reminder/) to learn more.</target>
+        <note>Text reminding the user has a high balance, recommending them to learn about self-custody</note>
       </trans-unit>
       <trans-unit id="Illegal Content" xml:space="preserve">
         <source>Illegal Content</source>
@@ -5402,6 +5507,11 @@ Sidebar menu label to sign out of the account.</note>
         <source>Maybe later</source>
         <target state="new">Maybe later</target>
         <note>Text for button to disconnect from Nostr Wallet Connect lightning wallet.</note>
+      </trans-unit>
+      <trans-unit id="Media from someone you don't follow" xml:space="preserve">
+        <source>Media from someone you don't follow</source>
+        <target state="new">Media from someone you don't follow</target>
+        <note>Label on the image blur mask</note>
       </trans-unit>
       <trans-unit id="Media previews" xml:space="preserve">
         <source>Media previews</source>
@@ -5702,6 +5812,11 @@ Button label to dismiss an error dialog</note>
         <source>Ok</source>
         <target state="new">Ok</target>
         <note>Button to dismiss the alert.</note>
+      </trans-unit>
+      <trans-unit id="One-click setup" xml:space="preserve">
+        <source>One-click setup</source>
+        <target state="new">One-click setup</target>
+        <note>Button label for users to do a one-click Coinos wallet setup.</note>
       </trans-unit>
       <trans-unit id="Online" xml:space="preserve">
         <source>Online</source>
@@ -6188,6 +6303,11 @@ Setting to enable Repost Local Notification</note>
         <target state="new">SOFTWARE</target>
         <note>Text label indicating which relay software is used to run this Nostr relay.</note>
       </trans-unit>
+      <trans-unit id="Safety Reminder" xml:space="preserve">
+        <source>Safety Reminder</source>
+        <target state="new">Safety Reminder</target>
+        <note>Heading for a safety reminder that appears when the user has too many funds, recommending them to learn about safeguarding their funds.</note>
+      </trans-unit>
       <trans-unit id="Satoshi Nakamoto" xml:space="preserve">
         <source>Satoshi Nakamoto</source>
         <target state="new">Satoshi Nakamoto</target>
@@ -6487,6 +6607,11 @@ Button to show more of a long profile description.</note>
         <target state="new">Someone zapped you ⚡️</target>
         <note>Title label for a push notification where someone zapped the user</note>
       </trans-unit>
+      <trans-unit id="Something went wrong when performing the one-click Coinos wallet setup." xml:space="preserve">
+        <source>Something went wrong when performing the one-click Coinos wallet setup.</source>
+        <target state="new">Something went wrong when performing the one-click Coinos wallet setup.</target>
+        <note>Error label when user tries the one-click Coinos wallet setup but fails for some generic reason.</note>
+      </trans-unit>
       <trans-unit id="Sorry, but for some reason there has been an issue while trying to crop this image. Please try again later. If the error persists, please contact [Damus support](mailto:support@damus.io)" xml:space="preserve">
         <source>Sorry, but for some reason there has been an issue while trying to crop this image. Please try again later. If the error persists, please contact [Damus support](mailto:support@damus.io)</source>
         <target state="new">Sorry, but for some reason there has been an issue while trying to crop this image. Please try again later. If the error persists, please contact [Damus support](mailto:support@damus.io)</target>
@@ -6577,6 +6702,11 @@ Section header for Universe/Search spam</note>
         <source>Take Photo</source>
         <target state="new">Take Photo</target>
         <note>Option to take a photo with the camera</note>
+      </trans-unit>
+      <trans-unit id="Tap to load" xml:space="preserve">
+        <source>Tap to load</source>
+        <target state="new">Tap to load</target>
+        <note>Label for button that allows user to dismiss media content warning and unblur the image</note>
       </trans-unit>
       <trans-unit id="Test (local)" xml:space="preserve">
         <source>Test (local)</source>
@@ -7083,6 +7213,11 @@ User confirm Yes</note>
         <target state="new">You have no bookmarks yet, add them in the context menu</target>
         <note>Text indicating that there are no bookmarks to be viewed</note>
       </trans-unit>
+      <trans-unit id="You must be logged in with your nsec to use this option." xml:space="preserve">
+        <source>You must be logged in with your nsec to use this option.</source>
+        <target state="new">You must be logged in with your nsec to use this option.</target>
+        <note>Warning text for users who cannot create a Coinos account via the one-click setup without being logged in with their nsec.</note>
+      </trans-unit>
       <trans-unit id="You opened an invalid link. The link you tried to open refers to &quot;nrelay&quot;, which has been deprecated and is not supported." xml:space="preserve">
         <source>You opened an invalid link. The link you tried to open refers to "nrelay", which has been deprecated and is not supported.</source>
         <target state="new">You opened an invalid link. The link you tried to open refers to "nrelay", which has been deprecated and is not supported.</target>
@@ -7122,6 +7257,11 @@ User confirm Yes</note>
         <source>Your draft has been saved to storage.</source>
         <target state="new">Your draft has been saved to storage.</target>
         <note>Accessibility label indicating that a user's post draft has been saved, meant to be read by screen reading technology.</note>
+      </trans-unit>
+      <trans-unit id="Your profile will not be shared with Coinos." xml:space="preserve">
+        <source>Your profile will not be shared with Coinos.</source>
+        <target state="new">Your profile will not be shared with Coinos.</target>
+        <note>Label text for users to reassure them that their nsec is not shared with a third party.</note>
       </trans-unit>
       <trans-unit id="Your relay list appears to be broken, so we cannot connect you to your Nostr network." xml:space="preserve">
         <source>Your relay list appears to be broken, so we cannot connect you to your Nostr network.</source>
