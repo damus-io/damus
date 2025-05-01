@@ -401,7 +401,7 @@ struct BlurOverlayView: View {
                     .foregroundStyle(.white)
                     .bold()
                     .padding(EdgeInsets(top: 5, leading: 10, bottom: 0, trailing: 10))
-                Text(NSLocalizedString("Media from someone you \n don't follow", comment: "Label on the image blur mask"))
+                Text(NSLocalizedString("Media from someone you don't follow", comment: "Label on the image blur mask"))
                     .multilineTextAlignment(.center)
                     .foregroundStyle(Color.white)
                     .font(.title2)
