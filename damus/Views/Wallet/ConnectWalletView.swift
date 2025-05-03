@@ -152,7 +152,7 @@ struct ConnectWalletView: View {
                 CoinosButton() {
                     self.show_coinos_options = true
                 }
-                Text("Coinos is a service operated by a third-party. We have no access to your Coinos wallet.", comment: "Small caption with a disclaimer that Damus does not own or have access to Coinos wallets, Coinos is a third-party service.")
+                Text("Coinos is a service operated by a third-party. The Damus team has no access to your wallet.", comment: "Small caption with a disclaimer that Damus does not own or have access to Coinos wallets, Coinos is a third-party service.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
