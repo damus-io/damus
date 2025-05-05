@@ -24,7 +24,7 @@ struct WalletView: View {
     func MainWalletView(nwc: WalletConnectURL) -> some View {
         ScrollView {
             VStack(spacing: 35) {
-                if let balance = model.balance, balance > WALLET_WARNING_THRESHOLD {
+                if let balance = model.balance, balance > WALLET_WARNING_THRESHOLD && !settings.dismiss_wallet_high_balance_warning {
                     VStack(spacing: 10) {
                         HStack {
                             Image(systemName: "exclamationmark.circle")
@@ -36,7 +36,16 @@ struct WalletView: View {
                         
                         Text("If your wallet balance is getting high, it's important to understand how to keep your funds secure. Please consider learning the best practices to ensure your assets remain safe. [Click here](https://damus.io/docs/wallet/high-balance-safety-reminder/) to learn more.", comment: "Text reminding the user has a high balance, recommending them to learn about self-custody")
                             .foregroundStyle(.damusWarningSecondary)
+                            .accentColor(.damusWarningTertiary)
                             .opacity(0.8)
+                        
+                        Button(action: {
+                            settings.dismiss_wallet_high_balance_warning = true
+                        }, label: {
+                            Text("Dismiss", comment: "Button label to dismiss the safety reminder that the user's wallet has a high balance")
+                        })
+                        .bold()
+                        .foregroundStyle(.damusWarningTertiary)
                     }
                     .padding()
                     .overlay(
