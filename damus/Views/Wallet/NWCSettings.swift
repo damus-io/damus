@@ -136,6 +136,9 @@ struct NWCSettings: View {
             
             AccountDetailsView(nwc: nwc)
             
+            Toggle(NSLocalizedString("Disable high balance warning", comment: "Setting to disable high balance warnings on the user's wallet"), isOn: $settings.dismiss_wallet_high_balance_warning)
+                .toggleStyle(.switch)
+            
             Button(action: {
                 self.model.disconnect()
                 dismiss()
