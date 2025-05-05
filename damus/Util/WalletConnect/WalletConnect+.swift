@@ -20,6 +20,7 @@ extension WalletConnect {
     static func subscribe(url: WalletConnectURL, pool: RelayPool) {
         var filter = NostrFilter(kinds: [.nwc_response])
         filter.authors = [url.pubkey]
+        filter.pubkeys = [url.keypair.pubkey]
         filter.limit = 0
         let sub = NostrSubscribe(filters: [filter], sub_id: "nwc")
 
