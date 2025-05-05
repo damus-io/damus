@@ -134,7 +134,7 @@ struct NWCSettings: View {
             SupportDamus
                 .padding(.bottom)
             
-            AccountDetailsView(nwc: nwc)
+            AccountDetailsView(nwc: nwc, damus_state: damus_state)
             
             Toggle(NSLocalizedString("Disable high balance warning", comment: "Setting to disable high balance warnings on the user's wallet"), isOn: $settings.dismiss_wallet_high_balance_warning)
                 .toggleStyle(.switch)
@@ -185,6 +185,7 @@ struct NWCSettings: View {
     
     struct AccountDetailsView: View {
         let nwc: WalletConnect.ConnectURL
+        let damus_state: DamusState?
         
         var body: some View {
             VStack(alignment: .leading) {
@@ -198,11 +199,17 @@ struct NWCSettings: View {
                 Text("Routing", comment: "Label indicating the routing address for Nostr Wallet Connect payments. In other words, the relay used by the NWC wallet provider")
                     .font(.headline)
                 
-                Text(nwc.relay.absoluteString)
-                    .font(.body)
-                    .fontWeight(.bold)
-                    .foregroundColor(.gray)
-                    .padding(.bottom)
+                if let damus_state {
+                    RelayView(state: damus_state, relay: nwc.relay, showActionButtons: .constant(false), recommended: false, disableNavLink: true)
+                        .padding(.bottom)
+                }
+                else {
+                    Text(nwc.relay.absoluteString)
+                        .font(.body)
+                        .fontWeight(.bold)
+                        .foregroundColor(.gray)
+                        .padding(.bottom)
+                }
                 
                 if let lud16 = nwc.lud16 {
                     Text("Account", comment: "Label for the user account information with the Nostr Wallet Connect wallet provider.")
