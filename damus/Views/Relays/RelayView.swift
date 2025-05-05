@@ -11,12 +11,14 @@ struct RelayView: View {
     let state: DamusState
     let relay: RelayURL
     let recommended: Bool
+    /// Disables navigation link
+    let disableNavLink: Bool
     @ObservedObject private var model_cache: RelayModelCache
 
     @State var relay_state: Bool
     @Binding var showActionButtons: Bool
 
-    init(state: DamusState, relay: RelayURL, showActionButtons: Binding<Bool>, recommended: Bool) {
+    init(state: DamusState, relay: RelayURL, showActionButtons: Binding<Bool>, recommended: Bool, disableNavLink: Bool = false) {
         self.state = state
         self.relay = relay
         self.recommended = recommended
@@ -24,6 +26,7 @@ struct RelayView: View {
         _showActionButtons = showActionButtons
         let relay_state = RelayView.get_relay_state(pool: state.nostrNetwork.pool, relay: relay)
         self._relay_state = State(initialValue: relay_state)
+        self.disableNavLink = disableNavLink
     }
 
     static func get_relay_state(pool: RelayPool, relay: RelayURL) -> Bool {
@@ -96,10 +99,12 @@ struct RelayView: View {
                         RelayStatusView(connection: relay_connection)
                     }
                     
-                    Image("chevron-large-right")
-                        .resizable()
-                        .frame(width: 15, height: 15)
-                        .foregroundColor(.gray)
+                    if !disableNavLink {
+                        Image("chevron-large-right")
+                            .resizable()
+                            .frame(width: 15, height: 15)
+                            .foregroundColor(.gray)
+                    }
                 }
             }
             .contentShape(Rectangle())
@@ -108,7 +113,9 @@ struct RelayView: View {
             self.relay_state = RelayView.get_relay_state(pool: state.nostrNetwork.pool, relay: self.relay)
         }
         .onTapGesture {
-            state.nav.push(route: Route.RelayDetail(relay: relay, metadata: model_cache.model(with_relay_id: relay)?.metadata))
+            if !disableNavLink {
+                state.nav.push(route: Route.RelayDetail(relay: relay, metadata: model_cache.model(with_relay_id: relay)?.metadata))
+            }
         }
     }
     
