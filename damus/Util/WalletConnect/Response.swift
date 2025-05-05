@@ -5,6 +5,8 @@
 //  Created by Daniel D’Aquino on 2025-03-10.
 //
 
+import Combine
+
 extension WalletConnect {
     /// Models a response from the NWC provider
     struct Response: Decodable {
@@ -50,35 +52,80 @@ extension WalletConnect {
         let req_id: NoteId
         let response: Response
         
-        init?(from: NostrEvent, nwc: WalletConnect.ConnectURL) async {
-            guard let note_id = from.referenced_ids.first else {
-                return nil
-            }
-
-            self.req_id = note_id
-
-            let ares = Task {
-                guard let json = decrypt_dm(nwc.keypair.privkey, pubkey: nwc.pubkey, content: from.content, encoding: .base64),
-                      let resp: WalletConnect.Response = decode_json(json)
-                else {
-                    let resp: WalletConnect.Response? = nil
-                    return resp
-                }
-                
-                return resp
-            }
+        init(from event: NostrEvent, nwc: WalletConnect.ConnectURL) async throws(InitializationError) {
+            guard event.pubkey == nwc.pubkey else { throw .incorrectAuthorPubkey }
             
-            guard let res = await ares.value else {
-                return nil
+            guard let referencedNoteId = event.referenced_ids.first else { throw .missingRequestIdReference }
+
+            self.req_id = referencedNoteId
+            
+            var json = ""
+            do {
+                json = try NIP04.decryptContent(
+                    recipientPrivateKey: nwc.keypair.privkey,
+                    senderPubkey: nwc.pubkey,
+                    content: event.content,
+                    encoding: .base64
+                )
             }
-                
-            self.response = res
+            catch { throw .failedToDecrypt(error) }
+            
+            do {
+                let response: WalletConnect.Response = try decode_json_throwing(json)
+                self.response = response
+            }
+            catch { throw .failedToDecodeJSON(error) }
+        }
+        
+        enum InitializationError: Error {
+            case incorrectAuthorPubkey
+            case missingRequestIdReference
+            case failedToDecodeJSON(any Error)
+            case failedToDecrypt(any Error)
         }
     }
     
     struct WalletResponseErr: Codable {
-        let code: String?
+        let code: Code?
         let message: String?
+
+        enum Code: String, Codable {
+            /// The client is sending commands too fast. It should retry in a few seconds.
+            case rateLimited = "RATE_LIMITED"
+            /// The command is not known or is intentionally not implemented.
+            case notImplemented = "NOT_IMPLEMENTED"
+            /// The wallet does not have enough funds to cover a fee reserve or the payment amount.
+            case insufficientBalance = "INSUFFICIENT_BALANCE"
+            /// The wallet has exceeded its spending quota.
+            case quotaExceeded = "QUOTA_EXCEEDED"
+            /// This public key is not allowed to do this operation.
+            case restricted = "RESTRICTED"
+            /// This public key has no wallet connected.
+            case unauthorized = "UNAUTHORIZED"
+            /// An internal error.
+            case internalError = "INTERNAL"
+            /// Other error.
+            case other = "OTHER"
+        }
+
+        enum CodingKeys: String, CodingKey {
+            case code, message
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            
+            // Attempt to decode the code as a String
+            if let codeString = try container.decodeIfPresent(String.self, forKey: .code),
+               let validCode = Code(rawValue: codeString) {
+                self.code = validCode
+            } else {
+                // If the code is either missing or not one of the allowed cases, set it to nil
+                self.code = nil
+            }
+            
+            self.message = try container.decodeIfPresent(String.self, forKey: .message)
+        }
     }
 }
 

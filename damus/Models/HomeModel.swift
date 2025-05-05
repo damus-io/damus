@@ -261,23 +261,36 @@ class HomeModel: ContactsDelegate {
         Task { @MainActor in
             // TODO: Adapt KeychainStorage to StringCodable and instead of parsing to WalletConnectURL every time
             guard let nwc_str = damus_state.settings.nostr_wallet_connect,
-                  let nwc = WalletConnectURL(str: nwc_str),
-                  let resp = await WalletConnect.FullWalletResponse(from: ev, nwc: nwc) else {
-                Log.error("HomeModel: Received NWC response I do not understand", for: .nwc)
+                  let nwc = WalletConnectURL(str: nwc_str) else {
                 return
             }
-
+            
+            var resp: WalletConnect.FullWalletResponse? = nil
+            do {
+                resp = try await WalletConnect.FullWalletResponse(from: ev, nwc: nwc)
+            } catch {
+                Log.error("HomeModel: Error on NWC wallet response handling: %s", for: .nwc, error.localizedDescription)
+                if let initError = error as? WalletConnect.FullWalletResponse.InitializationError,
+                   let humanReadableError = initError.humanReadableError {
+                    present_sheet(.error(humanReadableError))
+                }
+            }
+            guard let resp else { return }
+            
             // since command results are not returned for ephemeral events,
             // remove the request from the postbox which is likely failing over and over
             if damus_state.nostrNetwork.postbox.remove_relayer(relay_id: nwc.relay, event_id: resp.req_id) {
-                print("nwc: got response, removed \(resp.req_id) from the postbox [\(relay)]")
+                Log.debug("HomeModel: got NWC response, removed %s from the postbox [%s]", for: .nwc, resp.req_id.hex(), relay.absoluteString)
             } else {
-                print("nwc: \(resp.req_id) not found in the postbox, nothing to remove [\(relay)]")
+                Log.debug("HomeModel: got NWC response, %s not found in the postbox, nothing to remove [%s]", for: .nwc, resp.req_id.hex(), relay.absoluteString)
             }
             
             guard resp.response.error == nil else {
-                print("nwc error: \(resp.response)")
+                Log.error("HomeModel: NWC wallet raised an error: %s", for: .nwc, String(describing: resp.response))
                 WalletConnect.handle_error(zapcache: self.damus_state.zaps, evcache: self.damus_state.events, resp: resp)
+                if let humanReadableError = resp.response.error?.humanReadableError {
+                    present_sheet(.error(humanReadableError))
+                }
                 return
             }
             
