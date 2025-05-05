@@ -50,6 +50,10 @@ struct ErrorView: View {
             .cornerRadius(10)
             .padding(.vertical, 30)
             
+            if let technical_info = error.technical_info {
+                ErrorTechInfoCopyButton(errorInfo: technical_info)
+            }
+            
             Spacer()
             
             if let damus_state, damus_state.is_privkey_user {
@@ -67,6 +71,39 @@ struct ErrorView: View {
         }
         .padding(20)
         .padding(.top, 20)
+    }
+    
+    struct ErrorTechInfoCopyButton: View {
+        let errorInfo: String
+        @State var copied: Bool = false
+        
+        var body: some View {
+            VStack {
+                if !copied {
+                    Button(action: {
+                        UIPasteboard.general.string = errorInfo
+                        copied = true
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            copied = false
+                        }
+                    }, label: {
+                        HStack {
+                            Image(systemName: "square.on.square.dashed")
+                            Text("Copy technical information", comment: "Button label to allow user to copy technical information from an error screen (usually to provide our support team for further troubleshooting)")
+                        }
+                    })
+                }
+                else {
+                    HStack {
+                        Image(systemName: "checkmark.circle")
+                        Text("Copied!", comment: "Label indicating that the error technical information was successfully copied to the clipboard, which shows up as soon as the user clicks the copy button.")
+                    }
+                    .foregroundStyle(.damusGreen)
+                }
+            }
+            .padding(.vertical, 20)
+        }
     }
     
     /// An error that is displayed to the user, and can be sent to the Developers as well.
@@ -113,7 +150,7 @@ struct ErrorView: View {
         error: .init(
             user_visible_description: "We are still too early",
             tip: "Stay humble, keep building, stack sats",
-            technical_info: nil
+            technical_info: "UTXOs too small, must stack more sats"
         )
     )
 }
