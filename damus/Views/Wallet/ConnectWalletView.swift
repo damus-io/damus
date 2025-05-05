@@ -70,7 +70,7 @@ struct ConnectWalletView: View {
                     
                     Spacer()
                     
-                    NWCSettings.AccountDetailsView(nwc: nwc)
+                    NWCSettings.AccountDetailsView(nwc: nwc, damus_state: nil)
                     
                     Spacer()
                     
