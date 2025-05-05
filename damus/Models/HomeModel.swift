@@ -265,6 +265,11 @@ class HomeModel: ContactsDelegate {
                 return
             }
             
+            guard nwc.relay == relay else { return }    // Don't process NWC responses coming from relays other than our designated one
+            guard ev.referenced_pubkeys.first == nwc.keypair.pubkey else {
+                return      // This message is not for us. Ignore it.
+            }
+            
             var resp: WalletConnect.FullWalletResponse? = nil
             do {
                 resp = try await WalletConnect.FullWalletResponse(from: ev, nwc: nwc)
