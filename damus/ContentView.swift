@@ -300,9 +300,19 @@ struct ContentView: View {
         .edgesIgnoringSafeArea(hide_bar ? [.bottom] : [])
         .postConfirmationToast(message: $postConfirmationToastMessage, style: .success)
         .task {
-                for await (event, relayID) in relayNotification.stream {
+            //                for await (event, relayID) in relayNotification.stream {
+            //                    postConfirmationToastMessage = "Your note has been posted to \(event.totalRelays-event.remaining.count) out of \(event.totalRelays) relays"
+            //                    }
+            for await notification in relayNotification.stream {
+                switch notification {
+                case .inProgress(let event, let relayID):
                     postConfirmationToastMessage = "Your note has been posted to \(event.totalRelays-event.remaining.count) out of \(event.totalRelays) relays"
-                    }
+                
+                case .initial:
+                    postConfirmationToastMessage = "Your note is being posted..."
+                
+                }
+            }
         }
         .onAppear() {
             self.connect()
@@ -1193,7 +1203,10 @@ func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: Ev
         guard let new_ev = post.to_event(keypair: keypair) else {
             return false
         }
-        postbox.send(new_ev)
+        Task{
+            await relayNotification.add(item: .initial)
+            postbox.send(new_ev)
+        }
         for eref in new_ev.referenced_ids.prefix(3) {
             // also broadcast at most 3 referenced events
             if let ev = events.lookup(eref) {

@@ -54,7 +54,12 @@ enum CancelSendErr {
     case too_late
 }
 
-let relayNotification = QueueableNotify<(PostedEvent, RelayURL)>(maxQueueItems: 100)
+enum RelayNotification {
+    case initial
+    case inProgress(PostedEvent,RelayURL)
+}
+
+let relayNotification = QueueableNotify<(RelayNotification)>(maxQueueItems: 100)
 
 class PostBox {
     let pool: RelayPool
@@ -143,7 +148,7 @@ class PostBox {
         print("Toatl Relays : \(ev.totalRelays)")
         
         Task{
-            await relayNotification.add(item: (ev,relay_id))
+            await relayNotification.add(item: .inProgress(ev, relay_id))
         }
         return prev_count != after_count
     }

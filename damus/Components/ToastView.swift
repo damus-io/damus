@@ -53,6 +53,7 @@ struct ToastModifier: ViewModifier {
             if let message = message {
                 ToastView(style: style, message: message)
                     .padding(.top, 50)
+                    .animation(.easeInOut, value: message)
                     .onChange(of: message){ _ in
                         restartTimer()
                     }
@@ -80,6 +81,7 @@ struct Toast: Equatable {
 enum ToastStyle{
     case success
     case error
+    
 }
 
 extension ToastStyle{
