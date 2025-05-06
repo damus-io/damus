@@ -206,17 +206,16 @@ func url_str(_ url: URL) -> CompatibleText {
 }
 
 func classify_url(_ url: URL) -> UrlType {
-    let str = url.lastPathComponent.lowercased()
-    
-    if str.hasSuffix(".png") || str.hasSuffix(".jpg") || str.hasSuffix(".jpeg") || str.hasSuffix(".gif") || str.hasSuffix(".webp") {
+    let fileExtension = url.lastPathComponent.lowercased().components(separatedBy: ".").last
+
+    switch fileExtension {
+    case "png", "jpg", "jpeg", "gif", "webp":
         return .media(.image(url))
-    }
-    
-    if str.hasSuffix(".mp4") || str.hasSuffix(".mov") || str.hasSuffix(".m3u8") {
+    case "mp4", "mov", "m3u8":
         return .media(.video(url))
+    default:
+        return .link(url)
     }
-    
-    return .link(url)
 }
 
 func attributed_string_attach_icon(_ astr: inout AttributedString, img: UIImage) {
