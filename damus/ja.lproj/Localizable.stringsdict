@@ -44,6 +44,20 @@
 			<string>フォロー中</string>
 		</dict>
 	</dict>
+	<key>hellthread_notifications_disabled</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@HELLTHREAD_PROFILES@</string>
+		<key>HELLTHREAD_PROFILES</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>other</key>
+			<string>%d以上のプロフィールをタグづけしている通知を表示しない</string>
+		</dict>
+	</dict>
 	<key>imports_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -70,6 +84,20 @@
 			<string>d</string>
 			<key>other</key>
 			<string>%2$@と他%1$d人がリポストしました</string>
+		</dict>
+	</dict>
+	<key>quoted_reposts_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@QUOTE_REPOSTS@</string>
+		<key>QUOTE_REPOSTS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>other</key>
+			<string>引用</string>
 		</dict>
 	</dict>
 	<key>reacted_tagged_in_3</key>
@@ -210,20 +238,6 @@
 			<string>d</string>
 			<key>other</key>
 			<string>リポスト</string>
-		</dict>
-	</dict>
-	<key>quoted_reposts_count</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@QUOTE_REPOSTS@</string>
-		<key>QUOTE_REPOSTS</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>other</key>
-			<string>引用</string>
 		</dict>
 	</dict>
 	<key>sats</key>
