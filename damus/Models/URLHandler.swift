@@ -47,13 +47,10 @@ struct DamusURLHandler {
             if damus_state.settings.show_wallet_selector {
                 return .sheet(.select_wallet(invoice: invoice.string))
             } else {
-                do {
-                    try open_with_wallet(wallet: damus_state.settings.default_wallet.model, invoice: invoice.string)
-                    return .no_action
-                }
-                catch {
+                guard let url = try? getUrlToOpen(invoice: invoice.string, with: damus_state.settings.default_wallet.model) else {
                     return .sheet(.select_wallet(invoice: invoice.string))
                 }
+                return .external_url(url)
             }
         case nil:
             break
