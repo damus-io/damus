@@ -79,6 +79,7 @@ struct PostView: View {
     var autoSaveModel: AutoSaveIndicatorView.AutoSaveViewModel
 
     @State var preUploadedMedia: [PreUploadedMedia] = []
+    @State var mediaUploadUnderProgress: MediaUpload? = nil
     
     @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
     @StateObject var tagModel: TagModel = TagModel()
@@ -330,11 +331,6 @@ struct PostView: View {
                 PostButton
             }
             
-            if let progress = image_upload.progress {
-                ProgressView(value: progress, total: 1.0)
-                    .progressViewStyle(.linear)
-            }
-            
             Divider()
                 .foregroundColor(DamusColors.neutral3)
                 .padding(.top, 5)
@@ -346,6 +342,7 @@ struct PostView: View {
 
     @discardableResult
     func handle_upload(media: MediaUpload) async -> Bool {
+        mediaUploadUnderProgress = media
         let uploader = damus_state.settings.default_media_uploader
         
         let img = getImage(media: media)
@@ -354,6 +351,7 @@ struct PostView: View {
         async let blurhash = calculate_blurhash(img: img)
         let res = await image_upload.start(media: media, uploader: uploader, mediaType: .normal, keypair: damus_state.keypair)
         
+        mediaUploadUnderProgress = nil
         switch res {
         case .success(let url):
             guard let url = URL(string: url) else {
@@ -401,10 +399,13 @@ struct PostView: View {
                 }
                 .id("post")
                 
-                PVImageCarouselView(media: $uploadedMedias, deviceWidth: deviceSize.size.width)
-                    .onChange(of: uploadedMedias) { media in
-                        post_changed(post: post, media: media)
-                    }
+                PVImageCarouselView(media: $uploadedMedias,
+                                    mediaUnderProgress: $mediaUploadUnderProgress,
+                                    imageUploadModel: image_upload,
+                                    deviceWidth: deviceSize.size.width)
+                        .onChange(of: uploadedMedias) { media in
+                            post_changed(post: post, media: media)
+                }
                 
                 if case .quoting(let ev) = action {
                     BuilderEventView(damus: damus_state, event: ev)
@@ -620,6 +621,8 @@ struct PostView_Previews: PreviewProvider {
 
 struct PVImageCarouselView: View {
     @Binding var media: [UploadedMedia]
+    @Binding var mediaUnderProgress: MediaUpload?
+    @ObservedObject var imageUploadModel: ImageUploadModel
 
     let deviceWidth: CGFloat
 
@@ -665,6 +668,25 @@ struct PVImageCarouselView: View {
                                 }
                         }
                         .padding(.bottom, 35)
+                    }
+                }
+                if let mediaUP = mediaUnderProgress, let progress = imageUploadModel.progress {
+                    ZStack {
+                        // Media under upload-progress
+                        Image(uiImage: getImage(media: mediaUP))
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: media.count == 0 ? deviceWidth * 0.8 : 250, height: media.count == 0 ? 400 : 250)
+                            .cornerRadius(10)
+                            .opacity(0.3)
+                            .padding()
+                        // Circle showing progress on top of media
+                        Circle()
+                            .trim(from: 0, to: CGFloat(progress))
+                            .stroke(Color.damusPurple, lineWidth: 5.0)
+                            .rotationEffect(.degrees(-90))
+                            .frame(width: 30, height: 30)
+                            .padding()
                     }
                 }
             }
