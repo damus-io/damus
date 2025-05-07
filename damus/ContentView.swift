@@ -742,6 +742,8 @@ struct ContentView: View {
         case route(Route)
         /// Open a sheet
         case sheet(Sheets)
+        /// Open an external URL
+        case external_url(URL)
         /// Do nothing.
         ///
         /// ## Implementation notes
@@ -758,6 +760,8 @@ struct ContentView: View {
             navigationCoordinator.push(route: route)
         case .sheet(let sheet):
             self.active_sheet = sheet
+        case .external_url(let url):
+            this_app.open(url)
         case .no_action:
             return
         }

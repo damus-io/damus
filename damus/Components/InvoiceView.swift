@@ -94,25 +94,29 @@ enum OpenWalletError: Error {
 }
 
 func open_with_wallet(wallet: Wallet.Model, invoice: String) throws {
+    let url = try getUrlToOpen(invoice: invoice, with: wallet)
+    this_app.open(url)
+}
+
+func getUrlToOpen(invoice: String, with wallet: Wallet.Model) throws(OpenWalletError) -> URL {
     if let url = URL(string: "\(wallet.link)\(invoice)"), this_app.canOpenURL(url) {
-        this_app.open(url)
+        return url
     } else {
         guard let store_link = wallet.appStoreLink else {
-            throw OpenWalletError.no_wallet_to_open
+            throw .no_wallet_to_open
         }
         
         guard let url = URL(string: store_link) else {
-            throw OpenWalletError.store_link_invalid
+            throw .store_link_invalid
         }
         
         guard this_app.canOpenURL(url) else {
-            throw OpenWalletError.system_cannot_open_store_link
+            throw .system_cannot_open_store_link
         }
         
-        this_app.open(url)
+        return url
     }
 }
-
 
 let test_invoice = Invoice(description: .description("this is a description"), amount: .specific(10000), string: "lnbc100n1p357sl0sp5t9n56wdztun39lgdqlr30xqwksg3k69q4q2rkr52aplujw0esn0qpp5mrqgljk62z20q4nvgr6lzcyn6fhylzccwdvu4k77apg3zmrkujjqdpzw35xjueqd9ejqcfqv3jhxcmjd9c8g6t0dcxqyjw5qcqpjrzjqt56h4gvp5yx36u2uzqa6qwcsk3e2duunfxppzj9vhypc3wfe2wswz607uqq3xqqqsqqqqqqqqqqqlqqyg9qyysgqagx5h20aeulj3gdwx3kxs8u9f4mcakdkwuakasamm9562ffyr9en8yg20lg0ygnr9zpwp68524kmda0t5xp2wytex35pu8hapyjajxqpsql29r", expiry: 604800, payment_hash: Data(), created_at: 1666139119)
 
