@@ -9,6 +9,7 @@ import SwiftUI
 
 struct BalanceView: View {
     var balance: Int64?
+    @StateObject private var coinbase = CoinbaseModel()
     
     var body: some View {
         VStack(spacing: 5) {
@@ -16,6 +17,10 @@ struct BalanceView: View {
                 .foregroundStyle(DamusColors.neutral6)
             if let balance {
                 self.numericalBalanceView(text: NumberFormatter.localizedString(from: NSNumber(integerLiteral: Int(balance)), number: .decimal))
+                
+                Text(coinbase.satsToFiat(input: balance))
+                    .fontWeight(.medium)
+                    .foregroundStyle(DamusColors.neutral6)
             }
             else {
                 // Make sure we do not show any numeric value to the user when still loading (or when failed to load)
@@ -25,7 +30,12 @@ struct BalanceView: View {
                     .shimmer(true)
             }
         }
+        .onAppear {
+            coinbase.loadCachedPrice()
+            coinbase.fetchFromCoinbase()
+        }
     }
+
     
     func numericalBalanceView(text: String) -> some View {
         HStack {
@@ -43,7 +53,7 @@ struct BalanceView: View {
                     .foregroundStyle(PinkGradient)
             }
         }
-        .padding(.bottom)
+        .padding(.bottom, 5)
     }
 }
 
