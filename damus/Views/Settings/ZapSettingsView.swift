@@ -63,6 +63,11 @@ struct ZapSettingsView: View {
                         }
                     }
             }
+            
+            Section(NSLocalizedString("NWC wallet", comment: "Title for section in zap settings that controls general NWC wallet settings.")) {
+                Toggle(NSLocalizedString("Disable high balance warning", comment: "Setting to disable high balance warnings on the user's wallet"), isOn: $settings.dismiss_wallet_high_balance_warning)
+                    .toggleStyle(.switch)
+            }
         }
         .navigationTitle(NSLocalizedString("Zaps", comment: "Navigation title for zap settings."))
         .onReceive(handle_notify(.switched_timeline)) { _ in

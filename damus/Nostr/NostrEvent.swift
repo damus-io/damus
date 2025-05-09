@@ -379,6 +379,10 @@ func decode_json<T: Decodable>(_ val: String) -> T? {
     return try? JSONDecoder().decode(T.self, from: Data(val.utf8))
 }
 
+func decode_json_throwing<T: Decodable>(_ val: String) throws -> T {
+    return try JSONDecoder().decode(T.self, from: Data(val.utf8))
+}
+
 func decode_data<T: Decodable>(_ data: Data) -> T? {
     let decoder = JSONDecoder()
     do {
@@ -539,6 +543,7 @@ func event_to_json(ev: NostrEvent) -> String {
     return str
 }
 
+@available(*, deprecated, renamed: "NIP04.decryptContent", message: "Deprecated, please use NIP04.decryptContent instead")
 func decrypt_dm(_ privkey: Privkey?, pubkey: Pubkey, content: String, encoding: EncEncoding) -> String? {
     guard let privkey = privkey else {
         return nil

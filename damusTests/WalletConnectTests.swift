@@ -87,7 +87,7 @@ final class WalletConnectTests: XCTestCase {
         let pool = RelayPool(ndb: .empty)
         let box = PostBox(pool: pool)
         
-        WalletConnect.pay(url: nwc, pool: pool, post: box, invoice: "invoice")
+        WalletConnect.pay(url: nwc, pool: pool, post: box, invoice: "invoice", zap_request: nil)
         
         XCTAssertEqual(pool.our_descriptors.count, 0)
         XCTAssertEqual(pool.all_descriptors.count, 1)
@@ -98,5 +98,110 @@ final class WalletConnectTests: XCTestCase {
         XCTAssertEqual(ev.skip_ephemeral, false)
         XCTAssertEqual(ev.remaining.count, 1)
         XCTAssertEqual(ev.remaining[0].relay.url.absoluteString, "ws://127.0.0.1")
+    }
+    
+    let testBolt11 = "lnbc15u1p3xnhl2pp5jptserfk3zk4qy42tlucycrfwxhydvlemu9pqr93tuzlv9cc7g3sdqsvfhkcap3xyhx7un8cqzpgxqzjcsp5f8c52y2stc300gl6s4xswtjpc37hrnnr3c9wvtgjfuvqmpm35evq9qyyssqy4lgd8tj637qcjp05rdpxxykjenthxftej7a2zzmwrmrl70fyj9hvj0rewhzj7jfyuwkwcg9g2jpwtk3wkjtwnkdks84hsnu8xps5vsq4gj5hs"
+    let testStringEncodedZapRequest = """
+    {"content":"","created_at":1746235486,"id":"faf5192c6805dea002e50cd52c7e553e3ee66ac42f30f41f1fe62b924f68fb22","kind":9734,"pubkey":"056b5b5966f500defb3b790a14633e5ec4a0e8883ca29bc23d0030553edb084a","sig":"21076018677656a220977c77e34bfa7427e1056a49b633afd3653d1d7466846cf6b35cf3fbf5908c712ebd647119cfadb1fa47e83121a238d77b1996f0fa26ee","tags":[["p","e8361082333142fc7f483b7dbd9bb36d671f2fbcf0a28015b2304fed79365fe8"],["relays","wss://nos.lol","wss://notify.damus.io","wss://relay.damus.io"]]}
+    """
+    let testDoubleStringEncodedZapRequest = """
+    "{\\\"content\\\":\\\"\\\",\\\"created_at\\\":1746235486,\\\"id\\\":\\\"faf5192c6805dea002e50cd52c7e553e3ee66ac42f30f41f1fe62b924f68fb22\\\",\\\"kind\\\":9734,\\\"pubkey\\\":\\\"056b5b5966f500defb3b790a14633e5ec4a0e8883ca29bc23d0030553edb084a\\\",\\\"sig\\\":\\\"21076018677656a220977c77e34bfa7427e1056a49b633afd3653d1d7466846cf6b35cf3fbf5908c712ebd647119cfadb1fa47e83121a238d77b1996f0fa26ee\\\",\\\"tags\\\":[[\\\"p\\\",\\\"e8361082333142fc7f483b7dbd9bb36d671f2fbcf0a28015b2304fed79365fe8\\\"],[\\\"relays\\\",\\\"wss://nos.lol\\\",\\\"wss://notify.damus.io\\\",\\\"wss://relay.damus.io\\\"]]}"
+    """
+    
+    func testEncodingPayInvoiceRequest() throws {
+        let testZapRequest = decode_nostr_event_json(json: testStringEncodedZapRequest)!
+        let metadata = WalletConnect.Request.Metadata(nostr: testZapRequest)
+        let request = WalletConnect.Request.payInvoice(invoice: "lntest", description: testStringEncodedZapRequest, metadata: metadata)
+        
+        let encodedData = try JSONEncoder().encode(request)
+        let encodedString = String(data: encodedData, encoding: .utf8)!
+        
+        XCTAssertTrue(encodedString.contains("\"method\":\"pay_invoice\""))
+        XCTAssertTrue(encodedString.contains("\"invoice\":\"lntest\""))
+        XCTAssertTrue(encodedString.contains("\"description\":\"{"))
+        XCTAssertTrue(encodedString.contains("\"nostr\":{"))
+    }
+    
+    func testDecodingPayInvoiceRequest() throws {
+        let testZapRequest = decode_nostr_event_json(json: testStringEncodedZapRequest)!
+        
+        let jsonText = """
+        {
+            "method": "pay_invoice",
+            "params": {
+                "invoice": "\(testBolt11)",
+                "description": \(testDoubleStringEncodedZapRequest),
+                "metadata": {
+                    "nostr": \(testStringEncodedZapRequest)
+                }
+            }
+        }
+        """
+        
+        let jsonData = jsonText.data(using: .utf8)!
+        
+        let decodedRequest = try JSONDecoder().decode(WalletConnect.Request.self, from: jsonData)
+        
+        switch decodedRequest {
+        case .payInvoice(let invoice, let description, let metadata):
+            XCTAssertEqual(invoice, testBolt11)
+            XCTAssertEqual(description, testStringEncodedZapRequest)
+            XCTAssertNotNil(metadata)
+            XCTAssertEqual(metadata!.nostr, testZapRequest)
+        default:
+            XCTFail("Decoded to the wrong case")
+        }
+    }
+    
+    func testDecodingPayInvoiceRequestWithoutMetadata() throws {
+        let jsonData = """
+        {
+            "method": "pay_invoice",
+            "params": {
+                "invoice": "\(testBolt11)",
+                "description": \(testDoubleStringEncodedZapRequest)
+            }
+        }
+        """.data(using: .utf8)!
+        
+        let decodedRequest = try JSONDecoder().decode(WalletConnect.Request.self, from: jsonData)
+        
+        switch decodedRequest {
+        case .payInvoice(let invoice, let description, let metadata):
+            XCTAssertEqual(invoice, testBolt11)
+            XCTAssertEqual(description, testStringEncodedZapRequest)
+            XCTAssertNil(metadata)
+        default:
+            XCTFail("Decoded to the wrong case")
+        }
+    }
+    
+    func testDecodingPayInvoiceRequestWithCrazyMetadata() throws {
+        let jsonText = """
+        {
+            "method": "pay_invoice",
+            "params": {
+                "invoice": "\(testBolt11)",
+                "description": \(testDoubleStringEncodedZapRequest),
+                "metadata": {
+                    "nostr": "totally not a zap request because this metadata is crazy",
+                    "lorem": "ipsum"
+                }
+            }
+        }
+        """
+        
+        let jsonData = jsonText.data(using: .utf8)!
+        
+        let decodedRequest = try JSONDecoder().decode(WalletConnect.Request.self, from: jsonData)
+        
+        switch decodedRequest {
+        case .payInvoice(let invoice, let description, let metadata):
+            XCTAssertEqual(invoice, testBolt11)
+            XCTAssertEqual(description, testStringEncodedZapRequest)
+            XCTAssertEqual(metadata?.nostr, nil)
+        default:
+            XCTFail("Decoded to the wrong case")
+        }
     }
 }

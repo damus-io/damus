@@ -113,6 +113,9 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "show_wallet_selector", default_value: false)
     var show_wallet_selector: Bool
     
+    @Setting(key: "dismiss_wallet_high_balance_warning", default_value: false)
+    var dismiss_wallet_high_balance_warning: Bool
+    
     @Setting(key: "left_handed", default_value: false)
     var left_handed: Bool
     

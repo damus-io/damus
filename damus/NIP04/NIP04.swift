@@ -52,4 +52,28 @@ extension NIP04 {
         
         return create_encrypted_event(message, to_pk: to_pk, tags: tags, keypair: keypair, created_at: created, kind: 4)
     }
+    
+    /// Decrypts string content
+    static func decryptContent(recipientPrivateKey: Privkey, senderPubkey: Pubkey, content: String, encoding: EncEncoding) throws(NIP04DecryptionError) -> String {
+        guard let shared_sec = get_shared_secret(privkey: recipientPrivateKey, pubkey: senderPubkey) else {
+            throw .failedToComputeSharedSecret
+        }
+        guard let dat = (encoding == .base64 ? decode_dm_base64(content) : decode_dm_bech32(content)) else {
+            throw .failedToDecodeEncryptedContent
+        }
+        guard let dat = aes_decrypt(data: dat.content, iv: dat.iv, shared_sec: shared_sec) else {
+            throw .failedToDecryptAES
+        }
+        guard let decryptedString = String(data: dat, encoding: .utf8) else {
+            throw .utf8DecodingFailedOnDecryptedPayload
+        }
+        return decryptedString
+    }
+    
+    enum NIP04DecryptionError: Error {
+        case failedToComputeSharedSecret
+        case failedToDecodeEncryptedContent
+        case failedToDecryptAES
+        case utf8DecodingFailedOnDecryptedPayload
+    }
 }

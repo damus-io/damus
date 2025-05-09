@@ -3628,6 +3628,49 @@ int ndb_builder_finalize(struct ndb_builder *builder, struct ndb_note **note,
 	return total_size;
 }
 
+/// Finalizes the ndb note builder, assuming the signature and pubkey have been manually set, and verifies if the signature is valid for that computed ID.
+///
+/// This is useful when manually decoding an ndb note from another user, and verification of both id and signature is needed
+int ndb_builder_finalize_verify(struct ndb_builder *builder, struct ndb_note **note)
+{
+    secp256k1_context *ctx;
+    
+    int strings_len = builder->strings.p - builder->strings.start;
+    unsigned char *note_end = builder->note_cur.p + strings_len;
+    int total_size = note_end - builder->note_cur.start;
+
+    // move the strings buffer next to the end of our ndb_note
+    memmove(builder->note_cur.p, builder->strings.start, strings_len);
+
+    // set the strings location
+    builder->note->strings = builder->note_cur.p - builder->note_cur.start;
+
+    // record the total size
+    //builder->note->size = total_size;
+
+    *note = builder->note;
+
+    // use the remaining memory for building our id buffer
+    unsigned char *end   = builder->mem.end;
+    unsigned char *start = (unsigned char*)(*note) + total_size;
+
+    if (!ndb_calculate_id(builder->note, start, end - start))
+        return 0;
+    
+    // verify! If it's an invalid note we don't need to
+    // bother finalizing it
+    ctx = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY);
+    if (!ndb_note_verify(ctx, builder->note->pubkey, builder->note->id, builder->note->sig)) {
+        ndb_debug("note verification failed\n");
+        return 0;
+    }
+
+    // make sure we're aligned as a whole
+    total_size = (total_size + 7) & ~7;
+    assert((total_size % 8) == 0);
+    return total_size;
+}
+
 struct ndb_note * ndb_builder_note(struct ndb_builder *builder)
 {
 	return builder->note;
