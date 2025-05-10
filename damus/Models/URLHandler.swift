@@ -98,6 +98,8 @@ struct DamusURLHandler {
                 break
             case .naddr(let naddr):
                 return .event_reference(.naddr(naddr))
+            case .community(_):
+                break   // TODO: Implement something here
             }
         case .filter(let filt):
             return .filter(filt)

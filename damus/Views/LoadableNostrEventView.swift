@@ -62,7 +62,7 @@ class LoadableNostrEventViewModel: ObservableObject {
             guard let ev = await self.loadEvent(noteId: note_id) else { return .not_found }
             guard let known_kind = ev.known_kind else { return .unknown_or_unsupported_kind }
             switch known_kind {
-            case .text, .highlight:
+            case .text, .highlight, .scoped_comment:
                 return .loaded(route: Route.Thread(thread: ThreadModel(event: ev, damus_state: damus_state)))
             case .dm:
                 let dm_model = damus_state.dms.lookup_or_create(ev.pubkey)

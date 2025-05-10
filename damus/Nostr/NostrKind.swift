@@ -30,4 +30,5 @@ enum NostrKind: UInt32, Codable {
     case nwc_response = 23195
     case http_auth = 27235
     case status = 30315
+    case scoped_comment = 1111
 }

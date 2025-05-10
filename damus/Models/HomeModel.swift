@@ -227,6 +227,8 @@ class HomeModel: ContactsDelegate {
             break
         case .relay_list:
             break   // This will be handled by `UserRelayListManager`
+        case .scoped_comment:
+            break   // This is handled by CommunityModel
         }
     }
 
@@ -1086,6 +1088,8 @@ func timeline_to_notification_bits(_ timeline: Timeline, ev: NostrEvent?) -> New
         return [.search]
     case .dms:
         return [.dms]
+    case .community:
+        return [.community]
     }
 }
 

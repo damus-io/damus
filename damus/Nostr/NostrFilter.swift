@@ -19,6 +19,7 @@ struct NostrFilter: Codable, Equatable {
     var hashtag: [String]?
     var parameter: [String]?
     var quotes: [NoteId]?
+    var root_i_tags: [String]?
 
     private enum CodingKeys : String, CodingKey {
         case ids
@@ -28,13 +29,14 @@ struct NostrFilter: Codable, Equatable {
         case hashtag = "#t"
         case parameter = "#d"
         case quotes = "#q"
+        case root_i_tags = "#I"
         case since
         case until
         case authors
         case limit
     }
     
-    init(ids: [NoteId]? = nil, kinds: [NostrKind]? = nil, referenced_ids: [NoteId]? = nil, pubkeys: [Pubkey]? = nil, since: UInt32? = nil, until: UInt32? = nil, limit: UInt32? = nil, authors: [Pubkey]? = nil, hashtag: [String]? = nil, quotes: [NoteId]? = nil) {
+    init(ids: [NoteId]? = nil, kinds: [NostrKind]? = nil, referenced_ids: [NoteId]? = nil, pubkeys: [Pubkey]? = nil, since: UInt32? = nil, until: UInt32? = nil, limit: UInt32? = nil, authors: [Pubkey]? = nil, hashtag: [String]? = nil, quotes: [NoteId]? = nil, root_i_tags: [String]? = nil) {
         self.ids = ids
         self.kinds = kinds
         self.referenced_ids = referenced_ids
@@ -45,10 +47,11 @@ struct NostrFilter: Codable, Equatable {
         self.authors = authors
         self.hashtag = hashtag
         self.quotes = quotes
+        self.root_i_tags = root_i_tags
     }
     
     public static func copy(from: NostrFilter) -> NostrFilter {
-        NostrFilter(ids: from.ids, kinds: from.kinds, referenced_ids: from.referenced_ids, pubkeys: from.pubkeys, since: from.since, until: from.until, authors: from.authors, hashtag: from.hashtag)
+        NostrFilter(ids: from.ids, kinds: from.kinds, referenced_ids: from.referenced_ids, pubkeys: from.pubkeys, since: from.since, until: from.until, authors: from.authors, hashtag: from.hashtag, root_i_tags: from.root_i_tags)
     }
     
     public static func filter_hashtag(_ htags: [String]) -> NostrFilter {

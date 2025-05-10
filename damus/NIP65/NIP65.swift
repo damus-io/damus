@@ -115,7 +115,7 @@ extension NIP65.RelayList {
             switch rkey {
             case .r: return try self.fromRawInfo(urlString: t1.string(), rwMarker: t2?.string())
             // Keep options explicit to make compiler prompt developer on whether to ignore or handle new future options
-            case .e, .p, .q, .t, .d, .a: return nil
+            case .e, .p, .q, .t, .d, .a, .I: return nil
             }
         }
 

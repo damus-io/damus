@@ -1649,6 +1649,22 @@
 		D7CE1B472B0BE719002EDAD4 /* NativeObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B9462A9AD44700DC3548 /* NativeObject.swift */; };
 		D7CE1B482B0BE719002EDAD4 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B93D2A9AD44700DC3548 /* Message.swift */; };
 		D7CE1B492B0BE729002EDAD4 /* DisplayName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9BB83029C0ED4F00FC4E37 /* DisplayName.swift */; };
+		D7CE6FEF2DCE8BC4008B3AE1 /* CommunitiesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE6FEE2DCE8BC4008B3AE1 /* CommunitiesView.swift */; };
+		D7CE6FF02DCE8BC4008B3AE1 /* CommunitiesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE6FEE2DCE8BC4008B3AE1 /* CommunitiesView.swift */; };
+		D7CE6FF12DCE8BC4008B3AE1 /* CommunitiesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE6FEE2DCE8BC4008B3AE1 /* CommunitiesView.swift */; };
+		D7CE6FF42DCEB11F008B3AE1 /* CommunityModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE6FF32DCEB118008B3AE1 /* CommunityModel.swift */; };
+		D7CE6FF52DCEB11F008B3AE1 /* CommunityModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE6FF32DCEB118008B3AE1 /* CommunityModel.swift */; };
+		D7CE6FF62DCEB11F008B3AE1 /* CommunityModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE6FF32DCEB118008B3AE1 /* CommunityModel.swift */; };
+		D7CE6FF92DCEB2EB008B3AE1 /* NIP22.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE6FF82DCEB2E8008B3AE1 /* NIP22.swift */; };
+		D7CE6FFA2DCEB2EB008B3AE1 /* NIP22.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE6FF82DCEB2E8008B3AE1 /* NIP22.swift */; };
+		D7CE6FFB2DCEB2EB008B3AE1 /* NIP22.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE6FF82DCEB2E8008B3AE1 /* NIP22.swift */; };
+		D7CE6FFE2DCEB35F008B3AE1 /* NIP73.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE6FFD2DCEB35C008B3AE1 /* NIP73.swift */; };
+		D7CE6FFF2DCEB35F008B3AE1 /* NIP73.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE6FFD2DCEB35C008B3AE1 /* NIP73.swift */; };
+		D7CE70002DCEB35F008B3AE1 /* NIP73.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE6FFD2DCEB35C008B3AE1 /* NIP73.swift */; };
+		D7CE70022DCEE6BC008B3AE1 /* CommunitiesHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE70012DCEE6BC008B3AE1 /* CommunitiesHomeView.swift */; };
+		D7CE70032DCEE6BC008B3AE1 /* CommunitiesHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE70012DCEE6BC008B3AE1 /* CommunitiesHomeView.swift */; };
+		D7CE70042DCEE6BC008B3AE1 /* CommunitiesHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE70012DCEE6BC008B3AE1 /* CommunitiesHomeView.swift */; };
+		D7CE70052DCEF54A008B3AE1 /* NIP73.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE6FFD2DCEB35C008B3AE1 /* NIP73.swift */; };
 		D7D09AB52DADCA5C00AB170D /* CoinosDeterministicAccountClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D09AB42DADCA5600AB170D /* CoinosDeterministicAccountClient.swift */; };
 		D7D09AB62DADCA5C00AB170D /* CoinosDeterministicAccountClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D09AB42DADCA5600AB170D /* CoinosDeterministicAccountClient.swift */; };
 		D7D09AB72DADCA5C00AB170D /* CoinosDeterministicAccountClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D09AB42DADCA5600AB170D /* CoinosDeterministicAccountClient.swift */; };
@@ -2557,6 +2573,11 @@
 		D7CB5D5E2B11770C00AD4105 /* FollowState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowState.swift; sourceTree = "<group>"; };
 		D7CBD1D32B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleNotificationManagement.swift; sourceTree = "<group>"; };
 		D7CBD1D52B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleImpendingExpirationTests.swift; sourceTree = "<group>"; };
+		D7CE6FEE2DCE8BC4008B3AE1 /* CommunitiesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunitiesView.swift; sourceTree = "<group>"; };
+		D7CE6FF32DCEB118008B3AE1 /* CommunityModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityModel.swift; sourceTree = "<group>"; };
+		D7CE6FF82DCEB2E8008B3AE1 /* NIP22.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP22.swift; sourceTree = "<group>"; };
+		D7CE6FFD2DCEB35C008B3AE1 /* NIP73.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP73.swift; sourceTree = "<group>"; };
+		D7CE70012DCEE6BC008B3AE1 /* CommunitiesHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunitiesHomeView.swift; sourceTree = "<group>"; };
 		D7D09AB42DADCA5600AB170D /* CoinosDeterministicAccountClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinosDeterministicAccountClient.swift; sourceTree = "<group>"; };
 		D7D2A3802BF815D000E4B42B /* PushNotificationClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationClient.swift; sourceTree = "<group>"; };
 		D7D68FF82C9E01B60015A515 /* KFClickable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KFClickable.swift; sourceTree = "<group>"; };
@@ -2770,6 +2791,7 @@
 		4C0A3F8D280F63FF000448DE /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				D7CE6FF22DCEB10F008B3AE1 /* Communities */,
 				D73BDB122D71212600D69970 /* NostrNetworkManager */,
 				D74F43082B23F09300425B75 /* Purple */,
 				BA3759882ABCCDE30018D73B /* Camera */,
@@ -3175,6 +3197,7 @@
 		4C75EFA227FA576C0006080F /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				D7CE6FE92DCE8B7C008B3AE1 /* Communities */,
 				D74EA08C2D2E26E6002290DD /* ErrorHandling */,
 				D7D68FF72C9E01A80015A515 /* Utils */,
 				D78DB85D2C20FE9E00F0AB12 /* Chat */,
@@ -3678,6 +3701,8 @@
 		4CE6DEE527F7A08100C66700 /* damus */ = {
 			isa = PBXGroup;
 			children = (
+				D7CE6FFC2DCEB355008B3AE1 /* NIP73 */,
+				D7CE6FF72DCEB2DE008B3AE1 /* NIP22 */,
 				D7DB93082D69478400DA1EE5 /* NIP65 */,
 				D7DB1FDC2D5A77E500CF06DA /* NIP44 */,
 				D755B28B2D3E7D6500BBEEFA /* NIP37 */,
@@ -4070,6 +4095,39 @@
 				D7CBD1D32B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		D7CE6FE92DCE8B7C008B3AE1 /* Communities */ = {
+			isa = PBXGroup;
+			children = (
+				D7CE6FEE2DCE8BC4008B3AE1 /* CommunitiesView.swift */,
+				D7CE70012DCEE6BC008B3AE1 /* CommunitiesHomeView.swift */,
+			);
+			path = Communities;
+			sourceTree = "<group>";
+		};
+		D7CE6FF22DCEB10F008B3AE1 /* Communities */ = {
+			isa = PBXGroup;
+			children = (
+				D7CE6FF32DCEB118008B3AE1 /* CommunityModel.swift */,
+			);
+			path = Communities;
+			sourceTree = "<group>";
+		};
+		D7CE6FF72DCEB2DE008B3AE1 /* NIP22 */ = {
+			isa = PBXGroup;
+			children = (
+				D7CE6FF82DCEB2E8008B3AE1 /* NIP22.swift */,
+			);
+			path = NIP22;
+			sourceTree = "<group>";
+		};
+		D7CE6FFC2DCEB355008B3AE1 /* NIP73 */ = {
+			isa = PBXGroup;
+			children = (
+				D7CE6FFD2DCEB35C008B3AE1 /* NIP73.swift */,
+			);
+			path = NIP73;
 			sourceTree = "<group>";
 		};
 		D7D68FF72C9E01A80015A515 /* Utils */ = {
@@ -4581,6 +4639,7 @@
 				4C32B95B2A9AD44700DC3548 /* NativeObject.swift in Sources */,
 				3AB72AB9298ECF30004BB58C /* Translator.swift in Sources */,
 				4C363A9028247A1D006E126D /* NostrLink.swift in Sources */,
+				D7CE6FF62DCEB11F008B3AE1 /* CommunityModel.swift in Sources */,
 				4C3D52B6298DB4E6001C5831 /* ZapEvent.swift in Sources */,
 				647D9A8D2968520300A295DE /* SideMenuView.swift in Sources */,
 				F7F0BA272978E54D009531F3 /* ParticipantsView.swift in Sources */,
@@ -4648,6 +4707,7 @@
 				4C45E5022BED4D000025A428 /* ThreadReply.swift in Sources */,
 				D74AAFD42B155ECB006CF0F4 /* Zaps+.swift in Sources */,
 				4C75EFB128049D510006080F /* NostrResponse.swift in Sources */,
+				D7CE70002DCEB35F008B3AE1 /* NIP73.swift in Sources */,
 				4C7D09592A05BEAD00943473 /* KeyboardVisible.swift in Sources */,
 				4CEE2AF7280B2DEA00AB5EEF /* ProfileName.swift in Sources */,
 				4CC7AAEB297F0AEC00430951 /* BuilderEventView.swift in Sources */,
@@ -4838,6 +4898,7 @@
 				7C60CAEF298471A1009C80D6 /* CoreSVG.swift in Sources */,
 				D706C5AF2D5D31C20027C627 /* AutoSaveIndicatorView.swift in Sources */,
 				6439E014296790CF0020672B /* ProfilePicImageView.swift in Sources */,
+				D7CE6FF92DCEB2EB008B3AE1 /* NIP22.swift in Sources */,
 				4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */,
 				4C1253682A76D2470004F4B8 /* MuteNotify.swift in Sources */,
 				4CDA128C29EB19C40006FA5A /* LocalNotification.swift in Sources */,
@@ -4905,6 +4966,7 @@
 				4C32B9592A9AD44700DC3548 /* Table.swift in Sources */,
 				4C5D5C9D2A6B2CB40024563C /* AsciiCharacter.swift in Sources */,
 				4CF0ABEC29844B4700D66079 /* AnyDecodable.swift in Sources */,
+				D7CE6FF02DCE8BC4008B3AE1 /* CommunitiesView.swift in Sources */,
 				4C9146FE2A2A87C200DDEA40 /* nostrscript.c in Sources */,
 				4C5F9118283D88E40052CD1C /* FollowingModel.swift in Sources */,
 				4C1A9A1A29DCA17E00516EAC /* ReplyCounter.swift in Sources */,
@@ -4970,6 +5032,7 @@
 				3169CAED294FCCFC00EE4006 /* Constants.swift in Sources */,
 				4C9AA14A2A4587A6003F49FD /* NotificationStatusModel.swift in Sources */,
 				D7100C5C2B77016700C59298 /* IAPProductStateView.swift in Sources */,
+				D7CE70022DCEE6BC008B3AE1 /* CommunitiesHomeView.swift in Sources */,
 				4CB9D4A72992D02B00A9A7E4 /* ProfileNameView.swift in Sources */,
 				D733F9E82D92C76100317B11 /* UnownedNdbNote.swift in Sources */,
 				D74EA0902D2E271E002290DD /* ErrorView.swift in Sources */,
@@ -5199,6 +5262,7 @@
 				82D6FB322CD99F7900C925F4 /* FillAndStroke.swift in Sources */,
 				82D6FB332CD99F7900C925F4 /* Array.swift in Sources */,
 				82D6FB342CD99F7900C925F4 /* VectorMath.swift in Sources */,
+				D7CE70032DCEE6BC008B3AE1 /* CommunitiesHomeView.swift in Sources */,
 				5C8498022D5D150000F74FEB /* ZapExplainer.swift in Sources */,
 				82D6FB352CD99F7900C925F4 /* OffsetExtension.swift in Sources */,
 				82D6FB362CD99F7900C925F4 /* RelayFilters.swift in Sources */,
@@ -5210,6 +5274,7 @@
 				82D6FB3C2CD99F7900C925F4 /* AnyEncodable.swift in Sources */,
 				82D6FB3D2CD99F7900C925F4 /* Zap.swift in Sources */,
 				82D6FB3E2CD99F7900C925F4 /* NIPURLBuilder.swift in Sources */,
+				D7CE6FFE2DCEB35F008B3AE1 /* NIP73.swift in Sources */,
 				82D6FB3F2CD99F7900C925F4 /* TimeAgo.swift in Sources */,
 				82D6FB402CD99F7900C925F4 /* Parser.swift in Sources */,
 				82D6FB412CD99F7900C925F4 /* InsertSort.swift in Sources */,
@@ -5281,6 +5346,7 @@
 				82D6FB812CD99F7900C925F4 /* PostBlock.swift in Sources */,
 				82D6FB822CD99F7900C925F4 /* Reply.swift in Sources */,
 				82D6FB832CD99F7900C925F4 /* SearchModel.swift in Sources */,
+				D7CE6FEF2DCE8BC4008B3AE1 /* CommunitiesView.swift in Sources */,
 				82D6FB842CD99F7900C925F4 /* NostrFilter+Hashable.swift in Sources */,
 				82D6FB852CD99F7900C925F4 /* Contacts.swift in Sources */,
 				82D6FB862CD99F7900C925F4 /* CreateAccountModel.swift in Sources */,
@@ -5395,6 +5461,7 @@
 				82D6FBF32CD99F7900C925F4 /* DamusPurpleView.swift in Sources */,
 				82D6FBF42CD99F7900C925F4 /* DamusPurpleWelcomeView.swift in Sources */,
 				82D6FBF52CD99F7900C925F4 /* DamusPurpleTranslationSetupView.swift in Sources */,
+				D7CE6FFB2DCEB2EB008B3AE1 /* NIP22.swift in Sources */,
 				82D6FBF62CD99F7900C925F4 /* DamusPurpleURLSheetView.swift in Sources */,
 				82D6FBF72CD99F7900C925F4 /* DamusPurpleVerifyNpubView.swift in Sources */,
 				82D6FBF82CD99F7900C925F4 /* DamusPurpleAccountView.swift in Sources */,
@@ -5525,6 +5592,7 @@
 				82D6FC6D2CD99F7900C925F4 /* UserRelaysView.swift in Sources */,
 				82D6FC6E2CD99F7900C925F4 /* SideMenuView.swift in Sources */,
 				82D6FC6F2CD99F7900C925F4 /* BannerImageView.swift in Sources */,
+				D7CE6FF42DCEB11F008B3AE1 /* CommunityModel.swift in Sources */,
 				82D6FC702CD99F7900C925F4 /* ReactionsView.swift in Sources */,
 				82D6FC712CD99F7900C925F4 /* ReportView.swift in Sources */,
 				82D6FC722CD99F7900C925F4 /* EULAView.swift in Sources */,
@@ -5565,6 +5633,7 @@
 				D73E5E2F2C6A97F4007EB227 /* ScrollToTopNotify.swift in Sources */,
 				D73E5E302C6A97F4007EB227 /* SwitchedTimelineNotify.swift in Sources */,
 				D73E5E312C6A97F4007EB227 /* UnfollowedNotify.swift in Sources */,
+				D7CE6FF52DCEB11F008B3AE1 /* CommunityModel.swift in Sources */,
 				D73E5E322C6A97F4007EB227 /* UnfollowNotify.swift in Sources */,
 				D73E5E332C6A97F4007EB227 /* ZappingNotify.swift in Sources */,
 				D73E5F8E2C6AA6F3007EB227 /* InvoiceView.swift in Sources */,
@@ -5664,6 +5733,7 @@
 				D73E5E912C6A97F4007EB227 /* CustomizeZapModel.swift in Sources */,
 				D73E5E922C6A97F4007EB227 /* EventGroup.swift in Sources */,
 				D73E5E932C6A97F4007EB227 /* ZapGroup.swift in Sources */,
+				D7CE6FFF2DCEB35F008B3AE1 /* NIP73.swift in Sources */,
 				D73E5E942C6A97F4007EB227 /* NotificationStatusModel.swift in Sources */,
 				D73E5E952C6A97F4007EB227 /* ThreadModel.swift in Sources */,
 				D73E5E962C6A97F4007EB227 /* ReplyMap.swift in Sources */,
@@ -5697,6 +5767,7 @@
 				D73E5F902C6AA715007EB227 /* Theme.swift in Sources */,
 				D73E5EAD2C6A97F4007EB227 /* MutedThreadsManager.swift in Sources */,
 				D73E5EAE2C6A97F4007EB227 /* WalletModel.swift in Sources */,
+				D7CE6FFA2DCEB2EB008B3AE1 /* NIP22.swift in Sources */,
 				D73E5EAF2C6A97F4007EB227 /* ZapButtonModel.swift in Sources */,
 				D73E5EB02C6A97F4007EB227 /* ContentFilters.swift in Sources */,
 				D73E5EB12C6A97F4007EB227 /* DamusCacheManager.swift in Sources */,
@@ -5704,6 +5775,7 @@
 				D73E5EB32C6A97F4007EB227 /* Contacts+.swift in Sources */,
 				D73E5EB42C6A97F4007EB227 /* NoteContent.swift in Sources */,
 				D73E5EB52C6A97F4007EB227 /* LongformEvent.swift in Sources */,
+				D7CE70042DCEE6BC008B3AE1 /* CommunitiesHomeView.swift in Sources */,
 				D73E5EB62C6A97F4007EB227 /* PushNotificationClient.swift in Sources */,
 				D706C5B92D602A110027C627 /* QueueableNotify.swift in Sources */,
 				D71AD8FD2CEC176A002E2C3C /* AppAccessibilityIdentifiers.swift in Sources */,
@@ -5872,6 +5944,7 @@
 				D73E5F4E2C6A97F5007EB227 /* EmptyTimelineView.swift in Sources */,
 				D73E5F4F2C6A97F5007EB227 /* EmptyUserSearchView.swift in Sources */,
 				D73E5F502C6A97F5007EB227 /* EventView.swift in Sources */,
+				D7CE6FF12DCE8BC4008B3AE1 /* CommunitiesView.swift in Sources */,
 				D73E5F512C6A97F5007EB227 /* EventDetailView.swift in Sources */,
 				D73E5F522C6A97F5007EB227 /* FollowButtonView.swift in Sources */,
 				D73E5F532C6A97F5007EB227 /* FollowingView.swift in Sources */,
@@ -6102,6 +6175,7 @@
 				D798D2242B0859C900234419 /* LocalizationUtil.swift in Sources */,
 				D7CE1B322B0BE6C3002EDAD4 /* NdbTxn.swift in Sources */,
 				D7CE1B372B0BE719002EDAD4 /* Verifier.swift in Sources */,
+				D7CE70052DCEF54A008B3AE1 /* NIP73.swift in Sources */,
 				D74AAFC82B155C9D006CF0F4 /* InsertSort.swift in Sources */,
 				D723411A2B6864F200E1E135 /* DamusPurpleEnvironment.swift in Sources */,
 				D7EDED292B1182060018B19C /* AttachMediaUtility.swift in Sources */,

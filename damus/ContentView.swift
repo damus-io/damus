@@ -179,6 +179,8 @@ struct ContentView: View {
                 
             case .dms:
                 DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms, settings: damus_state!.settings)
+            case .community:
+                CommunitiesHomeView(damus: damus)
             }
         }
         .background(DamusColors.adaptableWhite)
@@ -1085,6 +1087,8 @@ func timeline_name(_ timeline: Timeline?) -> String {
         return NSLocalizedString("Universe 🛸", comment: "Toolbar label for the universal view where notes from all connected relay servers appear.")
     case .dms:
         return NSLocalizedString("DMs", comment: "Toolbar label for DMs view, where DM is the English abbreviation for Direct Message.")
+    case .community:
+        return NSLocalizedString("Communities", comment: "Toolbar label for communities view, where the user can connect to communities.")
     }
 }
 

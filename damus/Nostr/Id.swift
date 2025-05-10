@@ -47,6 +47,16 @@ protocol TagItemConvertible {
     static func fromTagItem(_ item: String?) -> Self?
 }
 
+/// Protocol for types that can be converted from/to multiple tag sequences with the possibilty of an error
+protocol RootableUniqueMultiTagConvertible {
+    associatedtype E: Error
+    var isRootTag: Bool { get }
+    var tags: [[String]] { get }
+    static func fromTags(tags: TagsSequence, root: Bool) throws(E) -> Self?
+    static func fromTags(tagStrings: [[String]], root: Bool) throws(E) -> Self?
+    func formatTag(root: Bool) -> [[String]]
+}
+
 struct QuoteId: IdType, TagKey, TagConvertible {
     let id: Data
     
