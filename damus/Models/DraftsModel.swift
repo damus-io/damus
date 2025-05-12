@@ -163,6 +163,7 @@ class Drafts: ObservableObject {
     @Published var post: DraftArtifacts? = nil
     @Published var replies: [NoteId: DraftArtifacts] = [:]
     @Published var quotes: [NoteId: DraftArtifacts] = [:]
+    @Published var community_posts: [NIP73.ID.Value: DraftArtifacts] = [:]
     /// The drafts we have for highlights
     ///
     /// ## Implementation notes

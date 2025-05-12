@@ -77,6 +77,8 @@ func is_already_following(contacts: NostrEvent, follow: FollowRef) -> Bool {
         case (.hashtag, .pubkey), (.pubkey, .hashtag),
             (.event, _), (.quote, _), (.param, _), (.naddr, _), (.reference(_), _):
             return false
+        case (.community(_), _):
+            return false // TODO: Double-check this
         }
     }
 }

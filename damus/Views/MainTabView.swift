@@ -11,6 +11,7 @@ enum Timeline: String, CustomStringConvertible, Hashable {
     case home
     case notifications
     case search
+    case community
     case dms
     
     var description: String {
@@ -28,6 +29,7 @@ func show_indicator(timeline: Timeline, current: NewEventsBits, indicator_settin
 struct TabButton: View {
     let timeline: Timeline
     let img: String
+    let selected_img: String
     @Binding var selected: Timeline
     @ObservedObject var nstatus: NotificationStatusModel
     
@@ -55,7 +57,7 @@ struct TabButton: View {
             let bits = timeline_to_notification_bits(timeline, ev: nil)
             nstatus.new_events = NewEventsBits(rawValue: nstatus.new_events.rawValue & ~bits.rawValue)
         }) {
-            Image(selected != timeline ? img : "\(img).fill")
+            Image(selected != timeline ? img : selected_img)
                 .contentShape(Rectangle())
                 .frame(maxWidth: .infinity, minHeight: 30.0)
         }
@@ -77,10 +79,11 @@ struct TabBar: View {
         VStack {
             Divider()
             HStack {
-                TabButton(timeline: .home, img: "home", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("1")
-                TabButton(timeline: .dms, img: "messages", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("2")
-                TabButton(timeline: .search, img: "search", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("3")
-                TabButton(timeline: .notifications, img: "notification-bell", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("4")
+                TabButton(timeline: .home, img: "home", selected_img: "home.fill", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("1")
+                TabButton(timeline: .dms, img: "messages", selected_img: "messages.fill", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("2")
+                TabButton(timeline: .search, img: "search", selected_img: "search.fill", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("3")
+                TabButton(timeline: .community, img: "explore-compass", selected_img: "explore-compass", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("4")
+                TabButton(timeline: .notifications, img: "notification-bell", selected_img: "notification-bell.fill", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("5")
             }
         }
         .opacity(selected != .home || (selected == .home && !navIsAtRoot) ? 1.0 : 0.35 + abs(1.25 - (abs(headerOffset/100.0))))

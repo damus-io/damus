@@ -135,6 +135,7 @@ enum RefId: TagConvertible, TagKeys, Equatable, Hashable {
     case hashtag(Hashtag)
     case param(TagElem)
     case naddr(NAddr)
+    case community(NIP73.ID.Value)
     case reference(String)
     
     /// The key that defines the type of reference being made
@@ -147,6 +148,7 @@ enum RefId: TagConvertible, TagKeys, Equatable, Hashable {
         case .param:        return .d
         case .naddr:        return .a
         case .reference:    return .r
+        case .community:    return .I
         }
     }
 
@@ -159,7 +161,7 @@ enum RefId: TagConvertible, TagKeys, Equatable, Hashable {
     ///
     /// The `RefKey` is "p"
     enum RefKey: AsciiCharacter, TagKey, CustomStringConvertible {
-        case e, p, t, d, q, a, r
+        case e, p, t, d, q, a, r, I
 
         var keychar: AsciiCharacter {
             self.rawValue
@@ -187,6 +189,8 @@ enum RefId: TagConvertible, TagKeys, Equatable, Hashable {
             return naddr.kind.description + ":" + naddr.author.hex() + ":" + naddr.identifier
         case .reference(let string):
             return string
+        case .community(let value):
+            return value.value
         }
     }
 
@@ -209,6 +213,9 @@ enum RefId: TagConvertible, TagKeys, Equatable, Hashable {
         case .d: return .param(t1)
         case .a: return .naddr(NAddr(identifier: "", author: Pubkey(Data()), relays: [], kind: 0))
         case .r: return .reference(t1.string())
+        case .I:
+            guard let value = try? NIP73.ID.Value.from(kind: .hashtag, value: t1.string()) else { return nil }  // TODO: Remove hardcoded stuff
+            return .community(value)
         }
     }
 }

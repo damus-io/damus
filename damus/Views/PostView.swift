@@ -32,6 +32,7 @@ enum PostAction {
     case quoting(NostrEvent)
     case posting(PostTarget)
     case highlighting(HighlightContentDraft)
+    case posting_to(community: NIP73.ID.Value)
     case sharing(ShareContent)
     
     var ev: NostrEvent? {
@@ -45,6 +46,8 @@ enum PostAction {
             case .highlighting:
                 return nil
             case .sharing(_):
+                return nil
+            case .posting_to(community: _):
                 return nil
         }
     }
@@ -228,6 +231,8 @@ struct PostView: View {
                 damus_state.drafts.highlights.removeValue(forKey: draft)
             case .sharing(_):
                 damus_state.drafts.post = nil
+            case .posting_to(community: let id):
+                damus_state.drafts.community_posts[id] = nil
         }
 
         damus_state.drafts.save(damus_state: damus_state)
@@ -447,9 +452,17 @@ struct PostView: View {
                 ScrollViewReader { scroller in
                     ScrollView {
                         VStack(alignment: .leading) {
-                            if case .replying_to(let replying_to) = self.action {
+                            switch self.action {
+                            case .replying_to(let replying_to):
                                 ReplyView(replying_to: replying_to, damus: damus_state, original_pubkeys: pubkeys, filtered_pubkeys: $filtered_pubkeys)
+                            case .posting_to(community: let id):
+                                Text("Posting to \"\(id.displayName)\" community")  // TODO: Localize
+                                    .bold()
+                                    .font(.caption)
+                            case .quoting(_), .posting(_), .highlighting(_), .sharing(_):
+                                EmptyView()
                             }
+                            
                             
                             Editor(deviceSize: deviceSize)
                                 .padding(.top, 5)
@@ -563,6 +576,8 @@ struct PostView: View {
                                 self.imageUploadConfirmDamusShare = true // display Confirm Sheet after 1 sec
                             }
                         }
+                    case .posting_to(community: let community):
+                        break   // TODO: Double-check this
                 }
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -746,6 +761,8 @@ func set_draft_for_post(drafts: Drafts, action: PostAction, artifacts: DraftArti
         drafts.highlights[draft] = artifacts
     case .sharing(_):
         drafts.post = artifacts
+    case .posting_to(community: let id):
+        drafts.community_posts[id] = artifacts
     }
 }
 
@@ -769,6 +786,8 @@ func load_draft_for_post(drafts: Drafts, action: PostAction) -> DraftArtifacts? 
         return other_matches.first?.value
     case .sharing(_):
         return drafts.post
+    case .posting_to(community: let id):
+        return drafts.community_posts[id]
     }
 }
 
@@ -874,6 +893,8 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
     }
 
     var tags: [[String]] = []
+    
+    var kind: NostrKind = .text
 
     switch action {
     case .replying_to(let replying_to):
@@ -890,6 +911,9 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
         }
     case .posting, .highlighting, .sharing:
         break
+    case .posting_to(community: let id):
+        tags.append(contentsOf: NIP73.ID(isRootTag: true, value: id).tags)
+        kind = .scoped_comment
     }
 
     // append additional tags
@@ -911,7 +935,7 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
             }
     }
 
-    return NostrPost(content: content.trimmingCharacters(in: .whitespacesAndNewlines), kind: .text, tags: tags)
+    return NostrPost(content: content.trimmingCharacters(in: .whitespacesAndNewlines), kind: kind, tags: tags)
 }
 
 func isSupportedVideo(url: URL?) -> Bool {

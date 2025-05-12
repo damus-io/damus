@@ -18,6 +18,7 @@ struct NewEventsBits: OptionSet {
     static let search = NewEventsBits(rawValue: 1 << 5)
     static let dms = NewEventsBits(rawValue: 1 << 6)
     static let damus_app_notifications = NewEventsBits(rawValue: 1 << 7)
+    static let community = NewEventsBits(rawValue: 1 << 8)
     
     static let all = NewEventsBits(rawValue: 0xFFFFFFFF)
     static let notifications: NewEventsBits = [.zaps, .likes, .reposts, .mentions, .damus_app_notifications]
