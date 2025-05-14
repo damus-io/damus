@@ -2,6 +2,22 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>follow_pack_user_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOW_PACK_USERS@</string>
+		<key>FOLLOW_PACK_USERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>user</string>
+			<key>other</key>
+			<string>users</string>
+		</dict>
+	</dict>
 	<key>followed_by_three_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
