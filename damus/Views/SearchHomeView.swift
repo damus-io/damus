@@ -15,8 +15,9 @@ struct SearchHomeView: View {
     @State var search: String = ""
     @FocusState private var isFocused: Bool
 
-    var content_filter: (NostrEvent) -> Bool {
-        let filters = ContentFilters.defaults(damus_state: self.damus_state)
+    func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
+        var filters = ContentFilters.defaults(damus_state: damus_state)
+        filters.append(fstate.filter)
         return ContentFilters(filters: filters).filter
     }
 
@@ -52,21 +53,20 @@ struct SearchHomeView: View {
             loading: $model.loading,
             damus: damus_state,
             show_friend_icon: true,
-            filter: { ev in
-                if !content_filter(ev) {
-                    return false
-                }
-                
-                let event_muted = damus_state.mutelist_manager.is_event_muted(ev)
-                if event_muted {
-                    return false
-                }
-
-                return true
-            },
+            filter:content_filter(FilterState.posts),
             content: {
-                AnyView(VStack {
-                    SuggestedHashtagsView(damus_state: damus_state, max_items: 5, events: model.events)
+                AnyView(VStack(alignment: .leading) {
+                    HStack {
+                        Image(systemName: "sparkles")
+                            .foregroundStyle(PinkGradient)
+                        Text("Follow Packs", comment: "A label indicating that the items below it are follow packs")
+                            .foregroundStyle(PinkGradient)
+                    }
+                    .padding(.top)
+                    .padding(.horizontal)
+                    
+                    FollowPackTimelineView<AnyView>(events: model.events, loading: $model.loading, damus: damus_state, show_friend_icon: true,filter:content_filter(FilterState.follow_list)
+                    ).padding(.bottom)
                     
                     Divider()
                         .frame(height: 1)
