@@ -1,4 +1,3 @@
-//
 //  SearchHomeModel.swift
 //  damus
 //
@@ -16,6 +15,7 @@ class SearchHomeModel: ObservableObject {
     var seen_pubkey: Set<Pubkey> = Set()
     let damus_state: DamusState
     let base_subid = UUID().description
+    let follow_pack_subid = UUID().description
     let profiles_subid = UUID().description
     let limit: UInt32 = 500
     //let multiple_events_per_pubkey: Bool = false
@@ -42,12 +42,18 @@ class SearchHomeModel: ObservableObject {
     func subscribe() {
         loading = true
         let to_relays = determine_to_relays(pool: damus_state.nostrNetwork.pool, filters: damus_state.relay_filters)
+
+        var follow_list_filter = NostrFilter(kinds: [.follow_list])
+        follow_list_filter.until = UInt32(Date.now.timeIntervalSince1970)
+        
         damus_state.nostrNetwork.pool.subscribe(sub_id: base_subid, filters: [get_base_filter()], handler: handle_event, to: to_relays)
+        damus_state.nostrNetwork.pool.subscribe(sub_id: follow_pack_subid, filters: [follow_list_filter], handler: handle_event, to: to_relays)
     }
 
     func unsubscribe(to: RelayURL? = nil) {
         loading = false
         damus_state.nostrNetwork.pool.unsubscribe(sub_id: base_subid, to: to.map { [$0] })
+        damus_state.nostrNetwork.pool.unsubscribe(sub_id: follow_pack_subid, to: to.map { [$0] })
     }
 
     func handle_event(relay_id: RelayURL, conn_ev: NostrConnectionEvent) {
@@ -57,7 +63,7 @@ class SearchHomeModel: ObservableObject {
         
         switch event {
         case .event(let sub_id, let ev):
-            guard sub_id == self.base_subid || sub_id == self.profiles_subid else {
+            guard sub_id == self.base_subid || sub_id == self.profiles_subid || sub_id == self.follow_pack_subid else {
                 return
             }
             if ev.is_textlike && should_show_event(state: damus_state, ev: ev) && !ev.is_reply()
