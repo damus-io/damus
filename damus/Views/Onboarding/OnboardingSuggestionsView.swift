@@ -26,49 +26,103 @@ struct OnboardingSuggestionsView: View {
             current_page += 1
         }
     }
+    
+    private var canLeaveInterestSelectionPage: Bool {
+        let count = model.interests.count
+        return count > 0
+    }
+    
+    /// Save the user's selected interests to NDB
+    private func saveInterestsToNdb() {
+        // Convert the selected interests to hashtags for the NIP51 interest list
+        let interestItems = model.interests.map { interest in
+            NIP51.InterestList.InterestItem.hashtag(interest.rawValue)
+        }
+        
+        // Create the interest list
+        let interestList = NIP51.InterestList(interests: Array(interestItems))
+        
+        // Convert to a NostrEvent and send to NDB
+        guard let keypair = model.damus_state.keypair.to_full(),
+              let event = interestList.toNostrEvent(keypair: keypair, timestamp: nil) else {
+            return      // Not a big deal, fail silently
+        }
+        
+        // Send the event to NostrDB to allow us to retrieve later
+        // Did not send this to the network yet because:
+        // 1. I believe we should add an opt-out/opt-in button.
+        // 2. If we do, and the user accepts to share it, it will be an awkward situation considering:
+        //     - We don't show that anywhere else yet
+        //     - We don't have other mechanisms to allow the user to edit this yet
+        //
+        // Therefore, it is better to just save it locally, and retrieve this once we build out https://github.com/damus-io/damus/issues/3042
+        model.damus_state.nostrNetwork.pool.send_raw_to_local_ndb(.typical(.event(event)))
+    }
 
     var body: some View {
         NavigationView {
             TabView(selection: $current_page) {
-                SuggestedUsersPageView(model: model, next_page: self.next_page)
-                    .navigationTitle(NSLocalizedString("Who to Follow", comment: "Title for a screen displaying suggestions of who to follow"))
+                InterestSelectionView(damus_state: model.damus_state, next_page: {
+                    self.next_page()
+                }, selectedInterests: $model.interests, isNextEnabled: canLeaveInterestSelectionPage)
+                    .navigationTitle(NSLocalizedString("Select your interests", comment: "Title for a screen asking the user for interests"))
                     .navigationBarTitleDisplayMode(.inline)
-                    .navigationBarItems(leading: Button(action: {
-                        self.next_page()
-                    }, label: {
-                        Text("Skip", comment: "Button to dismiss the suggested users screen")
-                            .font(.subheadline.weight(.semibold))
-                    })
-                    .accessibilityIdentifier(AppAccessibilityIdentifiers.onboarding_sheet_skip_button.rawValue)
-                    )
                     .tag(0)
                 
-                PostView(
-                    action: .posting(.user(model.damus_state.pubkey)),
-                    damus_state: model.damus_state, 
-                    prompt_view: {
-                        AnyView(
-                            HStack {
-                                Image(systemName: "sparkles")
-                                Text("Add your first post", comment: "Prompt given to the user during onboarding, suggesting them to write their first post")
-                            }
-                                .foregroundColor(.secondary)
-                                .font(.callout)
-                                .padding(.top, 10)
+                if canLeaveInterestSelectionPage {
+                    
+                    OnboardingContentSettings(model: model, next_page: self.next_page, settings: model.damus_state.settings, selectedInterests: $model.interests)
+                        .navigationTitle(NSLocalizedString("Content settings", comment: "Title for an onboarding screen showing user some content settings"))
+                        .navigationBarTitleDisplayMode(.inline)
+                        .tag(1)
+                    
+                    SuggestedUsersPageView(model: model, next_page: self.next_page)
+                        .navigationTitle(NSLocalizedString("Who to Follow", comment: "Title for a screen displaying suggestions of who to follow"))
+                        .navigationBarTitleDisplayMode(.inline)
+                        .navigationBarItems(leading: Button(action: {
+                            self.next_page()
+                        }, label: {
+                            Text("Skip", comment: "Button to dismiss the suggested users screen")
+                                .font(.subheadline.weight(.semibold))
+                        })
+                            .accessibilityIdentifier(AppAccessibilityIdentifiers.onboarding_sheet_skip_button.rawValue)
                         )
-                    },
-                    placeholder_messages: self.first_post_examples,
-                    initial_text_suffix: self.initial_text_suffix
-                )
-                .onReceive(handle_notify(.post)) { _ in
-                    // NOTE: Even though PostView already calls `dismiss`, that is not guaranteed to work under deeply nested views.
-                    // Thus, we should also call `dismiss` from here (a direct subview of a sheet), which is explicitly supported by Apple.
-                    // See https://github.com/damus-io/damus/issues/1726 for more context and information
-                    dismiss()
+                        .tag(2)
+                    
+                    PostView(
+                        action: .posting(.user(model.damus_state.pubkey)),
+                        damus_state: model.damus_state,
+                        prompt_view: {
+                            AnyView(
+                                HStack {
+                                    Image(systemName: "sparkles")
+                                    Text("Add your first post", comment: "Prompt given to the user during onboarding, suggesting them to write their first post")
+                                }
+                                    .foregroundColor(.secondary)
+                                    .font(.callout)
+                                    .padding(.top, 10)
+                            )
+                        },
+                        placeholder_messages: self.first_post_examples,
+                        initial_text_suffix: self.initial_text_suffix
+                    )
+                    .onReceive(handle_notify(.post)) { _ in
+                        // NOTE: Even though PostView already calls `dismiss`, that is not guaranteed to work under deeply nested views.
+                        // Thus, we should also call `dismiss` from here (a direct subview of a sheet), which is explicitly supported by Apple.
+                        // See https://github.com/damus-io/damus/issues/1726 for more context and information
+                        dismiss()
+                    }
+                    .tag(3)
                 }
-                .tag(1)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
+            .onChange(of: current_page) { newPage in
+                // If the user just swiped from the interests page (0) to the next page (1),
+                // save their interests to NDB
+                if newPage == 1 && current_page == 1 {
+                    saveInterestsToNdb()
+                }
+            }
         }
     }
 }
@@ -79,20 +133,27 @@ fileprivate struct SuggestedUsersPageView: View {
     
     var body: some View {
         VStack {
-            List {
-                ForEach(model.groups) { group in
-                    Section {
-                        ForEach(group.users, id: \.self) { pk in
-                            if let user = model.suggestedUser(pubkey: pk) {
-                                SuggestedUserView(user: user, damus_state: model.damus_state)
+            if let suggestions = model.suggestions {
+                List {
+                    ForEach(suggestions, id: \.self) { followPack in
+                        Section {
+                            ForEach(followPack.publicKeys, id: \.self) { pk in
+                                if let usersInterests = model.interestUserMap[pk],
+                                   !usersInterests.intersection(model.interests).isEmpty && usersInterests.intersection(model.disinterests).isEmpty,
+                                   let user = model.suggestedUser(pubkey: pk) {
+                                    SuggestedUserView(user: user, damus_state: model.damus_state)
+                                }
                             }
+                        } header: {
+                            SuggestedUsersSectionHeader(followPack: followPack, model: model)
                         }
-                    } header: {
-                        SuggestedUsersSectionHeader(group: group, model: model)
                     }
                 }
+                .listStyle(.plain)
             }
-            .listStyle(.plain)
+            else {
+                ProgressView()
+            }
             
             Spacer()
             
@@ -110,17 +171,14 @@ fileprivate struct SuggestedUsersPageView: View {
 }
 
 struct SuggestedUsersSectionHeader: View {
-    let group: SuggestedUserGroup
+    let followPack: FollowPackEvent
     let model: SuggestedUsersViewModel
     var body: some View {
         HStack {
-            let locale = Locale.current
-            let format = localizedStringFormat(key: group.category, locale: locale)
-            let categoryName = String(format: format, locale: locale)
-            Text(categoryName)
+            Text(followPack.title ?? NSLocalizedString("Untitled Follow Pack", comment: "Default title for a follow pack if no title is specified"))
             Spacer()
             Button(NSLocalizedString("Follow All", comment: "Button to follow all users in this section")) {
-                model.follow(pubkeys: group.users)
+                model.follow(pubkeys: followPack.publicKeys)
             }
             .font(.subheadline.weight(.semibold))
         }
@@ -129,6 +187,6 @@ struct SuggestedUsersSectionHeader: View {
 
 struct SuggestedUsersView_Previews: PreviewProvider {
     static var previews: some View {
-        OnboardingSuggestionsView(model: SuggestedUsersViewModel(damus_state: test_damus_state))
+        OnboardingSuggestionsView(model: try! SuggestedUsersViewModel(damus_state: test_damus_state))
     }
 }
