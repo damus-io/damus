@@ -8,13 +8,14 @@
 
 import Foundation
 
-struct FollowPackEvent {
+struct FollowPackEvent: Hashable {
     let event: NostrEvent
     var title: String? = nil
     var uuid: String? = nil
     var image: URL? = nil
     var description: String? = nil
     var publicKeys: [Pubkey] = []
+    var interests: Set<Interest> = []
     
     
     static func parse(from ev: NostrEvent) -> FollowPackEvent {
@@ -38,6 +39,10 @@ struct FollowPackEvent {
                    let b32 = try? bech32_decode(tag[1].string())
                 {
                     followlist.publicKeys.append(Pubkey(b32.data))
+                }
+            case "t":
+                if let interest = Interest(rawValue: tag[1].string()) {
+                    followlist.interests.insert(interest)
                 }
             default:
                 break

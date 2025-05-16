@@ -30,6 +30,16 @@ struct OnboardingSuggestionsView: View {
     var body: some View {
         NavigationView {
             TabView(selection: $current_page) {
+                InterestSelectionView(next_page: self.next_page, selectedInterests: $model.interests)
+                    .navigationTitle(NSLocalizedString("Select your interests", comment: "Title for a screen asking the user for interests"))
+                    .navigationBarTitleDisplayMode(.inline)
+                    .tag(0)
+                
+                DisinterestSelectionView(next_page: self.next_page, settings: model.damus_state.settings, selectedInterests: $model.interests)
+                    .navigationTitle(NSLocalizedString("Content settings", comment: "Title for an onboarding screen showing user some content settings"))
+                    .navigationBarTitleDisplayMode(.inline)
+                    .tag(1)
+                
                 SuggestedUsersPageView(model: model, next_page: self.next_page)
                     .navigationTitle(NSLocalizedString("Who to Follow", comment: "Title for a screen displaying suggestions of who to follow"))
                     .navigationBarTitleDisplayMode(.inline)
@@ -41,7 +51,7 @@ struct OnboardingSuggestionsView: View {
                     })
                     .accessibilityIdentifier(AppAccessibilityIdentifiers.onboarding_sheet_skip_button.rawValue)
                     )
-                    .tag(0)
+                    .tag(2)
                 
                 PostView(
                     action: .posting(.user(model.damus_state.pubkey)),
@@ -66,7 +76,7 @@ struct OnboardingSuggestionsView: View {
                     // See https://github.com/damus-io/damus/issues/1726 for more context and information
                     dismiss()
                 }
-                .tag(1)
+                .tag(3)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
         }
@@ -79,20 +89,27 @@ fileprivate struct SuggestedUsersPageView: View {
     
     var body: some View {
         VStack {
-            List {
-                ForEach(model.groups) { group in
-                    Section {
-                        ForEach(group.users, id: \.self) { pk in
-                            if let user = model.suggestedUser(pubkey: pk) {
-                                SuggestedUserView(user: user, damus_state: model.damus_state)
+            if let suggestions = model.suggestions {
+                List {
+                    ForEach(suggestions, id: \.self) { followPack in
+                        Section {
+                            ForEach(followPack.publicKeys, id: \.self) { pk in
+                                if let usersInterests = model.interestUserMap[pk],
+                                   !usersInterests.intersection(model.interests).isEmpty && usersInterests.intersection(model.disinterests).isEmpty,
+                                   let user = model.suggestedUser(pubkey: pk) {
+                                    SuggestedUserView(user: user, damus_state: model.damus_state)
+                                }
                             }
+                        } header: {
+                            SuggestedUsersSectionHeader(followPack: followPack, model: model)
                         }
-                    } header: {
-                        SuggestedUsersSectionHeader(group: group, model: model)
                     }
                 }
+                .listStyle(.plain)
             }
-            .listStyle(.plain)
+            else {
+                ProgressView()
+            }
             
             Spacer()
             
@@ -110,17 +127,14 @@ fileprivate struct SuggestedUsersPageView: View {
 }
 
 struct SuggestedUsersSectionHeader: View {
-    let group: SuggestedUserGroup
+    let followPack: FollowPackEvent
     let model: SuggestedUsersViewModel
     var body: some View {
         HStack {
-            let locale = Locale.current
-            let format = localizedStringFormat(key: group.category, locale: locale)
-            let categoryName = String(format: format, locale: locale)
-            Text(categoryName)
+            Text(followPack.title ?? NSLocalizedString("Untitled Follow Pack", comment: "Default title for a follow pack if no title is specified"))
             Spacer()
             Button(NSLocalizedString("Follow All", comment: "Button to follow all users in this section")) {
-                model.follow(pubkeys: group.users)
+                model.follow(pubkeys: followPack.publicKeys)
             }
             .font(.subheadline.weight(.semibold))
         }
@@ -129,6 +143,6 @@ struct SuggestedUsersSectionHeader: View {
 
 struct SuggestedUsersView_Previews: PreviewProvider {
     static var previews: some View {
-        OnboardingSuggestionsView(model: SuggestedUsersViewModel(damus_state: test_damus_state))
+        OnboardingSuggestionsView(model: try! SuggestedUsersViewModel(damus_state: test_damus_state))
     }
 }
