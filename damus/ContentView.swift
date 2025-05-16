@@ -334,7 +334,20 @@ struct ContentView: View {
                     .presentationDetents([.height(550)])
                     .presentationDragIndicator(.visible)
             case .onboardingSuggestions:
-                OnboardingSuggestionsView(model: SuggestedUsersViewModel(damus_state: damus_state!))
+                if let model = try? SuggestedUsersViewModel(damus_state: damus_state!) {
+                    OnboardingSuggestionsView(model: model)
+                        .interactiveDismissDisabled(true)
+                }
+                else {
+                    ErrorView(
+                        damus_state: damus_state,
+                        error: .init(
+                            user_visible_description: NSLocalizedString("Unexpected error loading user suggestions", comment: "Human readable error label"),
+                            tip: NSLocalizedString("Please contact support", comment: "Human readable error tip"),
+                            technical_info: "Error inializing SuggestedUsersViewModel"
+                        )
+                    )
+                }
             case .purple(let purple_url):
                 DamusPurpleURLSheetView(damus_state: damus_state!, purple_url: purple_url)
             case .purple_onboarding:

@@ -137,6 +137,9 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "hide_nsfw_tagged_content", default_value: false)
     var hide_nsfw_tagged_content: Bool
     
+    @Setting(key: "reduce_bitcoin_content", default_value: false)
+    var reduce_bitcoin_content: Bool
+    
     @Setting(key: "show_profile_action_sheet_on_pfp_click", default_value: true)
     var show_profile_action_sheet_on_pfp_click: Bool
 
