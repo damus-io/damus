@@ -177,6 +177,9 @@
     "An additional percentage of each zap will be sent to support Damus development" : {
       "comment" : "Text indicating that they can contribute zaps to support Damus development."
     },
+    "An internal error occurred in your wallet." : {
+      "comment" : "Error description for an internal error"
+    },
     "An unexpected error happened while trying to perform this action. Please contact support." : {
       "comment" : "Error message for a failed reset/repair operation"
     },
@@ -185,6 +188,9 @@
     },
     "An unknown error occurred while adding a relay." : {
       "comment" : "Title of an unknown relay error message."
+    },
+    "An unspecified error occurred in your wallet." : {
+      "comment" : "Error description for an unspecified error"
     },
     "Animations" : {
       "comment" : "Toggle to enable or disable image animation"
@@ -303,6 +309,9 @@
     "Check the address and/or the relay list." : {
       "comment" : "Human readable tip for error"
     },
+    "Check your account permissions or contact support." : {
+      "comment" : "Tip for restricted operation"
+    },
     "Check your internet connection and try again. If the error persists, contact support." : {
       "comment" : "Error tip when user tries to create the one-click Coinos wallet setup but fails for a generic reason."
     },
@@ -330,7 +339,7 @@
     "Close" : {
       "comment" : "Button label giving the user the option to close the sheet due to not being logged in.\nButton label giving the user the option to close the sheet from which they shared content\nButton label giving the user the option to close the sheet from which they were trying share.\nButton label giving the user the option to close the sheet from which they were trying to share.\nButton label giving the user the option to close the view when no content is available to share"
     },
-    "Coinos is a service operated by a third-party. We have no access to your Coinos wallet." : {
+    "Coinos is a service operated by a third-party. The Damus team has no access to your wallet." : {
       "comment" : "Small caption with a disclaimer that Damus does not own or have access to Coinos wallets, Coinos is a third-party service."
     },
     "Coming soon" : {
@@ -387,6 +396,9 @@
     "Copied" : {
       "comment" : "Label indicating that a user's key was copied."
     },
+    "Copied!" : {
+      "comment" : "Label indicating that the error technical information was successfully copied to the clipboard, which shows up as soon as the user clicks the copy button."
+    },
     "Copy" : {
       "comment" : "Button to copy a relay server address.\nButton to copy the value found.\nContext menu option for copying the version of damus."
     },
@@ -416,6 +428,9 @@
     },
     "Copy Report ID" : {
       "comment" : "Button to copy report ID."
+    },
+    "Copy technical information" : {
+      "comment" : "Button label to allow user to copy technical information from an error screen (usually to provide our support team for further troubleshooting)"
     },
     "Copy text" : {
       "comment" : "Context menu option for copying the text from an note."
@@ -501,6 +516,9 @@
     "Developer Mode enables features and options that may help developers diagnose issues and improve this app. Most users will not need Developer Mode." : {
       "comment" : "Section header for Developer Settings view"
     },
+    "Disable high balance warning" : {
+      "comment" : "Setting to disable high balance warnings on the user's wallet"
+    },
     "Discard changes?" : {
       "comment" : "Alert user that changes have been made."
     },
@@ -511,7 +529,7 @@
       "comment" : "Text for button to disconnect from Nostr Wallet Connect lightning wallet."
     },
     "Dismiss" : {
-      "comment" : "Button to dismiss alert\nButton to dismiss error"
+      "comment" : "Button label to dismiss the safety reminder that the user's wallet has a high balance\nButton to dismiss alert\nButton to dismiss error"
     },
     "DMs" : {
       "comment" : "Navigation title for DMs view, where DM is the English abbreviation for Direct Message.\nNavigation title for view of DMs, where DM is an English abbreviation for Direct Message.\nPicker option for DM selector for seeing only DMs that have been responded to. DM is the English abbreviation for Direct Message.\nSetting to enable DM Local Notification\nToolbar label for DMs view, where DM is the English abbreviation for Direct Message."
@@ -539,6 +557,9 @@
     },
     "Edit profile picture" : {
       "comment" : "Accessibility label for a button that edits a profile picture"
+    },
+    "Empty error message" : {
+      "comment" : "A human readable placeholder to indicate that the error message is empty"
     },
     "Enable experimental Purple API support" : {
       "comment" : "Developer mode setting to enable experimental Purple API support."
@@ -1099,6 +1120,9 @@
     "Nudity" : {
       "comment" : "Description of report type for nudity."
     },
+    "NWC wallet" : {
+      "comment" : "Title for section in zap settings that controls general NWC wallet settings."
+    },
     "Ok" : {
       "comment" : "Button to dismiss the alert."
     },
@@ -1171,6 +1195,9 @@
     "Plan" : {
       "comment" : "Prompt selection of DeepL subscription plan to perform machine translations on notes"
     },
+    "Please check for updates or contact your wallet provider." : {
+      "comment" : "Tip for not implemented error"
+    },
     "Please check the address and try again" : {
       "comment" : "Tip for an error where the relay address being added is invalid"
     },
@@ -1183,8 +1210,17 @@
     "Please contact support." : {
       "comment" : "Tip for an unknown relay error message."
     },
+    "Please contact the developer of your wallet provider for help." : {
+      "comment" : "Human readable error description for an unknown error raised by a wallet provider."
+    },
     "Please contact the person who provided the link, and ask for another link." : {
       "comment" : "User-visible tip on what to do if a link contains a deprecated \"nrelay\" reference."
+    },
+    "Please copy the technical info and send it to our support team." : {
+      "comment" : "Tip on how to resolve issue when wallet returns an invalid response"
+    },
+    "Please deposit more funds and try again." : {
+      "comment" : "Tip for insufficient balance errors"
     },
     "Please double-check the checkout web page, or go to the Side Menu → \"Purple\" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue." : {
       "comment" : "User-facing tips on what to do if a Purple welcome link doesn't work"
@@ -1198,11 +1234,17 @@
     "Please try again later or contact support if the issue persists." : {
       "comment" : "Human readable tip for error"
     },
+    "Please try again or contact your wallet provider for further assistance." : {
+      "comment" : "Tip for unspecified error"
+    },
     "Please try again, check the URL for typos, or contact support for further help." : {
       "comment" : "User visible error tips"
     },
     "Please try opening this content on another Nostr app that supports this type of content." : {
       "comment" : "User-visible advice on what to do if they see the error indicating a note has an unknown kind or is unsupported for viewing."
+    },
+    "Please verify your credentials or permissions." : {
+      "comment" : "Tip for unauthorized access"
     },
     "Point your camera to a QR code…" : {
       "comment" : "Text on QR code camera view instructing user to point to QR code"
@@ -1701,6 +1743,9 @@
     "This device's in-app purchase is registered to a different Nostr account. Unable to manage this Purple account. If you believe this was a mistake, please contact us via support@damus.io." : {
       "comment" : "Notice label that user cannot manage their In-App purchases"
     },
+    "This feature is not implemented by your wallet." : {
+      "comment" : "Error description for not implemented feature"
+    },
     "This is a public key, you will not be able to make notes or interact in any way. This is used for viewing accounts from their perspective." : {
       "comment" : "Warning that the inputted account key is a public key and the result of what happens because of it."
     },
@@ -1712,6 +1757,9 @@
     },
     "This note contains too many items and cannot be rendered" : {
       "comment" : "Error message indicating that a note is too big and cannot be rendered"
+    },
+    "This operation is restricted by your wallet." : {
+      "comment" : "Error description for restricted operation"
     },
     "This relay is already in your list." : {
       "comment" : "Human readable tip for error"
@@ -1760,6 +1808,9 @@
     },
     "Try checking the link again, your internet connection, or contact the person who provided you the link for help." : {
       "comment" : "Tips on what to do if a note cannot be found."
+    },
+    "Try restarting your wallet or contacting support if the problem persists." : {
+      "comment" : "Tip for internal error"
     },
     "Type %@ to delete" : {
       "comment" : "Text field prompt asking user to type DELETE in all caps to confirm that they want to proceed with deleting their account."
@@ -1854,8 +1905,23 @@
     "Visit the Damus website on a web browser to manage billing" : {
       "comment" : "Instruction on how to manage billing externally"
     },
+    "Wait a few moments, and then try again." : {
+      "comment" : "Tip for rate limit error"
+    },
+    "Wait for the quota to reset, or configure your wallet provider to allow a higher limit." : {
+      "comment" : "Tip for quota exceeded"
+    },
     "Wallet" : {
       "comment" : "Navigation title for Wallet view\nNavigation title for attaching Nostr Wallet Connect lightning wallet.\nSidebar menu label for Wallet view.\nTitle for section in zap settings that controls the Lightning wallet selection."
+    },
+    "Wallet provider returned a response that we could not decrypt." : {
+      "comment" : "Error description shown to the user when a response from the wallet provider contains data the app could not decrypt."
+    },
+    "Wallet provider returned a response that we do not understand." : {
+      "comment" : "Error description shown to the user when a response from the wallet provider contains data the app does not understand"
+    },
+    "Wallet provider returned an invalid response." : {
+      "comment" : "Error description shown to the user when a response from the wallet provider is invalid"
     },
     "WARNING:\n\nThis will attempt to repair your relay list based on other information we have. You may lose any relays you have added manually. Only proceed if you have lost your relay list beyond recoverability or if you are ok with losing any manually added relays." : {
       "comment" : "Alert for repairing the user's relay list."
@@ -1926,6 +1992,9 @@
     "you" : {
       "comment" : "You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself."
     },
+    "You are not authorized to perform this action with your wallet." : {
+      "comment" : "Error description for unauthorized access"
+    },
     "You cannot share content because you are not logged in. Please close this view, log in to your account, and try again." : {
       "comment" : "Label explaining that sharing cannot proceed because the user is not logged in."
     },
@@ -1953,6 +2022,9 @@
     "You unlocked" : {
       "comment" : "Part 1 of 2 in message 'You unlocked automatic translations' the user gets when they sign up for Damus Purple"
     },
+    "Your connected wallet raised an unknown error. Message: %s" : {
+      "comment" : "Human readable error description for unknown error"
+    },
     "Your content is being broadcasted to the network. Please wait." : {
       "comment" : "Label explaining that their content sharing action is in progress"
     },
@@ -1979,6 +2051,15 @@
     },
     "Your report will be sent to the relays you are connected to" : {
       "comment" : "Footer text to inform user what will happen when the report is submitted."
+    },
+    "Your transaction quota has been exceeded." : {
+      "comment" : "Error description for quota exceeded"
+    },
+    "Your wallet does not have sufficient balance for this transaction." : {
+      "comment" : "Error description for insufficient balance"
+    },
+    "Your wallet is temporarily being rate limited." : {
+      "comment" : "Error description for rate limit error"
     },
     "Zap" : {
       "comment" : "Accessibility label for zap button\nButton label that allows the user to zap (i.e. send a Bitcoin tip via the lightning network) the user shown on-screen\nText underneath the number of sats indicating that it's the amount used for zaps.\nTitle of notification when a non-private zap is received."
