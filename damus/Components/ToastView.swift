@@ -10,11 +10,18 @@ import SwiftUI
 struct ToastView: View {
     var style: ToastStyle
     var message: String
+    @State var completedEvents = 1.0
     
     var body: some View {
         HStack{
-            Image(systemName: style.iconName)
-                .foregroundStyle(style.color)
+            if let iconName = style.iconName{
+                Image(systemName: iconName)
+                    .foregroundStyle(style.color)
+            }
+            else{
+                ProgressView(value: completedEvents)
+                    .progressViewStyle(.circular)
+            }
             Text(message)
                 .font(.caption)
                 .fontWeight(.semibold)
@@ -22,21 +29,25 @@ struct ToastView: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .stroke(.purple, lineWidth: 0.5)
-                .background(
+                .fill(.ultraThinMaterial)
+                .background(.white.opacity(0.05))
+                .overlay(
                     RoundedRectangle(cornerRadius: 24)
-                        .fill(.white)
+                        .stroke(Color.damusAdaptableBlack.opacity(0.2),lineWidth: 1)
                 )
-                .shadow(color: .purple.opacity(0.35), radius: 6)
+                .clipShape(RoundedRectangle(cornerRadius: 24))
+                .shadow(radius: 5.0, x:0 , y: 5)
         )
         .padding()
         .transition(.opacity.combined(with: .move(edge: .top)))
         .animation(.easeInOut(duration: 0.3), value: message)
+
     }
+    
 }
 
 #Preview {
-    ToastView(style: .success, message: "Your note has been posted to 10/14 relays")
+    ToastView(style: .initial, message: "Your note has been posted to 10/14 relays")
     ToastView(style: .error, message: "Could not post your note")
 
 }
@@ -81,16 +92,19 @@ struct Toast: Equatable {
 enum ToastStyle{
     case success
     case error
+    case initial
     
 }
 
 extension ToastStyle{
-    var iconName: String {
+    var iconName: String? {
         switch self {
         case .error: 
             return "xmark.circle.fill"
         case .success: 
             return "checkmark"
+        case .initial:
+            return nil
         }
     }
     var color: Color {
@@ -99,8 +113,9 @@ extension ToastStyle{
             return Color.red
         case .success:
             return Color.green
+        case .initial:
+            return Color.black
         }
-        
     }
 }
 
