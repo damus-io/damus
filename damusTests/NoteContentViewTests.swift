@@ -291,6 +291,45 @@ class NoteContentViewTests: XCTestCase {
         XCTAssertEqual(noteArtifactsSeparated.images[0].absoluteString, "https://damus.io/nothidden.png")
     }
 
+    func testRenderBlocksWithPreviewableBlocksAtEndAreHiddenWhenHashtagsAreEmbedded() throws {
+        let noteId = test_note.id.bech32
+        let invoiceString = "lnbc100n1p357sl0sp5t9n56wdztun39lgdqlr30xqwksg3k69q4q2rkr52aplujw0esn0qpp5mrqgljk62z20q4nvgr6lzcyn6fhylzccwdvu4k77apg3zmrkujjqdpzw35xjueqd9ejqcfqv3jhxcmjd9c8g6t0dcxqyjw5qcqpjrzjqt56h4gvp5yx36u2uzqa6qwcsk3e2duunfxppzj9vhypc3wfe2wswz607uqq3xqqqsqqqqqqqqqqqlqqyg9qyysgqagx5h20aeulj3gdwx3kxs8u9f4mcakdkwuakasamm9562ffyr9en8yg20lg0ygnr9zpwp68524kmda0t5xp2wytex35pu8hapyjajxqpsql29r"
+        let content = "    Check this out.   \nhttps://hidden.tld/\nhttps://damus.io/hidden1.png\n\(invoiceString)\nhttps://damus.io/hidden2.png\nnostr:\(noteId)#hashtag1 #hashtag2 "
+        let note = try XCTUnwrap(NostrEvent(content: content, keypair: test_keypair))
+        let parsed: Blocks = parse_note_content(content: .init(note: note, keypair: test_keypair))
+
+        let testState = test_damus_state
+
+        let noteArtifactsSeparated: NoteArtifactsSeparated = render_blocks(blocks: parsed, profiles: testState.profiles, can_hide_last_previewable_refs: true)
+        let attributedText: AttributedString = noteArtifactsSeparated.content.attributed
+
+        let runs: AttributedString.Runs = attributedText.runs
+        let runArray: [AttributedString.Runs.Run] = Array(runs)
+        XCTAssertEqual(runArray.count, 4)
+        XCTAssertTrue(runArray[0].description.contains("Check this out."))
+        XCTAssertFalse(runArray[0].description.contains("https://hidden.tld/"))
+        XCTAssertFalse(runArray[0].description.contains("https://damus.io/hidden1.png"))
+        XCTAssertFalse(runArray[0].description.contains("lnbc100n:qpsql29r"))
+        XCTAssertFalse(runArray[0].description.contains("https://damus.io/hidden2.png"))
+        XCTAssertFalse(runArray[0].description.contains("note1qqq:qqn2l0z3"))
+        XCTAssertTrue(runArray[1].description.contains("#hashtag1"))
+        XCTAssertTrue(runArray[3].description.contains("#hashtag2"))
+
+        XCTAssertEqual(noteArtifactsSeparated.images.count, 2)
+        XCTAssertEqual(noteArtifactsSeparated.images[0].absoluteString, "https://damus.io/hidden1.png")
+        XCTAssertEqual(noteArtifactsSeparated.images[1].absoluteString, "https://damus.io/hidden2.png")
+
+        XCTAssertEqual(noteArtifactsSeparated.media.count, 2)
+        XCTAssertEqual(noteArtifactsSeparated.media[0].url.absoluteString, "https://damus.io/hidden1.png")
+        XCTAssertEqual(noteArtifactsSeparated.media[1].url.absoluteString, "https://damus.io/hidden2.png")
+
+        XCTAssertEqual(noteArtifactsSeparated.links.count, 1)
+        XCTAssertEqual(noteArtifactsSeparated.links[0].absoluteString, "https://hidden.tld/")
+
+        XCTAssertEqual(noteArtifactsSeparated.invoices.count, 1)
+        XCTAssertEqual(noteArtifactsSeparated.invoices[0].string, invoiceString)
+    }
+
     /// Based on https://github.com/damus-io/damus/issues/1468
     /// Tests whether a note content view correctly parses an image block when url in JSON content contains optional escaped slashes
     func testParseImageBlockInContentWithEscapedSlashes() throws {
