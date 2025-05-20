@@ -117,6 +117,10 @@ func render_blocks(blocks bs: Blocks, profiles: Profiles, can_hide_last_previewa
                 }
                 hide_text_index = i
             } else if case .text(let txt) = block, txt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                // We should hide whitespace at the end sequence.
+                hide_text_index = i
+            } else if case .hashtag = block {
+                // We should keep hashtags at the end sequence but hide all the other previewables around it.
                 hide_text_index = i
             } else {
                 break
@@ -149,7 +153,16 @@ func render_blocks(blocks bs: Blocks, profiles: Profiles, can_hide_last_previewa
             // No need to show the text representation of the block if the only previewables are the sequence of them
             // found at the end of the content.
             // This is to save unnecessary use of screen space.
+            // The only exception is that if there are hashtags embedded in the end sequence, which is not uncommon,
+            // then we still want to show those hashtags but hide everything else that is previewable in the end sequence.
             if ind >= hide_text_index {
+                if case .text(let txt) = block, txt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    if case .hashtag = blocks[safe: ind+1] {
+                        return str + CompatibleText(stringLiteral: reduce_text_block(ind: ind, hide_text_index: -1, txt: txt))
+                    }
+                } else if case .hashtag(let htag) = block {
+                    return str + hashtag_str(htag)
+                }
                 return str
             }
         }
