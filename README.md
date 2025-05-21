@@ -2,7 +2,7 @@
 
 # damus
 
-A twitter-like [nostr][nostr] client for iPhone, iPad and MacOS. 
+A twitter-like [nostr][nostr] client for iPhone, iPad and MacOS. Y
 
 <img src="./ss.png" width="50%" height="50%" />
 
