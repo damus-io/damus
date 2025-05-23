@@ -65,8 +65,28 @@ struct SearchHomeView: View {
                 return true
             },
             content: {
-                AnyView(VStack {
-                    SuggestedHashtagsView(damus_state: damus_state, max_items: 5, events: model.events)
+                AnyView(VStack(alignment: .leading) {
+                    HStack {
+                        Image(systemName: "sparkles")
+                            .foregroundStyle(PinkGradient)
+                        Text("Follow Packs", comment: "A label indicating that the items below it are follow packs")
+                            .foregroundStyle(PinkGradient)
+                    }
+                    .padding(.top)
+                    .padding(.horizontal)
+                    
+                    FollowPackTimelineView<AnyView>(events: model.events, loading: $model.loading, damus: damus_state, show_friend_icon: true, filter: { ev in
+                        if !content_filter(ev) {
+                            return false
+                        }
+                        
+                        let event_muted = damus_state.mutelist_manager.is_event_muted(ev)
+                        if event_muted {
+                            return false
+                        }
+
+                        return true
+                    }).padding(.bottom)
                     
                     Divider()
                         .frame(height: 1)

@@ -45,4 +45,3 @@ struct Pubkey: IdType, TagKey, TagConvertible, Identifiable {
     }
     
 }
-
