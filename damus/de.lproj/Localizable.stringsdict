@@ -63,7 +63,7 @@
 			<key>one</key>
 			<string>Benachrichtigungen ausblenden, die mehr als %d Profil markieren</string>
 			<key>other</key>
-			<string>Hide notifications that tag more than %d profiles</string>
+			<string>Benachrichtigungen ausblenden, die mehr als %d Profile markieren.</string>
 		</dict>
 	</dict>
 	<key>imports_count</key>
