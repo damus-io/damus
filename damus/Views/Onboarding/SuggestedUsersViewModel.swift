@@ -8,30 +8,64 @@
 import Foundation
 import Combine
 
+
 struct SuggestedUserGroup: Identifiable, Codable {
-    let id = UUID()
+    var id: String { category }
     let category: String
     let users: [Pubkey]
 
     enum CodingKeys: String, CodingKey {
         case category, users
     }
+    
+    /// Returns user groups where
+    static func from(suggestions: UserSuggestions) -> [SuggestedUserGroup] {
+        var groups: [String: [Pubkey]] = [:]
+        for (pubkey, categories) in suggestions {
+            for category in categories {
+                groups[category, default: []].append(pubkey)
+            }
+        }
+        return groups.map({ (category, users) in
+            return SuggestedUserGroup(category: category, users: users)
+        })
+    }
 }
 
+typealias UserSuggestions = [Pubkey: Set<String>]
+typealias UserSuggestionsEncoded = [String: Set<String>]
 
+func filter(suggestions: UserSuggestions, interests: Set<String>, disinterests: Set<String>) -> UserSuggestions {
+    return suggestions.filter({ (pubkey, categories) in
+        return !categories.intersection(interests).isEmpty && categories.intersection(disinterests).isEmpty
+    })
+}
+
+@MainActor
 class SuggestedUsersViewModel: ObservableObject {
 
     public let damus_state: DamusState
-
-    @Published var groups: [SuggestedUserGroup] = []
+    
+    @Published var allSuggestions: [FollowPackEvent]? = nil
+    var suggestions: [FollowPackEvent]? {
+        guard let allSuggestions else { return nil }
+        return allSuggestions.filter({ suggestion in
+            return !suggestion.interests.intersection(self.interests).isEmpty && suggestion.interests.intersection(self.disinterests).isEmpty
+        })
+    }
+    var interestUserMap: [Pubkey: Set<Interest>] = [:]
+    @Published var interests: Set<Interest> = []
+    var disinterests: Set<Interest> {
+        damus_state.settings.reduce_bitcoin_content ? Set([.bitcoin]) : []
+    }
 
     private let sub_id = UUID().uuidString
 
-    init(damus_state: DamusState) {
+    init(damus_state: DamusState) throws {
         self.damus_state = damus_state
-        loadSuggestedUserGroups()
-        let pubkeys = getPubkeys(groups: groups)
-        subscribeToSuggestedProfiles(pubkeys: pubkeys)
+        Task {
+            await self.loadSuggestedFollowPacks()
+        }
     }
 
     func suggestedUser(pubkey: Pubkey) -> SuggestedUser? {
@@ -49,57 +83,63 @@ class SuggestedUsersViewModel: ObservableObject {
         }
     }
 
-    private func loadSuggestedUserGroups() {
-        guard let url = Bundle.main.url(forResource: "suggested_users", withExtension: "json") else {
-            return
+    private func loadSuggestedFollowPacks() async {
+        var followPacks = [FollowPackEvent]()
+        let filter = NostrFilter(
+            kinds: [NostrKind.follow_list],
+            authors: [Constants.ONBOARDING_FOLLOW_PACK_CURATOR_PUBKEY]
+        )
+
+        // Create a task to process the subscription
+        let subscriptionTask = Task {
+            for await item in self.damus_state.nostrNetwork.reader.subscribe(filters: [filter]) {
+                // Check for cancellation on each iteration
+                guard !Task.isCancelled else { break }
+
+                switch item {
+                case .event(let borrow):
+                    try? borrow { event in
+                        let followPack = FollowPackEvent.parse(from: event.toOwned())
+                        followPacks.append(followPack)
+                        for pubkey in followPack.publicKeys {
+                            self.interestUserMap[pubkey] = Set(Array(self.interestUserMap[pubkey] ?? []) + Array(followPack.interests))
+                        }
+                    }
+                case .eose:
+                    break
+                }
+            }
         }
 
-        guard let data = try? Data(contentsOf: url) else {
-            return
-        }
-
-        let decoder = JSONDecoder()
-        do {
-            let groups = try decoder.decode([SuggestedUserGroup].self, from: data)
-            self.groups = groups
-        } catch {
-            print(error.localizedDescription.localizedLowercase)
+        // Wait for 5 seconds before timing out
+        try? await Task.sleep(nanoseconds: 5_000_000_000)
+        // Cancel the subscription task on timeout
+        subscriptionTask.cancel()
+        
+        self.allSuggestions = followPacks
+        
+        let pubkeys = getPubkeys(suggestions: followPacks)
+        let profileFilter = NostrFilter(kinds: [.metadata], authors: pubkeys)
+        for await item in damus_state.nostrNetwork.reader.subscribe(filters: [profileFilter]) {
+            switch item {
+            case .event(borrow: let borrow):
+                continue    // We just need NostrDB to ingest these
+            case .eose:
+                break
+            }
         }
     }
-
-    private func getPubkeys(groups: [SuggestedUserGroup]) -> [Pubkey] {
-        var pubkeys: [Pubkey] = []
-        for group in groups {
-            pubkeys.append(contentsOf: group.users)
-        }
-        return pubkeys
+    
+    enum UserSuggestionLoadingErrorReason: Error {
+        case fileNotFound
+        case decodingFailed
     }
 
-    private func subscribeToSuggestedProfiles(pubkeys: [Pubkey]) {
-        let filter = NostrFilter(kinds: [.metadata], authors: pubkeys)
-        damus_state.nostrNetwork.pool.subscribe(sub_id: sub_id, filters: [filter], handler: handle_event)
-    }
-
-    func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
-        guard case .nostr_event(let nev) = ev else {
-            return
+    private func getPubkeys(suggestions: [FollowPackEvent]) -> [Pubkey] {
+        var allPubkeys: [Pubkey] = []
+        for suggestion in suggestions {
+            allPubkeys.append(contentsOf: suggestion.publicKeys)
         }
-
-        switch nev {
-        case .event:
-            break
-
-        case .notice(let msg):
-            print("suggested user profiles notice: \(msg)")
-
-        case .eose:
-            self.objectWillChange.send()
-
-        case .ok:
-            break
-
-        case .auth:
-            break
-        }
+        return allPubkeys
     }
 }
