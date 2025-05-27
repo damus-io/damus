@@ -5,6 +5,7 @@
 //  Created by Scott Penrose on 5/7/23.
 //
 
+import FaviconFinder
 import SwiftUI
 
 enum Route: Hashable {
@@ -46,6 +47,8 @@ enum Route: Hashable {
     case Wallet(wallet: WalletModel)
     case WalletScanner(result: Binding<WalletScanResult>)
     case FollowersYouKnow(friendedFollowers: [Pubkey], followers: FollowersModel)
+    case NIP05DomainEvents(events: NIP05DomainEventsModel, nip05_domain_favicon: FaviconURL?)
+    case NIP05DomainPubkeys(domain: String, nip05_domain_favicon: FaviconURL?, pubkeys: [Pubkey])
 
     @ViewBuilder
     func view(navigationCoordinator: NavigationCoordinator, damusState: DamusState) -> some View {
@@ -127,6 +130,10 @@ enum Route: Hashable {
             FollowersYouKnowView(damus_state: damusState, friended_followers: friendedFollowers, followers: followers)
         case .Script(let load_model):
             LoadScript(pool: damusState.nostrNetwork.pool, model: load_model)
+        case .NIP05DomainEvents(let events, let nip05_domain_favicon):
+            NIP05DomainTimelineView(damus_state: damusState, model: events, nip05_domain_favicon: nip05_domain_favicon)
+        case .NIP05DomainPubkeys(let domain, let nip05_domain_favicon, let pubkeys):
+            NIP05DomainPubkeysView(damus_state: damusState, domain: domain, nip05_domain_favicon: nip05_domain_favicon, pubkeys: pubkeys)
         }
     }
 
@@ -231,6 +238,12 @@ enum Route: Hashable {
         case .Script(let model):
             hasher.combine("script")
             hasher.combine(model.data.count)
+        case .NIP05DomainEvents(let events, _):
+            hasher.combine("nip05DomainEvents")
+            hasher.combine(events.domain)
+        case .NIP05DomainPubkeys(let domain, _, _):
+            hasher.combine("nip05DomainPubkeys")
+            hasher.combine(domain)
         }
     }
 }

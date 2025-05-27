@@ -29,15 +29,15 @@ extension KFOptionSetter {
         options.onlyLoadFirstFrame = disable_animation
         
         switch imageContext {
-            case .pfp:
-                options.diskCacheExpiration = .days(60)
-                break
-            case .banner:
-                options.diskCacheExpiration = .days(5)
-                break
-            case .note:
-                options.diskCacheExpiration = .days(1)
-                break
+        case .pfp, .favicon:
+            options.diskCacheExpiration = .days(60)
+            break
+        case .banner:
+            options.diskCacheExpiration = .days(5)
+            break
+        case .note:
+            options.diskCacheExpiration = .days(1)
+            break
         }
         
         return self
@@ -82,11 +82,14 @@ enum ImageContext {
     case pfp
     case banner
     case note
-    
+    case favicon
+
     func maxMebibyteSize() -> Int {
         switch self {
+        case .favicon:
+            return 512_000 // 500KiB
         case .pfp:
-            return 5_242_880 // 5Mib
+            return 5_242_880 // 5MiB
         case .banner, .note:
             return 20_971_520 // 20MiB
         }
@@ -94,6 +97,8 @@ enum ImageContext {
     
     func downsampleSize() -> CGSize {
         switch self {
+        case .favicon:
+            return CGSize(width: 18, height: 18)
         case .pfp:
             return CGSize(width: 200, height: 200)
         case .banner:

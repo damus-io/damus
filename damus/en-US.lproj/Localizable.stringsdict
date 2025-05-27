@@ -82,6 +82,22 @@
 			<string>Imports</string>
 		</dict>
 	</dict>
+	<key>notes_from_three_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Notes from %2$@, %3$@, %4$@ &amp; %1$d other in your trusted network</string>
+			<key>other</key>
+			<string>Notes from %2$@, %3$@, %4$@ &amp; %1$d others in your trusted network</string>
+		</dict>
+	</dict>
 	<key>people_reposted_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
