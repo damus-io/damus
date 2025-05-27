@@ -35,6 +35,7 @@ class Profiles {
     @MainActor
     private var profiles: [Pubkey: ProfileData] = [:]
 
+    // Map of validated NIP-05 address to pubkey.
     @MainActor
     var nip05_pubkey: [String: Pubkey] = [:]
 

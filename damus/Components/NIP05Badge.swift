@@ -5,27 +5,27 @@
 //  Created by William Casarin on 2023-01-11.
 //
 
+import FaviconFinder
+import Kingfisher
 import SwiftUI
 
 struct NIP05Badge: View {
     let nip05: NIP05
     let pubkey: Pubkey
-    let contacts: Contacts
+    let damus_state: DamusState
     let show_domain: Bool
-    let profiles: Profiles
+    let nip05_domain_favicon: FaviconURL?
 
-    @Environment(\.openURL) var openURL
-    
-    init(nip05: NIP05, pubkey: Pubkey, contacts: Contacts, show_domain: Bool, profiles: Profiles) {
+    init(nip05: NIP05, pubkey: Pubkey, damus_state: DamusState, show_domain: Bool, nip05_domain_favicon: FaviconURL?) {
         self.nip05 = nip05
         self.pubkey = pubkey
-        self.contacts = contacts
+        self.damus_state = damus_state
         self.show_domain = show_domain
-        self.profiles = profiles
+        self.nip05_domain_favicon = nip05_domain_favicon
     }
     
     var nip05_color: Bool {
-       return use_nip05_color(pubkey: pubkey, contacts: contacts)
+        return use_nip05_color(pubkey: pubkey, contacts: damus_state.contacts)
     }
     
     var Seal: some View {
@@ -44,8 +44,23 @@ struct NIP05Badge: View {
         }
     }
 
+    var domainBadge: some View {
+        Group {
+            if let nip05_domain_favicon {
+                KFImage(nip05_domain_favicon.source)
+                    .imageContext(.favicon, disable_animation: true)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 18, height: 18)
+                    .clipped()
+            } else {
+                EmptyView()
+            }
+        }
+    }
+
     var username_matches_nip05: Bool {
-        guard let name = profiles.lookup(id: pubkey)?.map({ p in p?.name }).value
+        guard let name = damus_state.profiles.lookup(id: pubkey)?.map({ p in p?.name }).value
         else {
             return false
         }
@@ -65,14 +80,18 @@ struct NIP05Badge: View {
         HStack(spacing: 2) {
             Seal
 
-            if show_domain {
-                Text(nip05_string)
-                    .nip05_colorized(gradient: nip05_color)
-                    .onTapGesture {
-                        if let nip5url = nip05.siteUrl {
-                            openURL(nip5url)
-                        }
-                    }
+            Group {
+                if show_domain {
+                    Text(nip05_string)
+                        .nip05_colorized(gradient: nip05_color)
+                }
+
+                if nip05_domain_favicon != nil {
+                    domainBadge
+                }
+            }
+            .onTapGesture {
+                damus_state.nav.push(route: Route.NIP05DomainEvents(events: NIP05DomainEventsModel(state: damus_state, domain: nip05.host), nip05_domain_favicon: nip05_domain_favicon))
             }
         }
 
@@ -98,13 +117,9 @@ struct NIP05Badge_Previews: PreviewProvider {
     static var previews: some View {
         let test_state = test_damus_state
         VStack {
-            NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, contacts: test_state.contacts, show_domain: true, profiles: test_state.profiles)
+            NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, damus_state: test_state, show_domain: true, nip05_domain_favicon: nil)
 
-            NIP05Badge(nip05: NIP05(username: "_", host: "jb55.com"), pubkey: test_state.pubkey, contacts: test_state.contacts, show_domain: true, profiles: test_state.profiles)
-
-            NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, contacts: test_state.contacts, show_domain: true, profiles: test_state.profiles)
-
-            NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, contacts: Contacts(our_pubkey: test_pubkey), show_domain: true, profiles: test_state.profiles)
+            NIP05Badge(nip05: NIP05(username: "_", host: "jb55.com"), pubkey: test_state.pubkey, damus_state: test_state, show_domain: true, nip05_domain_favicon: nil)
         }
     }
 }
