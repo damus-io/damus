@@ -25,14 +25,16 @@ struct TransactionView: View {
         let formatter = RelativeDateTimeFormatter()
         let relativeDate = formatter.localizedString(for: created_at, relativeTo: Date.now)
         let event = decode_nostr_event_json(transaction.description ?? "") ?? transaction.metadata?.nostr
-        let pubkey = self.pubkeyToDisplay(for: event, isIncomingTransaction: isIncomingTransaction) ?? ANON_PUBKEY
+        let pubkey = self.pubkeyToDisplay(for: event, isIncomingTransaction: isIncomingTransaction)
         
         VStack(alignment: .leading) {
             HStack(alignment: .center) {
                 ZStack {
-                    ProfilePicView(pubkey: pubkey, size: 45, highlight: .custom(.damusAdaptableBlack, 0.1), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, privacy_sensitive: true)
+                    ProfilePicView(pubkey: pubkey ?? ANON_PUBKEY, size: 45, highlight: .custom(.damusAdaptableBlack, 0.1), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, privacy_sensitive: true)
                         .onTapGesture {
-                            damus_state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))
+                            if let pubkey {
+                                damus_state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))
+                            }
                         }
 
                     if !hide_balance && !redactedForPrivacy {
@@ -97,17 +99,15 @@ struct TransactionView: View {
         }
     }
     
-    func userDisplayName(pubkey: Pubkey) -> String {
-        let profile_txn = damus_state.profiles.lookup(id: pubkey, txn_name: "txview-profile")
-        let profile = profile_txn?.unsafeUnownedValue
-        
-        if let display_name = profile?.display_name {
-            return display_name
-        } else if let name = profile?.name {
-            return "@" + name
-        } else {
+    func userDisplayName(pubkey: Pubkey?) -> String {
+        guard let pubkey else {
             return NSLocalizedString("Unknown", comment: "A name label for an unknown user")
         }
+
+        let profile_txn = damus_state.profiles.lookup(id: pubkey, txn_name: "txview-profile")
+        let profile = profile_txn?.unsafeUnownedValue
+
+        return Profile.displayName(profile: profile, pubkey: pubkey).displayName
     }
     
 }
