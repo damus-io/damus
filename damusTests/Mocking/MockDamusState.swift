@@ -49,7 +49,8 @@ func generate_test_damus_state(
                            video: .init(),
                            ndb: ndb,
                            quote_reposts: .init(our_pubkey: our_pubkey),
-                           emoji_provider: DefaultEmojiProvider(showAllVariations: false)
+                           emoji_provider: DefaultEmojiProvider(showAllVariations: false),
+                           favicon_cache: .init()
     )
 
     return damus

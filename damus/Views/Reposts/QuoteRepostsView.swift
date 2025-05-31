@@ -12,9 +12,19 @@ struct QuoteRepostsView: View {
     @ObservedObject var model: EventsModel
 
     var body: some View {
-        TimelineView<AnyView>(events: model.events, loading: $model.loading, damus: damus_state, show_friend_icon: true, filter: ContentFilters.default_filters(damus_state: damus_state).filter(ev:))
+        TimelineView(events: model.events, loading: $model.loading, damus: damus_state, show_friend_icon: true, filter: ContentFilters.default_filters(damus_state: damus_state).filter(ev:)) {
+            ZStack(alignment: .leading) {
+                DamusBackground(maxHeight: 250)
+                    .mask(LinearGradient(gradient: Gradient(colors: [.black, .black, .black, .clear]), startPoint: .top, endPoint: .bottom))
+                Text("Quotes", comment: "Navigation bar title for Quote Reposts view.")
+                    .foregroundStyle(DamusLogoGradient.gradient)
+                    .font(.title.bold())
+                    .padding(.leading, 30)
+                    .padding(.top, 30)
+            }
+        }
+        .ignoresSafeArea()
         .padding(.bottom, tabHeight)
-        .navigationBarTitle(NSLocalizedString("Quotes", comment: "Navigation bar title for Quote Reposts view."))
         .onAppear {
             model.subscribe()
         }

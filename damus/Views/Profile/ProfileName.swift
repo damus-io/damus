@@ -5,6 +5,7 @@
 //  Created by William Casarin on 2022-04-16.
 //
 
+import FaviconFinder
 import SwiftUI
 
 enum FriendType {
@@ -43,6 +44,7 @@ struct ProfileName: View {
     @State var nip05: NIP05?
     @State var donation: Int?
     @State var purple_account: DamusPurple.Account?
+    @State var nip05_domain_favicon: FaviconURL?
 
     init(pubkey: Pubkey, prefix: String = "", damus: DamusState, show_nip5_domain: Bool = true, supporterBadgeStyle: SupporterBadge.Style = .compact) {
         self.pubkey = pubkey
@@ -61,7 +63,7 @@ struct ProfileName: View {
     var current_nip05: NIP05? {
         nip05 ?? damus_state.profiles.is_validated(pubkey)
     }
-        
+
     func current_display_name(profile: Profile?) -> DisplayName {
         return display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)
     }
@@ -101,7 +103,7 @@ struct ProfileName: View {
                 .fontWeight(prefix == "@" ? .none : .bold)
 
             if let nip05 = current_nip05 {
-                NIP05Badge(nip05: nip05, pubkey: pubkey, contacts: damus_state.contacts, show_domain: show_nip5_domain, profiles: damus_state.profiles)
+                NIP05Badge(nip05: nip05, pubkey: pubkey, damus_state: damus_state, show_domain: show_nip5_domain, nip05_domain_favicon: nip05_domain_favicon)
             }
 
             if let friend = friend_type, current_nip05 == nil {
@@ -118,9 +120,15 @@ struct ProfileName: View {
 
         }
         .task {
-             if damus_state.purple.enable_purple {
-                 self.purple_account = try? await damus_state.purple.get_maybe_cached_account(pubkey: pubkey)
-             }
+            if damus_state.purple.enable_purple {
+                self.purple_account = try? await damus_state.purple.get_maybe_cached_account(pubkey: pubkey)
+            }
+        }
+        .task {
+            if let domain = current_nip05?.host {
+                self.nip05_domain_favicon = try? await damus_state.favicon_cache.lookup(domain)
+                    .largest()
+            }
         }
         .onReceive(handle_notify(.profile_updated)) { update in
             if update.pubkey != pubkey {
@@ -151,6 +159,24 @@ struct ProfileName: View {
         let nip05 = damus_state.profiles.is_validated(pubkey)
         if nip05 != self.nip05 {
             self.nip05 = nip05
+
+            if let domain = nip05?.host {
+                Task {
+                    let favicon = try? await damus_state.favicon_cache.lookup(domain)
+                        .filter {
+                            if let size = $0.size {
+                                return size.width <= 128 && size.height <= 128
+                            } else {
+                                return true
+                            }
+                        }
+                        .largest()
+
+                    await MainActor.run {
+                        self.nip05_domain_favicon = favicon
+                    }
+                }
+            }
         }
 
         if donation != profile.damus_donation {

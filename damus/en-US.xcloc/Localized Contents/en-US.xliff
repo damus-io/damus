@@ -308,6 +308,11 @@ Label for filter for all notifications.</note>
         <target>An additional percentage of each zap will be sent to support Damus development</target>
         <note>Text indicating that they can contribute zaps to support Damus development.</note>
       </trans-unit>
+      <trans-unit id="An internal error occurred in your wallet." xml:space="preserve">
+        <source>An internal error occurred in your wallet.</source>
+        <target>An internal error occurred in your wallet.</target>
+        <note>Error description for an internal error</note>
+      </trans-unit>
       <trans-unit id="An unexpected error happened while trying to perform this action. Please contact support." xml:space="preserve">
         <source>An unexpected error happened while trying to perform this action. Please contact support.</source>
         <target>An unexpected error happened while trying to perform this action. Please contact support.</target>
@@ -322,6 +327,11 @@ Label for filter for all notifications.</note>
         <source>An unknown error occurred while adding a relay.</source>
         <target>An unknown error occurred while adding a relay.</target>
         <note>Title of an unknown relay error message.</note>
+      </trans-unit>
+      <trans-unit id="An unspecified error occurred in your wallet." xml:space="preserve">
+        <source>An unspecified error occurred in your wallet.</source>
+        <target>An unspecified error occurred in your wallet.</target>
+        <note>Error description for an unspecified error</note>
       </trans-unit>
       <trans-unit id="Animations" xml:space="preserve">
         <source>Animations</source>
@@ -511,6 +521,11 @@ Text for button to cancel out of connecting Nostr Wallet Connect lightning walle
         <target>Check the address and/or the relay list.</target>
         <note>Human readable tip for error</note>
       </trans-unit>
+      <trans-unit id="Check your account permissions or contact support." xml:space="preserve">
+        <source>Check your account permissions or contact support.</source>
+        <target>Check your account permissions or contact support.</target>
+        <note>Tip for restricted operation</note>
+      </trans-unit>
       <trans-unit id="Check your internet connection and try again. If the error persists, contact support." xml:space="preserve">
         <source>Check your internet connection and try again. If the error persists, contact support.</source>
         <target>Check your internet connection and try again. If the error persists, contact support.</target>
@@ -557,9 +572,9 @@ Text for button to cancel out of connecting Nostr Wallet Connect lightning walle
         <note>Button label giving the user the option to close the sheet from which they posted a highlight
 Button label giving the user the option to close the sheet from which they were trying to post a highlight</note>
       </trans-unit>
-      <trans-unit id="Coinos is a service operated by a third-party. We have no access to your Coinos wallet." xml:space="preserve">
-        <source>Coinos is a service operated by a third-party. We have no access to your Coinos wallet.</source>
-        <target>Coinos is a service operated by a third-party. We have no access to your Coinos wallet.</target>
+      <trans-unit id="Coinos is a service operated by a third-party. The Damus team has no access to your wallet." xml:space="preserve">
+        <source>Coinos is a service operated by a third-party. The Damus team has no access to your wallet.</source>
+        <target>Coinos is a service operated by a third-party. The Damus team has no access to your wallet.</target>
         <note>Small caption with a disclaimer that Damus does not own or have access to Coinos wallets, Coinos is a third-party service.</note>
       </trans-unit>
       <trans-unit id="Coming soon" xml:space="preserve">
@@ -652,6 +667,11 @@ Prompt to user to continue</note>
         <target>Copied</target>
         <note>Label indicating that a user's key was copied.</note>
       </trans-unit>
+      <trans-unit id="Copied!" xml:space="preserve">
+        <source>Copied!</source>
+        <target>Copied!</target>
+        <note>Label indicating that the error technical information was successfully copied to the clipboard, which shows up as soon as the user clicks the copy button.</note>
+      </trans-unit>
       <trans-unit id="Copy" xml:space="preserve">
         <source>Copy</source>
         <target>Copy</target>
@@ -708,6 +728,11 @@ Context menu option for copying the version of damus.</note>
         <source>Copy note JSON</source>
         <target>Copy note JSON</target>
         <note>Context menu option for copying the JSON text from the note.</note>
+      </trans-unit>
+      <trans-unit id="Copy technical information" xml:space="preserve">
+        <source>Copy technical information</source>
+        <target>Copy technical information</target>
+        <note>Button label to allow user to copy technical information from an error screen (usually to provide our support team for further troubleshooting)</note>
       </trans-unit>
       <trans-unit id="Copy text" xml:space="preserve">
         <source>Copy text</source>
@@ -855,6 +880,11 @@ Section header for developer settings</note>
         <target>Developer Mode enables features and options that may help developers diagnose issues and improve this app. Most users will not need Developer Mode.</target>
         <note>Section header for Developer Settings view</note>
       </trans-unit>
+      <trans-unit id="Disable high balance warning" xml:space="preserve">
+        <source>Disable high balance warning</source>
+        <target>Disable high balance warning</target>
+        <note>Setting to disable high balance warnings on the user's wallet</note>
+      </trans-unit>
       <trans-unit id="Discard changes?" xml:space="preserve">
         <source>Discard changes?</source>
         <target>Discard changes?</target>
@@ -874,7 +904,8 @@ Button to disconnect from the relay.</note>
       <trans-unit id="Dismiss" xml:space="preserve">
         <source>Dismiss</source>
         <target>Dismiss</target>
-        <note>Button to dismiss alert
+        <note>Button label to dismiss the safety reminder that the user's wallet has a high balance
+Button to dismiss alert
 Button to dismiss error</note>
       </trans-unit>
       <trans-unit id="Done" xml:space="preserve">
@@ -925,6 +956,11 @@ Edit Button for editing profile</note>
         <source>Edit profile picture</source>
         <target>Edit profile picture</target>
         <note>Accessibility label for a button that edits a profile picture</note>
+      </trans-unit>
+      <trans-unit id="Empty error message" xml:space="preserve">
+        <source>Empty error message</source>
+        <target>Empty error message</target>
+        <note>A human readable placeholder to indicate that the error message is empty</note>
       </trans-unit>
       <trans-unit id="Enable Purple auto-translations" xml:space="preserve">
         <source>Enable Purple auto-translations</source>
@@ -1620,6 +1656,11 @@ Text label indicating that there is no NIP-11 relay description information foun
 Text label indicating that there is no NIP-11 relay software information found. In English, N/A stands for not applicable.
 Text label indicating that there is no NIP-11 relay software version information found. In English, N/A stands for not applicable.</note>
       </trans-unit>
+      <trans-unit id="NWC wallet" xml:space="preserve">
+        <source>NWC wallet</source>
+        <target>NWC wallet</target>
+        <note>Title for section in zap settings that controls general NWC wallet settings.</note>
+      </trans-unit>
       <trans-unit id="Name" xml:space="preserve">
         <source>Name</source>
         <target>Name</target>
@@ -1942,6 +1983,11 @@ Section title for deleting the user</note>
         <target>Plan</target>
         <note>Prompt selection of DeepL subscription plan to perform machine translations on notes</note>
       </trans-unit>
+      <trans-unit id="Please check for updates or contact your wallet provider." xml:space="preserve">
+        <source>Please check for updates or contact your wallet provider.</source>
+        <target>Please check for updates or contact your wallet provider.</target>
+        <note>Tip for not implemented error</note>
+      </trans-unit>
       <trans-unit id="Please check the address and try again" xml:space="preserve">
         <source>Please check the address and try again</source>
         <target>Please check the address and try again</target>
@@ -1962,10 +2008,25 @@ Section title for deleting the user</note>
         <target>Please contact support.</target>
         <note>Tip for an unknown relay error message.</note>
       </trans-unit>
+      <trans-unit id="Please contact the developer of your wallet provider for help." xml:space="preserve">
+        <source>Please contact the developer of your wallet provider for help.</source>
+        <target>Please contact the developer of your wallet provider for help.</target>
+        <note>Human readable error description for an unknown error raised by a wallet provider.</note>
+      </trans-unit>
       <trans-unit id="Please contact the person who provided the link, and ask for another link." xml:space="preserve">
         <source>Please contact the person who provided the link, and ask for another link.</source>
         <target>Please contact the person who provided the link, and ask for another link.</target>
         <note>User-visible tip on what to do if a link contains a deprecated "nrelay" reference.</note>
+      </trans-unit>
+      <trans-unit id="Please copy the technical info and send it to our support team." xml:space="preserve">
+        <source>Please copy the technical info and send it to our support team.</source>
+        <target>Please copy the technical info and send it to our support team.</target>
+        <note>Tip on how to resolve issue when wallet returns an invalid response</note>
+      </trans-unit>
+      <trans-unit id="Please deposit more funds and try again." xml:space="preserve">
+        <source>Please deposit more funds and try again.</source>
+        <target>Please deposit more funds and try again.</target>
+        <note>Tip for insufficient balance errors</note>
       </trans-unit>
       <trans-unit id="Please double-check the checkout web page, or go to the Side Menu → &quot;Purple&quot; to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue." xml:space="preserve">
         <source>Please double-check the checkout web page, or go to the Side Menu → "Purple" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue.</source>
@@ -1987,6 +2048,11 @@ Section title for deleting the user</note>
         <target>Please try again later or contact support if the issue persists.</target>
         <note>Human readable tip for error</note>
       </trans-unit>
+      <trans-unit id="Please try again or contact your wallet provider for further assistance." xml:space="preserve">
+        <source>Please try again or contact your wallet provider for further assistance.</source>
+        <target>Please try again or contact your wallet provider for further assistance.</target>
+        <note>Tip for unspecified error</note>
+      </trans-unit>
       <trans-unit id="Please try again, check the URL for typos, or contact support for further help." xml:space="preserve">
         <source>Please try again, check the URL for typos, or contact support for further help.</source>
         <target>Please try again, check the URL for typos, or contact support for further help.</target>
@@ -1996,6 +2062,11 @@ Section title for deleting the user</note>
         <source>Please try opening this content on another Nostr app that supports this type of content.</source>
         <target>Please try opening this content on another Nostr app that supports this type of content.</target>
         <note>User-visible advice on what to do if they see the error indicating a note has an unknown kind or is unsupported for viewing.</note>
+      </trans-unit>
+      <trans-unit id="Please verify your credentials or permissions." xml:space="preserve">
+        <source>Please verify your credentials or permissions.</source>
+        <target>Please verify your credentials or permissions.</target>
+        <note>Tip for unauthorized access</note>
       </trans-unit>
       <trans-unit id="Point your camera to a QR code…" xml:space="preserve">
         <source>Point your camera to a QR code…</source>
@@ -2810,6 +2881,11 @@ Enjoy!</target>
         <target>This device's in-app purchase is registered to a different Nostr account. Unable to manage this Purple account. If you believe this was a mistake, please contact us via support@damus.io.</target>
         <note>Notice label that user cannot manage their In-App purchases</note>
       </trans-unit>
+      <trans-unit id="This feature is not implemented by your wallet." xml:space="preserve">
+        <source>This feature is not implemented by your wallet.</source>
+        <target>This feature is not implemented by your wallet.</target>
+        <note>Error description for not implemented feature</note>
+      </trans-unit>
       <trans-unit id="This is a public key, you will not be able to make notes or interact in any way. This is used for viewing accounts from their perspective." xml:space="preserve">
         <source>This is a public key, you will not be able to make notes or interact in any way. This is used for viewing accounts from their perspective.</source>
         <target>This is a public key, you will not be able to make notes or interact in any way. This is used for viewing accounts from their perspective.</target>
@@ -2838,6 +2914,11 @@ Nice to meet you all! #introductions #plebchain </target>
         <source>This note contains too many items and cannot be rendered</source>
         <target>This note contains too many items and cannot be rendered</target>
         <note>Error message indicating that a note is too big and cannot be rendered</note>
+      </trans-unit>
+      <trans-unit id="This operation is restricted by your wallet." xml:space="preserve">
+        <source>This operation is restricted by your wallet.</source>
+        <target>This operation is restricted by your wallet.</target>
+        <note>Error description for restricted operation</note>
       </trans-unit>
       <trans-unit id="This relay is already in your list." xml:space="preserve">
         <source>This relay is already in your list.</source>
@@ -2914,6 +2995,11 @@ Section header for text and appearance settings</note>
         <source>Try checking the link again, your internet connection, or contact the person who provided you the link for help.</source>
         <target>Try checking the link again, your internet connection, or contact the person who provided you the link for help.</target>
         <note>Tips on what to do if a note cannot be found.</note>
+      </trans-unit>
+      <trans-unit id="Try restarting your wallet or contacting support if the problem persists." xml:space="preserve">
+        <source>Try restarting your wallet or contacting support if the problem persists.</source>
+        <target>Try restarting your wallet or contacting support if the problem persists.</target>
+        <note>Tip for internal error</note>
       </trans-unit>
       <trans-unit id="Type %@ to delete" xml:space="preserve">
         <source>Type %@ to delete</source>
@@ -3107,6 +3193,16 @@ This will reset your contact list, including the list of everyone you follow and
 This will reset your contact list, including the list of everyone you follow and potentially the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY.</target>
         <note>Alert for resetting the user's contact list.</note>
       </trans-unit>
+      <trans-unit id="Wait a few moments, and then try again." xml:space="preserve">
+        <source>Wait a few moments, and then try again.</source>
+        <target>Wait a few moments, and then try again.</target>
+        <note>Tip for rate limit error</note>
+      </trans-unit>
+      <trans-unit id="Wait for the quota to reset, or configure your wallet provider to allow a higher limit." xml:space="preserve">
+        <source>Wait for the quota to reset, or configure your wallet provider to allow a higher limit.</source>
+        <target>Wait for the quota to reset, or configure your wallet provider to allow a higher limit.</target>
+        <note>Tip for quota exceeded</note>
+      </trans-unit>
       <trans-unit id="Wallet" xml:space="preserve">
         <source>Wallet</source>
         <target>Wallet</target>
@@ -3114,6 +3210,21 @@ This will reset your contact list, including the list of everyone you follow and
 Navigation title for attaching Nostr Wallet Connect lightning wallet.
 Sidebar menu label for Wallet view.
 Title for section in zap settings that controls the Lightning wallet selection.</note>
+      </trans-unit>
+      <trans-unit id="Wallet provider returned a response that we could not decrypt." xml:space="preserve">
+        <source>Wallet provider returned a response that we could not decrypt.</source>
+        <target>Wallet provider returned a response that we could not decrypt.</target>
+        <note>Error description shown to the user when a response from the wallet provider contains data the app could not decrypt.</note>
+      </trans-unit>
+      <trans-unit id="Wallet provider returned a response that we do not understand." xml:space="preserve">
+        <source>Wallet provider returned a response that we do not understand.</source>
+        <target>Wallet provider returned a response that we do not understand.</target>
+        <note>Error description shown to the user when a response from the wallet provider contains data the app does not understand</note>
+      </trans-unit>
+      <trans-unit id="Wallet provider returned an invalid response." xml:space="preserve">
+        <source>Wallet provider returned an invalid response.</source>
+        <target>Wallet provider returned an invalid response.</target>
+        <note>Error description shown to the user when a response from the wallet provider is invalid</note>
       </trans-unit>
       <trans-unit id="We did not detect any issues that we can automatically fix for you. If you are having issues, please contact Damus support: [support@damus.io](mailto:support@damus.io)" xml:space="preserve">
         <source>We did not detect any issues that we can automatically fix for you. If you are having issues, please contact Damus support: [support@damus.io](mailto:support@damus.io)</source>
@@ -3206,6 +3317,11 @@ User confirm Yes</note>
         <target>Yes, Overwrite</target>
         <note>Text of button that confirms to overwrite the existing mutelist.</note>
       </trans-unit>
+      <trans-unit id="You are not authorized to perform this action with your wallet." xml:space="preserve">
+        <source>You are not authorized to perform this action with your wallet.</source>
+        <target>You are not authorized to perform this action with your wallet.</target>
+        <note>Error description for unauthorized access</note>
+      </trans-unit>
       <trans-unit id="You cannot post a highlight because you are not logged in with a private key! Please close this, login with a private key (or nsec), and try again." xml:space="preserve">
         <source>You cannot post a highlight because you are not logged in with a private key! Please close this, login with a private key (or nsec), and try again.</source>
         <target>You cannot post a highlight because you are not logged in with a private key! Please close this, login with a private key (or nsec), and try again.</target>
@@ -3276,6 +3392,11 @@ User confirm Yes</note>
         <target>Your Purple subscription has expired. Renew?</target>
         <note>A notification message explaining to the user that their Damus Purple Subscription has expired, prompting them to renew.</note>
       </trans-unit>
+      <trans-unit id="Your connected wallet raised an unknown error. Message: %s" xml:space="preserve">
+        <source>Your connected wallet raised an unknown error. Message: %s</source>
+        <target>Your connected wallet raised an unknown error. Message: %s</target>
+        <note>Human readable error description for unknown error</note>
+      </trans-unit>
       <trans-unit id="Your draft has been saved to storage." xml:space="preserve">
         <source>Your draft has been saved to storage.</source>
         <target>Your draft has been saved to storage.</target>
@@ -3300,6 +3421,21 @@ User confirm Yes</note>
         <source>Your report will be sent to the relays you are connected to</source>
         <target>Your report will be sent to the relays you are connected to</target>
         <note>Footer text to inform user what will happen when the report is submitted.</note>
+      </trans-unit>
+      <trans-unit id="Your transaction quota has been exceeded." xml:space="preserve">
+        <source>Your transaction quota has been exceeded.</source>
+        <target>Your transaction quota has been exceeded.</target>
+        <note>Error description for quota exceeded</note>
+      </trans-unit>
+      <trans-unit id="Your wallet does not have sufficient balance for this transaction." xml:space="preserve">
+        <source>Your wallet does not have sufficient balance for this transaction.</source>
+        <target>Your wallet does not have sufficient balance for this transaction.</target>
+        <note>Error description for insufficient balance</note>
+      </trans-unit>
+      <trans-unit id="Your wallet is temporarily being rate limited." xml:space="preserve">
+        <source>Your wallet is temporarily being rate limited.</source>
+        <target>Your wallet is temporarily being rate limited.</target>
+        <note>Error description for rate limit error</note>
       </trans-unit>
       <trans-unit id="Zap" xml:space="preserve">
         <source>Zap</source>
@@ -4287,6 +4423,11 @@ Label for filter for all notifications.</note>
         <target state="new">An additional percentage of each zap will be sent to support Damus development</target>
         <note>Text indicating that they can contribute zaps to support Damus development.</note>
       </trans-unit>
+      <trans-unit id="An internal error occurred in your wallet." xml:space="preserve">
+        <source>An internal error occurred in your wallet.</source>
+        <target state="new">An internal error occurred in your wallet.</target>
+        <note>Error description for an internal error</note>
+      </trans-unit>
       <trans-unit id="An unexpected error happened while trying to perform this action. Please contact support." xml:space="preserve">
         <source>An unexpected error happened while trying to perform this action. Please contact support.</source>
         <target state="new">An unexpected error happened while trying to perform this action. Please contact support.</target>
@@ -4301,6 +4442,11 @@ Label for filter for all notifications.</note>
         <source>An unknown error occurred while adding a relay.</source>
         <target state="new">An unknown error occurred while adding a relay.</target>
         <note>Title of an unknown relay error message.</note>
+      </trans-unit>
+      <trans-unit id="An unspecified error occurred in your wallet." xml:space="preserve">
+        <source>An unspecified error occurred in your wallet.</source>
+        <target state="new">An unspecified error occurred in your wallet.</target>
+        <note>Error description for an unspecified error</note>
       </trans-unit>
       <trans-unit id="Animations" xml:space="preserve">
         <source>Animations</source>
@@ -4490,6 +4636,11 @@ Text for button to cancel out of connecting Nostr Wallet Connect lightning walle
         <target state="new">Check the address and/or the relay list.</target>
         <note>Human readable tip for error</note>
       </trans-unit>
+      <trans-unit id="Check your account permissions or contact support." xml:space="preserve">
+        <source>Check your account permissions or contact support.</source>
+        <target state="new">Check your account permissions or contact support.</target>
+        <note>Tip for restricted operation</note>
+      </trans-unit>
       <trans-unit id="Check your internet connection and try again. If the error persists, contact support." xml:space="preserve">
         <source>Check your internet connection and try again. If the error persists, contact support.</source>
         <target state="new">Check your internet connection and try again. If the error persists, contact support.</target>
@@ -4539,9 +4690,9 @@ Button label giving the user the option to close the sheet from which they were 
 Button label giving the user the option to close the sheet from which they were trying to share.
 Button label giving the user the option to close the view when no content is available to share</note>
       </trans-unit>
-      <trans-unit id="Coinos is a service operated by a third-party. We have no access to your Coinos wallet." xml:space="preserve">
-        <source>Coinos is a service operated by a third-party. We have no access to your Coinos wallet.</source>
-        <target state="new">Coinos is a service operated by a third-party. We have no access to your Coinos wallet.</target>
+      <trans-unit id="Coinos is a service operated by a third-party. The Damus team has no access to your wallet." xml:space="preserve">
+        <source>Coinos is a service operated by a third-party. The Damus team has no access to your wallet.</source>
+        <target state="new">Coinos is a service operated by a third-party. The Damus team has no access to your wallet.</target>
         <note>Small caption with a disclaimer that Damus does not own or have access to Coinos wallets, Coinos is a third-party service.</note>
       </trans-unit>
       <trans-unit id="Coming soon" xml:space="preserve">
@@ -4634,6 +4785,11 @@ Prompt to user to continue</note>
         <target state="new">Copied</target>
         <note>Label indicating that a user's key was copied.</note>
       </trans-unit>
+      <trans-unit id="Copied!" xml:space="preserve">
+        <source>Copied!</source>
+        <target state="new">Copied!</target>
+        <note>Label indicating that the error technical information was successfully copied to the clipboard, which shows up as soon as the user clicks the copy button.</note>
+      </trans-unit>
       <trans-unit id="Copy" xml:space="preserve">
         <source>Copy</source>
         <target state="new">Copy</target>
@@ -4690,6 +4846,11 @@ Context menu option for copying the version of damus.</note>
         <source>Copy note JSON</source>
         <target state="new">Copy note JSON</target>
         <note>Context menu option for copying the JSON text from the note.</note>
+      </trans-unit>
+      <trans-unit id="Copy technical information" xml:space="preserve">
+        <source>Copy technical information</source>
+        <target state="new">Copy technical information</target>
+        <note>Button label to allow user to copy technical information from an error screen (usually to provide our support team for further troubleshooting)</note>
       </trans-unit>
       <trans-unit id="Copy text" xml:space="preserve">
         <source>Copy text</source>
@@ -4837,6 +4998,11 @@ Section header for developer settings</note>
         <target state="new">Developer Mode enables features and options that may help developers diagnose issues and improve this app. Most users will not need Developer Mode.</target>
         <note>Section header for Developer Settings view</note>
       </trans-unit>
+      <trans-unit id="Disable high balance warning" xml:space="preserve">
+        <source>Disable high balance warning</source>
+        <target state="new">Disable high balance warning</target>
+        <note>Setting to disable high balance warnings on the user's wallet</note>
+      </trans-unit>
       <trans-unit id="Discard changes?" xml:space="preserve">
         <source>Discard changes?</source>
         <target state="new">Discard changes?</target>
@@ -4856,7 +5022,8 @@ Button to disconnect from the relay.</note>
       <trans-unit id="Dismiss" xml:space="preserve">
         <source>Dismiss</source>
         <target state="new">Dismiss</target>
-        <note>Button to dismiss alert
+        <note>Button label to dismiss the safety reminder that the user's wallet has a high balance
+Button to dismiss alert
 Button to dismiss error</note>
       </trans-unit>
       <trans-unit id="Done" xml:space="preserve">
@@ -4907,6 +5074,11 @@ Edit Button for editing profile</note>
         <source>Edit profile picture</source>
         <target state="new">Edit profile picture</target>
         <note>Accessibility label for a button that edits a profile picture</note>
+      </trans-unit>
+      <trans-unit id="Empty error message" xml:space="preserve">
+        <source>Empty error message</source>
+        <target state="new">Empty error message</target>
+        <note>A human readable placeholder to indicate that the error message is empty</note>
       </trans-unit>
       <trans-unit id="Enable Purple auto-translations" xml:space="preserve">
         <source>Enable Purple auto-translations</source>
@@ -5597,6 +5769,11 @@ Text label indicating that there is no NIP-11 relay description information foun
 Text label indicating that there is no NIP-11 relay software information found. In English, N/A stands for not applicable.
 Text label indicating that there is no NIP-11 relay software version information found. In English, N/A stands for not applicable.</note>
       </trans-unit>
+      <trans-unit id="NWC wallet" xml:space="preserve">
+        <source>NWC wallet</source>
+        <target state="new">NWC wallet</target>
+        <note>Title for section in zap settings that controls general NWC wallet settings.</note>
+      </trans-unit>
       <trans-unit id="Name" xml:space="preserve">
         <source>Name</source>
         <target state="new">Name</target>
@@ -5919,6 +6096,11 @@ Section title for deleting the user</note>
         <target state="new">Plan</target>
         <note>Prompt selection of DeepL subscription plan to perform machine translations on notes</note>
       </trans-unit>
+      <trans-unit id="Please check for updates or contact your wallet provider." xml:space="preserve">
+        <source>Please check for updates or contact your wallet provider.</source>
+        <target state="new">Please check for updates or contact your wallet provider.</target>
+        <note>Tip for not implemented error</note>
+      </trans-unit>
       <trans-unit id="Please check the address and try again" xml:space="preserve">
         <source>Please check the address and try again</source>
         <target state="new">Please check the address and try again</target>
@@ -5939,10 +6121,25 @@ Section title for deleting the user</note>
         <target state="new">Please contact support.</target>
         <note>Tip for an unknown relay error message.</note>
       </trans-unit>
+      <trans-unit id="Please contact the developer of your wallet provider for help." xml:space="preserve">
+        <source>Please contact the developer of your wallet provider for help.</source>
+        <target state="new">Please contact the developer of your wallet provider for help.</target>
+        <note>Human readable error description for an unknown error raised by a wallet provider.</note>
+      </trans-unit>
       <trans-unit id="Please contact the person who provided the link, and ask for another link." xml:space="preserve">
         <source>Please contact the person who provided the link, and ask for another link.</source>
         <target state="new">Please contact the person who provided the link, and ask for another link.</target>
         <note>User-visible tip on what to do if a link contains a deprecated "nrelay" reference.</note>
+      </trans-unit>
+      <trans-unit id="Please copy the technical info and send it to our support team." xml:space="preserve">
+        <source>Please copy the technical info and send it to our support team.</source>
+        <target state="new">Please copy the technical info and send it to our support team.</target>
+        <note>Tip on how to resolve issue when wallet returns an invalid response</note>
+      </trans-unit>
+      <trans-unit id="Please deposit more funds and try again." xml:space="preserve">
+        <source>Please deposit more funds and try again.</source>
+        <target state="new">Please deposit more funds and try again.</target>
+        <note>Tip for insufficient balance errors</note>
       </trans-unit>
       <trans-unit id="Please double-check the checkout web page, or go to the Side Menu → &quot;Purple&quot; to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue." xml:space="preserve">
         <source>Please double-check the checkout web page, or go to the Side Menu → "Purple" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue.</source>
@@ -5964,6 +6161,11 @@ Section title for deleting the user</note>
         <target state="new">Please try again later or contact support if the issue persists.</target>
         <note>Human readable tip for error</note>
       </trans-unit>
+      <trans-unit id="Please try again or contact your wallet provider for further assistance." xml:space="preserve">
+        <source>Please try again or contact your wallet provider for further assistance.</source>
+        <target state="new">Please try again or contact your wallet provider for further assistance.</target>
+        <note>Tip for unspecified error</note>
+      </trans-unit>
       <trans-unit id="Please try again, check the URL for typos, or contact support for further help." xml:space="preserve">
         <source>Please try again, check the URL for typos, or contact support for further help.</source>
         <target state="new">Please try again, check the URL for typos, or contact support for further help.</target>
@@ -5973,6 +6175,11 @@ Section title for deleting the user</note>
         <source>Please try opening this content on another Nostr app that supports this type of content.</source>
         <target state="new">Please try opening this content on another Nostr app that supports this type of content.</target>
         <note>User-visible advice on what to do if they see the error indicating a note has an unknown kind or is unsupported for viewing.</note>
+      </trans-unit>
+      <trans-unit id="Please verify your credentials or permissions." xml:space="preserve">
+        <source>Please verify your credentials or permissions.</source>
+        <target state="new">Please verify your credentials or permissions.</target>
+        <note>Tip for unauthorized access</note>
       </trans-unit>
       <trans-unit id="Point your camera to a QR code…" xml:space="preserve">
         <source>Point your camera to a QR code…</source>
@@ -6792,6 +6999,11 @@ Enjoy!</target>
         <target state="new">This device's in-app purchase is registered to a different Nostr account. Unable to manage this Purple account. If you believe this was a mistake, please contact us via support@damus.io.</target>
         <note>Notice label that user cannot manage their In-App purchases</note>
       </trans-unit>
+      <trans-unit id="This feature is not implemented by your wallet." xml:space="preserve">
+        <source>This feature is not implemented by your wallet.</source>
+        <target state="new">This feature is not implemented by your wallet.</target>
+        <note>Error description for not implemented feature</note>
+      </trans-unit>
       <trans-unit id="This is a public key, you will not be able to make notes or interact in any way. This is used for viewing accounts from their perspective." xml:space="preserve">
         <source>This is a public key, you will not be able to make notes or interact in any way. This is used for viewing accounts from their perspective.</source>
         <target state="new">This is a public key, you will not be able to make notes or interact in any way. This is used for viewing accounts from their perspective.</target>
@@ -6815,6 +7027,11 @@ Nice to meet you all! #introductions #plebchain </target>
         <source>This note contains too many items and cannot be rendered</source>
         <target state="new">This note contains too many items and cannot be rendered</target>
         <note>Error message indicating that a note is too big and cannot be rendered</note>
+      </trans-unit>
+      <trans-unit id="This operation is restricted by your wallet." xml:space="preserve">
+        <source>This operation is restricted by your wallet.</source>
+        <target state="new">This operation is restricted by your wallet.</target>
+        <note>Error description for restricted operation</note>
       </trans-unit>
       <trans-unit id="This relay is already in your list." xml:space="preserve">
         <source>This relay is already in your list.</source>
@@ -6891,6 +7108,11 @@ Section header for text and appearance settings</note>
         <source>Try checking the link again, your internet connection, or contact the person who provided you the link for help.</source>
         <target state="new">Try checking the link again, your internet connection, or contact the person who provided you the link for help.</target>
         <note>Tips on what to do if a note cannot be found.</note>
+      </trans-unit>
+      <trans-unit id="Try restarting your wallet or contacting support if the problem persists." xml:space="preserve">
+        <source>Try restarting your wallet or contacting support if the problem persists.</source>
+        <target state="new">Try restarting your wallet or contacting support if the problem persists.</target>
+        <note>Tip for internal error</note>
       </trans-unit>
       <trans-unit id="Type %@ to delete" xml:space="preserve">
         <source>Type %@ to delete</source>
@@ -7084,6 +7306,16 @@ This will reset your contact list, including the list of everyone you follow and
 This will reset your contact list, including the list of everyone you follow and potentially the list of all relays you usually connect to. ONLY PROCEED IF YOU ARE SURE YOU HAVE LOST YOUR CONTACT LIST BEYOND RECOVERABILITY.</target>
         <note>Alert for resetting the user's contact list.</note>
       </trans-unit>
+      <trans-unit id="Wait a few moments, and then try again." xml:space="preserve">
+        <source>Wait a few moments, and then try again.</source>
+        <target state="new">Wait a few moments, and then try again.</target>
+        <note>Tip for rate limit error</note>
+      </trans-unit>
+      <trans-unit id="Wait for the quota to reset, or configure your wallet provider to allow a higher limit." xml:space="preserve">
+        <source>Wait for the quota to reset, or configure your wallet provider to allow a higher limit.</source>
+        <target state="new">Wait for the quota to reset, or configure your wallet provider to allow a higher limit.</target>
+        <note>Tip for quota exceeded</note>
+      </trans-unit>
       <trans-unit id="Wallet" xml:space="preserve">
         <source>Wallet</source>
         <target state="new">Wallet</target>
@@ -7091,6 +7323,21 @@ This will reset your contact list, including the list of everyone you follow and
 Navigation title for attaching Nostr Wallet Connect lightning wallet.
 Sidebar menu label for Wallet view.
 Title for section in zap settings that controls the Lightning wallet selection.</note>
+      </trans-unit>
+      <trans-unit id="Wallet provider returned a response that we could not decrypt." xml:space="preserve">
+        <source>Wallet provider returned a response that we could not decrypt.</source>
+        <target state="new">Wallet provider returned a response that we could not decrypt.</target>
+        <note>Error description shown to the user when a response from the wallet provider contains data the app could not decrypt.</note>
+      </trans-unit>
+      <trans-unit id="Wallet provider returned a response that we do not understand." xml:space="preserve">
+        <source>Wallet provider returned a response that we do not understand.</source>
+        <target state="new">Wallet provider returned a response that we do not understand.</target>
+        <note>Error description shown to the user when a response from the wallet provider contains data the app does not understand</note>
+      </trans-unit>
+      <trans-unit id="Wallet provider returned an invalid response." xml:space="preserve">
+        <source>Wallet provider returned an invalid response.</source>
+        <target state="new">Wallet provider returned an invalid response.</target>
+        <note>Error description shown to the user when a response from the wallet provider is invalid</note>
       </trans-unit>
       <trans-unit id="We did not detect any issues that we can automatically fix for you. If you are having issues, please contact Damus support: [support@damus.io](mailto:support@damus.io)" xml:space="preserve">
         <source>We did not detect any issues that we can automatically fix for you. If you are having issues, please contact Damus support: [support@damus.io](mailto:support@damus.io)</source>
@@ -7183,6 +7430,11 @@ User confirm Yes</note>
         <target state="new">Yes, Overwrite</target>
         <note>Text of button that confirms to overwrite the existing mutelist.</note>
       </trans-unit>
+      <trans-unit id="You are not authorized to perform this action with your wallet." xml:space="preserve">
+        <source>You are not authorized to perform this action with your wallet.</source>
+        <target state="new">You are not authorized to perform this action with your wallet.</target>
+        <note>Error description for unauthorized access</note>
+      </trans-unit>
       <trans-unit id="You cannot share content because you are not logged in. Please close this view, log in to your account, and try again." xml:space="preserve">
         <source>You cannot share content because you are not logged in. Please close this view, log in to your account, and try again.</source>
         <target state="new">You cannot share content because you are not logged in. Please close this view, log in to your account, and try again.</target>
@@ -7248,6 +7500,11 @@ User confirm Yes</note>
         <target state="new">Your Purple subscription has expired. Renew?</target>
         <note>A notification message explaining to the user that their Damus Purple Subscription has expired, prompting them to renew.</note>
       </trans-unit>
+      <trans-unit id="Your connected wallet raised an unknown error. Message: %s" xml:space="preserve">
+        <source>Your connected wallet raised an unknown error. Message: %s</source>
+        <target state="new">Your connected wallet raised an unknown error. Message: %s</target>
+        <note>Human readable error description for unknown error</note>
+      </trans-unit>
       <trans-unit id="Your content is being broadcasted to the network. Please wait." xml:space="preserve">
         <source>Your content is being broadcasted to the network. Please wait.</source>
         <target state="new">Your content is being broadcasted to the network. Please wait.</target>
@@ -7272,6 +7529,21 @@ User confirm Yes</note>
         <source>Your report will be sent to the relays you are connected to</source>
         <target state="new">Your report will be sent to the relays you are connected to</target>
         <note>Footer text to inform user what will happen when the report is submitted.</note>
+      </trans-unit>
+      <trans-unit id="Your transaction quota has been exceeded." xml:space="preserve">
+        <source>Your transaction quota has been exceeded.</source>
+        <target state="new">Your transaction quota has been exceeded.</target>
+        <note>Error description for quota exceeded</note>
+      </trans-unit>
+      <trans-unit id="Your wallet does not have sufficient balance for this transaction." xml:space="preserve">
+        <source>Your wallet does not have sufficient balance for this transaction.</source>
+        <target state="new">Your wallet does not have sufficient balance for this transaction.</target>
+        <note>Error description for insufficient balance</note>
+      </trans-unit>
+      <trans-unit id="Your wallet is temporarily being rate limited." xml:space="preserve">
+        <source>Your wallet is temporarily being rate limited.</source>
+        <target state="new">Your wallet is temporarily being rate limited.</target>
+        <note>Error description for rate limit error</note>
       </trans-unit>
       <trans-unit id="Zap" xml:space="preserve">
         <source>Zap</source>

@@ -1,5 +1,5 @@
 {
-  "originHash" : "06318d35ee2e6bd681b95591e67da33a9461b48a3c652e58bd9d1a6f0d82bdac",
+  "originHash" : "1fc7e0b44329ba72cd285eeb022b5b92582cd01586b920d243cb0485c2e69dcc",
   "pins" : [
     {
       "identity" : "codescanner",
@@ -33,6 +33,15 @@
       "state" : {
         "revision" : "3f48903721eae223238ff0af17c22d6373d33813",
         "version" : "0.2.0"
+      }
+    },
+    {
+      "identity" : "faviconfinder",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/will-lumley/FaviconFinder.git",
+      "state" : {
+        "revision" : "9279f4371f4877ca302ba3bf1015f3f58ae4a56c",
+        "version" : "5.1.4"
       }
     },
     {
@@ -103,6 +112,15 @@
       "state" : {
         "revision" : "4c50bff6c168f74425f70476be62a072980d2da7",
         "version" : "0.1.2"
+      }
+    },
+    {
+      "identity" : "swiftsoup",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/scinfu/SwiftSoup.git",
+      "state" : {
+        "revision" : "bba848db50462894e7fc0891d018dfecad4ef11e",
+        "version" : "2.8.7"
       }
     },
     {

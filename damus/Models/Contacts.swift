@@ -38,6 +38,10 @@ class Contacts {
         return friends
     }
 
+    func get_friend_of_friends_list() -> Set<Pubkey> {
+        return friend_of_friends
+    }
+
     func get_followed_hashtags() -> Set<String> {
         guard let ev = self.event else { return Set() }
         return Set(ev.referenced_hashtags.map({ $0.hashtag }))
