@@ -8,14 +8,18 @@
 import SwiftUI
 
 struct TransactionView: View {
-    
+    @Environment(\.redactionReasons) var redactionReasons
+
     let damus_state: DamusState
     var transaction: WalletConnect.Transaction
-    
+
+    @Binding var hide_balance: Bool
+
     var body: some View {
+        let redactedForPrivacy = redactionReasons.contains(.privacy)
         let isIncomingTransaction = transaction.type == "incoming"
         let txType = isIncomingTransaction ? "arrow-bottom-left" : "arrow-top-right"
-        let txColor = isIncomingTransaction ? DamusColors.success : Color.gray
+        let txColor = (isIncomingTransaction && !hide_balance && !redactedForPrivacy) ? DamusColors.success : Color.gray
         let txOp = isIncomingTransaction ? "+" : "-"
         let created_at = Date.init(timeIntervalSince1970: TimeInterval(transaction.created_at))
         let formatter = RelativeDateTimeFormatter()
@@ -26,21 +30,23 @@ struct TransactionView: View {
         VStack(alignment: .leading) {
             HStack(alignment: .center) {
                 ZStack {
-                    ProfilePicView(pubkey: pubkey, size: 45, highlight: .custom(.damusAdaptableBlack, 0.1), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                    ProfilePicView(pubkey: pubkey, size: 45, highlight: .custom(.damusAdaptableBlack, 0.1), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, privacy_sensitive: true)
                         .onTapGesture {
                             damus_state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))
                         }
-                    
-                    Image(txType)
-                        .resizable()
-                        .frame(width: 18, height: 18)
-                        .foregroundColor(.white)
-                        .padding(2)
-                        .background(txColor)
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.damusAdaptableWhite, lineWidth: 1.0))
-                        .padding(.top, 25)
-                        .padding(.leading, 35)
+
+                    if !hide_balance && !redactedForPrivacy {
+                        Image(txType)
+                            .resizable()
+                            .frame(width: 18, height: 18)
+                            .foregroundColor(.white)
+                            .padding(2)
+                            .background(txColor)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(Color.damusAdaptableWhite, lineWidth: 1.0))
+                            .padding(.top, 25)
+                            .padding(.leading, 35)
+                    }
                 }
                 
                 VStack(alignment: .leading, spacing: 10) {
@@ -58,10 +64,17 @@ struct TransactionView: View {
                 
                 Spacer()
 
-                Text(verbatim: "\(txOp) \(format_msats(transaction.amount))")
-                    .font(.headline)
-                    .foregroundColor(txColor)
-                    .bold()
+                if hide_balance {
+                    Text(verbatim: "*****")
+                        .font(.headline)
+                        .foregroundColor(txColor)
+                        .bold()
+                } else {
+                    Text(verbatim: "\(txOp) \(format_msats(transaction.amount))")
+                        .font(.headline)
+                        .foregroundColor(txColor)
+                        .bold()
+                }
             }
             .frame(maxWidth: .infinity, minHeight: 75, alignment: .center)
             .padding(.horizontal, 10)
@@ -107,27 +120,32 @@ struct TransactionsView: View {
         transactions?.sorted(by: { $0.created_at > $1.created_at })
     }
 
+    @Binding var hide_balance: Bool
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Latest transactions", comment: "Heading for latest wallet transactions list")
                 .foregroundStyle(DamusColors.neutral6)
-            
-            if let sortedTransactions {
-                if sortedTransactions.isEmpty {
-                    emptyTransactions
-                } else {
-                    ForEach(sortedTransactions, id: \.self) { transaction in
-                        TransactionView(damus_state: damus_state, transaction: transaction)
+
+            Group {
+                if let sortedTransactions {
+                    if sortedTransactions.isEmpty {
+                        emptyTransactions
+                    } else {
+                        ForEach(sortedTransactions, id: \.self) { transaction in
+                            TransactionView(damus_state: damus_state, transaction: transaction, hide_balance: $hide_balance)
+                        }
                     }
                 }
+                else {
+                    // Make sure we do not show "No transactions yet" to the user when still loading (or when failed to load)
+                    // This is important because if we show that when things are not loaded properly, we risk scaring the user into thinking that they have lost funds.
+                    emptyTransactions
+                        .redacted(reason: .placeholder)
+                        .shimmer(true)
+                }
             }
-            else {
-                // Make sure we do not show "No transactions yet" to the user when still loading (or when failed to load)
-                // This is important because if we show that when things are not loaded properly, we risk scaring the user into thinking that they have lost funds.
-                emptyTransactions
-                    .redacted(reason: .placeholder)
-                    .shimmer(true)
-            }
+            .privacySensitive()
         }
     }
     
@@ -154,8 +172,10 @@ struct TransactionsView_Previews: PreviewProvider {
     static let transaction3: WalletConnect.Transaction = WalletConnect.Transaction(type: "outgoing", invoice: "", description: "", description_hash: "", preimage: "", payment_hash: "123456789042", amount: 303000, fees_paid: 0, created_at: 1737590101, expires_at: 0, settled_at: 0, metadata: nil)
     static let transaction4: WalletConnect.Transaction = WalletConnect.Transaction(type: "incoming", invoice: "", description: "", description_hash: "", preimage: "", payment_hash: "1234567890662", amount: 720000, fees_paid: 0, created_at: 1737090300, expires_at: 0, settled_at: 0, metadata: nil)
     static var test_transactions: [WalletConnect.Transaction] = [transaction1, transaction2, transaction3, transaction4]
-    
+
+    @State private static var hide_balance: Bool = false
+
     static var previews: some View {
-        TransactionsView(damus_state: tds, transactions: test_transactions)
+        TransactionsView(damus_state: tds, transactions: test_transactions, hide_balance: $hide_balance)
     }
 }

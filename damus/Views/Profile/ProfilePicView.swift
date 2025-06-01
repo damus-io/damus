@@ -31,7 +31,6 @@ func pfp_line_width(_ h: Highlight) -> CGFloat {
 struct InnerProfilePicView: View {
     let url: URL?
     let fallbackUrl: URL?
-    let pubkey: Pubkey
     let size: CGFloat
     let highlight: Highlight
     let disable_animation: Bool
@@ -65,16 +64,19 @@ struct InnerProfilePicView: View {
 
 
 struct ProfilePicView: View {
+    @Environment(\.redactionReasons) var redactionReasons
+
     let pubkey: Pubkey
     let size: CGFloat
     let highlight: Highlight
     let profiles: Profiles
     let disable_animation: Bool
     let zappability_indicator: Bool
-    
+    let privacy_sensitive: Bool
+
     @State var picture: String?
     
-    init(pubkey: Pubkey, size: CGFloat, highlight: Highlight, profiles: Profiles, disable_animation: Bool, picture: String? = nil, show_zappability: Bool? = nil) {
+    init(pubkey: Pubkey, size: CGFloat, highlight: Highlight, profiles: Profiles, disable_animation: Bool, picture: String? = nil, show_zappability: Bool? = nil, privacy_sensitive: Bool = false) {
         self.pubkey = pubkey
         self.profiles = profiles
         self.size = size
@@ -82,15 +84,24 @@ struct ProfilePicView: View {
         self._picture = State(initialValue: picture)
         self.disable_animation = disable_animation
         self.zappability_indicator = show_zappability ?? false
+        self.privacy_sensitive = privacy_sensitive
     }
-    
+
+    var privacy_sensitive_pubkey: Pubkey {
+        if privacy_sensitive && redactionReasons.contains(.privacy) {
+            ANON_PUBKEY
+        } else {
+            pubkey
+        }
+    }
+
     func get_lnurl() -> String? {
         return profiles.lookup_with_timestamp(pubkey)?.unsafeUnownedValue?.lnurl
     }
     
     var body: some View {
         ZStack (alignment: Alignment(horizontal: .trailing, vertical: .bottom)) {
-            InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: pubkey, profiles: profiles), fallbackUrl: URL(string: robohash(pubkey)), pubkey: pubkey, size: size, highlight: highlight, disable_animation: disable_animation)
+            InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: privacy_sensitive_pubkey, profiles: profiles), fallbackUrl: URL(string: robohash(privacy_sensitive_pubkey)), size: size, highlight: highlight, disable_animation: disable_animation)
                 .onReceive(handle_notify(.profile_updated)) { updated in
                     guard updated.pubkey == self.pubkey else {
                         return

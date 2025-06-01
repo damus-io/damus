@@ -35,7 +35,6 @@ struct SuggestedUserView: View {
             let target = FollowTarget.pubkey(user.pubkey)
             InnerProfilePicView(url: user.pfp,
                                 fallbackUrl: nil,
-                                pubkey: target.pubkey,
                                 size: 50,
                                 highlight: .none,
                                 disable_animation: false)
