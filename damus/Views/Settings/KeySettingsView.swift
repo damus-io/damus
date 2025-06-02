@@ -89,6 +89,7 @@ struct KeySettingsView: View {
                                 .disabled(true)
                         } else {
                             Text(sec)
+                                .privacySensitive()
                                 .clipShape(RoundedRectangle(cornerRadius: 5))
                         }
                         

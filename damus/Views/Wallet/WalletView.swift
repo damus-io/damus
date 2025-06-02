@@ -14,7 +14,8 @@ struct WalletView: View {
     @State var show_settings: Bool = false
     @ObservedObject var model: WalletModel
     @ObservedObject var settings: UserSettingsStore
-    
+    @State private var showBalance: Bool = false
+
     init(damus_state: DamusState, model: WalletModel? = nil) {
         self.damus_state = damus_state
         self._model = ObservedObject(wrappedValue: model ?? damus_state.wallet)
@@ -47,6 +48,7 @@ struct WalletView: View {
                         .bold()
                         .foregroundStyle(.damusWarningTertiary)
                     }
+                    .privacySensitive()
                     .padding()
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
@@ -56,9 +58,9 @@ struct WalletView: View {
                 
                 VStack(spacing: 5) {
                     
-                    BalanceView(balance: model.balance)
-                    
-                    TransactionsView(damus_state: damus_state, transactions: model.transactions)
+                    BalanceView(balance: model.balance, hide_balance: $settings.hide_wallet_balance)
+
+                    TransactionsView(damus_state: damus_state, transactions: model.transactions, hide_balance: $settings.hide_wallet_balance)
                 }
             }
             .navigationTitle(NSLocalizedString("Wallet", comment: "Navigation title for Wallet view"))
