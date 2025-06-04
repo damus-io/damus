@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+#if canImport(TipKit)
+import TipKit
+#endif
+
 class NotificationFilter: ObservableObject, Equatable {
     @Published var state: NotificationFilterState
     @Published var friend_filter: FriendFilter
@@ -75,7 +79,9 @@ struct NotificationsView: View {
     @StateObject var filter = NotificationFilter()
     @SceneStorage("NotificationsView.filter_state") var filter_state: NotificationFilterState = .all
     @Binding var subtitle: String?
-    
+
+    @State var showTip: Bool = true
+
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {

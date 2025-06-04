@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwipeActions
+import TipKit
 
 struct ChatroomThreadView: View {
     @Environment(\.dismiss) var dismiss
@@ -154,6 +155,12 @@ struct ChatroomThreadView: View {
 
                     // MARK: - Children view - outside trusted network
                     if !untrusted_events.isEmpty {
+                        if #available(iOS 17, *) {
+                            TipView(TrustedNetworkRepliesTip.shared, arrowEdge: .bottom)
+                                .padding(.top, 10)
+                                .padding(.horizontal)
+                        }
+
                         VStack(alignment: .leading, spacing: 0) {
                             // Track this section's position
                             Color.clear
@@ -178,6 +185,10 @@ struct ChatroomThreadView: View {
                             Button(action: {
                                 withAnimation {
                                     untrusted_network_expanded.toggle()
+
+                                    if #available(iOS 17, *) {
+                                        TrustedNetworkRepliesTip.shared.invalidate(reason: .actionPerformed)
+                                    }
                                 }
                             }) {
                                 OutsideTrustedNetworkLabel

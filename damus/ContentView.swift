@@ -10,6 +10,10 @@ import AVKit
 import MediaPlayer
 import EmojiPicker
 
+#if canImport(TipKit)
+import TipKit
+#endif
+
 struct ZapSheet {
     let target: ZapTarget
     let lnurl: String
@@ -705,6 +709,21 @@ struct ContentView: View {
         
         damus_state.nostrNetwork.pool.register_handler(sub_id: sub_id, handler: home.handle_event)
         damus_state.nostrNetwork.connect()
+
+        if #available(iOS 17, *) {
+            if damus_state.settings.developer_mode && damus_state.settings.reset_tips_on_launch {
+                do {
+                    try Tips.resetDatastore()
+                } catch {
+                    Log.error("Failed to reset tips datastore: %s", for: .tips, error.localizedDescription)
+                }
+            }
+            do {
+                try Tips.configure()
+            } catch {
+                Log.error("Failed to configure tips: %s", for: .tips, error.localizedDescription)
+            }
+        }
     }
 
     func music_changed(_ state: MusicState) {
