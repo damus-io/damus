@@ -337,12 +337,6 @@ struct ChatEventView: View {
     }
 }
 
-extension Notification.Name {
-    static var toggle_thread_view: Notification.Name {
-        return Notification.Name("convert_to_thread")
-    }
-}
-
 #Preview {
     let bar = make_actionbar_model(ev: test_note.id, damus: test_damus_state)
     return ChatEventView(event: test_note, selected_event: test_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, focus_event: nil, highlight_bubble: false, bar: bar)
