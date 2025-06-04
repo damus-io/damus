@@ -127,7 +127,10 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "media_previews", default_value: true)
     var media_previews: Bool
-    
+
+    @Setting(key: "show_trusted_replies_first", default_value: true)
+    var show_trusted_replies_first: Bool
+
     @Setting(key: "hide_nsfw_tagged_content", default_value: false)
     var hide_nsfw_tagged_content: Bool
     
