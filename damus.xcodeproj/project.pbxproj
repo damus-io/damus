@@ -27,6 +27,9 @@
 		3A4325A82961E11400BFCD9D /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = 3A4325AA2961E11400BFCD9D /* Localizable.stringsdict */; };
 		3A4647CF2A413ADC00386AD8 /* CondensedProfilePicturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A4647CE2A413ADC00386AD8 /* CondensedProfilePicturesView.swift */; };
 		3A48E7B029DFBE9D006E787E /* MutedThreadsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A48E7AF29DFBE9D006E787E /* MutedThreadsManager.swift */; };
+		3A515C502DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A515C4F2DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift */; };
+		3A515C512DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A515C4F2DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift */; };
+		3A515C522DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A515C4F2DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift */; };
 		3A8CC6CC2A2CFEF900940F5F /* StringUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A8CC6CB2A2CFEF900940F5F /* StringUtil.swift */; };
 		3A92C0FE2DE16E9800CEEBAC /* FaviconCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A92C0FD2DE16E9800CEEBAC /* FaviconCache.swift */; };
 		3A92C0FF2DE16E9800CEEBAC /* FaviconCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A92C0FD2DE16E9800CEEBAC /* FaviconCache.swift */; };
@@ -1870,6 +1873,7 @@
 		3A47CB782BDA05A200728A7C /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fi; path = fi.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3A47CB792BDA05A200728A7C /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = fi; path = fi.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		3A48E7AF29DFBE9D006E787E /* MutedThreadsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutedThreadsManager.swift; sourceTree = "<group>"; };
+		3A515C4F2DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedNetworkRepliesTip.swift; sourceTree = "<group>"; };
 		3A5C4575296A879E0032D398 /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = "es-419"; path = "es-419.lproj/Localizable.stringsdict"; sourceTree = "<group>"; };
 		3A5CAE1D298DC0DB00B5334F /* zh-CN */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-CN"; path = "zh-CN.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		3A5CAE1E298DC0DB00B5334F /* zh-CN */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-CN"; path = "zh-CN.lproj/Localizable.strings"; sourceTree = "<group>"; };
@@ -2748,6 +2752,14 @@
 			path = "Empty Views";
 			sourceTree = "<group>";
 		};
+		3A515C4E2DF4E0E6002D3B34 /* Tips */ = {
+			isa = PBXGroup;
+			children = (
+				3A515C4F2DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift */,
+			);
+			path = Tips;
+			sourceTree = "<group>";
+		};
 		3AA24800297E3DAE0090C62D /* Reposts */ = {
 			isa = PBXGroup;
 			children = (
@@ -3245,6 +3257,7 @@
 				4C190F232A547D1700027FD5 /* NostrScript */,
 				4C7D095A2A098C5C00943473 /* Wallet */,
 				4C8D1A6D29F31E4100ACDF75 /* Buttons */,
+				3A515C4E2DF4E0E6002D3B34 /* Tips */,
 				4C1A9A2829DDF53B00516EAC /* Video */,
 				4C1A9A1B29DDCF8B00516EAC /* Settings */,
 				4CFF8F6129CC9A80008DB934 /* Images */,
@@ -4766,6 +4779,7 @@
 				D7100C5A2B76FD5100C59298 /* LogoView.swift in Sources */,
 				4C0A3F8F280F640A000448DE /* ThreadModel.swift in Sources */,
 				4C3AC79F2833115300E1F516 /* FollowButtonView.swift in Sources */,
+				3A515C502DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift in Sources */,
 				D7CB5D3B2B112FBB00AD4105 /* NotificationFormatter.swift in Sources */,
 				4C4E137B2A76D5FB00BDD832 /* MuteThreadNotify.swift in Sources */,
 				4CC7AAE7297EFA7B00430951 /* Zap.swift in Sources */,
@@ -5416,6 +5430,7 @@
 				82D6FB9D2CD99F7900C925F4 /* ZapButtonModel.swift in Sources */,
 				5C09FD142DF283D700823661 /* FollowPackModel.swift in Sources */,
 				82D6FB9E2CD99F7900C925F4 /* ContentFilters.swift in Sources */,
+				3A515C512DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift in Sources */,
 				82D6FB9F2CD99F7900C925F4 /* DamusCacheManager.swift in Sources */,
 				82D6FBA02CD99F7900C925F4 /* NotificationsManager.swift in Sources */,
 				D755B28E2D3E7D8800BBEEFA /* NIP37Draft.swift in Sources */,
@@ -5671,6 +5686,7 @@
 				D73E5E2B2C6A97F4007EB227 /* PostNotify.swift in Sources */,
 				D73E5E2C2C6A97F4007EB227 /* PresentSheetNotify.swift in Sources */,
 				D73E5E2D2C6A97F4007EB227 /* ProfileUpdatedNotify.swift in Sources */,
+				3A515C522DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift in Sources */,
 				D73E5E2E2C6A97F4007EB227 /* ReportNotify.swift in Sources */,
 				D73E5E2F2C6A97F4007EB227 /* ScrollToTopNotify.swift in Sources */,
 				D73E5E302C6A97F4007EB227 /* SwitchedTimelineNotify.swift in Sources */,
