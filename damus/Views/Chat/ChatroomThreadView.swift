@@ -8,6 +8,10 @@
 import SwiftUI
 import SwipeActions
 
+#if canImport(TipKit)
+import TipKit
+#endif
+
 struct ChatroomThreadView: View {
     @Environment(\.dismiss) var dismiss
     @State var once: Bool = false
@@ -158,6 +162,11 @@ struct ChatroomThreadView: View {
 
                     // MARK: - Children view - outside trusted network
                     if !untrusted_events.isEmpty {
+                        if #available(iOS 17.0, macOS 14.0, *) {
+                            TipView(TrustedNetworkRepliesTip(), arrowEdge: .bottom)
+                                .padding(.top, 10)
+                        }
+
                         VStack(alignment: .leading, spacing: 0) {
                             // Track this section's position
                             Color.clear
@@ -241,6 +250,21 @@ struct ChatroomThreadView: View {
                 thread.unsubscribe()
             }
         }
+    }
+}
+
+@available(iOS 17.0, macOS 14.0, *)
+struct TrustedNetworkRepliesTip: Tip {
+    var title: Text {
+        Text("Toggle visibility of replies from outside your trusted network", comment: "Title of tip that informs users what trusted network means and that they can toggle the visibility of threaded replies from outside their trusted network.")
+    }
+
+    var message: Text? {
+        Text("Your trusted network is comprised of profiles you follow and profiles that they follow.", comment: "Description of the tip that informs users what trusted network means.")
+    }
+
+    var image: Image? {
+        Image(systemName: "network.badge.shield.half.filled")
     }
 }
 
