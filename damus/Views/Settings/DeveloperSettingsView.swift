@@ -96,6 +96,11 @@ struct DeveloperSettingsView: View {
 
                     Toggle(NSLocalizedString("Enable experimental Purple In-app purchase support", comment: "Developer mode setting to enable experimental Purple In-app purchase support."), isOn: $settings.enable_experimental_purple_iap_support)
                         .toggleStyle(.switch)
+
+                    if #available(iOS 17, *) {
+                        Toggle(NSLocalizedString("Reset tips on launch", comment: "Developer mode setting to reset tips upon app first launch. Tips are visual contextual hints that highlight new, interesting, or unused features users have not discovered yet."), isOn: $settings.reset_tips_on_launch)
+                            .toggleStyle(.switch)
+                    }
                 }
             }
         }
