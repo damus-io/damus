@@ -6,10 +6,7 @@
 //
 
 import SwiftUI
-
-#if canImport(TipKit)
 import TipKit
-#endif
 
 class NotificationFilter: ObservableObject, Equatable {
     @Published var state: NotificationFilterState
@@ -80,11 +77,10 @@ struct NotificationsView: View {
     @SceneStorage("NotificationsView.filter_state") var filter_state: NotificationFilterState = .all
     @Binding var subtitle: String?
 
-    @State var showTip: Bool = true
-
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
+        let showTrustedButton = would_filter_non_friends_from_notifications(contacts: state.contacts, state: filter_state, items: self.notifications.notifications)
         TabView(selection: $filter_state) {
             NotificationTab(
                 NotificationFilter(
@@ -121,14 +117,19 @@ struct NotificationsView: View {
                 Button(
                     action: { state.nav.push(route: Route.NotificationSettings(settings: state.settings)) },
                     label: {
-                        Image("settings")
+                        Image(systemName: "gearshape")
+                            .frame(width: 24, height: 24)
                             .foregroundColor(.gray)
                     }
                 )
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                if would_filter_non_friends_from_notifications(contacts: state.contacts, state: filter_state, items: self.notifications.notifications) {
-                    FriendsButton(filter: $filter.friend_filter)
+                if showTrustedButton {
+                    TrustedNetworkButton(filter: $filter.friend_filter) {
+                        if #available(iOS 17, *) {
+                            TrustedNetworkButtonTip.shared.invalidate(reason: .actionPerformed)
+                        }
+                    }
                 }
             }
         }
@@ -146,6 +147,13 @@ struct NotificationsView: View {
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 0) {
+                if #available(iOS 17, *), showTrustedButton {
+                    TipView(TrustedNetworkButtonTip.shared)
+                        .tipBackground(.clear)
+                        .tipViewStyle(TrustedNetworkButtonTipViewStyle())
+                        .padding(.horizontal)
+                }
+
                 CustomPicker(tabs: [
                     (NSLocalizedString("All", comment: "Label for filter for all notifications."), NotificationFilterState.all),
                     (NSLocalizedString("Zaps", comment: "Label for filter for zap notifications."), NotificationFilterState.zaps),

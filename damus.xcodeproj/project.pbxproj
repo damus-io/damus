@@ -30,6 +30,9 @@
 		3A515C502DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A515C4F2DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift */; };
 		3A515C512DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A515C4F2DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift */; };
 		3A515C522DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A515C4F2DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift */; };
+		3A515C542DF5371D002D3B34 /* TrustedNetworkButtonTipViewStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A515C532DF5371D002D3B34 /* TrustedNetworkButtonTipViewStyle.swift */; };
+		3A515C552DF5371D002D3B34 /* TrustedNetworkButtonTipViewStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A515C532DF5371D002D3B34 /* TrustedNetworkButtonTipViewStyle.swift */; };
+		3A515C562DF5371D002D3B34 /* TrustedNetworkButtonTipViewStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A515C532DF5371D002D3B34 /* TrustedNetworkButtonTipViewStyle.swift */; };
 		3A8CC6CC2A2CFEF900940F5F /* StringUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A8CC6CB2A2CFEF900940F5F /* StringUtil.swift */; };
 		3A92C0FE2DE16E9800CEEBAC /* FaviconCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A92C0FD2DE16E9800CEEBAC /* FaviconCache.swift */; };
 		3A92C0FF2DE16E9800CEEBAC /* FaviconCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A92C0FD2DE16E9800CEEBAC /* FaviconCache.swift */; };
@@ -38,6 +41,9 @@
 		3A96E3FE2D6BCE3800AE1630 /* RepostedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A96E3FD2D6BCE3800AE1630 /* RepostedTests.swift */; };
 		3AA247FF297E3D900090C62D /* RepostsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA247FE297E3D900090C62D /* RepostsView.swift */; };
 		3AA24802297E3DC20090C62D /* RepostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA24801297E3DC20090C62D /* RepostView.swift */; };
+		3AA2F4E82DF1467A00B18606 /* TrustedNetworkButtonTip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA2F4E72DF1467A00B18606 /* TrustedNetworkButtonTip.swift */; };
+		3AA2F4E92DF1467A00B18606 /* TrustedNetworkButtonTip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA2F4E72DF1467A00B18606 /* TrustedNetworkButtonTip.swift */; };
+		3AA2F4EA2DF1467A00B18606 /* TrustedNetworkButtonTip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA2F4E72DF1467A00B18606 /* TrustedNetworkButtonTip.swift */; };
 		3AA59D1D2999B0400061C48E /* DraftsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA59D1C2999B0400061C48E /* DraftsModel.swift */; };
 		3AAA95CA298DF87B00F3D526 /* TranslationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AAA95C9298DF87B00F3D526 /* TranslationService.swift */; };
 		3AAA95CC298E07E900F3D526 /* DeepLPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AAA95CB298E07E900F3D526 /* DeepLPlan.swift */; };
@@ -267,7 +273,7 @@
 		4C8D00CF29E38B950036AF10 /* nostr_bech32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D00CE29E38B950036AF10 /* nostr_bech32.c */; };
 		4C8D00D429E3C5D40036AF10 /* NIP19Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D00D329E3C5D40036AF10 /* NIP19Tests.swift */; };
 		4C8D1A6C29F1DFC200ACDF75 /* FriendIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D1A6B29F1DFC200ACDF75 /* FriendIcon.swift */; };
-		4C8D1A6F29F31E5000ACDF75 /* FriendsButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */; };
+		4C8D1A6F29F31E5000ACDF75 /* TrustedNetworkButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D1A6E29F31E5000ACDF75 /* TrustedNetworkButton.swift */; };
 		4C8EC52529D1FA6C0085D9A8 /* DamusColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8EC52429D1FA6C0085D9A8 /* DamusColors.swift */; };
 		4C8FA7242BED58A900798A6A /* ThreadReply.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C45E5012BED4D000025A428 /* ThreadReply.swift */; };
 		4C9054852A6AEAA000811EEC /* NdbTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9054842A6AEAA000811EEC /* NdbTests.swift */; };
@@ -781,7 +787,7 @@
 		82D6FBD52CD99F7900C925F4 /* ConnectWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D095C2A098C5D00943473 /* ConnectWalletView.swift */; };
 		82D6FBD62CD99F7900C925F4 /* WalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D095D2A098C5D00943473 /* WalletView.swift */; };
 		82D6FBD72CD99F7900C925F4 /* NWCScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09672A0AE9B200943473 /* NWCScannerView.swift */; };
-		82D6FBD82CD99F7900C925F4 /* FriendsButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */; };
+		82D6FBD82CD99F7900C925F4 /* TrustedNetworkButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D1A6E29F31E5000ACDF75 /* TrustedNetworkButton.swift */; };
 		82D6FBD92CD99F7900C925F4 /* GradientFollowButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694F32A6732B7001F4053 /* GradientFollowButton.swift */; };
 		82D6FBDA2CD99F7900C925F4 /* AlbyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09652A0AE62100943473 /* AlbyButton.swift */; };
 		82D6FBDC2CD99F7900C925F4 /* DamusVideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2929DDF54400516EAC /* DamusVideoPlayerView.swift */; };
@@ -1323,7 +1329,7 @@
 		D73E5ECC2C6A97F4007EB227 /* SuggestedUsersViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694EB2A662292001F4053 /* SuggestedUsersViewModel.swift */; };
 		D73E5ED22C6A97F4007EB227 /* WalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D095D2A098C5D00943473 /* WalletView.swift */; };
 		D73E5ED32C6A97F4007EB227 /* NWCScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09672A0AE9B200943473 /* NWCScannerView.swift */; };
-		D73E5ED42C6A97F4007EB227 /* FriendsButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */; };
+		D73E5ED42C6A97F4007EB227 /* TrustedNetworkButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D1A6E29F31E5000ACDF75 /* TrustedNetworkButton.swift */; };
 		D73E5ED52C6A97F4007EB227 /* GradientFollowButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694F32A6732B7001F4053 /* GradientFollowButton.swift */; };
 		D73E5ED62C6A97F4007EB227 /* AlbyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09652A0AE62100943473 /* AlbyButton.swift */; };
 		D73E5ED82C6A97F4007EB227 /* DamusVideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2929DDF54400516EAC /* DamusVideoPlayerView.swift */; };
@@ -1874,6 +1880,7 @@
 		3A47CB792BDA05A200728A7C /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = fi; path = fi.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		3A48E7AF29DFBE9D006E787E /* MutedThreadsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutedThreadsManager.swift; sourceTree = "<group>"; };
 		3A515C4F2DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedNetworkRepliesTip.swift; sourceTree = "<group>"; };
+		3A515C532DF5371D002D3B34 /* TrustedNetworkButtonTipViewStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedNetworkButtonTipViewStyle.swift; sourceTree = "<group>"; };
 		3A5C4575296A879E0032D398 /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = "es-419"; path = "es-419.lproj/Localizable.stringsdict"; sourceTree = "<group>"; };
 		3A5CAE1D298DC0DB00B5334F /* zh-CN */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-CN"; path = "zh-CN.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		3A5CAE1E298DC0DB00B5334F /* zh-CN */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-CN"; path = "zh-CN.lproj/Localizable.strings"; sourceTree = "<group>"; };
@@ -1908,6 +1915,7 @@
 		3A994C4E2BE5B9370019F632 /* th */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = th; path = th.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3AA247FE297E3D900090C62D /* RepostsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepostsView.swift; sourceTree = "<group>"; };
 		3AA24801297E3DC20090C62D /* RepostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepostView.swift; sourceTree = "<group>"; };
+		3AA2F4E72DF1467A00B18606 /* TrustedNetworkButtonTip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedNetworkButtonTip.swift; sourceTree = "<group>"; };
 		3AA59D1C2999B0400061C48E /* DraftsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DraftsModel.swift; sourceTree = "<group>"; };
 		3AA5E70229B682A5002701ED /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3AA5E70329B682AD002701ED /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -2295,7 +2303,7 @@
 		4C8D00D229E3C19F0036AF10 /* str_block.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = str_block.h; sourceTree = "<group>"; };
 		4C8D00D329E3C5D40036AF10 /* NIP19Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP19Tests.swift; sourceTree = "<group>"; };
 		4C8D1A6B29F1DFC200ACDF75 /* FriendIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendIcon.swift; sourceTree = "<group>"; };
-		4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsButton.swift; sourceTree = "<group>"; };
+		4C8D1A6E29F31E5000ACDF75 /* TrustedNetworkButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedNetworkButton.swift; sourceTree = "<group>"; };
 		4C8EC52429D1FA6C0085D9A8 /* DamusColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusColors.swift; sourceTree = "<group>"; };
 		4C9054842A6AEAA000811EEC /* NdbTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbTests.swift; sourceTree = "<group>"; };
 		4C9054882A6AED4700811EEC /* NdbTagIterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbTagIterator.swift; sourceTree = "<group>"; };
@@ -2755,6 +2763,8 @@
 		3A515C4E2DF4E0E6002D3B34 /* Tips */ = {
 			isa = PBXGroup;
 			children = (
+				3AA2F4E72DF1467A00B18606 /* TrustedNetworkButtonTip.swift */,
+				3A515C532DF5371D002D3B34 /* TrustedNetworkButtonTipViewStyle.swift */,
 				3A515C4F2DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift */,
 			);
 			path = Tips;
@@ -3455,7 +3465,7 @@
 			isa = PBXGroup;
 			children = (
 				5CB017202D2D985800A9ED05 /* CoinosButton.swift */,
-				4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */,
+				4C8D1A6E29F31E5000ACDF75 /* TrustedNetworkButton.swift */,
 				F71694F32A6732B7001F4053 /* GradientFollowButton.swift */,
 				4C7D09652A0AE62100943473 /* AlbyButton.swift */,
 			);
@@ -4692,7 +4702,7 @@
 				4C3D52B8298DB5C6001C5831 /* TextEvent.swift in Sources */,
 				4C216F362870A9A700040376 /* InputDismissKeyboard.swift in Sources */,
 				D74AAFCF2B155D8C006CF0F4 /* ZapDataModel.swift in Sources */,
-				4C8D1A6F29F31E5000ACDF75 /* FriendsButton.swift in Sources */,
+				4C8D1A6F29F31E5000ACDF75 /* TrustedNetworkButton.swift in Sources */,
 				D7100C562B76F8E600C59298 /* PurpleViewPrimitives.swift in Sources */,
 				B57B4C642B312BFA00A232C0 /* RelayAuthenticationDetail.swift in Sources */,
 				D7EDED2E2B128E8A0018B19C /* CollectionExtension.swift in Sources */,
@@ -4875,6 +4885,7 @@
 				4CA352A22A76AEC5003BB08B /* LikedNotify.swift in Sources */,
 				5CC8529F2BD744F60039FFC5 /* HighlightView.swift in Sources */,
 				BA37598D2ABCCE500018D73B /* PhotoCaptureProcessor.swift in Sources */,
+				3A515C562DF5371D002D3B34 /* TrustedNetworkButtonTipViewStyle.swift in Sources */,
 				5CC8529D2BD741CD0039FFC5 /* HighlightEvent.swift in Sources */,
 				4C9146FD2A2A87C200DDEA40 /* wasm.c in Sources */,
 				4C75EFAF28049D350006080F /* NostrFilter.swift in Sources */,
@@ -4921,6 +4932,7 @@
 				4C1A9A2729DDE31900516EAC /* TranslationSettingsView.swift in Sources */,
 				BA3759942ABCCEBA0018D73B /* CameraService.swift in Sources */,
 				4CB8838629656C8B00DC99E7 /* NIP05.swift in Sources */,
+				3AA2F4E82DF1467A00B18606 /* TrustedNetworkButtonTip.swift in Sources */,
 				4CF0ABD82981980C00D66079 /* Lists.swift in Sources */,
 				F71694EA2A662232001F4053 /* OnboardingSuggestionsView.swift in Sources */,
 				4C12536A2A76D3850004F4B8 /* RelaysChangedNotify.swift in Sources */,
@@ -5178,6 +5190,7 @@
 				82D6FAB42CD99F7900C925F4 /* Verifiable.swift in Sources */,
 				82D6FAB52CD99F7900C925F4 /* NativeObject.swift in Sources */,
 				82D6FAB62CD99F7900C925F4 /* String+extension.swift in Sources */,
+				3A515C552DF5371D002D3B34 /* TrustedNetworkButtonTipViewStyle.swift in Sources */,
 				82D6FAB72CD99F7900C925F4 /* FlatBufferObject.swift in Sources */,
 				82D6FAB82CD99F7900C925F4 /* Enum.swift in Sources */,
 				82D6FAB92CD99F7900C925F4 /* builder.c in Sources */,
@@ -5481,13 +5494,14 @@
 				82D6FBCC2CD99F7900C925F4 /* CameraPreview.swift in Sources */,
 				82D6FBCD2CD99F7900C925F4 /* CameraController.swift in Sources */,
 				82D6FBCE2CD99F7900C925F4 /* OnboardingSuggestionsView.swift in Sources */,
+				3AA2F4EA2DF1467A00B18606 /* TrustedNetworkButtonTip.swift in Sources */,
 				82D6FBCF2CD99F7900C925F4 /* SuggestedUserView.swift in Sources */,
 				82D6FBD02CD99F7900C925F4 /* SuggestedUsersViewModel.swift in Sources */,
 				82D6FBD12CD99F7900C925F4 /* LoadScript.swift in Sources */,
 				82D6FBD52CD99F7900C925F4 /* ConnectWalletView.swift in Sources */,
 				82D6FBD62CD99F7900C925F4 /* WalletView.swift in Sources */,
 				82D6FBD72CD99F7900C925F4 /* NWCScannerView.swift in Sources */,
-				82D6FBD82CD99F7900C925F4 /* FriendsButton.swift in Sources */,
+				82D6FBD82CD99F7900C925F4 /* TrustedNetworkButton.swift in Sources */,
 				82D6FBD92CD99F7900C925F4 /* GradientFollowButton.swift in Sources */,
 				82D6FBDA2CD99F7900C925F4 /* AlbyButton.swift in Sources */,
 				82D6FBDC2CD99F7900C925F4 /* DamusVideoPlayerView.swift in Sources */,
@@ -5796,6 +5810,7 @@
 				D73E5E922C6A97F4007EB227 /* EventGroup.swift in Sources */,
 				D73E5E932C6A97F4007EB227 /* ZapGroup.swift in Sources */,
 				D73E5E942C6A97F4007EB227 /* NotificationStatusModel.swift in Sources */,
+				3A515C542DF5371D002D3B34 /* TrustedNetworkButtonTipViewStyle.swift in Sources */,
 				D73E5E952C6A97F4007EB227 /* ThreadModel.swift in Sources */,
 				D73E5E962C6A97F4007EB227 /* ReplyMap.swift in Sources */,
 				D73E5E972C6A97F4007EB227 /* ProfileModel.swift in Sources */,
@@ -5854,6 +5869,7 @@
 				D73E5EC02C6A97F4007EB227 /* NostrEvent+.swift in Sources */,
 				D73E5EC12C6A97F4007EB227 /* NIP98AuthenticatedRequest.swift in Sources */,
 				D73E5EC22C6A97F4007EB227 /* NostrAuth.swift in Sources */,
+				3AA2F4E92DF1467A00B18606 /* TrustedNetworkButtonTip.swift in Sources */,
 				D73E5EC42C6A97F4007EB227 /* ReplyQuoteView.swift in Sources */,
 				D73E5EC62C6A97F4007EB227 /* ChatBubbleView.swift in Sources */,
 				D73E5EC72C6A97F4007EB227 /* VisibilityTracker.swift in Sources */,
@@ -5865,7 +5881,7 @@
 				D73E5ED22C6A97F4007EB227 /* WalletView.swift in Sources */,
 				D73E5ED32C6A97F4007EB227 /* NWCScannerView.swift in Sources */,
 				D74E64132DC95CC7004C7892 /* HumanReadableErrors.swift in Sources */,
-				D73E5ED42C6A97F4007EB227 /* FriendsButton.swift in Sources */,
+				D73E5ED42C6A97F4007EB227 /* TrustedNetworkButton.swift in Sources */,
 				D73E5ED52C6A97F4007EB227 /* GradientFollowButton.swift in Sources */,
 				D73E5ED62C6A97F4007EB227 /* AlbyButton.swift in Sources */,
 				D73E5ED82C6A97F4007EB227 /* DamusVideoPlayerView.swift in Sources */,
