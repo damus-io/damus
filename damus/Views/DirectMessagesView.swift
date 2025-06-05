@@ -18,6 +18,7 @@ struct DirectMessagesView: View {
     @State var dm_type: DMType = .friend
     @ObservedObject var model: DirectMessagesModel
     @ObservedObject var settings: UserSettingsStore
+    @Binding var subtitle: String?
 
     func MainContent(requests: Bool) -> some View {
         ScrollView {
@@ -93,10 +94,15 @@ struct DirectMessagesView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if would_filter_non_friends_from_dms(contacts: damus_state.contacts, dms: self.model.dms) {
-                    
-                    FriendsButton(filter: $settings.friend_filter)
+                    TrustedNetworkButton(filter: $settings.friend_filter)
                 }
             }
+        }
+        .onAppear {
+            self.subtitle = settings.friend_filter.description()
+        }
+        .onChange(of: settings.friend_filter) { val in
+            self.subtitle = val.description()
         }
         .navigationTitle(NSLocalizedString("DMs", comment: "Navigation title for view of DMs, where DM is an English abbreviation for Direct Message."))
     }
@@ -115,6 +121,6 @@ func would_filter_non_friends_from_dms(contacts: Contacts, dms: [DirectMessageMo
 struct DirectMessagesView_Previews: PreviewProvider {
     static var previews: some View {
         let ds = test_damus_state
-        DirectMessagesView(damus_state: ds, model: ds.dms, settings: ds.settings)
+        DirectMessagesView(damus_state: ds, model: ds.dms, settings: ds.settings, subtitle: .constant(nil))
     }
 }

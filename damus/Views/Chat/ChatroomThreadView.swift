@@ -7,10 +7,7 @@
 
 import SwiftUI
 import SwipeActions
-
-#if canImport(TipKit)
 import TipKit
-#endif
 
 struct ChatroomThreadView: View {
     @Environment(\.dismiss) var dismiss

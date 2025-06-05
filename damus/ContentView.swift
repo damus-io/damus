@@ -9,10 +9,7 @@ import SwiftUI
 import AVKit
 import MediaPlayer
 import EmojiPicker
-
-#if canImport(TipKit)
 import TipKit
-#endif
 
 struct ZapSheet {
     let target: ZapTarget
@@ -182,7 +179,7 @@ struct ContentView: View {
                 NotificationsView(state: damus, notifications: home.notifications, subtitle: $menu_subtitle)
                 
             case .dms:
-                DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms, settings: damus_state!.settings)
+                DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms, settings: damus_state!.settings, subtitle: $menu_subtitle)
             }
         }
         .background(DamusColors.adaptableWhite)
