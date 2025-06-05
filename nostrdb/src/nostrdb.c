@@ -7095,7 +7095,7 @@ static struct ndb_blocks *ndb_note_to_blocks(struct ndb_note *note)
 	if (content_len >= INT32_MAX)
 		return NULL;
 
-	unsigned char *buffer = malloc(content_len);
+    unsigned char *buffer = malloc(2<<18);  // Not carefully calculated, but ok because we will not need this once we switch to the local relay model
 	if (!buffer)
 		return NULL;
 
