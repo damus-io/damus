@@ -51,4 +51,15 @@ struct NoteId: IdType, TagKey, TagConvertible {
 
         return note_id
     }
+    
+    func withUnsafePointer<T>(_ body: (UnsafePointer<UInt8>) throws -> T) rethrows -> T {
+        return try self.id.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) in
+            guard let baseAddress = bytes.baseAddress else {
+                fatalError("Cannot get base address")
+            }
+            return try baseAddress.withMemoryRebound(to: UInt8.self, capacity: bytes.count) { ptr in
+                return try body(ptr)
+            }
+        }
+    }
 }
