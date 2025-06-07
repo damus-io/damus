@@ -75,7 +75,7 @@ struct NotificationsView: View {
     @StateObject var filter = NotificationFilter()
     @SceneStorage("NotificationsView.filter_state") var filter_state: NotificationFilterState = .all
     @Binding var subtitle: String?
-    
+
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
@@ -122,7 +122,7 @@ struct NotificationsView: View {
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 if would_filter_non_friends_from_notifications(contacts: state.contacts, state: filter_state, items: self.notifications.notifications) {
-                    FriendsButton(filter: $filter.friend_filter)
+                    TrustedNetworkButton(filter: $filter.friend_filter)
                 }
             }
         }
