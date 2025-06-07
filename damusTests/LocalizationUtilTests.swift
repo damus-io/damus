@@ -15,6 +15,7 @@ final class LocalizationUtilTests: XCTestCase {
 
         // Test cases of the localization string key, and the expected en-US strings for a count of 0, 1, and 2.
         let keys = [
+            ["follow_pack_user_count", "users", "user", "users"],
             ["followers_count", "Followers", "Follower", "Followers"],
             ["following_count", "Following", "Following", "Following"],
             ["hellthread_notifications_disabled", "Hide notifications that tag more than 0 profiles", "Hide notifications that tag more than 1 profile", "Hide notifications that tag more than 2 profiles"],
