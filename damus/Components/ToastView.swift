@@ -7,25 +7,19 @@
 
 import SwiftUI
 
-struct ToastView: View {
-    var style: ToastStyle
-    var message: String
-    @State var completedEvents = 1.0
+// Generic Toast View UI using which we build other custom Toasts
+
+struct GenericToastView<Content:View>: View {
+//    var style: ToastStyle
+//    var message: String
+    let content: Content
+    
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
     
     var body: some View {
-        HStack{
-            if let iconName = style.iconName{
-                Image(systemName: iconName)
-                    .foregroundStyle(style.color)
-            }
-            else{
-                ProgressView(value: completedEvents)
-                    .progressViewStyle(.circular)
-            }
-            Text(message)
-                .font(.caption)
-                .fontWeight(.semibold)
-        }
+        content
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 24)
@@ -40,30 +34,67 @@ struct ToastView: View {
         )
         .padding()
         .transition(.opacity.combined(with: .move(edge: .top)))
-        .animation(.easeInOut(duration: 0.3), value: message)
+//        .animation(.easeInOut(duration: 0.3))
 
     }
     
 }
 
-#Preview {
-    ToastView(style: .initial, message: "Your note has been posted to 10/14 relays")
-    ToastView(style: .error, message: "Could not post your note")
+// Example implementation of a toast which shows a user on how many relays a post has been sucessfully posted to .
 
+struct PostConfirmationToastView: View {
+    var message : String
+    let style: ToastStyle
+    var body: some View {
+        GenericToastView{
+            HStack{
+                if let iconName = style.iconName{
+                    Image(systemName: iconName)
+                        .foregroundStyle(style.color)
+                }
+                Text(message)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+            }
+        }
+    }
 }
+// Current implementation uses separate ViewModifiers for each type of Toast.
+// FUTURE WORK: Can be improved to use one ViewModifier for all kinds of toasts .
 
-struct ToastModifier: ViewModifier {
+struct PostConfirmationToastModifier: ViewModifier {
     @Binding var message: String?
     @State var timer: Timer?
     let style: ToastStyle
+    @State private var offset = CGSize.zero
     
     func body(content: Content) -> some View {
         ZStack(alignment: .top){
+            
             content
             
             if let message = message {
-                ToastView(style: style, message: message)
+                PostConfirmationToastView(message: message, style: style)
                     .padding(.top, 50)
+                    .offset(x:offset.width)
+                    .gesture(
+                        DragGesture()
+                            .onChanged{gesture in
+                                offset = gesture.translation
+                            }
+                            .onEnded{_ in
+                                if abs(offset.width)>100 {
+                                    withAnimation{
+                                        self.message=nil
+                                        offset = CGSize.zero
+                                    }
+                                }
+                                else{
+                                    offset = CGSize.zero
+                                }
+                                
+                            }
+                    )
                     .animation(.easeInOut, value: message)
                     .onChange(of: message){ _ in
                         restartTimer()
@@ -82,11 +113,10 @@ struct ToastModifier: ViewModifier {
     }
 }
 
-struct Toast: Equatable {
-    var style: ToastStyle
-    var message: String
-    var Duration: Double = 3
-    var width: Double = .infinity
+extension View{
+    func postConfirmationToast(message: Binding<String?>, style: ToastStyle) -> some View {
+        self.modifier(PostConfirmationToastModifier(message: message, style: style))
+    }
 }
 
 enum ToastStyle{
@@ -119,8 +149,3 @@ extension ToastStyle{
     }
 }
 
-extension View{
-    func postConfirmationToast(message: Binding<String?>, style: ToastStyle) -> some View {
-        self.modifier(ToastModifier(message: message, style: style))
-    }
-}
