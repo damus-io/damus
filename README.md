@@ -1,10 +1,26 @@
-[![Run Test Suite](https://github.com/damus-io/damus/actions/workflows/run-tests.yaml/badge.svg?branch=master)](https://github.com/damus-io/damus/actions/workflows/run-tests.yaml)
+<div align="center">
 
-# damus
+<img src="./damus/Assets.xcassets/damus-home.imageset/damus-home@2x.png" alt="Damus Logo" title="Damus logo" width=""/>
+
+# Damus
+
+The social network you control
 
 A twitter-like [nostr][nostr] client for iPhone, iPad and MacOS. 
 
-<img src="./ss.png" width="50%" height="50%" />
+[![License: GPL-3.0](https://img.shields.io/github/license/damus-io/damus?labelColor=27303D&color=0877d2)](/LICENSE)
+
+## Download and Install
+
+[![Apple](https://img.shields.io/badge/Apple-%23000000.svg?style=for-the-badge&logo=apple&logoColor=white)](https://apps.apple.com/us/app/damus/id1628663131)
+
+## Supported Platforms
+
+iOS 16.0+ • macOS 13.0+
+
+<img src="./demo1.png" width="70%" height="50%" />
+
+</div>
 
 [nostr]: https://github.com/fiatjaf/nostr
 
