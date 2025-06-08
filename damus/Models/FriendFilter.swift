@@ -35,9 +35,9 @@ enum FriendFilter: String, StringCodable {
     func description() -> String {
         switch self {
             case .all:
-                return NSLocalizedString("All", comment: "Human-readable short description of the 'friends filter' when it is set to 'all'")
+                return NSLocalizedString("All", comment: "Human-readable short description of the 'trusted network filter' when it is disabled, and therefore is showing all content.")
             case .friends_of_friends:
-                return NSLocalizedString("Friends of friends", comment: "Human-readable short description of the 'friends filter' when it is set to 'friends-of-friends'")
+                return NSLocalizedString("Trusted Network", comment: "Human-readable short description of the 'trusted network filter' when it is enabled, and therefore showing content from only the trusted network.")
         }
     }
 }

@@ -9,6 +9,7 @@ import SwiftUI
 import AVKit
 import MediaPlayer
 import EmojiPicker
+import TipKit
 
 struct ZapSheet {
     let target: ZapTarget
@@ -178,7 +179,7 @@ struct ContentView: View {
                 NotificationsView(state: damus, notifications: home.notifications, subtitle: $menu_subtitle)
                 
             case .dms:
-                DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms, settings: damus_state!.settings)
+                DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms, settings: damus_state!.settings, subtitle: $menu_subtitle)
             }
         }
         .background(DamusColors.adaptableWhite)
@@ -705,6 +706,21 @@ struct ContentView: View {
         
         damus_state.nostrNetwork.pool.register_handler(sub_id: sub_id, handler: home.handle_event)
         damus_state.nostrNetwork.connect()
+
+        if #available(iOS 17, *) {
+            if damus_state.settings.developer_mode && damus_state.settings.reset_tips_on_launch {
+                do {
+                    try Tips.resetDatastore()
+                } catch {
+                    Log.error("Failed to reset tips datastore: %s", for: .tips, error.localizedDescription)
+                }
+            }
+            do {
+                try Tips.configure()
+            } catch {
+                Log.error("Failed to configure tips: %s", for: .tips, error.localizedDescription)
+            }
+        }
     }
 
     func music_changed(_ state: MusicState) {

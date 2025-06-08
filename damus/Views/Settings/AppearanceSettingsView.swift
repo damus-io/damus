@@ -100,6 +100,8 @@ struct AppearanceSettingsView: View {
                 header: Text("Content filters", comment: "Section title for content filtering/moderation configuration."),
                 footer: Text("Notes with the #nsfw tag usually contains adult content or other \"Not safe for work\" content", comment: "Section footer clarifying what #nsfw (not safe for work) tags mean")
             ) {
+                Toggle(NSLocalizedString("Show replies from your trusted network first", comment: "Setting to show replies in threads from the current user's trusted network first."), isOn: $settings.show_trusted_replies_first)
+                    .toggleStyle(.switch)
                 Toggle(NSLocalizedString("Hide notes with #nsfw tags", comment: "Setting to hide notes with the #nsfw (not safe for work) tags"), isOn: $settings.hide_nsfw_tagged_content)
                     .toggleStyle(.switch)
             }
