@@ -789,7 +789,7 @@ class HomeModel: ContactsDelegate {
         notification_status.new_events = notifs
         
         guard should_display_notification(state: damus_state, event: ev, mode: .local),
-              let notification_object = generate_local_notification_object(from: ev, state: damus_state)
+              let notification_object = generate_local_notification_object(ndb: self.damus_state.ndb, from: ev, state: damus_state)
         else {
             return
         }
@@ -1163,7 +1163,7 @@ func create_in_app_profile_zap_notification(profiles: Profiles, zap: Zap, locale
     content.title = NotificationFormatter.zap_notification_title(zap)
     content.body = NotificationFormatter.zap_notification_body(profiles: profiles, zap: zap, locale: locale)
     content.sound = UNNotificationSound.default
-    content.userInfo = LossyLocalNotification(type: .profile_zap, mention: .pubkey(profile_id)).to_user_info()
+    content.userInfo = LossyLocalNotification(type: .profile_zap, mention: .init(nip19: .npub(profile_id))).to_user_info()
 
     let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
 

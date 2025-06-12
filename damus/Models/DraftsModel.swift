@@ -93,8 +93,10 @@ class DraftArtifacts: Equatable {
     ///   - draft_id: The unique ID of this draft, used for keeping draft identities stable. UUIDs are recommended but not required.
     ///   - damus_state: The user's Damus state, used for fetching profiles in NostrDB
     /// - Returns: The draft that can be loaded into `PostView`.
-    static func from(event: NostrEvent, draft_id: String, damus_state: DamusState) -> DraftArtifacts {
-        let parsed_blocks = parse_note_content(content: .init(note: event, keypair: damus_state.keypair))
+    static func from(event: NostrEvent, draft_id: String, damus_state: DamusState) -> DraftArtifacts? {
+        guard let parsed_blocks = parse_note_content(content: .init(note: event, keypair: damus_state.keypair)) else {
+            return nil
+        }
         return Self.from(parsed_blocks: parsed_blocks, references: Array(event.references), draft_id: draft_id, damus_state: damus_state)
     }
     
@@ -112,7 +114,7 @@ class DraftArtifacts: Equatable {
         for block in parsed_blocks.blocks {
             switch block {
             case .mention(let mention):
-                if case .pubkey(let pubkey) = mention.ref {
+                if let pubkey = mention.ref.nip19.pubkey() {
                     // A profile reference, format things properly.
                     let profile = damus_state.ndb.lookup_profile(pubkey)?.unsafeUnownedValue?.profile
                     let profile_name = DisplayName(profile: profile, pubkey: pubkey).username
@@ -128,12 +130,10 @@ class DraftArtifacts: Equatable {
                         ]
                     )
                     rich_text_content.append(attributed_string)
-                }
-                else if case .note(_) = mention.ref {
+                } else if case .note(_) = mention.ref.nip19 {
                     // These note references occur when we quote a note, and since that is tracked via `PostAction` in `PostView`, ignore it here to avoid attaching the same event twice in a note
                     continue
-                }
-                else {
+                } else {
                     // Other references
                     rich_text_content.append(.init(string: block.asString))
                 }
@@ -195,7 +195,10 @@ class Drafts: ObservableObject {
         ) else { return }
         
         // Find out where to place these drafts
-        let blocks = parse_note_content(content: .note(nip37_draft.unwrapped_note))
+        guard let blocks = parse_note_content(content: .note(nip37_draft.unwrapped_note)) else {
+            return
+        }
+
         switch known_kind {
         case .text:
             if let replied_to_note_id = nip37_draft.unwrapped_note.direct_replies() {
@@ -204,7 +207,7 @@ class Drafts: ObservableObject {
             else {
                 for block in blocks.blocks {
                     if case .mention(let mention) = block {
-                        if case .note(let note_id) = mention.ref {
+                        if case .note(let note_id) = mention.ref.nip19 {
                             self.quotes[note_id] = draft_artifacts
                             return
                         }

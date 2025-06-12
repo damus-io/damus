@@ -21,10 +21,10 @@ import Foundation
 /// ```
 struct TagSequence: Sequence {
     let note: NdbNote
-    let tag: UnsafeMutablePointer<ndb_tag>
+    let tag: ndb_tag_ptr
 
     var count: UInt16 {
-        tag.pointee.count
+        ndb_tag_count(tag.ptr)
     }
 
     func strings() -> [String] {
@@ -46,7 +46,7 @@ struct TagIterator: IteratorProtocol {
     typealias Element = NdbTagElem
 
     mutating func next() -> NdbTagElem? {
-        guard index < tag.pointee.count else { return nil }
+        guard index < ndb_tag_count(tag.ptr) else { return nil }
         let el = NdbTagElem(note: note, tag: tag, index: index)
 
         index += 1
@@ -56,13 +56,13 @@ struct TagIterator: IteratorProtocol {
 
     var index: Int32
     let note: NdbNote
-    var tag: UnsafeMutablePointer<ndb_tag>
+    var tag: ndb_tag_ptr
 
     var count: UInt16 {
-        tag.pointee.count
+        ndb_tag_count(tag.ptr)
     }
 
-    init(note: NdbNote, tag: UnsafeMutablePointer<ndb_tag>) {
+    init(note: NdbNote, tag: ndb_tag_ptr) {
         self.note = note
         self.tag = tag
         self.index = 0

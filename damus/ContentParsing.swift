@@ -20,45 +20,6 @@ enum NoteContent {
     }
 }
 
-func parsed_blocks_finish(bs: inout note_blocks, tags: TagsSequence?) -> Blocks {
-    var out: [Block] = []
-
-    var i = 0
-    while (i < bs.num_blocks) {
-        let block = bs.blocks[i]
-
-        if let converted = Block(block, tags: tags) {
-            out.append(converted)
-        }
-
-        i += 1
-    }
-
-    let words = Int(bs.words)
-    blocks_free(&bs)
-
-    return Blocks(words: words, blocks: out)
-
-}
-
-func parse_note_content(content: NoteContent) -> Blocks {
-    var bs = note_blocks()
-    bs.num_blocks = 0;
-    
-    blocks_init(&bs)
-
-    switch content {
-    case .content(let s, let tags):
-        return s.withCString { cptr in
-            damus_parse_content(&bs, cptr)
-            return parsed_blocks_finish(bs: &bs, tags: tags)
-        }
-    case .note(let note):
-        damus_parse_content(&bs, note.content_raw)
-        return parsed_blocks_finish(bs: &bs, tags: note.tags)
-    }
-}
-
 func interpret_event_refs(tags: TagsSequence) -> ThreadReply? {
     // migration is long over, lets just do this to fix tests
     return interpret_event_refs_ndb(tags: tags)
