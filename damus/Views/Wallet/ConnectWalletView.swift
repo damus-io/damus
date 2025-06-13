@@ -16,7 +16,7 @@ struct ConnectWalletView: View {
     @State var error: String? = nil
     @State var wallet_scan_result: WalletScanResult = .scanning
     @State var show_introduction: Bool = true
-    @State var show_coinos_options: Bool = false
+    @State var show_legacy_options: Bool = false
     var nav: NavigationCoordinator
     let userKeypair: Keypair
     
@@ -48,6 +48,10 @@ struct ConnectWalletView: View {
                     }
                 )
             }
+            .sheet(isPresented: $show_legacy_options, content: {
+                LegacyOptionsSheet
+                    .presentationDetents([.large])
+            })
     }
     
     struct AreYouSure: View {
@@ -131,84 +135,45 @@ struct ConnectWalletView: View {
         }
     }
     
-    var AutomaticSetup: some View {
-        VStack(spacing: 10) {
-            Text("AUTOMATIC SETUP", comment: "Heading for the section that performs an automatic wallet connection setup.")
-                .font(.caption)
-                .padding(.top)
-                .foregroundStyle(PinkGradient)
-            
-            Text("Create new wallet", comment: "Button text for creating a new wallet.")
-                .font(.title)
-                .fontWeight(.bold)
-            
-            Text("Easily create a new wallet and attach it to your account.", comment: "Description for the create new wallet feature.")
-                .font(.body)
-                .multilineTextAlignment(.center)
-            
-            Spacer()
-            
-            VStack(spacing: 5) {
-                CoinosButton() {
-                    self.show_coinos_options = true
-                }
-                Text("Coinos is a service operated by a third-party. The Damus team has no access to your wallet.", comment: "Small caption with a disclaimer that Damus does not own or have access to Coinos wallets, Coinos is a third-party service.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-            .padding()
-        }
-        .frame(minHeight: 250)
-        .padding(10)
-        .cornerRadius(10)
-        .overlay(
-            RoundedRectangle(cornerRadius: 25)
-                .stroke(DamusColors.neutral3, lineWidth: 2)
-                .padding(2) // Avoids border clipping on the sides
-        )
-        .padding(.top, 20)
-        .sheet(isPresented: $show_coinos_options, content: {
-            CoinosConnectionOptionsSheet
-        })
-    }
-    
-    var CoinosConnectionOptionsSheet: some View {
+    var LegacyOptionsSheet: some View {
         VStack(spacing: 20) {
-            Text("How would you like to connect to your Coinos wallet?", comment: "Question for the user when connecting a Coinos wallet.")
+            Text("Legacy options", comment: "Heading for a section of legacy wallet options that have been deprecated")
                 .font(.title3)
                 .bold()
                 .multilineTextAlignment(.center)
                 .padding(.bottom, 10)
                 .lineLimit(2)
             
-            Spacer()
+            WarningMessage(
+                header: NSLocalizedString("Deprecated options", comment: "Heading for a warning label about deprecated legacy wallet options"),
+                description: NSLocalizedString(
+                    "These options are here for users who had these before, but they are no longer recommended.",
+                    comment: "Heading for a warning label about deprecated legacy wallet options"
+                ),
+                content: { EmptyView() }
+            )
             
             VStack(spacing: 5) {
-                Button(
-                    action: { self.oneClickSetup() },
-                    label: {
-                        HStack {
-                            Spacer()
-                            VStack {
-                                HStack {
-                                    Image(systemName: "wand.and.sparkles")
-                                    Text("One-click setup", comment: "Button label for users to do a one-click Coinos wallet setup.")
-                                }
-                                // I have to hide this on npub logins, because otherwise SwiftUI will start truncating text
-                                if self.userKeypair.privkey != nil {
-                                    Text("Also click here if you had a one-click setup before.", comment: "Button description hint for users who may want to do a one-click setup.")
-                                        .font(.caption)
-                                }
-                            }
-                            Spacer()
-                        }
+                VStack {
+                    CoinosOneClickSetupButton(action: {
+                        self.oneClickSetup()
+                    })
+                    .opacity(self.userKeypair.privkey == nil ? 0.5 : 1.0)
+                    .disabled(self.userKeypair.privkey == nil)
+                    Text("Coinos is a service operated by a third-party. The Damus team has no access to your wallet.", comment: "Small caption with a disclaimer that Damus does not own or have access to Coinos wallets, Coinos is a third-party service.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.vertical, 5)
+                        .multilineTextAlignment(.center)
+                    
+                    // I have to hide this on npub logins, because otherwise SwiftUI will start truncating text
+                    if self.userKeypair.privkey != nil {
+                        Text("Click here only if you had a one-click setup before.", comment: "Button description hint for users who may want to do a one-click setup.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
-                )
-                .frame(maxWidth: .infinity)
-                .buttonStyle(GradientButtonStyle())
-                .opacity(self.userKeypair.privkey == nil ? 0.5 : 1.0)
-                .disabled(self.userKeypair.privkey == nil)
+                }
                 
                 if self.userKeypair.privkey == nil {
                     Text("You must be logged in with your nsec to use this option.", comment: "Warning text for users who cannot create a Coinos account via the one-click setup without being logged in with their nsec.")
@@ -223,30 +188,7 @@ struct ConnectWalletView: View {
                 }
             }
             
-            Button(
-                action: {
-                    show_introduction = false
-                    show_coinos_options = false
-                    openURL(URL(string:"https://coinos.io/settings/nostr")!)
-                },
-                label: {
-                    HStack {
-                        Spacer()
-                        
-                        VStack {
-                            HStack {
-                                Image(systemName: "arrow.up.right")
-                                Text("Connect via the website", comment: "Button label for users who are setting up a Coinos wallet and would like to connect via the website")
-                            }
-                            Text("Click here if you have a Coinos username and password.", comment: "Button description hint for users who may want to connect via the website.")
-                                .font(.caption)
-                        }
-                        
-                        Spacer()
-                    }
-                }
-            )
-            .frame(maxWidth: .infinity)
+            Spacer()
         }
         .padding()
         .presentationDetents([.height(300)])
@@ -254,22 +196,32 @@ struct ConnectWalletView: View {
     
     func oneClickSetup() {
         Task {
-            show_coinos_options = false
+            show_legacy_options = false
             do {
                 guard let fullKeypair = self.userKeypair.to_full() else {
                     throw CoinosDeterministicAccountClient.ClientError.errorFormingRequest
                 }
                 let client = CoinosDeterministicAccountClient(userKeypair: fullKeypair)
-                try await client.loginOrRegister()
+                try await client.login()
                 let nwcURL = try await client.createNWCConnection()
                 model.connect(nwcURL)   // Connect directly, to make it a true one-click setup
             }
             catch {
-                present_sheet(.error(.init(
-                    user_visible_description: NSLocalizedString("Something went wrong when performing the one-click Coinos wallet setup.", comment: "Error label when user tries the one-click Coinos wallet setup but fails for some generic reason."),
-                    tip: NSLocalizedString("Check your internet connection and try again. If the error persists, contact support.", comment: "Error tip when user tries to create the one-click Coinos wallet setup but fails for a generic reason."),
-                    technical_info: error.localizedDescription
-                )))
+                if let clientError = error as? CoinosDeterministicAccountClient.ClientError,
+                   case .unauthorized = clientError {
+                    present_sheet(.error(.init(
+                        user_visible_description: NSLocalizedString("A one-click Coinos account was either not found for this Nostr account, or the password was incorrect. No new accounts can be created, as this option is deprecated.", comment: "Error label when user tries to login to a one-click Coinos wallet setup but no account can be found."),
+                        tip: NSLocalizedString("If you do not already have a Coinos one-click wallet, please look for another wallet solution. If you already have a one-click wallet, please contact support.", comment: "Error tip when user tries to login to a one-click Coinos wallet setup but no account can be found."),
+                        technical_info: "User clicked on the Coinos one-click setup button, but the account was either not found for this Nostr account, or the password was incorrect. New accounts will not be created due to deprecation. Error description: \(error.localizedDescription)"
+                    )))
+                }
+                else {
+                    present_sheet(.error(.init(
+                        user_visible_description: NSLocalizedString("Something went wrong when performing the one-click Coinos wallet setup.", comment: "Error label when user tries the one-click Coinos wallet setup but fails for some generic reason."),
+                        tip: NSLocalizedString("Check your internet connection and try again. If the error persists, contact support.", comment: "Error tip when user tries to create the one-click Coinos wallet setup but fails for a generic reason."),
+                        technical_info: error.localizedDescription
+                    )))
+                }
             }
         }
     }
@@ -345,9 +297,13 @@ struct ConnectWalletView: View {
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
                 
-                AutomaticSetup
-                
                 ManualSetup
+                
+                Button(action: {
+                    self.show_legacy_options = true
+                }, label: {
+                    Text("Legacy wallet options", comment: "Button label for connecting to legacy wallets that have been deprecated")
+                })
                 
                 if let err = self.error {
                     Text(err)

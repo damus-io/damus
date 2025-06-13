@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct CoinosButton: View {
+struct CoinosOneClickSetupButton: View {
     let action: () -> ()
     
     @Environment(\.colorScheme) var colorScheme
@@ -25,7 +25,7 @@ struct CoinosButton: View {
                     .resizable()
                     .frame(width: 35, height: 35)
                 
-                Text("Connect to Coinos", comment:  "Button to attach a Coinos Wallet, a service that provides a Lightning wallet for zapping sats. Coinos is the name of the service and should not be translated.")
+                Text("Coinos one-click setup", comment:  "Button to attach a Coinos Wallet via a one-click setup. Coinos is a service that provides a Lightning wallet for zapping sats, and its name should not be translated.")
                     .padding()
                     .bold()
             }
@@ -41,7 +41,7 @@ struct CoinosButton: View {
 
 struct CoinosButton_Previews: PreviewProvider {
     static var previews: some View {
-        CoinosButton(action: {
+        CoinosOneClickSetupButton(action: {
             print("mutiny button")
         })
     }

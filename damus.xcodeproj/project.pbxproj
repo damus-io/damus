@@ -432,9 +432,9 @@
 		5C8498032D5D150000F74FEB /* ZapExplainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8498012D5D14FA00F74FEB /* ZapExplainer.swift */; };
 		5C8498042D5D150000F74FEB /* ZapExplainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8498012D5D14FA00F74FEB /* ZapExplainer.swift */; };
 		5C8711DE2C460C06007879C2 /* PostingTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */; };
-		5CB017212D2D985E00A9ED05 /* CoinosButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017202D2D985800A9ED05 /* CoinosButton.swift */; };
-		5CB017222D2D985E00A9ED05 /* CoinosButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017202D2D985800A9ED05 /* CoinosButton.swift */; };
-		5CB017232D2D985E00A9ED05 /* CoinosButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017202D2D985800A9ED05 /* CoinosButton.swift */; };
+		5CB017212D2D985E00A9ED05 /* CoinosOneClickSetupButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017202D2D985800A9ED05 /* CoinosOneClickSetupButton.swift */; };
+		5CB017222D2D985E00A9ED05 /* CoinosOneClickSetupButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017202D2D985800A9ED05 /* CoinosOneClickSetupButton.swift */; };
+		5CB017232D2D985E00A9ED05 /* CoinosOneClickSetupButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017202D2D985800A9ED05 /* CoinosOneClickSetupButton.swift */; };
 		5CB017252D42C5C400A9ED05 /* TransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017242D42C5BD00A9ED05 /* TransactionsView.swift */; };
 		5CB017262D42C5C400A9ED05 /* TransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017242D42C5BD00A9ED05 /* TransactionsView.swift */; };
 		5CB017272D42C5C400A9ED05 /* TransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017242D42C5BD00A9ED05 /* TransactionsView.swift */; };
@@ -2449,7 +2449,7 @@
 		5C7389B02B6EFA7100781E0A /* ProxyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyView.swift; sourceTree = "<group>"; };
 		5C8498012D5D14FA00F74FEB /* ZapExplainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapExplainer.swift; sourceTree = "<group>"; };
 		5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostingTimelineView.swift; sourceTree = "<group>"; };
-		5CB017202D2D985800A9ED05 /* CoinosButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinosButton.swift; sourceTree = "<group>"; };
+		5CB017202D2D985800A9ED05 /* CoinosOneClickSetupButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinosOneClickSetupButton.swift; sourceTree = "<group>"; };
 		5CB017242D42C5BD00A9ED05 /* TransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsView.swift; sourceTree = "<group>"; };
 		5CB0172C2D42C76600A9ED05 /* BalanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceView.swift; sourceTree = "<group>"; };
 		5CB017302D4422D600A9ED05 /* NWCSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NWCSettings.swift; sourceTree = "<group>"; };
@@ -3419,7 +3419,7 @@
 		4C8D1A6D29F31E4100ACDF75 /* Buttons */ = {
 			isa = PBXGroup;
 			children = (
-				5CB017202D2D985800A9ED05 /* CoinosButton.swift */,
+				5CB017202D2D985800A9ED05 /* CoinosOneClickSetupButton.swift */,
 				4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */,
 				F71694F32A6732B7001F4053 /* GradientFollowButton.swift */,
 				4C7D09652A0AE62100943473 /* AlbyButton.swift */,
@@ -4980,7 +4980,7 @@
 				5C513FBA297F72980072348F /* CustomPicker.swift in Sources */,
 				4C1253622A76D00B0004F4B8 /* PostNotify.swift in Sources */,
 				4CACA9D5280C31E100D9BBE8 /* ReplyView.swift in Sources */,
-				5CB017232D2D985E00A9ED05 /* CoinosButton.swift in Sources */,
+				5CB017232D2D985E00A9ED05 /* CoinosOneClickSetupButton.swift in Sources */,
 				F7908E92298B0F0700AB113A /* RelayDetailView.swift in Sources */,
 				4C9147002A2A891E00DDEA40 /* error.c in Sources */,
 				4CE879552996BAB900F758CC /* RelayPaidDetail.swift in Sources */,
@@ -5490,7 +5490,7 @@
 				82D6FC0E2CD99F7900C925F4 /* ProfilePicView.swift in Sources */,
 				82D6FC0F2CD99F7900C925F4 /* ProfileView.swift in Sources */,
 				82D6FC102CD99F7900C925F4 /* ProfileNameView.swift in Sources */,
-				5CB017212D2D985E00A9ED05 /* CoinosButton.swift in Sources */,
+				5CB017212D2D985E00A9ED05 /* CoinosOneClickSetupButton.swift in Sources */,
 				82D6FC112CD99F7900C925F4 /* MaybeAnonPfpView.swift in Sources */,
 				82D6FC122CD99F7900C925F4 /* EventProfileName.swift in Sources */,
 				82D6FC132CD99F7900C925F4 /* FriendIcon.swift in Sources */,
@@ -5785,7 +5785,7 @@
 				3A92C0FF2DE16E9800CEEBAC /* FaviconCache.swift in Sources */,
 				D73E5EBC2C6A97F4007EB227 /* Relay.swift in Sources */,
 				D73E5EBD2C6A97F4007EB227 /* NostrRequest.swift in Sources */,
-				5CB017222D2D985E00A9ED05 /* CoinosButton.swift in Sources */,
+				5CB017222D2D985E00A9ED05 /* CoinosOneClickSetupButton.swift in Sources */,
 				D73E5EBE2C6A97F4007EB227 /* NostrLink.swift in Sources */,
 				D73E5EBF2C6A97F4007EB227 /* WebSocket.swift in Sources */,
 				D73E5F812C6AA07A007EB227 /* HighlighterExtensionAliases.swift in Sources */,

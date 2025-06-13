@@ -26,38 +26,23 @@ struct WalletView: View {
         ScrollView {
             VStack(spacing: 35) {
                 if let balance = model.balance, balance > WALLET_WARNING_THRESHOLD && !settings.dismiss_wallet_high_balance_warning {
-                    VStack(spacing: 10) {
-                        HStack {
-                            Image(systemName: "exclamationmark.circle")
-                            Text("Safety Reminder", comment: "Heading for a safety reminder that appears when the user has too many funds, recommending them to learn about safeguarding their funds.")
-                                .font(.title3)
-                                .bold()
+                    WarningMessage(
+                        header: NSLocalizedString("Safety Reminder", comment: "Heading for a safety reminder that appears when the user has too many funds, recommending them to learn about safeguarding their funds."),
+                        description: NSLocalizedString("If your wallet balance is getting high, it's important to understand how to keep your funds secure. Please consider learning the best practices to ensure your assets remain safe. [Click here](https://damus.io/docs/wallet/high-balance-safety-reminder/) to learn more.", comment: "Text reminding the user has a high balance, recommending them to learn about self-custody"),
+                        content: {
+                            Button(action: {
+                                settings.dismiss_wallet_high_balance_warning = true
+                            }, label: {
+                                Text("Dismiss", comment: "Button label to dismiss the safety reminder that the user's wallet has a high balance")
+                            })
+                            .bold()
+                            .foregroundStyle(.damusWarningTertiary)
                         }
-                        .foregroundStyle(.damusWarningTertiary)
-                        
-                        Text("If your wallet balance is getting high, it's important to understand how to keep your funds secure. Please consider learning the best practices to ensure your assets remain safe. [Click here](https://damus.io/docs/wallet/high-balance-safety-reminder/) to learn more.", comment: "Text reminding the user has a high balance, recommending them to learn about self-custody")
-                            .foregroundStyle(.damusWarningSecondary)
-                            .accentColor(.damusWarningTertiary)
-                            .opacity(0.8)
-                        
-                        Button(action: {
-                            settings.dismiss_wallet_high_balance_warning = true
-                        }, label: {
-                            Text("Dismiss", comment: "Button label to dismiss the safety reminder that the user's wallet has a high balance")
-                        })
-                        .bold()
-                        .foregroundStyle(.damusWarningTertiary)
-                    }
-                    .privacySensitive()
-                    .padding()
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(.damusWarningBorder, lineWidth: 1)
                     )
+                    .privacySensitive()
                 }
                 
                 VStack(spacing: 5) {
-                    
                     BalanceView(balance: model.balance, hide_balance: $settings.hide_wallet_balance)
 
                     TransactionsView(damus_state: damus_state, transactions: model.transactions, hide_balance: $settings.hide_wallet_balance)
@@ -121,6 +106,37 @@ struct WalletView: View {
         WalletConnect.request_transaction_list(url: nwc, pool: damus_state.nostrNetwork.pool, post: damus_state.nostrNetwork.postbox, delay: delay, on_flush: flusher)
         WalletConnect.request_balance_information(url: nwc, pool: damus_state.nostrNetwork.pool, post: damus_state.nostrNetwork.postbox, delay: delay, on_flush: flusher)
         return
+    }
+}
+
+struct WarningMessage<Content: View>: View {
+    let header: String
+    let description: String
+    let content: () -> Content
+    
+    var body: some View {
+        VStack(spacing: 10) {
+            HStack {
+                Image(systemName: "exclamationmark.circle")
+                Text(header)
+                    .font(.title3)
+                    .bold()
+            }
+            .foregroundStyle(.damusWarningTertiary)
+            
+            Text(description)
+                .foregroundStyle(.damusWarningSecondary)
+                .accentColor(.damusWarningTertiary)
+                .multilineTextAlignment(.center)
+                .opacity(0.8)
+            
+            content()
+        }
+        .padding()
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(.damusWarningBorder, lineWidth: 1)
+        )
     }
 }
 
