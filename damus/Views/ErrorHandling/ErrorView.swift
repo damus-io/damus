@@ -48,7 +48,7 @@ struct ErrorView: View {
             .padding()
             .background(Color.secondary.opacity(0.2))
             .cornerRadius(10)
-            .padding(.vertical, 30)
+            .padding(.vertical, 10)
             
             if let technical_info = error.technical_info {
                 ErrorTechInfoCopyButton(errorInfo: technical_info)
