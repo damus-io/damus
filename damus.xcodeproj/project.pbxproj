@@ -1696,6 +1696,9 @@
 		D7DB930C2D69486700DA1EE5 /* NIP65.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DB93092D69485A00DA1EE5 /* NIP65.swift */; };
 		D7DBD41F2B02F15E002A6197 /* NostrKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFD32819DE8F00B3DE84 /* NostrKind.swift */; };
 		D7DEEF2F2A8C021E00E0C99F /* NostrEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */; };
+		D7DF58322DFCF18D00E9AD28 /* SendPaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DF58312DFCF18800E9AD28 /* SendPaymentView.swift */; };
+		D7DF58332DFCF18D00E9AD28 /* SendPaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DF58312DFCF18800E9AD28 /* SendPaymentView.swift */; };
+		D7DF58342DFCF18D00E9AD28 /* SendPaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DF58312DFCF18800E9AD28 /* SendPaymentView.swift */; };
 		D7EB00B02CD59C8D00660C07 /* PresentFullScreenItemNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EB00AF2CD59C8300660C07 /* PresentFullScreenItemNotify.swift */; };
 		D7EB00B12CD59C8D00660C07 /* PresentFullScreenItemNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EB00AF2CD59C8300660C07 /* PresentFullScreenItemNotify.swift */; };
 		D7EDED152B11776B0018B19C /* LibreTranslateServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE45AF5297BB2E700C1D842 /* LibreTranslateServer.swift */; };
@@ -2601,6 +2604,7 @@
 		D7DB93042D66A43B00DA1EE5 /* Undistractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Undistractor.swift; sourceTree = "<group>"; };
 		D7DB93092D69485A00DA1EE5 /* NIP65.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP65.swift; sourceTree = "<group>"; };
 		D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrEventTests.swift; sourceTree = "<group>"; };
+		D7DF58312DFCF18800E9AD28 /* SendPaymentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendPaymentView.swift; sourceTree = "<group>"; };
 		D7EB00AF2CD59C8300660C07 /* PresentFullScreenItemNotify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentFullScreenItemNotify.swift; sourceTree = "<group>"; };
 		D7EDED1B2B1178FE0018B19C /* NoteContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteContent.swift; sourceTree = "<group>"; };
 		D7EDED1D2B11797D0018B19C /* LongformEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongformEvent.swift; sourceTree = "<group>"; };
@@ -3325,6 +3329,7 @@
 		4C7D095A2A098C5C00943473 /* Wallet */ = {
 			isa = PBXGroup;
 			children = (
+				D7DF58312DFCF18800E9AD28 /* SendPaymentView.swift */,
 				5C8498012D5D14FA00F74FEB /* ZapExplainer.swift */,
 				5CB017302D4422D600A9ED05 /* NWCSettings.swift */,
 				5CB0172C2D42C76600A9ED05 /* BalanceView.swift */,
@@ -4936,6 +4941,7 @@
 				4C3AC7A728369BA200E1F516 /* SearchHomeView.swift in Sources */,
 				E0EE9DD42B8E5FEA00F3002D /* ImageProcessing.swift in Sources */,
 				4CB883B0297705DD00DC99E7 /* NoteZapButton.swift in Sources */,
+				D7DF58342DFCF18D00E9AD28 /* SendPaymentView.swift in Sources */,
 				4C363A922825FCF2006E126D /* ProfileUpdate.swift in Sources */,
 				4C3BEFDA281DCA1400B3DE84 /* LikeCounter.swift in Sources */,
 				4C32B9502A9AD44700DC3548 /* FlatBufferBuilder.swift in Sources */,
@@ -5206,6 +5212,7 @@
 				82D6FAFD2CD99F7900C925F4 /* IdType.swift in Sources */,
 				82D6FAFE2CD99F7900C925F4 /* Pubkey.swift in Sources */,
 				82D6FAFF2CD99F7900C925F4 /* NoteId.swift in Sources */,
+				D7DF58332DFCF18D00E9AD28 /* SendPaymentView.swift in Sources */,
 				82D6FB002CD99F7900C925F4 /* Referenced.swift in Sources */,
 				5CB0172D2D42C76A00A9ED05 /* BalanceView.swift in Sources */,
 				82D6FB012CD99F7900C925F4 /* Block.swift in Sources */,
@@ -5948,6 +5955,7 @@
 				D73E5F512C6A97F5007EB227 /* EventDetailView.swift in Sources */,
 				D73E5F522C6A97F5007EB227 /* FollowButtonView.swift in Sources */,
 				D73E5F532C6A97F5007EB227 /* FollowingView.swift in Sources */,
+				D7DF58322DFCF18D00E9AD28 /* SendPaymentView.swift in Sources */,
 				D73E5F542C6A97F5007EB227 /* LoginView.swift in Sources */,
 				D73E5F552C6A97F5007EB227 /* QRScanNSECView.swift in Sources */,
 				D73E5F562C6A97F5007EB227 /* NoteContentView.swift in Sources */,

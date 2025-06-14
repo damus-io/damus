@@ -202,3 +202,13 @@ extension Block {
         }
     }
 }
+extension Block {
+    var asInvoice: Invoice? {
+        switch self {
+        case .invoice(let invoice):
+            return invoice
+        default:
+            return nil
+        }
+    }
+}
