@@ -9,18 +9,6 @@ import XCTest
 @testable import damus
 
 
-extension Block {
-    var asInvoice: Invoice? {
-        switch self {
-        case .invoice(let invoice):
-            return invoice
-        default:
-            return nil
-        }
-    }
-}
-
-
 final class InvoiceTests: XCTestCase {
 
     override func setUpWithError() throws {

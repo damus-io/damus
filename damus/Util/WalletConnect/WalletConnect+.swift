@@ -105,6 +105,28 @@ extension WalletConnect {
         post.send(ev, to: [url.relay], skip_ephemeral: false, delay: delay, on_flush: on_flush)
         return ev
     }
+    
+    @MainActor
+    static func refresh_wallet_information(damus_state: DamusState) async {
+        damus_state.wallet.resetWalletStateInformation()
+        await Self.update_wallet_information(damus_state: damus_state)
+    }
+    
+    @MainActor
+    static func update_wallet_information(damus_state: DamusState) async {
+        guard let url = damus_state.settings.nostr_wallet_connect,
+              let nwc = WalletConnectURL(str: url) else {
+            return
+        }
+        
+        let flusher: OnFlush? = nil
+        
+        let delay = 0.0     // We don't need a delay when fetching a transaction list or balance
+
+        WalletConnect.request_transaction_list(url: nwc, pool: damus_state.nostrNetwork.pool, post: damus_state.nostrNetwork.postbox, delay: delay, on_flush: flusher)
+        WalletConnect.request_balance_information(url: nwc, pool: damus_state.nostrNetwork.pool, post: damus_state.nostrNetwork.postbox, delay: delay, on_flush: flusher)
+        return
+    }
 
     static func handle_zap_success(state: DamusState, resp: WalletConnect.FullWalletResponse) {
         // find the pending zap and mark it as pending-confirmed

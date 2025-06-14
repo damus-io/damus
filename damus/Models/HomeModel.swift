@@ -292,24 +292,12 @@ class HomeModel: ContactsDelegate {
                 Log.debug("HomeModel: got NWC response, %s not found in the postbox, nothing to remove [%s]", for: .nwc, resp.req_id.hex(), relay.absoluteString)
             }
             
+            damus_state.wallet.handle_nwc_response(response: resp)  // This can handle success or error cases
+            
             guard resp.response.error == nil else {
                 Log.error("HomeModel: NWC wallet raised an error: %s", for: .nwc, String(describing: resp.response))
                 WalletConnect.handle_error(zapcache: self.damus_state.zaps, evcache: self.damus_state.events, resp: resp)
-                if let humanReadableError = resp.response.error?.humanReadableError {
-                    present_sheet(.error(humanReadableError))
-                }
-                return
-            }
-            
-            if resp.response.result_type == .list_transactions {
-                Log.info("Received NWC transaction list from %s", for: .nwc, relay.absoluteString)
-                damus_state.wallet.handle_nwc_response(response: resp)
-                return
-            }
-            
-            if resp.response.result_type == .get_balance {
-                Log.info("Received NWC balance information from %s", for: .nwc, relay.absoluteString)
-                damus_state.wallet.handle_nwc_response(response: resp)
+                
                 return
             }
 

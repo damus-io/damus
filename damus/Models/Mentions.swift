@@ -163,6 +163,10 @@ struct LightningInvoice<T> {
     let payment_hash: Data
     let created_at: UInt64
     
+    var abbreviated: String {
+        return self.string.prefix(8) + "…" + self.string.suffix(8)
+    }
+    
     var description_string: String {
         switch description {
         case .description(let string):
@@ -170,6 +174,17 @@ struct LightningInvoice<T> {
         case .description_hash:
             return ""
         }
+    }
+    
+    static func from(string: String) -> Invoice? {
+        // This feels a bit hacky at first, but it is actually clean
+        // because it reuses the same well-tested parsing logic as the rest of the app,
+        // avoiding code duplication and utilizing the guarantees acquired from age and testing.
+        // We could also use the C function `parse_invoice`, but it requires extra C bridging logic.
+        // NDBTODO: This may need updating on the nostrdb upgrade.
+        let parsedBlocks = parse_note_content(content: .content(string,nil)).blocks
+        guard parsedBlocks.count == 1 else { return nil }
+        return parsedBlocks[0].asInvoice
     }
 }
 
@@ -190,6 +205,13 @@ enum Amount: Equatable {
             return NSLocalizedString("Any", comment: "Any amount of sats")
         case .specific(let amt):
             return format_msats(amt)
+        }
+    }
+    
+    func amount_sats() -> Int64? {
+        switch self {
+        case .any: nil
+        case .specific(let amount): amount / 1000
         }
     }
 }
