@@ -17,7 +17,7 @@ struct BalanceView: View {
             Text("Current balance", comment: "Label for displaying current wallet balance")
                 .foregroundStyle(DamusColors.neutral6)
             if let balance {
-                self.numericalBalanceView(text: NumberFormatter.localizedString(from: NSNumber(integerLiteral: Int(balance)), number: .decimal))
+                NumericalBalanceView(text: NumberFormatter.localizedString(from: NSNumber(integerLiteral: Int(balance)), number: .decimal), hide_balance: $hide_balance)
             }
             else {
                 // Make sure we do not show any numeric value to the user when still loading (or when failed to load)
@@ -33,8 +33,13 @@ struct BalanceView: View {
             }
         }
     }
+}
+
+struct NumericalBalanceView: View {
+    let text: String
+    @Binding var hide_balance: Bool
     
-    func numericalBalanceView(text: String) -> some View {
+    var body: some View {
         Group {
             if hide_balance {
                 Text(verbatim: "*****")

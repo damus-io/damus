@@ -52,7 +52,7 @@ extension WalletConnect {
         let req_id: NoteId
         let response: Response
         
-        init(from event: NostrEvent, nwc: WalletConnect.ConnectURL) async throws(InitializationError) {
+        init(from event: NostrEvent, nwc: WalletConnect.ConnectURL) throws(InitializationError) {
             guard event.pubkey == nwc.pubkey else { throw .incorrectAuthorPubkey }
             
             guard let referencedNoteId = event.referenced_ids.first else { throw .missingRequestIdReference }
@@ -85,7 +85,7 @@ extension WalletConnect {
         }
     }
     
-    struct WalletResponseErr: Codable {
+    struct WalletResponseErr: Codable, Error {
         let code: Code?
         let message: String?
 

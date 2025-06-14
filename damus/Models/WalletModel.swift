@@ -27,6 +27,11 @@ class WalletModel: ObservableObject {
     
     @Published private(set) var connect_state: WalletConnectState
     
+    /// A dictionary listing continuations waiting for a response for each request note id.
+    ///
+    /// Please see the `waitForResponse` method for context.
+    private var continuations: [NoteId: CheckedContinuation<WalletConnect.Response.Result, any Error>] = [:]
+    
     init(state: WalletConnectState, settings: UserSettingsStore) {
         self.connect_state = state
         self.previous_state = .none
@@ -75,12 +80,16 @@ class WalletModel: ObservableObject {
     /// 
     /// - Parameter response: The NWC response received from the network
     func handle_nwc_response(response: WalletConnect.FullWalletResponse) {
-        switch response.response.result {
+        if let error = response.response.error {
+            self.resume(request: response.req_id, throwing: error)
+            return
+        }
+        guard let result = response.response.result else { return }
+        self.resume(request: response.req_id, with: result)
+        switch result {
         case .get_balance(let balanceResp):
             self.balance = balanceResp.balance / 1000
-        case .none:
-            return
-        case .some(.pay_invoice(_)):
+        case .pay_invoice(_):
             return
         case .list_transactions(let transactionsResp):
             self.transactions = transactionsResp.transactions
@@ -90,5 +99,42 @@ class WalletModel: ObservableObject {
     func resetWalletStateInformation() {
         self.transactions = nil
         self.balance = nil
+    }
+    
+    
+    // MARK: - Async wallet response waiting mechanism
+    
+    func waitForResponse(for requestId: NoteId, timeout: Duration = .seconds(10)) async throws -> WalletConnect.Response.Result {
+        return try await withCheckedThrowingContinuation({ continuation in
+            self.continuations[requestId] = continuation
+            
+            let timeoutTask = Task {
+                try? await Task.sleep(for: timeout)
+                self.resume(request: requestId, throwing: WaitError.timeout)    // Must resume the continuation exactly once even if there is no response
+            }
+        })
+    }
+    
+    private func resume(request requestId: NoteId, with result: WalletConnect.Response.Result) {
+        continuations[requestId]?.resume(returning: result)
+        continuations[requestId] = nil      // Never resume a continuation twice
+    }
+    
+    private func resume(request requestId: NoteId, throwing error: any Error) {
+        if let continuation = continuations[requestId] {
+            continuation.resume(throwing: error)
+            continuations[requestId] = nil      // Never resume a continuation twice
+            return      // Error will be handled by the listener, no need for the generic error sheet
+        }
+        
+        // No listeners to catch the error, show generic error sheet
+        if let error = error as? WalletConnect.WalletResponseErr,
+           let humanReadableError = error.humanReadableError {
+            present_sheet(.error(humanReadableError))
+        }
+    }
+    
+    enum WaitError: Error {
+        case timeout
     }
 }

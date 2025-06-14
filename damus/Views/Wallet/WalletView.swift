@@ -12,6 +12,7 @@ let WALLET_WARNING_THRESHOLD: UInt64 = 100000
 struct WalletView: View {
     let damus_state: DamusState
     @State var show_settings: Bool = false
+    @State var show_send_sheet: Bool = false
     @ObservedObject var model: WalletModel
     @ObservedObject var settings: UserSettingsStore
     @State private var showBalance: Bool = false
@@ -59,6 +60,19 @@ struct WalletView: View {
                 VStack(spacing: 5) {
                     
                     BalanceView(balance: model.balance, hide_balance: $settings.hide_wallet_balance)
+                    
+                    Button(action: {
+                        show_send_sheet = true
+                    }) {
+                        HStack {
+                            Image(systemName: "paperplane.fill")
+                            Text("Send", comment: "Button label to send bitcoin payment from wallet")
+                                .font(.headline)
+                        }
+                        .padding(.horizontal, 10)
+                    }
+                    .buttonStyle(GradientButtonStyle())
+                    .padding(.bottom, 20)
 
                     TransactionsView(damus_state: damus_state, transactions: model.transactions, hide_balance: $settings.hide_wallet_balance)
                 }
@@ -104,23 +118,17 @@ struct WalletView: View {
                     .presentationDragIndicator(.visible)
                     .presentationDetents([.large])
                 }
+                .sheet(isPresented: $show_send_sheet) {
+                    SendPaymentView(damus_state: damus_state, model: model, nwc: nwc)
+                        .presentationDragIndicator(.visible)
+                        .presentationDetents([.large])
+                }
         }
     }
     
     @MainActor
     func updateWalletInformation() async {
-        guard let url = damus_state.settings.nostr_wallet_connect,
-              let nwc = WalletConnectURL(str: url) else {
-            return
-        }
-        
-        let flusher: OnFlush? = nil
-        
-        let delay = 0.0     // We don't need a delay when fetching a transaction list or balance
-
-        WalletConnect.request_transaction_list(url: nwc, pool: damus_state.nostrNetwork.pool, post: damus_state.nostrNetwork.postbox, delay: delay, on_flush: flusher)
-        WalletConnect.request_balance_information(url: nwc, pool: damus_state.nostrNetwork.pool, post: damus_state.nostrNetwork.postbox, delay: delay, on_flush: flusher)
-        return
+        await WalletConnect.update_wallet_information(damus_state: damus_state)
     }
 }
 
