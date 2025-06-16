@@ -22,7 +22,12 @@ struct BalanceView: View {
             else {
                 // Make sure we do not show any numeric value to the user when still loading (or when failed to load)
                 // This is important because if we show a numeric value like "zero" when things are not loaded properly, we risk scaring the user into thinking that they have lost funds.
-                self.numericalBalanceView(text: "??")
+                Text(verbatim: "??")
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.70)
+                    .font(.veryVeryLargeTitle)
+                    .fontWeight(.heavy)
+                    .foregroundStyle(PinkGradient)
                     .redacted(reason: .placeholder)
                     .shimmer(true)
             }
