@@ -82,6 +82,22 @@
 			<string>Importeringen</string>
 		</dict>
 	</dict>
+	<key>notes_from_three_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Notities van %2$@, %3$@ en %4$@; %1$d ander in je netwerk</string>
+			<key>other</key>
+			<string>Notities van %2$@, %3$@ en %4$@; %1$d anderen in je netwerk</string>
+		</dict>
+	</dict>
 	<key>people_reposted_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
