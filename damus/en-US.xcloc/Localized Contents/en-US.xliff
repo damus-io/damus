@@ -57,6 +57,7 @@
         <target>%@ %@</target>
         <note>Sentence composed of 2 variables to describe how many imports were performed from loading a NostrScript. In source English, the first variable is the number of imports, and the second variable is 'Import' or 'Imports'.
 Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.
+Sentence composed of 2 variables to describe how many people are in the follow pack. In source English, the first variable is the number of users, and the second variable is 'user' or 'users'.
 Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.
 Sentence composed of 2 variables to describe how many quoted reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
 Sentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.
@@ -280,7 +281,7 @@ Title text to indicate user to an add a relay.</note>
       <trans-unit id="All" xml:space="preserve">
         <source>All</source>
         <target>All</target>
-        <note>Human-readable short description of the 'friends filter' when it is set to 'all'
+        <note>Human-readable short description of the 'trusted network filter' when it is disabled, and therefore is showing all content.
 Label for filter for all notifications.</note>
       </trans-unit>
       <trans-unit id="All recent notes" xml:space="preserve">
@@ -1116,6 +1117,11 @@ Section header for first aid tools and settings</note>
         <target>Follow Back</target>
         <note>Button to follow a user back.</note>
       </trans-unit>
+      <trans-unit id="Follow Packs" xml:space="preserve">
+        <source>Follow Packs</source>
+        <target>Follow Packs</target>
+        <note>A label indicating that the items below it are follow packs</note>
+      </trans-unit>
       <trans-unit id="Follow hashtag" xml:space="preserve">
         <source>Follow hashtag</source>
         <target>Follow hashtag</target>
@@ -1197,11 +1203,6 @@ My side interests include languages and I am striving to be a #polyglot - I am a
         <source>Free</source>
         <target>Free</target>
         <note>Dropdown option for selecting Free plan for DeepL translation service.</note>
-      </trans-unit>
-      <trans-unit id="Friends of friends" xml:space="preserve">
-        <source>Friends of friends</source>
-        <target>Friends of friends</target>
-        <note>Human-readable short description of the 'friends filter' when it is set to 'friends-of-friends'</note>
       </trans-unit>
       <trans-unit id="General" xml:space="preserve">
         <source>General</source>
@@ -1712,6 +1713,11 @@ User confirm No</note>
         <target>No contact list was found. You might experience issues using the app. If you suspect you have permanently lost your contact list (or if you never had one), you can fix this by resetting it</target>
         <note>Section footer for Contact list first aid tools</note>
       </trans-unit>
+      <trans-unit id="No cover image" xml:space="preserve">
+        <source>No cover image</source>
+        <target>No cover image</target>
+        <note>Text letting user know there is no cover image.</note>
+      </trans-unit>
       <trans-unit id="No image is currently setup" xml:space="preserve">
         <source>No image is currently setup</source>
         <target>No image is currently setup</target>
@@ -1985,7 +1991,8 @@ Button label to dismiss an error dialog</note>
       <trans-unit id="People" xml:space="preserve">
         <source>People</source>
         <target>People</target>
-        <note>Label for filter for seeing only people follows.</note>
+        <note>Label for filter for seeing only people follows.
+Label for filter for seeing the people in this follow pack.</note>
       </trans-unit>
       <trans-unit id="People will be able to send you cash from your profile. No money goes to Damus." xml:space="preserve">
         <source>People will be able to send you cash from your profile. No money goes to Damus.</source>
@@ -2107,6 +2114,11 @@ Section title for deleting the user</note>
         <source>Posting</source>
         <target>Posting</target>
         <note>Title indicating that the highlight post is being published to the network</note>
+      </trans-unit>
+      <trans-unit id="Posts" xml:space="preserve">
+        <source>Posts</source>
+        <target>Posts</target>
+        <note>Label for filter for seeing the posts from the people in this follow pack.</note>
       </trans-unit>
       <trans-unit id="Private" xml:space="preserve">
         <source>Private</source>
@@ -2306,6 +2318,11 @@ Title of relays view</note>
         <target>Repair relay list</target>
         <note>Button to repair relay list.</note>
       </trans-unit>
+      <trans-unit id="Replies outside your trusted network" xml:space="preserve">
+        <source>Replies outside your trusted network</source>
+        <target>Replies outside your trusted network</target>
+        <note>Section title in thread for replies from outside of the current user's trusted network, which is their follows and follows of follows.</note>
+      </trans-unit>
       <trans-unit id="Reply" xml:space="preserve">
         <source>Reply</source>
         <target>Reply</target>
@@ -2391,6 +2408,11 @@ Setting to enable Repost Local Notification</note>
         <source>Reset contact list</source>
         <target>Reset contact list</target>
         <note>Button to reset contact list.</note>
+      </trans-unit>
+      <trans-unit id="Reset tips on launch" xml:space="preserve">
+        <source>Reset tips on launch</source>
+        <target>Reset tips on launch</target>
+        <note>Developer mode setting to reset tips upon app first launch. Tips are visual contextual hints that highlight new, interesting, or unused features users have not discovered yet.</note>
       </trans-unit>
       <trans-unit id="Retry" xml:space="preserve">
         <source>Retry</source>
@@ -2665,6 +2687,11 @@ Button to show more of a long profile description.</note>
         <source>Show profile action sheets</source>
         <target>Show profile action sheets</target>
         <note>Setting to show profile action sheets when clicking on a user's profile picture</note>
+      </trans-unit>
+      <trans-unit id="Show replies from your trusted network first" xml:space="preserve">
+        <source>Show replies from your trusted network first</source>
+        <target>Show replies from your trusted network first</target>
+        <note>Setting to show replies in threads from the current user's trusted network first.</note>
       </trans-unit>
       <trans-unit id="Show wallet selector" xml:space="preserve">
         <source>Show wallet selector</source>
@@ -2965,6 +2992,16 @@ Nice to meet you all! #introductions #plebchain </target>
         <target>Toggle key visibility</target>
         <note>Accessibility label for toggling the visibility of the private key input field</note>
       </trans-unit>
+      <trans-unit id="Toggle visibility of content from outside your trusted network" xml:space="preserve">
+        <source>Toggle visibility of content from outside your trusted network</source>
+        <target>Toggle visibility of content from outside your trusted network</target>
+        <note>Title of tip that informs users what trusted network means and that they can toggle the visibility of content from outside their trusted network.</note>
+      </trans-unit>
+      <trans-unit id="Toggle visibility of replies from outside your trusted network" xml:space="preserve">
+        <source>Toggle visibility of replies from outside your trusted network</source>
+        <target>Toggle visibility of replies from outside your trusted network</target>
+        <note>Title of tip that informs users what trusted network means and that they can toggle the visibility of threaded replies from outside their trusted network.</note>
+      </trans-unit>
       <trans-unit id="Top Zap" xml:space="preserve">
         <source>Top Zap</source>
         <target>Top Zap</target>
@@ -3010,6 +3047,11 @@ Section header for text and appearance settings</note>
         <source>Truncate timeline text</source>
         <target>Truncate timeline text</target>
         <note>Setting to truncate text in timeline</note>
+      </trans-unit>
+      <trans-unit id="Trusted Network" xml:space="preserve">
+        <source>Trusted Network</source>
+        <target>Trusted Network</target>
+        <note>Human-readable short description of the 'trusted network filter' when it is enabled, and therefore showing content from only the trusted network.</note>
       </trans-unit>
       <trans-unit id="Try checking the link again, your internet connection, or contact the person who provided you the link for help." xml:space="preserve">
         <source>Try checking the link again, your internet connection, or contact the person who provided you the link for help.</source>
@@ -3091,7 +3133,8 @@ Example URL to LibreTranslate server</note>
       <trans-unit id="Untitled" xml:space="preserve">
         <source>Untitled</source>
         <target>Untitled</target>
-        <note>Title of longform event if it is untitled.</note>
+        <note>Title of follow list event if it is untitled.
+Title of longform event if it is untitled.</note>
       </trans-unit>
       <trans-unit id="Update" xml:space="preserve">
         <source>Update</source>
@@ -3447,6 +3490,11 @@ User confirm Yes</note>
         <target>Your transaction quota has been exceeded.</target>
         <note>Error description for quota exceeded</note>
       </trans-unit>
+      <trans-unit id="Your trusted network is comprised of profiles you follow and profiles that they follow." xml:space="preserve">
+        <source>Your trusted network is comprised of profiles you follow and profiles that they follow.</source>
+        <target>Your trusted network is comprised of profiles you follow and profiles that they follow.</target>
+        <note>Description of the tip that informs users what trusted network means.</note>
+      </trans-unit>
       <trans-unit id="Your wallet does not have sufficient balance for this transaction." xml:space="preserve">
         <source>Your wallet does not have sufficient balance for this transaction.</source>
         <target>Your wallet does not have sufficient balance for this transaction.</target>
@@ -3743,6 +3791,21 @@ String indicating that a given timestamp just occurred</note>
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.4" build-num="16F6"/>
     </header>
     <body>
+      <trans-unit id="/follow_pack_user_count:dict/FOLLOW_PACK_USERS:dict/one:dict/:string" xml:space="preserve">
+        <source>user</source>
+        <target>user</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/follow_pack_user_count:dict/FOLLOW_PACK_USERS:dict/other:dict/:string" xml:space="preserve">
+        <source>users</source>
+        <target>users</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/follow_pack_user_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@FOLLOW_PACK_USERS@</source>
+        <target>%#@FOLLOW_PACK_USERS@</target>
+        <note/>
+      </trans-unit>
       <trans-unit id="/followed_by_three_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@OTHERS@</source>
         <target>%#@OTHERS@</target>
@@ -4207,6 +4270,7 @@ String indicating that a given timestamp just occurred</note>
         <target state="new">%1$@ %2$@</target>
         <note>Sentence composed of 2 variables to describe how many imports were performed from loading a NostrScript. In source English, the first variable is the number of imports, and the second variable is 'Import' or 'Imports'.
 Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.
+Sentence composed of 2 variables to describe how many people are in the follow pack. In source English, the first variable is the number of users, and the second variable is 'user' or 'users'.
 Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.
 Sentence composed of 2 variables to describe how many quoted reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
 Sentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.
@@ -4430,7 +4494,7 @@ Title text to indicate user to an add a relay.</note>
       <trans-unit id="All" xml:space="preserve">
         <source>All</source>
         <target state="new">All</target>
-        <note>Human-readable short description of the 'friends filter' when it is set to 'all'
+        <note>Human-readable short description of the 'trusted network filter' when it is disabled, and therefore is showing all content.
 Label for filter for all notifications.</note>
       </trans-unit>
       <trans-unit id="All recent notes" xml:space="preserve">
@@ -5269,6 +5333,11 @@ Section header for first aid tools and settings</note>
         <target state="new">Follow Back</target>
         <note>Button to follow a user back.</note>
       </trans-unit>
+      <trans-unit id="Follow Packs" xml:space="preserve">
+        <source>Follow Packs</source>
+        <target state="new">Follow Packs</target>
+        <note>A label indicating that the items below it are follow packs</note>
+      </trans-unit>
       <trans-unit id="Follow hashtag" xml:space="preserve">
         <source>Follow hashtag</source>
         <target state="new">Follow hashtag</target>
@@ -5350,11 +5419,6 @@ My side interests include languages and I am striving to be a #polyglot - I am a
         <source>Free</source>
         <target state="new">Free</target>
         <note>Dropdown option for selecting Free plan for DeepL translation service.</note>
-      </trans-unit>
-      <trans-unit id="Friends of friends" xml:space="preserve">
-        <source>Friends of friends</source>
-        <target state="new">Friends of friends</target>
-        <note>Human-readable short description of the 'friends filter' when it is set to 'friends-of-friends'</note>
       </trans-unit>
       <trans-unit id="General" xml:space="preserve">
         <source>General</source>
@@ -5865,6 +5929,11 @@ User confirm No</note>
         <target state="new">No content available to share</target>
         <note>Title indicating that there was no available content to share</note>
       </trans-unit>
+      <trans-unit id="No cover image" xml:space="preserve">
+        <source>No cover image</source>
+        <target state="new">No cover image</target>
+        <note>Text letting user know there is no cover image.</note>
+      </trans-unit>
       <trans-unit id="No image is currently setup" xml:space="preserve">
         <source>No image is currently setup</source>
         <target state="new">No image is currently setup</target>
@@ -6133,7 +6202,8 @@ Button label to dismiss an error dialog</note>
       <trans-unit id="People" xml:space="preserve">
         <source>People</source>
         <target state="new">People</target>
-        <note>Label for filter for seeing only people follows.</note>
+        <note>Label for filter for seeing only people follows.
+Label for filter for seeing the people in this follow pack.</note>
       </trans-unit>
       <trans-unit id="People will be able to send you cash from your profile. No money goes to Damus." xml:space="preserve">
         <source>People will be able to send you cash from your profile. No money goes to Damus.</source>
@@ -6245,6 +6315,11 @@ Section title for deleting the user</note>
         <source>Post</source>
         <target state="new">Post</target>
         <note>Button to post a note.</note>
+      </trans-unit>
+      <trans-unit id="Posts" xml:space="preserve">
+        <source>Posts</source>
+        <target state="new">Posts</target>
+        <note>Label for filter for seeing the posts from the people in this follow pack.</note>
       </trans-unit>
       <trans-unit id="Private" xml:space="preserve">
         <source>Private</source>
@@ -6444,6 +6519,11 @@ Title of relays view</note>
         <target state="new">Repair relay list</target>
         <note>Button to repair relay list.</note>
       </trans-unit>
+      <trans-unit id="Replies outside your trusted network" xml:space="preserve">
+        <source>Replies outside your trusted network</source>
+        <target state="new">Replies outside your trusted network</target>
+        <note>Section title in thread for replies from outside of the current user's trusted network, which is their follows and follows of follows.</note>
+      </trans-unit>
       <trans-unit id="Reply" xml:space="preserve">
         <source>Reply</source>
         <target state="new">Reply</target>
@@ -6529,6 +6609,11 @@ Setting to enable Repost Local Notification</note>
         <source>Reset contact list</source>
         <target state="new">Reset contact list</target>
         <note>Button to reset contact list.</note>
+      </trans-unit>
+      <trans-unit id="Reset tips on launch" xml:space="preserve">
+        <source>Reset tips on launch</source>
+        <target state="new">Reset tips on launch</target>
+        <note>Developer mode setting to reset tips upon app first launch. Tips are visual contextual hints that highlight new, interesting, or unused features users have not discovered yet.</note>
       </trans-unit>
       <trans-unit id="Retry" xml:space="preserve">
         <source>Retry</source>
@@ -6813,6 +6898,11 @@ Button to show more of a long profile description.</note>
         <source>Show profile action sheets</source>
         <target state="new">Show profile action sheets</target>
         <note>Setting to show profile action sheets when clicking on a user's profile picture</note>
+      </trans-unit>
+      <trans-unit id="Show replies from your trusted network first" xml:space="preserve">
+        <source>Show replies from your trusted network first</source>
+        <target state="new">Show replies from your trusted network first</target>
+        <note>Setting to show replies in threads from the current user's trusted network first.</note>
       </trans-unit>
       <trans-unit id="Show wallet selector" xml:space="preserve">
         <source>Show wallet selector</source>
@@ -7113,6 +7203,16 @@ Nice to meet you all! #introductions #plebchain </target>
         <target state="new">Toggle key visibility</target>
         <note>Accessibility label for toggling the visibility of the private key input field</note>
       </trans-unit>
+      <trans-unit id="Toggle visibility of content from outside your trusted network" xml:space="preserve">
+        <source>Toggle visibility of content from outside your trusted network</source>
+        <target state="new">Toggle visibility of content from outside your trusted network</target>
+        <note>Title of tip that informs users what trusted network means and that they can toggle the visibility of content from outside their trusted network.</note>
+      </trans-unit>
+      <trans-unit id="Toggle visibility of replies from outside your trusted network" xml:space="preserve">
+        <source>Toggle visibility of replies from outside your trusted network</source>
+        <target state="new">Toggle visibility of replies from outside your trusted network</target>
+        <note>Title of tip that informs users what trusted network means and that they can toggle the visibility of threaded replies from outside their trusted network.</note>
+      </trans-unit>
       <trans-unit id="Top Zap" xml:space="preserve">
         <source>Top Zap</source>
         <target state="new">Top Zap</target>
@@ -7158,6 +7258,11 @@ Section header for text and appearance settings</note>
         <source>Truncate timeline text</source>
         <target state="new">Truncate timeline text</target>
         <note>Setting to truncate text in timeline</note>
+      </trans-unit>
+      <trans-unit id="Trusted Network" xml:space="preserve">
+        <source>Trusted Network</source>
+        <target state="new">Trusted Network</target>
+        <note>Human-readable short description of the 'trusted network filter' when it is enabled, and therefore showing content from only the trusted network.</note>
       </trans-unit>
       <trans-unit id="Try checking the link again, your internet connection, or contact the person who provided you the link for help." xml:space="preserve">
         <source>Try checking the link again, your internet connection, or contact the person who provided you the link for help.</source>
@@ -7239,7 +7344,8 @@ Example URL to LibreTranslate server</note>
       <trans-unit id="Untitled" xml:space="preserve">
         <source>Untitled</source>
         <target state="new">Untitled</target>
-        <note>Title of longform event if it is untitled.</note>
+        <note>Title of follow list event if it is untitled.
+Title of longform event if it is untitled.</note>
       </trans-unit>
       <trans-unit id="Update" xml:space="preserve">
         <source>Update</source>
@@ -7589,6 +7695,11 @@ User confirm Yes</note>
         <source>Your transaction quota has been exceeded.</source>
         <target state="new">Your transaction quota has been exceeded.</target>
         <note>Error description for quota exceeded</note>
+      </trans-unit>
+      <trans-unit id="Your trusted network is comprised of profiles you follow and profiles that they follow." xml:space="preserve">
+        <source>Your trusted network is comprised of profiles you follow and profiles that they follow.</source>
+        <target state="new">Your trusted network is comprised of profiles you follow and profiles that they follow.</target>
+        <note>Description of the tip that informs users what trusted network means.</note>
       </trans-unit>
       <trans-unit id="Your wallet does not have sufficient balance for this transaction." xml:space="preserve">
         <source>Your wallet does not have sufficient balance for this transaction.</source>

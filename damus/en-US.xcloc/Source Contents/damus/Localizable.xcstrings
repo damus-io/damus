@@ -28,7 +28,7 @@
       "comment" : "Amount of money required to publish to the Nostr relay. In English, this would look something like '10 sats / event', meaning it costs 10 sats to publish one event."
     },
     "%@ %@" : {
-      "comment" : "Sentence composed of 2 variables to describe how many imports were performed from loading a NostrScript. In source English, the first variable is the number of imports, and the second variable is 'Import' or 'Imports'.\nSentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.\nSentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.\nSentence composed of 2 variables to describe how many quoted reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.\nSentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.\nSentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.\nSentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.\nSentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.",
+      "comment" : "Sentence composed of 2 variables to describe how many imports were performed from loading a NostrScript. In source English, the first variable is the number of imports, and the second variable is 'Import' or 'Imports'.\nSentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.\nSentence composed of 2 variables to describe how many people are in the follow pack. In source English, the first variable is the number of users, and the second variable is 'user' or 'users'.\nSentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.\nSentence composed of 2 variables to describe how many quoted reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.\nSentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.\nSentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.\nSentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.\nSentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.",
       "localizations" : {
         "en-US" : {
           "stringUnit" : {
@@ -160,7 +160,7 @@
       "comment" : "Heading for some advice text to help the user with an error"
     },
     "All" : {
-      "comment" : "Human-readable short description of the 'friends filter' when it is set to 'all'\nLabel for filter for all notifications."
+      "comment" : "Human-readable short description of the 'trusted network filter' when it is disabled, and therefore is showing all content.\nLabel for filter for all notifications."
     },
     "All recent notes" : {
       "comment" : "A label indicating that the notes being displayed below it are all recent notes"
@@ -660,6 +660,9 @@
     "Follow me on Nostr" : {
       "comment" : "Text on QR code view to prompt viewer looking at screen to follow the user."
     },
+    "Follow Packs" : {
+      "comment" : "A label indicating that the items below it are follow packs"
+    },
     "Followed by %@" : {
       "comment" : "Text to indicate that the user is followed by one of our follows."
     },
@@ -714,9 +717,6 @@
     },
     "Free" : {
       "comment" : "Dropdown option for selecting Free plan for DeepL translation service."
-    },
-    "Friends of friends" : {
-      "comment" : "Human-readable short description of the 'friends filter' when it is set to 'friends-of-friends'"
     },
     "General" : {
       "comment" : "Section header for general damus notifications user configuration"
@@ -1009,6 +1009,9 @@
     "No content available to share" : {
       "comment" : "Title indicating that there was no available content to share"
     },
+    "No cover image" : {
+      "comment" : "Text letting user know there is no cover image."
+    },
     "No image is currently setup" : {
       "comment" : "Accessibility value on image control"
     },
@@ -1212,7 +1215,7 @@
       "comment" : "Label to display that authentication to a server is pending."
     },
     "People" : {
-      "comment" : "Label for filter for seeing only people follows."
+      "comment" : "Label for filter for seeing only people follows.\nLabel for filter for seeing the people in this follow pack."
     },
     "People will be able to send you cash from your profile. No money goes to Damus." : {
       "comment" : "The description for one of the \"Why add Zaps?\" boxes"
@@ -1279,6 +1282,9 @@
     },
     "Post" : {
       "comment" : "Button to post a note."
+    },
+    "Posts" : {
+      "comment" : "Label for filter for seeing the posts from the people in this follow pack."
     },
     "Private" : {
       "comment" : "Button text to indicate that the zap type is a private zap.\nHeading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading.\nPicker option to indicate that a zap should be sent privately and not identify the user to the public."
@@ -1406,6 +1412,9 @@
     "Repair relay list" : {
       "comment" : "Button to repair relay list."
     },
+    "Replies outside your trusted network" : {
+      "comment" : "Section title in thread for replies from outside of the current user's trusted network, which is their follows and follows of follows."
+    },
     "Reply" : {
       "comment" : "Accessibility label for reply button"
     },
@@ -1464,6 +1473,9 @@
     },
     "Reset contact list" : {
       "comment" : "Button to reset contact list."
+    },
+    "Reset tips on launch" : {
+      "comment" : "Developer mode setting to reset tips upon app first launch. Tips are visual contextual hints that highlight new, interesting, or unused features users have not discovered yet."
     },
     "Retry" : {
       "comment" : "Button to retry completing account creation after an error occurred."
@@ -1629,6 +1641,9 @@
     },
     "Show profile action sheets" : {
       "comment" : "Setting to show profile action sheets when clicking on a user's profile picture"
+    },
+    "Show replies from your trusted network first" : {
+      "comment" : "Setting to show replies in threads from the current user's trusted network first."
     },
     "Show wallet selector" : {
       "comment" : "Toggle to show or hide selection of wallet."
@@ -1804,6 +1819,12 @@
     "Toggle key visibility" : {
       "comment" : "Accessibility label for toggling the visibility of the private key input field"
     },
+    "Toggle visibility of content from outside your trusted network" : {
+      "comment" : "Title of tip that informs users what trusted network means and that they can toggle the visibility of content from outside their trusted network."
+    },
+    "Toggle visibility of replies from outside your trusted network" : {
+      "comment" : "Title of tip that informs users what trusted network means and that they can toggle the visibility of threaded replies from outside their trusted network."
+    },
     "Top hits" : {
       "comment" : "A label indicating that the notes being displayed below it are all top note search results"
     },
@@ -1833,6 +1854,9 @@
     },
     "Truncate timeline text" : {
       "comment" : "Setting to truncate text in timeline"
+    },
+    "Trusted Network" : {
+      "comment" : "Human-readable short description of the 'trusted network filter' when it is enabled, and therefore showing content from only the trusted network."
     },
     "Try checking the link again, your internet connection, or contact the person who provided you the link for help." : {
       "comment" : "Tips on what to do if a note cannot be found."
@@ -1877,7 +1901,7 @@
       "comment" : "Label represnting a button that the user can tap to unmute a given hashtag so they start seeing it in their feed again."
     },
     "Untitled" : {
-      "comment" : "Title of longform event if it is untitled."
+      "comment" : "Title of follow list event if it is untitled.\nTitle of longform event if it is untitled."
     },
     "Update" : {
       "comment" : "Update button text for updating image url."
@@ -2082,6 +2106,9 @@
     },
     "Your transaction quota has been exceeded." : {
       "comment" : "Error description for quota exceeded"
+    },
+    "Your trusted network is comprised of profiles you follow and profiles that they follow." : {
+      "comment" : "Description of the tip that informs users what trusted network means."
     },
     "Your wallet does not have sufficient balance for this transaction." : {
       "comment" : "Error description for insufficient balance"
