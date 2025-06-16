@@ -468,6 +468,9 @@
     "Create new wallet" : {
       "comment" : "Button text for creating a new wallet."
     },
+    "Created by %@" : {
+      "comment" : "Lets the user know who created this follow pack."
+    },
     "Current balance" : {
       "comment" : "Label for displaying current wallet balance"
     },

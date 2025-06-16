@@ -140,12 +140,12 @@ struct FollowPackView: View {
                 let displayName = Profile.displayName(profile: profile, pubkey: event.event.pubkey)
                 switch displayName {
                 case .one(let one):
-                    Text(NSLocalizedString("Created by \(one)", comment: "Lets the user know who created this follow pack."))
+                    Text("Created by \(one)", comment: "Lets the user know who created this follow pack.")
                         .font(.subheadline).foregroundColor(.gray)
                     
                 case .both(username: let username, displayName: let displayName):
                         HStack(spacing: 6) {
-                            Text(NSLocalizedString("Created by \(displayName)", comment: "Lets the user know who created this follow pack."))
+                            Text("Created by \(displayName)", comment: "Lets the user know who created this follow pack.")
                                 .font(.subheadline).foregroundColor(.gray)
                             
                             Text(verbatim: "@\(username)")
