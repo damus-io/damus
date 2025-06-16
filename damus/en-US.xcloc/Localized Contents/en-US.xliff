@@ -790,6 +790,11 @@ Context menu option for copying the version of damus.</note>
         <target>Create new wallet</target>
         <note>Button text for creating a new wallet.</note>
       </trans-unit>
+      <trans-unit id="Created by %@" xml:space="preserve">
+        <source>Created by %@</source>
+        <target>Created by %@</target>
+        <note>Lets the user know who created this follow pack.</note>
+      </trans-unit>
       <trans-unit id="Current balance" xml:space="preserve">
         <source>Current balance</source>
         <target>Current balance</target>
@@ -5005,6 +5010,11 @@ Context menu option for copying the version of damus.</note>
         <source>Create new wallet</source>
         <target state="new">Create new wallet</target>
         <note>Button text for creating a new wallet.</note>
+      </trans-unit>
+      <trans-unit id="Created by %@" xml:space="preserve">
+        <source>Created by %@</source>
+        <target state="new">Created by %@</target>
+        <note>Lets the user know who created this follow pack.</note>
       </trans-unit>
       <trans-unit id="Current balance" xml:space="preserve">
         <source>Current balance</source>
