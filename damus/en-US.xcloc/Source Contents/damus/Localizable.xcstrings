@@ -763,6 +763,9 @@
     "Hide all 🤙's" : {
       "comment" : "Section footer describing OnlyZaps mode"
     },
+    "Hide balance" : {
+      "comment" : "Setting to hide wallet balance."
+    },
     "Hide notes with #nsfw tags" : {
       "comment" : "Setting to hide notes with the #nsfw (not safe for work) tags"
     },
@@ -1089,6 +1092,31 @@
     },
     "Notes & Replies" : {
       "comment" : "Label for filter for seeing notes and replies (instead of only notes)."
+    },
+    "Notes from %@" : {
+      "comment" : "Text to indicate that notes from one pubkey in our trusted network are shown below."
+    },
+    "Notes from %@ & %@" : {
+      "comment" : "Text to indicate that notes from two pubkeys in our trusted network are shown below.",
+      "localizations" : {
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Notes from %1$@ & %2$@"
+          }
+        }
+      }
+    },
+    "Notes from %@, %@ & %@" : {
+      "comment" : "Text to indicate that notes from three pubkeys in our trusted network are shown below.",
+      "localizations" : {
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Notes from %1$@, %2$@ & %3$@"
+          }
+        }
+      }
     },
     "Notes with the #nsfw tag usually contains adult content or other \"Not safe for work\" content" : {
       "comment" : "Section footer clarifying what #nsfw (not safe for work) tags mean"

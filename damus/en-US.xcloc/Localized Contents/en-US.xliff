@@ -2,7 +2,7 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
   <file original="damus/en-US.lproj/InfoPlist.strings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.3" build-num="16E140"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.4" build-num="16F6"/>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">
@@ -44,7 +44,7 @@
   </file>
   <file original="damus/en-US.lproj/Localizable.strings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.3" build-num="16E140"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.4" build-num="16F6"/>
     </header>
     <body>
       <trans-unit id="#%@" xml:space="preserve">
@@ -1288,6 +1288,11 @@ This is my first post on Damus, I am happy to meet you all 🤙. What’s up?
         <target>Hide all 🤙's</target>
         <note>Section footer describing OnlyZaps mode</note>
       </trans-unit>
+      <trans-unit id="Hide balance" xml:space="preserve">
+        <source>Hide balance</source>
+        <target>Hide balance</target>
+        <note>Setting to hide wallet balance.</note>
+      </trans-unit>
       <trans-unit id="Hide notes with #nsfw tags" xml:space="preserve">
         <source>Hide notes with #nsfw tags</source>
         <target>Hide notes with #nsfw tags</target>
@@ -1829,6 +1834,21 @@ Label for filter for seeing only notes (instead of notes and replies).</note>
         <source>Notes &amp; Replies</source>
         <target>Notes &amp; Replies</target>
         <note>Label for filter for seeing notes and replies (instead of only notes).</note>
+      </trans-unit>
+      <trans-unit id="Notes from %@" xml:space="preserve">
+        <source>Notes from %@</source>
+        <target>Notes from %@</target>
+        <note>Text to indicate that notes from one pubkey in our trusted network are shown below.</note>
+      </trans-unit>
+      <trans-unit id="Notes from %@ &amp; %@" xml:space="preserve">
+        <source>Notes from %1$@ &amp; %2$@</source>
+        <target>Notes from %1$@ &amp; %2$@</target>
+        <note>Text to indicate that notes from two pubkeys in our trusted network are shown below.</note>
+      </trans-unit>
+      <trans-unit id="Notes from %@, %@ &amp; %@" xml:space="preserve">
+        <source>Notes from %1$@, %2$@ &amp; %3$@</source>
+        <target>Notes from %1$@, %2$@ &amp; %3$@</target>
+        <note>Text to indicate that notes from three pubkeys in our trusted network are shown below.</note>
       </trans-unit>
       <trans-unit id="Notes with the #nsfw tag usually contains adult content or other &quot;Not safe for work&quot; content" xml:space="preserve">
         <source>Notes with the #nsfw tag usually contains adult content or other "Not safe for work" content</source>
@@ -3720,7 +3740,7 @@ String indicating that a given timestamp just occurred</note>
   </file>
   <file original="damus/en-US.lproj/Localizable.stringsdict" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.3" build-num="16E140"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.4" build-num="16F6"/>
     </header>
     <body>
       <trans-unit id="/followed_by_three_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
@@ -3796,6 +3816,21 @@ String indicating that a given timestamp just occurred</note>
       <trans-unit id="/imports_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@IMPORTS@</source>
         <target>%#@IMPORTS@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/notes_from_three_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@OTHERS@</source>
+        <target>%#@OTHERS@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/notes_from_three_and_others:dict/OTHERS:dict/one:dict/:string" xml:space="preserve">
+        <source>Notes from %2$@, %3$@, %4$@ &amp; %1$d other in your trusted network</source>
+        <target>Notes from %2$@, %3$@, %4$@ &amp; %1$d other in your trusted network</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/notes_from_three_and_others:dict/OTHERS:dict/other:dict/:string" xml:space="preserve">
+        <source>Notes from %2$@, %3$@, %4$@ &amp; %1$d others in your trusted network</source>
+        <target>Notes from %2$@, %3$@, %4$@ &amp; %1$d others in your trusted network</target>
         <note/>
       </trans-unit>
       <trans-unit id="/people_reposted_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
@@ -4132,7 +4167,7 @@ String indicating that a given timestamp just occurred</note>
   </file>
   <file original="damus/InfoPlist.xcstrings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.3" build-num="16E140"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.4" build-num="16F6"/>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">
@@ -4154,7 +4189,7 @@ String indicating that a given timestamp just occurred</note>
   </file>
   <file original="damus/Localizable.xcstrings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.3" build-num="16E140"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.4" build-num="16F6"/>
     </header>
     <body>
       <trans-unit id="" xml:space="preserve">
@@ -5406,6 +5441,11 @@ This is my first post on Damus, I am happy to meet you all 🤙. What’s up?
         <target state="new">Hide all 🤙's</target>
         <note>Section footer describing OnlyZaps mode</note>
       </trans-unit>
+      <trans-unit id="Hide balance" xml:space="preserve">
+        <source>Hide balance</source>
+        <target state="new">Hide balance</target>
+        <note>Setting to hide wallet balance.</note>
+      </trans-unit>
       <trans-unit id="Hide notes with #nsfw tags" xml:space="preserve">
         <source>Hide notes with #nsfw tags</source>
         <target state="new">Hide notes with #nsfw tags</target>
@@ -5942,6 +5982,21 @@ Label for filter for seeing only notes (instead of notes and replies).</note>
         <source>Notes &amp; Replies</source>
         <target state="new">Notes &amp; Replies</target>
         <note>Label for filter for seeing notes and replies (instead of only notes).</note>
+      </trans-unit>
+      <trans-unit id="Notes from %@" xml:space="preserve">
+        <source>Notes from %@</source>
+        <target state="new">Notes from %@</target>
+        <note>Text to indicate that notes from one pubkey in our trusted network are shown below.</note>
+      </trans-unit>
+      <trans-unit id="Notes from %@ &amp; %@" xml:space="preserve">
+        <source>Notes from %1$@ &amp; %2$@</source>
+        <target state="new">Notes from %1$@ &amp; %2$@</target>
+        <note>Text to indicate that notes from two pubkeys in our trusted network are shown below.</note>
+      </trans-unit>
+      <trans-unit id="Notes from %@, %@ &amp; %@" xml:space="preserve">
+        <source>Notes from %1$@, %2$@ &amp; %3$@</source>
+        <target state="new">Notes from %1$@, %2$@ &amp; %3$@</target>
+        <note>Text to indicate that notes from three pubkeys in our trusted network are shown below.</note>
       </trans-unit>
       <trans-unit id="Notes with the #nsfw tag usually contains adult content or other &quot;Not safe for work&quot; content" xml:space="preserve">
         <source>Notes with the #nsfw tag usually contains adult content or other "Not safe for work" content</source>
@@ -7698,7 +7753,7 @@ String indicating that a given timestamp just occurred</note>
   </file>
   <file original="damus/Resources/InfoPlist.xcstrings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.3" build-num="16E140"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.4" build-num="16F6"/>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">
@@ -7720,7 +7775,7 @@ String indicating that a given timestamp just occurred</note>
   </file>
   <file original="highlighter action extension/InfoPlist.xcstrings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.3" build-num="16E140"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.4" build-num="16F6"/>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">
