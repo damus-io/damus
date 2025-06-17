@@ -47,20 +47,6 @@ struct MutelistView: View {
 
     var body: some View {
         List {
-            Section(NSLocalizedString("Users", comment: "Section header title for a list of muted users.")) {
-                ForEach(users, id: \.self) { user in
-                    if case let MuteItem.user(pubkey, _) = user {
-                        UserViewRow(damus_state: damus_state, pubkey: pubkey)
-                         .id(pubkey)
-                         .swipeActions {
-                             RemoveAction(item: .user(pubkey, nil))
-                         }
-                         .onTapGesture {
-                             damus_state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))
-                         }
-                    }
-                }
-            }
             Section(NSLocalizedString("Hashtags", comment: "Section header title for a list of hashtags that are muted.")) {
                 ForEach(hashtags, id: \.self) { item in
                     if case let MuteItem.hashtag(hashtag, _) = item {
@@ -86,10 +72,7 @@ struct MutelistView: View {
                     }
                 }
             }
-            Section(
-                header: Text(NSLocalizedString("Threads", comment: "Section header title for a list of threads that are muted.")),
-                footer: Text("").padding(.bottom, 10 + tabHeight + getSafeAreaBottom())
-            ) {
+            Section(NSLocalizedString("Threads", comment: "Section header title for a list of threads that are muted.")) {
                 ForEach(threads, id: \.self) { item in
                     if case let MuteItem.thread(note_id, _) = item {
                         if let event = damus_state.events.lookup(note_id) {
@@ -101,6 +84,23 @@ struct MutelistView: View {
                         } else {
                             Text("Error retrieving muted event", comment: "Text for an item that application failed to retrieve the muted event for.")
                         }
+                    }
+                }
+            }
+            Section(
+                header: Text(NSLocalizedString("Users", comment: "Section header title for a list of muted users.")),
+                footer: Text("").padding(.bottom, 10 + tabHeight + getSafeAreaBottom())
+            ) {
+                ForEach(users, id: \.self) { user in
+                    if case let MuteItem.user(pubkey, _) = user {
+                        UserViewRow(damus_state: damus_state, pubkey: pubkey)
+                            .id(pubkey)
+                            .swipeActions {
+                                RemoveAction(item: .user(pubkey, nil))
+                            }
+                            .onTapGesture {
+                                damus_state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))
+                            }
                     }
                 }
             }
