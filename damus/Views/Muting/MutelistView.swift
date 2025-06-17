@@ -33,7 +33,7 @@ struct MutelistView: View {
             damus_state.nostrNetwork.postbox.send(new_ev)
             updateMuteItems()
         } label: {
-            Label(NSLocalizedString("Delete", comment: "Button to remove a user from their mutelist."), image: "delete")
+            Label("Delete", image: "delete")
         }
         .tint(.red)
     }
@@ -47,7 +47,7 @@ struct MutelistView: View {
 
     var body: some View {
         List {
-            Section(NSLocalizedString("Hashtags", comment: "Section header title for a list of hashtags that are muted.")) {
+            Section("Hashtags") {
                 ForEach(hashtags, id: \.self) { item in
                     if case let MuteItem.hashtag(hashtag, _) = item {
                         Text(verbatim: "#\(hashtag.hashtag)")
@@ -61,7 +61,7 @@ struct MutelistView: View {
                     }
                 }
             }
-            Section(NSLocalizedString("Words", comment: "Section header title for a list of words that are muted.")) {
+            Section("Words") {
                 ForEach(words, id: \.self) { item in
                     if case let MuteItem.word(word, _) = item {
                         Text(word)
@@ -72,7 +72,7 @@ struct MutelistView: View {
                     }
                 }
             }
-            Section(NSLocalizedString("Threads", comment: "Section header title for a list of threads that are muted.")) {
+            Section("Threads")  {
                 ForEach(threads, id: \.self) { item in
                     if case let MuteItem.thread(note_id, _) = item {
                         if let event = damus_state.events.lookup(note_id) {
@@ -82,13 +82,13 @@ struct MutelistView: View {
                                     RemoveAction(item: .thread(note_id, nil))
                                 }
                         } else {
-                            Text("Error retrieving muted event", comment: "Text for an item that application failed to retrieve the muted event for.")
+                            Text("Error retrieving muted event")
                         }
                     }
                 }
             }
             Section(
-                header: Text(NSLocalizedString("Users", comment: "Section header title for a list of muted users.")),
+                header: Text("Users"),
                 footer: Text("").padding(.bottom, 10 + tabHeight + getSafeAreaBottom())
             ) {
                 ForEach(users, id: \.self) { user in
@@ -105,7 +105,7 @@ struct MutelistView: View {
                 }
             }
         }
-        .navigationTitle(NSLocalizedString("Muted", comment: "Navigation title of view to see list of muted users & phrases."))
+        .navigationTitle("Muted")
         .onAppear {
             updateMuteItems()
         }
