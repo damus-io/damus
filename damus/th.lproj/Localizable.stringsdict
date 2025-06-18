@@ -2,6 +2,20 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>follow_pack_user_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOW_PACK_USERS@</string>
+		<key>FOLLOW_PACK_USERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>other</key>
+			<string>ผู้ใช้</string>
+		</dict>
+	</dict>
 	<key>followed_by_three_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -70,6 +84,20 @@
 			<string>d</string>
 			<key>other</key>
 			<string>นำเข้า</string>
+		</dict>
+	</dict>
+	<key>notes_from_three_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>other</key>
+			<string>โน้ตจาก %2@, %4d คนในเครือข่ายที่เชื่อถือของคุณ</string>
 		</dict>
 	</dict>
 	<key>people_reposted_count</key>
