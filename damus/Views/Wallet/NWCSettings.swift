@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct NWCSettings: View {
     
@@ -16,6 +17,18 @@ struct NWCSettings: View {
     
     @Environment(\.dismiss) var dismiss
     
+    // Budget sync state tracking
+    @State private var isCoinosWallet: Bool = false
+    @State private var maxWeeklyBudget: UInt64? = nil
+    @State private var budgetSyncState: BudgetSyncState = .undefined
+    
+    // Min/max budget values for slider
+    private let minBudget: UInt64 = 100
+    private let maxBudget: UInt64 = 10_000_000
+    
+    // Slider min/max values for logarithmic scale (0-1 range)
+    private let sliderMin: Double = 0.0
+    private let sliderMax: Double = 1.0
     
     func donation_binding() -> Binding<Double> {
         return Binding(get: {
@@ -141,6 +154,75 @@ struct NWCSettings: View {
 
             Toggle(NSLocalizedString("Hide balance", comment: "Setting to hide wallet balance."), isOn: $settings.hide_wallet_balance)
                 .toggleStyle(.switch)
+                
+            if isCoinosWallet, let maxWeeklyBudget {
+                VStack(alignment: .leading) {
+                    Text("Max weekly budget", comment: "Label for setting the maximum weekly budget for Coinos wallet")
+                        .font(.headline)
+                        .padding(.bottom, 2)
+                    Text("The maximum amount of funds that are allowed to be sent out from this wallet each week.", comment: "Description explaining the purpose of the 'Max weekly budget' setting for Coinos one-click setup wallets")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack {
+                            Slider(
+                                // Use a logarithmic scale for this slider to give more control to different kinds of users:
+                                //
+                                // - Users with higher budget tolerance can select very high amounts (e.g. Easy to go up to 5M or 10M sats)
+                                // - Conservative users can still have fine-grained control over lower amounts (e.g. Easy to switch between 500 and 1.5K sats)
+                                value: Binding(
+                                    get: {
+                                        // Convert from budget value to slider position (0-1)
+                                        budgetToSliderPosition(budget: maxWeeklyBudget)
+                                    },
+                                    set: { 
+                                        // Convert from slider position to budget value
+                                        let newValue = sliderPositionToBudget(position: $0)
+                                        if self.maxWeeklyBudget != newValue {
+                                            self.maxWeeklyBudget = newValue
+                                        }
+                                    }
+                                ),
+                                in: sliderMin...sliderMax,
+                                onEditingChanged: { editing in
+                                    if !editing {
+                                        updateMaxWeeklyBudget()
+                                    }
+                                }
+                            )
+                            
+                            Text(verbatim: format_msats(Int64(maxWeeklyBudget) * 1000))
+                                .foregroundColor(.gray)
+                                .frame(width: 150, alignment: .trailing)
+                        }
+                        
+                        // Budget sync status
+                        HStack {
+                            switch budgetSyncState {
+                            case .undefined:
+                                EmptyView()
+                            case .success:
+                                HStack {
+                                    Image("check-circle.fill")
+                                        .foregroundStyle(.damusGreen)
+                                    Text("Successfully updated", comment: "Label indicating success in updating budget")
+                                }
+                            case .syncing:
+                                HStack(spacing: 10) {
+                                    ProgressView()
+                                    Text("Updating", comment: "Label indicating budget update is in progress")
+                                }
+                            case .failure(let error):
+                                Text(error)
+                                    .foregroundStyle(.damusDangerPrimary)
+                            }
+                        }
+                        .padding(.top, 5)
+                    }
+                }
+                .padding(.vertical, 8)
+            }
 
             Button(action: {
                 self.model.disconnect()
@@ -156,6 +238,10 @@ struct NWCSettings: View {
         .padding()
         .onAppear() {
             model.initial_percent = model.settings.donation_percent
+            checkIfCoinosWallet()
+            if isCoinosWallet {
+                fetchCurrentBudget()
+            }
         }
         .onChange(of: model.settings.donation_percent) { p in
             let profile_txn = damus_state.profiles.lookup(id: damus_state.pubkey)
@@ -183,6 +269,79 @@ struct NWCSettings: View {
                 return
             }
             damus_state.nostrNetwork.postbox.send(meta)
+        }
+    }
+    
+    // Check if the current wallet is a Coinos one-click wallet
+    private func checkIfCoinosWallet() {
+        // Check condition 1: Relay is coinos.io
+        let isRelayCoinos = nwc.relay.absoluteString == "wss://relay.coinos.io"
+        
+        // Check condition 2: LUD16 matches expected format
+        guard let keypair = damus_state.keypair.to_full() else {
+            isCoinosWallet = false
+            return
+        }
+        
+        let client = CoinosDeterministicAccountClient(userKeypair: keypair)
+        let expectedLud16 = client.expectedLud16
+        
+        isCoinosWallet = isRelayCoinos && nwc.lud16 == expectedLud16
+    }
+    
+    /// Fetches the current max weekly budget from Coinos
+    private func fetchCurrentBudget() {
+        guard let keypair = damus_state.keypair.to_full() else { return }
+        
+        let client = CoinosDeterministicAccountClient(userKeypair: keypair)
+        
+        Task {
+            do {
+                if let config = try await client.getNWCAppConnectionConfig(),
+                   let maxAmount = config.max_amount {
+                    DispatchQueue.main.async {
+                        self.maxWeeklyBudget = maxAmount
+                    }
+                }
+            } catch {
+                self.budgetSyncState = .failure(error: error.localizedDescription)
+            }
+        }
+    }
+    
+    /// Updates the max weekly budget on Coinos
+    private func updateMaxWeeklyBudget() {
+        guard let maxWeeklyBudget else { return }
+        guard let keypair = damus_state.keypair.to_full() else { return }
+        
+        budgetSyncState = .syncing
+        
+        let client = CoinosDeterministicAccountClient(userKeypair: keypair)
+        
+        Task {
+            do {
+                // First ensure we're logged in
+                try await client.loginIfNeeded()
+                
+                // Update the connection with the new budget
+                _ = try await client.updateNWCConnection(maxAmount: maxWeeklyBudget)
+            
+                DispatchQueue.main.async {
+                    self.budgetSyncState = .success
+                    
+                    // Reset success state after a delay
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        if case .success = self.budgetSyncState {
+                            self.budgetSyncState = .undefined
+                        }
+                    }
+                }
+                
+            } catch {
+                DispatchQueue.main.async {
+                    self.budgetSyncState = .failure(error: error.localizedDescription)
+                }
+            }
         }
     }
     
@@ -233,11 +392,58 @@ struct NWCSettings: View {
             )
         }
     }
+    
+    
+    // MARK: - Logarithmic scale conversions
+    
+    /// Converts from budget value to a slider position (0-1 range)
+    func budgetToSliderPosition(budget: UInt64) -> Double {
+        // Ensure budget is within bounds
+        let clampedBudget = max(minBudget, min(maxBudget, budget))
+        
+        // Calculate the log scale position
+        let minLog = log10(Double(minBudget))
+        let maxLog = log10(Double(maxBudget))
+        let budgetLog = log10(Double(clampedBudget))
+        
+        // Convert to 0-1 range
+        return (budgetLog - minLog) / (maxLog - minLog)
+    }
+    
+    // Convert from slider position (0-1) to budget value
+    func sliderPositionToBudget(position: Double) -> UInt64 {
+        // Ensure position is within bounds
+        let clampedPosition = max(sliderMin, min(sliderMax, position))
+        
+        // Calculate the log scale value
+        let minLog = log10(Double(minBudget))
+        let maxLog = log10(Double(maxBudget))
+        let valueLog = minLog + clampedPosition * (maxLog - minLog)
+        
+        // Convert to budget value and round to nearest 100 to make the number look "cleaner"
+        let exactValue = pow(10, valueLog)
+        let roundedValue = round(exactValue / 100) * 100
+        
+        return UInt64(roundedValue)
+    }
 }
 
 struct NWCSettings_Previews: PreviewProvider {
     static let tds = test_damus_state
     static var previews: some View {
         NWCSettings(damus_state: tds, nwc: test_wallet_connect_url, model: WalletModel(state: .existing(test_wallet_connect_url), settings: tds.settings), settings: tds.settings)
+    }
+}
+
+extension NWCSettings {
+    enum BudgetSyncState: Equatable {
+        /// State is unknown
+        case undefined
+        /// Budget is successfully updated
+        case success
+        /// Budget is being updated
+        case syncing
+        /// There was a failure during update
+        case failure(error: String)
     }
 }
