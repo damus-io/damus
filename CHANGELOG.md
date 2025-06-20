@@ -1,3 +1,54 @@
+## [1.15] - 2025-07-11
+
+**Note:** This version was only released on TestFlight, and never officially released on the App Store.
+
+### Added
+
+- Added new onboarding suggestions based on user-selected interests (Daniel D’Aquino)
+- Added adjustable max budget setting for Coinos one-click wallets (Daniel D’Aquino)
+- Added send feature to the wallet view (Daniel D’Aquino)
+- Added popover tips to DMs and Notifications toolbars on Trusted Network button (Terry Yiu)
+- Added tip in threads to inform users what trusted network means (Terry Yiu)
+- Added web of trust reply sorting in threads to mitigate spam (Terry Yiu)
+- Added follow list kind 39089 (ericholguin)
+- Added follow pack preview (ericholguin)
+- Added follow pack timeline to Universe View (ericholguin)
+- Added NIP-05 favicon to profile names and NIP-05 web of trust feed (Terry Yiu)
+- Display uploading indicator in post view (Swift Coder)
+
+
+### Changed
+
+- Improved the image sizing behavior on the image carousel for a smoother experience (Daniel D’Aquino)
+- Handle npub correctly in draft notes (Askia Linder)
+- Move users-section to be last in muted view (Askia Linder)
+- Removed media from regular link previews if media is already being shown (Terry Yiu)
+- Renamed Friends of Friends to Trusted Network (Terry Yiu)
+- Added privacy-based redaction to nsec in key settings view (Terry Yiu)
+- Added privacy-based redaction to wallet view (Terry Yiu)
+- Renamed Bitcoin Beach wallet to Blink (Terry Yiu)
+
+
+### Fixed
+
+- Fixed #nsfw tag filtering to be case insensitive (Terry Yiu)
+- Fixed stretchy banner header in Edit profile (Swift)
+- Fixed note rendering to include regular link previews with media removed when media previews are disabled (Terry Yiu)
+- Improve error handling on wallet send feature (Daniel D’Aquino)
+- Fixed issue where the text "??" would appear on the balance while loading (Daniel D’Aquino)
+- Hide end previewables when hashtags are present (Terry Yiu)
+- Fixed wallet transactions to always show profile display name unless there is no pubkey (Terry Yiu)
+- Fixed quotes view header alignment (Terry Yiu)
+
+
+### Removed
+
+- Removed hashtags in Universe View (ericholguin)
+
+
+[1.15]: https://github.com/damus-io/damus/releases/tag/v1.15
+
+
 ## [1.14] - 2025-05-25
 
 ### Added
