@@ -217,6 +217,10 @@ struct SendPaymentView: View {
                                     ))
                                 }
                             }
+                            else if let error = error as? WalletConnect.WalletResponseErr,
+                                    let humanReadableError = error.humanReadableError  {
+                                sendState = .failed(error: humanReadableError)
+                            }
                             else {
                                 sendState = .failed(error: .init(
                                     user_visible_description: NSLocalizedString("An unexpected error occurred.", comment: "A human-readable error message"),
