@@ -176,6 +176,48 @@ final class PostViewTests: XCTestCase {
 
         XCTAssertEqual(post.tags, [["q", test_note.id.hex()]])
     }
+
+    func testBuildPostRecognizesStringsAsNpubs() throws {
+        // given
+        let expectedLink = "nostr:\(test_pubkey.npub)"
+        let content = NSMutableAttributedString(string: "@test", attributes: [
+            NSAttributedString.Key.link: "damus:\(expectedLink)"
+        ])
+
+        // when
+        let post = build_post(
+            state: test_damus_state,
+            post: content,
+            action: .posting(.user(test_pubkey)),
+            uploadedMedias: [],
+            pubkeys: []
+        )
+
+        // then
+        XCTAssertEqual(post.content, expectedLink)
+    }
+
+    func testBuildPostRecognizesUrlsAsNpubs() throws {
+        // given
+        guard let npubUrl = URL(string: "damus:nostr:\(test_pubkey.npub)") else {
+            return XCTFail("Could not create URL")
+        }
+        let content = NSMutableAttributedString(string: "@test", attributes: [
+            NSAttributedString.Key.link: npubUrl
+        ])
+
+        // when
+        let post = build_post(
+            state: test_damus_state,
+            post: content,
+            action: .posting(.user(test_pubkey)),
+            uploadedMedias: [],
+            pubkeys: []
+        )
+
+        // then
+        XCTAssertEqual(post.content, "nostr:\(test_pubkey.npub)")
+    }
 }
 
 func checkMentionLinkEditorHandling(
