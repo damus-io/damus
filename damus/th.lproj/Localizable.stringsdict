@@ -86,20 +86,6 @@
 			<string>นำเข้า</string>
 		</dict>
 	</dict>
-	<key>notes_from_three_and_others</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@OTHERS@</string>
-		<key>OTHERS</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>other</key>
-			<string>โน้ตจาก %2@, %4d คนในเครือข่ายที่เชื่อถือของคุณ</string>
-		</dict>
-	</dict>
 	<key>people_reposted_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
