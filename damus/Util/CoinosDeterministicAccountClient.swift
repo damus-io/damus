@@ -42,6 +42,11 @@ class CoinosDeterministicAccountClient {
         return String(fullText.prefix(16))
     }
     
+    var expectedLud16: String? {
+        guard let username else { return nil }
+        return username + "@coinos.io"
+    }
+    
     /// A deterministic password for a Coinos account
     private var password: String? {
         // Add some prefix so that we can ensure this will NOT match the user nor the NWC private key
@@ -143,6 +148,50 @@ class CoinosDeterministicAccountClient {
         
         let config = try defaultWalletConnectionConfig()
         let configData = try encode_json_data(config)
+        
+        let (data, response) = try await self.makeAuthenticatedRequest(
+            method: .post,
+            url: urlEndpoint,
+            payload: configData,
+            payload_type: .json
+        )
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            switch httpResponse.statusCode {
+            case 200:
+                guard let nwc = try await self.getNWCUrl() else { throw ClientError.errorProcessingResponse }
+                return nwc
+            case 401: throw ClientError.unauthorized
+            default: throw ClientError.unexpectedHTTPResponse(status_code: httpResponse.statusCode, response: data)
+            }
+        }
+        throw ClientError.errorProcessingResponse
+    }
+    
+    /// Updates an existing NWC connection with a new maximum budget
+    ///
+    /// Note: Account and NWC connection must exist before calling this endpoint
+    func updateNWCConnection(maxAmount: UInt64) async throws -> WalletConnectURL {
+        guard let nwcKeypair else { throw ClientError.errorFormingRequest }
+        guard let urlEndpoint = URL(string: "https://coinos.io/api/app") else { throw ClientError.errorFormingRequest }
+        
+        try await self.loginIfNeeded()
+        
+        // Get existing config first
+        guard let existingConfig = try await self.getNWCAppConnectionConfig() else {
+            throw ClientError.errorProcessingResponse
+        }
+        
+        // Create updated config with new max amount
+        let updatedConfig = NewWalletConnectionConfig(
+            name: existingConfig.name ?? self.nwcConnectionName,
+            secret: existingConfig.secret ?? nwcKeypair.privkey.hex(),
+            pubkey: existingConfig.pubkey ?? nwcKeypair.pubkey.hex(),
+            max_amount: maxAmount,
+            budget_renewal: .weekly
+        )
+        
+        let configData = try encode_json_data(updatedConfig)
         
         let (data, response) = try await self.makeAuthenticatedRequest(
             method: .post,
