@@ -87,6 +87,12 @@ struct NoteContentView: View {
             return linkPreviewWithNoMedia(cached)
         }
 
+        // If media is already being shown, do not show media in the link preview
+        // to avoid taking up additional screen space.
+        if case let .separated(separated) = note_artifacts, !separated.media.isEmpty && !self.options.contains(.no_media) {
+            return linkPreviewWithNoMedia(cached)
+        }
+
         return LinkViewRepresentable(meta: .linkmeta(cached))
     }
 
