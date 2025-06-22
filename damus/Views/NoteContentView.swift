@@ -73,15 +73,34 @@ struct NoteContentView: View {
     }
     
     var preview: LinkViewRepresentable? {
-        guard !blur_images,
-              case .loaded(let preview) = preview_model.state,
+        guard case .loaded(let preview) = preview_model.state,
               case .value(let cached) = preview else {
             return nil
         }
-        
+
+        // If either
+        // (1) the blur images setting is enabled
+        // (2) the media previews setting is disabled
+        // (3) this note content view does not display media
+        // then do not show media in the link preview.
+        if blur_images || !damus_state.settings.media_previews || self.options.contains(.no_media) {
+            return linkPreviewWithNoMedia(cached)
+        }
+
         return LinkViewRepresentable(meta: .linkmeta(cached))
     }
-    
+
+    // Creates a LinkViewRepresentable without media previews.
+    func linkPreviewWithNoMedia(_ cached: CachedMetadata) -> LinkViewRepresentable? {
+        let linkMetadata = LPLinkMetadata()
+
+        linkMetadata.originalURL = cached.meta.originalURL
+        linkMetadata.title = cached.meta.title
+        linkMetadata.url = cached.meta.url
+
+        return LinkViewRepresentable(meta: .linkmeta(CachedMetadata(meta: linkMetadata)))
+    }
+
     func truncatedText(content: CompatibleText) -> some View {
         Group {
             if truncate_very_short {
@@ -108,7 +127,7 @@ struct NoteContentView: View {
     
     func previewView(links: [URL]) -> some View {
         Group {
-            if let preview = self.preview, !blur_images {
+            if let preview = self.preview {
                 if let preview_height {
                     preview
                         .frame(height: preview_height)
@@ -181,7 +200,7 @@ struct NoteContentView: View {
                 }
             }
 
-            if damus_state.settings.media_previews, has_previews {
+            if has_previews {
                 if with_padding {
                     previewView(links: artifacts.links).padding(.horizontal)
                 } else {
