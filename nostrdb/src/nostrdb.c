@@ -185,6 +185,8 @@ struct ndb_ingester {
 	struct prot_queue *writer_inbox;
 	void *filter_context;
 	ndb_ingest_filter_fn filter;
+
+	int scratch_size;
 };
 
 struct ndb_filter_group {
@@ -2321,17 +2323,34 @@ int ndb_end_query(struct ndb_txn *txn)
 	return mdb_txn_commit(txn->mdb_txn) == 0;
 }
 
-int ndb_note_verify(void *ctx, unsigned char pubkey[32], unsigned char id[32],
-		    unsigned char sig[64])
+int ndb_note_verify(void *ctx, unsigned char *scratch, size_t scratch_size,
+		    struct ndb_note *note)
 {
+	unsigned char id[32];
 	secp256k1_xonly_pubkey xonly_pubkey;
 	int ok;
 
-	ok = secp256k1_xonly_pubkey_parse((secp256k1_context*)ctx, &xonly_pubkey,
-					  pubkey) != 0;
+	// first, we ensure the id is valid by calculating the id independently
+	// from what is given to us
+	if (!ndb_calculate_id(note, scratch, scratch_size, id)) {
+		ndb_debug("ndb_note_verify: scratch buffer size too small");
+		return 0;
+	}
+
+	if (memcmp(id, note->id, 32)) {
+		ndb_debug("ndb_note_verify: note id does not match!");
+		return 0;
+	}
+
+        // id is ok, let's check signature
+
+	ok = secp256k1_xonly_pubkey_parse((secp256k1_context*)ctx,
+					  &xonly_pubkey,
+					  ndb_note_pubkey(note)) != 0;
 	if (!ok) return 0;
 
-	ok = secp256k1_schnorrsig_verify((secp256k1_context*)ctx, sig, id, 32,
+	ok = secp256k1_schnorrsig_verify((secp256k1_context*)ctx,
+					 ndb_note_sig(note), id, 32,
 					 &xonly_pubkey) > 0;
 	if (!ok) return 0;
 
@@ -2754,6 +2773,7 @@ static int ndb_ingester_process_note(secp256k1_context *ctx,
 				     size_t note_size,
 				     struct ndb_writer_msg *out,
 				     struct ndb_ingester *ingester,
+				     unsigned char *scratch,
 				     const char *relay)
 {
 	enum ndb_ingest_filter_action action;
@@ -2774,8 +2794,8 @@ static int ndb_ingester_process_note(secp256k1_context *ctx,
 	} else {
 		// verify! If it's an invalid note we don't need to
 		// bother writing it to the database
-		if (!ndb_note_verify(ctx, note->pubkey, note->id, note->sig)) {
-			ndb_debug("signature verification failed\n");
+		if (!ndb_note_verify(ctx, scratch, ingester->scratch_size, note)) {
+			ndb_debug("note verification failed\n");
 			return 0;
 		}
 	}
@@ -2871,6 +2891,7 @@ static int ndb_ingester_process_event(secp256k1_context *ctx,
 				      struct ndb_ingester *ingester,
 				      struct ndb_ingester_event *ev,
 				      struct ndb_writer_msg *out,
+				      unsigned char *scratch,
 				      MDB_txn *read_txn)
 {
 	struct ndb_tce tce;
@@ -2945,7 +2966,7 @@ static int ndb_ingester_process_event(secp256k1_context *ctx,
 			}
 
 			if (!ndb_ingester_process_note(ctx, note, note_size,
-						       out, ingester,
+						       out, ingester, scratch,
 						       ev->relay)) {
 				ndb_debug("failed to process note\n");
 				goto cleanup;
@@ -2967,7 +2988,7 @@ static int ndb_ingester_process_event(secp256k1_context *ctx,
 			}
 
 			if (!ndb_ingester_process_note(ctx, note, note_size,
-						       out, ingester,
+						       out, ingester, scratch,
 						       ev->relay)) {
 				ndb_debug("failed to process note\n");
 				goto cleanup;
@@ -5599,7 +5620,12 @@ static void *ndb_ingester_thread(void *data)
 	struct ndb_writer_msg outs[THREAD_QUEUE_BATCH], *out;
 	int i, to_write, popped, done, any_event;
 	MDB_txn *read_txn = NULL;
+	unsigned char *scratch;
 	int rc;
+
+	// this is used in note verification and anything else that
+	// needs a temporary buffer
+	scratch = malloc(ingester->scratch_size);
 
 	ctx = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY);
 	//ndb_debug("started ingester thread\n");
@@ -5638,6 +5664,7 @@ static void *ndb_ingester_thread(void *data)
 				out = &outs[to_write];
 				if (ndb_ingester_process_event(ctx, ingester,
 							       &msg->event, out,
+							       scratch,
 							       read_txn)) {
 					to_write++;
 				}
@@ -5657,6 +5684,7 @@ static void *ndb_ingester_thread(void *data)
 
 	ndb_debug("quitting ingester thread\n");
 	secp256k1_context_destroy(ctx);
+	free(scratch);
 	return NULL;
 }
 
@@ -5694,6 +5722,7 @@ static int ndb_writer_init(struct ndb_writer *writer, struct ndb_lmdb *lmdb,
 static int ndb_ingester_init(struct ndb_ingester *ingester,
 			     struct ndb_lmdb *lmdb,
 			     struct prot_queue *writer_inbox,
+			     int scratch_size,
 			     const struct ndb_config *config)
 {
 	int elem_size, num_elems;
@@ -5703,6 +5732,7 @@ static int ndb_ingester_init(struct ndb_ingester *ingester,
 	elem_size = sizeof(struct ndb_ingester_msg);
 	num_elems = DEFAULT_QUEUE_SIZE;
 
+	ingester->scratch_size = scratch_size;
 	ingester->writer_inbox = writer_inbox;
 	ingester->lmdb = lmdb;
 	ingester->flags = config->flags;
@@ -5979,7 +6009,8 @@ int ndb_init(struct ndb **pndb, const char *filename, const struct ndb_config *c
 		return 0;
 	}
 
-	if (!ndb_ingester_init(&ndb->ingester, &ndb->lmdb, &ndb->writer.inbox, config)) {
+	if (!ndb_ingester_init(&ndb->ingester, &ndb->lmdb, &ndb->writer.inbox,
+			       config->writer_scratch_buffer_size, config)) {
 		fprintf(stderr, "failed to initialize %d ingester thread(s)\n",
 				config->ingester_threads);
 		return 0;
@@ -6612,7 +6643,7 @@ int ndb_filter_json(const struct ndb_filter *filter, char *buf, int buflen)
 	return cur.p - cur.start;
 }
 
-int ndb_calculate_id(struct ndb_note *note, unsigned char *buf, int buflen) {
+int ndb_calculate_id(struct ndb_note *note, unsigned char *buf, int buflen, unsigned char *id) {
 	int len;
 
 	if (!(len = ndb_event_commitment(note, buf, buflen)))
@@ -6620,7 +6651,7 @@ int ndb_calculate_id(struct ndb_note *note, unsigned char *buf, int buflen) {
 
 	//fprintf(stderr, "%.*s\n", len, buf);
 
-	sha256((struct sha256*)note->id, buf, len);
+	sha256((struct sha256*)id, buf, len);
 
 	return 1;
 }
@@ -6696,7 +6727,8 @@ int ndb_builder_finalize(struct ndb_builder *builder, struct ndb_note **note,
 
 		ndb_builder_set_pubkey(builder, keypair->pubkey);
 
-		if (!ndb_calculate_id(builder->note, start, end - start))
+		if (!ndb_calculate_id(builder->note, start, end - start,
+				      builder->note->id))
 			return 0;
 
 		if (!ndb_sign_id(keypair, (*note)->id, (*note)->sig))

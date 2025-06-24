@@ -493,11 +493,11 @@ void ndb_config_set_subscription_callback(struct ndb_config *config, ndb_sub_fn 
 void ndb_config_set_writer_scratch_buffer_size(struct ndb_config *config, int scratch_size);
 
 // HELPERS
-int ndb_calculate_id(struct ndb_note *note, unsigned char *buf, int buflen);
+int ndb_calculate_id(struct ndb_note *note, unsigned char *buf, int buflen, unsigned char *id);
 int ndb_sign_id(struct ndb_keypair *keypair, unsigned char id[32], unsigned char sig[64]);
 int ndb_create_keypair(struct ndb_keypair *key);
 int ndb_decode_key(const char *secstr, struct ndb_keypair *keypair);
-int ndb_note_verify(void *secp_ctx, unsigned char pubkey[32], unsigned char id[32], unsigned char signature[64]);
+int ndb_note_verify(void *secp_ctx, unsigned char *scratch, size_t scratch_size, struct ndb_note *note);
 
 // NDB
 int ndb_init(struct ndb **ndb, const char *dbdir, const struct ndb_config *);
