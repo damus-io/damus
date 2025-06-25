@@ -97,7 +97,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>โน้ตจาก %2@, %3$@, %4$@ &amp; %1$d และคนอื่นๆในเครือข่ายที่น่าเชื่อถือของคุณ</string>
+			<string>โน้ตจาก %2$@, %3$@, %4$@ &amp; %1$d และคนอื่นๆในเครือข่ายที่น่าเชื่อถือของคุณ</string>
 		</dict>
 	</dict>
 	<key>people_reposted_count</key>
