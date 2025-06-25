@@ -304,6 +304,11 @@ Label for filter for all notifications.</note>
         <target>Always show onboarding</target>
         <note>Developer mode setting to always show onboarding suggestions.</note>
       </trans-unit>
+      <trans-unit id="Amount" xml:space="preserve">
+        <source>Amount</source>
+        <target>Amount</target>
+        <note>Label for invoice payment amount in confirmation screen</note>
+      </trans-unit>
       <trans-unit id="An additional percentage of each zap will be sent to support Damus development" xml:space="preserve">
         <source>An additional percentage of each zap will be sent to support Damus development</source>
         <target>An additional percentage of each zap will be sent to support Damus development</target>
@@ -318,6 +323,11 @@ Label for filter for all notifications.</note>
         <source>An unexpected error happened while trying to perform this action. Please contact support.</source>
         <target>An unexpected error happened while trying to perform this action. Please contact support.</target>
         <note>Error message for a failed reset/repair operation</note>
+      </trans-unit>
+      <trans-unit id="An unexpected error occurred." xml:space="preserve">
+        <source>An unexpected error occurred.</source>
+        <target>An unexpected error occurred.</target>
+        <note>A human-readable error message</note>
       </trans-unit>
       <trans-unit id="An unexpected error occurred. Please contact Damus support via [Nostr](damus:npub18m76awca3y37hkvuneavuw6pjj4525fw90necxmadrvjg0sdy6qsngq955) or [email](support@damus.io) with the error message below." xml:space="preserve">
         <source>An unexpected error occurred. Please contact Damus support via [Nostr](damus:npub18m76awca3y37hkvuneavuw6pjj4525fw90necxmadrvjg0sdy6qsngq955) or [email](support@damus.io) with the error message below.</source>
@@ -421,6 +431,11 @@ Tip: You can always change this later in Settings → Translations</target>
         <target>Automatically translate notes</target>
         <note>Toggle to automatically translate notes.</note>
       </trans-unit>
+      <trans-unit id="Back" xml:space="preserve">
+        <source>Back</source>
+        <target>Back</target>
+        <note>Button to go back to invoice input</note>
+      </trans-unit>
       <trans-unit id="Be the first to access upcoming premium features: Automatic translations, longer note storage, and more" xml:space="preserve">
         <source>Be the first to access upcoming premium features: Automatic translations, longer note storage, and more</source>
         <target>Be the first to access upcoming premium features: Automatic translations, longer note storage, and more</target>
@@ -440,6 +455,11 @@ Tip: You can always change this later in Settings → Translations</target>
         <source>Blur images</source>
         <target>Blur images</target>
         <note>Setting to blur images</note>
+      </trans-unit>
+      <trans-unit id="Bolt11 Invoice" xml:space="preserve">
+        <source>Bolt11 Invoice</source>
+        <target>Bolt11 Invoice</target>
+        <note>Label for the bolt11 invoice string in confirmation screen</note>
       </trans-unit>
       <trans-unit id="Bookmarks" xml:space="preserve">
         <source>Bookmarks</source>
@@ -492,6 +512,7 @@ Button to cancel any interaction with the QRCode link.
 Button to cancel out of alert that creates a new mutelist.
 Button to cancel out of posting a note.
 Button to cancel out of search text entry mode.
+Button to cancel the LNURL payment process.
 Button to cancel the upload.
 Cancel button text for dismissing profile status settings view.
 Cancel button text for dismissing updating image url.
@@ -516,6 +537,16 @@ Text for button to cancel out of connecting Nostr Wallet Connect lightning walle
         <source>Changing this setting will cause the cache to be cleared. This will free space, but images may take longer to load again. Are you sure you want to proceed?</source>
         <target>Changing this setting will cause the cache to be cleared. This will free space, but images may take longer to load again. Are you sure you want to proceed?</target>
         <note>Message explaining consequences of changing the 'enable animation' setting</note>
+      </trans-unit>
+      <trans-unit id="Check if the invoice is valid, your wallet is online, configured correctly, and try again. If the error persists, please contact support and/or your wallet provider." xml:space="preserve">
+        <source>Check if the invoice is valid, your wallet is online, configured correctly, and try again. If the error persists, please contact support and/or your wallet provider.</source>
+        <target>Check if the invoice is valid, your wallet is online, configured correctly, and try again. If the error persists, please contact support and/or your wallet provider.</target>
+        <note>A human-readable tip guiding the user on what to do when seeing a timeout error while sending a wallet payment.</note>
+      </trans-unit>
+      <trans-unit id="Check if your wallet looks configured correctly and try again. If the error persists, please contact support." xml:space="preserve">
+        <source>Check if your wallet looks configured correctly and try again. If the error persists, please contact support.</source>
+        <target>Check if your wallet looks configured correctly and try again. If the error persists, please contact support.</target>
+        <note>A human-readable tip for an error when a payment request cannot be made to a wallet.</note>
       </trans-unit>
       <trans-unit id="Check the address and/or the relay list." xml:space="preserve">
         <source>Check the address and/or the relay list.</source>
@@ -593,6 +624,16 @@ Button label giving the user the option to close the sheet from which they were 
         <target>Configure Damus Purple</target>
         <note>Button to allow Damus Purple to be configured</note>
       </trans-unit>
+      <trans-unit id="Confirm" xml:space="preserve">
+        <source>Confirm</source>
+        <target>Confirm</target>
+        <note>Button to confirm payment</note>
+      </trans-unit>
+      <trans-unit id="Confirm Payment" xml:space="preserve">
+        <source>Confirm Payment</source>
+        <target>Confirm Payment</target>
+        <note>Title for payment confirmation screen</note>
+      </trans-unit>
       <trans-unit id="Confirmation" xml:space="preserve">
         <source>Confirmation</source>
         <target>Confirmation</target>
@@ -653,6 +694,7 @@ Text for button to conect to Nostr Wallet Connect lightning wallet.</note>
         <source>Continue</source>
         <target>Continue</target>
         <note>Button to dismiss suggested users view and continue to the main app
+Button to proceed with LNURL payment process.
 Continue with bookmarks.
 Continue with deleting the user.
 Continue with the user-requested operation.
@@ -917,7 +959,8 @@ Button to dismiss error</note>
       <trans-unit id="Done" xml:space="preserve">
         <source>Done</source>
         <target>Done</target>
-        <note>Button to dismiss wallet selection view for paying Lightning invoice.
+        <note>Button to dismiss successful payment screen
+Button to dismiss wallet selection view for paying Lightning invoice.
 Button to leave edit mode for modifying the list of relays.</note>
       </trans-unit>
       <trans-unit id="Duration" xml:space="preserve">
@@ -988,6 +1031,11 @@ Edit Button for editing profile</note>
         <target>Encrypted</target>
         <note>Heading indicating that this application keeps private messaging end-to-end encrypted.</note>
       </trans-unit>
+      <trans-unit id="Enter Amount" xml:space="preserve">
+        <source>Enter Amount</source>
+        <target>Enter Amount</target>
+        <note>Header text for LNURL payment amount entry screen</note>
+      </trans-unit>
       <trans-unit id="Enter your account key" xml:space="preserve">
         <source>Enter your account key</source>
         <target>Enter your account key</target>
@@ -1011,10 +1059,16 @@ Title indicating that an error has occurred.</note>
         <target>Error disabling push notifications with the server: %@</target>
         <note>Error label shown when user tries to disable push notifications but something fails</note>
       </trans-unit>
+      <trans-unit id="Error fetching LNURL payment information" xml:space="preserve">
+        <source>Error fetching LNURL payment information</source>
+        <target>Error fetching LNURL payment information</target>
+        <note>Error message when LNURL fetch fails</note>
+      </trans-unit>
       <trans-unit id="Error fetching lightning invoice" xml:space="preserve">
         <source>Error fetching lightning invoice</source>
         <target>Error fetching lightning invoice</target>
-        <note>Message to display when there was an error fetching a lightning invoice while attempting to zap.</note>
+        <note>Error message when there was an error fetching a lightning invoice
+Message to display when there was an error fetching a lightning invoice while attempting to zap.</note>
       </trans-unit>
       <trans-unit id="Error retrieving muted event" xml:space="preserve">
         <source>Error retrieving muted event</source>
@@ -1090,6 +1144,11 @@ Title indicating that an error has occurred.</note>
         <source>Failed to parse</source>
         <target>Failed to parse</target>
         <note>NostrScript error message when it fails to parse a script.</note>
+      </trans-unit>
+      <trans-unit id="Failed to scan QR code, please try again." xml:space="preserve">
+        <source>Failed to scan QR code, please try again.</source>
+        <target>Failed to scan QR code, please try again.</target>
+        <note>Error message for failed QR scan</note>
       </trans-unit>
       <trans-unit id="Find a Wallet" xml:space="preserve">
         <source>Find a Wallet</source>
@@ -1329,6 +1388,11 @@ This is my first post on Damus, I am happy to meet you all 🤙. What’s up?
         <target>Home</target>
         <note>Navigation bar title for Home view where notes and replies appear from those who the user is following.</note>
       </trans-unit>
+      <trans-unit id="How much would you like to send?" xml:space="preserve">
+        <source>How much would you like to send?</source>
+        <target>How much would you like to send?</target>
+        <note>Instruction text for LNURL payment amount</note>
+      </trans-unit>
       <trans-unit id="How would you like to connect to your Coinos wallet?" xml:space="preserve">
         <source>How would you like to connect to your Coinos wallet?</source>
         <target>How would you like to connect to your Coinos wallet?</target>
@@ -1418,6 +1482,11 @@ Option to enter a url</note>
         <source>Invalid lightning address</source>
         <target>Invalid lightning address</target>
         <note>Message to display when there was an error attempting to zap due to an invalid lightning address.</note>
+      </trans-unit>
+      <trans-unit id="Invalid lightning invoice received" xml:space="preserve">
+        <source>Invalid lightning invoice received</source>
+        <target>Invalid lightning invoice received</target>
+        <note>Error message when the lightning invoice received from LNURL is invalid</note>
       </trans-unit>
       <trans-unit id="Invalid relay address" xml:space="preserve">
         <source>Invalid relay address</source>
@@ -1973,6 +2042,16 @@ Button label to dismiss an error dialog</note>
         <target>Paste NWC Address</target>
         <note>Text for button to connect a lightning wallet.</note>
       </trans-unit>
+      <trans-unit id="Paste from Clipboard" xml:space="preserve">
+        <source>Paste from Clipboard</source>
+        <target>Paste from Clipboard</target>
+        <note>Button to paste invoice from clipboard</note>
+      </trans-unit>
+      <trans-unit id="Paste invoice from clipboard" xml:space="preserve">
+        <source>Paste invoice from clipboard</source>
+        <target>Paste invoice from clipboard</target>
+        <note>Accessibility label for the invoice paste button</note>
+      </trans-unit>
       <trans-unit id="Paste private key" xml:space="preserve">
         <source>Paste private key</source>
         <target>Paste private key</target>
@@ -1987,6 +2066,11 @@ Button label to dismiss an error dialog</note>
         <source>Pay the Lightning invoice</source>
         <target>Pay the Lightning invoice</target>
         <note>Navigation bar title for view to pay Lightning invoice.</note>
+      </trans-unit>
+      <trans-unit id="Payment Sent!" xml:space="preserve">
+        <source>Payment Sent!</source>
+        <target>Payment Sent!</target>
+        <note>Title for successful payment screen</note>
       </trans-unit>
       <trans-unit id="Pending" xml:space="preserve">
         <source>Pending</source>
@@ -2065,6 +2149,11 @@ Section title for deleting the user</note>
         <target>Please double-check the checkout web page, or go to the Side Menu → "Purple" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue.</target>
         <note>User-facing tips on what to do if a Purple welcome link doesn't work</note>
       </trans-unit>
+      <trans-unit id="Please enter a valid amount" xml:space="preserve">
+        <source>Please enter a valid amount</source>
+        <target>Please enter a valid amount</target>
+        <note>Error message when no valid amount is entered for LNURL payment</note>
+      </trans-unit>
       <trans-unit id="Please go to Settings &gt; First Aid &gt; Repair relay list, or contact support." xml:space="preserve">
         <source>Please go to Settings &gt; First Aid &gt; Repair relay list, or contact support.</source>
         <target>Please go to Settings &gt; First Aid &gt; Repair relay list, or contact support.</target>
@@ -2090,6 +2179,11 @@ Section title for deleting the user</note>
         <target>Please try again, check the URL for typos, or contact support for further help.</target>
         <note>User visible error tips</note>
       </trans-unit>
+      <trans-unit id="Please try again. If the error persists, please contact support." xml:space="preserve">
+        <source>Please try again. If the error persists, please contact support.</source>
+        <target>Please try again. If the error persists, please contact support.</target>
+        <note>A human-readable tip guiding the user on what to do when seeing an unexpected error while sending a wallet payment.</note>
+      </trans-unit>
       <trans-unit id="Please try opening this content on another Nostr app that supports this type of content." xml:space="preserve">
         <source>Please try opening this content on another Nostr app that supports this type of content.</source>
         <target>Please try opening this content on another Nostr app that supports this type of content.</target>
@@ -2099,6 +2193,11 @@ Section title for deleting the user</note>
         <source>Please verify your credentials or permissions.</source>
         <target>Please verify your credentials or permissions.</target>
         <note>Tip for unauthorized access</note>
+      </trans-unit>
+      <trans-unit id="Please wait while your payment is being processed…" xml:space="preserve">
+        <source>Please wait while your payment is being processed…</source>
+        <target>Please wait while your payment is being processed…</target>
+        <note>Message while payment is being processed</note>
       </trans-unit>
       <trans-unit id="Point your camera to a QR code…" xml:space="preserve">
         <source>Point your camera to a QR code…</source>
@@ -2146,6 +2245,16 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <source>Pro</source>
         <target>Pro</target>
         <note>Dropdown option for selecting Pro plan for DeepL translation service.</note>
+      </trans-unit>
+      <trans-unit id="Processing Payment" xml:space="preserve">
+        <source>Processing Payment</source>
+        <target>Processing Payment</target>
+        <note>Title for payment processing screen</note>
+      </trans-unit>
+      <trans-unit id="Processing..." xml:space="preserve">
+        <source>Processing...</source>
+        <target>Processing...</target>
+        <note>Text to indicate that the app is in the process of fetching an invoice.</note>
       </trans-unit>
       <trans-unit id="Production" xml:space="preserve">
         <source>Production</source>
@@ -2255,6 +2364,11 @@ Picker option to indicate that a zap should be sent publicly and identify the us
         <note>Navigation bar title for Reactions view.
 Section header for reactions settings
 Title of emoji reactions view</note>
+      </trans-unit>
+      <trans-unit id="Received an incorrect or unexpected response from the wallet provider. This looks like an issue with your wallet provider." xml:space="preserve">
+        <source>Received an incorrect or unexpected response from the wallet provider. This looks like an issue with your wallet provider.</source>
+        <target>Received an incorrect or unexpected response from the wallet provider. This looks like an issue with your wallet provider.</target>
+        <note>A human-readable error message</note>
       </trans-unit>
       <trans-unit id="Recommended" xml:space="preserve">
         <source>Recommended</source>
@@ -2505,6 +2619,11 @@ Button to save key, complete account creation, and start using the app.</note>
         <target>Scan Code</target>
         <note>Button to switch to scan QR Code page.</note>
       </trans-unit>
+      <trans-unit id="Scan Lightning Invoice" xml:space="preserve">
+        <source>Scan Lightning Invoice</source>
+        <target>Scan Lightning Invoice</target>
+        <note>Title for the invoice scanning screen</note>
+      </trans-unit>
       <trans-unit id="Scan NWC Address" xml:space="preserve">
         <source>Scan NWC Address</source>
         <target>Scan NWC Address</target>
@@ -2585,6 +2704,11 @@ Title of the text field for searching.</note>
         <source>Select default wallet</source>
         <target>Select default wallet</target>
         <note>Prompt selection of user's default wallet</note>
+      </trans-unit>
+      <trans-unit id="Send" xml:space="preserve">
+        <source>Send</source>
+        <target>Send</target>
+        <note>Button label to send bitcoin payment from wallet</note>
       </trans-unit>
       <trans-unit id="Send a message to start the conversation..." xml:space="preserve">
         <source>Send a message to start the conversation...</source>
@@ -2768,6 +2892,11 @@ Button to show more of a long profile description.</note>
         <target>Sorry, this QR code looks incompatible with Damus. Please try another one.</target>
         <note>Text on QR code camera view telling the user a QR is incompatible</note>
       </trans-unit>
+      <trans-unit id="Sorry, we do not support paying invoices without amount yet. Please scan an invoice with an amount." xml:space="preserve">
+        <source>Sorry, we do not support paying invoices without amount yet. Please scan an invoice with an amount.</source>
+        <target>Sorry, we do not support paying invoices without amount yet. Please scan an invoice with an amount.</target>
+        <note>A user-readable message indicating that the lightning invoice they scanned or pasted is not supported and is missing an amount.</note>
+      </trans-unit>
       <trans-unit id="Spam" xml:space="preserve">
         <source>Spam</source>
         <target>Spam</target>
@@ -2898,6 +3027,16 @@ Enjoy!</target>
         <target>The camera was not capable of scanning the requested codes.</target>
         <note>Camera's bad output error label</note>
       </trans-unit>
+      <trans-unit id="The payment request could not be made to your wallet provider." xml:space="preserve">
+        <source>The payment request could not be made to your wallet provider.</source>
+        <target>The payment request could not be made to your wallet provider.</target>
+        <note>A human-readable error message</note>
+      </trans-unit>
+      <trans-unit id="The payment request did not receive a response and the request timed-out." xml:space="preserve">
+        <source>The payment request did not receive a response and the request timed-out.</source>
+        <target>The payment request did not receive a response and the request timed-out.</target>
+        <note>A human-readable error message</note>
+      </trans-unit>
       <trans-unit id="The social network you control" xml:space="preserve">
         <source>The social network you control</source>
         <target>The social network you control</target>
@@ -2932,6 +3071,11 @@ Enjoy!</target>
         <source>This device's in-app purchase is registered to a different Nostr account. Unable to manage this Purple account. If you believe this was a mistake, please contact us via support@damus.io.</source>
         <target>This device's in-app purchase is registered to a different Nostr account. Unable to manage this Purple account. If you believe this was a mistake, please contact us via support@damus.io.</target>
         <note>Notice label that user cannot manage their In-App purchases</note>
+      </trans-unit>
+      <trans-unit id="This does not appear to be a valid Lightning invoice or LNURL." xml:space="preserve">
+        <source>This does not appear to be a valid Lightning invoice or LNURL.</source>
+        <target>This does not appear to be a valid Lightning invoice or LNURL.</target>
+        <note>A user-readable message indicating that the scanned or pasted content was not a valid lightning invoice or LNURL.</note>
       </trans-unit>
       <trans-unit id="This feature is not implemented by your wallet." xml:space="preserve">
         <source>This feature is not implemented by your wallet.</source>
@@ -3057,6 +3201,16 @@ Section header for text and appearance settings</note>
         <source>Trusted Network</source>
         <target>Trusted Network</target>
         <note>Human-readable short description of the 'trusted network filter' when it is enabled, and therefore showing content from only the trusted network.</note>
+      </trans-unit>
+      <trans-unit id="Try Again" xml:space="preserve">
+        <source>Try Again</source>
+        <target>Try Again</target>
+        <note>Button to retry payment</note>
+      </trans-unit>
+      <trans-unit id="Try again. If the error persists, please contact your wallet provider and/or our support team." xml:space="preserve">
+        <source>Try again. If the error persists, please contact your wallet provider and/or our support team.</source>
+        <target>Try again. If the error persists, please contact your wallet provider and/or our support team.</target>
+        <note>A human-readable tip for an error when a payment request cannot be made to a wallet.</note>
       </trans-unit>
       <trans-unit id="Try checking the link again, your internet connection, or contact the person who provided you the link for help." xml:space="preserve">
         <source>Try checking the link again, your internet connection, or contact the person who provided you the link for help.</source>
@@ -3410,6 +3564,11 @@ User confirm Yes</note>
         <target>You clicked on a Purple welcome link, but we could not find your checkout. This is likely a bug.</target>
         <note>Error label upon continuing in the app from a Damus Purple purchase</note>
       </trans-unit>
+      <trans-unit id="You do not have enough funds to pay for this invoice." xml:space="preserve">
+        <source>You do not have enough funds to pay for this invoice.</source>
+        <target>You do not have enough funds to pay for this invoice.</target>
+        <note>Label on invoice payment screen, indicating user has insufficient funds</note>
+      </trans-unit>
       <trans-unit id="You do not have permission to alter this relay list." xml:space="preserve">
         <source>You do not have permission to alter this relay list.</source>
         <target>You do not have permission to alter this relay list.</target>
@@ -3474,6 +3633,11 @@ User confirm Yes</note>
         <source>Your highlight is being broadcasted to the network. Please wait.</source>
         <target>Your highlight is being broadcasted to the network. Please wait.</target>
         <note>Label explaining there their highlight publishing action is in progress</note>
+      </trans-unit>
+      <trans-unit id="Your payment has been successfully sent." xml:space="preserve">
+        <source>Your payment has been successfully sent.</source>
+        <target>Your payment has been successfully sent.</target>
+        <note>Message for successful payment</note>
       </trans-unit>
       <trans-unit id="Your profile will not be shared with Coinos." xml:space="preserve">
         <source>Your profile will not be shared with Coinos.</source>
@@ -4522,6 +4686,11 @@ Label for filter for all notifications.</note>
         <target state="new">Always show onboarding</target>
         <note>Developer mode setting to always show onboarding suggestions.</note>
       </trans-unit>
+      <trans-unit id="Amount" xml:space="preserve">
+        <source>Amount</source>
+        <target state="new">Amount</target>
+        <note>Label for invoice payment amount in confirmation screen</note>
+      </trans-unit>
       <trans-unit id="An additional percentage of each zap will be sent to support Damus development" xml:space="preserve">
         <source>An additional percentage of each zap will be sent to support Damus development</source>
         <target state="new">An additional percentage of each zap will be sent to support Damus development</target>
@@ -4536,6 +4705,11 @@ Label for filter for all notifications.</note>
         <source>An unexpected error happened while trying to perform this action. Please contact support.</source>
         <target state="new">An unexpected error happened while trying to perform this action. Please contact support.</target>
         <note>Error message for a failed reset/repair operation</note>
+      </trans-unit>
+      <trans-unit id="An unexpected error occurred." xml:space="preserve">
+        <source>An unexpected error occurred.</source>
+        <target state="new">An unexpected error occurred.</target>
+        <note>A human-readable error message</note>
       </trans-unit>
       <trans-unit id="An unexpected error occurred. Please contact Damus support via [Nostr](damus:npub18m76awca3y37hkvuneavuw6pjj4525fw90necxmadrvjg0sdy6qsngq955) or [email](support@damus.io) with the error message below." xml:space="preserve">
         <source>An unexpected error occurred. Please contact Damus support via [Nostr](damus:npub18m76awca3y37hkvuneavuw6pjj4525fw90necxmadrvjg0sdy6qsngq955) or [email](support@damus.io) with the error message below.</source>
@@ -4639,6 +4813,11 @@ Tip: You can always change this later in Settings → Translations</target>
         <target state="new">Automatically translate notes</target>
         <note>Toggle to automatically translate notes.</note>
       </trans-unit>
+      <trans-unit id="Back" xml:space="preserve">
+        <source>Back</source>
+        <target state="new">Back</target>
+        <note>Button to go back to invoice input</note>
+      </trans-unit>
       <trans-unit id="Be the first to access upcoming premium features: Automatic translations, longer note storage, and more" xml:space="preserve">
         <source>Be the first to access upcoming premium features: Automatic translations, longer note storage, and more</source>
         <target state="new">Be the first to access upcoming premium features: Automatic translations, longer note storage, and more</target>
@@ -4658,6 +4837,11 @@ Tip: You can always change this later in Settings → Translations</target>
         <source>Blur images</source>
         <target state="new">Blur images</target>
         <note>Setting to blur images</note>
+      </trans-unit>
+      <trans-unit id="Bolt11 Invoice" xml:space="preserve">
+        <source>Bolt11 Invoice</source>
+        <target state="new">Bolt11 Invoice</target>
+        <note>Label for the bolt11 invoice string in confirmation screen</note>
       </trans-unit>
       <trans-unit id="Bookmarks" xml:space="preserve">
         <source>Bookmarks</source>
@@ -4710,6 +4894,7 @@ Button to cancel any interaction with the QRCode link.
 Button to cancel out of alert that creates a new mutelist.
 Button to cancel out of posting a note.
 Button to cancel out of search text entry mode.
+Button to cancel the LNURL payment process.
 Button to cancel the upload.
 Cancel button text for dismissing profile status settings view.
 Cancel button text for dismissing updating image url.
@@ -4734,6 +4919,16 @@ Text for button to cancel out of connecting Nostr Wallet Connect lightning walle
         <source>Changing this setting will cause the cache to be cleared. This will free space, but images may take longer to load again. Are you sure you want to proceed?</source>
         <target state="new">Changing this setting will cause the cache to be cleared. This will free space, but images may take longer to load again. Are you sure you want to proceed?</target>
         <note>Message explaining consequences of changing the 'enable animation' setting</note>
+      </trans-unit>
+      <trans-unit id="Check if the invoice is valid, your wallet is online, configured correctly, and try again. If the error persists, please contact support and/or your wallet provider." xml:space="preserve">
+        <source>Check if the invoice is valid, your wallet is online, configured correctly, and try again. If the error persists, please contact support and/or your wallet provider.</source>
+        <target state="new">Check if the invoice is valid, your wallet is online, configured correctly, and try again. If the error persists, please contact support and/or your wallet provider.</target>
+        <note>A human-readable tip guiding the user on what to do when seeing a timeout error while sending a wallet payment.</note>
+      </trans-unit>
+      <trans-unit id="Check if your wallet looks configured correctly and try again. If the error persists, please contact support." xml:space="preserve">
+        <source>Check if your wallet looks configured correctly and try again. If the error persists, please contact support.</source>
+        <target state="new">Check if your wallet looks configured correctly and try again. If the error persists, please contact support.</target>
+        <note>A human-readable tip for an error when a payment request cannot be made to a wallet.</note>
       </trans-unit>
       <trans-unit id="Check the address and/or the relay list." xml:space="preserve">
         <source>Check the address and/or the relay list.</source>
@@ -4814,6 +5009,16 @@ Button label giving the user the option to close the view when no content is ava
         <target state="new">Configure Damus Purple</target>
         <note>Button to allow Damus Purple to be configured</note>
       </trans-unit>
+      <trans-unit id="Confirm" xml:space="preserve">
+        <source>Confirm</source>
+        <target state="new">Confirm</target>
+        <note>Button to confirm payment</note>
+      </trans-unit>
+      <trans-unit id="Confirm Payment" xml:space="preserve">
+        <source>Confirm Payment</source>
+        <target state="new">Confirm Payment</target>
+        <note>Title for payment confirmation screen</note>
+      </trans-unit>
       <trans-unit id="Confirmation" xml:space="preserve">
         <source>Confirmation</source>
         <target state="new">Confirmation</target>
@@ -4874,6 +5079,7 @@ Text for button to conect to Nostr Wallet Connect lightning wallet.</note>
         <source>Continue</source>
         <target state="new">Continue</target>
         <note>Button to dismiss suggested users view and continue to the main app
+Button to proceed with LNURL payment process.
 Continue with bookmarks.
 Continue with deleting the user.
 Continue with the user-requested operation.
@@ -5138,7 +5344,8 @@ Button to dismiss error</note>
       <trans-unit id="Done" xml:space="preserve">
         <source>Done</source>
         <target state="new">Done</target>
-        <note>Button to dismiss wallet selection view for paying Lightning invoice.
+        <note>Button to dismiss successful payment screen
+Button to dismiss wallet selection view for paying Lightning invoice.
 Button to leave edit mode for modifying the list of relays.</note>
       </trans-unit>
       <trans-unit id="Duration" xml:space="preserve">
@@ -5209,6 +5416,11 @@ Edit Button for editing profile</note>
         <target state="new">Encrypted</target>
         <note>Heading indicating that this application keeps private messaging end-to-end encrypted.</note>
       </trans-unit>
+      <trans-unit id="Enter Amount" xml:space="preserve">
+        <source>Enter Amount</source>
+        <target state="new">Enter Amount</target>
+        <note>Header text for LNURL payment amount entry screen</note>
+      </trans-unit>
       <trans-unit id="Enter your account key" xml:space="preserve">
         <source>Enter your account key</source>
         <target state="new">Enter your account key</target>
@@ -5232,10 +5444,16 @@ Title indicating that an error has occurred.</note>
         <target state="new">Error disabling push notifications with the server: %@</target>
         <note>Error label shown when user tries to disable push notifications but something fails</note>
       </trans-unit>
+      <trans-unit id="Error fetching LNURL payment information" xml:space="preserve">
+        <source>Error fetching LNURL payment information</source>
+        <target state="new">Error fetching LNURL payment information</target>
+        <note>Error message when LNURL fetch fails</note>
+      </trans-unit>
       <trans-unit id="Error fetching lightning invoice" xml:space="preserve">
         <source>Error fetching lightning invoice</source>
         <target state="new">Error fetching lightning invoice</target>
-        <note>Message to display when there was an error fetching a lightning invoice while attempting to zap.</note>
+        <note>Error message when there was an error fetching a lightning invoice
+Message to display when there was an error fetching a lightning invoice while attempting to zap.</note>
       </trans-unit>
       <trans-unit id="Error retrieving muted event" xml:space="preserve">
         <source>Error retrieving muted event</source>
@@ -5311,6 +5529,11 @@ Title indicating that an error has occurred.</note>
         <source>Failed to parse</source>
         <target state="new">Failed to parse</target>
         <note>NostrScript error message when it fails to parse a script.</note>
+      </trans-unit>
+      <trans-unit id="Failed to scan QR code, please try again." xml:space="preserve">
+        <source>Failed to scan QR code, please try again.</source>
+        <target state="new">Failed to scan QR code, please try again.</target>
+        <note>Error message for failed QR scan</note>
       </trans-unit>
       <trans-unit id="Find a Wallet" xml:space="preserve">
         <source>Find a Wallet</source>
@@ -5550,6 +5773,11 @@ This is my first post on Damus, I am happy to meet you all 🤙. What’s up?
         <target state="new">Home</target>
         <note>Navigation bar title for Home view where notes and replies appear from those who the user is following.</note>
       </trans-unit>
+      <trans-unit id="How much would you like to send?" xml:space="preserve">
+        <source>How much would you like to send?</source>
+        <target state="new">How much would you like to send?</target>
+        <note>Instruction text for LNURL payment amount</note>
+      </trans-unit>
       <trans-unit id="How would you like to connect to your Coinos wallet?" xml:space="preserve">
         <source>How would you like to connect to your Coinos wallet?</source>
         <target state="new">How would you like to connect to your Coinos wallet?</target>
@@ -5639,6 +5867,11 @@ Option to enter a url</note>
         <source>Invalid lightning address</source>
         <target state="new">Invalid lightning address</target>
         <note>Message to display when there was an error attempting to zap due to an invalid lightning address.</note>
+      </trans-unit>
+      <trans-unit id="Invalid lightning invoice received" xml:space="preserve">
+        <source>Invalid lightning invoice received</source>
+        <target state="new">Invalid lightning invoice received</target>
+        <note>Error message when the lightning invoice received from LNURL is invalid</note>
       </trans-unit>
       <trans-unit id="Invalid relay address" xml:space="preserve">
         <source>Invalid relay address</source>
@@ -6189,6 +6422,16 @@ Button label to dismiss an error dialog</note>
         <target state="new">Paste NWC Address</target>
         <note>Text for button to connect a lightning wallet.</note>
       </trans-unit>
+      <trans-unit id="Paste from Clipboard" xml:space="preserve">
+        <source>Paste from Clipboard</source>
+        <target state="new">Paste from Clipboard</target>
+        <note>Button to paste invoice from clipboard</note>
+      </trans-unit>
+      <trans-unit id="Paste invoice from clipboard" xml:space="preserve">
+        <source>Paste invoice from clipboard</source>
+        <target state="new">Paste invoice from clipboard</target>
+        <note>Accessibility label for the invoice paste button</note>
+      </trans-unit>
       <trans-unit id="Paste private key" xml:space="preserve">
         <source>Paste private key</source>
         <target state="new">Paste private key</target>
@@ -6203,6 +6446,11 @@ Button label to dismiss an error dialog</note>
         <source>Pay the Lightning invoice</source>
         <target state="new">Pay the Lightning invoice</target>
         <note>Navigation bar title for view to pay Lightning invoice.</note>
+      </trans-unit>
+      <trans-unit id="Payment Sent!" xml:space="preserve">
+        <source>Payment Sent!</source>
+        <target state="new">Payment Sent!</target>
+        <note>Title for successful payment screen</note>
       </trans-unit>
       <trans-unit id="Pending" xml:space="preserve">
         <source>Pending</source>
@@ -6281,6 +6529,11 @@ Section title for deleting the user</note>
         <target state="new">Please double-check the checkout web page, or go to the Side Menu → "Purple" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue.</target>
         <note>User-facing tips on what to do if a Purple welcome link doesn't work</note>
       </trans-unit>
+      <trans-unit id="Please enter a valid amount" xml:space="preserve">
+        <source>Please enter a valid amount</source>
+        <target state="new">Please enter a valid amount</target>
+        <note>Error message when no valid amount is entered for LNURL payment</note>
+      </trans-unit>
       <trans-unit id="Please go to Settings &gt; First Aid &gt; Repair relay list, or contact support." xml:space="preserve">
         <source>Please go to Settings &gt; First Aid &gt; Repair relay list, or contact support.</source>
         <target state="new">Please go to Settings &gt; First Aid &gt; Repair relay list, or contact support.</target>
@@ -6306,6 +6559,11 @@ Section title for deleting the user</note>
         <target state="new">Please try again, check the URL for typos, or contact support for further help.</target>
         <note>User visible error tips</note>
       </trans-unit>
+      <trans-unit id="Please try again. If the error persists, please contact support." xml:space="preserve">
+        <source>Please try again. If the error persists, please contact support.</source>
+        <target state="new">Please try again. If the error persists, please contact support.</target>
+        <note>A human-readable tip guiding the user on what to do when seeing an unexpected error while sending a wallet payment.</note>
+      </trans-unit>
       <trans-unit id="Please try opening this content on another Nostr app that supports this type of content." xml:space="preserve">
         <source>Please try opening this content on another Nostr app that supports this type of content.</source>
         <target state="new">Please try opening this content on another Nostr app that supports this type of content.</target>
@@ -6315,6 +6573,11 @@ Section title for deleting the user</note>
         <source>Please verify your credentials or permissions.</source>
         <target state="new">Please verify your credentials or permissions.</target>
         <note>Tip for unauthorized access</note>
+      </trans-unit>
+      <trans-unit id="Please wait while your payment is being processed…" xml:space="preserve">
+        <source>Please wait while your payment is being processed…</source>
+        <target state="new">Please wait while your payment is being processed…</target>
+        <note>Message while payment is being processed</note>
       </trans-unit>
       <trans-unit id="Point your camera to a QR code…" xml:space="preserve">
         <source>Point your camera to a QR code…</source>
@@ -6352,6 +6615,16 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <source>Pro</source>
         <target state="new">Pro</target>
         <note>Dropdown option for selecting Pro plan for DeepL translation service.</note>
+      </trans-unit>
+      <trans-unit id="Processing Payment" xml:space="preserve">
+        <source>Processing Payment</source>
+        <target state="new">Processing Payment</target>
+        <note>Title for payment processing screen</note>
+      </trans-unit>
+      <trans-unit id="Processing..." xml:space="preserve">
+        <source>Processing...</source>
+        <target state="new">Processing...</target>
+        <note>Text to indicate that the app is in the process of fetching an invoice.</note>
       </trans-unit>
       <trans-unit id="Production" xml:space="preserve">
         <source>Production</source>
@@ -6461,6 +6734,11 @@ Picker option to indicate that a zap should be sent publicly and identify the us
         <note>Navigation bar title for Reactions view.
 Section header for reactions settings
 Title of emoji reactions view</note>
+      </trans-unit>
+      <trans-unit id="Received an incorrect or unexpected response from the wallet provider. This looks like an issue with your wallet provider." xml:space="preserve">
+        <source>Received an incorrect or unexpected response from the wallet provider. This looks like an issue with your wallet provider.</source>
+        <target state="new">Received an incorrect or unexpected response from the wallet provider. This looks like an issue with your wallet provider.</target>
+        <note>A human-readable error message</note>
       </trans-unit>
       <trans-unit id="Recommended" xml:space="preserve">
         <source>Recommended</source>
@@ -6711,6 +6989,11 @@ Button to save key, complete account creation, and start using the app.</note>
         <target state="new">Scan Code</target>
         <note>Button to switch to scan QR Code page.</note>
       </trans-unit>
+      <trans-unit id="Scan Lightning Invoice" xml:space="preserve">
+        <source>Scan Lightning Invoice</source>
+        <target state="new">Scan Lightning Invoice</target>
+        <note>Title for the invoice scanning screen</note>
+      </trans-unit>
       <trans-unit id="Scan NWC Address" xml:space="preserve">
         <source>Scan NWC Address</source>
         <target state="new">Scan NWC Address</target>
@@ -6791,6 +7074,11 @@ Title of the text field for searching.</note>
         <source>Select default wallet</source>
         <target state="new">Select default wallet</target>
         <note>Prompt selection of user's default wallet</note>
+      </trans-unit>
+      <trans-unit id="Send" xml:space="preserve">
+        <source>Send</source>
+        <target state="new">Send</target>
+        <note>Button label to send bitcoin payment from wallet</note>
       </trans-unit>
       <trans-unit id="Send a message to start the conversation..." xml:space="preserve">
         <source>Send a message to start the conversation...</source>
@@ -6984,6 +7272,11 @@ Button to show more of a long profile description.</note>
         <target state="new">Sorry, this QR code looks incompatible with Damus. Please try another one.</target>
         <note>Text on QR code camera view telling the user a QR is incompatible</note>
       </trans-unit>
+      <trans-unit id="Sorry, we do not support paying invoices without amount yet. Please scan an invoice with an amount." xml:space="preserve">
+        <source>Sorry, we do not support paying invoices without amount yet. Please scan an invoice with an amount.</source>
+        <target state="new">Sorry, we do not support paying invoices without amount yet. Please scan an invoice with an amount.</target>
+        <note>A user-readable message indicating that the lightning invoice they scanned or pasted is not supported and is missing an amount.</note>
+      </trans-unit>
       <trans-unit id="Spam" xml:space="preserve">
         <source>Spam</source>
         <target state="new">Spam</target>
@@ -7114,6 +7407,16 @@ Enjoy!</target>
         <target state="new">The camera was not capable of scanning the requested codes.</target>
         <note>Camera's bad output error label</note>
       </trans-unit>
+      <trans-unit id="The payment request could not be made to your wallet provider." xml:space="preserve">
+        <source>The payment request could not be made to your wallet provider.</source>
+        <target state="new">The payment request could not be made to your wallet provider.</target>
+        <note>A human-readable error message</note>
+      </trans-unit>
+      <trans-unit id="The payment request did not receive a response and the request timed-out." xml:space="preserve">
+        <source>The payment request did not receive a response and the request timed-out.</source>
+        <target state="new">The payment request did not receive a response and the request timed-out.</target>
+        <note>A human-readable error message</note>
+      </trans-unit>
       <trans-unit id="The social network you control" xml:space="preserve">
         <source>The social network you control</source>
         <target state="new">The social network you control</target>
@@ -7153,6 +7456,11 @@ Enjoy!</target>
         <source>This device's in-app purchase is registered to a different Nostr account. Unable to manage this Purple account. If you believe this was a mistake, please contact us via support@damus.io.</source>
         <target state="new">This device's in-app purchase is registered to a different Nostr account. Unable to manage this Purple account. If you believe this was a mistake, please contact us via support@damus.io.</target>
         <note>Notice label that user cannot manage their In-App purchases</note>
+      </trans-unit>
+      <trans-unit id="This does not appear to be a valid Lightning invoice or LNURL." xml:space="preserve">
+        <source>This does not appear to be a valid Lightning invoice or LNURL.</source>
+        <target state="new">This does not appear to be a valid Lightning invoice or LNURL.</target>
+        <note>A user-readable message indicating that the scanned or pasted content was not a valid lightning invoice or LNURL.</note>
       </trans-unit>
       <trans-unit id="This feature is not implemented by your wallet." xml:space="preserve">
         <source>This feature is not implemented by your wallet.</source>
@@ -7273,6 +7581,16 @@ Section header for text and appearance settings</note>
         <source>Trusted Network</source>
         <target state="new">Trusted Network</target>
         <note>Human-readable short description of the 'trusted network filter' when it is enabled, and therefore showing content from only the trusted network.</note>
+      </trans-unit>
+      <trans-unit id="Try Again" xml:space="preserve">
+        <source>Try Again</source>
+        <target state="new">Try Again</target>
+        <note>Button to retry payment</note>
+      </trans-unit>
+      <trans-unit id="Try again. If the error persists, please contact your wallet provider and/or our support team." xml:space="preserve">
+        <source>Try again. If the error persists, please contact your wallet provider and/or our support team.</source>
+        <target state="new">Try again. If the error persists, please contact your wallet provider and/or our support team.</target>
+        <note>A human-readable tip for an error when a payment request cannot be made to a wallet.</note>
       </trans-unit>
       <trans-unit id="Try checking the link again, your internet connection, or contact the person who provided you the link for help." xml:space="preserve">
         <source>Try checking the link again, your internet connection, or contact the person who provided you the link for help.</source>
@@ -7621,6 +7939,11 @@ User confirm Yes</note>
         <target state="new">You clicked on a Purple welcome link, but we could not find your checkout. This is likely a bug.</target>
         <note>Error label upon continuing in the app from a Damus Purple purchase</note>
       </trans-unit>
+      <trans-unit id="You do not have enough funds to pay for this invoice." xml:space="preserve">
+        <source>You do not have enough funds to pay for this invoice.</source>
+        <target state="new">You do not have enough funds to pay for this invoice.</target>
+        <note>Label on invoice payment screen, indicating user has insufficient funds</note>
+      </trans-unit>
       <trans-unit id="You do not have permission to alter this relay list." xml:space="preserve">
         <source>You do not have permission to alter this relay list.</source>
         <target state="new">You do not have permission to alter this relay list.</target>
@@ -7685,6 +8008,11 @@ User confirm Yes</note>
         <source>Your draft has been saved to storage.</source>
         <target state="new">Your draft has been saved to storage.</target>
         <note>Accessibility label indicating that a user's post draft has been saved, meant to be read by screen reading technology.</note>
+      </trans-unit>
+      <trans-unit id="Your payment has been successfully sent." xml:space="preserve">
+        <source>Your payment has been successfully sent.</source>
+        <target state="new">Your payment has been successfully sent.</target>
+        <note>Message for successful payment</note>
       </trans-unit>
       <trans-unit id="Your profile will not be shared with Coinos." xml:space="preserve">
         <source>Your profile will not be shared with Coinos.</source>
