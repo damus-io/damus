@@ -18,6 +18,9 @@ class Constants {
     static let MAIN_APP_BUNDLE_IDENTIFIER: String = "com.jb55.damus2"
     static let NOTIFICATION_EXTENSION_BUNDLE_IDENTIFIER: String = "com.jb55.damus2.DamusNotificationService"
     
+    // MARK: Curation
+    static let ONBOARDING_FOLLOW_PACK_CURATOR_PUBKEY: Pubkey = Pubkey(hex: "895c2a90a860ac18434aa69e7b0da8465721216fa36e42c022e393579c486cba")!
+    
     // MARK: Push notification server
     static let PUSH_NOTIFICATION_SERVER_PRODUCTION_BASE_URL: URL = URL(string: "https://notify.damus.io")!
     static let PUSH_NOTIFICATION_SERVER_STAGING_BASE_URL: URL = URL(string: "https://notify-staging.damus.io")!

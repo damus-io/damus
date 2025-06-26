@@ -229,6 +229,8 @@ class HomeModel: ContactsDelegate {
             break   // This will be handled by `UserRelayListManager`
         case .follow_list:
             break
+        case .interest_list:
+            break   // Don't care for now
         }
     }
 
