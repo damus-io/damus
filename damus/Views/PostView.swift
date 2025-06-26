@@ -863,7 +863,9 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
 func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], pubkeys: [Pubkey]) -> NostrPost {
     let post = NSMutableAttributedString(attributedString: post)
     post.enumerateAttributes(in: NSRange(location: 0, length: post.length), options: []) { attributes, range, stop in
-        if let link = attributes[.link] as? String {
+        let linkValue = attributes[.link]
+        let link = (linkValue as? String) ?? (linkValue as? URL)?.absoluteString
+        if let link {
             let nextCharIndex = range.upperBound
             if nextCharIndex < post.length,
                let nextChar = post.attributedSubstring(from: NSRange(location: nextCharIndex, length: 1)).string.first,
