@@ -350,11 +350,10 @@ struct NoteContentView: View {
     var body: some View {
         ArtifactContent
             .onReceive(handle_notify(.profile_updated)) { profile in
-                guard let blocks_txn = event.blocks(ndb: damus_state.ndb) else {
+                guard let blockGroup = try? NdbBlockGroup.from(event: event, using: damus_state.ndb, and: damus_state.keypair) else {
                     return
                 }
-                let blocks = blocks_txn.unsafeUnownedValue
-                for block in blocks.iter(note: event) {
+                for block in blockGroup.blocks {
                     switch block {
                     case .mention(let m):
                         guard let typ = m.bech32_type else {
@@ -536,11 +535,10 @@ struct NoteContentView_Previews: PreviewProvider {
 }
 
 func separate_images(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> [MediaUrl]? {
-    guard let blocks_txn = ev.blocks(ndb: ndb) else {
+    guard let blockGroup = try? NdbBlockGroup.from(event: ev, using: ndb, and: keypair) else {
         return nil
     }
-    let blocks = blocks_txn.unsafeUnownedValue
-    let urlBlocks: [URL] = blocks.iter(note: ev).reduce(into: []) { urls, block in
+    let urlBlocks: [URL] = blockGroup.blocks.reduce(into: []) { urls, block in
         guard case .url(let url) = block,
               let parsed_url = URL(string: url.as_str()) else {
             return
