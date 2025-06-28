@@ -780,12 +780,11 @@ func validate_event(ev: NostrEvent) -> ValidationResult {
 }
 
 func first_eref_mention(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> Mention<NoteId>? {
-    guard let blocks_txn = ev.blocks(ndb: ndb) else {
+    guard let blockGroup = try? NdbBlockGroup.from(event: ev, using: ndb, and: keypair) else {
         return nil
     }
 
-    let ndb_blocks = blocks_txn.unsafeUnownedValue
-    let blocks = ndb_blocks.iter(note: ev).filter { block in
+    let blocks = blockGroup.blocks.filter { block in
         guard case .mention(let mention) = block else {
                 return false
             }
@@ -815,12 +814,11 @@ func first_eref_mention(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> Mention<N
     return nil
 }
 
-func separate_invoices(ndb: Ndb, ev: NostrEvent) -> [Invoice]? {
-    guard let blocks_txn = ev.blocks(ndb: ndb) else {
+func separate_invoices(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> [Invoice]? {
+    guard let blockGroup = try? NdbBlockGroup.from(event: ev, using: ndb, and: keypair) else {
         return nil
     }
-    let ndb_blocks = blocks_txn.unsafeUnownedValue
-    let invoiceBlocks: [Invoice] = ndb_blocks.iter(note: ev).reduce(into: []) { invoices, block in
+    let invoiceBlocks: [Invoice] = blockGroup.blocks.reduce(into: []) { invoices, block in
         guard case .invoice(let invoice) = block,
               let invoice = invoice.as_invoice()
         else {

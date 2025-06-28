@@ -72,9 +72,9 @@ func generate_local_notification_object(ndb: Ndb, from ev: NostrEvent, state: He
     
     if type == .text,
        state.settings.mention_notification,
-       let blocks = ev.blocks(ndb: ndb)?.unsafeUnownedValue
+       let blockGroup = try? NdbBlockGroup.from(event: ev, using: ndb, and: state.keypair)
     {
-        for case .mention(let mention) in blocks.iter(note: ev) {
+        for case .mention(let mention) in blockGroup.blocks {
             guard case .npub = mention.bech32_type,
                   (memcmp(state.keypair.pubkey.id.bytes, mention.bech32.npub.pubkey, 32) == 0) else {
                 continue

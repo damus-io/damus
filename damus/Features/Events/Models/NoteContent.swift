@@ -67,22 +67,28 @@ func note_artifact_is_separated(kind: NostrKind?) -> Bool {
 }
 
 func render_immediately_available_note_content(ndb: Ndb, ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> NoteArtifacts {
-    guard let blocks = ev.blocks(ndb: ndb) else {
-        return .separated(.just_content(ev.get_content(keypair)))
-    }
-
     if ev.known_kind == .longform {
         return .longform(LongformContent(ev.content))
     }
     
-    return .separated(render_blocks(blocks: blocks.unsafeUnownedValue, profiles: profiles, note: ev, can_hide_last_previewable_refs: true))
+    do {
+        let blocks = try NdbBlockGroup.from(event: ev, using: ndb, and: keypair)
+        return .separated(render_blocks(blocks: blocks, profiles: profiles, can_hide_last_previewable_refs: true))
+    }
+    catch {
+        // TODO: Improve error handling in the future, bubbling it up so that the view can decide how display errors. Keep legacy behavior for now.
+        return .separated(.just_content(ev.get_content(keypair)))
+    }
 }
 
 actor ContentRenderer {
     func render_note_content(ndb: Ndb, ev: NostrEvent, profiles: Profiles, keypair: Keypair) async -> NoteArtifacts {
-        guard let result = try? await ndb.waitFor(noteId: ev.id, timeout: 10) else {
-            return .separated(.just_content(ev.get_content(keypair)))
+        if ev.known_kind == .dm {
+            // Use the enhanced render_immediately_available_note_content which now handles DMs properly
+            // by decrypting and parsing the content with ndb_parse_content
+            return render_immediately_available_note_content(ndb: ndb, ev: ev, profiles: profiles, keypair: keypair)
         }
+        let result = try? await ndb.waitFor(noteId: ev.id, timeout: 3)
         return render_immediately_available_note_content(ndb: ndb, ev: ev, profiles: profiles, keypair: keypair)
     }
 }
@@ -92,14 +98,14 @@ actor ContentRenderer {
 // Block previews should actually be rendered in the position of the note content where it was found.
 // Currently, we put some previews at the bottom of the note, which is incorrect as they take things out of
 // the author's intended context.
-func render_blocks(blocks: NdbBlocks, profiles: Profiles, note: NdbNote, can_hide_last_previewable_refs: Bool = false) -> NoteArtifactsSeparated {
+func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide_last_previewable_refs: Bool = false) -> NoteArtifactsSeparated {
     var invoices: [Invoice] = []
     var urls: [UrlType] = []
     
     var end_mention_count = 0
     var end_url_count = 0
     
-    let ndb_blocks = blocks.iter(note: note).collect()
+    let ndb_blocks = blocks.blocks
     let one_note_ref = ndb_blocks
         .filter({
             if case .mention(let mention) = $0,
