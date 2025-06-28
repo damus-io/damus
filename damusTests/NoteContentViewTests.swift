@@ -342,6 +342,20 @@ class NoteContentViewTests: XCTestCase {
         XCTAssertTrue((parsed.blocks[0].asURL != nil), "NoteContentView does not correctly parse an image block when url in JSON content contains optional escaped slashes.")
     }
     
+    /// Quick test that exercises the direct parsing methods (i.e. not fetching blocks from nostrdb) from `NdbBlockGroup`, and its bridging code with C.
+    /// The parsing logic itself already has test coverage at the nostrdb level.
+    func testDirectBlockParsing() {
+        let kp = test_keypair_full
+        let dm: NdbNote = NIP04.create_dm("Test", to_pk: kp.pubkey, tags: [], keypair: kp.to_keypair())!
+        let blocks = try! NdbBlockGroup.from(event: dm, using: test_damus_state.ndb, and: kp.to_keypair())
+        XCTAssertEqual(blocks.blocks.count, 1)
+        
+        let post = NostrPost(content: "Test", kind: .text)
+        let event = post.to_event(keypair: kp)!
+        let blocks2 = try! NdbBlockGroup.from(event: event, using: test_damus_state.ndb, and: kp.to_keypair())
+        XCTAssertEqual(blocks2.blocks.count, 1)
+    }
+    
     func testMentionStr_Pubkey_ContainsAbbreviated() throws {
         let compatibleText = createCompatibleText(test_pubkey.npub)
         

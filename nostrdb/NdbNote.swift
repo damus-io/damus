@@ -457,23 +457,25 @@ extension NdbNote {
         return ThreadReply(tags: self.tags)?.reply.note_id
     }
 
-    func blocks(ndb: Ndb) -> NdbTxn<NdbBlocks>? {
-        let blocks_txn = NdbTxn<NdbBlocks?>(ndb: ndb) { txn in
+    func block_offsets(ndb: Ndb) -> SafeNdbTxn<NdbBlockGroup.BlocksMetadata>? {
+        let blocks_txn: SafeNdbTxn<NdbBlockGroup.BlocksMetadata>? = .new(on: ndb) { txn -> NdbBlockGroup.BlocksMetadata? in
             guard let key = ndb.lookup_note_key_with_txn(self.id, txn: txn) else {
                 return nil
             }
             return ndb.lookup_blocks_by_key_with_txn(key, txn: txn)
         }
 
-        guard let blocks_txn else {
-            return nil
-        }
+        guard let blocks_txn else { return nil }
 
-        return blocks_txn.collect()
+        return blocks_txn
+    }
+    
+    func is_content_encrypted() -> Bool {
+        return known_kind == .dm    // Probably other kinds should be listed here
     }
 
     func get_content(_ keypair: Keypair) -> String {
-        if known_kind == .dm {
+        if is_content_encrypted() {
             return decrypted(keypair: keypair) ?? "*failed to decrypt content*"
         }
         else if known_kind == .highlight {
@@ -484,7 +486,7 @@ extension NdbNote {
     }
 
     func maybe_get_content(_ keypair: Keypair) -> String? {
-        if known_kind == .dm {
+        if is_content_encrypted() {
             return decrypted(keypair: keypair)
         }
 
