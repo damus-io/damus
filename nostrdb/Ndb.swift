@@ -227,16 +227,16 @@ class Ndb {
         return true
     }
     
-    func lookup_blocks_by_key_with_txn<Y>(_ key: NoteKey, txn: NdbTxn<Y>) -> NdbBlocks? {
+    func lookup_blocks_by_key_with_txn(_ key: NoteKey, txn: RawNdbTxnAccessible) -> NdbBlockGroup.BlocksMetadata? {
         guard let blocks = ndb_get_blocks_by_key(self.ndb.ndb, &txn.txn, key) else {
             return nil
         }
 
-        return NdbBlocks(ptr: blocks)
+        return NdbBlockGroup.BlocksMetadata(ptr: blocks)
     }
 
-    func lookup_blocks_by_key(_ key: NoteKey) -> NdbTxn<NdbBlocks?>? {
-        NdbTxn(ndb: self) { txn in
+    func lookup_blocks_by_key(_ key: NoteKey) -> SafeNdbTxn<NdbBlockGroup.BlocksMetadata?>? {
+        SafeNdbTxn<NdbBlockGroup.BlocksMetadata?>.new(on: self) { txn in
             lookup_blocks_by_key_with_txn(key, txn: txn)
         }
     }
@@ -493,7 +493,7 @@ class Ndb {
         }
     }
 
-    func lookup_note_key_with_txn<Y>(_ id: NoteId, txn: NdbTxn<Y>) -> NoteKey? {
+    func lookup_note_key_with_txn(_ id: NoteId, txn: some RawNdbTxnAccessible) -> NoteKey? {
         guard !closed else { return nil }
         return id.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> NoteKey? in
             guard let p = ptr.baseAddress else {
