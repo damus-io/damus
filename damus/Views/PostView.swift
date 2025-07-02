@@ -635,7 +635,6 @@ struct PVImageCarouselView: View {
                             VideoPlayer(player: configurePlayer(with: media[index].localURL))
                                 .frame(width: media.count == 1 ? deviceWidth * 0.8 : 250, height: media.count == 1 ? 400 : 250)
                                 .cornerRadius(10)
-                                .padding()
                                 .contextMenu { contextMenuContent(for: media[index]) }
                         } else {
                             KFAnimatedImage(media[index].uploadedURL)
@@ -643,31 +642,38 @@ struct PVImageCarouselView: View {
                                 .configure { view in
                                     view.framePreloadCount = 3
                                 }
+                                .aspectRatio(contentMode: .fit)
                                 .frame(width: media.count == 1 ? deviceWidth * 0.8 : 250, height: media.count == 1 ? 400 : 250)
                                 .cornerRadius(10)
-                                .padding()
                                 .contextMenu { contextMenuContent(for: media[index]) }
                         }
                         
-                        VStack {  // Set spacing to 0 to remove the gap between items
+                        Button(action: {
+                            media.remove(at: index)
+                        }) {
                             Image("close-circle")
                                 .foregroundColor(.white)
+                                .background(Color.black.opacity(0.5))
+                                .clipShape(Circle())
                                 .padding(20)
                                 .shadow(radius: 5)
-                                .onTapGesture {
-                                    media.remove(at: index) // Direct removal using index
-                                }
-                            
-                            if isSupportedVideo(url: media[index].uploadedURL) {
+                        }
+                        if isSupportedVideo(url: media[index].uploadedURL) {
+                            VStack {
                                 Spacer()
+                                HStack {
                                     Image(systemName: "video")
                                         .foregroundColor(.white)
                                         .padding(10)
+                                        .background(Color.black.opacity(0.5))
+                                        .clipShape(Circle())
                                         .shadow(radius: 5)
                                         .opacity(0.6)
+                                    Spacer()
                                 }
+                                .padding(.bottom, 20)
+                            }
                         }
-                        .padding(.bottom, 35)
                     }
                 }
                 if let mediaUP = mediaUnderProgress, let progress = imageUploadModel.progress {
