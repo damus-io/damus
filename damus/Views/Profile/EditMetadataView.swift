@@ -9,6 +9,7 @@ import SwiftUI
 import Combine
 
 let BANNER_HEIGHT: CGFloat = 150.0;
+fileprivate let Scroll_height: CGFloat = 700.0
 
 struct EditMetadataView: View {
     let damus_state: DamusState
@@ -79,11 +80,14 @@ struct EditMetadataView: View {
     func topSection(topLevelGeo: GeometryProxy) -> some View {
         ZStack(alignment: .top) {
             GeometryReader { geo in
+                let offset = geo.frame(in: .global).minY
                 EditBannerImageView(damus_state: damus_state, viewModel: bannerUploadObserver, callback: uploadedBanner(image_url:), safeAreaInsets: topLevelGeo.safeAreaInsets, banner_image: URL(string: banner))
                     .aspectRatio(contentMode: .fill)
-                    .frame(width: geo.size.width, height: BANNER_HEIGHT)
+                    .frame(width: geo.size.width, height: offset > 0 ? BANNER_HEIGHT + offset : BANNER_HEIGHT)
                     .clipped()
-            }.frame(height: BANNER_HEIGHT)
+                    .offset(y: offset > 0 ? -offset : 0) // Pin the top
+            }
+            .frame(height: BANNER_HEIGHT)
             VStack(alignment: .leading) {
                 let pfp_size: CGFloat = 90.0
 
@@ -129,74 +133,78 @@ struct EditMetadataView: View {
     
     func content(topLevelGeo: GeometryProxy) -> some View {
         VStack(alignment: .leading) {
-            self.topSection(topLevelGeo: topLevelGeo)
-            Form {
-                Section(NSLocalizedString("Your Name", comment: "Label for Your Name section of user profile form.")) {
-                    let display_name_placeholder = "Satoshi Nakamoto"
-                    TextField(display_name_placeholder, text: $display_name)
-                        .autocorrectionDisabled(true)
-                        .textInputAutocapitalization(.never)
-                }
+            ScrollView(showsIndicators: false) {
+                self.topSection(topLevelGeo: topLevelGeo)
                 
-                Section(NSLocalizedString("Username", comment: "Label for Username section of user profile form.")) {
-                    let username_placeholder = "satoshi"
-                    TextField(username_placeholder, text: $name)
-                        .autocorrectionDisabled(true)
-                        .textInputAutocapitalization(.never)
-
-                }
-                
-                Section(NSLocalizedString("Website", comment: "Label for Website section of user profile form.")) {
-                    TextField(NSLocalizedString("https://jb55.com", comment: "Placeholder example text for website URL for user profile."), text: $website)
-                        .autocorrectionDisabled(true)
-                        .textInputAutocapitalization(.never)
-                }
-                
-                Section(NSLocalizedString("About Me", comment: "Label for About Me section of user profile form.")) {
-                    let placeholder = NSLocalizedString("Absolute Boss", comment: "Placeholder text for About Me description.")
-                    ZStack(alignment: .topLeading) {
-                        TextEditor(text: $about)
-                            .textInputAutocapitalization(.sentences)
-                            .frame(minHeight: 45, alignment: .leading)
-                            .multilineTextAlignment(.leading)
-                        Text(about.isEmpty ? placeholder : about)
-                            .padding(4)
-                            .opacity(about.isEmpty ? 1 : 0)
-                            .foregroundColor(Color(uiColor: .placeholderText))
+                Form {
+                    Section(NSLocalizedString("Your Name", comment: "Label for Your Name section of user profile form.")) {
+                        let display_name_placeholder = "Satoshi Nakamoto"
+                        TextField(display_name_placeholder, text: $display_name)
+                            .autocorrectionDisabled(true)
+                            .textInputAutocapitalization(.never)
                     }
-                }
-                
-                Section(NSLocalizedString("Bitcoin Lightning Tips", comment: "Label for Bitcoin Lightning Tips section of user profile form.")) {
-                    TextField(NSLocalizedString("Lightning Address or LNURL", comment: "Placeholder text for entry of Lightning Address or LNURL."), text: $ln)
-                        .autocorrectionDisabled(true)
-                        .textInputAutocapitalization(.never)
-                        .onReceive(Just(ln)) { newValue in
-                            self.ln = newValue.trimmingCharacters(in: .whitespaces)
-                        }
-                }
-                                
-                Section(content: {
-                    TextField(NSLocalizedString("jb55@jb55.com", comment: "Placeholder example text for identifier used for Nostr addresses."), text: $nip05)
-                        .autocorrectionDisabled(true)
-                        .textInputAutocapitalization(.never)
-                        .onReceive(Just(nip05)) { newValue in
-                            self.nip05 = newValue.trimmingCharacters(in: .whitespaces)
-                        }
-                }, header: {
-                    Text("Nostr Address", comment: "Label for the Nostr Address section of user profile form.")
-                }, footer: {
-                    switch validate_nostr_address(nip05: nip05_parts, nip05_str: nip05) {
-                    case .empty:
-                        // without this, the keyboard dismisses unnecessarily when the footer changes state
-                        Text("")
-                    case .valid:
-                        Text("")
-                    case .invalid:
-                        Text("'\(nip05)' is an invalid Nostr address. It should look like an email address.", comment: "Description of why the Nostr address is invalid.")
+                    
+                    Section(NSLocalizedString("Username", comment: "Label for Username section of user profile form.")) {
+                        let username_placeholder = "satoshi"
+                        TextField(username_placeholder, text: $name)
+                            .autocorrectionDisabled(true)
+                            .textInputAutocapitalization(.never)
+                        
                     }
-                })
-
-
+                    
+                    Section(NSLocalizedString("Website", comment: "Label for Website section of user profile form.")) {
+                        TextField(NSLocalizedString("https://jb55.com", comment: "Placeholder example text for website URL for user profile."), text: $website)
+                            .autocorrectionDisabled(true)
+                            .textInputAutocapitalization(.never)
+                    }
+                    
+                    Section(NSLocalizedString("About Me", comment: "Label for About Me section of user profile form.")) {
+                        let placeholder = NSLocalizedString("Absolute Boss", comment: "Placeholder text for About Me description.")
+                        ZStack(alignment: .topLeading) {
+                            TextEditor(text: $about)
+                                .textInputAutocapitalization(.sentences)
+                                .frame(minHeight: 45, alignment: .leading)
+                                .multilineTextAlignment(.leading)
+                            Text(about.isEmpty ? placeholder : about)
+                                .padding(4)
+                                .opacity(about.isEmpty ? 1 : 0)
+                                .foregroundColor(Color(uiColor: .placeholderText))
+                        }
+                    }
+                    
+                    Section(NSLocalizedString("Bitcoin Lightning Tips", comment: "Label for Bitcoin Lightning Tips section of user profile form.")) {
+                        TextField(NSLocalizedString("Lightning Address or LNURL", comment: "Placeholder text for entry of Lightning Address or LNURL."), text: $ln)
+                            .autocorrectionDisabled(true)
+                            .textInputAutocapitalization(.never)
+                            .onReceive(Just(ln)) { newValue in
+                                self.ln = newValue.trimmingCharacters(in: .whitespaces)
+                            }
+                    }
+                    
+                    Section(content: {
+                        TextField(NSLocalizedString("jb55@jb55.com", comment: "Placeholder example text for identifier used for Nostr addresses."), text: $nip05)
+                            .autocorrectionDisabled(true)
+                            .textInputAutocapitalization(.never)
+                            .onReceive(Just(nip05)) { newValue in
+                                self.nip05 = newValue.trimmingCharacters(in: .whitespaces)
+                            }
+                    }, header: {
+                        Text("Nostr Address", comment: "Label for the Nostr Address section of user profile form.")
+                    }, footer: {
+                        switch validate_nostr_address(nip05: nip05_parts, nip05_str: nip05) {
+                        case .empty:
+                            // without this, the keyboard dismisses unnecessarily when the footer changes state
+                            Text("")
+                        case .valid:
+                            Text("")
+                        case .invalid:
+                            Text("'\(nip05)' is an invalid Nostr address. It should look like an email address.", comment: "Description of why the Nostr address is invalid.")
+                        }
+                    })
+                    
+                    
+                }
+                .frame(height: Scroll_height)
             }
             
             Button(action: {
