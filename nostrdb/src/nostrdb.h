@@ -551,6 +551,7 @@ void ndb_builder_set_id(struct ndb_builder *builder, unsigned char *id);
 void ndb_builder_set_kind(struct ndb_builder *builder, uint32_t kind);
 int ndb_builder_new_tag(struct ndb_builder *builder);
 int ndb_builder_push_tag_str(struct ndb_builder *builder, const char *str, int len);
+int ndb_builder_push_tag_id(struct ndb_builder *builder, unsigned char *id);
 
 // FILTERS
 int ndb_filter_init(struct ndb_filter *);

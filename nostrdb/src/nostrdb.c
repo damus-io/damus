@@ -7739,6 +7739,16 @@ int ndb_builder_push_tag_str(struct ndb_builder *builder,
 	return ndb_builder_finalize_tag(builder, pstr);
 }
 
+/// Push an id element to the current tag. Needs to be 32 bytes
+int ndb_builder_push_tag_id(struct ndb_builder *builder,
+			    unsigned char *id)
+{
+	union ndb_packed_str pstr;
+	if (!ndb_builder_push_packed_id(builder, id, &pstr))
+		return 0;
+	return ndb_builder_finalize_tag(builder, pstr);
+}
+
 //
 // CONFIG
 //
