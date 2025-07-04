@@ -51,7 +51,7 @@ extension ndb_invoice_block {
     }
 }
 
-enum NdbBlock {
+enum NdbBlock: ~Copyable {
     case text(ndb_str_block)
     case mention(ndb_mention_bech32_block)
     case hashtag(ndb_str_block)
@@ -107,10 +107,6 @@ struct NdbBlockGroup: ~Copyable {
     fileprivate let metadata: MaybeTxn<BlocksMetadata>
     /// The raw text content of the note
     fileprivate let rawTextContent: String
-    /// An iterable list of blocks that make up this object
-    var blocks: [NdbBlock] {
-        return self.collectBlocks()
-    }
     var words: Int {
         return metadata.borrow { $0.words }
     }
@@ -149,12 +145,12 @@ enum MaybeTxn<T: ~Copyable>: ~Copyable {
     case pure(T)
     case txn(SafeNdbTxn<T>)
     
-    func borrow<Y>(_ borrowFunction: (borrowing T) -> Y) -> Y {
+    func borrow<Y>(_ borrowFunction: (borrowing T) throws -> Y) rethrows -> Y {
         switch self {
         case .pure(let item):
-            return borrowFunction(item)
+            return try borrowFunction(item)
         case .txn(let txn):
-            return borrowFunction(txn.val)
+            return try borrowFunction(txn.val)
         }
     }
 }
@@ -239,35 +235,60 @@ extension NdbBlockGroup {
     }
 }
 
+
+// MARK: - Enumeration support
+
 extension NdbBlockGroup {
-    /// Collects all blocks in the group into an array without using Iterator/Sequence protocols
+    typealias NdbBlockList = NonCopyableLinkedList<NdbBlock>
+    
+    /// Borrows all blocks in the group one by one and runs a function defined by the caller.
     ///
     /// **Implementation note:**
-    /// This is done as a function instead of using `Sequence` and  `Iterator` protocols because it does seem to be possible to conform to both `Sequence` and `~Copyable` at the same time.
+    /// This is done as a function instead of using `Sequence` and  `Iterator` protocols because it is currently not possible to conform to both `Sequence` and `~Copyable` at the same time, as Sequence requires elements to be `Copyable`
     ///
-    /// - Returns: An array of all blocks in the group
-    fileprivate func collectBlocks() -> [NdbBlock] {
-        var blocks = [NdbBlock]()
+    /// - Parameter borrowingFunction: The function to be run on each iteration. Takes in two parameters: The index of the item in the list (zero-indexed), and the block itself.
+    /// - Returns: The `Y` value returned by the provided function, when such function returns `.loopReturn(Y)`
+    @discardableResult
+    func forEachBlock<Y>(_ borrowingFunction: ((Int, borrowing NdbBlock) throws -> NdbBlockList.LoopCommand<Y>)) rethrows -> Y?  {
+        return try withList({ try $0.forEachItem(borrowingFunction) })
+    }
+    
+    /// Borrows all blocks in the group one by one and runs a function defined by the caller, in reverse order
+    ///
+    /// **Implementation note:**
+    /// This is done as a function instead of using `Sequence` and  `Iterator` protocols because it is currently not possible to conform to both `Sequence` and `~Copyable` at the same time, as Sequence requires elements to be `Copyable`
+    ///
+    /// - Parameter borrowingFunction: The function to be run on each iteration. Takes in two parameters: The index of the item in the list (zero-indexed), and the block itself.
+    /// - Returns: The `Y` value returned by the provided function, when such function returns `.loopReturn(Y)`
+    @discardableResult
+    func forEachBlockReversed<Y>(_ borrowingFunction: ((Int, borrowing NdbBlock) throws -> NdbBlockList.LoopCommand<Y>)) rethrows -> Y?  {
+        return try withList({ try $0.forEachItemReversed(borrowingFunction) })
+    }
+    
+    /// Iterates over each item of the list, updating a final value, and returns the final result at the end.
+    func reduce<Y>(initialResult: Y, _ borrowingFunction: ((_ index: Int, _ partialResult: Y, _ item: borrowing NdbBlock) throws -> NdbBlockList.LoopCommand<Y>)) rethrows -> Y?  {
+        return try withList({ try $0.reduce(initialResult: initialResult, borrowingFunction) })
+    }
+    
+    /// Borrows the block list for processing
+    func withList<Y>(_ borrowingFunction: (borrowing NdbBlockList) throws -> Y) rethrows -> Y {
+        var linkedList: NdbBlockList = .init()
         
-        // Ensure the C string remains valid for the entire operation by keeping
-        // all operations using it within the withCString closure
-        self.rawTextContent.withCString { cptr in
+        return try self.rawTextContent.withCString { cptr in
             var iter = ndb_block_iterator(content: cptr, blocks: nil, block: ndb_block(), p: nil)
             
             // Start the iteration
-            self.metadata.borrow { value in
+            return try self.metadata.borrow { value in
                 ndb_blocks_iterate_start(cptr, value.as_ptr(), &iter)
                 
                 // Collect blocks into array
-                while let ptr = ndb_blocks_iterate_next(&iter),
+                outerLoop: while let ptr = ndb_blocks_iterate_next(&iter),
                       let block = NdbBlock(ndb_block_ptr(ptr: ptr)) {
-                    blocks.append(block)
+                    linkedList.add(item: block)
                 }
+                
+                return try borrowingFunction(linkedList)
             }
         }
-        
-        return blocks
     }
 }
-
-
