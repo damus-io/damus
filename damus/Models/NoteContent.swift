@@ -105,152 +105,183 @@ func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide
     var end_mention_count = 0
     var end_url_count = 0
     
-    let ndb_blocks = blocks.blocks
-    let one_note_ref = ndb_blocks
-        .filter({
-            if case .mention(let mention) = $0,
-               let typ = mention.bech32_type,
+    let note_ref_count: Int? = try? blocks.reduce(initialResult: 0) { index, partialResult, item in
+        switch item {
+        case .mention(let mention):
+            if let typ = mention.bech32_type,
                typ.is_notelike {
-                return true
+                return .loopReturn(partialResult + 1)
             }
-            return false
-        })
-        .count == 1
-
-    // Search backwards until we find the beginning index of the chain of previewables that reach the end of the content.
-    var hide_text_index = ndb_blocks.endIndex
-    if can_hide_last_previewable_refs {
-        outerLoop: for (i, block) in ndb_blocks.enumerated().reversed() {
-            if block.is_previewable {
-                switch block {
-                case .mention:
-                    end_mention_count += 1
-                    
-                    // If there is more than one previewable mention,
-                    // do not hide anything because we allow rich rendering of only one mention currently.
-                    // This should be fixed in the future to show events inline instead.
-                    if end_mention_count > 1 {
-                        hide_text_index = ndb_blocks.endIndex
-                        break outerLoop
-                    }
-                case .url(let url_block):
-                    guard let url_string = NdbBlock.convertToStringCopy(from: url_block),
-                          let url = URL(string: url_string) else {
-                        continue    // We can't classify this, ignore and move on
-                    }
-                    let url_type = classify_url(url)
-                    if case .link = url_type {
-                        end_url_count += 1
-                        
-                        // If there is more than one link, do not hide anything because we allow rich rendering of only
-                        // one link.
-                        if end_url_count > 1 {
-                            hide_text_index = ndb_blocks.endIndex
-                            break outerLoop
-                        }
-                    }
-                default:
-                    break
-                }
-                hide_text_index = i
-            } else if case .text(let txt_block) = block,
-                      let txt = NdbBlock.convertToStringCopy(from: txt_block),
-                      txt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                // We should hide whitespace at the end sequence.
-                hide_text_index = i
-            } else if case .hashtag = block {
-                // SPECIAL CASE:
-                // We should keep hashtags at the end sequence but hide all the other previewables around it.
-                hide_text_index = i
-            } else {
-                break
-            }
-        }
-    }
-
-    var ind: Int = -1
-    let txt: CompatibleText = ndb_blocks.reduce(into: CompatibleText()) { str, block in
-        ind = ind + 1
-
-        // Add the rendered previewable blocks to their type-specific lists.
-        switch block {
-        case .url(let url_block):
-            guard let url_string = NdbBlock.convertToStringCopy(from: url_block),
-                  let url = URL(string: url_string) else {
-                break    // We can't classify this, ignore and move on
-            }
-            let url_type = classify_url(url)
-            urls.append(url_type)
-        case .invoice(let invoice_block):
-            guard let invoice = invoice_block.as_invoice() else { break }
-            invoices.append(invoice)
         default:
             break
         }
+        return .loopContinue
+    }
+    let one_note_ref = note_ref_count == 1
 
-        if can_hide_last_previewable_refs {
-            // If there are previewable blocks that occur before the consecutive sequence of them at the end of the content,
-            // we should not hide the text representation of any previewable block to avoid altering the format of the note.
-            if ind < hide_text_index && block.is_previewable {
-                hide_text_index = ndb_blocks.endIndex
-            }
-
-            // No need to show the text representation of the block if the only previewables are the sequence of them
-            // found at the end of the content.
-            // This is to save unnecessary use of screen space.
-            // The only exception is that if there are hashtags embedded in the end sequence, which is not uncommon,
-            // then we still want to show those hashtags but hide everything else that is previewable in the end sequence.
-            if ind >= hide_text_index {
-                if case .text(let txt_block) = block,
-                          let txt = NdbBlock.convertToStringCopy(from: txt_block),
-                          txt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    if case .hashtag = ndb_blocks[safe: ind+1] {
-                        str = str + CompatibleText(stringLiteral: reduce_text_block(ind: ind, hide_text_index: hide_text_index, txt: txt))
+    // Search backwards until we find the beginning index of the chain of previewables that reach the end of the content.
+    var hide_text_index: Int = 0
+    if can_hide_last_previewable_refs {
+        let _: ()? = blocks.withList({ blocksList in
+            let endIndex = blocksList.count
+            return blocksList.forEachItemReversed({ index, block in
+                if block.is_previewable {
+                    switch block {
+                    case .mention:
+                        end_mention_count += 1
+                        
+                        // If there is more than one previewable mention,
+                        // do not hide anything because we allow rich rendering of only one mention currently.
+                        // This should be fixed in the future to show events inline instead.
+                        if end_mention_count > 1 {
+                            hide_text_index = endIndex
+                            return .loopBreak
+                        }
+                    case .url(let url_block):
+                        guard let url_string = NdbBlock.convertToStringCopy(from: url_block),
+                              let url = URL(string: url_string) else {
+                            return .loopContinue    // We can't classify this, ignore and move on
+                        }
+                        let url_type = classify_url(url)
+                        if case .link = url_type {
+                            end_url_count += 1
+                            
+                            // If there is more than one link, do not hide anything because we allow rich rendering of only
+                            // one link.
+                            if end_url_count > 1 {
+                                hide_text_index = endIndex
+                                return .loopBreak
+                            }
+                        }
+                    default:
+                        break
                     }
-                } else if case .hashtag(let htag) = block {
-                    str = str + hashtag_str(htag.as_str())
+                    hide_text_index = index
                 }
-                return
-            }
-        }
-
-        switch block {
-        case .mention(let m):
-            if let typ = m.bech32_type, typ.is_notelike, one_note_ref {
-                return
-            }
-            guard let mention = MentionRef(block: m) else { return }
-            str = str + mention_str(.any(mention), profiles: profiles)
-        case .text(let txt):
-            if case .hashtag = blocks[safe: ind+1] {
-                // SPECIAL CASE:
-                // Do not trim whitespaces from suffix if the following block is a hashtag.
-                // This is because of the code further up (see "SPECIAL CASE").
-                str = str + CompatibleText(stringLiteral: reduce_text_block(ind: ind, hide_text_index: -1, txt: txt.as_str()))
-            } else {
-                str = str + CompatibleText(stringLiteral: reduce_text_block(ind: ind, hide_text_index: hide_text_index, txt: txt.as_str()))
-            }
-        case .hashtag(let htag):
-            str = str + hashtag_str(htag.as_str())
-        case .invoice(let invoice):
-            guard let inv = invoice.as_invoice() else { return }
-            invoices.append(inv)
-        case .url(let url):
-            guard let url = URL(string: url.as_str()) else { return }
-            let url_type = classify_url(url)
-            switch url_type {
-            case .media:
-                urls.append(url_type)
-            case .link(let url):
-                urls.append(url_type)
-                str = str + url_str(url)
-            }
-        case .mention_index:
-            return
-        }
+                else {
+                    switch block {
+                    case .text(let txt_block):
+                        if let txt = NdbBlock.convertToStringCopy(from: txt_block),
+                           txt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            // We should hide whitespace at the end sequence.
+                            hide_text_index = index
+                        }
+                    case .hashtag(_):
+                        // SPECIAL CASE:
+                        // We should keep hashtags at the end sequence but hide all the other previewables around it.
+                        hide_text_index = index
+                    default:
+                        return .loopBreak
+                    }
+                }
+                return .loopContinue
+            })
+        })
     }
 
-    return NoteArtifactsSeparated(content: txt, words: blocks.words, urls: urls, invoices: invoices)
+    var ind: Int = -1
+    let txt: CompatibleText? = try? blocks.withList({ blocksList in
+        let endIndex = blocksList.count
+        return try blocksList.reduce(initialResult: CompatibleText(), { index, str, block in
+            ind = ind + 1
+
+            // Add the rendered previewable blocks to their type-specific lists.
+            switch block {
+            case .url(let url_block):
+                guard let url_string = NdbBlock.convertToStringCopy(from: url_block),
+                      let url = URL(string: url_string) else {
+                    break    // We can't classify this, ignore and move on
+                }
+                let url_type = classify_url(url)
+                urls.append(url_type)
+            case .invoice(let invoice_block):
+                guard let invoice = invoice_block.as_invoice() else { break }
+                invoices.append(invoice)
+            default:
+                break
+            }
+
+            if can_hide_last_previewable_refs {
+                // If there are previewable blocks that occur before the consecutive sequence of them at the end of the content,
+                // we should not hide the text representation of any previewable block to avoid altering the format of the note.
+                if ind < hide_text_index && block.is_previewable {
+                    hide_text_index = endIndex
+                }
+
+                // No need to show the text representation of the block if the only previewables are the sequence of them
+                // found at the end of the content.
+                // This is to save unnecessary use of screen space.
+                // The only exception is that if there are hashtags embedded in the end sequence, which is not uncommon,
+                // then we still want to show those hashtags but hide everything else that is previewable in the end sequence.
+                if ind >= hide_text_index {
+                    switch block {
+                    case .text(let txt_block):
+                        if let txt = NdbBlock.convertToStringCopy(from: txt_block),
+                           txt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            let returnItem: CompatibleText? = blocksList.useItem(at: ind + 1, { matchingBlock in
+                                switch matchingBlock {
+                                case .hashtag(_):
+                                    return str + CompatibleText(stringLiteral: reduce_text_block(ind: ind, hide_text_index: hide_text_index, txt: txt))
+                                default:
+                                    return nil
+                                }
+                            }) ?? nil
+                            if let returnItem {
+                                return .loopReturn(returnItem)
+                            }
+                        }
+                    case .hashtag(let htag):
+                        return .loopReturn(str + hashtag_str(htag.as_str()))
+                    default:
+                        break
+                    }
+                }
+            }
+
+            switch block {
+            case .mention(let m):
+                if let typ = m.bech32_type, typ.is_notelike, one_note_ref {
+                    return .loopContinue
+                }
+                guard let mention = MentionRef(block: m) else { return .loopContinue }
+                return .loopReturn(str + mention_str(.any(mention), profiles: profiles))
+            case .text(let txt):
+                var hide_text_index_argument = hide_text_index
+                blocksList.useItem(at: ind+1, { block in
+                    switch block {
+                    case .hashtag(_):
+                        // SPECIAL CASE:
+                        // Do not trim whitespaces from suffix if the following block is a hashtag.
+                        // This is because of the code further up (see "SPECIAL CASE").
+                        hide_text_index_argument = -1
+                    default:
+                        break
+                    }
+                })
+                return .loopReturn(str + CompatibleText(stringLiteral: reduce_text_block(ind: ind, hide_text_index: hide_text_index_argument, txt: txt.as_str())))
+            case .hashtag(let htag):
+                return .loopReturn(str + hashtag_str(htag.as_str()))
+            case .invoice(let invoice):
+                guard let inv = invoice.as_invoice() else { return .loopContinue }
+                invoices.append(inv)
+            case .url(let url):
+                guard let url = URL(string: url.as_str()) else { return .loopContinue }
+                let url_type = classify_url(url)
+                switch url_type {
+                case .media:
+                    urls.append(url_type)
+                case .link(let url):
+                    urls.append(url_type)
+                    return .loopReturn(str + url_str(url))
+                }
+            case .mention_index:
+                return .loopContinue
+            }
+            return .loopContinue
+        })
+    })
+
+    return NoteArtifactsSeparated(content: txt ?? CompatibleText(), words: blocks.words, urls: urls, invoices: invoices)
 }
 
 func reduce_text_block(ind: Int, hide_text_index: Int, txt: String) -> String {
