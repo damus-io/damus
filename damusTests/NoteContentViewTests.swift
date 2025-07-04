@@ -348,12 +348,14 @@ class NoteContentViewTests: XCTestCase {
         let kp = test_keypair_full
         let dm: NdbNote = NIP04.create_dm("Test", to_pk: kp.pubkey, tags: [], keypair: kp.to_keypair())!
         let blocks = try! NdbBlockGroup.from(event: dm, using: test_damus_state.ndb, and: kp.to_keypair())
-        XCTAssertEqual(blocks.blocks.count, 1)
+        let blockCount1 = try? blocks.withList({ $0.count })
+        XCTAssertEqual(blockCount1, 1)
         
         let post = NostrPost(content: "Test", kind: .text)
         let event = post.to_event(keypair: kp)!
         let blocks2 = try! NdbBlockGroup.from(event: event, using: test_damus_state.ndb, and: kp.to_keypair())
-        XCTAssertEqual(blocks2.blocks.count, 1)
+        let blockCount2 = try? blocks2.withList({ $0.count })
+        XCTAssertEqual(blockCount2, 1)
     }
     
     func testMentionStr_Pubkey_ContainsAbbreviated() throws {
