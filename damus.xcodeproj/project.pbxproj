@@ -1552,6 +1552,10 @@
 		D74EA0932D2E77B9002290DD /* LoadableNostrEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74EA0922D2E77B9002290DD /* LoadableNostrEventView.swift */; };
 		D74EA0942D2E77B9002290DD /* LoadableNostrEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74EA0922D2E77B9002290DD /* LoadableNostrEventView.swift */; };
 		D74EA0952D2E77B9002290DD /* LoadableNostrEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74EA0922D2E77B9002290DD /* LoadableNostrEventView.swift */; };
+		D74EC84F2E1856B70091DC51 /* NonCopyableLinkedList.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74EC84E2E1856AF0091DC51 /* NonCopyableLinkedList.swift */; };
+		D74EC8502E1856B70091DC51 /* NonCopyableLinkedList.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74EC84E2E1856AF0091DC51 /* NonCopyableLinkedList.swift */; };
+		D74EC8512E1856B70091DC51 /* NonCopyableLinkedList.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74EC84E2E1856AF0091DC51 /* NonCopyableLinkedList.swift */; };
+		D74EC8522E1856B70091DC51 /* NonCopyableLinkedList.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74EC84E2E1856AF0091DC51 /* NonCopyableLinkedList.swift */; };
 		D74F430A2B23F0BE00425B75 /* DamusPurple.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74F43092B23F0BE00425B75 /* DamusPurple.swift */; };
 		D74F430C2B23FB9B00425B75 /* StoreObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74F430B2B23FB9B00425B75 /* StoreObserver.swift */; };
 		D753CEAA2BE9DE04001C3A5D /* MutingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D753CEA92BE9DE04001C3A5D /* MutingTests.swift */; };
@@ -2590,6 +2594,7 @@
 		D74E64112DC95CBE004C7892 /* HumanReadableErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HumanReadableErrors.swift; sourceTree = "<group>"; };
 		D74EA08D2D2E271E002290DD /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
 		D74EA0922D2E77B9002290DD /* LoadableNostrEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadableNostrEventView.swift; sourceTree = "<group>"; };
+		D74EC84E2E1856AF0091DC51 /* NonCopyableLinkedList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NonCopyableLinkedList.swift; sourceTree = "<group>"; };
 		D74F43092B23F0BE00425B75 /* DamusPurple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurple.swift; sourceTree = "<group>"; };
 		D74F430B2B23FB9B00425B75 /* StoreObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreObserver.swift; sourceTree = "<group>"; };
 		D753CEA92BE9DE04001C3A5D /* MutingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutingTests.swift; sourceTree = "<group>"; };
@@ -3370,6 +3375,7 @@
 		4C9054862A6AEB4500811EEC /* nostrdb */ = {
 			isa = PBXGroup;
 			children = (
+				D74EC84E2E1856AF0091DC51 /* NonCopyableLinkedList.swift */,
 				D733F9E42D92C75C00317B11 /* UnownedNdbNote.swift */,
 				D7F5630F2DEE71BB008509DE /* NdbFilter.swift */,
 				D74DEC892DA0A19800E69FA6 /* Ndb+.swift */,
@@ -5187,6 +5193,7 @@
 				4C3BEFD6281D995700B3DE84 /* ActionBarModel.swift in Sources */,
 				4C7D09762A0AF19E00943473 /* FillAndStroke.swift in Sources */,
 				4CA927612A290E340098A105 /* EventShell.swift in Sources */,
+				D74EC8502E1856B70091DC51 /* NonCopyableLinkedList.swift in Sources */,
 				4C363AA428296DEE006E126D /* SearchModel.swift in Sources */,
 				4C8D00CC29DF92DF0036AF10 /* Hashtags.swift in Sources */,
 				D74EA0942D2E77B9002290DD /* LoadableNostrEventView.swift in Sources */,
@@ -5679,6 +5686,7 @@
 				82D6FBB02CD99F7900C925F4 /* RelayConnection.swift in Sources */,
 				82D6FBB12CD99F7900C925F4 /* RelayLog.swift in Sources */,
 				82D6FBB22CD99F7900C925F4 /* Nostr.swift in Sources */,
+				D74EC8512E1856B70091DC51 /* NonCopyableLinkedList.swift in Sources */,
 				82D6FBB32CD99F7900C925F4 /* NostrFilter.swift in Sources */,
 				82D6FBB42CD99F7900C925F4 /* NostrResponse.swift in Sources */,
 				82D6FBB52CD99F7900C925F4 /* NostrEvent.swift in Sources */,
@@ -5979,6 +5987,7 @@
 				D73E5E612C6A97F4007EB227 /* ImageProcessing.swift in Sources */,
 				D73E5E622C6A97F4007EB227 /* BlurHashEncode.swift in Sources */,
 				D73E5E632C6A97F4007EB227 /* BlurHashDecode.swift in Sources */,
+				D74EC8522E1856B70091DC51 /* NonCopyableLinkedList.swift in Sources */,
 				D73E5F952C6AA753007EB227 /* FullScreenCarouselView.swift in Sources */,
 				D73E5E642C6A97F4007EB227 /* PostBox.swift in Sources */,
 				D73E5E652C6A97F4007EB227 /* KFOptionSetter+.swift in Sources */,
@@ -6420,6 +6429,7 @@
 				4CBB6F792B7311AA000477A4 /* error.c in Sources */,
 				4CBB6F7A2B7311AA000477A4 /* bech32_util.c in Sources */,
 				4CBB6F712B731184000477A4 /* bolt11.c in Sources */,
+				D74EC84F2E1856B70091DC51 /* NonCopyableLinkedList.swift in Sources */,
 				4CBB6F702B731179000477A4 /* invoice.c in Sources */,
 				4CBB6F6F2B73116B000477A4 /* content_parser.c in Sources */,
 				4CBB6F6E2B731113000477A4 /* block.c in Sources */,

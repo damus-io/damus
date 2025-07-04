@@ -765,49 +765,42 @@ func first_eref_mention(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> Mention<N
     guard let blockGroup = try? NdbBlockGroup.from(event: ev, using: ndb, and: keypair) else {
         return nil
     }
-
-    let blocks = blockGroup.blocks.filter { block in
-        guard case .mention(let mention) = block else {
-                return false
-            }
-
-        switch mention.bech32_type {
-        case .note, .nevent:
-            return true
-        default:
-            return false
-        }
-    }
     
-    /// MARK: - Preview
-    if let firstBlock = blocks.first,
-       case .mention(let mention) = firstBlock {
-        switch mention.bech32_type {
-        case .note:
-            let data = mention.bech32.note.event_id.as_data(size: 32)
-            return .note(NoteId(data))
-        case .nevent:
-            let data = mention.bech32.nevent.event_id.as_data(size: 32)
-            return .note(NoteId(data))
+    return try? blockGroup.forEachBlock({ index, block in
+        // Step 1: Filter
+        switch block {
+        case .mention(let mention):
+            switch mention.bech32_type {
+            case .note:
+                let data = mention.bech32.note.event_id.as_data(size: 32)
+                return .loopReturn(.note(NoteId(data)))
+            case .nevent:
+                let data = mention.bech32.nevent.event_id.as_data(size: 32)
+                return .loopReturn(.note(NoteId(data)))
+            default:
+                return .loopBreak
+            }
         default:
-            return nil
+            return .loopContinue
         }
-    }
-    return nil
+    })
 }
 
 func separate_invoices(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> [Invoice]? {
     guard let blockGroup = try? NdbBlockGroup.from(event: ev, using: ndb, and: keypair) else {
         return nil
     }
-    let invoiceBlocks: [Invoice] = blockGroup.blocks.reduce(into: []) { invoices, block in
-        guard case .invoice(let invoice) = block,
-              let invoice = invoice.as_invoice()
-        else {
-            return
+    let invoiceBlocks: [Invoice] = (try? blockGroup.reduce(initialResult: [Invoice](), { index, invoices, block in
+        switch block {
+        case .invoice(let invoice):
+            if let invoice = invoice.as_invoice() {
+                return .loopReturn(invoices + [invoice])
+            }
+        default:
+            break
         }
-        invoices.append(invoice)
-    }
+        return .loopContinue
+    })) ?? []
     return invoiceBlocks.isEmpty ? nil : invoiceBlocks
 }
 

@@ -74,13 +74,21 @@ func generate_local_notification_object(ndb: Ndb, from ev: NostrEvent, state: He
        state.settings.mention_notification,
        let blockGroup = try? NdbBlockGroup.from(event: ev, using: ndb, and: state.keypair)
     {
-        for case .mention(let mention) in blockGroup.blocks {
-            guard case .npub = mention.bech32_type,
-                  (memcmp(state.keypair.pubkey.id.bytes, mention.bech32.npub.pubkey, 32) == 0) else {
-                continue
+        let notification: LocalNotification? = try? blockGroup.forEachBlock({ index, block in
+            switch block {
+            case .mention(let mention):
+                guard case .npub = mention.bech32_type,
+                      (memcmp(state.keypair.pubkey.id.bytes, mention.bech32.npub.pubkey, 32) == 0) else {
+                    return .loopContinue
+                }
+                let content_preview = render_notification_content_preview(ndb: ndb, ev: ev, profiles: state.profiles, keypair: state.keypair)
+                return .loopReturn(LocalNotification(type: .mention, event: ev, target: .note(ev), content: content_preview))
+            default:
+                return .loopContinue
             }
-            let content_preview = render_notification_content_preview(ndb: ndb, ev: ev, profiles: state.profiles, keypair: state.keypair)
-            return LocalNotification(type: .mention, event: ev, target: .note(ev), content: content_preview)
+        })
+        if let notification {
+            return notification
         }
 
         if ev.referenced_ids.contains(where: { note_id in

@@ -328,11 +328,11 @@ struct NoteContentView: View {
                 guard let blockGroup = try? NdbBlockGroup.from(event: event, using: damus_state.ndb, and: damus_state.keypair) else {
                     return
                 }
-                for block in blockGroup.blocks {
+                let _: Int? = try? blockGroup.forEachBlock { index, block in
                     switch block {
                     case .mention(let m):
                         guard let typ = m.bech32_type else {
-                            continue
+                            return .loopContinue
                         }
                         switch typ {
                         case .nprofile:
@@ -343,18 +343,19 @@ struct NoteContentView: View {
                             if m.bech32.npub.matches_pubkey(pk: profile.pubkey) {
                                 load(force_artifacts: true)
                             }
-                        case .nevent: continue
-                        case .nrelay: continue
-                        case .nsec: continue
-                        case .note: continue
-                        case .naddr: continue
+                        case .nevent: return .loopContinue
+                        case .nrelay: return .loopContinue
+                        case .nsec: return .loopContinue
+                        case .note: return .loopContinue
+                        case .naddr: return .loopContinue
                         }
-                    case .text: return
-                    case .hashtag: return
-                    case .url: return
-                    case .invoice: return
-                    case .mention_index(_): return
+                    case .text: return .loopContinue
+                    case .hashtag: return .loopContinue
+                    case .url: return .loopContinue
+                    case .invoice: return .loopContinue
+                    case .mention_index(_): return .loopContinue
                     }
+                    return .loopContinue
                 }
             }
             .onAppear {
@@ -513,16 +514,21 @@ func separate_images(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> [MediaUrl]? 
     guard let blockGroup = try? NdbBlockGroup.from(event: ev, using: ndb, and: keypair) else {
         return nil
     }
-    let urlBlocks: [URL] = blockGroup.blocks.reduce(into: []) { urls, block in
-        guard case .url(let url) = block,
-              let parsed_url = URL(string: url.as_str()) else {
-            return
+    let urlBlocks: [URL] = (try? blockGroup.reduce(initialResult: Array<URL>()) { index, urls, block in
+        switch block {
+        case .url(let url):
+            guard let parsed_url = URL(string: url.as_str()) else {
+                return .loopContinue
+            }
+            
+            if classify_url(parsed_url).is_img != nil {
+                return .loopReturn(urls + [parsed_url])
+            }
+        default:
+            break
         }
-
-        if classify_url(parsed_url).is_img != nil {
-            urls.append(parsed_url)
-        }
-    }
+        return .loopContinue
+    }) ?? []
     let mediaUrls = urlBlocks.map { MediaUrl.image($0) }
     return mediaUrls.isEmpty ? nil : mediaUrls
 }
