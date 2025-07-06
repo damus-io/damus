@@ -84,6 +84,48 @@
     "%lld%%" : {
       "comment" : "Percentage of additional zap that should be sent to support Damus development."
     },
+    "♾️ Other" : {
+      "comment" : "Interest topic label"
+    },
+    "⚾️ Sports" : {
+      "comment" : "Interest topic label"
+    },
+    "✈️ Travel" : {
+      "comment" : "Interest topic label"
+    },
+    "🍱 Food" : {
+      "comment" : "Interest topic label"
+    },
+    "🎨 Art" : {
+      "comment" : "Interest topic label"
+    },
+    "🎶 Music" : {
+      "comment" : "Interest topic label"
+    },
+    "🏃 Health" : {
+      "comment" : "Interest topic label"
+    },
+    "🏛️ Politics" : {
+      "comment" : "Interest topic label"
+    },
+    "🏝️ Lifestyle" : {
+      "comment" : "Interest topic label"
+    },
+    "💻 Tech" : {
+      "comment" : "Interest topic label"
+    },
+    "📚 Humanities" : {
+      "comment" : "Interest topic label"
+    },
+    "🔭 Science" : {
+      "comment" : "Interest topic label"
+    },
+    "🛐 Religion" : {
+      "comment" : "Interest topic label"
+    },
+    "₿ Bitcoin" : {
+      "comment" : "Interest topic label"
+    },
     "1 month" : {
       "comment" : "A duration of 1 month to be shown to the user. Most likely in the context of how long they want to mute a piece of content for."
     },
@@ -410,6 +452,9 @@
     },
     "Content filters" : {
       "comment" : "Section title for content filtering/moderation configuration."
+    },
+    "Content settings" : {
+      "comment" : "Title for an onboarding screen showing user some content settings"
     },
     "Continue" : {
       "comment" : "Button to dismiss suggested users view and continue to the main app\nButton to proceed with LNURL payment process.\nContinue with bookmarks.\nContinue with deleting the user.\nContinue with the user-requested operation.\nPrompt to user to continue"
@@ -803,7 +848,7 @@
       "comment" : "Setting to hide wallet balance."
     },
     "Hide notes with #nsfw tags" : {
-      "comment" : "Setting to hide notes with the #nsfw (not safe for work) tags"
+      "comment" : "Setting to hide notes with not safe for work tags\nSetting to hide notes with the #nsfw (not safe for work) tags"
     },
     "Hide notifications that tag many profiles" : {
       "comment" : "Label for notification settings toggle that hides notifications that tag many people."
@@ -970,6 +1015,9 @@
     "MANUAL SETUP" : {
       "comment" : "Label for manual wallet setup."
     },
+    "Max weekly budget" : {
+      "comment" : "Label for setting the maximum weekly budget for Coinos wallet"
+    },
     "Maybe later" : {
       "comment" : "Text for button to disconnect from Nostr Wallet Connect lightning wallet."
     },
@@ -1040,7 +1088,7 @@
       "comment" : "Ask the user if they are new to Nostr"
     },
     "Next" : {
-      "comment" : "Button to continue with account creation."
+      "comment" : "Button to continue with account creation.\nNext button title"
     },
     "No" : {
       "comment" : "Do not discard changes.\nUser confirm No"
@@ -1164,7 +1212,7 @@
       }
     },
     "Notes with the #nsfw tag usually contains adult content or other \"Not safe for work\" content" : {
-      "comment" : "Section footer clarifying what #nsfw (not safe for work) tags mean"
+      "comment" : "Explanation of what NSFW means\nSection footer clarifying what #nsfw (not safe for work) tags mean"
     },
     "Nothing to see here. Check back later!" : {
       "comment" : "Indicates that there are no notes in the timeline to view."
@@ -1238,6 +1286,9 @@
     "Orange-pill" : {
       "comment" : "Button label that allows the user to start a direct message conversation with the user shown on-screen, to orange-pill them (i.e. help them to setup zaps)"
     },
+    "Other preferences" : {
+      "comment" : "Screen title for content preferences screen during onboarding"
+    },
     "Paid Relay" : {
       "comment" : "Text indicating that this is a paid relay."
     },
@@ -1286,6 +1337,9 @@
     "Please choose relays from the list below to filter the current feed:" : {
       "comment" : "Instructions on how to filter a specific timeline feed by choosing relay servers to filter on."
     },
+    "Please contact support" : {
+      "comment" : "Human readable error tip"
+    },
     "Please contact support for further help." : {
       "comment" : "Human readable tips for what to do for a failure to find the relay list"
     },
@@ -1315,6 +1369,9 @@
     },
     "Please make sure you have logged-in with your private key." : {
       "comment" : "Human readable tip for error"
+    },
+    "Please pick your interests. This will help us recommend accounts to follow." : {
+      "comment" : "Instruction for interest selection"
     },
     "Please try again later or contact support if the issue persists." : {
       "comment" : "Human readable tip for error"
@@ -1645,6 +1702,12 @@
     "Select default wallet" : {
       "comment" : "Prompt selection of user's default wallet"
     },
+    "Select your interests" : {
+      "comment" : "Title for a screen asking the user for interests"
+    },
+    "Select Your Interests" : {
+      "comment" : "Screen title for interest selection"
+    },
     "self" : {
       "comment" : "Part of a larger sentence 'Replying to self' in US English. 'self' indicates that the user is replying to themself and no one else."
     },
@@ -1699,6 +1762,9 @@
     "Show" : {
       "comment" : "Button to show a note which has been muted.\nToggle to show or hide user's secret account login key."
     },
+    "Show Bitcoin-heavy profile suggestions" : {
+      "comment" : "Setting label during onboarding"
+    },
     "Show general statuses" : {
       "comment" : "Settings toggle for enabling general user statuses"
     },
@@ -1743,6 +1809,9 @@
     },
     "SOFTWARE" : {
       "comment" : "Text label indicating which relay software is used to run this Nostr relay."
+    },
+    "Some profiles tend to have a lot of Bitcoin-related content alongside their topics of interest. Disable this setting if you prefer to filter out follow suggestions that frequently talk about Bitcoin." : {
+      "comment" : "Explanation label for the 'Show Bitcoin-heavy profile suggestions' onboarding toggle setting"
     },
     "Someone posted a note" : {
       "comment" : "Title label for push notification where someone posted a note"
@@ -1792,6 +1861,9 @@
     "Successfully synced" : {
       "comment" : "Label indicating success in syncing notification preferences"
     },
+    "Successfully updated" : {
+      "comment" : "Label indicating success in updating budget"
+    },
     "Suggested hashtags" : {
       "comment" : "A label indicating that the items below it are suggested hashtags"
     },
@@ -1839,6 +1911,9 @@
     },
     "The camera was not capable of scanning the requested codes." : {
       "comment" : "Camera's bad output error label"
+    },
+    "The maximum amount of funds that are allowed to be sent out from this wallet each week." : {
+      "comment" : "Description explaining the purpose of the 'Max weekly budget' setting for Coinos one-click setup wallets"
     },
     "The payment request could not be made to your wallet provider." : {
       "comment" : "A human-readable error message"
@@ -1957,6 +2032,9 @@
     "Try restarting your wallet or contacting support if the problem persists." : {
       "comment" : "Tip for internal error"
     },
+    "Tweak these settings to better match your preferences" : {
+      "comment" : "Instructions for content preferences screen during onboarding"
+    },
     "Type %@ to delete" : {
       "comment" : "Text field prompt asking user to type DELETE in all caps to confirm that they want to proceed with deleting their account."
     },
@@ -1968,6 +2046,9 @@
     },
     "Undistract mode" : {
       "comment" : "Developer mode setting to scramble text and images to avoid distractions during development."
+    },
+    "Unexpected error loading user suggestions" : {
+      "comment" : "Human readable error label"
     },
     "Unfollow" : {
       "comment" : "Button to unfollow a user."
@@ -1996,8 +2077,14 @@
     "Untitled" : {
       "comment" : "Title of follow list event if it is untitled.\nTitle of longform event if it is untitled."
     },
+    "Untitled Follow Pack" : {
+      "comment" : "Default title for a follow pack if no title is specified"
+    },
     "Update" : {
       "comment" : "Update button text for updating image url."
+    },
+    "Updating" : {
+      "comment" : "Label indicating budget update is in progress"
     },
     "Upload" : {
       "comment" : "Button to proceed with uploading."

@@ -690,6 +690,11 @@ Text for button to conect to Nostr Wallet Connect lightning wallet.</note>
         <target>Content filters</target>
         <note>Section title for content filtering/moderation configuration.</note>
       </trans-unit>
+      <trans-unit id="Content settings" xml:space="preserve">
+        <source>Content settings</source>
+        <target>Content settings</target>
+        <note>Title for an onboarding screen showing user some content settings</note>
+      </trans-unit>
       <trans-unit id="Continue" xml:space="preserve">
         <source>Continue</source>
         <target>Continue</target>
@@ -1361,7 +1366,8 @@ This is my first post on Damus, I am happy to meet you all 🤙. What’s up?
       <trans-unit id="Hide notes with #nsfw tags" xml:space="preserve">
         <source>Hide notes with #nsfw tags</source>
         <target>Hide notes with #nsfw tags</target>
-        <note>Setting to hide notes with the #nsfw (not safe for work) tags</note>
+        <note>Setting to hide notes with not safe for work tags
+Setting to hide notes with the #nsfw (not safe for work) tags</note>
       </trans-unit>
       <trans-unit id="Hide notifications that tag many profiles" xml:space="preserve">
         <source>Hide notifications that tag many profiles</source>
@@ -1637,6 +1643,11 @@ Sidebar menu label to sign out of the account.</note>
         <target>Manage subscription</target>
         <note>Button to take user to manage Damus Purple subscription</note>
       </trans-unit>
+      <trans-unit id="Max weekly budget" xml:space="preserve">
+        <source>Max weekly budget</source>
+        <target>Max weekly budget</target>
+        <note>Label for setting the maximum weekly budget for Coinos wallet</note>
+      </trans-unit>
       <trans-unit id="Maybe later" xml:space="preserve">
         <source>Maybe later</source>
         <target>Maybe later</target>
@@ -1774,7 +1785,8 @@ Text label indicating that there is no NIP-11 relay software version information
       <trans-unit id="Next" xml:space="preserve">
         <source>Next</source>
         <target>Next</target>
-        <note>Button to continue with account creation.</note>
+        <note>Button to continue with account creation.
+Next button title</note>
       </trans-unit>
       <trans-unit id="No" xml:space="preserve">
         <source>No</source>
@@ -1933,7 +1945,8 @@ Label for filter for seeing only notes (instead of notes and replies).</note>
       <trans-unit id="Notes with the #nsfw tag usually contains adult content or other &quot;Not safe for work&quot; content" xml:space="preserve">
         <source>Notes with the #nsfw tag usually contains adult content or other "Not safe for work" content</source>
         <target>Notes with the #nsfw tag usually contains adult content or other "Not safe for work" content</target>
-        <note>Section footer clarifying what #nsfw (not safe for work) tags mean</note>
+        <note>Explanation of what NSFW means
+Section footer clarifying what #nsfw (not safe for work) tags mean</note>
       </trans-unit>
       <trans-unit id="Nothing to see here. Check back later!" xml:space="preserve">
         <source>Nothing to see here. Check back later!</source>
@@ -2032,6 +2045,11 @@ Button label to dismiss an error dialog</note>
         <target>Orange-pill</target>
         <note>Button label that allows the user to start a direct message conversation with the user shown on-screen, to orange-pill them (i.e. help them to setup zaps)</note>
       </trans-unit>
+      <trans-unit id="Other preferences" xml:space="preserve">
+        <source>Other preferences</source>
+        <target>Other preferences</target>
+        <note>Screen title for content preferences screen during onboarding</note>
+      </trans-unit>
       <trans-unit id="Paid Relay" xml:space="preserve">
         <source>Paid Relay</source>
         <target>Paid Relay</target>
@@ -2114,6 +2132,11 @@ Section title for deleting the user</note>
         <target>Please choose relays from the list below to filter the current feed:</target>
         <note>Instructions on how to filter a specific timeline feed by choosing relay servers to filter on.</note>
       </trans-unit>
+      <trans-unit id="Please contact support" xml:space="preserve">
+        <source>Please contact support</source>
+        <target>Please contact support</target>
+        <note>Human readable error tip</note>
+      </trans-unit>
       <trans-unit id="Please contact support for further help." xml:space="preserve">
         <source>Please contact support for further help.</source>
         <target>Please contact support for further help.</target>
@@ -2163,6 +2186,11 @@ Section title for deleting the user</note>
         <source>Please make sure you have logged-in with your private key.</source>
         <target>Please make sure you have logged-in with your private key.</target>
         <note>Human readable tip for error</note>
+      </trans-unit>
+      <trans-unit id="Please pick your interests. This will help us recommend accounts to follow." xml:space="preserve">
+        <source>Please pick your interests. This will help us recommend accounts to follow.</source>
+        <target>Please pick your interests. This will help us recommend accounts to follow.</target>
+        <note>Instruction for interest selection</note>
       </trans-unit>
       <trans-unit id="Please try again later or contact support if the issue persists." xml:space="preserve">
         <source>Please try again later or contact support if the issue persists.</source>
@@ -2690,6 +2718,11 @@ Title of the text field for searching.</note>
         <target>Secret Account Login Key</target>
         <note>Section title for user's secret account login key.</note>
       </trans-unit>
+      <trans-unit id="Select Your Interests" xml:space="preserve">
+        <source>Select Your Interests</source>
+        <target>Select Your Interests</target>
+        <note>Screen title for interest selection</note>
+      </trans-unit>
       <trans-unit id="Select a Lightning wallet" xml:space="preserve">
         <source>Select a Lightning wallet</source>
         <target>Select a Lightning wallet</target>
@@ -2704,6 +2737,11 @@ Title of the text field for searching.</note>
         <source>Select default wallet</source>
         <target>Select default wallet</target>
         <note>Prompt selection of user's default wallet</note>
+      </trans-unit>
+      <trans-unit id="Select your interests" xml:space="preserve">
+        <source>Select your interests</source>
+        <target>Select your interests</target>
+        <note>Title for a screen asking the user for interests</note>
       </trans-unit>
       <trans-unit id="Send" xml:space="preserve">
         <source>Send</source>
@@ -2786,6 +2824,11 @@ Save button text for saving profile status settings.</note>
         <note>Button to show a note which has been muted.
 Toggle to show or hide user's secret account login key.</note>
       </trans-unit>
+      <trans-unit id="Show Bitcoin-heavy profile suggestions" xml:space="preserve">
+        <source>Show Bitcoin-heavy profile suggestions</source>
+        <target>Show Bitcoin-heavy profile suggestions</target>
+        <note>Setting label during onboarding</note>
+      </trans-unit>
       <trans-unit id="Show general statuses" xml:space="preserve">
         <source>Show general statuses</source>
         <target>Show general statuses</target>
@@ -2856,6 +2899,11 @@ Button to show more of a long profile description.</note>
         <source>Skip</source>
         <target>Skip</target>
         <note>Button to dismiss the suggested users screen</note>
+      </trans-unit>
+      <trans-unit id="Some profiles tend to have a lot of Bitcoin-related content alongside their topics of interest. Disable this setting if you prefer to filter out follow suggestions that frequently talk about Bitcoin." xml:space="preserve">
+        <source>Some profiles tend to have a lot of Bitcoin-related content alongside their topics of interest. Disable this setting if you prefer to filter out follow suggestions that frequently talk about Bitcoin.</source>
+        <target>Some profiles tend to have a lot of Bitcoin-related content alongside their topics of interest. Disable this setting if you prefer to filter out follow suggestions that frequently talk about Bitcoin.</target>
+        <note>Explanation label for the 'Show Bitcoin-heavy profile suggestions' onboarding toggle setting</note>
       </trans-unit>
       <trans-unit id="Someone posted a note" xml:space="preserve">
         <source>Someone posted a note</source>
@@ -2937,6 +2985,11 @@ Section header for Universe/Search spam</note>
         <source>Successfully synced</source>
         <target>Successfully synced</target>
         <note>Label indicating success in syncing notification preferences</note>
+      </trans-unit>
+      <trans-unit id="Successfully updated" xml:space="preserve">
+        <source>Successfully updated</source>
+        <target>Successfully updated</target>
+        <note>Label indicating success in updating budget</note>
       </trans-unit>
       <trans-unit id="Suggested hashtags" xml:space="preserve">
         <source>Suggested hashtags</source>
@@ -3026,6 +3079,11 @@ Enjoy!</target>
         <source>The camera was not capable of scanning the requested codes.</source>
         <target>The camera was not capable of scanning the requested codes.</target>
         <note>Camera's bad output error label</note>
+      </trans-unit>
+      <trans-unit id="The maximum amount of funds that are allowed to be sent out from this wallet each week." xml:space="preserve">
+        <source>The maximum amount of funds that are allowed to be sent out from this wallet each week.</source>
+        <target>The maximum amount of funds that are allowed to be sent out from this wallet each week.</target>
+        <note>Description explaining the purpose of the 'Max weekly budget' setting for Coinos one-click setup wallets</note>
       </trans-unit>
       <trans-unit id="The payment request could not be made to your wallet provider." xml:space="preserve">
         <source>The payment request could not be made to your wallet provider.</source>
@@ -3222,6 +3280,11 @@ Section header for text and appearance settings</note>
         <target>Try restarting your wallet or contacting support if the problem persists.</target>
         <note>Tip for internal error</note>
       </trans-unit>
+      <trans-unit id="Tweak these settings to better match your preferences" xml:space="preserve">
+        <source>Tweak these settings to better match your preferences</source>
+        <target>Tweak these settings to better match your preferences</target>
+        <note>Instructions for content preferences screen during onboarding</note>
+      </trans-unit>
       <trans-unit id="Type %@ to delete" xml:space="preserve">
         <source>Type %@ to delete</source>
         <target>Type %@ to delete</target>
@@ -3248,6 +3311,11 @@ Example URL to LibreTranslate server</note>
         <source>Undistract mode</source>
         <target>Undistract mode</target>
         <note>Developer mode setting to scramble text and images to avoid distractions during development.</note>
+      </trans-unit>
+      <trans-unit id="Unexpected error loading user suggestions" xml:space="preserve">
+        <source>Unexpected error loading user suggestions</source>
+        <target>Unexpected error loading user suggestions</target>
+        <note>Human readable error label</note>
       </trans-unit>
       <trans-unit id="Unfollow" xml:space="preserve">
         <source>Unfollow</source>
@@ -3295,10 +3363,20 @@ Example URL to LibreTranslate server</note>
         <note>Title of follow list event if it is untitled.
 Title of longform event if it is untitled.</note>
       </trans-unit>
+      <trans-unit id="Untitled Follow Pack" xml:space="preserve">
+        <source>Untitled Follow Pack</source>
+        <target>Untitled Follow Pack</target>
+        <note>Default title for a follow pack if no title is specified</note>
+      </trans-unit>
       <trans-unit id="Update" xml:space="preserve">
         <source>Update</source>
         <target>Update</target>
         <note>Update button text for updating image url.</note>
+      </trans-unit>
+      <trans-unit id="Updating" xml:space="preserve">
+        <source>Updating</source>
+        <target>Updating</target>
+        <note>Label indicating budget update is in progress</note>
       </trans-unit>
       <trans-unit id="Upload" xml:space="preserve">
         <source>Upload</source>
@@ -3952,6 +4030,76 @@ String indicating that a given timestamp just occurred</note>
         <source>%@ and %@ zapped you</source>
         <target>%@ and %@ zapped you</target>
         <note>Notification that 2 users zapped the current user's profile</note>
+      </trans-unit>
+      <trans-unit id="₿ Bitcoin" xml:space="preserve">
+        <source>₿ Bitcoin</source>
+        <target>₿ Bitcoin</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="♾️ Other" xml:space="preserve">
+        <source>♾️ Other</source>
+        <target>♾️ Other</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="⚾️ Sports" xml:space="preserve">
+        <source>⚾️ Sports</source>
+        <target>⚾️ Sports</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="✈️ Travel" xml:space="preserve">
+        <source>✈️ Travel</source>
+        <target>✈️ Travel</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="🍱 Food" xml:space="preserve">
+        <source>🍱 Food</source>
+        <target>🍱 Food</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="🎨 Art" xml:space="preserve">
+        <source>🎨 Art</source>
+        <target>🎨 Art</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="🎶 Music" xml:space="preserve">
+        <source>🎶 Music</source>
+        <target>🎶 Music</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="🏃 Health" xml:space="preserve">
+        <source>🏃 Health</source>
+        <target>🏃 Health</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="🏛️ Politics" xml:space="preserve">
+        <source>🏛️ Politics</source>
+        <target>🏛️ Politics</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="🏝️ Lifestyle" xml:space="preserve">
+        <source>🏝️ Lifestyle</source>
+        <target>🏝️ Lifestyle</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="💻 Tech" xml:space="preserve">
+        <source>💻 Tech</source>
+        <target>💻 Tech</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="📚 Humanities" xml:space="preserve">
+        <source>📚 Humanities</source>
+        <target>📚 Humanities</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="🔭 Science" xml:space="preserve">
+        <source>🔭 Science</source>
+        <target>🔭 Science</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="🛐 Religion" xml:space="preserve">
+        <source>🛐 Religion</source>
+        <target>🛐 Religion</target>
+        <note>Interest topic label</note>
       </trans-unit>
     </body>
   </file>
@@ -5075,6 +5223,11 @@ Text for button to conect to Nostr Wallet Connect lightning wallet.</note>
         <target state="new">Content filters</target>
         <note>Section title for content filtering/moderation configuration.</note>
       </trans-unit>
+      <trans-unit id="Content settings" xml:space="preserve">
+        <source>Content settings</source>
+        <target state="new">Content settings</target>
+        <note>Title for an onboarding screen showing user some content settings</note>
+      </trans-unit>
       <trans-unit id="Continue" xml:space="preserve">
         <source>Continue</source>
         <target state="new">Continue</target>
@@ -5746,7 +5899,8 @@ This is my first post on Damus, I am happy to meet you all 🤙. What’s up?
       <trans-unit id="Hide notes with #nsfw tags" xml:space="preserve">
         <source>Hide notes with #nsfw tags</source>
         <target state="new">Hide notes with #nsfw tags</target>
-        <note>Setting to hide notes with the #nsfw (not safe for work) tags</note>
+        <note>Setting to hide notes with not safe for work tags
+Setting to hide notes with the #nsfw (not safe for work) tags</note>
       </trans-unit>
       <trans-unit id="Hide notifications that tag many profiles" xml:space="preserve">
         <source>Hide notifications that tag many profiles</source>
@@ -6022,6 +6176,11 @@ Sidebar menu label to sign out of the account.</note>
         <target state="new">Manage subscription</target>
         <note>Button to take user to manage Damus Purple subscription</note>
       </trans-unit>
+      <trans-unit id="Max weekly budget" xml:space="preserve">
+        <source>Max weekly budget</source>
+        <target state="new">Max weekly budget</target>
+        <note>Label for setting the maximum weekly budget for Coinos wallet</note>
+      </trans-unit>
       <trans-unit id="Maybe later" xml:space="preserve">
         <source>Maybe later</source>
         <target state="new">Maybe later</target>
@@ -6154,7 +6313,8 @@ Text label indicating that there is no NIP-11 relay software version information
       <trans-unit id="Next" xml:space="preserve">
         <source>Next</source>
         <target state="new">Next</target>
-        <note>Button to continue with account creation.</note>
+        <note>Button to continue with account creation.
+Next button title</note>
       </trans-unit>
       <trans-unit id="No" xml:space="preserve">
         <source>No</source>
@@ -6313,7 +6473,8 @@ Label for filter for seeing only notes (instead of notes and replies).</note>
       <trans-unit id="Notes with the #nsfw tag usually contains adult content or other &quot;Not safe for work&quot; content" xml:space="preserve">
         <source>Notes with the #nsfw tag usually contains adult content or other "Not safe for work" content</source>
         <target state="new">Notes with the #nsfw tag usually contains adult content or other "Not safe for work" content</target>
-        <note>Section footer clarifying what #nsfw (not safe for work) tags mean</note>
+        <note>Explanation of what NSFW means
+Section footer clarifying what #nsfw (not safe for work) tags mean</note>
       </trans-unit>
       <trans-unit id="Nothing to see here. Check back later!" xml:space="preserve">
         <source>Nothing to see here. Check back later!</source>
@@ -6412,6 +6573,11 @@ Button label to dismiss an error dialog</note>
         <target state="new">Orange-pill</target>
         <note>Button label that allows the user to start a direct message conversation with the user shown on-screen, to orange-pill them (i.e. help them to setup zaps)</note>
       </trans-unit>
+      <trans-unit id="Other preferences" xml:space="preserve">
+        <source>Other preferences</source>
+        <target state="new">Other preferences</target>
+        <note>Screen title for content preferences screen during onboarding</note>
+      </trans-unit>
       <trans-unit id="Paid Relay" xml:space="preserve">
         <source>Paid Relay</source>
         <target state="new">Paid Relay</target>
@@ -6494,6 +6660,11 @@ Section title for deleting the user</note>
         <target state="new">Please choose relays from the list below to filter the current feed:</target>
         <note>Instructions on how to filter a specific timeline feed by choosing relay servers to filter on.</note>
       </trans-unit>
+      <trans-unit id="Please contact support" xml:space="preserve">
+        <source>Please contact support</source>
+        <target state="new">Please contact support</target>
+        <note>Human readable error tip</note>
+      </trans-unit>
       <trans-unit id="Please contact support for further help." xml:space="preserve">
         <source>Please contact support for further help.</source>
         <target state="new">Please contact support for further help.</target>
@@ -6543,6 +6714,11 @@ Section title for deleting the user</note>
         <source>Please make sure you have logged-in with your private key.</source>
         <target state="new">Please make sure you have logged-in with your private key.</target>
         <note>Human readable tip for error</note>
+      </trans-unit>
+      <trans-unit id="Please pick your interests. This will help us recommend accounts to follow." xml:space="preserve">
+        <source>Please pick your interests. This will help us recommend accounts to follow.</source>
+        <target state="new">Please pick your interests. This will help us recommend accounts to follow.</target>
+        <note>Instruction for interest selection</note>
       </trans-unit>
       <trans-unit id="Please try again later or contact support if the issue persists." xml:space="preserve">
         <source>Please try again later or contact support if the issue persists.</source>
@@ -7060,6 +7236,11 @@ Title of the text field for searching.</note>
         <target state="new">Secret Account Login Key</target>
         <note>Section title for user's secret account login key.</note>
       </trans-unit>
+      <trans-unit id="Select Your Interests" xml:space="preserve">
+        <source>Select Your Interests</source>
+        <target state="new">Select Your Interests</target>
+        <note>Screen title for interest selection</note>
+      </trans-unit>
       <trans-unit id="Select a Lightning wallet" xml:space="preserve">
         <source>Select a Lightning wallet</source>
         <target state="new">Select a Lightning wallet</target>
@@ -7074,6 +7255,11 @@ Title of the text field for searching.</note>
         <source>Select default wallet</source>
         <target state="new">Select default wallet</target>
         <note>Prompt selection of user's default wallet</note>
+      </trans-unit>
+      <trans-unit id="Select your interests" xml:space="preserve">
+        <source>Select your interests</source>
+        <target state="new">Select your interests</target>
+        <note>Title for a screen asking the user for interests</note>
       </trans-unit>
       <trans-unit id="Send" xml:space="preserve">
         <source>Send</source>
@@ -7166,6 +7352,11 @@ Save button text for saving profile status settings.</note>
         <note>Button to show a note which has been muted.
 Toggle to show or hide user's secret account login key.</note>
       </trans-unit>
+      <trans-unit id="Show Bitcoin-heavy profile suggestions" xml:space="preserve">
+        <source>Show Bitcoin-heavy profile suggestions</source>
+        <target state="new">Show Bitcoin-heavy profile suggestions</target>
+        <note>Setting label during onboarding</note>
+      </trans-unit>
       <trans-unit id="Show general statuses" xml:space="preserve">
         <source>Show general statuses</source>
         <target state="new">Show general statuses</target>
@@ -7236,6 +7427,11 @@ Button to show more of a long profile description.</note>
         <source>Skip</source>
         <target state="new">Skip</target>
         <note>Button to dismiss the suggested users screen</note>
+      </trans-unit>
+      <trans-unit id="Some profiles tend to have a lot of Bitcoin-related content alongside their topics of interest. Disable this setting if you prefer to filter out follow suggestions that frequently talk about Bitcoin." xml:space="preserve">
+        <source>Some profiles tend to have a lot of Bitcoin-related content alongside their topics of interest. Disable this setting if you prefer to filter out follow suggestions that frequently talk about Bitcoin.</source>
+        <target state="new">Some profiles tend to have a lot of Bitcoin-related content alongside their topics of interest. Disable this setting if you prefer to filter out follow suggestions that frequently talk about Bitcoin.</target>
+        <note>Explanation label for the 'Show Bitcoin-heavy profile suggestions' onboarding toggle setting</note>
       </trans-unit>
       <trans-unit id="Someone posted a note" xml:space="preserve">
         <source>Someone posted a note</source>
@@ -7317,6 +7513,11 @@ Section header for Universe/Search spam</note>
         <source>Successfully synced</source>
         <target state="new">Successfully synced</target>
         <note>Label indicating success in syncing notification preferences</note>
+      </trans-unit>
+      <trans-unit id="Successfully updated" xml:space="preserve">
+        <source>Successfully updated</source>
+        <target state="new">Successfully updated</target>
+        <note>Label indicating success in updating budget</note>
       </trans-unit>
       <trans-unit id="Suggested hashtags" xml:space="preserve">
         <source>Suggested hashtags</source>
@@ -7406,6 +7607,11 @@ Enjoy!</target>
         <source>The camera was not capable of scanning the requested codes.</source>
         <target state="new">The camera was not capable of scanning the requested codes.</target>
         <note>Camera's bad output error label</note>
+      </trans-unit>
+      <trans-unit id="The maximum amount of funds that are allowed to be sent out from this wallet each week." xml:space="preserve">
+        <source>The maximum amount of funds that are allowed to be sent out from this wallet each week.</source>
+        <target state="new">The maximum amount of funds that are allowed to be sent out from this wallet each week.</target>
+        <note>Description explaining the purpose of the 'Max weekly budget' setting for Coinos one-click setup wallets</note>
       </trans-unit>
       <trans-unit id="The payment request could not be made to your wallet provider." xml:space="preserve">
         <source>The payment request could not be made to your wallet provider.</source>
@@ -7602,6 +7808,11 @@ Section header for text and appearance settings</note>
         <target state="new">Try restarting your wallet or contacting support if the problem persists.</target>
         <note>Tip for internal error</note>
       </trans-unit>
+      <trans-unit id="Tweak these settings to better match your preferences" xml:space="preserve">
+        <source>Tweak these settings to better match your preferences</source>
+        <target state="new">Tweak these settings to better match your preferences</target>
+        <note>Instructions for content preferences screen during onboarding</note>
+      </trans-unit>
       <trans-unit id="Type %@ to delete" xml:space="preserve">
         <source>Type %@ to delete</source>
         <target state="new">Type %@ to delete</target>
@@ -7628,6 +7839,11 @@ Example URL to LibreTranslate server</note>
         <source>Undistract mode</source>
         <target state="new">Undistract mode</target>
         <note>Developer mode setting to scramble text and images to avoid distractions during development.</note>
+      </trans-unit>
+      <trans-unit id="Unexpected error loading user suggestions" xml:space="preserve">
+        <source>Unexpected error loading user suggestions</source>
+        <target state="new">Unexpected error loading user suggestions</target>
+        <note>Human readable error label</note>
       </trans-unit>
       <trans-unit id="Unfollow" xml:space="preserve">
         <source>Unfollow</source>
@@ -7675,10 +7891,20 @@ Example URL to LibreTranslate server</note>
         <note>Title of follow list event if it is untitled.
 Title of longform event if it is untitled.</note>
       </trans-unit>
+      <trans-unit id="Untitled Follow Pack" xml:space="preserve">
+        <source>Untitled Follow Pack</source>
+        <target state="new">Untitled Follow Pack</target>
+        <note>Default title for a follow pack if no title is specified</note>
+      </trans-unit>
       <trans-unit id="Update" xml:space="preserve">
         <source>Update</source>
         <target state="new">Update</target>
         <note>Update button text for updating image url.</note>
+      </trans-unit>
+      <trans-unit id="Updating" xml:space="preserve">
+        <source>Updating</source>
+        <target state="new">Updating</target>
+        <note>Label indicating budget update is in progress</note>
       </trans-unit>
       <trans-unit id="Upload" xml:space="preserve">
         <source>Upload</source>
@@ -8197,6 +8423,76 @@ String indicating that a given timestamp just occurred</note>
         <source>you</source>
         <target state="new">you</target>
         <note>You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself.</note>
+      </trans-unit>
+      <trans-unit id="₿ Bitcoin" xml:space="preserve">
+        <source>₿ Bitcoin</source>
+        <target state="new">₿ Bitcoin</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="♾️ Other" xml:space="preserve">
+        <source>♾️ Other</source>
+        <target state="new">♾️ Other</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="⚾️ Sports" xml:space="preserve">
+        <source>⚾️ Sports</source>
+        <target state="new">⚾️ Sports</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="✈️ Travel" xml:space="preserve">
+        <source>✈️ Travel</source>
+        <target state="new">✈️ Travel</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="🍱 Food" xml:space="preserve">
+        <source>🍱 Food</source>
+        <target state="new">🍱 Food</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="🎨 Art" xml:space="preserve">
+        <source>🎨 Art</source>
+        <target state="new">🎨 Art</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="🎶 Music" xml:space="preserve">
+        <source>🎶 Music</source>
+        <target state="new">🎶 Music</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="🏃 Health" xml:space="preserve">
+        <source>🏃 Health</source>
+        <target state="new">🏃 Health</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="🏛️ Politics" xml:space="preserve">
+        <source>🏛️ Politics</source>
+        <target state="new">🏛️ Politics</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="🏝️ Lifestyle" xml:space="preserve">
+        <source>🏝️ Lifestyle</source>
+        <target state="new">🏝️ Lifestyle</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="💻 Tech" xml:space="preserve">
+        <source>💻 Tech</source>
+        <target state="new">💻 Tech</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="📚 Humanities" xml:space="preserve">
+        <source>📚 Humanities</source>
+        <target state="new">📚 Humanities</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="🔭 Science" xml:space="preserve">
+        <source>🔭 Science</source>
+        <target state="new">🔭 Science</target>
+        <note>Interest topic label</note>
+      </trans-unit>
+      <trans-unit id="🛐 Religion" xml:space="preserve">
+        <source>🛐 Religion</source>
+        <target state="new">🛐 Religion</target>
+        <note>Interest topic label</note>
       </trans-unit>
     </body>
   </file>
