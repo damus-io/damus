@@ -62,6 +62,9 @@ class damusUITests: XCTestCase {
             try self.login()
         }
 
+        app.buttons[AID.onboarding_interest_option_button.rawValue].tapIfExists(timeout: 5)
+        app.buttons[AID.onboarding_interest_page_next_page.rawValue].tapIfExists(timeout: 5)
+        app.buttons[AID.onboarding_content_settings_page_next_page.rawValue].tapIfExists(timeout: 5)
         app.buttons[AID.onboarding_sheet_skip_button.rawValue].tapIfExists(timeout: 5)
         app.buttons[AID.post_composer_cancel_button.rawValue].tapIfExists(timeout: 5)
     }
