@@ -52,6 +52,7 @@ extension OnboardingSuggestionsView {
                     .disabled(!isNextEnabled)
                     .opacity(isNextEnabled ? 1.0 : 0.5)
                     .padding([.leading, .trailing, .bottom])
+                    .accessibilityIdentifier(AppAccessibilityIdentifiers.onboarding_interest_page_next_page.rawValue)
                 }
                 .padding()
             }
@@ -82,6 +83,7 @@ extension OnboardingSuggestionsView {
                             selectedInterests.insert(interest)
                         }
                     }
+                    .accessibilityIdentifier(AppAccessibilityIdentifiers.onboarding_interest_option_button.rawValue)
                     .disabled(disabled)
                     .opacity(disabled ? 0.5 : 1.0)
                 }
