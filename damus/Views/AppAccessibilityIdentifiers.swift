@@ -28,6 +28,15 @@ enum AppAccessibilityIdentifiers: String {
     // MARK: Onboarding
     // Prefix: `onboarding`
     
+    /// Any interest option button on the "select your interests" page during onboarding
+    case onboarding_interest_option_button
+    
+    /// The "next" button on the onboarding interest page
+    case onboarding_interest_page_next_page
+    
+    /// The "next" button on the onboarding content settings page
+    case onboarding_content_settings_page_next_page
+    
     /// The skip button on the onboarding sheet
     case onboarding_sheet_skip_button
     
