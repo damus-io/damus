@@ -162,6 +162,7 @@ class CarouselModel: ObservableObject {
             // Upon updating information, update the carousel fill size if the size for the current url has changed
             if oldValue[current_url] != media_size_information[current_url] {
                 self.refresh_current_item_fill()
+                self.refresh_first_item_height()
             }
         }
     }
@@ -186,6 +187,13 @@ class CarouselModel: ObservableObject {
     ///   and is automatically updated upon changes to these properties.
     @Published private(set) var current_item_fill: ImageFill?
     
+    /// Holds the ideal fill dimensions for the first item in the carousel.
+    /// This is used to maintain a consistent height for the carousel when swiping between images.
+    /// **Usage note:** This property is automatically updated when other properties are set, and should not be set directly.
+    /// **Implementation note:** This property ensures the carousel maintains a consistent height based on the first image,
+    /// preventing the UI from "jumping" when swiping between images of different aspect ratios.
+    @Published private(set) var first_image_fill: ImageFill?
+    
     
     // MARK: Initialization and de-initialization
 
@@ -207,6 +215,7 @@ class CarouselModel: ObservableObject {
         self.observe_video_sizes()
         Task {
             self.refresh_current_item_fill()
+            self.refresh_first_item_height()
         }
     }
     
@@ -241,10 +250,17 @@ class CarouselModel: ObservableObject {
     /// **Usage note:** This is private, do not call this directly from outside the class.
     /// **Implementation note:** This should be called using `didSet` observers on properties that affect the fill
     private func refresh_current_item_fill() {
-        if let current_url,
-           let item_size = self.media_size_information[current_url],
+        self.current_item_fill = self.compute_item_fill(url: current_url)
+    }
+    
+    /// Computes the image fill properties for a given URL without side effects.
+    /// This is a pure function that calculates the appropriate fill dimensions based on image size and container constraints.
+    /// **Usage note:** This is a helper method used by both `refresh_current_item_fill` and `refresh_first_item_height`.
+    private func compute_item_fill(url: URL?) -> ImageFill? {
+        if let url,
+           let item_size = self.media_size_information[url],
            let geo_size {
-            self.current_item_fill = ImageFill.calculate_image_fill(
+            return ImageFill.calculate_image_fill(
                 geo_size: geo_size,
                 img_size: item_size,
                 maxHeight: self.max_height,
@@ -252,8 +268,25 @@ class CarouselModel: ObservableObject {
             )
         }
         else {
-            self.current_item_fill = nil    // Not enough information to compute the proper fill. Default to nil
+            return nil    // Not enough information to compute the proper fill. Default to nil
         }
+    }
+    
+    /// This function refreshes the first item height based on the current state of the model
+    /// **Usage note:** This is private, do not call this directly from outside the class.
+    /// **Implementation note:** This should be called using `didSet` observers on properties that affect the height.
+    /// When the first image dimensions change, this ensures the carousel maintains consistent dimensions.
+    private func refresh_first_item_height() {
+        self.first_image_fill = self.compute_first_item_fill()
+    }
+    
+    /// Computes the first item fill with no side-effects.
+    /// **Usage note:** Not to be used outside the class. Use the `first_image_fill` property instead.
+    /// **Implementation note:** This retrieves the first URL from the carousel and computes its fill properties
+    /// to establish a consistent height for the entire carousel.
+    private func compute_first_item_fill() -> ImageFill? {
+        guard let first_url = urls[safe: 0] else { return nil }
+        return self.compute_item_fill(url: first_url.url)
     }
 }
 
@@ -286,13 +319,15 @@ struct ImageCarousel<Content: View>: View {
         self.content = content
     }
     
-    var filling: Bool {
-        model.current_item_fill?.filling == true
-    }
+    /// Determines if the image should fill its container.
+    /// Always returns true to ensure images consistently fill the width of the container.
+    /// This simplifies the layout behavior and prevents inconsistent sizing between carousel items.
+    var filling: Bool { true }
     
     var height: CGFloat {
-        // Use the calculated fill height if available, otherwise use the default fill height
-        model.current_item_fill?.height ?? model.default_fill_height
+        // Use the first image height (to prevent height from jumping when swiping), then default to the default fill height
+        // This prioritization ensures consistent carousel height regardless of which image is currently displayed
+        model.first_image_fill?.height ?? model.default_fill_height
     }
     
     func Placeholder(url: URL, geo_size: CGSize, num_urls: Int) -> some View {
@@ -376,6 +411,7 @@ struct ImageCarousel<Content: View>: View {
         }
         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
         .frame(height: height)
+        .clipped() // Prevents content from overflowing the frame, ensuring clean edges in the carousel
         .onChange(of: model.selectedIndex) { value in
             model.selectedIndex = value
         }
