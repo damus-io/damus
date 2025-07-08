@@ -591,6 +591,11 @@ int ndb_filter_end(struct ndb_filter *filter)
 	size_t orig_size;
 #endif
 	size_t data_len, elem_len;
+	unsigned char *rel;
+
+	assert(filter);
+	assert(filter->elem_buf.start);
+
 	if (filter->finalized == 1)
 		return 0;
 
@@ -609,7 +614,10 @@ int ndb_filter_end(struct ndb_filter *filter)
 	memmove(filter->elem_buf.p, filter->data_buf.start, data_len);
 
 	// realloc the whole thing
-	filter->elem_buf.start = realloc(filter->elem_buf.start, elem_len + data_len);
+	rel = realloc(filter->elem_buf.start, elem_len + data_len);
+	if (rel) 
+		filter->elem_buf.start = rel;
+	assert(filter->elem_buf.start);
 	filter->elem_buf.end = filter->elem_buf.start + elem_len;
 	filter->elem_buf.p = filter->elem_buf.end;
 
@@ -4149,12 +4157,12 @@ static int ndb_query_plan_execute_profile_search(
 	// get the authors element after we finalize the filter, since
 	// the data could have moved
 	if (!(els = ndb_filter_find_elements(f, NDB_FILTER_AUTHORS)))
-		return 0;
+		goto fail;
 
 	// grab pointer to pubkey in the filter so that we can
 	// update the filter as we go
 	if (!(filter_pubkey = ndb_filter_get_id_element(f, els, 0)))
-		return 0;
+		goto fail;
 
 	for (i = 0; !query_is_full(results, limit); i++) {
 		if (i == 0) {
@@ -4170,10 +4178,15 @@ static int ndb_query_plan_execute_profile_search(
 
 		// Look up the corresponding note associated with that pubkey
 		if (!ndb_query_plan_execute_author_kinds(txn, f, results, limit))
-			return 0;
+			goto fail;
 	}
 
+	ndb_filter_destroy(f);
 	return 1;
+
+fail:
+	ndb_filter_destroy(f);
+	return 0;
 }
 
 static int ndb_query_plan_execute_relay_kinds(
