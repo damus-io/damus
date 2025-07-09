@@ -84,6 +84,48 @@
     "%lld%%" : {
       "comment" : "Percentage of additional zap that should be sent to support Damus development."
     },
+    "♾️ Other" : {
+      "comment" : "Interest topic label"
+    },
+    "⚾️ Sports" : {
+      "comment" : "Interest topic label"
+    },
+    "✈️ Travel" : {
+      "comment" : "Interest topic label"
+    },
+    "🍱 Food" : {
+      "comment" : "Interest topic label"
+    },
+    "🎨 Art" : {
+      "comment" : "Interest topic label"
+    },
+    "🎶 Music" : {
+      "comment" : "Interest topic label"
+    },
+    "🏃 Health" : {
+      "comment" : "Interest topic label"
+    },
+    "🏛️ Politics" : {
+      "comment" : "Interest topic label"
+    },
+    "🏝️ Lifestyle" : {
+      "comment" : "Interest topic label"
+    },
+    "💻 Tech" : {
+      "comment" : "Interest topic label"
+    },
+    "📚 Humanities" : {
+      "comment" : "Interest topic label"
+    },
+    "🔭 Science" : {
+      "comment" : "Interest topic label"
+    },
+    "🛐 Religion" : {
+      "comment" : "Interest topic label"
+    },
+    "₿ Bitcoin" : {
+      "comment" : "Interest topic label"
+    },
     "1 month" : {
       "comment" : "A duration of 1 month to be shown to the user. Most likely in the context of how long they want to mute a piece of content for."
     },
@@ -174,6 +216,9 @@
     "Always show onboarding" : {
       "comment" : "Developer mode setting to always show onboarding suggestions."
     },
+    "Amount" : {
+      "comment" : "Label for invoice payment amount in confirmation screen"
+    },
     "An additional percentage of each zap will be sent to support Damus development" : {
       "comment" : "Text indicating that they can contribute zaps to support Damus development."
     },
@@ -182,6 +227,9 @@
     },
     "An unexpected error happened while trying to perform this action. Please contact support." : {
       "comment" : "Error message for a failed reset/repair operation"
+    },
+    "An unexpected error occurred." : {
+      "comment" : "A human-readable error message"
     },
     "An unexpected error occurred. Please contact Damus support via [Nostr](damus:npub18m76awca3y37hkvuneavuw6pjj4525fw90necxmadrvjg0sdy6qsngq955) or [email](support@damus.io) with the error message below." : {
       "comment" : "Label explaining there was an error, and suggesting next steps"
@@ -261,6 +309,9 @@
     "Automatically translate notes" : {
       "comment" : "Toggle to automatically translate notes."
     },
+    "Back" : {
+      "comment" : "Button to go back to invoice input"
+    },
     "Be the first to access upcoming premium features: Automatic translations, longer note storage, and more" : {
       "comment" : "Description of new features to be expected"
     },
@@ -272,6 +323,9 @@
     },
     "Blur images" : {
       "comment" : "Setting to blur images"
+    },
+    "Bolt11 Invoice" : {
+      "comment" : "Label for the bolt11 invoice string in confirmation screen"
     },
     "Bookmarks" : {
       "comment" : "Sidebar menu label for Bookmarks view.\nTitle of bookmarks view"
@@ -298,13 +352,19 @@
       "comment" : "User-visible heading for an error message indicating a note has an unknown kind or is unsupported for viewing."
     },
     "Cancel" : {
-      "comment" : "Alert button to cancel out of alert for muting a user.\nButton to cancel a repost.\nButton to cancel any interaction with the QRCode link.\nButton to cancel out of alert that creates a new mutelist.\nButton to cancel out of posting a note.\nButton to cancel out of search text entry mode.\nButton to cancel the upload.\nCancel button text for dismissing profile status settings view.\nCancel button text for dismissing updating image url.\nCancel deleting bookmarks.\nCancel deleting the user.\nCancel out of logging out the user.\nCancel out of search view.\nCancel the user-requested operation.\nText for button to cancel out of connecting Nostr Wallet Connect lightning wallet."
+      "comment" : "Alert button to cancel out of alert for muting a user.\nButton to cancel a repost.\nButton to cancel any interaction with the QRCode link.\nButton to cancel out of alert that creates a new mutelist.\nButton to cancel out of posting a note.\nButton to cancel out of search text entry mode.\nButton to cancel the LNURL payment process.\nButton to cancel the upload.\nCancel button text for dismissing profile status settings view.\nCancel button text for dismissing updating image url.\nCancel deleting bookmarks.\nCancel deleting the user.\nCancel out of logging out the user.\nCancel out of search view.\nCancel the user-requested operation.\nText for button to cancel out of connecting Nostr Wallet Connect lightning wallet."
     },
     "Cancelled" : {
       "comment" : "Title indicating that the user has cancelled."
     },
     "Changing this setting will cause the cache to be cleared. This will free space, but images may take longer to load again. Are you sure you want to proceed?" : {
       "comment" : "Message explaining consequences of changing the 'enable animation' setting"
+    },
+    "Check if the invoice is valid, your wallet is online, configured correctly, and try again. If the error persists, please contact support and/or your wallet provider." : {
+      "comment" : "A human-readable tip guiding the user on what to do when seeing a timeout error while sending a wallet payment."
+    },
+    "Check if your wallet looks configured correctly and try again. If the error persists, please contact support." : {
+      "comment" : "A human-readable tip for an error when a payment request cannot be made to a wallet."
     },
     "Check the address and/or the relay list." : {
       "comment" : "Human readable tip for error"
@@ -351,6 +411,12 @@
     "Configure Damus Purple" : {
       "comment" : "Button to allow Damus Purple to be configured"
     },
+    "Confirm" : {
+      "comment" : "Button to confirm payment"
+    },
+    "Confirm Payment" : {
+      "comment" : "Title for payment confirmation screen"
+    },
     "Confirmation" : {
       "comment" : "Confirmation dialog title"
     },
@@ -387,8 +453,11 @@
     "Content filters" : {
       "comment" : "Section title for content filtering/moderation configuration."
     },
+    "Content settings" : {
+      "comment" : "Title for an onboarding screen showing user some content settings"
+    },
     "Continue" : {
-      "comment" : "Button to dismiss suggested users view and continue to the main app\nContinue with bookmarks.\nContinue with deleting the user.\nContinue with the user-requested operation.\nPrompt to user to continue"
+      "comment" : "Button to dismiss suggested users view and continue to the main app\nButton to proceed with LNURL payment process.\nContinue with bookmarks.\nContinue with deleting the user.\nContinue with the user-requested operation.\nPrompt to user to continue"
     },
     "Conversations" : {
       "comment" : "Label for filter for seeing notes and replies that involve conversations between the signed in user and the current profile."
@@ -538,7 +607,7 @@
       "comment" : "Navigation title for DMs view, where DM is the English abbreviation for Direct Message.\nNavigation title for view of DMs, where DM is an English abbreviation for Direct Message.\nPicker option for DM selector for seeing only DMs that have been responded to. DM is the English abbreviation for Direct Message.\nSetting to enable DM Local Notification\nToolbar label for DMs view, where DM is the English abbreviation for Direct Message."
     },
     "Done" : {
-      "comment" : "Button to dismiss wallet selection view for paying Lightning invoice.\nButton to leave edit mode for modifying the list of relays."
+      "comment" : "Button to dismiss successful payment screen\nButton to dismiss wallet selection view for paying Lightning invoice.\nButton to leave edit mode for modifying the list of relays."
     },
     "Duration" : {
       "comment" : "Label for profile status expiration duration picker.\nThe duration in which to mute the given item."
@@ -576,6 +645,9 @@
     "Encrypted" : {
       "comment" : "Heading indicating that this application keeps private messaging end-to-end encrypted."
     },
+    "Enter Amount" : {
+      "comment" : "Header text for LNURL payment amount entry screen"
+    },
     "Enter your account key" : {
       "comment" : "Prompt for user to enter an account key to login."
     },
@@ -589,7 +661,10 @@
       "comment" : "Error label shown when user tries to disable push notifications but something fails"
     },
     "Error fetching lightning invoice" : {
-      "comment" : "Message to display when there was an error fetching a lightning invoice while attempting to zap."
+      "comment" : "Error message when there was an error fetching a lightning invoice\nMessage to display when there was an error fetching a lightning invoice while attempting to zap."
+    },
+    "Error fetching LNURL payment information" : {
+      "comment" : "Error message when LNURL fetch fails"
     },
     "Error retrieving muted event" : {
       "comment" : "Text for an item that application failed to retrieve the muted event for."
@@ -638,6 +713,9 @@
     },
     "Failed to parse" : {
       "comment" : "NostrScript error message when it fails to parse a script."
+    },
+    "Failed to scan QR code, please try again." : {
+      "comment" : "Error message for failed QR scan"
     },
     "Find a Wallet" : {
       "comment" : "The heading for one of the \"Why add Zaps?\" boxes"
@@ -770,7 +848,7 @@
       "comment" : "Setting to hide wallet balance."
     },
     "Hide notes with #nsfw tags" : {
-      "comment" : "Setting to hide notes with the #nsfw (not safe for work) tags"
+      "comment" : "Setting to hide notes with not safe for work tags\nSetting to hide notes with the #nsfw (not safe for work) tags"
     },
     "Hide notifications that tag many profiles" : {
       "comment" : "Label for notification settings toggle that hides notifications that tag many people."
@@ -786,6 +864,9 @@
     },
     "Home" : {
       "comment" : "Navigation bar title for Home view where notes and replies appear from those who the user is following."
+    },
+    "How much would you like to send?" : {
+      "comment" : "Instruction text for LNURL payment amount"
     },
     "How would you like to connect to your Coinos wallet?" : {
       "comment" : "Question for the user when connecting a Coinos wallet."
@@ -831,6 +912,9 @@
     },
     "Invalid lightning address" : {
       "comment" : "Message to display when there was an error attempting to zap due to an invalid lightning address."
+    },
+    "Invalid lightning invoice received" : {
+      "comment" : "Error message when the lightning invoice received from LNURL is invalid"
     },
     "Invalid Nostr wallet connection string" : {
       "comment" : "Error message when an invalid Nostr wallet connection string is provided."
@@ -931,6 +1015,9 @@
     "MANUAL SETUP" : {
       "comment" : "Label for manual wallet setup."
     },
+    "Max weekly budget" : {
+      "comment" : "Label for setting the maximum weekly budget for Coinos wallet"
+    },
     "Maybe later" : {
       "comment" : "Text for button to disconnect from Nostr Wallet Connect lightning wallet."
     },
@@ -1001,7 +1088,7 @@
       "comment" : "Ask the user if they are new to Nostr"
     },
     "Next" : {
-      "comment" : "Button to continue with account creation."
+      "comment" : "Button to continue with account creation.\nNext button title"
     },
     "No" : {
       "comment" : "Do not discard changes.\nUser confirm No"
@@ -1125,7 +1212,7 @@
       }
     },
     "Notes with the #nsfw tag usually contains adult content or other \"Not safe for work\" content" : {
-      "comment" : "Section footer clarifying what #nsfw (not safe for work) tags mean"
+      "comment" : "Explanation of what NSFW means\nSection footer clarifying what #nsfw (not safe for work) tags mean"
     },
     "Nothing to see here. Check back later!" : {
       "comment" : "Indicates that there are no notes in the timeline to view."
@@ -1199,8 +1286,17 @@
     "Orange-pill" : {
       "comment" : "Button label that allows the user to start a direct message conversation with the user shown on-screen, to orange-pill them (i.e. help them to setup zaps)"
     },
+    "Other preferences" : {
+      "comment" : "Screen title for content preferences screen during onboarding"
+    },
     "Paid Relay" : {
       "comment" : "Text indicating that this is a paid relay."
+    },
+    "Paste from Clipboard" : {
+      "comment" : "Button to paste invoice from clipboard"
+    },
+    "Paste invoice from clipboard" : {
+      "comment" : "Accessibility label for the invoice paste button"
     },
     "Paste NWC Address" : {
       "comment" : "Text for button to connect a lightning wallet."
@@ -1213,6 +1309,9 @@
     },
     "Pay the Lightning invoice" : {
       "comment" : "Navigation bar title for view to pay Lightning invoice."
+    },
+    "Payment Sent!" : {
+      "comment" : "Title for successful payment screen"
     },
     "Pending" : {
       "comment" : "Label to display that authentication to a server is pending."
@@ -1238,6 +1337,9 @@
     "Please choose relays from the list below to filter the current feed:" : {
       "comment" : "Instructions on how to filter a specific timeline feed by choosing relay servers to filter on."
     },
+    "Please contact support" : {
+      "comment" : "Human readable error tip"
+    },
     "Please contact support for further help." : {
       "comment" : "Human readable tips for what to do for a failure to find the relay list"
     },
@@ -1259,11 +1361,17 @@
     "Please double-check the checkout web page, or go to the Side Menu → \"Purple\" to check your account status. If you have already paid, but still don't see your account active, please save the URL of the checkout page where you came from, contact our support, and give us the URL to help you with this issue." : {
       "comment" : "User-facing tips on what to do if a Purple welcome link doesn't work"
     },
+    "Please enter a valid amount" : {
+      "comment" : "Error message when no valid amount is entered for LNURL payment"
+    },
     "Please go to Settings > First Aid > Repair relay list, or contact support." : {
       "comment" : "Human readable tip for error"
     },
     "Please make sure you have logged-in with your private key." : {
       "comment" : "Human readable tip for error"
+    },
+    "Please pick your interests. This will help us recommend accounts to follow." : {
+      "comment" : "Instruction for interest selection"
     },
     "Please try again later or contact support if the issue persists." : {
       "comment" : "Human readable tip for error"
@@ -1274,11 +1382,17 @@
     "Please try again, check the URL for typos, or contact support for further help." : {
       "comment" : "User visible error tips"
     },
+    "Please try again. If the error persists, please contact support." : {
+      "comment" : "A human-readable tip guiding the user on what to do when seeing an unexpected error while sending a wallet payment."
+    },
     "Please try opening this content on another Nostr app that supports this type of content." : {
       "comment" : "User-visible advice on what to do if they see the error indicating a note has an unknown kind or is unsupported for viewing."
     },
     "Please verify your credentials or permissions." : {
       "comment" : "Tip for unauthorized access"
+    },
+    "Please wait while your payment is being processed…" : {
+      "comment" : "Message while payment is being processed"
     },
     "Point your camera to a QR code…" : {
       "comment" : "Text on QR code camera view instructing user to point to QR code"
@@ -1312,6 +1426,12 @@
     },
     "Pro" : {
       "comment" : "Dropdown option for selecting Pro plan for DeepL translation service."
+    },
+    "Processing Payment" : {
+      "comment" : "Title for payment processing screen"
+    },
+    "Processing..." : {
+      "comment" : "Text to indicate that the app is in the process of fetching an invoice."
     },
     "Production" : {
       "comment" : "Label indicating the production environment for Damus Purple\nLabel indicating the production environment for Push notification functionality"
@@ -1375,6 +1495,9 @@
     },
     "Reactions" : {
       "comment" : "Navigation bar title for Reactions view.\nSection header for reactions settings\nTitle of emoji reactions view"
+    },
+    "Received an incorrect or unexpected response from the wallet provider. This looks like an issue with your wallet provider." : {
+      "comment" : "A human-readable error message"
     },
     "Recommended" : {
       "comment" : "Title of the tab that shows the list of relays recommended by Damus."
@@ -1534,6 +1657,9 @@
     "Scan for QR Code" : {
       "comment" : "Context menu option to scan image for a QR Code."
     },
+    "Scan Lightning Invoice" : {
+      "comment" : "Title for the invoice scanning screen"
+    },
     "Scan NWC Address" : {
       "comment" : "Text for button to connect a lightning wallet."
     },
@@ -1576,8 +1702,17 @@
     "Select default wallet" : {
       "comment" : "Prompt selection of user's default wallet"
     },
+    "Select your interests" : {
+      "comment" : "Title for a screen asking the user for interests"
+    },
+    "Select Your Interests" : {
+      "comment" : "Screen title for interest selection"
+    },
     "self" : {
       "comment" : "Part of a larger sentence 'Replying to self' in US English. 'self' indicates that the user is replying to themself and no one else."
+    },
+    "Send" : {
+      "comment" : "Button label to send bitcoin payment from wallet"
     },
     "Send a message to start the conversation..." : {
       "comment" : "Text prompt for user to send a message to the other user."
@@ -1627,6 +1762,9 @@
     "Show" : {
       "comment" : "Button to show a note which has been muted.\nToggle to show or hide user's secret account login key."
     },
+    "Show Bitcoin-heavy profile suggestions" : {
+      "comment" : "Setting label during onboarding"
+    },
     "Show general statuses" : {
       "comment" : "Settings toggle for enabling general user statuses"
     },
@@ -1672,6 +1810,9 @@
     "SOFTWARE" : {
       "comment" : "Text label indicating which relay software is used to run this Nostr relay."
     },
+    "Some profiles tend to have a lot of Bitcoin-related content alongside their topics of interest. Disable this setting if you prefer to filter out follow suggestions that frequently talk about Bitcoin." : {
+      "comment" : "Explanation label for the 'Show Bitcoin-heavy profile suggestions' onboarding toggle setting"
+    },
     "Someone posted a note" : {
       "comment" : "Title label for push notification where someone posted a note"
     },
@@ -1692,6 +1833,9 @@
     },
     "Sorry, this QR code looks incompatible with Damus. Please try another one." : {
       "comment" : "Text on QR code camera view telling the user a QR is incompatible"
+    },
+    "Sorry, we do not support paying invoices without amount yet. Please scan an invoice with an amount." : {
+      "comment" : "A user-readable message indicating that the lightning invoice they scanned or pasted is not supported and is missing an amount."
     },
     "Spam" : {
       "comment" : "Description of report type for spam.\nSection header for Universe/Search spam"
@@ -1716,6 +1860,9 @@
     },
     "Successfully synced" : {
       "comment" : "Label indicating success in syncing notification preferences"
+    },
+    "Successfully updated" : {
+      "comment" : "Label indicating success in updating budget"
     },
     "Suggested hashtags" : {
       "comment" : "A label indicating that the items below it are suggested hashtags"
@@ -1765,6 +1912,15 @@
     "The camera was not capable of scanning the requested codes." : {
       "comment" : "Camera's bad output error label"
     },
+    "The maximum amount of funds that are allowed to be sent out from this wallet each week." : {
+      "comment" : "Description explaining the purpose of the 'Max weekly budget' setting for Coinos one-click setup wallets"
+    },
+    "The payment request could not be made to your wallet provider." : {
+      "comment" : "A human-readable error message"
+    },
+    "The payment request did not receive a response and the request timed-out." : {
+      "comment" : "A human-readable error message"
+    },
     "The social network you control" : {
       "comment" : "Quick description of what Damus is"
     },
@@ -1788,6 +1944,9 @@
     },
     "This device's in-app purchase is registered to a different Nostr account. Unable to manage this Purple account. If you believe this was a mistake, please contact us via support@damus.io." : {
       "comment" : "Notice label that user cannot manage their In-App purchases"
+    },
+    "This does not appear to be a valid Lightning invoice or LNURL." : {
+      "comment" : "A user-readable message indicating that the scanned or pasted content was not a valid lightning invoice or LNURL."
     },
     "This feature is not implemented by your wallet." : {
       "comment" : "Error description for not implemented feature"
@@ -1861,11 +2020,20 @@
     "Trusted Network" : {
       "comment" : "Human-readable short description of the 'trusted network filter' when it is enabled, and therefore showing content from only the trusted network."
     },
+    "Try Again" : {
+      "comment" : "Button to retry payment"
+    },
+    "Try again. If the error persists, please contact your wallet provider and/or our support team." : {
+      "comment" : "A human-readable tip for an error when a payment request cannot be made to a wallet."
+    },
     "Try checking the link again, your internet connection, or contact the person who provided you the link for help." : {
       "comment" : "Tips on what to do if a note cannot be found."
     },
     "Try restarting your wallet or contacting support if the problem persists." : {
       "comment" : "Tip for internal error"
+    },
+    "Tweak these settings to better match your preferences" : {
+      "comment" : "Instructions for content preferences screen during onboarding"
     },
     "Type %@ to delete" : {
       "comment" : "Text field prompt asking user to type DELETE in all caps to confirm that they want to proceed with deleting their account."
@@ -1878,6 +2046,9 @@
     },
     "Undistract mode" : {
       "comment" : "Developer mode setting to scramble text and images to avoid distractions during development."
+    },
+    "Unexpected error loading user suggestions" : {
+      "comment" : "Human readable error label"
     },
     "Unfollow" : {
       "comment" : "Button to unfollow a user."
@@ -1906,8 +2077,14 @@
     "Untitled" : {
       "comment" : "Title of follow list event if it is untitled.\nTitle of longform event if it is untitled."
     },
+    "Untitled Follow Pack" : {
+      "comment" : "Default title for a follow pack if no title is specified"
+    },
     "Update" : {
       "comment" : "Update button text for updating image url."
+    },
+    "Updating" : {
+      "comment" : "Label indicating budget update is in progress"
     },
     "Upload" : {
       "comment" : "Button to proceed with uploading."
@@ -2059,6 +2236,9 @@
     "You clicked on a Purple welcome link, but we could not find your checkout. This is likely a bug." : {
       "comment" : "Error label upon continuing in the app from a Damus Purple purchase"
     },
+    "You do not have enough funds to pay for this invoice." : {
+      "comment" : "Label on invoice payment screen, indicating user has insufficient funds"
+    },
     "You do not have permission to alter this relay list." : {
       "comment" : "Human readable error description"
     },
@@ -2088,6 +2268,9 @@
     },
     "Your Name" : {
       "comment" : "Label for Your Name section of user profile form."
+    },
+    "Your payment has been successfully sent." : {
+      "comment" : "Message for successful payment"
     },
     "Your profile will not be shared with Coinos." : {
       "comment" : "Label text for users to reassure them that their nsec is not shared with a third party."
