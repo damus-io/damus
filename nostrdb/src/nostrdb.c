@@ -7848,6 +7848,8 @@ int ndb_print_author_kind_index(struct ndb_txn *txn)
 		i++;
 	}
 
+	mdb_cursor_close(cur);
+
 	return i;
 }
 
@@ -7872,6 +7874,8 @@ int ndb_print_relay_kind_index(struct ndb_txn *txn)
 		i++;
 	}
 
+	mdb_cursor_close(cur);
+
 	return i;
 }
 
@@ -7890,6 +7894,8 @@ int ndb_print_tag_index(struct ndb_txn *txn)
 		print_tag_kv(txn, &k, &v);
 		i++;
 	}
+
+	mdb_cursor_close(cur);
 
 	return 1;
 }
@@ -7912,6 +7918,8 @@ int ndb_print_kind_keys(struct ndb_txn *txn)
 
 		i++;
 	}
+
+	mdb_cursor_close(cur);
 
 	return 1;
 }
@@ -7939,6 +7947,8 @@ int ndb_print_search_keys(struct ndb_txn *txn)
 
 		i++;
 	}
+
+	mdb_cursor_close(cur);
 
 	return 1;
 }
