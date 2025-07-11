@@ -4197,6 +4197,7 @@ static int ndb_query_plan_execute_profile_search(
 			goto fail;
 	}
 
+	ndb_search_profile_end(&profile_search);
 	ndb_filter_destroy(f);
 	return 1;
 
