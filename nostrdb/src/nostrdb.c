@@ -2674,12 +2674,12 @@ void ndb_profile_record_builder_init(struct ndb_profile_record_builder *b)
 
 void ndb_profile_record_builder_free(struct ndb_profile_record_builder *b)
 {
+	if (b->flatbuf)
+		flatcc_builder_aligned_free(b->flatbuf);
 	if (b->builder) {
 		flatcc_builder_clear(b->builder);
 		free(b->builder);
 	}
-	if (b->flatbuf)
-		free(b->flatbuf);
 
 	b->builder = NULL;
 	b->flatbuf = NULL;
