@@ -594,7 +594,8 @@ int ndb_parse_content(unsigned char *buf, int buf_size,
 			return 0;
 	}
 
-	parser.blocks->blocks_size = parser.buffer.p - blocks_start;
+	parser.blocks->blocks_size = parser.buffer.p - (parser.buffer.start + sizeof(struct ndb_blocks));
+    assert(parser.blocks->blocks_size < ((2<<18) + 1));
 
 	//
 	// pad to 8-byte alignment
@@ -606,4 +607,3 @@ int ndb_parse_content(unsigned char *buf, int buf_size,
 
 	return 1;
 }
-
