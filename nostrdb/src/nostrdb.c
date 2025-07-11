@@ -7095,12 +7095,14 @@ static struct ndb_blocks *ndb_note_to_blocks(struct ndb_note *note)
 	// something weird is going on
 	if (content_len >= INT32_MAX)
 		return NULL;
+    
+    uint32_t buf_size = 2<<18;
 
-	buffer = malloc(2<<18);  // Not carefully calculated, but ok because we will not need this once we switch to the local relay model
+	buffer = malloc(buf_size);  // Not carefully calculated, but ok because we will not need this once we switch to the local relay model
 	if (!buffer)
 		return NULL;
 
-	if (!ndb_parse_content(buffer, content_len, content, content_len, &blocks)) {
+	if (!ndb_parse_content(buffer, buf_size, content, content_len, &blocks)) {
 		free(buffer);
 		return NULL;
 	}
