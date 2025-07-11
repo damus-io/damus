@@ -2,6 +2,22 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>follow_pack_user_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOW_PACK_USERS@</string>
+		<key>FOLLOW_PACK_USERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Nutzer</string>
+			<key>other</key>
+			<string>Nutzer</string>
+		</dict>
+	</dict>
 	<key>followed_by_three_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -80,6 +96,22 @@
 			<string>Importieren</string>
 			<key>other</key>
 			<string>Imporieren</string>
+		</dict>
+	</dict>
+	<key>notes_from_three_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Notiz von %2$@, %3$@, %4$@ & %1$d weiterem aus deinem vertrauenswürdigen Netzwerk</string>
+			<key>other</key>
+			<string>Notizen von %2$@, %3$@, %4$@ & %1$d weiteren aus deinem vertrauenswürdigen Netzwerk</string>
 		</dict>
 	</dict>
 	<key>people_reposted_count</key>
