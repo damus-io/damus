@@ -3388,7 +3388,7 @@ static int ndb_write_reaction_stats(struct ndb_txn *txn, struct ndb_note *note)
 
 	if (root == NULL) {
 		ndb_debug("failed to create note metadata record\n");
-		return 0;
+		goto fail;
 	}
 
 	// metadata is keyed on id because we want to collect stats regardless
@@ -3406,13 +3406,18 @@ static int ndb_write_reaction_stats(struct ndb_txn *txn, struct ndb_note *note)
 
 	if ((rc = mdb_put(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_META], &key, &val, 0))) {
 		ndb_debug("write reaction stats to db failed: %s\n", mdb_strerror(rc));
-		free(root);
-		return 0;
+		goto fail;
 	}
 
 	free(root);
+	flatcc_builder_clear(&builder);
 
 	return 1;
+
+fail:
+	free(root);
+	flatcc_builder_clear(&builder);
+	return 0;
 }
 
 
