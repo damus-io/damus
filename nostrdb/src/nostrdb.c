@@ -3080,6 +3080,7 @@ int ndb_search_profile(struct ndb_txn *txn, struct ndb_search *search, const cha
 		search->key = k.mv_data;
 		assert(v.mv_size == 8);
 		search->profile_key = *((uint64_t*)v.mv_data);
+		mdb_cursor_close(search->cursor);
 		return 1;
 	}
 
