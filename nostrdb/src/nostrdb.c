@@ -3671,7 +3671,8 @@ static int ndb_query_plan_execute_ids(struct ndb_txn *txn,
 	uint64_t note_id, until, *pint;
 	size_t note_size;
 	unsigned char *id;
-	struct ndb_note_relay_iterator note_relay_iter;
+	struct ndb_note_relay_iterator note_relay_iter = {0};
+	struct ndb_note_relay_iterator *relay_iter = NULL;
 
 	until = UINT64_MAX;
 
@@ -3712,17 +3713,20 @@ static int ndb_query_plan_execute_ids(struct ndb_txn *txn,
 		if (!(note = ndb_get_note_by_key(txn, note_id, &note_size)))
 			continue;
 
-		if (need_relays)
-			ndb_note_relay_iterate_start(txn, &note_relay_iter, note_id);
+		relay_iter = need_relays ? &note_relay_iter : NULL;
+		if (relay_iter)
+			ndb_note_relay_iterate_start(txn, relay_iter, note_id);
 
 		// Sure this particular lookup matched the index query, but
 		// does it match the entire filter? Check! We also pass in
 		// things we've already matched via the filter so we don't have
 		// to check again. This can be pretty important for filters
 		// with a large number of entries.
-		if (!ndb_filter_matches_with(filter, note, 1 << NDB_FILTER_IDS,
-					     need_relays ? &note_relay_iter : NULL))
+		if (!ndb_filter_matches_with(filter, note, 1 << NDB_FILTER_IDS, relay_iter)) {
+			ndb_note_relay_iterate_close(relay_iter);
 			continue;
+		}
+		ndb_note_relay_iterate_close(relay_iter);
 
 		ndb_query_result_init(&res, note, note_size, note_id);
 		if (!push_query_result(results, &res))
@@ -3973,8 +3977,9 @@ static int ndb_query_plan_execute_tags(struct ndb_txn *txn,
 
 		if (!(len = ndb_encode_tag_key(key_buffer, sizeof(key_buffer),
 					       tags->field.tag, tag, taglen,
-					       until)))
-			return 0;
+					       until))) {
+			goto fail;
+		}
 
 		k.mv_data = key_buffer;
 		k.mv_size = len;
@@ -4020,6 +4025,9 @@ next:
 
 	mdb_cursor_close(cur);
 	return 1;
+fail:
+	mdb_cursor_close(cur);
+	return 0;
 }
 
 static int ndb_query_plan_execute_author_kinds(
