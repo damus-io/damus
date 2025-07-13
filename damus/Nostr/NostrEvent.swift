@@ -448,17 +448,26 @@ func random_bytes(count: Int) -> Data {
     return Data(bytes: bytes, count: count)
 }
 
-func make_boost_event(keypair: FullKeypair, boosted: NostrEvent) -> NostrEvent? {
+func make_boost_event(keypair: FullKeypair, boosted: NostrEvent, relayURL: RelayURL?) -> NostrEvent? {
     var tags = Array(boosted.referenced_pubkeys).map({ pk in pk.tag })
 
-    tags.append(["e", boosted.id.hex(), "", "root"])
-    tags.append(["p", boosted.pubkey.hex()])
+    var eTagBuilder = ["e", boosted.id.hex()]
+    var pTagBuilder = ["p", boosted.pubkey.hex()]
+
+    let relayURLString = relayURL?.absoluteString
+    if let relayURLString {
+        pTagBuilder.append(relayURLString)
+    }
+    eTagBuilder.append(contentsOf: [relayURLString ?? "", "root", boosted.pubkey.hex()])
+
+    tags.append(eTagBuilder)
+    tags.append(pTagBuilder)
 
     let content = event_to_json(ev: boosted)
     return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 6, tags: tags)
 }
 
-func make_like_event(keypair: FullKeypair, liked: NostrEvent, content: String = "🤙") -> NostrEvent? {
+func make_like_event(keypair: FullKeypair, liked: NostrEvent, content: String = "🤙", relayURL: RelayURL?) -> NostrEvent? {
     var tags = liked.tags.reduce(into: [[String]]()) { ts, tag in
         guard tag.count >= 2,
               (tag[0].matches_char("e") || tag[0].matches_char("p")) else {
@@ -467,8 +476,17 @@ func make_like_event(keypair: FullKeypair, liked: NostrEvent, content: String = 
         ts.append(tag.strings())
     }
 
-    tags.append(["e", liked.id.hex()])
-    tags.append(["p", liked.pubkey.hex()])
+    var eTagBuilder = ["e", liked.id.hex()]
+    var pTagBuilder = ["p", liked.pubkey.hex()]
+
+    let relayURLString = relayURL?.absoluteString
+    if let relayURLString {
+        pTagBuilder.append(relayURLString)
+    }
+    eTagBuilder.append(contentsOf: [relayURLString ?? "", liked.pubkey.hex()])
+
+    tags.append(eTagBuilder)
+    tags.append(pTagBuilder)
 
     return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 7, tags: tags)
 }

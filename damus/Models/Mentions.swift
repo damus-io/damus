@@ -64,10 +64,35 @@ enum MentionRef: TagKeys, TagConvertible, Equatable, Hashable {
         switch self {
         case .pubkey(let pubkey): return ["p", pubkey.hex()]
         case .note(let noteId):   return ["e", noteId.hex()]
-        case .nevent(let nevent): return ["e", nevent.noteid.hex()]
-        case .nprofile(let nprofile): return ["p", nprofile.author.hex()]
+        case .nevent(let nevent):
+            var tagBuilder = ["e", nevent.noteid.hex()]
+
+            let relay = nevent.relays.first
+            if let author = nevent.author?.hex() {
+                tagBuilder.append(relay ?? "")
+                tagBuilder.append(author)
+            } else if let relay {
+                tagBuilder.append(relay)
+            }
+
+            return tagBuilder
+        case .nprofile(let nprofile):
+            var tagBuilder = ["p", nprofile.author.hex()]
+
+            if let relay = nprofile.relays.first {
+                tagBuilder.append(relay)
+            }
+
+            return tagBuilder
         case .nrelay(let url): return ["r", url]
-        case .naddr(let naddr): return ["a", naddr.kind.description + ":" + naddr.author.hex() + ":" + naddr.identifier.string()]
+        case .naddr(let naddr):
+            var tagBuilder = ["a", "\(naddr.kind.description):\(naddr.author.hex()):\(naddr.identifier.string())"]
+
+            if let relay = naddr.relays.first {
+                tagBuilder.append(relay)
+            }
+
+            return tagBuilder
         }
     }
 

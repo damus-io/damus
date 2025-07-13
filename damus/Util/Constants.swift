@@ -45,4 +45,5 @@ class Constants {
     
     // MARK: General constants
     static let GIF_IMAGE_TYPE: String = "com.compuserve.gif"
+    static let MAX_SHARE_RELAYS = 4
 }

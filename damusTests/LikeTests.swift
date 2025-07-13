@@ -25,7 +25,7 @@ class LikeTests: XCTestCase {
                                keypair: test_keypair,
                                tags: [cindy.tag, bob.tag])!
         let id = liked.id
-        let like_ev = make_like_event(keypair: test_keypair_full, liked: liked)!
+        let like_ev = make_like_event(keypair: test_keypair_full, liked: liked, relayURL: nil)!
 
         XCTAssertTrue(like_ev.referenced_pubkeys.contains(test_keypair.pubkey))
         XCTAssertTrue(like_ev.referenced_pubkeys.contains(cindy))
@@ -36,12 +36,12 @@ class LikeTests: XCTestCase {
     func testToReactionEmoji() {
         let liked = NostrEvent(content: "awesome #[0] post", keypair: test_keypair, tags: [["p", "cindy"], ["e", "bob"]])!
 
-        let emptyReaction = make_like_event(keypair: test_keypair_full, liked: liked, content: "")!
-        let plusReaction = make_like_event(keypair: test_keypair_full, liked: liked, content: "+")!
-        let minusReaction = make_like_event(keypair: test_keypair_full, liked: liked, content: "-")!
-        let heartReaction = make_like_event(keypair: test_keypair_full, liked: liked, content: "❤️")!
-        let thumbsUpReaction = make_like_event(keypair: test_keypair_full, liked: liked, content: "👍")!
-        let shakaReaction = make_like_event(keypair: test_keypair_full, liked: liked, content: "🤙")!
+        let emptyReaction = make_like_event(keypair: test_keypair_full, liked: liked, content: "", relayURL: nil)!
+        let plusReaction = make_like_event(keypair: test_keypair_full, liked: liked, content: "+", relayURL: nil)!
+        let minusReaction = make_like_event(keypair: test_keypair_full, liked: liked, content: "-", relayURL: nil)!
+        let heartReaction = make_like_event(keypair: test_keypair_full, liked: liked, content: "❤️", relayURL: nil)!
+        let thumbsUpReaction = make_like_event(keypair: test_keypair_full, liked: liked, content: "👍", relayURL: nil)!
+        let shakaReaction = make_like_event(keypair: test_keypair_full, liked: liked, content: "🤙", relayURL: nil)!
 
         XCTAssertEqual(to_reaction_emoji(ev: emptyReaction), "❤️")
         XCTAssertEqual(to_reaction_emoji(ev: plusReaction), "❤️")

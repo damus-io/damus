@@ -217,7 +217,16 @@ struct EventActionBar: View {
             AnyView(self.action_bar_content)
         }
     }
-    
+
+    var event_relay_url_strings: [String] {
+        let relays = damus_state.nostrNetwork.relaysForEvent(event: event)
+        if !relays.isEmpty {
+            return relays.prefix(Constants.MAX_SHARE_RELAYS).map { $0.absoluteString }
+        }
+
+        return userProfile.getCappedRelayStrings()
+    }
+
     var body: some View {
         self.content
         .onAppear {
@@ -233,7 +242,9 @@ struct EventActionBar: View {
             }
         }
         .sheet(isPresented: $show_share_sheet, onDismiss: { self.show_share_sheet = false }) {
-            ShareSheet(activityItems: [URL(string: "https://damus.io/" + event.id.bech32)!])
+            if let url = URL(string: "https://damus.io/" + Bech32Object.encode(.nevent(NEvent(event: event, relays: event_relay_url_strings)))) {
+                ShareSheet(activityItems: [url])
+            }
         }
         .sheet(isPresented: $show_repost_action, onDismiss: { self.show_repost_action = false }) {
         
@@ -262,7 +273,7 @@ struct EventActionBar: View {
 
     func send_like(emoji: String) {
         guard let keypair = damus_state.keypair.to_full(),
-              let like_ev = make_like_event(keypair: keypair, liked: event, content: emoji) else {
+              let like_ev = make_like_event(keypair: keypair, liked: event, content: emoji, relayURL: damus_state.nostrNetwork.relaysForEvent(event: event).first) else {
             return
         }
 

@@ -19,17 +19,12 @@ struct QueuedRequest {
     let skip_ephemeral: Bool
 }
 
-struct SeenEvent: Hashable {
-    let relay_id: RelayURL
-    let evid: NoteId
-}
-
 /// Establishes and manages connections and subscriptions to a list of relays.
 class RelayPool {
     private(set) var relays: [Relay] = []
     var handlers: [RelayHandler] = []
     var request_queue: [QueuedRequest] = []
-    var seen: Set<SeenEvent> = Set()
+    var seen: [NoteId: Set<RelayURL>] = [:]
     var counts: [RelayURL: UInt64] = [:]
     var ndb: Ndb
     /// The keypair used to authenticate with relays
@@ -357,15 +352,11 @@ class RelayPool {
     func record_seen(relay_id: RelayURL, event: NostrConnectionEvent) {
         if case .nostr_event(let ev) = event {
             if case .event(_, let nev) = ev {
-                let k = SeenEvent(relay_id: relay_id, evid: nev.id)
-                if !seen.contains(k) {
-                    seen.insert(k)
-                    if counts[relay_id] == nil {
-                        counts[relay_id] = 1
-                    } else {
-                        counts[relay_id] = (counts[relay_id] ?? 0) + 1
-                    }
+                if seen[nev.id]?.contains(relay_id) == true {
+                    return
                 }
+                seen[nev.id, default: Set()].insert(relay_id)
+                counts[relay_id, default: 0] += 1
             }
         }
     }
