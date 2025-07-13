@@ -235,7 +235,7 @@ struct ChatEventView: View {
     
     func send_like(emoji: String) {
         guard let keypair = damus_state.keypair.to_full(),
-              let like_ev = make_like_event(keypair: keypair, liked: event, content: emoji) else {
+              let like_ev = make_like_event(keypair: keypair, liked: event, content: emoji, relayURL: damus_state.nostrNetwork.relaysForEvent(event: event).first) else {
             return
         }
 

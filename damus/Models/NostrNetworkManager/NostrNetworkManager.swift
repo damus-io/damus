@@ -51,6 +51,16 @@ class NostrNetworkManager {
     func connect() {
         self.userRelayList.connect()
     }
+
+    func relaysForEvent(event: NostrEvent) -> [RelayURL] {
+        // TODO(tyiu) Ideally this list would be sorted by the event author's outbox relay preferences
+        // and reliability of relays to maximize chances of others finding this event.
+        if let relays = pool.seen[event.id] {
+            return Array(relays)
+        }
+
+        return []
+    }
 }
 
 

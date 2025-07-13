@@ -22,8 +22,6 @@ class ProfileModel: ObservableObject, Equatable {
         }
         return nil
     }
-
-    private let MAX_SHARE_RELAYS = 4
     
     var events: EventHolder
     let pubkey: Pubkey
@@ -222,7 +220,7 @@ class ProfileModel: ObservableObject, Equatable {
     }
 
     func getCappedRelayStrings() -> [String] {
-        return self.relay_urls?.prefix(MAX_SHARE_RELAYS).map { $0.absoluteString } ?? []
+        return self.relay_urls?.prefix(Constants.MAX_SHARE_RELAYS).map { $0.absoluteString } ?? []
     }
 }
 

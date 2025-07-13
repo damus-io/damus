@@ -167,7 +167,23 @@ class Bech32ObjectTests: XCTestCase {
         
         XCTAssertEqual(expectedEncoding, actualEncoding)
     }
-    
+
+    func testTLVEncoding_NeventFromNostrEvent_ValidContent() throws {
+        let relays = ["wss://relay.damus.io", "wss://relay.nostr.band"]
+        let nevent = NEvent(event: test_note, relays: relays)
+
+        XCTAssertEqual(nevent.noteid, test_note.id)
+        XCTAssertEqual(nevent.relays, relays)
+        XCTAssertEqual(nevent.author, test_note.pubkey)
+        XCTAssertEqual(nevent.kind, test_note.kind)
+
+        let expectedEncoding = "nevent1qqsqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpz3mhxue69uhhyetvv9ujuerpd46hxtnfduq3vamnwvaz7tmjv4kxz7fwdehhxarj9e3xzmnyqgsgydql3q4ka27d9wnlrmus4tvkrnc8ftc4h8h5fgyln54gl0a7dgsrqsqqqqqpppe7n6"
+
+        let actualEncoding = Bech32Object.encode(.nevent(NEvent(event: test_note, relays: relays)))
+
+        XCTAssertEqual(expectedEncoding, actualEncoding)
+    }
+
     func testTLVEncoding_NProfileExample_ValidContent() throws {
         guard let author = try bech32_decode("npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6") else {
             XCTFail()

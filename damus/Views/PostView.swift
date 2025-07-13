@@ -798,18 +798,18 @@ private func isAlphanumeric(_ char: Character) -> Bool {
     return char.isLetter || char.isNumber
 }
 
-func nip10_reply_tags(replying_to: NostrEvent, keypair: Keypair) -> [[String]] {
+func nip10_reply_tags(replying_to: NostrEvent, keypair: Keypair, relayURL: RelayURL?) -> [[String]] {
     guard let nip10 = replying_to.thread_reply() else {
         // we're replying to a post that isn't in a thread,
         // just add a single reply-to-root tag
-        return [["e", replying_to.id.hex(), "", "root"]]
+        return [["e", replying_to.id.hex(), relayURL?.absoluteString ?? "", "root"]]
     }
 
     // otherwise use the root tag from the parent's nip10 reply and include the note
     // that we are replying to's note id.
     let tags = [
         ["e", nip10.root.note_id.hex(), nip10.root.relay ?? "", "root"],
-        ["e", replying_to.id.hex(), "", "reply"]
+        ["e", replying_to.id.hex(), relayURL?.absoluteString ?? "", "reply"]
     ]
 
     return tags
@@ -902,15 +902,19 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
     switch action {
     case .replying_to(let replying_to):
         // start off with the reply tags
-        tags = nip10_reply_tags(replying_to: replying_to, keypair: state.keypair)
+        tags = nip10_reply_tags(replying_to: replying_to, keypair: state.keypair, relayURL: state.nostrNetwork.relaysForEvent(event: replying_to).first)
 
     case .quoting(let ev):
-        content.append("\n\nnostr:" + bech32_note_id(ev.id))
+        let relay_urls = state.nostrNetwork.relaysForEvent(event: ev)
+        let nevent = Bech32Object.encode(.nevent(NEvent(event: ev, relays: relay_urls.prefix(4).map { $0.absoluteString })))
+        content.append("\n\nnostr:\(nevent)")
 
-        tags.append(["q", ev.id.hex()]);
-
-        if let quoted_ev = state.events.lookup(ev.id) {
-            tags.append(["p", quoted_ev.pubkey.hex()])
+        if let first_relay = relay_urls.first?.absoluteString {
+            tags.append(["q", ev.id.hex(), first_relay, ev.pubkey.hex()]);
+            tags.append(["p", ev.pubkey.hex(), first_relay])
+        } else {
+            tags.append(["q", ev.id.hex(), "", ev.pubkey.hex()]);
+            tags.append(["p", ev.pubkey.hex()])
         }
     case .posting, .highlighting, .sharing:
         break

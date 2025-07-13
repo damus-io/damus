@@ -63,7 +63,16 @@ struct MenuItems: View {
         self.target_pubkey = target_pubkey
         self.profileModel = profileModel
     }
-    
+
+    var event_relay_url_strings: [String] {
+        let relays = damus_state.nostrNetwork.relaysForEvent(event: event)
+        if !relays.isEmpty {
+            return relays.prefix(Constants.MAX_SHARE_RELAYS).map { $0.absoluteString }
+        }
+
+        return profileModel.getCappedRelayStrings()
+    }
+
     var body: some View {
         Group {
             Button {
@@ -79,7 +88,7 @@ struct MenuItems: View {
             }
 
             Button {
-                UIPasteboard.general.string = event.id.bech32
+                UIPasteboard.general.string = Bech32Object.encode(.nevent(NEvent(event: event, relays: event_relay_url_strings)))
             } label: {
                 Label(NSLocalizedString("Copy note ID", comment: "Context menu option for copying the ID of the note."), image: "note-book")
             }

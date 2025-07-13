@@ -47,6 +47,10 @@ struct NEvent : Equatable, Hashable {
         self.author = author
         self.kind = kind
     }
+
+    init(event: NostrEvent, relays: [String]) {
+        self.init(noteid: event.id, relays: relays, author: event.pubkey, kind: event.kind)
+    }
 }
 
 struct NProfile : Equatable, Hashable {

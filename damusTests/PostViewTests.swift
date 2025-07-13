@@ -174,7 +174,7 @@ final class PostViewTests: XCTestCase {
     func testQuoteRepost() {
         let post = build_post(state: test_damus_state, post: .init(), action: .quoting(test_note), uploadedMedias: [], pubkeys: [])
 
-        XCTAssertEqual(post.tags, [["q", test_note.id.hex()]])
+        XCTAssertEqual(post.tags, [["q", test_note.id.hex(), "", jack_keypair.pubkey.hex()], ["p", jack_keypair.pubkey.hex()]])
     }
 
     func testBuildPostRecognizesStringsAsNpubs() throws {

@@ -21,7 +21,7 @@ struct RepostAction: View {
                 dismiss()
                             
                 guard let keypair = self.damus_state.keypair.to_full(),
-                      let boost = make_boost_event(keypair: keypair, boosted: self.event) else {
+                      let boost = make_boost_event(keypair: keypair, boosted: self.event, relayURL: damus_state.nostrNetwork.relaysForEvent(event: self.event).first) else {
                     return
                 }
 
