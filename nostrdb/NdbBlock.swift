@@ -257,12 +257,12 @@ extension NdbBlockGroup {
             // Start the iteration
             self.metadata.borrow { value in
                 ndb_blocks_iterate_start(cptr, value.as_ptr(), &iter)
-            }
-            
-            // Collect blocks into array
-            while let ptr = ndb_blocks_iterate_next(&iter),
-                  let block = NdbBlock(ndb_block_ptr(ptr: ptr)) {
-                blocks.append(block)
+                
+                // Collect blocks into array
+                while let ptr = ndb_blocks_iterate_next(&iter),
+                      let block = NdbBlock(ndb_block_ptr(ptr: ptr)) {
+                    blocks.append(block)
+                }
             }
         }
         
