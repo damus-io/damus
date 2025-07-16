@@ -109,9 +109,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Notizen von %2$@, %3$@, %4$@ & %1$d weiterem aus deinem vertrauenswürdigen Netzwerk</string>
+			<string>Notizen von %2$@, %3$@, %4$@ &amp; %1$d weiterem aus deinem vertrauenswürdigen Netzwerk</string>
 			<key>other</key>
-			<string>Notizen von %2$@, %3$@, %4$@ & %1$d weiteren aus deinem vertrauenswürdigen Netzwerk</string>
+			<string>Notizen von %2$@, %3$@, %4$@ &amp; %1$d weiteren aus deinem vertrauenswürdigen Netzwerk</string>
 		</dict>
 	</dict>
 	<key>people_reposted_count</key>
