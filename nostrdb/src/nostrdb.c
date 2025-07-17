@@ -4112,6 +4112,9 @@ static int ndb_query_plan_execute_author_kinds(
 			if (pkey->timestamp < since)
 				break;
 
+			if (memcmp(pkey->id, author, 32))
+				break;
+
 			note_id = *(uint64_t*)v.mv_data;
 			if (!(note = ndb_get_note_by_key(txn, note_id, &note_size)))
 				goto next;
