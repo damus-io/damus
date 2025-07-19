@@ -59,6 +59,16 @@ struct EventDetailBar: View {
                 }
                 .buttonStyle(PlainButtonStyle())
             }
+
+            if bar.relays > 0 {
+                let relays = Array(state.nostrNetwork.pool.seen[target] ?? [])
+                NavigationLink(value: Route.UserRelays(relays: relays)) {
+                    let nounString = pluralizedString(key: "relays_count", count: bar.relays)
+                    let noun = Text(nounString).foregroundColor(.gray)
+                    Text("\(Text(verbatim: bar.relays.formatted()).font(.body.bold())) \(noun)", comment: "Sentence composed of 2 variables to describe how many relays a note was found on. In source English, the first variable is the number of relays, and the second variable is 'Relay' or 'Relays'.")
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
         }
     }
 }
