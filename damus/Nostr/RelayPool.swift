@@ -357,6 +357,7 @@ class RelayPool {
                 }
                 seen[nev.id, default: Set()].insert(relay_id)
                 counts[relay_id, default: 0] += 1
+                notify(.update_stats(note_id: nev.id))
             }
         }
     }
