@@ -76,6 +76,11 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, keypair: Keypair) -
     return .separated(render_blocks(blocks: blocks, profiles: profiles, can_hide_last_previewable_refs: true))
 }
 
+// FIXME(tyiu): There are a lot of hacks to get this function to render the blocks correctly.
+// However, the entire note content rendering logic just needs to be rewritten.
+// Block previews should actually be rendered in the position of the note content where it was found.
+// Currently, we put some previews at the bottom of the note, which is incorrect as they take things out of
+// the author's intended context.
 func render_blocks(blocks bs: Blocks, profiles: Profiles, can_hide_last_previewable_refs: Bool = false) -> NoteArtifactsSeparated {
     var invoices: [Invoice] = []
     var urls: [UrlType] = []
@@ -120,6 +125,7 @@ func render_blocks(blocks bs: Blocks, profiles: Profiles, can_hide_last_previewa
                 // We should hide whitespace at the end sequence.
                 hide_text_index = i
             } else if case .hashtag = block {
+                // SPECIAL CASE:
                 // We should keep hashtags at the end sequence but hide all the other previewables around it.
                 hide_text_index = i
             } else {
@@ -171,7 +177,14 @@ func render_blocks(blocks bs: Blocks, profiles: Profiles, can_hide_last_previewa
         case .mention(let m):
             return str + mention_str(m, profiles: profiles)
         case .text(let txt):
-            return str + CompatibleText(stringLiteral: reduce_text_block(ind: ind, hide_text_index: hide_text_index, txt: txt))
+            if case .hashtag = blocks[safe: ind+1] {
+                // SPECIAL CASE:
+                // Do not trim whitespaces from suffix if the following block is a hashtag.
+                // This is because of the code further up (see "SPECIAL CASE").
+                return str + CompatibleText(stringLiteral: reduce_text_block(ind: ind, hide_text_index: -1, txt: txt))
+            } else {
+                return str + CompatibleText(stringLiteral: reduce_text_block(ind: ind, hide_text_index: hide_text_index, txt: txt))
+            }
         case .relay(let relay):
             return str + CompatibleText(stringLiteral: relay)
         case .hashtag(let htag):
