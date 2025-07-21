@@ -266,14 +266,7 @@ func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide
                 invoices.append(inv)
             case .url(let url):
                 guard let url = URL(string: url.as_str()) else { return .loopContinue }
-                let url_type = classify_url(url)
-                switch url_type {
-                case .media:
-                    urls.append(url_type)
-                case .link(let url):
-                    urls.append(url_type)
-                    return .loopReturn(str + url_str(url))
-                }
+                return .loopReturn(str + url_str(url))
             case .mention_index:
                 return .loopContinue
             }
