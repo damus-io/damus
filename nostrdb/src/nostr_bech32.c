@@ -307,7 +307,7 @@ int parse_nostr_bech32(unsigned char *buf, int buflen,
 	unsigned char *start;
 	size_t parsed_len, u5_out_len, u8_out_len;
 	enum nostr_bech32_type type;
-#define MAX_PREFIX 8
+    #define MAX_PREFIX 9    // 8 bytes for the text, 1 byte for the null terminator
 	struct cursor cur, bech32, u8;
 
 	make_cursor(buf, buf + buflen, &cur);
