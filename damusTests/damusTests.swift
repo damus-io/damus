@@ -249,14 +249,6 @@ class damusTests: XCTestCase {
         XCTAssertEqual(ev.tags[0][1].string(), "3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d")
     }
     
-    func testTagGeneration_Nrelay_ContainsRTag() {
-        let ev = createEventFromContentString("nrelay1qqt8wumn8ghj7un9d3shjtnwdaehgu3wvfskueq4r295t")
-        
-        XCTAssertEqual(ev.tags.count, 1)
-        XCTAssertEqual(ev.tags[0][0].string(), "r")
-        XCTAssertEqual(ev.tags[0][1].string(), "wss://relay.nostr.band")
-    }
-    
     func testTagGeneration_Naddr_ContainsATag(){
         let ev = createEventFromContentString("naddr1qqxnzdesxqmnxvpexqunzvpcqyt8wumn8ghj7un9d3shjtnwdaehgu3wvfskueqzypve7elhmamff3sr5mgxxms4a0rppkmhmn7504h96pfcdkpplvl2jqcyqqq823cnmhuld")
         

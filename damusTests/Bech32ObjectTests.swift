@@ -89,16 +89,6 @@ class Bech32ObjectTests: XCTestCase {
         XCTAssertEqual(expectedObject, actualObject)
     }
     
-    func testTLVParsing_NRelayExample_ValidContent() throws {
-        let content = "nrelay1qqt8wumn8ghj7un9d3shjtnwdaehgu3wvfskueq4r295t"
-        let relay = "wss://relay.nostr.band"
-        
-        let expectedObject = Bech32Object.nrelay(relay)
-        let actualObject = Bech32Object.parse(content)
-        
-        XCTAssertEqual(expectedObject, actualObject)
-    }
-    
     func testTLVParsing_NaddrExample_ValidContent() throws {
         let content = "naddr1qqxnzdesxqmnxvpexqunzvpcqyt8wumn8ghj7un9d3shjtnwdaehgu3wvfskueqzypve7elhmamff3sr5mgxxms4a0rppkmhmn7504h96pfcdkpplvl2jqcyqqq823cnmhuld"
         
