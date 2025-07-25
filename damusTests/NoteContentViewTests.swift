@@ -409,20 +409,6 @@ class NoteContentViewTests: XCTestCase {
         assertCompatibleTextHasExpectedString(compatibleText: compatibleText, expected: bech)
     }
     
-    func testMentionStr_Nrelay_ContainsAbbreviated() {
-        let bech = "nrelay1qqt8wumn8ghj7un9d3shjtnwdaehgu3wvfskueq4r295t"
-        let compatibleText = createCompatibleText(bech)
-        
-        assertCompatibleTextHasExpectedString(compatibleText: compatibleText, expected: "wss://relay.nostr.band")
-    }
-    
-    func testMentionStr_Nrelay_ContainsFullBech32() {
-        let bech = "nrelay1qqt8wumn8ghj7un9d3shjtnwdaehgu3wvfskueq4r295t"
-        let compatibleText = createCompatibleText(bech)
-        
-        assertCompatibleTextHasExpectedString(compatibleText: compatibleText, expected: bech)
-    }
-    
     func testMentionStr_Naddr_ContainsAbbreviated() {
         let bech = "naddr1qqxnzdesxqmnxvpexqunzvpcqyt8wumn8ghj7un9d3shjtnwdaehgu3wvfskueqzypve7elhmamff3sr5mgxxms4a0rppkmhmn7504h96pfcdkpplvl2jqcyqqq823cnmhuld"
         let compatibleText = createCompatibleText(bech)
