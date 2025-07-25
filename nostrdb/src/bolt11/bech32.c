@@ -104,7 +104,9 @@ bech32_encoding bech32_decode_len(char* hrp, uint8_t *data, size_t *data_len, co
         ++(*data_len);
     }
     hrp_len = input_len - (1 + *data_len);
-    if (hrp_len > max_hrp_len)
+    // Maximum amount of text content is buffer length - 1 byte, to account for the null-terminator
+    int max_hrp_content_len = max_hrp_len - 1;
+    if (hrp_len > max_hrp_content_len)
 	    return BECH32_ENCODING_NONE;
     if (1 + *data_len >= input_len || *data_len < 6) {
         return BECH32_ENCODING_NONE;
