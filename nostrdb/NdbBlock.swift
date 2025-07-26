@@ -139,6 +139,15 @@ struct NdbBlockGroup: ~Copyable {
             rawTextContent: content
         )
     }
+    
+    /// Parses the note contents on-demand from a specific text.
+    static func parse(content: String) throws(NdbBlocksError) -> Self {
+        guard let metadata = BlocksMetadata.parseContent(content: content) else { throw NdbBlocksError.parseError }
+        return self.init(
+            metadata: .pure(metadata),
+            rawTextContent: content
+        )
+    }
 }
 
 enum MaybeTxn<T: ~Copyable>: ~Copyable {
