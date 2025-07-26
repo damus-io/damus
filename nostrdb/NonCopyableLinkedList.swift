@@ -38,7 +38,7 @@ struct NonCopyableLinkedList<T: ~Copyable>: ~Copyable {
     
     /// Iterates over each item of the list in reverse, with enumeration support.
     func forEachItemReversed<Y, E: Error>(_ borrowingFunction: ((_ index: Int, _ item: borrowing T) throws(E) -> LoopCommand<Y>)) throws(E) -> Y?  {
-        var indexCounter = count
+        var indexCounter = count - 1
         var cursor: Node? = self.tail
         
         outerLoop: while let nextItem = cursor {
