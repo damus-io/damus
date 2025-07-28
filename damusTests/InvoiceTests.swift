@@ -19,6 +19,9 @@ final class InvoiceTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
     
+    /*
+    // gh-3144: It was decided on a standup meeting that we do not need invoices to render, few people use this feature.
+    
     func testParseAnyAmountInvoice() throws {
         let invstr = "LNBC1P3MR5UJSP5G7SA48YD4JWTTPCHWMY4QYN4UWZQCJQ8NMWKD6QE3HCRVYTDLH9SPP57YM9TSA9NN4M4XU59XMJCXKR7YDV29DDP6LVQUT46ZW6CU3KE9GQDQ9V9H8JXQ8P3MYLZJCQPJRZJQF60PZDVNGGQWQDNERZSQN35L8CVQ3QG2Z5NSZYD0D3Q0JW2TL6VUZA7FYQQWKGQQYQQQQLGQQQQXJQQ9Q9QXPQYSGQ39EM4QJMQFKZGJXZVGL7QJMYNSWA8PGDTAGXXRG5Z92M7VLCGKQK2L2THDF8LM0AUKAURH7FVAWDLRNMVF38W4EYJDNVN9V4Z9CRS5CQCV465C"
         
@@ -199,5 +202,7 @@ final class InvoiceTests: XCTestCase {
             XCTAssertEqual(success, true)
         })
     }
+     
+    */
 
 }
