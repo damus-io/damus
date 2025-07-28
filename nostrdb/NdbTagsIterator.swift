@@ -66,7 +66,7 @@ struct TagsSequence: Encodable, Sequence {
             }
             i += 1
         }
-        precondition(false, "sequence subscript oob")
+        precondition(false, "Sequence subscript out of bounds")
         // it seems like the compiler needs this or it gets bitchy
         let nil_ptr = OpaquePointer(bitPattern: 0)
         return .init(note: .init(note: .init(ptr: nil_ptr), size: 0, owned: true, key: nil), tag: .init(ptr: nil_ptr))
