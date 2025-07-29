@@ -113,7 +113,7 @@ static int push_bech32_mention(struct ndb_content_parser *p, struct ndb_str_bloc
 	uint16_t *u8_size;
 	enum nostr_bech32_type type;
 	size_t u5_out_len, u8_out_len;
-	static const int MAX_PREFIX = 8;
+	static const int MAX_PREFIX = 9;
 	char prefix[9] = {0};
 
 	start = p->buffer.p;
