@@ -120,6 +120,9 @@ struct NdbBlockGroup: ~Copyable {
         if event.is_content_encrypted() {
             return try parse(event: event, keypair: keypair)
         }
+        else if event.known_kind == .highlight {
+            return try parse(event: event, keypair: keypair)
+        }
         else {
             guard let offsets = event.block_offsets(ndb: ndb) else {
                 return try parse(event: event, keypair: keypair)

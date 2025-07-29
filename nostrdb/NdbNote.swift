@@ -489,6 +489,9 @@ extension NdbNote {
         if is_content_encrypted() {
             return decrypted(keypair: keypair)
         }
+        else if known_kind == .highlight {
+            return self.referenced_comment_items.first?.content
+        }
 
         return content
     }
