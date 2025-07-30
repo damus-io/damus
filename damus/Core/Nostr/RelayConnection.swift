@@ -9,8 +9,32 @@ import Combine
 import Foundation
 
 enum NostrConnectionEvent {
-    case ws_event(WebSocketEvent)
+    /// Other non-message websocket events
+    case ws_connection_event(WSConnectionEvent)
+    /// A nostr response
     case nostr_event(NostrResponse)
+    
+    /// Models non-messaging websocket events
+    ///
+    /// Implementation note: Messaging events should use `.nostr_event` in `NostrConnectionEvent`
+    enum WSConnectionEvent {
+        case connected
+        case disconnected(URLSessionWebSocketTask.CloseCode, String?)
+        case error(Error)
+        
+        static func from(full_ws_event: WebSocketEvent) -> Self? {
+            switch full_ws_event {
+            case .connected:
+                return .connected
+            case .message(_):
+                return nil
+            case .disconnected(let closeCode, let string):
+                return .disconnected(closeCode, string)
+            case .error(let error):
+                return .error(error)
+            }
+        }
+    }
 }
 
 final class RelayConnection: ObservableObject {
@@ -31,11 +55,11 @@ final class RelayConnection: ObservableObject {
 
     init(url: RelayURL,
          handleEvent: @escaping (NostrConnectionEvent) -> (),
-         processEvent: @escaping (WebSocketEvent) -> ())
+         processUnverifiedWSEvent: @escaping (WebSocketEvent) -> ())
     {
         self.relay_url = url
         self.handleEvent = handleEvent
-        self.processEvent = processEvent
+        self.processEvent = processUnverifiedWSEvent
     }
     
     func ping() {
@@ -115,6 +139,7 @@ final class RelayConnection: ObservableObject {
     }
     
     private func receive(event: WebSocketEvent) {
+        assert(!Thread.isMainThread, "This code must not be executed on the main thread")
         processEvent(event)
         switch event {
         case .connected:
@@ -152,7 +177,8 @@ final class RelayConnection: ObservableObject {
             }
         }
         DispatchQueue.main.async {
-            self.handleEvent(.ws_event(event))
+            guard let ws_connection_event = NostrConnectionEvent.WSConnectionEvent.from(full_ws_event: event) else { return }
+            self.handleEvent(.ws_connection_event(ws_connection_event))
         }
         
         if let description = event.description {
@@ -190,7 +216,9 @@ final class RelayConnection: ObservableObject {
     private func receive(message: URLSessionWebSocketTask.Message) {
         switch message {
         case .string(let messageString):
-            if let ev = decode_nostr_event(txt: messageString) {
+            // NOTE: Once we switch to the local relay model,
+            // we will not need to verify nostr events at this point.
+            if let ev = decode_and_verify_nostr_response(txt: messageString) {
                 DispatchQueue.main.async {
                     self.handleEvent(.nostr_event(ev))
                 }

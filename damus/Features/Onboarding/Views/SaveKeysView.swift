@@ -162,7 +162,7 @@ struct SaveKeysView: View {
 
     func handle_event(relay: RelayURL, ev: NostrConnectionEvent) {
         switch ev {
-        case .ws_event(let wsev):
+        case .ws_connection_event(let wsev):
             switch wsev {
             case .connected:
                 let metadata = create_account_to_metadata(account)

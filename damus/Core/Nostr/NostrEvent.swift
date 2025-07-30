@@ -334,6 +334,27 @@ func decode_nostr_event(txt: String) -> NostrResponse? {
     return NostrResponse.owned_from_json(json: txt)
 }
 
+func decode_and_verify_nostr_response(txt: String) -> NostrResponse? {
+    guard let response = NostrResponse.owned_from_json(json: txt) else { return nil }
+    guard verify_nostr_response(response: response) == true else { return nil }
+    return response
+}
+
+func verify_nostr_response(response: borrowing NostrResponse) -> Bool {
+    switch response {
+    case .event(_, let event):
+        return event.verify()
+    case .notice(_):
+        return true
+    case .eose(_):
+        return true
+    case .ok(_):
+        return true
+    case .auth(_):
+        return true
+    }
+}
+
 func encode_json<T: Encodable>(_ val: T) -> String? {
     let encoder = JSONEncoder()
     encoder.outputFormatting = .withoutEscapingSlashes

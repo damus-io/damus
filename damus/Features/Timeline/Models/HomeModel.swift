@@ -460,7 +460,7 @@ class HomeModel: ContactsDelegate {
     @MainActor
     func handle_event(relay_id: RelayURL, conn_event: NostrConnectionEvent) {
         switch conn_event {
-        case .ws_event(let ev):
+        case .ws_connection_event(let ev):
             switch ev {
             case .connected:
                 if !done_init {

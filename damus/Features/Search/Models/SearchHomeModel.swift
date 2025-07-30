@@ -150,7 +150,7 @@ func load_profiles<Y>(context: String, profiles_subid: String, relay_id: RelayUR
         
         let now = UInt64(Date.now.timeIntervalSince1970)
         switch conn_ev {
-        case .ws_event:
+        case .ws_connection_event:
             break
         case .nostr_event(let ev):
             guard ev.subid == profiles_subid, rid == relay_id else { return }

@@ -345,6 +345,28 @@ class NdbNote: Codable, Equatable, Hashable {
                 json: cstr, json_len: UInt32(json.utf8.count), bufsize: bufsize)
         }
     }
+    
+    func verify() -> Bool {
+        let scratch_buf_len = MAX_NOTE_SIZE
+        let scratch_buf = malloc(scratch_buf_len)
+        defer { free(scratch_buf) }  // Ensure we deallocate as soon as we leave this scope, regardless of the outcome
+        
+        let current_id = self.id
+        
+        // Calculate the ID based on the content
+        guard ndb_calculate_id(self.note.ptr, scratch_buf, Int32(scratch_buf_len)) == 1 else { return false }
+        
+        let computed_id = self.id
+        
+        // Ensure computed ID matches given id to prevent ID tampering
+        guard computed_id == current_id else { return false }
+        
+        // Verify the signature against the pubkey and the computed ID, to verify the validity of the whole note
+        var ctx = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_VERIFY))
+        guard ndb_note_verify(&ctx, ndb_note_pubkey(self.note.ptr), ndb_note_id(self.note.ptr), ndb_note_sig(self.note.ptr)) == 1 else { return false }
+        
+        return true
+    }
 
     static func owned_from_json_cstr(json: UnsafePointer<CChar>, json_len: UInt32, bufsize: Int = 2 << 18) -> NdbNote? {
         let data = malloc(bufsize)

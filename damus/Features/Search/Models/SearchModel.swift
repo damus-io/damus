@@ -109,7 +109,7 @@ func event_matches_filter(_ ev: NostrEvent, filter: NostrFilter) -> Bool {
 
 func handle_subid_event(pool: RelayPool, relay_id: RelayURL, ev: NostrConnectionEvent, handle: (String, NostrEvent) -> ()) -> (String?, Bool) {
     switch ev {
-    case .ws_event:
+    case .ws_connection_event:
         return (nil, false)
         
     case .nostr_event(let res):

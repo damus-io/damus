@@ -126,7 +126,7 @@ class RelayPool {
         }
         let conn = RelayConnection(url: desc.url, handleEvent: { event in
             self.handle_event(relay_id: relay_id, event: event)
-        }, processEvent: { wsev in
+        }, processUnverifiedWSEvent: { wsev in
             guard case .message(let msg) = wsev,
                   case .string(let str) = msg
             else { return }
@@ -214,9 +214,9 @@ class RelayPool {
             var eoseSent = false
             self.subscribe(sub_id: sub_id, filters: filters, handler: { (relayUrl, connectionEvent) in
                 switch connectionEvent {
-                case .ws_event(let ev):
+                case .ws_connection_event(let ev):
                     // Websocket events such as connect/disconnect/error are already handled in `RelayConnection`. Do not perform any handling here.
-                    // For the future, perhaps we should abstract away `.ws_event` in `RelayPool`? Seems like something to be handled on the `RelayConnection` layer.
+                    // For the future, perhaps we should abstract away `.ws_connection_event` in `RelayPool`? Seems like something to be handled on the `RelayConnection` layer.
                     break
                 case .nostr_event(let nostrResponse):
                     guard nostrResponse.subid == sub_id else { return } // Do not stream items that do not belong in this subscription
@@ -366,7 +366,7 @@ class RelayPool {
         record_seen(relay_id: relay_id, event: event)
 
         // run req queue when we reconnect
-        if case .ws_event(let ws) = event {
+        if case .ws_connection_event(let ws) = event {
             if case .connected = ws {
                 run_queue(relay_id)
             }

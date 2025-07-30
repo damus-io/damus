@@ -155,7 +155,7 @@ class ProfileModel: ObservableObject, Equatable {
 
     private func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
         switch ev {
-        case .ws_event:
+        case .ws_connection_event:
             return
         case .nostr_event(let resp):
             guard resp.subid == self.sub_id || resp.subid == self.prof_subid || resp.subid == self.conversations_subid else {

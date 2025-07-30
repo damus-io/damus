@@ -18,6 +18,51 @@ class damusTests: XCTestCase {
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
+    
+    func testEventVerify() throws {
+        let test_valid_note_text = """
+        {"id":"f4a5635d78d4c1ec2bf7d15d33bd8d5e0afdb8a5a24047f095842281c744e6a3","created_at":1753898578,"content":"Test 1102","kind":1,"pubkey":"056b5b5966f500defb3b790a14633e5ec4a0e8883ca29bc23d0030553edb084a","sig":"d03f0beee7355a8b6ce437b43e01f2d3be8c0f3f17b41a8dec8a9b9804d44ab639b7906c545e4b51820f00b09d00cfa5058916e93126e8a11a65e2623f95f152","tags":[]}
+        """
+        let test_invalid_note_tampered_sig_text = """
+        {"id":"f4a5635d78d4c1ec2bf7d15d33bd8d5e0afdb8a5a24047f095842281c744e6a3","created_at":1753898578,"content":"Test 1102","kind":1,"pubkey":"056b5b5966f500defb3b790a14633e5ec4a0e8883ca29bc23d0030553edb084a","sig":"d03f0beee7355a8b6ce437b43e01f2d3be8c0f3f17b41a8dec8a9b9804d44ab639b7906c545e4b51820f00b09d00cfa5058916e93126e8a11a65e2623f95f153","tags":[]}
+        """
+        let test_invalid_note_tampered_id_text = """
+        {"id":"f4a5635d78d4c1ec2bf7d15d33bd8d5e0afdb8a5a24047f095842281c744e600","created_at":1753898578,"content":"Test 1102","kind":1,"pubkey":"056b5b5966f500defb3b790a14633e5ec4a0e8883ca29bc23d0030553edb084a","sig":"d03f0beee7355a8b6ce437b43e01f2d3be8c0f3f17b41a8dec8a9b9804d44ab639b7906c545e4b51820f00b09d00cfa5058916e93126e8a11a65e2623f95f152","tags":[]}
+        """
+        let test_invalid_note_tampered_date_text = """
+        {"id":"f4a5635d78d4c1ec2bf7d15d33bd8d5e0afdb8a5a24047f095842281c744e6a3","created_at":1753898579,"content":"Test 1102","kind":1,"pubkey":"056b5b5966f500defb3b790a14633e5ec4a0e8883ca29bc23d0030553edb084a","sig":"d03f0beee7355a8b6ce437b43e01f2d3be8c0f3f17b41a8dec8a9b9804d44ab639b7906c545e4b51820f00b09d00cfa5058916e93126e8a11a65e2623f95f152","tags":[]}
+        """
+        let test_invalid_note_tampered_pubkey_text = """
+        {"id":"f4a5635d78d4c1ec2bf7d15d33bd8d5e0afdb8a5a24047f095842281c744e6a3","created_at":1753898578,"content":"Test 1102","kind":1,"pubkey":"056b5b5966f500defb3b790a14633e5ec4a0e8883ca29bc23d0030553edb084b","sig":"d03f0beee7355a8b6ce437b43e01f2d3be8c0f3f17b41a8dec8a9b9804d44ab639b7906c545e4b51820f00b09d00cfa5058916e93126e8a11a65e2623f95f152","tags":[]}
+        """
+        let test_invalid_note_tampered_content_text = """
+        {"id":"f4a5635d78d4c1ec2bf7d15d33bd8d5e0afdb8a5a24047f095842281c744e6a3","created_at":1753898578,"content":"Test 1103","kind":1,"pubkey":"056b5b5966f500defb3b790a14633e5ec4a0e8883ca29bc23d0030553edb084a","sig":"d03f0beee7355a8b6ce437b43e01f2d3be8c0f3f17b41a8dec8a9b9804d44ab639b7906c545e4b51820f00b09d00cfa5058916e93126e8a11a65e2623f95f152","tags":[]}
+        """
+        let test_invalid_note_tampered_kind_text = """
+        {"id":"f4a5635d78d4c1ec2bf7d15d33bd8d5e0afdb8a5a24047f095842281c744e6a3","created_at":1753898578,"content":"Test 1102","kind":2,"pubkey":"056b5b5966f500defb3b790a14633e5ec4a0e8883ca29bc23d0030553edb084a","sig":"d03f0beee7355a8b6ce437b43e01f2d3be8c0f3f17b41a8dec8a9b9804d44ab639b7906c545e4b51820f00b09d00cfa5058916e93126e8a11a65e2623f95f152","tags":[]}
+        """
+        let test_invalid_note_tampered_tags_text = """
+        {"id":"f4a5635d78d4c1ec2bf7d15d33bd8d5e0afdb8a5a24047f095842281c744e6a3","created_at":1753898578,"content":"Test 1102","kind":1,"pubkey":"056b5b5966f500defb3b790a14633e5ec4a0e8883ca29bc23d0030553edb084a","sig":"d03f0beee7355a8b6ce437b43e01f2d3be8c0f3f17b41a8dec8a9b9804d44ab639b7906c545e4b51820f00b09d00cfa5058916e93126e8a11a65e2623f95f152","tags":[["t", "foo"]]}
+        """
+        
+        let test_valid_note = NdbNote.owned_from_json(json: test_valid_note_text)!
+        let test_invalid_note_tampered_sig = NdbNote.owned_from_json(json: test_invalid_note_tampered_sig_text)!
+        var test_invalid_note_tampered_id = NdbNote.owned_from_json(json: test_invalid_note_tampered_id_text)!
+        let test_invalid_note_tampered_date = NdbNote.owned_from_json(json: test_invalid_note_tampered_date_text)!
+        let test_invalid_note_tampered_pubkey = NdbNote.owned_from_json(json: test_invalid_note_tampered_pubkey_text)!
+        let test_invalid_note_tampered_content = NdbNote.owned_from_json(json: test_invalid_note_tampered_content_text)!
+        let test_invalid_note_tampered_kind = NdbNote.owned_from_json(json: test_invalid_note_tampered_kind_text)!
+        let test_invalid_note_tampered_tags = NdbNote.owned_from_json(json: test_invalid_note_tampered_tags_text)!
+        
+        XCTAssertEqual(test_valid_note.verify(), true)
+        XCTAssertEqual(test_invalid_note_tampered_sig.verify(), false)
+        XCTAssertEqual(test_invalid_note_tampered_id.verify(), false)
+        XCTAssertEqual(test_invalid_note_tampered_date.verify(), false)
+        XCTAssertEqual(test_invalid_note_tampered_pubkey.verify(), false)
+        XCTAssertEqual(test_invalid_note_tampered_content.verify(), false)
+        XCTAssertEqual(test_invalid_note_tampered_kind.verify(), false)
+        XCTAssertEqual(test_invalid_note_tampered_tags.verify(), false)
+    }
 
     func testIdEquality() throws {
         let pubkey = test_pubkey

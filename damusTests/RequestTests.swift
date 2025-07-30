@@ -22,7 +22,7 @@ final class RequestTests: XCTestCase {
         let url = RelayURL("wss://example.com")!
         let relayDescriptor = RelayPool.RelayDescriptor(url: url, info: .readWrite)
         let relayConnection = RelayConnection(url: url) { _ in
-        } processEvent: { _ in
+        } processUnverifiedWSEvent: { _ in
         }
 
         let relay = RelayPool.Relay(descriptor: relayDescriptor, connection: relayConnection)
