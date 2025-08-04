@@ -30,7 +30,10 @@ class NdbTxn<T>: RawNdbTxnAccessible {
         self.name = name ?? "txn"
         self.ndb = ndb
         self.generation = ndb.generation
-        if let active_txn = Thread.current.threadDictionary["ndb_txn"] as? ndb_txn {
+        if let active_txn = Thread.current.threadDictionary["ndb_txn"] as? ndb_txn,
+           let txn_generation = Thread.current.threadDictionary["txn_generation"] as? Int,
+           txn_generation == ndb.generation
+        {
             // some parent thread is active, use that instead
             print("txn: inherited txn")
             self.txn = active_txn
@@ -147,7 +150,10 @@ class SafeNdbTxn<T: ~Copyable> {
         var generation = ndb.generation
         var txn: ndb_txn
         let inherited: Bool
-        if let active_txn = Thread.current.threadDictionary["ndb_txn"] as? ndb_txn {
+        if let active_txn = Thread.current.threadDictionary["ndb_txn"] as? ndb_txn,
+           let txn_generation = Thread.current.threadDictionary["txn_generation"] as? Int,
+           txn_generation == ndb.generation
+        {
             // some parent thread is active, use that instead
             print("txn: inherited txn")
             txn = active_txn
