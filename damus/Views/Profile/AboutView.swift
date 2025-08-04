@@ -47,9 +47,8 @@ struct AboutView: View {
             }
         }
         .onAppear {
-            // TODO: Fix about content
-            //let blocks = ndb_parse_content(content: .content(about, nil))
-            //about_string = render_blocks(blocks: blocks, profiles: state.profiles).content.attributed
+            guard let blocks = try? NdbBlockGroup.parse(content: about) else { return }
+            self.about_string = render_blocks(blocks: blocks, profiles: state.profiles).content.attributed
         }
         
     }
