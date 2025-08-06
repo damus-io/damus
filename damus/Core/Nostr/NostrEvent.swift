@@ -780,23 +780,19 @@ func validate_event(ev: NostrEvent) -> ValidationResult {
 }
 
 func first_eref_mention(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> Mention<NoteId>? {
-    guard let blockGroup = try? NdbBlockGroup.from(event: ev, using: ndb, and: keypair) else {
-        return nil
-    }
+    guard let blockGroup = try? NdbBlockGroup.from(event: ev, using: ndb, and: keypair) else { return nil }
     
-    return try? blockGroup.forEachBlock({ index, block in
-        // Step 1: Filter
+    return blockGroup.forEachBlock({ index, block in
         switch block {
         case .mention(let mention):
-            switch mention.bech32_type {
-            case .note:
-                let data = mention.bech32.note.event_id.as_data(size: 32)
-                return .loopReturn(.note(NoteId(data)))
-            case .nevent:
-                let data = mention.bech32.nevent.event_id.as_data(size: 32)
-                return .loopReturn(.note(NoteId(data)))
+            guard let mention = MentionRef(block: mention) else { return .loopContinue }
+            switch mention.nip19 {
+            case .note(let noteId):
+                return .loopReturn(Mention<NoteId>.note(noteId, index: index))
+            case .nevent(let nEvent):
+                return .loopReturn(Mention<NoteId>.note(nEvent.noteid, index: index))
             default:
-                return .loopBreak
+                return .loopContinue
             }
         default:
             return .loopContinue
