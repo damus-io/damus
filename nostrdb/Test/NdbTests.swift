@@ -81,7 +81,7 @@ final class NdbTests: XCTestCase {
 
     }
 
-    func test_ndb_seach() throws {
+    func test_ndb_search() throws {
         do {
             let ndb = Ndb(path: db_dir)!
             let ok = ndb.process_events(test_wire_events)
@@ -93,6 +93,10 @@ final class NdbTests: XCTestCase {
             let note_ids = ndb.text_search(query: "barked")
             XCTAssertEqual(note_ids.count, 1)
             let expected_note_id = NoteId(hex: "b17a540710fe8495b16bfbaf31c6962c4ba8387f3284a7973ad523988095417e")!
+            guard note_ids.count > 0 else {
+                XCTFail("Expected at least one note to be found")
+                return
+            }
             let note_id = ndb.lookup_note_by_key(note_ids[0])?.map({ n in n?.id }).value
             XCTAssertEqual(note_id, .some(expected_note_id))
         }

@@ -219,8 +219,8 @@ class ProfileModel: ObservableObject, Equatable {
         damus.nostrNetwork.pool.unsubscribe(sub_id: findRelay_subid)
     }
 
-    func getCappedRelayStrings() -> [String] {
-        return self.relay_urls?.prefix(Constants.MAX_SHARE_RELAYS).map { $0.absoluteString } ?? []
+    func getCappedRelays() -> [RelayURL] {
+        return relay_list?.relays.keys.prefix(Constants.MAX_SHARE_RELAYS).map { $0 } ?? []
     }
 }
 

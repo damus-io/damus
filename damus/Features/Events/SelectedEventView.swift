@@ -82,7 +82,7 @@ struct SelectedEventView: View {
     
     var Mention: some View {
         Group {
-            if let mention = first_eref_mention(ev: event, keypair: damus.keypair) {
+            if let mention = first_eref_mention(ndb: damus.ndb, ev: event, keypair: damus.keypair) {
                 MentionView(damus_state: damus, mention: mention)
                     .padding(.horizontal)
             }

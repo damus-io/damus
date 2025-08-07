@@ -23,6 +23,21 @@ struct Blur: UIViewRepresentable {
     }
 }
 
+extension bech32_nprofile {
+    func matches_pubkey(pk: Pubkey) -> Bool {
+        pk.id.withUnsafeBytes { bytes in
+            memcmp(self.pubkey, bytes, 32) == 0
+        }
+    }
+}
+
+extension bech32_npub {
+    func matches_pubkey(pk: Pubkey) -> Bool {
+        pk.id.withUnsafeBytes { bytes in
+            memcmp(self.pubkey, bytes, 32) == 0
+        }
+    }
+}
 
 struct NoteContentView: View {
     
@@ -280,7 +295,7 @@ struct NoteContentView: View {
                 }
                 await preload_event(plan: plan, state: damus_state)
             } else if force_artifacts {
-                let arts = render_note_content(ev: event, profiles: damus_state.profiles, keypair: damus_state.keypair)
+                let arts = await ContentRenderer().render_note_content(ndb: damus_state.ndb, ev: event, profiles: damus_state.profiles, keypair: damus_state.keypair)
                 self.artifacts_model.state = .loaded(arts)
             }
         }
@@ -335,20 +350,37 @@ struct NoteContentView: View {
     var body: some View {
         ArtifactContent
             .onReceive(handle_notify(.profile_updated)) { profile in
-                let blocks = event.blocks(damus_state.keypair)
-                for block in blocks.blocks {
+                guard let blockGroup = try? NdbBlockGroup.from(event: event, using: damus_state.ndb, and: damus_state.keypair) else {
+                    return
+                }
+                let _: Int? = try? blockGroup.forEachBlock { index, block in
                     switch block {
                     case .mention(let m):
-                        if case .pubkey(let pk) = m.ref, pk == profile.pubkey {
-                            load(force_artifacts: true)
-                            return
+                        guard let typ = m.bech32_type else {
+                            return .loopContinue
                         }
-                    case .relay: return
-                    case .text: return
-                    case .hashtag: return
-                    case .url: return
-                    case .invoice: return
+                        switch typ {
+                        case .nprofile:
+                            if m.bech32.nprofile.matches_pubkey(pk: profile.pubkey) {
+                                load(force_artifacts: true)
+                            }
+                        case .npub:
+                            if m.bech32.npub.matches_pubkey(pk: profile.pubkey) {
+                                load(force_artifacts: true)
+                            }
+                        case .nevent: return .loopContinue
+                        case .nrelay: return .loopContinue
+                        case .nsec: return .loopContinue
+                        case .note: return .loopContinue
+                        case .naddr: return .loopContinue
+                        }
+                    case .text: return .loopContinue
+                    case .hashtag: return .loopContinue
+                    case .url: return .loopContinue
+                    case .invoice: return .loopContinue
+                    case .mention_index(_): return .loopContinue
                     }
+                    return .loopContinue
                 }
             }
             .onAppear {
@@ -503,15 +535,25 @@ struct NoteContentView_Previews: PreviewProvider {
     }
 }
 
-func separate_images(ev: NostrEvent, keypair: Keypair) -> [MediaUrl]? {
-    let urlBlocks: [URL] = ev.blocks(keypair).blocks.reduce(into: []) { urls, block in
-        guard case .url(let url) = block else {
-            return
-        }
-        if classify_url(url).is_img != nil {
-            urls.append(url)
-        }
+func separate_images(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> [MediaUrl]? {
+    guard let blockGroup = try? NdbBlockGroup.from(event: ev, using: ndb, and: keypair) else {
+        return nil
     }
+    let urlBlocks: [URL] = (try? blockGroup.reduce(initialResult: Array<URL>()) { index, urls, block in
+        switch block {
+        case .url(let url):
+            guard let parsed_url = URL(string: url.as_str()) else {
+                return .loopContinue
+            }
+            
+            if classify_url(parsed_url).is_img != nil {
+                return .loopReturn(urls + [parsed_url])
+            }
+        default:
+            break
+        }
+        return .loopContinue
+    }) ?? []
     let mediaUrls = urlBlocks.map { MediaUrl.image($0) }
     return mediaUrls.isEmpty ? nil : mediaUrls
 }

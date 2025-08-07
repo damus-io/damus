@@ -27,13 +27,13 @@ struct ShareAction: View {
         self._show_share = show_share
     }
 
-    var event_relay_url_strings: [String] {
+    var event_relay_url_strings: [RelayURL] {
         let relays = userProfile.damus.nostrNetwork.relaysForEvent(event: event)
         if !relays.isEmpty {
-            return relays.prefix(Constants.MAX_SHARE_RELAYS).map { $0.absoluteString }
+            return relays.prefix(Constants.MAX_SHARE_RELAYS).map { $0 }
         }
 
-        return userProfile.getCappedRelayStrings()
+        return userProfile.getCappedRelays()
     }
 
     var body: some View {
@@ -49,7 +49,7 @@ struct ShareAction: View {
                 
                 ShareActionButton(img: "link", text: NSLocalizedString("Copy Link", comment: "Button to copy link to note")) {
                     dismiss()
-                    UIPasteboard.general.string = "https://damus.io/" + Bech32Object.encode(.nevent(NEvent(event: event, relays: event_relay_url_strings)))
+                    UIPasteboard.general.string = "https://damus.io/" + Bech32Object.encode(.nevent(NEvent(noteid: event.id, relays: userProfile.getCappedRelays())))
                 }
                 
                 let bookmarkImg = isBookmarked ? "bookmark.fill" : "bookmark"

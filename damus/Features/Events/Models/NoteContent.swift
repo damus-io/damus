@@ -66,14 +66,31 @@ func note_artifact_is_separated(kind: NostrKind?) -> Bool {
     return kind != .longform
 }
 
-func render_note_content(ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> NoteArtifacts {
-    let blocks = ev.blocks(keypair)
-
+func render_immediately_available_note_content(ndb: Ndb, ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> NoteArtifacts {
     if ev.known_kind == .longform {
         return .longform(LongformContent(ev.content))
     }
     
-    return .separated(render_blocks(blocks: blocks, profiles: profiles, can_hide_last_previewable_refs: true))
+    do {
+        let blocks = try NdbBlockGroup.from(event: ev, using: ndb, and: keypair)
+        return .separated(render_blocks(blocks: blocks, profiles: profiles, can_hide_last_previewable_refs: true))
+    }
+    catch {
+        // TODO: Improve error handling in the future, bubbling it up so that the view can decide how display errors. Keep legacy behavior for now.
+        return .separated(.just_content(ev.get_content(keypair)))
+    }
+}
+
+actor ContentRenderer {
+    func render_note_content(ndb: Ndb, ev: NostrEvent, profiles: Profiles, keypair: Keypair) async -> NoteArtifacts {
+        if ev.known_kind == .dm {
+            // Use the enhanced render_immediately_available_note_content which now handles DMs properly
+            // by decrypting and parsing the content with ndb_parse_content
+            return render_immediately_available_note_content(ndb: ndb, ev: ev, profiles: profiles, keypair: keypair)
+        }
+        let result = try? await ndb.waitFor(noteId: ev.id, timeout: 3)
+        return render_immediately_available_note_content(ndb: ndb, ev: ev, profiles: profiles, keypair: keypair)
+    }
 }
 
 // FIXME(tyiu): There are a lot of hacks to get this function to render the blocks correctly.
@@ -81,122 +98,185 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, keypair: Keypair) -
 // Block previews should actually be rendered in the position of the note content where it was found.
 // Currently, we put some previews at the bottom of the note, which is incorrect as they take things out of
 // the author's intended context.
-func render_blocks(blocks bs: Blocks, profiles: Profiles, can_hide_last_previewable_refs: Bool = false) -> NoteArtifactsSeparated {
+func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide_last_previewable_refs: Bool = false) -> NoteArtifactsSeparated {
     var invoices: [Invoice] = []
     var urls: [UrlType] = []
-    let blocks = bs.blocks
-
+    
     var end_mention_count = 0
     var end_url_count = 0
-
-    // Search backwards until we find the beginning index of the chain of previewables that reach the end of the content.
-    var hide_text_index = blocks.endIndex
-    if can_hide_last_previewable_refs {
-        outerLoop: for (i, block) in blocks.enumerated().reversed() {
-            if block.is_previewable {
-                switch block {
-                case .mention:
-                    end_mention_count += 1
-
-                    // If there is more than one previewable mention,
-                    // do not hide anything because we allow rich rendering of only one mention currently.
-                    // This should be fixed in the future to show events inline instead.
-                    if end_mention_count > 1 {
-                        hide_text_index = blocks.endIndex
-                        break outerLoop
-                    }
-                case .url(let url):
-                    let url_type = classify_url(url)
-                    if case .link = url_type {
-                        end_url_count += 1
-
-                        // If there is more than one link, do not hide anything because we allow rich rendering of only
-                        // one link.
-                        if end_url_count > 1 {
-                            hide_text_index = blocks.endIndex
-                            break outerLoop
-                        }
-                    }
-                default:
-                    break
-                }
-                hide_text_index = i
-            } else if case .text(let txt) = block, txt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                // We should hide whitespace at the end sequence.
-                hide_text_index = i
-            } else if case .hashtag = block {
-                // SPECIAL CASE:
-                // We should keep hashtags at the end sequence but hide all the other previewables around it.
-                hide_text_index = i
-            } else {
-                break
+    
+    let note_ref_count: Int? = try? blocks.reduce(initialResult: 0) { index, partialResult, item in
+        switch item {
+        case .mention(let mention):
+            if let typ = mention.bech32_type,
+               typ.is_notelike {
+                return .loopReturn(partialResult + 1)
             }
-        }
-    }
-
-    var ind: Int = -1
-    let txt: CompatibleText = blocks.reduce(CompatibleText()) { str, block in
-        ind = ind + 1
-
-        // Add the rendered previewable blocks to their type-specific lists.
-        switch block {
-        case .invoice(let invoice):
-            invoices.append(invoice)
-        case .url(let url):
-            let url_type = classify_url(url)
-            urls.append(url_type)
         default:
             break
         }
+        return .loopContinue
+    }
+    let one_note_ref = note_ref_count == 1
 
-        if can_hide_last_previewable_refs {
-            // If there are previewable blocks that occur before the consecutive sequence of them at the end of the content,
-            // we should not hide the text representation of any previewable block to avoid altering the format of the note.
-            if ind < hide_text_index && block.is_previewable {
-                hide_text_index = blocks.endIndex
-            }
-
-            // No need to show the text representation of the block if the only previewables are the sequence of them
-            // found at the end of the content.
-            // This is to save unnecessary use of screen space.
-            // The only exception is that if there are hashtags embedded in the end sequence, which is not uncommon,
-            // then we still want to show those hashtags but hide everything else that is previewable in the end sequence.
-            if ind >= hide_text_index {
-                if case .text(let txt) = block, txt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    if case .hashtag = blocks[safe: ind+1] {
-                        return str + CompatibleText(stringLiteral: reduce_text_block(ind: ind, hide_text_index: -1, txt: txt))
+    // Search backwards until we find the beginning index of the chain of previewables that reach the end of the content.
+    var hide_text_index: Int = 0
+    if can_hide_last_previewable_refs {
+        let _: ()? = blocks.withList({ blocksList in
+            let endIndex = blocksList.count
+            hide_text_index = endIndex
+            return blocksList.forEachItemReversed({ index, block in
+                if block.is_previewable {
+                    switch block {
+                    case .mention:
+                        end_mention_count += 1
+                        
+                        // If there is more than one previewable mention,
+                        // do not hide anything because we allow rich rendering of only one mention currently.
+                        // This should be fixed in the future to show events inline instead.
+                        if end_mention_count > 1 {
+                            hide_text_index = endIndex
+                            return .loopBreak
+                        }
+                    case .url(let url_block):
+                        guard let url = URL(string: url_block.as_str()) else {
+                            return .loopContinue    // We can't classify this, ignore and move on
+                        }
+                        let url_type = classify_url(url)
+                        if case .link = url_type {
+                            end_url_count += 1
+                            
+                            // If there is more than one link, do not hide anything because we allow rich rendering of only
+                            // one link.
+                            if end_url_count > 1 {
+                                hide_text_index = endIndex
+                                return .loopBreak
+                            }
+                        }
+                    default:
+                        break
                     }
-                } else if case .hashtag(let htag) = block {
-                    return str + hashtag_str(htag)
+                    hide_text_index = index
                 }
-                return str
-            }
-        }
-
-        switch block {
-        case .mention(let m):
-            return str + mention_str(m, profiles: profiles)
-        case .text(let txt):
-            if case .hashtag = blocks[safe: ind+1] {
-                // SPECIAL CASE:
-                // Do not trim whitespaces from suffix if the following block is a hashtag.
-                // This is because of the code further up (see "SPECIAL CASE").
-                return str + CompatibleText(stringLiteral: reduce_text_block(ind: ind, hide_text_index: -1, txt: txt))
-            } else {
-                return str + CompatibleText(stringLiteral: reduce_text_block(ind: ind, hide_text_index: hide_text_index, txt: txt))
-            }
-        case .relay(let relay):
-            return str + CompatibleText(stringLiteral: relay)
-        case .hashtag(let htag):
-            return str + hashtag_str(htag)
-        case .invoice(let invoice):
-            return str + invoice_str(invoice)
-        case .url(let url):
-            return str + url_str(url)
-        }
+                else {
+                    switch block {
+                    case .text(let txt_block):
+                        if let txt = NdbBlock.convertToStringCopy(from: txt_block),
+                           txt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            // We should hide whitespace at the end sequence.
+                            hide_text_index = index
+                        }
+                        else {
+                            return .loopBreak
+                        }
+                    case .hashtag(_):
+                        // SPECIAL CASE:
+                        // We should keep hashtags at the end sequence but hide all the other previewables around it.
+                        hide_text_index = index
+                    default:
+                        return .loopBreak
+                    }
+                }
+                return .loopContinue
+            })
+        })
     }
 
-    return NoteArtifactsSeparated(content: txt, words: bs.words, urls: urls, invoices: invoices)
+    let txt: CompatibleText? = try? blocks.withList({ blocksList in
+        let endIndex = blocksList.count
+        return try blocksList.reduce(initialResult: CompatibleText(), { index, str, block in
+
+            // Add the rendered previewable blocks to their type-specific lists.
+            switch block {
+            case .url(let url_block):
+                guard let url_string = NdbBlock.convertToStringCopy(from: url_block),
+                      let url = URL(string: url_string) else {
+                    break    // We can't classify this, ignore and move on
+                }
+                let url_type = classify_url(url)
+                urls.append(url_type)
+            case .invoice(let invoice_block):
+                guard let invoice = invoice_block.as_invoice() else { break }
+                invoices.append(invoice)
+            default:
+                break
+            }
+
+            if can_hide_last_previewable_refs {
+                // If there are previewable blocks that occur before the consecutive sequence of them at the end of the content,
+                // we should not hide the text representation of any previewable block to avoid altering the format of the note.
+                if index < hide_text_index && block.is_previewable {
+                    hide_text_index = endIndex
+                }
+
+                // No need to show the text representation of the block if the only previewables are the sequence of them
+                // found at the end of the content.
+                // This is to save unnecessary use of screen space.
+                // The only exception is that if there are hashtags embedded in the end sequence, which is not uncommon,
+                // then we still want to show those hashtags but hide everything else that is previewable in the end sequence.
+                if index >= hide_text_index {
+                    switch block {
+                    case .text(let txt_block):
+                        if let txt = NdbBlock.convertToStringCopy(from: txt_block),
+                           txt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            let returnItem: CompatibleText? = blocksList.useItem(at: index + 1, { matchingBlock in
+                                switch matchingBlock {
+                                case .hashtag(_):
+                                    return str + CompatibleText(stringLiteral: reduce_text_block(ind: index, hide_text_index: hide_text_index, txt: txt))
+                                default:
+                                    return nil
+                                }
+                            }) ?? nil
+                            if let returnItem {
+                                return .loopReturn(returnItem)
+                            }
+                        }
+                    case .hashtag(let htag):
+                        return .loopReturn(str + hashtag_str(htag.as_str()))
+                    default:
+                        return .loopContinue
+                    }
+                    return .loopReturn(str)
+                }
+            }
+
+            switch block {
+            case .mention(let m):
+                if let typ = m.bech32_type, typ.is_notelike, one_note_ref {
+                    return .loopContinue
+                }
+                guard let mention = MentionRef(block: m) else { return .loopContinue }
+                return .loopReturn(str + mention_str(.any(mention), profiles: profiles))
+            case .text(let txt):
+                var hide_text_index_argument = hide_text_index
+                blocksList.useItem(at: index+1, { block in
+                    switch block {
+                    case .hashtag(_):
+                        // SPECIAL CASE:
+                        // Do not trim whitespaces from suffix if the following block is a hashtag.
+                        // This is because of the code further up (see "SPECIAL CASE").
+                        hide_text_index_argument = -1
+                    default:
+                        break
+                    }
+                })
+                return .loopReturn(str + CompatibleText(stringLiteral: reduce_text_block(ind: index, hide_text_index: hide_text_index_argument, txt: txt.as_str())))
+            case .hashtag(let htag):
+                return .loopReturn(str + hashtag_str(htag.as_str()))
+            case .invoice(let invoice):
+                guard let inv = invoice.as_invoice() else { return .loopContinue }
+                invoices.append(inv)
+            case .url(let url):
+                guard let url = URL(string: url.as_str()) else { return .loopContinue }
+                return .loopReturn(str + url_str(url))
+            case .mention_index:
+                return .loopContinue
+            }
+            return .loopContinue
+        })
+    })
+
+    return NoteArtifactsSeparated(content: txt ?? CompatibleText(), words: blocks.words, urls: urls, invoices: invoices)
 }
 
 func reduce_text_block(ind: Int, hide_text_index: Int, txt: String) -> String {
@@ -262,13 +342,17 @@ func mention_str(_ m: Mention<MentionRef>, profiles: Profiles) -> CompatibleText
     let bech32String = Bech32Object.encode(m.ref.toBech32Object())
     
     let display_str: String = {
-        switch m.ref {
-        case .pubkey(let pk): return getDisplayName(pk: pk, profiles: profiles)
+        switch m.ref.nip19 {
+        case .npub(let pk): return getDisplayName(pk: pk, profiles: profiles)
         case .note: return abbrev_identifier(bech32String)
         case .nevent: return abbrev_identifier(bech32String)
         case .nprofile(let nprofile): return getDisplayName(pk: nprofile.author, profiles: profiles)
         case .nrelay(let url): return url
         case .naddr: return abbrev_identifier(bech32String)
+        case .nsec(let prv):
+            guard let npub = privkey_to_pubkey(privkey: prv)?.npub else { return "nsec..." }
+            return abbrev_identifier(npub)
+        case .nscript(_): return bech32String
         }
     }()
 

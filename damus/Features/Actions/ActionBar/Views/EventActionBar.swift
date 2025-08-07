@@ -218,13 +218,13 @@ struct EventActionBar: View {
         }
     }
 
-    var event_relay_url_strings: [String] {
+    var event_relay_url_strings: [RelayURL] {
         let relays = damus_state.nostrNetwork.relaysForEvent(event: event)
         if !relays.isEmpty {
-            return relays.prefix(Constants.MAX_SHARE_RELAYS).map { $0.absoluteString }
+            return relays.prefix(Constants.MAX_SHARE_RELAYS).map { $0 }
         }
 
-        return userProfile.getCappedRelayStrings()
+        return userProfile.getCappedRelays()
     }
 
     var body: some View {

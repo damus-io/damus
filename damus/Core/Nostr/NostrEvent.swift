@@ -518,6 +518,15 @@ func uniq<T: Hashable>(_ xs: [T]) -> [T] {
     return ys
 }
 
+func gather_quote_ids(our_pubkey: Pubkey, from: NostrEvent) -> [RefId] {
+    var ids: [RefId] = [.quote(from.id.quote_id)]
+    if from.pubkey != our_pubkey {
+        ids.append(.pubkey(from.pubkey))
+    }
+    return ids
+}
+
+
 func gather_reply_ids(our_pubkey: Pubkey, from: NostrEvent) -> [RefId] {
     var ids: [RefId] = from.referenced_ids.first.map({ ref in [ .event(ref) ] }) ?? []
 
@@ -535,14 +544,6 @@ func gather_reply_ids(our_pubkey: Pubkey, from: NostrEvent) -> [RefId] {
         ids.append(.pubkey(from.pubkey))
     }
 
-    return ids
-}
-
-func gather_quote_ids(our_pubkey: Pubkey, from: NostrEvent) -> [RefId] {
-    var ids: [RefId] = [.quote(from.id.quote_id)]
-    if from.pubkey != our_pubkey {
-        ids.append(.pubkey(from.pubkey))
-    }
     return ids
 }
 
@@ -778,42 +779,42 @@ func validate_event(ev: NostrEvent) -> ValidationResult {
     return ok ? .ok : .bad_sig
 }
 
-func first_eref_mention(ev: NostrEvent, keypair: Keypair) -> Mention<NoteId>? {
-    let blocks = ev.blocks(keypair).blocks.filter { block in
-        guard case .mention(let mention) = block else {
-                return false
-            }
-
-        switch mention.ref {
-        case .note, .nevent:
-            return true
-        default:
-            return false
-        }
-    }
+func first_eref_mention(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> Mention<NoteId>? {
+    guard let blockGroup = try? NdbBlockGroup.from(event: ev, using: ndb, and: keypair) else { return nil }
     
-    /// MARK: - Preview
-    if let firstBlock = blocks.first,
-       case .mention(let mention) = firstBlock {
-        switch mention.ref {
-        case .note(let note_id):
-            return .note(note_id)
-        case .nevent(let nevent):
-            return .note(nevent.noteid)
+    return blockGroup.forEachBlock({ index, block in
+        switch block {
+        case .mention(let mention):
+            guard let mention = MentionRef(block: mention) else { return .loopContinue }
+            switch mention.nip19 {
+            case .note(let noteId):
+                return .loopReturn(Mention<NoteId>.note(noteId, index: index))
+            case .nevent(let nEvent):
+                return .loopReturn(Mention<NoteId>.note(nEvent.noteid, index: index))
+            default:
+                return .loopContinue
+            }
         default:
-            return nil
+            return .loopContinue
         }
-    }
-    return nil
+    })
 }
 
-func separate_invoices(ev: NostrEvent, keypair: Keypair) -> [Invoice]? {
-    let invoiceBlocks: [Invoice] = ev.blocks(keypair).blocks.reduce(into: []) { invoices, block in
-        guard case .invoice(let invoice) = block else {
-            return
-        }
-        invoices.append(invoice)
+func separate_invoices(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> [Invoice]? {
+    guard let blockGroup = try? NdbBlockGroup.from(event: ev, using: ndb, and: keypair) else {
+        return nil
     }
+    let invoiceBlocks: [Invoice] = (try? blockGroup.reduce(initialResult: [Invoice](), { index, invoices, block in
+        switch block {
+        case .invoice(let invoice):
+            if let invoice = invoice.as_invoice() {
+                return .loopReturn(invoices + [invoice])
+            }
+        default:
+            break
+        }
+        return .loopContinue
+    })) ?? []
     return invoiceBlocks.isEmpty ? nil : invoiceBlocks
 }
 
