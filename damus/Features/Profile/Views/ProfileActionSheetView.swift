@@ -14,6 +14,7 @@ struct ProfileActionSheetView: View {
     @StateObject var profile: ProfileModel
     @StateObject var zap_button_model: ZapButtonModel = ZapButtonModel()
     @State private var sheetHeight: CGFloat = .zero
+    @State private var favorite: Bool
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
@@ -25,6 +26,7 @@ struct ProfileActionSheetView: View {
         self.damus_state = damus_state
         self._profile = StateObject(wrappedValue: ProfileModel(pubkey: pubkey, damus: damus_state))
         self.navigationHandler = navigationHandler
+        self.favorite = damus_state.favorites.isFavorite(pubkey)
     }
 
     func imageBorderColor() -> Color {
@@ -66,6 +68,31 @@ struct ProfileActionSheetView: View {
             Text("Mute", comment: "Button label that allows the user to mute the user shown on-screen")
                 .foregroundStyle(.secondary)
                 .font(.caption)
+        }
+    }
+
+    var favoriteButton: some View {
+        VStack(alignment: .center, spacing: 10) {
+            Button(
+                action: {
+                    damus_state.favorites.toggleFavorite(profile.pubkey)
+                },
+                label: {
+                    Image("star")
+                        .foregroundColor(favorite ? .green : .primary)
+                        .profile_button_style(scheme: colorScheme)
+                }
+            )
+            .buttonStyle(NeutralButtonShape.circle.style)
+            Text("Favorite", comment: "Button label that allows the user to favorite the user shown on-screen")
+                .foregroundStyle(.secondary)
+                .font(.caption)
+        }
+        .onReceive(handle_notify(.favorite)) { pubkey in
+            favorite = damus_state.favorites.isFavorite(pubkey)
+        }
+        .onReceive(handle_notify(.unfavorite)) { pubkey in
+            favorite = damus_state.favorites.isFavorite(pubkey)
         }
     }
         
@@ -121,17 +148,18 @@ struct ProfileActionSheetView: View {
                 AboutView(state: damus_state, about: about, max_about_length: 140, text_alignment: .center)
                     .padding(.top)
             }
-            
-            HStack(spacing: 20) {
-                self.followButton
-                self.zapButton
-                self.dmButton
-                if damus_state.keypair.pubkey != profile.pubkey && damus_state.keypair.privkey != nil {
-                    self.muteButton
+            ScrollView(.horizontal) {
+                HStack(spacing: 20) {
+                    followButton
+                    favoriteButton
+                    zapButton
+                    dmButton
+                    if damus_state.keypair.pubkey != profile.pubkey && damus_state.keypair.privkey != nil {
+                        muteButton
+                    }
                 }
+                .padding()
             }
-            .padding()
-            
             Button(
                 action: {
                     self.navigate(route: Route.ProfileByKey(pubkey: profile.pubkey))

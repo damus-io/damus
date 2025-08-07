@@ -422,6 +422,15 @@ struct ContentView: View {
         .onReceive(handle_notify(.followed)) { _ in
             home.resubscribe(.following)
         }
+        .onReceive(handle_notify(.favorite)) { pubkey in
+            damus_state.favorites.handle_favorite(state: damus_state, target: pubkey)
+        }
+        .onReceive(handle_notify(.unfavorite)) { pubkey in
+            damus_state.favorites.handle_unfavorite(state: damus_state, target: pubkey)
+        }
+        .onReceive(handle_notify(.favorites_updated)) { _ in
+            home.resubscribe(.following)
+        }
         .onReceive(handle_notify(.post)) { post in
             guard let state = self.damus_state,
                   let keypair = state.keypair.to_full() else {
@@ -701,7 +710,8 @@ struct ContentView: View {
                                       ndb: ndb,
                                       quote_reposts: .init(our_pubkey: pubkey),
                                       emoji_provider: DefaultEmojiProvider(showAllVariations: true),
-                                      favicon_cache: FaviconCache()
+                                      favicon_cache: FaviconCache(),
+                                      favorites: FavoritesManager.shared
         )
         
         home.damus_state = self.damus_state!

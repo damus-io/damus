@@ -185,7 +185,7 @@ class SuggestedUsersViewModel: ObservableObject {
     /// Loads the newest follow packs from the network, and overwrites the provided follow packs where appropriate
     private func loadSuggestedFollowPacksFromNetwork(packsById: inout [FollowPackID: FollowPackEvent]) async {
         let filter = NostrFilter(
-            kinds: [NostrKind.follow_list],
+            kinds: [NostrKind.starter_list],
             authors: [Constants.ONBOARDING_FOLLOW_PACK_CURATOR_PUBKEY]
         )
         

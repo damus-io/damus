@@ -169,7 +169,7 @@ struct FollowPackView: View {
 struct FollowPackView_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
-            FollowPackView(state: test_damus_state, ev: test_follow_list_event, model: FollowPackModel(damus_state: test_damus_state), blur_imgs: false)
+            FollowPackView(state: test_damus_state, ev: test_starter_list_event, model: FollowPackModel(damus_state: test_damus_state), blur_imgs: false)
         }
         .frame(height: 400)
     }

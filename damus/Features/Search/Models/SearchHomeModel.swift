@@ -43,11 +43,11 @@ class SearchHomeModel: ObservableObject {
         loading = true
         let to_relays = determine_to_relays(pool: damus_state.nostrNetwork.pool, filters: damus_state.relay_filters)
 
-        var follow_list_filter = NostrFilter(kinds: [.follow_list])
-        follow_list_filter.until = UInt32(Date.now.timeIntervalSince1970)
+        var starter_list_filter = NostrFilter(kinds: [.starter_list])
+        starter_list_filter.until = UInt32(Date.now.timeIntervalSince1970)
         
         damus_state.nostrNetwork.pool.subscribe(sub_id: base_subid, filters: [get_base_filter()], handler: handle_event, to: to_relays)
-        damus_state.nostrNetwork.pool.subscribe(sub_id: follow_pack_subid, filters: [follow_list_filter], handler: handle_event, to: to_relays)
+        damus_state.nostrNetwork.pool.subscribe(sub_id: follow_pack_subid, filters: [starter_list_filter], handler: handle_event, to: to_relays)
     }
 
     func unsubscribe(to: RelayURL? = nil) {

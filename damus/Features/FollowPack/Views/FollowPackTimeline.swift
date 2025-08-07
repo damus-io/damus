@@ -107,7 +107,7 @@ struct FollowPackInnerView: View {
                     let ev = tup.0
                     let ind = tup.1
                     let blur_imgs = should_blur_images(settings: state.settings, contacts: state.contacts, ev: ev, our_pubkey: state.pubkey)
-                    if ev.kind == NostrKind.follow_list.rawValue {
+                    if ev.kind == NostrKind.starter_list.rawValue {
                         FollowPackPreview(state: state, ev: ev, options: event_options, blur_imgs: blur_imgs)
                             .onTapGesture {
                                 state.nav.push(route: Route.FollowPack(followPack: ev, model: FollowPackModel(damus_state: state), blur_imgs: blur_imgs))

@@ -123,7 +123,7 @@ struct ProfileView: View {
         var filters = ContentFilters.defaults(damus_state: damus_state)
         filters.append(fstate.filter)
         switch fstate {
-        case .posts, .posts_and_replies, .follow_list:
+        case .posts, .posts_and_replies, .starter_list, .favorites:
             filters.append({ profile.pubkey == $0.pubkey })
         case .conversations:
             filters.append({ profile.conversation_events.contains($0.id) } )
@@ -270,6 +270,7 @@ struct ProfileView: View {
 
     func actionSection(record: ProfileRecord?, pubkey: Pubkey) -> some View {
         return Group {
+            FavoriteButtonView(pubkey: profile.pubkey, damus_state: damus_state)
             if let record,
                let profile = record.profile,
                let lnurl = record.lnurl,
@@ -468,6 +469,9 @@ struct ProfileView: View {
                         }
                         if filter_state == FilterState.posts_and_replies {
                             InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.posts_and_replies))
+                        }
+                        if filter_state == FilterState.favorites {
+                            InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.favorites))
                         }
                         if filter_state == FilterState.conversations && !profile.conversation_events.isEmpty {
                             InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.conversations))

@@ -38,8 +38,9 @@ class DamusState: HeadlessDamusState {
     let emoji_provider: EmojiProvider
     let favicon_cache: FaviconCache
     private(set) var nostrNetwork: NostrNetworkManager
+    let favorites: Favorites
 
-    init(keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: DamusVideoCoordinator, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider, favicon_cache: FaviconCache) {
+    init(keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: DamusVideoCoordinator, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider, favicon_cache: FaviconCache, favorites: Favorites) {
         self.keypair = keypair
         self.likes = likes
         self.boosts = boosts
@@ -70,6 +71,7 @@ class DamusState: HeadlessDamusState {
         self.push_notification_client = PushNotificationClient(keypair: keypair, settings: settings)
         self.emoji_provider = emoji_provider
         self.favicon_cache = FaviconCache()
+        self.favorites = favorites
 
         let networkManagerDelegate = NostrNetworkManagerDelegate(settings: settings, contacts: contacts, ndb: ndb, keypair: keypair, relayModelCache: relay_model_cache, relayFilters: relay_filters)
         self.nostrNetwork = NostrNetworkManager(delegate: networkManagerDelegate)
@@ -129,7 +131,8 @@ class DamusState: HeadlessDamusState {
             ndb: ndb,
             quote_reposts: .init(our_pubkey: pubkey),
             emoji_provider: DefaultEmojiProvider(showAllVariations: true),
-            favicon_cache: FaviconCache()
+            favicon_cache: FaviconCache(),
+            favorites: FavoritesManager.shared
         )
     }
 
@@ -198,7 +201,8 @@ class DamusState: HeadlessDamusState {
             ndb: .empty,
             quote_reposts: .init(our_pubkey: empty_pub),
             emoji_provider: DefaultEmojiProvider(showAllVariations: true),
-            favicon_cache: FaviconCache()
+            favicon_cache: FaviconCache(),
+            favorites: FavoritesManager.shared
         )
     }
 }
