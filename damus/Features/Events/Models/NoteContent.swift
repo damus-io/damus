@@ -124,6 +124,7 @@ func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide
     if can_hide_last_previewable_refs {
         let _: ()? = blocks.withList({ blocksList in
             let endIndex = blocksList.count
+            hide_text_index = endIndex
             return blocksList.forEachItemReversed({ index, block in
                 if block.is_previewable {
                     switch block {
@@ -138,8 +139,7 @@ func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide
                             return .loopBreak
                         }
                     case .url(let url_block):
-                        guard let url_string = NdbBlock.convertToStringCopy(from: url_block),
-                              let url = URL(string: url_string) else {
+                        guard let url = URL(string: url_block.as_str()) else {
                             return .loopContinue    // We can't classify this, ignore and move on
                         }
                         let url_type = classify_url(url)
@@ -166,6 +166,9 @@ func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide
                             // We should hide whitespace at the end sequence.
                             hide_text_index = index
                         }
+                        else {
+                            return .loopBreak
+                        }
                     case .hashtag(_):
                         // SPECIAL CASE:
                         // We should keep hashtags at the end sequence but hide all the other previewables around it.
@@ -179,11 +182,9 @@ func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide
         })
     }
 
-    var ind: Int = -1
     let txt: CompatibleText? = try? blocks.withList({ blocksList in
         let endIndex = blocksList.count
         return try blocksList.reduce(initialResult: CompatibleText(), { index, str, block in
-            ind = ind + 1
 
             // Add the rendered previewable blocks to their type-specific lists.
             switch block {
@@ -204,7 +205,7 @@ func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide
             if can_hide_last_previewable_refs {
                 // If there are previewable blocks that occur before the consecutive sequence of them at the end of the content,
                 // we should not hide the text representation of any previewable block to avoid altering the format of the note.
-                if ind < hide_text_index && block.is_previewable {
+                if index < hide_text_index && block.is_previewable {
                     hide_text_index = endIndex
                 }
 
@@ -213,15 +214,15 @@ func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide
                 // This is to save unnecessary use of screen space.
                 // The only exception is that if there are hashtags embedded in the end sequence, which is not uncommon,
                 // then we still want to show those hashtags but hide everything else that is previewable in the end sequence.
-                if ind >= hide_text_index {
+                if index >= hide_text_index {
                     switch block {
                     case .text(let txt_block):
                         if let txt = NdbBlock.convertToStringCopy(from: txt_block),
                            txt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            let returnItem: CompatibleText? = blocksList.useItem(at: ind + 1, { matchingBlock in
+                            let returnItem: CompatibleText? = blocksList.useItem(at: index + 1, { matchingBlock in
                                 switch matchingBlock {
                                 case .hashtag(_):
-                                    return str + CompatibleText(stringLiteral: reduce_text_block(ind: ind, hide_text_index: hide_text_index, txt: txt))
+                                    return str + CompatibleText(stringLiteral: reduce_text_block(ind: index, hide_text_index: hide_text_index, txt: txt))
                                 default:
                                     return nil
                                 }
@@ -233,8 +234,9 @@ func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide
                     case .hashtag(let htag):
                         return .loopReturn(str + hashtag_str(htag.as_str()))
                     default:
-                        break
+                        return .loopContinue
                     }
+                    return .loopReturn(str)
                 }
             }
 
@@ -247,7 +249,7 @@ func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide
                 return .loopReturn(str + mention_str(.any(mention), profiles: profiles))
             case .text(let txt):
                 var hide_text_index_argument = hide_text_index
-                blocksList.useItem(at: ind+1, { block in
+                blocksList.useItem(at: index+1, { block in
                     switch block {
                     case .hashtag(_):
                         // SPECIAL CASE:
@@ -258,7 +260,7 @@ func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide
                         break
                     }
                 })
-                return .loopReturn(str + CompatibleText(stringLiteral: reduce_text_block(ind: ind, hide_text_index: hide_text_index_argument, txt: txt.as_str())))
+                return .loopReturn(str + CompatibleText(stringLiteral: reduce_text_block(ind: index, hide_text_index: hide_text_index_argument, txt: txt.as_str())))
             case .hashtag(let htag):
                 return .loopReturn(str + hashtag_str(htag.as_str()))
             case .invoice(let invoice):
