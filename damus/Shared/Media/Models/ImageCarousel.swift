@@ -224,7 +224,7 @@ class CarouselModel: ObservableObject {
         for media_url in urls {
             switch media_url {
                 case .video(let url):
-                    let video_player = damus_state.video.get_player(for: url)
+                    let video_player = damus_state.video.get_player(for: url, title: "Untitled", link: url.absoluteString, artist: "NA", artwork: "NA")
                     if let video_size = video_player.video_size {
                         self.media_size_information[url] = video_size  // Set the initial size if available
                     }
@@ -355,7 +355,7 @@ struct ImageCarousel<Content: View>: View {
                         present(full_screen_item: .full_screen_carousel(urls: model.urls, selectedIndex: $model.selectedIndex))
                     }
             case .video(let url):
-                   let video_model = model.damus_state.video.get_player(for: url)
+                   let video_model = model.damus_state.video.get_player(for: url, title: "Untitled", link: url.absoluteString, artist: "NA", artwork: "NA")
                     DamusVideoPlayerView(
                         model: video_model,
                         coordinator: model.damus_state.video,

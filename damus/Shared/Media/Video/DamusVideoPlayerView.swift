@@ -54,7 +54,7 @@ struct DamusVideoPlayerView: View {
     
     init(url: URL, coordinator: DamusVideoCoordinator, style: Style) {
         self.url = url
-        self.model = coordinator.get_player(for: url)
+        self.model = coordinator.get_player(for: url, title: "Untitled", link: url.absoluteString, artist: "NA", artwork: "NA")
         self.video_coordinator = coordinator
         self.style = style
     }
@@ -69,9 +69,9 @@ struct DamusVideoPlayerView: View {
     var body: some View {
         ZStack {
             switch self.style {
-                case .full:
+            case .full, .live:
                     DamusVideoPlayer.BaseView(player: model, show_playback_controls: true)
-                case .preview(on_tap: let on_tap), .no_controls(on_tap: let on_tap):
+            case .preview(on_tap: let on_tap), .no_controls(on_tap: let on_tap):
                     if let on_tap {
                         DamusVideoPlayer.BaseView(player: model, show_playback_controls: false)
                             .highPriorityGesture(TapGesture().onEnded({
@@ -115,9 +115,9 @@ struct DamusVideoPlayerView: View {
     
     func main_stage_granted() {
         switch self.style {
-            case .full, .no_controls:
+        case .full, .no_controls:
                 self.model.is_muted = false
-            case .preview:
+            case .preview, .live:
                 self.model.is_muted = true
         }
     }
@@ -180,6 +180,8 @@ struct DamusVideoPlayerView: View {
         case preview(on_tap: (() -> Void)?)
         /// A video player without any playback controls, suitable if using custom controls elsewhere.
         case no_controls(on_tap: (() -> Void)?)
+        /// A video player suited for live videos
+        case live
     }
 }
 struct DamusVideoPlayer_Previews: PreviewProvider {

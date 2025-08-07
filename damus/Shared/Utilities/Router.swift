@@ -50,6 +50,8 @@ enum Route: Hashable {
     case NIP05DomainEvents(events: NIP05DomainEventsModel, nip05_domain_favicon: FaviconURL?)
     case NIP05DomainPubkeys(domain: String, nip05_domain_favicon: FaviconURL?, pubkeys: [Pubkey])
     case FollowPack(followPack: NostrEvent, model: FollowPackModel, blur_imgs: Bool)
+    case LiveEvents(model: LiveEventModel)
+    case LiveEvent(LiveEvent: NostrEvent, model: LiveEventModel)
 
     @ViewBuilder
     func view(navigationCoordinator: NavigationCoordinator, damusState: DamusState) -> some View {
@@ -137,6 +139,10 @@ enum Route: Hashable {
             NIP05DomainPubkeysView(damus_state: damusState, domain: domain, nip05_domain_favicon: nip05_domain_favicon, pubkeys: pubkeys)
         case .FollowPack(let followPack, let followPackModel, let blur_imgs):
             FollowPackView(state: damusState, ev: followPack, model: followPackModel, blur_imgs: blur_imgs)
+        case .LiveEvents(let model):
+            LiveStreamHomeView(damus_state: damusState, model: model)
+        case .LiveEvent(let liveEvent, let liveEventModel):
+            LiveStreamView(state: damusState, ev: liveEvent, model: liveEventModel)
         }
     }
 
@@ -250,6 +256,11 @@ enum Route: Hashable {
         case .FollowPack(let followPack, let followPackModel, let blur_imgs):
             hasher.combine("followPack")
             hasher.combine(followPack.id)
+        case .LiveEvents(let model):
+            hasher.combine("liveEvents")
+        case .LiveEvent(let liveEvent, let liveEventModel):
+            hasher.combine("liveEvent")
+            hasher.combine(liveEvent.id)
         }
     }
 }

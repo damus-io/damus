@@ -34,8 +34,13 @@ import SwiftUI
     /// This measure helps avoid state inconsistencies and other flakiness. DO NOT USE THIS OUTSIDE `DamusVideoPlayer`
     private var player: AVPlayer
     
-    
     // MARK: SwiftUI-friendly interface
+    
+    /// Metadata for Picture-in-Picture
+    @Published var playbackVideoLink: String = ""
+    @Published var playbackTitle: String = ""
+    @Published var playbackArtist: String = ""
+    @Published var playbackArtwork: String = ""
     
     /// Indicates whether the video has audio at all
     @Published private(set) var has_audio = false
@@ -106,12 +111,47 @@ import SwiftUI
     
     // MARK: - Initialization, deinitialization and reinitialization
     
-    public init(url: URL) {
+    public init(url: URL, title: String, link: String, artist: String, artwork: String) {
         self.url = url
+        self.playbackTitle = title
+        self.playbackArtist = artist
+        self.playbackArtwork = artwork
+        self.playbackVideoLink = link
         self.player = AVPlayer(playerItem: AVPlayerItem(url: url))
+        setupMetadata()
         self.video_size = nil
         
         Task { await self.load() }
+    }
+    
+    private func setupMetadata() {
+        let title = AVMutableMetadataItem()
+        title.identifier = .commonIdentifierTitle
+        title.value = playbackTitle as NSString
+        title.extendedLanguageTag = "und"
+
+        let artist = AVMutableMetadataItem()
+        artist.identifier = .commonIdentifierArtist
+        artist.value = playbackArtist as NSString
+        artist.extendedLanguageTag = "und"
+
+        let artwork = AVMutableMetadataItem()
+        setupArtworkMetadata(artwork)
+
+        // Set external metadata for the current AVPlayerItem
+        player.currentItem?.externalMetadata = [title, artist, artwork]
+    }
+    
+    // Set up artwork metadata based on UIImage
+    private func setupArtworkMetadata(_ artwork: AVMutableMetadataItem) {
+        if let image = UIImage(named: "Artist") {
+            if let imageData = image.jpegData(compressionQuality: 1.0) {
+                artwork.identifier = .commonIdentifierArtwork
+                artwork.value = imageData as NSData
+                artwork.dataType = kCMMetadataBaseDataType_JPEG as String
+                artwork.extendedLanguageTag = "und"
+            }
+        }
     }
     
     func reinitializePlayer() {
@@ -260,6 +300,8 @@ extension DamusVideoPlayer {
         func makeUIViewController(context: Context) -> AVPlayerViewController {
             let controller = AVPlayerViewController()
             controller.showsPlaybackControls = show_playback_controls
+            controller.allowsPictureInPicturePlayback = true
+            controller.canStartPictureInPictureAutomaticallyFromInline = true
             return controller
         }
         

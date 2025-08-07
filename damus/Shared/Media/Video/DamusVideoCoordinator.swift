@@ -60,11 +60,11 @@ final class DamusVideoCoordinator: ObservableObject {
 
     
     @MainActor
-    func get_player(for url: URL) -> DamusVideoPlayer {
+    func get_player(for url: URL, title: String, link: String, artist: String, artwork: String) -> DamusVideoPlayer {
         if let player = self.players[url] {
             return player
         }
-        let player = DamusVideoPlayer(url: url)
+        let player = DamusVideoPlayer(url: url, title: title, link: link, artist: artist, artwork: artwork)
         self.players[url] = player
         return player
     }

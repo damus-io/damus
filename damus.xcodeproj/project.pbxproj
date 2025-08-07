@@ -448,10 +448,52 @@
 		5C6E1DAD2A193EC2008FC15A /* GradientButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C6E1DAC2A193EC2008FC15A /* GradientButtonStyle.swift */; };
 		5C6E1DAF2A194075008FC15A /* PinkGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C6E1DAE2A194075008FC15A /* PinkGradient.swift */; };
 		5C7389B12B6EFA7100781E0A /* ProxyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7389B02B6EFA7100781E0A /* ProxyView.swift */; };
+		5C78A7E42E44FF8900CF177D /* LiveEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7E32E44FF8600CF177D /* LiveEvent.swift */; };
+		5C78A7E52E44FF8900CF177D /* LiveEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7E32E44FF8600CF177D /* LiveEvent.swift */; };
+		5C78A7E62E44FF8900CF177D /* LiveEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7E32E44FF8600CF177D /* LiveEvent.swift */; };
+		5C78A7E82E45000700CF177D /* LiveEventModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7E72E45000200CF177D /* LiveEventModel.swift */; };
+		5C78A7E92E45000700CF177D /* LiveEventModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7E72E45000200CF177D /* LiveEventModel.swift */; };
+		5C78A7EA2E45000700CF177D /* LiveEventModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7E72E45000200CF177D /* LiveEventModel.swift */; };
+		5C78A7EC2E45007B00CF177D /* LiveStreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7EB2E45007500CF177D /* LiveStreamView.swift */; };
+		5C78A7ED2E45007B00CF177D /* LiveStreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7EB2E45007500CF177D /* LiveStreamView.swift */; };
+		5C78A7EE2E45007B00CF177D /* LiveStreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7EB2E45007500CF177D /* LiveStreamView.swift */; };
+		5C78A7F02E45009400CF177D /* LiveStreamPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7EF2E45008D00CF177D /* LiveStreamPreview.swift */; };
+		5C78A7F12E45009400CF177D /* LiveStreamPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7EF2E45008D00CF177D /* LiveStreamPreview.swift */; };
+		5C78A7F22E45009400CF177D /* LiveStreamPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7EF2E45008D00CF177D /* LiveStreamPreview.swift */; };
+		5C78A7F42E4500B000CF177D /* LiveStreamHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7F32E4500A800CF177D /* LiveStreamHomeView.swift */; };
+		5C78A7F52E4500B000CF177D /* LiveStreamHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7F32E4500A800CF177D /* LiveStreamHomeView.swift */; };
+		5C78A7F62E4500B000CF177D /* LiveStreamHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7F32E4500A800CF177D /* LiveStreamHomeView.swift */; };
 		5C8498022D5D150000F74FEB /* ZapExplainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8498012D5D14FA00F74FEB /* ZapExplainer.swift */; };
 		5C8498032D5D150000F74FEB /* ZapExplainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8498012D5D14FA00F74FEB /* ZapExplainer.swift */; };
 		5C8498042D5D150000F74FEB /* ZapExplainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8498012D5D14FA00F74FEB /* ZapExplainer.swift */; };
 		5C8711DE2C460C06007879C2 /* PostingTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */; };
+		5CA9E8452E4500E700BECF6A /* LiveStreamTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8442E4500E100BECF6A /* LiveStreamTimeline.swift */; };
+		5CA9E8462E4500E700BECF6A /* LiveStreamTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8442E4500E100BECF6A /* LiveStreamTimeline.swift */; };
+		5CA9E8472E4500E700BECF6A /* LiveStreamTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8442E4500E100BECF6A /* LiveStreamTimeline.swift */; };
+		5CA9E8492E45025800BECF6A /* Glow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8482E45025500BECF6A /* Glow.swift */; };
+		5CA9E84A2E45025800BECF6A /* Glow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8482E45025500BECF6A /* Glow.swift */; };
+		5CA9E84B2E45025800BECF6A /* Glow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8482E45025500BECF6A /* Glow.swift */; };
+		5CA9E8552E452A1E00BECF6A /* LiveChatHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8542E452A1700BECF6A /* LiveChatHomeView.swift */; };
+		5CA9E8562E452A1E00BECF6A /* LiveChatHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8542E452A1700BECF6A /* LiveChatHomeView.swift */; };
+		5CA9E8572E452A1E00BECF6A /* LiveChatHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8542E452A1700BECF6A /* LiveChatHomeView.swift */; };
+		5CA9E8592E452A4900BECF6A /* LiveChatModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8582E452A4300BECF6A /* LiveChatModel.swift */; };
+		5CA9E85A2E452A4900BECF6A /* LiveChatModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8582E452A4300BECF6A /* LiveChatModel.swift */; };
+		5CA9E85B2E452A4900BECF6A /* LiveChatModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8582E452A4300BECF6A /* LiveChatModel.swift */; };
+		5CA9E8612E46731700BECF6A /* LiveStreamViewers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8602E46730600BECF6A /* LiveStreamViewers.swift */; };
+		5CA9E8622E46731700BECF6A /* LiveStreamViewers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8602E46730600BECF6A /* LiveStreamViewers.swift */; };
+		5CA9E8632E46731700BECF6A /* LiveStreamViewers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8602E46730600BECF6A /* LiveStreamViewers.swift */; };
+		5CA9E8652E46739700BECF6A /* LiveStreamBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8642E46739200BECF6A /* LiveStreamBanner.swift */; };
+		5CA9E8662E46739700BECF6A /* LiveStreamBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8642E46739200BECF6A /* LiveStreamBanner.swift */; };
+		5CA9E8672E46739700BECF6A /* LiveStreamBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8642E46739200BECF6A /* LiveStreamBanner.swift */; };
+		5CA9E8692E4673F400BECF6A /* LiveStreamStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8682E4673F000BECF6A /* LiveStreamStatus.swift */; };
+		5CA9E86A2E4673F400BECF6A /* LiveStreamStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8682E4673F000BECF6A /* LiveStreamStatus.swift */; };
+		5CA9E86B2E4673F400BECF6A /* LiveStreamStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8682E4673F000BECF6A /* LiveStreamStatus.swift */; };
+		5CA9E86E2E4678FE00BECF6A /* LiveStreamProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E86D2E4678F000BECF6A /* LiveStreamProfile.swift */; };
+		5CA9E86F2E4678FE00BECF6A /* LiveStreamProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E86D2E4678F000BECF6A /* LiveStreamProfile.swift */; };
+		5CA9E8702E4678FE00BECF6A /* LiveStreamProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E86D2E4678F000BECF6A /* LiveStreamProfile.swift */; };
+		5CA9E8722E467A5700BECF6A /* EventTags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8712E467A5000BECF6A /* EventTags.swift */; };
+		5CA9E8732E467A5700BECF6A /* EventTags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8712E467A5000BECF6A /* EventTags.swift */; };
+		5CA9E8742E467A5700BECF6A /* EventTags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA9E8712E467A5000BECF6A /* EventTags.swift */; };
 		5CB017212D2D985E00A9ED05 /* CoinosButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017202D2D985800A9ED05 /* CoinosButton.swift */; };
 		5CB017222D2D985E00A9ED05 /* CoinosButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017202D2D985800A9ED05 /* CoinosButton.swift */; };
 		5CB017232D2D985E00A9ED05 /* CoinosButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017202D2D985800A9ED05 /* CoinosButton.swift */; };
@@ -2481,8 +2523,22 @@
 		5C6E1DAC2A193EC2008FC15A /* GradientButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientButtonStyle.swift; sourceTree = "<group>"; };
 		5C6E1DAE2A194075008FC15A /* PinkGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinkGradient.swift; sourceTree = "<group>"; };
 		5C7389B02B6EFA7100781E0A /* ProxyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyView.swift; sourceTree = "<group>"; };
+		5C78A7E32E44FF8600CF177D /* LiveEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveEvent.swift; sourceTree = "<group>"; };
+		5C78A7E72E45000200CF177D /* LiveEventModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveEventModel.swift; sourceTree = "<group>"; };
+		5C78A7EB2E45007500CF177D /* LiveStreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamView.swift; sourceTree = "<group>"; };
+		5C78A7EF2E45008D00CF177D /* LiveStreamPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamPreview.swift; sourceTree = "<group>"; };
+		5C78A7F32E4500A800CF177D /* LiveStreamHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamHomeView.swift; sourceTree = "<group>"; };
 		5C8498012D5D14FA00F74FEB /* ZapExplainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapExplainer.swift; sourceTree = "<group>"; };
 		5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostingTimelineView.swift; sourceTree = "<group>"; };
+		5CA9E8442E4500E100BECF6A /* LiveStreamTimeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamTimeline.swift; sourceTree = "<group>"; };
+		5CA9E8482E45025500BECF6A /* Glow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Glow.swift; sourceTree = "<group>"; };
+		5CA9E8542E452A1700BECF6A /* LiveChatHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveChatHomeView.swift; sourceTree = "<group>"; };
+		5CA9E8582E452A4300BECF6A /* LiveChatModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveChatModel.swift; sourceTree = "<group>"; };
+		5CA9E8602E46730600BECF6A /* LiveStreamViewers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamViewers.swift; sourceTree = "<group>"; };
+		5CA9E8642E46739200BECF6A /* LiveStreamBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamBanner.swift; sourceTree = "<group>"; };
+		5CA9E8682E4673F000BECF6A /* LiveStreamStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamStatus.swift; sourceTree = "<group>"; };
+		5CA9E86D2E4678F000BECF6A /* LiveStreamProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamProfile.swift; sourceTree = "<group>"; };
+		5CA9E8712E467A5000BECF6A /* EventTags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTags.swift; sourceTree = "<group>"; };
 		5CB017202D2D985800A9ED05 /* CoinosButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinosButton.swift; sourceTree = "<group>"; };
 		5CB017242D42C5BD00A9ED05 /* TransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsView.swift; sourceTree = "<group>"; };
 		5CB0172C2D42C76600A9ED05 /* BalanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceView.swift; sourceTree = "<group>"; };
@@ -3428,6 +3484,7 @@
 				5C513FCB2984ACA60072348F /* QRCodeView.swift */,
 				4C363A8B28236B92006E126D /* PubkeyView.swift */,
 				4C8D00CB29DF92DF0036AF10 /* Hashtags.swift */,
+				5CA9E8712E467A5000BECF6A /* EventTags.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -3702,6 +3759,7 @@
 		5C78A7792E22FDFE00CF177D /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				5C78A7DF2E44FF2500CF177D /* Live */,
 				5C78A7BC2E304D7400CF177D /* Translations */,
 				5C78A7B52E3046F400CF177D /* NIP05 */,
 				5C78A7AA2E30428D00CF177D /* Actions */,
@@ -4531,6 +4589,81 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		5C78A7DF2E44FF2500CF177D /* Live */ = {
+			isa = PBXGroup;
+			children = (
+				5CA9E85F2E4568F900BECF6A /* LiveStream */,
+				5CA9E85C2E4567B100BECF6A /* LiveChat */,
+			);
+			path = Live;
+			sourceTree = "<group>";
+		};
+		5C78A7E02E44FF3A00CF177D /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				5C78A7E72E45000200CF177D /* LiveEventModel.swift */,
+				5C78A7E32E44FF8600CF177D /* LiveEvent.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		5C78A7E12E44FF3F00CF177D /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				5CA9E86C2E46779300BECF6A /* Components */,
+				5CA9E8442E4500E100BECF6A /* LiveStreamTimeline.swift */,
+				5C78A7F32E4500A800CF177D /* LiveStreamHomeView.swift */,
+				5C78A7EF2E45008D00CF177D /* LiveStreamPreview.swift */,
+				5C78A7EB2E45007500CF177D /* LiveStreamView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		5CA9E85C2E4567B100BECF6A /* LiveChat */ = {
+			isa = PBXGroup;
+			children = (
+				5CA9E85E2E4567FA00BECF6A /* Models */,
+				5CA9E85D2E4567F500BECF6A /* Views */,
+			);
+			path = LiveChat;
+			sourceTree = "<group>";
+		};
+		5CA9E85D2E4567F500BECF6A /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				5CA9E8542E452A1700BECF6A /* LiveChatHomeView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		5CA9E85E2E4567FA00BECF6A /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				5CA9E8582E452A4300BECF6A /* LiveChatModel.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		5CA9E85F2E4568F900BECF6A /* LiveStream */ = {
+			isa = PBXGroup;
+			children = (
+				5C78A7E12E44FF3F00CF177D /* Views */,
+				5C78A7E02E44FF3A00CF177D /* Models */,
+			);
+			path = LiveStream;
+			sourceTree = "<group>";
+		};
+		5CA9E86C2E46779300BECF6A /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				5CA9E86D2E4678F000BECF6A /* LiveStreamProfile.swift */,
+				5CA9E8682E4673F000BECF6A /* LiveStreamStatus.swift */,
+				5CA9E8642E46739200BECF6A /* LiveStreamBanner.swift */,
+				5CA9E8602E46730600BECF6A /* LiveStreamViewers.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
 		7C0F392D29B57C8F0039859C /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
@@ -4735,6 +4868,7 @@
 		F7F0BA23297892AE009531F3 /* Modifiers */ = {
 			isa = PBXGroup;
 			children = (
+				5CA9E8482E45025500BECF6A /* Glow.swift */,
 				F7F0BA24297892BD009531F3 /* SwipeToDismiss.swift */,
 			);
 			path = Modifiers;
@@ -5173,6 +5307,7 @@
 				4CB55EF5295E679D007FD187 /* UserRelaysView.swift in Sources */,
 				4C363AA228296A7E006E126D /* SearchView.swift in Sources */,
 				D798D2282B085CDA00234419 /* NdbNote+.swift in Sources */,
+				5CA9E8552E452A1E00BECF6A /* LiveChatHomeView.swift in Sources */,
 				3ACF94422DA9FCAB00971A4E /* NIP05DomainTimelineView.swift in Sources */,
 				4CC7AAED297F0B9E00430951 /* Highlight.swift in Sources */,
 				4C1253662A76D0FF0004F4B8 /* OnlyZapsNotify.swift in Sources */,
@@ -5202,6 +5337,7 @@
 				4C32B9552A9AD44700DC3548 /* ByteBuffer.swift in Sources */,
 				4C32B95B2A9AD44700DC3548 /* NativeObject.swift in Sources */,
 				3AB72AB9298ECF30004BB58C /* Translator.swift in Sources */,
+				5CA9E8722E467A5700BECF6A /* EventTags.swift in Sources */,
 				4C363A9028247A1D006E126D /* NostrLink.swift in Sources */,
 				4C3D52B6298DB4E6001C5831 /* ZapEvent.swift in Sources */,
 				647D9A8D2968520300A295DE /* SideMenuView.swift in Sources */,
@@ -5225,6 +5361,7 @@
 				BA3759972ABCCF360018D73B /* CameraPreview.swift in Sources */,
 				4C75EFA627FF87A20006080F /* Nostr.swift in Sources */,
 				4CA927672A290F8B0098A105 /* RelativeTime.swift in Sources */,
+				5C78A7F52E4500B000CF177D /* LiveStreamHomeView.swift in Sources */,
 				5C4FA8032DCAF80E00CE658C /* FollowPackTimeline.swift in Sources */,
 				4CB883A62975F83C00DC99E7 /* LNUrlPayRequest.swift in Sources */,
 				D7CB5D4B2B11721600AD4105 /* ZapType.swift in Sources */,
@@ -5288,6 +5425,7 @@
 				3A3040F129A8FF97008A0F29 /* LocalizationUtil.swift in Sources */,
 				F75BA12D29A1855400E10810 /* BookmarksManager.swift in Sources */,
 				4CC14FEF2A73FCCB007AEB17 /* IdType.swift in Sources */,
+				5CA9E85B2E452A4900BECF6A /* LiveChatModel.swift in Sources */,
 				4C3EA67F28FFC01D00C48A62 /* InvoiceView.swift in Sources */,
 				4C011B612BD0B25C002F2F9B /* ReplyQuoteView.swift in Sources */,
 				D71AC4CC2BA8E3480076268E /* VisibilityTracker.swift in Sources */,
@@ -5299,6 +5437,7 @@
 				4C198DF529F88D2E004C165C /* ImageMetadata.swift in Sources */,
 				4CCEB7AE29B53D260078AA28 /* SearchingEventView.swift in Sources */,
 				4CF0ABE929844AF100D66079 /* AnyCodable.swift in Sources */,
+				5CA9E8472E4500E700BECF6A /* LiveStreamTimeline.swift in Sources */,
 				BA3759932ABCCEBA0018D73B /* CameraModel.swift in Sources */,
 				D7FA46E72DBDAA7E002C9BB0 /* ImageCacheMigrations.swift in Sources */,
 				D7100C5A2B76FD5100C59298 /* LogoView.swift in Sources */,
@@ -5307,6 +5446,7 @@
 				3A515C502DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift in Sources */,
 				D7CB5D3B2B112FBB00AD4105 /* NotificationFormatter.swift in Sources */,
 				4C4E137B2A76D5FB00BDD832 /* MuteThreadNotify.swift in Sources */,
+				5CA9E8492E45025800BECF6A /* Glow.swift in Sources */,
 				4CC7AAE7297EFA7B00430951 /* Zap.swift in Sources */,
 				4C12535A2A76C9960004F4B8 /* UnfollowNotify.swift in Sources */,
 				4C32B95C2A9AD44700DC3548 /* String+extension.swift in Sources */,
@@ -5358,6 +5498,7 @@
 				4CFF8F6D29CD022E008DB934 /* WideEventView.swift in Sources */,
 				9609F058296E220800069BF3 /* BannerImageView.swift in Sources */,
 				4C363A94282704FA006E126D /* Post.swift in Sources */,
+				5C78A7F02E45009400CF177D /* LiveStreamPreview.swift in Sources */,
 				4C216F32286E388800040376 /* DMChatView.swift in Sources */,
 				4C7D09782A0B0CC900943473 /* WalletModel.swift in Sources */,
 				4C1253522A76C6130004F4B8 /* ComposeNotify.swift in Sources */,
@@ -5404,6 +5545,7 @@
 				4C75EFAF28049D350006080F /* NostrFilter.swift in Sources */,
 				4C3EA64C28FF59AC00C48A62 /* bech32_util.c in Sources */,
 				4CA9276C2A2910D10098A105 /* ReplyPart.swift in Sources */,
+				5CA9E8622E46731700BECF6A /* LiveStreamViewers.swift in Sources */,
 				D7C6787E2B2D34CC00BCEAFB /* NIP98AuthenticatedRequest.swift in Sources */,
 				5CB017252D42C5C400A9ED05 /* TransactionsView.swift in Sources */,
 				4CE1399029F0661A00AC6A0B /* RepostAction.swift in Sources */,
@@ -5450,6 +5592,7 @@
 				3AA2F4E82DF1467A00B18606 /* TrustedNetworkButtonTip.swift in Sources */,
 				4CF0ABD82981980C00D66079 /* Lists.swift in Sources */,
 				F71694EA2A662232001F4053 /* OnboardingSuggestionsView.swift in Sources */,
+				5CA9E86A2E4673F400BECF6A /* LiveStreamStatus.swift in Sources */,
 				4C12536A2A76D3850004F4B8 /* RelaysChangedNotify.swift in Sources */,
 				4C30AC8029A6A53F00E2BD5A /* ProfilePicturesView.swift in Sources */,
 				D7373BAA2B68A65A00F7783D /* PurpleAccountUpdateNotify.swift in Sources */,
@@ -5461,6 +5604,7 @@
 				5C14C29B2BBBA29C00079FD2 /* RelaySoftwareDetail.swift in Sources */,
 				5CB017312D4422DB00A9ED05 /* NWCSettings.swift in Sources */,
 				D78F080D2D7F78EF00FC6C75 /* Request.swift in Sources */,
+				5CA9E8672E46739700BECF6A /* LiveStreamBanner.swift in Sources */,
 				D78DB85F2C20FED300F0AB12 /* ChatBubbleView.swift in Sources */,
 				D2277EEA2A089BD5006C3807 /* Router.swift in Sources */,
 				4C9D6D162B1AA9C6004E5CD9 /* DisplayTabBarNotify.swift in Sources */,
@@ -5470,6 +5614,7 @@
 				D7EFBA372CC322F300F45588 /* DamusVideoControlsView.swift in Sources */,
 				7C60CAEF298471A1009C80D6 /* CoreSVG.swift in Sources */,
 				D706C5AF2D5D31C20027C627 /* AutoSaveIndicatorView.swift in Sources */,
+				5C78A7EA2E45000700CF177D /* LiveEventModel.swift in Sources */,
 				6439E014296790CF0020672B /* ProfilePicImageView.swift in Sources */,
 				4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */,
 				4C1253682A76D2470004F4B8 /* MuteNotify.swift in Sources */,
@@ -5481,6 +5626,7 @@
 				4C8D00CC29DF92DF0036AF10 /* Hashtags.swift in Sources */,
 				D74EA0942D2E77B9002290DD /* LoadableNostrEventView.swift in Sources */,
 				4CEE2AF3280B25C500AB5EEF /* ProfilePicView.swift in Sources */,
+				5C78A7E42E44FF8900CF177D /* LiveEvent.swift in Sources */,
 				4CC7AAF6297F1A6A00430951 /* EventBody.swift in Sources */,
 				D76556D62B1E6C08001B0CCC /* DamusPurpleWelcomeView.swift in Sources */,
 				3165648B295B70D500C64604 /* LinkView.swift in Sources */,
@@ -5508,6 +5654,7 @@
 				4C3EA66D28FF782800C48A62 /* amount.c in Sources */,
 				4C32B9562A9AD44700DC3548 /* TableVerifier.swift in Sources */,
 				5CF2DCCE2AABE1A500984B8D /* DamusLightGradient.swift in Sources */,
+				5C78A7EC2E45007B00CF177D /* LiveStreamView.swift in Sources */,
 				4C5E54062A9671F800FF6E60 /* UserStatusSheet.swift in Sources */,
 				F71694F42A6732B7001F4053 /* GradientFollowButton.swift in Sources */,
 				4C3AC7A728369BA200E1F516 /* SearchHomeView.swift in Sources */,
@@ -5600,6 +5747,7 @@
 				D7ADD3DE2B53854300F104C4 /* DamusPurpleURL.swift in Sources */,
 				E4FA1C032A24BB7F00482697 /* SearchSettingsView.swift in Sources */,
 				4C75EFBB2804A34C0006080F /* ProofOfWork.swift in Sources */,
+				5CA9E8702E4678FE00BECF6A /* LiveStreamProfile.swift in Sources */,
 				4C3AC7A52836987600E1F516 /* MainTabView.swift in Sources */,
 				D76874F32AE3632B00FB0F68 /* ProfileZapLinkView.swift in Sources */,
 				D77BFA0B2AE3051200621634 /* ProfileActionSheetView.swift in Sources */,
@@ -5714,6 +5862,7 @@
 				82D6FABB2CD99F7900C925F4 /* emitter.c in Sources */,
 				82D6FABC2CD99F7900C925F4 /* refmap.c in Sources */,
 				82D6FABD2CD99F7900C925F4 /* verifier.c in Sources */,
+				5C78A7E92E45000700CF177D /* LiveEventModel.swift in Sources */,
 				82D6FABE2CD99F7900C925F4 /* NdbProfile.swift in Sources */,
 				D78F08112D7F78F900FC6C75 /* Response.swift in Sources */,
 				82D6FABF2CD99F7900C925F4 /* NdbTagIterator.swift in Sources */,
@@ -5758,6 +5907,7 @@
 				82D6FAE42CD99F7900C925F4 /* FollowNotify.swift in Sources */,
 				82D6FAE52CD99F7900C925F4 /* LikedNotify.swift in Sources */,
 				82D6FAE62CD99F7900C925F4 /* LocalNotificationNotify.swift in Sources */,
+				5CA9E84B2E45025800BECF6A /* Glow.swift in Sources */,
 				5C4FA8012DC5119300CE658C /* FollowPackPreview.swift in Sources */,
 				82D6FAE72CD99F7900C925F4 /* LoginNotify.swift in Sources */,
 				82D6FAE82CD99F7900C925F4 /* LogoutNotify.swift in Sources */,
@@ -5765,6 +5915,7 @@
 				3ACF94482DAA006500971A4E /* NIP05DomainEventsModel.swift in Sources */,
 				82D6FAE92CD99F7900C925F4 /* NewMutesNotify.swift in Sources */,
 				82D6FAEA2CD99F7900C925F4 /* NewUnmutesNotify.swift in Sources */,
+				5CA9E8452E4500E700BECF6A /* LiveStreamTimeline.swift in Sources */,
 				82D6FAEB2CD99F7900C925F4 /* Notify.swift in Sources */,
 				82D6FAEC2CD99F7900C925F4 /* OnlyZapsNotify.swift in Sources */,
 				82D6FAED2CD99F7900C925F4 /* PostNotify.swift in Sources */,
@@ -5872,6 +6023,7 @@
 				82D6FB472CD99F7900C925F4 /* LinkView.swift in Sources */,
 				D7DB1FDF2D5A78CE00CF06DA /* NIP44.swift in Sources */,
 				82D6FB482CD99F7900C925F4 /* PreviewCache.swift in Sources */,
+				5CA9E8692E4673F400BECF6A /* LiveStreamStatus.swift in Sources */,
 				82D6FB492CD99F7900C925F4 /* Theme.swift in Sources */,
 				82D6FB4A2CD99F7900C925F4 /* NIP05.swift in Sources */,
 				82D6FB4B2CD99F7900C925F4 /* Lists.swift in Sources */,
@@ -5885,6 +6037,7 @@
 				82D6FB532CD99F7900C925F4 /* Debouncer.swift in Sources */,
 				82D6FB542CD99F7900C925F4 /* EventHolder.swift in Sources */,
 				82D6FB552CD99F7900C925F4 /* LocalizationUtil.swift in Sources */,
+				5C78A7F22E45009400CF177D /* LiveStreamPreview.swift in Sources */,
 				82D6FB562CD99F7900C925F4 /* EventCache.swift in Sources */,
 				82D6FB572CD99F7900C925F4 /* DisplayName.swift in Sources */,
 				82D6FB582CD99F7900C925F4 /* DebouncedOnChange.swift in Sources */,
@@ -5909,6 +6062,7 @@
 				82D6FB692CD99F7900C925F4 /* DamusPurpleNotificationManagement.swift in Sources */,
 				82D6FB6A2CD99F7900C925F4 /* DamusPurple.swift in Sources */,
 				82D6FB6B2CD99F7900C925F4 /* StoreObserver.swift in Sources */,
+				5CA9E8562E452A1E00BECF6A /* LiveChatHomeView.swift in Sources */,
 				82D6FB6C2CD99F7900C925F4 /* DamusPurpleURL.swift in Sources */,
 				82D6FB6D2CD99F7900C925F4 /* DamusPurpleEnvironment.swift in Sources */,
 				82D6FB6E2CD99F7900C925F4 /* PurpleStoreKitManager.swift in Sources */,
@@ -5922,6 +6076,7 @@
 				82D6FB772CD99F7900C925F4 /* ThreadModel.swift in Sources */,
 				82D6FB782CD99F7900C925F4 /* ReplyMap.swift in Sources */,
 				82D6FB792CD99F7900C925F4 /* ProfileModel.swift in Sources */,
+				5CA9E85A2E452A4900BECF6A /* LiveChatModel.swift in Sources */,
 				82D6FB7A2CD99F7900C925F4 /* ActionBarModel.swift in Sources */,
 				82D6FB7B2CD99F7900C925F4 /* LikeCounter.swift in Sources */,
 				82D6FB7C2CD99F7900C925F4 /* Liked.swift in Sources */,
@@ -5933,6 +6088,7 @@
 				82D6FB832CD99F7900C925F4 /* SearchModel.swift in Sources */,
 				82D6FB842CD99F7900C925F4 /* NostrFilter+Hashable.swift in Sources */,
 				82D6FB852CD99F7900C925F4 /* Contacts.swift in Sources */,
+				5C78A7ED2E45007B00CF177D /* LiveStreamView.swift in Sources */,
 				82D6FB862CD99F7900C925F4 /* CreateAccountModel.swift in Sources */,
 				82D6FB872CD99F7900C925F4 /* HomeModel.swift in Sources */,
 				82D6FB882CD99F7900C925F4 /* SignalModel.swift in Sources */,
@@ -5969,12 +6125,14 @@
 				82D6FBA12CD99F7900C925F4 /* Contacts+.swift in Sources */,
 				82D6FBA22CD99F7900C925F4 /* ZapType.swift in Sources */,
 				82D6FBA32CD99F7900C925F4 /* NewEventsBits.swift in Sources */,
+				5CA9E86F2E4678FE00BECF6A /* LiveStreamProfile.swift in Sources */,
 				82D6FBA42CD99F7900C925F4 /* FriendFilter.swift in Sources */,
 				82D6FBA52CD99F7900C925F4 /* MediaUploader.swift in Sources */,
 				82D6FBA62CD99F7900C925F4 /* FollowState.swift in Sources */,
 				82D6FBA72CD99F7900C925F4 /* NoteContent.swift in Sources */,
 				82D6FBA82CD99F7900C925F4 /* LongformEvent.swift in Sources */,
 				82D6FBA92CD99F7900C925F4 /* DamusUserDefaults.swift in Sources */,
+				5CA9E8732E467A5700BECF6A /* EventTags.swift in Sources */,
 				82D6FBAA2CD99F7900C925F4 /* HeadlessDamusState.swift in Sources */,
 				82D6FBAB2CD99F7900C925F4 /* MuteItem.swift in Sources */,
 				82D6FBAC2CD99F7900C925F4 /* MutelistManager.swift in Sources */,
@@ -5982,6 +6140,7 @@
 				82D6FBAE2CD99F7900C925F4 /* HighlightEvent.swift in Sources */,
 				82D6FBAF2CD99F7900C925F4 /* CommentItem.swift in Sources */,
 				82D6FBB02CD99F7900C925F4 /* RelayConnection.swift in Sources */,
+				5C78A7F62E4500B000CF177D /* LiveStreamHomeView.swift in Sources */,
 				82D6FBB12CD99F7900C925F4 /* RelayLog.swift in Sources */,
 				82D6FBB22CD99F7900C925F4 /* Nostr.swift in Sources */,
 				82D6FBB32CD99F7900C925F4 /* NostrFilter.swift in Sources */,
@@ -6003,6 +6162,7 @@
 				D76BE18C2E0CF3DA004AD0C6 /* Interests.swift in Sources */,
 				82D6FBC22CD99F7900C925F4 /* NostrEvent+.swift in Sources */,
 				82D6FBC32CD99F7900C925F4 /* NIP98AuthenticatedRequest.swift in Sources */,
+				5CA9E8662E46739700BECF6A /* LiveStreamBanner.swift in Sources */,
 				82D6FBC42CD99F7900C925F4 /* NostrAuth.swift in Sources */,
 				82D6FBC52CD99F7900C925F4 /* MakeZapRequest.swift in Sources */,
 				82D6FBC62CD99F7900C925F4 /* KFClickable.swift in Sources */,
@@ -6072,6 +6232,7 @@
 				82D6FC082CD99F7900C925F4 /* ProfileZapLinkView.swift in Sources */,
 				D71AD8FE2CEC176A002E2C3C /* AppAccessibilityIdentifiers.swift in Sources */,
 				82D6FC092CD99F7900C925F4 /* AboutView.swift in Sources */,
+				5CA9E8612E46731700BECF6A /* LiveStreamViewers.swift in Sources */,
 				82D6FC0A2CD99F7900C925F4 /* ProfileName.swift in Sources */,
 				82D6FC0B2CD99F7900C925F4 /* ProfilePictureSelector.swift in Sources */,
 				82D6FC0C2CD99F7900C925F4 /* EditMetadataView.swift in Sources */,
@@ -6177,6 +6338,7 @@
 				82D6FC672CD99F7900C925F4 /* SearchResultsView.swift in Sources */,
 				82D6FC682CD99F7900C925F4 /* SearchView.swift in Sources */,
 				82D6FC692CD99F7900C925F4 /* SelectWalletView.swift in Sources */,
+				5C78A7E52E44FF8900CF177D /* LiveEvent.swift in Sources */,
 				82D6FC6A2CD99F7900C925F4 /* SetupView.swift in Sources */,
 				82D6FC6C2CD99F7900C925F4 /* TimelineView.swift in Sources */,
 				82D6FC6D2CD99F7900C925F4 /* UserRelaysView.swift in Sources */,
@@ -6213,7 +6375,9 @@
 				D73E5E272C6A97F4007EB227 /* LocalNotificationNotify.swift in Sources */,
 				D73E5F8B2C6AA6A2007EB227 /* UserStatusSheet.swift in Sources */,
 				D73E5E282C6A97F4007EB227 /* LoginNotify.swift in Sources */,
+				5CA9E84A2E45025800BECF6A /* Glow.swift in Sources */,
 				D73E5E292C6A97F4007EB227 /* LogoutNotify.swift in Sources */,
+				5CA9E8632E46731700BECF6A /* LiveStreamViewers.swift in Sources */,
 				D73E5E2A2C6A97F4007EB227 /* OnlyZapsNotify.swift in Sources */,
 				D73E5E2B2C6A97F4007EB227 /* PostNotify.swift in Sources */,
 				D73E5E2C2C6A97F4007EB227 /* PresentSheetNotify.swift in Sources */,
@@ -6232,6 +6396,7 @@
 				D73E5E362C6A97F4007EB227 /* MuteThreadNotify.swift in Sources */,
 				D73E5E372C6A97F4007EB227 /* ReconnectRelaysNotify.swift in Sources */,
 				D73E5E382C6A97F4007EB227 /* PurpleAccountUpdateNotify.swift in Sources */,
+				5CA9E86E2E4678FE00BECF6A /* LiveStreamProfile.swift in Sources */,
 				D73E5E392C6A97F4007EB227 /* DamusDuration.swift in Sources */,
 				D73E5E3A2C6A97F4007EB227 /* SwipeToDismiss.swift in Sources */,
 				D73E5E3B2C6A97F4007EB227 /* MusicController.swift in Sources */,
@@ -6293,6 +6458,7 @@
 				D73E5E722C6A97F4007EB227 /* LinkView.swift in Sources */,
 				5C4FA7EE2DC29AE900CE658C /* FollowPackEvent.swift in Sources */,
 				D73E5F922C6AA720007EB227 /* QRCodeView.swift in Sources */,
+				5C78A7F42E4500B000CF177D /* LiveStreamHomeView.swift in Sources */,
 				D73E5E742C6A97F4007EB227 /* Lists.swift in Sources */,
 				D73C7ED92DE51690001F9392 /* OnboardingSuggestionsView.swift in Sources */,
 				D73E5E752C6A97F4007EB227 /* CoreSVG.swift in Sources */,
@@ -6317,6 +6483,8 @@
 				D73E5E872C6A97F4007EB227 /* DamusPurple.swift in Sources */,
 				D73E5F992C6AA864007EB227 /* InvoicesView.swift in Sources */,
 				D73E5E882C6A97F4007EB227 /* StoreObserver.swift in Sources */,
+				5C78A7E62E44FF8900CF177D /* LiveEvent.swift in Sources */,
+				5C78A7F12E45009400CF177D /* LiveStreamPreview.swift in Sources */,
 				D73E5E892C6A97F4007EB227 /* DamusPurpleURL.swift in Sources */,
 				D73E5E8A2C6A97F4007EB227 /* PurpleStoreKitManager.swift in Sources */,
 				D733F9E72D92C76100317B11 /* UnownedNdbNote.swift in Sources */,
@@ -6357,6 +6525,8 @@
 				D73E5EA92C6A97F4007EB227 /* Report.swift in Sources */,
 				D73E5EAA2C6A97F4007EB227 /* ZapsModel.swift in Sources */,
 				D73E5EAB2C6A97F4007EB227 /* DraftsModel.swift in Sources */,
+				5CA9E8592E452A4900BECF6A /* LiveChatModel.swift in Sources */,
+				5C78A7EE2E45007B00CF177D /* LiveStreamView.swift in Sources */,
 				D73E5F932C6AA743007EB227 /* SetupView.swift in Sources */,
 				D73E5EAC2C6A97F4007EB227 /* NotificationsModel.swift in Sources */,
 				D73E5F902C6AA715007EB227 /* Theme.swift in Sources */,
@@ -6415,6 +6585,7 @@
 				D73E5EE32C6A97F4007EB227 /* DeveloperSettingsView.swift in Sources */,
 				D73E5EE42C6A97F4007EB227 /* FirstAidSettingsView.swift in Sources */,
 				D73E5EE52C6A97F4007EB227 /* ImageContextMenuModifier.swift in Sources */,
+				5CA9E8462E4500E700BECF6A /* LiveStreamTimeline.swift in Sources */,
 				D73E5EE72C6A97F4007EB227 /* ProfilePicImageView.swift in Sources */,
 				D73E5EE82C6A97F4007EB227 /* ImageContainerView.swift in Sources */,
 				D73E5EE92C6A97F4007EB227 /* MediaView.swift in Sources */,
@@ -6422,6 +6593,7 @@
 				D73E5F8C2C6AA6A7007EB227 /* ProfileActionSheetView.swift in Sources */,
 				D73E5EEB2C6A97F4007EB227 /* MarketingContentView.swift in Sources */,
 				D73E5EEC2C6A97F4007EB227 /* LogoView.swift in Sources */,
+				5CA9E86B2E4673F400BECF6A /* LiveStreamStatus.swift in Sources */,
 				D73E5EED2C6A97F4007EB227 /* IAPProductStateView.swift in Sources */,
 				D73E5EEE2C6A97F4007EB227 /* PurpleBackdrop.swift in Sources */,
 				D73E5EEF2C6A97F4007EB227 /* DamusPurpleView.swift in Sources */,
@@ -6552,6 +6724,7 @@
 				D73E5F582C6A97F5007EB227 /* MediaPicker.swift in Sources */,
 				D73E5F592C6A97F5007EB227 /* TextViewWrapper.swift in Sources */,
 				D7EFBA382CC322F300F45588 /* DamusVideoControlsView.swift in Sources */,
+				5CA9E8572E452A1E00BECF6A /* LiveChatHomeView.swift in Sources */,
 				D73E5F5A2C6A97F5007EB227 /* MainTabView.swift in Sources */,
 				D73E5F5B2C6A97F5007EB227 /* PubkeyView.swift in Sources */,
 				D73E5F5C2C6A97F5007EB227 /* ReplyView.swift in Sources */,
@@ -6586,6 +6759,7 @@
 				D703D74C2C6709CE00A400EA /* Zaps.swift in Sources */,
 				D703D7552C670A3700A400EA /* DamusUserDefaults.swift in Sources */,
 				D703D7A32C670E1D00A400EA /* nostr_bech32.c in Sources */,
+				5CA9E8742E467A5700BECF6A /* EventTags.swift in Sources */,
 				D703D7992C670DF900A400EA /* sha256.c in Sources */,
 				5C4FA8002DC5119300CE658C /* FollowPackPreview.swift in Sources */,
 				D703D7972C670DED00A400EA /* wasm.c in Sources */,
@@ -6663,7 +6837,9 @@
 				D703D7612C670AC000A400EA /* FlatBufferObject.swift in Sources */,
 				D703D7942C670DE300A400EA /* bolt11.c in Sources */,
 				D703D74A2C6709C200A400EA /* MuteItem.swift in Sources */,
+				5CA9E8652E46739700BECF6A /* LiveStreamBanner.swift in Sources */,
 				D703D77C2C670BFB00A400EA /* Enum.swift in Sources */,
+				5C78A7E82E45000700CF177D /* LiveEventModel.swift in Sources */,
 				D73E5E1F2C6A969E007EB227 /* RelayModelCache.swift in Sources */,
 				D703D7AB2C670F6900A400EA /* UnmuteThreadNotify.swift in Sources */,
 				D703D7702C670B5F00A400EA /* UserStatus.swift in Sources */,
@@ -7170,7 +7346,8 @@
 				INFOPLIST_FILE = damus/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Damus;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Damus needs access to your camera if you want to scan QR codes and upload photos from it";
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "Damus needs access to your media library for playback statuses";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Damus needs access to your camera in order to upload photos and scan QR codes.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Local authentication to access private key";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Damus needs access to your microphone to allow you to create video recordings that you can choose to post publicly on the network";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Granting Damus access to your photos allows you to save images.";
@@ -7222,7 +7399,8 @@
 				INFOPLIST_FILE = damus/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Damus;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Damus needs access to your camera if you want to scan QR codes and upload photos from it";
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "Damus needs access to your media library for playback statuses";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Damus needs access to your camera in order to upload photos and scan QR codes.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Local authentication to access private key";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Damus needs access to your microphone to allow you to create video recordings that you can choose to post publicly on the network";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Granting Damus access to your photos allows you to save images.";

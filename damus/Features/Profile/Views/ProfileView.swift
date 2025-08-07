@@ -123,7 +123,7 @@ struct ProfileView: View {
         var filters = ContentFilters.defaults(damus_state: damus_state)
         filters.append(fstate.filter)
         switch fstate {
-        case .posts, .posts_and_replies, .follow_list:
+        case .posts, .posts_and_replies, .follow_list, .live, .live_chat:
             filters.append({ profile.pubkey == $0.pubkey })
         case .conversations:
             filters.append({ profile.conversation_events.contains($0.id) } )

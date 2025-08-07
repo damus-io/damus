@@ -8,6 +8,7 @@
 import Kingfisher
 import SwiftUI
 import StoreKit
+import AVKit
 
 @main
 struct damusApp: App {
@@ -82,6 +83,16 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         registerNotificationCategories()
         ImageCacheMigrations.migrateKingfisherCacheIfNeeded()
         configureKingfisherCache()
+        
+        do {
+          try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers, .allowAirPlay])
+          print("Playback OK")
+          try AVAudioSession.sharedInstance().setActive(true)
+          print("Session is Active")
+        } catch {
+          print(error)
+        }
+        
         return true
     }
     

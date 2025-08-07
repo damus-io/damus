@@ -23,9 +23,13 @@ struct EventViewOptions: OptionSet {
     static let truncate_content_very_short = EventViewOptions(rawValue: 1 << 11)
     static let no_previews = EventViewOptions(rawValue: 1 << 12)
     static let no_show_more = EventViewOptions(rawValue: 1 << 13)
+    static let small_text = EventViewOptions(rawValue: 1 << 14)
+    static let no_status = EventViewOptions(rawValue: 1 << 15)
+    static let no_context_menu = EventViewOptions(rawValue: 1 << 16)
 
     static let embedded: EventViewOptions = [.no_action_bar, .small_pfp, .wide, .truncate_content, .nested]
     static let embedded_text_only: EventViewOptions = [.no_action_bar, .small_pfp, .wide, .truncate_content, .nested, .no_media, .truncate_content_very_short, .no_previews]
+    static let live_chat: EventViewOptions = [.no_action_bar, .small_pfp, .wide, .truncate_content, .no_previews, .nested, .small_text, .no_status, .no_context_menu]
 }
 
 struct TextEvent: View {
@@ -51,6 +55,15 @@ struct TextEvent: View {
 
     func EvBody(options: EventViewOptions) -> some View {
         let blur_imgs = should_blur_images(settings: damus.settings, contacts: damus.contacts, ev: event, our_pubkey: damus.pubkey)
+        if options.contains(.small_text) {
+            return NoteContentView(
+                damus_state: damus,
+                event: event,
+                blur_images: blur_imgs,
+                size: .small,
+                options: options)
+        }
+        
         return NoteContentView(
             damus_state: damus,
             event: event,
