@@ -630,44 +630,50 @@ struct PVImageCarouselView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack {
                 ForEach(media.indices, id: \.self) { index in
-                    ZStack(alignment: .topLeading) {
-                        if isSupportedVideo(url: media[index].uploadedURL) {
-                            VideoPlayer(player: configurePlayer(with: media[index].localURL))
-                                .frame(width: media.count == 1 ? deviceWidth * 0.8 : 250, height: media.count == 1 ? 400 : 250)
-                                .cornerRadius(10)
-                                .padding()
-                                .contextMenu { contextMenuContent(for: media[index]) }
-                        } else {
-                            KFAnimatedImage(media[index].uploadedURL)
-                                .imageContext(.note, disable_animation: false)
-                                .configure { view in
-                                    view.framePreloadCount = 3
+                    if isSupportedVideo(url: media[index].uploadedURL) {
+                        VideoPlayer(player: configurePlayer(with: media[index].localURL))
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: media.count == 1 ? deviceWidth * 0.8 : 250, alignment: .topLeading)
+                            .cornerRadius(10)
+                            .contextMenu { contextMenuContent(for: media[index]) }
+                            .overlay(
+                                Button(action: {
+                                    media.remove(at: index)
+                                }) {
+                                    closeImageView
                                 }
-                                .frame(width: media.count == 1 ? deviceWidth * 0.8 : 250, height: media.count == 1 ? 400 : 250)
-                                .cornerRadius(10)
-                                .padding()
-                                .contextMenu { contextMenuContent(for: media[index]) }
-                        }
-                        
-                        VStack {  // Set spacing to 0 to remove the gap between items
-                            Image("close-circle")
-                                .foregroundColor(.white)
-                                .padding(20)
-                                .shadow(radius: 5)
-                                .onTapGesture {
-                                    media.remove(at: index) // Direct removal using index
+                                    .padding([.top, .leading], 8),
+                                alignment: .topLeading
+                            )
+                            .overlay(
+                                Image(systemName: "video")
+                                    .foregroundColor(.white)
+                                    .padding(10)
+                                    .background(Color.black.opacity(0.5))
+                                    .clipShape(Circle())
+                                    .shadow(radius: 5)
+                                    .opacity(0.6),
+                                alignment: .bottomLeading
+                            )
+                    } else {
+                        KFAnimatedImage(media[index].uploadedURL)
+                            .imageContext(.note, disable_animation: false)
+                            .configure { view in
+                                view.framePreloadCount = 3
+                            }
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: media.count == 1 ? deviceWidth * 0.8 : 250, alignment: .topLeading)
+                            .cornerRadius(10)
+                            .contextMenu { contextMenuContent(for: media[index]) }
+                            .overlay(
+                                Button(action: {
+                                    media.remove(at: index)
+                                }) {
+                                    closeImageView
                                 }
-                            
-                            if isSupportedVideo(url: media[index].uploadedURL) {
-                                Spacer()
-                                    Image(systemName: "video")
-                                        .foregroundColor(.white)
-                                        .padding(10)
-                                        .shadow(radius: 5)
-                                        .opacity(0.6)
-                                }
-                        }
-                        .padding(.bottom, 35)
+                                    .padding([.top, .leading], 8),
+                                alignment: .topLeading
+                            )
                     }
                 }
                 if let mediaUP = mediaUnderProgress, let progress = imageUploadModel.progress {
@@ -675,8 +681,8 @@ struct PVImageCarouselView: View {
                         // Media under upload-progress
                         Image(uiImage: getImage(media: mediaUP))
                             .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: media.count == 0 ? deviceWidth * 0.8 : 250, height: media.count == 0 ? 400 : 250)
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: media.count == 1 ? deviceWidth * 0.8 : 250, alignment: .topLeading)
                             .cornerRadius(10)
                             .opacity(0.3)
                             .padding()
@@ -712,6 +718,14 @@ struct PVImageCarouselView: View {
         player.allowsExternalPlayback = false
         player.usesExternalPlaybackWhileExternalScreenIsActive = false
         return player
+    }
+
+    private var closeImageView: some View {
+        Image("close-circle")
+            .foregroundColor(.white)
+            .background(Color.black.opacity(0.5))
+            .clipShape(Circle())
+            .shadow(radius: 5)
     }
 }
 
