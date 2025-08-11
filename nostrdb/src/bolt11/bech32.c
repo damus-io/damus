@@ -162,7 +162,8 @@ bech32_encoding bech32_decode(char* hrp, uint8_t *data, size_t *data_len, const 
     if (len > max_input_len) {
         return BECH32_ENCODING_NONE;
     }
-    return bech32_decode_len(hrp, data, data_len, input, len, 8);
+    static const int MAX_PREFIX = 9;    // 8 bytes for the text, 1 byte for the null terminator
+    return bech32_decode_len(hrp, data, data_len, input, len, MAX_PREFIX);
 }
 
 int bech32_convert_bits(uint8_t* out, size_t* outlen, int outbits, const uint8_t* in, size_t inlen, int inbits, int pad) {
