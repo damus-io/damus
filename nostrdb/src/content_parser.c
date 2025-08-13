@@ -24,8 +24,10 @@ struct ndb_content_parser {
 
 static int parse_digit(struct cursor *cur, int *digit) {
 	int c;
-	if ((c = peek_char(cur, 0)) == -1)
+	if ((c = peek_char(cur, 0)) == -1) {
+		*digit = 0;
 		return 0;
+	}
 	
 	c -= '0';
 	
