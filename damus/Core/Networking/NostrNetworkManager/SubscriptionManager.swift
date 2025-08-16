@@ -30,10 +30,10 @@ extension NostrNetworkManager {
         ///
         /// - Parameter filters: The nostr filters to specify what kind of data to subscribe to
         /// - Returns: An async stream of nostr data
-        func subscribe(filters: [NostrFilter]) -> AsyncStream<StreamItem> {
+        func subscribe(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil) -> AsyncStream<StreamItem> {
             return AsyncStream<StreamItem> { continuation in
                 let streamTask = Task {
-                    for await item in self.pool.subscribe(filters: filters) {
+                    for await item in self.pool.subscribe(filters: filters, to: desiredRelays) {
                         switch item {
                         case .eose: continuation.yield(.eose)
                         case .event(let nostrEvent):

@@ -14,6 +14,7 @@ struct SearchHomeView: View {
     @StateObject var model: SearchHomeModel
     @State var search: String = ""
     @FocusState private var isFocused: Bool
+    @State var loadingTask: Task<Void, Never>?
 
     func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
         var filters = ContentFilters.defaults(damus_state: damus_state)
@@ -84,8 +85,8 @@ struct SearchHomeView: View {
         )
         .refreshable {
             // Fetch new information by unsubscribing and resubscribing to the relay
-            model.unsubscribe()
-            model.subscribe()
+            loadingTask?.cancel()
+            loadingTask = Task { await model.load() }
         }
     }
     
@@ -93,8 +94,8 @@ struct SearchHomeView: View {
         SearchResultsView(damus_state: damus_state, search: $search)
             .refreshable {
                 // Fetch new information by unsubscribing and resubscribing to the relay
-                model.unsubscribe()
-                model.subscribe()
+                loadingTask?.cancel()
+                loadingTask = Task { await model.load() }
             }
     }
     
@@ -129,11 +130,11 @@ struct SearchHomeView: View {
         }
         .onAppear {
             if model.events.events.isEmpty {
-                model.subscribe()
+                loadingTask = Task { await model.load() }
             }
         }
         .onDisappear {
-            model.unsubscribe()
+            loadingTask?.cancel()
         }
     }
 }

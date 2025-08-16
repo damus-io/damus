@@ -14,7 +14,7 @@ class FollowingModel {
     let contacts: [Pubkey]
     let hashtags: [Hashtag]
 
-    let sub_id: String = UUID().description
+    private var listener: Task<Void, Never>? = nil
     
     init(damus_state: DamusState, contacts: [Pubkey], hashtags: [Hashtag]) {
         self.damus_state = damus_state
@@ -41,19 +41,17 @@ class FollowingModel {
             return
         }
         let filters = [filter]
-        //print_filters(relay_id: "following", filters: [filters])
-        self.damus_state.nostrNetwork.pool.subscribe(sub_id: sub_id, filters: filters, handler: handle_event)
+        self.listener?.cancel()
+        self.listener = Task {
+            for await item in self.damus_state.nostrNetwork.reader.subscribe(filters: filters) {
+                // don't need to do anything here really
+                continue
+            }
+        }
     }
     
     func unsubscribe() {
-        if !needs_sub {
-            return
-        }
-        print("unsubscribing from following \(sub_id)")
-        self.damus_state.nostrNetwork.pool.unsubscribe(sub_id: sub_id)
-    }
-
-    func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
-        // don't need to do anything here really
+        self.listener?.cancel()
+        self.listener = nil
     }
 }

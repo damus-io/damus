@@ -185,7 +185,7 @@ struct SendPaymentView: View {
                     sendState = .processing
                     
                     // Process payment
-                    guard let payRequestEv = WalletConnect.pay(url: nwc, pool: damus_state.nostrNetwork.pool, post: damus_state.nostrNetwork.postbox, invoice: invoice.string, zap_request: nil, delay: nil) else {
+                    guard let payRequestEv = damus_state.nostrNetwork.nwcPay(url: nwc, post: damus_state.nostrNetwork.postbox, invoice: invoice.string, zap_request: nil) else {
                         sendState = .failed(error: .init(
                             user_visible_description: NSLocalizedString("The payment request could not be made to your wallet provider.", comment: "A human-readable error message"),
                             tip: NSLocalizedString("Check if your wallet looks configured correctly and try again. If the error persists, please contact support.", comment: "A human-readable tip for an error when a payment request cannot be made to a wallet."),

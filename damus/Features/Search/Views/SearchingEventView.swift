@@ -77,7 +77,8 @@ struct SearchingEventView: View {
             }
             
         case .event(let note_id):
-            find_event(state: state, query: .event(evid: note_id)) { res in
+            Task {
+                let res = await state.nostrNetwork.findEvent(query: .event(evid: note_id))
                 guard case .event(let ev) = res else {
                     self.search_state = .not_found
                     return
@@ -85,7 +86,8 @@ struct SearchingEventView: View {
                 self.search_state = .found(ev)
             }
         case .profile(let pubkey):
-            find_event(state: state, query: .profile(pubkey: pubkey)) { res in
+            Task {
+                let res = await state.nostrNetwork.findEvent(query: .profile(pubkey: pubkey))
                 guard case .profile(let pubkey) = res else {
                     self.search_state = .not_found
                     return
@@ -93,7 +95,8 @@ struct SearchingEventView: View {
                 self.search_state = .found_profile(pubkey)
             }
         case .naddr(let naddr):
-            naddrLookup(damus_state: state, naddr: naddr) { res in
+            Task {
+                let res = await state.nostrNetwork.lookup(naddr: naddr)
                 guard let res = res else {
                     self.search_state = .not_found
                     return

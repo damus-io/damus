@@ -65,12 +65,11 @@ class HomeModel: ContactsDelegate {
     let resub_debouncer = Debouncer(interval: 3.0)
     var should_debounce_dms = true
 
-    let home_subid = UUID().description
-    let contacts_subid = UUID().description
-    let notifications_subid = UUID().description
-    let dms_subid = UUID().description
-    let init_subid = UUID().description
-    let profiles_subid = UUID().description
+    var homeHandlerTask: Task<Void, Never>?
+    var contactsHandlerTask: Task<Void, Never>?
+    var notificationsHandlerTask: Task<Void, Never>?
+    var dmsHandlerTask: Task<Void, Never>?
+    var nwcHandlerTask: Task<Void, Never>?
     
     var loading: Bool = false
 
@@ -94,21 +93,8 @@ class HomeModel: ContactsDelegate {
         preload_events(state: self.damus_state, events: [ev])
     }
     
-    var pool: RelayPool {
-        self.damus_state.nostrNetwork.pool
-    }
-    
     var dms: DirectMessagesModel {
         return damus_state.dms
-    }
-    
-    func has_sub_id_event(sub_id: String, ev_id: NoteId) -> Bool {
-        if !has_event.keys.contains(sub_id) {
-            has_event[sub_id] = Set()
-            return false
-        }
-
-        return has_event[sub_id]!.contains(ev_id)
     }
     
     func setup_debouncer() {
@@ -140,6 +126,28 @@ class HomeModel: ContactsDelegate {
         damus_state.drafts.load(from: damus_state)
     }
     
+    enum RelayListLoadingError: Error {
+        case noRelayList
+        case relayListParseError
+        
+        var humanReadableError: ErrorView.UserPresentableError {
+            switch self {
+            case .noRelayList:
+                return ErrorView.UserPresentableError(
+                    user_visible_description: NSLocalizedString("Your relay list could not be found, so we cannot connect you to your Nostr network.", comment: "Human readable error description for a failure to find the relay list"),
+                    tip: NSLocalizedString("Please check your internet connection and restart the app. If the error persists, please go to Settings > First Aid.", comment: "Human readable tips for what to do for a failure to find the relay list"),
+                    technical_info: "No NIP-65 relay list or legacy kind:3 contact event could be found."
+                )
+            case .relayListParseError:
+                return ErrorView.UserPresentableError(
+                    user_visible_description: NSLocalizedString("Your relay list appears to be broken, so we cannot connect you to your Nostr network.", comment: "Human readable error description for a failure to parse the relay list due to a bad relay list"),
+                    tip: NSLocalizedString("Please contact support for further help.", comment: "Human readable tips for what to do for a failure to find the relay list"),
+                    technical_info: "Relay list could not be parsed."
+                )
+            }
+        }
+    }
+    
     // MARK: - ContactsDelegate functions
     
     func latest_contact_event_changed(new_event: NostrEvent) {
@@ -158,9 +166,6 @@ class HomeModel: ContactsDelegate {
         print("hit resub debouncer")
 
         resub_debouncer.debounce {
-            print("resub")
-            self.unsubscribe_to_home_filters()
-
             switch resubbing {
             case .following:
                 break
@@ -175,25 +180,16 @@ class HomeModel: ContactsDelegate {
     }
 
     @MainActor
-    func process_event(sub_id: String, relay_id: RelayURL, ev: NostrEvent) {
-        if has_sub_id_event(sub_id: sub_id, ev_id: ev.id) {
-            return
-        }
-
-        let last_k = get_last_event_of_kind(relay_id: relay_id, kind: ev.kind)
-        if last_k == nil || ev.created_at > last_k!.created_at {
-            last_event_of_kind[relay_id]?[ev.kind] = ev
-        }
-
+    func process_event(ev: NostrEvent, context: SubscriptionContext) {
         guard let kind = ev.known_kind else {
             return
         }
 
         switch kind {
         case .chat, .longform, .text, .highlight:
-            handle_text_event(sub_id: sub_id, ev)
+            handle_text_event(ev, context: context)
         case .contacts:
-            handle_contact_event(sub_id: sub_id, relay_id: relay_id, ev: ev)
+            handle_contact_event(ev: ev)
         case .metadata:
             // profile metadata processing is handled by nostrdb
             break
@@ -202,7 +198,7 @@ class HomeModel: ContactsDelegate {
         case .mute_list:
             handle_mute_list_event(ev)
         case .boost:
-            handle_boost_event(sub_id: sub_id, ev)
+            handle_boost_event(ev, context: context)
         case .like:
             handle_like_event(ev)
         case .dm:
@@ -216,7 +212,7 @@ class HomeModel: ContactsDelegate {
         case .nwc_request:
             break
         case .nwc_response:
-            handle_nwc_response(ev, relay: relay_id)
+            handle_nwc_response(ev)
         case .http_auth:
             break
         case .status:
@@ -261,7 +257,7 @@ class HomeModel: ContactsDelegate {
         pdata.status.update_status(st)
     }
 
-    func handle_nwc_response(_ ev: NostrEvent, relay: RelayURL) {
+    func handle_nwc_response(_ ev: NostrEvent) {
         Task { @MainActor in
             // TODO: Adapt KeychainStorage to StringCodable and instead of parsing to WalletConnectURL every time
             guard let nwc_str = damus_state.settings.nostr_wallet_connect,
@@ -269,7 +265,6 @@ class HomeModel: ContactsDelegate {
                 return
             }
             
-            guard nwc.relay == relay else { return }    // Don't process NWC responses coming from relays other than our designated one
             guard ev.referenced_pubkeys.first == nwc.keypair.pubkey else {
                 return      // This message is not for us. Ignore it.
             }
@@ -289,9 +284,9 @@ class HomeModel: ContactsDelegate {
             // since command results are not returned for ephemeral events,
             // remove the request from the postbox which is likely failing over and over
             if damus_state.nostrNetwork.postbox.remove_relayer(relay_id: nwc.relay, event_id: resp.req_id) {
-                Log.debug("HomeModel: got NWC response, removed %s from the postbox [%s]", for: .nwc, resp.req_id.hex(), relay.absoluteString)
+                Log.debug("HomeModel: got NWC response, removed %s from the postbox", for: .nwc, resp.req_id.hex())
             } else {
-                Log.debug("HomeModel: got NWC response, %s not found in the postbox, nothing to remove [%s]", for: .nwc, resp.req_id.hex(), relay.absoluteString)
+                Log.debug("HomeModel: got NWC response, %s not found in the postbox, nothing to remove", for: .nwc, resp.req_id.hex())
             }
             
             damus_state.wallet.handle_nwc_response(response: resp)  // This can handle success or error cases
@@ -303,7 +298,6 @@ class HomeModel: ContactsDelegate {
                 return
             }
 
-            print("nwc success: \(resp.response.result.debugDescription) [\(relay)]")
             WalletConnect.handle_zap_success(state: self.damus_state, resp: resp)
         }
     }
@@ -382,19 +376,11 @@ class HomeModel: ContactsDelegate {
         self.deleted_events.insert(ev.id)
     }
 
-    func handle_contact_event(sub_id: String, relay_id: RelayURL, ev: NostrEvent) {
+    func handle_contact_event(ev: NostrEvent) {
         process_contact_event(state: self.damus_state, ev: ev)
-
-        if sub_id == init_subid {
-            pool.send(.unsubscribe(init_subid), to: [relay_id])
-            if !done_init {
-                done_init = true
-                send_home_filters(relay_id: nil)
-            }
-        }
     }
 
-    func handle_boost_event(sub_id: String, _ ev: NostrEvent) {
+    func handle_boost_event(_ ev: NostrEvent, context: SubscriptionContext) {
         var boost_ev_id = ev.last_refid()
 
         if let inner_ev = ev.get_inner_event(cache: damus_state.events) {
@@ -409,7 +395,7 @@ class HomeModel: ContactsDelegate {
                 
                 if inner_ev.is_textlike {
                     DispatchQueue.main.async {
-                        self.handle_text_event(sub_id: sub_id, ev)
+                        self.handle_text_event(ev, context: context)
                     }
                 }
             }
@@ -457,94 +443,50 @@ class HomeModel: ContactsDelegate {
         }
     }
 
-    @MainActor
-    func handle_event(relay_id: RelayURL, conn_event: NostrConnectionEvent) {
-        switch conn_event {
-        case .ws_connection_event(let ev):
-            switch ev {
-            case .connected:
-                if !done_init {
-                    self.loading = true
-                    send_initial_filters(relay_id: relay_id)
-                } else {
-                    //remove_bootstrap_nodes(damus_state)
-                    send_home_filters(relay_id: relay_id)
+    /// Send the initial filters, just our contact list and relay list mostly
+    func send_initial_filters() {
+        Task {
+            let filter = NostrFilter(kinds: [.contacts], limit: 1, authors: [damus_state.pubkey])
+            for await item in damus_state.nostrNetwork.reader.subscribe(filters: [filter]) {
+                switch item {
+                case .event(let borrow):
+                    var event: NostrEvent? = nil
+                    try? borrow { ev in
+                        event = ev.toOwned()
+                    }
+                    guard let event else { return }
+                    await process_event(ev: event, context: .initialContactList)
+                    continue
+                case .eose:
+                    if !done_init {
+                        done_init = true
+                        send_home_filters()
+                    }
+                    break
                 }
-                
-                // connect to nwc relays when connected
-                if let nwc_str = damus_state.settings.nostr_wallet_connect,
-                   let r = pool.get_relay(relay_id),
-                   r.descriptor.variant == .nwc,
-                   let nwc = WalletConnectURL(str: nwc_str),
-                   nwc.relay == relay_id
-                {
-                    WalletConnect.subscribe(url: nwc, pool: pool)
-                }
-            case .error(let merr):
-                let desc = String(describing: merr)
-                if desc.contains("Software caused connection abort") {
-                    pool.reconnect(to: [relay_id])
-                }
-            case .disconnected:
-                pool.reconnect(to: [relay_id])
-            default:
-                break
-            }
-            
-            update_signal_from_pool(signal: self.signal, pool: damus_state.nostrNetwork.pool)
-        case .nostr_event(let ev):
-            switch ev {
-            case .event(let sub_id, let ev):
-                // globally handle likes
-                /*
-                let always_process = sub_id == notifications_subid || sub_id == contacts_subid || sub_id == home_subid || sub_id == dms_subid || sub_id == init_subid || ev.known_kind == .like || ev.known_kind == .boost || ev.known_kind == .zap || ev.known_kind == .contacts || ev.known_kind == .metadata
-                if !always_process {
-                    // TODO: other views like threads might have their own sub ids, so ignore those events... or should we?
-                    return
-                }
-                */
-
-                self.process_event(sub_id: sub_id, relay_id: relay_id, ev: ev)
-            case .notice(let msg):
-                print(msg)
-
-            case .eose(let sub_id):
-                guard let txn = NdbTxn(ndb: damus_state.ndb) else {
-                    return
-                }
-
-                if sub_id == dms_subid {
-                    var dms = dms.dms.flatMap { $0.events }
-                    dms.append(contentsOf: incoming_dms)
-                    load_profiles(context: "dms", profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(dms), damus_state: damus_state, txn: txn)
-                } else if sub_id == notifications_subid {
-                    load_profiles(context: "notifications", profiles_subid: profiles_subid, relay_id: relay_id, load: .from_keys(notifications.uniq_pubkeys()), damus_state: damus_state, txn: txn)
-                } else if sub_id == home_subid {
-                    load_profiles(context: "home", profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(events.events), damus_state: damus_state, txn: txn)
-                }
-                
-                self.loading = false
-                break
-                
-            case .ok:
-                break
-            case .auth:
-                break
             }
             
         }
-    }
-
-
-    /// Send the initial filters, just our contact list mostly
-    func send_initial_filters(relay_id: RelayURL) {
-        let filter = NostrFilter(kinds: [.contacts], limit: 1, authors: [damus_state.pubkey])
-        let subscription = NostrSubscribe(filters: [filter], sub_id: init_subid)
-        pool.send(.subscribe(subscription), to: [relay_id])
+        
+        Task {
+            let relayListFilter = NostrFilter(kinds: [.relay_list], limit: 1, authors: [damus_state.pubkey])
+            for await item in damus_state.nostrNetwork.reader.subscribe(filters: [relayListFilter]) {
+                switch item {
+                case .event(let borrow):
+                    var event: NostrEvent? = nil
+                    try? borrow { ev in
+                        event = ev.toOwned()
+                    }
+                    guard let event else { return }
+                    await process_event(ev: event, context: .initialRelayList)
+                case .eose: break
+                }
+            }
+        }
     }
 
     /// After initial connection or reconnect, send subscription filters for the home timeline, DMs, and notifications
-    func send_home_filters(relay_id: RelayURL?) {
+    func send_home_filters() {
         // TODO: since times should be based on events from a specific relay
         // perhaps we could mark this in the relay pool somehow
 
@@ -589,29 +531,90 @@ class HomeModel: ContactsDelegate {
         let contacts_filter_chunks = contacts_filter.chunked(on: .authors, into: MAX_CONTACTS_ON_FILTER)
         var contacts_filters = contacts_filter_chunks + [our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter]
         var dms_filters = [dms_filter, our_dms_filter]
-        let last_of_kind = get_last_of_kind(relay_id: relay_id)
-
-        contacts_filters = update_filters_with_since(last_of_kind: last_of_kind, filters: contacts_filters)
-        notifications_filters = update_filters_with_since(last_of_kind: last_of_kind, filters: notifications_filters)
-        dms_filters = update_filters_with_since(last_of_kind: last_of_kind, filters: dms_filters)
 
         //print_filters(relay_id: relay_id, filters: [home_filters, contacts_filters, notifications_filters, dms_filters])
 
-        subscribe_to_home_filters(relay_id: relay_id)
+        subscribe_to_home_filters()
 
-        let relay_ids = relay_id.map { [$0] }
-
-        pool.send(.subscribe(.init(filters: contacts_filters, sub_id: contacts_subid)), to: relay_ids)
-        pool.send(.subscribe(.init(filters: notifications_filters, sub_id: notifications_subid)), to: relay_ids)
-        pool.send(.subscribe(.init(filters: dms_filters, sub_id: dms_subid)), to: relay_ids)
+        
+        self.contactsHandlerTask?.cancel()
+        self.contactsHandlerTask = Task {
+            for await item in damus_state.nostrNetwork.reader.subscribe(filters: contacts_filters) {
+                switch item {
+                case .event(let borrow):
+                    var event: NostrEvent? = nil
+                    try? borrow { ev in
+                        var event = ev.toOwned()
+                    }
+                    guard let event else { return }
+                    await self.process_event(ev: event, context: .contacts)
+                case .eose: continue
+                }
+            }
+        }
+        self.notificationsHandlerTask?.cancel()
+        self.notificationsHandlerTask = Task {
+            for await item in damus_state.nostrNetwork.reader.subscribe(filters: notifications_filters) {
+                switch item {
+                case .event(let borrow):
+                    var event: NostrEvent? = nil
+                    try? borrow { ev in
+                        event = ev.toOwned()
+                    }
+                    guard let event else { return }
+                    await self.process_event(ev: event, context: .notifications)
+                case .eose:
+                    guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
+                    load_profiles(context: "notifications", load: .from_keys(notifications.uniq_pubkeys()), damus_state: damus_state, txn: txn)
+                }
+            }
+        }
+        self.dmsHandlerTask?.cancel()
+        self.dmsHandlerTask = Task {
+            for await item in damus_state.nostrNetwork.reader.subscribe(filters: dms_filters) {
+                switch item {
+                case .event(let borrow):
+                    var event: NostrEvent? = nil
+                    try? borrow { ev in
+                        event = ev.toOwned()
+                    }
+                    guard let event else { return }
+                    await self.process_event(ev: event, context: .dms)
+                case .eose:
+                    guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
+                    var dms = dms.dms.flatMap { $0.events }
+                    dms.append(contentsOf: incoming_dms)
+                    load_profiles(context: "dms", load: .from_events(dms), damus_state: damus_state, txn: txn)
+                }
+            }
+        }
+        self.nwcHandlerTask?.cancel()
+        self.nwcHandlerTask = Task {
+            if let nwc_str = damus_state.settings.nostr_wallet_connect,
+               let nwc = WalletConnectURL(str: nwc_str)
+            {
+                var filter = NostrFilter(kinds: [.nwc_response])
+                filter.authors = [nwc.pubkey]
+                filter.limit = 0
+                for await item in damus_state.nostrNetwork.reader.subscribe(filters: [filter], to: [nwc.relay]) {
+                    switch item {
+                    case .event(let borrow):
+                        var event: NostrEvent? = nil
+                        try? borrow { ev in
+                            event = ev.toOwned()
+                        }
+                        guard let event else { return }
+                        await self.process_event(ev: event, context: .nwc)
+                    case .eose: continue
+                    }
+                }
+            }
+            
+        }
     }
 
     func get_last_of_kind(relay_id: RelayURL?) -> [UInt32: NostrEvent] {
         return relay_id.flatMap { last_event_of_kind[$0] } ?? [:]
-    }
-
-    func unsubscribe_to_home_filters() {
-        pool.send(.unsubscribe(home_subid))
     }
 
     func get_friends() -> [Pubkey] {
@@ -620,7 +623,7 @@ class HomeModel: ContactsDelegate {
         return Array(friends)
     }
 
-    func subscribe_to_home_filters(friends fs: [Pubkey]? = nil, relay_id: RelayURL? = nil) {
+    func subscribe_to_home_filters(friends fs: [Pubkey]? = nil) {
         // TODO: separate likes?
         var home_filter_kinds: [NostrKind] = [
             .text, .longform, .boost, .highlight
@@ -649,11 +652,34 @@ class HomeModel: ContactsDelegate {
             home_filters.append(hashtag_filter)
         }
 
-        let relay_ids = relay_id.map { [$0] }
-        home_filters = update_filters_with_since(last_of_kind: get_last_of_kind(relay_id: relay_id), filters: home_filters)
-        let sub = NostrSubscribe(filters: home_filters, sub_id: home_subid)
-
-        pool.send(.subscribe(sub), to: relay_ids)
+        self.homeHandlerTask?.cancel()
+        self.homeHandlerTask = Task {
+            for await item in damus_state.nostrNetwork.reader.subscribe(filters: home_filters) {
+                switch item {
+                case .event(let borrow):
+                    var event: NostrEvent? = nil
+                    try? borrow { ev in
+                        event = ev.toOwned()
+                    }
+                    guard let event else { return }
+                    await self.process_event(ev: event, context: .home)
+                case .eose:
+                    guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
+                    load_profiles(context: "home", load: .from_events(events.events), damus_state: damus_state, txn: txn)
+                }
+            }
+        }
+    }
+    
+    /// Adapter pattern to make migration easier
+    enum SubscriptionContext {
+        case initialContactList
+        case initialRelayList
+        case home
+        case notifications
+        case dms
+        case contacts
+        case nwc
     }
 
     func handle_mute_list_event(_ ev: NostrEvent) {
@@ -746,7 +772,7 @@ class HomeModel: ContactsDelegate {
     }
 
 
-    func handle_text_event(sub_id: String, _ ev: NostrEvent) {
+    func handle_text_event(_ ev: NostrEvent, context: SubscriptionContext) {
         guard should_show_event(state: damus_state, ev: ev) else {
             return
         }
@@ -770,10 +796,13 @@ class HomeModel: ContactsDelegate {
             }
         }
 
-        if sub_id == home_subid {
+        switch context {
+        case .home:
             insert_home_event(ev)
-        } else if sub_id == notifications_subid {
+        case .notifications:
             handle_notification(ev: ev)
+        case .dms, .contacts, .initialRelayList, .initialContactList, .nwc:
+            break
         }
     }
     
@@ -1191,3 +1220,24 @@ func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: 
     }
 }
 
+// MARK: - Extension to bridge NIP-65 relay list structs with app-native objects
+// TODO: Do we need this??
+
+//extension NIP65.RelayList {
+//    static func fromLegacyContactList(_ contactList: NdbNote) throws(BridgeError) -> Self {
+//        guard let relayListInfo = decode_json_relays(contactList.content) else { throw .couldNotDecodeRelayListInfo }
+//        let relayItems = relayListInfo.map({ url, rwConfiguration in
+//            return RelayItem(url: url, rwConfiguration: rwConfiguration.toNIP65RWConfiguration() ?? .readWrite)
+//        })
+//        return NIP65.RelayList(relays: relayItems)
+//    }
+//    
+//    static func fromLegacyContactList(_ contactList: NdbNote?) throws(BridgeError) -> Self? {
+//        guard let contactList = contactList else { return nil }
+//        return try fromLegacyContactList(contactList)
+//    }
+//    
+//    enum BridgeError: Error {
+//        case couldNotDecodeRelayListInfo
+//    }
+//}

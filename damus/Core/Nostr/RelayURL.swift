@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct RelayURL: Hashable, Equatable, Codable, CodingKeyRepresentable, Identifiable, Comparable, CustomStringConvertible {
+public struct RelayURL: Hashable, Equatable, Codable, CodingKeyRepresentable, Identifiable, Comparable, CustomStringConvertible, Sendable {
     private(set) var url: URL
 
     public var id: URL {

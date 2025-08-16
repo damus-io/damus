@@ -19,6 +19,11 @@ struct QueuedRequest {
     let skip_ephemeral: Bool
 }
 
+struct SeenEvent: Hashable {
+    let relay_id: RelayURL
+    let evid: NoteId
+}
+
 /// Establishes and manages connections and subscriptions to a list of relays.
 class RelayPool {
     private(set) var relays: [Relay] = []
@@ -31,6 +36,8 @@ class RelayPool {
     var keypair: Keypair?
     var message_received_function: (((String, RelayDescriptor)) -> Void)?
     var message_sent_function: (((String, Relay)) -> Void)?
+    var delegate: Delegate?
+    private(set) var signal: SignalModel = SignalModel()
 
     private let network_monitor = NWPathMonitor()
     private let network_monitor_queue = DispatchQueue(label: "io.damus.network_monitor")
@@ -407,6 +414,13 @@ class RelayPool {
 
 func add_rw_relay(_ pool: RelayPool, _ url: RelayURL) {
     try? pool.add_relay(RelayPool.RelayDescriptor(url: url, info: .readWrite))
+}
+
+
+extension RelayPool {
+    protocol Delegate {
+        func latestRelayListChanged(_ newEvent: NdbNote)
+    }
 }
 
 

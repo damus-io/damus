@@ -193,7 +193,7 @@ struct ShareExtensionView: View {
                 break
             case .active:
                 print("txn: 📙 SHARE ACTIVE")
-                state.nostrNetwork.pool.ping()
+                state.nostrNetwork.ping()
             @unknown default:
                 break
             }
