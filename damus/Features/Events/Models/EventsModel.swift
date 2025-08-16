@@ -11,10 +11,10 @@ class EventsModel: ObservableObject {
     let state: DamusState
     let target: NoteId
     let kind: QueryKind
-    let sub_id = UUID().uuidString
     let profiles_id = UUID().uuidString
     var events: EventHolder
     @Published var loading: Bool
+    var loadingTask: Task<Void, Never>?
 
     enum QueryKind {
         case kind(NostrKind)
@@ -68,42 +68,34 @@ class EventsModel: ObservableObject {
     }
     
     func subscribe() {
-        state.nostrNetwork.pool.subscribe(sub_id: sub_id,
-                             filters: [get_filter()],
-                             handler: handle_nostr_event)
+        loadingTask?.cancel()
+        loadingTask = Task {
+            for await item in state.nostrNetwork.reader.subscribe(filters: [get_filter()]) {
+                switch item {
+                case .event(let borrow):
+                    var event: NostrEvent? = nil
+                    try? borrow { ev in
+                        event = ev.toOwned()
+                    }
+                    guard let event else { return }
+                    if events.insert(event) { objectWillChange.send() }
+                case .eose:
+                    break
+                }
+            }
+            self.loading = false
+            guard let txn = NdbTxn(ndb: self.state.ndb) else { return }
+            load_profiles(context: "events_model", load: .from_events(events.all_events), damus_state: state, txn: txn)
+        }
     }
     
     func unsubscribe() {
-        state.nostrNetwork.pool.unsubscribe(sub_id: sub_id)
+        loadingTask?.cancel()
     }
 
     private func handle_event(relay_id: RelayURL, ev: NostrEvent) {
         if events.insert(ev) {
             objectWillChange.send()
-        }
-    }
-
-    func handle_nostr_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
-        guard case .nostr_event(let nev) = ev, nev.subid == self.sub_id
-        else {
-            return
-        }
-
-        switch nev {
-        case .event(_, let ev):
-            handle_event(relay_id: relay_id, ev: ev)
-        case .notice:
-            break
-        case .ok:
-            break
-        case .auth:
-            break
-        case .eose:
-            self.loading = false
-            guard let txn = NdbTxn(ndb: self.state.ndb) else {
-                return
-            }
-            load_profiles(context: "events_model", profiles_subid: profiles_id, relay_id: relay_id, load: .from_events(events.all_events), damus_state: state, txn: txn)
         }
     }
 }

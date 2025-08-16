@@ -72,7 +72,7 @@ struct NoteZapButton: View {
     
     func tap() {
         guard let our_zap else {
-            send_zap(damus_state: damus_state, target: target, lnurl: lnurl, is_custom: false, comment: nil, amount_sats: nil, zap_type: damus_state.settings.default_zap_type)
+            Task { await send_zap(damus_state: damus_state, target: target, lnurl: lnurl, is_custom: false, comment: nil, amount_sats: nil, zap_type: damus_state.settings.default_zap_type) }
             return
         }
         
@@ -173,13 +173,13 @@ func initial_pending_zap_state(settings: UserSettingsStore) -> PendingZapState {
     return .external(ExtPendingZapState(state: .fetching_invoice))
 }
 
-func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_custom: Bool, comment: String?, amount_sats: Int?, zap_type: ZapType) {
+func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_custom: Bool, comment: String?, amount_sats: Int?, zap_type: ZapType) async {
     guard let keypair = damus_state.keypair.to_full() else {
         return
     }
     
     // Only take the first 10 because reasons
-    let relays = Array(damus_state.nostrNetwork.pool.our_descriptors.prefix(10))
+    let relays = Array(damus_state.nostrNetwork.ourRelayDescriptors.prefix(10))
     let content = comment ?? ""
     
     guard let mzapreq = make_zap_request_event(keypair: keypair, content: content, relays: relays, target: target, zap_type: zap_type) else {
@@ -232,7 +232,7 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
                 flusher = .once({ pe in
                     // send donation zap when the pending zap is flushed, this allows user to cancel and not send a donation
                     Task { @MainActor in
-                        await WalletConnect.send_donation_zap(pool: damus_state.nostrNetwork.pool, postbox: damus_state.nostrNetwork.postbox, nwc: nwc_state.url, percent: damus_state.settings.donation_percent, base_msats: amount_msat)
+                        await damus_state.nostrNetwork.send_donation_zap(nwc: nwc_state.url, percent: damus_state.settings.donation_percent, base_msats: amount_msat)
                     }
                 })
             }
@@ -240,7 +240,7 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
             // we don't have a delay on one-tap nozaps (since this will be from customize zap view)
             let delay = damus_state.settings.nozaps ? nil : 5.0
 
-            let nwc_req = WalletConnect.pay(url: nwc_state.url, pool: damus_state.nostrNetwork.pool, post: damus_state.nostrNetwork.postbox, invoice: inv, zap_request: zapreq, delay: delay, on_flush: flusher)
+            let nwc_req = damus_state.nostrNetwork.nwcPay(url: nwc_state.url, post: damus_state.nostrNetwork.postbox, invoice: inv, delay: delay, on_flush: flusher)
 
             guard let nwc_req, case .nwc(let pzap_state) = pending_zap_state else {
                 print("nwc: failed to send nwc request for zapreq \(reqid.reqid)")

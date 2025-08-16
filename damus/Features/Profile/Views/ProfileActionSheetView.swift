@@ -283,7 +283,7 @@ fileprivate struct ProfileActionSheetZapButton: View {
         VStack(alignment: .center, spacing: 10) {
             Button(
                 action: {
-                    send_zap(damus_state: damus_state, target: .profile(self.profile.pubkey), lnurl: lnurl, is_custom: false, comment: nil, amount_sats: nil, zap_type: damus_state.settings.default_zap_type)
+                    Task { await send_zap(damus_state: damus_state, target: .profile(self.profile.pubkey), lnurl: lnurl, is_custom: false, comment: nil, amount_sats: nil, zap_type: damus_state.settings.default_zap_type) }
                     zap_state = .zapping
                 },
                 label: {

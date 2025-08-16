@@ -14,8 +14,8 @@ class SearchModel: ObservableObject {
     @Published var loading: Bool = false
     
     var search: NostrFilter
-    let sub_id = UUID().description
     let profiles_subid = UUID().description
+    var listener: Task<Void, Never>? = nil
     let limit: UInt32 = 500
     
     init(state: DamusState, search: NostrFilter) {
@@ -39,17 +39,32 @@ class SearchModel: ObservableObject {
         search.kinds = [.text, .like, .longform, .highlight, .follow_list]
 
         //likes_filter.ids = ref_events.referenced_ids!
-
-        print("subscribing to search '\(search)' with sub_id \(sub_id)")
-        state.nostrNetwork.pool.register_handler(sub_id: sub_id, handler: handle_event)
-        loading = true
-        state.nostrNetwork.pool.send(.subscribe(.init(filters: [search], sub_id: sub_id)))
+        listener?.cancel()
+        listener = Task {
+            self.loading = true
+            print("subscribing to search")
+            for await item in await state.nostrNetwork.reader.subscribe(filters: [search]) {
+                switch item {
+                case .event(let borrow):
+                    try? borrow { ev in
+                        let event = ev.toOwned()
+                        if event.is_textlike && event.should_show_event {
+                            self.add_event(event)
+                        }
+                    }
+                case .eose:
+                    break
+                }
+                guard let txn = NdbTxn(ndb: state.ndb) else { return }
+                load_profiles(context: "search", load: .from_events(self.events.all_events), damus_state: state, txn: txn)
+            }
+            self.loading = false
+        }
     }
     
     func unsubscribe() {
-        state.nostrNetwork.pool.unsubscribe(sub_id: sub_id)
-        loading = false
-        print("unsubscribing from search '\(search)' with sub_id \(sub_id)")
+        listener?.cancel()
+        listener = nil
     }
     
     func add_event(_ ev: NostrEvent) {
@@ -63,25 +78,6 @@ class SearchModel: ObservableObject {
         
         if self.events.insert(ev) {
             objectWillChange.send()
-        }
-    }
-
-    func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
-        let (sub_id, done) = handle_subid_event(pool: state.nostrNetwork.pool, relay_id: relay_id, ev: ev) { sub_id, ev in
-            if ev.is_textlike && ev.should_show_event {
-                self.add_event(ev)
-            }
-        }
-        
-        guard done else {
-            return
-        }
-        
-        self.loading = false
-        
-        if sub_id == self.sub_id {
-            guard let txn = NdbTxn(ndb: state.ndb) else { return }
-            load_profiles(context: "search", profiles_subid: self.profiles_subid, relay_id: relay_id, load: .from_events(self.events.all_events), damus_state: state, txn: txn)
         }
     }
 }
@@ -105,34 +101,4 @@ func event_matches_filter(_ ev: NostrEvent, filter: NostrFilter) -> Bool {
         return event_matches_hashtag(ev, hashtags: hashtags)
     }
     return true
-}
-
-func handle_subid_event(pool: RelayPool, relay_id: RelayURL, ev: NostrConnectionEvent, handle: (String, NostrEvent) -> ()) -> (String?, Bool) {
-    switch ev {
-    case .ws_connection_event:
-        return (nil, false)
-        
-    case .nostr_event(let res):
-        switch res {
-        case .event(let ev_subid, let ev):
-            handle(ev_subid, ev)
-            return (ev_subid, false)
-        
-        case .ok:
-            return (nil, false)
-
-        case .notice(let note):
-            if note.contains("Too many subscription filters") {
-                // TODO: resend filters?
-                pool.reconnect(to: [relay_id])
-            }
-            return (nil, false)
-            
-        case .eose(let subid):
-            return (subid, true)
-
-        case .auth:
-            return (nil, false)
-        }
-    }
 }

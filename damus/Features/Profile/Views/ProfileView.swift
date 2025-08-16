@@ -588,3 +588,4 @@ func check_nip05_validity(pubkey: Pubkey, profiles: Profiles) {
         }
     }
 }
+

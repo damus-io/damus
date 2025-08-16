@@ -123,8 +123,8 @@ extension WalletConnect {
         
         let delay = 0.0     // We don't need a delay when fetching a transaction list or balance
 
-        WalletConnect.request_transaction_list(url: nwc, pool: damus_state.nostrNetwork.pool, post: damus_state.nostrNetwork.postbox, delay: delay, on_flush: flusher)
-        WalletConnect.request_balance_information(url: nwc, pool: damus_state.nostrNetwork.pool, post: damus_state.nostrNetwork.postbox, delay: delay, on_flush: flusher)
+        damus_state.nostrNetwork.requestTransactionList(url: nwc, delay: delay, on_flush: flusher)
+        damus_state.nostrNetwork.requestBalanceInformation(url: nwc, delay: delay, on_flush: flusher)
         return
     }
 
@@ -151,22 +151,6 @@ extension WalletConnect {
                 return
             }
         }
-    }
-
-    /// Send a donation zap to the Damus team
-    static func send_donation_zap(pool: RelayPool, postbox: PostBox, nwc: WalletConnectURL, percent: Int, base_msats: Int64) async {
-        let percent_f = Double(percent) / 100.0
-        let donations_msats = Int64(percent_f * Double(base_msats))
-        
-        let payreq = LNUrlPayRequest(allowsNostr: true, commentAllowed: nil, nostrPubkey: "", callback: "https://sendsats.lol/@damus")
-        guard let invoice = await fetch_zap_invoice(payreq, zapreq: nil, msats: donations_msats, zap_type: .non_zap, comment: nil) else {
-            // we failed... oh well. no donation for us.
-            print("damus-donation failed to fetch invoice")
-            return
-        }
-        
-        print("damus-donation donating...")
-        WalletConnect.pay(url: nwc, pool: pool, post: postbox, invoice: invoice, zap_request: nil, delay: nil)
     }
 
     /// Handles a received Nostr Wallet Connect error

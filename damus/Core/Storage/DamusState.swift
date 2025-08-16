@@ -164,7 +164,7 @@ class DamusState: HeadlessDamusState {
             try await self.push_notification_client.revoke_token()
         }
         wallet.disconnect()
-        nostrNetwork.pool.close()
+        nostrNetwork.close()
         ndb.close()
     }
 

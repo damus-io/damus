@@ -224,7 +224,7 @@ class Drafts: ObservableObject {
     }
     
     /// Saves the drafts tracked by this class persistently using NostrDB + UserDefaults
-    func save(damus_state: DamusState) {
+    func save(damus_state: DamusState) async {
         var draft_events: [NdbNote] = []
         post_artifact_block: if let post_artifacts = self.post {
             let nip37_draft = try? post_artifacts.to_nip37_draft(action: .posting(.user(damus_state.pubkey)), damus_state: damus_state)
@@ -254,7 +254,7 @@ class Drafts: ObservableObject {
             // TODO: Once it is time to implement draft syncing with relays, please consider the following:
             // - Privacy: Sending drafts to the network leaks metadata about app activity, and may break user expectations
             // - Down-sync conflict resolution: Consider how to solve conflicts for different draft versions holding the same ID (e.g. edited in Damus, then another client, then Damus again)
-            damus_state.nostrNetwork.pool.send_raw_to_local_ndb(.typical(.event(draft_event)))
+            damus_state.nostrNetwork.sendToNostrDB(event: draft_event)
         }
         
         damus_state.settings.draft_event_ids = draft_events.map({ $0.id.hex() })
