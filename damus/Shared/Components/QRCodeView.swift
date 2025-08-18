@@ -435,26 +435,20 @@ fileprivate struct QRCameraView<Content: View>: View {
             guard str.count != 0 else {
                 return nil
             }
-            
+
             if str.hasPrefix("nostr:") {
                 str.removeFirst("nostr:".count)
             }
-            
-            if let decoded = hex_decode(str),
-               str.count == 64
-            {
-                self.pubkey = Pubkey(Data(decoded))
-                return
+
+            let bech32 = Bech32Object.parse(str)
+            switch bech32 {
+            case .nprofile(let nprofile):
+                self.pubkey = nprofile.author
+            case .npub(let pubkey):
+                self.pubkey = pubkey
+            default:
+                return nil
             }
-            
-            if str.starts(with: "npub"),
-               let b32 = try? bech32_decode(str)
-            {
-                self.pubkey = Pubkey(b32.data)
-                return
-            }
-            
-            return nil
         }
     }
 }
