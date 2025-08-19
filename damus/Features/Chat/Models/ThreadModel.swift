@@ -56,12 +56,7 @@ class ThreadModel: ObservableObject {
     /// The damus state, needed to access the relay pool and load the thread events
     let damus_state: DamusState
     
-    private let profiles_subid = UUID().description
-    private let base_subid = UUID().description
-    private let meta_subid = UUID().description
-    private var subids: [String] {
-        return [profiles_subid, base_subid, meta_subid]
-    }
+    private var listener: Task<Void, Never>?
     
     
     // MARK: Initialization
@@ -85,17 +80,6 @@ class ThreadModel: ObservableObject {
     
     
     // MARK: Relay pool subscription management
-    
-    /// Unsubscribe from events in the relay pool. Call this when unloading the view
-    func unsubscribe() {
-        self.damus_state.nostrNetwork.pool.remove_handler(sub_id: base_subid)
-        self.damus_state.nostrNetwork.pool.remove_handler(sub_id: meta_subid)
-        self.damus_state.nostrNetwork.pool.remove_handler(sub_id: profiles_subid)
-        self.damus_state.nostrNetwork.pool.unsubscribe(sub_id: base_subid)
-        self.damus_state.nostrNetwork.pool.unsubscribe(sub_id: meta_subid)
-        self.damus_state.nostrNetwork.pool.unsubscribe(sub_id: profiles_subid)
-        Log.info("unsubscribing to thread %s with sub_id %s", for: .render, original_event.id.hex(), base_subid)
-    }
     
     /// Subscribe to events in this thread. Call this when loading the view.
     func subscribe() {
@@ -127,10 +111,27 @@ class ThreadModel: ObservableObject {
 
         let base_filters = [event_filter, ref_events]
         let meta_filters = [meta_events, quote_events]
-
-        Log.info("subscribing to thread %s with sub_id %s", for: .render, original_event.id.hex(), base_subid)
-        damus_state.nostrNetwork.pool.subscribe(sub_id: base_subid, filters: base_filters, handler: handle_event)
-        damus_state.nostrNetwork.pool.subscribe(sub_id: meta_subid, filters: meta_filters, handler: handle_event)
+        
+        self.listener?.cancel()
+        self.listener = Task {
+            Log.info("subscribing to thread %s ", for: .render, original_event.id.hex())
+            for await item in damus_state.nostrNetwork.reader.subscribe(filters: base_filters + meta_filters) {
+                switch item {
+                case .event(let borrow):
+                    try? borrow { event in
+                        handle_event(ev: event.toOwned())
+                    }
+                case .eose:
+                    guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
+                    load_profiles(context: "thread", load: .from_events(Array(event_map.events)), damus_state: damus_state, txn: txn)
+                }
+            }
+        }
+    }
+    
+    func unsubscribe() {
+        self.listener?.cancel()
+        self.listener = nil
     }
     
     /// Adds an event to this thread.
@@ -175,34 +176,19 @@ class ThreadModel: ObservableObject {
     ///
     /// Marked as private because it is this class' responsibility to load events, not the view's. Simplify the interface
     @MainActor
-    private func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
-        let (sub_id, done) = handle_subid_event(pool: damus_state.nostrNetwork.pool, relay_id: relay_id, ev: ev) { sid, ev in
-            guard subids.contains(sid) else {
-                return
+    private func handle_event(ev: NostrEvent) {
+        if ev.known_kind == .zap {
+            process_zap_event(state: damus_state, ev: ev) { zap in
+                
             }
-            
-            if ev.known_kind == .zap {
-                process_zap_event(state: damus_state, ev: ev) { zap in
-                    
-                }
-            } else if ev.is_textlike {
-                // handle thread quote reposts, we just count them instead of
-                // adding them to the thread
-                if let target = ev.is_quote_repost, target == self.selected_event.id {
-                    //let _ = self.damus_state.quote_reposts.add_event(ev, target: target)
-                } else {
-                    self.add_event(ev, keypair: damus_state.keypair)
-                }
+        } else if ev.is_textlike {
+            // handle thread quote reposts, we just count them instead of
+            // adding them to the thread
+            if let target = ev.is_quote_repost, target == self.selected_event.id {
+                //let _ = self.damus_state.quote_reposts.add_event(ev, target: target)
+            } else {
+                self.add_event(ev, keypair: damus_state.keypair)
             }
-        }
-        
-        guard done, let sub_id, subids.contains(sub_id) else {
-            return
-        }
-        
-        if sub_id == self.base_subid {
-            guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
-            load_profiles(context: "thread", profiles_subid: self.profiles_subid, relay_id: relay_id, load: .from_events(Array(event_map.events)), damus_state: damus_state, txn: txn)
         }
     }
     

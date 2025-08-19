@@ -169,7 +169,9 @@ struct CustomizeZapView: View {
             } else {
                 Button(action: {
                     let amount = model.custom_amount_sats
-                    send_zap(damus_state: state, target: target, lnurl: lnurl, is_custom: true, comment: model.comment, amount_sats: amount, zap_type: model.zap_type)
+                    Task {
+                        await send_zap(damus_state: state, target: target, lnurl: lnurl, is_custom: true, comment: model.comment, amount_sats: amount, zap_type: model.zap_type)
+                    }
                     model.zapping = true
                 }) {
                     HStack {

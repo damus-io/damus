@@ -152,7 +152,7 @@ struct MenuItems: View {
             profileModel.subscribeToFindRelays()
         }
         .onDisappear() {
-            profileModel.unsubscribeFindRelays()
+            profileModel.findRelaysListener?.cancel()
         }
     }
 }
