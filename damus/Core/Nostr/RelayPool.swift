@@ -284,6 +284,7 @@ class RelayPool {
         return c
     }
 
+    @MainActor
     func queue_req(r: NostrRequestType, relay: RelayURL, skip_ephemeral: Bool) {
         let count = count_queued(relay: relay)
         guard count <= 10 else {
@@ -326,7 +327,7 @@ class RelayPool {
             }
             
             guard relay.connection.isConnected else {
-                queue_req(r: req, relay: relay.id, skip_ephemeral: skip_ephemeral)
+                Task { await queue_req(r: req, relay: relay.id, skip_ephemeral: skip_ephemeral) }
                 continue
             }
             
