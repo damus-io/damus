@@ -99,6 +99,7 @@ class RelayPool {
         }
     }
 
+    @MainActor
     func register_handler(sub_id: String, handler: @escaping (RelayURL, NostrConnectionEvent) -> ()) {
         for handler in handlers {
             // don't add duplicate handlers
@@ -201,8 +202,10 @@ class RelayPool {
     }
 
     func subscribe(sub_id: String, filters: [NostrFilter], handler: @escaping (RelayURL, NostrConnectionEvent) -> (), to: [RelayURL]? = nil) {
-        register_handler(sub_id: sub_id, handler: handler)
-        send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to)
+        Task {
+            await register_handler(sub_id: sub_id, handler: handler)
+            send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to)
+        }
     }
     
     /// Subscribes to data from the `RelayPool` based on a filter and a list of desired relays.
@@ -264,8 +267,10 @@ class RelayPool {
     }
 
     func subscribe_to(sub_id: String, filters: [NostrFilter], to: [RelayURL]?, handler: @escaping (RelayURL, NostrConnectionEvent) -> ()) {
-        register_handler(sub_id: sub_id, handler: handler)
-        send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to)
+        Task {
+            await register_handler(sub_id: sub_id, handler: handler)
+            send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to)
+        }
     }
 
     func count_queued(relay: RelayURL) -> Int {
