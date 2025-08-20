@@ -40,7 +40,9 @@ class SearchHomeModel: ObservableObject {
     }
     
     func load() async {
-        loading = true
+        DispatchQueue.main.async {
+            self.loading = true
+        }
         let to_relays = damus_state.nostrNetwork.ourRelayDescriptors
             .map { $0.url }
             .filter { !damus_state.relay_filters.is_filtered(timeline: .search, relay_id: $0) }
@@ -57,7 +59,9 @@ class SearchHomeModel: ObservableObject {
             case .eose: break
             }
         }
-        loading = false
+        DispatchQueue.main.async {
+            self.loading = false
+        }
         
         guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
         load_profiles(context: "universe", load: .from_events(events.all_events), damus_state: damus_state, txn: txn)
