@@ -33,22 +33,27 @@ extension NostrNetworkManager {
         func subscribe(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil) -> AsyncStream<StreamItem> {
             return AsyncStream<StreamItem> { continuation in
                 let ndbStreamTask = Task {
-                    for await item in try self.ndb.subscribe(filters: try filters.map({ try NdbFilter(from: $0) })) {
-                        switch item {
-                        case .eose:
-                            continuation.yield(.eose)
-                        case .event(let noteKey):
-                            let lender: NdbNoteLender = { lend in
-                                guard let ndbNoteTxn = self.ndb.lookup_note_by_key(noteKey) else {
-                                    throw NdbNoteLenderError.errorLoadingNote
+                    do {
+                        for await item in try self.ndb.subscribe(filters: try filters.map({ try NdbFilter(from: $0) })) {
+                            switch item {
+                            case .eose:
+                                continuation.yield(.eose)
+                            case .event(let noteKey):
+                                let lender: NdbNoteLender = { lend in
+                                    guard let ndbNoteTxn = self.ndb.lookup_note_by_key(noteKey) else {
+                                        throw NdbNoteLenderError.errorLoadingNote
+                                    }
+                                    guard let unownedNote = UnownedNdbNote(ndbNoteTxn) else {
+                                        throw NdbNoteLenderError.errorLoadingNote
+                                    }
+                                    lend(unownedNote)
                                 }
-                                guard let unownedNote = UnownedNdbNote(ndbNoteTxn) else {
-                                    throw NdbNoteLenderError.errorLoadingNote
-                                }
-                                lend(unownedNote)
+                                continuation.yield(.event(borrow: lender))
                             }
-                            continuation.yield(.event(borrow: lender))
                         }
+                    }
+                    catch {
+                        Log.error("NDB streaming error: %s", for: .ndb, error.localizedDescription)
                     }
                 }
                 let streamTask = Task {
