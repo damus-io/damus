@@ -11,7 +11,8 @@ import EmojiPicker
 
 // Generates a test damus state with configurable mock parameters
 func generate_test_damus_state(
-    mock_profile_info: [Pubkey: Profile]?
+    mock_profile_info: [Pubkey: Profile]?,
+    home: HomeModel? = nil
 ) -> DamusState {
     // Create a unique temporary directory
     let ndb = Ndb.test
@@ -32,7 +33,7 @@ func generate_test_damus_state(
                            boosts: .init(our_pubkey: our_pubkey),
                            contacts: .init(our_pubkey: our_pubkey), mutelist_manager: mutelist_manager,
                            profiles: profiles,
-                           dms: .init(our_pubkey: our_pubkey),
+                           dms: home?.dms ?? .init(our_pubkey: our_pubkey),
                            previews: .init(),
                            zaps: .init(our_pubkey: our_pubkey),
                            lnurls: .init(),
@@ -52,6 +53,8 @@ func generate_test_damus_state(
                            emoji_provider: DefaultEmojiProvider(showAllVariations: false),
                            favicon_cache: .init()
     )
+    
+    home?.damus_state = damus
 
     return damus
 }

@@ -561,8 +561,8 @@ class HomeModel: ContactsDelegate {
                     try? borrow { ev in
                         event = ev.toOwned()
                     }
-                    guard let event else { return }
-                    await self.process_event(ev: event, context: .notifications)
+                    guard let theEvent = event else { return }
+                    await self.process_event(ev: theEvent, context: .notifications)
                 case .eose:
                     guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
                     load_profiles(context: "notifications", load: .from_keys(notifications.uniq_pubkeys()), damus_state: damus_state, txn: txn)
