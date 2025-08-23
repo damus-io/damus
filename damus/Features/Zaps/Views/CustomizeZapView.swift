@@ -8,6 +8,17 @@
 import SwiftUI
 import Combine
 
+let zapAmounts: [Int: String] = [
+    69: "😘",
+    420: "🌿",
+    5000: "💜",
+    10_000: "😍",
+    20_000: "🤩",
+    50_000: "🔥",
+    100_000: "🚀",
+    1_000_000: "🤯",
+]
+
 struct ZapAmountItem: Identifiable, Hashable {
     let amount: Int
     let icon: String
@@ -22,19 +33,14 @@ func get_default_zap_amount_item(_ def: Int) -> ZapAmountItem {
 }
 
 func get_zap_amount_items(_ default_zap_amt: Int) -> [ZapAmountItem] {
-    let def_item = get_default_zap_amount_item(default_zap_amt)
-    var entries = [
-        ZapAmountItem(amount: 69, icon: "😘"),
-        ZapAmountItem(amount: 420, icon: "🌿"),
-        ZapAmountItem(amount: 5000, icon: "💜"),
-        ZapAmountItem(amount: 10_000, icon: "😍"),
-        ZapAmountItem(amount: 20_000, icon: "🤩"),
-        ZapAmountItem(amount: 50_000, icon: "🔥"),
-        ZapAmountItem(amount: 100_000, icon: "🚀"),
-        ZapAmountItem(amount: 1_000_000, icon: "🤯"),
-    ]
-    entries.append(def_item)
-    
+    var entries = zapAmounts.map { ZapAmountItem(amount: $0.key, icon: $0.value) }
+
+    // Add default zap amount to the list only if it is not one of the preset entries so that it is not duplicated.
+    if zapAmounts[default_zap_amt] == nil {
+        let def_item = get_default_zap_amount_item(default_zap_amt)
+        entries.append(def_item)
+    }
+
     entries.sort { $0.amount < $1.amount }
     return entries
 }
