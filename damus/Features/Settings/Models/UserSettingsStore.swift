@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-let fallback_zap_amount = 1000
+let fallback_zap_amount = 21
 let default_emoji_reactions = ["🤣", "🤙", "⚡", "💜", "🔥", "😀", "😃", "😄", "🥶"]
 
 func setting_property_key(key: String) -> String {
