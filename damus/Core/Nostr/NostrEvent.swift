@@ -866,10 +866,39 @@ extension NostrEvent {
     ///
     /// If the event is not a mutelist it will return `nil`.
     var mute_list: Set<MuteItem>? {
-        if (self.kind == NostrKind.list_deprecated.rawValue && self.referenced_params.contains(where: { p in p.param.matches_str("mute") })) || self.kind == NostrKind.mute_list.rawValue {
+        if (self.kind == NostrKind.follow_list.rawValue && self.referenced_params.contains(where: { p in p.param.matches_str("mute") })) || self.kind == NostrKind.mute_list.rawValue {
             return Set(self.referenced_mute_items)
         } else {
             return nil
         }
     }
 }
+
+#if DEBUG
+extension NostrEvent {
+    var debugDescription: String {
+        var output = "🔍 NostrEvent Debug Info\n"
+        output += "═══════════════════════════\n"
+        output += "📝 ID: \(id)\n"
+        output += "👤 Pubkey: \(pubkey)\n"
+        output += "📅 Created: \(Date(timeIntervalSince1970: TimeInterval(created_at))) (\(created_at))\n"
+        output += "🏷️  Kind: \(kind) (\(String(describing: known_kind))\n"
+        output += "✍️  Signature: \(sig)\n"
+        output += "📄 Content (\(content.count) chars):\n"
+        output += "   \"\(content.prefix(100))\(content.count > 100 ? "..." : "")\"\n"
+
+        output += "\n🏷️  Tags (\(tags.count) total):\n"
+        for (index, tag) in tags.enumerated() {
+            output += "   [\(index)]: ["
+            for (tagIndex, tagElem) in tag.enumerated() {
+                if tagIndex > 0 { output += ", " }
+                output += "\"\(tagElem.string())\""
+            }
+            output += "]\n"
+        }
+
+        output += "═══════════════════════════\n"
+        return output
+    }
+}
+#endif

@@ -197,8 +197,9 @@ class HomeModel: ContactsDelegate {
         case .metadata:
             // profile metadata processing is handled by nostrdb
             break
-        case .list_deprecated:
+        case .follow_list:
             handle_old_list_event(ev)
+            damus_state.favorites.handleEvent(ev, pubkey: damus_state.pubkey)
         case .mute_list:
             handle_mute_list_event(ev)
         case .boost:
@@ -227,7 +228,7 @@ class HomeModel: ContactsDelegate {
             break
         case .relay_list:
             break   // This will be handled by `UserRelayListManager`
-        case .follow_list:
+        case .starter_list:
             break
         case .interest_list:
             break   // Don't care for now
@@ -556,9 +557,9 @@ class HomeModel: ContactsDelegate {
         var our_contacts_filter = NostrFilter(kinds: [.contacts, .metadata])
         our_contacts_filter.authors = [damus_state.pubkey]
         
-        var our_old_blocklist_filter = NostrFilter(kinds: [.list_deprecated])
-        our_old_blocklist_filter.parameter = ["mute"]
-        our_old_blocklist_filter.authors = [damus_state.pubkey]
+        var favorite_blocklist_filter = NostrFilter(kinds: [.follow_list])
+        favorite_blocklist_filter.parameter = [FavoritesManager.FAVORITE_TAG]
+        favorite_blocklist_filter.authors = [damus_state.pubkey]
 
         var our_blocklist_filter = NostrFilter(kinds: [.mute_list])
         our_blocklist_filter.authors = [damus_state.pubkey]
@@ -587,7 +588,7 @@ class HomeModel: ContactsDelegate {
 
         var notifications_filters = [notifications_filter]
         let contacts_filter_chunks = contacts_filter.chunked(on: .authors, into: MAX_CONTACTS_ON_FILTER)
-        var contacts_filters = contacts_filter_chunks + [our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter]
+        var contacts_filters = contacts_filter_chunks + [our_contacts_filter, our_blocklist_filter, favorite_blocklist_filter]
         var dms_filters = [dms_filter, our_dms_filter]
         let last_of_kind = get_last_of_kind(relay_id: relay_id)
 
@@ -641,6 +642,16 @@ class HomeModel: ContactsDelegate {
         home_filter.limit = 500
 
         var home_filters = home_filter.chunked(on: .authors, into: MAX_CONTACTS_ON_FILTER)
+
+        // Add filter for favorited users who we dont follow
+        let all_favorites = damus_state.favorites.favorites
+        let favorited_not_followed = Array(all_favorites.subtracting(Set(friends)))
+        if !favorited_not_followed.isEmpty {
+            var favorites_filter = NostrFilter(kinds: home_filter_kinds)
+            favorites_filter.authors = favorited_not_followed
+            favorites_filter.limit = 500
+            home_filters.append(favorites_filter)
+        }
 
         let followed_hashtags = Array(damus_state.contacts.get_followed_hashtags())
         if followed_hashtags.count != 0 {

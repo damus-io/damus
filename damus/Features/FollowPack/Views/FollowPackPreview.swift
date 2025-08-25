@@ -210,7 +210,7 @@ struct FollowPackPreview: View {
     }
 }
 
-let test_follow_list_event = FollowPackEvent.parse(from: NostrEvent(
+let test_starter_list_event = FollowPackEvent.parse(from: NostrEvent(
     content: "",
     keypair: test_keypair,
     kind: NostrKind.longform.rawValue,
@@ -235,7 +235,7 @@ let test_follow_list_event = FollowPackEvent.parse(from: NostrEvent(
 struct FollowPackPreview_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
-            FollowPackPreview(state: test_damus_state, ev: test_follow_list_event.event, options: [], blur_imgs: false)
+            FollowPackPreview(state: test_damus_state, ev: test_starter_list_event.event, options: [], blur_imgs: false)
         }
         .frame(height: 400)
     }

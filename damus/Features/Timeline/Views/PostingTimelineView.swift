@@ -29,6 +29,9 @@ struct PostingTimelineView: View {
     func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
         var filters = ContentFilters.defaults(damus_state: damus_state)
         filters.append(fstate.filter)
+        if fstate == .favorites {
+            filters.append(damus_state.favorites.filter)
+        }
         return ContentFilters(filters: filters).filter
     }
     
@@ -72,7 +75,8 @@ struct PostingTimelineView: View {
             VStack(spacing: 0) {
                 CustomPicker(tabs: [
                     (NSLocalizedString("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies)."), FilterState.posts),
-                    (NSLocalizedString("Notes & Replies", comment: "Label for filter for seeing notes and replies (instead of only notes)."), FilterState.posts_and_replies)
+                    (NSLocalizedString("Notes & Replies", comment: "Label for filter for seeing notes and replies (instead of only notes)."), FilterState.posts_and_replies),
+                    (NSLocalizedString("Favorites", comment: "Label for filter for seeing only posts from favorited users."), FilterState.favorites)
                 ],
                              selection: $filter_state)
                 
@@ -96,6 +100,9 @@ struct PostingTimelineView: View {
                     contentTimelineView(filter: content_filter(.posts_and_replies))
                         .tag(FilterState.posts_and_replies)
                         .id(FilterState.posts_and_replies)
+                    contentTimelineView(filter: content_filter(.favorites))
+                        .tag(FilterState.favorites)
+                        .id(FilterState.favorites)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 

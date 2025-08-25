@@ -50,7 +50,8 @@ func generate_test_damus_state(
                            ndb: ndb,
                            quote_reposts: .init(our_pubkey: our_pubkey),
                            emoji_provider: DefaultEmojiProvider(showAllVariations: false),
-                           favicon_cache: .init()
+                           favicon_cache: .init(),
+                           favorites: FavoritesManagerMock()
     )
 
     return damus

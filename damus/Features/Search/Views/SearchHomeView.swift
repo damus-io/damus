@@ -65,7 +65,7 @@ struct SearchHomeView: View {
                     .padding(.top)
                     .padding(.horizontal)
                     
-                    FollowPackTimelineView<AnyView>(events: model.events, loading: $model.loading, damus: damus_state, show_friend_icon: true,filter:content_filter(FilterState.follow_list)
+                    FollowPackTimelineView<AnyView>(events: model.events, loading: $model.loading, damus: damus_state, show_friend_icon: true,filter:content_filter(FilterState.starter_list)
                     ).padding(.bottom)
                     
                     Divider()

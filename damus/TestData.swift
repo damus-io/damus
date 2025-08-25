@@ -107,7 +107,8 @@ var test_damus_state: DamusState = ({
                            ndb: ndb,
                            quote_reposts: .init(our_pubkey: our_pubkey),
                            emoji_provider: DefaultEmojiProvider(showAllVariations: true),
-                           favicon_cache: .init()
+                           favicon_cache: .init(),
+                           favorites: FavoritesManagerMock()
     )
 
     /*
