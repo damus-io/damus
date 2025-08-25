@@ -28,7 +28,7 @@
       "comment" : "Amount of money required to publish to the Nostr relay. In English, this would look something like '10 sats / event', meaning it costs 10 sats to publish one event."
     },
     "%@ %@" : {
-      "comment" : "Sentence composed of 2 variables to describe how many imports were performed from loading a NostrScript. In source English, the first variable is the number of imports, and the second variable is 'Import' or 'Imports'.\nSentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.\nSentence composed of 2 variables to describe how many people are in the follow pack. In source English, the first variable is the number of users, and the second variable is 'user' or 'users'.\nSentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.\nSentence composed of 2 variables to describe how many quoted reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.\nSentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.\nSentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.\nSentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.\nSentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.",
+      "comment" : "Sentence composed of 2 variables to describe how many imports were performed from loading a NostrScript. In source English, the first variable is the number of imports, and the second variable is 'Import' or 'Imports'.\nSentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.\nSentence composed of 2 variables to describe how many people are in the follow pack. In source English, the first variable is the number of users, and the second variable is 'user' or 'users'.\nSentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.\nSentence composed of 2 variables to describe how many quoted reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.\nSentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.\nSentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.\nSentence composed of 2 variables to describe how many relays a note was found on. In source English, the first variable is the number of relays, and the second variable is 'Relay' or 'Relays'.\nSentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.\nSentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.",
       "localizations" : {
         "en-US" : {
           "stringUnit" : {
@@ -422,9 +422,6 @@
     },
     "Connect" : {
       "comment" : "Button to connect to the relay.\nText for button to conect to Nostr Wallet Connect lightning wallet."
-    },
-    "Connect to Alby Wallet" : {
-      "comment" : "Button to attach an Alby Wallet, a service that provides a Lightning wallet for zapping sats. Alby is the name of the service and should not be translated."
     },
     "Connect to Coinos" : {
       "comment" : "Button to attach a Coinos Wallet, a service that provides a Lightning wallet for zapping sats. Coinos is the name of the service and should not be translated."
@@ -1352,6 +1349,9 @@
     "Please contact the person who provided the link, and ask for another link." : {
       "comment" : "User-visible tip on what to do if a link contains a deprecated \"nrelay\" reference."
     },
+    "Please contact the person who provided the link, and ask for another link. Also, this link may have sensitive information, please use caution before sharing it." : {
+      "comment" : "User-visible tip on what to do if a link contains an unsupported \"nsec\" reference."
+    },
     "Please copy the technical info and send it to our support team." : {
       "comment" : "Tip on how to resolve issue when wallet returns an invalid response"
     },
@@ -2253,6 +2253,9 @@
     },
     "You opened an invalid link. The link you tried to open refers to \"nrelay\", which has been deprecated and is not supported." : {
       "comment" : "User-visible error description for a user who tries to open a deprecated \"nrelay\" link."
+    },
+    "You opened an invalid link. The link you tried to open refers to \"nsec\", which is not supported." : {
+      "comment" : "User-visible error description for a user who tries to open an unsupported \"nsec\" link."
     },
     "You unlocked" : {
       "comment" : "Part 1 of 2 in message 'You unlocked automatic translations' the user gets when they sign up for Damus Purple"
