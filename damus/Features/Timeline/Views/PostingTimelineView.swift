@@ -25,10 +25,17 @@ struct PostingTimelineView: View {
     @State var headerHeight: CGFloat = 0
     @Binding var headerOffset: CGFloat
     @SceneStorage("PostingTimelineView.filter_state") var filter_state : FilterState = .posts_and_replies
+    @State var timeline_source: TimelineSource = .follows
 
     func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
         var filters = ContentFilters.defaults(damus_state: damus_state)
         filters.append(fstate.filter)
+        switch timeline_source {
+        case .follows:
+            filters.append(damus_state.contacts.friend_filter)
+        case .favorites:
+            filters.append(damus_state.contactCards.filter)
+        }
         return ContentFilters(filters: filters).filter
     }
     
@@ -48,6 +55,22 @@ struct PostingTimelineView: View {
                     
                     Spacer()
                     
+                    HStack(alignment: .center) {
+                        SignalView(state: damus_state, signal: home.signal)
+                        let switchView = PostingTimelineSwitcherView(
+                            damusState: damus_state,
+                            timelineSource: $timeline_source
+                        )
+                        if #available(iOS 17.0, *) {
+                            switchView
+                                .popoverTip(PostingTimelineSwitcherView.TimelineSwitcherTip.shared)
+                        } else {
+                            switchView
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .overlay {
                     Image("damus-home")
                         .resizable()
                         .frame(width:30,height:30)
@@ -57,15 +80,7 @@ struct PostingTimelineView: View {
                         .onTapGesture {
                             isSideBarOpened.toggle()
                         }
-                        .padding(.leading)
-                    
-                    Spacer()
-                    
-                    HStack(alignment: .center) {
-                        SignalView(state: damus_state, signal: home.signal)
-                    }
                 }
-                .frame(maxWidth: .infinity, alignment: .trailing)
             }
             .padding(.horizontal, 20)
             
@@ -124,5 +139,17 @@ struct PostingTimelineView: View {
                 .offset(y: -headerOffset < headerHeight ? headerOffset : (headerOffset < 0 ? headerOffset : 0))
                 .opacity(1.0 - (abs(headerOffset/100.0)))
         }
+    }
+}
+
+struct PostingTimelineView_Previews: PreviewProvider {
+    static var previews: some View {
+        PostingTimelineView(
+            damus_state: test_damus_state,
+            home: HomeModel(),
+            isSideBarOpened: .constant(false),
+            active_sheet: .constant(nil),
+            headerOffset: .constant(0)
+        )
     }
 }

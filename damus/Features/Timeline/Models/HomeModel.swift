@@ -174,6 +174,15 @@ class HomeModel: ContactsDelegate {
         }
     }
 
+    /// Force refresh of home timeline filters, bypassing startup debounce
+    /// Used when favorites are fetched from network during startup to ensure unfollowed favorited users are included
+    /// This is needed because the normal resubscribe path is blocked during initial load.
+    /// TODO: Will this be a performance problem?
+    func refresh_home_filters() {
+        unsubscribe_to_home_filters()
+        subscribe_to_home_filters()
+    }
+
     @MainActor
     func process_event(sub_id: String, relay_id: RelayURL, ev: NostrEvent) {
         if has_sub_id_event(sub_id: sub_id, ev_id: ev.id) {
@@ -201,6 +210,8 @@ class HomeModel: ContactsDelegate {
             handle_old_list_event(ev)
         case .mute_list:
             handle_mute_list_event(ev)
+        case .contact_card:
+            damus_state.contactCards.loadEvent(ev, pubkey: damus_state.pubkey)
         case .boost:
             handle_boost_event(sub_id: sub_id, ev)
         case .like:
@@ -560,6 +571,9 @@ class HomeModel: ContactsDelegate {
         our_old_blocklist_filter.parameter = ["mute"]
         our_old_blocklist_filter.authors = [damus_state.pubkey]
 
+        var contact_cards_filter = NostrFilter(kinds: [.contact_card])
+        contact_cards_filter.authors = [damus_state.pubkey]
+
         var our_blocklist_filter = NostrFilter(kinds: [.mute_list])
         our_blocklist_filter.authors = [damus_state.pubkey]
 
@@ -587,7 +601,7 @@ class HomeModel: ContactsDelegate {
 
         var notifications_filters = [notifications_filter]
         let contacts_filter_chunks = contacts_filter.chunked(on: .authors, into: MAX_CONTACTS_ON_FILTER)
-        var contacts_filters = contacts_filter_chunks + [our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter]
+        var contacts_filters = contacts_filter_chunks + [our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter, contact_cards_filter]
         var dms_filters = [dms_filter, our_dms_filter]
         let last_of_kind = get_last_of_kind(relay_id: relay_id)
 
@@ -647,6 +661,16 @@ class HomeModel: ContactsDelegate {
             var hashtag_filter = NostrFilter.filter_hashtag(followed_hashtags)
             hashtag_filter.limit = 100
             home_filters.append(hashtag_filter)
+        }
+
+        // Add filter for favorited users who we dont follow
+        let all_favorites = damus_state.contactCards.favorites
+        let favorited_not_followed = Array(all_favorites.subtracting(Set(friends)))
+        if !favorited_not_followed.isEmpty {
+            var favorites_filter = NostrFilter(kinds: home_filter_kinds)
+            favorites_filter.authors = favorited_not_followed
+            favorites_filter.limit = 500
+            home_filters.append(favorites_filter)
         }
 
         let relay_ids = relay_id.map { [$0] }

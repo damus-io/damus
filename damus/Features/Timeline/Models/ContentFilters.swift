@@ -7,6 +7,20 @@
 
 import Foundation
 
+/// Timeline source determines whether to show content from follows or favorites
+enum TimelineSource: CustomStringConvertible {
+    case follows
+    case favorites
+
+    var description: String {
+        switch self {
+        case .follows:
+            return NSLocalizedString("Follows", comment: "Show Notes from your following")
+        case .favorites:
+            return NSLocalizedString("Favorites", comment: "Show Notes from your favorites")
+        }
+    }
+}
 
 /// Simple filter to determine whether to show posts or all posts and replies.
 enum FilterState : Int {
