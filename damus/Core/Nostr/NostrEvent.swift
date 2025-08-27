@@ -872,4 +872,31 @@ extension NostrEvent {
             return nil
         }
     }
+
+#if DEBUG
+    var debugDescription: String {
+        var output = "🔍 NostrEvent Debug Info\n"
+        output += "═══════════════════════════\n"
+        output += "📝 ID: \(id)\n"
+        output += "👤 Pubkey: \(pubkey)\n"
+        output += "📅 Created: \(Date(timeIntervalSince1970: TimeInterval(created_at))) (\(created_at))\n"
+        output += "🏷️  Kind: \(kind) (\(String(describing: known_kind))\n"
+        output += "✍️  Signature: \(sig)\n"
+        output += "📄 Content (\(content.count) chars):\n"
+        output += "   \"\(content.prefix(100))\(content.count > 100 ? "..." : "")\"\n"
+
+        output += "\n🏷️  Tags (\(tags.count) total):\n"
+        for (index, tag) in tags.enumerated() {
+            output += "   [\(index)]: ["
+            for (tagIndex, tagElem) in tag.enumerated() {
+                if tagIndex > 0 { output += ", " }
+                output += "\"\(tagElem.string())\""
+            }
+            output += "]\n"
+        }
+
+        output += "═══════════════════════════\n"
+        return output
+    }
+#endif
 }
