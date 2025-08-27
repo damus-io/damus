@@ -512,6 +512,7 @@ struct ContentView: View {
             case .background:
                 print("txn: 📙 DAMUS BACKGROUNDED")
                 Task { @MainActor in
+                    await damus_state.nostrNetwork.close()  // Close ndb streaming tasks before closing ndb to avoid memory errors
                     damus_state.ndb.close()
                 }
                 break

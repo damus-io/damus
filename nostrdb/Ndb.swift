@@ -698,8 +698,12 @@ class Ndb {
         // Fetch initial results
         guard let txn = NdbTxn(ndb: self) else { throw .cannotOpenTransaction }
         
+        do { try Task.checkCancellation() } catch { throw .cancelled }
+        
         // Use our safe wrapper instead of direct C function call
         let noteIds = try query(with: txn, filters: filters, maxResults: maxSimultaneousResults)
+        
+        do { try Task.checkCancellation() } catch { throw .cancelled }
         
         // Create a subscription for new events
         let newEventsStream = ndbSubscribe(filters: filters)
@@ -717,6 +721,7 @@ class Ndb {
             // Create a task to forward events from the subscription stream
             let forwardingTask = Task {
                 for await item in newEventsStream {
+                    try Task.checkCancellation()
                     continuation.yield(item)
                 }
                 continuation.finish()
@@ -876,6 +881,7 @@ extension Ndb {
         case cannotConvertFilter(any Error)
         case initialQueryFailed
         case timeout
+        case cancelled
     }
     
     /// An error that may happen when looking something up
