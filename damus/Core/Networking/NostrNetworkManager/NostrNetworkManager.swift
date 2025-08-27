@@ -234,7 +234,8 @@ class NostrNetworkManager {
     
     // MARK: - App lifecycle functions
     
-    func close() {
+    func close() async {
+        await self.reader.cancelAllTasks()
         pool.close()
     }
 }

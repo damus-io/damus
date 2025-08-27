@@ -164,8 +164,10 @@ class DamusState: HeadlessDamusState {
             try await self.push_notification_client.revoke_token()
         }
         wallet.disconnect()
-        nostrNetwork.close()
-        ndb.close()
+        Task {
+            await nostrNetwork.close()  // Close ndb streaming tasks before closing ndb to avoid memory errors
+            ndb.close()
+        }
     }
 
     static var empty: DamusState {
