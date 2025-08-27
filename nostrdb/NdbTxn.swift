@@ -39,6 +39,9 @@ class NdbTxn<T>: RawNdbTxnAccessible {
             self.txn = active_txn
             self.inherited = true
             self.generation = Thread.current.threadDictionary["txn_generation"] as! Int
+            let ref_count = Thread.current.threadDictionary["ndb_txn_ref_count"] as! Int
+            let new_ref_count = ref_count + 1
+            Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
         } else {
             self.txn = ndb_txn()
             guard !ndb.is_closed else { return nil }
@@ -52,6 +55,7 @@ class NdbTxn<T>: RawNdbTxnAccessible {
             }
             self.generation = ndb.generation
             Thread.current.threadDictionary["ndb_txn"] = self.txn
+            Thread.current.threadDictionary["ndb_txn_ref_count"] = 1
             Thread.current.threadDictionary["txn_generation"] = ndb.generation
             self.inherited = false
         }
@@ -84,6 +88,20 @@ class NdbTxn<T>: RawNdbTxnAccessible {
             print("txn: OLD GENERATION (\(self.generation) != \(ndb.generation)), IGNORING")
             return
         }
+        if ndb.is_closed {
+            print("txn: not closing. db closed")
+            return
+        }
+        if let ref_count = Thread.current.threadDictionary["ndb_txn_ref_count"] as? Int {
+            let new_ref_count = ref_count - 1
+            Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
+            assert(new_ref_count >= 0, "NdbTxn reference count should never be below zero")
+            if new_ref_count <= 0 {
+                ndb_end_query(&self.txn)
+                Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")
+                Thread.current.threadDictionary.removeObject(forKey: "ndb_txn_ref_count")
+            }
+        }
         if inherited {
             print("txn: not closing. inherited ")
             return
@@ -92,18 +110,11 @@ class NdbTxn<T>: RawNdbTxnAccessible {
             //print("txn: not closing. moved")
             return
         }
-        if ndb.is_closed {
-            print("txn: not closing. db closed")
-            return
-        }
 
         #if TXNDEBUG
         txn_count -= 1;
         print("txn: close gen\(generation) '\(name)' \(txn_count)")
         #endif
-        ndb_end_query(&self.txn)
-        //self.skip_close = true
-        Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")
     }
 
     // functor
@@ -159,6 +170,9 @@ class SafeNdbTxn<T: ~Copyable> {
             txn = active_txn
             inherited = true
             generation = Thread.current.threadDictionary["txn_generation"] as! Int
+            let ref_count = Thread.current.threadDictionary["ndb_txn_ref_count"] as! Int
+            let new_ref_count = ref_count + 1
+            Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
         } else {
             txn = ndb_txn()
             guard !ndb.is_closed else { return nil }
@@ -172,6 +186,7 @@ class SafeNdbTxn<T: ~Copyable> {
             }
             generation = ndb.generation
             Thread.current.threadDictionary["ndb_txn"] = txn
+            Thread.current.threadDictionary["ndb_txn_ref_count"] = 1
             Thread.current.threadDictionary["txn_generation"] = ndb.generation
             inherited = false
         }
@@ -199,6 +214,20 @@ class SafeNdbTxn<T: ~Copyable> {
             print("txn: OLD GENERATION (\(self.generation) != \(ndb.generation)), IGNORING")
             return
         }
+        if ndb.is_closed {
+            print("txn: not closing. db closed")
+            return
+        }
+        if let ref_count = Thread.current.threadDictionary["ndb_txn_ref_count"] as? Int {
+            let new_ref_count = ref_count - 1
+            Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
+            assert(new_ref_count >= 0, "NdbTxn reference count should never be below zero")
+            if new_ref_count <= 0 {
+                ndb_end_query(&self.txn)
+                Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")
+                Thread.current.threadDictionary.removeObject(forKey: "ndb_txn_ref_count")
+            }
+        }
         if inherited {
             print("txn: not closing. inherited ")
             return
@@ -207,18 +236,11 @@ class SafeNdbTxn<T: ~Copyable> {
             //print("txn: not closing. moved")
             return
         }
-        if ndb.is_closed {
-            print("txn: not closing. db closed")
-            return
-        }
 
         #if TXNDEBUG
         txn_count -= 1;
         print("txn: close gen\(generation) '\(name)' \(txn_count)")
         #endif
-        ndb_end_query(&self.txn)
-        //self.skip_close = true
-        Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")
     }
 
     // functor
