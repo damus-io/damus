@@ -87,7 +87,7 @@ class ProfileModel: ObservableObject, Equatable {
             }
             guard let txn = NdbTxn(ndb: damus.ndb) else { return }
             load_profiles(context: "profile", load: .from_events(events.events), damus_state: damus, txn: txn)
-            progress += 1
+            await bumpUpProgress()
         }
         profileListener?.cancel()
         profileListener = Task {
@@ -102,12 +102,17 @@ class ProfileModel: ObservableObject, Equatable {
                 case .eose: break
                 }
             }
-            progress += 1
+            await bumpUpProgress()
         }
         conversationListener?.cancel()
         conversationListener = Task {
             await listenToConversations()
         }
+    }
+    
+    @MainActor
+    func bumpUpProgress() {
+        progress += 1
     }
     
     func listenToConversations() async {
