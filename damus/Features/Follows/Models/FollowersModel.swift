@@ -59,6 +59,7 @@ class FollowersModel: ObservableObject {
         self.profilesListener = nil
     }
     
+    @MainActor
     func handle_contact_event(_ ev: NostrEvent) {
         if has_contact.contains(ev.pubkey) {
             return
@@ -93,7 +94,7 @@ class FollowersModel: ObservableObject {
     
     func handle_event(ev: NostrEvent) {
         if ev.known_kind == .contacts {
-            handle_contact_event(ev)
+            Task { await handle_contact_event(ev) }
         }
     }
 }
