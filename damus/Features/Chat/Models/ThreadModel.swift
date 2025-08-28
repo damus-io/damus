@@ -190,6 +190,12 @@ class ThreadModel: ObservableObject {
                 self.add_event(ev, keypair: damus_state.keypair)
             }
         }
+        else if ev.known_kind == .boost {
+            damus_state.boosts.add_event(ev, target: original_event.id)
+        }
+        else if ev.known_kind == .like {
+            damus_state.likes.add_event(ev, target: original_event.id)
+        }
     }
     
     // MARK: External control interface
