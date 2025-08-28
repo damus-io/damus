@@ -35,6 +35,54 @@ extension NostrNetworkManager {
         /// - Returns: An async stream of nostr data
         func subscribe(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil) -> AsyncStream<StreamItem> {
             return AsyncStream<StreamItem> { continuation in
+                let subscriptionId = UUID()
+                Log.info("Starting subscription %s: %s", for: .subscription_manager, subscriptionId.uuidString, filters.debugDescription)
+                let multiSessionStreamingTask = Task {
+                    while !Task.isCancelled {
+                        do {
+                            guard !self.ndb.is_closed else {
+                                Log.info("%s: Ndb closed. Sleeping for 1 second before resuming.", for: .subscription_manager, subscriptionId.uuidString)
+                                try await Task.sleep(nanoseconds: 1_000_000_000)
+                                continue
+                            }
+                            guard self.pool.open else {
+                                Log.info("%s: RelayPool closed. Sleeping for 1 second before resuming.", for: .subscription_manager, subscriptionId.uuidString)
+                                try await Task.sleep(nanoseconds: 1_000_000_000)
+                                continue
+                            }
+                            Log.info("%s: Streaming.", for: .subscription_manager, subscriptionId.uuidString)
+                            for await item in self.sessionSubscribe(filters: filters, to: desiredRelays) {
+                                try Task.checkCancellation()
+                                continuation.yield(item)
+                            }
+                            Log.info("%s: Session subscription ended. Sleeping for 1 second before resuming.", for: .subscription_manager, subscriptionId.uuidString)
+                            try await Task.sleep(nanoseconds: 1_000_000_000)
+                        }
+                        catch {
+                            Log.error("%s: Error: %s", for: .subscription_manager, subscriptionId.uuidString, error.localizedDescription)
+                        }
+                    }
+                    Log.info("%s: Terminated.", for: .subscription_manager, subscriptionId.uuidString)
+                }
+                continuation.onTermination = { @Sendable _ in
+                    Log.info("%s: Cancelled.", for: .subscription_manager, subscriptionId.uuidString)
+                    multiSessionStreamingTask.cancel()
+                }
+            }
+        }
+        
+        /// Subscribes to data from the user's relays
+        ///
+        /// Only survives for a single session. This exits after the app is backgrounded
+        ///
+        /// ## Implementation notes
+        ///
+        /// - When we migrate to the local relay model, we should modify this function to stream directly from NostrDB
+        ///
+        /// - Parameter filters: The nostr filters to specify what kind of data to subscribe to
+        /// - Returns: An async stream of nostr data
+        private func sessionSubscribe(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil) -> AsyncStream<StreamItem> {
+            return AsyncStream<StreamItem> { continuation in
                 let ndbStreamTask = Task {
                     do {
                         for await item in try self.ndb.subscribe(filters: try filters.map({ try NdbFilter(from: $0) })) {

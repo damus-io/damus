@@ -27,6 +27,7 @@ struct SeenEvent: Hashable {
 /// Establishes and manages connections and subscriptions to a list of relays.
 class RelayPool {
     private(set) var relays: [Relay] = []
+    var open: Bool = false
     var handlers: [RelayHandler] = []
     var request_queue: [QueuedRequest] = []
     var seen: [NoteId: Set<RelayURL>] = [:]
@@ -46,6 +47,7 @@ class RelayPool {
     func close() {
         disconnect()
         relays = []
+        open = false
         handlers = []
         request_queue = []
         seen.removeAll()
@@ -181,6 +183,7 @@ class RelayPool {
     }
 
     func connect(to: [RelayURL]? = nil) {
+        open = true
         let relays = to.map{ get_relays($0) } ?? self.relays
         for relay in relays {
             relay.connection.connect()

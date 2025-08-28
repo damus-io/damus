@@ -521,6 +521,7 @@ struct ContentView: View {
                 break
             case .active:
                 print("txn: 📙 DAMUS ACTIVE")
+                damus_state.nostrNetwork.connect()
                 damus_state.nostrNetwork.ping()
             @unknown default:
                 break

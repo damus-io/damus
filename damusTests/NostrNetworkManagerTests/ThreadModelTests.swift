@@ -15,6 +15,8 @@ final class ThreadModelTests: XCTestCase {
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         damusState = generate_test_damus_state(mock_profile_info: nil)
+        try! damusState?.nostrNetwork.userRelayList.set(userRelayList: NIP65.RelayList())
+        damusState?.nostrNetwork.connect()
 
         let notesJSONL = getTestNotesJSONL()
 
