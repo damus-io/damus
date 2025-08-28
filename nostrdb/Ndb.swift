@@ -712,6 +712,7 @@ class Ndb {
         return AsyncStream<StreamItem> { continuation in
             // Stream all results already present in the database
             for noteId in noteIds {
+                if Task.isCancelled { return }
                 continuation.yield(.event(noteId))
             }
             

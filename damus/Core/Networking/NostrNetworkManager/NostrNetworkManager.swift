@@ -50,6 +50,7 @@ class NostrNetworkManager {
     /// Connects the app to the Nostr network
     func connect() {
         self.userRelayList.connect()
+        self.pool.open = true
     }
     
     func disconnect() {
