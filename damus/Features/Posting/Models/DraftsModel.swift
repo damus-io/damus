@@ -257,7 +257,9 @@ class Drafts: ObservableObject {
             damus_state.nostrNetwork.sendToNostrDB(event: draft_event)
         }
         
-        damus_state.settings.draft_event_ids = draft_events.map({ $0.id.hex() })
+        DispatchQueue.main.async {
+            damus_state.settings.draft_event_ids = draft_events.map({ $0.id.hex() })
+        }
     }
 }
 
