@@ -92,8 +92,9 @@ class ProfileModel: ObservableObject, Equatable {
         profileListener?.cancel()
         profileListener = Task {
             var profile_filter = NostrFilter(kinds: [.contacts, .metadata, .boost])
+            var relay_list_filter = NostrFilter(kinds: [.relay_list], authors: [pubkey])
             profile_filter.authors = [pubkey]
-            for await item in damus.nostrNetwork.reader.subscribe(filters: [profile_filter]) {
+            for await item in damus.nostrNetwork.reader.subscribe(filters: [profile_filter, relay_list_filter]) {
                 switch item {
                 case .event(let borrow):
                     try? borrow { event in
