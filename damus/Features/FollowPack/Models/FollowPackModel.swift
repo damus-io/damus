@@ -13,7 +13,7 @@ class FollowPackModel: ObservableObject {
     @Published var loading: Bool = false
     
     let damus_state: DamusState
-    let subid = UUID().description
+    var listener: Task<Void, Never>? = nil
     let limit: UInt32 = 500
     
     init(damus_state: DamusState) {
@@ -25,52 +25,40 @@ class FollowPackModel: ObservableObject {
     
     func subscribe(follow_pack_users: [Pubkey]) {
         loading = true
-        let to_relays = determine_to_relays(pool: damus_state.nostrNetwork.pool, filters: damus_state.relay_filters)
+        self.listener = Task {
+            await self.listenForUpdates(follow_pack_users: follow_pack_users)
+        }
+    }
+
+    func unsubscribe(to: RelayURL? = nil) {
+        loading = false
+        self.listener?.cancel()
+    }
+    
+    func listenForUpdates(follow_pack_users: [Pubkey]) async {
+        let to_relays = damus_state.nostrNetwork.determineToRelays(filters: damus_state.relay_filters)
         var filter = NostrFilter(kinds: [.text, .chat])
         filter.until = UInt32(Date.now.timeIntervalSince1970)
         filter.authors = follow_pack_users
         filter.limit = 500
         
-        damus_state.nostrNetwork.pool.subscribe(sub_id: subid, filters: [filter], handler: handle_event, to: to_relays)
-    }
-
-    func unsubscribe(to: RelayURL? = nil) {
-        loading = false
-        damus_state.nostrNetwork.pool.unsubscribe(sub_id: subid, to: to.map { [$0] })
-    }
-
-    func handle_event(relay_id: RelayURL, conn_ev: NostrConnectionEvent) {
-        guard case .nostr_event(let event) = conn_ev else {
-            return
-        }
-        
-        switch event {
-        case .event(let sub_id, let ev):
-            guard sub_id == self.subid else {
-                return
-            }
-            if ev.is_textlike && should_show_event(state: damus_state, ev: ev) && !ev.is_reply()
-            {
-                if self.events.insert(ev) {
-                    self.objectWillChange.send()
+        for await item in damus_state.nostrNetwork.reader.subscribe(filters: [filter], to: to_relays) {
+            switch item {
+            case .event(borrow: let borrow):
+                var event: NostrEvent? = nil
+                try? borrow { ev in
+                    event = ev.toOwned()
                 }
+                guard let event else { return }
+                if event.is_textlike && should_show_event(state: damus_state, ev: event) && !event.is_reply()
+                {
+                    if self.events.insert(event) {
+                        self.objectWillChange.send()
+                    }
+                }
+            case .eose:
+                continue
             }
-        case .notice(let msg):
-            print("follow pack notice: \(msg)")
-        case .ok:
-            break
-        case .eose(let sub_id):
-            loading = false
-            
-            if sub_id == self.subid {
-                unsubscribe(to: relay_id)
-                
-                guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
-            }
-
-            break
-        case .auth:
-            break
         }
     }
 }

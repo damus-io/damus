@@ -19,9 +19,15 @@ struct QueuedRequest {
     let skip_ephemeral: Bool
 }
 
+struct SeenEvent: Hashable {
+    let relay_id: RelayURL
+    let evid: NoteId
+}
+
 /// Establishes and manages connections and subscriptions to a list of relays.
 class RelayPool {
     private(set) var relays: [Relay] = []
+    var open: Bool = false
     var handlers: [RelayHandler] = []
     var request_queue: [QueuedRequest] = []
     var seen: [NoteId: Set<RelayURL>] = [:]
@@ -31,6 +37,8 @@ class RelayPool {
     var keypair: Keypair?
     var message_received_function: (((String, RelayDescriptor)) -> Void)?
     var message_sent_function: (((String, Relay)) -> Void)?
+    var delegate: Delegate?
+    private(set) var signal: SignalModel = SignalModel()
 
     private let network_monitor = NWPathMonitor()
     private let network_monitor_queue = DispatchQueue(label: "io.damus.network_monitor")
@@ -39,6 +47,7 @@ class RelayPool {
     func close() {
         disconnect()
         relays = []
+        open = false
         handlers = []
         request_queue = []
         seen.removeAll()
@@ -92,6 +101,7 @@ class RelayPool {
         }
     }
 
+    @MainActor
     func register_handler(sub_id: String, handler: @escaping (RelayURL, NostrConnectionEvent) -> ()) {
         for handler in handlers {
             // don't add duplicate handlers
@@ -173,6 +183,7 @@ class RelayPool {
     }
 
     func connect(to: [RelayURL]? = nil) {
+        open = true
         let relays = to.map{ get_relays($0) } ?? self.relays
         for relay in relays {
             relay.connection.connect()
@@ -194,8 +205,10 @@ class RelayPool {
     }
 
     func subscribe(sub_id: String, filters: [NostrFilter], handler: @escaping (RelayURL, NostrConnectionEvent) -> (), to: [RelayURL]? = nil) {
-        register_handler(sub_id: sub_id, handler: handler)
-        send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to)
+        Task {
+            await register_handler(sub_id: sub_id, handler: handler)
+            send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to)
+        }
     }
     
     /// Subscribes to data from the `RelayPool` based on a filter and a list of desired relays.
@@ -257,8 +270,10 @@ class RelayPool {
     }
 
     func subscribe_to(sub_id: String, filters: [NostrFilter], to: [RelayURL]?, handler: @escaping (RelayURL, NostrConnectionEvent) -> ()) {
-        register_handler(sub_id: sub_id, handler: handler)
-        send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to)
+        Task {
+            await register_handler(sub_id: sub_id, handler: handler)
+            send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to)
+        }
     }
 
     func count_queued(relay: RelayURL) -> Int {
@@ -272,6 +287,7 @@ class RelayPool {
         return c
     }
 
+    @MainActor
     func queue_req(r: NostrRequestType, relay: RelayURL, skip_ephemeral: Bool) {
         let count = count_queued(relay: relay)
         guard count <= 10 else {
@@ -314,7 +330,7 @@ class RelayPool {
             }
             
             guard relay.connection.isConnected else {
-                queue_req(r: req, relay: relay.id, skip_ephemeral: skip_ephemeral)
+                Task { await queue_req(r: req, relay: relay.id, skip_ephemeral: skip_ephemeral) }
                 continue
             }
             
@@ -407,6 +423,13 @@ class RelayPool {
 
 func add_rw_relay(_ pool: RelayPool, _ url: RelayURL) {
     try? pool.add_relay(RelayPool.RelayDescriptor(url: url, info: .readWrite))
+}
+
+
+extension RelayPool {
+    protocol Delegate {
+        func latestRelayListChanged(_ newEvent: NdbNote)
+    }
 }
 
 

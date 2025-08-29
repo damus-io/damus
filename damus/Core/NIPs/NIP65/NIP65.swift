@@ -42,6 +42,10 @@ extension NIP65 {
             self.relays = Self.relayOrderedDictionary(from: relays)
         }
         
+        init() {
+            self.relays = Self.relayOrderedDictionary(from: [])
+        }
+        
         init(relays: [RelayURL]) {
             let relayItemList = relays.map({ RelayItem(url: $0, rwConfiguration: .readWrite) })
             self.relays = Self.relayOrderedDictionary(from: relayItemList)
