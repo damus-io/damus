@@ -2,6 +2,26 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>follow_pack_user_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOW_PACK_USERS@</string>
+		<key>FOLLOW_PACK_USERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>użytkownik</string>
+			<key>few</key>
+			<string>użytkowników</string>
+			<key>many</key>
+			<string>użytkowników</string>
+			<key>other</key>
+			<string>użytkownika</string>
+		</dict>
+	</dict>
 	<key>followed_by_three_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -62,6 +82,26 @@
 			<string>Obserwuje</string>
 		</dict>
 	</dict>
+	<key>hellthread_notifications_disabled</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@HELLTHREAD_PROFILES@</string>
+		<key>HELLTHREAD_PROFILES</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Ukryj powiadomienia, które oznaczają więcej niż %d profil.</string>
+			<key>few</key>
+			<string>Ukryj powiadomienia, które oznaczają więcej niż %d profile.</string>
+			<key>many</key>
+			<string>Ukryj powiadomienia, które oznaczają więcej niż %d profili.</string>
+			<key>other</key>
+			<string>Ukryj powiadomienia, które oznaczają więcej niż %d profila.</string>
+		</dict>
+	</dict>
 	<key>imports_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -82,6 +122,26 @@
 			<string>Importa</string>
 		</dict>
 	</dict>
+	<key>notes_from_three_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Notatki od %2$@, %3$@, %4$@ i %1$d innej osoby w Twojej zaufanej sieci.</string>
+			<key>few</key>
+			<string>Notatki od %2$@, %3$@, %4$@ i %1$d innych osób w Twojej zaufanej sieci.</string>
+			<key>many</key>
+			<string>Notatki od %2$@, %3$@, %4$@ i %1$d innych osób w Twojej zaufanej sieci.</string>
+			<key>other</key>
+			<string>Notatki od %2$@, %3$@, %4$@ i %1$d innej osoby w Twojej zaufanej sieci.</string>
+		</dict>
+	</dict>
 	<key>people_reposted_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -100,6 +160,26 @@
 			<string>%2$@ i %1$d innych osób podało dalej</string>
 			<key>other</key>
 			<string>%2$@ i %1$d innej osoby podało dalej</string>
+		</dict>
+	</dict>
+	<key>quoted_reposts_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@QUOTE_REPOSTS@</string>
+		<key>QUOTE_REPOSTS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Cytowanie</string>
+			<key>few</key>
+			<string>Cytowania</string>
+			<key>many</key>
+			<string>Cytowań</string>
+			<key>other</key>
+			<string>Cytowania</string>
 		</dict>
 	</dict>
 	<key>reacted_tagged_in_3</key>
@@ -300,26 +380,6 @@
 			<string>Podanych dalej</string>
 			<key>other</key>
 			<string>Podane dalej</string>
-		</dict>
-	</dict>
-	<key>quoted_reposts_count</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@QUOTE_REPOSTS@</string>
-		<key>QUOTE_REPOSTS</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>Cytowanie</string>
-			<key>few</key>
-			<string>Cytowania</string>
-			<key>many</key>
-			<string>Cytowań</string>
-			<key>other</key>
-			<string>Cytowania</string>
 		</dict>
 	</dict>
 	<key>sats</key>
