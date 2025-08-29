@@ -67,18 +67,21 @@ class NIP05DomainEventsModel: ObservableObject {
         for await item in state.nostrNetwork.reader.subscribe(filters: [filter]) {
             switch item {
             case .event(borrow: let borrow):
-                try? borrow { event in
-                    self.add_event(event.toOwned())
+                var event: NostrEvent? = nil
+                try? borrow { ev in
+                    event = ev.toOwned()
                     guard let txn = NdbTxn(ndb: state.ndb) else { return }
                     load_profiles(context: "search", load: .from_events(self.events.all_events), damus_state: state, txn: txn)
                 }
+                guard let event else { return }
+                await self.add_event(event)
             case .eose:
                 continue
             }
         }
     }
 
-    func add_event(_ ev: NostrEvent) {
+    func add_event(_ ev: NostrEvent) async {
         if !event_matches_filter(ev, filter: filter) {
             return
         }
@@ -87,8 +90,10 @@ class NIP05DomainEventsModel: ObservableObject {
             return
         }
 
-        if self.events.insert(ev) {
-            objectWillChange.send()
+        if await self.events.insert(ev) {
+            DispatchQueue.main.async {
+                self.objectWillChange.send()
+            }
         }
     }
 }

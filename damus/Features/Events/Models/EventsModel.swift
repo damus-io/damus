@@ -78,7 +78,11 @@ class EventsModel: ObservableObject {
                         event = ev.toOwned()
                     }
                     guard let event else { return }
-                    if events.insert(event) { objectWillChange.send() }
+                    Task {
+                        if await events.insert(event) {
+                            DispatchQueue.main.async { self.objectWillChange.send() }
+                        }
+                    }
                 case .eose:
                     break
                 }
@@ -93,6 +97,7 @@ class EventsModel: ObservableObject {
         loadingTask?.cancel()
     }
 
+    @MainActor
     private func handle_event(relay_id: RelayURL, ev: NostrEvent) {
         if events.insert(ev) {
             objectWillChange.send()

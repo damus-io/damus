@@ -765,6 +765,7 @@ class HomeModel: ContactsDelegate {
         }
     }
 
+    @MainActor
     func insert_home_event(_ ev: NostrEvent) {
         if events.insert(ev) {
             handle_last_event(ev: ev, timeline: .home)
@@ -798,7 +799,7 @@ class HomeModel: ContactsDelegate {
 
         switch context {
         case .home:
-            insert_home_event(ev)
+            Task { await insert_home_event(ev) }
         case .notifications:
             handle_notification(ev: ev)
         case .dms, .contacts, .initialRelayList, .initialContactList, .nwc:

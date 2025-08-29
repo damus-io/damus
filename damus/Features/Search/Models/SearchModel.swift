@@ -49,7 +49,7 @@ class SearchModel: ObservableObject {
                     try? borrow { ev in
                         let event = ev.toOwned()
                         if event.is_textlike && event.should_show_event {
-                            self.add_event(event)
+                            Task { await self.add_event(event) }
                         }
                     }
                 case .eose:
@@ -67,6 +67,7 @@ class SearchModel: ObservableObject {
         listener = nil
     }
     
+    @MainActor
     func add_event(_ ev: NostrEvent) {
         if !event_matches_filter(ev, filter: search) {
             return

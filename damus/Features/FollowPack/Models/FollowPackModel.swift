@@ -25,6 +25,7 @@ class FollowPackModel: ObservableObject {
     
     func subscribe(follow_pack_users: [Pubkey]) {
         loading = true
+        self.listener?.cancel()
         self.listener = Task {
             await self.listenForUpdates(follow_pack_users: follow_pack_users)
         }
@@ -52,8 +53,10 @@ class FollowPackModel: ObservableObject {
                 guard let event else { return }
                 if event.is_textlike && should_show_event(state: damus_state, ev: event) && !event.is_reply()
                 {
-                    if self.events.insert(event) {
-                        self.objectWillChange.send()
+                    if await self.events.insert(event) {
+                        DispatchQueue.main.async {
+                            self.objectWillChange.send()
+                        }
                     }
                 }
             case .eose:
