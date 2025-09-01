@@ -70,7 +70,8 @@ class EventsModel: ObservableObject {
     func subscribe() {
         loadingTask?.cancel()
         loadingTask = Task {
-            for await item in state.nostrNetwork.reader.subscribe(filters: [get_filter()]) {
+            DispatchQueue.main.async { self.loading = true }
+            outerLoop: for await item in state.nostrNetwork.reader.subscribe(filters: [get_filter()]) {
                 switch item {
                 case .event(let borrow):
                     var event: NostrEvent? = nil
@@ -84,10 +85,11 @@ class EventsModel: ObservableObject {
                         }
                     }
                 case .eose:
-                    break
+                    DispatchQueue.main.async { self.loading = false }
+                    break outerLoop
                 }
             }
-            self.loading = false
+            DispatchQueue.main.async { self.loading = false }
             guard let txn = NdbTxn(ndb: self.state.ndb) else { return }
             load_profiles(context: "events_model", load: .from_events(events.all_events), damus_state: state, txn: txn)
         }
