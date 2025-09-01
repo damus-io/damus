@@ -76,6 +76,7 @@ class NIP05DomainEventsModel: ObservableObject {
                 guard let event else { return }
                 await self.add_event(event)
             case .eose:
+                DispatchQueue.main.async { self.loading = false }
                 continue
             }
         }
@@ -86,7 +87,7 @@ class NIP05DomainEventsModel: ObservableObject {
             return
         }
 
-        guard should_show_event(state: state, ev: ev) else {
+        guard await should_show_event(state: state, ev: ev) else {
             return
         }
 

@@ -84,7 +84,9 @@ class HomeModel: ContactsDelegate {
     init() {
         self.damus_state = DamusState.empty
         self.setup_debouncer()
-        filter_events()
+        DispatchQueue.main.async {
+            self.filter_events()
+        }
         events.on_queue = preloader
         //self.events = EventHolder(on_queue: preloader)
     }
@@ -353,6 +355,7 @@ class HomeModel: ContactsDelegate {
         }
     }
     
+    @MainActor
     func filter_events() {
         events.filter { ev in
             !damus_state.mutelist_manager.is_muted(.user(ev.pubkey, nil))
@@ -422,6 +425,7 @@ class HomeModel: ContactsDelegate {
         }
     }
 
+    @MainActor
     func handle_like_event(_ ev: NostrEvent) {
         guard let e = ev.last_refid() else {
             // no id ref? invalid like event
@@ -682,6 +686,7 @@ class HomeModel: ContactsDelegate {
         case nwc
     }
 
+    @MainActor
     func handle_mute_list_event(_ ev: NostrEvent) {
         // we only care about our mutelist
         guard ev.pubkey == damus_state.pubkey else {
@@ -700,6 +705,7 @@ class HomeModel: ContactsDelegate {
         migrate_old_muted_threads_to_new_mutelist(keypair: damus_state.keypair, damus_state: damus_state)
     }
 
+    @MainActor
     func handle_old_list_event(_ ev: NostrEvent) {
         // we only care about our lists
         guard ev.pubkey == damus_state.pubkey else {
@@ -731,6 +737,7 @@ class HomeModel: ContactsDelegate {
         return m[kind]
     }
     
+    @MainActor
     func handle_notification(ev: NostrEvent) {
         // don't show notifications from ourselves
         guard ev.pubkey != damus_state.pubkey,
@@ -750,7 +757,7 @@ class HomeModel: ContactsDelegate {
         }
         
         if handle_last_event(ev: ev, timeline: .notifications) {
-            process_local_notification(state: damus_state, event: ev)
+            Task { await process_local_notification(state: damus_state, event: ev) }
         }
         
     }
@@ -773,6 +780,7 @@ class HomeModel: ContactsDelegate {
     }
 
 
+    @MainActor
     func handle_text_event(_ ev: NostrEvent, context: SubscriptionContext) {
         guard should_show_event(state: damus_state, ev: ev) else {
             return
@@ -808,17 +816,21 @@ class HomeModel: ContactsDelegate {
     }
     
     func got_new_dm(notifs: NewEventsBits, ev: NostrEvent) {
-        notification_status.new_events = notifs
-        
-        guard should_display_notification(state: damus_state, event: ev, mode: .local),
-              let notification_object = generate_local_notification_object(ndb: self.damus_state.ndb, from: ev, state: damus_state)
-        else {
-            return
+        Task {
+            notification_status.new_events = notifs
+            
+            
+            guard await should_display_notification(state: damus_state, event: ev, mode: .local),
+                  let notification_object = generate_local_notification_object(ndb: self.damus_state.ndb, from: ev, state: damus_state)
+            else {
+                return
+            }
+            
+            create_local_notification(profiles: damus_state.profiles, notify: notification_object)
         }
-        
-        create_local_notification(profiles: damus_state.profiles, notify: notification_object)
     }
     
+    @MainActor
     func handle_dm(_ ev: NostrEvent) {
         guard should_show_event(state: damus_state, ev: ev) else {
             return
@@ -1150,6 +1162,7 @@ func event_has_our_pubkey(_ ev: NostrEvent, our_pubkey: Pubkey) -> Bool {
     return ev.referenced_pubkeys.contains(our_pubkey)
 }
 
+@MainActor
 func should_show_event(event: NostrEvent, damus_state: DamusState) -> Bool {
     return should_show_event(
         state: damus_state,
@@ -1157,6 +1170,7 @@ func should_show_event(event: NostrEvent, damus_state: DamusState) -> Bool {
     )
 }
 
+@MainActor
 func should_show_event(state: DamusState, ev: NostrEvent) -> Bool {
     let event_muted = state.mutelist_manager.is_event_muted(ev)
     if event_muted {

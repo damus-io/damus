@@ -26,6 +26,7 @@ class SearchModel: ObservableObject {
         })
     }
     
+    @MainActor
     func filter_muted()  {
         self.events.filter {
             should_show_event(state: state, ev: $0)

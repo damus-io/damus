@@ -34,6 +34,7 @@ class SearchHomeModel: ObservableObject {
         return filter
     }
     
+    @MainActor
     func filter_muted() {
         events.filter { should_show_event(state: damus_state, ev: $0) }
         self.objectWillChange.send()

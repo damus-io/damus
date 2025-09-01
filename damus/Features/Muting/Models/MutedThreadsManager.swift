@@ -23,6 +23,7 @@ func loadOldMutedThreads(pubkey: Pubkey) -> [NoteId] {
 // We need to still use it since existing users might have their muted threads stored in UserDefaults
 // So now all it's doing is moving a users muted threads to the new kind:10000 system
 // It should not be used for any purpose beyond that
+@MainActor
 func migrate_old_muted_threads_to_new_mutelist(keypair: Keypair, damus_state: DamusState) {
     // Ensure that keypair is fullkeypair
     guard let fullKeypair = keypair.to_full() else { return }

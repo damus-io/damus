@@ -51,7 +51,8 @@ class FollowPackModel: ObservableObject {
                     event = ev.toOwned()
                 }
                 guard let event else { return }
-                if event.is_textlike && should_show_event(state: damus_state, ev: event) && !event.is_reply()
+                let should_show_event = await should_show_event(state: damus_state, ev: event)
+                if event.is_textlike && should_show_event && !event.is_reply()
                 {
                     if await self.events.insert(event) {
                         DispatchQueue.main.async {
