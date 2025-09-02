@@ -26,11 +26,11 @@ class ContactCardManager: ContactCard {
     }
 
     func handleFavorite(state: DamusState, target: Pubkey) {
-        handlFavorite(state: state, target: target, favorite: true)
+        handleFavorite(state: state, target: target, favorite: true)
     }
 
     func handleUnfavorite(state: DamusState, target: Pubkey) {
-        handlFavorite(state: state, target: target, favorite: false)
+        handleFavorite(state: state, target: target, favorite: false)
     }
 
     func loadEvent(_ ev: NostrEvent, pubkey: Pubkey) {
@@ -100,7 +100,7 @@ class ContactCardManager: ContactCard {
         return NostrEvent(content: "", keypair: keypair.to_keypair(), kind: kind, tags: tags)
     }
 
-    private func handlFavorite(state: DamusState, target: Pubkey, favorite: Bool) {
+    private func handleFavorite(state: DamusState, target: Pubkey, favorite: Bool) {
         guard let keypair = state.keypair.to_full() else {
             return
         }
