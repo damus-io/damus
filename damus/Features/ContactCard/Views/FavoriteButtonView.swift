@@ -13,8 +13,13 @@ struct FavoriteButtonView: View {
     }
     
     var body: some View {
-        Button(action: {
-            damus_state.contactCards.toggleFavorite(pubkey)
+        Button(
+            action: {
+                damus_state.contactCards.toggleFavorite(
+                    pubkey,
+                    postbox: damus_state.nostrNetwork.postbox,
+                    keyPair: damus_state.keypair.to_full()
+                )
             favorite.toggle()
         }) {
             Image(favorite ? "star.fill" : "star")

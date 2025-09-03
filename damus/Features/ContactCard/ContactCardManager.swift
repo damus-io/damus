@@ -15,22 +15,14 @@ class ContactCardManager: ContactCard {
         favorites.contains(pubkey)
     }
 
-    func toggleFavorite(_ pubkey: Pubkey) {
+    func toggleFavorite(_ pubkey: Pubkey, postbox: PostBox, keyPair: FullKeypair?) {
         if favorites.contains(pubkey) {
             favorites.remove(pubkey)
-            notify(.contactCard(.unfavorite(pubkey)))
+            handleFavorite(target: pubkey, favorite: false, postbox: postbox, keypair: keyPair)
         } else {
             favorites.insert(pubkey)
-            notify(.contactCard(.favorite(pubkey)))
+            handleFavorite(target: pubkey, favorite: true, postbox: postbox, keypair: keyPair)
         }
-    }
-
-    func handleFavorite(state: DamusState, target: Pubkey) {
-        handleFavorite(state: state, target: target, favorite: true)
-    }
-
-    func handleUnfavorite(state: DamusState, target: Pubkey) {
-        handleFavorite(state: state, target: target, favorite: false)
     }
 
     func loadEvent(_ ev: NostrEvent, pubkey: Pubkey) {
@@ -73,7 +65,7 @@ class ContactCardManager: ContactCard {
         }
 
         latestContactCardEvents[targetPubkey] = ev
-        notify(.contactCard(.favoritesUpdated))
+        notify(.favoriteUpdated())
     }
 
     var filter: ((_ ev: NostrEvent) -> Bool) {
@@ -100,8 +92,8 @@ class ContactCardManager: ContactCard {
         return NostrEvent(content: "", keypair: keypair.to_keypair(), kind: kind, tags: tags)
     }
 
-    private func handleFavorite(state: DamusState, target: Pubkey, favorite: Bool) {
-        guard let keypair = state.keypair.to_full() else {
+    private func handleFavorite(target: Pubkey, favorite: Bool, postbox: PostBox, keypair: FullKeypair?) {
+        guard let keypair else {
             return
         }
         let ev: NostrEvent?
@@ -121,18 +113,16 @@ class ContactCardManager: ContactCard {
             favorites.remove(target)
         }
 
-        state.nostrNetwork.postbox.send(ev)
+        postbox.send(ev)
         latestContactCardEvents[target] = ev
-        notify(.contactCard(.favoritesUpdated))
+        notify(.favoriteUpdated())
     }
 }
 
 protocol ContactCard {
     func isFavorite(_ pubkey: Pubkey) -> Bool
-    func toggleFavorite(_ pubkey: Pubkey)
+    func toggleFavorite(_ pubkey: Pubkey, postbox: PostBox, keyPair: FullKeypair?)
     func loadEvent(_ ev: NostrEvent, pubkey: Pubkey)
-    func handleFavorite(state: DamusState, target: Pubkey)
-    func handleUnfavorite(state: DamusState, target: Pubkey)
     var filter: ((_ ev: NostrEvent) -> Bool) { get }
     var favorites: Set<Pubkey> { get }
 }

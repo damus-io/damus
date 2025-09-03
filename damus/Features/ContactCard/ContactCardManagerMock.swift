@@ -8,7 +8,7 @@ class ContactCardManagerMock: ContactCard  {
        favorites.contains(pubkey)
     }
 
-    func toggleFavorite(_ pubkey: Pubkey) {
+    func toggleFavorite(_ pubkey: Pubkey, postbox: PostBox, keyPair: FullKeypair?) {
         if favorites.contains(pubkey) {
             favorites.remove(pubkey)
         } else {
@@ -18,22 +18,6 @@ class ContactCardManagerMock: ContactCard  {
 
     func loadEvent(_ ev: NostrEvent, pubkey: Pubkey) {
         event = ev
-    }
-
-    private func handle_favorite_action(state: DamusState, target: Pubkey, is_favorite: Bool) {
-        if is_favorite {
-            favorites.insert(target)
-        } else {
-            favorites.remove(target)
-        }
-    }
-
-    func handleFavorite(state: DamusState, target: Pubkey) {
-        handle_favorite_action(state: state, target: target, is_favorite: true)
-    }
-
-    func handleUnfavorite(state: DamusState, target: Pubkey) {
-        handle_favorite_action(state: state, target: target, is_favorite: false)
     }
 
     var filter: ((_ ev: NostrEvent) -> Bool) {

@@ -75,7 +75,12 @@ struct ProfileActionSheetView: View {
         VStack(alignment: .center, spacing: 10) {
             Button(
                 action: {
-                    damus_state.contactCards.toggleFavorite(profile.pubkey)
+                    damus_state.contactCards.toggleFavorite(
+                        profile.pubkey,
+                        postbox: damus_state.nostrNetwork.postbox,
+                        keyPair: damus_state.keypair.to_full()
+                    )
+                    favorite = damus_state.contactCards.isFavorite(profile.pubkey)
                 },
                 label: {
                     Image("star")
@@ -87,16 +92,6 @@ struct ProfileActionSheetView: View {
             Text("Favorite", comment: "Button label that allows the user to favorite the user shown on-screen")
                 .foregroundStyle(.secondary)
                 .font(.caption)
-        }
-        .onReceive(handle_notify(.contactCard)) { notifyType in
-            switch notifyType {
-            case .favorite(let pubkey):
-                favorite = damus_state.contactCards.isFavorite(pubkey)
-            case .unfavorite(let pubkey):
-                favorite = damus_state.contactCards.isFavorite(pubkey)
-            case .favoritesUpdated:
-                break
-            }
         }
     }
 

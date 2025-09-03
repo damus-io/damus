@@ -27,7 +27,7 @@ final class ContactCardManagerTests: XCTestCase {
         // Given: A pubkey added to favorites
         let sut = ContactCardManager()
         let pubkey = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
-        sut.toggleFavorite(pubkey)
+        sut.toggleFavorite(pubkey, postbox: test_damus_state.nostrNetwork.postbox, keyPair: generate_new_keypair())
         
         // When: Checking if the pubkey is favorite
         let result = sut.isFavorite(pubkey)
@@ -41,7 +41,7 @@ final class ContactCardManagerTests: XCTestCase {
         let sut = ContactCardManager()
         let expected = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
         let differentPubkey = Pubkey(hex: "5b0183ab6c3e322bf4d41c6b3aef98562a144847b7499543727c5539a114563e")!
-        sut.toggleFavorite(expected)
+        sut.toggleFavorite(expected, postbox: test_damus_state.nostrNetwork.postbox, keyPair: generate_new_keypair())
         
         // When: Checking if a different pubkey is favorite
         let result = sut.isFavorite(differentPubkey)
@@ -57,7 +57,7 @@ final class ContactCardManagerTests: XCTestCase {
         XCTAssertFalse(sut.isFavorite(pubkey))
         
         // When: Toggling the pubkey
-        sut.toggleFavorite(pubkey)
+        sut.toggleFavorite(pubkey, postbox: test_damus_state.nostrNetwork.postbox, keyPair: generate_new_keypair())
         
         // Then: Should be added to favorites
         XCTAssertTrue(sut.isFavorite(pubkey))
@@ -68,11 +68,12 @@ final class ContactCardManagerTests: XCTestCase {
         // Given: A pubkey already in favorites
         let sut = ContactCardManager()
         let pubkey = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
-        sut.toggleFavorite(pubkey)
+        let keypair = generate_new_keypair()
+        sut.toggleFavorite(pubkey, postbox: test_damus_state.nostrNetwork.postbox, keyPair: keypair)
         XCTAssertTrue(sut.isFavorite(pubkey))
         
         // When: Toggling the pubkey again
-        sut.toggleFavorite(pubkey)
+        sut.toggleFavorite(pubkey, postbox: test_damus_state.nostrNetwork.postbox, keyPair: keypair)
         
         // Then: Should be removed from favorites
         XCTAssertFalse(sut.isFavorite(pubkey))
@@ -111,7 +112,7 @@ final class ContactCardManagerTests: XCTestCase {
         let userPubkey = Pubkey(hex: "5b0183ab6c3e322bf4d41c6b3aef98562a144847b7499543727c5539a114563e")!
 
         // First add to favorites
-        sut.toggleFavorite(targetPubkey)
+        sut.toggleFavorite(targetPubkey, postbox: test_damus_state.nostrNetwork.postbox, keyPair: generate_new_keypair())
         XCTAssertTrue(sut.isFavorite(targetPubkey))
 
         // Create unfavorite contact card (only target public key tag, no contact set tag)
@@ -222,7 +223,7 @@ final class ContactCardManagerTests: XCTestCase {
         let sut = ContactCardManager()
         let favoritePubkey = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
         let otherPubkey = Pubkey(hex: "5b0183ab6c3e322bf4d41c6b3aef98562a144847b7499543727c5539a114563e")!
-        sut.toggleFavorite(favoritePubkey)
+        sut.toggleFavorite(favoritePubkey, postbox: test_damus_state.nostrNetwork.postbox, keyPair: generate_new_keypair())
         // Create events from both pubkeys
         let favoriteEvent = NostrEvent(
             content: "Hello from favorite",

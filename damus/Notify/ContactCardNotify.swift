@@ -1,22 +1,16 @@
-enum ContactCardNotifyType {
-    case favorite(Pubkey)
-    case unfavorite(Pubkey)
-    case favoritesUpdated
-}
-
-struct ContactCardNotify: Notify {
-    typealias Payload = ContactCardNotifyType
-    var payload: Payload
+struct FavoriteNotify: Notify {
+    typealias Payload = Void
+    var payload: Void
 }
 
 extension NotifyHandler {
-    static var contactCard: NotifyHandler<ContactCardNotify> {
-        NotifyHandler<ContactCardNotify>()
+    static var favoriteUpdated: NotifyHandler<FavoriteNotify> {
+        .init()
     }
 }
 
 extension Notifications {
-    static func contactCard(_ type: ContactCardNotifyType) -> Notifications<ContactCardNotify> {
-        .init(.init(payload: type))
+    static func favoriteUpdated() -> Notifications<FavoriteNotify> {
+        .init(.init(payload: ()))
     }
 }
