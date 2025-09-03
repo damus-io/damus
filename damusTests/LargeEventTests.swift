@@ -10,7 +10,7 @@ import XCTest
 
 final class LargeEventTests: XCTestCase {
 
-    func testLongPost() throws {
+    func testLongPost() async throws {
         let json = "[\"EVENT\",\"subid\",\(test_failing_nostr_report)]"
         let resp = NostrResponse.owned_from_json(json: json)
 
@@ -25,7 +25,8 @@ final class LargeEventTests: XCTestCase {
         XCTAssertEqual(subid, "subid")
         XCTAssertTrue(ev.should_show_event)
         XCTAssertTrue(!ev.too_big)
-        XCTAssertTrue(should_show_event(state: test_damus_state, ev: ev))
+        let shouldShowEvent = await should_show_event(state: test_damus_state, ev: ev)
+        XCTAssertTrue(shouldShowEvent)
         XCTAssertTrue(validate_event(ev: ev) == .ok)
     }
 
