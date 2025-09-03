@@ -41,7 +41,7 @@ enum HomeResubFilter {
     }
 }
 
-class HomeModel: ContactsDelegate {
+class HomeModel: ContactsDelegate, ObservableObject {
     // The maximum amount of contacts placed on a home feed subscription filter.
     // If the user has more contacts, chunking or other techniques will be used to avoid sending huge filters
     let MAX_CONTACTS_ON_FILTER = 500
@@ -71,7 +71,7 @@ class HomeModel: ContactsDelegate {
     var dmsHandlerTask: Task<Void, Never>?
     var nwcHandlerTask: Task<Void, Never>?
     
-    var loading: Bool = false
+    @Published var loading: Bool = true
 
     var signal = SignalModel()
     
@@ -658,6 +658,9 @@ class HomeModel: ContactsDelegate {
 
         self.homeHandlerTask?.cancel()
         self.homeHandlerTask = Task {
+            DispatchQueue.main.async {
+                self.loading = true
+            }
             for await item in damus_state.nostrNetwork.reader.subscribe(filters: home_filters) {
                 switch item {
                 case .event(let borrow):
@@ -669,6 +672,9 @@ class HomeModel: ContactsDelegate {
                     await self.process_event(ev: event, context: .home)
                 case .eose:
                     guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
+                    DispatchQueue.main.async {
+                        self.loading = false
+                    }
                     load_profiles(context: "home", load: .from_events(events.events), damus_state: damus_state, txn: txn)
                 }
             }

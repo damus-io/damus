@@ -95,6 +95,7 @@ struct TimelineView<Content: View>: View {
                     }
             }
             .coordinateSpace(name: "scroll")
+            .disabled(self.loading)
             .onReceive(handle_notify(.scroll_to_top)) { () in
                 events.flush()
                 self.events.set_should_queue(false)

@@ -10,7 +10,7 @@ import SwiftUI
 struct PostingTimelineView: View {
     
     let damus_state: DamusState
-    var home: HomeModel
+    @ObservedObject var home: HomeModel
     @State var search: String = ""
     @State var results: [NostrEvent] = []
     @State var initialOffset: CGFloat?
@@ -25,6 +25,14 @@ struct PostingTimelineView: View {
     @State var headerHeight: CGFloat = 0
     @Binding var headerOffset: CGFloat
     @SceneStorage("PostingTimelineView.filter_state") var filter_state : FilterState = .posts_and_replies
+    
+    var loading: Binding<Bool> {
+        Binding(get: {
+            return home.loading
+        }, set: {
+            home.loading = $0
+        })
+    }
 
     func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
         var filters = ContentFilters.defaults(damus_state: damus_state)
@@ -33,7 +41,7 @@ struct PostingTimelineView: View {
     }
     
     func contentTimelineView(filter: (@escaping (NostrEvent) -> Bool)) -> some View {
-        TimelineView<AnyView>(events: home.events, loading: .constant(false), headerHeight: $headerHeight, headerOffset: $headerOffset, damus: damus_state, show_friend_icon: false, filter: filter)
+        TimelineView<AnyView>(events: home.events, loading: self.loading, headerHeight: $headerHeight, headerOffset: $headerOffset, damus: damus_state, show_friend_icon: false, filter: filter)
     }
     
     func HeaderView()->some View {
