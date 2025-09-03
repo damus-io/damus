@@ -135,6 +135,7 @@ struct ContentView: View {
     @StateObject var navigationCoordinator: NavigationCoordinator = NavigationCoordinator()
     @AppStorage("has_seen_suggested_users") private var hasSeenOnboardingSuggestions = false
     let sub_id = UUID().description
+    @State var damusClosingTask: Task<Void, Never>? = nil
     
     // connect retry timer
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -478,31 +479,32 @@ struct ContentView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { obj in
             print("txn: 📙 DAMUS ACTIVE NOTIFY")
-            if damus_state.ndb.reopen() {
-                print("txn: NOSTRDB REOPENED")
-            } else {
-                print("txn: NOSTRDB FAILED TO REOPEN closed:\(damus_state.ndb.is_closed)")
-            }
-            if damus_state.purple.checkout_ids_in_progress.count > 0 {
-                // For extra assurance, run this after one second, to avoid race conditions if the app is also handling a damus purple welcome url.
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    Task {
-                        let freshly_completed_checkout_ids = try? await damus_state.purple.check_status_of_checkouts_in_progress()
-                        let there_is_a_completed_checkout: Bool = (freshly_completed_checkout_ids?.count ?? 0) > 0
-                        let account_info = try await damus_state.purple.fetch_account(pubkey: self.keypair.pubkey)
-                        if there_is_a_completed_checkout == true && account_info?.active == true {
-                            if damus_state.purple.onboarding_status.user_has_never_seen_the_onboarding_before() {
-                                // Show welcome sheet
-                                self.active_sheet = .purple_onboarding
-                            }
-                            else {
-                                self.active_sheet = .purple(DamusPurpleURL.init(is_staging: damus_state.purple.environment == .staging, variant: .landing))
+            Task {
+                await damusClosingTask?.value  // Wait for the closing task to finish before reopening things, to avoid race conditions
+                if damus_state.ndb.reopen() {
+                    print("txn: NOSTRDB REOPENED")
+                } else {
+                    print("txn: NOSTRDB FAILED TO REOPEN closed:\(damus_state.ndb.is_closed)")
+                }
+                if damus_state.purple.checkout_ids_in_progress.count > 0 {
+                    // For extra assurance, run this after one second, to avoid race conditions if the app is also handling a damus purple welcome url.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        Task {
+                            let freshly_completed_checkout_ids = try? await damus_state.purple.check_status_of_checkouts_in_progress()
+                            let there_is_a_completed_checkout: Bool = (freshly_completed_checkout_ids?.count ?? 0) > 0
+                            let account_info = try await damus_state.purple.fetch_account(pubkey: self.keypair.pubkey)
+                            if there_is_a_completed_checkout == true && account_info?.active == true {
+                                if damus_state.purple.onboarding_status.user_has_never_seen_the_onboarding_before() {
+                                    // Show welcome sheet
+                                    self.active_sheet = .purple_onboarding
+                                }
+                                else {
+                                    self.active_sheet = .purple(DamusPurpleURL.init(is_staging: damus_state.purple.environment == .staging, variant: .landing))
+                                }
                             }
                         }
                     }
                 }
-            }
-            Task {
                 await damus_state.purple.check_and_send_app_notifications_if_needed(handler: home.handle_damus_app_notification)
             }
         }
@@ -511,7 +513,7 @@ struct ContentView: View {
             switch phase {
             case .background:
                 print("txn: 📙 DAMUS BACKGROUNDED")
-                Task { @MainActor in
+                damusClosingTask = Task { @MainActor in
                     await damus_state.nostrNetwork.close()  // Close ndb streaming tasks before closing ndb to avoid memory errors
                     damus_state.ndb.close()
                 }
@@ -521,8 +523,11 @@ struct ContentView: View {
                 break
             case .active:
                 print("txn: 📙 DAMUS ACTIVE")
-                damus_state.nostrNetwork.connect()
-                damus_state.nostrNetwork.ping()
+                Task {
+                    await damusClosingTask?.value  // Wait for the closing task to finish before reopening things, to avoid race conditions
+                    damus_state.nostrNetwork.connect()
+                    damus_state.nostrNetwork.ping()
+                }
             @unknown default:
                 break
             }
