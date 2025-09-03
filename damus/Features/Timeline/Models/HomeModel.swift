@@ -174,6 +174,14 @@ class HomeModel: ContactsDelegate {
         }
     }
 
+    /// Force refresh of home timeline filters, bypassing startup debounce
+    /// Used when favorites are fetched from network during startup to ensure unfollowed favorited users are included
+    /// This is needed because the normal resubscribe path is blocked during initial load
+    func refresh_home_filters() {
+        unsubscribe_to_home_filters()
+        subscribe_to_home_filters()
+    }
+
     @MainActor
     func process_event(sub_id: String, relay_id: RelayURL, ev: NostrEvent) {
         if has_sub_id_event(sub_id: sub_id, ev_id: ev.id) {

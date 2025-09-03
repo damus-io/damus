@@ -454,7 +454,7 @@ struct ContentView: View {
             case .unfavorite(let pubkey):
                 damus_state.contactCards.handleUnfavorite(state: damus_state, target: pubkey)
             case .favoritesUpdated:
-                home.resubscribe(.following)
+                home.refresh_home_filters()
             }
         }
         .onReceive(handle_notify(.zapping)) { zap_ev in
