@@ -29,6 +29,26 @@ struct InnerTimelineView: View {
     
     var body: some View {
         LazyVStack(spacing: 0) {
+            let incomingEvents = events.incoming.filter({ filter($0) })
+            if incomingEvents.count > 0 {
+                Button(
+                    action: {
+                        notify(.scroll_to_top)
+                    },
+                    label: {
+                        HStack(spacing: 6) {
+                            CondensedProfilePicturesView(state: state, pubkeys: incomingEvents.map({ $0.pubkey }), maxPictures: 3)
+                            Text("Load new content", comment: "Button to load new notes in the timeline")
+                                .bold()
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                    }
+                )
+                .buttonStyle(NeutralButtonStyle(cornerRadius: 50))
+                .padding(.vertical, 10)
+            }
+            
             let events = self.events.events
             if events.isEmpty {
                 EmptyTimelineView()

@@ -11,8 +11,8 @@ import Foundation
 class EventHolder: ObservableObject, ScrollQueue {
     private var has_event = Set<NoteId>()
     @Published var events: [NostrEvent]
-    var incoming: [NostrEvent]
-    var should_queue = false
+    @Published var incoming: [NostrEvent]
+    private(set) var should_queue = false
     var on_queue: ((NostrEvent) -> Void)?
     
     func set_should_queue(_ val: Bool) {
