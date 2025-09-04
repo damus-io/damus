@@ -124,7 +124,8 @@ final class ContactCardManagerTests: XCTestCase {
             content: "",
             keypair: Keypair(pubkey: userPubkey, privkey: nil),
             kind: NostrKind.contact_card.rawValue,
-            tags: tags
+            tags: tags,
+            createdAt: UInt32(Date().timeIntervalSince1970) + 1
         )!
 
         // When: Handling the unfavorite contact card event
