@@ -15,7 +15,7 @@ class SearchModel: ObservableObject {
     
     var search: NostrFilter
     let profiles_subid = UUID().description
-    var listener: Task<Void, Never>? = nil
+    var listener: Task<Void, any Error>? = nil
     let limit: UInt32 = 500
     
     init(state: DamusState, search: NostrFilter) {
@@ -42,9 +42,13 @@ class SearchModel: ObservableObject {
         //likes_filter.ids = ref_events.referenced_ids!
         listener?.cancel()
         listener = Task {
-            self.loading = true
+            DispatchQueue.main.async {
+                self.loading = true
+            }
             print("subscribing to search")
-            for await item in await state.nostrNetwork.reader.subscribe(filters: [search]) {
+            try Task.checkCancellation()
+            outerLoop: for await item in await state.nostrNetwork.reader.subscribe(filters: [search]) {
+                try Task.checkCancellation()
                 switch item {
                 case .event(let borrow):
                     try? borrow { ev in
@@ -54,12 +58,15 @@ class SearchModel: ObservableObject {
                         }
                     }
                 case .eose:
-                    break
+                    break outerLoop
                 }
-                guard let txn = NdbTxn(ndb: state.ndb) else { return }
-                load_profiles(context: "search", load: .from_events(self.events.all_events), damus_state: state, txn: txn)
             }
-            self.loading = false
+            guard let txn = NdbTxn(ndb: state.ndb) else { return }
+            try Task.checkCancellation()
+            load_profiles(context: "search", load: .from_events(self.events.all_events), damus_state: state, txn: txn)
+            DispatchQueue.main.async {
+                self.loading = false
+            }
         }
     }
     
