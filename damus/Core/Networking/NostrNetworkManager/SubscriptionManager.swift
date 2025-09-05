@@ -25,6 +25,28 @@ extension NostrNetworkManager {
         
         // MARK: - Reading data from Nostr
         
+        /// Subscribes to data from user's relays, for a maximum period of time — after which the stream will end.
+        ///
+        /// This is useful when waiting for some specific data from Nostr, but not indefinitely.
+        func subscribe(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, timeout: Duration) -> AsyncStream<StreamItem> {
+            return AsyncStream<StreamItem> { continuation in
+                let streamingTask = Task {
+                    for await item in self.subscribe(filters: filters, to: desiredRelays) {
+                        try Task.checkCancellation()
+                        continuation.yield(item)
+                    }
+                }
+                let timeoutTask = Task {
+                    try await Task.sleep(for: timeout)
+                    continuation.finish()   // End the stream due to timeout.
+                }
+                continuation.onTermination = { @Sendable _ in
+                    timeoutTask.cancel()
+                    streamingTask.cancel()
+                }
+            }
+        }
+        
         /// Subscribes to data from the user's relays
         ///
         /// ## Implementation notes
@@ -112,10 +134,16 @@ extension NostrNetworkManager {
                 }
                 let streamTask = Task {
                     do {
-                        for await _ in self.pool.subscribe(filters: filters, to: desiredRelays) {
+                        for await item in self.pool.subscribe(filters: filters, to: desiredRelays) {
                             // NO-OP. Notes will be automatically ingested by NostrDB
                             // TODO: Improve efficiency of subscriptions?
                             try Task.checkCancellation()
+                            switch item {
+                            case .event(let event):
+                                Log.debug("Session subscribe: Received kind %d event with id %s from the network", for: .subscription_manager, event.kind, event.id.hex())
+                            case .eose:
+                                Log.debug("Session subscribe: Received EOSE from the network", for: .subscription_manager)
+                            }
                         }
                     }
                     catch {

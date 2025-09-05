@@ -45,11 +45,11 @@ struct SendPaymentView: View {
                 break
             case .completed:
                 // Refresh wallet to reflect new balance after payment
-                Task { await WalletConnect.refresh_wallet_information(damus_state: damus_state) }
+                Task { try await model.refreshWalletInformation() }
             case .failed:
                 // Even when a wallet says it has failed, update balance just in case it is a false negative,
                 // This might prevent the user from accidentally sending a payment twice in case of a bug.
-                Task { await WalletConnect.refresh_wallet_information(damus_state: damus_state) }
+                Task { try await model.refreshWalletInformation() }
             }
         }
     }

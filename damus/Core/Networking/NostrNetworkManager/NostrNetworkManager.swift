@@ -85,8 +85,8 @@ class NostrNetworkManager {
         self.pool.send_raw_to_local_ndb(.typical(.event(event)))
     }
     
-    func send(event: NostrEvent) {
-        self.pool.send(.event(event))
+    func send(event: NostrEvent, to targetRelays: [RelayURL]? = nil, skipEphemeralRelays: Bool = true) {
+        self.pool.send(.event(event), to: targetRelays, skip_ephemeral: skipEphemeralRelays)
     }
     
     func query(filters: [NostrFilter], to: [RelayURL]? = nil) async -> [NostrEvent] {
@@ -206,14 +206,6 @@ class NostrNetworkManager {
     @discardableResult
     func nwcPay(url: WalletConnectURL, post: PostBox, invoice: String, delay: TimeInterval? = 5.0, on_flush: OnFlush? = nil, zap_request: NostrEvent? = nil) -> NostrEvent? {
         WalletConnect.pay(url: url, pool: self.pool, post: post, invoice: invoice, zap_request: nil)
-    }
-    
-    func requestTransactionList(url: WalletConnectURL, delay: TimeInterval? = 0.0, on_flush: OnFlush? = nil) {
-        WalletConnect.request_transaction_list(url: url, pool: self.pool, post: self.postbox, delay: delay, on_flush: on_flush)
-    }
-    
-    func requestBalanceInformation(url: WalletConnectURL, delay: TimeInterval? = 0.0, on_flush: OnFlush? = nil) {
-        WalletConnect.request_balance_information(url: url, pool: self.pool, post: self.postbox, delay: delay, on_flush: on_flush)
     }
     
     /// Send a donation zap to the Damus team

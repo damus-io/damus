@@ -207,7 +207,10 @@ class RelayPool {
     func subscribe(sub_id: String, filters: [NostrFilter], handler: @escaping (RelayURL, NostrConnectionEvent) -> (), to: [RelayURL]? = nil) {
         Task {
             await register_handler(sub_id: sub_id, handler: handler)
-            send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to)
+            // When the caller specifies no relays, it is implied that the user wants to use the ones in the user relay list. Skip ephemeral relays in that case.
+            // When the caller specifies specific relays, do not skip ephemeral relays to respect the exact list given by the caller.
+            let shouldSkipEphemeralRelays = to == nil ? true : false
+            send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to, skip_ephemeral: shouldSkipEphemeralRelays)
         }
     }
     

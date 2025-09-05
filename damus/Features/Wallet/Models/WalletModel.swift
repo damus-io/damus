@@ -11,11 +11,24 @@ enum WalletConnectState {
     case new(WalletConnectURL)
     case existing(WalletConnectURL)
     case none
+    
+    /// Gets the currently connected NWC URL
+    func currentNwcUrl() -> WalletConnectURL? {
+        switch self {
+        case .new:
+            return nil  // User has not confirmed they want to use this yet, so we cannot call it "current"
+        case .existing(let nwcUrl):
+            return nwcUrl
+        case .none:
+            return nil
+        }
+    }
 }
 
 /// Models and manages the user's NWC wallet based on the app's settings
 class WalletModel: ObservableObject {
     var settings: UserSettingsStore
+    var nostrNetwork: NostrNetworkManager? = nil
     private(set) var previous_state: WalletConnectState
     var initial_percent: Int
     /// The wallet's balance, in sats.
@@ -37,6 +50,7 @@ class WalletModel: ObservableObject {
         self.previous_state = .none
         self.settings = settings
         self.initial_percent = settings.donation_percent
+        self.nostrNetwork = nil
     }
     
     init(settings: UserSettingsStore) {
@@ -50,6 +64,7 @@ class WalletModel: ObservableObject {
             self.connect_state = .none
         }
         self.initial_percent = settings.donation_percent
+        self.nostrNetwork = nil
     }
     
     func cancel() {
@@ -96,11 +111,113 @@ class WalletModel: ObservableObject {
         }
     }
     
+    
+    // MARK: - Wallet internal state lifecycle functions
+    
+    @MainActor
     func resetWalletStateInformation() {
         self.transactions = nil
         self.balance = nil
     }
     
+    
+    func refreshWalletInformation() async throws {
+        await self.resetWalletStateInformation()
+        try await loadWalletInformation()
+    }
+    
+    func loadWalletInformation() async throws {
+        try await loadBalance()
+        try await loadTransactionList()
+    }
+    
+    func loadBalance() async throws {
+        let balance = try await fetchBalance()
+        DispatchQueue.main.async {
+            self.balance = balance
+        }
+    }
+    
+    func loadTransactionList() async throws {
+        let transactions = try await fetchTransactions(from: nil, until: nil, limit: 50, offset: 0, unpaid: false, type: "")
+        DispatchQueue.main.async {
+            self.transactions = transactions
+        }
+    }
+    
+    // MARK: - Easy wallet info fetching interface
+    
+    func fetchTransactions(from: UInt64?, until: UInt64?, limit: Int?, offset: Int?, unpaid: Bool?, type: String?) async throws -> [WalletConnect.Transaction] {
+        let response = try await self.request(.getTransactionList(from: from, until: until, limit: limit, offset: offset, unpaid: unpaid, type: type))
+        guard case .list_transactions(let transactionResponse) = response else { throw FetchError.responseMismatch }
+        return transactionResponse.transactions
+    }
+    
+    
+    /// Fetches the balance amount from the network and returns the amount in sats
+    func fetchBalance() async throws -> Int64 {
+        let response = try await self.request(.getBalance)
+        guard case .get_balance(let balanceResponse) = response else { throw FetchError.responseMismatch }
+        return balanceResponse.balance / 1000
+    }
+    
+    enum FetchError: Error {
+        case responseMismatch
+    }
+    
+    // MARK: - Easy request/response interface
+    
+    func request(_ request: WalletConnect.Request, timeout: Duration = .seconds(10)) async throws(WalletRequestError) -> WalletConnect.Response.Result {
+        guard let nostrNetwork else { throw .notConnectedToTheNostrNetwork }
+        guard let currentNwcUrl = self.connect_state.currentNwcUrl() else { throw .noConnectedWallet }
+        guard let requestEvent = request.to_nostr_event(to_pk: currentNwcUrl.pubkey, keypair: currentNwcUrl.keypair) else { throw .errorFormattingRequest }
+
+        let responseFilters = [
+            NostrFilter(
+                kinds: [.nwc_response],
+                referenced_ids: [requestEvent.id],
+                pubkeys: [currentNwcUrl.keypair.pubkey],
+                authors: [currentNwcUrl.pubkey]
+            )
+        ]
+        
+        nostrNetwork.send(event: requestEvent, to: [currentNwcUrl.relay], skipEphemeralRelays: false)
+        for await item in nostrNetwork.reader.subscribe(filters: responseFilters, to: [currentNwcUrl.relay], timeout: timeout) {
+            switch item {
+            case .event(borrow: let borrow):
+                var responseEvent: NostrEvent? = nil
+                try? borrow { ev in responseEvent = ev.toOwned() }
+                guard let responseEvent else { throw .internalError }
+                
+                let fullWalletResponse: WalletConnect.FullWalletResponse
+                do { fullWalletResponse = try WalletConnect.FullWalletResponse(from: responseEvent, nwc: currentNwcUrl) }
+                catch { throw WalletRequestError.walletResponseDecodingError(error) }
+                
+                guard fullWalletResponse.req_id == requestEvent.id else { continue }    // Our filters may match other responses
+                if let responseError = fullWalletResponse.response.error { throw .walletResponseError(responseError) }
+                
+                guard let result = fullWalletResponse.response.result else { throw .walletEmptyResponse }
+                return result
+            case .eose:
+                continue
+            }
+        }
+        do { try Task.checkCancellation() } catch { throw .cancelled }
+        throw .responseTimeout
+    }
+    
+    enum WalletRequestError: Error {
+        case notConnectedToTheNostrNetwork
+        case noConnectedWallet
+        case errorFormattingRequest
+        case internalError
+        case walletResponseDecodingError(WalletConnect.FullWalletResponse.InitializationError)
+        case walletResponseMismatch
+        case walletResponseError(WalletConnect.WalletResponseErr)
+        case walletEmptyResponse
+        case responseTimeout
+        case cancelled
+    }
     
     // MARK: - Async wallet response waiting mechanism
     

@@ -72,7 +72,9 @@ class DamusState: HeadlessDamusState {
         self.favicon_cache = FaviconCache()
 
         let networkManagerDelegate = NostrNetworkManagerDelegate(settings: settings, contacts: contacts, ndb: ndb, keypair: keypair, relayModelCache: relay_model_cache, relayFilters: relay_filters)
-        self.nostrNetwork = NostrNetworkManager(delegate: networkManagerDelegate)
+        let nostrNetwork = NostrNetworkManager(delegate: networkManagerDelegate)
+        self.nostrNetwork = nostrNetwork
+        self.wallet.nostrNetwork = nostrNetwork
     }
     
     @MainActor
@@ -122,7 +124,7 @@ class DamusState: HeadlessDamusState {
             events: EventCache(ndb: ndb),
             bookmarks: BookmarksManager(pubkey: pubkey),
             replies: ReplyCounter(our_pubkey: pubkey),
-            wallet: WalletModel(settings: settings),
+            wallet: WalletModel(settings: settings), // nostrNetwork is connected after initialization
             nav: navigationCoordinator,
             music: MusicController(onChange: { _ in }),
             video: DamusVideoCoordinator(),
