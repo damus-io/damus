@@ -22,8 +22,8 @@ struct FavoriteButtonView: View {
                 )
             favorite.toggle()
         }) {
-            Image(favorite ? "star.fill" : "star")
-                .foregroundColor(favorite ? .green : .primary)
+            Image(favorite ? "heart.fill" : "heart")
+                .foregroundColor(favorite ? DamusColors.purple : .primary)
                 .font(.system(size: 16, weight: .medium))
         }
         .buttonStyle(PlainButtonStyle())

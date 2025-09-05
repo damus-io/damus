@@ -83,8 +83,8 @@ struct ProfileActionSheetView: View {
                     favorite = damus_state.contactCards.isFavorite(profile.pubkey)
                 },
                 label: {
-                    Image("star")
-                        .foregroundColor(favorite ? .green : .primary)
+                    Image("heart.fill")
+                        .foregroundColor(favorite ? DamusColors.deepPurple : .primary)
                         .profile_button_style(scheme: colorScheme)
                 }
             )
