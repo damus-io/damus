@@ -14,10 +14,11 @@ enum FilterState : Int {
     case posts_and_replies = 1
     case conversations = 2
     case follow_list = 3
+    case favorites
 
     func filter(ev: NostrEvent) -> Bool {
         switch self {
-        case .posts:
+        case .posts, .favorites:
             return ev.known_kind == .boost || ev.known_kind == .highlight || !ev.is_reply()
         case .posts_and_replies:
             return true

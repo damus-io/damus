@@ -30,10 +30,10 @@ struct InnerTimelineView: View {
     var body: some View {
         LazyVStack(spacing: 0) {
             let events = self.events.events
-            if events.isEmpty {
+            let evs = events.filter(filter)
+            if evs.isEmpty {
                 EmptyTimelineView()
             } else {
-                let evs = events.filter(filter)
                 let indexed = Array(zip(evs, 0...))
                 ForEach(indexed, id: \.0.id) { tup in
                     let ev = tup.0
