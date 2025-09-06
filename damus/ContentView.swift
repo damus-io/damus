@@ -174,7 +174,7 @@ struct ContentView: View {
                 }
                 
             case .home:
-                PostingTimelineView(damus_state: damus_state!, home: home, isSideBarOpened: $isSideBarOpened, active_sheet: $active_sheet, headerOffset: $headerOffset)
+                PostingTimelineView(damus_state: damus_state!, home: home, homeEvents: home.events, isSideBarOpened: $isSideBarOpened, active_sheet: $active_sheet, headerOffset: $headerOffset)
                 
             case .notifications:
                 NotificationsView(state: damus, notifications: home.notifications, subtitle: $menu_subtitle)

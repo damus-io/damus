@@ -11,6 +11,8 @@ struct PostingTimelineView: View {
     
     let damus_state: DamusState
     @ObservedObject var home: HomeModel
+    /// Set this to `home.events`. This is separate from `home` because we need the events object to be directly observed so that we get instant view updates
+    @ObservedObject var homeEvents: EventHolder
     @State var search: String = ""
     @State var results: [NostrEvent] = []
     @State var initialOffset: CGFloat?
@@ -44,53 +46,75 @@ struct PostingTimelineView: View {
         TimelineView<AnyView>(events: home.events, loading: self.loading, headerHeight: $headerHeight, headerOffset: $headerOffset, damus: damus_state, show_friend_icon: false, filter: filter)
     }
     
-    func HeaderView()->some View {
+    func HeaderView() -> some View {
         VStack {
-            VStack(spacing: 0) {
-                // This is needed for the Dynamic Island
-                HStack {}
-                .frame(height: getSafeAreaTop())
-                
-                HStack(alignment: .top) {
-                    TopbarSideMenuButton(damus_state: damus_state, isSideBarOpened: $isSideBarOpened)
+            VStack {
+                VStack(spacing: 0) {
+                    // This is needed for the Dynamic Island
+                    HStack {}
+                        .frame(height: getSafeAreaTop())
                     
-                    Spacer()
-                    
-                    Image("damus-home")
-                        .resizable()
-                        .frame(width:30,height:30)
-                        .shadow(color: DamusColors.purple, radius: 2)
-                        .opacity(isSideBarOpened ? 0 : 1)
-                        .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
-                        .onTapGesture {
-                            isSideBarOpened.toggle()
+                    HStack(alignment: .top) {
+                        TopbarSideMenuButton(damus_state: damus_state, isSideBarOpened: $isSideBarOpened)
+                        
+                        Spacer()
+                        
+                        Image("damus-home")
+                            .resizable()
+                            .frame(width:30,height:30)
+                            .shadow(color: DamusColors.purple, radius: 2)
+                            .opacity(isSideBarOpened ? 0 : 1)
+                            .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
+                            .onTapGesture {
+                                isSideBarOpened.toggle()
+                            }
+                            .padding(.leading)
+                        
+                        Spacer()
+                        
+                        HStack(alignment: .center) {
+                            SignalView(state: damus_state, signal: home.signal)
                         }
-                        .padding(.leading)
-                    
-                    Spacer()
-                    
-                    HStack(alignment: .center) {
-                        SignalView(state: damus_state, signal: home.signal)
                     }
+                    .frame(maxWidth: .infinity, alignment: .trailing)
                 }
-                .frame(maxWidth: .infinity, alignment: .trailing)
-            }
-            .padding(.horizontal, 20)
-            
-            VStack(spacing: 0) {
-                CustomPicker(tabs: [
-                    (NSLocalizedString("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies)."), FilterState.posts),
-                    (NSLocalizedString("Notes & Replies", comment: "Label for filter for seeing notes and replies (instead of only notes)."), FilterState.posts_and_replies)
-                ],
-                             selection: $filter_state)
+                .padding(.horizontal, 20)
                 
-                Divider()
-                    .frame(height: 1)
+                VStack(spacing: 0) {
+                    CustomPicker(tabs: [
+                        (NSLocalizedString("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies)."), FilterState.posts),
+                        (NSLocalizedString("Notes & Replies", comment: "Label for filter for seeing notes and replies (instead of only notes)."), FilterState.posts_and_replies)
+                    ],
+                                 selection: $filter_state)
+                    
+                    Divider()
+                        .frame(height: 1)
+                }
             }
-        }
-        .background {
-            DamusColors.adaptableWhite
-                .ignoresSafeArea()
+            .background {
+                DamusColors.adaptableWhite
+                    .ignoresSafeArea()
+            }
+            
+            if homeEvents.incoming.count > 0 {
+                Button(
+                    action: {
+                        notify(.scroll_to_top)
+                    },
+                    label: {
+                        HStack(spacing: 6) {
+                            CondensedProfilePicturesView(state: damus_state, pubkeys: homeEvents.incoming.map({ $0.pubkey }), maxPictures: 3)
+                                .scaleEffect(0.75)
+                            Text("Load new content", comment: "Button to load new notes in the timeline")
+                                .bold()
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                    }
+                )
+                .buttonStyle(NeutralButtonStyle(cornerRadius: 50))
+                .padding(.vertical, 10)
+            }
         }
     }
 
