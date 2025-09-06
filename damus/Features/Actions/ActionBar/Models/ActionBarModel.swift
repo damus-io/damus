@@ -58,7 +58,7 @@ class ActionBarModel: ObservableObject {
         self.our_zap = damus.zaps.our_zaps[evid]?.first
         self.our_reply = damus.replies.our_reply(evid)
         self.our_quote_repost = damus.quote_reposts.our_events[evid]
-        self.relays = (damus.nostrNetwork.pool.seen[evid] ?? []).count
+        self.relays = (damus.nostrNetwork.relayURLsThatSawNote(id: evid) ?? []).count
         self.objectWillChange.send()
     }
     

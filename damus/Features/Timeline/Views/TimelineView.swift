@@ -95,9 +95,10 @@ struct TimelineView<Content: View>: View {
                     }
             }
             .coordinateSpace(name: "scroll")
+            .disabled(self.loading)
             .onReceive(handle_notify(.scroll_to_top)) { () in
                 events.flush()
-                self.events.should_queue = false
+                self.events.set_should_queue(false)
                 scroll_to_event(scroller: scroller, id: "startblock", delay: 0.0, animate: true, anchor: .top)
             }
         }
@@ -122,11 +123,8 @@ protocol ScrollQueue {
     
 func handle_scroll_queue(_ proxy: GeometryProxy, queue: ScrollQueue) {
     let offset = -proxy.frame(in: .named("scroll")).origin.y
-    guard offset >= 0 else {
-        return
-    }
-    let val = offset > 0
-    if queue.should_queue != val {
-        queue.set_should_queue(val)
+    let new_should_queue = offset > 0
+    if queue.should_queue != new_should_queue {
+        queue.set_should_queue(new_should_queue)
     }
 }

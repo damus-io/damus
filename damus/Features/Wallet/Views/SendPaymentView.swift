@@ -45,11 +45,11 @@ struct SendPaymentView: View {
                 break
             case .completed:
                 // Refresh wallet to reflect new balance after payment
-                Task { await WalletConnect.refresh_wallet_information(damus_state: damus_state) }
+                Task { try await model.refreshWalletInformation() }
             case .failed:
                 // Even when a wallet says it has failed, update balance just in case it is a false negative,
                 // This might prevent the user from accidentally sending a payment twice in case of a bug.
-                Task { await WalletConnect.refresh_wallet_information(damus_state: damus_state) }
+                Task { try await model.refreshWalletInformation() }
             }
         }
     }
@@ -185,7 +185,7 @@ struct SendPaymentView: View {
                     sendState = .processing
                     
                     // Process payment
-                    guard let payRequestEv = WalletConnect.pay(url: nwc, pool: damus_state.nostrNetwork.pool, post: damus_state.nostrNetwork.postbox, invoice: invoice.string, zap_request: nil, delay: nil) else {
+                    guard let payRequestEv = damus_state.nostrNetwork.nwcPay(url: nwc, post: damus_state.nostrNetwork.postbox, invoice: invoice.string, zap_request: nil) else {
                         sendState = .failed(error: .init(
                             user_visible_description: NSLocalizedString("The payment request could not be made to your wallet provider.", comment: "A human-readable error message"),
                             tip: NSLocalizedString("Check if your wallet looks configured correctly and try again. If the error persists, please contact support.", comment: "A human-readable tip for an error when a payment request cannot be made to a wallet."),

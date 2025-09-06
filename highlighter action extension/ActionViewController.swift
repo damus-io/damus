@@ -164,7 +164,7 @@ struct ShareExtensionView: View {
                 break
             case .active:
                 print("txn: 📙 HIGHLIGHTER ACTIVE")
-                state.nostrNetwork.pool.ping()
+                state.nostrNetwork.ping()
             @unknown default:
                 break
             }

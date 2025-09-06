@@ -61,7 +61,7 @@ struct EventDetailBar: View {
             }
 
             if bar.relays > 0 {
-                let relays = Array(state.nostrNetwork.pool.seen[target] ?? [])
+                let relays = Array(state.nostrNetwork.relayURLsThatSawNote(id: target) ?? [])
                 NavigationLink(value: Route.UserRelays(relays: relays)) {
                     let nounString = pluralizedString(key: "relays_count", count: bar.relays)
                     let noun = Text(nounString).foregroundColor(.gray)

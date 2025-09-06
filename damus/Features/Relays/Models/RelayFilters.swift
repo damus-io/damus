@@ -84,9 +84,3 @@ func load_relay_filters(_ pubkey: Pubkey) -> Set<RelayFilter>? {
         s.insert(filter)
     }
 }
-
-func determine_to_relays(pool: RelayPool, filters: RelayFilters) -> [RelayURL] {
-    return pool.our_descriptors
-        .map { $0.url }
-        .filter { !filters.is_filtered(timeline: .search, relay_id: $0) }
-}

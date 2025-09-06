@@ -60,7 +60,7 @@ class PostBox {
     init(pool: RelayPool) {
         self.pool = pool
         self.events = [:]
-        pool.register_handler(sub_id: "postbox", handler: handle_event)
+        Task { await pool.register_handler(sub_id: "postbox", handler: handle_event) }
     }
     
     // only works reliably on delay-sent events
