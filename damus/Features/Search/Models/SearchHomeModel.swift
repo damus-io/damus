@@ -53,13 +53,8 @@ class SearchHomeModel: ObservableObject {
         
         outerLoop: for await item in damus_state.nostrNetwork.reader.subscribe(filters: [get_base_filter(), follow_list_filter], to: to_relays) {
             switch item {
-            case .event(let borrow):
-                var event: NostrEvent? = nil
-                try? borrow { ev in
-                    event = ev.toOwned()
-                }
-                guard let event else { return }
-                await self.handleEvent(event)
+            case .event(let lender):
+                await lender.justUseACopy({ await self.handleEvent($0) })
             case .eose:
                 break outerLoop
             }
@@ -136,15 +131,12 @@ func load_profiles<Y>(context: String, load: PubkeysToLoad, damus_state: DamusSt
         for await item in damus_state.nostrNetwork.reader.subscribe(filters: [filter]) {
             let now = UInt64(Date.now.timeIntervalSince1970)
             switch item {
-            case .event(let borrow):
-                var event: NostrEvent? = nil
-                try? borrow { ev in
-                    event = ev.toOwned()
-                }
-                guard let event else { return }
-                if event.known_kind == .metadata {
-                    damus_state.ndb.write_profile_last_fetched(pubkey: event.pubkey, fetched_at: now)
-                }
+            case .event(let lender):
+                lender.justUseACopy({ event in
+                    if event.known_kind == .metadata {
+                        damus_state.ndb.write_profile_last_fetched(pubkey: event.pubkey, fetched_at: now)
+                    }
+                })
             case .eose:
                 break
             }

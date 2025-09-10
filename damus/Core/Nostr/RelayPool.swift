@@ -219,9 +219,10 @@ class RelayPool {
     /// - Parameters:
     ///   - filters: The filters specifying the desired content.
     ///   - desiredRelays: The desired relays which to subsctibe to. If `nil`, it defaults to the `RelayPool`'s default list
-    ///   - eoseTimeout: The maximum timeout which to give up waiting for the eoseSignal, in seconds
+    ///   - eoseTimeout: The maximum timeout which to give up waiting for the eoseSignal
     /// - Returns: Returns an async stream that callers can easily consume via a for-loop
-    func subscribe(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, eoseTimeout: TimeInterval = 10) -> AsyncStream<StreamItem> {
+    func subscribe(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, eoseTimeout: Duration? = nil) -> AsyncStream<StreamItem> {
+        let eoseTimeout = eoseTimeout ?? .seconds(10)
         let desiredRelays = desiredRelays ?? self.relays.map({ $0.descriptor.url })
         return AsyncStream<StreamItem> { continuation in
             let sub_id = UUID().uuidString
@@ -255,7 +256,7 @@ class RelayPool {
                 }
             }, to: desiredRelays)
             Task {
-                try? await Task.sleep(nanoseconds: 1_000_000_000 * UInt64(eoseTimeout))
+                try? await Task.sleep(for: eoseTimeout)
                 if !eoseSent { continuation.yield(with: .success(.eose)) }
             }
             continuation.onTermination = { @Sendable _ in

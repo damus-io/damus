@@ -28,27 +28,16 @@ struct EventLoaderView<Content: View>: View {
         self.loadingTask?.cancel()
     }
     
-    func subscribe(filters: [NostrFilter]) {
+    func subscribe() {
         self.loadingTask?.cancel()
         self.loadingTask = Task {
-            for await item in await damus_state.nostrNetwork.reader.subscribe(filters: filters) {
-                switch item {
-                case .event(let borrow):
-                    try? borrow { ev in
-                        event = ev.toOwned()
-                    }
-                    break
-                case .eose:
-                    break
-                }
-            }
+            let lender = try? await damus_state.nostrNetwork.reader.lookup(noteId: self.event_id)
+            lender?.justUseACopy({ event = $0 })
         }
     }
     
     func load() {
-        subscribe(filters: [
-            NostrFilter(ids: [self.event_id], limit: 1)
-        ])
+        subscribe()
     }
     
     var body: some View {

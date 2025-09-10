@@ -66,16 +66,11 @@ class NIP05DomainEventsModel: ObservableObject {
         
         for await item in state.nostrNetwork.reader.subscribe(filters: [filter]) {
             switch item {
-            case .event(borrow: let borrow):
-                var event: NostrEvent? = nil
-                try? borrow { ev in
-                    event = ev.toOwned()
-                    guard let txn = NdbTxn(ndb: state.ndb) else { return }
-                    load_profiles(context: "search", load: .from_events(self.events.all_events), damus_state: state, txn: txn)
-                }
-                guard let event else { return }
-                await self.add_event(event)
+            case .event(let lender):
+                await lender.justUseACopy({ await self.add_event($0) })
             case .eose:
+                guard let txn = NdbTxn(ndb: state.ndb) else { return }
+                load_profiles(context: "search", load: .from_events(self.events.all_events), damus_state: state, txn: txn)
                 DispatchQueue.main.async { self.loading = false }
                 continue
             }

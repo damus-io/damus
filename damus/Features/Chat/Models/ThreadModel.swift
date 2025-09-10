@@ -117,10 +117,8 @@ class ThreadModel: ObservableObject {
             Log.info("subscribing to thread %s ", for: .render, original_event.id.hex())
             for await item in damus_state.nostrNetwork.reader.subscribe(filters: base_filters + meta_filters) {
                 switch item {
-                case .event(let borrow):
-                    try? borrow { event in
-                        handle_event(ev: event.toOwned())
-                    }
+                case .event(let lender):
+                    lender.justUseACopy({ handle_event(ev: $0) })
                 case .eose:
                     guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
                     load_profiles(context: "thread", load: .from_events(Array(event_map.events)), damus_state: damus_state, txn: txn)

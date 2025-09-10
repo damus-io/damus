@@ -38,12 +38,10 @@ class FollowersModel: ObservableObject {
         let filters = [filter]
         self.listener?.cancel()
         self.listener = Task {
-            for await item in await damus_state.nostrNetwork.reader.subscribe(filters: filters) {
+            for await item in damus_state.nostrNetwork.reader.subscribe(filters: filters) {
                 switch item {
-                case .event(let borrow):
-                    try? borrow { event in
-                        self.handle_event(ev: event.toOwned())
-                    }
+                case .event(let lender):
+                    lender.justUseACopy({ self.handle_event(ev: $0) })
                 case .eose:
                     guard let txn = NdbTxn(ndb: self.damus_state.ndb) else { return }
                     load_profiles(txn: txn)
@@ -82,10 +80,8 @@ class FollowersModel: ObservableObject {
         self.profilesListener = Task {
             for await item in await damus_state.nostrNetwork.reader.subscribe(filters: [filter]) {
                 switch item {
-                case .event(let borrow):
-                    try? borrow { event in
-                        self.handle_event(ev: event.toOwned())
-                    }
+                case .event(let lender):
+                    lender.justUseACopy({ self.handle_event(ev: $0) })
                 case .eose: break
                 }
             }

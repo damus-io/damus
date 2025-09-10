@@ -78,10 +78,8 @@ class ProfileModel: ObservableObject, Equatable {
             text_filter.limit = 500
             for await item in damus.nostrNetwork.reader.subscribe(filters: [text_filter]) {
                 switch item {
-                case .event(let borrow):
-                    try? borrow { event in
-                        handleNostrEvent(event.toOwned())
-                    }
+                case .event(let lender):
+                    lender.justUseACopy({ handleNostrEvent($0) })
                 case .eose: break
                 }
             }
@@ -96,10 +94,8 @@ class ProfileModel: ObservableObject, Equatable {
             profile_filter.authors = [pubkey]
             for await item in damus.nostrNetwork.reader.subscribe(filters: [profile_filter, relay_list_filter]) {
                 switch item {
-                case .event(let borrow):
-                    try? borrow { event in
-                        handleNostrEvent(event.toOwned())
-                    }
+                case .event(let lender):
+                    lender.justUseACopy({ handleNostrEvent($0) })
                 case .eose: break
                 }
             }
@@ -129,8 +125,8 @@ class ProfileModel: ObservableObject, Equatable {
         print("subscribing to conversation events from and to profile \(pubkey)")
         for await item in self.damus.nostrNetwork.reader.subscribe(filters: [conversations_filter_them, conversations_filter_us]) {
             switch item {
-            case .event(borrow: let borrow):
-                try? borrow { ev in
+            case .event(let lender):
+                try? lender.borrow { ev in
                     if !seen_event.contains(ev.id) {
                         let event = ev.toOwned()
                         Task { await self.add_event(event) }
@@ -210,8 +206,8 @@ class ProfileModel: ObservableObject, Equatable {
         self.findRelaysListener = Task {
             for await item in await damus.nostrNetwork.reader.subscribe(filters: [profile_filter]) {
                 switch item {
-                case .event(let borrow):
-                    try? borrow { event in
+                case .event(let lender):
+                    try? lender.borrow { event in
                         if case .contacts = event.known_kind {
                             // TODO: Is this correct?
                             self.legacy_relay_list = decode_json_relays(event.content)

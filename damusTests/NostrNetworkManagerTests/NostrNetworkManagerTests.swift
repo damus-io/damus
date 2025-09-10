@@ -47,8 +47,8 @@ class NostrNetworkManagerTests: XCTestCase {
         Task {
             for await item in self.damusState!.nostrNetwork.reader.subscribe(filters: [filter]) {
                 switch item {
-                case .event(borrow: let borrow):
-                    try? borrow { event in
+                case .event(let lender):
+                    try? lender.borrow { event in
                         receivedCount += 1
                         if eventIds.contains(event.id) {
                             XCTFail("Got duplicate event ID: \(event.id) ")

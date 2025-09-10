@@ -194,9 +194,9 @@ class SuggestedUsersViewModel: ObservableObject {
             guard !Task.isCancelled else { break }
 
             switch item {
-            case .event(let borrow):
-                try? borrow { event in
-                    let followPack = FollowPackEvent.parse(from: event.toOwned())
+            case .event(let lender):
+                lender.justUseACopy({ event in
+                    let followPack = FollowPackEvent.parse(from: event)
                     
                     guard let id = followPack.uuid else { return }
                     
@@ -209,7 +209,7 @@ class SuggestedUsersViewModel: ObservableObject {
                     }
                     
                     packsById[id] = latestPackForThisId
-                }
+                })
             case .eose:
                 break
             }

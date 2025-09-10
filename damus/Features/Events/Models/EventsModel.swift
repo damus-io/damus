@@ -73,16 +73,13 @@ class EventsModel: ObservableObject {
             DispatchQueue.main.async { self.loading = true }
             outerLoop: for await item in state.nostrNetwork.reader.subscribe(filters: [get_filter()]) {
                 switch item {
-                case .event(let borrow):
-                    var event: NostrEvent? = nil
-                    try? borrow { ev in
-                        event = ev.toOwned()
-                    }
-                    guard let event else { return }
+                case .event(let lender):
                     Task {
-                        if await events.insert(event) {
-                            DispatchQueue.main.async { self.objectWillChange.send() }
-                        }
+                        await lender.justUseACopy({ event in
+                            if await events.insert(event) {
+                                DispatchQueue.main.async { self.objectWillChange.send() }
+                            }
+                        })
                     }
                 case .eose:
                     DispatchQueue.main.async { self.loading = false }

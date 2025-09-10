@@ -453,13 +453,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
             let filter = NostrFilter(kinds: [.contacts], limit: 1, authors: [damus_state.pubkey])
             for await item in damus_state.nostrNetwork.reader.subscribe(filters: [filter]) {
                 switch item {
-                case .event(let borrow):
-                    var event: NostrEvent? = nil
-                    try? borrow { ev in
-                        event = ev.toOwned()
-                    }
-                    guard let event else { return }
-                    await process_event(ev: event, context: .initialContactList)
+                case .event(let lender):
+                    await lender.justUseACopy({ await process_event(ev: $0, context: .initialContactList) })
                     continue
                 case .eose:
                     if !done_init {
@@ -476,13 +471,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
             let relayListFilter = NostrFilter(kinds: [.relay_list], limit: 1, authors: [damus_state.pubkey])
             for await item in damus_state.nostrNetwork.reader.subscribe(filters: [relayListFilter]) {
                 switch item {
-                case .event(let borrow):
-                    var event: NostrEvent? = nil
-                    try? borrow { ev in
-                        event = ev.toOwned()
-                    }
-                    guard let event else { return }
-                    await process_event(ev: event, context: .initialRelayList)
+                case .event(let lender):
+                    await lender.justUseACopy({ await process_event(ev: $0, context: .initialRelayList) })
                 case .eose: break
                 }
             }
@@ -545,13 +535,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
         self.contactsHandlerTask = Task {
             for await item in damus_state.nostrNetwork.reader.subscribe(filters: contacts_filters) {
                 switch item {
-                case .event(let borrow):
-                    var event: NostrEvent? = nil
-                    try? borrow { ev in
-                        var event = ev.toOwned()
-                    }
-                    guard let event else { return }
-                    await self.process_event(ev: event, context: .contacts)
+                case .event(let lender):
+                    await lender.justUseACopy({ await process_event(ev: $0, context: .contacts) })
                 case .eose: continue
                 }
             }
@@ -560,13 +545,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
         self.notificationsHandlerTask = Task {
             for await item in damus_state.nostrNetwork.reader.subscribe(filters: notifications_filters) {
                 switch item {
-                case .event(let borrow):
-                    var event: NostrEvent? = nil
-                    try? borrow { ev in
-                        event = ev.toOwned()
-                    }
-                    guard let theEvent = event else { return }
-                    await self.process_event(ev: theEvent, context: .notifications)
+                case .event(let lender):
+                    await lender.justUseACopy({ await process_event(ev: $0, context: .notifications) })
                 case .eose:
                     guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
                     load_profiles(context: "notifications", load: .from_keys(notifications.uniq_pubkeys()), damus_state: damus_state, txn: txn)
@@ -577,13 +557,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
         self.dmsHandlerTask = Task {
             for await item in damus_state.nostrNetwork.reader.subscribe(filters: dms_filters) {
                 switch item {
-                case .event(let borrow):
-                    var event: NostrEvent? = nil
-                    try? borrow { ev in
-                        event = ev.toOwned()
-                    }
-                    guard let event else { return }
-                    await self.process_event(ev: event, context: .dms)
+                case .event(let lender):
+                    await lender.justUseACopy({ await process_event(ev: $0, context: .dms) })
                 case .eose:
                     guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
                     var dms = dms.dms.flatMap { $0.events }
@@ -602,13 +577,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
                 filter.limit = 0
                 for await item in damus_state.nostrNetwork.reader.subscribe(filters: [filter], to: [nwc.relay]) {
                     switch item {
-                    case .event(let borrow):
-                        var event: NostrEvent? = nil
-                        try? borrow { ev in
-                            event = ev.toOwned()
-                        }
-                        guard let event else { return }
-                        await self.process_event(ev: event, context: .nwc)
+                    case .event(let lender):
+                        await lender.justUseACopy({ await process_event(ev: $0, context: .nwc) })
                     case .eose: continue
                     }
                 }
@@ -663,13 +633,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
             }
             for await item in damus_state.nostrNetwork.reader.subscribe(filters: home_filters) {
                 switch item {
-                case .event(let borrow):
-                    var event: NostrEvent? = nil
-                    try? borrow { ev in
-                        event = ev.toOwned()
-                    }
-                    guard let event else { return }
-                    await self.process_event(ev: event, context: .home)
+                case .event(let lender):
+                    await lender.justUseACopy({ await process_event(ev: $0, context: .home) })
                 case .eose:
                     guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
                     DispatchQueue.main.async {

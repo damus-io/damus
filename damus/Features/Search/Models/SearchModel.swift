@@ -47,20 +47,13 @@ class SearchModel: ObservableObject {
             }
             print("subscribing to search")
             try Task.checkCancellation()
-            outerLoop: for await item in await state.nostrNetwork.reader.subscribe(filters: [search]) {
-                try Task.checkCancellation()
-                switch item {
-                case .event(let borrow):
-                    try? borrow { ev in
-                        let event = ev.toOwned()
-                        if event.is_textlike && event.should_show_event {
-                            Task { await self.add_event(event) }
-                        }
-                    }
-                case .eose:
-                    break outerLoop
+            let events = await state.nostrNetwork.reader.query(filters: [search])
+            for event in events {
+                if event.is_textlike && event.should_show_event {
+                    await self.add_event(event)
                 }
             }
+            
             guard let txn = NdbTxn(ndb: state.ndb) else { return }
             try Task.checkCancellation()
             load_profiles(context: "search", load: .from_events(self.events.all_events), damus_state: state, txn: txn)

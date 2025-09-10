@@ -184,10 +184,8 @@ class WalletModel: ObservableObject {
         nostrNetwork.send(event: requestEvent, to: [currentNwcUrl.relay], skipEphemeralRelays: false)
         for await item in nostrNetwork.reader.subscribe(filters: responseFilters, to: [currentNwcUrl.relay], timeout: timeout) {
             switch item {
-            case .event(borrow: let borrow):
-                var responseEvent: NostrEvent? = nil
-                try? borrow { ev in responseEvent = ev.toOwned() }
-                guard let responseEvent else { throw .internalError }
+            case .event(let lender):
+                guard let responseEvent = try? lender.getCopy() else { throw .internalError }
                 
                 let fullWalletResponse: WalletConnect.FullWalletResponse
                 do { fullWalletResponse = try WalletConnect.FullWalletResponse(from: responseEvent, nwc: currentNwcUrl) }

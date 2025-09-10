@@ -135,15 +135,15 @@ extension NostrNetworkManager {
             let filter = NostrFilter(kinds: [.relay_list], authors: [delegate.keypair.pubkey])
             for await item in self.reader.subscribe(filters: [filter]) {
                 switch item {
-                case .event(borrow: let borrow):                                                                // Signature validity already ensured at this point
+                case .event(let lender):                                                                // Signature validity already ensured at this point
                     let currentRelayListCreationDate = self.getUserCurrentRelayListCreationDate()
-                    try? borrow { note in
+                    try? lender.borrow({ note in
                         guard note.pubkey == self.delegate.keypair.pubkey else { return }               // Ensure this new list was ours
                         guard note.createdAt > (currentRelayListCreationDate ?? 0) else { return }      // Ensure this is a newer list
                         guard let relayList = try? NIP65.RelayList(event: note) else { return }         // Ensure it is a valid NIP-65 list
                         
                         try? self.set(userRelayList: relayList)                                         // Set the validated list
-                    }
+                    })
                 case .eose: continue
                 }
             }
