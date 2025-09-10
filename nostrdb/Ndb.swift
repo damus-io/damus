@@ -34,6 +34,8 @@ class Ndb {
     var generation: Int
     private var closed: Bool
     private var callbackHandler: Ndb.CallbackHandler
+    
+    private static let DEFAULT_WRITER_SCRATCH_SIZE: Int32 = 2097152;  // 2mb scratch size for the writer thread, it should match with the one specified in nostrdb.c
 
     var is_closed: Bool {
         self.closed || self.ndb.ndb == nil
@@ -111,7 +113,7 @@ class Ndb {
         let ok = path.withCString { testdir in
             var ok = false
             while !ok && mapsize > 1024 * 1024 * 700 {
-                var cfg = ndb_config(flags: 0, ingester_threads: ingest_threads, mapsize: mapsize, filter_context: nil, ingest_filter: nil, sub_cb_ctx: nil, sub_cb: nil)
+                var cfg = ndb_config(flags: 0, ingester_threads: ingest_threads, writer_scratch_buffer_size: DEFAULT_WRITER_SCRATCH_SIZE, mapsize: mapsize, filter_context: nil, ingest_filter: nil, sub_cb_ctx: nil, sub_cb: nil)
                 
                 // Here we hook up the global callback function for subscription callbacks.
                 // We do an "unretained" pass here because the lifetime of the callback handler is larger than the lifetime of the nostrdb monitor in the C code.
