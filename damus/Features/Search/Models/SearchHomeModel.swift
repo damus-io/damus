@@ -51,14 +51,10 @@ class SearchHomeModel: ObservableObject {
         var follow_list_filter = NostrFilter(kinds: [.follow_list])
         follow_list_filter.until = UInt32(Date.now.timeIntervalSince1970)
         
-        outerLoop: for await item in damus_state.nostrNetwork.reader.subscribe(filters: [get_base_filter(), follow_list_filter], to: to_relays) {
-            switch item {
-            case .event(let lender):
-                await lender.justUseACopy({ await self.handleEvent($0) })
-            case .eose:
-                break outerLoop
-            }
+        for await noteLender in damus_state.nostrNetwork.reader.streamNotesUntilEndOfStoredEvents(filters: [get_base_filter(), follow_list_filter], to: to_relays) {
+            await noteLender.justUseACopy({ await self.handleEvent($0) })
         }
+        
         DispatchQueue.main.async {
             self.loading = false
         }

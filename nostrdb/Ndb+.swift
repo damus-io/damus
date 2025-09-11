@@ -27,4 +27,13 @@ extension Ndb {
         }
         return try self.subscribe(filters: ndbFilters, maxSimultaneousResults: maxSimultaneousResults)
     }
+    
+    /// Determines if a given note was seen on any of the listed relay URLs
+    func was(noteKey: NoteKey, seenOnAnyOf relayUrls: [RelayURL], txn: SafeNdbTxn<()>? = nil) throws -> Bool {
+        return try self.was(noteKey: noteKey, seenOnAnyOf: relayUrls.map({ $0.absoluteString }), txn: txn)
+    }
+    
+    func process_event(_ str: String, originRelayURL: RelayURL? = nil) -> Bool {
+        self.process_event(str, originRelayURL: originRelayURL?.absoluteString)
+    }
 }

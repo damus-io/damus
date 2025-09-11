@@ -137,7 +137,13 @@ extension NostrNetworkManager {
                             case .event(let noteKey):
                                 let lender = NdbNoteLender(ndb: self.ndb, noteKey: noteKey)
                                 try Task.checkCancellation()
-                                continuation.yield(.event(lender: lender))
+                                guard let desiredRelays else {
+                                    continuation.yield(.event(lender: lender))  // If no desired relays are specified, return all notes we see.
+                                    break
+                                }
+                                if try ndb.was(noteKey: noteKey, seenOnAnyOf: desiredRelays) {
+                                    continuation.yield(.event(lender: lender))  // If desired relays were specified and this note was seen there, return it.
+                                }
                             }
                         }
                     }

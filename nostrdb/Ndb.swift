@@ -563,10 +563,20 @@ class Ndb {
         }
     }
 
-    func process_event(_ str: String) -> Bool {
+    func process_event(_ str: String, originRelayURL: String? = nil) -> Bool {
         guard !is_closed else { return false }
+        guard let originRelayURL else {
+            return str.withCString { cstr in
+                return ndb_process_event(ndb.ndb, cstr, Int32(str.utf8.count)) != 0
+            }
+        }
         return str.withCString { cstr in
-            return ndb_process_event(ndb.ndb, cstr, Int32(str.utf8.count)) != 0
+            return originRelayURL.withCString { originRelayCString in
+                let meta = UnsafeMutablePointer<ndb_ingest_meta>.allocate(capacity: 1)
+                defer { meta.deallocate() }
+                ndb_ingest_meta_init(meta, 0, originRelayCString)
+                return ndb_process_event_with(ndb.ndb, cstr, Int32(str.utf8.count), meta) != 0
+            }
         }
     }
 
@@ -805,6 +815,25 @@ class Ndb {
         }
     }
     
+    /// Determines if a given note was seen on a specific relay URL
+    func was(noteKey: NoteKey, seenOn relayUrl: String, txn: SafeNdbTxn<()>? = nil) throws -> Bool {
+        guard let txn = txn ?? SafeNdbTxn.new(on: self) else { throw NdbLookupError.cannotOpenTransaction }
+        return relayUrl.withCString({ relayCString in
+            return ndb_note_seen_on_relay(&txn.txn, noteKey, relayCString) == 1
+        })
+    }
+    
+    /// Determines if a given note was seen on any of the listed relay URLs
+    func was(noteKey: NoteKey, seenOnAnyOf relayUrls: [String], txn: SafeNdbTxn<()>? = nil) throws -> Bool {
+        guard let txn = txn ?? SafeNdbTxn.new(on: self) else { throw NdbLookupError.cannotOpenTransaction }
+        for relayUrl in relayUrls {
+            if try self.was(noteKey: noteKey, seenOn: relayUrl, txn: txn) {
+                return true
+            }
+        }
+        return false
+    }
+    
     // MARK: Internal ndb callback interfaces
     
     internal func setCallback(for subscriptionId: UInt64, callback: @escaping (NoteKey) -> Void) async {
@@ -893,6 +922,11 @@ extension Ndb {
         case streamError(NdbStreamError)
         case internalInconsistency
         case timeout
+        case notFound
+    }
+    
+    enum OperationError: Error {
+        case genericError
     }
 }
 
