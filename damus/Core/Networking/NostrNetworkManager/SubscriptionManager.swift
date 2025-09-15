@@ -134,9 +134,14 @@ extension NostrNetworkManager {
                 
                 // This closure function issues (yields) an EOSE signal to the stream if all relevant conditions are met
                 let yieldEOSEIfReady = {
+                    let connectedToNetwork = self.pool.network_monitor.currentPath.status == .satisfied
                     // In normal mode: Issuing EOSE requires EOSE from both NDB and the network, since they are all considered separate relays
                     // In experimental local relay model mode: Issuing EOSE requires only EOSE from NDB, since that is the only relay that "matters"
-                    let canIssueEOSE = self.experimentalLocalRelayModelSupport ? ndbEOSEIssued : ndbEOSEIssued && networkEOSEIssued
+                    let canIssueEOSE = self.experimentalLocalRelayModelSupport ?
+                    (ndbEOSEIssued)
+                    :
+                    (ndbEOSEIssued && (networkEOSEIssued || !connectedToNetwork))
+                    
                     if canIssueEOSE {
                         continuation.yield(.eose)
                     }

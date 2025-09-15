@@ -40,7 +40,7 @@ class RelayPool {
     var delegate: Delegate?
     private(set) var signal: SignalModel = SignalModel()
 
-    private let network_monitor = NWPathMonitor()
+    let network_monitor = NWPathMonitor()
     private let network_monitor_queue = DispatchQueue(label: "io.damus.network_monitor")
     private var last_network_status: NWPath.Status = .unsatisfied
     
