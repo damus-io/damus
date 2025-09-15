@@ -142,7 +142,7 @@ struct SaveKeysView: View {
             add_rw_relay(self.pool, relay)
         }
 
-        self.pool.register_handler(sub_id: "signup", handler: handle_event)
+        Task { await self.pool.register_handler(sub_id: "signup", handler: handle_event) }
 
         self.loading = true
         

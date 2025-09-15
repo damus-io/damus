@@ -95,4 +95,10 @@ class EventHolder: ObservableObject, ScrollQueue {
         
         self.incoming = []
     }
+    
+    @MainActor
+    func reset() {
+        self.incoming = []
+        self.events = []
+    }
 }

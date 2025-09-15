@@ -10,9 +10,11 @@ import Foundation
 /// The data model for the SearchHome view, typically something global-like
 class SearchHomeModel: ObservableObject {
     var events: EventHolder
+    var followPackEvents: EventHolder
     @Published var loading: Bool = false
 
     var seen_pubkey: Set<Pubkey> = Set()
+    var follow_pack_seen_pubkey: Set<Pubkey> = Set()
     let damus_state: DamusState
     let base_subid = UUID().description
     let follow_pack_subid = UUID().description
@@ -23,6 +25,9 @@ class SearchHomeModel: ObservableObject {
     init(damus_state: DamusState) {
         self.damus_state = damus_state
         self.events = EventHolder(on_queue: { ev in
+            preload_events(state: damus_state, events: [ev])
+        })
+        self.followPackEvents = EventHolder(on_queue: { ev in
             preload_events(state: damus_state, events: [ev])
         })
     }
@@ -40,6 +45,12 @@ class SearchHomeModel: ObservableObject {
         self.objectWillChange.send()
     }
     
+    @MainActor
+    func reload() async {
+        self.events.reset()
+        await self.load()
+    }
+    
     func load() async {
         DispatchQueue.main.async {
             self.loading = true
@@ -51,16 +62,23 @@ class SearchHomeModel: ObservableObject {
         var follow_list_filter = NostrFilter(kinds: [.follow_list])
         follow_list_filter.until = UInt32(Date.now.timeIntervalSince1970)
         
-        for await noteLender in damus_state.nostrNetwork.reader.streamNotesUntilEndOfStoredEvents(filters: [get_base_filter(), follow_list_filter], to: to_relays) {
+        for await noteLender in damus_state.nostrNetwork.reader.streamNotesUntilEndOfStoredEvents(filters: [follow_list_filter], to: to_relays) {
+            await noteLender.justUseACopy({ await self.handleFollowPackEvent($0) })
+        }
+        
+        for await noteLender in damus_state.nostrNetwork.reader.streamNotesUntilEndOfStoredEvents(filters: [get_base_filter()], to: to_relays) {
             await noteLender.justUseACopy({ await self.handleEvent($0) })
         }
+        
+        guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
+        let allEvents = events.all_events + followPackEvents.all_events
+        let task = load_profiles(context: "universe", load: .from_events(allEvents), damus_state: damus_state, txn: txn)
+        
+        try? await task?.value
         
         DispatchQueue.main.async {
             self.loading = false
         }
-        
-        guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
-        load_profiles(context: "universe", load: .from_events(events.all_events), damus_state: damus_state, txn: txn)
     }
     
     @MainActor
@@ -72,6 +90,20 @@ class SearchHomeModel: ObservableObject {
             seen_pubkey.insert(ev.pubkey)
             
             if self.events.insert(ev) {
+                self.objectWillChange.send()
+            }
+        }
+    }
+    
+    @MainActor
+    func handleFollowPackEvent(_ ev: NostrEvent) {
+        if ev.known_kind == .follow_list && should_show_event(state: damus_state, ev: ev) && !ev.is_reply() {
+            if !damus_state.settings.multiple_events_per_pubkey && follow_pack_seen_pubkey.contains(ev.pubkey) {
+                return
+            }
+            follow_pack_seen_pubkey.insert(ev.pubkey)
+            
+            if self.followPackEvents.insert(ev) {
                 self.objectWillChange.send()
             }
         }
@@ -113,28 +145,23 @@ enum PubkeysToLoad {
     case from_keys([Pubkey])
 }
 
-func load_profiles<Y>(context: String, load: PubkeysToLoad, damus_state: DamusState, txn: NdbTxn<Y>) {
+func load_profiles<Y>(context: String, load: PubkeysToLoad, damus_state: DamusState, txn: NdbTxn<Y>) -> Task<Void, any Error>? {
     let authors = find_profiles_to_fetch(profiles: damus_state.profiles, load: load, cache: damus_state.events, txn: txn)
 
     guard !authors.isEmpty else {
-        return
+        return nil
     }
     
-    Task {
+    return Task {
         print("load_profiles[\(context)]: requesting \(authors.count) profiles from relay pool")
         let filter = NostrFilter(kinds: [.metadata], authors: authors)
         
-        for await item in damus_state.nostrNetwork.reader.subscribe(filters: [filter]) {
+        for await noteLender in damus_state.nostrNetwork.reader.streamNotesUntilEndOfStoredEvents(filters: [filter]) {
             let now = UInt64(Date.now.timeIntervalSince1970)
-            switch item {
-            case .event(let lender):
-                lender.justUseACopy({ event in
-                    if event.known_kind == .metadata {
-                        damus_state.ndb.write_profile_last_fetched(pubkey: event.pubkey, fetched_at: now)
-                    }
-                })
-            case .eose:
-                break
+            try noteLender.borrow { event in
+                if event.known_kind == .metadata {
+                    damus_state.ndb.write_profile_last_fetched(pubkey: event.pubkey, fetched_at: now)
+                }
             }
         }
         

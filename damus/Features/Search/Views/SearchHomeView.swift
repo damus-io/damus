@@ -54,7 +54,7 @@ struct SearchHomeView: View {
             loading: $model.loading,
             damus: damus_state,
             show_friend_icon: true,
-            filter:content_filter(FilterState.posts),
+            filter: content_filter(FilterState.posts),
             content: {
                 AnyView(VStack(alignment: .leading) {
                     HStack {
@@ -66,7 +66,7 @@ struct SearchHomeView: View {
                     .padding(.top)
                     .padding(.horizontal)
                     
-                    FollowPackTimelineView<AnyView>(events: model.events, loading: $model.loading, damus: damus_state, show_friend_icon: true,filter:content_filter(FilterState.follow_list)
+                    FollowPackTimelineView<AnyView>(events: model.followPackEvents, loading: $model.loading, damus: damus_state, show_friend_icon: true, filter: content_filter(FilterState.follow_list)
                     ).padding(.bottom)
                     
                     Divider()
@@ -83,20 +83,10 @@ struct SearchHomeView: View {
                 }.padding(.bottom, 50))
             }
         )
-        .refreshable {
-            // Fetch new information by unsubscribing and resubscribing to the relay
-            loadingTask?.cancel()
-            loadingTask = Task { await model.load() }
-        }
     }
     
     var SearchContent: some View {
         SearchResultsView(damus_state: damus_state, search: $search)
-            .refreshable {
-                // Fetch new information by unsubscribing and resubscribing to the relay
-                loadingTask?.cancel()
-                loadingTask = Task { await model.load() }
-            }
     }
     
     var MainContent: some View {
@@ -135,6 +125,12 @@ struct SearchHomeView: View {
         }
         .onDisappear {
             loadingTask?.cancel()
+        }
+        .refreshable {
+            // Fetch new information by unsubscribing and resubscribing to the relay
+            loadingTask?.cancel()
+            loadingTask = Task { await model.reload() }
+            try? await loadingTask?.value
         }
     }
 }

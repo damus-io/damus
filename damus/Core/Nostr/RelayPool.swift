@@ -43,6 +43,10 @@ class RelayPool {
     private let network_monitor = NWPathMonitor()
     private let network_monitor_queue = DispatchQueue(label: "io.damus.network_monitor")
     private var last_network_status: NWPath.Status = .unsatisfied
+    
+    /// The limit of maximum concurrent subscriptions. Any subscriptions beyond this limit will be paused until subscriptions clear
+    /// This is to avoid error states and undefined behaviour related to hitting subscription limits on the relays, by letting those wait instead — with the principle that slower is better than broken.
+    static let MAX_CONCURRENT_SUBSCRIPTION_LIMIT = 10   // This number is only an educated guess at this point.
 
     func close() {
         disconnect()
@@ -102,10 +106,17 @@ class RelayPool {
     }
 
     @MainActor
-    func register_handler(sub_id: String, handler: @escaping (RelayURL, NostrConnectionEvent) -> ()) {
+    func register_handler(sub_id: String, handler: @escaping (RelayURL, NostrConnectionEvent) -> ()) async {
+        while handlers.count > Self.MAX_CONCURRENT_SUBSCRIPTION_LIMIT {
+            Log.debug("%s: Too many subscriptions, waiting for subscription pool to clear", for: .networking, sub_id)
+            try? await Task.sleep(for: .seconds(1))
+        }
+        Log.debug("%s: Subscription pool cleared", for: .networking, sub_id)
         for handler in handlers {
             // don't add duplicate handlers
             if handler.sub_id == sub_id {
+                assertionFailure("Duplicate handlers are not allowed. Proper error handling for this has not been built yet.")
+                Log.error("Duplicate handlers are not allowed. Error handling for this has not been built yet.", for: .networking)
                 return
             }
         }
