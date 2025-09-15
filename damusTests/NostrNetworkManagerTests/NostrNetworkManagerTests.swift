@@ -21,7 +21,7 @@ class NostrNetworkManagerTests: XCTestCase {
         let notesJSONL = getTestNotesJSONL()
 
         for noteText in notesJSONL.split(separator: "\n") {
-            let _ = damusState!.ndb.process_event("[\"EVENT\",\"subid\",\(String(noteText))]")
+            let _ = damusState!.ndb.processEvent("[\"EVENT\",\"subid\",\(String(noteText))]")
         }
     }
     

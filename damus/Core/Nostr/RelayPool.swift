@@ -141,7 +141,7 @@ class RelayPool {
                   case .string(let str) = msg
             else { return }
 
-            let _ = self.ndb.process_event(str, originRelayURL: relay_id)
+            let _ = self.ndb.processEvent(str, originRelayURL: relay_id)
             self.message_received_function?((str, desc))
         })
         let relay = Relay(descriptor: desc, connection: conn)

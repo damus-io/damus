@@ -16,11 +16,13 @@ extension NostrNetworkManager {
         private let pool: RelayPool
         private var ndb: Ndb
         private var taskManager: TaskManager
+        private let experimentalLocalRelayModelSupport: Bool
         
-        init(pool: RelayPool, ndb: Ndb) {
+        init(pool: RelayPool, ndb: Ndb, experimentalLocalRelayModelSupport: Bool) {
             self.pool = pool
             self.ndb = ndb
             self.taskManager = TaskManager()
+            self.experimentalLocalRelayModelSupport = experimentalLocalRelayModelSupport
         }
         
         // MARK: - Subscribing and Streaming data from Nostr
@@ -127,13 +129,28 @@ extension NostrNetworkManager {
         /// - Returns: An async stream of nostr data
         private func sessionSubscribe(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil) -> AsyncStream<StreamItem> {
             return AsyncStream<StreamItem> { continuation in
+                var ndbEOSEIssued = false
+                var networkEOSEIssued = false
+                
+                // This closure function issues (yields) an EOSE signal to the stream if all relevant conditions are met
+                let yieldEOSEIfReady = {
+                    // In normal mode: Issuing EOSE requires EOSE from both NDB and the network, since they are all considered separate relays
+                    // In experimental local relay model mode: Issuing EOSE requires only EOSE from NDB, since that is the only relay that "matters"
+                    let canIssueEOSE = self.experimentalLocalRelayModelSupport ? ndbEOSEIssued : ndbEOSEIssued && networkEOSEIssued
+                    if canIssueEOSE {
+                        continuation.yield(.eose)
+                    }
+                }
+                
                 let ndbStreamTask = Task {
                     do {
                         for await item in try self.ndb.subscribe(filters: try filters.map({ try NdbFilter(from: $0) })) {
                             try Task.checkCancellation()
                             switch item {
                             case .eose:
-                                continuation.yield(.eose)
+                                Log.debug("Session subscribe: Received EOSE from nostrdb", for: .subscription_manager)
+                                ndbEOSEIssued = true
+                                yieldEOSEIfReady()
                             case .event(let noteKey):
                                 let lender = NdbNoteLender(ndb: self.ndb, noteKey: noteKey)
                                 try Task.checkCancellation()
@@ -161,8 +178,14 @@ extension NostrNetworkManager {
                             switch item {
                             case .event(let event):
                                 Log.debug("Session subscribe: Received kind %d event with id %s from the network", for: .subscription_manager, event.kind, event.id.hex())
+                                if !self.experimentalLocalRelayModelSupport {
+                                    // In normal mode (non-experimental), we stream from ndb but also directly from the network
+                                    continuation.yield(.event(lender: NdbNoteLender(ownedNdbNote: event)))
+                                }
                             case .eose:
                                 Log.debug("Session subscribe: Received EOSE from the network", for: .subscription_manager)
+                                networkEOSEIssued = true
+                                yieldEOSEIfReady()
                             }
                         }
                     }

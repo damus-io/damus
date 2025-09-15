@@ -243,6 +243,10 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "enable_experimental_purple_api", default_value: false)
     var enable_experimental_purple_api: Bool
     
+    /// Whether the app has the experimental local relay model flag that streams data only from the local relay (ndb)
+    @Setting(key: "enable_experimental_local_relay_model", default_value: false)
+    var enable_experimental_local_relay_model: Bool
+    
     @StringSetting(key: "purple_environment", default_value: .production)
     var purple_enviroment: DamusPurpleEnvironment
 

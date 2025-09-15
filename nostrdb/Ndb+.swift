@@ -33,7 +33,7 @@ extension Ndb {
         return try self.was(noteKey: noteKey, seenOnAnyOf: relayUrls.map({ $0.absoluteString }), txn: txn)
     }
     
-    func process_event(_ str: String, originRelayURL: RelayURL? = nil) -> Bool {
+    func processEvent(_ str: String, originRelayURL: RelayURL? = nil) -> Bool {
         self.process_event(str, originRelayURL: originRelayURL?.absoluteString)
     }
 }

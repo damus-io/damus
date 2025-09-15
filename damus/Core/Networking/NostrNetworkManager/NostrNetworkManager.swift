@@ -38,7 +38,7 @@ class NostrNetworkManager {
         self.delegate = delegate
         let pool = RelayPool(ndb: delegate.ndb, keypair: delegate.keypair)
         self.pool = pool
-        let reader = SubscriptionManager(pool: pool, ndb: delegate.ndb)
+        let reader = SubscriptionManager(pool: pool, ndb: delegate.ndb, experimentalLocalRelayModelSupport: self.delegate.experimentalLocalRelayModelSupport)
         let userRelayList = UserRelayListManager(delegate: delegate, pool: pool, reader: reader)
         self.reader = reader
         self.userRelayList = userRelayList
@@ -173,6 +173,9 @@ extension NostrNetworkManager {
         
         /// Whether the app is in developer mode
         var developerMode: Bool { get }
+        
+        /// Whether the app has the experimental local relay model flag that streams data only from the local relay (ndb)
+        var experimentalLocalRelayModelSupport: Bool { get }
         
         /// The cache of relay model information
         var relayModelCache: RelayModelCache { get }
