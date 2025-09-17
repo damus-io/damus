@@ -61,6 +61,10 @@ class NostrNetworkManagerTests: XCTestCase {
                 case .eose:
                     // End of stream, break out of the loop
                     endOfStream.fulfill()
+                case .ndbEose:
+                    continue
+                case .networkEose:
+                    continue
                 }
             }
         }

@@ -450,6 +450,9 @@ class HomeModel: ContactsDelegate, ObservableObject {
     /// Send the initial filters, just our contact list and relay list mostly
     func send_initial_filters() {
         Task {
+            let startTime = CFAbsoluteTimeGetCurrent()
+            let id = UUID()
+            Log.info("Initial filter task started with ID %s", for: .homeModel, id.uuidString)
             let filter = NostrFilter(kinds: [.contacts], limit: 1, authors: [damus_state.pubkey])
             for await item in damus_state.nostrNetwork.reader.subscribe(filters: [filter]) {
                 switch item {
@@ -459,8 +462,13 @@ class HomeModel: ContactsDelegate, ObservableObject {
                 case .eose:
                     if !done_init {
                         done_init = true
+                        Log.info("Initial filter task %s: Done initialization; Elapsed time: %.2f seconds", for: .homeModel, id.uuidString, CFAbsoluteTimeGetCurrent() - startTime)
                         send_home_filters()
                     }
+                    break
+                case .ndbEose:
+                    break
+                case .networkEose:
                     break
                 }
             }
@@ -474,6 +482,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
                 case .event(let lender):
                     await lender.justUseACopy({ await process_event(ev: $0, context: .initialRelayList) })
                 case .eose: break
+                case .ndbEose: break
+                case .networkEose: break
                 }
             }
         }
@@ -538,6 +548,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
                 case .event(let lender):
                     await lender.justUseACopy({ await process_event(ev: $0, context: .contacts) })
                 case .eose: continue
+                case .ndbEose: continue
+                case .networkEose: continue
                 }
             }
         }
@@ -550,6 +562,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
                 case .eose:
                     guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
                     load_profiles(context: "notifications", load: .from_keys(notifications.uniq_pubkeys()), damus_state: damus_state, txn: txn)
+                case .ndbEose: break
+                case .networkEose: break
                 }
             }
         }
@@ -564,6 +578,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
                     var dms = dms.dms.flatMap { $0.events }
                     dms.append(contentsOf: incoming_dms)
                     load_profiles(context: "dms", load: .from_events(dms), damus_state: damus_state, txn: txn)
+                case .ndbEose: break
+                case .networkEose: break
                 }
             }
         }
@@ -580,6 +596,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
                     case .event(let lender):
                         await lender.justUseACopy({ await process_event(ev: $0, context: .nwc) })
                     case .eose: continue
+                    case .ndbEose: continue
+                    case .networkEose: continue
                     }
                 }
             }
@@ -628,19 +646,43 @@ class HomeModel: ContactsDelegate, ObservableObject {
 
         self.homeHandlerTask?.cancel()
         self.homeHandlerTask = Task {
+            let startTime = CFAbsoluteTimeGetCurrent()
+            let id = UUID()
+            Log.info("Home handler task: Starting home handler task with ID %s", for: .homeModel, id.uuidString)
+    
             DispatchQueue.main.async {
                 self.loading = true
             }
-            for await item in damus_state.nostrNetwork.reader.subscribe(filters: home_filters) {
+            for await item in damus_state.nostrNetwork.reader.subscribe(filters: home_filters, id: id) {
                 switch item {
                 case .event(let lender):
-                    await lender.justUseACopy({ await process_event(ev: $0, context: .home) })
+                    let currentTime = CFAbsoluteTimeGetCurrent()
+                    // Process events in parallel on a separate task, to avoid holding up upcoming signals
+                    // Empirical evidence has shown that in at least one instance this technique saved up to 5 seconds of load time!
+                    Task { await lender.justUseACopy({ await process_event(ev: $0, context: .home) }) }
                 case .eose:
+                    let eoseTime = CFAbsoluteTimeGetCurrent()
+                    Log.info("Home handler task %s: Received general EOSE after %.2f seconds", for: .homeModel, id.uuidString, eoseTime - startTime)
+            
+                    guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
+                    load_profiles(context: "home", load: .from_events(events.events), damus_state: damus_state, txn: txn)
+            
+                    let finishTime = CFAbsoluteTimeGetCurrent()
+                    Log.info("Home handler task %s: Completed initial loading task after %.2f seconds", for: .homeModel, id.uuidString, eoseTime - startTime)
+                case .ndbEose:
+                    let eoseTime = CFAbsoluteTimeGetCurrent()
+                    Log.info("Home handler task %s: Received NDB EOSE after %.2f seconds", for: .homeModel, id.uuidString, eoseTime - startTime)
+            
                     guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
                     DispatchQueue.main.async {
                         self.loading = false
                     }
                     load_profiles(context: "home", load: .from_events(events.events), damus_state: damus_state, txn: txn)
+            
+                    let finishTime = CFAbsoluteTimeGetCurrent()
+                    Log.info("Home handler task %s: Completed initial NDB loading task after %.2f seconds", for: .homeModel, id.uuidString, eoseTime - startTime)
+                case .networkEose:
+                    break
                 }
             }
         }

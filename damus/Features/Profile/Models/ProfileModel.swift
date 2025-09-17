@@ -81,6 +81,8 @@ class ProfileModel: ObservableObject, Equatable {
                 case .event(let lender):
                     lender.justUseACopy({ handleNostrEvent($0) })
                 case .eose: break
+                case .ndbEose: break
+                case .networkEose: break
                 }
             }
             guard let txn = NdbTxn(ndb: damus.ndb) else { return }
@@ -97,6 +99,8 @@ class ProfileModel: ObservableObject, Equatable {
                 case .event(let lender):
                     lender.justUseACopy({ handleNostrEvent($0) })
                 case .eose: break
+                case .ndbEose: break
+                case .networkEose: break
                 }
             }
             await bumpUpProgress()
@@ -137,6 +141,10 @@ class ProfileModel: ObservableObject, Equatable {
                     }
                 }
             case .eose:
+                continue
+            case .ndbEose:
+                continue
+            case .networkEose:
                 continue
             }
         }
@@ -214,6 +222,10 @@ class ProfileModel: ObservableObject, Equatable {
                         }
                     }
                 case .eose:
+                    break
+                case .ndbEose:
+                    break
+                case .networkEose:
                     break
                 }
             }

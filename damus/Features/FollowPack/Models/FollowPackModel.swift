@@ -59,6 +59,10 @@ class FollowPackModel: ObservableObject {
                 })
             case .eose:
                 continue
+            case .ndbEose:
+                continue
+            case .networkEose:
+                continue
             }
         }
     }

@@ -43,6 +43,10 @@ class ZapsModel: ObservableObject {
                     let events = state.events.lookup_zaps(target: target).map { $0.request.ev }
                     guard let txn = NdbTxn(ndb: state.ndb) else { return }
                     load_profiles(context: "zaps_model", load: .from_events(events), damus_state: state, txn: txn)
+                case .ndbEose:
+                    break
+                case .networkEose:
+                    break
                 }
             }
         }

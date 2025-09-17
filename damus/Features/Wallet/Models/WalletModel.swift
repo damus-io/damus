@@ -198,6 +198,10 @@ class WalletModel: ObservableObject {
                 return result
             case .eose:
                 continue
+            case .ndbEose:
+                continue
+            case .networkEose:
+                continue
             }
         }
         do { try Task.checkCancellation() } catch { throw .cancelled }

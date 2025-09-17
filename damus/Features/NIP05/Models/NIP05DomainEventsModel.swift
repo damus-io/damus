@@ -73,6 +73,10 @@ class NIP05DomainEventsModel: ObservableObject {
                 load_profiles(context: "search", load: .from_events(self.events.all_events), damus_state: state, txn: txn)
                 DispatchQueue.main.async { self.loading = false }
                 continue
+            case .ndbEose:
+                break
+            case .networkEose:
+                break
             }
         }
     }

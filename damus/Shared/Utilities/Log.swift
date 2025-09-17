@@ -24,6 +24,7 @@ enum LogCategory: String {
     case video_coordination
     case tips
     case ndb
+    case homeModel
 }
 
 /// Damus structured logger

@@ -189,30 +189,25 @@ class SuggestedUsersViewModel: ObservableObject {
             authors: [Constants.ONBOARDING_FOLLOW_PACK_CURATOR_PUBKEY]
         )
         
-        for await item in self.damus_state.nostrNetwork.reader.subscribe(filters: [filter]) {
+        for await lender in self.damus_state.nostrNetwork.reader.streamNotesUntilEndOfStoredEvents(filters: [filter]) {
             // Check for cancellation on each iteration
             guard !Task.isCancelled else { break }
-
-            switch item {
-            case .event(let lender):
-                lender.justUseACopy({ event in
-                    let followPack = FollowPackEvent.parse(from: event)
-                    
-                    guard let id = followPack.uuid else { return }
-                    
-                    let latestPackForThisId: FollowPackEvent
-                    
-                    if let existingPack = packsById[id], existingPack.event.created_at > followPack.event.created_at {
-                        latestPackForThisId = existingPack
-                    } else {
-                        latestPackForThisId = followPack
-                    }
-                    
-                    packsById[id] = latestPackForThisId
-                })
-            case .eose:
-                break
-            }
+            
+            lender.justUseACopy({ event in
+                let followPack = FollowPackEvent.parse(from: event)
+                
+                guard let id = followPack.uuid else { return }
+                
+                let latestPackForThisId: FollowPackEvent
+                
+                if let existingPack = packsById[id], existingPack.event.created_at > followPack.event.created_at {
+                    latestPackForThisId = existingPack
+                } else {
+                    latestPackForThisId = followPack
+                }
+                
+                packsById[id] = latestPackForThisId
+            })
         }
     }
 
@@ -228,13 +223,8 @@ class SuggestedUsersViewModel: ObservableObject {
         }
         
         let profileFilter = NostrFilter(kinds: [.metadata], authors: allPubkeys)
-        for await item in damus_state.nostrNetwork.reader.subscribe(filters: [profileFilter]) {
-            switch item {
-            case .event(_):
-                continue    // We just need NostrDB to ingest these for them to be available elsewhere, no need to analyze the data
-            case .eose:
-                break
-            }
+        for await _ in damus_state.nostrNetwork.reader.streamNotesUntilEndOfStoredEvents(filters: [profileFilter]) {
+            // NO-OP. We just need NostrDB to ingest these for them to be available elsewhere, no need to analyze the data
         }
     }
 }

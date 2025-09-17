@@ -145,6 +145,8 @@ extension NostrNetworkManager {
                         try? self.set(userRelayList: relayList)                                         // Set the validated list
                     })
                 case .eose: continue
+                case .ndbEose: continue
+                case .networkEose: continue
                 }
             }
         }

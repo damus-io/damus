@@ -122,6 +122,10 @@ class ThreadModel: ObservableObject {
                 case .eose:
                     guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
                     load_profiles(context: "thread", load: .from_events(Array(event_map.events)), damus_state: damus_state, txn: txn)
+                case .ndbEose:
+                    break
+                case .networkEose:
+                    break
                 }
             }
         }

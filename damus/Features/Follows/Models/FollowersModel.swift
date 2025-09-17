@@ -45,6 +45,10 @@ class FollowersModel: ObservableObject {
                 case .eose:
                     guard let txn = NdbTxn(ndb: self.damus_state.ndb) else { return }
                     load_profiles(txn: txn)
+                case .ndbEose:
+                    continue
+                case .networkEose:
+                    continue
                 }
             }
         }
@@ -83,6 +87,10 @@ class FollowersModel: ObservableObject {
                 case .event(let lender):
                     lender.justUseACopy({ self.handle_event(ev: $0) })
                 case .eose: break
+                case .ndbEose:
+                    continue
+                case .networkEose:
+                    continue
                 }
             }
         }
