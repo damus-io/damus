@@ -12,11 +12,11 @@ struct NIP04 {}
 extension NIP04 {
     /// Encrypts a message using NIP-04.
     static func encrypt_message(message: String, privkey: Privkey, to_pk: Pubkey, encoding: EncEncoding = .base64) -> String? {
-        let iv = random_bytes(count: 16).bytes
+        let iv = random_bytes(count: 16).byteArray
         guard let shared_sec = get_shared_secret(privkey: privkey, pubkey: to_pk) else {
             return nil
         }
-        let utf8_message = Data(message.utf8).bytes
+        let utf8_message = Data(message.utf8).byteArray
         guard let enc_message = aes_encrypt(data: utf8_message, iv: iv, shared_sec: shared_sec) else {
             return nil
         }

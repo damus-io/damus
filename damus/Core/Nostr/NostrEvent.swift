@@ -321,7 +321,7 @@ func sign_id(privkey: String, id: String) -> String {
 
     // Extra params for custom signing
 
-    var aux_rand = random_bytes(count: 64).bytes
+    var aux_rand = random_bytes(count: 64).byteArray
     var digest = try! id.bytes
 
     // API allows for signing variable length messages
@@ -786,15 +786,15 @@ func validate_event(ev: NostrEvent) -> ValidationResult {
     let ctx = secp256k1.Context.raw
     var xonly_pubkey = secp256k1_xonly_pubkey.init()
 
-    var ev_pubkey = ev.pubkey.id.bytes
+    var ev_pubkey = ev.pubkey.id.byteArray
 
     var ok = secp256k1_xonly_pubkey_parse(ctx, &xonly_pubkey, &ev_pubkey) != 0
     if !ok {
         return .bad_sig
     }
 
-    var sig = ev.sig.data.bytes
-    var idbytes = id.id.bytes
+    var sig = ev.sig.data.byteArray
+    var idbytes = id.id.byteArray
 
     ok = secp256k1_schnorrsig_verify(ctx, &sig, &idbytes, 32, &xonly_pubkey) > 0
     return ok ? .ok : .bad_sig
