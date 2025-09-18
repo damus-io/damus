@@ -291,7 +291,7 @@ class NdbNote: Codable, Equatable, Hashable {
                 return nil
             }
         case .manual(_, let signature, _):
-            var raw_sig = signature.data.bytes
+            var raw_sig = signature.data.byteArray
             ndb_builder_set_sig(&builder, &raw_sig)
             
             do {

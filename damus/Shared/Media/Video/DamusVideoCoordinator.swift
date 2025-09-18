@@ -7,7 +7,7 @@
 
 import Combine
 import Foundation
-import SwiftUICore
+import SwiftUI
 import AVFoundation
 
 /// DamusVideoCoordinator is responsible for coordinating the various video players throughout the app, and providing a nicely orchestrated experience.

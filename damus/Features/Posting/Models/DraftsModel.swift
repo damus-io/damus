@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import SwiftUICore
+import SwiftUI
 import UIKit
 
 /// Represents artifacts in a post draft, which is rendered by `PostView`

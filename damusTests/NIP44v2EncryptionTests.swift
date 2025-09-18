@@ -132,7 +132,7 @@ final class NIP44v2EncryptingTests: XCTestCase {
         try encryptDecryptVectors.forEach { vector in
             let conversationKey = vector.conversationKey
             let conversationKeyData = try XCTUnwrap(conversationKey.hexDecoded)
-            let conversationKeyBytes = conversationKeyData.bytes
+            let conversationKeyBytes = conversationKeyData.byteArray
 
             let nonce = try XCTUnwrap(vector.nonce.hexDecoded)
             let expectedPlaintextSHA256 = vector.plaintextSHA256
@@ -211,7 +211,7 @@ final class NIP44v2EncryptingTests: XCTestCase {
     func testInvalidDecrypt() throws {
         let decryptVectors = try XCTUnwrap(vectors.v2.invalid.decrypt)
         try decryptVectors.forEach { vector in
-            let conversationKey = try XCTUnwrap(vector.conversationKey.hexDecoded).bytes
+            let conversationKey = try XCTUnwrap(vector.conversationKey.hexDecoded).byteArray
             let payload = vector.payload
             XCTAssertThrowsError(try NIP44v2Encryption.decrypt(payload: payload, conversationKey: conversationKey), vector.note)
         }
