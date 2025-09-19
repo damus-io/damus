@@ -14,7 +14,7 @@ struct ProfilePicturesView: View {
     var body: some View {
         HStack {
             ForEach(pubkeys.prefix(8), id: \.self) { pubkey in
-                ProfilePicView(pubkey: pubkey, size: 32.0, highlight: .none, profiles: state.profiles, disable_animation: state.settings.disable_animation)
+                ProfilePicView(pubkey: pubkey, size: 32.0, highlight: .none, profiles: state.profiles, disable_animation: state.settings.disable_animation, damusState: state)
                     .onTapGesture {
                         state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))
                     }

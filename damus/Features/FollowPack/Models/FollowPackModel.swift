@@ -43,27 +43,18 @@ class FollowPackModel: ObservableObject {
         filter.authors = follow_pack_users
         filter.limit = 500
         
-        for await item in damus_state.nostrNetwork.reader.subscribe(filters: [filter], to: to_relays) {
-            switch item {
-            case .event(lender: let lender):
-                await lender.justUseACopy({ event in
-                    let should_show_event = await should_show_event(state: damus_state, ev: event)
-                    if event.is_textlike && should_show_event && !event.is_reply()
-                    {
-                        if await self.events.insert(event) {
-                            DispatchQueue.main.async {
-                                self.objectWillChange.send()
-                            }
+        for await event in damus_state.nostrNetwork.reader.streamIndefinitely(filters: [filter], to: to_relays) {
+            await event.justUseACopy({ event in
+                let should_show_event = await should_show_event(state: damus_state, ev: event)
+                if event.is_textlike && should_show_event && !event.is_reply()
+                {
+                    if await self.events.insert(event) {
+                        DispatchQueue.main.async {
+                            self.objectWillChange.send()
                         }
                     }
-                })
-            case .eose:
-                continue
-            case .ndbEose:
-                continue
-            case .networkEose:
-                continue
-            }
+                }
+            })
         }
     }
 }

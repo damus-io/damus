@@ -43,7 +43,7 @@ class FollowingModel {
         let filters = [filter]
         self.listener?.cancel()
         self.listener = Task {
-            for await item in self.damus_state.nostrNetwork.reader.subscribe(filters: filters) {
+            for await item in self.damus_state.nostrNetwork.reader.advancedStream(filters: filters) {
                 // don't need to do anything here really
                 continue
             }

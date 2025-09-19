@@ -189,7 +189,7 @@ class SuggestedUsersViewModel: ObservableObject {
             authors: [Constants.ONBOARDING_FOLLOW_PACK_CURATOR_PUBKEY]
         )
         
-        for await lender in self.damus_state.nostrNetwork.reader.streamNotesUntilEndOfStoredEvents(filters: [filter]) {
+        for await lender in self.damus_state.nostrNetwork.reader.streamExistingEvents(filters: [filter]) {
             // Check for cancellation on each iteration
             guard !Task.isCancelled else { break }
             
@@ -212,6 +212,7 @@ class SuggestedUsersViewModel: ObservableObject {
     }
 
     /// Finds all profiles mentioned in the follow packs, and loads the profile data from the network
+    // TODO LOCAL_RELAY_PROFILE: Remove this
     private func loadProfiles(for packs: [FollowPackEvent]) async {
         var allPubkeys: [Pubkey] = []
         
@@ -223,7 +224,7 @@ class SuggestedUsersViewModel: ObservableObject {
         }
         
         let profileFilter = NostrFilter(kinds: [.metadata], authors: allPubkeys)
-        for await _ in damus_state.nostrNetwork.reader.streamNotesUntilEndOfStoredEvents(filters: [profileFilter]) {
+        for await _ in damus_state.nostrNetwork.reader.streamExistingEvents(filters: [profileFilter]) {
             // NO-OP. We just need NostrDB to ingest these for them to be available elsewhere, no need to analyze the data
         }
     }

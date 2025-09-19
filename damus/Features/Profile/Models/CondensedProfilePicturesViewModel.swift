@@ -21,22 +21,4 @@ class CondensedProfilePicturesViewModel: ObservableObject {
         self.pubkeys = pubkeys
         self.maxPictures = min(maxPictures, pubkeys.count)
     }
-    
-    func load() {
-        loadingTask?.cancel()
-        loadingTask = Task { try? await loadingTask() }
-    }
-    
-    func loadingTask() async throws {
-        let filter = NostrFilter(kinds: [.metadata], authors: shownPubkeys)
-        let _ = await state.nostrNetwork.reader.query(filters: [filter])
-        for await _ in state.nostrNetwork.reader.streamNotesUntilEndOfStoredEvents(filters: [filter]) {
-            // NO-OP, we just need it to be loaded into NostrDB.
-            try Task.checkCancellation()
-        }
-        DispatchQueue.main.async {
-            // Cause the view to re-render with the newly loaded profiles
-            self.objectWillChange.send()
-        }
-    }
 }

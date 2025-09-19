@@ -64,13 +64,11 @@ class NIP05DomainEventsModel: ObservableObject {
         filter.authors = Array(authors)
 
         
-        for await item in state.nostrNetwork.reader.subscribe(filters: [filter]) {
+        for await item in state.nostrNetwork.reader.advancedStream(filters: [filter]) {
             switch item {
             case .event(let lender):
                 await lender.justUseACopy({ await self.add_event($0) })
             case .eose:
-                guard let txn = NdbTxn(ndb: state.ndb) else { return }
-                load_profiles(context: "search", load: .from_events(self.events.all_events), damus_state: state, txn: txn)
                 DispatchQueue.main.async { self.loading = false }
                 continue
             case .ndbEose:

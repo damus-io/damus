@@ -27,7 +27,7 @@ struct Reposted: View {
 
             // Show profile picture of the reposter only if the reposter is not the author of the reposted note.
             if pubkey != target.pubkey {
-                ProfilePicView(pubkey: pubkey, size: eventview_pfp_size(.small), highlight: .none, profiles: damus.profiles, disable_animation: damus.settings.disable_animation)
+                ProfilePicView(pubkey: pubkey, size: eventview_pfp_size(.small), highlight: .none, profiles: damus.profiles, disable_animation: damus.settings.disable_animation, damusState: damus)
                     .onTapGesture {
                         show_profile_action_sheet_if_enabled(damus_state: damus, pubkey: pubkey)
                     }

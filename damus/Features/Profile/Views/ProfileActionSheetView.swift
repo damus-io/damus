@@ -107,7 +107,7 @@ struct ProfileActionSheetView: View {
     
     var body: some View {
         VStack(alignment: .center) {
-            ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+            ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
             if let url = self.profile_data()?.profile?.website_url {
                 WebsiteLink(url: url, style: .accent)
                     .padding(.top, -15)

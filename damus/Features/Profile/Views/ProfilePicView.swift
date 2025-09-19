@@ -75,8 +75,10 @@ struct ProfilePicView: View {
     let privacy_sensitive: Bool
 
     @State var picture: String?
+    @StateObject private var profileObserver: ProfileObserver
+    @EnvironmentObject var damusState: DamusState
     
-    init(pubkey: Pubkey, size: CGFloat, highlight: Highlight, profiles: Profiles, disable_animation: Bool, picture: String? = nil, show_zappability: Bool? = nil, privacy_sensitive: Bool = false) {
+    init(pubkey: Pubkey, size: CGFloat, highlight: Highlight, profiles: Profiles, disable_animation: Bool, picture: String? = nil, show_zappability: Bool? = nil, privacy_sensitive: Bool = false, damusState: DamusState) {
         self.pubkey = pubkey
         self.profiles = profiles
         self.size = size
@@ -85,6 +87,7 @@ struct ProfilePicView: View {
         self.disable_animation = disable_animation
         self.zappability_indicator = show_zappability ?? false
         self.privacy_sensitive = privacy_sensitive
+        self._profileObserver = StateObject.init(wrappedValue: ProfileObserver(pubkey: pubkey, damusState: damusState))
     }
 
     var privacy_sensitive_pubkey: Pubkey {
@@ -163,7 +166,8 @@ struct ProfilePicView_Previews: PreviewProvider {
             size: 100,
             highlight: .none,
             profiles: make_preview_profiles(pubkey),
-            disable_animation: false
+            disable_animation: false,
+            damusState: test_damus_state
         )
     }
 }

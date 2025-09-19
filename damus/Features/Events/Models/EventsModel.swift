@@ -71,7 +71,7 @@ class EventsModel: ObservableObject {
         loadingTask?.cancel()
         loadingTask = Task {
             DispatchQueue.main.async { self.loading = true }
-            outerLoop: for await item in state.nostrNetwork.reader.subscribe(filters: [get_filter()]) {
+            outerLoop: for await item in state.nostrNetwork.reader.advancedStream(filters: [get_filter()]) {
                 switch item {
                 case .event(let lender):
                     Task {
@@ -91,8 +91,6 @@ class EventsModel: ObservableObject {
                 }
             }
             DispatchQueue.main.async { self.loading = false }
-            guard let txn = NdbTxn(ndb: self.state.ndb) else { return }
-            load_profiles(context: "events_model", load: .from_events(events.all_events), damus_state: state, txn: txn)
         }
     }
     

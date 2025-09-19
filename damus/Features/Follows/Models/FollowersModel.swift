@@ -38,18 +38,8 @@ class FollowersModel: ObservableObject {
         let filters = [filter]
         self.listener?.cancel()
         self.listener = Task {
-            for await item in damus_state.nostrNetwork.reader.subscribe(filters: filters) {
-                switch item {
-                case .event(let lender):
-                    lender.justUseACopy({ self.handle_event(ev: $0) })
-                case .eose:
-                    guard let txn = NdbTxn(ndb: self.damus_state.ndb) else { return }
-                    load_profiles(txn: txn)
-                case .ndbEose:
-                    continue
-                case .networkEose:
-                    continue
-                }
+            for await lender in damus_state.nostrNetwork.reader.streamIndefinitely(filters: filters) {
+                lender.justUseACopy({ self.handle_event(ev: $0) })
             }
         }
     }
@@ -69,31 +59,6 @@ class FollowersModel: ObservableObject {
         process_contact_event(state: damus_state, ev: ev)
         contacts?.append(ev.pubkey)
         has_contact.insert(ev.pubkey)
-    }
-
-    func load_profiles<Y>(txn: NdbTxn<Y>) {
-        let authors = find_profiles_to_fetch_from_keys(profiles: damus_state.profiles, pks: contacts ?? [], txn: txn)
-        if authors.isEmpty {
-            return
-        }
-        
-        let filter = NostrFilter(kinds: [.metadata],
-                                 authors: authors)
-        
-        self.profilesListener?.cancel()
-        self.profilesListener = Task {
-            for await item in await damus_state.nostrNetwork.reader.subscribe(filters: [filter]) {
-                switch item {
-                case .event(let lender):
-                    lender.justUseACopy({ self.handle_event(ev: $0) })
-                case .eose: break
-                case .ndbEose:
-                    continue
-                case .networkEose:
-                    continue
-                }
-            }
-        }
     }
     
     func handle_event(ev: NostrEvent) {

@@ -454,22 +454,12 @@ class HomeModel: ContactsDelegate, ObservableObject {
             let id = UUID()
             Log.info("Initial filter task started with ID %s", for: .homeModel, id.uuidString)
             let filter = NostrFilter(kinds: [.contacts], limit: 1, authors: [damus_state.pubkey])
-            for await item in damus_state.nostrNetwork.reader.subscribe(filters: [filter]) {
-                switch item {
-                case .event(let lender):
-                    await lender.justUseACopy({ await process_event(ev: $0, context: .initialContactList) })
-                    continue
-                case .eose:
-                    if !done_init {
-                        done_init = true
-                        Log.info("Initial filter task %s: Done initialization; Elapsed time: %.2f seconds", for: .homeModel, id.uuidString, CFAbsoluteTimeGetCurrent() - startTime)
-                        send_home_filters()
-                    }
-                    break
-                case .ndbEose:
-                    break
-                case .networkEose:
-                    break
+            for await event in damus_state.nostrNetwork.reader.streamIndefinitely(filters: [filter]) {
+                await event.justUseACopy({ await process_event(ev: $0, context: .initialContactList) })
+                if !done_init {
+                    done_init = true
+                    Log.info("Initial filter task %s: Done initialization; Elapsed time: %.2f seconds", for: .homeModel, id.uuidString, CFAbsoluteTimeGetCurrent() - startTime)
+                    send_home_filters()
                 }
             }
             
@@ -477,14 +467,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
         
         Task {
             let relayListFilter = NostrFilter(kinds: [.relay_list], limit: 1, authors: [damus_state.pubkey])
-            for await item in damus_state.nostrNetwork.reader.subscribe(filters: [relayListFilter]) {
-                switch item {
-                case .event(let lender):
-                    await lender.justUseACopy({ await process_event(ev: $0, context: .initialRelayList) })
-                case .eose: break
-                case .ndbEose: break
-                case .networkEose: break
-                }
+            for await event in damus_state.nostrNetwork.reader.streamIndefinitely(filters: [relayListFilter]) {
+                await event.justUseACopy({ await process_event(ev: $0, context: .initialRelayList) })
             }
         }
     }
@@ -543,41 +527,25 @@ class HomeModel: ContactsDelegate, ObservableObject {
         
         self.contactsHandlerTask?.cancel()
         self.contactsHandlerTask = Task {
-            for await item in damus_state.nostrNetwork.reader.subscribe(filters: contacts_filters) {
-                switch item {
-                case .event(let lender):
-                    await lender.justUseACopy({ await process_event(ev: $0, context: .contacts) })
-                case .eose: continue
-                case .ndbEose: continue
-                case .networkEose: continue
-                }
+            for await event in damus_state.nostrNetwork.reader.streamIndefinitely(filters: contacts_filters) {
+                await event.justUseACopy({ await process_event(ev: $0, context: .contacts) })
             }
         }
         self.notificationsHandlerTask?.cancel()
         self.notificationsHandlerTask = Task {
-            for await item in damus_state.nostrNetwork.reader.subscribe(filters: notifications_filters) {
-                switch item {
-                case .event(let lender):
-                    await lender.justUseACopy({ await process_event(ev: $0, context: .notifications) })
-                case .eose:
-                    guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
-                    load_profiles(context: "notifications", load: .from_keys(notifications.uniq_pubkeys()), damus_state: damus_state, txn: txn)
-                case .ndbEose: break
-                case .networkEose: break
-                }
+            for await event in damus_state.nostrNetwork.reader.streamIndefinitely(filters: notifications_filters) {
+                await event.justUseACopy({ await process_event(ev: $0, context: .notifications) })
             }
         }
         self.dmsHandlerTask?.cancel()
         self.dmsHandlerTask = Task {
-            for await item in damus_state.nostrNetwork.reader.subscribe(filters: dms_filters) {
+            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: dms_filters) {
                 switch item {
                 case .event(let lender):
                     await lender.justUseACopy({ await process_event(ev: $0, context: .dms) })
                 case .eose:
-                    guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
                     var dms = dms.dms.flatMap { $0.events }
                     dms.append(contentsOf: incoming_dms)
-                    load_profiles(context: "dms", load: .from_events(dms), damus_state: damus_state, txn: txn)
                 case .ndbEose: break
                 case .networkEose: break
                 }
@@ -591,14 +559,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
                 var filter = NostrFilter(kinds: [.nwc_response])
                 filter.authors = [nwc.pubkey]
                 filter.limit = 0
-                for await item in damus_state.nostrNetwork.reader.subscribe(filters: [filter], to: [nwc.relay]) {
-                    switch item {
-                    case .event(let lender):
-                        await lender.justUseACopy({ await process_event(ev: $0, context: .nwc) })
-                    case .eose: continue
-                    case .ndbEose: continue
-                    case .networkEose: continue
-                    }
+                for await event in damus_state.nostrNetwork.reader.streamIndefinitely(filters: [filter], to: [nwc.relay]) {
+                    await event.justUseACopy({ await process_event(ev: $0, context: .nwc) })
                 }
             }
             
@@ -653,7 +615,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
             DispatchQueue.main.async {
                 self.loading = true
             }
-            for await item in damus_state.nostrNetwork.reader.subscribe(filters: home_filters, id: id) {
+            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: home_filters, id: id) {
                 switch item {
                 case .event(let lender):
                     let currentTime = CFAbsoluteTimeGetCurrent()
@@ -664,20 +626,15 @@ class HomeModel: ContactsDelegate, ObservableObject {
                     let eoseTime = CFAbsoluteTimeGetCurrent()
                     Log.info("Home handler task %s: Received general EOSE after %.2f seconds", for: .homeModel, id.uuidString, eoseTime - startTime)
             
-                    guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
-                    load_profiles(context: "home", load: .from_events(events.events), damus_state: damus_state, txn: txn)
-            
                     let finishTime = CFAbsoluteTimeGetCurrent()
                     Log.info("Home handler task %s: Completed initial loading task after %.2f seconds", for: .homeModel, id.uuidString, eoseTime - startTime)
                 case .ndbEose:
                     let eoseTime = CFAbsoluteTimeGetCurrent()
                     Log.info("Home handler task %s: Received NDB EOSE after %.2f seconds", for: .homeModel, id.uuidString, eoseTime - startTime)
-            
-                    guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
+                    
                     DispatchQueue.main.async {
                         self.loading = false
                     }
-                    load_profiles(context: "home", load: .from_events(events.events), damus_state: damus_state, txn: txn)
             
                     let finishTime = CFAbsoluteTimeGetCurrent()
                     Log.info("Home handler task %s: Completed initial NDB loading task after %.2f seconds", for: .homeModel, id.uuidString, eoseTime - startTime)

@@ -182,27 +182,18 @@ class WalletModel: ObservableObject {
         ]
         
         nostrNetwork.send(event: requestEvent, to: [currentNwcUrl.relay], skipEphemeralRelays: false)
-        for await item in nostrNetwork.reader.subscribe(filters: responseFilters, to: [currentNwcUrl.relay], timeout: timeout) {
-            switch item {
-            case .event(let lender):
-                guard let responseEvent = try? lender.getCopy() else { throw .internalError }
-                
-                let fullWalletResponse: WalletConnect.FullWalletResponse
-                do { fullWalletResponse = try WalletConnect.FullWalletResponse(from: responseEvent, nwc: currentNwcUrl) }
-                catch { throw WalletRequestError.walletResponseDecodingError(error) }
-                
-                guard fullWalletResponse.req_id == requestEvent.id else { continue }    // Our filters may match other responses
-                if let responseError = fullWalletResponse.response.error { throw .walletResponseError(responseError) }
-                
-                guard let result = fullWalletResponse.response.result else { throw .walletEmptyResponse }
-                return result
-            case .eose:
-                continue
-            case .ndbEose:
-                continue
-            case .networkEose:
-                continue
-            }
+        for await event in nostrNetwork.reader.timedStream(filters: responseFilters, to: [currentNwcUrl.relay], timeout: timeout) {
+            guard let responseEvent = try? event.getCopy() else { throw .internalError }
+            
+            let fullWalletResponse: WalletConnect.FullWalletResponse
+            do { fullWalletResponse = try WalletConnect.FullWalletResponse(from: responseEvent, nwc: currentNwcUrl) }
+            catch { throw WalletRequestError.walletResponseDecodingError(error) }
+            
+            guard fullWalletResponse.req_id == requestEvent.id else { continue }    // Our filters may match other responses
+            if let responseError = fullWalletResponse.response.error { throw .walletResponseError(responseError) }
+            
+            guard let result = fullWalletResponse.response.result else { throw .walletEmptyResponse }
+            return result
         }
         do { try Task.checkCancellation() } catch { throw .cancelled }
         throw .responseTimeout

@@ -33,21 +33,8 @@ class ZapsModel: ObservableObject {
         }
         zapCommsListener?.cancel()
         zapCommsListener = Task {
-            for await item in state.nostrNetwork.reader.subscribe(filters: [filter]) {
-                switch item {
-                case .event(let lender):
-                    await lender.justUseACopy({ event in
-                        await self.handle_event(ev: event)
-                    })
-                case .eose:
-                    let events = state.events.lookup_zaps(target: target).map { $0.request.ev }
-                    guard let txn = NdbTxn(ndb: state.ndb) else { return }
-                    load_profiles(context: "zaps_model", load: .from_events(events), damus_state: state, txn: txn)
-                case .ndbEose:
-                    break
-                case .networkEose:
-                    break
-                }
+            for await event in state.nostrNetwork.reader.streamIndefinitely(filters: [filter]) {
+                await event.justUseACopy({ await self.handle_event(ev: $0) })
             }
         }
     }

@@ -76,34 +76,21 @@ class ProfileModel: ObservableObject, Equatable {
             var text_filter = NostrFilter(kinds: [.text, .longform, .highlight])
             text_filter.authors = [pubkey]
             text_filter.limit = 500
-            for await item in damus.nostrNetwork.reader.subscribe(filters: [text_filter]) {
-                switch item {
-                case .event(let lender):
-                    lender.justUseACopy({ handleNostrEvent($0) })
-                case .eose: break
-                case .ndbEose: break
-                case .networkEose: break
-                }
-            }
-            guard let txn = NdbTxn(ndb: damus.ndb) else { return }
-            load_profiles(context: "profile", load: .from_events(events.events), damus_state: damus, txn: txn)
             await bumpUpProgress()
+            for await event in damus.nostrNetwork.reader.streamIndefinitely(filters: [text_filter]) {
+                event.justUseACopy({ handleNostrEvent($0) })
+            }
         }
         profileListener?.cancel()
         profileListener = Task {
             var profile_filter = NostrFilter(kinds: [.contacts, .metadata, .boost])
             var relay_list_filter = NostrFilter(kinds: [.relay_list], authors: [pubkey])
             profile_filter.authors = [pubkey]
-            for await item in damus.nostrNetwork.reader.subscribe(filters: [profile_filter, relay_list_filter]) {
-                switch item {
-                case .event(let lender):
-                    lender.justUseACopy({ handleNostrEvent($0) })
-                case .eose: break
-                case .ndbEose: break
-                case .networkEose: break
-                }
-            }
             await bumpUpProgress()
+            for await event in damus.nostrNetwork.reader.streamIndefinitely(filters: [profile_filter, relay_list_filter]) {
+                event.justUseACopy({ handleNostrEvent($0) })
+            }
+            
         }
         conversationListener?.cancel()
         conversationListener = Task {
@@ -127,25 +114,16 @@ class ProfileModel: ObservableObject, Equatable {
         let conversations_filter_them = NostrFilter(kinds: conversation_kinds, pubkeys: [damus.pubkey], limit: limit, authors: [pubkey])
         let conversations_filter_us = NostrFilter(kinds: conversation_kinds, pubkeys: [pubkey], limit: limit, authors: [damus.pubkey])
         print("subscribing to conversation events from and to profile \(pubkey)")
-        for await item in self.damus.nostrNetwork.reader.subscribe(filters: [conversations_filter_them, conversations_filter_us]) {
-            switch item {
-            case .event(let lender):
-                try? lender.borrow { ev in
-                    if !seen_event.contains(ev.id) {
-                        let event = ev.toOwned()
-                        Task { await self.add_event(event) }
-                        conversation_events.insert(ev.id)
-                    }
-                    else if !conversation_events.contains(ev.id) {
-                        conversation_events.insert(ev.id)
-                    }
+        for await noteLender in self.damus.nostrNetwork.reader.streamIndefinitely(filters: [conversations_filter_them, conversations_filter_us]) {
+            try? noteLender.borrow { ev in
+                if !seen_event.contains(ev.id) {
+                    let event = ev.toOwned()
+                    Task { await self.add_event(event) }
+                    conversation_events.insert(ev.id)
                 }
-            case .eose:
-                continue
-            case .ndbEose:
-                continue
-            case .networkEose:
-                continue
+                else if !conversation_events.contains(ev.id) {
+                    conversation_events.insert(ev.id)
+                }
             }
         }
     }
@@ -212,21 +190,12 @@ class ProfileModel: ObservableObject, Equatable {
         profile_filter.authors = [pubkey]
         self.findRelaysListener?.cancel()
         self.findRelaysListener = Task {
-            for await item in await damus.nostrNetwork.reader.subscribe(filters: [profile_filter]) {
-                switch item {
-                case .event(let lender):
-                    try? lender.borrow { event in
-                        if case .contacts = event.known_kind {
-                            // TODO: Is this correct?
-                            self.legacy_relay_list = decode_json_relays(event.content)
-                        }
+            for await noteLender in damus.nostrNetwork.reader.streamIndefinitely(filters: [profile_filter]) {
+                try? noteLender.borrow { event in
+                    if case .contacts = event.known_kind {
+                        // TODO: Is this correct?
+                        self.legacy_relay_list = decode_json_relays(event.content)
                     }
-                case .eose:
-                    break
-                case .ndbEose:
-                    break
-                case .networkEose:
-                    break
                 }
             }
         }

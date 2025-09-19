@@ -30,11 +30,11 @@ extension NostrNetworkManager {
         // MARK: - Subscribing and Streaming data from Nostr
         
         /// Streams notes until the EOSE signal
-        func streamNotesUntilEndOfStoredEvents(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, timeout: Duration? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
+        func streamExistingEvents(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, timeout: Duration? = nil, streamMode: StreamMode? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
             let timeout = timeout ?? .seconds(10)
             return AsyncStream<NdbNoteLender> { continuation in
                 let streamingTask = Task {
-                    outerLoop: for await item in self.subscribe(filters: filters, to: desiredRelays, timeout: timeout, id: id) {
+                    outerLoop: for await item in self.advancedStream(filters: filters, to: desiredRelays, timeout: timeout, streamMode: streamMode, id: id) {
                         try Task.checkCancellation()
                         switch item {
                         case .event(let lender):
@@ -58,34 +58,55 @@ extension NostrNetworkManager {
         /// Subscribes to data from user's relays, for a maximum period of time — after which the stream will end.
         ///
         /// This is useful when waiting for some specific data from Nostr, but not indefinitely.
-        func subscribe(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, timeout: Duration, id: UUID? = nil) -> AsyncStream<StreamItem> {
-            return AsyncStream<StreamItem> { continuation in
+        func timedStream(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, timeout: Duration, streamMode: StreamMode? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
+            return AsyncStream<NdbNoteLender> { continuation in
                 let streamingTask = Task {
-                    for await item in self.subscribe(filters: filters, to: desiredRelays, id: id) {
+                    for await item in self.advancedStream(filters: filters, to: desiredRelays, timeout: timeout, streamMode: streamMode, id: id) {
                         try Task.checkCancellation()
-                        continuation.yield(item)
+                        switch item {
+                        case .event(lender: let lender):
+                            continuation.yield(lender)
+                        case .eose: break
+                        case .ndbEose: break
+                        case .networkEose: break
+                        }
                     }
-                }
-                let timeoutTask = Task {
-                    try await Task.sleep(for: timeout)
-                    continuation.finish()   // End the stream due to timeout.
+                    continuation.finish()
                 }
                 continuation.onTermination = { @Sendable _ in
-                    timeoutTask.cancel()
+                    streamingTask.cancel()
+                }
+            }
+        }
+        
+        /// Subscribes to notes indefinitely
+        ///
+        /// This is useful when simply streaming all events indefinitely
+        func streamIndefinitely(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, streamMode: StreamMode? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
+            return AsyncStream<NdbNoteLender> { continuation in
+                let streamingTask = Task {
+                    for await item in self.advancedStream(filters: filters, to: desiredRelays, streamMode: streamMode, id: id) {
+                        try Task.checkCancellation()
+                        switch item {
+                        case .event(lender: let lender):
+                            continuation.yield(lender)
+                        case .eose:
+                            break
+                        case .ndbEose:
+                            break
+                        case .networkEose:
+                            break
+                        }
+                    }
+                }
+                continuation.onTermination = { @Sendable _ in
                     streamingTask.cancel()
                 }
             }
         }
         
         /// Subscribes to data from the user's relays
-        ///
-        /// ## Implementation notes
-        ///
-        /// - When we migrate to the local relay model, we should modify this function to stream directly from NostrDB
-        ///
-        /// - Parameter filters: The nostr filters to specify what kind of data to subscribe to
-        /// - Returns: An async stream of nostr data
-        func subscribe(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, id: UUID? = nil) -> AsyncStream<StreamItem> {
+        func advancedStream(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, timeout: Duration? = nil, streamMode: StreamMode? = nil, id: UUID? = nil) -> AsyncStream<StreamItem> {
             return AsyncStream<StreamItem> { continuation in
                 let subscriptionId = id ?? UUID()
                 let startTime = CFAbsoluteTimeGetCurrent()
@@ -104,7 +125,7 @@ extension NostrNetworkManager {
                                 continue
                             }
                             Log.info("%s: Streaming.", for: .subscription_manager, subscriptionId.uuidString)
-                            for await item in self.sessionSubscribe(filters: filters, to: desiredRelays, id: id) {
+                            for await item in self.sessionSubscribe(filters: filters, to: desiredRelays, streamMode: streamMode, id: id) {
                                 try Task.checkCancellation()
                                 continuation.yield(item)
                             }
@@ -117,9 +138,16 @@ extension NostrNetworkManager {
                     }
                     Log.info("%s: Terminated.", for: .subscription_manager, subscriptionId.uuidString)
                 }
+                let timeoutTask = Task {
+                    if let timeout {
+                        try await Task.sleep(for: timeout)
+                        continuation.finish()   // End the stream due to timeout.
+                    }
+                }
                 continuation.onTermination = { @Sendable _ in
                     Log.info("%s: Cancelled.", for: .subscription_manager, subscriptionId.uuidString)
                     multiSessionStreamingTask.cancel()
+                    timeoutTask.cancel()
                 }
             }
         }
@@ -134,8 +162,9 @@ extension NostrNetworkManager {
         ///
         /// - Parameter filters: The nostr filters to specify what kind of data to subscribe to
         /// - Returns: An async stream of nostr data
-        private func sessionSubscribe(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, id: UUID? = nil) -> AsyncStream<StreamItem> {
+        private func sessionSubscribe(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, streamMode: StreamMode? = nil, id: UUID? = nil) -> AsyncStream<StreamItem> {
             let id = id ?? UUID()
+            let streamMode = streamMode ?? defaultStreamMode()
             return AsyncStream<StreamItem> { continuation in
                 let startTime = CFAbsoluteTimeGetCurrent()
                 Log.debug("Session subscription %s: Started", for: .subscription_manager, id.uuidString)
@@ -147,10 +176,10 @@ extension NostrNetworkManager {
                     let connectedToNetwork = self.pool.network_monitor.currentPath.status == .satisfied
                     // In normal mode: Issuing EOSE requires EOSE from both NDB and the network, since they are all considered separate relays
                     // In experimental local relay model mode: Issuing EOSE requires only EOSE from NDB, since that is the only relay that "matters"
-                    let canIssueEOSE = self.experimentalLocalRelayModelSupport ?
-                    (ndbEOSEIssued)
-                    :
-                    (ndbEOSEIssued && (networkEOSEIssued || !connectedToNetwork))
+                    let canIssueEOSE = switch streamMode {
+                    case .ndbFirst: (ndbEOSEIssued)
+                    case .ndbAndNetworkParallel: (ndbEOSEIssued && (networkEOSEIssued || !connectedToNetwork))
+                    }
                     
                     if canIssueEOSE {
                         Log.debug("Session subscription %s: Issued EOSE for session. Elapsed: %.2f seconds", for: .subscription_manager, id.uuidString, CFAbsoluteTimeGetCurrent() - startTime)
@@ -197,8 +226,10 @@ extension NostrNetworkManager {
                                 if EXTRA_VERBOSE_LOGGING {
                                     Log.debug("Session subscription %s: Received kind %d event with id %s from the network", for: .subscription_manager, id.uuidString, event.kind, event.id.hex())
                                 }
-                                if !self.experimentalLocalRelayModelSupport {
-                                    // In normal mode (non-experimental), we stream from ndb but also directly from the network
+                                switch streamMode {
+                                case .ndbFirst:
+                                    break   // NO-OP
+                                case .ndbAndNetworkParallel:
                                     continuation.yield(.event(lender: NdbNoteLender(ownedNdbNote: event)))
                                 }
                             case .eose:
@@ -229,6 +260,12 @@ extension NostrNetworkManager {
             }
         }
         
+        // MARK: - Utility functions
+        
+        private func defaultStreamMode() -> StreamMode {
+            self.experimentalLocalRelayModelSupport ? .ndbFirst : .ndbAndNetworkParallel
+        }
+        
         // MARK: - Finding specific data from Nostr
         
         /// Finds a non-replaceable event based on a note ID
@@ -255,7 +292,7 @@ extension NostrNetworkManager {
         
         func query(filters: [NostrFilter], to: [RelayURL]? = nil, timeout: Duration? = nil) async -> [NostrEvent] {
             var events: [NostrEvent] = []
-            for await noteLender in self.streamNotesUntilEndOfStoredEvents(filters: filters, to: to, timeout: timeout) {
+            for await noteLender in self.streamExistingEvents(filters: filters, to: to, timeout: timeout) {
                 noteLender.justUseACopy({ events.append($0) })
             }
             return events
@@ -270,7 +307,7 @@ extension NostrNetworkManager {
 
             let filter = NostrFilter(kinds: nostrKinds, authors: [naddr.author])
             
-            for await noteLender in self.streamNotesUntilEndOfStoredEvents(filters: [filter], to: targetRelays, timeout: timeout) {
+            for await noteLender in self.streamExistingEvents(filters: [filter], to: targetRelays, timeout: timeout) {
                 // TODO: This can be refactored to borrow the note instead of copying it. But we need to implement `referenced_params` on `UnownedNdbNote` to do so
                 guard let event = noteLender.justGetACopy() else { continue }
                 if event.referenced_params.first?.param.string() == naddr.identifier {
@@ -307,7 +344,7 @@ extension NostrNetworkManager {
             var has_event = false
             guard let filter else { return nil }
             
-            for await noteLender in self.streamNotesUntilEndOfStoredEvents(filters: [filter], to: find_from) {
+            for await noteLender in self.streamExistingEvents(filters: [filter], to: find_from) {
                 let foundEvent: FoundEvent? = try? noteLender.borrow({ event in
                     switch query {
                     case .profile:
@@ -363,7 +400,7 @@ extension NostrNetworkManager {
     enum StreamItem {
         /// An event which can be borrowed from NostrDB
         case event(lender: NdbNoteLender)
-        /// The canonical "end of stored events". See implementations of `subscribe` to see when this event is fired in relation to other EOSEs
+        /// The canonical generic "end of stored events", which depends on the stream mode. See `StreamMode` to see when this event is fired in relation to other EOSEs
         case eose
         /// "End of stored events" from NostrDB.
         case ndbEose
@@ -385,5 +422,13 @@ extension NostrNetworkManager {
                 return "NETWORK EOSE"
             }
         }
+    }
+    
+    /// The mode of streaming
+    enum StreamMode {
+        /// Returns notes exclusively through NostrDB, treating it as the only channel for information in the pipeline. Generic EOSE is fired when EOSE is received from NostrDB
+        case ndbFirst
+        /// Returns notes from both NostrDB and the network, in parallel, treating it with similar importance against the network relays. Generic EOSE is fired when EOSE is received from both the network and NostrDB
+        case ndbAndNetworkParallel
     }
 }

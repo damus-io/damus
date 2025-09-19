@@ -110,7 +110,7 @@ enum NdbNoteLender: Sendable {
             return try self.getCopy()
         }
         catch {
-            assertionFailure("Unexpected error while fetching a copy of an NdbNote: \(error.localizedDescription)")
+//            assertionFailure("Unexpected error while fetching a copy of an NdbNote: \(error.localizedDescription)")
             Log.error("Unexpected error while fetching a copy of an NdbNote: %s", for: .ndb, error.localizedDescription)
         }
         return nil

@@ -33,6 +33,7 @@ class NostrNetworkManager {
     let postbox: PostBox
     /// Handles subscriptions and functions to read or consume data from the Nostr network
     let reader: SubscriptionManager
+    let profilesManager: ProfilesManager
     
     init(delegate: Delegate) {
         self.delegate = delegate
@@ -43,6 +44,7 @@ class NostrNetworkManager {
         self.reader = reader
         self.userRelayList = userRelayList
         self.postbox = PostBox(pool: pool)
+        self.profilesManager = ProfilesManager(subscriptionManager: reader, ndb: delegate.ndb)
     }
     
     // MARK: - Control functions
@@ -51,6 +53,7 @@ class NostrNetworkManager {
     func connect() {
         self.userRelayList.connect()
         self.pool.open = true
+        Task { await self.profilesManager.load() }
     }
     
     func disconnect() {

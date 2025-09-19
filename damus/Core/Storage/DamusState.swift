@@ -9,7 +9,7 @@ import Foundation
 import LinkPresentation
 import EmojiPicker
 
-class DamusState: HeadlessDamusState {
+class DamusState: HeadlessDamusState, ObservableObject {
     let keypair: Keypair
     let likes: EventCounter
     let boosts: EventCounter

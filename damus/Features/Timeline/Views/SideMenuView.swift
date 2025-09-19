@@ -104,7 +104,7 @@ struct SideMenuView: View {
         return VStack(alignment: .leading) {
             HStack(spacing: 10) {
                 
-                ProfilePicView(pubkey: damus_state.pubkey, size: 50, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                ProfilePicView(pubkey: damus_state.pubkey, size: 50, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
                 
                 Spacer()
                 

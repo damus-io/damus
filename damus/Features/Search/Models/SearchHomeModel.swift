@@ -62,19 +62,13 @@ class SearchHomeModel: ObservableObject {
         var follow_list_filter = NostrFilter(kinds: [.follow_list])
         follow_list_filter.until = UInt32(Date.now.timeIntervalSince1970)
         
-        for await noteLender in damus_state.nostrNetwork.reader.streamNotesUntilEndOfStoredEvents(filters: [follow_list_filter], to: to_relays) {
+        for await noteLender in damus_state.nostrNetwork.reader.streamExistingEvents(filters: [follow_list_filter], to: to_relays) {
             await noteLender.justUseACopy({ await self.handleFollowPackEvent($0) })
         }
         
-        for await noteLender in damus_state.nostrNetwork.reader.streamNotesUntilEndOfStoredEvents(filters: [get_base_filter()], to: to_relays) {
+        for await noteLender in damus_state.nostrNetwork.reader.streamExistingEvents(filters: [get_base_filter()], to: to_relays) {
             await noteLender.justUseACopy({ await self.handleEvent($0) })
         }
-        
-        guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
-        let allEvents = events.all_events + followPackEvents.all_events
-        let task = load_profiles(context: "universe", load: .from_events(allEvents), damus_state: damus_state, txn: txn)
-        
-        try? await task?.value
         
         DispatchQueue.main.async {
             self.loading = false
@@ -144,28 +138,3 @@ enum PubkeysToLoad {
     case from_events([NostrEvent])
     case from_keys([Pubkey])
 }
-
-func load_profiles<Y>(context: String, load: PubkeysToLoad, damus_state: DamusState, txn: NdbTxn<Y>) -> Task<Void, any Error>? {
-    let authors = find_profiles_to_fetch(profiles: damus_state.profiles, load: load, cache: damus_state.events, txn: txn)
-
-    guard !authors.isEmpty else {
-        return nil
-    }
-    
-    return Task {
-        print("load_profiles[\(context)]: requesting \(authors.count) profiles from relay pool")
-        let filter = NostrFilter(kinds: [.metadata], authors: authors)
-        
-        for await noteLender in damus_state.nostrNetwork.reader.streamNotesUntilEndOfStoredEvents(filters: [filter]) {
-            let now = UInt64(Date.now.timeIntervalSince1970)
-            try noteLender.borrow { event in
-                if event.known_kind == .metadata {
-                    damus_state.ndb.write_profile_last_fetched(pubkey: event.pubkey, fetched_at: now)
-                }
-            }
-        }
-        
-        print("load_profiles[\(context)]: done loading \(authors.count) profiles from relay pool")
-    }
-}
-

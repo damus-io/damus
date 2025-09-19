@@ -26,7 +26,7 @@ struct ReplyQuoteView: View {
             VStack(alignment: .leading) {
                 HStack(alignment: .center) {
                     if can_show_event {
-                        ProfilePicView(pubkey: event.pubkey, size: 14, highlight: .reply, profiles: state.profiles, disable_animation: false)
+                        ProfilePicView(pubkey: event.pubkey, size: 14, highlight: .reply, profiles: state.profiles, disable_animation: false, damusState: state)
                         let blur_images = should_blur_images(settings: state.settings, contacts: state.contacts, ev: event, our_pubkey: state.pubkey)
                         NoteContentView(damus_state: state, event: event, blur_images: blur_images, size: .small, options: options)
                             .font(.callout)

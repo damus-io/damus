@@ -18,16 +18,12 @@ struct CondensedProfilePicturesView: View {
         // Using ZStack to make profile pictures floating and stacked on top of each other.
         ZStack {
             ForEach((0..<model.maxPictures).reversed(), id: \.self) { index in
-                ProfilePicView(pubkey: model.pubkeys[index], size: 32.0, highlight: .none, profiles: model.state.profiles, disable_animation: model.state.settings.disable_animation)
+                ProfilePicView(pubkey: model.pubkeys[index], size: 32.0, highlight: .none, profiles: model.state.profiles, disable_animation: model.state.settings.disable_animation, damusState: model.state)
                     .offset(x: CGFloat(index) * 20)
             }
         }
         // Padding is needed so that other components drawn adjacent to this view don't get drawn on top.
         .padding(.trailing, CGFloat((model.maxPictures - 1) * 20))
-        .onAppear {
-            self.model.load()
-        }
-        
     }
 }
 

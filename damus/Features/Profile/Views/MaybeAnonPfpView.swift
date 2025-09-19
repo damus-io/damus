@@ -28,7 +28,7 @@ struct MaybeAnonPfpView: View {
                     .font(.largeTitle)
                     .frame(width: size, height: size)
             } else {
-                ProfilePicView(pubkey: pubkey, size: size, highlight: .none, profiles: state.profiles, disable_animation: state.settings.disable_animation, show_zappability: true)
+                ProfilePicView(pubkey: pubkey, size: size, highlight: .none, profiles: state.profiles, disable_animation: state.settings.disable_animation, show_zappability: true, damusState: state)
                     .onTapGesture {
                         show_profile_action_sheet_if_enabled(damus_state: state, pubkey: pubkey)
                     }

@@ -819,7 +819,7 @@ struct TopbarSideMenuButton: View {
         Button {
             isSideBarOpened.toggle()
         } label: {
-            ProfilePicView(pubkey: damus_state.pubkey, size: 32, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+            ProfilePicView(pubkey: damus_state.pubkey, size: 32, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
                 .opacity(isSideBarOpened ? 0 : 1)
                 .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
                 .accessibilityHidden(true)  // Knowing there is a profile picture here leads to no actionable outcome to VoiceOver users, so it is best not to show it

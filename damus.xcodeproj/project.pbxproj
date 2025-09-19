@@ -1161,6 +1161,12 @@
 		D72A2D022AD9C136002AFF62 /* EventViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2CFF2AD9B66B002AFF62 /* EventViewTests.swift */; };
 		D72A2D052AD9C1B5002AFF62 /* MockDamusState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2D042AD9C1B5002AFF62 /* MockDamusState.swift */; };
 		D72A2D072AD9C1FB002AFF62 /* MockProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2D062AD9C1FB002AFF62 /* MockProfiles.swift */; };
+		D72B6FA22E7DFB450050CD1D /* ProfilesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72B6FA12E7DFB3F0050CD1D /* ProfilesManager.swift */; };
+		D72B6FA32E7DFB450050CD1D /* ProfilesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72B6FA12E7DFB3F0050CD1D /* ProfilesManager.swift */; };
+		D72B6FA42E7DFB450050CD1D /* ProfilesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72B6FA12E7DFB3F0050CD1D /* ProfilesManager.swift */; };
+		D72B6FA62E7E06AD0050CD1D /* ProfileObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72B6FA52E7E06A40050CD1D /* ProfileObserver.swift */; };
+		D72B6FA72E7E06AD0050CD1D /* ProfileObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72B6FA52E7E06A40050CD1D /* ProfileObserver.swift */; };
+		D72B6FA92E7E06AD0050CD1D /* ProfileObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72B6FA52E7E06A40050CD1D /* ProfileObserver.swift */; };
 		D72C01312E78C10500AACB67 /* CondensedProfilePicturesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72C01302E78C0FB00AACB67 /* CondensedProfilePicturesViewModel.swift */; };
 		D72C01322E78C10500AACB67 /* CondensedProfilePicturesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72C01302E78C0FB00AACB67 /* CondensedProfilePicturesViewModel.swift */; };
 		D72C01332E78C10500AACB67 /* CondensedProfilePicturesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72C01302E78C0FB00AACB67 /* CondensedProfilePicturesViewModel.swift */; };
@@ -2614,6 +2620,8 @@
 		D72A2CFF2AD9B66B002AFF62 /* EventViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventViewTests.swift; sourceTree = "<group>"; };
 		D72A2D042AD9C1B5002AFF62 /* MockDamusState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDamusState.swift; sourceTree = "<group>"; };
 		D72A2D062AD9C1FB002AFF62 /* MockProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockProfiles.swift; sourceTree = "<group>"; };
+		D72B6FA12E7DFB3F0050CD1D /* ProfilesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilesManager.swift; sourceTree = "<group>"; };
+		D72B6FA52E7E06A40050CD1D /* ProfileObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileObserver.swift; sourceTree = "<group>"; };
 		D72C01302E78C0FB00AACB67 /* CondensedProfilePicturesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CondensedProfilePicturesViewModel.swift; sourceTree = "<group>"; };
 		D72E12772BEED22400F4F781 /* Array.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Array.swift; sourceTree = "<group>"; };
 		D72E12792BEEEED000F4F781 /* NostrFilterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrFilterTests.swift; sourceTree = "<group>"; };
@@ -3105,6 +3113,7 @@
 		4C75EFAB28049CC80006080F /* Nostr */ = {
 			isa = PBXGroup;
 			children = (
+				D72B6FA52E7E06A40050CD1D /* ProfileObserver.swift */,
 				4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */,
 				50A60D132A28BEEE00186190 /* RelayLog.swift */,
 				4C75EFA527FF87A20006080F /* Nostr.swift */,
@@ -4907,6 +4916,7 @@
 		D73BDB122D71212600D69970 /* NostrNetworkManager */ = {
 			isa = PBXGroup;
 			children = (
+				D72B6FA12E7DFB3F0050CD1D /* ProfilesManager.swift */,
 				D733F9E02D92C1AA00317B11 /* SubscriptionManager.swift */,
 				D73BDB172D71310C00D69970 /* UserRelayListErrors.swift */,
 				D73BDB132D71215F00D69970 /* UserRelayListManager.swift */,
@@ -5712,6 +5722,7 @@
 				4C64305C2A945AFF00B0C0E9 /* MusicController.swift in Sources */,
 				5053ACA72A56DF3B00851AE3 /* DeveloperSettingsView.swift in Sources */,
 				F79C7FAD29D5E9620000F946 /* EditPictureControl.swift in Sources */,
+				D72B6FA62E7E06AD0050CD1D /* ProfileObserver.swift in Sources */,
 				4C011B5F2BD0A56A002F2F9B /* ChatroomThreadView.swift in Sources */,
 				4C9F18E229AA9B6C008C55EC /* CustomizeZapView.swift in Sources */,
 				4C2859602A12A2BE004746F7 /* SupporterBadge.swift in Sources */,
@@ -5764,6 +5775,7 @@
 				4C5F9114283D694D0052CD1C /* FollowTarget.swift in Sources */,
 				5C0567582C8FBC560073F23A /* NDBSearchView.swift in Sources */,
 				D72341192B6864F200E1E135 /* DamusPurpleEnvironment.swift in Sources */,
+				D72B6FA32E7DFB450050CD1D /* ProfilesManager.swift in Sources */,
 				4CF0ABD629817F5B00D66079 /* ReportView.swift in Sources */,
 				D71528002E0A3D6900C893D6 /* InterestList.swift in Sources */,
 				4C1A9A2729DDE31900516EAC /* TranslationSettingsView.swift in Sources */,
@@ -6064,6 +6076,7 @@
 				82D6FAC12CD99F7900C925F4 /* AsciiCharacter.swift in Sources */,
 				82D6FAC22CD99F7900C925F4 /* NdbTagElem.swift in Sources */,
 				82D6FAC32CD99F7900C925F4 /* Ndb.swift in Sources */,
+				D72B6FA92E7E06AD0050CD1D /* ProfileObserver.swift in Sources */,
 				82D6FAC42CD99F7900C925F4 /* NdbTagsIterator.swift in Sources */,
 				82D6FAC52CD99F7900C925F4 /* NdbTxn.swift in Sources */,
 				82D6FAC72CD99F7900C925F4 /* midl.c in Sources */,
@@ -6124,6 +6137,7 @@
 				82D6FB052CD99F7900C925F4 /* MusicController.swift in Sources */,
 				82D6FB062CD99F7900C925F4 /* UserStatusView.swift in Sources */,
 				82D6FB072CD99F7900C925F4 /* UserStatus.swift in Sources */,
+				D72B6FA22E7DFB450050CD1D /* ProfilesManager.swift in Sources */,
 				5CB017262D42C5C400A9ED05 /* TransactionsView.swift in Sources */,
 				82D6FB082CD99F7900C925F4 /* UserStatusSheet.swift in Sources */,
 				82D6FB092CD99F7900C925F4 /* SearchHeaderView.swift in Sources */,
@@ -6551,6 +6565,7 @@
 				D73E5E242C6A97F4007EB227 /* FollowedNotify.swift in Sources */,
 				D73E5E252C6A97F4007EB227 /* FollowNotify.swift in Sources */,
 				D73E5E262C6A97F4007EB227 /* LikedNotify.swift in Sources */,
+				D72B6FA42E7DFB450050CD1D /* ProfilesManager.swift in Sources */,
 				D73E5E272C6A97F4007EB227 /* LocalNotificationNotify.swift in Sources */,
 				D73E5F8B2C6AA6A2007EB227 /* UserStatusSheet.swift in Sources */,
 				D73E5E282C6A97F4007EB227 /* LoginNotify.swift in Sources */,
@@ -6664,6 +6679,7 @@
 				D73E5E8A2C6A97F4007EB227 /* PurpleStoreKitManager.swift in Sources */,
 				D733F9E72D92C76100317B11 /* UnownedNdbNote.swift in Sources */,
 				D73E5E8E2C6A97F4007EB227 /* ImageResizer.swift in Sources */,
+				D72B6FA72E7E06AD0050CD1D /* ProfileObserver.swift in Sources */,
 				D78F080E2D7F78EF00FC6C75 /* Request.swift in Sources */,
 				D73E5E8F2C6A97F4007EB227 /* PhotoCaptureProcessor.swift in Sources */,
 				D773BC602C6D538500349F0A /* CommentItem.swift in Sources */,
