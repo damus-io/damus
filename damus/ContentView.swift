@@ -744,7 +744,7 @@ struct ContentView: View {
         }
         damus_state.nostrNetwork.connect()
         // TODO: Move this to a better spot. Not sure what is the best signal to listen to for sending initial filters
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: {
             self.home.send_initial_filters()
         })
     }
