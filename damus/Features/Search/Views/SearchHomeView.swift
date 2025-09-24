@@ -126,12 +126,6 @@ struct SearchHomeView: View {
         .onDisappear {
             loadingTask?.cancel()
         }
-        .refreshable {
-            // Fetch new information by unsubscribing and resubscribing to the relay
-            loadingTask?.cancel()
-            loadingTask = Task { await model.reload() }
-            try? await loadingTask?.value
-        }
     }
 }
 
