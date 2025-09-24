@@ -66,9 +66,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
     var should_debounce_dms = true
 
     var homeHandlerTask: Task<Void, Never>?
-    var contactsHandlerTask: Task<Void, Never>?
     var notificationsHandlerTask: Task<Void, Never>?
-    var dmsHandlerTask: Task<Void, Never>?
+    var generalHandlerTask: Task<Void, Never>?
     var nwcHandlerTask: Task<Void, Never>?
     
     @Published var loading: Bool = true
@@ -454,8 +453,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
             let id = UUID()
             Log.info("Initial filter task started with ID %s", for: .homeModel, id.uuidString)
             let filter = NostrFilter(kinds: [.contacts], limit: 1, authors: [damus_state.pubkey])
-            for await event in damus_state.nostrNetwork.reader.streamIndefinitely(filters: [filter]) {
-                await event.justUseACopy({ await process_event(ev: $0, context: .initialContactList) })
+            for await event in damus_state.nostrNetwork.reader.streamExistingEvents(filters: [filter]) {
+                await event.justUseACopy({ await process_event(ev: $0, context: .other) })
                 if !done_init {
                     done_init = true
                     Log.info("Initial filter task %s: Done initialization; Elapsed time: %.2f seconds", for: .homeModel, id.uuidString, CFAbsoluteTimeGetCurrent() - startTime)
@@ -463,13 +462,6 @@ class HomeModel: ContactsDelegate, ObservableObject {
                 }
             }
             
-        }
-        
-        Task {
-            let relayListFilter = NostrFilter(kinds: [.relay_list], limit: 1, authors: [damus_state.pubkey])
-            for await event in damus_state.nostrNetwork.reader.streamIndefinitely(filters: [relayListFilter]) {
-                await event.justUseACopy({ await process_event(ev: $0, context: .initialRelayList) })
-            }
         }
     }
 
@@ -517,36 +509,31 @@ class HomeModel: ContactsDelegate, ObservableObject {
 
         var notifications_filters = [notifications_filter]
         let contacts_filter_chunks = contacts_filter.chunked(on: .authors, into: MAX_CONTACTS_ON_FILTER)
-        var contacts_filters = contacts_filter_chunks + [our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter]
+        var contacts_filters = [our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter] + contacts_filter_chunks
         var dms_filters = [dms_filter, our_dms_filter]
 
         //print_filters(relay_id: relay_id, filters: [home_filters, contacts_filters, notifications_filters, dms_filters])
 
         subscribe_to_home_filters()
 
-        
-        self.contactsHandlerTask?.cancel()
-        self.contactsHandlerTask = Task {
-            for await event in damus_state.nostrNetwork.reader.streamIndefinitely(filters: contacts_filters) {
-                await event.justUseACopy({ await process_event(ev: $0, context: .contacts) })
-            }
-        }
         self.notificationsHandlerTask?.cancel()
         self.notificationsHandlerTask = Task {
             for await event in damus_state.nostrNetwork.reader.streamIndefinitely(filters: notifications_filters) {
                 await event.justUseACopy({ await process_event(ev: $0, context: .notifications) })
             }
         }
-        self.dmsHandlerTask?.cancel()
-        self.dmsHandlerTask = Task {
-            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: dms_filters) {
+        self.generalHandlerTask?.cancel()
+        self.generalHandlerTask = Task {
+            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: dms_filters + contacts_filters) {
                 switch item {
                 case .event(let lender):
-                    await lender.justUseACopy({ await process_event(ev: $0, context: .dms) })
+                    await lender.justUseACopy({ await process_event(ev: $0, context: .other) })
                 case .eose:
                     var dms = dms.dms.flatMap { $0.events }
                     dms.append(contentsOf: incoming_dms)
-                case .ndbEose: break
+                case .ndbEose:
+                    var dms = dms.dms.flatMap { $0.events }
+                    dms.append(contentsOf: incoming_dms)
                 case .networkEose: break
                 }
             }
@@ -560,7 +547,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
                 filter.authors = [nwc.pubkey]
                 filter.limit = 0
                 for await event in damus_state.nostrNetwork.reader.streamIndefinitely(filters: [filter], to: [nwc.relay]) {
-                    await event.justUseACopy({ await process_event(ev: $0, context: .nwc) })
+                    await event.justUseACopy({ await process_event(ev: $0, context: .other) })
                 }
             }
             
@@ -647,13 +634,9 @@ class HomeModel: ContactsDelegate, ObservableObject {
     
     /// Adapter pattern to make migration easier
     enum SubscriptionContext {
-        case initialContactList
-        case initialRelayList
         case home
         case notifications
-        case dms
-        case contacts
-        case nwc
+        case other
     }
 
     @MainActor
@@ -780,7 +763,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
             Task { await insert_home_event(ev) }
         case .notifications:
             handle_notification(ev: ev)
-        case .dms, .contacts, .initialRelayList, .initialContactList, .nwc:
+        case .other:
             break
         }
     }
