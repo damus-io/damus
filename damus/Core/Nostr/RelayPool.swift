@@ -269,13 +269,22 @@ class RelayPool {
                     }
                 }
             }, to: desiredRelays)
-            Task {
+            let timeoutTask = Task {
                 try? await Task.sleep(for: eoseTimeout)
                 if !eoseSent { continuation.yield(with: .success(.eose)) }
             }
-            continuation.onTermination = { @Sendable _ in
+            continuation.onTermination = { @Sendable termination in
+                switch termination {
+                case .finished:
+                    Log.debug("RelayPool subscription %s finished. Closing.", for: .networking, sub_id)
+                case .cancelled:
+                    Log.debug("RelayPool subscription %s cancelled. Closing.", for: .networking, sub_id)
+                @unknown default:
+                    break
+                }
                 self.unsubscribe(sub_id: sub_id, to: desiredRelays)
                 self.remove_handler(sub_id: sub_id)
+                timeoutTask.cancel()
             }
         }
     }
