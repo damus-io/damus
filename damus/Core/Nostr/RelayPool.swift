@@ -45,8 +45,8 @@ class RelayPool {
     private var last_network_status: NWPath.Status = .unsatisfied
     
     /// The limit of maximum concurrent subscriptions. Any subscriptions beyond this limit will be paused until subscriptions clear
-    /// This is to avoid error states and undefined behaviour related to hitting subscription limits on the relays, by letting those wait instead — with the principle that slower is better than broken.
-    static let MAX_CONCURRENT_SUBSCRIPTION_LIMIT = 10   // This number is only an educated guess at this point.
+    /// This is to avoid error states and undefined behaviour related to hitting subscription limits on the relays, by letting those wait instead — with the principle that although slower is not ideal, it is better than completely broken.
+    static let MAX_CONCURRENT_SUBSCRIPTION_LIMIT = 14   // This number is only an educated guess based on some local experiments.
 
     func close() {
         disconnect()
