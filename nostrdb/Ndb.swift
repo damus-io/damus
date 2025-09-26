@@ -623,6 +623,7 @@ class Ndb {
     /// - Returns: Array of note keys matching the filters
     /// - Throws: NdbStreamError if the query fails
     func query<Y>(with txn: NdbTxn<Y>, filters: [NdbFilter], maxResults: Int) throws(NdbStreamError) -> [NoteKey] {
+        guard !self.is_closed else { throw .ndbClosed }
         let filtersPointer = UnsafeMutablePointer<ndb_filter>.allocate(capacity: filters.count)
         defer { filtersPointer.deallocate() }
         
@@ -636,6 +637,7 @@ class Ndb {
         let results = UnsafeMutablePointer<ndb_query_result>.allocate(capacity: maxResults)
         defer { results.deallocate() }
         
+        guard !self.is_closed else { throw .ndbClosed }
         guard ndb_query(&txn.txn, filtersPointer, Int32(filters.count), results, Int32(maxResults), count) == 1 else {
             throw NdbStreamError.initialQueryFailed
         }
@@ -707,6 +709,7 @@ class Ndb {
     }
     
     func subscribe(filters: [NdbFilter], maxSimultaneousResults: Int = 1000) throws(NdbStreamError) -> AsyncStream<StreamItem> {
+        guard !self.is_closed else { throw .ndbClosed }
         // Fetch initial results
         guard let txn = NdbTxn(ndb: self) else { throw .cannotOpenTransaction }
         
@@ -914,6 +917,7 @@ extension Ndb {
         case initialQueryFailed
         case timeout
         case cancelled
+        case ndbClosed
     }
     
     /// An error that may happen when looking something up
