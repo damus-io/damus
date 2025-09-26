@@ -49,9 +49,11 @@ extension NostrNetworkManager {
             }
         }
         
-        func stop() {
+        func stop() async {
             self.subscriptionSwitcherTask?.cancel()
             self.profileListenerTask?.cancel()
+            try? await self.subscriptionSwitcherTask?.value
+            try? await self.profileListenerTask?.value
         }
         
         private func restartProfileListenerTask() {

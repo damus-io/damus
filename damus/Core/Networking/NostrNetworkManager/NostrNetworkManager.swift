@@ -47,7 +47,7 @@ class NostrNetworkManager {
         self.profilesManager = ProfilesManager(subscriptionManager: reader, ndb: delegate.ndb)
     }
     
-    // MARK: - Control functions
+    // MARK: - Control and lifecycle functions
     
     /// Connects the app to the Nostr network
     func connect() {
@@ -58,6 +58,12 @@ class NostrNetworkManager {
     
     func disconnect() {
         self.pool.disconnect()
+    }
+    
+    func close() async {
+        await self.reader.cancelAllTasks()
+        await self.profilesManager.stop()
+        pool.close()
     }
     
     func ping() {
@@ -136,14 +142,6 @@ class NostrNetworkManager {
         
         print("damus-donation donating...")
         WalletConnect.pay(url: nwc, pool: self.pool, post: self.postbox, invoice: invoice, zap_request: nil, delay: nil)
-    }
-    
-    
-    // MARK: - App lifecycle functions
-    
-    func close() async {
-        await self.reader.cancelAllTasks()
-        pool.close()
     }
 }
 
