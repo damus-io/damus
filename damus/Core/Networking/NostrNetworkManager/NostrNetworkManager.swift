@@ -61,9 +61,18 @@ class NostrNetworkManager {
     }
     
     func close() async {
-        await self.reader.cancelAllTasks()
-        await self.profilesManager.stop()
-        pool.close()
+        await withTaskGroup { group in
+            // Spawn each cancellation task in parallel for faster execution speed
+            group.addTask {
+                await self.reader.cancelAllTasks()
+            }
+            group.addTask {
+                await self.profilesManager.stop()
+            }
+            pool.close()
+            // But await on each one to prevent race conditions
+            for await value in group { continue }
+        }
     }
     
     func ping() {

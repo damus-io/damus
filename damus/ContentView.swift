@@ -513,9 +513,21 @@ struct ContentView: View {
             switch phase {
             case .background:
                 print("txn: 📙 DAMUS BACKGROUNDED")
+                let bgTask = this_app.beginBackgroundTask(withName: "Closing things down gracefully", expirationHandler: { [weak damus_state] in
+                    Log.error("App background signal handling: RUNNING OUT OF TIME! JUST CLOSE NDB DIRECTLY!", for: .app_lifecycle)
+                    // Background time about to expire, so close ndb directly.
+                    // This may still cause a memory error crash if subscription tasks have not been properly closed yet, but that is less likely than a 0xdead10cc crash if we don't do anything here.
+                    damus_state?.ndb.close()
+                })
+                
                 damusClosingTask = Task { @MainActor in
+                    Log.debug("App background signal handling: App being backgrounded", for: .app_lifecycle)
+                    let startTime = CFAbsoluteTimeGetCurrent()
                     await damus_state.nostrNetwork.close()  // Close ndb streaming tasks before closing ndb to avoid memory errors
+                    Log.debug("App background signal handling: Nostr network closed after %.2f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - startTime)
                     damus_state.ndb.close()
+                    Log.debug("App background signal handling: Ndb closed after %.2f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - startTime)
+                    this_app.endBackgroundTask(bgTask)
                 }
                 break
             case .inactive:

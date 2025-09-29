@@ -42,6 +42,7 @@ extension NostrNetworkManager {
                     try await Task.sleep(for: .seconds(1))
                     try Task.checkCancellation()
                     if subscriptionNeedsUpdate {
+                        try Task.checkCancellation()
                         self.restartProfileListenerTask()
                         subscriptionNeedsUpdate = false
                     }
@@ -50,10 +51,19 @@ extension NostrNetworkManager {
         }
         
         func stop() async {
-            self.subscriptionSwitcherTask?.cancel()
-            self.profileListenerTask?.cancel()
-            try? await self.subscriptionSwitcherTask?.value
-            try? await self.profileListenerTask?.value
+            await withTaskGroup { group in
+                // Spawn each cancellation in parallel for better execution speed
+                group.addTask {
+                    await self.subscriptionSwitcherTask?.cancel()
+                    try? await self.subscriptionSwitcherTask?.value
+                }
+                group.addTask {
+                    await self.profileListenerTask?.cancel()
+                    try? await self.profileListenerTask?.value
+                }
+                // But await for all of them to be done before returning to avoid race conditions
+                for await value in group { continue }
+            }
         }
         
         private func restartProfileListenerTask() {
@@ -70,6 +80,7 @@ extension NostrNetworkManager {
             let pubkeys = Array(streams.keys)
             guard pubkeys.count > 0 else { return }
             let profileFilter = NostrFilter(kinds: [.metadata], authors: pubkeys)
+            try Task.checkCancellation()
             for await ndbLender in self.subscriptionManager.streamIndefinitely(filters: [profileFilter], streamMode: .ndbFirst) {
                 try Task.checkCancellation()
                 try? ndbLender.borrow { ev in

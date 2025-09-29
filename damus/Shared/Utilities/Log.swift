@@ -14,6 +14,7 @@ enum LogCategory: String {
     case render
     case storage
     case networking
+    case app_lifecycle
     case subscription_manager
     case timeline
     /// Logs related to Nostr Wallet Connect components

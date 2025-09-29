@@ -387,12 +387,21 @@ extension NostrNetworkManager {
             }
             
             func cancelAllTasks() async {
-                Log.info("Cancelling all SubscriptionManager tasks", for: .subscription_manager)
-                for (taskId, _) in self.tasks {
-                    Log.info("Cancelling SubscriptionManager task %s", for: .subscription_manager, taskId.uuidString)
-                    await cancelAndCleanUp(taskId: taskId)
+                await withTaskGroup { group in
+                    Log.info("Cancelling all SubscriptionManager tasks", for: .subscription_manager)
+                    // Start each task cancellation in parallel for faster execution
+                    for (taskId, _) in self.tasks {
+                        Log.info("Cancelling SubscriptionManager task %s", for: .subscription_manager, taskId.uuidString)
+                        group.addTask {
+                            await self.cancelAndCleanUp(taskId: taskId)
+                        }
+                    }
+                    // However, wait until all cancellations are complete to avoid race conditions.
+                    for await value in group {
+                        continue
+                    }
+                    Log.info("Cancelled all SubscriptionManager tasks", for: .subscription_manager)
                 }
-                Log.info("Cancelled all SubscriptionManager tasks", for: .subscription_manager)
             }
         }
     }
