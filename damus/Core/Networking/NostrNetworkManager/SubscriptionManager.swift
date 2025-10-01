@@ -254,13 +254,13 @@ extension NostrNetworkManager {
                 }
                 
                 Task {
+                    // Add the ndb streaming task to the task manager so that it can be cancelled when the app is backgrounded
                     let ndbStreamTaskId = await self.taskManager.add(task: ndbStreamTask)
-                    let streamTaskId = await self.taskManager.add(task: streamTask)
                     
                     continuation.onTermination = { @Sendable _ in
                         Task {
                             await self.taskManager.cancelAndCleanUp(taskId: ndbStreamTaskId)
-                            await self.taskManager.cancelAndCleanUp(taskId: streamTaskId)
+                            streamTask.cancel()
                         }
                     }
                 }

@@ -475,7 +475,7 @@ struct ContentView: View {
             }
         }
         .onReceive(handle_notify(.disconnect_relays)) { () in
-            damus_state.nostrNetwork.disconnect()
+            damus_state.nostrNetwork.disconnectRelays()
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { obj in
             print("txn: 📙 DAMUS ACTIVE NOTIFY")
@@ -523,7 +523,7 @@ struct ContentView: View {
                 damusClosingTask = Task { @MainActor in
                     Log.debug("App background signal handling: App being backgrounded", for: .app_lifecycle)
                     let startTime = CFAbsoluteTimeGetCurrent()
-                    await damus_state.nostrNetwork.close()  // Close ndb streaming tasks before closing ndb to avoid memory errors
+                    await damus_state.nostrNetwork.handleAppBackgroundRequest()  // Close ndb streaming tasks before closing ndb to avoid memory errors
                     Log.debug("App background signal handling: Nostr network closed after %.2f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - startTime)
                     damus_state.ndb.close()
                     Log.debug("App background signal handling: Ndb closed after %.2f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - startTime)
@@ -537,7 +537,8 @@ struct ContentView: View {
                 print("txn: 📙 DAMUS ACTIVE")
                 Task {
                     await damusClosingTask?.value  // Wait for the closing task to finish before reopening things, to avoid race conditions
-                    damus_state.nostrNetwork.connect()
+                    damusClosingTask = nil
+                    // Pinging the network will automatically reconnect any dead websocket connections
                     damus_state.nostrNetwork.ping()
                 }
             @unknown default:

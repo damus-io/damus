@@ -10,7 +10,7 @@ import Network
 
 struct RelayHandler {
     let sub_id: String
-    let callback: (RelayURL, NostrConnectionEvent) -> ()
+    var callback: (RelayURL, NostrConnectionEvent) -> ()
 }
 
 struct QueuedRequest {
@@ -95,7 +95,7 @@ class RelayPool {
 
     func remove_handler(sub_id: String) {
         self.handlers = handlers.filter { $0.sub_id != sub_id }
-        print("removing \(sub_id) handler, current: \(handlers.count)")
+        Log.debug("Removing %s handler, current: %d", for: .networking, sub_id, handlers.count)
     }
     
     func ping() {
@@ -112,16 +112,17 @@ class RelayPool {
             try? await Task.sleep(for: .seconds(1))
         }
         Log.debug("%s: Subscription pool cleared", for: .networking, sub_id)
-        for handler in handlers {
-            // don't add duplicate handlers
+        handlers = handlers.filter({ handler in
             if handler.sub_id == sub_id {
-                assertionFailure("Duplicate handlers are not allowed. Proper error handling for this has not been built yet.")
-                Log.error("Duplicate handlers are not allowed. Error handling for this has not been built yet.", for: .networking)
-                return
+                Log.error("Duplicate handler detected for the same subscription ID. Overriding.", for: .networking)
+                return false
             }
-        }
+            else {
+                return true
+            }
+        })
         self.handlers.append(RelayHandler(sub_id: sub_id, callback: handler))
-        print("registering \(sub_id) handler, current: \(self.handlers.count)")
+        Log.debug("Registering %s handler, current: %d", for: .networking, sub_id, self.handlers.count)
     }
 
     func remove_relay(_ relay_id: RelayURL) {
@@ -194,14 +195,17 @@ class RelayPool {
     }
 
     func connect(to: [RelayURL]? = nil) {
-        open = true
         let relays = to.map{ get_relays($0) } ?? self.relays
         for relay in relays {
             relay.connection.connect()
         }
+        // Mark as open last, to prevent other classes from pulling data before the relays are actually connected
+        open = true
     }
 
     func disconnect(to: [RelayURL]? = nil) {
+        // Mark as closed first, to prevent other classes from pulling data while the relays are being disconnected
+        open = false
         let relays = to.map{ get_relays($0) } ?? self.relays
         for relay in relays {
             relay.connection.disconnect()
@@ -218,9 +222,11 @@ class RelayPool {
     func subscribe(sub_id: String, filters: [NostrFilter], handler: @escaping (RelayURL, NostrConnectionEvent) -> (), to: [RelayURL]? = nil) {
         Task {
             await register_handler(sub_id: sub_id, handler: handler)
+            
             // When the caller specifies no relays, it is implied that the user wants to use the ones in the user relay list. Skip ephemeral relays in that case.
             // When the caller specifies specific relays, do not skip ephemeral relays to respect the exact list given by the caller.
             let shouldSkipEphemeralRelays = to == nil ? true : false
+            
             send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to, skip_ephemeral: shouldSkipEphemeralRelays)
         }
     }
@@ -299,6 +305,7 @@ class RelayPool {
     func subscribe_to(sub_id: String, filters: [NostrFilter], to: [RelayURL]?, handler: @escaping (RelayURL, NostrConnectionEvent) -> ()) {
         Task {
             await register_handler(sub_id: sub_id, handler: handler)
+            
             send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to)
         }
     }
@@ -313,7 +320,7 @@ class RelayPool {
         
         return c
     }
-
+    
     @MainActor
     func queue_req(r: NostrRequestType, relay: RelayURL, skip_ephemeral: Bool) {
         let count = count_queued(relay: relay)

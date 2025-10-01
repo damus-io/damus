@@ -236,9 +236,14 @@ extension NostrNetworkManager {
                 )
                 changed = true
             }
+            
+            // Always tell RelayPool to connect whether or not we are already connected.
+            // This is because:
+            // 1. Internally it won't redo the connection because of internal checks
+            // 2. Even if the relay list has not changed, relays may have been disconnected from app lifecycle or other events
+            pool.connect()
 
             if changed {
-                pool.connect()
                 notify(.relays_changed)
             }
         }

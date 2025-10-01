@@ -51,13 +51,16 @@ class NostrNetworkManager {
     
     /// Connects the app to the Nostr network
     func connect() {
-        self.userRelayList.connect()
-        self.pool.open = true
+        self.userRelayList.connect()    // Will load the user's list, apply it, and get RelayPool to connect to it.
         Task { await self.profilesManager.load() }
     }
     
-    func disconnect() {
+    func disconnectRelays() {
         self.pool.disconnect()
+    }
+    
+    func handleAppBackgroundRequest() async {
+        await self.reader.cancelAllTasks()
     }
     
     func close() async {
@@ -69,9 +72,9 @@ class NostrNetworkManager {
             group.addTask {
                 await self.profilesManager.stop()
             }
-            pool.close()
             // But await on each one to prevent race conditions
             for await value in group { continue }
+            pool.close()
         }
     }
     
