@@ -30,7 +30,7 @@ struct TransactionView: View {
         VStack(alignment: .leading) {
             HStack(alignment: .center) {
                 ZStack {
-                    ProfilePicView(pubkey: pubkey ?? ANON_PUBKEY, size: 45, highlight: .custom(.damusAdaptableBlack, 0.1), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, privacy_sensitive: true)
+                    ProfilePicView(pubkey: pubkey ?? ANON_PUBKEY, size: 45, highlight: .custom(.damusAdaptableBlack, 0.1), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, privacy_sensitive: true, damusState: damus_state)
                         .onTapGesture {
                             if let pubkey {
                                 damus_state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))

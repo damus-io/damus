@@ -63,7 +63,7 @@ struct DMChatView: View, KeyboardReadable {
     var Header: some View {
         return NavigationLink(value: Route.ProfileByKey(pubkey: pubkey)) {
             HStack {
-                ProfilePicView(pubkey: pubkey, size: 24, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                ProfilePicView(pubkey: pubkey, size: 24, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
 
                 ProfileName(pubkey: pubkey, damus: damus_state)
             }

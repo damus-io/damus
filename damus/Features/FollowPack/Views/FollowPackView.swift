@@ -131,7 +131,7 @@ struct FollowPackView: View {
             }
             
             HStack(alignment: .center) {
-                ProfilePicView(pubkey: event.event.pubkey, size: 25, highlight: .none, profiles: state.profiles, disable_animation: state.settings.disable_animation, show_zappability: true)
+                ProfilePicView(pubkey: event.event.pubkey, size: 25, highlight: .none, profiles: state.profiles, disable_animation: state.settings.disable_animation, show_zappability: true, damusState: state)
                     .onTapGesture {
                         state.nav.push(route: Route.ProfileByKey(pubkey: event.event.pubkey))
                     }

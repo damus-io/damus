@@ -10,7 +10,7 @@ import XCTest
 @testable import damus
 
 final class MutingTests: XCTestCase {
-    func testWordMuting() {
+    func testWordMuting() async {
         // Setup some test data
         let test_note = NostrEvent(
             content: "Nostr is the super app. Because it’s actually an ecosystem of apps, all of which make each other better. People haven’t grasped that yet. They will when it’s more accessible and onboarding is more straightforward and intuitive.",
@@ -25,7 +25,7 @@ final class MutingTests: XCTestCase {
         )!
         
         let mute_item: MuteItem = .word("airdrop", nil)
-        let existing_mutelist = test_damus_state.mutelist_manager.event
+        let existing_mutelist = await test_damus_state.mutelist_manager.event
 
         guard
             let full_keypair = test_damus_state.keypair.to_full(),
@@ -34,10 +34,12 @@ final class MutingTests: XCTestCase {
             return
         }
 
-        test_damus_state.mutelist_manager.set_mutelist(mutelist)
+        await test_damus_state.mutelist_manager.set_mutelist(mutelist)
         test_damus_state.nostrNetwork.postbox.send(mutelist)
         
-        XCTAssert(test_damus_state.mutelist_manager.is_event_muted(spammy_test_note))
-        XCTAssertFalse(test_damus_state.mutelist_manager.is_event_muted(test_note))
+        let spammy_note_muted = await test_damus_state.mutelist_manager.is_event_muted(spammy_test_note)
+        XCTAssert(spammy_note_muted)
+        let test_note_muted = await test_damus_state.mutelist_manager.is_event_muted(test_note)
+        XCTAssertFalse(test_note_muted)
     }
 }

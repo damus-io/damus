@@ -715,7 +715,6 @@ static inline int cursor_align(struct cursor *cur, int bytes) {
 
 	// pad to n-byte alignment
 	pad = ((size + (bytes-1)) & ~(bytes-1)) - size;
-
 	if (pad > 0 && !cursor_memset(cur, 0, pad))
 		return 0;
 

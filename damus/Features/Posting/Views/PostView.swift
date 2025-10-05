@@ -105,7 +105,7 @@ struct PostView: View {
         self.prompt_view = prompt_view
         self.placeholder_messages = placeholder_messages ?? [POST_PLACEHOLDER]
         self.initial_text_suffix = initial_text_suffix
-        self.autoSaveModel = AutoSaveIndicatorView.AutoSaveViewModel(save: { damus_state.drafts.save(damus_state: damus_state) })
+        self.autoSaveModel = AutoSaveIndicatorView.AutoSaveViewModel(save: { await damus_state.drafts.save(damus_state: damus_state) })
     }
 
     @Environment(\.dismiss) var dismiss
@@ -231,7 +231,7 @@ struct PostView: View {
                 damus_state.drafts.post = nil
         }
 
-        damus_state.drafts.save(damus_state: damus_state)
+        Task{ await damus_state.drafts.save(damus_state: damus_state) }
     }
     
     func load_draft() -> Bool {
@@ -388,7 +388,7 @@ struct PostView: View {
         HStack(alignment: .top, spacing: 0) {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .top) {
-                    ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                    ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
                     
                     VStack(alignment: .leading) {
                         if let prompt_view {

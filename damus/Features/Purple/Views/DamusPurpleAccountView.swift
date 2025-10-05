@@ -15,7 +15,7 @@ struct DamusPurpleAccountView: View {
     
     var body: some View {
         VStack {
-            ProfilePicView(pubkey: account.pubkey, size: pfp_size, highlight: .custom(Color.black.opacity(0.4), 1.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+            ProfilePicView(pubkey: account.pubkey, size: pfp_size, highlight: .custom(Color.black.opacity(0.4), 1.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
                 .background(Color.black.opacity(0.4).clipShape(Circle()))
                 .shadow(color: .black, radius: 10, x: 0.0, y: 5)
             

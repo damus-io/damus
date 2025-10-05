@@ -20,7 +20,7 @@ struct RelayAdminDetail: View {
                     .fontWeight(.heavy)
                     .foregroundColor(DamusColors.mediumGrey)
                 if let pubkey = nip11?.pubkey {
-                    ProfilePicView(pubkey: pubkey, size: 40, highlight: .custom(.gray.opacity(0.5), 1), profiles: state.profiles, disable_animation: state.settings.disable_animation)
+                    ProfilePicView(pubkey: pubkey, size: 40, highlight: .custom(.gray.opacity(0.5), 1), profiles: state.profiles, disable_animation: state.settings.disable_animation, damusState: state)
                         .padding(.bottom, 5)
                         .onTapGesture {
                             state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))

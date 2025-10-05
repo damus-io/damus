@@ -129,7 +129,7 @@ struct UserStatusSheet: View {
                 Divider()
                 
                 ZStack(alignment: .top) {
-                    ProfilePicView(pubkey: keypair.pubkey, size: 120.0, highlight: .custom(DamusColors.white, 3.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                    ProfilePicView(pubkey: keypair.pubkey, size: 120.0, highlight: .custom(DamusColors.white, 3.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
                         .padding(.top, 30)
                     
                     VStack(spacing: 0) {

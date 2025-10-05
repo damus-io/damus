@@ -83,7 +83,7 @@ struct ChatEventView: View {
     
     var profile_picture_view: some View {
         VStack {
-            ProfilePicView(pubkey: event.pubkey, size: 32, highlight: .none, profiles: damus_state.profiles, disable_animation: disable_animation)
+            ProfilePicView(pubkey: event.pubkey, size: 32, highlight: .none, profiles: damus_state.profiles, disable_animation: disable_animation, damusState: damus_state)
                 .onTapGesture {
                     show_profile_action_sheet_if_enabled(damus_state: damus_state, pubkey: event.pubkey)
                 }

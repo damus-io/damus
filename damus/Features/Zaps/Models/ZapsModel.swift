@@ -11,7 +11,7 @@ class ZapsModel: ObservableObject {
     let state: DamusState
     let target: ZapTarget
     
-    let zaps_subid = UUID().description
+    var zapCommsListener: Task<Void, Never>? = nil
     let profiles_subid = UUID().description
     
     init(state: DamusState, target: ZapTarget) {
@@ -31,46 +31,28 @@ class ZapsModel: ObservableObject {
         case .note(let note_target):
             filter.referenced_ids = [note_target.note_id]
         }
-        state.nostrNetwork.pool.subscribe(sub_id: zaps_subid, filters: [filter], handler: handle_event)
+        zapCommsListener?.cancel()
+        zapCommsListener = Task {
+            for await event in state.nostrNetwork.reader.streamIndefinitely(filters: [filter]) {
+                await event.justUseACopy({ await self.handle_event(ev: $0) })
+            }
+        }
     }
     
     func unsubscribe() {
-        state.nostrNetwork.pool.unsubscribe(sub_id: zaps_subid)
+        zapCommsListener?.cancel()
+        zapCommsListener = nil
     }
-
+    
     @MainActor
-    func handle_event(relay_id: RelayURL, conn_ev: NostrConnectionEvent) {
-        guard case .nostr_event(let resp) = conn_ev else {
+    func handle_event(ev: NostrEvent) {
+        guard ev.kind == 9735,
+              let zapper = state.profiles.lookup_zapper(pubkey: target.pubkey),
+              let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper, our_privkey: state.keypair.privkey)
+        else {
             return
         }
         
-        guard resp.subid == zaps_subid else {
-            return
-        }
-        
-        switch resp {
-        case .ok:
-            break
-        case .notice:
-            break
-        case .eose:
-            let events = state.events.lookup_zaps(target: target).map { $0.request.ev }
-            guard let txn = NdbTxn(ndb: state.ndb) else { return }
-            load_profiles(context: "zaps_model", profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(events), damus_state: state, txn: txn)
-        case .event(_, let ev):
-            guard ev.kind == 9735,
-                  let zapper = state.profiles.lookup_zapper(pubkey: target.pubkey),
-                  let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper, our_privkey: state.keypair.privkey)
-            else {
-                return
-            }
-            
-            self.state.add_zap(zap: .zap(zap))
-        case .auth:
-            break
-        }
-        
-        
-        
+        self.state.add_zap(zap: .zap(zap))
     }
 }

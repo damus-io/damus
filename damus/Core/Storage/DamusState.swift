@@ -9,7 +9,7 @@ import Foundation
 import LinkPresentation
 import EmojiPicker
 
-class DamusState: HeadlessDamusState {
+class DamusState: HeadlessDamusState, ObservableObject {
     let keypair: Keypair
     let likes: EventCounter
     let boosts: EventCounter
@@ -72,7 +72,9 @@ class DamusState: HeadlessDamusState {
         self.favicon_cache = FaviconCache()
 
         let networkManagerDelegate = NostrNetworkManagerDelegate(settings: settings, contacts: contacts, ndb: ndb, keypair: keypair, relayModelCache: relay_model_cache, relayFilters: relay_filters)
-        self.nostrNetwork = NostrNetworkManager(delegate: networkManagerDelegate)
+        let nostrNetwork = NostrNetworkManager(delegate: networkManagerDelegate)
+        self.nostrNetwork = nostrNetwork
+        self.wallet.nostrNetwork = nostrNetwork
     }
     
     @MainActor
@@ -122,7 +124,7 @@ class DamusState: HeadlessDamusState {
             events: EventCache(ndb: ndb),
             bookmarks: BookmarksManager(pubkey: pubkey),
             replies: ReplyCounter(our_pubkey: pubkey),
-            wallet: WalletModel(settings: settings),
+            wallet: WalletModel(settings: settings), // nostrNetwork is connected after initialization
             nav: navigationCoordinator,
             music: MusicController(onChange: { _ in }),
             video: DamusVideoCoordinator(),
@@ -164,8 +166,10 @@ class DamusState: HeadlessDamusState {
             try await self.push_notification_client.revoke_token()
         }
         wallet.disconnect()
-        nostrNetwork.pool.close()
-        ndb.close()
+        Task {
+            await nostrNetwork.close()  // Close ndb streaming tasks before closing ndb to avoid memory errors
+            ndb.close()
+        }
     }
 
     static var empty: DamusState {
@@ -219,6 +223,7 @@ fileprivate extension DamusState {
         var latestContactListEvent: NostrEvent? { self.contacts.event }
         var bootstrapRelays: [RelayURL] { get_default_bootstrap_relays() }
         var developerMode: Bool { self.settings.developer_mode }
+        var experimentalLocalRelayModelSupport: Bool { self.settings.enable_experimental_local_relay_model }
         var relayModelCache: RelayModelCache
         var relayFilters: RelayFilters
         

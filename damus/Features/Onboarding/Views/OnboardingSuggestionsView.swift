@@ -56,7 +56,7 @@ struct OnboardingSuggestionsView: View {
         //     - We don't have other mechanisms to allow the user to edit this yet
         //
         // Therefore, it is better to just save it locally, and retrieve this once we build out https://github.com/damus-io/damus/issues/3042
-        model.damus_state.nostrNetwork.pool.send_raw_to_local_ndb(.typical(.event(event)))
+        model.damus_state.nostrNetwork.sendToNostrDB(event: event)
     }
 
     var body: some View {

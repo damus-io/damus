@@ -10,7 +10,9 @@ import Network
 
 struct RelayHandler {
     let sub_id: String
-    let callback: (RelayURL, NostrConnectionEvent) -> ()
+    let filters: [NostrFilter]?
+    let to: [RelayURL]?
+    var callback: (RelayURL, NostrConnectionEvent) -> ()
 }
 
 struct QueuedRequest {
@@ -19,9 +21,15 @@ struct QueuedRequest {
     let skip_ephemeral: Bool
 }
 
+struct SeenEvent: Hashable {
+    let relay_id: RelayURL
+    let evid: NoteId
+}
+
 /// Establishes and manages connections and subscriptions to a list of relays.
 class RelayPool {
     private(set) var relays: [Relay] = []
+    var open: Bool = false
     var handlers: [RelayHandler] = []
     var request_queue: [QueuedRequest] = []
     var seen: [NoteId: Set<RelayURL>] = [:]
@@ -31,14 +39,21 @@ class RelayPool {
     var keypair: Keypair?
     var message_received_function: (((String, RelayDescriptor)) -> Void)?
     var message_sent_function: (((String, Relay)) -> Void)?
+    var delegate: Delegate?
+    private(set) var signal: SignalModel = SignalModel()
 
-    private let network_monitor = NWPathMonitor()
+    let network_monitor = NWPathMonitor()
     private let network_monitor_queue = DispatchQueue(label: "io.damus.network_monitor")
     private var last_network_status: NWPath.Status = .unsatisfied
+    
+    /// The limit of maximum concurrent subscriptions. Any subscriptions beyond this limit will be paused until subscriptions clear
+    /// This is to avoid error states and undefined behaviour related to hitting subscription limits on the relays, by letting those wait instead — with the principle that although slower is not ideal, it is better than completely broken.
+    static let MAX_CONCURRENT_SUBSCRIPTION_LIMIT = 14   // This number is only an educated guess based on some local experiments.
 
     func close() {
         disconnect()
         relays = []
+        open = false
         handlers = []
         request_queue = []
         seen.removeAll()
@@ -82,7 +97,7 @@ class RelayPool {
 
     func remove_handler(sub_id: String) {
         self.handlers = handlers.filter { $0.sub_id != sub_id }
-        print("removing \(sub_id) handler, current: \(handlers.count)")
+        Log.debug("Removing %s handler, current: %d", for: .networking, sub_id, handlers.count)
     }
     
     func ping() {
@@ -92,15 +107,24 @@ class RelayPool {
         }
     }
 
-    func register_handler(sub_id: String, handler: @escaping (RelayURL, NostrConnectionEvent) -> ()) {
-        for handler in handlers {
-            // don't add duplicate handlers
-            if handler.sub_id == sub_id {
-                return
-            }
+    @MainActor
+    func register_handler(sub_id: String, filters: [NostrFilter]?, to relays: [RelayURL]? = nil, handler: @escaping (RelayURL, NostrConnectionEvent) -> ()) async {
+        while handlers.count > Self.MAX_CONCURRENT_SUBSCRIPTION_LIMIT {
+            Log.debug("%s: Too many subscriptions, waiting for subscription pool to clear", for: .networking, sub_id)
+            try? await Task.sleep(for: .seconds(1))
         }
-        self.handlers.append(RelayHandler(sub_id: sub_id, callback: handler))
-        print("registering \(sub_id) handler, current: \(self.handlers.count)")
+        Log.debug("%s: Subscription pool cleared", for: .networking, sub_id)
+        handlers = handlers.filter({ handler in
+            if handler.sub_id == sub_id {
+                Log.error("Duplicate handler detected for the same subscription ID. Overriding.", for: .networking)
+                return false
+            }
+            else {
+                return true
+            }
+        })
+        self.handlers.append(RelayHandler(sub_id: sub_id, filters: filters, to: relays, callback: handler))
+        Log.debug("Registering %s handler, current: %d", for: .networking, sub_id, self.handlers.count)
     }
 
     func remove_relay(_ relay_id: RelayURL) {
@@ -131,7 +155,7 @@ class RelayPool {
                   case .string(let str) = msg
             else { return }
 
-            let _ = self.ndb.process_event(str)
+            let _ = self.ndb.processEvent(str, originRelayURL: relay_id)
             self.message_received_function?((str, desc))
         })
         let relay = Relay(descriptor: desc, connection: conn)
@@ -177,12 +201,33 @@ class RelayPool {
         for relay in relays {
             relay.connection.connect()
         }
+        // Mark as open last, to prevent other classes from pulling data before the relays are actually connected
+        open = true
     }
 
     func disconnect(to: [RelayURL]? = nil) {
+        // Mark as closed first, to prevent other classes from pulling data while the relays are being disconnected
+        open = false
         let relays = to.map{ get_relays($0) } ?? self.relays
         for relay in relays {
             relay.connection.disconnect()
+        }
+    }
+    
+    /// Deletes queued up requests that should not persist between app sessions (i.e. when the app goes to background then back to foreground)
+    func cleanQueuedRequestForSessionEnd() {
+        request_queue = request_queue.filter { request in
+            guard case .typical(let typicalRequest) = request.req else { return true }
+            switch typicalRequest {
+            case .subscribe(_):
+                return true
+            case .unsubscribe(_):
+                return false    // Do not persist unsubscribe requests to prevent them to race against subscribe requests when we come back to the foreground.
+            case .event(_):
+                return true
+            case .auth(_):
+                return true
+            }
         }
     }
 
@@ -194,8 +239,15 @@ class RelayPool {
     }
 
     func subscribe(sub_id: String, filters: [NostrFilter], handler: @escaping (RelayURL, NostrConnectionEvent) -> (), to: [RelayURL]? = nil) {
-        register_handler(sub_id: sub_id, handler: handler)
-        send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to)
+        Task {
+            await register_handler(sub_id: sub_id, filters: filters, to: to, handler: handler)
+            
+            // When the caller specifies no relays, it is implied that the user wants to use the ones in the user relay list. Skip ephemeral relays in that case.
+            // When the caller specifies specific relays, do not skip ephemeral relays to respect the exact list given by the caller.
+            let shouldSkipEphemeralRelays = to == nil ? true : false
+            
+            send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to, skip_ephemeral: shouldSkipEphemeralRelays)
+        }
     }
     
     /// Subscribes to data from the `RelayPool` based on a filter and a list of desired relays.
@@ -203,12 +255,15 @@ class RelayPool {
     /// - Parameters:
     ///   - filters: The filters specifying the desired content.
     ///   - desiredRelays: The desired relays which to subsctibe to. If `nil`, it defaults to the `RelayPool`'s default list
-    ///   - eoseTimeout: The maximum timeout which to give up waiting for the eoseSignal, in seconds
+    ///   - eoseTimeout: The maximum timeout which to give up waiting for the eoseSignal
     /// - Returns: Returns an async stream that callers can easily consume via a for-loop
-    func subscribe(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, eoseTimeout: TimeInterval = 10) -> AsyncStream<StreamItem> {
-        let desiredRelays = desiredRelays ?? self.relays.map({ $0.descriptor.url })
+    func subscribe(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, eoseTimeout: Duration? = nil, id: UUID? = nil) -> AsyncStream<StreamItem> {
+        let eoseTimeout = eoseTimeout ?? .seconds(5)
+        let desiredRelays = desiredRelays ?? self.relays.filter({ $0.connection.isConnected }).map({ $0.descriptor.url })
+        let startTime = CFAbsoluteTimeGetCurrent()
         return AsyncStream<StreamItem> { continuation in
-            let sub_id = UUID().uuidString
+            let id = id ?? UUID()
+            let sub_id = id.uuidString
             var seenEvents: Set<NoteId> = []
             var relaysWhoFinishedInitialResults: Set<RelayURL> = []
             var eoseSent = false
@@ -229,6 +284,7 @@ class RelayPool {
                         break   // We do not support handling these yet
                     case .eose(_):
                         relaysWhoFinishedInitialResults.insert(relayUrl)
+                        Log.debug("RelayPool subscription %s: EOSE from %s. EOSE count: %d/%d. Elapsed: %.2f seconds.", for: .networking, id.uuidString, relayUrl.absoluteString, relaysWhoFinishedInitialResults.count, Set(desiredRelays).count, CFAbsoluteTimeGetCurrent() - startTime)
                         if relaysWhoFinishedInitialResults == Set(desiredRelays) {
                             continuation.yield(with: .success(.eose))
                             eoseSent = true
@@ -238,13 +294,22 @@ class RelayPool {
                     }
                 }
             }, to: desiredRelays)
-            Task {
-                try? await Task.sleep(nanoseconds: 1_000_000_000 * UInt64(eoseTimeout))
+            let timeoutTask = Task {
+                try? await Task.sleep(for: eoseTimeout)
                 if !eoseSent { continuation.yield(with: .success(.eose)) }
             }
-            continuation.onTermination = { @Sendable _ in
+            continuation.onTermination = { @Sendable termination in
+                switch termination {
+                case .finished:
+                    Log.debug("RelayPool subscription %s finished. Closing.", for: .networking, sub_id)
+                case .cancelled:
+                    Log.debug("RelayPool subscription %s cancelled. Closing.", for: .networking, sub_id)
+                @unknown default:
+                    break
+                }
                 self.unsubscribe(sub_id: sub_id, to: desiredRelays)
                 self.remove_handler(sub_id: sub_id)
+                timeoutTask.cancel()
             }
         }
     }
@@ -257,8 +322,11 @@ class RelayPool {
     }
 
     func subscribe_to(sub_id: String, filters: [NostrFilter], to: [RelayURL]?, handler: @escaping (RelayURL, NostrConnectionEvent) -> ()) {
-        register_handler(sub_id: sub_id, handler: handler)
-        send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to)
+        Task {
+            await register_handler(sub_id: sub_id, filters: filters, to: to, handler: handler)
+            
+            send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to)
+        }
     }
 
     func count_queued(relay: RelayURL) -> Int {
@@ -271,7 +339,8 @@ class RelayPool {
         
         return c
     }
-
+    
+    @MainActor
     func queue_req(r: NostrRequestType, relay: RelayURL, skip_ephemeral: Bool) {
         let count = count_queued(relay: relay)
         guard count <= 10 else {
@@ -314,7 +383,7 @@ class RelayPool {
             }
             
             guard relay.connection.isConnected else {
-                queue_req(r: req, relay: relay.id, skip_ephemeral: skip_ephemeral)
+                Task { await queue_req(r: req, relay: relay.id, skip_ephemeral: skip_ephemeral) }
                 continue
             }
             
@@ -361,14 +430,35 @@ class RelayPool {
             }
         }
     }
+    
+    func resubscribeAll(relayId: RelayURL) {
+        for handler in self.handlers {
+            guard let filters = handler.filters else { continue }
+            // When the caller specifies no relays, it is implied that the user wants to use the ones in the user relay list. Skip ephemeral relays in that case.
+            // When the caller specifies specific relays, do not skip ephemeral relays to respect the exact list given by the caller.
+            let shouldSkipEphemeralRelays = handler.to == nil ? true : false
+            
+            if let handlerTargetRelays = handler.to,
+               !handlerTargetRelays.contains(where: { $0 == relayId }) {
+                // Not part of the target relays, skip
+                continue
+            }
+            
+            Log.debug("%s: Sending resubscribe request to %s", for: .networking, handler.sub_id, relayId.absoluteString)
+            send(.subscribe(.init(filters: filters, sub_id: handler.sub_id)), to: [relayId], skip_ephemeral: shouldSkipEphemeralRelays)
+        }
+    }
 
     func handle_event(relay_id: RelayURL, event: NostrConnectionEvent) {
         record_seen(relay_id: relay_id, event: event)
 
-        // run req queue when we reconnect
+        // When we reconnect, do two things
+        // - Send messages that were stored in the queue
+        // - Re-subscribe to filters we had subscribed before
         if case .ws_connection_event(let ws) = event {
             if case .connected = ws {
                 run_queue(relay_id)
+                self.resubscribeAll(relayId: relay_id)
             }
         }
 
@@ -407,6 +497,13 @@ class RelayPool {
 
 func add_rw_relay(_ pool: RelayPool, _ url: RelayURL) {
     try? pool.add_relay(RelayPool.RelayDescriptor(url: url, info: .readWrite))
+}
+
+
+extension RelayPool {
+    protocol Delegate {
+        func latestRelayListChanged(_ newEvent: NdbNote)
+    }
 }
 
 

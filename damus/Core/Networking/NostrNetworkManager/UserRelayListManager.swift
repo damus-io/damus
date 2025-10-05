@@ -133,19 +133,15 @@ extension NostrNetworkManager {
         
         func listenAndHandleRelayUpdates() async {
             let filter = NostrFilter(kinds: [.relay_list], authors: [delegate.keypair.pubkey])
-            for await item in self.reader.subscribe(filters: [filter]) {
-                switch item {
-                case .event(borrow: let borrow):                                                                // Signature validity already ensured at this point
-                    let currentRelayListCreationDate = self.getUserCurrentRelayListCreationDate()
-                    try? borrow { note in
-                        guard note.pubkey == self.delegate.keypair.pubkey else { return }               // Ensure this new list was ours
-                        guard note.createdAt > (currentRelayListCreationDate ?? 0) else { return }      // Ensure this is a newer list
-                        guard let relayList = try? NIP65.RelayList(event: note) else { return }         // Ensure it is a valid NIP-65 list
-                        
-                        try? self.set(userRelayList: relayList)                                         // Set the validated list
-                    }
-                case .eose: continue
-                }
+            for await noteLender in self.reader.streamIndefinitely(filters: [filter]) {
+                let currentRelayListCreationDate = self.getUserCurrentRelayListCreationDate()
+                try? noteLender.borrow({ note in
+                    guard note.pubkey == self.delegate.keypair.pubkey else { return }               // Ensure this new list was ours
+                    guard note.createdAt > (currentRelayListCreationDate ?? 0) else { return }      // Ensure this is a newer list
+                    guard let relayList = try? NIP65.RelayList(event: note) else { return }         // Ensure it is a valid NIP-65 list
+                    
+                    try? self.set(userRelayList: relayList)                                         // Set the validated list
+                })
             }
         }
         
@@ -240,9 +236,14 @@ extension NostrNetworkManager {
                 )
                 changed = true
             }
+            
+            // Always tell RelayPool to connect whether or not we are already connected.
+            // This is because:
+            // 1. Internally it won't redo the connection because of internal checks
+            // 2. Even if the relay list has not changed, relays may have been disconnected from app lifecycle or other events
+            pool.connect()
 
             if changed {
-                pool.connect()
                 notify(.relays_changed)
             }
         }

@@ -11,8 +11,8 @@ import Foundation
 class EventHolder: ObservableObject, ScrollQueue {
     private var has_event = Set<NoteId>()
     @Published var events: [NostrEvent]
-    var incoming: [NostrEvent]
-    var should_queue = false
+    @Published var incoming: [NostrEvent]
+    private(set) var should_queue = false
     var on_queue: ((NostrEvent) -> Void)?
     
     func set_should_queue(_ val: Bool) {
@@ -38,6 +38,7 @@ class EventHolder: ObservableObject, ScrollQueue {
         self.incoming = self.incoming.filter(isIncluded)
     }
     
+    @MainActor
     func insert(_ ev: NostrEvent) -> Bool {
         if should_queue {
             return insert_queued(ev)
@@ -46,6 +47,7 @@ class EventHolder: ObservableObject, ScrollQueue {
         }
     }
     
+    @MainActor
     private func insert_immediate(_ ev: NostrEvent) -> Bool {
         if has_event.contains(ev.id) {
             return false
@@ -86,9 +88,17 @@ class EventHolder: ObservableObject, ScrollQueue {
         }
         
         if changed {
-            self.objectWillChange.send()
+            DispatchQueue.main.async {
+                self.objectWillChange.send()
+            }
         }
         
         self.incoming = []
+    }
+    
+    @MainActor
+    func reset() {
+        self.incoming = []
+        self.events = []
     }
 }
