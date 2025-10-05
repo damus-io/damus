@@ -538,6 +538,7 @@ struct ContentView: View {
                 Task {
                     await damusClosingTask?.value  // Wait for the closing task to finish before reopening things, to avoid race conditions
                     damusClosingTask = nil
+                    damus_state.ndb.reopen()
                     // Pinging the network will automatically reconnect any dead websocket connections
                     damus_state.nostrNetwork.ping()
                 }

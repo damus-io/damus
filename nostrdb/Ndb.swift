@@ -701,9 +701,10 @@ class Ndb {
                 terminationStarted = true
                 Log.debug("ndb_wait: stream: Terminated early", for: .ndb)
                 streaming = false
-                ndb_unsubscribe(self.ndb.ndb, subid)
                 Task { await self.unsetCallback(subscriptionId: subid) }
                 filtersPointer.deallocate()
+                guard !self.is_closed else { return }   // Double-check Ndb is open before sending unsubscribe
+                ndb_unsubscribe(self.ndb.ndb, subid)
             }
         }
     }

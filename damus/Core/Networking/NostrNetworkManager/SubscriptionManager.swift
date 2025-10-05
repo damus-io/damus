@@ -220,6 +220,7 @@ extension NostrNetworkManager {
                     catch {
                         Self.logger.error("Session subscription \(id.uuidString, privacy: .public): NDB streaming error: \(error.localizedDescription, privacy: .public)")
                     }
+                    Self.logger.debug("Session subscription \(id.uuidString, privacy: .public): NDB streaming ended")
                     continuation.finish()
                 }
                 let streamTask = Task {
@@ -250,17 +251,19 @@ extension NostrNetworkManager {
                     catch {
                         Self.logger.error("Session subscription \(id.uuidString, privacy: .public): Network streaming error: \(error.localizedDescription, privacy: .public)")
                     }
+                    Self.logger.debug("Session subscription \(id.uuidString, privacy: .public): Network streaming ended")
                     continuation.finish()
                 }
                 
                 Task {
                     // Add the ndb streaming task to the task manager so that it can be cancelled when the app is backgrounded
                     let ndbStreamTaskId = await self.taskManager.add(task: ndbStreamTask)
+                    let streamTaskId = await self.taskManager.add(task: streamTask)
                     
                     continuation.onTermination = { @Sendable _ in
                         Task {
                             await self.taskManager.cancelAndCleanUp(taskId: ndbStreamTaskId)
-                            streamTask.cancel()
+                            await self.taskManager.cancelAndCleanUp(taskId: streamTaskId)
                         }
                     }
                 }

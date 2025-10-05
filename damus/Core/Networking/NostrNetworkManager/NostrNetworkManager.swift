@@ -61,6 +61,7 @@ class NostrNetworkManager {
     
     func handleAppBackgroundRequest() async {
         await self.reader.cancelAllTasks()
+        self.pool.cleanQueuedRequestForSessionEnd()
     }
     
     func close() async {
