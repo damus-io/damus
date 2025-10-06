@@ -45,7 +45,7 @@ class NostrNetworkManagerTests: XCTestCase {
         var receivedCount = 0
         var eventIds: Set<NoteId> = []
         Task {
-            for await item in self.damusState!.nostrNetwork.reader.subscribe(filters: [filter]) {
+            for await item in self.damusState!.nostrNetwork.reader.advancedStream(filters: [filter], streamMode: .ndbFirst) {
                 switch item {
                 case .event(let lender):
                     try? lender.borrow { event in
