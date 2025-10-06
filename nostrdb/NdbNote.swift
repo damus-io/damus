@@ -290,9 +290,11 @@ class NdbNote: Codable, Equatable, Hashable {
                 free(buf)
                 return nil
             }
-        case .manual(_, let signature, _):
+        case .manual(_, let signature, let noteId):
             var raw_sig = signature.data.byteArray
+            var raw_id = noteId.id.byteArray
             ndb_builder_set_sig(&builder, &raw_sig)
+            ndb_builder_set_id(&builder, &raw_id)
             
             do {
                 // Finalize note, save length, and ensure it is higher than zero (which signals finalization has succeeded)
