@@ -259,7 +259,7 @@ class RelayPool {
     /// - Returns: Returns an async stream that callers can easily consume via a for-loop
     func subscribe(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, eoseTimeout: Duration? = nil, id: UUID? = nil) -> AsyncStream<StreamItem> {
         let eoseTimeout = eoseTimeout ?? .seconds(5)
-        let desiredRelays = desiredRelays ?? self.relays.filter({ $0.connection.isConnected }).map({ $0.descriptor.url })
+        let desiredRelays = desiredRelays ?? self.relays.map({ $0.descriptor.url })
         let startTime = CFAbsoluteTimeGetCurrent()
         return AsyncStream<StreamItem> { continuation in
             let id = id ?? UUID()
@@ -284,8 +284,9 @@ class RelayPool {
                         break   // We do not support handling these yet
                     case .eose(_):
                         relaysWhoFinishedInitialResults.insert(relayUrl)
-                        Log.debug("RelayPool subscription %s: EOSE from %s. EOSE count: %d/%d. Elapsed: %.2f seconds.", for: .networking, id.uuidString, relayUrl.absoluteString, relaysWhoFinishedInitialResults.count, Set(desiredRelays).count, CFAbsoluteTimeGetCurrent() - startTime)
-                        if relaysWhoFinishedInitialResults == Set(desiredRelays) {
+                        let desiredAndConnectedRelays = desiredRelays ?? self.relays.filter({ $0.connection.isConnected }).map({ $0.descriptor.url })
+                        Log.debug("RelayPool subscription %s: EOSE from %s. EOSE count: %d/%d. Elapsed: %.2f seconds.", for: .networking, id.uuidString, relayUrl.absoluteString, relaysWhoFinishedInitialResults.count, Set(desiredAndConnectedRelays).count, CFAbsoluteTimeGetCurrent() - startTime)
+                        if relaysWhoFinishedInitialResults == Set(desiredAndConnectedRelays) {
                             continuation.yield(with: .success(.eose))
                             eoseSent = true
                         }

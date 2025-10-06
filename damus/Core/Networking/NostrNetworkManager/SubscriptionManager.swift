@@ -198,13 +198,6 @@ extension NostrNetworkManager {
                         continue
                     }
                     
-                    // FIXME: The delay below is to prevent race conditions when the RelayPool is initializing during the app start.
-                    // Without this, occasionally there is a race condition that causes the subscribe call to be missed somehow
-                    // despite mechanisms in place to queue up requests when relays are disconnected, as well as mechanisms to send subscribe requests when the relay is already connected.
-                    // This is difficult to fix as it will require a big refactor in `RelayPool` to implement proper async/await mechanisms, instead of the current "fire and forget" interfaces.
-                    // If this delay fixes the occasional timeline staleness when starting the app, it helps prove the hypothesis above.
-                    try await Task.sleep(nanoseconds: 2_000_000_000)
-                    
                     do {
                         for await item in self.pool.subscribe(filters: filters, to: desiredRelays, id: id) {
                             // NO-OP. Notes will be automatically ingested by NostrDB
