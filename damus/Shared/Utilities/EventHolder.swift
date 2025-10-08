@@ -11,6 +11,7 @@ import Foundation
 class EventHolder: ObservableObject, ScrollQueue {
     private var has_event = Set<NoteId>()
     @Published var events: [NostrEvent]
+    var filteredHolders: [UUID: FilteredHolder] = [:]
     var incoming: [NostrEvent]
     private(set) var should_queue = false
     var on_queue: ((NostrEvent) -> Void)?
@@ -58,6 +59,9 @@ class EventHolder: ObservableObject, ScrollQueue {
         if insert_uniq_sorted_event_created(events: &self.events, new_ev: ev) {
             return true
         }
+        for (id, filteredView) in self.filteredHolders {
+            filteredView.insert(event: ev)
+        }
         
         return false
     }
@@ -85,6 +89,9 @@ class EventHolder: ObservableObject, ScrollQueue {
             if insert_uniq_sorted_event_created(events: &events, new_ev: event) {
                 changed = true
             }
+            for (id, filteredHolder) in self.filteredHolders {
+                filteredHolder.insert(event: event)
+            }
         }
         
         if changed {
@@ -100,5 +107,46 @@ class EventHolder: ObservableObject, ScrollQueue {
     func reset() {
         self.incoming = []
         self.events = []
+        for (id, filteredHolder) in filteredHolders {
+            filteredHolder.update(events: [])
+        }
+    }
+    
+    @MainActor
+    func add(filteredHolder: FilteredHolder) -> UUID {
+        let id = UUID()
+        self.filteredHolders[id] = filteredHolder
+        filteredHolder.update(events: self.events)
+        return id
+    }
+    
+    @MainActor
+    func removeFilteredHolder(id: UUID) {
+        self.filteredHolders[id] = nil
+    }
+    
+    class FilteredHolder: ObservableObject {
+        @Published private(set) var events: [NostrEvent]
+        let filter: (NostrEvent) -> Bool
+        
+        init(filter: @escaping (NostrEvent) -> Bool) {
+            self.events = []
+            self.filter = filter
+        }
+        
+        func update(events: [NostrEvent]) {
+            self.events = events.filter(self.filter)
+        }
+        
+        func insert(event: NostrEvent) {
+            guard self.filter(event) else { return }
+            var changed = false
+            if insert_uniq_sorted_event_created(events: &events, new_ev: event) {
+                changed = true
+            }
+            if changed {
+                self.objectWillChange.send()
+            }
+        }
     }
 }

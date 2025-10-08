@@ -9,14 +9,18 @@ import SwiftUI
 
 
 struct InnerTimelineView: View {
-    @ObservedObject var events: EventHolder
+    var events: EventHolder
+    @ObservedObject var filteredEvents: EventHolder.FilteredHolder
+    var filteredEventHolderId: UUID
     let state: DamusState
-    let filter: (NostrEvent) -> Bool
 
     init(events: EventHolder, damus: DamusState, filter: @escaping (NostrEvent) -> Bool, apply_mute_rules: Bool = true) {
         self.events = events
         self.state = damus
-        self.filter = apply_mute_rules ? { filter($0) && !damus.mutelist_manager.is_event_muted($0) } : filter
+        let filter = apply_mute_rules ? { filter($0) && !damus.mutelist_manager.is_event_muted($0) } : filter
+        let filteredEvents = EventHolder.FilteredHolder(filter: filter)
+        self.filteredEvents = filteredEvents
+        self.filteredEventHolderId = events.add(filteredHolder: filteredEvents)
     }
     
     var event_options: EventViewOptions {
@@ -29,12 +33,11 @@ struct InnerTimelineView: View {
     
     var body: some View {
         LazyVStack(spacing: 0) {
-            let events = self.events.events
+            let events = self.filteredEvents.events
             if events.isEmpty {
                 EmptyTimelineView()
             } else {
-                let evs = events.filter(filter)
-                let indexed = Array(zip(evs, 0...))
+                let indexed = Array(zip(events, 0...))
                 ForEach(indexed, id: \.0.id) { tup in
                     let ev = tup.0
                     let ind = tup.1
@@ -61,6 +64,9 @@ struct InnerTimelineView: View {
                         .padding([.top], 7)
                 }
             }
+        }
+        .onDisappear {
+            self.events.removeFilteredHolder(id: self.filteredEventHolderId)
         }
         //.padding(.horizontal)
         
