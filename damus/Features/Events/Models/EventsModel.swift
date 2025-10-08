@@ -82,9 +82,9 @@ class EventsModel: ObservableObject {
                         })
                     }
                 case .eose:
-                    DispatchQueue.main.async { self.loading = false }
                     break outerLoop
                 case .ndbEose:
+                    DispatchQueue.main.async { self.loading = false }
                     break
                 case .networkEose:
                     break
