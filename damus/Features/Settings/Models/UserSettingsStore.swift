@@ -249,6 +249,10 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "enable_experimental_local_relay_model", default_value: false)
     var enable_experimental_local_relay_model: Bool
     
+    /// Whether the app should present the experimental floating "Load new content" button
+    @Setting(key: "enable_experimental_load_new_content_button", default_value: false)
+    var enable_experimental_load_new_content_button: Bool
+    
     @StringSetting(key: "purple_environment", default_value: .production)
     var purple_enviroment: DamusPurpleEnvironment
 

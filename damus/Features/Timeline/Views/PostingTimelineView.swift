@@ -96,7 +96,7 @@ struct PostingTimelineView: View {
                     .ignoresSafeArea()
             }
             
-            if homeEvents.incoming.count > 0 {
+            if damus_state.settings.enable_experimental_load_new_content_button && homeEvents.incoming.count > 0 {
                 Button(
                     action: {
                         notify(.scroll_to_top)
