@@ -36,10 +36,17 @@ struct EventActionBar: View {
         self.swipe_context = swipe_context
     }
     
-    var lnurl: String? {
-        damus_state.profiles.lookup_with_timestamp(event.pubkey)?.map({ pr in
+    @State var lnurl: String? = nil
+    
+    // Fetching an LNURL is expensive enough that it can cause a hitch. Use a special backgroundable function to fetch the value.
+    // Fetch on `.onAppear`
+    nonisolated func fetchLNURL() {
+        let lnurl = damus_state.profiles.lookup_with_timestamp(event.pubkey)?.map({ pr in
             pr?.lnurl
         }).value
+        DispatchQueue.main.async {
+            self.lnurl = lnurl
+        }
     }
     
     var show_like: Bool {
@@ -231,6 +238,9 @@ struct EventActionBar: View {
         self.content
         .onAppear {
             self.bar.update(damus: damus_state, evid: self.event.id)
+            Task.detached(priority: .background, operation: {
+                self.fetchLNURL()
+            })
         }
         .sheet(isPresented: $show_share_action, onDismiss: { self.show_share_action = false }) {
             if #available(iOS 16.0, *) {
