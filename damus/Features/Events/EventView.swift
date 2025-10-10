@@ -47,6 +47,9 @@ struct EventView: View {
                 LongformPreview(state: damus, ev: event, options: options)
             } else if event.known_kind == .highlight {
                 HighlightView(state: damus, event: event, options: options)
+            } else if event.known_kind == .poll, let poll = PollEvent(event: event) {
+                damus.polls.registerPollEvent(event)
+                PollEventView(damus: damus, event: event, poll: poll, options: options)
             } else {
                 TextEvent(damus: damus, event: event, pubkey: pubkey, options: options)
                     //.padding([.top], 6)
@@ -158,4 +161,3 @@ struct EventView_Previews: PreviewProvider {
         .padding()
     }
 }
-

@@ -192,6 +192,10 @@ class HomeModel: ContactsDelegate {
         switch kind {
         case .chat, .longform, .text, .highlight:
             handle_text_event(sub_id: sub_id, ev)
+        case .poll:
+            handle_poll_event(sub_id: sub_id, ev)
+        case .poll_response:
+            handle_poll_response(ev)
         case .contacts:
             handle_contact_event(sub_id: sub_id, relay_id: relay_id, ev: ev)
         case .metadata:
@@ -623,7 +627,7 @@ class HomeModel: ContactsDelegate {
     func subscribe_to_home_filters(friends fs: [Pubkey]? = nil, relay_id: RelayURL? = nil) {
         // TODO: separate likes?
         var home_filter_kinds: [NostrKind] = [
-            .text, .longform, .boost, .highlight
+            .text, .longform, .boost, .highlight, .poll
         ]
         if !damus_state.settings.onlyzaps_mode {
             home_filter_kinds.append(.like)
@@ -775,6 +779,15 @@ class HomeModel: ContactsDelegate {
         } else if sub_id == notifications_subid {
             handle_notification(ev: ev)
         }
+    }
+    
+    func handle_poll_event(sub_id: String, _ ev: NostrEvent) {
+        damus_state.polls.registerPollEvent(ev)
+        handle_text_event(sub_id: sub_id, ev)
+    }
+    
+    func handle_poll_response(_ ev: NostrEvent) {
+        damus_state.polls.registerResponseEvent(ev)
     }
     
     func got_new_dm(notifs: NewEventsBits, ev: NostrEvent) {
@@ -1190,4 +1203,3 @@ func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: 
         }
     }
 }
-
