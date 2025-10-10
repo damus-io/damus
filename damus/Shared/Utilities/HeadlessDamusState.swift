@@ -19,7 +19,6 @@ protocol HeadlessDamusState {
     var keypair: Keypair { get }
     var profiles: Profiles { get }
     var zaps: Zaps { get }
-    var polls: PollResultsStore { get }
     var lnurls: LNUrls { get }
     
     @discardableResult

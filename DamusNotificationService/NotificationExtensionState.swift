@@ -15,7 +15,6 @@ struct NotificationExtensionState: HeadlessDamusState {
     let keypair: Keypair
     let profiles: Profiles
     let zaps: Zaps
-    let polls: PollResultsStore
     let lnurls: LNUrls
     
     init?() {
@@ -33,7 +32,6 @@ struct NotificationExtensionState: HeadlessDamusState {
         self.keypair = keypair
         self.profiles = Profiles(ndb: ndb)
         self.zaps = Zaps(our_pubkey: keypair.pubkey)
-        self.polls = PollResultsStore()
         self.lnurls = LNUrls()
     }
     
