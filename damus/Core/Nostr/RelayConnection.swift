@@ -48,13 +48,13 @@ final class RelayConnection: ObservableObject {
     private lazy var socket = WebSocket(relay_url.url)
     private var subscriptionToken: AnyCancellable?
 
-    private var handleEvent: (NostrConnectionEvent) -> ()
+    private var handleEvent: (NostrConnectionEvent) async -> ()
     private var processEvent: (WebSocketEvent) -> ()
     private let relay_url: RelayURL
     var log: RelayLog?
 
     init(url: RelayURL,
-         handleEvent: @escaping (NostrConnectionEvent) -> (),
+         handleEvent: @escaping (NostrConnectionEvent) async -> (),
          processUnverifiedWSEvent: @escaping (WebSocketEvent) -> ())
     {
         self.relay_url = url
@@ -95,12 +95,12 @@ final class RelayConnection: ObservableObject {
             .sink { [weak self] completion in
                 switch completion {
                 case .failure(let error):
-                    self?.receive(event: .error(error))
+                    Task { await self?.receive(event: .error(error)) }
                 case .finished:
-                    self?.receive(event: .disconnected(.normalClosure, nil))
+                    Task { await self?.receive(event: .disconnected(.normalClosure, nil)) }
                 }
             } receiveValue: { [weak self] event in
-                self?.receive(event: event)
+                Task { await self?.receive(event: event) }
             }
             
         socket.connect()
@@ -138,7 +138,7 @@ final class RelayConnection: ObservableObject {
         }
     }
     
-    private func receive(event: WebSocketEvent) {
+    private func receive(event: WebSocketEvent) async {
         assert(!Thread.isMainThread, "This code must not be executed on the main thread")
         processEvent(event)
         switch event {
@@ -149,7 +149,7 @@ final class RelayConnection: ObservableObject {
                 self.isConnecting = false
             }
         case .message(let message):
-            self.receive(message: message)
+            await self.receive(message: message)
         case .disconnected(let closeCode, let reason):
             if closeCode != .normalClosure {
                 Log.error("⚠️ Warning: RelayConnection (%d) closed with code: %s", for: .networking, String(describing: closeCode), String(describing: reason))
@@ -176,10 +176,8 @@ final class RelayConnection: ObservableObject {
                 self.reconnect_with_backoff()
             }
         }
-        DispatchQueue.main.async {
-            guard let ws_connection_event = NostrConnectionEvent.WSConnectionEvent.from(full_ws_event: event) else { return }
-            self.handleEvent(.ws_connection_event(ws_connection_event))
-        }
+        guard let ws_connection_event = NostrConnectionEvent.WSConnectionEvent.from(full_ws_event: event) else { return }
+        await self.handleEvent(.ws_connection_event(ws_connection_event))
         
         if let description = event.description {
             log?.add(description)
@@ -213,21 +211,19 @@ final class RelayConnection: ObservableObject {
         }
     }
     
-    private func receive(message: URLSessionWebSocketTask.Message) {
+    private func receive(message: URLSessionWebSocketTask.Message) async {
         switch message {
         case .string(let messageString):
             // NOTE: Once we switch to the local relay model,
             // we will not need to verify nostr events at this point.
             if let ev = decode_and_verify_nostr_response(txt: messageString) {
-                DispatchQueue.main.async {
-                    self.handleEvent(.nostr_event(ev))
-                }
+                await self.handleEvent(.nostr_event(ev))
                 return
             }
             print("failed to decode event \(messageString)")
         case .data(let messageData):
             if let messageString = String(data: messageData, encoding: .utf8) {
-                receive(message: .string(messageString))
+                await receive(message: .string(messageString))
             }
         @unknown default:
             print("An unexpected URLSessionWebSocketTask.Message was received.")

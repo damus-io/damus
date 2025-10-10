@@ -64,9 +64,9 @@ class DraftArtifacts: Equatable {
     ///   - damus_state: The damus state, needed for encrypting, fetching Nostr data depedencies, and forming the NIP-37 draft
     ///   - references: references in the post?
     /// - Returns: The NIP-37 draft packaged in a way that can be easily wrapped/unwrapped.
-    func to_nip37_draft(action: PostAction, damus_state: DamusState) throws -> NIP37Draft? {
+    func to_nip37_draft(action: PostAction, damus_state: DamusState) async throws -> NIP37Draft? {
         guard let keypair = damus_state.keypair.to_full() else { return nil }
-        let post = build_post(state: damus_state, action: action, draft: self)
+        let post = await build_post(state: damus_state, action: action, draft: self)
         guard let note = post.to_event(keypair: keypair) else { return nil }
         return try NIP37Draft(unwrapped_note: note, draft_id: self.id, keypair: keypair)
     }
@@ -227,24 +227,24 @@ class Drafts: ObservableObject {
     func save(damus_state: DamusState) async {
         var draft_events: [NdbNote] = []
         post_artifact_block: if let post_artifacts = self.post {
-            let nip37_draft = try? post_artifacts.to_nip37_draft(action: .posting(.user(damus_state.pubkey)), damus_state: damus_state)
+            let nip37_draft = try? await post_artifacts.to_nip37_draft(action: .posting(.user(damus_state.pubkey)), damus_state: damus_state)
             guard let wrapped_note = nip37_draft?.wrapped_note else { break post_artifact_block }
             draft_events.append(wrapped_note)
         }
         for (replied_to_note_id, reply_artifacts) in self.replies {
             guard let replied_to_note = damus_state.ndb.lookup_note(replied_to_note_id)?.unsafeUnownedValue?.to_owned() else { continue }
-            let nip37_draft = try? reply_artifacts.to_nip37_draft(action: .replying_to(replied_to_note), damus_state: damus_state)
+            let nip37_draft = try? await reply_artifacts.to_nip37_draft(action: .replying_to(replied_to_note), damus_state: damus_state)
             guard let wrapped_note = nip37_draft?.wrapped_note else { continue }
             draft_events.append(wrapped_note)
         }
         for (quoted_note_id, quote_note_artifacts) in self.quotes {
             guard let quoted_note = damus_state.ndb.lookup_note(quoted_note_id)?.unsafeUnownedValue?.to_owned() else { continue }
-            let nip37_draft = try? quote_note_artifacts.to_nip37_draft(action: .quoting(quoted_note), damus_state: damus_state)
+            let nip37_draft = try? await quote_note_artifacts.to_nip37_draft(action: .quoting(quoted_note), damus_state: damus_state)
             guard let wrapped_note = nip37_draft?.wrapped_note else { continue }
             draft_events.append(wrapped_note)
         }
         for (highlight, highlight_note_artifacts) in self.highlights {
-            let nip37_draft = try? highlight_note_artifacts.to_nip37_draft(action: .highlighting(highlight), damus_state: damus_state)
+            let nip37_draft = try? await highlight_note_artifacts.to_nip37_draft(action: .highlighting(highlight), damus_state: damus_state)
             guard let wrapped_note = nip37_draft?.wrapped_note else { continue }
             draft_events.append(wrapped_note)
         }
@@ -254,7 +254,7 @@ class Drafts: ObservableObject {
             // TODO: Once it is time to implement draft syncing with relays, please consider the following:
             // - Privacy: Sending drafts to the network leaks metadata about app activity, and may break user expectations
             // - Down-sync conflict resolution: Consider how to solve conflicts for different draft versions holding the same ID (e.g. edited in Damus, then another client, then Damus again)
-            damus_state.nostrNetwork.sendToNostrDB(event: draft_event)
+            await damus_state.nostrNetwork.sendToNostrDB(event: draft_event)
         }
         
         DispatchQueue.main.async {

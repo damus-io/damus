@@ -122,68 +122,68 @@ extension NostrNetworkManager {
         
         // MARK: - Listening to and handling relay updates from the network
         
-        func connect() {
-            self.load()
+        func connect() async {
+            await self.load()
             
             self.relayListObserverTask?.cancel()
             self.relayListObserverTask = Task { await self.listenAndHandleRelayUpdates() }
             self.walletUpdatesObserverTask?.cancel()
-            self.walletUpdatesObserverTask = handle_notify(.attached_wallet).sink { _ in self.load() }
+            self.walletUpdatesObserverTask = handle_notify(.attached_wallet).sink { _ in Task { await self.load() } }
         }
         
         func listenAndHandleRelayUpdates() async {
             let filter = NostrFilter(kinds: [.relay_list], authors: [delegate.keypair.pubkey])
             for await noteLender in self.reader.streamIndefinitely(filters: [filter]) {
                 let currentRelayListCreationDate = self.getUserCurrentRelayListCreationDate()
-                try? noteLender.borrow({ note in
+                try? await noteLender.borrow({ note in
                     guard note.pubkey == self.delegate.keypair.pubkey else { return }               // Ensure this new list was ours
                     guard note.createdAt > (currentRelayListCreationDate ?? 0) else { return }      // Ensure this is a newer list
                     guard let relayList = try? NIP65.RelayList(event: note) else { return }         // Ensure it is a valid NIP-65 list
                     
-                    try? self.set(userRelayList: relayList)                                         // Set the validated list
+                    try? await self.set(userRelayList: relayList)                                         // Set the validated list
                 })
             }
         }
         
         // MARK: - Editing the user's relay list
     
-        func upsert(relay: NIP65.RelayList.RelayItem, force: Bool = false, overwriteExisting: Bool = false) throws(UpdateError) {
+        func upsert(relay: NIP65.RelayList.RelayItem, force: Bool = false, overwriteExisting: Bool = false) async throws(UpdateError) {
             guard let currentUserRelayList = force ? self.getBestEffortRelayList() : self.getUserCurrentRelayList() else { throw .noInitialRelayList }
             guard !currentUserRelayList.relays.keys.contains(relay.url) || overwriteExisting else { throw .relayAlreadyExists }
             var newList = currentUserRelayList.relays
             newList[relay.url] = relay
-            try self.set(userRelayList: NIP65.RelayList(relays: Array(newList.values)))
+            try await self.set(userRelayList: NIP65.RelayList(relays: Array(newList.values)))
         }
     
-        func insert(relay: NIP65.RelayList.RelayItem, force: Bool = false) throws(UpdateError) {
+        func insert(relay: NIP65.RelayList.RelayItem, force: Bool = false) async throws(UpdateError) {
             guard let currentUserRelayList = force ? self.getBestEffortRelayList() : self.getUserCurrentRelayList() else { throw .noInitialRelayList }
             guard currentUserRelayList.relays[relay.url] == nil else { throw .relayAlreadyExists }
-            try self.upsert(relay: relay, force: force)
+            try await self.upsert(relay: relay, force: force)
         }
     
-        func remove(relayURL: RelayURL, force: Bool = false) throws(UpdateError) {
+        func remove(relayURL: RelayURL, force: Bool = false) async throws(UpdateError) {
             guard let currentUserRelayList = force ? self.getBestEffortRelayList() : self.getUserCurrentRelayList() else { throw .noInitialRelayList }
             guard currentUserRelayList.relays.keys.contains(relayURL) || force else { throw .noSuchRelay }
             var newList = currentUserRelayList.relays
             newList[relayURL] = nil
-            try self.set(userRelayList: NIP65.RelayList(relays: Array(newList.values)))
+            try await self.set(userRelayList: NIP65.RelayList(relays: Array(newList.values)))
         }
     
-        func set(userRelayList: NIP65.RelayList) throws(UpdateError) {
+        func set(userRelayList: NIP65.RelayList) async throws(UpdateError) {
             guard let fullKeypair = delegate.keypair.to_full() else { throw .notAuthorizedToChangeRelayList }
             guard let relayListEvent = userRelayList.toNostrEvent(keypair: fullKeypair) else { throw .cannotFormRelayListEvent }
     
-            self.apply(newRelayList: self.computeRelaysToConnectTo(with: userRelayList))
+            await self.apply(newRelayList: self.computeRelaysToConnectTo(with: userRelayList))
     
-            self.pool.send(.event(relayListEvent))   // This will send to NostrDB as well, which will locally save that NIP-65 event
+            await self.pool.send(.event(relayListEvent))   // This will send to NostrDB as well, which will locally save that NIP-65 event
             self.delegate.latestRelayListEventIdHex = relayListEvent.id.hex()   // Make sure we are able to recall this event from NostrDB
         }
         
         // MARK: - Syncing our saved user relay list with the active `RelayPool`
         
         /// Loads the current user relay list
-        func load() {
-            self.apply(newRelayList: self.relaysToConnectTo())
+        func load() async {
+            await self.apply(newRelayList: self.relaysToConnectTo())
         }
         
         /// Loads a new relay list into the active relay pool, making sure it matches the specified relay list.
@@ -197,7 +197,8 @@ extension NostrNetworkManager {
         ///
         /// - This is `private` because syncing the user's saved relay list with the relay pool is `NostrNetworkManager`'s responsibility,
         ///   so we do not want other classes to forcibly load this.
-        private func apply(newRelayList: [RelayPool.RelayDescriptor]) {
+        @MainActor
+        private func apply(newRelayList: [RelayPool.RelayDescriptor]) async {
             let currentRelayList = self.pool.relays.map({ $0.descriptor })
 
             var changed = false
@@ -217,31 +218,37 @@ extension NostrNetworkManager {
             let relaysToRemove = currentRelayURLs.subtracting(newRelayURLs)
             let relaysToAdd = newRelayURLs.subtracting(currentRelayURLs)
             
-            // Remove relays not in the new list
-            relaysToRemove.forEach { url in
-                pool.remove_relay(url)
-                changed = true
-            }
+            await withTaskGroup { taskGroup in
+                // Remove relays not in the new list
+                relaysToRemove.forEach { url in
+                    taskGroup.addTask(operation: { await self.pool.remove_relay(url) })
+                    changed = true
+                }
 
-            // Add new relays from the new list
-            relaysToAdd.forEach { url in
-                guard let descriptor = newRelayList.first(where: { $0.url == url }) else { return }
-                add_new_relay(
-                    model_cache: delegate.relayModelCache,
-                    relay_filters: delegate.relayFilters,
-                    pool: pool,
-                    descriptor: descriptor,
-                    new_relay_filters: new_relay_filters,
-                    logging_enabled: delegate.developerMode
-                )
-                changed = true
+                // Add new relays from the new list
+                relaysToAdd.forEach { url in
+                    guard let descriptor = newRelayList.first(where: { $0.url == url }) else { return }
+                    taskGroup.addTask(operation: {
+                        await add_new_relay(
+                            model_cache: self.delegate.relayModelCache,
+                            relay_filters: self.delegate.relayFilters,
+                            pool: self.pool,
+                            descriptor: descriptor,
+                            new_relay_filters: new_relay_filters,
+                            logging_enabled: self.delegate.developerMode
+                        )
+                    })
+                    changed = true
+                }
+                
+                for await value in taskGroup { continue }
             }
             
             // Always tell RelayPool to connect whether or not we are already connected.
             // This is because:
             // 1. Internally it won't redo the connection because of internal checks
             // 2. Even if the relay list has not changed, relays may have been disconnected from app lifecycle or other events
-            pool.connect()
+            await pool.connect()
 
             if changed {
                 notify(.relays_changed)
@@ -281,8 +288,8 @@ fileprivate extension NIP65.RelayList {
 ///   - descriptor: The description of the relay being added
 ///   - new_relay_filters: Whether to insert new relay filters
 ///   - logging_enabled: Whether logging is enabled
-fileprivate func add_new_relay(model_cache: RelayModelCache, relay_filters: RelayFilters, pool: RelayPool, descriptor: RelayPool.RelayDescriptor, new_relay_filters: Bool, logging_enabled: Bool) {
-    try? pool.add_relay(descriptor)
+fileprivate func add_new_relay(model_cache: RelayModelCache, relay_filters: RelayFilters, pool: RelayPool, descriptor: RelayPool.RelayDescriptor, new_relay_filters: Bool, logging_enabled: Bool) async {
+    try? await pool.add_relay(descriptor)
     let url = descriptor.url
 
     let relay_id = url
@@ -300,7 +307,7 @@ fileprivate func add_new_relay(model_cache: RelayModelCache, relay_filters: Rela
             model_cache.insert(model: model)
             
             if logging_enabled {
-                pool.setLog(model.log, for: relay_id)
+                Task { await pool.setLog(model.log, for: relay_id) }
             }
             
             // if this is the first time adding filters, we should filter non-paid relays

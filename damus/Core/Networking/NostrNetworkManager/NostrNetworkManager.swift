@@ -50,18 +50,18 @@ class NostrNetworkManager {
     // MARK: - Control and lifecycle functions
     
     /// Connects the app to the Nostr network
-    func connect() {
-        self.userRelayList.connect()    // Will load the user's list, apply it, and get RelayPool to connect to it.
-        Task { await self.profilesManager.load() }
+    func connect() async {
+        await self.userRelayList.connect()    // Will load the user's list, apply it, and get RelayPool to connect to it.
+        await self.profilesManager.load()
     }
     
-    func disconnectRelays() {
-        self.pool.disconnect()
+    func disconnectRelays() async {
+        await self.pool.disconnect()
     }
     
     func handleAppBackgroundRequest() async {
         await self.reader.cancelAllTasks()
-        self.pool.cleanQueuedRequestForSessionEnd()
+        await self.pool.cleanQueuedRequestForSessionEnd()
     }
     
     func close() async {
@@ -75,18 +75,19 @@ class NostrNetworkManager {
             }
             // But await on each one to prevent race conditions
             for await value in group { continue }
-            pool.close()
+            await pool.close()
         }
     }
     
-    func ping() {
-        self.pool.ping()
+    func ping() async {
+        await self.pool.ping()
     }
 
-    func relaysForEvent(event: NostrEvent) -> [RelayURL] {
+    @MainActor
+    func relaysForEvent(event: NostrEvent) async -> [RelayURL] {
         // TODO(tyiu) Ideally this list would be sorted by the event author's outbox relay preferences
         // and reliability of relays to maximize chances of others finding this event.
-        if let relays = pool.seen[event.id] {
+        if let relays = await pool.seen[event.id] {
             return Array(relays)
         }
 
@@ -103,30 +104,35 @@ class NostrNetworkManager {
     /// - This is also to help us migrate to the relay model.
     // TODO: Define a better interface. This is a temporary scaffold to replace direct relay pool access. After that is done, we can refactor this interface to be cleaner and reduce non-sense.
     
-    func sendToNostrDB(event: NostrEvent) {
-        self.pool.send_raw_to_local_ndb(.typical(.event(event)))
+    func sendToNostrDB(event: NostrEvent) async {
+        await self.pool.send_raw_to_local_ndb(.typical(.event(event)))
     }
     
-    func send(event: NostrEvent, to targetRelays: [RelayURL]? = nil, skipEphemeralRelays: Bool = true) {
-        self.pool.send(.event(event), to: targetRelays, skip_ephemeral: skipEphemeralRelays)
+    func send(event: NostrEvent, to targetRelays: [RelayURL]? = nil, skipEphemeralRelays: Bool = true) async {
+        await self.pool.send(.event(event), to: targetRelays, skip_ephemeral: skipEphemeralRelays)
     }
     
+    @MainActor
     func getRelay(_ id: RelayURL) -> RelayPool.Relay? {
         pool.get_relay(id)
     }
     
+    @MainActor
     var connectedRelays: [RelayPool.Relay] {
         self.pool.relays
     }
     
+    @MainActor
     var ourRelayDescriptors: [RelayPool.RelayDescriptor] {
         self.pool.our_descriptors
     }
     
-    func relayURLsThatSawNote(id: NoteId) -> Set<RelayURL>? {
-        return self.pool.seen[id]
+    @MainActor
+    func relayURLsThatSawNote(id: NoteId) async -> Set<RelayURL>? {
+        return await self.pool.seen[id]
     }
     
+    @MainActor
     func determineToRelays(filters: RelayFilters) -> [RelayURL] {
         return self.pool.our_descriptors
             .map { $0.url }
@@ -137,8 +143,8 @@ class NostrNetworkManager {
     // TODO: Move this to NWCManager
     
     @discardableResult
-    func nwcPay(url: WalletConnectURL, post: PostBox, invoice: String, delay: TimeInterval? = 5.0, on_flush: OnFlush? = nil, zap_request: NostrEvent? = nil) -> NostrEvent? {
-        WalletConnect.pay(url: url, pool: self.pool, post: post, invoice: invoice, zap_request: nil)
+    func nwcPay(url: WalletConnectURL, post: PostBox, invoice: String, delay: TimeInterval? = 5.0, on_flush: OnFlush? = nil, zap_request: NostrEvent? = nil) async -> NostrEvent? {
+        await WalletConnect.pay(url: url, pool: self.pool, post: post, invoice: invoice, zap_request: nil)
     }
     
     /// Send a donation zap to the Damus team
@@ -154,7 +160,7 @@ class NostrNetworkManager {
         }
         
         print("damus-donation donating...")
-        WalletConnect.pay(url: nwc, pool: self.pool, post: self.postbox, invoice: invoice, zap_request: nil, delay: nil)
+        await WalletConnect.pay(url: nwc, pool: self.pool, post: self.postbox, invoice: invoice, zap_request: nil, delay: nil)
     }
 }
 

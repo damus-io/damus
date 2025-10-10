@@ -812,13 +812,15 @@ class HomeModel: ContactsDelegate, ObservableObject {
 }
 
 
-func update_signal_from_pool(signal: SignalModel, pool: RelayPool) {
-    if signal.max_signal != pool.relays.count {
-        signal.max_signal = pool.relays.count
+func update_signal_from_pool(signal: SignalModel, pool: RelayPool) async {
+    let relayCount = await pool.relays.count
+    if signal.max_signal != relayCount {
+        signal.max_signal = relayCount
     }
 
-    if signal.signal != pool.num_connected {
-        signal.signal = pool.num_connected
+    let numberOfConnectedRelays = await pool.num_connected
+    if signal.signal != numberOfConnectedRelays {
+        signal.signal = numberOfConnectedRelays
     }
 }
 

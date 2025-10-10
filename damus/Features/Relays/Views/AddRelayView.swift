@@ -80,30 +80,32 @@ struct AddRelayView: View {
             }
             
             Button(action: {
-                if new_relay.starts(with: "wss://") == false && new_relay.starts(with: "ws://") == false {
-                    new_relay = "wss://" + new_relay
+                Task {
+                    if new_relay.starts(with: "wss://") == false && new_relay.starts(with: "ws://") == false {
+                        new_relay = "wss://" + new_relay
+                    }
+                    
+                    guard let url = RelayURL(new_relay) else {
+                        relayAddErrorTitle = NSLocalizedString("Invalid relay address", comment: "Heading for an error when adding a relay")
+                        relayAddErrorMessage = NSLocalizedString("Please check the address and try again", comment: "Tip for an error where the relay address being added is invalid")
+                        return
+                    }
+                    
+                    do {
+                        try await state.nostrNetwork.userRelayList.insert(relay: NIP65.RelayList.RelayItem(url: url, rwConfiguration: .readWrite))
+                        relayAddErrorTitle = nil      // Clear error title
+                        relayAddErrorMessage = nil    // Clear error message
+                    }
+                    catch {
+                        present_sheet(.error(self.humanReadableError(for: error)))
+                    }
+                    
+                    new_relay = ""
+                    
+                    this_app.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    
+                    dismiss()
                 }
-
-                guard let url = RelayURL(new_relay) else {
-                    relayAddErrorTitle = NSLocalizedString("Invalid relay address", comment: "Heading for an error when adding a relay")
-                    relayAddErrorMessage = NSLocalizedString("Please check the address and try again", comment: "Tip for an error where the relay address being added is invalid")
-                    return
-                }
-
-                do {
-                    try state.nostrNetwork.userRelayList.insert(relay: NIP65.RelayList.RelayItem(url: url, rwConfiguration: .readWrite))
-                    relayAddErrorTitle = nil      // Clear error title
-                    relayAddErrorMessage = nil    // Clear error message
-                }
-                catch {
-                    present_sheet(.error(self.humanReadableError(for: error)))
-                }
-
-                new_relay = ""
-
-                this_app.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                
-                dismiss()
             }) {
                 HStack {
                     Text("Add relay", comment: "Button to add a relay.")

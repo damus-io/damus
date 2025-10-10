@@ -173,7 +173,7 @@ struct ShareExtensionView: View {
         .onReceive(handle_notify(.post)) { post_notification in
             switch post_notification {
             case .post(let post):
-                self.post(post)
+                Task { await self.post(post) }
             case .cancel:
                 self.share_state = .cancelled
                 dismissParent?()
@@ -193,7 +193,7 @@ struct ShareExtensionView: View {
                 break
             case .active:
                 print("txn: 📙 SHARE ACTIVE")
-                state.nostrNetwork.ping()
+                Task { await state.nostrNetwork.ping() }
             @unknown default:
                 break
             }
@@ -216,7 +216,7 @@ struct ShareExtensionView: View {
         }
     }
     
-    func post(_ post: NostrPost) {
+    func post(_ post: NostrPost) async {
         self.share_state = .posting
         guard let state else {
             self.share_state = .failed(error: "Damus state not initialized")
@@ -230,7 +230,7 @@ struct ShareExtensionView: View {
             self.share_state = .failed(error: "Cannot convert post data into a nostr event")
             return
         }
-        state.nostrNetwork.postbox.send(posted_event, on_flush: .once({ flushed_event in
+        await state.nostrNetwork.postbox.send(posted_event, on_flush: .once({ flushed_event in
             if flushed_event.event.id == posted_event.id {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {  // Offset labor perception bias
                     self.share_state = .posted(event: flushed_event.event)
@@ -250,7 +250,7 @@ struct ShareExtensionView: View {
             return false
         }
         state = DamusState(keypair: keypair)
-        state?.nostrNetwork.connect()
+        Task { await state?.nostrNetwork.connect() }
         return true
     }
     

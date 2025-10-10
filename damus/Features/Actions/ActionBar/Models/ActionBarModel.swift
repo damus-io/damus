@@ -46,7 +46,8 @@ class ActionBarModel: ObservableObject {
         self.relays = relays
     }
     
-    func update(damus: DamusState, evid: NoteId) {
+    @MainActor
+    func update(damus: DamusState, evid: NoteId) async {
         self.likes = damus.likes.counts[evid] ?? 0
         self.boosts = damus.boosts.counts[evid] ?? 0
         self.zaps = damus.zaps.event_counts[evid] ?? 0
@@ -58,7 +59,7 @@ class ActionBarModel: ObservableObject {
         self.our_zap = damus.zaps.our_zaps[evid]?.first
         self.our_reply = damus.replies.our_reply(evid)
         self.our_quote_repost = damus.quote_reposts.our_events[evid]
-        self.relays = (damus.nostrNetwork.relayURLsThatSawNote(id: evid) ?? []).count
+        self.relays = (await damus.nostrNetwork.relayURLsThatSawNote(id: evid) ?? []).count
         self.objectWillChange.send()
     }
     

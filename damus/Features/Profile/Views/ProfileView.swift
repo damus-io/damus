@@ -219,7 +219,7 @@ struct ProfileView: View {
                         }
 
                         damus_state.mutelist_manager.set_mutelist(new_ev)
-                        damus_state.nostrNetwork.postbox.send(new_ev)
+                        Task { await damus_state.nostrNetwork.postbox.send(new_ev) }
                     }
                 } else {
                     Button(NSLocalizedString("Mute", comment: "Button to mute a profile"), role: .destructive) {

@@ -192,14 +192,14 @@ extension NostrNetworkManager {
                 Self.logger.debug("Network subscription \(id.uuidString, privacy: .public): Started")
                 
                 let streamTask = Task {
-                    while !self.pool.open {
+                    while await !self.pool.open {
                         Self.logger.info("\(id.uuidString, privacy: .public): RelayPool closed. Sleeping for 1 second before resuming.")
                         try await Task.sleep(nanoseconds: 1_000_000_000)
                         continue
                     }
                     
                     do {
-                        for await item in self.pool.subscribe(filters: filters, to: desiredRelays, id: id) {
+                        for await item in await self.pool.subscribe(filters: filters, to: desiredRelays, id: id) {
                             // NO-OP. Notes will be automatically ingested by NostrDB
                             // TODO: Improve efficiency of subscriptions?
                             try Task.checkCancellation()
@@ -333,7 +333,7 @@ extension NostrNetworkManager {
             }
             
             // Not available in local ndb, stream from network
-            outerLoop: for await item in self.pool.subscribe(filters: [NostrFilter(ids: [noteId], limit: 1)], to: targetRelays, eoseTimeout: timeout) {
+            outerLoop: for await item in await self.pool.subscribe(filters: [NostrFilter(ids: [noteId], limit: 1)], to: targetRelays, eoseTimeout: timeout) {
                 switch item {
                 case .event(let event):
                     return NdbNoteLender(ownedNdbNote: event)

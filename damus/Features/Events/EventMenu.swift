@@ -64,8 +64,8 @@ struct MenuItems: View {
         self.profileModel = profileModel
     }
 
-    var event_relay_url_strings: [RelayURL] {
-        let relays = damus_state.nostrNetwork.relaysForEvent(event: event)
+    func event_relay_url_strings() async -> [RelayURL] {
+        let relays = await damus_state.nostrNetwork.relaysForEvent(event: event)
         if !relays.isEmpty {
             return relays.prefix(Constants.MAX_SHARE_RELAYS).map { $0 }
         }
@@ -88,7 +88,7 @@ struct MenuItems: View {
             }
 
             Button {
-                UIPasteboard.general.string = Bech32Object.encode(.nevent(NEvent(event: event, relays: event_relay_url_strings)))
+                Task { UIPasteboard.general.string = Bech32Object.encode(.nevent(NEvent(event: event, relays: await event_relay_url_strings()))) }
             } label: {
                 Label(NSLocalizedString("Copy note ID", comment: "Context menu option for copying the ID of the note."), image: "note-book")
             }
@@ -122,7 +122,7 @@ struct MenuItems: View {
                     if let full_keypair = self.damus_state.keypair.to_full(),
                        let new_mutelist_ev = toggle_from_mutelist(keypair: full_keypair, prev: damus_state.mutelist_manager.event, to_toggle: .thread(event.thread_id(), duration?.date_from_now)) {
                         damus_state.mutelist_manager.set_mutelist(new_mutelist_ev)
-                        damus_state.nostrNetwork.postbox.send(new_mutelist_ev)
+                        Task { await damus_state.nostrNetwork.postbox.send(new_mutelist_ev) }
                     }
                     let muted = damus_state.mutelist_manager.is_event_muted(event)
                     isMutedThread = muted

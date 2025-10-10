@@ -55,7 +55,7 @@ class SearchHomeModel: ObservableObject {
         DispatchQueue.main.async {
             self.loading = true
         }
-        let to_relays = damus_state.nostrNetwork.ourRelayDescriptors
+        let to_relays = await damus_state.nostrNetwork.ourRelayDescriptors
             .map { $0.url }
             .filter { !damus_state.relay_filters.is_filtered(timeline: .search, relay_id: $0) }
         

@@ -300,16 +300,18 @@ struct ContentView: View {
         .ignoresSafeArea(.keyboard)
         .edgesIgnoringSafeArea(hide_bar ? [.bottom] : [])
         .onAppear() {
-            self.connect()
-            try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default, options: .mixWithOthers)
-            setup_notifications()
-            if !hasSeenOnboardingSuggestions || damus_state!.settings.always_show_onboarding_suggestions {
-                active_sheet = .onboardingSuggestions
-                hasSeenOnboardingSuggestions = true
-            }
-            self.appDelegate?.state = damus_state
-            Task {  // We probably don't need this to be a detached task. According to https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/#Defining-and-Calling-Asynchronous-Functions, awaits are only suspension points that do not block the thread.
-                await self.listenAndHandleLocalNotifications()
+            Task {
+                await self.connect()
+                try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default, options: .mixWithOthers)
+                setup_notifications()
+                if !hasSeenOnboardingSuggestions || damus_state!.settings.always_show_onboarding_suggestions {
+                    active_sheet = .onboardingSuggestions
+                    hasSeenOnboardingSuggestions = true
+                }
+                self.appDelegate?.state = damus_state
+                Task {  // We probably don't need this to be a detached task. According to https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/#Defining-and-Calling-Asynchronous-Functions, awaits are only suspension points that do not block the thread.
+                    await self.listenAndHandleLocalNotifications()
+                }
             }
         }
         .sheet(item: $active_sheet) { item in
@@ -371,7 +373,7 @@ struct ContentView: View {
             self.hide_bar = !show
         }
         .onReceive(timer) { n in
-            self.damus_state?.nostrNetwork.postbox.try_flushing_events()
+            Task{ await self.damus_state?.nostrNetwork.postbox.try_flushing_events() }
             self.damus_state!.profiles.profile_data(self.damus_state!.pubkey).status.try_expire()
         }
         .onReceive(handle_notify(.report)) { target in
@@ -382,45 +384,47 @@ struct ContentView: View {
             self.confirm_mute = true
         }
         .onReceive(handle_notify(.attached_wallet)) { nwc in
-            try? damus_state.nostrNetwork.userRelayList.load()    // Reload relay list to apply changes
-
-            // update the lightning address on our profile when we attach a
-            // wallet with an associated
-            guard let ds = self.damus_state,
-                  let lud16 = nwc.lud16,
-                  let keypair = ds.keypair.to_full(),
-                  let profile_txn = ds.profiles.lookup(id: ds.pubkey),
-                  let profile = profile_txn.unsafeUnownedValue,
-                  lud16 != profile.lud16 else {
-                return
+            Task {
+                try? await damus_state.nostrNetwork.userRelayList.load()    // Reload relay list to apply changes
+                
+                // update the lightning address on our profile when we attach a
+                // wallet with an associated
+                guard let ds = self.damus_state,
+                      let lud16 = nwc.lud16,
+                      let keypair = ds.keypair.to_full(),
+                      let profile_txn = ds.profiles.lookup(id: ds.pubkey),
+                      let profile = profile_txn.unsafeUnownedValue,
+                      lud16 != profile.lud16 else {
+                    return
+                }
+                
+                // clear zapper cache for old lud16
+                if profile.lud16 != nil {
+                    // TODO: should this be somewhere else, where we process profile events!?
+                    invalidate_zapper_cache(pubkey: keypair.pubkey, profiles: ds.profiles, lnurl: ds.lnurls)
+                }
+                
+                let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: lud16, nip05: profile.nip05, damus_donation: profile.damus_donation, reactions: profile.reactions)
+                
+                guard let ev = make_metadata_event(keypair: keypair, metadata: prof) else { return }
+                await ds.nostrNetwork.postbox.send(ev)
             }
-
-            // clear zapper cache for old lud16
-            if profile.lud16 != nil {
-                // TODO: should this be somewhere else, where we process profile events!?
-                invalidate_zapper_cache(pubkey: keypair.pubkey, profiles: ds.profiles, lnurl: ds.lnurls)
-            }
-            
-            let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: lud16, nip05: profile.nip05, damus_donation: profile.damus_donation, reactions: profile.reactions)
-
-            guard let ev = make_metadata_event(keypair: keypair, metadata: prof) else { return }
-            ds.nostrNetwork.postbox.send(ev)
         }
         .onReceive(handle_notify(.broadcast)) { ev in
             guard let ds = self.damus_state else { return }
 
-            ds.nostrNetwork.postbox.send(ev)
+            Task { await ds.nostrNetwork.postbox.send(ev) }
         }
         .onReceive(handle_notify(.unfollow)) { target in
             guard let state = self.damus_state else { return }
-            _ = handle_unfollow(state: state, unfollow: target.follow_ref)
+            Task { _ = await handle_unfollow(state: state, unfollow: target.follow_ref) }
         }
         .onReceive(handle_notify(.unfollowed)) { unfollow in
             home.resubscribe(.unfollowing(unfollow))
         }
         .onReceive(handle_notify(.follow)) { target in
             guard let state = self.damus_state else { return }
-            handle_follow_notif(state: state, target: target)
+            Task { await handle_follow_notif(state: state, target: target) }
         }
         .onReceive(handle_notify(.followed)) { _ in
             home.resubscribe(.following)
@@ -431,8 +435,10 @@ struct ContentView: View {
                       return
             }
 
-            if !handle_post_notification(keypair: keypair, postbox: state.nostrNetwork.postbox, events: state.events, post: post) {
-                self.active_sheet = nil
+            Task {
+                if await !handle_post_notification(keypair: keypair, postbox: state.nostrNetwork.postbox, events: state.events, post: post) {
+                    self.active_sheet = nil
+                }
             }
         }
         .onReceive(handle_notify(.new_mutes)) { _ in
@@ -475,7 +481,7 @@ struct ContentView: View {
             }
         }
         .onReceive(handle_notify(.disconnect_relays)) { () in
-            damus_state.nostrNetwork.disconnectRelays()
+            Task { await damus_state.nostrNetwork.disconnectRelays() }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { obj in
             print("txn: 📙 DAMUS ACTIVE NOTIFY")
@@ -540,27 +546,29 @@ struct ContentView: View {
                     damusClosingTask = nil
                     damus_state.ndb.reopen()
                     // Pinging the network will automatically reconnect any dead websocket connections
-                    damus_state.nostrNetwork.ping()
+                    await damus_state.nostrNetwork.ping()
                 }
             @unknown default:
                 break
             }
         }
         .onReceive(handle_notify(.onlyzaps_mode)) { hide in
-            home.filter_events()
-
-            guard let ds = damus_state,
-                  let profile_txn = ds.profiles.lookup(id: ds.pubkey),
-                  let profile = profile_txn.unsafeUnownedValue,
-                  let keypair = ds.keypair.to_full()
-            else {
-                return
+            Task {
+                home.filter_events()
+                
+                guard let ds = damus_state,
+                      let profile_txn = ds.profiles.lookup(id: ds.pubkey),
+                      let profile = profile_txn.unsafeUnownedValue,
+                      let keypair = ds.keypair.to_full()
+                else {
+                    return
+                }
+                
+                let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: profile.lud16, nip05: profile.nip05, damus_donation: profile.damus_donation, reactions: !hide)
+                
+                guard let profile_ev = make_metadata_event(keypair: keypair, metadata: prof) else { return }
+                await ds.nostrNetwork.postbox.send(profile_ev)
             }
-
-            let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: profile.lud16, nip05: profile.nip05, damus_donation: profile.damus_donation, reactions: !hide)
-
-            guard let profile_ev = make_metadata_event(keypair: keypair, metadata: prof) else { return }
-            ds.nostrNetwork.postbox.send(profile_ev)
         }
         .alert(NSLocalizedString("User muted", comment: "Alert message to indicate the user has been muted"), isPresented: $user_muted_confirm, actions: {
             Button(NSLocalizedString("Thanks!", comment: "Button to close out of alert that informs that the action to muted a user was successful.")) {
@@ -583,20 +591,22 @@ struct ContentView: View {
             }
 
             Button(NSLocalizedString("Yes, Overwrite", comment: "Text of button that confirms to overwrite the existing mutelist.")) {
-                guard let ds = damus_state,
-                      let keypair = ds.keypair.to_full(),
-                      let muting,
-                      let mutelist = create_or_update_mutelist(keypair: keypair, mprev: nil, to_add: muting)
-                else {
-                    return
+                Task {
+                    guard let ds = damus_state,
+                          let keypair = ds.keypair.to_full(),
+                          let muting,
+                          let mutelist = create_or_update_mutelist(keypair: keypair, mprev: nil, to_add: muting)
+                    else {
+                        return
+                    }
+                    
+                    ds.mutelist_manager.set_mutelist(mutelist)
+                    await ds.nostrNetwork.postbox.send(mutelist)
+                    
+                    confirm_overwrite_mutelist = false
+                    confirm_mute = false
+                    user_muted_confirm = true
                 }
-                
-                ds.mutelist_manager.set_mutelist(mutelist)
-                ds.nostrNetwork.postbox.send(mutelist)
-
-                confirm_overwrite_mutelist = false
-                confirm_mute = false
-                user_muted_confirm = true
             }
         }, message: {
             Text("No mute list found, create a new one? This will overwrite any previous mute lists.", comment: "Alert message prompt that asks if the user wants to create a new mute list, overwriting previous mute lists.")
@@ -624,7 +634,7 @@ struct ContentView: View {
                     }
 
                     ds.mutelist_manager.set_mutelist(ev)
-                    ds.nostrNetwork.postbox.send(ev)
+                    Task { await ds.nostrNetwork.postbox.send(ev) }
                 }
             }
         }, message: {
@@ -676,7 +686,7 @@ struct ContentView: View {
         self.execute_open_action(openAction)
     }
 
-    func connect() {
+    func connect() async {
         // nostrdb
         var mndb = Ndb()
         if mndb == nil {
@@ -698,7 +708,7 @@ struct ContentView: View {
         
         let settings = UserSettingsStore.globally_load_for(pubkey: pubkey)
 
-        let new_relay_filters = load_relay_filters(pubkey) == nil
+        let new_relay_filters = await load_relay_filters(pubkey) == nil
 
         self.damus_state = DamusState(keypair: keypair,
                                       likes: EventCounter(our_pubkey: pubkey),
@@ -756,7 +766,7 @@ struct ContentView: View {
                 Log.error("Failed to configure tips: %s", for: .tips, error.localizedDescription)
             }
         }
-        damus_state.nostrNetwork.connect()
+        await damus_state.nostrNetwork.connect()
         // TODO: Move this to a better spot. Not sure what is the best signal to listen to for sending initial filters
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: {
             self.home.send_initial_filters()
@@ -764,26 +774,28 @@ struct ContentView: View {
     }
 
     func music_changed(_ state: MusicState) {
-        guard let damus_state else { return }
-        switch state {
-        case .playback_state:
-            break
-        case .song(let song):
-            guard let song, let kp = damus_state.keypair.to_full() else { return }
-
-            let pdata = damus_state.profiles.profile_data(damus_state.pubkey)
-
-            let desc = "\(song.title ?? "Unknown") - \(song.artist ?? "Unknown")"
-            let encodedDesc = desc.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-            let url = encodedDesc.flatMap { enc in
-                URL(string: "spotify:search:\(enc)")
+        Task {
+            guard let damus_state else { return }
+            switch state {
+            case .playback_state:
+                break
+            case .song(let song):
+                guard let song, let kp = damus_state.keypair.to_full() else { return }
+                
+                let pdata = damus_state.profiles.profile_data(damus_state.pubkey)
+                
+                let desc = "\(song.title ?? "Unknown") - \(song.artist ?? "Unknown")"
+                let encodedDesc = desc.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+                let url = encodedDesc.flatMap { enc in
+                    URL(string: "spotify:search:\(enc)")
+                }
+                let music = UserStatus(type: .music, expires_at: Date.now.addingTimeInterval(song.playbackDuration), content: desc, created_at: UInt32(Date.now.timeIntervalSince1970), url: url)
+                
+                pdata.status.music = music
+                
+                guard let ev = music.to_note(keypair: kp) else { return }
+                await damus_state.nostrNetwork.postbox.send(ev)
             }
-            let music = UserStatus(type: .music, expires_at: Date.now.addingTimeInterval(song.playbackDuration), content: desc, created_at: UInt32(Date.now.timeIntervalSince1970), url: url)
-
-            pdata.status.music = music
-
-            guard let ev = music.to_note(keypair: kp) else { return }
-            damus_state.nostrNetwork.postbox.send(ev)
         }
     }
     
@@ -935,7 +947,7 @@ func update_filters_with_since(last_of_kind: [UInt32: NostrEvent], filters: [Nos
     }
 }
 
-
+@MainActor
 func setup_notifications() {
     this_app.registerForRemoteNotifications()
     let center = UNUserNotificationCenter.current()
@@ -992,14 +1004,14 @@ func timeline_name(_ timeline: Timeline?) -> String {
 }
 
 @discardableResult
-func handle_unfollow(state: DamusState, unfollow: FollowRef) -> Bool {
+func handle_unfollow(state: DamusState, unfollow: FollowRef) async -> Bool {
     guard let keypair = state.keypair.to_full() else {
         return false
     }
 
     let old_contacts = state.contacts.event
 
-    guard let ev = unfollow_reference(postbox: state.nostrNetwork.postbox, our_contacts: old_contacts, keypair: keypair, unfollow: unfollow)
+    guard let ev = await unfollow_reference(postbox: state.nostrNetwork.postbox, our_contacts: old_contacts, keypair: keypair, unfollow: unfollow)
     else {
         return false
     }
@@ -1020,12 +1032,12 @@ func handle_unfollow(state: DamusState, unfollow: FollowRef) -> Bool {
 }
 
 @discardableResult
-func handle_follow(state: DamusState, follow: FollowRef) -> Bool {
+func handle_follow(state: DamusState, follow: FollowRef) async -> Bool {
     guard let keypair = state.keypair.to_full() else {
         return false
     }
 
-    guard let ev = follow_reference(box: state.nostrNetwork.postbox, our_contacts: state.contacts.event, keypair: keypair, follow: follow)
+    guard let ev = await follow_reference(box: state.nostrNetwork.postbox, our_contacts: state.contacts.event, keypair: keypair, follow: follow)
     else {
         return false
     }
@@ -1045,7 +1057,7 @@ func handle_follow(state: DamusState, follow: FollowRef) -> Bool {
 }
 
 @discardableResult
-func handle_follow_notif(state: DamusState, target: FollowTarget) -> Bool {
+func handle_follow_notif(state: DamusState, target: FollowTarget) async -> Bool {
     switch target {
     case .pubkey(let pk):
         state.contacts.add_friend_pubkey(pk)
@@ -1053,10 +1065,10 @@ func handle_follow_notif(state: DamusState, target: FollowTarget) -> Bool {
         state.contacts.add_friend_contact(ev)
     }
 
-    return handle_follow(state: state, follow: target.follow_ref)
+    return await handle_follow(state: state, follow: target.follow_ref)
 }
 
-func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: EventCache, post: NostrPostResult) -> Bool {
+func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: EventCache, post: NostrPostResult) async -> Bool {
     switch post {
     case .post(let post):
         //let post = tup.0
@@ -1065,17 +1077,17 @@ func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: Ev
         guard let new_ev = post.to_event(keypair: keypair) else {
             return false
         }
-        postbox.send(new_ev)
+        await postbox.send(new_ev)
         for eref in new_ev.referenced_ids.prefix(3) {
             // also broadcast at most 3 referenced events
             if let ev = events.lookup(eref) {
-                postbox.send(ev)
+                await postbox.send(ev)
             }
         }
         for qref in new_ev.referenced_quote_ids.prefix(3) {
             // also broadcast at most 3 referenced quoted events
             if let ev = events.lookup(qref.note_id) {
-                postbox.send(ev)
+                await postbox.send(ev)
             }
         }
         return true

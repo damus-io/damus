@@ -17,14 +17,14 @@ extension WalletConnect {
     /// - Parameters:
     ///   - url: The Nostr Wallet Connect URL containing connection info to the NWC wallet
     ///   - pool: The RelayPool to send the subscription request through
-    static func subscribe(url: WalletConnectURL, pool: RelayPool) {
+    static func subscribe(url: WalletConnectURL, pool: RelayPool) async {
         var filter = NostrFilter(kinds: [.nwc_response])
         filter.authors = [url.pubkey]
         filter.pubkeys = [url.keypair.pubkey]
         filter.limit = 0
         let sub = NostrSubscribe(filters: [filter], sub_id: "nwc")
 
-        pool.send(.subscribe(sub), to: [url.relay], skip_ephemeral: false)
+        await pool.send(.subscribe(sub), to: [url.relay], skip_ephemeral: false)
     }
 
     /// Sends out a request to pay an invoice to the NWC relay, and ensures that:
@@ -41,16 +41,16 @@ extension WalletConnect {
     ///   - on_flush: A callback to call after the event has been flushed to the network
     /// - Returns: The Nostr Event that was sent to the network, representing the request that was made
     @discardableResult
-    static func pay(url: WalletConnectURL, pool: RelayPool, post: PostBox, invoice: String, zap_request: NostrEvent?, delay: TimeInterval? = 5.0, on_flush: OnFlush? = nil) -> NostrEvent? {
+    static func pay(url: WalletConnectURL, pool: RelayPool, post: PostBox, invoice: String, zap_request: NostrEvent?, delay: TimeInterval? = 5.0, on_flush: OnFlush? = nil) async -> NostrEvent? {
         
         let req = WalletConnect.Request.payZapRequest(invoice: invoice, zapRequest: zap_request)
         guard let ev = req.to_nostr_event(to_pk: url.pubkey, keypair: url.keypair) else {
             return nil
         }
 
-        try? pool.add_relay(.nwc(url: url.relay))   // Ensure the NWC relay is connected
-        WalletConnect.subscribe(url: url, pool: pool)      // Ensure we are listening to NWC updates from the relay
-        post.send(ev, to: [url.relay], skip_ephemeral: false, delay: delay, on_flush: on_flush)
+        try? await pool.add_relay(.nwc(url: url.relay))   // Ensure the NWC relay is connected
+        await WalletConnect.subscribe(url: url, pool: pool)      // Ensure we are listening to NWC updates from the relay
+        await post.send(ev, to: [url.relay], skip_ephemeral: false, delay: delay, on_flush: on_flush)
         return ev
     }
 

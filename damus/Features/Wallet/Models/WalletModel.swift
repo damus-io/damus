@@ -181,7 +181,7 @@ class WalletModel: ObservableObject {
             )
         ]
         
-        nostrNetwork.send(event: requestEvent, to: [currentNwcUrl.relay], skipEphemeralRelays: false)
+        await nostrNetwork.send(event: requestEvent, to: [currentNwcUrl.relay], skipEphemeralRelays: false)
         for await event in nostrNetwork.reader.timedStream(filters: responseFilters, to: [currentNwcUrl.relay], timeout: timeout) {
             guard let responseEvent = try? event.getCopy() else { throw .internalError }
             

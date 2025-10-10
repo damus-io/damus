@@ -179,7 +179,7 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
     }
     
     // Only take the first 10 because reasons
-    let relays = Array(damus_state.nostrNetwork.ourRelayDescriptors.prefix(10))
+    let relays = Array(await damus_state.nostrNetwork.ourRelayDescriptors.prefix(10))
     let content = comment ?? ""
     
     guard let mzapreq = make_zap_request_event(keypair: keypair, content: content, relays: relays, target: target, zap_type: zap_type) else {
@@ -240,7 +240,7 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
             // we don't have a delay on one-tap nozaps (since this will be from customize zap view)
             let delay = damus_state.settings.nozaps ? nil : 5.0
 
-            let nwc_req = damus_state.nostrNetwork.nwcPay(url: nwc_state.url, post: damus_state.nostrNetwork.postbox, invoice: inv, delay: delay, on_flush: flusher)
+            let nwc_req = await damus_state.nostrNetwork.nwcPay(url: nwc_state.url, post: damus_state.nostrNetwork.postbox, invoice: inv, delay: delay, on_flush: flusher)
 
             guard let nwc_req, case .nwc(let pzap_state) = pending_zap_state else {
                 print("nwc: failed to send nwc request for zapreq \(reqid.reqid)")

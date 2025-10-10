@@ -121,8 +121,8 @@ struct PostView: View {
         uploadTasks.removeAll()
     }
     
-    func send_post() {
-        let new_post = build_post(state: self.damus_state, post: self.post, action: action, uploadedMedias: uploadedMedias, references: self.references, filtered_pubkeys: filtered_pubkeys)
+    func send_post() async {
+        let new_post = await build_post(state: self.damus_state, post: self.post, action: action, uploadedMedias: uploadedMedias, references: self.references, filtered_pubkeys: filtered_pubkeys)
 
         notify(.post(.post(new_post)))
 
@@ -190,7 +190,7 @@ struct PostView: View {
     
     var PostButton: some View {
         Button(NSLocalizedString("Post", comment: "Button to post a note.")) {
-            self.send_post()
+            Task { await self.send_post() }
         }
         .disabled(posting_disabled)
         .opacity(posting_disabled ? 0.5 : 1.0)
@@ -829,8 +829,8 @@ func nip10_reply_tags(replying_to: NostrEvent, keypair: Keypair, relayURL: Relay
     return tags
 }
 
-func build_post(state: DamusState, action: PostAction, draft: DraftArtifacts) -> NostrPost {
-    return build_post(
+func build_post(state: DamusState, action: PostAction, draft: DraftArtifacts) async -> NostrPost {
+    return await build_post(
         state: state,
         post: draft.content,
         action: action,
@@ -840,7 +840,7 @@ func build_post(state: DamusState, action: PostAction, draft: DraftArtifacts) ->
     )
 }
 
-func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], references: [RefId], filtered_pubkeys: Set<Pubkey>) -> NostrPost {
+func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], references: [RefId], filtered_pubkeys: Set<Pubkey>) async -> NostrPost {
     // don't add duplicate pubkeys but retain order
     var pkset = Set<Pubkey>()
 
@@ -858,7 +858,7 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
         acc.append(pk)
     }
     
-    return build_post(state: state, post: post, action: action, uploadedMedias: uploadedMedias, pubkeys: pks)
+    return await build_post(state: state, post: post, action: action, uploadedMedias: uploadedMedias, pubkeys: pks)
 }
 
 /// This builds a Nostr post from draft data from `PostView` or other draft-related classes
@@ -874,7 +874,7 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
 ///   - uploadedMedias: The medias attached to this post
 ///   - pubkeys: The referenced pubkeys
 /// - Returns: A NostrPost, which can then be signed into an event.
-func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], pubkeys: [Pubkey]) -> NostrPost {
+func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], pubkeys: [Pubkey]) async -> NostrPost {
     let post = NSMutableAttributedString(attributedString: post)
     post.enumerateAttributes(in: NSRange(location: 0, length: post.length), options: []) { attributes, range, stop in
         let linkValue = attributes[.link]
@@ -916,10 +916,10 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
     switch action {
     case .replying_to(let replying_to):
         // start off with the reply tags
-        tags = nip10_reply_tags(replying_to: replying_to, keypair: state.keypair, relayURL: state.nostrNetwork.relaysForEvent(event: replying_to).first)
+        tags = nip10_reply_tags(replying_to: replying_to, keypair: state.keypair, relayURL: await state.nostrNetwork.relaysForEvent(event: replying_to).first)
 
     case .quoting(let ev):
-        let relay_urls = state.nostrNetwork.relaysForEvent(event: ev)
+        let relay_urls = await state.nostrNetwork.relaysForEvent(event: ev)
         let nevent = Bech32Object.encode(.nevent(NEvent(event: ev, relays: relay_urls.prefix(4).map { $0 })))
         content.append("\n\nnostr:\(nevent)")
 

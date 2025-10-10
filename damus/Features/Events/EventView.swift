@@ -106,7 +106,7 @@ func format_date(date: Date, time_style: DateFormatter.Style = .short) -> String
 
 func make_actionbar_model(ev: NoteId, damus: DamusState) -> ActionBarModel {
     let model = ActionBarModel.empty()
-    model.update(damus: damus, evid: ev)
+    Task { await model.update(damus: damus, evid: ev) }
     return model
 }
 
