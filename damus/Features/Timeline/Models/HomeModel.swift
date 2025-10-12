@@ -782,12 +782,16 @@ class HomeModel: ContactsDelegate {
     }
     
     func handle_poll_event(sub_id: String, _ ev: NostrEvent) {
-        damus_state.polls.registerPollEvent(ev)
+        Task { @MainActor in
+            damus_state.polls.registerPollEvent(ev)
+        }
         handle_text_event(sub_id: sub_id, ev)
     }
-    
+
     func handle_poll_response(_ ev: NostrEvent) {
-        damus_state.polls.registerResponseEvent(ev)
+        Task { @MainActor in
+            damus_state.polls.registerResponseEvent(ev)
+        }
     }
     
     func got_new_dm(notifs: NewEventsBits, ev: NostrEvent) {

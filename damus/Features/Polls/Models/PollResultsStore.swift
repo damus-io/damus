@@ -7,6 +7,16 @@
 
 import Foundation
 
+protocol PollResponseNetworking {
+    func subscribeToPollResponses(poll: PollEvent, subId: String, handler: @escaping (NostrResponse) -> Void)
+    func sendPollResponseEvent(_ event: NostrEvent, relayHints: [RelayURL]?)
+}
+
+protocol PollVotingContext {
+    var keypair: Keypair { get }
+    var pollNetwork: PollResponseNetworking { get }
+}
+
 @MainActor
 final class PollResultsStore: ObservableObject {
     enum PollVoteError: Error {
@@ -110,17 +120,13 @@ final class PollResultsStore: ObservableObject {
         }
     }
 
-    func ensureResults(for poll: PollEvent, network: NostrNetworkManager) {
+    func ensureResults(for poll: PollEvent, network: PollResponseNetworking) {
         if subscriptions[poll.id] != nil { return }
         let subid = "poll-\(poll.id.hex())"
         subscriptions[poll.id] = subid
 
-        let filter = NostrFilter(kinds: [.poll_response], referenced_ids: [poll.id])
-        let relays = poll.relayHints.isEmpty ? nil : poll.relayHints
-
-        network.pool.subscribe_to(sub_id: subid, filters: [filter], to: relays) { [weak self] _, event in
+        network.subscribeToPollResponses(poll: poll, subId: subid) { [weak self] response in
             guard let self else { return }
-            guard case .nostr_event(let response) = event else { return }
 
             switch response {
             case .event(_, let nostrEvent):
@@ -135,8 +141,8 @@ final class PollResultsStore: ObservableObject {
         }
     }
 
-    func submitVote(for poll: PollEvent, selections: [String], damusState: DamusState) -> Result<Void, PollVoteError> {
-        guard let keypair = damusState.keypair.to_full() else { return .failure(.noKeypair) }
+    func submitVote(for poll: PollEvent, selections: [String], context: PollVotingContext) -> Result<Void, PollVoteError> {
+        guard let keypair = context.keypair.to_full() else { return .failure(.noKeypair) }
         guard !selections.isEmpty else { return .failure(.noSelection) }
         guard !poll.isExpired(now: Date()) else { return .failure(.pollClosed) }
 
@@ -147,7 +153,8 @@ final class PollResultsStore: ObservableObject {
             return .failure(.eventBuildFailed)
         }
 
-        damusState.nostrNetwork.postbox.send(event, to: poll.relayHints.isEmpty ? nil : poll.relayHints)
+        let relays = poll.relayHints.isEmpty ? nil : poll.relayHints
+        context.pollNetwork.sendPollResponseEvent(event, relayHints: relays)
         registerResponseEvent(event)
         return .success(())
     }

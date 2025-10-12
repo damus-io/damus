@@ -122,14 +122,19 @@ struct PollResponse {
     init?(event: NostrEvent) {
         guard event.known_kind == .poll_response else { return nil }
 
-        guard let pollReference = event.referenced_ids.first(where: { ref in
-            if case .event = ref {
-                return true
+        var pollId: NoteId?
+        for tag in event.tags {
+            guard tag.count >= 2 else { continue }
+            var iterator = tag.makeIterator()
+            guard let keyElem = iterator.next(), keyElem.string() == "e",
+                  let idElem = iterator.next(), let pollIdData = idElem.id() else {
+                continue
             }
-            return false
-        }),
-        case .event(let pollId) = pollReference
-        else {
+            pollId = NoteId(pollIdData)
+            break
+        }
+
+        guard let pollId else {
             return nil
         }
 
@@ -156,4 +161,3 @@ struct PollResponse {
         self.optionIds = responses
     }
 }
-

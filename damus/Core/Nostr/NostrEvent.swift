@@ -130,7 +130,10 @@ class NostrEventOld: Codable, Identifiable, CustomStringConvertible, Equatable, 
 
 extension NostrEventOld {
     var is_textlike: Bool {
-        return kind == 1 || kind == 42 || kind == 30023
+        return kind == NostrKind.text.rawValue ||
+               kind == NostrKind.chat.rawValue ||
+               kind == NostrKind.longform.rawValue ||
+               kind == NostrKind.poll.rawValue
     }
 
     var too_big: Bool {

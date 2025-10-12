@@ -35,7 +35,7 @@ func generate_test_damus_state(
                            dms: .init(our_pubkey: our_pubkey),
                            previews: .init(),
                            zaps: .init(our_pubkey: our_pubkey),
-                           polls: PollResultsStore(),
+                           polls: MainActor.assumeIsolated { PollResultsStore() },
                            lnurls: .init(),
                            settings: settings,
                            relay_filters: .init(our_pubkey: our_pubkey),

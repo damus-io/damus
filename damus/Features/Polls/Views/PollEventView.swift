@@ -21,6 +21,7 @@ struct PollEventView: View {
         self.poll = poll
         self.options = options
         self.store = damus.polls
+        self.store.registerPollEvent(event)
     }
 
     var body: some View {
@@ -177,7 +178,7 @@ private struct PollEventCard: View {
         isSubmitting = true
         errorMessage = nil
 
-        let result = store.submitVote(for: poll, selections: Array(selectedOptions), damusState: damusState)
+        let result = store.submitVote(for: poll, selections: Array(selectedOptions), context: damusState)
         switch result {
         case .success:
             selectedOptions = Set(ourSelections)
@@ -301,4 +302,3 @@ private struct PollResultRow: View {
         }
     }
 }
-

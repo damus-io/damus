@@ -47,14 +47,23 @@ struct EventView: View {
                 LongformPreview(state: damus, ev: event, options: options)
             } else if event.known_kind == .highlight {
                 HighlightView(state: damus, event: event, options: options)
-            } else if event.known_kind == .poll, let poll = PollEvent(event: event) {
-                damus.polls.registerPollEvent(event)
-                PollEventView(damus: damus, event: event, poll: poll, options: options)
+            } else if event.known_kind == .poll,
+                      let poll = PollEvent(event: event),
+                      let pollView = PollEventViewFactory.makePollEventView(damus: damus, event: event, poll: poll, options: options) {
+                pollView
             } else {
                 TextEvent(damus: damus, event: event, pubkey: pubkey, options: options)
                     //.padding([.top], 6)
             }
         }
+    }
+}
+
+struct PollEventViewFactory {
+    static var builder: (DamusState, NostrEvent, PollEvent, EventViewOptions) -> AnyView? = { _, _, _, _ in nil }
+
+    static func makePollEventView(damus: DamusState, event: NostrEvent, poll: PollEvent, options: EventViewOptions) -> AnyView? {
+        builder(damus, event, poll, options)
     }
 }
 

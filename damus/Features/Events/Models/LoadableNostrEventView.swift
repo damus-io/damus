@@ -62,7 +62,7 @@ class LoadableNostrEventViewModel: ObservableObject {
             guard let ev = await self.loadEvent(noteId: note_id) else { return .not_found }
             guard let known_kind = ev.known_kind else { return .unknown_or_unsupported_kind }
             switch known_kind {
-            case .text, .highlight:
+            case .text, .highlight, .poll:
                 return .loaded(route: Route.Thread(thread: ThreadModel(event: ev, damus_state: damus_state)))
             case .dm:
                 let dm_model = damus_state.dms.lookup_or_create(ev.pubkey)
@@ -74,7 +74,7 @@ class LoadableNostrEventViewModel: ObservableObject {
             case .zap, .zap_request:
                 guard let zap = await get_zap(from: ev, state: damus_state) else { return .not_found }
                 return .loaded(route: Route.Zaps(target: zap.target))
-            case .contacts, .metadata, .delete, .boost, .chat, .mute_list, .list_deprecated, .draft, .longform, .nwc_request, .nwc_response, .http_auth, .status, .relay_list, .follow_list, .interest_list, .poll, .poll_response:
+            case .contacts, .metadata, .delete, .boost, .chat, .mute_list, .list_deprecated, .draft, .longform, .nwc_request, .nwc_response, .http_auth, .status, .relay_list, .follow_list, .interest_list, .poll_response:
                 return .unknown_or_unsupported_kind
             }
         case .naddr(let naddr):
