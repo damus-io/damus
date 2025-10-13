@@ -15,8 +15,6 @@ class NostrNetworkManagerTests: XCTestCase {
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         damusState = generate_test_damus_state(mock_profile_info: nil)
-        try! damusState?.nostrNetwork.userRelayList.set(userRelayList: NIP65.RelayList())
-        damusState?.nostrNetwork.connect()
 
         let notesJSONL = getTestNotesJSONL()
 
@@ -59,9 +57,10 @@ class NostrNetworkManagerTests: XCTestCase {
                         gotAtLeastExpectedCount.fulfill()
                     }
                 case .eose:
+                    continue
+                case .ndbEose:
                     // End of stream, break out of the loop
                     endOfStream.fulfill()
-                case .ndbEose:
                     continue
                 case .networkEose:
                     continue
@@ -83,7 +82,10 @@ class NostrNetworkManagerTests: XCTestCase {
     /// ```
     /// nak req --kind 1 ws://localhost:10547 | wc -l
     /// ```
-    func testNdbSubscription() {
+    func testNdbSubscription() async {
+        try! await damusState?.nostrNetwork.userRelayList.set(userRelayList: NIP65.RelayList())
+        await damusState?.nostrNetwork.connect()
+        
         ensureSubscribeGetsAllExpectedNotes(filter: NostrFilter(kinds: [.text]), expectedCount: 57)
         ensureSubscribeGetsAllExpectedNotes(filter: NostrFilter(authors: [Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!]), expectedCount: 22)
         ensureSubscribeGetsAllExpectedNotes(filter: NostrFilter(kinds: [.boost], referenced_ids: [NoteId(hex: "64b26d0a587f5f894470e1e4783756b4d8ba971226de975ee30ac1b69970d5a1")!]), expectedCount: 5)

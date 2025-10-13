@@ -35,7 +35,7 @@ final class MutingTests: XCTestCase {
         }
 
         await test_damus_state.mutelist_manager.set_mutelist(mutelist)
-        test_damus_state.nostrNetwork.postbox.send(mutelist)
+        await test_damus_state.nostrNetwork.postbox.send(mutelist)
         
         let spammy_note_muted = await test_damus_state.mutelist_manager.is_event_muted(spammy_test_note)
         XCTAssert(spammy_note_muted)

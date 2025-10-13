@@ -70,14 +70,15 @@ final class AuthIntegrationTests: XCTestCase {
     }
      */
 
-    func testAuthIntegrationRelayDamusIo() {
+    @MainActor
+    func testAuthIntegrationRelayDamusIo() async {
         // Create relay pool and connect to `wss://relay.damus.io`
         let relay_url = RelayURL("wss://relay.damus.io")!
         var received_messages: [String] = []
         var sent_messages: [String] = []
         let keypair: Keypair = generate_new_keypair().to_keypair()
         let pool = RelayPool(ndb: Ndb.test, keypair: keypair)
-        pool.message_received_function = { obj in
+        await pool.set_message_received_function({ obj in
             let str = obj.0
             let descriptor = obj.1
 
@@ -86,8 +87,8 @@ final class AuthIntegrationTests: XCTestCase {
             }
 
             received_messages.append(str)
-        }
-        pool.message_sent_function = { obj in
+        })
+        await pool.set_message_sent_function({ obj in
             let str = obj.0
             let relay = obj.1
 
@@ -96,10 +97,10 @@ final class AuthIntegrationTests: XCTestCase {
             }
 
             sent_messages.append(str)
-        }
+        })
         XCTAssertEqual(pool.relays.count, 0)
         let relay_descriptor = RelayPool.RelayDescriptor.init(url: relay_url, info: .readWrite)
-        try! pool.add_relay(relay_descriptor)
+        try! await pool.add_relay(relay_descriptor)
         XCTAssertEqual(pool.relays.count, 1)
         let connection_expectation = XCTestExpectation(description: "Waiting for connection")
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
@@ -114,14 +115,15 @@ final class AuthIntegrationTests: XCTestCase {
         XCTAssertEqual(received_messages.count, 0)
     }
 
-    func testAuthIntegrationNostrWine() {
+    @MainActor
+    func testAuthIntegrationNostrWine() async {
         // Create relay pool and connect to `wss://nostr.wine`
         let relay_url = RelayURL("wss://nostr.wine")!
         var received_messages: [String] = []
         var sent_messages: [String] = []
         let keypair: Keypair = generate_new_keypair().to_keypair()
         let pool = RelayPool(ndb: Ndb.test, keypair: keypair)
-        pool.message_received_function = { obj in
+        await pool.set_message_received_function({ obj in
             let str = obj.0
             let descriptor = obj.1
 
@@ -130,8 +132,8 @@ final class AuthIntegrationTests: XCTestCase {
             }
 
             received_messages.append(str)
-        }
-        pool.message_sent_function = { obj in
+        })
+        await pool.set_message_sent_function({ obj in
             let str = obj.0
             let relay = obj.1
 
@@ -140,10 +142,10 @@ final class AuthIntegrationTests: XCTestCase {
             }
 
             sent_messages.append(str)
-        }
+        })
         XCTAssertEqual(pool.relays.count, 0)
         let relay_descriptor = RelayPool.RelayDescriptor.init(url: relay_url, info: .readWrite)
-        try! pool.add_relay(relay_descriptor)
+        try! await pool.add_relay(relay_descriptor)
         XCTAssertEqual(pool.relays.count, 1)
         let connection_expectation = XCTestExpectation(description: "Waiting for connection")
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
@@ -162,7 +164,7 @@ final class AuthIntegrationTests: XCTestCase {
         let subscribe = NostrSubscribe(filters: [
             NostrFilter(kinds: [.dm])
         ], sub_id: uuid)
-        pool.send(NostrRequest.subscribe(subscribe))
+        await pool.send(NostrRequest.subscribe(subscribe))
         // Wait for AUTH message to have been received & sent
         let msg_expectation = XCTestExpectation(description: "Waiting for messages")
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
@@ -185,4 +187,14 @@ final class AuthIntegrationTests: XCTestCase {
         XCTAssertEqual((sent_msg["tags"] as! [[String]]).first { $0[0] == "challenge" }![1], json_received[1] as! String)
     }
 
+}
+
+extension RelayPool {
+    func set_message_received_function(_ newFunction: (((String, RelayDescriptor)) -> Void)?) {
+        self.message_received_function = newFunction
+    }
+    
+    func set_message_sent_function(_ newFunction: (((String, Relay)) -> Void)? = nil) {
+        self.message_sent_function = newFunction
+    }
 }

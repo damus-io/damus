@@ -86,7 +86,7 @@ class ReplyTests: XCTestCase {
 //        XCTAssertEqual(post_blocks.count, 1)
 //    }
 
-    func testNewlineMentions() throws {
+    func testNewlineMentions() async throws {
         let bech32_pk = "npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s"
         let pk = bech32_pubkey_decode(bech32_pk)!
 
@@ -96,7 +96,7 @@ class ReplyTests: XCTestCase {
         post.append(user_tag_attr_string(profile: profile, pubkey: pk))
         post.append(.init(string: "\n"))
 
-        let post_note = build_post(state: test_damus_state, post: post, action: .posting(.none), uploadedMedias: [], pubkeys: [pk])
+        let post_note = await build_post(state: test_damus_state, post: post, action: .posting(.none), uploadedMedias: [], pubkeys: [pk])
 
         let expected_render = "nostr:\(pk.npub)\nnostr:\(pk.npub)"
         XCTAssertEqual(post_note.content, expected_render)
