@@ -81,7 +81,7 @@ extension NostrNetworkManager {
             guard pubkeys.count > 0 else { return }
             let profileFilter = NostrFilter(kinds: [.metadata], authors: pubkeys)
             try Task.checkCancellation()
-            for await ndbLender in self.subscriptionManager.streamIndefinitely(filters: [profileFilter], streamMode: .ndbFirst) {
+            for await ndbLender in self.subscriptionManager.streamIndefinitely(filters: [profileFilter], streamMode: .ndbFirst(optimizeNetworkFilter: true)) {
                 try Task.checkCancellation()
                 try? ndbLender.borrow { ev in
                     publishProfileUpdates(metadataEvent: ev)

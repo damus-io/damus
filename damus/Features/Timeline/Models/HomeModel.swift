@@ -524,7 +524,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         }
         self.generalHandlerTask?.cancel()
         self.generalHandlerTask = Task {
-            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: dms_filters + contacts_filters) {
+            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: dms_filters + contacts_filters, streamMode: .ndbAndNetworkParallel(optimizeNetworkFilter: true)) {
                 switch item {
                 case .event(let lender):
                     await lender.justUseACopy({ await process_event(ev: $0, context: .other) })
@@ -602,7 +602,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
             DispatchQueue.main.async {
                 self.loading = true
             }
-            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: home_filters, id: id) {
+            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: home_filters, streamMode: .ndbAndNetworkParallel(optimizeNetworkFilter: true), id: id) {
                 switch item {
                 case .event(let lender):
                     let currentTime = CFAbsoluteTimeGetCurrent()

@@ -35,6 +35,15 @@ enum NostrConnectionEvent {
             }
         }
     }
+    
+    var subId: String? {
+        switch self {
+        case .ws_connection_event(_):
+            return nil
+        case .nostr_event(let event):
+            return event.subid
+        }
+    }
 }
 
 final class RelayConnection: ObservableObject {
