@@ -59,19 +59,21 @@ class Ndb {
 
     // NostrDB used to be stored on the app container's document directory
     static private var old_db_path: String? {
-        guard let path = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.absoluteString else {
+        guard let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
             return nil
         }
-        return remove_file_prefix(path)
+        return url.path
     }
 
     static var db_path: String? {
         // Use the `group.com.damus` container, so that it can be accessible from other targets
         // e.g. The notification service extension needs to access Ndb data, which is done through this shared file container.
-        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: APPLICATION_GROUP_IDENTIFIER) else {
-            return nil
+        if let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: APPLICATION_GROUP_IDENTIFIER) {
+            return containerURL.path
+        } else {
+            // Fallback for development without App Groups - use Documents directory
+            return old_db_path
         }
-        return remove_file_prefix(containerURL.absoluteString)
     }
     
     static private var db_files: [String] = ["data.mdb", "lock.mdb"]
@@ -104,11 +106,19 @@ class Ndb {
             return nil      // If the caller claims to not own the DB file, and the DB files do not exist, then we should not initialize Ndb
         }
 
-        guard let path = path.map(remove_file_prefix) ?? Ndb.db_path else {
+        let final_path: String
+        if let input_path = path {
+            final_path = remove_file_prefix(input_path)
+        } else if let db_path = Ndb.db_path {
+            final_path = db_path
+        } else {
             return nil
         }
 
-        let ok = path.withCString { testdir in
+        // Debug logging
+        print("ndb: Using database path: \(final_path)")
+
+        let ok = final_path.withCString { testdir in
             var ok = false
             while !ok && mapsize > 1024 * 1024 * 700 {
                 var cfg = ndb_config(flags: 0, ingester_threads: ingest_threads, mapsize: mapsize, filter_context: nil, ingest_filter: nil, sub_cb_ctx: nil, sub_cb: nil)

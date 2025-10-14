@@ -8,7 +8,7 @@
 import Foundation
 
 func create_or_update_mutelist(keypair: FullKeypair, mprev: NostrEvent?, to_add: Set<MuteItem>) -> NostrEvent? {
-    let muted_items: Set<MuteItem> = (mprev?.mute_list ?? Set<MuteItem>()).union(to_add).filter { !$0.is_expired() }
+    let muted_items: Set<MuteItem> = (mprev?.mute_list ?? Set<MuteItem>()).union(to_add)
     let tags: [[String]] = muted_items.map { $0.tag }
     return NostrEvent(content: mprev?.content ?? "", keypair: keypair.to_keypair(), kind: NostrKind.mute_list.rawValue, tags: tags)
 }
@@ -18,7 +18,7 @@ func create_or_update_mutelist(keypair: FullKeypair, mprev: NostrEvent?, to_add:
 }
 
 func remove_from_mutelist(keypair: FullKeypair, prev: NostrEvent?, to_remove: MuteItem) -> NostrEvent? {
-    let muted_items: Set<MuteItem> = (prev?.mute_list ?? Set<MuteItem>()).subtracting([to_remove]).filter { !$0.is_expired() }
+    let muted_items: Set<MuteItem> = (prev?.mute_list ?? Set<MuteItem>()).subtracting([to_remove])
     let tags: [[String]] = muted_items.map { $0.tag }
     return NostrEvent(content: "", keypair: keypair.to_keypair(), kind: NostrKind.mute_list.rawValue, tags: tags)
 }

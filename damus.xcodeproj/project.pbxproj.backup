@@ -7385,7 +7385,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"MDB_SHORT_SEMNAMES=1",
-					"MDB_SEM_NAME_PREFIX=dm",
+					"MDB_SEM_NAME_PREFIX=\"group.com.damus\"",
 					"$(inherited)",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -7456,9 +7456,9 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-				"MDB_SHORT_SEMNAMES=1",
-				"MDB_SEM_NAME_PREFIX=dm",
-			);
+					"MDB_SHORT_SEMNAMES=1",
+					"MDB_SEM_NAME_PREFIX=\"group.com.damus\"",
+				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -7501,8 +7501,7 @@
 				INFOPLIST_FILE = damus/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Damus;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
-				INFOPLIST_KEY_NSAppleMusicUsageDescription = "Damus needs access to your media library for playback statuses";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Damus needs access to your camera in order to upload photos and scan QR codes.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Damus needs access to your camera if you want to scan QR codes and upload photos from it";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Local authentication to access private key";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Damus needs access to your microphone to allow you to create video recordings that you can choose to post publicly on the network";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Granting Damus access to your photos allows you to save images.";
@@ -7523,7 +7522,7 @@
 					"$(PROJECT_DIR)/nostrdb/src/bolt11",
 					"$(PROJECT_DIR)/nostrdb/ccan",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.elsat.damus2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -7556,8 +7555,7 @@
 				INFOPLIST_FILE = damus/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Damus;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
-				INFOPLIST_KEY_NSAppleMusicUsageDescription = "Damus needs access to your media library for playback statuses";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Damus needs access to your camera in order to upload photos and scan QR codes.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Damus needs access to your camera if you want to scan QR codes and upload photos from it";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Local authentication to access private key";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Damus needs access to your microphone to allow you to create video recordings that you can choose to post publicly on the network";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Granting Damus access to your photos allows you to save images.";
@@ -7578,7 +7576,7 @@
 					"$(PROJECT_DIR)/nostrdb/src/bolt11",
 					"$(PROJECT_DIR)/nostrdb/ccan",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.elsat.damus2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -7602,7 +7600,7 @@
 				DEVELOPMENT_TEAM = K6F7D9VUM7;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.elsat.damusTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damusTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -7622,7 +7620,7 @@
 				DEVELOPMENT_TEAM = K6F7D9VUM7;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.elsat.damusTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damusTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -7640,7 +7638,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = K6F7D9VUM7;
 				GENERATE_INFOPLIST_FILE = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.elsat.damusUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damusUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -7658,7 +7656,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = K6F7D9VUM7;
 				GENERATE_INFOPLIST_FILE = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.elsat.damusUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damusUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -7693,7 +7691,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.elsat.damus2.share-extension";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.jb55.damus2.share-extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
@@ -7727,7 +7725,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.elsat.damus2.share-extension";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.jb55.damus2.share-extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
@@ -7761,7 +7759,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.elsat.damus2.highlighter-action-extension";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.jb55.damus2.highlighter-action-extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
@@ -7796,7 +7794,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.elsat.damus2.highlighter-action-extension";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.jb55.damus2.highlighter-action-extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
@@ -7830,7 +7828,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.elsat.damus2.DamusNotificationService;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2.DamusNotificationService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
@@ -7865,7 +7863,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.elsat.damus2.DamusNotificationService;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2.DamusNotificationService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
