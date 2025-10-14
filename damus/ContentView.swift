@@ -234,6 +234,7 @@ struct ContentView: View {
                 NavigationStack(path: $navigationCoordinator.path) {
                     TabView { // Prevents navbar appearance change on scroll
                         MainContent(damus: damus)
+                            .environment(\.navigationCoordinator, navigationCoordinator)
                             .toolbar() {
                                 ToolbarItem(placement: .navigationBarLeading) {
                                     TopbarSideMenuButton(damus_state: damus, isSideBarOpened: $isSideBarOpened)

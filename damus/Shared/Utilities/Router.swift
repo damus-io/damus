@@ -50,6 +50,7 @@ enum Route: Hashable {
     case NIP05DomainEvents(events: NIP05DomainEventsModel, nip05_domain_favicon: FaviconURL?)
     case NIP05DomainPubkeys(domain: String, nip05_domain_favicon: FaviconURL?, pubkeys: [Pubkey])
     case FollowPack(followPack: NostrEvent, model: FollowPackModel, blur_imgs: Bool)
+    case Longform(event: LongformEvent)
 
     @ViewBuilder
     func view(navigationCoordinator: NavigationCoordinator, damusState: DamusState) -> some View {
@@ -137,6 +138,10 @@ enum Route: Hashable {
             NIP05DomainPubkeysView(damus_state: damusState, domain: domain, nip05_domain_favicon: nip05_domain_favicon, pubkeys: pubkeys)
         case .FollowPack(let followPack, let followPackModel, let blur_imgs):
             FollowPackView(state: damusState, ev: followPack, model: followPackModel, blur_imgs: blur_imgs)
+        case .Longform(let longform_event):
+            ScrollView {
+                LongformView(state: damusState, event: longform_event)
+            }
         }
     }
 
@@ -250,6 +255,9 @@ enum Route: Hashable {
         case .FollowPack(let followPack, let followPackModel, let blur_imgs):
             hasher.combine("followPack")
             hasher.combine(followPack.id)
+        case .Longform(let longform_event):
+            hasher.combine("longform")
+            hasher.combine(longform_event.event.id)
         }
     }
 }

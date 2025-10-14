@@ -22,6 +22,39 @@ struct HighlightDescription: View {
     }
 }
 
+// Description for addressable events (like longform articles)
+struct HighlightAddressableDescription: View {
+    let highlight_event: HighlightEvent
+    let author_pubkey: Pubkey
+    let ndb: Ndb
+
+    var body: some View {
+        let description_info = highlight_event.source_description_info(highlighted_event: nil)
+        let pubkeys = description_info.pubkeys.isEmpty ? [author_pubkey] : description_info.pubkeys
+
+        guard let profile_txn = NdbTxn(ndb: ndb) else {
+            return AnyView(EmptyView())
+        }
+
+        let names: [String] = pubkeys.map { pk in
+            let prof = ndb.lookup_profile_with_txn(pk, txn: profile_txn)
+            return Profile.displayName(profile: prof?.profile, pubkey: pk).username.truncate(maxLength: 50)
+        }
+
+        let uniqueNames: [String] = Array(Set(names))
+        let text = uniqueNames.isEmpty
+            ? NSLocalizedString("Highlighted", comment: "Label to indicate that the user is highlighting content.")
+            : String(format: NSLocalizedString("Highlighted %@", comment: "Label to indicate that the user is highlighting 1 user."), uniqueNames.first ?? "")
+
+        return AnyView(
+            (Text(Image(systemName: "highlighter")) + Text(verbatim: " \(text)"))
+                .font(.footnote)
+                .foregroundColor(.gray)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        )
+    }
+}
+
 struct HighlightDescription_Previews: PreviewProvider {
     static var previews: some View {
         HighlightDescription(highlight_event: HighlightEvent.parse(from: test_note), highlighted_event: nil, ndb: test_damus_state.ndb)
