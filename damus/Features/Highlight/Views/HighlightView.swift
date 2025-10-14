@@ -268,94 +268,15 @@ private struct HighlightAddressableEventRefInline: View {
 
         let identifier = components[2]
 
-        // Try NostrDB first
-        if let txn = NdbTxn(ndb: damus_state.ndb) {
-            let nostrFilter = NostrFilter(
-                kinds: [NostrKind(rawValue: kind)].compactMap { $0 },
-                authors: [pubkey]
-            )
-
-            guard let ndbFilter = try? NdbFilter(from: nostrFilter) else {
-                isLoading = false
-                return
-            }
-
-            let noteKeys = try? damus_state.ndb.query(with: txn, filters: [ndbFilter], maxResults: 100)
-            if let noteKeys = noteKeys {
-                for noteKey in noteKeys {
-                    if let note = damus_state.ndb.lookup_note_by_key_with_txn(noteKey, txn: txn) {
-                        // Check d-tag
-                        var foundMatch = false
-                        for i in 0..<Int(note.tags.count) {
-                            let tag = note.tags[i]
-                            if Int(tag.count) >= 2 {
-                                let tag_name = tag[0].string()
-                                let tag_value = tag[1].string()
-                                if tag_name == "d" && tag_value == identifier {
-                                    foundMatch = true
-                                    break
-                                }
-                            }
-                        }
-                        if foundMatch {
-                            self.longformEvent = LongformEvent.parse(from: note.to_owned())
-                            self.isLoading = false
-                            return
-                        }
-                    }
-                }
-            }
+        // Use the established naddrLookup helper which handles both NDB and relay lookup
+        let naddr = NAddr(identifier: identifier, author: pubkey, relays: [], kind: kind)
+        guard let event = await naddrLookup(damus_state: damus_state, naddr: naddr) else {
+            isLoading = false
+            return
         }
 
-        // Fetch from relays if not in DB
-        await fetchFromRelays(kind: kind, pubkey: pubkey, identifier: identifier)
-    }
-
-    private func fetchFromRelays(kind: UInt32, pubkey: Pubkey, identifier: String) async {
-        let filter = NostrFilter(
-            kinds: [NostrKind(rawValue: kind)].compactMap { $0 },
-            authors: [pubkey]
-        )
-
-        let sub_id = UUID().description
-
-        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-            var hasResumed = false
-
-            damus_state.nostrNetwork.pool.subscribe_to(sub_id: sub_id, filters: [filter], to: nil) { relay_id, res in
-                guard case .nostr_event(let ev_response) = res else { return }
-
-                if case .event(_, let ev) = ev_response {
-                    for tag in ev.tags {
-                        if tag.count >= 2 && tag[0].string() == "d" && tag[1].string() == identifier {
-                            self.longformEvent = LongformEvent.parse(from: ev)
-                            self.isLoading = false
-                            damus_state.nostrNetwork.pool.unsubscribe(sub_id: sub_id)
-                            if !hasResumed {
-                                continuation.resume()
-                                hasResumed = true
-                            }
-                            return
-                        }
-                    }
-                } else if case .eose = ev_response {
-                    if !hasResumed {
-                        self.isLoading = false
-                        continuation.resume()
-                        hasResumed = true
-                    }
-                }
-            }
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                damus_state.nostrNetwork.pool.unsubscribe(sub_id: sub_id)
-                if !hasResumed {
-                    self.isLoading = false
-                    continuation.resume()
-                    hasResumed = true
-                }
-            }
-        }
+        self.longformEvent = LongformEvent.parse(from: event)
+        self.isLoading = false
     }
 }
 
@@ -409,84 +330,13 @@ struct HighlightView: View {
 
         let identifier = components[2]
 
-        // Try NostrDB first
-        if let txn = NdbTxn(ndb: state.ndb) {
-            let nostrFilter = NostrFilter(
-                kinds: [NostrKind(rawValue: kind)].compactMap { $0 },
-                authors: [pubkey]
-            )
-
-            guard let ndbFilter = try? NdbFilter(from: nostrFilter) else {
-                return
-            }
-
-            let noteKeys = try? state.ndb.query(with: txn, filters: [ndbFilter], maxResults: 100)
-            if let noteKeys = noteKeys {
-                for noteKey in noteKeys {
-                    if let note = state.ndb.lookup_note_by_key_with_txn(noteKey, txn: txn) {
-                        // Check d-tag
-                        for i in 0..<Int(note.tags.count) {
-                            let tag = note.tags[i]
-                            if Int(tag.count) >= 2 {
-                                let tag_name = tag[0].string()
-                                let tag_value = tag[1].string()
-                                if tag_name == "d" && tag_value == identifier {
-                                    self.longformEvent = LongformEvent.parse(from: note.to_owned())
-                                    return
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        // Use the established naddrLookup helper which handles both NDB and relay lookup
+        let naddr = NAddr(identifier: identifier, author: pubkey, relays: [], kind: kind)
+        guard let event = await naddrLookup(damus_state: state, naddr: naddr) else {
+            return
         }
 
-        // Fetch from relays if not in DB
-        await fetchFromRelays(kind: kind, pubkey: pubkey, identifier: identifier)
-    }
-
-    private func fetchFromRelays(kind: UInt32, pubkey: Pubkey, identifier: String) async {
-        let filter = NostrFilter(
-            kinds: [NostrKind(rawValue: kind)].compactMap { $0 },
-            authors: [pubkey]
-        )
-
-        let sub_id = UUID().description
-
-        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-            var hasResumed = false
-
-            state.nostrNetwork.pool.subscribe_to(sub_id: sub_id, filters: [filter], to: nil) { relay_id, res in
-                guard case .nostr_event(let ev_response) = res else { return }
-
-                if case .event(_, let ev) = ev_response {
-                    for tag in ev.tags {
-                        if tag.count >= 2 && tag[0].string() == "d" && tag[1].string() == identifier {
-                            self.longformEvent = LongformEvent.parse(from: ev)
-                            state.nostrNetwork.pool.unsubscribe(sub_id: sub_id)
-                            if !hasResumed {
-                                continuation.resume()
-                                hasResumed = true
-                            }
-                            return
-                        }
-                    }
-                } else if case .eose = ev_response {
-                    if !hasResumed {
-                        continuation.resume()
-                        hasResumed = true
-                    }
-                }
-            }
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                state.nostrNetwork.pool.unsubscribe(sub_id: sub_id)
-                if !hasResumed {
-                    continuation.resume()
-                    hasResumed = true
-                }
-            }
-        }
+        self.longformEvent = LongformEvent.parse(from: event)
     }
 }
 
