@@ -104,7 +104,11 @@ struct HighlightBodyView: View {
                 // For addressable events, extract pubkey from "kind:pubkey:d-tag" format
                 let components = addr_ref.split(separator: ":").map(String.init)
                 if components.count >= 2, let pubkey = Pubkey(hex: components[1]) {
-                    HighlightAddressableDescription(highlight_event: event, author_pubkey: pubkey, ndb: state.ndb)
+                    let profile_txn = state.profiles.lookup(id: pubkey, txn_name: "highlight-addr-desc")
+                    let profile = profile_txn?.unsafeUnownedValue
+                    let author_name = Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
+
+                    HighlightAddressableDescription(author_name: author_name)
                         .padding(.horizontal)
                         .padding(.bottom, 5)
                 }
