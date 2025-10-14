@@ -1,0 +1,4 @@
+module secp256k1 {
+header "secp256k1-Swift.h"
+export *
+}

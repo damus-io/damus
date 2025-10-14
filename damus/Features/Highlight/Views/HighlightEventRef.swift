@@ -11,7 +11,6 @@ import Kingfisher
 struct HighlightEventRef: View {
     let damus_state: DamusState
     let event_ref: NoteId
-    @Environment(\.navigationCoordinator) private var navCoordinator
 
     init(damus_state: DamusState, event_ref: NoteId) {
         self.damus_state = damus_state
@@ -37,7 +36,7 @@ struct HighlightEventRef: View {
                 if event.known_kind == .longform {
                     Button(action: {
                         let longform_event = LongformEvent.parse(from: event)
-                        navCoordinator?.push(route: .Longform(event: longform_event))
+                        damus_state.nav.push(route: .Longform(event: longform_event))
                     }) {
                     HStack(alignment: .top, spacing: 10) {
                         let longform_event = LongformEvent.parse(from: event)
@@ -96,17 +95,5 @@ struct HighlightEventRef: View {
                 }
             }
         }
-    }
-}
-
-// MARK: - Environment Key for NavigationCoordinator
-private struct NavigationCoordinatorKey: EnvironmentKey {
-    static let defaultValue: NavigationCoordinator? = nil
-}
-
-extension EnvironmentValues {
-    var navigationCoordinator: NavigationCoordinator? {
-        get { self[NavigationCoordinatorKey.self] }
-        set { self[NavigationCoordinatorKey.self] = newValue }
     }
 }

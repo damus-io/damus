@@ -1,0 +1,4 @@
+module EmojiKit {
+header "EmojiKit-Swift.h"
+export *
+}

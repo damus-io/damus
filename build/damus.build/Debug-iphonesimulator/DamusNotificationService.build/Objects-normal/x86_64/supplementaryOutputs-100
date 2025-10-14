@@ -1,0 +1,107 @@
+{
+  "/Users/jax/develop/iOS-Damus-Highlights/damus/DamusNotificationService/NotificationExtensionState.swift" : {
+    "const-values" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/NotificationExtensionState.swiftconstvalues",
+    "dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/NotificationExtensionState.d",
+    "diagnostics" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/NotificationExtensionState.dia",
+    "object" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/NotificationExtensionState.o",
+    "swift-dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/NotificationExtensionState.swiftdeps"
+  },
+  "/Users/jax/develop/iOS-Damus-Highlights/damus/damus/Core/Nostr/ContentParsing.swift" : {
+    "const-values" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/ContentParsing.swiftconstvalues",
+    "dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/ContentParsing.d",
+    "diagnostics" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/ContentParsing.dia",
+    "object" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/ContentParsing.o",
+    "swift-dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/ContentParsing.swiftdeps"
+  },
+  "/Users/jax/develop/iOS-Damus-Highlights/damus/damus/Core/Nostr/Mentions.swift" : {
+    "const-values" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Mentions.swiftconstvalues",
+    "dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Mentions.d",
+    "diagnostics" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Mentions.dia",
+    "object" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Mentions.o",
+    "swift-dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Mentions.swiftdeps"
+  },
+  "/Users/jax/develop/iOS-Damus-Highlights/damus/damus/Core/Types/Ids/Pubkey.swift" : {
+    "const-values" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Pubkey.swiftconstvalues",
+    "dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Pubkey.d",
+    "diagnostics" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Pubkey.dia",
+    "object" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Pubkey.o",
+    "swift-dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Pubkey.swiftdeps"
+  },
+  "/Users/jax/develop/iOS-Damus-Highlights/damus/damus/Features/Purple/Models/DamusPurpleEnvironment.swift" : {
+    "const-values" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/DamusPurpleEnvironment.swiftconstvalues",
+    "dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/DamusPurpleEnvironment.d",
+    "diagnostics" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/DamusPurpleEnvironment.dia",
+    "object" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/DamusPurpleEnvironment.o",
+    "swift-dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/DamusPurpleEnvironment.swiftdeps"
+  },
+  "/Users/jax/develop/iOS-Damus-Highlights/damus/damus/Shared/Components/DamusColors.swift" : {
+    "const-values" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/DamusColors.swiftconstvalues",
+    "dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/DamusColors.d",
+    "diagnostics" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/DamusColors.dia",
+    "object" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/DamusColors.o",
+    "swift-dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/DamusColors.swiftdeps"
+  },
+  "/Users/jax/develop/iOS-Damus-Highlights/damus/damus/Shared/Media/Images/AttachMediaUtility.swift" : {
+    "const-values" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/AttachMediaUtility.swiftconstvalues",
+    "dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/AttachMediaUtility.d",
+    "diagnostics" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/AttachMediaUtility.dia",
+    "object" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/AttachMediaUtility.o",
+    "swift-dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/AttachMediaUtility.swiftdeps"
+  },
+  "/Users/jax/develop/iOS-Damus-Highlights/damus/damus/Shared/Utilities/InsertSort.swift" : {
+    "const-values" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/InsertSort.swiftconstvalues",
+    "dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/InsertSort.d",
+    "diagnostics" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/InsertSort.dia",
+    "object" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/InsertSort.o",
+    "swift-dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/InsertSort.swiftdeps"
+  },
+  "/Users/jax/develop/iOS-Damus-Highlights/damus/damus/Shared/Utilities/LocalizationUtil.swift" : {
+    "const-values" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/LocalizationUtil.swiftconstvalues",
+    "dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/LocalizationUtil.d",
+    "diagnostics" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/LocalizationUtil.dia",
+    "object" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/LocalizationUtil.o",
+    "swift-dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/LocalizationUtil.swiftdeps"
+  },
+  "/Users/jax/develop/iOS-Damus-Highlights/damus/damus/Shared/Utilities/Log.swift" : {
+    "const-values" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Log.swiftconstvalues",
+    "dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Log.d",
+    "diagnostics" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Log.dia",
+    "object" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Log.o",
+    "swift-dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Log.swiftdeps"
+  },
+  "/Users/jax/develop/iOS-Damus-Highlights/damus/flatbuffers/Int+extension.swift" : {
+    "const-values" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Int+extension.swiftconstvalues",
+    "dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Int+extension.d",
+    "diagnostics" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Int+extension.dia",
+    "object" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Int+extension.o",
+    "swift-dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Int+extension.swiftdeps"
+  },
+  "/Users/jax/develop/iOS-Damus-Highlights/damus/flatbuffers/Offset.swift" : {
+    "const-values" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Offset.swiftconstvalues",
+    "dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Offset.d",
+    "diagnostics" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Offset.dia",
+    "object" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Offset.o",
+    "swift-dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Offset.swiftdeps"
+  },
+  "/Users/jax/develop/iOS-Damus-Highlights/damus/flatbuffers/Verifier.swift" : {
+    "const-values" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Verifier-6f9dfa54ea1dddcf54217f325a93a441.swiftconstvalues",
+    "dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Verifier-6f9dfa54ea1dddcf54217f325a93a441.d",
+    "diagnostics" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Verifier-6f9dfa54ea1dddcf54217f325a93a441.dia",
+    "object" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Verifier-6f9dfa54ea1dddcf54217f325a93a441.o",
+    "swift-dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/Verifier-6f9dfa54ea1dddcf54217f325a93a441.swiftdeps"
+  },
+  "/Users/jax/develop/iOS-Damus-Highlights/damus/nostrdb/NdbFilter.swift" : {
+    "const-values" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/NdbFilter.swiftconstvalues",
+    "dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/NdbFilter.d",
+    "diagnostics" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/NdbFilter.dia",
+    "object" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/NdbFilter.o",
+    "swift-dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/NdbFilter.swiftdeps"
+  },
+  "/Users/jax/develop/iOS-Damus-Highlights/damus/nostrdb/NdbTxn.swift" : {
+    "const-values" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/NdbTxn.swiftconstvalues",
+    "dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/NdbTxn.d",
+    "diagnostics" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/NdbTxn.dia",
+    "object" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/NdbTxn.o",
+    "swift-dependencies" : "/Users/jax/develop/iOS-Damus-Highlights/damus/build/damus.build/Debug-iphonesimulator/DamusNotificationService.build/Objects-normal/x86_64/NdbTxn.swiftdeps"
+  }
+}

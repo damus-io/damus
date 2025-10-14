@@ -1,0 +1,19 @@
+{
+  "" : {
+    "diagnostics" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/LRUCache/build/LRUCache.build/Debug-iphonesimulator/LRUCache.build/Objects-normal/arm64/LRUCache-primary.dia",
+    "emit-module-dependencies" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/LRUCache/build/LRUCache.build/Debug-iphonesimulator/LRUCache.build/Objects-normal/arm64/LRUCache-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/LRUCache/build/LRUCache.build/Debug-iphonesimulator/LRUCache.build/Objects-normal/arm64/LRUCache-primary-emit-module.dia",
+    "pch" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/LRUCache/build/LRUCache.build/Debug-iphonesimulator/LRUCache.build/Objects-normal/arm64/LRUCache-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/LRUCache/build/LRUCache.build/Debug-iphonesimulator/LRUCache.build/Objects-normal/arm64/LRUCache-primary.swiftdeps"
+  },
+  "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/LRUCache/Sources/LRUCache.swift" : {
+    "const-values" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/LRUCache/build/LRUCache.build/Debug-iphonesimulator/LRUCache.build/Objects-normal/arm64/LRUCache.swiftconstvalues",
+    "dependencies" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/LRUCache/build/LRUCache.build/Debug-iphonesimulator/LRUCache.build/Objects-normal/arm64/LRUCache.d",
+    "diagnostics" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/LRUCache/build/LRUCache.build/Debug-iphonesimulator/LRUCache.build/Objects-normal/arm64/LRUCache.dia",
+    "index-unit-output-path" : "/LRUCache.build/Debug-iphonesimulator/LRUCache.build/Objects-normal/arm64/LRUCache.o",
+    "llvm-bc" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/LRUCache/build/LRUCache.build/Debug-iphonesimulator/LRUCache.build/Objects-normal/arm64/LRUCache.bc",
+    "object" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/LRUCache/build/LRUCache.build/Debug-iphonesimulator/LRUCache.build/Objects-normal/arm64/LRUCache.o",
+    "swift-dependencies" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/LRUCache/build/LRUCache.build/Debug-iphonesimulator/LRUCache.build/Objects-normal/arm64/LRUCache.swiftdeps",
+    "swiftmodule" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/LRUCache/build/LRUCache.build/Debug-iphonesimulator/LRUCache.build/Objects-normal/arm64/LRUCache~partial.swiftmodule"
+  }
+}

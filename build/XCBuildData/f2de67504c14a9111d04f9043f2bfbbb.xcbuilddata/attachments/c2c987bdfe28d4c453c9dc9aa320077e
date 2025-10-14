@@ -1,0 +1,4 @@
+module cmark_gfm {
+umbrella header "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/swift-markdown-ui/Sources/cmark-gfm/include/cmark_gfm.h"
+export *
+}

@@ -1,0 +1,4 @@
+module CryptoSwift {
+header "CryptoSwift-Swift.h"
+export *
+}

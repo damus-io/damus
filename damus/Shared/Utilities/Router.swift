@@ -271,12 +271,23 @@ class NavigationCoordinator: ObservableObject {
         }
         path.append(route)
     }
-    
+
     func isAtRoot() -> Bool {
         return path.count == 0
     }
 
     func popToRoot() {
         path = []
+    }
+}
+
+private struct NavigationCoordinatorKey: EnvironmentKey {
+    static let defaultValue: NavigationCoordinator? = nil
+}
+
+extension EnvironmentValues {
+    var navigationCoordinator: NavigationCoordinator? {
+        get { self[NavigationCoordinatorKey.self] }
+        set { self[NavigationCoordinatorKey.self] = newValue }
     }
 }

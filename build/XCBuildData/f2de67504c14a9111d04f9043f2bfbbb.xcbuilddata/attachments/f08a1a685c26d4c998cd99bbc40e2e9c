@@ -1,0 +1,4 @@
+module SwiftyCrop {
+header "SwiftyCrop-Swift.h"
+export *
+}
