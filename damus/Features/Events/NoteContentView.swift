@@ -331,8 +331,13 @@ struct NoteContentView: View {
         Group {
             switch self.note_artifacts {
             case .longform(let md):
-                Markdown(md.markdown)
-                    .padding([.leading, .trailing, .top])
+                if size == .selected {
+                    SelectableText(damus_state: damus_state, event: self.event, attributedString: AttributedString(event.content), size: self.size)
+                        .padding([.leading, .trailing, .top])
+                } else {
+                    Markdown(md.markdown)
+                        .padding([.leading, .trailing, .top])
+                }
             case .separated(let separated):
                 if #available(iOS 17.4, macOS 14.4, *) {
                     MainContent(artifacts: separated)

@@ -1,0 +1,4 @@
+module CodeScanner {
+header "CodeScanner-Swift.h"
+export *
+}
