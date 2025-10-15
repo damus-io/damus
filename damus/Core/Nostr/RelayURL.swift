@@ -35,12 +35,20 @@ public struct RelayURL: Hashable, Equatable, Codable, CodingKeyRepresentable, Id
         guard let scheme = url.scheme else {
             return nil
         }
-        
-        guard scheme == "ws" || scheme == "wss" else {
+
+        let normalizedScheme = scheme.lowercased()
+
+        guard normalizedScheme == "ws" || normalizedScheme == "wss" else {
             return nil
         }
         
-        self.url = url
+        if normalizedScheme != scheme {
+            var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+            components?.scheme = normalizedScheme
+            self.url = components?.url ?? url
+        } else {
+            self.url = url
+        }
     }
     
     // MARK: - Codable
