@@ -27,7 +27,10 @@ struct EventMutingContainerView<Content: View>: View {
         self.damus_state = damus_state
         self.event = event
         self.content = content()
-        self._shown = State(initialValue: should_show_event(state: damus_state, ev: event))
+        let initial_shown = should_show_event(state: damus_state, ev: event)
+        let initial_reason = damus_state.mutelist_manager.event_muted_reason(event)
+        self._shown = State(initialValue: initial_shown)
+        self._muted_reason = State(initialValue: initial_reason)
     }
     
     init(damus_state: DamusState, event: NostrEvent, muteBox: @escaping MuteBoxViewClosure, @ViewBuilder content: () -> Content) {
@@ -38,18 +41,40 @@ struct EventMutingContainerView<Content: View>: View {
     var should_mute: Bool {
         return !should_show_event(state: damus_state, ev: event)
     }
+
+    var current_muted_reason: MuteItem? {
+        if let muted_reason {
+            return muted_reason
+        }
+        return damus_state.mutelist_manager.event_muted_reason(event)
+    }
+    
+    var should_show_mute_box: Bool {
+        guard should_mute else {
+            return false
+        }
+        guard let reason = current_muted_reason else {
+            return true
+        }
+        if case .user = reason {
+            // Skip placeholders for people the user has muted entirely.
+            return false
+        }
+        return true
+    }
     
     var body: some View {
         Group {
-            if should_mute {
+            if should_show_mute_box {
+                let reason = current_muted_reason
                 if let customMuteBox {
-                    customMuteBox($shown, muted_reason)
+                    customMuteBox($shown, reason)
                 }
                 else {
-                    EventMutedBoxView(shown: $shown, reason: muted_reason)
+                    EventMutedBoxView(shown: $shown, reason: reason)
                 }
             }
-            if shown {
+            if shown || !should_mute {
                 self.content
             }
         }
@@ -61,9 +86,12 @@ struct EventMutingContainerView<Content: View>: View {
             }
         }
         .onReceive(handle_notify(.new_unmutes)) { unmutes in
-            if damus_state.mutelist_manager.event_muted_reason(event) != nil {
+            let latest_reason = damus_state.mutelist_manager.event_muted_reason(event)
+            if latest_reason == nil {
                 shown = true
                 muted_reason = nil
+            } else {
+                muted_reason = latest_reason
             }
         }
     }
