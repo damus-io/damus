@@ -33,7 +33,7 @@ class NotificationFilter: ObservableObject, Equatable {
         self.hellthread_notification_max_pubkeys = hellthread_notification_max_pubkeys
     }
     
-    func filter(contacts: Contacts, mutelist_manager: MutelistManager, items: [NotificationItem]) -> [NotificationItem] {
+    func filter(contacts: Contacts, items: [NotificationItem]) -> [NotificationItem] {
         
         return items.reduce(into: []) { acc, item in
             if !self.state.filter(item) {
@@ -41,7 +41,6 @@ class NotificationFilter: ObservableObject, Equatable {
             }
 
             if let item = item.filter({ ev in
-                !mutelist_manager.is_event_muted(ev) &&
                 self.friend_filter.filter(contacts: contacts, pubkey: ev.pubkey) &&
                 (!hellthread_notifications_disabled || !ev.is_hellthread(max_pubkeys: hellthread_notification_max_pubkeys)) &&
                 // Allow notes that are created no more than 3 seconds in the future
@@ -170,7 +169,7 @@ struct NotificationsView: View {
     func NotificationTab(_ filter: NotificationFilter) -> some View {
         ScrollViewReader { scroller in
             ScrollView {
-                let notifs = Array(zip(1..., filter.filter(contacts: state.contacts, mutelist_manager: state.mutelist_manager, items: notifications.notifications)))
+                let notifs = Array(zip(1..., filter.filter(contacts: state.contacts, items: notifications.notifications)))
                 if notifs.isEmpty {
                     EmptyTimelineView()
                 } else {
