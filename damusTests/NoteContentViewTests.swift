@@ -89,6 +89,56 @@ class NoteContentViewTests: XCTestCase {
         XCTAssertTrue(runArray[2].description.contains(" Pura Vida"))
     }
 
+    func testRenderBlocksWithRelayLinkIsDetected() throws {
+        let relayString = "wss://relay.damus.io"
+        let content = "Relay: \(relayString)"
+        let note = try XCTUnwrap(NostrEvent(content: content, keypair: test_keypair))
+        let parsed: Blocks = parse_note_content(content: .init(note: note, keypair: test_keypair))
+
+        let testState = test_damus_state
+
+        let noteArtifactsSeparated: NoteArtifactsSeparated = render_blocks(blocks: parsed, profiles: testState.profiles)
+        let attributedText: AttributedString = noteArtifactsSeparated.content.attributed
+
+        let runs: AttributedString.Runs = attributedText.runs
+        let runArray: [AttributedString.Runs.Run] = Array(runs)
+
+        XCTAssertEqual(runArray.count, 2)
+        XCTAssertTrue(runArray[1].description.contains(relayString))
+
+        let encodedRelay = relayString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? relayString
+        let expectedDeepLink = "damus://relay?url=\(encodedRelay)"
+        XCTAssertEqual(runArray[1].link?.absoluteString, expectedDeepLink)
+        XCTAssertEqual(noteArtifactsSeparated.relays.count, 1)
+        XCTAssertEqual(noteArtifactsSeparated.relays.first?.absoluteString, relayString)
+        XCTAssertTrue(noteArtifactsSeparated.links.isEmpty)
+    }
+
+    func testRenderBlocksWithRelayLinkTrailingPunctuation() throws {
+        let relayString = "wss://relay.damus.io"
+        let content = "Relay: \(relayString)! Wow"
+        let note = try XCTUnwrap(NostrEvent(content: content, keypair: test_keypair))
+        let parsed: Blocks = parse_note_content(content: .init(note: note, keypair: test_keypair))
+
+        let testState = test_damus_state
+
+        let noteArtifactsSeparated: NoteArtifactsSeparated = render_blocks(blocks: parsed, profiles: testState.profiles)
+        let attributedText: AttributedString = noteArtifactsSeparated.content.attributed
+
+        let runs: AttributedString.Runs = attributedText.runs
+        let runArray: [AttributedString.Runs.Run] = Array(runs)
+
+        XCTAssertEqual(runArray.count, 3)
+        XCTAssertTrue(runArray[1].description.contains(relayString))
+
+        let encodedRelay = relayString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? relayString
+        let expectedDeepLink = "damus://relay?url=\(encodedRelay)"
+        XCTAssertEqual(runArray[1].link?.absoluteString, expectedDeepLink)
+        XCTAssertEqual(noteArtifactsSeparated.relays.count, 1)
+        XCTAssertEqual(noteArtifactsSeparated.relays.first?.absoluteString, relayString)
+        XCTAssertTrue(noteArtifactsSeparated.links.isEmpty)
+    }
+
     func testRenderBlocksWithNoteIdInMiddleAreRendered() throws {
         let noteId = test_note.id.bech32
         let content = "    Check this out: nostr:\(noteId) Pura Vida    "

@@ -30,6 +30,10 @@ struct NoteArtifactsSeparated: Equatable {
     var links: [URL] {
         return urls.compactMap { url in url.is_link }
     }
+
+    var relays: [RelayURL] {
+        return urls.compactMap { url in url.is_relay }
+    }
     
     static func just_content(_ content: String) -> NoteArtifactsSeparated {
         let txt = CompatibleText(attributed: AttributedString(stringLiteral: content))
@@ -143,7 +147,7 @@ func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide
                             return .loopContinue    // We can't classify this, ignore and move on
                         }
                         let url_type = classify_url(url)
-                        if case .link = url_type {
+                        if url_type.isPreviewableLink {
                             end_url_count += 1
                             
                             // If there is more than one link, do not hide anything because we allow rich rendering of only
@@ -240,37 +244,44 @@ func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide
                 }
             }
 
-            switch block {
-            case .mention(let m):
-                if let typ = m.bech32_type, typ.is_notelike, one_note_ref {
-                    return .loopContinue
-                }
-                guard let mention = MentionRef(block: m) else { return .loopContinue }
-                return .loopReturn(str + mention_str(.any(mention), profiles: profiles))
-            case .text(let txt):
-                var hide_text_index_argument = hide_text_index
-                blocksList.useItem(at: index+1, { block in
-                    switch block {
-                    case .hashtag(_):
-                        // SPECIAL CASE:
-                        // Do not trim whitespaces from suffix if the following block is a hashtag.
-                        // This is because of the code further up (see "SPECIAL CASE").
-                        hide_text_index_argument = -1
-                    default:
-                        break
-                    }
-                })
-                return .loopReturn(str + CompatibleText(stringLiteral: reduce_text_block(ind: index, hide_text_index: hide_text_index_argument, txt: txt.as_str())))
-            case .hashtag(let htag):
-                return .loopReturn(str + hashtag_str(htag.as_str()))
-            case .invoice(let invoice):
-                guard let inv = invoice.as_invoice() else { return .loopContinue }
-                invoices.append(inv)
-            case .url(let url):
-                guard let url = URL(string: url.as_str()) else { return .loopContinue }
-                return .loopReturn(str + url_str(url))
-            case .mention_index:
+        switch block {
+        case .mention(let m):
+            if let typ = m.bech32_type, typ.is_notelike, one_note_ref {
                 return .loopContinue
+            }
+            guard let mention = MentionRef(block: m) else { return .loopContinue }
+            return .loopReturn(str + mention_str(.any(mention), profiles: profiles))
+        case .text(let txt):
+            var hide_text_index_argument = hide_text_index
+            blocksList.useItem(at: index + 1) { block in
+                switch block {
+                case .hashtag(_):
+                    // SPECIAL CASE:
+                    // Do not trim whitespaces from suffix if the following block is a hashtag.
+                    // This is because of the code further up (see "SPECIAL CASE").
+                    hide_text_index_argument = -1
+                default:
+                    break
+                }
+            }
+
+            let reduced_text = reduce_text_block(ind: index, hide_text_index: hide_text_index_argument, txt: txt.as_str())
+            if let relayResult = linkifyRelayText(reduced_text) {
+                urls.append(contentsOf: relayResult.detectedURLs)
+                return .loopReturn(str + relayResult.text)
+            } else {
+                return .loopReturn(str + CompatibleText(stringLiteral: reduced_text))
+            }
+        case .hashtag(let htag):
+            return .loopReturn(str + hashtag_str(htag.as_str()))
+        case .invoice(let invoice):
+            guard let inv = invoice.as_invoice() else { return .loopContinue }
+            invoices.append(inv)
+        case .url(let url):
+            guard let url = URL(string: url.as_str()) else { return .loopContinue }
+            return .loopReturn(str + url_str(url))
+        case .mention_index:
+            return .loopContinue
             }
             return .loopContinue
         })
@@ -304,6 +315,10 @@ func invoice_str(_ invoice: Invoice) -> CompatibleText {
 }
 
 func url_str(_ url: URL) -> CompatibleText {
+    if let relay = RelayURL(url.absoluteString) {
+        return relay_str(relay, original: url)
+    }
+
     var attributedString = AttributedString(stringLiteral: url.absoluteString)
     attributedString.link = url
     attributedString.foregroundColor = DamusColors.purple
@@ -311,7 +326,110 @@ func url_str(_ url: URL) -> CompatibleText {
     return CompatibleText(attributed: attributedString)
 }
 
+func relay_str(_ relay: RelayURL, original: URL?) -> CompatibleText {
+    let displayString = original?.absoluteString ?? relay.absoluteString
+
+    var attributedString = AttributedString(stringLiteral: displayString)
+    
+    if let encoded = relay.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+       let deepLink = URL(string: "damus://relay?url=\(encoded)") {
+        attributedString.link = deepLink
+    } else {
+        attributedString.link = relay.id
+    }
+    attributedString.foregroundColor = DamusColors.purple
+
+    return CompatibleText(attributed: attributedString)
+}
+
+private struct RelayLinkResult {
+    let range: Range<String.Index>
+    let relay: RelayURL
+    let displayString: String
+}
+
+private struct LinkifiedRelayText {
+    let text: CompatibleText
+    let detectedURLs: [UrlType]
+}
+
+private let relayURLPattern: NSRegularExpression = {
+    // Match ws:// or wss:// followed by any non-whitespace characters.
+    return try! NSRegularExpression(pattern: "(?i)wss?://[^\\s]+", options: [])
+}()
+
+private let trailingCharactersToTrim: Set<Character> = ["!", "?", ".", ",", ":", ";", ")", "]", "\"", "’", "'"]
+
+private func linkifyRelayText(_ text: String) -> LinkifiedRelayText? {
+    guard !text.isEmpty else { return nil }
+
+    let matches = findRelayLinkResults(in: text)
+    guard !matches.isEmpty else { return nil }
+
+    var parts: [CompatibleText] = []
+    var detectedURLs: [UrlType] = []
+    var currentIndex = text.startIndex
+
+    for match in matches {
+        if match.range.lowerBound > currentIndex {
+            let prefix = String(text[currentIndex..<match.range.lowerBound])
+            parts.append(CompatibleText(stringLiteral: prefix))
+        }
+
+        detectedURLs.append(.relay(match.relay))
+        let originalURL = URL(string: match.displayString)
+        parts.append(relay_str(match.relay, original: originalURL))
+
+        currentIndex = match.range.upperBound
+    }
+
+    if currentIndex < text.endIndex {
+        let suffix = String(text[currentIndex...])
+        parts.append(CompatibleText(stringLiteral: suffix))
+    }
+
+    guard var combined = parts.first else {
+        return nil
+    }
+
+    for part in parts.dropFirst() {
+        combined = combined + part
+    }
+
+    return LinkifiedRelayText(text: combined, detectedURLs: detectedURLs)
+}
+
+private func findRelayLinkResults(in text: String) -> [RelayLinkResult] {
+    let nsrange = NSRange(text.startIndex..<text.endIndex, in: text)
+    let matches = relayURLPattern.matches(in: text, options: [], range: nsrange)
+
+    var results: [RelayLinkResult] = []
+
+    for match in matches {
+        guard var range = Range(match.range, in: text) else { continue }
+
+        var candidate = String(text[range])
+
+        // Trim trailing punctuation characters that commonly follow URLs in natural language
+        while let last = candidate.last, trailingCharactersToTrim.contains(last), range.lowerBound < range.upperBound {
+            range = range.lowerBound..<text.index(before: range.upperBound)
+            candidate = String(text[range])
+        }
+
+        guard !candidate.isEmpty else { continue }
+        guard let relay = RelayURL(candidate) else { continue }
+
+        results.append(RelayLinkResult(range: range, relay: relay, displayString: candidate))
+    }
+
+    return results
+}
+
 func classify_url(_ url: URL) -> UrlType {
+    if let relay = RelayURL(url.absoluteString) {
+        return .relay(relay)
+    }
+
     let fileExtension = url.lastPathComponent.lowercased().components(separatedBy: ".").last
 
     switch fileExtension {
@@ -443,6 +561,7 @@ enum NoteArtifacts {
 enum UrlType {
     case media(MediaUrl)
     case link(URL)
+    case relay(RelayURL)
     
     var url: URL {
         switch self {
@@ -455,6 +574,8 @@ enum UrlType {
             }
         case .link(let url):
             return url
+        case .relay(let relay):
+            return relay.id
         }
     }
     
@@ -468,6 +589,8 @@ enum UrlType {
                 return url
             }
         case .link:
+            return nil
+        case .relay:
             return nil
         }
     }
@@ -483,6 +606,8 @@ enum UrlType {
             }
         case .link:
             return nil
+        case .relay:
+            return nil
         }
     }
     
@@ -492,6 +617,8 @@ enum UrlType {
             return nil
         case .link(let url):
             return url
+        case .relay:
+            return nil
         }
     }
     
@@ -501,6 +628,26 @@ enum UrlType {
             return murl
         case .link:
             return nil
+        case .relay:
+            return nil
+        }
+    }
+
+    var is_relay: RelayURL? {
+        switch self {
+        case .relay(let relay):
+            return relay
+        case .media, .link:
+            return nil
+        }
+    }
+
+    var isPreviewableLink: Bool {
+        switch self {
+        case .link, .relay:
+            return true
+        case .media:
+            return false
         }
     }
 }
