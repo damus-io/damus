@@ -686,6 +686,7 @@ struct ContentView: View {
                                       dms: home.dms,
                                       previews: PreviewCache(),
                                       zaps: Zaps(our_pubkey: pubkey),
+                                      polls: MainActor.assumeIsolated { PollResultsStore() },
                                       lnurls: LNUrls(),
                                       settings: settings,
                                       relay_filters: relay_filters,
@@ -1260,4 +1261,3 @@ func logout(_ state: DamusState?)
     state?.close()
     notify(.logout)
 }
-

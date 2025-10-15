@@ -12,6 +12,11 @@ import StoreKit
 @main
 struct damusApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
+    init() {
+        PollEventViewFactory.registerAppBuilder()
+    }
+
     var body: some Scene {
         WindowGroup {
             MainView(appDelegate: appDelegate)

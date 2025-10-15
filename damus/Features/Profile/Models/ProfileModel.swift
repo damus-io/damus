@@ -75,7 +75,7 @@ class ProfileModel: ObservableObject, Equatable {
     }
 
     func subscribe() {
-        var text_filter = NostrFilter(kinds: [.text, .longform, .highlight])
+        var text_filter = NostrFilter(kinds: [.text, .longform, .highlight, .poll])
         var profile_filter = NostrFilter(kinds: [.contacts, .metadata, .boost])
         var relay_list_filter = NostrFilter(kinds: [.relay_list], authors: [pubkey])
 
@@ -98,7 +98,7 @@ class ProfileModel: ObservableObject, Equatable {
             return
         }
 
-        let conversation_kinds: [NostrKind] = [.text, .longform, .highlight]
+        let conversation_kinds: [NostrKind] = [.text, .longform, .highlight, .poll]
         let limit: UInt32 = 500
         let conversations_filter_them = NostrFilter(kinds: conversation_kinds, pubkeys: [damus.pubkey], limit: limit, authors: [pubkey])
         let conversations_filter_us = NostrFilter(kinds: conversation_kinds, pubkeys: [pubkey], limit: limit, authors: [damus.pubkey])
@@ -122,7 +122,7 @@ class ProfileModel: ObservableObject, Equatable {
     }
 
     private func add_event(_ ev: NostrEvent) {
-        if ev.is_textlike || ev.known_kind == .boost {
+        if ev.is_textlike || ev.known_kind == .boost || ev.known_kind == .poll {
             if self.events.insert(ev) {
                 self.objectWillChange.send()
             }
