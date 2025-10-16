@@ -208,12 +208,15 @@ class NdbNote: Codable, Equatable, Hashable {
     fileprivate enum NoteConstructionMaterial {
         case keypair(Keypair)
         case manual(Pubkey, Signature, NoteId)
+        case unsigned(Pubkey, NoteId)
         
         var pubkey: Pubkey {
             switch self {
             case .keypair(let keypair):
                 return keypair.pubkey
             case .manual(let pubkey, _, _):
+                return pubkey
+            case .unsigned(let pubkey, _):
                 return pubkey
             }
         }
@@ -222,7 +225,7 @@ class NdbNote: Codable, Equatable, Hashable {
             switch self {
             case .keypair(let kp):
                 return kp.privkey
-            case .manual(_, _, _):
+            case .manual(_, _, _), .unsigned:
                 return nil
             }
         }
@@ -314,6 +317,30 @@ class NdbNote: Codable, Equatable, Hashable {
                 free(buf)
                 return nil
             }
+        case .unsigned(_, let noteId):
+            var zeroSig = [UInt8](repeating: 0, count: 64)
+            ndb_builder_set_sig(&builder, &zeroSig)
+
+            len = ndb_builder_finalize(&builder, &n.ptr, nil)
+            if len <= 0 {
+                free(buf)
+                return nil
+            }
+
+            let scratch_buf_len = MAX_NOTE_SIZE
+            let scratch_buf = malloc(scratch_buf_len)
+            defer { free(scratch_buf) }
+
+            guard ndb_calculate_id(n.ptr, scratch_buf, Int32(scratch_buf_len)) == 1 else {
+                free(buf)
+                return nil
+            }
+
+            let computedId = NoteId(Data(bytes: ndb_note_id(n.ptr), count: 32))
+            if computedId != noteId {
+                free(buf)
+                return nil
+            }
         }
 
         //guard let n else { return nil }
@@ -337,6 +364,19 @@ class NdbNote: Codable, Equatable, Hashable {
     
     convenience init?(content: String, author: Pubkey, kind: UInt32 = 1, tags: [[String]] = [], createdAt: UInt32 = UInt32(Date().timeIntervalSince1970), id: NoteId, sig: Signature) {
         self.init(content: content, noteConstructionMaterial: .manual(author, sig, id), kind: kind, tags: tags, createdAt: createdAt)
+    }
+
+    static func makeUnsigned(content: String,
+                             pubkey: Pubkey,
+                             kind: UInt32,
+                             tags: [[String]],
+                             createdAt: UInt32,
+                             id: NoteId) -> NdbNote? {
+        return NdbNote(content: content,
+                       noteConstructionMaterial: .unsigned(pubkey, id),
+                       kind: kind,
+                       tags: tags,
+                       createdAt: createdAt)
     }
 
     static func owned_from_json(json: String, bufsize: Int = 2 << 18) -> NdbNote? {
@@ -524,6 +564,21 @@ extension NdbNote {
             return decrypted_content
         }
 
+        if let kind = known_kind {
+            switch kind {
+            case .dmChat17, .dmFile17:
+                self.decrypted_content = content
+                return content
+            default:
+                break
+            }
+        }
+
+        guard let privkey = keypair.privkey else {
+            Log.error("Unable to decrypt DM %s because no private key is available", for: .dms, id.hex())
+            return nil
+        }
+
         let our_pubkey = keypair.pubkey
 
         // NDBTODO: don't hex encode
@@ -535,7 +590,7 @@ extension NdbNote {
         }
 
         // NDBTODO: pass data to pubkey
-        let dec = decrypt_dm(keypair.privkey, pubkey: pubkey, content: self.content, encoding: .base64)
+        let dec = decrypt_dm(privkey, pubkey: pubkey, content: self.content, encoding: .base64)
         self.decrypted_content = dec
 
         return dec

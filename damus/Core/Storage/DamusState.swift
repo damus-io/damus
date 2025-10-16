@@ -19,6 +19,7 @@ class DamusState: HeadlessDamusState {
     let mutelist_manager: MutelistManager
     let profiles: Profiles
     let dms: DirectMessagesModel
+    let dmRelayPreferences: DMRelayPreferencesStore
     let previews: PreviewCache
     let zaps: Zaps
     let lnurls: LNUrls
@@ -40,7 +41,7 @@ class DamusState: HeadlessDamusState {
     let favicon_cache: FaviconCache
     private(set) var nostrNetwork: NostrNetworkManager
 
-    init(keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, contactCards: ContactCard, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: DamusVideoCoordinator, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider, favicon_cache: FaviconCache) {
+    init(keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, contactCards: ContactCard, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, dmRelayPreferences: DMRelayPreferencesStore? = nil, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: DamusVideoCoordinator, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider, favicon_cache: FaviconCache) {
         self.keypair = keypair
         self.likes = likes
         self.boosts = boosts
@@ -49,6 +50,7 @@ class DamusState: HeadlessDamusState {
         self.mutelist_manager = mutelist_manager
         self.profiles = profiles
         self.dms = dms
+        self.dmRelayPreferences = dmRelayPreferences ?? DMRelayPreferencesStore()
         self.previews = previews
         self.zaps = zaps
         self.lnurls = lnurls
@@ -229,6 +231,38 @@ fileprivate extension DamusState {
         var nwcWallet: WalletConnectURL? {
             guard let nwcString = self.settings.nostr_wallet_connect else { return nil }
             return WalletConnectURL(str: nwcString)
+        }
+    }
+}
+
+extension DamusState {
+    func dmRelayTargets(for recipient: Pubkey) -> [RelayURL] {
+        var relaySet = Set(dmRelayPreferences.relays(for: recipient) ?? [])
+        if let ours = dmRelayPreferences.relays(for: pubkey) {
+            relaySet.formUnion(ours)
+        }
+
+        if relaySet.isEmpty {
+            relaySet.formUnion(nostrNetwork.pool.our_descriptors.map { $0.url })
+        }
+
+        return Array(relaySet)
+    }
+
+    func requestDMRelayPreferences(for pubkey: Pubkey) {
+        guard dmRelayPreferences.shouldRequest(for: pubkey) else {
+            return
+        }
+
+        var filter = NostrFilter(kinds: [.dmRelayPreferences])
+        filter.authors = [pubkey]
+        filter.limit = 1
+
+        let subId = "dm-relays-\(pubkey.hex())-\(UUID().uuidString)"
+        nostrNetwork.pool.send(.subscribe(.init(filters: [filter], sub_id: subId)))
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 15.0) {
+            self.nostrNetwork.pool.send(.unsubscribe(subId))
         }
     }
 }

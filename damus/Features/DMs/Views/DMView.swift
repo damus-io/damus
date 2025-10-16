@@ -41,18 +41,26 @@ struct DMView: View {
                 Spacer(minLength: UIScreen.main.bounds.width * 0.2)
             }
 
+            let indicatorInset: CGFloat = encryptionIconName == nil ? 0 : 18
             let should_blur_img = should_blur_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
 
             VStack(alignment: .trailing) {
                 NoteContentView(damus_state: damus_state, event: event, blur_images: should_blur_img, size: .normal, options: dm_options)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding([.top, .leading, .trailing], 10)
+                    .padding(.trailing, indicatorInset)
                     .padding([.bottom], 10)
                     .background(VisualEffectView(effect: UIBlurEffect(style: .prominent))
                         .background(is_ours ? Color.accentColor.opacity(0.9) : Color.secondary.opacity(0.15))
                     )
                     .cornerRadius(8.0)
                     .tint(is_ours ? Color.white : Color.accentColor)
+                    .overlay(alignment: .topTrailing) {
+                        encryptionIndicator
+                            .allowsHitTesting(false)
+                            .padding(.top, 3)
+                            .padding(.trailing, 4)
+                    }
 
                 Text(format_relative_time(event.created_at))
                    .font(.footnote)
@@ -72,6 +80,43 @@ struct DMView: View {
             DM
         }
         
+    }
+
+    private var encryptionIndicator: some View {
+        Group {
+            if let iconName = encryptionIconName {
+                Image(systemName: iconName)
+                    .font(.caption.weight(.bold))
+                    .foregroundColor(encryptionIconColor)
+                    .padding(4)
+                    .background(
+                        Capsule()
+                            .fill(encryptionBackgroundColor)
+                    )
+            } else {
+                EmptyView()
+            }
+        }
+    }
+
+    private var encryptionIconName: String? {
+        guard let kind = event.known_kind else { return nil }
+        switch kind {
+        case .dm:
+            return "lock.open"
+        case .dmChat17, .dmFile17:
+            return "lock"
+        default:
+            return nil
+        }
+    }
+
+    private var encryptionIconColor: Color {
+        Color.white
+    }
+
+    private var encryptionBackgroundColor: Color {
+        Color.black.opacity(0.45)
     }
 }
 

@@ -125,22 +125,58 @@ struct DMChatView: View, KeyboardReadable {
     }
 
     func send_message() {
-        let tags = [["p", pubkey.hex()]]
         guard let post_blocks = parse_post_blocks(content: dms.draft)?.blocks else {
             return
         }
         let content = post_blocks.map({ pb in pb.asString }).joined(separator: "")
 
-        guard let dm = NIP04.create_dm(content, to_pk: pubkey, tags: tags, keypair: damus_state.keypair) else {
-            print("error creating dm")
+        let tags = [["p", pubkey.hex()]]
+
+        let conversationSupportsNIP17 = dms.events.contains { ev in
+            guard let kind = ev.known_kind else { return false }
+            return kind == .dmChat17 || kind == .dmFile17
+        }
+
+        guard damus_state.settings.enable_nip17_dm || conversationSupportsNIP17 else {
+            guard let dm = NIP04.create_dm(content, to_pk: pubkey, tags: tags, keypair: damus_state.keypair) else {
+                Log.error("error creating legacy DM", for: .dms)
+                return
+            }
+
+            dms.draft = ""
+            damus_state.nostrNetwork.postbox.send(dm)
+            handle_incoming_dm(ev: dm, our_pubkey: damus_state.pubkey, dms: damus_state.dms, prev_events: NewEventsBits())
+            end_editing()
             return
         }
 
-        dms.draft = ""
+        guard let fullKeypair = damus_state.keypair.to_full() else {
+            Log.error("Cannot send DM17 message without private key", for: .dms)
+            return
+        }
 
-        damus_state.nostrNetwork.postbox.send(dm)
-        
-        handle_incoming_dm(ev: dm, our_pubkey: damus_state.pubkey, dms: damus_state.dms, prev_events: NewEventsBits())
+        do {
+            let wrapResult = try NIP17.wrapMessage(content: content,
+                                                   recipients: [pubkey],
+                                                   sender: fullKeypair,
+                                                   additionalTags: [],
+                                                   messageKind: .dmChat17)
+
+            dms.draft = ""
+
+            for (recipient, wrap) in wrapResult.wraps {
+                let relays = damus_state.dmRelayTargets(for: recipient)
+                damus_state.nostrNetwork.postbox.send(wrap, to: relays)
+            }
+
+            if let displayEvent = NIP17.makeDisplayEvent(from: wrapResult.unsigned) {
+                handle_incoming_dm(ev: displayEvent, our_pubkey: damus_state.pubkey, dms: damus_state.dms, prev_events: NewEventsBits())
+            } else {
+                Log.error("Failed to construct NIP-17 display event after sending", for: .dms)
+            }
+        } catch {
+            Log.error("Failed to create NIP-17 message: %s", for: .dms, error.localizedDescription)
+        }
 
         end_editing()
     }
@@ -158,6 +194,9 @@ struct DMChatView: View, KeyboardReadable {
         }
         .navigationTitle(NSLocalizedString("DMs", comment: "Navigation title for DMs view, where DM is the English abbreviation for Direct Message."))
         .toolbar { Header }
+        .onAppear {
+            damus_state.requestDMRelayPreferences(for: pubkey)
+        }
         .onDisappear {
             if dms.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 dms.draft = ""
@@ -186,4 +225,3 @@ extension View {
             .background(content())
     }
 }
-

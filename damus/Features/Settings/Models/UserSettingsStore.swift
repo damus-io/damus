@@ -184,6 +184,9 @@ class UserSettingsStore: ObservableObject {
 
     @Setting(key: "translate_dms", default_value: false)
     var translate_dms: Bool
+
+    @Setting(key: "enable_nip17_dm", default_value: false)
+    var enable_nip17_dm: Bool
     
     @Setting(key: "truncate_timeline_text", default_value: false)
     var truncate_timeline_text: Bool

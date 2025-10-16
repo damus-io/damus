@@ -90,7 +90,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
             return
         }
         
-        Task {
+        Task { @MainActor in
             try await state.push_notification_client.set_device_token(new_device_token: deviceToken)
         }
     }
