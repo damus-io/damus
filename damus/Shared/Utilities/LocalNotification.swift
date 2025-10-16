@@ -88,18 +88,16 @@ enum LocalNotificationType: String {
     
     static func from(nostr_kind: NostrKind) -> Self? {
         switch nostr_kind {
-            case .text:
-                return .mention
-            case .dm:
-                return .dm
-            case .like:
-                return .like
-            case .longform:
-                return .mention
-            case .zap:
-                return .zap
-            default:
-                return nil
+        case .text, .longform:
+            return .mention
+        case .dm, .dmChat17, .dmFile17:
+            return .dm
+        case .like:
+            return .like
+        case .zap:
+            return .zap
+        default:
+            return nil
         }
     }
 }

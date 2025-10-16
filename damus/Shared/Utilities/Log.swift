@@ -15,6 +15,7 @@ enum LogCategory: String {
     case storage
     case networking
     case timeline
+    case dms
     /// Logs related to Nostr Wallet Connect components
     case nwc
     case push_notifications

@@ -160,7 +160,7 @@ final class AuthIntegrationTests: XCTestCase {
         let uuid = UUID().uuidString
         // Send `["REQ", subscription_id, {"kinds": [4]}]`
         let subscribe = NostrSubscribe(filters: [
-            NostrFilter(kinds: [.dm])
+            NostrFilter(kinds: [.dm, .dmGiftWrap])
         ], sub_id: uuid)
         pool.send(NostrRequest.subscribe(subscribe))
         // Wait for AUTH message to have been received & sent

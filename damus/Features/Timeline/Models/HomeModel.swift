@@ -71,6 +71,7 @@ class HomeModel: ContactsDelegate {
     let dms_subid = UUID().description
     let init_subid = UUID().description
     let profiles_subid = UUID().description
+    let dm_relays_subid = UUID().description
     
     var loading: Bool = false
 
@@ -218,6 +219,14 @@ class HomeModel: ContactsDelegate {
             handle_like_event(ev)
         case .dm:
             handle_dm(ev)
+        case .dmGiftWrap:
+            handle_dm_giftwrap(ev)
+        case .dmSeal:
+            break
+        case .dmChat17, .dmFile17:
+            handle_dm(ev)
+        case .dmRelayPreferences:
+            handle_dm_relay_preferences(ev)
         case .delete:
             handle_delete_event(ev)
         case .zap:
@@ -577,9 +586,12 @@ class HomeModel: ContactsDelegate {
         var our_blocklist_filter = NostrFilter(kinds: [.mute_list])
         our_blocklist_filter.authors = [damus_state.pubkey]
 
-        var dms_filter = NostrFilter(kinds: [.dm])
+        var dms_filter = NostrFilter(kinds: [.dmGiftWrap, .dm])
 
-        var our_dms_filter = NostrFilter(kinds: [.dm])
+        var our_dms_filter = NostrFilter(kinds: [.dmGiftWrap, .dm])
+
+        var dm_relays_filter = NostrFilter(kinds: [.dmRelayPreferences])
+        dm_relays_filter.authors = friends
 
         // friends only?...
         //dms_filter.authors = friends
@@ -603,11 +615,13 @@ class HomeModel: ContactsDelegate {
         let contacts_filter_chunks = contacts_filter.chunked(on: .authors, into: MAX_CONTACTS_ON_FILTER)
         var contacts_filters = contacts_filter_chunks + [our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter, contact_cards_filter]
         var dms_filters = [dms_filter, our_dms_filter]
+        var dm_relays_filters = [dm_relays_filter]
         let last_of_kind = get_last_of_kind(relay_id: relay_id)
 
         contacts_filters = update_filters_with_since(last_of_kind: last_of_kind, filters: contacts_filters)
         notifications_filters = update_filters_with_since(last_of_kind: last_of_kind, filters: notifications_filters)
         dms_filters = update_filters_with_since(last_of_kind: last_of_kind, filters: dms_filters)
+        dm_relays_filters = update_filters_with_since(last_of_kind: last_of_kind, filters: dm_relays_filters)
 
         //print_filters(relay_id: relay_id, filters: [home_filters, contacts_filters, notifications_filters, dms_filters])
 
@@ -618,6 +632,7 @@ class HomeModel: ContactsDelegate {
         pool.send(.subscribe(.init(filters: contacts_filters, sub_id: contacts_subid)), to: relay_ids)
         pool.send(.subscribe(.init(filters: notifications_filters, sub_id: notifications_subid)), to: relay_ids)
         pool.send(.subscribe(.init(filters: dms_filters, sub_id: dms_subid)), to: relay_ids)
+        pool.send(.subscribe(.init(filters: dm_relays_filters, sub_id: dm_relays_subid)), to: relay_ids)
     }
 
     func get_last_of_kind(relay_id: RelayURL?) -> [UInt32: NostrEvent] {
@@ -840,6 +855,39 @@ class HomeModel: ContactsDelegate {
     }
 }
 
+extension HomeModel {
+    @MainActor
+    func handle_dm_giftwrap(_ ev: NostrEvent) {
+        guard event_has_our_pubkey(ev, our_pubkey: damus_state.pubkey) else {
+            Log.debug("Ignoring NIP-17 gift wrap %s that does not reference our pubkey", for: .dms, ev.id.hex())
+            return
+        }
+        guard let privkey = damus_state.keypair.privkey else {
+            Log.error("Cannot unwrap NIP-17 gift wrap %s because no private key is available", for: .dms, ev.id.hex())
+            return
+        }
+
+        do {
+            damus_state.events.insert(ev)
+            let decrypted = try NIP17.unwrapGiftWrap(ev, recipientPrivkey: privkey)
+            guard let displayEvent = NIP17.makeDisplayEvent(from: decrypted.message) else {
+                Log.error("Failed to construct display event from NIP-17 message %s", for: .dms, decrypted.message.id.hex())
+                return
+            }
+            damus_state.events.insert(decrypted.seal)
+            Log.debug("Unwrapped NIP-17 gift wrap %s from %s", for: .dms, ev.id.hex(), decrypted.message.pubkey.hex())
+            handle_dm(displayEvent)
+        } catch {
+            Log.error("Failed to unwrap NIP-17 gift wrap %s: %s", for: .dms, ev.id.hex(), error.localizedDescription)
+        }
+    }
+
+    @MainActor
+    func handle_dm_relay_preferences(_ ev: NostrEvent) {
+        damus_state.dmRelayPreferences.update(from: ev)
+    }
+}
+
 
 func update_signal_from_pool(signal: SignalModel, pool: RelayPool) {
     if signal.max_signal != pool.relays.count {
@@ -1051,6 +1099,12 @@ func handle_incoming_dm(ev: NostrEvent, our_pubkey: Pubkey, dms: DirectMessagesM
         inserted = true
     }
     
+    if inserted {
+        Log.debug("Inserted DM event %s (kind %d) into conversation with %s", for: .dms, ev.id.hex(), ev.kind, the_pk.hex())
+    } else {
+        Log.debug("Skipped inserting DM event %s because it was already present", for: .dms, ev.id.hex())
+    }
+    
     var new_bits: NewEventsBits? = nil
     if inserted {
         new_bits = handle_last_events(new_events: prev_events, ev: ev, timeline: .dms, shouldNotify: !ours)
@@ -1214,4 +1268,3 @@ func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: 
         }
     }
 }
-

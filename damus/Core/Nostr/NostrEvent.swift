@@ -178,6 +178,15 @@ extension NostrEventOld {
 
 
     func decrypted(privkey: String?) -> String? {
+        if let kind = known_kind {
+            switch kind {
+            case .dmChat17, .dmFile17:
+                return content
+            default:
+                break
+            }
+        }
+
         if let decrypted_content = decrypted_content {
             return decrypted_content
         }
@@ -207,11 +216,18 @@ extension NostrEventOld {
     }
 
     func get_content(_ privkey: String?) -> String {
-        if known_kind == .dm {
-            return decrypted(privkey: privkey) ?? "*failed to decrypt content*"
+        guard let kind = known_kind else {
+            return content
         }
 
-        return content
+        switch kind {
+        case .dm:
+            return decrypted(privkey: privkey) ?? "*failed to decrypt content*"
+        case .dmChat17, .dmFile17:
+            return content
+        default:
+            return content
+        }
     }
 
     var description: String {

@@ -12,7 +12,7 @@ enum NoteContent {
     case content(String, TagsSequence?)
 
     init(note: NostrEvent, keypair: Keypair) {
-        if note.known_kind == .dm || note.known_kind == .highlight {
+        if note.known_kind?.isDirectMessage == true || note.known_kind == .highlight {
             self = .content(note.get_content(keypair), note.tags)
         } else {
             self = .note(note)
