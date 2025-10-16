@@ -50,7 +50,8 @@ enum MuteItem: Hashable, Equatable {
         case (.user(let lhs_pubkey, _), .user(let rhs_pubkey, _)):
             return lhs_pubkey == rhs_pubkey && !rhs.is_expired()
         case (.hashtag(let lhs_hashtag, _), .hashtag(let rhs_hashtag, _)):
-            return lhs_hashtag == rhs_hashtag && !rhs.is_expired()
+            // Case-insensitive comparison for hashtags
+            return lhs_hashtag.hashtag.caseInsensitiveCompare(rhs_hashtag.hashtag) == .orderedSame && !rhs.is_expired()
         case (.word(let lhs_word, _), .word(let rhs_word, _)):
             return lhs_word == rhs_word && !rhs.is_expired()
         case (.thread(let lhs_thread, _), .thread(let rhs_thread, _)):
