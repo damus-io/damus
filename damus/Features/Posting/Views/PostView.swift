@@ -122,7 +122,12 @@ struct PostView: View {
         uploadTasks.removeAll()
     }
 
+    var pollsFeatureEnabled: Bool {
+        damus_state.settings.enable_nip88_polls
+    }
+
     var pollComposerAvailable: Bool {
+        guard pollsFeatureEnabled else { return false }
         if case .posting = action {
             return true
         }
@@ -151,7 +156,7 @@ struct PostView: View {
     }
 
     var pollIsValid: Bool {
-        guard pollComposerAvailable, pollDraft != nil else { return false }
+        guard pollsFeatureEnabled, pollComposerAvailable, pollDraft != nil else { return false }
         if pollQuestionText.isEmpty { return false }
         if pollOptionLabels.count < PollDraft.minimumOptions { return false }
         if pollHasDuplicateOptions { return false }
@@ -178,7 +183,15 @@ struct PostView: View {
     }
 
     func send_post() {
-        let new_post = build_post(state: self.damus_state, post: self.post, action: action, uploadedMedias: uploadedMedias, references: self.references, filtered_pubkeys: filtered_pubkeys, pollDraft: pollDraft)
+        let new_post = build_post(
+            state: self.damus_state,
+            post: self.post,
+            action: action,
+            uploadedMedias: uploadedMedias,
+            references: self.references,
+            filtered_pubkeys: filtered_pubkeys,
+            pollDraft: pollsFeatureEnabled ? pollDraft : nil
+        )
 
         notify(.post(.post(new_post)))
 
@@ -197,7 +210,7 @@ struct PostView: View {
     }
 
     var posting_disabled: Bool {
-        if pollDraft != nil {
+        if pollsFeatureEnabled, pollDraft != nil {
             return uploading_disabled || !pollIsValid
         }
         switch action {
@@ -320,8 +333,12 @@ struct PostView: View {
 
         self.uploadedMedias = draft.media
         self.post = draft.content
-        self.pollDraft = draft.pollDraft
-        self.pollDraft?.ensureMinimumOptions()
+        if pollsFeatureEnabled {
+            self.pollDraft = draft.pollDraft
+            self.pollDraft?.ensureMinimumOptions()
+        } else {
+            self.pollDraft = nil
+        }
         self.autoSaveModel.markSaved()  // The draft we just loaded is saved to memory. Mark it as such.
         return true
     }
@@ -336,9 +353,17 @@ struct PostView: View {
             draft.media = uploadedMedias
             draft.references = references
             draft.filtered_pubkeys = filtered_pubkeys
-            draft.pollDraft = pollDraft
+            if pollsFeatureEnabled {
+                draft.pollDraft = pollDraft
+            }
         } else {
-            let artifacts = DraftArtifacts(content: post, media: uploadedMedias, references: references, id: UUID().uuidString, pollDraft: pollDraft)
+            let artifacts = DraftArtifacts(
+                content: post,
+                media: uploadedMedias,
+                references: references,
+                id: UUID().uuidString,
+                pollDraft: pollsFeatureEnabled ? pollDraft : nil
+            )
             set_draft_for_post(drafts: damus_state.drafts, action: action, artifacts: artifacts)
         }
         self.autoSaveModel.needsSaving()
@@ -542,7 +567,7 @@ struct PostView: View {
                 }
                 
                 // This if-block observes @ for tagging
-                if pollDraft == nil, let searching {
+                if (pollDraft == nil || !pollsFeatureEnabled), let searching {
                     UserSearch(damus_state: damus_state, search: searching, focusWordAttributes: $focusWordAttributes, newCursorIndex: $newCursorIndex, post: $post)
                         .frame(maxHeight: .infinity)
                         .environmentObject(tagModel)
@@ -559,7 +584,7 @@ struct PostView: View {
                } else {
                     Divider()
                     VStack(alignment: .leading) {
-                        if pollDraft != nil {
+                        if pollsFeatureEnabled, pollDraft != nil {
                             PollComposerView(
                                 draft: Binding(
                                     get: { self.pollDraft ?? PollDraft.makeDefault() },
@@ -579,6 +604,7 @@ struct PostView: View {
         }
             .background(DamusColors.adaptableWhite.edgesIgnoringSafeArea(.all))
         .onChange(of: pollDraft) { _ in
+            guard pollsFeatureEnabled else { return }
             post_changed(post: post, media: uploadedMedias)
         }
             .sheet(isPresented: $attach_media) {
@@ -953,7 +979,15 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
         acc.append(pk)
     }
     
-    return build_post(state: state, post: post, action: action, uploadedMedias: uploadedMedias, pubkeys: pks, pollDraft: pollDraft)
+    let effectivePollDraft = state.settings.enable_nip88_polls ? pollDraft : nil
+    return build_post(
+        state: state,
+        post: post,
+        action: action,
+        uploadedMedias: uploadedMedias,
+        pubkeys: pks,
+        pollDraft: effectivePollDraft
+    )
 }
 
 /// This builds a Nostr post from draft data from `PostView` or other draft-related classes
@@ -970,7 +1004,8 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
 ///   - pubkeys: The referenced pubkeys
 /// - Returns: A NostrPost, which can then be signed into an event.
 func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], pubkeys: [Pubkey], pollDraft: PollDraft? = nil) -> NostrPost {
-    if let pollDraft, case .posting = action, let pollPost = build_poll_post(state: state, post: post, pollDraft: pollDraft) {
+    let pollsFeatureEnabled = state.settings.enable_nip88_polls
+    if pollsFeatureEnabled, let pollDraft, case .posting = action, let pollPost = build_poll_post(state: state, post: post, pollDraft: pollDraft) {
         return pollPost
     }
 

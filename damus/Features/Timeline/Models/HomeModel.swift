@@ -101,6 +101,10 @@ class HomeModel: ContactsDelegate {
     var dms: DirectMessagesModel {
         return damus_state.dms
     }
+
+    var pollsFeatureEnabled: Bool {
+        damus_state.settings.enable_nip88_polls
+    }
     
     func has_sub_id_event(sub_id: String, ev_id: NoteId) -> Bool {
         if !has_event.keys.contains(sub_id) {
@@ -193,9 +197,15 @@ class HomeModel: ContactsDelegate {
         case .chat, .longform, .text, .highlight:
             handle_text_event(sub_id: sub_id, ev)
         case .poll:
-            handle_poll_event(sub_id: sub_id, ev)
+            if pollsFeatureEnabled {
+                handle_poll_event(sub_id: sub_id, ev)
+            } else {
+                handle_text_event(sub_id: sub_id, ev)
+            }
         case .poll_response:
-            handle_poll_response(ev)
+            if pollsFeatureEnabled {
+                handle_poll_response(ev)
+            }
         case .contacts:
             handle_contact_event(sub_id: sub_id, relay_id: relay_id, ev: ev)
         case .metadata:
