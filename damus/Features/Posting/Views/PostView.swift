@@ -94,6 +94,9 @@ struct PostView: View {
     
     @State private var current_placeholder_index = 0
     @State private var uploadTasks: [Task<Void, Never>] = []
+    #if !APPEXTENSION
+    @State private var pastedGifMetadataCache: [URL: FileMetadata] = [:]
+    #endif
 
     let action: PostAction
     let damus_state: DamusState
@@ -129,7 +132,12 @@ struct PostView: View {
         uploadTasks.removeAll()
     }
     
-    func send_post() {
+    @MainActor
+    func send_post() async {
+        #if !APPEXTENSION
+        await enrichPastedGifLinks()
+        #endif
+
         let new_post = build_post(state: self.damus_state, post: self.post, action: action, uploadedMedias: uploadedMedias, references: self.references, filtered_pubkeys: filtered_pubkeys)
 
         notify(.post(.post(new_post)))
@@ -223,7 +231,9 @@ struct PostView: View {
     
     var PostButton: some View {
         Button(NSLocalizedString("Post", comment: "Button to post a note.")) {
-            self.send_post()
+            Task {
+                await self.send_post()
+            }
         }
         .disabled(posting_disabled)
         .opacity(posting_disabled ? 0.5 : 1.0)
@@ -411,26 +421,44 @@ struct PostView: View {
     /// Handle GIF selection from GIFPickerView
     /// GIFs are added directly without re-uploading since they're already hosted
     func handle_gif_selection(_ item: GIFPickerItem) {
-        let metadata = item.metadata
+        if let metadata = appendGif(metadata: item.metadata, alt: item.fallbackAlt, notify: true) {
+            pastedGifMetadataCache[metadata.url] = metadata
+        }
+    }
+
+    @discardableResult
+    @MainActor
+    private func appendGif(metadata: FileMetadata, alt: String?, notify: Bool) -> FileMetadata? {
         let fullURL = metadata.url
+
+        if uploadedMedias.contains(where: { $0.uploadedURL == fullURL }) {
+            return nil
+        }
 
         var enrichedMetadata = metadata
 
-        if metadata.eventId == nil, let keypair = damus_state.keypair.to_full() {
-            if let metadataEvent = metadata.toNostrEvent(keypair: keypair, content: item.displayTitle) {
-                damus_state.nostrNetwork.postbox.send(metadataEvent)
-                let relayHints = metadata.relayHints.isEmpty ? damus_state.nostrNetwork.pool.our_descriptors.map { $0.url } : metadata.relayHints
-                enrichedMetadata = enrichedMetadata.updating(
-                    eventId: metadataEvent.id,
-                    author: metadataEvent.pubkey,
-                    publishedAt: metadataEvent.created_at,
-                    relayHints: relayHints
-                )
-            }
+        if let alt, !alt.isEmpty {
+            enrichedMetadata = enrichedMetadata.updating(alt: alt, summary: enrichedMetadata.summary ?? alt)
         }
 
-        if let alt = item.fallbackAlt, !alt.isEmpty {
-            enrichedMetadata = enrichedMetadata.updating(alt: alt, summary: enrichedMetadata.summary ?? alt)
+        if enrichedMetadata.eventId == nil,
+           let keypair = damus_state.keypair.to_full(),
+           let metadataEvent = enrichedMetadata.toNostrEvent(
+                keypair: keypair,
+                content: alt ?? enrichedMetadata.summary ?? enrichedMetadata.url.lastPathComponent
+           ) {
+            damus_state.nostrNetwork.postbox.send(metadataEvent)
+            let relayHints = enrichedMetadata.relayHints.isEmpty ? damus_state.nostrNetwork.pool.our_descriptors.map { $0.url } : enrichedMetadata.relayHints
+            enrichedMetadata = enrichedMetadata.updating(
+                eventId: metadataEvent.id,
+                author: metadataEvent.pubkey,
+                publishedAt: metadataEvent.created_at,
+                relayHints: relayHints
+            )
+        }
+
+        if uploadedMedias.contains(where: { $0.uploadedURL == fullURL }) {
+            return enrichedMetadata
         }
 
         let imageMetadata = enrichedMetadata.toImageMetadata()
@@ -443,7 +471,111 @@ struct PostView: View {
         )
 
         uploadedMedias.append(uploadedMedia)
-        post_changed(post: post, media: uploadedMedias)
+
+        if notify {
+            post_changed(post: post, media: uploadedMedias)
+        }
+
+        return enrichedMetadata
+    }
+
+    private func extractGifURLs(from text: String) -> [URL] {
+        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else {
+            return []
+        }
+
+        let range = NSRange(text.startIndex..<text.endIndex, in: text)
+        var urls: [URL] = []
+        detector.enumerateMatches(in: text, options: [], range: range) { match, _, _ in
+            guard let match, let url = match.url else { return }
+            urls.append(url)
+        }
+        return urls
+    }
+
+    @MainActor
+    private func enrichPastedGifLinks() async {
+        let detectedURLs = extractGifURLs(from: post.string)
+        if detectedURLs.isEmpty {
+            return
+        }
+
+        var existingURLs = Set(uploadedMedias.map { $0.uploadedURL })
+        var appended = false
+
+        for url in detectedURLs {
+            if existingURLs.contains(url) {
+                continue
+            }
+
+            let metadata: FileMetadata
+            if let cached = pastedGifMetadataCache[url] {
+                metadata = cached
+            } else {
+                guard let fetched = await makeMetadataForRemoteGIF(url: url) else { continue }
+                metadata = fetched
+            }
+
+            if let enriched = appendGif(metadata: metadata, alt: nil, notify: false) {
+                pastedGifMetadataCache[enriched.url] = enriched
+                existingURLs.insert(enriched.url)
+                appended = true
+            }
+        }
+
+        if appended {
+            post_changed(post: post, media: uploadedMedias)
+        }
+    }
+
+    private func makeMetadataForRemoteGIF(url: URL) async -> FileMetadata? {
+        guard let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https" else {
+            return nil
+        }
+
+        let lastComponent = url.lastPathComponent.lowercased()
+        let urlSuggestsGif = lastComponent.hasSuffix(".gif")
+
+        var confirmedMimeType: String?
+        var contentLength: Int?
+
+        if let response = try? await fetchHEADResponse(for: url) {
+            confirmedMimeType = response.value(forHTTPHeaderField: "Content-Type")?.lowercased()
+
+            if let lengthHeader = response.value(forHTTPHeaderField: "Content-Length"),
+               let length = Int(lengthHeader) {
+                contentLength = length
+            }
+        }
+
+        if let mimeType = confirmedMimeType, !mimeType.contains("gif") {
+            return nil
+        }
+
+        if confirmedMimeType == nil && !urlSuggestsGif {
+            return nil
+        }
+
+        return FileMetadata(
+            url: url,
+            mimeType: confirmedMimeType ?? "image/gif",
+            size: contentLength,
+            summary: url.lastPathComponent,
+            alt: url.lastPathComponent,
+            service: url.host
+        )
+    }
+
+    private func fetchHEADResponse(for url: URL) async throws -> HTTPURLResponse {
+        var request = URLRequest(url: url)
+        request.httpMethod = "HEAD"
+        request.timeoutInterval = 8
+
+        let (_, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+        return http
     }
     #endif
 
