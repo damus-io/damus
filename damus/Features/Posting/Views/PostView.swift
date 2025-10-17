@@ -829,6 +829,45 @@ func nip10_reply_tags(replying_to: NostrEvent, keypair: Keypair, relayURL: Relay
     return tags
 }
 
+private func buildTag(_ key: String, _ components: String?...) -> [String] {
+    var tag = [key]
+    for component in components {
+        guard let component, !component.isEmpty else { continue }
+        tag.append(component)
+    }
+    return tag
+}
+
+func nip22_comment_tags(replying_to: NostrEvent, state: DamusState) -> [[String]]? {
+    guard replying_to.known_kind == .longform else {
+        return nil
+    }
+
+    guard let identifier = replying_to.referenced_params.first?.param.string(), !identifier.isEmpty else {
+        return nil
+    }
+
+    let address = "\(replying_to.kind):\(replying_to.pubkey.hex()):\(identifier)"
+    let relay = state.nostrNetwork.relaysForEvent(event: replying_to).first?.absoluteString
+    let rootKindString = "\(replying_to.kind)"
+    let rootPubkey = replying_to.pubkey.hex()
+    let rootId = replying_to.id.hex()
+
+    var tags: [[String]] = []
+
+    tags.append(buildTag("A", address, relay))
+    tags.append(["K", rootKindString])
+    tags.append(buildTag("P", rootPubkey, relay))
+
+    // For top-level comments, parent equals root
+    tags.append(buildTag("a", address, relay))
+    tags.append(buildTag("e", rootId, relay, rootPubkey))
+    tags.append(["k", rootKindString])
+    tags.append(buildTag("p", rootPubkey, relay))
+
+    return tags
+}
+
 func build_post(state: DamusState, action: PostAction, draft: DraftArtifacts) -> NostrPost {
     return build_post(
         state: state,
@@ -912,11 +951,17 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
     }
 
     var tags: [[String]] = []
+    var postKind: NostrKind = .text
 
     switch action {
     case .replying_to(let replying_to):
         // start off with the reply tags
-        tags = nip10_reply_tags(replying_to: replying_to, keypair: state.keypair, relayURL: state.nostrNetwork.relaysForEvent(event: replying_to).first)
+        if let nip22Tags = nip22_comment_tags(replying_to: replying_to, state: state) {
+            tags = nip22Tags
+            postKind = .comment
+        } else {
+            tags = nip10_reply_tags(replying_to: replying_to, keypair: state.keypair, relayURL: state.nostrNetwork.relaysForEvent(event: replying_to).first)
+        }
 
     case .quoting(let ev):
         let relay_urls = state.nostrNetwork.relaysForEvent(event: ev)
@@ -953,7 +998,7 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
             }
     }
 
-    return NostrPost(content: content.trimmingCharacters(in: .whitespacesAndNewlines), kind: .text, tags: tags)
+    return NostrPost(content: content.trimmingCharacters(in: .whitespacesAndNewlines), kind: postKind, tags: tags)
 }
 
 func isSupportedVideo(url: URL?) -> Bool {
@@ -974,4 +1019,3 @@ func isSupportedImage(url: URL) -> Bool {
     let supportedTypes = ["jpg", "png", "gif"]
     return supportedTypes.contains(fileExtension)
 }
-

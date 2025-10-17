@@ -143,6 +143,41 @@ struct ReplaceableParam: TagConvertible {
     var keychar: AsciiCharacter { "d" }
 }
 
+struct AddressPointer: Hashable {
+    let kind: UInt32
+    let pubkey: Pubkey
+    let identifier: String
+
+    init(kind: UInt32, pubkey: Pubkey, identifier: String) {
+        self.kind = kind
+        self.pubkey = pubkey
+        self.identifier = identifier
+    }
+
+    init?(rawValue: String) {
+        let components = rawValue.split(separator: ":", maxSplits: 2, omittingEmptySubsequences: false)
+        guard components.count == 3,
+              let kind = UInt32(components[0]),
+              let pubkey = Pubkey(hex: String(components[1]))
+        else {
+            return nil
+        }
+
+        self.init(kind: kind, pubkey: pubkey, identifier: String(components[2]))
+    }
+
+    static func from(tag: TagSequence, allowedKeys: Set<AsciiCharacter>) -> AddressPointer? {
+        guard tag.count >= 2,
+              let key = tag[0].single_char,
+              allowedKeys.contains(key)
+        else {
+            return nil
+        }
+
+        return AddressPointer(rawValue: tag[1].string())
+    }
+}
+
 struct Signature: Codable, Hashable, Equatable {
     let data: Data
     
