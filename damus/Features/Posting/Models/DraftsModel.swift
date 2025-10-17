@@ -141,7 +141,7 @@ class DraftArtifacts: Equatable {
                 if isSupportedImage(url: url) {
                     // Image, add that to our media attachments
                     // TODO: Add metadata decoding support
-                    media.append(UploadedMedia(localURL: url, uploadedURL: url, metadata: .none))
+                    media.append(UploadedMedia(localURL: url, uploadedURL: url, metadata: .none, fileMetadata: nil))
                     continue
                 }
                 else {

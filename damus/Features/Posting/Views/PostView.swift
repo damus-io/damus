@@ -8,6 +8,13 @@
 import SwiftUI
 import AVKit
 import Kingfisher
+import Foundation
+
+#if APPEXTENSION
+typealias PostFileMetadata = ImageMetadata
+#else
+typealias PostFileMetadata = FileMetadata
+#endif
 
 enum NostrPostResult {
     case post(NostrPost)
@@ -63,6 +70,7 @@ struct PostView: View {
     @FocusState var focus: Bool
     @State var attach_media: Bool = false
     @State var attach_camera: Bool = false
+    @State var attach_gif: Bool = false
     @State var error: String? = nil
     @State var image_upload_confirm: Bool = false
     @State var imagePastedFromPasteboard: PreUploadedMedia? = nil
@@ -177,11 +185,36 @@ struct PostView: View {
                 .padding(6)
         })
     }
-    
+
+    #if !APPEXTENSION
+    var GIFButton: some View {
+        Button(action: {
+            attach_gif = true
+        }, label: {
+            Text("GIF")
+                .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                .foregroundColor(.white)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(Color.accentColor)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .stroke(Color.accentColor.opacity(0.6), lineWidth: 1)
+                        )
+                )
+        })
+    }
+    #endif
+
     var AttachmentBar: some View {
         HStack(alignment: .center, spacing: 15) {
             ImageButton
             CameraButton
+            #if !APPEXTENSION
+            GIFButton
+            #endif
             Spacer()
             AutoSaveIndicatorView(saveViewModel: self.autoSaveModel)
         }
@@ -344,13 +377,13 @@ struct PostView: View {
     func handle_upload(media: MediaUpload) async -> Bool {
         mediaUploadUnderProgress = media
         let uploader = damus_state.settings.default_media_uploader
-        
+
         let img = getImage(media: media)
         print("img size w:\(img.size.width) h:\(img.size.height)")
-        
+
         async let blurhash = calculate_blurhash(img: img)
         let res = await image_upload.start(media: media, uploader: uploader, mediaType: .normal, keypair: damus_state.keypair)
-        
+
         mediaUploadUnderProgress = nil
         switch res {
         case .success(let url):
@@ -360,10 +393,10 @@ struct PostView: View {
             }
             let blurhash = await blurhash
             let meta = blurhash.map { bh in calculate_image_metadata(url: url, img: img, blurhash: bh) }
-            let uploadedMedia = UploadedMedia(localURL: media.localURL, uploadedURL: url, metadata: meta)
+            let uploadedMedia = UploadedMedia(localURL: media.localURL, uploadedURL: url, metadata: meta, fileMetadata: nil)
             uploadedMedias.append(uploadedMedia)
             return true
-            
+
         case .failed(let error):
             if let error {
                 self.error = error.localizedDescription
@@ -373,7 +406,47 @@ struct PostView: View {
             return false
         }
     }
-    
+
+    #if !APPEXTENSION
+    /// Handle GIF selection from GIFPickerView
+    /// GIFs are added directly without re-uploading since they're already hosted
+    func handle_gif_selection(_ item: GIFPickerItem) {
+        let metadata = item.metadata
+        let fullURL = metadata.url
+
+        var enrichedMetadata = metadata
+
+        if metadata.eventId == nil, let keypair = damus_state.keypair.to_full() {
+            if let metadataEvent = metadata.toNostrEvent(keypair: keypair, content: item.displayTitle) {
+                damus_state.nostrNetwork.postbox.send(metadataEvent)
+                let relayHints = metadata.relayHints.isEmpty ? damus_state.nostrNetwork.pool.our_descriptors.map { $0.url } : metadata.relayHints
+                enrichedMetadata = enrichedMetadata.updating(
+                    eventId: metadataEvent.id,
+                    author: metadataEvent.pubkey,
+                    publishedAt: metadataEvent.created_at,
+                    relayHints: relayHints
+                )
+            }
+        }
+
+        if let alt = item.fallbackAlt, !alt.isEmpty {
+            enrichedMetadata = enrichedMetadata.updating(alt: alt, summary: enrichedMetadata.summary ?? alt)
+        }
+
+        let imageMetadata = enrichedMetadata.toImageMetadata()
+
+        let uploadedMedia = UploadedMedia(
+            localURL: fullURL,
+            uploadedURL: fullURL,
+            metadata: imageMetadata,
+            fileMetadata: enrichedMetadata
+        )
+
+        uploadedMedias.append(uploadedMedia)
+        post_changed(post: post, media: uploadedMedias)
+    }
+    #endif
+
     var multiply_factor: CGFloat {
         if case .quoting = action {
             return 0.4
@@ -515,6 +588,13 @@ struct PostView: View {
                     self.attach_media = true
                 }))
             }
+            #if !APPEXTENSION
+            .sheet(isPresented: $attach_gif) {
+                GIFPickerView(damusState: damus_state) { item in
+                    self.handle_gif_selection(item)
+                }
+            }
+            #endif
             // This alert seeks confirmation about Image-upload when user taps Paste option
             .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $imageUploadConfirmPasteboard) {
                 Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
@@ -767,6 +847,22 @@ struct UploadedMedia: Equatable {
     let localURL: URL
     let uploadedURL: URL
     let metadata: ImageMetadata?
+    let fileMetadata: PostFileMetadata?
+
+    static func == (lhs: UploadedMedia, rhs: UploadedMedia) -> Bool {
+        guard lhs.localURL == rhs.localURL,
+              lhs.uploadedURL == rhs.uploadedURL,
+              lhs.metadata == rhs.metadata else {
+            return false
+        }
+
+        #if APPEXTENSION
+        return true
+        #else
+        return lhs.fileMetadata?.eventId == rhs.fileMetadata?.eventId &&
+        lhs.fileMetadata?.url == rhs.fileMetadata?.url
+        #endif
+    }
 }
 
 
@@ -936,6 +1032,23 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
 
     // append additional tags
     tags += uploadedMedias.compactMap { $0.metadata?.to_tag() }
+
+    #if !APPEXTENSION
+    var seenFileIds: Set<String> = []
+    var metadataReferenceTags: [[String]] = []
+    for media in uploadedMedias {
+        guard let metadata = media.fileMetadata, let eventId = metadata.eventId else { continue }
+        let identifier = eventId.hex()
+        guard !seenFileIds.contains(identifier) else { continue }
+        seenFileIds.insert(identifier)
+
+        metadataReferenceTags.append(["file", identifier])
+        let relays = metadata.relayHints
+        let nevent = Bech32Object.encode(.nevent(NEvent(noteid: eventId, relays: relays, author: metadata.author, kind: NostrKind.file_metadata.rawValue)))
+        metadataReferenceTags.append(["r", "nostr:\(nevent)"])
+    }
+    tags += metadataReferenceTags
+    #endif
     
     switch action {
         case .highlighting(let draft):
@@ -974,4 +1087,3 @@ func isSupportedImage(url: URL) -> Bool {
     let supportedTypes = ["jpg", "png", "gif"]
     return supportedTypes.contains(fileExtension)
 }
-

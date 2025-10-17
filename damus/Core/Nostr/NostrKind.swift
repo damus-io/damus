@@ -32,4 +32,5 @@ enum NostrKind: UInt32, Codable {
     case http_auth = 27235
     case status = 30315
     case follow_list = 39089
+    case file_metadata = 1063
 }

@@ -231,6 +231,8 @@ class HomeModel: ContactsDelegate {
             break
         case .interest_list:
             break   // Don't care for now
+        case .file_metadata:
+            break   // File metadata events (NIP-94) - not processed in timeline
         }
     }
 

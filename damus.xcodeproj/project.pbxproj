@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0E8A4BB72AE4359200065E81 /* NostrFilter+Hashable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E8A4BB62AE4359200065E81 /* NostrFilter+Hashable.swift */; };
+		186B4E337BA36E7231BECF74 /* PostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFA327FA577B0006080F /* PostView.swift */; };
 		3165648B295B70D500C64604 /* LinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3165648A295B70D500C64604 /* LinkView.swift */; };
 		3169CAE6294E69C000EE4006 /* EmptyTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CAE5294E69C000EE4006 /* EmptyTimelineView.swift */; };
 		3169CAED294FCCFC00EE4006 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CAEC294FCCFC00EE4006 /* Constants.swift */; };
@@ -492,6 +493,16 @@
 		50B5685329F97CB400A23243 /* CredentialHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B5685229F97CB400A23243 /* CredentialHandler.swift */; };
 		50C3E08A2AA8E3F7006A4BC0 /* AVPlayer+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C3E0892AA8E3F7006A4BC0 /* AVPlayer+Additions.swift */; };
 		50DA11262A16A23F00236234 /* Launch.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 50DA11252A16A23F00236234 /* Launch.storyboard */; };
+		557885A52EA1D4E600E24AE4 /* TenorGIFProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 557885A02EA1D4E600E24AE4 /* TenorGIFProvider.swift */; };
+		557885A62EA1D4E600E24AE4 /* FileMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 557885992EA1D4E600E24AE4 /* FileMetadata.swift */; };
+		557885A72EA1D4E600E24AE4 /* GIFPickerItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5578859B2EA1D4E600E24AE4 /* GIFPickerItem.swift */; };
+		557885A82EA1D4E600E24AE4 /* NostrGIFProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5578859D2EA1D4E600E24AE4 /* NostrGIFProvider.swift */; };
+		557885A92EA1D4E600E24AE4 /* TenorAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5578859E2EA1D4E600E24AE4 /* TenorAPI.swift */; };
+		557885AA2EA1D4E600E24AE4 /* GIFPickerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5578859C2EA1D4E600E24AE4 /* GIFPickerViewModel.swift */; };
+		557885AB2EA1D4E600E24AE4 /* GIFPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 557885A32EA1D4E600E24AE4 /* GIFPickerView.swift */; };
+		557885AC2EA1D4E600E24AE4 /* TenorGIF.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5578859F2EA1D4E600E24AE4 /* TenorGIF.swift */; };
+		557885AD2EA1D4E600E24AE4 /* GIFCatalogBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5578859A2EA1D4E600E24AE4 /* GIFCatalogBootstrap.swift */; };
+		557885AE2EA1D4E600E24AE4 /* GIFBootstrapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 557885A22EA1D4E600E24AE4 /* GIFBootstrapView.swift */; };
 		5C0567532C8B5F9C0073F23A /* PostingTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */; };
 		5C0567552C8B60C20073F23A /* OffsetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567542C8B60C20073F23A /* OffsetExtension.swift */; };
 		5C0567562C8B60E60073F23A /* OffsetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567542C8B60C20073F23A /* OffsetExtension.swift */; };
@@ -965,7 +976,6 @@
 		82D6FC5A2CD99F7900C925F4 /* QRScanNSECView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADFE73542AD4793100EC7326 /* QRScanNSECView.swift */; };
 		82D6FC5B2CD99F7900C925F4 /* NoteContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A8D28236FE4006E126D /* NoteContentView.swift */; };
 		82D6FC5C2CD99F7900C925F4 /* PostButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFAC28049CFB0006080F /* PostButton.swift */; };
-		82D6FC5D2CD99F7900C925F4 /* PostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFA327FA577B0006080F /* PostView.swift */; };
 		82D6FC5E2CD99F7900C925F4 /* AttachMediaUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */; };
 		82D6FC5F2CD99F7900C925F4 /* MediaPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F757933929D7AECD007DEAC1 /* MediaPicker.swift */; };
 		82D6FC602CD99F7900C925F4 /* TextViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C83F89229A937B900136C08 /* TextViewWrapper.swift */; };
@@ -2510,6 +2520,16 @@
 		50B5685229F97CB400A23243 /* CredentialHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialHandler.swift; sourceTree = "<group>"; };
 		50C3E0892AA8E3F7006A4BC0 /* AVPlayer+Additions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVPlayer+Additions.swift"; sourceTree = "<group>"; };
 		50DA11252A16A23F00236234 /* Launch.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Launch.storyboard; sourceTree = "<group>"; };
+		557885992EA1D4E600E24AE4 /* FileMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadata.swift; sourceTree = "<group>"; };
+		5578859A2EA1D4E600E24AE4 /* GIFCatalogBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GIFCatalogBootstrap.swift; sourceTree = "<group>"; };
+		5578859B2EA1D4E600E24AE4 /* GIFPickerItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GIFPickerItem.swift; sourceTree = "<group>"; };
+		5578859C2EA1D4E600E24AE4 /* GIFPickerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GIFPickerViewModel.swift; sourceTree = "<group>"; };
+		5578859D2EA1D4E600E24AE4 /* NostrGIFProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrGIFProvider.swift; sourceTree = "<group>"; };
+		5578859E2EA1D4E600E24AE4 /* TenorAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TenorAPI.swift; sourceTree = "<group>"; };
+		5578859F2EA1D4E600E24AE4 /* TenorGIF.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TenorGIF.swift; sourceTree = "<group>"; };
+		557885A02EA1D4E600E24AE4 /* TenorGIFProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TenorGIFProvider.swift; sourceTree = "<group>"; };
+		557885A22EA1D4E600E24AE4 /* GIFBootstrapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GIFBootstrapView.swift; sourceTree = "<group>"; };
+		557885A32EA1D4E600E24AE4 /* GIFPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GIFPickerView.swift; sourceTree = "<group>"; };
 		5C0567542C8B60C20073F23A /* OffsetExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OffsetExtension.swift; sourceTree = "<group>"; };
 		5C0567572C8FBC560073F23A /* NDBSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NDBSearchView.swift; sourceTree = "<group>"; };
 		5C0707D02A1ECB38004E7B51 /* DamusLogoGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusLogoGradient.swift; sourceTree = "<group>"; };
@@ -3938,6 +3958,30 @@
 			path = Images;
 			sourceTree = "<group>";
 		};
+		557885A12EA1D4E600E24AE4 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				557885992EA1D4E600E24AE4 /* FileMetadata.swift */,
+				5578859A2EA1D4E600E24AE4 /* GIFCatalogBootstrap.swift */,
+				5578859B2EA1D4E600E24AE4 /* GIFPickerItem.swift */,
+				5578859C2EA1D4E600E24AE4 /* GIFPickerViewModel.swift */,
+				5578859D2EA1D4E600E24AE4 /* NostrGIFProvider.swift */,
+				5578859E2EA1D4E600E24AE4 /* TenorAPI.swift */,
+				5578859F2EA1D4E600E24AE4 /* TenorGIF.swift */,
+				557885A02EA1D4E600E24AE4 /* TenorGIFProvider.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		557885A42EA1D4E600E24AE4 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				557885A22EA1D4E600E24AE4 /* GIFBootstrapView.swift */,
+				557885A32EA1D4E600E24AE4 /* GIFPickerView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		5C78A7752E22F84A00CF177D /* Core */ = {
 			isa = PBXGroup;
 			children = (
@@ -3986,6 +4030,8 @@
 		5C78A7792E22FDFE00CF177D /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				557885A12EA1D4E600E24AE4 /* Models */,
+				557885A42EA1D4E600E24AE4 /* Views */,
 				5C78A7BC2E304D7400CF177D /* Translations */,
 				5C78A7B52E3046F400CF177D /* NIP05 */,
 				5C78A7AA2E30428D00CF177D /* Actions */,
@@ -5440,6 +5486,16 @@
 				F757933A29D7AECD007DEAC1 /* MediaPicker.swift in Sources */,
 				4CC6AA752CAB688500989CEF /* str.c in Sources */,
 				4CC6AA762CAB688500989CEF /* tal.c in Sources */,
+				557885A52EA1D4E600E24AE4 /* TenorGIFProvider.swift in Sources */,
+				557885A62EA1D4E600E24AE4 /* FileMetadata.swift in Sources */,
+				557885A72EA1D4E600E24AE4 /* GIFPickerItem.swift in Sources */,
+				557885A82EA1D4E600E24AE4 /* NostrGIFProvider.swift in Sources */,
+				557885A92EA1D4E600E24AE4 /* TenorAPI.swift in Sources */,
+				557885AA2EA1D4E600E24AE4 /* GIFPickerViewModel.swift in Sources */,
+				557885AB2EA1D4E600E24AE4 /* GIFPickerView.swift in Sources */,
+				557885AC2EA1D4E600E24AE4 /* TenorGIF.swift in Sources */,
+				557885AD2EA1D4E600E24AE4 /* GIFCatalogBootstrap.swift in Sources */,
+				557885AE2EA1D4E600E24AE4 /* GIFBootstrapView.swift in Sources */,
 				4CC6AA782CAB688500989CEF /* mem.c in Sources */,
 				4CC6AA792CAB688500989CEF /* sha256.c in Sources */,
 				4CC6AA7B2CAB688500989CEF /* likely.c in Sources */,
@@ -6464,7 +6520,6 @@
 				82D6FC5B2CD99F7900C925F4 /* NoteContentView.swift in Sources */,
 				82D6FC5C2CD99F7900C925F4 /* PostButton.swift in Sources */,
 				5CB017322D4422DB00A9ED05 /* NWCSettings.swift in Sources */,
-				82D6FC5D2CD99F7900C925F4 /* PostView.swift in Sources */,
 				82D6FC5E2CD99F7900C925F4 /* AttachMediaUtility.swift in Sources */,
 				82D6FC5F2CD99F7900C925F4 /* MediaPicker.swift in Sources */,
 				82D6FC602CD99F7900C925F4 /* TextViewWrapper.swift in Sources */,
@@ -6497,6 +6552,7 @@
 				82D6FC7B2CD99F7900C925F4 /* TestData.swift in Sources */,
 				82D6FC7C2CD99F7900C925F4 /* ContentParsing.swift in Sources */,
 				82D6FC7D2CD99F7900C925F4 /* NotificationFormatter.swift in Sources */,
+				186B4E337BA36E7231BECF74 /* PostView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -7670,6 +7726,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
+					"APPEXTENSION=1",
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "share extension/Info.plist";
@@ -7682,6 +7739,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				OTHER_SWIFT_FLAGS = "$(inherited) -DAPPEXTENSION";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jb55.damus2.share-extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -7703,6 +7761,10 @@
 				DEVELOPMENT_TEAM = XK7H4JAB3D;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"APPEXTENSION=1",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "share extension/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "share extension";
@@ -7714,6 +7776,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				OTHER_SWIFT_FLAGS = "$(inherited) -DAPPEXTENSION";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jb55.damus2.share-extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -7735,6 +7798,10 @@
 				DEVELOPMENT_TEAM = XK7H4JAB3D;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"APPEXTENSION=1",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "highlighter action extension/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Highlight on Damus";
@@ -7746,6 +7813,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				OTHER_SWIFT_FLAGS = "$(inherited) -DAPPEXTENSION";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jb55.damus2.highlighter-action-extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -7768,6 +7836,10 @@
 				DEVELOPMENT_TEAM = XK7H4JAB3D;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"APPEXTENSION=1",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "highlighter action extension/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Highlight on Damus";
@@ -7779,6 +7851,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				OTHER_SWIFT_FLAGS = "$(inherited) -DAPPEXTENSION";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jb55.damus2.highlighter-action-extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -7800,6 +7873,10 @@
 				DEVELOPMENT_TEAM = XK7H4JAB3D;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"APPEXTENSION=1",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DamusNotificationService/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DamusNotificationService;
@@ -7811,6 +7888,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				OTHER_SWIFT_FLAGS = "$(inherited) -DAPPEXTENSION";
 				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2.DamusNotificationService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -7833,6 +7911,10 @@
 				DEVELOPMENT_TEAM = XK7H4JAB3D;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"APPEXTENSION=1",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DamusNotificationService/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DamusNotificationService;
@@ -7844,6 +7926,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				OTHER_SWIFT_FLAGS = "$(inherited) -DAPPEXTENSION";
 				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2.DamusNotificationService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
