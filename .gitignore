@@ -7,3 +7,4 @@ TODO.bak
 tags
 build-git-hash.txt
 .build
+build/

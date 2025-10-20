@@ -1,4 +1,0 @@
-module FaviconFinder {
-header "FaviconFinder-Swift.h"
-export *
-}
