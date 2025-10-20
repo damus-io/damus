@@ -95,4 +95,25 @@ struct ImageCacheMigrations {
         Log.error("App group container unavailable; using fallback cache directory at %s", for: .storage, fallbackURL.path)
         return fallbackURL
     }
+
+    /// Returns every directory path the app has historically used to store Kingfisher disk cache data.
+    ///
+    /// These paths may or may not exist on disk; callers should check for existence before operating on them.
+    static func knownKingfisherCacheDirectories() -> [URL] {
+        var seen = Set<String>()
+        var directories: [URL] = []
+
+        func appendIfNeeded(_ url: URL) {
+            let standardizedPath = url.standardizedFileURL.path
+            guard !standardizedPath.isEmpty, !seen.contains(standardizedPath) else { return }
+            seen.insert(standardizedPath)
+            directories.append(URL(fileURLWithPath: standardizedPath, isDirectory: true))
+        }
+
+        appendIfNeeded(kingfisherCachePath())
+        appendIfNeeded(URL(fileURLWithPath: migration1KingfisherCachePath(), isDirectory: true))
+        appendIfNeeded(URL(fileURLWithPath: migration0KingfisherCachePath(), isDirectory: true))
+
+        return directories
+    }
 }
