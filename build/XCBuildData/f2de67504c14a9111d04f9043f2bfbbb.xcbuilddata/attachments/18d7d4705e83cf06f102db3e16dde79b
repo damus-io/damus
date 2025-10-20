@@ -1,4 +1,0 @@
-module Atomics {
-header "Atomics-Swift.h"
-export *
-}

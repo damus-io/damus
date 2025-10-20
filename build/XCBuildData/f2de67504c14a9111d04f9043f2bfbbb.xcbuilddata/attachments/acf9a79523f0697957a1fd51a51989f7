@@ -1,4 +1,0 @@
-module EmojiPicker {
-header "EmojiPicker-Swift.h"
-export *
-}

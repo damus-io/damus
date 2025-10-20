@@ -1,4 +1,0 @@
-module SwipeActions {
-header "SwipeActions-Swift.h"
-export *
-}

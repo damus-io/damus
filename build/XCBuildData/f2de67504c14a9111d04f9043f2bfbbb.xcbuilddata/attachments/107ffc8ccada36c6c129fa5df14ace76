@@ -1,4 +1,0 @@
-module InternalCollectionsUtilities {
-header "InternalCollectionsUtilities-Swift.h"
-export *
-}
