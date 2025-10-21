@@ -6,6 +6,9 @@ _[Please provide a summary of the changes in this PR.]_
 
 - [ ] I have read (or I am familiar with) the [Contribution Guidelines](../docs/CONTRIBUTING.md)
 - [ ] I have tested the changes in this PR
+- [ ] I have profiled the changes to ensure there are no performance regressions, or I do not need to profile the changes.
+    - Utilize Xcode profiler to measure performance impact of code changes. See https://developer.apple.com/videos/play/wwdc2025/306
+    - If not needed, provide reason:
 - [ ] I have opened or referred to an existing github issue related to this change.
 - [ ] My PR is either small, or I have split it into smaller logical commits that are easier to review
 - [ ] I have added the signoff line to all my commits. See [Signing off your work](../docs/CONTRIBUTING.md#sign-your-work---the-developers-certificate-of-origin)

@@ -15,6 +15,7 @@ class DamusState: HeadlessDamusState {
     let boosts: EventCounter
     let quote_reposts: EventCounter
     let contacts: Contacts
+    let contactCards: ContactCard
     let mutelist_manager: MutelistManager
     let profiles: Profiles
     let dms: DirectMessagesModel
@@ -45,6 +46,7 @@ class DamusState: HeadlessDamusState {
         likes: EventCounter,
         boosts: EventCounter,
         contacts: Contacts,
+        contactCards: ContactCard,
         mutelist_manager: MutelistManager,
         profiles: Profiles,
         dms: DirectMessagesModel,
@@ -73,6 +75,7 @@ class DamusState: HeadlessDamusState {
         self.likes = likes
         self.boosts = boosts
         self.contacts = contacts
+        self.contactCards = contactCards
         self.mutelist_manager = mutelist_manager
         self.profiles = profiles
         self.dms = dms
@@ -139,6 +142,7 @@ class DamusState: HeadlessDamusState {
             likes: EventCounter(our_pubkey: pubkey),
             boosts: EventCounter(our_pubkey: pubkey),
             contacts: Contacts(our_pubkey: pubkey),
+            contactCards: ContactCardManager(),
             mutelist_manager: MutelistManager(user_keypair: keypair),
             profiles: Profiles(ndb: ndb),
             dms: home.dms,
@@ -209,6 +213,7 @@ class DamusState: HeadlessDamusState {
             likes: EventCounter(our_pubkey: empty_pub),
             boosts: EventCounter(our_pubkey: empty_pub),
             contacts: Contacts(our_pubkey: empty_pub),
+            contactCards: ContactCardManagerMock(),
             mutelist_manager: MutelistManager(user_keypair: kp),
             profiles: Profiles(ndb: .empty),
             dms: DirectMessagesModel(our_pubkey: empty_pub),

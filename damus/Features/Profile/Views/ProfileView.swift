@@ -270,6 +270,7 @@ struct ProfileView: View {
 
     func actionSection(record: ProfileRecord?, pubkey: Pubkey) -> some View {
         return Group {
+            FavoriteButtonView(pubkey: profile.pubkey, damus_state: damus_state)
             if let record,
                let profile = record.profile,
                let lnurl = record.lnurl,
