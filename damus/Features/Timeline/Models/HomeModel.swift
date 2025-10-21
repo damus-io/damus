@@ -123,6 +123,7 @@ class HomeModel: ContactsDelegate {
     /// This is called whenever DamusState gets set. This function is used to load or setup anything we need from the new DamusState
     func load_our_stuff_from_damus_state() {
         self.load_latest_contact_event_from_damus_state()
+        self.load_latest_mutelist_event_from_damus_state()
         self.load_drafts_from_damus_state()
     }
     
@@ -134,6 +135,77 @@ class HomeModel: ContactsDelegate {
         guard let latest_contact_event_id = NoteId(hex: latest_contact_event_id_hex) else { return }
         guard let latest_contact_event: NdbNote = damus_state.ndb.lookup_note( latest_contact_event_id)?.unsafeUnownedValue?.to_owned() else { return }
         process_contact_event(state: damus_state, ev: latest_contact_event)
+    }
+    
+    /// Loads the latest mute list event we have stored locally so that the mutelist manager is immediately aware of previous mutes.
+    func load_latest_mutelist_event_from_damus_state() {
+        if let current_event = damus_state.mutelist_manager.event {
+            damus_state.settings.latest_mutelist_event_id_hex = current_event.id.hex()
+            return
+        }
+        
+        if let stored_event = load_mutelist_event_from_settings() {
+            apply_loaded_mutelist_event(stored_event)
+            return
+        }
+        
+        if let latest_event = load_latest_mutelist_event_from_db() {
+            apply_loaded_mutelist_event(latest_event)
+            return
+        }
+        
+        if let legacy_event = load_latest_legacy_mutelist_event_from_db() {
+            apply_loaded_mutelist_event(legacy_event)
+        }
+    }
+    
+    private func load_mutelist_event_from_settings() -> NostrEvent? {
+        guard let event_id_hex = damus_state.settings.latest_mutelist_event_id_hex,
+              let event_id = NoteId(hex: event_id_hex),
+              let event = damus_state.ndb.lookup_note(event_id)?.unsafeUnownedValue?.to_owned()
+        else {
+            return nil
+        }
+        return event
+    }
+    
+    private func load_latest_mutelist_event_from_db(limit: Int = 5) -> NostrEvent? {
+        guard let txn = NdbTxn(ndb: damus_state.ndb) else { return nil }
+        guard let filter = try? NdbFilter(from: NostrFilter(kinds: [.mute_list], limit: UInt32(limit), authors: [damus_state.pubkey])) else { return nil }
+        guard let note_key = try? damus_state.ndb.query(with: txn, filters: [filter], maxResults: limit).first,
+              let note = damus_state.ndb.lookup_note_by_key_with_txn(note_key, txn: txn)
+        else {
+            return nil
+        }
+        return note.to_owned()
+    }
+    
+    private func load_latest_legacy_mutelist_event_from_db(limit: Int = 20) -> NostrEvent? {
+        guard let txn = NdbTxn(ndb: damus_state.ndb) else { return nil }
+        guard let filter = try? NdbFilter(from: NostrFilter(kinds: [.list_deprecated], limit: UInt32(limit), authors: [damus_state.pubkey])) else { return nil }
+        guard let note_keys = try? damus_state.ndb.query(with: txn, filters: [filter], maxResults: limit) else { return nil }
+        
+        var candidates: [NostrEvent] = []
+        for key in note_keys {
+            guard let note = damus_state.ndb.lookup_note_by_key_with_txn(key, txn: txn) else { continue }
+            let owned_note = note.to_owned()
+            if owned_note.referenced_params.contains(where: { $0.param.matches_str("mute") }) {
+                candidates.append(owned_note)
+            }
+        }
+        
+        return candidates.max(by: { $0.created_at < $1.created_at })
+    }
+    
+    private func apply_loaded_mutelist_event(_ event: NostrEvent) {
+        if let current_event = damus_state.mutelist_manager.event,
+           current_event.created_at >= event.created_at {
+            damus_state.settings.latest_mutelist_event_id_hex = current_event.id.hex()
+            return
+        }
+        
+        damus_state.mutelist_manager.set_mutelist(event)
+        damus_state.settings.latest_mutelist_event_id_hex = event.id.hex()
     }
     
     func load_drafts_from_damus_state() {
@@ -694,6 +766,7 @@ class HomeModel: ContactsDelegate {
         }
 
         damus_state.mutelist_manager.set_mutelist(ev)
+        damus_state.settings.latest_mutelist_event_id_hex = ev.id.hex()
 
         migrate_old_muted_threads_to_new_mutelist(keypair: damus_state.keypair, damus_state: damus_state)
     }
@@ -716,6 +789,7 @@ class HomeModel: ContactsDelegate {
         }
 
         damus_state.mutelist_manager.set_mutelist(ev)
+        damus_state.settings.latest_mutelist_event_id_hex = ev.id.hex()
 
         migrate_old_muted_threads_to_new_mutelist(keypair: damus_state.keypair, damus_state: damus_state)
     }
@@ -1214,4 +1288,3 @@ func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: 
         }
     }
 }
-
