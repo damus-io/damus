@@ -11,6 +11,12 @@ import MediaPlayer
 import EmojiPicker
 import TipKit
 
+extension View {
+    func eraseToAnyView() -> AnyView {
+        AnyView(self)
+    }
+}
+
 struct ZapSheet {
     let target: ZapTarget
     let lnurl: String
@@ -117,7 +123,9 @@ struct ContentView: View {
     
     @State var active_sheet: Sheets? = nil
     @State var active_full_screen_item: FullScreenItem? = nil
-    @State var damus_state: DamusState!
+    @State private var damus_state: DamusState?
+    @State private var hasStartedInitialConnect = false
+    @State private var hasCompletedPostConnectSetup = false
     @State var menu_subtitle: String? = nil
     @SceneStorage("ContentView.selected_timeline") var selected_timeline: Timeline = .home {
         willSet {
@@ -166,21 +174,21 @@ struct ContentView: View {
             switch selected_timeline {
             case .search:
                 if #available(iOS 16.0, *) {
-                    SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
+                    SearchHomeView(damus_state: damus, model: SearchHomeModel(damus_state: damus))
                         .scrollDismissesKeyboard(.immediately)
                 } else {
                     // Fallback on earlier versions
-                    SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
+                    SearchHomeView(damus_state: damus, model: SearchHomeModel(damus_state: damus))
                 }
                 
             case .home:
-                PostingTimelineView(damus_state: damus_state!, home: home, homeEvents: home.events, isSideBarOpened: $isSideBarOpened, active_sheet: $active_sheet, headerOffset: $headerOffset)
+                PostingTimelineView(damus_state: damus, home: home, homeEvents: home.events, isSideBarOpened: $isSideBarOpened, active_sheet: $active_sheet, headerOffset: $headerOffset)
                 
             case .notifications:
                 NotificationsView(state: damus, notifications: home.notifications, subtitle: $menu_subtitle)
                 
             case .dms:
-                DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms, settings: damus_state!.settings, subtitle: $menu_subtitle)
+                DirectMessagesView(damus_state: damus, model: damus.dms, settings: damus.settings, subtitle: $menu_subtitle)
             }
         }
         .background(DamusColors.adaptableWhite)
@@ -200,8 +208,11 @@ struct ContentView: View {
     
     func MaybeReportView(target: ReportTarget) -> some View {
         Group {
-            if let keypair = damus_state.keypair.to_full() {
-                ReportView(postbox: damus_state.nostrNetwork.postbox, target: target, keypair: keypair)
+            if
+                let state = damus_state,
+                let keypair = state.keypair.to_full()
+            {
+                ReportView(postbox: state.nostrNetwork.postbox, target: target, keypair: keypair)
             } else {
                 EmptyView()
             }
@@ -209,13 +220,21 @@ struct ContentView: View {
     }
     
     func open_event(ev: NostrEvent) {
-        let thread = ThreadModel(event: ev, damus_state: damus_state!)
+        guard let state = damus_state else {
+            Log.error("Attempted to open event before DamusState was ready", for: .app_lifecycle)
+            return
+        }
+        let thread = ThreadModel(event: ev, damus_state: state)
         navigationCoordinator.push(route: Route.Thread(thread: thread))
     }
     
     func open_wallet(nwc: WalletConnectURL) {
-        self.damus_state!.wallet.new(nwc)
-        navigationCoordinator.push(route: Route.Wallet(wallet: damus_state!.wallet))
+        guard let state = damus_state else {
+            Log.error("Attempted to open wallet before DamusState was ready", for: .app_lifecycle)
+            return
+        }
+        state.wallet.new(nwc)
+        navigationCoordinator.push(route: Route.Wallet(wallet: state.wallet))
     }
     
     func open_script(_ script: [UInt8]) {
@@ -225,428 +244,511 @@ struct ContentView: View {
     }
     
     func open_search(filt: NostrFilter) {
-        let search = SearchModel(state: damus_state!, search: filt)
+        guard let state = damus_state else {
+            Log.error("Attempted to open search before DamusState was ready", for: .app_lifecycle)
+            return
+        }
+        let search = SearchModel(state: state, search: filt)
         navigationCoordinator.push(route: Route.Search(search: search))
     }
+
+    private func withDamusState<Content: View>(@ViewBuilder _ builder: (DamusState) -> Content) -> AnyView {
+        if let state = damus_state {
+            return AnyView(builder(state))
+        } else {
+            return AnyView(EmptyView())
+        }
+    }
     
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            if let damus = self.damus_state {
-                NavigationStack(path: $navigationCoordinator.path) {
-                    TabView { // Prevents navbar appearance change on scroll
-                        MainContent(damus: damus)
-                            .toolbar() {
-                                ToolbarItem(placement: .navigationBarLeading) {
-                                    TopbarSideMenuButton(damus_state: damus, isSideBarOpened: $isSideBarOpened)
-                                }
-                                
-                                ToolbarItem(placement: .navigationBarTrailing) {
-                                    HStack(alignment: .center) {
-                                        SignalView(state: damus_state!, signal: home.signal)
-                                        
-                                        // maybe expand this to other timelines in the future
-                                        if selected_timeline == .search {
-                                            
-                                            Button(action: {
-                                                present_sheet(.filter)
-                                            }, label: {
-                                                Image("filter")
-                                                    .foregroundColor(.gray)
-                                            })
-                                        }
-                                    }
-                                }
-                            }
-                    }
-                    .background(DamusColors.adaptableWhite)
-                    .edgesIgnoringSafeArea(selected_timeline != .home ? [] : [.top, .bottom])
-                    .tabViewStyle(.page(indexDisplayMode: .never))
-                    .overlay(
-                        SideMenuView(damus_state: damus_state!, isSidebarVisible: $isSideBarOpened.animation(), selected: $selected_timeline)
-                    )
-                    .navigationDestination(for: Route.self) { route in
-                        route.view(navigationCoordinator: navigationCoordinator, damusState: damus_state!)
-                    }
-                    .onReceive(handle_notify(.switched_timeline)) { _ in
-                        navigationCoordinator.popToRoot()
-                    }
-                }
-                .navigationViewStyle(.stack)
-                .damus_full_screen_cover($active_full_screen_item, damus_state: damus, content: { item in
-                    return item.view(damus_state: damus)
-                })
-                .overlay(alignment: .bottom) {
-                    if !hide_bar {
-                        if !isSideBarOpened {
-                            TabBar(nstatus: home.notification_status, navIsAtRoot: navIsAtRoot(), selected: $selected_timeline, headerOffset: $headerOffset, settings: damus.settings, action: switch_timeline)
-                                .padding([.bottom], 8)
-                                .background(selected_timeline != .home || (selected_timeline == .home && !self.navIsAtRoot()) ? DamusColors.adaptableWhite : DamusColors.adaptableWhite.opacity(abs(1.25 - (abs(headerOffset/100.0)))))
-                                .anchorPreference(key: HeaderBoundsKey.self, value: .bounds){$0}
-                                .overlayPreferenceValue(HeaderBoundsKey.self) { value in
-                                    GeometryReader{ proxy in
-                                        if let anchor = value{
-                                            Color.clear
-                                                .onAppear {
-                                                    tabHeight = proxy[anchor].height
-                                                }
-                                        }
-                                    }
-                                }
-                        }
-                    }
-                }
-            }
-        }
-        .ignoresSafeArea(.keyboard)
-        .edgesIgnoringSafeArea(hide_bar ? [.bottom] : [])
-        .onAppear() {
-            Task {
-                await self.connect()
-                try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default, options: .mixWithOthers)
-                setup_notifications()
-                if !hasSeenOnboardingSuggestions || damus_state!.settings.always_show_onboarding_suggestions {
-                    active_sheet = .onboardingSuggestions
-                    hasSeenOnboardingSuggestions = true
-                }
-                self.appDelegate?.state = damus_state
-                Task {  // We probably don't need this to be a detached task. According to https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/#Defining-and-Calling-Asynchronous-Functions, awaits are only suspension points that do not block the thread.
-                    await self.listenAndHandleLocalNotifications()
-                }
-            }
-        }
-        .sheet(item: $active_sheet) { item in
-            switch item {
+    private func contentView(for damus: DamusState) -> AnyView {
+        let baseView = mainNavigation(for: damus)
+            .ignoresSafeArea(.keyboard)
+            .edgesIgnoringSafeArea(hide_bar ? [.bottom] : [])
+            .onAppear { onAppearSetup() }
+            .sheet(item: $active_sheet) { item in
+                switch item {
             case .report(let target):
                 MaybeReportView(target: target)
             case .post(let action):
-                PostView(action: action, damus_state: damus_state!)
+                withDamusState { state in
+                    PostView(action: action, damus_state: state)
+                }
             case .user_status:
-                UserStatusSheet(damus_state: damus_state!, postbox: damus_state!.nostrNetwork.postbox, keypair: damus_state!.keypair, status: damus_state!.profiles.profile_data(damus_state!.pubkey).status)
-                    .presentationDragIndicator(.visible)
+                withDamusState { state in
+                    UserStatusSheet(damus_state: state, postbox: state.nostrNetwork.postbox, keypair: state.keypair, status: state.profiles.profile_data(state.pubkey).status)
+                        .presentationDragIndicator(.visible)
+                }
             case .event:
                 EventDetailView()
             case .profile_action(let pubkey):
-                ProfileActionSheetView(damus_state: damus_state!, pubkey: pubkey)
+                withDamusState { state in
+                    ProfileActionSheetView(damus_state: state, pubkey: pubkey)
+                }
             case .zap(let zapsheet):
-                CustomizeZapView(state: damus_state!, target: zapsheet.target, lnurl: zapsheet.lnurl)
+                withDamusState { state in
+                    CustomizeZapView(state: state, target: zapsheet.target, lnurl: zapsheet.lnurl)
+                }
             case .select_wallet(let select):
-                SelectWalletView(default_wallet: damus_state!.settings.default_wallet, active_sheet: $active_sheet, our_pubkey: damus_state!.pubkey, invoice: select.invoice)
+                withDamusState { state in
+                    SelectWalletView(default_wallet: state.settings.default_wallet, active_sheet: $active_sheet, our_pubkey: state.pubkey, invoice: select.invoice)
+                }
             case .filter:
                 let timeline = selected_timeline
-                RelayFilterView(state: damus_state!, timeline: timeline)
-                    .presentationDetents([.height(550)])
-                    .presentationDragIndicator(.visible)
-            case .onboardingSuggestions:
-                if let model = try? SuggestedUsersViewModel(damus_state: damus_state!) {
-                    OnboardingSuggestionsView(model: model)
-                        .interactiveDismissDisabled(true)
+                withDamusState { state in
+                    RelayFilterView(state: state, timeline: timeline)
+                        .presentationDetents([.height(550)])
+                        .presentationDragIndicator(.visible)
                 }
-                else {
-                    ErrorView(
-                        damus_state: damus_state,
-                        error: .init(
-                            user_visible_description: NSLocalizedString("Unexpected error loading user suggestions", comment: "Human readable error label"),
-                            tip: NSLocalizedString("Please contact support", comment: "Human readable error tip"),
-                            technical_info: "Error inializing SuggestedUsersViewModel"
+            case .onboardingSuggestions:
+                withDamusState { state in
+                    if let model = try? SuggestedUsersViewModel(damus_state: state) {
+                        OnboardingSuggestionsView(model: model)
+                            .interactiveDismissDisabled(true)
+                    }
+                    else {
+                        ErrorView(
+                            damus_state: state,
+                            error: .init(
+                                user_visible_description: NSLocalizedString("Unexpected error loading user suggestions", comment: "Human readable error label"),
+                                tip: NSLocalizedString("Please contact support", comment: "Human readable error tip"),
+                                technical_info: "Error inializing SuggestedUsersViewModel"
+                            )
                         )
-                    )
+                    }
                 }
             case .purple(let purple_url):
-                DamusPurpleURLSheetView(damus_state: damus_state!, purple_url: purple_url)
+                withDamusState { state in
+                    DamusPurpleURLSheetView(damus_state: state, purple_url: purple_url)
+                }
             case .purple_onboarding:
-                DamusPurpleNewUserOnboardingView(damus_state: damus_state)
+                withDamusState { state in
+                    DamusPurpleNewUserOnboardingView(damus_state: state)
+                }
             case .error(let error):
-                ErrorView(damus_state: damus_state!, error: error)
+                withDamusState { state in
+                    ErrorView(damus_state: state, error: error)
+                }
             }
         }
-        .onOpenURL { url in
-            Task {
-                let open_action = await DamusURLHandler.handle_opening_url_and_compute_view_action(damus_state: self.damus_state, url: url)
-                self.execute_open_action(open_action)
+
+        let withOpenURL = attachOpenURLAndTimerHandlers(to: baseView)
+        let withNotifications = attachNotificationHandlers(to: withOpenURL)
+        let withAppState = attachAppStateHandlers(to: withNotifications)
+        return attachAlertHandlers(to: withAppState)
+    }
+
+    private func attachOpenURLAndTimerHandlers<V: View>(to view: V) -> AnyView {
+        view
+            .onOpenURL { url in
+                Task {
+                    guard let state = self.damus_state else {
+                        Log.error("Received URL open request before DamusState is ready", for: .app_lifecycle)
+                        return
+                    }
+
+                    let open_action = await DamusURLHandler.handle_opening_url_and_compute_view_action(damus_state: state, url: url)
+                    self.execute_open_action(open_action)
+                }
             }
-        }
-        .onReceive(handle_notify(.compose)) { action in
-            self.active_sheet = .post(action)
-        }
-        .onReceive(handle_notify(.display_tabbar)) { display in
-            let show = display
-            self.hide_bar = !show
-        }
-        .onReceive(timer) { n in
-            Task{ await self.damus_state?.nostrNetwork.postbox.try_flushing_events() }
-            self.damus_state!.profiles.profile_data(self.damus_state!.pubkey).status.try_expire()
-        }
-        .onReceive(handle_notify(.report)) { target in
-            self.active_sheet = .report(target)
-        }
-        .onReceive(handle_notify(.mute)) { mute_item in
-            self.muting = mute_item
-            self.confirm_mute = true
-        }
-        .onReceive(handle_notify(.attached_wallet)) { nwc in
-            Task {
-                try? await damus_state.nostrNetwork.userRelayList.load()    // Reload relay list to apply changes
-                
-                // update the lightning address on our profile when we attach a
-                // wallet with an associated
-                guard let ds = self.damus_state,
-                      let lud16 = nwc.lud16,
-                      let keypair = ds.keypair.to_full(),
-                      let profile_txn = ds.profiles.lookup(id: ds.pubkey),
-                      let profile = profile_txn.unsafeUnownedValue,
-                      lud16 != profile.lud16 else {
+            .onReceive(handle_notify(.compose)) { action in
+                self.active_sheet = .post(action)
+            }
+            .onReceive(handle_notify(.display_tabbar)) { display in
+                let show = display
+                self.hide_bar = !show
+            }
+            .onReceive(timer) { _ in
+                Task { await self.damus_state?.nostrNetwork.postbox.try_flushing_events() }
+                if let state = damus_state {
+                    state.profiles.profile_data(state.pubkey).status.try_expire()
+                }
+            }
+            .eraseToAnyView()
+    }
+
+    private func attachNotificationHandlers<V: View>(to view: V) -> AnyView {
+        view
+            .onReceive(handle_notify(.report)) { target in
+                self.active_sheet = .report(target)
+            }
+            .onReceive(handle_notify(.mute)) { mute_item in
+                self.muting = mute_item
+                self.confirm_mute = true
+            }
+            .onReceive(handle_notify(.attached_wallet)) { nwc in
+                Task {
+                    guard let ds = self.damus_state else {
+                        Log.error("Received wallet attachment notification before DamusState is ready", for: .app_lifecycle)
+                        return
+                    }
+
+                    try? await ds.nostrNetwork.userRelayList.load()
+
+                    guard
+                          let lud16 = nwc.lud16,
+                          let keypair = ds.keypair.to_full(),
+                          let profile_txn = ds.profiles.lookup(id: ds.pubkey),
+                          let profile = profile_txn.unsafeUnownedValue,
+                          lud16 != profile.lud16 else {
+                        return
+                    }
+
+                    if profile.lud16 != nil {
+                        invalidate_zapper_cache(pubkey: keypair.pubkey, profiles: ds.profiles, lnurl: ds.lnurls)
+                    }
+
+                    let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: lud16, nip05: profile.nip05, damus_donation: profile.damus_donation, reactions: profile.reactions)
+
+                    guard let ev = make_metadata_event(keypair: keypair, metadata: prof) else { return }
+                    await ds.nostrNetwork.postbox.send(ev)
+                }
+            }
+            .onReceive(handle_notify(.broadcast)) { ev in
+                guard let ds = self.damus_state else { return }
+
+                Task { await ds.nostrNetwork.postbox.send(ev) }
+            }
+            .onReceive(handle_notify(.unfollow)) { target in
+                guard let state = self.damus_state else { return }
+                Task { _ = await handle_unfollow(state: state, unfollow: target.follow_ref) }
+            }
+            .onReceive(handle_notify(.unfollowed)) { unfollow in
+                home.resubscribe(.unfollowing(unfollow))
+            }
+            .onReceive(handle_notify(.follow)) { target in
+                guard let state = self.damus_state else { return }
+                Task { await handle_follow_notif(state: state, target: target) }
+            }
+            .onReceive(handle_notify(.followed)) { _ in
+                home.resubscribe(.following)
+            }
+            .onReceive(handle_notify(.post)) { post in
+                guard let state = self.damus_state,
+                      let keypair = state.keypair.to_full() else {
+                          return
+                }
+
+                Task {
+                    if await !handle_post_notification(keypair: keypair, postbox: state.nostrNetwork.postbox, events: state.events, post: post) {
+                        self.active_sheet = nil
+                    }
+                }
+            }
+            .onReceive(handle_notify(.new_mutes)) { _ in
+                home.filter_events()
+            }
+            .onReceive(handle_notify(.mute_thread)) { _ in
+                home.filter_events()
+            }
+            .onReceive(handle_notify(.unmute_thread)) { _ in
+                home.filter_events()
+            }
+            .onReceive(handle_notify(.present_sheet)) { sheet in
+                self.active_sheet = sheet
+            }
+            .onReceive(handle_notify(.present_full_screen_item)) { item in
+                self.active_full_screen_item = item
+            }
+            .onReceive(handle_notify(.zapping)) { zap_ev in
+                guard !zap_ev.is_custom else {
                     return
                 }
-                
-                // clear zapper cache for old lud16
-                if profile.lud16 != nil {
-                    // TODO: should this be somewhere else, where we process profile events!?
-                    invalidate_zapper_cache(pubkey: keypair.pubkey, profiles: ds.profiles, lnurl: ds.lnurls)
-                }
-                
-                let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: lud16, nip05: profile.nip05, damus_donation: profile.damus_donation, reactions: profile.reactions)
-                
-                guard let ev = make_metadata_event(keypair: keypair, metadata: prof) else { return }
-                await ds.nostrNetwork.postbox.send(ev)
-            }
-        }
-        .onReceive(handle_notify(.broadcast)) { ev in
-            guard let ds = self.damus_state else { return }
+                guard let state = damus_state else { return }
 
-            Task { await ds.nostrNetwork.postbox.send(ev) }
-        }
-        .onReceive(handle_notify(.unfollow)) { target in
-            guard let state = self.damus_state else { return }
-            Task { _ = await handle_unfollow(state: state, unfollow: target.follow_ref) }
-        }
-        .onReceive(handle_notify(.unfollowed)) { unfollow in
-            home.resubscribe(.unfollowing(unfollow))
-        }
-        .onReceive(handle_notify(.follow)) { target in
-            guard let state = self.damus_state else { return }
-            Task { await handle_follow_notif(state: state, target: target) }
-        }
-        .onReceive(handle_notify(.followed)) { _ in
-            home.resubscribe(.following)
-        }
-        .onReceive(handle_notify(.post)) { post in
-            guard let state = self.damus_state,
-                  let keypair = state.keypair.to_full() else {
-                      return
-            }
-
-            Task {
-                if await !handle_post_notification(keypair: keypair, postbox: state.nostrNetwork.postbox, events: state.events, post: post) {
-                    self.active_sheet = nil
-                }
-            }
-        }
-        .onReceive(handle_notify(.new_mutes)) { _ in
-            home.filter_events()
-        }
-        .onReceive(handle_notify(.mute_thread)) { _ in
-            home.filter_events()
-        }
-        .onReceive(handle_notify(.unmute_thread)) { _ in
-            home.filter_events()
-        }
-        .onReceive(handle_notify(.present_sheet)) { sheet in
-            self.active_sheet = sheet
-        }
-        .onReceive(handle_notify(.present_full_screen_item)) { item in
-            self.active_full_screen_item = item
-        }
-        .onReceive(handle_notify(.zapping)) { zap_ev in
-            guard !zap_ev.is_custom else {
-                return
-            }
-            
-            switch zap_ev.type {
-            case .failed:
-                break
-            case .got_zap_invoice(let inv):
-                if damus_state!.settings.show_wallet_selector {
-                    present_sheet(.select_wallet(invoice: inv))
-                } else {
-                    let wallet = damus_state!.settings.default_wallet.model
-                    do {
-                        try open_with_wallet(wallet: wallet, invoice: inv)
-                    }
-                    catch {
+                switch zap_ev.type {
+                case .failed:
+                    break
+                case .got_zap_invoice(let inv):
+                    if state.settings.show_wallet_selector {
                         present_sheet(.select_wallet(invoice: inv))
+                    } else {
+                        let wallet = state.settings.default_wallet.model
+                        do {
+                            try open_with_wallet(wallet: wallet, invoice: inv)
+                        }
+                        catch {
+                            present_sheet(.select_wallet(invoice: inv))
+                        }
                     }
+                case .sent_from_nwc:
+                    break
                 }
-            case .sent_from_nwc:
-                break
             }
-        }
-        .onReceive(handle_notify(.disconnect_relays)) { () in
-            Task { await damus_state.nostrNetwork.disconnectRelays() }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { obj in
-            print("txn: 📙 DAMUS ACTIVE NOTIFY")
-            Task {
-                await damusClosingTask?.value  // Wait for the closing task to finish before reopening things, to avoid race conditions
-                if damus_state.ndb.reopen() {
-                    print("txn: NOSTRDB REOPENED")
-                } else {
-                    print("txn: NOSTRDB FAILED TO REOPEN closed:\(damus_state.ndb.is_closed)")
-                }
-                if damus_state.purple.checkout_ids_in_progress.count > 0 {
-                    // For extra assurance, run this after one second, to avoid race conditions if the app is also handling a damus purple welcome url.
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                        Task {
-                            let freshly_completed_checkout_ids = try? await damus_state.purple.check_status_of_checkouts_in_progress()
-                            let there_is_a_completed_checkout: Bool = (freshly_completed_checkout_ids?.count ?? 0) > 0
-                            let account_info = try await damus_state.purple.fetch_account(pubkey: self.keypair.pubkey)
-                            if there_is_a_completed_checkout == true && account_info?.active == true {
-                                if damus_state.purple.onboarding_status.user_has_never_seen_the_onboarding_before() {
-                                    // Show welcome sheet
-                                    self.active_sheet = .purple_onboarding
-                                }
-                                else {
-                                    self.active_sheet = .purple(DamusPurpleURL.init(is_staging: damus_state.purple.environment == .staging, variant: .landing))
+            .onReceive(handle_notify(.disconnect_relays)) { () in
+                guard let state = damus_state else { return }
+                Task { await state.nostrNetwork.disconnectRelays() }
+            }
+            .eraseToAnyView()
+    }
+
+    private func attachAppStateHandlers<V: View>(to view: V) -> AnyView {
+        view
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+                print("txn: 📙 DAMUS ACTIVE NOTIFY")
+                Task {
+                    await damusClosingTask?.value
+                    guard let state = damus_state else { return }
+                    if state.ndb.reopen() {
+                        print("txn: NOSTRDB REOPENED")
+                    } else {
+                        print("txn: NOSTRDB FAILED TO REOPEN closed:\(state.ndb.is_closed)")
+                    }
+                    if state.purple.checkout_ids_in_progress.count > 0 {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            Task {
+                                let freshly_completed_checkout_ids = try? await state.purple.check_status_of_checkouts_in_progress()
+                                let there_is_a_completed_checkout: Bool = (freshly_completed_checkout_ids?.count ?? 0) > 0
+                                let account_info = try await state.purple.fetch_account(pubkey: self.keypair.pubkey)
+                                if there_is_a_completed_checkout == true && account_info?.active == true {
+                                    if state.purple.onboarding_status.user_has_never_seen_the_onboarding_before() {
+                                        self.active_sheet = .purple_onboarding
+                                    }
+                                    else {
+                                        self.active_sheet = .purple(DamusPurpleURL.init(is_staging: state.purple.environment == .staging, variant: .landing))
+                                    }
                                 }
                             }
                         }
                     }
+                    await state.purple.check_and_send_app_notifications_if_needed(handler: home.handle_damus_app_notification)
                 }
-                await damus_state.purple.check_and_send_app_notifications_if_needed(handler: home.handle_damus_app_notification)
             }
-        }
-        .onChange(of: scenePhase) { (phase: ScenePhase) in
-            guard let damus_state else { return }
-            switch phase {
-            case .background:
-                print("txn: 📙 DAMUS BACKGROUNDED")
-                let bgTask = this_app.beginBackgroundTask(withName: "Closing things down gracefully", expirationHandler: { [weak damus_state] in
-                    Log.error("App background signal handling: RUNNING OUT OF TIME! JUST CLOSE NDB DIRECTLY!", for: .app_lifecycle)
-                    // Background time about to expire, so close ndb directly.
-                    // This may still cause a memory error crash if subscription tasks have not been properly closed yet, but that is less likely than a 0xdead10cc crash if we don't do anything here.
-                    damus_state?.ndb.close()
-                })
-                
-                damusClosingTask = Task { @MainActor in
-                    Log.debug("App background signal handling: App being backgrounded", for: .app_lifecycle)
-                    let startTime = CFAbsoluteTimeGetCurrent()
-                    await damus_state.nostrNetwork.handleAppBackgroundRequest()  // Close ndb streaming tasks before closing ndb to avoid memory errors
-                    Log.debug("App background signal handling: Nostr network closed after %.2f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - startTime)
-                    damus_state.ndb.close()
-                    Log.debug("App background signal handling: Ndb closed after %.2f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - startTime)
-                    this_app.endBackgroundTask(bgTask)
-                }
-                break
-            case .inactive:
-                print("txn: 📙 DAMUS INACTIVE")
-                break
-            case .active:
-                print("txn: 📙 DAMUS ACTIVE")
-                Task {
-                    await damusClosingTask?.value  // Wait for the closing task to finish before reopening things, to avoid race conditions
-                    damusClosingTask = nil
-                    damus_state.ndb.reopen()
-                    // Pinging the network will automatically reconnect any dead websocket connections
-                    await damus_state.nostrNetwork.ping()
-                }
-            @unknown default:
-                break
-            }
-        }
-        .onReceive(handle_notify(.onlyzaps_mode)) { hide in
-            Task {
-                home.filter_events()
-                
-                guard let ds = damus_state,
-                      let profile_txn = ds.profiles.lookup(id: ds.pubkey),
-                      let profile = profile_txn.unsafeUnownedValue,
-                      let keypair = ds.keypair.to_full()
-                else {
-                    return
-                }
-                
-                let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: profile.lud16, nip05: profile.nip05, damus_donation: profile.damus_donation, reactions: !hide)
-                
-                guard let profile_ev = make_metadata_event(keypair: keypair, metadata: prof) else { return }
-                await ds.nostrNetwork.postbox.send(profile_ev)
-            }
-        }
-        .alert(NSLocalizedString("User muted", comment: "Alert message to indicate the user has been muted"), isPresented: $user_muted_confirm, actions: {
-            Button(NSLocalizedString("Thanks!", comment: "Button to close out of alert that informs that the action to muted a user was successful.")) {
-                user_muted_confirm = false
-            }
-        }, message: {
-            if case let .user(pubkey, _) = self.muting {
-                let profile_txn = damus_state!.profiles.lookup(id: pubkey)
-                let profile = profile_txn?.unsafeUnownedValue
-                let name = Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
-                Text("\(name) has been muted", comment: "Alert message that informs a user was muted.")
-            } else {
-                Text("User has been muted", comment: "Alert message that informs a user was muted.")
-            }
-        })
-        .alert(NSLocalizedString("Create new mutelist", comment: "Title of alert prompting the user to create a new mutelist."), isPresented: $confirm_overwrite_mutelist, actions: {
-            Button(NSLocalizedString("Cancel", comment: "Button to cancel out of alert that creates a new mutelist.")) {
-                confirm_overwrite_mutelist = false
-                confirm_mute = false
-            }
+            .onChange(of: scenePhase) { (phase: ScenePhase) in
+                guard let damus_state else { return }
+                switch phase {
+                case .background:
+                    print("txn: 📙 DAMUS BACKGROUNDED")
+                    let bgTask = this_app.beginBackgroundTask(withName: "Closing things down gracefully", expirationHandler: { [weak damus_state] in
+                        Log.error("App background signal handling: RUNNING OUT OF TIME! JUST CLOSE NDB DIRECTLY!", for: .app_lifecycle)
+                        damus_state?.ndb.close()
+                    })
 
-            Button(NSLocalizedString("Yes, Overwrite", comment: "Text of button that confirms to overwrite the existing mutelist.")) {
+                    damusClosingTask = Task { @MainActor in
+                        Log.debug("App background signal handling: App being backgrounded", for: .app_lifecycle)
+                        let startTime = CFAbsoluteTimeGetCurrent()
+                        await damus_state.nostrNetwork.handleAppBackgroundRequest()
+                        Log.debug("App background signal handling: Nostr network closed after %.2f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - startTime)
+                        damus_state.ndb.close()
+                        Log.debug("App background signal handling: Ndb closed after %.2f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - startTime)
+                        this_app.endBackgroundTask(bgTask)
+                    }
+                case .inactive:
+                    print("txn: 📙 DAMUS INACTIVE")
+                case .active:
+                    print("txn: 📙 DAMUS ACTIVE")
+                    Task {
+                        await damusClosingTask?.value
+                        damusClosingTask = nil
+                        damus_state.ndb.reopen()
+                        await damus_state.nostrNetwork.ping()
+                    }
+                @unknown default:
+                    break
+                }
+            }
+            .onReceive(handle_notify(.onlyzaps_mode)) { hide in
                 Task {
+                    home.filter_events()
+
                     guard let ds = damus_state,
-                          let keypair = ds.keypair.to_full(),
-                          let muting,
-                          let mutelist = create_or_update_mutelist(keypair: keypair, mprev: nil, to_add: muting)
+                          let profile_txn = ds.profiles.lookup(id: ds.pubkey),
+                          let profile = profile_txn.unsafeUnownedValue,
+                          let keypair = ds.keypair.to_full()
                     else {
                         return
                     }
-                    
-                    ds.mutelist_manager.set_mutelist(mutelist)
-                    await ds.nostrNetwork.postbox.send(mutelist)
-                    
+
+                    let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: profile.lud16, nip05: profile.nip05, damus_donation: profile.damus_donation, reactions: !hide)
+
+                    guard let profile_ev = make_metadata_event(keypair: keypair, metadata: prof) else { return }
+                    await ds.nostrNetwork.postbox.send(profile_ev)
+                }
+            }
+            .eraseToAnyView()
+    }
+
+    private func attachAlertHandlers<V: View>(to view: V) -> AnyView {
+        view
+            .alert(NSLocalizedString("User muted", comment: "Alert message to indicate the user has been muted"), isPresented: $user_muted_confirm, actions: {
+                Button(NSLocalizedString("Thanks!", comment: "Button to close out of alert that informs that the action to muted a user was successful.")) {
+                    user_muted_confirm = false
+                }
+            }, message: {
+                if case let .user(pubkey, _) = self.muting,
+                   let state = damus_state {
+                    let profile_txn = state.profiles.lookup(id: pubkey)
+                    let profile = profile_txn?.unsafeUnownedValue
+                    let name = Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
+                    Text("\(name) has been muted", comment: "Alert message that informs a user was muted.")
+                } else {
+                    Text("User has been muted", comment: "Alert message that informs a user was muted.")
+                }
+            })
+            .alert(NSLocalizedString("Create new mutelist", comment: "Title of alert prompting the user to create a new mutelist."), isPresented: $confirm_overwrite_mutelist, actions: {
+                Button(NSLocalizedString("Cancel", comment: "Button to cancel out of alert that creates a new mutelist.")) {
                     confirm_overwrite_mutelist = false
                     confirm_mute = false
-                    user_muted_confirm = true
-                }
-            }
-        }, message: {
-            Text("No mute list found, create a new one? This will overwrite any previous mute lists.", comment: "Alert message prompt that asks if the user wants to create a new mute list, overwriting previous mute lists.")
-        })
-        .alert(NSLocalizedString("Mute/Block User", comment: "Title of alert for muting/blocking a user."), isPresented: $confirm_mute, actions: {
-            Button(NSLocalizedString("Cancel", comment: "Alert button to cancel out of alert for muting a user."), role: .cancel) {
-                confirm_mute = false
-            }
-            Button(NSLocalizedString("Mute", comment: "Alert button to mute a user."), role: .destructive) {
-                guard let ds = damus_state else {
-                    return
                 }
 
-                if ds.mutelist_manager.event == nil {
-                    confirm_overwrite_mutelist = true
+                Button(NSLocalizedString("Yes, Overwrite", comment: "Text of button that confirms to overwrite the existing mutelist.")) {
+                    Task {
+                        guard let ds = damus_state,
+                              let keypair = ds.keypair.to_full(),
+                              let muting,
+                              let mutelist = create_or_update_mutelist(keypair: keypair, mprev: nil, to_add: muting)
+                        else {
+                            return
+                        }
+
+                        ds.mutelist_manager.set_mutelist(mutelist)
+                        await ds.nostrNetwork.postbox.send(mutelist)
+
+                        confirm_overwrite_mutelist = false
+                        confirm_mute = false
+                        user_muted_confirm = true
+                    }
+                }
+            }, message: {
+                Text("No mute list found, create a new one? This will overwrite any previous mute lists.", comment: "Alert message prompt that asks if the user wants to create a new mute list, overwriting previous mute lists.")
+            })
+            .alert(NSLocalizedString("Mute/Block User", comment: "Title of alert for muting/blocking a user."), isPresented: $confirm_mute, actions: {
+                Button(NSLocalizedString("Cancel", comment: "Alert button to cancel out of alert for muting a user."), role: .cancel) {
+                    confirm_mute = false
+                }
+                Button(NSLocalizedString("Mute", comment: "Alert button to mute a user."), role: .destructive) {
+                    guard let ds = damus_state else {
+                        return
+                    }
+
+                    if ds.mutelist_manager.event == nil {
+                        confirm_overwrite_mutelist = true
+                    } else {
+                        guard let keypair = ds.keypair.to_full(),
+                              let muting
+                        else {
+                            return
+                        }
+
+                        guard let ev = create_or_update_mutelist(keypair: keypair, mprev: ds.mutelist_manager.event, to_add: muting) else {
+                            return
+                        }
+
+                        ds.mutelist_manager.set_mutelist(ev)
+                        Task { await ds.nostrNetwork.postbox.send(ev) }
+                    }
+                }
+            }, message: {
+                if case let .user(pubkey, _) = muting {
+                    let profile_txn = damus_state?.profiles.lookup(id: pubkey)
+                    let profile = profile_txn?.unsafeUnownedValue
+                    let name = Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
+                    Text("Mute \(name)?", comment: "Alert message prompt to ask if a user should be muted.")
                 } else {
-                    guard let keypair = ds.keypair.to_full(),
-                          let muting
-                    else {
-                        return
-                    }
+                    Text("Could not find user to mute...", comment: "Alert message to indicate that the muted user could not be found.")
+                }
+            })
+            .eraseToAnyView()
+    }
 
-                    guard let ev = create_or_update_mutelist(keypair: keypair, mprev: ds.mutelist_manager.event, to_add: muting) else {
-                        return
-                    }
+    var body: some View {
+        Group {
+            if let damus = damus_state {
+                contentView(for: damus)
+            } else {
+                ProgressView()
+            }
+        }
+        .task {
+            await startInitialConnectIfNeeded()
+        }
+    }
 
-                    ds.mutelist_manager.set_mutelist(ev)
-                    Task { await ds.nostrNetwork.postbox.send(ev) }
+    private func mainNavigation(for damus: DamusState) -> AnyView {
+        AnyView(
+            NavigationStack(path: $navigationCoordinator.path) {
+                tabContainer(for: damus)
+            }
+            .navigationViewStyle(.stack)
+            .damus_full_screen_cover($active_full_screen_item, damus_state: damus) { item in
+                item.view(damus_state: damus)
+            }
+            .overlay(alignment: .bottom) {
+                bottomBar(for: damus)
+            }
+        )
+    }
+
+    private func tabContainer(for damus: DamusState) -> AnyView {
+        AnyView(
+            TabView { // Prevents navbar appearance change on scroll
+                MainContent(damus: damus)
+                    .toolbar { navigationToolbar(for: damus) }
+            }
+            .background(DamusColors.adaptableWhite)
+            .edgesIgnoringSafeArea(selected_timeline != .home ? [] : [.top, .bottom])
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            .overlay(
+                SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened.animation(), selected: $selected_timeline)
+            )
+            .navigationDestination(for: Route.self) { route in
+                route.view(navigationCoordinator: navigationCoordinator, damusState: damus)
+            }
+            .onReceive(handle_notify(.switched_timeline)) { _ in
+                navigationCoordinator.popToRoot()
+            }
+        )
+    }
+
+    @ToolbarContentBuilder
+    private func navigationToolbar(for damus: DamusState) -> some ToolbarContent {
+        ToolbarItem(placement: .navigationBarLeading) {
+            TopbarSideMenuButton(damus_state: damus, isSideBarOpened: $isSideBarOpened)
+        }
+
+        ToolbarItem(placement: .navigationBarTrailing) {
+            HStack(alignment: .center) {
+                SignalView(state: damus, signal: home.signal)
+
+                if selected_timeline == .search {
+                    Button(action: {
+                        present_sheet(.filter)
+                    }, label: {
+                        Image("filter")
+                            .foregroundColor(.gray)
+                    })
                 }
             }
-        }, message: {
-            if case let .user(pubkey, _) = muting {
-                let profile_txn = damus_state?.profiles.lookup(id: pubkey)
-                let profile = profile_txn?.unsafeUnownedValue
-                let name = Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
-                Text("Mute \(name)?", comment: "Alert message prompt to ask if a user should be muted.")
-            } else {
-                Text("Could not find user to mute...", comment: "Alert message to indicate that the muted user could not be found.")
+        }
+    }
+
+    @ViewBuilder
+    private func bottomBar(for damus: DamusState) -> some View {
+        if !hide_bar && !isSideBarOpened {
+            TabBar(nstatus: home.notification_status, navIsAtRoot: navIsAtRoot(), selected: $selected_timeline, headerOffset: $headerOffset, settings: damus.settings, action: switch_timeline)
+                .padding([.bottom], 8)
+                .background(selected_timeline != .home || (selected_timeline == .home && !self.navIsAtRoot()) ? DamusColors.adaptableWhite : DamusColors.adaptableWhite.opacity(abs(1.25 - (abs(headerOffset/100.0)))))
+                .anchorPreference(key: HeaderBoundsKey.self, value: .bounds) { $0 }
+                .overlayPreferenceValue(HeaderBoundsKey.self) { value in
+                    GeometryReader { proxy in
+                        if let anchor = value {
+                            Color.clear
+                                .onAppear {
+                                    tabHeight = proxy[anchor].height
+                                }
+                        }
+                    }
+                }
+        }
+    }
+
+    private func onAppearSetup() {
+        Task { @MainActor in
+            guard let state = damus_state else {
+                Log.error("DamusState not ready when onAppearSetup ran", for: .app_lifecycle)
+                return
             }
-        })
+            await runPostConnectionSetupIfNeeded(with: state)
+        }
     }
     
     func switch_timeline(_ timeline: Timeline) {
@@ -686,6 +788,14 @@ struct ContentView: View {
         self.execute_open_action(openAction)
     }
 
+    @MainActor
+    private func startInitialConnectIfNeeded() async {
+        guard !hasStartedInitialConnect else { return }
+        hasStartedInitialConnect = true
+        await self.connect()
+    }
+
+    @MainActor
     func connect() async {
         // nostrdb
         var mndb = Ndb()
@@ -708,7 +818,7 @@ struct ContentView: View {
         
         let settings = UserSettingsStore.globally_load_for(pubkey: pubkey)
 
-        let new_relay_filters = await load_relay_filters(pubkey) == nil
+        _ = load_relay_filters(pubkey)
 
         self.damus_state = DamusState(keypair: keypair,
                                       likes: EventCounter(our_pubkey: pubkey),
@@ -737,13 +847,15 @@ struct ContentView: View {
                                       favicon_cache: FaviconCache()
         )
         
-        home.damus_state = self.damus_state!
+        guard let state = self.damus_state else { return }
         
-        if let damus_state, damus_state.purple.enable_purple {
+        home.damus_state = state
+        
+        if state.purple.enable_purple {
             // Assign delegate so that we can send receipts to the Purple API server as soon as we get updates from user's purchases
-            StoreObserver.standard.delegate = damus_state.purple
+            StoreObserver.standard.delegate = state.purple
             Task {
-                await damus_state.purple.check_and_send_app_notifications_if_needed(handler: home.handle_damus_app_notification)
+                await state.purple.check_and_send_app_notifications_if_needed(handler: home.handle_damus_app_notification)
             }
         }
         else {
@@ -753,7 +865,7 @@ struct ContentView: View {
 
 
         if #available(iOS 17, *) {
-            if damus_state.settings.developer_mode && damus_state.settings.reset_tips_on_launch {
+            if state.settings.developer_mode && state.settings.reset_tips_on_launch {
                 do {
                     try Tips.resetDatastore()
                 } catch {
@@ -766,11 +878,30 @@ struct ContentView: View {
                 Log.error("Failed to configure tips: %s", for: .tips, error.localizedDescription)
             }
         }
-        await damus_state.nostrNetwork.connect()
+        await state.nostrNetwork.connect()
         // TODO: Move this to a better spot. Not sure what is the best signal to listen to for sending initial filters
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: {
             self.home.send_initial_filters()
         })
+
+        await runPostConnectionSetupIfNeeded(with: state)
+    }
+
+    @MainActor
+    private func runPostConnectionSetupIfNeeded(with state: DamusState) async {
+        guard !hasCompletedPostConnectSetup else { return }
+        hasCompletedPostConnectSetup = true
+
+        try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default, options: .mixWithOthers)
+        setup_notifications()
+        if !hasSeenOnboardingSuggestions || state.settings.always_show_onboarding_suggestions {
+            active_sheet = .onboardingSuggestions
+            hasSeenOnboardingSuggestions = true
+        }
+        self.appDelegate?.state = state
+        Task {
+            await self.listenAndHandleLocalNotifications()
+        }
     }
 
     func music_changed(_ state: MusicState) {
