@@ -35,7 +35,7 @@ actor RelayPool {
     var request_queue: [QueuedRequest] = []
     var seen: [NoteId: Set<RelayURL>] = [:]
     var counts: [RelayURL: UInt64] = [:]
-    var ndb: Ndb
+    var ndb: Ndb?
     /// The keypair used to authenticate with relays
     var keypair: Keypair?
     var message_received_function: (((String, RelayDescriptor)) -> Void)?
@@ -71,7 +71,7 @@ actor RelayPool {
         seen.removeAll()
     }
 
-    init(ndb: Ndb, keypair: Keypair? = nil) {
+    init(ndb: Ndb?, keypair: Keypair? = nil) {
         self.ndb = ndb
         self.keypair = keypair
 
@@ -179,7 +179,7 @@ actor RelayPool {
                   case .string(let str) = msg
             else { return }
 
-            let _ = self.ndb.processEvent(str, originRelayURL: relay_id)
+            let _ = self.ndb?.processEvent(str, originRelayURL: relay_id)
             self.message_received_function?((str, desc))
         })
         let relay = Relay(descriptor: desc, connection: conn)
@@ -400,10 +400,10 @@ actor RelayPool {
         switch req {
             case .typical(let r):
                 if case .event = r, let rstr = make_nostr_req(r) {
-                    let _ = ndb.process_client_event(rstr)
+                    let _ = ndb?.process_client_event(rstr)
                 }
             case .custom(let string):
-                let _ = ndb.process_client_event(string)
+                let _ = ndb?.process_client_event(string)
         }
     }
 

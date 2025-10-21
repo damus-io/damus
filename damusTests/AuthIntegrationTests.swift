@@ -103,13 +103,16 @@ final class AuthIntegrationTests: XCTestCase {
         try! await pool.add_relay(relay_descriptor)
         XCTAssertEqual(pool.relays.count, 1)
         let connection_expectation = XCTestExpectation(description: "Waiting for connection")
+        await pool.connect()
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
-            if pool.num_connected == 1 {
-                connection_expectation.fulfill()
-                timer.invalidate()
+            Task {
+                if await pool.num_connected == 1 {
+                    connection_expectation.fulfill()
+                    timer.invalidate()
+                }
             }
         }
-        wait(for: [connection_expectation], timeout: 30.0)
+        await fulfillment(of: [connection_expectation], timeout: 30.0)
         XCTAssertEqual(pool.num_connected, 1)
         // Assert that no AUTH messages have been received
         XCTAssertEqual(received_messages.count, 0)
@@ -148,13 +151,16 @@ final class AuthIntegrationTests: XCTestCase {
         try! await pool.add_relay(relay_descriptor)
         XCTAssertEqual(pool.relays.count, 1)
         let connection_expectation = XCTestExpectation(description: "Waiting for connection")
+        await pool.connect()
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
-            if pool.num_connected == 1 {
-                connection_expectation.fulfill()
-                timer.invalidate()
+            Task {
+                if pool.num_connected == 1 {
+                    connection_expectation.fulfill()
+                    timer.invalidate()
+                }
             }
         }
-        wait(for: [connection_expectation], timeout: 30.0)
+        await fulfillment(of: [connection_expectation], timeout: 30.0)
         XCTAssertEqual(pool.num_connected, 1)
         // Assert that no AUTH messages have been received
         XCTAssertEqual(received_messages.count, 0)
@@ -173,13 +179,15 @@ final class AuthIntegrationTests: XCTestCase {
                 timer.invalidate()
             }
         }
-        wait(for: [msg_expectation], timeout: 30.0)
+        await fulfillment(of: [msg_expectation], timeout: 30.0)
         // Assert that AUTH message has been received
         XCTAssertTrue(received_messages.count >= 1, "expected recieved_messages to be >= 1")
+        if received_messages.count < 1 { return }   // End test early
         let json_received = try! JSONSerialization.jsonObject(with: received_messages[0].data(using: .utf8)!, options: []) as! [Any]
         XCTAssertEqual(json_received[0] as! String, "AUTH")
         // Assert that we've replied with the AUTH response
         XCTAssertEqual(sent_messages.count, 2)
+        if sent_messages.count < 2 { return }
         let json_sent = try! JSONSerialization.jsonObject(with: sent_messages[1].data(using: .utf8)!, options: []) as! [Any]
         XCTAssertEqual(json_sent[0] as! String, "AUTH")
         let sent_msg = json_sent[1] as! [String: Any]

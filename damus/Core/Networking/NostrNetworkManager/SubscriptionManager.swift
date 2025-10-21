@@ -25,8 +25,6 @@ extension NostrNetworkManager {
             category: "subscription_manager"
         )
         
-        let EXTRA_VERBOSE_LOGGING: Bool = false
-        
         init(pool: RelayPool, ndb: Ndb, experimentalLocalRelayModelSupport: Bool) {
             self.pool = pool
             self.ndb = ndb
@@ -127,7 +125,7 @@ extension NostrNetworkManager {
                     // In normal mode: Issuing EOSE requires EOSE from both NDB and the network, since they are all considered separate relays
                     // In experimental local relay model mode: Issuing EOSE requires only EOSE from NDB, since that is the only relay that "matters"
                     let canIssueEOSE = switch streamMode {
-                    case .ndbFirst: (ndbEOSEIssued)
+                    case .ndbFirst, .ndbOnly: (ndbEOSEIssued)
                     case .ndbAndNetworkParallel: (ndbEOSEIssued && (networkEOSEIssued || !connectedToNetwork))
                     }
                     
@@ -142,6 +140,7 @@ extension NostrNetworkManager {
                 var latestNoteTimestampSeen: UInt32? = nil
                 
                 let startNetworkStreamTask = {
+                    guard streamMode.shouldStreamFromNetwork else { return }
                     networkStreamTask = Task {
                         while !Task.isCancelled {
                             let optimizedFilters = filters.map {
@@ -171,7 +170,7 @@ extension NostrNetworkManager {
                     }
                 }
                 
-                if streamMode.optimizeNetworkFilter == false {
+                if streamMode.optimizeNetworkFilter == false && streamMode.shouldStreamFromNetwork {
                     // Start streaming from the network straight away
                     startNetworkStreamTask()
                 }
@@ -199,7 +198,7 @@ extension NostrNetworkManager {
                                 logStreamPipelineStats("SubscriptionManager_Advanced_Stream_\(id)", "Consumer_\(id)")
                                 continuation.yield(item)
                                 ndbEOSEIssued = true
-                                if streamMode.optimizeNetworkFilter {
+                                if streamMode.optimizeNetworkFilter && streamMode.shouldStreamFromNetwork {
                                     startNetworkStreamTask()
                                 }
                                 yieldEOSEIfReady()
@@ -237,11 +236,8 @@ extension NostrNetworkManager {
                             logStreamPipelineStats("RelayPool_Handler_\(id)", "SubscriptionManager_Network_Stream_\(id)")
                             switch item {
                             case .event(let event):
-                                if EXTRA_VERBOSE_LOGGING {
-                                    Self.logger.debug("Session subscription \(id.uuidString, privacy: .public): Received kind \(event.kind, privacy: .public) event with id \(event.id.hex(), privacy: .private) from the network")
-                                }
                                 switch streamMode {
-                                case .ndbFirst:
+                                case .ndbFirst, .ndbOnly:
                                     break   // NO-OP
                                 case .ndbAndNetworkParallel:
                                     continuation.yield(.event(lender: NdbNoteLender(ownedNdbNote: event)))
@@ -534,6 +530,8 @@ extension NostrNetworkManager {
         /// Returns notes from both NostrDB and the network, in parallel, treating it with similar importance against the network relays. Generic EOSE is fired when EOSE is received from both the network and NostrDB
         /// `optimizeNetworkFilter`: Returns notes from ndb, then streams from the network with an added "since" filter set to the latest note stored on ndb.
         case ndbAndNetworkParallel(optimizeNetworkFilter: Bool)
+        /// Ignores the network. Used for testing purposes
+        case ndbOnly
         
         var optimizeNetworkFilter: Bool {
             switch self {
@@ -541,6 +539,19 @@ extension NostrNetworkManager {
                 return optimizeNetworkFilter
             case .ndbAndNetworkParallel(optimizeNetworkFilter: let optimizeNetworkFilter):
                 return optimizeNetworkFilter
+            case .ndbOnly:
+                return false
+            }
+        }
+        
+        var shouldStreamFromNetwork: Bool {
+            switch self {
+            case .ndbFirst:
+                return true
+            case .ndbAndNetworkParallel:
+                return true
+            case .ndbOnly:
+                return false
             }
         }
     }

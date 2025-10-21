@@ -14,7 +14,10 @@ class NostrNetworkManagerTests: XCTestCase {
     
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
-        damusState = generate_test_damus_state(mock_profile_info: nil)
+        damusState = generate_test_damus_state(
+            mock_profile_info: nil,
+            addNdbToRelayPool: false    // Don't give RelayPool any access to Ndb. This will prevent incoming notes from affecting our test
+        )
 
         let notesJSONL = getTestNotesJSONL()
 
@@ -37,13 +40,12 @@ class NostrNetworkManagerTests: XCTestCase {
         return try! String(contentsOf: fileURL, encoding: .utf8)
     }
     
-    func ensureSubscribeGetsAllExpectedNotes(filter: NostrFilter, expectedCount: Int) {
+    func ensureSubscribeGetsAllExpectedNotes(filter: NostrFilter, expectedCount: Int) async {
         let endOfStream = XCTestExpectation(description: "Stream should receive EOSE")
-        let gotAtLeastExpectedCount = XCTestExpectation(description: "Stream should receive at least the expected number of items")
         var receivedCount = 0
         var eventIds: Set<NoteId> = []
         Task {
-            for await item in self.damusState!.nostrNetwork.reader.advancedStream(filters: [filter], streamMode: .ndbFirst) {
+            for await item in self.damusState!.nostrNetwork.reader.advancedStream(filters: [filter], streamMode: .ndbOnly) {
                 switch item {
                 case .event(let lender):
                     try? lender.borrow { event in
@@ -52,9 +54,6 @@ class NostrNetworkManagerTests: XCTestCase {
                             XCTFail("Got duplicate event ID: \(event.id) ")
                         }
                         eventIds.insert(event.id)
-                    }
-                    if receivedCount == expectedCount {
-                        gotAtLeastExpectedCount.fulfill()
                     }
                 case .eose:
                     continue
@@ -67,7 +66,7 @@ class NostrNetworkManagerTests: XCTestCase {
                 }
             }
         }
-        wait(for: [endOfStream, gotAtLeastExpectedCount], timeout: 10.0)
+        await fulfillment(of: [endOfStream], timeout: 15.0)
         XCTAssertEqual(receivedCount, expectedCount, "Event IDs: \(eventIds.map({ $0.hex() }))")
     }
     
@@ -83,14 +82,11 @@ class NostrNetworkManagerTests: XCTestCase {
     /// nak req --kind 1 ws://localhost:10547 | wc -l
     /// ```
     func testNdbSubscription() async {
-        try! await damusState?.nostrNetwork.userRelayList.set(userRelayList: NIP65.RelayList())
-        await damusState?.nostrNetwork.connect()
-        
-        ensureSubscribeGetsAllExpectedNotes(filter: NostrFilter(kinds: [.text]), expectedCount: 57)
-        ensureSubscribeGetsAllExpectedNotes(filter: NostrFilter(authors: [Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!]), expectedCount: 22)
-        ensureSubscribeGetsAllExpectedNotes(filter: NostrFilter(kinds: [.boost], referenced_ids: [NoteId(hex: "64b26d0a587f5f894470e1e4783756b4d8ba971226de975ee30ac1b69970d5a1")!]), expectedCount: 5)
-        ensureSubscribeGetsAllExpectedNotes(filter: NostrFilter(kinds: [.text, .boost, .zap], referenced_ids: [NoteId(hex: "64b26d0a587f5f894470e1e4783756b4d8ba971226de975ee30ac1b69970d5a1")!], limit: 500), expectedCount: 5)
-        ensureSubscribeGetsAllExpectedNotes(filter: NostrFilter(kinds: [.text], limit: 10), expectedCount: 10)
-        ensureSubscribeGetsAllExpectedNotes(filter: NostrFilter(kinds: [.text], until: UInt32(Date.now.timeIntervalSince1970), limit: 10), expectedCount: 10)
+        await ensureSubscribeGetsAllExpectedNotes(filter: NostrFilter(kinds: [.text]), expectedCount: 57)
+        await ensureSubscribeGetsAllExpectedNotes(filter: NostrFilter(authors: [Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!]), expectedCount: 22)
+        await ensureSubscribeGetsAllExpectedNotes(filter: NostrFilter(kinds: [.boost], referenced_ids: [NoteId(hex: "64b26d0a587f5f894470e1e4783756b4d8ba971226de975ee30ac1b69970d5a1")!]), expectedCount: 5)
+        await ensureSubscribeGetsAllExpectedNotes(filter: NostrFilter(kinds: [.text, .boost, .zap], referenced_ids: [NoteId(hex: "64b26d0a587f5f894470e1e4783756b4d8ba971226de975ee30ac1b69970d5a1")!], limit: 500), expectedCount: 5)
+        await ensureSubscribeGetsAllExpectedNotes(filter: NostrFilter(kinds: [.text], limit: 10), expectedCount: 10)
+        await ensureSubscribeGetsAllExpectedNotes(filter: NostrFilter(kinds: [.text], until: UInt32(Date.now.timeIntervalSince1970), limit: 10), expectedCount: 10)
     }
 }

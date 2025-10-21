@@ -35,9 +35,9 @@ class NostrNetworkManager {
     let reader: SubscriptionManager
     let profilesManager: ProfilesManager
     
-    init(delegate: Delegate) {
+    init(delegate: Delegate, addNdbToRelayPool: Bool = true) {
         self.delegate = delegate
-        let pool = RelayPool(ndb: delegate.ndb, keypair: delegate.keypair)
+        let pool = RelayPool(ndb: addNdbToRelayPool ? delegate.ndb : nil, keypair: delegate.keypair)
         self.pool = pool
         let reader = SubscriptionManager(pool: pool, ndb: delegate.ndb, experimentalLocalRelayModelSupport: self.delegate.experimentalLocalRelayModelSupport)
         let userRelayList = UserRelayListManager(delegate: delegate, pool: pool, reader: reader)
