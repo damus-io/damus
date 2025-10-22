@@ -83,6 +83,7 @@ var test_damus_state: DamusState = ({
     let our_pubkey = test_pubkey
     let pool = RelayPool(ndb: ndb)
     let settings = UserSettingsStore()
+    let pollStore = MainActor.assumeIsolated { PollResultsStore() }
     let damus = DamusState(keypair: test_keypair,
                            likes: .init(our_pubkey: our_pubkey),
                            boosts: .init(our_pubkey: our_pubkey),
@@ -93,7 +94,7 @@ var test_damus_state: DamusState = ({
                            dms: .init(our_pubkey: our_pubkey),
                            previews: .init(),
                            zaps: .init(our_pubkey: our_pubkey),
-                           polls: PollResultsStore(),
+                           polls: pollStore,
                            lnurls: .init(),
                            settings: settings,
                            relay_filters: .init(our_pubkey: our_pubkey),
@@ -450,4 +451,3 @@ let test_thread_note_4 = NdbNote.owned_from_json(json: "{\"created_at\":17181816
 let test_thread_note_5 = NdbNote.owned_from_json(json: "{\"created_at\":1718188975,\"tags\":[[\"e\",\"d98e197facb1c9fdeddc1a1caf53060114138e9af73745fd2eb0f7f432df806c\",\"\",\"root\"],[\"p\",\"4523be58d395b1b196a9b8c82b038b6895cb02b683d0c253a955068dba1facd0\"],[\"p\",\"32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245\"]],\"pubkey\":\"59cacbd83ad5c54ad91dacf51a49c06e0bef730ac0e7c235a6f6fa29b9230f02\",\"kind\":1,\"content\":\"I’m pretty sure it doesn’t. nostr:npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s\",\"sig\":\"74919775e50588aa76de57ef75541678b9618d35849fbee9ea70d84fc38a15610a13d82c48c1d2b62b2c9fe0117be91fa2291b0d93b8fe0209dc3ae3749188d8\",\"id\":\"6e953d06e3cdf6119b7cc4bfdef5139acb410b9bf79c02cd4ca0f2e1bbe6b572\"}")!
 let test_thread_note_6 = NdbNote.owned_from_json(json: "{\"pubkey\":\"17538dc2a62769d09443f18c37cbe358fab5bbf981173542aa7c5ff171ed77c4\",\"content\":\"😢\n\ncc nostr:npub13v47pg9dxjq96an8jfev9znhm0k7ntwtlh9y335paj9kyjsjpznqzzl3l8 \n\nSoon™️\",\"sig\":\"3ba1b651bc6c288b31948ee1f8680b7735d8c00e2daa55c3ac8973d111d7bfef2db28bb4a36c912dd803238b2bee9b7054aea387418aa4db33d4991c61a253e1\",\"kind\":1,\"id\":\"62769f438ec80edfd3995358159a9427bf037283affe7790d4f1cacd5837d88f\",\"created_at\":1718403197,\"tags\":[[\"e\",\"d98e197facb1c9fdeddc1a1caf53060114138e9af73745fd2eb0f7f432df806c\",\"\",\"root\"],[\"e\",\"6e953d06e3cdf6119b7cc4bfdef5139acb410b9bf79c02cd4ca0f2e1bbe6b572\",\"\",\"reply\"],[\"p\",\"4523be58d395b1b196a9b8c82b038b6895cb02b683d0c253a955068dba1facd0\"],[\"p\",\"32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245\"],[\"p\",\"59cacbd83ad5c54ad91dacf51a49c06e0bef730ac0e7c235a6f6fa29b9230f02\"],[\"p\",\"8b2be0a0ad34805d76679272c28a77dbede9adcbfdca48c681ec8b624a1208a6\"]]}")!
 let test_thread_note_7 = NdbNote.owned_from_json(json: "{\"kind\":1,\"id\":\"06007f699f5240f90a6e508d2e89e8bef75348c3ebdde43d58d72311f49693a3\",\"tags\":[[\"e\",\"d98e197facb1c9fdeddc1a1caf53060114138e9af73745fd2eb0f7f432df806c\",\"\",\"root\"],[\"e\",\"62769f438ec80edfd3995358159a9427bf037283affe7790d4f1cacd5837d88f\",\"\",\"reply\"],[\"p\",\"4523be58d395b1b196a9b8c82b038b6895cb02b683d0c253a955068dba1facd0\"],[\"p\",\"32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245\"],[\"p\",\"8b2be0a0ad34805d76679272c28a77dbede9adcbfdca48c681ec8b624a1208a6\"],[\"p\",\"17538dc2a62769d09443f18c37cbe358fab5bbf981173542aa7c5ff171ed77c4\"]],\"created_at\":1718403771,\"pubkey\":\"59cacbd83ad5c54ad91dacf51a49c06e0bef730ac0e7c235a6f6fa29b9230f02\",\"sig\":\"72ca242d2c82d0440dbb198822b3a1885a4dac5bc44ef02d8f9760a591d16340ab66649339e796b2810894d89f56c240194bf8d8bfefc833cbbd72d004077c74\",\"content\":\"Would love to see it! 🌐\"}")!
-

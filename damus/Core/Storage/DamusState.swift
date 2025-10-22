@@ -203,10 +203,13 @@ class DamusState: HeadlessDamusState {
         ndb.close()
     }
 
+    @MainActor
     static var empty: DamusState {
         let empty_pub: Pubkey = .empty
         let empty_sec: Privkey = .empty
         let kp = Keypair(pubkey: empty_pub, privkey: nil)
+        
+        let pollStore = MainActor.assumeIsolated { PollResultsStore() }
         
         return DamusState.init(
             keypair: Keypair(pubkey: empty_pub, privkey: empty_sec),
@@ -219,7 +222,7 @@ class DamusState: HeadlessDamusState {
             dms: DirectMessagesModel(our_pubkey: empty_pub),
             previews: PreviewCache(),
             zaps: Zaps(our_pubkey: empty_pub),
-            polls: PollResultsStore(),
+            polls: pollStore,
             lnurls: LNUrls(),
             settings: UserSettingsStore(),
             relay_filters: RelayFilters(our_pubkey: empty_pub),
