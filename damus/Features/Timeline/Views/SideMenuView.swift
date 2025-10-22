@@ -87,6 +87,7 @@ struct SideMenuView: View {
             }, label: {
                 navLabel(title: NSLocalizedString("Logout", comment: "Sidebar menu label to sign out of the account."), img: "logout")
             })
+            .accessibilityIdentifier(AppAccessibilityIdentifiers.side_menu_logout_button.rawValue)
         }
     }
 
@@ -211,6 +212,7 @@ struct SideMenuView: View {
                 Button(NSLocalizedString("Logout", comment: "Button for logging out the user."), role: .destructive) {
                     logout(damus_state)
                 }
+                .accessibilityIdentifier(AppAccessibilityIdentifiers.side_menu_logout_confirm_button.rawValue)
             } message: {
                 Text("Make sure your nsec account key is saved before you logout or you will lose access to this account", comment: "Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out.")
             }

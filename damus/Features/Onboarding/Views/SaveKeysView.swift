@@ -99,6 +99,7 @@ struct SaveKeysView: View {
                     }
                     .buttonStyle(GradientButtonStyle())
                     .padding(.top, 20)
+                    .accessibilityIdentifier(AppAccessibilityIdentifiers.sign_up_save_keys_button.rawValue)
                     
                     Button(action: {
                         Task { await complete_account_creation(account) }
@@ -111,6 +112,7 @@ struct SaveKeysView: View {
                     }
                     .buttonStyle(NeutralButtonStyle(padding: EdgeInsets(top: 15, leading: 15, bottom: 15, trailing: 15), cornerRadius: 12))
                     .padding(.top, 20)
+                    .accessibilityIdentifier(AppAccessibilityIdentifiers.sign_up_skip_save_keys_button.rawValue)
                 }
             }
             .padding(20)
