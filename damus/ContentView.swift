@@ -456,6 +456,9 @@ struct ContentView: View {
         .onReceive(handle_notify(.present_full_screen_item)) { item in
             self.active_full_screen_item = item
         }
+        .onReceive(handle_notify(.favoriteUpdated)) { _ in
+            home.resubscribe(.following)
+        }
         .onReceive(handle_notify(.zapping)) { zap_ev in
             guard !zap_ev.is_custom else {
                 return
@@ -714,6 +717,7 @@ struct ContentView: View {
                                       likes: EventCounter(our_pubkey: pubkey),
                                       boosts: EventCounter(our_pubkey: pubkey),
                                       contacts: Contacts(our_pubkey: pubkey),
+                                      contactCards: ContactCardManager(),
                                       mutelist_manager: MutelistManager(user_keypair: keypair),
                                       profiles: Profiles(ndb: ndb),
                                       dms: home.dms,

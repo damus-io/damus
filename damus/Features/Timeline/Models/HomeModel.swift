@@ -198,6 +198,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
             handle_old_list_event(ev)
         case .mute_list:
             handle_mute_list_event(ev)
+        case .contact_card:
+            damus_state.contactCards.loadEvent(ev, pubkey: damus_state.pubkey)
         case .boost:
             handle_boost_event(ev, context: context)
         case .like:
@@ -482,6 +484,9 @@ class HomeModel: ContactsDelegate, ObservableObject {
         our_old_blocklist_filter.parameter = ["mute"]
         our_old_blocklist_filter.authors = [damus_state.pubkey]
 
+        var contact_cards_filter = NostrFilter(kinds: [.contact_card])
+        contact_cards_filter.authors = [damus_state.pubkey]
+
         var our_blocklist_filter = NostrFilter(kinds: [.mute_list])
         our_blocklist_filter.authors = [damus_state.pubkey]
 
@@ -509,7 +514,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
 
         var notifications_filters = [notifications_filter]
         let contacts_filter_chunks = contacts_filter.chunked(on: .authors, into: MAX_CONTACTS_ON_FILTER)
-        var contacts_filters = [our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter] + contacts_filter_chunks
+        var contacts_filters = contacts_filter_chunks + [our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter, contact_cards_filter]
         var dms_filters = [dms_filter, our_dms_filter]
 
         //print_filters(relay_id: relay_id, filters: [home_filters, contacts_filters, notifications_filters, dms_filters])
@@ -591,6 +596,16 @@ class HomeModel: ContactsDelegate, ObservableObject {
             var hashtag_filter = NostrFilter.filter_hashtag(followed_hashtags)
             hashtag_filter.limit = 100
             home_filters.append(hashtag_filter)
+        }
+
+        // Add filter for favorited users who we dont follow
+        let all_favorites = damus_state.contactCards.favorites
+        let favorited_not_followed = Array(all_favorites.subtracting(Set(friends)))
+        if !favorited_not_followed.isEmpty {
+            var favorites_filter = NostrFilter(kinds: home_filter_kinds)
+            favorites_filter.authors = favorited_not_followed
+            favorites_filter.limit = 500
+            home_filters.append(favorites_filter)
         }
 
         self.homeHandlerTask?.cancel()

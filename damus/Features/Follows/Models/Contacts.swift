@@ -96,6 +96,13 @@ class Contacts {
     func get_friended_followers(_ pubkey: Pubkey) -> [Pubkey] {
         return Array((pubkey_to_our_friends[pubkey] ?? Set()))
     }
+
+    var friend_filter: (NostrEvent) -> Bool {
+        { [weak self] ev in
+            guard let self else { return false }
+            return self.is_friend(ev.pubkey)
+        }
+    }
 }
 
 /// Delegate protocol for `Contacts`. Use this to listen to significant updates from a `Contacts` instance

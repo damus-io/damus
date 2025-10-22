@@ -27,6 +27,7 @@ struct PostingTimelineView: View {
     @State var headerHeight: CGFloat = 0
     @Binding var headerOffset: CGFloat
     @SceneStorage("PostingTimelineView.filter_state") var filter_state : FilterState = .posts_and_replies
+    @State var timeline_source: TimelineSource = .follows
     
     var loading: Binding<Bool> {
         Binding(get: {
@@ -39,6 +40,12 @@ struct PostingTimelineView: View {
     func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
         var filters = ContentFilters.defaults(damus_state: damus_state)
         filters.append(fstate.filter)
+        switch timeline_source {
+        case .follows:
+            filters.append(damus_state.contacts.friend_filter)
+        case .favorites:
+            filters.append(damus_state.contactCards.filter)
+        }
         return ContentFilters(filters: filters).filter
     }
     
@@ -48,73 +55,59 @@ struct PostingTimelineView: View {
     
     func HeaderView() -> some View {
         VStack {
-            VStack {
-                VStack(spacing: 0) {
-                    // This is needed for the Dynamic Island
-                    HStack {}
-                        .frame(height: getSafeAreaTop())
-                    
-                    HStack(alignment: .top) {
-                        TopbarSideMenuButton(damus_state: damus_state, isSideBarOpened: $isSideBarOpened)
-                        
-                        Spacer()
-                        
-                        Image("damus-home")
-                            .resizable()
-                            .frame(width:30,height:30)
-                            .shadow(color: DamusColors.purple, radius: 2)
-                            .opacity(isSideBarOpened ? 0 : 1)
-                            .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
-                            .onTapGesture {
-                                isSideBarOpened.toggle()
-                            }
-                            .padding(.leading)
-                        
-                        Spacer()
-                        
-                        HStack(alignment: .center) {
-                            SignalView(state: damus_state, signal: home.signal)
+            VStack(spacing: 0) {
+                // This is needed for the Dynamic Island
+                HStack {}
+                .frame(height: getSafeAreaTop())
+
+                HStack(alignment: .top) {
+                    TopbarSideMenuButton(damus_state: damus_state, isSideBarOpened: $isSideBarOpened)
+
+                    Spacer()
+
+                    HStack(alignment: .center) {
+                        SignalView(state: damus_state, signal: home.signal)
+                        let switchView = PostingTimelineSwitcherView(
+                            damusState: damus_state,
+                            timelineSource: $timeline_source
+                        )
+                        if #available(iOS 17.0, *) {
+                            switchView
+                                .popoverTip(PostingTimelineSwitcherView.TimelineSwitcherTip.shared)
+                        } else {
+                            switchView
                         }
                     }
-                    .frame(maxWidth: .infinity, alignment: .trailing)
                 }
-                .padding(.horizontal, 20)
-                
-                VStack(spacing: 0) {
-                    CustomPicker(tabs: [
-                        (NSLocalizedString("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies)."), FilterState.posts),
-                        (NSLocalizedString("Notes & Replies", comment: "Label for filter for seeing notes and replies (instead of only notes)."), FilterState.posts_and_replies)
-                    ],
-                                 selection: $filter_state)
-                    
-                    Divider()
-                        .frame(height: 1)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .overlay {
+                    Image("damus-home")
+                        .resizable()
+                        .frame(width:30,height:30)
+                        .shadow(color: DamusColors.purple, radius: 2)
+                        .opacity(isSideBarOpened ? 0 : 1)
+                        .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
+                        .onTapGesture {
+                            isSideBarOpened.toggle()
+                        }
                 }
             }
-            .background {
-                DamusColors.adaptableWhite
-                    .ignoresSafeArea()
-            }
+            .padding(.horizontal, 20)
             
-            if damus_state.settings.enable_experimental_load_new_content_button && homeEvents.incoming.count > 0 {
-                Button(
-                    action: {
-                        notify(.scroll_to_top)
-                    },
-                    label: {
-                        HStack(spacing: 6) {
-                            CondensedProfilePicturesView(state: damus_state, pubkeys: homeEvents.incoming.map({ $0.pubkey }), maxPictures: 3)
-                                .scaleEffect(0.75)
-                            Text("Load new content", comment: "Button to load new notes in the timeline")
-                                .bold()
-                        }
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 5)
-                    }
-                )
-                .buttonStyle(NeutralButtonStyle(cornerRadius: 50))
-                .padding(.vertical, 10)
+            VStack(spacing: 0) {
+                CustomPicker(tabs: [
+                    (NSLocalizedString("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies)."), FilterState.posts),
+                    (NSLocalizedString("Notes & Replies", comment: "Label for filter for seeing notes and replies (instead of only notes)."), FilterState.posts_and_replies)
+                ],
+                             selection: $filter_state)
+                
+                Divider()
+                    .frame(height: 1)
             }
+        }
+        .background {
+            DamusColors.adaptableWhite
+                .ignoresSafeArea()
         }
     }
 
@@ -156,5 +149,18 @@ struct PostingTimelineView: View {
                 .offset(y: -headerOffset < headerHeight ? headerOffset : (headerOffset < 0 ? headerOffset : 0))
                 .opacity(1.0 - (abs(headerOffset/100.0)))
         }
+    }
+}
+
+struct PostingTimelineView_Previews: PreviewProvider {
+    static var previews: some View {
+        PostingTimelineView(
+            damus_state: test_damus_state,
+            home: HomeModel(),
+            homeEvents: .init(),
+            isSideBarOpened: .constant(false),
+            active_sheet: .constant(nil),
+            headerOffset: .constant(0)
+        )
     }
 }

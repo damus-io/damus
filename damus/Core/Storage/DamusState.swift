@@ -15,6 +15,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
     let boosts: EventCounter
     let quote_reposts: EventCounter
     let contacts: Contacts
+    let contactCards: ContactCard
     let mutelist_manager: MutelistManager
     let profiles: Profiles
     let dms: DirectMessagesModel
@@ -39,11 +40,12 @@ class DamusState: HeadlessDamusState, ObservableObject {
     let favicon_cache: FaviconCache
     private(set) var nostrNetwork: NostrNetworkManager
 
-    init(keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: DamusVideoCoordinator, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider, favicon_cache: FaviconCache, addNdbToRelayPool: Bool = true) {
+    init(keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, contactCards: ContactCard, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: DamusVideoCoordinator, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider, favicon_cache: FaviconCache, addNdbToRelayPool: Bool = true) {
         self.keypair = keypair
         self.likes = likes
         self.boosts = boosts
         self.contacts = contacts
+        self.contactCards = contactCards
         self.mutelist_manager = mutelist_manager
         self.profiles = profiles
         self.dms = dms
@@ -111,6 +113,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
             likes: EventCounter(our_pubkey: pubkey),
             boosts: EventCounter(our_pubkey: pubkey),
             contacts: Contacts(our_pubkey: pubkey),
+            contactCards: ContactCardManager(),
             mutelist_manager: MutelistManager(user_keypair: keypair),
             profiles: Profiles(ndb: ndb),
             dms: home.dms,
@@ -182,6 +185,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
             likes: EventCounter(our_pubkey: empty_pub),
             boosts: EventCounter(our_pubkey: empty_pub),
             contacts: Contacts(our_pubkey: empty_pub),
+            contactCards: ContactCardManagerMock(),
             mutelist_manager: MutelistManager(user_keypair: kp),
             profiles: Profiles(ndb: .empty),
             dms: DirectMessagesModel(our_pubkey: empty_pub),
