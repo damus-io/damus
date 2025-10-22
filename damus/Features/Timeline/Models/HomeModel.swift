@@ -1157,6 +1157,20 @@ func should_show_event(state: DamusState, ev: NostrEvent) -> Bool {
         return false
     }
 
+    if state.settings.hide_nsfw_tagged_content {
+        if event_has_nsfw_tag(ev) {
+            return false
+        }
+
+        if ev.known_kind == .boost,
+           let inner_ev = ev.get_cached_inner_event(cache: state.events),
+           inner_ev.referenced_hashtags.contains(where: { tag in
+               tag.hashtag.caseInsensitiveCompare("nsfw") == .orderedSame
+           }) {
+            return false
+        }
+    }
+
     return ev.should_show_event
 }
 
@@ -1214,4 +1228,3 @@ func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: 
         }
     }
 }
-

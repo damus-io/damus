@@ -43,9 +43,16 @@ enum FilterState : Int {
     }
 }
 
+/// Returns true when an event is tagged with #nsfw (case-insensitive).
+func event_has_nsfw_tag(_ ev: NostrEvent) -> Bool {
+    return ev.referenced_hashtags.contains { tag in
+        tag.hashtag.caseInsensitiveCompare("nsfw") == .orderedSame
+    }
+}
+
 /// Simple filter to determine whether to show posts with #nsfw tags
 func nsfw_tag_filter(ev: NostrEvent) -> Bool {
-    return ev.referenced_hashtags.first(where: { t in t.hashtag.caseInsensitiveCompare("nsfw") == .orderedSame }) == nil
+    return !event_has_nsfw_tag(ev)
 }
 
 func get_repost_of_muted_user_filter(damus_state: DamusState) -> ((_ ev: NostrEvent) -> Bool) {
