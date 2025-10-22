@@ -143,8 +143,12 @@ struct SaveKeysView: View {
         for relay in bootstrap_relays {
             await add_rw_relay(self.pool, relay)
         }
+        
+        self.loading = true
                 
         Task {
+            await self.pool.connect()
+            
             let stream = AsyncStream<(RelayURL, NostrConnectionEvent)> { streamContinuation in
                 Task { await self.pool.register_handler(sub_id: "signup", filters: nil, handler: streamContinuation) }
             }
@@ -152,10 +156,6 @@ struct SaveKeysView: View {
                 await handle_event(relay: relayUrl, ev: connectionEvent)
             }
         }
-
-        self.loading = true
-        
-        await self.pool.connect()
     }
     
     func save_to_storage(first_contact_event: NdbNote, first_relay_list_event: NdbNote, for account: CreateAccountModel) {

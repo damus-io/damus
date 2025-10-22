@@ -10,6 +10,7 @@ import Network
 
 struct RelayHandler {
     let sub_id: String
+    /// The filters that this handler will handle. Set this to `nil` if you want your handler to receive all events coming from the relays.
     let filters: [NostrFilter]?
     let to: [RelayURL]?
     var handler: AsyncStream<(RelayURL, NostrConnectionEvent)>.Continuation
@@ -535,7 +536,10 @@ actor RelayPool {
         }
 
         for handler in handlers {
-            guard handler.sub_id == event.subId else { continue }
+            // We send data to the handlers if:
+            // - the subscription ID matches, or
+            // - the handler filters is `nil`, which is used in some cases as a blanket "give me all notes" (e.g. during signup)
+            guard handler.sub_id == event.subId || handler.filters == nil else { continue }
             logStreamPipelineStats("RelayPool_\(relay_id.absoluteString)", "RelayPool_Handler_\(handler.sub_id)")
             handler.handler.yield((relay_id, event))
         }
