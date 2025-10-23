@@ -50,6 +50,15 @@ struct TimelineView<Content: View>: View {
         MainContent
     }
     
+    var topPadding: CGFloat {
+        if #available(iOS 26.0, *) {
+            headerHeight
+        }
+        else {
+            headerHeight - getSafeAreaTop()
+        }
+    }
+    
     var MainContent: some View {
         ScrollViewReader { scroller in
             ScrollView {
@@ -65,7 +74,7 @@ struct TimelineView<Content: View>: View {
                     .redacted(reason: loading ? .placeholder : [])
                     .shimmer(loading)
                     .disabled(loading)
-                    .padding(.top, headerHeight - getSafeAreaTop())
+                    .padding(.top, topPadding)
                     .offsetY { previous, current in
                         if previous > current{
                             if direction != .up && current < 0 {
