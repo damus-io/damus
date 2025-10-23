@@ -198,6 +198,9 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "truncate_mention_text", default_value: true)
     var truncate_mention_text: Bool
+
+    @Setting(key: "enable_nip88_polls", default_value: false)
+    var enable_nip88_polls: Bool
     
     @Setting(key: "notification_indicators", default_value: NewEventsBits.all.rawValue)
     var notification_indicators: Int

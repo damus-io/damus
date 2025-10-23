@@ -83,7 +83,7 @@ class HomeModel: ContactsDelegate {
     var zap_button: ZapButtonModel = ZapButtonModel()
     
     init() {
-        self.damus_state = DamusState.empty
+        self.damus_state = MainActor.assumeIsolated { DamusState.empty }
         self.setup_debouncer()
         filter_events()
         events.on_queue = preloader
@@ -100,6 +100,10 @@ class HomeModel: ContactsDelegate {
     
     var dms: DirectMessagesModel {
         return damus_state.dms
+    }
+
+    var pollsFeatureEnabled: Bool {
+        damus_state.settings.enable_nip88_polls
     }
     
     func has_sub_id_event(sub_id: String, ev_id: NoteId) -> Bool {
@@ -201,6 +205,16 @@ class HomeModel: ContactsDelegate {
         switch kind {
         case .chat, .longform, .text, .highlight:
             handle_text_event(sub_id: sub_id, ev)
+        case .poll:
+            if pollsFeatureEnabled {
+                handle_poll_event(sub_id: sub_id, ev)
+            } else {
+                handle_text_event(sub_id: sub_id, ev)
+            }
+        case .poll_response:
+            if pollsFeatureEnabled {
+                handle_poll_response(ev)
+            }
         case .contacts:
             handle_contact_event(sub_id: sub_id, relay_id: relay_id, ev: ev)
         case .metadata:
@@ -637,7 +651,7 @@ class HomeModel: ContactsDelegate {
     func subscribe_to_home_filters(friends fs: [Pubkey]? = nil, relay_id: RelayURL? = nil) {
         // TODO: separate likes?
         var home_filter_kinds: [NostrKind] = [
-            .text, .longform, .boost, .highlight
+            .text, .longform, .boost, .highlight, .poll
         ]
         if !damus_state.settings.onlyzaps_mode {
             home_filter_kinds.append(.like)
@@ -798,6 +812,19 @@ class HomeModel: ContactsDelegate {
             insert_home_event(ev)
         } else if sub_id == notifications_subid {
             handle_notification(ev: ev)
+        }
+    }
+    
+    func handle_poll_event(sub_id: String, _ ev: NostrEvent) {
+        Task { @MainActor in
+            damus_state.polls.registerPollEvent(ev)
+        }
+        handle_text_event(sub_id: sub_id, ev)
+    }
+    
+    func handle_poll_response(_ ev: NostrEvent) {
+        Task { @MainActor in
+            damus_state.polls.registerResponseEvent(ev)
         }
     }
     
@@ -1214,4 +1241,3 @@ func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: 
         }
     }
 }
-
