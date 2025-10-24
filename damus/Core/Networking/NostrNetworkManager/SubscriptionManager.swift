@@ -145,7 +145,10 @@ extension NostrNetworkManager {
                         while !Task.isCancelled {
                             let optimizedFilters = filters.map {
                                 var optimizedFilter = $0
-                                optimizedFilter.since = latestNoteTimestampSeen
+                                // Shift the since filter 2 minutes (120 seconds) before the last note timestamp
+                                if let latestTimestamp = latestNoteTimestampSeen {
+                                    optimizedFilter.since = latestTimestamp > 120 ? latestTimestamp - 120 : 0
+                                }
                                 return optimizedFilter
                             }
                             for await item in self.multiSessionNetworkStream(filters: optimizedFilters, to: desiredRelays, streamMode: streamMode, id: id) {
