@@ -57,6 +57,22 @@ struct SideMenuView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
+            
+            NavigationLink(destination: DamusLabsView(damus_state: damus_state)) {
+                HStack(spacing: 23) {
+                    Image(systemName: "flask")
+                        .fontWeight(.bold)
+                        .tint(DamusColors.adaptableBlack)
+                    Text("Labs")
+                        .font(.title2.weight(.semibold))
+                        .foregroundColor(DamusColors.adaptableBlack)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .dynamicTypeSize(.xSmall)
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
 
             NavigationLink(value: Route.MuteList) {
                 navLabel(title: NSLocalizedString("Muted", comment: "Sidebar menu label for muted users view."), img: "mute")
