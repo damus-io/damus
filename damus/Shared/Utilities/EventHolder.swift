@@ -11,8 +11,9 @@ import Foundation
 class EventHolder: ObservableObject, ScrollQueue {
     private var has_event = Set<NoteId>()
     @Published var events: [NostrEvent]
+    var filteredHolders: [UUID: FilteredHolder] = [:]
     var incoming: [NostrEvent]
-    var should_queue = false
+    private(set) var should_queue = false
     var on_queue: ((NostrEvent) -> Void)?
     
     func set_should_queue(_ val: Bool) {
@@ -38,6 +39,7 @@ class EventHolder: ObservableObject, ScrollQueue {
         self.incoming = self.incoming.filter(isIncluded)
     }
     
+    @MainActor
     func insert(_ ev: NostrEvent) -> Bool {
         if should_queue {
             return insert_queued(ev)
@@ -46,6 +48,7 @@ class EventHolder: ObservableObject, ScrollQueue {
         }
     }
     
+    @MainActor
     private func insert_immediate(_ ev: NostrEvent) -> Bool {
         if has_event.contains(ev.id) {
             return false
@@ -55,6 +58,9 @@ class EventHolder: ObservableObject, ScrollQueue {
         
         if insert_uniq_sorted_event_created(events: &self.events, new_ev: ev) {
             return true
+        }
+        for (id, filteredView) in self.filteredHolders {
+            filteredView.insert(event: ev)
         }
         
         return false
@@ -83,12 +89,64 @@ class EventHolder: ObservableObject, ScrollQueue {
             if insert_uniq_sorted_event_created(events: &events, new_ev: event) {
                 changed = true
             }
+            for (id, filteredHolder) in self.filteredHolders {
+                filteredHolder.insert(event: event)
+            }
         }
         
         if changed {
-            self.objectWillChange.send()
+            DispatchQueue.main.async {
+                self.objectWillChange.send()
+            }
         }
         
         self.incoming = []
+    }
+    
+    @MainActor
+    func reset() {
+        self.incoming = []
+        self.events = []
+        for (id, filteredHolder) in filteredHolders {
+            filteredHolder.update(events: [])
+        }
+    }
+    
+    @MainActor
+    func add(filteredHolder: FilteredHolder) -> UUID {
+        let id = UUID()
+        self.filteredHolders[id] = filteredHolder
+        filteredHolder.update(events: self.events)
+        return id
+    }
+    
+    @MainActor
+    func removeFilteredHolder(id: UUID) {
+        self.filteredHolders[id] = nil
+    }
+    
+    class FilteredHolder: ObservableObject {
+        @Published private(set) var events: [NostrEvent]
+        let filter: (NostrEvent) -> Bool
+        
+        init(filter: @escaping (NostrEvent) -> Bool) {
+            self.events = []
+            self.filter = filter
+        }
+        
+        func update(events: [NostrEvent]) {
+            self.events = events.filter(self.filter)
+        }
+        
+        func insert(event: NostrEvent) {
+            guard self.filter(event) else { return }
+            var changed = false
+            if insert_uniq_sorted_event_created(events: &events, new_ev: event) {
+                changed = true
+            }
+            if changed {
+                self.objectWillChange.send()
+            }
+        }
     }
 }

@@ -33,7 +33,9 @@ struct NotifyHandler<T> { }
 
 func notify<T: Notify>(_ notify: Notifications<T>) {
     let notify = notify.notify
-    NotificationCenter.default.post(name: T.name, object: notify.payload)
+    DispatchQueue.main.async {
+        NotificationCenter.default.post(name: T.name, object: notify.payload)
+    }
 }
 
 func handle_notify<T: Notify>(_ handler: NotifyHandler<T>) -> AnyPublisher<T.Payload, Never> {

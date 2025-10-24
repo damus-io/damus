@@ -55,10 +55,12 @@ struct CreateAccountView: View, KeyboardReadable {
                         .foregroundColor(DamusColors.neutral6)
                     FormTextInput(NSLocalizedString("Satoshi Nakamoto", comment: "Name of Bitcoin creator(s)."), text: $account.name)
                         .textInputAutocapitalization(.words)
+                        .accessibilityIdentifier(AppAccessibilityIdentifiers.sign_up_name_field.rawValue)
                     
                     FormLabel(NSLocalizedString("Bio", comment: "Label to prompt bio entry for user to describe themself."), optional: true)
                         .foregroundColor(DamusColors.neutral6)
                     FormTextInput(NSLocalizedString("Absolute legend.", comment: "Example Bio"), text: $account.about)
+                        .accessibilityIdentifier(AppAccessibilityIdentifiers.sign_up_bio_field.rawValue)
                 }
                 .padding(.top, 25)
                 
@@ -75,6 +77,7 @@ struct CreateAccountView: View, KeyboardReadable {
                 .disabled(profileUploadObserver.isLoading || account.name.isEmpty)
                 .opacity(profileUploadObserver.isLoading || account.name.isEmpty ? 0.5 : 1)
                 .padding(.top, 20)
+                .accessibilityIdentifier(AppAccessibilityIdentifiers.sign_up_next_button.rawValue)
                 
                 LoginPrompt()
                     .padding(.top)

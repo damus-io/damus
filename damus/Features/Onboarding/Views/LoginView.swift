@@ -452,6 +452,7 @@ struct CreateAccountPrompt: View {
             Button(NSLocalizedString("Create account", comment: "Button to navigate to create account view.")) {
                 nav.push(route: Route.CreateAccount)
             }
+            .accessibilityIdentifier(AppAccessibilityIdentifiers.sign_up_option_button.rawValue)
             
             Spacer()
         }

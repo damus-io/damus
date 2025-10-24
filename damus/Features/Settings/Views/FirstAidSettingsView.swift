@@ -68,13 +68,13 @@ struct FirstAidSettingsView: View {
         guard let new_contact_list_event = make_first_contact_event(keypair: damus_state.keypair) else {
             throw FirstAidError.cannotMakeFirstContactEvent
         }
-        damus_state.nostrNetwork.pool.send(.event(new_contact_list_event))
+        await damus_state.nostrNetwork.send(event: new_contact_list_event)
         damus_state.settings.latest_contact_event_id_hex = new_contact_list_event.id.hex()
     }
     
     func resetRelayList() async throws {
         let bestEffortRelayList = damus_state.nostrNetwork.userRelayList.getBestEffortRelayList()
-        try damus_state.nostrNetwork.userRelayList.set(userRelayList: bestEffortRelayList)
+        try await damus_state.nostrNetwork.userRelayList.set(userRelayList: bestEffortRelayList)
     }
     
     enum FirstAidError: Error {

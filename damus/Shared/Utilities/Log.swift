@@ -14,6 +14,8 @@ enum LogCategory: String {
     case render
     case storage
     case networking
+    case app_lifecycle
+    case subscription_manager
     case timeline
     /// Logs related to Nostr Wallet Connect components
     case nwc
@@ -23,6 +25,7 @@ enum LogCategory: String {
     case video_coordination
     case tips
     case ndb
+    case homeModel
 }
 
 /// Damus structured logger

@@ -95,7 +95,7 @@ class Zaps {
             event_counts[note_id] = event_counts[note_id]! + 1
             event_totals[note_id] = event_totals[note_id]! + zap.amount
 
-            notify(.update_stats(note_id: note_id))
+            Task { await notify(.update_stats(note_id: note_id)) }
         }
     }
 }

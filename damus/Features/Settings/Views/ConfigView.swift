@@ -182,8 +182,10 @@ struct ConfigView: View {
                       let ev = created_deleted_account_profile(keypair: keypair) else {
                     return
                 }
-                state.nostrNetwork.postbox.send(ev)
-                logout(state)
+                Task {
+                    await state.nostrNetwork.postbox.send(ev)
+                    logout(state)
+                }
             }
         }
         .alert(NSLocalizedString("Logout", comment: "Alert for logging out the user."), isPresented: $confirm_logout) {

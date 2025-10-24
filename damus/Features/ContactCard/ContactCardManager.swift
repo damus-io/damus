@@ -113,7 +113,7 @@ class ContactCardManager: ContactCard {
             favorites.remove(target)
         }
 
-        postbox.send(ev)
+        Task { await postbox.send(ev) }
         latestContactCardEvents[target] = ev
         notify(.favoriteUpdated())
     }

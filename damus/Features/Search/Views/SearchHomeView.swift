@@ -14,6 +14,7 @@ struct SearchHomeView: View {
     @StateObject var model: SearchHomeModel
     @State var search: String = ""
     @FocusState private var isFocused: Bool
+    @State var loadingTask: Task<Void, Never>?
 
     func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
         var filters = ContentFilters.defaults(damus_state: damus_state)
@@ -53,7 +54,7 @@ struct SearchHomeView: View {
             loading: $model.loading,
             damus: damus_state,
             show_friend_icon: true,
-            filter:content_filter(FilterState.posts),
+            filter: content_filter(FilterState.posts),
             content: {
                 AnyView(VStack(alignment: .leading) {
                     HStack {
@@ -65,7 +66,7 @@ struct SearchHomeView: View {
                     .padding(.top)
                     .padding(.horizontal)
                     
-                    FollowPackTimelineView<AnyView>(events: model.events, loading: $model.loading, damus: damus_state, show_friend_icon: true,filter:content_filter(FilterState.follow_list)
+                    FollowPackTimelineView<AnyView>(events: model.followPackEvents, loading: $model.loading, damus: damus_state, show_friend_icon: true, filter: content_filter(FilterState.follow_list)
                     ).padding(.bottom)
                     
                     Divider()
@@ -82,20 +83,10 @@ struct SearchHomeView: View {
                 }.padding(.bottom, 50))
             }
         )
-        .refreshable {
-            // Fetch new information by unsubscribing and resubscribing to the relay
-            model.unsubscribe()
-            model.subscribe()
-        }
     }
     
     var SearchContent: some View {
         SearchResultsView(damus_state: damus_state, search: $search)
-            .refreshable {
-                // Fetch new information by unsubscribing and resubscribing to the relay
-                model.unsubscribe()
-                model.subscribe()
-            }
     }
     
     var MainContent: some View {
@@ -129,11 +120,11 @@ struct SearchHomeView: View {
         }
         .onAppear {
             if model.events.events.isEmpty {
-                model.subscribe()
+                loadingTask = Task { await model.load() }
             }
         }
         .onDisappear {
-            model.unsubscribe()
+            loadingTask?.cancel()
         }
     }
 }

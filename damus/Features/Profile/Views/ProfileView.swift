@@ -219,7 +219,7 @@ struct ProfileView: View {
                         }
 
                         damus_state.mutelist_manager.set_mutelist(new_ev)
-                        damus_state.nostrNetwork.postbox.send(new_ev)
+                        Task { await damus_state.nostrNetwork.postbox.send(new_ev) }
                     }
                 } else {
                     Button(NSLocalizedString("Mute", comment: "Button to mute a profile"), role: .destructive) {
@@ -313,7 +313,7 @@ struct ProfileView: View {
             let follows_you = profile.pubkey != damus_state.pubkey && profile.follows(pubkey: damus_state.pubkey)
 
             HStack(alignment: .center) {
-                ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
                     .padding(.top, -(pfp_size / 2.0))
                     .offset(y: pfpOffset())
                     .scaleEffect(pfpScale())
@@ -589,3 +589,4 @@ func check_nip05_validity(pubkey: Pubkey, profiles: Profiles) {
         }
     }
 }
+

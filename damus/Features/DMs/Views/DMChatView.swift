@@ -63,7 +63,7 @@ struct DMChatView: View, KeyboardReadable {
     var Header: some View {
         return NavigationLink(value: Route.ProfileByKey(pubkey: pubkey)) {
             HStack {
-                ProfilePicView(pubkey: pubkey, size: 24, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                ProfilePicView(pubkey: pubkey, size: 24, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
 
                 ProfileName(pubkey: pubkey, damus: damus_state)
             }
@@ -108,7 +108,7 @@ struct DMChatView: View, KeyboardReadable {
                 Button(
                     role: .none,
                     action: {
-                        send_message()
+                        Task { await send_message() }
                     }
                 ) {
                     Label("", image: "send")
@@ -124,7 +124,7 @@ struct DMChatView: View, KeyboardReadable {
          */
     }
 
-    func send_message() {
+    func send_message() async {
         let tags = [["p", pubkey.hex()]]
         guard let post_blocks = parse_post_blocks(content: dms.draft)?.blocks else {
             return
@@ -138,7 +138,7 @@ struct DMChatView: View, KeyboardReadable {
 
         dms.draft = ""
 
-        damus_state.nostrNetwork.postbox.send(dm)
+        await damus_state.nostrNetwork.postbox.send(dm)
         
         handle_incoming_dm(ev: dm, our_pubkey: damus_state.pubkey, dms: damus_state.dms, prev_events: NewEventsBits())
 

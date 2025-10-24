@@ -108,10 +108,23 @@ import SwiftUI
     
     public init(url: URL) {
         self.url = url
-        self.player = AVPlayer(playerItem: AVPlayerItem(url: url))
+        // Initialize with an empty player first
+        self.player = AVPlayer()
         self.video_size = nil
         
-        Task { await self.load() }
+        // Creating the player item is an expensive action. Create it on a background thread to avoid performance issues.
+        Task.detached(priority: TaskPriority.userInitiated) {
+            self.loadPlayerItem(url: url)
+        }
+    }
+    
+    nonisolated private func loadPlayerItem(url: URL) {
+        let playerItem = AVPlayerItem(url: url)
+        
+        DispatchQueue.main.async {
+            self.player.replaceCurrentItem(with: playerItem)
+            Task { await self.load() }
+        }
     }
     
     func reinitializePlayer() {
@@ -122,12 +135,12 @@ import SwiftUI
         videoDurationObserver?.invalidate()
         videoIsPlayingObserver?.invalidate()
         
-        // Reset player
-        self.player = AVPlayer(playerItem: AVPlayerItem(url: url))
+        // Initialize player with nil item first
+        self.player.replaceCurrentItem(with: nil)
         
-        // Load once again
-        Task {
-            await load()
+        // Creating the player item is an expensive action. Create it on a background thread to avoid performance issues.
+        Task.detached(priority: TaskPriority.userInitiated) {
+            self.loadPlayerItem(url: self.url)
         }
     }
     

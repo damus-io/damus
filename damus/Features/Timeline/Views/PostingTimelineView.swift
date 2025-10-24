@@ -10,7 +10,9 @@ import SwiftUI
 struct PostingTimelineView: View {
     
     let damus_state: DamusState
-    var home: HomeModel
+    @ObservedObject var home: HomeModel
+    /// Set this to `home.events`. This is separate from `home` because we need the events object to be directly observed so that we get instant view updates
+    @ObservedObject var homeEvents: EventHolder
     @State var search: String = ""
     @State var results: [NostrEvent] = []
     @State var initialOffset: CGFloat?
@@ -26,6 +28,14 @@ struct PostingTimelineView: View {
     @Binding var headerOffset: CGFloat
     @SceneStorage("PostingTimelineView.filter_state") var filter_state : FilterState = .posts_and_replies
     @State var timeline_source: TimelineSource = .follows
+    
+    var loading: Binding<Bool> {
+        Binding(get: {
+            return home.loading
+        }, set: {
+            home.loading = $0
+        })
+    }
 
     func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
         var filters = ContentFilters.defaults(damus_state: damus_state)
@@ -40,21 +50,21 @@ struct PostingTimelineView: View {
     }
     
     func contentTimelineView(filter: (@escaping (NostrEvent) -> Bool)) -> some View {
-        TimelineView<AnyView>(events: home.events, loading: .constant(false), headerHeight: $headerHeight, headerOffset: $headerOffset, damus: damus_state, show_friend_icon: false, filter: filter)
+        TimelineView<AnyView>(events: home.events, loading: self.loading, headerHeight: $headerHeight, headerOffset: $headerOffset, damus: damus_state, show_friend_icon: false, filter: filter)
     }
     
-    func HeaderView()->some View {
+    func HeaderView() -> some View {
         VStack {
             VStack(spacing: 0) {
                 // This is needed for the Dynamic Island
                 HStack {}
                 .frame(height: getSafeAreaTop())
-                
+
                 HStack(alignment: .top) {
                     TopbarSideMenuButton(damus_state: damus_state, isSideBarOpened: $isSideBarOpened)
-                    
+
                     Spacer()
-                    
+
                     HStack(alignment: .center) {
                         SignalView(state: damus_state, signal: home.signal)
                         let switchView = PostingTimelineSwitcherView(
@@ -147,6 +157,7 @@ struct PostingTimelineView_Previews: PreviewProvider {
         PostingTimelineView(
             damus_state: test_damus_state,
             home: HomeModel(),
+            homeEvents: .init(),
             isSideBarOpened: .constant(false),
             active_sheet: .constant(nil),
             headerOffset: .constant(0)

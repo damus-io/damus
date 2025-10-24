@@ -37,6 +37,6 @@ extension Notifications {
 /// The requests from this function will be received and handled at the top level app view (`ContentView`), which contains a `.damus_full_screen_cover`.
 ///
 func present(full_screen_item: FullScreenItem) {
-    notify(.present_full_screen_item(full_screen_item))
+    Task { await notify(.present_full_screen_item(full_screen_item)) }
 }
 

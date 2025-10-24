@@ -44,6 +44,7 @@ struct SetupView: View {
                         .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
                     }
                     .buttonStyle(GradientButtonStyle())
+                    .accessibilityIdentifier(AppAccessibilityIdentifiers.sign_up_option_button.rawValue)
                     .padding(.horizontal)
                     
                     Button(action: {
