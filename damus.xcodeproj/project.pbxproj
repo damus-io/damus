@@ -543,6 +543,18 @@
 		5CB017312D4422DB00A9ED05 /* NWCSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017302D4422D600A9ED05 /* NWCSettings.swift */; };
 		5CB017322D4422DB00A9ED05 /* NWCSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017302D4422D600A9ED05 /* NWCSettings.swift */; };
 		5CB017332D4422DB00A9ED05 /* NWCSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017302D4422D600A9ED05 /* NWCSettings.swift */; };
+		5CB645982EA317D20018BD91 /* DamusLabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB645972EA317CC0018BD91 /* DamusLabs.swift */; };
+		5CB645992EA317D20018BD91 /* DamusLabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB645972EA317CC0018BD91 /* DamusLabs.swift */; };
+		5CB6459A2EA317D20018BD91 /* DamusLabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB645972EA317CC0018BD91 /* DamusLabs.swift */; };
+		5CB6459C2EA31D8E0018BD91 /* LabsIntroduction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB6459B2EA31D750018BD91 /* LabsIntroduction.swift */; };
+		5CB6459D2EA31D8E0018BD91 /* LabsIntroduction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB6459B2EA31D750018BD91 /* LabsIntroduction.swift */; };
+		5CB6459E2EA31D8E0018BD91 /* LabsIntroduction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB6459B2EA31D750018BD91 /* LabsIntroduction.swift */; };
+		5CB645A12EA31E410018BD91 /* LabsLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB645A02EA31E3D0018BD91 /* LabsLogoView.swift */; };
+		5CB645A22EA31E410018BD91 /* LabsLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB645A02EA31E3D0018BD91 /* LabsLogoView.swift */; };
+		5CB645A32EA31E410018BD91 /* LabsLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB645A02EA31E3D0018BD91 /* LabsLogoView.swift */; };
+		5CB645A92EAC01430018BD91 /* DamusLabsExpirements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB645A82EAC013A0018BD91 /* DamusLabsExpirements.swift */; };
+		5CB645AA2EAC01430018BD91 /* DamusLabsExpirements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB645A82EAC013A0018BD91 /* DamusLabsExpirements.swift */; };
+		5CB645AB2EAC01430018BD91 /* DamusLabsExpirements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB645A82EAC013A0018BD91 /* DamusLabsExpirements.swift */; };
 		5CC8529D2BD741CD0039FFC5 /* HighlightEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC8529C2BD741CD0039FFC5 /* HighlightEvent.swift */; };
 		5CC8529F2BD744F60039FFC5 /* HighlightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC8529E2BD744F60039FFC5 /* HighlightView.swift */; };
 		5CC852A22BDED9B90039FFC5 /* HighlightDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC852A12BDED9B90039FFC5 /* HighlightDescription.swift */; };
@@ -2551,6 +2563,10 @@
 		5CB017242D42C5BD00A9ED05 /* TransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsView.swift; sourceTree = "<group>"; };
 		5CB0172C2D42C76600A9ED05 /* BalanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceView.swift; sourceTree = "<group>"; };
 		5CB017302D4422D600A9ED05 /* NWCSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NWCSettings.swift; sourceTree = "<group>"; };
+		5CB645972EA317CC0018BD91 /* DamusLabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusLabs.swift; sourceTree = "<group>"; };
+		5CB6459B2EA31D750018BD91 /* LabsIntroduction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabsIntroduction.swift; sourceTree = "<group>"; };
+		5CB645A02EA31E3D0018BD91 /* LabsLogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabsLogoView.swift; sourceTree = "<group>"; };
+		5CB645A82EAC013A0018BD91 /* DamusLabsExpirements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusLabsExpirements.swift; sourceTree = "<group>"; };
 		5CC8529C2BD741CD0039FFC5 /* HighlightEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightEvent.swift; sourceTree = "<group>"; };
 		5CC8529E2BD744F60039FFC5 /* HighlightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightView.swift; sourceTree = "<group>"; };
 		5CC852A12BDED9B90039FFC5 /* HighlightDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightDescription.swift; sourceTree = "<group>"; };
@@ -4021,6 +4037,7 @@
 				5C78A7872E30345900CF177D /* Longform */,
 				5C78A7842E30340E00CF177D /* FollowPack */,
 				4CFF8F5729C9FD07008DB934 /* Purple */,
+				5CB645962EA3106A0018BD91 /* Labs */,
 				4CE879562996C44A00F758CC /* Zaps */,
 				4C7D095A2A098C5C00943473 /* Wallet */,
 				4CCEB7AC29B53D180078AA28 /* Search */,
@@ -4841,6 +4858,33 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		5CB645952EA3106A0018BD91 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				5CB645A82EAC013A0018BD91 /* DamusLabsExpirements.swift */,
+				5CB6459B2EA31D750018BD91 /* LabsIntroduction.swift */,
+				5CB645972EA317CC0018BD91 /* DamusLabs.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		5CB645962EA3106A0018BD91 /* Labs */ = {
+			isa = PBXGroup;
+			children = (
+				5CB6459F2EA31E2C0018BD91 /* Detail */,
+				5CB645952EA3106A0018BD91 /* Views */,
+			);
+			path = Labs;
+			sourceTree = "<group>";
+		};
+		5CB6459F2EA31E2C0018BD91 /* Detail */ = {
+			isa = PBXGroup;
+			children = (
+				5CB645A02EA31E3D0018BD91 /* LabsLogoView.swift */,
+			);
+			path = Detail;
+			sourceTree = "<group>";
+		};
 		7C0F392D29B57C8F0039859C /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
@@ -5500,6 +5544,7 @@
 				4CB8838D296F710400DC99E7 /* Reposted.swift in Sources */,
 				4CE6DEE927F7A08100C66700 /* ContentView.swift in Sources */,
 				2710433D2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */,
+				5CB6459A2EA317D20018BD91 /* DamusLabs.swift in Sources */,
 				4CEE2AF5280B29E600AB5EEF /* TimeAgo.swift in Sources */,
 				4CC14FF12A73FCDB007AEB17 /* Pubkey.swift in Sources */,
 				5C8711DE2C460C06007879C2 /* PostingTimelineView.swift in Sources */,
@@ -5877,6 +5922,7 @@
 				4C9BB83129C0ED4F00FC4E37 /* DisplayName.swift in Sources */,
 				7CFF6317299FEFE5005D382A /* SelectableText.swift in Sources */,
 				D5C1AFD42E5EE2820092F72F /* FavoriteButtonView.swift in Sources */,
+				5CB645AB2EAC01430018BD91 /* DamusLabsExpirements.swift in Sources */,
 				D5C1AFCA2E5EE12B0092F72F /* ContactCardNotify.swift in Sources */,
 				4CA352A82A76B37E003BB08B /* NewMutesNotify.swift in Sources */,
 				4CFF8F6929CC9ED1008DB934 /* ImageContainerView.swift in Sources */,
@@ -5934,6 +5980,7 @@
 				4C73C5142A4437C10062CAC0 /* ZapUserView.swift in Sources */,
 				501F8C802A0220E1001AFC1D /* KeychainStorage.swift in Sources */,
 				3A92C0FE2DE16E9800CEEBAC /* FaviconCache.swift in Sources */,
+				5CB645A22EA31E410018BD91 /* LabsLogoView.swift in Sources */,
 				4C1A9A1D29DDCF9B00516EAC /* NotificationSettingsView.swift in Sources */,
 				5CC868DD2AA29B3200FB22BA /* NeutralButtonStyle.swift in Sources */,
 				4C75EFB528049D790006080F /* Relay.swift in Sources */,
@@ -5956,6 +6003,7 @@
 				D7100C5C2B77016700C59298 /* IAPProductStateView.swift in Sources */,
 				4CB9D4A72992D02B00A9A7E4 /* ProfileNameView.swift in Sources */,
 				D733F9E82D92C76100317B11 /* UnownedNdbNote.swift in Sources */,
+				5CB6459C2EA31D8E0018BD91 /* LabsIntroduction.swift in Sources */,
 				D77135D42E7B766B00E7639F /* DataExtensions.swift in Sources */,
 				D74EA0902D2E271E002290DD /* ErrorView.swift in Sources */,
 				4CE4F0F429D779B5005914DB /* PostBox.swift in Sources */,
@@ -6040,6 +6088,7 @@
 				5C4FA7FB2DC29C3800CE658C /* FollowPackView.swift in Sources */,
 				4C3624722D5EA18E00DD066E /* amount.c in Sources */,
 				4C3624712D5EA18300DD066E /* error.c in Sources */,
+				5CB645A92EAC01430018BD91 /* DamusLabsExpirements.swift in Sources */,
 				4C3624702D5EA17700DD066E /* utf8.c in Sources */,
 				4C36246F2D5EA16A00DD066E /* str.c in Sources */,
 				4C36246E2D5EA10400DD066E /* hash_u5.c in Sources */,
@@ -6191,6 +6240,7 @@
 				82D6FB2C2CD99F7900C925F4 /* ImageMetadata.swift in Sources */,
 				D71527FF2E0A3D6900C893D6 /* InterestList.swift in Sources */,
 				82D6FB2D2CD99F7900C925F4 /* ImageProcessing.swift in Sources */,
+				5CB6459D2EA31D8E0018BD91 /* LabsIntroduction.swift in Sources */,
 				82D6FB2E2CD99F7900C925F4 /* BlurHashEncode.swift in Sources */,
 				82D6FB2F2CD99F7900C925F4 /* BlurHashDecode.swift in Sources */,
 				82D6FB302CD99F7900C925F4 /* PostBox.swift in Sources */,
@@ -6427,6 +6477,7 @@
 				D71AD8FE2CEC176A002E2C3C /* AppAccessibilityIdentifiers.swift in Sources */,
 				82D6FC092CD99F7900C925F4 /* AboutView.swift in Sources */,
 				82D6FC0A2CD99F7900C925F4 /* ProfileName.swift in Sources */,
+				5CB645982EA317D20018BD91 /* DamusLabs.swift in Sources */,
 				82D6FC0B2CD99F7900C925F4 /* ProfilePictureSelector.swift in Sources */,
 				82D6FC0C2CD99F7900C925F4 /* EditMetadataView.swift in Sources */,
 				82D6FC0D2CD99F7900C925F4 /* EditPictureControl.swift in Sources */,
@@ -6438,6 +6489,7 @@
 				82D6FC122CD99F7900C925F4 /* EventProfileName.swift in Sources */,
 				82D6FC132CD99F7900C925F4 /* FriendIcon.swift in Sources */,
 				82D6FC142CD99F7900C925F4 /* CondensedProfilePicturesView.swift in Sources */,
+				5CB645A32EA31E410018BD91 /* LabsLogoView.swift in Sources */,
 				82D6FC152CD99F7900C925F4 /* ProfileEditButton.swift in Sources */,
 				D73BDB102D6FF5F600D69970 /* NostrNetworkManager.swift in Sources */,
 				82D6FC162CD99F7900C925F4 /* RelayPaidDetail.swift in Sources */,
@@ -6690,6 +6742,7 @@
 				D73E5E872C6A97F4007EB227 /* DamusPurple.swift in Sources */,
 				D73E5F992C6AA864007EB227 /* InvoicesView.swift in Sources */,
 				D73E5E882C6A97F4007EB227 /* StoreObserver.swift in Sources */,
+				5CB645992EA317D20018BD91 /* DamusLabs.swift in Sources */,
 				D73E5E892C6A97F4007EB227 /* DamusPurpleURL.swift in Sources */,
 				D73E5E8A2C6A97F4007EB227 /* PurpleStoreKitManager.swift in Sources */,
 				D733F9E72D92C76100317B11 /* UnownedNdbNote.swift in Sources */,
@@ -6853,6 +6906,7 @@
 				D73E5F0E2C6A97F4007EB227 /* FriendIcon.swift in Sources */,
 				D73E5F0F2C6A97F4007EB227 /* CondensedProfilePicturesView.swift in Sources */,
 				D73E5F102C6A97F4007EB227 /* ProfileEditButton.swift in Sources */,
+				5CB6459E2EA31D8E0018BD91 /* LabsIntroduction.swift in Sources */,
 				D73E5F112C6A97F4007EB227 /* RelayPaidDetail.swift in Sources */,
 				D7AACFFF2E0387B800FB7699 /* LnurlAmountView.swift in Sources */,
 				D73E5F122C6A97F4007EB227 /* RelayAuthenticationDetail.swift in Sources */,
@@ -7002,6 +7056,7 @@
 				D703D7A52C670E3E00A400EA /* mdb.c in Sources */,
 				D703D76B2C670B3100A400EA /* Referenced.swift in Sources */,
 				D73BDB192D71311900D69970 /* UserRelayListErrors.swift in Sources */,
+				5CB645A12EA31E410018BD91 /* LabsLogoView.swift in Sources */,
 				D703D7582C670A6000A400EA /* Id.swift in Sources */,
 				5C05675A2C8FBDE70073F23A /* NDBSearchView.swift in Sources */,
 				D703D76E2C670B4900A400EA /* NdbTagsIterator.swift in Sources */,
@@ -7045,6 +7100,7 @@
 				D73E5E162C6A9619007EB227 /* PostView.swift in Sources */,
 				D703D7872C670C7E00A400EA /* DamusPurpleEnvironment.swift in Sources */,
 				D703D7892C670C8600A400EA /* DeepLPlan.swift in Sources */,
+				5CB645AA2EAC01430018BD91 /* DamusLabsExpirements.swift in Sources */,
 				D73E5E182C6A963D007EB227 /* AttachMediaUtility.swift in Sources */,
 				D73E5F852C6AA628007EB227 /* LoadScript.swift in Sources */,
 				D703D74E2C6709DA00A400EA /* Pubkey.swift in Sources */,

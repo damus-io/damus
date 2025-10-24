@@ -195,6 +195,9 @@ struct ContentView: View {
                 }
             }
         }
+        .onAppear {
+            notify(.display_tabbar(true))
+        }
     }
     
     func MaybeReportView(target: ReportTarget) -> some View {

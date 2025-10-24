@@ -68,9 +68,6 @@ struct DamusPurpleView: View, DamusPurpleStoreKitManagerDelegate {
                 self.account_uuid = try await damus_state.purple.get_maybe_cached_uuid_for_account()
             }
         }
-        .onDisappear {
-            notify(.display_tabbar(true))
-        }
         .onReceive(handle_notify(.purple_account_update), perform: { account in
             self.my_account_info_state = .loaded(account: account)
         })
