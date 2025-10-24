@@ -42,6 +42,7 @@ class NostrNetworkManagerTests: XCTestCase {
     
     func ensureSubscribeGetsAllExpectedNotes(filter: NostrFilter, expectedCount: Int) async {
         let endOfStream = XCTestExpectation(description: "Stream should receive EOSE")
+        let atLeastXEvents = XCTestExpectation(description: "Stream should get at least the expected number of notes")
         var receivedCount = 0
         var eventIds: Set<NoteId> = []
         Task {
@@ -55,6 +56,9 @@ class NostrNetworkManagerTests: XCTestCase {
                         }
                         eventIds.insert(event.id)
                     }
+                    if eventIds.count >= expectedCount {
+                        atLeastXEvents.fulfill()
+                    }
                 case .eose:
                     continue
                 case .ndbEose:
@@ -66,7 +70,7 @@ class NostrNetworkManagerTests: XCTestCase {
                 }
             }
         }
-        await fulfillment(of: [endOfStream], timeout: 15.0)
+        await fulfillment(of: [endOfStream, atLeastXEvents], timeout: 15.0)
         XCTAssertEqual(receivedCount, expectedCount, "Event IDs: \(eventIds.map({ $0.hex() }))")
     }
     
