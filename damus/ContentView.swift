@@ -303,8 +303,10 @@ struct ContentView: View {
             try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default, options: .mixWithOthers)
             setup_notifications()
             if !hasSeenOnboardingSuggestions || damus_state!.settings.always_show_onboarding_suggestions {
-                active_sheet = .onboardingSuggestions
-                hasSeenOnboardingSuggestions = true
+                if damus_state.is_privkey_user {
+                    active_sheet = .onboardingSuggestions
+                    hasSeenOnboardingSuggestions = true
+                }
             }
             self.appDelegate?.state = damus_state
             Task {  // We probably don't need this to be a detached task. According to https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/#Defining-and-Calling-Asynchronous-Functions, awaits are only suspension points that do not block the thread.
