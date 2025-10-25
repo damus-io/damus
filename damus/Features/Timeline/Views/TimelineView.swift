@@ -70,7 +70,7 @@ struct TimelineView<Content: View>: View {
                     .id("startblock")
                     .frame(height: 0)
 
-                InnerTimelineView(events: events, damus: damus, filter: loading ? { _ in true } : filter, apply_mute_rules: self.apply_mute_rules)
+                InnerTimelineView(events: events, damus: damus, filter: filter, apply_mute_rules: self.apply_mute_rules)
                     .redacted(reason: loading ? .placeholder : [])
                     .shimmer(loading)
                     .disabled(loading)
