@@ -1183,9 +1183,6 @@
 		D7F33A4F2F0E7B0E00BD0B18 /* OutboxRelayHints.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F33A4B2F0E7B0E00BD0B18 /* OutboxRelayHints.swift */; };
 		D7F33A502F0E7B0E00BD0B18 /* OutboxRelayHints.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F33A4B2F0E7B0E00BD0B18 /* OutboxRelayHints.swift */; };
 		D7F33A512F0E7B0E00BD0B18 /* OutboxRelayHints.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F33A4B2F0E7B0E00BD0B18 /* OutboxRelayHints.swift */; };
-		D7F33A542F0E8BB800BD0B18 /* OutboxRecoveryTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F33A532F0E8BB800BD0B18 /* OutboxRecoveryTracker.swift */; };
-		D7F33A552F0E8BB800BD0B18 /* OutboxRecoveryTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F33A532F0E8BB800BD0B18 /* OutboxRecoveryTracker.swift */; };
-		D7F33A562F0E8BB800BD0B18 /* OutboxRecoveryTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F33A532F0E8BB800BD0B18 /* OutboxRecoveryTracker.swift */; };
 		D733F9E52D92C76100317B11 /* UnownedNdbNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = D733F9E42D92C75C00317B11 /* UnownedNdbNote.swift */; };
 		D733F9E62D92C76100317B11 /* UnownedNdbNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = D733F9E42D92C75C00317B11 /* UnownedNdbNote.swift */; };
 		D733F9E72D92C76100317B11 /* UnownedNdbNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = D733F9E42D92C75C00317B11 /* UnownedNdbNote.swift */; };
@@ -2642,7 +2639,6 @@
 		D733F9E02D92C1AA00317B11 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		D7F33A4A2F0E7B0E00BD0B18 /* OutboxManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutboxManager.swift; sourceTree = "<group>"; };
 		D7F33A4B2F0E7B0E00BD0B18 /* OutboxRelayHints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutboxRelayHints.swift; sourceTree = "<group>"; };
-		D7F33A532F0E8BB800BD0B18 /* OutboxRecoveryTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutboxRecoveryTracker.swift; sourceTree = "<group>"; };
 		D733F9E42D92C75C00317B11 /* UnownedNdbNote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnownedNdbNote.swift; sourceTree = "<group>"; };
 		D734B1442CCC19B1000B5C97 /* DamusFullScreenCover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusFullScreenCover.swift; sourceTree = "<group>"; };
 		D7373BA52B688EA200F7783D /* DamusPurpleTranslationSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleTranslationSetupView.swift; sourceTree = "<group>"; };
@@ -4936,7 +4932,6 @@
 				D72B6FA12E7DFB3F0050CD1D /* ProfilesManager.swift */,
 				D7F33A4A2F0E7B0E00BD0B18 /* OutboxManager.swift */,
 				D7F33A4B2F0E7B0E00BD0B18 /* OutboxRelayHints.swift */,
-				D7F33A532F0E8BB800BD0B18 /* OutboxRecoveryTracker.swift */,
 				D733F9E02D92C1AA00317B11 /* SubscriptionManager.swift */,
 				D73BDB172D71310C00D69970 /* UserRelayListErrors.swift */,
 				D73BDB132D71215F00D69970 /* UserRelayListManager.swift */,
@@ -5635,7 +5630,6 @@
 				D733F9E32D92C1D900317B11 /* SubscriptionManager.swift in Sources */,
 				D7F33A4C2F0E7B0E00BD0B18 /* OutboxManager.swift in Sources */,
 				D7F33A4F2F0E7B0E00BD0B18 /* OutboxRelayHints.swift in Sources */,
-				D7F33A542F0E8BB800BD0B18 /* OutboxRecoveryTracker.swift in Sources */,
 				F7908E97298B1FDF00AB113A /* NIPURLBuilder.swift in Sources */,
 				4C285C8228385570008A31F1 /* CarouselView.swift in Sources */,
 				4CF480592B633F3800F2B2C0 /* NdbBlock.swift in Sources */,
@@ -6210,7 +6204,6 @@
 				D73BDB162D71216500D69970 /* UserRelayListManager.swift in Sources */,
 				D7F33A4D2F0E7B0E00BD0B18 /* OutboxManager.swift in Sources */,
 				D7F33A502F0E7B0E00BD0B18 /* OutboxRelayHints.swift in Sources */,
-				D7F33A552F0E8BB800BD0B18 /* OutboxRecoveryTracker.swift in Sources */,
 				82D6FB322CD99F7900C925F4 /* FillAndStroke.swift in Sources */,
 				82D6FB332CD99F7900C925F4 /* Array.swift in Sources */,
 				82D6FB342CD99F7900C925F4 /* VectorMath.swift in Sources */,
@@ -6933,7 +6926,6 @@
 				D733F9E12D92C1D900317B11 /* SubscriptionManager.swift in Sources */,
 				D7F33A4E2F0E7B0E00BD0B18 /* OutboxManager.swift in Sources */,
 				D7F33A512F0E7B0E00BD0B18 /* OutboxRelayHints.swift in Sources */,
-				D7F33A562F0E8BB800BD0B18 /* OutboxRecoveryTracker.swift in Sources */,
 				D73E5F4A2C6A97F5007EB227 /* CreateAccountView.swift in Sources */,
 				D73E5F7A2C6A9C55007EB227 /* NotificationFormatter.swift in Sources */,
 				D73E5F4B2C6A97F5007EB227 /* DirectMessagesView.swift in Sources */,

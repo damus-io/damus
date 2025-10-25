@@ -530,9 +530,6 @@ extension NostrNetworkManager {
                     switch item {
                     case .event(let event):
                         self.outboxManager?.recordFallback(noteId: event.id)
-                        await MainActor.run {
-                            OutboxRecoveryTracker.shared.mark(noteId: event.id)
-                        }
                         return NdbNoteLender(ownedNdbNote: event)
                     case .eose:
                         return nil

@@ -30,39 +30,28 @@ struct EventView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            if shouldShowOutboxBadge {
-                OutboxBadgeView()
-            }
-            eventContent
-        }
-    }
-    
-    @ViewBuilder
-    private var eventContent: some View {
-        if event.known_kind == .boost {
-            if let inner_ev = event.get_inner_event(cache: damus.events) {
-                RepostedEvent(damus: damus, event: event, inner_ev: inner_ev, options: options)
+        VStack {
+            if event.known_kind == .boost {
+                if let inner_ev = event.get_inner_event(cache: damus.events) {
+                    RepostedEvent(damus: damus, event: event, inner_ev: inner_ev, options: options)
+                } else {
+                    EmptyView()
+                }
+            } else if event.known_kind == .zap {
+                if let zap = damus.zaps.zaps[event.id] {
+                    ZapEvent(damus: damus, zap: zap, is_top_zap: options.contains(.top_zap))
+                } else {
+                    EmptyView()
+                }
+            } else if event.known_kind == .longform {
+                LongformPreview(state: damus, ev: event, options: options)
+            } else if event.known_kind == .highlight {
+                HighlightView(state: damus, event: event, options: options)
             } else {
-                EmptyView()
+                TextEvent(damus: damus, event: event, pubkey: pubkey, options: options)
+                    //.padding([.top], 6)
             }
-        } else if event.known_kind == .zap {
-            if let zap = damus.zaps.zaps[event.id] {
-                ZapEvent(damus: damus, zap: zap, is_top_zap: options.contains(.top_zap))
-            } else {
-                EmptyView()
-            }
-        } else if event.known_kind == .longform {
-            LongformPreview(state: damus, ev: event, options: options)
-        } else if event.known_kind == .highlight {
-            HighlightView(state: damus, event: event, options: options)
-        } else {
-            TextEvent(damus: damus, event: event, pubkey: pubkey, options: options)
         }
-    }
-    
-    private var shouldShowOutboxBadge: Bool {
-        damus.settings.enable_outbox_analytics && OutboxRecoveryTracker.shared.hasRecovered(noteId: event.id)
     }
 }
 
@@ -170,18 +159,3 @@ struct EventView_Previews: PreviewProvider {
     }
 }
 
-struct OutboxBadgeView: View {
-    var body: some View {
-        Label {
-            Text(NSLocalizedString("Recovered via autopilot", comment: "Badge shown when a note was retrieved through outbox/autopilot."))
-        } icon: {
-            Image(systemName: "antenna.radiowaves.left.and.right")
-        }
-        .font(.caption)
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(.thinMaterial)
-        .clipShape(Capsule())
-        .accessibilityLabel(NSLocalizedString("Recovered via autopilot", comment: "Accessibility label for badge shown when note was retrieved with outbox."))
-    }
-}
