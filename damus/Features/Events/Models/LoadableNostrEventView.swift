@@ -134,6 +134,7 @@ struct LoadableNostrEventView: View {
         }
     }
     
+    
     var not_found: some View {
         SomethingWrong(
             imageSystemName: "questionmark.app",
