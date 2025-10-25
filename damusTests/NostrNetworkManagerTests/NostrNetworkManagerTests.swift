@@ -129,6 +129,7 @@ class NostrNetworkManagerTests: XCTestCase {
         var count = 0
         var receivedIds = Set<NoteId>()
         let subscribeExpectation = XCTestExpectation(description: "Should receive all events and EOSE")
+        let atLeastXNotes = XCTestExpectation(description: "Should get at least the expected amount of notes")
         
         Task {
             do {
@@ -142,6 +143,9 @@ class NostrNetworkManagerTests: XCTestCase {
                                 receivedIds.insert(note.id)
                             }
                         }
+                        if count >= expectedCount {
+                            atLeastXNotes.fulfill()
+                        }
                     case .eose:
                         // End of stored events
                         subscribeExpectation.fulfill()
@@ -153,7 +157,7 @@ class NostrNetworkManagerTests: XCTestCase {
             }
         }
         
-        await fulfillment(of: [subscribeExpectation], timeout: 10.0)
+        await fulfillment(of: [subscribeExpectation, atLeastXNotes], timeout: 10.0)
         
         // Verify we received exactly the expected number of unique events
         XCTAssertEqual(count, expectedCount, "Should receive all \(expectedCount) events")

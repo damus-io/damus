@@ -691,7 +691,7 @@ class Ndb {
             // We are setting the continuation after issuing the subscription call.
             // This won't cause lost notes because if any notes get issued before registering
             // the continuation they will get queued by `Ndb.CallbackHandler`
-            Task {
+            let continuationSetupTask = Task {
                 await self.setContinuation(for: subid, continuation: continuation)
             }
             
@@ -701,6 +701,7 @@ class Ndb {
                 terminationStarted = true
                 Log.debug("ndb_wait: stream: Terminated early", for: .ndb)
                 streaming = false
+                continuationSetupTask.cancel()
                 Task { await self.unsetContinuation(subscriptionId: subid) }
                 filtersPointer.deallocate()
                 guard !self.is_closed else { return }   // Double-check Ndb is open before sending unsubscribe
@@ -711,18 +712,20 @@ class Ndb {
     
     func subscribe(filters: [NdbFilter], maxSimultaneousResults: Int = 1000) throws(NdbStreamError) -> AsyncStream<StreamItem> {
         guard !self.is_closed else { throw .ndbClosed }
-        // Fetch initial results
-        guard let txn = NdbTxn(ndb: self) else { throw .cannotOpenTransaction }
         
         do { try Task.checkCancellation() } catch { throw .cancelled }
+        
+        // CRITICAL: Create the subscription FIRST before querying to avoid race condition
+        // This ensures that any events indexed after subscription but before query won't be missed
+        let newEventsStream = ndbSubscribe(filters: filters)
+        
+        // Now fetch initial results after subscription is registered
+        guard let txn = NdbTxn(ndb: self) else { throw .cannotOpenTransaction }
         
         // Use our safe wrapper instead of direct C function call
         let noteIds = try query(with: txn, filters: filters, maxResults: maxSimultaneousResults)
         
         do { try Task.checkCancellation() } catch { throw .cancelled }
-        
-        // Create a subscription for new events
-        let newEventsStream = ndbSubscribe(filters: filters)
         
         // Create a cascading stream that combines initial results with new events
         return AsyncStream<StreamItem> { continuation in
