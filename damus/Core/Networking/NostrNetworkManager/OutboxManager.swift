@@ -24,21 +24,34 @@ final class OutboxManager {
     private let relayPool: RelayPool
     private let hints: OutboxRelayHintProviding
     private(set) var isEnabled: Bool
+    private(set) var analyticsEnabled: Bool
     let telemetry: Telemetry
     
     init(
         relayPool: RelayPool,
         hints: OutboxRelayHintProviding,
-        isEnabled: Bool = true
+        isEnabled: Bool = true,
+        analyticsEnabled: Bool = false
     ) {
         self.relayPool = relayPool
         self.hints = hints
         self.isEnabled = isEnabled
+        self.analyticsEnabled = analyticsEnabled
         self.telemetry = Telemetry()
     }
     
     func setEnabled(_ enabled: Bool) {
         self.isEnabled = enabled
+    }
+    
+    func setAnalyticsEnabled(_ enabled: Bool) {
+        self.analyticsEnabled = enabled
+        if !enabled {
+            DispatchQueue.main.async {
+                self.telemetry.fallbackCount = 0
+                self.telemetry.lastRecoveredNoteId = nil
+            }
+        }
     }
     
     /// Resolves a merged list of relay URLs that may contain the target authors represented by the filters.
@@ -74,6 +87,7 @@ final class OutboxManager {
     }
     
     func recordFallback(noteId: NoteId) {
+        guard analyticsEnabled else { return }
         DispatchQueue.main.async {
             self.telemetry.fallbackCount += 1
             self.telemetry.lastRecoveredNoteId = noteId

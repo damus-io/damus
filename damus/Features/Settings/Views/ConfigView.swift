@@ -172,7 +172,7 @@ struct ConfigView: View {
                     footer:
                         VStack(alignment: .leading, spacing: 4) {
                             Text(autopilotDescription)
-                            if outboxTelemetry.fallbackCount > 0 {
+                            if settings.enable_outbox_analytics && outboxTelemetry.fallbackCount > 0 {
                                 Text(String(format: autopilotStatsFormat, outboxTelemetry.fallbackCount))
                                     .font(.footnote)
                                     .foregroundStyle(.secondary)

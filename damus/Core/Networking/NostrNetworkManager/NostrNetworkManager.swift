@@ -41,7 +41,12 @@ class NostrNetworkManager {
         let pool = RelayPool(ndb: addNdbToRelayPool ? delegate.ndb : nil, keypair: delegate.keypair)
         self.pool = pool
         let outboxHints = OutboxRelayHints(ndb: delegate.ndb)
-        let outbox = OutboxManager(relayPool: pool, hints: outboxHints, isEnabled: delegate.outboxAutopilotEnabled)
+        let outbox = OutboxManager(
+            relayPool: pool,
+            hints: outboxHints,
+            isEnabled: delegate.outboxAutopilotEnabled,
+            analyticsEnabled: delegate.outboxAnalyticsEnabled
+        )
         self.outbox = outbox
         let reader = SubscriptionManager(
             pool: pool,
@@ -208,6 +213,9 @@ extension NostrNetworkManager {
         
         /// Whether the outbox/autopilot path should be enabled
         var outboxAutopilotEnabled: Bool { get }
+        
+        /// Whether internal analytics for outbox should be collected
+        var outboxAnalyticsEnabled: Bool { get }
         
         /// The cache of relay model information
         var relayModelCache: RelayModelCache { get }
