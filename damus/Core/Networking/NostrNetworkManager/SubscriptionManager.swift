@@ -19,17 +19,19 @@ extension NostrNetworkManager {
         private var ndb: Ndb
         private var taskManager: TaskManager
         private let experimentalLocalRelayModelSupport: Bool
+        private let outboxManager: OutboxManager?
         
         private static let logger = Logger(
             subsystem: Constants.MAIN_APP_BUNDLE_IDENTIFIER,
             category: "subscription_manager"
         )
         
-        init(pool: RelayPool, ndb: Ndb, experimentalLocalRelayModelSupport: Bool) {
+        init(pool: RelayPool, ndb: Ndb, experimentalLocalRelayModelSupport: Bool, outboxManager: OutboxManager?) {
             self.pool = pool
             self.ndb = ndb
             self.taskManager = TaskManager()
             self.experimentalLocalRelayModelSupport = experimentalLocalRelayModelSupport
+            self.outboxManager = outboxManager
         }
         
         // MARK: - Subscribing and Streaming data from Nostr
@@ -220,9 +222,7 @@ extension NostrNetworkManager {
             let id = id ?? UUID()
             let streamMode = streamMode ?? defaultStreamMode()
             return AsyncStream<StreamItem> { continuation in
-                let startTime = CFAbsoluteTimeGetCurrent()
                 Self.logger.debug("Network subscription \(id.uuidString, privacy: .public): Started")
-                
                 let streamTask = Task {
                     while await !self.pool.open {
                         Self.logger.info("\(id.uuidString, privacy: .public): RelayPool closed. Sleeping for 1 second before resuming.")
@@ -231,21 +231,25 @@ extension NostrNetworkManager {
                     }
                     
                     do {
-                        for await item in await self.pool.subscribe(filters: filters, to: desiredRelays, id: id) {
-                            try Task.checkCancellation()
-                            logStreamPipelineStats("RelayPool_Handler_\(id)", "SubscriptionManager_Network_Stream_\(id)")
-                            switch item {
-                            case .event(let event):
-                                switch streamMode {
-                                case .ndbFirst, .ndbOnly:
-                                    break   // NO-OP
-                                case .ndbAndNetworkParallel:
-                                    continuation.yield(.event(lender: NdbNoteLender(ownedNdbNote: event)))
-                                }
-                            case .eose:
-                                Self.logger.debug("Session subscription \(id.uuidString, privacy: .public): Received EOSE from the network. Elapsed: \(CFAbsoluteTimeGetCurrent() - startTime, format: .fixed(precision: 2), privacy: .public) seconds")
-                                continuation.yield(.networkEose)
-                            }
+                        let fallbackRelays = await self.prepareOutboxRelays(for: filters, requestedRelays: desiredRelays)
+                        let shouldEmitEOSEAfterPrimary = fallbackRelays.isEmpty
+                        try await self.streamNetworkSession(
+                            filters: filters,
+                            to: desiredRelays,
+                            streamMode: streamMode,
+                            continuation: continuation,
+                            id: id,
+                            emitEOSE: shouldEmitEOSEAfterPrimary
+                        )
+                        if !fallbackRelays.isEmpty {
+                            try await self.streamNetworkSession(
+                                filters: filters,
+                                to: fallbackRelays,
+                                streamMode: streamMode,
+                                continuation: continuation,
+                                id: id,
+                                emitEOSE: true
+                            )
                         }
                     }
                     catch {
@@ -371,6 +375,10 @@ extension NostrNetworkManager {
                 }
             }
             
+            if let outboxMatch = await fetchFirstEventFromOutbox(filters: [filter], timeout: timeout, requestedRelays: targetRelays) {
+                return outboxMatch
+            }
+            
             return nil
         }
         
@@ -445,6 +453,90 @@ extension NostrNetworkManager {
                 }
             }
 
+            if let outboxNote = await fetchFirstEventFromOutbox(filters: [filter], timeout: nil, requestedRelays: find_from) {
+                let foundEvent: FoundEvent? = try? outboxNote.borrow({ event in
+                    switch query {
+                    case .profile:
+                        if event.known_kind == .metadata {
+                            return .profile(event.pubkey)
+                        }
+                    case .event:
+                        return .event(event.toOwned())
+                    }
+                    return nil
+                })
+                if let foundEvent {
+                    return foundEvent
+                }
+            }
+            
+            return nil
+        }
+        
+        private func streamNetworkSession(
+            filters: [NostrFilter],
+            to relays: [RelayURL]?,
+            streamMode: StreamMode,
+            continuation: AsyncStream<StreamItem>.Continuation,
+            id: UUID,
+            emitEOSE: Bool
+        ) async throws {
+            let startTime = CFAbsoluteTimeGetCurrent()
+            for await item in await self.pool.subscribe(filters: filters, to: relays, id: id) {
+                try Task.checkCancellation()
+                logStreamPipelineStats("RelayPool_Handler_\(id)", "SubscriptionManager_Network_Stream_\(id)")
+                switch item {
+                case .event(let event):
+                    guard case .ndbAndNetworkParallel = streamMode else { continue }
+                    continuation.yield(.event(lender: NdbNoteLender(ownedNdbNote: event)))
+                case .eose:
+                    if emitEOSE {
+                        Self.logger.debug("Session subscription \(id.uuidString, privacy: .public): Received EOSE from the network. Elapsed: \(CFAbsoluteTimeGetCurrent() - startTime, format: .fixed(precision: 2), privacy: .public) seconds")
+                        continuation.yield(.networkEose)
+                    }
+                    return
+                }
+            }
+            
+            if emitEOSE {
+                Self.logger.debug("Session subscription \(id.uuidString, privacy: .public): Network stream ended without explicit EOSE.")
+                continuation.yield(.networkEose)
+            }
+        }
+        
+        private func prepareOutboxRelays(for filters: [NostrFilter], requestedRelays: [RelayURL]?) async -> [RelayURL] {
+            guard requestedRelays == nil else { return [] }
+            guard let outboxManager else { return [] }
+            let relays = await outboxManager.relayURLs(for: filters)
+            if relays.isEmpty {
+                return []
+            }
+            await outboxManager.ensureEphemeralConnections(for: relays)
+            Self.logger.debug("Prepared \(relays.count, privacy: .public) outbox relays for filters \(filters.debugDescription, privacy: .private)")
+            return relays
+        }
+        
+        func fetchFirstEventFromOutbox(
+            filters: [NostrFilter],
+            timeout: Duration?,
+            requestedRelays: [RelayURL]?,
+            subscriptionId: UUID = UUID()
+        ) async -> NdbNoteLender? {
+            let relays = await prepareOutboxRelays(for: filters, requestedRelays: requestedRelays)
+            guard !relays.isEmpty else { return nil }
+            do {
+                let stream = await self.pool.subscribe(filters: filters, to: relays, eoseTimeout: timeout, id: subscriptionId)
+                for await item in stream {
+                    switch item {
+                    case .event(let event):
+                        return NdbNoteLender(ownedNdbNote: event)
+                    case .eose:
+                        return nil
+                    }
+                }
+            } catch {
+                Self.logger.error("Outbox fallback failed: \(error.localizedDescription, privacy: .public)")
+            }
             return nil
         }
         
