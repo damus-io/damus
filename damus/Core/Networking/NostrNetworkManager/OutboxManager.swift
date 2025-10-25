@@ -87,10 +87,11 @@ final class OutboxManager {
     }
     
     func recordFallback(noteId: NoteId) {
-        guard analyticsEnabled else { return }
+        guard analyticsEnabled && isEnabled else { return }
         DispatchQueue.main.async {
             self.telemetry.fallbackCount += 1
             self.telemetry.lastRecoveredNoteId = noteId
+            Self.logger.info("Outbox recovered note: \(noteId.hex(), privacy: .public). Total session count: \(self.telemetry.fallbackCount, privacy: .public)")
         }
     }
     
