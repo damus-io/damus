@@ -249,6 +249,10 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "enable_experimental_local_relay_model", default_value: false)
     var enable_experimental_local_relay_model: Bool
     
+    /// Whether Damus should automatically discover and connect to hinted relays (outbox/autopilot mode)
+    @Setting(key: "enable_outbox_autopilot", default_value: true)
+    var enable_outbox_autopilot: Bool
+    
     /// Whether the app should present the experimental floating "Load new content" button
     @Setting(key: "enable_experimental_load_new_content_button", default_value: false)
     var enable_experimental_load_new_content_button: Bool

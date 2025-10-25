@@ -31,6 +31,9 @@ struct ConfigView: View {
     private let zapsTitle = NSLocalizedString("Zaps", comment: "Section header for zap settings")
     private let translationTitle = NSLocalizedString("Translation", comment: "Section header for text and appearance settings")
     private let reactionsTitle = NSLocalizedString("Reactions", comment: "Section header for reactions settings")
+    private let outboxSectionTitle = NSLocalizedString("Outbox", comment: "Section header for outbox settings")
+    private let autopilotTitle = NSLocalizedString("Outbox autopilot", comment: "Toggle label for automatically discovering relays for outbox mode")
+    private let autopilotDescription = NSLocalizedString("Automatically discover and temporarily connect to relays referenced by the people you follow. This improves reliability without changing your saved relay list.", comment: "Footer description for the outbox autopilot toggle")
     private let developerTitle = NSLocalizedString("Developer", comment: "Section header for developer settings")
     private let firstAidTitle = NSLocalizedString("First Aid", comment: "Section header for first aid tools and settings")
     private let signOutTitle = NSLocalizedString("Sign out", comment: "Sidebar menu label to sign out of the account.")
@@ -156,6 +159,22 @@ struct ConfigView: View {
                                 }
                             }
                     }
+                }
+            }
+            
+            if showSettingsButton(title: autopilotTitle) {
+                Section(header: Text(outboxSectionTitle),
+                        footer: Text(autopilotDescription)) {
+                    Toggle(isOn: Binding(
+                        get: { settings.enable_outbox_autopilot },
+                        set: { newValue in
+                            settings.enable_outbox_autopilot = newValue
+                            state.nostrNetwork.outbox.setEnabled(newValue)
+                        }
+                    )) {
+                        Label(autopilotTitle, systemImage: "antenna.radiowaves.left.and.right")
+                    }
+                    .toggleStyle(.switch)
                 }
             }
         }

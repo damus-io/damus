@@ -41,7 +41,7 @@ class NostrNetworkManager {
         let pool = RelayPool(ndb: addNdbToRelayPool ? delegate.ndb : nil, keypair: delegate.keypair)
         self.pool = pool
         let outboxHints = OutboxRelayHints(ndb: delegate.ndb)
-        let outbox = OutboxManager(relayPool: pool, hints: outboxHints, isEnabled: true)
+        let outbox = OutboxManager(relayPool: pool, hints: outboxHints, isEnabled: delegate.outboxAutopilotEnabled)
         self.outbox = outbox
         let reader = SubscriptionManager(
             pool: pool,
@@ -205,6 +205,9 @@ extension NostrNetworkManager {
         
         /// Whether the app has the experimental local relay model flag that streams data only from the local relay (ndb)
         var experimentalLocalRelayModelSupport: Bool { get }
+        
+        /// Whether the outbox/autopilot path should be enabled
+        var outboxAutopilotEnabled: Bool { get }
         
         /// The cache of relay model information
         var relayModelCache: RelayModelCache { get }
