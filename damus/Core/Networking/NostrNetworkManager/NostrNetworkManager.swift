@@ -34,12 +34,21 @@ class NostrNetworkManager {
     /// Handles subscriptions and functions to read or consume data from the Nostr network
     let reader: SubscriptionManager
     let profilesManager: ProfilesManager
+    let outbox: OutboxManager
     
     init(delegate: Delegate, addNdbToRelayPool: Bool = true) {
         self.delegate = delegate
         let pool = RelayPool(ndb: addNdbToRelayPool ? delegate.ndb : nil, keypair: delegate.keypair)
         self.pool = pool
-        let reader = SubscriptionManager(pool: pool, ndb: delegate.ndb, experimentalLocalRelayModelSupport: self.delegate.experimentalLocalRelayModelSupport)
+        let outboxHints = OutboxRelayHints(ndb: delegate.ndb)
+        let outbox = OutboxManager(relayPool: pool, hints: outboxHints, isEnabled: true)
+        self.outbox = outbox
+        let reader = SubscriptionManager(
+            pool: pool,
+            ndb: delegate.ndb,
+            experimentalLocalRelayModelSupport: self.delegate.experimentalLocalRelayModelSupport,
+            outboxManager: outbox
+        )
         let userRelayList = UserRelayListManager(delegate: delegate, pool: pool, reader: reader)
         self.reader = reader
         self.userRelayList = userRelayList
