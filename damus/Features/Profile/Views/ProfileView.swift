@@ -591,4 +591,3 @@ func check_nip05_validity(pubkey: Pubkey, damus_state: DamusState) {
         }
     }
 }
-
