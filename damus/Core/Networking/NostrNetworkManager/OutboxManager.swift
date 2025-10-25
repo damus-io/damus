@@ -5,11 +5,17 @@
 //  Created by OpenAI Codex on 2025-09-06.
 //
 
+import Combine
 import Foundation
 import os
 
 /// Coordinates outbox-specific behaviour such as autopilot toggling and relay hint resolution.
 final class OutboxManager {
+    final class Telemetry: ObservableObject {
+        @Published fileprivate(set) var fallbackCount: Int = 0
+        @Published fileprivate(set) var lastRecoveredNoteId: NoteId?
+    }
+    
     private static let logger = Logger(
         subsystem: Constants.MAIN_APP_BUNDLE_IDENTIFIER,
         category: "outbox_manager"
@@ -18,6 +24,7 @@ final class OutboxManager {
     private let relayPool: RelayPool
     private let hints: OutboxRelayHintProviding
     private(set) var isEnabled: Bool
+    let telemetry: Telemetry
     
     init(
         relayPool: RelayPool,
@@ -27,6 +34,7 @@ final class OutboxManager {
         self.relayPool = relayPool
         self.hints = hints
         self.isEnabled = isEnabled
+        self.telemetry = Telemetry()
     }
     
     func setEnabled(_ enabled: Bool) {
@@ -62,6 +70,13 @@ final class OutboxManager {
         guard isEnabled else { return }
         for relay in relays {
             await addEphemeralRelayIfNeeded(relay)
+        }
+    }
+    
+    func recordFallback(noteId: NoteId) {
+        DispatchQueue.main.async {
+            self.telemetry.fallbackCount += 1
+            self.telemetry.lastRecoveredNoteId = noteId
         }
     }
     

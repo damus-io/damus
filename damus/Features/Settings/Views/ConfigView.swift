@@ -21,6 +21,7 @@ struct ConfigView: View {
     @State private var searchText: String = ""
 
     @ObservedObject var settings: UserSettingsStore
+    @ObservedObject var outboxTelemetry: OutboxManager.Telemetry
     
     // String constants
     private let DELETE_KEYWORD = "DELETE"
@@ -34,6 +35,8 @@ struct ConfigView: View {
     private let outboxSectionTitle = NSLocalizedString("Outbox", comment: "Section header for outbox settings")
     private let autopilotTitle = NSLocalizedString("Outbox autopilot", comment: "Toggle label for automatically discovering relays for outbox mode")
     private let autopilotDescription = NSLocalizedString("Automatically discover and temporarily connect to relays referenced by the people you follow. This improves reliability without changing your saved relay list.", comment: "Footer description for the outbox autopilot toggle")
+    private let autopilotStatsFormat = NSLocalizedString("%d notes recovered via autopilot this session.", comment: "Telemetry summary showing how many notes were recovered via outbox.")
+    private let autopilotLastNoteFormat = NSLocalizedString("Last recovery: %@", comment: "Telemetry summary describing the last note id recovered via autopilot.")
     private let developerTitle = NSLocalizedString("Developer", comment: "Section header for developer settings")
     private let firstAidTitle = NSLocalizedString("First Aid", comment: "Section header for first aid tools and settings")
     private let signOutTitle = NSLocalizedString("Sign out", comment: "Sidebar menu label to sign out of the account.")
@@ -44,6 +47,7 @@ struct ConfigView: View {
     init(state: DamusState) {
         self.state = state
         _settings = ObservedObject(initialValue: state.settings)
+        _outboxTelemetry = ObservedObject(initialValue: state.nostrNetwork.outbox.telemetry)
     }
 
     func textColor() -> Color {
@@ -163,8 +167,23 @@ struct ConfigView: View {
             }
             
             if showSettingsButton(title: autopilotTitle) {
-                Section(header: Text(outboxSectionTitle),
-                        footer: Text(autopilotDescription)) {
+                Section(
+                    header: Text(outboxSectionTitle),
+                    footer:
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(autopilotDescription)
+                            if outboxTelemetry.fallbackCount > 0 {
+                                Text(String(format: autopilotStatsFormat, outboxTelemetry.fallbackCount))
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                                if let lastId = outboxTelemetry.lastRecoveredNoteId {
+                                    Text(String(format: autopilotLastNoteFormat, String(lastId.hex().prefix(8))))
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                ) {
                     Toggle(isOn: Binding(
                         get: { settings.enable_outbox_autopilot },
                         set: { newValue in

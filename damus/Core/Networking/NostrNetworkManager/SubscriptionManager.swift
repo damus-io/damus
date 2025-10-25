@@ -529,6 +529,7 @@ extension NostrNetworkManager {
                 for await item in stream {
                     switch item {
                     case .event(let event):
+                        self.outboxManager?.recordFallback(noteId: event.id)
                         return NdbNoteLender(ownedNdbNote: event)
                     case .eose:
                         return nil
