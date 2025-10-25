@@ -93,4 +93,70 @@ class NostrNetworkManagerTests: XCTestCase {
         await ensureSubscribeGetsAllExpectedNotes(filter: NostrFilter(kinds: [.text], limit: 10), expectedCount: 10)
         await ensureSubscribeGetsAllExpectedNotes(filter: NostrFilter(kinds: [.text], until: UInt32(Date.now.timeIntervalSince1970), limit: 10), expectedCount: 10)
     }
+    
+    /// Tests Ndb streaming directly without NostrNetworkManager
+    ///
+    /// This test verifies that Ndb's subscription mechanism reliably returns all stored events
+    /// without any intermittent failures. The test creates a fresh Ndb instance, populates it
+    /// with a known number of events, subscribes to them, and verifies the count matches exactly.
+    func testDirectNdbStreaming() async throws {
+        let ndb = Ndb.test
+        defer { ndb.close() }
+        
+        // Pre-populate database with 100 test notes
+        let expectedCount = 100
+        let testPubkey = test_keypair_full.pubkey
+        
+        for i in 0..<expectedCount {
+            let testNote = NostrEvent(
+                content: "Test note \(i)",
+                keypair: test_keypair,
+                kind: NostrKind.text.rawValue,
+                tags: []
+            )
+            
+            // Process the event as a relay message
+            let eventJson = encode_json(testNote)!
+            let relayMessage = "[\"EVENT\",\"subid\",\(eventJson)]"
+            let processed = ndb.processEvent(relayMessage)
+            XCTAssertTrue(processed, "Failed to process event \(i)")
+        }
+        
+        // Give Ndb a moment to finish processing all events
+        try await Task.sleep(for: .milliseconds(100))
+        
+        // Subscribe and count all events
+        var count = 0
+        var receivedIds = Set<NoteId>()
+        let subscribeExpectation = XCTestExpectation(description: "Should receive all events and EOSE")
+        
+        Task {
+            do {
+                for try await item in try ndb.subscribe(filters: [NostrFilter(kinds: [.text], authors: [testPubkey])]) {
+                    switch item {
+                    case .event(let noteKey):
+                        // Lookup the note to verify it exists
+                        if let txn = NdbTxn(ndb: ndb) {
+                            if let note = ndb.lookup_note_by_key_with_txn(noteKey, txn: txn) {
+                                count += 1
+                                receivedIds.insert(note.id)
+                            }
+                        }
+                    case .eose:
+                        // End of stored events
+                        subscribeExpectation.fulfill()
+                        break
+                    }
+                }
+            } catch {
+                XCTFail("Subscription failed with error: \(error)")
+            }
+        }
+        
+        await fulfillment(of: [subscribeExpectation], timeout: 10.0)
+        
+        // Verify we received exactly the expected number of unique events
+        XCTAssertEqual(count, expectedCount, "Should receive all \(expectedCount) events")
+        XCTAssertEqual(receivedIds.count, expectedCount, "Should receive \(expectedCount) unique events")
+    }
 }
