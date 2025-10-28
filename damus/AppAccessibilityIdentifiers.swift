@@ -25,6 +25,23 @@ enum AppAccessibilityIdentifiers: String {
     case sign_in_confirm_button
     
     
+    // MARK: Sign Up / Create Account
+    // Prefix: `sign_up`
+    
+    /// Button to navigate to create account view
+    case sign_up_option_button
+    /// Text field for entering name during account creation
+    case sign_up_name_field
+    /// Text field for entering bio during account creation
+    case sign_up_bio_field
+    /// Button to proceed to the next step after entering profile info
+    case sign_up_next_button
+    /// Button to save keys after account creation
+    case sign_up_save_keys_button
+    /// Button to skip saving keys
+    case sign_up_skip_save_keys_button
+    
+    
     // MARK: Onboarding
     // Prefix: `onboarding`
     
@@ -59,6 +76,12 @@ enum AppAccessibilityIdentifiers: String {
     
     /// The profile option in the side menu
     case side_menu_profile_button
+    
+    /// The logout button in the side menu
+    case side_menu_logout_button
+    
+    /// The logout confirmation button in the alert dialog
+    case side_menu_logout_confirm_button
     
     
     // MARK: Items specific to the user's own profile

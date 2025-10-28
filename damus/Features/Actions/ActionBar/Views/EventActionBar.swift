@@ -36,10 +36,17 @@ struct EventActionBar: View {
         self.swipe_context = swipe_context
     }
     
-    var lnurl: String? {
-        damus_state.profiles.lookup_with_timestamp(event.pubkey)?.map({ pr in
+    @State var lnurl: String? = nil
+    
+    // Fetching an LNURL is expensive enough that it can cause a hitch. Use a special backgroundable function to fetch the value.
+    // Fetch on `.onAppear`
+    nonisolated func fetchLNURL() {
+        let lnurl = damus_state.profiles.lookup_with_timestamp(event.pubkey)?.map({ pr in
             pr?.lnurl
         }).value
+        DispatchQueue.main.async {
+            self.lnurl = lnurl
+        }
     }
     
     var show_like: Bool {
@@ -82,8 +89,10 @@ struct EventActionBar: View {
     
     var like_swipe_button: some View {
         SwipeAction(image: "shaka", backgroundColor: DamusColors.adaptableGrey) {
-            send_like(emoji: damus_state.settings.default_emoji_reaction)
-            self.swipe_context?.state.wrappedValue = .closed
+            Task {
+                await send_like(emoji: damus_state.settings.default_emoji_reaction)
+                self.swipe_context?.state.wrappedValue = .closed
+            }
         }
         .swipeButtonStyle()
         .accessibilityLabel(NSLocalizedString("React with default reaction emoji", comment: "Accessibility label for react button"))
@@ -131,7 +140,7 @@ struct EventActionBar: View {
                 if bar.liked {
                     //notify(.delete, bar.our_like)
                 } else {
-                    send_like(emoji: emoji)
+                    Task { await send_like(emoji: emoji) }
                 }
             }
             
@@ -218,8 +227,15 @@ struct EventActionBar: View {
         }
     }
 
-    var event_relay_url_strings: [RelayURL] {
-        let relays = damus_state.nostrNetwork.relaysForEvent(event: event)
+    @State var event_relay_url_strings: [RelayURL] = []
+    
+    func updateEventRelayURLStrings() async {
+        let newValue = await fetchEventRelayURLStrings()
+        self.event_relay_url_strings = newValue
+    }
+    
+    func fetchEventRelayURLStrings() async -> [RelayURL] {
+        let relays = await damus_state.nostrNetwork.relaysForEvent(event: event)
         if !relays.isEmpty {
             return relays.prefix(Constants.MAX_SHARE_RELAYS).map { $0 }
         }
@@ -230,7 +246,11 @@ struct EventActionBar: View {
     var body: some View {
         self.content
         .onAppear {
-            self.bar.update(damus: damus_state, evid: self.event.id)
+            Task.detached(priority: .background, operation: {
+                await self.bar.update(damus: damus_state, evid: self.event.id)
+                self.fetchLNURL()
+                await self.updateEventRelayURLStrings()
+            })
         }
         .sheet(isPresented: $show_share_action, onDismiss: { self.show_share_action = false }) {
             if #available(iOS 16.0, *) {
@@ -258,7 +278,10 @@ struct EventActionBar: View {
         }
         .onReceive(handle_notify(.update_stats)) { target in
             guard target == self.event.id else { return }
-            self.bar.update(damus: self.damus_state, evid: target)
+            Task {
+                await self.bar.update(damus: self.damus_state, evid: target)
+                await self.updateEventRelayURLStrings()
+            }
         }
         .onReceive(handle_notify(.liked)) { liked in
             if liked.id != event.id {
@@ -271,9 +294,9 @@ struct EventActionBar: View {
         }
     }
 
-    func send_like(emoji: String) {
+    func send_like(emoji: String) async {
         guard let keypair = damus_state.keypair.to_full(),
-              let like_ev = make_like_event(keypair: keypair, liked: event, content: emoji, relayURL: damus_state.nostrNetwork.relaysForEvent(event: event).first) else {
+              let like_ev = await make_like_event(keypair: keypair, liked: event, content: emoji, relayURL: damus_state.nostrNetwork.relaysForEvent(event: event).first) else {
             return
         }
 
@@ -281,7 +304,7 @@ struct EventActionBar: View {
 
         generator.impactOccurred()
         
-        damus_state.nostrNetwork.postbox.send(like_ev)
+        await damus_state.nostrNetwork.postbox.send(like_ev)
     }
     
     // MARK: Helper structures

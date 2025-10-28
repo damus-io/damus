@@ -10,19 +10,24 @@ import Foundation
 /// The data model for the SearchHome view, typically something global-like
 class SearchHomeModel: ObservableObject {
     var events: EventHolder
+    var followPackEvents: EventHolder
     @Published var loading: Bool = false
 
     var seen_pubkey: Set<Pubkey> = Set()
+    var follow_pack_seen_pubkey: Set<Pubkey> = Set()
     let damus_state: DamusState
     let base_subid = UUID().description
     let follow_pack_subid = UUID().description
     let profiles_subid = UUID().description
-    let limit: UInt32 = 500
+    let limit: UInt32 = 200
     //let multiple_events_per_pubkey: Bool = false
     
     init(damus_state: DamusState) {
         self.damus_state = damus_state
         self.events = EventHolder(on_queue: { ev in
+            preload_events(state: damus_state, events: [ev])
+        })
+        self.followPackEvents = EventHolder(on_queue: { ev in
             preload_events(state: damus_state, events: [ev])
         })
     }
@@ -34,68 +39,73 @@ class SearchHomeModel: ObservableObject {
         return filter
     }
     
+    @MainActor
     func filter_muted() {
         events.filter { should_show_event(state: damus_state, ev: $0) }
         self.objectWillChange.send()
     }
     
-    func subscribe() {
-        loading = true
-        let to_relays = determine_to_relays(pool: damus_state.nostrNetwork.pool, filters: damus_state.relay_filters)
-
+    @MainActor
+    func reload() async {
+        self.events.reset()
+        await self.load()
+    }
+    
+    func load() async {
+        DispatchQueue.main.async {
+            self.loading = true
+        }
+        let to_relays = await damus_state.nostrNetwork.ourRelayDescriptors
+            .map { $0.url }
+            .filter { !damus_state.relay_filters.is_filtered(timeline: .search, relay_id: $0) }
+        
         var follow_list_filter = NostrFilter(kinds: [.follow_list])
         follow_list_filter.until = UInt32(Date.now.timeIntervalSince1970)
         
-        damus_state.nostrNetwork.pool.subscribe(sub_id: base_subid, filters: [get_base_filter()], handler: handle_event, to: to_relays)
-        damus_state.nostrNetwork.pool.subscribe(sub_id: follow_pack_subid, filters: [follow_list_filter], handler: handle_event, to: to_relays)
-    }
-
-    func unsubscribe(to: RelayURL? = nil) {
-        loading = false
-        damus_state.nostrNetwork.pool.unsubscribe(sub_id: base_subid, to: to.map { [$0] })
-        damus_state.nostrNetwork.pool.unsubscribe(sub_id: follow_pack_subid, to: to.map { [$0] })
-    }
-
-    func handle_event(relay_id: RelayURL, conn_ev: NostrConnectionEvent) {
-        guard case .nostr_event(let event) = conn_ev else {
-            return
+        for await item in damus_state.nostrNetwork.reader.advancedStream(filters: [get_base_filter(), follow_list_filter], to: to_relays) {
+            switch item {
+            case .event(lender: let lender):
+                await lender.justUseACopy({ event in
+                    await self.handleFollowPackEvent(event)
+                    await self.handleEvent(event)
+                })
+            case .eose:
+                break
+            case .ndbEose:
+                DispatchQueue.main.async {
+                    self.loading = false
+                }
+            case .networkEose:
+                break
+            }
         }
-        
-        switch event {
-        case .event(let sub_id, let ev):
-            guard sub_id == self.base_subid || sub_id == self.profiles_subid || sub_id == self.follow_pack_subid else {
+    }
+    
+    @MainActor
+    func handleEvent(_ ev: NostrEvent) {
+        if ev.is_textlike && should_show_event(state: damus_state, ev: ev) && !ev.is_reply() {
+            if !damus_state.settings.multiple_events_per_pubkey && seen_pubkey.contains(ev.pubkey) {
                 return
             }
-            if ev.is_textlike && should_show_event(state: damus_state, ev: ev) && !ev.is_reply()
-            {
-                if !damus_state.settings.multiple_events_per_pubkey && seen_pubkey.contains(ev.pubkey) {
-                    return
-                }
-                seen_pubkey.insert(ev.pubkey)
-                
-                if self.events.insert(ev) {
-                    self.objectWillChange.send()
-                }
-            }
-        case .notice(let msg):
-            print("search home notice: \(msg)")
-        case .ok:
-            break
-        case .eose(let sub_id):
-            loading = false
+            seen_pubkey.insert(ev.pubkey)
             
-            if sub_id == self.base_subid {
-                // Make sure we unsubscribe after we've fetched the global events
-                // global events are not realtime
-                unsubscribe(to: relay_id)
-                
-                guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
-                load_profiles(context: "universe", profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(events.all_events), damus_state: damus_state, txn: txn)
+            if self.events.insert(ev) {
+                self.objectWillChange.send()
             }
-
-            break
-        case .auth:
-            break
+        }
+    }
+    
+    @MainActor
+    func handleFollowPackEvent(_ ev: NostrEvent) {
+        if ev.known_kind == .follow_list && should_show_event(state: damus_state, ev: ev) && !ev.is_reply() {
+            if !damus_state.settings.multiple_events_per_pubkey && follow_pack_seen_pubkey.contains(ev.pubkey) {
+                return
+            }
+            follow_pack_seen_pubkey.insert(ev.pubkey)
+            
+            if self.followPackEvents.insert(ev) {
+                self.objectWillChange.send()
+            }
         }
     }
 }
@@ -134,45 +144,3 @@ enum PubkeysToLoad {
     case from_events([NostrEvent])
     case from_keys([Pubkey])
 }
-
-func load_profiles<Y>(context: String, profiles_subid: String, relay_id: RelayURL, load: PubkeysToLoad, damus_state: DamusState, txn: NdbTxn<Y>) {
-    let authors = find_profiles_to_fetch(profiles: damus_state.profiles, load: load, cache: damus_state.events, txn: txn)
-
-    guard !authors.isEmpty else {
-        return
-    }
-    
-    print("load_profiles[\(context)]: requesting \(authors.count) profiles from \(relay_id)")
-
-    let filter = NostrFilter(kinds: [.metadata], authors: authors)
-
-    damus_state.nostrNetwork.pool.subscribe_to(sub_id: profiles_subid, filters: [filter], to: [relay_id]) { rid, conn_ev in
-        
-        let now = UInt64(Date.now.timeIntervalSince1970)
-        switch conn_ev {
-        case .ws_connection_event:
-            break
-        case .nostr_event(let ev):
-            guard ev.subid == profiles_subid, rid == relay_id else { return }
-
-            switch ev {
-            case .event(_, let ev):
-                if ev.known_kind == .metadata {
-                    damus_state.ndb.write_profile_last_fetched(pubkey: ev.pubkey, fetched_at: now)
-                }
-            case .eose:
-                print("load_profiles[\(context)]: done loading \(authors.count) profiles from \(relay_id)")
-                damus_state.nostrNetwork.pool.unsubscribe(sub_id: profiles_subid, to: [relay_id])
-            case .ok:
-                break
-            case .notice:
-                break
-            case .auth:
-                break
-            }
-        }
-
-
-    }
-}
-

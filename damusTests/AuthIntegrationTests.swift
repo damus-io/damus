@@ -70,14 +70,15 @@ final class AuthIntegrationTests: XCTestCase {
     }
      */
 
-    func testAuthIntegrationRelayDamusIo() {
+    @MainActor
+    func testAuthIntegrationRelayDamusIo() async {
         // Create relay pool and connect to `wss://relay.damus.io`
         let relay_url = RelayURL("wss://relay.damus.io")!
         var received_messages: [String] = []
         var sent_messages: [String] = []
         let keypair: Keypair = generate_new_keypair().to_keypair()
         let pool = RelayPool(ndb: Ndb.test, keypair: keypair)
-        pool.message_received_function = { obj in
+        await pool.set_message_received_function({ obj in
             let str = obj.0
             let descriptor = obj.1
 
@@ -86,8 +87,8 @@ final class AuthIntegrationTests: XCTestCase {
             }
 
             received_messages.append(str)
-        }
-        pool.message_sent_function = { obj in
+        })
+        await pool.set_message_sent_function({ obj in
             let str = obj.0
             let relay = obj.1
 
@@ -96,32 +97,36 @@ final class AuthIntegrationTests: XCTestCase {
             }
 
             sent_messages.append(str)
-        }
+        })
         XCTAssertEqual(pool.relays.count, 0)
         let relay_descriptor = RelayPool.RelayDescriptor.init(url: relay_url, info: .readWrite)
-        try! pool.add_relay(relay_descriptor)
+        try! await pool.add_relay(relay_descriptor)
         XCTAssertEqual(pool.relays.count, 1)
         let connection_expectation = XCTestExpectation(description: "Waiting for connection")
+        await pool.connect()
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
-            if pool.num_connected == 1 {
-                connection_expectation.fulfill()
-                timer.invalidate()
+            Task {
+                if await pool.num_connected == 1 {
+                    connection_expectation.fulfill()
+                    timer.invalidate()
+                }
             }
         }
-        wait(for: [connection_expectation], timeout: 30.0)
+        await fulfillment(of: [connection_expectation], timeout: 30.0)
         XCTAssertEqual(pool.num_connected, 1)
         // Assert that no AUTH messages have been received
         XCTAssertEqual(received_messages.count, 0)
     }
 
-    func testAuthIntegrationNostrWine() {
+    @MainActor
+    func testAuthIntegrationNostrWine() async {
         // Create relay pool and connect to `wss://nostr.wine`
         let relay_url = RelayURL("wss://nostr.wine")!
         var received_messages: [String] = []
         var sent_messages: [String] = []
         let keypair: Keypair = generate_new_keypair().to_keypair()
         let pool = RelayPool(ndb: Ndb.test, keypair: keypair)
-        pool.message_received_function = { obj in
+        await pool.set_message_received_function({ obj in
             let str = obj.0
             let descriptor = obj.1
 
@@ -130,8 +135,8 @@ final class AuthIntegrationTests: XCTestCase {
             }
 
             received_messages.append(str)
-        }
-        pool.message_sent_function = { obj in
+        })
+        await pool.set_message_sent_function({ obj in
             let str = obj.0
             let relay = obj.1
 
@@ -140,19 +145,22 @@ final class AuthIntegrationTests: XCTestCase {
             }
 
             sent_messages.append(str)
-        }
+        })
         XCTAssertEqual(pool.relays.count, 0)
         let relay_descriptor = RelayPool.RelayDescriptor.init(url: relay_url, info: .readWrite)
-        try! pool.add_relay(relay_descriptor)
+        try! await pool.add_relay(relay_descriptor)
         XCTAssertEqual(pool.relays.count, 1)
         let connection_expectation = XCTestExpectation(description: "Waiting for connection")
+        await pool.connect()
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
-            if pool.num_connected == 1 {
-                connection_expectation.fulfill()
-                timer.invalidate()
+            Task {
+                if pool.num_connected == 1 {
+                    connection_expectation.fulfill()
+                    timer.invalidate()
+                }
             }
         }
-        wait(for: [connection_expectation], timeout: 30.0)
+        await fulfillment(of: [connection_expectation], timeout: 30.0)
         XCTAssertEqual(pool.num_connected, 1)
         // Assert that no AUTH messages have been received
         XCTAssertEqual(received_messages.count, 0)
@@ -162,7 +170,7 @@ final class AuthIntegrationTests: XCTestCase {
         let subscribe = NostrSubscribe(filters: [
             NostrFilter(kinds: [.dm])
         ], sub_id: uuid)
-        pool.send(NostrRequest.subscribe(subscribe))
+        await pool.send(NostrRequest.subscribe(subscribe))
         // Wait for AUTH message to have been received & sent
         let msg_expectation = XCTestExpectation(description: "Waiting for messages")
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
@@ -171,13 +179,15 @@ final class AuthIntegrationTests: XCTestCase {
                 timer.invalidate()
             }
         }
-        wait(for: [msg_expectation], timeout: 30.0)
+        await fulfillment(of: [msg_expectation], timeout: 30.0)
         // Assert that AUTH message has been received
         XCTAssertTrue(received_messages.count >= 1, "expected recieved_messages to be >= 1")
+        if received_messages.count < 1 { return }   // End test early
         let json_received = try! JSONSerialization.jsonObject(with: received_messages[0].data(using: .utf8)!, options: []) as! [Any]
         XCTAssertEqual(json_received[0] as! String, "AUTH")
         // Assert that we've replied with the AUTH response
         XCTAssertEqual(sent_messages.count, 2)
+        if sent_messages.count < 2 { return }
         let json_sent = try! JSONSerialization.jsonObject(with: sent_messages[1].data(using: .utf8)!, options: []) as! [Any]
         XCTAssertEqual(json_sent[0] as! String, "AUTH")
         let sent_msg = json_sent[1] as! [String: Any]
@@ -185,4 +195,14 @@ final class AuthIntegrationTests: XCTestCase {
         XCTAssertEqual((sent_msg["tags"] as! [[String]]).first { $0[0] == "challenge" }![1], json_received[1] as! String)
     }
 
+}
+
+extension RelayPool {
+    func set_message_received_function(_ newFunction: (((String, RelayDescriptor)) -> Void)?) {
+        self.message_received_function = newFunction
+    }
+    
+    func set_message_sent_function(_ newFunction: (((String, Relay)) -> Void)? = nil) {
+        self.message_sent_function = newFunction
+    }
 }

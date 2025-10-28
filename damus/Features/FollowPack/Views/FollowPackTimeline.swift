@@ -66,7 +66,7 @@ struct FollowPackTimelineView<Content: View>: View {
             .coordinateSpace(name: "scroll")
             .onReceive(handle_notify(.scroll_to_top)) { () in
                 events.flush()
-                self.events.should_queue = false
+                self.events.set_should_queue(false)
                 scroll_to_event(scroller: scroller, id: "startblock", delay: 0.0, animate: true, anchor: .top)
             }
         }

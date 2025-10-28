@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 class MutelistManager {
     let user_keypair: Keypair
     private(set) var event: NostrEvent? = nil
@@ -26,7 +27,7 @@ class MutelistManager {
     
     var muted_notes_cache: [NoteId: EventMuteStatus] = [:]
     
-    init(user_keypair: Keypair) {
+    nonisolated init(user_keypair: Keypair) {
         self.user_keypair = user_keypair
     }
 

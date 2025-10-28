@@ -9,17 +9,17 @@
 
 import Foundation
 
-func follow_reference(box: PostBox, our_contacts: NostrEvent?, keypair: FullKeypair, follow: FollowRef) -> NostrEvent? {
+func follow_reference(box: PostBox, our_contacts: NostrEvent?, keypair: FullKeypair, follow: FollowRef) async -> NostrEvent? {
     guard let ev = follow_user_event(our_contacts: our_contacts, keypair: keypair, follow: follow) else {
         return nil
     }
     
-    box.send(ev)
+    await box.send(ev)
 
     return ev
 }
 
-func unfollow_reference(postbox: PostBox, our_contacts: NostrEvent?, keypair: FullKeypair, unfollow: FollowRef) -> NostrEvent? {
+func unfollow_reference(postbox: PostBox, our_contacts: NostrEvent?, keypair: FullKeypair, unfollow: FollowRef) async -> NostrEvent? {
     guard let cs = our_contacts else {
         return nil
     }
@@ -28,7 +28,7 @@ func unfollow_reference(postbox: PostBox, our_contacts: NostrEvent?, keypair: Fu
         return nil
     }
 
-    postbox.send(ev)
+    await postbox.send(ev)
     
     return ev
 }

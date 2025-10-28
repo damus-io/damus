@@ -30,8 +30,11 @@ struct MutelistView: View {
             }
 
             damus_state.mutelist_manager.set_mutelist(new_ev)
-            damus_state.nostrNetwork.postbox.send(new_ev)
-            updateMuteItems()
+            damus_state.settings.latest_mutelist_event_id_hex = new_ev.id.hex()
+            Task {
+                await damus_state.nostrNetwork.postbox.send(new_ev)
+                updateMuteItems()
+            }
         } label: {
             Label(NSLocalizedString("Delete", comment: "Button to remove a user from their mutelist."), image: "delete")
         }

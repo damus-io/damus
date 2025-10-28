@@ -12,8 +12,8 @@ import UIKit
 
 let EVENT_MAX_AGE_FOR_NOTIFICATION: TimeInterval = 12 * 60 * 60
 
-func process_local_notification(state: HeadlessDamusState, event ev: NostrEvent) {
-    guard should_display_notification(state: state, event: ev, mode: .local) else {
+func process_local_notification(state: HeadlessDamusState, event ev: NostrEvent) async {
+    guard await should_display_notification(state: state, event: ev, mode: .local) else {
         // We should not display notification. Exit.
         return
     }
@@ -25,7 +25,7 @@ func process_local_notification(state: HeadlessDamusState, event ev: NostrEvent)
     create_local_notification(profiles: state.profiles, notify: local_notification)
 }
 
-func should_display_notification(state: HeadlessDamusState, event ev: NostrEvent, mode: UserSettingsStore.NotificationsMode) -> Bool {
+func should_display_notification(state: HeadlessDamusState, event ev: NostrEvent, mode: UserSettingsStore.NotificationsMode) async -> Bool {
     // Do not show notification if it's coming from a mode different from the one selected by our user
     guard state.settings.notification_mode == mode else {
         return false
@@ -46,7 +46,7 @@ func should_display_notification(state: HeadlessDamusState, event ev: NostrEvent
     }
 
     // Don't show notifications that match mute list.
-    if state.mutelist_manager.is_event_muted(ev) {
+    if await state.mutelist_manager.is_event_muted(ev) {
         return false
     }
 

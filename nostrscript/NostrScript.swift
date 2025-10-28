@@ -310,7 +310,10 @@ public func nscript_nostr_cmd(interp: UnsafeMutablePointer<wasm_interp>?, cmd: I
 func nscript_add_relay(script: NostrScript, relay: String) -> Bool {
     guard let url = RelayURL(relay) else { return false }
     let desc = RelayPool.RelayDescriptor(url: url, info: .readWrite, variant: .ephemeral)
-    return (try? script.pool.add_relay(desc)) != nil
+    // Interacting with RelayPool needs to be done asynchronously, thus we cannot return the answer synchronously
+    // return (try? await script.pool.add_relay(desc)) != nil
+    Task { try await script.pool.add_relay(desc) }
+    return true
 }
 
 
@@ -344,9 +347,7 @@ public func nscript_pool_send_to(interp: UnsafeMutablePointer<wasm_interp>?, pre
         return 0
     }
 
-    DispatchQueue.main.async {
-        script.pool.send_raw(.custom(req_str), to: [to_relay_url], skip_ephemeral: false)
-    }
+    Task { await script.pool.send_raw(.custom(req_str), to: [to_relay_url], skip_ephemeral: false) }
 
     return 1;
 }
@@ -354,9 +355,7 @@ public func nscript_pool_send_to(interp: UnsafeMutablePointer<wasm_interp>?, pre
 func nscript_pool_send(script: NostrScript, req req_str: String) -> Int32 {
     //script.test("pool_send: '\(req_str)'")
     
-    DispatchQueue.main.sync {
-        script.pool.send_raw(.custom(req_str), skip_ephemeral: false)
-    }
+    Task { await script.pool.send_raw(.custom(req_str), skip_ephemeral: false) }
     
     return 1;
 }

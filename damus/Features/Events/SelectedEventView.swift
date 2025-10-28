@@ -74,7 +74,7 @@ struct SelectedEventView: View {
             }
             .onReceive(handle_notify(.update_stats)) { target in
                 guard target == self.event.id else { return }
-                self.bar.update(damus: self.damus, evid: target)
+                Task { await self.bar.update(damus: self.damus, evid: target) }
             }
             .compositingGroup()
         }
