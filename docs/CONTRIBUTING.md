@@ -1,10 +1,32 @@
 # Contributing
 
-## Submitting patches
+Making contributions takes significant effort and time from both the contributor 
+and the person who will review your work.
+
+We made these guidelines to help you make successful contributions and avoid
+wasted time and effort! So even though it might require a bit of extra time 
+to read these, it will likely save you a lot of time and headaches while 
+making contributions.
 
 *Most of this comes from the linux kernel guidelines for submitting
 patches, we follow many of the same guidelines. These are very important!
-If you want your code to be accepted, please read this carefully*
+If you want your code to be accepted, please read these carefully*
+
+## Choosing the scope of your contribution
+
+Since reviews require time and effort from our busy team, it is important to
+carefully choose the scope of your work.
+
+If your contributions are long and difficult to review and/or verify,
+or if they do not solve something that is of high priority for the team,
+you may find that your contributions may take much longer to get merged,
+or they may get rejected completely.
+
+If this is your first time contributing, we *strongly* recommend starting small,
+and then working your way up to larger contributions as you get familiar with
+the entire process.
+
+## Submitting patches/PRs
 
 Describe your problem.  Whether your patch is a one-line bug fix or
 5000 lines of a new feature, there must be an underlying problem that
@@ -157,4 +179,104 @@ changelogs, please include:
 
 The changelog script will pick these up and give you attribution for your
 change
+
+### Testing
+
+It is crucial that you properly test your changes. The reviewer needs to be
+convinced that your changes actually work, solve the issue at hand, and do not 
+introduce new issues.
+
+Therefore, with every PR/patch, you should include a report indicating what was
+tested, under what circumstances (e.g. Devices, devices, setup, etc.), and how.
+
+The goal is not to overburden the contributor, but to allow the reviewer to 
+independently verify the claims being made about the contribution as needed.
+Therefore, test reports should be specific enough that the reviewer 
+can independently verify them.
+
+The more complex and widespread your changes, the more testing it will require.
+
+If the reviewer cannot verify your claims in a time-efficient manner, you may be
+asked to perform further testing, and/or experience delays.
+
+DON'T:
+❌ Provide vague test reports.
+❌ Make big changes and not provide enough test coverage.
+❌ Expect the reviewer to do a lot of testing on your behalf.
+❌ Underestimate how much testing and polish bigger changes actually need.
+
+DO:
+✅ Provide enough details about your testing so that the reviewer can verify quality.
+✅ Make it easy for the reviewer to understand that your changes actually work.
+
+#### Recreating and root-causing issues
+
+If your contribution tries to fix an existing issue, please try to ensure that
+you can recreate the original issue, or can reasonably prove its root cause 
+with sound logic, before making the fix.
+
+Without the ability to recreate the issue, it is near impossible to know 
+if a successful test result is due to a successful fix, or simply "luck".
+
+Ideally, there should be a specific test procedure that clearly fails
+before your changes, and clearly passes after your changes.
+
+If you are solving an issue that is easy or "obvious" to recreate, you may not
+need this. However, if you are solving difficult or intermittent 
+issues, this is very important. Many times it is where most of the work really is!
+
+For intermittent issues, please perform several iterations of the tests 
+until you can confidently assert the issue is really fixed.
+
+DON'T:
+❌ Claim an intermittent issue is fixed simply because some test procedure passes.
+❌ Expect the reviewer to find the issue recreation steps for you.
+
+DO:
+✅ Find a procedure that recreates the issue before changes are applied.
+✅ Be consistent with the procedure applied for issue recreation and fix verification.
+✅ Run enough iterations of testing for intermittent issues.
+✅ Provide sound reasoning for your fix when it is impractical to recreate the issue.
+
+
+## Submitting multiple PRs
+
+Unless otherwise needed by our priorities and roadmap, our team will only work 
+and prioritize one PR per author at a time to ensure every PR author has a chance 
+to get their PR reviewed, and incentivize all contributors to prioritize 
+driving existing PRs to the finish line.
+
+If you submit multiple PRs at a time, our team will pick a PR to focus on first, and
+label other PRs as being on a "queue". If this happens, please focus on addressing
+issues on an existing PR over opening a new PR.
+
+The above rule may be waived as needed by the team to fulfill its priorities.
+
+
+## AI-assisted contributions
+
+We embrace and encourage new technologies and innovations in our product development.
+Therefore, AI-assisted contributions are welcome in this repository. 
+However, AI-assisted submissions will be treated with the same standards and rigour
+as any other human-made submissions. Therefore, AI-assisted submissions must also
+follow all these guidelines.
+
+If you do not have any Software Engineering experience, please consider the following:
+- Make sure you have the proper rights to submit the AI-generated code.
+- Make sure you are able to "own" your contributions — meaning that you can attend to
+  requests and feedback our reviewers make.
+
+Although we endeavour to be helpful when making requests back to PR/patch authors, 
+we are under no obligation to provide extensive assistance to AI-assisted contributors 
+who have significant gaps in their Software Engineering knowledge.
+
+As mentioned at the top, we encourage all contributors to start with small contributions,
+to become familiar with the process. We believe this will increase your chances of success!
+
+## Questions about the guidelines
+
+Feel free to ask our team about questions you may have regarding these guidelines, we will
+be happy to clarify any of the above items!
+
+Thank you for contributing to Damus!
 
