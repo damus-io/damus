@@ -4,6 +4,32 @@ _[Please provide a summary of the changes in this PR.]_
 
 ## Checklist
 
+<!-- 
+CHOOSE YOUR CHECKLIST: 
+- If this is an EXPERIMENTAL DAMUS LABS FEATURE, follow the "Experimental Feature Checklist" below and DELETE the "Standard PR Checklist"
+- If this is a STANDARD PR, follow the "Standard PR Checklist" below and DELETE the "Experimental Feature Checklist"
+-->
+
+### Experimental Feature Checklist
+
+<!-- DELETE THIS SECTION if this is a standard PR -->
+
+> [!TIP]
+> This Pull Request is an experimental feature for Damus Labs, and follows a fast-track review process.
+> The overall requirements are lowered and the review process is not as strict as usual. However, the feature will only be available for Purple users who opt-in.
+
+- [ ] I have read (or I am familiar with) the [Contribution Guidelines](../docs/CONTRIBUTING.md).
+- [ ] I have done some testing on the changes in this PR to ensure it is at least functional.
+- [ ] I made sure that this new feature is only available when the user opts-in from the Damus Labs screen, and does not affect the rest of the app when turned off. 
+- [ ] My PR is either small, or I have split it into smaller logical commits that are easier to review.
+- [ ] I have added the signoff line to all my commits. See [Signing off your work](../docs/CONTRIBUTING.md#sign-your-work---the-developers-certificate-of-origin).
+- [ ] I have added an appropriate changelog entry to my commit in this PR. See [Adding changelog entries](../docs/CONTRIBUTING.md#add-changelog-changed-changelog-fixed-etc).
+    - Example changelog entry: `Changelog-Added: Added experimental feature <X> to Damus Labs`
+
+### Standard PR Checklist
+
+<!-- DELETE THIS SECTION if this is an experimental Damus Labs feature -->
+
 - [ ] I have read (or I am familiar with) the [Contribution Guidelines](../docs/CONTRIBUTING.md)
 - [ ] I have tested the changes in this PR
 - [ ] I have profiled the changes to ensure there are no performance regressions, or I do not need to profile the changes.
