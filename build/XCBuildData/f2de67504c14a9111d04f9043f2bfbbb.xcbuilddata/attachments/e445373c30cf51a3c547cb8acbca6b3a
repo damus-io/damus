@@ -1,0 +1,19 @@
+{
+  "" : {
+    "diagnostics" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/SwipeActions/build/SwipeActions.build/Debug-iphonesimulator/SwipeActions.build/Objects-normal/x86_64/SwipeActions-primary.dia",
+    "emit-module-dependencies" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/SwipeActions/build/SwipeActions.build/Debug-iphonesimulator/SwipeActions.build/Objects-normal/x86_64/SwipeActions-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/SwipeActions/build/SwipeActions.build/Debug-iphonesimulator/SwipeActions.build/Objects-normal/x86_64/SwipeActions-primary-emit-module.dia",
+    "pch" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/SwipeActions/build/SwipeActions.build/Debug-iphonesimulator/SwipeActions.build/Objects-normal/x86_64/SwipeActions-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/SwipeActions/build/SwipeActions.build/Debug-iphonesimulator/SwipeActions.build/Objects-normal/x86_64/SwipeActions-primary.swiftdeps"
+  },
+  "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/SwipeActions/Sources/SwipeActions.swift" : {
+    "const-values" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/SwipeActions/build/SwipeActions.build/Debug-iphonesimulator/SwipeActions.build/Objects-normal/x86_64/SwipeActions.swiftconstvalues",
+    "dependencies" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/SwipeActions/build/SwipeActions.build/Debug-iphonesimulator/SwipeActions.build/Objects-normal/x86_64/SwipeActions.d",
+    "diagnostics" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/SwipeActions/build/SwipeActions.build/Debug-iphonesimulator/SwipeActions.build/Objects-normal/x86_64/SwipeActions.dia",
+    "index-unit-output-path" : "/SwipeActions.build/Debug-iphonesimulator/SwipeActions.build/Objects-normal/x86_64/SwipeActions.o",
+    "llvm-bc" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/SwipeActions/build/SwipeActions.build/Debug-iphonesimulator/SwipeActions.build/Objects-normal/x86_64/SwipeActions.bc",
+    "object" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/SwipeActions/build/SwipeActions.build/Debug-iphonesimulator/SwipeActions.build/Objects-normal/x86_64/SwipeActions.o",
+    "swift-dependencies" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/SwipeActions/build/SwipeActions.build/Debug-iphonesimulator/SwipeActions.build/Objects-normal/x86_64/SwipeActions.swiftdeps",
+    "swiftmodule" : "/Users/jax/Library/Developer/Xcode/DerivedData/damus-gmmpigfzjzfqwkfqmxkphvabbqsa/SourcePackages/checkouts/SwipeActions/build/SwipeActions.build/Debug-iphonesimulator/SwipeActions.build/Objects-normal/x86_64/SwipeActions~partial.swiftmodule"
+  }
+}

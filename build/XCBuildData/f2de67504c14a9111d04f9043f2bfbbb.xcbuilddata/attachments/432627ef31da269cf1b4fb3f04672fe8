@@ -1,0 +1,4 @@
+module SwiftSoup {
+header "SwiftSoup-Swift.h"
+export *
+}

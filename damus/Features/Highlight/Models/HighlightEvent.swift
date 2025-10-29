@@ -10,7 +10,8 @@ import Foundation
 struct HighlightEvent {
     let event: NostrEvent
 
-    var event_ref: String? = nil
+    var event_ref: String? = nil  // 'e' tag - regular event ID
+    var addr_ref: String? = nil   // 'a' tag - addressable event (kind:pubkey:d-tag)
     var url_ref: URL? = nil
     var context: String? = nil
     
@@ -25,7 +26,7 @@ struct HighlightEvent {
             guard tag.count >= 2 else { continue }
             switch tag[0].string() {
             case "e":   highlight.event_ref = tag[1].string()
-            case "a":   highlight.event_ref = tag[1].string()
+            case "a":   highlight.addr_ref = tag[1].string()
             case "r":
                 if tag.count >= 3,
                    tag[2].string() == HighlightSource.TAG_SOURCE_ELEMENT,
@@ -205,32 +206,43 @@ struct HighlightContentDraft: Hashable {
 enum HighlightSource: Hashable {
     static let TAG_SOURCE_ELEMENT = "source"
     case event(NoteId)
+    case addressable_event(String)  // "kind:pubkey:d-tag" for NIP-33 addressable events (like longform)
     case external_url(URL)
-    
+
     func tags() -> [[String]] {
         switch self {
             case .event(let event_id):
                 return [ ["e", "\(event_id)", HighlightSource.TAG_SOURCE_ELEMENT] ]
+            case .addressable_event(let addr):
+                return [ ["a", addr] ]
             case .external_url(let url):
                 return [ ["r", "\(url)", HighlightSource.TAG_SOURCE_ELEMENT] ]
         }
     }
-    
+
     func ref() -> RefId {
         switch self {
             case .event(let event_id):
                 return .event(event_id)
+            case .addressable_event(let addr):
+                return .reference(addr)
             case .external_url(let url):
                 return .reference(url.absoluteString)
         }
     }
-    
+
     static func from(tags: [[String]]) -> HighlightSource? {
         for tag in tags {
+            // Check for 'a' tag (addressable event) first - no "source" marker needed per NIP-84
+            if tag.count >= 2 && tag[0] == "a" {
+                return .addressable_event(tag[1])
+            }
+            // Check for 'e' tag with "source" marker
             if tag.count == 3 && tag[0] == "e" && tag[2] == HighlightSource.TAG_SOURCE_ELEMENT {
                 guard let event_id = NoteId(hex: tag[1]) else { continue }
                 return .event(event_id)
             }
+            // Check for 'r' tag with "source" marker
             if tag.count == 3 && tag[0] == "r" && tag[2] == HighlightSource.TAG_SOURCE_ELEMENT {
                 guard let url = URL(string: tag[1]) else { continue }
                 return .external_url(url)

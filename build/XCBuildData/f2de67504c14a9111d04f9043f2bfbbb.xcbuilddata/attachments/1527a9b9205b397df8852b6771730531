@@ -1,0 +1,4 @@
+module SwiftTrie {
+header "SwiftTrie-Swift.h"
+export *
+}

@@ -63,7 +63,7 @@ struct SelectableText: View {
         })) {
             if let event, case .show_highlight_post_view(let highlighted_text) = self.selectedTextActionState {
                 PostView(
-                    action: .highlighting(.init(selected_text: highlighted_text, source: .event(event.id))),
+                    action: .highlighting(.init(selected_text: highlighted_text, source: highlightSource(for: event))),
                     damus_state: damus_state
                 )
                 .presentationDragIndicator(.visible)
@@ -87,7 +87,31 @@ struct SelectableText: View {
     func enableHighlighting() -> Bool {
         self.event != nil
     }
-    
+
+    /// Determines the appropriate HighlightSource for the given event
+    /// - For longform articles (kind 30023), creates an addressable event reference
+    /// - For regular events, creates a standard event reference
+    private func highlightSource(for event: NostrEvent) -> HighlightSource {
+        // Check if this is a longform article (kind 30023)
+        if event.known_kind == .longform {
+            // Extract the d-tag identifier for the addressable event
+            var d_identifier: String?
+            for tag in event.tags {
+                if tag.count >= 2 && tag[0].string() == "d" {
+                    d_identifier = tag[1].string()
+                    break
+                }
+            }
+
+            // Create addressable event reference: "kind:pubkey:d-identifier"
+            let addr = "\(event.kind):\(event.pubkey.hex()):\(d_identifier ?? "")"
+            return .addressable_event(addr)
+        }
+
+        // For all other events, use regular event ID
+        return .event(event.id)
+    }
+
     enum SelectedTextActionState {
         case hide
         case show_highlight_post_view(highlighted_text: String)

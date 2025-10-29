@@ -92,7 +92,28 @@ struct HighlightBodyView: View {
 
     var Main: some View {
         VStack(alignment: .leading, spacing: 0) {
-            
+
+            // Show provenance - who is being highlighted
+            if let event_ref = event.event_ref, let eventHex = hex_decode_id(event_ref) {
+                EventLoaderView(damus_state: state, event_id: NoteId(eventHex)) { highlighted_event in
+                    HighlightDescription(highlight_event: event, highlighted_event: highlighted_event, ndb: state.ndb)
+                        .padding(.horizontal)
+                        .padding(.bottom, 5)
+                }
+            } else if let addr_ref = event.addr_ref {
+                // For addressable events, extract pubkey from "kind:pubkey:d-tag" format
+                let components = addr_ref.split(separator: ":").map(String.init)
+                if components.count >= 2, let pubkey = Pubkey(hex: components[1]) {
+                    let profile_txn = state.profiles.lookup(id: pubkey, txn_name: "highlight-addr-desc")
+                    let profile = profile_txn?.unsafeUnownedValue
+                    let author_name = Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
+
+                    HighlightAddressableDescription(author_name: author_name)
+                        .padding(.horizontal)
+                        .padding(.bottom, 5)
+                }
+            }
+
             if self.event.event.referenced_comment_items.first?.content != nil {
                 let all_options = options.union(.no_action_bar)
                 NoteContentView(
@@ -137,13 +158,15 @@ struct HighlightBodyView: View {
             if let url = event.url_ref {
                 HighlightLink(state: state, url: url, content: event.event.content)
                     .padding(.horizontal)
-            } else {
-                if let evRef = event.event_ref {
-                    if let eventHex = hex_decode_id(evRef) {
-                        HighlightEventRef(damus_state: state, event_ref: NoteId(eventHex))
-                            .padding(.horizontal)
-                            .padding(.top, 5)
-                    }
+            } else if let addr_ref = event.addr_ref {
+                HighlightAddressableEventRefInline(damus_state: state, addr_ref: addr_ref)
+                    .padding(.horizontal)
+                    .padding(.top, 5)
+            } else if let evRef = event.event_ref {
+                if let eventHex = hex_decode_id(evRef) {
+                    HighlightEventRef(damus_state: state, event_ref: NoteId(eventHex))
+                        .padding(.horizontal)
+                        .padding(.top, 5)
                 }
             }
 
@@ -151,10 +174,117 @@ struct HighlightBodyView: View {
     }
 }
 
+// MARK: - Inline implementation for addressable event references
+
+/// Inline view for addressable events (longform articles) in highlights
+private struct HighlightAddressableEventRefInline: View {
+    let damus_state: DamusState
+    let addr_ref: String
+    @State private var longformEvent: LongformEvent?
+    @State private var isLoading = true
+
+    var body: some View {
+        Group {
+            if let longformEvent = longformEvent {
+                NavigationLink(value: Route.Longform(event: longformEvent)) {
+                    HStack(alignment: .top, spacing: 10) {
+                        if let url = longformEvent.image {
+                            KFAnimatedImage(url)
+                                .callbackQueue(.dispatch(.global(qos:.background)))
+                                .backgroundDecode(true)
+                                .imageContext(.note, disable_animation: true)
+                                .image_fade(duration: 0.25)
+                                .cancelOnDisappear(true)
+                                .configure { view in
+                                    view.framePreloadCount = 3
+                                }
+                                .frame(width: 35, height: 35)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .overlay(RoundedRectangle(cornerRadius: 10).stroke(.gray.opacity(0.5), lineWidth: 0.5))
+                                .scaledToFit()
+                        } else {
+                            Image("markdown")
+                                .resizable()
+                                .foregroundColor(DamusColors.neutral6)
+                                .background(DamusColors.neutral3)
+                                .frame(width: 35, height: 35)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .overlay(RoundedRectangle(cornerRadius: 10).stroke(.gray.opacity(0.5), lineWidth: 0.5))
+                        }
+
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text(longformEvent.title ?? NSLocalizedString("Untitled", comment: "Title of longform event if it is untitled."))
+                                .font(.system(size: 14, weight: .bold))
+                                .lineLimit(1)
+                                .foregroundColor(DamusColors.adaptableBlack)
+
+                            let profile_txn = damus_state.profiles.lookup(id: longformEvent.event.pubkey, txn_name: "highlight-longform")
+                            let profile = profile_txn?.unsafeUnownedValue
+
+                            if let display_name = profile?.display_name {
+                                Text(display_name)
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.gray)
+                            } else if let name = profile?.name {
+                                Text(name)
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                    }
+                    .padding([.leading, .vertical], 7)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(DamusColors.adaptableWhite)
+                    .cornerRadius(10)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(DamusColors.neutral3, lineWidth: 2)
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
+            } else if isLoading {
+                ProgressView()
+                    .padding()
+            } else {
+                Text("Article not found", comment: "Message when highlighted article cannot be found")
+                    .foregroundColor(.gray)
+                    .font(.caption)
+            }
+        }
+        .task {
+            await loadLongformEvent()
+        }
+    }
+
+    private func loadLongformEvent() async {
+        // Parse addr_ref: "kind:pubkey:d-identifier"
+        let components = addr_ref.split(separator: ":").map(String.init)
+        guard components.count >= 3,
+              let kind = UInt32(components[0]),
+              let pubkey = Pubkey(hex: components[1]) else {
+            isLoading = false
+            return
+        }
+
+        let identifier = components[2]
+
+        // Use the established naddrLookup helper which handles both NDB and relay lookup
+        let naddr = NAddr(identifier: identifier, author: pubkey, relays: [], kind: kind)
+        guard let event = await naddrLookup(damus_state: damus_state, naddr: naddr) else {
+            isLoading = false
+            return
+        }
+
+        self.longformEvent = LongformEvent.parse(from: event)
+        self.isLoading = false
+    }
+}
+
 struct HighlightView: View {
     let state: DamusState
     let event: HighlightEvent
     let options: EventViewOptions
+    @State private var longformEvent: LongformEvent?
 
     init(state: DamusState, event: NostrEvent, options: EventViewOptions) {
         self.state = state
@@ -163,11 +293,50 @@ struct HighlightView: View {
     }
 
     var body: some View {
+        Group {
+            if let longformEvent = longformEvent {
+                NavigationLink(value: Route.Longform(event: longformEvent)) {
+                    HighlightContent
+                }
+                .buttonStyle(PlainButtonStyle())
+            } else {
+                HighlightContent
+            }
+        }
+        .task {
+            // Load longform event if this highlight references an addressable event
+            if let addr_ref = event.addr_ref {
+                await loadLongformEvent(addr_ref: addr_ref)
+            }
+        }
+    }
+
+    private var HighlightContent: some View {
         VStack(alignment: .leading) {
             EventShell(state: state, event: event.event, options: options) {
                 HighlightBodyView(state: state, ev: event, options: options)
             }
         }
+    }
+
+    private func loadLongformEvent(addr_ref: String) async {
+        // Parse addr_ref: "kind:pubkey:d-identifier"
+        let components = addr_ref.split(separator: ":").map(String.init)
+        guard components.count >= 3,
+              let kind = UInt32(components[0]),
+              let pubkey = Pubkey(hex: components[1]) else {
+            return
+        }
+
+        let identifier = components[2]
+
+        // Use the established naddrLookup helper which handles both NDB and relay lookup
+        let naddr = NAddr(identifier: identifier, author: pubkey, relays: [], kind: kind)
+        guard let event = await naddrLookup(damus_state: state, naddr: naddr) else {
+            return
+        }
+
+        self.longformEvent = LongformEvent.parse(from: event)
     }
 }
 

@@ -34,6 +34,10 @@ struct HighlightEventRef: View {
         EventLoaderView(damus_state: damus_state, event_id: event_ref) { event in
             EventMutingContainerView(damus_state: damus_state, event: event) {
                 if event.known_kind == .longform {
+                    Button(action: {
+                        let longform_event = LongformEvent.parse(from: event)
+                        damus_state.nav.push(route: .Longform(event: longform_event))
+                    }) {
                     HStack(alignment: .top, spacing: 10) {
                         let longform_event = LongformEvent.parse(from: event)
                         if let url = longform_event.image {
@@ -84,6 +88,8 @@ struct HighlightEventRef: View {
                         RoundedRectangle(cornerRadius: 10)
                             .stroke(DamusColors.neutral3, lineWidth: 2)
                     )
+                    }
+                    .buttonStyle(PlainButtonStyle())
                 } else {
                     EmptyView()
                 }
