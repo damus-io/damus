@@ -29,6 +29,10 @@ struct EventView: View {
         self.pubkey = pubkey ?? event.pubkey
     }
 
+    var pollsFeatureEnabled: Bool {
+        damus.settings.enable_nip88_polls
+    }
+
     var body: some View {
         VStack {
             if event.known_kind == .boost {
@@ -47,6 +51,11 @@ struct EventView: View {
                 LongformPreview(state: damus, ev: event, options: options)
             } else if event.known_kind == .highlight {
                 HighlightView(state: damus, event: event, options: options)
+            } else if pollsFeatureEnabled, event.known_kind == .poll, let poll = PollEvent(event: event) {
+                PollEventView(damus: damus, event: event, poll: poll, options: options)
+                    .onAppear {
+                        damus.polls.registerPollEvent(event)
+                    }
             } else {
                 TextEvent(damus: damus, event: event, pubkey: pubkey, options: options)
                     //.padding([.top], 6)
@@ -158,4 +167,3 @@ struct EventView_Previews: PreviewProvider {
         .padding()
     }
 }
-
