@@ -27,6 +27,9 @@ struct DamusURLHandler {
         switch parsed_url_info {
         case .profile(let pubkey):
             return .route(.ProfileByKey(pubkey: pubkey))
+        case .relay(let relayURL):
+            let metadata = damus_state.relay_model_cache.model(with_relay_id: relayURL)?.metadata
+            return .route(.RelayDetail(relay: relayURL, metadata: metadata))
         case .filter(let nostrFilter):
             let search = SearchModel(state: damus_state, search: nostrFilter)
             return .route(.Search(search: search))
@@ -76,6 +79,10 @@ struct DamusURLHandler {
         if let nwc = WalletConnectURL(str: url.absoluteString) {
             return .wallet_connect(nwc)
         }
+
+        if let parsedRelay = parse_relay_url(url: url) {
+            return parsedRelay
+        }
         
         guard let link = decode_nostr_uri(url.absoluteString) else {
             return nil
@@ -111,6 +118,7 @@ struct DamusURLHandler {
     
     enum ParsedURLInfo {
         case profile(Pubkey)
+        case relay(RelayURL)
         case filter(NostrFilter)
         case event(NostrEvent)
         case event_reference(LoadableNostrEventViewModel.NoteReference)
@@ -118,5 +126,51 @@ struct DamusURLHandler {
         case script([UInt8])
         case purple(DamusPurpleURL)
         case invoice(Invoice)
+    }
+
+    private static func parse_relay_url(url: URL) -> ParsedURLInfo? {
+        guard let scheme = url.scheme?.lowercased() else {
+            return nil
+        }
+
+        switch scheme {
+        case "damus":
+            guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+                return nil
+            }
+
+            let host = components.host?.lowercased()
+            var potentialRelayString: String?
+
+            if host == "relay" {
+                potentialRelayString = components.queryItems?.first(where: { $0.name == "url" })?.value
+                if potentialRelayString == nil {
+                    let trimmedPath = components.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+                    potentialRelayString = trimmedPath.isEmpty ? nil : trimmedPath
+                }
+            } else {
+                let trimmedPath = components.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+                if trimmedPath.lowercased().hasPrefix("relay:") {
+                    potentialRelayString = String(trimmedPath.dropFirst("relay:".count))
+                }
+            }
+
+            guard let rawRelay = potentialRelayString else {
+                return nil
+            }
+
+            let decodedRelay = rawRelay.removingPercentEncoding ?? rawRelay
+            guard let relay = RelayURL(decodedRelay) else {
+                return nil
+            }
+
+            return .relay(relay)
+
+        case "ws", "wss":
+            return RelayURL(url.absoluteString).map { .relay($0) }
+
+        default:
+            return nil
+        }
     }
 }
