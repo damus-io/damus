@@ -40,7 +40,11 @@ struct PostingTimelineView: View {
     func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
         var filters = ContentFilters.defaults(damus_state: damus_state)
         filters.append(fstate.filter)
-        switch timeline_source {
+        
+        // If favourites feature is disabled, always use follows
+        let sourceToUse = damus_state.settings.enable_favourites_feature ? timeline_source : .follows
+        
+        switch sourceToUse {
         case .follows:
             filters.append(damus_state.contacts.friend_filter)
         case .favorites:
@@ -67,15 +71,17 @@ struct PostingTimelineView: View {
 
                     HStack(alignment: .center) {
                         SignalView(state: damus_state, signal: home.signal)
-                        let switchView = PostingTimelineSwitcherView(
-                            damusState: damus_state,
-                            timelineSource: $timeline_source
-                        )
-                        if #available(iOS 17.0, *) {
-                            switchView
-                                .popoverTip(PostingTimelineSwitcherView.TimelineSwitcherTip.shared)
-                        } else {
-                            switchView
+                        if damus_state.settings.enable_favourites_feature {
+                            let switchView = PostingTimelineSwitcherView(
+                                damusState: damus_state,
+                                timelineSource: $timeline_source
+                            )
+                            if #available(iOS 17.0, *) {
+                                switchView
+                                    .popoverTip(PostingTimelineSwitcherView.TimelineSwitcherTip.shared)
+                            } else {
+                                switchView
+                            }
                         }
                     }
                 }

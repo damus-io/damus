@@ -150,7 +150,9 @@ struct ProfileActionSheetView: View {
             ScrollView(.horizontal) {
                 HStack(spacing: 20) {
                     followButton
-                    favoriteButton
+                    if damus_state.settings.enable_favourites_feature {
+                        favoriteButton
+                    }
                     zapButton
                     dmButton
                     if damus_state.keypair.pubkey != profile.pubkey && damus_state.keypair.privkey != nil {
