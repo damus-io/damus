@@ -147,7 +147,7 @@ final class NIP10Tests: XCTestCase {
         XCTAssertEqual(tr.is_reply_to_root, true)
     }
 
-    func test_marker_reply() {
+    func test_marker_reply() async {
         let note_json = """
         {
           "pubkey": "5b0183ab6c3e322bf4d41c6b3aef98562a144847b7499543727c5539a114563e",
@@ -181,7 +181,7 @@ final class NIP10Tests: XCTestCase {
         let pk = Pubkey(hex: "5b0183ab6c3e322bf4d41c6b3aef98562a144847b7499543727c5539a114563e")!
         //let last_reply_hex = "1bb940ce0ba0d4a3b2a589355d908498dcd7452f941cf520072218f7e6ede75e"
         let note = decode_nostr_event_json(json: note_json)!
-        let reply = build_post(state: test_damus_state, post: .init(string: "hello"), action: .replying_to(note), uploadedMedias: [], pubkeys: [pk] + note.referenced_pubkeys.map({pk in pk}))
+        let reply = await build_post(state: test_damus_state, post: .init(string: "hello"), action: .replying_to(note), uploadedMedias: [], pubkeys: [pk] + note.referenced_pubkeys.map({pk in pk}))
         let root_hex = "00152d2945459fb394fed2ea95af879c903c4ec42d96327a739fa27c023f20e0"
 
         XCTAssertEqual(reply.tags,

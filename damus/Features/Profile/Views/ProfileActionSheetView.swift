@@ -133,7 +133,7 @@ struct ProfileActionSheetView: View {
     
     var body: some View {
         VStack(alignment: .center) {
-            ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+            ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
             if let url = self.profile_data()?.profile?.website_url {
                 WebsiteLink(url: url, style: .accent)
                     .padding(.top, -15)
@@ -310,7 +310,7 @@ fileprivate struct ProfileActionSheetZapButton: View {
         VStack(alignment: .center, spacing: 10) {
             Button(
                 action: {
-                    send_zap(damus_state: damus_state, target: .profile(self.profile.pubkey), lnurl: lnurl, is_custom: false, comment: nil, amount_sats: nil, zap_type: damus_state.settings.default_zap_type)
+                    Task { await send_zap(damus_state: damus_state, target: .profile(self.profile.pubkey), lnurl: lnurl, is_custom: false, comment: nil, amount_sats: nil, zap_type: damus_state.settings.default_zap_type) }
                     zap_state = .zapping
                 },
                 label: {

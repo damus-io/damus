@@ -130,7 +130,7 @@ enum Route: Hashable {
         case .FollowersYouKnow(let friendedFollowers, let followers):
             FollowersYouKnowView(damus_state: damusState, friended_followers: friendedFollowers, followers: followers)
         case .Script(let load_model):
-            LoadScript(pool: damusState.nostrNetwork.pool, model: load_model)
+            LoadScript(pool: RelayPool(ndb: damusState.ndb, keypair: damusState.keypair), model: load_model)
         case .NIP05DomainEvents(let events, let nip05_domain_favicon):
             NIP05DomainTimelineView(damus_state: damusState, model: events, nip05_domain_favicon: nip05_domain_favicon)
         case .NIP05DomainPubkeys(let domain, let nip05_domain_favicon, let pubkeys):
@@ -237,7 +237,6 @@ enum Route: Hashable {
         case .FollowersYouKnow(let friendedFollowers, let followers):
             hasher.combine("followersYouKnow")
             hasher.combine(friendedFollowers)
-            hasher.combine(followers.sub_id)
         case .Script(let model):
             hasher.combine("script")
             hasher.combine(model.data.count)

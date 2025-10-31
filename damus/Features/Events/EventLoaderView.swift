@@ -13,6 +13,7 @@ struct EventLoaderView<Content: View>: View {
     let event_id: NoteId
     @State var event: NostrEvent?
     @State var subscription_uuid: String = UUID().description
+    @State var loadingTask: Task<Void, Never>? = nil
     let content: (NostrEvent) -> Content
     
     init(damus_state: DamusState, event_id: NoteId, @ViewBuilder content: @escaping (NostrEvent) -> Content) {
@@ -24,40 +25,19 @@ struct EventLoaderView<Content: View>: View {
     }
     
     func unsubscribe() {
-        damus_state.nostrNetwork.pool.unsubscribe(sub_id: subscription_uuid)
+        self.loadingTask?.cancel()
     }
     
-    func subscribe(filters: [NostrFilter]) {
-        damus_state.nostrNetwork.pool.register_handler(sub_id: subscription_uuid, handler: handle_event)
-        damus_state.nostrNetwork.pool.send(.subscribe(.init(filters: filters, sub_id: subscription_uuid)))
-    }
-
-    func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
-        guard case .nostr_event(let nostr_response) = ev else {
-            return
+    func subscribe() {
+        self.loadingTask?.cancel()
+        self.loadingTask = Task {
+            let lender = try? await damus_state.nostrNetwork.reader.lookup(noteId: self.event_id)
+            lender?.justUseACopy({ event = $0 })
         }
-        
-        guard case .event(let id, let nostr_event) = nostr_response else {
-            return
-        }
-        
-        guard id == subscription_uuid else {
-            return
-        }
-        
-        if event != nil {
-            return
-        }
-        
-        event = nostr_event
-        
-        unsubscribe()
     }
     
     func load() {
-        subscribe(filters: [
-            NostrFilter(ids: [self.event_id], limit: 1)
-        ])
+        subscribe()
     }
     
     var body: some View {

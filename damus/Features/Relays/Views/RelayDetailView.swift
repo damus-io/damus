@@ -30,7 +30,7 @@ struct RelayDetailView: View {
 
     func RemoveRelayButton(_ keypair: FullKeypair) -> some View {
         Button(action: {
-            self.removeRelay()
+            Task { await self.removeRelay() }
         }) {
             HStack {
                 Text("Disconnect", comment: "Button to disconnect from the relay.")
@@ -43,7 +43,7 @@ struct RelayDetailView: View {
     
     func ConnectRelayButton(_ keypair: FullKeypair) -> some View {
         Button(action: {
-            self.connectRelay()
+            Task { await self.connectRelay() }
         }) {
             HStack {
                 Text("Connect", comment: "Button to connect to the relay.")
@@ -177,16 +177,18 @@ struct RelayDetailView: View {
     }
 
     private var relay_object: RelayPool.Relay? {
-        state.nostrNetwork.pool.get_relay(relay)
+        // TODO: Concurrency problems?
+        state.nostrNetwork.connectedRelays.first(where: { $0.descriptor.url == relay })
     }
 
     private var relay_connection: RelayConnection? {
         relay_object?.connection
     }
     
-    func removeRelay() {
+    func removeRelay() async {
         do {
-            try state.nostrNetwork.userRelayList.remove(relayURL: self.relay)
+            // TODO: Concurrency problems?
+            try await state.nostrNetwork.userRelayList.remove(relayURL: self.relay)
             dismiss()
         }
         catch {
@@ -194,9 +196,10 @@ struct RelayDetailView: View {
         }
     }
     
-    func connectRelay() {
+    func connectRelay() async {
         do {
-            try state.nostrNetwork.userRelayList.insert(relay: NIP65.RelayList.RelayItem(url: relay, rwConfiguration: .readWrite))
+            // TODO: Concurrency problems?
+            try await state.nostrNetwork.userRelayList.insert(relay: NIP65.RelayList.RelayItem(url: relay, rwConfiguration: .readWrite))
             dismiss()
         }
         catch {

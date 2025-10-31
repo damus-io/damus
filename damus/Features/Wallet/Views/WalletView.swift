@@ -16,6 +16,7 @@ struct WalletView: View {
     @ObservedObject var model: WalletModel
     @ObservedObject var settings: UserSettingsStore
     @State private var showBalance: Bool = false
+    @State private var walletRefreshTask: Task<Void, Never>? = nil
 
     init(damus_state: DamusState, model: WalletModel? = nil) {
         self.damus_state = damus_state
@@ -104,11 +105,10 @@ struct WalletView: View {
                     }
                 }
                 .onAppear() {
-                    Task { await self.updateWalletInformation() }
+                    self.refreshWalletInformation()
                 }
                 .refreshable {
-                    model.resetWalletStateInformation()
-                    await self.updateWalletInformation()
+                    self.refreshWalletInformation()
                 }
                 .sheet(isPresented: $show_settings, onDismiss: { self.show_settings = false }) {
                     ScrollView {
@@ -127,8 +127,20 @@ struct WalletView: View {
     }
     
     @MainActor
-    func updateWalletInformation() async {
-        await WalletConnect.update_wallet_information(damus_state: damus_state)
+    func refreshWalletInformation() {
+        walletRefreshTask?.cancel()
+        walletRefreshTask = Task {
+            do {
+                try await self.model.refreshWalletInformation()
+            }
+            catch {
+                guard let error = error as? ErrorView.UserPresentableErrorProtocol else {
+                    Log.error("Error while refreshing wallet: %s", for: .nwc, error.localizedDescription)
+                    return
+                }
+                present_sheet(.error(error.userPresentableError))
+            }
+        }
     }
 }
 

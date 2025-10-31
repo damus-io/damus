@@ -45,6 +45,7 @@ struct ProfileName: View {
     @State var donation: Int?
     @State var purple_account: DamusPurple.Account?
     @State var nip05_domain_favicon: FaviconURL?
+    @StateObject var profileObserver: ProfileObserver
 
     init(pubkey: Pubkey, prefix: String = "", damus: DamusState, show_nip5_domain: Bool = true, supporterBadgeStyle: SupporterBadge.Style = .compact) {
         self.pubkey = pubkey
@@ -53,6 +54,7 @@ struct ProfileName: View {
         self.show_nip5_domain = show_nip5_domain
         self.supporterBadgeStyle = supporterBadgeStyle
         self.purple_account = nil
+        self._profileObserver = StateObject.init(wrappedValue: ProfileObserver(pubkey: pubkey, damusState: damus))
     }
     
     var friend_type: FriendType? {

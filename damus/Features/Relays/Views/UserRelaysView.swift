@@ -22,7 +22,7 @@ struct UserRelaysView: View {
 
     static func make_relay_state(state: DamusState, relays: [RelayURL]) -> [(RelayURL, Bool)] {
         return relays.map({ r in
-            return (r, state.nostrNetwork.pool.get_relay(r) == nil)
+            return (r, state.nostrNetwork.getRelay(r) == nil)
         }).sorted { (a, b) in a.0 < b.0 }
     }
     

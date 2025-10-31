@@ -1,5 +1,5 @@
 { pkgs ? import <nixpkgs> {} }:
 with pkgs;
 mkShell {
-  buildInputs = with python3Packages; [ Mako requests wabt todo-txt-cli pyyaml ];
+  buildInputs = with python3Packages; [ Mako requests wabt todo-txt-cli pyyaml plotly numpy ];
 }

@@ -15,12 +15,18 @@ struct ReplyQuoteView: View {
     @ObservedObject var thread: ThreadModel
     let options: EventViewOptions
     
+    @State var can_show_event = true
+    
+    func update_should_show_event(event: NdbNote) async {
+        self.can_show_event = await should_show_event(event: event, damus_state: state)
+    }
+    
     func content(event: NdbNote) -> some View {
         ZStack(alignment: .leading) {
             VStack(alignment: .leading) {
                 HStack(alignment: .center) {
-                    if should_show_event(event: event, damus_state: state) {
-                        ProfilePicView(pubkey: event.pubkey, size: 14, highlight: .reply, profiles: state.profiles, disable_animation: false)
+                    if can_show_event {
+                        ProfilePicView(pubkey: event.pubkey, size: 14, highlight: .reply, profiles: state.profiles, disable_animation: false, damusState: state)
                         let blur_images = should_blur_images(settings: state.settings, contacts: state.contacts, ev: event, our_pubkey: state.pubkey)
                         NoteContentView(damus_state: state, event: event, blur_images: blur_images, size: .small, options: options)
                             .font(.callout)
@@ -56,6 +62,9 @@ struct ReplyQuoteView: View {
         Group {
             if let event = state.events.lookup(event_id) {
                 self.content(event: event)
+                    .onAppear {
+                        Task { await self.update_should_show_event(event: event) }
+                    }
             }
         }
     }

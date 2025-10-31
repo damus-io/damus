@@ -24,13 +24,13 @@ struct RelayView: View {
         self.recommended = recommended
         self.model_cache = state.relay_model_cache
         _showActionButtons = showActionButtons
-        let relay_state = RelayView.get_relay_state(pool: state.nostrNetwork.pool, relay: relay)
+        let relay_state = RelayView.get_relay_state(state: state, relay: relay)
         self._relay_state = State(initialValue: relay_state)
         self.disableNavLink = disableNavLink
     }
 
-    static func get_relay_state(pool: RelayPool, relay: RelayURL) -> Bool {
-        return pool.get_relay(relay) == nil
+    static func get_relay_state(state: DamusState, relay: RelayURL) -> Bool {
+        return state.nostrNetwork.getRelay(relay) == nil
     }
 
     var body: some View {
@@ -110,7 +110,7 @@ struct RelayView: View {
             .contentShape(Rectangle())
         }
         .onReceive(handle_notify(.relays_changed)) { _ in
-            self.relay_state = RelayView.get_relay_state(pool: state.nostrNetwork.pool, relay: self.relay)
+            self.relay_state = RelayView.get_relay_state(state: state, relay: self.relay)
         }
         .onTapGesture {
             if !disableNavLink {
@@ -120,7 +120,7 @@ struct RelayView: View {
     }
     
     private var relay_connection: RelayConnection? {
-        state.nostrNetwork.pool.get_relay(relay)?.connection
+        state.nostrNetwork.getRelay(relay)?.connection
     }
     
     func add_action(keypair: FullKeypair) async {

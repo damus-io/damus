@@ -125,7 +125,7 @@ struct HashtagUnfollowButton: View {
         
     func unfollow(_ hashtag: String) {
         is_following = false
-        handle_unfollow(state: damus_state, unfollow: FollowRef.hashtag(hashtag))
+        Task { await handle_unfollow(state: damus_state, unfollow: FollowRef.hashtag(hashtag)) }
     }
 }
 
@@ -144,7 +144,7 @@ struct HashtagFollowButton: View {
     
     func follow(_ hashtag: String) {
         is_following = true
-        handle_follow(state: damus_state, follow: .hashtag(hashtag))
+        Task { await handle_follow(state: damus_state, follow: .hashtag(hashtag)) }
     }
 }
 

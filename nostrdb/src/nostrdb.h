@@ -2,6 +2,7 @@
 #define NOSTRDB_H
 
 #include <inttypes.h>
+#include <stdbool.h>
 #include "win.h"
 #include "cursor.h"
 
@@ -48,11 +49,17 @@ struct ndb_t {
 };
 
 struct ndb_str {
+	// NDB_PACKED_STR, NDB_PACKED_ID
 	unsigned char flag;
 	union {
 		const char *str;
 		unsigned char *id;
 	};
+};
+
+struct ndb_ingest_meta {
+	unsigned client;
+	const char *relay;
 };
 
 struct ndb_keypair {
@@ -157,8 +164,10 @@ enum ndb_filter_fieldtype {
 	NDB_FILTER_UNTIL   = 6,
 	NDB_FILTER_LIMIT   = 7,
 	NDB_FILTER_SEARCH  = 8,
+	NDB_FILTER_RELAYS  = 9,
+	NDB_FILTER_CUSTOM  = 10,
 };
-#define NDB_NUM_FILTERS 7
+#define NDB_NUM_FILTERS 10
 
 // when matching generic tags, we need to know if we're dealing with
 // a pointer to a 32-byte ID or a null terminated string
@@ -167,6 +176,7 @@ enum ndb_generic_element_type {
 	NDB_ELEMENT_STRING  = 1,
 	NDB_ELEMENT_ID      = 2,
 	NDB_ELEMENT_INT     = 3,
+	NDB_ELEMENT_CUSTOM  = 4,
 };
 
 enum ndb_search_order {
@@ -189,6 +199,8 @@ enum ndb_dbs {
 	NDB_DB_NOTE_TAGS,  // note tags index
 	NDB_DB_NOTE_PUBKEY, // note pubkey index
 	NDB_DB_NOTE_PUBKEY_KIND, // note pubkey kind index
+	NDB_DB_NOTE_RELAY_KIND, // relay+kind+created -> note_id
+	NDB_DB_NOTE_RELAYS, // note_id -> relays
 	NDB_DBS,
 };
 
@@ -222,6 +234,13 @@ struct ndb_builder {
 	struct ndb_tag *current_tag;
 };
 
+struct ndb_note_relay_iterator {
+	struct ndb_txn *txn;
+	uint64_t note_key;
+	int cursor_op;
+	void *mdb_cur;
+};
+
 struct ndb_iterator {
 	struct ndb_note *note;
 	struct ndb_tag *tag;
@@ -235,10 +254,18 @@ struct ndb_filter_string {
 	int len;
 };
 
+typedef bool ndb_filter_callback_fn(void *, struct ndb_note *);
+
+struct ndb_filter_custom {
+	void *ctx;
+	ndb_filter_callback_fn *cb;
+};
+
 union ndb_filter_element {
 	struct ndb_filter_string string;
 	const unsigned char *id;
 	uint64_t integer;
+	struct ndb_filter_custom custom_filter;
 };
 
 struct ndb_filter_field {
@@ -273,6 +300,7 @@ struct ndb_filter {
 struct ndb_config {
 	int flags;
 	int ingester_threads;
+	int writer_scratch_buffer_size;
 	size_t mapsize;
 	void *filter_context;
 	ndb_ingest_filter_fn ingest_filter;
@@ -459,24 +487,38 @@ void ndb_config_set_mapsize(struct ndb_config *config, size_t mapsize);
 void ndb_config_set_ingest_filter(struct ndb_config *config, ndb_ingest_filter_fn fn, void *);
 void ndb_config_set_subscription_callback(struct ndb_config *config, ndb_sub_fn fn, void *ctx);
 
+/// Configurable scratch buffer size for the writer thread. Default is 2MB. If you have smaller notes
+/// you can decrease this to reduce memory usage. If you have bigger notes you should increase this so
+/// that the writer thread can properly parse larger notes.
+void ndb_config_set_writer_scratch_buffer_size(struct ndb_config *config, int scratch_size);
+
 // HELPERS
-int ndb_calculate_id(struct ndb_note *note, unsigned char *buf, int buflen);
+int ndb_calculate_id(struct ndb_note *note, unsigned char *buf, int buflen, unsigned char *id);
 int ndb_sign_id(struct ndb_keypair *keypair, unsigned char id[32], unsigned char sig[64]);
 int ndb_create_keypair(struct ndb_keypair *key);
 int ndb_decode_key(const char *secstr, struct ndb_keypair *keypair);
-int ndb_note_verify(void *secp_ctx, unsigned char pubkey[32], unsigned char id[32], unsigned char signature[64]);
+int ndb_note_verify(void *secp_ctx, unsigned char *scratch, size_t scratch_size, struct ndb_note *note);
 
 // NDB
 int ndb_init(struct ndb **ndb, const char *dbdir, const struct ndb_config *);
 int ndb_db_version(struct ndb_txn *txn);
+
+// NOTE PROCESSING
 int ndb_process_event(struct ndb *, const char *json, int len);
+void ndb_ingest_meta_init(struct ndb_ingest_meta *meta, unsigned client, const char *relay);
+// Process an event, recording the relay where it came from.
+int ndb_process_event_with(struct ndb *, const char *json, int len, struct ndb_ingest_meta *meta);
 int ndb_process_events(struct ndb *, const char *ldjson, size_t len);
+int ndb_process_events_with(struct ndb *ndb, const char *ldjson, size_t json_len, struct ndb_ingest_meta *meta);
 #ifndef _WIN32
 // TODO: fix on windows
 int ndb_process_events_stream(struct ndb *, FILE* fp);
 #endif
+// deprecated: use ndb_ingest_event_with
 int ndb_process_client_event(struct ndb *, const char *json, int len);
+// deprecated: use ndb_ingest_events_with
 int ndb_process_client_events(struct ndb *, const char *json, size_t len);
+
 int ndb_begin_query(struct ndb *, struct ndb_txn *);
 int ndb_search_profile(struct ndb_txn *txn, struct ndb_search *search, const char *query);
 int ndb_search_profile_next(struct ndb_search *search);
@@ -491,6 +533,7 @@ uint64_t ndb_get_profilekey_by_pubkey(struct ndb_txn *txn, const unsigned char *
 struct ndb_note *ndb_get_note_by_id(struct ndb_txn *txn, const unsigned char *id, size_t *len, uint64_t *primkey);
 struct ndb_note *ndb_get_note_by_key(struct ndb_txn *txn, uint64_t key, size_t *len);
 void *ndb_get_note_meta(struct ndb_txn *txn, const unsigned char *id, size_t *len);
+int ndb_note_seen_on_relay(struct ndb_txn *txn, uint64_t note_key, const char *relay);
 void ndb_destroy(struct ndb *);
 
 // BUILDER
@@ -508,6 +551,7 @@ void ndb_builder_set_id(struct ndb_builder *builder, unsigned char *id);
 void ndb_builder_set_kind(struct ndb_builder *builder, uint32_t kind);
 int ndb_builder_new_tag(struct ndb_builder *builder);
 int ndb_builder_push_tag_str(struct ndb_builder *builder, const char *str, int len);
+int ndb_builder_push_tag_id(struct ndb_builder *builder, unsigned char *id);
 
 // FILTERS
 int ndb_filter_init(struct ndb_filter *);
@@ -520,6 +564,7 @@ int ndb_filter_init_with(struct ndb_filter *filter, int pages);
 int ndb_filter_add_id_element(struct ndb_filter *, const unsigned char *id);
 int ndb_filter_add_int_element(struct ndb_filter *, uint64_t integer);
 int ndb_filter_add_str_element(struct ndb_filter *, const char *str);
+int ndb_filter_add_custom_filter_element(struct ndb_filter *filter, ndb_filter_callback_fn *cb, void *ctx);
 int ndb_filter_eq(const struct ndb_filter *, const struct ndb_filter *);
 
 /// is `a` a subset of `b`
@@ -539,6 +584,7 @@ struct ndb_filter_elements *ndb_filter_get_elements(const struct ndb_filter *, i
 int ndb_filter_start_field(struct ndb_filter *, enum ndb_filter_fieldtype);
 int ndb_filter_start_tag_field(struct ndb_filter *, char tag);
 int ndb_filter_matches(struct ndb_filter *, struct ndb_note *);
+int ndb_filter_matches_with_relay(struct ndb_filter *, struct ndb_note *, struct ndb_note_relay_iterator *iter);
 int ndb_filter_clone(struct ndb_filter *dst, struct ndb_filter *src);
 int ndb_filter_end(struct ndb_filter *);
 void ndb_filter_end_field(struct ndb_filter *);
@@ -591,6 +637,11 @@ uint16_t ndb_tag_count(struct ndb_tag *);
 int ndb_tags_iterate_next(struct ndb_iterator *iter);
 struct ndb_str ndb_iter_tag_str(struct ndb_iterator *iter, int ind);
 struct ndb_str ndb_tag_str(struct ndb_note *note, struct ndb_tag *tag, int ind);
+
+// RELAY ITER
+int ndb_note_relay_iterate_start(struct ndb_txn *txn, struct ndb_note_relay_iterator *iter, uint64_t note_key);
+const char *ndb_note_relay_iterate_next(struct ndb_note_relay_iterator *iter);
+void ndb_note_relay_iterate_close(struct ndb_note_relay_iterator *iter);
 
 // NAMES
 const char *ndb_db_name(enum ndb_dbs db);

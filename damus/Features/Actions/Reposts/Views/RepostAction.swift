@@ -19,13 +19,15 @@ struct RepostAction: View {
             
             Button {
                 dismiss()
-                            
-                guard let keypair = self.damus_state.keypair.to_full(),
-                      let boost = make_boost_event(keypair: keypair, boosted: self.event, relayURL: damus_state.nostrNetwork.relaysForEvent(event: self.event).first) else {
-                    return
+                
+                Task {
+                    guard let keypair = self.damus_state.keypair.to_full(),
+                          let boost = await make_boost_event(keypair: keypair, boosted: self.event, relayURL: damus_state.nostrNetwork.relaysForEvent(event: self.event).first) else {
+                        return
+                    }
+                    
+                    await damus_state.nostrNetwork.postbox.send(boost)
                 }
-
-                damus_state.nostrNetwork.postbox.send(boost)
             } label: {
                 Label(NSLocalizedString("Repost", comment: "Button to repost a note"), image: "repost")
                     .frame(maxWidth: .infinity, minHeight: 50, maxHeight: 50, alignment: .leading)

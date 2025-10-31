@@ -32,7 +32,7 @@ struct RelayConfigView: View {
     
     init(state: DamusState) {
         self.state = state
-        _relays = State(initialValue: state.nostrNetwork.pool.our_descriptors)
+        _relays = State(initialValue: state.nostrNetwork.ourRelayDescriptors)
         UITabBar.appearance().isHidden = true
     }
     
@@ -98,7 +98,7 @@ struct RelayConfigView: View {
             }
         }
         .onReceive(handle_notify(.relays_changed)) { _ in
-            self.relays = state.nostrNetwork.pool.our_descriptors
+            self.relays = state.nostrNetwork.ourRelayDescriptors
         }
         .onAppear {
             notify(.display_tabbar(false))

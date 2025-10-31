@@ -13,6 +13,7 @@ struct EventDetailBar: View {
     let target_pk: Pubkey
 
     @ObservedObject var bar: ActionBarModel
+    @State var relays: [RelayURL] = []
     
     init(state: DamusState, target: NoteId, target_pk: Pubkey) {
         self.state = state
@@ -61,7 +62,6 @@ struct EventDetailBar: View {
             }
 
             if bar.relays > 0 {
-                let relays = Array(state.nostrNetwork.pool.seen[target] ?? [])
                 NavigationLink(value: Route.UserRelays(relays: relays)) {
                     let nounString = pluralizedString(key: "relays_count", count: bar.relays)
                     let noun = Text(nounString).foregroundColor(.gray)
@@ -70,6 +70,18 @@ struct EventDetailBar: View {
                 .buttonStyle(PlainButtonStyle())
             }
         }
+        .onAppear {
+            Task { await self.updateSeenRelays() }
+        }
+        .onReceive(handle_notify(.update_stats)) { noteId in
+            guard noteId == target else { return }
+            Task { await self.updateSeenRelays() }
+        }
+    }
+    
+    func updateSeenRelays() async {
+        let relays = await Array(state.nostrNetwork.relayURLsThatSawNote(id: target) ?? [])
+        self.relays = relays
     }
 }
 
