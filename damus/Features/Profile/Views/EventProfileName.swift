@@ -17,6 +17,7 @@ struct EventProfileName: View {
     @State var nip05: NIP05?
     @State var donation: Int?
     @State var purple_account: DamusPurple.Account?
+    @StateObject private var profileObserver: ProfileObserver
 
     let size: EventViewKind
     
@@ -27,6 +28,7 @@ struct EventProfileName: View {
         let donation = damus.ndb.lookup_profile(pubkey)?.map({ p in p?.profile?.damus_donation }).value
         self._donation = State(wrappedValue: donation)
         self.purple_account = nil
+        self._profileObserver = StateObject.init(wrappedValue: ProfileObserver(pubkey: pubkey, damusState: damus))
     }
     
     var friend_type: FriendType? {
