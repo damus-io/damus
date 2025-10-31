@@ -68,6 +68,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
     var homeHandlerTask: Task<Void, Never>?
     var notificationsHandlerTask: Task<Void, Never>?
     var generalHandlerTask: Task<Void, Never>?
+    var ndbOnlyHandlerTask: Task<Void, Never>?
     var nwcHandlerTask: Task<Void, Never>?
     
     @Published var loading: Bool = true
@@ -512,10 +513,11 @@ class HomeModel: ContactsDelegate, ObservableObject {
         notifications_filter.pubkeys = [damus_state.pubkey]
         notifications_filter.limit = 500
 
-        var notifications_filters = [notifications_filter]
+        let notifications_filters = [notifications_filter]
         let contacts_filter_chunks = contacts_filter.chunked(on: .authors, into: MAX_CONTACTS_ON_FILTER)
-        var contacts_filters = contacts_filter_chunks + [our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter, contact_cards_filter]
-        var dms_filters = [dms_filter, our_dms_filter]
+        let low_volume_important_filters = [our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter, contact_cards_filter]
+        let contacts_filters = contacts_filter_chunks + low_volume_important_filters
+        let dms_filters = [dms_filter, our_dms_filter]
 
         //print_filters(relay_id: relay_id, filters: [home_filters, contacts_filters, notifications_filters, dms_filters])
 
@@ -541,6 +543,17 @@ class HomeModel: ContactsDelegate, ObservableObject {
                     dms.append(contentsOf: incoming_dms)
                 case .networkEose: break
                 }
+            }
+        }
+        // Due to subscription volume limits in ndb and in relays, some important events may get clipped in the `generalHandlerTask` above.
+        // This could lead to issues (e.g. The app overriding a mutelist because it does not have it)
+        // Therefore, we have this ndb-only stream for some low volume important items.
+        // The reason we do not separate into two complete streams is because
+        // we need to keep total relay subscription down to avoid relay subscription limits.
+        self.ndbOnlyHandlerTask?.cancel()
+        self.ndbOnlyHandlerTask = Task {
+            for await eventLender in damus_state.nostrNetwork.reader.streamIndefinitely(filters: low_volume_important_filters, streamMode: .ndbOnly) {
+                await eventLender.justUseACopy({ await process_event(ev: $0, context: .other) })
             }
         }
         self.nwcHandlerTask?.cancel()
