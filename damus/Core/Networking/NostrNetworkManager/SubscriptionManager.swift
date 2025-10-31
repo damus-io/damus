@@ -533,7 +533,7 @@ extension NostrNetworkManager {
         /// Returns notes from both NostrDB and the network, in parallel, treating it with similar importance against the network relays. Generic EOSE is fired when EOSE is received from both the network and NostrDB
         /// `optimizeNetworkFilter`: Returns notes from ndb, then streams from the network with an added "since" filter set to the latest note stored on ndb.
         case ndbAndNetworkParallel(optimizeNetworkFilter: Bool)
-        /// Ignores the network. Used for testing purposes
+        /// Ignores the network.
         case ndbOnly
         
         var optimizeNetworkFilter: Bool {
