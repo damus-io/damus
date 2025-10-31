@@ -253,6 +253,10 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "enable_experimental_load_new_content_button", default_value: false)
     var enable_experimental_load_new_content_button: Bool
     
+    /// Whether the app should show the Favourites feature (Damus Labs)
+    @Setting(key: "enable_favourites_feature", default_value: false)
+    var enable_favourites_feature: Bool
+    
     @StringSetting(key: "purple_environment", default_value: .production)
     var purple_enviroment: DamusPurpleEnvironment
 

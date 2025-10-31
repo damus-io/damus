@@ -599,13 +599,15 @@ class HomeModel: ContactsDelegate, ObservableObject {
         }
 
         // Add filter for favorited users who we dont follow
-        let all_favorites = damus_state.contactCards.favorites
-        let favorited_not_followed = Array(all_favorites.subtracting(Set(friends)))
-        if !favorited_not_followed.isEmpty {
-            var favorites_filter = NostrFilter(kinds: home_filter_kinds)
-            favorites_filter.authors = favorited_not_followed
-            favorites_filter.limit = 500
-            home_filters.append(favorites_filter)
+        if damus_state.settings.enable_favourites_feature {
+            let all_favorites = damus_state.contactCards.favorites
+            let favorited_not_followed = Array(all_favorites.subtracting(Set(friends)))
+            if !favorited_not_followed.isEmpty {
+                var favorites_filter = NostrFilter(kinds: home_filter_kinds)
+                favorites_filter.authors = favorited_not_followed
+                favorites_filter.limit = 500
+                home_filters.append(favorites_filter)
+            }
         }
 
         self.homeHandlerTask?.cancel()
