@@ -228,6 +228,8 @@ fileprivate extension DamusState {
         var bootstrapRelays: [RelayURL] { get_default_bootstrap_relays() }
         var developerMode: Bool { self.settings.developer_mode }
         var experimentalLocalRelayModelSupport: Bool { self.settings.enable_experimental_local_relay_model }
+        var outboxAutopilotEnabled: Bool { self.settings.enable_outbox_autopilot }
+        var outboxAnalyticsEnabled: Bool { self.settings.enable_outbox_analytics }
         var relayModelCache: RelayModelCache
         var relayFilters: RelayFilters
         

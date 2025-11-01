@@ -158,6 +158,7 @@ struct ConfigView: View {
                     }
                 }
             }
+            
         }
         .navigationTitle(NSLocalizedString("Settings", comment: "Navigation title for Settings view."))
         .navigationBarTitleDisplayMode(.large)
