@@ -59,9 +59,19 @@ class NostrNetworkManager {
         await self.pool.disconnect()
     }
     
-    func handleAppBackgroundRequest() async {
+    func handleAppBackgroundRequest(beforeClosingNdb operationBeforeClosingNdb: (() async -> Void)? = nil) async {
+        // Mark NDB as closed without actually closing it, to avoid new tasks from using NostrDB
+        // self.delegate.ndb.markClosed()
         await self.reader.cancelAllTasks()
         await self.pool.cleanQueuedRequestForSessionEnd()
+        await operationBeforeClosingNdb?()
+        self.delegate.ndb.close()
+    }
+    
+    func handleAppForegroundRequest() async {
+        self.delegate.ndb.reopen()
+        // Pinging the network will automatically reconnect any dead websocket connections
+        await self.ping()
     }
     
     func close() async {
