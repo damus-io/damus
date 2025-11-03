@@ -29,6 +29,7 @@ class ProfileModel: ObservableObject, Equatable {
     let pubkey: Pubkey
     let damus: DamusState
     
+    @MainActor  // Isolate this to the main actor to avoid crashes arising from race conditions
     var seen_event: Set<NoteId> = Set()
     
     var findRelaysListener: Task<Void, Never>? = nil
@@ -115,8 +116,8 @@ class ProfileModel: ObservableObject, Equatable {
         let conversations_filter_us = NostrFilter(kinds: conversation_kinds, pubkeys: [pubkey], limit: limit, authors: [damus.pubkey])
         print("subscribing to conversation events from and to profile \(pubkey)")
         for await noteLender in self.damus.nostrNetwork.reader.streamIndefinitely(filters: [conversations_filter_them, conversations_filter_us]) {
-            try? noteLender.borrow { ev in
-                if !seen_event.contains(ev.id) {
+            try? await noteLender.borrow { ev in
+                if await !seen_event.contains(ev.id) {
                     let event = ev.toOwned()
                     Task { await self.add_event(event) }
                     conversation_events.insert(ev.id)
