@@ -207,6 +207,12 @@ class Ndb {
         self.callbackHandler = Ndb.CallbackHandler()
     }
     
+    /// Mark NostrDB as "closed" without actually closing it.
+    /// Useful when shutting down tasks that use NostrDB while avoiding new tasks from using it.
+    func markClosed() {
+        self.closed = true
+    }
+    
     func close() {
         guard !self.is_closed else { return }
         self.closed = true
