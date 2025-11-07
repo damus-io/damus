@@ -21,7 +21,7 @@ struct EventProfileName: View {
 
     let size: EventViewKind
     
-    init(pubkey: Pubkey, damus: DamusState, size: EventViewKind = .normal) {
+    init(pubkey: Pubkey, damus: DamusState, size: EventViewKind) {
         self.damus_state = damus
         self.pubkey = pubkey
         self.size = size
@@ -68,11 +68,15 @@ struct EventProfileName: View {
             case .one(let one):
                 Text(one)
                     .font(.body.weight(.bold))
+                    .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
+                    .fontWeight(.bold)
                 
             case .both(username: let username, displayName: let displayName):
                     HStack(spacing: 6) {
                         Text(verbatim: displayName)
                             .font(.body.weight(.bold))
+                            .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
+                            .fontWeight(.bold)
                         
                         Text(verbatim: "@\(username)")
                             .foregroundColor(.gray)
@@ -86,17 +90,18 @@ struct EventProfileName: View {
             }
              */
             
-             
-            if let frend = friend_type {
-                FriendIcon(friend: frend)
+            if size != .small {
+                if let frend = friend_type {
+                    FriendIcon(friend: frend)
+                }
+                
+                if onlyzapper(profile) {
+                    Image("zap-hashtag")
+                        .frame(width: 14, height: 14)
+                }
+                
+                SupporterBadge(percent: self.supporter_percentage(), purple_account: self.purple_account, style: .compact)
             }
-            
-            if onlyzapper(profile) {
-                Image("zap-hashtag")
-                    .frame(width: 14, height: 14)
-            }
-            
-            SupporterBadge(percent: self.supporter_percentage(), purple_account: self.purple_account, style: .compact)
         }
         .onReceive(handle_notify(.profile_updated)) { update in
             if update.pubkey != pubkey {
@@ -132,6 +137,6 @@ struct EventProfileName: View {
 
 struct EventProfileName_Previews: PreviewProvider {
     static var previews: some View {
-        EventProfileName(pubkey: test_note.pubkey, damus: test_damus_state)
+        EventProfileName(pubkey: test_note.pubkey, damus: test_damus_state, size: .normal)
     }
 }

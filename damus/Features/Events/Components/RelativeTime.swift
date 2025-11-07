@@ -9,10 +9,12 @@ import SwiftUI
 
 struct RelativeTime: View {
     @ObservedObject var time: RelativeTimeModel
+    let size: EventViewKind
+    let font_size: Double
     
     var body: some View {
         Text(verbatim: "\(time.value)")
-            .font(.system(size: 16))
+            .font(eventviewsize_to_font(size, font_size: font_size))
             .foregroundColor(.gray)
     }
 }
@@ -20,6 +22,6 @@ struct RelativeTime: View {
 
 struct RelativeTime_Previews: PreviewProvider {
     static var previews: some View {
-        RelativeTime(time: RelativeTimeModel())
+        RelativeTime(time: RelativeTimeModel(), size: .normal, font_size: 1.0)
     }
 }

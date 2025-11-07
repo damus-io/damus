@@ -365,6 +365,11 @@ class UserSettingsStore: ObservableObject {
         }
     }
     
+    // MARK: Damus Labs Experiments
+    @Setting(key: "live", default_value: false)
+    var live: Bool
+    
+    
     // MARK: Internal, hidden settings
     
     // TODO: Get rid of this once we have NostrDB query capabilities integrated
