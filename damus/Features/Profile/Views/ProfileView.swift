@@ -127,6 +127,8 @@ struct ProfileView: View {
             filters.append({ profile.pubkey == $0.pubkey })
         case .conversations:
             filters.append({ profile.conversation_events.contains($0.id) } )
+        case .live, .live_chat:
+            break
         }
         return ContentFilters(filters: filters).filter
     }

@@ -27,7 +27,6 @@ struct DamusLabsView: View {
             PurpleBackdrop {
                 VStack {
                     MainContent
-                        .padding(.top, 125)
                 }
             }
             .navigationBarHidden(true)
@@ -51,15 +50,13 @@ struct DamusLabsView: View {
     
     var MainContent: some View {
         VStack {
-            LabsLogoView()
-            
             if let purple_account, purple_account.active == true {
-                DamusLabsExpirements(damus_state: damus_state)
+                DamusLabsExpirements(damus_state: damus_state, settings: damus_state.settings)
             } else {
+                LabsLogoView()
+                    .padding(.top, 125)
                 LabsIntroductionView(damus_state: damus_state)
             }
-            
-            Spacer()
         }
     }
 }
