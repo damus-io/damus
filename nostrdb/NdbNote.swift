@@ -387,7 +387,7 @@ class NdbNote: Codable, Equatable, Hashable {
 extension NdbNote {
     var is_textlike: Bool {
         switch known_kind {
-        case .text, .chat, .longform, .highlight:
+        case .text, .chat, .longform, .highlight, .live, .live_chat:
             true
         default:
             false

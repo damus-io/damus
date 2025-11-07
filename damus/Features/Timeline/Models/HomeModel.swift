@@ -231,6 +231,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
             break
         case .interest_list:
             break   // Don't care for now
+        case .live, .live_chat:
+            break
         }
     }
 

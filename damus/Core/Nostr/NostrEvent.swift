@@ -512,6 +512,15 @@ func make_like_event(keypair: FullKeypair, liked: NostrEvent, content: String = 
     return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 7, tags: tags)
 }
 
+func make_live_chat_event(keypair: FullKeypair, content: String, root: String, dtag: String, relayURL: RelayURL?) -> NostrEvent? {
+    //var tags = Array(boosted.referenced_pubkeys).map({ pk in pk.tag })
+    var aTagBuilder = ["a", "30311:\(root):\(dtag)"]
+
+    var tags: [[String]] = [aTagBuilder]
+
+    return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 1311, tags: tags)
+}
+
 func generate_private_keypair(our_privkey: Privkey, id: NoteId, created_at: UInt32) -> FullKeypair? {
     let to_hash = our_privkey.hex() + id.hex() + String(created_at)
     guard let dat = to_hash.data(using: .utf8) else {
