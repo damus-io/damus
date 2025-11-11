@@ -64,7 +64,7 @@ struct PostingTimelineView: View {
                 HStack {}
                 .frame(height: getSafeAreaTop())
 
-                HStack(alignment: .top) {
+                HStack(alignment: .bottom) {
                     TopbarSideMenuButton(damus_state: damus_state, isSideBarOpened: $isSideBarOpened)
 
                     Spacer()
@@ -98,7 +98,8 @@ struct PostingTimelineView: View {
                         }
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.leading, 20)
+            .padding(.trailing, 15)
             
             VStack(spacing: 0) {
                 CustomPicker(tabs: [
