@@ -36,10 +36,9 @@ struct PostingTimelineSwitcherView: View {
                 }
             }
         } label: {
-            Image(systemName: "square.stack")
-                .foregroundColor(DamusColors.purple)
-                .frame(height: 35)
+            Color.clear
         }
+        .frame(width: 50, height: 35)
         .menuOrder(.fixed)
         .accessibilityLabel(NSLocalizedString("Timeline switcher, select \(TimelineSource.follows.description) or \(TimelineSource.favorites.description)", comment: "Accessibility label for the timeline switcher button at the topbar"))
     }
@@ -68,10 +67,13 @@ struct PostingTimelineSwitcherView: View {
 
 struct PostingTimelineSwitcherView_Previews: PreviewProvider {
     static var previews: some View {
-        PostingTimelineSwitcherView(
-            damusState: test_damus_state,
-            timelineSource: .constant(.follows)
-        )
+        VStack {
+            PostingTimelineSwitcherView(
+                damusState: test_damus_state,
+                timelineSource: .constant(.follows)
+            )
+            Spacer()
+        }
     }
 }
 

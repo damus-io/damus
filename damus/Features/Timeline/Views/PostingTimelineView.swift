@@ -64,7 +64,7 @@ struct PostingTimelineView: View {
                 HStack {}
                 .frame(height: getSafeAreaTop())
 
-                HStack(alignment: .top) {
+                HStack(alignment: .center) {
                     TopbarSideMenuButton(damus_state: damus_state, isSideBarOpened: $isSideBarOpened)
 
                     Spacer()
@@ -77,8 +77,12 @@ struct PostingTimelineView: View {
                                 timelineSource: $timeline_source
                             )
                             if #available(iOS 17.0, *) {
+                                Image(systemName: "square.stack")
+                                    .foregroundColor(DamusColors.purple)
+                                    .overlay(
                                 switchView
                                     .popoverTip(PostingTimelineSwitcherView.TimelineSwitcherTip.shared)
+                                    )
                             } else {
                                 switchView
                             }
