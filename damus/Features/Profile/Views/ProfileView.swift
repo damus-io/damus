@@ -27,7 +27,7 @@ func follow_btn_txt(_ fs: FollowState, follows_you: Bool) -> String {
 func followedByString(_ friend_intersection: [Pubkey], ndb: Ndb, locale: Locale = Locale.current) -> String {
     let bundle = bundleForLocale(locale: locale)
     let names: [String] = friend_intersection.prefix(3).map { pk in
-        let profile = ndb.lookup_profile_and_copy(pk)
+        let profile = try? ndb.lookup_profile_and_copy(pk)
         return Profile.displayName(profile: profile, pubkey: pk).username.truncate(maxLength: 20)
     }
 
@@ -108,7 +108,7 @@ struct ProfileView: View {
     }
     
     func getProfileInfo() -> (String, String) {
-        let ndbprofile = self.damus_state.profiles.lookup(id: profile.pubkey)
+        let ndbprofile = try? self.damus_state.profiles.lookup(id: profile.pubkey)
         let displayName = Profile.displayName(profile: ndbprofile, pubkey: profile.pubkey).displayName.truncate(maxLength: 25)
         let userName = Profile.displayName(profile: ndbprofile, pubkey: profile.pubkey).username.truncate(maxLength: 25)
         return (displayName, "@\(userName)")
@@ -358,8 +358,8 @@ struct ProfileView: View {
 
     var aboutSection: some View {
         VStack(alignment: .leading, spacing: 8.0) {
-            let lnurl = damus_state.profiles.lookup_lnurl(profile.pubkey)
-            let ndbprofile = damus_state.profiles.lookup(id: profile.pubkey)
+            let lnurl = try? damus_state.profiles.lookup_lnurl(profile.pubkey)
+            let ndbprofile = try? damus_state.profiles.lookup(id: profile.pubkey)
 
             nameSection(ndbprofile: ndbprofile, lnurl: lnurl)
 
@@ -570,7 +570,7 @@ extension View {
 @MainActor
 func check_nip05_validity(pubkey: Pubkey, damus_state: DamusState) {
     let profiles = damus_state.profiles
-    let profile = profiles.lookup(id: pubkey)
+    let profile = try? profiles.lookup(id: pubkey)
 
     guard let nip05 = profile?.nip05,
           profiles.is_validated(pubkey) == nil

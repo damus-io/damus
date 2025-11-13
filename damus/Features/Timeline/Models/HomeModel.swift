@@ -124,7 +124,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         damus_state.contacts.delegate = self
         guard let latest_contact_event_id_hex = damus_state.settings.latest_contact_event_id_hex else { return }
         guard let latest_contact_event_id = NoteId(hex: latest_contact_event_id_hex) else { return }
-        guard let latest_contact_event: NdbNote = damus_state.ndb.lookup_note_and_copy(latest_contact_event_id) else { return }
+        guard let latest_contact_event: NdbNote = try? damus_state.ndb.lookup_note_and_copy(latest_contact_event_id) else { return }
         process_contact_event(state: damus_state, ev: latest_contact_event)
     }
     
@@ -153,7 +153,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         
         var candidates: [NostrEvent] = []
         for key in note_keys {
-            guard let note = damus_state.ndb.lookup_note_by_key_and_copy(key) else { continue }
+            guard let note = try? damus_state.ndb.lookup_note_by_key_and_copy(key) else { continue }
             candidates.append(note)
         }
         return candidates.max(by: { $0.created_at < $1.created_at })
@@ -166,7 +166,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         
         var candidates: [NostrEvent] = []
         for key in note_keys {
-            guard let note = damus_state.ndb.lookup_note_by_key_and_copy(key) else { continue }
+            guard let note = try? damus_state.ndb.lookup_note_by_key_and_copy(key) else { continue }
             if note.referenced_params.contains(where: { $0.param.matches_str("mute") }) {
                 candidates.append(note)
             }

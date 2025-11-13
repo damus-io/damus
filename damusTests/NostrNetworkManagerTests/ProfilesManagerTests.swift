@@ -42,7 +42,7 @@ class ProfilesManagerTests: XCTestCase {
         try await Task.sleep(for: .milliseconds(100))
 
         // Verify profile is in NDB
-        let cachedProfile = ndb.lookup_profile_and_copy(profilePubkey)
+        let cachedProfile = try? ndb.lookup_profile_and_copy(profilePubkey)
         XCTAssertNotNil(cachedProfile, "Profile should be cached in NDB")
         XCTAssertEqual(cachedProfile?.name, "testuser")
 
@@ -109,7 +109,7 @@ class ProfilesManagerTests: XCTestCase {
         try await Task.sleep(for: .milliseconds(100))
 
         // Verify profile is in NDB
-        let cachedProfile = ndb.lookup_profile_and_copy(profilePubkey)
+        let cachedProfile = try? ndb.lookup_profile_and_copy(profilePubkey)
         XCTAssertNotNil(cachedProfile, "Profile should be cached in NDB")
 
         // Create ProfilesManager

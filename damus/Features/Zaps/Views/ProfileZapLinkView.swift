@@ -33,8 +33,8 @@ struct ProfileZapLinkView<Content: View>: View {
         self.label = label
         self.action = action
         
-        let profile = damus_state.profiles.lookup(id: pubkey)
-        let lnurl = damus_state.profiles.lookup_with_timestamp(pubkey, borrow: { pr -> String? in
+        let profile = try? damus_state.profiles.lookup(id: pubkey)
+        let lnurl = try? damus_state.profiles.lookup_with_timestamp(pubkey, borrow: { pr -> String? in
             switch pr {
             case .some(let pr): return pr.lnurl
             case .none: return nil

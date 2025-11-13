@@ -120,7 +120,10 @@ func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad, cache: Even
 }
 
 func find_profiles_to_fetch_from_keys(profiles: Profiles, pks: [Pubkey]) -> [Pubkey] {
-    Array(Set(pks.filter { pk in !profiles.has_fresh_profile(id: pk) }))
+    Array(Set(pks.filter { pk in
+        let has_fresh_profile = (try? profiles.has_fresh_profile(id: pk)) ?? false
+        return !has_fresh_profile
+    }))
 }
 
 func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent], cache: EventCache) -> [Pubkey] {
@@ -128,11 +131,14 @@ func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent]
 
     for ev in events {
         // lookup profiles from boosted events
-        if ev.known_kind == .boost, let bev = ev.get_inner_event(cache: cache), !profiles.has_fresh_profile(id: bev.pubkey) {
+        if ev.known_kind == .boost,
+            let bev = ev.get_inner_event(cache: cache),
+            let has_fresh_profiles = try? profiles.has_fresh_profile(id: bev.pubkey),
+            !has_fresh_profiles {
             pubkeys.insert(bev.pubkey)
         }
         
-        if !profiles.has_fresh_profile(id: ev.pubkey) {
+        if let has_fresh_profiles = try? profiles.has_fresh_profile(id: ev.pubkey), !has_fresh_profiles {
             pubkeys.insert(ev.pubkey)
         }
     }

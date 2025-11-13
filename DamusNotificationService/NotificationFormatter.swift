@@ -125,7 +125,7 @@ struct NotificationFormatter {
         let src = zap.request.ev
         let pk = zap.is_anon ? ANON_PUBKEY : src.pubkey
 
-        let profile = profiles.lookup(id: pk)
+        let profile = try? profiles.lookup(id: pk)
         let name = Profile.displayName(profile: profile, pubkey: pk).displayName.truncate(maxLength: 50)
 
         let sats = NSNumber(value: (Double(zap.invoice.amount) / 1000.0))

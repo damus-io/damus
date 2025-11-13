@@ -47,7 +47,7 @@ struct SearchingEventView: View {
         switch search {
         case .nip05(let nip05):
             if let pk = state.profiles.nip05_pubkey[nip05] {
-                if state.profiles.lookup_key_by_pubkey(pk) != nil {
+                if (try? state.profiles.lookup_key_by_pubkey(pk)) != nil {
                     self.search_state = .found_profile(pk)
                 }
             } else {

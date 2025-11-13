@@ -63,15 +63,14 @@ final class NdbTests: XCTestCase {
         do {
             let ndb = Ndb(path: db_dir)!
             let id = NoteId(hex: "d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349")!
-            guard let txn = NdbTxn(ndb: ndb) else { return XCTAssert(false) }
-            let note = ndb.lookup_note_and_copy(id)
+            let note = try? ndb.lookup_note_and_copy(id)
             XCTAssertNotNil(note)
             guard let note else { return }
             let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
             XCTAssertEqual(note.pubkey, pk)
 
-            let profile = ndb.lookup_profile_and_copy(pk)
-            let lnurl = ndb.lookup_profile_lnurl(pk)
+            let profile = try? ndb.lookup_profile_and_copy(pk)
+            let lnurl = try? ndb.lookup_profile_lnurl(pk)
             XCTAssertNotNil(profile)
             guard let profile else { return }
 
@@ -91,14 +90,14 @@ final class NdbTests: XCTestCase {
         
         do {
             let ndb = Ndb(path: db_dir)!
-            let note_ids = ndb.text_search(query: "barked")
+            let note_ids = (try? ndb.text_search(query: "barked")) ?? []
             XCTAssertEqual(note_ids.count, 1)
             let expected_note_id = NoteId(hex: "b17a540710fe8495b16bfbaf31c6962c4ba8387f3284a7973ad523988095417e")!
             guard note_ids.count > 0 else {
                 XCTFail("Expected at least one note to be found")
                 return
             }
-            let note_id = ndb.lookup_note_by_key(note_ids[0], borrow: { maybeUnownedNote -> NoteId? in
+            let note_id = try? ndb.lookup_note_by_key(note_ids[0], borrow: { maybeUnownedNote -> NoteId? in
                 switch maybeUnownedNote {
                 case .none: return nil
                 case .some(let unownedNote): return unownedNote.id

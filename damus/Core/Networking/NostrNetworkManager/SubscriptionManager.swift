@@ -360,7 +360,7 @@ extension NostrNetworkManager {
             let filter = NostrFilter(ids: [noteId], limit: 1)
             
             // Since note ids point to immutable objects, we can do a simple ndb lookup first
-            if let noteKey = self.ndb.lookup_note_key(noteId) {
+            if let noteKey = try? self.ndb.lookup_note_key(noteId) {
                 return NdbNoteLender(ndb: self.ndb, noteKey: noteKey)
             }
             
@@ -413,18 +413,18 @@ extension NostrNetworkManager {
             
             switch query {
             case .profile(let pubkey):
-                let profileNotNil = self.ndb.lookup_profile(pubkey, borrow: { pr in
+                let profileNotNil = try? self.ndb.lookup_profile(pubkey, borrow: { pr in
                     switch pr {
                     case .some(let pr): return pr.profile != nil
                     case .none: return true
                     }
                 })
-                if profileNotNil {
+                if profileNotNil ?? false {
                     return .profile(pubkey)
                 }
                 filter = NostrFilter(kinds: [.metadata], limit: 1, authors: [pubkey])
             case .event(let evid):
-                if let event = self.ndb.lookup_note_and_copy(evid) {
+                if let event = try? self.ndb.lookup_note_and_copy(evid) {
                     return .event(event)
                 }
                 filter = NostrFilter(ids: [evid], limit: 1)

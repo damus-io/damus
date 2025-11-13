@@ -115,7 +115,7 @@ struct BannerImageView: View {
 }
 
 func get_banner_url(banner: String?, pubkey: Pubkey, profiles: Profiles) -> URL? {
-    let bannerUrlString = banner ?? profiles.lookup(id: pubkey)?.banner ?? ""
+    let bannerUrlString = banner ?? (try? profiles.lookup(id: pubkey)?.banner) ?? ""
     if let url = URL(string: bannerUrlString) {
         return url
     }

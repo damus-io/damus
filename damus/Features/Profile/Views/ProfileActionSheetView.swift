@@ -33,16 +33,16 @@ struct ProfileActionSheetView: View {
         colorScheme == .light ? DamusColors.white : DamusColors.black
     }
     
-    func profile_data<T>(borrow lendingFunction: (_: borrowing ProfileRecord?) throws -> T) rethrows -> T {
+    func profile_data<T>(borrow lendingFunction: (_: borrowing ProfileRecord?) throws -> T) throws -> T {
         return try damus_state.profiles.lookup_with_timestamp(profile.pubkey, borrow: lendingFunction)
     }
     
     func get_profile() -> Profile? {
-        return damus_state.profiles.lookup(id: profile.pubkey)
+        return try? damus_state.profiles.lookup(id: profile.pubkey)
     }
     
     func get_lnurl() -> String? {
-        return damus_state.profiles.lookup_lnurl(profile.pubkey)
+        return try? damus_state.profiles.lookup_lnurl(profile.pubkey)
     }
     
     func navigate(route: Route) {

@@ -58,7 +58,7 @@ class NotificationService: UNNotificationServiceExtension {
         }
 
         let sender_profile = {
-            let profile = state.profiles.lookup(id: nostr_event.pubkey)
+            let profile = try? state.profiles.lookup(id: nostr_event.pubkey)
             let picture = ((profile?.picture.map { URL(string: $0) }) ?? URL(string: robohash(nostr_event.pubkey)))!
             return ProfileBuf(picture: picture,
                                  name: profile?.name,
@@ -185,7 +185,7 @@ func message_intent_from_note(ndb: Ndb, sender_profile: ProfileBuf, content: Str
 
     // gather recipients
     if let recipient_note_id = note.direct_replies() {
-        let replying_to_pk = ndb.lookup_note(recipient_note_id, borrow: { replying_to_note -> Pubkey? in
+        let replying_to_pk = try? ndb.lookup_note(recipient_note_id, borrow: { replying_to_note -> Pubkey? in
             switch replying_to_note {
             case .none: return nil
             case .some(let note): return note.pubkey
@@ -251,7 +251,7 @@ func message_intent_from_note(ndb: Ndb, sender_profile: ProfileBuf, content: Str
 }
 
 func pubkey_to_inperson(ndb: Ndb, pubkey: Pubkey, our_pubkey: Pubkey) async -> INPerson {
-    let profile = ndb.lookup_profile(pubkey, borrow: { profileRecord in
+    let profile = try? ndb.lookup_profile(pubkey, borrow: { profileRecord in
         switch profileRecord {
         case .some(let pr): return pr.profile
         case .none: return nil
