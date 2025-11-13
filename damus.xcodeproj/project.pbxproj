@@ -1655,6 +1655,7 @@
 		D78F08182D7F7F7500FC6C75 /* NIP04.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78F08162D7F7F6C00FC6C75 /* NIP04.swift */; };
 		D78F08192D7F7F7500FC6C75 /* NIP04.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78F08162D7F7F6C00FC6C75 /* NIP04.swift */; };
 		D78F081A2D7F803100FC6C75 /* NIP04.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78F08162D7F7F6C00FC6C75 /* NIP04.swift */; };
+		D795356B2EBD28A800AACF98 /* AppLifecycleHandlingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D795356A2EBD289D00AACF98 /* AppLifecycleHandlingTests.swift */; };
 		D798D21A2B0856CC00234419 /* Mentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7FF7D42823313F009601DB /* Mentions.swift */; };
 		D798D21B2B0856F200234419 /* NdbTagsIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDD1AE12A6B3074001CD4DF /* NdbTagsIterator.swift */; };
 		D798D21C2B0857E400234419 /* Bech32Object.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABEF29857E9200D66079 /* Bech32Object.swift */; };
@@ -2714,6 +2715,7 @@
 		D78F080B2D7F78EB00FC6C75 /* Request.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Request.swift; sourceTree = "<group>"; };
 		D78F08102D7F78F600FC6C75 /* Response.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Response.swift; sourceTree = "<group>"; };
 		D78F08162D7F7F6C00FC6C75 /* NIP04.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP04.swift; sourceTree = "<group>"; };
+		D795356A2EBD289D00AACF98 /* AppLifecycleHandlingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLifecycleHandlingTests.swift; sourceTree = "<group>"; };
 		D798D21D2B0858BB00234419 /* MigratedTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigratedTypes.swift; sourceTree = "<group>"; };
 		D798D2272B085CDA00234419 /* NdbNote+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NdbNote+.swift"; sourceTree = "<group>"; };
 		D798D22B2B086C7400234419 /* NostrEvent+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NostrEvent+.swift"; sourceTree = "<group>"; };
@@ -5114,6 +5116,7 @@
 		D7EBF8BC2E5946F9004EAE29 /* NostrNetworkManagerTests */ = {
 			isa = PBXGroup;
 			children = (
+				D795356A2EBD289D00AACF98 /* AppLifecycleHandlingTests.swift */,
 				D7EBF8BD2E594708004EAE29 /* test_notes.jsonl */,
 				D7EBF8BA2E5901F7004EAE29 /* NostrNetworkManagerTests.swift */,
 				D7EBF8BF2E5D39D1004EAE29 /* ThreadModelTests.swift */,
@@ -6079,6 +6082,7 @@
 				D72E127A2BEEEED000F4F781 /* NostrFilterTests.swift in Sources */,
 				B5B4D1432B37D47600844320 /* NdbExtensions.swift in Sources */,
 				3ACBCB78295FE5C70037388A /* TimeAgoTests.swift in Sources */,
+				D795356B2EBD28A800AACF98 /* AppLifecycleHandlingTests.swift in Sources */,
 				D72A2D072AD9C1FB002AFF62 /* MockProfiles.swift in Sources */,
 				B5A75C2A2B546D94007AFBC0 /* MuteItemTests.swift in Sources */,
 				D7DB1FEE2D5AC51B00CF06DA /* NIP44v2EncryptionTests.swift in Sources */,
