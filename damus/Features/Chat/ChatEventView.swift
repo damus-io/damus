@@ -115,7 +115,7 @@ struct ChatEventView: View {
     // MARK: Zapping properties
 
     var lnurl: String? {
-        damus_state.profiles.lookup_lnurl(event.pubkey)
+        try? damus_state.profiles.lookup_lnurl(event.pubkey)
     }
     var zap_target: ZapTarget {
         ZapTarget.note(id: event.id, author: event.pubkey)

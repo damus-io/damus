@@ -83,8 +83,8 @@ func generate_text_mention_notification(ndb: Ndb, from ev: NostrEvent, state: He
         return notification
     }
 
-    if ev.referenced_ids.contains(where: { note_id in
-        guard let note_author: Pubkey = state.ndb.lookup_note(note_id, borrow: { note in
+    if let contains = try? ev.referenced_ids.contains(where: { note_id in
+        guard let note_author: Pubkey = try state.ndb.lookup_note(note_id, borrow: { note in
             switch note {
             case .some(let note): return note.pubkey
             case .none: return nil
@@ -92,7 +92,7 @@ func generate_text_mention_notification(ndb: Ndb, from ev: NostrEvent, state: He
         }) else { return false }
         guard note_author == state.keypair.pubkey else { return false }
         return true
-    }) {
+    }), contains {
         // This is a reply to one of our posts
         let content_preview = render_notification_content_preview(ndb: state.ndb, ev: ev, profiles: state.profiles, keypair: state.keypair)
         return LocalNotification(type: .reply, event: ev, target: .note(ev), content: content_preview)
@@ -126,7 +126,7 @@ func generate_local_notification_object(ndb: Ndb, from ev: NostrEvent, state: He
         let content_preview = render_notification_content_preview(ndb: ndb, ev: inner_ev, profiles: state.profiles, keypair: state.keypair)
         return LocalNotification(type: .repost, event: ev, target: .note(inner_ev), content: content_preview)
     } else if type == .like, state.settings.like_notification, let evid = ev.referenced_ids.last {
-        return state.ndb.lookup_note(evid, borrow: { liked_event in
+        return try? state.ndb.lookup_note(evid, borrow: { liked_event in
             switch liked_event {
             case .none:
                 return LocalNotification(type: .like, event: ev, target: .note_id(evid), content: "")
@@ -191,7 +191,7 @@ func render_notification_content_preview(ndb: Ndb, ev: NostrEvent, profiles: Pro
 }
 
 func event_author_name(profiles: Profiles, pubkey: Pubkey) -> String {
-    let profile = profiles.lookup(id: pubkey)
+    let profile = try? profiles.lookup(id: pubkey)
     return Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
 }
 
@@ -228,7 +228,7 @@ func process_zap_event(state: HeadlessDamusState, ev: NostrEvent, completion: @e
         return
     }
 
-    guard let lnurl = state.profiles.lookup_with_timestamp(ptag, borrow: { record -> String? in
+    guard let lnurl = try? state.profiles.lookup_with_timestamp(ptag, borrow: { record -> String? in
         switch record {
         case .none: return nil
         case .some(let record): return record.lnurl
@@ -280,7 +280,7 @@ func get_zap_target_pubkey(ev: NostrEvent, ndb: Ndb) -> Pubkey? {
     }
 
     // we can't trust the p tag on note zaps because they can be faked
-    return ndb.lookup_note(etag, borrow: { note in
+    return try? ndb.lookup_note(etag, borrow: { note in
         switch note {
         case .none:
             // We don't have the event in cache so we can't check the pubkey.

@@ -222,7 +222,7 @@ class EventCache {
             return ev
         }
 
-        if let ev = self.ndb.lookup_note_and_copy(evid) {
+        if let ev = try? self.ndb.lookup_note_and_copy(evid) {
             events[ev.id] = ev
             return ev
         }

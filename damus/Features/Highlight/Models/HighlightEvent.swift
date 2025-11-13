@@ -101,7 +101,7 @@ struct HighlightEvent {
         }
 
         let names: [String] = pubkeys.map { pk in
-            let profile = ndb.lookup_profile_and_copy(pk)
+            let profile = try? ndb.lookup_profile_and_copy(pk)
 
             return Profile.displayName(profile: profile, pubkey: pk).username.truncate(maxLength: 50)
         }

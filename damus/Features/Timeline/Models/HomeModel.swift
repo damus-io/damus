@@ -120,7 +120,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         damus_state.contacts.delegate = self
         guard let latest_contact_event_id_hex = damus_state.settings.latest_contact_event_id_hex else { return }
         guard let latest_contact_event_id = NoteId(hex: latest_contact_event_id_hex) else { return }
-        guard let latest_contact_event: NdbNote = damus_state.ndb.lookup_note_and_copy(latest_contact_event_id) else { return }
+        guard let latest_contact_event: NdbNote = try? damus_state.ndb.lookup_note_and_copy(latest_contact_event_id) else { return }
         process_contact_event(state: damus_state, ev: latest_contact_event)
     }
     

@@ -24,7 +24,7 @@ struct EventProfileName: View {
         self.damus_state = damus
         self.pubkey = pubkey
         self.size = size
-        let donation = damus.profiles.lookup(id: pubkey)?.damus_donation
+        let donation = try? damus.profiles.lookup(id: pubkey)?.damus_donation
         self._donation = State(wrappedValue: donation)
         self.purple_account = nil
     }
@@ -59,7 +59,7 @@ struct EventProfileName: View {
     }
 
     var body: some View {
-        let profile = damus_state.profiles.lookup(id: pubkey)
+        let profile = try? damus_state.profiles.lookup(id: pubkey)
         HStack(spacing: 2) {
             switch current_display_name(profile) {
             case .one(let one):
