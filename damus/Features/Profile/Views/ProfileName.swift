@@ -94,7 +94,7 @@ struct ProfileName: View {
     }
     
     var body: some View {
-        let profile = damus_state.profiles.lookup(id: pubkey)
+        let profile = try? damus_state.profiles.lookup(id: pubkey)
 
         HStack(spacing: 2) {
             Text(verbatim: "\(prefix)\(name_choice(profile: profile))")

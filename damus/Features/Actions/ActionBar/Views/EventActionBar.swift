@@ -41,7 +41,7 @@ struct EventActionBar: View {
     // Fetching an LNURL is expensive enough that it can cause a hitch. Use a special backgroundable function to fetch the value.
     // Fetch on `.onAppear`
     nonisolated func fetchLNURL() {
-        let lnurl = damus_state.profiles.lookup_lnurl(event.pubkey)
+        let lnurl = try? damus_state.profiles.lookup_lnurl(event.pubkey)
         DispatchQueue.main.async {
             self.lnurl = lnurl
         }

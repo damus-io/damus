@@ -73,7 +73,7 @@ struct QRCodeView: View {
     
     var QRView: some View {
         VStack(alignment: .center) {
-            let profile = damus_state.profiles.lookup(id: pubkey)
+            let profile = try? damus_state.profiles.lookup(id: pubkey)
 
             ProfilePicView(pubkey: pubkey, size: 90.0, highlight: .custom(DamusColors.white, 3.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
                     .padding(.top, 20)

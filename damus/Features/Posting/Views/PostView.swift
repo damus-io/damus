@@ -212,7 +212,7 @@ struct PostView: View {
             return .init(string: "")
         }
         
-        let profile = damus_state.profiles.lookup(id: pubkey)
+        let profile = try? damus_state.profiles.lookup(id: pubkey)
         return user_tag_attr_string(profile: profile, pubkey: pubkey)
     }
     

@@ -244,7 +244,7 @@ struct NWCSettings: View {
             }
         }
         .onChange(of: model.settings.donation_percent) { p in
-            guard let profile = damus_state.profiles.lookup(id: damus_state.pubkey) else {
+            guard let profile = try? damus_state.profiles.lookup(id: damus_state.pubkey) else {
                 return
             }
             
@@ -257,7 +257,7 @@ struct NWCSettings: View {
         .onDisappear {
             
             guard let keypair = damus_state.keypair.to_full(),
-                  let profile = damus_state.profiles.lookup(id: damus_state.pubkey),
+                  let profile = try? damus_state.profiles.lookup(id: damus_state.pubkey),
                   model.initial_percent != profile.damus_donation
             else {
                 return

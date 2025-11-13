@@ -98,7 +98,7 @@ struct ProfilePicView: View {
     }
 
     func get_lnurl() -> String? {
-        return profiles.lookup_with_timestamp(pubkey, borrow: { pr in
+        return try? profiles.lookup_with_timestamp(pubkey, borrow: { pr in
             switch pr {
             case .some(let pr): return pr.lnurl
             case .none: return nil
@@ -134,7 +134,7 @@ struct ProfilePicView: View {
 }
 
 func get_profile_url(picture: String?, pubkey: Pubkey, profiles: Profiles) -> URL {
-    let pic = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
+    let pic = picture ?? (try? profiles.lookup(id: pubkey)?.picture) ?? robohash(pubkey)
     if let url = URL(string: pic) {
         return url
     }
