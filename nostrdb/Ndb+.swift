@@ -18,12 +18,12 @@ extension Ndb {
     ///   - maxSimultaneousResults: Maximum number of initial results to return
     /// - Returns: AsyncStream of StreamItem events
     /// - Throws: NdbStreamError if subscription fails
-    func subscribe(filters: [NostrFilter], maxSimultaneousResults: Int = 1000) throws(NdbStreamError) -> AsyncStream<StreamItem> {
+    func subscribe(filters: [NostrFilter], maxSimultaneousResults: Int = 1000) throws -> AsyncStream<StreamItem> {
         let ndbFilters: [NdbFilter]
         do {
             ndbFilters = try filters.toNdbFilters()
         } catch {
-            throw .cannotConvertFilter(error)
+            throw NdbStreamError.cannotConvertFilter(error)
         }
         return try self.subscribe(filters: ndbFilters, maxSimultaneousResults: maxSimultaneousResults)
     }
