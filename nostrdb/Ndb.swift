@@ -710,22 +710,22 @@ class Ndb {
         }
     }
     
-    func subscribe(filters: [NdbFilter], maxSimultaneousResults: Int = 1000) throws(NdbStreamError) -> AsyncStream<StreamItem> {
-        guard !self.is_closed else { throw .ndbClosed }
+    func subscribe(filters: [NdbFilter], maxSimultaneousResults: Int = 1000) throws -> AsyncStream<StreamItem> {
+        guard !self.is_closed else { throw NdbStreamError.ndbClosed }
         
-        do { try Task.checkCancellation() } catch { throw .cancelled }
+        do { try Task.checkCancellation() } catch { throw NdbStreamError.cancelled }
         
         // CRITICAL: Create the subscription FIRST before querying to avoid race condition
         // This ensures that any events indexed after subscription but before query won't be missed
         let newEventsStream = ndbSubscribe(filters: filters)
         
         // Now fetch initial results after subscription is registered
-        guard let txn = NdbTxn(ndb: self) else { throw .cannotOpenTransaction }
+        guard let txn = NdbTxn(ndb: self) else { throw NdbStreamError.cannotOpenTransaction }
         
         // Use our safe wrapper instead of direct C function call
         let noteIds = try query(with: txn, filters: filters, maxResults: maxSimultaneousResults)
         
-        do { try Task.checkCancellation() } catch { throw .cancelled }
+        do { try Task.checkCancellation() } catch { throw NdbStreamError.cancelled }
         
         // Create a cascading stream that combines initial results with new events
         return AsyncStream<StreamItem> { continuation in
