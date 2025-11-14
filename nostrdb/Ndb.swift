@@ -7,6 +7,7 @@
 
 import Foundation
 import OSLog
+import Synchronization
 
 fileprivate let APPLICATION_GROUP_IDENTIFIER = "group.com.damus"
 
@@ -34,6 +35,7 @@ class Ndb {
     var generation: Int
     private var closed: Bool
     private var callbackHandler: Ndb.CallbackHandler
+    let ndbAccessLock: Ndb.UseLockProtocol = initLock()
     
     private static let DEFAULT_WRITER_SCRATCH_SIZE: Int32 = 2097152;  // 2mb scratch size for the writer thread, it should match with the one specified in nostrdb.c
 
@@ -158,6 +160,7 @@ class Ndb {
         self.ndb = db
         self.closed = false
         self.callbackHandler = callbackHandler
+        self.ndbAccessLock.markNdbOpen()
     }
     
     private static func migrate_db_location_if_needed() throws {
@@ -207,6 +210,12 @@ class Ndb {
         self.callbackHandler = Ndb.CallbackHandler()
     }
     
+    
+    // MARK: - Syncing use of the `ndb` C object
+    // This is done to prevent race conditions where one thread is using ndb (e.g. querying), while another thread is closing ndb.
+    
+    
+    
     /// Mark NostrDB as "closed" without actually closing it.
     /// Useful when shutting down tasks that use NostrDB while avoiding new tasks from using it.
     func markClosed() {
@@ -216,10 +225,13 @@ class Ndb {
     func close() {
         guard !self.is_closed else { return }
         self.closed = true
-        print("txn: CLOSING NOSTRDB")
-        ndb_destroy(self.ndb.ndb)
-        self.generation += 1
-        print("txn: NOSTRDB CLOSED")
+        try! self.ndbAccessLock.waitUntilNdbCanClose(thenClose: {
+            print("txn: CLOSING NOSTRDB")
+            ndb_destroy(self.ndb.ndb)
+            self.generation += 1
+            print("txn: NOSTRDB CLOSED")
+            return false
+        }, maxTimeout: .milliseconds(2000))
     }
 
     func reopen() -> Bool {
@@ -231,6 +243,7 @@ class Ndb {
         print("txn: NOSTRDB REOPENED (gen \(generation))")
 
         self.closed = false
+        self.ndbAccessLock.markNdbOpen()
         self.ndb = db
         return true
     }
@@ -628,32 +641,35 @@ class Ndb {
     ///   - maxResults: Maximum number of results to return
     /// - Returns: Array of note keys matching the filters
     /// - Throws: NdbStreamError if the query fails
-    func query<Y>(with txn: NdbTxn<Y>, filters: [NdbFilter], maxResults: Int) throws(NdbStreamError) -> [NoteKey] {
-        guard !self.is_closed else { throw .ndbClosed }
-        let filtersPointer = UnsafeMutablePointer<ndb_filter>.allocate(capacity: filters.count)
-        defer { filtersPointer.deallocate() }
-        
-        for (index, ndbFilter) in filters.enumerated() {
-            filtersPointer.advanced(by: index).pointee = ndbFilter.ndbFilter
-        }
-        
-        let count = UnsafeMutablePointer<Int32>.allocate(capacity: 1)
-        defer { count.deallocate() }
-        
-        let results = UnsafeMutablePointer<ndb_query_result>.allocate(capacity: maxResults)
-        defer { results.deallocate() }
-        
-        guard !self.is_closed else { throw .ndbClosed }
-        guard ndb_query(&txn.txn, filtersPointer, Int32(filters.count), results, Int32(maxResults), count) == 1 else {
-            throw NdbStreamError.initialQueryFailed
-        }
-        
-        var noteIds: [NoteKey] = []
-        for i in 0..<count.pointee {
-            noteIds.append(results.advanced(by: Int(i)).pointee.note_id)
-        }
-        
-        return noteIds
+    func query<Y>(with txn: NdbTxn<Y>, filters: [NdbFilter], maxResults: Int) throws -> [NoteKey] {
+        guard !self.is_closed else { throw NdbStreamError.ndbClosed }
+        return try self.ndbAccessLock.keepNdbOpen(during: {
+            guard txn.generation == self.generation else { throw NdbStreamError.cannotOpenTransaction }
+            
+            let filtersPointer = UnsafeMutablePointer<ndb_filter>.allocate(capacity: filters.count)
+            defer { filtersPointer.deallocate() }
+            
+            for (index, ndbFilter) in filters.enumerated() {
+                filtersPointer.advanced(by: index).pointee = ndbFilter.ndbFilter
+            }
+            
+            let count = UnsafeMutablePointer<Int32>.allocate(capacity: 1)
+            defer { count.deallocate() }
+            
+            let results = UnsafeMutablePointer<ndb_query_result>.allocate(capacity: maxResults)
+            defer { results.deallocate() }
+            
+            guard ndb_query(&txn.txn, filtersPointer, Int32(filters.count), results, Int32(maxResults), count) == 1 else {
+                throw NdbStreamError.initialQueryFailed
+            }
+            
+            var noteIds: [NoteKey] = []
+            for i in 0..<count.pointee {
+                noteIds.append(results.advanced(by: Int(i)).pointee.note_id)
+            }
+            
+            return noteIds
+        }, maxTimeout: .milliseconds(500))
     }
     
     /// Safe wrapper around `ndb_subscribe` that handles all pointer management
@@ -1002,4 +1018,3 @@ func getDebugCheckedRoot<T: FlatBufferObject>(byteBuffer: inout ByteBuffer) thro
 func remove_file_prefix(_ str: String) -> String {
     return str.replacingOccurrences(of: "file://", with: "")
 }
-
