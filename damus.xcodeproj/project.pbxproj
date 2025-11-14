@@ -1668,6 +1668,10 @@
 		D74EC8522E1856B70091DC51 /* NonCopyableLinkedList.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74EC84E2E1856AF0091DC51 /* NonCopyableLinkedList.swift */; };
 		D74F430A2B23F0BE00425B75 /* DamusPurple.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74F43092B23F0BE00425B75 /* DamusPurple.swift */; };
 		D74F430C2B23FB9B00425B75 /* StoreObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74F430B2B23FB9B00425B75 /* StoreObserver.swift */; };
+		D75154BF2EC5910A00BF2CB2 /* NdbUseLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75154BE2EC5910600BF2CB2 /* NdbUseLock.swift */; };
+		D75154C02EC5910A00BF2CB2 /* NdbUseLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75154BE2EC5910600BF2CB2 /* NdbUseLock.swift */; };
+		D75154C12EC5910A00BF2CB2 /* NdbUseLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75154BE2EC5910600BF2CB2 /* NdbUseLock.swift */; };
+		D75154C22EC5910A00BF2CB2 /* NdbUseLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75154BE2EC5910600BF2CB2 /* NdbUseLock.swift */; };
 		D753CEAA2BE9DE04001C3A5D /* MutingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D753CEA92BE9DE04001C3A5D /* MutingTests.swift */; };
 		D755B28D2D3E7D8800BBEEFA /* NIP37Draft.swift in Sources */ = {isa = PBXBuildFile; fileRef = D755B28C2D3E7D7D00BBEEFA /* NIP37Draft.swift */; };
 		D755B28E2D3E7D8800BBEEFA /* NIP37Draft.swift in Sources */ = {isa = PBXBuildFile; fileRef = D755B28C2D3E7D7D00BBEEFA /* NIP37Draft.swift */; };
@@ -2767,6 +2771,7 @@
 		D74EC84E2E1856AF0091DC51 /* NonCopyableLinkedList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NonCopyableLinkedList.swift; sourceTree = "<group>"; };
 		D74F43092B23F0BE00425B75 /* DamusPurple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurple.swift; sourceTree = "<group>"; };
 		D74F430B2B23FB9B00425B75 /* StoreObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreObserver.swift; sourceTree = "<group>"; };
+		D75154BE2EC5910600BF2CB2 /* NdbUseLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbUseLock.swift; sourceTree = "<group>"; };
 		D753CEA92BE9DE04001C3A5D /* MutingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutingTests.swift; sourceTree = "<group>"; };
 		D755B28C2D3E7D7D00BBEEFA /* NIP37Draft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP37Draft.swift; sourceTree = "<group>"; };
 		D76556D52B1E6C08001B0CCC /* DamusPurpleWelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleWelcomeView.swift; sourceTree = "<group>"; };
@@ -3299,6 +3304,7 @@
 		4C9054862A6AEB4500811EEC /* nostrdb */ = {
 			isa = PBXGroup;
 			children = (
+				D75154BE2EC5910600BF2CB2 /* NdbUseLock.swift */,
 				D74EC84E2E1856AF0091DC51 /* NonCopyableLinkedList.swift */,
 				D733F9E42D92C75C00317B11 /* UnownedNdbNote.swift */,
 				D7F5630F2DEE71BB008509DE /* NdbFilter.swift */,
@@ -5740,6 +5746,7 @@
 				4CC6AA792CAB688500989CEF /* sha256.c in Sources */,
 				4CC6AA7B2CAB688500989CEF /* likely.c in Sources */,
 				4CC6AA7F2CAB688500989CEF /* htable.c in Sources */,
+				D75154C02EC5910A00BF2CB2 /* NdbUseLock.swift in Sources */,
 				4CC6AA862CAB688500989CEF /* list.c in Sources */,
 				4CC6AA872CAB688500989CEF /* utf8.c in Sources */,
 				4CC6AA892CAB688500989CEF /* debug.c in Sources */,
@@ -6781,6 +6788,7 @@
 				82D6FC3A2CD99F7900C925F4 /* WideEventView.swift in Sources */,
 				82D6FC3B2CD99F7900C925F4 /* LongformView.swift in Sources */,
 				82D6FC3C2CD99F7900C925F4 /* LongformPreview.swift in Sources */,
+				D75154C22EC5910A00BF2CB2 /* NdbUseLock.swift in Sources */,
 				82D6FC3D2CD99F7900C925F4 /* EventShell.swift in Sources */,
 				82D6FC3E2CD99F7900C925F4 /* MentionView.swift in Sources */,
 				82D6FC3F2CD99F7900C925F4 /* EventLoaderView.swift in Sources */,
@@ -7206,6 +7214,7 @@
 				D73E5F302C6A97F4007EB227 /* EventProfile.swift in Sources */,
 				D73E5F312C6A97F4007EB227 /* EventMenu.swift in Sources */,
 				D73E5F322C6A97F4007EB227 /* EventMutingContainerView.swift in Sources */,
+				D75154C12EC5910A00BF2CB2 /* NdbUseLock.swift in Sources */,
 				D73E5F332C6A97F4007EB227 /* ZapEvent.swift in Sources */,
 				5C8F97362EB46145009399B1 /* LiveStreamView.swift in Sources */,
 				D73E5F342C6A97F4007EB227 /* TextEvent.swift in Sources */,
@@ -7470,6 +7479,7 @@
 				4CC6AAC52CAB688500989CEF /* likely.c in Sources */,
 				4CC6AAC92CAB688500989CEF /* htable.c in Sources */,
 				4CC6AAD02CAB688500989CEF /* list.c in Sources */,
+				D75154BF2EC5910A00BF2CB2 /* NdbUseLock.swift in Sources */,
 				4CC6AAD12CAB688500989CEF /* utf8.c in Sources */,
 				4CC6AAD32CAB688500989CEF /* debug.c in Sources */,
 				4CC6AAD42CAB688500989CEF /* str.c in Sources */,
