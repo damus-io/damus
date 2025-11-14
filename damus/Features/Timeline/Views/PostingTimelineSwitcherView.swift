@@ -38,7 +38,8 @@ struct PostingTimelineSwitcherView: View {
         } label: {
             Image(systemName: "square.stack")
                 .foregroundColor(DamusColors.purple)
-                .frame(height: 35)
+                .padding(10)
+                .frame(height: 24)
         }
         .menuOrder(.fixed)
         .accessibilityLabel(NSLocalizedString("Timeline switcher, select \(TimelineSource.follows.description) or \(TimelineSource.favorites.description)", comment: "Accessibility label for the timeline switcher button at the topbar"))

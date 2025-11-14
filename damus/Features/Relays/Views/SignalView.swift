@@ -19,7 +19,6 @@ struct SignalView: View {
                         .font(.callout)
                         .foregroundColor(.gray)
                 }
-                .frame(width:50,height:30)
                 .disabled(signal.signal == signal.max_signal)
             }
         }
