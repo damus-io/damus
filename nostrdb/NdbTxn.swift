@@ -43,16 +43,18 @@ class NdbTxn<T>: RawNdbTxnAccessible {
             let new_ref_count = ref_count + 1
             Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
         } else {
-            self.txn = ndb_txn()
             guard !ndb.is_closed else { return nil }
-            self.generation = ndb.generation
-            #if TXNDEBUG
-            txn_count += 1
-            #endif
-            let ok = ndb_begin_query(ndb.ndb.ndb, &self.txn) != 0
-            if !ok {
-                return nil
-            }
+            let txn: ndb_txn? = try? ndb.ndbAccessLock.keepNdbOpen(during: {
+                var txn = ndb_txn()
+                #if TXNDEBUG
+                txn_count += 1
+                #endif
+                let ok = ndb_begin_query(ndb.ndb.ndb, &txn) != 0
+                guard ok else { return nil }
+                return txn
+            }, maxTimeout: .milliseconds(200))
+            guard let txn else { return nil }
+            self.txn = txn
             self.generation = ndb.generation
             Thread.current.threadDictionary["ndb_txn"] = self.txn
             Thread.current.threadDictionary["ndb_txn_ref_count"] = 1
