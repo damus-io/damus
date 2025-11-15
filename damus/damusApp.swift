@@ -115,6 +115,11 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
     private func configureKingfisherCache() {
         let cachePath = ImageCacheMigrations.kingfisherCachePath()
+        do {
+            try FileManager.default.createDirectory(at: cachePath, withIntermediateDirectories: true)
+        } catch {
+            Log.error("Failed to create Kingfisher cache directory: %s", for: .storage, error.localizedDescription)
+        }
         if let cache = try? ImageCache(name: "sharedCache", cacheDirectoryURL: cachePath) {
             KingfisherManager.shared.cache = cache
         }

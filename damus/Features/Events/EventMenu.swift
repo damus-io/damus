@@ -122,6 +122,7 @@ struct MenuItems: View {
                     if let full_keypair = self.damus_state.keypair.to_full(),
                        let new_mutelist_ev = toggle_from_mutelist(keypair: full_keypair, prev: damus_state.mutelist_manager.event, to_toggle: .thread(event.thread_id(), duration?.date_from_now)) {
                         damus_state.mutelist_manager.set_mutelist(new_mutelist_ev)
+                        damus_state.settings.latest_mutelist_event_id_hex = new_mutelist_ev.id.hex()
                         Task { await damus_state.nostrNetwork.postbox.send(new_mutelist_ev) }
                     }
                     let muted = damus_state.mutelist_manager.is_event_muted(event)
