@@ -12,6 +12,8 @@ struct DamusLabsExperiments: View {
     let damus_state: DamusState
     @ObservedObject var settings: UserSettingsStore
     @State var show_live_explainer: Bool = false
+    @State var show_zaps_explainer: Bool = false
+    @State var show_favorites_explainer: Bool = false
     
     var body: some View {
         ScrollView {
@@ -39,6 +41,8 @@ struct DamusLabsExperiments: View {
                 .padding(.top, 10)
                 
                 LabsToggleView(toggleName: "Live", systemImage: "record.circle", isOn: $settings.live, showInfo: $show_live_explainer)
+                LabsToggleView(toggleName: "Zaps", systemImage: "bolt.fill", isOn: $settings.zaps, showInfo: $show_zaps_explainer)
+                LabsToggleView(toggleName: "Favorites", systemImage: "heart.fill", isOn: $settings.enable_favourites_feature, showInfo: $show_favorites_explainer)
 
             }
             .padding([.trailing, .leading], 20)
@@ -56,7 +60,18 @@ struct DamusLabsExperiments: View {
                 systemImage: "record.circle",
                 labDescription: "This will allow you to see all the real-time live streams happening on Nostr! As well as let you view and interact in the Live Chat. Please keep in mind this is still a work in progress and issues are expected. When enabled you will see the Live option in your side menu.")
         }
-
+        .sheet(isPresented: $show_zaps_explainer) {
+            LabsExplainerView(
+                labName: "Zaps",
+                systemImage: "bolt.fill",
+                labDescription: "This enables experimental zap features. We are working to get these features working for everyone!")
+        }
+        .sheet(isPresented: $show_favorites_explainer) {
+            LabsExplainerView(
+                labName: "Favorites",
+                systemImage: "heart.fill",
+                labDescription: "This will allow you to pick users to be part of your favorites list. You can also switch your profile timeline to only see posts from your favorite contacts.")
+        }
     }
 }
 
