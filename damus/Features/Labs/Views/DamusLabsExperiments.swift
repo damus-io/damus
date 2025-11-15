@@ -44,27 +44,28 @@ struct DamusLabsExperiments: View {
                 
                 LabsToggleView(toggleName: live_label, systemImage: "record.circle", isOn: $settings.live, showInfo: $show_live_explainer)
                 LabsToggleView(toggleName: favorites_label, systemImage: "heart.fill", isOn: $settings.enable_favourites_feature, showInfo: $show_favorites_explainer)
+
             }
             .padding([.trailing, .leading], 20)
             .padding(.bottom, 50)
             
             Image("damooseLabs")
                 .resizable()
+                .accessibilityHidden(true)
                 .aspectRatio(contentMode: .fill)
-            
         }
         .ignoresSafeArea(edges: .bottom)
         .sheet(isPresented: $show_live_explainer) {
             LabsExplainerView(
                 labName: live_label,
                 systemImage: "record.circle",
-                labDescription: "This will allow you to see all the real-time live streams happening on Nostr! As well as let you view and interact in the Live Chat. Please keep in mind this is still a work in progress and issues are expected. When enabled you will see the Live option in your side menu.")
+                labDescription: NSLocalizedString("This will allow you to see all the real-time live streams happening on Nostr! As well as let you view and interact in the Live Chat. Please keep in mind this is still a work in progress and issues are expected. When enabled you will see the Live option in your side menu.", comment: "Damus Labs feature explanation"))
         }
         .sheet(isPresented: $show_favorites_explainer) {
             LabsExplainerView(
                 labName: favorites_label,
                 systemImage: "heart.fill",
-                labDescription: "This will allow you to pick users to be part of your favorites list. You can also switch your profile timeline to only see posts from your favorite contacts.")
+                labDescription: NSLocalizedString("This will allow you to pick users to be part of your favorites list. You can also switch your profile timeline to only see posts from your favorite contacts.", comment: "Damus Labs feature explanation"))
         }
     }
 }
