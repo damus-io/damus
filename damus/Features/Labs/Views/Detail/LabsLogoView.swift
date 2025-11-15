@@ -22,6 +22,7 @@ struct LabsLogoView: View {
                             endPoint: .bottomTrailing), lineWidth: 1)
                 )
                 .shadow(radius: 5)
+                .accessibilityHidden(true)
             
             VStack(alignment: .leading) {
                 HStack(spacing: 0) {
@@ -29,6 +30,7 @@ struct LabsLogoView: View {
                         .font(.system(size: 60.0).weight(.bold))
                         .foregroundColor(.white)
                         .tracking(-2)
+                        .accessibilityHidden(true)
                     Image(systemName: "flask.fill")
                         .padding(.top, 25)
                         .foregroundStyle(
@@ -38,6 +40,7 @@ struct LabsLogoView: View {
                                 endPoint: .bottomTrailing
                             )
                         )
+                        .accessibilityHidden(true)
                     Image(systemName: "testtube.2")
                         .padding(.top, 25)
                         .foregroundStyle(
@@ -47,10 +50,12 @@ struct LabsLogoView: View {
                                 endPoint: .topTrailing
                             )
                         )
+                        .accessibilityHidden(true)
                 }
             }
         }
         .padding(.bottom, 30)
+        .accessibilityLabel(NSLocalizedString("Damus Labs stylized logo", comment: "Accessibility label for a stylized Damus Labs logo"))
     }
 }
 
