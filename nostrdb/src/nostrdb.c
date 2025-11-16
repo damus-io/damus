@@ -2328,7 +2328,12 @@ static struct ndb_migration MIGRATIONS[] = {
 int ndb_end_query(struct ndb_txn *txn)
 {
 	// this works on read or write queries.
-	return mdb_txn_commit(txn->mdb_txn) == 0;
+	int rc = mdb_txn_commit(txn->mdb_txn);
+	if (rc != 0) {
+		/* Bubble up failures so callers have context for stuck transactions. */
+		fprintf(stderr, "ndb_end_query: mdb_txn_commit failed with %d\n", rc);
+	}
+	return rc == 0;
 }
 
 int ndb_note_verify(void *ctx, unsigned char *scratch, size_t scratch_size,

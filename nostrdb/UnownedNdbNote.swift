@@ -70,10 +70,14 @@ enum NdbNoteLender: Sendable {
     func borrow<T>(_ lendingFunction: (_: borrowing UnownedNdbNote) async throws -> T) async throws -> T {
         switch self {
         case .ndbNoteKey(let ndb, let noteKey):
-            guard !ndb.is_closed else { throw LendingError.ndbClosed }
-            guard let ndbNoteTxn = ndb.lookup_note_by_key(noteKey) else { throw LendingError.errorLoadingNote }
-            guard let unownedNote = UnownedNdbNote(ndbNoteTxn) else { throw LendingError.errorLoadingNote }
-            return try await lendingFunction(unownedNote)
+            let safeNote: UnownedNdbNote = try {
+                guard !ndb.is_closed else { throw LendingError.ndbClosed }
+                guard let ndbNoteTxn = ndb.lookup_note_by_key(noteKey) else { throw LendingError.errorLoadingNote }
+                guard let unownedNote = UnownedNdbNote(ndbNoteTxn) else { throw LendingError.errorLoadingNote }
+                // Copy inside this scoped helper so the txn gets dropped before we ever hit an await.
+                return UnownedNdbNote(unownedNote.toOwned())
+            }()
+            return try await lendingFunction(safeNote)
         case .owned(let note):
             return try await lendingFunction(UnownedNdbNote(note))
         }
