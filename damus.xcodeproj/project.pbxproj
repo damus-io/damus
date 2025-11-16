@@ -531,6 +531,60 @@
 		5C8498032D5D150000F74FEB /* ZapExplainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8498012D5D14FA00F74FEB /* ZapExplainer.swift */; };
 		5C8498042D5D150000F74FEB /* ZapExplainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8498012D5D14FA00F74FEB /* ZapExplainer.swift */; };
 		5C8711DE2C460C06007879C2 /* PostingTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */; };
+		5C8F970A2EB45E8C009399B1 /* LiveChatModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97092EB45E85009399B1 /* LiveChatModel.swift */; };
+		5C8F970B2EB45E8C009399B1 /* LiveChatModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97092EB45E85009399B1 /* LiveChatModel.swift */; };
+		5C8F970C2EB45E8C009399B1 /* LiveChatModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97092EB45E85009399B1 /* LiveChatModel.swift */; };
+		5C8F970E2EB45F7C009399B1 /* LiveChatHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F970D2EB45F68009399B1 /* LiveChatHomeView.swift */; };
+		5C8F970F2EB45F7C009399B1 /* LiveChatHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F970D2EB45F68009399B1 /* LiveChatHomeView.swift */; };
+		5C8F97102EB45F7C009399B1 /* LiveChatHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F970D2EB45F68009399B1 /* LiveChatHomeView.swift */; };
+		5C8F97122EB45FAA009399B1 /* LiveChatTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97112EB45FA3009399B1 /* LiveChatTimeline.swift */; };
+		5C8F97132EB45FAA009399B1 /* LiveChatTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97112EB45FA3009399B1 /* LiveChatTimeline.swift */; };
+		5C8F97142EB45FAA009399B1 /* LiveChatTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97112EB45FA3009399B1 /* LiveChatTimeline.swift */; };
+		5C8F97162EB45FD7009399B1 /* LiveChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97152EB45FD1009399B1 /* LiveChatView.swift */; };
+		5C8F97172EB45FD7009399B1 /* LiveChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97152EB45FD1009399B1 /* LiveChatView.swift */; };
+		5C8F97182EB45FD7009399B1 /* LiveChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97152EB45FD1009399B1 /* LiveChatView.swift */; };
+		5C8F971C2EB4607B009399B1 /* LiveEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F971B2EB46078009399B1 /* LiveEvent.swift */; };
+		5C8F971D2EB4607B009399B1 /* LiveEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F971B2EB46078009399B1 /* LiveEvent.swift */; };
+		5C8F971E2EB4607B009399B1 /* LiveEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F971B2EB46078009399B1 /* LiveEvent.swift */; };
+		5C8F97202EB46097009399B1 /* LiveEventModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F971F2EB46093009399B1 /* LiveEventModel.swift */; };
+		5C8F97212EB46097009399B1 /* LiveEventModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F971F2EB46093009399B1 /* LiveEventModel.swift */; };
+		5C8F97222EB46097009399B1 /* LiveEventModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F971F2EB46093009399B1 /* LiveEventModel.swift */; };
+		5C8F97252EB460CA009399B1 /* LiveStreamBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97242EB460C2009399B1 /* LiveStreamBanner.swift */; };
+		5C8F97262EB460CA009399B1 /* LiveStreamBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97242EB460C2009399B1 /* LiveStreamBanner.swift */; };
+		5C8F97272EB460CA009399B1 /* LiveStreamBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97242EB460C2009399B1 /* LiveStreamBanner.swift */; };
+		5C8F97292EB460E6009399B1 /* LiveStreamProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97282EB460DC009399B1 /* LiveStreamProfile.swift */; };
+		5C8F972A2EB460E6009399B1 /* LiveStreamProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97282EB460DC009399B1 /* LiveStreamProfile.swift */; };
+		5C8F972B2EB460E6009399B1 /* LiveStreamProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97282EB460DC009399B1 /* LiveStreamProfile.swift */; };
+		5C8F972D2EB46116009399B1 /* LiveStreamStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F972C2EB4610F009399B1 /* LiveStreamStatus.swift */; };
+		5C8F972E2EB46116009399B1 /* LiveStreamStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F972C2EB4610F009399B1 /* LiveStreamStatus.swift */; };
+		5C8F972F2EB46116009399B1 /* LiveStreamStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F972C2EB4610F009399B1 /* LiveStreamStatus.swift */; };
+		5C8F97312EB46126009399B1 /* LiveStreamViewers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97302EB46121009399B1 /* LiveStreamViewers.swift */; };
+		5C8F97322EB46126009399B1 /* LiveStreamViewers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97302EB46121009399B1 /* LiveStreamViewers.swift */; };
+		5C8F97332EB46126009399B1 /* LiveStreamViewers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97302EB46121009399B1 /* LiveStreamViewers.swift */; };
+		5C8F97352EB46145009399B1 /* LiveStreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97342EB46141009399B1 /* LiveStreamView.swift */; };
+		5C8F97362EB46145009399B1 /* LiveStreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97342EB46141009399B1 /* LiveStreamView.swift */; };
+		5C8F97372EB46145009399B1 /* LiveStreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97342EB46141009399B1 /* LiveStreamView.swift */; };
+		5C8F97392EB4616D009399B1 /* LiveStreamTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97382EB46167009399B1 /* LiveStreamTimeline.swift */; };
+		5C8F973A2EB4616D009399B1 /* LiveStreamTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97382EB46167009399B1 /* LiveStreamTimeline.swift */; };
+		5C8F973B2EB4616D009399B1 /* LiveStreamTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97382EB46167009399B1 /* LiveStreamTimeline.swift */; };
+		5C8F973D2EB46197009399B1 /* LiveStreamPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F973C2EB46192009399B1 /* LiveStreamPreview.swift */; };
+		5C8F973E2EB46197009399B1 /* LiveStreamPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F973C2EB46192009399B1 /* LiveStreamPreview.swift */; };
+		5C8F973F2EB46197009399B1 /* LiveStreamPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F973C2EB46192009399B1 /* LiveStreamPreview.swift */; };
+		5C8F97412EB461B2009399B1 /* LiveStreamHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97402EB461AB009399B1 /* LiveStreamHomeView.swift */; };
+		5C8F97422EB461B2009399B1 /* LiveStreamHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97402EB461AB009399B1 /* LiveStreamHomeView.swift */; };
+		5C8F97432EB461B2009399B1 /* LiveStreamHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97402EB461AB009399B1 /* LiveStreamHomeView.swift */; };
+		5C8F97452EB461DB009399B1 /* EventTags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97442EB461D6009399B1 /* EventTags.swift */; };
+		5C8F97462EB461DB009399B1 /* EventTags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97442EB461D6009399B1 /* EventTags.swift */; };
+		5C8F97472EB461DB009399B1 /* EventTags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97442EB461D6009399B1 /* EventTags.swift */; };
+		5C8F97492EB4620A009399B1 /* Glow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97482EB46208009399B1 /* Glow.swift */; };
+		5C8F974A2EB4620A009399B1 /* Glow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97482EB46208009399B1 /* Glow.swift */; };
+		5C8F974B2EB4620A009399B1 /* Glow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97482EB46208009399B1 /* Glow.swift */; };
+		5C8F974E2EBD704A009399B1 /* LabsToggleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F974D2EBD7044009399B1 /* LabsToggleView.swift */; };
+		5C8F974F2EBD704A009399B1 /* LabsToggleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F974D2EBD7044009399B1 /* LabsToggleView.swift */; };
+		5C8F97502EBD704A009399B1 /* LabsToggleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F974D2EBD7044009399B1 /* LabsToggleView.swift */; };
+		5C8F97522EBD7083009399B1 /* LabsExplainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97512EBD7071009399B1 /* LabsExplainerView.swift */; };
+		5C8F97532EBD7083009399B1 /* LabsExplainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97512EBD7071009399B1 /* LabsExplainerView.swift */; };
+		5C8F97542EBD7083009399B1 /* LabsExplainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8F97512EBD7071009399B1 /* LabsExplainerView.swift */; };
 		5CB017212D2D985E00A9ED05 /* CoinosButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017202D2D985800A9ED05 /* CoinosButton.swift */; };
 		5CB017222D2D985E00A9ED05 /* CoinosButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017202D2D985800A9ED05 /* CoinosButton.swift */; };
 		5CB017232D2D985E00A9ED05 /* CoinosButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB017202D2D985800A9ED05 /* CoinosButton.swift */; };
@@ -552,9 +606,9 @@
 		5CB645A12EA31E410018BD91 /* LabsLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB645A02EA31E3D0018BD91 /* LabsLogoView.swift */; };
 		5CB645A22EA31E410018BD91 /* LabsLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB645A02EA31E3D0018BD91 /* LabsLogoView.swift */; };
 		5CB645A32EA31E410018BD91 /* LabsLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB645A02EA31E3D0018BD91 /* LabsLogoView.swift */; };
-		5CB645A92EAC01430018BD91 /* DamusLabsExpirements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB645A82EAC013A0018BD91 /* DamusLabsExpirements.swift */; };
-		5CB645AA2EAC01430018BD91 /* DamusLabsExpirements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB645A82EAC013A0018BD91 /* DamusLabsExpirements.swift */; };
-		5CB645AB2EAC01430018BD91 /* DamusLabsExpirements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB645A82EAC013A0018BD91 /* DamusLabsExpirements.swift */; };
+		5CB645A92EAC01430018BD91 /* DamusLabsExperiments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB645A82EAC013A0018BD91 /* DamusLabsExperiments.swift */; };
+		5CB645AA2EAC01430018BD91 /* DamusLabsExperiments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB645A82EAC013A0018BD91 /* DamusLabsExperiments.swift */; };
+		5CB645AB2EAC01430018BD91 /* DamusLabsExperiments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB645A82EAC013A0018BD91 /* DamusLabsExperiments.swift */; };
 		5CC8529D2BD741CD0039FFC5 /* HighlightEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC8529C2BD741CD0039FFC5 /* HighlightEvent.swift */; };
 		5CC8529F2BD744F60039FFC5 /* HighlightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC8529E2BD744F60039FFC5 /* HighlightView.swift */; };
 		5CC852A22BDED9B90039FFC5 /* HighlightDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC852A12BDED9B90039FFC5 /* HighlightDescription.swift */; };
@@ -1189,6 +1243,15 @@
 		D72A2D022AD9C136002AFF62 /* EventViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2CFF2AD9B66B002AFF62 /* EventViewTests.swift */; };
 		D72A2D052AD9C1B5002AFF62 /* MockDamusState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2D042AD9C1B5002AFF62 /* MockDamusState.swift */; };
 		D72A2D072AD9C1FB002AFF62 /* MockProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2D062AD9C1FB002AFF62 /* MockProfiles.swift */; };
+		D72B6FA22E7DFB450050CD1D /* ProfilesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72B6FA12E7DFB3F0050CD1D /* ProfilesManager.swift */; };
+		D72B6FA32E7DFB450050CD1D /* ProfilesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72B6FA12E7DFB3F0050CD1D /* ProfilesManager.swift */; };
+		D72B6FA42E7DFB450050CD1D /* ProfilesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72B6FA12E7DFB3F0050CD1D /* ProfilesManager.swift */; };
+		D72B6FA62E7E06AD0050CD1D /* ProfileObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72B6FA52E7E06A40050CD1D /* ProfileObserver.swift */; };
+		D72B6FA72E7E06AD0050CD1D /* ProfileObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72B6FA52E7E06A40050CD1D /* ProfileObserver.swift */; };
+		D72B6FA92E7E06AD0050CD1D /* ProfileObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72B6FA52E7E06A40050CD1D /* ProfileObserver.swift */; };
+		D72C01312E78C10500AACB67 /* CondensedProfilePicturesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72C01302E78C0FB00AACB67 /* CondensedProfilePicturesViewModel.swift */; };
+		D72C01322E78C10500AACB67 /* CondensedProfilePicturesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72C01302E78C0FB00AACB67 /* CondensedProfilePicturesViewModel.swift */; };
+		D72C01332E78C10500AACB67 /* CondensedProfilePicturesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72C01302E78C0FB00AACB67 /* CondensedProfilePicturesViewModel.swift */; };
 		D72E12782BEED22500F4F781 /* Array.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72E12772BEED22400F4F781 /* Array.swift */; };
 		D72E127A2BEEEED000F4F781 /* NostrFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72E12792BEEEED000F4F781 /* NostrFilterTests.swift */; };
 		D7315A2A2ACDF3B70036E30A /* DamusCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7315A292ACDF3B70036E30A /* DamusCacheManager.swift */; };
@@ -1784,8 +1847,14 @@
 		D7DF58322DFCF18D00E9AD28 /* SendPaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DF58312DFCF18800E9AD28 /* SendPaymentView.swift */; };
 		D7DF58332DFCF18D00E9AD28 /* SendPaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DF58312DFCF18800E9AD28 /* SendPaymentView.swift */; };
 		D7DF58342DFCF18D00E9AD28 /* SendPaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DF58312DFCF18800E9AD28 /* SendPaymentView.swift */; };
+		D7E5B2D32EA0188200CF47AC /* StreamPipelineDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E5B2D22EA0187B00CF47AC /* StreamPipelineDiagnostics.swift */; };
+		D7E5B2D42EA0188200CF47AC /* StreamPipelineDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E5B2D22EA0187B00CF47AC /* StreamPipelineDiagnostics.swift */; };
+		D7E5B2D52EA0188200CF47AC /* StreamPipelineDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E5B2D22EA0187B00CF47AC /* StreamPipelineDiagnostics.swift */; };
 		D7EB00B02CD59C8D00660C07 /* PresentFullScreenItemNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EB00AF2CD59C8300660C07 /* PresentFullScreenItemNotify.swift */; };
 		D7EB00B12CD59C8D00660C07 /* PresentFullScreenItemNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EB00AF2CD59C8300660C07 /* PresentFullScreenItemNotify.swift */; };
+		D7EBF8BB2E59022A004EAE29 /* NostrNetworkManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EBF8BA2E5901F7004EAE29 /* NostrNetworkManagerTests.swift */; };
+		D7EBF8BE2E59470D004EAE29 /* test_notes.jsonl in Resources */ = {isa = PBXBuildFile; fileRef = D7EBF8BD2E594708004EAE29 /* test_notes.jsonl */; };
+		D7EBF8C02E5D39DC004EAE29 /* ThreadModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EBF8BF2E5D39D1004EAE29 /* ThreadModelTests.swift */; };
 		D7EDED152B11776B0018B19C /* LibreTranslateServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE45AF5297BB2E700C1D842 /* LibreTranslateServer.swift */; };
 		D7EDED162B1177840018B19C /* LNUrls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB883B5297730E400DC99E7 /* LNUrls.swift */; };
 		D7EDED172B1177960018B19C /* TranslationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AAA95C9298DF87B00F3D526 /* TranslationService.swift */; };
@@ -2559,6 +2628,24 @@
 		5C7389B02B6EFA7100781E0A /* ProxyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyView.swift; sourceTree = "<group>"; };
 		5C8498012D5D14FA00F74FEB /* ZapExplainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapExplainer.swift; sourceTree = "<group>"; };
 		5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostingTimelineView.swift; sourceTree = "<group>"; };
+		5C8F97092EB45E85009399B1 /* LiveChatModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveChatModel.swift; sourceTree = "<group>"; };
+		5C8F970D2EB45F68009399B1 /* LiveChatHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveChatHomeView.swift; sourceTree = "<group>"; };
+		5C8F97112EB45FA3009399B1 /* LiveChatTimeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveChatTimeline.swift; sourceTree = "<group>"; };
+		5C8F97152EB45FD1009399B1 /* LiveChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveChatView.swift; sourceTree = "<group>"; };
+		5C8F971B2EB46078009399B1 /* LiveEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveEvent.swift; sourceTree = "<group>"; };
+		5C8F971F2EB46093009399B1 /* LiveEventModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveEventModel.swift; sourceTree = "<group>"; };
+		5C8F97242EB460C2009399B1 /* LiveStreamBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamBanner.swift; sourceTree = "<group>"; };
+		5C8F97282EB460DC009399B1 /* LiveStreamProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamProfile.swift; sourceTree = "<group>"; };
+		5C8F972C2EB4610F009399B1 /* LiveStreamStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamStatus.swift; sourceTree = "<group>"; };
+		5C8F97302EB46121009399B1 /* LiveStreamViewers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamViewers.swift; sourceTree = "<group>"; };
+		5C8F97342EB46141009399B1 /* LiveStreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamView.swift; sourceTree = "<group>"; };
+		5C8F97382EB46167009399B1 /* LiveStreamTimeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamTimeline.swift; sourceTree = "<group>"; };
+		5C8F973C2EB46192009399B1 /* LiveStreamPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamPreview.swift; sourceTree = "<group>"; };
+		5C8F97402EB461AB009399B1 /* LiveStreamHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamHomeView.swift; sourceTree = "<group>"; };
+		5C8F97442EB461D6009399B1 /* EventTags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTags.swift; sourceTree = "<group>"; };
+		5C8F97482EB46208009399B1 /* Glow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Glow.swift; sourceTree = "<group>"; };
+		5C8F974D2EBD7044009399B1 /* LabsToggleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabsToggleView.swift; sourceTree = "<group>"; };
+		5C8F97512EBD7071009399B1 /* LabsExplainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabsExplainerView.swift; sourceTree = "<group>"; };
 		5CB017202D2D985800A9ED05 /* CoinosButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinosButton.swift; sourceTree = "<group>"; };
 		5CB017242D42C5BD00A9ED05 /* TransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsView.swift; sourceTree = "<group>"; };
 		5CB0172C2D42C76600A9ED05 /* BalanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceView.swift; sourceTree = "<group>"; };
@@ -2566,7 +2653,7 @@
 		5CB645972EA317CC0018BD91 /* DamusLabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusLabs.swift; sourceTree = "<group>"; };
 		5CB6459B2EA31D750018BD91 /* LabsIntroduction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabsIntroduction.swift; sourceTree = "<group>"; };
 		5CB645A02EA31E3D0018BD91 /* LabsLogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabsLogoView.swift; sourceTree = "<group>"; };
-		5CB645A82EAC013A0018BD91 /* DamusLabsExpirements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusLabsExpirements.swift; sourceTree = "<group>"; };
+		5CB645A82EAC013A0018BD91 /* DamusLabsExperiments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusLabsExperiments.swift; sourceTree = "<group>"; };
 		5CC8529C2BD741CD0039FFC5 /* HighlightEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightEvent.swift; sourceTree = "<group>"; };
 		5CC8529E2BD744F60039FFC5 /* HighlightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightView.swift; sourceTree = "<group>"; };
 		5CC852A12BDED9B90039FFC5 /* HighlightDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightDescription.swift; sourceTree = "<group>"; };
@@ -2646,6 +2733,9 @@
 		D72A2CFF2AD9B66B002AFF62 /* EventViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventViewTests.swift; sourceTree = "<group>"; };
 		D72A2D042AD9C1B5002AFF62 /* MockDamusState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDamusState.swift; sourceTree = "<group>"; };
 		D72A2D062AD9C1FB002AFF62 /* MockProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockProfiles.swift; sourceTree = "<group>"; };
+		D72B6FA12E7DFB3F0050CD1D /* ProfilesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilesManager.swift; sourceTree = "<group>"; };
+		D72B6FA52E7E06A40050CD1D /* ProfileObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileObserver.swift; sourceTree = "<group>"; };
+		D72C01302E78C0FB00AACB67 /* CondensedProfilePicturesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CondensedProfilePicturesViewModel.swift; sourceTree = "<group>"; };
 		D72E12772BEED22400F4F781 /* Array.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Array.swift; sourceTree = "<group>"; };
 		D72E12792BEEEED000F4F781 /* NostrFilterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrFilterTests.swift; sourceTree = "<group>"; };
 		D7315A292ACDF3B70036E30A /* DamusCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusCacheManager.swift; sourceTree = "<group>"; };
@@ -2730,7 +2820,11 @@
 		D7DB93092D69485A00DA1EE5 /* NIP65.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP65.swift; sourceTree = "<group>"; };
 		D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrEventTests.swift; sourceTree = "<group>"; };
 		D7DF58312DFCF18800E9AD28 /* SendPaymentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendPaymentView.swift; sourceTree = "<group>"; };
+		D7E5B2D22EA0187B00CF47AC /* StreamPipelineDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPipelineDiagnostics.swift; sourceTree = "<group>"; };
 		D7EB00AF2CD59C8300660C07 /* PresentFullScreenItemNotify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentFullScreenItemNotify.swift; sourceTree = "<group>"; };
+		D7EBF8BA2E5901F7004EAE29 /* NostrNetworkManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrNetworkManagerTests.swift; sourceTree = "<group>"; };
+		D7EBF8BD2E594708004EAE29 /* test_notes.jsonl */ = {isa = PBXFileReference; lastKnownFileType = text; path = test_notes.jsonl; sourceTree = "<group>"; };
+		D7EBF8BF2E5D39D1004EAE29 /* ThreadModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadModelTests.swift; sourceTree = "<group>"; };
 		D7EDED1B2B1178FE0018B19C /* NoteContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteContent.swift; sourceTree = "<group>"; };
 		D7EDED1D2B11797D0018B19C /* LongformEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongformEvent.swift; sourceTree = "<group>"; };
 		D7EDED202B117DCA0018B19C /* SequenceUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SequenceUtils.swift; sourceTree = "<group>"; };
@@ -3133,6 +3227,7 @@
 		4C75EFAB28049CC80006080F /* Nostr */ = {
 			isa = PBXGroup;
 			children = (
+				D72B6FA52E7E06A40050CD1D /* ProfileObserver.swift */,
 				4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */,
 				50A60D132A28BEEE00186190 /* RelayLog.swift */,
 				4C75EFA527FF87A20006080F /* Nostr.swift */,
@@ -3640,6 +3735,7 @@
 				5C513FCB2984ACA60072348F /* QRCodeView.swift */,
 				4C363A8B28236B92006E126D /* PubkeyView.swift */,
 				4C8D00CB29DF92DF0036AF10 /* Hashtags.swift */,
+				5C8F97442EB461D6009399B1 /* EventTags.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -3714,6 +3810,7 @@
 		4CE6DEF627F7A08200C66700 /* damusTests */ = {
 			isa = PBXGroup;
 			children = (
+				D7EBF8BC2E5946F9004EAE29 /* NostrNetworkManagerTests */,
 				D7DB1FED2D5AC50F00CF06DA /* NIP44v2EncryptionTests.swift */,
 				D7A0D8742D1FE66A00DCBE59 /* EditPictureControlTests.swift */,
 				E06336A72B7582D600A88E6B /* Assets */,
@@ -4025,6 +4122,7 @@
 		5C78A7792E22FDFE00CF177D /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				5C8F97042EB45E39009399B1 /* Live */,
 				D5C1AFC22E5DFF040092F72F /* ContactCard */,
 				5C78A7BC2E304D7400CF177D /* Translations */,
 				5C78A7B52E3046F400CF177D /* NIP05 */,
@@ -4340,6 +4438,7 @@
 		5C78A7922E3036F800CF177D /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				D72C01302E78C0FB00AACB67 /* CondensedProfilePicturesViewModel.swift */,
 				4C3BEFD12819DB9B00B3DE84 /* ProfileModel.swift */,
 				4C363A912825FCF2006E126D /* ProfileUpdate.swift */,
 			);
@@ -4708,6 +4807,7 @@
 		5C78A7B82E3047DE00CF177D /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				D7E5B2D22EA0187B00CF47AC /* StreamPipelineDiagnostics.swift */,
 				D77135D22E7B766300E7639F /* DataExtensions.swift */,
 				4CF0ABEA29844B2F00D66079 /* AnyCodable */,
 				D73B74E02D8365B40067BDBC /* ExtraFonts.swift */,
@@ -4858,12 +4958,100 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		5C8F97042EB45E39009399B1 /* Live */ = {
+			isa = PBXGroup;
+			children = (
+				5C8F97062EB45E53009399B1 /* LiveStream */,
+				5C8F97052EB45E4C009399B1 /* LiveChat */,
+			);
+			path = Live;
+			sourceTree = "<group>";
+		};
+		5C8F97052EB45E4C009399B1 /* LiveChat */ = {
+			isa = PBXGroup;
+			children = (
+				5C8F97072EB45E5F009399B1 /* Models */,
+				5C8F97082EB45E63009399B1 /* Views */,
+			);
+			path = LiveChat;
+			sourceTree = "<group>";
+		};
+		5C8F97062EB45E53009399B1 /* LiveStream */ = {
+			isa = PBXGroup;
+			children = (
+				5C8F971A2EB4600C009399B1 /* Views */,
+				5C8F97192EB46005009399B1 /* Models */,
+			);
+			path = LiveStream;
+			sourceTree = "<group>";
+		};
+		5C8F97072EB45E5F009399B1 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				5C8F97092EB45E85009399B1 /* LiveChatModel.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		5C8F97082EB45E63009399B1 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				5C8F97152EB45FD1009399B1 /* LiveChatView.swift */,
+				5C8F97112EB45FA3009399B1 /* LiveChatTimeline.swift */,
+				5C8F970D2EB45F68009399B1 /* LiveChatHomeView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		5C8F97192EB46005009399B1 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				5C8F971F2EB46093009399B1 /* LiveEventModel.swift */,
+				5C8F971B2EB46078009399B1 /* LiveEvent.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		5C8F971A2EB4600C009399B1 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				5C8F97402EB461AB009399B1 /* LiveStreamHomeView.swift */,
+				5C8F973C2EB46192009399B1 /* LiveStreamPreview.swift */,
+				5C8F97382EB46167009399B1 /* LiveStreamTimeline.swift */,
+				5C8F97342EB46141009399B1 /* LiveStreamView.swift */,
+				5C8F97232EB460B8009399B1 /* Components */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		5C8F97232EB460B8009399B1 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				5C8F97302EB46121009399B1 /* LiveStreamViewers.swift */,
+				5C8F972C2EB4610F009399B1 /* LiveStreamStatus.swift */,
+				5C8F97282EB460DC009399B1 /* LiveStreamProfile.swift */,
+				5C8F97242EB460C2009399B1 /* LiveStreamBanner.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		5C8F974C2EBD703D009399B1 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				5C8F97512EBD7071009399B1 /* LabsExplainerView.swift */,
+				5C8F974D2EBD7044009399B1 /* LabsToggleView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
 		5CB645952EA3106A0018BD91 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				5CB645A82EAC013A0018BD91 /* DamusLabsExpirements.swift */,
+				5C8F974C2EBD703D009399B1 /* Components */,
+				5CB645A82EAC013A0018BD91 /* DamusLabsExperiments.swift */,
 				5CB6459B2EA31D750018BD91 /* LabsIntroduction.swift */,
 				5CB645972EA317CC0018BD91 /* DamusLabs.swift */,
+				5CB6459F2EA31E2C0018BD91 /* Detail */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -4871,7 +5059,6 @@
 		5CB645962EA3106A0018BD91 /* Labs */ = {
 			isa = PBXGroup;
 			children = (
-				5CB6459F2EA31E2C0018BD91 /* Detail */,
 				5CB645952EA3106A0018BD91 /* Views */,
 			);
 			path = Labs;
@@ -4982,6 +5169,7 @@
 		D73BDB122D71212600D69970 /* NostrNetworkManager */ = {
 			isa = PBXGroup;
 			children = (
+				D72B6FA12E7DFB3F0050CD1D /* ProfilesManager.swift */,
 				D733F9E02D92C1AA00317B11 /* SubscriptionManager.swift */,
 				D73BDB172D71310C00D69970 /* UserRelayListErrors.swift */,
 				D73BDB132D71215F00D69970 /* UserRelayListManager.swift */,
@@ -5084,6 +5272,16 @@
 			path = NIP65;
 			sourceTree = "<group>";
 		};
+		D7EBF8BC2E5946F9004EAE29 /* NostrNetworkManagerTests */ = {
+			isa = PBXGroup;
+			children = (
+				D7EBF8BD2E594708004EAE29 /* test_notes.jsonl */,
+				D7EBF8BA2E5901F7004EAE29 /* NostrNetworkManagerTests.swift */,
+				D7EBF8BF2E5D39D1004EAE29 /* ThreadModelTests.swift */,
+			);
+			path = NostrNetworkManagerTests;
+			sourceTree = "<group>";
+		};
 		E06336A72B7582D600A88E6B /* Assets */ = {
 			isa = PBXGroup;
 			children = (
@@ -5107,6 +5305,7 @@
 		F7F0BA23297892AE009531F3 /* Modifiers */ = {
 			isa = PBXGroup;
 			children = (
+				5C8F97482EB46208009399B1 /* Glow.swift */,
 				F7F0BA24297892BD009531F3 /* SwipeToDismiss.swift */,
 			);
 			path = Modifiers;
@@ -5407,6 +5606,7 @@
 			files = (
 				E06336AB2B75850100A88E6B /* img_with_location.jpeg in Resources */,
 				D7DB1FF12D5AC5D700CF06DA /* nip44.vectors.json in Resources */,
+				D7EBF8BE2E59470D004EAE29 /* test_notes.jsonl in Resources */,
 				4C0C039A2A61E27B0098B3B8 /* bool_setting.wasm in Resources */,
 				D7DB1FF32D5AC5EA00CF06DA /* LICENSES in Resources */,
 				4C0C03992A61E27B0098B3B8 /* primal.wasm in Resources */,
@@ -5481,9 +5681,11 @@
 				4C3DCC762A9FE9EC0091E592 /* NdbTxn.swift in Sources */,
 				4CEF958D2A9CE650000F901B /* verifier.c in Sources */,
 				D73BDB0E2D6FF5F600D69970 /* NostrNetworkManager.swift in Sources */,
+				5C8F97262EB460CA009399B1 /* LiveStreamBanner.swift in Sources */,
 				4C32B9332A99845B00DC3548 /* Ndb.swift in Sources */,
 				D7ADD3E22B538E3500F104C4 /* DamusPurpleVerifyNpubView.swift in Sources */,
 				4C4793082A993E8900489948 /* refmap.c in Sources */,
+				5C8F972D2EB46116009399B1 /* LiveStreamStatus.swift in Sources */,
 				4C4793072A993E6200489948 /* emitter.c in Sources */,
 				4C4793062A993E5300489948 /* json_parser.c in Sources */,
 				4C4793052A993E3200489948 /* builder.c in Sources */,
@@ -5501,6 +5703,7 @@
 				4C285C8428385690008A31F1 /* CreateAccountView.swift in Sources */,
 				4CDD1AE22A6B3074001CD4DF /* NdbTagsIterator.swift in Sources */,
 				4C216F34286F5ACD00040376 /* DMView.swift in Sources */,
+				5C8F97522EBD7083009399B1 /* LabsExplainerView.swift in Sources */,
 				D7CB5D512B1174D100AD4105 /* FriendFilter.swift in Sources */,
 				D74DEC8C2DA0A19B00E69FA6 /* Ndb+.swift in Sources */,
 				D7CBD1D42B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift in Sources */,
@@ -5520,6 +5723,7 @@
 				4C363A8C28236B92006E126D /* PubkeyView.swift in Sources */,
 				4CDA128A29E9D10C0006FA5A /* SignalView.swift in Sources */,
 				4C12535C2A76CA540004F4B8 /* LoginNotify.swift in Sources */,
+				5C8F97222EB46097009399B1 /* LiveEventModel.swift in Sources */,
 				4C5C7E68284ED36500A22DF5 /* SearchHomeModel.swift in Sources */,
 				4C54AA0C29A5543C003E4487 /* ZapGroup.swift in Sources */,
 				4C190F202A535FC200027FD5 /* CustomizeZapModel.swift in Sources */,
@@ -5598,6 +5802,7 @@
 				4CF0ABE32981BC7D00D66079 /* UserView.swift in Sources */,
 				4CE0E2AF29A2E82100DB4CA2 /* EventHolder.swift in Sources */,
 				B51C1CEA2B55A60A00E312A9 /* AddMuteItemView.swift in Sources */,
+				5C8F97332EB46126009399B1 /* LiveStreamViewers.swift in Sources */,
 				4C5D5C992A6AF8F80024563C /* NdbNote.swift in Sources */,
 				4CF0ABF029857E9200D66079 /* Bech32Object.swift in Sources */,
 				D7D68FFA2C9E01BE0015A515 /* KFClickable.swift in Sources */,
@@ -5625,6 +5830,7 @@
 				D5C1AFC62E5DFF700092F72F /* ContactCardManagerMock.swift in Sources */,
 				4C4DD3DB2A6CA7E8005B4E85 /* ContentParsing.swift in Sources */,
 				F71694F22A67314D001F4053 /* SuggestedUserView.swift in Sources */,
+				5C8F97172EB45FD7009399B1 /* LiveChatView.swift in Sources */,
 				4C9BB83429C12D9900FC4E37 /* EventProfileName.swift in Sources */,
 				4C7D09602A098C5D00943473 /* WalletView.swift in Sources */,
 				4CB8838F296F781C00DC99E7 /* ReactionsView.swift in Sources */,
@@ -5717,6 +5923,7 @@
 				7C95CAEE299DCEF1009DCB67 /* KFOptionSetter+.swift in Sources */,
 				4C7D09722A0AEF5E00943473 /* DamusGradient.swift in Sources */,
 				4C463CBF2B960B96008A8C36 /* PurpleBackdrop.swift in Sources */,
+				5C8F97502EBD704A009399B1 /* LabsToggleView.swift in Sources */,
 				BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */,
 				3169CAE6294E69C000EE4006 /* EmptyTimelineView.swift in Sources */,
 				4CF4803A2B631C0100F2B2C0 /* nostr_bech32.c in Sources */,
@@ -5735,12 +5942,14 @@
 				4C3A1D3729637E0500558C0F /* PreviewCache.swift in Sources */,
 				D78F08142D7F78F900FC6C75 /* Response.swift in Sources */,
 				4C3AC7A12835A81400E1F516 /* SetupView.swift in Sources */,
+				5C8F97372EB46145009399B1 /* LiveStreamView.swift in Sources */,
 				4C06670128FC7C5900038D2A /* RelayView.swift in Sources */,
 				4C285C8C28398BC7008A31F1 /* Keys.swift in Sources */,
 				5CC852A22BDED9B90039FFC5 /* HighlightDescription.swift in Sources */,
 				4C94D6432BA5AEFE00C26EFF /* QuoteRepostsView.swift in Sources */,
 				D7EDED332B12ACAE0018B19C /* DamusUserDefaults.swift in Sources */,
 				4CA352AE2A76C1AC003BB08B /* FollowedNotify.swift in Sources */,
+				5C8F97422EB461B2009399B1 /* LiveStreamHomeView.swift in Sources */,
 				4CACA9DC280C38C000D9BBE8 /* Profiles.swift in Sources */,
 				4CE879582996C45300F758CC /* ZapsView.swift in Sources */,
 				4C30AC7429A5680900E2BD5A /* EventGroupView.swift in Sources */,
@@ -5781,6 +5990,7 @@
 				4C64305C2A945AFF00B0C0E9 /* MusicController.swift in Sources */,
 				5053ACA72A56DF3B00851AE3 /* DeveloperSettingsView.swift in Sources */,
 				F79C7FAD29D5E9620000F946 /* EditPictureControl.swift in Sources */,
+				D72B6FA62E7E06AD0050CD1D /* ProfileObserver.swift in Sources */,
 				4C011B5F2BD0A56A002F2F9B /* ChatroomThreadView.swift in Sources */,
 				4C9F18E229AA9B6C008C55EC /* CustomizeZapView.swift in Sources */,
 				4C2859602A12A2BE004746F7 /* SupporterBadge.swift in Sources */,
@@ -5790,11 +6000,13 @@
 				4CA352A22A76AEC5003BB08B /* LikedNotify.swift in Sources */,
 				5CC8529F2BD744F60039FFC5 /* HighlightView.swift in Sources */,
 				BA37598D2ABCCE500018D73B /* PhotoCaptureProcessor.swift in Sources */,
+				5C8F97462EB461DB009399B1 /* EventTags.swift in Sources */,
 				3A515C562DF5371D002D3B34 /* TrustedNetworkButtonTipViewStyle.swift in Sources */,
 				5CC8529D2BD741CD0039FFC5 /* HighlightEvent.swift in Sources */,
 				4C75EFAF28049D350006080F /* NostrFilter.swift in Sources */,
 				4CF480422B631C0100F2B2C0 /* NdbProfile.swift in Sources */,
 				4CA9276C2A2910D10098A105 /* ReplyPart.swift in Sources */,
+				5C8F97102EB45F7C009399B1 /* LiveChatHomeView.swift in Sources */,
 				D7C6787E2B2D34CC00BCEAFB /* NIP98AuthenticatedRequest.swift in Sources */,
 				5CB017252D42C5C400A9ED05 /* TransactionsView.swift in Sources */,
 				4CE1399029F0661A00AC6A0B /* RepostAction.swift in Sources */,
@@ -5821,11 +6033,13 @@
 				D73FA9E12DDC12AA00C706E1 /* OnboardingContentSettings.swift in Sources */,
 				5C42E78C29DB76D90086AAC1 /* EmptyUserSearchView.swift in Sources */,
 				4CB88396296F7F8B00DC99E7 /* ReactionView.swift in Sources */,
+				5C8F97132EB45FAA009399B1 /* LiveChatTimeline.swift in Sources */,
 				50A16FFD2AA7525700DFEC1F /* DamusVideoPlayer.swift in Sources */,
 				4CF480552B631C4F00F2B2C0 /* wasm.c in Sources */,
 				50A16FFD2AA7525700DFEC1F /* DamusVideoPlayer.swift in Sources */,
 				4CFF8F6B29CD0079008DB934 /* RepostedEvent.swift in Sources */,
 				D78CD5982B8990300014D539 /* DamusAppNotificationView.swift in Sources */,
+				5C8F972B2EB460E6009399B1 /* LiveStreamProfile.swift in Sources */,
 				D724D8272B64B40B00ABE789 /* DamusPurpleAccountView.swift in Sources */,
 				4C8682872814DE470026224F /* ProfileView.swift in Sources */,
 				5C0707D12A1ECB38004E7B51 /* DamusLogoGradient.swift in Sources */,
@@ -5833,6 +6047,7 @@
 				4C5F9114283D694D0052CD1C /* FollowTarget.swift in Sources */,
 				5C0567582C8FBC560073F23A /* NDBSearchView.swift in Sources */,
 				D72341192B6864F200E1E135 /* DamusPurpleEnvironment.swift in Sources */,
+				D72B6FA32E7DFB450050CD1D /* ProfilesManager.swift in Sources */,
 				4CF0ABD629817F5B00D66079 /* ReportView.swift in Sources */,
 				D71528002E0A3D6900C893D6 /* InterestList.swift in Sources */,
 				4C1A9A2729DDE31900516EAC /* TranslationSettingsView.swift in Sources */,
@@ -5863,10 +6078,12 @@
 				D706C5AF2D5D31C20027C627 /* AutoSaveIndicatorView.swift in Sources */,
 				6439E014296790CF0020672B /* ProfilePicImageView.swift in Sources */,
 				4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */,
+				D72C01312E78C10500AACB67 /* CondensedProfilePicturesViewModel.swift in Sources */,
 				4C1253682A76D2470004F4B8 /* MuteNotify.swift in Sources */,
 				4CDA128C29EB19C40006FA5A /* LocalNotification.swift in Sources */,
 				4C3BEFD6281D995700B3DE84 /* ActionBarModel.swift in Sources */,
 				4C7D09762A0AF19E00943473 /* FillAndStroke.swift in Sources */,
+				D7E5B2D42EA0188200CF47AC /* StreamPipelineDiagnostics.swift in Sources */,
 				4CA927612A290E340098A105 /* EventShell.swift in Sources */,
 				D74EC8502E1856B70091DC51 /* NonCopyableLinkedList.swift in Sources */,
 				4C363AA428296DEE006E126D /* SearchModel.swift in Sources */,
@@ -5881,6 +6098,7 @@
 				4C1253562A76C8C60004F4B8 /* BroadcastNotify.swift in Sources */,
 				4CF480392B631C0100F2B2C0 /* block.c in Sources */,
 				4C3BEFD42819DE8F00B3DE84 /* NostrKind.swift in Sources */,
+				5C8F973F2EB46197009399B1 /* LiveStreamPreview.swift in Sources */,
 				B533694E2B66D791008A805E /* MutelistManager.swift in Sources */,
 				4C32B9532A9AD44700DC3548 /* Verifier.swift in Sources */,
 				5C14C29D2BBBA40B00079FD2 /* RelayAdminDetail.swift in Sources */,
@@ -5903,6 +6121,7 @@
 				E0EE9DD42B8E5FEA00F3002D /* ImageProcessing.swift in Sources */,
 				4CB883B0297705DD00DC99E7 /* NoteZapButton.swift in Sources */,
 				D7DF58342DFCF18D00E9AD28 /* SendPaymentView.swift in Sources */,
+				5C8F970A2EB45E8C009399B1 /* LiveChatModel.swift in Sources */,
 				4C363A922825FCF2006E126D /* ProfileUpdate.swift in Sources */,
 				4C3BEFDA281DCA1400B3DE84 /* LikeCounter.swift in Sources */,
 				4C32B9502A9AD44700DC3548 /* FlatBufferBuilder.swift in Sources */,
@@ -5922,9 +6141,10 @@
 				4C9BB83129C0ED4F00FC4E37 /* DisplayName.swift in Sources */,
 				7CFF6317299FEFE5005D382A /* SelectableText.swift in Sources */,
 				D5C1AFD42E5EE2820092F72F /* FavoriteButtonView.swift in Sources */,
-				5CB645AB2EAC01430018BD91 /* DamusLabsExpirements.swift in Sources */,
+				5CB645AB2EAC01430018BD91 /* DamusLabsExperiments.swift in Sources */,
 				D5C1AFCA2E5EE12B0092F72F /* ContactCardNotify.swift in Sources */,
 				4CA352A82A76B37E003BB08B /* NewMutesNotify.swift in Sources */,
+				5C8F974A2EB4620A009399B1 /* Glow.swift in Sources */,
 				4CFF8F6929CC9ED1008DB934 /* ImageContainerView.swift in Sources */,
 				7527271E2A93FF0100214108 /* Block.swift in Sources */,
 				4C54AA0729A540BA003E4487 /* NotificationsModel.swift in Sources */,
@@ -5953,9 +6173,11 @@
 				4C1253622A76D00B0004F4B8 /* PostNotify.swift in Sources */,
 				4CACA9D5280C31E100D9BBE8 /* ReplyView.swift in Sources */,
 				5CB017232D2D985E00A9ED05 /* CoinosButton.swift in Sources */,
+				5C8F973B2EB4616D009399B1 /* LiveStreamTimeline.swift in Sources */,
 				F7908E92298B0F0700AB113A /* RelayDetailView.swift in Sources */,
 				4CE879552996BAB900F758CC /* RelayPaidDetail.swift in Sources */,
 				5CB0172F2D42C76A00A9ED05 /* BalanceView.swift in Sources */,
+				5C8F971D2EB4607B009399B1 /* LiveEvent.swift in Sources */,
 				4C1253602A76CF890004F4B8 /* ScrollToTopNotify.swift in Sources */,
 				4CA3529E2A76AE67003BB08B /* FollowNotify.swift in Sources */,
 				4CF0ABD42980996B00D66079 /* Report.swift in Sources */,
@@ -6023,11 +6245,13 @@
 				4C9B0DEE2A65A75F00CBDA21 /* AttrStringTestExtensions.swift in Sources */,
 				4C19AE552A5D977400C90DB7 /* HashtagTests.swift in Sources */,
 				D72927AD2BAB515C00F93E90 /* RelayURLTests.swift in Sources */,
+				D7EBF8C02E5D39DC004EAE29 /* ThreadModelTests.swift in Sources */,
 				4C0ED07F2D7A1E260020D8A2 /* Benchmarking.swift in Sources */,
 				3A3040ED29A5CB86008A0F29 /* ReplyDescriptionTests.swift in Sources */,
 				D71DC1EC2A9129C3006E207C /* PostViewTests.swift in Sources */,
 				3AAC7A022A60FE72002B50DF /* LocalizationUtilTests.swift in Sources */,
 				D7CBD1D62B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift in Sources */,
+				D7EBF8BB2E59022A004EAE29 /* NostrNetworkManagerTests.swift in Sources */,
 				D7DEEF2F2A8C021E00E0C99F /* NostrEventTests.swift in Sources */,
 				4C8D00D429E3C5D40036AF10 /* NIP19Tests.swift in Sources */,
 				3A30410129AB12AA008A0F29 /* EventGroupViewTests.swift in Sources */,
@@ -6088,7 +6312,7 @@
 				5C4FA7FB2DC29C3800CE658C /* FollowPackView.swift in Sources */,
 				4C3624722D5EA18E00DD066E /* amount.c in Sources */,
 				4C3624712D5EA18300DD066E /* error.c in Sources */,
-				5CB645A92EAC01430018BD91 /* DamusLabsExpirements.swift in Sources */,
+				5CB645A92EAC01430018BD91 /* DamusLabsExperiments.swift in Sources */,
 				4C3624702D5EA17700DD066E /* utf8.c in Sources */,
 				4C36246F2D5EA16A00DD066E /* str.c in Sources */,
 				4C36246E2D5EA10400DD066E /* hash_u5.c in Sources */,
@@ -6111,6 +6335,7 @@
 				82D6FA9A2CD9820500C925F4 /* ShareViewController.swift in Sources */,
 				82D6FAA92CD99F7900C925F4 /* FbConstants.swift in Sources */,
 				82D6FAAA2CD99F7900C925F4 /* Offset.swift in Sources */,
+				5C8F97322EB46126009399B1 /* LiveStreamViewers.swift in Sources */,
 				82D6FAAB2CD99F7900C925F4 /* Int+extension.swift in Sources */,
 				82D6FAAC2CD99F7900C925F4 /* FlatBufferBuilder.swift in Sources */,
 				82D6FAAD2CD99F7900C925F4 /* FlatbuffersErrors.swift in Sources */,
@@ -6137,6 +6362,7 @@
 				82D6FAC12CD99F7900C925F4 /* AsciiCharacter.swift in Sources */,
 				82D6FAC22CD99F7900C925F4 /* NdbTagElem.swift in Sources */,
 				82D6FAC32CD99F7900C925F4 /* Ndb.swift in Sources */,
+				D72B6FA92E7E06AD0050CD1D /* ProfileObserver.swift in Sources */,
 				82D6FAC42CD99F7900C925F4 /* NdbTagsIterator.swift in Sources */,
 				82D6FAC52CD99F7900C925F4 /* NdbTxn.swift in Sources */,
 				82D6FAC72CD99F7900C925F4 /* midl.c in Sources */,
@@ -6198,6 +6424,7 @@
 				82D6FB052CD99F7900C925F4 /* MusicController.swift in Sources */,
 				82D6FB062CD99F7900C925F4 /* UserStatusView.swift in Sources */,
 				82D6FB072CD99F7900C925F4 /* UserStatus.swift in Sources */,
+				D72B6FA22E7DFB450050CD1D /* ProfilesManager.swift in Sources */,
 				5CB017262D42C5C400A9ED05 /* TransactionsView.swift in Sources */,
 				82D6FB082CD99F7900C925F4 /* UserStatusSheet.swift in Sources */,
 				82D6FB092CD99F7900C925F4 /* SearchHeaderView.swift in Sources */,
@@ -6244,13 +6471,16 @@
 				82D6FB2E2CD99F7900C925F4 /* BlurHashEncode.swift in Sources */,
 				82D6FB2F2CD99F7900C925F4 /* BlurHashDecode.swift in Sources */,
 				82D6FB302CD99F7900C925F4 /* PostBox.swift in Sources */,
+				5C8F970B2EB45E8C009399B1 /* LiveChatModel.swift in Sources */,
 				82D6FB312CD99F7900C925F4 /* KFOptionSetter+.swift in Sources */,
+				5C8F972F2EB46116009399B1 /* LiveStreamStatus.swift in Sources */,
 				D73BDB162D71216500D69970 /* UserRelayListManager.swift in Sources */,
 				82D6FB322CD99F7900C925F4 /* FillAndStroke.swift in Sources */,
 				82D6FB332CD99F7900C925F4 /* Array.swift in Sources */,
 				82D6FB342CD99F7900C925F4 /* VectorMath.swift in Sources */,
 				5C8498022D5D150000F74FEB /* ZapExplainer.swift in Sources */,
 				82D6FB352CD99F7900C925F4 /* OffsetExtension.swift in Sources */,
+				5C8F973A2EB4616D009399B1 /* LiveStreamTimeline.swift in Sources */,
 				82D6FB362CD99F7900C925F4 /* RelayFilters.swift in Sources */,
 				82D6FB372CD99F7900C925F4 /* RelayModelCache.swift in Sources */,
 				82D6FB382CD99F7900C925F4 /* RelayBootstrap.swift in Sources */,
@@ -6297,6 +6527,7 @@
 				82D6FB5F2CD99F7900C925F4 /* KeyboardVisible.swift in Sources */,
 				82D6FB602CD99F7900C925F4 /* StringUtil.swift in Sources */,
 				D78F08172D7F7F7500FC6C75 /* NIP04.swift in Sources */,
+				5C8F973E2EB46197009399B1 /* LiveStreamPreview.swift in Sources */,
 				82D6FB612CD99F7900C925F4 /* Router.swift in Sources */,
 				82D6FB622CD99F7900C925F4 /* Log.swift in Sources */,
 				82D6FB632CD99F7900C925F4 /* AVPlayer+Additions.swift in Sources */,
@@ -6362,6 +6593,7 @@
 				82D6FB9B2CD99F7900C925F4 /* MutedThreadsManager.swift in Sources */,
 				82D6FB9C2CD99F7900C925F4 /* WalletModel.swift in Sources */,
 				82D6FB9D2CD99F7900C925F4 /* ZapButtonModel.swift in Sources */,
+				5C8F97432EB461B2009399B1 /* LiveStreamHomeView.swift in Sources */,
 				5C09FD142DF283D700823661 /* FollowPackModel.swift in Sources */,
 				82D6FB9E2CD99F7900C925F4 /* ContentFilters.swift in Sources */,
 				3A515C512DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift in Sources */,
@@ -6373,6 +6605,7 @@
 				82D6FBA32CD99F7900C925F4 /* NewEventsBits.swift in Sources */,
 				82D6FBA42CD99F7900C925F4 /* FriendFilter.swift in Sources */,
 				82D6FBA52CD99F7900C925F4 /* MediaUploader.swift in Sources */,
+				5C8F974F2EBD704A009399B1 /* LabsToggleView.swift in Sources */,
 				82D6FBA62CD99F7900C925F4 /* FollowState.swift in Sources */,
 				82D6FBA72CD99F7900C925F4 /* NoteContent.swift in Sources */,
 				82D6FBA82CD99F7900C925F4 /* LongformEvent.swift in Sources */,
@@ -6424,6 +6657,7 @@
 				82D6FBD62CD99F7900C925F4 /* WalletView.swift in Sources */,
 				82D6FBD72CD99F7900C925F4 /* NWCScannerView.swift in Sources */,
 				82D6FBD82CD99F7900C925F4 /* TrustedNetworkButton.swift in Sources */,
+				5C8F971E2EB4607B009399B1 /* LiveEvent.swift in Sources */,
 				82D6FBD92CD99F7900C925F4 /* GradientFollowButton.swift in Sources */,
 				82D6FBDC2CD99F7900C925F4 /* DamusVideoPlayerView.swift in Sources */,
 				82D6FBDD2CD99F7900C925F4 /* DamusVideoPlayer.swift in Sources */,
@@ -6435,6 +6669,7 @@
 				82D6FBE32CD99F7900C925F4 /* KeySettingsView.swift in Sources */,
 				82D6FBE42CD99F7900C925F4 /* ZapSettingsView.swift in Sources */,
 				82D6FBE52CD99F7900C925F4 /* TranslationSettingsView.swift in Sources */,
+				5C8F97472EB461DB009399B1 /* EventTags.swift in Sources */,
 				82D6FBE62CD99F7900C925F4 /* SearchSettingsView.swift in Sources */,
 				82D6FBE72CD99F7900C925F4 /* DeveloperSettingsView.swift in Sources */,
 				82D6FBE82CD99F7900C925F4 /* FirstAidSettingsView.swift in Sources */,
@@ -6443,6 +6678,7 @@
 				D7F360272CEBBDC0009D34DA /* DamusVideoControlsView.swift in Sources */,
 				82D6FBEB2CD99F7900C925F4 /* ProfilePicImageView.swift in Sources */,
 				82D6FBEC2CD99F7900C925F4 /* ImageContainerView.swift in Sources */,
+				5C8F97492EB4620A009399B1 /* Glow.swift in Sources */,
 				82D6FBED2CD99F7900C925F4 /* MediaView.swift in Sources */,
 				82D6FBEE2CD99F7900C925F4 /* PurpleViewPrimitives.swift in Sources */,
 				82D6FBEF2CD99F7900C925F4 /* MarketingContentView.swift in Sources */,
@@ -6450,8 +6686,10 @@
 				82D6FBF02CD99F7900C925F4 /* LogoView.swift in Sources */,
 				82D6FBF12CD99F7900C925F4 /* IAPProductStateView.swift in Sources */,
 				D74DEC8B2DA0A19B00E69FA6 /* Ndb+.swift in Sources */,
+				5C8F97252EB460CA009399B1 /* LiveStreamBanner.swift in Sources */,
 				82D6FBF22CD99F7900C925F4 /* PurpleBackdrop.swift in Sources */,
 				82D6FBF32CD99F7900C925F4 /* DamusPurpleView.swift in Sources */,
+				5C8F972A2EB460E6009399B1 /* LiveStreamProfile.swift in Sources */,
 				82D6FBF42CD99F7900C925F4 /* DamusPurpleWelcomeView.swift in Sources */,
 				82D6FBF52CD99F7900C925F4 /* DamusPurpleTranslationSetupView.swift in Sources */,
 				82D6FBF62CD99F7900C925F4 /* DamusPurpleURLSheetView.swift in Sources */,
@@ -6474,8 +6712,10 @@
 				82D6FC062CD99F7900C925F4 /* ZapTypePicker.swift in Sources */,
 				82D6FC072CD99F7900C925F4 /* ZapUserView.swift in Sources */,
 				82D6FC082CD99F7900C925F4 /* ProfileZapLinkView.swift in Sources */,
+				5C8F970E2EB45F7C009399B1 /* LiveChatHomeView.swift in Sources */,
 				D71AD8FE2CEC176A002E2C3C /* AppAccessibilityIdentifiers.swift in Sources */,
 				82D6FC092CD99F7900C925F4 /* AboutView.swift in Sources */,
+				D72C01332E78C10500AACB67 /* CondensedProfilePicturesViewModel.swift in Sources */,
 				82D6FC0A2CD99F7900C925F4 /* ProfileName.swift in Sources */,
 				5CB645982EA317D20018BD91 /* DamusLabs.swift in Sources */,
 				82D6FC0B2CD99F7900C925F4 /* ProfilePictureSelector.swift in Sources */,
@@ -6484,6 +6724,7 @@
 				82D6FC0E2CD99F7900C925F4 /* ProfilePicView.swift in Sources */,
 				82D6FC0F2CD99F7900C925F4 /* ProfileView.swift in Sources */,
 				82D6FC102CD99F7900C925F4 /* ProfileNameView.swift in Sources */,
+				D7E5B2D52EA0188200CF47AC /* StreamPipelineDiagnostics.swift in Sources */,
 				5CB017212D2D985E00A9ED05 /* CoinosButton.swift in Sources */,
 				82D6FC112CD99F7900C925F4 /* MaybeAnonPfpView.swift in Sources */,
 				82D6FC122CD99F7900C925F4 /* EventProfileName.swift in Sources */,
@@ -6520,8 +6761,10 @@
 				82D6FC2E2CD99F7900C925F4 /* ReplyDescription.swift in Sources */,
 				82D6FC2F2CD99F7900C925F4 /* RelativeTime.swift in Sources */,
 				82D6FC302CD99F7900C925F4 /* ReplyPart.swift in Sources */,
+				5C8F97532EBD7083009399B1 /* LabsExplainerView.swift in Sources */,
 				82D6FC312CD99F7900C925F4 /* ProxyView.swift in Sources */,
 				82D6FC322CD99F7900C925F4 /* SelectedEventView.swift in Sources */,
+				5C8F97352EB46145009399B1 /* LiveStreamView.swift in Sources */,
 				82D6FC332CD99F7900C925F4 /* EventBody.swift in Sources */,
 				D5C1AFC02E5DF7E60092F72F /* ContactCardManager.swift in Sources */,
 				82D6FC342CD99F7900C925F4 /* BuilderEventView.swift in Sources */,
@@ -6537,6 +6780,7 @@
 				82D6FC3D2CD99F7900C925F4 /* EventShell.swift in Sources */,
 				82D6FC3E2CD99F7900C925F4 /* MentionView.swift in Sources */,
 				82D6FC3F2CD99F7900C925F4 /* EventLoaderView.swift in Sources */,
+				5C8F97122EB45FAA009399B1 /* LiveChatTimeline.swift in Sources */,
 				82D6FC402CD99F7900C925F4 /* RepostView.swift in Sources */,
 				82D6FC412CD99F7900C925F4 /* RepostedEvent.swift in Sources */,
 				82D6FC422CD99F7900C925F4 /* QuoteRepostsView.swift in Sources */,
@@ -6561,6 +6805,7 @@
 				82D6FC532CD99F7900C925F4 /* EmptyTimelineView.swift in Sources */,
 				82D6FC542CD99F7900C925F4 /* EmptyUserSearchView.swift in Sources */,
 				D706C5B82D602A110027C627 /* QueueableNotify.swift in Sources */,
+				5C8F97182EB45FD7009399B1 /* LiveChatView.swift in Sources */,
 				82D6FC552CD99F7900C925F4 /* EventView.swift in Sources */,
 				82D6FC562CD99F7900C925F4 /* EventDetailView.swift in Sources */,
 				82D6FC572CD99F7900C925F4 /* FollowButtonView.swift in Sources */,
@@ -6577,6 +6822,7 @@
 				82D6FC612CD99F7900C925F4 /* MainTabView.swift in Sources */,
 				82D6FC622CD99F7900C925F4 /* PubkeyView.swift in Sources */,
 				D7F360252CEBBD7E009D34DA /* DamusFullScreenCover.swift in Sources */,
+				5C8F97212EB46097009399B1 /* LiveEventModel.swift in Sources */,
 				82D6FC632CD99F7900C925F4 /* ReplyView.swift in Sources */,
 				82D6FC642CD99F7900C925F4 /* ParticipantsView.swift in Sources */,
 				82D6FC652CD99F7900C925F4 /* SaveKeysView.swift in Sources */,
@@ -6612,6 +6858,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C36247D2D5EA22300DD066E /* invoice.c in Sources */,
+				5C8F974E2EBD704A009399B1 /* LabsToggleView.swift in Sources */,
 				4C36247C2D5EA21F00DD066E /* amount.c in Sources */,
 				4C36247B2D5EA21200DD066E /* hash_u5.c in Sources */,
 				4C36247A2D5EA20C00DD066E /* bech32.c in Sources */,
@@ -6632,6 +6879,7 @@
 				D73E5E242C6A97F4007EB227 /* FollowedNotify.swift in Sources */,
 				D73E5E252C6A97F4007EB227 /* FollowNotify.swift in Sources */,
 				D73E5E262C6A97F4007EB227 /* LikedNotify.swift in Sources */,
+				D72B6FA42E7DFB450050CD1D /* ProfilesManager.swift in Sources */,
 				D73E5E272C6A97F4007EB227 /* LocalNotificationNotify.swift in Sources */,
 				D73E5F8B2C6AA6A2007EB227 /* UserStatusSheet.swift in Sources */,
 				D73E5E282C6A97F4007EB227 /* LoginNotify.swift in Sources */,
@@ -6653,6 +6901,7 @@
 				D73E5E352C6A97F4007EB227 /* RelaysChangedNotify.swift in Sources */,
 				D73E5E362C6A97F4007EB227 /* MuteThreadNotify.swift in Sources */,
 				D73E5E372C6A97F4007EB227 /* ReconnectRelaysNotify.swift in Sources */,
+				5C8F97202EB46097009399B1 /* LiveEventModel.swift in Sources */,
 				D73E5E382C6A97F4007EB227 /* PurpleAccountUpdateNotify.swift in Sources */,
 				D73E5E392C6A97F4007EB227 /* DamusDuration.swift in Sources */,
 				D73E5E3A2C6A97F4007EB227 /* SwipeToDismiss.swift in Sources */,
@@ -6696,6 +6945,7 @@
 				D73E5E622C6A97F4007EB227 /* BlurHashEncode.swift in Sources */,
 				5C09FD122DF283D700823661 /* FollowPackModel.swift in Sources */,
 				D73E5E632C6A97F4007EB227 /* BlurHashDecode.swift in Sources */,
+				5C8F97542EBD7083009399B1 /* LabsExplainerView.swift in Sources */,
 				D74EC8522E1856B70091DC51 /* NonCopyableLinkedList.swift in Sources */,
 				D73E5F952C6AA753007EB227 /* FullScreenCarouselView.swift in Sources */,
 				D76BE18E2E0CF3DA004AD0C6 /* Interests.swift in Sources */,
@@ -6734,6 +6984,7 @@
 				D73E5E7F2C6A97F4007EB227 /* LocalNotification.swift in Sources */,
 				D73E5E802C6A97F4007EB227 /* CredentialHandler.swift in Sources */,
 				D73E5E812C6A97F4007EB227 /* KeyboardVisible.swift in Sources */,
+				5C8F971C2EB4607B009399B1 /* LiveEvent.swift in Sources */,
 				D73E5E832C6A97F4007EB227 /* AVPlayer+Additions.swift in Sources */,
 				5C4FA7FC2DC29C3800CE658C /* FollowPackView.swift in Sources */,
 				D73E5E842C6A97F4007EB227 /* Zaps+.swift in Sources */,
@@ -6747,6 +6998,7 @@
 				D73E5E8A2C6A97F4007EB227 /* PurpleStoreKitManager.swift in Sources */,
 				D733F9E72D92C76100317B11 /* UnownedNdbNote.swift in Sources */,
 				D73E5E8E2C6A97F4007EB227 /* ImageResizer.swift in Sources */,
+				D72B6FA72E7E06AD0050CD1D /* ProfileObserver.swift in Sources */,
 				D78F080E2D7F78EF00FC6C75 /* Request.swift in Sources */,
 				D73E5E8F2C6A97F4007EB227 /* PhotoCaptureProcessor.swift in Sources */,
 				D773BC602C6D538500349F0A /* CommentItem.swift in Sources */,
@@ -6802,6 +7054,7 @@
 				D73E5EAD2C6A97F4007EB227 /* MutedThreadsManager.swift in Sources */,
 				D73E5EAE2C6A97F4007EB227 /* WalletModel.swift in Sources */,
 				D73E5EAF2C6A97F4007EB227 /* ZapButtonModel.swift in Sources */,
+				5C8F97292EB460E6009399B1 /* LiveStreamProfile.swift in Sources */,
 				D73E5EB02C6A97F4007EB227 /* ContentFilters.swift in Sources */,
 				D73E5EB12C6A97F4007EB227 /* DamusCacheManager.swift in Sources */,
 				D73E5EB22C6A97F4007EB227 /* NotificationsManager.swift in Sources */,
@@ -6824,6 +7077,7 @@
 				D73E5EBE2C6A97F4007EB227 /* NostrLink.swift in Sources */,
 				D73E5EBF2C6A97F4007EB227 /* WebSocket.swift in Sources */,
 				D73E5F812C6AA07A007EB227 /* HighlighterExtensionAliases.swift in Sources */,
+				5C8F97392EB4616D009399B1 /* LiveStreamTimeline.swift in Sources */,
 				D73E5EC02C6A97F4007EB227 /* NostrEvent+.swift in Sources */,
 				D73E5EC12C6A97F4007EB227 /* NIP98AuthenticatedRequest.swift in Sources */,
 				D73E5EC22C6A97F4007EB227 /* NostrAuth.swift in Sources */,
@@ -6849,6 +7103,7 @@
 				D73E5EDF2C6A97F4007EB227 /* KeySettingsView.swift in Sources */,
 				5C0567562C8B60E60073F23A /* OffsetExtension.swift in Sources */,
 				D73E5EE02C6A97F4007EB227 /* ZapSettingsView.swift in Sources */,
+				5C8F97142EB45FAA009399B1 /* LiveChatTimeline.swift in Sources */,
 				D73E5F792C6A9C4C007EB227 /* HomeModel.swift in Sources */,
 				D73E5EE12C6A97F4007EB227 /* TranslationSettingsView.swift in Sources */,
 				D73E5EE22C6A97F4007EB227 /* SearchSettingsView.swift in Sources */,
@@ -6871,6 +7126,7 @@
 				D73E5EF32C6A97F4007EB227 /* DamusPurpleVerifyNpubView.swift in Sources */,
 				D73E5EF42C6A97F4007EB227 /* DamusPurpleAccountView.swift in Sources */,
 				5CB0172E2D42C76A00A9ED05 /* BalanceView.swift in Sources */,
+				5C8F973D2EB46197009399B1 /* LiveStreamPreview.swift in Sources */,
 				D73E5EF52C6A97F4007EB227 /* DamusPurpleNewUserOnboardingView.swift in Sources */,
 				D73E5EF62C6A97F4007EB227 /* SearchingEventView.swift in Sources */,
 				D73E5EF72C6A97F4007EB227 /* PullDownSearch.swift in Sources */,
@@ -6879,6 +7135,7 @@
 				D73B74E32D8365BA0067BDBC /* ExtraFonts.swift in Sources */,
 				D73E5EF92C6A97F4007EB227 /* EventGroupView.swift in Sources */,
 				D73E5EFA2C6A97F4007EB227 /* NotificationItemView.swift in Sources */,
+				5C8F97272EB460CA009399B1 /* LiveStreamBanner.swift in Sources */,
 				D73E5EFB2C6A97F4007EB227 /* ProfilePicturesView.swift in Sources */,
 				D73E5EFC2C6A97F4007EB227 /* DamusAppNotificationView.swift in Sources */,
 				D73E5EFD2C6A97F4007EB227 /* InnerTimelineView.swift in Sources */,
@@ -6946,6 +7203,7 @@
 				D73E5F312C6A97F4007EB227 /* EventMenu.swift in Sources */,
 				D73E5F322C6A97F4007EB227 /* EventMutingContainerView.swift in Sources */,
 				D73E5F332C6A97F4007EB227 /* ZapEvent.swift in Sources */,
+				5C8F97362EB46145009399B1 /* LiveStreamView.swift in Sources */,
 				D73E5F342C6A97F4007EB227 /* TextEvent.swift in Sources */,
 				D73E5F352C6A97F4007EB227 /* WideEventView.swift in Sources */,
 				D7D68FF92C9E01BE0015A515 /* KFClickable.swift in Sources */,
@@ -6961,13 +7219,17 @@
 				D73E5F3D2C6A97F4007EB227 /* QuoteRepostsView.swift in Sources */,
 				D73E5F3E2C6A97F4007EB227 /* ReactionView.swift in Sources */,
 				D73E5F3F2C6A97F4007EB227 /* EventActionBar.swift in Sources */,
+				5C8F97452EB461DB009399B1 /* EventTags.swift in Sources */,
 				D73E5F402C6A97F5007EB227 /* EventDetailBar.swift in Sources */,
+				5C8F972E2EB46116009399B1 /* LiveStreamStatus.swift in Sources */,
 				D73E5F412C6A97F5007EB227 /* ShareAction.swift in Sources */,
 				D73E5F422C6A97F5007EB227 /* RepostAction.swift in Sources */,
 				D73E5F942C6AA74D007EB227 /* EULAView.swift in Sources */,
 				D73E5F432C6A97F5007EB227 /* ShareActionButton.swift in Sources */,
 				D73E5F442C6A97F5007EB227 /* BigButton.swift in Sources */,
 				D73E5F8D2C6AA6D7007EB227 /* AddMuteItemView.swift in Sources */,
+				5C8F970F2EB45F7C009399B1 /* LiveChatHomeView.swift in Sources */,
+				5C8F97412EB461B2009399B1 /* LiveStreamHomeView.swift in Sources */,
 				D73E5F452C6A97F5007EB227 /* AddRelayView.swift in Sources */,
 				D73E5F472C6A97F5007EB227 /* BookmarksView.swift in Sources */,
 				D73E5F482C6A97F5007EB227 /* CarouselView.swift in Sources */,
@@ -7037,11 +7299,13 @@
 				D703D7762C670BCA00A400EA /* Verifier.swift in Sources */,
 				D703D75A2C670A7900A400EA /* LNUrls.swift in Sources */,
 				D703D74B2C6709C900A400EA /* NoteId.swift in Sources */,
+				5C8F97162EB45FD7009399B1 /* LiveChatView.swift in Sources */,
 				D703D7B52C67111C00A400EA /* CollectionExtension.swift in Sources */,
 				D703D7722C670B8000A400EA /* FlatBufferBuilder.swift in Sources */,
 				D703D7502C6709F500A400EA /* NdbTxn.swift in Sources */,
 				D703D77E2C670C1100A400EA /* NostrKind.swift in Sources */,
 				D73E5F972C6AA7B7007EB227 /* SuggestedHashtagsView.swift in Sources */,
+				D72C01322E78C10500AACB67 /* CondensedProfilePicturesViewModel.swift in Sources */,
 				D703D7B22C6710AF00A400EA /* ContentParsing.swift in Sources */,
 				D703D7522C670A1400A400EA /* Log.swift in Sources */,
 				D73E5E1B2C6A9672007EB227 /* LikeCounter.swift in Sources */,
@@ -7064,6 +7328,7 @@
 				D703D7692C670B2600A400EA /* Block.swift in Sources */,
 				D703D77D2C670C0300A400EA /* FlatbuffersErrors.swift in Sources */,
 				D703D7A62C670E5200A400EA /* builder.c in Sources */,
+				5C8F974B2EB4620A009399B1 /* Glow.swift in Sources */,
 				D703D78D2C670CAF00A400EA /* UpdateStatsNotify.swift in Sources */,
 				D703D75C2C670A8400A400EA /* NdbNote.swift in Sources */,
 				D703D7592C670A7300A400EA /* Profiles.swift in Sources */,
@@ -7097,10 +7362,12 @@
 				D703D7752C670BBF00A400EA /* Constants.swift in Sources */,
 				D73E5E172C6A962A007EB227 /* ImageUploadModel.swift in Sources */,
 				D703D76A2C670B2C00A400EA /* Bech32Object.swift in Sources */,
+				D7E5B2D32EA0188200CF47AC /* StreamPipelineDiagnostics.swift in Sources */,
 				D73E5E162C6A9619007EB227 /* PostView.swift in Sources */,
 				D703D7872C670C7E00A400EA /* DamusPurpleEnvironment.swift in Sources */,
+				5C8F970C2EB45E8C009399B1 /* LiveChatModel.swift in Sources */,
 				D703D7892C670C8600A400EA /* DeepLPlan.swift in Sources */,
-				5CB645AA2EAC01430018BD91 /* DamusLabsExpirements.swift in Sources */,
+				5CB645AA2EAC01430018BD91 /* DamusLabsExperiments.swift in Sources */,
 				D73E5E182C6A963D007EB227 /* AttachMediaUtility.swift in Sources */,
 				D73E5F852C6AA628007EB227 /* LoadScript.swift in Sources */,
 				D703D74E2C6709DA00A400EA /* Pubkey.swift in Sources */,
@@ -7125,6 +7392,7 @@
 				D703D71E2C66E47100A400EA /* ActionViewController.swift in Sources */,
 				D703D7472C67092700A400EA /* UserSettingsStore.swift in Sources */,
 				D703D7852C670C6100A400EA /* Notify.swift in Sources */,
+				5C8F97312EB46126009399B1 /* LiveStreamViewers.swift in Sources */,
 				D703D7532C670A2600A400EA /* Wallet.swift in Sources */,
 				D755B28F2D3E7D8800BBEEFA /* NIP37Draft.swift in Sources */,
 				D703D75F2C670AA200A400EA /* NostrEvent.swift in Sources */,
@@ -7518,7 +7786,7 @@
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 12.3;
-				MARKETING_VERSION = 1.15;
+				MARKETING_VERSION = 1.16;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -7589,7 +7857,7 @@
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 12.3;
-				MARKETING_VERSION = 1.15;
+				MARKETING_VERSION = 1.16;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;

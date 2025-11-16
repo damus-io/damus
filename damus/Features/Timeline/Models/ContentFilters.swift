@@ -28,6 +28,8 @@ enum FilterState : Int {
     case posts_and_replies = 1
     case conversations = 2
     case follow_list = 3
+    case live = 4
+    case live_chat = 5
 
     func filter(ev: NostrEvent) -> Bool {
         switch self {
@@ -39,6 +41,10 @@ enum FilterState : Int {
             return true
         case .follow_list:
             return ev.known_kind == .follow_list
+        case .live:
+            return ev.known_kind == .live
+        case .live_chat:
+            return ev.known_kind == .live_chat
         }
     }
 }
@@ -48,6 +54,7 @@ func nsfw_tag_filter(ev: NostrEvent) -> Bool {
     return ev.referenced_hashtags.first(where: { t in t.hashtag.caseInsensitiveCompare("nsfw") == .orderedSame }) == nil
 }
 
+@MainActor
 func get_repost_of_muted_user_filter(damus_state: DamusState) -> ((_ ev: NostrEvent) -> Bool) {
     return { ev in
         guard ev.known_kind == .boost else { return true }
@@ -79,10 +86,12 @@ struct ContentFilters {
 }
 
 extension ContentFilters {
+    @MainActor
     static func default_filters(damus_state: DamusState) -> ContentFilters {
         return ContentFilters(filters: ContentFilters.defaults(damus_state: damus_state))
     }
 
+    @MainActor
     static func defaults(damus_state: DamusState) -> [(NostrEvent) -> Bool] {
         var filters = Array<(NostrEvent) -> Bool>()
         if damus_state.settings.hide_nsfw_tagged_content {

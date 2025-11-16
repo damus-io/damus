@@ -76,7 +76,7 @@ struct QRCodeView: View {
             let profile_txn = damus_state.profiles.lookup(id: pubkey, txn_name: "qrview-profile")
             let profile = profile_txn?.unsafeUnownedValue
 
-            ProfilePicView(pubkey: pubkey, size: 90.0, highlight: .custom(DamusColors.white, 3.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+            ProfilePicView(pubkey: pubkey, size: 90.0, highlight: .custom(DamusColors.white, 3.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
                     .padding(.top, 20)
             
             if let display_name = profile?.display_name {

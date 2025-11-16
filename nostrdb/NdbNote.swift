@@ -290,9 +290,11 @@ class NdbNote: Codable, Equatable, Hashable {
                 free(buf)
                 return nil
             }
-        case .manual(_, let signature, _):
+        case .manual(_, let signature, let noteId):
             var raw_sig = signature.data.byteArray
+            var raw_id = noteId.id.byteArray
             ndb_builder_set_sig(&builder, &raw_sig)
+            ndb_builder_set_id(&builder, &raw_id)
             
             do {
                 // Finalize note, save length, and ensure it is higher than zero (which signals finalization has succeeded)
@@ -303,12 +305,10 @@ class NdbNote: Codable, Equatable, Hashable {
                 let scratch_buf = malloc(scratch_buf_len)
                 defer { free(scratch_buf) }  // Ensure we deallocate as soon as we leave this scope, regardless of the outcome
                 
-                // Calculate the ID based on the content
-                guard ndb_calculate_id(n.ptr, scratch_buf, Int32(scratch_buf_len)) == 1 else { throw InitError.generic }
-                
                 // Verify the signature against the pubkey and the computed ID, to verify the validity of the whole note
                 var ctx = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_VERIFY))
-                guard ndb_note_verify(&ctx, ndb_note_pubkey(n.ptr), ndb_note_id(n.ptr), ndb_note_sig(n.ptr)) == 1 else { throw InitError.generic }
+                
+                guard ndb_note_verify(&ctx, scratch_buf, scratch_buf_len, n.ptr) == 1 else { throw InitError.generic }
             }
             catch {
                 free(buf)
@@ -351,19 +351,9 @@ class NdbNote: Codable, Equatable, Hashable {
         let scratch_buf = malloc(scratch_buf_len)
         defer { free(scratch_buf) }  // Ensure we deallocate as soon as we leave this scope, regardless of the outcome
         
-        let current_id = self.id
-        
-        // Calculate the ID based on the content
-        guard ndb_calculate_id(self.note.ptr, scratch_buf, Int32(scratch_buf_len)) == 1 else { return false }
-        
-        let computed_id = self.id
-        
-        // Ensure computed ID matches given id to prevent ID tampering
-        guard computed_id == current_id else { return false }
-        
         // Verify the signature against the pubkey and the computed ID, to verify the validity of the whole note
         var ctx = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_VERIFY))
-        guard ndb_note_verify(&ctx, ndb_note_pubkey(self.note.ptr), ndb_note_id(self.note.ptr), ndb_note_sig(self.note.ptr)) == 1 else { return false }
+        guard ndb_note_verify(&ctx, scratch_buf, scratch_buf_len, self.note.ptr) == 1 else { return false }
         
         return true
     }
@@ -396,7 +386,12 @@ class NdbNote: Codable, Equatable, Hashable {
 // Extension to make NdbNote compatible with NostrEvent's original API
 extension NdbNote {
     var is_textlike: Bool {
-        return kind == 1 || kind == 42 || kind == 30023 || kind == 9802 || kind == 39089
+        switch known_kind {
+        case .text, .chat, .longform, .highlight, .live, .live_chat:
+            true
+        default:
+            false
+        }
     }
 
     var is_quote_repost: NoteId? {

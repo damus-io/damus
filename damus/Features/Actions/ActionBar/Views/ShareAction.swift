@@ -27,8 +27,15 @@ struct ShareAction: View {
         self._show_share = show_share
     }
 
-    var event_relay_url_strings: [RelayURL] {
-        let relays = userProfile.damus.nostrNetwork.relaysForEvent(event: event)
+    @State var event_relay_url_strings: [RelayURL] = []
+    
+    func updateEventRelayURLStrings() async {
+        let newValue = await fetchEventRelayURLStrings()
+        self.event_relay_url_strings = newValue
+    }
+    
+    func fetchEventRelayURLStrings() async -> [RelayURL] {
+        let relays = await userProfile.damus.nostrNetwork.relaysForEvent(event: event)
         if !relays.isEmpty {
             return relays.prefix(Constants.MAX_SHARE_RELAYS).map { $0 }
         }
@@ -80,8 +87,13 @@ struct ShareAction: View {
                 }
             }
         }
+        .onReceive(handle_notify(.update_stats), perform: { noteId in
+            guard noteId == event.id else { return }
+            Task { await self.updateEventRelayURLStrings() }
+        })
         .onAppear() {
             userProfile.subscribeToFindRelays()
+            Task { await self.updateEventRelayURLStrings() }
         }
         .onDisappear() {
             userProfile.unsubscribeFindRelays()

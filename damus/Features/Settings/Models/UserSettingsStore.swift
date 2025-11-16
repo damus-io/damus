@@ -32,7 +32,9 @@ func setting_get_property_value<T>(key: String, scoped_key: String, default_valu
 func setting_set_property_value<T: Equatable>(scoped_key: String, old_value: T, new_value: T) -> T? {
     guard old_value != new_value else { return nil }
     DamusUserDefaults.standard.set(new_value, forKey: scoped_key)
-    UserSettingsStore.shared?.objectWillChange.send()
+    DispatchQueue.main.async {
+        UserSettingsStore.shared?.objectWillChange.send()
+    }
     return new_value
 }
 
@@ -243,6 +245,18 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "enable_experimental_purple_api", default_value: false)
     var enable_experimental_purple_api: Bool
     
+    /// Whether the app has the experimental local relay model flag that streams data only from the local relay (ndb)
+    @Setting(key: "enable_experimental_local_relay_model", default_value: false)
+    var enable_experimental_local_relay_model: Bool
+    
+    /// Whether the app should present the experimental floating "Load new content" button
+    @Setting(key: "enable_experimental_load_new_content_button", default_value: false)
+    var enable_experimental_load_new_content_button: Bool
+    
+    /// Whether the app should show the Favourites feature (Damus Labs)
+    @Setting(key: "enable_favourites_feature", default_value: false)
+    var enable_favourites_feature: Bool
+    
     @StringSetting(key: "purple_environment", default_value: .production)
     var purple_enviroment: DamusPurpleEnvironment
 
@@ -350,6 +364,11 @@ class UserSettingsStore: ObservableObject {
             return internal_winetranslate_api_key != nil
         }
     }
+    
+    // MARK: Damus Labs Experiments
+    @Setting(key: "live", default_value: false)
+    var live: Bool
+    
     
     // MARK: Internal, hidden settings
     

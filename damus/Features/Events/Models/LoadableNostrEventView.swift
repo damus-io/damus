@@ -50,7 +50,7 @@ class LoadableNostrEventViewModel: ObservableObject {
     
     /// Asynchronously find an event from NostrDB or from the network (if not available on NostrDB)
     private func loadEvent(noteId: NoteId) async -> NostrEvent? {
-        let res = await find_event(state: damus_state, query: .event(evid: noteId))
+        let res = await damus_state.nostrNetwork.reader.findEvent(query: .event(evid: noteId))
         guard let res, case .event(let ev) = res else { return nil }
         return ev
     }
@@ -74,11 +74,11 @@ class LoadableNostrEventViewModel: ObservableObject {
             case .zap, .zap_request:
                 guard let zap = await get_zap(from: ev, state: damus_state) else { return .not_found }
                 return .loaded(route: Route.Zaps(target: zap.target))
-            case .contacts, .metadata, .delete, .boost, .chat, .mute_list, .list_deprecated, .draft, .longform, .nwc_request, .nwc_response, .http_auth, .status, .relay_list, .follow_list, .interest_list, .contact_card:
+            case .contacts, .metadata, .delete, .boost, .chat, .mute_list, .list_deprecated, .draft, .longform, .nwc_request, .nwc_response, .http_auth, .status, .relay_list, .follow_list, .interest_list, .contact_card, .live, .live_chat:
                 return .unknown_or_unsupported_kind
             }
         case .naddr(let naddr):
-            guard let event = await naddrLookup(damus_state: damus_state, naddr: naddr) else { return .not_found }
+            guard let event = await damus_state.nostrNetwork.reader.lookup(naddr: naddr) else { return .not_found }
             return .loaded(route: Route.Thread(thread: ThreadModel(event: event, damus_state: damus_state)))
         }
     }

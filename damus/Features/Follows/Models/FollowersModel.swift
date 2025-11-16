@@ -14,8 +14,8 @@ class FollowersModel: ObservableObject {
     @Published var contacts: [Pubkey]? = nil
     var has_contact: Set<Pubkey> = Set()
 
-    let sub_id: String = UUID().description
-    let profiles_id: String = UUID().description
+    var listener: Task<Void, Never>? = nil
+    var profilesListener: Task<Void, Never>? = nil
     
     var count: Int? {
         guard let contacts = self.contacts else {
@@ -36,14 +36,22 @@ class FollowersModel: ObservableObject {
     func subscribe() {
         let filter = get_filter()
         let filters = [filter]
-        //print_filters(relay_id: "following", filters: [filters])
-        self.damus_state.nostrNetwork.pool.subscribe(sub_id: sub_id, filters: filters, handler: handle_event)
+        self.listener?.cancel()
+        self.listener = Task {
+            for await lender in damus_state.nostrNetwork.reader.streamIndefinitely(filters: filters) {
+                lender.justUseACopy({ self.handle_event(ev: $0) })
+            }
+        }
     }
     
     func unsubscribe() {
-        self.damus_state.nostrNetwork.pool.unsubscribe(sub_id: sub_id)
+        self.listener?.cancel()
+        self.profilesListener?.cancel()
+        self.listener = nil
+        self.profilesListener = nil
     }
     
+    @MainActor
     func handle_contact_event(_ ev: NostrEvent) {
         if has_contact.contains(ev.pubkey) {
             return
@@ -52,47 +60,10 @@ class FollowersModel: ObservableObject {
         contacts?.append(ev.pubkey)
         has_contact.insert(ev.pubkey)
     }
-
-    func load_profiles<Y>(relay_id: RelayURL, txn: NdbTxn<Y>) {
-        let authors = find_profiles_to_fetch_from_keys(profiles: damus_state.profiles, pks: contacts ?? [], txn: txn)
-        if authors.isEmpty {
-            return
-        }
-        
-        let filter = NostrFilter(kinds: [.metadata],
-                                 authors: authors)
-        damus_state.nostrNetwork.pool.subscribe_to(sub_id: profiles_id, filters: [filter], to: [relay_id], handler: handle_event)
-    }
-
-    func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
-        guard case .nostr_event(let nev) = ev else {
-            return
-        }
-        
-        switch nev {
-        case .event(let sub_id, let ev):
-            guard sub_id == self.sub_id || sub_id == self.profiles_id else {
-                return
-            }
-            
-            if ev.known_kind == .contacts {
-                handle_contact_event(ev)
-            }
-        case .notice(let msg):
-            print("followingmodel notice: \(msg)")
-            
-        case .eose(let sub_id):
-            if sub_id == self.sub_id {
-                guard let txn = NdbTxn(ndb: self.damus_state.ndb) else { return }
-                load_profiles(relay_id: relay_id, txn: txn)
-            } else if sub_id == self.profiles_id {
-                damus_state.nostrNetwork.pool.unsubscribe(sub_id: profiles_id, to: [relay_id])
-            }
-            
-        case .ok:
-            break
-        case .auth:
-            break
+    
+    func handle_event(ev: NostrEvent) {
+        if ev.known_kind == .contacts {
+            Task { await handle_contact_event(ev) }
         }
     }
 }

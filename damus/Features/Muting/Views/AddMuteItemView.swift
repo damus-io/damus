@@ -87,7 +87,7 @@ struct AddMuteItemView: View {
                     }
 
                     state.mutelist_manager.set_mutelist(mutelist)
-                    state.nostrNetwork.postbox.send(mutelist)
+                    Task { await state.nostrNetwork.postbox.send(mutelist) }
                 }
 
                 new_text = ""

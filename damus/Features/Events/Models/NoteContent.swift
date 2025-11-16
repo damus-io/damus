@@ -83,12 +83,6 @@ func render_immediately_available_note_content(ndb: Ndb, ev: NostrEvent, profile
 
 actor ContentRenderer {
     func render_note_content(ndb: Ndb, ev: NostrEvent, profiles: Profiles, keypair: Keypair) async -> NoteArtifacts {
-        if ev.known_kind == .dm {
-            // Use the enhanced render_immediately_available_note_content which now handles DMs properly
-            // by decrypting and parsing the content with ndb_parse_content
-            return render_immediately_available_note_content(ndb: ndb, ev: ev, profiles: profiles, keypair: keypair)
-        }
-        let result = try? await ndb.waitFor(noteId: ev.id, timeout: 3)
         return render_immediately_available_note_content(ndb: ndb, ev: ev, profiles: profiles, keypair: keypair)
     }
 }

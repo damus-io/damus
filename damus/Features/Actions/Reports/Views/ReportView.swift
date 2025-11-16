@@ -57,13 +57,13 @@ struct ReportView: View {
         .padding()
     }
     
-    func do_send_report() {
+    func do_send_report() async {
         guard let selected_report_type,
               let ev = NostrEvent(content: report_message, keypair: keypair.to_keypair(), kind: 1984, tags: target.reportTags(type: selected_report_type)) else {
             return
         }
         
-        postbox.send(ev)
+        await postbox.send(ev)
         
         report_sent = true
         report_id = bech32_note_id(ev.id)
@@ -116,7 +116,7 @@ struct ReportView: View {
 
                 Section(content: {
                     Button(send_report_button_text) {
-                        do_send_report()
+                        Task { await do_send_report() }
                     }
                     .disabled(selected_report_type == nil)
                 }, footer: {

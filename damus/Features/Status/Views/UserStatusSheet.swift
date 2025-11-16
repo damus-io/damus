@@ -109,16 +109,18 @@ struct UserStatusSheet: View {
                     Spacer()
                     
                     Button(action: {
-                        guard let status = self.status.general,
-                              let kp = keypair.to_full(),
-                              let ev = make_user_status_note(status: status, keypair: kp, expiry: duration.expiration)
-                        else {
-                            return
+                        Task {
+                            guard let status = self.status.general,
+                                  let kp = keypair.to_full(),
+                                  let ev = make_user_status_note(status: status, keypair: kp, expiry: duration.expiration)
+                            else {
+                                return
+                            }
+                            
+                            await postbox.send(ev)
+                            
+                            dismiss()
                         }
-                        
-                        postbox.send(ev)
-                        
-                        dismiss()
                     }, label: {
                         Text("Share", comment: "Save button text for saving profile status settings.")
                     })
@@ -129,7 +131,7 @@ struct UserStatusSheet: View {
                 Divider()
                 
                 ZStack(alignment: .top) {
-                    ProfilePicView(pubkey: keypair.pubkey, size: 120.0, highlight: .custom(DamusColors.white, 3.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                    ProfilePicView(pubkey: keypair.pubkey, size: 120.0, highlight: .custom(DamusColors.white, 3.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
                         .padding(.top, 30)
                     
                     VStack(spacing: 0) {

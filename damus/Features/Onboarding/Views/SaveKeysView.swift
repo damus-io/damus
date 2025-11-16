@@ -75,7 +75,7 @@ struct SaveKeysView: View {
                         .foregroundColor(.red)
                     
                     Button(action: {
-                        complete_account_creation(account)
+                        Task { await complete_account_creation(account) }
                     }) {
                         HStack {
                             Text("Retry", comment:  "Button to retry completing account creation after an error occurred.")
@@ -89,7 +89,7 @@ struct SaveKeysView: View {
                     
                     Button(action: {
                         save_key(account)
-                        complete_account_creation(account)
+                        Task { await complete_account_creation(account) }
                     }) {
                         HStack {
                             Text("Save", comment:  "Button to save key, complete account creation, and start using the app.")
@@ -99,9 +99,10 @@ struct SaveKeysView: View {
                     }
                     .buttonStyle(GradientButtonStyle())
                     .padding(.top, 20)
+                    .accessibilityIdentifier(AppAccessibilityIdentifiers.sign_up_save_keys_button.rawValue)
                     
                     Button(action: {
-                        complete_account_creation(account)
+                        Task { await complete_account_creation(account) }
                     }) {
                         HStack {
                             Text("Not now", comment:  "Button to not save key, complete account creation, and start using the app.")
@@ -111,6 +112,7 @@ struct SaveKeysView: View {
                     }
                     .buttonStyle(NeutralButtonStyle(padding: EdgeInsets(top: 15, leading: 15, bottom: 15, trailing: 15), cornerRadius: 12))
                     .padding(.top, 20)
+                    .accessibilityIdentifier(AppAccessibilityIdentifiers.sign_up_skip_save_keys_button.rawValue)
                 }
             }
             .padding(20)
@@ -125,7 +127,7 @@ struct SaveKeysView: View {
         credential_handler.save_credential(pubkey: account.pubkey, privkey: account.privkey)
     }
     
-    func complete_account_creation(_ account: CreateAccountModel) {
+    func complete_account_creation(_ account: CreateAccountModel) async {
         guard let first_contact_event else {
             error = NSLocalizedString("Could not create your initial contact list event. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help.", comment: "Error message to the user indicating that the initial contact list failed to be created.")
             return
@@ -139,14 +141,21 @@ struct SaveKeysView: View {
         
         let bootstrap_relays = load_bootstrap_relays(pubkey: account.pubkey)
         for relay in bootstrap_relays {
-            add_rw_relay(self.pool, relay)
+            await add_rw_relay(self.pool, relay)
         }
-
-        self.pool.register_handler(sub_id: "signup", handler: handle_event)
-
-        self.loading = true
         
-        self.pool.connect()
+        self.loading = true
+                
+        Task {
+            await self.pool.connect()
+            
+            let stream = AsyncStream<(RelayURL, NostrConnectionEvent)> { streamContinuation in
+                Task { await self.pool.register_handler(sub_id: "signup", filters: nil, handler: streamContinuation) }
+            }
+            for await (relayUrl, connectionEvent) in stream {
+                await handle_event(relay: relayUrl, ev: connectionEvent)
+            }
+        }
     }
     
     func save_to_storage(first_contact_event: NdbNote, first_relay_list_event: NdbNote, for account: CreateAccountModel) {
@@ -160,7 +169,7 @@ struct SaveKeysView: View {
         settings.latestRelayListEventIdHex = first_relay_list_event.id.hex()
     }
 
-    func handle_event(relay: RelayURL, ev: NostrConnectionEvent) {
+    func handle_event(relay: RelayURL, ev: NostrConnectionEvent) async {
         switch ev {
         case .ws_connection_event(let wsev):
             switch wsev {
@@ -169,15 +178,15 @@ struct SaveKeysView: View {
                 
                 if let keypair = account.keypair.to_full(),
                    let metadata_ev = make_metadata_event(keypair: keypair, metadata: metadata) {
-                    self.pool.send(.event(metadata_ev))
+                    await self.pool.send(.event(metadata_ev))
                 }
                 
                 if let first_contact_event {
-                    self.pool.send(.event(first_contact_event))
+                    await self.pool.send(.event(first_contact_event))
                 }
                 
                 if let first_relay_list_event {
-                    self.pool.send(.event(first_relay_list_event))
+                    await self.pool.send(.event(first_relay_list_event))
                 }
                 
                 do {

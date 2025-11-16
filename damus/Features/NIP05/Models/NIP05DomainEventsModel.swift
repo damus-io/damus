@@ -15,8 +15,7 @@ class NIP05DomainEventsModel: ObservableObject {
 
     let domain: String
     var filter: NostrFilter
-    let sub_id = UUID().description
-    let profiles_subid = UUID().description
+    var loadingTask: Task<Void, Never>?
     let limit: UInt32 = 500
 
     init(state: DamusState, domain: String) {
@@ -29,6 +28,20 @@ class NIP05DomainEventsModel: ObservableObject {
     }
 
     @MainActor func subscribe() {
+        print("subscribing to notes from friends of friends with '\(domain)' NIP-05 domain")
+        loadingTask = Task {
+            await streamItems()
+        }
+        loading = true
+    }
+
+    func unsubscribe() {
+        loadingTask?.cancel()
+        loading = false
+        print("unsubscribing from notes from friends of friends with '\(domain)' NIP-05 domain")
+    }
+    
+    func streamItems() async {
         filter.limit = self.limit
         filter.kinds = [.text, .longform, .highlight]
 
@@ -50,48 +63,35 @@ class NIP05DomainEventsModel: ObservableObject {
         }
         filter.authors = Array(authors)
 
-        print("subscribing to notes from friends of friends with '\(domain)' NIP-05 domain with sub_id \(sub_id)")
-        state.nostrNetwork.pool.register_handler(sub_id: sub_id, handler: handle_event)
-        loading = true
-        state.nostrNetwork.pool.send(.subscribe(.init(filters: [filter], sub_id: sub_id)))
+        
+        for await item in state.nostrNetwork.reader.advancedStream(filters: [filter]) {
+            switch item {
+            case .event(let lender):
+                await lender.justUseACopy({ await self.add_event($0) })
+            case .eose:
+                DispatchQueue.main.async { self.loading = false }
+                continue
+            case .ndbEose:
+                break
+            case .networkEose:
+                break
+            }
+        }
     }
 
-    func unsubscribe() {
-        state.nostrNetwork.pool.unsubscribe(sub_id: sub_id)
-        loading = false
-        print("unsubscribing from notes from friends of friends with '\(domain)' NIP-05 domain with sub_id \(sub_id)")
-    }
-
-    func add_event(_ ev: NostrEvent) {
+    func add_event(_ ev: NostrEvent) async {
         if !event_matches_filter(ev, filter: filter) {
             return
         }
 
-        guard should_show_event(state: state, ev: ev) else {
+        guard await should_show_event(state: state, ev: ev) else {
             return
         }
 
-        if self.events.insert(ev) {
-            objectWillChange.send()
-        }
-    }
-
-    func handle_event(relay_id: RelayURL, ev: NostrConnectionEvent) {
-        let (sub_id, done) = handle_subid_event(pool: state.nostrNetwork.pool, relay_id: relay_id, ev: ev) { sub_id, ev in
-            if sub_id == self.sub_id && ev.is_textlike && ev.should_show_event {
-                self.add_event(ev)
+        if await self.events.insert(ev) {
+            DispatchQueue.main.async {
+                self.objectWillChange.send()
             }
-        }
-
-        guard done else {
-            return
-        }
-
-        self.loading = false
-
-        if sub_id == self.sub_id {
-            guard let txn = NdbTxn(ndb: state.ndb) else { return }
-            load_profiles(context: "search", profiles_subid: self.profiles_subid, relay_id: relay_id, load: .from_events(self.events.all_events), damus_state: state, txn: txn)
         }
     }
 }

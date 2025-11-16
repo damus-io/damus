@@ -140,6 +140,11 @@ struct ErrorView: View {
         let technical_info: String?
         
     }
+    
+    /// An error that can be displayed to the user, and can be sent to the Developers as well.
+    protocol UserPresentableErrorProtocol: Error {
+        var userPresentableError: UserPresentableError { get }
+    }
 }
 
 

@@ -171,13 +171,13 @@ final class PostViewTests: XCTestCase {
         nonAlphaNumerics.forEach { testAddingStringAfterLink(str: $0)}
     }
 
-    func testQuoteRepost() {
-        let post = build_post(state: test_damus_state, post: .init(), action: .quoting(test_note), uploadedMedias: [], pubkeys: [])
+    func testQuoteRepost() async {
+        let post = await build_post(state: test_damus_state, post: .init(), action: .quoting(test_note), uploadedMedias: [], pubkeys: [])
 
         XCTAssertEqual(post.tags, [["q", test_note.id.hex(), "", jack_keypair.pubkey.hex()], ["p", jack_keypair.pubkey.hex()]])
     }
 
-    func testBuildPostRecognizesStringsAsNpubs() throws {
+    func testBuildPostRecognizesStringsAsNpubs() async throws {
         // given
         let expectedLink = "nostr:\(test_pubkey.npub)"
         let content = NSMutableAttributedString(string: "@test", attributes: [
@@ -185,7 +185,7 @@ final class PostViewTests: XCTestCase {
         ])
 
         // when
-        let post = build_post(
+        let post = await build_post(
             state: test_damus_state,
             post: content,
             action: .posting(.user(test_pubkey)),
@@ -197,7 +197,7 @@ final class PostViewTests: XCTestCase {
         XCTAssertEqual(post.content, expectedLink)
     }
 
-    func testBuildPostRecognizesUrlsAsNpubs() throws {
+    func testBuildPostRecognizesUrlsAsNpubs() async throws {
         // given
         guard let npubUrl = URL(string: "damus:nostr:\(test_pubkey.npub)") else {
             return XCTFail("Could not create URL")
@@ -207,7 +207,7 @@ final class PostViewTests: XCTestCase {
         ])
 
         // when
-        let post = build_post(
+        let post = await build_post(
             state: test_damus_state,
             post: content,
             action: .posting(.user(test_pubkey)),

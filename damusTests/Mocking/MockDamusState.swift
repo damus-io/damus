@@ -11,12 +11,13 @@ import EmojiPicker
 
 // Generates a test damus state with configurable mock parameters
 func generate_test_damus_state(
-    mock_profile_info: [Pubkey: Profile]?
+    mock_profile_info: [Pubkey: Profile]?,
+    home: HomeModel? = nil,
+    addNdbToRelayPool: Bool = true
 ) -> DamusState {
     // Create a unique temporary directory
     let ndb = Ndb.test
     let our_pubkey = test_pubkey
-    let pool = RelayPool(ndb: ndb)
     let settings = UserSettingsStore()
     
     let profiles: Profiles = {
@@ -34,7 +35,7 @@ func generate_test_damus_state(
                            contactCards: ContactCardManagerMock(),
                            mutelist_manager: mutelist_manager,
                            profiles: profiles,
-                           dms: .init(our_pubkey: our_pubkey),
+                           dms: home?.dms ?? .init(our_pubkey: our_pubkey),
                            previews: .init(),
                            zaps: .init(our_pubkey: our_pubkey),
                            lnurls: .init(),
@@ -52,8 +53,11 @@ func generate_test_damus_state(
                            ndb: ndb,
                            quote_reposts: .init(our_pubkey: our_pubkey),
                            emoji_provider: DefaultEmojiProvider(showAllVariations: false),
-                           favicon_cache: .init()
+                           favicon_cache: .init(),
+                           addNdbToRelayPool: addNdbToRelayPool
     )
+    
+    home?.damus_state = damus
 
     return damus
 }
