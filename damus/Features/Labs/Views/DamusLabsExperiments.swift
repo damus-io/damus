@@ -12,6 +12,10 @@ struct DamusLabsExperiments: View {
     let damus_state: DamusState
     @ObservedObject var settings: UserSettingsStore
     @State var show_live_explainer: Bool = false
+    @State var show_favorites_explainer: Bool = false
+    
+    let live_label = NSLocalizedString("Live", comment: "Label for a toggle that enables an experimental feature")
+    let favorites_label = NSLocalizedString("Favorites", comment: "Label for a toggle that enables an experimental feature")
     
     var body: some View {
         ScrollView {
@@ -38,7 +42,8 @@ struct DamusLabsExperiments: View {
                 .cornerRadius(15)
                 .padding(.top, 10)
                 
-                LabsToggleView(toggleName: "Live", systemImage: "record.circle", isOn: $settings.live, showInfo: $show_live_explainer)
+                LabsToggleView(toggleName: live_label, systemImage: "record.circle", isOn: $settings.live, showInfo: $show_live_explainer)
+                LabsToggleView(toggleName: favorites_label, systemImage: "heart.fill", isOn: $settings.enable_favourites_feature, showInfo: $show_favorites_explainer)
 
             }
             .padding([.trailing, .leading], 20)
@@ -46,17 +51,22 @@ struct DamusLabsExperiments: View {
             
             Image("damooseLabs")
                 .resizable()
+                .accessibilityHidden(true)
                 .aspectRatio(contentMode: .fill)
-            
         }
         .ignoresSafeArea(edges: .bottom)
         .sheet(isPresented: $show_live_explainer) {
             LabsExplainerView(
-                labName: "Live",
+                labName: live_label,
                 systemImage: "record.circle",
-                labDescription: "This will allow you to see all the real-time live streams happening on Nostr! As well as let you view and interact in the Live Chat. Please keep in mind this is still a work in progress and issues are expected. When enabled you will see the Live option in your side menu.")
+                labDescription: NSLocalizedString("This will allow you to see all the real-time live streams happening on Nostr! As well as let you view and interact in the Live Chat. Please keep in mind this is still a work in progress and issues are expected. When enabled you will see the Live option in your side menu.", comment: "Damus Labs feature explanation"))
         }
-
+        .sheet(isPresented: $show_favorites_explainer) {
+            LabsExplainerView(
+                labName: favorites_label,
+                systemImage: "heart.fill",
+                labDescription: NSLocalizedString("This will allow you to pick users to be part of your favorites list. You can also switch your profile timeline to only see posts from your favorite contacts.", comment: "Damus Labs feature explanation"))
+        }
     }
 }
 

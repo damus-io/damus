@@ -191,12 +191,8 @@ class UserSettingsStore: ObservableObject {
     var truncate_timeline_text: Bool
     
     /// Nozaps mode gimps note zapping to fit into apple's content-tipping guidelines. It can not be configurable to end-users on the app store
-    ///
-    /// Update 2025-05-12: This can be re-enabled 🥳. See https://github.com/damus-io/damus/issues/3016
     // @Setting(key: "nozaps", default_value: true)
-    var nozaps: Bool {
-        return false
-    }
+    var nozaps: Bool { true }
     
     @Setting(key: "truncate_mention_text", default_value: true)
     var truncate_mention_text: Bool
@@ -252,10 +248,6 @@ class UserSettingsStore: ObservableObject {
     /// Whether the app should present the experimental floating "Load new content" button
     @Setting(key: "enable_experimental_load_new_content_button", default_value: false)
     var enable_experimental_load_new_content_button: Bool
-    
-    /// Whether the app should show the Favourites feature (Damus Labs)
-    @Setting(key: "enable_favourites_feature", default_value: false)
-    var enable_favourites_feature: Bool
     
     @StringSetting(key: "purple_environment", default_value: .production)
     var purple_enviroment: DamusPurpleEnvironment
@@ -369,6 +361,9 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "live", default_value: false)
     var live: Bool
     
+    /// Whether the app should show the Favourites feature (Damus Labs)
+    @Setting(key: "labs_experiment_favorites", default_value: false)
+    var enable_favourites_feature: Bool
     
     // MARK: Internal, hidden settings
     
