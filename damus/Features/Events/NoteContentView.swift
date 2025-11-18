@@ -45,6 +45,7 @@ struct NoteContentView: View {
     let event: NostrEvent
     @State var blur_images: Bool
     @State var load_media: Bool = false
+    @State private var requestedMentionProfiles: Set<Pubkey> = []
     let size: EventViewKind
     let preview_height: CGFloat?
     let options: EventViewOptions
@@ -273,10 +274,61 @@ struct NoteContentView: View {
         .padding(.horizontal)
     }
     
+    func ensureMentionProfilesAreFetchingIfNeeded() {
+        guard let blockGroup = try? NdbBlockGroup.from(event: event, using: damus_state.ndb, and: damus_state.keypair) else {
+            return
+        }
+
+        var mentionPubkeys: Set<Pubkey> = []
+        let _: ()? = try? blockGroup.forEachBlock({ _, block in
+            switch block {
+            case .mention(let mentionBlock):
+                if let mention = MentionRef(block: mentionBlock),
+                   let pubkey = mention.pubkey {
+                    mentionPubkeys.insert(pubkey)
+                }
+            default:
+                break
+            }
+            return .loopContinue
+        })
+
+        guard !mentionPubkeys.isEmpty else { return }
+
+        var toFetch: [Pubkey] = []
+        for pubkey in mentionPubkeys {
+            if requestedMentionProfiles.contains(pubkey) {
+                continue
+            }
+            requestedMentionProfiles.insert(pubkey)
+
+            if let txn = damus_state.ndb.lookup_profile(pubkey),
+               damus_state.profiles.has_fresh_profile(id: pubkey, txn: txn) {
+                continue
+            }
+
+            toFetch.append(pubkey)
+        }
+
+        guard !toFetch.isEmpty else { return }
+
+        // Kick off metadata fetches for any missing mention profiles so their names can render once loaded.
+        for pubkey in toFetch {
+            Task {
+                for await _ in await damus_state.nostrNetwork.profilesManager.streamProfile(pubkey: pubkey) {
+                    // NO-OP, we will receive the update via `notify`
+                    break
+                }
+            }
+        }
+    }
+
     func load(force_artifacts: Bool = false) {
         if case .loading = damus_state.events.get_cache_data(event.id).artifacts_model.state {
             return
         }
+
+        ensureMentionProfilesAreFetchingIfNeeded()
         
         // always reload artifacts on load
         let plan = get_preload_plan(evcache: damus_state.events, ev: event, our_keypair: damus_state.keypair, settings: damus_state.settings)
