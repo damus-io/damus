@@ -27,7 +27,8 @@ final class LocalizationUtilTests: XCTestCase {
             ["sats", "sats", "sat", "sats"],
             ["users_talking_about_it", "0 users talking about it", "1 user talking about it", "2 users talking about it"],
             ["word_count", "0 Words", "1 Word", "2 Words"],
-            ["zaps_count", "Zaps", "Zap", "Zaps"]
+            ["zaps_count", "Zaps", "Zap", "Zaps"],
+            ["media_count", "media items", "media item", "media items"]
         ]
 
         for key in keys {

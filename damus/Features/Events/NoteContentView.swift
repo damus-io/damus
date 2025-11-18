@@ -46,6 +46,7 @@ struct NoteContentView: View {
     let event: NostrEvent
     @State var blur_images: Bool
     @State var load_media: Bool = false
+    @State private var showLinksDropdown = false
     let size: EventViewKind
     let preview_height: CGFloat?
     let options: EventViewOptions
@@ -173,28 +174,30 @@ struct NoteContentView: View {
         let contentToRender = highlightedContent(artifacts.content)
 
         return VStack(alignment: .leading) {
-            if size == .selected {
-                if with_padding {
-                    SelectableText(damus_state: damus_state, event: self.event, attributedString: contentToRender.attributed, size: self.size)
-                        .padding(.horizontal)
+            if artifacts.content.attributed.characters.count != 0 {
+                if size == .selected {
+                    if with_padding {
+                        SelectableText(damus_state: damus_state, event: self.event, attributedString: contentToRender.attributed, size: self.size)
+                            .padding(.horizontal)
+                    } else {
+                        SelectableText(damus_state: damus_state, event: self.event, attributedString: contentToRender.attributed, size: self.size)
+                    }
                 } else {
-                    SelectableText(damus_state: damus_state, event: self.event, attributedString: contentToRender.attributed, size: self.size)
+                    if with_padding {
+                        truncatedText(content: contentToRender)
+                            .padding(.horizontal)
+                    } else {
+                        truncatedText(content: contentToRender)
+                    }
                 }
-            } else {
-                if with_padding {
-                    truncatedText(content: contentToRender)
-                        .padding(.horizontal)
-                } else {
-                    truncatedText(content: contentToRender)
-                }
-            }
 
-            if !options.contains(.no_translate) && (size == .selected || TranslationService.isAppleTranslationPopoverSupported || damus_state.settings.auto_translate) {
-                if with_padding {
-                    translateView
-                        .padding(.horizontal)
-                } else {
-                    translateView
+                if !options.contains(.no_translate) && (size == .selected || TranslationService.isAppleTranslationPopoverSupported || damus_state.settings.auto_translate) {
+                    if with_padding {
+                        translateView
+                            .padding(.horizontal)
+                    } else {
+                        translateView
+                    }
                 }
             }
 
@@ -235,46 +238,111 @@ struct NoteContentView: View {
             }
 
         }
+        .padding(.top, artifacts.content.attributed.characters.count == 0 ? 7 : 0)
     }
 
     var has_previews: Bool {
         !options.contains(.no_previews)
     }
-
+    
     func loadMediaButton(artifacts: NoteArtifactsSeparated) -> some View {
-        Button(action: {
-            load_media = true
-        }, label: {
-            VStack(alignment: .leading) {
-                HStack {
-                    Image("images")
-                    Text("Load media", comment: "Button to show media in note.")
-                        .fontWeight(.bold)
-                        .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
-                }
-                .padding(EdgeInsets(top: 5, leading: 10, bottom: 0, trailing: 10))
+        VStack(spacing: 0) {
+            HStack(spacing: 0) {
                 
-                ForEach(artifacts.media.indices, id: \.self) { index in
-                    Divider()
-                        .frame(height: 1)
-                    switch artifacts.media[index] {
-                    case .image(let url), .video(let url):
-                        Text(abbreviateURL(url))
+                Button(action: {
+                    load_media = true
+                }) {
+                    HStack(spacing: 10) {
+                        ZStack(alignment: .topTrailing) {
+                            Image("images")
+                                .foregroundStyle(DamusColors.neutral6)
+                                .accessibilityHidden(true)
+                            
+                            if artifacts.media.count > 1 {
+                                Text("\(artifacts.media.count)")
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 4)
+                                    .padding(.vertical, 2)
+                                    .background(
+                                        Capsule()
+                                            .fill(DamusColors.neutral6)
+                                    )
+                                    .offset(x: 6, y: -6)
+                                    .accessibilityHidden(true)
+                            }
+                        }
+                        
+                        Text("Load \(artifacts.media.count) \(pluralizedString(key: "media_count", count: artifacts.media.count))")
                             .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
                             .foregroundStyle(DamusColors.neutral6)
-                            .multilineTextAlignment(.leading)
-                            .padding(EdgeInsets(top: 0, leading: 10, bottom: 5, trailing: 10))
+                        
+                        Spacer()
+
+                    }
+                    .padding(.vertical, 12)
+                    .padding(.leading, 14)
+                    .padding(.trailing, 8)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(PlainButtonStyle())
+
+                Rectangle()
+                    .fill(DamusColors.neutral3)
+                    .frame(width: 1)
+                    .padding(.vertical, 8)
+                
+                Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        showLinksDropdown.toggle()
+                    }
+                }) {
+                    Image(systemName: showLinksDropdown ? "chevron.up.circle.fill" : "chevron.down.circle")
+                        .font(.system(size: 16))
+                        .foregroundStyle(DamusColors.neutral6)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(PlainButtonStyle())
+                .accessibilityLabel(NSLocalizedString(showLinksDropdown ? "Hide media links" : "Show media links", comment: "Accessibility label for toggle button to show/hide media link list"))
+            }
+            .background(
+                 RoundedRectangle(cornerRadius: 10)
+                     .fill(DamusColors.neutral1.opacity(0.6))
+                     .overlay(
+                         RoundedRectangle(cornerRadius: 10)
+                             .stroke(DamusColors.neutral3, lineWidth: 1)
+                     )
+                     .shadow(color: .black.opacity(0.05), radius: 2, y: 1)
+             )
+             
+            if showLinksDropdown {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(Array(artifacts.media.enumerated()), id: \.offset) { index, mediaItem in
+                        if index > 0 {
+                            Divider()
+                                .background(DamusColors.neutral3)
+                        }
+                        
+                        mediaLinkRow(for: mediaItem, at: index)
                     }
                 }
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(DamusColors.neutral1.opacity(0.4))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(DamusColors.neutral3, lineWidth: 1)
+                        )
+                        .shadow(color: .black.opacity(0.05), radius: 2, y: 1)
+                )
+                .padding(.top, 6)
+                .transition(.asymmetric(
+                    insertion: .opacity.combined(with: .scale(scale: 0.95, anchor: .top)),
+                    removal: .opacity
+                ))
             }
-            .background(DamusColors.neutral1)
-            .frame(minWidth: nil, maxWidth: .infinity, alignment: .center)
-            .cornerRadius(8)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(DamusColors.neutral3, lineWidth: 1)
-            )
-        })
+        }
         .padding(.horizontal)
     }
     
@@ -303,6 +371,63 @@ struct NoteContentView: View {
         }
     }
 
+    @ViewBuilder
+    private func mediaLinkRow(for mediaItem: MediaUrl, at index: Int) -> some View {
+        switch mediaItem {
+        case .image(let url), .video(let url):
+            Button(action: {
+                load_media = true
+            }) {
+                HStack(spacing: 10) {
+
+                    Image(systemName: "photo.circle.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(DamusColors.neutral6)
+                        .accessibilityHidden(true)
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(abbreviateURL(url))
+                            .font(.system(size: 13))
+                            .foregroundStyle(DamusColors.neutral6)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                        
+                        if let domain = url.host {
+                            Text(domain)
+                                .font(.system(size: 11))
+                                .foregroundStyle(DamusColors.neutral6)
+                        }
+                    }
+                    
+                    Spacer(minLength: 8)
+                    
+                    HStack(spacing: 12) {
+                        Button(action: {
+                            UIPasteboard.general.string = url.absoluteString
+                            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                            impactFeedback.impactOccurred()
+                        }) {
+                            Image(systemName: "doc.on.doc")
+                                .font(.system(size: 14))
+                                .foregroundStyle(DamusColors.neutral6)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .accessibilityLabel(NSLocalizedString("Copy media link", comment: "Accessibility label for copy media link button"))
+                    }
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.clear)
+                        .contentShape(Rectangle())
+                )
+            }
+            .buttonStyle(PlainButtonStyle())
+            .accessibilityLabel(NSLocalizedString("Load \(abbreviateURL(url))", comment: "Accessibility label for button to load specific media item"))
+        }
+    }
+    
     func load(force_artifacts: Bool = false) {
         if case .loading = damus_state.events.get_cache_data(event.id).artifacts_model.state {
             return
