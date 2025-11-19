@@ -38,6 +38,7 @@ func generate_test_damus_state(
                            dms: home?.dms ?? .init(our_pubkey: our_pubkey),
                            previews: .init(),
                            zaps: .init(our_pubkey: our_pubkey),
+                           polls: PollResultsStore(),
                            lnurls: .init(),
                            settings: settings,
                            relay_filters: .init(our_pubkey: our_pubkey),

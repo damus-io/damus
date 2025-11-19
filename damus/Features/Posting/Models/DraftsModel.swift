@@ -34,23 +34,27 @@ class DraftArtifacts: Equatable {
     ///
     /// For example, when replying to an event, the user can select which pubkey mentions they want to keep, and which ones to remove.
     var filtered_pubkeys: Set<Pubkey> = []
+    /// Optional poll configuration associated with this draft
+    var pollDraft: PollDraft? = nil
     
     /// A unique ID for this draft that allows us to address these if we need to.
     ///
     /// This will be the unique identifier in the NIP-37 note
     let id: String
     
-    init(content: NSMutableAttributedString = NSMutableAttributedString(string: ""), media: [UploadedMedia] = [], references: [RefId], id: String) {
+    init(content: NSMutableAttributedString = NSMutableAttributedString(string: ""), media: [UploadedMedia] = [], references: [RefId], id: String, pollDraft: PollDraft? = nil) {
         self.content = content
         self.media = media
         self.references = references
         self.id = id
+        self.pollDraft = pollDraft
     }
-    
+
     static func == (lhs: DraftArtifacts, rhs: DraftArtifacts) -> Bool {
         return (
             lhs.media == rhs.media &&
-            lhs.content.string == rhs.content.string    // Comparing the text content is not perfect but acceptable in this case because attributes for our post editor are determined purely from text content
+            lhs.content.string == rhs.content.string &&
+            lhs.pollDraft == rhs.pollDraft    // Comparing the text content is not perfect but acceptable in this case because attributes for our post editor are determined purely from text content
         )
     }
     
