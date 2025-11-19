@@ -48,12 +48,30 @@ struct SideMenuView: View {
 
             if damus_state.purple.enable_purple {
                 NavigationLink(destination: DamusPurpleView(damus_state: damus_state)) {
-                    HStack(spacing: 23) {
-                        Image("nostr-hashtag")
+                    HStack(spacing: 16) {
+                        Image("damus-dark-logo")
+                            .resizable()
+                            .frame(width: 25, height: 25)
+                            .clipShape(RoundedRectangle(cornerRadius: 7.0))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 7)
+                                    .stroke(LinearGradient(
+                                        colors: [DamusColors.lighterPink.opacity(0.8), .white.opacity(0), DamusColors.deepPurple.opacity(0.6)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing), lineWidth: 1)
+                            )
+                            .shadow(radius: 1)
                         Text("Purple")
-                            .foregroundColor(DamusColors.purple)
                             .font(.title2.weight(.semibold))
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [DamusColors.lighterPink, DamusColors.deepPurple],
+                                    startPoint: .bottomLeading,
+                                    endPoint: .topTrailing
+                                )
+                            )
                     }
+                    .padding(.leading, 2)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
