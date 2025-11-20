@@ -116,15 +116,13 @@ class ProfileModel: ObservableObject, Equatable {
         let conversations_filter_us = NostrFilter(kinds: conversation_kinds, pubkeys: [pubkey], limit: limit, authors: [damus.pubkey])
         print("subscribing to conversation events from and to profile \(pubkey)")
         for await noteLender in self.damus.nostrNetwork.reader.streamIndefinitely(filters: [conversations_filter_them, conversations_filter_us]) {
-            try? await noteLender.borrow { ev in
-                if await !seen_event.contains(ev.id) {
-                    let event = ev.toOwned()
-                    Task { await self.add_event(event) }
-                    conversation_events.insert(ev.id)
-                }
-                else if !conversation_events.contains(ev.id) {
-                    conversation_events.insert(ev.id)
-                }
+            guard let event = noteLender.justGetACopy() else { continue }
+            if await !seen_event.contains(event.id) {
+                Task { await self.add_event(event) }
+                conversation_events.insert(event.id)
+            }
+            else if !conversation_events.contains(event.id) {
+                conversation_events.insert(event.id)
             }
         }
     }
