@@ -754,7 +754,10 @@ class Ndb {
         }
     }
     
-    private func waitWithoutTimeout(for noteId: NoteId) async throws(NdbLookupError) -> NdbTxn<NdbNote>? {
+    /// Waits for a note without enforcing a timeout and returns an owned copy.
+    ///
+    /// Returning an owned value ensures the transaction stays entirely within this synchronous scope.
+    private func waitWithoutTimeout(for noteId: NoteId) async throws(NdbLookupError) -> NostrEvent? {
         do {
             for try await item in try self.subscribe(filters: [NostrFilter(ids: [noteId])]) {
                 switch item {
@@ -762,10 +765,12 @@ class Ndb {
                     continue
                 case .event(let noteKey):
                     guard let txn = NdbTxn(ndb: self) else { throw NdbLookupError.cannotOpenTransaction }
-                    guard let note = self.lookup_note_by_key_with_txn(noteKey, txn: txn) else { throw NdbLookupError.internalInconsistency }
+                    guard let note = self.lookup_note_by_key_with_txn(noteKey, txn: txn) else {
+                        throw NdbLookupError.internalInconsistency
+                    }
                     if note.id == noteId {
-                        Log.debug("ndb wait: %d has matching id %s. Returning transaction", for: .ndb, noteKey, noteId.hex())
-                        return NdbTxn<NdbNote>.pure(ndb: self, val: note)
+                        Log.debug("ndb wait: %d has matching id %s. Returning owned note", for: .ndb, noteKey, noteId.hex())
+                        return note.to_owned()
                     }
                 }
             }
@@ -778,7 +783,8 @@ class Ndb {
         return nil
     }
     
-    func waitFor(noteId: NoteId, timeout: TimeInterval = 10) async throws(NdbLookupError) -> NdbTxn<NdbNote>? {
+    /// Waits for a note (up to `timeout`) and returns an owned copy that is safe to cross async boundaries.
+    func waitFor(noteId: NoteId, timeout: TimeInterval = 10) async throws(NdbLookupError) -> NostrEvent? {
         do {
             return try await withCheckedThrowingContinuation({ continuation in
                 var done = false
@@ -996,4 +1002,3 @@ func getDebugCheckedRoot<T: FlatBufferObject>(byteBuffer: inout ByteBuffer) thro
 func remove_file_prefix(_ str: String) -> String {
     return str.replacingOccurrences(of: "file://", with: "")
 }
-
