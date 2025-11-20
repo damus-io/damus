@@ -152,6 +152,22 @@ final class NdbTests: XCTestCase {
         XCTAssertEqual(total_count_stored, total_count_iter)
     }
     
+    func test_waitForReturnsOwnedNoteAcrossAsyncBoundary() async throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+        
+        let expectedId = NoteId(hex: "d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349")!
+        let result = try await ndb.waitFor(noteId: expectedId, timeout: 1)
+        let note = try XCTUnwrap(result)
+        
+        // Introduce an async suspension point to ensure the returned note survives independent of any txn.
+        await Task.yield()
+        
+        XCTAssertEqual(note.id, expectedId)
+        XCTAssertNil(Thread.current.threadDictionary["ndb_txn"])
+        XCTAssertNil(Thread.current.threadDictionary["ndb_txn_ref_count"])
+    }
+    
     /// Based on https://github.com/damus-io/damus/issues/1468
     /// Tests whether a JSON with optional escaped slash characters is correctly unescaped (In accordance to https://datatracker.ietf.org/doc/html/rfc8259#section-7)
     func test_decode_json_with_escaped_slashes() {
@@ -240,4 +256,3 @@ final class NdbTests: XCTestCase {
     }
 
 }
-

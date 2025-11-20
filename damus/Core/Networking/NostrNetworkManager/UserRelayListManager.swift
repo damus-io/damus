@@ -135,13 +135,12 @@ extension NostrNetworkManager {
             let filter = NostrFilter(kinds: [.relay_list], authors: [delegate.keypair.pubkey])
             for await noteLender in self.reader.streamIndefinitely(filters: [filter]) {
                 let currentRelayListCreationDate = self.getUserCurrentRelayListCreationDate()
-                try? await noteLender.borrow({ note in
-                    guard note.pubkey == self.delegate.keypair.pubkey else { return }               // Ensure this new list was ours
-                    guard note.createdAt > (currentRelayListCreationDate ?? 0) else { return }      // Ensure this is a newer list
-                    guard let relayList = try? NIP65.RelayList(event: note) else { return }         // Ensure it is a valid NIP-65 list
-                    
-                    try? await self.set(userRelayList: relayList)                                         // Set the validated list
-                })
+                guard let note = noteLender.justGetACopy() else { return }
+                guard note.pubkey == self.delegate.keypair.pubkey else { return }               // Ensure this new list was ours
+                guard note.created_at > (currentRelayListCreationDate ?? 0) else { return }     // Ensure this is a newer list
+                guard let relayList = try? NIP65.RelayList(event: note) else { return }         // Ensure it is a valid NIP-65 list
+                
+                try? await self.set(userRelayList: relayList)                                   // Set the validated list
             }
         }
         
