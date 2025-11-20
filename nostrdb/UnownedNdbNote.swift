@@ -66,19 +66,6 @@ enum NdbNoteLender: Sendable {
         }
     }
     
-    /// Borrows the note temporarily (asynchronously)
-    func borrow<T>(_ lendingFunction: (_: borrowing UnownedNdbNote) async throws -> T) async throws -> T {
-        switch self {
-        case .ndbNoteKey(let ndb, let noteKey):
-            guard !ndb.is_closed else { throw LendingError.ndbClosed }
-            guard let ndbNoteTxn = ndb.lookup_note_by_key(noteKey) else { throw LendingError.errorLoadingNote }
-            guard let unownedNote = UnownedNdbNote(ndbNoteTxn) else { throw LendingError.errorLoadingNote }
-            return try await lendingFunction(unownedNote)
-        case .owned(let note):
-            return try await lendingFunction(UnownedNdbNote(note))
-        }
-    }
-    
     /// Gets an owned copy of the note
     func getCopy() throws -> NdbNote {
         return try self.borrow({ ev in

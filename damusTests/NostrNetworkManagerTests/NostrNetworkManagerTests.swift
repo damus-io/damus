@@ -163,4 +163,85 @@ class NostrNetworkManagerTests: XCTestCase {
         XCTAssertEqual(count, expectedCount, "Should receive all \(expectedCount) events")
         XCTAssertEqual(receivedIds.count, expectedCount, "Should receive \(expectedCount) unique events")
     }
+
+    /// Ensures the relay list listener ignores a bad event and still applies the next valid update.
+    func testRelayListListenerSkipsInvalidEventsAndContinues() async throws {
+        let ndb = Ndb.test
+        let delegate = MockNetworkDelegate(ndb: ndb, keypair: test_keypair, bootstrapRelays: [RelayURL("wss://relay.damus.io")!])
+        let pool = RelayPool(ndb: ndb, keypair: test_keypair)
+        let reader = MockSubscriptionManager(pool: pool, ndb: ndb)
+        let manager = SpyUserRelayListManager(delegate: delegate, pool: pool, reader: reader)
+        let appliedExpectation = expectation(description: "Applies valid relay list after encountering an invalid event")
+        manager.setExpectation = appliedExpectation
+
+        guard let invalidEvent = NostrEvent(content: "invalid", keypair: test_keypair, kind: NostrKind.metadata.rawValue, createdAt: 1) else {
+            XCTFail("Failed to create invalid test event")
+            return
+        }
+        let validRelayList = NIP65.RelayList(relays: [RelayURL("wss://relay-2.damus.io")!])
+        guard let validEvent = validRelayList.toNostrEvent(keypair: test_keypair_full) else {
+            XCTFail("Failed to create valid relay list event")
+            return
+        }
+
+        // Feed the listener a bad event followed by a valid relay list.
+        reader.queuedLenders = [.owned(invalidEvent), .owned(validEvent)]
+
+        await manager.listenAndHandleRelayUpdates()
+        await fulfillment(of: [appliedExpectation], timeout: 1.0)
+
+        XCTAssertEqual(manager.setCallCount, 1)
+        XCTAssertEqual(manager.appliedRelayLists.first?.relays.count, validRelayList.relays.count)
+    }
+}
+
+// MARK: - Test doubles
+
+private final class MockNetworkDelegate: NostrNetworkManager.Delegate {
+    var ndb: Ndb
+    var keypair: Keypair
+    var latestRelayListEventIdHex: String?
+    var latestContactListEvent: NostrEvent?
+    var bootstrapRelays: [RelayURL]
+    var developerMode: Bool = false
+    var experimentalLocalRelayModelSupport: Bool = false
+    var relayModelCache: RelayModelCache
+    var relayFilters: RelayFilters
+    var nwcWallet: WalletConnectURL?
+
+    init(ndb: Ndb, keypair: Keypair, bootstrapRelays: [RelayURL]) {
+        self.ndb = ndb
+        self.keypair = keypair
+        self.bootstrapRelays = bootstrapRelays
+        self.relayModelCache = RelayModelCache()
+        self.relayFilters = RelayFilters(our_pubkey: keypair.pubkey)
+    }
+}
+
+private final class MockSubscriptionManager: NostrNetworkManager.SubscriptionManager {
+    var queuedLenders: [NdbNoteLender] = []
+
+    init(pool: RelayPool, ndb: Ndb) {
+        super.init(pool: pool, ndb: ndb, experimentalLocalRelayModelSupport: false)
+    }
+
+    override func streamIndefinitely(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, streamMode: NostrNetworkManager.StreamMode? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
+        let lenders = queuedLenders
+        return AsyncStream { continuation in
+            lenders.forEach { continuation.yield($0) }
+            continuation.finish()
+        }
+    }
+}
+
+private final class SpyUserRelayListManager: NostrNetworkManager.UserRelayListManager {
+    var setCallCount = 0
+    var appliedRelayLists: [NIP65.RelayList] = []
+    var setExpectation: XCTestExpectation?
+
+    override func set(userRelayList: NIP65.RelayList) async throws(UpdateError) {
+        setCallCount += 1
+        appliedRelayLists.append(userRelayList)
+        setExpectation?.fulfill()
+    }
 }
