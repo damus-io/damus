@@ -221,6 +221,7 @@ struct ProfileView: View {
                         }
 
                         damus_state.mutelist_manager.set_mutelist(new_ev)
+                        damus_state.settings.latest_mutelist_event_id_hex = new_ev.id.hex()
                         Task { await damus_state.nostrNetwork.postbox.send(new_ev) }
                     }
                 } else {
@@ -593,4 +594,3 @@ func check_nip05_validity(pubkey: Pubkey, profiles: Profiles) {
         }
     }
 }
-
