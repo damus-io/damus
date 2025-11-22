@@ -101,6 +101,10 @@ extension NostrNetworkManager {
                     relevantStream.continuation.yield(profile)
                 }
             }
+            
+            // Notify the rest of the app so views that rely on rendered text (like mention strings)
+            // can reload and pick up the freshly fetched profile metadata.
+            notify(.profile_updated(.remote(pubkey: metadataEvent.pubkey)))
         }
         
         
