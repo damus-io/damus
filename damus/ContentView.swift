@@ -538,9 +538,7 @@ struct ContentView: View {
                     Log.debug("App background signal handling: App being backgrounded", for: .app_lifecycle)
                     let startTime = CFAbsoluteTimeGetCurrent()
                     await damus_state.nostrNetwork.handleAppBackgroundRequest()  // Close ndb streaming tasks before closing ndb to avoid memory errors
-                    Log.debug("App background signal handling: Nostr network closed after %.2f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - startTime)
-                    damus_state.ndb.close()
-                    Log.debug("App background signal handling: Ndb closed after %.2f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - startTime)
+                    Log.debug("App background signal handling: Nostr network and Ndb closed after %.2f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - startTime)
                     this_app.endBackgroundTask(bgTask)
                 }
                 break
@@ -552,9 +550,7 @@ struct ContentView: View {
                 Task {
                     await damusClosingTask?.value  // Wait for the closing task to finish before reopening things, to avoid race conditions
                     damusClosingTask = nil
-                    damus_state.ndb.reopen()
-                    // Pinging the network will automatically reconnect any dead websocket connections
-                    await damus_state.nostrNetwork.ping()
+                    await damus_state.nostrNetwork.handleAppForegroundRequest()
                 }
             @unknown default:
                 break
@@ -1143,7 +1139,6 @@ extension LossyLocalNotification {
         }
     }
 }
-
 
 func logout(_ state: DamusState?)
 {
