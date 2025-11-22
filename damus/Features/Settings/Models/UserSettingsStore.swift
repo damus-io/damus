@@ -202,6 +202,9 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "auto_translate", default_value: true)
     var auto_translate: Bool
+    
+    @Setting(key: "publish_client_tag", default_value: true)
+    var publish_client_tag: Bool
 
     @Setting(key: "show_general_statuses", default_value: true)
     var show_general_statuses: Bool

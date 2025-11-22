@@ -441,7 +441,7 @@ struct ContentView: View {
             }
 
             Task {
-                if await !handle_post_notification(keypair: keypair, postbox: state.nostrNetwork.postbox, events: state.events, post: post) {
+                if await !handle_post_notification(keypair: keypair, postbox: state.nostrNetwork.postbox, events: state.events, post: post, clientTag: state.clientTagComponents) {
                     self.active_sheet = nil
                 }
             }
@@ -1077,13 +1077,13 @@ func handle_follow_notif(state: DamusState, target: FollowTarget) async -> Bool 
     return await handle_follow(state: state, follow: target.follow_ref)
 }
 
-func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: EventCache, post: NostrPostResult) async -> Bool {
+func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: EventCache, post: NostrPostResult, clientTag: [String]? = nil) async -> Bool {
     switch post {
     case .post(let post):
         //let post = tup.0
         //let to_relays = tup.1
         print("post \(post.content)")
-        guard let new_ev = post.to_event(keypair: keypair) else {
+        guard let new_ev = post.to_event(keypair: keypair, clientTag: clientTag) else {
             return false
         }
         await postbox.send(new_ev)

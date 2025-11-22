@@ -35,6 +35,10 @@ struct EventTop: View {
             ProfileName(is_anon: is_anon)
             TimeDot()
             RelativeTime(time: state.events.get_cache_data(event.id).relative_time, size: size, font_size: state.settings.font_size)
+            if let clientTag = event.clientTag {
+                TimeDot()
+                ClientTagLabel(clientTag: clientTag, size: size, font_size: state.settings.font_size)
+            }
             Spacer()
             if !options.contains(.no_context_menu) {
                 EventMenuContext(damus: state, event: event)
@@ -47,5 +51,18 @@ struct EventTop: View {
 struct EventTop_Previews: PreviewProvider {
     static var previews: some View {
         EventTop(state: test_damus_state, event: test_note, pubkey: test_note.pubkey, is_anon: false, size: .normal, options: [])
+    }
+}
+
+struct ClientTagLabel: View {
+    let clientTag: ClientTagMetadata
+    let size: EventViewKind
+    let font_size: Double
+
+    var body: some View {
+        Text(String(format: NSLocalizedString("via %@", comment: "Label indicating which client published the event"), clientTag.name))
+            .font(eventviewsize_to_font(size, font_size: font_size))
+            .foregroundColor(.gray)
+            .lineLimit(1)
     }
 }
