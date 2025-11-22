@@ -43,6 +43,31 @@ final class RequestTests: XCTestCase {
         XCTAssertEqual(dictionary["id"] as! String, String(repeating: "0", count: 64))
     }
 
+    func testSanitizeFilterRemovesNullIds() throws {
+        let invalid = "{\"ids\":[null,\"abc\"],\"limit\":1}"
+        guard let sanitized = sanitizeFilterJSONStringIfNeeded(invalid) else {
+            XCTFail("Expected sanitized string")
+            return
+        }
+        
+        let data = sanitized.data(using: .utf8)!
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        XCTAssertEqual(json["limit"] as? Int, 1)
+        XCTAssertEqual(json["ids"] as? [String], ["abc"])
+    }
+    
+    func testSanitizeFilterHandlesAllNullIds() throws {
+        let invalid = "{\"ids\":[null],\"limit\":1}"
+        guard let sanitized = sanitizeFilterJSONStringIfNeeded(invalid) else {
+            XCTFail("Expected sanitized string")
+            return
+        }
+        
+        let data = sanitized.data(using: .utf8)!
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        XCTAssertEqual(json["ids"] as? [String], [])
+    }
+
     /* FIXME: these tests depend on order of json fields which is undefined
     func testMakePushEvent() {
         let now = Int64(Date().timeIntervalSince1970)
