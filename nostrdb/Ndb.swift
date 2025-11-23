@@ -489,16 +489,15 @@ class Ndb {
         }
     }
 
-    /// Retrieve a profile record as an owned copy and pass it to the closure.
+    /// Retrieve a profile as an owned value and pass it to the closure.
     ///
-    /// This mirrors `withOwnedNote` for consistency: callers get a value that is
-    /// detached from the underlying transaction so it is safe to use across async work.
-    func withOwnedProfile<T>(_ pubkey: Pubkey, txn_name: String? = nil, _ body: (ProfileRecord) throws -> T) rethrows -> T? {
+    /// This returns the underlying `NdbProfile` value (not `ProfileRecord`) so callers
+    /// can safely use it across async work without holding transaction-backed memory.
+    func withOwnedProfile<T>(_ pubkey: Pubkey, txn_name: String? = nil, _ body: (NdbProfile) throws -> T) rethrows -> T? {
         guard let txn = lookup_profile(pubkey, txn_name: txn_name) else { return nil }
-        guard let profile = txn.unsafeUnownedValue else { return nil }
-        // ProfileRecord is a value type, so this local copy is detached from the transaction.
-        let ownedProfile = profile
-        return try body(ownedProfile)
+        guard let profileRecord = txn.unsafeUnownedValue else { return nil }
+        guard let profile = profileRecord.profile else { return nil }
+        return try body(profile)
     }
 
     func lookup_note_with_txn<Y>(id: NoteId, txn: NdbTxn<Y>) -> NdbNote? {
