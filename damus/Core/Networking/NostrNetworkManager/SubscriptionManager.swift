@@ -39,18 +39,22 @@ extension NostrNetworkManager {
             let timeout = timeout ?? .seconds(10)
             return AsyncStream<NdbNoteLender> { continuation in
                 let streamingTask = Task {
-                    outerLoop: for await item in self.advancedStream(filters: filters, to: desiredRelays, timeout: timeout, streamMode: streamMode, id: id) {
-                        try Task.checkCancellation()
-                        switch item {
-                        case .event(let lender):
-                            continuation.yield(lender)
-                        case .eose:
-                            break outerLoop
-                        case .ndbEose:
-                            continue
-                        case .networkEose:
-                            continue
+                    do {
+                        outerLoop: for await item in self.advancedStream(filters: filters, to: desiredRelays, timeout: timeout, streamMode: streamMode, id: id) {
+                            try Task.checkCancellation()
+                            switch item {
+                            case .event(let lender):
+                                continuation.yield(lender)
+                            case .eose:
+                                break outerLoop
+                            case .ndbEose:
+                                continue
+                            case .networkEose:
+                                continue
+                            }
                         }
+                    } catch {
+                        Self.logger.error("streamExistingEvents failed: \(error.localizedDescription, privacy: .public)")
                     }
                     continuation.finish()
                 }
@@ -66,15 +70,19 @@ extension NostrNetworkManager {
         func timedStream(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, timeout: Duration, streamMode: StreamMode? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
             return AsyncStream<NdbNoteLender> { continuation in
                 let streamingTask = Task {
-                    for await item in self.advancedStream(filters: filters, to: desiredRelays, timeout: timeout, streamMode: streamMode, id: id) {
-                        try Task.checkCancellation()
-                        switch item {
-                        case .event(lender: let lender):
-                            continuation.yield(lender)
-                        case .eose: break
-                        case .ndbEose: break
-                        case .networkEose: break
+                    do {
+                        for await item in self.advancedStream(filters: filters, to: desiredRelays, timeout: timeout, streamMode: streamMode, id: id) {
+                            try Task.checkCancellation()
+                            switch item {
+                            case .event(lender: let lender):
+                                continuation.yield(lender)
+                            case .eose: break
+                            case .ndbEose: break
+                            case .networkEose: break
+                            }
                         }
+                    } catch {
+                        Self.logger.error("timedStream failed: \(error.localizedDescription, privacy: .public)")
                     }
                     continuation.finish()
                 }
@@ -90,18 +98,22 @@ extension NostrNetworkManager {
         func streamIndefinitely(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, streamMode: StreamMode? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
             return AsyncStream<NdbNoteLender> { continuation in
                 let streamingTask = Task {
-                    for await item in self.advancedStream(filters: filters, to: desiredRelays, streamMode: streamMode, id: id) {
-                        try Task.checkCancellation()
-                        switch item {
-                        case .event(lender: let lender):
-                            continuation.yield(lender)
-                        case .eose:
-                            break
-                        case .ndbEose:
-                            break
-                        case .networkEose:
-                            break
+                    do {
+                        for await item in self.advancedStream(filters: filters, to: desiredRelays, streamMode: streamMode, id: id) {
+                            try Task.checkCancellation()
+                            switch item {
+                            case .event(lender: let lender):
+                                continuation.yield(lender)
+                            case .eose:
+                                break
+                            case .ndbEose:
+                                break
+                            case .networkEose:
+                                break
+                            }
                         }
+                    } catch {
+                        Self.logger.error("streamIndefinitely failed: \(error.localizedDescription, privacy: .public)")
                     }
                 }
                 continuation.onTermination = { @Sendable _ in
@@ -142,33 +154,37 @@ extension NostrNetworkManager {
                 let startNetworkStreamTask = {
                     guard streamMode.shouldStreamFromNetwork else { return }
                     networkStreamTask = Task {
-                        while !Task.isCancelled {
-                            let optimizedFilters = filters.map {
-                                var optimizedFilter = $0
-                                // Shift the since filter 2 minutes (120 seconds) before the last note timestamp
-                                if let latestTimestamp = latestNoteTimestampSeen {
-                                    optimizedFilter.since = latestTimestamp > 120 ? latestTimestamp - 120 : 0
+                        do {
+                            while !Task.isCancelled {
+                                let optimizedFilters = filters.map {
+                                    var optimizedFilter = $0
+                                    // Shift the since filter 2 minutes (120 seconds) before the last note timestamp
+                                    if let latestTimestamp = latestNoteTimestampSeen {
+                                        optimizedFilter.since = latestTimestamp > 120 ? latestTimestamp - 120 : 0
+                                    }
+                                    return optimizedFilter
                                 }
-                                return optimizedFilter
-                            }
-                            for await item in self.multiSessionNetworkStream(filters: optimizedFilters, to: desiredRelays, streamMode: streamMode, id: id) {
-                                try Task.checkCancellation()
-                                logStreamPipelineStats("SubscriptionManager_Network_Stream_\(id)", "SubscriptionManager_Advanced_Stream_\(id)")
-                                switch item {
-                                case .event(let lender):
-                                    logStreamPipelineStats("SubscriptionManager_Advanced_Stream_\(id)", "Consumer_\(id)")
-                                    continuation.yield(item)
-                                case .eose:
-                                    break   // Should not happen
-                                case .ndbEose:
-                                    break   // Should not happen
-                                case .networkEose:
-                                    logStreamPipelineStats("SubscriptionManager_Advanced_Stream_\(id)", "Consumer_\(id)")
-                                    continuation.yield(item)
-                                    networkEOSEIssued = true
-                                    yieldEOSEIfReady()
+                                for await item in self.multiSessionNetworkStream(filters: optimizedFilters, to: desiredRelays, streamMode: streamMode, id: id) {
+                                    try Task.checkCancellation()
+                                    logStreamPipelineStats("SubscriptionManager_Network_Stream_\(id)", "SubscriptionManager_Advanced_Stream_\(id)")
+                                    switch item {
+                                    case .event(let lender):
+                                        logStreamPipelineStats("SubscriptionManager_Advanced_Stream_\(id)", "Consumer_\(id)")
+                                        continuation.yield(item)
+                                    case .eose:
+                                        break   // Should not happen
+                                    case .ndbEose:
+                                        break   // Should not happen
+                                    case .networkEose:
+                                        logStreamPipelineStats("SubscriptionManager_Advanced_Stream_\(id)", "Consumer_\(id)")
+                                        continuation.yield(item)
+                                        networkEOSEIssued = true
+                                        yieldEOSEIfReady()
+                                    }
                                 }
                             }
+                        } catch {
+                            Self.logger.error("Network stream failed: \(error.localizedDescription, privacy: .public)")
                         }
                     }
                 }
@@ -179,36 +195,40 @@ extension NostrNetworkManager {
                 }
                 
                 let ndbStreamTask = Task {
-                    while !Task.isCancelled {
-                        for await item in self.multiSessionNdbStream(filters: filters, to: desiredRelays, streamMode: streamMode, id: id) {
-                            try Task.checkCancellation()
-                            logStreamPipelineStats("SubscriptionManager_Ndb_MultiSession_Stream_\(id)", "SubscriptionManager_Advanced_Stream_\(id)")
-                            switch item {
-                            case .event(let lender):
-                                logStreamPipelineStats("SubscriptionManager_Advanced_Stream_\(id)", "Consumer_\(id)")
-                                try? lender.borrow({ event in
-                                    if let latestTimestamp = latestNoteTimestampSeen {
-                                        latestNoteTimestampSeen = max(latestTimestamp, event.createdAt)
+                    do {
+                        while !Task.isCancelled {
+                            for await item in self.multiSessionNdbStream(filters: filters, to: desiredRelays, streamMode: streamMode, id: id) {
+                                try Task.checkCancellation()
+                                logStreamPipelineStats("SubscriptionManager_Ndb_MultiSession_Stream_\(id)", "SubscriptionManager_Advanced_Stream_\(id)")
+                                switch item {
+                                case .event(let lender):
+                                    logStreamPipelineStats("SubscriptionManager_Advanced_Stream_\(id)", "Consumer_\(id)")
+                                    try? lender.borrow({ event in
+                                        if let latestTimestamp = latestNoteTimestampSeen {
+                                            latestNoteTimestampSeen = max(latestTimestamp, event.createdAt)
+                                        }
+                                        else {
+                                            latestNoteTimestampSeen = event.createdAt
+                                        }
+                                    })
+                                    continuation.yield(item)
+                                case .eose:
+                                    break   // Should not happen
+                                case .ndbEose:
+                                    logStreamPipelineStats("SubscriptionManager_Advanced_Stream_\(id)", "Consumer_\(id)")
+                                    continuation.yield(item)
+                                    ndbEOSEIssued = true
+                                    if streamMode.optimizeNetworkFilter && streamMode.shouldStreamFromNetwork {
+                                        startNetworkStreamTask()
                                     }
-                                    else {
-                                        latestNoteTimestampSeen = event.createdAt
-                                    }
-                                })
-                                continuation.yield(item)
-                            case .eose:
-                                break   // Should not happen
-                            case .ndbEose:
-                                logStreamPipelineStats("SubscriptionManager_Advanced_Stream_\(id)", "Consumer_\(id)")
-                                continuation.yield(item)
-                                ndbEOSEIssued = true
-                                if streamMode.optimizeNetworkFilter && streamMode.shouldStreamFromNetwork {
-                                    startNetworkStreamTask()
+                                    yieldEOSEIfReady()
+                                case .networkEose:
+                                    break   // Should not happen
                                 }
-                                yieldEOSEIfReady()
-                            case .networkEose:
-                                break   // Should not happen
                             }
                         }
+                    } catch {
+                        Self.logger.error("NDB stream failed: \(error.localizedDescription, privacy: .public)")
                     }
                 }
                 
