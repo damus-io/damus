@@ -411,6 +411,16 @@ class Ndb {
         }
     }
 
+    /// Borrow a note synchronously and return the closure's result.
+    ///
+    /// The note is copied to an owned instance before the closure runs so callers
+    /// cannot accidentally rely on transaction-backed memory after this function returns.
+    func withNote<T>(_ id: NoteId, txn_name: String? = nil, _ body: (NdbNote) throws -> T) rethrows -> T? {
+        guard let txn = lookup_note(id, txn_name: txn_name) else { return nil }
+        guard let note = txn.unsafeUnownedValue else { return nil }
+        return try body(note.to_owned())
+    }
+
     private func lookup_profile_by_key_inner<Y>(_ key: ProfileKey, txn: NdbTxn<Y>) -> ProfileRecord? {
         var size: Int = 0
         guard let profile_p = ndb_get_profile_by_key(&txn.txn, key, &size) else {
@@ -468,6 +478,16 @@ class Ndb {
         return NdbTxn(ndb: self) { txn in
             lookup_profile_by_key_inner(key, txn: txn)
         }
+    }
+
+    /// Borrow a profile synchronously and return the closure's result.
+    ///
+    /// A copy is handed to the closure so the caller does not have to worry about
+    /// transaction lifetimes or unsafe unowned access.
+    func withProfile<T>(_ pubkey: Pubkey, txn_name: String? = nil, _ body: (ProfileRecord) throws -> T) rethrows -> T? {
+        guard let txn = lookup_profile(pubkey, txn_name: txn_name) else { return nil }
+        guard let profile = txn.unsafeUnownedValue else { return nil }
+        return try body(profile)
     }
 
     func lookup_note_with_txn<Y>(id: NoteId, txn: NdbTxn<Y>) -> NdbNote? {
