@@ -222,7 +222,7 @@ class EventCache {
             return ev
         }
 
-        if let ev = self.ndb.lookup_note(evid)?.unsafeUnownedValue?.to_owned() {
+        if let ev = self.ndb.withNote(evid, txn_name: "eventCache_lookup", { $0 }) {
             events[ev.id] = ev
             return ev
         }
@@ -460,4 +460,3 @@ func preload_events(state: DamusState, events: [NostrEvent]) {
         }
     }
 }
-

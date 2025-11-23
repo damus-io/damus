@@ -413,15 +413,13 @@ extension NostrNetworkManager {
             
             switch query {
             case .profile(let pubkey):
-                if let profile_txn = self.ndb.lookup_profile(pubkey),
-                   let record = profile_txn.unsafeUnownedValue,
-                   record.profile != nil
-                {
+                if let record = self.ndb.withProfile(pubkey, txn_name: "findEvent_profile", { $0 }),
+                   record.profile != nil {
                     return .profile(pubkey)
                 }
                 filter = NostrFilter(kinds: [.metadata], limit: 1, authors: [pubkey])
             case .event(let evid):
-                if let event = self.ndb.lookup_note(evid)?.unsafeUnownedValue?.to_owned() {
+                if let event = self.ndb.withNote(evid, txn_name: "findEvent_event", { $0 }) {
                     return .event(event)
                 }
                 filter = NostrFilter(ids: [evid], limit: 1)
