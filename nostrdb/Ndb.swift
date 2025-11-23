@@ -414,8 +414,9 @@ class Ndb {
     // MARK: - Owned helper APIs
     //
     // These helpers hand callers owned data and hide `NdbTxn` lifetimes to keep async
-    // code from holding transaction-backed memory across awaits. Use lower-level
-    // lookup_* functions only when you need transaction context.
+    // code from holding transaction-backed memory across awaits. Use the lower-level
+    // lookup_* functions only when you explicitly need transaction context and can
+    // keep the work synchronous. Owned helpers prioritize safety over avoiding copies.
 
     /// Retrieve a note as an owned copy and pass it to the closure.
     ///
@@ -495,6 +496,7 @@ class Ndb {
     func withOwnedProfile<T>(_ pubkey: Pubkey, txn_name: String? = nil, _ body: (ProfileRecord) throws -> T) rethrows -> T? {
         guard let txn = lookup_profile(pubkey, txn_name: txn_name) else { return nil }
         guard let profile = txn.unsafeUnownedValue else { return nil }
+        // ProfileRecord is a value type, so this local copy is detached from the transaction.
         let ownedProfile = profile
         return try body(ownedProfile)
     }
