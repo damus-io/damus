@@ -609,6 +609,7 @@ struct ContentView: View {
                     }
                     
                     ds.mutelist_manager.set_mutelist(mutelist)
+                    ds.settings.latest_mutelist_event_id_hex = mutelist.id.hex()
                     await ds.nostrNetwork.postbox.send(mutelist)
                     
                     confirm_overwrite_mutelist = false
@@ -629,6 +630,10 @@ struct ContentView: View {
                 }
 
                 if ds.mutelist_manager.event == nil {
+                    home.load_latest_mutelist_event_from_damus_state()
+                }
+
+                if ds.mutelist_manager.event == nil {
                     confirm_overwrite_mutelist = true
                 } else {
                     guard let keypair = ds.keypair.to_full(),
@@ -642,6 +647,7 @@ struct ContentView: View {
                     }
 
                     ds.mutelist_manager.set_mutelist(ev)
+                    ds.settings.latest_mutelist_event_id_hex = ev.id.hex()
                     Task { await ds.nostrNetwork.postbox.send(ev) }
                 }
             }
