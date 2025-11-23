@@ -222,7 +222,7 @@ class EventCache {
             return ev
         }
 
-        if let ev = self.ndb.withNote(evid, txn_name: "eventCache_lookup", { $0 }) {
+        if let ev = self.ndb.withOwnedNote(evid, txn_name: "eventCache_lookup", { $0 }) {
             events[ev.id] = ev
             return ev
         }
