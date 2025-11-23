@@ -411,14 +411,22 @@ class Ndb {
         }
     }
 
-    /// Borrow a note synchronously and return the closure's result.
+    // MARK: - Owned helper APIs
+    //
+    // These helpers hand callers owned data and hide `NdbTxn` lifetimes to keep async
+    // code from holding transaction-backed memory across awaits. Use lower-level
+    // lookup_* functions only when you need transaction context.
+
+    /// Retrieve a note as an owned copy and pass it to the closure.
     ///
-    /// The note is copied to an owned instance before the closure runs so callers
-    /// cannot accidentally rely on transaction-backed memory after this function returns.
-    func withNote<T>(_ id: NoteId, txn_name: String? = nil, _ body: (NdbNote) throws -> T) rethrows -> T? {
+    /// Use this for async-safe access when you do not want to expose `NdbTxn` lifetimes
+    /// to callers. The owned copy avoids holding transaction-backed memory across awaits.
+    /// Prefer lower-level lookup APIs only when you explicitly need transaction context.
+    func withOwnedNote<T>(_ id: NoteId, txn_name: String? = nil, _ body: (NdbNote) throws -> T) rethrows -> T? {
         guard let txn = lookup_note(id, txn_name: txn_name) else { return nil }
         guard let note = txn.unsafeUnownedValue else { return nil }
-        return try body(note.to_owned())
+        let ownedNote = note.to_owned()
+        return try body(ownedNote)
     }
 
     private func lookup_profile_by_key_inner<Y>(_ key: ProfileKey, txn: NdbTxn<Y>) -> ProfileRecord? {
@@ -480,14 +488,15 @@ class Ndb {
         }
     }
 
-    /// Borrow a profile synchronously and return the closure's result.
+    /// Retrieve a profile record as an owned copy and pass it to the closure.
     ///
-    /// A copy is handed to the closure so the caller does not have to worry about
-    /// transaction lifetimes or unsafe unowned access.
-    func withProfile<T>(_ pubkey: Pubkey, txn_name: String? = nil, _ body: (ProfileRecord) throws -> T) rethrows -> T? {
+    /// This mirrors `withOwnedNote` for consistency: callers get a value that is
+    /// detached from the underlying transaction so it is safe to use across async work.
+    func withOwnedProfile<T>(_ pubkey: Pubkey, txn_name: String? = nil, _ body: (ProfileRecord) throws -> T) rethrows -> T? {
         guard let txn = lookup_profile(pubkey, txn_name: txn_name) else { return nil }
         guard let profile = txn.unsafeUnownedValue else { return nil }
-        return try body(profile)
+        let ownedProfile = profile
+        return try body(ownedProfile)
     }
 
     func lookup_note_with_txn<Y>(id: NoteId, txn: NdbTxn<Y>) -> NdbNote? {
