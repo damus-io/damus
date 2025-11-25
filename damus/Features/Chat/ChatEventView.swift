@@ -36,8 +36,23 @@ struct ChatEventView: View {
     @State var selected_emoji: Emoji?
 
     @State private var isOnTopHalfOfScreen: Bool = false
-    @ObservedObject var bar: ActionBarModel
+    @StateObject private var bar: ActionBarModel
     @Environment(\.swipeViewGroupSelection) var swipeViewGroupSelection
+    
+    init(event: NostrEvent, selected_event: NostrEvent, prev_ev: NostrEvent?, next_ev: NostrEvent?, damus_state: DamusState, thread: ThreadModel, scroll_to_event: ((_ id: NoteId) -> Void)?, focus_event: (() -> Void)?, highlight_bubble: Bool) {
+        self.event = event
+        self.selected_event = selected_event
+        self.prev_ev = prev_ev
+        self.next_ev = next_ev
+        self.damus_state = damus_state
+        self.thread = thread
+        self.scroll_to_event = scroll_to_event
+        self.focus_event = focus_event
+        self.highlight_bubble = highlight_bubble
+        
+        // Initialize @StateObject using wrappedValue
+        _bar = StateObject(wrappedValue: make_actionbar_model(ev: event.id, damus: damus_state))
+    }
     
     enum PopoverState: String {
         case closed
@@ -340,21 +355,17 @@ struct ChatEventView: View {
 }
 
 #Preview {
-    let bar = make_actionbar_model(ev: test_note.id, damus: test_damus_state)
-    return ChatEventView(event: test_note, selected_event: test_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, focus_event: nil, highlight_bubble: false, bar: bar)
+    return ChatEventView(event: test_note, selected_event: test_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, focus_event: nil, highlight_bubble: false)
 }
 
 #Preview {
-    let bar = make_actionbar_model(ev: test_note.id, damus: test_damus_state)
-    return ChatEventView(event: test_short_note, selected_event: test_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, focus_event: nil, highlight_bubble: false, bar: bar)
+    return ChatEventView(event: test_short_note, selected_event: test_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, focus_event: nil, highlight_bubble: false)
 }
 
 #Preview {
-    let bar = make_actionbar_model(ev: test_note.id, damus: test_damus_state)
-    return ChatEventView(event: test_short_note, selected_event: test_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, focus_event: nil, highlight_bubble: true, bar: bar)
+    return ChatEventView(event: test_short_note, selected_event: test_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, focus_event: nil, highlight_bubble: true)
 }
 
 #Preview {
-    let bar = make_actionbar_model(ev: test_note.id, damus: test_damus_state)
-    return ChatEventView(event: test_super_short_note, selected_event: test_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, focus_event: nil, highlight_bubble: false, bar: bar)
+    return ChatEventView(event: test_super_short_note, selected_event: test_note, prev_ev: nil, next_ev: nil, damus_state: test_damus_state, thread: ThreadModel(event: test_note, damus_state: test_damus_state), scroll_to_event: nil, focus_event: nil, highlight_bubble: false)
 }
