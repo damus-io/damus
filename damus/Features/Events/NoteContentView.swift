@@ -313,11 +313,11 @@ struct NoteContentView: View {
         guard !toFetch.isEmpty else { return }
 
         // Kick off metadata fetches for any missing mention profiles so their names can render once loaded.
-        Task {
-            for pubkey in toFetch {
-                let result = await damus_state.nostrNetwork.reader.findEvent(query: .profile(pubkey: pubkey))
-                if case .profile = result {
-                    notify(.profile_updated(.remote(pubkey: pubkey)))
+        for pubkey in toFetch {
+            Task {
+                for await _ in await damus_state.nostrNetwork.profilesManager.streamProfile(pubkey: pubkey) {
+                    // NO-OP, we will receive the update via `notify`
+                    break
                 }
             }
         }
