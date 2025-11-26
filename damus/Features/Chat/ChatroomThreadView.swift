@@ -64,8 +64,7 @@ struct ChatroomThreadView: View {
                               focus_event: {
                     self.set_active_event(scroller: scroller, ev: ev)
                 },
-                              highlight_bubble: highlighted_note_id == ev.id,
-                              bar: make_actionbar_model(ev: ev.id, damus: damus)
+                              highlight_bubble: highlighted_note_id == ev.id
                 )
                 .id(ev.id)
                 .matchedGeometryEffect(id: ev.id.hex(), in: animation, anchor: .center)
