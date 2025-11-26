@@ -278,18 +278,35 @@ struct NoteContentView: View {
         guard let blockGroup = try? NdbBlockGroup.from(event: event, using: damus_state.ndb, and: damus_state.keypair) else {
             return
         }
+        
+        func mentionPubkey(for block: borrowing NdbBlock) -> Pubkey? {
+            switch block {
+            case .mention(let mentionBlock):
+                guard let mention = MentionRef(block: mentionBlock) else {
+                    return nil
+                }
+                return mention.pubkey
+            case .mention_index(let mentionIndex):
+                let tags = event.tags
+                let tagPosition = Int(mentionIndex)
+                guard tagPosition >= 0, tagPosition < Int(tags.count) else {
+                    return nil
+                }
+                guard let mention = MentionRef.from_tag(tag: tags[tagPosition]) else {
+                    return nil
+                }
+                return mention.pubkey
+            default:
+                return nil
+            }
+        }
 
         var mentionPubkeys: Set<Pubkey> = []
         let _: ()? = try? blockGroup.forEachBlock({ _, block in
-            switch block {
-            case .mention(let mentionBlock):
-                if let mention = MentionRef(block: mentionBlock),
-                   let pubkey = mention.pubkey {
-                    mentionPubkeys.insert(pubkey)
-                }
-            default:
-                break
+            guard let pubkey = mentionPubkey(for: block) else {
+                return .loopContinue
             }
+            mentionPubkeys.insert(pubkey)
             return .loopContinue
         })
 
