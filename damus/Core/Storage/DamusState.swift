@@ -8,6 +8,7 @@
 import Foundation
 import LinkPresentation
 import EmojiPicker
+import UIKit
 
 class DamusState: HeadlessDamusState, ObservableObject {
     let keypair: Keypair
@@ -38,6 +39,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
     var push_notification_client: PushNotificationClient
     let emoji_provider: EmojiProvider
     let favicon_cache: FaviconCache
+    let batteryOptimizer: BatteryOptimizationController
     private(set) var nostrNetwork: NostrNetworkManager
 
     init(keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, contactCards: ContactCard, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: DamusVideoCoordinator, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider, favicon_cache: FaviconCache, addNdbToRelayPool: Bool = true) {
@@ -72,9 +74,10 @@ class DamusState: HeadlessDamusState, ObservableObject {
         self.push_notification_client = PushNotificationClient(keypair: keypair, settings: settings)
         self.emoji_provider = emoji_provider
         self.favicon_cache = FaviconCache()
+        self.batteryOptimizer = BatteryOptimizationController(device: UIDevice.current)
 
         let networkManagerDelegate = NostrNetworkManagerDelegate(settings: settings, contacts: contacts, ndb: ndb, keypair: keypair, relayModelCache: relay_model_cache, relayFilters: relay_filters)
-        let nostrNetwork = NostrNetworkManager(delegate: networkManagerDelegate, addNdbToRelayPool: addNdbToRelayPool)
+        let nostrNetwork = NostrNetworkManager(delegate: networkManagerDelegate, batteryOptimizer: batteryOptimizer, addNdbToRelayPool: addNdbToRelayPool)
         self.nostrNetwork = nostrNetwork
         self.wallet.nostrNetwork = nostrNetwork
     }

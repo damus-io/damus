@@ -4,6 +4,7 @@
 //
 //  Created by Daniel D’Aquino on 2025-02-26.
 //
+import Combine
 import Foundation
 
 /// Manages interactions with the Nostr Network.
@@ -27,6 +28,8 @@ class NostrNetworkManager {
     private let pool: RelayPool // TODO: Make this private and make higher level interface for classes outside the NostrNetworkManager
     /// A delegate that allows us to interact with the rest of app without introducing hard or circular dependencies
     private var delegate: Delegate
+    private let batteryOptimizer: BatteryOptimizationController
+    private var cancellables: Set<AnyCancellable> = []
     /// Manages the user's relay list, controls RelayPool's connected relays
     let userRelayList: UserRelayListManager
     /// Handles sending out notes to the network
@@ -35,8 +38,9 @@ class NostrNetworkManager {
     let reader: SubscriptionManager
     let profilesManager: ProfilesManager
     
-    init(delegate: Delegate, addNdbToRelayPool: Bool = true) {
+    init(delegate: Delegate, batteryOptimizer: BatteryOptimizationController, addNdbToRelayPool: Bool = true) {
         self.delegate = delegate
+        self.batteryOptimizer = batteryOptimizer
         let pool = RelayPool(ndb: addNdbToRelayPool ? delegate.ndb : nil, keypair: delegate.keypair)
         self.pool = pool
         let reader = SubscriptionManager(pool: pool, ndb: delegate.ndb, experimentalLocalRelayModelSupport: self.delegate.experimentalLocalRelayModelSupport)
@@ -45,6 +49,8 @@ class NostrNetworkManager {
         self.userRelayList = userRelayList
         self.postbox = PostBox(pool: pool)
         self.profilesManager = ProfilesManager(subscriptionManager: reader, ndb: delegate.ndb)
+        
+        Task { await self.observeBatteryConfiguration() }
     }
     
     // MARK: - Control and lifecycle functions
@@ -164,6 +170,36 @@ class NostrNetworkManager {
     }
 }
 
+private extension NostrNetworkManager {
+    @MainActor
+    func observeBatteryConfiguration() {
+        Task {
+            let initialConfiguration = await MainActor.run { batteryOptimizer.configuration }
+            self.applyBatteryConfiguration(initialConfiguration)
+        }
+        batteryOptimizer.$configuration
+            .receive(on: RunLoop.main)
+            .sink { [weak self] configuration in
+                Task { @MainActor [weak self] in
+                    guard let self else { return }
+                    await self.applyBatteryConfiguration(configuration)
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    @MainActor
+    func applyBatteryConfiguration(_ configuration: BatteryOptimizationController.Configuration) {
+        Task {
+            await self.pool.updateMaxConcurrentSubscriptions(configuration.maxConcurrentSubscriptions)
+        }
+        self.reader.updateBatteryConfiguration(
+            preference: configuration.streamPreference,
+            scanRestInterval: configuration.scanRestInterval,
+            eoseTimeout: configuration.eoseTimeout
+        )
+    }
+}
 
 // MARK: - Helper types
 
