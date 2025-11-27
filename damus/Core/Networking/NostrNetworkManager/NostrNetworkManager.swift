@@ -28,7 +28,7 @@ class NostrNetworkManager {
     private let pool: RelayPool // TODO: Make this private and make higher level interface for classes outside the NostrNetworkManager
     /// A delegate that allows us to interact with the rest of app without introducing hard or circular dependencies
     private var delegate: Delegate
-    private let batteryOptimizer: BatteryOptimizationController
+    private let batteryOptimizer: BatteryOptimizationController?
     private var cancellables: Set<AnyCancellable> = []
     /// Manages the user's relay list, controls RelayPool's connected relays
     let userRelayList: UserRelayListManager
@@ -38,7 +38,7 @@ class NostrNetworkManager {
     let reader: SubscriptionManager
     let profilesManager: ProfilesManager
     
-    init(delegate: Delegate, batteryOptimizer: BatteryOptimizationController, addNdbToRelayPool: Bool = true) {
+    init(delegate: Delegate, batteryOptimizer: BatteryOptimizationController?, addNdbToRelayPool: Bool = true) {
         self.delegate = delegate
         self.batteryOptimizer = batteryOptimizer
         let pool = RelayPool(ndb: addNdbToRelayPool ? delegate.ndb : nil, keypair: delegate.keypair)
@@ -173,10 +173,8 @@ class NostrNetworkManager {
 private extension NostrNetworkManager {
     @MainActor
     func observeBatteryConfiguration() {
-        Task {
-            let initialConfiguration = await MainActor.run { batteryOptimizer.configuration }
-            self.applyBatteryConfiguration(initialConfiguration)
-        }
+        guard let batteryOptimizer else { return }
+        applyBatteryConfiguration(batteryOptimizer.configuration)
         batteryOptimizer.$configuration
             .receive(on: RunLoop.main)
             .sink { [weak self] configuration in

@@ -365,6 +365,10 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "labs_experiment_favorites", default_value: false)
     var enable_favourites_feature: Bool
     
+    /// Enables the adaptive battery optimization experiment (Damus Labs)
+    @Setting(key: "labs_experiment_adaptive_battery", default_value: false)
+    var enable_adaptive_battery_optimization: Bool
+    
     // MARK: Internal, hidden settings
     
     // TODO: Get rid of this once we have NostrDB query capabilities integrated

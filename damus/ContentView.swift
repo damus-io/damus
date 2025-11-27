@@ -524,7 +524,7 @@ struct ContentView: View {
         }
         .onChange(of: scenePhase) { (phase: ScenePhase) in
             guard let damus_state else { return }
-            damus_state.batteryOptimizer.setAppBackgrounded(phase == .background)
+            damus_state.batteryOptimizer?.setAppBackgrounded(phase == .background)
             switch phase {
             case .background:
                 print("txn: 📙 DAMUS BACKGROUNDED")
