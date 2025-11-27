@@ -93,6 +93,17 @@ class Profiles {
         return txn.map({ pr in pr?.profile })
     }
 
+    /// Returns an owned copy of the latest profile metadata for callers that must avoid keeping an `NdbTxn` alive.
+    func snapshot(id: Pubkey, txn_name: String? = nil) -> Profile? {
+        guard let txn = ndb.lookup_profile(id, txn_name: txn_name),
+              let record = txn.unsafeUnownedValue,
+              let profile = record.profile
+        else {
+            return nil
+        }
+        return profile.ownedCopy()
+    }
+
     func lookup_key_by_pubkey(_ pubkey: Pubkey) -> ProfileKey? {
         ndb.lookup_profile_key(pubkey)
     }

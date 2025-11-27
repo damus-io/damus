@@ -57,6 +57,24 @@ extension NdbProfile {
         return displayName
     }
 
+    /// Make an owned copy backed by a new FlatBuffer so it can safely outlive the source transaction.
+    func ownedCopy() -> NdbProfile {
+        let donationV2 = self.damusDonationV2 == 0 ? nil : Int(self.damusDonationV2)
+        return NdbProfile(
+            name: self.name,
+            display_name: self.displayName,
+            about: self.about,
+            picture: self.picture,
+            banner: self.banner,
+            website: self.website,
+            lud06: self.lud06,
+            lud16: self.lud16,
+            nip05: self.nip05,
+            damus_donation: donationV2,
+            reactions: self.reactions
+        )
+    }
+
     static func displayName(profile: Profile?, pubkey: Pubkey) -> DisplayName {
         return DisplayName(name: profile?.name, display_name: profile?.display_name, pubkey: pubkey)
     }
