@@ -90,7 +90,11 @@ class Profiles {
         guard let txn = ndb.lookup_profile(id, txn_name: txn_name) else {
             return nil
         }
-        return txn.map({ pr in pr?.profile })
+        guard let record = txn.unsafeUnownedValue else {
+            return NdbTxn<Profile?>.pure(ndb: ndb, val: nil)
+        }
+        let ownedProfile = record.profile?.ownedCopy()
+        return NdbTxn<Profile?>.pure(ndb: ndb, val: ownedProfile)
     }
 
     func lookup_key_by_pubkey(_ pubkey: Pubkey) -> ProfileKey? {
