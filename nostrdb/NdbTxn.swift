@@ -43,16 +43,18 @@ class NdbTxn<T>: RawNdbTxnAccessible {
             let new_ref_count = ref_count + 1
             Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
         } else {
-            self.txn = ndb_txn()
             guard !ndb.is_closed else { return nil }
-            self.generation = ndb.generation
-            #if TXNDEBUG
-            txn_count += 1
-            #endif
-            let ok = ndb_begin_query(ndb.ndb.ndb, &self.txn) != 0
-            if !ok {
-                return nil
-            }
+            let txn: ndb_txn? = try? ndb.ndbAccessLock.keepNdbOpen(during: {
+                var txn = ndb_txn()
+                #if TXNDEBUG
+                txn_count += 1
+                #endif
+                let ok = ndb_begin_query(ndb.ndb.ndb, &txn) != 0
+                guard ok else { return nil }
+                return txn
+            }, maxWaitTimeout: .milliseconds(200))
+            guard let txn else { return nil }
+            self.txn = txn
             self.generation = ndb.generation
             Thread.current.threadDictionary["ndb_txn"] = self.txn
             Thread.current.threadDictionary["ndb_txn_ref_count"] = 1
@@ -97,7 +99,13 @@ class NdbTxn<T>: RawNdbTxnAccessible {
             Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
             assert(new_ref_count >= 0, "NdbTxn reference count should never be below zero")
             if new_ref_count <= 0 {
-                ndb_end_query(&self.txn)
+                _ = try? ndb.ndbAccessLock.keepNdbOpen(during: {
+                    // Check again to avoid TOCTOU race conditions where the ndb may have upgraded generations in the meantime
+                    if self.generation != self.ndb.generation { return }
+                    if self.ndb.is_closed { return }
+                    
+                    ndb_end_query(&self.txn)
+                }, maxWaitTimeout: .milliseconds(200))
                 Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")
                 Thread.current.threadDictionary.removeObject(forKey: "ndb_txn_ref_count")
             }
