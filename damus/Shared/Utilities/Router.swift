@@ -19,6 +19,7 @@ enum Route: Hashable {
     case RelayConfig
     case Script(script: ScriptModel)
     case Bookmarks
+    case Outbox
     case Config
     case EditMetadata
     case DMChat(dms: DirectMessageModel)
@@ -74,6 +75,8 @@ enum Route: Hashable {
             RelayConfigView(state: damusState)
         case .Bookmarks:
             BookmarksView(state: damusState)
+        case .Outbox:
+            OutboxView(store: damusState.pendingPostStore, postbox: damusState.nostrNetwork.postbox, damusState: damusState)
         case .Config:
             ConfigView(state: damusState)
         case .EditMetadata:
@@ -175,6 +178,8 @@ enum Route: Hashable {
             hasher.combine("relayConfig")
         case .Bookmarks:
             hasher.combine("bookmarks")
+        case .Outbox:
+            hasher.combine("outbox")
         case .Config:
             hasher.combine("config")
         case .EditMetadata:
@@ -206,7 +211,7 @@ enum Route: Hashable {
             hasher.combine("firstAidSettings")
         case .Thread(let threadModel):
             hasher.combine("thread")
-            hasher.combine(threadModel.original_event.id)
+            hasher.combine(threadModel.routeIdentifier)
         case .LoadableNostrEvent(note_reference: let note_reference):
             hasher.combine("loadable_nostr_event")
             hasher.combine(note_reference)
@@ -241,7 +246,7 @@ enum Route: Hashable {
             hasher.combine("wallet")
         case .WalletScanner:
             hasher.combine("walletScanner")
-        case .FollowersYouKnow(let friendedFollowers, let followers):
+        case .FollowersYouKnow(let friendedFollowers, _):
             hasher.combine("followersYouKnow")
             hasher.combine(friendedFollowers)
         case .Script(let model):
@@ -253,12 +258,12 @@ enum Route: Hashable {
         case .NIP05DomainPubkeys(let domain, _, _):
             hasher.combine("nip05DomainPubkeys")
             hasher.combine(domain)
-        case .FollowPack(let followPack, let followPackModel, let blur_imgs):
+        case .FollowPack(let followPack, _, _):
             hasher.combine("followPack")
             hasher.combine(followPack.id)
-        case .LiveEvents(let model):
+        case .LiveEvents:
             hasher.combine("liveEvents")
-        case .LiveEvent(let liveEvent, let liveEventModel):
+        case .LiveEvent(let liveEvent, _):
             hasher.combine("liveEvent")
             hasher.combine(liveEvent.id)
         }

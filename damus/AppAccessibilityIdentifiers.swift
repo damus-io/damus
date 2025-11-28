@@ -64,6 +64,9 @@ enum AppAccessibilityIdentifiers: String {
     /// The cancel post button
     case post_composer_cancel_button
     
+    /// Floating button to start composing a new post
+    case compose_post_button
+    
     // MARK: Main interface layout
     // Prefix: `main`
     

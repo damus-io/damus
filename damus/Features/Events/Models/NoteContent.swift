@@ -327,8 +327,9 @@ func attributed_string_attach_icon(_ astr: inout AttributedString, img: UIImage)
 }
 
 func getDisplayName(pk: Pubkey, profiles: Profiles) -> String {
-    let profile_txn = profiles.lookup(id: pk, txn_name: "getDisplayName")
-    let profile = profile_txn?.unsafeUnownedValue
+    // Snapshot the profile so SwiftUI renderers never retain a live database transaction while
+    // we compute strings across async frames.
+    let profile = profiles.snapshot(id: pk, txn_name: "getDisplayName")
     return Profile.displayName(profile: profile, pubkey: pk).username.truncate(maxLength: 50)
 }
 

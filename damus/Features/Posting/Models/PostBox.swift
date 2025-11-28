@@ -34,6 +34,7 @@ class PostedEvent {
     let flush_after: Date?
     var flushed_once: Bool
     let on_flush: OnFlush?
+    var acknowledged: Bool = false
 
     init(event: NostrEvent, remaining: [RelayURL], skip_ephemeral: Bool, flush_after: Date?, on_flush: OnFlush?) {
         self.event = event
@@ -55,10 +56,12 @@ enum CancelSendErr {
 
 class PostBox {
     private let pool: RelayPool
+    private let pendingStore: PendingPostStore?
     var events: [NoteId: PostedEvent]
 
-    init(pool: RelayPool) {
+    init(pool: RelayPool, pendingStore: PendingPostStore? = nil) {
         self.pool = pool
+        self.pendingStore = pendingStore
         self.events = [:]
         Task {
             let stream = AsyncStream<(RelayURL, NostrConnectionEvent)> { streamContinuation in
@@ -67,6 +70,9 @@ class PostBox {
             for await (relayUrl, connectionEvent) in stream {
                 handle_event(relay_id: relayUrl, connectionEvent)
             }
+        }
+        Task {
+            await restorePendingPosts()
         }
     }
     
@@ -141,6 +147,13 @@ class PostBox {
         let prev_count = ev.remaining.count
         ev.remaining = ev.remaining.filter { $0.relay != relay_id }
         let after_count = ev.remaining.count
+        if !ev.acknowledged && prev_count != after_count {
+            ev.acknowledged = true
+            if let pendingStore {
+                Task { await pendingStore.markSent(event_id) }
+            }
+        }
+
         if ev.remaining.count == 0 {
             self.events.removeValue(forKey: event_id)
         }
@@ -166,7 +179,7 @@ class PostBox {
         }
     }
 
-    func send(_ event: NostrEvent, to: [RelayURL]? = nil, skip_ephemeral: Bool = true, delay: TimeInterval? = nil, on_flush: OnFlush? = nil) async {
+    func send(_ event: NostrEvent, to: [RelayURL]? = nil, skip_ephemeral: Bool = true, delay: TimeInterval? = nil, on_flush: OnFlush? = nil, trackPending: Bool = true) async {
         // Don't add event if we already have it
         if events[event.id] != nil {
             return
@@ -183,11 +196,27 @@ class PostBox {
         let posted_ev = PostedEvent(event: event, remaining: remaining, skip_ephemeral: skip_ephemeral, flush_after: after, on_flush: on_flush)
 
         events[event.id] = posted_ev
+        if trackPending, let pendingStore {
+            await pendingStore.track(event: event)
+        }
         
         if after == nil {
             await flush_event(posted_ev)
         }
     }
+
+    func dropPending(noteId: NoteId) {
+        events.removeValue(forKey: noteId)
+        if let pendingStore {
+            Task { await pendingStore.remove(noteId) }
+        }
+    }
+    
+    private func restorePendingPosts() async {
+        guard let pendingStore else { return }
+        let events = await pendingStore.pendingEvents()
+        for event in events {
+            await send(event, skip_ephemeral: true, trackPending: false)
+        }
+    }
 }
-
-

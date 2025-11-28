@@ -161,6 +161,10 @@ struct ContentView: View {
         }
     }
     
+    var showFloatingOfflineIndicator: Bool {
+        shouldShowFloatingOfflineIndicator(timeline: selected_timeline, signal: home.signal, headerOffset: headerOffset)
+    }
+    
     func MainContent(damus: DamusState) -> some View {
         VStack {
             switch selected_timeline {
@@ -197,6 +201,7 @@ struct ContentView: View {
             }
         }
         .onAppear {
+            applyUITestOfflineStateIfNeeded(signal: home.signal)
             notify(.display_tabbar(true))
         }
     }
@@ -274,10 +279,20 @@ struct ContentView: View {
                         navigationCoordinator.popToRoot()
                     }
                 }
+                .environment(\.connectivitySignal, home.signal)
                 .navigationViewStyle(.stack)
                 .damus_full_screen_cover($active_full_screen_item, damus_state: damus, content: { item in
                     return item.view(damus_state: damus)
                 })
+                .overlay(alignment: .topTrailing) {
+                    if showFloatingOfflineIndicator {
+                        FloatingOfflineIndicator()
+                            .padding(.trailing, 16)
+                            .padding(.top, getSafeAreaTop() + 8)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                            .allowsHitTesting(false)
+                    }
+                }
                 .overlay(alignment: .bottom) {
                     if !hide_bar {
                         if !isSideBarOpened {
@@ -325,6 +340,7 @@ struct ContentView: View {
                 MaybeReportView(target: target)
             case .post(let action):
                 PostView(action: action, damus_state: damus_state!)
+                    .environment(\.connectivitySignal, home.signal)
             case .user_status:
                 UserStatusSheet(damus_state: damus_state!, postbox: damus_state!.nostrNetwork.postbox, keypair: damus_state!.keypair, status: damus_state!.profiles.profile_data(damus_state!.pubkey).status)
                     .presentationDragIndicator(.visible)
@@ -1142,6 +1158,23 @@ extension LossyLocalNotification {
             return .route(.Script(script: ScriptModel(data: script, state: .not_loaded)))
         }
     }
+}
+
+func shouldShowFloatingOfflineIndicator(timeline: Timeline, signal: SignalModel, headerOffset: CGFloat) -> Bool {
+    guard timeline == .home else { return false }
+    guard signal.isOffline else { return false }
+    return headerOffset < -20
+}
+
+func applyUITestOfflineStateIfNeeded(signal: SignalModel) {
+#if DEBUG
+    guard ProcessInfo.processInfo.arguments.contains("--ui-testing-offline") else { return }
+    DispatchQueue.main.async {
+        signal.max_signal = max(signal.max_signal, 1)
+        signal.signal = 0
+        signal.isNetworkReachable = false
+    }
+#endif
 }
 
 
