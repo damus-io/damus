@@ -32,6 +32,7 @@ func PostButton(action: @escaping () -> ()) -> some View {
         }
     })
     .keyboardShortcut("n", modifiers: [.command, .shift])
+    .accessibilityIdentifier(AppAccessibilityIdentifiers.compose_post_button.rawValue)
 }
 
 func PostButtonContainer(is_left_handed: Bool, action: @escaping () -> Void) -> some View {

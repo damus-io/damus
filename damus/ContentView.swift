@@ -201,6 +201,7 @@ struct ContentView: View {
             }
         }
         .onAppear {
+            applyUITestOfflineStateIfNeeded(signal: home.signal)
             notify(.display_tabbar(true))
         }
     }
@@ -1163,6 +1164,17 @@ func shouldShowFloatingOfflineIndicator(timeline: Timeline, signal: SignalModel,
     guard timeline == .home else { return false }
     guard signal.isOffline else { return false }
     return headerOffset < -20
+}
+
+func applyUITestOfflineStateIfNeeded(signal: SignalModel) {
+#if DEBUG
+    guard ProcessInfo.processInfo.arguments.contains("--ui-testing-offline") else { return }
+    DispatchQueue.main.async {
+        signal.max_signal = max(signal.max_signal, 1)
+        signal.signal = 0
+        signal.isNetworkReachable = false
+    }
+#endif
 }
 
 

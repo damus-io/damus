@@ -9,21 +9,17 @@ import XCTest
 
 class damusUITests: XCTestCase {
     var app = XCUIApplication()
+    var baseLaunchArguments: [String] = []
     typealias AID = AppAccessibilityIdentifiers
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
-        self.app = XCUIApplication()
-
         // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
 
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
-        
         // Set app language to English
-        app.launchArguments += ["-AppleLanguages", "(en)"]
-        app.launchArguments += ["-AppleLocale", "en_US"]
-        
+        baseLaunchArguments = ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
+
         // Force portrait orientation
         XCUIDevice.shared.orientation = .portrait
         
@@ -31,12 +27,21 @@ class damusUITests: XCTestCase {
         addTeardownBlock {
             XCUIDevice.shared.orientation = .portrait
         }
-        
-        app.launch()
+
+        launchApp()
     }
 
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
+    }
+
+    func launchApp(extraArgs: [String] = []) {
+        app.terminate()
+        app = XCUIApplication()
+        var args = baseLaunchArguments
+        args.append(contentsOf: extraArgs)
+        app.launchArguments = args
+        app.launch()
     }
 
     /// Tests if banner edit button is clickable.
@@ -177,6 +182,20 @@ class damusUITests: XCTestCase {
         app.buttons[AID.onboarding_content_settings_page_next_page.rawValue].tapIfExists(timeout: 5)
         app.buttons[AID.onboarding_sheet_skip_button.rawValue].tapIfExists(timeout: 5)
         app.buttons[AID.post_composer_cancel_button.rawValue].tapIfExists(timeout: 5)
+    }
+
+    func testOfflineComposerShowsIndicator() throws {
+        launchApp(extraArgs: ["--ui-testing-offline"])
+        try loginIfNotAlready()
+        
+        guard app.buttons[AID.compose_post_button.rawValue].waitForExistence(timeout: 10) else {
+            throw DamusUITestError.timeout_waiting_for_element
+        }
+        app.buttons[AID.compose_post_button.rawValue].tap()
+        
+        guard app.otherElements["offline-compose-pill"].waitForExistence(timeout: 5) else {
+            throw DamusUITestError.timeout_waiting_for_element
+        }
     }
     
     func login() throws {
