@@ -218,6 +218,23 @@ final class PostViewTests: XCTestCase {
         // then
         XCTAssertEqual(post.content, "nostr:\(test_pubkey.npub)")
     }
+
+    func testToEventAddsClientTagWhenProvided() {
+        let post = NostrPost(content: "gm")
+        let clientTag = ["client", "Damus"]
+        let event = post.to_event(keypair: test_keypair_full, clientTag: clientTag)
+        XCTAssertTrue(event?.tags.contains(where: { $0 == clientTag }) ?? false)
+    }
+
+    func testToEventDoesNotDuplicateExistingClientTag() {
+        let existingTags = [["client", "Custom"]]
+        let post = NostrPost(content: "gm", tags: existingTags)
+        let clientTag = ["client", "Damus"]
+        let event = post.to_event(keypair: test_keypair_full, clientTag: clientTag)
+        let clientTagCount = event?.tags.filter { $0.first == "client" }.count
+        XCTAssertEqual(clientTagCount, 1)
+        XCTAssertEqual(event?.tags.first(where: { $0.first == "client" }), existingTags.first)
+    }
 }
 
 func checkMentionLinkEditorHandling(
@@ -253,5 +270,4 @@ func testAddingStringAfterLink(str: String) {
         XCTAssertNil(newManuallyEditedContent.attribute(.link, at: 11, effectiveRange: nil))
     })
 }
-
 

@@ -202,6 +202,9 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "auto_translate", default_value: true)
     var auto_translate: Bool
+    
+    @Setting(key: "publish_client_tag", default_value: true)
+    var publish_client_tag: Bool
 
     @Setting(key: "show_general_statuses", default_value: true)
     var show_general_statuses: Bool
@@ -364,6 +367,10 @@ class UserSettingsStore: ObservableObject {
     /// Whether the app should show the Favourites feature (Damus Labs)
     @Setting(key: "labs_experiment_favorites", default_value: false)
     var enable_favourites_feature: Bool
+    
+    /// Whether the app should show nostr client tags under posts (Damus Labs)
+    @Setting(key: "labs_experiment_client_tags", default_value: false)
+    var enable_client_tag_labels: Bool
     
     // MARK: Internal, hidden settings
     

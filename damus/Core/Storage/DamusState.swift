@@ -162,6 +162,13 @@ class DamusState: HeadlessDamusState, ObservableObject {
     var is_privkey_user: Bool {
         keypair.privkey != nil
     }
+    
+    var clientTagComponents: [String]? {
+        guard settings.publish_client_tag else {
+            return nil
+        }
+        return ClientTagMetadata.damus.tagValues
+    }
 
     func close() {
         print("txn: damus close")
