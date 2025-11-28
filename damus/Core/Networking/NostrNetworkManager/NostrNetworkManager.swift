@@ -43,7 +43,7 @@ class NostrNetworkManager {
         let userRelayList = UserRelayListManager(delegate: delegate, pool: pool, reader: reader)
         self.reader = reader
         self.userRelayList = userRelayList
-        self.postbox = PostBox(pool: pool)
+        self.postbox = PostBox(pool: pool, pendingStore: delegate.pendingPostStore)
         self.profilesManager = ProfilesManager(subscriptionManager: reader, ndb: delegate.ndb)
     }
     
@@ -205,5 +205,8 @@ extension NostrNetworkManager {
         
         /// The user's connected NWC wallet
         var nwcWallet: WalletConnectURL? { get }
+        
+        /// Store tracking posts waiting to be flushed to relays
+        var pendingPostStore: PendingPostStore { get }
     }
 }

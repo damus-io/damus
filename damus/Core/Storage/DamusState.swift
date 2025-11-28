@@ -26,6 +26,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
     let relay_filters: RelayFilters
     let relay_model_cache: RelayModelCache
     let drafts: Drafts
+    let pendingPostStore: PendingPostStore
     let events: EventCache
     let bookmarks: BookmarksManager
     let replies: ReplyCounter
@@ -40,7 +41,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
     let favicon_cache: FaviconCache
     private(set) var nostrNetwork: NostrNetworkManager
 
-    init(keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, contactCards: ContactCard, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: DamusVideoCoordinator, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider, favicon_cache: FaviconCache, addNdbToRelayPool: Bool = true) {
+    init(keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, contactCards: ContactCard, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: DamusVideoCoordinator, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider, favicon_cache: FaviconCache, pendingPostStore: PendingPostStore = PendingPostStore(), addNdbToRelayPool: Bool = true) {
         self.keypair = keypair
         self.likes = likes
         self.boosts = boosts
@@ -57,6 +58,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
         self.relay_model_cache = relay_model_cache
         self.drafts = drafts
         self.events = events
+        self.pendingPostStore = pendingPostStore
         self.bookmarks = bookmarks
         self.replies = replies
         self.wallet = wallet
@@ -73,7 +75,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
         self.emoji_provider = emoji_provider
         self.favicon_cache = FaviconCache()
 
-        let networkManagerDelegate = NostrNetworkManagerDelegate(settings: settings, contacts: contacts, ndb: ndb, keypair: keypair, relayModelCache: relay_model_cache, relayFilters: relay_filters)
+        let networkManagerDelegate = NostrNetworkManagerDelegate(settings: settings, contacts: contacts, ndb: ndb, keypair: keypair, relayModelCache: relay_model_cache, relayFilters: relay_filters, pendingPostStore: pendingPostStore)
         let nostrNetwork = NostrNetworkManager(delegate: networkManagerDelegate, addNdbToRelayPool: addNdbToRelayPool)
         self.nostrNetwork = nostrNetwork
         self.wallet.nostrNetwork = nostrNetwork
@@ -134,7 +136,8 @@ class DamusState: HeadlessDamusState, ObservableObject {
             ndb: ndb,
             quote_reposts: .init(our_pubkey: pubkey),
             emoji_provider: DefaultEmojiProvider(showAllVariations: true),
-            favicon_cache: FaviconCache()
+            favicon_cache: FaviconCache(),
+            pendingPostStore: PendingPostStore()
         )
     }
 
@@ -230,6 +233,7 @@ fileprivate extension DamusState {
         var experimentalLocalRelayModelSupport: Bool { self.settings.enable_experimental_local_relay_model }
         var relayModelCache: RelayModelCache
         var relayFilters: RelayFilters
+        var pendingPostStore: PendingPostStore
         
         var nwcWallet: WalletConnectURL? {
             guard let nwcString = self.settings.nostr_wallet_connect else { return nil }
