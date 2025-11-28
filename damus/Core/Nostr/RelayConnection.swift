@@ -280,12 +280,62 @@ func make_nostr_subscription_req(_ filters: [NostrFilter], sub_id: String) -> St
     var req = "[\"REQ\",\"\(sub_id)\""
     for filter in filters {
         req += ","
-        guard let filter_json = try? encoder.encode(filter) else {
+        guard let filter_json = try? encoder.encode(filter),
+              var filter_json_str = String(data: filter_json, encoding: .utf8) else {
             return nil
         }
-        let filter_json_str = String(decoding: filter_json, as: UTF8.self)
+        if let sanitized = sanitizeFilterJSONStringIfNeeded(filter_json_str) {
+            filter_json_str = sanitized
+        }
         req += filter_json_str
     }
     req += "]"
     return req
+}
+
+/// Detects and removes any `null` values from JSON encoded filters before they are sent to relays.
+/// Returns a sanitized JSON string when any invalid values were found, or `nil` when the input was already valid.
+func sanitizeFilterJSONStringIfNeeded(_ jsonString: String) -> String? {
+    guard jsonString.contains("null"),
+          let data = jsonString.data(using: .utf8),
+          let sanitizedData = sanitizeFilterJSONDataIfNeeded(data),
+          let sanitizedString = String(data: sanitizedData, encoding: .utf8)
+    else {
+        return nil
+    }
+    
+    return sanitizedString
+}
+
+private func sanitizeFilterJSONDataIfNeeded(_ data: Data) -> Data? {
+    guard var json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+        return nil
+    }
+    
+    var modified = false
+    let stringArrayKeys = ["ids", "#e", "#p", "#q", "#d", "authors", "hashtag"]
+    for key in stringArrayKeys {
+        modified = sanitizeStringArrayField(in: &json, key: key) || modified
+    }
+    
+    guard modified, let sanitizedData = try? JSONSerialization.data(withJSONObject: json) else {
+        return nil
+    }
+    
+    Log.error("Sanitized invalid nostr filter before sending to relay", for: .networking)
+    return sanitizedData
+}
+
+private func sanitizeStringArrayField(in json: inout [String: Any], key: String) -> Bool {
+    guard let rawArray = json[key] as? [Any] else {
+        return false
+    }
+    
+    let sanitizedValues = rawArray.compactMap { $0 as? String }
+    guard sanitizedValues.count != rawArray.count else {
+        return false
+    }
+    
+    json[key] = sanitizedValues
+    return true
 }
