@@ -38,7 +38,14 @@ class SignalModel: ObservableObject {
     }
     
     var isOffline: Bool {
-        (!isNetworkReachable) || (max_signal > 0 && signal == 0)
+        if !isNetworkReachable {
+            return true
+        }
+        if max_signal == 0 {
+            // No relays configured means we cannot reach the network even if connectivity is fine.
+            return true
+        }
+        return signal == 0
     }
     
     private func startMonitor() {
