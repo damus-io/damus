@@ -162,7 +162,7 @@ struct ContentView: View {
     }
     
     var showFloatingOfflineIndicator: Bool {
-        selected_timeline == .home && home.signal.isOffline && headerOffset < -20
+        shouldShowFloatingOfflineIndicator(timeline: selected_timeline, signal: home.signal, headerOffset: headerOffset)
     }
     
     func MainContent(damus: DamusState) -> some View {
@@ -1157,6 +1157,12 @@ extension LossyLocalNotification {
             return .route(.Script(script: ScriptModel(data: script, state: .not_loaded)))
         }
     }
+}
+
+func shouldShowFloatingOfflineIndicator(timeline: Timeline, signal: SignalModel, headerOffset: CGFloat) -> Bool {
+    guard timeline == .home else { return false }
+    guard signal.isOffline else { return false }
+    return headerOffset < -20
 }
 
 
