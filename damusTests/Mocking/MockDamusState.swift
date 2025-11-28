@@ -10,6 +10,7 @@ import Foundation
 import EmojiPicker
 
 // Generates a test damus state with configurable mock parameters
+@MainActor
 func generate_test_damus_state(
     mock_profile_info: [Pubkey: Profile]?,
     home: HomeModel? = nil,
