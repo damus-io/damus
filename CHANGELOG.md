@@ -1,3 +1,114 @@
+
+## [1.16] - 2026-01-28
+
+### Added
+
+- Added live stream timeline (ericholguin)
+- Added live chat timeline (ericholguin)
+- Added ability to create live chat event (ericholguin)
+- Damus Labs Toggle (ericholguin)
+- Added Damus Labs (ericholguin)
+- Add Timeline switcher button for NIP-81-favorites (Askia Linder)
+- Added the ability to load saved notes if device is offline (Daniel D’Aquino)
+- Notes now load offline (Daniel D’Aquino)
+- Added support for scanning nprofile QR codes (Terry Yiu)
+- Add nip50 search filters and queries (William Casarin)
+- Add ndb_filter_init_with (William Casarin)
+- Add ndb_filter_is_subset_of (William Casarin)
+- Add ndb_filter_eq for filter equality testing (William Casarin)
+- Add method for parsing filter json (William Casarin)
+- Add ndb_filter_json method for creating json filters (William Casarin)
+- Add ndb_unsubscribe to unsubscribe from subscriptions (William Casarin)
+- Add general created_at query plan for timelines (William Casarin)
+- Add ndb_poll_for_notes (William Casarin)
+- Added filter subscriptions (William Casarin)
+- Add initial rust library (William Casarin)
+- Added relay count and relay view to events (Terry Yiu)
+- Add relay hints to tags and identifiers (Terry Yiu)
+- Added focus mode with auto-hide navigation for longform reading (alltheseas)
+- Added sepia mode and line height settings for longform articles (alltheseas)
+- Added estimated read time to longform preview (alltheseas)
+- Added reading progress bar for longform articles (alltheseas)
+- Added automatic conversion of pasted npub/nprofile to human-readable mentions in post composer (alltheseas)
+- Added hashtag spam filter setting to hide posts with too many hashtags (alltheseas)
+- Profile metadata preloading for improved timeline performance (Daniel D’Aquino)
+- Added a pull to refresh feature on DMs that allows users to resync DMs with their relays (Daniel D’Aquino)
+
+
+### Changed
+
+- Improved performance around note content views to prevent hangs (Daniel D’Aquino)
+- Highlight note search results (alltheseas)
+- Improved draft saving feature to prevent data loss if app closes too quickly (Daniel D’Aquino)
+- Changed Damus Purple Side View logo and text (ericholguin)
+- Placed the Favorites feature behind a feature flag (Daniel D’Aquino)
+- Tweaked since optimization filter to capture notes that would otherwise be lost (Daniel D’Aquino)
+- Optimized network bandwidth usage and improved timeline performance (Daniel D’Aquino)
+- Increased transaction list limit to 50 transactions (Daniel D’Aquino)
+- Improved loading UX in the home timeline (Daniel D’Aquino)
+- Added UX hint to make it easier to load new notes (Daniel D’Aquino)
+- Switched to the local relay model (Daniel D’Aquino)
+- Reduced default zap amount and deduplicated from preset zap amount items (Terry Yiu)
+- Use NostrDB for rendering note contents (Daniel D’Aquino)
+- Changed abbreviated pubkey format to npub1...xyz for better readability (alltheseas)
+- Changed focus mode to only hide navigation on scroll down (alltheseas)
+- Removed card styling from longform preview in full article view (alltheseas)
+- Improved storage efficiency for NostrDB on extensions (Daniel D’Aquino)
+- Changed load media UI (ericholguin)
+
+
+### Fixed
+
+- Fixed broken automatic translations (alltheseas)
+- Fixed an issue where notifications view would occasionally appear blank when the app started. (alltheseas)
+- Fixed incorrect behaviour on the post editor that would cause the text cursor to occasionally jump beyond the correct location in some editing operations. (alltheseas)
+- Fixed several crashes throughout the app (Daniel D’Aquino)
+- Fixed an issue where an empty dot would appear on some thread chat views (alltheseas)
+- Ensure mention profile prefetch covers mention_index blocks (alltheseas)
+- Fixed an issue where the mute list view may occasionally freeze the app (Daniel D’Aquino)
+- Fix mention pills falling back to @npub text when profile metadata is missing (alltheseas)
+- Fixed an occasional random crash related to viewing profiles (Daniel D’Aquino)
+- Improved robustness in the part of the code that streams notes from nostrdb (Daniel D’Aquino)
+- Added performance improvements to timeline scrolling (Daniel D’Aquino)
+- Improved security around note validation (Daniel D’Aquino)
+- Fixed an issue where the app would crash when swapping between apps (Daniel D’Aquino)
+- Fixed memory error in nostrdb (Daniel D’Aquino)
+- Fixed bug where non-bech32 damus io urls would cause corruption (William Casarin)
+- Fix aspect ratio on pasted or uploaded images (askeew)
+- Fixed note content rendering to not remove whitespace before hashtag (Terry Yiu)
+- Fixed background crashes with error code 0xdead10cc (Daniel D’Aquino)
+- Fixed crashes that happened when the app went into background mode (Daniel D’Aquino)
+- Added more guards to prevent accidental overrides of the user's mutelist (alltheseas)
+- Fixed instances where a profile would not display profile name and picture for a few seconds (alltheseas)
+- Longform article links now open correctly when shared as nevent URLs (alltheseas)
+- Longform articles now open at the top instead of midway through (alltheseas)
+- Fixed tab bar staying hidden when switching from longform to non-longform event (alltheseas)
+- Fixed stretched/cut-off images in longform notes (alltheseas)
+- Fixed mentions unlinking when typing text before them (alltheseas)
+- Fixed cursor jumping behind first letter when typing a new note (alltheseas)
+- Fixed an issue that would occasionally cause the app to freeze (Daniel D’Aquino)
+- Fix issue where your own replies were sometimes not trusted (alltheseas)
+- Fix issue where search results were out of order (alltheseas)
+- Fixed repost notifications not appearing in notifications tab (alltheseas)
+- Fixed a crash that occurred when clicking "follow all" during onboarding. (Daniel D’Aquino)
+
+
+
+### Removed
+
+- Removed "Load new content" button (Daniel D’Aquino)
+- Wallet view no longer hangs on loading placeholder (Daniel D’Aquino)
+- Fixed issue where the app would occasionally launch an empty universe view (Daniel D’Aquino)
+- Profile action sheet buttons now center properly when fewer than 5 buttons are displayed (Daniel D’Aquino)
+- Fixed an issue where DMs may not appear for users with a large contact list (Daniel D’Aquino)
+- Fixed an issue that could cause certain networking operations to hang indefinitely (Daniel D’Aquino)
+- Fixed a race condition in the networking logic that could cause notes to get missed in certain rare scenarios (Daniel D’Aquino)
+- Fixed a crash on iOS 17 that would happen on startup (Daniel D’Aquino)
+
+
+[1.16]: https://github.com/damus-io/damus/releases/tag/v1.16
+
+
 ## [1.15] - 2025-07-11
 
 **Note:** This version was only released on TestFlight, and never officially released on the App Store.
