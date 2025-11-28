@@ -414,6 +414,9 @@
 		D7B3F30B2F1A1B4E00A8451E /* OfflineConnectivityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B3F3012F1A1B4D00A8451E /* OfflineConnectivityViews.swift */; };
 		D7B3F30C2F1A1B4E00A8451E /* ConnectivitySignalEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B3F3052F1A1B4D00A8451E /* ConnectivitySignalEnvironment.swift */; };
 		D7B3F30D2F1A1B4E00A8451E /* ConnectivitySignalEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B3F3052F1A1B4D00A8451E /* ConnectivitySignalEnvironment.swift */; };
+		D7B3F3122F1A33D900A8451E /* PendingPostStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B3F3102F1A33D900A8451E /* PendingPostStore.swift */; };
+		D7B3F3132F1A33D900A8451E /* OutboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B3F3112F1A33D900A8451E /* OutboxView.swift */; };
+		D7B3F3142F1A33D900A8451E /* PendingPostStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B3F3152F1A33D900A8451E /* PendingPostStoreTests.swift */; };
 		4CDA128A29E9D10C0006FA5A /* SignalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDA128929E9D10C0006FA5A /* SignalView.swift */; };
 		4CDA128C29EB19C40006FA5A /* LocalNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDA128B29EB19C40006FA5A /* LocalNotification.swift */; };
 		4CDD1AE02A6B305F001CD4DF /* NdbTagElem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDD1ADF2A6B305F001CD4DF /* NdbTagElem.swift */; };
@@ -2379,6 +2382,9 @@
 		4C8EC52429D1FA6C0085D9A8 /* DamusColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusColors.swift; sourceTree = "<group>"; };
 		D7B3F3012F1A1B4D00A8451E /* OfflineConnectivityViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineConnectivityViews.swift; sourceTree = "<group>"; };
 		D7B3F3052F1A1B4D00A8451E /* ConnectivitySignalEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectivitySignalEnvironment.swift; sourceTree = "<group>"; };
+		D7B3F3102F1A33D900A8451E /* PendingPostStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingPostStore.swift; sourceTree = "<group>"; };
+		D7B3F3112F1A33D900A8451E /* OutboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutboxView.swift; sourceTree = "<group>"; };
+		D7B3F3152F1A33D900A8451E /* PendingPostStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingPostStoreTests.swift; sourceTree = "<group>"; };
 		4C9054842A6AEAA000811EEC /* NdbTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbTests.swift; sourceTree = "<group>"; };
 		4C9054882A6AED4700811EEC /* NdbTagIterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbTagIterator.swift; sourceTree = "<group>"; };
 		4C90548A2A6AEDEE00811EEC /* NdbNote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbNote.swift; sourceTree = "<group>"; };
@@ -3847,6 +3853,7 @@
 				3ACBCB77295FE5C70037388A /* TimeAgoTests.swift */,
 				4CB88399297322D200DC99E7 /* DMTests.swift */,
 				4CF0ABDB2981A19E00D66079 /* ListTests.swift */,
+				D7B3F3152F1A33D900A8451E /* PendingPostStoreTests.swift */,
 				4CB883A9297612FF00DC99E7 /* ZapTests.swift */,
 				4CB883AD2976FA9300DC99E7 /* FormatTests.swift */,
 				3A3040EC29A5CB86008A0F29 /* ReplyDescriptionTests.swift */,
@@ -4659,6 +4666,7 @@
 				D706C5AE2D5D31B20027C627 /* AutoSaveIndicatorView.swift */,
 				4CF0ABF52985CD5500D66079 /* UserSearch.swift */,
 				4C75EFA327FA577B0006080F /* PostView.swift */,
+				D7B3F3112F1A33D900A8451E /* OutboxView.swift */,
 				F7F0BA262978E54D009531F3 /* ParticipantsView.swift */,
 				4CACA9D4280C31E100D9BBE8 /* ReplyView.swift */,
 			);
@@ -4672,6 +4680,7 @@
 				3AA59D1C2999B0400061C48E /* DraftsModel.swift */,
 				4C0A3F92280F66F5000448DE /* ReplyMap.swift */,
 				4C363A9928283854006E126D /* Reply.swift */,
+				D7B3F3102F1A33D900A8451E /* PendingPostStore.swift */,
 				4CE4F0F329D779B5005914DB /* PostBox.swift */,
 				4C1A9A1929DCA17E00516EAC /* ReplyCounter.swift */,
 			);
@@ -6083,6 +6092,7 @@
 				4C8EC52529D1FA6C0085D9A8 /* DamusColors.swift in Sources */,
 				D7B3F3022F1A1B4D00A8451E /* OfflineConnectivityViews.swift in Sources */,
 				D7B3F3062F1A1B4D00A8451E /* ConnectivitySignalEnvironment.swift in Sources */,
+				D7B3F3122F1A33D900A8451E /* PendingPostStore.swift in Sources */,
 				3A4647CF2A413ADC00386AD8 /* CondensedProfilePicturesView.swift in Sources */,
 				5C14C29B2BBBA29C00079FD2 /* RelaySoftwareDetail.swift in Sources */,
 				5CB017312D4422DB00A9ED05 /* NWCSettings.swift in Sources */,
@@ -6093,6 +6103,7 @@
 				4CC14FF92A741939007AEB17 /* Referenced.swift in Sources */,
 				4C5C7E6A284EDE2E00A22DF5 /* SearchResultsView.swift in Sources */,
 				4CE1399429F0669900AC6A0B /* BigButton.swift in Sources */,
+				D7B3F3132F1A33D900A8451E /* OutboxView.swift in Sources */,
 				D7EFBA372CC322F300F45588 /* DamusVideoControlsView.swift in Sources */,
 				7C60CAEF298471A1009C80D6 /* CoreSVG.swift in Sources */,
 				D706C5AF2D5D31C20027C627 /* AutoSaveIndicatorView.swift in Sources */,
@@ -6302,6 +6313,7 @@
 				4CB883AE2976FA9300DC99E7 /* FormatTests.swift in Sources */,
 				D72A2D052AD9C1B5002AFF62 /* MockDamusState.swift in Sources */,
 				E06336AA2B75832100A88E6B /* ImageMetadataTest.swift in Sources */,
+				D7B3F3142F1A33D900A8451E /* PendingPostStoreTests.swift in Sources */,
 				4C363AA02828A8DD006E126D /* LikeTests.swift in Sources */,
 				D7A0D8752D1FE67900DCBE59 /* EditPictureControlTests.swift in Sources */,
 				4C90BD1C283AC38E008EE7EF /* Bech32Tests.swift in Sources */,

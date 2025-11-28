@@ -19,6 +19,7 @@ enum Route: Hashable {
     case RelayConfig
     case Script(script: ScriptModel)
     case Bookmarks
+    case Outbox
     case Config
     case EditMetadata
     case DMChat(dms: DirectMessageModel)
@@ -74,6 +75,8 @@ enum Route: Hashable {
             RelayConfigView(state: damusState)
         case .Bookmarks:
             BookmarksView(state: damusState)
+        case .Outbox:
+            OutboxView(store: damusState.pendingPostStore, postbox: damusState.nostrNetwork.postbox)
         case .Config:
             ConfigView(state: damusState)
         case .EditMetadata:
@@ -175,6 +178,8 @@ enum Route: Hashable {
             hasher.combine("relayConfig")
         case .Bookmarks:
             hasher.combine("bookmarks")
+        case .Outbox:
+            hasher.combine("outbox")
         case .Config:
             hasher.combine("config")
         case .EditMetadata:

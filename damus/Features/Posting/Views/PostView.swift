@@ -400,8 +400,13 @@ struct PostView: View {
         HStack(spacing: 6) {
             Image(systemName: "clock.arrow.circlepath")
                 .font(.caption)
-            Text("Will send when you reconnect", comment: "Caption shown in the composer to explain that notes are queued while offline.")
-                .font(.caption)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Will send when you reconnect", comment: "Caption shown in the composer to explain that notes are queued while offline.")
+                    .font(.caption)
+                Text("Check Outbox in the side menu to follow pending notes.", comment: "Additional help text that explains the Outbox view is where pending notes can be monitored.")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
         }
         .foregroundColor(DamusColors.adaptableBlack.opacity(0.6))
         .padding(.top, 6)
