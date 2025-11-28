@@ -8,8 +8,8 @@
 import Foundation
 import Network
 
-protocol NetworkPathMonitoring {
-    var pathUpdateHandler: ((NWPath) -> Void)? { get set }
+protocol NetworkPathMonitoring: AnyObject {
+    var pathUpdateHandler: (@Sendable (NWPath) -> Void)? { get set }
     func start(queue: DispatchQueue)
     func cancel()
 }
