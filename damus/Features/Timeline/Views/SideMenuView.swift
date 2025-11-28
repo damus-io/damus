@@ -111,9 +111,10 @@ struct SideMenuView: View {
                 navLabel(title: NSLocalizedString("Bookmarks", comment: "Sidebar menu label for Bookmarks view."), img: "bookmark")
             }
             
-            NavigationLink(value: Route.Outbox) {
-                navLabel(title: NSLocalizedString("Outbox", comment: "Sidebar menu label for the pending posts outbox."), img: "paperplane")
-            }
+        NavigationLink(value: Route.Outbox) {
+            navLabel(title: NSLocalizedString("Outbox", comment: "Sidebar menu label for the pending posts outbox."), img: "paperplane")
+        }
+        .accessibilityIdentifier(AppAccessibilityIdentifiers.side_menu_outbox_button.rawValue)
 
             Link(destination: URL(string: "https://store.damus.io/?ref=damus_ios_app")!) {
                 navLabel(title: NSLocalizedString("Merch", comment: "Sidebar menu label for merch store link."), img: "shop")

@@ -66,6 +66,7 @@ struct OutboxView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .accessibilityIdentifier(AppAccessibilityIdentifiers.outbox_list.rawValue)
         .navigationTitle(Text("Outbox", comment: "Navigation title for the view listing pending posts awaiting delivery."))
         .alert(item: $retryStatusMessage) { status in
             Alert(
@@ -148,6 +149,7 @@ private struct PendingPostRow: View {
                     .labelStyle(.iconOnly)
                     .font(.title3)
                     .buttonStyle(.borderless)
+                    .accessibilityLabel(Text("Send pending note now", comment: "Accessibility label describing the action to immediately send a pending post." ))
                 }
                 
                 Button(role: .destructive, action: deleteAction) {
@@ -155,6 +157,7 @@ private struct PendingPostRow: View {
                 }
                 .font(.title3)
                 .buttonStyle(.borderless)
+                .accessibilityLabel(Text("Delete pending note", comment: "Accessibility label describing the action to delete a pending post."))
             }
         }
         .padding(.vertical, 4)

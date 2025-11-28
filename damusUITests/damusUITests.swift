@@ -198,6 +198,27 @@ class damusUITests: XCTestCase {
         }
     }
     
+    func testOutboxDisplaysPendingFixtures() throws {
+        launchApp(extraArgs: ["--ui-testing-offline", "--ui-testing-outbox-fixtures"])
+        try loginIfNotAlready()
+        
+        guard app.buttons[AID.main_side_menu_button.rawValue].tapIfExists(timeout: 5) else {
+            throw DamusUITestError.timeout_waiting_for_element
+        }
+        
+        guard app.buttons[AID.side_menu_outbox_button.rawValue].tapIfExists(timeout: 5) else {
+            throw DamusUITestError.timeout_waiting_for_element
+        }
+        
+        let outboxList = app.tables[AID.outbox_list.rawValue]
+        guard outboxList.waitForExistence(timeout: 5) else {
+            throw DamusUITestError.timeout_waiting_for_element
+        }
+        
+        XCTAssertTrue(app.staticTexts["UITest pending note 1"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["UITest pending note 2"].waitForExistence(timeout: 5))
+    }
+    
     func login() throws {
         app.buttons[AID.sign_in_option_button.rawValue].tap()
         

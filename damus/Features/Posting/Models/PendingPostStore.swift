@@ -74,6 +74,7 @@ final class PendingPostStore: ObservableObject {
             self.fileURL = folder.appendingPathComponent("pending-posts.json")
         }
         load()
+        applyUITestFixturesIfNeeded()
     }
     
     func pendingEvents() -> [NostrEvent] {
@@ -177,4 +178,31 @@ final class PendingPostStore: ObservableObject {
         posts = trimmedPosts
         return true
     }
+    
+    #if DEBUG
+    private func applyUITestFixturesIfNeeded() {
+        guard ProcessInfo.processInfo.arguments.contains("--ui-testing-outbox-fixtures") else { return }
+        if FileManager.default.fileExists(atPath: fileURL.path) {
+            return
+        }
+        guard posts.isEmpty else { return }
+        posts = Self.makeUITestPendingPosts()
+    }
+    
+    private static func makeUITestPendingPosts() -> [PendingPost] {
+        guard let first = NostrEvent(
+            content: "UITest pending note 1",
+            keypair: test_keypair,
+            createdAt: 1
+        ),
+        let second = NostrEvent(
+            content: "UITest pending note 2",
+            keypair: test_keypair,
+            createdAt: 2
+        ) else {
+            return []
+        }
+        return [PendingPost(event: first), PendingPost(event: second)]
+    }
+    #endif
 }
