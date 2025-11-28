@@ -41,9 +41,9 @@ class SignalModel: ObservableObject {
         if !isNetworkReachable {
             return true
         }
-        if max_signal == 0 {
-            // No relays configured means we cannot reach the network even if connectivity is fine.
-            return true
+        guard max_signal > 0 else {
+            // Relay counts are unknown until the relay list loads; avoid flashing offline until we have real data.
+            return false
         }
         return signal == 0
     }

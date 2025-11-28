@@ -33,9 +33,9 @@ final class SignalModelTests: XCTestCase {
         XCTAssertTrue(model.isOffline)
     }
     
-    func testNoRelaysConfiguredCountsAsOffline() {
+    func testNoRelaysConfiguredRemainsOnlineUntilKnown() {
         let model = makeSignalModel(signal: 0, maxSignal: 0, reachable: true)
-        XCTAssertTrue(model.isOffline)
+        XCTAssertFalse(model.isOffline)
     }
 }
 
