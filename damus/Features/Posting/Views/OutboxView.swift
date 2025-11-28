@@ -10,6 +10,7 @@ import SwiftUI
 struct OutboxView: View {
     @ObservedObject var store: PendingPostStore
     let postbox: PostBox
+    let damusState: DamusState
     
     var pendingPosts: [PendingPost] {
         store.posts
@@ -33,9 +34,12 @@ struct OutboxView: View {
                 .listRowBackground(Color.clear)
             } else {
                 ForEach(pendingPosts) { post in
-                    PendingPostRow(post: post,
-                                   retryAction: { retry(post) },
-                                   deleteAction: { remove(post) })
+                    PendingPostRow(
+                        post: post,
+                        damusState: damusState,
+                        retryAction: { retry(post) },
+                        deleteAction: { remove(post) }
+                    )
                 }
             }
         }
@@ -56,16 +60,27 @@ struct OutboxView: View {
 
 private struct PendingPostRow: View {
     let post: PendingPost
+    let damusState: DamusState
     let retryAction: () -> Void
     let deleteAction: () -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(post.preview)
-                .font(.body)
-                .lineLimit(3)
+            if let event = post.event {
+                NoteContentView(
+                    damus_state: damusState,
+                    event: event,
+                    blur_images: should_blur_images(damus_state: damusState, ev: event),
+                    size: .normal,
+                    options: [.truncate_content]
+                )
+                .accessibilityIdentifier("pending-post-\(post.id)")
+            } else {
+                Text(post.preview)
+                    .font(.body)
+            }
             
-            HStack {
+            HStack(spacing: 20) {
                 Text(post.createdAt, style: .time)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
@@ -76,11 +91,13 @@ private struct PendingPostRow: View {
                     Label(NSLocalizedString("Send now", comment: "Button title to immediately send a pending post."), systemImage: "arrow.up.circle")
                 }
                 .labelStyle(.iconOnly)
+                .font(.title3)
                 .buttonStyle(.borderless)
                 
                 Button(role: .destructive, action: deleteAction) {
                     Image(systemName: "trash")
                 }
+                .font(.title3)
                 .buttonStyle(.borderless)
             }
         }
