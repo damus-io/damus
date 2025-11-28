@@ -11,6 +11,8 @@ struct OutboxView: View {
     @ObservedObject var store: PendingPostStore
     let postbox: PostBox
     let damusState: DamusState
+    @State private var retryingPosts: Set<String> = []
+    @State private var retryStatusMessage: RetryStatusMessage?
     
     var pendingPosts: [PendingPost] {
         store.posts
@@ -57,18 +59,45 @@ struct OutboxView: View {
                         post: post,
                         damusState: damusState,
                         retryAction: { retry(post) },
-                        deleteAction: { remove(post) }
+                        deleteAction: { remove(post) },
+                        isRetrying: retryingPosts.contains(post.id)
                     )
                 }
             }
         }
         .listStyle(.insetGrouped)
         .navigationTitle(Text("Outbox", comment: "Navigation title for the view listing pending posts awaiting delivery."))
+        .alert(item: $retryStatusMessage) { status in
+            Alert(
+                title: Text("Outbox", comment: "Title for alerts shown in the outbox view."),
+                message: Text(status.message),
+                dismissButton: .default(Text("OK", comment: "Alert dismissal button title."))
+            )
+        }
     }
     
     private func retry(_ post: PendingPost) {
-        guard let event = post.event else { return }
-        Task { await postbox.send(event, trackPending: false) }
+        if retryingPosts.contains(post.id) {
+            return
+        }
+        
+        guard let event = post.event else {
+            retryStatusMessage = RetryStatusMessage(
+                message: NSLocalizedString("Unable to resend this note because it is missing local data.", comment: "Error shown when retrying a pending post without serialized content.")
+            )
+            return
+        }
+        
+        retryingPosts.insert(post.id)
+        Task {
+            await postbox.send(event, trackPending: true)
+            await MainActor.run {
+                retryingPosts.remove(post.id)
+                retryStatusMessage = RetryStatusMessage(
+                    message: NSLocalizedString("Note queued for delivery. It will disappear once a relay acknowledges it.", comment: "Confirmation shown after tapping retry on a pending post.")
+                )
+            }
+        }
     }
     
     private func remove(_ post: PendingPost) {
@@ -82,6 +111,7 @@ private struct PendingPostRow: View {
     let damusState: DamusState
     let retryAction: () -> Void
     let deleteAction: () -> Void
+    let isRetrying: Bool
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -106,12 +136,19 @@ private struct PendingPostRow: View {
                 
                 Spacer()
                 
-                Button(action: retryAction) {
-                    Label(NSLocalizedString("Send now", comment: "Button title to immediately send a pending post."), systemImage: "arrow.up.circle")
+                if isRetrying {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .frame(width: 28, height: 28)
+                        .accessibilityIdentifier("pending-post-\(post.id)-retrying")
+                } else {
+                    Button(action: retryAction) {
+                        Label(NSLocalizedString("Send now", comment: "Button title to immediately send a pending post."), systemImage: "arrow.up.circle")
+                    }
+                    .labelStyle(.iconOnly)
+                    .font(.title3)
+                    .buttonStyle(.borderless)
                 }
-                .labelStyle(.iconOnly)
-                .font(.title3)
-                .buttonStyle(.borderless)
                 
                 Button(role: .destructive, action: deleteAction) {
                     Image(systemName: "trash")
@@ -122,4 +159,9 @@ private struct PendingPostRow: View {
         }
         .padding(.vertical, 4)
     }
+}
+
+private struct RetryStatusMessage: Identifiable {
+    let id = UUID()
+    let message: String
 }
