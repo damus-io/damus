@@ -34,6 +34,7 @@ class PostedEvent {
     let flush_after: Date?
     var flushed_once: Bool
     let on_flush: OnFlush?
+    var acknowledged: Bool = false
 
     init(event: NostrEvent, remaining: [RelayURL], skip_ephemeral: Bool, flush_after: Date?, on_flush: OnFlush?) {
         self.event = event
@@ -146,11 +147,15 @@ class PostBox {
         let prev_count = ev.remaining.count
         ev.remaining = ev.remaining.filter { $0.relay != relay_id }
         let after_count = ev.remaining.count
-        if ev.remaining.count == 0 {
-            self.events.removeValue(forKey: event_id)
+        if !ev.acknowledged && prev_count != after_count {
+            ev.acknowledged = true
             if let pendingStore {
                 Task { await pendingStore.markSent(event_id) }
             }
+        }
+
+        if ev.remaining.count == 0 {
+            self.events.removeValue(forKey: event_id)
         }
         return prev_count != after_count
     }

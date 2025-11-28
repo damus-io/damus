@@ -460,4 +460,3 @@ func preload_events(state: DamusState, events: [NostrEvent]) {
         }
     }
 }
-

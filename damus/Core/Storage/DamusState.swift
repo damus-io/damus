@@ -41,7 +41,8 @@ class DamusState: HeadlessDamusState, ObservableObject {
     let favicon_cache: FaviconCache
     private(set) var nostrNetwork: NostrNetworkManager
 
-    init(keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, contactCards: ContactCard, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: DamusVideoCoordinator, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider, favicon_cache: FaviconCache, pendingPostStore: PendingPostStore = PendingPostStore(), addNdbToRelayPool: Bool = true) {
+    @MainActor
+    init(keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, contactCards: ContactCard, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: DamusVideoCoordinator, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider, favicon_cache: FaviconCache, pendingPostStore: PendingPostStore? = nil, addNdbToRelayPool: Bool = true) {
         self.keypair = keypair
         self.likes = likes
         self.boosts = boosts
@@ -58,7 +59,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
         self.relay_model_cache = relay_model_cache
         self.drafts = drafts
         self.events = events
-        self.pendingPostStore = pendingPostStore
+        self.pendingPostStore = pendingPostStore ?? PendingPostStore()
         self.bookmarks = bookmarks
         self.replies = replies
         self.wallet = wallet
@@ -75,7 +76,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
         self.emoji_provider = emoji_provider
         self.favicon_cache = FaviconCache()
 
-        let networkManagerDelegate = NostrNetworkManagerDelegate(settings: settings, contacts: contacts, ndb: ndb, keypair: keypair, relayModelCache: relay_model_cache, relayFilters: relay_filters, pendingPostStore: pendingPostStore)
+        let networkManagerDelegate = NostrNetworkManagerDelegate(settings: settings, contacts: contacts, ndb: ndb, keypair: keypair, relayModelCache: relay_model_cache, relayFilters: relay_filters, pendingPostStore: self.pendingPostStore)
         let nostrNetwork = NostrNetworkManager(delegate: networkManagerDelegate, addNdbToRelayPool: addNdbToRelayPool)
         self.nostrNetwork = nostrNetwork
         self.wallet.nostrNetwork = nostrNetwork
@@ -99,14 +100,12 @@ class DamusState: HeadlessDamusState, ObservableObject {
         
         let navigationCoordinator: NavigationCoordinator = NavigationCoordinator()
         let home: HomeModel = HomeModel()
-        let sub_id = UUID().uuidString
 
         guard let ndb = mndb else { return nil }
         let pubkey = keypair.pubkey
 
         let model_cache = RelayModelCache()
         let relay_filters = RelayFilters(our_pubkey: pubkey)
-        let bootstrap_relays = load_bootstrap_relays(pubkey: pubkey)
         
         let settings = UserSettingsStore.globally_load_for(pubkey: pubkey)
 
@@ -134,7 +133,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
             music: MusicController(onChange: { _ in }),
             video: DamusVideoCoordinator(),
             ndb: ndb,
-            quote_reposts: .init(our_pubkey: pubkey),
+            quote_reposts: EventCounter(our_pubkey: pubkey),
             emoji_provider: DefaultEmojiProvider(showAllVariations: true),
             favicon_cache: FaviconCache(),
             pendingPostStore: PendingPostStore()
@@ -178,12 +177,13 @@ class DamusState: HeadlessDamusState, ObservableObject {
         }
     }
 
+    @MainActor
     static var empty: DamusState {
         let empty_pub: Pubkey = .empty
         let empty_sec: Privkey = .empty
         let kp = Keypair(pubkey: empty_pub, privkey: nil)
         
-        return DamusState.init(
+        return DamusState(
             keypair: Keypair(pubkey: empty_pub, privkey: empty_sec),
             likes: EventCounter(our_pubkey: empty_pub),
             boosts: EventCounter(our_pubkey: empty_pub),
@@ -206,10 +206,11 @@ class DamusState: HeadlessDamusState, ObservableObject {
             nav: NavigationCoordinator(),
             music: nil,
             video: DamusVideoCoordinator(),
-            ndb: .empty,
-            quote_reposts: .init(our_pubkey: empty_pub),
+            ndb: Ndb.empty,
+            quote_reposts: EventCounter(our_pubkey: empty_pub),
             emoji_provider: DefaultEmojiProvider(showAllVariations: true),
-            favicon_cache: FaviconCache()
+            favicon_cache: FaviconCache(),
+            pendingPostStore: PendingPostStore()
         )
     }
 }
