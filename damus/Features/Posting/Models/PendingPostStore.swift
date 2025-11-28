@@ -54,7 +54,7 @@ final class PendingPostStore: ObservableObject {
     private let ioQueue = DispatchQueue(label: "io.damus.pendingposts", qos: .utility)
     private let fileURL: URL
     
-    private enum Constants {
+    private enum StoreLimits {
         static let maxQueueSize = 100
         static let maxPendingAge: TimeInterval = 60 * 60 * 24 * 7 // 7 days
     }
@@ -121,7 +121,9 @@ final class PendingPostStore: ObservableObject {
                     }
                 }
             } catch {
-                self.publishPersistenceError(message: "Failed to load pending posts", error: error)
+                Task { @MainActor in
+                    self.publishPersistenceError(message: "Failed to load pending posts", error: error)
+                }
             }
         }
     }
@@ -132,18 +134,18 @@ final class PendingPostStore: ObservableObject {
                 let data = try JSONEncoder().encode(snapshot)
                 try data.write(to: self.fileURL)
             } catch {
-                self.publishPersistenceError(message: "Failed to save pending posts", error: error)
+                Task { @MainActor in
+                    self.publishPersistenceError(message: "Failed to save pending posts", error: error)
+                }
             }
         }
     }
     
     private func publishPersistenceError(message: String, error: Error) {
-        Self.logger.error("\(message, privacy: .public): \(error.localizedDescription, privacy: .public)")
-        Task { @MainActor in
-            self.lastError = PendingPostStoreError(
-                message: "\(message): \(error.localizedDescription)"
-            )
-        }
+        Self.logger.error("\(message): \(error.localizedDescription)")
+        lastError = PendingPostStoreError(
+            message: "\(message): \(error.localizedDescription)"
+        )
     }
     
     private func dropPost(with id: String) {
@@ -159,14 +161,14 @@ final class PendingPostStore: ObservableObject {
     private func trimStaleAndExcess(now: Date = Date()) -> Bool {
         var changed = false
         var trimmedPosts = posts.filter {
-            let isFresh = now.timeIntervalSince($0.updatedAt) <= Constants.maxPendingAge
+            let isFresh = now.timeIntervalSince($0.updatedAt) <= StoreLimits.maxPendingAge
             if !isFresh {
                 changed = true
             }
             return isFresh
         }
-        if trimmedPosts.count > Constants.maxQueueSize {
-            trimmedPosts = Array(trimmedPosts.prefix(Constants.maxQueueSize))
+        if trimmedPosts.count > StoreLimits.maxQueueSize {
+            trimmedPosts = Array(trimmedPosts.prefix(StoreLimits.maxQueueSize))
             changed = true
         }
         if !changed {
