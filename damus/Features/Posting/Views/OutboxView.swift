@@ -18,6 +18,25 @@ struct OutboxView: View {
     
     var body: some View {
         List {
+            if let error = store.lastError {
+                Section {
+                    HStack(spacing: 12) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+                        Text(error.message)
+                            .font(.subheadline)
+                        Spacer()
+                        Button {
+                            store.clearError()
+                        } label: {
+                            Text("Dismiss", comment: "Button title for dismissing a persistence error banner.")
+                        }
+                        .font(.caption)
+                    }
+                    .accessibilityIdentifier("outbox-persistence-error")
+                }
+            }
+            
             if pendingPosts.isEmpty {
                 VStack(alignment: .center, spacing: 8) {
                     Image(systemName: "paperplane")
