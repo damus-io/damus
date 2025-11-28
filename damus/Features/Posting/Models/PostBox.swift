@@ -35,6 +35,7 @@ class PostedEvent {
     var flushed_once: Bool
     let on_flush: OnFlush?
     var acknowledged: Bool = false
+    let enqueuedAt: Date
 
     init(event: NostrEvent, remaining: [RelayURL], skip_ephemeral: Bool, flush_after: Date?, on_flush: OnFlush?) {
         self.event = event
@@ -45,6 +46,7 @@ class PostedEvent {
         self.remaining = remaining.map {
             Relayer(relay: $0, attempts: 0, retry_after: 10.0)
         }
+        self.enqueuedAt = Date.now
     }
 }
 
@@ -58,6 +60,14 @@ class PostBox {
     private let pool: RelayPool
     private let pendingStore: PendingPostStore?
     var events: [NoteId: PostedEvent]
+    
+    private enum Constants {
+        static let maxRelayAttempts = 8
+        static let maxRetryInterval: Double = 60
+        static let pendingEventTimeout: TimeInterval = 60 * 5
+        static let connectivityPollInterval: UInt64 = 200_000_000 // 0.2s
+        static let connectivityWait: TimeInterval = 5
+    }
 
     init(pool: RelayPool, pendingStore: PendingPostStore? = nil) {
         self.pool = pool
@@ -72,6 +82,7 @@ class PostBox {
             }
         }
         Task {
+            await waitForInitialConnectivity()
             await restorePendingPosts()
         }
     }
@@ -96,21 +107,41 @@ class PostBox {
     
     func try_flushing_events() async {
         let now = Int64(Date().timeIntervalSince1970)
-        for kv in events {
-            let event = kv.value
-            
+        removeExpiredEvents()
+        var eventsToDrop: [NoteId] = []
+        for (noteId, event) in events {
             // some are delayed
             if let after = event.flush_after, Date.now.timeIntervalSince1970 < after.timeIntervalSince1970 {
                 continue
             }
             
-            for relayer in event.remaining {
-                if relayer.last_attempt == nil ||
-                   (now >= (relayer.last_attempt! + Int64(relayer.retry_after))) {
-                    print("attempt #\(relayer.attempts) to flush event '\(event.event.content)' to \(relayer.relay) after \(relayer.retry_after) seconds")
-                    await flush_event(event, to_relay: relayer)
-                }
+            event.remaining.removeAll { relayer in
+                relayer.attempts >= Constants.maxRelayAttempts
             }
+            
+            if event.remaining.isEmpty {
+                eventsToDrop.append(noteId)
+                continue
+            }
+            
+            for relayer in event.remaining {
+                let lastAttempt = relayer.last_attempt ?? 0
+                let nextWindow = lastAttempt + Int64(relayer.retry_after)
+                if relayer.last_attempt != nil && now < nextWindow {
+                    continue
+                }
+                
+                print("attempt #\(relayer.attempts) to flush event '\(event.event.content)' to \(relayer.relay) after \(relayer.retry_after) seconds")
+                await flush_event(event, to_relay: relayer)
+            }
+        }
+        
+        if eventsToDrop.isEmpty {
+            return
+        }
+        for noteId in eventsToDrop {
+            print("dropping pending note \(noteId.hex()) after exhausting relay attempts")
+            dropPending(noteId: noteId)
         }
     }
 
@@ -169,7 +200,7 @@ class PostBox {
         for relayer in relayers {
             relayer.attempts += 1
             relayer.last_attempt = Int64(Date().timeIntervalSince1970)
-            relayer.retry_after *= 1.5
+            relayer.retry_after = min(relayer.retry_after * 1.5, Constants.maxRetryInterval)
             if await pool.get_relay(relayer.relay) != nil {
                 print("flushing event \(event.event.id) to \(relayer.relay)")
             } else {
@@ -217,6 +248,37 @@ class PostBox {
         let events = await pendingStore.pendingEvents()
         for event in events {
             await send(event, skip_ephemeral: true, trackPending: false)
+        }
+    }
+    
+    private func waitForInitialConnectivity() async {
+        let deadline = Date.now.addingTimeInterval(Constants.connectivityWait)
+        while Date.now < deadline {
+            if await hasConnectedRelay() {
+                return
+            }
+            try? await Task.sleep(nanoseconds: Constants.connectivityPollInterval)
+        }
+    }
+    
+    private func hasConnectedRelay() async -> Bool {
+        await pool.num_connected > 0
+    }
+    
+    private func removeExpiredEvents() {
+        let referenceDate = Date.now
+        var expired: [NoteId] = []
+        for (noteId, event) in events {
+            if referenceDate.timeIntervalSince(event.enqueuedAt) > Constants.pendingEventTimeout {
+                expired.append(noteId)
+            }
+        }
+        if expired.isEmpty {
+            return
+        }
+        for noteId in expired {
+            print("dropping pending note \(noteId.hex()) after timeout while offline")
+            dropPending(noteId: noteId)
         }
     }
 }
