@@ -109,6 +109,7 @@ struct PostView: View {
     }
 
     @Environment(\.dismiss) var dismiss
+    @Environment(\.connectivitySignal) var connectivitySignal
 
     func cancel() {
         notify(.post(.cancel))
@@ -328,6 +329,12 @@ struct PostView: View {
 
                 Spacer()
 
+                if isOffline {
+                    OfflineStatusPill()
+                        .padding(.trailing, 4)
+                        .accessibilityIdentifier("offline-compose-pill")
+                }
+
                 PostButton
             }
             
@@ -384,6 +391,23 @@ struct PostView: View {
         }
     }
     
+    var isOffline: Bool {
+        guard let signal = connectivitySignal else { return false }
+        return signal.isOffline
+    }
+    
+    var OfflineComposeHint: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "clock.arrow.circlepath")
+                .font(.caption)
+            Text("Will send when you reconnect", comment: "Caption shown in the composer to explain that notes are queued while offline.")
+                .font(.caption)
+        }
+        .foregroundColor(DamusColors.adaptableBlack.opacity(0.6))
+        .padding(.top, 6)
+        .accessibilityIdentifier("offline-compose-hint")
+    }
+    
     func Editor(deviceSize: GeometryProxy) -> some View {
         HStack(alignment: .top, spacing: 0) {
             VStack(alignment: .leading, spacing: 0) {
@@ -417,6 +441,11 @@ struct PostView: View {
                         let url = draft.getLinkURL() {
                     LinkViewRepresentable(meta: .url(url))
                         .frame(height: 50)
+                }
+                
+                if isOffline {
+                    OfflineComposeHint
+                        .transition(.opacity)
                 }
             }
             .padding(.horizontal)
@@ -974,4 +1003,3 @@ func isSupportedImage(url: URL) -> Bool {
     let supportedTypes = ["jpg", "png", "gif"]
     return supportedTypes.contains(fileExtension)
 }
-

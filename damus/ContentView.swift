@@ -161,6 +161,10 @@ struct ContentView: View {
         }
     }
     
+    var showFloatingOfflineIndicator: Bool {
+        selected_timeline == .home && home.signal.isOffline && headerOffset < -20
+    }
+    
     func MainContent(damus: DamusState) -> some View {
         VStack {
             switch selected_timeline {
@@ -274,10 +278,20 @@ struct ContentView: View {
                         navigationCoordinator.popToRoot()
                     }
                 }
+                .environment(\.connectivitySignal, home.signal)
                 .navigationViewStyle(.stack)
                 .damus_full_screen_cover($active_full_screen_item, damus_state: damus, content: { item in
                     return item.view(damus_state: damus)
                 })
+                .overlay(alignment: .topTrailing) {
+                    if showFloatingOfflineIndicator {
+                        FloatingOfflineIndicator()
+                            .padding(.trailing, 16)
+                            .padding(.top, getSafeAreaTop() + 8)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                            .allowsHitTesting(false)
+                    }
+                }
                 .overlay(alignment: .bottom) {
                     if !hide_bar {
                         if !isSideBarOpened {
@@ -325,6 +339,7 @@ struct ContentView: View {
                 MaybeReportView(target: target)
             case .post(let action):
                 PostView(action: action, damus_state: damus_state!)
+                    .environment(\.connectivitySignal, home.signal)
             case .user_status:
                 UserStatusSheet(damus_state: damus_state!, postbox: damus_state!.nostrNetwork.postbox, keypair: damus_state!.keypair, status: damus_state!.profiles.profile_data(damus_state!.pubkey).status)
                     .presentationDragIndicator(.visible)
