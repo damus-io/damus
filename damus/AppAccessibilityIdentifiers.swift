@@ -64,6 +64,9 @@ enum AppAccessibilityIdentifiers: String {
     /// The cancel post button
     case post_composer_cancel_button
     
+    /// Floating button to start composing a new post
+    case compose_post_button
+    
     // MARK: Main interface layout
     // Prefix: `main`
     
@@ -83,6 +86,9 @@ enum AppAccessibilityIdentifiers: String {
     /// The logout confirmation button in the alert dialog
     case side_menu_logout_confirm_button
     
+    /// The Outbox option in the side menu
+    case side_menu_outbox_button
+    
     
     // MARK: Items specific to the user's own profile
     // Prefix: `own_profile`
@@ -95,4 +101,11 @@ enum AppAccessibilityIdentifiers: String {
     
     /// The button to pick the new banner image from URL
     case own_profile_banner_image_edit_from_url
+    
+    
+    // MARK: Outbox
+    // Prefix: `outbox`
+    
+    /// The list showing pending posts waiting to send
+    case outbox_list
 }

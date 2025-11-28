@@ -12,6 +12,7 @@ import Foundation
 /// It also keeps track of a selected event in the thread, and can pinpoint all of its parents and reply chain
 @MainActor
 class ThreadModel: ObservableObject {
+    nonisolated(unsafe) let routeIdentifier: NoteId
     /// The original event where this thread was loaded from
     /// We use this to know the starting point from which we try to load the rest of the thread
     /// This is immutable because this is our starting point of the thread, and we don't expect this to ever change during the lifetime of a thread view
@@ -66,6 +67,7 @@ class ThreadModel: ObservableObject {
     /// You should also call `subscribe()` to start loading thread events from the relay pool.
     /// This is done manually to ensure we only load stuff when needed (e.g. when a view appears)
     init(event: NostrEvent, damus_state: DamusState) {
+        self.routeIdentifier = event.id
         self.damus_state = damus_state
         self.event_map = ThreadEventMap()
         self.original_event = event
