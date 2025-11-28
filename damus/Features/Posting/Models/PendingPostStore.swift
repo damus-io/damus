@@ -54,6 +54,11 @@ final class PendingPostStore: ObservableObject {
     private let ioQueue = DispatchQueue(label: "io.damus.pendingposts", qos: .utility)
     private let fileURL: URL
     
+    private enum Constants {
+        static let maxQueueSize = 100
+        static let maxPendingAge: TimeInterval = 60 * 60 * 24 * 7 // 7 days
+    }
+    
     private static let logger = Logger(
         subsystem: Constants.MAIN_APP_BUNDLE_IDENTIFIER,
         category: "pending_post_store"
@@ -87,17 +92,16 @@ final class PendingPostStore: ObservableObject {
             posts.append(PendingPost(event: event))
         }
         posts.sort(by: { $0.createdAt > $1.createdAt })
+        trimStaleAndExcess()
         persist(snapshot: posts)
     }
     
     func markSent(_ id: NoteId) {
-        posts.removeAll { $0.id == id.hex() }
-        persist(snapshot: posts)
+        dropPost(with: id.hex())
     }
     
     func remove(_ id: NoteId) {
-        posts.removeAll { $0.id == id.hex() }
-        persist(snapshot: posts)
+        dropPost(with: id.hex())
     }
     
     private func load() {
@@ -111,6 +115,10 @@ final class PendingPostStore: ObservableObject {
                 let decoded = try JSONDecoder().decode([PendingPost].self, from: data)
                 Task { @MainActor in
                     self.posts = decoded.sorted(by: { $0.createdAt > $1.createdAt })
+                    let trimmed = self.trimStaleAndExcess()
+                    if trimmed {
+                        self.persist(snapshot: self.posts)
+                    }
                 }
             } catch {
                 self.publishPersistenceError(message: "Failed to load pending posts", error: error)
@@ -136,5 +144,35 @@ final class PendingPostStore: ObservableObject {
                 message: "\(message): \(error.localizedDescription)"
             )
         }
+    }
+    
+    private func dropPost(with id: String) {
+        let originalCount = posts.count
+        posts.removeAll { $0.id == id }
+        if posts.count == originalCount {
+            return
+        }
+        persist(snapshot: posts)
+    }
+    
+    @discardableResult
+    private func trimStaleAndExcess(now: Date = Date()) -> Bool {
+        var changed = false
+        var trimmedPosts = posts.filter {
+            let isFresh = now.timeIntervalSince($0.updatedAt) <= Constants.maxPendingAge
+            if !isFresh {
+                changed = true
+            }
+            return isFresh
+        }
+        if trimmedPosts.count > Constants.maxQueueSize {
+            trimmedPosts = Array(trimmedPosts.prefix(Constants.maxQueueSize))
+            changed = true
+        }
+        if !changed {
+            return false
+        }
+        posts = trimmedPosts
+        return true
     }
 }
