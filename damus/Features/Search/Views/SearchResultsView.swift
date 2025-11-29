@@ -154,17 +154,18 @@ struct SearchResultsView: View {
         }
 
         do {
-            guard let txn = NdbTxn(ndb: damus_state.ndb) else { return }
             for note_key in note_keys {
-                guard let note = damus_state.ndb.lookup_note_by_key_with_txn(note_key, txn: txn) else {
-                    continue
-                }
-
-                if !keyset.contains(note_key) {
-                    let owned_note = note.to_owned()
-                    res.append(owned_note)
-                    keyset.insert(note_key)
-                }
+                damus_state.ndb.lookup_note_by_key(note_key, borrow: { maybeUnownedNote in
+                    switch maybeUnownedNote {
+                    case .none: return
+                    case .some(let unownedNote):
+                        if !keyset.contains(note_key) {
+                            let owned_note = unownedNote.toOwned()
+                            res.append(owned_note)
+                            keyset.insert(note_key)
+                        }
+                    }
+                })
             }
         }
 
@@ -182,12 +183,10 @@ struct SearchResultsView: View {
         }
         .frame(maxHeight: .infinity)
         .onAppear {
-            guard let txn = NdbTxn.init(ndb: damus_state.ndb) else { return }
-            self.result = search_for_string(profiles: damus_state.profiles, contacts: damus_state.contacts, search: search, txn: txn)
+            self.result = search_for_string(profiles: damus_state.profiles, contacts: damus_state.contacts, search: search)
         }
         .onChange(of: search) { new in
-            guard let txn = NdbTxn.init(ndb: damus_state.ndb) else { return }
-            self.result = search_for_string(profiles: damus_state.profiles, contacts: damus_state.contacts, search: search, txn: txn)
+            self.result = search_for_string(profiles: damus_state.profiles, contacts: damus_state.contacts, search: search)
         }
         .onChange(of: search) { query in
             debouncer.debounce {
@@ -208,7 +207,7 @@ struct SearchResultsView_Previews: PreviewProvider {
  */
 
 
-func search_for_string<Y>(profiles: Profiles, contacts: Contacts, search new: String, txn: NdbTxn<Y>) -> Search? {
+func search_for_string(profiles: Profiles, contacts: Contacts, search new: String) -> Search? {
     guard new.count != 0 else {
         return nil
     }
@@ -251,7 +250,7 @@ func search_for_string<Y>(profiles: Profiles, contacts: Contacts, search new: St
         return .naddr(naddr)
     }
     
-    let multisearch = MultiSearch(text: new, hashtag: make_hashtagable(searchQuery), profiles: search_profiles(profiles: profiles, contacts: contacts, search: new, txn: txn))
+    let multisearch = MultiSearch(text: new, hashtag: make_hashtagable(searchQuery), profiles: search_profiles(profiles: profiles, contacts: contacts, search: new))
     return .multi(multisearch)
 }
 
@@ -268,7 +267,7 @@ func make_hashtagable(_ str: String) -> String {
     return String(new.filter{$0 != " "})
 }
 
-func search_profiles<Y>(profiles: Profiles, contacts: Contacts, search: String, txn: NdbTxn<Y>) -> [Pubkey] {
+func search_profiles(profiles: Profiles, contacts: Contacts, search: String) -> [Pubkey] {
     // Search by hex pubkey.
     if let pubkey = hex_decode_pubkey(search),
        profiles.lookup_key_by_pubkey(pubkey) != nil
@@ -285,7 +284,7 @@ func search_profiles<Y>(profiles: Profiles, contacts: Contacts, search: String, 
         return [pk]
     }
 
-    return profiles.search(search, limit: 128, txn: txn).sorted { a, b in
+    return profiles.search(search, limit: 128).sorted { a, b in
         let aFriendTypePriority = get_friend_type(contacts: contacts, pubkey: a)?.priority ?? 0
         let bFriendTypePriority = get_friend_type(contacts: contacts, pubkey: b)?.priority ?? 0
 

@@ -235,7 +235,8 @@ class Ndb {
         return true
     }
     
-    func lookup_blocks_by_key_with_txn(_ key: NoteKey, txn: RawNdbTxnAccessible) -> NdbBlockGroup.BlocksMetadata? {
+    // GH_3245 TODO: This is a low level call, make it hidden from outside Ndb
+    internal func lookup_blocks_by_key_with_txn(_ key: NoteKey, txn: RawNdbTxnAccessible) -> NdbBlockGroup.BlocksMetadata? {
         guard let blocks = ndb_get_blocks_by_key(self.ndb.ndb, &txn.txn, key) else {
             return nil
         }
@@ -243,13 +244,17 @@ class Ndb {
         return NdbBlockGroup.BlocksMetadata(ptr: blocks)
     }
 
-    func lookup_blocks_by_key(_ key: NoteKey) -> SafeNdbTxn<NdbBlockGroup.BlocksMetadata?>? {
-        SafeNdbTxn<NdbBlockGroup.BlocksMetadata?>.new(on: self) { txn in
+    func lookup_blocks_by_key<T>(_ key: NoteKey, borrow lendingFunction: (_: borrowing NdbBlockGroup.BlocksMetadata?) throws -> T) rethrows -> T {
+        let txn = SafeNdbTxn<NdbBlockGroup.BlocksMetadata?>.new(on: self) { txn in
             lookup_blocks_by_key_with_txn(key, txn: txn)
         }
+        guard let txn else {
+            return try lendingFunction(nil)
+        }
+        return try lendingFunction(txn.val)
     }
 
-    func lookup_note_by_key_with_txn<Y>(_ key: NoteKey, txn: NdbTxn<Y>) -> NdbNote? {
+    private func lookup_note_by_key_with_txn<Y>(_ key: NoteKey, txn: NdbTxn<Y>) -> NdbNote? {
         var size: Int = 0
         guard let note_p = ndb_get_note_by_key(&txn.txn, key, &size) else {
             return nil
@@ -411,13 +416,25 @@ class Ndb {
         return note_ids
     }
 
-    func lookup_note_by_key(_ key: NoteKey) -> NdbTxn<NdbNote?>? {
-        return NdbTxn(ndb: self) { txn in
+    func lookup_note_by_key<T>(_ key: NoteKey, borrow lendingFunction: (_: borrowing UnownedNdbNote?) throws -> T) rethrows -> T {
+        let txn = NdbTxn(ndb: self) { txn in
             lookup_note_by_key_with_txn(key, txn: txn)
         }
+        guard let rawNote = txn?.unsafeUnownedValue else { return try lendingFunction(nil) }
+        let unownedNote = UnownedNdbNote(rawNote)
+        return try lendingFunction(.some(unownedNote))
+    }
+    
+    func lookup_note_by_key_and_copy(_ key: NoteKey) -> NdbNote? {
+        return lookup_note_by_key(key, borrow: { maybeUnownedNote -> NdbNote? in
+            switch maybeUnownedNote {
+            case .none: return nil
+            case .some(let unownedNote): return unownedNote.toOwned()
+            }
+        })
     }
 
-    private func lookup_profile_by_key_inner<Y>(_ key: ProfileKey, txn: NdbTxn<Y>) -> ProfileRecord? {
+    private func lookup_profile_by_key_inner(_ key: ProfileKey, txn: RawNdbTxnAccessible) -> ProfileRecord? {
         var size: Int = 0
         guard let profile_p = ndb_get_profile_by_key(&txn.txn, key, &size) else {
             return nil
@@ -451,32 +468,36 @@ class Ndb {
         }
     }
 
-    private func lookup_profile_with_txn_inner<Y>(pubkey: Pubkey, txn: NdbTxn<Y>) -> ProfileRecord? {
-        return pubkey.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> ProfileRecord? in
+    private func lookup_profile_with_txn_inner(pubkey: Pubkey, txn: some RawNdbTxnAccessible) -> ProfileRecord? {
+        var record: ProfileRecord? = nil
+        pubkey.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) in
             var size: Int = 0
             var key: UInt64 = 0
 
             guard let baseAddress = ptr.baseAddress,
                   let profile_p = ndb_get_profile_by_pubkey(&txn.txn, baseAddress, &size, &key)
             else {
-                return nil
+                return
             }
 
-            return profile_flatbuf_to_record(ptr: profile_p, size: size, key: key)
+            record = profile_flatbuf_to_record(ptr: profile_p, size: size, key: key)
         }
+        return record
     }
 
-    func lookup_profile_by_key_with_txn<Y>(key: ProfileKey, txn: NdbTxn<Y>) -> ProfileRecord? {
+    private func lookup_profile_by_key_with_txn(key: ProfileKey, txn: RawNdbTxnAccessible) -> ProfileRecord? {
         lookup_profile_by_key_inner(key, txn: txn)
     }
 
-    func lookup_profile_by_key(key: ProfileKey) -> NdbTxn<ProfileRecord?>? {
-        return NdbTxn(ndb: self) { txn in
-            lookup_profile_by_key_inner(key, txn: txn)
+    func lookup_profile_by_key<T>(key: ProfileKey, borrow lendingFunction: (_: borrowing ProfileRecord?) throws -> T) rethrows -> T {
+        let txn = SafeNdbTxn<ProfileRecord?>.new(on: self) { txn in
+            return lookup_profile_by_key_inner(key, txn: txn)
         }
+        guard let txn else { return try lendingFunction(nil) }
+        return try lendingFunction(txn.val)
     }
 
-    func lookup_note_with_txn<Y>(id: NoteId, txn: NdbTxn<Y>) -> NdbNote? {
+    private func lookup_note_with_txn<Y>(id: NoteId, txn: NdbTxn<Y>) -> NdbNote? {
         lookup_note_with_txn_inner(id: id, txn: txn)
     }
 
@@ -490,7 +511,7 @@ class Ndb {
         return txn.value
     }
 
-    func lookup_profile_key_with_txn<Y>(_ pubkey: Pubkey, txn: NdbTxn<Y>) -> ProfileKey? {
+    private func lookup_profile_key_with_txn<Y>(_ pubkey: Pubkey, txn: NdbTxn<Y>) -> ProfileKey? {
         return pubkey.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> NoteKey? in
             guard let p = ptr.baseAddress else { return nil }
             let r = ndb_get_profilekey_by_pubkey(&txn.txn, p)
@@ -501,7 +522,8 @@ class Ndb {
         }
     }
 
-    func lookup_note_key_with_txn(_ id: NoteId, txn: some RawNdbTxnAccessible) -> NoteKey? {
+    // GH_3245 TODO: This is a low level call, make it hidden from outside Ndb
+    internal func lookup_note_key_with_txn(_ id: NoteId, txn: some RawNdbTxnAccessible) -> NoteKey? {
         guard !closed else { return nil }
         return id.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> NoteKey? in
             guard let p = ptr.baseAddress else {
@@ -525,19 +547,47 @@ class Ndb {
         return txn.value
     }
 
-    func lookup_note(_ id: NoteId, txn_name: String? = nil) -> NdbTxn<NdbNote?>? {
-        NdbTxn(ndb: self, name: txn_name) { txn in
+    func lookup_note<T>(_ id: NoteId, borrow lendingFunction: (_: borrowing UnownedNdbNote?) throws -> T) rethrows -> T {
+        let txn = NdbTxn(ndb: self) { txn in
             lookup_note_with_txn_inner(id: id, txn: txn)
         }
+        guard let rawNote = txn?.unsafeUnownedValue else { return try lendingFunction(nil) }
+        return try lendingFunction(UnownedNdbNote(rawNote))
     }
-
-    func lookup_profile(_ pubkey: Pubkey, txn_name: String? = nil) -> NdbTxn<ProfileRecord?>? {
-        NdbTxn(ndb: self, name: txn_name) { txn in
+    
+    func lookup_note_and_copy(_ id: NoteId) -> NdbNote? {
+        return self.lookup_note(id, borrow: { unownedNote in
+            return unownedNote?.toOwned()
+        })
+    }
+    
+    func lookup_profile<T>(_ pubkey: Pubkey, borrow lendingFunction: (_: borrowing ProfileRecord?) throws -> T) rethrows -> T {
+        let txn = SafeNdbTxn<ProfileRecord?>.new(on: self) { txn in
             lookup_profile_with_txn_inner(pubkey: pubkey, txn: txn)
         }
+        guard let txn else { return try lendingFunction(nil) }
+        return try lendingFunction(txn.val)
+    }
+    
+    func lookup_profile_lnurl(_ pubkey: Pubkey) -> String? {
+        return lookup_profile(pubkey, borrow: { pr in
+            switch pr {
+            case .none: return nil
+            case .some(let pr): return pr.lnurl
+            }
+        })
+    }
+    
+    func lookup_profile_and_copy(_ pubkey: Pubkey) -> Profile? {
+        return self.lookup_profile(pubkey, borrow: { pr in
+            switch pr {
+            case .some(let pr): return pr.profile
+            case .none: return nil
+            }
+        })
     }
 
-    func lookup_profile_with_txn<Y>(_ pubkey: Pubkey, txn: NdbTxn<Y>) -> ProfileRecord? {
+    private func lookup_profile_with_txn<Y>(_ pubkey: Pubkey, txn: NdbTxn<Y>) -> ProfileRecord? {
         lookup_profile_with_txn_inner(pubkey: pubkey, txn: txn)
     }
     
@@ -556,7 +606,7 @@ class Ndb {
         }
     }
 
-    func read_profile_last_fetched<Y>(txn: NdbTxn<Y>, pubkey: Pubkey) -> UInt64? {
+    private func read_profile_last_fetched<Y>(txn: NdbTxn<Y>, pubkey: Pubkey) -> UInt64? {
         guard !closed else { return nil }
         return pubkey.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> UInt64? in
             guard let p = ptr.baseAddress else { return nil }
@@ -567,6 +617,14 @@ class Ndb {
 
             return res
         }
+    }
+    
+    func read_profile_last_fetched(pubkey: Pubkey) -> UInt64? {
+        var last_fetched: UInt64? = nil
+        let _ = NdbTxn(ndb: self) { txn in
+            last_fetched = read_profile_last_fetched(txn: txn, pubkey: pubkey)
+        }
+        return last_fetched
     }
 
     func process_event(_ str: String, originRelayURL: String? = nil) -> Bool {
@@ -592,8 +650,13 @@ class Ndb {
             return ndb_process_events(ndb.ndb, cstr, str.utf8.count) != 0
         }
     }
+    
+    func search_profile(_ search: String, limit: Int) -> [Pubkey] {
+        guard let txn = NdbTxn<()>.init(ndb: self) else { return [] }
+        return search_profile(search, limit: limit, txn: txn)
+    }
 
-    func search_profile<Y>(_ search: String, limit: Int, txn: NdbTxn<Y>) -> [Pubkey] {
+    private func search_profile<Y>(_ search: String, limit: Int, txn: NdbTxn<Y>) -> [Pubkey] {
         var pks = Array<Pubkey>()
 
         return search.withCString { q in
@@ -621,6 +684,11 @@ class Ndb {
     
     // MARK: NdbFilter queries and subscriptions
     
+    func query(filters: [NdbFilter], maxResults: Int) throws(NdbStreamError) -> [NoteKey] {
+        guard let txn = NdbTxn(ndb: self) else { return [] }
+        return try query(with: txn, filters: filters, maxResults: maxResults)
+    }
+    
     /// Safe wrapper around the `ndb_query` C function
     /// - Parameters:
     ///   - txn: Database transaction
@@ -628,7 +696,7 @@ class Ndb {
     ///   - maxResults: Maximum number of results to return
     /// - Returns: Array of note keys matching the filters
     /// - Throws: NdbStreamError if the query fails
-    func query<Y>(with txn: NdbTxn<Y>, filters: [NdbFilter], maxResults: Int) throws(NdbStreamError) -> [NoteKey] {
+    private func query<Y>(with txn: NdbTxn<Y>, filters: [NdbFilter], maxResults: Int) throws(NdbStreamError) -> [NoteKey] {
         guard !self.is_closed else { throw .ndbClosed }
         let filtersPointer = UnsafeMutablePointer<ndb_filter>.allocate(capacity: filters.count)
         defer { filtersPointer.deallocate() }
@@ -784,60 +852,20 @@ class Ndb {
         return nil
     }
     
-    func waitFor(noteId: NoteId, timeout: TimeInterval = 10) async throws(NdbLookupError) -> NdbTxn<NdbNote>? {
-        do {
-            return try await withCheckedThrowingContinuation({ continuation in
-                var done = false
-                let waitTask = Task {
-                    do {
-                        Log.debug("ndb_wait: Waiting for %s", for: .ndb, noteId.hex())
-                        let result = try await self.waitWithoutTimeout(for: noteId)
-                        if !done {
-                            Log.debug("ndb_wait: Found %s", for: .ndb, noteId.hex())
-                            continuation.resume(returning: result)
-                            done = true
-                        }
-                    }
-                    catch {
-                        if Task.isCancelled {
-                            return  // the timeout task will handle throwing the timeout error
-                        }
-                        if !done {
-                            Log.debug("ndb_wait: Error on %s: %s", for: .ndb, noteId.hex(), error.localizedDescription)
-                            continuation.resume(throwing: error)
-                            done = true
-                        }
-                    }
-                }
-                
-                let timeoutTask = Task {
-                    try await Task.sleep(for: .seconds(Int(timeout)))
-                    if !done {
-                        Log.debug("ndb_wait: Timeout on %s. Cancelling wait task…", for: .ndb, noteId.hex())
-                        done = true
-                        print("ndb_wait: throwing timeout error")
-                        continuation.resume(throwing: NdbLookupError.timeout)
-                    }
-                    waitTask.cancel()
-                }
-            })
-        }
-        catch {
-            if let error = error as? NdbLookupError { throw error }
-            else { throw .internalInconsistency }
-        }
-    }
-    
     /// Determines if a given note was seen on a specific relay URL
-    func was(noteKey: NoteKey, seenOn relayUrl: String, txn: SafeNdbTxn<()>? = nil) throws -> Bool {
+    private func was(noteKey: NoteKey, seenOn relayUrl: String, txn: SafeNdbTxn<()>?) throws -> Bool {
         guard let txn = txn ?? SafeNdbTxn.new(on: self) else { throw NdbLookupError.cannotOpenTransaction }
         return relayUrl.withCString({ relayCString in
             return ndb_note_seen_on_relay(&txn.txn, noteKey, relayCString) == 1
         })
     }
     
+    func was(noteKey: NoteKey, seenOn relayUrl: String) throws -> Bool {
+        return try self.was(noteKey: noteKey, seenOn: relayUrl, txn: nil)
+    }
+    
     /// Determines if a given note was seen on any of the listed relay URLs
-    func was(noteKey: NoteKey, seenOnAnyOf relayUrls: [String], txn: SafeNdbTxn<()>? = nil) throws -> Bool {
+    private func was(noteKey: NoteKey, seenOnAnyOf relayUrls: [String], txn: SafeNdbTxn<()>? = nil) throws -> Bool {
         guard let txn = txn ?? SafeNdbTxn.new(on: self) else { throw NdbLookupError.cannotOpenTransaction }
         for relayUrl in relayUrls {
             if try self.was(noteKey: noteKey, seenOn: relayUrl, txn: txn) {
@@ -845,6 +873,11 @@ class Ndb {
             }
         }
         return false
+    }
+    
+    /// Determines if a given note was seen on any of the listed relay URLs
+    func was(noteKey: NoteKey, seenOnAnyOf relayUrls: [String]) throws -> Bool {
+        return try self.was(noteKey: noteKey, seenOnAnyOf: relayUrls, txn: nil)
     }
     
     // MARK: Internal ndb callback interfaces

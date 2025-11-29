@@ -99,7 +99,12 @@ struct ProfilePicView: View {
     }
 
     func get_lnurl() -> String? {
-        return profiles.lookup_with_timestamp(pubkey)?.unsafeUnownedValue?.lnurl
+        return profiles.lookup_with_timestamp(pubkey, borrow: { pr in
+            switch pr {
+            case .some(let pr): return pr.lnurl
+            case .none: return nil
+            }
+        })
     }
     
     var body: some View {
@@ -116,8 +121,7 @@ struct ProfilePicView: View {
                                 self.picture = pic
                             }
                         case .remote(pubkey: let pk):
-                            let profile_txn = profiles.lookup(id: pk)
-                            let profile = profile_txn?.unsafeUnownedValue
+                            let profile = profiles.lookup(id: pk)
                             if let pic = profile?.picture {
                                 self.picture = pic
                             }
@@ -141,7 +145,7 @@ struct ProfilePicView: View {
 }
 
 func get_profile_url(picture: String?, pubkey: Pubkey, profiles: Profiles) -> URL {
-    let pic = picture ?? profiles.lookup(id: pubkey, txn_name: "get_profile_url")?.map({ $0?.picture }).value ?? robohash(pubkey)
+    let pic = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
     if let url = URL(string: pic) {
         return url
     }

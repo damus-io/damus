@@ -25,7 +25,7 @@ struct EventProfileName: View {
         self.damus_state = damus
         self.pubkey = pubkey
         self.size = size
-        let donation = damus.ndb.lookup_profile(pubkey)?.map({ p in p?.profile?.damus_donation }).value
+        let donation = damus.profiles.lookup(id: pubkey)?.damus_donation
         self._donation = State(wrappedValue: donation)
         self.purple_account = nil
         self._profileObserver = StateObject.init(wrappedValue: ProfileObserver(pubkey: pubkey, damusState: damus))
@@ -61,8 +61,7 @@ struct EventProfileName: View {
     }
 
     var body: some View {
-        let profile_txn = damus_state.profiles.lookup(id: pubkey)
-        let profile = profile_txn?.unsafeUnownedValue
+        let profile = damus_state.profiles.lookup(id: pubkey)
         HStack(spacing: 2) {
             switch current_display_name(profile) {
             case .one(let one):
@@ -108,8 +107,7 @@ struct EventProfileName: View {
                 return
             }
 
-            let profile_txn = damus_state.profiles.lookup(id: update.pubkey)
-            guard let profile = profile_txn?.unsafeUnownedValue else { return }
+            guard let profile = damus_state.profiles.lookup(id: update.pubkey) else { return }
 
             let display_name = Profile.displayName(profile: profile, pubkey: pubkey)
             if display_name != self.display_name {

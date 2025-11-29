@@ -73,6 +73,10 @@ class NdbNote: Codable, Equatable, Hashable {
         }
         #endif
     }
+    
+    func clone() -> NdbNote {
+        return self.to_owned()
+    }
 
     func to_owned() -> NdbNote {
         if self.owned {
@@ -474,17 +478,12 @@ extension NdbNote {
         return ThreadReply(tags: self.tags)?.reply.note_id
     }
 
-    func block_offsets(ndb: Ndb) -> SafeNdbTxn<NdbBlockGroup.BlocksMetadata>? {
-        let blocks_txn: SafeNdbTxn<NdbBlockGroup.BlocksMetadata>? = .new(on: ndb) { txn -> NdbBlockGroup.BlocksMetadata? in
-            guard let key = ndb.lookup_note_key_with_txn(self.id, txn: txn) else {
-                return nil
-            }
-            return ndb.lookup_blocks_by_key_with_txn(key, txn: txn)
-        }
-
-        guard let blocks_txn else { return nil }
-
-        return blocks_txn
+    func block_offsets<T>(ndb: Ndb, borrow lendingFunction: (_: borrowing NdbBlockGroup.BlocksMetadata?) throws -> T) rethrows -> T {
+        guard let key = ndb.lookup_note_key(self.id) else { return try lendingFunction(nil) }
+        
+        return try ndb.lookup_blocks_by_key(key, borrow: { blocks in
+            return try lendingFunction(blocks)
+        })
     }
     
     func is_content_encrypted() -> Bool {

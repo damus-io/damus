@@ -136,8 +136,7 @@ struct SideMenuView: View {
         var display_name: String? = nil
 
         do {
-            let profile_txn = damus_state.ndb.lookup_profile(damus_state.pubkey, txn_name: "top_profile")
-            let profile = profile_txn?.unsafeUnownedValue?.profile
+            let profile = damus_state.profiles.lookup(id: damus_state.pubkey)
             name = profile?.name
             display_name = profile?.display_name
         }

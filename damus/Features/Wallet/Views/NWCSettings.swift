@@ -244,8 +244,7 @@ struct NWCSettings: View {
             }
         }
         .onChange(of: model.settings.donation_percent) { p in
-            let profile_txn = damus_state.profiles.lookup(id: damus_state.pubkey)
-            guard let profile = profile_txn?.unsafeUnownedValue else {
+            guard let profile = damus_state.profiles.lookup(id: damus_state.pubkey) else {
                 return
             }
             
@@ -254,10 +253,9 @@ struct NWCSettings: View {
             notify(.profile_updated(.manual(pubkey: self.damus_state.pubkey, profile: prof)))
         }
         .onDisappear {
-            let profile_txn = damus_state.profiles.lookup(id: damus_state.pubkey)
             
             guard let keypair = damus_state.keypair.to_full(),
-                  let profile = profile_txn?.unsafeUnownedValue,
+                  let profile = damus_state.profiles.lookup(id: damus_state.pubkey),
                   model.initial_percent != profile.damus_donation
             else {
                 return

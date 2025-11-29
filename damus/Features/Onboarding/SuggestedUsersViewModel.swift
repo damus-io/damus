@@ -79,8 +79,7 @@ class SuggestedUsersViewModel: ObservableObject {
 
     /// Gets suggested user information from a provided pubkey
     func suggestedUser(pubkey: Pubkey) -> SuggestedUser? {
-        let profile_txn = damus_state.profiles.lookup(id: pubkey)
-        if let profile = profile_txn?.unsafeUnownedValue,
+        if let profile = damus_state.profiles.lookup(id: pubkey),
            let user = SuggestedUser(name: profile.name, about: profile.about, picture: profile.picture, pubkey: pubkey) {
             return user
         }

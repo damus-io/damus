@@ -11,8 +11,8 @@ typealias Profile = NdbProfile
 typealias ProfileKey = UInt64
 //typealias ProfileRecord = NdbProfileRecord
 
-class ProfileRecord {
-    let data: NdbProfileRecord
+struct ProfileRecord: ~Copyable {
+    private let data: NdbProfileRecord  // Marked as private to make users access the safer `profile` property
 
     init(data: NdbProfileRecord, key: ProfileKey) {
         self.data = data
@@ -20,7 +20,11 @@ class ProfileRecord {
     }
 
     let profileKey: ProfileKey
-    var profile: Profile? { return data.profile }
+    var profile: Profile? {
+        // Clone the data since `NdbProfile` can be unowned, but does not `~Copyable` semantics.
+        // This helps ensure the memory safety of this property
+        return data.profile?.clone()
+    }
     var receivedAt: UInt64 { data.receivedAt }
     var noteKey: UInt64 { data.noteKey }
 
@@ -37,10 +41,7 @@ class ProfileRecord {
         }
         
         if addr.contains("@") {
-            // this is a heavy op and is used a lot in views, cache it!
-            let addr = lnaddress_to_lnurl(addr);
-            self._lnurl = addr
-            return addr
+            return lnaddress_to_lnurl(addr)
         }
         
         if !addr.lowercased().hasPrefix("lnurl") {
@@ -80,6 +81,24 @@ extension NdbProfile {
             }
             return URL(string: trim)
         }
+    }
+    
+    
+    /// Clones this object. Useful for creating an owned copy from an unowned profile
+    func clone() -> Self {
+        return NdbProfile(
+            name: self.name,
+            display_name: self.display_name,
+            about: self.about,
+            picture: self.picture,
+            banner: self.banner,
+            website: self.website,
+            lud06: self.lud06,
+            lud16: self.lud16,
+            nip05: self.nip05,
+            damus_donation: self.damus_donation,
+            reactions: self.reactions
+        )
     }
 
     init(name: String? = nil, display_name: String? = nil, about: String? = nil, picture: String? = nil, banner: String? = nil, website: String? = nil, lud06: String? = nil, lud16: String? = nil, nip05: String? = nil, damus_donation: Int? = nil, reactions: Bool = true) {
@@ -309,7 +328,40 @@ func make_ln_url(_ str: String?) -> URL? {
     return str.flatMap { URL(string: "lightning:" + $0) }
 }
 
+import Synchronization
+
+@available(iOS 18.0, *)
+class CachedLNAddressConverter {
+    static let shared: CachedLNAddressConverter = .init()
+    
+    private let cache: Mutex<[String: String?]> = .init([:]) // Using a mutex here to avoid race conditions without imposing actor isolation requirements.
+    
+    func lnaddress_to_lnurl(_ lnaddr: String) -> String? {
+        if let cachedValue = cache.withLock({ $0[lnaddr] }) {
+            return cachedValue
+        }
+        
+        let lnurl: String? = compute_lnaddress_to_lnurl(lnaddr)
+        
+        cache.withLock({ cache in
+            cache[lnaddr] = .some(lnurl)
+        })
+        return lnurl
+    }
+}
+
 func lnaddress_to_lnurl(_ lnaddr: String) -> String? {
+    if #available(iOS 18.0, *) {
+        // This is a heavy op, use a cache if available!
+        return CachedLNAddressConverter.shared.lnaddress_to_lnurl(lnaddr)
+    } else {
+        // Fallback on earlier versions
+        return compute_lnaddress_to_lnurl(lnaddr)
+    }
+}
+
+
+func compute_lnaddress_to_lnurl(_ lnaddr: String) -> String? {
     let parts = lnaddr.split(separator: "@")
     guard parts.count == 2 else {
         return nil
@@ -322,4 +374,3 @@ func lnaddress_to_lnurl(_ lnaddr: String) -> String? {
     
     return bech32_encode(hrp: "lnurl", Array(dat))
 }
-
