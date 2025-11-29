@@ -110,29 +110,29 @@ class SearchHomeModel: ObservableObject {
     }
 }
 
-func find_profiles_to_fetch<Y>(profiles: Profiles, load: PubkeysToLoad, cache: EventCache, txn: NdbTxn<Y>) -> [Pubkey] {
+func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad, cache: EventCache) -> [Pubkey] {
     switch load {
     case .from_events(let events):
-        return find_profiles_to_fetch_from_events(profiles: profiles, events: events, cache: cache, txn: txn)
+        return find_profiles_to_fetch_from_events(profiles: profiles, events: events, cache: cache)
     case .from_keys(let pks):
-        return find_profiles_to_fetch_from_keys(profiles: profiles, pks: pks, txn: txn)
+        return find_profiles_to_fetch_from_keys(profiles: profiles, pks: pks)
     }
 }
 
-func find_profiles_to_fetch_from_keys<Y>(profiles: Profiles, pks: [Pubkey], txn: NdbTxn<Y>) -> [Pubkey] {
-    Array(Set(pks.filter { pk in !profiles.has_fresh_profile(id: pk, txn: txn) }))
+func find_profiles_to_fetch_from_keys(profiles: Profiles, pks: [Pubkey]) -> [Pubkey] {
+    Array(Set(pks.filter { pk in !profiles.has_fresh_profile(id: pk) }))
 }
 
-func find_profiles_to_fetch_from_events<Y>(profiles: Profiles, events: [NostrEvent], cache: EventCache, txn: NdbTxn<Y>) -> [Pubkey] {
+func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent], cache: EventCache) -> [Pubkey] {
     var pubkeys = Set<Pubkey>()
 
     for ev in events {
         // lookup profiles from boosted events
-        if ev.known_kind == .boost, let bev = ev.get_inner_event(cache: cache), !profiles.has_fresh_profile(id: bev.pubkey, txn: txn) {
+        if ev.known_kind == .boost, let bev = ev.get_inner_event(cache: cache), !profiles.has_fresh_profile(id: bev.pubkey) {
             pubkeys.insert(bev.pubkey)
         }
         
-        if !profiles.has_fresh_profile(id: ev.pubkey, txn: txn) {
+        if !profiles.has_fresh_profile(id: ev.pubkey) {
             pubkeys.insert(ev.pubkey)
         }
     }

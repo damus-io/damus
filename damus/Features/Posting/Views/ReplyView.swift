@@ -27,7 +27,7 @@ struct ReplyView: View {
                 let names = references
                     .map { pubkey in
                         let pk = pubkey
-                        let prof = damus.ndb.lookup_profile(pk)?.unsafeUnownedValue?.profile
+                        let prof = damus.profiles.lookup(id: pk)
                         return "@" + Profile.displayName(profile: prof, pubkey: pk).username.truncate(maxLength: 50)
                     }
                     .joined(separator: " ")

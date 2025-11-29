@@ -104,8 +104,7 @@ struct TransactionView: View {
             return NSLocalizedString("Unknown", comment: "A name label for an unknown user")
         }
 
-        let profile_txn = damus_state.profiles.lookup(id: pubkey, txn_name: "txview-profile")
-        let profile = profile_txn?.unsafeUnownedValue
+        let profile = damus_state.profiles.lookup(id: pubkey)
 
         return Profile.displayName(profile: profile, pubkey: pubkey).displayName
     }

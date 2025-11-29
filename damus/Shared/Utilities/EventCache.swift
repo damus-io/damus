@@ -222,7 +222,7 @@ class EventCache {
             return ev
         }
 
-        if let ev = self.ndb.lookup_note(evid)?.unsafeUnownedValue?.to_owned() {
+        if let ev = self.ndb.lookup_note_and_copy(evid) {
             events[ev.id] = ev
             return ev
         }

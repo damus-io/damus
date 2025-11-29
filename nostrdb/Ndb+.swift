@@ -29,8 +29,8 @@ extension Ndb {
     }
     
     /// Determines if a given note was seen on any of the listed relay URLs
-    func was(noteKey: NoteKey, seenOnAnyOf relayUrls: [RelayURL], txn: SafeNdbTxn<()>? = nil) throws -> Bool {
-        return try self.was(noteKey: noteKey, seenOnAnyOf: relayUrls.map({ $0.absoluteString }), txn: txn)
+    func was(noteKey: NoteKey, seenOnAnyOf relayUrls: [RelayURL]) throws -> Bool {
+        return try self.was(noteKey: noteKey, seenOnAnyOf: relayUrls.map({ $0.absoluteString }))
     }
     
     func processEvent(_ str: String, originRelayURL: RelayURL? = nil) -> Bool {

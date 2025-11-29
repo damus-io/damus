@@ -31,17 +31,18 @@ struct PullDownSearchView: View {
         }
 
         do {
-            guard let txn = NdbTxn(ndb: state.ndb) else { return }
             for note_key in note_keys {
-                guard let note = state.ndb.lookup_note_by_key_with_txn(note_key, txn: txn) else {
-                    continue
-                }
-
-                if !keyset.contains(note_key) {
-                    let owned_note = note.to_owned()
-                    res.append(owned_note)
-                    keyset.insert(note_key)
-                }
+                state.ndb.lookup_note_by_key(note_key, borrow: { maybeUnownedNote in
+                    switch maybeUnownedNote {
+                    case .none: return  // Skip this
+                    case .some(let unownedNote):
+                        if !keyset.contains(note_key) {
+                            let owned_note = unownedNote.toOwned()
+                            res.append(owned_note)
+                            keyset.insert(note_key)
+                        }
+                    }
+                })
             }
         }
 

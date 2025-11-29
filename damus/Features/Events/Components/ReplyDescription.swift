@@ -38,14 +38,10 @@ func reply_desc(ndb: Ndb, event: NostrEvent, replying_to: NostrEvent?, locale: L
         return NSLocalizedString("Replying to self", bundle: bundle, comment: "Label to indicate that the user is replying to themself.")
     }
 
-    guard let profile_txn = NdbTxn(ndb: ndb) else  {
-        return ""
-    }
-
     let names: [String] = pubkeys.map { pk in
-        let prof = ndb.lookup_profile_with_txn(pk, txn: profile_txn)
+        let profile = ndb.lookup_profile_and_copy(pk)
 
-        return Profile.displayName(profile: prof?.profile, pubkey: pk).username.truncate(maxLength: 50)
+        return Profile.displayName(profile: profile, pubkey: pk).username.truncate(maxLength: 50)
     }
     
     let uniqueNames = NSOrderedSet(array: names).array as! [String]

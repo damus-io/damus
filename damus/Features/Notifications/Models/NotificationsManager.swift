@@ -65,63 +65,77 @@ func should_display_notification(state: HeadlessDamusState, event ev: NostrEvent
     return true
 }
 
+func generate_text_mention_notification(ndb: Ndb, from ev: NostrEvent, state: HeadlessDamusState, blockGroup: borrowing NdbBlockGroup) -> LocalNotification? {
+    let notification: LocalNotification? = blockGroup.forEachBlock({ index, block in
+        switch block {
+        case .mention(let mention):
+            guard case .npub = mention.bech32_type,
+                  (memcmp(state.keypair.pubkey.id.bytes, mention.bech32.npub.pubkey, 32) == 0) else {
+                return .loopContinue
+            }
+            let content_preview = render_notification_content_preview(ndb: ndb, ev: ev, profiles: state.profiles, keypair: state.keypair)
+            return .loopReturn(LocalNotification(type: .mention, event: ev, target: .note(ev), content: content_preview))
+        default:
+            return .loopContinue
+        }
+    })
+    if let notification {
+        return notification
+    }
+
+    if ev.referenced_ids.contains(where: { note_id in
+        guard let note_author: Pubkey = state.ndb.lookup_note(note_id, borrow: { note in
+            switch note {
+            case .some(let note): return note.pubkey
+            case .none: return nil
+            }
+        }) else { return false }
+        guard note_author == state.keypair.pubkey else { return false }
+        return true
+    }) {
+        // This is a reply to one of our posts
+        let content_preview = render_notification_content_preview(ndb: state.ndb, ev: ev, profiles: state.profiles, keypair: state.keypair)
+        return LocalNotification(type: .reply, event: ev, target: .note(ev), content: content_preview)
+    }
+
+    if ev.referenced_pubkeys.contains(state.keypair.pubkey) {
+        // not mentioned or replied to, just tagged
+        let content_preview = render_notification_content_preview(ndb: state.ndb, ev: ev, profiles: state.profiles, keypair: state.keypair)
+        return LocalNotification(type: .tagged, event: ev, target: .note(ev), content: content_preview)
+    }
+    
+    return nil
+}
+
 func generate_local_notification_object(ndb: Ndb, from ev: NostrEvent, state: HeadlessDamusState) -> LocalNotification? {
     guard let type = ev.known_kind else {
         return nil
     }
     
     if type == .text,
-       state.settings.mention_notification,
-       let blockGroup = try? NdbBlockGroup.from(event: ev, using: ndb, and: state.keypair)
+       state.settings.mention_notification
     {
-        let notification: LocalNotification? = try? blockGroup.forEachBlock({ index, block in
-            switch block {
-            case .mention(let mention):
-                guard case .npub = mention.bech32_type,
-                      (memcmp(state.keypair.pubkey.id.bytes, mention.bech32.npub.pubkey, 32) == 0) else {
-                    return .loopContinue
-                }
-                let content_preview = render_notification_content_preview(ndb: ndb, ev: ev, profiles: state.profiles, keypair: state.keypair)
-                return .loopReturn(LocalNotification(type: .mention, event: ev, target: .note(ev), content: content_preview))
-            default:
-                return .loopContinue
-            }
+        return try? NdbBlockGroup.borrowBlockGroup(event: ev, using: ndb, and: state.keypair, borrow: { blockGroup in
+            return generate_text_mention_notification(ndb: ndb, from: ev, state: state, blockGroup: blockGroup)
         })
-        if let notification {
-            return notification
-        }
-
-        if ev.referenced_ids.contains(where: { note_id in
-            guard let note_author: Pubkey = state.ndb.lookup_note(note_id)?.unsafeUnownedValue?.pubkey else { return false }
-            guard note_author == state.keypair.pubkey else { return false }
-            return true
-        }) {
-            // This is a reply to one of our posts
-            let content_preview = render_notification_content_preview(ndb: state.ndb, ev: ev, profiles: state.profiles, keypair: state.keypair)
-            return LocalNotification(type: .reply, event: ev, target: .note(ev), content: content_preview)
-        }
-
-        if ev.referenced_pubkeys.contains(state.keypair.pubkey) {
-            // not mentioned or replied to, just tagged
-            let content_preview = render_notification_content_preview(ndb: state.ndb, ev: ev, profiles: state.profiles, keypair: state.keypair)
-            return LocalNotification(type: .tagged, event: ev, target: .note(ev), content: content_preview)
-        }
-
     } else if type == .boost,
               state.settings.repost_notification,
               let inner_ev = ev.get_inner_event()
     {
+        
         let content_preview = render_notification_content_preview(ndb: ndb, ev: inner_ev, profiles: state.profiles, keypair: state.keypair)
         return LocalNotification(type: .repost, event: ev, target: .note(inner_ev), content: content_preview)
     } else if type == .like, state.settings.like_notification, let evid = ev.referenced_ids.last {
-        if let txn = state.ndb.lookup_note(evid, txn_name: "local_notification_like"),
-           let liked_event = txn.unsafeUnownedValue
-        {
-           let content_preview = render_notification_content_preview(ndb: ndb, ev: liked_event, profiles: state.profiles, keypair: state.keypair)
-            return LocalNotification(type: .like, event: ev, target: .note(liked_event), content: content_preview)
-        } else {
-            return LocalNotification(type: .like, event: ev, target: .note_id(evid), content: "")
-        }
+        return state.ndb.lookup_note(evid, borrow: { liked_event in
+            switch liked_event {
+            case .none:
+                return LocalNotification(type: .like, event: ev, target: .note_id(evid), content: "")
+            case .some(let liked_event):
+                let owned_liked_event = liked_event.toOwned()
+                let content_preview = render_notification_content_preview(ndb: ndb, ev: owned_liked_event, profiles: state.profiles, keypair: state.keypair)
+                return LocalNotification(type: .like, event: ev, target: .note(owned_liked_event), content: content_preview)
+            }
+        })
     }
     else if type == .dm,
             state.settings.dm_notification {
@@ -177,8 +191,7 @@ func render_notification_content_preview(ndb: Ndb, ev: NostrEvent, profiles: Pro
 }
 
 func event_author_name(profiles: Profiles, pubkey: Pubkey) -> String {
-    let profile_txn = profiles.lookup(id: pubkey)
-    let profile = profile_txn?.unsafeUnownedValue
+    let profile = profiles.lookup(id: pubkey)
     return Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
 }
 
@@ -214,9 +227,13 @@ func process_zap_event(state: HeadlessDamusState, ev: NostrEvent, completion: @e
         completion(.done(zap))
         return
     }
-    
-    guard let txn = state.profiles.lookup_with_timestamp(ptag),
-          let lnurl = txn.map({ pr in pr?.lnurl }).value else {
+
+    guard let lnurl = state.profiles.lookup_with_timestamp(ptag, borrow: { record -> String? in
+        switch record {
+        case .none: return nil
+        case .some(let record): return record.lnurl
+        }
+    }) else {
         completion(.failed)
         return
     }
@@ -263,18 +280,19 @@ func get_zap_target_pubkey(ev: NostrEvent, ndb: Ndb) -> Pubkey? {
     }
 
     // we can't trust the p tag on note zaps because they can be faked
-    guard let txn = ndb.lookup_note(etag),
-          let pk = txn.unsafeUnownedValue?.pubkey else {
-        // We don't have the event in cache so we can't check the pubkey.
+    return ndb.lookup_note(etag, borrow: { note in
+        switch note {
+        case .none:
+            // We don't have the event in cache so we can't check the pubkey.
 
-        // We could return this as an invalid zap but that wouldn't be correct
-        // all of the time, and may reject valid zaps. What we need is a new
-        // unvalidated zap state, but for now we simply leak a bit of correctness...
-
-        return ev.referenced_pubkeys.just_one()
-    }
-
-    return pk
+            // We could return this as an invalid zap but that wouldn't be correct
+            // all of the time, and may reject valid zaps. What we need is a new
+            // unvalidated zap state, but for now we simply leak a bit of correctness...
+            return ev.referenced_pubkeys.just_one()
+        case .some(let note):
+            return note.pubkey
+        }
+    })
 }
 
 fileprivate func process_zap_event_with_zapper(state: HeadlessDamusState, ev: NostrEvent, zapper: Pubkey) -> Zap? {

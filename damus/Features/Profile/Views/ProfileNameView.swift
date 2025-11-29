@@ -16,8 +16,7 @@ struct ProfileNameView: View {
     var body: some View {
         Group {
             VStack(alignment: .leading) {
-                let profile_txn = self.damus.profiles.lookup(id: pubkey)
-                let profile = profile_txn?.unsafeUnownedValue
+                let profile = self.damus.profiles.lookup(id: pubkey)
 
                 switch Profile.displayName(profile: profile, pubkey: pubkey) {
                 case .one:

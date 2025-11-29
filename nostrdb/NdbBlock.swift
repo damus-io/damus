@@ -104,11 +104,16 @@ enum NdbBlock: ~Copyable {
 /// Represents a group of blocks
 struct NdbBlockGroup: ~Copyable {
     /// The block offsets
-    fileprivate let metadata: MaybeTxn<BlocksMetadata>
+    fileprivate let metadata: BlocksMetadata
     /// The raw text content of the note
     fileprivate let rawTextContent: String
     var words: Int {
-        return metadata.borrow { $0.words }
+        return metadata.words
+    }
+    
+    init(metadata: consuming BlocksMetadata, rawTextContent: String) {
+        self.metadata = metadata
+        self.rawTextContent = rawTextContent
     }
     
     /// Gets the parsed blocks from a specific note.
@@ -116,18 +121,20 @@ struct NdbBlockGroup: ~Copyable {
     /// This function will:
     /// - fetch blocks information from NostrDB if possible _and_ available, or
     /// - parse blocks on-demand.
-    static func from(event: NdbNote, using ndb: Ndb, and keypair: Keypair) throws(NdbBlocksError) -> Self {
+    static func borrowBlockGroup<T>(event: NdbNote, using ndb: Ndb, and keypair: Keypair, borrow lendingFunction: (_: borrowing Self) throws -> T) throws -> T {
         if event.is_content_encrypted() {
-            return try parse(event: event, keypair: keypair)
+            return try lendingFunction(parse(event: event, keypair: keypair))
         }
         else if event.known_kind == .highlight {
-            return try parse(event: event, keypair: keypair)
+            return try lendingFunction(parse(event: event, keypair: keypair))
         }
         else {
-            guard let offsets = event.block_offsets(ndb: ndb) else {
-                return try parse(event: event, keypair: keypair)
-            }
-            return .init(metadata: .txn(offsets), rawTextContent: event.content)
+            return try ndb.lookup_block_group_by_key(event: event, borrow: { group in
+                switch group {
+                case .none: return try lendingFunction(parse(event: event, keypair: keypair))
+                case .some(let group): return try lendingFunction(group)
+                }
+            })
         }
     }
     
@@ -136,34 +143,44 @@ struct NdbBlockGroup: ~Copyable {
     /// Prioritize using `from(event: NdbNote, using ndb: Ndb, and keypair: Keypair)` when possible.
     static func parse(event: NdbNote, keypair: Keypair) throws(NdbBlocksError) -> Self {
         guard let content = event.maybe_get_content(keypair) else { throw NdbBlocksError.decryptionError }
-        guard let metadata = BlocksMetadata.parseContent(content: content) else { throw NdbBlocksError.parseError }
+        guard var metadata = BlocksMetadata.parseContent(content: content) else { throw NdbBlocksError.parseError }
         return self.init(
-            metadata: .pure(metadata),
+            metadata: metadata,
             rawTextContent: content
         )
     }
     
     /// Parses the note contents on-demand from a specific text.
     static func parse(content: String) throws(NdbBlocksError) -> Self {
-        guard let metadata = BlocksMetadata.parseContent(content: content) else { throw NdbBlocksError.parseError }
+        guard var metadata = BlocksMetadata.parseContent(content: content) else { throw NdbBlocksError.parseError }
         return self.init(
-            metadata: .pure(metadata),
+            metadata: metadata,
             rawTextContent: content
         )
     }
 }
 
-enum MaybeTxn<T: ~Copyable>: ~Copyable {
-    case pure(T)
-    case txn(SafeNdbTxn<T>)
-    
-    func borrow<Y>(_ borrowFunction: (borrowing T) throws -> Y) rethrows -> Y {
-        switch self {
-        case .pure(let item):
-            return try borrowFunction(item)
-        case .txn(let txn):
-            return try borrowFunction(txn.val)
+// MARK: - Extensions enabling low-level control
+
+fileprivate extension Ndb {
+    func lookup_block_group_by_key<T>(event: NdbNote, borrow lendingFunction: sending (_: borrowing NdbBlockGroup?) throws -> T) rethrows -> T {
+        let txn = SafeNdbTxn<NdbBlockGroup?>.new(on: self) { txn in
+            guard let key = lookup_note_key_with_txn(event.id, txn: txn) else { return nil }
+            return lookup_block_group_by_key_with_txn(key, event: event, txn: txn)
         }
+        guard let txn else {
+            return try lendingFunction(nil)
+        }
+        return try lendingFunction(txn.val)
+    }
+    
+    func lookup_block_group_by_key_with_txn(_ key: NoteKey, event: NdbNote, txn: RawNdbTxnAccessible) -> NdbBlockGroup? {
+        guard let blocks = ndb_get_blocks_by_key(self.ndb.ndb, &txn.txn, key) else {
+            return nil
+        }
+
+        let metadata = NdbBlockGroup.BlocksMetadata(ptr: blocks)
+        return NdbBlockGroup(metadata: metadata, rawTextContent: event.content)
     }
 }
 
@@ -174,8 +191,6 @@ extension NdbBlockGroup {
     /// Wrapper for the `ndb_blocks` C struct
     ///
     /// This does not store the actual block contents, only the offsets on the content string and block metadata.
-    ///
-    /// **Implementation note:** This would be better as `~Copyable`, but `NdbTxn` does not support `~Copyable` yet.
     struct BlocksMetadata: ~Copyable {
         private let blocks_ptr: ndb_blocks_ptr
         private let buffer: UnsafeMutableRawPointer?
@@ -290,17 +305,14 @@ extension NdbBlockGroup {
             var iter = ndb_block_iterator(content: cptr, blocks: nil, block: ndb_block(), p: nil)
             
             // Start the iteration
-            return try self.metadata.borrow { value in
-                ndb_blocks_iterate_start(cptr, value.as_ptr(), &iter)
-                
-                // Collect blocks into array
-                outerLoop: while let ptr = ndb_blocks_iterate_next(&iter),
-                      let block = NdbBlock(ndb_block_ptr(ptr: ptr)) {
-                    linkedList.add(item: block)
-                }
-                
-                return try borrowingFunction(linkedList)
+            ndb_blocks_iterate_start(cptr, self.metadata.as_ptr(), &iter)
+            
+            // Collect blocks into array
+            outerLoop: while let ptr = ndb_blocks_iterate_next(&iter),
+                  let block = NdbBlock(ndb_block_ptr(ptr: ptr)) {
+                linkedList.add(item: block)
             }
+            return try borrowingFunction(linkedList)
         }
     }
 }

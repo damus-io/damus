@@ -17,13 +17,11 @@ struct UserSearch: View {
     @EnvironmentObject var tagModel: TagModel
     
     var users: [Pubkey] {
-        guard let txn = NdbTxn(ndb: damus_state.ndb) else { return [] }
-        return search_profiles(profiles: damus_state.profiles, contacts: damus_state.contacts, search: search, txn: txn)
+        return search_profiles(profiles: damus_state.profiles, contacts: damus_state.contacts, search: search)
     }
     
     func on_user_tapped(pk: Pubkey) {
-        let profile_txn = damus_state.profiles.lookup(id: pk)
-        let profile = profile_txn?.unsafeUnownedValue
+        let profile = damus_state.profiles.lookup(id: pk)
         let user_tag = user_tag_attr_string(profile: profile, pubkey: pk)
 
         appendUserTag(withTag: user_tag)

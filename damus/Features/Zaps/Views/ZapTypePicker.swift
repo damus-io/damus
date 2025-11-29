@@ -97,8 +97,7 @@ func zap_type_desc(type: ZapType, profiles: Profiles, pubkey: Pubkey) -> String 
     case .anon:
         return NSLocalizedString("No one will see that you zapped", comment: "Description of anonymous zap type where the zap is sent anonymously and does not identify the user who sent it.")
     case .priv:
-        let prof_txn = profiles.lookup(id: pubkey)
-        let prof = prof_txn?.unsafeUnownedValue
+        let prof = profiles.lookup(id: pubkey)
         let name = Profile.displayName(profile: prof, pubkey: pubkey).username.truncate(maxLength: 50)
         return String.localizedStringWithFormat(NSLocalizedString("private_zap_description", value: "Only '%@' will see that you zapped them", comment: "Description of private zap type where the zap is sent privately and does not identify the user to the public."), name)
     case .non_zap:

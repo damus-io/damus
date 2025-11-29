@@ -78,7 +78,7 @@ class NdbTxn<T>: RawNdbTxnAccessible {
 
     /// Only access temporarily! Do not store database references for longterm use. If it's a primitive type you
     /// can retrieve this value with `.value`
-    var unsafeUnownedValue: T {
+    internal var unsafeUnownedValue: T { 
         precondition(!moved)
         return val
     }

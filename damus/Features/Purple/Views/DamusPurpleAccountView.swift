@@ -121,8 +121,7 @@ struct DamusPurpleAccountView: View {
     }
     
     func profile_display_name() -> String {
-        let profile_txn: NdbTxn<ProfileRecord?>? = damus_state.profiles.lookup_with_timestamp(account.pubkey)
-        let profile: NdbProfile? = profile_txn?.unsafeUnownedValue?.profile
+        let profile = damus_state.profiles.lookup(id: account.pubkey)
         let display_name = DisplayName(profile: profile, pubkey: account.pubkey).displayName
         return display_name
     }
