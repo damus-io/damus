@@ -72,8 +72,9 @@ func render_immediately_available_note_content(ndb: Ndb, ev: NostrEvent, profile
     }
     
     do {
-        let blocks = try NdbBlockGroup.from(event: ev, using: ndb, and: keypair)
-        return .separated(render_blocks(blocks: blocks, profiles: profiles, can_hide_last_previewable_refs: true))
+        return try NdbBlockGroup.borrowBlockGroup(event: ev, using: ndb, and: keypair, borrow: { blocks in
+            return .separated(render_blocks(blocks: blocks, profiles: profiles, can_hide_last_previewable_refs: true))
+        })
     }
     catch {
         // TODO: Improve error handling in the future, bubbling it up so that the view can decide how display errors. Keep legacy behavior for now.
@@ -327,8 +328,7 @@ func attributed_string_attach_icon(_ astr: inout AttributedString, img: UIImage)
 }
 
 func getDisplayName(pk: Pubkey, profiles: Profiles) -> String {
-    let profile_txn = profiles.lookup(id: pk, txn_name: "getDisplayName")
-    let profile = profile_txn?.unsafeUnownedValue
+    let profile = profiles.lookup(id: pk)
     return Profile.displayName(profile: profile, pubkey: pk).username.truncate(maxLength: 50)
 }
 

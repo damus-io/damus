@@ -61,8 +61,7 @@ class AppLifecycleHandlingTests: XCTestCase {
             do {
                 try await Task.sleep(for: .milliseconds(Int.random(in: 0...10)))
                 print("APP_LIFECYCLE_TEST \(i): Starting new query. Elapsed time: \(getElapsedTimeMiliseconds())")
-                guard let txn = NdbTxn(ndb: damusState.ndb) else { continue }
-                _ = try damusState.ndb.query(with: txn, filters: [try NdbFilter(from: NostrFilter(kinds: [.text], limit: 1000))], maxResults: 500)
+                _ = try damusState.ndb.query(filters: [try NdbFilter(from: NostrFilter(kinds: [.text], limit: 1000))], maxResults: 500)
             }
             catch {
                 print("APP_LIFECYCLE_TEST \(i): Query error: \(error). Elapsed time: \(getElapsedTimeMiliseconds())")

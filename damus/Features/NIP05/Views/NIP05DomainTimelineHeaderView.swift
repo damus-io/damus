@@ -82,7 +82,12 @@ struct NIP05DomainTimelineHeaderView: View {
 func friendsOfFriendsString(_ friendsOfFriends: [Pubkey], ndb: Ndb, locale: Locale = Locale.current) -> String {
     let bundle = bundleForLocale(locale: locale)
     let names: [String] = friendsOfFriends.prefix(3).map { pk in
-        let profile = ndb.lookup_profile(pk)?.unsafeUnownedValue?.profile
+        let profile = ndb.lookup_profile(pk, borrow: { pr in
+            switch pr {
+            case .some(let pr): return pr.profile
+            case .none: return nil
+            }
+        })
         return Profile.displayName(profile: profile, pubkey: pk).username.truncate(maxLength: 20)
     }
 

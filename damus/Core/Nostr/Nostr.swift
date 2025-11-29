@@ -11,8 +11,8 @@ typealias Profile = NdbProfile
 typealias ProfileKey = UInt64
 //typealias ProfileRecord = NdbProfileRecord
 
-class ProfileRecord {
-    let data: NdbProfileRecord
+struct ProfileRecord: ~Copyable {
+    private let data: NdbProfileRecord  // Marked as private to make users access the safer `profile` property
 
     init(data: NdbProfileRecord, key: ProfileKey) {
         self.data = data
@@ -20,7 +20,11 @@ class ProfileRecord {
     }
 
     let profileKey: ProfileKey
-    var profile: Profile? { return data.profile }
+    var profile: Profile? {
+        // Clone the data since `NdbProfile` can be unowned, but does not `~Copyable` semantics.
+        // This helps ensure the memory safety of this property
+        return data.profile?.clone()
+    }
     var receivedAt: UInt64 { data.receivedAt }
     var noteKey: UInt64 { data.noteKey }
 
@@ -37,9 +41,10 @@ class ProfileRecord {
         }
         
         if addr.contains("@") {
+            // GH-3245 TODO: Do we still need the code below after migration?
             // this is a heavy op and is used a lot in views, cache it!
-            let addr = lnaddress_to_lnurl(addr);
-            self._lnurl = addr
+//            let addr = lnaddress_to_lnurl(addr);
+//            self._lnurl = addr
             return addr
         }
         
@@ -80,6 +85,24 @@ extension NdbProfile {
             }
             return URL(string: trim)
         }
+    }
+    
+    
+    /// Clones this object. Useful for creating an owned copy from an unowned profile
+    func clone() -> Self {
+        return NdbProfile(
+            name: self.name,
+            display_name: self.display_name,
+            about: self.about,
+            picture: self.picture,
+            banner: self.banner,
+            website: self.website,
+            lud06: self.lud06,
+            lud16: self.lud16,
+            nip05: self.nip05,
+            damus_donation: self.damus_donation,
+            reactions: self.reactions
+        )
     }
 
     init(name: String? = nil, display_name: String? = nil, about: String? = nil, picture: String? = nil, banner: String? = nil, website: String? = nil, lud06: String? = nil, lud16: String? = nil, nip05: String? = nil, damus_donation: Int? = nil, reactions: Bool = true) {

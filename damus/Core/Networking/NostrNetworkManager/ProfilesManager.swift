@@ -96,7 +96,7 @@ extension NostrNetworkManager {
             
             if let relevantStreams = streams[metadataEvent.pubkey] {
                 // If we have the user metadata event in ndb, then we should have the profile record as well.
-                guard let profile = ndb.lookup_profile(metadataEvent.pubkey) else { return }
+                guard let profile = ndb.lookup_profile_and_copy(metadataEvent.pubkey) else { return }
                 for relevantStream in relevantStreams.values {
                     relevantStream.continuation.yield(profile)
                 }
@@ -144,7 +144,7 @@ extension NostrNetworkManager {
         
         // MARK: - Helper types
         
-        typealias ProfileStreamItem = NdbTxn<ProfileRecord?>
+        typealias ProfileStreamItem = Profile
         
         struct ProfileStreamInfo {
             let id: UUID = UUID()

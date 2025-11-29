@@ -58,9 +58,12 @@ enum NdbNoteLender: Sendable {
         switch self {
         case .ndbNoteKey(let ndb, let noteKey):
             guard !ndb.is_closed else { throw LendingError.ndbClosed }
-            guard let ndbNoteTxn = ndb.lookup_note_by_key(noteKey) else { throw LendingError.errorLoadingNote }
-            guard let unownedNote = UnownedNdbNote(ndbNoteTxn) else { throw LendingError.errorLoadingNote }
-            return try lendingFunction(unownedNote)
+            return try ndb.lookup_note_by_key(noteKey, borrow: { maybeUnownedNote in
+                switch maybeUnownedNote {
+                case .none: throw LendingError.errorLoadingNote
+                case .some(let unownedNote): return try lendingFunction(unownedNote)
+                }
+            })
         case .owned(let note):
             return try lendingFunction(UnownedNdbNote(note))
         }
