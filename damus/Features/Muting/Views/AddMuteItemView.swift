@@ -87,6 +87,7 @@ struct AddMuteItemView: View {
                     }
 
                     state.mutelist_manager.set_mutelist(mutelist)
+                    state.settings.latest_mutelist_event_id_hex = mutelist.id.hex()
                     Task { await state.nostrNetwork.postbox.send(mutelist) }
                 }
 
