@@ -20,6 +20,23 @@ struct SelectWallet {
     let invoice: String
 }
 
+struct TransientToastNotify: Notify {
+    typealias Payload = String
+    var payload: Payload
+}
+
+extension NotifyHandler {
+    static var transient_toast: NotifyHandler<TransientToastNotify> {
+        .init()
+    }
+}
+
+extension Notifications {
+    static func transient_toast(_ message: String) -> Notifications<TransientToastNotify> {
+        .init(.init(payload: message))
+    }
+}
+
 enum Sheets: Identifiable {
     case post(PostAction)
     case report(ReportTarget)
@@ -136,6 +153,8 @@ struct ContentView: View {
     @AppStorage("has_seen_suggested_users") private var hasSeenOnboardingSuggestions = false
     let sub_id = UUID().description
     @State var damusClosingTask: Task<Void, Never>? = nil
+    @State private var transientToastMessage: String? = nil
+    @State private var transientToastDismissTask: Task<Void, Never>? = nil
     
     // connect retry timer
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -293,6 +312,13 @@ struct ContentView: View {
                             .allowsHitTesting(false)
                     }
                 }
+                .overlay(alignment: .top) {
+                    if let transientToastMessage {
+                        InlineToastView(message: transientToastMessage)
+                            .padding(.top, getSafeAreaTop() + 8)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                    }
+                }
                 .overlay(alignment: .bottom) {
                     if !hide_bar {
                         if !isSideBarOpened {
@@ -315,6 +341,7 @@ struct ContentView: View {
                 }
             }
         }
+        .animation(.easeInOut(duration: 0.35), value: transientToastMessage)
         .ignoresSafeArea(.keyboard)
         .edgesIgnoringSafeArea(hide_bar ? [.bottom] : [])
         .onAppear() {
@@ -388,6 +415,16 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.compose)) { action in
             self.active_sheet = .post(action)
+        }
+        .onReceive(handle_notify(.transient_toast)) { message in
+            transientToastDismissTask?.cancel()
+            transientToastMessage = message
+            transientToastDismissTask = Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 2_000_000_000)
+                withAnimation {
+                    transientToastMessage = nil
+                }
+            }
         }
         .onReceive(handle_notify(.display_tabbar)) { display in
             let show = display

@@ -12,9 +12,14 @@ struct DMChatView: View, KeyboardReadable {
     let damus_state: DamusState
     @FocusState private var isTextFieldFocused: Bool
     @ObservedObject var dms: DirectMessageModel
+    @Environment(\.connectivitySignal) var connectivitySignal
     
     var pubkey: Pubkey {
         dms.pubkey
+    }
+    
+    var isOffline: Bool {
+        connectivitySignal?.isOffline ?? false
     }
     
     var Messages: some View {
@@ -114,6 +119,17 @@ struct DMChatView: View, KeyboardReadable {
                     Label("", image: "send")
                         .font(.title)
                 }
+                .disabled(isOffline)
+                .opacity(isOffline ? 0.5 : 1.0)
+                .overlay {
+                    if isOffline {
+                        Color.clear
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                notify(.transient_toast(NSLocalizedString("DMs unavailable offline.", comment: "Toast shown when attempting to send a DM while offline.")))
+                            }
+                    }
+                }
             }
         }
 
@@ -125,6 +141,7 @@ struct DMChatView: View, KeyboardReadable {
     }
 
     func send_message() async {
+        guard !isOffline else { return }
         let tags = [["p", pubkey.hex()]]
         guard let post_blocks = parse_post_blocks(content: dms.draft)?.blocks else {
             return
@@ -186,4 +203,3 @@ extension View {
             .background(content())
     }
 }
-

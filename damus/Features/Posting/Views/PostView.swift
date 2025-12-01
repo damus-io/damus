@@ -162,21 +162,33 @@ struct PostView: View {
     
     var ImageButton: some View {
         Button(action: {
+            if isOffline {
+                notify(.transient_toast(NSLocalizedString("Uploads unavailable offline.", comment: "Toast shown when attempting to upload media while offline.")))
+                return
+            }
             preUploadedMedia.removeAll()
             attach_media = true
         }, label: {
             Image("images")
                 .padding(6)
         })
+        .disabled(uploading_disabled)
+        .opacity((uploading_disabled || isOffline) ? 0.5 : 1.0)
     }
     
     var CameraButton: some View {
         Button(action: {
+            if isOffline {
+                notify(.transient_toast(NSLocalizedString("Uploads unavailable offline.", comment: "Toast shown when attempting to upload media while offline.")))
+                return
+            }
             attach_camera = true
         }, label: {
             Image("camera")
                 .padding(6)
         })
+        .disabled(uploading_disabled)
+        .opacity((uploading_disabled || isOffline) ? 0.5 : 1.0)
     }
     
     var AttachmentBar: some View {

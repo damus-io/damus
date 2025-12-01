@@ -22,10 +22,12 @@ struct EventActionBar: View {
     @State var show_share_sheet: Bool = false
     @State var show_share_action: Bool = false
     @State var show_repost_action: Bool = false
-
+    
     @State private var selectedEmoji: Emoji? = nil
 
     @ObservedObject var bar: ActionBarModel
+    
+    @Environment(\.connectivitySignal) var connectivitySignal
     
     init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel? = nil, options: Options = [], swipe_context: SwipeContext? = nil) {
         self.damus_state = damus_state
@@ -57,6 +59,10 @@ struct EventActionBar: View {
         return true
     }
     
+    var isOffline: Bool {
+        connectivitySignal?.isOffline ?? false
+    }
+    
     var space_if_spread: AnyView {
         if options.contains(.no_spread) {
             return AnyView(EmptyView())
@@ -80,7 +86,7 @@ struct EventActionBar: View {
     
     var repost_swipe_button: some View {
         SwipeAction(image: "repost", backgroundColor: DamusColors.adaptableGrey) {
-            self.show_repost_action = true
+            handleRepostTapped()
             self.swipe_context?.state.wrappedValue = .closed
         }
         .swipeButtonStyle()
@@ -89,10 +95,8 @@ struct EventActionBar: View {
     
     var like_swipe_button: some View {
         SwipeAction(image: "shaka", backgroundColor: DamusColors.adaptableGrey) {
-            Task {
-                await send_like(emoji: damus_state.settings.default_emoji_reaction)
-                self.swipe_context?.state.wrappedValue = .closed
-            }
+            handleLikeTapped(emoji: damus_state.settings.default_emoji_reaction)
+            self.swipe_context?.state.wrappedValue = .closed
         }
         .swipeButtonStyle()
         .accessibilityLabel(NSLocalizedString("React with default reaction emoji", comment: "Accessibility label for react button"))
@@ -125,29 +129,37 @@ struct EventActionBar: View {
         HStack(spacing: 4) {
             
             EventActionButton(img: "repost", col: bar.boosted ? Color.green : nil) {
-                self.show_repost_action = true
+                handleRepostTapped()
             }
             .accessibilityLabel(NSLocalizedString("Reposts", comment: "Accessibility label for boosts button"))
             Text(verbatim: "\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
                 .font(.footnote.weight(.medium))
                 .foregroundColor(bar.boosted ? Color.green : Color.gray)
         }
+        .opacity(isOffline ? 0.5 : 1.0)
     }
     
     var like_button: some View {
         HStack(spacing: 4) {
             LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil) { emoji in
-                if bar.liked {
-                    //notify(.delete, bar.our_like)
-                } else {
-                    Task { await send_like(emoji: emoji) }
-                }
+                handleLikeTapped(emoji: emoji)
             }
             
             Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
                 .font(.footnote.weight(.medium))
                 .nip05_colorized(gradient: bar.liked)
         }
+        .opacity(isOffline ? 0.5 : 1.0)
+        .overlay {
+            if isOffline {
+                        Color.clear
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                // Gentle inline notification for offline tap
+                                notify(.transient_toast(NSLocalizedString("Likes unavailable offline.", comment: "Toast shown when attempting to like while offline.")))
+                            }
+                    }
+                }
     }
     
     var share_button: some View {
@@ -202,10 +214,21 @@ struct EventActionBar: View {
                 self.space_if_spread
                 self.like_button
             }
-                
+            
             if let lnurl = self.lnurl, !should_hide_zap {
                 self.space_if_spread
                 NoteZapButton(damus_state: damus_state, target: ZapTarget.note(id: event.id, author: event.pubkey), lnurl: lnurl, zaps: zap_model)
+                    .opacity(isOffline ? 0.5 : 1.0)
+                    .overlay {
+                        if isOffline {
+                            Color.clear
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    // Inform users that lightning actions are paused offline
+                                    notify(.transient_toast(NSLocalizedString("Zaps unavailable offline.", comment: "Toast shown when attempting to zap while offline.")))
+                                }
+                        }
+                    }
             }
             
             if !should_hide_share_button {
@@ -295,6 +318,7 @@ struct EventActionBar: View {
     }
 
     func send_like(emoji: String) async {
+        guard !isOffline else { return }
         guard let keypair = damus_state.keypair.to_full(),
               let like_ev = await make_like_event(keypair: keypair, liked: event, content: emoji, relayURL: damus_state.nostrNetwork.relaysForEvent(event: event).first) else {
             return
@@ -305,6 +329,28 @@ struct EventActionBar: View {
         generator.impactOccurred()
         
         await damus_state.nostrNetwork.postbox.send(like_ev)
+    }
+    
+    func handleRepostTapped() {
+        if isOffline {
+            notify(.transient_toast(NSLocalizedString("Reposts unavailable offline.", comment: "Toast shown when attempting to repost while offline.")))
+            return
+        }
+        
+        show_repost_action = true
+    }
+    
+    func handleLikeTapped(emoji: String) {
+        if isOffline {
+            notify(.transient_toast(NSLocalizedString("Likes unavailable offline.", comment: "Toast shown when attempting to like while offline.")))
+            return
+        }
+        
+        if bar.liked {
+            // Intentionally no unlike when offline handling; liking is idempotent here.
+            return
+        }
+        Task { await send_like(emoji: emoji) }
     }
     
     // MARK: Helper structures
@@ -330,6 +376,23 @@ func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> 
         .onTapGesture {
             action()
         }
+}
+
+struct InlineToastView: View {
+    let message: String
+    
+    var body: some View {
+        Text(message)
+            .font(.footnote.weight(.medium))
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(Color.black.opacity(0.9))
+            .foregroundColor(.white)
+            .clipShape(Capsule(style: .continuous))
+            .shadow(color: .black.opacity(0.25), radius: 8, y: 3)
+            .padding(.horizontal, 24)
+    }
 }
 
 struct LikeButton: View {
