@@ -21,6 +21,7 @@ struct TimelineView<Content: View>: View {
     let filter: (NostrEvent) -> Bool
     let content: Content?
     let apply_mute_rules: Bool
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(events: EventHolder, loading: Binding<Bool>, headerHeight: Binding<CGFloat>, headerOffset: Binding<CGFloat>, damus: DamusState, show_friend_icon: Bool, filter: @escaping (NostrEvent) -> Bool, apply_mute_rules: Bool = true, content: (() -> Content)? = nil) {
         self.events = events
@@ -120,11 +121,11 @@ struct TimelineView<Content: View>: View {
                 TimelineLoadingBanner()
                     .padding(.top, topPadding + 8)
                     .padding(.horizontal, 20)
-                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .transition(reduceMotion ? .identity : .move(edge: .top).combined(with: .opacity))
                     .allowsHitTesting(false)
             }
         }
-        .animation(.spring(response: 0.45, dampingFraction: 0.85), value: loading)
+        .animation(reduceMotion ? nil : .spring(response: 0.45, dampingFraction: 0.85), value: loading)
         .onAppear {
             events.flush()
         }
@@ -140,6 +141,7 @@ struct TimelineView_Previews: PreviewProvider {
 
 struct TimelineSkeletonList: View {
     private let rowCount = 4
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var body: some View {
         VStack(spacing: 0) {
             ForEach(0..<rowCount, id: \.self) { index in
@@ -150,7 +152,8 @@ struct TimelineSkeletonList: View {
                 }
             }
         }
-        .shimmer(true)
+        // Skip shimmer if the user prefers reduced motion.
+        .shimmer(!reduceMotion)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(NSLocalizedString("Loading new notes", comment: "Accessibility label for the timeline skeleton rows that indicate the feed is refreshing."))
     }

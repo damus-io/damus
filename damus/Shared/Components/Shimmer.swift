@@ -33,6 +33,7 @@ struct ShimmeringView<Content: View>: View {
     private let configuration: ShimmerConfiguration
     @State private var startPoint: UnitPoint
     @State private var endPoint: UnitPoint
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     init(configuration: ShimmerConfiguration, @ViewBuilder content: @escaping () -> Content) {
         self.configuration = configuration
         self.content = content
@@ -51,13 +52,16 @@ struct ShimmeringView<Content: View>: View {
             .opacity(configuration.opacity)
             .blendMode(.overlay)
             .onAppear {
+                // Honor the user's Reduce Motion setting by skipping shimmer animation entirely.
+                guard reduceMotion == false else {
+                    return
+                }
                 withAnimation(Animation.linear(duration: configuration.duration).repeatForever(autoreverses: false)) {
                     startPoint = configuration.finalLocation.start
                     endPoint = configuration.finalLocation.end
                 }
             }
         }
-        .edgesIgnoringSafeArea(.all)
     }
 }
 
