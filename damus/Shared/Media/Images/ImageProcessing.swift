@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import AVFoundation
 
 /// Removes GPS data from image at url and writes changes to new file
 func processImage(url: URL) -> URL? {
@@ -39,21 +40,17 @@ fileprivate func processImage(source: CGImageSource, fileExtension: String) -> U
     return destinationURL
 }
 
-/// TODO: strip GPS data from video
+/// Re-encodes the original video to MP4 while dropping metadata (GPS, etc.).
+/// We refuse to produce an output if sanitization fails so no clip ever uploads with location data.
 func processVideo(videoURL: URL) -> URL? {
-    saveVideoToTemporaryFolder(videoURL: videoURL)
-}
-
-fileprivate func saveVideoToTemporaryFolder(videoURL: URL) -> URL? {
-    let destinationURL = generateUniqueTemporaryMediaURL(fileExtension: videoURL.pathExtension)
+    let destinationURL = generateUniqueTemporaryMediaURL(fileExtension: "mp4")
     
-    do {
-        try FileManager.default.copyItem(at: videoURL, to: destinationURL)
-        return destinationURL
-    } catch {
-        print("Error copying file: \(error.localizedDescription)")
+    guard exportVideoStrippingSensitiveMetadata(from: videoURL, to: destinationURL) else {
+        print("Failed to sanitize video metadata; blocking upload.")
         return nil
     }
+    
+    return destinationURL
 }
 
 /// Generate a temporary URL with a unique filename
@@ -87,9 +84,13 @@ func generateMediaUpload(_ media: PreUploadedMedia?) -> MediaUpload? {
     case .processed_image(let url):
         return .image(url)
     case .processed_video(let url):
+        // Already sanitized earlier (e.g. picker fallback copied the data outside a security scope).
         return .video(url)
     case .unprocessed_video(let url):
-        guard let newUrl = processVideo(videoURL: url) else { return nil }
+        guard let newUrl = processVideo(videoURL: url) else {
+            url.stopAccessingSecurityScopedResource()
+            return nil
+        }
         url.stopAccessingSecurityScopedResource()
         return .video(newUrl)
     }
@@ -148,4 +149,32 @@ fileprivate func removeGPSDataFromImage(source: CGImageSource, url: URL) -> CGIm
     }
     
     return destination
+}
+
+private func exportVideoStrippingSensitiveMetadata(from sourceURL: URL, to destinationURL: URL) -> Bool {
+    let asset = AVAsset(url: sourceURL)
+    guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {
+        print("Failed to create export session for video.")
+        return false
+    }
+    
+    exportSession.outputURL = destinationURL
+    exportSession.outputFileType = .mp4
+    exportSession.shouldOptimizeForNetworkUse = true
+    exportSession.metadataItemFilter = AVMetadataItemFilter.forSharing()
+    
+    let semaphore = DispatchSemaphore(value: 0)
+    exportSession.exportAsynchronously {
+        semaphore.signal()
+    }
+    semaphore.wait()
+    
+    if exportSession.status == .completed {
+        return true
+    } else {
+        if let error = exportSession.error {
+            print("Video export failed: \(error.localizedDescription)")
+        }
+        return false
+    }
 }
