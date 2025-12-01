@@ -119,7 +119,6 @@ struct DMChatView: View, KeyboardReadable {
                     Label("", image: "send")
                         .font(.title)
                 }
-                .disabled(isOffline)
                 .opacity(isOffline ? 0.5 : 1.0)
                 .overlay {
                     if isOffline {
@@ -141,7 +140,7 @@ struct DMChatView: View, KeyboardReadable {
     }
 
     func send_message() async {
-        guard !isOffline else { return }
+        guard !isOffline else { return } // Action is guarded; offline taps are surfaced via the toast overlay
         let tags = [["p", pubkey.hex()]]
         guard let post_blocks = parse_post_blocks(content: dms.draft)?.blocks else {
             return

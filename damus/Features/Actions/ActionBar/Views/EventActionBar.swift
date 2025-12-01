@@ -333,6 +333,7 @@ struct EventActionBar: View {
     
     func handleRepostTapped() {
         if isOffline {
+            // Keep action inert while surfacing state via global toast
             notify(.transient_toast(NSLocalizedString("Reposts unavailable offline.", comment: "Toast shown when attempting to repost while offline.")))
             return
         }
@@ -342,6 +343,7 @@ struct EventActionBar: View {
     
     func handleLikeTapped(emoji: String) {
         if isOffline {
+            // Keep action inert while surfacing state via global toast
             notify(.transient_toast(NSLocalizedString("Likes unavailable offline.", comment: "Toast shown when attempting to like while offline.")))
             return
         }
