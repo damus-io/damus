@@ -19,8 +19,12 @@ struct AutoSaveIndicatorView: View {
                 EmptyView()
                     .accessibilityHidden(true)  // Probably no need to show this to users with visual impairment, might be too noisy.
             case .saving:
-                ProgressView()
-                    .accessibilityHidden(true)  // Probably no need to show this to users with visual impairment, might be too noisy.
+                HStack(spacing: 6) {
+                    ProgressView()
+                    Text(NSLocalizedString("Saving draft…", comment: "Text indicating that the draft is currently being saved."))
+                        .font(.caption)
+                }
+                .accessibilityLabel(NSLocalizedString("Saving draft…", comment: "Accessibility label indicating that the draft is currently being saved."))
             case .saved:
                 Image(systemName: "checkmark")
                     .accessibilityHidden(true)

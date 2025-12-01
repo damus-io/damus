@@ -133,11 +133,11 @@ fileprivate struct SuggestedUsersPageView: View {
     
     var body: some View {
         VStack {
-            if let suggestions = model.suggestions {
-                List {
-                    ForEach(suggestions, id: \.self) { followPack in
-                        Section {
-                            ForEach(followPack.publicKeys, id: \.self) { pk in
+                if let suggestions = model.suggestions {
+                    List {
+                        ForEach(suggestions, id: \.self) { followPack in
+                            Section {
+                                ForEach(followPack.publicKeys, id: \.self) { pk in
                                 if let usersInterests = model.interestUserMap[pk],
                                    !usersInterests.intersection(model.interests).isEmpty && usersInterests.intersection(model.disinterests).isEmpty,
                                    let user = model.suggestedUser(pubkey: pk) {
@@ -152,7 +152,13 @@ fileprivate struct SuggestedUsersPageView: View {
                 .listStyle(.plain)
             }
             else {
-                ProgressView()
+                VStack(spacing: 8) {
+                    ProgressView()
+                        .accessibilityLabel(NSLocalizedString("Loading people to follow", comment: "Accessibility label indicating the app is loading suggested users."))
+                    Text("Finding people you might like…", comment: "Label shown while we load suggested users during onboarding.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
             }
             
             Spacer()
