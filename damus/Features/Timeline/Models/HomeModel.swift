@@ -650,15 +650,12 @@ class HomeModel: ContactsDelegate, ObservableObject {
                 case .ndbEose:
                     let eoseTime = CFAbsoluteTimeGetCurrent()
                     Log.info("Home handler task %s: Received NDB EOSE after %.2f seconds", for: .homeModel, id.uuidString, eoseTime - startTime)
-                    
+                case .networkEose:
                     DispatchQueue.main.async {
                         self.loading = false
                     }
-            
                     let finishTime = CFAbsoluteTimeGetCurrent()
-                    Log.info("Home handler task %s: Completed initial NDB loading task after %.2f seconds", for: .homeModel, id.uuidString, eoseTime - startTime)
-                case .networkEose:
-                    break
+                    Log.info("Home handler task %s: Received network EOSE after %.2f seconds", for: .homeModel, id.uuidString, finishTime - startTime)
                 }
             }
         }

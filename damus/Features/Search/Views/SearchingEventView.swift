@@ -114,6 +114,7 @@ struct SearchingEventView: View {
                     Text("Looking for \(search_name)...", comment: "Label that appears when searching for note or profile")
                     ProgressView()
                         .progressViewStyle(.circular)
+                        .accessibilityLabel(Text(String(format: NSLocalizedString("Searching for %@", comment: "Accessibility label indicating what is being searched for."), search_name)))
                 }
             case .found(let ev):
                 NavigationLink(value: Route.Thread(thread: ThreadModel(event: ev, damus_state: state))) {
