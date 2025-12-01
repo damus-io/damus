@@ -180,38 +180,45 @@ struct TimelineSkeletonRow: View {
                     .frame(width: 44, height: 44)
                 
                 VStack(alignment: .leading, spacing: 10) {
-                    skeletonLine(width: 120, height: 12)
+                    skeletonLine(relativeWidth: 0.35, height: 12)
                         .opacity(0.8)
                     
-                    skeletonLine(width: 220)
-                    skeletonLine(width: 180)
-                    skeletonLine(width: 140)
+                    skeletonLine(relativeWidth: 0.7)
+                    skeletonLine(relativeWidth: 0.55)
+                    skeletonLine(relativeWidth: 0.45)
                 }
             }
             
             HStack(spacing: 16) {
-                pill(width: 50)
-                pill(width: 36)
-                pill(width: 44)
-                pill(width: 32)
+                pill(relativeWidth: 0.16)
+                pill(relativeWidth: 0.12)
+                pill(relativeWidth: 0.14)
+                pill(relativeWidth: 0.1)
             }
         }
         .padding(.top, 7)
     }
     
-    private func skeletonLine(width: CGFloat, height: CGFloat = 10) -> some View {
-        HStack(spacing: 0) {
+    private func skeletonLine(relativeWidth: CGFloat, height: CGFloat = 10) -> some View {
+        GeometryReader { proxy in
+            let targetWidth = max(80, proxy.size.width * relativeWidth)
             RoundedRectangle(cornerRadius: 6, style: .continuous)
                 .fill(lineColor)
-                .frame(width: width, height: height)
-            Spacer(minLength: 0)
+                .frame(width: targetWidth, height: height, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .frame(height: height)
     }
     
-    private func pill(width: CGFloat) -> some View {
-        Capsule()
-            .fill(pillColor)
-            .frame(width: width, height: 10)
+    private func pill(relativeWidth: CGFloat) -> some View {
+        GeometryReader { proxy in
+            let targetWidth = max(28, proxy.size.width * relativeWidth)
+            Capsule()
+                .fill(pillColor)
+                .frame(width: targetWidth, height: 10, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .frame(height: 10)
     }
 }
 
