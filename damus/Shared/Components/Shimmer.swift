@@ -62,6 +62,8 @@ struct ShimmeringView<Content: View>: View {
                 }
             }
         }
+        // Keep the shimmer confined to the view bounds instead of bleeding into safe areas.
+        .clipped()
     }
 }
 

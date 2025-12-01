@@ -220,7 +220,6 @@ struct TimelineLoadingBanner: View {
         HStack(spacing: 12) {
             ProgressView()
                 .progressViewStyle(CircularProgressViewStyle(tint: DamusColors.purple))
-                .scaleEffect(0.85)
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(NSLocalizedString("Connecting to relays...", comment: "Primary status text shown while the timeline waits for relays to send fresh notes."))

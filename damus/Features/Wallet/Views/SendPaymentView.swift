@@ -259,7 +259,6 @@ struct SendPaymentView: View {
                 .bold()
             
             ProgressView()
-                .scaleEffect(1.5)
                 .padding()
             
             Text("Please wait while your payment is being processed…", comment: "Message while payment is being processed")
