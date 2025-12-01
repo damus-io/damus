@@ -8,6 +8,7 @@
 import Foundation
 
 class Contacts {
+    private let lock = NSLock()
     private var friends: Set<Pubkey> = Set()
     private var friend_of_friends: Set<Pubkey> = Set()
     /// Tracks which friends are friends of a given pubkey.
@@ -27,18 +28,24 @@ class Contacts {
     }
 
     func remove_friend(_ pubkey: Pubkey) {
+        lock.lock()
+        defer { lock.unlock() }
         friends.remove(pubkey)
 
-        pubkey_to_our_friends.forEach {
-            pubkey_to_our_friends[$0.key]?.remove(pubkey)
+        for key in pubkey_to_our_friends.keys {
+            pubkey_to_our_friends[key]?.remove(pubkey)
         }
     }
     
     func get_friend_list() -> Set<Pubkey> {
+        lock.lock()
+        defer { lock.unlock() }
         return friends
     }
 
     func get_friend_of_friends_list() -> Set<Pubkey> {
+        lock.lock()
+        defer { lock.unlock() }
         return friend_of_friends
     }
 
@@ -53,10 +60,14 @@ class Contacts {
     }
 
     func add_friend_pubkey(_ pubkey: Pubkey) {
+        lock.lock()
+        defer { lock.unlock() }
         friends.insert(pubkey)
     }
     
     func add_friend_contact(_ contact: NostrEvent) {
+        lock.lock()
+        defer { lock.unlock() }
         friends.insert(contact.pubkey)
         for pk in contact.referenced_pubkeys {
             friend_of_friends.insert(pk)
@@ -73,14 +84,20 @@ class Contacts {
     }
     
     func is_friend_of_friend(_ pubkey: Pubkey) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
         return friend_of_friends.contains(pubkey)
     }
     
     func is_in_friendosphere(_ pubkey: Pubkey) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
         return friends.contains(pubkey) || friend_of_friends.contains(pubkey)
     }
 
     func is_friend(_ pubkey: Pubkey) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
         return friends.contains(pubkey)
     }
     
@@ -94,6 +111,8 @@ class Contacts {
 
     /// Gets the list of pubkeys of our friends who follow the given pubkey.
     func get_friended_followers(_ pubkey: Pubkey) -> [Pubkey] {
+        lock.lock()
+        defer { lock.unlock() }
         return Array((pubkey_to_our_friends[pubkey] ?? Set()))
     }
 

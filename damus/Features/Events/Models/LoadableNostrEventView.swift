@@ -74,7 +74,7 @@ class LoadableNostrEventViewModel: ObservableObject {
             case .zap, .zap_request:
                 guard let zap = await get_zap(from: ev, state: damus_state) else { return .not_found }
                 return .loaded(route: Route.Zaps(target: zap.target))
-            case .contacts, .metadata, .delete, .boost, .chat, .mute_list, .list_deprecated, .draft, .longform, .nwc_request, .nwc_response, .http_auth, .status, .relay_list, .follow_list, .interest_list, .contact_card, .live, .live_chat:
+            case .contacts, .metadata, .delete, .boost, .chat, .mute_list, .list_deprecated, .draft, .longform, .nwc_request, .nwc_response, .http_auth, .status, .relay_list, .follow_list, .interest_list, .contact_card, .live, .live_chat, .vine_short:
                 return .unknown_or_unsupported_kind
             }
         case .naddr(let naddr):

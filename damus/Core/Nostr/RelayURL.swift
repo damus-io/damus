@@ -88,6 +88,11 @@ public struct RelayURL: Hashable, Equatable, Codable, CodingKeyRepresentable, Id
 
 }
 
+extension RelayURL {
+    /// Shared relay used by the Vine short-video feed.
+    static let vineRelay = RelayURL("wss://relay.divine.video")!
+}
+
 private struct StringKey: CodingKey {
     var stringValue: String
     init(stringValue: String) {
