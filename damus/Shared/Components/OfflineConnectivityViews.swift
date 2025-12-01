@@ -20,7 +20,7 @@ struct OfflineStatusPill: View {
             Image(systemName: "antenna.radiowaves.left.and.right.slash")
                 .font(.subheadline)
         }
-        .foregroundColor(DamusColors.deepPurple)
+        .foregroundColor(Color.orange) // Use system warning color for degraded connectivity state
         .padding(.horizontal, 14)
         .padding(.vertical, 8)
         .background(
@@ -28,7 +28,7 @@ struct OfflineStatusPill: View {
                 .fill(.ultraThinMaterial)
                 .overlay(
                     Capsule(style: .continuous)
-                        .fill(DamusColors.purple.opacity(colorScheme == .dark ? 0.25 : 0.18))
+                        .fill(Color.orange.opacity(colorScheme == .dark ? 0.20 : 0.14))
                 )
         )
         .accessibilityElement(children: .combine)
@@ -50,15 +50,15 @@ struct OfflineConnectivityBanner: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(.thinMaterial)
+                .fill(.ultraThinMaterial)
                 .overlay(
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(DamusColors.purple.opacity(colorScheme == .dark ? 0.28 : 0.14))
+                        .fill(Color.orange.opacity(colorScheme == .dark ? 0.20 : 0.12))
                 )
         )
         .overlay(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(DamusColors.purple.opacity(0.25), lineWidth: 1)
+                .stroke(Color.orange.opacity(0.35), lineWidth: 1)
         )
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .padding(.horizontal, 16)
@@ -131,6 +131,6 @@ struct ConnectivityBannerHost: View {
     private func playFeedbackIfNeeded() {
         guard !didPlayHaptic else { return }
         didPlayHaptic = true
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        UINotificationFeedbackGenerator().notificationOccurred(.warning)
     }
 }
