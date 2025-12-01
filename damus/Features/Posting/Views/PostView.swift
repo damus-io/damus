@@ -423,6 +423,7 @@ struct PostView: View {
         .foregroundColor(DamusColors.adaptableBlack.opacity(0.6))
         .padding(.top, 6)
         .accessibilityIdentifier("offline-compose-hint")
+        .accessibilityLabel(Text("Offline: message will send when reconnected. Check Outbox for pending notes.", comment: "Accessibility label describing offline compose state."))
     }
     
     func Editor(deviceSize: GeometryProxy) -> some View {

@@ -80,7 +80,7 @@ struct ConnectivityBannerHost: View {
     @State private var pendingWorkItem: DispatchWorkItem?
     @State private var didPlayHaptic = false
     
-    private let offlineDisplayDelay: TimeInterval = 3
+    private let offlineDisplayDelay: TimeInterval = 0.5
     
     var body: some View {
         Group {
@@ -101,7 +101,7 @@ struct ConnectivityBannerHost: View {
         .onDisappear {
             pendingWorkItem?.cancel()
         }
-        .accessibilityAddTraits(.isStaticText)
+        .accessibilityAddTraits(.updatesFrequently)
     }
     
     private var shouldShowBanner: Bool {
