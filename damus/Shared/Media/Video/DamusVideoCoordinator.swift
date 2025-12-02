@@ -24,6 +24,8 @@ final class DamusVideoCoordinator: ObservableObject {
     
     // MARK: State and information about each video
     private var players: [URL: DamusVideoPlayer] = [:]
+    private var player_usage_order: [URL] = []
+    private let max_cached_players = 24
     
     // MARK: Main stage requests from player views
     // The stacks of video player views that have marked themselves as visible on the user screen.
@@ -62,10 +64,13 @@ final class DamusVideoCoordinator: ObservableObject {
     @MainActor
     func get_player(for url: URL) -> DamusVideoPlayer {
         if let player = self.players[url] {
+            touch_usage(url: url)
             return player
         }
         let player = DamusVideoPlayer(url: url)
         self.players[url] = player
+        touch_usage(url: url)
+        evict_if_needed()
         return player
     }
 
@@ -127,5 +132,34 @@ final class DamusVideoCoordinator: ObservableObject {
         var layer_context: ViewLayerContext
         var player: DamusVideoPlayer
         var main_stage_granted: (() -> Void)?
+    }
+    
+    // MARK: - LRU cache management for players
+    
+    @MainActor
+    private func touch_usage(url: URL) {
+        player_usage_order.removeAll(where: { $0 == url })
+        player_usage_order.append(url)
+    }
+    
+    @MainActor
+    private func evict_if_needed() {
+        guard players.count > max_cached_players else { return }
+        let protected_urls: Set<URL> = active_urls()
+        guard let victim = player_usage_order.first(where: { !protected_urls.contains($0) }) else { return }
+        players.removeValue(forKey: victim)
+        player_usage_order.removeAll(where: { $0 == victim })
+        Log.info("VIDEO_COORDINATOR: evicted cached player for %s", for: .video_coordination, victim.absoluteString)
+    }
+    
+    @MainActor
+    private func active_urls() -> Set<URL> {
+        var urls = Set<URL>()
+        if let focused = focused_video?.url {
+            urls.insert(focused)
+        }
+        urls.formUnion(normal_layer_main_stage_requests.map { $0.player.url })
+        urls.formUnion(full_screen_layer_stage_requests.map { $0.player.url })
+        return urls
     }
 }
