@@ -87,12 +87,16 @@ struct FullScreenCarouselView<Content: View>: View {
             }
             .ignoresSafeArea()
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-            .gesture(TapGesture(count: 2).onEnded {
-                // Prevents menu from hiding on double tap
-            })
-            .gesture(TapGesture(count: 1).onEnded {
-                showMenu.toggle()
-            })
+            // Gestures: single tap toggles play/pause; double tap toggles chrome.
+            // Use an exclusive high-priority gesture so double-tap wins when present.
+            .highPriorityGesture(
+                TapGesture(count: 2)
+                    .onEnded { toggle_chrome() }
+                    .exclusively(before:
+                        TapGesture()
+                            .onEnded { toggle_play_pause() }
+                    )
+            )
             .overlay(
                 GeometryReader { geo in
                     VStack {
@@ -147,6 +151,17 @@ struct FullScreenCarouselView<Content: View>: View {
                 }
             )
         }
+    }
+    
+    private func toggle_play_pause() {
+        // Only toggle play/pause if the current item is actually a video
+        guard case .video = urls[safe: carouselSelection.index] else { return }
+        guard let video = video_coordinator.focused_video else { return }
+        video.is_playing.toggle()
+    }
+    
+    private func toggle_chrome() {
+        showMenu.toggle()
     }
 }
 
