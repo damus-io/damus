@@ -102,9 +102,11 @@ struct FullScreenCarouselView<Content: View>: View {
                                     presentationMode.wrappedValue.dismiss()
                                 }, label: {
                                     Image(systemName: "xmark")
-                                        .frame(width: 30, height: 30)
+                                        .frame(width: 44, height: 44)
                                 })
                                 .buttonStyle(PlayerCircleButtonStyle())
+                                .accessibilityLabel(Text("Close video"))
+                                .accessibilityHint(Text("Returns to the previous view"))
                                 
                                 Spacer()
 
@@ -116,9 +118,11 @@ struct FullScreenCarouselView<Content: View>: View {
                                                                                       comment: "Label for the preview of the image being picture"),
                                                                     image: Image(uiImage: image))) {
                                         Image(systemName: "ellipsis")
-                                            .frame(width: 30, height: 30)
+                                            .frame(width: 44, height: 44)
                                     }
                                     .buttonStyle(PlayerCircleButtonStyle())
+                                    .accessibilityLabel(Text("Share image"))
+                                    .accessibilityHint(Text("Opens sharing options for this item"))
                                 }
                             }
                             .padding()
