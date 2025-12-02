@@ -10,6 +10,7 @@ import AVKit
 import Combine
 import Foundation
 import SwiftUI
+import UIKit
 
 /// DamusVideoPlayer has the function of wrapping `AVPlayer` and exposing a control interface that integrates seamlessly with SwiftUI views
 ///
@@ -33,6 +34,8 @@ import SwiftUI
     /// This is not public because we don't want any callers of this class controlling the `AVPlayer` directly, we want them to go through our interface
     /// This measure helps avoid state inconsistencies and other flakiness. DO NOT USE THIS OUTSIDE `DamusVideoPlayer`
     private var player: AVPlayer
+    /// The last rendered frame for placeholder use
+    @Published private(set) var posterImage: UIImage?
     
     
     // MARK: SwiftUI-friendly interface
@@ -52,9 +55,25 @@ import SwiftUI
     }
     /// Whether the video is loading
     @Published private(set) var is_loading = true
+    /// Load state for richer UI feedback
+    @Published private(set) var load_state: LoadState = .loading {
+        didSet {
+            switch load_state {
+                case .loading:
+                    is_loading = true
+                case .ready:
+                    is_loading = false
+                case .failed:
+                    is_loading = false
+                    should_play_when_ready = false
+            }
+        }
+    }
     /// The current time of playback, in seconds
     /// Usage note: If editing (such as in a slider), make sure to set `is_editing_current_time` to `true` to detach this value from the current playback
     @Published var current_time: TimeInterval = .zero
+    /// Tracks whether the user has requested playback while we are still loading.
+    private var should_play_when_ready: Bool = false
     /// Whether video is playing or not
     @Published var is_playing = false {
         didSet {
@@ -63,10 +82,23 @@ import SwiftUI
             // When scrubbing stops, the `is_editing_current_time` handler will automatically play/pause depending on `is_playing`
             if is_editing_current_time { return }
             if is_playing {
-                player.play()
+                switch load_state {
+                    case .ready:
+                        player.play()
+                        should_play_when_ready = false
+                    case .loading:
+                        // Kick off playback to trigger readiness, but keep waiting flag so we can resume when ready.
+                        should_play_when_ready = true
+                        player.play()
+                    case .failed:
+                        // Do not attempt playback on failure.
+                        should_play_when_ready = false
+                        is_playing = false
+                }
             }
             else {
                 player.pause()
+                should_play_when_ready = false
             }
         }
     }
@@ -102,6 +134,7 @@ import SwiftUI
     private var videoDurationObserver: NSKeyValueObservation?
     private var videoCurrentTimeObserver: Any?
     private var videoIsPlayingObserver: NSKeyValueObservation?
+    private var videoStatusObserver: NSKeyValueObservation?
     
     
     // MARK: - Initialization, deinitialization and reinitialization
@@ -128,12 +161,14 @@ import SwiftUI
     }
     
     func reinitializePlayer() {
+        posterImage = nil
         Log.info("DamusVideoPlayer: Reinitializing internal player…", for: .video_coordination)
         
         // Tear down
         videoSizeObserver?.invalidate()
         videoDurationObserver?.invalidate()
         videoIsPlayingObserver?.invalidate()
+        videoStatusObserver?.invalidate()
         
         // Initialize player with nil item first
         self.player.replaceCurrentItem(with: nil)
@@ -146,9 +181,9 @@ import SwiftUI
     
     /// Internally loads this class
     private func load() async {
+        load_state = .loading
         Task {
             has_audio = await self.video_has_audio()
-            is_loading = false
         }
         
         player.isMuted = is_muted
@@ -164,6 +199,7 @@ import SwiftUI
         observeDuration()
         observeCurrentTime()
         observeVideoIsPlaying()
+        observeStatus()
     }
     
     deinit {
@@ -171,6 +207,26 @@ import SwiftUI
         videoSizeObserver?.invalidate()
         videoDurationObserver?.invalidate()
         videoIsPlayingObserver?.invalidate()
+        videoStatusObserver?.invalidate()
+    }
+    
+    private func capturePosterFrame() {
+        guard posterImage == nil else { return }
+        Task.detached(priority: .userInitiated) {
+            let asset = await self.player.currentItem?.asset ?? AVAsset(url: self.url)
+            let generator = AVAssetImageGenerator(asset: asset)
+            generator.appliesPreferredTrackTransform = true
+            generator.maximumSize = CGSize(width: 512, height: 512)
+            do {
+                let cgImage = try generator.copyCGImage(at: CMTime(seconds: 0.1, preferredTimescale: 600), actualTime: nil)
+                let image = UIImage(cgImage: cgImage)
+                await MainActor.run {
+                    self.posterImage = image
+                }
+            } catch {
+                // If we fail to capture, keep placeholder as-is.
+            }
+        }
     }
     
     // MARK: - Observers
@@ -220,6 +276,31 @@ import SwiftUI
         })
     }
     
+    private func observeStatus() {
+        videoStatusObserver = player.currentItem?.observe(\.status, options: [.new], changeHandler: { [weak self] (playerItem, change) in
+            guard let self else { return }
+            guard let status = change.newValue else { return }
+            DispatchQueue.main.async {
+                switch status {
+                    case .readyToPlay:
+                        self.load_state = .ready
+                        self.capturePosterFrame()
+                        if self.should_play_when_ready {
+                            self.player.play()
+                            self.should_play_when_ready = false
+                        }
+                    case .failed:
+                        let message = playerItem.error?.localizedDescription ?? "Unable to play video"
+                        self.load_state = .failed(message: message)
+                    case .unknown:
+                        self.load_state = .loading
+                    @unknown default:
+                        self.load_state = .loading
+                }
+            }
+        })
+    }
+    
     // MARK: - Other internal logic functions
     
     private func video_has_audio() async -> Bool {
@@ -257,6 +338,12 @@ import SwiftUI
 }
 
 extension DamusVideoPlayer {
+    enum LoadState {
+        case loading
+        case ready
+        case failed(message: String)
+    }
+    
     /// The simplest view for a `DamusVideoPlayer` object.
     ///
     /// Other views with more features should use this as a base.
