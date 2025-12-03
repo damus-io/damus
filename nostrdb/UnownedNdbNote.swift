@@ -58,8 +58,14 @@ enum NdbNoteLender: Sendable {
         switch self {
         case .ndbNoteKey(let ndb, let noteKey):
             guard !ndb.is_closed else { throw LendingError.ndbClosed }
-            guard let ndbNoteTxn = ndb.lookup_note_by_key(noteKey) else { throw LendingError.errorLoadingNote }
-            guard let unownedNote = UnownedNdbNote(ndbNoteTxn) else { throw LendingError.errorLoadingNote }
+            guard let ndbNoteTxn = ndb.lookup_note_by_key(noteKey) else {
+                Log.error("Failed to borrow note: lookup returned nil for key \(noteKey)", for: .ndb)
+                throw LendingError.errorLoadingNote
+            }
+            guard let unownedNote = UnownedNdbNote(ndbNoteTxn) else {
+                Log.error("Failed to borrow note: unable to build UnownedNdbNote for key \(noteKey)", for: .ndb)
+                throw LendingError.errorLoadingNote
+            }
             return try lendingFunction(unownedNote)
         case .owned(let note):
             return try lendingFunction(UnownedNdbNote(note))
@@ -106,13 +112,26 @@ enum NdbNoteLender: Sendable {
     /// - On production builds, an error will be printed to the logs.
     func justGetACopy() -> NdbNote? {
         do {
-            return try self.getCopy()
+            return try self.snapshot()
         }
         catch {
 //            assertionFailure("Unexpected error while fetching a copy of an NdbNote: \(error.localizedDescription)")
             Log.error("Unexpected error while fetching a copy of an NdbNote: %s", for: .ndb, error.localizedDescription)
         }
         return nil
+    }
+
+    /// Materialize an owned snapshot of the note, avoiding any long-lived LMDB transaction usage.
+    func snapshot() throws -> NdbNote {
+        switch self {
+        case .ndbNoteKey(let ndb, let noteKey):
+            if let owned = ndb.snapshot_note_by_key(noteKey) {
+                return owned
+            }
+            throw LendingError.errorLoadingNote
+        case .owned(let note):
+            return note.to_owned()
+        }
     }
     
     enum LendingError: Error {
