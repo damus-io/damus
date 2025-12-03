@@ -281,15 +281,10 @@ struct NoteContentView: View {
 
         var mentionPubkeys: Set<Pubkey> = []
         let _: ()? = try? blockGroup.forEachBlock({ _, block in
-            switch block {
-            case .mention(let mentionBlock):
-                if let mention = MentionRef(block: mentionBlock),
-                   let pubkey = mention.pubkey {
-                    mentionPubkeys.insert(pubkey)
-                }
-            default:
-                break
+            guard let pubkey = block.mentionPubkey(tags: event.tags) else {
+                return .loopContinue
             }
+            mentionPubkeys.insert(pubkey)
             return .loopContinue
         })
 
@@ -608,4 +603,27 @@ func separate_images(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> [MediaUrl]? 
     }) ?? []
     let mediaUrls = urlBlocks.map { MediaUrl.image($0) }
     return mediaUrls.isEmpty ? nil : mediaUrls
+}
+
+extension NdbBlock {
+    func mentionPubkey(tags: Tags) -> Pubkey? {
+        switch self {
+        case .mention(let mentionBlock):
+            guard let mention = MentionRef(block: mentionBlock) else {
+                return nil
+            }
+            return mention.pubkey
+        case .mention_index(let mentionIndex):
+            let tagPosition = Int(mentionIndex)
+            guard tagPosition >= 0, tagPosition < tags.count else {
+                return nil
+            }
+            guard let mention = MentionRef.from_tag(tag: tags[tagPosition]) else {
+                return nil
+            }
+            return mention.pubkey
+        default:
+            return nil
+        }
+    }
 }
