@@ -315,7 +315,9 @@ extension NostrNetworkManager {
                                 Self.logger.debug("Session subscription \(id.uuidString, privacy: .public): Received EOSE from nostrdb. Elapsed: \(CFAbsoluteTimeGetCurrent() - startTime, format: .fixed(precision: 2), privacy: .public) seconds")
                                 continuation.yield(.ndbEose)
                             case .event(let noteKey):
-                                let lender = NdbNoteLender(ndb: self.ndb, noteKey: noteKey)
+                                // Prefer to hand out owned snapshots so downstream async consumers never keep LMDB transactions alive.
+                                let ownedSnapshot = self.ndb.snapshot_note_by_key(noteKey, txnName: "sessionNdbStream")
+                                let lender = ownedSnapshot.map { NdbNoteLender(ownedNdbNote: $0) } ?? NdbNoteLender(ndb: self.ndb, noteKey: noteKey)
                                 try Task.checkCancellation()
                                 guard let desiredRelays else {
                                     continuation.yield(.event(lender: lender))  // If no desired relays are specified, return all notes we see.
@@ -361,6 +363,10 @@ extension NostrNetworkManager {
             
             // Since note ids point to immutable objects, we can do a simple ndb lookup first
             if let noteKey = self.ndb.lookup_note_key(noteId) {
+                // Snapshot eagerly to avoid passing live transactions to async callers.
+                if let owned = self.ndb.snapshot_note_by_key(noteKey, txnName: "SubscriptionManager.lookup") {
+                    return NdbNoteLender(ownedNdbNote: owned)
+                }
                 return NdbNoteLender(ndb: self.ndb, noteKey: noteKey)
             }
             
