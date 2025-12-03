@@ -245,7 +245,7 @@ class Ndb {
 
     func lookup_note_by_key_with_txn<Y>(_ key: NoteKey, txn: NdbTxn<Y>) -> NdbNote? {
         if txn.ndb.is_closed || txn.generation != self.generation {
-            Log.error("Aborting lookup_note_by_key: closed or stale txn (gen \(txn.generation) vs \(self.generation))", for: .ndb)
+            Log.error("Aborting lookup_note_by_key: closed or stale txn (gen %d vs %d)", for: .ndb, txn.generation, self.generation)
             return nil
         }
 
@@ -419,12 +419,12 @@ class Ndb {
     /// Returns an owned copy of a note so callers do not have to retain a live LMDB transaction.
     func snapshot_note_by_key(_ key: NoteKey, txnName: String = "snapshot_note_by_key") -> NdbNote? {
         guard let txn = NdbTxn(ndb: self, name: txnName) else {
-            Log.error("Unable to open txn for snapshot \(txnName) on key \(key)", for: .ndb)
+            Log.error("Unable to open txn for snapshot %s on key %llu", for: .ndb, txnName, key)
             return nil
         }
 
         guard let note = lookup_note_by_key_with_txn(key, txn: txn) else {
-            Log.error("Unable to snapshot note for key \(key)", for: .ndb)
+            Log.error("Unable to snapshot note for key %llu", for: .ndb, key)
             return nil
         }
 
@@ -454,7 +454,7 @@ class Ndb {
 
     private func lookup_note_with_txn_inner<Y>(id: NoteId, txn: NdbTxn<Y>) -> NdbNote? {
         if txn.ndb.is_closed || txn.generation != self.generation {
-            Log.error("Aborting lookup_note_with_txn_inner: closed or stale txn (gen \(txn.generation) vs \(self.generation))", for: .ndb)
+            Log.error("Aborting lookup_note_with_txn_inner: closed or stale txn (gen %d vs %d)", for: .ndb, txn.generation, self.generation)
             return nil
         }
 

@@ -51,7 +51,7 @@ class NdbTxn<T>: RawNdbTxnAccessible {
             #endif
             let ok = ndb_begin_query(ndb.ndb.ndb, &self.txn) != 0
             if !ok {
-                Log.error("Failed to begin NdbTxn '\(self.name)' (ndb is_closed=\(ndb.is_closed))", for: .ndb)
+                Log.error("Failed to begin NdbTxn '%s' (ndb is_closed=%d)", for: .ndb, self.name, ndb.is_closed ? 1 : 0)
                 return nil
             }
             self.generation = ndb.generation
