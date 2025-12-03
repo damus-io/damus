@@ -59,11 +59,11 @@ enum NdbNoteLender: Sendable {
         case .ndbNoteKey(let ndb, let noteKey):
             guard !ndb.is_closed else { throw LendingError.ndbClosed }
             guard let ndbNoteTxn = ndb.lookup_note_by_key(noteKey) else {
-                Log.error("Failed to borrow note: lookup returned nil for key \(noteKey)", for: .ndb)
+                Log.error("Failed to borrow note: lookup returned nil for key %llu", for: .ndb, noteKey)
                 throw LendingError.errorLoadingNote
             }
             guard let unownedNote = UnownedNdbNote(ndbNoteTxn) else {
-                Log.error("Failed to borrow note: unable to build UnownedNdbNote for key \(noteKey)", for: .ndb)
+                Log.error("Failed to borrow note: unable to build UnownedNdbNote for key %llu", for: .ndb, noteKey)
                 throw LendingError.errorLoadingNote
             }
             return try lendingFunction(unownedNote)
