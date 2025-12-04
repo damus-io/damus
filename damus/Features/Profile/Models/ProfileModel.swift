@@ -79,17 +79,17 @@ class ProfileModel: ObservableObject, Equatable {
             text_filter.limit = 500
             await bumpUpProgress()
             for await event in damus.nostrNetwork.reader.streamIndefinitely(filters: [text_filter]) {
-                event.justUseACopy({ handleNostrEvent($0) })
+                await event.justUseACopy({ handleNostrEvent($0) })
             }
         }
         profileListener?.cancel()
         profileListener = Task {
             var profile_filter = NostrFilter(kinds: [.contacts, .metadata, .boost])
-            var relay_list_filter = NostrFilter(kinds: [.relay_list], authors: [pubkey])
+            let relay_list_filter = NostrFilter(kinds: [.relay_list], authors: [pubkey])
             profile_filter.authors = [pubkey]
             await bumpUpProgress()
             for await event in damus.nostrNetwork.reader.streamIndefinitely(filters: [profile_filter, relay_list_filter]) {
-                event.justUseACopy({ handleNostrEvent($0) })
+                await event.justUseACopy({ handleNostrEvent($0) })
             }
             
         }
@@ -116,7 +116,7 @@ class ProfileModel: ObservableObject, Equatable {
         let conversations_filter_us = NostrFilter(kinds: conversation_kinds, pubkeys: [pubkey], limit: limit, authors: [damus.pubkey])
         print("subscribing to conversation events from and to profile \(pubkey)")
         for await noteLender in self.damus.nostrNetwork.reader.streamIndefinitely(filters: [conversations_filter_them, conversations_filter_us]) {
-            guard let event = noteLender.justGetACopy() else { continue }
+            guard let event = await noteLender.justGetACopy() else { continue }
             if await !seen_event.contains(event.id) {
                 Task { await self.add_event(event) }
                 conversation_events.insert(event.id)
@@ -190,7 +190,7 @@ class ProfileModel: ObservableObject, Equatable {
         self.findRelaysListener?.cancel()
         self.findRelaysListener = Task {
             for await noteLender in damus.nostrNetwork.reader.streamIndefinitely(filters: [profile_filter]) {
-                try? noteLender.borrow { event in
+                try? await noteLender.borrow { event in
                     if case .contacts = event.known_kind {
                         // TODO: Is this correct?
                         self.legacy_relay_list = decode_json_relays(event.content)

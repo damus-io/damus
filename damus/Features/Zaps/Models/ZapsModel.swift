@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 class ZapsModel: ObservableObject {
     let state: DamusState
     let target: ZapTarget
@@ -32,8 +33,8 @@ class ZapsModel: ObservableObject {
             filter.referenced_ids = [note_target.note_id]
         }
         zapCommsListener?.cancel()
-        zapCommsListener = Task {
-            for await event in state.nostrNetwork.reader.streamIndefinitely(filters: [filter]) {
+        zapCommsListener = Task.detached {
+            for await event in self.state.nostrNetwork.reader.streamIndefinitely(filters: [filter]) {
                 await event.justUseACopy({ await self.handle_event(ev: $0) })
             }
         }

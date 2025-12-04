@@ -90,6 +90,7 @@ struct HighlightEvent {
         return ReplyDesc(pubkeys: highlighted_authors, others: others_count)
     }
     
+    @NdbActor
     func source_description_text(ndb: Ndb, highlighted_event: NostrEvent?, locale: Locale = Locale.current) -> String {
         let description_info = self.source_description_info(highlighted_event: highlighted_event)
         let pubkeys = description_info.pubkeys

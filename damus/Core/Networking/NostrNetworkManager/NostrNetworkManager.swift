@@ -65,11 +65,11 @@ class NostrNetworkManager {
         await self.reader.cancelAllTasks()
         await self.pool.cleanQueuedRequestForSessionEnd()
         await operationBeforeClosingNdb?()
-        self.delegate.ndb.close()
+        await self.delegate.ndb.close()
     }
     
     func handleAppForegroundRequest() async {
-        self.delegate.ndb.reopen()
+        await self.delegate.ndb.reopen()
         // Pinging the network will automatically reconnect any dead websocket connections
         await self.ping()
     }

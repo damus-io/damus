@@ -186,7 +186,7 @@ extension NostrNetworkManager {
                             switch item {
                             case .event(let lender):
                                 logStreamPipelineStats("SubscriptionManager_Advanced_Stream_\(id)", "Consumer_\(id)")
-                                try? lender.borrow({ event in
+                                try? await lender.borrow({ event in
                                     if let latestTimestamp = latestNoteTimestampSeen {
                                         latestNoteTimestampSeen = max(latestTimestamp, event.createdAt)
                                     }

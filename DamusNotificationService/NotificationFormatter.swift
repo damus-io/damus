@@ -85,6 +85,7 @@ struct NotificationFormatter {
         return (content, identifier)
     }
     
+    @NdbActor
     func format_message(displayName: String, notify: LocalNotification, state: HeadlessDamusState) async -> (content: UNMutableNotificationContent, identifier: String)? {
         // Try sync method first and return if it works
         if let sync_formatted_message = self.format_message(displayName: displayName, notify: notify) {
@@ -121,6 +122,7 @@ struct NotificationFormatter {
         }
     }
 
+    @NdbActor
     static func zap_notification_body(profiles: Profiles, zap: Zap, locale: Locale = Locale.current) -> String {
         let src = zap.request.ev
         let pk = zap.is_anon ? ANON_PUBKEY : src.pubkey

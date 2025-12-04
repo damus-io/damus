@@ -18,11 +18,11 @@ func process_local_notification(state: HeadlessDamusState, event ev: NostrEvent)
         return
     }
 
-    guard let local_notification = generate_local_notification_object(ndb: state.ndb, from: ev, state: state) else {
+    guard let local_notification = await generate_local_notification_object(ndb: state.ndb, from: ev, state: state) else {
         return
     }
 
-    create_local_notification(profiles: state.profiles, notify: local_notification)
+    await create_local_notification(profiles: state.profiles, notify: local_notification)
 }
 
 func should_display_notification(state: HeadlessDamusState, event ev: NostrEvent, mode: UserSettingsStore.NotificationsMode) async -> Bool {
@@ -65,6 +65,7 @@ func should_display_notification(state: HeadlessDamusState, event ev: NostrEvent
     return true
 }
 
+@NdbActor
 func generate_text_mention_notification(ndb: Ndb, from ev: NostrEvent, state: HeadlessDamusState, blockGroup: borrowing NdbBlockGroup) -> LocalNotification? {
     let notification: LocalNotification? = blockGroup.forEachBlock({ index, block in
         switch block {
@@ -107,6 +108,7 @@ func generate_text_mention_notification(ndb: Ndb, from ev: NostrEvent, state: He
     return nil
 }
 
+@NdbActor
 func generate_local_notification_object(ndb: Ndb, from ev: NostrEvent, state: HeadlessDamusState) -> LocalNotification? {
     guard let type = ev.known_kind else {
         return nil
@@ -150,6 +152,7 @@ func generate_local_notification_object(ndb: Ndb, from ev: NostrEvent, state: He
     return nil
 }
 
+@NdbActor
 func create_local_notification(profiles: Profiles, notify: LocalNotification) {
     let displayName = event_author_name(profiles: profiles, pubkey: notify.event.pubkey)
     
@@ -168,6 +171,7 @@ func create_local_notification(profiles: Profiles, notify: LocalNotification) {
     }
 }
 
+@NdbActor
 func render_notification_content_preview(ndb: Ndb, ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> String {
 
     let prefix_len = 300
@@ -190,6 +194,7 @@ func render_notification_content_preview(ndb: Ndb, ev: NostrEvent, profiles: Pro
     }
 }
 
+@NdbActor
 func event_author_name(profiles: Profiles, pubkey: Pubkey) -> String {
     let profile = profiles.lookup(id: pubkey)
     return Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
@@ -258,6 +263,7 @@ func process_zap_event(state: HeadlessDamusState, ev: NostrEvent, completion: @e
 
 // securely get the zap target's pubkey. this can be faked so we need to be
 // careful
+@NdbActor
 func get_zap_target_pubkey(ev: NostrEvent, ndb: Ndb) -> Pubkey? {
     let etags = Array(ev.referenced_ids)
 
