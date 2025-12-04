@@ -13,6 +13,7 @@ extension NdbNote {
         return NdbNote.owned_from_json_cstr(json: content_raw, json_len: content_len)
     }
 
+    @NdbActor
     func get_cached_inner_event(cache: EventCache) -> NdbNote? {
         guard self.known_kind == .boost || self.known_kind == .highlight else {
             return nil
@@ -26,6 +27,7 @@ extension NdbNote {
         return nil
     }
 
+    @NdbActor
     func get_inner_event(cache: EventCache) -> NdbNote? {
         if let ev = get_cached_inner_event(cache: cache) {
             return ev

@@ -160,8 +160,8 @@ func translate_note(profiles: Profiles, keypair: Keypair, event: NostrEvent, set
 
     // Render translated note using the same NostrDB block parser so links/mentions/media stay consistent.
     let artifacts: NoteArtifactsSeparated
-    if let translated_blocks = try? NdbBlockGroup.parse(content: translated_note) {
-        artifacts = render_blocks(blocks: translated_blocks, profiles: profiles, can_hide_last_previewable_refs: true)
+    if let translated_blocks = try? await NdbBlockGroup.parse(content: translated_note) {
+        artifacts = await render_blocks(blocks: translated_blocks, profiles: profiles, can_hide_last_previewable_refs: true)
     } else {
         artifacts = .just_content(translated_note)
     }

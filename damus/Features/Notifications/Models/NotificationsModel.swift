@@ -92,6 +92,7 @@ enum NotificationItem {
     }
 }
 
+@MainActor
 class NotificationsModel: ObservableObject, ScrollQueue {
     var incoming_zaps: [Zapping] = []
     var incoming_events: [NostrEvent] = []

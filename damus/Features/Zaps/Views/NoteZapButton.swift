@@ -70,7 +70,7 @@ struct NoteZapButton: View {
         return Color.orange
     }
     
-    func tap() {
+    func tap() async {
         guard let our_zap else {
             Task { await send_zap(damus_state: damus_state, target: target, lnurl: lnurl, is_custom: false, comment: nil, amount_sats: nil, zap_type: damus_state.settings.default_zap_type) }
             return
@@ -84,7 +84,7 @@ struct NoteZapButton: View {
             print("cancel_zap: we already have a real zap, can't cancel")
             break
         case .pending(let pzap):
-            guard let res = cancel_zap(zap: pzap, box: damus_state.nostrNetwork.postbox, zapcache: damus_state.zaps, evcache: damus_state.events) else {
+            guard let res = await cancel_zap(zap: pzap, box: damus_state.nostrNetwork.postbox, zapcache: damus_state.zaps, evcache: damus_state.events) else {
                 
                 UIImpactFeedbackGenerator(style: .soft).impactOccurred()
                 return
@@ -146,7 +146,7 @@ struct NoteZapButton: View {
         .highPriorityGesture(TapGesture().onEnded {
             guard !damus_state.settings.nozaps else { return }
             
-            tap()
+            Task { await tap() }
         })
     }
 }
@@ -194,7 +194,7 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
     let reqid = ZapRequestId(from_makezap: mzapreq)
     
     UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
-    damus_state.add_zap(zap: .pending(pending_zap))
+    await damus_state.add_zap(zap: .pending(pending_zap))
     
     Task { @MainActor in
         guard let payreq = await damus_state.lnurls.lookup_or_fetch(pubkey: target.pubkey, lnurl: lnurl) else {
@@ -276,7 +276,7 @@ enum CancelZapErr {
     case not_nwc
 }
 
-func cancel_zap(zap: PendingZap, box: PostBox, zapcache: Zaps, evcache: EventCache) -> CancelZapErr? {
+func cancel_zap(zap: PendingZap, box: PostBox, zapcache: Zaps, evcache: EventCache) async -> CancelZapErr? {
     guard case .nwc(let nwc_state) = zap.state else {
         return .not_nwc
     }
@@ -302,11 +302,11 @@ func cancel_zap(zap: PendingZap, box: PostBox, zapcache: Zaps, evcache: EventCac
             return .send_err(err)
         }
         let reqid = ZapRequestId(from_pending: zap)
-        remove_zap(reqid: reqid, zapcache: zapcache, evcache: evcache)
+        await remove_zap(reqid: reqid, zapcache: zapcache, evcache: evcache)
         
     case .failed:
         let reqid = ZapRequestId(from_pending: zap)
-        remove_zap(reqid: reqid, zapcache: zapcache, evcache: evcache)
+        await remove_zap(reqid: reqid, zapcache: zapcache, evcache: evcache)
     }
     
     return nil

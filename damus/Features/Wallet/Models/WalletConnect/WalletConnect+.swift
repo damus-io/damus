@@ -70,8 +70,12 @@ extension WalletConnect {
                 
                 if nwc_state.update_state(state: .confirmed) {
                     // notify the zaps model of an update so it can mark them as paid
-                    state.events.get_cache_data(NoteId(pzap.target.id)).zaps_model.objectWillChange.send()
-                    print("NWC success confirmed")
+                    Task {
+                        await MainActor.run {
+                            state.events.get_cache_data(NoteId(pzap.target.id)).zaps_model.objectWillChange.send()
+                        }
+                        print("NWC success confirmed")
+                    }
                 }
                 
                 return
@@ -96,7 +100,7 @@ extension WalletConnect {
                 
                 // remove the pending zap if there was an error
                 let reqid = ZapRequestId(from_pending: pzap)
-                remove_zap(reqid: reqid, zapcache: zapcache, evcache: evcache)
+                Task { await remove_zap(reqid: reqid, zapcache: zapcache, evcache: evcache) }
                 return
             }
         }

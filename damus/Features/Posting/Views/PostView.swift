@@ -768,7 +768,7 @@ struct UploadedMedia: Equatable {
     let metadata: ImageMetadata?
 }
 
-
+@MainActor
 func set_draft_for_post(drafts: Drafts, action: PostAction, artifacts: DraftArtifacts) {
     switch action {
     case .replying_to(let ev):
@@ -784,6 +784,7 @@ func set_draft_for_post(drafts: Drafts, action: PostAction, artifacts: DraftArti
     }
 }
 
+@MainActor
 func load_draft_for_post(drafts: Drafts, action: PostAction) -> DraftArtifacts? {
     switch action {
     case .replying_to(let ev):

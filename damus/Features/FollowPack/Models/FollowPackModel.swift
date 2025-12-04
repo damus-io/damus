@@ -19,7 +19,7 @@ class FollowPackModel: ObservableObject {
     init(damus_state: DamusState) {
         self.damus_state = damus_state
         self.events = EventHolder(on_queue: { ev in
-            preload_events(state: damus_state, events: [ev])
+            Task { await preload_events(state: damus_state, events: [ev]) }
         })
     }
     

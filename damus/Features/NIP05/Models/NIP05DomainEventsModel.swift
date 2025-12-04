@@ -22,7 +22,7 @@ class NIP05DomainEventsModel: ObservableObject {
         self.state = state
         self.domain = domain
         self.events = EventHolder(on_queue: { ev in
-            preload_events(state: state, events: [ev])
+            Task { await preload_events(state: state, events: [ev]) }
         })
         self.filter = NostrFilter()
     }
@@ -46,18 +46,20 @@ class NIP05DomainEventsModel: ObservableObject {
         filter.kinds = [.text, .longform, .highlight]
 
         var authors = Set<Pubkey>()
-        for pubkey in state.contacts.get_friend_of_friends_list() {
-            guard let profile = state.profiles.lookup(id: pubkey),
-                  let nip05_str = profile.nip05,
-                  let nip05 = NIP05.parse(nip05_str),
-                  nip05.host.caseInsensitiveCompare(domain) == .orderedSame else {
-                continue
-            }
+        await MainActor.run {
+            for pubkey in state.contacts.get_friend_of_friends_list() {
+                guard let profile = state.profiles.lookup(id: pubkey),
+                      let nip05_str = profile.nip05,
+                      let nip05 = NIP05.parse(nip05_str),
+                      nip05.host.caseInsensitiveCompare(domain) == .orderedSame else {
+                    continue
+                }
 
-            authors.insert(pubkey)
-        }
-        if authors.isEmpty {
-            return
+                authors.insert(pubkey)
+            }
+            if authors.isEmpty {
+                return
+            }
         }
         filter.authors = Array(authors)
 

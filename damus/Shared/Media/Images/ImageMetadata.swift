@@ -181,6 +181,7 @@ func event_image_metadata(ev: NostrEvent) -> [ImageMetadata] {
     }
 }
 
+@NdbActor
 func process_image_metadatas(cache: EventCache, ev: NostrEvent) {
     for meta in event_image_metadata(ev: ev) {
         guard cache.lookup_img_metadata(url: meta.url) == nil else {

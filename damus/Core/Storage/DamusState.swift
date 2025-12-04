@@ -139,6 +139,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
     }
 
     @discardableResult
+    @NdbActor
     func add_zap(zap: Zapping) -> Bool {
         // store generic zap mapping
         self.zaps.add_zap(zap: zap)
@@ -171,10 +172,11 @@ class DamusState: HeadlessDamusState, ObservableObject {
         wallet.disconnect()
         Task {
             await nostrNetwork.close()  // Close ndb streaming tasks before closing ndb to avoid memory errors
-            ndb.close()
+            await ndb.close()
         }
     }
 
+    @MainActor
     static var empty: DamusState {
         let empty_pub: Pubkey = .empty
         let empty_sec: Privkey = .empty

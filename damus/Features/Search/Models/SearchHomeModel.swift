@@ -22,6 +22,7 @@ class SearchHomeModel: ObservableObject {
     let limit: UInt32 = 200
     //let multiple_events_per_pubkey: Bool = false
     
+    @MainActor
     init(damus_state: DamusState) {
         self.damus_state = damus_state
         self.events = EventHolder(on_queue: { ev in
@@ -110,6 +111,7 @@ class SearchHomeModel: ObservableObject {
     }
 }
 
+@NdbActor
 func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad, cache: EventCache) -> [Pubkey] {
     switch load {
     case .from_events(let events):
@@ -119,10 +121,12 @@ func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad, cache: Even
     }
 }
 
+@NdbActor
 func find_profiles_to_fetch_from_keys(profiles: Profiles, pks: [Pubkey]) -> [Pubkey] {
     Array(Set(pks.filter { pk in !profiles.has_fresh_profile(id: pk) }))
 }
 
+@NdbActor
 func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent], cache: EventCache) -> [Pubkey] {
     var pubkeys = Set<Pubkey>()
 

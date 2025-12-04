@@ -51,7 +51,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
     
     var damus_state: DamusState {
         didSet {
-            self.load_our_stuff_from_damus_state()
+            Task { await self.load_our_stuff_from_damus_state() }
         }
     }
 
@@ -75,12 +75,14 @@ class HomeModel: ContactsDelegate, ObservableObject {
 
     var signal = SignalModel()
     
+    @MainActor
     var notifications = NotificationsModel()
     var notification_status = NotificationStatusModel()
     var events: EventHolder = EventHolder()
     var already_reposted: Set<NoteId> = Set()
     var zap_button: ZapButtonModel = ZapButtonModel()
     
+    @MainActor
     init() {
         self.damus_state = DamusState.empty
         self.setup_debouncer()
@@ -109,21 +111,22 @@ class HomeModel: ContactsDelegate, ObservableObject {
     // MARK: - Loading items from DamusState
     
     /// This is called whenever DamusState gets set. This function is used to load or setup anything we need from the new DamusState
-    func load_our_stuff_from_damus_state() {
-        self.load_latest_contact_event_from_damus_state()
-        self.load_drafts_from_damus_state()
+    func load_our_stuff_from_damus_state() async {
+        await self.load_latest_contact_event_from_damus_state()
+        await self.load_drafts_from_damus_state()
     }
     
     /// This loads the latest contact event we have on file from NostrDB. This should be called as soon as we get the new DamusState
     /// Loading the latest contact list event into our `Contacts` instance from storage is important to avoid getting into weird states when the network is unreliable or when relays delete such information
-    func load_latest_contact_event_from_damus_state() {
+    func load_latest_contact_event_from_damus_state() async {
         damus_state.contacts.delegate = self
         guard let latest_contact_event_id_hex = damus_state.settings.latest_contact_event_id_hex else { return }
         guard let latest_contact_event_id = NoteId(hex: latest_contact_event_id_hex) else { return }
-        guard let latest_contact_event: NdbNote = damus_state.ndb.lookup_note_and_copy(latest_contact_event_id) else { return }
+        guard let latest_contact_event: NdbNote = await damus_state.ndb.lookup_note_and_copy(latest_contact_event_id) else { return }
         process_contact_event(state: damus_state, ev: latest_contact_event)
     }
     
+    @MainActor
     func load_drafts_from_damus_state() {
         damus_state.drafts.load(from: damus_state)
     }
@@ -182,7 +185,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
     }
 
     @MainActor
-    func process_event(ev: NostrEvent, context: SubscriptionContext) {
+    func process_event(ev: NostrEvent, context: SubscriptionContext) async {
         guard let kind = ev.known_kind else {
             return
         }
@@ -202,7 +205,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         case .contact_card:
             damus_state.contactCards.loadEvent(ev, pubkey: damus_state.pubkey)
         case .boost:
-            handle_boost_event(ev, context: context)
+            await handle_boost_event(ev, context: context)
         case .like:
             handle_like_event(ev)
         case .dm:
@@ -387,10 +390,10 @@ class HomeModel: ContactsDelegate, ObservableObject {
         process_contact_event(state: self.damus_state, ev: ev)
     }
 
-    func handle_boost_event(_ ev: NostrEvent, context: SubscriptionContext) {
+    func handle_boost_event(_ ev: NostrEvent, context: SubscriptionContext) async {
         var boost_ev_id = ev.last_refid()
 
-        if let inner_ev = ev.get_inner_event(cache: damus_state.events) {
+        if let inner_ev = await ev.get_inner_event(cache: damus_state.events) {
             boost_ev_id = inner_ev.id
 
             Task {
@@ -820,6 +823,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         }
     }
     
+    @NdbActor
     func got_new_dm(notifs: NewEventsBits, ev: NostrEvent) {
         Task {
             notification_status.new_events = notifs
@@ -965,6 +969,7 @@ func print_filters(relay_id: String?, filters groups: [[NostrFilter]]) {
  */
 
 // TODO: remove this, let nostrdb handle all validation
+@NdbActor
 func guard_valid_event(events: EventCache, ev: NostrEvent, callback: @escaping () -> Void) {
     let validated = events.is_event_valid(ev.id)
     
@@ -1200,6 +1205,7 @@ func zap_vibrate(zap_amount: Int64) {
     vibration_generator.impactOccurred()
 }
 
+@NdbActor
 func create_in_app_profile_zap_notification(profiles: Profiles, zap: Zap, locale: Locale = Locale.current, profile_id: Pubkey) {
     let content = UNMutableNotificationContent()
 
@@ -1221,6 +1227,7 @@ func create_in_app_profile_zap_notification(profiles: Profiles, zap: Zap, locale
     }
 }
 
+@NdbActor
 func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: Locale = Locale.current, evId: NoteId) {
     let content = UNMutableNotificationContent()
 

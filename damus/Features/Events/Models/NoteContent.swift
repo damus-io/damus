@@ -66,6 +66,7 @@ func note_artifact_is_separated(kind: NostrKind?) -> Bool {
     return kind != .longform
 }
 
+@NdbActor
 func render_immediately_available_note_content(ndb: Ndb, ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> NoteArtifacts {
     if ev.known_kind == .longform {
         return .longform(LongformContent(ev.content))
@@ -82,10 +83,9 @@ func render_immediately_available_note_content(ndb: Ndb, ev: NostrEvent, profile
     }
 }
 
-actor ContentRenderer {
-    func render_note_content(ndb: Ndb, ev: NostrEvent, profiles: Profiles, keypair: Keypair) async -> NoteArtifacts {
-        return render_immediately_available_note_content(ndb: ndb, ev: ev, profiles: profiles, keypair: keypair)
-    }
+@NdbActor
+func render_note_content(ndb: Ndb, ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> NoteArtifacts {
+    return render_immediately_available_note_content(ndb: ndb, ev: ev, profiles: profiles, keypair: keypair)
 }
 
 // FIXME(tyiu): There are a lot of hacks to get this function to render the blocks correctly.
@@ -93,6 +93,7 @@ actor ContentRenderer {
 // Block previews should actually be rendered in the position of the note content where it was found.
 // Currently, we put some previews at the bottom of the note, which is incorrect as they take things out of
 // the author's intended context.
+@NdbActor
 func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide_last_previewable_refs: Bool = false) -> NoteArtifactsSeparated {
     var invoices: [Invoice] = []
     var urls: [UrlType] = []
@@ -327,11 +328,13 @@ func attributed_string_attach_icon(_ astr: inout AttributedString, img: UIImage)
     astr.append(wrapped)
 }
 
+@NdbActor
 func getDisplayName(pk: Pubkey, profiles: Profiles) -> String {
     let profile = profiles.lookup(id: pk)
     return Profile.displayName(profile: profile, pubkey: pk).username.truncate(maxLength: 50)
 }
 
+@NdbActor
 func mention_str(_ m: Mention<MentionRef>, profiles: Profiles) -> CompatibleText {
     let bech32String = Bech32Object.encode(m.ref.toBech32Object())
     

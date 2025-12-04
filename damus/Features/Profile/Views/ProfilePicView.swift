@@ -133,6 +133,7 @@ struct ProfilePicView: View {
     }
 }
 
+@NdbActor
 func get_profile_url(picture: String?, pubkey: Pubkey, profiles: Profiles) -> URL {
     let pic = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
     if let url = URL(string: pic) {
@@ -141,6 +142,7 @@ func get_profile_url(picture: String?, pubkey: Pubkey, profiles: Profiles) -> UR
     return URL(string: robohash(pubkey))!
 }
 
+@MainActor
 func make_preview_profiles(_ pubkey: Pubkey) -> Profiles {
     let profiles = Profiles(ndb: test_damus_state.ndb)
     //let picture = "http://cdn.jb55.com/img/red-me.jpg"

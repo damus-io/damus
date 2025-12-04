@@ -143,6 +143,7 @@ func event_group_unique_pubkeys(profiles: Profiles, group: EventGroupType) -> [P
  "zapped_your_profile_2" - returned when 2 zaps occurred to the current user's profile
  "zapped_your_profile_3" - returned when 3 or more zaps occurred to the current user's profile
  */
+@NdbActor
 func reacting_to_text(profiles: Profiles, our_pubkey: Pubkey, group: EventGroupType, ev: NostrEvent?, pubkeys: [Pubkey], locale: Locale = Locale.current) -> String {
     if group.events.count == 0 {
         return "??"

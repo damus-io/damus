@@ -63,9 +63,11 @@ let test_private_zap = Zap(event: test_note, invoice: test_zap_invoice, zapper: 
 
 let test_pending_zap = PendingZap(amount_msat: 10000, target: .note(id: test_note.id, author: test_note.pubkey), request: .normal(test_zap_request), type: .pub, state: .external(.init(state: .fetching_invoice)))
 
+@MainActor
 let test_following_model = FollowingModel(damus_state: test_damus_state, contacts: [test_pubkey, test_pubkey_2], hashtags: [Hashtag(hashtag: "grownostr"), Hashtag(hashtag: "zapathon")])
 
 
+@MainActor
 var test_damus_state: DamusState = ({
     // Create a unique temporary directory
     var tempDir: String!

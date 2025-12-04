@@ -27,6 +27,7 @@ struct ReplyDescription_Previews: PreviewProvider {
     }
 }
 
+@NdbActor
 func reply_desc(ndb: Ndb, event: NostrEvent, replying_to: NostrEvent?, locale: Locale = Locale.current) -> String {
     let desc = make_reply_description(event, replying_to: replying_to)
     let pubkeys = desc.pubkeys

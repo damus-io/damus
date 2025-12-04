@@ -79,6 +79,7 @@ struct NIP05DomainTimelineHeaderView: View {
     }
 }
 
+@NdbActor
 func friendsOfFriendsString(_ friendsOfFriends: [Pubkey], ndb: Ndb, locale: Locale = Locale.current) -> String {
     let bundle = bundleForLocale(locale: locale)
     let names: [String] = friendsOfFriends.prefix(3).map { pk in

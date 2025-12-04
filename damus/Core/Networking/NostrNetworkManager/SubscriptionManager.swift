@@ -186,7 +186,7 @@ extension NostrNetworkManager {
                             switch item {
                             case .event(let lender):
                                 logStreamPipelineStats("SubscriptionManager_Advanced_Stream_\(id)", "Consumer_\(id)")
-                                try? lender.borrow({ event in
+                                try? await lender.borrow({ event in
                                     if let latestTimestamp = latestNoteTimestampSeen {
                                         latestNoteTimestampSeen = max(latestTimestamp, event.createdAt)
                                     }
@@ -272,7 +272,7 @@ extension NostrNetworkManager {
                 let multiSessionStreamingTask = Task {
                     while !Task.isCancelled {
                         do {
-                            guard !self.ndb.is_closed else {
+                            guard await !self.ndb.is_closed else {
                                 Self.logger.info("\(subscriptionId.uuidString, privacy: .public): Ndb closed. Sleeping for 1 second before resuming.")
                                 try await Task.sleep(nanoseconds: 1_000_000_000)
                                 continue
@@ -308,7 +308,7 @@ extension NostrNetworkManager {
                 
                 let ndbStreamTask = Task {
                     do {
-                        for await item in try self.ndb.subscribe(filters: try filters.map({ try NdbFilter(from: $0) })) {
+                        for await item in try await self.ndb.subscribe(filters: try filters.map({ try NdbFilter(from: $0) })) {
                             try Task.checkCancellation()
                             switch item {
                             case .eose:
@@ -321,7 +321,7 @@ extension NostrNetworkManager {
                                     continuation.yield(.event(lender: lender))  // If no desired relays are specified, return all notes we see.
                                     break
                                 }
-                                if try ndb.was(noteKey: noteKey, seenOnAnyOf: desiredRelays) {
+                                if try await ndb.was(noteKey: noteKey, seenOnAnyOf: desiredRelays) {
                                     continuation.yield(.event(lender: lender))  // If desired relays were specified and this note was seen there, return it.
                                 }
                             }
@@ -360,7 +360,7 @@ extension NostrNetworkManager {
             let filter = NostrFilter(ids: [noteId], limit: 1)
             
             // Since note ids point to immutable objects, we can do a simple ndb lookup first
-            if let noteKey = self.ndb.lookup_note_key(noteId) {
+            if let noteKey = await self.ndb.lookup_note_key(noteId) {
                 return NdbNoteLender(ndb: self.ndb, noteKey: noteKey)
             }
             
@@ -380,7 +380,7 @@ extension NostrNetworkManager {
         func query(filters: [NostrFilter], to: [RelayURL]? = nil, timeout: Duration? = nil) async -> [NostrEvent] {
             var events: [NostrEvent] = []
             for await noteLender in self.streamExistingEvents(filters: filters, to: to, timeout: timeout) {
-                noteLender.justUseACopy({ events.append($0) })
+                await noteLender.justUseACopy({ events.append($0) })
             }
             return events
         }
@@ -396,7 +396,7 @@ extension NostrNetworkManager {
             
             for await noteLender in self.streamExistingEvents(filters: [filter], to: targetRelays, timeout: timeout) {
                 // TODO: This can be refactored to borrow the note instead of copying it. But we need to implement `referenced_params` on `UnownedNdbNote` to do so
-                guard let event = noteLender.justGetACopy() else { continue }
+                guard let event = await noteLender.justGetACopy() else { continue }
                 if event.referenced_params.first?.param.string() == naddr.identifier {
                     return event
                 }
@@ -413,7 +413,7 @@ extension NostrNetworkManager {
             
             switch query {
             case .profile(let pubkey):
-                let profileNotNil = self.ndb.lookup_profile(pubkey, borrow: { pr in
+                let profileNotNil = await self.ndb.lookup_profile(pubkey, borrow: { pr in
                     switch pr {
                     case .some(let pr): return pr.profile != nil
                     case .none: return true
@@ -424,7 +424,7 @@ extension NostrNetworkManager {
                 }
                 filter = NostrFilter(kinds: [.metadata], limit: 1, authors: [pubkey])
             case .event(let evid):
-                if let event = self.ndb.lookup_note_and_copy(evid) {
+                if let event = await self.ndb.lookup_note_and_copy(evid) {
                     return .event(event)
                 }
                 filter = NostrFilter(ids: [evid], limit: 1)
@@ -435,7 +435,7 @@ extension NostrNetworkManager {
             guard let filter else { return nil }
             
             for await noteLender in self.streamExistingEvents(filters: [filter], to: find_from) {
-                let foundEvent: FoundEvent? = try? noteLender.borrow({ event in
+                let foundEvent: FoundEvent? = try? await noteLender.borrow({ event in
                     switch query {
                     case .profile:
                         if event.known_kind == .metadata {
@@ -513,11 +513,8 @@ extension NostrNetworkManager {
         
         var debugDescription: String {
             switch self {
-            case .event(lender: let lender):
-                let detailedDescription = try? lender.borrow({ event in
-                    "Note with ID: \(event.id.hex())"
-                })
-                return detailedDescription ?? "Some note"
+            case .event(_):
+                return "Some note"
             case .eose:
                 return "EOSE"
             case .ndbEose:

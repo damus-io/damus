@@ -90,6 +90,7 @@ struct ZapTypePicker_Previews: PreviewProvider {
     }
 }
 
+@NdbActor
 func zap_type_desc(type: ZapType, profiles: Profiles, pubkey: Pubkey) -> String {
     switch type {
     case .pub:

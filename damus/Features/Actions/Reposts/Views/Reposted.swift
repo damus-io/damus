@@ -53,6 +53,7 @@ struct Reposted: View {
     }
 }
 
+@NdbActor
 func people_reposted_text(profiles: Profiles, pubkey: Pubkey, reposts: Int, locale: Locale = Locale.current) -> String {
     guard reposts > 0 else {
         return ""

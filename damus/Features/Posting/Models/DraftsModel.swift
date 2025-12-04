@@ -76,6 +76,7 @@ class DraftArtifacts: Equatable {
     ///   - nip37_draft: The NIP-37 draft object
     ///   - damus_state: Damus state of the user who wants to load this draft object. Needed for pulling profiles from Ndb, and decrypting contents.
     /// - Returns: A draft artifacts object, or `nil` if such cannot be loaded.
+    @NdbActor
     static func from(nip37_draft: NIP37Draft, damus_state: DamusState) -> DraftArtifacts? {
         return Self.from(
             event: nip37_draft.unwrapped_note,
@@ -93,6 +94,7 @@ class DraftArtifacts: Equatable {
     ///   - draft_id: The unique ID of this draft, used for keeping draft identities stable. UUIDs are recommended but not required.
     ///   - damus_state: The user's Damus state, used for fetching profiles in NostrDB
     /// - Returns: The draft that can be loaded into `PostView`.
+    @NdbActor
     static func from(event: NostrEvent, draft_id: String, damus_state: DamusState) -> DraftArtifacts? {
         guard let parsed_blocks = parse_note_content(content: .init(note: event, keypair: damus_state.keypair)) else {
             return nil
@@ -108,6 +110,7 @@ class DraftArtifacts: Equatable {
     ///   - draft_id: The unique ID of the draft as per NIP-37
     ///   - damus_state: Damus state, used for fetching profile info in NostrDB
     /// - Returns: The draft that can be loaded into `PostView`.
+    @NdbActor
     static func from(parsed_blocks: Blocks, references: [RefId], draft_id: String, damus_state: DamusState) -> DraftArtifacts {
         let rich_text_content: NSMutableAttributedString = .init(string: "")
         var media: [UploadedMedia] = []
@@ -159,6 +162,7 @@ class DraftArtifacts: Equatable {
 
 
 /// Holds and keeps track of the note post drafts throughout the app.
+@MainActor
 class Drafts: ObservableObject {
     @Published var post: DraftArtifacts? = nil
     @Published var replies: [NoteId: DraftArtifacts] = [:]
@@ -170,6 +174,7 @@ class Drafts: ObservableObject {
     @Published var highlights: [HighlightContentDraft: DraftArtifacts] = [:]
     
     /// Loads drafts from storage (NostrDB + UserDefaults)
+    @NdbActor
     func load(from damus_state: DamusState) {
         guard let note_ids = damus_state.settings.draft_event_ids?.compactMap({ NoteId(hex: $0) }) else { return }
         for note_id in note_ids {
@@ -186,6 +191,7 @@ class Drafts: ObservableObject {
     }
     
     /// Loads a specific NIP-37 note into this class
+    @NdbActor
     func load(wrapped_draft_note: NdbNote, with damus_state: DamusState) throws {
         // Extract draft info from the NIP-37 note
         guard let full_keypair = damus_state.keypair.to_full() else { return }

@@ -36,15 +36,14 @@ struct EventActionBar: View {
         self.swipe_context = swipe_context
     }
     
-    @State var lnurl: String? = nil
+    @MainActor @State var lnurl: String? = nil
     
     // Fetching an LNURL is expensive enough that it can cause a hitch. Use a special backgroundable function to fetch the value.
     // Fetch on `.onAppear`
-    nonisolated func fetchLNURL() {
+    @NdbActor
+    func fetchLNURL() {
         let lnurl = damus_state.profiles.lookup_lnurl(event.pubkey)
-        DispatchQueue.main.async {
-            self.lnurl = lnurl
-        }
+        self.lnurl = lnurl
     }
     
     var show_like: Bool {
@@ -256,7 +255,7 @@ struct EventActionBar: View {
         .onAppear {
             Task.detached(priority: .background, operation: {
                 await self.bar.update(damus: damus_state, evid: self.event.id)
-                self.fetchLNURL()
+                await self.fetchLNURL()
                 await self.updateEventRelayURLStrings()
             })
         }

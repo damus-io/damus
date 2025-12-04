@@ -102,6 +102,7 @@ enum NdbBlock: ~Copyable {
 }
 
 /// Represents a group of blocks
+@NdbActor
 struct NdbBlockGroup: ~Copyable {
     /// The block offsets
     fileprivate let metadata: BlocksMetadata
@@ -121,7 +122,7 @@ struct NdbBlockGroup: ~Copyable {
     /// This function will:
     /// - fetch blocks information from NostrDB if possible _and_ available, or
     /// - parse blocks on-demand.
-    static func borrowBlockGroup<T>(event: NdbNote, using ndb: Ndb, and keypair: Keypair, borrow lendingFunction: (_: borrowing Self) throws -> T) throws -> T {
+    static func borrowBlockGroup<T>(event: NdbNote, using ndb: Ndb, and keypair: Keypair, borrow lendingFunction: @NdbActor (_: borrowing Self) throws -> T) throws -> T {
         if event.is_content_encrypted() {
             return try lendingFunction(parse(event: event, keypair: keypair))
         }
@@ -163,7 +164,8 @@ struct NdbBlockGroup: ~Copyable {
 // MARK: - Extensions enabling low-level control
 
 fileprivate extension Ndb {
-    func lookup_block_group_by_key<T>(event: NdbNote, borrow lendingFunction: sending (_: borrowing NdbBlockGroup?) throws -> T) rethrows -> T {
+    @NdbActor
+    func lookup_block_group_by_key<T>(event: NdbNote, borrow lendingFunction: @NdbActor (_: borrowing NdbBlockGroup?) throws -> T) rethrows -> T {
         let txn = SafeNdbTxn<NdbBlockGroup?>.new(on: self) { txn in
             guard let key = lookup_note_key_with_txn(event.id, txn: txn) else { return nil }
             return lookup_block_group_by_key_with_txn(key, event: event, txn: txn)
