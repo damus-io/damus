@@ -81,6 +81,23 @@ extension NdbProfile {
             return URL(string: trim)
         }
     }
+    
+    /// Clones this object. Useful for creating an owned copy from an unowned profile
+    func clone() -> Self {
+        return NdbProfile(
+            name: self.name,
+            display_name: self.display_name,
+            about: self.about,
+            picture: self.picture,
+            banner: self.banner,
+            website: self.website,
+            lud06: self.lud06,
+            lud16: self.lud16,
+            nip05: self.nip05,
+            damus_donation: self.damus_donation,
+            reactions: self.reactions
+        )
+    }
 
     init(name: String? = nil, display_name: String? = nil, about: String? = nil, picture: String? = nil, banner: String? = nil, website: String? = nil, lud06: String? = nil, lud16: String? = nil, nip05: String? = nil, damus_donation: Int? = nil, reactions: Bool = true) {
 
