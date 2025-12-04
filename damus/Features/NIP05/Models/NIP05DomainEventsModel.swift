@@ -8,6 +8,7 @@
 import FaviconFinder
 import Foundation
 
+@MainActor
 class NIP05DomainEventsModel: ObservableObject {
     let state: DamusState
     var events: EventHolder
@@ -35,7 +36,6 @@ class NIP05DomainEventsModel: ObservableObject {
         self.filter = NostrFilter()
     }
 
-    @MainActor
     func subscribe(resetEvents: Bool = true) {
         print("subscribing to notes with '\(domain)' NIP-05 domain (filter: \(friend_filter.rawValue))")
         filter = NostrFilter()
@@ -60,7 +60,6 @@ class NIP05DomainEventsModel: ObservableObject {
         print("unsubscribing from notes with '\(domain)' NIP-05 domain (filter: \(friend_filter.rawValue))")
     }
 
-    @MainActor
     func set_friend_filter(_ new_filter: FriendFilter) {
         guard new_filter != self.friend_filter else { return }
         self.friend_filter = new_filter
@@ -71,98 +70,66 @@ class NIP05DomainEventsModel: ObservableObject {
     }
 
     private func matches_domain(_ pubkey: Pubkey) -> Bool {
-        // Prefer validated nip05 if present; fallback to raw nip05 on profile.
-        if let validated = state.profiles.is_validated(pubkey),
-           validated.host.caseInsensitiveCompare(domain) == .orderedSame {
+        NIP05DomainHelpers.matches_domain(pubkey, domain: domain, profiles: state.profiles)
+    }
+
+    nonisolated private func resolve_domain_match(pubkey: Pubkey) async -> Bool {
+        // Quick check if already matches
+        let initialMatch = await MainActor.run { matches_domain(pubkey) }
+        if initialMatch {
             return true
         }
 
-        guard let profile = try? state.profiles.lookup(id: pubkey),
-              let nip05_str = profile.nip05,
-              let nip05 = NIP05.parse(nip05_str) else {
+        // Check if we're already requesting this profile (race condition protection)
+        let alreadyRequesting = await MainActor.run { requesting_profiles.contains(pubkey) }
+        if alreadyRequesting {
             return false
         }
-
-        return nip05.host.caseInsensitiveCompare(domain) == .orderedSame
-    }
-
-    private func validated_authors_for_domain() async -> Set<Pubkey> {
-        let validated = await MainActor.run { state.profiles.nip05_pubkey }
-        return Set(validated.compactMap { (nip05_str, pk) in
-            guard let nip05 = NIP05.parse(nip05_str),
-                  nip05.host.caseInsensitiveCompare(domain) == .orderedSame else {
-                return nil
-            }
-            return pk
-        })
-    }
-
-    private func authors_for_domain() async -> Set<Pubkey> {
-        var authors = Set<Pubkey>()
-
-        switch friend_filter {
-        case .friends_of_friends:
-            for pubkey in state.contacts.get_friend_of_friends_list() where matches_domain(pubkey) {
-                authors.insert(pubkey)
-            }
-        case .all:
-            let validated = await validated_authors_for_domain()
-            authors.formUnion(validated)
-
-            // Also include any friend-of-friends that match the domain even if not validated yet.
-            for pubkey in state.contacts.get_friend_of_friends_list() where matches_domain(pubkey) {
-                authors.insert(pubkey)
-            }
-        }
-
-        return authors
-    }
-
-    private func resolve_domain_match(pubkey: Pubkey) async -> Bool {
-        if matches_domain(pubkey) {
-            return true
-        }
-
-        if requesting_profiles.contains(pubkey) {
-            return false
-        }
-        requesting_profiles.insert(pubkey)
+        await MainActor.run { _ = requesting_profiles.insert(pubkey) }
 
         // Try to fetch metadata quickly; bail early if the task was cancelled.
         let metaFilter = NostrFilter(kinds: [.metadata], limit: 1, authors: [pubkey])
+        let (state, _) = await MainActor.run { (self.state, ()) }
         for await lender in state.nostrNetwork.reader.timedStream(filters: [metaFilter], timeout: .seconds(3)) {
             await lender.justUseACopy { _ in }
             if Task.isCancelled { break }
         }
 
-        requesting_profiles.remove(pubkey)
-        return matches_domain(pubkey)
+        // Cleanup synchronously on MainActor before returning
+        return await MainActor.run {
+            requesting_profiles.remove(pubkey)
+            return matches_domain(pubkey)
+        }
     }
 
     func streamItems() async {
         filter.limit = used_initial_page ? self.limit : self.initial_limit
         filter.kinds = [.text, .longform, .highlight]
 
-        let authors = await authors_for_domain()
-        switch friend_filter {
-        case .friends_of_friends:
-            if authors.isEmpty {
-                await MainActor.run {
-                    self.loading = false
-                    self.has_more = false
-                }
-                return
-            }
-            filter.authors = Array(authors)
-        case .all:
-            // WOT off: do not restrict authors so we can discover new domain users.
-            filter.authors = nil
+        // Get authors with matching NIP-05 domain
+        // In WOT mode: filters to friends-of-friends
+        // In discovery mode: scans all cached profiles in nostrdb
+        let authors = await NIP05DomainHelpers.authors_for_domain(
+            domain: domain,
+            friend_filter: friend_filter,
+            contacts: state.contacts,
+            profiles: state.profiles,
+            ndb: state.ndb
+        )
+
+        // Early return if no authors found - prevents empty queries
+        guard !authors.isEmpty else {
+            self.loading = false
+            self.has_more = false
+            return
         }
 
-        await MainActor.run {
-            for pubkey in authors {
-                check_nip05_validity(pubkey: pubkey, profiles: state.profiles)
-            }
+        // Query events only from authors with matching domain
+        // This is much more efficient than streaming all events and filtering each one
+        filter.authors = Array(authors)
+
+        for pubkey in authors {
+            check_nip05_validity(pubkey: pubkey, profiles: state.profiles)
         }
 
         for await item in state.nostrNetwork.reader.advancedStream(filters: [filter]) {
@@ -182,7 +149,6 @@ class NIP05DomainEventsModel: ObservableObject {
         }
     }
 
-    @MainActor
     func load_more() {
         guard !loading_more, has_more else { return }
         guard let oldest = events.all_events.last?.created_at else { return }
@@ -229,31 +195,25 @@ class NIP05DomainEventsModel: ObservableObject {
     }
 
     func add_event(_ ev: NostrEvent) async {
-        // Ignore metadata/other kinds; timeline only cares about content notes.
-        if ev.known_kind == .metadata {
-            return
-        }
+        // Early returns for events we don't want to display
 
-        if !event_matches_filter(ev, filter: filter) {
-            return
-        }
+        // Skip metadata events - we only show text content
+        guard ev.known_kind != .metadata else { return }
 
-        guard await should_show_event(state: state, ev: ev) else {
-            return
-        }
+        // Skip events that don't match our filter criteria
+        guard event_matches_filter(ev, filter: filter) else { return }
 
-        await MainActor.run {
-            check_nip05_validity(pubkey: ev.pubkey, profiles: state.profiles)
-        }
+        // Skip events filtered by content rules (muted, NSFW, etc)
+        guard await should_show_event(state: state, ev: ev) else { return }
 
-        guard await resolve_domain_match(pubkey: ev.pubkey) else {
-            return
-        }
+        // Validate the NIP-05 for this author
+        check_nip05_validity(pubkey: ev.pubkey, profiles: state.profiles)
+
+        // Note: We don't check domain match here because we pre-filtered authors
+        // All events in this stream are from pubkeys with matching NIP-05 domain
 
         if await self.events.insert(ev) {
-            DispatchQueue.main.async {
-                self.objectWillChange.send()
-            }
+            self.objectWillChange.send()
         }
     }
 }
