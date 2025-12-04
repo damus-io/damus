@@ -22,27 +22,9 @@ struct NIP05DomainTimelineView: View {
         self._friend_filter = State(initialValue: model.friend_filter)
     }
 
-    private func nip05MatchesDomain(_ pubkey: Pubkey) -> Bool {
-        if let validated = damus_state.profiles.is_validated(pubkey),
-           validated.host.caseInsensitiveCompare(model.domain) == .orderedSame {
-            return true
-        }
-
-        let profile = damus_state.profiles.lookup(id: pubkey)?.unsafeUnownedValue
-        guard let nip05_str = profile?.nip05,
-              let nip05 = NIP05.parse(nip05_str) else {
-            return false
-        }
-
-        return nip05.host.caseInsensitiveCompare(model.domain) == .orderedSame
-    }
-
     func nip05_filter(ev: NostrEvent) -> Bool {
-        guard friend_filter.filter(contacts: damus_state.contacts, pubkey: ev.pubkey) else {
-            return false
-        }
-
-        return nip05MatchesDomain(ev.pubkey)
+        // Only check domain matching here - the model already filtered authors by friend_filter
+        return NIP05DomainHelpers.matches_domain(ev.pubkey, domain: model.domain, profiles: damus_state.profiles)
     }
 
     var contentFilters: ContentFilters {
