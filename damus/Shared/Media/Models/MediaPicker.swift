@@ -138,8 +138,12 @@ struct MediaPicker: UIViewControllerRepresentable {
                 print("Acquired permission to security scoped resource")
                 self.chooseMedia(unprocessedEnum(url), orderId: orderId)
             } else {
-                // Need to copy URL to non-security scoped location
-                guard let newUrl = fallback(url) else { return }
+                // Need to copy URL to non-security scoped location; if sanitization fails, abort upload attempt.
+                guard let newUrl = fallback(url) else {
+                    Log.error("Failed to sanitize media picked from Photos; skipping unsafe upload.", for: .image_uploading)
+                    self.dispatchGroup.leave()
+                    return
+                }
                 self.chooseMedia(processedEnum(newUrl), orderId: orderId)
             }
         }

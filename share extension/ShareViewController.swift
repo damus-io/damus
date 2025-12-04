@@ -346,8 +346,13 @@ struct ShareExtensionView: View {
                 print("Acquired permission to security scoped resource")
                 chooseMedia(unprocessedEnum(url))
             } else {
-                // Need to copy URL to non-security scoped location
-                guard let newUrl = fallback(url) else { return }
+                // Need to copy URL to non-security scoped location; bail out if sanitization fails.
+                guard let newUrl = fallback(url) else {
+                    DispatchQueue.main.async {
+                        self.share_state = .failed(error: NSLocalizedString("We could not prepare the selected video for upload. Please try again.", comment: "Error shown when share extension fails to sanitize video metadata."))
+                    }
+                    return
+                }
                 chooseMedia(processedEnum(newUrl))
             }
         }
