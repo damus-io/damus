@@ -13,6 +13,7 @@ struct NIP05DomainTimelineHeaderView: View {
     let damus_state: DamusState
     @ObservedObject var model: NIP05DomainEventsModel
     let nip05_domain_favicon: FaviconURL?
+    let friend_filter: FriendFilter
 
     @Environment(\.openURL) var openURL
 
@@ -31,16 +32,30 @@ struct NIP05DomainTimelineHeaderView: View {
         }
     }
 
-    var friendsOfFriends: [Pubkey] {
-        // Order it such that the pubkeys that have events come first in the array so that their profile pictures
-        // show first.
+    private func domainAuthors() -> [Pubkey] {
+        // Order with authors that already have events first to make the header feel responsive.
         let pubkeys = model.events.all_events.map { $0.pubkey } + (model.filter.authors ?? [])
+        let orderedUnique = NSMutableOrderedSet(array: pubkeys).array as? [Pubkey] ?? []
 
-        // Filter out duplicates but retain order, and filter out any that do not have a validated NIP-05.
-        return (NSMutableOrderedSet(array: pubkeys).array as? [Pubkey] ?? [])
-            .filter {
-                damus_state.contacts.is_in_friendosphere($0) && damus_state.profiles.is_validated($0) != nil
+        // Only keep pubkeys that match the domain; use nip05 host (validated or not) so we surface everyone in scope.
+        let matching = orderedUnique.filter { pk in
+            let validated = damus_state.profiles.is_validated(pk)
+            if let host = validated?.host {
+                return host.caseInsensitiveCompare(model.domain) == .orderedSame
             }
+            let profile = damus_state.profiles.lookup(id: pk)?.unsafeUnownedValue
+            guard let nip05_str = profile?.nip05,
+                  let nip05 = NIP05.parse(nip05_str) else {
+                return false
+            }
+            return nip05.host.caseInsensitiveCompare(model.domain) == .orderedSame
+        }
+
+        if friend_filter == .friends_of_friends {
+            return matching.filter { damus_state.contacts.is_in_friendosphere($0) }
+        }
+
+        return matching
     }
 
     var body: some View {
@@ -60,19 +75,19 @@ struct NIP05DomainTimelineHeaderView: View {
                     }
             }
 
-            let friendsOfFriends = friendsOfFriends
+            let authors = domainAuthors()
 
             HStack {
-                CondensedProfilePicturesView(state: damus_state, pubkeys: friendsOfFriends, maxPictures: 3)
-                let friendsOfFriendsString = friendsOfFriendsString(friendsOfFriends, ndb: damus_state.ndb)
-                Text(friendsOfFriendsString)
+                CondensedProfilePicturesView(state: damus_state, pubkeys: authors, maxPictures: 3)
+                let description = friendsOfFriendsString(authors, ndb: damus_state.ndb)
+                Text(description)
                     .font(.subheadline)
                     .foregroundColor(.gray)
                     .multilineTextAlignment(.leading)
             }
             .onTapGesture {
-                if !friendsOfFriends.isEmpty {
-                    damus_state.nav.push(route: Route.NIP05DomainPubkeys(domain: model.domain, nip05_domain_favicon: nip05_domain_favicon, pubkeys: friendsOfFriends))
+                if !authors.isEmpty {
+                    damus_state.nav.push(route: Route.NIP05DomainPubkeys(domain: model.domain, nip05_domain_favicon: nip05_domain_favicon, pubkeys: authors))
                 }
             }
         }
