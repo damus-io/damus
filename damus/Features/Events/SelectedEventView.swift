@@ -16,6 +16,7 @@ struct SelectedEventView: View {
         event.pubkey
     }
     
+    @State private var relays: [RelayURL] = []
     @StateObject var bar: ActionBarModel
 
     init(damus: DamusState, event: NostrEvent, size: EventViewKind) {
@@ -51,10 +52,30 @@ struct SelectedEventView: View {
 
                 Mention
                 
-                Text(verbatim: "\(format_date(created_at: event.created_at))")
-                    .padding([.top, .leading, .trailing])
-                    .font(.footnote)
-                    .foregroundColor(.gray)
+                // Keep relay count aligned with timestamp while staying tappable for relay details.
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text(verbatim: "\(format_date(created_at: event.created_at))")
+                        .font(.footnote)
+                        .foregroundColor(.gray)
+
+                    Spacer(minLength: 8)
+
+                    if !relays.isEmpty {
+                        NavigationLink(value: Route.UserRelays(relays: relays)) {
+                            let nounString = pluralizedString(key: "relays_count", count: relays.count)
+                            HStack(spacing: 4) {
+                                Text(verbatim: relays.count.formatted())
+                                    .font(.footnote.weight(.semibold))
+                                    .foregroundColor(.gray)
+                                Text(LocalizedStringKey(nounString), comment: "Sentence composed of 2 variables to describe how many relays a note was found on. In source English, the first variable is the number of relays, and the second variable is 'Relay' or 'Relays'.")
+                                    .font(.footnote)
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+                .padding([.top, .leading, .trailing])
                 
                 Divider()
                     .padding([.bottom], 4)
@@ -74,9 +95,15 @@ struct SelectedEventView: View {
             }
             .onReceive(handle_notify(.update_stats)) { target in
                 guard target == self.event.id else { return }
-                Task { await self.bar.update(damus: self.damus, evid: target) }
+                Task {
+                    await self.bar.update(damus: self.damus, evid: target)
+                    await self.updateSeenRelays()
+                }
             }
             .compositingGroup()
+            .onAppear {
+                Task { await self.updateSeenRelays() }
+            }
         }
     }
     
@@ -86,6 +113,14 @@ struct SelectedEventView: View {
                 MentionView(damus_state: damus, mention: mention)
                     .padding(.horizontal)
             }
+        }
+    }
+
+    func updateSeenRelays() async {
+        // Fetch relays on the network actor then hop to main to publish state.
+        let relays = await Array(damus.nostrNetwork.relayURLsThatSawNote(id: event.id) ?? [])
+        await MainActor.run {
+            self.relays = relays
         }
     }
 }
