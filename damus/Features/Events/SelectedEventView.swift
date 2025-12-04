@@ -52,6 +52,7 @@ struct SelectedEventView: View {
 
                 Mention
                 
+                // Keep relay count aligned with timestamp while staying tappable for relay details.
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Text(verbatim: "\(format_date(created_at: event.created_at))")
                         .font(.footnote)
@@ -116,6 +117,7 @@ struct SelectedEventView: View {
     }
 
     func updateSeenRelays() async {
+        // Fetch relays on the network actor then hop to main to publish state.
         let relays = await Array(damus.nostrNetwork.relayURLsThatSawNote(id: event.id) ?? [])
         await MainActor.run {
             self.relays = relays
