@@ -530,6 +530,14 @@ class Ndb {
             lookup_profile_with_txn_inner(pubkey: pubkey, txn: txn)
         }
     }
+    
+    func lookup_profile_and_copy(_ pubkey: Pubkey) -> Profile? {
+        let txn = NdbTxn(ndb: self) { txn in
+            lookup_profile_with_txn_inner(pubkey: pubkey, txn: txn)
+        }
+        guard let record = txn?.unsafeUnownedValue else { return nil }
+        return record.profile?.clone()
+    }
 
     func lookup_profile_with_txn<Y>(_ pubkey: Pubkey, txn: NdbTxn<Y>) -> ProfileRecord? {
         lookup_profile_with_txn_inner(pubkey: pubkey, txn: txn)
