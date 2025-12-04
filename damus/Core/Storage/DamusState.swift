@@ -102,6 +102,9 @@ class DamusState: HeadlessDamusState, ObservableObject {
         guard let ndb = mndb else { return nil }
         let pubkey = keypair.pubkey
 
+        // Load profile bootstrap on first launch
+        ProfileBootstrap.loadIfNeeded(ndb: ndb)
+
         let model_cache = RelayModelCache()
         let relay_filters = RelayFilters(our_pubkey: pubkey)
         let bootstrap_relays = load_bootstrap_relays(pubkey: pubkey)
