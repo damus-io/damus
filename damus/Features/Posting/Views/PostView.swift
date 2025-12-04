@@ -109,6 +109,7 @@ struct PostView: View {
     }
 
     @Environment(\.dismiss) var dismiss
+    @Environment(\.connectivitySignal) var connectivitySignal
 
     func cancel() {
         notify(.post(.cancel))
@@ -161,21 +162,33 @@ struct PostView: View {
     
     var ImageButton: some View {
         Button(action: {
+            if isOffline {
+                notify(.transient_toast(NSLocalizedString("Uploads unavailable offline.", comment: "Toast shown when attempting to upload media while offline.")))
+                return
+            }
             preUploadedMedia.removeAll()
             attach_media = true
         }, label: {
             Image("images")
                 .padding(6)
         })
+        .disabled(uploading_disabled)
+        .opacity((uploading_disabled || isOffline) ? 0.5 : 1.0)
     }
     
     var CameraButton: some View {
         Button(action: {
+            if isOffline {
+                notify(.transient_toast(NSLocalizedString("Uploads unavailable offline.", comment: "Toast shown when attempting to upload media while offline.")))
+                return
+            }
             attach_camera = true
         }, label: {
             Image("camera")
                 .padding(6)
         })
+        .disabled(uploading_disabled)
+        .opacity((uploading_disabled || isOffline) ? 0.5 : 1.0)
     }
     
     var AttachmentBar: some View {
@@ -328,6 +341,12 @@ struct PostView: View {
 
                 Spacer()
 
+                if isOffline {
+                    OfflineStatusPill()
+                        .padding(.trailing, 4)
+                        .accessibilityIdentifier("offline-compose-pill")
+                }
+
                 PostButton
             }
             
@@ -384,6 +403,29 @@ struct PostView: View {
         }
     }
     
+    var isOffline: Bool {
+        guard let signal = connectivitySignal else { return false }
+        return signal.isOffline
+    }
+    
+    var OfflineComposeHint: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "clock.arrow.circlepath")
+                .font(.caption)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Will send when you reconnect", comment: "Caption shown in the composer to explain that notes are queued while offline.")
+                    .font(.caption)
+                Text("Check Outbox in the side menu to follow pending notes.", comment: "Additional help text that explains the Outbox view is where pending notes can be monitored.")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .foregroundColor(DamusColors.adaptableBlack.opacity(0.6))
+        .padding(.top, 6)
+        .accessibilityIdentifier("offline-compose-hint")
+        .accessibilityLabel(Text("Offline: message will send when reconnected. Check Outbox for pending notes.", comment: "Accessibility label describing offline compose state."))
+    }
+    
     func Editor(deviceSize: GeometryProxy) -> some View {
         HStack(alignment: .top, spacing: 0) {
             VStack(alignment: .leading, spacing: 0) {
@@ -417,6 +459,11 @@ struct PostView: View {
                         let url = draft.getLinkURL() {
                     LinkViewRepresentable(meta: .url(url))
                         .frame(height: 50)
+                }
+                
+                if isOffline {
+                    OfflineComposeHint
+                        .transition(.opacity)
                 }
             }
             .padding(.horizontal)
@@ -974,4 +1021,3 @@ func isSupportedImage(url: URL) -> Bool {
     let supportedTypes = ["jpg", "png", "gif"]
     return supportedTypes.contains(fileExtension)
 }
-

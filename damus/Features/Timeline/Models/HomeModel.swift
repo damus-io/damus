@@ -81,6 +81,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
     var already_reposted: Set<NoteId> = Set()
     var zap_button: ZapButtonModel = ZapButtonModel()
     
+    @MainActor
     init() {
         self.damus_state = DamusState.empty
         self.setup_debouncer()

@@ -6,6 +6,7 @@
 //  Ref: https://blog.logrocket.com/create-custom-collapsible-sidebar-swiftui/
 
 import SwiftUI
+import UIKit
 
 @MainActor
 struct SideMenuView: View {
@@ -109,6 +110,11 @@ struct SideMenuView: View {
             NavigationLink(value: Route.Bookmarks) {
                 navLabel(title: NSLocalizedString("Bookmarks", comment: "Sidebar menu label for Bookmarks view."), img: "bookmark")
             }
+            
+        NavigationLink(value: Route.Outbox) {
+            navLabel(title: NSLocalizedString("Outbox", comment: "Sidebar menu label for the pending posts outbox."), img: "paperplane")
+        }
+        .accessibilityIdentifier(AppAccessibilityIdentifiers.side_menu_outbox_button.rawValue)
 
             Link(destination: URL(string: "https://store.damus.io/?ref=damus_ios_app")!) {
                 navLabel(title: NSLocalizedString("Merch", comment: "Sidebar menu label for merch store link."), img: "shop")
@@ -263,8 +269,14 @@ struct SideMenuView: View {
 
     func navLabel(title: String, img: String) -> some View {
         HStack(spacing: 20) {
-            Image(img)
-                .tint(DamusColors.adaptableBlack)
+            if UIImage(named: img) != nil {
+                Image(img)
+                    .tint(DamusColors.adaptableBlack)
+            } else {
+                Image(systemName: img)
+                    .fontWeight(.semibold)
+                    .foregroundColor(DamusColors.adaptableBlack)
+            }
             
             Text(title)
                 .font(.title2.weight(.semibold))
