@@ -68,10 +68,12 @@ struct TextViewWrapper: UIViewRepresentable {
         if let index = cursorIndex {
             guard let newPosition = uiView.position(from: uiView.beginningOfDocument, offset: index),
                   let textRange = uiView.textRange(from: newPosition, to: newPosition) else {
+                // If the explicit cursor target is invalid, fall back to the saved range
                 uiView.selectedRange = selectionRange
                 tagModel.diff = 0
                 return
             }
+
             uiView.selectedTextRange = textRange
             tagModel.diff = 0
             return
