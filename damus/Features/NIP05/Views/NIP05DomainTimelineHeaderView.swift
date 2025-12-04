@@ -13,6 +13,7 @@ struct NIP05DomainTimelineHeaderView: View {
     let damus_state: DamusState
     @ObservedObject var model: NIP05DomainEventsModel
     let nip05_domain_favicon: FaviconURL?
+    let friend_filter: FriendFilter
 
     @Environment(\.openURL) var openURL
 
@@ -31,16 +32,15 @@ struct NIP05DomainTimelineHeaderView: View {
         }
     }
 
-    var friendsOfFriends: [Pubkey] {
-        // Order it such that the pubkeys that have events come first in the array so that their profile pictures
-        // show first.
-        let pubkeys = model.events.all_events.map { $0.pubkey } + (model.filter.authors ?? [])
-
-        // Filter out duplicates but retain order, and filter out any that do not have a validated NIP-05.
-        return (NSMutableOrderedSet(array: pubkeys).array as? [Pubkey] ?? [])
-            .filter {
-                damus_state.contacts.is_in_friendosphere($0) && damus_state.profiles.is_validated($0) != nil
-            }
+    private func domainAuthors() -> [Pubkey] {
+        NIP05DomainHelpers.ordered_domain_authors(
+            domain: model.domain,
+            friend_filter: friend_filter,
+            contacts: damus_state.contacts,
+            profiles: damus_state.profiles,
+            eventPubkeys: model.events.all_events.map { $0.pubkey },
+            filterAuthors: model.filter.authors
+        )
     }
 
     var body: some View {
@@ -60,27 +60,42 @@ struct NIP05DomainTimelineHeaderView: View {
                     }
             }
 
-            let friendsOfFriends = friendsOfFriends
+            let authors = domainAuthors()
 
             HStack {
-                CondensedProfilePicturesView(state: damus_state, pubkeys: friendsOfFriends, maxPictures: 3)
-                let friendsOfFriendsString = friendsOfFriendsString(friendsOfFriends, ndb: damus_state.ndb)
-                Text(friendsOfFriendsString)
+                CondensedProfilePicturesView(state: damus_state, pubkeys: authors, maxPictures: 3)
+                let description = friendsOfFriendsString(authors, ndb: damus_state.ndb, wotEnabled: friend_filter == .friends_of_friends)
+                Text(description)
                     .font(.subheadline)
                     .foregroundColor(.gray)
                     .multilineTextAlignment(.leading)
             }
             .onTapGesture {
-                if !friendsOfFriends.isEmpty {
-                    damus_state.nav.push(route: Route.NIP05DomainPubkeys(domain: model.domain, nip05_domain_favicon: nip05_domain_favicon, pubkeys: friendsOfFriends))
+                if !authors.isEmpty {
+                    damus_state.nav.push(route: Route.NIP05DomainPubkeys(domain: model.domain, nip05_domain_favicon: nip05_domain_favicon, pubkeys: authors))
                 }
             }
         }
     }
 }
 
-func friendsOfFriendsString(_ friendsOfFriends: [Pubkey], ndb: Ndb, locale: Locale = Locale.current) -> String {
+/// Generates a localized string describing which authors' notes are shown in the feed
+///
+/// Formats the display text based on how many authors have notes:
+/// - 0 authors: Shows empty state message (different for WOT on/off)
+/// - 1-3 authors: Lists names explicitly ("Notes from Alice", "Notes from Alice & Bob", etc.)
+/// - 4+ authors: Shows first 3 names plus count of others
+///
+/// - Parameters:
+///   - friendsOfFriends: Array of pubkeys with notes in this feed
+///   - ndb: Nostrdb instance for profile lookups
+///   - locale: Locale for string formatting
+///   - wotEnabled: Whether Web-of-Trust filtering is active
+/// - Returns: Localized description string
+func friendsOfFriendsString(_ friendsOfFriends: [Pubkey], ndb: Ndb, locale: Locale = Locale.current, wotEnabled: Bool = true) -> String {
     let bundle = bundleForLocale(locale: locale)
+
+    // Get display names for up to 3 authors
     let names: [String] = friendsOfFriends.prefix(3).map { pk in
         let profile = try? ndb.lookup_profile(pk, borrow: { pr in
             switch pr {
@@ -93,7 +108,12 @@ func friendsOfFriendsString(_ friendsOfFriends: [Pubkey], ndb: Ndb, locale: Loca
 
     switch friendsOfFriends.count {
     case 0:
-        return "No one in your trusted network is associated with this domain."
+        // Different empty state messaging based on WOT mode
+        if wotEnabled {
+            return "No one in your trusted network is associated with this domain."
+        } else {
+            return "No cached profiles found for this domain. Try following users from this domain to see their notes."
+        }
     case 1:
         let format = NSLocalizedString("Notes from %@", bundle: bundle, comment: "Text to indicate that notes from one pubkey in our trusted network are shown below.")
         return String(format: format, locale: locale, names[0])
@@ -112,5 +132,5 @@ func friendsOfFriendsString(_ friendsOfFriends: [Pubkey], ndb: Ndb, locale: Loca
 #Preview {
     let model = NIP05DomainEventsModel(state: test_damus_state, domain: "damus.io")
     let nip05_domain_favicon = FaviconURL(source: URL(string: "https://damus.io/favicon.ico")!, format: .ico, sourceType: .ico)
-    NIP05DomainTimelineHeaderView(damus_state: test_damus_state, model: model, nip05_domain_favicon: nip05_domain_favicon)
+    NIP05DomainTimelineHeaderView(damus_state: test_damus_state, model: model, nip05_domain_favicon: nip05_domain_favicon, friend_filter: .friends_of_friends)
 }

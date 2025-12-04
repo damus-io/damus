@@ -13,9 +13,36 @@ struct NIP05DomainTimelineView: View {
     let damus_state: DamusState
     @ObservedObject var model: NIP05DomainEventsModel
     let nip05_domain_favicon: FaviconURL?
+    @State private var friend_filter: FriendFilter
+
+    init(damus_state: DamusState, model: NIP05DomainEventsModel, nip05_domain_favicon: FaviconURL?) {
+        self.damus_state = damus_state
+        self.model = model
+        self.nip05_domain_favicon = nip05_domain_favicon
+        self._friend_filter = State(initialValue: model.friend_filter)
+    }
+
+    private func nip05MatchesDomain(_ pubkey: Pubkey) -> Bool {
+        if let validated = damus_state.profiles.is_validated(pubkey),
+           validated.host.caseInsensitiveCompare(model.domain) == .orderedSame {
+            return true
+        }
+
+        guard let profile = try? damus_state.profiles.lookup(id: pubkey),
+              let nip05_str = profile.nip05,
+              let nip05 = NIP05.parse(nip05_str) else {
+            return false
+        }
+
+        return nip05.host.caseInsensitiveCompare(model.domain) == .orderedSame
+    }
 
     func nip05_filter(ev: NostrEvent) -> Bool {
-        damus_state.contacts.is_in_friendosphere(ev.pubkey) && damus_state.profiles.is_validated(ev.pubkey) != nil
+        guard friend_filter.filter(contacts: damus_state.contacts, pubkey: ev.pubkey) else {
+            return false
+        }
+
+        return nip05MatchesDomain(ev.pubkey)
     }
 
     var contentFilters: ContentFilters {
@@ -32,7 +59,7 @@ struct NIP05DomainTimelineView: View {
             ZStack(alignment: .leading) {
                 DamusBackground(maxHeight: height)
                     .mask(LinearGradient(gradient: Gradient(colors: [.black, .black, .black, .clear]), startPoint: .top, endPoint: .bottom))
-                NIP05DomainTimelineHeaderView(damus_state: damus_state, model: model, nip05_domain_favicon: nip05_domain_favicon)
+                NIP05DomainTimelineHeaderView(damus_state: damus_state, model: model, nip05_domain_favicon: nip05_domain_favicon, friend_filter: friend_filter)
                     .padding(.leading, 30)
                     .padding(.top, 30)
             }
@@ -43,15 +70,46 @@ struct NIP05DomainTimelineView: View {
             guard model.events.all_events.isEmpty else { return }
 
             model.subscribe()
-
-            if let pubkeys = model.filter.authors {
-                for pubkey in pubkeys {
-                    check_nip05_validity(pubkey: pubkey, damus_state: damus_state)
-                }
-            }
         }
         .onDisappear {
             model.unsubscribe()
+        }
+        .safeAreaInset(edge: .bottom) {
+            if model.has_more {
+                Button {
+                    model.load_more()
+                } label: {
+                    if model.loading_more {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .padding(.vertical, 8)
+                    } else {
+                        Text("Load older notes")
+                            .font(.subheadline.weight(.semibold))
+                            .padding(.vertical, 8)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .background(.ultraThinMaterial)
+            } else {
+                EmptyView()
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                TrustedNetworkButton(filter: $friend_filter)
+            }
+        }
+        .onChange(of: friend_filter) { val in
+            damus_state.settings.friend_filter = val
+            Task { @MainActor in
+                model.set_friend_filter(val)
+            }
+        }
+        .onAppear {
+            if friend_filter != damus_state.settings.friend_filter {
+                friend_filter = damus_state.settings.friend_filter
+            }
         }
     }
 }
