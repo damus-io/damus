@@ -13,14 +13,12 @@ struct EventDetailBar: View {
     let target_pk: Pubkey
 
     @ObservedObject var bar: ActionBarModel
-    @State var relays: [RelayURL] = []
     
     init(state: DamusState, target: NoteId, target_pk: Pubkey) {
         self.state = state
         self.target = target
         self.target_pk = target_pk
         self._bar = ObservedObject(wrappedValue: make_actionbar_model(ev: target, damus: state))
-        
     }
     
     var body: some View {
@@ -61,27 +59,7 @@ struct EventDetailBar: View {
                 .buttonStyle(PlainButtonStyle())
             }
 
-            if bar.relays > 0 {
-                NavigationLink(value: Route.UserRelays(relays: relays)) {
-                    let nounString = pluralizedString(key: "relays_count", count: bar.relays)
-                    let noun = Text(nounString).foregroundColor(.gray)
-                    Text("\(Text(verbatim: bar.relays.formatted()).font(.body.bold())) \(noun)", comment: "Sentence composed of 2 variables to describe how many relays a note was found on. In source English, the first variable is the number of relays, and the second variable is 'Relay' or 'Relays'.")
-                }
-                .buttonStyle(PlainButtonStyle())
-            }
         }
-        .onAppear {
-            Task { await self.updateSeenRelays() }
-        }
-        .onReceive(handle_notify(.update_stats)) { noteId in
-            guard noteId == target else { return }
-            Task { await self.updateSeenRelays() }
-        }
-    }
-    
-    func updateSeenRelays() async {
-        let relays = await Array(state.nostrNetwork.relayURLsThatSawNote(id: target) ?? [])
-        self.relays = relays
     }
 }
 
