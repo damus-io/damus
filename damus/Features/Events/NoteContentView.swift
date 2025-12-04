@@ -60,7 +60,10 @@ struct NoteContentView: View {
         if damus_state.settings.undistractMode {
             return .separated(.just_content(Undistractor.makeGibberish(text: event.get_content(damus_state.keypair))))
         }
-        return self.artifacts_model.state.artifacts ?? .separated(.just_content(event.get_content(damus_state.keypair)))
+        if let artifacts = self.artifacts_model.state.artifacts {
+            return artifacts
+        }
+        return render_immediately_available_note_content(ndb: damus_state.ndb, ev: event, profiles: damus_state.profiles, keypair: damus_state.keypair)
     }
     
     init(damus_state: DamusState, event: NostrEvent, blur_images: Bool, size: EventViewKind, options: EventViewOptions) {

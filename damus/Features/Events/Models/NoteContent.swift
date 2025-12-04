@@ -262,6 +262,11 @@ func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide
                 invoices.append(inv)
             case .url(let url):
                 guard let url = URL(string: url.as_str()) else { return .loopContinue }
+                let url_type = classify_url(url)
+                if case .media(.image) = url_type {
+                    // Hide image URLs in the rendered text; the media itself is shown separately.
+                    return .loopContinue
+                }
                 return .loopReturn(str + url_str(url))
             case .mention_index:
                 return .loopContinue
