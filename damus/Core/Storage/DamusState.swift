@@ -81,8 +81,10 @@ class DamusState: HeadlessDamusState, ObservableObject {
     
     @MainActor
     convenience init?(keypair: Keypair) {
+        print("🔷🔷🔷 DamusState convenience init called! 🔷🔷🔷")
         // nostrdb
         var mndb = Ndb()
+        print("🔷 Created Ndb: \(mndb != nil ? "SUCCESS" : "FAILED")")
         if mndb == nil {
             // try recovery
             print("DB ISSUE! RECOVERING")
