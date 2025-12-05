@@ -81,8 +81,10 @@ class DamusState: HeadlessDamusState, ObservableObject {
     
     @MainActor
     convenience init?(keypair: Keypair) {
+        print("🔷🔷🔷 DamusState convenience init called! 🔷🔷🔷")
         // nostrdb
         var mndb = Ndb()
+        print("🔷 Created Ndb: \(mndb != nil ? "SUCCESS" : "FAILED")")
         if mndb == nil {
             // try recovery
             print("DB ISSUE! RECOVERING")
@@ -101,12 +103,6 @@ class DamusState: HeadlessDamusState, ObservableObject {
 
         guard let ndb = mndb else { return nil }
         let pubkey = keypair.pubkey
-
-        // Load profile bootstrap on first launch (main app only)
-        if let bundleId = Bundle.main.bundleIdentifier,
-           bundleId == "com.jb55.damus2" {
-            ProfileBootstrap.loadIfNeeded(ndb: ndb)
-        }
 
         let model_cache = RelayModelCache()
         let relay_filters = RelayFilters(our_pubkey: pubkey)
