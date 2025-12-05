@@ -495,7 +495,7 @@
 		50B5685329F97CB400A23243 /* CredentialHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B5685229F97CB400A23243 /* CredentialHandler.swift */; };
 		50C3E08A2AA8E3F7006A4BC0 /* AVPlayer+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C3E0892AA8E3F7006A4BC0 /* AVPlayer+Additions.swift */; };
 		50DA11262A16A23F00236234 /* Launch.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 50DA11252A16A23F00236234 /* Launch.storyboard */; };
-		5540C3442EE25DA2008AE906 /* profile-bootstrap.jsonl in Resources */ = {isa = PBXBuildFile; fileRef = 5540C3432EE25DA2008AE906 /* profile-bootstrap.jsonl */; };
+		5540C3462EE3592B008AE906 /* profile-bootstrap.jsonl in Resources */ = {isa = PBXBuildFile; fileRef = 5540C3452EE3592B008AE906 /* profile-bootstrap.jsonl */; };
 		5A8BC7660507069F07BDFE95 /* ProfileBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B417F7F53417121001923B /* ProfileBootstrap.swift */; };
 		5C0567532C8B5F9C0073F23A /* PostingTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */; };
 		5C0567552C8B60C20073F23A /* OffsetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567542C8B60C20073F23A /* OffsetExtension.swift */; };
@@ -1494,7 +1494,7 @@
 		D73E5EFB2C6A97F4007EB227 /* ProfilePicturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C30AC7F29A6A53F00E2BD5A /* ProfilePicturesView.swift */; };
 		D73E5EFC2C6A97F4007EB227 /* DamusAppNotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78CD5972B8990300014D539 /* DamusAppNotificationView.swift */; };
 		D73E5EFD2C6A97F4007EB227 /* InnerTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE0E2B529A3ED5500DB4CA2 /* InnerTimelineView.swift */; };
-		D73E5EFE2C6A97F4007EB227 /* BuildFile in Sources */ = {isa = PBXBuildFile; };
+		D73E5EFE2C6A97F4007EB227 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		D73E5EFF2C6A97F4007EB227 /* ZapsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE879572996C45300F758CC /* ZapsView.swift */; };
 		D73E5F002C6A97F4007EB227 /* CustomizeZapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9F18E129AA9B6C008C55EC /* CustomizeZapView.swift */; };
 		D73E5F012C6A97F4007EB227 /* ZapTypePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA3FA0F29F593D000FDB3C3 /* ZapTypePicker.swift */; };
@@ -2612,7 +2612,7 @@
 		50B5685229F97CB400A23243 /* CredentialHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialHandler.swift; sourceTree = "<group>"; };
 		50C3E0892AA8E3F7006A4BC0 /* AVPlayer+Additions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVPlayer+Additions.swift"; sourceTree = "<group>"; };
 		50DA11252A16A23F00236234 /* Launch.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Launch.storyboard; sourceTree = "<group>"; };
-		5540C3432EE25DA2008AE906 /* profile-bootstrap.jsonl */ = {isa = PBXFileReference; lastKnownFileType = text; path = "profile-bootstrap.jsonl"; sourceTree = "<group>"; };
+		5540C3452EE3592B008AE906 /* profile-bootstrap.jsonl */ = {isa = PBXFileReference; lastKnownFileType = text; path = "profile-bootstrap.jsonl"; sourceTree = "<group>"; };
 		5C0567542C8B60C20073F23A /* OffsetExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OffsetExtension.swift; sourceTree = "<group>"; };
 		5C0567572C8FBC560073F23A /* NDBSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NDBSearchView.swift; sourceTree = "<group>"; };
 		5C0707D02A1ECB38004E7B51 /* DamusLogoGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusLogoGradient.swift; sourceTree = "<group>"; };
@@ -3784,7 +3784,7 @@
 		4CE6DEE527F7A08100C66700 /* damus */ = {
 			isa = PBXGroup;
 			children = (
-				5540C3432EE25DA2008AE906 /* profile-bootstrap.jsonl */,
+				5540C3452EE3592B008AE906 /* profile-bootstrap.jsonl */,
 				5C78A7932E30387400CF177D /* Shared */,
 				5C78A7792E22FDFE00CF177D /* Features */,
 				5C78A7752E22F84A00CF177D /* Core */,
@@ -5569,7 +5569,7 @@
 			);
 			mainGroup = 4CE6DEDA27F7A08100C66700;
 			packageReferences = (
-				4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */,
+				4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */,
 				4C06670228FC7EC500038D2A /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				4CCF9AB02A1FE80B00E03CFB /* XCRemoteSwiftPackageReference "GSPlayer" */,
 				4C27C9302A64766F007DBC75 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
@@ -5603,7 +5603,7 @@
 				D71527F42E0A2DCA00C893D6 /* follow-packs.jsonl in Resources */,
 				4C1D4FB42A7967990024F453 /* build-git-hash.txt in Resources */,
 				D7FB14222BE5970000398331 /* PrivacyInfo.xcprivacy in Resources */,
-				5540C3442EE25DA2008AE906 /* profile-bootstrap.jsonl in Resources */,
+				5540C3462EE3592B008AE906 /* profile-bootstrap.jsonl in Resources */,
 				3ACB685F297633BC00C46468 /* Localizable.strings in Resources */,
 				4CE6DEEE27F7A08200C66700 /* Preview Assets.xcassets in Resources */,
 				3ACB685C297633BC00C46468 /* InfoPlist.strings in Resources */,
@@ -7158,7 +7158,7 @@
 				D73E5EFB2C6A97F4007EB227 /* ProfilePicturesView.swift in Sources */,
 				D73E5EFC2C6A97F4007EB227 /* DamusAppNotificationView.swift in Sources */,
 				D73E5EFD2C6A97F4007EB227 /* InnerTimelineView.swift in Sources */,
-				D73E5EFE2C6A97F4007EB227 /* BuildFile in Sources */,
+				D73E5EFE2C6A97F4007EB227 /* (null) in Sources */,
 				D7EB00B02CD59C8D00660C07 /* PresentFullScreenItemNotify.swift in Sources */,
 				D73E5EFF2C6A97F4007EB227 /* ZapsView.swift in Sources */,
 				D73E5F002C6A97F4007EB227 /* CustomizeZapView.swift in Sources */,
@@ -8360,7 +8360,7 @@
 				kind = branch;
 			};
 		};
-		4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */ = {
+		4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/jb55/secp256k1.swift";
 			requirement = {
@@ -8456,12 +8456,12 @@
 		};
 		4C649880286E0EE300EAE2B3 /* secp256k1 */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */;
+			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
 			productName = secp256k1;
 		};
 		82D6FC802CD99FC500C925F4 /* secp256k1 */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */;
+			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
 			productName = secp256k1;
 		};
 		82D6FC832CD9A48500C925F4 /* Kingfisher */ = {
@@ -8486,7 +8486,7 @@
 		};
 		D703D7482C6709B100A400EA /* secp256k1 */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */;
+			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
 			productName = secp256k1;
 		};
 		D703D7AC2C670FA700A400EA /* MarkdownUI */ = {
@@ -8531,7 +8531,7 @@
 		};
 		D789D11F2AFEFBF20083A7AB /* secp256k1 */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */;
+			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
 			productName = secp256k1;
 		};
 		D78DB8582C1CE9CA00F0AB12 /* SwipeActions */ = {
