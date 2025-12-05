@@ -72,22 +72,19 @@ struct DamusVideoPlayerView: View {
                 case .full:
                     DamusVideoPlayer.BaseView(player: model, show_playback_controls: true)
                 case .preview(on_tap: let on_tap), .no_controls(on_tap: let on_tap):
-                    if let on_tap {
-                        DamusVideoPlayer.BaseView(player: model, show_playback_controls: false)
-                            .highPriorityGesture(TapGesture().onEnded({
-                                on_tap()
-                            }))
-                    }
-                    else {
+                    ZStack {
+                        placeholder_underlay
                         DamusVideoPlayer.BaseView(player: model, show_playback_controls: false)
                     }
+                    .modifier(FullscreenTapModifier(onTap: on_tap))
             }
             
-            if model.is_loading {
-                ProgressView()
-                    .progressViewStyle(.circular)
-                    .tint(.white)
-                    .scaleEffect(CGSize(width: 1.5, height: 1.5))
+            if case .loading = model.load_state, model.is_playing == false {
+                loading_overlay
+            }
+            
+            if case .failed(let message) = model.load_state {
+                error_overlay(message: message)
             }
             
             if case .preview = self.style {
@@ -102,6 +99,7 @@ struct DamusVideoPlayerView: View {
         .on_visibility_change(perform: { new_is_visible in
             self.is_visible = new_is_visible
         }, method: self.visibility_tracking_method)
+        // Keep spinner visible above poster/last frame; allow interactions to hit the view.
     }
     
     private var visibility_tracking_method: VisibilityTracker.Method {
@@ -171,6 +169,75 @@ struct DamusVideoPlayerView: View {
         }
     }
     
+    private var loading_overlay: some View {
+        VStack {
+            Spacer()
+            HStack {
+                Spacer()
+                VStack(spacing: 8) {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .tint(.white)
+                        .scaleEffect(CGSize(width: 1.5, height: 1.5))
+                    Text("Loading…")
+                        .foregroundColor(.white)
+                        .font(.caption)
+                }
+                .padding(12)
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                Spacer()
+            }
+            Spacer()
+        }
+    }
+    
+    private func error_overlay(message: String) -> some View {
+        VStack {
+            Spacer()
+            HStack {
+                Spacer()
+                VStack(spacing: 10) {
+                    Text("Unable to play video")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                    Text(message)
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.8))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                    Button(action: {
+                        model.reinitializePlayer()
+                    }, label: {
+                        Text("Retry")
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Color.white.opacity(0.2))
+                            .foregroundColor(.white)
+                            .clipShape(Capsule())
+                    })
+                }
+                .padding(14)
+                .background(Color.black.opacity(0.7))
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                Spacer()
+            }
+            Spacer()
+        }
+    }
+    
+    private var placeholder_underlay: some View {
+        Group {
+            if let poster = model.posterImage {
+                Image(uiImage: poster)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+            } else {
+                Color.black.opacity(0.4)
+            }
+        }
+    }
+    
     // MARK: - Helper structures
     
     enum Style {
@@ -180,6 +247,19 @@ struct DamusVideoPlayerView: View {
         case preview(on_tap: (() -> Void)?)
         /// A video player without any playback controls, suitable if using custom controls elsewhere.
         case no_controls(on_tap: (() -> Void)?)
+    }
+}
+
+private struct FullscreenTapModifier: ViewModifier {
+    let onTap: (() -> Void)?
+    
+    func body(content: Content) -> some View {
+        guard let onTap else { return AnyView(content) }
+        return AnyView(
+            content.highPriorityGesture(TapGesture().onEnded({
+                onTap()
+            }))
+        )
     }
 }
 struct DamusVideoPlayer_Previews: PreviewProvider {
