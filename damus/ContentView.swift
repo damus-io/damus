@@ -711,6 +711,11 @@ struct ContentView: View {
 
         guard let ndb = mndb else { return  }
 
+        // Load bundled profile events on first app launch to improve UX.
+        // This pre-populates nostrdb with 388 profiles so new users see
+        // actual names instead of npub strings in their initial timeline.
+        ProfileBootstrap.loadIfNeeded(ndb: ndb)
+
         let model_cache = RelayModelCache()
         let relay_filters = RelayFilters(our_pubkey: pubkey)
         
