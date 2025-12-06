@@ -106,6 +106,14 @@ struct AppearanceSettingsView: View {
                     .toggleStyle(.switch)
             }
             
+            Section(header: Text("Privacy", comment: "Section header for privacy related settings")) {
+                Toggle(NSLocalizedString("Share Damus client tag", comment: "Setting to publish a client tag indicating Damus posted the note"), isOn: $settings.publish_client_tag)
+                    .toggleStyle(.switch)
+                Text("Client tags can help other apps understand new kinds of events. Turn this off if you prefer not to identify Damus when posting.", comment: "Description for the client tag privacy toggle.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            
             // MARK: - Profiles
             Section(
                 header: Text("Profiles", comment: "Section title for profile view configuration."),
