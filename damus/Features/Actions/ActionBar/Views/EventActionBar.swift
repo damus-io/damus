@@ -185,32 +185,42 @@ struct EventActionBar: View {
         let should_hide_repost = hide_items_without_activity && bar.boosts == 0
         let should_hide_reactions = hide_items_without_activity && bar.likes == 0
         let zap_model = self.damus_state.events.get_cache_data(self.event.id).zaps_model
-        let should_hide_zap = hide_items_without_activity && zap_model.zap_total > 0
+        let should_hide_zap = hide_items_without_activity && zap_model.zap_total == 0
         let should_hide_share_button = hide_items_without_activity
+        // Only render the bar if at least one action is visible; avoids empty overlays/dots.
+        let has_any_action = (!should_hide_chat_bubble && damus_state.keypair.privkey != nil)
+            || !should_hide_repost
+            || (show_like && !should_hide_reactions)
+            || (!should_hide_zap && self.lnurl != nil)
+            || !should_hide_share_button
 
-        return HStack(spacing: options.contains(.no_spread) ? 10 : 0) {
-            if damus_state.keypair.privkey != nil && !should_hide_chat_bubble {
-                self.reply_button
-            }
-            
-            if !should_hide_repost {
-                self.space_if_spread
-                self.repost_button
-            }
-            
-            if show_like && !should_hide_reactions {
-                self.space_if_spread
-                self.like_button
-            }
-                
-            if let lnurl = self.lnurl, !should_hide_zap {
-                self.space_if_spread
-                NoteZapButton(damus_state: damus_state, target: ZapTarget.note(id: event.id, author: event.pubkey), lnurl: lnurl, zaps: zap_model)
-            }
-            
-            if !should_hide_share_button {
-                self.space_if_spread
-                self.share_button
+        return Group {
+            if has_any_action {
+                HStack(spacing: options.contains(.no_spread) ? 10 : 0) {
+                    if damus_state.keypair.privkey != nil && !should_hide_chat_bubble {
+                        self.reply_button
+                    }
+                    
+                    if !should_hide_repost {
+                        self.space_if_spread
+                        self.repost_button
+                    }
+                    
+                    if show_like && !should_hide_reactions {
+                        self.space_if_spread
+                        self.like_button
+                    }
+                        
+                    if let lnurl = self.lnurl, !should_hide_zap {
+                        self.space_if_spread
+                        NoteZapButton(damus_state: damus_state, target: ZapTarget.note(id: event.id, author: event.pubkey), lnurl: lnurl, zaps: zap_model)
+                    }
+                    
+                    if !should_hide_share_button {
+                        self.space_if_spread
+                        self.share_button
+                    }
+                }
             }
         }
     }
