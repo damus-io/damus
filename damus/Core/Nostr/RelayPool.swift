@@ -43,6 +43,7 @@ actor RelayPool {
     var message_sent_function: (((String, Relay)) -> Void)?
     var delegate: Delegate?
     private(set) var signal: SignalModel = SignalModel()
+    private var maxConcurrentSubscriptionsLimit: Int = RelayPool.MAX_CONCURRENT_SUBSCRIPTION_LIMIT
 
     let network_monitor = NWPathMonitor()
     private let network_monitor_queue = DispatchQueue(label: "io.damus.network_monitor")
@@ -132,7 +133,7 @@ actor RelayPool {
     }
 
     func register_handler(sub_id: String, filters: [NostrFilter]?, to relays: [RelayURL]? = nil, handler: AsyncStream<(RelayURL, NostrConnectionEvent)>.Continuation) async {
-        while handlers.count > Self.MAX_CONCURRENT_SUBSCRIPTION_LIMIT {
+        while handlers.count > maxConcurrentSubscriptionsLimit {
             Log.debug("%s: Too many subscriptions, waiting for subscription pool to clear", for: .networking, sub_id)
             try? await Task.sleep(for: .seconds(1))
         }
@@ -149,6 +150,10 @@ actor RelayPool {
         })
         self.handlers.append(RelayHandler(sub_id: sub_id, filters: filters, to: relays, handler: handler))
         Log.debug("Registering %s handler, current: %d", for: .networking, sub_id, self.handlers.count)
+    }
+    
+    func updateMaxConcurrentSubscriptions(_ newLimit: Int) {
+        maxConcurrentSubscriptionsLimit = max(1, newLimit)
     }
 
     @MainActor
@@ -556,5 +561,4 @@ extension RelayPool {
         func latestRelayListChanged(_ newEvent: NdbNote)
     }
 }
-
 

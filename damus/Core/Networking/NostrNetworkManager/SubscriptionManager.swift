@@ -19,6 +19,10 @@ extension NostrNetworkManager {
         private var ndb: Ndb
         private var taskManager: TaskManager
         private let experimentalLocalRelayModelSupport: Bool
+        private let configurationQueue = DispatchQueue(label: "io.damus.subscription_manager.configuration", attributes: .concurrent)
+        private var defaultStreamModeStorage: StreamMode
+        private var scanRestInterval: TimeInterval = 0
+        private var eoseTimeout: TimeInterval = 5
         
         private static let logger = Logger(
             subsystem: Constants.MAIN_APP_BUNDLE_IDENTIFIER,
@@ -30,6 +34,7 @@ extension NostrNetworkManager {
             self.ndb = ndb
             self.taskManager = TaskManager()
             self.experimentalLocalRelayModelSupport = experimentalLocalRelayModelSupport
+            self.defaultStreamModeStorage = experimentalLocalRelayModelSupport ? .ndbFirst(optimizeNetworkFilter: false) : .ndbAndNetworkParallel(optimizeNetworkFilter: false)
         }
         
         // MARK: - Subscribing and Streaming data from Nostr
@@ -169,6 +174,7 @@ extension NostrNetworkManager {
                                     yieldEOSEIfReady()
                                 }
                             }
+                            await self.sleepForScanDutyCycleIfNeeded()
                         }
                     }
                 }
@@ -209,6 +215,7 @@ extension NostrNetworkManager {
                                 break   // Should not happen
                             }
                         }
+                        await self.sleepForScanDutyCycleIfNeeded()
                     }
                 }
                 
@@ -234,7 +241,7 @@ extension NostrNetworkManager {
                     }
                     
                     do {
-                        for await item in await self.pool.subscribe(filters: filters, to: desiredRelays, id: id) {
+                        for await item in await self.pool.subscribe(filters: filters, to: desiredRelays, eoseTimeout: self.currentEoseTimeout(), id: id) {
                             try Task.checkCancellation()
                             logStreamPipelineStats("RelayPool_Handler_\(id)", "SubscriptionManager_Network_Stream_\(id)")
                             switch item {
@@ -255,6 +262,7 @@ extension NostrNetworkManager {
                         Self.logger.error("Network subscription \(id.uuidString, privacy: .public): Streaming error: \(error.localizedDescription, privacy: .public)")
                     }
                     Self.logger.debug("Network subscription \(id.uuidString, privacy: .public): Network streaming ended")
+                    await self.sleepForScanDutyCycleIfNeeded()
                     continuation.finish()
                 }
                 
@@ -283,8 +291,8 @@ extension NostrNetworkManager {
                                 logStreamPipelineStats("SubscriptionManager_Ndb_Session_Stream_\(id?.uuidString ?? "NoID")", "SubscriptionManager_Ndb_MultiSession_Stream_\(id?.uuidString ?? "NoID")")
                                 continuation.yield(item)
                             }
-                            Self.logger.info("\(subscriptionId.uuidString, privacy: .public): Session subscription ended. Sleeping for 1 second before resuming.")
-                            try await Task.sleep(nanoseconds: 1_000_000_000)
+                            Self.logger.info("\(subscriptionId.uuidString, privacy: .public): Session subscription ended. Applying scan duty delay if needed.")
+                            await self.sleepForScanDutyCycleIfNeeded()
                         }
                         catch {
                             Self.logger.error("Session subscription \(subscriptionId.uuidString, privacy: .public): Error: \(error.localizedDescription, privacy: .public)")
@@ -350,7 +358,7 @@ extension NostrNetworkManager {
         // MARK: - Utility functions
         
         private func defaultStreamMode() -> StreamMode {
-            self.experimentalLocalRelayModelSupport ? .ndbFirst(optimizeNetworkFilter: false) : .ndbAndNetworkParallel(optimizeNetworkFilter: false)
+            configurationQueue.sync { defaultStreamModeStorage }
         }
         
         // MARK: - Finding specific data from Nostr
@@ -455,6 +463,44 @@ extension NostrNetworkManager {
         
         func cancelAllTasks() async {
             await self.taskManager.cancelAllTasks()
+        }
+        
+        func updateBatteryConfiguration(streamMode: StreamMode, scanRestInterval: TimeInterval, eoseTimeout: TimeInterval) {
+            configurationQueue.async(flags: .barrier) {
+                self.defaultStreamModeStorage = streamMode
+                self.scanRestInterval = scanRestInterval
+                self.eoseTimeout = eoseTimeout
+            }
+        }
+        
+        func updateBatteryConfiguration(preference: BatteryOptimizationController.StreamPreference, scanRestInterval: TimeInterval, eoseTimeout: TimeInterval) {
+            let streamMode: StreamMode
+            switch preference {
+            case .ndbFirst(let optimize):
+                streamMode = .ndbFirst(optimizeNetworkFilter: optimize)
+            case .ndbAndNetworkParallel(let optimize):
+                streamMode = .ndbAndNetworkParallel(optimizeNetworkFilter: optimize)
+            case .ndbOnly:
+                streamMode = .ndbOnly
+            }
+            updateBatteryConfiguration(streamMode: streamMode, scanRestInterval: scanRestInterval, eoseTimeout: eoseTimeout)
+        }
+        
+        private func currentScanRestInterval() -> TimeInterval {
+            configurationQueue.sync { scanRestInterval }
+        }
+        
+        private func sleepForScanDutyCycleIfNeeded() async {
+            let rest = currentScanRestInterval()
+            guard rest > 0 else { return }
+            let nanoseconds = UInt64((rest * 1_000_000_000).rounded())
+            try? await Task.sleep(nanoseconds: nanoseconds)
+        }
+        
+        private func currentEoseTimeout() -> Duration {
+            let seconds = configurationQueue.sync { eoseTimeout }
+            let nanoseconds = Int64((seconds * 1_000_000_000).rounded())
+            return .nanoseconds(nanoseconds)
         }
         
         actor TaskManager {
