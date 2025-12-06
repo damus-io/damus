@@ -31,6 +31,7 @@ Damus is an iOS client built around a local relay model ([damus-io/damus#3204](h
 - Sign all commits (`git commit -s`) and include appropriate `Changelog-*`, `Closes:`, or `Fixes:` tags as described in `docs/CONTRIBUTING.md`.
 - Keep patches scoped: one logical change per commit, ensuring the app builds and runs after each step.
 - Favor Swift-first solutions that lean on `nostrdb` types (`Ndb`, `NdbNote`, iterators) before introducing new storage mechanisms.
+- Avoid leaking `NdbTxn` references into async/UI surfaces; take owned snapshots (e.g., `snapshot_note_by_key`, `Profiles.snapshot`) when data needs to outlive a query.
 - Update documentation when workflows change, especially this file, `README.md`, or developer notes.
 
 ## Agent Requirements

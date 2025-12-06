@@ -315,7 +315,14 @@ extension NostrNetworkManager {
                                 Self.logger.debug("Session subscription \(id.uuidString, privacy: .public): Received EOSE from nostrdb. Elapsed: \(CFAbsoluteTimeGetCurrent() - startTime, format: .fixed(precision: 2), privacy: .public) seconds")
                                 continuation.yield(.ndbEose)
                             case .event(let noteKey):
-                                let lender = NdbNoteLender(ndb: self.ndb, noteKey: noteKey)
+                                // Prefer to hand out owned snapshots so downstream async consumers never keep LMDB transactions alive.
+                                let ownedSnapshot = self.ndb.snapshot_note_by_key(noteKey, txnName: "sessionNdbStream")
+                                guard let ownedSnapshot else {
+                                    // Root cause fix: never hand out live transactions across async boundaries.
+                                    Self.logger.error("Session subscription \(id.uuidString, privacy: .public): snapshot failed for note key \(noteKey, privacy: .public); dropping to avoid leaking live txn")
+                                    continue
+                                }
+                                let lender = NdbNoteLender(ownedNdbNote: ownedSnapshot)
                                 try Task.checkCancellation()
                                 guard let desiredRelays else {
                                     continuation.yield(.event(lender: lender))  // If no desired relays are specified, return all notes we see.
@@ -361,7 +368,12 @@ extension NostrNetworkManager {
             
             // Since note ids point to immutable objects, we can do a simple ndb lookup first
             if let noteKey = self.ndb.lookup_note_key(noteId) {
-                return NdbNoteLender(ndb: self.ndb, noteKey: noteKey)
+                // Snapshot eagerly to avoid passing live transactions to async callers.
+                guard let owned = self.ndb.snapshot_note_by_key(noteKey, txnName: "SubscriptionManager.lookup") else {
+                    Self.logger.error("Lookup snapshot failed for note key \(noteKey, privacy: .public); dropping to avoid leaking live txn")
+                    return nil
+                }
+                return NdbNoteLender(ownedNdbNote: owned)
             }
             
             // Not available in local ndb, stream from network
