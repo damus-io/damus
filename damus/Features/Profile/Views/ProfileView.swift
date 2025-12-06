@@ -27,7 +27,7 @@ func follow_btn_txt(_ fs: FollowState, follows_you: Bool) -> String {
 func followedByString(_ friend_intersection: [Pubkey], ndb: Ndb, locale: Locale = Locale.current) -> String {
     let bundle = bundleForLocale(locale: locale)
     let names: [String] = friend_intersection.prefix(3).map { pk in
-        let profile = ndb.lookup_profile(pk)?.unsafeUnownedValue?.profile
+        let profile = ndb.lookup_profile_and_copy(pk)
         return Profile.displayName(profile: profile, pubkey: pk).username.truncate(maxLength: 20)
     }
 
@@ -108,8 +108,7 @@ struct ProfileView: View {
     }
     
     func getProfileInfo() -> (String, String) {
-        let profile_txn = self.damus_state.profiles.lookup(id: profile.pubkey)
-        let ndbprofile = profile_txn?.unsafeUnownedValue
+        let ndbprofile = self.damus_state.profiles.lookup(id: profile.pubkey)
         let displayName = Profile.displayName(profile: ndbprofile, pubkey: profile.pubkey).displayName.truncate(maxLength: 25)
         let userName = Profile.displayName(profile: ndbprofile, pubkey: profile.pubkey).username.truncate(maxLength: 25)
         return (displayName, "@\(userName)")
@@ -241,8 +240,8 @@ struct ProfileView: View {
         }
     }
 
-    func lnButton(unownedProfile: Profile?, record: ProfileRecord?) -> some View {
-        return ProfileZapLinkView(unownedProfileRecord: record, profileModel: self.profile) { reactions_enabled, lud16, lnurl in
+    func lnButton(profile: Profile?, lnurl: String?) -> some View {
+        return ProfileZapLinkView(profile: profile, lnurl: lnurl, profileModel: self.profile) { reactions_enabled, lud16, lnurl in
             Image(reactions_enabled ? "zap.fill" : "zap")
                 .foregroundColor(reactions_enabled ? .orange : Color.primary)
                 .profile_button_style(scheme: colorScheme)
@@ -270,17 +269,16 @@ struct ProfileView: View {
             .font(.footnote)
     }
 
-    func actionSection(record: ProfileRecord?, pubkey: Pubkey) -> some View {
+    func actionSection(ndbprofile: Profile?, lnurl: String?, pubkey: Pubkey) -> some View {
         return Group {
             if damus_state.settings.enable_favourites_feature {
                 FavoriteButtonView(pubkey: profile.pubkey, damus_state: damus_state)
             }
-            if let record,
-               let profile = record.profile,
-               let lnurl = record.lnurl,
+            if let profile = ndbprofile,
+               let lnurl,
                lnurl != ""
             {
-                lnButton(unownedProfile: profile, record: record)
+                lnButton(profile: ndbprofile, lnurl: lnurl)
             }
 
             dmButton
@@ -312,7 +310,7 @@ struct ProfileView: View {
         return scale < 1 ? scale : 1
     }
 
-    func nameSection(profile_data: ProfileRecord?) -> some View {
+    func nameSection(ndbprofile: Profile?, lnurl: String?) -> some View {
         return Group {
             let follows_you = profile.pubkey != damus_state.pubkey && profile.follows(pubkey: damus_state.pubkey)
 
@@ -334,7 +332,7 @@ struct ProfileView: View {
                     followsYouBadge
                 }
 
-                actionSection(record: profile_data, pubkey: profile.pubkey)
+                actionSection(ndbprofile: ndbprofile, lnurl: lnurl, pubkey: profile.pubkey)
             }
 
             ProfileNameView(pubkey: profile.pubkey, damus: damus_state)
@@ -360,16 +358,16 @@ struct ProfileView: View {
 
     var aboutSection: some View {
         VStack(alignment: .leading, spacing: 8.0) {
-            let profile_txn = damus_state.profiles.lookup_with_timestamp(profile.pubkey)
-            let profile_data = profile_txn?.unsafeUnownedValue
+            let lnurl = damus_state.profiles.lookup_lnurl(profile.pubkey)
+            let ndbprofile = damus_state.profiles.lookup(id: profile.pubkey)
 
-            nameSection(profile_data: profile_data)
+            nameSection(ndbprofile: ndbprofile, lnurl: lnurl)
 
-            if let about = profile_data?.profile?.about {
+            if let about = ndbprofile?.about {
                 AboutView(state: damus_state, about: about)
             }
 
-            if let url = profile_data?.profile?.website_url {
+            if let url = ndbprofile?.website_url {
                 WebsiteLink(url: url)
             }
 
@@ -571,10 +569,9 @@ extension View {
 
 @MainActor
 func check_nip05_validity(pubkey: Pubkey, profiles: Profiles) {
-    let profile_txn = profiles.lookup(id: pubkey)
+    let profile = profiles.lookup(id: pubkey)
 
-    guard let profile = profile_txn?.unsafeUnownedValue,
-          let nip05 = profile.nip05,
+    guard let nip05 = profile?.nip05,
           profiles.is_validated(pubkey) == nil
     else {
         return

@@ -116,7 +116,7 @@ class DraftArtifacts: Equatable {
             case .mention(let mention):
                 if let pubkey = mention.ref.nip19.pubkey() {
                     // A profile reference, format things properly.
-                    let profile = damus_state.ndb.lookup_profile(pubkey)?.unsafeUnownedValue?.profile
+                    let profile = damus_state.profiles.lookup(id: pubkey)
                     let profile_name = DisplayName(profile: profile, pubkey: pubkey).username
                     guard let url_address = URL(string: block.asString) else {
                         rich_text_content.append(.init(string: block.asString))
@@ -173,8 +173,10 @@ class Drafts: ObservableObject {
     func load(from damus_state: DamusState) {
         guard let note_ids = damus_state.settings.draft_event_ids?.compactMap({ NoteId(hex: $0) }) else { return }
         for note_id in note_ids {
-            let txn = damus_state.ndb.lookup_note(note_id)
-            guard let note = txn?.unsafeUnownedValue else { continue }
+            let note = damus_state.ndb.lookup_note(note_id, borrow: { event in
+                return event?.toOwned()
+            })
+            guard let note else { continue }
             // Implementation note: This currently fails silently, because:
             // 1. Errors are unlikely and not expected
             // 2. It is not mission critical to recover from this error
@@ -232,13 +234,13 @@ class Drafts: ObservableObject {
             draft_events.append(wrapped_note)
         }
         for (replied_to_note_id, reply_artifacts) in self.replies {
-            guard let replied_to_note = damus_state.ndb.lookup_note(replied_to_note_id)?.unsafeUnownedValue?.to_owned() else { continue }
+            guard let replied_to_note = damus_state.ndb.lookup_note_and_copy(replied_to_note_id) else { continue }
             let nip37_draft = try? await reply_artifacts.to_nip37_draft(action: .replying_to(replied_to_note), damus_state: damus_state)
             guard let wrapped_note = nip37_draft?.wrapped_note else { continue }
             draft_events.append(wrapped_note)
         }
         for (quoted_note_id, quote_note_artifacts) in self.quotes {
-            guard let quoted_note = damus_state.ndb.lookup_note(quoted_note_id)?.unsafeUnownedValue?.to_owned() else { continue }
+            guard let quoted_note = damus_state.ndb.lookup_note_and_copy(quoted_note_id) else { continue }
             let nip37_draft = try? await quote_note_artifacts.to_nip37_draft(action: .quoting(quoted_note), damus_state: damus_state)
             guard let wrapped_note = nip37_draft?.wrapped_note else { continue }
             draft_events.append(wrapped_note)

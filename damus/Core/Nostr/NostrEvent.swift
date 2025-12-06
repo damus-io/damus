@@ -810,42 +810,41 @@ func validate_event(ev: NostrEvent) -> ValidationResult {
 }
 
 func first_eref_mention(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> Mention<NoteId>? {
-    guard let blockGroup = try? NdbBlockGroup.from(event: ev, using: ndb, and: keypair) else { return nil }
-    
-    return blockGroup.forEachBlock({ index, block in
-        switch block {
-        case .mention(let mention):
-            guard let mention = MentionRef(block: mention) else { return .loopContinue }
-            switch mention.nip19 {
-            case .note(let noteId):
-                return .loopReturn(Mention<NoteId>.note(noteId, index: index))
-            case .nevent(let nEvent):
-                return .loopReturn(Mention<NoteId>.note(nEvent.noteid, index: index))
+    return try? NdbBlockGroup.borrowBlockGroup(event: ev, using: ndb, and: keypair, borrow: { blockGroup in
+        return blockGroup.forEachBlock({ index, block in
+            switch block {
+            case .mention(let mention):
+                guard let mention = MentionRef(block: mention) else { return .loopContinue }
+                switch mention.nip19 {
+                case .note(let noteId):
+                    return .loopReturn(Mention<NoteId>.note(noteId, index: index))
+                case .nevent(let nEvent):
+                    return .loopReturn(Mention<NoteId>.note(nEvent.noteid, index: index))
+                default:
+                    return .loopContinue
+                }
             default:
                 return .loopContinue
             }
-        default:
-            return .loopContinue
-        }
+        })
     })
 }
 
 func separate_invoices(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> [Invoice]? {
-    guard let blockGroup = try? NdbBlockGroup.from(event: ev, using: ndb, and: keypair) else {
-        return nil
-    }
-    let invoiceBlocks: [Invoice] = (try? blockGroup.reduce(initialResult: [Invoice](), { index, invoices, block in
-        switch block {
-        case .invoice(let invoice):
-            if let invoice = invoice.as_invoice() {
-                return .loopReturn(invoices + [invoice])
+    return try? NdbBlockGroup.borrowBlockGroup(event: ev, using: ndb, and: keypair, borrow: { blockGroup in
+        let invoiceBlocks: [Invoice] = (try? blockGroup.reduce(initialResult: [Invoice](), { index, invoices, block in
+            switch block {
+            case .invoice(let invoice):
+                if let invoice = invoice.as_invoice() {
+                    return .loopReturn(invoices + [invoice])
+                }
+            default:
+                break
             }
-        default:
-            break
-        }
-        return .loopContinue
-    })) ?? []
-    return invoiceBlocks.isEmpty ? nil : invoiceBlocks
+            return .loopContinue
+        })) ?? []
+        return invoiceBlocks.isEmpty ? nil : invoiceBlocks
+    })
 }
 
 /**

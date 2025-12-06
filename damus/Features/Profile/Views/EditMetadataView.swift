@@ -33,8 +33,7 @@ struct EditMetadataView: View {
     
     init(damus_state: DamusState) {
         self.damus_state = damus_state
-        let profile_txn = damus_state.profiles.lookup(id: damus_state.pubkey)
-        let data = profile_txn?.unsafeUnownedValue
+        let data = damus_state.profiles.lookup(id: damus_state.pubkey)
 
         _name = State(initialValue: data?.name ?? "")
         _display_name = State(initialValue: data?.display_name ?? "")
@@ -259,8 +258,7 @@ struct EditMetadataView: View {
     }
     
     func didChange() -> Bool {
-        let profile_txn = damus_state.profiles.lookup(id: damus_state.pubkey)
-        let data = profile_txn?.unsafeUnownedValue
+        let data = damus_state.profiles.lookup(id: damus_state.pubkey)
         
         if data?.name ?? "" != name {
             return true

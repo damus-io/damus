@@ -151,8 +151,7 @@ struct FollowingView: View {
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
         .onAppear {
-            guard let txn = NdbTxn(ndb: self.damus_state.ndb) else { return }
-            following.subscribe(txn: txn)
+            following.subscribe()
         }
         .onDisappear {
             following.unsubscribe()

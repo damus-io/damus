@@ -137,11 +137,9 @@ class NostrNetworkManagerTests: XCTestCase {
                     switch item {
                     case .event(let noteKey):
                         // Lookup the note to verify it exists
-                        if let txn = NdbTxn(ndb: ndb) {
-                            if let note = ndb.lookup_note_by_key_with_txn(noteKey, txn: txn) {
-                                count += 1
-                                receivedIds.insert(note.id)
-                            }
+                        if let note = ndb.lookup_note_by_key_and_copy(noteKey) {
+                            count += 1
+                            receivedIds.insert(note.id)
                         }
                         if count >= expectedCount {
                             atLeastXNotes.fulfill()

@@ -33,21 +33,26 @@ struct ProfileZapLinkView<Content: View>: View {
         self.label = label
         self.action = action
         
-        let profile_txn = damus_state.profiles.lookup_with_timestamp(pubkey)
-        let record = profile_txn?.unsafeUnownedValue
-        self.reactions_enabled = record?.profile?.reactions ?? true
-        self.lud16 = record?.profile?.lud06?.trimmingCharacters(in: .whitespaces)
-        self.lnurl = record?.lnurl?.trimmingCharacters(in: .whitespaces)
+        let profile = damus_state.profiles.lookup(id: pubkey)
+        let lnurl = damus_state.profiles.lookup_with_timestamp(pubkey, borrow: { pr -> String? in
+            switch pr {
+            case .some(let pr): return pr.lnurl
+            case .none: return nil
+            }
+        })
+        self.reactions_enabled = profile?.reactions ?? true
+        self.lud16 = profile?.lud06?.trimmingCharacters(in: .whitespaces)
+        self.lnurl = lnurl?.trimmingCharacters(in: .whitespaces)
     }
     
-    init(unownedProfileRecord: ProfileRecord?, profileModel: ProfileModel, action: ActionFunction? = nil, @ViewBuilder label: @escaping ContentViewFunction) {
+    init(profile: Profile?, lnurl: String?, profileModel: ProfileModel, action: ActionFunction? = nil, @ViewBuilder label: @escaping ContentViewFunction) {
         self.pubkey = profileModel.pubkey
         self.label = label
         self.action = action
         
-        self.reactions_enabled = unownedProfileRecord?.profile?.reactions ?? true
-        self.lud16 = unownedProfileRecord?.profile?.lud16?.trimmingCharacters(in: .whitespaces)
-        self.lnurl = unownedProfileRecord?.lnurl?.trimmingCharacters(in: .whitespaces)
+        self.reactions_enabled = profile?.reactions ?? true
+        self.lud16 = profile?.lud16?.trimmingCharacters(in: .whitespaces)
+        self.lnurl = lnurl?.trimmingCharacters(in: .whitespaces)
     }
     
     var body: some View {

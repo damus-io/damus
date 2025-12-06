@@ -18,19 +18,19 @@ extension Ndb {
     ///   - maxSimultaneousResults: Maximum number of initial results to return
     /// - Returns: AsyncStream of StreamItem events
     /// - Throws: NdbStreamError if subscription fails
-    func subscribe(filters: [NostrFilter], maxSimultaneousResults: Int = 1000) throws(NdbStreamError) -> AsyncStream<StreamItem> {
+    func subscribe(filters: [NostrFilter], maxSimultaneousResults: Int = 1000) throws -> AsyncStream<StreamItem> {
         let ndbFilters: [NdbFilter]
         do {
             ndbFilters = try filters.toNdbFilters()
         } catch {
-            throw .cannotConvertFilter(error)
+            throw NdbStreamError.cannotConvertFilter(error)
         }
         return try self.subscribe(filters: ndbFilters, maxSimultaneousResults: maxSimultaneousResults)
     }
     
     /// Determines if a given note was seen on any of the listed relay URLs
-    func was(noteKey: NoteKey, seenOnAnyOf relayUrls: [RelayURL], txn: SafeNdbTxn<()>? = nil) throws -> Bool {
-        return try self.was(noteKey: noteKey, seenOnAnyOf: relayUrls.map({ $0.absoluteString }), txn: txn)
+    func was(noteKey: NoteKey, seenOnAnyOf relayUrls: [RelayURL]) throws -> Bool {
+        return try self.was(noteKey: noteKey, seenOnAnyOf: relayUrls.map({ $0.absoluteString }))
     }
     
     func processEvent(_ str: String, originRelayURL: RelayURL? = nil) -> Bool {

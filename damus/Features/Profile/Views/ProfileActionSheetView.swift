@@ -33,13 +33,16 @@ struct ProfileActionSheetView: View {
         colorScheme == .light ? DamusColors.white : DamusColors.black
     }
     
-    func profile_data() -> ProfileRecord? {
-        let profile_txn = damus_state.profiles.lookup_with_timestamp(profile.pubkey)
-        return profile_txn?.unsafeUnownedValue
+    func profile_data<T>(borrow lendingFunction: (_: borrowing ProfileRecord?) throws -> T) rethrows -> T {
+        return try damus_state.profiles.lookup_with_timestamp(profile.pubkey, borrow: lendingFunction)
     }
     
     func get_profile() -> Profile? {
-        return self.profile_data()?.profile
+        return damus_state.profiles.lookup(id: profile.pubkey)
+    }
+    
+    func get_lnurl() -> String? {
+        return damus_state.profiles.lookup_lnurl(profile.pubkey)
     }
     
     func navigate(route: Route) {
@@ -115,7 +118,7 @@ struct ProfileActionSheetView: View {
     }
     
     var zapButton: some View {
-        if let lnurl = self.profile_data()?.lnurl, lnurl != "" {
+        if let lnurl = self.get_lnurl(), lnurl != "" {
             return AnyView(ProfileActionSheetZapButton(damus_state: damus_state, profile: profile, lnurl: lnurl))
         }
         else {
@@ -134,7 +137,7 @@ struct ProfileActionSheetView: View {
     var body: some View {
         VStack(alignment: .center) {
             ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
-            if let url = self.profile_data()?.profile?.website_url {
+            if let url = self.get_profile()?.website_url {
                 WebsiteLink(url: url, style: .accent)
                     .padding(.top, -15)
             }
@@ -143,7 +146,7 @@ struct ProfileActionSheetView: View {
             
             PubkeyView(pubkey: profile.pubkey)
             
-            if let about = self.profile_data()?.profile?.about {
+            if let about = self.get_profile()?.about {
                 AboutView(state: damus_state, about: about, max_about_length: 140, text_alignment: .center)
                     .padding(.top)
             }

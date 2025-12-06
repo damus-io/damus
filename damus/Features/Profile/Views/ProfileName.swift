@@ -96,8 +96,7 @@ struct ProfileName: View {
     }
     
     var body: some View {
-        let profile_txn = damus_state.profiles.lookup(id: pubkey)
-        let profile = profile_txn?.unsafeUnownedValue
+        let profile = damus_state.profiles.lookup(id: pubkey)
 
         HStack(spacing: 2) {
             Text(verbatim: "\(prefix)\(name_choice(profile: profile))")
@@ -139,8 +138,7 @@ struct ProfileName: View {
 
             switch update {
             case .remote(let pubkey):
-                guard let profile_txn = damus_state.profiles.lookup(id: pubkey),
-                      let prof = profile_txn.unsafeUnownedValue else {
+                guard let prof = damus_state.profiles.lookup(id: pubkey) else {
                     return
                 }
                 handle_profile_update(profile: prof)

@@ -18,8 +18,7 @@ struct LiveStreamProfile: View {
                 .onTapGesture {
                     state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))
                 }
-            let profile_txn = state.profiles.lookup(id: pubkey)
-            let profile = profile_txn?.unsafeUnownedValue
+            let profile = state.profiles.lookup(id: pubkey)
             let displayName = Profile.displayName(profile: profile, pubkey: pubkey)
             switch displayName {
             case .one(let one):

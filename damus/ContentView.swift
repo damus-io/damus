@@ -397,8 +397,7 @@ struct ContentView: View {
                 guard let ds = self.damus_state,
                       let lud16 = nwc.lud16,
                       let keypair = ds.keypair.to_full(),
-                      let profile_txn = ds.profiles.lookup(id: ds.pubkey),
-                      let profile = profile_txn.unsafeUnownedValue,
+                      let profile = ds.profiles.lookup(id: ds.pubkey),
                       lud16 != profile.lud16 else {
                     return
                 }
@@ -538,9 +537,7 @@ struct ContentView: View {
                     Log.debug("App background signal handling: App being backgrounded", for: .app_lifecycle)
                     let startTime = CFAbsoluteTimeGetCurrent()
                     await damus_state.nostrNetwork.handleAppBackgroundRequest()  // Close ndb streaming tasks before closing ndb to avoid memory errors
-                    Log.debug("App background signal handling: Nostr network closed after %.2f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - startTime)
-                    damus_state.ndb.close()
-                    Log.debug("App background signal handling: Ndb closed after %.2f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - startTime)
+                    Log.debug("App background signal handling: Nostr network and Ndb closed after %.2f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - startTime)
                     this_app.endBackgroundTask(bgTask)
                 }
                 break
@@ -552,9 +549,7 @@ struct ContentView: View {
                 Task {
                     await damusClosingTask?.value  // Wait for the closing task to finish before reopening things, to avoid race conditions
                     damusClosingTask = nil
-                    damus_state.ndb.reopen()
-                    // Pinging the network will automatically reconnect any dead websocket connections
-                    await damus_state.nostrNetwork.ping()
+                    await damus_state.nostrNetwork.handleAppForegroundRequest()
                 }
             @unknown default:
                 break
@@ -565,8 +560,7 @@ struct ContentView: View {
                 home.filter_events()
                 
                 guard let ds = damus_state,
-                      let profile_txn = ds.profiles.lookup(id: ds.pubkey),
-                      let profile = profile_txn.unsafeUnownedValue,
+                      let profile = ds.profiles.lookup(id: ds.pubkey),
                       let keypair = ds.keypair.to_full()
                 else {
                     return
@@ -584,8 +578,7 @@ struct ContentView: View {
             }
         }, message: {
             if case let .user(pubkey, _) = self.muting {
-                let profile_txn = damus_state!.profiles.lookup(id: pubkey)
-                let profile = profile_txn?.unsafeUnownedValue
+                let profile = damus_state!.profiles.lookup(id: pubkey)
                 let name = Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
                 Text("\(name) has been muted", comment: "Alert message that informs a user was muted.")
             } else {
@@ -647,8 +640,7 @@ struct ContentView: View {
             }
         }, message: {
             if case let .user(pubkey, _) = muting {
-                let profile_txn = damus_state?.profiles.lookup(id: pubkey)
-                let profile = profile_txn?.unsafeUnownedValue
+                let profile = damus_state?.profiles.lookup(id: pubkey)
                 let name = Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
                 Text("Mute \(name)?", comment: "Alert message prompt to ask if a user should be muted.")
             } else {
@@ -1143,7 +1135,6 @@ extension LossyLocalNotification {
         }
     }
 }
-
 
 func logout(_ state: DamusState?)
 {

@@ -74,31 +74,45 @@ class Profiles {
         profile_data(pubkey).zapper
     }
 
-    func lookup_with_timestamp(_ pubkey: Pubkey) -> NdbTxn<ProfileRecord?>? {
-        ndb.lookup_profile(pubkey)
+    func lookup_with_timestamp<T>(_ pubkey: Pubkey, borrow lendingFunction: (_: borrowing ProfileRecord?) throws -> T) rethrows -> T {
+        return try ndb.lookup_profile(pubkey, borrow: lendingFunction)
+    }
+    
+    func lookup_lnurl(_ pubkey: Pubkey) -> String? {
+        return lookup_with_timestamp(pubkey, borrow: { pr in
+            switch pr {
+            case .some(let pr): return pr.lnurl
+            case .none: return nil
+            }
+        })
     }
 
-    func lookup_by_key(key: ProfileKey) -> NdbTxn<ProfileRecord?>? {
-        ndb.lookup_profile_by_key(key: key)
+    func lookup_by_key<T>(key: ProfileKey, borrow lendingFunction: (_: borrowing ProfileRecord?) throws -> T) rethrows -> T {
+        return try ndb.lookup_profile_by_key(key: key, borrow: lendingFunction)
     }
 
-    func search<Y>(_ query: String, limit: Int, txn: NdbTxn<Y>) -> [Pubkey] {
-        ndb.search_profile(query, limit: limit, txn: txn)
+    func search(_ query: String, limit: Int) -> [Pubkey] {
+        ndb.search_profile(query, limit: limit)
     }
 
-    func lookup(id: Pubkey, txn_name: String? = nil) -> NdbTxn<Profile?>? {
-        guard let txn = ndb.lookup_profile(id, txn_name: txn_name) else {
-            return nil
-        }
-        return txn.map({ pr in pr?.profile })
+    func lookup(id: Pubkey) -> Profile? {
+        return ndb.lookup_profile(id, borrow: { pr in
+            switch pr {
+            case .none:
+                return nil
+            case .some(let profileRecord):
+                // This will clone the value to make it owned and safe to return.
+                return profileRecord.profile
+            }
+        })
     }
 
     func lookup_key_by_pubkey(_ pubkey: Pubkey) -> ProfileKey? {
         ndb.lookup_profile_key(pubkey)
     }
 
-    func has_fresh_profile<Y>(id: Pubkey, txn: NdbTxn<Y>) -> Bool {
-        guard let fetched_at = ndb.read_profile_last_fetched(txn: txn, pubkey: id)
+    func has_fresh_profile(id: Pubkey) -> Bool {
+        guard let fetched_at = ndb.read_profile_last_fetched(pubkey: id)
         else {
             return false
         }
