@@ -1,0 +1,7 @@
+# Profile bootstrap generation artifacts
+profile-bootstrap.jsonl
+profile-bootstrap-full.jsonl
+profile-bootstrap.log
+pubkeys.txt
+profiles_temp.jsonl
+*.jsonl
