@@ -147,6 +147,8 @@ struct TimelineView<Content: View>: View {
         }
         .onDisappear {
             saveScrollPosition()
+            // Reset so we restore position next time view appears
+            hasRestoredPosition = false
         }
     }
 
