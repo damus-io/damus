@@ -69,6 +69,7 @@ struct SearchView: View {
                                 }
 
                                 appstate.mutelist_manager.set_mutelist(mutelist)
+                                appstate.settings.latest_mutelist_event_id_hex = mutelist.id.hex()
                                 Task { await appstate.nostrNetwork.postbox.send(mutelist) }
                             } label: {
                                 Text("Unmute Hashtag", comment: "Label represnting a button that the user can tap to unmute a given hashtag so they start seeing it in their feed again.")
@@ -104,6 +105,7 @@ struct SearchView: View {
         }
 
         appstate.mutelist_manager.set_mutelist(mutelist)
+        appstate.settings.latest_mutelist_event_id_hex = mutelist.id.hex()
         Task { await appstate.nostrNetwork.postbox.send(mutelist) }
     }
 
