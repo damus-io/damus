@@ -1877,6 +1877,9 @@
 		D7EDED312B1290B80018B19C /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = D7EDED302B1290B80018B19C /* MarkdownUI */; };
 		D7EDED332B12ACAE0018B19C /* DamusUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */; };
 		D7EDED342B12ACAE0018B19C /* DamusUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */; };
+		5C0A0002300000000000A001 /* ScrollPositionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0A0001300000000000A001 /* ScrollPositionManager.swift */; };
+		5C0A0003300000000000A001 /* ScrollPositionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0A0001300000000000A001 /* ScrollPositionManager.swift */; };
+		5C0A0004300000000000A001 /* ScrollPositionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0A0001300000000000A001 /* ScrollPositionManager.swift */; };
 		D7EFBA372CC322F300F45588 /* DamusVideoControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EFBA362CC322F300F45588 /* DamusVideoControlsView.swift */; };
 		D7EFBA382CC322F300F45588 /* DamusVideoControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EFBA362CC322F300F45588 /* DamusVideoControlsView.swift */; };
 		D7F360252CEBBD7E009D34DA /* DamusFullScreenCover.swift in Sources */ = {isa = PBXBuildFile; fileRef = D734B1442CCC19B1000B5C97 /* DamusFullScreenCover.swift */; };
@@ -2830,6 +2833,7 @@
 		D7EDED202B117DCA0018B19C /* SequenceUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SequenceUtils.swift; sourceTree = "<group>"; };
 		D7EDED2D2B128E8A0018B19C /* CollectionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionExtension.swift; sourceTree = "<group>"; };
 		D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusUserDefaults.swift; sourceTree = "<group>"; };
+		5C0A0001300000000000A001 /* ScrollPositionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollPositionManager.swift; sourceTree = "<group>"; };
 		D7EFBA362CC322F300F45588 /* DamusVideoControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusVideoControlsView.swift; sourceTree = "<group>"; };
 		D7F5630F2DEE71BB008509DE /* NdbFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbFilter.swift; sourceTree = "<group>"; };
 		D7FA46E42DBDAA75002C9BB0 /* ImageCacheMigrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCacheMigrations.swift; sourceTree = "<group>"; };
@@ -4907,6 +4911,7 @@
 				D7315A292ACDF3B70036E30A /* DamusCacheManager.swift */,
 				501F8C7F2A0220E1001AFC1D /* KeychainStorage.swift */,
 				4C3BEFDF281DE1ED00B3DE84 /* DamusState.swift */,
+				5C0A0001300000000000A001 /* ScrollPositionManager.swift */,
 			);
 			path = Storage;
 			sourceTree = "<group>";
@@ -5948,6 +5953,7 @@
 				5CC852A22BDED9B90039FFC5 /* HighlightDescription.swift in Sources */,
 				4C94D6432BA5AEFE00C26EFF /* QuoteRepostsView.swift in Sources */,
 				D7EDED332B12ACAE0018B19C /* DamusUserDefaults.swift in Sources */,
+				5C0A0002300000000000A001 /* ScrollPositionManager.swift in Sources */,
 				4CA352AE2A76C1AC003BB08B /* FollowedNotify.swift in Sources */,
 				5C8F97422EB461B2009399B1 /* LiveStreamHomeView.swift in Sources */,
 				4CACA9DC280C38C000D9BBE8 /* Profiles.swift in Sources */,
@@ -6610,6 +6616,7 @@
 				82D6FBA72CD99F7900C925F4 /* NoteContent.swift in Sources */,
 				82D6FBA82CD99F7900C925F4 /* LongformEvent.swift in Sources */,
 				82D6FBA92CD99F7900C925F4 /* DamusUserDefaults.swift in Sources */,
+				5C0A0003300000000000A001 /* ScrollPositionManager.swift in Sources */,
 				82D6FBAA2CD99F7900C925F4 /* HeadlessDamusState.swift in Sources */,
 				82D6FBAB2CD99F7900C925F4 /* MuteItem.swift in Sources */,
 				82D6FBAC2CD99F7900C925F4 /* MutelistManager.swift in Sources */,
@@ -7287,6 +7294,7 @@
 				D73E5E1A2C6A9665007EB227 /* RelayPool.swift in Sources */,
 				D703D74C2C6709CE00A400EA /* Zaps.swift in Sources */,
 				D703D7552C670A3700A400EA /* DamusUserDefaults.swift in Sources */,
+				5C0A0004300000000000A001 /* ScrollPositionManager.swift in Sources */,
 				5C4FA8002DC5119300CE658C /* FollowPackPreview.swift in Sources */,
 				5C8498042D5D150000F74FEB /* ZapExplainer.swift in Sources */,
 				D703D7842C670C4700A400EA /* SequenceUtils.swift in Sources */,
