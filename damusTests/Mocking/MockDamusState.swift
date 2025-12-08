@@ -54,6 +54,7 @@ func generate_test_damus_state(
                            quote_reposts: .init(our_pubkey: our_pubkey),
                            emoji_provider: DefaultEmojiProvider(showAllVariations: false),
                            favicon_cache: .init(),
+                           scrollPositions: .init(),
                            addNdbToRelayPool: addNdbToRelayPool
     )
     
