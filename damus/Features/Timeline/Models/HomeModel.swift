@@ -70,6 +70,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
     var homeHandlerTask: Task<Void, Never>?
     var notificationsHandlerTask: Task<Void, Never>?
     var generalHandlerTask: Task<Void, Never>?
+    var dmsHandlerTask: Task<Void, Never>?
     var ndbOnlyHandlerTask: Task<Void, Never>?
     var nwcHandlerTask: Task<Void, Never>?
     
@@ -603,9 +604,9 @@ class HomeModel: ContactsDelegate, ObservableObject {
                 }
             }
         }
-        self.generalHandlerTask?.cancel()
-        self.generalHandlerTask = Task {
-            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: dms_filters + contacts_filters, streamMode: .ndbAndNetworkParallel(networkOptimization: .sinceOptimization)) {
+        self.dmsHandlerTask?.cancel()
+        self.dmsHandlerTask = Task {
+            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: dms_filters, streamMode: .ndbAndNetworkParallel(networkOptimization: .sinceOptimization)) {
                 switch item {
                 case .event(let lender):
                     await lender.justUseACopy({ await process_event(ev: $0, context: .other) })
@@ -617,6 +618,12 @@ class HomeModel: ContactsDelegate, ObservableObject {
                     dms.append(contentsOf: incoming_dms)
                 case .networkEose: break
                 }
+            }
+        }
+        self.generalHandlerTask?.cancel()
+        self.generalHandlerTask = Task {
+            for await lender in damus_state.nostrNetwork.reader.streamIndefinitely(filters: contacts_filters, streamMode: .ndbAndNetworkParallel(networkOptimization: .sinceOptimization)) {
+                await lender.justUseACopy({ await process_event(ev: $0, context: .other) })
             }
         }
         // Due to subscription volume limits in ndb and in relays, some important events may get clipped in the `generalHandlerTask` above.
