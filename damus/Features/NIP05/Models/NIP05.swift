@@ -120,33 +120,41 @@ struct NIP05DomainHelpers {
     static func scan_all_cached_profiles(domain: String, ndb: Ndb, limit: Int = 10000) -> Set<Pubkey> {
         var matching = Set<Pubkey>()
 
-        // Early return if we can't create a transaction
-        guard let txn = NdbTxn(ndb: ndb) else { return matching }
-
         var nostrFilter = NostrFilter()
         nostrFilter.kinds = [.metadata]
         nostrFilter.limit = UInt32(limit)
 
         do {
             let ndbFilter = try NdbFilter(from: nostrFilter)
-            let noteKeys = try ndb.query(with: txn, filters: [ndbFilter], maxResults: limit)
+            let noteKeys = try ndb.query(filters: [ndbFilter], maxResults: limit)
 
             for noteKey in noteKeys {
-                guard let note = ndb.lookup_note_by_key_with_txn(noteKey, txn: txn) else {
+                // Get the pubkey from the metadata note
+                guard let pubkey: Pubkey = try ndb.lookup_note_by_key(noteKey, borrow: {
+                    switch $0 {
+                    case .none: return nil
+                    case .some(let note): return note.pubkey
+                    }
+                }) else {
                     continue
                 }
 
-                // Look up the profile for this pubkey
-                guard let profileRecord = ndb.lookup_profile_with_txn(note.pubkey, txn: txn),
-                      let profile = profileRecord.profile else {
-                    continue
-                }
+                // Look up the profile and check domain match
+                let matches: Bool = (try? ndb.lookup_profile(pubkey, borrow: {
+                    switch $0 {
+                    case .none: return false
+                    case .some(let record):
+                        guard let profile = record.profile,
+                              let nip05_str = profile.nip05,
+                              let nip05 = NIP05.parse(nip05_str) else {
+                            return false
+                        }
+                        return nip05.host.caseInsensitiveCompare(domain) == .orderedSame
+                    }
+                })) ?? false
 
-                // Check if this profile's NIP-05 matches the domain
-                if let nip05_str = profile.nip05,
-                   let nip05 = NIP05.parse(nip05_str),
-                   nip05.host.caseInsensitiveCompare(domain) == .orderedSame {
-                    matching.insert(note.pubkey)
+                if matches {
+                    matching.insert(pubkey)
                 }
             }
         } catch {

@@ -9,93 +9,147 @@ import FaviconFinder
 import Kingfisher
 import SwiftUI
 
-struct NIP05DomainTimelineHeaderView: View {
-    let damus_state: DamusState
+// MARK: - Domain Title View
+
+/// Displays the NIP-05 domain name with its favicon as a tappable link.
+/// Tapping opens the domain's website in the browser.
+struct NIP05DomainTitleView: View {
     @ObservedObject var model: NIP05DomainEventsModel
     let nip05_domain_favicon: FaviconURL?
-    let friend_filter: FriendFilter
 
     @Environment(\.openURL) var openURL
 
-    var Icon: some View {
-        ZStack {
-            if let nip05_domain_favicon {
-                KFImage(nip05_domain_favicon.source)
-                    .imageContext(.favicon, disable_animation: true)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 18, height: 18)
-                    .clipped()
-            } else {
-                EmptyView()
-            }
-        }
-    }
-
-    private func domainAuthors() -> [Pubkey] {
-        NIP05DomainHelpers.ordered_domain_authors(
-            domain: model.domain,
-            friend_filter: friend_filter,
-            contacts: damus_state.contacts,
-            profiles: damus_state.profiles,
-            eventPubkeys: model.events.all_events.map { $0.pubkey },
-            filterAuthors: model.filter.authors
-        )
-    }
-
     var body: some View {
-        VStack(alignment: .leading) {
-            HStack {
-                if nip05_domain_favicon != nil {
-                    Icon
+        Button {
+            guard let url = URL(string: "https://\(model.domain)") else { return }
+            openURL(url)
+        } label: {
+            HStack(spacing: 6) {
+                if let nip05_domain_favicon {
+                    KFImage(nip05_domain_favicon.source)
+                        .imageContext(.favicon, disable_animation: true)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 20, height: 20)
+                        .clipped()
                 }
 
                 Text(model.domain)
                     .foregroundStyle(DamusLogoGradient.gradient)
-                    .font(.title.bold())
-                    .onTapGesture {
-                        if let url = URL(string: "https://\(model.domain)") {
-                            openURL(url)
-                        }
-                    }
+                    .font(.title2.bold())
             }
+        }
+        .buttonStyle(.plain)
+    }
+}
 
-            let authors = domainAuthors()
+// MARK: - Friends View
 
-            HStack {
-                CondensedProfilePicturesView(state: damus_state, pubkeys: authors, maxPictures: 3)
-                let description = friendsOfFriendsString(authors, ndb: damus_state.ndb, wotEnabled: friend_filter == .friends_of_friends)
-                Text(description)
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                    .multilineTextAlignment(.leading)
+/// Displays a summary of authors posting from this NIP-05 domain.
+/// Shows stacked profile pictures with a text description below.
+/// Tapping navigates to the full list of domain members.
+struct NIP05DomainFriendsView: View {
+    let damus_state: DamusState
+    @ObservedObject var model: NIP05DomainEventsModel
+    let nip05_domain_favicon: FaviconURL?
+
+    /// Collects all unique authors from both loaded events and the subscription filter.
+    /// Preserves order with most active authors (by event recency) appearing first.
+    private var allAuthors: [Pubkey] {
+        let eventAuthors = model.events.all_events.map { $0.pubkey }
+        let filterAuthors = model.filter.authors ?? []
+
+        var seen = Set<Pubkey>()
+        return (eventAuthors + filterAuthors).filter { seen.insert($0).inserted }
+    }
+
+    var body: some View {
+        let authors = allAuthors
+
+        Button {
+            guard !authors.isEmpty else { return }
+            damus_state.nav.push(route: Route.NIP05DomainPubkeys(
+                domain: model.domain,
+                nip05_domain_favicon: nip05_domain_favicon,
+                pubkeys: authors
+            ))
+        } label: {
+            VStack(alignment: .leading, spacing: 4) {
+                // Smaller avatars (24pt) stacked horizontally
+                CondensedProfilePicturesView(state: damus_state, pubkeys: authors, maxPictures: 4, size: 24)
+
+                // Description text below avatars, allowing 2 lines for longer lists
+                Text(notesFromAuthorsString(authors, ndb: damus_state.ndb))
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            .onTapGesture {
-                if !authors.isEmpty {
-                    damus_state.nav.push(route: Route.NIP05DomainPubkeys(domain: model.domain, nip05_domain_favicon: nip05_domain_favicon, pubkeys: authors))
-                }
-            }
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Author String Generation
+
+/// Generates a localized "Notes from X, Y & Z others" string for the given authors.
+///
+/// Examples:
+/// - 0 authors: "No notes yet"
+/// - 1 author: "Notes from Alice"
+/// - 2 authors: "Notes from Alice & Bob"
+/// - 3 authors: "Notes from Alice, Bob & Carol"
+/// - 4+ authors: "Notes from Alice, Bob, Carol & 2 others"
+func notesFromAuthorsString(_ authors: [Pubkey], ndb: Ndb, locale: Locale = Locale.current) -> String {
+    let bundle = bundleForLocale(locale: locale)
+
+    // Get display names for up to the first 3 authors
+    let names: [String] = authors.prefix(3).map { pk in
+        let profile = try? ndb.lookup_profile_and_copy(pk)
+        return Profile.displayName(profile: profile, pubkey: pk).username.truncate(maxLength: 20)
+    }
+
+    switch authors.count {
+    case 0:
+        return NSLocalizedString("No notes yet", bundle: bundle, comment: "Text when no notes are available from this domain")
+    case 1:
+        let format = NSLocalizedString("Notes from %@", bundle: bundle, comment: "Text showing notes from one author")
+        return String(format: format, locale: locale, names[0])
+    case 2:
+        let format = NSLocalizedString("Notes from %@ & %@", bundle: bundle, comment: "Text showing notes from two authors")
+        return String(format: format, locale: locale, names[0], names[1])
+    case 3:
+        let format = NSLocalizedString("Notes from %@, %@ & %@", bundle: bundle, comment: "Text showing notes from three authors")
+        return String(format: format, locale: locale, names[0], names[1], names[2])
+    default:
+        let format = localizedStringFormat(key: "notes_from_three_and_others", locale: locale)
+        return String(format: format, locale: locale, authors.count - 3, names[0], names[1], names[2])
+    }
+}
+
+// MARK: - Legacy Header View
+
+/// Full header view combining title and friends sections.
+/// Kept for backwards compatibility with existing usages.
+struct NIP05DomainTimelineHeaderView: View {
+    let damus_state: DamusState
+    @ObservedObject var model: NIP05DomainEventsModel
+    let nip05_domain_favicon: FaviconURL?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            NIP05DomainTitleView(model: model, nip05_domain_favicon: nip05_domain_favicon)
+            NIP05DomainFriendsView(damus_state: damus_state, model: model, nip05_domain_favicon: nip05_domain_favicon)
         }
     }
 }
 
-/// Generates a localized string describing which authors' notes are shown in the feed
-///
-/// Formats the display text based on how many authors have notes:
-/// - 0 authors: Shows empty state message (different for WOT on/off)
-/// - 1-3 authors: Lists names explicitly ("Notes from Alice", "Notes from Alice & Bob", etc.)
-/// - 4+ authors: Shows first 3 names plus count of others
-///
-/// - Parameters:
-///   - friendsOfFriends: Array of pubkeys with notes in this feed
-///   - ndb: Nostrdb instance for profile lookups
-///   - locale: Locale for string formatting
-///   - wotEnabled: Whether Web-of-Trust filtering is active
-/// - Returns: Localized description string
-func friendsOfFriendsString(_ friendsOfFriends: [Pubkey], ndb: Ndb, locale: Locale = Locale.current, wotEnabled: Bool = true) -> String {
-    let bundle = bundleForLocale(locale: locale)
+// MARK: - Friends of Friends String (Legacy)
 
-    // Get display names for up to 3 authors
+/// Generates a localized string for friends-of-friends in the trusted network.
+/// Similar to notesFromAuthorsString but with different context in comments.
+func friendsOfFriendsString(_ friendsOfFriends: [Pubkey], ndb: Ndb, locale: Locale = Locale.current) -> String {
+    let bundle = bundleForLocale(locale: locale)
     let names: [String] = friendsOfFriends.prefix(3).map { pk in
         let profile = try? ndb.lookup_profile(pk, borrow: { pr in
             switch pr {
@@ -108,12 +162,7 @@ func friendsOfFriendsString(_ friendsOfFriends: [Pubkey], ndb: Ndb, locale: Loca
 
     switch friendsOfFriends.count {
     case 0:
-        // Different empty state messaging based on WOT mode
-        if wotEnabled {
-            return "No one in your trusted network is associated with this domain."
-        } else {
-            return "No cached profiles found for this domain. Try following users from this domain to see their notes."
-        }
+        return NSLocalizedString("No one in your trusted network is associated with this domain.", bundle: bundle, comment: "Text when no friends-of-friends are associated with this NIP-05 domain")
     case 1:
         let format = NSLocalizedString("Notes from %@", bundle: bundle, comment: "Text to indicate that notes from one pubkey in our trusted network are shown below.")
         return String(format: format, locale: locale, names[0])
@@ -129,8 +178,10 @@ func friendsOfFriendsString(_ friendsOfFriends: [Pubkey], ndb: Ndb, locale: Loca
     }
 }
 
+// MARK: - Preview
+
 #Preview {
     let model = NIP05DomainEventsModel(state: test_damus_state, domain: "damus.io")
     let nip05_domain_favicon = FaviconURL(source: URL(string: "https://damus.io/favicon.ico")!, format: .ico, sourceType: .ico)
-    NIP05DomainTimelineHeaderView(damus_state: test_damus_state, model: model, nip05_domain_favicon: nip05_domain_favicon, friend_filter: .friends_of_friends)
+    NIP05DomainTimelineHeaderView(damus_state: test_damus_state, model: model, nip05_domain_favicon: nip05_domain_favicon)
 }

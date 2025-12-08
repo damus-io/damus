@@ -24,7 +24,9 @@ class NIP05DomainEventsModel: ObservableObject {
     let initial_limit: UInt32 = 200
     let limit: UInt32 = 500
     private var used_initial_page: Bool = false
-    private var requesting_profiles: Set<Pubkey> = []
+    /// When set, the relay query includes `since` so the full time window is fetched.
+    /// Used by grouped mode to ensure complete event counts.
+    private var since: UInt32? = nil
 
     init(state: DamusState, domain: String, friend_filter: FriendFilter = .friends_of_friends) {
         self.state = state
@@ -36,8 +38,12 @@ class NIP05DomainEventsModel: ObservableObject {
         self.filter = NostrFilter()
     }
 
-    func subscribe(resetEvents: Bool = true) {
-        print("subscribing to notes with '\(domain)' NIP-05 domain (filter: \(friend_filter.rawValue))")
+    /// - Parameter since: Optional lower-bound timestamp for relay queries.
+    ///   When set, the relay returns all events after this time (used by grouped mode
+    ///   to ensure the full time window is fetched, not just the most recent N events).
+    func subscribe(resetEvents: Bool = true, since: UInt32? = nil) {
+        print("subscribing to notes with '\(domain)' NIP-05 domain (filter: \(friend_filter.rawValue), since: \(since.map(String.init) ?? "nil"))")
+        self.since = since
         filter = NostrFilter()
         if resetEvents {
             events.reset()
@@ -47,6 +53,7 @@ class NIP05DomainEventsModel: ObservableObject {
         used_initial_page = false
         has_more = true
         loading_more = false
+        loadingTask?.cancel()
         loadingTask = Task {
             await streamItems()
         }
@@ -73,37 +80,15 @@ class NIP05DomainEventsModel: ObservableObject {
         NIP05DomainHelpers.matches_domain(pubkey, domain: domain, profiles: state.profiles)
     }
 
-    nonisolated private func resolve_domain_match(pubkey: Pubkey) async -> Bool {
-        // Quick check if already matches
-        let initialMatch = await MainActor.run { matches_domain(pubkey) }
-        if initialMatch {
-            return true
-        }
-
-        // Check if we're already requesting this profile (race condition protection)
-        let alreadyRequesting = await MainActor.run { requesting_profiles.contains(pubkey) }
-        if alreadyRequesting {
-            return false
-        }
-        await MainActor.run { _ = requesting_profiles.insert(pubkey) }
-
-        // Try to fetch metadata quickly; bail early if the task was cancelled.
-        let metaFilter = NostrFilter(kinds: [.metadata], limit: 1, authors: [pubkey])
-        let (state, _) = await MainActor.run { (self.state, ()) }
-        for await lender in state.nostrNetwork.reader.timedStream(filters: [metaFilter], timeout: .seconds(3)) {
-            await lender.justUseACopy { _ in }
-            if Task.isCancelled { break }
-        }
-
-        // Cleanup synchronously on MainActor before returning
-        return await MainActor.run {
-            requesting_profiles.remove(pubkey)
-            return matches_domain(pubkey)
-        }
-    }
-
     func streamItems() async {
-        filter.limit = used_initial_page ? self.limit : self.initial_limit
+        // When `since` is set (grouped mode), the time window bounds the result set
+        // so we can use a higher limit. Without `since`, use the normal paging limits.
+        if let since {
+            filter.since = since
+            filter.limit = 5000
+        } else {
+            filter.limit = used_initial_page ? self.limit : self.initial_limit
+        }
         filter.kinds = [.text, .longform, .highlight]
 
         // Get authors with matching NIP-05 domain
@@ -129,7 +114,7 @@ class NIP05DomainEventsModel: ObservableObject {
         filter.authors = Array(authors)
 
         for pubkey in authors {
-            check_nip05_validity(pubkey: pubkey, profiles: state.profiles)
+            check_nip05_validity(pubkey: pubkey, damus_state: state)
         }
 
         for await item in state.nostrNetwork.reader.advancedStream(filters: [filter]) {
@@ -137,11 +122,9 @@ class NIP05DomainEventsModel: ObservableObject {
             case .event(let lender):
                 await lender.justUseACopy({ await self.add_event($0) })
             case .eose:
-                DispatchQueue.main.async {
-                    self.loading = false
-                    self.used_initial_page = true
-                    self.last_loaded_count = self.events.all_events.count
-                }
+                self.loading = false
+                self.used_initial_page = true
+                self.last_loaded_count = self.events.all_events.count
                 continue
             case .ndbEose, .networkEose:
                 break
@@ -165,7 +148,7 @@ class NIP05DomainEventsModel: ObservableObject {
         moreFilter.limit = self.limit
         moreFilter.kinds = [.text, .longform, .highlight]
         moreFilter.until = until
-        moreFilter.authors = friend_filter == .friends_of_friends ? filter.authors : nil
+        moreFilter.authors = filter.authors
 
         var gotEvent = false
         for await item in state.nostrNetwork.reader.advancedStream(filters: [moreFilter]) {
@@ -174,14 +157,12 @@ class NIP05DomainEventsModel: ObservableObject {
                 gotEvent = true
                 await lender.justUseACopy({ await self.add_event($0) })
             case .eose:
-                DispatchQueue.main.async {
-                    self.loading_more = false
-                    let newCount = self.events.all_events.count
-                    if !gotEvent || newCount == self.last_loaded_count {
-                        self.has_more = false
-                    } else {
-                        self.last_loaded_count = newCount
-                    }
+                self.loading_more = false
+                let newCount = self.events.all_events.count
+                if !gotEvent || newCount == self.last_loaded_count {
+                    self.has_more = false
+                } else {
+                    self.last_loaded_count = newCount
                 }
                 return
             case .ndbEose, .networkEose:
@@ -189,9 +170,8 @@ class NIP05DomainEventsModel: ObservableObject {
             }
         }
 
-        DispatchQueue.main.async {
-            self.loading_more = false
-        }
+        self.loading_more = false
+        self.has_more = false
     }
 
     func add_event(_ ev: NostrEvent) async {
@@ -207,7 +187,7 @@ class NIP05DomainEventsModel: ObservableObject {
         guard await should_show_event(state: state, ev: ev) else { return }
 
         // Validate the NIP-05 for this author
-        check_nip05_validity(pubkey: ev.pubkey, profiles: state.profiles)
+        check_nip05_validity(pubkey: ev.pubkey, damus_state: state)
 
         // Note: We don't check domain match here because we pre-filtered authors
         // All events in this stream are from pubkeys with matching NIP-05 domain

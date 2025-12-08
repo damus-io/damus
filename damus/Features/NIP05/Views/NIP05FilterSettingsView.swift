@@ -9,10 +9,8 @@ import SwiftUI
 
 /// Settings for NIP-05 domain feed filtering (fevela-style)
 class NIP05FilterSettings: ObservableObject {
-    @Published var enableGroupedMode: Bool = true
+    @Published var enableGroupedMode: Bool
     @Published var timeRange: NIP05TimeRange = .day
-    @Published var compactView: Bool = true
-    @Published var showLastNotePreview: Bool = true
     @Published var includeReplies: Bool = false
     @Published var hideShortNotes: Bool = false
     @Published var filteredWords: String = ""
@@ -20,11 +18,14 @@ class NIP05FilterSettings: ObservableObject {
 
     static let maxNotesOptions: [Int?] = [nil, 3, 5, 10, 20]
 
+    /// - Parameter enableGroupedMode: Initial grouped mode state. NIP-05 domain views pass `true`; home timeline defaults to `false`.
+    init(enableGroupedMode: Bool = false) {
+        self.enableGroupedMode = enableGroupedMode
+    }
+
     func reset() {
-        enableGroupedMode = true
+        enableGroupedMode = false
         timeRange = .day
-        compactView = true
-        showLastNotePreview = true
         includeReplies = false
         hideShortNotes = false
         filteredWords = ""
@@ -62,21 +63,6 @@ struct NIP05FilterSettingsView: View {
                         }
                     }
                     .pickerStyle(.menu)
-                }
-
-                // View options (only when grouped mode is enabled)
-                if settings.enableGroupedMode {
-                    Section {
-                        Toggle(isOn: $settings.compactView) {
-                            Text("Compact view: show only authors", comment: "Toggle for compact author-only view")
-                        }
-                        .tint(DamusColors.purple)
-
-                        Toggle(isOn: $settings.showLastNotePreview) {
-                            Text("Show preview of the last note", comment: "Toggle to show preview of most recent note")
-                        }
-                        .tint(DamusColors.purple)
-                    }
                 }
 
                 // Content filters
