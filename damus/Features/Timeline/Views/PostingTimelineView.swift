@@ -54,7 +54,16 @@ struct PostingTimelineView: View {
     }
     
     func contentTimelineView(filter: (@escaping (NostrEvent) -> Bool)) -> some View {
-        TimelineView<AnyView>(events: home.events, loading: self.loading, headerHeight: $headerHeight, headerOffset: $headerOffset, damus: damus_state, show_friend_icon: false, filter: filter)
+        TimelineView<AnyView>(
+            events: home.events,
+            loading: self.loading,
+            headerHeight: $headerHeight,
+            headerOffset: $headerOffset,
+            damus: damus_state,
+            show_friend_icon: false,
+            filter: filter,
+            positionKey: .homeTimeline
+        )
     }
     
     func HeaderView() -> some View {

@@ -55,6 +55,7 @@ struct SearchHomeView: View {
             damus: damus_state,
             show_friend_icon: true,
             filter: content_filter(FilterState.posts),
+            positionKey: .search,
             content: {
                 AnyView(VStack(alignment: .leading) {
                     HStack {
