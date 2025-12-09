@@ -12,9 +12,22 @@ enum Timeline: String, CustomStringConvertible, Hashable {
     case notifications
     case search
     case dms
-    
+
     var description: String {
         return self.rawValue
+    }
+
+    var accessibilityLabel: String {
+        switch self {
+        case .home:
+            return NSLocalizedString("Home", comment: "Accessibility label for Home tab")
+        case .notifications:
+            return NSLocalizedString("Notifications", comment: "Accessibility label for Notifications tab")
+        case .search:
+            return NSLocalizedString("Search", comment: "Accessibility label for Search tab")
+        case .dms:
+            return NSLocalizedString("Direct Messages", comment: "Accessibility label for DMs tab")
+        }
     }
 }
 
@@ -49,6 +62,10 @@ struct TabButton: View {
         }
     }
     
+    var hasNewEvents: Bool {
+        show_indicator(timeline: timeline, current: nstatus.new_events, indicator_setting: settings.notification_indicators)
+    }
+
     var Tab: some View {
         Button(action: {
             action(timeline)
@@ -61,6 +78,9 @@ struct TabButton: View {
                 .contentShape(Rectangle())
         }
         .foregroundColor(.primary)
+        .accessibilityLabel(timeline.accessibilityLabel)
+        .accessibilityHint(hasNewEvents ? NSLocalizedString("New items available", comment: "Accessibility hint when tab has new content") : "")
+        .accessibilityAddTraits(selected == timeline ? .isSelected : [])
     }
 }
     

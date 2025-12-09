@@ -45,6 +45,7 @@ struct SideMenuView: View {
             NavigationLink(value: Route.Wallet(wallet: damus_state.wallet)) {
                 navLabel(title: NSLocalizedString("Wallet", comment: "Sidebar menu label for Wallet view."), img: "wallet")
             }
+            .accessibilityLabel(NSLocalizedString("Wallet", comment: "Accessibility label for Wallet menu item"))
 
             if damus_state.purple.enable_purple {
                 NavigationLink(destination: DamusPurpleView(damus_state: damus_state)) {
@@ -74,8 +75,9 @@ struct SideMenuView: View {
                     .padding(.leading, 2)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                .accessibilityLabel(NSLocalizedString("Damus Purple", comment: "Accessibility label for Damus Purple menu item"))
             }
-            
+
             NavigationLink(destination: DamusLabsView(damus_state: damus_state)) {
                 HStack(spacing: 23) {
                     Image(systemName: "flask")
@@ -91,32 +93,39 @@ struct SideMenuView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            
+            .accessibilityLabel(NSLocalizedString("Labs", comment: "Accessibility label for Labs menu item"))
+
             if damus_state.settings.live {
                 NavigationLink(value: Route.LiveEvents(model: LiveEventModel(damus_state: damus_state))) {
                     navLabel(title: NSLocalizedString("Live", comment: "Sidebar menu label for live events view."), img: "record")
                 }
+                .accessibilityLabel(NSLocalizedString("Live Events", comment: "Accessibility label for Live Events menu item"))
             }
 
             NavigationLink(value: Route.MuteList) {
                 navLabel(title: NSLocalizedString("Muted", comment: "Sidebar menu label for muted users view."), img: "mute")
             }
+            .accessibilityLabel(NSLocalizedString("Muted Users", comment: "Accessibility label for Muted Users menu item"))
 
             NavigationLink(value: Route.RelayConfig) {
                 navLabel(title: NSLocalizedString("Relays", comment: "Sidebar menu label for Relays view."), img: "world-relays")
             }
+            .accessibilityLabel(NSLocalizedString("Relays", comment: "Accessibility label for Relays menu item"))
 
             NavigationLink(value: Route.Bookmarks) {
                 navLabel(title: NSLocalizedString("Bookmarks", comment: "Sidebar menu label for Bookmarks view."), img: "bookmark")
             }
+            .accessibilityLabel(NSLocalizedString("Bookmarks", comment: "Accessibility label for Bookmarks menu item"))
 
             Link(destination: URL(string: "https://store.damus.io/?ref=damus_ios_app")!) {
                 navLabel(title: NSLocalizedString("Merch", comment: "Sidebar menu label for merch store link."), img: "shop")
             }
+            .accessibilityLabel(NSLocalizedString("Merch Store", comment: "Accessibility label for Merch Store menu item"))
 
             NavigationLink(value: Route.Config) {
                 navLabel(title: NSLocalizedString("Settings", comment: "Sidebar menu label for accessing the app settings"), img: "settings")
             }
+            .accessibilityLabel(NSLocalizedString("Settings", comment: "Accessibility label for Settings menu item"))
             
             Button(action: {
                 if damus_state.keypair.privkey == nil {
@@ -162,7 +171,8 @@ struct SideMenuView: View {
                                 .foregroundColor(DamusColors.neutral3)
                         }
                 })
-                
+                .accessibilityLabel(NSLocalizedString("Set Status", comment: "Accessibility label for set status button"))
+
                 Button(action: {
                     showQRCode.toggle()
                     isSidebarVisible = false
@@ -176,7 +186,9 @@ struct SideMenuView: View {
                             Circle()
                                 .foregroundColor(DamusColors.neutral3)
                         }
-                }).damus_full_screen_cover($showQRCode, damus_state: damus_state) {
+                })
+                .accessibilityLabel(NSLocalizedString("Show QR Code", comment: "Accessibility label for QR code button"))
+                .damus_full_screen_cover($showQRCode, damus_state: damus_state) {
                     QRCodeView(damus_state: damus_state, pubkey: damus_state.pubkey)
                 }
             }

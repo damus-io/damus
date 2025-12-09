@@ -180,6 +180,7 @@ struct ProfileView: View {
         } label: {
             navImage(img: "chevron-left")
         }
+        .accessibilityLabel(NSLocalizedString("Back", comment: "Accessibility label for back button"))
     }
 
     var navActionSheetButton: some View {
@@ -191,6 +192,7 @@ struct ProfileView: View {
                 .background(Color.black.opacity(0.6))
                 .clipShape(Circle())
         }
+        .accessibilityLabel(NSLocalizedString("More Options", comment: "Accessibility label for more options button"))
         .confirmationDialog(NSLocalizedString("Actions", comment: "Title for confirmation dialog to either share, report, or mute a profile."), isPresented: $action_sheet_presented) {
             Button(NSLocalizedString("Share", comment: "Button to share the link to a profile.")) {
                 show_share_sheet = true
@@ -247,14 +249,16 @@ struct ProfileView: View {
                 .profile_button_style(scheme: colorScheme)
                 .cornerRadius(24)
         }
+        .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button on profile"))
     }
-    
+
     var dmButton: some View {
         let dm_model = damus_state.dms.lookup_or_create(profile.pubkey)
         return NavigationLink(value: Route.DMChat(dms: dm_model)) {
             Image("messages")
                 .profile_button_style(scheme: colorScheme)
         }
+        .accessibilityLabel(NSLocalizedString("Direct Message", comment: "Accessibility label for DM button on profile"))
     }
     
     private var followsYouBadge: some View {

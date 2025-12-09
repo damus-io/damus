@@ -31,6 +31,7 @@ struct BigButton: View {
                 }
                 .padding(EdgeInsets(top: 10, leading: 50, bottom: 25, trailing: 50))
         }
+        .accessibilityLabel(text)
     }
 }
 

@@ -17,6 +17,19 @@ struct GradientFollowButton: View {
     private let grayTextColor = Color(#colorLiteral(red: 0.1450980392, green: 0.1607843137, blue: 0.1764705882, alpha: 1))
     private let grayBorder = Color(#colorLiteral(red: 0.8666666667, green: 0.8823529412, blue: 0.8901960784, alpha: 1))
 
+    var accessibilityLabelText: String {
+        switch follow_state {
+        case .follows:
+            return NSLocalizedString("Following, double tap to unfollow", comment: "Accessibility label for follow button when following")
+        case .following:
+            return NSLocalizedString("Processing follow", comment: "Accessibility label for follow button when processing")
+        case .unfollowing:
+            return NSLocalizedString("Processing unfollow", comment: "Accessibility label for follow button when processing")
+        case .unfollows:
+            return NSLocalizedString("Follow, double tap to follow this user", comment: "Accessibility label for follow button when not following")
+        }
+    }
+
     var body: some View {
 
         Button(action: {
@@ -41,6 +54,7 @@ struct GradientFollowButton: View {
         .background(follow_state == .unfollows ? PinkGradient : GrayGradient)
         .cornerRadius(12)
         .frame(width: 100)
+        .accessibilityLabel(accessibilityLabelText)
         .onReceive(handle_notify(.followed)) { ref in
             guard target.follow_ref == ref else { return }
             self.follow_state = .follows

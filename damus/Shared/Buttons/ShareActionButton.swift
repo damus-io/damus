@@ -43,6 +43,7 @@ struct ShareActionButton: View {
                     .padding(.top)
             }
         }
+        .accessibilityLabel(text)
     }
 }
 
