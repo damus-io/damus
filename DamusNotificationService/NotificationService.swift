@@ -417,8 +417,10 @@ func download_image_for_notification(picture: URL) async -> URL? {
     let urlHash = stable_hash_for_url(picture)
 
     // Check if we already have this image cached (reuse across extension launches)
+    // Validate the cached file is readable as an image to avoid reusing corrupt/zero-byte files
     let existingFiles = try? FileManager.default.contentsOfDirectory(at: pfpDirectory, includingPropertiesForKeys: nil)
-    if let existingFile = existingFiles?.first(where: { $0.lastPathComponent.hasPrefix(urlHash) }) {
+    if let existingFile = existingFiles?.first(where: { $0.lastPathComponent.hasPrefix(urlHash) }),
+       is_valid_image_file(existingFile) {
         return existingFile
     }
 
@@ -485,4 +487,12 @@ private func detect_image_extension(from data: Data) -> String? {
     }
 }
 
-
+/// Validates that a file exists and contains a readable image.
+/// Uses ImageIO to verify the file is not corrupt or zero-byte.
+private func is_valid_image_file(_ url: URL) -> Bool {
+    guard let source = CGImageSourceCreateWithURL(url as CFURL, nil) else {
+        return false
+    }
+    // Check that ImageIO can determine the image type (implies valid header)
+    return CGImageSourceGetType(source) != nil
+}
