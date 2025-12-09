@@ -527,8 +527,28 @@ class HomeModel: ContactsDelegate, ObservableObject {
 
         self.notificationsHandlerTask?.cancel()
         self.notificationsHandlerTask = Task {
-            for await event in damus_state.nostrNetwork.reader.streamIndefinitely(filters: notifications_filters) {
-                await event.justUseACopy({ await process_event(ev: $0, context: .notifications) })
+            // Use advancedStream (not streamIndefinitely) so we receive EOSE signals.
+            // This lets us flush queued notifications once the local database finishes loading,
+            // fixing the race condition where onAppear fires before events arrive.
+            for await item in damus_state.nostrNetwork.reader.advancedStream(
+                filters: notifications_filters,
+                streamMode: .ndbAndNetworkParallel(optimizeNetworkFilter: true)
+            ) {
+                switch item {
+                case .event(let lender):
+                    await lender.justUseACopy({ await process_event(ev: $0, context: .notifications) })
+
+                case .ndbEose:
+                    // Local database finished loading. Flush any queued notifications
+                    // and disable queuing so subsequent events display immediately.
+                    await MainActor.run {
+                        self.notifications.flush(damus_state)
+                        self.notifications.set_should_queue(false)
+                    }
+
+                case .eose, .networkEose:
+                    break
+                }
             }
         }
         self.generalHandlerTask?.cancel()
