@@ -21,11 +21,17 @@ struct SaveKeysView: View {
     
     let first_contact_event: NdbNote?
     let first_relay_list_event: NdbNote?
-    
+    let first_metadata_event: NostrEvent?
+
     init(account: CreateAccountModel) {
         self.account = account
         self.first_contact_event = make_first_contact_event(keypair: account.keypair)
         self.first_relay_list_event = NIP65.RelayList(relays: get_default_bootstrap_relays()).toNostrEvent(keypair: account.full_keypair)
+
+        // Pre-create metadata event so we can save it locally before network publish.
+        // This ensures profile data persists even if onboarding network requests fail.
+        let metadata = create_account_to_metadata(account)
+        self.first_metadata_event = make_metadata_event(keypair: account.full_keypair, metadata: metadata)
     }
     
     var body: some View {
@@ -136,7 +142,13 @@ struct SaveKeysView: View {
             error = NSLocalizedString("Could not create your initial relay list. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help.", comment: "Error message to the user indicating that the initial relay list failed to be created.")
             return
         }
-        // Save contact list to storage right away so that we don't need to depend on the network to complete this important step
+        guard first_metadata_event != nil else {
+            error = NSLocalizedString("Could not create your profile. This is a software bug, please contact Damus support via support@damus.io or through our Nostr account for help.", comment: "Error message to the user indicating that the initial profile metadata failed to be created.")
+            return
+        }
+
+        // Save all initial events to local storage first, before network publish.
+        // This ensures data persists even if onboarding network requests fail (common on cellular).
         self.save_to_storage(first_contact_event: first_contact_event, first_relay_list_event: first_relay_list_event, for: account)
         
         let bootstrap_relays = load_bootstrap_relays(pubkey: account.pubkey)
@@ -158,12 +170,23 @@ struct SaveKeysView: View {
         }
     }
     
+    /// Saves the initial account events to local NostrDB storage.
+    ///
+    /// This is called BEFORE attempting network publish to ensure data persists
+    /// even if the network is unavailable (common on cellular during onboarding).
+    /// The events are later published to relays when a connection is established.
     func save_to_storage(first_contact_event: NdbNote, first_relay_list_event: NdbNote, for account: CreateAccountModel) {
-        // Send to NostrDB so that we have a local copy in storage
+        // Send to NostrDB so that we have a local copy in storage.
+        // Order: contacts, relay list, then metadata.
         self.pool.send_raw_to_local_ndb(.typical(.event(first_contact_event)))
         self.pool.send_raw_to_local_ndb(.typical(.event(first_relay_list_event)))
-        
-        // Save the ID to user settings so that we can easily find it later.
+
+        // Also save metadata locally so profile displays correctly even if network fails.
+        if let first_metadata_event {
+            self.pool.send_raw_to_local_ndb(.typical(.event(first_metadata_event)))
+        }
+
+        // Save event IDs to user settings so we can retrieve them later.
         let settings = UserSettingsStore.globally_load_for(pubkey: account.pubkey)
         settings.latest_contact_event_id_hex = first_contact_event.id.hex()
         settings.latestRelayListEventIdHex = first_relay_list_event.id.hex()
@@ -174,21 +197,24 @@ struct SaveKeysView: View {
         case .ws_connection_event(let wsev):
             switch wsev {
             case .connected:
-                let metadata = create_account_to_metadata(account)
-                
-                if let keypair = account.keypair.to_full(),
-                   let metadata_ev = make_metadata_event(keypair: keypair, metadata: metadata) {
-                    await self.pool.send(.event(metadata_ev))
-                }
-                
+                // Publish events to the network now that we have a connection.
+                // Note: These events were already saved locally in save_to_storage(),
+                // so network failure won't lose data - this just propagates to relays.
+
                 if let first_contact_event {
                     await self.pool.send(.event(first_contact_event))
                 }
-                
+
                 if let first_relay_list_event {
                     await self.pool.send(.event(first_relay_list_event))
                 }
-                
+
+                // Publish profile metadata to network.
+                // Already saved locally in save_to_storage() for offline resilience.
+                if let first_metadata_event {
+                    await self.pool.send(.event(first_metadata_event))
+                }
+
                 do {
                     try save_keypair(pubkey: account.pubkey, privkey: account.privkey)
                     notify(.login(account.keypair))
