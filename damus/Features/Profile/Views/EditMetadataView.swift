@@ -57,14 +57,34 @@ struct EditMetadataView: View {
         return profile
     }
     
+    /// Saves the user's profile changes using an offline-first approach.
+    ///
+    /// This fixes an issue where profile updates wouldn't persist without restarting
+    /// the app (GitHub issue #3200). The problem was that profile changes were only
+    /// sent to relays, leaving the local state stale until the event round-tripped
+    /// back from the network - which may never happen on unreliable cellular connections.
+    ///
+    /// The fix applies three steps in order:
+    /// 1. Save to local NostrDB first (guarantees local persistence)
+    /// 2. Notify the app to update UI immediately (no network dependency)
+    /// 3. Publish to relays (can succeed/fail independently of local state)
     func save() async {
         let profile = to_profile()
-        guard let keypair = damus_state.keypair.to_full(),
-              let metadata_ev = make_metadata_event(keypair: keypair, metadata: profile)
-        else {
-            return
-        }
 
+        guard let keypair = damus_state.keypair.to_full() else { return }
+        guard let metadata_ev = make_metadata_event(keypair: keypair, metadata: profile) else { return }
+
+        // Step 1: Save to local NostrDB first.
+        // This ensures the profile is persisted locally even if network publish fails.
+        await damus_state.nostrNetwork.sendToNostrDB(event: metadata_ev)
+
+        // Step 2: Notify the app to refresh UI immediately.
+        // This triggers all profile-dependent views to update without waiting for network.
+        notify(.profile_updated(.manual(pubkey: damus_state.pubkey, profile: profile)))
+
+        // Step 3: Publish to relays.
+        // This propagates the update to the network. Success/failure here doesn't
+        // affect the local user experience - their profile is already updated locally.
         await damus_state.nostrNetwork.postbox.send(metadata_ev)
     }
 
