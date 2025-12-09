@@ -153,7 +153,7 @@ struct CreateAccountView_Previews: PreviewProvider {
 func FormTextInput(_ title: String, text: Binding<String>) -> some View {
     return TextField("", text: text)
         .placeholder(when: text.wrappedValue.isEmpty) {
-            Text(title).foregroundColor(.gray.opacity(0.5))
+            Text(title).foregroundColor(DamusColors.mediumGrey)
         }
         .padding(15)
         .background {
