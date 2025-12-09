@@ -10,23 +10,31 @@ import SwiftUI
 struct PubkeyView: View {
     let pubkey: Pubkey
     var sidemenu: Bool = false
-    
+
     @Environment(\.colorScheme) var colorScheme
-    
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
+
     @State private var isCopied = false
-    
+
     func keyColor() -> Color {
         colorScheme == .light ? DamusColors.black : DamusColors.white
     }
-    
+
     private func copyPubkey(_ pubkey: String) {
         UIPasteboard.general.string = pubkey
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-        withAnimation {
+        if reduceMotion {
             isCopied = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                withAnimation {
-                    isCopied = false
+                isCopied = false
+            }
+        } else {
+            withAnimation {
+                isCopied = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    withAnimation {
+                        isCopied = false
+                    }
                 }
             }
         }

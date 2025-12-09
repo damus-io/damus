@@ -13,9 +13,10 @@ let RECTANGLE_GRADIENT = LinearGradient(gradient: Gradient(colors: [
 ]), startPoint: .leading, endPoint: .trailing)
 
 struct CustomPicker<SelectionValue: Hashable>: View {
-    
+
     let tabs: [(String, SelectionValue)]
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
 
     @Namespace var picker
     @Binding var selection: SelectionValue
@@ -24,8 +25,12 @@ struct CustomPicker<SelectionValue: Hashable>: View {
         HStack {
             ForEach(tabs, id: \.1) { (text, tag) in
                 Button {
-                    withAnimation(.spring()) {
+                    if reduceMotion {
                         selection = tag
+                    } else {
+                        withAnimation(.spring()) {
+                            selection = tag
+                        }
                     }
                 } label: {
                     Text(text).padding(EdgeInsets(top: 15, leading: 0, bottom: 10, trailing: 0))

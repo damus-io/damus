@@ -348,6 +348,8 @@ struct LikeButton: View {
     let liked_emoji: String?
     let action: (_ emoji: String) -> Void
 
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
+
     // For reactions background
     @State private var showReactionsBG = 0
     @State private var rotateThumb = -45
@@ -401,17 +403,21 @@ struct LikeButton: View {
             }.presentationDetents([.medium, .large])
         }
         .accessibilityLabel(NSLocalizedString("Like", comment: "Accessibility Label for Like button"))
-        .rotationEffect(Angle(degrees: shouldAnimate ? rotationAngle : 0))
+        .rotationEffect(Angle(degrees: (shouldAnimate && !reduceMotion) ? rotationAngle : 0))
         .onReceive(self.timer) { _ in
-            shakaAnimationLogic()
+            if !reduceMotion {
+                shakaAnimationLogic()
+            }
         }
         .simultaneousGesture(longPressGesture())
         .highPriorityGesture(TapGesture().onEnded {
             guard !isReactionsVisible else { return }
-            withAnimation(Animation.easeOut(duration: 0.15)) {
-                self.action(damus_state.settings.default_emoji_reaction)
-                shouldAnimate = true
-                amountOfAngleIncrease = 20.0
+            self.action(damus_state.settings.default_emoji_reaction)
+            if !reduceMotion {
+                withAnimation(Animation.easeOut(duration: 0.15)) {
+                    shouldAnimate = true
+                    amountOfAngleIncrease = 20.0
+                }
             }
         })
         .onChange(of: selectedEmoji) { newSelectedEmoji in

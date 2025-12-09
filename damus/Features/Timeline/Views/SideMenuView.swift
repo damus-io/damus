@@ -14,6 +14,7 @@ struct SideMenuView: View {
     @Binding var selected: Timeline
     @State var confirm_logout: Bool = false
     @State private var showQRCode = false
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
 
     var sideBarWidth = min(UIScreen.main.bounds.size.width * 0.65, 400.0)
     let verticalSpacing: CGFloat = 25
@@ -26,7 +27,7 @@ struct SideMenuView: View {
             }
             .background(DamusColors.darkGrey.opacity(0.6))
             .opacity(isSidebarVisible ? 1 : 0)
-            .animation(.default, value: isSidebarVisible)
+            .animation(reduceMotion ? .none : .default, value: isSidebarVisible)
             .onTapGesture {
                 isSidebarVisible.toggle()
             }
@@ -255,7 +256,7 @@ struct SideMenuView: View {
             }
             .frame(width: sideBarWidth)
             .offset(x: isSidebarVisible ? 0 : -(sideBarWidth + padding))
-            .animation(.default, value: isSidebarVisible)
+            .animation(reduceMotion ? .none : .default, value: isSidebarVisible)
             .alert("Logout", isPresented: $confirm_logout) {
                 Button(NSLocalizedString("Cancel", comment: "Cancel out of logging out the user."), role: .cancel) {
                     confirm_logout = false
