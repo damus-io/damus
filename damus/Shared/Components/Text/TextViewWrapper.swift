@@ -49,21 +49,41 @@ struct TextViewWrapper: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: UITextView, context: Context) {
+        // Save the current selection BEFORE making any changes
+        // This is critical because setting attributedText causes UITextView to reset the cursor position
+        let savedRange = uiView.selectedRange
+
         uiView.attributedText = attributedText
 
         TextViewWrapper.setTextProperties(uiView)
-        setCursorPosition(textView: uiView)
-        let range = uiView.selectedRange
 
-        // Set the text height that will fit all the text
-        // This is needed because the UIKit auto-layout prefers to overflow the text to the right than to expand the text box vertically, even with low horizontal compression resistance
-        self.setIdealHeight(uiView: uiView)
+        // Restore cursor position with priority:
+        // 1. If cursorIndex is explicitly set (e.g., from mention insertion), use it
+        // 2. Otherwise, restore the saved range with tag diff adjustment
+        // Clamp saved selection to current text bounds to avoid out-of-range resets after text mutations
+        let adjustedLocation = max(0, min(savedRange.location + tagModel.diff, attributedText.length))
+        let adjustedLength = max(0, min(savedRange.length, attributedText.length - adjustedLocation))
+        let selectionRange = NSRange(location: adjustedLocation, length: adjustedLength)
 
-        uiView.selectedRange = NSRange(location: range.location + tagModel.diff, length: range.length)
+        if let index = cursorIndex,
+           let newPosition = uiView.position(from: uiView.beginningOfDocument, offset: index),
+           let textRange = uiView.textRange(from: newPosition, to: newPosition) {
+            uiView.selectedTextRange = textRange
+            tagModel.diff = 0
+            self.setIdealHeight(uiView: uiView)
+            return
+        }   // If the explicit cursor target is invalid, fall back to the saved range
+
+        // Restore the saved range, adjusted for any tag model changes
+        uiView.selectedRange = selectionRange
         tagModel.diff = 0
+        self.setIdealHeight(uiView: uiView)
     }
     
-    /// Based on our desired layout, calculate the ideal size of the text box, then set the height to the ideal size
+    /// Based on our desired layout, calculate the ideal size of the text box, then set the height to the ideal size.
+    ///
+    /// Sets the text height that will fit all the text.
+    /// This is needed because the UIKit auto-layout prefers to overflow the text to the right than to expand the text box vertically, even with low horizontal compression resistance.
     private func setIdealHeight(uiView: UITextView) {
         DispatchQueue.main.async {  // Queue on main thread, because modifying view state directly during re-render causes undefined behavior
             let idealSize = uiView.sizeThatFits(CGSize(
@@ -74,13 +94,6 @@ struct TextViewWrapper: UIViewRepresentable {
                 self.textHeight = idealSize.height
             }
         }
-    }
-
-    private func setCursorPosition(textView: UITextView) {
-        guard let index = cursorIndex, let newPosition = textView.position(from: textView.beginningOfDocument, offset: index) else {
-            return
-        }
-        textView.selectedTextRange = textView.textRange(from: newPosition, to: newPosition)
     }
 
     func makeCoordinator() -> Coordinator {
