@@ -65,30 +65,25 @@ struct TextViewWrapper: UIViewRepresentable {
         let adjustedLength = max(0, min(savedRange.length, attributedText.length - adjustedLocation))
         let selectionRange = NSRange(location: adjustedLocation, length: adjustedLength)
 
-        if let index = cursorIndex {
-            guard let newPosition = uiView.position(from: uiView.beginningOfDocument, offset: index),
-                  let textRange = uiView.textRange(from: newPosition, to: newPosition) else {
-                // If the explicit cursor target is invalid, fall back to the saved range
-                uiView.selectedRange = selectionRange
-                tagModel.diff = 0
-                return
-            }
-
+        if let index = cursorIndex,
+           let newPosition = uiView.position(from: uiView.beginningOfDocument, offset: index),
+           let textRange = uiView.textRange(from: newPosition, to: newPosition) {
             uiView.selectedTextRange = textRange
             tagModel.diff = 0
+            self.setIdealHeight(uiView: uiView)
             return
-        }
+        }   // If the explicit cursor target is invalid, fall back to the saved range
 
         // Restore the saved range, adjusted for any tag model changes
         uiView.selectedRange = selectionRange
         tagModel.diff = 0
-
-        // Set the text height that will fit all the text
-        // This is needed because the UIKit auto-layout prefers to overflow the text to the right than to expand the text box vertically, even with low horizontal compression resistance
         self.setIdealHeight(uiView: uiView)
     }
     
-    /// Based on our desired layout, calculate the ideal size of the text box, then set the height to the ideal size
+    /// Based on our desired layout, calculate the ideal size of the text box, then set the height to the ideal size.
+    ///
+    /// Sets the text height that will fit all the text.
+    /// This is needed because the UIKit auto-layout prefers to overflow the text to the right than to expand the text box vertically, even with low horizontal compression resistance.
     private func setIdealHeight(uiView: UITextView) {
         DispatchQueue.main.async {  // Queue on main thread, because modifying view state directly during re-render causes undefined behavior
             let idealSize = uiView.sizeThatFits(CGSize(
