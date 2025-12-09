@@ -61,7 +61,7 @@ class NostrNetworkManager {
     
     func handleAppBackgroundRequest(beforeClosingNdb operationBeforeClosingNdb: (() async -> Void)? = nil) async {
         // Mark NDB as closed without actually closing it, to avoid new tasks from using NostrDB
-        // self.delegate.ndb.markClosed()
+        self.delegate.ndb.markClosed()
         await self.reader.cancelAllTasks()
         await self.pool.cleanQueuedRequestForSessionEnd()
         await operationBeforeClosingNdb?()
