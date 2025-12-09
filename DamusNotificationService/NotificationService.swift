@@ -56,8 +56,17 @@ class NotificationService: UNNotificationServiceExtension {
             return
         }
 
+        // Look up sender's profile from the shared Ndb database.
+        // If the profile is not found (nil), DisplayName will fall back to an abbreviated
+        // bech32 pubkey (e.g., "npub1abc:xyz"). This happens when:
+        // - The user has never been viewed in the main app
+        // - The profile metadata hasn't been fetched from relays yet
+        // - The database isn't properly synced between main app and extension
         let sender_profile = {
             let profile = state.profiles.lookup(id: nostr_event.pubkey)
+            if profile == nil {
+                Log.debug("Profile not found in database for pubkey %s - will display abbreviated bech32", for: .push_notifications, nostr_event.pubkey.npub)
+            }
             let picture = ((profile?.picture.map { URL(string: $0) }) ?? URL(string: robohash(nostr_event.pubkey)))!
             return ProfileBuf(picture: picture,
                                  name: profile?.name,
