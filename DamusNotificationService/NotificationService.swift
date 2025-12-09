@@ -30,6 +30,10 @@ class NotificationService: UNNotificationServiceExtension {
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         configureKingfisherCache()
 
+        // Clean up old notification profile pictures to prevent disk space accumulation.
+        // This runs on each notification which is frequent enough to keep the cache tidy.
+        cleanup_old_notification_images()
+
         self.contentHandler = contentHandler
         
         guard let nostr_event_json = request.content.userInfo["nostr_event"] as? String,
@@ -341,6 +345,42 @@ func robohash(_ pk: Pubkey) -> String {
 
 // MARK: - Notification Attachment Helpers
 
+/// Prefix used for temporary notification profile picture files.
+/// Files matching this pattern can be safely cleaned up periodically.
+private let NOTIFICATION_PFP_FILE_PREFIX = "notif_pfp_"
+
+/// Cleans up old notification profile picture files from the app group container.
+/// Call this periodically to prevent disk space accumulation.
+/// Files are identified by the NOTIFICATION_PFP_FILE_PREFIX prefix.
+func cleanup_old_notification_images() {
+    guard let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Constants.DAMUS_APP_GROUP_IDENTIFIER) else {
+        return
+    }
+
+    let fileManager = FileManager.default
+    guard let contents = try? fileManager.contentsOfDirectory(at: groupURL, includingPropertiesForKeys: [.creationDateKey]) else {
+        return
+    }
+
+    let cutoffDate = Date().addingTimeInterval(-24 * 60 * 60) // 24 hours ago
+
+    for fileURL in contents {
+        // Only clean up notification PFP files
+        guard fileURL.lastPathComponent.hasPrefix(NOTIFICATION_PFP_FILE_PREFIX) else {
+            continue
+        }
+
+        // Check file age and remove if older than cutoff
+        guard let attributes = try? fileManager.attributesOfItem(atPath: fileURL.path),
+              let creationDate = attributes[.creationDate] as? Date,
+              creationDate < cutoffDate else {
+            continue
+        }
+
+        try? fileManager.removeItem(at: fileURL)
+    }
+}
+
 /// Downloads a profile picture and saves it to a local file for use as a notification attachment.
 ///
 /// UNNotificationAttachment requires a local file URL - it cannot fetch remote images directly.
@@ -374,8 +414,9 @@ func download_image_for_notification(picture: URL) async -> URL? {
 
     // Determine file extension from the original URL to preserve format
     let pathExtension = picture.pathExtension.isEmpty ? "jpg" : picture.pathExtension
-    // Create a unique filename based on the URL hash to avoid collisions
-    let filename = "notif_pfp_\(picture.absoluteString.hashValue).\(pathExtension)"
+    // Create a unique filename based on the URL hash to avoid collisions.
+    // Uses NOTIFICATION_PFP_FILE_PREFIX so cleanup_old_notification_images() can identify these files.
+    let filename = "\(NOTIFICATION_PFP_FILE_PREFIX)\(picture.absoluteString.hashValue).\(pathExtension)"
     let localURL = groupURL.appendingPathComponent(filename)
 
     do {
