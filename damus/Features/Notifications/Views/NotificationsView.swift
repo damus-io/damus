@@ -198,6 +198,12 @@ struct NotificationsView: View {
         }
         .onAppear {
             let _ = notifications.flush(state)
+
+            // Disable queuing once the tab is visible. This ensures any events
+            // arriving after onAppear insert immediately rather than being queued
+            // indefinitely. Acts as a safety net alongside the ndbEose flush in
+            // HomeModel - whichever fires first will disable queuing.
+            notifications.set_should_queue(false)
         }
     }
 }
