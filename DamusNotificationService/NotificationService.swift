@@ -10,6 +10,8 @@ import ImageIO
 import UserNotifications
 import Foundation
 import Intents
+import CryptoKit
+import UniformTypeIdentifiers
 
 class NotificationService: UNNotificationServiceExtension {
 
@@ -345,32 +347,25 @@ func robohash(_ pk: Pubkey) -> String {
 
 // MARK: - Notification Attachment Helpers
 
-/// Prefix used for temporary notification profile picture files.
-/// Files matching this pattern can be safely cleaned up periodically.
-private let NOTIFICATION_PFP_FILE_PREFIX = "notif_pfp_"
+/// Subdirectory within the app group container for notification profile pictures.
+/// Using a dedicated folder avoids enumerating the entire app group container during cleanup.
+private let NOTIFICATION_PFP_DIRNAME = "notification_pfp"
 
-/// Cleans up old notification profile picture files from the app group container.
+/// Cleans up old notification profile picture files from the dedicated subdirectory.
 /// Call this periodically to prevent disk space accumulation.
-/// Files are identified by the NOTIFICATION_PFP_FILE_PREFIX prefix.
 func cleanup_old_notification_images() {
-    guard let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Constants.DAMUS_APP_GROUP_IDENTIFIER) else {
+    guard let pfpDirectory = notification_pfp_directory() else {
         return
     }
 
     let fileManager = FileManager.default
-    guard let contents = try? fileManager.contentsOfDirectory(at: groupURL, includingPropertiesForKeys: [.creationDateKey]) else {
+    guard let contents = try? fileManager.contentsOfDirectory(at: pfpDirectory, includingPropertiesForKeys: [.creationDateKey]) else {
         return
     }
 
     let cutoffDate = Date().addingTimeInterval(-24 * 60 * 60) // 24 hours ago
 
     for fileURL in contents {
-        // Only clean up notification PFP files
-        guard fileURL.lastPathComponent.hasPrefix(NOTIFICATION_PFP_FILE_PREFIX) else {
-            continue
-        }
-
-        // Check file age and remove if older than cutoff
         guard let attributes = try? fileManager.attributesOfItem(atPath: fileURL.path),
               let creationDate = attributes[.creationDate] as? Date,
               creationDate < cutoffDate else {
@@ -381,18 +376,53 @@ func cleanup_old_notification_images() {
     }
 }
 
+/// Returns the dedicated directory for notification profile pictures, creating it if needed.
+private func notification_pfp_directory() -> URL? {
+    guard let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Constants.DAMUS_APP_GROUP_IDENTIFIER) else {
+        return nil
+    }
+
+    let pfpDirectory = groupURL.appendingPathComponent(NOTIFICATION_PFP_DIRNAME)
+
+    // Create directory if it doesn't exist
+    if !FileManager.default.fileExists(atPath: pfpDirectory.path) {
+        try? FileManager.default.createDirectory(at: pfpDirectory, withIntermediateDirectories: true)
+    }
+
+    return pfpDirectory
+}
+
 /// Downloads a profile picture and saves it to a local file for use as a notification attachment.
 ///
 /// UNNotificationAttachment requires a local file URL - it cannot fetch remote images directly.
 /// This function bridges that gap by:
 /// 1. Using Kingfisher to download (or retrieve from cache) the image
-/// 2. Saving the image data to a temporary file in the app group container
-/// 3. Returning the local file URL suitable for UNNotificationAttachment
+/// 2. Detecting the actual image type from the data (not relying on URL extension)
+/// 3. Saving the image data to a dedicated subdirectory in the app group container
+/// 4. Returning the local file URL suitable for UNNotificationAttachment
+///
+/// The filename uses a stable SHA256 hash of the URL, so the same image URL will always
+/// map to the same file. This enables reuse across notification service extension launches
+/// and reduces disk churn.
 ///
 /// - Parameter picture: The remote URL of the profile picture to download
 /// - Returns: A local file URL pointing to the downloaded image, or nil if download/save failed
 func download_image_for_notification(picture: URL) async -> URL? {
-    // Fetch the image using Kingfisher (handles caching automatically)
+    guard let pfpDirectory = notification_pfp_directory() else {
+        Log.error("Failed to get notification PFP directory", for: .push_notifications)
+        return nil
+    }
+
+    // Generate stable filename from URL using SHA256 (not hashValue, which varies per process)
+    let urlHash = stable_hash_for_url(picture)
+
+    // Check if we already have this image cached (reuse across extension launches)
+    let existingFiles = try? FileManager.default.contentsOfDirectory(at: pfpDirectory, includingPropertiesForKeys: nil)
+    if let existingFile = existingFiles?.first(where: { $0.lastPathComponent.hasPrefix(urlHash) }) {
+        return existingFile
+    }
+
+    // Fetch the image using Kingfisher (handles its own caching)
     guard let result = try? await fetch_pfp(picture: picture) else {
         Log.error("Failed to fetch profile picture for notification: %s", for: .push_notifications, picture.absoluteString)
         return nil
@@ -405,19 +435,11 @@ func download_image_for_notification(picture: URL) async -> URL? {
         return nil
     }
 
-    // Save to a temporary file in the app group container.
-    // Using app group ensures the notification extension has access to the file.
-    guard let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Constants.DAMUS_APP_GROUP_IDENTIFIER) else {
-        Log.error("Failed to get app group container URL", for: .push_notifications)
-        return nil
-    }
-
-    // Determine file extension from the original URL to preserve format
-    let pathExtension = picture.pathExtension.isEmpty ? "jpg" : picture.pathExtension
-    // Create a unique filename based on the URL hash to avoid collisions.
-    // Uses NOTIFICATION_PFP_FILE_PREFIX so cleanup_old_notification_images() can identify these files.
-    let filename = "\(NOTIFICATION_PFP_FILE_PREFIX)\(picture.absoluteString.hashValue).\(pathExtension)"
-    let localURL = groupURL.appendingPathComponent(filename)
+    // Detect actual image type from data using ImageIO, not URL extension.
+    // This handles extension-less URLs and servers that serve different formats.
+    let fileExtension = detect_image_extension(from: imageData) ?? "jpg"
+    let filename = "\(urlHash).\(fileExtension)"
+    let localURL = pfpDirectory.appendingPathComponent(filename)
 
     do {
         try imageData.write(to: localURL)
@@ -425,6 +447,41 @@ func download_image_for_notification(picture: URL) async -> URL? {
     } catch {
         Log.error("Failed to write profile picture to local file: %s", for: .push_notifications, error.localizedDescription)
         return nil
+    }
+}
+
+/// Generates a stable hash string for a URL using SHA256.
+/// Unlike Swift's hashValue, this is consistent across process launches.
+private func stable_hash_for_url(_ url: URL) -> String {
+    let data = Data(url.absoluteString.utf8)
+    let hash = SHA256.hash(data: data)
+    // Use first 16 bytes (32 hex chars) for reasonable uniqueness without excessive length
+    return hash.prefix(16).map { String(format: "%02x", $0) }.joined()
+}
+
+/// Detects the image format from raw data and returns the appropriate file extension.
+/// Uses ImageIO's CGImageSource to inspect the actual image data, not the URL.
+private func detect_image_extension(from data: Data) -> String? {
+    guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+          let uti = CGImageSourceGetType(source) else {
+        return nil
+    }
+
+    // Convert UTI to file extension using UniformTypeIdentifiers
+    if let utType = UTType(uti as String),
+       let preferredExtension = utType.preferredFilenameExtension {
+        return preferredExtension
+    }
+
+    // Fallback: map common UTIs manually
+    let utiString = uti as String
+    switch utiString {
+    case "public.jpeg": return "jpg"
+    case "public.png": return "png"
+    case "com.compuserve.gif": return "gif"
+    case "public.heic": return "heic"
+    case "org.webmproject.webp": return "webp"
+    default: return nil
     }
 }
 
