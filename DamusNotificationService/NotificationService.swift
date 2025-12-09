@@ -9,7 +9,6 @@ import Kingfisher
 import ImageIO
 import UserNotifications
 import Foundation
-import UniformTypeIdentifiers
 import Intents
 
 class NotificationService: UNNotificationServiceExtension {
@@ -107,17 +106,20 @@ class NotificationService: UNNotificationServiceExtension {
                 return
             }
 
-            do {
-                var options: [AnyHashable: Any] = [:]
-                if let imageSource = CGImageSourceCreateWithURL(sender_profile.picture as CFURL, nil),
-                   let uti = CGImageSourceGetType(imageSource) {
-                    options[UNNotificationAttachmentOptionsTypeHintKey] = uti
+            // Attach profile picture to notification.
+            // UNNotificationAttachment requires a LOCAL file URL - remote URLs silently fail.
+            // We must download the image first and save it to disk.
+            if let localPictureURL = await download_image_for_notification(picture: sender_profile.picture) {
+                do {
+                    let attachment = try UNNotificationAttachment(
+                        identifier: sender_profile.picture.absoluteString,
+                        url: localPictureURL,
+                        options: nil  // Let iOS infer the type from the file extension
+                    )
+                    improvedContent.attachments = [attachment]
+                } catch {
+                    Log.error("Failed to create notification attachment: %s", for: .push_notifications, error.localizedDescription)
                 }
-
-                let attachment = try UNNotificationAttachment(identifier: sender_profile.picture.absoluteString, url: sender_profile.picture, options: options)
-                improvedContent.attachments = [attachment]
-            } catch {
-                Log.error("failed to get notification attachment: %s", for: .push_notifications, error.localizedDescription)
             }
 
             let kind = nostr_event.known_kind
@@ -326,6 +328,54 @@ func profile_to_inperson(name: String?, display_name: String?, picture: String?,
 
 func robohash(_ pk: Pubkey) -> String {
     return "https://robohash.org/" + pk.hex()
+}
+
+// MARK: - Notification Attachment Helpers
+
+/// Downloads a profile picture and saves it to a local file for use as a notification attachment.
+///
+/// UNNotificationAttachment requires a local file URL - it cannot fetch remote images directly.
+/// This function bridges that gap by:
+/// 1. Using Kingfisher to download (or retrieve from cache) the image
+/// 2. Saving the image data to a temporary file in the app group container
+/// 3. Returning the local file URL suitable for UNNotificationAttachment
+///
+/// - Parameter picture: The remote URL of the profile picture to download
+/// - Returns: A local file URL pointing to the downloaded image, or nil if download/save failed
+func download_image_for_notification(picture: URL) async -> URL? {
+    // Fetch the image using Kingfisher (handles caching automatically)
+    guard let result = try? await fetch_pfp(picture: picture) else {
+        Log.error("Failed to fetch profile picture for notification: %s", for: .push_notifications, picture.absoluteString)
+        return nil
+    }
+
+    // Use Kingfisher's data() which preserves the original image format,
+    // rather than re-encoding with pngData() which could break animated GIFs or increase file size
+    guard let imageData = result.data() else {
+        Log.error("Failed to get image data from fetch result", for: .push_notifications)
+        return nil
+    }
+
+    // Save to a temporary file in the app group container.
+    // Using app group ensures the notification extension has access to the file.
+    guard let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Constants.DAMUS_APP_GROUP_IDENTIFIER) else {
+        Log.error("Failed to get app group container URL", for: .push_notifications)
+        return nil
+    }
+
+    // Determine file extension from the original URL to preserve format
+    let pathExtension = picture.pathExtension.isEmpty ? "jpg" : picture.pathExtension
+    // Create a unique filename based on the URL hash to avoid collisions
+    let filename = "notif_pfp_\(picture.absoluteString.hashValue).\(pathExtension)"
+    let localURL = groupURL.appendingPathComponent(filename)
+
+    do {
+        try imageData.write(to: localURL)
+        return localURL
+    } catch {
+        Log.error("Failed to write profile picture to local file: %s", for: .push_notifications, error.localizedDescription)
+        return nil
+    }
 }
 
 
