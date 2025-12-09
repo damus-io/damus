@@ -83,7 +83,7 @@ struct ConfigView: View {
                     //Zaps
                     if showSettingsButton(title: zapsTitle){
                         NavigationLink(value: Route.ZapSettings(settings: settings)){
-                            IconLabel(zapsTitle,img_name:"zap.fill",color:.orange)
+                            IconLabel(zapsTitle,img_name:"zap.fill",color:DamusColors.adaptableOrange)
                         }
                     }
                     //Translation

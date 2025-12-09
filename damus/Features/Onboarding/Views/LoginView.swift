@@ -83,7 +83,7 @@ struct LoginView: View {
 
                 if parsed?.is_pub ?? false {
                     Text("This is a public key, you will not be able to make notes or interact in any way. This is used for viewing accounts from their perspective.", comment: "Warning that the inputted account key is a public key and the result of what happens because of it.")
-                        .foregroundColor(Color.orange)
+                        .foregroundColor(DamusColors.adaptableOrange)
                         .bold()
                         .fixedSize(horizontal: false, vertical: true)
                 }

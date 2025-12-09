@@ -63,11 +63,11 @@ struct NoteZapButton: View {
     
     var zap_color: Color {
         if our_zap == nil {
-            return Color.gray
+            return DamusColors.mediumGrey
         }
-        
+
         // always orange !
-        return Color.orange
+        return DamusColors.adaptableOrange
     }
     
     func tap() {

@@ -69,7 +69,7 @@ struct InvoiceView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Label("", image: "zap.fill")
-                        .foregroundColor(.orange)
+                        .foregroundColor(DamusColors.adaptableOrange)
                     Text("Lightning Invoice", comment: "Indicates that the view is for paying a Lightning invoice.")
                     Spacer()
                     CopyButton

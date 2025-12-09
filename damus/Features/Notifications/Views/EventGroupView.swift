@@ -196,9 +196,9 @@ struct EventGroupView: View {
         let fmt = format_msats_abbrev(zapgrp.msat_total)
         return VStack(alignment: .center) {
             Image("zap.fill")
-                .foregroundColor(.orange)
+                .foregroundColor(DamusColors.adaptableOrange)
             Text(fmt)
-                .foregroundColor(Color.orange)
+                .foregroundColor(DamusColors.adaptableOrange)
         }
     }
     

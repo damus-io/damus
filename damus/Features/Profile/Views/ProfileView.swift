@@ -245,7 +245,7 @@ struct ProfileView: View {
     func lnButton(profile: Profile?, lnurl: String?) -> some View {
         return ProfileZapLinkView(profile: profile, lnurl: lnurl, profileModel: self.profile) { reactions_enabled, lud16, lnurl in
             Image(reactions_enabled ? "zap.fill" : "zap")
-                .foregroundColor(reactions_enabled ? .orange : Color.primary)
+                .foregroundColor(reactions_enabled ? DamusColors.adaptableOrange : Color.primary)
                 .profile_button_style(scheme: colorScheme)
                 .cornerRadius(24)
         }

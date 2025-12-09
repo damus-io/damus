@@ -16,7 +16,7 @@ struct ZapEvent: View {
         VStack(alignment: .leading) {
             HStack(alignment: .center) {
                 Image("zap.fill")
-                    .foregroundColor(.orange)
+                    .foregroundColor(DamusColors.adaptableOrange)
                 
                 Text(verbatim: format_msats(zap.amount))
                     .font(.headline)
