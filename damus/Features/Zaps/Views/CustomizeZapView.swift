@@ -131,8 +131,7 @@ struct CustomizeZapView: View {
                 .task {
                     self.focusedTextField = .amount
                 }
-                .font(.system(size: 72, weight: .heavy, design: .default))
-                .minimumScaleFactor(0.01)
+                .font(.largeTitle.weight(.heavy))
                 .keyboardType(.numberPad)
                 .multilineTextAlignment(.center)
                 .onChange(of: model.custom_amount) { newValue in
