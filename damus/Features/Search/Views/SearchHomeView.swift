@@ -26,7 +26,7 @@ struct SearchHomeView: View {
         HStack {
             HStack{
                 Image("search")
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
                 TextField(NSLocalizedString("Search...", comment: "Placeholder text to prompt entry of search query."), text: $search)
                     .autocorrectionDisabled(true)
                     .textInputAutocapitalization(.never)

@@ -105,7 +105,7 @@ extension View {
         if gradient {
             return AnyView(self.foregroundStyle(LINEAR_GRADIENT))
         } else {
-            return AnyView(self.foregroundColor(.gray))
+            return AnyView(self.foregroundColor(DamusColors.mediumGrey))
         }
         
     }

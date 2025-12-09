@@ -16,7 +16,7 @@ struct HighlightDescription: View {
     var body: some View {
         (Text(Image(systemName: "highlighter")) + Text(verbatim: " \(highlight_event.source_description_text(ndb: ndb, highlighted_event: highlighted_event))"))
             .font(.footnote)
-            .foregroundColor(.gray)
+            .foregroundColor(DamusColors.mediumGrey)
             .frame(maxWidth: .infinity, alignment: .leading)
 
     }

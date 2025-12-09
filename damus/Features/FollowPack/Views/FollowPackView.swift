@@ -124,7 +124,7 @@ struct FollowPackView: View {
             if let description = event.description {
                 Text(description)
                     .font(.body)
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
                     .padding(.horizontal, 10)
             } else {
                 EmptyView()
@@ -140,15 +140,15 @@ struct FollowPackView: View {
                 switch displayName {
                 case .one(let one):
                     Text("Created by \(one)", comment: "Lets the user know who created this follow pack.")
-                        .font(.subheadline).foregroundColor(.gray)
+                        .font(.subheadline).foregroundColor(DamusColors.mediumGrey)
                     
                 case .both(username: let username, displayName: let displayName):
                         HStack(spacing: 6) {
                             Text("Created by \(displayName)", comment: "Lets the user know who created this follow pack.")
-                                .font(.subheadline).foregroundColor(.gray)
+                                .font(.subheadline).foregroundColor(DamusColors.mediumGrey)
                             
                             Text(verbatim: "@\(username)")
-                                .font(.subheadline).foregroundColor(.gray)
+                                .font(.subheadline).foregroundColor(DamusColors.mediumGrey)
                         }
                 }
             }

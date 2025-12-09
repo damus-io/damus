@@ -68,11 +68,11 @@ struct HighlightEventRef: View {
                             if let display_name = profile?.display_name {
                                 Text(display_name)
                                     .font(.system(size: 12))
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(DamusColors.mediumGrey)
                             } else if let name = profile?.name {
                                 Text(name)
                                     .font(.system(size: 12))
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(DamusColors.mediumGrey)
                             }
                         }
                     }

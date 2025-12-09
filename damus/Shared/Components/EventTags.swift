@@ -16,7 +16,7 @@ struct EventTags: View {
                 ForEach(tags ?? [], id: \.self) { tag in
                     Text(tag)
                         .font(.caption2)
-                        .foregroundColor(.gray)
+                        .foregroundColor(DamusColors.mediumGrey)
                         .padding(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
                         .background(DamusColors.neutral1)
                         .cornerRadius(20)

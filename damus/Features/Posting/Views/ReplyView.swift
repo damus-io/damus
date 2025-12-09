@@ -33,11 +33,11 @@ struct ReplyView: View {
                     .joined(separator: " ")
                 if names.isEmpty {
                     Text("Replying to \(Text("self", comment: "Part of a larger sentence 'Replying to self' in US English. 'self' indicates that the user is replying to themself and no one else.").foregroundColor(.accentColor).font(.footnote))", comment: "Indicating that the user is replying to the themself and no one else, where the parameter is 'self' in US English.")
-                        .foregroundColor(.gray)
+                        .foregroundColor(DamusColors.mediumGrey)
                         .font(.footnote)
                 } else {
                     Text("Replying to \(Text(verbatim: names).foregroundColor(.accentColor).font(.footnote))", comment: "Indicating that the user is replying to the following listed people.")
-                        .foregroundColor(.gray)
+                        .foregroundColor(DamusColors.mediumGrey)
                         .font(.footnote)
                 }
             }

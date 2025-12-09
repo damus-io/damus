@@ -40,7 +40,7 @@ struct Reposted: View {
             NavigationLink(value: Route.Reposts(reposts: .reposts(state: damus, target: target.id))) {
                 Text(people_reposted_text(profiles: damus.profiles, pubkey: pubkey, reposts: reposts))
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
             }
         }
         .onReceive(handle_notify(.update_stats), perform: { note_id in

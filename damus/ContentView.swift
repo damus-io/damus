@@ -254,7 +254,7 @@ struct ContentView: View {
                                                 present_sheet(.filter)
                                             }, label: {
                                                 Image("filter")
-                                                    .foregroundColor(.gray)
+                                                    .foregroundColor(DamusColors.mediumGrey)
                                             })
                                         }
                                     }

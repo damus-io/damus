@@ -17,7 +17,7 @@ struct EmptyTimelineView: View {
                 .multilineTextAlignment(.center)
                 .font(.callout.weight(.medium))
         }
-        .foregroundColor(.gray)
+        .foregroundColor(DamusColors.mediumGrey)
         .padding()
     }
 }

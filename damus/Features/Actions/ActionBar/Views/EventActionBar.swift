@@ -392,7 +392,7 @@ struct LikeButton: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 22, height: 20)
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
             }
         }
         .frame(minWidth: 44, minHeight: 44)

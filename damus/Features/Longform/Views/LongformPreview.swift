@@ -53,18 +53,18 @@ struct LongformPreviewBody: View {
             if truncate_very_short {
                 TruncatedText(text: content, maxChars: 140, show_show_more_button: !options.contains(.no_show_more))
                     .font(header ? .body : .caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
                     .padding(.horizontal, 10)
             }
             else if truncate {
                 TruncatedText(text: content, show_show_more_button: !options.contains(.no_show_more))
                     .font(header ? .body : .caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
                     .padding(.horizontal, 10)
             } else {
                 content.text
                     .font(header ? .body : .caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
                     .padding(.horizontal, 10)
             }
         }
@@ -142,7 +142,7 @@ struct LongformPreviewBody: View {
                         ForEach(labels, id: \.self) { label in
                             Text(label)
                                 .font(.caption)
-                                .foregroundColor(.gray)
+                                .foregroundColor(DamusColors.mediumGrey)
                                 .padding(EdgeInsets(top: 5, leading: 15, bottom: 5, trailing: 15))
                                 .background(DamusColors.neutral1)
                                 .cornerRadius(20)

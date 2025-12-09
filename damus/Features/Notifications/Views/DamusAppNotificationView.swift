@@ -43,7 +43,7 @@ struct DamusAppNotificationView: View {
                                 .foregroundStyle(.secondary)
                             Text(relative_date)
                                 .font(.system(size: 16))
-                                .foregroundColor(.gray)
+                                .foregroundColor(DamusColors.mediumGrey)
                         }
                         HStack(spacing: 3) {
                             Image("check-circle.fill")

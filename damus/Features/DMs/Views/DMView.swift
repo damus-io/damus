@@ -56,7 +56,7 @@ struct DMView: View {
 
                 Text(format_relative_time(event.created_at))
                    .font(.footnote)
-                   .foregroundColor(.gray)
+                   .foregroundColor(DamusColors.mediumGrey)
                    .opacity(0.8)
             }
 

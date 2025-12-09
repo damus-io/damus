@@ -63,7 +63,7 @@ struct RelayView: View {
                     }
                     Text(relay.absoluteString)
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundColor(DamusColors.mediumGrey)
                         .lineLimit(1)
                         .contextMenu {
                             CopyAction(relay: relay.absoluteString)
@@ -103,7 +103,7 @@ struct RelayView: View {
                         Image("chevron-large-right")
                             .resizable()
                             .frame(width: 15, height: 15)
-                            .foregroundColor(.gray)
+                            .foregroundColor(DamusColors.mediumGrey)
                     }
                 }
             }

@@ -84,7 +84,7 @@ struct RelayDetailView: View {
                 Text(relay.absoluteString)
                     .font(.headline)
                     .fontWeight(.regular)
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
                 
                 HStack {
                     if nip11?.is_paid ?? false {

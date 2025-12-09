@@ -16,7 +16,7 @@ struct ReplyDescription: View {
     var body: some View {
         Text(verbatim: "\(reply_desc(ndb: ndb, event: event, replying_to: replying_to))")
             .font(.footnote)
-            .foregroundColor(.gray)
+            .foregroundColor(DamusColors.mediumGrey)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

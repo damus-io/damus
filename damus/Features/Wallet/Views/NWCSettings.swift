@@ -193,7 +193,7 @@ struct NWCSettings: View {
                             )
                             
                             Text(verbatim: format_msats(Int64(maxWeeklyBudget) * 1000))
-                                .foregroundColor(.gray)
+                                .foregroundColor(DamusColors.mediumGrey)
                                 .frame(width: 150, alignment: .trailing)
                         }
                         
@@ -367,7 +367,7 @@ struct NWCSettings: View {
                     Text(nwc.relay.absoluteString)
                         .font(.body)
                         .fontWeight(.bold)
-                        .foregroundColor(.gray)
+                        .foregroundColor(DamusColors.mediumGrey)
                         .padding(.bottom)
                 }
                 
@@ -378,7 +378,7 @@ struct NWCSettings: View {
                     Text(lud16)
                         .font(.body)
                         .fontWeight(.bold)
-                        .foregroundColor(.gray)
+                        .foregroundColor(DamusColors.mediumGrey)
                 }
             }
             .frame(maxWidth: .infinity, minHeight: 250, alignment: .leading)

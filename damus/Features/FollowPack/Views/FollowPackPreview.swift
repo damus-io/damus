@@ -21,7 +21,7 @@ struct FollowPackUsers: View {
 
             let followPackUserCount = publicKeys.count
             let nounString = pluralizedString(key: "follow_pack_user_count", count: followPackUserCount)
-            let nounText = Text(verbatim: nounString).font(.subheadline).foregroundColor(.gray)
+            let nounText = Text(verbatim: nounString).font(.subheadline).foregroundColor(DamusColors.mediumGrey)
             Text("\(Text(verbatim: followPackUserCount.formatted()).font(.subheadline.weight(.medium))) \(nounText)", comment: "Sentence composed of 2 variables to describe how many people are in the follow pack. In source English, the first variable is the number of users, and the second variable is 'user' or 'users'.")
         }
     }
@@ -81,7 +81,7 @@ struct FollowPackBannerImage: View {
             }
         } else {
             Text(NSLocalizedString("No cover image", comment: "Text letting user know there is no cover image."))
-                .foregroundColor(.gray)
+                .foregroundColor(DamusColors.mediumGrey)
                 .frame(width: 350, height: 180)
             Divider()
         }
@@ -143,12 +143,12 @@ struct FollowPackPreviewBody: View {
             if let description = event.description {
                 Text(description)
                     .font(header ? .body : .caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
                     .padding(.horizontal, 10)
             } else {
                 Text("")
                     .font(header ? .body : .caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
                     .padding(.horizontal, 10)
             }
             
@@ -162,15 +162,15 @@ struct FollowPackPreviewBody: View {
                 switch displayName {
                 case .one(let one):
                     Text(one)
-                        .font(.subheadline).foregroundColor(.gray)
+                        .font(.subheadline).foregroundColor(DamusColors.mediumGrey)
                     
                 case .both(username: let username, displayName: let displayName):
                         HStack(spacing: 6) {
                             Text(verbatim: displayName)
-                                .font(.subheadline).foregroundColor(.gray)
+                                .font(.subheadline).foregroundColor(DamusColors.mediumGrey)
                             
                             Text(verbatim: "@\(username)")
-                                .font(.subheadline).foregroundColor(.gray)
+                                .font(.subheadline).foregroundColor(DamusColors.mediumGrey)
                         }
                 }
             }

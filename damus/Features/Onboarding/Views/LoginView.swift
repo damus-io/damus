@@ -307,7 +307,7 @@ struct KeyInput: View {
             }, label: {
                 Image(systemName: "doc.on.clipboard")
             })
-            .foregroundColor(.gray)
+            .foregroundColor(DamusColors.mediumGrey)
             .accessibilityLabel(NSLocalizedString("Paste private key", comment: "Accessibility label for the private key paste button"))
             
             SignInScan(shouldSaveKey: shouldSaveKey, loginKey: key, privKeyFound: privKeyFound)
@@ -327,7 +327,7 @@ struct KeyInput: View {
             }, label: {
                 Image(systemName: "eye.slash")
             })
-            .foregroundColor(.gray)
+            .foregroundColor(DamusColors.mediumGrey)
             .accessibilityLabel(NSLocalizedString("Toggle key visibility", comment: "Accessibility label for toggling the visibility of the private key input field"))
         }
         .padding(.vertical, 2)
@@ -400,7 +400,7 @@ struct SignInScan: View {
         VStack {
             Button(action: { showQR.toggle() }, label: {
                 Image(systemName: "qrcode.viewfinder")})
-            .foregroundColor(.gray)
+            .foregroundColor(DamusColors.mediumGrey)
             .accessibilityLabel(NSLocalizedString("Scan QR code", comment: "Accessibility label for a button that scans a private key QR code"))
         }
         .sheet(isPresented: $showQR, onDismiss: {

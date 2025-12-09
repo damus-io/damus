@@ -34,7 +34,7 @@ struct TrustedNetworkButton: View {
             } else {
                 Image(systemName: "network.slash")
                     .frame(width: 24, height: 24)
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
             }
         }
         .buttonStyle(.plain)

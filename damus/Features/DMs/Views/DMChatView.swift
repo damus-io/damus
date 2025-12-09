@@ -154,7 +154,7 @@ struct DMChatView: View, KeyboardReadable {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
                 .opacity(((dms.events.count == 0) ? 1.0 : 0.0))
-                .foregroundColor(.gray)
+                .foregroundColor(DamusColors.mediumGrey)
         }
         .navigationTitle(NSLocalizedString("DMs", comment: "Navigation title for DMs view, where DM is the English abbreviation for Direct Message."))
         .toolbar { Header }

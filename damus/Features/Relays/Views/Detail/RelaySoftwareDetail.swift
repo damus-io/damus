@@ -20,18 +20,18 @@ struct RelaySoftwareDetail: View {
                     .foregroundColor(DamusColors.mediumGrey)
                 
                 Image("code")
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
                 
                 let software = nip11?.software
                 let softwareSeparated = software?.components(separatedBy: "/")
                 if let softwareShortened = softwareSeparated?.last {
                     Text(softwareShortened)
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundColor(DamusColors.mediumGrey)
                 } else {
                     Text("N/A", comment: "Text label indicating that there is no NIP-11 relay software information found. In English, N/A stands for not applicable.")
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundColor(DamusColors.mediumGrey)
                 }
             }
             
@@ -44,16 +44,16 @@ struct RelaySoftwareDetail: View {
                     .foregroundColor(DamusColors.mediumGrey)
                 
                 Image("branches")
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
 
                 if let version = nip11?.version, !version.isEmpty {
                     Text(version)
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundColor(DamusColors.mediumGrey)
                 } else {
                     Text("N/A", comment: "Text label indicating that there is no NIP-11 relay software version information found. In English, N/A stands for not applicable.")
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundColor(DamusColors.mediumGrey)
                 }
             }
         }

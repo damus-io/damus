@@ -22,7 +22,7 @@ struct FriendIcon: View {
                 Image(systemName: "person.fill.and.arrow.left.and.arrow.right")
                     .resizable()
                     .frame(width: 21, height: 14)
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
             }
         }
     }

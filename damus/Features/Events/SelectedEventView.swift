@@ -54,7 +54,7 @@ struct SelectedEventView: View {
                 Text(verbatim: "\(format_date(created_at: event.created_at))")
                     .padding([.top, .leading, .trailing])
                     .font(.footnote)
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
                 
                 Divider()
                     .padding([.bottom], 4)

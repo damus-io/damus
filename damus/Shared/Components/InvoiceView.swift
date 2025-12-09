@@ -26,7 +26,7 @@ struct InvoiceView: View {
         } label: {
             if !copied {
                 Image("copy2")
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
             } else {
                 Image("check-circle")
                     .foregroundColor(DamusColors.green)

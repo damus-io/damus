@@ -41,15 +41,15 @@ struct RelayAdminDetail: View {
                     .fontWeight(.heavy)
                     .foregroundColor(DamusColors.mediumGrey)
                 Image("messages")
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
                 if let contact = nip11?.contact, !contact.isEmpty {
                     Text(contact)
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundColor(DamusColors.mediumGrey)
                 } else {
                     Text("N/A", comment: "Text label indicating that there is no NIP-11 relay admin contact information found. In English, N/A stands for not applicable.")
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundColor(DamusColors.mediumGrey)
                 }
             }
         }

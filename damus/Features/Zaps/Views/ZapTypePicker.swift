@@ -57,7 +57,7 @@ struct ZapTypePicker: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 20, height: 20)
-                        .foregroundColor(.gray)
+                        .foregroundColor(DamusColors.mediumGrey)
                     
                     Text(text)
                         .font(.system(size: 20, weight: .semibold))
@@ -69,7 +69,7 @@ struct ZapTypePicker: View {
                 let zapTypeDescription = zap_type_desc(type: type, profiles: profiles, pubkey: pubkey)
                 Text(zapTypeDescription)
                     .padding(.horizontal)
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
                     .font(.system(size: 16))
             }
         }

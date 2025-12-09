@@ -31,7 +31,7 @@ struct ProfileNameView: View {
                     HStack(alignment: .center, spacing: spacing) {
                         ProfileName(pubkey: pubkey, prefix: "@", damus: damus, supporterBadgeStyle: .full)
                             .font(.callout)
-                            .foregroundColor(.gray)
+                            .foregroundColor(DamusColors.mediumGrey)
                     }
                 }
                 

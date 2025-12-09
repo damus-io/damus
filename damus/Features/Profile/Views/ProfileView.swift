@@ -265,7 +265,7 @@ struct ProfileView: View {
         Text("Follows you", comment: "Text to indicate that a user is following your profile.")
             .padding([.leading, .trailing], 6.0)
             .padding([.top, .bottom], 2.0)
-            .foregroundColor(.gray)
+            .foregroundColor(DamusColors.mediumGrey)
             .background {
                 RoundedRectangle(cornerRadius: 5.0)
                     .foregroundColor(DamusColors.adaptableGrey)
@@ -347,7 +347,7 @@ struct ProfileView: View {
         HStack {
             if let followerCount = followers.count {
                 let nounString = pluralizedString(key: "followers_count", count: followerCount)
-                let nounText = Text(verbatim: nounString).font(.subheadline).foregroundColor(.gray)
+                let nounText = Text(verbatim: nounString).font(.subheadline).foregroundColor(DamusColors.mediumGrey)
                 Text("\(Text(verbatim: followerCount.formatted()).font(.subheadline.weight(.medium))) \(nounText)", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.")
             } else {
                 Image("download")
@@ -355,7 +355,7 @@ struct ProfileView: View {
                     .frame(width: 20, height: 20)
                 Text("Followers", comment: "Label describing followers of a user.")
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
             }
         }
     }
@@ -382,7 +382,7 @@ struct ProfileView: View {
                     let following_model = FollowingModel(damus_state: damus_state, contacts: contacts, hashtags: hashtags)
                     NavigationLink(value: Route.Following(following: following_model)) {
                         HStack {
-                            let noun_text = Text(verbatim: "\(pluralizedString(key: "following_count", count: profile.following))").font(.subheadline).foregroundColor(.gray)
+                            let noun_text = Text(verbatim: "\(pluralizedString(key: "following_count", count: profile.following))").font(.subheadline).foregroundColor(DamusColors.mediumGrey)
                             Text("\(Text(verbatim: profile.following.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
                         }
                     }
@@ -406,7 +406,7 @@ struct ProfileView: View {
                 if let relays = profile.relay_urls {
                     // Only open relay config view if the user is logged in with private key and they are looking at their own profile.
                     let noun_string = pluralizedString(key: "relays_count", count: relays.count)
-                    let noun_text = Text(noun_string).font(.subheadline).foregroundColor(.gray)
+                    let noun_text = Text(noun_string).font(.subheadline).foregroundColor(DamusColors.mediumGrey)
                     let relay_text = Text("\(Text(verbatim: relays.count.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
                     if profile.pubkey == damus_state.pubkey && damus_state.is_privkey_user {
                         NavigationLink(value: Route.RelayConfig) {
@@ -432,7 +432,7 @@ struct ProfileView: View {
                             CondensedProfilePicturesView(state: damus_state, pubkeys: friended_followers, maxPictures: 3)
                             let followedByString = followedByString(friended_followers, ndb: damus_state.ndb)
                             Text(followedByString)
-                                .font(.subheadline).foregroundColor(.gray)
+                                .font(.subheadline).foregroundColor(DamusColors.mediumGrey)
                                 .multilineTextAlignment(.leading)
                         }
                     }

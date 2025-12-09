@@ -21,13 +21,13 @@ struct UserStatusView: View {
         HStack {
             Text(verbatim: "\(prefix)\(st.content)")
                 .lineLimit(1)
-                .foregroundColor(.gray)
+                .foregroundColor(DamusColors.mediumGrey)
                 .font(.callout.italic())
             if st.url != nil {
                 Image("link")
                     .resizable()
                     .frame(width: 16, height: 16)
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
             }
         }
         .onTapGesture {
