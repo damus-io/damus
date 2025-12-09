@@ -28,7 +28,7 @@ struct ParticipantsView: View {
                     Text("Remove all", comment: "Button label to remove all participants from a note reply.")
                 }
                 .font(.footnote.weight(.bold))
-                .frame(width: 100, height: 30)
+                .frame(minWidth: 100, minHeight: 44)
                 .foregroundColor(.white)
                 .background(LINEAR_GRADIENT)
                 .clipShape(Capsule())
@@ -39,7 +39,7 @@ struct ParticipantsView: View {
                     Text("Add all", comment: "Button label to re-add all original participants as profiles to reply to in a note")
                 }
                 .font(.footnote.weight(.bold))
-                .frame(width: 80, height: 30)
+                .frame(minWidth: 80, minHeight: 44)
                 .foregroundColor(.white)
                 .background(LINEAR_GRADIENT)
                 .clipShape(Capsule())
