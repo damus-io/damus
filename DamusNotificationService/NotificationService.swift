@@ -417,11 +417,17 @@ func download_image_for_notification(picture: URL) async -> URL? {
     let urlHash = stable_hash_for_url(picture)
 
     // Check if we already have this image cached (reuse across extension launches)
-    // Validate the cached file is readable as an image to avoid reusing corrupt/zero-byte files
+    // Find all files matching the hash prefix and return the first valid one.
+    // Delete any invalid/corrupt files to prevent them from blocking valid matches.
     let existingFiles = try? FileManager.default.contentsOfDirectory(at: pfpDirectory, includingPropertiesForKeys: nil)
-    if let existingFile = existingFiles?.first(where: { $0.lastPathComponent.hasPrefix(urlHash) }),
-       is_valid_image_file(existingFile) {
-        return existingFile
+    let matchingFiles = existingFiles?.filter { $0.lastPathComponent.hasPrefix(urlHash) } ?? []
+    for file in matchingFiles {
+        if is_valid_image_file(file) {
+            return file
+        } else {
+            // Remove corrupt/empty file so it doesn't block future lookups
+            try? FileManager.default.removeItem(at: file)
+        }
     }
 
     // Fetch the image using Kingfisher (handles its own caching)
