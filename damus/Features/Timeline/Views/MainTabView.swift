@@ -56,8 +56,9 @@ struct TabButton: View {
             nstatus.new_events = NewEventsBits(rawValue: nstatus.new_events.rawValue & ~bits.rawValue)
         }) {
             Image(selected != timeline ? img : "\(img).fill")
+                .frame(width: 24, height: 24)
+                .frame(maxWidth: .infinity, minHeight: 44)
                 .contentShape(Rectangle())
-                .frame(maxWidth: .infinity, minHeight: 30.0)
         }
         .foregroundColor(.primary)
     }

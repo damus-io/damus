@@ -335,6 +335,8 @@ func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> 
         .font(.footnote.weight(.medium))
         .aspectRatio(contentMode: .fit)
         .frame(width: 20, height: 20)
+        .frame(minWidth: 44, minHeight: 44)
+        .contentShape(Rectangle())
         .onTapGesture {
             action()
         }
@@ -391,6 +393,8 @@ struct LikeButton: View {
                     .foregroundColor(.gray)
             }
         }
+        .frame(minWidth: 44, minHeight: 44)
+        .contentShape(Rectangle())
         .sheet(isPresented: $isReactionsVisible) {
             NavigationView {
                 EmojiPickerView(selectedEmoji: $selectedEmoji, emojiProvider: damus_state.emoji_provider)

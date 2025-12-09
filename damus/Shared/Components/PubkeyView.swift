@@ -72,13 +72,13 @@ struct PubkeyView: View {
                         } icon: {
                             Image("copy2")
                                 .resizable()
-                                .contentShape(Rectangle())
                                 .foregroundColor(colorScheme == .light ? DamusColors.darkGrey : DamusColors.lightGrey)
                                 .frame(width: sidemenu ? 15 : 20, height: sidemenu ? 15 : 20)
                         }
                         .labelStyle(IconOnlyLabelStyle())
                         .symbolRenderingMode(.hierarchical)
-                        
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(Rectangle())
                     }
                 }
             }

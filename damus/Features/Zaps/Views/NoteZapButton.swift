@@ -127,7 +127,7 @@ struct NoteZapButton: View {
                         .foregroundColor(zap_color)
                         .font(.footnote.weight(.medium))
                         .aspectRatio(contentMode: .fit)
-                        .frame(width:20, height: 20)
+                        .frame(width: 20, height: 20)
                 })
             }
 
@@ -137,6 +137,8 @@ struct NoteZapButton: View {
                     .foregroundColor(zap_color)
             }
         }
+        .frame(minHeight: 44)
+        .contentShape(Rectangle())
         .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button"))
         .simultaneousGesture(LongPressGesture().onEnded {_  in
             guard !damus_state.settings.nozaps else { return }
