@@ -18,7 +18,7 @@ struct EmptyUserSearchView: View {
     var body: some View {
         VStack {
             Image("question")
-                .font(.system(size: 35))
+                .font(.largeTitle)
                 .padding()
             Text("Could not find the user you're looking for", comment: "Indicates that there are no users found.")
                 .multilineTextAlignment(.center)

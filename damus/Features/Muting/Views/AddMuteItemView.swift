@@ -20,7 +20,7 @@ struct AddMuteItemView: View {
     var body: some View {
         VStack {
             Text("Add mute item", comment: "Title text to indicate user to an add an item to their mutelist.")
-                .font(.system(size: 20, weight: .bold))
+                .font(.headline)
                 .padding(.vertical)
 
             Divider()

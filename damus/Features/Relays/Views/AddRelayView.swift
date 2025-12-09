@@ -20,7 +20,7 @@ struct AddRelayView: View {
     var body: some View {
         VStack {
             Text("Add relay", comment: "Title text to indicate user to an add a relay.")
-                .font(.system(size: 20, weight: .bold))
+                .font(.headline)
                 .padding(.vertical)
             
             Divider()

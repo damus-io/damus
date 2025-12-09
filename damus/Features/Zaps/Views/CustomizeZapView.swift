@@ -131,7 +131,7 @@ struct CustomizeZapView: View {
                 .task {
                     self.focusedTextField = .amount
                 }
-                .font(.system(size: 72, weight: .heavy))
+                .font(.system(size: 72, weight: .heavy, design: .default))
                 .minimumScaleFactor(0.01)
                 .keyboardType(.numberPad)
                 .multilineTextAlignment(.center)
@@ -146,7 +146,7 @@ struct CustomizeZapView: View {
                 }
             let noun = pluralizedString(key: "sats", count: model.custom_amount_sats ?? 0)
             Text(noun)
-                .font(.system(size: 18, weight: .heavy))
+                .font(.headline)
         }
     }
     
@@ -182,7 +182,7 @@ struct CustomizeZapView: View {
                 }) {
                     HStack {
                         Text("Zap User", comment: "Button to send a zap.")
-                            .font(.system(size: 20, weight: .bold))
+                            .font(.headline)
                     }
                     .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
                 }

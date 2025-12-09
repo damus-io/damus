@@ -48,7 +48,7 @@ struct ShareAction: View {
         VStack {
             Text("Share Note", comment: "Title text to indicate that the buttons below are meant to be used to share a note with others.")
                 .padding()
-                .font(.system(size: 17, weight: .bold))
+                .font(.headline)
             
             Spacer()
 

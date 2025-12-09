@@ -31,7 +31,7 @@ struct ZapTypePicker: View {
         VStack(spacing: 20) {
             HStack {
                 Text("Zap type", comment: "Text to indicate that the buttons below it is for choosing the type of zap to send.")
-                    .font(.system(size: 25, weight: .heavy))
+                    .font(.title2.weight(.heavy))
                 Spacer()
                 if !is_default {
                     Button(action: {
@@ -60,7 +60,7 @@ struct ZapTypePicker: View {
                         .foregroundColor(DamusColors.mediumGrey)
                     
                     Text(text)
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.headline)
                     
                     Spacer()
                 }
@@ -70,7 +70,7 @@ struct ZapTypePicker: View {
                 Text(zapTypeDescription)
                     .padding(.horizontal)
                     .foregroundColor(DamusColors.mediumGrey)
-                    .font(.system(size: 16))
+                    .font(.callout)
             }
         }
         .frame(maxWidth: .infinity, minHeight: 50, maxHeight: 70)

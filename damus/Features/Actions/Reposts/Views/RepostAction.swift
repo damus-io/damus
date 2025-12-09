@@ -33,7 +33,7 @@ struct RepostAction: View {
                     .frame(maxWidth: .infinity, minHeight: 50, maxHeight: 50, alignment: .leading)
 
             }
-            .font(.system(size: 20, weight: .regular))
+            .font(.body)
             .foregroundColor(colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite"))
             .padding(EdgeInsets(top: 25, leading: 50, bottom: 0, trailing: 50))
             
@@ -48,7 +48,7 @@ struct RepostAction: View {
                     .frame(maxWidth: .infinity, minHeight: 50, maxHeight: 50, alignment: .leading)
 
             }
-            .font(.system(size: 20, weight: .regular))
+            .font(.body)
             .foregroundColor(colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite"))
             .padding(EdgeInsets(top: 0, leading: 50, bottom: 0, trailing: 50))
             

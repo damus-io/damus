@@ -27,7 +27,7 @@ struct ParticipantsView: View {
                 } label: {
                     Text("Remove all", comment: "Button label to remove all participants from a note reply.")
                 }
-                .font(.system(size: 14, weight: .bold))
+                .font(.footnote.weight(.bold))
                 .frame(width: 100, height: 30)
                 .foregroundColor(.white)
                 .background(LINEAR_GRADIENT)
@@ -38,7 +38,7 @@ struct ParticipantsView: View {
                 } label: {
                     Text("Add all", comment: "Button label to re-add all original participants as profiles to reply to in a note")
                 }
-                .font(.system(size: 14, weight: .bold))
+                .font(.footnote.weight(.bold))
                 .frame(width: 80, height: 30)
                 .foregroundColor(.white)
                 .background(LINEAR_GRADIENT)
@@ -53,7 +53,7 @@ struct ParticipantsView: View {
                             UserView(damus_state: damus_state, pubkey: pubkey)
                             
                             Image("check-circle.fill")
-                                .font(.system(size: 30))
+                                .font(.title)
                                 .foregroundColor(filtered_pubkeys.contains(pubkey) ? .gray : DamusColors.purple)
                         }
                         .onTapGesture {

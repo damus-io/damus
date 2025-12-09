@@ -113,7 +113,7 @@ struct RelayConfigView: View {
         ScrollView(showsIndicators: false) {
             HStack {
                 Text(title)
-                    .font(.system(size: 32, weight: .bold))
+                    .font(.largeTitle.weight(.bold))
                 
                 
                 Spacer()
@@ -150,7 +150,7 @@ extension RelayConfigView{
     func CustomTabItem(title: String, isActive: Bool) -> some View {
         HStack {
             Text(title)
-                .font(.system(size: 12, weight: isActive ? .bold : .regular))
+                .font(isActive ? .caption.weight(.bold) : .caption)
                 .foregroundColor(isActive ? .damusAdaptableBlack : .damusAdaptableBlack.opacity(0.7))
         }
         .frame(width: 110, height: 30)

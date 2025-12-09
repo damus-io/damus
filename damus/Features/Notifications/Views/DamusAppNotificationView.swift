@@ -42,7 +42,7 @@ struct DamusAppNotificationView: View {
                             Text(verbatim: "·")
                                 .foregroundStyle(.secondary)
                             Text(relative_date)
-                                .font(.system(size: 16))
+                                .font(.callout)
                                 .foregroundColor(DamusColors.mediumGrey)
                         }
                         HStack(spacing: 3) {

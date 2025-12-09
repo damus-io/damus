@@ -135,7 +135,7 @@ struct ProfilePicImageView: View {
                     nav.push(route: Route.EditMetadata)
                 }) {
                     Text("Edit", comment: "Edit Button for editing profile")
-                        .font(.system(size: 16, weight: .bold))
+                        .font(.callout.weight(.bold))
                         .foregroundColor(Color("DamusPurple"))
                     Spacer()
                 }

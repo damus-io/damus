@@ -566,7 +566,7 @@ struct ProfileView_Previews: PreviewProvider {
 extension View {
     func profile_button_style(scheme: ColorScheme) -> some View {
         self.symbolRenderingMode(.palette)
-            .font(.system(size: 32).weight(.thin))
+            .font(.title.weight(.thin))
             .foregroundStyle(scheme == .dark ? .white : .black, scheme == .dark ? .white : .black)
     }
 }

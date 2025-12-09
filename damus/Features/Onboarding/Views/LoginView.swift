@@ -355,7 +355,7 @@ struct SignInHeader: View {
             
             Text("Sign in", comment: "Title of view to log into an account.")
                 .foregroundColor(DamusColors.neutral6)
-                .font(.system(size: 32, weight: .bold))
+                .font(.largeTitle.weight(.bold))
                 .padding(.bottom, 5)
             
             Text("Welcome to the social network you control", comment: "Welcome text")

@@ -22,7 +22,7 @@ struct QRScanNSECView: View {
                 Text("Scan Your Private Key QR",
                      comment: "Text to prompt scanning a QR code of a user's privkey to login to their profile.")
                     .padding(.top, 50)
-                    .font(.system(size: 24, weight: .heavy))
+                    .font(.title2.weight(.bold))
 
                 Spacer()
                 CodeScannerView(codeTypes: [.qr],

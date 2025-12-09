@@ -152,7 +152,7 @@ struct RelayDetailView: View {
                                 .padding(.top)
                             Divider()
                             Text(log.contents ?? NSLocalizedString("No logs to display", comment: "Label to indicate that there are no developer mode logs available to be displayed on the screen"))
-                                .font(.system(size: 13))
+                                .font(.footnote)
                                 .lineLimit(nil)
                                 .fixedSize(horizontal: false, vertical: true)
                         }

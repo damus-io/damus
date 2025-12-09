@@ -14,7 +14,7 @@ struct FailedRelayImage: View {
     var body: some View {
         let abbrv = String(url?.host()?.first?.uppercased() ?? "R")
         Text(abbrv)
-            .font(.system(size: 40, weight: .bold))
+            .font(.title.weight(.bold))
     }
 }
 
