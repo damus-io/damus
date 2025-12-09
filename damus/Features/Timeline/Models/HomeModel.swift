@@ -69,6 +69,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
     var notificationsHandlerTask: Task<Void, Never>?
     var generalHandlerTask: Task<Void, Never>?
     var dmsHandlerTask: Task<Void, Never>?
+    var fullDMHistoryTask: Task<Void, Never>?
     var ndbOnlyHandlerTask: Task<Void, Never>?
     var nwcHandlerTask: Task<Void, Never>?
     
@@ -821,7 +822,65 @@ class HomeModel: ContactsDelegate, ObservableObject {
             create_local_notification(profiles: damus_state.profiles, notify: notification_object)
         }
     }
-    
+
+    /// Fetches DM history from relays.
+    ///
+    /// By default, the DM subscription uses `optimizeNetworkFilter: true` which adds a
+    /// `since` parameter based on the latest local timestamp. This is efficient but can
+    /// miss older DMs if the local database doesn't have complete history.
+    ///
+    /// This method requests DM history with `optimizeNetworkFilter: false`, which starts
+    /// the network fetch immediately rather than waiting for NDB. However, the underlying
+    /// `advancedStream` still applies a `since` filter based on local timestamps once any
+    /// NDB data is seen. This means older DMs may still be missed if the local database
+    /// has newer messages. Users can pull multiple times to incrementally sync history.
+    ///
+    /// A proper fix would require changes to `SubscriptionManager` to fully bypass the
+    /// `since` optimization when `optimizeNetworkFilter: false`.
+    ///
+    /// Uses a 30-second hard timeout and 500 event limit to prevent runaway fetches.
+    func fetchFullDMHistory() async {
+        fullDMHistoryTask?.cancel()
+
+        // DMs sent to us (limit to prevent runaway pulls; user can pull again for more)
+        var dms_filter = NostrFilter(kinds: [.dm])
+        dms_filter.pubkeys = [damus_state.pubkey]
+        dms_filter.limit = 500
+
+        // DMs we sent
+        var our_dms_filter = NostrFilter(kinds: [.dm])
+        our_dms_filter.authors = [damus_state.pubkey]
+        our_dms_filter.limit = 500
+
+        let filters = [dms_filter, our_dms_filter]
+        let timeoutSeconds: UInt64 = 30
+
+        fullDMHistoryTask = Task {
+            // Race between the stream and a hard timeout to guarantee completion
+            await withTaskGroup(of: Void.self) { group in
+                group.addTask {
+                    for await lender in self.damus_state.nostrNetwork.reader.streamExistingEvents(filters: filters, timeout: .seconds(30), streamMode: .ndbAndNetworkParallel(optimizeNetworkFilter: false)) {
+                        if Task.isCancelled { return }
+                        await lender.justUseACopy({ await self.process_event(ev: $0, context: .other) })
+                    }
+                }
+
+                group.addTask {
+                    // Hard timeout fallback - cancel if stream hasn't finished
+                    try? await Task.sleep(nanoseconds: timeoutSeconds * 1_000_000_000)
+                }
+
+                // Wait for first task to complete (either stream finishes or timeout)
+                await group.next()
+                // Cancel remaining tasks
+                group.cancelAll()
+            }
+        }
+
+        // Wait for the task to complete so .refreshable knows when to stop spinning
+        await fullDMHistoryTask?.value
+    }
+
     @MainActor
     func handle_dm(_ ev: NostrEvent) {
         guard should_show_event(state: damus_state, ev: ev) else {
