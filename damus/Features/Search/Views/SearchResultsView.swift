@@ -169,10 +169,11 @@ struct SearchResultsView: View {
             }
         }
 
-        let res_ = res
+        // Text search can return keys in a mixed order; enforce newest-first here
+        let sorted = res.sorted { $0.created_at > $1.created_at }
 
-        Task { @MainActor [res_] in
-            results = res_
+        Task { @MainActor [sorted] in
+            results = sorted
         }
     }
     
@@ -296,4 +297,3 @@ func search_profiles(profiles: Profiles, contacts: Contacts, search: String) -> 
         }
     }
 }
-
