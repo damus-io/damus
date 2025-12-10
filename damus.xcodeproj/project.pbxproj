@@ -1833,6 +1833,10 @@
 		D7DB1FE82D5A9F5300CF06DA /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = D7DB1FE72D5A9F5300CF06DA /* CryptoSwift */; };
 		D7DB1FEA2D5A9F5A00CF06DA /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = D7DB1FE92D5A9F5A00CF06DA /* CryptoSwift */; };
 		D7DB1FEC2D5A9F6500CF06DA /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = D7DB1FEB2D5A9F6500CF06DA /* CryptoSwift */; };
+		D7E5B2DB2EA080BE00CF47AC /* Negentropy in Frameworks */ = {isa = PBXBuildFile; productRef = D7E5B2DA2EA080BE00CF47AC /* Negentropy */; };
+		D7E5B2DF2EA0A68600CF47AC /* Negentropy in Frameworks */ = {isa = PBXBuildFile; productRef = D7E5B2DE2EA0A68600CF47AC /* Negentropy */; };
+		D7E5B2E12EA0A69200CF47AC /* Negentropy in Frameworks */ = {isa = PBXBuildFile; productRef = D7E5B2E02EA0A69200CF47AC /* Negentropy */; };
+		D7E5B2E32EA0A69900CF47AC /* Negentropy in Frameworks */ = {isa = PBXBuildFile; productRef = D7E5B2E22EA0A69900CF47AC /* Negentropy */; };
 		D7DB1FEE2D5AC51B00CF06DA /* NIP44v2EncryptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DB1FED2D5AC50F00CF06DA /* NIP44v2EncryptionTests.swift */; };
 		D7DB1FF12D5AC5D700CF06DA /* nip44.vectors.json in Resources */ = {isa = PBXBuildFile; fileRef = D7DB1FF02D5AC5D700CF06DA /* nip44.vectors.json */; };
 		D7DB1FF32D5AC5EA00CF06DA /* LICENSES in Resources */ = {isa = PBXBuildFile; fileRef = D7DB1FF22D5AC5E400CF06DA /* LICENSES */; };
@@ -2876,6 +2880,7 @@
 				D78DB8592C1CE9CA00F0AB12 /* SwipeActions in Frameworks */,
 				4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */,
 				4C27C9322A64766F007DBC75 /* MarkdownUI in Frameworks */,
+				D7E5B2DB2EA080BE00CF47AC /* Negentropy in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2908,6 +2913,7 @@
 				82D6FC882CD9A4DE00C925F4 /* EmojiPicker in Frameworks */,
 				82D6FC842CD9A48500C925F4 /* Kingfisher in Frameworks */,
 				82D6FC812CD99FC500C925F4 /* secp256k1 in Frameworks */,
+				D7E5B2E32EA0A69900CF47AC /* Negentropy in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2925,6 +2931,7 @@
 				D703D7492C6709B100A400EA /* secp256k1 in Frameworks */,
 				D70D909C2CDED7B200CD0534 /* CodeScanner in Frameworks */,
 				D73E5F9B2C6AA8B0007EB227 /* Kingfisher in Frameworks */,
+				D7E5B2E12EA0A69200CF47AC /* Negentropy in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2936,6 +2943,7 @@
 				D789D1202AFEFBF20083A7AB /* secp256k1 in Frameworks */,
 				D7EDED312B1290B80018B19C /* MarkdownUI in Frameworks */,
 				D7DB1FEA2D5A9F5A00CF06DA /* CryptoSwift in Frameworks */,
+				D7E5B2DF2EA0A68600CF47AC /* Negentropy in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5353,6 +5361,7 @@
 				D7C48C0A2D12DE0C00A3BACF /* SwiftyCrop */,
 				D7DB1FE32D5A9AC900CF06DA /* CryptoSwift */,
 				3ACF94372DA9A52F00971A4E /* FaviconFinder */,
+				D7E5B2DA2EA080BE00CF47AC /* Negentropy */,
 			);
 			productName = damus;
 			productReference = 4CE6DEE327F7A08100C66700 /* damus.app */;
@@ -5421,6 +5430,7 @@
 				D7C48C0C2D12E34900A3BACF /* SwiftyCrop */,
 				D7DB1FEB2D5A9F6500CF06DA /* CryptoSwift */,
 				3ACF943F2DA9B11200971A4E /* FaviconFinder */,
+				D7E5B2E22EA0A69900CF47AC /* Negentropy */,
 			);
 			productName = "share extension";
 			productReference = 82D6FA972CD9820500C925F4 /* ShareExtension.appex */;
@@ -5451,6 +5461,7 @@
 				D7C48C0E2D12E35600A3BACF /* SwiftyCrop */,
 				D7DB1FE72D5A9F5300CF06DA /* CryptoSwift */,
 				3ACF943D2DA9B10800971A4E /* FaviconFinder */,
+				D7E5B2E02EA0A69200CF47AC /* Negentropy */,
 			);
 			productName = "highlighter action extension";
 			productReference = D703D7172C66E47100A400EA /* HighlighterActionExtension.appex */;
@@ -5475,6 +5486,7 @@
 				D7EDED302B1290B80018B19C /* MarkdownUI */,
 				D7DB1FE92D5A9F5A00CF06DA /* CryptoSwift */,
 				4C5726B92D72C6FA00E7FF82 /* Kingfisher */,
+				D7E5B2DE2EA0A68600CF47AC /* Negentropy */,
 			);
 			productName = DamusNotificationService;
 			productReference = D79C4C142AFEB061003A41B4 /* DamusNotificationService.appex */;
@@ -5564,6 +5576,7 @@
 				D7C48C092D12DE0C00A3BACF /* XCRemoteSwiftPackageReference "SwiftyCrop" */,
 				D7DB1FE22D5A9AC900CF06DA /* XCRemoteSwiftPackageReference "CryptoSwift" */,
 				3ACF94362DA9A52F00971A4E /* XCRemoteSwiftPackageReference "FaviconFinder" */,
+				D7E5B2D92EA080BE00CF47AC /* XCRemoteSwiftPackageReference "negentropy-swift" */,
 			);
 			productRefGroup = 4CE6DEE427F7A08100C66700 /* Products */;
 			projectDirPath = "";
@@ -8396,6 +8409,14 @@
 				revision = e74bbbfbef939224b242ae7c342a90e60b88b5ce;
 			};
 		};
+		D7E5B2D92EA080BE00CF47AC /* XCRemoteSwiftPackageReference "negentropy-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/damus-io/negentropy-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -8578,6 +8599,26 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D70D90962CDED61800CD0534 /* XCRemoteSwiftPackageReference "CodeScanner" */;
 			productName = CodeScanner;
+		};
+		D7E5B2DA2EA080BE00CF47AC /* Negentropy */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D7E5B2D92EA080BE00CF47AC /* XCRemoteSwiftPackageReference "negentropy-swift" */;
+			productName = Negentropy;
+		};
+		D7E5B2DE2EA0A68600CF47AC /* Negentropy */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D7E5B2D92EA080BE00CF47AC /* XCRemoteSwiftPackageReference "negentropy-swift" */;
+			productName = Negentropy;
+		};
+		D7E5B2E02EA0A69200CF47AC /* Negentropy */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D7E5B2D92EA080BE00CF47AC /* XCRemoteSwiftPackageReference "negentropy-swift" */;
+			productName = Negentropy;
+		};
+		D7E5B2E22EA0A69900CF47AC /* Negentropy */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D7E5B2D92EA080BE00CF47AC /* XCRemoteSwiftPackageReference "negentropy-swift" */;
+			productName = Negentropy;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -6,6 +6,7 @@
 //
 import Foundation
 import os
+import Negentropy
 
 
 extension NostrNetworkManager {
@@ -137,21 +138,14 @@ extension NostrNetworkManager {
                 }
                 
                 var networkStreamTask: Task<Void, any Error>? = nil
-                var latestNoteTimestampSeen: UInt32? = nil
+                // Collect IDs seen locally so negentropy can reconcile deltas against relays.
+                var negentropyStorageVector = NegentropyStorageVector()
                 
                 let startNetworkStreamTask = {
                     guard streamMode.shouldStreamFromNetwork else { return }
                     networkStreamTask = Task {
                         while !Task.isCancelled {
-                            let optimizedFilters = filters.map {
-                                var optimizedFilter = $0
-                                // Shift the since filter 2 minutes (120 seconds) before the last note timestamp
-                                if let latestTimestamp = latestNoteTimestampSeen {
-                                    optimizedFilter.since = latestTimestamp > 120 ? latestTimestamp - 120 : 0
-                                }
-                                return optimizedFilter
-                            }
-                            for await item in self.multiSessionNetworkStream(filters: optimizedFilters, to: desiredRelays, streamMode: streamMode, id: id) {
+                            for await item in self.multiSessionNetworkStream(filters: filters, to: desiredRelays, streamMode: streamMode, negentropyVector: negentropyStorageVector, id: id) {
                                 try Task.checkCancellation()
                                 logStreamPipelineStats("SubscriptionManager_Network_Stream_\(id)", "SubscriptionManager_Advanced_Stream_\(id)")
                                 switch item {
@@ -187,12 +181,7 @@ extension NostrNetworkManager {
                             case .event(let lender):
                                 logStreamPipelineStats("SubscriptionManager_Advanced_Stream_\(id)", "Consumer_\(id)")
                                 try? lender.borrow({ event in
-                                    if let latestTimestamp = latestNoteTimestampSeen {
-                                        latestNoteTimestampSeen = max(latestTimestamp, event.createdAt)
-                                    }
-                                    else {
-                                        latestNoteTimestampSeen = event.createdAt
-                                    }
+                                    try negentropyStorageVector.insert(timestamp: UInt64(event.createdAt), id: try Id(data: event.id.id))
                                 })
                                 continuation.yield(item)
                             case .eose:
@@ -219,7 +208,7 @@ extension NostrNetworkManager {
             }
         }
         
-        private func multiSessionNetworkStream(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, streamMode: StreamMode? = nil, id: UUID? = nil) -> AsyncStream<StreamItem> {
+        private func multiSessionNetworkStream(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, streamMode: StreamMode? = nil, negentropyVector: NegentropyStorageVector?, id: UUID? = nil) -> AsyncStream<StreamItem> {
             let id = id ?? UUID()
             let streamMode = streamMode ?? defaultStreamMode()
             return AsyncStream<StreamItem> { continuation in
@@ -234,7 +223,7 @@ extension NostrNetworkManager {
                     }
                     
                     do {
-                        for await item in await self.pool.subscribe(filters: filters, to: desiredRelays, id: id) {
+                        for await item in await self.baseNetworkStream(filters: filters, to: desiredRelays, streamMode: streamMode, negentropyVector: negentropyVector, id: id) {
                             try Task.checkCancellation()
                             logStreamPipelineStats("RelayPool_Handler_\(id)", "SubscriptionManager_Network_Stream_\(id)")
                             switch item {
@@ -258,6 +247,32 @@ extension NostrNetworkManager {
                     continuation.finish()
                 }
                 
+                continuation.onTermination = { @Sendable _ in
+                    streamTask.cancel()
+                }
+            }
+        }
+        
+        private func baseNetworkStream(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, streamMode: StreamMode? = nil, negentropyVector: NegentropyStorageVector?, id: UUID? = nil) -> AsyncStream<RelayPool.StreamItem> {
+            let streamMode = streamMode ?? defaultStreamMode()
+            return AsyncStream<RelayPool.StreamItem> { continuation in
+                let streamTask = Task {
+                    do {
+                        if let negentropyVector, streamMode.optimizeNetworkFilter {
+                            for await item in try await self.pool.negentropySubscribe(filters: filters, to: desiredRelays, negentropyVector: negentropyVector, id: id) {
+                                try Task.checkCancellation()
+                                continuation.yield(item)
+                            }
+                        } else {
+                            for await item in await self.pool.subscribe(filters: filters, to: desiredRelays, id: id) {
+                                try Task.checkCancellation()
+                                continuation.yield(item)
+                            }
+                        }
+                    } catch {
+                        Self.logger.error("Network subscription \(id?.uuidString ?? \"unknown\", privacy: .public): Streaming error: \(error.localizedDescription, privacy: .public)")
+                    }
+                }
                 continuation.onTermination = { @Sendable _ in
                     streamTask.cancel()
                 }
