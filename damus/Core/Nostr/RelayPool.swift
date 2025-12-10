@@ -599,10 +599,15 @@ actor RelayPool {
                 await withTaskGroup { group in
                     for desiredRelay in desiredRelays {
                         group.addTask {
-                            try? await self.negentropySync(filters: filters, to: desiredRelay, negentropyVector: negentropyVector, missingTracker: missingTracker, eoseTimeout: eoseTimeout, streamContinuation: continuation)
+                            do {
+                                try await self.negentropySync(filters: filters, to: desiredRelay, negentropyVector: negentropyVector, missingTracker: missingTracker, eoseTimeout: eoseTimeout, streamContinuation: continuation)
+                            } catch {
+                                Log.error("Negentropy sync failed for %s: %s", for: .networking, desiredRelay.descriptor.url.absoluteString, error.localizedDescription)
+                            }
                         }
                     }
                 }
+                continuation.yield(.eose) // Signal completion of negentropy phase before regular subscribe.
                 let updatedFilters = filters.map({
                     var newFilter = $0
                     newFilter.since = negentropyStartTimestamp
@@ -626,9 +631,16 @@ actor RelayPool {
         guard !uniqueMissingNoteIds.isEmpty else {
             return
         }
-        let missingIdsFilter = NostrFilter(ids: uniqueMissingNoteIds)
-        for await event in self.subscribeExistingItems(filters: [missingIdsFilter], to: [desiredRelay.descriptor.url], eoseTimeout: eoseTimeout) {
-            streamContinuation.yield(.event(event))
+        let batchSize = 500
+        var idx = 0
+        while idx < uniqueMissingNoteIds.count {
+            let end = min(idx + batchSize, uniqueMissingNoteIds.count)
+            let batch = Array(uniqueMissingNoteIds[idx..<end])
+            let missingIdsFilter = NostrFilter(ids: batch)
+            for await event in self.subscribeExistingItems(filters: [missingIdsFilter], to: [desiredRelay.descriptor.url], eoseTimeout: eoseTimeout) {
+                streamContinuation.yield(.event(event))
+            }
+            idx = end
         }
     }
 }

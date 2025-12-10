@@ -270,7 +270,7 @@ extension NostrNetworkManager {
                             }
                         }
                     } catch {
-                        Self.logger.error("Network subscription \(id?.uuidString ?? \"unknown\", privacy: .public): Streaming error: \(error.localizedDescription, privacy: .public)")
+                        Self.logger.error("Network subscription \(id?.uuidString ?? "unknown"): Streaming error: \(error.localizedDescription)")
                     }
                 }
                 continuation.onTermination = { @Sendable _ in
