@@ -59,6 +59,7 @@ struct PostView: View {
     ///
     /// For example, when replying to an event, the user can select which pubkey mentions they want to keep, and which ones to remove.
     @State var filtered_pubkeys: Set<Pubkey> = []
+    @State var pollDraft: PollDraft? = nil
     
     @FocusState var focus: Bool
     @State var attach_media: Bool = false
@@ -120,9 +121,77 @@ struct PostView: View {
         uploadTasks.forEach { $0.cancel() }
         uploadTasks.removeAll()
     }
-    
+
+    var pollsFeatureEnabled: Bool {
+        damus_state.settings.enable_nip88_polls
+    }
+
+    var pollComposerAvailable: Bool {
+        guard pollsFeatureEnabled else { return false }
+        if case .posting = action {
+            return true
+        }
+        return false
+    }
+
+    var pollQuestionText: String {
+        post.string.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    var pollOptionLabels: [String] {
+        guard let pollDraft else { return [] }
+        return pollDraft.options
+            .map { $0.text.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+    }
+
+    var pollHasDuplicateOptions: Bool {
+        let lowered = pollOptionLabels.map { $0.lowercased() }
+        return Set(lowered).count != lowered.count
+    }
+
+    var pollExpirationIsValid: Bool {
+        guard let endsAt = pollDraft?.endsAt else { return true }
+        return endsAt > Date()
+    }
+
+    var pollIsValid: Bool {
+        guard pollsFeatureEnabled, pollComposerAvailable, pollDraft != nil else { return false }
+        if pollQuestionText.isEmpty { return false }
+        if pollOptionLabels.count < PollDraft.minimumOptions { return false }
+        if pollHasDuplicateOptions { return false }
+        if !pollExpirationIsValid { return false }
+        return true
+    }
+
+    func activatePollComposer() {
+        guard pollComposerAvailable else { return }
+        if pollDraft == nil {
+            pollDraft = PollDraft.makeDefault()
+        }
+        pollDraft?.ensureMinimumOptions()
+        uploadedMedias.removeAll()
+        references.removeAll()
+        filtered_pubkeys.removeAll()
+        post_changed(post: post, media: uploadedMedias)
+    }
+
+    func deactivatePollComposer() {
+        guard pollDraft != nil else { return }
+        pollDraft = nil
+        post_changed(post: post, media: uploadedMedias)
+    }
+
     func send_post() async {
-        let new_post = await build_post(state: self.damus_state, post: self.post, action: action, uploadedMedias: uploadedMedias, references: self.references, filtered_pubkeys: filtered_pubkeys)
+        let new_post = await build_post(
+            state: self.damus_state,
+            post: self.post,
+            action: action,
+            uploadedMedias: uploadedMedias,
+            references: self.references,
+            filtered_pubkeys: filtered_pubkeys,
+            pollDraft: pollsFeatureEnabled ? pollDraft : nil
+        )
 
         notify(.post(.post(new_post)))
 
@@ -141,6 +210,9 @@ struct PostView: View {
     }
 
     var posting_disabled: Bool {
+        if pollsFeatureEnabled, pollDraft != nil {
+            return uploading_disabled || !pollIsValid
+        }
         switch action {
             case .highlighting(_):
                 return false
@@ -168,7 +240,19 @@ struct PostView: View {
                 .padding(6)
         })
     }
-    
+
+    var PollButton: some View {
+        Button(action: {
+            activatePollComposer()
+        }, label: {
+            Image(systemName: "chart.bar.fill")
+                .imageScale(.large)
+                .padding(6)
+        })
+        .disabled(!pollComposerAvailable)
+        .accessibilityLabel(Text("Add Poll", comment: "Button to enable the poll composer."))
+    }
+
     var CameraButton: some View {
         Button(action: {
             attach_camera = true
@@ -180,6 +264,9 @@ struct PostView: View {
     
     var AttachmentBar: some View {
         HStack(alignment: .center, spacing: 15) {
+            if pollComposerAvailable {
+                PollButton
+            }
             ImageButton
             CameraButton
             Spacer()
@@ -230,19 +317,27 @@ struct PostView: View {
                 damus_state.drafts.post = nil
         }
 
-        Task{ await damus_state.drafts.save(damus_state: damus_state) }
+        pollDraft = nil
+        Task { await damus_state.drafts.save(damus_state: damus_state) }
     }
     
     func load_draft() -> Bool {
         guard let draft = load_draft_for_post(drafts: self.damus_state.drafts, action: self.action) else {
             self.post = NSMutableAttributedString("")
             self.uploadedMedias = []
+            self.pollDraft = nil
             self.autoSaveModel.markNothingToSave()   // We should not save empty drafts.
             return false
         }
-        
+
         self.uploadedMedias = draft.media
         self.post = draft.content
+        if pollsFeatureEnabled {
+            self.pollDraft = draft.pollDraft
+            self.pollDraft?.ensureMinimumOptions()
+        } else {
+            self.pollDraft = nil
+        }
         self.autoSaveModel.markSaved()  // The draft we just loaded is saved to memory. Mark it as such.
         return true
     }
@@ -257,8 +352,17 @@ struct PostView: View {
             draft.media = uploadedMedias
             draft.references = references
             draft.filtered_pubkeys = filtered_pubkeys
+            if pollsFeatureEnabled {
+                draft.pollDraft = pollDraft
+            }
         } else {
-            let artifacts = DraftArtifacts(content: post, media: uploadedMedias, references: references, id: UUID().uuidString)
+            let artifacts = DraftArtifacts(
+                content: post,
+                media: uploadedMedias,
+                references: references,
+                id: UUID().uuidString,
+                pollDraft: pollsFeatureEnabled ? pollDraft : nil
+            )
             set_draft_for_post(drafts: damus_state.drafts, action: action, artifacts: artifacts)
         }
         self.autoSaveModel.needsSaving()
@@ -462,7 +566,7 @@ struct PostView: View {
                 }
                 
                 // This if-block observes @ for tagging
-                if let searching {
+                if (pollDraft == nil || !pollsFeatureEnabled), let searching {
                     UserSearch(damus_state: damus_state, search: searching, focusWordAttributes: $focusWordAttributes, newCursorIndex: $newCursorIndex, post: $post)
                         .frame(maxHeight: .infinity)
                         .environmentObject(tagModel)
@@ -479,13 +583,29 @@ struct PostView: View {
                } else {
                     Divider()
                     VStack(alignment: .leading) {
-                        AttachmentBar
-                            .padding(.vertical, 5)
+                        if pollsFeatureEnabled, pollDraft != nil {
+                            PollComposerView(
+                                draft: Binding(
+                                    get: { self.pollDraft ?? PollDraft.makeDefault() },
+                                    set: { self.pollDraft = $0 }
+                                ),
+                                onRemove: { deactivatePollComposer() }
+                            )
+                            .padding(.vertical, 8)
                             .padding(.horizontal)
+                        } else {
+                            AttachmentBar
+                                .padding(.vertical, 5)
+                                .padding(.horizontal)
+                        }
                     }
                 }
-            }
+        }
             .background(DamusColors.adaptableWhite.edgesIgnoringSafeArea(.all))
+        .onChange(of: pollDraft) { _ in
+            guard pollsFeatureEnabled else { return }
+            post_changed(post: post, media: uploadedMedias)
+        }
             .sheet(isPresented: $attach_media) {
                 MediaPicker(mediaPickerEntry: .postView, onMediaSelected: { image_upload_confirm = true }) { media in
                     self.preUploadedMedia.append(media)
@@ -835,11 +955,12 @@ func build_post(state: DamusState, action: PostAction, draft: DraftArtifacts) as
         action: action,
         uploadedMedias: draft.media,
         references: draft.references,
-        filtered_pubkeys: draft.filtered_pubkeys
+        filtered_pubkeys: draft.filtered_pubkeys,
+        pollDraft: draft.pollDraft
     )
 }
 
-func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], references: [RefId], filtered_pubkeys: Set<Pubkey>) async -> NostrPost {
+func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], references: [RefId], filtered_pubkeys: Set<Pubkey>, pollDraft: PollDraft? = nil) async -> NostrPost {
     // don't add duplicate pubkeys but retain order
     var pkset = Set<Pubkey>()
 
@@ -857,7 +978,15 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
         acc.append(pk)
     }
     
-    return await build_post(state: state, post: post, action: action, uploadedMedias: uploadedMedias, pubkeys: pks)
+    let effectivePollDraft = state.settings.enable_nip88_polls ? pollDraft : nil
+    return await build_post(
+        state: state,
+        post: post,
+        action: action,
+        uploadedMedias: uploadedMedias,
+        pubkeys: pks,
+        pollDraft: effectivePollDraft
+    )
 }
 
 /// This builds a Nostr post from draft data from `PostView` or other draft-related classes
@@ -873,7 +1002,11 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
 ///   - uploadedMedias: The medias attached to this post
 ///   - pubkeys: The referenced pubkeys
 /// - Returns: A NostrPost, which can then be signed into an event.
-func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], pubkeys: [Pubkey]) async -> NostrPost {
+func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], pubkeys: [Pubkey], pollDraft: PollDraft? = nil) async -> NostrPost {
+    let pollsFeatureEnabled = state.settings.enable_nip88_polls
+    if pollsFeatureEnabled, let pollDraft, case .posting = action, let pollPost = build_poll_post(state: state, post: post, pollDraft: pollDraft) {
+        return pollPost
+    }
     let post = NSMutableAttributedString(attributedString: post)
     post.enumerateAttributes(in: NSRange(location: 0, length: post.length), options: []) { attributes, range, stop in
         let linkValue = attributes[.link]
@@ -955,6 +1088,61 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
     return NostrPost(content: content.trimmingCharacters(in: .whitespacesAndNewlines), kind: .text, tags: tags)
 }
 
+func build_poll_post(state: DamusState, post: NSAttributedString, pollDraft: PollDraft) -> NostrPost? {
+    let question = post.string.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !question.isEmpty else { return nil }
+
+    let trimmedOptions = pollDraft.options
+        .map { $0.text.trimmingCharacters(in: .whitespacesAndNewlines) }
+        .filter { !$0.isEmpty }
+
+    guard trimmedOptions.count >= PollDraft.minimumOptions else { return nil }
+
+    var optionTags: [[String]] = []
+    var seenKeys: Set<String> = []
+
+    for option in trimmedOptions {
+        let key = option.lowercased()
+        guard !seenKeys.contains(key) else { continue }
+        seenKeys.insert(key)
+        optionTags.append(["option", generateOptionIdentifier(), option])
+    }
+
+    guard optionTags.count >= PollDraft.minimumOptions else { return nil }
+
+    var tags: [[String]] = optionTags
+    tags.append(["polltype", pollDraft.pollType.rawValue])
+
+    if let endsAt = pollDraft.endsAt {
+        let current = Date().timeIntervalSince1970
+        let raw = endsAt.timeIntervalSince1970
+        if raw > current {
+            let clamped = min(max(raw, 0), Double(UInt32.max))
+            let seconds = UInt32(clamped.rounded())
+            tags.append(["endsAt", String(seconds)])
+        }
+    }
+
+    let relayHints = defaultPollRelayHints(state: state)
+    for relay in relayHints {
+        tags.append(["relay", relay.absoluteString])
+    }
+
+    return NostrPost(content: question, kind: .poll, tags: tags)
+}
+
+private func defaultPollRelayHints(state: DamusState) -> [RelayURL] {
+    let relayList = state.nostrNetwork.userRelayList.getBestEffortRelayList()
+    return relayList.relays.values.compactMap { item in
+        item.rwConfiguration.canWrite ? item.url : nil
+    }
+}
+
+private func generateOptionIdentifier() -> String {
+    let base = UUID().uuidString.replacingOccurrences(of: "-", with: "")
+    return String(base.prefix(10)).lowercased()
+}
+
 func isSupportedVideo(url: URL?) -> Bool {
     guard let url = url else { return false }
     let fileExtension = url.pathExtension.lowercased()
@@ -973,4 +1161,3 @@ func isSupportedImage(url: URL) -> Bool {
     let supportedTypes = ["jpg", "png", "gif"]
     return supportedTypes.contains(fileExtension)
 }
-

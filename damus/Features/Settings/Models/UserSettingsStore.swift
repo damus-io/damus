@@ -200,7 +200,7 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "truncate_mention_text", default_value: true)
     var truncate_mention_text: Bool
-    
+
     @Setting(key: "notification_indicators", default_value: NewEventsBits.all.rawValue)
     var notification_indicators: Int
     
@@ -368,6 +368,10 @@ class UserSettingsStore: ObservableObject {
     /// Whether the app should show the Favourites feature (Damus Labs)
     @Setting(key: "labs_experiment_favorites", default_value: false)
     var enable_favourites_feature: Bool
+
+    /// Whether the app should expose the experimental NIP-88 polls feature (Damus Labs)
+    @Setting(key: "enable_nip88_polls", default_value: false)
+    var enable_nip88_polls: Bool
     
     // MARK: Internal, hidden settings
     

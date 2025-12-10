@@ -144,11 +144,16 @@ struct WalletView: View {
     }
 }
 
-let test_wallet_connect_url = WalletConnectURL(pubkey: test_pubkey, relay: .init("wss://relay.damus.io")!, keypair: test_damus_state.keypair.to_full()!, lud16: "jb55@sendsats.com")
-
 struct WalletView_Previews: PreviewProvider {
-    static let tds = test_damus_state
+    @MainActor
     static var previews: some View {
-        WalletView(damus_state: tds, model: WalletModel(state: .existing(test_wallet_connect_url), settings: tds.settings))
+        let state = test_damus_state
+        let connectURL = WalletConnectURL(
+            pubkey: test_pubkey,
+            relay: .init("wss://relay.damus.io")!,
+            keypair: state.keypair.to_full()!,
+            lud16: "jb55@sendsats.com"
+        )
+        return WalletView(damus_state: state, model: WalletModel(state: .existing(connectURL), settings: state.settings))
     }
 }
