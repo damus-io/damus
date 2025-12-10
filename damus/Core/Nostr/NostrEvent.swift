@@ -32,6 +32,41 @@ enum ValidationResult: Decodable {
     case bad_sig
 }
 
+struct ClientTagMetadata: Equatable {
+    let name: String
+    let handlerAddress: String?
+    let relayHint: String?
+
+    init(name: String, handlerAddress: String? = nil, relayHint: String? = nil) {
+        self.name = name
+        self.handlerAddress = handlerAddress
+        self.relayHint = relayHint
+    }
+
+    init?(tagComponents: [String]) {
+        guard tagComponents.first == "client", let clientName = tagComponents[safe: 1], !clientName.isEmpty else {
+            return nil
+        }
+
+        self.name = clientName
+        self.handlerAddress = tagComponents[safe: 2]
+        self.relayHint = tagComponents[safe: 3]
+    }
+
+    var tagValues: [String] {
+        var components = ["client", name]
+        if let handlerAddress, !handlerAddress.isEmpty {
+            components.append(handlerAddress)
+            if let relayHint, !relayHint.isEmpty {
+                components.append(relayHint)
+            }
+        }
+        return components
+    }
+
+    static let damus = ClientTagMetadata(name: "Damus")
+}
+
     /*
 class NostrEventOld: Codable, Identifiable, CustomStringConvertible, Equatable, Hashable, Comparable {
     // TODO: memory mapped db events
@@ -306,6 +341,15 @@ extension NostrEventOld {
 
     public var referenced_hashtags: [ReferencedId] {
         return get_referenced_ids(key: "t")
+    }
+    
+    var clientTag: ClientTagMetadata? {
+        for tag in tags {
+            if tag.first == "client", let metadata = ClientTagMetadata(tagComponents: tag) {
+                return metadata
+            }
+        }
+        return nil
     }
 
     var age: TimeInterval {
