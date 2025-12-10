@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import AVFoundation
 
 /// Removes GPS data from image at url and writes changes to new file
 func processImage(url: URL) -> URL? {
@@ -39,9 +40,17 @@ fileprivate func processImage(source: CGImageSource, fileExtension: String) -> U
     return destinationURL
 }
 
-/// TODO: strip GPS data from video
+/// Re-encodes the video to MP4 and removes sensitive metadata (GPS, etc.)
+/// We always run this before uploading so clips recorded anywhere inside Damus
+/// (camera, share extension, etc.) never leak location data.
 func processVideo(videoURL: URL) -> URL? {
-    saveVideoToTemporaryFolder(videoURL: videoURL)
+    let destinationURL = generateUniqueTemporaryMediaURL(fileExtension: "mp4")
+    if exportVideoStrippingSensitiveMetadata(from: videoURL, to: destinationURL) {
+        return destinationURL
+    }
+    
+    // Fallback to raw copy if export fails so the user can still proceed.
+    return saveVideoToTemporaryFolder(videoURL: videoURL)
 }
 
 fileprivate func saveVideoToTemporaryFolder(videoURL: URL) -> URL? {
@@ -87,7 +96,8 @@ func generateMediaUpload(_ media: PreUploadedMedia?) -> MediaUpload? {
     case .processed_image(let url):
         return .image(url)
     case .processed_video(let url):
-        return .video(url)
+        guard let sanitizedUrl = processVideo(videoURL: url) else { return nil }
+        return .video(sanitizedUrl)
     case .unprocessed_video(let url):
         guard let newUrl = processVideo(videoURL: url) else { return nil }
         url.stopAccessingSecurityScopedResource()
@@ -148,4 +158,32 @@ fileprivate func removeGPSDataFromImage(source: CGImageSource, url: URL) -> CGIm
     }
     
     return destination
+}
+
+private func exportVideoStrippingSensitiveMetadata(from sourceURL: URL, to destinationURL: URL) -> Bool {
+    let asset = AVAsset(url: sourceURL)
+    guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {
+        print("Failed to create export session for video.")
+        return false
+    }
+    
+    exportSession.outputURL = destinationURL
+    exportSession.outputFileType = .mp4
+    exportSession.shouldOptimizeForNetworkUse = true
+    exportSession.metadataItemFilter = AVMetadataItemFilter.forSharing()
+    
+    let semaphore = DispatchSemaphore(value: 0)
+    exportSession.exportAsynchronously {
+        semaphore.signal()
+    }
+    semaphore.wait()
+    
+    if exportSession.status == .completed {
+        return true
+    } else {
+        if let error = exportSession.error {
+            print("Video export failed: \(error.localizedDescription)")
+        }
+        return false
+    }
 }
