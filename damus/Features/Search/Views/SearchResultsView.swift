@@ -45,6 +45,9 @@ struct InnerSearchResults: View {
     let damus_state: DamusState
     let search: Search?
     @Binding var results: [NostrEvent]
+    @Binding var is_loading: Bool
+    @Binding var relay_result_count: Int
+    @Binding var relay_search_attempted: Bool
     
     func ProfileSearchResult(pk: Pubkey) -> some View {
         FollowUserView(target: .pubkey(pk), damus_state: damus_state)
@@ -68,7 +71,12 @@ struct InnerSearchResults: View {
     }
     
     func TextSearch(_ txt: String) -> some View {
-        return NavigationLink(value: Route.NDBSearch(results: $results)) {
+        return NavigationLink(value: Route.NDBSearch(
+            results: $results,
+            isLoading: $is_loading,
+            relayCount: $relay_result_count,
+            relayAttempted: $relay_search_attempted
+        )) {
             HStack {
                 Text("Search word: \(txt)", comment: "Navigation link to search for a word.")
             }
@@ -138,47 +146,155 @@ struct SearchResultsView: View {
     @Binding var search: String
     @State var result: Search? = nil
     @State var results: [NostrEvent] = []
+    @State private var relay_result_count: Int = 0
+    @State private var is_search_loading: Bool = false
+    @State private var relay_search_attempted: Bool = false
     let debouncer: Debouncer = Debouncer(interval: 0.25)
-    
-    func do_search(query: String) {
-        let limit = 128
-        var note_keys = damus_state.ndb.text_search(query: query, limit: limit, order: .newest_first)
-        var res = [NostrEvent]()
-        // TODO: fix duplicate results from search
-        var keyset = Set<NoteKey>()
 
-        // try reverse because newest first is a bit buggy on partial searches
-        if note_keys.count == 0 {
-            // don't touch existing results if there are no new ones
+    private func local_ndb_search(_ query: String, limit: Int) -> [NostrEvent] {
+        let note_keys = damus_state.ndb.text_search(query: query, limit: limit, order: .newest_first)
+        guard !note_keys.isEmpty else { return [] }
+
+        var found = [NostrEvent]()
+        var seen = Set<NoteKey>()
+
+        for note_key in note_keys {
+            damus_state.ndb.lookup_note_by_key(note_key, borrow: { maybeUnownedNote in
+                switch maybeUnownedNote {
+                case .none:
+                    return
+                case .some(let unownedNote):
+                    guard !seen.contains(note_key) else { return }
+                    found.append(unownedNote.toOwned())
+                    seen.insert(note_key)
+                }
+            })
+        }
+
+        return found
+    }
+
+    /// NIP-50 relay search to augment local nostrdb results.
+    private func nip50_relay_search(_ query: String, limit: Int) async -> ([NostrEvent], Bool) {
+        let descriptors = damus_state.nostrNetwork.ourRelayDescriptors
+        let nip50Relays = descriptors.compactMap { desc -> RelayURL? in
+            guard let nips = damus_state.relay_model_cache.model(withURL: desc.url)?.metadata.supported_nips else {
+                return nil
+            }
+            return nips.contains(50) ? desc.url : nil
+        }
+        // Prefer relays that explicitly advertise NIP-50; if none do, fall back to all relays so we still attempt.
+        let targetRelays = nip50Relays.isEmpty ? descriptors.map { $0.url } : nip50Relays
+
+        guard !targetRelays.isEmpty else { return ([], true) }
+
+        var filter = NostrFilter()
+        filter.search = query
+        filter.kinds = [.text, .longform, .highlight]
+        filter.limit = UInt32(limit)
+
+        let events = await damus_state.nostrNetwork.reader.query(filters: [filter], to: targetRelays)
+
+        let lowered = query.lowercased()
+        guard !lowered.isEmpty else { return (events, true) }
+
+        // Client-side guard to keep only items that actually contain the query.
+        let filtered = events.filter { $0.content.lowercased().contains(lowered) }
+        return (filtered, true)
+    }
+
+    private func do_search(query: String) async {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            await MainActor.run {
+                results = []
+                relay_result_count = 0
+                relay_search_attempted = false
+                is_search_loading = false
+            }
             return
         }
 
-        do {
-            for note_key in note_keys {
-                damus_state.ndb.lookup_note_by_key(note_key, borrow: { maybeUnownedNote in
-                    switch maybeUnownedNote {
-                    case .none: return
-                    case .some(let unownedNote):
-                        if !keyset.contains(note_key) {
-                            let owned_note = unownedNote.toOwned()
-                            res.append(owned_note)
-                            keyset.insert(note_key)
-                        }
-                    }
-                })
-            }
+        let localLimit = 128
+        let relayLimit = 100
+
+        await MainActor.run {
+            is_search_loading = true
         }
 
-        let res_ = res
+        async let local = local_ndb_search(trimmed, limit: localLimit)
+        async let remote = nip50_relay_search(trimmed, limit: relayLimit)
 
-        Task { @MainActor [res_] in
-            results = res_
+        let (remoteEvents, remoteAttempted) = await remote
+        let combined = await [local, remoteEvents].flatMap { $0 }
+        let remoteCount = remoteEvents.count
+
+        guard !combined.isEmpty else {
+            await MainActor.run {
+                results = []
+                relay_result_count = 0
+                relay_search_attempted = remoteAttempted
+                is_search_loading = false
+            }
+            return
+        }
+
+        var seen = Set<NoteId>()
+        var deduped: [NostrEvent] = []
+
+        for event in combined {
+            guard !seen.contains(event.id) else { continue }
+            seen.insert(event.id)
+            deduped.append(event)
+        }
+
+        let sorted = deduped.sorted { $0.created_at > $1.created_at }
+        let capped = Array(sorted.prefix(100))
+
+        await MainActor.run {
+            results = capped
+            relay_result_count = remoteCount
+            relay_search_attempted = remoteAttempted
+            is_search_loading = false
         }
     }
     
     var body: some View {
         ScrollView {
-            InnerSearchResults(damus_state: damus_state, search: result, results: $results)
+            if relay_result_count > 0 {
+                // Temporary dev indicator to confirm NIP-50 relay hits; keep if it proves useful.
+                HStack(spacing: 8) {
+                    Image(systemName: "antenna.radiowaves.left.and.right")
+                        .foregroundColor(.secondary)
+                    Text("Relay results included")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+                .padding(.horizontal)
+                .padding(.top, 8)
+            } else if relay_search_attempted {
+                // Relay search was sent but yielded no filtered hits.
+                HStack(spacing: 8) {
+                    Image(systemName: "antenna.radiowaves.left.and.right.slash")
+                        .foregroundColor(.secondary)
+                    Text("Relay search sent")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+                .padding(.horizontal)
+                .padding(.top, 8)
+            }
+
+            InnerSearchResults(
+                damus_state: damus_state,
+                search: result,
+                results: $results,
+                is_loading: $is_search_loading,
+                relay_result_count: $relay_result_count,
+                relay_search_attempted: $relay_search_attempted
+            )
                 .padding()
         }
         .frame(maxHeight: .infinity)
@@ -191,7 +307,7 @@ struct SearchResultsView: View {
         .onChange(of: search) { query in
             debouncer.debounce {
                 Task.detached {
-                    do_search(query: query)
+                    await do_search(query: query)
                 }
             }
         }
@@ -296,4 +412,3 @@ func search_profiles(profiles: Profiles, contacts: Contacts, search: String) -> 
         }
     }
 }
-

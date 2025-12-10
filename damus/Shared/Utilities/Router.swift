@@ -39,7 +39,7 @@ enum Route: Hashable {
     case Reactions(reactions: EventsModel)
     case Zaps(target: ZapTarget)
     case Search(search: SearchModel)
-    case NDBSearch(results:  Binding<[NostrEvent]>)
+    case NDBSearch(results:  Binding<[NostrEvent]>, isLoading: Binding<Bool>, relayCount: Binding<Int>, relayAttempted: Binding<Bool>)
     case EULA
     case Login
     case CreateAccount
@@ -115,8 +115,14 @@ enum Route: Hashable {
             ZapsView(state: damusState, target: target)
         case .Search(let search):
             SearchView(appstate: damusState, search: search)
-        case .NDBSearch(let results):
-            NDBSearchView(damus_state: damusState, results: results)
+        case .NDBSearch(let results, let isLoading, let relayCount, let relayAttempted):
+            NDBSearchView(
+                damus_state: damusState,
+                results: results,
+                is_loading: isLoading,
+                relay_result_count: relayCount,
+                relay_search_attempted: relayAttempted
+            )
         case .EULA:
             EULAView(nav: navigationCoordinator)
         case .Login:

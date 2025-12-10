@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		0E8A4BB72AE4359200065E81 /* NostrFilter+Hashable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E8A4BB62AE4359200065E81 /* NostrFilter+Hashable.swift */; };
+		140E92358E443D780D49BD00 /* UserProfilePullDownSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10124094B7D20F5D1597B07 /* UserProfilePullDownSearchView.swift */; };
+		203BB7C11E150648CDC4F3EF /* UserProfilePullDownSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10124094B7D20F5D1597B07 /* UserProfilePullDownSearchView.swift */; };
 		2710433D2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */; };
 		2710433E2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */; };
 		2710433F2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */; };
@@ -1097,6 +1099,7 @@
 		BA3759972ABCCF360018D73B /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3759962ABCCF360018D73B /* CameraPreview.swift */; };
 		BA693074295D649800ADDB87 /* UserSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA693073295D649800ADDB87 /* UserSettingsStore.swift */; };
 		BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */; };
+		D096828D50E47751D7FEB6A0 /* UserProfilePullDownSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10124094B7D20F5D1597B07 /* UserProfilePullDownSearchView.swift */; };
 		D2277EEA2A089BD5006C3807 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2277EE92A089BD5006C3807 /* Router.swift */; };
 		D5C1AFBF2E5DF7E60092F72F /* ContactCardManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5C1AFBE2E5DF7E60092F72F /* ContactCardManager.swift */; };
 		D5C1AFC02E5DF7E60092F72F /* ContactCardManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5C1AFBE2E5DF7E60092F72F /* ContactCardManager.swift */; };
@@ -1490,7 +1493,7 @@
 		D73E5EFB2C6A97F4007EB227 /* ProfilePicturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C30AC7F29A6A53F00E2BD5A /* ProfilePicturesView.swift */; };
 		D73E5EFC2C6A97F4007EB227 /* DamusAppNotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78CD5972B8990300014D539 /* DamusAppNotificationView.swift */; };
 		D73E5EFD2C6A97F4007EB227 /* InnerTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE0E2B529A3ED5500DB4CA2 /* InnerTimelineView.swift */; };
-		D73E5EFE2C6A97F4007EB227 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		D73E5EFE2C6A97F4007EB227 /* BuildFile in Sources */ = {isa = PBXBuildFile; };
 		D73E5EFF2C6A97F4007EB227 /* ZapsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE879572996C45300F758CC /* ZapsView.swift */; };
 		D73E5F002C6A97F4007EB227 /* CustomizeZapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9F18E129AA9B6C008C55EC /* CustomizeZapView.swift */; };
 		D73E5F012C6A97F4007EB227 /* ZapTypePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA3FA0F29F593D000FDB3C3 /* ZapTypePicker.swift */; };
@@ -2700,6 +2703,7 @@
 		BA3759962ABCCF360018D73B /* CameraPreview.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraPreview.swift; sourceTree = "<group>"; };
 		BA693073295D649800ADDB87 /* UserSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettingsStore.swift; sourceTree = "<group>"; };
 		BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectWalletView.swift; sourceTree = "<group>"; };
+		D10124094B7D20F5D1597B07 /* UserProfilePullDownSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfilePullDownSearchView.swift; sourceTree = "<group>"; };
 		D2277EE92A089BD5006C3807 /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		D5C1AFBE2E5DF7E60092F72F /* ContactCardManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactCardManager.swift; sourceTree = "<group>"; };
 		D5C1AFC32E5DFF700092F72F /* ContactCardManagerMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactCardManagerMock.swift; sourceTree = "<group>"; };
@@ -4258,6 +4262,7 @@
 				4C5C7E69284EDE2E00A22DF5 /* SearchResultsView.swift */,
 				4C3AC7A628369BA200E1F516 /* SearchHomeView.swift */,
 				4C687C232A5FA86D0092C550 /* SearchHeaderView.swift */,
+				D10124094B7D20F5D1597B07 /* UserProfilePullDownSearchView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -5553,7 +5558,7 @@
 			);
 			mainGroup = 4CE6DEDA27F7A08100C66700;
 			packageReferences = (
-				4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */,
+				4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */,
 				4C06670228FC7EC500038D2A /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				4CCF9AB02A1FE80B00E03CFB /* XCRemoteSwiftPackageReference "GSPlayer" */,
 				4C27C9302A64766F007DBC75 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
@@ -5954,6 +5959,7 @@
 				4CE879582996C45300F758CC /* ZapsView.swift in Sources */,
 				4C30AC7429A5680900E2BD5A /* EventGroupView.swift in Sources */,
 				4C9D6D1B2B1D35D7004E5CD9 /* PullDownSearch.swift in Sources */,
+				D096828D50E47751D7FEB6A0 /* UserProfilePullDownSearchView.swift in Sources */,
 				4C633352283D419F00B1C9C3 /* SignalModel.swift in Sources */,
 				D7EB00B12CD59C8D00660C07 /* PresentFullScreenItemNotify.swift in Sources */,
 				4CFF8F6D29CD022E008DB934 /* WideEventView.swift in Sources */,
@@ -6850,6 +6856,7 @@
 				82D6FC7B2CD99F7900C925F4 /* TestData.swift in Sources */,
 				82D6FC7C2CD99F7900C925F4 /* ContentParsing.swift in Sources */,
 				82D6FC7D2CD99F7900C925F4 /* NotificationFormatter.swift in Sources */,
+				203BB7C11E150648CDC4F3EF /* UserProfilePullDownSearchView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -7139,7 +7146,7 @@
 				D73E5EFB2C6A97F4007EB227 /* ProfilePicturesView.swift in Sources */,
 				D73E5EFC2C6A97F4007EB227 /* DamusAppNotificationView.swift in Sources */,
 				D73E5EFD2C6A97F4007EB227 /* InnerTimelineView.swift in Sources */,
-				D73E5EFE2C6A97F4007EB227 /* (null) in Sources */,
+				D73E5EFE2C6A97F4007EB227 /* BuildFile in Sources */,
 				D7EB00B02CD59C8D00660C07 /* PresentFullScreenItemNotify.swift in Sources */,
 				D73E5EFF2C6A97F4007EB227 /* ZapsView.swift in Sources */,
 				D73E5F002C6A97F4007EB227 /* CustomizeZapView.swift in Sources */,
@@ -7405,6 +7412,7 @@
 				D703D75B2C670A7F00A400EA /* Contacts.swift in Sources */,
 				D703D7812C670C2B00A400EA /* Bech32.swift in Sources */,
 				D73E5E1E2C6A9694007EB227 /* RelayFilters.swift in Sources */,
+				140E92358E443D780D49BD00 /* UserProfilePullDownSearchView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8340,7 +8348,7 @@
 				kind = branch;
 			};
 		};
-		4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */ = {
+		4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/jb55/secp256k1.swift";
 			requirement = {
@@ -8436,12 +8444,12 @@
 		};
 		4C649880286E0EE300EAE2B3 /* secp256k1 */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
+			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */;
 			productName = secp256k1;
 		};
 		82D6FC802CD99FC500C925F4 /* secp256k1 */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
+			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */;
 			productName = secp256k1;
 		};
 		82D6FC832CD9A48500C925F4 /* Kingfisher */ = {
@@ -8466,7 +8474,7 @@
 		};
 		D703D7482C6709B100A400EA /* secp256k1 */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
+			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */;
 			productName = secp256k1;
 		};
 		D703D7AC2C670FA700A400EA /* MarkdownUI */ = {
@@ -8511,7 +8519,7 @@
 		};
 		D789D11F2AFEFBF20083A7AB /* secp256k1 */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
+			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */;
 			productName = secp256k1;
 		};
 		D78DB8582C1CE9CA00F0AB12 /* SwipeActions */ = {

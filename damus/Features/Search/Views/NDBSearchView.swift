@@ -8,12 +8,52 @@
 import SwiftUI
 
 struct NDBSearchView: View {
-    
     let damus_state: DamusState
     @Binding var results: [NostrEvent]
+    @Binding var is_loading: Bool
+    @Binding var relay_result_count: Int
+    @Binding var relay_search_attempted: Bool
+
+    var relayBadge: some View {
+        Group {
+            if relay_result_count > 0 {
+                HStack(spacing: 8) {
+                    Image(systemName: "antenna.radiowaves.left.and.right")
+                        .foregroundColor(.secondary)
+                    Text("Relay results included")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+            } else if relay_search_attempted {
+                HStack(spacing: 8) {
+                    Image(systemName: "antenna.radiowaves.left.and.right.slash")
+                        .foregroundColor(.secondary)
+                    Text("Relay search sent")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+            }
+        }
+        .padding(.horizontal)
+        .padding(.top, 8)
+    }
     
     var body: some View {
         ScrollView {
+            if is_loading {
+                HStack {
+                    Spacer()
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                    Spacer()
+                }
+                .padding()
+            }
+
+            relayBadge
+
             if results.count > 0 {
                 HStack {
                     Spacer()
