@@ -10,6 +10,7 @@ import LinkPresentation
 import NaturalLanguage
 import MarkdownUI
 import Translation
+import UIKit
 
 struct Blur: UIViewRepresentable {
     var style: UIBlurEffect.Style = .systemUltraThinMaterial
@@ -49,6 +50,7 @@ struct NoteContentView: View {
     let size: EventViewKind
     let preview_height: CGFloat?
     let options: EventViewOptions
+    let highlightTerms: [String]
 
     @State var isAppleTranslationPopoverPresented: Bool = false
 
@@ -63,12 +65,13 @@ struct NoteContentView: View {
         return self.artifacts_model.state.artifacts ?? .separated(.just_content(event.get_content(damus_state.keypair)))
     }
     
-    init(damus_state: DamusState, event: NostrEvent, blur_images: Bool, size: EventViewKind, options: EventViewOptions) {
+    init(damus_state: DamusState, event: NostrEvent, blur_images: Bool, size: EventViewKind, options: EventViewOptions, highlightTerms: [String] = []) {
         self.damus_state = damus_state
         self.event = event
         self.blur_images = blur_images
         self.size = size
         self.options = options
+        self.highlightTerms = highlightTerms
         self.preview_height = lookup_cached_preview_size(previews: damus_state.previews, evid: event.id)
         let cached = damus_state.events.get_cache_data(event.id)
         self._preview_model = ObservedObject(wrappedValue: cached.preview_model)
@@ -168,20 +171,22 @@ struct NoteContentView: View {
     }
     
     func MainContent(artifacts: NoteArtifactsSeparated) -> some View {
-        VStack(alignment: .leading) {
+        let contentToRender = highlightedContent(artifacts.content)
+
+        return VStack(alignment: .leading) {
             if size == .selected {
                 if with_padding {
-                    SelectableText(damus_state: damus_state, event: self.event, attributedString: artifacts.content.attributed, size: self.size)
+                    SelectableText(damus_state: damus_state, event: self.event, attributedString: contentToRender.attributed, size: self.size)
                         .padding(.horizontal)
                 } else {
-                    SelectableText(damus_state: damus_state, event: self.event, attributedString: artifacts.content.attributed, size: self.size)
+                    SelectableText(damus_state: damus_state, event: self.event, attributedString: contentToRender.attributed, size: self.size)
                 }
             } else {
                 if with_padding {
-                    truncatedText(content: artifacts.content)
+                    truncatedText(content: contentToRender)
                         .padding(.horizontal)
                 } else {
-                    truncatedText(content: artifacts.content)
+                    truncatedText(content: contentToRender)
                 }
             }
 
@@ -390,7 +395,51 @@ struct NoteContentView: View {
         }
         .fixedSize(horizontal: false, vertical: true)
     }
-    
+
+    var normalizedHighlightTerms: [String] {
+        var output: [String] = []
+        var seen = Set<String>()
+
+        let preparedTerms = highlightTerms
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .flatMap { term -> [String] in
+                if term.hasPrefix("#") {
+                    let stripped = String(term.dropFirst())
+                    return [term, stripped]
+                }
+                return [term]
+            }
+
+        for term in preparedTerms {
+            let lower = term.lowercased()
+            if !lower.isEmpty && seen.insert(lower).inserted {
+                output.append(lower)
+            }
+        }
+
+        return output
+    }
+
+    func highlightedContent(_ content: CompatibleText) -> CompatibleText {
+        guard !normalizedHighlightTerms.isEmpty else { return content }
+
+        var attributed = content.attributed
+        highlightAttributedString(&attributed)
+        return CompatibleText(attributed: attributed)
+    }
+
+    func highlightAttributedString(_ attributed: inout AttributedString) {
+        for term in normalizedHighlightTerms {
+            var searchStart = attributed.startIndex
+
+            while let range = attributed[searchStart...].range(of: term, options: .caseInsensitive) {
+                attributed[range].backgroundColor = DamusColors.highlight
+                searchStart = range.upperBound
+            }
+        }
+    }
+
     var body: some View {
         ArtifactContent
             .onReceive(handle_notify(.profile_updated)) { profile in

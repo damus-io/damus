@@ -68,7 +68,7 @@ struct InnerSearchResults: View {
     }
     
     func TextSearch(_ txt: String) -> some View {
-        return NavigationLink(value: Route.NDBSearch(results: $results)) {
+        return NavigationLink(value: Route.NDBSearch(results: $results, query: txt)) {
             HStack {
                 Text("Search word: \(txt)", comment: "Navigation link to search for a word.")
             }
@@ -296,4 +296,3 @@ func search_profiles(profiles: Profiles, contacts: Contacts, search: String) -> 
         }
     }
 }
-

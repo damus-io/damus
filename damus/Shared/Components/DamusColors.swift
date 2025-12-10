@@ -28,7 +28,15 @@ class DamusColors {
     static let green = Color("DamusGreen")
     static let purple = Color("DamusPurple")
     static let deepPurple = Color("DamusDeepPurple")
-    static let highlight = Color("DamusHighlight")
+    static let highlight = Color(UIColor { traits in
+        if traits.userInterfaceStyle == .dark {
+            // Vivid Damus magenta tuned for dark backgrounds (strong contrast without glow)
+            return UIColor(red: 0.95, green: 0.43, blue: 0.82, alpha: 0.78)
+        } else {
+            // Slightly deeper pink on light so text stays legible
+            return UIColor(red: 0.88, green: 0.32, blue: 0.74, alpha: 0.62)
+        }
+    })
     static let blue = Color("DamusBlue")
     static let bitcoin = Color("Bitcoin")
     static let success = Color("DamusSuccessPrimary")

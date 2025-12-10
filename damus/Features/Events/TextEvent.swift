@@ -38,13 +38,15 @@ struct TextEvent: View {
     let pubkey: Pubkey
     let options: EventViewOptions
     let evdata: EventData
+    let highlightTerms: [String]
     
-    init(damus: DamusState, event: NostrEvent, pubkey: Pubkey, options: EventViewOptions) {
+    init(damus: DamusState, event: NostrEvent, pubkey: Pubkey, options: EventViewOptions, highlightTerms: [String] = []) {
         self.damus = damus
         self.event = event
         self.pubkey = pubkey
         self.options = options
         self.evdata = damus.events.get_cache_data(event.id)
+        self.highlightTerms = highlightTerms
     }
     
     var body: some View {
@@ -62,7 +64,8 @@ struct TextEvent: View {
                 event: event,
                 blur_images: blur_imgs,
                 size: .small,
-                options: options)
+                options: options,
+                highlightTerms: highlightTerms)
         }
         
         return NoteContentView(
@@ -70,7 +73,8 @@ struct TextEvent: View {
             event: event,
             blur_images: blur_imgs,
             size: .normal,
-            options: options
+            options: options,
+            highlightTerms: highlightTerms
         )
     }
 
@@ -87,4 +91,3 @@ struct TextEvent_Previews: PreviewProvider {
         }
     }
 }
-

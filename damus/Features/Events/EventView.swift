@@ -21,12 +21,14 @@ struct EventView: View {
     let options: EventViewOptions
     let damus: DamusState
     let pubkey: Pubkey
+    let highlightTerms: [String]
 
-    init(damus: DamusState, event: NostrEvent, pubkey: Pubkey? = nil, options: EventViewOptions = []) {
+    init(damus: DamusState, event: NostrEvent, pubkey: Pubkey? = nil, options: EventViewOptions = [], highlightTerms: [String] = []) {
         self.event = event
         self.options = options
         self.damus = damus
         self.pubkey = pubkey ?? event.pubkey
+        self.highlightTerms = highlightTerms
     }
 
     var body: some View {
@@ -48,7 +50,7 @@ struct EventView: View {
             } else if event.known_kind == .highlight {
                 HighlightView(state: damus, event: event, options: options)
             } else {
-                TextEvent(damus: damus, event: event, pubkey: pubkey, options: options)
+                TextEvent(damus: damus, event: event, pubkey: pubkey, options: options, highlightTerms: highlightTerms)
                     //.padding([.top], 6)
             }
         }
@@ -158,4 +160,3 @@ struct EventView_Previews: PreviewProvider {
         .padding()
     }
 }
-
