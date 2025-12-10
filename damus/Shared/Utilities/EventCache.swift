@@ -281,6 +281,7 @@ func can_and_should_translate(event: NostrEvent, our_keypair: Keypair, settings:
 
 func should_preload_translation(event: NostrEvent, our_keypair: Keypair, current_status: TranslateStatus, settings: UserSettingsStore, note_lang: String?) -> Bool {
     guard let note_lang else {
+        // Without a detected language we can't safely auto-translate.
         return false
     }
 
