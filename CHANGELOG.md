@@ -1,3 +1,75 @@
+
+
+## [1.16-rc3] - 2025-12-07
+
+### Added
+
+- Added live stream timeline (ericholguin)
+- Added live chat timeline (ericholguin)
+- Added ability to create live chat event (ericholguin)
+- Damus Labs Toggle (ericholguin)
+- Added Damus Labs (ericholguin)
+- Add Timeline switcher button for NIP-81-favorites (Askia Linder)
+- Added the ability to load saved notes if device is offline (Daniel D’Aquino)
+- Notes now load offline (Daniel D’Aquino)
+- Added support for scanning nprofile QR codes (Terry Yiu)
+- Add nip50 search filters and queries (William Casarin)
+- Add ndb_filter_init_with (William Casarin)
+- Add ndb_filter_is_subset_of (William Casarin)
+- Add ndb_filter_eq for filter equality testing (William Casarin)
+- Add method for parsing filter json (William Casarin)
+- Add ndb_filter_json method for creating json filters (William Casarin)
+- Add ndb_unsubscribe to unsubscribe from subscriptions (William Casarin)
+- Add general created_at query plan for timelines (William Casarin)
+- Add ndb_poll_for_notes (William Casarin)
+- Added filter subscriptions (William Casarin)
+- Add initial rust library (William Casarin)
+- Added relay count and relay view to events (Terry Yiu)
+- Add relay hints to tags and identifiers (Terry Yiu)
+
+
+### Changed
+
+- Changed Damus Purple Side View logo and text (ericholguin)
+- Placed the Favorites feature behind a feature flag (Daniel D’Aquino)
+- Tweaked since optimization filter to capture notes that would otherwise be lost (Daniel D’Aquino)
+- Optimized network bandwidth usage and improved timeline performance (Daniel D’Aquino)
+- Increased transaction list limit to 50 transactions (Daniel D’Aquino)
+- Improved loading UX in the home timeline (Daniel D’Aquino)
+- Added UX hint to make it easier to load new notes (Daniel D’Aquino)
+- Switched to the local relay model (Daniel D’Aquino)
+- Reduced default zap amount and deduplicated from preset zap amount items (Terry Yiu)
+- Use NostrDB for rendering note contents (Daniel D’Aquino)
+
+
+### Fixed
+
+- Fixed several crashes throughout the app (Daniel D’Aquino)
+- Fixed an issue where an empty dot would appear on some thread chat views (alltheseas)
+- Ensure mention profile prefetch covers mention_index blocks (alltheseas)
+- Fixed an issue where the mute list view may occasionally freeze the app (Daniel D’Aquino)
+- Fix mention pills falling back to @npub text when profile metadata is missing (alltheseas)
+- Fixed an occasional random crash related to viewing profiles (Daniel D’Aquino)
+- Improved robustness in the part of the code that streams notes from nostrdb (Daniel D’Aquino)
+- Added performance improvements to timeline scrolling (Daniel D’Aquino)
+- Improved security around note validation (Daniel D’Aquino)
+- Fixed an issue where the app would crash when swapping between apps (Daniel D’Aquino)
+- Fixed memory error in nostrdb (Daniel D’Aquino)
+- Fixed bug where non-bech32 damus io urls would cause corruption (William Casarin)
+- Fix aspect ratio on pasted or uploaded images (askeew)
+- Fixed note content rendering to not remove whitespace before hashtag (Terry Yiu)
+
+
+### Removed
+
+- Temporarily disabled note zaps (Daniel D’Aquino)
+- Removed "Load new content" button (Daniel D’Aquino)
+
+
+
+[1.16-rc3]: https://github.com/damus-io/damus/releases/tag/v1.16-rc3
+
+
 ## [1.15] - 2025-07-11
 
 **Note:** This version was only released on TestFlight, and never officially released on the App Store.
