@@ -632,8 +632,8 @@ actor RelayPool {
             }
         }
     }
-
-private func negentropySync(filters: [NostrFilter], to desiredRelay: Relay, negentropyVector: NegentropyStorageVector, missingTracker: NegentropyMissingTracker, eoseTimeout: Duration? = nil, streamContinuation: AsyncStream<StreamItem>.Continuation) async throws {
+    
+    private func negentropySync(filters: [NostrFilter], to desiredRelay: Relay, negentropyVector: NegentropyStorageVector, missingTracker: NegentropyMissingTracker, eoseTimeout: Duration? = nil, streamContinuation: AsyncStream<StreamItem>.Continuation) async throws {
         // No fallback to REQ: if relay does not support NIP-77 this sync will simply not return events.
         let missingIds = try await desiredRelay.connection.getMissingIds(filters: filters, negentropyVector: negentropyVector, timeout: eoseTimeout)
         let uniqueMissingNoteIds = await missingTracker.filterNew(missingIds)
