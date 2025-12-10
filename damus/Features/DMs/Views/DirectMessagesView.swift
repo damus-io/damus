@@ -36,9 +36,7 @@ struct DirectMessagesView: View {
             .padding(.horizontal)
         }
         .refreshable {
-            // Fetch full DM history without the `since` optimization.
-            // This allows users to manually sync older DMs that may have
-            // been missed due to the optimized network filter.
+            // Pull-to-refresh runs a negentropy sync to fetch any missing DMs.
             await home.fetchFullDMHistory()
         }
         .padding(.bottom, tabHeight)

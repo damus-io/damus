@@ -823,34 +823,25 @@ class HomeModel: ContactsDelegate, ObservableObject {
         }
     }
 
-    /// Fetches DM history from relays.
+    /// Fetches DM history from relays using negentropy reconciliation.
     ///
-    /// By default, the DM subscription uses `optimizeNetworkFilter: true` which adds a
-    /// `since` parameter based on the latest local timestamp. This is efficient but can
-    /// miss older DMs if the local database doesn't have complete history.
+    /// The default DM subscription uses `optimizeNetworkFilter: true`, which now performs
+    /// a Negentropy (NIP-77) sync before subscribing with a `since` cursor. This pull-to-refresh
+    /// entry point reuses that flow so we only ask relays for the IDs we are missing, then
+    /// stream the needed events.
     ///
-    /// This method requests DM history with `optimizeNetworkFilter: false`, which starts
-    /// the network fetch immediately rather than waiting for NDB. However, the underlying
-    /// `advancedStream` still applies a `since` filter based on local timestamps once any
-    /// NDB data is seen. This means older DMs may still be missed if the local database
-    /// has newer messages. Users can pull multiple times to incrementally sync history.
-    ///
-    /// A proper fix would require changes to `SubscriptionManager` to fully bypass the
-    /// `since` optimization when `optimizeNetworkFilter: false`.
-    ///
-    /// Uses a 30-second hard timeout and 500 event limit to prevent runaway fetches.
+    /// Uses a 30-second hard timeout to prevent runaway fetches; users can pull multiple
+    /// times to keep reconciling.
     func fetchFullDMHistory() async {
         fullDMHistoryTask?.cancel()
 
-        // DMs sent to us (limit to prevent runaway pulls; user can pull again for more)
+        // DMs sent to us
         var dms_filter = NostrFilter(kinds: [.dm])
         dms_filter.pubkeys = [damus_state.pubkey]
-        dms_filter.limit = 500
 
         // DMs we sent
         var our_dms_filter = NostrFilter(kinds: [.dm])
         our_dms_filter.authors = [damus_state.pubkey]
-        our_dms_filter.limit = 500
 
         let filters = [dms_filter, our_dms_filter]
         let timeoutSeconds: UInt64 = 30
@@ -859,7 +850,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
             // Race between the stream and a hard timeout to guarantee completion
             await withTaskGroup(of: Void.self) { group in
                 group.addTask {
-                    for await lender in self.damus_state.nostrNetwork.reader.streamExistingEvents(filters: filters, timeout: .seconds(30), streamMode: .ndbAndNetworkParallel(optimizeNetworkFilter: false)) {
+                    for await lender in self.damus_state.nostrNetwork.reader.streamExistingEvents(filters: filters, timeout: .seconds(timeoutSeconds), streamMode: .ndbAndNetworkParallel(optimizeNetworkFilter: true)) {
                         if Task.isCancelled { return }
                         await lender.justUseACopy({ await self.process_event(ev: $0, context: .other) })
                     }
