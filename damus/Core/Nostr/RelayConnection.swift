@@ -275,13 +275,13 @@ final class RelayConnection: ObservableObject {
         let frameSizeLimit = 60_000 // Copied from rust-nostr project: Default frame limit is 128k. Halve that (hex encoding) and subtract a bit (JSON msg overhead)
         try negentropyVector.seal()
         var negentropyClient = try Negentropy(storage: negentropyVector, frameSizeLimit: frameSizeLimit)
-        let initialMessage = try negentropyClient.initiate()
         let subscriptionId = UUID().uuidString
-        var pendingMessage: [UInt8]? = initialMessage
+        let initialMessage = try negentropyClient.initiate()
+        Log.info("Negentropy open %s -> sending %d bytes", for: .networking, subscriptionId, initialMessage.count)
         var needIds: [Id] = []
         var haveIds: [Id] = []
         
-        for await response in negentropyStream(subscriptionId: subscriptionId, filters: filters, initialMessage: pendingMessage ?? [], timeoutDuration: timeout) {
+        for await response in negentropyStream(subscriptionId: subscriptionId, filters: filters, initialMessage: initialMessage, timeoutDuration: timeout) {
             switch response {
             case .error(subscriptionId: _, reasonCodeString: let reasonCodeString):
                 Log.error("Negentropy error from relay: %s", for: .networking, reasonCodeString)
@@ -295,10 +295,12 @@ final class RelayConnection: ObservableObject {
                 
                 guard let nextMessage else {
                     // Finished reconciliation.
+                    Log.info("Negentropy complete %s -> need %d ids", for: .networking, subscriptionId, needIds.count)
                     return needIds
                 }
                 
                 // Keep going until reconcile returns nil.
+                Log.info("Negentropy msg %s -> sending %d bytes", for: .networking, subscriptionId, nextMessage.count)
                 self.send(.typical(.negentropyMessage(subscriptionId: subscriptionId, message: nextMessage)))
             case .invalidResponse(subscriptionId: _):
                 throw NegentropySyncError.relayError

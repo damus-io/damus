@@ -595,17 +595,26 @@ actor RelayPool {
             let missingTracker = NegentropyMissingTracker()
             let streamTask = Task {
                 let desiredRelays = await getRelays(targetRelays: desiredRelayURLs)
+                // Prefer relays we expect to support negentropy; fall back to the first.
+                let preferredHosts: [String] = ["relay.damus.io", "nos.lol"]
+                let primaryRelay = desiredRelays.sorted { lhs, rhs in
+                    let lidx = preferredHosts.firstIndex(where: { lhs.descriptor.url.url.host?.contains($0) == true }) ?? preferredHosts.count
+                    let ridx = preferredHosts.firstIndex(where: { rhs.descriptor.url.url.host?.contains($0) == true }) ?? preferredHosts.count
+                    if lidx == ridx { return lhs.descriptor.url.absoluteString < rhs.descriptor.url.absoluteString }
+                    return lidx < ridx
+                }.first
+                guard let primaryRelay else {
+                    continuation.finish()
+                    return
+                }
+                Log.info("Negentropy primary relay: %s", for: .networking, primaryRelay.descriptor.url.absoluteString)
+                // Build a fresh vector per negentropy session to avoid sealing errors.
+                var sessionVector = negentropyVector
                 let negentropyStartTimestamp = UInt32(Date().timeIntervalSince1970)
-                await withTaskGroup { group in
-                    for desiredRelay in desiredRelays {
-                        group.addTask {
-                            do {
-                                try await self.negentropySync(filters: filters, to: desiredRelay, negentropyVector: negentropyVector, missingTracker: missingTracker, eoseTimeout: eoseTimeout, streamContinuation: continuation)
-                            } catch {
-                                Log.error("Negentropy sync failed for %s: %s", for: .networking, desiredRelay.descriptor.url.absoluteString, error.localizedDescription)
-                            }
-                        }
-                    }
+                do {
+                    try await self.negentropySync(filters: filters, to: primaryRelay, negentropyVector: sessionVector, missingTracker: missingTracker, eoseTimeout: eoseTimeout, streamContinuation: continuation)
+                } catch {
+                    Log.error("Negentropy sync failed for %s: %s", for: .networking, primaryRelay.descriptor.url.absoluteString, error.localizedDescription)
                 }
                 continuation.yield(.eose) // Signal completion of negentropy phase before regular subscribe.
                 let updatedFilters = filters.map({
@@ -623,8 +632,8 @@ actor RelayPool {
             }
         }
     }
-    
-    private func negentropySync(filters: [NostrFilter], to desiredRelay: Relay, negentropyVector: NegentropyStorageVector, missingTracker: NegentropyMissingTracker, eoseTimeout: Duration? = nil, streamContinuation: AsyncStream<StreamItem>.Continuation) async throws {
+
+private func negentropySync(filters: [NostrFilter], to desiredRelay: Relay, negentropyVector: NegentropyStorageVector, missingTracker: NegentropyMissingTracker, eoseTimeout: Duration? = nil, streamContinuation: AsyncStream<StreamItem>.Continuation) async throws {
         // No fallback to REQ: if relay does not support NIP-77 this sync will simply not return events.
         let missingIds = try await desiredRelay.connection.getMissingIds(filters: filters, negentropyVector: negentropyVector, timeout: eoseTimeout)
         let uniqueMissingNoteIds = await missingTracker.filterNew(missingIds)

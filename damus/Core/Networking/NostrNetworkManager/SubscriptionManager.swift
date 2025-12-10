@@ -140,6 +140,8 @@ extension NostrNetworkManager {
                 var networkStreamTask: Task<Void, any Error>? = nil
                 // Collect IDs seen locally so negentropy can reconcile deltas against relays.
                 var negentropyStorageVector = NegentropyStorageVector()
+                var negentropyInsertCount = 0
+                let negentropyResetLimit = 10_000  // Bound memory for long-lived streams.
                 
                 let startNetworkStreamTask = {
                     guard streamMode.shouldStreamFromNetwork else { return }
@@ -182,6 +184,11 @@ extension NostrNetworkManager {
                                 logStreamPipelineStats("SubscriptionManager_Advanced_Stream_\(id)", "Consumer_\(id)")
                                 try? lender.borrow({ event in
                                     try negentropyStorageVector.insert(timestamp: UInt64(event.createdAt), id: try Id(data: event.id.id))
+                                    negentropyInsertCount += 1
+                                    if negentropyInsertCount >= negentropyResetLimit {
+                                        negentropyStorageVector = NegentropyStorageVector()
+                                        negentropyInsertCount = 0
+                                    }
                                 })
                                 continuation.yield(item)
                             case .eose:
