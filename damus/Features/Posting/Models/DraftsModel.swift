@@ -226,6 +226,7 @@ class Drafts: ObservableObject {
     }
     
     /// Saves the drafts tracked by this class persistently using NostrDB + UserDefaults
+    @MainActor
     func save(damus_state: DamusState) async {
         var draft_events: [NdbNote] = []
         post_artifact_block: if let post_artifacts = self.post {
