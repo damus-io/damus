@@ -64,7 +64,7 @@ class ActionBarModel: ObservableObject {
     }
     
     var is_empty: Bool {
-        return likes == 0 && boosts == 0 && zaps == 0 && quote_reposts == 0 && relays == 0
+        return likes == 0 && boosts == 0 && zaps == 0 && quote_reposts == 0
     }
     
     var liked: Bool {
