@@ -51,6 +51,13 @@ extension AutoSaveIndicatorView {
     
     /// Models an auto-save mechanism, which automatically saves an item after N seconds.
     ///
+    /// # Behavior
+    ///
+    /// - The timer starts when the user begins typing (first call to `needsSaving()`)
+    /// - If the user keeps typing continuously, the timer continues counting down without resetting
+    /// - This ensures drafts are auto-saved every few seconds even during continuous typing
+    /// - After a save completes, the timer can start again on the next edit
+    ///
     /// # Implementation notes
     ///
     /// - This runs on the main actor because running this on other actors causes issues with published properties.
@@ -118,6 +125,13 @@ extension AutoSaveIndicatorView {
         /// Marks item as needing to be saved.
         /// Call this whenever your item is modified.
         func needsSaving() {
+            // Only start the timer if we're not already counting down.
+            // This ensures the timer starts when the user first types, and continues
+            // counting down even if they keep typing, leading to auto-save every few seconds.
+            if case .needsSaving = self.savedState {
+                // Already counting down, don't reset the timer
+                return
+            }
             self.savedState = .needsSaving(secondsRemaining: self.saveDelay)
         }
         
