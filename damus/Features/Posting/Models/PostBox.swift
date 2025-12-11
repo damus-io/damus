@@ -166,6 +166,11 @@ class PostBox {
         }
     }
 
+    /// Computes the default relay targets (current connected, non-ephemeral relays).
+    func defaultRelayTargets() async -> [RelayURL] {
+        await pool.our_descriptors.map { $0.url }
+    }
+
     func send(_ event: NostrEvent, to: [RelayURL]? = nil, skip_ephemeral: Bool = true, delay: TimeInterval? = nil, on_flush: OnFlush? = nil) async {
         // Don't add event if we already have it
         if events[event.id] != nil {
@@ -189,5 +194,4 @@ class PostBox {
         }
     }
 }
-
 
