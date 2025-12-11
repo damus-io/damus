@@ -101,10 +101,6 @@ extension NostrNetworkManager {
                     relevantStream.continuation.yield(profile)
                 }
             }
-            
-            // Notify the rest of the app so views that rely on rendered text (like mention strings)
-            // can reload and pick up the freshly fetched profile metadata.
-            notify(.profile_updated(.remote(pubkey: metadataEvent.pubkey)))
         }
         
         
@@ -117,6 +113,23 @@ extension NostrNetworkManager {
                 
                 continuation.onTermination = { @Sendable _ in
                     Task { await self.removeStream(pubkey: pubkey, id: stream.id) }
+                }
+            }
+        }
+        
+        func streamProfiles(pubkeys: Set<Pubkey>) -> AsyncStream<ProfileStreamItem> {
+            return AsyncStream<ProfileStreamItem> { continuation in
+                let stream = ProfileStreamInfo(continuation: continuation)
+                for pubkey in pubkeys {
+                    self.add(pubkey: pubkey, stream: stream)
+                }
+                
+                continuation.onTermination = { @Sendable _ in
+                    Task {
+                        for pubkey in pubkeys {
+                            await self.removeStream(pubkey: pubkey, id: stream.id)
+                        }
+                    }
                 }
             }
         }
