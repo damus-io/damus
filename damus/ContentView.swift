@@ -686,7 +686,8 @@ struct ContentView: View {
         self.execute_open_action(openAction)
     }
 
-    func connect() async {
+    @concurrent     // Keep this off the main thread to unload it as much as possible in order to avoid hangs
+    nonisolated func connect() async {
         // nostrdb
         var mndb = Ndb()
         if mndb == nil {
