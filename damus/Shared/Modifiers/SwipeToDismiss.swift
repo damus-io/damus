@@ -63,15 +63,24 @@ struct SwipeToNavigateBackModifier: ViewModifier {
         content
             .offset(x: dragOffset)
             .animation(.interactiveSpring(), value: dragOffset)
-            .gesture(
+            .highPriorityGesture(
                 DragGesture(minimumDistance: 20, coordinateSpace: .global)
                     .onChanged { value in
                         // Only track right swipes (positive x translation)
                         guard value.translation.width > 0 else { return }
+
+                        // Only activate for predominantly horizontal gestures to avoid
+                        // conflicting with vertical scroll views
+                        let dominated_by_horizontal = abs(value.translation.width) > abs(value.translation.height)
+                        guard dominated_by_horizontal else { return }
+
                         // Apply resistance factor for natural drag feel
                         dragOffset = value.translation.width * 0.7
                     }
                     .onEnded { value in
+                        // If we never activated (no offset), don't process the end
+                        guard dragOffset > 0 else { return }
+
                         let horizontalAmount = value.translation.width
                         let velocity = value.predictedEndTranslation.width - value.translation.width
 
