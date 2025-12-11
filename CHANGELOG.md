@@ -19,6 +19,7 @@
 
 ### Changed
 
+- Republish user relay list (kind 10002) alongside outgoing posts and replies to improve NIP-65 compliance (alltheseas)
 - Improved the image sizing behavior on the image carousel for a smoother experience (Daniel D’Aquino)
 - Handle npub correctly in draft notes (Askia Linder)
 - Move users-section to be last in muted view (Askia Linder)
