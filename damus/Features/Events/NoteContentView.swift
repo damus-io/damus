@@ -46,7 +46,6 @@ struct NoteContentView: View {
     let event: NostrEvent
     @State var blur_images: Bool
     @State var load_media: Bool = false
-    @State private var requestedMentionProfiles: Set<Pubkey> = []
     let size: EventViewKind
     let preview_height: CGFloat?
     let options: EventViewOptions
@@ -279,10 +278,12 @@ struct NoteContentView: View {
         .padding(.horizontal)
     }
     
-    func ensureMentionProfilesAreFetchingIfNeeded() {
+    @concurrent
+    func streamProfiles() async throws {
         var mentionPubkeys: Set<Pubkey> = []
-        try? NdbBlockGroup.borrowBlockGroup(event: event, using: damus_state.ndb, and: damus_state.keypair, borrow: { blockGroup in
-            let _: ()? = try? blockGroup.forEachBlock({ _, block in
+        let event = await self.event.clone()
+        try await NdbBlockGroup.borrowBlockGroup(event: event, using: damus_state.ndb, and: damus_state.keypair, borrow: { blockGroup in
+            blockGroup.forEachBlock({ _, block in
                 guard let pubkey = block.mentionPubkey(tags: event.tags) else {
                     return .loopContinue
                 }
@@ -290,33 +291,13 @@ struct NoteContentView: View {
                 return .loopContinue
             })
         })
-
-        guard !mentionPubkeys.isEmpty else { return }
-
-        var toFetch: [Pubkey] = []
-        for pubkey in mentionPubkeys {
-            if requestedMentionProfiles.contains(pubkey) {
-                continue
-            }
-            requestedMentionProfiles.insert(pubkey)
-
-            if damus_state.profiles.has_fresh_profile(id: pubkey) {
-                continue
-            }
-
-            toFetch.append(pubkey)
+        
+        if mentionPubkeys.isEmpty {
+            return
         }
 
-        guard !toFetch.isEmpty else { return }
-
-        // Kick off metadata fetches for any missing mention profiles so their names can render once loaded.
-        for pubkey in toFetch {
-            Task {
-                for await _ in await damus_state.nostrNetwork.profilesManager.streamProfile(pubkey: pubkey) {
-                    // NO-OP, we will receive the update via `notify`
-                    break
-                }
-            }
+        for await profile in await damus_state.nostrNetwork.profilesManager.streamProfiles(pubkeys: mentionPubkeys) {
+            await load(force_artifacts: true)
         }
     }
 
@@ -324,8 +305,6 @@ struct NoteContentView: View {
         if case .loading = damus_state.events.get_cache_data(event.id).artifacts_model.state {
             return
         }
-
-        ensureMentionProfilesAreFetchingIfNeeded()
         
         // always reload artifacts on load
         let plan = get_preload_plan(evcache: damus_state.events, ev: event, our_keypair: damus_state.keypair, settings: damus_state.settings)
@@ -442,44 +421,13 @@ struct NoteContentView: View {
 
     var body: some View {
         ArtifactContent
-            .onReceive(handle_notify(.profile_updated)) { profile in
-                try? NdbBlockGroup.borrowBlockGroup(event: event, using: damus_state.ndb, and: damus_state.keypair, borrow: { blockGroup in
-                    let _: Int? = blockGroup.forEachBlock { index, block in
-                        switch block {
-                        case .mention(let m):
-                            guard let typ = m.bech32_type else {
-                                return .loopContinue
-                            }
-                            switch typ {
-                            case .nprofile:
-                                if m.bech32.nprofile.matches_pubkey(pk: profile.pubkey) {
-                                    load(force_artifacts: true)
-                                }
-                            case .npub:
-                                if m.bech32.npub.matches_pubkey(pk: profile.pubkey) {
-                                    load(force_artifacts: true)
-                                }
-                            case .nevent: return .loopContinue
-                            case .nrelay: return .loopContinue
-                            case .nsec: return .loopContinue
-                            case .note: return .loopContinue
-                            case .naddr: return .loopContinue
-                            }
-                        case .text: return .loopContinue
-                        case .hashtag: return .loopContinue
-                        case .url: return .loopContinue
-                        case .invoice: return .loopContinue
-                        case .mention_index(_): return .loopContinue
-                        }
-                        return .loopContinue
-                    }
-                })
+            .task {
+                try? await streamProfiles()
             }
             .onAppear {
                 load()
             }
     }
-    
 }
 
 class NoteArtifactsParts {

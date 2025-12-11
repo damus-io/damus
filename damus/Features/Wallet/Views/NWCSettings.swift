@@ -250,7 +250,9 @@ struct NWCSettings: View {
             
             let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: profile.lud16, nip05: profile.nip05, damus_donation: p, reactions: profile.reactions)
 
-            notify(.profile_updated(.manual(pubkey: self.damus_state.pubkey, profile: prof)))
+            Task {
+                await damus_state.nostrNetwork.profilesManager.notifyProfileUpdate(pubkey: self.damus_state.pubkey)
+            }
         }
         .onDisappear {
             
