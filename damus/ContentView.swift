@@ -269,6 +269,7 @@ struct ContentView: View {
                     )
                     .navigationDestination(for: Route.self) { route in
                         route.view(navigationCoordinator: navigationCoordinator, damusState: damus_state!)
+                            .swipeToNavigateBack(navigationCoordinator: navigationCoordinator)
                     }
                     .onReceive(handle_notify(.switched_timeline)) { _ in
                         navigationCoordinator.popToRoot()
