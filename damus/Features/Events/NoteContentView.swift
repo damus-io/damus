@@ -394,41 +394,46 @@ struct NoteContentView: View {
     var body: some View {
         ArtifactContent
             .onReceive(handle_notify(.profile_updated)) { profile in
-                try? NdbBlockGroup.borrowBlockGroup(event: event, using: damus_state.ndb, and: damus_state.keypair, borrow: { blockGroup in
-                    let _: Int? = blockGroup.forEachBlock { index, block in
-                        switch block {
-                        case .mention(let m):
-                            guard let typ = m.bech32_type else {
-                                return .loopContinue
-                            }
-                            switch typ {
-                            case .nprofile:
-                                if m.bech32.nprofile.matches_pubkey(pk: profile.pubkey) {
-                                    load(force_artifacts: true)
-                                }
-                            case .npub:
-                                if m.bech32.npub.matches_pubkey(pk: profile.pubkey) {
-                                    load(force_artifacts: true)
-                                }
-                            case .nevent: return .loopContinue
-                            case .nrelay: return .loopContinue
-                            case .nsec: return .loopContinue
-                            case .note: return .loopContinue
-                            case .naddr: return .loopContinue
-                            }
-                        case .text: return .loopContinue
-                        case .hashtag: return .loopContinue
-                        case .url: return .loopContinue
-                        case .invoice: return .loopContinue
-                        case .mention_index(_): return .loopContinue
-                        }
-                        return .loopContinue
-                    }
-                })
+                Task { await handleProfileUpdate(profile: profile) }
             }
             .onAppear {
                 load()
             }
+    }
+    
+    @concurrent     // This is a heavy and frequent operation. Keep this off the main thread to unload it as much as possible in order to avoid hangs
+    nonisolated func handleProfileUpdate(profile: ProfileUpdate) async {
+        try? await NdbBlockGroup.borrowBlockGroup(event: event, using: damus_state.ndb, and: damus_state.keypair, borrow: { blockGroup in
+            let _: Int? = blockGroup.forEachBlock { index, block in
+                switch block {
+                case .mention(let m):
+                    guard let typ = m.bech32_type else {
+                        return .loopContinue
+                    }
+                    switch typ {
+                    case .nprofile:
+                        if m.bech32.nprofile.matches_pubkey(pk: profile.pubkey) {
+                            Task { await load(force_artifacts: true) }
+                        }
+                    case .npub:
+                        if m.bech32.npub.matches_pubkey(pk: profile.pubkey) {
+                            Task { await load(force_artifacts: true) }
+                        }
+                    case .nevent: return .loopContinue
+                    case .nrelay: return .loopContinue
+                    case .nsec: return .loopContinue
+                    case .note: return .loopContinue
+                    case .naddr: return .loopContinue
+                    }
+                case .text: return .loopContinue
+                case .hashtag: return .loopContinue
+                case .url: return .loopContinue
+                case .invoice: return .loopContinue
+                case .mention_index(_): return .loopContinue
+                }
+                return .loopContinue
+            }
+        })
     }
     
 }
