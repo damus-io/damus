@@ -89,6 +89,15 @@ extension NostrNetworkManager {
             guard let latestRelayListEventId = NoteId(hex: latestRelayListEventId) else { return nil }
             return delegate.ndb.lookup_note_and_copy(latestRelayListEventId)
         }
+
+        /// Returns a signed relay list event ready to (re)publish.
+        ///
+        /// This is best-effort: if we cannot form the event (no list available or missing secret key), we return nil.
+        func latestRelayListEventForPublishing() -> NostrEvent? {
+            guard let currentRelayList = self.getUserCurrentRelayList() else { return nil }
+            guard let fullKeypair = delegate.keypair.to_full() else { return nil }
+            return currentRelayList.toNostrEvent(keypair: fullKeypair)
+        }
         
         /// Gets the latest `kind:3` relay list from NostrDB.
         ///
