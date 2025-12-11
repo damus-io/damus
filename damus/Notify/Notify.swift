@@ -33,7 +33,7 @@ struct NotifyHandler<T> { }
 
 func notify<T: Notify>(_ notify: Notifications<T>) {
     let notify = notify.notify
-    DispatchQueue.main.async {
+    Task.detached {
         NotificationCenter.default.post(name: T.name, object: notify.payload)
     }
 }
