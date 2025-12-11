@@ -283,4 +283,11 @@ class NavigationCoordinator: ObservableObject {
     func popToRoot() {
         path = []
     }
+
+    /// Pops the top route from the navigation stack, returning to the previous view.
+    /// Used by swipe-to-navigate-back gesture.
+    func pop() {
+        guard !path.isEmpty else { return }
+        path.removeLast()
+    }
 }
