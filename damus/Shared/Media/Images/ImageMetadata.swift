@@ -181,7 +181,8 @@ func event_image_metadata(ev: NostrEvent) -> [ImageMetadata] {
     }
 }
 
-func process_image_metadatas(cache: EventCache, ev: NostrEvent) {
+@concurrent
+nonisolated func process_image_metadatas(cache: EventCache, ev: NostrEvent) async {
     for meta in event_image_metadata(ev: ev) {
         guard cache.lookup_img_metadata(url: meta.url) == nil else {
             continue

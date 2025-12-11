@@ -181,36 +181,35 @@ class HomeModel: ContactsDelegate, ObservableObject {
         }
     }
 
-    @MainActor
-    func process_event(ev: NostrEvent, context: SubscriptionContext) {
+    func process_event(ev: NostrEvent, context: SubscriptionContext) async {
         guard let kind = ev.known_kind else {
             return
         }
 
         switch kind {
         case .chat, .longform, .text, .highlight:
-            handle_text_event(ev, context: context)
+            await handle_text_event(ev, context: context)
         case .contacts:
             handle_contact_event(ev: ev)
         case .metadata:
             // profile metadata processing is handled by nostrdb
             break
         case .list_deprecated:
-            handle_old_list_event(ev)
+            await handle_old_list_event(ev)
         case .mute_list:
-            handle_mute_list_event(ev)
+            await handle_mute_list_event(ev)
         case .contact_card:
             damus_state.contactCards.loadEvent(ev, pubkey: damus_state.pubkey)
         case .boost:
             handle_boost_event(ev, context: context)
         case .like:
-            handle_like_event(ev)
+            await handle_like_event(ev)
         case .dm:
-            handle_dm(ev)
+            await handle_dm(ev)
         case .delete:
             handle_delete_event(ev)
         case .zap:
-            handle_zap_event(ev)
+            await handle_zap_event(ev)
         case .zap_request:
             break
         case .nwc_request:
@@ -220,7 +219,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         case .http_auth:
             break
         case .status:
-            handle_status_event(ev)
+            await handle_status_event(ev)
         case .draft:
             // TODO: Implement draft syncing with relays. We intentionally do not support that as of writing. See `DraftsModel.swift` for other details
             // try? damus_state.drafts.load(wrapped_draft_note: ev, with: damus_state)
@@ -401,9 +400,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
                 }
                 
                 if inner_ev.is_textlike {
-                    DispatchQueue.main.async {
-                        self.handle_text_event(ev, context: context)
-                    }
+                    await self.handle_text_event(ev, context: context)
                 }
             }
         }
@@ -429,8 +426,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
         }
     }
 
-    @MainActor
-    func handle_like_event(_ ev: NostrEvent) {
+    @concurrent
+    nonisolated func handle_like_event(_ ev: NostrEvent) async {
         guard let e = ev.last_refid() else {
             // no id ref? invalid like event
             return
@@ -444,7 +441,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         case .already_counted:
             break
         case .success(let n):
-            handle_notification(ev: ev)
+            await handle_notification(ev: ev)
             let liked = Counted(event: ev, id: e, total: n)
             notify(.liked(liked))
             notify(.update_stats(note_id: e))
@@ -722,12 +719,12 @@ class HomeModel: ContactsDelegate, ObservableObject {
         return m[kind]
     }
     
-    @MainActor
-    func handle_notification(ev: NostrEvent) {
+    @concurrent
+    nonisolated func handle_notification(ev: NostrEvent) async {
         // don't show notifications from ourselves
         guard ev.pubkey != damus_state.pubkey,
               event_has_our_pubkey(ev, our_pubkey: self.damus_state.pubkey),
-              should_show_event(state: damus_state, ev: ev) else {
+              await should_show_event(state: damus_state, ev: ev) else {
             return
         }
         
@@ -765,14 +762,14 @@ class HomeModel: ContactsDelegate, ObservableObject {
     }
 
 
-    @MainActor
-    func handle_text_event(_ ev: NostrEvent, context: SubscriptionContext) {
-        guard should_show_event(state: damus_state, ev: ev) else {
+    @concurrent
+    nonisolated func handle_text_event(_ ev: NostrEvent, context: SubscriptionContext) async {
+        guard await should_show_event(state: damus_state, ev: ev) else {
             return
         }
         
         // TODO: will we need to process this in other places like zap request contents, etc?
-        process_image_metadatas(cache: damus_state.events, ev: ev)
+        await process_image_metadatas(cache: damus_state.events, ev: ev)
         damus_state.replies.count_replies(ev, keypair: self.damus_state.keypair)
         damus_state.events.insert(ev)
 
@@ -794,7 +791,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         case .home:
             Task { await insert_home_event(ev) }
         case .notifications:
-            handle_notification(ev: ev)
+            await handle_notification(ev: ev)
         case .other:
             break
         }
