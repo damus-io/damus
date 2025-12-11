@@ -90,27 +90,25 @@ struct BannerImageView: View {
     let disable_animation: Bool
     let pubkey: Pubkey
     let profiles: Profiles
+    let damusState: DamusState
     
     @State var banner: String?
     
-    init(pubkey: Pubkey, profiles: Profiles, disable_animation: Bool, banner: String? = nil) {
+    init(pubkey: Pubkey, profiles: Profiles, disable_animation: Bool, banner: String? = nil, damusState: DamusState) {
         self.pubkey = pubkey
         self.profiles = profiles
         self._banner = State(initialValue: banner)
         self.disable_animation = disable_animation
+        self.damusState = damusState
     }
     
     var body: some View {
         InnerBannerImageView(disable_animation: disable_animation, url: get_banner_url(banner: banner, pubkey: pubkey, profiles: profiles))
-            .onReceive(handle_notify(.profile_updated)) { updated in
-                guard updated.pubkey == self.pubkey,
-                      let profile = profiles.lookup(id: updated.pubkey)
-                else {
-                    return
-                }
-
-                if let bannerImage = profile.banner, bannerImage != self.banner {
-                    self.banner = bannerImage
+            .task {
+                for await profile in await damusState.nostrNetwork.profilesManager.streamProfile(pubkey: pubkey) {
+                    if let bannerImage = profile.banner, bannerImage != self.banner {
+                        self.banner = bannerImage
+                    }
                 }
             }
     }
@@ -129,7 +127,8 @@ struct BannerImageView_Previews: PreviewProvider {
         BannerImageView(
             pubkey: test_pubkey,
             profiles: make_preview_profiles(test_pubkey),
-            disable_animation: false
+            disable_animation: false,
+            damusState: test_damus_state
         )
     }
 }

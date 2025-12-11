@@ -101,10 +101,17 @@ extension NostrNetworkManager {
                     relevantStream.continuation.yield(profile)
                 }
             }
-            
-            // Notify the rest of the app so views that rely on rendered text (like mention strings)
-            // can reload and pick up the freshly fetched profile metadata.
-            notify(.profile_updated(.remote(pubkey: metadataEvent.pubkey)))
+        }
+        
+        /// Manually trigger profile updates for a given pubkey
+        /// This is useful for local profile changes (e.g., nip05 validation, donation percentage updates)
+        func notifyProfileUpdate(pubkey: Pubkey) {
+            if let relevantStreams = streams[pubkey] {
+                guard let profile = ndb.lookup_profile_and_copy(pubkey) else { return }
+                for relevantStream in relevantStreams.values {
+                    relevantStream.continuation.yield(profile)
+                }
+            }
         }
         
         
@@ -117,6 +124,29 @@ extension NostrNetworkManager {
                 
                 continuation.onTermination = { @Sendable _ in
                     Task { await self.removeStream(pubkey: pubkey, id: stream.id) }
+                }
+            }
+        }
+        
+        func streamProfiles(pubkeys: Set<Pubkey>) -> AsyncStream<ProfileStreamItem> {
+            guard !pubkeys.isEmpty else {
+                return AsyncStream<ProfileStreamItem> { continuation in
+                    continuation.finish()
+                }
+            }
+            
+            return AsyncStream<ProfileStreamItem> { continuation in
+                let stream = ProfileStreamInfo(continuation: continuation)
+                for pubkey in pubkeys {
+                    self.add(pubkey: pubkey, stream: stream)
+                }
+                
+                continuation.onTermination = { @Sendable _ in
+                    Task {
+                        for pubkey in pubkeys {
+                            await self.removeStream(pubkey: pubkey, id: stream.id)
+                        }
+                    }
                 }
             }
         }

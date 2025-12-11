@@ -46,7 +46,7 @@ struct NIP05DomainTimelineView: View {
 
             if let pubkeys = model.filter.authors {
                 for pubkey in pubkeys {
-                    check_nip05_validity(pubkey: pubkey, profiles: damus_state.profiles)
+                    check_nip05_validity(pubkey: pubkey, damus_state: damus_state)
                 }
             }
         }

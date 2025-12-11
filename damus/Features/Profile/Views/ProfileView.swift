@@ -144,7 +144,7 @@ struct ProfileView: View {
             return AnyView(
                 VStack(spacing: 0) {
                     ZStack {
-                        BannerImageView(pubkey: profile.pubkey, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                        BannerImageView(pubkey: profile.pubkey, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
                             .aspectRatio(contentMode: .fill)
                             .frame(width: proxy.size.width, height: minY > 0 ? bannerHeight + minY : bannerHeight)
                             .clipped()
@@ -525,7 +525,7 @@ struct ProfileView: View {
                 dismiss()
             }
             .onAppear() {
-                check_nip05_validity(pubkey: self.profile.pubkey, profiles: self.damus_state.profiles)
+                check_nip05_validity(pubkey: self.profile.pubkey, damus_state: self.damus_state)
                 profile.subscribe()
                 //followers.subscribe()
             }
@@ -568,7 +568,8 @@ extension View {
 }
 
 @MainActor
-func check_nip05_validity(pubkey: Pubkey, profiles: Profiles) {
+func check_nip05_validity(pubkey: Pubkey, damus_state: DamusState) {
+    let profiles = damus_state.profiles
     let profile = profiles.lookup(id: pubkey)
 
     guard let nip05 = profile?.nip05,
@@ -586,7 +587,7 @@ func check_nip05_validity(pubkey: Pubkey, profiles: Profiles) {
         Task { @MainActor in
             profiles.set_validated(pubkey, nip05: validated)
             profiles.nip05_pubkey[nip05] = pubkey
-            notify(.profile_updated(.remote(pubkey: pubkey)))
+            await damus_state.nostrNetwork.profilesManager.notifyProfileUpdate(pubkey: pubkey)
         }
     }
 }
