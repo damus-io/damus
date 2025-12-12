@@ -280,6 +280,11 @@ func can_and_should_translate(event: NostrEvent, our_keypair: Keypair, settings:
 }
 
 func should_preload_translation(event: NostrEvent, our_keypair: Keypair, current_status: TranslateStatus, settings: UserSettingsStore, note_lang: String?) -> Bool {
+    guard let note_lang else {
+        // Without a detected language we can't safely auto-translate.
+        return false
+    }
+
     switch current_status {
     case .havent_tried:
         return can_and_should_translate(event: event, our_keypair: our_keypair, settings: settings, note_lang: note_lang) && settings.auto_translate
@@ -306,7 +311,22 @@ func load_preview(artifacts: NoteArtifactsSeparated) async -> Preview? {
     return Preview(meta: meta)
 }
 
-func get_preload_plan(evcache: EventCache, ev: NostrEvent, our_keypair: Keypair, settings: UserSettingsStore) -> PreloadPlan? {
+/// note_language(ndb:...) asserts off the main thread; wrap to guarantee that.
+private func compute_note_language(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> String? {
+    if Thread.isMainThread {
+        var result: String?
+        let sem = DispatchSemaphore(value: 0)
+        DispatchQueue.global(qos: .userInitiated).async {
+            result = ev.note_language(ndb: ndb, keypair)
+            sem.signal()
+        }
+        sem.wait()
+        return result
+    }
+    return ev.note_language(ndb: ndb, keypair)
+}
+
+func get_preload_plan(ndb: Ndb, evcache: EventCache, ev: NostrEvent, our_keypair: Keypair, settings: UserSettingsStore) -> PreloadPlan? {
     let cache = evcache.get_cache_data(ev.id)
     let load_artifacts = cache.artifacts.should_preload
     if load_artifacts {
@@ -314,7 +334,10 @@ func get_preload_plan(evcache: EventCache, ev: NostrEvent, our_keypair: Keypair,
     }
 
     // Cached event might not have the note language determined yet, so determine the language here before figuring out if translations should be preloaded.
-    let note_lang = cache.translations_model.note_language ?? /*ev.note_language(our_keypair.privkey)*/ current_language()
+    let note_lang = cache.translations_model.note_language ?? compute_note_language(ndb: ndb, ev: ev, keypair: our_keypair)
+    if cache.translations_model.note_language == nil {
+        cache.translations_model.note_language = note_lang
+    }
 
     let load_translations = should_preload_translation(event: ev, our_keypair: our_keypair, current_status: cache.translations, settings: settings, note_lang: note_lang)
     if load_translations {
@@ -418,11 +441,14 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
         }
     }
     
-    let note_language = plan.data.translations_model.note_language ?? plan.event.note_language(ndb: state.ndb, our_keypair) ?? current_language()
+    let note_language = plan.data.translations_model.note_language ?? compute_note_language(ndb: state.ndb, ev: plan.event, keypair: our_keypair)
 
     var translations: TranslateStatus? = nil
     // We have to recheck should_translate here now that we have note_language
-    if plan.load_translations && can_and_should_translate(event: plan.event, our_keypair: our_keypair, settings: settings, note_lang: note_language) && settings.auto_translate
+    if plan.load_translations,
+       let note_language,
+       can_and_should_translate(event: plan.event, our_keypair: our_keypair, settings: settings, note_lang: note_language),
+       settings.auto_translate
     {
         translations = await translate_note(profiles: profiles, keypair: our_keypair, event: plan.event, settings: settings, note_lang: note_language, purple: state.purple)
     }
@@ -447,7 +473,7 @@ func preload_events(state: DamusState, events: [NostrEvent]) {
     let settings = state.settings
     
     let plans = events.compactMap { ev in
-        get_preload_plan(evcache: event_cache, ev: ev, our_keypair: our_keypair, settings: settings)
+        get_preload_plan(ndb: state.ndb, evcache: event_cache, ev: ev, our_keypair: our_keypair, settings: settings)
     }
     
     if plans.count == 0 {
@@ -460,4 +486,3 @@ func preload_events(state: DamusState, events: [NostrEvent]) {
         }
     }
 }
-
