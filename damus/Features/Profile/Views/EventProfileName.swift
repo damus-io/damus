@@ -78,7 +78,7 @@ struct EventProfileName: View {
                             .fontWeight(.bold)
                         
                         Text(verbatim: "@\(username)")
-                            .foregroundColor(.gray)
+                            .foregroundColor(DamusColors.mediumGrey)
                             .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
                     }
             }

@@ -33,7 +33,7 @@ struct IconLabel_Previews: PreviewProvider {
     static var previews: some View {
         Form {
             Section {
-                IconLabel(NSLocalizedString("Keys", comment: "Settings section for managing keys"), img_name: "key.fill", color: .orange)
+                IconLabel(NSLocalizedString("Keys", comment: "Settings section for managing keys"), img_name: "key.fill", color: DamusColors.adaptableOrange)
             
                 IconLabel(NSLocalizedString("Local Notifications", comment: "Section header for damus local notifications user configuration"), img_name: "bell.fill", color: .blue)
             

@@ -16,7 +16,7 @@ struct ZapEvent: View {
         VStack(alignment: .leading) {
             HStack(alignment: .center) {
                 Image("zap.fill")
-                    .foregroundColor(.orange)
+                    .foregroundColor(DamusColors.adaptableOrange)
                 
                 Text(verbatim: format_msats(zap.amount))
                     .font(.headline)
@@ -24,7 +24,7 @@ struct ZapEvent: View {
                 if is_top_zap {
                     Text("Top Zap", comment: "Text indicating that this zap is the one with the highest amount of sats.")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(DamusColors.mediumGrey)
                         .padding([.top], 2)
                 }
                 

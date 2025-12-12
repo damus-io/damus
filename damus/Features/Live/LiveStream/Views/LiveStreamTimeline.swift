@@ -48,7 +48,7 @@ struct LiveStreamTimelineView<Content: View>: View {
                             .fontWeight(.bold)
                         Text("Live events going on right now")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundColor(DamusColors.mediumGrey)
                     }
                     .padding(.horizontal, 5)
 

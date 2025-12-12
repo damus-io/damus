@@ -55,7 +55,7 @@ struct TranslateView: View {
         return VStack(alignment: .leading) {
             let translatedFromLanguageString = String(format: NSLocalizedString("Translated from %@", comment: "Button to indicate that the note has been translated from a different language."), lang ?? "ja")
             Text(translatedFromLanguageString)
-                .foregroundColor(.gray)
+                .foregroundColor(DamusColors.mediumGrey)
                 .font(.footnote)
                 .padding([.top, .bottom], 10)
 
