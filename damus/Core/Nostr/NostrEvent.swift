@@ -352,6 +352,10 @@ func verify_nostr_response(response: borrowing NostrResponse) -> Bool {
         return true
     case .auth(_):
         return true
+    case .negentropyError(subscriptionId: let subscriptionId, reasonCodeString: let reasonCodeString):
+        return true
+    case .negentropyMessage(subscriptionId: let subscriptionId, hexEncodedData: let hexEncodedData):
+        return true
     }
 }
 

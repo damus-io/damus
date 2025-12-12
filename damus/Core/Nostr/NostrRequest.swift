@@ -48,6 +48,12 @@ enum NostrRequest {
     case event(NostrEvent)
     /// Authenticate with the relay
     case auth(NostrEvent)
+    /// Negentropy open
+    case negentropyOpen(subscriptionId: String, filters: [NostrFilter], initialMessage: [UInt8])
+    /// Negentropy message
+    case negentropyMessage(subscriptionId: String, message: [UInt8])
+    /// Close negentropy communication
+    case negentropyClose(subscriptionId: String)
 
     /// Whether this request is meant to write data to a relay
     var is_write: Bool {
@@ -59,6 +65,12 @@ enum NostrRequest {
         case .event:
             return true
         case .auth:
+            return false
+        case .negentropyOpen:
+            return false
+        case .negentropyMessage:
+            return false
+        case .negentropyClose:
             return false
         }
     }

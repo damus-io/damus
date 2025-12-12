@@ -15,13 +15,15 @@ let package = Package(
             targets: ["damus"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/jb55/secp256k1.swift.git", branch: "main")
+        .package(url: "https://github.com/jb55/secp256k1.swift.git", branch: "main"),
+        .package(url: "https://github.com/damus-io/negentropy-swift", from: "0.1.0")
     ],
     targets: [
         .target(
             name: "damus",
             dependencies: [
-                .product(name: "secp256k1", package: "secp256k1.swift")
+                .product(name: "secp256k1", package: "secp256k1.swift"),
+                .product(name: "Negentropy", package: "negentropy-swift")
             ],
             path: "damus"),
         .testTarget(

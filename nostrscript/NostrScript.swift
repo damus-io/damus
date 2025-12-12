@@ -207,6 +207,12 @@ enum NScriptEventType: Int {
             self = .ok
         case .auth:
             self = .auth
+        case .negentropyError:
+            // Treat negentropy control-plane errors as notices for scripts.
+            self = .notice
+        case .negentropyMessage:
+            // Scripts ignore negentropy payloads.
+            self = .notice
         }
     }
 }
@@ -410,4 +416,3 @@ func nscript_run(interp: inout wasm_interp, resuming: Bool) -> NostrScriptRunRes
 
     return .finished(Int(retval))
 }
-
