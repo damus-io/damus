@@ -44,8 +44,14 @@ extension DamusPurpleView {
                             ProductsView(products)
                         }
                     case .loading:
-                        ProgressView()
-                            .progressViewStyle(.circular)
+                        HStack(spacing: 8) {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                                .accessibilityLabel(NSLocalizedString("Loading subscriptions", comment: "Accessibility label indicating subscription options are loading."))
+                            Text("Loading subscription options…", comment: "Label shown while we fetch App Store subscriptions.")
+                                .foregroundStyle(.white.opacity(0.75))
+                                .font(.footnote.weight(.medium))
+                        }
                 }
             }
         }
