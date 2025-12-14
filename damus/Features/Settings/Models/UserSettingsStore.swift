@@ -138,7 +138,13 @@ class UserSettingsStore: ObservableObject {
 
     @Setting(key: "hide_nsfw_tagged_content", default_value: false)
     var hide_nsfw_tagged_content: Bool
-    
+
+    @Setting(key: "hide_hashtag_spam", default_value: true)
+    var hide_hashtag_spam: Bool
+
+    @Setting(key: "max_hashtags", default_value: 3)
+    var max_hashtags: Int
+
     @Setting(key: "reduce_bitcoin_content", default_value: false)
     var reduce_bitcoin_content: Bool
     
