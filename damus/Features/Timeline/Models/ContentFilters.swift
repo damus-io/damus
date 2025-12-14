@@ -54,6 +54,22 @@ func nsfw_tag_filter(ev: NostrEvent) -> Bool {
     return ev.referenced_hashtags.first(where: { t in t.hashtag.caseInsensitiveCompare("nsfw") == .orderedSame }) == nil
 }
 
+/// Filter to hide posts with too many hashtags (spam detection)
+/// Checks both the event's "t" tags and hashtags in content text.
+/// If either exceeds the threshold, the post is filtered.
+func hashtag_spam_filter(ev: NostrEvent, max_hashtags: Int) -> Bool {
+    // Check "t" tags count
+    var tag_count = 0
+    for _ in ev.referenced_hashtags {
+        tag_count += 1
+        if tag_count > max_hashtags {
+            return false
+        }
+    }
+
+    return true
+}
+
 @MainActor
 func get_repost_of_muted_user_filter(damus_state: DamusState) -> ((_ ev: NostrEvent) -> Bool) {
     return { ev in
@@ -96,6 +112,10 @@ extension ContentFilters {
         var filters = Array<(NostrEvent) -> Bool>()
         if damus_state.settings.hide_nsfw_tagged_content {
             filters.append(nsfw_tag_filter)
+        }
+        if damus_state.settings.hide_hashtag_spam {
+            let max_hashtags = damus_state.settings.max_hashtags
+            filters.append({ ev in hashtag_spam_filter(ev: ev, max_hashtags: max_hashtags) })
         }
         filters.append(get_repost_of_muted_user_filter(damus_state: damus_state))
         filters.append(timestamp_filter)
