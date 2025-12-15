@@ -134,6 +134,42 @@ struct ProfileActionSheetView: View {
         }
     }
     
+    // Count the number of visible action buttons
+    var visibleButtonCount: Int {
+        var count = 1 // followButton is always visible
+        
+        if damus_state.settings.enable_favourites_feature {
+            count += 1 // favoriteButton
+        }
+        
+        if let lnurl = self.get_lnurl(), lnurl != "" {
+            count += 1 // zapButton
+        }
+        
+        count += 1 // dmButton is always visible
+        
+        if damus_state.keypair.pubkey != profile.pubkey && damus_state.keypair.privkey != nil {
+            count += 1 // muteButton
+        }
+        
+        return count
+    }
+    
+    var actionButtons: some View {
+        HStack(spacing: 20) {
+            followButton
+            if damus_state.settings.enable_favourites_feature {
+                favoriteButton
+            }
+            zapButton
+            dmButton
+            if damus_state.keypair.pubkey != profile.pubkey && damus_state.keypair.privkey != nil {
+                muteButton
+            }
+        }
+        .padding()
+    }
+    
     var body: some View {
         VStack(alignment: .center) {
             ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
@@ -150,19 +186,15 @@ struct ProfileActionSheetView: View {
                 AboutView(state: damus_state, about: about, max_about_length: 140, text_alignment: .center)
                     .padding(.top)
             }
-            ScrollView(.horizontal) {
-                HStack(spacing: 20) {
-                    followButton
-                    if damus_state.settings.enable_favourites_feature {
-                        favoriteButton
-                    }
-                    zapButton
-                    dmButton
-                    if damus_state.keypair.pubkey != profile.pubkey && damus_state.keypair.privkey != nil {
-                        muteButton
-                    }
+            
+            // Center-align buttons when there are fewer than 5, otherwise left-align in a ScrollView
+            if visibleButtonCount < 5 {
+                actionButtons
+                    .frame(maxWidth: .infinity)
+            } else {
+                ScrollView(.horizontal) {
+                    actionButtons
                 }
-                .padding()
             }
             Button(
                 action: {
