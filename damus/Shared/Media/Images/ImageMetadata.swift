@@ -37,24 +37,31 @@ struct ImageMetaDim: Equatable, StringCodable {
 struct ImageMetadata: Equatable {
     let url: URL
     let blurhash: String?
+    let thumbhash: String?  // ThumbHash: better detail, aspect ratio, alpha support
     let dim: ImageMetaDim?
-    
-    init(url: URL, blurhash: String? = nil, dim: ImageMetaDim? = nil) {
+
+    init(url: URL, blurhash: String? = nil, thumbhash: String? = nil, dim: ImageMetaDim? = nil) {
         self.url = url
         self.blurhash = blurhash
+        self.thumbhash = thumbhash
         self.dim = dim
     }
-    
+
     init?(tag: [String]) {
         guard let meta = decode_image_metadata(tag) else {
             return nil
         }
-        
+
         self = meta
     }
-    
+
     func to_tag() -> [String] {
         return image_metadata_to_tag(self)
+    }
+
+    /// Returns true if we have any placeholder hash (thumbhash preferred over blurhash)
+    var hasPlaceholder: Bool {
+        thumbhash != nil || blurhash != nil
     }
 }
 
@@ -68,12 +75,45 @@ func process_blurhash(blurhash: String, size: CGSize?) async -> UIImage? {
         }
         return img
     }
-    
+
     return await res.value
+}
+
+/// Decodes a base64-encoded ThumbHash string into a UIImage placeholder.
+/// ThumbHash produces better quality placeholders than BlurHash with embedded aspect ratio.
+func process_thumbhash(thumbhash: String, size: CGSize?) async -> UIImage? {
+    let res = Task.detached(priority: .low) { () -> UIImage? in
+        // ThumbHash is stored as base64-encoded data
+        guard let hashData = Data(base64Encoded: thumbhash) else {
+            return nil
+        }
+        // thumbHashToImage handles aspect ratio internally, returns ~32x32 image
+        return thumbHashToImage(hash: hashData)
+    }
+    return await res.value
+}
+
+/// Processes a placeholder hash, preferring thumbhash over blurhash.
+/// Returns a UIImage suitable for display while the full image loads.
+func process_placeholder(meta: ImageMetadata) async -> UIImage? {
+    // Prefer thumbhash: better quality, embedded aspect ratio, alpha support
+    if let thumbhash = meta.thumbhash {
+        return await process_thumbhash(thumbhash: thumbhash, size: meta.dim?.size)
+    }
+    // Fall back to blurhash for interoperability with other Nostr clients
+    if let blurhash = meta.blurhash {
+        return await process_blurhash(blurhash: blurhash, size: meta.dim?.size)
+    }
+    return nil
 }
 
 func image_metadata_to_tag(_ meta: ImageMetadata) -> [String] {
     var tags = ["imeta", "url \(meta.url.absoluteString)"]
+    // Include thumbhash if available (preferred placeholder format)
+    if let thumbhash = meta.thumbhash {
+        tags.append("thumbhash \(thumbhash)")
+    }
+    // Also include blurhash for backwards compatibility with older clients
     if let blurhash = meta.blurhash {
         tags.append("blurhash \(blurhash)")
     }
@@ -86,35 +126,43 @@ func image_metadata_to_tag(_ meta: ImageMetadata) -> [String] {
 func decode_image_metadata(_ parts: [String]) -> ImageMetadata? {
     var url: URL? = nil
     var blurhash: String? = nil
+    var thumbhash: String? = nil
     var dim: ImageMetaDim? = nil
-    
+
     for part in parts {
+        // Skip the "imeta" tag identifier
         if part == "imeta" {
             continue
         }
-        
+
         let ps = part.split(separator: " ")
-        
+
         guard ps.count == 2 else {
             return nil
         }
         let pname = ps[0]
         let pval = ps[1]
-        
-        if pname == "blurhash" {
+
+        switch pname {
+        case "thumbhash":
+            thumbhash = String(pval)
+        case "blurhash":
             blurhash = String(pval)
-        } else if pname == "dim" {
+        case "dim":
             dim = parse_image_meta_dim(String(pval))
-        } else if pname == "url" {
+        case "url":
             url = URL(string: String(pval))
+        default:
+            // Ignore unknown fields for forward compatibility
+            break
         }
     }
-    
+
     guard let url else {
         return nil
     }
 
-    return ImageMetadata(url: url, blurhash: blurhash, dim: dim)
+    return ImageMetadata(url: url, blurhash: blurhash, thumbhash: thumbhash, dim: dim)
 }
 
 func parse_image_meta_dim(_ pval: String) -> ImageMetaDim? {
@@ -183,25 +231,31 @@ func event_image_metadata(ev: NostrEvent) -> [ImageMetadata] {
 
 func process_image_metadatas(cache: EventCache, ev: NostrEvent) {
     for meta in event_image_metadata(ev: ev) {
+        // Skip if already cached
         guard cache.lookup_img_metadata(url: meta.url) == nil else {
             continue
         }
-        
-        // We don't need blurhash if we already have the source image cached
+
+        // Skip placeholder processing if the source image is already cached
         if ImageCache.default.isCached(forKey: meta.url.absoluteString) {
             continue
         }
-        
-        let state = ImageMetadataState(state: meta.blurhash == nil ? .not_needed : .processing, meta: meta)
+
+        // Determine initial state based on whether we have any placeholder hash
+        let needsProcessing = meta.hasPlaceholder
+        let initialState: ImageMetadataProcessState = needsProcessing ? .processing : .not_needed
+        let state = ImageMetadataState(state: initialState, meta: meta)
         cache.store_img_metadata(url: meta.url, meta: state)
-        
-        guard let blurhash = state.meta.blurhash else {
-            return
+
+        // Skip async processing if no placeholder hash is available
+        guard needsProcessing else {
+            continue
         }
-        
+
+        // Process placeholder asynchronously (thumbhash preferred, blurhash fallback)
         Task {
-            let img = await process_blurhash(blurhash: blurhash, size: state.meta.dim?.size)
-            
+            let img = await process_placeholder(meta: state.meta)
+
             Task { @MainActor in
                 if let img {
                     state.state = .processed(img)
