@@ -102,6 +102,11 @@ import SwiftUI
     private var videoDurationObserver: NSKeyValueObservation?
     private var videoCurrentTimeObserver: Any?
     private var videoIsPlayingObserver: NSKeyValueObservation?
+    private var videoStatusObserver: NSKeyValueObservation?
+    /// Tracks whether we've performed the initial seek to zero for this player item.
+    /// Reset to `false` when the player is reinitialized (e.g., after an error recovery).
+    /// This prevents redundant seeks while ensuring new player items always start at 0:00.
+    private var hasPerformedInitialSeek: Bool = false
     
     
     // MARK: - Initialization, deinitialization and reinitialization
@@ -129,12 +134,14 @@ import SwiftUI
     
     func reinitializePlayer() {
         Log.info("DamusVideoPlayer: Reinitializing internal player…", for: .video_coordination)
-        
+
         // Tear down
         videoSizeObserver?.invalidate()
         videoDurationObserver?.invalidate()
         videoIsPlayingObserver?.invalidate()
-        
+        videoStatusObserver?.invalidate()
+        hasPerformedInitialSeek = false
+
         // Initialize player with nil item first
         self.player.replaceCurrentItem(with: nil)
         
@@ -164,6 +171,7 @@ import SwiftUI
         observeDuration()
         observeCurrentTime()
         observeVideoIsPlaying()
+        observePlayerItemStatus()
     }
     
     deinit {
@@ -171,6 +179,7 @@ import SwiftUI
         videoSizeObserver?.invalidate()
         videoDurationObserver?.invalidate()
         videoIsPlayingObserver?.invalidate()
+        videoStatusObserver?.invalidate()
     }
     
     // MARK: - Observers
@@ -218,6 +227,34 @@ import SwiftUI
                 self.is_playing = new_rate > 0
             }
         })
+    }
+
+    /// Observes the player item's status and seeks to the beginning when ready.
+    ///
+    /// ## Why this is needed
+    /// AVPlayer does not guarantee playback starts at exactly 0:00. When loading a video,
+    /// the initial position depends on keyframe alignment, codec buffering, and metadata.
+    /// Short videos are especially affected as the offset becomes a noticeable portion
+    /// of total duration.
+    ///
+    /// ## Solution
+    /// We observe `AVPlayerItem.status` and perform a precise seek to `CMTime.zero` with
+    /// zero tolerance once the item reports `.readyToPlay`. This ensures the first frame
+    /// is always shown, regardless of the video's internal structure.
+    ///
+    /// - SeeAlso: https://github.com/damus-io/damus/issues/3100
+    private func observePlayerItemStatus() {
+        videoStatusObserver = player.currentItem?.observe(\.status, options: [.new]) { [weak self] (playerItem, change) in
+            guard let self else { return }
+            guard playerItem.status == .readyToPlay else { return }
+
+            DispatchQueue.main.async {
+                guard !self.hasPerformedInitialSeek else { return }
+                self.hasPerformedInitialSeek = true
+                // toleranceBefore/After: .zero ensures frame-accurate seek to the exact start
+                self.player.seek(to: CMTime.zero, toleranceBefore: .zero, toleranceAfter: .zero)
+            }
+        }
     }
     
     // MARK: - Other internal logic functions
