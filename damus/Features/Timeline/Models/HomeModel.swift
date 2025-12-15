@@ -233,6 +233,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
             break   // Don't care for now
         case .live, .live_chat:
             break
+        case .blossom_auth, .blossom_server_list:
+            break   // Blossom events are handled separately by BlossomServerListManager
         }
     }
 

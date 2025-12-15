@@ -7,6 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BL0SS0M0000000000000011 /* BlossomTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BL0SS0M0000000000000001 /* BlossomTypes.swift */; };
+		BL0SS0M0000000000000012 /* BlossomTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BL0SS0M0000000000000001 /* BlossomTypes.swift */; };
+		BL0SS0M0000000000000013 /* BlossomTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BL0SS0M0000000000000001 /* BlossomTypes.swift */; };
+		BL0SS0M0000000000000021 /* BlossomAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = BL0SS0M0000000000000002 /* BlossomAuth.swift */; };
+		BL0SS0M0000000000000022 /* BlossomAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = BL0SS0M0000000000000002 /* BlossomAuth.swift */; };
+		BL0SS0M0000000000000023 /* BlossomAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = BL0SS0M0000000000000002 /* BlossomAuth.swift */; };
+		BL0SS0M0000000000000031 /* BlossomUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = BL0SS0M0000000000000003 /* BlossomUploader.swift */; };
+		BL0SS0M0000000000000032 /* BlossomUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = BL0SS0M0000000000000003 /* BlossomUploader.swift */; };
+		BL0SS0M0000000000000033 /* BlossomUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = BL0SS0M0000000000000003 /* BlossomUploader.swift */; };
 		0E8A4BB72AE4359200065E81 /* NostrFilter+Hashable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E8A4BB62AE4359200065E81 /* NostrFilter+Hashable.swift */; };
 		2710433D2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */; };
 		2710433E2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */; };
@@ -2820,6 +2829,9 @@
 		D7DB1FF22D5AC5E400CF06DA /* LICENSES */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSES; sourceTree = "<group>"; };
 		D7DB93042D66A43B00DA1EE5 /* Undistractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Undistractor.swift; sourceTree = "<group>"; };
 		D7DB93092D69485A00DA1EE5 /* NIP65.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP65.swift; sourceTree = "<group>"; };
+		BL0SS0M0000000000000001 /* BlossomTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlossomTypes.swift; sourceTree = "<group>"; };
+		BL0SS0M0000000000000002 /* BlossomAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlossomAuth.swift; sourceTree = "<group>"; };
+		BL0SS0M0000000000000003 /* BlossomUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlossomUploader.swift; sourceTree = "<group>"; };
 		D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrEventTests.swift; sourceTree = "<group>"; };
 		D7DF58312DFCF18800E9AD28 /* SendPaymentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendPaymentView.swift; sourceTree = "<group>"; };
 		D7E5B2D22EA0187B00CF47AC /* StreamPipelineDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPipelineDiagnostics.swift; sourceTree = "<group>"; };
@@ -4080,6 +4092,7 @@
 		5C78A7752E22F84A00CF177D /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				BL0SS0M0000000000000000 /* Blossom */,
 				5C78A7BD2E306D6000CF177D /* Storage */,
 				5C78A77C2E22FE7100CF177D /* Networking */,
 				5C78A7782E22FAE700CF177D /* DIPs */,
@@ -4112,6 +4125,16 @@
 				B57B4C652B312C3700A232C0 /* NostrAuth.swift */,
 			);
 			path = NIP98;
+			sourceTree = "<group>";
+		};
+		BL0SS0M0000000000000000 /* Blossom */ = {
+			isa = PBXGroup;
+			children = (
+				BL0SS0M0000000000000001 /* BlossomTypes.swift */,
+				BL0SS0M0000000000000002 /* BlossomAuth.swift */,
+				BL0SS0M0000000000000003 /* BlossomUploader.swift */,
+			);
+			path = Blossom;
 			sourceTree = "<group>";
 		};
 		5C78A7782E22FAE700CF177D /* DIPs */ = {
@@ -5748,6 +5771,9 @@
 				4CF0ABEE29844B5500D66079 /* AnyEncodable.swift in Sources */,
 				B57B4C662B312C3700A232C0 /* NostrAuth.swift in Sources */,
 				D7DB930B2D69486700DA1EE5 /* NIP65.swift in Sources */,
+				BL0SS0M0000000000000011 /* BlossomTypes.swift in Sources */,
+				BL0SS0M0000000000000021 /* BlossomAuth.swift in Sources */,
+				BL0SS0M0000000000000031 /* BlossomUploader.swift in Sources */,
 				4CB8838D296F710400DC99E7 /* Reposted.swift in Sources */,
 				4CE6DEE927F7A08100C66700 /* ContentView.swift in Sources */,
 				2710433D2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */,
@@ -6670,6 +6696,9 @@
 				82D6FBE12CD99F7900C925F4 /* NotificationSettingsView.swift in Sources */,
 				82D6FBE22CD99F7900C925F4 /* AppearanceSettingsView.swift in Sources */,
 				D7DB930A2D69486700DA1EE5 /* NIP65.swift in Sources */,
+				BL0SS0M0000000000000012 /* BlossomTypes.swift in Sources */,
+				BL0SS0M0000000000000022 /* BlossomAuth.swift in Sources */,
+				BL0SS0M0000000000000032 /* BlossomUploader.swift in Sources */,
 				82D6FBE32CD99F7900C925F4 /* KeySettingsView.swift in Sources */,
 				82D6FBE42CD99F7900C925F4 /* ZapSettingsView.swift in Sources */,
 				82D6FBE52CD99F7900C925F4 /* TranslationSettingsView.swift in Sources */,
@@ -7152,6 +7181,9 @@
 				D73E5F022C6A97F4007EB227 /* ZapUserView.swift in Sources */,
 				D73E5F032C6A97F4007EB227 /* ProfileZapLinkView.swift in Sources */,
 				D7DB930C2D69486700DA1EE5 /* NIP65.swift in Sources */,
+				BL0SS0M0000000000000013 /* BlossomTypes.swift in Sources */,
+				BL0SS0M0000000000000023 /* BlossomAuth.swift in Sources */,
+				BL0SS0M0000000000000033 /* BlossomUploader.swift in Sources */,
 				D73E5F042C6A97F4007EB227 /* AboutView.swift in Sources */,
 				D73E5F052C6A97F4007EB227 /* ProfileName.swift in Sources */,
 				D73E5F062C6A97F4007EB227 /* ProfilePictureSelector.swift in Sources */,
