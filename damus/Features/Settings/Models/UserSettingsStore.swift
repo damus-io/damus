@@ -382,7 +382,20 @@ class UserSettingsStore: ObservableObject {
     // TODO: Get rid of this once we have NostrDB query capabilities integrated
     @Setting(key: "latest_relay_list_event_id", default_value: nil)
     var latestRelayListEventIdHex: String?
-    
+
+    // MARK: Blossom Settings
+
+    /// Event ID for the user's kind 10063 Blossom server list event.
+    /// Used to look up the full event from NostrDB.
+    @Setting(key: "latest_blossom_server_list_event_id", default_value: nil)
+    var latestBlossomServerListEventIdHex: String?
+
+    /// Manually configured Blossom server URL.
+    /// This is the primary method for v1 - allows users to enter a server URL
+    /// without needing to publish a kind 10063 event.
+    @Setting(key: "manual_blossom_server_url", default_value: nil)
+    var manualBlossomServerUrl: String?
+
     // MARK: Helper types
     
     enum NotificationsMode: String, CaseIterable, Identifiable, StringCodable, Equatable {
