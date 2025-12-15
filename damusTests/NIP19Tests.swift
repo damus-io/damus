@@ -51,5 +51,95 @@ final class NIP19Tests: XCTestCase {
         XCTAssertEqual(res[1], .mention(.any(.note(note_id))))
         XCTAssertEqual(res[2], .text("?"))
     }
-    
+
+    // MARK: - Longform Markdown Preprocessing Tests
+
+    func test_preprocess_nprofile_in_markdown() throws {
+        let profiles = test_damus_state.profiles
+        let nprofile = "nprofile1qqsrhuxx8l9ex335q7he0f09aej04zpazpl0ne2cgukyawd24mayt8gpp4mhxue69uhhytnc9e3k7mgpz4mhxue69uhkg6nzv9ejuumpv34kytnrdaksjlyr9p"
+        let markdown = "Check out nostr:\(nprofile) for more info."
+        let result = preprocessNostrLinksInMarkdown(markdown, profiles: profiles)
+
+        XCTAssertTrue(result.contains("](damus:nostr:\(nprofile))"), "nprofile should be converted to markdown link")
+        XCTAssertFalse(result.contains("nostr:\(nprofile) "), "Bare nostr URI should be replaced")
+    }
+
+    func test_preprocess_npub_in_markdown() throws {
+        let profiles = test_damus_state.profiles
+        let npub = "npub10elfcs4fr0l0r8af98jlmgdh9c8tcxjvz9qkw038js35mp4dma8qzvjptg"
+        let markdown = "Follow nostr:\(npub) on nostr!"
+        let result = preprocessNostrLinksInMarkdown(markdown, profiles: profiles)
+
+        XCTAssertTrue(result.contains("](damus:nostr:\(npub))"), "npub should be converted to markdown link")
+    }
+
+    func test_preprocess_note_in_markdown() throws {
+        let profiles = test_damus_state.profiles
+        let note = "note1s4p70596lv50x0zftuses32t6ck8x6wgd4edwacyetfxwns2jtysux7vep"
+        let markdown = "See this post: nostr:\(note)"
+        let result = preprocessNostrLinksInMarkdown(markdown, profiles: profiles)
+
+        XCTAssertTrue(result.contains("](damus:nostr:\(note))"), "note should be converted to markdown link")
+        XCTAssertTrue(result.contains("[@"), "note mention should have @ prefix")
+    }
+
+    func test_preprocess_nevent_in_markdown() throws {
+        let profiles = test_damus_state.profiles
+        let nevent = "nevent1qqs9tcwc9dx5dqun6u4sxfkgkuy6p0znk2slqjjjlctxsjffxr98u0qpz3mhxue69uhhyetvv9ujuerpd46hxtnfdufzkeuj"
+        let markdown = "Check this event: nostr:\(nevent)"
+        let result = preprocessNostrLinksInMarkdown(markdown, profiles: profiles)
+
+        XCTAssertTrue(result.contains("](damus:nostr:\(nevent))"), "nevent should be converted to markdown link")
+        XCTAssertTrue(result.contains("[@"), "nevent mention should have @ prefix")
+    }
+
+    func test_preprocess_does_not_double_process_existing_links() throws {
+        let profiles = test_damus_state.profiles
+        let npub = "npub10elfcs4fr0l0r8af98jlmgdh9c8tcxjvz9qkw038js35mp4dma8qzvjptg"
+        let markdown = "Already a link: [@someone](damus:nostr:\(npub))"
+        let result = preprocessNostrLinksInMarkdown(markdown, profiles: profiles)
+
+        XCTAssertEqual(result, markdown, "Existing markdown links should not be double-processed")
+    }
+
+    func test_preprocess_multiple_nostr_uris() throws {
+        let profiles = test_damus_state.profiles
+        let npub = "npub10elfcs4fr0l0r8af98jlmgdh9c8tcxjvz9qkw038js35mp4dma8qzvjptg"
+        let note = "note1s4p70596lv50x0zftuses32t6ck8x6wgd4edwacyetfxwns2jtysux7vep"
+        let markdown = "User nostr:\(npub) posted nostr:\(note)"
+        let result = preprocessNostrLinksInMarkdown(markdown, profiles: profiles)
+
+        XCTAssertTrue(result.contains("](damus:nostr:\(npub))"), "First URI should be converted")
+        XCTAssertTrue(result.contains("](damus:nostr:\(note))"), "Second URI should be converted")
+    }
+
+    func test_preprocess_plain_text_unchanged() throws {
+        let profiles = test_damus_state.profiles
+        let markdown = "This is just plain text without any nostr links."
+        let result = preprocessNostrLinksInMarkdown(markdown, profiles: profiles)
+
+        XCTAssertEqual(result, markdown, "Plain text should remain unchanged")
+    }
+
+    // MARK: - Bare Bech32 Entity Tests (without nostr: prefix)
+
+    func test_preprocess_bare_npub_without_nostr_prefix() throws {
+        let profiles = test_damus_state.profiles
+        let npub = "npub10elfcs4fr0l0r8af98jlmgdh9c8tcxjvz9qkw038js35mp4dma8qzvjptg"
+        let markdown = "Check out \(npub) for updates."
+        let result = preprocessNostrLinksInMarkdown(markdown, profiles: profiles)
+
+        XCTAssertTrue(result.contains("](damus:nostr:\(npub))"), "Bare npub should be converted to markdown link")
+        XCTAssertFalse(result.contains(" \(npub) "), "Bare npub should be replaced")
+    }
+
+    func test_preprocess_bare_nprofile_without_nostr_prefix() throws {
+        let profiles = test_damus_state.profiles
+        let nprofile = "nprofile1qqsrhuxx8l9ex335q7he0f09aej04zpazpl0ne2cgukyawd24mayt8gpp4mhxue69uhhytnc9e3k7mgpz4mhxue69uhkg6nzv9ejuumpv34kytnrdaksjlyr9p"
+        let markdown = "Follow \(nprofile) on nostr!"
+        let result = preprocessNostrLinksInMarkdown(markdown, profiles: profiles)
+
+        XCTAssertTrue(result.contains("](damus:nostr:\(nprofile))"), "Bare nprofile should be converted to markdown link")
+    }
+
 }

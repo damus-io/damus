@@ -361,21 +361,28 @@ class NoteContentViewTests: XCTestCase {
     }
     
     func testMentionStr_Pubkey_ContainsAbbreviated() throws {
-        let compatibleText = createCompatibleText(test_pubkey.npub)
-        
-        assertCompatibleTextHasExpectedString(compatibleText: compatibleText, expected: "17ldvg64:nq5mhr77")
+        let npub = test_pubkey.npub
+        let compatibleText = createCompatibleText(npub)
+
+        // When profile not cached, should show abbreviated bech32 (npub1xxx:yyy)
+        // instead of abbreviated pubkey (abc123:xyz789)
+        let expectedAbbrev = abbrev_identifier(npub)
+        assertCompatibleTextHasExpectedString(compatibleText: compatibleText, expected: expectedAbbrev)
     }
-    
+
     func testMentionStr_Pubkey_ContainsFullBech32() {
         let compatableText = createCompatibleText(test_pubkey.npub)
 
         assertCompatibleTextHasExpectedString(compatibleText: compatableText, expected: test_pubkey.npub)
     }
-    
+
     func testMentionStr_Nprofile_ContainsAbbreviated() throws {
-        let compatibleText = createCompatibleText("nprofile1qqsrhuxx8l9ex335q7he0f09aej04zpazpl0ne2cgukyawd24mayt8gpp4mhxue69uhhytnc9e3k7mgpz4mhxue69uhkg6nzv9ejuumpv34kytnrdaksjlyr9p")
-                
-        assertCompatibleTextHasExpectedString(compatibleText: compatibleText, expected: "180cvv07:wsyjh6w6")
+        let nprofile = "nprofile1qqsrhuxx8l9ex335q7he0f09aej04zpazpl0ne2cgukyawd24mayt8gpp4mhxue69uhhytnc9e3k7mgpz4mhxue69uhkg6nzv9ejuumpv34kytnrdaksjlyr9p"
+        let compatibleText = createCompatibleText(nprofile)
+
+        // When profile not cached, should show abbreviated bech32 (nprofile1xxx:yyy)
+        let expectedAbbrev = abbrev_identifier(nprofile)
+        assertCompatibleTextHasExpectedString(compatibleText: compatibleText, expected: expectedAbbrev)
     }
     
     func testMentionStr_Nprofile_ContainsFullBech32() throws {
