@@ -22,6 +22,7 @@ enum MediaUploader: String, CaseIterable, MediaUploaderProtocol, StringCodable {
     var id: String { self.rawValue }
     case nostrBuild
     case nostrcheck
+    case blossom
     
     init?(from string: String) {
         guard let mu = MediaUploader(rawValue: string) else {
@@ -39,8 +40,11 @@ enum MediaUploader: String, CaseIterable, MediaUploaderProtocol, StringCodable {
         switch self {
         case .nostrBuild:
             return "\"fileToUpload\""
-        default:
+        case .nostrcheck:
             return "\"file\""
+        case .blossom:
+            // Blossom uses PUT with raw body, not form-data
+            return ""
         }
     }
     
@@ -63,6 +67,8 @@ enum MediaUploader: String, CaseIterable, MediaUploaderProtocol, StringCodable {
             return true
         case .nostrcheck:
             return true
+        case .blossom:
+            return true
         }
     }
     
@@ -72,6 +78,9 @@ enum MediaUploader: String, CaseIterable, MediaUploaderProtocol, StringCodable {
             return true
         case .nostrcheck:
             return true
+        case .blossom:
+            // Blossom uses kind 24242 auth, not NIP-98
+            return false
         }
     }
     
@@ -88,6 +97,8 @@ enum MediaUploader: String, CaseIterable, MediaUploaderProtocol, StringCodable {
             return .init(index: -1, tag: "nostrBuild", displayName: "nostr.build")
         case .nostrcheck:
             return .init(index: 0, tag: "nostrcheck", displayName: "nostrcheck.me")
+        case .blossom:
+            return .init(index: 1, tag: "blossom", displayName: "Blossom")
         }
     }
     
@@ -97,6 +108,10 @@ enum MediaUploader: String, CaseIterable, MediaUploaderProtocol, StringCodable {
             return "https://nostr.build/api/v2/nip96/upload"
         case .nostrcheck:
             return "https://nostrcheck.me/api/v2/media"
+        case .blossom:
+            // Blossom uses user-configured server URL, not a fixed endpoint
+            // The actual URL is retrieved from settings at upload time
+            return ""
         }
     }
     
