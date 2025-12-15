@@ -193,11 +193,11 @@ func calculate_blurhash(img: UIImage) async -> String? {
     guard img.size.height > 0 else {
         return nil
     }
-    
+
     let res = Task.detached(priority: .low) {
         let bhs = get_blurhash_size(img_size: img.size) ?? CGSize(width: 100.0, height: 100.0)
         let smaller = img.resized(to: bhs)
-        
+
         guard let blurhash = smaller.blurHash(numberOfComponents: (5,5)) else {
             let meta: String? = nil
             return meta
@@ -205,16 +205,36 @@ func calculate_blurhash(img: UIImage) async -> String? {
 
         return blurhash
     }
-    
+
     return await res.value
 }
 
-func calculate_image_metadata(url: URL, img: UIImage, blurhash: String) -> ImageMetadata {
+/// Calculates a ThumbHash from a UIImage.
+/// The hash is returned as a base64-encoded string suitable for storage in imeta tags.
+/// ThumbHash automatically handles aspect ratio and produces ~25 bytes of data.
+func calculate_thumbhash(img: UIImage) async -> String? {
+    guard img.size.width > 0, img.size.height > 0 else {
+        return nil
+    }
+
+    let res = Task.detached(priority: .low) { () -> String? in
+        // imageToThumbHash handles resizing internally (max 100x100)
+        let hashData = imageToThumbHash(image: img)
+        // Return as base64 string for storage in Nostr events
+        return hashData.base64EncodedString()
+    }
+
+    return await res.value
+}
+
+/// Creates ImageMetadata with a thumbhash placeholder.
+/// Used when uploading images to include placeholder data in the imeta tag.
+func calculate_image_metadata(url: URL, img: UIImage, thumbhash: String) -> ImageMetadata {
     let width = Int(img.size.width)
     let height = Int(img.size.height)
     let dim = ImageMetaDim(width: width, height: height)
-    
-    return ImageMetadata(url: url, blurhash: blurhash, dim: dim)
+
+    return ImageMetadata(url: url, thumbhash: thumbhash, dim: dim)
 }
 
 

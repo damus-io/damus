@@ -343,13 +343,15 @@ struct PostView: View {
     func handle_upload(media: MediaUpload) async -> Bool {
         mediaUploadUnderProgress = media
         let uploader = damus_state.settings.default_media_uploader
-        
+
         let img = getImage(media: media)
         print("img size w:\(img.size.width) h:\(img.size.height)")
-        
-        async let blurhash = calculate_blurhash(img: img)
+
+        // Calculate thumbhash concurrently with upload for better performance
+        // ThumbHash provides better quality placeholders than BlurHash
+        async let thumbhash = calculate_thumbhash(img: img)
         let res = await image_upload.start(media: media, uploader: uploader, mediaType: .normal, keypair: damus_state.keypair)
-        
+
         mediaUploadUnderProgress = nil
         switch res {
         case .success(let url):
@@ -357,12 +359,12 @@ struct PostView: View {
                 self.error = "Error uploading image :("
                 return false
             }
-            let blurhash = await blurhash
-            let meta = blurhash.map { bh in calculate_image_metadata(url: url, img: img, blurhash: bh) }
+            let thumbhash = await thumbhash
+            let meta = thumbhash.map { th in calculate_image_metadata(url: url, img: img, thumbhash: th) }
             let uploadedMedia = UploadedMedia(localURL: media.localURL, uploadedURL: url, metadata: meta)
             uploadedMedias.append(uploadedMedia)
             return true
-            
+
         case .failed(let error):
             if let error {
                 self.error = error.localizedDescription
