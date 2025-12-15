@@ -263,7 +263,7 @@ func process_image_metadatas(cache: EventCache, ev: NostrEvent) {
 
         // Determine initial state based on whether we have any placeholder hash
         let needsProcessing = meta.hasPlaceholder
-        let initialState: ImageMetadataProcessState = needsProcessing ? .processing : .not_needed
+        let initialState: ImageMetaProcessState = needsProcessing ? .processing : .not_needed
         let state = ImageMetadataState(state: initialState, meta: meta)
         cache.store_img_metadata(url: meta.url, meta: state)
 
