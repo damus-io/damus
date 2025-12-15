@@ -25,6 +25,64 @@ protocol AttachMediaUtilityProtocol {
 }
 
 class AttachMediaUtility {
+
+    // MARK: - Blossom Upload
+
+    /// Handles upload via Blossom protocol (BUD-02).
+    ///
+    /// Blossom uses a different approach than NIP-96 uploaders:
+    /// - PUT request with raw binary body (not multipart form-data)
+    /// - Kind 24242 authorization (not NIP-98)
+    /// - Server URL from user settings (not hardcoded)
+    fileprivate static func uploadViaBlossom(
+        mediaToUpload: MediaUpload,
+        keypair: Keypair?
+    ) async -> ImageUploadResult {
+        // Get Blossom server URL from settings
+        guard let settings = UserSettingsStore.shared,
+              let serverURLString = settings.manualBlossomServerUrl,
+              !serverURLString.isEmpty,
+              let serverURL = BlossomServerURL(serverURLString) else {
+            print("Blossom upload failed: No server configured")
+            return .failed(BlossomError.noServerConfigured)
+        }
+
+        // Need keypair for Blossom auth
+        guard let keypair = keypair,
+              let fullKeypair = keypair.to_full() else {
+            print("Blossom upload failed: No private key for signing")
+            return .failed(BlossomError.authenticationFailed)
+        }
+
+        // Load media data
+        let mediaData: Data
+        do {
+            mediaData = try Data(contentsOf: mediaToUpload.localURL)
+        } catch {
+            print("Blossom upload failed: Could not load media data - \(error)")
+            return .failed(error)
+        }
+
+        // Use BlossomUploader to perform the upload
+        let uploader = BlossomUploader()
+        let result = await uploader.upload(
+            data: mediaData,
+            mimeType: mediaToUpload.mime_type,
+            to: serverURL,
+            keypair: fullKeypair.to_keypair()
+        )
+
+        switch result {
+        case .success(let blobDescriptor):
+            return .success(blobDescriptor.url)
+        case .failed(let error):
+            print("Blossom upload failed: \(error)")
+            return .failed(error)
+        }
+    }
+
+    // MARK: - NIP-96 Upload Body
+
     fileprivate static func create_upload_body(mediaData: Data, boundary: String, mediaUploader: any MediaUploaderProtocol, mediaToUpload: MediaUpload, mediaType: ImageUploadMediaType) -> Data {
         let mediaTypeFieldValue = mediaUploader.mediaTypeValue(for: mediaType)
         let mediaTypeFieldEntry: String?
@@ -47,6 +105,13 @@ class AttachMediaUtility {
     }
 
     static func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: any MediaUploaderProtocol, mediaType: ImageUploadMediaType, progress: URLSessionTaskDelegate, keypair: Keypair? = nil) async -> ImageUploadResult {
+
+        // Branch early for Blossom - it uses a completely different upload mechanism
+        if let uploader = mediaUploader as? MediaUploader, uploader == .blossom {
+            return await uploadViaBlossom(mediaToUpload: mediaToUpload, keypair: keypair)
+        }
+
+        // NIP-96 upload flow for other uploaders (nostr.build, nostrcheck, etc.)
         var mediaData: Data?
         guard let url = URL(string: mediaUploader.postAPI) else {
             return .failed(nil)

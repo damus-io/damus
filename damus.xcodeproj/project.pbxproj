@@ -28,6 +28,11 @@
 		BL0SS0M0000000000000071 /* AddBlossomServerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BL0SS0M0000000000000007 /* AddBlossomServerView.swift */; };
 		BL0SS0M0000000000000072 /* AddBlossomServerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BL0SS0M0000000000000007 /* AddBlossomServerView.swift */; };
 		BL0SS0M0000000000000073 /* AddBlossomServerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BL0SS0M0000000000000007 /* AddBlossomServerView.swift */; };
+		BL0SS0M0000000000000014 /* BlossomTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BL0SS0M0000000000000001 /* BlossomTypes.swift */; };
+		BL0SS0M0000000000000024 /* BlossomAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = BL0SS0M0000000000000002 /* BlossomAuth.swift */; };
+		BL0SS0M0000000000000034 /* BlossomUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = BL0SS0M0000000000000003 /* BlossomUploader.swift */; };
+		BL0SS0M0000000000000044 /* BlossomServerList.swift in Sources */ = {isa = PBXBuildFile; fileRef = BL0SS0M0000000000000004 /* BlossomServerList.swift */; };
+		BL0SS0M0000000000000054 /* BlossomServerListManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BL0SS0M0000000000000005 /* BlossomServerListManager.swift */; };
 		0E8A4BB72AE4359200065E81 /* NostrFilter+Hashable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E8A4BB62AE4359200065E81 /* NostrFilter+Hashable.swift */; };
 		2710433D2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */; };
 		2710433E2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */; };
@@ -7573,6 +7578,9 @@
 				D7CB5D422B116F8900AD4105 /* Contacts.swift in Sources */,
 				D7CB5D5D2B1176B200AD4105 /* MediaUploader.swift in Sources */,
 				D7DBD41F2B02F15E002A6197 /* NostrKind.swift in Sources */,
+				BL0SS0M0000000000000014 /* BlossomTypes.swift in Sources */,
+				BL0SS0M0000000000000024 /* BlossomAuth.swift in Sources */,
+				BL0SS0M0000000000000034 /* BlossomUploader.swift in Sources */,
 				D7CE1B3C2B0BE719002EDAD4 /* TableVerifier.swift in Sources */,
 				D7EDED2F2B128E8A0018B19C /* CollectionExtension.swift in Sources */,
 				D7CCFC082B05834500323D86 /* NoteId.swift in Sources */,
