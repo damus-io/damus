@@ -119,6 +119,22 @@ final class ImageMetadataTest : XCTestCase {
         XCTAssertEqual(tag[0], "imeta")
     }
 
+    /// Test that image_metadata_to_tag includes both hashes for compatibility
+    func testImageMetadataToTagWithBothHashes() {
+        let meta = ImageMetadata(
+            url: URL(string: "https://example.com/test.jpg")!,
+            blurhash: "LEHV6nWB2yk8pyo0adR*.7kCMdnj",
+            thumbhash: "1QcSHQRnh493V4dIh4eXh1h4kJUI",
+            dim: ImageMetaDim(width: 100, height: 100)
+        )
+
+        let tag = meta.to_tag()
+
+        XCTAssertTrue(tag.contains("thumbhash 1QcSHQRnh493V4dIh4eXh1h4kJUI"), "Should include thumbhash")
+        XCTAssertTrue(tag.contains("blurhash LEHV6nWB2yk8pyo0adR*.7kCMdnj"), "Should include blurhash for compatibility")
+        XCTAssertEqual(tag[0], "imeta")
+    }
+
     // MARK: - GPS Data Tests
 
     func testRemoveGPSData() {

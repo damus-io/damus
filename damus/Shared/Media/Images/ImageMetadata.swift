@@ -227,14 +227,16 @@ func calculate_thumbhash(img: UIImage) async -> String? {
     return await res.value
 }
 
-/// Creates ImageMetadata with a thumbhash placeholder.
-/// Used when uploading images to include placeholder data in the imeta tag.
-func calculate_image_metadata(url: URL, img: UIImage, thumbhash: String) -> ImageMetadata {
+/// Creates ImageMetadata with placeholder hashes for uploaded images.
+/// Both thumbhash and blurhash are included for maximum client compatibility:
+/// - thumbhash: better quality, aspect ratio, alpha support (newer clients)
+/// - blurhash: widely supported by existing Nostr clients
+func calculate_image_metadata(url: URL, img: UIImage, thumbhash: String?, blurhash: String?) -> ImageMetadata {
     let width = Int(img.size.width)
     let height = Int(img.size.height)
     let dim = ImageMetaDim(width: width, height: height)
 
-    return ImageMetadata(url: url, thumbhash: thumbhash, dim: dim)
+    return ImageMetadata(url: url, blurhash: blurhash, thumbhash: thumbhash, dim: dim)
 }
 
 
