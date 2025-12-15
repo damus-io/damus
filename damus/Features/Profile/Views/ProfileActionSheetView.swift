@@ -161,7 +161,9 @@ struct ProfileActionSheetView: View {
             if damus_state.settings.enable_favourites_feature {
                 favoriteButton
             }
-            zapButton
+            if let lnurl = self.get_lnurl(), lnurl != "" {
+                zapButton
+            }
             dmButton
             if damus_state.keypair.pubkey != profile.pubkey && damus_state.keypair.privkey != nil {
                 muteButton
