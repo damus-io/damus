@@ -36,6 +36,14 @@ struct AppearanceSettingsView: View {
     @State var showing_enable_animation_alert: Bool = false
     @State var enable_animation_toggle_is_user_initiated: Bool = true
 
+    var max_hashtags_binding: Binding<Double> {
+        Binding<Double>(get: {
+            return Double(settings.max_hashtags)
+        }, set: {
+            settings.max_hashtags = Int($0)
+        })
+    }
+
     var FontSize: some View {
         VStack(alignment: .leading) {
             Slider(value: $settings.font_size, in: 0.5...2.0, step: 0.1)
@@ -104,6 +112,14 @@ struct AppearanceSettingsView: View {
                     .toggleStyle(.switch)
                 Toggle(NSLocalizedString("Hide notes with #nsfw tags", comment: "Setting to hide notes with the #nsfw (not safe for work) tags"), isOn: $settings.hide_nsfw_tagged_content)
                     .toggleStyle(.switch)
+                Toggle(NSLocalizedString("Hide posts with too many hashtags", comment: "Setting to hide notes that contain too many hashtags (spam)"), isOn: $settings.hide_hashtag_spam)
+                    .toggleStyle(.switch)
+                if settings.hide_hashtag_spam {
+                    VStack(alignment: .leading) {
+                        Text(String(format: NSLocalizedString("Maximum hashtags: %d", comment: "Label showing the maximum number of hashtags allowed before a post is hidden"), settings.max_hashtags))
+                        Slider(value: max_hashtags_binding, in: 1...20, step: 1)
+                    }
+                }
             }
             
             // MARK: - Profiles
