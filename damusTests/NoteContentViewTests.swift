@@ -342,6 +342,21 @@ class NoteContentViewTests: XCTestCase {
         XCTAssertTrue((parsed.blocks[0].asURL != nil), "NoteContentView does not correctly parse an image block when url in JSON content contains optional escaped slashes.")
     }
     
+    func testImageUrlsAreNotRenderedInContent() throws {
+        let content = "Look at this https://damus.io/image.png wow"
+        let note = try XCTUnwrap(NostrEvent(content: content, keypair: test_keypair))
+        let parsed = try XCTUnwrap(parse_note_content(content: .init(note: note, keypair: test_keypair)))
+
+        let noteArtifactsSeparated: NoteArtifactsSeparated = render_blocks(blocks: parsed, profiles: test_damus_state.profiles, can_hide_last_previewable_refs: true)
+        let attributedText: AttributedString = noteArtifactsSeparated.content.attributed
+        let renderedText = attributedText.description
+
+        XCTAssertFalse(renderedText.contains("https://damus.io/image.png"))
+        XCTAssertTrue(renderedText.contains("Look at this"))
+        XCTAssertTrue(renderedText.contains("wow"))
+        XCTAssertEqual(noteArtifactsSeparated.images.first?.absoluteString, "https://damus.io/image.png")
+    }
+    
     /// Quick test that exercises the direct parsing methods (i.e. not fetching blocks from nostrdb) from `NdbBlockGroup`, and its bridging code with C.
     /// The parsing logic itself already has test coverage at the nostrdb level.
     func testDirectBlockParsing() {
