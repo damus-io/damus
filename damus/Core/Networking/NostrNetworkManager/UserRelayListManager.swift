@@ -30,10 +30,12 @@ extension NostrNetworkManager {
         
         // MARK: - Computing the relays to connect to
         
+        @NdbActor
         private func relaysToConnectTo() -> [RelayPool.RelayDescriptor] {
             return self.computeRelaysToConnectTo(with: self.getBestEffortRelayList())
         }
         
+        @NdbActor
         private func computeRelaysToConnectTo(with relayList: NIP65.RelayList) -> [RelayPool.RelayDescriptor] {
             let regularRelayDescriptorList = relayList.toRelayDescriptors()
             if let nwcWallet = delegate.nwcWallet {
@@ -49,6 +51,7 @@ extension NostrNetworkManager {
         /// It attempts to get a relay list from the user. If one is not available, it uses the default bootstrap list.
         ///
         /// This is always guaranteed to return a relay list.
+        @NdbActor
         func getBestEffortRelayList() -> NIP65.RelayList {
             guard let userCurrentRelayList = self.getUserCurrentRelayList() else {
                 return NIP65.RelayList(relays: delegate.bootstrapRelays)
@@ -59,6 +62,7 @@ extension NostrNetworkManager {
         /// Gets the user's current relay list.
         ///
         /// It attempts to get a NIP-65 relay list from the local database, or falls back to a legacy list.
+        @NdbActor
         func getUserCurrentRelayList() -> NIP65.RelayList? {
             if let latestRelayListEvent = try? self.getLatestNIP65RelayList() { return latestRelayListEvent }
             if let latestRelayListEvent = try? self.getLatestKind3RelayList() { return latestRelayListEvent }
@@ -71,6 +75,7 @@ extension NostrNetworkManager {
         /// This is `private` because it is part of internal logic. Callers should use the higher level functions.
         ///
         /// - Returns: The latest NIP-65 relay list object
+        @NdbActor
         private func getLatestNIP65RelayList() throws(LoadingError) -> NIP65.RelayList? {
             guard let latestRelayListEvent = self.getLatestNIP65RelayListEvent() else { return nil }
             guard let list = try? NIP65.RelayList(event: latestRelayListEvent) else { throw .relayListParseError }
@@ -84,6 +89,7 @@ extension NostrNetworkManager {
         /// It is recommended to use this function only if the NostrEvent metadata is needed. For cases where only the relay list info is needed, use `getLatestNIP65RelayList` instead.
         ///
         /// - Returns: The latest NIP-65 relay list NdbNote
+        @NdbActor
         private func getLatestNIP65RelayListEvent() -> NdbNote? {
             guard let latestRelayListEventId = delegate.latestRelayListEventIdHex else { return nil }
             guard let latestRelayListEventId = NoteId(hex: latestRelayListEventId) else { return nil }
@@ -114,6 +120,7 @@ extension NostrNetworkManager {
         
         /// Gets the creation date of the user's current relay list, with preference to NIP-65 relay lists
         /// - Returns: The current relay list's creation date
+        @NdbActor 
         private func getUserCurrentRelayListCreationDate() -> UInt32? {
             if let latestNIP65RelayListEvent = self.getLatestNIP65RelayListEvent() { return latestNIP65RelayListEvent.created_at }
             if let latestKind3RelayListEvent = delegate.latestContactListEvent { return latestKind3RelayListEvent.created_at }
@@ -126,19 +133,22 @@ extension NostrNetworkManager {
             await self.load()
             
             self.relayListObserverTask?.cancel()
-            self.relayListObserverTask = Task { await self.listenAndHandleRelayUpdates() }
+            self.relayListObserverTask = Task.detached { try? await self.listenAndHandleRelayUpdates() }
             self.walletUpdatesObserverTask?.cancel()
             self.walletUpdatesObserverTask = handle_notify(.attached_wallet).sink { _ in Task { await self.load() } }
         }
         
-        func listenAndHandleRelayUpdates() async {
-            let filter = NostrFilter(kinds: [.relay_list], authors: [delegate.keypair.pubkey])
+        func listenAndHandleRelayUpdates() async throws {
+            let pubkey = delegate.keypair.pubkey
+            let filter = NostrFilter(kinds: [.relay_list], authors: [pubkey])
             for await noteLender in self.reader.streamIndefinitely(filters: [filter]) {
-                let currentRelayListCreationDate = self.getUserCurrentRelayListCreationDate()
-                guard let note = noteLender.justGetACopy() else { continue }
-                guard note.pubkey == self.delegate.keypair.pubkey else { continue }               // Ensure this new list was ours
+                try Task.checkCancellation()
+                let currentRelayListCreationDate = await self.getUserCurrentRelayListCreationDate()
+                guard let note = await noteLender.justGetACopy() else { continue }
+                guard note.pubkey == pubkey else { continue }               // Ensure this new list was ours
                 guard note.created_at > (currentRelayListCreationDate ?? 0) else { continue }     // Ensure this is a newer list
                 guard let relayList = try? NIP65.RelayList(event: note) else { continue }         // Ensure it is a valid NIP-65 list
+                try Task.checkCancellation()
                 
                 try? await self.set(userRelayList: relayList)                                     // Set the validated list
             }
@@ -146,6 +156,7 @@ extension NostrNetworkManager {
         
         // MARK: - Editing the user's relay list
     
+        @NdbActor
         func upsert(relay: NIP65.RelayList.RelayItem, force: Bool = false, overwriteExisting: Bool = false) async throws(UpdateError) {
             guard let currentUserRelayList = force ? self.getBestEffortRelayList() : self.getUserCurrentRelayList() else { throw .noInitialRelayList }
             guard !currentUserRelayList.relays.keys.contains(relay.url) || overwriteExisting else { throw .relayAlreadyExists }
@@ -154,12 +165,14 @@ extension NostrNetworkManager {
             try await self.set(userRelayList: NIP65.RelayList(relays: Array(newList.values)))
         }
     
+        @NdbActor
         func insert(relay: NIP65.RelayList.RelayItem, force: Bool = false) async throws(UpdateError) {
             guard let currentUserRelayList = force ? self.getBestEffortRelayList() : self.getUserCurrentRelayList() else { throw .noInitialRelayList }
             guard currentUserRelayList.relays[relay.url] == nil else { throw .relayAlreadyExists }
             try await self.upsert(relay: relay, force: force)
         }
     
+        @NdbActor
         func remove(relayURL: RelayURL, force: Bool = false) async throws(UpdateError) {
             guard let currentUserRelayList = force ? self.getBestEffortRelayList() : self.getUserCurrentRelayList() else { throw .noInitialRelayList }
             guard currentUserRelayList.relays.keys.contains(relayURL) || force else { throw .noSuchRelay }

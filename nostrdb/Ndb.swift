@@ -27,6 +27,12 @@ enum DatabaseError: Error {
     }
 }
 
+
+/// Actor for ndb operations.
+/// Most of Damus code does ndb lookups and queries directly from SwiftUI bodies or other `MainActor` contexts. Place this on the main actor for now.
+typealias NdbActor = MainActor
+
+@NdbActor
 class Ndb {
     var ndb: ndb_t
     let path: String?
@@ -60,14 +66,14 @@ class Ndb {
     }
 
     // NostrDB used to be stored on the app container's document directory
-    static private var old_db_path: String? {
+    nonisolated static private var old_db_path: String? {
         guard let path = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.absoluteString else {
             return nil
         }
         return remove_file_prefix(path)
     }
 
-    static var db_path: String? {
+    nonisolated static var db_path: String? {
         // Use the `group.com.damus` container, so that it can be accessible from other targets
         // e.g. The notification service extension needs to access Ndb data, which is done through this shared file container.
         guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: APPLICATION_GROUP_IDENTIFIER) else {
@@ -76,14 +82,14 @@ class Ndb {
         return remove_file_prefix(containerURL.absoluteString)
     }
     
-    static private var db_files: [String] = ["data.mdb", "lock.mdb"]
+    nonisolated static private let db_files: [String] = ["data.mdb", "lock.mdb"]
 
-    static var empty: Ndb {
+    nonisolated static var empty: Ndb {
         print("txn: NOSTRDB EMPTY")
         return Ndb(ndb: ndb_t(ndb: nil))
     }
     
-    static func open(path: String? = nil, owns_db_file: Bool = true, callbackHandler: Ndb.CallbackHandler) -> ndb_t? {
+    nonisolated static func open(path: String? = nil, owns_db_file: Bool = true, callbackHandler: Ndb.CallbackHandler) -> ndb_t? {
         var ndb_p: OpaquePointer? = nil
 
         let ingest_threads: Int32 = 4
@@ -146,7 +152,7 @@ class Ndb {
         return ndb_instance
     }
 
-    init?(path: String? = nil, owns_db_file: Bool = true) {
+    nonisolated init?(path: String? = nil, owns_db_file: Bool = true) {
         let callbackHandler = Ndb.CallbackHandler()
         guard let db = Self.open(path: path, owns_db_file: owns_db_file, callbackHandler: callbackHandler) else {
             return nil
@@ -160,7 +166,7 @@ class Ndb {
         self.callbackHandler = callbackHandler
     }
     
-    private static func migrate_db_location_if_needed() throws {
+    nonisolated private static func migrate_db_location_if_needed() throws {
         guard let old_db_path, let db_path else {
             throw Errors.cannot_find_db_path
         }
@@ -193,11 +199,11 @@ class Ndb {
         }
     }
     
-    private static func db_files_exist(path: String) -> Bool {
+    nonisolated private static func db_files_exist(path: String) -> Bool {
         return db_files.allSatisfy { FileManager.default.fileExists(atPath: "\(path)/\($0)") }
     }
 
-    init(ndb: ndb_t) {
+    nonisolated init(ndb: ndb_t) {
         self.ndb = ndb
         self.generation = 0
         self.path = nil
@@ -244,7 +250,7 @@ class Ndb {
         return NdbBlockGroup.BlocksMetadata(ptr: blocks)
     }
 
-    func lookup_blocks_by_key<T>(_ key: NoteKey, borrow lendingFunction: (_: borrowing NdbBlockGroup.BlocksMetadata?) throws -> T) rethrows -> T {
+    func lookup_blocks_by_key<T>(_ key: NoteKey, borrow lendingFunction: @NdbActor (_: borrowing NdbBlockGroup.BlocksMetadata?) throws -> T) rethrows -> T {
         let txn = SafeNdbTxn<NdbBlockGroup.BlocksMetadata?>.new(on: self) { txn in
             lookup_blocks_by_key_with_txn(key, txn: txn)
         }
@@ -416,7 +422,7 @@ class Ndb {
         return note_ids
     }
 
-    func lookup_note_by_key<T>(_ key: NoteKey, borrow lendingFunction: (_: borrowing UnownedNdbNote?) throws -> T) rethrows -> T {
+    func lookup_note_by_key<T>(_ key: NoteKey, borrow lendingFunction: @NdbActor (_: borrowing UnownedNdbNote?) throws -> T) rethrows -> T {
         let txn = NdbTxn(ndb: self) { txn in
             lookup_note_by_key_with_txn(key, txn: txn)
         }
@@ -489,7 +495,7 @@ class Ndb {
         lookup_profile_by_key_inner(key, txn: txn)
     }
 
-    func lookup_profile_by_key<T>(key: ProfileKey, borrow lendingFunction: (_: borrowing ProfileRecord?) throws -> T) rethrows -> T {
+    func lookup_profile_by_key<T>(key: ProfileKey, borrow lendingFunction: @NdbActor (_: borrowing ProfileRecord?) throws -> T) rethrows -> T {
         let txn = SafeNdbTxn<ProfileRecord?>.new(on: self) { txn in
             return lookup_profile_by_key_inner(key, txn: txn)
         }
@@ -547,7 +553,7 @@ class Ndb {
         return txn.value
     }
 
-    func lookup_note<T>(_ id: NoteId, borrow lendingFunction: (_: borrowing UnownedNdbNote?) throws -> T) rethrows -> T {
+    func lookup_note<T>(_ id: NoteId, borrow lendingFunction: @NdbActor (_: borrowing UnownedNdbNote?) throws -> T) rethrows -> T {
         let txn = NdbTxn(ndb: self) { txn in
             lookup_note_with_txn_inner(id: id, txn: txn)
         }
@@ -561,7 +567,7 @@ class Ndb {
         })
     }
     
-    func lookup_profile<T>(_ pubkey: Pubkey, borrow lendingFunction: (_: borrowing ProfileRecord?) throws -> T) rethrows -> T {
+    func lookup_profile<T>(_ pubkey: Pubkey, borrow lendingFunction: @NdbActor (_: borrowing ProfileRecord?) throws -> T) rethrows -> T {
         let txn = SafeNdbTxn<ProfileRecord?>.new(on: self) { txn in
             lookup_profile_with_txn_inner(pubkey: pubkey, txn: txn)
         }
@@ -749,7 +755,7 @@ class Ndb {
                 streaming = false
                 // Clean up resources on early termination
                 if subid != 0 {
-                    ndb_unsubscribe(self.ndb.ndb, subid)
+                    Task { await self.unsubscribe(subid: subid) }
                     Task { await self.unsetContinuation(subscriptionId: subid) }
                 }
                 filtersPointer.deallocate()
@@ -778,10 +784,14 @@ class Ndb {
                 continuationSetupTask.cancel()
                 Task { await self.unsetContinuation(subscriptionId: subid) }
                 filtersPointer.deallocate()
-                guard !self.is_closed else { return }   // Double-check Ndb is open before sending unsubscribe
-                ndb_unsubscribe(self.ndb.ndb, subid)
+                Task { await self.unsubscribe(subid: subid) }
             }
         }
+    }
+    
+    private func unsubscribe(subid: UInt64) {
+        guard !self.is_closed else { return }   // Double-check Ndb is open before sending unsubscribe
+        ndb_unsubscribe(self.ndb.ndb, subid)
     }
     
     func subscribe(filters: [NdbFilter], maxSimultaneousResults: Int = 1000) throws -> AsyncStream<StreamItem> {
@@ -901,7 +911,7 @@ class Ndb {
 
     deinit {
         print("txn: Ndb de-init")
-        self.close()
+        ndb_destroy(self.ndb.ndb)
     }
 }
 

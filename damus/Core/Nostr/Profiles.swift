@@ -27,6 +27,7 @@ class ProfileData {
     }
 }
 
+@NdbActor
 class Profiles {
     private var ndb: Ndb
 
@@ -39,7 +40,7 @@ class Profiles {
     @MainActor
     var nip05_pubkey: [String: Pubkey] = [:]
 
-    init(ndb: Ndb) {
+    nonisolated init(ndb: Ndb) {
         self.ndb = ndb
     }
 
@@ -73,7 +74,7 @@ class Profiles {
     func lookup_zapper(pubkey: Pubkey) -> Pubkey? {
         profile_data(pubkey).zapper
     }
-
+    
     func lookup_with_timestamp<T>(_ pubkey: Pubkey, borrow lendingFunction: (_: borrowing ProfileRecord?) throws -> T) rethrows -> T {
         return try ndb.lookup_profile(pubkey, borrow: lendingFunction)
     }

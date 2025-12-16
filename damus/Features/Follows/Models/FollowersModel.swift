@@ -39,7 +39,7 @@ class FollowersModel: ObservableObject {
         self.listener?.cancel()
         self.listener = Task {
             for await lender in damus_state.nostrNetwork.reader.streamIndefinitely(filters: filters) {
-                lender.justUseACopy({ self.handle_event(ev: $0) })
+                await lender.justUseACopy({ self.handle_event(ev: $0) })
             }
         }
     }

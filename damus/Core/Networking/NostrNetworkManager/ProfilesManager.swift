@@ -83,20 +83,19 @@ extension NostrNetworkManager {
             try Task.checkCancellation()
             for await ndbLender in self.subscriptionManager.streamIndefinitely(filters: [profileFilter], streamMode: .ndbFirst(optimizeNetworkFilter: false)) {
                 try Task.checkCancellation()
-                try? ndbLender.borrow { ev in
-                    publishProfileUpdates(metadataEvent: ev)
-                }
+                guard let note = await ndbLender.justGetACopy() else { continue }
+                await publishProfileUpdates(metadataEvent: note)
                 try Task.checkCancellation()
             }
         }
         
-        private func publishProfileUpdates(metadataEvent: borrowing UnownedNdbNote) {
+        private func publishProfileUpdates(metadataEvent: NdbNote) async {
             let now = UInt64(Date.now.timeIntervalSince1970)
-            ndb.write_profile_last_fetched(pubkey: metadataEvent.pubkey, fetched_at: now)
+            await ndb.write_profile_last_fetched(pubkey: metadataEvent.pubkey, fetched_at: now)
+            guard let profile = await ndb.lookup_profile_and_copy(metadataEvent.pubkey) else { return }
             
             if let relevantStreams = streams[metadataEvent.pubkey] {
                 // If we have the user metadata event in ndb, then we should have the profile record as well.
-                guard let profile = ndb.lookup_profile_and_copy(metadataEvent.pubkey) else { return }
                 for relevantStream in relevantStreams.values {
                     relevantStream.continuation.yield(profile)
                 }
@@ -105,9 +104,9 @@ extension NostrNetworkManager {
         
         /// Manually trigger profile updates for a given pubkey
         /// This is useful for local profile changes (e.g., nip05 validation, donation percentage updates)
-        func notifyProfileUpdate(pubkey: Pubkey) {
+        func notifyProfileUpdate(pubkey: Pubkey) async {
             if let relevantStreams = streams[pubkey] {
-                guard let profile = ndb.lookup_profile_and_copy(pubkey) else { return }
+                guard let profile = await ndb.lookup_profile_and_copy(pubkey) else { return }
                 for relevantStream in relevantStreams.values {
                     relevantStream.continuation.yield(profile)
                 }

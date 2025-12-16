@@ -1081,13 +1081,13 @@ func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: Ev
         await postbox.send(new_ev)
         for eref in new_ev.referenced_ids.prefix(3) {
             // also broadcast at most 3 referenced events
-            if let ev = events.lookup(eref) {
+            if let ev = await events.lookup(eref) {
                 await postbox.send(ev)
             }
         }
         for qref in new_ev.referenced_quote_ids.prefix(3) {
             // also broadcast at most 3 referenced quoted events
-            if let ev = events.lookup(qref.note_id) {
+            if let ev = await events.lookup(qref.note_id) {
                 await postbox.send(ev)
             }
         }

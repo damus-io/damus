@@ -24,6 +24,7 @@ func follow_btn_txt(_ fs: FollowState, follows_you: Bool) -> String {
     }
 }
 
+@NdbActor
 func followedByString(_ friend_intersection: [Pubkey], ndb: Ndb, locale: Locale = Locale.current) -> String {
     let bundle = bundleForLocale(locale: locale)
     let names: [String] = friend_intersection.prefix(3).map { pk in

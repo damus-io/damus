@@ -180,7 +180,9 @@ actor RelayPool {
                   case .string(let str) = msg
             else { return }
 
-            let _ = self.ndb?.processEvent(str, originRelayURL: relay_id)
+            Task.detached {
+                let _ = await self.ndb?.processEvent(str, originRelayURL: relay_id)
+            }
             self.message_received_function?((str, desc))
         })
         let relay = Relay(descriptor: desc, connection: conn)
@@ -401,10 +403,10 @@ actor RelayPool {
         switch req {
             case .typical(let r):
                 if case .event = r, let rstr = make_nostr_req(r) {
-                    let _ = ndb?.process_client_event(rstr)
+                    Task.detached { await self.ndb?.process_client_event(rstr) }
                 }
             case .custom(let string):
-                let _ = ndb?.process_client_event(string)
+                Task.detached { await self.ndb?.process_client_event(string) }
         }
     }
 

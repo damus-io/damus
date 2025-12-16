@@ -478,6 +478,7 @@ extension NdbNote {
         return ThreadReply(tags: self.tags)?.reply.note_id
     }
 
+    @NdbActor
     func block_offsets<T>(ndb: Ndb, borrow lendingFunction: (_: borrowing NdbBlockGroup.BlocksMetadata?) throws -> T) rethrows -> T {
         guard let key = ndb.lookup_note_key(self.id) else { return try lendingFunction(nil) }
         

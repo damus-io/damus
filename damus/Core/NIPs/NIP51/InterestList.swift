@@ -67,10 +67,12 @@ extension NIP51 {
         
         // MARK: - Initialization
         
+        @NdbActor
         init(event: NdbNote) throws(E) {
             try self.init(event: UnownedNdbNote(event))
         }
         
+        @NdbActor
         init(event: borrowing UnownedNdbNote) throws(E) {
             guard event.known_kind == .interest_list else {
                 throw E.notInterestList
@@ -87,6 +89,7 @@ extension NIP51 {
             self.interests = interests
         }
         
+        @NdbActor
         init?(event: NdbNote?) throws(E) {
             guard let event else { return nil }
             try self.init(event: event)

@@ -22,6 +22,7 @@ class FollowingModel {
         self.hashtags = hashtags
     }
     
+    @NdbActor
     func get_filter() -> NostrFilter {
         var f = NostrFilter(kinds: [.metadata])
         f.authors = self.contacts.reduce(into: Array<Pubkey>()) { acc, pk in
@@ -34,6 +35,7 @@ class FollowingModel {
         return f
     }
     
+    @NdbActor
     func subscribe() {
         let filter = get_filter()
         if (filter.authors?.count ?? 0) == 0 {

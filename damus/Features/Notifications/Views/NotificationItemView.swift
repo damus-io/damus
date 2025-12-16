@@ -13,6 +13,7 @@ enum ShowItem {
     case show_damus_app_notification(DamusAppNotification)
 }
 
+@NdbActor
 func notification_item_event(events: EventCache, notif: NotificationItem) -> ShowItem {
     switch notif {
     case .repost(let evid, _):

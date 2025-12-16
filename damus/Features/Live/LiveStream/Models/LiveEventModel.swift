@@ -16,6 +16,7 @@ class LiveEventModel: ObservableObject {
     var subscriptionTask: Task<Void, any Error>? = nil
     var seen_dtag: Set<String> = Set()
 
+    @MainActor
     init(damus_state: DamusState) {
         self.damus_state = damus_state
         self.events = EventHolder(on_queue: { ev in

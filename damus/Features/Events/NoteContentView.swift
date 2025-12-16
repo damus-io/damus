@@ -323,7 +323,7 @@ struct NoteContentView: View {
                 }
                 await preload_event(plan: plan, state: damus_state)
             } else if force_artifacts {
-                let arts = await ContentRenderer().render_note_content(ndb: damus_state.ndb, ev: event, profiles: damus_state.profiles, keypair: damus_state.keypair)
+                let arts = render_note_content(ndb: damus_state.ndb, ev: event, profiles: damus_state.profiles, keypair: damus_state.keypair)
                 self.artifacts_model.state = .loaded(arts)
             }
         }
@@ -575,6 +575,7 @@ struct NoteContentView_Previews: PreviewProvider {
     }
 }
 
+@NdbActor
 func separate_images(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> [MediaUrl]? {
     return try? NdbBlockGroup.borrowBlockGroup(event: ev, using: ndb, and: keypair, borrow: { blockGroup in
         let urlBlocks: [URL] = (blockGroup.reduce(initialResult: Array<URL>()) { index, urls, block in
