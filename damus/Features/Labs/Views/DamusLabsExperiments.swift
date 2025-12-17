@@ -13,9 +13,11 @@ struct DamusLabsExperiments: View {
     @ObservedObject var settings: UserSettingsStore
     @State var show_live_explainer: Bool = false
     @State var show_favorites_explainer: Bool = false
+    @State var show_battery_explainer: Bool = false
     
     let live_label = NSLocalizedString("Live", comment: "Label for a toggle that enables an experimental feature")
     let favorites_label = NSLocalizedString("Favorites", comment: "Label for a toggle that enables an experimental feature")
+    let adaptive_battery_label = NSLocalizedString("Adaptive Battery", comment: "Label for the Damus Labs toggle that enables adaptive battery optimizations")
     
     var body: some View {
         ScrollView {
@@ -44,6 +46,7 @@ struct DamusLabsExperiments: View {
                 
                 LabsToggleView(toggleName: live_label, systemImage: "record.circle", isOn: $settings.live, showInfo: $show_live_explainer)
                 LabsToggleView(toggleName: favorites_label, systemImage: "heart.fill", isOn: $settings.enable_favourites_feature, showInfo: $show_favorites_explainer)
+                LabsToggleView(toggleName: adaptive_battery_label, systemImage: "battery.100", isOn: $settings.enable_adaptive_battery_optimization, showInfo: $show_battery_explainer)
 
             }
             .padding([.trailing, .leading], 20)
@@ -66,6 +69,12 @@ struct DamusLabsExperiments: View {
                 labName: favorites_label,
                 systemImage: "heart.fill",
                 labDescription: NSLocalizedString("This will allow you to pick users to be part of your favorites list. You can also switch your profile timeline to only see posts from your favorite contacts.", comment: "Damus Labs feature explanation"))
+        }
+        .sheet(isPresented: $show_battery_explainer) {
+            LabsExplainerView(
+                labName: adaptive_battery_label,
+                systemImage: "battery.100",
+                labDescription: NSLocalizedString("Adaptive battery moderates relay subscriptions and scanning rates to help extend your battery life. This experiment temporarily reduces background work when power is low or the app is backgrounded. Expect occasional gaps while we tune it.", comment: "Damus Labs feature explanation"))
         }
     }
 }
