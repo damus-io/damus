@@ -134,39 +134,38 @@ struct ProfileActionSheetView: View {
         }
     }
     
-    // Count the number of visible action buttons
-    var visibleButtonCount: Int {
-        var count = 1 // followButton is always visible
+    // Build an array of visible action buttons
+    var visibleActionButtons: [AnyView] {
+        var buttons: [AnyView] = []
         
+        // Follow button is always visible
+        buttons.append(AnyView(followButton))
+        
+        // Favorite button (conditional)
         if damus_state.settings.enable_favourites_feature {
-            count += 1 // favoriteButton
+            buttons.append(AnyView(favoriteButton))
         }
         
+        // Zap button (conditional)
         if let lnurl = self.get_lnurl(), lnurl != "" {
-            count += 1 // zapButton
+            buttons.append(AnyView(ProfileActionSheetZapButton(damus_state: damus_state, profile: profile, lnurl: lnurl)))
         }
         
-        count += 1 // dmButton is always visible
+        // DM button is always visible
+        buttons.append(AnyView(dmButton))
         
+        // Mute button (conditional)
         if damus_state.keypair.pubkey != profile.pubkey && damus_state.keypair.privkey != nil {
-            count += 1 // muteButton
+            buttons.append(AnyView(muteButton))
         }
         
-        return count
+        return buttons
     }
     
     var actionButtons: some View {
         HStack(spacing: 20) {
-            followButton
-            if damus_state.settings.enable_favourites_feature {
-                favoriteButton
-            }
-            if let lnurl = self.get_lnurl(), lnurl != "" {
-                zapButton
-            }
-            dmButton
-            if damus_state.keypair.pubkey != profile.pubkey && damus_state.keypair.privkey != nil {
-                muteButton
+            ForEach(0..<visibleActionButtons.count, id: \.self) { index in
+                visibleActionButtons[index]
             }
         }
         .padding()
@@ -190,7 +189,7 @@ struct ProfileActionSheetView: View {
             }
             
             // Center-align buttons when there are fewer than 5, otherwise left-align in a ScrollView
-            if visibleButtonCount < 5 {
+            if visibleActionButtons.count < 5 {
                 actionButtons
                     .frame(maxWidth: .infinity)
             } else {
