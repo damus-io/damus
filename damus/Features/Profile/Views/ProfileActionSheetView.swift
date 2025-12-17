@@ -134,38 +134,63 @@ struct ProfileActionSheetView: View {
         }
     }
     
-    // Build an array of visible action buttons
-    var visibleActionButtons: [AnyView] {
-        var buttons: [AnyView] = []
+    // Enum to represent button types
+    enum ActionButtonType: Hashable {
+        case follow
+        case favorite
+        case zap(lnurl: String)
+        case dm
+        case mute
+    }
+    
+    // Build an array of visible action button types
+    var visibleActionButtonTypes: [ActionButtonType] {
+        var buttonTypes: [ActionButtonType] = []
         
         // Follow button is always visible
-        buttons.append(AnyView(followButton))
+        buttonTypes.append(.follow)
         
         // Favorite button (conditional)
         if damus_state.settings.enable_favourites_feature {
-            buttons.append(AnyView(favoriteButton))
+            buttonTypes.append(.favorite)
         }
         
         // Zap button (conditional)
         if let lnurl = self.get_lnurl(), lnurl != "" {
-            buttons.append(AnyView(ProfileActionSheetZapButton(damus_state: damus_state, profile: profile, lnurl: lnurl)))
+            buttonTypes.append(.zap(lnurl: lnurl))
         }
         
         // DM button is always visible
-        buttons.append(AnyView(dmButton))
+        buttonTypes.append(.dm)
         
         // Mute button (conditional)
         if damus_state.keypair.pubkey != profile.pubkey && damus_state.keypair.privkey != nil {
-            buttons.append(AnyView(muteButton))
+            buttonTypes.append(.mute)
         }
         
-        return buttons
+        return buttonTypes
+    }
+    
+    @ViewBuilder
+    func renderButton(_ buttonType: ActionButtonType) -> some View {
+        switch buttonType {
+        case .follow:
+            followButton
+        case .favorite:
+            favoriteButton
+        case .zap(let lnurl):
+            ProfileActionSheetZapButton(damus_state: damus_state, profile: profile, lnurl: lnurl)
+        case .dm:
+            dmButton
+        case .mute:
+            muteButton
+        }
     }
     
     var actionButtons: some View {
         HStack(spacing: 20) {
-            ForEach(0..<visibleActionButtons.count, id: \.self) { index in
-                visibleActionButtons[index]
+            ForEach(visibleActionButtonTypes, id: \.self) { buttonType in
+                renderButton(buttonType)
             }
         }
         .padding()
@@ -189,7 +214,7 @@ struct ProfileActionSheetView: View {
             }
             
             // Center-align buttons when there are fewer than 5, otherwise left-align in a ScrollView
-            if visibleActionButtons.count < 5 {
+            if visibleActionButtonTypes.count < 5 {
                 actionButtons
                     .frame(maxWidth: .infinity)
             } else {
