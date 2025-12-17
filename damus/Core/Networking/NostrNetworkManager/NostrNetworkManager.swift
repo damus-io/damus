@@ -72,7 +72,45 @@ class NostrNetworkManager {
         self.delegate.ndb.reopen()
         // Pinging the network will automatically reconnect any dead websocket connections
         await self.ping()
+
+        #if !EXTENSION_TARGET
+        // Try to use NIP-77 negentropy for efficient sync of missing events
+        await syncTimelineWithNegentropy()
+        #endif
     }
+
+    #if !EXTENSION_TARGET
+    /// Use NIP-77 negentropy to sync timeline events efficiently
+    /// This fetches only the events we're missing instead of re-fetching everything
+    private func syncTimelineWithNegentropy() async {
+        guard await pool.isNegentropyAvailable else {
+            Log.info("Negentropy sync not available, skipping", for: .networking)
+            return
+        }
+
+        // Create a timeline filter for negentropy sync
+        // Note: limit is required for relay.damus.io NEG-OPEN - use large value for fingerprinting accuracy
+        var timelineFilter = NostrFilter(kinds: [.text, .longform, .boost, .highlight, .like])
+        timelineFilter.limit = 50000
+
+        do {
+            let startTime = CFAbsoluteTimeGetCurrent()
+            let results = try await pool.syncWithNegentropy(
+                filter: timelineFilter,
+                relayModelCache: delegate.relayModelCache
+            )
+
+            let totalNeedIds = results.values.reduce(0) { $0 + $1.needIds.count }
+            let elapsed = CFAbsoluteTimeGetCurrent() - startTime
+            let relayNames = results.keys.map { $0.absoluteString }.joined(separator: ", ")
+
+            Log.info("Negentropy sync completed in %.2fs: requested %d missing events from %d relays: %s",
+                    for: .networking, elapsed, totalNeedIds, results.count, relayNames)
+        } catch {
+            Log.error("Negentropy sync failed: %s", for: .networking, error.localizedDescription)
+        }
+    }
+    #endif
     
     func close() async {
         await withTaskGroup { group in

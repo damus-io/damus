@@ -44,6 +44,11 @@ actor RelayPool {
     var delegate: Delegate?
     private(set) var signal: SignalModel = SignalModel()
 
+    #if !EXTENSION_TARGET
+    /// Manager for NIP-77 negentropy sync sessions
+    private(set) var negentropyManager: NegentropyManager?
+    #endif
+
     let network_monitor = NWPathMonitor()
     private let network_monitor_queue = DispatchQueue(label: "io.damus.network_monitor")
     private var last_network_status: NWPath.Status = .unsatisfied
@@ -80,7 +85,22 @@ actor RelayPool {
             Task { await self?.pathUpdateHandler(path: path) }
         }
         network_monitor.start(queue: network_monitor_queue)
+
+        #if !EXTENSION_TARGET
+        // Initialize negentropy manager (needs to be done after self is available)
+        Task { [weak self] in
+            guard let self = self else { return }
+            await self.initializeNegentropyManager()
+        }
+        #endif
     }
+
+    #if !EXTENSION_TARGET
+    /// Initialize the negentropy manager (must be called from async context)
+    private func initializeNegentropyManager() {
+        self.negentropyManager = NegentropyManager(pool: self, ndb: self.ndb)
+    }
+    #endif
     
     private func pathUpdateHandler(path: NWPath) async {
         if (path.status == .satisfied || path.status == .requiresConnection) && self.last_network_status != path.status {
@@ -262,6 +282,8 @@ actor RelayPool {
                 return true
             case .auth(_):
                 return true
+            case .negOpen(_), .negMsg(_), .negClose(_):
+                return false    // Do not persist negentropy requests between sessions
             }
         }
     }
@@ -332,6 +354,8 @@ actor RelayPool {
                             }
                         case .ok(_): break    // No need to handle this, we are not sending an event to the relay
                         case .auth(_): break    // Handled in a separate function in RelayPool
+                        case .negMsg(_), .negErr(_): break  // Handled by NegentropyManager
+                        case .closed(_): break  // Handled by NegentropyManager for neg-fetch subscriptions
                         }
                     }
                 }
@@ -498,13 +522,22 @@ actor RelayPool {
     func handle_event(relay_id: RelayURL, event: NostrConnectionEvent) async {
         record_seen(relay_id: relay_id, event: event)
 
-        // When we reconnect, do two things
+        // When we connect/reconnect, do these things:
         // - Send messages that were stored in the queue
         // - Re-subscribe to filters we had subscribed before
+        // - On reconnect only: run negentropy sync for this relay
         if case .ws_connection_event(let ws) = event {
-            if case .connected = ws {
+            if case .connected(let isReconnect) = ws {
                 run_queue(relay_id)
                 await self.resubscribeAll(relayId: relay_id)
+
+                // Sync with this relay via negentropy when it reconnects
+                // (initial connect sync is handled by app foreground handler)
+                #if !EXTENSION_TARGET
+                if isReconnect {
+                    await negentropyManager?.syncSingleRelay(relay_id)
+                }
+                #endif
             }
         }
 
@@ -535,6 +568,35 @@ actor RelayPool {
             }
         }
 
+        #if !EXTENSION_TARGET
+        // Handle NIP-77 negentropy responses
+        if case let .nostr_event(nostrResponse) = event {
+            switch nostrResponse {
+            case .negMsg(let response):
+                await negentropyManager?.handleNegentropyMessage(response, from: relay_id)
+            case .negErr(let error):
+                await negentropyManager?.handleNegentropyError(error)
+            case .event(let subId, _):
+                // Track events received for negentropy fetch subscriptions
+                if subId.hasPrefix("neg-fetch-") {
+                    await negentropyManager?.trackFetchedEvent(subId: subId)
+                }
+            case .eose(let subId):
+                // Log completion when negentropy fetch finishes
+                if subId.hasPrefix("neg-fetch-") {
+                    await negentropyManager?.handleFetchEOSE(subId: subId)
+                }
+            case .closed(let closed):
+                // Handle CLOSED for negentropy fetch subscriptions
+                if closed.sub_id.hasPrefix("neg-fetch-") {
+                    await negentropyManager?.handleFetchClosed(subId: closed.sub_id, message: closed.message)
+                }
+            default:
+                break
+            }
+        }
+        #endif
+
         for handler in handlers {
             // We send data to the handlers if:
             // - the subscription ID matches, or
@@ -549,6 +611,30 @@ actor RelayPool {
 func add_rw_relay(_ pool: RelayPool, _ url: RelayURL) async {
     try? await pool.add_relay(RelayPool.RelayDescriptor(url: url, info: .readWrite))
 }
+
+#if !EXTENSION_TARGET
+// MARK: - NIP-77 Negentropy Sync
+
+extension RelayPool {
+    /// Sync timeline events using NIP-77 negentropy protocol
+    /// This efficiently syncs only missing events rather than re-fetching everything
+    /// - Parameters:
+    ///   - filter: The filter for events to sync (typically timeline filter)
+    ///   - relays: Specific relays to sync with (nil = all connected relays)
+    /// - Returns: Dictionary of relay URL to sync results
+    func syncWithNegentropy(filter: NostrFilter, to relays: [RelayURL]? = nil, relayModelCache: RelayModelCache? = nil) async throws -> [RelayURL: NegentropySyncResult] {
+        guard let manager = negentropyManager else {
+            throw NegentropySyncError.initializationFailed
+        }
+        return try await manager.sync(filter: filter, to: relays, relayModelCache: relayModelCache)
+    }
+
+    /// Check if negentropy sync is available (manager is initialized)
+    var isNegentropyAvailable: Bool {
+        return negentropyManager != nil
+    }
+}
+#endif
 
 
 extension RelayPool {

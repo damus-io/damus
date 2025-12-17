@@ -352,6 +352,12 @@ func verify_nostr_response(response: borrowing NostrResponse) -> Bool {
         return true
     case .auth(_):
         return true
+    case .negMsg(_):
+        return true  // NIP-77 negentropy messages don't need verification
+    case .negErr(_):
+        return true  // NIP-77 negentropy errors don't need verification
+    case .closed(_):
+        return true  // CLOSED messages don't need verification
     }
 }
 
