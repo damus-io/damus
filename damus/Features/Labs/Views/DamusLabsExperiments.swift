@@ -13,9 +13,11 @@ struct DamusLabsExperiments: View {
     @ObservedObject var settings: UserSettingsStore
     @State var show_live_explainer: Bool = false
     @State var show_favorites_explainer: Bool = false
+    @State var show_client_tag_explainer: Bool = false
     
     let live_label = NSLocalizedString("Live", comment: "Label for a toggle that enables an experimental feature")
     let favorites_label = NSLocalizedString("Favorites", comment: "Label for a toggle that enables an experimental feature")
+    let client_tag_label = NSLocalizedString("Client Tags", comment: "Label for a toggle that enables an experimental feature")
     
     var body: some View {
         ScrollView {
@@ -44,6 +46,7 @@ struct DamusLabsExperiments: View {
                 
                 LabsToggleView(toggleName: live_label, systemImage: "record.circle", isOn: $settings.live, showInfo: $show_live_explainer)
                 LabsToggleView(toggleName: favorites_label, systemImage: "heart.fill", isOn: $settings.enable_favourites_feature, showInfo: $show_favorites_explainer)
+                LabsToggleView(toggleName: client_tag_label, systemImage: "tag", isOn: $settings.enable_client_tag_labels, showInfo: $show_client_tag_explainer)
 
             }
             .padding([.trailing, .leading], 20)
@@ -66,6 +69,12 @@ struct DamusLabsExperiments: View {
                 labName: favorites_label,
                 systemImage: "heart.fill",
                 labDescription: NSLocalizedString("This will allow you to pick users to be part of your favorites list. You can also switch your profile timeline to only see posts from your favorite contacts.", comment: "Damus Labs feature explanation"))
+        }
+        .sheet(isPresented: $show_client_tag_explainer) {
+            LabsExplainerView(
+                labName: client_tag_label,
+                systemImage: "tag",
+                labDescription: NSLocalizedString("This adds a \"via ClientName\" indicator beside timestamps so you can see which nostr app posted an event. Expect occasional missing data while we continue improving client tag detection.", comment: "Damus Labs feature explanation"))
         }
     }
 }

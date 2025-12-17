@@ -18,7 +18,7 @@ struct NostrPost {
         self.tags = tags
     }
     
-    func to_event(keypair: FullKeypair) -> NostrEvent? {
+    func to_event(keypair: FullKeypair, clientTag: [String]? = nil) -> NostrEvent? {
         let post_blocks = self.parse_blocks()
         let post_tags = self.make_post_tags(post_blocks: post_blocks, tags: self.tags)
         let content = post_tags.blocks
@@ -30,10 +30,13 @@ struct NostrPost {
             if content.count > 0 {
                 new_tags.append(["comment", content])
             }
+            addClientTagIfNeeded(clientTag, to: &new_tags)
             return NostrEvent(content: self.content, keypair: keypair.to_keypair(), kind: self.kind.rawValue, tags: new_tags)
         }
         
-        return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: self.kind.rawValue, tags: post_tags.tags)
+        var final_tags = post_tags.tags
+        addClientTagIfNeeded(clientTag, to: &final_tags)
+        return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: self.kind.rawValue, tags: final_tags)
     }
     
     func parse_blocks() -> [Block] {
@@ -77,6 +80,16 @@ struct NostrPost {
         }
 
         return PostTags(blocks: post_blocks, tags: new_tags)
+    }
+}
+
+extension NostrPost {
+    fileprivate func addClientTagIfNeeded(_ clientTag: [String]?, to tags: inout [[String]]) {
+        guard let clientTag else { return }
+        guard tags.first(where: { $0.first == "client" }) == nil else {
+            return
+        }
+        tags.append(clientTag)
     }
 }
 
