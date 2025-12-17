@@ -525,14 +525,14 @@ actor RelayPool {
         // When we connect/reconnect, do these things:
         // - Send messages that were stored in the queue
         // - Re-subscribe to filters we had subscribed before
-        // - On reconnect only: run negentropy sync for this relay
+        // - On reconnect: run negentropy sync for this relay
         if case .ws_connection_event(let ws) = event {
             if case .connected(let isReconnect) = ws {
                 run_queue(relay_id)
                 await self.resubscribeAll(relayId: relay_id)
 
-                // Sync with this relay via negentropy when it reconnects
-                // (initial connect sync is handled by app foreground handler)
+                // Sync with this relay via negentropy on RECONNECT only
+                // Initial connects are handled by background NIP-11 check which provides settling time
                 #if !EXTENSION_TARGET
                 if isReconnect {
                     await negentropyManager?.syncSingleRelay(relay_id)
@@ -576,6 +576,12 @@ actor RelayPool {
                 await negentropyManager?.handleNegentropyMessage(response, from: relay_id)
             case .negErr(let error):
                 await negentropyManager?.handleNegentropyError(error)
+            case .notice(let message):
+                // Handle "negentropy disabled" NOTICE - mark relay as unsupported
+                if message.lowercased().contains("negentropy disabled") {
+                    Log.info("Negentropy: %s has negentropy disabled (NOTICE)", for: .networking, relay_id.absoluteString)
+                    await negentropyManager?.markRelayUnsupported(relay_id)
+                }
             case .event(let subId, _):
                 // Track events received for negentropy fetch subscriptions
                 if subId.hasPrefix("neg-fetch-") {
@@ -622,11 +628,11 @@ extension RelayPool {
     ///   - filter: The filter for events to sync (typically timeline filter)
     ///   - relays: Specific relays to sync with (nil = all connected relays)
     /// - Returns: Dictionary of relay URL to sync results
-    func syncWithNegentropy(filter: NostrFilter, to relays: [RelayURL]? = nil, relayModelCache: RelayModelCache? = nil) async throws -> [RelayURL: NegentropySyncResult] {
+    func syncWithNegentropy(filter: NostrFilter, to relays: [RelayURL]? = nil) async throws -> [RelayURL: NegentropySyncResult] {
         guard let manager = negentropyManager else {
             throw NegentropySyncError.initializationFailed
         }
-        return try await manager.sync(filter: filter, to: relays, relayModelCache: relayModelCache)
+        return try await manager.sync(filter: filter, to: relays)
     }
 
     /// Check if negentropy sync is available (manager is initialized)

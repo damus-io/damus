@@ -95,10 +95,7 @@ class NostrNetworkManager {
 
         do {
             let startTime = CFAbsoluteTimeGetCurrent()
-            let results = try await pool.syncWithNegentropy(
-                filter: timelineFilter,
-                relayModelCache: delegate.relayModelCache
-            )
+            let results = try await pool.syncWithNegentropy(filter: timelineFilter)
 
             let totalNeedIds = results.values.reduce(0) { $0 + $1.needIds.count }
             let elapsed = CFAbsoluteTimeGetCurrent() - startTime

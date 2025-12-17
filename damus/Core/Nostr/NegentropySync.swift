@@ -21,6 +21,93 @@
 #if !EXTENSION_TARGET
 import Foundation
 
+// MARK: - Negentropy Support Cache
+
+/// Caches which relays support negentropy to avoid repeated checks.
+/// Results are cached for 7 days to allow relays to update their support.
+final class NegentropySupportCache {
+    private static let cacheKey = "negentropy_relay_support_cache"
+
+    /// Cached result for a relay
+    struct CacheEntry: Codable {
+        let supported: Bool
+        let timestamp: Date
+
+        var isExpired: Bool {
+            Date().timeIntervalSince(timestamp) > Self.cacheExpiryDays * 24 * 60 * 60
+        }
+
+        private static let cacheExpiryDays = 7.0
+    }
+
+    private var cache: [String: CacheEntry] = [:]
+
+    init() {
+        loadFromUserDefaults()
+    }
+
+    /// Check if a relay is known to support negentropy
+    func isKnownSupported(_ relay: RelayURL) -> Bool {
+        guard let entry = cache[relay.absoluteString] else {
+            return false  // Unknown
+        }
+        if entry.isExpired {
+            cache.removeValue(forKey: relay.absoluteString)
+            return false  // Expired
+        }
+        return entry.supported
+    }
+
+    /// Check if a relay is known to NOT support negentropy
+    func isKnownUnsupported(_ relay: RelayURL) -> Bool {
+        guard let entry = cache[relay.absoluteString] else {
+            return false  // Unknown
+        }
+        if entry.isExpired {
+            cache.removeValue(forKey: relay.absoluteString)
+            return false  // Expired
+        }
+        return !entry.supported
+    }
+
+    /// Check if a relay's support status is unknown (not in cache)
+    func isUnknown(_ relay: RelayURL) -> Bool {
+        guard let entry = cache[relay.absoluteString] else {
+            return true  // Not in cache
+        }
+        if entry.isExpired {
+            cache.removeValue(forKey: relay.absoluteString)
+            return true  // Expired = unknown
+        }
+        return false
+    }
+
+    /// Mark a relay as supporting or not supporting negentropy
+    func setSupport(_ relay: RelayURL, supported: Bool) {
+        cache[relay.absoluteString] = CacheEntry(supported: supported, timestamp: Date())
+        saveToUserDefaults()
+    }
+
+    /// Get all relays known to support negentropy
+    func knownSupportedRelays() -> [String] {
+        return cache.filter { !$0.value.isExpired && $0.value.supported }.map { $0.key }
+    }
+
+    private func loadFromUserDefaults() {
+        guard let data = UserDefaults.standard.data(forKey: Self.cacheKey),
+              let decoded = try? JSONDecoder().decode([String: CacheEntry].self, from: data) else {
+            return
+        }
+        // Filter out expired entries on load
+        cache = decoded.filter { !$0.value.isExpired }
+    }
+
+    private func saveToUserDefaults() {
+        guard let data = try? JSONEncoder().encode(cache) else { return }
+        UserDefaults.standard.set(data, forKey: Self.cacheKey)
+    }
+}
+
 // MARK: - Types
 
 /// Represents the state of a negentropy sync session
@@ -70,6 +157,12 @@ actor NegentropySession {
 
     /// Continuation for async waiting on session completion
     private var completionContinuation: CheckedContinuation<NegentropySyncResult, Never>?
+
+    /// Tracks when we last received a message (for inactivity timeout)
+    private(set) var lastActivityTime: Date = Date()
+
+    /// Whether we've received at least one response (confirms relay supports negentropy)
+    private(set) var hasReceivedResponse: Bool = false
 
     init(relay: RelayURL, filter: NostrFilter, subId: String? = nil) {
         self.relay = relay
@@ -155,6 +248,10 @@ actor NegentropySession {
             throw NegentropySyncError.sessionNotFound
         }
 
+        // Track activity for timeout management
+        hasReceivedResponse = true
+        lastActivityTime = Date()
+
         // Process the message and generate response using native implementation
         let nextMsg = try negentropy.reconcileHex(hexMessage: messageHex)
 
@@ -215,7 +312,6 @@ actor NegentropyManager {
     private var sessions: [String: NegentropySession] = [:]
     private weak var pool: RelayPool?
     private var ndb: Ndb?
-    private var relayModelCache: RelayModelCache?
 
     /// Tracks active fetch subscriptions by sub_id for completion logging
     private var fetchTrackers: [String: NegentropyFetchTracker] = [:]
@@ -226,10 +322,79 @@ actor NegentropyManager {
     /// Tracks which relays have individual syncs in progress
     private var relaySyncsInProgress: Set<RelayURL> = []
 
-    init(pool: RelayPool?, ndb: Ndb?, relayModelCache: RelayModelCache? = nil) {
+    /// Cache for relay negentropy support (avoids NIP-11 checks on every startup)
+    private let supportCache = NegentropySupportCache()
+
+    init(pool: RelayPool?, ndb: Ndb?) {
         self.pool = pool
         self.ndb = ndb
-        self.relayModelCache = relayModelCache
+    }
+
+    /// Mark a relay as not supporting negentropy (called when we get NEG-ERR or "negentropy disabled")
+    /// Also cancels any pending sessions for this relay.
+    func markRelayUnsupported(_ relay: RelayURL) {
+        supportCache.setSupport(relay, supported: false)
+
+        // Cancel any pending sessions for this relay
+        for (subId, session) in sessions {
+            Task {
+                let sessionRelay = await session.relay
+                if sessionRelay == relay {
+                    await session.fail(reason: "Relay does not support negentropy")
+                    sessions.removeValue(forKey: subId)
+                }
+            }
+        }
+
+        // Remove from in-progress tracking
+        relaySyncsInProgress.remove(relay)
+    }
+
+    /// Mark a relay as supporting negentropy (called when we get a successful NEG-MSG)
+    func markRelaySupported(_ relay: RelayURL) {
+        supportCache.setSupport(relay, supported: true)
+    }
+
+    /// Check if relay support status is unknown
+    func isRelayUnknown(_ relay: RelayURL) -> Bool {
+        return supportCache.isUnknown(relay)
+    }
+
+    // MARK: NIP-11 Background Check
+
+    /// Check NIP-11 for unknown relays and sync those that support NIP-77.
+    /// This runs in the background and doesn't block startup.
+    private func checkNIP11AndSyncIfSupported(_ relays: [RelayURL], filter: NostrFilter) async {
+        await withTaskGroup(of: Void.self) { group in
+            for relay in relays {
+                group.addTask {
+                    do {
+                        // Fetch NIP-11 metadata
+                        guard let metadata = try await fetch_relay_metadata(relay_id: relay) else {
+                            Log.debug("Negentropy: no NIP-11 metadata for %s", for: .networking, relay.absoluteString)
+                            return
+                        }
+
+                        // Check if relay advertises NIP-77 support
+                        let supportsNIP77 = metadata.supported_nips?.contains(77) ?? false
+
+                        if supportsNIP77 {
+                            Log.info("Negentropy: %s advertises NIP-77, starting sync", for: .networking, relay.absoluteString)
+                            // Mark as potentially supported and try to sync
+                            // (will be confirmed as supported when we get NEG-MSG)
+                            await self.syncSingleRelayInternal(relay, filter: filter)
+                        } else {
+                            // Mark as unsupported so we don't check again
+                            await self.markRelayUnsupported(relay)
+                            Log.debug("Negentropy: %s does not advertise NIP-77", for: .networking, relay.absoluteString)
+                        }
+                    } catch {
+                        Log.debug("Negentropy: failed to fetch NIP-11 for %s: %s",
+                                 for: .networking, relay.absoluteString, error.localizedDescription)
+                    }
+                }
+            }
+        }
     }
 
     // MARK: Fetch Tracking
@@ -287,73 +452,21 @@ actor NegentropyManager {
         return fetchTrackers[subId] != nil
     }
 
-    // MARK: NIP-11 Relay Filtering
-
-    /// Check if we have NIP-11 metadata cached for a relay
-    @MainActor
-    private func hasNIP11Metadata(_ relay: RelayURL, cache: RelayModelCache?) -> Bool {
-        guard let cache = cache,
-              let model = cache.model(withURL: relay) else {
-            return false
-        }
-        return model.metadata.supported_nips != nil
-    }
-
-    /// Check if a relay supports NIP-77 based on its NIP-11 document
-    ///
-    /// TODO: Some relays (e.g., nos.lol) advertise NIP-77 in their NIP-11 but actually have
-    /// negentropy disabled. We should remember when a relay rejects negentropy with
-    /// "negentropy disabled" NOTICE and skip it in future sync attempts.
-    @MainActor
-    private func relaySupportsNIP77(_ relay: RelayURL, cache: RelayModelCache?) -> Bool {
-        guard let cache = cache,
-              let model = cache.model(withURL: relay),
-              let supportedNips = model.metadata.supported_nips else {
-            // If we don't have NIP-11 info, don't try negentropy (avoid errors)
-            return false
-        }
-        return supportedNips.contains(77)
-    }
-
-    /// Fetch NIP-11 metadata for a relay and check if it supports NIP-77
-    /// This is used when metadata isn't cached yet
-    private func fetchAndCheckNIP77Support(_ relay: RelayURL, cache: RelayModelCache?) async -> Bool {
-        do {
-            guard let metadata = try await fetch_relay_metadata(relay_id: relay) else {
-                return false
-            }
-
-            // Cache the metadata for future use
-            if let cache = cache {
-                await MainActor.run {
-                    let model = RelayModel(relay, metadata: metadata)
-                    cache.insert(model: model)
-                }
-            }
-
-            return metadata.supported_nips?.contains(77) ?? false
-        } catch {
-            Log.debug("Failed to fetch NIP-11 for %s: %s", for: .networking, relay.absoluteString, error.localizedDescription)
-            return false
-        }
-    }
-
     // MARK: Sync Entry Point
 
     /// Start a negentropy sync for a filter across specified relays.
     ///
     /// This is the main entry point. It:
     /// 1. Waits for relay connections (with grace period for slow relays)
-    /// 2. Filters to relays that support NIP-77 (via NIP-11)
+    /// 2. Tries all relays optimistically (skips those cached as unsupported)
     /// 3. Runs sync sessions in parallel
-    /// 4. Returns aggregated results
+    /// 4. Caches relay support based on responses (NEG-MSG = supported, NEG-ERR = unsupported)
     ///
     /// - Parameters:
     ///   - filter: The filter to sync (e.g., timeline events)
     ///   - relays: Specific relays to sync with (nil = all connected relays)
-    ///   - relayModelCache: Cache of relay NIP-11 info for filtering by NIP-77 support
     /// - Returns: Dictionary of relay URL to sync results
-    func sync(filter: NostrFilter, to relays: [RelayURL]? = nil, relayModelCache: RelayModelCache? = nil) async throws -> [RelayURL: NegentropySyncResult] {
+    func sync(filter: NostrFilter, to relays: [RelayURL]? = nil) async throws -> [RelayURL: NegentropySyncResult] {
         // Skip if a full sync is already in progress
         guard !isFullSyncInProgress else {
             Log.info("Negentropy sync: skipping, full sync already in progress", for: .networking)
@@ -363,9 +476,6 @@ actor NegentropyManager {
         isFullSyncInProgress = true
         defer { isFullSyncInProgress = false }
 
-        // Use passed cache or fall back to stored one
-        let cache = relayModelCache ?? self.relayModelCache
-        self.relayModelCache = cache
         guard let pool = pool else {
             throw NegentropySyncError.initializationFailed
         }
@@ -415,60 +525,66 @@ actor NegentropyManager {
             return [:]
         }
 
-        // Filter to only relays that advertise NIP-77 support in their NIP-11 document
-        var nip77Relays: [RelayURL] = []
-        var noNip77Relays: [RelayURL] = []
-        var uncachedRelays: [RelayURL] = []
+        // Only sync relays we KNOW support negentropy (from cache).
+        // Unknown relays will be checked via NIP-11 in the background.
+        // Skip relays that are already syncing (from connect handler).
+        var syncRelays: [RelayURL] = []
+        var skippedRelays: [RelayURL] = []
+        var unknownRelays: [RelayURL] = []
+        var alreadySyncing: [RelayURL] = []
 
         for relay in targetRelays {
-            if await relaySupportsNIP77(relay, cache: cache) {
-                nip77Relays.append(relay)
-            } else if await hasNIP11Metadata(relay, cache: cache) {
-                noNip77Relays.append(relay)
+            if relaySyncsInProgress.contains(relay) {
+                alreadySyncing.append(relay)
+            } else if supportCache.isKnownSupported(relay) {
+                syncRelays.append(relay)
+            } else if supportCache.isKnownUnsupported(relay) {
+                skippedRelays.append(relay)
             } else {
-                uncachedRelays.append(relay)
+                unknownRelays.append(relay)
             }
         }
 
-        // For relays without cached metadata, fetch NIP-11 on-demand (in parallel)
-        if !uncachedRelays.isEmpty {
-            let uncachedNames = uncachedRelays.map { $0.absoluteString }.joined(separator: ", ")
-            Log.info("Negentropy sync: fetching NIP-11 for %d relays: %s", for: .networking, uncachedRelays.count, uncachedNames)
+        if !alreadySyncing.isEmpty {
+            let names = alreadySyncing.map { $0.absoluteString }.joined(separator: ", ")
+            Log.debug("Negentropy sync: %d relays already syncing: %s", for: .networking, alreadySyncing.count, names)
+        }
 
-            await withTaskGroup(of: (RelayURL, Bool).self) { group in
-                for relay in uncachedRelays {
-                    group.addTask {
-                        let supportsNIP77 = await self.fetchAndCheckNIP77Support(relay, cache: cache)
-                        return (relay, supportsNIP77)
-                    }
-                }
+        if !skippedRelays.isEmpty {
+            let names = skippedRelays.map { $0.absoluteString }.joined(separator: ", ")
+            Log.info("Negentropy sync: skipping %d relays (cached as unsupported): %s", for: .networking, skippedRelays.count, names)
+        }
 
-                for await (relay, supportsNIP77) in group {
-                    if supportsNIP77 {
-                        nip77Relays.append(relay)
-                    } else {
-                        noNip77Relays.append(relay)
-                    }
-                }
+        // Check NIP-11 for unknown relays in the background (doesn't block startup)
+        if !unknownRelays.isEmpty {
+            let names = unknownRelays.map { $0.absoluteString }.joined(separator: ", ")
+            Log.info("Negentropy sync: checking NIP-11 for %d unknown relays in background: %s", for: .networking, unknownRelays.count, names)
+            Task {
+                await self.checkNIP11AndSyncIfSupported(unknownRelays, filter: filter)
             }
         }
 
-        if !noNip77Relays.isEmpty {
-            let names = noNip77Relays.map { $0.absoluteString }.joined(separator: ", ")
-            Log.info("Negentropy sync: skipping %d relays without NIP-77: %s", for: .networking, noNip77Relays.count, names)
-        }
-
-        if nip77Relays.isEmpty {
-            Log.info("Negentropy sync: no relays with NIP-77 support found", for: .networking)
+        if syncRelays.isEmpty {
+            Log.info("Negentropy sync: no known-supported relays to sync immediately", for: .networking)
             return [:]
         }
 
-        let relayNames = nip77Relays.map { $0.absoluteString }.joined(separator: ", ")
-        Log.info("Negentropy sync: starting sync with %d NIP-77 relays: %s", for: .networking, nip77Relays.count, relayNames)
+        // Short settling delay to let connections fully establish
+        // WebSocket "connected" doesn't mean the relay is ready to process messages.
+        // The NIP-11 check (for unknown relays) provides this delay naturally.
+        try? await Task.sleep(nanoseconds: 1_500_000_000)  // 1.5 seconds
+
+        let relayNames = syncRelays.map { $0.absoluteString }.joined(separator: ", ")
+        Log.info("Negentropy sync: starting sync with %d relays: %s", for: .networking, syncRelays.count, relayNames)
+
+        // Track all relays we're about to sync to prevent duplicate reconnect syncs
+        for relay in syncRelays {
+            relaySyncsInProgress.insert(relay)
+        }
 
         // Sync with all relays in parallel for speed
-        return await withTaskGroup(of: (RelayURL, NegentropySyncResult?).self) { group in
-            for relay in nip77Relays {
+        let results = await withTaskGroup(of: (RelayURL, NegentropySyncResult?).self) { group in
+            for relay in syncRelays {
                 group.addTask {
                     do {
                         let result = try await self.syncWithRelay(relay, filter: filter)
@@ -488,51 +604,81 @@ actor NegentropyManager {
             }
             return results
         }
-    }
 
-    /// Sync a single relay on reconnect.
-    ///
-    /// Called when a relay reconnects to sync any events we may have missed while disconnected.
-    /// Skips if a full sync is in progress (to avoid duplicate work) or if this relay is already syncing.
-    /// Skips relays that don't support NIP-77.
-    func syncSingleRelay(_ relay: RelayURL) async {
-        // Skip if full sync is already in progress (it will handle this relay)
-        guard !isFullSyncInProgress else {
-            Log.debug("Negentropy reconnect sync: skipping %s, full sync in progress", for: .networking, relay.absoluteString)
-            return
+        // Clear tracking for completed syncs
+        for relay in syncRelays {
+            relaySyncsInProgress.remove(relay)
         }
 
+        return results
+    }
+
+    /// Sync a single relay on connect/reconnect.
+    ///
+    /// Called when a relay connects to sync any events we may have missed.
+    /// - Known supported: syncs immediately
+    /// - Known unsupported: skips
+    /// - Unknown: checks NIP-11 first, then syncs if supported
+    func syncSingleRelay(_ relay: RelayURL) async {
         // Skip if this relay is already being synced
         guard !relaySyncsInProgress.contains(relay) else {
             Log.debug("Negentropy reconnect sync: skipping %s, already syncing", for: .networking, relay.absoluteString)
             return
         }
 
-        relaySyncsInProgress.insert(relay)
-        defer { relaySyncsInProgress.remove(relay) }
-
-        // Check NIP-77 support
-        let supportsNIP77: Bool
-        if await relaySupportsNIP77(relay, cache: relayModelCache) {
-            supportsNIP77 = true
-        } else if await hasNIP11Metadata(relay, cache: relayModelCache) {
-            // We have metadata but relay doesn't support NIP-77, skip silently
-            return
-        } else {
-            // No cached metadata, try on-demand fetch
-            supportsNIP77 = await fetchAndCheckNIP77Support(relay, cache: relayModelCache)
-        }
-
-        guard supportsNIP77 else {
+        // Skip if we know this relay doesn't support negentropy
+        guard !supportCache.isKnownUnsupported(relay) else {
             return
         }
 
-        Log.info("Negentropy sync: reconnected relay %s, starting sync", for: .networking, relay.absoluteString)
-
-        // Build filter for timeline events (same as app foreground sync)
-        // Note: limit is required for relay.damus.io NEG-OPEN
+        // Build filter for timeline events
         var filter = NostrFilter(kinds: [.text, .longform, .highlight])
         filter.limit = 50000
+
+        // If relay is known supported, sync after short settling delay
+        if supportCache.isKnownSupported(relay) {
+            Log.info("Negentropy sync: relay %s reconnected, waiting for connection to settle", for: .networking, relay.absoluteString)
+            // Short delay to let reconnection fully establish
+            try? await Task.sleep(nanoseconds: 1_000_000_000)  // 1 second
+            await syncSingleRelayInternal(relay, filter: filter)
+            return
+        }
+
+        // Unknown relay - check NIP-11 first (in background to not block)
+        Log.debug("Negentropy sync: checking NIP-11 for unknown relay %s", for: .networking, relay.absoluteString)
+        Task {
+            do {
+                guard let metadata = try await fetch_relay_metadata(relay_id: relay) else {
+                    Log.debug("Negentropy: no NIP-11 metadata for %s", for: .networking, relay.absoluteString)
+                    return
+                }
+
+                let supportsNIP77 = metadata.supported_nips?.contains(77) ?? false
+
+                if supportsNIP77 {
+                    Log.info("Negentropy: %s advertises NIP-77, starting sync", for: .networking, relay.absoluteString)
+                    await self.syncSingleRelayInternal(relay, filter: filter)
+                } else {
+                    await self.markRelayUnsupported(relay)
+                    Log.debug("Negentropy: %s does not advertise NIP-77", for: .networking, relay.absoluteString)
+                }
+            } catch {
+                Log.debug("Negentropy: failed to fetch NIP-11 for %s: %s",
+                         for: .networking, relay.absoluteString, error.localizedDescription)
+            }
+        }
+    }
+
+    /// Internal method to sync a single relay (assumes checks already done).
+    private func syncSingleRelayInternal(_ relay: RelayURL, filter: NostrFilter) async {
+        // Skip if this relay is already being synced
+        guard !relaySyncsInProgress.contains(relay) else {
+            Log.debug("Negentropy sync: skipping %s, already syncing", for: .networking, relay.absoluteString)
+            return
+        }
+
+        relaySyncsInProgress.insert(relay)
+        defer { relaySyncsInProgress.remove(relay) }
 
         do {
             let result = try await syncWithRelay(relay, filter: filter)
@@ -544,11 +690,10 @@ actor NegentropyManager {
 
             // Log result - fetching is already handled by handleNegentropyMessage
             if result.needIds.isEmpty {
-                Log.info("Negentropy reconnect sync: %s - already up to date", for: .networking, relay.absoluteString)
+                Log.info("Negentropy sync: %s - already up to date", for: .networking, relay.absoluteString)
             }
-            // Note: if needIds is not empty, the fetch log is already shown by fetchMissingEvents
         } catch {
-            Log.error("Negentropy reconnect sync failed for %s: %s",
+            Log.error("Negentropy sync failed for %s: %s",
                      for: .networking, relay.absoluteString, error.localizedDescription)
         }
     }
@@ -584,27 +729,50 @@ actor NegentropyManager {
                 for: .networking, relay.absoluteString, initialMessage.count / 2)  // hex = 2 chars per byte
         await pool?.send(.negOpen(negOpen), to: [relay])
 
-        // Wait for completion with a timeout of 30 seconds
-        // The session will be signaled complete when handleNegentropyMessage receives the final response
-        // or when handleNegentropyError is called
+        // Two-phase timeout:
+        // - First response: 10s (fail fast if relay doesn't support NIP-77)
+        // - After first response: 30s inactivity timeout (give time for multi-round reconciliation)
         return await withTaskGroup(of: NegentropySyncResult.self) { group in
             // Task 1: Wait for actual completion
             group.addTask {
                 await session.waitForCompletion()
             }
 
-            // Task 2: Timeout after 30 seconds
+            // Task 2: Inactivity-based timeout
             group.addTask {
-                do {
-                    try await Task.sleep(nanoseconds: 30_000_000_000)
-                    // Only reaches here if not cancelled - actual timeout
-                    Log.error("Negentropy: timeout waiting for %s", for: .networking, relay.absoluteString)
-                    await session.fail(reason: "Timeout waiting for relay response")
-                    let result = await session.getResults()
-                    return NegentropySyncResult(haveIds: result.haveIds, needIds: result.needIds, timedOut: true)
-                } catch {
-                    // Task was cancelled (session completed first) - return dummy result
-                    return NegentropySyncResult()
+                let startTime = Date()
+                let initialTimeout: TimeInterval = 10  // 10s for first response
+                let inactivityTimeout: TimeInterval = 30  // 30s between messages
+
+                while true {
+                    do {
+                        // Check every 2 seconds
+                        try await Task.sleep(nanoseconds: 2_000_000_000)
+
+                        let hasResponse = await session.hasReceivedResponse
+                        let lastActivity = await session.lastActivityTime
+
+                        if !hasResponse {
+                            // Still waiting for first response
+                            if Date().timeIntervalSince(startTime) > initialTimeout {
+                                Log.info("Negentropy: timeout waiting for %s (may not support NIP-77)", for: .networking, relay.absoluteString)
+                                await session.fail(reason: "Timeout waiting for first response")
+                                let result = await session.getResults()
+                                return NegentropySyncResult(haveIds: result.haveIds, needIds: result.needIds, timedOut: true)
+                            }
+                        } else {
+                            // Have received response, check for inactivity
+                            if Date().timeIntervalSince(lastActivity) > inactivityTimeout {
+                                Log.info("Negentropy: inactivity timeout for %s", for: .networking, relay.absoluteString)
+                                await session.fail(reason: "Inactivity timeout")
+                                let result = await session.getResults()
+                                return NegentropySyncResult(haveIds: result.haveIds, needIds: result.needIds, timedOut: true)
+                            }
+                        }
+                    } catch {
+                        // Task was cancelled (session completed first) - return dummy result
+                        return NegentropySyncResult()
+                    }
                 }
             }
 
@@ -627,6 +795,9 @@ actor NegentropyManager {
             Log.error("Received NEG-MSG for unknown session: %s", for: .networking, response.sub_id)
             return
         }
+
+        // First successful NEG-MSG confirms this relay supports negentropy
+        markRelaySupported(relay)
 
         Log.debug("Negentropy: received NEG-MSG from %s", for: .networking, relay.absoluteString)
 
@@ -654,11 +825,20 @@ actor NegentropyManager {
         }
     }
 
-    /// Handle a NEG-ERR response from a relay
+    /// Handle a NEG-ERR response from a relay.
+    ///
+    /// Marks the relay as not supporting negentropy in the cache so we skip it in future syncs.
     func handleNegentropyError(_ error: NegentropyError) async {
         guard let session = sessions[error.sub_id] else {
             return
         }
+
+        // Cache this relay as unsupported so we don't try again
+        let relay = await session.relay
+        markRelayUnsupported(relay)
+        Log.info("Negentropy: marking %s as unsupported (NEG-ERR: %s)",
+                for: .networking, relay.absoluteString, error.reason)
+
         await session.fail(reason: error.reason)
         sessions.removeValue(forKey: error.sub_id)
     }

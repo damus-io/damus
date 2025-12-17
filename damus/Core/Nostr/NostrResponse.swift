@@ -83,29 +83,35 @@ enum NostrResponse {
         }
     }
 
-    /// Try to parse messages that nostrdb doesn't support (NIP-77 negentropy, CLOSED)
+    /// Try to parse messages that nostrdb doesn't support (NIP-77 negentropy, CLOSED, NOTICE)
     static func parse_extended(json: String) -> NostrResponse? {
         // Quick check for messages we handle here
-        guard json.hasPrefix("[\"NEG-") || json.hasPrefix("[\"CLOSED\"") else { return nil }
+        guard json.hasPrefix("[\"NEG-") || json.hasPrefix("[\"CLOSED\"") || json.hasPrefix("[\"NOTICE\"") else { return nil }
 
         guard let data = json.data(using: .utf8),
               let array = try? JSONSerialization.jsonObject(with: data) as? [Any],
               array.count >= 2,
-              let msgType = array[0] as? String,
-              let subId = array[1] as? String else {
+              let msgType = array[0] as? String else {
             return nil
         }
 
         switch msgType {
+        case "NOTICE":
+            // NIP-01: ["NOTICE", "message"]
+            guard let message = array[1] as? String else { return nil }
+            return .notice(message)
+
         case "NEG-MSG":
-            guard array.count >= 3,
+            guard let subId = array[1] as? String,
+                  array.count >= 3,
                   let message = array[2] as? String else {
                 return nil
             }
             return .negMsg(NegentropyResponse(sub_id: subId, message: message))
 
         case "NEG-ERR":
-            guard array.count >= 3,
+            guard let subId = array[1] as? String,
+                  array.count >= 3,
                   let reason = array[2] as? String else {
                 return nil
             }
@@ -113,6 +119,7 @@ enum NostrResponse {
 
         case "CLOSED":
             // NIP-01: ["CLOSED", <subscription_id>, <message>]
+            guard let subId = array[1] as? String else { return nil }
             let message = array.count >= 3 ? (array[2] as? String ?? "") : ""
             return .closed(SubscriptionClosed(sub_id: subId, message: message))
 

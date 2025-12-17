@@ -8,6 +8,7 @@
 #include "ndb_negentropy.h"
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 /* ============================================================
  * VARINT ENCODING/DECODING
@@ -1500,6 +1501,7 @@ int ndb_negentropy_reconcile(struct ndb_negentropy *neg,
 	struct ndb_negentropy_range in_range;
 	int consumed;
 	int received_non_skip = 0;  /* Track if we received any non-SKIP input */
+	int range_count = 0;  /* Track range number for error diagnostics */
 
 	/* Guard: validate inputs */
 	if (neg == NULL || msg == NULL || out == NULL || outlen == NULL)
@@ -1522,10 +1524,15 @@ int ndb_negentropy_reconcile(struct ndb_negentropy *neg,
 	remaining = msglen - 1;
 
 	while (remaining > 0) {
+		range_count++;
+
 		/* Decode next range */
 		consumed = ndb_negentropy_range_decode(p, remaining, &in_range, &prev_ts_in);
-		if (consumed == 0)
+		if (consumed == 0) {
+			fprintf(stderr, "ndb_negentropy: decode failed at range %d, remaining=%zu\n",
+				range_count, remaining);
 			return 0;
+		}
 
 		p += consumed;
 		remaining -= (size_t)consumed;
@@ -1555,8 +1562,11 @@ int ndb_negentropy_reconcile(struct ndb_negentropy *neg,
 			written = ndb_negentropy_range_encode(
 				out + out_offset, *outlen - out_offset,
 				&out_range, &prev_ts_out);
-			if (written == 0)
+			if (written == 0) {
+				fprintf(stderr, "ndb_negentropy: SKIP encode failed at range %d, out_offset=%zu, buflen=%zu\n",
+					range_count, out_offset, *outlen);
 				return 0;
+			}
 
 			out_offset += (size_t)written;
 			break;
@@ -1584,8 +1594,11 @@ int ndb_negentropy_reconcile(struct ndb_negentropy *neg,
 				written = ndb_negentropy_range_encode(
 					out + out_offset, *outlen - out_offset,
 					&out_range, &prev_ts_out);
-				if (written == 0)
+				if (written == 0) {
+					fprintf(stderr, "ndb_negentropy: FP-SKIP encode failed at range %d, out_offset=%zu\n",
+						range_count, out_offset);
 					return 0;
+				}
 
 				out_offset += (size_t)written;
 			} else {
@@ -1611,8 +1624,11 @@ int ndb_negentropy_reconcile(struct ndb_negentropy *neg,
 					if (our_count > 0) {
 						size_t i;
 						id_buf = malloc(our_count * 32);
-						if (id_buf == NULL)
+						if (id_buf == NULL) {
+							fprintf(stderr, "ndb_negentropy: malloc failed at range %d, our_count=%zu\n",
+								range_count, our_count);
 							return 0;
+						}
 
 						for (i = 0; i < our_count; i++) {
 							memcpy(id_buf + i * 32,
@@ -1630,8 +1646,11 @@ int ndb_negentropy_reconcile(struct ndb_negentropy *neg,
 
 					free(id_buf);
 
-					if (written == 0)
+					if (written == 0) {
+						fprintf(stderr, "ndb_negentropy: IDLIST encode failed at range %d, our_count=%zu, out_offset=%zu\n",
+							range_count, our_count, out_offset);
 						return 0;
+					}
 
 					out_offset += (size_t)written;
 				} else {
@@ -1676,8 +1695,11 @@ int ndb_negentropy_reconcile(struct ndb_negentropy *neg,
 						written = ndb_negentropy_range_encode(
 							out + out_offset, *outlen - out_offset,
 							&out_range, &prev_ts_out);
-						if (written == 0)
+						if (written == 0) {
+							fprintf(stderr, "ndb_negentropy: FP-SPLIT encode failed at range %d split %d, out_offset=%zu\n",
+								range_count, s, out_offset);
 							return 0;
+						}
 
 						out_offset += (size_t)written;
 						split_lower = split_upper;
@@ -1749,8 +1771,11 @@ int ndb_negentropy_reconcile(struct ndb_negentropy *neg,
 			written = ndb_negentropy_range_encode(
 				out + out_offset, *outlen - out_offset,
 				&out_range, &prev_ts_out);
-			if (written == 0)
+			if (written == 0) {
+				fprintf(stderr, "ndb_negentropy: IDLIST-SKIP encode failed at range %d, out_offset=%zu\n",
+					range_count, out_offset);
 				return 0;
+			}
 
 			out_offset += (size_t)written;
 			break;
@@ -1800,14 +1825,19 @@ int ndb_negentropy_reconcile(struct ndb_negentropy *neg,
 			written = ndb_negentropy_range_encode(
 				out + out_offset, *outlen - out_offset,
 				&out_range, &prev_ts_out);
-			if (written == 0)
+			if (written == 0) {
+				fprintf(stderr, "ndb_negentropy: IDLIST_RESPONSE-SKIP encode failed at range %d, out_offset=%zu\n",
+					range_count, out_offset);
 				return 0;
+			}
 
 			out_offset += (size_t)written;
 			break;
 		}
 
 		default:
+			fprintf(stderr, "ndb_negentropy: unknown mode %d at range %d\n",
+				in_range.mode, range_count);
 			return 0;
 		}
 
