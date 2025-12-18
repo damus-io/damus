@@ -13,9 +13,63 @@
 //  - Uses kind 24242 auth (not NIP-98 kind 27235)
 //  - Returns blob descriptor JSON (not NIP-94 event)
 //
+//  Large file support:
+//  - Uses streaming SHA256 to avoid loading entire file into memory
+//  - Uses URLSession.uploadTask(fromFile:) for memory-efficient uploads
+//
 
 import Foundation
 import CommonCrypto
+
+// MARK: - Streaming SHA256
+
+/// Computes SHA256 hash of a file using streaming to avoid loading entire file into memory.
+/// Reads the file in chunks (default 64KB) and updates the hash incrementally.
+///
+/// - Parameters:
+///   - fileURL: URL of the file to hash
+///   - chunkSize: Size of chunks to read (default 64KB)
+/// - Returns: Hex-encoded SHA256 hash, or nil if file cannot be read
+func computeStreamingSHA256(fileURL: URL, chunkSize: Int = 64 * 1024) -> String? {
+    // Check file exists first - InputStream doesn't fail for non-existent files
+    guard FileManager.default.fileExists(atPath: fileURL.path) else {
+        return nil
+    }
+
+    guard let inputStream = InputStream(url: fileURL) else {
+        return nil
+    }
+
+    inputStream.open()
+    defer { inputStream.close() }
+
+    // Check for open errors
+    if inputStream.streamStatus == .error {
+        return nil
+    }
+
+    var context = CC_SHA256_CTX()
+    CC_SHA256_Init(&context)
+
+    var buffer = [UInt8](repeating: 0, count: chunkSize)
+
+    while inputStream.hasBytesAvailable {
+        let bytesRead = inputStream.read(&buffer, maxLength: chunkSize)
+        if bytesRead < 0 {
+            // Read error
+            return nil
+        }
+        if bytesRead == 0 {
+            break
+        }
+        CC_SHA256_Update(&context, buffer, CC_LONG(bytesRead))
+    }
+
+    var hash = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
+    CC_SHA256_Final(&hash, &context)
+
+    return hash.map { String(format: "%02x", $0) }.joined()
+}
 
 // MARK: - Blossom Uploader
 
@@ -156,11 +210,81 @@ struct BlossomUploader {
     }
 }
 
-// MARK: - Convenience Extension
+// MARK: - Streaming File Upload
 
 extension BlossomUploader {
 
-    /// Uploads media from a URL (reads file data first).
+    /// Uploads a file to a Blossom server using streaming.
+    ///
+    /// This method is optimized for large files (videos, etc.):
+    /// - Uses streaming SHA256 to hash without loading entire file into memory
+    /// - Uses URLSession.uploadTask(fromFile:) for memory-efficient upload
+    ///
+    /// - Parameters:
+    ///   - fileURL: Local file URL to upload
+    ///   - mimeType: MIME type of the file
+    ///   - serverURL: The Blossom server to upload to
+    ///   - keypair: User's keypair for authorization
+    ///   - progressDelegate: Optional delegate for upload progress tracking
+    /// - Returns: Upload result with blob descriptor or error
+    func uploadFile(
+        fileURL: URL,
+        mimeType: String,
+        to serverURL: BlossomServerURL,
+        keypair: Keypair,
+        progressDelegate: URLSessionTaskDelegate? = nil
+    ) async -> BlossomUploadResult {
+        // Step 1: Compute SHA256 hash using streaming (memory-efficient)
+        guard let sha256Hex = computeStreamingSHA256(fileURL: fileURL) else {
+            return .failed(.fileReadError)
+        }
+
+        // Step 2: Create Blossom authorization event
+        guard let authBase64 = create_blossom_upload_auth(keypair: keypair, sha256Hex: sha256Hex) else {
+            return .failed(.authenticationFailed)
+        }
+
+        // Step 3: Build the upload request
+        var request = URLRequest(url: serverURL.uploadURL)
+        request.httpMethod = "PUT"
+
+        // Set headers per BUD-02
+        request.setValue(mimeType, forHTTPHeaderField: "Content-Type")
+        request.setValue(blossom_authorization_header(authBase64), forHTTPHeaderField: "Authorization")
+
+        // Step 4: Execute the upload using file-based upload task (streams from disk)
+        let responseData: Data
+        let response: URLResponse
+
+        do {
+            let session = URLSession.shared
+            (responseData, response) = try await session.upload(for: request, fromFile: fileURL, delegate: progressDelegate)
+        } catch {
+            return .failed(.uploadFailed(underlying: error))
+        }
+
+        // Step 5: Validate HTTP response
+        guard let httpResponse = response as? HTTPURLResponse else {
+            return .failed(.invalidResponse)
+        }
+
+        guard httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 else {
+            let reason = extractErrorReason(from: httpResponse, body: responseData)
+            return .failed(.serverRejected(reason: reason, statusCode: httpResponse.statusCode))
+        }
+
+        // Step 6: Parse blob descriptor response
+        guard let descriptor = parseBlossomResponse(responseData) else {
+            return .failed(.invalidResponse)
+        }
+
+        return .success(descriptor)
+    }
+
+    /// Uploads media from a URL.
+    ///
+    /// For small files (<1MB), loads data into memory for simpler handling.
+    /// For larger files, uses streaming upload for memory efficiency.
     ///
     /// - Parameters:
     ///   - fileURL: Local file URL to upload
@@ -176,6 +300,22 @@ extension BlossomUploader {
         keypair: Keypair,
         progressDelegate: URLSessionTaskDelegate? = nil
     ) async -> BlossomUploadResult {
+        // Check file size to decide upload strategy
+        let fileSize: Int64
+        do {
+            let attributes = try FileManager.default.attributesOfItem(atPath: fileURL.path)
+            fileSize = attributes[.size] as? Int64 ?? 0
+        } catch {
+            return .failed(.fileReadError)
+        }
+
+        // For files larger than 1MB, use streaming upload
+        let oneMB: Int64 = 1024 * 1024
+        if fileSize > oneMB {
+            return await uploadFile(fileURL: fileURL, mimeType: mimeType, to: serverURL, keypair: keypair, progressDelegate: progressDelegate)
+        }
+
+        // For small files, load into memory (simpler, still efficient for small data)
         guard let data = try? Data(contentsOf: fileURL) else {
             return .failed(.fileReadError)
         }

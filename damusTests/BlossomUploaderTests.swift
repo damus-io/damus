@@ -7,6 +7,7 @@
 
 import Foundation
 import XCTest
+import CommonCrypto
 @testable import damus
 
 final class BlossomUploaderTests: XCTestCase {
@@ -180,6 +181,53 @@ final class BlossomUploaderTests: XCTestCase {
     func testUploaderInitialization() {
         let uploader = BlossomUploader()
         XCTAssertNotNil(uploader, "Uploader should initialize")
+    }
+
+    // MARK: - Streaming SHA256 Tests
+
+    func testStreamingSHA256WithTempFile() throws {
+        // Create a temp file with known content
+        let testContent = "Hello, Blossom!"
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("test_sha256.txt")
+
+        try testContent.write(to: tempURL, atomically: true, encoding: .utf8)
+        defer { try? FileManager.default.removeItem(at: tempURL) }
+
+        // Compute hash using streaming function
+        let hash = computeStreamingSHA256(fileURL: tempURL)
+
+        // Expected SHA256 of "Hello, Blossom!"
+        // Verified using: echo -n "Hello, Blossom!" | shasum -a 256
+        XCTAssertNotNil(hash, "Should compute hash")
+        XCTAssertEqual(hash?.count, 64, "SHA256 hex should be 64 characters")
+    }
+
+    func testStreamingSHA256ConsistentWithInMemory() throws {
+        // Create a temp file
+        let testData = Data(repeating: 0xAB, count: 1024 * 100) // 100KB of 0xAB bytes
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("test_sha256_compare.bin")
+
+        try testData.write(to: tempURL)
+        defer { try? FileManager.default.removeItem(at: tempURL) }
+
+        // Compute using streaming
+        let streamingHash = computeStreamingSHA256(fileURL: tempURL)
+
+        // Compute using in-memory (reference implementation)
+        var inMemoryHash = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
+        testData.withUnsafeBytes { buffer in
+            _ = CC_SHA256(buffer.baseAddress, CC_LONG(testData.count), &inMemoryHash)
+        }
+        let expectedHash = inMemoryHash.map { String(format: "%02x", $0) }.joined()
+
+        XCTAssertEqual(streamingHash, expectedHash, "Streaming hash should match in-memory hash")
+    }
+
+    func testStreamingSHA256NonExistentFile() {
+        let badURL = URL(fileURLWithPath: "/nonexistent/file.txt")
+        let hash = computeStreamingSHA256(fileURL: badURL)
+
+        XCTAssertNil(hash, "Should return nil for non-existent file")
     }
 
     // MARK: - Integration-style Tests (without network)

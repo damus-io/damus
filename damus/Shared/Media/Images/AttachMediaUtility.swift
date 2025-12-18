@@ -34,6 +34,8 @@ class AttachMediaUtility {
     /// - PUT request with raw binary body (not multipart form-data)
     /// - Kind 24242 authorization (not NIP-98)
     /// - Server URL from user settings (not hardcoded)
+    ///
+    /// For large files (videos), uses streaming upload to avoid memory issues.
     fileprivate static func uploadViaBlossom(
         mediaToUpload: MediaUpload,
         keypair: Keypair?,
@@ -55,19 +57,11 @@ class AttachMediaUtility {
             return .failed(BlossomError.authenticationFailed)
         }
 
-        // Load media data
-        let mediaData: Data
-        do {
-            mediaData = try Data(contentsOf: mediaToUpload.localURL)
-        } catch {
-            print("Blossom upload failed: Could not load media data - \(error)")
-            return .failed(error)
-        }
-
         // Use BlossomUploader to perform the upload
+        // The uploader handles streaming for large files automatically
         let uploader = BlossomUploader()
         let result = await uploader.upload(
-            data: mediaData,
+            fileURL: mediaToUpload.localURL,
             mimeType: mediaToUpload.mime_type,
             to: serverURL,
             keypair: fullKeypair.to_keypair(),
@@ -108,10 +102,17 @@ class AttachMediaUtility {
 
     static func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: any MediaUploaderProtocol, mediaType: ImageUploadMediaType, progress: URLSessionTaskDelegate, keypair: Keypair? = nil) async -> ImageUploadResult {
 
+        print("[AttachMediaUtility] create_upload_request called")
+        print("[AttachMediaUtility] mediaUploader type: \(type(of: mediaUploader))")
+        print("[AttachMediaUtility] mediaUploader id: \(mediaUploader.id)")
+
         // Branch early for Blossom - it uses a completely different upload mechanism
         if let uploader = mediaUploader as? MediaUploader, uploader == .blossom {
+            print("[AttachMediaUtility] Taking Blossom path")
             return await uploadViaBlossom(mediaToUpload: mediaToUpload, keypair: keypair, progress: progress)
         }
+
+        print("[AttachMediaUtility] Taking NIP-96 path for: \(mediaUploader.postAPI)")
 
         // NIP-96 upload flow for other uploaders (nostr.build, nostrcheck, etc.)
         var mediaData: Data?

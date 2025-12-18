@@ -103,12 +103,13 @@ struct MediaPicker: UIViewControllerRepresentable {
                     result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier) { (url, error) in
                         guard let url, error == nil else { return }
 
-                        self.attemptAcquireResourceAndChooseMedia(
-                            url: url,
-                            fallback: processVideo,
-                            unprocessedEnum: {.unprocessed_video($0)},
-                            processedEnum: {.processed_video($0)}, orderId: orderId
-                        )
+                        // IMPORTANT: loadFileRepresentation provides a temp file that is deleted
+                        // after this completion handler returns. We MUST copy it immediately.
+                        guard let copiedURL = processVideo(videoURL: url) else {
+                            print("[MediaPicker] Failed to copy video to temp location")
+                            return
+                        }
+                        self.chooseMedia(.processed_video(copiedURL), orderId: orderId)
                     }
                 }
             }
