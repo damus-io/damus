@@ -294,6 +294,8 @@ struct ChatEventView: View {
             HStack {
                 if by_other_user { Spacer() }
 
+                // Offset pushes the bar below the bubble to avoid overlapping short message text.
+                // Previously used .padding(.vertical, -20) which pulled the bar UP into the bubble.
                 EventActionBar(damus_state: damus_state, event: event, bar: bar, options: [.no_spread, .hide_items_without_activity])
                     .padding(10)
                     .background(DamusColors.adaptableLighterGrey)
@@ -302,10 +304,10 @@ struct ChatEventView: View {
                     .overlay(RoundedRectangle(cornerSize: CGSize(width: 100, height: 100)).stroke(DamusColors.adaptableWhite, lineWidth: 1))
                     .shadow(color: Color.black.opacity(0.05), radius: 3, y: 3)
                     .scaleEffect(0.7, anchor: is_ours ? .leading : .trailing)
+                    .offset(y: 15)
 
                 if is_ours { Spacer() }
             }
-            .padding(.vertical, -20)
         }
     }
     
