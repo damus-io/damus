@@ -385,7 +385,7 @@ struct AddBlossomMirrorServerView: View {
 
         guard let serverURL = BlossomServerURL(trimmedURL) else {
             errorMessage = NSLocalizedString(
-                "Invalid URL. Please enter a valid http or https URL.",
+                "Invalid URL. Please enter a valid https URL.",
                 comment: "Error shown when user enters an invalid server URL"
             )
             return

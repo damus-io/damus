@@ -20,10 +20,9 @@ final class BlossomUploaderTests: XCTestCase {
         XCTAssertEqual(url?.absoluteString, "https://blossom.example.com")
     }
 
-    func testServerURLValidHttp() {
+    func testServerURLRejectsHttp() {
         let url = BlossomServerURL("http://localhost:3000")
-        XCTAssertNotNil(url, "Valid HTTP URL should be accepted")
-        XCTAssertEqual(url?.absoluteString, "http://localhost:3000")
+        XCTAssertNil(url, "HTTP URL should be rejected - HTTPS required for security")
     }
 
     func testServerURLTrailingSlashRemoved() {
@@ -239,8 +238,8 @@ final class BlossomUploaderTests: XCTestCase {
         let keypair = test_keypair_full.to_keypair()
         let testData = "test data".data(using: .utf8)!
 
-        // Create a URL that will immediately fail (localhost with no server)
-        guard let serverURL = BlossomServerURL("http://127.0.0.1:1") else {
+        // Create a URL that will immediately fail (localhost with no server listening)
+        guard let serverURL = BlossomServerURL("https://127.0.0.1:1") else {
             XCTFail("Should create server URL")
             return
         }

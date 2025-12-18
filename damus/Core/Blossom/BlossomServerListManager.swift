@@ -133,12 +133,14 @@ class BlossomServerListManager {
     /// without publishing a kind 10063 event.
     ///
     /// - Parameter url: The server URL to set, or nil to clear
+    @MainActor
     func setManualServer(_ url: BlossomServerURL?) {
         guard let delegate = delegate else { return }
         delegate.settings.manualBlossomServerUrl = url?.absoluteString
     }
 
     /// Clears the manual server URL.
+    @MainActor
     func clearManualServer() {
         setManualServer(nil)
     }

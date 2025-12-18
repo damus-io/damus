@@ -152,10 +152,10 @@ struct AddBlossomServerView: View {
     private func saveServer() {
         let trimmedURL = urlText.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        // Validate URL format
+        // Validate URL format (HTTPS required for security)
         guard let serverURL = BlossomServerURL(trimmedURL) else {
             errorMessage = NSLocalizedString(
-                "Invalid URL. Please enter a valid http or https URL.",
+                "Invalid URL. Please enter a valid https URL.",
                 comment: "Error shown when user enters an invalid Blossom server URL"
             )
             return

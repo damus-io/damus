@@ -31,20 +31,13 @@ struct BlossomServerURL: Hashable, Codable, Sendable {
     }
 
     init?(_ urlString: String) {
-        // Validate URL format
-        guard let url = URL(string: urlString) else {
-            return nil
-        }
+        guard let url = URL(string: urlString) else { return nil }
 
-        // Must have a valid scheme (http or https)
-        guard let scheme = url.scheme, (scheme == "http" || scheme == "https") else {
-            return nil
-        }
+        // Require HTTPS for security - media uploads contain auth headers
+        // and user data that should not be sent over plaintext HTTP
+        guard url.scheme == "https" else { return nil }
 
-        // Must have a host
-        guard url.host != nil else {
-            return nil
-        }
+        guard url.host != nil else { return nil }
 
         self.url = url
     }
@@ -53,9 +46,16 @@ struct BlossomServerURL: Hashable, Codable, Sendable {
         self.init(url.absoluteString)
     }
 
-    /// Returns the URL for the upload endpoint (PUT /upload).
+    /// Returns the URL for the upload endpoint (PUT /upload per BUD-02).
     var uploadURL: URL {
         url.appendingPathComponent("upload")
+    }
+
+    /// Returns the URL for the media optimization endpoint (PUT /media per BUD-05).
+    /// This endpoint allows servers to perform media transformations like
+    /// resizing images or transcoding videos before storage.
+    var mediaURL: URL {
+        url.appendingPathComponent("media")
     }
 
     /// Returns the URL for retrieving a blob by its SHA256 hash.
