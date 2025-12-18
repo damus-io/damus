@@ -234,7 +234,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         case .live, .live_chat:
             break
         case .blossom_auth, .blossom_server_list:
-            break   // Blossom events are handled separately by BlossomServerListManager
+            break   // Blossom server list (kind 10063) support planned for future release; v1 uses manual server URL in settings
         }
     }
 
