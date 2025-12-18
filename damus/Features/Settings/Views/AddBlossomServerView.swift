@@ -134,6 +134,7 @@ struct AddBlossomServerView: View {
     private var exampleServers: [String] {
         [
             "https://blossom.primal.net",
+            "https://nostr.download",
             "https://blossom.oxtr.dev",
             "https://cdn.satellite.earth"
         ]
