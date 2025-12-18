@@ -850,21 +850,27 @@ class HomeModel: ContactsDelegate, ObservableObject {
             handle_quote_repost_event(ev, target: quoted_event.note_id)
         }
 
-        // don't add duplicate reposts to home
-        if ev.known_kind == .boost, let target = ev.get_inner_event()?.id {
-            if already_reposted.contains(target) {
-                Log.info("Skipping duplicate repost for event %s", for: .timeline, target.hex())
-                return
-            } else {
-                already_reposted.insert(target)
-            }
-        }
-
         switch context {
         case .home:
+            // Deduplicate reposts in home feed only (issue #859).
+            //
+            // IMPORTANT: This dedup logic must remain inside the .home case.
+            // Moving it outside the switch would break notification delivery
+            // for reposts (issue #3165). Notifications should always show
+            // reposts of YOUR posts, even if the same note was already
+            // reposted by someone else in your home feed.
+            if ev.known_kind == .boost, let target = ev.get_inner_event()?.id {
+                guard !already_reposted.contains(target) else {
+                    Log.info("Skipping duplicate repost for event %s", for: .timeline, target.hex())
+                    return
+                }
+                already_reposted.insert(target)
+            }
             Task { await insert_home_event(ev) }
+
         case .notifications:
             handle_notification(ev: ev)
+
         case .other:
             break
         }
