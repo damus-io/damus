@@ -396,6 +396,37 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "manual_blossom_server_url", default_value: nil)
     var manualBlossomServerUrl: String?
 
+    /// Whether to mirror uploads to backup Blossom servers.
+    /// When enabled, after a successful upload to the primary server,
+    /// the blob will be mirrored to configured backup servers via BUD-04.
+    @Setting(key: "blossom_mirror_enabled", default_value: false)
+    var blossomMirrorEnabled: Bool
+
+    /// JSON-encoded array of Blossom mirror server URLs.
+    /// These servers receive mirrored copies of uploads when mirroring is enabled.
+    @Setting(key: "blossom_mirror_servers", default_value: nil)
+    var blossomMirrorServersJson: String?
+
+    /// Computed property to get/set mirror servers as an array.
+    var blossomMirrorServers: [String] {
+        get {
+            guard let json = blossomMirrorServersJson,
+                  let data = json.data(using: .utf8),
+                  let servers = try? JSONDecoder().decode([String].self, from: data) else {
+                return []
+            }
+            return servers
+        }
+        set {
+            if newValue.isEmpty {
+                blossomMirrorServersJson = nil
+            } else if let data = try? JSONEncoder().encode(newValue),
+                      let json = String(data: data, encoding: .utf8) {
+                blossomMirrorServersJson = json
+            }
+        }
+    }
+
     // MARK: Helper types
     
     enum NotificationsMode: String, CaseIterable, Identifiable, StringCodable, Equatable {

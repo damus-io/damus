@@ -323,3 +323,111 @@ extension BlossomUploader {
         return await upload(data: data, mimeType: mimeType, to: serverURL, keypair: keypair, progressDelegate: progressDelegate)
     }
 }
+
+// MARK: - Mirroring (BUD-04)
+
+extension BlossomUploader {
+
+    /// Mirrors a blob from a remote URL to a Blossom server.
+    ///
+    /// This implements BUD-04: the server downloads the blob from the source URL
+    /// and stores it locally. This is more efficient than re-uploading the data.
+    ///
+    /// - Parameters:
+    ///   - sourceURL: The URL where the blob is currently hosted
+    ///   - targetServer: The Blossom server to mirror to
+    ///   - sha256Hex: SHA256 hash of the blob (for authorization)
+    ///   - keypair: User's keypair for authorization
+    /// - Returns: Mirror result with blob descriptor or error
+    func mirror(
+        sourceURL: String,
+        to targetServer: BlossomServerURL,
+        sha256Hex: String,
+        keypair: Keypair
+    ) async -> BlossomUploadResult {
+        // Create Blossom authorization event for the mirror
+        guard let authBase64 = create_blossom_upload_auth(keypair: keypair, sha256Hex: sha256Hex) else {
+            return .failed(.authenticationFailed)
+        }
+
+        // Build the mirror request per BUD-04
+        let mirrorURL = targetServer.url.appendingPathComponent("mirror")
+        var request = URLRequest(url: mirrorURL)
+        request.httpMethod = "PUT"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(blossom_authorization_header(authBase64), forHTTPHeaderField: "Authorization")
+
+        // Request body is JSON with the source URL
+        let body: [String: String] = ["url": sourceURL]
+        guard let bodyData = try? JSONEncoder().encode(body) else {
+            return .failed(.invalidResponse)
+        }
+        request.httpBody = bodyData
+
+        // Execute the request
+        let responseData: Data
+        let response: URLResponse
+
+        do {
+            (responseData, response) = try await URLSession.shared.data(for: request)
+        } catch {
+            return .failed(.uploadFailed(underlying: error))
+        }
+
+        // Validate HTTP response
+        guard let httpResponse = response as? HTTPURLResponse else {
+            return .failed(.invalidResponse)
+        }
+
+        guard httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 else {
+            let reason = extractErrorReason(from: httpResponse, body: responseData)
+            return .failed(.serverRejected(reason: reason, statusCode: httpResponse.statusCode))
+        }
+
+        // Parse blob descriptor response
+        guard let descriptor = parseBlossomResponse(responseData) else {
+            return .failed(.invalidResponse)
+        }
+
+        return .success(descriptor)
+    }
+
+    /// Mirrors a blob to multiple servers in the background.
+    ///
+    /// This is fire-and-forget - errors are logged but don't affect the caller.
+    /// Used after a successful primary upload to ensure redundancy.
+    ///
+    /// - Parameters:
+    ///   - sourceURL: The URL where the blob was uploaded (from primary server)
+    ///   - sha256Hex: SHA256 hash of the blob
+    ///   - targetServers: List of server URLs to mirror to
+    ///   - keypair: User's keypair for authorization
+    static func mirrorToServersInBackground(
+        sourceURL: String,
+        sha256Hex: String,
+        targetServers: [BlossomServerURL],
+        keypair: Keypair
+    ) {
+        guard !targetServers.isEmpty else { return }
+
+        Task.detached(priority: .background) {
+            let uploader = BlossomUploader()
+
+            for server in targetServers {
+                let result = await uploader.mirror(
+                    sourceURL: sourceURL,
+                    to: server,
+                    sha256Hex: sha256Hex,
+                    keypair: keypair
+                )
+
+                switch result {
+                case .success(let descriptor):
+                    print("[BlossomMirror] Successfully mirrored to \(server.absoluteString): \(descriptor.url)")
+                case .failed(let error):
+                    print("[BlossomMirror] Failed to mirror to \(server.absoluteString): \(error)")
+                }
+            }
+        }
+    }
+}

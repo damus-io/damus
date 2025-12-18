@@ -70,11 +70,39 @@ class AttachMediaUtility {
 
         switch result {
         case .success(let blobDescriptor):
+            // Trigger background mirroring to backup servers (BUD-04)
+            // This is fire-and-forget - doesn't block the upload response
+            triggerBackgroundMirroring(
+                blobDescriptor: blobDescriptor,
+                settings: settings,
+                keypair: fullKeypair.to_keypair()
+            )
             return .success(blobDescriptor.url)
+
         case .failed(let error):
             print("Blossom upload failed: \(error)")
             return .failed(error)
         }
+    }
+
+    /// Triggers background mirroring to configured backup servers.
+    /// Only runs if mirroring is enabled and mirror servers are configured.
+    private static func triggerBackgroundMirroring(
+        blobDescriptor: BlossomBlobDescriptor,
+        settings: UserSettingsStore,
+        keypair: Keypair
+    ) {
+        guard settings.blossomMirrorEnabled else { return }
+
+        let mirrorServerURLs = settings.blossomMirrorServers.compactMap { BlossomServerURL($0) }
+        guard !mirrorServerURLs.isEmpty else { return }
+
+        BlossomUploader.mirrorToServersInBackground(
+            sourceURL: blobDescriptor.url,
+            sha256Hex: blobDescriptor.sha256,
+            targetServers: mirrorServerURLs,
+            keypair: keypair
+        )
     }
 
     // MARK: - NIP-96 Upload Body
@@ -101,18 +129,10 @@ class AttachMediaUtility {
     }
 
     static func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: any MediaUploaderProtocol, mediaType: ImageUploadMediaType, progress: URLSessionTaskDelegate, keypair: Keypair? = nil) async -> ImageUploadResult {
-
-        print("[AttachMediaUtility] create_upload_request called")
-        print("[AttachMediaUtility] mediaUploader type: \(type(of: mediaUploader))")
-        print("[AttachMediaUtility] mediaUploader id: \(mediaUploader.id)")
-
-        // Branch early for Blossom - it uses a completely different upload mechanism
+        // Route to Blossom uploader for Blossom protocol (BUD-02)
         if let uploader = mediaUploader as? MediaUploader, uploader == .blossom {
-            print("[AttachMediaUtility] Taking Blossom path")
             return await uploadViaBlossom(mediaToUpload: mediaToUpload, keypair: keypair, progress: progress)
         }
-
-        print("[AttachMediaUtility] Taking NIP-96 path for: \(mediaUploader.postAPI)")
 
         // NIP-96 upload flow for other uploaders (nostr.build, nostrcheck, etc.)
         var mediaData: Data?
