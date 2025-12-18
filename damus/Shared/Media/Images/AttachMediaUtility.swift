@@ -36,7 +36,8 @@ class AttachMediaUtility {
     /// - Server URL from user settings (not hardcoded)
     fileprivate static func uploadViaBlossom(
         mediaToUpload: MediaUpload,
-        keypair: Keypair?
+        keypair: Keypair?,
+        progress: URLSessionTaskDelegate
     ) async -> ImageUploadResult {
         // Get Blossom server URL from settings
         guard let settings = UserSettingsStore.shared,
@@ -69,7 +70,8 @@ class AttachMediaUtility {
             data: mediaData,
             mimeType: mediaToUpload.mime_type,
             to: serverURL,
-            keypair: fullKeypair.to_keypair()
+            keypair: fullKeypair.to_keypair(),
+            progressDelegate: progress
         )
 
         switch result {
@@ -108,7 +110,7 @@ class AttachMediaUtility {
 
         // Branch early for Blossom - it uses a completely different upload mechanism
         if let uploader = mediaUploader as? MediaUploader, uploader == .blossom {
-            return await uploadViaBlossom(mediaToUpload: mediaToUpload, keypair: keypair)
+            return await uploadViaBlossom(mediaToUpload: mediaToUpload, keypair: keypair, progress: progress)
         }
 
         // NIP-96 upload flow for other uploaders (nostr.build, nostrcheck, etc.)

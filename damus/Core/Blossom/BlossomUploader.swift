@@ -54,12 +54,14 @@ struct BlossomUploader {
     ///   - mimeType: MIME type of the data (e.g., "image/jpeg")
     ///   - serverURL: The Blossom server to upload to
     ///   - keypair: User's keypair for authorization
+    ///   - progressDelegate: Optional delegate for upload progress tracking
     /// - Returns: Upload result with blob descriptor or error
     func upload(
         data: Data,
         mimeType: String,
         to serverURL: BlossomServerURL,
-        keypair: Keypair
+        keypair: Keypair,
+        progressDelegate: URLSessionTaskDelegate? = nil
     ) async -> BlossomUploadResult {
         // Step 1: Compute SHA256 hash of the data
         // This is required for the authorization event's "x" tag
@@ -87,7 +89,7 @@ struct BlossomUploader {
         let response: URLResponse
 
         do {
-            (responseData, response) = try await URLSession.shared.data(for: request)
+            (responseData, response) = try await URLSession.shared.data(for: request, delegate: progressDelegate)
         } catch {
             return .failed(.uploadFailed(underlying: error))
         }
@@ -165,17 +167,19 @@ extension BlossomUploader {
     ///   - mimeType: MIME type of the file
     ///   - serverURL: The Blossom server to upload to
     ///   - keypair: User's keypair for authorization
+    ///   - progressDelegate: Optional delegate for upload progress tracking
     /// - Returns: Upload result with blob descriptor or error
     func upload(
         fileURL: URL,
         mimeType: String,
         to serverURL: BlossomServerURL,
-        keypair: Keypair
+        keypair: Keypair,
+        progressDelegate: URLSessionTaskDelegate? = nil
     ) async -> BlossomUploadResult {
         guard let data = try? Data(contentsOf: fileURL) else {
             return .failed(.fileReadError)
         }
 
-        return await upload(data: data, mimeType: mimeType, to: serverURL, keypair: keypair)
+        return await upload(data: data, mimeType: mimeType, to: serverURL, keypair: keypair, progressDelegate: progressDelegate)
     }
 }
