@@ -14,9 +14,17 @@ struct InnerTimelineView: View {
     var filteredEventHolderId: UUID
     let state: DamusState
 
-    init(events: EventHolder, damus: DamusState, filter: @escaping (NostrEvent) -> Bool, apply_mute_rules: Bool = true) {
+    /// Called when an event becomes visible. Used for scroll position tracking.
+    var onEventVisible: ((NoteId) -> Void)?
+
+    /// Called when an event is no longer visible. Used for scroll position tracking.
+    var onEventHidden: ((NoteId) -> Void)?
+
+    init(events: EventHolder, damus: DamusState, filter: @escaping (NostrEvent) -> Bool, apply_mute_rules: Bool = true, onEventVisible: ((NoteId) -> Void)? = nil, onEventHidden: ((NoteId) -> Void)? = nil) {
         self.events = events
         self.state = damus
+        self.onEventVisible = onEventVisible
+        self.onEventHidden = onEventHidden
         let filter = apply_mute_rules ? { filter($0) && !damus.mutelist_manager.is_event_muted($0) } : filter
         let filteredEvents = EventHolder.FilteredHolder(filter: filter)
         self.filteredEvents = filteredEvents
@@ -49,6 +57,10 @@ struct InnerTimelineView: View {
                         }
                         .padding(.top, 7)
                         .onAppear {
+                            // Track visibility for scroll position restoration
+                            onEventVisible?(ev.id)
+
+                            // Preload upcoming events for smooth scrolling
                             let to_preload =
                             Array([indexed[safe: ind+1]?.0,
                                    indexed[safe: ind+2]?.0,
@@ -56,10 +68,14 @@ struct InnerTimelineView: View {
                                    indexed[safe: ind+4]?.0,
                                    indexed[safe: ind+5]?.0
                                   ].compactMap({ $0 }))
-                            
+
                             preload_events(state: state, events: to_preload)
                         }
-                    
+                        .onDisappear {
+                            // Track visibility for scroll position restoration
+                            onEventHidden?(ev.id)
+                        }
+
                     ThiccDivider()
                         .padding([.top], 7)
                 }

@@ -26,7 +26,7 @@ struct PostingTimelineView: View {
     @State private var indicatorPosition: CGFloat = 0
     @State var headerHeight: CGFloat = 0
     @Binding var headerOffset: CGFloat
-    @SceneStorage("PostingTimelineView.filter_state") var filter_state : FilterState = .posts_and_replies
+    @AppStorage("PostingTimelineView.filter_state") var filter_state : FilterState = .posts_and_replies
     @State var timeline_source: TimelineSource = .follows
     
     var loading: Binding<Bool> {
@@ -54,7 +54,16 @@ struct PostingTimelineView: View {
     }
     
     func contentTimelineView(filter: (@escaping (NostrEvent) -> Bool)) -> some View {
-        TimelineView<AnyView>(events: home.events, loading: self.loading, headerHeight: $headerHeight, headerOffset: $headerOffset, damus: damus_state, show_friend_icon: false, filter: filter)
+        TimelineView<AnyView>(
+            events: home.events,
+            loading: self.loading,
+            headerHeight: $headerHeight,
+            headerOffset: $headerOffset,
+            damus: damus_state,
+            show_friend_icon: false,
+            filter: filter,
+            positionKey: .homeTimeline
+        )
     }
     
     func HeaderView() -> some View {
