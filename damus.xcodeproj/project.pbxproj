@@ -1103,6 +1103,8 @@
 		9CA876E229A00CEA0003B9A3 /* AttachMediaUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */; };
 		ADFE73552AD4793100EC7326 /* QRScanNSECView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADFE73542AD4793100EC7326 /* QRScanNSECView.swift */; };
 		B501062D2B363036003874F5 /* AuthIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B501062C2B363036003874F5 /* AuthIntegrationTests.swift */; };
+		BL0550M0000000000000001A /* BlossomAuthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BL0550M0000000000000001B /* BlossomAuthTests.swift */; };
+		BL0550M0000000000000002A /* BlossomUploaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BL0550M0000000000000002B /* BlossomUploaderTests.swift */; };
 		B51C1CEA2B55A60A00E312A9 /* AddMuteItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51C1CE82B55A60A00E312A9 /* AddMuteItemView.swift */; };
 		B51C1CEB2B55A60A00E312A9 /* MuteDurationMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51C1CE92B55A60A00E312A9 /* MuteDurationMenu.swift */; };
 		B533694E2B66D791008A805E /* MutelistManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B533694D2B66D791008A805E /* MutelistManager.swift */; };
@@ -2709,6 +2711,8 @@
 		9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachMediaUtility.swift; sourceTree = "<group>"; };
 		ADFE73542AD4793100EC7326 /* QRScanNSECView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QRScanNSECView.swift; sourceTree = "<group>"; };
 		B501062C2B363036003874F5 /* AuthIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthIntegrationTests.swift; sourceTree = "<group>"; usesTabs = 0; };
+		BL0550M0000000000000001B /* BlossomAuthTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlossomAuthTests.swift; sourceTree = "<group>"; };
+		BL0550M0000000000000002B /* BlossomUploaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlossomUploaderTests.swift; sourceTree = "<group>"; };
 		B51C1CE82B55A60A00E312A9 /* AddMuteItemView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddMuteItemView.swift; sourceTree = "<group>"; };
 		B51C1CE92B55A60A00E312A9 /* MuteDurationMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MuteDurationMenu.swift; sourceTree = "<group>"; };
 		B533694D2B66D791008A805E /* MutelistManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutelistManager.swift; sourceTree = "<group>"; usesTabs = 0; };
@@ -3884,6 +3888,8 @@
 				D72A2CFF2AD9B66B002AFF62 /* EventViewTests.swift */,
 				D7315A2B2ACDF4DA0036E30A /* DamusCacheManagerTests.swift */,
 				B501062C2B363036003874F5 /* AuthIntegrationTests.swift */,
+				BL0550M0000000000000001B /* BlossomAuthTests.swift */,
+				BL0550M0000000000000002B /* BlossomUploaderTests.swift */,
 				E0E024102B7C19C20075735D /* TranslationTests.swift */,
 				E06336A92B75832100A88E6B /* ImageMetadataTest.swift */,
 				D7CBD1D52B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift */,
@@ -6337,6 +6343,8 @@
 				F944F56E29EA9CCC0067B3BF /* DamusParseContentTests.swift in Sources */,
 				D7BEE6F92D37B37400CF659F /* DraftTests.swift in Sources */,
 				B501062D2B363036003874F5 /* AuthIntegrationTests.swift in Sources */,
+				BL0550M0000000000000001A /* BlossomAuthTests.swift in Sources */,
+				BL0550M0000000000000002A /* BlossomUploaderTests.swift in Sources */,
 				4CB883AE2976FA9300DC99E7 /* FormatTests.swift in Sources */,
 				D72A2D052AD9C1B5002AFF62 /* MockDamusState.swift in Sources */,
 				E06336AA2B75832100A88E6B /* ImageMetadataTest.swift in Sources */,
