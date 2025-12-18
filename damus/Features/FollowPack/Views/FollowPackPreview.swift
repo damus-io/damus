@@ -157,7 +157,7 @@ struct FollowPackPreviewBody: View {
                     .onTapGesture {
                         state.nav.push(route: Route.ProfileByKey(pubkey: event.event.pubkey))
                     }
-                let profile = state.profiles.lookup(id: event.event.pubkey)
+                let profile = try? state.profiles.lookup(id: event.event.pubkey)
                 let displayName = Profile.displayName(profile: profile, pubkey: event.event.pubkey)
                 switch displayName {
                 case .one(let one):

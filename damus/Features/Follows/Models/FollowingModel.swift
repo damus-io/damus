@@ -26,7 +26,7 @@ class FollowingModel {
         var f = NostrFilter(kinds: [.metadata])
         f.authors = self.contacts.reduce(into: Array<Pubkey>()) { acc, pk in
             // don't fetch profiles we already have
-            if damus_state.profiles.has_fresh_profile(id: pk) {
+            if (try? damus_state.profiles.has_fresh_profile(id: pk)) ?? false {
                 return
             }
             acc.append(pk)

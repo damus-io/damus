@@ -87,7 +87,7 @@ extension NostrNetworkManager {
         private func getLatestNIP65RelayListEvent() -> NdbNote? {
             guard let latestRelayListEventId = delegate.latestRelayListEventIdHex else { return nil }
             guard let latestRelayListEventId = NoteId(hex: latestRelayListEventId) else { return nil }
-            return delegate.ndb.lookup_note_and_copy(latestRelayListEventId)
+            return try? delegate.ndb.lookup_note_and_copy(latestRelayListEventId)
         }
         
         /// Gets the latest `kind:3` relay list from NostrDB.

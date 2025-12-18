@@ -92,11 +92,11 @@ extension NostrNetworkManager {
         
         private func publishProfileUpdates(metadataEvent: borrowing UnownedNdbNote) {
             let now = UInt64(Date.now.timeIntervalSince1970)
-            ndb.write_profile_last_fetched(pubkey: metadataEvent.pubkey, fetched_at: now)
+            try? ndb.write_profile_last_fetched(pubkey: metadataEvent.pubkey, fetched_at: now)
             
             if let relevantStreams = streams[metadataEvent.pubkey] {
                 // If we have the user metadata event in ndb, then we should have the profile record as well.
-                guard let profile = ndb.lookup_profile_and_copy(metadataEvent.pubkey) else { return }
+                guard let profile = try? ndb.lookup_profile_and_copy(metadataEvent.pubkey) else { return }
                 for relevantStream in relevantStreams.values {
                     relevantStream.continuation.yield(profile)
                 }
@@ -107,7 +107,7 @@ extension NostrNetworkManager {
         /// This is useful for local profile changes (e.g., nip05 validation, donation percentage updates)
         func notifyProfileUpdate(pubkey: Pubkey) {
             if let relevantStreams = streams[pubkey] {
-                guard let profile = ndb.lookup_profile_and_copy(pubkey) else { return }
+                guard let profile = try? ndb.lookup_profile_and_copy(pubkey) else { return }
                 for relevantStream in relevantStreams.values {
                     relevantStream.continuation.yield(profile)
                 }

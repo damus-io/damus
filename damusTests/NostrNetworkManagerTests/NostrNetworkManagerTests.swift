@@ -137,7 +137,7 @@ class NostrNetworkManagerTests: XCTestCase {
                     switch item {
                     case .event(let noteKey):
                         // Lookup the note to verify it exists
-                        if let note = ndb.lookup_note_by_key_and_copy(noteKey) {
+                        if let note = try? ndb.lookup_note_by_key_and_copy(noteKey) {
                             count += 1
                             receivedIds.insert(note.id)
                         }

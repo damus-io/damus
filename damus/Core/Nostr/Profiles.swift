@@ -74,12 +74,12 @@ class Profiles {
         profile_data(pubkey).zapper
     }
 
-    func lookup_with_timestamp<T>(_ pubkey: Pubkey, borrow lendingFunction: (_: borrowing ProfileRecord?) throws -> T) rethrows -> T {
+    func lookup_with_timestamp<T>(_ pubkey: Pubkey, borrow lendingFunction: (_: borrowing ProfileRecord?) throws -> T) throws -> T {
         return try ndb.lookup_profile(pubkey, borrow: lendingFunction)
     }
     
-    func lookup_lnurl(_ pubkey: Pubkey) -> String? {
-        return lookup_with_timestamp(pubkey, borrow: { pr in
+    func lookup_lnurl(_ pubkey: Pubkey) throws -> String? {
+        return try lookup_with_timestamp(pubkey, borrow: { pr in
             switch pr {
             case .some(let pr): return pr.lnurl
             case .none: return nil
@@ -87,16 +87,16 @@ class Profiles {
         })
     }
 
-    func lookup_by_key<T>(key: ProfileKey, borrow lendingFunction: (_: borrowing ProfileRecord?) throws -> T) rethrows -> T {
+    func lookup_by_key<T>(key: ProfileKey, borrow lendingFunction: (_: borrowing ProfileRecord?) throws -> T) throws -> T {
         return try ndb.lookup_profile_by_key(key: key, borrow: lendingFunction)
     }
 
-    func search(_ query: String, limit: Int) -> [Pubkey] {
-        ndb.search_profile(query, limit: limit)
+    func search(_ query: String, limit: Int) throws -> [Pubkey] {
+        try ndb.search_profile(query, limit: limit)
     }
 
-    func lookup(id: Pubkey) -> Profile? {
-        return ndb.lookup_profile(id, borrow: { pr in
+    func lookup(id: Pubkey) throws -> Profile? {
+        return try ndb.lookup_profile(id, borrow: { pr in
             switch pr {
             case .none:
                 return nil
@@ -107,12 +107,12 @@ class Profiles {
         })
     }
 
-    func lookup_key_by_pubkey(_ pubkey: Pubkey) -> ProfileKey? {
-        ndb.lookup_profile_key(pubkey)
+    func lookup_key_by_pubkey(_ pubkey: Pubkey) throws -> ProfileKey? {
+        try ndb.lookup_profile_key(pubkey)
     }
 
-    func has_fresh_profile(id: Pubkey) -> Bool {
-        guard let fetched_at = ndb.read_profile_last_fetched(pubkey: id)
+    func has_fresh_profile(id: Pubkey) throws -> Bool {
+        guard let fetched_at = try ndb.read_profile_last_fetched(pubkey: id)
         else {
             return false
         }

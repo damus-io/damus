@@ -63,7 +63,7 @@ struct HighlightEventRef: View {
                                 .font(.system(size: 14, weight: .bold))
                                 .lineLimit(1)
 
-                            let profile = damus_state.profiles.lookup(id: longform_event.event.pubkey)
+                            let profile = try? damus_state.profiles.lookup(id: longform_event.event.pubkey)
 
                             if let display_name = profile?.display_name {
                                 Text(display_name)

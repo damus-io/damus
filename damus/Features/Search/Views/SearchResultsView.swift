@@ -142,7 +142,7 @@ struct SearchResultsView: View {
     
     func do_search(query: String) {
         let limit = 128
-        var note_keys = damus_state.ndb.text_search(query: query, limit: limit, order: .newest_first)
+        var note_keys = (try? damus_state.ndb.text_search(query: query, limit: limit, order: .newest_first)) ?? []
         var res = [NostrEvent]()
         // TODO: fix duplicate results from search
         var keyset = Set<NoteKey>()
@@ -155,7 +155,7 @@ struct SearchResultsView: View {
 
         do {
             for note_key in note_keys {
-                damus_state.ndb.lookup_note_by_key(note_key, borrow: { maybeUnownedNote in
+                try? damus_state.ndb.lookup_note_by_key(note_key, borrow: { maybeUnownedNote in
                     switch maybeUnownedNote {
                     case .none: return
                     case .some(let unownedNote):
@@ -270,7 +270,7 @@ func make_hashtagable(_ str: String) -> String {
 func search_profiles(profiles: Profiles, contacts: Contacts, search: String) -> [Pubkey] {
     // Search by hex pubkey.
     if let pubkey = hex_decode_pubkey(search),
-       profiles.lookup_key_by_pubkey(pubkey) != nil
+       (try? profiles.lookup_key_by_pubkey(pubkey)) != nil
     {
         return [pubkey]
     }
@@ -279,12 +279,12 @@ func search_profiles(profiles: Profiles, contacts: Contacts, search: String) -> 
     if search.starts(with: "npub"),
        let bech32_key = decode_bech32_key(search),
        case Bech32Key.pub(let pk) = bech32_key,
-       profiles.lookup_key_by_pubkey(pk) != nil
+       (try? profiles.lookup_key_by_pubkey(pk)) != nil
     {
         return [pk]
     }
 
-    return profiles.search(search, limit: 128).sorted { a, b in
+    return (try? profiles.search(search, limit: 128).sorted { a, b in
         let aFriendTypePriority = get_friend_type(contacts: contacts, pubkey: a)?.priority ?? 0
         let bFriendTypePriority = get_friend_type(contacts: contacts, pubkey: b)?.priority ?? 0
 
@@ -294,5 +294,5 @@ func search_profiles(profiles: Profiles, contacts: Contacts, search: String) -> 
         } else {
             return false
         }
-    }
+    }) ?? []
 }

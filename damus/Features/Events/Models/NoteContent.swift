@@ -328,7 +328,7 @@ func attributed_string_attach_icon(_ astr: inout AttributedString, img: UIImage)
 }
 
 func getDisplayName(pk: Pubkey, profiles: Profiles) -> String {
-    let profile = profiles.lookup(id: pk)
+    let profile = try? profiles.lookup(id: pk)
     return Profile.displayName(profile: profile, pubkey: pk).username.truncate(maxLength: 50)
 }
 

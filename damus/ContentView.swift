@@ -397,7 +397,7 @@ struct ContentView: View {
                 guard let ds = self.damus_state,
                       let lud16 = nwc.lud16,
                       let keypair = ds.keypair.to_full(),
-                      let profile = ds.profiles.lookup(id: ds.pubkey),
+                      let profile = try? ds.profiles.lookup(id: ds.pubkey),
                       lud16 != profile.lud16 else {
                     return
                 }
@@ -560,7 +560,7 @@ struct ContentView: View {
                 home.filter_events()
                 
                 guard let ds = damus_state,
-                      let profile = ds.profiles.lookup(id: ds.pubkey),
+                      let profile = try? ds.profiles.lookup(id: ds.pubkey),
                       let keypair = ds.keypair.to_full()
                 else {
                     return
@@ -578,7 +578,7 @@ struct ContentView: View {
             }
         }, message: {
             if case let .user(pubkey, _) = self.muting {
-                let profile = damus_state!.profiles.lookup(id: pubkey)
+                let profile = try? damus_state!.profiles.lookup(id: pubkey)
                 let name = Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
                 Text("\(name) has been muted", comment: "Alert message that informs a user was muted.")
             } else {
@@ -640,7 +640,7 @@ struct ContentView: View {
             }
         }, message: {
             if case let .user(pubkey, _) = muting {
-                let profile = damus_state?.profiles.lookup(id: pubkey)
+                let profile = try? damus_state?.profiles.lookup(id: pubkey)
                 let name = Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
                 Text("Mute \(name)?", comment: "Alert message prompt to ask if a user should be muted.")
             } else {

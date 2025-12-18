@@ -104,7 +104,7 @@ struct TransactionView: View {
             return NSLocalizedString("Unknown", comment: "A name label for an unknown user")
         }
 
-        let profile = damus_state.profiles.lookup(id: pubkey)
+        let profile = try? damus_state.profiles.lookup(id: pubkey)
 
         return Profile.displayName(profile: profile, pubkey: pubkey).displayName
     }

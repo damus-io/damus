@@ -24,6 +24,12 @@ class NdbTxn<T>: RawNdbTxnAccessible {
     static func pure(ndb: Ndb, val: T) -> NdbTxn<T> {
         .init(ndb: ndb, txn: ndb_txn(), val: val, generation: ndb.generation, inherited: true, name: "pure_txn")
     }
+    
+    /// Simple helper struct for the init function to avoid compiler errors encountered by using other techniques
+    private struct R {
+        let txn: ndb_txn
+        let generation: Int
+    }
 
     init?(ndb: Ndb, with: (NdbTxn<T>) -> T = { _ in () }, name: String? = nil) {
         guard !ndb.is_closed else { return nil }
@@ -43,17 +49,18 @@ class NdbTxn<T>: RawNdbTxnAccessible {
             let new_ref_count = ref_count + 1
             Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
         } else {
-            self.txn = ndb_txn()
-            guard !ndb.is_closed else { return nil }
-            self.generation = ndb.generation
-            #if TXNDEBUG
-            txn_count += 1
-            #endif
-            let ok = ndb_begin_query(ndb.ndb.ndb, &self.txn) != 0
-            if !ok {
-                return nil
-            }
-            self.generation = ndb.generation
+            let result: R? = try? ndb.withNdb({
+                var txn = ndb_txn()
+                #if TXNDEBUG
+                txn_count += 1
+                #endif
+                let ok = ndb_begin_query(ndb.ndb.ndb, &txn) != 0
+                guard ok else { return .none }
+                return .some(R(txn: txn, generation: ndb.generation))
+            }, maxWaitTimeout: .milliseconds(200))
+            guard let result else { return nil }
+            self.txn = result.txn
+            self.generation = result.generation
             Thread.current.threadDictionary["ndb_txn"] = self.txn
             Thread.current.threadDictionary["ndb_txn_ref_count"] = 1
             Thread.current.threadDictionary["txn_generation"] = ndb.generation
@@ -97,7 +104,9 @@ class NdbTxn<T>: RawNdbTxnAccessible {
             Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
             assert(new_ref_count >= 0, "NdbTxn reference count should never be below zero")
             if new_ref_count <= 0 {
-                ndb_end_query(&self.txn)
+                _ = try? ndb.withNdb({
+                    ndb_end_query(&self.txn)
+                }, maxWaitTimeout: .milliseconds(200))
                 Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")
                 Thread.current.threadDictionary.removeObject(forKey: "ndb_txn_ref_count")
             }
@@ -156,10 +165,16 @@ class SafeNdbTxn<T: ~Copyable> {
         .init(ndb: ndb, txn: ndb_txn(), val: val, generation: ndb.generation, inherited: true, name: "pure_txn")
     }
     
+    /// Simple helper struct for the init function to avoid compiler errors encountered by using other techniques
+    private struct R {
+        let txn: ndb_txn
+        let generation: Int
+    }
+    
     static func new(on ndb: Ndb, with valueGetter: (PlaceholderNdbTxn) -> T? = { _ in () }, name: String = "txn") -> SafeNdbTxn<T>? {
         guard !ndb.is_closed else { return nil }
-        var generation = ndb.generation
-        var txn: ndb_txn
+        let generation: Int
+        let txn: ndb_txn
         let inherited: Bool
         if let active_txn = Thread.current.threadDictionary["ndb_txn"] as? ndb_txn,
            let txn_generation = Thread.current.threadDictionary["txn_generation"] as? Int,
@@ -174,26 +189,26 @@ class SafeNdbTxn<T: ~Copyable> {
             let new_ref_count = ref_count + 1
             Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
         } else {
-            txn = ndb_txn()
-            guard !ndb.is_closed else { return nil }
-            generation = ndb.generation
-            #if TXNDEBUG
-            txn_count += 1
-            #endif
-            let ok = ndb_begin_query(ndb.ndb.ndb, &txn) != 0
-            if !ok {
-                return nil
-            }
-            generation = ndb.generation
+            let result: R? = try? ndb.withNdb({
+                var txn = ndb_txn()
+                #if TXNDEBUG
+                txn_count += 1
+                #endif
+                let ok = ndb_begin_query(ndb.ndb.ndb, &txn) != 0
+                guard ok else { return .none }
+                return .some(R(txn: txn, generation: ndb.generation))
+            }, maxWaitTimeout: .milliseconds(200))
+            guard let result else { return nil }
+            txn = result.txn
+            generation = result.generation
             Thread.current.threadDictionary["ndb_txn"] = txn
             Thread.current.threadDictionary["ndb_txn_ref_count"] = 1
             Thread.current.threadDictionary["txn_generation"] = ndb.generation
             inherited = false
         }
         #if TXNDEBUG
-        print("txn: open  gen\(self.generation) '\(self.name)' \(txn_count)")
+        print("txn: open  gen\(generation) '\(name)' \(txn_count)")
         #endif
-        let moved = false
         let placeholderTxn = PlaceholderNdbTxn(txn: txn)
         guard let val = valueGetter(placeholderTxn) else { return nil }
         return SafeNdbTxn<T>(ndb: ndb, txn: txn, val: val, generation: generation, inherited: inherited, name: name)
@@ -223,7 +238,9 @@ class SafeNdbTxn<T: ~Copyable> {
             Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
             assert(new_ref_count >= 0, "NdbTxn reference count should never be below zero")
             if new_ref_count <= 0 {
-                ndb_end_query(&self.txn)
+                _ = try? ndb.withNdb({
+                    ndb_end_query(&self.txn)
+                }, maxWaitTimeout: .milliseconds(200))
                 Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")
                 Thread.current.threadDictionary.removeObject(forKey: "ndb_txn_ref_count")
             }

@@ -21,7 +21,7 @@ struct UserSearch: View {
     }
     
     func on_user_tapped(pk: Pubkey) {
-        let profile = damus_state.profiles.lookup(id: pk)
+        let profile = try? damus_state.profiles.lookup(id: pk)
         let user_tag = user_tag_attr_string(profile: profile, pubkey: pk)
 
         appendUserTag(withTag: user_tag)

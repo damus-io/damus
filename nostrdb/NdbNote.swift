@@ -478,8 +478,8 @@ extension NdbNote {
         return ThreadReply(tags: self.tags)?.reply.note_id
     }
 
-    func block_offsets<T>(ndb: Ndb, borrow lendingFunction: (_: borrowing NdbBlockGroup.BlocksMetadata?) throws -> T) rethrows -> T {
-        guard let key = ndb.lookup_note_key(self.id) else { return try lendingFunction(nil) }
+    func block_offsets<T>(ndb: Ndb, borrow lendingFunction: (_: borrowing NdbBlockGroup.BlocksMetadata?) throws -> T) throws -> T {
+        guard let key = try ndb.lookup_note_key(self.id) else { return try lendingFunction(nil) }
         
         return try ndb.lookup_blocks_by_key(key, borrow: { blocks in
             return try lendingFunction(blocks)
