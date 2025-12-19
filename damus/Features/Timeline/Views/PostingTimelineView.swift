@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import TipKit
 
 struct PostingTimelineView: View {
     
@@ -29,6 +30,17 @@ struct PostingTimelineView: View {
     @SceneStorage("PostingTimelineView.filter_state") var filter_state : FilterState = .posts_and_replies
     @State var timeline_source: TimelineSource = .follows
     
+    @State private var damusTips: Any? = {
+        if #available(iOS 18.0, *) {
+            return TipGroup(.ordered) {
+                TrustedNetworkButtonTip.shared
+                TrustedNetworkRepliesTip.shared
+                PostingTimelineSwitcherView.TimelineSwitcherTip.shared
+            }
+        }
+        return nil
+    }()
+
     var loading: Binding<Bool> {
         Binding(get: {
             return home.loading
@@ -72,20 +84,12 @@ struct PostingTimelineView: View {
                     HStack(alignment: .center) {
                         SignalView(state: damus_state, signal: home.signal)
                         if damus_state.settings.enable_favourites_feature {
-                            let switchView = PostingTimelineSwitcherView(
-                                damusState: damus_state,
-                                timelineSource: $timeline_source
-                            )
-                            if #available(iOS 17.0, *) {
-                                Image(systemName: "square.stack")
-                                    .foregroundColor(DamusColors.purple)
-                                    .overlay(
-                                switchView
-                                    .popoverTip(PostingTimelineSwitcherView.TimelineSwitcherTip.shared)
-                                    )
-                            } else {
-                                switchView
-                            }
+                            Image(systemName: "square.stack")
+                                .foregroundColor(DamusColors.purple)
+                                .overlay(PostingTimelineSwitcherView(
+                                    damusState: damus_state,
+                                    timelineSource: $timeline_source
+                                ))
                         }
                     }
                 }
@@ -103,7 +107,12 @@ struct PostingTimelineView: View {
                 }
             }
             .padding(.horizontal, 20)
-            
+            if #available(iOS 18.0, *), let tipGroup = damusTips as? TipGroup {
+                TipView(tipGroup.currentTip as? PostingTimelineSwitcherView.TimelineSwitcherTip)
+                    .tipBackground(.clear)
+                    .tipViewStyle(TrustedNetworkButtonTipViewStyle())
+                    .padding(.horizontal)
+            }
             VStack(spacing: 0) {
                 CustomPicker(tabs: [
                     (NSLocalizedString("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies)."), FilterState.posts),
