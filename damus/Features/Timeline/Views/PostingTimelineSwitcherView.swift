@@ -15,9 +15,6 @@ struct PostingTimelineSwitcherView: View {
     init(damusState: DamusState, timelineSource: Binding<TimelineSource>) {
         self.damusState = damusState
         self._timelineSource = timelineSource
-        if #available(iOS 17.0, *) {
-            try? Tips.configure([.displayFrequency(.daily)])
-        }
     }
 
     var body: some View {
@@ -46,10 +43,6 @@ struct PostingTimelineSwitcherView: View {
     @available(iOS 17, *)
     struct TimelineSwitcherTip: Tip {
         static let shared = TimelineSwitcherTip()
-
-        var options: [Option] {
-            [MaxDisplayCount(1)]
-        }
 
         var title: Text {
             Text("Timeline switcher", comment: "Title of tip that informs users that they can switch timelines.")
