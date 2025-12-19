@@ -68,7 +68,7 @@ func note_artifact_is_separated(kind: NostrKind?) -> Bool {
 
 func render_immediately_available_note_content(ndb: Ndb, ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> NoteArtifacts {
     if ev.known_kind == .longform {
-        return .longform(LongformContent(ev.content))
+        return .longform(LongformContent(ev.content, profiles: profiles))
     }
     
     do {
@@ -332,30 +332,47 @@ func getDisplayName(pk: Pubkey, profiles: Profiles) -> String {
     return Profile.displayName(profile: profile, pubkey: pk).username.truncate(maxLength: 50)
 }
 
+/// Returns the profile display name if found in cache, nil otherwise.
+///
+/// Use this when you want to fall back to abbreviated bech32 instead of
+/// abbreviated pubkey when the profile isn't cached. The abbreviated bech32
+/// format (e.g., `npub1abc:xyz`) is more informative than the raw pubkey
+/// format (e.g., `abc123:xyz789`) as it indicates the entity type.
+func getProfileDisplayNameIfFound(pk: Pubkey, profiles: Profiles) -> String? {
+    let displayName = getDisplayName(pk: pk, profiles: profiles)
+    // Profile.displayName returns abbreviated pubkey (contains ":") when profile not found
+    if displayName.contains(":") { return nil }
+    return displayName
+}
+
 func mention_str(_ m: Mention<MentionRef>, profiles: Profiles) -> CompatibleText {
     let bech32String = Bech32Object.encode(m.ref.toBech32Object())
-    
+
     let display_str: String = {
         switch m.ref.nip19 {
-        case .npub(let pk): return getDisplayName(pk: pk, profiles: profiles)
-        case .note: return abbrev_identifier(bech32String)
-        case .nevent: return abbrev_identifier(bech32String)
-        case .nprofile(let nprofile): return getDisplayName(pk: nprofile.author, profiles: profiles)
-        case .nrelay(let url): return url
-        case .naddr: return abbrev_identifier(bech32String)
+        case .npub(let pk):
+            // Use profile name if cached, otherwise show abbreviated bech32
+            return getProfileDisplayNameIfFound(pk: pk, profiles: profiles)
+                ?? abbrev_identifier(bech32String)
+        case .nprofile(let nprofile):
+            return getProfileDisplayNameIfFound(pk: nprofile.author, profiles: profiles)
+                ?? abbrev_identifier(bech32String)
+        case .note, .nevent, .naddr:
+            return abbrev_identifier(bech32String)
+        case .nrelay(let url):
+            return url
         case .nsec(let prv):
             guard let npub = privkey_to_pubkey(privkey: prv)?.npub else { return "nsec..." }
             return abbrev_identifier(npub)
-        case .nscript(_): return bech32String
+        case .nscript:
+            return bech32String
         }
     }()
 
-    let display_str_with_at = "@\(display_str)"
-
-    var attributedString = AttributedString(stringLiteral: display_str_with_at)
+    var attributedString = AttributedString(stringLiteral: "@\(display_str)")
     attributedString.link = URL(string: "damus:nostr:\(bech32String)")
     attributedString.foregroundColor = DamusColors.purple
-    
+
     return CompatibleText(attributed: attributedString)
 }
 
@@ -377,12 +394,118 @@ func trim_prefix(_ str: String) -> String {
     return result
 }
 
+// MARK: - Longform Nostr Link Processing
+
+/// Preprocesses markdown to convert nostr entities into clickable markdown links.
+///
+/// MarkdownUI doesn't natively understand nostr URIs or bare bech32 entities,
+/// so we convert them into markdown link syntax. Handles both:
+/// - Prefixed: `nostr:nprofile1...` -> `[@display](damus:nostr:nprofile1...)`
+/// - Bare: `nprofile1...` -> `[@display](damus:nostr:nprofile1...)`
+///
+/// This matches the behavior of kind1 notes where bare bech32 entities are
+/// also recognized and rendered as clickable mentions.
+///
+/// - Parameters:
+///   - markdown: The raw markdown content from a longform note
+///   - profiles: Profile cache for looking up display names
+/// - Returns: Markdown with nostr entities converted to clickable links
+func preprocessNostrLinksInMarkdown(_ markdown: String, profiles: Profiles) -> String {
+    let bech32Chars = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
+    var result = markdown
+
+    // First pass: Process nostr: prefixed URIs
+    // Negative lookbehinds prevent matching URIs already in links: ](... or damus:
+    let nostrPrefixPattern = "(?<!\\]\\()(?<!damus:)(nostr:(npub1|nprofile1|note1|nevent1|naddr1|nrelay1)[\(bech32Chars)]+)"
+
+    if let regex = try? NSRegularExpression(pattern: nostrPrefixPattern, options: []) {
+        let nsString = result as NSString
+        let matches = regex.matches(in: result, options: [], range: NSRange(location: 0, length: nsString.length))
+
+        for match in matches.reversed() {
+            let fullRange = match.range
+            let nostrUri = nsString.substring(with: fullRange)
+            let bech32String = String(nostrUri.dropFirst("nostr:".count))
+
+            let displayString = getNostrLinkDisplayString(bech32String, profiles: profiles)
+            let markdownLink = "[\(displayString)](damus:\(nostrUri))"
+
+            guard let swiftRange = Range(fullRange, in: result) else { continue }
+            result.replaceSubrange(swiftRange, with: markdownLink)
+        }
+    }
+
+    // Second pass: Process bare bech32 entities (without nostr: prefix)
+    // Additional lookbehind prevents matching entities already processed above
+    let bareBech32Pattern = "(?<!\\]\\()(?<!damus:)(?<!nostr:)\\b(npub1|nprofile1|note1|nevent1|naddr1|nrelay1)[\(bech32Chars)]+"
+
+    if let regex = try? NSRegularExpression(pattern: bareBech32Pattern, options: []) {
+        let nsString = result as NSString
+        let matches = regex.matches(in: result, options: [], range: NSRange(location: 0, length: nsString.length))
+
+        for match in matches.reversed() {
+            let fullRange = match.range
+            let bech32String = nsString.substring(with: fullRange)
+
+            let displayString = getNostrLinkDisplayString(bech32String, profiles: profiles)
+            // Add nostr: prefix for the damus: deep link
+            let markdownLink = "[\(displayString)](damus:nostr:\(bech32String))"
+
+            guard let swiftRange = Range(fullRange, in: result) else { continue }
+            result.replaceSubrange(swiftRange, with: markdownLink)
+        }
+    }
+
+    return result
+}
+
+/// Generates display text for a nostr bech32 entity.
+///
+/// For profile references (npub/nprofile), shows `@username` when the profile
+/// is cached, otherwise falls back to abbreviated bech32. This mirrors the
+/// behavior of `mention_str()` used in kind1 notes for consistency.
+///
+/// The abbreviated bech32 format (e.g., `@npub1abc:xyz`) is preferred over
+/// abbreviated pubkey (e.g., `@abc123:xyz789`) as it clearly indicates the
+/// entity type even when the profile hasn't been fetched yet.
+///
+/// - Parameters:
+///   - bech32String: The bech32-encoded entity (without nostr: prefix)
+///   - profiles: Profile cache for looking up display names
+/// - Returns: Display string with @ prefix for mentions
+func getNostrLinkDisplayString(_ bech32String: String, profiles: Profiles) -> String {
+    guard let parsed = Bech32Object.parse(bech32String) else {
+        return "@\(abbrev_identifier(bech32String))"
+    }
+
+    switch parsed {
+    case .npub(let pk):
+        let name = getProfileDisplayNameIfFound(pk: pk, profiles: profiles)
+            ?? abbrev_identifier(bech32String)
+        return "@\(name)"
+    case .nprofile(let nprofile):
+        let name = getProfileDisplayNameIfFound(pk: nprofile.author, profiles: profiles)
+            ?? abbrev_identifier(bech32String)
+        return "@\(name)"
+    case .note, .nevent, .naddr:
+        return "@\(abbrev_identifier(bech32String))"
+    case .nrelay(let url):
+        return "@\(url)"
+    case .nsec(let prv):
+        guard let npub = privkey_to_pubkey(privkey: prv)?.npub else { return "@nsec..." }
+        return "@\(abbrev_identifier(npub))"
+    case .nscript:
+        return "@\(bech32String)"
+    }
+}
+
 struct LongformContent {
     let markdown: MarkdownContent
     let words: Int
 
-    init(_ markdown: String) {
-        let blocks = [BlockNode].init(markdown: markdown)
+    init(_ markdown: String, profiles: Profiles) {
+        let processedMarkdown = preprocessNostrLinksInMarkdown(markdown, profiles: profiles)
+        let blocks = [BlockNode].init(markdown: processedMarkdown)
         self.markdown = MarkdownContent(blocks: blocks)
         self.words = count_markdown_words(blocks: blocks)
     }
