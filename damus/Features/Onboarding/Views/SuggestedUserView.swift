@@ -44,7 +44,7 @@ struct SuggestedUserView: View {
                 }
                 Text(user.about)
                     .lineLimit(3)
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
                     .font(.caption)
             }
             .frame(maxWidth: .infinity, alignment: .leading)

@@ -335,6 +335,8 @@ func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> 
         .font(.footnote.weight(.medium))
         .aspectRatio(contentMode: .fit)
         .frame(width: 20, height: 20)
+        .frame(minWidth: 44, minHeight: 44)
+        .contentShape(Rectangle())
         .onTapGesture {
             action()
         }
@@ -345,6 +347,8 @@ struct LikeButton: View {
     let liked: Bool
     let liked_emoji: String?
     let action: (_ emoji: String) -> Void
+
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
 
     // For reactions background
     @State private var showReactionsBG = 0
@@ -388,26 +392,32 @@ struct LikeButton: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 22, height: 20)
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
             }
         }
+        .frame(minWidth: 44, minHeight: 44)
+        .contentShape(Rectangle())
         .sheet(isPresented: $isReactionsVisible) {
             NavigationView {
                 EmojiPickerView(selectedEmoji: $selectedEmoji, emojiProvider: damus_state.emoji_provider)
             }.presentationDetents([.medium, .large])
         }
         .accessibilityLabel(NSLocalizedString("Like", comment: "Accessibility Label for Like button"))
-        .rotationEffect(Angle(degrees: shouldAnimate ? rotationAngle : 0))
+        .rotationEffect(Angle(degrees: (shouldAnimate && !reduceMotion) ? rotationAngle : 0))
         .onReceive(self.timer) { _ in
-            shakaAnimationLogic()
+            if !reduceMotion {
+                shakaAnimationLogic()
+            }
         }
         .simultaneousGesture(longPressGesture())
         .highPriorityGesture(TapGesture().onEnded {
             guard !isReactionsVisible else { return }
-            withAnimation(Animation.easeOut(duration: 0.15)) {
-                self.action(damus_state.settings.default_emoji_reaction)
-                shouldAnimate = true
-                amountOfAngleIncrease = 20.0
+            self.action(damus_state.settings.default_emoji_reaction)
+            if !reduceMotion {
+                withAnimation(Animation.easeOut(duration: 0.15)) {
+                    shouldAnimate = true
+                    amountOfAngleIncrease = 20.0
+                }
             }
         })
         .onChange(of: selectedEmoji) { newSelectedEmoji in

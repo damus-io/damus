@@ -31,7 +31,7 @@ struct ZapTypePicker: View {
         VStack(spacing: 20) {
             HStack {
                 Text("Zap type", comment: "Text to indicate that the buttons below it is for choosing the type of zap to send.")
-                    .font(.system(size: 25, weight: .heavy))
+                    .font(.title2.weight(.heavy))
                 Spacer()
                 if !is_default {
                     Button(action: {
@@ -57,10 +57,10 @@ struct ZapTypePicker: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 20, height: 20)
-                        .foregroundColor(.gray)
+                        .foregroundColor(DamusColors.mediumGrey)
                     
                     Text(text)
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.headline)
                     
                     Spacer()
                 }
@@ -69,8 +69,8 @@ struct ZapTypePicker: View {
                 let zapTypeDescription = zap_type_desc(type: type, profiles: profiles, pubkey: pubkey)
                 Text(zapTypeDescription)
                     .padding(.horizontal)
-                    .foregroundColor(.gray)
-                    .font(.system(size: 16))
+                    .foregroundColor(DamusColors.mediumGrey)
+                    .font(.callout)
             }
         }
         .frame(maxWidth: .infinity, minHeight: 50, maxHeight: 70)

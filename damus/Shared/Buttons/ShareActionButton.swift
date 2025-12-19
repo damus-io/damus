@@ -29,7 +29,7 @@ struct ShareActionButton: View {
             VStack() {
                 Image(img)
                     .foregroundColor(col)
-                    .font(.system(size: 23, weight: .bold))
+                    .font(.title2.weight(.bold))
                     .overlay {
                         Circle()
                             .stroke(col, lineWidth: 1)
@@ -43,6 +43,7 @@ struct ShareActionButton: View {
                     .padding(.top)
             }
         }
+        .accessibilityLabel(text)
     }
 }
 

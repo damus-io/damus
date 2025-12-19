@@ -59,7 +59,7 @@ struct SaveKeysView: View {
                     .padding(.top, 5)
                 
                 Text("We'll save your account key, so you won't need to enter it manually next time you log in.", comment: "Reminder to user that they should save their account information.")
-                    .font(.system(size: 14))
+                    .font(.footnote)
                     .foregroundColor(DamusColors.neutral6)
                     .padding(.top, 2)
                     .padding(.bottom, 100)

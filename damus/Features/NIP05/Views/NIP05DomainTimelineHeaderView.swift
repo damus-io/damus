@@ -67,7 +67,7 @@ struct NIP05DomainTimelineHeaderView: View {
                 let friendsOfFriendsString = friendsOfFriendsString(friendsOfFriends, ndb: damus_state.ndb)
                 Text(friendsOfFriendsString)
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
                     .multilineTextAlignment(.leading)
             }
             .onTapGesture {

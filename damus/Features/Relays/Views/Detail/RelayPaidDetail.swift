@@ -32,7 +32,7 @@ struct RelayPaidDetail: View {
         HStack {
             let displayString = displayAmount(unit: unit, amount: amount)
             Text(displayString)
-                .font(.system(size: 13, weight: .heavy))
+                .font(.footnote.weight(.bold))
                 .foregroundColor(DamusColors.white)
         }
     }
@@ -52,24 +52,24 @@ struct RelayPaidDetail: View {
                                 Amount(unit: admission[0].unit, amount: admission[0].amount)
                             } else {
                                 Text("Paid Relay", comment: "Text indicating that this is a paid relay.")
-                                    .font(.system(size: 13, weight: .heavy))
+                                    .font(.footnote.weight(.bold))
                                     .foregroundColor(DamusColors.white)
                             }
                         } else if let subscription = fees?.subscription {
                             if !subscription.isEmpty {
                                 Text("\(displayAmount(unit: subscription[0].unit, amount: subscription[0].amount)) / \(timeString(time: subscription[0].period))", comment: "Amount of money required to subscribe to the Nostr relay. In English, this would look something like '4,000 sats / 30 days', meaning it costs 4000 sats to subscribe to the Nostr relay for 30 days.")
-                                    .font(.system(size: 13, weight: .heavy))
+                                    .font(.footnote.weight(.bold))
                                     .foregroundColor(DamusColors.white)
                             }
                         } else if let publication = fees?.publication {
                             if !publication.isEmpty {
                                 Text("\(displayAmount(unit: publication[0].unit, amount: publication[0].amount)) / event", comment: "Amount of money required to publish to the Nostr relay. In English, this would look something like '10 sats / event', meaning it costs 10 sats to publish one event.")
-                                    .font(.system(size: 13, weight: .heavy))
+                                    .font(.footnote.weight(.bold))
                                     .foregroundColor(DamusColors.white)
                             }
                         } else {
                             Text("Paid Relay", comment: "Text indicating that this is a paid relay.")
-                                .font(.system(size: 13, weight: .heavy))
+                                .font(.footnote.weight(.bold))
                                 .foregroundColor(DamusColors.white)
                         }
                     })

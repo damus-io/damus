@@ -11,7 +11,7 @@ struct TimeDot: View {
     var body: some View {
         Text(verbatim: "⋅")
             .font(.footnote)
-            .foregroundColor(.gray)
+            .foregroundColor(DamusColors.mediumGrey)
     }
 }
 

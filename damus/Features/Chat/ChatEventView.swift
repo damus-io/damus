@@ -139,7 +139,7 @@ struct ChatEventView: View {
                             }
                             .lineLimit(1)
                         Text(verbatim: "\(format_relative_time(event.created_at))")
-                            .foregroundColor(.gray)
+                            .foregroundColor(DamusColors.mediumGrey)
                     }
                 }
                 

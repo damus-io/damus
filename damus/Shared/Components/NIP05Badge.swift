@@ -90,6 +90,8 @@ struct NIP05Badge: View {
                     domainBadge
                 }
             }
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
             .onTapGesture {
                 damus_state.nav.push(route: Route.NIP05DomainEvents(events: NIP05DomainEventsModel(state: damus_state, domain: nip05.host), nip05_domain_favicon: nip05_domain_favicon))
             }
@@ -103,7 +105,7 @@ extension View {
         if gradient {
             return AnyView(self.foregroundStyle(LINEAR_GRADIENT))
         } else {
-            return AnyView(self.foregroundColor(.gray))
+            return AnyView(self.foregroundColor(DamusColors.mediumGrey))
         }
         
     }
