@@ -46,7 +46,14 @@ struct ChatroomThreadView: View {
     }
 
     func trusted_event_filter(_ event: NostrEvent) -> Bool {
-        !damus.settings.show_trusted_replies_first || damus.contacts.is_in_friendosphere(event.pubkey)
+        // Always trust our own replies; otherwise gate by trusted network when the setting is enabled
+        if event.pubkey == damus.pubkey {
+            return true
+        }
+        if !damus.settings.show_trusted_replies_first {
+            return true
+        }
+        return damus.contacts.is_in_friendosphere(event.pubkey)
     }
 
     func ThreadedSwipeViewGroup(scroller: ScrollViewProxy, events: [NostrEvent]) -> some View {
