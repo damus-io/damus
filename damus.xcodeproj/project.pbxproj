@@ -618,6 +618,18 @@
 		5CF2DCCC2AA3AF0B00984B8D /* RelayPicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF2DCCB2AA3AF0B00984B8D /* RelayPicView.swift */; };
 		5CF2DCCE2AABE1A500984B8D /* DamusLightGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF2DCCD2AABE1A500984B8D /* DamusLightGradient.swift */; };
 		5CF72FC229B9142F00124A13 /* ShareAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF72FC129B9142F00124A13 /* ShareAction.swift */; };
+		5CFDE6E52EF4F782004E8661 /* TenorModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CFDE6E42EF4F77E004E8661 /* TenorModels.swift */; };
+		5CFDE6E62EF4F782004E8661 /* TenorModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CFDE6E42EF4F77E004E8661 /* TenorModels.swift */; };
+		5CFDE6E72EF4F782004E8661 /* TenorModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CFDE6E42EF4F77E004E8661 /* TenorModels.swift */; };
+		5CFDE6ED2EF4F7B2004E8661 /* GIFPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CFDE6EC2EF4F7AB004E8661 /* GIFPickerView.swift */; };
+		5CFDE6EE2EF4F7B2004E8661 /* GIFPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CFDE6EC2EF4F7AB004E8661 /* GIFPickerView.swift */; };
+		5CFDE6EF2EF4F7B2004E8661 /* GIFPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CFDE6EC2EF4F7AB004E8661 /* GIFPickerView.swift */; };
+		5CFDE6F12EF4F7EA004E8661 /* TenorAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CFDE6F02EF4F7E2004E8661 /* TenorAPIClient.swift */; };
+		5CFDE6F22EF4F7EA004E8661 /* TenorAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CFDE6F02EF4F7E2004E8661 /* TenorAPIClient.swift */; };
+		5CFDE6F32EF4F7EA004E8661 /* TenorAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CFDE6F02EF4F7E2004E8661 /* TenorAPIClient.swift */; };
+		5CFDE6F52EF4F93D004E8661 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CFDE6F42EF4F939004E8661 /* Secrets.swift */; };
+		5CFDE6F62EF4F93D004E8661 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CFDE6F42EF4F939004E8661 /* Secrets.swift */; };
+		5CFDE6F72EF4F93D004E8661 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CFDE6F42EF4F939004E8661 /* Secrets.swift */; };
 		6439E014296790CF0020672B /* ProfilePicImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6439E013296790CF0020672B /* ProfilePicImageView.swift */; };
 		643EA5C8296B764E005081BB /* RelayFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 643EA5C7296B764E005081BB /* RelayFilterView.swift */; };
 		647D9A8D2968520300A295DE /* SideMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 647D9A8C2968520300A295DE /* SideMenuView.swift */; };
@@ -2664,6 +2676,10 @@
 		5CF2DCCB2AA3AF0B00984B8D /* RelayPicView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayPicView.swift; sourceTree = "<group>"; };
 		5CF2DCCD2AABE1A500984B8D /* DamusLightGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusLightGradient.swift; sourceTree = "<group>"; };
 		5CF72FC129B9142F00124A13 /* ShareAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareAction.swift; sourceTree = "<group>"; };
+		5CFDE6E42EF4F77E004E8661 /* TenorModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TenorModels.swift; sourceTree = "<group>"; };
+		5CFDE6EC2EF4F7AB004E8661 /* GIFPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GIFPickerView.swift; sourceTree = "<group>"; };
+		5CFDE6F02EF4F7E2004E8661 /* TenorAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TenorAPIClient.swift; sourceTree = "<group>"; };
+		5CFDE6F42EF4F939004E8661 /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
 		6439E013296790CF0020672B /* ProfilePicImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePicImageView.swift; sourceTree = "<group>"; };
 		643EA5C7296B764E005081BB /* RelayFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayFilterView.swift; sourceTree = "<group>"; };
 		647D9A8C2968520300A295DE /* SideMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuView.swift; sourceTree = "<group>"; };
@@ -3780,6 +3796,7 @@
 		4CE6DEE527F7A08100C66700 /* damus */ = {
 			isa = PBXGroup;
 			children = (
+				5CFDE6F42EF4F939004E8661 /* Secrets.swift */,
 				5C78A7932E30387400CF177D /* Shared */,
 				5C78A7792E22FDFE00CF177D /* Features */,
 				5C78A7752E22F84A00CF177D /* Core */,
@@ -4538,6 +4555,7 @@
 		5C78A79C2E303CA300CF177D /* Media */ = {
 			isa = PBXGroup;
 			children = (
+				5CFDE6E32EF4F773004E8661 /* GIF */,
 				5C78A79D2E303D2600CF177D /* Models */,
 				4CFF8F6129CC9A80008DB934 /* Images */,
 				4C1A9A2829DDF53B00516EAC /* Video */,
@@ -5073,6 +5091,16 @@
 				5CB645A02EA31E3D0018BD91 /* LabsLogoView.swift */,
 			);
 			path = Detail;
+			sourceTree = "<group>";
+		};
+		5CFDE6E32EF4F773004E8661 /* GIF */ = {
+			isa = PBXGroup;
+			children = (
+				5CFDE6F02EF4F7E2004E8661 /* TenorAPIClient.swift */,
+				5CFDE6EC2EF4F7AB004E8661 /* GIFPickerView.swift */,
+				5CFDE6E42EF4F77E004E8661 /* TenorModels.swift */,
+			);
+			path = GIF;
 			sourceTree = "<group>";
 		};
 		7C0F392D29B57C8F0039859C /* Extensions */ = {
@@ -5800,12 +5828,14 @@
 				4C3D52B6298DB4E6001C5831 /* ZapEvent.swift in Sources */,
 				4CF4804D2B631C0100F2B2C0 /* amount.c in Sources */,
 				647D9A8D2968520300A295DE /* SideMenuView.swift in Sources */,
+				5CFDE6EF2EF4F7B2004E8661 /* GIFPickerView.swift in Sources */,
 				D7AAD0012E0387B800FB7699 /* LnurlAmountView.swift in Sources */,
 				F7F0BA272978E54D009531F3 /* ParticipantsView.swift in Sources */,
 				4CF0ABE32981BC7D00D66079 /* UserView.swift in Sources */,
 				4CE0E2AF29A2E82100DB4CA2 /* EventHolder.swift in Sources */,
 				B51C1CEA2B55A60A00E312A9 /* AddMuteItemView.swift in Sources */,
 				5C8F97332EB46126009399B1 /* LiveStreamViewers.swift in Sources */,
+				5CFDE6F22EF4F7EA004E8661 /* TenorAPIClient.swift in Sources */,
 				4C5D5C992A6AF8F80024563C /* NdbNote.swift in Sources */,
 				4CF0ABF029857E9200D66079 /* Bech32Object.swift in Sources */,
 				D7D68FFA2C9E01BE0015A515 /* KFClickable.swift in Sources */,
@@ -6028,6 +6058,7 @@
 				50088DA129E8271A008A1FDF /* WebSocket.swift in Sources */,
 				5C7389B12B6EFA7100781E0A /* ProxyView.swift in Sources */,
 				4C1253542A76C7D60004F4B8 /* LogoutNotify.swift in Sources */,
+				5CFDE6F52EF4F93D004E8661 /* Secrets.swift in Sources */,
 				5C513FCC2984ACA60072348F /* QRCodeView.swift in Sources */,
 				4CC14FF52A740BB7007AEB17 /* NoteId.swift in Sources */,
 				4C19AE512A5CEF7C00C90DB7 /* NostrScript.swift in Sources */,
@@ -6201,6 +6232,7 @@
 				4C1A9A2129DDD3E100516EAC /* KeySettingsView.swift in Sources */,
 				D723C38E2AB8D83400065664 /* ContentFilters.swift in Sources */,
 				4C011B5E2BD0A56A002F2F9B /* ChatEventView.swift in Sources */,
+				5CFDE6E62EF4F782004E8661 /* TenorModels.swift in Sources */,
 				4C32B95A2A9AD44700DC3548 /* Verifiable.swift in Sources */,
 				4C73C5142A4437C10062CAC0 /* ZapUserView.swift in Sources */,
 				501F8C802A0220E1001AFC1D /* KeychainStorage.swift in Sources */,
@@ -6393,6 +6425,7 @@
 				3ACF94482DAA006500971A4E /* NIP05DomainEventsModel.swift in Sources */,
 				82D6FAE92CD99F7900C925F4 /* NewMutesNotify.swift in Sources */,
 				82D6FAEA2CD99F7900C925F4 /* NewUnmutesNotify.swift in Sources */,
+				5CFDE6F12EF4F7EA004E8661 /* TenorAPIClient.swift in Sources */,
 				82D6FAEB2CD99F7900C925F4 /* Notify.swift in Sources */,
 				82D6FAEC2CD99F7900C925F4 /* OnlyZapsNotify.swift in Sources */,
 				82D6FAED2CD99F7900C925F4 /* PostNotify.swift in Sources */,
@@ -6494,6 +6527,7 @@
 				82D6FB3C2CD99F7900C925F4 /* AnyEncodable.swift in Sources */,
 				82D6FB3D2CD99F7900C925F4 /* Zap.swift in Sources */,
 				82D6FB3E2CD99F7900C925F4 /* NIPURLBuilder.swift in Sources */,
+				5CFDE6ED2EF4F7B2004E8661 /* GIFPickerView.swift in Sources */,
 				82D6FB3F2CD99F7900C925F4 /* TimeAgo.swift in Sources */,
 				82D6FB402CD99F7900C925F4 /* Parser.swift in Sources */,
 				82D6FB412CD99F7900C925F4 /* InsertSort.swift in Sources */,
@@ -6709,6 +6743,7 @@
 				82D6FC002CD99F7900C925F4 /* ProfilePicturesView.swift in Sources */,
 				82D6FC012CD99F7900C925F4 /* DamusAppNotificationView.swift in Sources */,
 				3A92C1002DE16E9800CEEBAC /* FaviconCache.swift in Sources */,
+				5CFDE6E52EF4F782004E8661 /* TenorModels.swift in Sources */,
 				82D6FC022CD99F7900C925F4 /* InnerTimelineView.swift in Sources */,
 				82D6FC032CD99F7900C925F4 /* PostingTimelineView.swift in Sources */,
 				82D6FC042CD99F7900C925F4 /* ZapsView.swift in Sources */,
@@ -6776,6 +6811,7 @@
 				82D6FC362CD99F7900C925F4 /* EventMenu.swift in Sources */,
 				D7AAD0002E0387B800FB7699 /* LnurlAmountView.swift in Sources */,
 				82D6FC372CD99F7900C925F4 /* EventMutingContainerView.swift in Sources */,
+				5CFDE6F62EF4F93D004E8661 /* Secrets.swift in Sources */,
 				82D6FC382CD99F7900C925F4 /* ZapEvent.swift in Sources */,
 				82D6FC392CD99F7900C925F4 /* TextEvent.swift in Sources */,
 				82D6FC3A2CD99F7900C925F4 /* WideEventView.swift in Sources */,
@@ -6892,6 +6928,7 @@
 				D73E5E2B2C6A97F4007EB227 /* PostNotify.swift in Sources */,
 				D73E5E2C2C6A97F4007EB227 /* PresentSheetNotify.swift in Sources */,
 				D73E5E2D2C6A97F4007EB227 /* ProfileUpdatedNotify.swift in Sources */,
+				5CFDE6F32EF4F7EA004E8661 /* TenorAPIClient.swift in Sources */,
 				3A515C522DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift in Sources */,
 				D73E5E2E2C6A97F4007EB227 /* ReportNotify.swift in Sources */,
 				D73E5E2F2C6A97F4007EB227 /* ScrollToTopNotify.swift in Sources */,
@@ -6934,6 +6971,7 @@
 				D73E5E542C6A97F4007EB227 /* NoteZapButton.swift in Sources */,
 				D73E5E552C6A97F4007EB227 /* TranslateView.swift in Sources */,
 				D73E5E562C6A97F4007EB227 /* SelectableText.swift in Sources */,
+				5CFDE6EE2EF4F7B2004E8661 /* GIFPickerView.swift in Sources */,
 				D73E5E572C6A97F4007EB227 /* DamusColors.swift in Sources */,
 				D73E5E582C6A97F4007EB227 /* ThiccDivider.swift in Sources */,
 				D73E5E592C6A97F4007EB227 /* IconLabel.swift in Sources */,
@@ -7279,6 +7317,7 @@
 				D73BDB142D71216500D69970 /* UserRelayListManager.swift in Sources */,
 				D73E5F6D2C6A97F5007EB227 /* Launch.storyboard in Sources */,
 				D73E5F6F2C6A97F5007EB227 /* RelayFilterView.swift in Sources */,
+				5CFDE6E72EF4F782004E8661 /* TenorModels.swift in Sources */,
 				D703D78A2C670C8A00A400EA /* LibreTranslateServer.swift in Sources */,
 				D703D7602C670AAB00A400EA /* MigratedTypes.swift in Sources */,
 				D73E5F742C6A9890007EB227 /* damusApp.swift in Sources */,
@@ -7315,6 +7354,7 @@
 				D73E5E1B2C6A9672007EB227 /* LikeCounter.swift in Sources */,
 				D703D7A92C670E5A00A400EA /* refmap.c in Sources */,
 				D73C7EDC2DE51699001F9392 /* OnboardingContentSettings.swift in Sources */,
+				5CFDE6F72EF4F93D004E8661 /* Secrets.swift in Sources */,
 				D703D77B2C670BF000A400EA /* TableVerifier.swift in Sources */,
 				3ACF94442DA9FCAB00971A4E /* NIP05DomainTimelineView.swift in Sources */,
 				D703D76D2C670B4500A400EA /* ZapDataModel.swift in Sources */,

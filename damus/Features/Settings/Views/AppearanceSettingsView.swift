@@ -95,6 +95,15 @@ struct AppearanceSettingsView: View {
                 self.ClearCacheButton
             }
             
+            // MARK: - GIFs
+            if damus_state.settings.enable_gifs_feature {
+                Section(NSLocalizedString("GIFs", comment: "Section title for GIFs configuration.")) {
+                    SecureField(NSLocalizedString("Tenor API Key (optional)", comment: "Prompt for optional entry of API Key to use with Tenor."), text: $settings.tenor_api_key)
+                        .disableAutocorrection(true)
+                        .autocapitalization(UITextAutocapitalizationType.none)
+                }
+            }
+            
             // MARK: - Content filters and moderation
             Section(
                 header: Text("Content filters", comment: "Section title for content filtering/moderation configuration."),

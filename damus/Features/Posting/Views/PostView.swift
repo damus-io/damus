@@ -63,6 +63,7 @@ struct PostView: View {
     @FocusState var focus: Bool
     @State var attach_media: Bool = false
     @State var attach_camera: Bool = false
+    @State var attach_gif: Bool = false
     @State var error: String? = nil
     @State var image_upload_confirm: Bool = false
     @State var imagePastedFromPasteboard: PreUploadedMedia? = nil
@@ -178,10 +179,22 @@ struct PostView: View {
         })
     }
     
+    var GIFButton: some View {
+        Button(action: {
+            attach_gif = true
+        }, label: {
+            Image("GIF")
+                .padding(6)
+        })
+    }
+    
     var AttachmentBar: some View {
         HStack(alignment: .center, spacing: 15) {
             ImageButton
             CameraButton
+            if damus_state.settings.enable_gifs_feature {
+                GIFButton
+            }
             Spacer()
             AutoSaveIndicatorView(saveViewModel: self.autoSaveModel)
         }
@@ -513,6 +526,14 @@ struct PostView: View {
                     self.attach_camera = false
                     self.attach_media = true
                 }))
+            }
+            .sheet(isPresented: $attach_gif) {
+                GIFPickerView(damus_state: damus_state) { gifURL in
+                    let uploadedMedia = UploadedMedia(localURL: gifURL, uploadedURL: gifURL, metadata: nil)
+                    uploadedMedias.append(uploadedMedia)
+                    post_changed(post: post, media: uploadedMedias)
+                    attach_gif = false
+                }
             }
             // This alert seeks confirmation about Image-upload when user taps Paste option
             .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $imageUploadConfirmPasteboard) {
