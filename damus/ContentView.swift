@@ -440,7 +440,7 @@ struct ContentView: View {
             }
 
             Task {
-                if await !handle_post_notification(keypair: keypair, postbox: state.nostrNetwork.postbox, events: state.events, post: post) {
+                if await !handle_post_notification(keypair: keypair, postbox: state.nostrNetwork.postbox, events: state.events, userRelayList: state.nostrNetwork.userRelayList, post: post) {
                     self.active_sheet = nil
                 }
             }
@@ -1069,7 +1069,7 @@ func handle_follow_notif(state: DamusState, target: FollowTarget) async -> Bool 
     return await handle_follow(state: state, follow: target.follow_ref)
 }
 
-func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: EventCache, post: NostrPostResult) async -> Bool {
+func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: EventCache, userRelayList: NostrNetworkManager.UserRelayListManager, post: NostrPostResult) async -> Bool {
     switch post {
     case .post(let post):
         //let post = tup.0
@@ -1078,18 +1078,23 @@ func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: Ev
         guard let new_ev = post.to_event(keypair: keypair) else {
             return false
         }
-        await postbox.send(new_ev)
+        let defaultTargets = await postbox.defaultRelayTargets()
+        await postbox.send(new_ev, to: defaultTargets)
         for eref in new_ev.referenced_ids.prefix(3) {
             // also broadcast at most 3 referenced events
             if let ev = events.lookup(eref) {
-                await postbox.send(ev)
+                await postbox.send(ev, to: defaultTargets)
             }
         }
         for qref in new_ev.referenced_quote_ids.prefix(3) {
             // also broadcast at most 3 referenced quoted events
             if let ev = events.lookup(qref.note_id) {
-                await postbox.send(ev)
+                await postbox.send(ev, to: defaultTargets)
             }
+        }
+        // Best-effort: publish our latest relay list alongside the post so relays serve the author's kind-10002.
+        if let relayListEvent = userRelayList.latestRelayListEventForPublishing() {
+            await postbox.send(relayListEvent, to: defaultTargets)
         }
         return true
     case .cancel:
