@@ -212,7 +212,7 @@ extension NostrNetworkManager {
         
         /// Relay filters
         var relayFilters: RelayFilters { get }
-        
+
         /// The user's connected NWC wallet
         var nwcWallet: WalletConnectURL? { get }
     }

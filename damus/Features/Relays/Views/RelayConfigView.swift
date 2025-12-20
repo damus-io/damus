@@ -37,11 +37,8 @@ struct RelayConfigView: View {
     }
     
     var recommended: [RelayPool.RelayDescriptor] {
-        let rs: [RelayPool.RelayDescriptor] = []
-        let recommended_relay_addresses = get_default_bootstrap_relays()
-        return recommended_relay_addresses.reduce(into: rs) { xs, x in
-            xs.append(RelayPool.RelayDescriptor(url: x, info: .readWrite))
-        }
+        // Use default bootstrap relays (includes purplepag.es)
+        return get_default_bootstrap_relays().map { RelayPool.RelayDescriptor(url: $0, info: .readWrite) }
     }
 
     var body: some View {
@@ -134,7 +131,7 @@ struct RelayConfigView: View {
 
             ForEach(relayList, id: \.url) { relay in
                 Group {
-                    RelayView(state: state, relay: relay.url, showActionButtons: $showActionButtons, recommended: recommended)
+                    RelayView(state: state, relay: relay.url, showActionButtons: $showActionButtons, recommended: recommended, descriptor: relay)
                     Divider()
                 }
             }

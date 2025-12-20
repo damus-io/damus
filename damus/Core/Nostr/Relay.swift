@@ -32,6 +32,7 @@ enum RelayVariant {
     case regular
     case ephemeral
     case nwc
+    case profilesOnly  // Only used for profile metadata queries (kind 0, 3, 10002)
 }
 
 extension RelayPool {
@@ -55,11 +56,21 @@ extension RelayPool {
                 return true
             case .nwc:
                 return true
+            case .profilesOnly:
+                return false  // Not ephemeral - filtering is handled separately via isProfileRelated check
             }
         }
-        
+
+        var isProfilesOnly: Bool {
+            variant == .profilesOnly
+        }
+
         static func nwc(url: RelayURL) -> RelayDescriptor {
             return RelayDescriptor(url: url, info: .readWrite, variant: .nwc)
+        }
+
+        static func profilesOnly(url: RelayURL) -> RelayDescriptor {
+            return RelayDescriptor(url: url, info: .read, variant: .profilesOnly)
         }
     }
 }

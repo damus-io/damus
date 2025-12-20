@@ -425,7 +425,13 @@ actor RelayPool {
             if relay.descriptor.ephemeral && skip_ephemeral {
                 continue    // Do not send requests to ephemeral relays if we want to skip them
             }
-            
+
+            // Filter purplepag.es to only receive profile-related requests (kinds 0, 3, 10002)
+            let isPurplePagesRelay = relay.descriptor.url.absoluteString.contains("purplepag.es")
+            if (relay.descriptor.isProfilesOnly || isPurplePagesRelay) && !req.isProfileRelated {
+                continue
+            }
+
             guard relay.connection.isConnected else {
                 Task { await queue_req(r: req, relay: relay.id, skip_ephemeral: skip_ephemeral) }
                 continue
@@ -465,16 +471,13 @@ actor RelayPool {
     }
 
     func record_seen(relay_id: RelayURL, event: NostrConnectionEvent) {
-        if case .nostr_event(let ev) = event {
-            if case .event(_, let nev) = ev {
-                if seen[nev.id]?.contains(relay_id) == true {
-                    return
-                }
-                seen[nev.id, default: Set()].insert(relay_id)
-                counts[relay_id, default: 0] += 1
-                notify(.update_stats(note_id: nev.id))
-            }
-        }
+        guard case .nostr_event(let ev) = event else { return }
+        guard case .event(_, let nev) = ev else { return }
+        guard seen[nev.id]?.contains(relay_id) != true else { return }
+
+        seen[nev.id, default: Set()].insert(relay_id)
+        counts[relay_id, default: 0] += 1
+        notify(.update_stats(note_id: nev.id))
     }
     
     func resubscribeAll(relayId: RelayURL) async {

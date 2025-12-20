@@ -13,24 +13,40 @@ struct RelayView: View {
     let recommended: Bool
     /// Disables navigation link
     let disableNavLink: Bool
+    /// Optional descriptor for recommended relays (not yet connected)
+    let descriptor: RelayPool.RelayDescriptor?
     @ObservedObject private var model_cache: RelayModelCache
 
     @State var relay_state: Bool
     @Binding var showActionButtons: Bool
 
-    init(state: DamusState, relay: RelayURL, showActionButtons: Binding<Bool>, recommended: Bool, disableNavLink: Bool = false) {
+    init(state: DamusState, relay: RelayURL, showActionButtons: Binding<Bool>, recommended: Bool, disableNavLink: Bool = false, descriptor: RelayPool.RelayDescriptor? = nil) {
         self.state = state
         self.relay = relay
         self.recommended = recommended
         self.model_cache = state.relay_model_cache
         _showActionButtons = showActionButtons
-        let relay_state = RelayView.get_relay_state(state: state, relay: relay)
-        self._relay_state = State(initialValue: relay_state)
+        self._relay_state = State(initialValue: state.nostrNetwork.getRelay(relay) == nil)
         self.disableNavLink = disableNavLink
+        self.descriptor = descriptor
     }
 
-    static func get_relay_state(state: DamusState, relay: RelayURL) -> Bool {
-        return state.nostrNetwork.getRelay(relay) == nil
+    /// Check if relay URL is purplepag.es (for showing Profile badge)
+    static func isPurplePagesRelay(_ relay: RelayURL) -> Bool {
+        relay.absoluteString.contains("purplepag.es")
+    }
+
+    /// Whether this relay is profile-only (for showing Profile badge)
+    var isProfileOnly: Bool {
+        if Self.isPurplePagesRelay(relay) {
+            return true
+        }
+        return state.nostrNetwork.getRelay(relay)?.descriptor.isProfilesOnly ?? descriptor?.isProfilesOnly ?? false
+    }
+
+    /// Whether relay needs to be added (true = show Add button, false = show Added button)
+    var needsToBeAdded: Bool {
+        return relay_state
     }
 
     var body: some View {
@@ -52,8 +68,11 @@ struct RelayView: View {
                             .font(.headline)
                             .padding(.bottom, 2)
                             .lineLimit(1)
-                        RelayType(is_paid: state.relay_model_cache.model(with_relay_id: relay)?.metadata.is_paid ?? false)
-                        
+                        RelayType(
+                            is_paid: state.relay_model_cache.model(with_relay_id: relay)?.metadata.is_paid ?? false,
+                            is_profile_only: isProfileOnly
+                        )
+
                         if relay.absoluteString.hasSuffix(".onion") {
                             Image("tor")
                                 .resizable()
@@ -79,7 +98,7 @@ struct RelayView: View {
                 if recommended {
                     if let keypair = state.keypair.to_full() {
                         VStack(alignment: .center) {
-                            if relay_state {
+                            if needsToBeAdded {
                                 AddButton(keypair: keypair)
                             } else {
                                 Button(action: {
@@ -110,7 +129,7 @@ struct RelayView: View {
             .contentShape(Rectangle())
         }
         .onReceive(handle_notify(.relays_changed)) { _ in
-            self.relay_state = RelayView.get_relay_state(state: state, relay: self.relay)
+            self.relay_state = state.nostrNetwork.getRelay(relay) == nil
         }
         .onTapGesture {
             if !disableNavLink {
@@ -131,7 +150,7 @@ struct RelayView: View {
             present_sheet(.error(error.humanReadableError))
         }
     }
-    
+
     func remove_action(privkey: Privkey) async {
         do {
             try await state.nostrNetwork.userRelayList.remove(relayURL: relay)

@@ -33,8 +33,25 @@ enum NostrRequestType {
         guard case .typical(let req) = self else {
             return true
         }
-        
+
         return req.is_read
+    }
+}
+
+extension NostrRequestType {
+    /// Profile-related kinds that should be queried on profiles-only relays
+    static let profileKinds: Set<NostrKind> = [.metadata, .contacts, .relay_list]
+
+    /// Whether this request is for profile-related data only
+    var isProfileRelated: Bool {
+        guard case .typical(let req) = self else { return false }
+        guard case .subscribe(let sub) = req else { return false }
+
+        // Check if ALL filters contain ONLY profile-related kinds
+        return sub.filters.allSatisfy { filter in
+            guard let kinds = filter.kinds else { return false }  // No kinds specified = could be anything
+            return kinds.allSatisfy { Self.profileKinds.contains($0) }
+        }
     }
 }
 
