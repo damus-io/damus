@@ -2,7 +2,7 @@
 //  ProfilesManagerTests.swift
 //  damusTests
 //
-//  Created by Claude on 2025-12-18.
+//  Created by alltheseas on 2025-12-18.
 //
 
 import XCTest
