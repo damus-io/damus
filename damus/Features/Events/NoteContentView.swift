@@ -296,7 +296,9 @@ struct NoteContentView: View {
             return
         }
 
-        for await profile in await damus_state.nostrNetwork.profilesManager.streamProfiles(pubkeys: mentionPubkeys) {
+        // Only re-render on network updates, not cached profiles.
+        // Initial render already uses cached profile data via the view hierarchy.
+        for await profile in await damus_state.nostrNetwork.profilesManager.streamProfiles(pubkeys: mentionPubkeys, yieldCached: false) {
             await load(force_artifacts: true)
         }
     }
