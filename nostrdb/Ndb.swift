@@ -70,12 +70,7 @@ class Ndb {
     }
 
     static var db_path: String? {
-        // Use the `group.com.damus` container, so that it can be accessible from other targets
-        // e.g. The notification service extension needs to access Ndb data, which is done through this shared file container.
-        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: APPLICATION_GROUP_IDENTIFIER) else {
-            return nil
-        }
-        return remove_file_prefix(containerURL.absoluteString)
+        return old_db_path
     }
     
     static private var db_files: [String] = ["data.mdb", "lock.mdb"]
