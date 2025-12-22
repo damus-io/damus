@@ -525,20 +525,31 @@ struct ContentView: View {
             guard let damus_state else { return }
             switch phase {
             case .background:
-                print("txn: 📙 DAMUS BACKGROUNDED")
+                let bgStartTime = CFAbsoluteTimeGetCurrent()
+                let remainingTime = this_app.backgroundTimeRemaining
+                Log.info("App background: ENTERING BACKGROUND. Remaining time: %.2f seconds", for: .app_lifecycle, remainingTime)
+                print("txn: 📙 DAMUS BACKGROUNDED (remaining: \(remainingTime)s)")
+
                 let bgTask = this_app.beginBackgroundTask(withName: "Closing things down gracefully", expirationHandler: { [weak damus_state] in
-                    Log.error("App background signal handling: RUNNING OUT OF TIME! JUST CLOSE NDB DIRECTLY!", for: .app_lifecycle)
+                    let elapsed = CFAbsoluteTimeGetCurrent() - bgStartTime
+                    Log.error("App background: EXPIRATION HANDLER FIRED after %.2f seconds! Force-closing NDB.", for: .app_lifecycle, elapsed)
                     // Background time about to expire, so close ndb directly.
                     // This may still cause a memory error crash if subscription tasks have not been properly closed yet, but that is less likely than a 0xdead10cc crash if we don't do anything here.
+                    let closeStart = CFAbsoluteTimeGetCurrent()
                     damus_state?.ndb.close()
+                    Log.error("App background: Force ndb.close() completed in %.3f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - closeStart)
                 })
-                
+                Log.info("App background: Background task ID=%d started", for: .app_lifecycle, bgTask.rawValue)
+
                 damusClosingTask = Task { @MainActor in
-                    Log.debug("App background signal handling: App being backgrounded", for: .app_lifecycle)
+                    Log.info("App background: Starting graceful shutdown task", for: .app_lifecycle)
                     let startTime = CFAbsoluteTimeGetCurrent()
                     await damus_state.nostrNetwork.handleAppBackgroundRequest()  // Close ndb streaming tasks before closing ndb to avoid memory errors
-                    Log.debug("App background signal handling: Nostr network and Ndb closed after %.2f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - startTime)
+                    let totalTime = CFAbsoluteTimeGetCurrent() - startTime
+                    Log.info("App background: Graceful shutdown completed in %.2f seconds", for: .app_lifecycle, totalTime)
+                    Log.info("App background: Calling endBackgroundTask for ID=%d", for: .app_lifecycle, bgTask.rawValue)
                     this_app.endBackgroundTask(bgTask)
+                    Log.info("App background: endBackgroundTask completed. Total bg time: %.2f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - bgStartTime)
                 }
                 break
             case .inactive:
