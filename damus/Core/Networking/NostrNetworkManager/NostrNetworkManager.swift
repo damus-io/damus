@@ -60,12 +60,32 @@ class NostrNetworkManager {
     }
     
     func handleAppBackgroundRequest(beforeClosingNdb operationBeforeClosingNdb: (() async -> Void)? = nil) async {
+        let totalStart = CFAbsoluteTimeGetCurrent()
+        Log.info("NostrNetwork.handleAppBackgroundRequest: Starting shutdown sequence", for: .app_lifecycle)
+
         // Mark NDB as closed without actually closing it, to avoid new tasks from using NostrDB
         self.delegate.ndb.markClosed()
+        Log.info("NostrNetwork: NDB marked closed", for: .app_lifecycle)
+
+        var stepStart = CFAbsoluteTimeGetCurrent()
         await self.reader.cancelAllTasks()
+        Log.info("NostrNetwork: reader.cancelAllTasks() completed in %.3f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - stepStart)
+
+        stepStart = CFAbsoluteTimeGetCurrent()
         await self.pool.cleanQueuedRequestForSessionEnd()
-        await operationBeforeClosingNdb?()
+        Log.info("NostrNetwork: pool.cleanQueuedRequestForSessionEnd() completed in %.3f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - stepStart)
+
+        if let operation = operationBeforeClosingNdb {
+            stepStart = CFAbsoluteTimeGetCurrent()
+            await operation()
+            Log.info("NostrNetwork: operationBeforeClosingNdb completed in %.3f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - stepStart)
+        }
+
+        stepStart = CFAbsoluteTimeGetCurrent()
         self.delegate.ndb.close()
+        Log.info("NostrNetwork: ndb.close() completed in %.3f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - stepStart)
+
+        Log.info("NostrNetwork.handleAppBackgroundRequest: Total shutdown time: %.3f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - totalStart)
     }
     
     func handleAppForegroundRequest() async {

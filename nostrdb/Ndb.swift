@@ -214,12 +214,19 @@ class Ndb {
     }
     
     func close() {
-        guard !self.is_closed else { return }
+        guard !self.is_closed else {
+            Log.info("Ndb.close(): Already closed, skipping", for: .ndb)
+            return
+        }
         self.closed = true
+        let startTime = CFAbsoluteTimeGetCurrent()
+        Log.info("Ndb.close(): Starting ndb_destroy...", for: .ndb)
         print("txn: CLOSING NOSTRDB")
         ndb_destroy(self.ndb.ndb)
+        let elapsed = CFAbsoluteTimeGetCurrent() - startTime
         self.generation += 1
-        print("txn: NOSTRDB CLOSED")
+        Log.info("Ndb.close(): ndb_destroy completed in %.3f seconds (gen %d)", for: .ndb, elapsed, self.generation)
+        print("txn: NOSTRDB CLOSED in \(elapsed)s")
     }
 
     func reopen() -> Bool {
