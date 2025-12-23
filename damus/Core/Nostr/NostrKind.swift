@@ -31,6 +31,8 @@ enum NostrKind: UInt32, Codable {
     case nwc_request = 23194
     case nwc_response = 23195
     case http_auth = 27235
+    case blossom_auth = 24242
+    case blossom_server_list = 10063
     case live = 30311
     case status = 30315
     case contact_card = 30_382
