@@ -134,6 +134,68 @@ struct ProfileActionSheetView: View {
         }
     }
     
+    // Enum to represent button types
+    enum ActionButtonType: Hashable {
+        case follow
+        case favorite
+        case zap(lnurl: String)
+        case dm
+        case mute
+    }
+    
+    // Build an array of visible action button types
+    var visibleActionButtonTypes: [ActionButtonType] {
+        var buttonTypes: [ActionButtonType] = []
+        
+        // Follow button is always visible
+        buttonTypes.append(.follow)
+        
+        // Favorite button (conditional)
+        if damus_state.settings.enable_favourites_feature {
+            buttonTypes.append(.favorite)
+        }
+        
+        // Zap button (conditional)
+        if let lnurl = self.get_lnurl(), lnurl != "" {
+            buttonTypes.append(.zap(lnurl: lnurl))
+        }
+        
+        // DM button is always visible
+        buttonTypes.append(.dm)
+        
+        // Mute button (conditional)
+        if damus_state.keypair.pubkey != profile.pubkey && damus_state.keypair.privkey != nil {
+            buttonTypes.append(.mute)
+        }
+        
+        return buttonTypes
+    }
+    
+    @ViewBuilder
+    func renderButton(_ buttonType: ActionButtonType) -> some View {
+        switch buttonType {
+        case .follow:
+            followButton
+        case .favorite:
+            favoriteButton
+        case .zap(let lnurl):
+            ProfileActionSheetZapButton(damus_state: damus_state, profile: profile, lnurl: lnurl)
+        case .dm:
+            dmButton
+        case .mute:
+            muteButton
+        }
+    }
+    
+    var actionButtons: some View {
+        HStack(spacing: 20) {
+            ForEach(visibleActionButtonTypes, id: \.self) { buttonType in
+                renderButton(buttonType)
+            }
+        }
+        .padding()
+    }
+    
     var body: some View {
         VStack(alignment: .center) {
             ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
@@ -150,19 +212,15 @@ struct ProfileActionSheetView: View {
                 AboutView(state: damus_state, about: about, max_about_length: 140, text_alignment: .center)
                     .padding(.top)
             }
-            ScrollView(.horizontal) {
-                HStack(spacing: 20) {
-                    followButton
-                    if damus_state.settings.enable_favourites_feature {
-                        favoriteButton
-                    }
-                    zapButton
-                    dmButton
-                    if damus_state.keypair.pubkey != profile.pubkey && damus_state.keypair.privkey != nil {
-                        muteButton
-                    }
+            
+            // Center-align buttons when there are fewer than 5, otherwise left-align in a ScrollView
+            if visibleActionButtonTypes.count < 5 {
+                actionButtons
+                    .frame(maxWidth: .infinity)
+            } else {
+                ScrollView(.horizontal) {
+                    actionButtons
                 }
-                .padding()
             }
             Button(
                 action: {
