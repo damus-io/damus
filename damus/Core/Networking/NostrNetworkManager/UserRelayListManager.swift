@@ -35,11 +35,12 @@ extension NostrNetworkManager {
         }
         
         private func computeRelaysToConnectTo(with relayList: NIP65.RelayList) -> [RelayPool.RelayDescriptor] {
-            let regularRelayDescriptorList = relayList.toRelayDescriptors()
+            var descriptors = relayList.toRelayDescriptors()
+
             if let nwcWallet = delegate.nwcWallet {
-                return regularRelayDescriptorList + [.nwc(url: nwcWallet.relay)]
+                descriptors.append(.nwc(url: nwcWallet.relay))
             }
-            return regularRelayDescriptorList
+            return descriptors
         }
         
         // MARK: - Getting the user's relay list
