@@ -62,60 +62,75 @@ struct LoginView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            VStack {
-                Spacer()
-                
-                SignInHeader()
-                
-                SignInEntry(key: $key, shouldSaveKey: $shouldSaveKey)
-                
-                let parsed = parse_key(key)
-                
-                if parsed?.is_hex ?? false {
-                    // convert to bech32 here
-                }
+            ScrollView {
+                VStack {
+                    Spacer(minLength: 20)
 
-                if let error = get_error(parsed_key: parsed) {
-                    Text(error)
-                        .foregroundColor(.red)
-                        .padding()
-                }
+                    SignInHeader()
 
-                if parsed?.is_pub ?? false {
-                    Text("This is a public key, you will not be able to make notes or interact in any way. This is used for viewing accounts from their perspective.", comment: "Warning that the inputted account key is a public key and the result of what happens because of it.")
-                        .foregroundColor(Color.orange)
-                        .bold()
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+                    AccountPickerView(
+                        onAddAccount: {},
+                        onCreateAccount: { nav.push(route: Route.CreateAccount) },
+                        showActions: false
+                    )
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
 
-                if let p = parsed {
-                    Button(action: {
-                        Task {
-                            do {
-                                try await process_login(p, is_pubkey: is_pubkey, shouldSaveKey: shouldSaveKey)
-                            } catch {
-                                self.error = error.localizedDescription
-                            }
-                        }
-                    }) {
-                        HStack {
-                            Text("Login", comment:  "Button to log into account.")
-                                .fontWeight(.semibold)
-                        }
-                        .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
+                    SignInEntry(key: $key, shouldSaveKey: $shouldSaveKey)
+
+                    let parsed = parse_key(key)
+
+                    if parsed?.is_hex ?? false {
+                        // convert to bech32 here
                     }
-                    .accessibilityIdentifier(AppAccessibilityIdentifiers.sign_in_confirm_button.rawValue)
-                    .buttonStyle(GradientButtonStyle())
-                    .padding(.top, 10)
+
+                    if let error = get_error(parsed_key: parsed) {
+                        Text(error)
+                            .foregroundColor(.red)
+                            .padding()
+                    }
+
+                    if parsed?.is_pub ?? false {
+                        Text("This is a public key, you will not be able to make notes or interact in any way. This is used for viewing accounts from their perspective.", comment: "Warning that the inputted account key is a public key and the result of what happens because of it.")
+                            .foregroundColor(Color.orange)
+                            .bold()
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    if let p = parsed {
+                        Button(action: {
+                            Task { await login(parsed: p, save: true) }
+                        }) {
+                            HStack {
+                                Text("Save & Login", comment:  "Button to save keys and log into account.")
+                                    .fontWeight(.semibold)
+                            }
+                            .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
+                        }
+                        .buttonStyle(GradientButtonStyle())
+                        .accessibilityIdentifier(AppAccessibilityIdentifiers.sign_in_confirm_button.rawValue)
+                        .padding(.top, 10)
+
+                        HStack {
+                            Text("or", comment: "Conjunction between login options")
+                                .foregroundColor(Color("DamusMediumGrey"))
+
+                            Button(NSLocalizedString("Login without saving", comment: "Button to log into account without saving keys.")) {
+                                Task { await login(parsed: p, save: false) }
+                            }
+
+                            Spacer()
+                        }
+                        .padding(.top, 5)
+                    }
+
+                    CreateAccountPrompt(nav: nav)
+                        .padding(.top, 10)
+
+                    Spacer(minLength: 50)
                 }
-
-                CreateAccountPrompt(nav: nav)
-                    .padding(.top, 10)
-
-                Spacer()
+                .padding()
             }
-            .padding()
-            .padding(.bottom, 50)
         }
         .background(DamusBackground(maxHeight: UIScreen.main.bounds.size.height/2), alignment: .top)
         .onAppear {
@@ -179,69 +194,63 @@ enum LoginError: LocalizedError {
     }
 }
 
-func process_login(_ key: ParsedKey, is_pubkey: Bool, shouldSaveKey: Bool = true) async throws {
-    if shouldSaveKey {
-        switch key {
-        case .priv(let priv):
-            try handle_privkey(priv)
-        case .pub(let pub):
-            try clear_saved_privkey()
-            save_pubkey(pubkey: pub)
+func process_login(_ key: ParsedKey, is_pubkey: Bool, shouldSaveKey: Bool = true) async throws -> Keypair {
+    let keypair = try await resolve_keypair(key, is_pubkey: is_pubkey)
 
-        case .nip05(let id):
-            guard let nip05 = await get_nip05_pubkey(id: id) else {
-                throw LoginError.nip05_failed
-            }
-
-            // this is a weird way to login anyways
-            /*
-             var bootstrap_relays = load_bootstrap_relays(pubkey: nip05.pubkey)
-             for relay in nip05.relays {
-             if !(bootstrap_relays.contains { $0 == relay }) {
-             bootstrap_relays.append(relay)
-             }
-             }
-             */
-            save_pubkey(pubkey: nip05.pubkey)
-
-        case .hex(let hexstr):
-            if is_pubkey, let pubkey = hex_decode_pubkey(hexstr) {
-                try clear_saved_privkey()
-
-                save_pubkey(pubkey: pubkey)
-            } else if let privkey = hex_decode_privkey(hexstr) {
-                try handle_privkey(privkey)
-            }
-        }
+    if !shouldSaveKey {
+        return keypair
     }
-    
-    func handle_privkey(_ privkey: Privkey) throws {
-        try save_privkey(privkey: privkey)
-        
-        guard let pk = privkey_to_pubkey(privkey: privkey) else {
+
+    let persisted = await persist_login(keypair: keypair)
+    await MainActor.run {
+        notify(.login(persisted))
+    }
+    return persisted
+}
+
+@MainActor
+private func resolve_keypair(_ key: ParsedKey, is_pubkey: Bool) async throws -> Keypair {
+    switch key {
+    case .priv(let priv):
+        guard let pub = privkey_to_pubkey(privkey: priv) else {
             throw LoginError.invalid_key
         }
-
-        CredentialHandler().save_credential(pubkey: pk, privkey: privkey)
-        save_pubkey(pubkey: pk)
-    }
-
-    func handle_transient_privkey(_ key: ParsedKey) -> Keypair? {
-        if case let .priv(priv) = key, let pubkey = privkey_to_pubkey(privkey: priv) {
-            return Keypair(pubkey: pubkey, privkey: priv)
+        return Keypair(pubkey: pub, privkey: priv)
+    case .pub(let pub):
+        return Keypair.just_pubkey(pub)
+    case .nip05(let id):
+        guard let nip05 = await get_nip05_pubkey(id: id) else {
+            throw LoginError.nip05_failed
         }
-        return nil
+        return Keypair.just_pubkey(nip05.pubkey)
+    case .hex(let hexstr):
+        if is_pubkey, let pubkey = hex_decode_pubkey(hexstr) {
+            return Keypair.just_pubkey(pubkey)
+        }
+
+        guard let privkey = hex_decode_privkey(hexstr),
+              let pubkey = privkey_to_pubkey(privkey: privkey) else {
+            throw LoginError.invalid_key
+        }
+        return Keypair(pubkey: pubkey, privkey: privkey)
+    }
+}
+
+@MainActor
+private func persist_login(keypair: Keypair) -> Keypair {
+    let shouldSavePriv = keypair.privkey != nil
+    if shouldSavePriv, let priv = keypair.privkey {
+        CredentialHandler().save_credential(pubkey: keypair.pubkey, privkey: priv)
     }
 
-    let keypair = shouldSaveKey ? get_saved_keypair() : handle_transient_privkey(key)
+    let store = AccountsStore.shared
+    store.addOrUpdate(keypair, savePriv: shouldSavePriv)
+    OnboardingSession.shared.end()
+    store.setActive(keypair.pubkey)
+    return store.activeKeypair ?? keypair
+}
 
-    guard let keypair = keypair else {
-        return
-    }
-
-    await MainActor.run {
-        notify(.login(keypair))
-    }
+extension LoginView {
 }
 
 struct NIP05Result: Decodable {

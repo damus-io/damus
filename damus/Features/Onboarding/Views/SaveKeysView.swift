@@ -189,12 +189,11 @@ struct SaveKeysView: View {
                     await self.pool.send(.event(first_relay_list_event))
                 }
                 
-                do {
-                    try save_keypair(pubkey: account.pubkey, privkey: account.privkey)
-                    notify(.login(account.keypair))
-                } catch {
-                    self.error = "Failed to save keys"
-                }
+                let store = AccountsStore.shared
+                store.addOrUpdate(account.keypair, savePriv: true)
+                OnboardingSession.shared.end()
+                store.setActive(account.pubkey)
+                notify(.login(store.activeKeypair ?? account.keypair))
                 
             case .error(let err):
                 self.loading = false
