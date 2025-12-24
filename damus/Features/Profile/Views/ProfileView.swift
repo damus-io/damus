@@ -81,6 +81,11 @@ struct ProfileView: View {
     @StateObject var profile: ProfileModel
     @StateObject var followers: FollowersModel
     @StateObject var zap_button_model: ZapButtonModel = ZapButtonModel()
+    @State private var showDMReadOnlyAlert: Bool = false
+
+    private var isReadOnly: Bool {
+        damus_state.keypair.privkey == nil
+    }
 
     init(damus_state: DamusState, profile: ProfileModel, followers: FollowersModel) {
         self.damus_state = damus_state
@@ -250,10 +255,21 @@ struct ProfileView: View {
     }
     
     var dmButton: some View {
-        let dm_model = damus_state.dms.lookup_or_create(profile.pubkey)
-        return NavigationLink(value: Route.DMChat(dms: dm_model)) {
-            Image("messages")
-                .profile_button_style(scheme: colorScheme)
+        Group {
+            if isReadOnly {
+                Button {
+                    showDMReadOnlyAlert = true
+                } label: {
+                    Image("messages")
+                        .profile_button_style(scheme: colorScheme)
+                }
+            } else {
+                let dm_model = damus_state.dms.lookup_or_create(profile.pubkey)
+                NavigationLink(value: Route.DMChat(dms: dm_model)) {
+                    Image("messages")
+                        .profile_button_style(scheme: colorScheme)
+                }
+            }
         }
     }
     
@@ -287,7 +303,8 @@ struct ProfileView: View {
                 FollowButtonView(
                     target: profile.get_follow_target(),
                     follows_you: profile.follows(pubkey: damus_state.pubkey),
-                    follow_state: damus_state.contacts.follow_state(profile.pubkey)
+                    follow_state: damus_state.contacts.follow_state(profile.pubkey),
+                    isReadOnly: damus_state.keypair.privkey == nil
                 )
             } else if damus_state.keypair.privkey != nil {
                 NavigationLink(value: Route.EditMetadata) {
@@ -508,7 +525,8 @@ struct ProfileView: View {
                         FollowButtonView(
                             target: profile.get_follow_target(),
                             follows_you: profile.follows(pubkey: damus_state.pubkey),
-                            follow_state: damus_state.contacts.follow_state(profile.pubkey)
+                            follow_state: damus_state.contacts.follow_state(profile.pubkey),
+                            isReadOnly: damus_state.keypair.privkey == nil
                         )
                         .padding(.top, 8)
                     }
@@ -540,6 +558,16 @@ struct ProfileView: View {
             }
             .damus_full_screen_cover($show_qr_code, damus_state: damus_state) {
                 QRCodeView(damus_state: damus_state, pubkey: profile.pubkey)
+            }
+            .alert(
+                NSLocalizedString("Read-Only Account", comment: "Alert title when read-only user tries to DM"),
+                isPresented: $showDMReadOnlyAlert
+            ) {
+                Button(NSLocalizedString("OK", comment: "Button to dismiss read-only alert")) {
+                    showDMReadOnlyAlert = false
+                }
+            } message: {
+                Text("Log in with your private key (nsec) to send direct messages.", comment: "Alert message explaining that private key is needed for DMs")
             }
 
             if damus_state.is_privkey_user {

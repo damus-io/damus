@@ -18,7 +18,7 @@ struct FollowUserView: View {
                     damus_state.nav.push(route: Route.ProfileByKey(pubkey: target.pubkey))
                 }
             
-            FollowButtonView(target: target, follows_you: false, follow_state: damus_state.contacts.follow_state(target.pubkey))
+            FollowButtonView(target: target, follows_you: false, follow_state: damus_state.contacts.follow_state(target.pubkey), isReadOnly: damus_state.keypair.privkey == nil)
         }
         Spacer()
     }

@@ -12,19 +12,22 @@ struct ShareAction: View {
     let bookmarks: BookmarksManager
     let userProfile: ProfileModel
     @State private var isBookmarked: Bool = false
+    @State private var showReadOnlyAlert: Bool = false
+    var isReadOnly: Bool = false
 
     @Binding var show_share: Bool
-    
+
     @Environment(\.dismiss) var dismiss
-    
-    init(event: NostrEvent, bookmarks: BookmarksManager, show_share: Binding<Bool>, userProfile: ProfileModel) {
+
+    init(event: NostrEvent, bookmarks: BookmarksManager, show_share: Binding<Bool>, userProfile: ProfileModel, isReadOnly: Bool = false) {
         let bookmarked = bookmarks.isBookmarked(event)
         self._isBookmarked = State(initialValue: bookmarked)
-        
+
         self.bookmarks = bookmarks
         self.event = event
         self.userProfile = userProfile
         self._show_share = show_share
+        self.isReadOnly = isReadOnly
     }
 
     @State var event_relay_url_strings: [RelayURL] = []
@@ -62,9 +65,13 @@ struct ShareAction: View {
                 let bookmarkImg = isBookmarked ? "bookmark.fill" : "bookmark"
                 let bookmarkTxt = isBookmarked ? NSLocalizedString("Remove Bookmark", comment: "Button text to remove bookmark from a note.") : NSLocalizedString("Add Bookmark", comment: "Button text to add bookmark to a note.")
                 ShareActionButton(img: bookmarkImg, text: bookmarkTxt) {
-                    dismiss()
-                    self.bookmarks.updateBookmark(event)
-                    isBookmarked = self.bookmarks.isBookmarked(event)
+                    if isReadOnly {
+                        showReadOnlyAlert = true
+                    } else {
+                        dismiss()
+                        self.bookmarks.updateBookmark(event)
+                        isBookmarked = self.bookmarks.isBookmarked(event)
+                    }
                 }
                 
                 ShareActionButton(img: "globe", text: NSLocalizedString("Broadcast", comment: "Button to broadcast note to all your relays")) {
@@ -97,6 +104,16 @@ struct ShareAction: View {
         }
         .onDisappear() {
             userProfile.unsubscribeFindRelays()
+        }
+        .alert(
+            NSLocalizedString("Read-Only Account", comment: "Alert title when read-only user tries to bookmark"),
+            isPresented: $showReadOnlyAlert
+        ) {
+            Button(NSLocalizedString("OK", comment: "Button to dismiss read-only alert")) {
+                showReadOnlyAlert = false
+            }
+        } message: {
+            Text("Log in with your private key (nsec) to bookmark notes.", comment: "Alert message explaining that private key is needed for bookmarks")
         }
     }
 }
