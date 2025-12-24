@@ -12,6 +12,7 @@ import XCTest
 final class ThreadModelTests: XCTestCase {
     var damusState: DamusState? = nil
     
+    @MainActor
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         damusState = generate_test_damus_state(mock_profile_info: nil)
