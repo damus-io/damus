@@ -24,6 +24,7 @@ struct ConfigView: View {
     
     // String constants
     private let DELETE_KEYWORD = "DELETE"
+    private let accountsTitle = NSLocalizedString("Accounts", comment: "Settings section for managing accounts")
     private let keysTitle = NSLocalizedString("Keys", comment: "Settings section for managing keys")
     private let appearanceTitle = NSLocalizedString("Appearance and filters", comment: "Section header for text, appearance, and content filter settings")
     private let searchUniverseTitle = NSLocalizedString("Search / Universe", comment: "Section header for search/universe settings")
@@ -55,6 +56,12 @@ struct ConfigView: View {
         ZStack(alignment: .leading) {
             Form {
                 Section {
+                    // Accounts
+                    if showSettingsButton(title: accountsTitle) {
+                        NavigationLink(value: Route.ManageAccountsSettings) {
+                            IconLabel(accountsTitle, img_name: "user", color: .blue)
+                        }
+                    }
                     // Keys
                     if showSettingsButton(title: keysTitle){
                         NavigationLink(value:Route.KeySettings(keypair: state.keypair)){
