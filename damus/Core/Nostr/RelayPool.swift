@@ -53,14 +53,30 @@ actor RelayPool {
     static let MAX_CONCURRENT_SUBSCRIPTION_LIMIT = 14   // This number is only an educated guess based on some local experiments.
 
     func close() async {
+        let startTime = CFAbsoluteTimeGetCurrent()
+        print("DIAG[\(startTime)] RelayPool.close: START")
+
+        print("DIAG[\(startTime)] RelayPool.close: disconnect START")
         await disconnect()
+        print("DIAG[\(startTime)] RelayPool.close: disconnect END")
+
+        print("DIAG[\(startTime)] RelayPool.close: clearRelays START")
         await clearRelays()
+        print("DIAG[\(startTime)] RelayPool.close: clearRelays END")
+
         open = false
         handlers = []
         request_queue = []
+
+        print("DIAG[\(startTime)] RelayPool.close: clearSeen START")
         await clearSeen()
+        print("DIAG[\(startTime)] RelayPool.close: clearSeen END")
+
         counts = [:]
         keypair = nil
+
+        let elapsed = CFAbsoluteTimeGetCurrent() - startTime
+        print("DIAG[\(startTime)] RelayPool.close: DONE (elapsed: \(String(format: "%.2f", elapsed))s)")
     }
     
     @MainActor

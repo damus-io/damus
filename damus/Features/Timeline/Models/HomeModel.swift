@@ -321,7 +321,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
                 return
             }
 
-            guard let new_bits = handle_last_events(new_events: self.notification_status.new_events, ev: ev, timeline: .notifications, shouldNotify: true) else {
+            guard let new_bits = handle_last_events(new_events: self.notification_status.new_events, ev: ev, timeline: .notifications, shouldNotify: true, pubkey: self.damus_state.pubkey) else {
                 return
             }
             
@@ -348,9 +348,9 @@ class HomeModel: ContactsDelegate, ObservableObject {
     @MainActor
     func handle_damus_app_notification(_ notification: DamusAppNotification) async {
         if self.notifications.insert_app_notification(notification: notification) {
-            let last_notification = get_last_event(.notifications)
+            let last_notification = get_last_event(.notifications, pubkey: self.damus_state.pubkey)
             if last_notification == nil || last_notification!.created_at < notification.last_event_at {
-                save_last_event(NoteId.empty, created_at: notification.last_event_at, timeline: .notifications)
+                save_last_event(NoteId.empty, created_at: notification.last_event_at, timeline: .notifications, pubkey: self.damus_state.pubkey)
                 // If we successfully inserted a new Damus App notification, switch ON the Damus App notification bit on our NewsEventsBits
                 // This will cause the bell icon on the tab bar to display the purple dot indicating there is an unread notification
                 self.notification_status.new_events = NewEventsBits(rawValue: self.notification_status.new_events.rawValue | NewEventsBits.damus_app_notifications.rawValue)
@@ -769,7 +769,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
 
     @discardableResult
     func handle_last_event(ev: NostrEvent, timeline: Timeline, shouldNotify: Bool = true) -> Bool {
-        if let new_bits = handle_last_events(new_events: self.notification_status.new_events, ev: ev, timeline: timeline, shouldNotify: shouldNotify) {
+        if let new_bits = handle_last_events(new_events: self.notification_status.new_events, ev: ev, timeline: timeline, shouldNotify: shouldNotify, pubkey: self.damus_state.pubkey) {
             self.notification_status.new_events = new_bits
             return true
         } else {
@@ -1078,7 +1078,7 @@ func handle_incoming_dm(ev: NostrEvent, our_pubkey: Pubkey, dms: DirectMessagesM
     
     var new_bits: NewEventsBits? = nil
     if inserted {
-        new_bits = handle_last_events(new_events: prev_events, ev: ev, timeline: .dms, shouldNotify: !ours)
+        new_bits = handle_last_events(new_events: prev_events, ev: ev, timeline: .dms, shouldNotify: !ours, pubkey: our_pubkey)
     }
     
     return (inserted, new_bits)
@@ -1150,16 +1150,16 @@ func timeline_to_notification_bits(_ timeline: Timeline, ev: NostrEvent?) -> New
 }
 
 /// A helper to determine if we need to notify the user of new events
-func handle_last_events(new_events: NewEventsBits, ev: NostrEvent, timeline: Timeline, shouldNotify: Bool = true) -> NewEventsBits? {
-    let last_ev = get_last_event(timeline)
+func handle_last_events(new_events: NewEventsBits, ev: NostrEvent, timeline: Timeline, shouldNotify: Bool = true, pubkey: Pubkey) -> NewEventsBits? {
+    let last_ev = get_last_event(timeline, pubkey: pubkey)
 
     if last_ev == nil || last_ev!.created_at < ev.created_at {
-        save_last_event(ev, timeline: timeline)
+        save_last_event(ev, timeline: timeline, pubkey: pubkey)
         if shouldNotify {
             return new_events.union(timeline_to_notification_bits(timeline, ev: ev))
         }
     }
-    
+
     return nil
 }
 

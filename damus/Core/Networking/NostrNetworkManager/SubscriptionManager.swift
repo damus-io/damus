@@ -19,17 +19,46 @@ extension NostrNetworkManager {
         private var ndb: Ndb
         private var taskManager: TaskManager
         private let experimentalLocalRelayModelSupport: Bool
-        
+
+        /// Generation captured at init time. Used with isStaleChecker to detect account switches.
+        private let generation: UInt64
+
+        /// Closure that checks if the current generation differs from ours (meaning account switched).
+        /// When this returns true, tasks should exit immediately.
+        private let isStaleChecker: () -> Bool
+
         private static let logger = Logger(
             subsystem: Constants.MAIN_APP_BUNDLE_IDENTIFIER,
             category: "subscription_manager"
         )
-        
-        init(pool: RelayPool, ndb: Ndb, experimentalLocalRelayModelSupport: Bool) {
+
+        init(pool: RelayPool, ndb: Ndb, experimentalLocalRelayModelSupport: Bool, generation: UInt64 = 0, currentGenerationProvider: (() -> UInt64)? = nil) {
             self.pool = pool
             self.ndb = ndb
             self.taskManager = TaskManager()
             self.experimentalLocalRelayModelSupport = experimentalLocalRelayModelSupport
+            self.generation = generation
+            // If no provider given, never consider stale (backwards compatibility)
+            if let provider = currentGenerationProvider {
+                self.isStaleChecker = { generation != provider() }
+            } else {
+                self.isStaleChecker = { false }
+            }
+        }
+
+        /// Returns true if this SubscriptionManager's generation is outdated (account switched)
+        private func isStale() -> Bool {
+            return isStaleChecker()
+        }
+
+        /// Guard helper that checks staleness and logs if stale.
+        /// Returns true if NOT stale (safe to continue), false if stale (should exit).
+        private func guardNotStaleOrCancel(_ logId: String) -> Bool {
+            if isStale() {
+                Self.logger.info("\(logId, privacy: .public): Generation stale, exiting.")
+                return false
+            }
+            return true
         }
         
         // MARK: - Subscribing and Streaming data from Nostr
@@ -228,13 +257,24 @@ extension NostrNetworkManager {
                 
                 let streamTask = Task {
                     while await !self.pool.open {
+                        // Exit immediately if generation changed (account switched)
+                        if self.isStale() {
+                            Self.logger.info("\(id.uuidString, privacy: .public): Generation stale, exiting network stream.")
+                            return
+                        }
                         Self.logger.info("\(id.uuidString, privacy: .public): RelayPool closed. Sleeping for 1 second before resuming.")
+                        print("DIAG: multiSessionNetworkStream(\(id.uuidString.prefix(8))): RelayPool closed, sleeping... (isCancelled: \(Task.isCancelled))")
                         try await Task.sleep(nanoseconds: 1_000_000_000)
                         continue
                     }
                     
                     do {
                         for await item in await self.pool.subscribe(filters: filters, to: desiredRelays, id: id) {
+                            // Exit if generation changed (account switched) even during active streaming
+                            guard self.guardNotStaleOrCancel(id.uuidString) else {
+                                continuation.finish()
+                                return
+                            }
                             try Task.checkCancellation()
                             logStreamPipelineStats("RelayPool_Handler_\(id)", "SubscriptionManager_Network_Stream_\(id)")
                             switch item {
@@ -271,14 +311,30 @@ extension NostrNetworkManager {
                 Self.logger.info("Starting multi-session NDB subscription \(subscriptionId.uuidString, privacy: .public): \(filters.debugDescription, privacy: .private)")
                 let multiSessionStreamingTask = Task {
                     while !Task.isCancelled {
+                        // Exit immediately if generation changed (account switched)
+                        if self.isStale() {
+                            Self.logger.info("\(subscriptionId.uuidString, privacy: .public): Generation stale, exiting NDB stream.")
+                            return
+                        }
                         do {
                             guard !self.ndb.is_closed else {
+                                // Check staleness again before sleeping
+                                if self.isStale() {
+                                    Self.logger.info("\(subscriptionId.uuidString, privacy: .public): Generation stale, exiting NDB stream.")
+                                    return
+                                }
                                 Self.logger.info("\(subscriptionId.uuidString, privacy: .public): Ndb closed. Sleeping for 1 second before resuming.")
+                                print("DIAG: multiSessionNdbStream(\(subscriptionId.uuidString.prefix(8))): Ndb closed, sleeping... (isCancelled: \(Task.isCancelled))")
                                 try await Task.sleep(nanoseconds: 1_000_000_000)
                                 continue
                             }
                             Self.logger.info("\(subscriptionId.uuidString, privacy: .public): Streaming from NDB.")
                             for await item in self.sessionNdbStream(filters: filters, to: desiredRelays, streamMode: streamMode, id: id) {
+                                // Exit if generation changed (account switched) even during active streaming
+                                guard self.guardNotStaleOrCancel(subscriptionId.uuidString) else {
+                                    continuation.finish()
+                                    return
+                                }
                                 try Task.checkCancellation()
                                 logStreamPipelineStats("SubscriptionManager_Ndb_Session_Stream_\(id?.uuidString ?? "NoID")", "SubscriptionManager_Ndb_MultiSession_Stream_\(id?.uuidString ?? "NoID")")
                                 continuation.yield(item)
@@ -455,9 +511,12 @@ extension NostrNetworkManager {
         }
         
         // MARK: - Task management
-        
+
         func cancelAllTasks() async {
+            let startTime = CFAbsoluteTimeGetCurrent()
+            print("DIAG[\(startTime)] SubscriptionManager.cancelAllTasks: START")
             await self.taskManager.cancelAllTasks()
+            print("DIAG[\(startTime)] SubscriptionManager.cancelAllTasks: END")
         }
         
         actor TaskManager {
@@ -475,15 +534,22 @@ extension NostrNetworkManager {
             }
             
             func cancelAndCleanUp(taskId: UUID) async {
+                let startTime = CFAbsoluteTimeGetCurrent()
+                print("DIAG[\(startTime)] TaskManager.cancelAndCleanUp(\(taskId.uuidString.prefix(8))): START")
                 self.tasks[taskId]?.cancel()
+                print("DIAG[\(startTime)] TaskManager.cancelAndCleanUp(\(taskId.uuidString.prefix(8))): cancel() called, awaiting value...")
                 await self.tasks[taskId]?.value
+                print("DIAG[\(startTime)] TaskManager.cancelAndCleanUp(\(taskId.uuidString.prefix(8))): END")
                 self.tasks[taskId] = nil
                 return
             }
-            
+
             func cancelAllTasks() async {
-                    await withTaskGroup { group in
-                        Self.logger.info("Cancelling all SubscriptionManager tasks")
+                let startTime = CFAbsoluteTimeGetCurrent()
+                let taskCount = self.tasks.count
+                print("DIAG[\(startTime)] TaskManager.cancelAllTasks: START (taskCount: \(taskCount))")
+                await withTaskGroup { group in
+                    Self.logger.info("Cancelling all SubscriptionManager tasks")
                     // Start each task cancellation in parallel for faster execution
                     for (taskId, _) in self.tasks {
                         Self.logger.info("Cancelling SubscriptionManager task \(taskId.uuidString, privacy: .public)")
@@ -497,6 +563,7 @@ extension NostrNetworkManager {
                     }
                     Self.logger.info("Cancelled all SubscriptionManager tasks")
                 }
+                print("DIAG[\(startTime)] TaskManager.cancelAllTasks: END")
             }
         }
     }

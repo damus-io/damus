@@ -105,10 +105,10 @@ struct VisibilityTracker: ViewModifier {
     
     /// Computes whether the view is "visible" in a range of the screen given its Y position
     private func compute_y_scroll_visible(centerY: CGFloat) -> Bool {
-        let screen_center_y = orientationTracker.deviceMajorAxis / 2
-        let screen_visibility_window_margin = orientationTracker.deviceMajorAxis * visibility_window / 2
-        let isBelowTop = centerY > screen_center_y - screen_visibility_window_margin,
-            isAboveBottom = centerY < screen_center_y + screen_visibility_window_margin
+        let screen_center_y: CGFloat = orientationTracker.deviceMajorAxis / 2
+        let screen_visibility_window_margin: CGFloat = orientationTracker.deviceMajorAxis * visibility_window / 2
+        let isBelowTop = centerY > screen_center_y - screen_visibility_window_margin
+        let isAboveBottom = centerY < screen_center_y + screen_visibility_window_margin
         return (isBelowTop && isAboveBottom)
     }
     
