@@ -329,19 +329,20 @@ class UserSettingsStore: ObservableObject {
     
     // These internal keys are necessary because entries in the keychain need to be Optional,
     // but the translation view needs non-Optional String in order to use them as Bindings.
-    @KeychainStorage(account: "deepl_apikey")
+    // Using PubkeyKeychainStorage to scope API keys per-account with automatic migration from legacy keys.
+    @PubkeyKeychainStorage(account: "deepl_apikey")
     var internal_deepl_api_key: String?
-    
-    @KeychainStorage(account: "nokyctranslate_apikey")
+
+    @PubkeyKeychainStorage(account: "nokyctranslate_apikey")
     var internal_nokyctranslate_api_key: String?
 
-    @KeychainStorage(account: "winetranslate_apikey")
+    @PubkeyKeychainStorage(account: "winetranslate_apikey")
     var internal_winetranslate_api_key: String?
-    
-    @KeychainStorage(account: "libretranslate_apikey")
+
+    @PubkeyKeychainStorage(account: "libretranslate_apikey")
     var internal_libretranslate_api_key: String?
-    
-    @KeychainStorage(account: "nostr_wallet_connect")
+
+    @PubkeyKeychainStorage(account: "nostr_wallet_connect")
     var nostr_wallet_connect: String? // TODO: strongly type this to WalletConnectURL
 
     var can_translate: Bool {
