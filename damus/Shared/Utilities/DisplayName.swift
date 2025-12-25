@@ -80,9 +80,11 @@ func parse_display_name(name: String?, display_name: String?, pubkey: Pubkey) ->
 }
 
 func abbrev_bech32_pubkey(pubkey: Pubkey) -> String {
-    return abbrev_identifier(String(pubkey.npub.dropFirst(4)))
+    let npub = pubkey.npub
+    // Show "npub1abc...xyz" format for better readability
+    return String(npub.prefix(9)) + "..." + String(npub.suffix(4))
 }
 
-func abbrev_identifier(_ pubkey: String, amount: Int = 8) -> String {
-    return pubkey.prefix(amount) + ":" + pubkey.suffix(amount)
+func abbrev_identifier(_ identifier: String, amount: Int = 8) -> String {
+    return identifier.prefix(amount) + ":" + identifier.suffix(amount)
 }

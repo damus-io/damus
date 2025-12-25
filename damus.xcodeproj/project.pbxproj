@@ -1670,6 +1670,7 @@
 		D74EC8522E1856B70091DC51 /* NonCopyableLinkedList.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74EC84E2E1856AF0091DC51 /* NonCopyableLinkedList.swift */; };
 		D74F430A2B23F0BE00425B75 /* DamusPurple.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74F43092B23F0BE00425B75 /* DamusPurple.swift */; };
 		D74F430C2B23FB9B00425B75 /* StoreObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74F430B2B23FB9B00425B75 /* StoreObserver.swift */; };
+		D751FA992EF62C8100E10F1B /* ProfilesManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D751FA982EF62C8100E10F1B /* ProfilesManagerTests.swift */; };
 		D753CEAA2BE9DE04001C3A5D /* MutingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D753CEA92BE9DE04001C3A5D /* MutingTests.swift */; };
 		D755B28D2D3E7D8800BBEEFA /* NIP37Draft.swift in Sources */ = {isa = PBXBuildFile; fileRef = D755B28C2D3E7D7D00BBEEFA /* NIP37Draft.swift */; };
 		D755B28E2D3E7D8800BBEEFA /* NIP37Draft.swift in Sources */ = {isa = PBXBuildFile; fileRef = D755B28C2D3E7D7D00BBEEFA /* NIP37Draft.swift */; };
@@ -2770,6 +2771,7 @@
 		D74EC84E2E1856AF0091DC51 /* NonCopyableLinkedList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NonCopyableLinkedList.swift; sourceTree = "<group>"; };
 		D74F43092B23F0BE00425B75 /* DamusPurple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurple.swift; sourceTree = "<group>"; };
 		D74F430B2B23FB9B00425B75 /* StoreObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreObserver.swift; sourceTree = "<group>"; };
+		D751FA982EF62C8100E10F1B /* ProfilesManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilesManagerTests.swift; sourceTree = "<group>"; };
 		D753CEA92BE9DE04001C3A5D /* MutingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutingTests.swift; sourceTree = "<group>"; };
 		D755B28C2D3E7D7D00BBEEFA /* NIP37Draft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP37Draft.swift; sourceTree = "<group>"; };
 		D76556D52B1E6C08001B0CCC /* DamusPurpleWelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleWelcomeView.swift; sourceTree = "<group>"; };
@@ -5281,6 +5283,7 @@
 		D7EBF8BC2E5946F9004EAE29 /* NostrNetworkManagerTests */ = {
 			isa = PBXGroup;
 			children = (
+				D751FA982EF62C8100E10F1B /* ProfilesManagerTests.swift */,
 				D7EBF8BD2E594708004EAE29 /* test_notes.jsonl */,
 				D7EBF8BA2E5901F7004EAE29 /* NostrNetworkManagerTests.swift */,
 				D7EBF8BF2E5D39D1004EAE29 /* ThreadModelTests.swift */,
@@ -6255,6 +6258,7 @@
 				4C0ED07F2D7A1E260020D8A2 /* Benchmarking.swift in Sources */,
 				3A3040ED29A5CB86008A0F29 /* ReplyDescriptionTests.swift in Sources */,
 				D71DC1EC2A9129C3006E207C /* PostViewTests.swift in Sources */,
+				D751FA992EF62C8100E10F1B /* ProfilesManagerTests.swift in Sources */,
 				3AAC7A022A60FE72002B50DF /* LocalizationUtilTests.swift in Sources */,
 				D7CBD1D62B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift in Sources */,
 				D7EBF8BB2E59022A004EAE29 /* NostrNetworkManagerTests.swift in Sources */,
