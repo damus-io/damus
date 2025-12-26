@@ -219,6 +219,105 @@ final class PostViewTests: XCTestCase {
         // then
         XCTAssertEqual(post.content, "nostr:\(test_pubkey.npub)")
     }
+
+    /// Tests that pasting an npub converts it to a mention link (issue #2289)
+    func testPastedNpubConvertsToMention() {
+        let content = NSMutableAttributedString(string: "Hello ")
+        var resultContent: NSMutableAttributedString?
+
+        let bindingContent: Binding<NSMutableAttributedString> = Binding(get: {
+            return content
+        }, set: { newValue in
+            resultContent = newValue
+        })
+
+        let coordinator = TextViewWrapper.Coordinator(
+            attributedText: bindingContent,
+            getFocusWordForMention: nil,
+            updateCursorPosition: { _ in },
+            initialTextSuffix: nil,
+            convertMentionRef: { pubkey in
+                // Return a mock mention tag
+                return NSMutableAttributedString(string: "@testuser", attributes: [
+                    NSAttributedString.Key.link: "damus:nostr:\(pubkey.npub)"
+                ])
+            }
+        )
+
+        let textView = UITextView()
+        textView.attributedText = content
+
+        // Paste an npub - should return false (handled manually) and convert to mention
+        let npub = test_pubkey.npub
+        let shouldChange = coordinator.textView(textView, shouldChangeTextIn: NSRange(location: 6, length: 0), replacementText: npub)
+
+        XCTAssertFalse(shouldChange, "shouldChangeTextIn should return false when converting npub to mention")
+        XCTAssertNotNil(resultContent, "Content should be updated with mention")
+        XCTAssertTrue(resultContent?.string.contains("@testuser") ?? false, "Content should contain the mention username")
+    }
+
+    /// Tests that pasting an nprofile converts it to a mention link (issue #2289)
+    func testPastedNprofileConvertsToMention() {
+        let content = NSMutableAttributedString(string: "")
+        var resultContent: NSMutableAttributedString?
+
+        let bindingContent: Binding<NSMutableAttributedString> = Binding(get: {
+            return content
+        }, set: { newValue in
+            resultContent = newValue
+        })
+
+        let coordinator = TextViewWrapper.Coordinator(
+            attributedText: bindingContent,
+            getFocusWordForMention: nil,
+            updateCursorPosition: { _ in },
+            initialTextSuffix: nil,
+            convertMentionRef: { pubkey in
+                return NSMutableAttributedString(string: "@profileuser", attributes: [
+                    NSAttributedString.Key.link: "damus:nostr:\(pubkey.npub)"
+                ])
+            }
+        )
+
+        let textView = UITextView()
+        textView.attributedText = content
+
+        // Create a valid nprofile for test_pubkey
+        let nprofile = Bech32Object.encode(.nprofile(NProfile(author: test_pubkey, relays: [])))
+        let shouldChange = coordinator.textView(textView, shouldChangeTextIn: NSRange(location: 0, length: 0), replacementText: nprofile)
+
+        XCTAssertFalse(shouldChange, "shouldChangeTextIn should return false when converting nprofile to mention")
+        XCTAssertNotNil(resultContent, "Content should be updated with mention")
+        XCTAssertTrue(resultContent?.string.contains("@profileuser") ?? false, "Content should contain the mention username")
+    }
+
+    /// Tests that regular text is not converted (not npub/nprofile)
+    func testRegularTextNotConverted() {
+        let content = NSMutableAttributedString(string: "Hello ")
+
+        let bindingContent: Binding<NSMutableAttributedString> = Binding(get: {
+            return content
+        }, set: { _ in })
+
+        let coordinator = TextViewWrapper.Coordinator(
+            attributedText: bindingContent,
+            getFocusWordForMention: nil,
+            updateCursorPosition: { _ in },
+            initialTextSuffix: nil,
+            convertMentionRef: { _ in
+                XCTFail("convertMentionRef should not be called for regular text")
+                return nil
+            }
+        )
+
+        let textView = UITextView()
+        textView.attributedText = content
+
+        // Paste regular text - should return true (not handled, allow default behavior)
+        let shouldChange = coordinator.textView(textView, shouldChangeTextIn: NSRange(location: 6, length: 0), replacementText: "world")
+
+        XCTAssertTrue(shouldChange, "shouldChangeTextIn should return true for regular text")
+    }
 }
 
 func checkMentionLinkEditorHandling(
@@ -237,7 +336,7 @@ func checkMentionLinkEditorHandling(
             if let expectedNewCursorIndex {
                 XCTAssertEqual(newCursorIndex, expectedNewCursorIndex)
             }
-        }, initialTextSuffix: nil)
+        }, initialTextSuffix: nil, convertMentionRef: nil)
         let textView = UITextView()
         textView.attributedText = content
 
