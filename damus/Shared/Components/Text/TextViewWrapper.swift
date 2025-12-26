@@ -226,6 +226,13 @@ struct TextViewWrapper: UIViewRepresentable {
                     // This link will naturally disappear, so no work needs to be done in this range.
                     return
                 }
+                else if range.location == linkRange.location && range.length == 0 {
+                    // Inserting at the left edge of a link. Handle manually to prevent the
+                    // new character from becoming part of the link, but preserve the link.
+                    // This allows users to type before a mention without breaking it.
+                    performEditActionManually = true
+                    return
+                }
                 else if linkRange.intersection(range) != nil {
                     // If user tries to change an existing link directly, remove the link attribute
                     mutable.removeAttribute(.link, range: linkRange)

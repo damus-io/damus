@@ -51,6 +51,8 @@ struct UserSearch: View {
                         ForEach(users) { pk in
                             UserView(damus_state: damus_state, pubkey: pk)
                                 .contentShape(Rectangle())
+                                .accessibilityElement(children: .combine)
+                                .accessibilityIdentifier(AppAccessibilityIdentifiers.post_composer_mention_user_result.rawValue)
                                 .onTapGesture {
                                     on_user_tapped(pk: pk)
                                 }

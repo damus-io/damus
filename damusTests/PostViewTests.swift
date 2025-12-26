@@ -107,12 +107,13 @@ final class PostViewTests: XCTestCase {
             XCTAssertNil(newManuallyEditedContent.attribute(.link, at: 6, effectiveRange: nil))
         })
 
-        // Test adding text right at the start of a mention link, to check that the link is removed
+        // Test adding text right at the start of a mention link - link should be preserved
         content = NSMutableAttributedString(string: "Hello @user")
         content.addAttribute(.link, value: "damus:1234", range: NSRange(location: 6, length: 5))
         checkMentionLinkEditorHandling(content: content, replacementText: "a", replacementRange: NSRange(location: 6, length: 0), shouldBeAbleToChangeAutomatically: false, expectedNewCursorIndex: 7, handleNewContent: { newManuallyEditedContent in
             XCTAssertEqual(newManuallyEditedContent.string, "Hello a@user")
-            XCTAssertNil(newManuallyEditedContent.attribute(.link, at: 7, effectiveRange: nil))
+            // Link should be preserved and shifted to position 7 (after the inserted "a")
+            XCTAssertNotNil(newManuallyEditedContent.attribute(.link, at: 7, effectiveRange: nil))
         })
 
         // Test that removing one link does not affect the other
