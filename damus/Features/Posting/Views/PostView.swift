@@ -86,6 +86,7 @@ struct PostView: View {
     
     @State private var current_placeholder_index = 0
     @State private var uploadTasks: [Task<Void, Never>] = []
+    @State private var profileFetchTasks: [Pubkey: Task<Void, Never>] = [:]
 
     let action: PostAction
     let damus_state: DamusState
@@ -113,14 +114,112 @@ struct PostView: View {
     func cancel() {
         notify(.post(.cancel))
         cancelUploadTasks()
+        cancelProfileFetchTasks()
         dismiss()
     }
-    
+
     func cancelUploadTasks() {
         uploadTasks.forEach { $0.cancel() }
         uploadTasks.removeAll()
     }
-    
+
+    /// Cancels all pending profile fetch tasks.
+    /// Called when the composer is dismissed to prevent background updates to a gone view.
+    func cancelProfileFetchTasks() {
+        profileFetchTasks.values.forEach { $0.cancel() }
+        profileFetchTasks.removeAll()
+    }
+
+    // MARK: - Async Profile Fetch for Pasted npub/nprofile (Issue #2289)
+    //
+    // When a user pastes an npub or nprofile, we immediately create a mention link.
+    // If the profile isn't in the local cache, the mention initially shows "@npub1abc...xyz".
+    // We then fetch the profile from relays asynchronously and update the mention text
+    // to show the human-readable name (e.g., "@jack") when it arrives.
+
+    /// Fetches a profile from relays and updates any mentions in the post when it arrives.
+    ///
+    /// This enables pasted npub/nprofile identifiers to resolve to human-readable names
+    /// even when the profile isn't in the local nostrdb cache. Uses `streamProfile` which
+    /// queries relays and yields the profile when found.
+    ///
+    /// - Parameter pubkey: The public key to fetch the profile for
+    func fetchProfileAndUpdateMention(pubkey: Pubkey) {
+        // Avoid duplicate fetches for the same pubkey
+        guard profileFetchTasks[pubkey] == nil else { return }
+
+        let task = Task {
+            // streamProfile yields profiles as they arrive from relays
+            // yieldCached: false since we already checked the cache before calling this
+            for await profile in await damus_state.nostrNetwork.profilesManager.streamProfile(pubkey: pubkey, yieldCached: false) {
+                await MainActor.run {
+                    updateMentionDisplayName(for: pubkey, profile: profile)
+                }
+                // Only need the first profile update
+                break
+            }
+
+            await MainActor.run {
+                profileFetchTasks.removeValue(forKey: pubkey)
+            }
+        }
+
+        profileFetchTasks[pubkey] = task
+    }
+
+    /// Updates the display text for mentions matching the given pubkey.
+    ///
+    /// Finds all mention links with the matching `damus:nostr:` URL scheme and replaces
+    /// the abbreviated "@npub1..." or "@nprofile1..." text with the resolved profile name.
+    /// Preserves all existing attributes (link, styling) on the mention.
+    ///
+    /// Uses a two-pass approach to avoid undefined behavior from mutating while enumerating:
+    /// 1. First pass: collect all matching ranges and their attributes
+    /// 2. Second pass: replace ranges in reverse order to maintain valid indices
+    ///
+    /// - Parameters:
+    ///   - pubkey: The public key whose mentions should be updated
+    ///   - profile: The fetched profile containing the display name
+    func updateMentionDisplayName(for pubkey: Pubkey, profile: Profile?) {
+        let linkURL = "damus:nostr:\(pubkey.npub)"
+        let newDisplayName = Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
+        let newTagString = "@\(newDisplayName)"
+
+        let mutablePost = NSMutableAttributedString(attributedString: post)
+
+        // Pass 1: Collect matching ranges (avoid mutating while enumerating)
+        var rangesToUpdate: [(range: NSRange, attrs: [NSAttributedString.Key: Any])] = []
+
+        mutablePost.enumerateAttribute(.link, in: NSRange(location: 0, length: mutablePost.length), options: []) { value, range, _ in
+            // Extract link URL from either String or URL type
+            let linkValue = (value as? String) ?? (value as? URL)?.absoluteString
+            guard linkValue == linkURL else { return }
+
+            // Only update if still showing abbreviated form (not already resolved)
+            let currentText = mutablePost.attributedSubstring(from: range).string
+            guard currentText.hasPrefix("@npub") || currentText.hasPrefix("@nprofile") else { return }
+
+            // Preserve all attributes from the original range
+            var collectedAttrs: [NSAttributedString.Key: Any] = [:]
+            mutablePost.enumerateAttributes(in: range, options: []) { attrs, _, _ in
+                collectedAttrs.merge(attrs) { _, new in new }
+            }
+            rangesToUpdate.append((range: range, attrs: collectedAttrs))
+        }
+
+        guard !rangesToUpdate.isEmpty else { return }
+
+        // Pass 2: Replace in reverse order so earlier indices remain valid
+        for (range, attrs) in rangesToUpdate.reversed() {
+            let newAttrString = NSMutableAttributedString(string: newTagString)
+            newAttrString.addAttributes(attrs, range: NSRange(location: 0, length: newAttrString.length))
+            mutablePost.replaceCharacters(in: range, with: newAttrString)
+        }
+
+        // Update post without cursor adjustment - async updates shouldn't move user's cursor
+        post = mutablePost
+    }
+
     func send_post() async {
         let new_post = await build_post(state: self.damus_state, post: self.post, action: action, uploadedMedias: uploadedMedias, references: self.references, filtered_pubkeys: filtered_pubkeys)
 
@@ -279,6 +378,15 @@ struct PostView: View {
                 },
                 updateCursorPosition: { newCursorIndex in
                     self.newCursorIndex = newCursorIndex
+                },
+                convertMentionRef: { pubkey in
+                    let profile = try? damus_state.profiles.lookup(id: pubkey)
+
+                    if profile == nil {
+                        fetchProfileAndUpdateMention(pubkey: pubkey)
+                    }
+
+                    return user_tag_attr_string(profile: profile, pubkey: pubkey)
                 }
             )
                 .environmentObject(tagModel)
@@ -575,6 +683,7 @@ struct PostView: View {
                     clear_draft()
                 }
                 preUploadedMedia.removeAll()
+                cancelProfileFetchTasks()
             }
         }
     }

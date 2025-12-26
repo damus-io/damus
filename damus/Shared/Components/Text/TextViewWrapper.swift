@@ -18,6 +18,7 @@ struct TextViewWrapper: UIViewRepresentable {
     let cursorIndex: Int?
     var getFocusWordForMention: ((String?, NSRange?) -> Void)? = nil
     let updateCursorPosition: ((Int) -> Void)
+    var convertMentionRef: ((Pubkey) -> NSMutableAttributedString?)? = nil
     
     func makeUIView(context: Context) -> UITextView {
         let textView = CustomPostTextView(imagePastedFromPasteboard: $imagePastedFromPasteboard,
@@ -97,7 +98,7 @@ struct TextViewWrapper: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(attributedText: $attributedText, getFocusWordForMention: getFocusWordForMention, updateCursorPosition: updateCursorPosition, initialTextSuffix: initialTextSuffix)
+        Coordinator(attributedText: $attributedText, getFocusWordForMention: getFocusWordForMention, updateCursorPosition: updateCursorPosition, initialTextSuffix: initialTextSuffix, convertMentionRef: convertMentionRef)
     }
 
     class Coordinator: NSObject, UITextViewDelegate {
@@ -106,17 +107,20 @@ struct TextViewWrapper: UIViewRepresentable {
         let updateCursorPosition: ((Int) -> Void)
         let initialTextSuffix: String?
         var initialTextSuffixWasAdded: Bool = false
+        var convertMentionRef: ((Pubkey) -> NSMutableAttributedString?)? = nil
         static let ESCAPE_SEQUENCES = ["\n", "@", "  ", ", ", ". ", "! ", "? ", "; ", "#"]
 
         init(attributedText: Binding<NSMutableAttributedString>,
              getFocusWordForMention: ((String?, NSRange?) -> Void)?,
              updateCursorPosition: @escaping ((Int) -> Void),
-             initialTextSuffix: String?
+             initialTextSuffix: String?,
+             convertMentionRef: ((Pubkey) -> NSMutableAttributedString?)?
         ) {
             _attributedText = attributedText
             self.getFocusWordForMention = getFocusWordForMention
             self.updateCursorPosition = updateCursorPosition
             self.initialTextSuffix = initialTextSuffix
+            self.convertMentionRef = convertMentionRef
         }
 
         func textViewDidChange(_ textView: UITextView) {
@@ -210,6 +214,23 @@ struct TextViewWrapper: UIViewRepresentable {
             guard let attributedString = textView.attributedText else {
                 return true     // If we cannot get an attributed string, just fail gracefully and allow changes
             }
+
+            // MARK: npub/nprofile Paste Handling (Issue #2289)
+            // When user pastes an npub or nprofile string, convert it to a mention link.
+            // This creates an attributed string with the damus:nostr: URL scheme that
+            // renders as a tappable @mention. If the profile isn't cached, PostView
+            // will trigger an async fetch to resolve the display name.
+            if let mentionTag = convertPastedNostrIdentifier(text) {
+                var mutable = NSMutableAttributedString(attributedString: attributedString)
+                // Add leading space if pasting immediately after non-whitespace
+                let paddedTag = pad_attr_string(tag: mentionTag, before: shouldPrepadMention(post: mutable, insertLocation: range.location))
+                mutable.replaceCharacters(in: range, with: paddedTag)
+                attributedText = mutable
+                // Position cursor after the inserted mention
+                updateCursorPosition(range.location + paddedTag.length)
+                return false
+            }
+
             var mutable = NSMutableAttributedString(attributedString: attributedString)
             
             let entireRange = NSRange(location: 0, length: attributedString.length)
@@ -267,6 +288,56 @@ struct TextViewWrapper: UIViewRepresentable {
             else {
                 attributedString.replaceCharacters(in: range, with: text)
             }
+        }
+
+        // MARK: - npub/nprofile Conversion Helpers
+
+        /// Converts a pasted npub or nprofile bech32 string to a mention attributed string.
+        ///
+        /// Handles both `npub1...` (public key) and `nprofile1...` (profile with optional relays)
+        /// formats. Uses `Bech32Object.parse` to decode and extract the public key.
+        ///
+        /// - Parameter text: The pasted text to check and convert
+        /// - Returns: An attributed mention string if valid npub/nprofile, nil otherwise
+        private func convertPastedNostrIdentifier(_ text: String) -> NSMutableAttributedString? {
+            let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+
+            // Early return if not a nostr identifier
+            guard trimmed.hasPrefix("npub1") || trimmed.hasPrefix("nprofile1") else {
+                return nil
+            }
+
+            // Parse bech32 and extract pubkey
+            guard let parsed = Bech32Object.parse(trimmed),
+                  let pubkey = parsed.pubkey() else {
+                return nil
+            }
+
+            // Convert to mention using the callback provided by PostView
+            return convertMentionRef?(pubkey)
+        }
+
+        /// Determines if a space should be inserted before a mention at the given location.
+        ///
+        /// When pasting an npub immediately after text (e.g., "Hello{paste}"), we need
+        /// to add a leading space so it renders as "Hello @mention" not "Hello@mention".
+        ///
+        /// - Parameters:
+        ///   - post: The current post attributed string
+        ///   - insertLocation: The index where the mention will be inserted
+        /// - Returns: true if a space should be prepended, false otherwise
+        private func shouldPrepadMention(post: NSMutableAttributedString, insertLocation: Int) -> Bool {
+            // No prepad needed at document start
+            guard insertLocation > 0 else { return false }
+
+            let precedingRange = NSRange(location: insertLocation - 1, length: 1)
+            let precedingChar = post.attributedSubstring(from: precedingRange).string.first
+
+            // No prepad if we can't read the character
+            guard let char = precedingChar else { return false }
+
+            // Prepad if preceding character is not whitespace or newline
+            return !char.isWhitespace && !char.isNewline
         }
         
     }
