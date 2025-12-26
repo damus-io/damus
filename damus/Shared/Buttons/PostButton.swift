@@ -31,6 +31,7 @@ func PostButton(action: @escaping () -> ()) -> some View {
                 .foregroundColor(Color.white)
         }
     })
+    .accessibilityIdentifier(AppAccessibilityIdentifiers.post_button.rawValue)
     .keyboardShortcut("n", modifiers: [.command, .shift])
 }
 
