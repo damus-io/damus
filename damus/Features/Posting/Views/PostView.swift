@@ -276,7 +276,7 @@ struct PostView: View {
                 getFocusWordForMention: { word, range in
                     focusWordAttributes = (word, range)
                     self.newCursorIndex = nil
-                }, 
+                },
                 updateCursorPosition: { newCursorIndex in
                     self.newCursorIndex = newCursorIndex
                 }
@@ -284,6 +284,7 @@ struct PostView: View {
                 .environmentObject(tagModel)
                 .focused($focus)
                 .textInputAutocapitalization(.sentences)
+                .accessibilityIdentifier(AppAccessibilityIdentifiers.post_composer_text_view.rawValue)
                 .onChange(of: post) { p in
                     post_changed(post: p, media: uploadedMedias)
                 }

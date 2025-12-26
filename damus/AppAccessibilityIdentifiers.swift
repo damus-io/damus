@@ -60,9 +60,19 @@ enum AppAccessibilityIdentifiers: String {
     
     // MARK: Post composer
     // Prefix: `post_composer`
-    
+
     /// The cancel post button
     case post_composer_cancel_button
+
+    /// The text view where the user types their note
+    case post_composer_text_view
+
+
+    // MARK: Post button (FAB)
+    // Prefix: `post_button`
+
+    /// The floating action button to create a new post
+    case post_button
     
     // MARK: Main interface layout
     // Prefix: `main`

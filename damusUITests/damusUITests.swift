@@ -188,6 +188,43 @@ class damusUITests: XCTestCase {
         guard app.buttons[AID.sign_in_confirm_button.rawValue].tapIfExists(timeout: 5) else { throw DamusUITestError.timeout_waiting_for_element }
     }
     
+    /// Tests that typing in the post composer works correctly, specifically that
+    /// the cursor position is maintained after typing each character.
+    /// This guards against regressions like https://github.com/damus-io/damus/issues/3461
+    /// where the cursor would jump to position 0 after typing the first character.
+    func testPostComposerCursorPosition() throws {
+        try self.loginIfNotAlready()
+
+        // Wait for main interface to load, then tap the post button (FAB)
+        guard app.buttons[AID.post_button.rawValue].waitForExistence(timeout: 10) else {
+            throw DamusUITestError.timeout_waiting_for_element
+        }
+        app.buttons[AID.post_button.rawValue].tap()
+
+        // Wait for the post composer text view to appear
+        guard app.textViews[AID.post_composer_text_view.rawValue].waitForExistence(timeout: 5) else {
+            throw DamusUITestError.timeout_waiting_for_element
+        }
+
+        let textView = app.textViews[AID.post_composer_text_view.rawValue]
+        textView.tap()
+
+        // Type a test string character by character
+        // If the cursor jumps to position 0 after the first character,
+        // the resulting text would be scrambled (e.g., "olleH" instead of "Hello")
+        let testString = "Hello"
+        textView.typeText(testString)
+
+        // Verify the text was typed correctly (not scrambled)
+        let actualText = textView.value as? String ?? ""
+        XCTAssertEqual(actualText, testString,
+                       "Text should be '\(testString)' but was '\(actualText)'. " +
+                       "This may indicate a cursor position bug.")
+
+        // Cancel the post to clean up
+        app.buttons[AID.post_composer_cancel_button.rawValue].tap()
+    }
+
     enum DamusUITestError: Error {
         case timeout_waiting_for_element
     }
