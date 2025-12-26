@@ -120,6 +120,7 @@ struct TextViewWrapper: UIViewRepresentable {
         }
 
         func textViewDidChange(_ textView: UITextView) {
+            // Handle one-time initial text suffix insertion (e.g., for replies)
             if let initialTextSuffix, !self.initialTextSuffixWasAdded {
                 self.initialTextSuffixWasAdded = true
                 var mutable = NSMutableAttributedString(attributedString: textView.attributedText)
@@ -129,11 +130,19 @@ struct TextViewWrapper: UIViewRepresentable {
                 DispatchQueue.main.async {
                     self.updateCursorPosition(originalRange.location)
                 }
+                processFocusedWordForMention(textView: textView)
+                return
             }
-            else {
-                attributedText = NSMutableAttributedString(attributedString: textView.attributedText)
-            }
+
+            attributedText = NSMutableAttributedString(attributedString: textView.attributedText)
             processFocusedWordForMention(textView: textView)
+
+            // Fix for cursor jumping to position 0 after typing first character.
+            // When text changes, multiple SwiftUI view updates can occur (text change,
+            // placeholder removal, height change). The getFocusWordForMention callback
+            // sets newCursorIndex to nil, forcing reliance on savedRange which may be
+            // stale. Explicitly tracking cursor position here ensures correct restoration.
+            updateCursorPosition(textView.selectedRange.location)
         }
 
         private func processFocusedWordForMention(textView: UITextView) {
