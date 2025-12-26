@@ -67,6 +67,9 @@ enum AppAccessibilityIdentifiers: String {
     /// The text view where the user types their note
     case post_composer_text_view
 
+    /// A user result in the mention autocomplete list
+    case post_composer_mention_user_result
+
 
     // MARK: Post button (FAB)
     // Prefix: `post_button`

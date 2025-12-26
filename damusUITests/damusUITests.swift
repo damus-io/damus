@@ -225,6 +225,74 @@ class damusUITests: XCTestCase {
         app.buttons[AID.post_composer_cancel_button.rawValue].tap()
     }
 
+    /// Tests that typing before a mention doesn't break the mention.
+    /// This guards against regressions like https://github.com/damus-io/damus/issues/3460
+    /// where inserting text before a mention would unlink it.
+    ///
+    /// The test creates a real mention link by selecting from autocomplete,
+    /// then types text before it and verifies the mention text is preserved.
+    /// Note: Link attribute preservation is verified in unit tests (PostViewTests).
+    func testTypingBeforeMentionPreservesMention() throws {
+        try self.loginIfNotAlready()
+
+        // Open post composer
+        guard app.buttons[AID.post_button.rawValue].waitForExistence(timeout: 10) else {
+            throw DamusUITestError.timeout_waiting_for_element
+        }
+        app.buttons[AID.post_button.rawValue].tap()
+
+        guard app.textViews[AID.post_composer_text_view.rawValue].waitForExistence(timeout: 5) else {
+            throw DamusUITestError.timeout_waiting_for_element
+        }
+
+        let textView = app.textViews[AID.post_composer_text_view.rawValue]
+        textView.tap()
+
+        // Type "@" to trigger mention autocomplete
+        textView.typeText("@")
+
+        // Wait for autocomplete results to appear and tap on a user to create a real mention link
+        let mentionResult = app.otherElements[AID.post_composer_mention_user_result.rawValue].firstMatch
+        guard mentionResult.waitForExistence(timeout: 5) else {
+            // If no autocomplete results (no contacts loaded), skip this test gracefully
+            app.buttons[AID.post_composer_cancel_button.rawValue].tap()
+            throw XCTSkip("No mention autocomplete results available - contacts may not be loaded")
+        }
+        mentionResult.tap()
+
+        // Wait for mention to be inserted (text should contain more than just "@")
+        let mentionInsertedPredicate = NSPredicate(format: "value CONTAINS[c] '@' AND value.length > 1")
+        let mentionInserted = expectation(for: mentionInsertedPredicate, evaluatedWith: textView)
+        wait(for: [mentionInserted], timeout: 3)
+
+        // Get the current text which should contain the mention (e.g., "@username ")
+        let textAfterMention = textView.value as? String ?? ""
+        XCTAssertTrue(textAfterMention.contains("@"),
+                      "Text should contain a mention after selection but was '\(textAfterMention)'")
+
+        // Move cursor to the beginning and type a prefix
+        let startCoordinate = textView.coordinate(withNormalizedOffset: CGVector(dx: 0.01, dy: 0.5))
+        startCoordinate.tap()
+
+        // Type prefix text before the mention
+        textView.typeText("Hey ")
+
+        // Wait for the prefix to be inserted
+        let prefixInsertedPredicate = NSPredicate(format: "value BEGINSWITH 'Hey '")
+        let prefixInserted = expectation(for: prefixInsertedPredicate, evaluatedWith: textView)
+        wait(for: [prefixInserted], timeout: 3)
+
+        // Verify the text contains both the prefix and the mention is preserved
+        let finalText = textView.value as? String ?? ""
+        XCTAssertTrue(finalText.hasPrefix("Hey "),
+                      "Text should start with 'Hey ' but was '\(finalText)'")
+        XCTAssertTrue(finalText.contains("@"),
+                      "Text should still contain the mention '@' but was '\(finalText)'")
+
+        // Cancel to clean up
+        app.buttons[AID.post_composer_cancel_button.rawValue].tap()
+    }
+
     enum DamusUITestError: Error {
         case timeout_waiting_for_element
     }
