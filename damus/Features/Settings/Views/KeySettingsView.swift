@@ -87,7 +87,7 @@ struct KeySettingsView: View {
             }
 
             if let sec = keypair.privkey?.nsec {
-                Section(NSLocalizedString("Secret Account Login Key", comment: "Section title for user's secret account login key.")) {
+                Section {
                     HStack {
                         if show_privkey == false || !has_authenticated_locally {
                             SecureField(NSLocalizedString("Private Key", comment: "Title of the secure field that holds the user's private key."), text: $privkey)
@@ -102,6 +102,20 @@ struct KeySettingsView: View {
                     }
 
                     ShowSecToggle
+                } header: {
+                    Text(NSLocalizedString("Secret Account Login Key", comment: "Section title for user's secret account login key."))
+                } footer: {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(alignment: .top, spacing: 6) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.orange)
+                                .font(.footnote)
+                            Text(NSLocalizedString("Your secret key is like a master password. Anyone who has it can control your account. Never share it or paste it into websites.", comment: "Warning about secret key security"))
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding(.top, 4)
                 }
             }
 

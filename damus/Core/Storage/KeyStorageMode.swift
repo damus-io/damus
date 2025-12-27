@@ -35,9 +35,9 @@ enum KeyStorageMode: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .iCloudSync:
-            return NSLocalizedString("iCloud Sync", comment: "Key storage mode: sync across devices via iCloud")
+            return NSLocalizedString("Backed up to iCloud", comment: "Key storage mode: sync across devices via iCloud")
         case .localOnly:
-            return NSLocalizedString("Local Only", comment: "Key storage mode: device-only with Secure Enclave")
+            return NSLocalizedString("This device only", comment: "Key storage mode: device-only with Secure Enclave")
         }
     }
 
@@ -45,9 +45,9 @@ enum KeyStorageMode: String, CaseIterable, Identifiable {
     var description: String {
         switch self {
         case .iCloudSync:
-            return NSLocalizedString("Your private key syncs across your Apple devices. You are trusting Apple not to compromise your key.", comment: "Description for iCloud sync key storage mode")
+            return NSLocalizedString("Your key syncs across your Apple devices. Lose your phone? Sign in on another Apple device.", comment: "Description for iCloud sync key storage mode")
         case .localOnly:
-            return NSLocalizedString("Your private key is protected by the Secure Enclave and never leaves this device. If this device is lost, Damus is uninstalled, or the device is wiped, your key is lost unless backed up manually.", comment: "Description for local-only key storage mode")
+            return NSLocalizedString("Your key stays on this phone only. Lose it or delete the app? It's gone forever unless you backed it up yourself.", comment: "Description for local-only key storage mode")
         }
     }
 
