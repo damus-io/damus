@@ -173,7 +173,13 @@ struct SaveKeysView: View {
     }
     
     func save_key(_ account: CreateAccountModel) {
-        credential_handler.save_credential(pubkey: account.pubkey, privkey: account.privkey)
+        // Only use Safari shared credentials for iCloud sync mode.
+        // For local-only mode, keys are stored via AccountsStore with Secure Enclave
+        // encryption - calling CredentialHandler would defeat the purpose by syncing
+        // the key via iCloud shared web credentials.
+        if KeyStorageSettings.mode == .iCloudSync {
+            credential_handler.save_credential(pubkey: account.pubkey, privkey: account.privkey)
+        }
     }
     
     func complete_account_creation(_ account: CreateAccountModel) async {

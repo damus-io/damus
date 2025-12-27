@@ -131,13 +131,6 @@ struct KeySettingsView: View {
                 Text(KeyStorageSettings.mode.description)
                     .font(.footnote)
                     .foregroundColor(.secondary)
-                #if targetEnvironment(simulator)
-                if keyStorageMode == .localOnly {
-                    Text(NSLocalizedString("Local-only storage is not available in the simulator. Use a real device to test Secure Enclave storage.", comment: "Warning when local-only storage is selected in simulator"))
-                        .font(.footnote)
-                        .foregroundColor(.orange)
-                }
-                #endif
             } header: {
                 Text(NSLocalizedString("Key Storage", comment: "Section header for key storage settings"))
             } footer: {

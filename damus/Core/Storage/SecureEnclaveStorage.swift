@@ -48,28 +48,51 @@ enum SecureEnclaveStorage {
         }
     }
 
-    /// Checks if Secure Enclave is available on this device
+    /// Checks if Secure Enclave is available on this device.
+    ///
+    /// This performs an actual key creation attempt with kSecAttrTokenIDSecureEnclave,
+    /// which is the only reliable way to detect SE availability. The test key is
+    /// immediately deleted after the check.
     static var isAvailable: Bool {
-        // Secure Enclave requires A7 chip or later (iPhone 5s+, iPad Air+)
-        // We check by attempting to create an access control object
-        let context = LAContext()
-        var error: NSError?
+        // Use a unique tag for the availability test key
+        let testTag = "io.damus.secure-enclave-availability-test".data(using: .utf8)!
 
-        // Check if the device supports device owner authentication
-        // This is a proxy for Secure Enclave availability
-        guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else {
-            return false
-        }
-
-        // Also verify we can create Secure Enclave access control
-        guard SecAccessControlCreateWithFlags(
+        // Create access control for SE key
+        guard let accessControl = SecAccessControlCreateWithFlags(
             kCFAllocatorDefault,
             kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
             .privateKeyUsage,
             nil
-        ) != nil else {
+        ) else {
             return false
         }
+
+        // Attempt to create an actual Secure Enclave key
+        let attributes: [CFString: Any] = [
+            kSecAttrKeyType: kSecAttrKeyTypeECSECPrimeRandom,
+            kSecAttrKeySizeInBits: 256,
+            kSecAttrTokenID: kSecAttrTokenIDSecureEnclave,
+            kSecPrivateKeyAttrs: [
+                kSecAttrIsPermanent: true,
+                kSecAttrApplicationTag: testTag,
+                kSecAttrAccessControl: accessControl
+            ] as [CFString: Any]
+        ]
+
+        var error: Unmanaged<CFError>?
+        guard let testKey = SecKeyCreateRandomKey(attributes as CFDictionary, &error) else {
+            // Key creation failed - Secure Enclave not available
+            return false
+        }
+
+        // SE is available - clean up the test key
+        _ = testKey  // Silence unused variable warning
+        let deleteQuery: [CFString: Any] = [
+            kSecClass: kSecClassKey,
+            kSecAttrApplicationTag: testTag,
+            kSecAttrTokenID: kSecAttrTokenIDSecureEnclave
+        ]
+        SecItemDelete(deleteQuery as CFDictionary)
 
         return true
     }

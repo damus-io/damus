@@ -239,7 +239,10 @@ private func resolve_keypair(_ key: ParsedKey, is_pubkey: Bool) async throws -> 
 @MainActor
 private func persist_login(keypair: Keypair) -> Keypair {
     let shouldSavePriv = keypair.privkey != nil
-    if shouldSavePriv, let priv = keypair.privkey {
+
+    // Only use Safari shared credentials for iCloud sync mode.
+    // For local-only mode, skip CredentialHandler to avoid syncing via iCloud.
+    if shouldSavePriv, let priv = keypair.privkey, KeyStorageSettings.mode == .iCloudSync {
         CredentialHandler().save_credential(pubkey: keypair.pubkey, privkey: priv)
     }
 
@@ -408,6 +411,8 @@ struct SignInEntry: View {
                         }
                         .pickerStyle(.segmented)
                         .onChange(of: selectedStorageMode) { newMode in
+                            // Immediate mode change is OK for login flow - no existing keys to migrate.
+                            // persist_login() reads KeyStorageSettings.mode when saving the new key.
                             KeyStorageSettings.mode = newMode
                         }
 
