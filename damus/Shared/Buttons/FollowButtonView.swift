@@ -8,16 +8,22 @@
 import SwiftUI
 
 struct FollowButtonView: View {
-    
+
     @Environment(\.colorScheme) var colorScheme
-    
+
     let target: FollowTarget
     let follows_you: Bool
     @State var follow_state: FollowState
-    
+    var isReadOnly: Bool = false
+    @State private var showReadOnlyAlert: Bool = false
+
     var body: some View {
         Button {
-            follow_state = perform_follow_btn_action(follow_state, target: target)
+            if isReadOnly {
+                showReadOnlyAlert = true
+            } else {
+                follow_state = perform_follow_btn_action(follow_state, target: target)
+            }
         } label: {
             Text(verbatim: "\(follow_btn_txt(follow_state, follows_you: follows_you))")
                 .frame(width: 105, height: 30)
@@ -42,6 +48,16 @@ struct FollowButtonView: View {
                   pk == target.pubkey else { return }
 
             self.follow_state = .unfollows
+        }
+        .alert(
+            NSLocalizedString("Read-Only Account", comment: "Alert title when read-only user tries to follow"),
+            isPresented: $showReadOnlyAlert
+        ) {
+            Button(NSLocalizedString("OK", comment: "Button to dismiss read-only alert")) {
+                showReadOnlyAlert = false
+            }
+        } message: {
+            Text("Log in with your private key (nsec) to follow users.", comment: "Alert message explaining that private key is needed to follow")
         }
     }
     

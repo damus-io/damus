@@ -22,8 +22,13 @@ struct EventActionBar: View {
     @State var show_share_sheet: Bool = false
     @State var show_share_action: Bool = false
     @State var show_repost_action: Bool = false
+    @State private var showReadOnlyAlert: Bool = false
 
     @State private var selectedEmoji: Emoji? = nil
+
+    private var isReadOnly: Bool {
+        damus_state.keypair.privkey == nil
+    }
 
     @ObservedObject var bar: ActionBarModel
     
@@ -78,19 +83,27 @@ struct EventActionBar: View {
     
     var repost_swipe_button: some View {
         SwipeAction(image: "repost", backgroundColor: DamusColors.adaptableGrey) {
-            self.show_repost_action = true
+            if isReadOnly {
+                showReadOnlyAlert = true
+            } else {
+                self.show_repost_action = true
+            }
             self.swipe_context?.state.wrappedValue = .closed
         }
         .swipeButtonStyle()
         .accessibilityLabel(NSLocalizedString("Repost or quote this note", comment: "Accessibility label for repost/quote button"))
     }
-    
+
     var like_swipe_button: some View {
         SwipeAction(image: "shaka", backgroundColor: DamusColors.adaptableGrey) {
-            Task {
-                await send_like(emoji: damus_state.settings.default_emoji_reaction)
-                self.swipe_context?.state.wrappedValue = .closed
+            if isReadOnly {
+                showReadOnlyAlert = true
+            } else {
+                Task {
+                    await send_like(emoji: damus_state.settings.default_emoji_reaction)
+                }
             }
+            self.swipe_context?.state.wrappedValue = .closed
         }
         .swipeButtonStyle()
         .accessibilityLabel(NSLocalizedString("React with default reaction emoji", comment: "Accessibility label for react button"))
@@ -121,9 +134,13 @@ struct EventActionBar: View {
     
     var repost_button: some View {
         HStack(spacing: 4) {
-            
+
             EventActionButton(img: "repost", col: bar.boosted ? Color.green : nil) {
-                self.show_repost_action = true
+                if isReadOnly {
+                    showReadOnlyAlert = true
+                } else {
+                    self.show_repost_action = true
+                }
             }
             .accessibilityLabel(NSLocalizedString("Reposts", comment: "Accessibility label for boosts button"))
             Text(verbatim: "\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
@@ -135,13 +152,15 @@ struct EventActionBar: View {
     var like_button: some View {
         HStack(spacing: 4) {
             LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil) { emoji in
-                if bar.liked {
+                if isReadOnly {
+                    showReadOnlyAlert = true
+                } else if bar.liked {
                     //notify(.delete, bar.our_like)
                 } else {
                     Task { await send_like(emoji: emoji) }
                 }
             }
-            
+
             Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
                 .font(.footnote.weight(.medium))
                 .nip05_colorized(gradient: bar.liked)
@@ -262,11 +281,11 @@ struct EventActionBar: View {
         }
         .sheet(isPresented: $show_share_action, onDismiss: { self.show_share_action = false }) {
             if #available(iOS 16.0, *) {
-                ShareAction(event: event, bookmarks: damus_state.bookmarks, show_share: $show_share_sheet, userProfile: userProfile)
+                ShareAction(event: event, bookmarks: damus_state.bookmarks, show_share: $show_share_sheet, userProfile: userProfile, isReadOnly: isReadOnly)
                     .presentationDetents([.height(300)])
                     .presentationDragIndicator(.visible)
             } else {
-                ShareAction(event: event, bookmarks: damus_state.bookmarks, show_share: $show_share_sheet, userProfile: userProfile)
+                ShareAction(event: event, bookmarks: damus_state.bookmarks, show_share: $show_share_sheet, userProfile: userProfile, isReadOnly: isReadOnly)
             }
         }
         .sheet(isPresented: $show_share_sheet, onDismiss: { self.show_share_sheet = false }) {
@@ -299,6 +318,16 @@ struct EventActionBar: View {
             if liked.event.pubkey == damus_state.keypair.pubkey {
                 self.bar.our_like = liked.event
             }
+        }
+        .alert(
+            NSLocalizedString("Read-Only Account", comment: "Alert title when read-only user tries to perform a write action"),
+            isPresented: $showReadOnlyAlert
+        ) {
+            Button(NSLocalizedString("OK", comment: "Button to dismiss read-only alert")) {
+                showReadOnlyAlert = false
+            }
+        } message: {
+            Text("Log in with your private key (nsec) to react, repost, and zap.", comment: "Alert message explaining that private key is needed for write actions")
         }
     }
 

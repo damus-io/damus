@@ -12,7 +12,12 @@ struct DMChatView: View, KeyboardReadable {
     let damus_state: DamusState
     @FocusState private var isTextFieldFocused: Bool
     @ObservedObject var dms: DirectMessageModel
-    
+    @State private var showReadOnlyAlert: Bool = false
+
+    private var isReadOnly: Bool {
+        damus_state.keypair.privkey == nil
+    }
+
     var pubkey: Pubkey {
         dms.pubkey
     }
@@ -100,7 +105,7 @@ struct DMChatView: View, KeyboardReadable {
     }
 
     var Footer: some View {
-    
+
         HStack(spacing: 0) {
             InputField
 
@@ -108,7 +113,11 @@ struct DMChatView: View, KeyboardReadable {
                 Button(
                     role: .none,
                     action: {
-                        Task { await send_message() }
+                        if isReadOnly {
+                            showReadOnlyAlert = true
+                        } else {
+                            Task { await send_message() }
+                        }
                     }
                 ) {
                     Label("", image: "send")
@@ -162,6 +171,16 @@ struct DMChatView: View, KeyboardReadable {
             if dms.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 dms.draft = ""
             }
+        }
+        .alert(
+            NSLocalizedString("Read-Only Account", comment: "Alert title when read-only user tries to send DM"),
+            isPresented: $showReadOnlyAlert
+        ) {
+            Button(NSLocalizedString("OK", comment: "Button to dismiss read-only alert")) {
+                showReadOnlyAlert = false
+            }
+        } message: {
+            Text("Log in with your private key (nsec) to send direct messages.", comment: "Alert message explaining that private key is needed for DMs")
         }
     }
 }

@@ -14,6 +14,8 @@ struct SideMenuView: View {
     @Binding var selected: Timeline
     @State var confirm_logout: Bool = false
     @State private var showQRCode = false
+    @State private var showAccountSwitcher = false
+    @ObservedObject private var accountsStore = AccountsStore.shared
 
     var sideBarWidth = min(UIScreen.main.bounds.size.width * 0.65, 400.0)
     let verticalSpacing: CGFloat = 25
@@ -143,11 +145,42 @@ struct SideMenuView: View {
 
         return VStack(alignment: .leading) {
             HStack(spacing: 10) {
-                
-                ProfilePicView(pubkey: damus_state.pubkey, size: 50, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
-                
+                // Profile picture with account count badge
+                ZStack(alignment: .bottomTrailing) {
+                    ProfilePicView(pubkey: damus_state.pubkey, size: 50, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
+
+                    // Account count badge (only shows when > 1 account)
+                    if accountsStore.accounts.count > 1 {
+                        AccountCountBadge(count: accountsStore.accounts.count)
+                            .offset(x: 4, y: 4)
+                    }
+                }
+                .onTapGesture {
+                    if accountsStore.accounts.count > 1 {
+                        showAccountSwitcher = true
+                    }
+                }
+
                 Spacer()
-                
+
+                // Account switcher button (only shows when > 1 account)
+                if accountsStore.accounts.count > 1 {
+                    Button(action: {
+                        showAccountSwitcher = true
+                    }, label: {
+                        Image(systemName: "person.2.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 22, height: 22)
+                            .padding(6)
+                            .foregroundColor(DamusColors.adaptableBlack)
+                            .background {
+                                Circle()
+                                    .foregroundColor(DamusColors.neutral3)
+                            }
+                    })
+                }
+
                 Button(action: {
                     present_sheet(.user_status)
                     isSidebarVisible = false
@@ -162,7 +195,7 @@ struct SideMenuView: View {
                                 .foregroundColor(DamusColors.neutral3)
                         }
                 })
-                
+
                 Button(action: {
                     showQRCode.toggle()
                     isSidebarVisible = false
@@ -254,6 +287,9 @@ struct SideMenuView: View {
                 .accessibilityIdentifier(AppAccessibilityIdentifiers.side_menu_logout_confirm_button.rawValue)
             } message: {
                 Text("Make sure your nsec account key is saved before you logout or you will lose access to this account", comment: "Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out.")
+            }
+            .sheet(isPresented: $showAccountSwitcher) {
+                AccountSwitcherSheet(damus_state: damus_state, accountsStore: accountsStore)
             }
 
             Spacer()
