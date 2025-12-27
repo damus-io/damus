@@ -64,6 +64,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
     var incoming_dms: [NostrEvent] = []
     let dm_debouncer = Debouncer(interval: 0.5)
     let resub_debouncer = Debouncer(interval: 3.0)
+    let notifications_resub_debouncer = Debouncer(interval: 2.0)
     var should_debounce_dms = true
 
     var homeHandlerTask: Task<Void, Never>?
@@ -81,6 +82,23 @@ class HomeModel: ContactsDelegate, ObservableObject {
     var events: EventHolder = EventHolder()
     var already_reposted: Set<NoteId> = Set()
     var zap_button: ZapButtonModel = ZapButtonModel()
+
+    /// IDs of our own notes, used to detect quote notifications.
+    ///
+    /// When a third-party client quotes one of our notes, they may only include
+    /// a `q` tag without a separate `p` tag for us. By tracking our note IDs,
+    /// we can match incoming events with `#q` filters and verify they quote our posts.
+    ///
+    /// The set is capped at `maxOurNoteIds` to prevent unbounded growth during long
+    /// sessions. When the cap is exceeded, the oldest entries are evicted.
+    var our_note_ids: Set<NoteId> = Set()
+
+    /// Tracks insertion order for our_note_ids to enable FIFO eviction when capped.
+    private var our_note_ids_order: [NoteId] = []
+
+    /// Maximum number of note IDs to track for quote notification detection.
+    /// This prevents unbounded memory growth and keeps relay filter sizes reasonable.
+    static let maxOurNoteIds = 1000
     
     init() {
         self.damus_state = DamusState.empty
@@ -115,6 +133,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         self.load_latest_contact_event_from_damus_state()
         self.load_latest_mutelist_event_from_damus_state()
         self.load_drafts_from_damus_state()
+        self.load_our_note_ids_from_nostrdb()
     }
     
     /// This loads the latest contact event we have on file from NostrDB. This should be called as soon as we get the new DamusState
@@ -178,7 +197,151 @@ class HomeModel: ContactsDelegate, ObservableObject {
     func load_drafts_from_damus_state() {
         damus_state.drafts.load(from: damus_state)
     }
-    
+
+    /// Kinds that can be quoted and should be tracked for quote notification detection.
+    ///
+    /// Per NIP-18, any event can be quoted. We track text notes, longform articles,
+    /// and highlights since these are the most commonly quoted content types.
+    static let quotableKinds: [NostrKind] = [.text, .longform, .highlight]
+
+    /// Loads our note IDs from nostrdb to enable quote notification detection.
+    ///
+    /// Per NIP-18, quote posts use `q` tags: `["q", "<event-id>", "<relay-url>", "<pubkey>"]`.
+    /// Third-party clients may not include a separate `p` tag for the quoted note's author,
+    /// so we need to match quote notifications by checking if the quoted note ID is ours.
+    ///
+    /// This queries nostrdb for our recent quotable notes (text, longform, highlights)
+    /// and caches their IDs for efficient lookup during notification validation.
+    func load_our_note_ids_from_nostrdb() {
+        do {
+            var filter = NostrFilter(kinds: Self.quotableKinds)
+            filter.authors = [damus_state.pubkey]
+            filter.limit = UInt32(Self.maxOurNoteIds)
+
+            let ndbFilter = try NdbFilter(from: filter)
+            let noteKeys = try damus_state.ndb.query(filters: [ndbFilter], maxResults: Self.maxOurNoteIds)
+
+            var loadedIds: Set<NoteId> = Set()
+            var loadedOrder: [NoteId] = []
+            for noteKey in noteKeys {
+                damus_state.ndb.lookup_note_by_key(noteKey, borrow: { maybeUnownedNote in
+                    switch maybeUnownedNote {
+                    case .none:
+                        break
+                    case .some(let unownedNote):
+                        loadedIds.insert(unownedNote.id)
+                        loadedOrder.append(unownedNote.id)
+                    }
+                })
+            }
+
+            self.our_note_ids = loadedIds
+            self.our_note_ids_order = loadedOrder
+            Log.info("Loaded %d of our note IDs for quote notification detection", for: .timeline, loadedIds.count)
+        } catch {
+            Log.error("Failed to load our note IDs from nostrdb: %@", for: .timeline, String(describing: error))
+        }
+    }
+
+    /// Adds a note ID to our tracked set when we post a new note.
+    ///
+    /// This keeps the quote notification detection up-to-date as we create new posts.
+    /// After adding, triggers a debounced resubscription to include the new ID in the
+    /// quotes notification filter.
+    ///
+    /// If the set exceeds `maxOurNoteIds`, the oldest entries are evicted (FIFO) to
+    /// keep the filter size bounded and prevent relay filter limits from being exceeded.
+    func track_our_new_note(_ noteId: NoteId) {
+        let wasInserted = our_note_ids.insert(noteId).inserted
+        guard wasInserted else { return }
+
+        our_note_ids_order.append(noteId)
+
+        // Evict oldest entries if we exceed the cap (FIFO eviction).
+        while our_note_ids.count > Self.maxOurNoteIds && !our_note_ids_order.isEmpty {
+            let oldest = our_note_ids_order.removeFirst()
+            our_note_ids.remove(oldest)
+        }
+
+        // Debounce resubscription to avoid excessive churn when posting multiple notes.
+        notifications_resub_debouncer.debounce {
+            self.subscribe_to_notifications()
+        }
+    }
+
+    /// Subscribes to notification events, including quote notifications.
+    ///
+    /// This method builds notification filters and starts the notification handler task.
+    /// It can be called multiple times to refresh the subscription when our note IDs
+    /// change (e.g., after posting a new note that could be quoted).
+    ///
+    /// The subscription includes:
+    /// 1. Standard notifications: events with our pubkey in a p tag
+    /// 2. Quote notifications: text events with our note IDs in a q tag
+    ///
+    /// - Note: There is a brief gap during subscription refresh where events could
+    ///   theoretically be missed (between cancel and new stream start). However:
+    ///   1. The gap is very short (milliseconds)
+    ///   2. Events arriving during this time are still stored in nostrdb
+    ///   3. They will be picked up on the next app launch or subscription refresh
+    ///   4. The debouncer minimizes refresh frequency to reduce this window
+    func subscribe_to_notifications() {
+        // Build the standard notification filter (events mentioning our pubkey).
+        var notifications_filter_kinds: [NostrKind] = [
+            .text,
+            .boost,
+            .zap,
+        ]
+        if !damus_state.settings.onlyzaps_mode {
+            notifications_filter_kinds.append(.like)
+        }
+        var notifications_filter = NostrFilter(kinds: notifications_filter_kinds)
+        notifications_filter.pubkeys = [damus_state.pubkey]
+        notifications_filter.limit = 500
+
+        // Build the quotes notification filter.
+        //
+        // Per NIP-18, quote posts use `q` tags: ["q", "<event-id>", "<relay-url>", "<pubkey>"].
+        // Third-party clients may only include the q tag without a separate p tag for us.
+        // This filter catches text events (kind 1) that quote one of our notes.
+        var notifications_filters = [notifications_filter]
+        if !our_note_ids.isEmpty {
+            var quotes_filter = NostrFilter(kinds: [.text])
+            quotes_filter.quotes = Array(our_note_ids)
+            quotes_filter.limit = 500
+            notifications_filters.append(quotes_filter)
+            Log.info("Added quotes notification filter with %d note IDs", for: .timeline, our_note_ids.count)
+        }
+
+        // Cancel existing subscription and start new one.
+        self.notificationsHandlerTask?.cancel()
+        self.notificationsHandlerTask = Task {
+            // Use advancedStream (not streamIndefinitely) so we receive EOSE signals.
+            // This lets us flush queued notifications once the local database finishes loading,
+            // fixing the race condition where onAppear fires before events arrive.
+            for await item in damus_state.nostrNetwork.reader.advancedStream(
+                filters: notifications_filters,
+                streamMode: .ndbAndNetworkParallel(optimizeNetworkFilter: true)
+            ) {
+                switch item {
+                case .event(let lender):
+                    await lender.justUseACopy({ await process_event(ev: $0, context: .notifications) })
+
+                case .ndbEose:
+                    // Local database finished loading. Flush any queued notifications
+                    // and disable queuing so subsequent events display immediately.
+                    await MainActor.run {
+                        self.notifications.flush(damus_state)
+                        self.notifications.set_should_queue(false)
+                    }
+
+                case .eose, .networkEose:
+                    break
+                }
+            }
+        }
+    }
+
     enum RelayListLoadingError: Error {
         case noRelayList
         case relayListParseError
@@ -554,19 +717,6 @@ class HomeModel: ContactsDelegate, ObservableObject {
         dms_filter.pubkeys = [ damus_state.pubkey ]
         our_dms_filter.authors = [ damus_state.pubkey ]
 
-        var notifications_filter_kinds: [NostrKind] = [
-            .text,
-            .boost,
-            .zap,
-        ]
-        if !damus_state.settings.onlyzaps_mode {
-            notifications_filter_kinds.append(.like)
-        }
-        var notifications_filter = NostrFilter(kinds: notifications_filter_kinds)
-        notifications_filter.pubkeys = [damus_state.pubkey]
-        notifications_filter.limit = 500
-
-        let notifications_filters = [notifications_filter]
         let contacts_filter_chunks = contacts_filter.chunked(on: .authors, into: MAX_CONTACTS_ON_FILTER)
         let low_volume_important_filters = [our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter, contact_cards_filter]
         let contacts_filters = contacts_filter_chunks + low_volume_important_filters
@@ -575,33 +725,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
         //print_filters(relay_id: relay_id, filters: [home_filters, contacts_filters, notifications_filters, dms_filters])
 
         subscribe_to_home_filters()
+        subscribe_to_notifications()
 
-        self.notificationsHandlerTask?.cancel()
-        self.notificationsHandlerTask = Task {
-            // Use advancedStream (not streamIndefinitely) so we receive EOSE signals.
-            // This lets us flush queued notifications once the local database finishes loading,
-            // fixing the race condition where onAppear fires before events arrive.
-            for await item in damus_state.nostrNetwork.reader.advancedStream(
-                filters: notifications_filters,
-                streamMode: .ndbAndNetworkParallel(optimizeNetworkFilter: true)
-            ) {
-                switch item {
-                case .event(let lender):
-                    await lender.justUseACopy({ await process_event(ev: $0, context: .notifications) })
-
-                case .ndbEose:
-                    // Local database finished loading. Flush any queued notifications
-                    // and disable queuing so subsequent events display immediately.
-                    await MainActor.run {
-                        self.notifications.flush(damus_state)
-                        self.notifications.set_should_queue(false)
-                    }
-
-                case .eose, .networkEose:
-                    break
-                }
-            }
-        }
         self.generalHandlerTask?.cancel()
         self.generalHandlerTask = Task {
             for await item in damus_state.nostrNetwork.reader.advancedStream(filters: dms_filters + contacts_filters, streamMode: .ndbAndNetworkParallel(optimizeNetworkFilter: true)) {
@@ -793,13 +918,30 @@ class HomeModel: ContactsDelegate, ObservableObject {
     
     @MainActor
     func handle_notification(ev: NostrEvent) {
-        // don't show notifications from ourselves
-        guard ev.pubkey != damus_state.pubkey,
-              event_has_our_pubkey(ev, our_pubkey: self.damus_state.pubkey),
-              should_show_event(state: damus_state, ev: ev) else {
+        // Don't show notifications from ourselves.
+        guard ev.pubkey != damus_state.pubkey else {
             return
         }
-        
+
+        // Validate that this notification is relevant to us.
+        //
+        // An event is relevant if:
+        // 1. It references our pubkey in a p tag (replies, mentions, boosts, zaps, likes)
+        // 2. OR it quotes one of our notes via a q tag (quote posts from third-party clients)
+        //
+        // This dual check is necessary because per NIP-18, quote posts may only include
+        // a q tag without a separate p tag for the quoted note's author.
+        let has_our_pubkey = event_has_our_pubkey(ev, our_pubkey: damus_state.pubkey)
+        let quotes_our_note = ev.referenced_quote_ids.contains { our_note_ids.contains($0.note_id) }
+
+        guard has_our_pubkey || quotes_our_note else {
+            return
+        }
+
+        guard should_show_event(state: damus_state, ev: ev) else {
+            return
+        }
+
         damus_state.events.insert(ev)
         
         if let inner_ev = ev.get_inner_event(cache: damus_state.events) {
@@ -839,7 +981,19 @@ class HomeModel: ContactsDelegate, ObservableObject {
         guard should_show_event(state: damus_state, ev: ev) else {
             return
         }
-        
+
+        // Track our own quotable notes for quote notification detection.
+        //
+        // When we post a new note, it comes back through the subscription.
+        // By tracking it here, we ensure our quote notification filter stays
+        // current even for notes posted during this session. The track_our_new_note
+        // function handles debounced resubscription to include the new ID.
+        if let kind = ev.known_kind,
+           Self.quotableKinds.contains(kind),
+           ev.pubkey == damus_state.pubkey {
+            track_our_new_note(ev.id)
+        }
+
         // TODO: will we need to process this in other places like zap request contents, etc?
         process_image_metadatas(cache: damus_state.events, ev: ev)
         damus_state.replies.count_replies(ev, keypair: self.damus_state.keypair)

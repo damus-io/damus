@@ -445,6 +445,7 @@
 		4CE6DEEE27F7A08200C66700 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4CE6DEED27F7A08200C66700 /* Preview Assets.xcassets */; };
 		4CE6DEF827F7A08200C66700 /* damusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DEF727F7A08200C66700 /* damusTests.swift */; };
 		B1A2C3D4E5F67890ABCD1234 /* AccountsStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1A2C3D4E5F67890ABCD5678 /* AccountsStoreTests.swift */; };
+		E7A1B2C3D4E5F67890ABCD01 /* QuoteNotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7A1B2C3D4E5F67890ABCD02 /* QuoteNotificationTests.swift */; };
 		4CE6DF0227F7A08200C66700 /* damusUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF0127F7A08200C66700 /* damusUITests.swift */; };
 		4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */; };
 		4CE8794829941DA700F758CC /* RelayFilters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE8794729941DA700F758CC /* RelayFilters.swift */; };
@@ -2539,6 +2540,7 @@
 		4CE6DEF327F7A08200C66700 /* damusTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = damusTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CE6DEF727F7A08200C66700 /* damusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damusTests.swift; sourceTree = "<group>"; };
 		B1A2C3D4E5F67890ABCD5678 /* AccountsStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsStoreTests.swift; sourceTree = "<group>"; };
+		E7A1B2C3D4E5F67890ABCD02 /* QuoteNotificationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteNotificationTests.swift; sourceTree = "<group>"; };
 		4CE6DEFD27F7A08200C66700 /* damusUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = damusUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CE6DF0127F7A08200C66700 /* damusUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damusUITests.swift; sourceTree = "<group>"; };
 		4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayConnection.swift; sourceTree = "<group>"; };
@@ -3876,6 +3878,7 @@
 				4C363A9D2828A822006E126D /* ReplyTests.swift */,
 				4CE6DEF727F7A08200C66700 /* damusTests.swift */,
 				B1A2C3D4E5F67890ABCD5678 /* AccountsStoreTests.swift */,
+				E7A1B2C3D4E5F67890ABCD02 /* QuoteNotificationTests.swift */,
 				4C3EA67A28FF7B3900C48A62 /* InvoiceTests.swift */,
 				3ACBCB77295FE5C70037388A /* TimeAgoTests.swift */,
 				4CB88399297322D200DC99E7 /* DMTests.swift */,
@@ -6377,6 +6380,7 @@
 				D7100CB62EEA3E20008D94B7 /* AutoSaveViewModelTests.swift in Sources */,
 				4CE6DEF827F7A08200C66700 /* damusTests.swift in Sources */,
 				B1A2C3D4E5F67890ABCD1234 /* AccountsStoreTests.swift in Sources */,
+				E7A1B2C3D4E5F67890ABCD01 /* QuoteNotificationTests.swift in Sources */,
 				D753CEAA2BE9DE04001C3A5D /* MutingTests.swift in Sources */,
 				3A3040F329A91366008A0F29 /* ProfileViewTests.swift in Sources */,
 				4CF0ABDC2981A19E00D66079 /* ListTests.swift in Sources */,
