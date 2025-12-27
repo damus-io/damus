@@ -18,6 +18,7 @@ struct TextViewWrapper: UIViewRepresentable {
     let cursorIndex: Int?
     var getFocusWordForMention: ((String?, NSRange?) -> Void)? = nil
     let updateCursorPosition: ((Int) -> Void)
+    var onImageURLPasted: ((URL) -> Void)? = nil
     
     func makeUIView(context: Context) -> UITextView {
         let textView = CustomPostTextView(imagePastedFromPasteboard: $imagePastedFromPasteboard,
@@ -97,7 +98,7 @@ struct TextViewWrapper: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(attributedText: $attributedText, getFocusWordForMention: getFocusWordForMention, updateCursorPosition: updateCursorPosition, initialTextSuffix: initialTextSuffix)
+        Coordinator(attributedText: $attributedText, getFocusWordForMention: getFocusWordForMention, updateCursorPosition: updateCursorPosition, initialTextSuffix: initialTextSuffix, onImageURLPasted: onImageURLPasted)
     }
 
     class Coordinator: NSObject, UITextViewDelegate {
@@ -106,17 +107,27 @@ struct TextViewWrapper: UIViewRepresentable {
         let updateCursorPosition: ((Int) -> Void)
         let initialTextSuffix: String?
         var initialTextSuffixWasAdded: Bool = false
+        var onImageURLPasted: ((URL) -> Void)? = nil
         static let ESCAPE_SEQUENCES = ["\n", "@", "  ", ", ", ". ", "! ", "? ", "; ", "#"]
+
+        /// Regex pattern for detecting image URLs (matches common image extensions with optional query params).
+        /// Excludes fragment identifiers (#) since content after # is not sent to the server.
+        static let imageURLPattern = try! NSRegularExpression(
+            pattern: #"^https?://[^\s#]+\.(jpg|jpeg|png|gif|webp|svg)(\?[^\s]*)?$"#,
+            options: [.caseInsensitive]
+        )
 
         init(attributedText: Binding<NSMutableAttributedString>,
              getFocusWordForMention: ((String?, NSRange?) -> Void)?,
              updateCursorPosition: @escaping ((Int) -> Void),
-             initialTextSuffix: String?
+             initialTextSuffix: String?,
+             onImageURLPasted: ((URL) -> Void)? = nil
         ) {
             _attributedText = attributedText
             self.getFocusWordForMention = getFocusWordForMention
             self.updateCursorPosition = updateCursorPosition
             self.initialTextSuffix = initialTextSuffix
+            self.onImageURLPasted = onImageURLPasted
         }
 
         func textViewDidChange(_ textView: UITextView) {
@@ -198,6 +209,15 @@ struct TextViewWrapper: UIViewRepresentable {
         // This `UITextViewDelegate` method is automatically called by the editor when edits occur, to check whether a change should occur
         // We will use this method to manually handle edits concerning mention ("@") links, to avoid manual text edits to attributed mention links
         func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+            // Check if pasted text is an image URL and handle it specially
+            if let onImageURLPasted = onImageURLPasted,
+               !text.isEmpty,
+               let url = URL(string: text.trimmingCharacters(in: .whitespacesAndNewlines)),
+               Self.imageURLPattern.firstMatch(in: text.trimmingCharacters(in: .whitespacesAndNewlines), options: [], range: NSRange(location: 0, length: text.trimmingCharacters(in: .whitespacesAndNewlines).utf16.count)) != nil {
+                onImageURLPasted(url)
+                return false  // Don't insert the URL text, it will appear as a media preview
+            }
+
             guard let attributedString = textView.attributedText else {
                 return true     // If we cannot get an attributed string, just fail gracefully and allow changes
             }
