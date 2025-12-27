@@ -45,7 +45,6 @@ struct ProfileName: View {
     @State var donation: Int?
     @State var purple_account: DamusPurple.Account?
     @State var nip05_domain_favicon: FaviconURL?
-    @StateObject var profileObserver: ProfileObserver
 
     init(pubkey: Pubkey, prefix: String = "", damus: DamusState, show_nip5_domain: Bool = true, supporterBadgeStyle: SupporterBadge.Style = .compact) {
         self.pubkey = pubkey
@@ -54,7 +53,6 @@ struct ProfileName: View {
         self.show_nip5_domain = show_nip5_domain
         self.supporterBadgeStyle = supporterBadgeStyle
         self.purple_account = nil
-        self._profileObserver = StateObject.init(wrappedValue: ProfileObserver(pubkey: pubkey, damusState: damus))
     }
     
     var friend_type: FriendType? {
@@ -131,21 +129,10 @@ struct ProfileName: View {
                     .largest()
             }
         }
-        .onReceive(handle_notify(.profile_updated)) { update in
-            if update.pubkey != pubkey {
-                return
+        .task {
+            for await profile in await damus_state.nostrNetwork.profilesManager.streamProfile(pubkey: pubkey) {
+                handle_profile_update(profile: profile)
             }
-
-            switch update {
-            case .remote(let pubkey):
-                guard let prof = damus_state.profiles.lookup(id: pubkey) else {
-                    return
-                }
-                handle_profile_update(profile: prof)
-            case .manual(_, let prof):
-                handle_profile_update(profile: prof)
-            }
-
         }
     }
 

@@ -41,6 +41,7 @@ enum HomeResubFilter {
     }
 }
 
+@MainActor
 class HomeModel: ContactsDelegate, ObservableObject {
     // The maximum amount of contacts placed on a home feed subscription filter.
     // If the user has more contacts, chunking or other techniques will be used to avoid sending huge filters
@@ -109,19 +110,69 @@ class HomeModel: ContactsDelegate, ObservableObject {
     // MARK: - Loading items from DamusState
     
     /// This is called whenever DamusState gets set. This function is used to load or setup anything we need from the new DamusState
+    @MainActor
     func load_our_stuff_from_damus_state() {
         self.load_latest_contact_event_from_damus_state()
+        self.load_latest_mutelist_event_from_damus_state()
         self.load_drafts_from_damus_state()
     }
     
     /// This loads the latest contact event we have on file from NostrDB. This should be called as soon as we get the new DamusState
     /// Loading the latest contact list event into our `Contacts` instance from storage is important to avoid getting into weird states when the network is unreliable or when relays delete such information
+    @MainActor
     func load_latest_contact_event_from_damus_state() {
         damus_state.contacts.delegate = self
         guard let latest_contact_event_id_hex = damus_state.settings.latest_contact_event_id_hex else { return }
         guard let latest_contact_event_id = NoteId(hex: latest_contact_event_id_hex) else { return }
         guard let latest_contact_event: NdbNote = damus_state.ndb.lookup_note_and_copy(latest_contact_event_id) else { return }
         process_contact_event(state: damus_state, ev: latest_contact_event)
+    }
+    
+    /// Loads the latest mute list event we have stored locally so that the mutelist manager is immediately aware of previous mutes.
+    @MainActor
+    func load_latest_mutelist_event_from_damus_state() {
+        if damus_state.mutelist_manager.event != nil {
+            return
+        }
+
+        if let latest_event = load_latest_mutelist_event_from_db() {
+            damus_state.mutelist_manager.set_mutelist(latest_event)
+            return
+        }
+
+        if let legacy_event = load_latest_legacy_mutelist_event_from_db() {
+            damus_state.mutelist_manager.set_mutelist(legacy_event)
+        }
+    }
+    
+    @MainActor
+    private func load_latest_mutelist_event_from_db(limit: Int = 5) -> NostrEvent? {
+        guard let filter = try? NdbFilter(from: NostrFilter(kinds: [.mute_list], limit: UInt32(limit), authors: [damus_state.pubkey])) else { return nil }
+        
+        guard let note_keys = try? damus_state.ndb.query(filters: [filter], maxResults: limit) else { return nil }
+        
+        var candidates: [NostrEvent] = []
+        for key in note_keys {
+            guard let note = damus_state.ndb.lookup_note_by_key_and_copy(key) else { continue }
+            candidates.append(note)
+        }
+        return candidates.max(by: { $0.created_at < $1.created_at })
+    }
+    
+    @MainActor
+    private func load_latest_legacy_mutelist_event_from_db(limit: Int = 20) -> NostrEvent? {
+        guard let filter = try? NdbFilter(from: NostrFilter(kinds: [.list_deprecated], limit: UInt32(limit), authors: [damus_state.pubkey])) else { return nil }
+        guard let note_keys = try? damus_state.ndb.query(filters: [filter], maxResults: limit) else { return nil }
+        
+        var candidates: [NostrEvent] = []
+        for key in note_keys {
+            guard let note = damus_state.ndb.lookup_note_by_key_and_copy(key) else { continue }
+            if note.referenced_params.contains(where: { $0.param.matches_str("mute") }) {
+                candidates.append(note)
+            }
+        }
+        
+        return candidates.max(by: { $0.created_at < $1.created_at })
     }
     
     func load_drafts_from_damus_state() {
@@ -706,7 +757,6 @@ class HomeModel: ContactsDelegate, ObservableObject {
         }
 
         damus_state.mutelist_manager.set_mutelist(ev)
-
         migrate_old_muted_threads_to_new_mutelist(keypair: damus_state.keypair, damus_state: damus_state)
     }
 
@@ -729,7 +779,6 @@ class HomeModel: ContactsDelegate, ObservableObject {
         }
 
         damus_state.mutelist_manager.set_mutelist(ev)
-
         migrate_old_muted_threads_to_new_mutelist(keypair: damus_state.keypair, damus_state: damus_state)
     }
 

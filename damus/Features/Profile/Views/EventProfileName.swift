@@ -17,7 +17,6 @@ struct EventProfileName: View {
     @State var nip05: NIP05?
     @State var donation: Int?
     @State var purple_account: DamusPurple.Account?
-    @StateObject private var profileObserver: ProfileObserver
 
     let size: EventViewKind
     
@@ -28,7 +27,6 @@ struct EventProfileName: View {
         let donation = damus.profiles.lookup(id: pubkey)?.damus_donation
         self._donation = State(wrappedValue: donation)
         self.purple_account = nil
-        self._profileObserver = StateObject.init(wrappedValue: ProfileObserver(pubkey: pubkey, damusState: damus))
     }
     
     var friend_type: FriendType? {
@@ -102,26 +100,22 @@ struct EventProfileName: View {
                 SupporterBadge(percent: self.supporter_percentage(), purple_account: self.purple_account, style: .compact)
             }
         }
-        .onReceive(handle_notify(.profile_updated)) { update in
-            if update.pubkey != pubkey {
-                return
-            }
+        .task {
+            for await profile in await damus_state.nostrNetwork.profilesManager.streamProfile(pubkey: pubkey) {
+                let display_name = Profile.displayName(profile: profile, pubkey: pubkey)
+                if display_name != self.display_name {
+                    self.display_name = display_name
+                }
 
-            guard let profile = damus_state.profiles.lookup(id: update.pubkey) else { return }
+                let nip05 = damus_state.profiles.is_validated(pubkey)
 
-            let display_name = Profile.displayName(profile: profile, pubkey: pubkey)
-            if display_name != self.display_name {
-                self.display_name = display_name
-            }
+                if self.nip05 != nip05 {
+                    self.nip05 = nip05
+                }
 
-            let nip05 = damus_state.profiles.is_validated(pubkey)
-
-            if self.nip05 != nip05 {
-                self.nip05 = nip05
-            }
-
-            if self.donation != profile.damus_donation {
-                donation = profile.damus_donation
+                if self.donation != profile.damus_donation {
+                    donation = profile.damus_donation
+                }
             }
         }
         .task {

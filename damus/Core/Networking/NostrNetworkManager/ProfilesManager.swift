@@ -108,22 +108,93 @@ extension NostrNetworkManager {
                     relevantStream.continuation.yield(profile)
                 }
             }
-            
-            // Notify the rest of the app so views that rely on rendered text (like mention strings)
-            // can reload and pick up the freshly fetched profile metadata.
-            notify(.profile_updated(.remote(pubkey: metadataEvent.pubkey)))
+        }
+        
+        /// Manually trigger profile updates for a given pubkey
+        /// This is useful for local profile changes (e.g., nip05 validation, donation percentage updates)
+        func notifyProfileUpdate(pubkey: Pubkey) {
+            if let relevantStreams = streams[pubkey] {
+                guard let profile = ndb.lookup_profile_and_copy(pubkey) else { return }
+                for relevantStream in relevantStreams.values {
+                    relevantStream.continuation.yield(profile)
+                }
+            }
         }
         
         
         // MARK: - Streaming interface
-        
-        func streamProfile(pubkey: Pubkey) -> AsyncStream<ProfileStreamItem> {
+
+        /// Streams profile updates for a single pubkey.
+        ///
+        /// By default, the stream immediately yields the existing profile from NostrDB
+        /// (if available), then continues yielding updates as they arrive from the network.
+        ///
+        /// This immediate yield is essential for views that display profile data (names,
+        /// pictures) because the subscription restart has a ~1 second delay. Without it,
+        /// views would flash abbreviated pubkeys or robohash placeholders.
+        ///
+        /// Set `yieldCached: false` for subscribers that only need network updates (e.g.,
+        /// re-rendering content when profiles change) and already handle initial state
+        /// through other means.
+        ///
+        /// - Parameters:
+        ///   - pubkey: The pubkey to stream profile updates for
+        ///   - yieldCached: Whether to immediately yield the cached profile. Defaults to `true`.
+        /// - Returns: An AsyncStream that yields Profile objects
+        func streamProfile(pubkey: Pubkey, yieldCached: Bool = true) -> AsyncStream<ProfileStreamItem> {
             return AsyncStream<ProfileStreamItem> { continuation in
                 let stream = ProfileStreamInfo(continuation: continuation)
                 self.add(pubkey: pubkey, stream: stream)
-                
+
+                // Yield cached profile immediately so views don't flash placeholder content.
+                // Callers that only need updates (not initial state) can opt out via yieldCached: false.
+                if yieldCached, let existingProfile = ndb.lookup_profile_and_copy(pubkey) {
+                    continuation.yield(existingProfile)
+                }
+
                 continuation.onTermination = { @Sendable _ in
                     Task { await self.removeStream(pubkey: pubkey, id: stream.id) }
+                }
+            }
+        }
+
+        /// Streams profile updates for multiple pubkeys.
+        ///
+        /// Same behavior as `streamProfile(_:yieldCached:)` but for a set of pubkeys.
+        ///
+        /// - Parameters:
+        ///   - pubkeys: The set of pubkeys to stream profile updates for
+        ///   - yieldCached: Whether to immediately yield cached profiles. Defaults to `true`.
+        /// - Returns: An AsyncStream that yields Profile objects
+        func streamProfiles(pubkeys: Set<Pubkey>, yieldCached: Bool = true) -> AsyncStream<ProfileStreamItem> {
+            guard !pubkeys.isEmpty else {
+                return AsyncStream<ProfileStreamItem> { continuation in
+                    continuation.finish()
+                }
+            }
+
+            return AsyncStream<ProfileStreamItem> { continuation in
+                let stream = ProfileStreamInfo(continuation: continuation)
+                for pubkey in pubkeys {
+                    self.add(pubkey: pubkey, stream: stream)
+                }
+
+                // Yield cached profiles immediately so views render correctly from the start.
+                // Callers that only need updates (not initial state) can opt out via yieldCached: false.
+                if yieldCached {
+                    for pubkey in pubkeys {
+                        if let existingProfile = ndb.lookup_profile_and_copy(pubkey) {
+                            continuation.yield(existingProfile)
+                        }
+                    }
+                }
+
+                continuation.onTermination = { @Sendable _ in
+                    Task {
+                        for pubkey in pubkeys {
+                            await self.removeStream(pubkey: pubkey, id: stream.id)
+                        }
+                    }
                 }
             }
         }

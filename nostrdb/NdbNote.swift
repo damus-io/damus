@@ -556,8 +556,8 @@ extension NdbNote {
         return thread_reply() != nil
     }
 
+    @MainActor
     func note_language(ndb: Ndb, _ keypair: Keypair) -> String? {
-        assert(!Thread.isMainThread, "This function must not be run on the main thread.")
 
         // Rely on Apple's NLLanguageRecognizer to tell us which language it thinks the note is in
         // and filter on only the text portions of the content as URLs and hashtags confuse the language recognizer.
