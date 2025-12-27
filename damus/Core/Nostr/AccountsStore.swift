@@ -99,6 +99,11 @@ final class AccountsStore: ObservableObject {
         return keypair(for: activePubkey)
     }
 
+    /// Returns true if any saved account has a private key stored
+    var hasAccountsWithPrivateKeys: Bool {
+        accounts.contains { $0.hasPrivateKey }
+    }
+
     func setActive(_ pubkey: Pubkey, allowDuringOnboarding: Bool = false) {
         if OnboardingSession.shared.isOnboarding && !allowDuringOnboarding {
             return
@@ -327,20 +332,51 @@ final class AccountsStore: ObservableObject {
         "pk-\(pubkey.hex().prefix(16))"
     }
 
-    /// Saves a private key to the Keychain with iCloud sync enabled.
+    /// Saves a private key to the Keychain using the current storage mode.
     ///
-    /// Note: `kSecAttrSynchronizable: true` enables iCloud Keychain sync, allowing
-    /// private keys to sync across the user's devices. This is a convenience feature
-    /// but represents a security/privacy tradeoff that should be documented in release notes.
+    /// - iCloud Sync mode: Stores plaintext hex with `kSecAttrSynchronizable: true`
+    /// - Local Only mode: Encrypts with Secure Enclave, stores with `kSecAttrSynchronizable: false`
     @discardableResult
     private func savePrivateKey(_ privkey: Privkey, for pubkey: Pubkey) -> Bool {
         let account = keychainAccountName(for: pubkey)
+        let mode = KeyStorageSettings.mode
+
+        // Prepare the value to store based on storage mode
+        let valueToStore: Data
+        let isSynchronizable: Bool
+
+        switch mode {
+        case .iCloudSync:
+            // Store plaintext hex, sync to iCloud
+            guard let data = privkey.hex().data(using: .utf8) else {
+                Log.error("Failed to encode privkey as UTF-8", for: .storage)
+                return false
+            }
+            valueToStore = data
+            isSynchronizable = true
+
+        case .localOnly:
+            // Encrypt with Secure Enclave, no sync
+            do {
+                let encrypted = try SecureEnclaveStorage.encryptPrivateKey(privkey.hex())
+                guard let data = encrypted.data(using: .utf8) else {
+                    Log.error("Failed to encode encrypted privkey as UTF-8", for: .storage)
+                    return false
+                }
+                valueToStore = data
+                isSynchronizable = false
+            } catch {
+                Log.error("Failed to encrypt privkey with Secure Enclave: %@", for: .storage, String(describing: error))
+                return false
+            }
+        }
+
         let query = [
             kSecAttrService: keychainService,
             kSecAttrAccount: account,
             kSecClass: kSecClassGenericPassword,
-            kSecAttrSynchronizable: true,
-            kSecValueData: privkey.hex().data(using: .utf8) as Any
+            kSecAttrSynchronizable: isSynchronizable,
+            kSecValueData: valueToStore as Any
         ] as [CFString: Any] as CFDictionary
 
         var status = SecItemAdd(query, nil)
@@ -349,11 +385,11 @@ final class AccountsStore: ObservableObject {
                 kSecAttrService: keychainService,
                 kSecAttrAccount: account,
                 kSecClass: kSecClassGenericPassword,
-                kSecAttrSynchronizable: true
+                kSecAttrSynchronizable: isSynchronizable
             ] as [CFString: Any] as CFDictionary
 
             let updates = [
-                kSecValueData: privkey.hex().data(using: .utf8) as Any
+                kSecValueData: valueToStore as Any
             ] as CFDictionary
 
             status = SecItemUpdate(searchQuery, updates)
@@ -363,87 +399,144 @@ final class AccountsStore: ObservableObject {
             Log.error("Failed to save privkey for account, status: %d", for: .storage, Int(status))
             return false
         }
+
+        // Only delete from the opposite mode AFTER successful save to avoid data loss
+        deletePrivateKeyInMode(for: pubkey, synchronizable: !isSynchronizable)
         return true
     }
 
+    /// Loads a private key from the Keychain.
+    /// Tries to load from the current storage mode first, then falls back to the other mode and migrates.
     private func loadPrivateKey(for pubkey: Pubkey) -> Privkey? {
         let account = keychainAccountName(for: pubkey)
+        let mode = KeyStorageSettings.mode
 
-        // First try to load synchronizable key (new format)
-        let syncQuery = [
+        // Try current mode first
+        if let privkey = loadPrivateKeyInMode(for: pubkey, account: account, mode: mode) {
+            return privkey
+        }
+
+        // Fall back to opposite mode and migrate if found
+        let oppositeMode: KeyStorageMode = mode == .iCloudSync ? .localOnly : .iCloudSync
+        if let privkey = loadPrivateKeyInMode(for: pubkey, account: account, mode: oppositeMode) {
+            // Migrate to current mode
+            Log.info("Migrating privkey from %@ to %@ mode", for: .storage, oppositeMode.rawValue, mode.rawValue)
+            if savePrivateKey(privkey, for: pubkey) {
+                // savePrivateKey already deletes the opposite mode key
+                Log.info("Successfully migrated privkey to %@ mode", for: .storage, mode.rawValue)
+            }
+            return privkey
+        }
+
+        return nil
+    }
+
+    /// Loads a private key from a specific storage mode.
+    private func loadPrivateKeyInMode(for pubkey: Pubkey, account: String, mode: KeyStorageMode) -> Privkey? {
+        let isSynchronizable = mode == .iCloudSync
+
+        let query = [
             kSecAttrService: keychainService,
             kSecAttrAccount: account,
             kSecClass: kSecClassGenericPassword,
-            kSecAttrSynchronizable: true,
+            kSecAttrSynchronizable: isSynchronizable,
             kSecReturnData: true,
             kSecMatchLimit: kSecMatchLimitOne
         ] as [CFString: Any] as CFDictionary
 
         var result: AnyObject?
-        var status = SecItemCopyMatching(syncQuery, &result)
-
-        // If not found, try non-synchronizable key (legacy format) and migrate it
-        if status == errSecItemNotFound {
-            let legacyQuery = [
-                kSecAttrService: keychainService,
-                kSecAttrAccount: account,
-                kSecClass: kSecClassGenericPassword,
-                kSecAttrSynchronizable: false,
-                kSecReturnData: true,
-                kSecMatchLimit: kSecMatchLimitOne
-            ] as [CFString: Any] as CFDictionary
-
-            status = SecItemCopyMatching(legacyQuery, &result)
-
-            // If found legacy key, migrate it to synchronizable
-            if status == errSecSuccess, let data = result as? Data,
-               let hexString = String(data: data, encoding: .utf8),
-               let privkey = hex_decode_privkey(hexString) {
-                // Re-save as synchronizable and delete legacy
-                if savePrivateKey(privkey, for: pubkey) {
-                    let deleteQuery = [
-                        kSecAttrService: keychainService,
-                        kSecAttrAccount: account,
-                        kSecClass: kSecClassGenericPassword,
-                        kSecAttrSynchronizable: false
-                    ] as [CFString: Any] as CFDictionary
-                    SecItemDelete(deleteQuery)
-                }
-                return privkey
-            }
-        }
+        let status = SecItemCopyMatching(query, &result)
 
         guard status == errSecSuccess, let data = result as? Data else {
             return nil
         }
 
-        guard let hexString = String(data: data, encoding: .utf8),
-              let privkey = hex_decode_privkey(hexString) else {
+        guard let storedString = String(data: data, encoding: .utf8) else {
             return nil
         }
 
-        return privkey
+        switch mode {
+        case .iCloudSync:
+            // Stored as plaintext hex
+            return hex_decode_privkey(storedString)
+
+        case .localOnly:
+            // Stored as Secure Enclave encrypted base64
+            do {
+                let decryptedHex = try SecureEnclaveStorage.decryptPrivateKey(storedString)
+                return hex_decode_privkey(decryptedHex)
+            } catch {
+                Log.error("Failed to decrypt privkey with Secure Enclave: %@", for: .storage, String(describing: error))
+                // Fallback: legacy non-sync entries stored as plaintext hex (pre-multi-account).
+                // Re-save to current mode - this intentionally migrates legacy keys to whatever
+                // the user's current preference is (iCloud or encrypted local-only).
+                guard let privkey = hex_decode_privkey(storedString) else {
+                    return nil
+                }
+                _ = savePrivateKey(privkey, for: pubkey)
+                return privkey
+            }
+        }
     }
 
+    /// Deletes a private key from both storage modes.
     private func deletePrivateKey(for pubkey: Pubkey) {
+        deletePrivateKeyInMode(for: pubkey, synchronizable: true)
+        deletePrivateKeyInMode(for: pubkey, synchronizable: false)
+    }
+
+    /// Deletes a private key from a specific storage mode.
+    private func deletePrivateKeyInMode(for pubkey: Pubkey, synchronizable: Bool) {
         let account = keychainAccountName(for: pubkey)
-
-        // Delete synchronizable key (new format)
-        let syncQuery = [
+        let query = [
             kSecAttrService: keychainService,
             kSecAttrAccount: account,
             kSecClass: kSecClassGenericPassword,
-            kSecAttrSynchronizable: true
+            kSecAttrSynchronizable: synchronizable
         ] as [CFString: Any] as CFDictionary
-        SecItemDelete(syncQuery)
+        SecItemDelete(query)
+    }
 
-        // Also delete legacy non-synchronizable key if it exists
-        let legacyQuery = [
-            kSecAttrService: keychainService,
-            kSecAttrAccount: account,
-            kSecClass: kSecClassGenericPassword,
-            kSecAttrSynchronizable: false
-        ] as [CFString: Any] as CFDictionary
-        SecItemDelete(legacyQuery)
+    /// Migrates all stored private keys to the current storage mode.
+    ///
+    /// This is called when the user changes their storage mode preference (iCloud ↔ Local).
+    /// Each key is loaded (which triggers auto-migration in `loadPrivateKey`), then verified
+    /// to ensure it's accessible in the new mode.
+    ///
+    /// - Returns: A tuple of (successCount, failureCount) for migration results
+    @discardableResult
+    func migrateAllKeysToCurrentMode() -> (success: Int, failed: Int) {
+        var successCount = 0
+        var failedCount = 0
+        let mode = KeyStorageSettings.mode
+
+        for account in accounts where account.hasPrivateKey {
+            // Load triggers migration if key is in opposite mode
+            guard loadPrivateKey(for: account.pubkey) != nil else {
+                failedCount += 1
+                Log.error("Failed to load key for migration", for: .storage)
+                continue
+            }
+
+            // Verify the key is now accessible in the target mode
+            let verifyAccount = keychainAccountName(for: account.pubkey)
+            guard loadPrivateKeyInMode(for: account.pubkey, account: verifyAccount, mode: mode) != nil else {
+                failedCount += 1
+                Log.error("Migration verification failed for account", for: .storage)
+                continue
+            }
+
+            successCount += 1
+            Log.info("Successfully migrated key for account to %@ mode", for: .storage, mode.rawValue)
+        }
+
+        // Log summary
+        if failedCount > 0 {
+            Log.error("Key migration completed with %d failures out of %d accounts", for: .storage, failedCount, successCount + failedCount)
+        } else if successCount > 0 {
+            Log.info("Key migration completed successfully for %d accounts", for: .storage, successCount)
+        }
+
+        return (successCount, failedCount)
     }
 }

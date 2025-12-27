@@ -24,12 +24,13 @@ struct MainView: View {
     @State var keypair: Keypair? = nil;
     @StateObject private var orientationTracker = OrientationTracker()
     @ObservedObject private var accountsStore = AccountsStore.shared
-    @StateObject private var onboardingSession = OnboardingSession.shared
+    @ObservedObject private var onboardingSession = OnboardingSession.shared
     @State private var showSavePrompt = false
     @State private var savePromptDismissed = false
     @State private var savePromptScheduledFor: Pubkey?
     @State private var isSwitchingAccount = false
     @State private var isHandlingLoginSwitch = false
+    @State private var showStorageMigrationPrompt = false
     var appDelegate: AppDelegate
 
     @ViewBuilder
@@ -96,6 +97,8 @@ struct MainView: View {
             needs_setup = keypair == nil
             // Don't show prompt immediately on appear - schedule it if needed
             scheduleShowSavePromptIfNeeded()
+            // Check if we need to show the storage mode migration prompt
+            checkAndShowStorageMigrationPrompt()
         }
         .onChange(of: accountsStore.activePubkey) { newPubkey in
             // Prevent double-close when login handler is already switching
@@ -113,6 +116,26 @@ struct MainView: View {
                     savePromptDismissed = true
                 }
             }
+        }
+        .sheet(isPresented: $showStorageMigrationPrompt) {
+            KeyStorageMigrationSheet {
+                showStorageMigrationPrompt = false
+                KeyStorageSettings.migrationPromptShown = true
+            }
+        }
+    }
+
+    /// Checks if we need to show the storage mode migration prompt for existing accounts
+    private func checkAndShowStorageMigrationPrompt() {
+        // Only show if not already shown
+        guard !KeyStorageSettings.migrationPromptShown else { return }
+        // Only show if user has existing accounts with private keys
+        guard accountsStore.hasAccountsWithPrivateKeys else { return }
+        // Show the prompt after a short delay
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 seconds
+            guard !KeyStorageSettings.migrationPromptShown else { return }
+            showStorageMigrationPrompt = true
         }
     }
 

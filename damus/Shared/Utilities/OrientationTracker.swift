@@ -8,7 +8,7 @@
 import SwiftUI
 
 class OrientationTracker: ObservableObject {
-    var deviceMajorAxis: CGFloat = 0
+    @Published var deviceMajorAxis: CGFloat = 0
     func setDeviceMajorAxis() {
         let bounds = UIScreen.main.bounds
         let height = max(bounds.height, bounds.width)

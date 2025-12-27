@@ -203,7 +203,11 @@ struct ConfigView: View {
                 logout(state)
             }
         } message: {
+            if KeyStorageSettings.mode == .localOnly {
+                Text("Your key is stored locally only. Make sure you have backed up your nsec key before logging out, or you will lose access to this account.", comment: "Reminder message for local-only storage when logging out.")
+            } else {
                 Text("Make sure your nsec account key is saved before you logout or you will lose access to this account", comment: "Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out.")
+            }
         }
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()

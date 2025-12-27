@@ -10,15 +10,20 @@ import LocalAuthentication
 
 struct KeySettingsView: View {
     let keypair: Keypair
-    
+
     @State var privkey: String
     @State var privkey_copied: Bool = false
     @State var pubkey_copied: Bool = false
     @State var show_privkey: Bool = false
     @State var has_authenticated_locally: Bool = false
-    
+    @State private var keyStorageMode: KeyStorageMode = KeyStorageSettings.mode
+    @State private var showStorageModeChangeAlert: Bool = false
+    @State private var pendingStorageMode: KeyStorageMode? = nil
+    @State private var showMigrationResultAlert: Bool = false
+    @State private var migrationResult: (success: Int, failed: Int)? = nil
+
     @Environment(\.dismiss) var dismiss
-    
+
     init(keypair: Keypair) {
         _privkey = State(initialValue: keypair.privkey?.nsec ?? "")
         self.keypair = keypair
@@ -80,7 +85,7 @@ struct KeySettingsView: View {
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 5))
             }
-            
+
             if let sec = keypair.privkey?.nsec {
                 Section(NSLocalizedString("Secret Account Login Key", comment: "Section title for user's secret account login key.")) {
                     HStack {
@@ -92,18 +97,111 @@ struct KeySettingsView: View {
                                 .privacySensitive()
                                 .clipShape(RoundedRectangle(cornerRadius: 5))
                         }
-                        
+
                         CopyButton(is_pk: false)
                     }
-                    
+
                     ShowSecToggle
                 }
             }
-            
+
+            // Key Storage Mode section
+            Section {
+                Picker(selection: $keyStorageMode) {
+                    ForEach(KeyStorageMode.allCases) { mode in
+                        Text(mode.title)
+                            .tag(mode)
+                            #if targetEnvironment(simulator)
+                            .disabled(mode == .localOnly)
+                            #endif
+                    }
+                } label: {
+                    Text(NSLocalizedString("Key Storage", comment: "Label for key storage mode picker"))
+                }
+                .onChange(of: keyStorageMode) { newMode in
+                    if newMode != KeyStorageSettings.mode {
+                        pendingStorageMode = newMode
+                        showStorageModeChangeAlert = true
+                        // Reset picker until confirmed
+                        keyStorageMode = KeyStorageSettings.mode
+                    }
+                }
+
+                // Show current mode description
+                Text(KeyStorageSettings.mode.description)
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                #if targetEnvironment(simulator)
+                if keyStorageMode == .localOnly {
+                    Text(NSLocalizedString("Local-only storage is not available in the simulator. Use a real device to test Secure Enclave storage.", comment: "Warning when local-only storage is selected in simulator"))
+                        .font(.footnote)
+                        .foregroundColor(.orange)
+                }
+                #endif
+            } header: {
+                Text(NSLocalizedString("Key Storage", comment: "Section header for key storage settings"))
+            } footer: {
+                if KeyStorageSettings.mode == .localOnly && !SecureEnclaveStorage.isAvailable {
+                    Text(NSLocalizedString("Secure Enclave is not available on this device. Keys will be stored locally without hardware encryption.", comment: "Warning when Secure Enclave is not available"))
+                        .foregroundColor(.orange)
+                }
+            }
         }
         .navigationTitle(NSLocalizedString("Keys", comment: "Navigation title for managing keys."))
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()
+        }
+        .alert(
+            NSLocalizedString("Change Key Storage Mode?", comment: "Alert title for changing key storage mode"),
+            isPresented: $showStorageModeChangeAlert,
+            presenting: pendingStorageMode
+        ) { newMode in
+            Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {
+                pendingStorageMode = nil
+            }
+            Button(newMode == .localOnly
+                   ? NSLocalizedString("Switch to Local Only", comment: "Confirm switching to local-only key storage")
+                   : NSLocalizedString("Switch to iCloud Sync", comment: "Confirm switching to iCloud sync key storage")
+            ) {
+                let previousMode = KeyStorageSettings.mode
+                KeyStorageSettings.mode = newMode
+                // Migrate all existing keys to new mode
+                let result = AccountsStore.shared.migrateAllKeysToCurrentMode()
+                migrationResult = result
+
+                if result.failed > 0 {
+                    // Rollback on failure
+                    KeyStorageSettings.mode = previousMode
+                    keyStorageMode = previousMode
+                } else {
+                    keyStorageMode = newMode
+                }
+                pendingStorageMode = nil
+                showMigrationResultAlert = true
+            }
+        } message: { newMode in
+            Text(newMode.description)
+        }
+        .alert(
+            migrationResult?.failed ?? 0 > 0
+                ? NSLocalizedString("Migration Failed", comment: "Alert title when key migration fails")
+                : NSLocalizedString("Migration Complete", comment: "Alert title when key migration succeeds"),
+            isPresented: $showMigrationResultAlert
+        ) {
+            Button(NSLocalizedString("OK", comment: "OK button")) {
+                showMigrationResultAlert = false
+                migrationResult = nil
+            }
+        } message: {
+            if let result = migrationResult {
+                if result.failed > 0 {
+                    Text("Failed to migrate \(result.failed) key(s). Your keys remain in the previous storage mode. Please try again or contact support.", comment: "Alert message when key migration fails")
+                } else if result.success > 0 {
+                    Text("Successfully migrated \(result.success) key(s) to the new storage mode.", comment: "Alert message when key migration succeeds")
+                } else {
+                    Text("No keys needed migration.", comment: "Alert message when no keys needed migration")
+                }
+            }
         }
     }
 }
@@ -133,4 +231,3 @@ func authenticate_locally(_ has_authenticated_locally: Bool, completion: @escapi
         completion(true)
     }
 }
-

@@ -377,21 +377,69 @@ struct SignInEntry: View {
     let key: Binding<String>
     let shouldSaveKey: Binding<Bool>
     @State private var privKeyFound: Bool = false
+    @State private var selectedStorageMode: KeyStorageMode = KeyStorageSettings.mode
+
     var body: some View {
         VStack(alignment: .leading) {
             Text("Enter your account key", comment: "Prompt for user to enter an account key to login.")
                 .foregroundColor(DamusColors.neutral6)
                 .fontWeight(.medium)
                 .padding(.top, 30)
-            
+
             KeyInput(NSLocalizedString("nsec1…", comment: "Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key."),
                      key: key,
                      shouldSaveKey: shouldSaveKey,
                      privKeyFound: $privKeyFound)
             .accessibilityIdentifier(AppAccessibilityIdentifiers.sign_in_nsec_key_entry_field.rawValue)
-            
+
             if privKeyFound {
                 Toggle(NSLocalizedString("Save Key in Secure Keychain", comment: "Toggle to save private key to the Apple secure keychain."), isOn: shouldSaveKey)
+
+                if shouldSaveKey.wrappedValue {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Key Storage", comment: "Label for key storage mode picker")
+                            .font(.subheadline)
+                            .foregroundColor(DamusColors.neutral6)
+
+                        Picker("", selection: $selectedStorageMode) {
+                            ForEach(KeyStorageMode.allCases) { mode in
+                                Text(mode.title).tag(mode)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .onChange(of: selectedStorageMode) { newMode in
+                            KeyStorageSettings.mode = newMode
+                        }
+
+                        Text(selectedStorageMode.description)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        if selectedStorageMode == .localOnly {
+                            HStack {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.orange)
+                                Text("Back up your key separately!", comment: "Warning about local-only key storage")
+                                    .font(.caption)
+                                    .foregroundColor(.orange)
+                            }
+                        }
+
+                        #if targetEnvironment(simulator)
+                        if selectedStorageMode == .iCloudSync {
+                            HStack {
+                                Image(systemName: "info.circle.fill")
+                                    .foregroundColor(.blue)
+                                Text("Simulator: iCloud sync requires signing into iCloud in Settings.", comment: "Simulator warning for iCloud sync")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        #endif
+                    }
+                    .padding(.top, 8)
+                }
             }
         }
     }

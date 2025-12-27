@@ -13,15 +13,17 @@ struct SaveKeysView: View {
     let pool: RelayPool = RelayPool(ndb: Ndb()!)
     @State var loading: Bool = false
     @State var error: String? = nil
-    
+
     @State private var credential_handler = CredentialHandler()
+    @State private var selectedStorageMode: KeyStorageMode = KeyStorageSettings.mode
+    @State private var showStorageInfo: Bool = false
 
     @FocusState var pubkey_focused: Bool
     @FocusState var privkey_focused: Bool
-    
+
     let first_contact_event: NdbNote?
     let first_relay_list_event: NdbNote?
-    
+
     init(account: CreateAccountModel) {
         self.account = account
         self.first_contact_event = make_first_contact_event(keypair: account.keypair)
@@ -62,9 +64,54 @@ struct SaveKeysView: View {
                     .font(.system(size: 14))
                     .foregroundColor(DamusColors.neutral6)
                     .padding(.top, 2)
-                    .padding(.bottom, 100)
                     .multilineTextAlignment(.center)
-                
+
+                // Storage mode picker
+                VStack(spacing: 12) {
+                    Text("How should we store your key?", comment: "Prompt asking user how to store their key")
+                        .font(.headline)
+                        .foregroundColor(DamusColors.neutral6)
+                        .padding(.top, 20)
+
+                    Picker("", selection: $selectedStorageMode) {
+                        ForEach(KeyStorageMode.allCases) { mode in
+                            Text(mode.title).tag(mode)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal)
+
+                    Text(selectedStorageMode.description)
+                        .font(.caption)
+                        .foregroundColor(DamusColors.neutral6)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    if selectedStorageMode == .localOnly {
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.orange)
+                            Text("Make sure to back up your key separately!", comment: "Warning about local-only key storage")
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                        }
+                    }
+
+                    #if targetEnvironment(simulator)
+                    if selectedStorageMode == .iCloudSync {
+                        HStack {
+                            Image(systemName: "info.circle.fill")
+                                .foregroundColor(.blue)
+                            Text("Simulator: iCloud sync requires signing into iCloud in Settings.", comment: "Simulator warning for iCloud sync")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    #endif
+                }
+                .padding(.bottom, 20)
+
                 Spacer()
                 
                 if loading {
@@ -88,6 +135,8 @@ struct SaveKeysView: View {
                 } else {
                     
                     Button(action: {
+                        // Apply the selected storage mode
+                        KeyStorageSettings.mode = selectedStorageMode
                         save_key(account)
                         Task { await complete_account_creation(account) }
                     }) {

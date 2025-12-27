@@ -95,7 +95,13 @@ struct ManageAccountsSettingsView: View {
             }
         } message: { account in
             let displayName = account.displayName ?? abbreviatedPubkey(account.pubkey)
-            Text("Are you sure you want to remove \(displayName)? This will remove the account from this device. If you have the private key saved elsewhere, you can add it again later.", comment: "Alert message confirming account removal")
+            let storageWarning = account.hasPrivateKey ? KeyStorageSettings.mode.warningForDeletion : ""
+            let baseMessage = NSLocalizedString("Are you sure you want to remove \(displayName)?", comment: "Alert message confirming account removal")
+            if account.hasPrivateKey {
+                Text("\(baseMessage)\n\n\(storageWarning)")
+            } else {
+                Text(baseMessage)
+            }
         }
     }
 

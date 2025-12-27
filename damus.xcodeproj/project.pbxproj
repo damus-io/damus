@@ -502,6 +502,12 @@
 		4FE60CDD295E1C5E00105A1F /* Wallet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE60CDC295E1C5E00105A1F /* Wallet.swift */; };
 		50088DA129E8271A008A1FDF /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50088DA029E8271A008A1FDF /* WebSocket.swift */; };
 		501F8C802A0220E1001AFC1D /* KeychainStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C7F2A0220E1001AFC1D /* KeychainStorage.swift */; };
+		355C2F4197E54B92A523E69A /* SecureEnclaveStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 355C2F4197E54B92A523E699 /* SecureEnclaveStorage.swift */; };
+		830065CFBBAD4021ADDE8A5E /* KeyStorageMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 830065CFBBAD4021ADDE8A5D /* KeyStorageMode.swift */; };
+		355C2F4197E54B92A523E69B /* SecureEnclaveStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 355C2F4197E54B92A523E699 /* SecureEnclaveStorage.swift */; };
+		830065CFBBAD4021ADDE8A5F /* KeyStorageMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 830065CFBBAD4021ADDE8A5D /* KeyStorageMode.swift */; };
+		355C2F4197E54B92A523E69C /* SecureEnclaveStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 355C2F4197E54B92A523E699 /* SecureEnclaveStorage.swift */; };
+		830065CFBBAD4021ADDE8A60 /* KeyStorageMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 830065CFBBAD4021ADDE8A5D /* KeyStorageMode.swift */; };
 		501F8C822A0224EB001AFC1D /* KeychainStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C812A0224EB001AFC1D /* KeychainStorageTests.swift */; };
 		504323A72A34915F006AE6DC /* RelayModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504323A62A34915F006AE6DC /* RelayModel.swift */; };
 		504323A92A3495B6006AE6DC /* RelayModelCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504323A82A3495B6006AE6DC /* RelayModelCache.swift */; };
@@ -2631,6 +2637,8 @@
 		4FE60CDC295E1C5E00105A1F /* Wallet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wallet.swift; sourceTree = "<group>"; };
 		50088DA029E8271A008A1FDF /* WebSocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocket.swift; sourceTree = "<group>"; };
 		501F8C7F2A0220E1001AFC1D /* KeychainStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStorage.swift; sourceTree = "<group>"; };
+		355C2F4197E54B92A523E699 /* SecureEnclaveStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureEnclaveStorage.swift; sourceTree = "<group>"; };
+		830065CFBBAD4021ADDE8A5D /* KeyStorageMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyStorageMode.swift; sourceTree = "<group>"; };
 		501F8C812A0224EB001AFC1D /* KeychainStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStorageTests.swift; sourceTree = "<group>"; };
 		504323A62A34915F006AE6DC /* RelayModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayModel.swift; sourceTree = "<group>"; };
 		504323A82A3495B6006AE6DC /* RelayModelCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayModelCache.swift; sourceTree = "<group>"; };
@@ -4953,6 +4961,8 @@
 				D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */,
 				D7315A292ACDF3B70036E30A /* DamusCacheManager.swift */,
 				501F8C7F2A0220E1001AFC1D /* KeychainStorage.swift */,
+				355C2F4197E54B92A523E699 /* SecureEnclaveStorage.swift */,
+				830065CFBBAD4021ADDE8A5D /* KeyStorageMode.swift */,
 				4C3BEFDF281DE1ED00B3DE84 /* DamusState.swift */,
 			);
 			path = Storage;
@@ -6267,6 +6277,8 @@
 				4C32B95A2A9AD44700DC3548 /* Verifiable.swift in Sources */,
 				4C73C5142A4437C10062CAC0 /* ZapUserView.swift in Sources */,
 				501F8C802A0220E1001AFC1D /* KeychainStorage.swift in Sources */,
+				355C2F4197E54B92A523E69A /* SecureEnclaveStorage.swift in Sources */,
+				830065CFBBAD4021ADDE8A5E /* KeyStorageMode.swift in Sources */,
 				3A92C0FE2DE16E9800CEEBAC /* FaviconCache.swift in Sources */,
 				5CB645A22EA31E410018BD91 /* LabsLogoView.swift in Sources */,
 				4C1A9A1D29DDCF9B00516EAC /* NotificationSettingsView.swift in Sources */,
@@ -6744,6 +6756,8 @@
 				82D6FBE12CD99F7900C925F4 /* NotificationSettingsView.swift in Sources */,
 				82D6FBE22CD99F7900C925F4 /* AppearanceSettingsView.swift in Sources */,
 				D7DB930A2D69486700DA1EE5 /* NIP65.swift in Sources */,
+				355C2F4197E54B92A523E69B /* SecureEnclaveStorage.swift in Sources */,
+				830065CFBBAD4021ADDE8A5F /* KeyStorageMode.swift in Sources */,
 				82D6FBE32CD99F7900C925F4 /* KeySettingsView.swift in Sources */,
 				82D6FBE42CD99F7900C925F4 /* ZapSettingsView.swift in Sources */,
 				82D6FBE52CD99F7900C925F4 /* TranslationSettingsView.swift in Sources */,
@@ -7368,6 +7382,8 @@
 				D703D78A2C670C8A00A400EA /* LibreTranslateServer.swift in Sources */,
 				D703D7602C670AAB00A400EA /* MigratedTypes.swift in Sources */,
 				D7A1C7F52F4F8D8D00D9B5F1 /* AccountsStore.swift in Sources */,
+				355C2F4197E54B92A523E69C /* SecureEnclaveStorage.swift in Sources */,
+				830065CFBBAD4021ADDE8A60 /* KeyStorageMode.swift in Sources */,
 				D7A1C7F92F4F8F5600D9B5F1 /* OnboardingSession.swift in Sources */,
 				D73E5E192C6A965A007EB227 /* DamusState.swift in Sources */,
 				D73E5F872C6AA639007EB227 /* ImageCarousel.swift in Sources */,
