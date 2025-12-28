@@ -70,7 +70,8 @@ class LoadableNostrEventViewModel: ObservableObject {
                 return .loaded(route: Route.DMChat(dms: dm_model))
             case .like:
                 guard let first_referenced_note_id = ev.referenced_ids.first else { return .not_found }
-                return await self.executeLoadingLogic(note_reference: .note_id(first_referenced_note_id, relays: []))
+                // Pass the same relay hints - the referenced note is likely on the same relay as the reaction
+                return await self.executeLoadingLogic(note_reference: .note_id(first_referenced_note_id, relays: relays))
             case .zap, .zap_request:
                 guard let zap = await get_zap(from: ev, state: damus_state) else { return .not_found }
                 return .loaded(route: Route.Zaps(target: zap.target))
