@@ -156,15 +156,30 @@ actor RelayPool {
         var i: Int = 0
 
         await self.disconnect(to: [relay_id])
-        
+
         for relay in relays {
             if relay.id == relay_id {
                 relay.connection.disablePermanently()
                 relays.remove(at: i)
                 break
             }
-            
+
             i += 1
+        }
+    }
+
+    /// Removes ephemeral relays from the pool and disconnects them.
+    /// Only removes relays that are marked as ephemeral; regular relays are left untouched.
+    ///
+    /// - Parameter relayURLs: The relay URLs to potentially remove (only ephemeral ones will be removed)
+    func removeEphemeralRelays(_ relayURLs: [RelayURL]) async {
+        for url in relayURLs {
+            if let relay = await get_relay(url), relay.descriptor.ephemeral {
+                #if DEBUG
+                print("[RelayPool] Removing ephemeral relay: \(url.absoluteString)")
+                #endif
+                await remove_relay(url)
+            }
         }
     }
 
@@ -195,8 +210,7 @@ actor RelayPool {
     /// Ensures the given relay URLs are connected, adding them as ephemeral relays if not already in the pool.
     /// Returns the list of relay URLs that are actually connected (ready for subscriptions).
     ///
-    /// Ephemeral relays are not immediately cleaned up to avoid race conditions with concurrent lookups.
-    /// They will be disconnected when idle and removed on app restart.
+    /// Ephemeral relays should be cleaned up by the caller after the lookup completes using `removeEphemeralRelays`.
     ///
     /// - Parameters:
     ///   - relayURLs: The relay URLs to ensure are connected

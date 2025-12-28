@@ -391,12 +391,20 @@ extension NostrNetworkManager {
         ///   - naddr: the `naddr` address
         func lookup(naddr: NAddr, to targetRelays: [RelayURL]? = nil, timeout: Duration? = nil) async -> NostrEvent? {
             var connectedTargetRelays = targetRelays
+            var ephemeralRelaysToCleanup: [RelayURL] = []
             if let relays = targetRelays, !relays.isEmpty {
                 let connectedRelays = await self.pool.ensureConnected(to: relays)
                 connectedTargetRelays = connectedRelays.isEmpty ? nil : connectedRelays
+                ephemeralRelaysToCleanup = relays
                 #if DEBUG
                 Self.logger.info("lookup(naddr): Using \(connectedRelays.count)/\(relays.count) relay hints: \(connectedRelays.map { $0.absoluteString }.joined(separator: ", "), privacy: .public)")
                 #endif
+            }
+
+            defer {
+                if !ephemeralRelaysToCleanup.isEmpty {
+                    Task { await self.pool.removeEphemeralRelays(ephemeralRelaysToCleanup) }
+                }
             }
 
             let nostrKinds: [NostrKind]? = NostrKind(rawValue: naddr.kind).map { [$0] }
@@ -439,12 +447,20 @@ extension NostrNetworkManager {
             guard let filter else { return nil }
 
             var targetRelays = find_from
+            var ephemeralRelaysToCleanup: [RelayURL] = []
             if let relays = find_from, !relays.isEmpty {
                 let connectedRelays = await self.pool.ensureConnected(to: relays)
                 targetRelays = connectedRelays.isEmpty ? nil : connectedRelays
+                ephemeralRelaysToCleanup = relays
                 #if DEBUG
                 Self.logger.info("findEvent: Using \(connectedRelays.count)/\(relays.count) relay hints: \(connectedRelays.map { $0.absoluteString }.joined(separator: ", "), privacy: .public)")
                 #endif
+            }
+
+            defer {
+                if !ephemeralRelaysToCleanup.isEmpty {
+                    Task { await self.pool.removeEphemeralRelays(ephemeralRelaysToCleanup) }
+                }
             }
 
             for await noteLender in self.streamExistingEvents(filters: [filter], to: targetRelays) {
