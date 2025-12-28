@@ -199,13 +199,12 @@ struct SearchResultsView: View {
     }
 }
 
-/*
-struct SearchResultsView_Previews: PreviewProvider {
-    static var previews: some View {
-        SearchResultsView(damus_state: test_damus_state(), s)
-    }
-}
- */
+/// Interprets a raw search string and maps it to an appropriate `Search` case.
+/// - Parameters:
+///   - profiles: Profile index used when resolving profile-lookups from the query.
+///   - contacts: Contact list used to prioritize or resolve profile-lookups.
+///   - search new: The raw user-provided search string to interpret.
+/// - Returns: A `Search` value representing the parsed query (e.g., `.nip05`, `.hashtag`, `.hex`, `.profile`, `.note`, `.nevent`, `.nprofile`, `.naddr`, or `.multi`), or `nil` if the input string is empty.
 
 @MainActor
 func search_for_string(profiles: Profiles, contacts: Contacts, search new: String) -> Search? {
