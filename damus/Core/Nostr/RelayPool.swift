@@ -44,6 +44,11 @@ actor RelayPool {
     var delegate: Delegate?
     private(set) var signal: SignalModel = SignalModel()
 
+    /// Tracks active leases on ephemeral relays to prevent premature cleanup.
+    /// Each lookup that uses an ephemeral relay acquires a lease; cleanup only
+    /// happens when the last lease is released.
+    private var ephemeralLeases: [RelayURL: Int] = [:]
+
     let network_monitor = NWPathMonitor()
     private let network_monitor_queue = DispatchQueue(label: "io.damus.network_monitor")
     private var last_network_status: NWPath.Status = .unsatisfied
@@ -168,17 +173,35 @@ actor RelayPool {
         }
     }
 
-    /// Removes ephemeral relays from the pool and disconnects them.
-    /// Only removes relays that are marked as ephemeral; regular relays are left untouched.
-    ///
-    /// - Parameter relayURLs: The relay URLs to potentially remove (only ephemeral ones will be removed)
-    func removeEphemeralRelays(_ relayURLs: [RelayURL]) async {
+    /// Acquires a lease on ephemeral relays to prevent them from being cleaned up
+    /// while a lookup is in progress. Must be paired with `releaseEphemeralRelays`.
+    func acquireEphemeralRelays(_ relayURLs: [RelayURL]) {
         for url in relayURLs {
-            if let relay = await get_relay(url), relay.descriptor.ephemeral {
+            ephemeralLeases[url, default: 0] += 1
+            #if DEBUG
+            print("[RelayPool] Acquired lease on ephemeral relay \(url.absoluteString), count: \(ephemeralLeases[url] ?? 0)")
+            #endif
+        }
+    }
+
+    /// Releases leases on ephemeral relays. When the last lease is released,
+    /// the relay is disconnected and removed from the pool.
+    func releaseEphemeralRelays(_ relayURLs: [RelayURL]) async {
+        for url in relayURLs {
+            guard let count = ephemeralLeases[url] else { continue }
+            if count <= 1 {
+                ephemeralLeases[url] = nil
+                if let relay = await get_relay(url), relay.descriptor.ephemeral {
+                    #if DEBUG
+                    print("[RelayPool] Releasing last lease, removing ephemeral relay: \(url.absoluteString)")
+                    #endif
+                    await remove_relay(url)
+                }
+            } else {
+                ephemeralLeases[url] = count - 1
                 #if DEBUG
-                print("[RelayPool] Removing ephemeral relay: \(url.absoluteString)")
+                print("[RelayPool] Released lease on ephemeral relay \(url.absoluteString), count: \(ephemeralLeases[url] ?? 0)")
                 #endif
-                await remove_relay(url)
             }
         }
     }
@@ -220,7 +243,7 @@ actor RelayPool {
     /// Ensures the given relay URLs are connected, adding them as ephemeral relays if not already in the pool.
     /// Returns the list of relay URLs that are actually connected (ready for subscriptions).
     ///
-    /// Ephemeral relays should be cleaned up by the caller after the lookup completes using `removeEphemeralRelays`.
+    /// Callers should use `acquireEphemeralRelays` before the lookup and `releaseEphemeralRelays` after.
     ///
     /// - Parameters:
     ///   - relayURLs: The relay URLs to ensure are connected
@@ -259,32 +282,42 @@ actor RelayPool {
 
         guard !toConnect.isEmpty else { return alreadyConnected }
 
-        // If we already have at least one connected relay, start connecting others in background
-        // and return immediately - no need to wait since we can use the already-connected relay
-        if !alreadyConnected.isEmpty {
-            Task { await connect(to: toConnect) }
-            return alreadyConnected
-        }
-
         await connect(to: toConnect)
 
-        let deadline = ContinuousClock.now + timeout
-        let checkInterval: Duration = .milliseconds(100)
+        let checkInterval: Duration = .milliseconds(50)
+        let overallDeadline = ContinuousClock.now + timeout
+        var graceDeadline: ContinuousClock.Instant? = alreadyConnected.isEmpty ? nil : ContinuousClock.now + .milliseconds(300)
 
-        waitLoop: while ContinuousClock.now < deadline {
+        // Wait for relays to connect. Once the first connects, start a grace period for others.
+        waitLoop: while ContinuousClock.now < overallDeadline {
             do {
                 try await Task.sleep(for: checkInterval)
             } catch {
                 break
             }
 
+            // Check if any relay has connected
+            var anyConnected = false
             for url in toConnect {
                 if let relay = await get_relay(url), relay.connection.isConnected {
+                    anyConnected = true
+                    break
+                }
+            }
+
+            if anyConnected {
+                // Start grace period on first connection (if not already started)
+                if graceDeadline == nil {
+                    graceDeadline = ContinuousClock.now + .milliseconds(300)
+                }
+                // Exit once grace period expires
+                if let deadline = graceDeadline, ContinuousClock.now >= deadline {
                     break waitLoop
                 }
             }
         }
 
+        // Collect all connected relays
         var connected = alreadyConnected
         for url in toConnect {
             if let relay = await get_relay(url), relay.connection.isConnected {

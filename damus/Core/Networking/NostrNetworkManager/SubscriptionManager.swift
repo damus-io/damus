@@ -391,19 +391,20 @@ extension NostrNetworkManager {
         ///   - naddr: the `naddr` address
         func lookup(naddr: NAddr, to targetRelays: [RelayURL]? = nil, timeout: Duration? = nil) async -> NostrEvent? {
             var connectedTargetRelays = targetRelays
-            var ephemeralRelaysToCleanup: [RelayURL] = []
+            var ephemeralRelays: [RelayURL] = []
             if let relays = targetRelays, !relays.isEmpty {
+                await self.pool.acquireEphemeralRelays(relays)
+                ephemeralRelays = relays
                 let connectedRelays = await self.pool.ensureConnected(to: relays)
                 connectedTargetRelays = connectedRelays.isEmpty ? nil : connectedRelays
-                ephemeralRelaysToCleanup = relays
                 #if DEBUG
                 Self.logger.info("lookup(naddr): Using \(connectedRelays.count)/\(relays.count) relay hints: \(connectedRelays.map { $0.absoluteString }.joined(separator: ", "), privacy: .public)")
                 #endif
             }
 
             defer {
-                if !ephemeralRelaysToCleanup.isEmpty {
-                    Task { await self.pool.removeEphemeralRelays(ephemeralRelaysToCleanup) }
+                if !ephemeralRelays.isEmpty {
+                    Task { await self.pool.releaseEphemeralRelays(ephemeralRelays) }
                 }
             }
 
@@ -447,19 +448,20 @@ extension NostrNetworkManager {
             guard let filter else { return nil }
 
             var targetRelays = find_from
-            var ephemeralRelaysToCleanup: [RelayURL] = []
+            var ephemeralRelays: [RelayURL] = []
             if let relays = find_from, !relays.isEmpty {
+                await self.pool.acquireEphemeralRelays(relays)
+                ephemeralRelays = relays
                 let connectedRelays = await self.pool.ensureConnected(to: relays)
                 targetRelays = connectedRelays.isEmpty ? nil : connectedRelays
-                ephemeralRelaysToCleanup = relays
                 #if DEBUG
                 Self.logger.info("findEvent: Using \(connectedRelays.count)/\(relays.count) relay hints: \(connectedRelays.map { $0.absoluteString }.joined(separator: ", "), privacy: .public)")
                 #endif
             }
 
             defer {
-                if !ephemeralRelaysToCleanup.isEmpty {
-                    Task { await self.pool.removeEphemeralRelays(ephemeralRelaysToCleanup) }
+                if !ephemeralRelays.isEmpty {
+                    Task { await self.pool.releaseEphemeralRelays(ephemeralRelays) }
                 }
             }
 
