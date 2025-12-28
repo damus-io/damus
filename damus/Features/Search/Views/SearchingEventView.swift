@@ -15,8 +15,8 @@ enum SearchState {
 }
 
 enum SearchType: Equatable {
-    case event(NoteId)
-    case profile(Pubkey)
+    case event(NoteId, relays: [RelayURL])
+    case profile(Pubkey, relays: [RelayURL])
     case nip05(String)
     case naddr(NAddr)
 }
@@ -32,9 +32,9 @@ struct SearchingEventView: View {
         switch search_type {
         case .nip05:
             return "Nostr Address"
-        case .profile:
+        case .profile(_, _):
             return "Profile"
-        case .event:
+        case .event(_, _):
             return "Note"
         case .naddr:
             return "Naddr"
@@ -76,18 +76,20 @@ struct SearchingEventView: View {
                 }
             }
             
-        case .event(let note_id):
+        case .event(let note_id, let relays):
             Task {
-                let res = await state.nostrNetwork.reader.findEvent(query: .event(evid: note_id))
+                let targetRelays = relays.isEmpty ? nil : relays
+                let res = await state.nostrNetwork.reader.findEvent(query: .event(evid: note_id, find_from: targetRelays))
                 guard case .event(let ev) = res else {
                     self.search_state = .not_found
                     return
                 }
                 self.search_state = .found(ev)
             }
-        case .profile(let pubkey):
+        case .profile(let pubkey, let relays):
             Task {
-                let res = await state.nostrNetwork.reader.findEvent(query: .profile(pubkey: pubkey))
+                let targetRelays = relays.isEmpty ? nil : relays
+                let res = await state.nostrNetwork.reader.findEvent(query: .profile(pubkey: pubkey, find_from: targetRelays))
                 guard case .profile(let pubkey) = res else {
                     self.search_state = .not_found
                     return
@@ -96,7 +98,8 @@ struct SearchingEventView: View {
             }
         case .naddr(let naddr):
             Task {
-                let res = await state.nostrNetwork.reader.lookup(naddr: naddr)
+                let targetRelays = naddr.relays.isEmpty ? nil : naddr.relays
+                let res = await state.nostrNetwork.reader.lookup(naddr: naddr, to: targetRelays)
                 guard let res = res else {
                     self.search_state = .not_found
                     return
@@ -141,6 +144,6 @@ struct SearchingEventView: View {
 struct SearchingEventView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state
-        SearchingEventView(state: state, search_type: .event(test_note.id))
+        SearchingEventView(state: state, search_type: .event(test_note.id, relays: []))
     }
 }

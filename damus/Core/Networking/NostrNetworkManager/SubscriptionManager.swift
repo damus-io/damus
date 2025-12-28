@@ -390,27 +390,33 @@ extension NostrNetworkManager {
         /// - Parameters:
         ///   - naddr: the `naddr` address
         func lookup(naddr: NAddr, to targetRelays: [RelayURL]? = nil, timeout: Duration? = nil) async -> NostrEvent? {
-            var nostrKinds: [NostrKind]? = NostrKind(rawValue: naddr.kind).map { [$0] }
+            var connectedTargetRelays = targetRelays
+            if let relays = targetRelays, !relays.isEmpty {
+                let connectedRelays = await self.pool.ensureConnected(to: relays)
+                connectedTargetRelays = connectedRelays.isEmpty ? nil : connectedRelays
+                #if DEBUG
+                Self.logger.info("lookup(naddr): Using \(connectedRelays.count)/\(relays.count) relay hints: \(connectedRelays.map { $0.absoluteString }.joined(separator: ", "), privacy: .public)")
+                #endif
+            }
 
+            let nostrKinds: [NostrKind]? = NostrKind(rawValue: naddr.kind).map { [$0] }
             let filter = NostrFilter(kinds: nostrKinds, authors: [naddr.author])
-            
-            for await noteLender in self.streamExistingEvents(filters: [filter], to: targetRelays, timeout: timeout) {
-                // TODO: This can be refactored to borrow the note instead of copying it. But we need to implement `referenced_params` on `UnownedNdbNote` to do so
+
+            for await noteLender in self.streamExistingEvents(filters: [filter], to: connectedTargetRelays, timeout: timeout) {
                 guard let event = noteLender.justGetACopy() else { continue }
                 if event.referenced_params.first?.param.string() == naddr.identifier {
                     return event
                 }
             }
-            
+
             return nil
         }
         
-        // TODO: Improve this. This is mostly intact to keep compatibility with its predecessor, but we can do better
         func findEvent(query: FindEvent) async -> FoundEvent? {
             var filter: NostrFilter? = nil
             let find_from = query.find_from
             let query = query.type
-            
+
             switch query {
             case .profile(let pubkey):
                 let profileNotNil = self.ndb.lookup_profile(pubkey, borrow: { pr in
@@ -429,12 +435,19 @@ extension NostrNetworkManager {
                 }
                 filter = NostrFilter(ids: [evid], limit: 1)
             }
-            
-            var attempts: Int = 0
-            var has_event = false
+
             guard let filter else { return nil }
-            
-            for await noteLender in self.streamExistingEvents(filters: [filter], to: find_from) {
+
+            var targetRelays = find_from
+            if let relays = find_from, !relays.isEmpty {
+                let connectedRelays = await self.pool.ensureConnected(to: relays)
+                targetRelays = connectedRelays.isEmpty ? nil : connectedRelays
+                #if DEBUG
+                Self.logger.info("findEvent: Using \(connectedRelays.count)/\(relays.count) relay hints: \(connectedRelays.map { $0.absoluteString }.joined(separator: ", "), privacy: .public)")
+                #endif
+            }
+
+            for await noteLender in self.streamExistingEvents(filters: [filter], to: targetRelays) {
                 let foundEvent: FoundEvent? = try? noteLender.borrow({ event in
                     switch query {
                     case .profile:

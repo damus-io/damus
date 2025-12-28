@@ -49,8 +49,9 @@ class LoadableNostrEventViewModel: ObservableObject {
     }
     
     /// Asynchronously find an event from NostrDB or from the network (if not available on NostrDB)
-    private func loadEvent(noteId: NoteId) async -> NostrEvent? {
-        let res = await damus_state.nostrNetwork.reader.findEvent(query: .event(evid: noteId))
+    private func loadEvent(noteId: NoteId, relays: [RelayURL]) async -> NostrEvent? {
+        let targetRelays = relays.isEmpty ? nil : relays
+        let res = await damus_state.nostrNetwork.reader.findEvent(query: .event(evid: noteId, find_from: targetRelays))
         guard let res, case .event(let ev) = res else { return nil }
         return ev
     }
@@ -58,8 +59,8 @@ class LoadableNostrEventViewModel: ObservableObject {
     /// Gets the note reference and tries to load it, outputting a new state for this view model.
     private func executeLoadingLogic(note_reference: NoteReference) async -> ThreadModelLoadingState {
         switch note_reference {
-        case .note_id(let note_id):
-            guard let ev = await self.loadEvent(noteId: note_id) else { return .not_found }
+        case .note_id(let note_id, let relays):
+            guard let ev = await self.loadEvent(noteId: note_id, relays: relays) else { return .not_found }
             guard let known_kind = ev.known_kind else { return .unknown_or_unsupported_kind }
             switch known_kind {
             case .text, .highlight:
@@ -68,9 +69,8 @@ class LoadableNostrEventViewModel: ObservableObject {
                 let dm_model = damus_state.dms.lookup_or_create(ev.pubkey)
                 return .loaded(route: Route.DMChat(dms: dm_model))
             case .like:
-                // Load the event that this reaction refers to.
                 guard let first_referenced_note_id = ev.referenced_ids.first else { return .not_found }
-                return await self.executeLoadingLogic(note_reference: .note_id(first_referenced_note_id))
+                return await self.executeLoadingLogic(note_reference: .note_id(first_referenced_note_id, relays: []))
             case .zap, .zap_request:
                 guard let zap = await get_zap(from: ev, state: damus_state) else { return .not_found }
                 return .loaded(route: Route.Zaps(target: zap.target))
@@ -78,7 +78,8 @@ class LoadableNostrEventViewModel: ObservableObject {
                 return .unknown_or_unsupported_kind
             }
         case .naddr(let naddr):
-            guard let event = await damus_state.nostrNetwork.reader.lookup(naddr: naddr) else { return .not_found }
+            let targetRelays = naddr.relays.isEmpty ? nil : naddr.relays
+            guard let event = await damus_state.nostrNetwork.reader.lookup(naddr: naddr, to: targetRelays) else { return .not_found }
             return .loaded(route: Route.Thread(thread: ThreadModel(event: event, damus_state: damus_state)))
         }
     }
@@ -91,7 +92,7 @@ class LoadableNostrEventViewModel: ObservableObject {
     }
     
     enum NoteReference: Hashable {
-        case note_id(NoteId)
+        case note_id(NoteId, relays: [RelayURL])
         case naddr(NAddr)
     }
 }
@@ -271,5 +272,5 @@ extension LoadableNostrEventView {
 }
 
 #Preview("Loadable") {
-    LoadableNostrEventView(state: test_damus_state, note_reference: .note_id(test_thread_note_1.id))
+    LoadableNostrEventView(state: test_damus_state, note_reference: .note_id(test_thread_note_1.id, relays: []))
 }

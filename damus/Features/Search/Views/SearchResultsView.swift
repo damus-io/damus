@@ -101,18 +101,18 @@ struct InnerSearchResults: View {
             case .nip05(let addr):
                 SearchingEventView(state: damus_state, search_type: .nip05(addr))
             case .profile(let pubkey):
-                SearchingEventView(state: damus_state, search_type: .profile(pubkey))
+                SearchingEventView(state: damus_state, search_type: .profile(pubkey, relays: []))
             case .hex(let h):
                 VStack(spacing: 10) {
-                    SearchingEventView(state: damus_state, search_type: .event(NoteId(h)))
-                    SearchingEventView(state: damus_state, search_type: .profile(Pubkey(h)))
-                } 
+                    SearchingEventView(state: damus_state, search_type: .event(NoteId(h), relays: []))
+                    SearchingEventView(state: damus_state, search_type: .profile(Pubkey(h), relays: []))
+                }
             case .note(let nid):
-                SearchingEventView(state: damus_state, search_type: .event(nid))
+                SearchingEventView(state: damus_state, search_type: .event(nid, relays: []))
             case .nevent(let nevent):
-                SearchingEventView(state: damus_state, search_type: .event(nevent.noteid))
+                SearchingEventView(state: damus_state, search_type: .event(nevent.noteid, relays: nevent.relays))
             case .nprofile(let nprofile):
-                SearchingEventView(state: damus_state, search_type: .profile(nprofile.author))
+                SearchingEventView(state: damus_state, search_type: .profile(nprofile.author, relays: nprofile.relays))
             case .naddr(let naddr):
                 SearchingEventView(state: damus_state, search_type: .naddr(naddr))
             case .multi(let multi):
@@ -239,6 +239,9 @@ func search_for_string(profiles: Profiles, contacts: Contacts, search new: Strin
     }
     
     if searchQuery.starts(with: "nevent"), case let .nevent(nevent) = Bech32Object.parse(searchQuery) {
+        #if DEBUG
+        print("[nevent] Parsed \(nevent.relays.count) relay hints: \(nevent.relays.map { $0.absoluteString })")
+        #endif
         return .nevent(nevent)
     }
     

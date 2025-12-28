@@ -192,6 +192,85 @@ actor RelayPool {
         self.relays.append(relay)
     }
 
+    /// Ensures the given relay URLs are connected, adding them as ephemeral relays if not already in the pool.
+    /// Returns the list of relay URLs that are actually connected (ready for subscriptions).
+    ///
+    /// Ephemeral relays are not immediately cleaned up to avoid race conditions with concurrent lookups.
+    /// They will be disconnected when idle and removed on app restart.
+    ///
+    /// - Parameters:
+    ///   - relayURLs: The relay URLs to ensure are connected
+    ///   - timeout: Maximum time to wait for pending connections (default 2s). Returns early when first relay connects.
+    /// - Returns: Connected relay URLs ready for subscriptions
+    func ensureConnected(to relayURLs: [RelayURL], timeout: Duration = .seconds(2)) async -> [RelayURL] {
+        var toConnect: [RelayURL] = []
+        var alreadyConnected: [RelayURL] = []
+
+        for url in relayURLs {
+            if let existing = await get_relay(url) {
+                if existing.connection.isConnected {
+                    alreadyConnected.append(url)
+                    #if DEBUG
+                    print("[RelayPool] Relay \(url.absoluteString) already connected")
+                    #endif
+                } else {
+                    toConnect.append(url)
+                }
+                continue
+            }
+
+            let descriptor = RelayDescriptor(url: url, info: .readWrite, variant: .ephemeral)
+            do {
+                try await add_relay(descriptor)
+                toConnect.append(url)
+                #if DEBUG
+                print("[RelayPool] Added ephemeral relay: \(url.absoluteString)")
+                #endif
+            } catch {
+                #if DEBUG
+                print("[RelayPool] Failed to add relay \(url.absoluteString): \(error)")
+                #endif
+            }
+        }
+
+        guard !toConnect.isEmpty else { return alreadyConnected }
+
+        await connect(to: toConnect)
+
+        let deadline = ContinuousClock.now + timeout
+        let checkInterval: Duration = .milliseconds(100)
+
+        waitLoop: while ContinuousClock.now < deadline {
+            do {
+                try await Task.sleep(for: checkInterval)
+            } catch {
+                break
+            }
+
+            for url in toConnect {
+                if let relay = await get_relay(url), relay.connection.isConnected {
+                    break waitLoop
+                }
+            }
+        }
+
+        var connected = alreadyConnected
+        for url in toConnect {
+            if let relay = await get_relay(url), relay.connection.isConnected {
+                connected.append(url)
+                #if DEBUG
+                print("[RelayPool] Relay \(url.absoluteString) connected: true")
+                #endif
+            } else {
+                #if DEBUG
+                print("[RelayPool] Relay \(url.absoluteString) connected: false (excluded)")
+                #endif
+            }
+        }
+
+        return connected
+    }
+
     func setLog(_ log: RelayLog, for relay_id: RelayURL) async {
         // add the current network state to the log
         log.add("Network state: \(network_monitor.currentPath.status)")
