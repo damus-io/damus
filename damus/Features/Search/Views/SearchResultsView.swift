@@ -101,18 +101,18 @@ struct InnerSearchResults: View {
             case .nip05(let addr):
                 SearchingEventView(state: damus_state, search_type: .nip05(addr))
             case .profile(let pubkey):
-                SearchingEventView(state: damus_state, search_type: .profile(pubkey))
+                SearchingEventView(state: damus_state, search_type: .profile(pubkey, relays: []))
             case .hex(let h):
                 VStack(spacing: 10) {
-                    SearchingEventView(state: damus_state, search_type: .event(NoteId(h)))
-                    SearchingEventView(state: damus_state, search_type: .profile(Pubkey(h)))
-                } 
+                    SearchingEventView(state: damus_state, search_type: .event(NoteId(h), relays: []))
+                    SearchingEventView(state: damus_state, search_type: .profile(Pubkey(h), relays: []))
+                }
             case .note(let nid):
-                SearchingEventView(state: damus_state, search_type: .event(nid))
+                SearchingEventView(state: damus_state, search_type: .event(nid, relays: []))
             case .nevent(let nevent):
-                SearchingEventView(state: damus_state, search_type: .event(nevent.noteid))
+                SearchingEventView(state: damus_state, search_type: .event(nevent.noteid, relays: nevent.relays))
             case .nprofile(let nprofile):
-                SearchingEventView(state: damus_state, search_type: .profile(nprofile.author))
+                SearchingEventView(state: damus_state, search_type: .profile(nprofile.author, relays: nprofile.relays))
             case .naddr(let naddr):
                 SearchingEventView(state: damus_state, search_type: .naddr(naddr))
             case .multi(let multi):
@@ -198,13 +198,12 @@ struct SearchResultsView: View {
     }
 }
 
-/*
-struct SearchResultsView_Previews: PreviewProvider {
-    static var previews: some View {
-        SearchResultsView(damus_state: test_damus_state(), s)
-    }
-}
- */
+/// Interprets a raw search string and maps it to an appropriate `Search` case.
+/// - Parameters:
+///   - profiles: Profile index used when resolving profile-lookups from the query.
+///   - contacts: Contact list used to prioritize or resolve profile-lookups.
+///   - search new: The raw user-provided search string to interpret.
+/// - Returns: A `Search` value representing the parsed query (e.g., `.nip05`, `.hashtag`, `.hex`, `.profile`, `.note`, `.nevent`, `.nprofile`, `.naddr`, or `.multi`), or `nil` if the input string is empty.
 
 
 func search_for_string(profiles: Profiles, contacts: Contacts, search new: String) -> Search? {
@@ -239,6 +238,10 @@ func search_for_string(profiles: Profiles, contacts: Contacts, search new: Strin
     }
     
     if searchQuery.starts(with: "nevent"), case let .nevent(nevent) = Bech32Object.parse(searchQuery) {
+        #if DEBUG
+        print("[nevent] Parsed note ID: \(nevent.noteid.hex())")
+        print("[nevent] Parsed \(nevent.relays.count) relay hints: \(nevent.relays.map { $0.absoluteString })")
+        #endif
         return .nevent(nevent)
     }
     
