@@ -240,6 +240,7 @@ func search_for_string(profiles: Profiles, contacts: Contacts, search new: Strin
     
     if searchQuery.starts(with: "nevent"), case let .nevent(nevent) = Bech32Object.parse(searchQuery) {
         #if DEBUG
+        print("[nevent] Parsed note ID: \(nevent.noteid.hex())")
         print("[nevent] Parsed \(nevent.relays.count) relay hints: \(nevent.relays.map { $0.absoluteString })")
         #endif
         return .nevent(nevent)
