@@ -203,6 +203,16 @@ class RelayPool {
                   case .string(let str) = msg
             else { return }
 
+            #if DEBUG
+            if desc.ephemeral {
+                if str.hasPrefix("[\"EVENT\"") {
+                    print("[RelayPool] Received EVENT from ephemeral relay \(relay_id.absoluteString): \(str.prefix(200))...")
+                } else if str.hasPrefix("[\"EOSE\"") {
+                    print("[RelayPool] Received EOSE from ephemeral relay \(relay_id.absoluteString)")
+                }
+            }
+            #endif
+
             let _ = self.ndb?.processEvent(str, originRelayURL: relay_id)
             self.message_received_function?((str, desc))
         })
@@ -354,7 +364,17 @@ class RelayPool {
     
     @MainActor
     func getRelays(targetRelays: [RelayURL]? = nil) -> [Relay] {
-        targetRelays.map{ get_relays($0) } ?? self.relays
+        let result = targetRelays.map{ get_relays($0) } ?? self.relays
+        #if DEBUG
+        if let targets = targetRelays {
+            let found = result.map { $0.descriptor.url.absoluteString }
+            let requested = targets.map { $0.absoluteString }
+            if found.count != targets.count {
+                print("[RelayPool] getRelays: MISMATCH! requested=\(requested) but found=\(found)")
+            }
+        }
+        #endif
+        return result
     }
     
     /// Deletes queued up requests that should not persist between app sessions (i.e. when the app goes to background then back to foreground)
@@ -409,6 +429,12 @@ class RelayPool {
     func subscribe(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, eoseTimeout: Duration? = nil, id: UUID? = nil) async -> AsyncStream<StreamItem> {
         let eoseTimeout = eoseTimeout ?? .seconds(5)
         let desiredRelays = await getRelays(targetRelays: desiredRelays)
+        #if DEBUG
+        print("[RelayPool] subscribe: requested=\(desiredRelays.map { $0.descriptor.url.absoluteString }), pool has \(await relays.count) relays")
+        if let ids = filters.first?.ids {
+            print("[RelayPool] subscribe: filter ids=\(ids.map { $0.hex() })")
+        }
+        #endif
         let startTime = CFAbsoluteTimeGetCurrent()
         return AsyncStream<StreamItem> { continuation in
             let id = id ?? UUID()
@@ -563,6 +589,11 @@ class RelayPool {
             }
             
             relay.connection.send(req, callback: { str in
+                #if DEBUG
+                if relay.descriptor.ephemeral && str.hasPrefix("[\"REQ\"") {
+                    print("[RelayPool] Sending REQ to ephemeral relay \(relay.id.absoluteString): \(str)")
+                }
+                #endif
                 self.message_sent_function?((str, relay))
             })
         }
