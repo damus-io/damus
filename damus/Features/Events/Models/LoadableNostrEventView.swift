@@ -31,6 +31,9 @@ class LoadableNostrEventViewModel: ObservableObject {
         Task { await self.load() }
     }
     
+    /// Starts loading the referenced Nostr event and updates the view model's `state` with the result or a timeout outcome.
+    /// 
+    /// This launches a dedicated task that runs the loading logic and a separate timeout task that cancels the loader after `TIMEOUT`. If the timeout fires, `state` is set to `.not_found`. If the load finishes first, the timeout task is cancelled.
     func load() async {
         // Start the loading process in a separate task to manage the timeout independently.
         let loadTask = Task { @MainActor in
@@ -48,7 +51,10 @@ class LoadableNostrEventViewModel: ObservableObject {
         timeoutTask.cancel() // Cancel the timeout task if loading finishes earlier.
     }
     
-    /// Asynchronously find an event from NostrDB or from the network (if not available on NostrDB)
+    /// Loads the Nostr event identified by `noteId`, optionally restricting the lookup to specific relays.
+    /// - Parameters:
+    ///   - relays: An array of relay URLs to restrict the lookup to. If empty, the lookup is not restricted to any relays.
+    /// - Returns: The `NostrEvent` matching `noteId` if found, `nil` otherwise.
     private func loadEvent(noteId: NoteId, relays: [RelayURL]) async -> NostrEvent? {
         let targetRelays = relays.isEmpty ? nil : relays
         let res = await damus_state.nostrNetwork.reader.findEvent(query: .event(evid: noteId, find_from: targetRelays))
@@ -56,7 +62,19 @@ class LoadableNostrEventViewModel: ObservableObject {
         return ev
     }
     
-    /// Gets the note reference and tries to load it, outputting a new state for this view model.
+    /// Resolve a NoteReference into a ThreadModelLoadingState describing how the referenced note should be presented.
+    /// 
+    /// For a `.note_id` reference this attempts to load the event (honoring optional relay hints) and maps event kinds as follows:
+    /// - `.text` or `.highlight` → `.loaded` with a `Route.Thread`.
+    /// - `.dm` → `.loaded` with a `Route.DMChat` for the corresponding DM model.
+    /// - `.like` → follows the first referenced note ID (propagating the same relay hints) and resolves it recursively.
+    /// - `.zap` or `.zap_request` → resolves a zap and, if found, returns `.loaded` with a `Route.Zaps`.
+    /// - any other known kind → `.unknown_or_unsupported_kind`.
+    /// If the event cannot be retrieved or a required referenced note/zap is missing, returns `.not_found`.
+    ///
+    /// For an `.naddr` reference this looks up the event (using relays from the NAddr if provided) and returns `.loaded` with a `Route.Thread` when found or `.not_found` when not found.
+    /// - Parameter note_reference: The note identifier to resolve; may include relay hints for relay-aware lookup.
+    /// - Returns: A `ThreadModelLoadingState` indicating the resolved presentation route (`.loaded(route: Route)`), `.not_found` when the note or required referenced data is missing, or `.unknown_or_unsupported_kind` when the event kind cannot be presented.
     private func executeLoadingLogic(note_reference: NoteReference) async -> ThreadModelLoadingState {
         switch note_reference {
         case .note_id(let note_id, let relays):

@@ -442,7 +442,12 @@ extension NostrNetworkManager {
         /// Finds a replaceable event based on an `naddr` address.
         ///
         /// - Parameters:
-        ///   - naddr: the `naddr` address
+        /// Finds a Nostr event that corresponds to the provided naddr identifier.
+        /// - Parameters:
+        ///   - naddr: The NAddr (network address) that identifies the target replaceable event (contains kind, author, and identifier).
+        ///   - targetRelays: Optional relay URLs to hint where to search; the method may acquire ephemeral relays and will use only the subset of those that become connected.
+        ///   - timeout: Optional duration to bound the search.
+        /// - Returns: The matching `NostrEvent` whose first referenced parameter equals `naddr.identifier`, or `nil` if no matching event is found.
         func lookup(naddr: NAddr, to targetRelays: [RelayURL]? = nil, timeout: Duration? = nil) async -> NostrEvent? {
             var connectedTargetRelays = targetRelays
             var ephemeralRelays: [RelayURL] = []
@@ -475,6 +480,10 @@ extension NostrNetworkManager {
             return nil
         }
         
+        /// Searches for a profile or event specified by `query` and returns the first matching result.
+        /// The function first checks the local NDB cache and, if not found, queries relays (honoring any relay hints in the query).
+        /// - Parameter query: Specifies what to find (profile by pubkey or event by id) and optional relay hints to use for network lookup.
+        /// - Returns: A `FoundEvent` containing the matched profile or event, or `nil` if no match is found.
         func findEvent(query: FindEvent) async -> FoundEvent? {
             var filter: NostrFilter? = nil
             let find_from = query.find_from

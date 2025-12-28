@@ -20,7 +20,11 @@ struct DamusURLHandler {
     /// - Parameters:
     ///   - damus_state: The Damus state. May be mutated as part of this function
     ///   - url: The URL to be opened
-    /// - Returns: A view to be shown to the user
+    /// Computes the UI action to perform for an incoming URL and returns the corresponding view or sheet action.
+    /// - Parameters:
+    ///   - damus_state: The app state used for constructing models, performing network lookups, opening wallet connections, and handling Purple URLs. This state may be mutated (for example, when initiating a wallet connection or delegating to the Purple handler).
+    ///   - url: The incoming URL to parse and handle.
+    /// - Returns: A `ContentView.ViewOpenAction` that represents the action to take for the URL — typically a route to a specific view (profile, thread, search, wallet, script, loadable event), a sheet (error or wallet selection), or an external URL action if applicable. If the URL cannot be parsed, the returned action is an error sheet describing the failure.
     static func handle_opening_url_and_compute_view_action(damus_state: DamusState, url: URL) async -> ContentView.ViewOpenAction {
         let parsed_url_info = parse_url(url: url)
         
@@ -73,7 +77,11 @@ struct DamusURLHandler {
     /// This function does not cause any mutations on the app, or any side-effects.
     ///
     /// - Parameter url: The URL to be parsed
-    /// - Returns: Structured information about the contents inside the URL. Returns `nil` if URL is not compatible, invalid, or could not be parsed for some reason.
+    /// Interprets a URL as a Damus/nostr resource and produces the corresponding ParsedURLInfo.
+    /// 
+    /// Recognizes Damus purple links, WalletConnect URLs, Bech32 nevent/nprofile forms (including relay hints),
+    /// and decoded nostr URIs for refs (pubkey, event, naddr, hashtag), filters, scripts, and invoices.
+    /// - Returns: A `ParsedURLInfo` describing the interpreted resource, or `nil` if the URL cannot be interpreted.
     static func parse_url(url: URL) -> ParsedURLInfo? {
         if let purple_url = DamusPurpleURL(url: url) {
             return .purple(purple_url)

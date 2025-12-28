@@ -41,6 +41,14 @@ struct SearchingEventView: View {
         }
     }
     
+    /// Performs the search described by `search` and updates `search_state` with the outcome.
+    ///
+    /// Starts the lookup for the provided SearchType and transitions `search_state` from `.searching` to one of:
+    /// - `.found(event)` when the target event is located,
+    /// - `.found_profile(pubkey)` when a profile pubkey is located (including nip05 resolution),
+    /// - `.not_found` when the lookup fails or yields no result.
+    /// - Parameters:
+    ///   - search: The SearchType to perform (nip05, event with optional relays, profile with optional relays, or naddr).
     func handle_search(search: SearchType) {
         self.search_state = .searching
         
