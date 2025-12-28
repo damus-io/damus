@@ -249,6 +249,13 @@ actor RelayPool {
 
         guard !toConnect.isEmpty else { return alreadyConnected }
 
+        // If we already have at least one connected relay, start connecting others in background
+        // and return immediately - no need to wait since we can use the already-connected relay
+        if !alreadyConnected.isEmpty {
+            Task { await connect(to: toConnect) }
+            return alreadyConnected
+        }
+
         await connect(to: toConnect)
 
         let deadline = ContinuousClock.now + timeout
