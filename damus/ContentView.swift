@@ -1118,10 +1118,9 @@ extension LossyLocalNotification {
         case .npub(let pubkey):
             return .route(.ProfileByKey(pubkey: pubkey))
         case .note(let noteId):
-            return .route(.LoadableNostrEvent(note_reference: .note_id(noteId)))
+            return .route(.LoadableNostrEvent(note_reference: .note_id(noteId, relays: [])))
         case .nevent(let nEvent):
-            // TODO: Improve this by implementing a route that handles nevents with their relay hints.
-            return .route(.LoadableNostrEvent(note_reference: .note_id(nEvent.noteid)))
+            return .route(.LoadableNostrEvent(note_reference: .note_id(nEvent.noteid, relays: nEvent.relays)))
         case .nprofile(let nProfile):
             // TODO: Improve this by implementing a profile route that handles nprofiles with their relay hints.
             return .route(.ProfileByKey(pubkey: nProfile.author))

@@ -27,6 +27,12 @@ struct DamusURLHandler {
         switch parsed_url_info {
         case .profile(let pubkey):
             return .route(.ProfileByKey(pubkey: pubkey))
+        case .profile_reference(let pubkey, let relays):
+            guard !relays.isEmpty else { return .route(.ProfileByKey(pubkey: pubkey)) }
+            Task {
+                let _ = await damus_state.nostrNetwork.reader.findEvent(query: .profile(pubkey: pubkey, find_from: relays))
+            }
+            return .route(.ProfileByKey(pubkey: pubkey))
         case .filter(let nostrFilter):
             let search = SearchModel(state: damus_state, search: nostrFilter)
             return .route(.Search(search: search))
@@ -76,7 +82,16 @@ struct DamusURLHandler {
         if let nwc = WalletConnectURL(str: url.absoluteString) {
             return .wallet_connect(nwc)
         }
-        
+
+        // Parse nevent/nprofile directly since decode_nostr_uri discards relay hints
+        let uri = remove_nostr_uri_prefix(url.absoluteString)
+        if uri.hasPrefix("nevent"), case .nevent(let nevent) = Bech32Object.parse(uri) {
+            return .event_reference(.note_id(nevent.noteid, relays: nevent.relays))
+        }
+        if uri.hasPrefix("nprofile"), case .nprofile(let nprofile) = Bech32Object.parse(uri) {
+            return .profile_reference(nprofile.author, relays: nprofile.relays)
+        }
+
         guard let link = decode_nostr_uri(url.absoluteString) else {
             return nil
         }
@@ -87,7 +102,7 @@ struct DamusURLHandler {
             case .pubkey(let pk):
                 return .profile(pk)
             case .event(let noteid):
-                return .event_reference(.note_id(noteid))
+                return .event_reference(.note_id(noteid, relays: []))
             case .hashtag(let ht):
                 return .filter(.filter_hashtag([ht.hashtag]))
             case .param, .quote, .reference:
@@ -111,6 +126,7 @@ struct DamusURLHandler {
     
     enum ParsedURLInfo {
         case profile(Pubkey)
+        case profile_reference(Pubkey, relays: [RelayURL])
         case filter(NostrFilter)
         case event(NostrEvent)
         case event_reference(LoadableNostrEventViewModel.NoteReference)
