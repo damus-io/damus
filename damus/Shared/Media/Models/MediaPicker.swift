@@ -17,7 +17,7 @@ enum MediaPickerEntry {
 struct MediaPicker: UIViewControllerRepresentable {
 
     @Environment(\.presentationMode)
-    @Binding private var presentationMode
+    private var presentationMode
     let mediaPickerEntry: MediaPickerEntry
 
     let onMediaSelected: (() -> Void)?
@@ -42,8 +42,14 @@ struct MediaPicker: UIViewControllerRepresentable {
         }
         
         func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-            if results.isEmpty {
-                self.parent.presentationMode.dismiss()
+            defer {
+                DispatchQueue.main.async {
+                    self.parent.presentationMode.wrappedValue.dismiss()
+                }
+            }
+            
+            guard !results.isEmpty else {
+                return
             }
             
             // When user dismiss the upload confirmation and re-adds again, reset orderIds and orderMap

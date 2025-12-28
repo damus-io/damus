@@ -27,11 +27,41 @@ struct UserRelaysView: View {
     }
     
     var body: some View {
-        List(relay_state, id: \.0) { (r, add) in
-            RelayView(state: state, relay: r, showActionButtons: .constant(true), recommended: true)
+        List {
+            Section {
+                Toggle(isOn: Binding(
+                    get: { state.settings.enable_vine_relay },
+                    set: { setDivineRelayEnabled($0) }
+                )) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Divine Relay", comment: "Label for the relay that powers Vine videos.")
+                            .font(.headline)
+                        Text("Required for Vine videos and divine.video content.")
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            
+            Section(header: Text("Relays", comment: "Header for the list of relays a user connects to.")) {
+                ForEach(relay_state, id: \.0) { (r, add) in
+                    RelayView(state: state, relay: r, showActionButtons: .constant(true), recommended: true)
+                }
+            }
         }
         .listStyle(PlainListStyle())
         .navigationBarTitle(NSLocalizedString("Relays", comment: "Navigation bar title that shows the list of relays for a user."))
+    }
+    
+    private func setDivineRelayEnabled(_ enabled: Bool) {
+        state.settings.enable_vine_relay = enabled
+        Task {
+            if enabled {
+                await state.nostrNetwork.ensureRelayConnected(.vineRelay)
+            } else {
+                await state.nostrNetwork.disconnectRelay(.vineRelay)
+            }
+        }
     }
 }
 
