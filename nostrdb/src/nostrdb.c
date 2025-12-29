@@ -6058,6 +6058,10 @@ int ndb_init(struct ndb **pndb, const char *filename, const struct ndb_config *c
 	return 1;
 }
 
+int ndb_snapshot(struct ndb *ndb, const char *path, unsigned int flags) {
+    return mdb_env_copy2(ndb->lmdb.env, path, flags);
+}
+
 void ndb_destroy(struct ndb *ndb)
 {
 	if (ndb == NULL)

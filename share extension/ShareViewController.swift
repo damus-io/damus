@@ -249,7 +249,7 @@ struct ShareExtensionView: View {
             self.share_state = .not_logged_in
             return false
         }
-        state = DamusState(keypair: keypair)
+        state = DamusState(keypair: keypair, owns_db_file: false)
         Task { await state?.nostrNetwork.connect() }
         return true
     }
