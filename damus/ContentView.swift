@@ -1073,6 +1073,40 @@ func handle_follow_notif(state: DamusState, target: FollowTarget) async -> Bool 
     return await handle_follow(state: state, follow: target.follow_ref)
 }
 
+/// Handles following multiple pubkeys in a single batch operation.
+/// This avoids race conditions that occur when firing separate follow notifications rapidly.
+/// - Parameters:
+///   - state: The DamusState containing contacts and keypair.
+///   - pubkeys: The list of pubkeys to follow.
+/// - Returns: `true` if the batch follow succeeded, `false` otherwise.
+@discardableResult
+func handle_follow_multiple(state: DamusState, pubkeys: [Pubkey]) async -> Bool {
+    guard let keypair = state.keypair.to_full() else {
+        return false
+    }
+
+    let follows = pubkeys.map { FollowRef.pubkey($0) }
+
+    guard let ev = await follow_multiple_references(
+        box: state.nostrNetwork.postbox,
+        our_contacts: state.contacts.event,
+        keypair: keypair,
+        follows: follows
+    ) else {
+        return false
+    }
+
+    state.contacts.event = ev
+
+    // Update local state and notify only after successful event creation
+    for pubkey in pubkeys {
+        state.contacts.add_friend_pubkey(pubkey)
+        notify(.followed(.pubkey(pubkey)))
+    }
+
+    return true
+}
+
 func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: EventCache, post: NostrPostResult) async -> Bool {
     switch post {
     case .post(let post):

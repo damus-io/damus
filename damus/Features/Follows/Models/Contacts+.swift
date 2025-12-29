@@ -94,3 +94,59 @@ func follow_with_existing_contacts(keypair: FullKeypair, our_contacts: NostrEven
     return NostrEvent(content: our_contacts.content, keypair: keypair.to_keypair(), kind: kind, tags: tags)
 }
 
+/// Creates a single contacts event that adds multiple follows at once.
+/// This avoids race conditions when following many users simultaneously (e.g., "Follow All").
+/// - Parameters:
+///   - box: The PostBox to send the event through.
+///   - our_contacts: The current contacts event, or nil if none exists.
+///   - keypair: The user's full keypair for signing.
+///   - follows: The list of follow references to add.
+/// - Returns: The new contacts event if successful, nil otherwise.
+func follow_multiple_references(box: PostBox, our_contacts: NostrEvent?, keypair: FullKeypair, follows: [FollowRef]) async -> NostrEvent? {
+    guard let ev = follow_multiple_users_event(our_contacts: our_contacts, keypair: keypair, follows: follows) else {
+        return nil
+    }
+
+    await box.send(ev)
+    return ev
+}
+
+/// Creates a contacts event that adds multiple follows at once.
+/// - Parameters:
+///   - our_contacts: The current contacts event, or nil if none exists.
+///   - keypair: The user's full keypair for signing.
+///   - follows: The list of follow references to add.
+/// - Returns: The new contacts event, or nil if there's nothing to add or no existing contacts.
+func follow_multiple_users_event(our_contacts: NostrEvent?, keypair: FullKeypair, follows: [FollowRef]) -> NostrEvent? {
+    guard let cs = our_contacts else {
+        // don't create contacts for now so we don't nuke our contact list due to connectivity issues
+        // we should only create contacts during profile creation
+        return nil
+    }
+
+    let kind = NostrKind.contacts.rawValue
+    var tags = cs.tags.strings()
+    var addedAny = false
+
+    for follow in follows {
+        // Skip if already following
+        if is_already_following(contacts: cs, follow: follow) {
+            continue
+        }
+
+        // Skip if already added in this batch
+        let newTag = follow.tag
+        if tags.contains(where: { $0 == newTag }) {
+            continue
+        }
+
+        tags.append(newTag)
+        addedAny = true
+    }
+
+    // Return nil if nothing was added
+    guard addedAny else { return nil }
+
+    return NostrEvent(content: cs.content, keypair: keypair.to_keypair(), kind: kind, tags: tags)
+}
+

@@ -86,10 +86,11 @@ class SuggestedUsersViewModel: ObservableObject {
         return nil
     }
 
-    /// Allows the user to follow a list of other users
+    /// Allows the user to follow a list of other users.
+    /// Uses batch follow to avoid race conditions when following many users at once.
     func follow(pubkeys: [Pubkey]) {
-        for pubkey in pubkeys {
-            notify(.follow(.pubkey(pubkey)))
+        Task {
+            await handle_follow_multiple(state: damus_state, pubkeys: pubkeys)
         }
     }
     
