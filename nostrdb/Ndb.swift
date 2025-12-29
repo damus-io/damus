@@ -44,10 +44,10 @@ class Ndb {
     }
     
     static func safemode() -> Ndb? {
-        guard let path = db_path ?? old_db_path else { return nil }
+        guard let path = db_path else { return nil }
 
         // delete the database and start fresh
-        if Self.db_files_exist(path: path) {
+        if Self.db_file_exists(path: path) {
             let file_manager = FileManager.default
             for db_file in db_files {
                 try? file_manager.removeItem(atPath: "\(path)/\(db_file)")
@@ -61,24 +61,31 @@ class Ndb {
         return ndb
     }
 
-    // NostrDB used to be stored on the app container's document directory
-    static private var old_db_path: String? {
+    static var db_path: String? {
         guard let path = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.absoluteString else {
             return nil
         }
         return remove_file_prefix(path)
     }
 
-    static var db_path: String? {
-        // Use the `group.com.damus` container, so that it can be accessible from other targets
-        // e.g. The notification service extension needs to access Ndb data, which is done through this shared file container.
+    // Shared app group container retained for legacy installs that still host the database there.
+    static private var legacy_db_path: String? {
         guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: APPLICATION_GROUP_IDENTIFIER) else {
             return nil
         }
         return remove_file_prefix(containerURL.absoluteString)
     }
     
-    static private var db_files: [String] = ["data.mdb", "lock.mdb"]
+    // DB read-only snapshot in the shared container so that extensions can get access to recent NostrDB data to enhance UX.
+    static var snapshot_db_path: String? {
+        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: APPLICATION_GROUP_IDENTIFIER) else {
+            return nil
+        }
+        return remove_file_prefix(containerURL.appendingPathComponent("snapshot", conformingTo: .directory).absoluteString)
+    }
+    
+    static private let main_db_file_name: String = "data.mdb"
+    static private let db_files: [String] = ["data.mdb", "lock.mdb"]
 
     static var empty: Ndb {
         print("txn: NOSTRDB EMPTY")
@@ -103,13 +110,17 @@ class Ndb {
             }
         }
         
-        guard let db_path = Self.db_path,
-              owns_db_file || Self.db_files_exist(path: db_path) else {
-            return nil      // If the caller claims to not own the DB file, and the DB files do not exist, then we should not initialize Ndb
-        }
-
-        guard let path = path.map(remove_file_prefix) ?? Ndb.db_path else {
+        // The path should be, in order of priority:
+        // 1. The path specified by the caller
+        // 2. If not specified, use a default path. The default path depends:
+        //     a. If the process owns the db file, `Ndb.db_path` is the default.
+        //     b. If the process does not own the db file, a read-only snapshot file (`Ndb.snapshot_db_path`) is used.
+        guard let path = path.map(remove_file_prefix) ?? (owns_db_file ? Ndb.db_path : Ndb.snapshot_db_path) else {
             return nil
+        }
+        
+        guard owns_db_file || Self.db_file_exists(path: path) else {
+            return nil      // If the caller claims to not own the DB file, and the DB files do not exist, then we should not initialize Ndb
         }
 
         let ok = path.withCString { testdir in
@@ -163,41 +174,95 @@ class Ndb {
         self.ndbAccessLock.markNdbOpen()
     }
     
-    private static func migrate_db_location_if_needed() throws {
-        guard let old_db_path, let db_path else {
+    static func migrate_db_location_if_needed(db_path: String? = nil, legacy_path: String? = nil) throws {
+        let db_path = db_path ?? Self.db_path
+        let legacy_path = legacy_path ?? Self.legacy_db_path
+        guard let db_path, let legacy_path else {
             throw Errors.cannot_find_db_path
         }
         
-        let file_manager = FileManager.default
+        // Determine which location holds the freshest database copy and ensure it resides in the private container.
+        let fileManager = FileManager.default
+        let private_db_file_exists = Self.db_file_exists(path: db_path)
+        let legacy_db_file_exists = Self.db_file_exists(path: legacy_path)
         
-        let old_db_files_exist = Self.db_files_exist(path: old_db_path)
-        let new_db_files_exist = Self.db_files_exist(path: db_path)
+        guard private_db_file_exists || legacy_db_file_exists else { return }
         
-        // Migration rules:
-        // 1. If DB files exist in the old path but not the new one, move files to the new path
-        // 2. If files do not exist anywhere, do nothing (let new DB be initialized)
-        // 3. If files exist in the new path, but not the old one, nothing needs to be done
-        // 4. If files exist on both, do nothing.
-        // Scenario 4 likely means that user has downgraded and re-upgraded.
-        // Although it might make sense to get the most recent DB, it might lead to data loss.
-        // If we leave both intact, it makes it easier to fix later, as no data loss would occur.
-        if old_db_files_exist && !new_db_files_exist {
-            Log.info("Migrating NostrDB to new file location…", for: .storage)
-            do {
-                try db_files.forEach { db_file in
-                    let old_path = "\(old_db_path)/\(db_file)"
-                    let new_path = "\(db_path)/\(db_file)"
-                    try file_manager.moveItem(atPath: old_path, toPath: new_path)
+        guard let latest_path = Self.latestDatabasePath(primaryPath: db_path,
+                                                        legacyPath: legacy_path,
+                                                        fileManager: fileManager) else { return }
+        
+        guard latest_path != db_path else {
+            // Desired path is already the latest path. No need to migrate.
+            if legacy_db_file_exists {
+                // Legacy db file still exists for some reason. To save space, delete this old copy
+                Log.info("Deleting legacy NostrDB files to save storage space…", for: .storage)
+                do {
+                    try db_files.forEach { db_file in
+                        let legacyFileURL = URL(fileURLWithPath: "\(legacy_path)/\(db_file)")
+                        if fileManager.fileExists(atPath: legacyFileURL.path) {
+                            try fileManager.removeItem(at: legacyFileURL)
+                        }
+                    }
+                    Log.info("Legacy NostrDB files successfully deleted", for: .storage)
+                } catch {
+                    Log.error("Failed to delete legacy NostrDB files: %@", for: .storage, String(describing: error))
                 }
-                Log.info("NostrDB files successfully migrated to the new location", for: .storage)
-            } catch {
-                throw Errors.db_file_migration_error
             }
+            return
+        }
+        
+        Log.info("Migrating NostrDB files to the private container…", for: .storage)
+        do {
+            try fileManager.createDirectory(atPath: db_path, withIntermediateDirectories: true)
+            
+            try db_files.forEach { db_file in
+                let sourceURL = URL(fileURLWithPath: "\(legacy_path)/\(db_file)")
+                let destinationURL = URL(fileURLWithPath: "\(db_path)/\(db_file)")
+                
+                if db_file != self.main_db_file_name && !fileManager.fileExists(atPath: sourceURL.path) {
+                    // A non-essential db file does not exist at the source, there is nothing to move. Move on to the next file
+                    return
+                }
+                
+                if fileManager.fileExists(atPath: destinationURL.path) {
+                    // Use replaceItemAt for atomic replacement
+                    _ = try fileManager.replaceItemAt(destinationURL, withItemAt: sourceURL, backupItemName: nil, options: [.usingNewMetadataOnly])
+                } else {
+                    // If destination doesn't exist, just move it
+                    try fileManager.moveItem(at: sourceURL, to: destinationURL)
+                }
+            }
+            
+            Log.info("NostrDB files successfully migrated to the private container", for: .storage)
+        } catch {
+            Log.error("Failed to migrate NostrDB files: %@", for: .storage, String(describing: error))
+            throw Errors.db_file_migration_error
         }
     }
     
-    private static func db_files_exist(path: String) -> Bool {
-        return db_files.allSatisfy { FileManager.default.fileExists(atPath: "\(path)/\($0)") }
+    private static func db_file_exists(path: String) -> Bool {
+        return FileManager.default.fileExists(atPath: "\(path)/\(Self.main_db_file_name)")
+    }
+    
+    /// Returns the path whose `data.mdb` file was modified most recently.
+    private static func latestDatabasePath(primaryPath: String,
+                                           legacyPath: String?,
+                                           fileManager: FileManager) -> String? {
+        guard let legacyPath else { return primaryPath }
+        guard let legacyDate = Self.lastModifiedDate(for: legacyPath, fileManager: fileManager) else { return primaryPath }
+        guard let primaryDate = Self.lastModifiedDate(for: primaryPath, fileManager: fileManager) else { return legacyPath }
+        return primaryDate > legacyDate ? primaryPath : legacyPath
+    }
+    
+    private static func lastModifiedDate(for path: String, fileManager: FileManager) -> Date? {
+        let dataFilePath = "\(path)/data.mdb"
+        guard fileManager.fileExists(atPath: dataFilePath),
+              let attributes = try? fileManager.attributesOfItem(atPath: dataFilePath),
+              let modificationDate = attributes[.modificationDate] as? Date else {
+            return nil
+        }
+        return modificationDate
     }
 
     init(ndb: ndb_t) {
@@ -242,6 +307,23 @@ class Ndb {
         return true
     }
     
+    /// Makes a copy of the database in a separate location
+    ///
+    /// This uses `mdb_env_copy2` which creates a consistent snapshot without blocking writers for long periods.
+    func snapshot(path: String) throws {
+        enum SnapshotError: Error {
+            case mdbOperationError(errno: Int32)
+        }
+        
+        try withNdb({
+            try path.withCString({ pathCString in
+                let rc = ndb_snapshot(self.ndb.ndb, pathCString, UInt32(0))
+                guard rc == 0 else {
+                    throw SnapshotError.mdbOperationError(errno: rc)
+                }
+            })
+        })
+    }
     
     // MARK: Thread safety mechanisms
     // Use these for all externally accessible methods that interact with the nostrdb database to prevent race conditions with app lifecycle events (i.e. NostrDB opening and closing)

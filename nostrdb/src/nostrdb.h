@@ -502,6 +502,9 @@ int ndb_note_verify(void *secp_ctx, unsigned char *scratch, size_t scratch_size,
 // NDB
 int ndb_init(struct ndb **ndb, const char *dbdir, const struct ndb_config *);
 int ndb_db_version(struct ndb_txn *txn);
+/// Takes a snapshot of the NostrDB contents to a separate path
+/// See `mdb_env_copy2` header for documentation on `path` and `flags`
+int ndb_snapshot(struct ndb *ndb, const char *path, unsigned int flags);
 
 // NOTE PROCESSING
 int ndb_process_event(struct ndb *, const char *json, int len);

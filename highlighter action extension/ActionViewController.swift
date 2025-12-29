@@ -134,7 +134,7 @@ struct ShareExtensionView: View {
                 self.highlighter_state = .not_logged_in
                 return
             }
-            self.state = DamusState(keypair: keypair)
+            self.state = DamusState(keypair: keypair, owns_db_file: false)
             Task { await self.state?.nostrNetwork.connect() }
         })
         .onChange(of: self.highlighter_state) {

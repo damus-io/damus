@@ -493,7 +493,6 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { obj in
             print("txn: 📙 DAMUS ACTIVE NOTIFY")
             Task {
-                await damusClosingTask?.value  // Wait for the closing task to finish before reopening things, to avoid race conditions
                 if damus_state.ndb.reopen() {
                     print("txn: NOSTRDB REOPENED")
                 } else {
@@ -527,17 +526,19 @@ struct ContentView: View {
             case .background:
                 print("txn: 📙 DAMUS BACKGROUNDED")
                 let bgTask = this_app.beginBackgroundTask(withName: "Closing things down gracefully", expirationHandler: { [weak damus_state] in
-                    Log.error("App background signal handling: RUNNING OUT OF TIME! JUST CLOSE NDB DIRECTLY!", for: .app_lifecycle)
-                    // Background time about to expire, so close ndb directly.
-                    // This may still cause a memory error crash if subscription tasks have not been properly closed yet, but that is less likely than a 0xdead10cc crash if we don't do anything here.
-                    damus_state?.ndb.close()
                 })
                 
                 damusClosingTask = Task { @MainActor in
                     Log.debug("App background signal handling: App being backgrounded", for: .app_lifecycle)
                     let startTime = CFAbsoluteTimeGetCurrent()
+                    
+                    // Stop periodic snapshots
+                    await damus_state.snapshotManager.stopPeriodicSnapshots()
+                    
                     await damus_state.nostrNetwork.handleAppBackgroundRequest()  // Close ndb streaming tasks before closing ndb to avoid memory errors
-                    Log.debug("App background signal handling: Nostr network and Ndb closed after %.2f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - startTime)
+                    
+                    Log.debug("App background signal handling: Nostr network manager closed after %.2f seconds", for: .app_lifecycle, CFAbsoluteTimeGetCurrent() - startTime)
+                    
                     this_app.endBackgroundTask(bgTask)
                 }
                 break
@@ -550,6 +551,9 @@ struct ContentView: View {
                     await damusClosingTask?.value  // Wait for the closing task to finish before reopening things, to avoid race conditions
                     damusClosingTask = nil
                     await damus_state.nostrNetwork.handleAppForegroundRequest()
+                    
+                    // Restart periodic snapshots when returning to foreground
+                    await damus_state.snapshotManager.startPeriodicSnapshots()
                 }
             @unknown default:
                 break
@@ -743,6 +747,8 @@ struct ContentView: View {
         )
         
         home.damus_state = self.damus_state!
+        
+        await damus_state.snapshotManager.startPeriodicSnapshots()
         
         if let damus_state, damus_state.purple.enable_purple {
             // Assign delegate so that we can send receipts to the Purple API server as soon as we get updates from user's purchases

@@ -97,7 +97,7 @@ enum Route: Hashable {
         case .SearchSettings(let settings):
             SearchSettingsView(settings: settings)
         case .DeveloperSettings(let settings):
-            DeveloperSettingsView(settings: settings)
+            DeveloperSettingsView(settings: settings, damus_state: damusState)
         case .FirstAidSettings(settings: let settings):
             FirstAidSettingsView(damus_state: damusState, settings: settings)
         case .Thread(let thread):

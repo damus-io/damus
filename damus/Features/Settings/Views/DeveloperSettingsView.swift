@@ -10,6 +10,7 @@ import SwiftUI
 
 struct DeveloperSettingsView: View {
     @ObservedObject var settings: UserSettingsStore
+    let damus_state: DamusState
     
     var body: some View {
         Form {
@@ -101,9 +102,74 @@ struct DeveloperSettingsView: View {
                         Toggle(NSLocalizedString("Reset tips on launch", comment: "Developer mode setting to reset tips upon app first launch. Tips are visual contextual hints that highlight new, interesting, or unused features users have not discovered yet."), isOn: $settings.reset_tips_on_launch)
                             .toggleStyle(.switch)
                     }
+                    
+                    SnapshotNdbButton(damus_state: self.damus_state)
                 }
             }
         }
         .navigationTitle(NSLocalizedString("Developer", comment: "Navigation title for developer settings"))
+    }
+}
+
+extension DeveloperSettingsView {
+    struct SnapshotNdbButton: View {
+        let damus_state: DamusState
+        @State var snapshotState: SnapshotState = .notDone
+        @State var snapshotTask: Task<Void, Never>? = nil
+        
+        var body: some View {
+            Button(action: { self.snapshot() }, label: {
+                HStack(spacing: 6) {
+                    switch snapshotState {
+                    case .notDone:
+                        Text("Snapshot Ndb to shared container", comment: "Developer settings button to snapshot ndb to shared container.")
+                    case .inProgress:
+                        ProgressView()
+                        Text("Snapshotting Ndb to shared container", comment: "Developer settings loading message indicating that ndb is being snapshotted to the shared container.")
+                    case .done:
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                        Text("Ndb has been snapshotted successfully", comment: "Developer settings message indicating that ndb was successfully snapshotted.")
+                    case .error(let errorMessage):
+                        Image(systemName: "xmark.circle")
+                            .foregroundColor(.red)
+                        Text(errorMessage)
+                    }
+                }
+            })
+            .disabled(self.snapshotState.isInProgress())
+        }
+        
+        func snapshot() {
+            Task {
+                snapshotTask?.cancel()
+                await snapshotTask?.value
+                snapshotTask = Task {
+                    self.snapshotState = .inProgress
+                    do {
+                        try await damus_state.snapshotManager.performSnapshot()
+                        self.snapshotState = .done
+                    } catch {
+                        self.snapshotState = .error(error.localizedDescription)
+                    }
+                }
+            }
+        }
+        
+        enum SnapshotState {
+            case notDone
+            case inProgress
+            case done
+            case error(String)
+            
+            func isInProgress() -> Bool {
+                if case .inProgress = self {
+                    return true
+                }
+                else {
+                    return false
+                }
+            }
+        }
     }
 }

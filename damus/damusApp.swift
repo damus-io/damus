@@ -82,6 +82,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         registerNotificationCategories()
         ImageCacheMigrations.migrateKingfisherCacheIfNeeded()
         configureKingfisherCache()
+        
         return true
     }
     
