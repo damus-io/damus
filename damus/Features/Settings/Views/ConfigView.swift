@@ -31,6 +31,7 @@ struct ConfigView: View {
     private let zapsTitle = NSLocalizedString("Zaps", comment: "Section header for zap settings")
     private let translationTitle = NSLocalizedString("Translation", comment: "Section header for text and appearance settings")
     private let reactionsTitle = NSLocalizedString("Reactions", comment: "Section header for reactions settings")
+    private let mediaServersTitle = NSLocalizedString("Media Servers", comment: "Section header for media server settings")
     private let developerTitle = NSLocalizedString("Developer", comment: "Section header for developer settings")
     private let firstAidTitle = NSLocalizedString("First Aid", comment: "Section header for first aid tools and settings")
     private let signOutTitle = NSLocalizedString("Sign out", comment: "Sidebar menu label to sign out of the account.")
@@ -96,6 +97,12 @@ struct ConfigView: View {
                     if showSettingsButton(title: reactionsTitle){
                         NavigationLink(value: Route.ReactionsSettings(settings: settings)){
                             IconLabel(reactionsTitle,img_name:"shaka.fill",color:.purple)
+                        }
+                    }
+                    //Media Servers
+                    if showSettingsButton(title: mediaServersTitle){
+                        NavigationLink(value: Route.MediaServerSettings(settings: settings)){
+                            IconLabel(mediaServersTitle,img_name:"upload",color:.cyan)
                         }
                     }
                     //Developer

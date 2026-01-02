@@ -88,7 +88,29 @@ struct AppearanceSettingsView: View {
                        selection: $settings.default_media_uploader) {
                     ForEach(MediaUploader.allCases, id: \.self) { uploader in
                         Text(uploader.model.displayName)
-                            .tag(uploader.model.tag)
+                            .tag(uploader)
+                    }
+                }
+
+                // Show prompt when Blossom is selected but no server configured
+                if settings.default_media_uploader == .blossom {
+                    if let serverURL = settings.manualBlossomServerUrl, !serverURL.isEmpty {
+                        HStack {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                            Text(verbatim: serverURL)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .lineLimit(1)
+                        }
+                    } else {
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.orange)
+                            Text("No Blossom server configured. Go to Media Servers settings to add one.", comment: "Warning shown when Blossom is selected but no server is configured")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }
 

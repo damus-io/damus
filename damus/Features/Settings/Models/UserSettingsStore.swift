@@ -382,7 +382,51 @@ class UserSettingsStore: ObservableObject {
     // TODO: Get rid of this once we have NostrDB query capabilities integrated
     @Setting(key: "latest_relay_list_event_id", default_value: nil)
     var latestRelayListEventIdHex: String?
-    
+
+    // MARK: Blossom Settings
+
+    /// Event ID for the user's kind 10063 Blossom server list event.
+    /// Used to look up the full event from NostrDB.
+    @Setting(key: "latest_blossom_server_list_event_id", default_value: nil)
+    var latestBlossomServerListEventIdHex: String?
+
+    /// Manually configured Blossom server URL.
+    /// This is the primary method for v1 - allows users to enter a server URL
+    /// without needing to publish a kind 10063 event.
+    @Setting(key: "manual_blossom_server_url", default_value: nil)
+    var manualBlossomServerUrl: String?
+
+    /// Whether to mirror uploads to backup Blossom servers.
+    /// When enabled, after a successful upload to the primary server,
+    /// the blob will be mirrored to configured backup servers via BUD-04.
+    @Setting(key: "blossom_mirror_enabled", default_value: false)
+    var blossomMirrorEnabled: Bool
+
+    /// JSON-encoded array of Blossom mirror server URLs.
+    /// These servers receive mirrored copies of uploads when mirroring is enabled.
+    @Setting(key: "blossom_mirror_servers", default_value: nil)
+    var blossomMirrorServersJson: String?
+
+    /// Computed property to get/set mirror servers as an array.
+    var blossomMirrorServers: [String] {
+        get {
+            guard let json = blossomMirrorServersJson,
+                  let data = json.data(using: .utf8),
+                  let servers = try? JSONDecoder().decode([String].self, from: data) else {
+                return []
+            }
+            return servers
+        }
+        set {
+            if newValue.isEmpty {
+                blossomMirrorServersJson = nil
+            } else if let data = try? JSONEncoder().encode(newValue),
+                      let json = String(data: data, encoding: .utf8) {
+                blossomMirrorServersJson = json
+            }
+        }
+    }
+
     // MARK: Helper types
     
     enum NotificationsMode: String, CaseIterable, Identifiable, StringCodable, Equatable {

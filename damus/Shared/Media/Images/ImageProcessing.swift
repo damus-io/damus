@@ -39,19 +39,24 @@ fileprivate func processImage(source: CGImageSource, fileExtension: String) -> U
     return destinationURL
 }
 
-/// TODO: strip GPS data from video
+//// TODO: strip GPS data from video
 func processVideo(videoURL: URL) -> URL? {
-    saveVideoToTemporaryFolder(videoURL: videoURL)
+    return saveVideoToTemporaryFolder(videoURL: videoURL)
 }
 
 fileprivate func saveVideoToTemporaryFolder(videoURL: URL) -> URL? {
+    print("[saveVideoToTemporaryFolder] source: \(videoURL)")
+    print("[saveVideoToTemporaryFolder] source exists: \(FileManager.default.fileExists(atPath: videoURL.path))")
+
     let destinationURL = generateUniqueTemporaryMediaURL(fileExtension: videoURL.pathExtension)
-    
+    print("[saveVideoToTemporaryFolder] destination: \(destinationURL)")
+
     do {
         try FileManager.default.copyItem(at: videoURL, to: destinationURL)
+        print("[saveVideoToTemporaryFolder] copy succeeded")
         return destinationURL
     } catch {
-        print("Error copying file: \(error.localizedDescription)")
+        print("[saveVideoToTemporaryFolder] Error copying file: \(error)")
         return nil
     }
 }
@@ -74,23 +79,44 @@ func generateUniqueTemporaryMediaURL(fileExtension: String) -> URL {
  and saved to a new location which isn't security scoped.
  */
 func generateMediaUpload(_ media: PreUploadedMedia?) -> MediaUpload? {
-    guard let media else { return nil }
-    
+    print("[generateMediaUpload] called with media: \(String(describing: media))")
+    guard let media else {
+        print("[generateMediaUpload] media is nil, returning nil")
+        return nil
+    }
+
     switch media {
     case .uiimage(let image):
-            guard let url = processImage(image: image) else { return nil }
-            return .image(url)
+        print("[generateMediaUpload] processing uiimage")
+        guard let url = processImage(image: image) else {
+            print("[generateMediaUpload] processImage failed for uiimage")
+            return nil
+        }
+        print("[generateMediaUpload] returning image url: \(url)")
+        return .image(url)
     case .unprocessed_image(let url):
-        guard let newUrl = processImage(url: url) else { return nil }
+        print("[generateMediaUpload] processing unprocessed_image: \(url)")
+        guard let newUrl = processImage(url: url) else {
+            print("[generateMediaUpload] processImage failed for unprocessed_image")
+            return nil
+        }
         url.stopAccessingSecurityScopedResource()
+        print("[generateMediaUpload] returning processed image url: \(newUrl)")
         return .image(newUrl)
     case .processed_image(let url):
+        print("[generateMediaUpload] returning processed_image: \(url)")
         return .image(url)
     case .processed_video(let url):
+        print("[generateMediaUpload] returning processed_video: \(url)")
         return .video(url)
     case .unprocessed_video(let url):
-        guard let newUrl = processVideo(videoURL: url) else { return nil }
+        print("[generateMediaUpload] processing unprocessed_video: \(url)")
+        guard let newUrl = processVideo(videoURL: url) else {
+            print("[generateMediaUpload] processVideo failed for unprocessed_video")
+            return nil
+        }
         url.stopAccessingSecurityScopedResource()
+        print("[generateMediaUpload] returning processed video url: \(newUrl)")
         return .video(newUrl)
     }
 }
