@@ -83,7 +83,9 @@ struct EditPictureControl: View {
             }))
         }
         .sheet(isPresented: self.model.show_library) {
-            MediaPicker(mediaPickerEntry: .editPictureControl) { media in
+            MediaPicker(mediaPickerEntry: .editPictureControl, onError: { _ in
+                self.model.failed(message: NSLocalizedString("Failed to process the selected image. Please try a different photo.", comment: "Error when image processing fails in picker"))
+            }) { media in
                 self.model.request_upload_authorization(media)
             }
         }
