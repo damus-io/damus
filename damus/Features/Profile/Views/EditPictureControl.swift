@@ -107,7 +107,21 @@ struct EditPictureControl: View {
             .presentationDragIndicator(.visible)
         }
         .sheet(item: self.model.error_message, onDismiss: { self.model.cancel() }, content: { error in
-            Text(error.rawValue)
+            VStack(spacing: 16) {
+                Text("Upload Failed", comment: "Title for upload error sheet")
+                    .font(.headline)
+                Text(error.rawValue)
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button(NSLocalizedString("OK", comment: "Dismiss button for error sheet")) {
+                    self.model.cancel()
+                }
+                .buttonStyle(.borderedProminent)
+            }
+            .padding()
+            .presentationDetents([.height(200)])
         })
     }
     

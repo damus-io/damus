@@ -323,6 +323,10 @@ struct PostView: View {
                 if let error {
                     Text(error)
                         .foregroundColor(.red)
+                        .font(.caption)
+                        .lineLimit(3)
+                        .minimumScaleFactor(0.8)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
 
                 Spacer()
