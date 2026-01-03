@@ -336,15 +336,15 @@ final class EditPictureControlTests: XCTestCase {
         var supportsVideo: Bool { return true }
         var requiresNip98: Bool { return true }
         var postAPI: String { return "http://localhost:8000" }
-        
-        func getMediaURL(from data: Data) -> String? {
-            return "http://localhost:8000"
+
+        func getMediaURL(from data: Data) -> Result<String, damus.UploadError> {
+            return .success("http://localhost:8000")
         }
-        
+
         func mediaTypeValue(for mediaType: damus.ImageUploadMediaType) -> String? {
             return "media_type_value"
         }
-        
+
         var uploadCalled = false
         var uploadCompletion: (() -> Void)?
     }

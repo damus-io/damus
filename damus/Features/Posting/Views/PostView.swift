@@ -354,7 +354,7 @@ struct PostView: View {
         switch res {
         case .success(let url):
             guard let url = URL(string: url) else {
-                self.error = "Error uploading image :("
+                self.error = NSLocalizedString("Invalid URL returned from server", comment: "Error when upload returns malformed URL")
                 return false
             }
             let blurhash = await blurhash
@@ -362,13 +362,9 @@ struct PostView: View {
             let uploadedMedia = UploadedMedia(localURL: media.localURL, uploadedURL: url, metadata: meta)
             uploadedMedias.append(uploadedMedia)
             return true
-            
+
         case .failed(let error):
-            if let error {
-                self.error = error.localizedDescription
-            } else {
-                self.error = "Error uploading image :("
-            }
+            self.error = error.userMessage
             return false
         }
     }

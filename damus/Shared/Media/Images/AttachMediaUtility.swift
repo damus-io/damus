@@ -10,9 +10,13 @@ import UIKit
 import CoreGraphics
 import UniformTypeIdentifiers
 
+/// Result of an image/video upload operation.
+///
+/// Contains either the uploaded media URL on success, or an `UploadError`
+/// with specific details about what went wrong on failure.
 enum ImageUploadResult {
     case success(String)
-    case failed(Error?)
+    case failed(UploadError)
 }
 
 enum ImageUploadMediaType {
@@ -46,59 +50,76 @@ class AttachMediaUtility {
         return body as Data
     }
 
+    /// Creates and executes an upload request for the given media.
+    ///
+    /// This method handles the complete upload flow:
+    /// 1. Validates the upload API URL
+    /// 2. Reads media data from disk
+    /// 3. Constructs a multipart form-data request
+    /// 4. Adds NIP-98 authentication if required
+    /// 5. Executes the upload with progress tracking
+    /// 6. Parses the server response for the uploaded URL
+    ///
+    /// - Parameters:
+    ///   - mediaToUpload: The media file to upload (image or video)
+    ///   - mediaUploader: The upload service configuration
+    ///   - mediaType: Whether this is a normal upload or profile picture
+    ///   - progress: Delegate for tracking upload progress
+    ///   - keypair: Optional keypair for NIP-98 authentication
+    /// - Returns: Upload result with the media URL on success, or typed error on failure
     static func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: any MediaUploaderProtocol, mediaType: ImageUploadMediaType, progress: URLSessionTaskDelegate, keypair: Keypair? = nil) async -> ImageUploadResult {
         var mediaData: Data?
+
         guard let url = URL(string: mediaUploader.postAPI) else {
-            return .failed(nil)
+            return .failed(.invalidAPIURL)
         }
-        
+
         var request = URLRequest(url: url)
         request.httpMethod = "POST";
         let boundary = "Boundary-\(UUID().description)"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        
+
         // If uploading to a media host that support NIP-98 authorization, add the header
         if mediaUploader.requiresNip98,
            let keypair,
             let method = request.httpMethod,
             let signature = create_nip98_signature(keypair: keypair, method: method, url: url) {
-
              request.setValue(signature, forHTTPHeaderField: "Authorization")
         }
-        
+
         switch mediaToUpload {
         case .image(let url):
             do {
                 mediaData = try Data(contentsOf: url)
             } catch {
-                return .failed(error)
+                return .failed(.fileReadError(underlying: error))
             }
         case .video(let url):
             do {
                 mediaData = try Data(contentsOf: url)
             } catch {
-                return .failed(error)
+                return .failed(.fileReadError(underlying: error))
             }
         }
 
         guard let mediaData else {
-            return .failed(nil)
+            return .failed(.noMediaData)
         }
 
         request.httpBody = create_upload_body(mediaData: mediaData, boundary: boundary, mediaUploader: mediaUploader, mediaToUpload: mediaToUpload, mediaType: mediaType)
-        
+
         do {
             let (data, _) = try await URLSession.shared.data(for: request, delegate: progress)
 
-            guard let url = mediaUploader.getMediaURL(from: data) else {
-                print("Upload failed getting media url")
-                return .failed(nil)
+            switch mediaUploader.getMediaURL(from: data) {
+            case .success(let url):
+                return .success(url)
+            case .failure(let error):
+                return .failed(error)
             }
-            
-            return .success(url)
-            
+
         } catch {
-            return .failed(error)
+            return .failed(.networkError(underlying: error))
         }
     }
 }

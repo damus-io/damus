@@ -530,12 +530,8 @@ class EditPictureControlViewModel<T: ImageUploadModelProtocol>: ObservableObject
                 self.state = .ready
                 callback(url)
             case .failed(let error):
-                if let error {
-                    Log.info("Error uploading profile image with error: %@", for: .image_uploading, error.localizedDescription)
-                } else {
-                    Log.info("Failed to upload profile image without error", for: .image_uploading)
-                }
-                self.state = .failed(message: NSLocalizedString("Error uploading profile image. Please check your internet connection and try again. If error persists, please contact Damus support (support@damus.io).", comment: "Error label when uploading profile image"))
+                Log.info("Error uploading profile image: %@", for: .image_uploading, error.userMessage)
+                self.state = .failed(message: error.userMessage)
             }
             upload_observer.isLoading = false
         }
