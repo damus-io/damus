@@ -34,6 +34,9 @@ enum UploadError: Error, LocalizedError {
     /// No media data available to upload
     case noMediaData
 
+    /// HTTP error with status code (4xx client errors are non-retryable)
+    case httpError(statusCode: Int, message: String)
+
     /// A user-friendly message describing the error.
     ///
     /// These messages are suitable for display in the UI and are localized.
@@ -53,11 +56,50 @@ enum UploadError: Error, LocalizedError {
             return NSLocalizedString("Invalid upload service URL", comment: "Error when upload API URL is malformed")
         case .noMediaData:
             return NSLocalizedString("No media data to upload", comment: "Error when media data is missing")
+        case .httpError(let statusCode, let message):
+            return String(format: NSLocalizedString("Upload failed (HTTP %d): %@", comment: "Error when server returns HTTP error"), statusCode, message)
         }
     }
 
     var errorDescription: String? {
         return userMessage
+    }
+
+    /// Whether this error is transient and the upload should be retried.
+    ///
+    /// Retryable errors include network timeouts, connection losses, and server errors (5xx).
+    /// Non-retryable errors include client errors (4xx), file issues, and explicit server rejections.
+    var isRetryable: Bool {
+        switch self {
+        case .networkError(let underlying):
+            // Check for transient network errors
+            let nsError = underlying as NSError
+            if nsError.domain == NSURLErrorDomain {
+                switch nsError.code {
+                case NSURLErrorTimedOut,
+                     NSURLErrorCannotConnectToHost,
+                     NSURLErrorNetworkConnectionLost,
+                     NSURLErrorNotConnectedToInternet,
+                     NSURLErrorDNSLookupFailed:
+                    return true
+                default:
+                    return false
+                }
+            }
+            return false
+        case .serverError:
+            // Server errors with messages are typically permanent (e.g., "file too large")
+            return false
+        case .jsonParsingFailed, .missingURL:
+            // Could be transient server issue, worth one retry
+            return true
+        case .fileReadError, .invalidAPIURL, .noMediaData:
+            // Local errors - retrying won't help
+            return false
+        case .httpError(let statusCode, _):
+            // 4xx client errors are permanent, 5xx server errors are retryable
+            return statusCode >= 500
+        }
     }
 }
 
@@ -167,11 +209,19 @@ enum MediaUploader: String, CaseIterable, MediaUploaderProtocol, StringCodable {
     /// - Parameter data: Raw JSON response data from the upload server
     /// - Returns: `.success(url)` with the uploaded media URL, or `.failure(error)` with details
     func getMediaURL(from data: Data) -> Result<String, UploadError> {
+        // Log raw response for debugging (truncated to avoid log spam)
+        if let responseString = String(data: data.prefix(500), encoding: .utf8) {
+            Log.debug("Upload response body (first 500 chars): %{public}@", for: .image_uploading, responseString)
+        }
+
         do {
             guard let jsonObject = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any],
                   let status = jsonObject["status"] as? String else {
+                Log.error("Failed to parse JSON response or missing status field", for: .image_uploading)
                 return .failure(.jsonParsingFailed)
             }
+
+            Log.debug("Response status: %{public}@", for: .image_uploading, status)
 
             if status == "success", let nip94Event = jsonObject["nip94_event"] as? [String: Any] {
                 if let tags = nip94Event["tags"] as? [[String]] {
@@ -181,13 +231,17 @@ enum MediaUploader: String, CaseIterable, MediaUploaderProtocol, StringCodable {
                         }
                     }
                 }
+                Log.error("Success response but no URL tag found in nip94_event", for: .image_uploading)
                 return .failure(.missingURL)
             } else if status == "error", let message = jsonObject["message"] as? String {
+                Log.error("Server returned error: %{public}@", for: .image_uploading, message)
                 return .failure(.serverError(message: message))
             } else {
+                Log.error("Unexpected response status: %{public}@", for: .image_uploading, status)
                 return .failure(.missingURL)
             }
         } catch {
+            Log.error("JSON parsing exception: %{public}@", for: .image_uploading, error.localizedDescription)
             return .failure(.jsonParsingFailed)
         }
     }
