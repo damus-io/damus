@@ -383,7 +383,10 @@ struct ChatroomThreadView: View {
             }
             .onAppear() {
                 thread.subscribe()
-                scroll_to_event(scroller: scroller, id: thread.selected_event.id, delay: 0.1, animate: false)
+                // Use .top anchor for longform articles so they open at the title,
+                // keep .bottom for regular notes to preserve parent context visibility
+                let anchor: UnitPoint = thread.selected_event.known_kind == .longform ? .top : .bottom
+                scroll_to_event(scroller: scroller, id: thread.selected_event.id, delay: 0.1, animate: false, anchor: anchor)
                 // Ensure chrome is visible when view appears (handles interrupted transitions)
                 if isLongformEvent {
                     chromeHidden = false
