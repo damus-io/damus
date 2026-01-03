@@ -11,7 +11,7 @@ import UIKit
 func processImage(url: URL) -> URL? {
     let fileExtension = url.pathExtension
     guard let imageData = try? Data(contentsOf: url) else {
-        print("Failed to load image data from URL.")
+        Log.error("Failed to load image data from URL: %{public}@", for: .image_uploading, url.lastPathComponent)
         return nil
     }
     
@@ -51,7 +51,7 @@ fileprivate func saveVideoToTemporaryFolder(videoURL: URL) -> URL? {
         try FileManager.default.copyItem(at: videoURL, to: destinationURL)
         return destinationURL
     } catch {
-        print("Error copying file: \(error.localizedDescription)")
+        Log.error("Error copying video file: %{public}@", for: .image_uploading, error.localizedDescription)
         return nil
     }
 }
@@ -110,7 +110,7 @@ extension UIImage {
 
 func canGetSourceTypeFromUrl(url: URL) -> Bool {
     guard let source = CGImageSourceCreateWithURL(url as CFURL, nil) else {
-        print("Failed to create image source.")
+        Log.debug("Failed to create image source for: %{public}@", for: .image_uploading, url.lastPathComponent)
         return false
     }
     return CGImageSourceGetType(source) != nil
@@ -118,7 +118,7 @@ func canGetSourceTypeFromUrl(url: URL) -> Bool {
 
 func removeGPSDataFromImageAndWrite(fromImageURL imageURL: URL) -> Bool {
     guard let source = CGImageSourceCreateWithURL(imageURL as CFURL, nil) else {
-        print("Failed to create image source.")
+        Log.error("Failed to create image source for GPS removal: %{public}@", for: .image_uploading, imageURL.lastPathComponent)
         return false
     }
 
@@ -127,25 +127,45 @@ func removeGPSDataFromImageAndWrite(fromImageURL imageURL: URL) -> Bool {
     return CGImageDestinationFinalize(destination)
 }
 
+/// Removes GPS metadata from an image source and writes to destination.
+///
+/// This implementation uses `CGImageSourceCreateImageAtIndex` + `CGImageDestinationAddImage`
+/// instead of `CGImageDestinationAddImageFromSource` to work around an iOS 18 bug where
+/// the latter causes crashes and "bad image size (0 x 0)" errors with HEIC images.
+///
+/// See: https://developer.apple.com/forums/thread/769659
 fileprivate func removeGPSDataFromImage(source: CGImageSource, url: URL) -> CGImageDestination? {
     let totalCount = CGImageSourceGetCount(source)
 
     guard totalCount > 0 else {
-        print("No images found.")
+        Log.error("No images found in source", for: .image_uploading)
         return nil
     }
 
     guard let type = CGImageSourceGetType(source),
           let destination = CGImageDestinationCreateWithURL(url as CFURL, type, totalCount, nil) else {
-        print("Failed to create image destination.")
+        Log.error("Failed to create image destination", for: .image_uploading)
         return nil
     }
-    
-    let removeGPSProperties: CFDictionary = [kCGImageMetadataShouldExcludeGPS: kCFBooleanTrue] as CFDictionary
-    
+
     for i in 0..<totalCount {
-        CGImageDestinationAddImageFromSource(destination, source, i, removeGPSProperties)
+        // iOS 18 workaround: Extract image and properties separately instead of using
+        // CGImageDestinationAddImageFromSource which has bugs with HEIC/thumbnail generation
+        guard let image = CGImageSourceCreateImageAtIndex(source, i, nil) else {
+            Log.error("Failed to create image at index %{public}d", for: .image_uploading, i)
+            continue
+        }
+
+        // Get existing properties and remove GPS data
+        var properties: [CFString: Any] = [:]
+        if let sourceProperties = CGImageSourceCopyPropertiesAtIndex(source, i, nil) as? [CFString: Any] {
+            properties = sourceProperties
+            // Remove GPS dictionary to strip location data
+            properties.removeValue(forKey: kCGImagePropertyGPSDictionary)
+        }
+
+        CGImageDestinationAddImage(destination, image, properties as CFDictionary)
     }
-    
+
     return destination
 }
