@@ -1084,6 +1084,7 @@
 		9C83F89329A937B900136C08 /* TextViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C83F89229A937B900136C08 /* TextViewWrapper.swift */; };
 		9CA876E229A00CEA0003B9A3 /* AttachMediaUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */; };
 		A5A8BE7064AAA049A338D69B /* NetworkConditionSimulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EACB203BB15A0E659C82A44 /* NetworkConditionSimulator.swift */; };
+		A6E0E48F4EFBF069BCE0BEE5 /* DirectMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 975B7688D5275561C2AEBF5D /* DirectMessageTests.swift */; };
 		AC47E761AC296AFDA0BCC544 /* ImageProcessingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 445CCB0ADFA692CA167E74CA /* ImageProcessingTests.swift */; };
 		ADFE73552AD4793100EC7326 /* QRScanNSECView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADFE73542AD4793100EC7326 /* QRScanNSECView.swift */; };
 		B46385365AB92D2F105DECE3 /* UploadRetryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F485B6CBC79D2977760F2624 /* UploadRetryTests.swift */; };
@@ -2708,6 +2709,7 @@
 		82D6FA9E2CD9820500C925F4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		82D6FAA62CD9820500C925F4 /* share extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "share extension.entitlements"; sourceTree = "<group>"; };
 		9609F057296E220800069BF3 /* BannerImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerImageView.swift; sourceTree = "<group>"; };
+		975B7688D5275561C2AEBF5D /* DirectMessageTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DirectMessageTests.swift; sourceTree = "<group>"; };
 		9C83F89229A937B900136C08 /* TextViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextViewWrapper.swift; sourceTree = "<group>"; };
 		9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachMediaUtility.swift; sourceTree = "<group>"; };
 		9EACB203BB15A0E659C82A44 /* NetworkConditionSimulator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NetworkConditionSimulator.swift; sourceTree = "<group>"; };
@@ -3913,6 +3915,7 @@
 				A868ACECBD46A80BF8796C11 /* RelayPoolTests.swift */,
 				D4B42FBCFC04128AC0E1C6F2 /* PostBoxTests.swift */,
 				4958D4088F6B535CF772D1DC /* EventHolderTests.swift */,
+				975B7688D5275561C2AEBF5D /* DirectMessageTests.swift */,
 			);
 			path = damusTests;
 			sourceTree = "<group>";
@@ -6372,6 +6375,7 @@
 				33979ECA582E510B2E73B678 /* RelayPoolTests.swift in Sources */,
 				3119592AC5F42E2003A136D1 /* PostBoxTests.swift in Sources */,
 				C770CE8AF978E8A9AAAAABE1 /* EventHolderTests.swift in Sources */,
+				A6E0E48F4EFBF069BCE0BEE5 /* DirectMessageTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
