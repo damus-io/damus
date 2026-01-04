@@ -6,6 +6,79 @@
 
 ---
 
+## Background: Nostr Protocol (NIP-01)
+
+Understanding the Nostr WebSocket protocol is essential for testing. Key points from NIP-01:
+
+### Client-to-Relay Messages
+```
+["EVENT", <event JSON>]           - Publish an event
+["REQ", <sub_id>, <filters...>]   - Subscribe to events
+["CLOSE", <sub_id>]               - Close subscription
+```
+
+### Relay-to-Client Messages
+```
+["EVENT", <sub_id>, <event JSON>] - Event matching subscription
+["OK", <event_id>, <bool>, <msg>] - Event acceptance/rejection
+["EOSE", <sub_id>]                - End of stored events
+["CLOSED", <sub_id>, <msg>]       - Subscription closed by relay
+["NOTICE", <msg>]                 - Human-readable message
+```
+
+### OK Message Prefixes (machine-readable)
+- `duplicate:` - already have this event
+- `pow:` - proof of work issue
+- `blocked:` - user is blocked
+- `rate-limited:` - too many requests
+- `invalid:` - malformed event
+- `restricted:` - not allowed
+- `error:` - general error
+
+### Testing Implications
+When simulating poor network, we need to test:
+1. **Partial message delivery** - JSON may be fragmented across TCP packets
+2. **Subscription timeout** - REQ sent but no EOSE received
+3. **Event rejection** - OK with false after publish
+4. **Rate limiting** - relay returns rate-limited prefix
+5. **Connection drops** - mid-subscription disconnects
+6. **Reconnection** - resubscribe after reconnect
+
+### Reference: strfry Relay Implementation
+
+For local test relay, consider [strfry](https://github.com/hoytech/strfry):
+
+**Supported NIPs:** 1, 2, 4, 9, 11, 22, 28, 40, 70, 77
+
+**Key Features:**
+- Embedded LMDB database (no external DB required)
+- Hot-reload configuration without restart
+- WebSocket compression (permessage-deflate)
+- Durable writes (events committed before OK response)
+- Multi-threaded: separate threads for WebSocket I/O, ingestion, queries, monitoring
+
+**Running for Tests:**
+```bash
+# Basic run (port 7777, localhost only)
+./strfry relay
+
+# Docker
+docker run -p 7777:7777 dockurr/strfry
+
+# Custom config
+./strfry --config=test.conf relay
+```
+
+**Testing Commands:**
+- `strfry scan` - filter events
+- `strfry delete` - remove events matching filter
+- `strfry import` - load JSONL test data
+- `strfry export` - dump events to JSONL
+
+**For CI Integration:** See Approach 3 (Local Test Relay) for Docker setup in GitHub Actions.
+
+---
+
 ## Why This Matters
 
 WebSocket connectivity affects **nearly every feature** in Damus:
@@ -869,3 +942,90 @@ jobs:
 1. **WebSocket-specific tests:** Need to create `RelayConnectionTests` and `RelayPoolTests` that verify behavior under poor network (Approach 1: Mock WebSocket Protocol)
 
 2. **Metrics verification:** Add assertions that verify expected latency/timeout behavior
+
+---
+
+## Phase 1 Implementation: Mock WebSocket Protocol
+
+**Date:** 2026-01-03
+**Status:** In Progress
+
+### Architecture Analysis
+
+**WebSocket.swift (104 lines):**
+- `final class WebSocket: NSObject, URLSessionWebSocketDelegate`
+- Key interface:
+  - `let subject: PassthroughSubject<WebSocketEvent, Never>` - event stream
+  - `func connect()` - start connection
+  - `func disconnect(closeCode:reason:)` - close connection
+  - `func send(_ message: URLSessionWebSocketTask.Message)` - send message
+  - `func ping(receiveHandler:)` - check connection health
+
+**RelayConnection.swift (291 lines):**
+- Creates WebSocket lazily: `private lazy var socket = WebSocket(relay_url.url)`
+- Subscribes to `socket.subject` in `connect()`
+- `private func receive(event: WebSocketEvent) async` - handles all events
+- Exponential backoff: `backoff *= 2.0` starting at 1.0s
+
+### Changes Required
+
+**1. Create WebSocketProtocol (new file or in WebSocket.swift):**
+```swift
+protocol WebSocketProtocol {
+    var subject: PassthroughSubject<WebSocketEvent, Never> { get }
+    func connect()
+    func disconnect(closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?)
+    func send(_ message: URLSessionWebSocketTask.Message)
+    func ping(receiveHandler: @escaping (Error?) -> Void)
+}
+```
+
+**2. Make WebSocket conform:**
+```swift
+final class WebSocket: NSObject, URLSessionWebSocketDelegate, WebSocketProtocol { ... }
+```
+
+**3. Modify RelayConnection to accept protocol:**
+```swift
+// Before:
+private lazy var socket = WebSocket(relay_url.url)
+
+// After:
+private var socket: WebSocketProtocol
+
+init(url: RelayURL,
+     webSocket: WebSocketProtocol? = nil,  // NEW: injectable
+     handleEvent: ...,
+     processUnverifiedWSEvent: ...) {
+    self.socket = webSocket ?? WebSocket(url.url)
+    ...
+}
+```
+
+**4. Create MockWebSocket:**
+```swift
+class MockWebSocket: WebSocketProtocol {
+    let subject = PassthroughSubject<WebSocketEvent, Never>()
+    var connectCalled = false
+    var disconnectCalled = false
+    var sentMessages: [URLSessionWebSocketTask.Message] = []
+
+    func simulateConnect() { subject.send(.connected) }
+    func simulateDisconnect() { subject.send(.disconnected(.goingAway, nil)) }
+    func simulateError(_ error: Error) { subject.send(.error(error)) }
+    func simulateMessage(_ text: String) { subject.send(.message(.string(text))) }
+}
+```
+
+### Test Cases for RelayConnectionTests
+
+| Test | Scenario | Expected |
+|------|----------|----------|
+| testConnectSetsConnectedState | Mock sends .connected | isConnected = true, isConnecting = false |
+| testDisconnectTriggersReconnect | Mock sends .disconnected | reconnect() called |
+| testErrorTriggersBackoff | Mock sends .error | backoff doubles, reconnect scheduled |
+| testBackoffResets | Connect after error | backoff resets to 1.0 |
+| testMultipleErrorsIncreaseBackoff | 3 errors in sequence | backoff = 1 → 2 → 4 → 8 |
+| testSendForwardsToSocket | Call send() | MockWebSocket receives message |
+| testPingSuccess | Mock returns no error | last_pong updated |
+| testPingFailure | Mock returns error | Triggers reconnect |

@@ -8,6 +8,37 @@
 import Combine
 import Foundation
 
+// MARK: - WebSocketProtocol
+
+/// Protocol defining the WebSocket interface for dependency injection and testing.
+///
+/// This protocol enables mocking WebSocket connections in unit tests to simulate
+/// various network conditions (disconnects, errors, slow responses) without
+/// requiring real network connections.
+protocol WebSocketProtocol: AnyObject {
+    /// Publisher for WebSocket events (connected, disconnected, message, error)
+    var subject: PassthroughSubject<WebSocketEvent, Never> { get }
+
+    /// Initiates the WebSocket connection
+    func connect()
+
+    /// Closes the WebSocket connection
+    /// - Parameters:
+    ///   - closeCode: The close code to send to the server
+    ///   - reason: Optional data explaining the close reason
+    func disconnect(closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?)
+
+    /// Sends a message through the WebSocket
+    /// - Parameter message: The message to send (string or data)
+    func send(_ message: URLSessionWebSocketTask.Message)
+
+    /// Sends a ping to verify the connection is alive
+    /// - Parameter receiveHandler: Callback with nil on success, error on failure
+    func ping(receiveHandler: @escaping (Error?) -> Void)
+}
+
+// MARK: - WebSocketEvent
+
 enum WebSocketEvent {
     case connected
     case message(URLSessionWebSocketTask.Message)
@@ -28,7 +59,7 @@ enum WebSocketEvent {
     }
 }
 
-final class WebSocket: NSObject, URLSessionWebSocketDelegate {
+final class WebSocket: NSObject, URLSessionWebSocketDelegate, WebSocketProtocol {
     
     private let url: URL
     private let session: URLSession
