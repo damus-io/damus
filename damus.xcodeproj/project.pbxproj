@@ -626,6 +626,7 @@
 		643EA5C8296B764E005081BB /* RelayFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 643EA5C7296B764E005081BB /* RelayFilterView.swift */; };
 		647D9A8D2968520300A295DE /* SideMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 647D9A8C2968520300A295DE /* SideMenuView.swift */; };
 		64FBD06F296255C400D9D3B2 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64FBD06E296255C400D9D3B2 /* Theme.swift */; };
+		710AF7C934F1C674F2C6D532 /* RelayIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6D5CB13E40F224741EE531E /* RelayIntegrationTests.swift */; };
 		7527271E2A93FF0100214108 /* Block.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7527271D2A93FF0100214108 /* Block.swift */; };
 		75AD872B2AA23A460085EF2C /* Block+Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75AD872A2AA23A460085EF2C /* Block+Tests.swift */; };
 		7C60CAEF298471A1009C80D6 /* CoreSVG.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C60CAEE298471A1009C80D6 /* CoreSVG.swift */; };
@@ -2733,6 +2734,7 @@
 		D5C1AFC72E5E00690092F72F /* ContactCardManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactCardManagerTests.swift; sourceTree = "<group>"; };
 		D5C1AFC92E5EE12B0092F72F /* ContactCardNotify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactCardNotify.swift; sourceTree = "<group>"; };
 		D5C1AFD12E5EE2820092F72F /* FavoriteButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteButtonView.swift; sourceTree = "<group>"; };
+		D6D5CB13E40F224741EE531E /* RelayIntegrationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RelayIntegrationTests.swift; sourceTree = "<group>"; };
 		D703D7172C66E47100A400EA /* HighlighterActionExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HighlighterActionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D703D7182C66E47100A400EA /* UniformTypeIdentifiers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UniformTypeIdentifiers.framework; path = System/Library/Frameworks/UniformTypeIdentifiers.framework; sourceTree = SDKROOT; };
 		D703D71B2C66E47100A400EA /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
@@ -3901,6 +3903,7 @@
 				445CCB0ADFA692CA167E74CA /* ImageProcessingTests.swift */,
 				4160787B0DFB7DFC63F8BFE5 /* MediaPickerTests.swift */,
 				21BD85677DAC4B81FBB9399A /* RelayConnectionTests.swift */,
+				D6D5CB13E40F224741EE531E /* RelayIntegrationTests.swift */,
 			);
 			path = damusTests;
 			sourceTree = "<group>";
@@ -6356,6 +6359,7 @@
 				5EFB8F36CFD7BFD0B7870614 /* MediaPickerTests.swift in Sources */,
 				2A65F366B82881D86AB2C027 /* MockWebSocket.swift in Sources */,
 				90B14A00F7D75541829DC39B /* RelayConnectionTests.swift in Sources */,
+				710AF7C934F1C674F2C6D532 /* RelayIntegrationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

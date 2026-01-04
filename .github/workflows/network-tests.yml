@@ -45,6 +45,14 @@ jobs:
           sudo throttle --profile $PROFILE
           echo "Network throttling enabled"
 
+      - name: Start strfry test relay
+        run: |
+          # Start strfry in Docker for local relay testing
+          docker run -d -p 7777:7777 --name strfry-test dockurr/strfry
+          # Wait for relay to be ready
+          sleep 5
+          echo "strfry test relay started on ws://localhost:7777"
+
       - name: Boot Simulator
         run: |
           # Boot simulator before tests to ensure it's ready
@@ -59,17 +67,23 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
             -resultBundlePath NetworkTestResults.xcresult \
             -only-testing:damusTests/UploadRetryTests \
+            -only-testing:damusTests/RelayConnectionTests \
+            -only-testing:damusTests/RelayIntegrationTests \
             CODE_SIGNING_ALLOWED=NO \
             | xcpretty --color
-        # Note: Add more test targets as WebSocket tests are developed:
-        # -only-testing:damusTests/RelayConnectionTests \
-        # -only-testing:damusTests/RelayPoolTests \
 
       - name: Stop network throttling
         if: always()
         run: |
           sudo throttle --stop || true
           echo "Network throttling disabled"
+
+      - name: Stop strfry test relay
+        if: always()
+        run: |
+          docker stop strfry-test || true
+          docker rm strfry-test || true
+          echo "strfry test relay stopped"
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
@@ -105,6 +119,12 @@ jobs:
       - name: Start ${{ matrix.profile }} throttling
         run: sudo throttle --profile ${{ matrix.profile }}
 
+      - name: Start strfry test relay
+        run: |
+          docker run -d -p 7777:7777 --name strfry-test dockurr/strfry
+          sleep 5
+          echo "strfry test relay started"
+
       - name: Boot Simulator
         run: |
           xcrun simctl boot "iPhone 15" || true
@@ -117,12 +137,20 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
             -resultBundlePath NetworkTestResults-${{ matrix.profile }}.xcresult \
             -only-testing:damusTests/UploadRetryTests \
+            -only-testing:damusTests/RelayConnectionTests \
+            -only-testing:damusTests/RelayIntegrationTests \
             CODE_SIGNING_ALLOWED=NO \
             | xcpretty --color
 
       - name: Stop throttling
         if: always()
         run: sudo throttle --stop || true
+
+      - name: Stop strfry test relay
+        if: always()
+        run: |
+          docker stop strfry-test || true
+          docker rm strfry-test || true
 
       - name: Upload Results
         uses: actions/upload-artifact@v4
