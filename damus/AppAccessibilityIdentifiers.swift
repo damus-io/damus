@@ -60,9 +60,18 @@ enum AppAccessibilityIdentifiers: String {
     
     // MARK: Post composer
     // Prefix: `post_composer`
-    
+
     /// The cancel post button
     case post_composer_cancel_button
+
+    /// The attach media button (image picker)
+    case post_composer_attach_media_button
+
+    /// Error message displayed when upload fails
+    case post_composer_error_message
+
+    /// Upload progress indicator
+    case post_composer_upload_progress
     
     // MARK: Main interface layout
     // Prefix: `main`
