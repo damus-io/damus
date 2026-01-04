@@ -17,6 +17,7 @@
 		3169CAED294FCCFC00EE4006 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CAEC294FCCFC00EE4006 /* Constants.swift */; };
 		317F0DF1BF6F0BBAA9A70CB6 /* NetworkConditionSimulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EACB203BB15A0E659C82A44 /* NetworkConditionSimulator.swift */; };
 		31D2E847295218AF006D67F8 /* Shimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D2E846295218AF006D67F8 /* Shimmer.swift */; };
+		33979ECA582E510B2E73B678 /* RelayPoolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A868ACECBD46A80BF8796C11 /* RelayPoolTests.swift */; };
 		3A0A30BB2C21397A00F8C9BC /* EmojiPicker in Frameworks */ = {isa = PBXBuildFile; productRef = 3A0A30BA2C21397A00F8C9BC /* EmojiPicker */; };
 		3A23838E2A297DD200E5AA2E /* ZapButtonModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A23838D2A297DD200E5AA2E /* ZapButtonModel.swift */; };
 		3A2BAC5A2DD7E4C400EBB4CC /* NIP05DomainTimelineHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A2BAC592DD7E4C400EBB4CC /* NIP05DomainTimelineHeaderView.swift */; };
@@ -2707,6 +2708,7 @@
 		9C83F89229A937B900136C08 /* TextViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextViewWrapper.swift; sourceTree = "<group>"; };
 		9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachMediaUtility.swift; sourceTree = "<group>"; };
 		9EACB203BB15A0E659C82A44 /* NetworkConditionSimulator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NetworkConditionSimulator.swift; sourceTree = "<group>"; };
+		A868ACECBD46A80BF8796C11 /* RelayPoolTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RelayPoolTests.swift; sourceTree = "<group>"; };
 		ADFE73542AD4793100EC7326 /* QRScanNSECView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QRScanNSECView.swift; sourceTree = "<group>"; };
 		B501062C2B363036003874F5 /* AuthIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthIntegrationTests.swift; sourceTree = "<group>"; usesTabs = 0; };
 		B51C1CE82B55A60A00E312A9 /* AddMuteItemView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddMuteItemView.swift; sourceTree = "<group>"; };
@@ -3904,6 +3906,7 @@
 				4160787B0DFB7DFC63F8BFE5 /* MediaPickerTests.swift */,
 				21BD85677DAC4B81FBB9399A /* RelayConnectionTests.swift */,
 				D6D5CB13E40F224741EE531E /* RelayIntegrationTests.swift */,
+				A868ACECBD46A80BF8796C11 /* RelayPoolTests.swift */,
 			);
 			path = damusTests;
 			sourceTree = "<group>";
@@ -6360,6 +6363,7 @@
 				2A65F366B82881D86AB2C027 /* MockWebSocket.swift in Sources */,
 				90B14A00F7D75541829DC39B /* RelayConnectionTests.swift in Sources */,
 				710AF7C934F1C674F2C6D532 /* RelayIntegrationTests.swift in Sources */,
+				33979ECA582E510B2E73B678 /* RelayPoolTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

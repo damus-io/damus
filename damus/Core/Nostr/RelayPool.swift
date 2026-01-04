@@ -168,12 +168,12 @@ actor RelayPool {
         }
     }
 
-    func add_relay(_ desc: RelayDescriptor) async throws(RelayError) {
+    func add_relay(_ desc: RelayDescriptor, webSocket: WebSocketProtocol? = nil) async throws(RelayError) {
         let relay_id = desc.url
         if await get_relay(relay_id) != nil {
             throw RelayError.RelayAlreadyExists
         }
-        let conn = RelayConnection(url: desc.url, handleEvent: { event in
+        let conn = RelayConnection(url: desc.url, webSocket: webSocket, handleEvent: { event in
             await self.handle_event(relay_id: relay_id, event: event)
         }, processUnverifiedWSEvent: { wsev in
             guard case .message(let msg) = wsev,
