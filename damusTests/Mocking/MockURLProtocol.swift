@@ -26,24 +26,54 @@ import Foundation
 /// }
 /// ```
 class MockURLProtocol: URLProtocol {
+    // MARK: - Thread-safe static state
+
+    private static let lock = NSLock()
+    private static var _requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
+    private static var _simulatedError: Error?
+    private static var _requestCount = 0
+    private static var _responseDelay: TimeInterval = 0
+
     /// Handler to process each request and return a response
-    static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
+    static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))? {
+        get { lock.withLock { _requestHandler } }
+        set { lock.withLock { _requestHandler = newValue } }
+    }
 
     /// Error to simulate on the next request (takes precedence over requestHandler)
-    static var simulatedError: Error?
+    static var simulatedError: Error? {
+        get { lock.withLock { _simulatedError } }
+        set { lock.withLock { _simulatedError = newValue } }
+    }
 
     /// Number of times a request has been made (useful for testing retries)
-    static var requestCount = 0
+    static var requestCount: Int {
+        get { lock.withLock { _requestCount } }
+        set { lock.withLock { _requestCount = newValue } }
+    }
 
     /// Delay before returning response (in seconds)
-    static var responseDelay: TimeInterval = 0
+    static var responseDelay: TimeInterval {
+        get { lock.withLock { _responseDelay } }
+        set { lock.withLock { _responseDelay = newValue } }
+    }
+
+    /// Thread-safe increment of request count, returns new value
+    static func incrementRequestCount() -> Int {
+        lock.withLock {
+            _requestCount += 1
+            return _requestCount
+        }
+    }
 
     /// Reset all mock state
     static func reset() {
-        requestHandler = nil
-        simulatedError = nil
-        requestCount = 0
-        responseDelay = 0
+        lock.withLock {
+            _requestHandler = nil
+            _simulatedError = nil
+            _requestCount = 0
+            _responseDelay = 0
+        }
     }
 
     override class func canInit(with request: URLRequest) -> Bool {
@@ -55,7 +85,7 @@ class MockURLProtocol: URLProtocol {
     }
 
     override func startLoading() {
-        MockURLProtocol.requestCount += 1
+        _ = MockURLProtocol.incrementRequestCount()
 
         // Handle delay if configured
         if MockURLProtocol.responseDelay > 0 {
@@ -94,37 +124,71 @@ class MockURLProtocol: URLProtocol {
 /// A mock URL protocol that can simulate failures for a specific number of requests
 /// before succeeding, useful for testing retry logic.
 class RetryTestURLProtocol: URLProtocol {
-    /// Number of times to fail before succeeding
-    static var failuresBeforeSuccess = 0
+    // MARK: - Thread-safe static state
 
-    /// Current request count
-    static var requestCount = 0
-
-    /// The error to return for failures
-    static var failureError: Error = NSError(
+    private static let lock = NSLock()
+    private static var _failuresBeforeSuccess = 0
+    private static var _requestCount = 0
+    private static var _failureError: Error = NSError(
         domain: NSURLErrorDomain,
         code: NSURLErrorTimedOut,
         userInfo: [NSLocalizedDescriptionKey: "Simulated timeout"]
     )
+    private static var _successResponse: (HTTPURLResponse, Data)?
+    private static var _httpResponse: (HTTPURLResponse, Data)?
+
+    /// Number of times to fail before succeeding
+    static var failuresBeforeSuccess: Int {
+        get { lock.withLock { _failuresBeforeSuccess } }
+        set { lock.withLock { _failuresBeforeSuccess = newValue } }
+    }
+
+    /// Current request count
+    static var requestCount: Int {
+        get { lock.withLock { _requestCount } }
+        set { lock.withLock { _requestCount = newValue } }
+    }
+
+    /// The error to return for failures
+    static var failureError: Error {
+        get { lock.withLock { _failureError } }
+        set { lock.withLock { _failureError = newValue } }
+    }
 
     /// The successful response to return after failures
-    static var successResponse: (HTTPURLResponse, Data)?
+    static var successResponse: (HTTPURLResponse, Data)? {
+        get { lock.withLock { _successResponse } }
+        set { lock.withLock { _successResponse = newValue } }
+    }
 
     /// HTTP response to return immediately (bypasses failure simulation)
     /// Use this to test HTTP error status codes (4xx, 5xx)
-    static var httpResponse: (HTTPURLResponse, Data)?
+    static var httpResponse: (HTTPURLResponse, Data)? {
+        get { lock.withLock { _httpResponse } }
+        set { lock.withLock { _httpResponse = newValue } }
+    }
+
+    /// Thread-safe increment of request count, returns new value
+    static func incrementRequestCount() -> Int {
+        lock.withLock {
+            _requestCount += 1
+            return _requestCount
+        }
+    }
 
     /// Reset all state
     static func reset() {
-        failuresBeforeSuccess = 0
-        requestCount = 0
-        failureError = NSError(
-            domain: NSURLErrorDomain,
-            code: NSURLErrorTimedOut,
-            userInfo: [NSLocalizedDescriptionKey: "Simulated timeout"]
-        )
-        successResponse = nil
-        httpResponse = nil
+        lock.withLock {
+            _failuresBeforeSuccess = 0
+            _requestCount = 0
+            _failureError = NSError(
+                domain: NSURLErrorDomain,
+                code: NSURLErrorTimedOut,
+                userInfo: [NSLocalizedDescriptionKey: "Simulated timeout"]
+            )
+            _successResponse = nil
+            _httpResponse = nil
+        }
     }
 
     override class func canInit(with request: URLRequest) -> Bool {
@@ -136,7 +200,7 @@ class RetryTestURLProtocol: URLProtocol {
     }
 
     override func startLoading() {
-        RetryTestURLProtocol.requestCount += 1
+        let currentCount = RetryTestURLProtocol.incrementRequestCount()
 
         // If httpResponse is set, always return it (for testing HTTP status codes)
         if let (response, data) = RetryTestURLProtocol.httpResponse {
@@ -146,7 +210,7 @@ class RetryTestURLProtocol: URLProtocol {
             return
         }
 
-        if RetryTestURLProtocol.requestCount <= RetryTestURLProtocol.failuresBeforeSuccess {
+        if currentCount <= RetryTestURLProtocol.failuresBeforeSuccess {
             // Simulate failure
             client?.urlProtocol(self, didFailWithError: RetryTestURLProtocol.failureError)
         } else if let (response, data) = RetryTestURLProtocol.successResponse {

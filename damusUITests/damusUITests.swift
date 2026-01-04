@@ -192,54 +192,40 @@ class damusUITests: XCTestCase {
         case timeout_waiting_for_element
     }
 
-    // MARK: - Network Condition Tests
+    // MARK: - Network Condition Simulator Infrastructure Tests
 
-    /// Tests that upload shows appropriate error message when network times out.
-    /// This test uses NetworkConditionSimulator to simulate a timeout condition.
-    func testUploadShowsErrorOnTimeout() throws {
-        // Configure app to simulate network timeout for upload requests
+    /// Verifies app launches correctly with timeout simulation enabled.
+    /// This is infrastructure scaffolding - a full upload timeout test would
+    /// navigate to composer, attach media, and verify error UI.
+    func testAppLaunchesWithTimeoutSimulation() throws {
         app.launchArguments += ["-SimulateNetworkCondition", "timeout", "-SimulateNetworkPattern", "upload"]
         app.terminate()
         app.launch()
 
         try self.loginIfNotAlready()
 
-        // Navigate to post composer
-        // Tap the compose button (usually a + or pencil icon in the tab bar or nav)
-        // For now, we'll use the side menu to get to a state where we can compose
         guard app.buttons[AID.main_side_menu_button.rawValue].waitForExistence(timeout: 5) else {
             throw DamusUITestError.timeout_waiting_for_element
         }
 
-        // This test verifies that the NetworkConditionSimulator infrastructure works.
-        // A full end-to-end test would require:
-        // 1. Navigating to post composer
-        // 2. Attaching an image
-        // 3. Waiting for upload to fail with timeout
-        // 4. Verifying error message appears
-
-        // For now, we verify the app launches successfully with network simulation enabled
         XCTAssertTrue(app.buttons[AID.main_side_menu_button.rawValue].exists,
                       "App should launch successfully with network simulation enabled")
     }
 
-    /// Tests that upload succeeds after retry when network recovers.
-    /// Uses failThenSucceed condition which fails first 2 requests then succeeds.
-    func testUploadSucceedsAfterRetry() throws {
-        // Configure app to fail first 2 requests, then succeed
+    /// Verifies app launches correctly with failThenSucceed simulation enabled.
+    /// This is infrastructure scaffolding - a full retry test would attach media
+    /// and verify eventual upload success after simulated failures.
+    func testAppLaunchesWithRetrySimulation() throws {
         app.launchArguments += ["-SimulateNetworkCondition", "failThenSucceed", "-SimulateNetworkPattern", "upload"]
         app.terminate()
         app.launch()
 
         try self.loginIfNotAlready()
 
-        // Verify app launches successfully
         guard app.buttons[AID.main_side_menu_button.rawValue].waitForExistence(timeout: 5) else {
             throw DamusUITestError.timeout_waiting_for_element
         }
 
-        // This test verifies the retry mechanism works with the simulator.
-        // The actual upload flow test would attach media and verify eventual success.
         XCTAssertTrue(app.buttons[AID.main_side_menu_button.rawValue].exists,
                       "App should launch successfully with failThenSucceed simulation")
     }
