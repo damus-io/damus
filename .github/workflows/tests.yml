@@ -1,0 +1,58 @@
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.2.app
+
+      - name: Build and Test
+        run: |
+          xcodebuild test \
+            -scheme damus \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
+            -resultBundlePath TestResults.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcpretty --color
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: TestResults.xcresult
+
+  thread-sanitizer:
+    name: Thread Sanitizer
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.2.app
+
+      - name: Build and Test with TSan
+        run: |
+          xcodebuild test \
+            -scheme damus-TSan \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
+            -resultBundlePath TSanResults.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcpretty --color
+
+      - name: Upload TSan Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tsan-results
+          path: TSanResults.xcresult

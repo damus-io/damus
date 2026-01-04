@@ -581,15 +581,21 @@ class TestMediaUploader: MediaUploaderProtocol {
 
     func getMediaURL(from data: Data) -> Result<String, UploadError> {
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let status = json["status"] as? String,
-              status == "success",
-              let nip94 = json["nip94_event"] as? [String: Any],
-              let tags = nip94["tags"] as? [[String]],
-              let urlTag = tags.first(where: { $0.first == "url" }),
-              urlTag.count > 1 else {
+              let status = json["status"] as? String else {
+            return .failure(.jsonParsingFailed)
+        }
+
+        if status == "success",
+           let nip94 = json["nip94_event"] as? [String: Any],
+           let tags = nip94["tags"] as? [[String]],
+           let urlTag = tags.first(where: { $0.first == "url" }),
+           urlTag.count > 1 {
+            return .success(urlTag[1])
+        } else if status == "error", let message = json["message"] as? String {
+            return .failure(.serverError(message: message))
+        } else {
             return .failure(.missingURL)
         }
-        return .success(urlTag[1])
     }
 
     func mediaTypeValue(for mediaType: ImageUploadMediaType) -> String? {

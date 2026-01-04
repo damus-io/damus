@@ -94,3 +94,39 @@ Apple's Network Link Conditioner tool simulates real-world network conditions. T
 
 Remember to disable Network Link Conditioner after testing.
 
+
+## Thread Sanitizer (TSan)
+
+Thread Sanitizer detects data races at runtime. It's particularly important for code that uses shared mutable state across threads (like `MediaPicker`'s `failedCount` and `orderMap`).
+
+### Running TSan locally
+
+**Using the TSan scheme in Xcode:**
+1. Select the `damus-TSan` scheme from the scheme selector
+2. Run tests with Cmd+U
+3. TSan violations appear as runtime errors in the test log
+
+**Using command line:**
+```bash
+xcodebuild test \
+  -scheme damus-TSan \
+  -destination 'platform=iOS Simulator,name=iPhone 15' \
+  | xcpretty
+```
+
+### CI integration
+
+The GitHub Actions workflow at `.github/workflows/tests.yml` runs TSan on every PR automatically. Check the "Thread Sanitizer" job for any race conditions.
+
+### What TSan catches
+
+- Data races: Multiple threads accessing shared memory without synchronization
+- Use-after-free in concurrent code
+- Thread leaks
+
+### Known limitations
+
+- TSan adds ~5-10x runtime overhead
+- Not compatible with Address Sanitizer (ASan)
+- Some system frameworks may trigger false positives (suppress with `__tsan_ignore`)
+
