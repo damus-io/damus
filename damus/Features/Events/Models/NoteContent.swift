@@ -382,9 +382,175 @@ struct LongformContent {
     let words: Int
 
     init(_ markdown: String) {
-        let blocks = [BlockNode].init(markdown: markdown)
+        // Pre-process markdown to ensure images are block-level (have blank lines around them)
+        // This prevents images from being parsed as inline within text paragraphs
+        let processedMarkdown = LongformContent.ensureBlockLevelImages(markdown)
+        let blocks = [BlockNode].init(markdown: processedMarkdown)
         self.markdown = MarkdownContent(blocks: blocks)
         self.words = count_markdown_words(blocks: blocks)
+    }
+
+    /// Ensures markdown images have blank lines around them so they parse as block-level elements.
+    /// Without blank lines, images followed by text are parsed as inline within a paragraph,
+    /// causing them to be clipped by SwiftUI's Text view.
+    ///
+    /// Safety: This function excludes:
+    /// - Fenced code blocks (``` or ~~~), indented code blocks (4 spaces/tab), and inline code
+    /// - Images inside lists (lines starting with -, *, + followed by space)
+    /// - Images inside blockquotes (lines starting with >)
+    /// - Images inside tables (lines containing | with table structure)
+    ///
+    /// Known limitations (images remain inline, may clip if mixed with text):
+    /// - Multi-line list items with images on continuation lines
+    /// - Reference-style images: ![alt][id]
+    /// - HTML <img> tags
+    /// - Inline code with nested backticks (e.g., `` `code` `` using longer delimiters)
+    private static func ensureBlockLevelImages(_ markdown: String) -> String {
+        // First, identify regions to exclude (fenced code blocks and inline code)
+        let excludedRanges = findExcludedRanges(in: markdown)
+
+        // Pattern matches markdown images: ![alt](url) or ![alt](url "title")
+        // Handles URLs with parentheses by matching balanced parens or escaped parens
+        let imagePattern = #"!\[[^\]]*\]\((?:[^()]+|\([^)]*\))+(?:\s+"[^"]*")?\)"#
+        guard let regex = try? NSRegularExpression(pattern: imagePattern, options: []) else {
+            return markdown
+        }
+
+        var result = markdown
+        let matches = regex.matches(in: result, options: [], range: NSRange(result.startIndex..., in: result))
+
+        // Process matches in reverse order to preserve indices
+        for match in matches.reversed() {
+            guard let range = Range(match.range, in: result) else { continue }
+
+            // Skip if this match is inside an excluded region (code block/inline code)
+            // Use String.Index comparison for correctness with non-ASCII content
+            if excludedRanges.contains(where: { $0.overlaps(range) }) {
+                continue
+            }
+
+            // Skip if inside a list, blockquote, or table context
+            if isInStructuredContext(result, at: range.lowerBound) {
+                continue
+            }
+
+            let imageMarkdown = String(result[range])
+
+            // Check what's before the image
+            let beforeIndex = range.lowerBound
+            let hasParagraphBreakBefore = beforeIndex == result.startIndex ||
+                result[result.index(before: beforeIndex)] == "\n" && (
+                    beforeIndex == result.index(after: result.startIndex) ||
+                    result[result.index(beforeIndex, offsetBy: -2)] == "\n"
+                )
+
+            // Check what's after the image
+            let afterIndex = range.upperBound
+            let hasParagraphBreakAfter = afterIndex == result.endIndex ||
+                result[afterIndex] == "\n" && (
+                    result.index(after: afterIndex) == result.endIndex ||
+                    result[result.index(after: afterIndex)] == "\n"
+                )
+
+            // Build replacement with proper paragraph breaks
+            var replacement = imageMarkdown
+            if !hasParagraphBreakBefore && beforeIndex != result.startIndex {
+                replacement = "\n\n" + replacement
+            }
+            if !hasParagraphBreakAfter && afterIndex != result.endIndex {
+                replacement = replacement + "\n\n"
+            }
+
+            if replacement != imageMarkdown {
+                result.replaceSubrange(range, with: replacement)
+            }
+        }
+
+        return result
+    }
+
+    /// Checks if the position is inside a list, blockquote, or table context.
+    /// Returns true if modifying this position would break markdown structure.
+    private static func isInStructuredContext(_ markdown: String, at position: String.Index) -> Bool {
+        // Find the start of the current line
+        var lineStart = position
+        while lineStart > markdown.startIndex {
+            let prevIndex = markdown.index(before: lineStart)
+            if markdown[prevIndex] == "\n" {
+                break
+            }
+            lineStart = prevIndex
+        }
+
+        // Get the line prefix (content before the image on this line)
+        let linePrefix = String(markdown[lineStart..<position])
+        let trimmedPrefix = linePrefix.trimmingCharacters(in: .whitespaces)
+
+        // Check for list markers: -, *, + followed by space (to avoid false positives)
+        if (trimmedPrefix.hasPrefix("- ") || trimmedPrefix.hasPrefix("* ") ||
+            trimmedPrefix.hasPrefix("+ ")) {
+            return true
+        }
+
+        // Check for numbered list: digit(s) followed by . or ) and space
+        let numberedListPattern = #"^\d+[.)]\s"#
+        if let numberedRegex = try? NSRegularExpression(pattern: numberedListPattern, options: []),
+           numberedRegex.firstMatch(in: trimmedPrefix, options: [], range: NSRange(trimmedPrefix.startIndex..., in: trimmedPrefix)) != nil {
+            return true
+        }
+
+        // Check for blockquote marker: >
+        if trimmedPrefix.hasPrefix(">") {
+            return true
+        }
+
+        // Check for table context: line has | at both start area and elsewhere (actual table row)
+        var lineEnd = position
+        while lineEnd < markdown.endIndex && markdown[lineEnd] != "\n" {
+            lineEnd = markdown.index(after: lineEnd)
+        }
+        let fullLine = String(markdown[lineStart..<lineEnd])
+        // Only treat as table if line has multiple | characters (actual table structure)
+        if fullLine.filter({ $0 == "|" }).count >= 2 {
+            return true
+        }
+
+        return false
+    }
+
+    /// Finds ranges in the markdown that should be excluded from image processing.
+    /// Returns ranges as String.Index for correct handling of non-ASCII content.
+    private static func findExcludedRanges(in markdown: String) -> [Range<String.Index>] {
+        var ranges: [Range<String.Index>] = []
+        let fullRange = NSRange(markdown.startIndex..., in: markdown)
+
+        // Find fenced code blocks (3+ backticks or tildes)
+        let fencedPattern = #"(?:^|\n)(`{3,}|~{3,}).*?(?:\n\1|\z)"#
+        guard let fencedRegex = try? NSRegularExpression(pattern: fencedPattern, options: [.dotMatchesLineSeparators]) else {
+            return ranges
+        }
+        ranges.append(contentsOf: fencedRegex.matches(in: markdown, options: [], range: fullRange)
+            .compactMap { Range($0.range, in: markdown) })
+
+        // Find indented code blocks (lines starting with 4 spaces or tab, preceded by blank line)
+        // Blank line may contain whitespace: \n followed by optional spaces/tabs then \n
+        let indentedPattern = #"(?:^|\n[ \t]*\n)((?:(?:    |\t).+\n?)+)"#
+        guard let indentedRegex = try? NSRegularExpression(pattern: indentedPattern, options: []) else {
+            return ranges
+        }
+        ranges.append(contentsOf: indentedRegex.matches(in: markdown, options: [], range: fullRange)
+            .filter { $0.numberOfRanges > 1 }
+            .compactMap { Range($0.range(at: 1), in: markdown) })
+
+        // Find inline code (1+ backticks, matching pairs)
+        let inlinePattern = #"(`+)(?!`)[^`]*?\1"#
+        guard let inlineRegex = try? NSRegularExpression(pattern: inlinePattern, options: []) else {
+            return ranges
+        }
+        ranges.append(contentsOf: inlineRegex.matches(in: markdown, options: [], range: fullRange)
+            .compactMap { Range($0.range, in: markdown) })
+
+        return ranges
     }
 }
 
