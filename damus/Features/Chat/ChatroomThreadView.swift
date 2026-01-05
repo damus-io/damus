@@ -69,22 +69,18 @@ struct ChatroomThreadView: View {
     }
 
     /// Updates chrome visibility based on scroll direction (longform only).
-    /// Scrolling down hides chrome, scrolling up shows it.
+    /// Scrolling down hides chrome; tap to restore (scroll up does not restore).
     private func updateChromeVisibility(newY: CGFloat) {
         guard isLongformEvent else { return }
 
         let delta = newY - lastScrollY
 
-        // Only toggle chrome state if scroll exceeds threshold
-        if abs(delta) > scrollThreshold {
-            let shouldHide = delta < 0  // Scrolling down (content moving up)
-
-            if shouldHide != chromeHidden {
-                withAnimation(.easeInOut(duration: 0.25)) {
-                    chromeHidden = shouldHide
-                }
-                notify(.display_tabbar(!shouldHide))
+        // Only hide chrome on scroll down, don't restore on scroll up (use tap instead)
+        if delta < -scrollThreshold && !chromeHidden {
+            withAnimation(.easeInOut(duration: 0.25)) {
+                chromeHidden = true
             }
+            notify(.display_tabbar(false))
         }
 
         // Always update lastScrollY to prevent stale delta accumulation
