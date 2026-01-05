@@ -50,6 +50,16 @@
 				<string>nostr+walletconnect</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>io.damus.nostrsigner</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>nostrsigner</string>
+			</array>
+		</dict>
 	</array>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>

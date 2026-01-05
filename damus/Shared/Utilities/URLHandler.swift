@@ -52,6 +52,10 @@ struct DamusURLHandler {
                 }
                 return .external_url(url)
             }
+        #if !EXTENSION
+        case .nostrSigner(let request):
+            return .sheet(.nostrSignerApproval(request))
+        #endif
         case nil:
             break
         }
@@ -69,14 +73,24 @@ struct DamusURLHandler {
     /// - Parameter url: The URL to be parsed
     /// - Returns: Structured information about the contents inside the URL. Returns `nil` if URL is not compatible, invalid, or could not be parsed for some reason.
     static func parse_url(url: URL) -> ParsedURLInfo? {
+        #if !EXTENSION
+        // Check for nostrsigner:// URL scheme (NIP-55 iOS extension)
+        if url.scheme == "nostrsigner" {
+            if let request = NostrSignerRequest.parse(url: url) {
+                return .nostrSigner(request)
+            }
+            return nil
+        }
+        #endif
+
         if let purple_url = DamusPurpleURL(url: url) {
             return .purple(purple_url)
         }
-        
+
         if let nwc = WalletConnectURL(str: url.absoluteString) {
             return .wallet_connect(nwc)
         }
-        
+
         guard let link = decode_nostr_uri(url.absoluteString) else {
             return nil
         }
@@ -118,5 +132,8 @@ struct DamusURLHandler {
         case script([UInt8])
         case purple(DamusPurpleURL)
         case invoice(Invoice)
+        #if !EXTENSION
+        case nostrSigner(NostrSignerRequest)
+        #endif
     }
 }

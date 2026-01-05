@@ -33,6 +33,9 @@ enum Sheets: Identifiable {
     case purple(DamusPurpleURL)
     case purple_onboarding
     case error(ErrorView.UserPresentableError)
+    #if !EXTENSION
+    case nostrSignerApproval(NostrSignerRequest)
+    #endif
 
     static func zap(target: ZapTarget, lnurl: String) -> Sheets {
         return .zap(ZapSheet(target: target, lnurl: lnurl))
@@ -56,6 +59,9 @@ enum Sheets: Identifiable {
         case .purple(let purple_url): return "purple" + purple_url.url_string()
         case .purple_onboarding: return "purple_onboarding"
         case .error(_): return "error"
+        #if !EXTENSION
+        case .nostrSignerApproval(let request): return "nostrsigner-" + request.clientId
+        #endif
         }
     }
 }
@@ -362,6 +368,10 @@ struct ContentView: View {
                 DamusPurpleNewUserOnboardingView(damus_state: damus_state)
             case .error(let error):
                 ErrorView(damus_state: damus_state!, error: error)
+            #if !EXTENSION
+            case .nostrSignerApproval(let request):
+                NostrSignerApprovalSheet(request: request, damus_state: damus_state!)
+            #endif
             }
         }
         .onOpenURL { url in
