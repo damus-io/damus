@@ -82,8 +82,12 @@ struct QuoteId: IdType, TagKey, TagConvertible {
 
 /// A quote reference with optional relay hints for fetching.
 ///
-/// Per NIP-18, `q` tags may include a relay URL at position 2 where the quoted
+/// Per NIP-10/NIP-18, `q` tags include a relay URL at position 2 where the quoted
 /// event can be found.
+///
+/// Note: The NIPs allow `q` tags to contain either event IDs (hex) or event addresses
+/// (`<kind>:<pubkey>:<d>` for replaceable events). This implementation currently only
+/// supports hex event IDs; quotes of addressable events are not yet handled.
 struct QuoteRef: TagConvertible {
     let quote_id: QuoteId
     let relayHints: [RelayURL]
@@ -102,6 +106,9 @@ struct QuoteRef: TagConvertible {
     }
 
     /// Parses a `q` tag into a QuoteRef, preserving relay hints from position 2.
+    ///
+    /// Only parses `q` tags containing hex event IDs. Tags with event addresses
+    /// (`<kind>:<pubkey>:<d>`) are not currently supported and will return nil.
     static func from_tag(tag: TagSequence) -> QuoteRef? {
         var i = tag.makeIterator()
 

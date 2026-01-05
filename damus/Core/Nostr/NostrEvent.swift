@@ -846,7 +846,7 @@ struct NoteMentionWithHints {
 /// Per NIP-19, `nevent` bech32 entities may include relay hints. This function extracts
 /// those hints so they can be used when fetching the referenced event.
 ///
-/// If no inline mention is found in the content, falls back to checking `q` tags (NIP-18)
+/// If no inline mention is found in the content, falls back to checking `q` tags (NIP-10/NIP-18)
 /// to support quote reposts that don't embed the quoted note inline.
 ///
 /// - Parameters:
