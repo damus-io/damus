@@ -636,6 +636,7 @@
 		7C95CAEE299DCEF1009DCB67 /* KFOptionSetter+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C95CAED299DCEF1009DCB67 /* KFOptionSetter+.swift */; };
 		7CFF6317299FEFE5005D382A /* SelectableText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CFF6316299FEFE5005D382A /* SelectableText.swift */; };
 		818EE79695D8D7CB476C22C0 /* ProfileNetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77CB7C169A91B43785F9E5CD /* ProfileNetworkTests.swift */; };
+		8A1B2C3D4E5F6A7B8C9D0E1F /* SearchNetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F7A8B9C0D1E2F /* SearchNetworkTests.swift */; };
 		82D6FA9A2CD9820500C925F4 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D6FA992CD9820500C925F4 /* ShareViewController.swift */; };
 		82D6FAA12CD9820500C925F4 /* ShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 82D6FA972CD9820500C925F4 /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		82D6FAA92CD99F7900C925F4 /* FbConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B9372A9AD44700DC3548 /* FbConstants.swift */; };
@@ -2703,6 +2704,7 @@
 		7527271D2A93FF0100214108 /* Block.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Block.swift; sourceTree = "<group>"; };
 		75AD872A2AA23A460085EF2C /* Block+Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Block+Tests.swift"; sourceTree = "<group>"; };
 		77CB7C169A91B43785F9E5CD /* ProfileNetworkTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProfileNetworkTests.swift; sourceTree = "<group>"; };
+		1A2B3C4D5E6F7A8B9C0D1E2F /* SearchNetworkTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SearchNetworkTests.swift; sourceTree = "<group>"; };
 		7C60CAEE298471A1009C80D6 /* CoreSVG.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreSVG.swift; sourceTree = "<group>"; };
 		7C902AE22981D55B002AB16E /* ZoomableScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableScrollView.swift; sourceTree = "<group>"; };
 		7C95CAED299DCEF1009DCB67 /* KFOptionSetter+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KFOptionSetter+.swift"; sourceTree = "<group>"; };
@@ -3922,6 +3924,7 @@
 				975B7688D5275561C2AEBF5D /* DirectMessageTests.swift */,
 				FE352C0DDD85F17DD0FA0848 /* ZapNetworkTests.swift */,
 				77CB7C169A91B43785F9E5CD /* ProfileNetworkTests.swift */,
+				1A2B3C4D5E6F7A8B9C0D1E2F /* SearchNetworkTests.swift */,
 			);
 			path = damusTests;
 			sourceTree = "<group>";
@@ -6384,6 +6387,7 @@
 				A6E0E48F4EFBF069BCE0BEE5 /* DirectMessageTests.swift in Sources */,
 				90BEE41F43707DA21DF8DE69 /* ZapNetworkTests.swift in Sources */,
 				818EE79695D8D7CB476C22C0 /* ProfileNetworkTests.swift in Sources */,
+				8A1B2C3D4E5F6A7B8C9D0E1F /* SearchNetworkTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
