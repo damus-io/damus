@@ -381,6 +381,11 @@ struct LongformContent {
     let markdown: MarkdownContent
     let words: Int
 
+    /// Estimated reading time in minutes, based on average reading speed of 200 words per minute.
+    var estimatedReadTimeMinutes: Int {
+        return max(1, words / 200)
+    }
+
     init(_ markdown: String) {
         // Pre-process markdown to ensure images are block-level (have blank lines around them)
         // This prevents images from being parsed as inline within text paragraphs
