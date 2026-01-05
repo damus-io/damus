@@ -9,8 +9,9 @@
 //  - Client→Relay: EVENT, REQ, CLOSE
 //  - Relay→Client: EVENT, OK, EOSE, CLOSED, NOTICE
 //
-//  Run strfry locally:
-//    docker run -d -p 7777:7777 --name strfry-test dockurr/strfry
+//  Run strfry locally (with permissive config):
+//    docker run -d -p 7777:7777 -v $(pwd)/test/strfry-test.conf:/etc/strfry.conf \
+//      --name strfry-test ghcr.io/dockur/strfry
 //
 //  Run with throttling:
 //    sudo throttle --profile 3g

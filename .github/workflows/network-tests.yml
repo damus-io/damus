@@ -47,8 +47,10 @@ jobs:
 
       - name: Start strfry test relay
         run: |
-          # Start strfry in Docker for local relay testing
-          docker run -d -p 7777:7777 --name strfry-test dockurr/strfry
+          # Start strfry with permissive config (no write policy restrictions)
+          docker run -d -p 7777:7777 \
+            -v ${{ github.workspace }}/test/strfry-test.conf:/etc/strfry.conf \
+            --name strfry-test ghcr.io/dockur/strfry
           # Wait for relay to be ready
           sleep 5
           echo "strfry test relay started on ws://localhost:7777"
@@ -121,7 +123,9 @@ jobs:
 
       - name: Start strfry test relay
         run: |
-          docker run -d -p 7777:7777 --name strfry-test dockurr/strfry
+          docker run -d -p 7777:7777 \
+            -v ${{ github.workspace }}/test/strfry-test.conf:/etc/strfry.conf \
+            --name strfry-test ghcr.io/dockur/strfry
           sleep 5
           echo "strfry test relay started"
 
