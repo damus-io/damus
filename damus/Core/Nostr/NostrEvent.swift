@@ -846,13 +846,17 @@ struct NoteMentionWithHints {
 /// Per NIP-19, `nevent` bech32 entities may include relay hints. This function extracts
 /// those hints so they can be used when fetching the referenced event.
 ///
+/// If no inline mention is found in the content, falls back to checking `q` tags (NIP-18)
+/// to support quote reposts that don't embed the quoted note inline.
+///
 /// - Parameters:
 ///   - ndb: The nostrdb instance.
 ///   - ev: The event to search.
 ///   - keypair: The keypair for decryption if needed.
 /// - Returns: A `NoteMentionWithHints` containing the note ID and relay hints, or nil if not found.
 func first_eref_mention_with_hints(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> NoteMentionWithHints? {
-    return try? NdbBlockGroup.borrowBlockGroup(event: ev, using: ndb, and: keypair, borrow: { blockGroup in
+    // First check content blocks for inline mentions
+    let inlineMention: NoteMentionWithHints? = try? NdbBlockGroup.borrowBlockGroup(event: ev, using: ndb, and: keypair, borrow: { blockGroup in
         return blockGroup.forEachBlock({ index, block in
             switch block {
             case .mention(let mention):
@@ -870,6 +874,16 @@ func first_eref_mention_with_hints(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -
             }
         })
     })
+
+    if let inlineMention {
+        return inlineMention
+    }
+
+    // Fall back to q tags (NIP-18 quote reposts)
+    guard let quoteRef = ev.referenced_quote_refs.first else {
+        return nil
+    }
+    return NoteMentionWithHints(noteId: quoteRef.note_id, relayHints: quoteRef.relayHints, index: nil)
 }
 
 func separate_invoices(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> [Invoice]? {
