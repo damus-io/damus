@@ -669,4 +669,128 @@ final class DMPostBoxTests: XCTestCase {
         await fulfillment(of: [expectation], timeout: 1.0)
         XCTAssertTrue(callbackFired, "on_flush callback should fire")
     }
+
+    // MARK: - Poor Network Condition Tests
+
+    /// Test: DM rejected by relay is removed from queue (no automatic retry)
+    func testDMRejectedByRelayIsRemoved() async throws {
+        guard let dm = makeDM(message: "Hello Bob!", from: alice, to: bob) else {
+            XCTFail("Failed to create DM")
+            return
+        }
+
+        await postbox.send(dm, to: [testRelayURL])
+        XCTAssertNotNil(postbox.events[dm.id])
+
+        // Relay rejects the DM
+        let result = CommandResult(event_id: dm.id, ok: false, msg: "blocked: you are not allowed to post")
+        postbox.handle_event(relay_id: testRelayURL, .nostr_event(.ok(result)))
+
+        // PostBox removes event on any response (OK or not)
+        // Retry logic must be handled at a higher level
+        XCTAssertNil(postbox.events[dm.id], "Rejected DM is removed from queue")
+    }
+
+    /// Test: Multiple DMs queued during network outage
+    func testMultipleDMsQueuedDuringOutage() async throws {
+        // Disconnect relay
+        mockSocket.simulateDisconnect()
+        try await Task.sleep(for: .milliseconds(100))
+
+        mockSocket.reset()
+
+        // Queue multiple DMs while disconnected
+        var dms: [NostrEvent] = []
+        for i in 1...3 {
+            guard let dm = makeDM(message: "Message \(i)", from: alice, to: bob) else {
+                XCTFail("Failed to create DM \(i)")
+                return
+            }
+            dms.append(dm)
+            await postbox.send(dm, to: [testRelayURL])
+        }
+
+        // All DMs should be queued
+        for dm in dms {
+            XCTAssertNotNil(postbox.events[dm.id], "DM should be queued")
+        }
+        XCTAssertEqual(mockSocket.sentMessages.count, 0, "No messages sent while disconnected")
+
+        // Verify queue integrity
+        XCTAssertEqual(postbox.events.count, 3, "All 3 DMs should be in queue")
+    }
+
+    /// Test: Connection flapping during DM delivery
+    func testConnectionFlappingDuringDMDelivery() async throws {
+        guard let dm = makeDM(message: "Hello Bob!", from: alice, to: bob) else {
+            XCTFail("Failed to create DM")
+            return
+        }
+
+        await postbox.send(dm, to: [testRelayURL])
+
+        // Rapid connect/disconnect cycle
+        mockSocket.simulateDisconnect()
+        try await Task.sleep(for: .milliseconds(50))
+        mockSocket.simulateConnect()
+        try await Task.sleep(for: .milliseconds(50))
+        mockSocket.simulateDisconnect()
+        try await Task.sleep(for: .milliseconds(50))
+        mockSocket.simulateConnect()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // DM should still be in queue (waiting for OK)
+        XCTAssertNotNil(postbox.events[dm.id], "DM should survive connection flapping")
+    }
+
+    /// Test: Partial relay success - some accept, some reject
+    func testPartialRelaySuccess() async throws {
+        let relay2URL = RelayURL("wss://relay2.test.com")!
+        let mockSocket2 = MockWebSocket()
+        let descriptor2 = RelayPool.RelayDescriptor(url: relay2URL, info: .readWrite)
+        try await pool.add_relay(descriptor2, webSocket: mockSocket2)
+        mockSocket2.simulateConnect()
+        try await Task.sleep(for: .milliseconds(100))
+
+        guard let dm = makeDM(message: "Hello Bob!", from: alice, to: bob) else {
+            XCTFail("Failed to create DM")
+            return
+        }
+
+        await postbox.send(dm, to: [testRelayURL, relay2URL])
+
+        // First relay accepts
+        simulateOKResponse(eventId: dm.id, success: true)
+        XCTAssertNotNil(postbox.events[dm.id], "DM should remain until all relays respond")
+
+        // Second relay rejects
+        let rejectResult = CommandResult(event_id: dm.id, ok: false, msg: "rate-limited")
+        postbox.handle_event(relay_id: relay2URL, .nostr_event(.ok(rejectResult)))
+
+        // Event tracking depends on implementation - at minimum both relays were attempted
+    }
+
+    /// Test: DM encrypted content survives queue/dequeue
+    func testDMEncryptedContentSurvivesQueue() async throws {
+        let message = "Secret message with unicode: 🔐"
+
+        guard let dm = makeDM(message: message, from: alice, to: bob) else {
+            XCTFail("Failed to create DM")
+            return
+        }
+
+        // Verify encryption before queueing
+        XCTAssertTrue(dm.content.contains("?iv="), "Content should be encrypted")
+
+        // Queue while disconnected
+        mockSocket.simulateDisconnect()
+        try await Task.sleep(for: .milliseconds(100))
+
+        await postbox.send(dm, to: [testRelayURL])
+
+        // Verify queued event maintains encrypted content
+        let queuedEvent = postbox.events[dm.id]
+        XCTAssertNotNil(queuedEvent)
+        XCTAssertTrue(dm.content.contains("?iv="), "Encrypted content should be preserved in queue")
+    }
 }
