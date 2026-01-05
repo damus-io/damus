@@ -94,9 +94,19 @@ struct DamusURLHandler {
         // Parse nevent/nprofile directly since decode_nostr_uri discards relay hints
         let uri = remove_nostr_uri_prefix(url.absoluteString)
         if uri.hasPrefix("nevent"), case .nevent(let nevent) = Bech32Object.parse(uri) {
+            #if DEBUG
+            if !nevent.relays.isEmpty {
+                print("[relay-hints] URL nevent: Found \(nevent.relays.count) hint(s) for \(nevent.noteid.hex().prefix(8))...: \(nevent.relays.map { $0.absoluteString })")
+            }
+            #endif
             return .event_reference(.note_id(nevent.noteid, relays: nevent.relays))
         }
         if uri.hasPrefix("nprofile"), case .nprofile(let nprofile) = Bech32Object.parse(uri) {
+            #if DEBUG
+            if !nprofile.relays.isEmpty {
+                print("[relay-hints] URL nprofile: Found \(nprofile.relays.count) hint(s) for \(nprofile.author.hex().prefix(8))...: \(nprofile.relays.map { $0.absoluteString })")
+            }
+            #endif
             return .profile_reference(nprofile.author, relays: nprofile.relays)
         }
 
