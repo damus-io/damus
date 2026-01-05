@@ -87,6 +87,9 @@ struct PostView: View {
     @State private var current_placeholder_index = 0
     @State private var uploadTasks: [Task<Void, Never>] = []
 
+    /// Extracted longform references (naddr or nevent) to display as preview cards
+    @State private var longformReferences: [LongformReference] = []
+
     let action: PostAction
     let damus_state: DamusState
     let prompt_view: (() -> AnyView)?
@@ -122,7 +125,54 @@ struct PostView: View {
     }
     
     func send_post() async {
-        let new_post = await build_post(state: self.damus_state, post: self.post, action: action, uploadedMedias: uploadedMedias, references: self.references, filtered_pubkeys: filtered_pubkeys)
+        // Re-add longform references to post content if any were extracted
+        var postWithReferences = NSMutableAttributedString(attributedString: self.post)
+
+        // Remove any longform references that might still be in the text (handles duplicates)
+        if !longformReferences.isEmpty {
+            let text = postWithReferences.string
+            let existingRefs = extractAllLongformReferences(from: text)
+            // Remove from end to start to preserve indices, including surrounding whitespace
+            for extraction in existingRefs.sorted(by: { $0.matchRange.location > $1.matchRange.location }) {
+                var deleteRange = extraction.matchRange
+
+                // Expand range to include surrounding whitespace/newlines
+                if deleteRange.location > 0 {
+                    let prevCharIndex = deleteRange.location - 1
+                    if let range = Range(NSRange(location: prevCharIndex, length: 1), in: text) {
+                        let prevChar = text[range]
+                        if prevChar.allSatisfy({ $0.isWhitespace || $0.isNewline }) {
+                            deleteRange = NSRange(location: prevCharIndex, length: deleteRange.length + 1)
+                        }
+                    }
+                }
+
+                let afterMatchEnd = deleteRange.location + deleteRange.length
+                if afterMatchEnd < text.count {
+                    if let range = Range(NSRange(location: afterMatchEnd, length: 1), in: text) {
+                        let nextChar = text[range]
+                        if nextChar.allSatisfy({ $0.isWhitespace || $0.isNewline }) {
+                            deleteRange = NSRange(location: deleteRange.location, length: deleteRange.length + 1)
+                        }
+                    }
+                }
+
+                postWithReferences.deleteCharacters(in: deleteRange)
+            }
+        }
+
+        if !longformReferences.isEmpty {
+            let refStrings = longformReferences.map { "nostr:\($0.bech32)" }.joined(separator: "\n")
+            // Add the references at the end with a newline separator if there's existing content
+            let trimmedContent = postWithReferences.string.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmedContent.isEmpty {
+                postWithReferences.append(NSAttributedString(string: "\n\n\(refStrings)"))
+            } else {
+                postWithReferences.append(NSAttributedString(string: refStrings))
+            }
+        }
+
+        let new_post = await build_post(state: self.damus_state, post: postWithReferences, action: action, uploadedMedias: uploadedMedias, references: self.references, filtered_pubkeys: filtered_pubkeys)
 
         notify(.post(.post(new_post)))
 
@@ -133,7 +183,7 @@ struct PostView: View {
     }
 
     var is_post_empty: Bool {
-        return post.string.allSatisfy { $0.isWhitespace } && uploadedMedias.isEmpty
+        return post.string.allSatisfy { $0.isWhitespace } && uploadedMedias.isEmpty && longformReferences.isEmpty
     }
 
     var uploading_disabled: Bool {
@@ -247,18 +297,91 @@ struct PostView: View {
         return true
     }
     
+    /// Extracts all longform references from the post text, stores them in state, and removes them from displayed text.
+    func extractAndRemoveLongformReferences() {
+        let text = post.string
+        let extractions = extractAllLongformReferences(from: text)
+
+        // Filter out references we already have
+        let newExtractions = extractions.filter { extraction in
+            !longformReferences.contains(extraction.reference)
+        }
+
+        guard !newExtractions.isEmpty else { return }
+
+        // Add new references
+        longformReferences.append(contentsOf: newExtractions.map { $0.reference })
+
+        // Remove the reference texts from the post (from end to start to preserve indices)
+        let mutablePost = NSMutableAttributedString(attributedString: post)
+        let sortedExtractions = newExtractions.sorted { $0.matchRange.location > $1.matchRange.location }
+
+        for extraction in sortedExtractions {
+            var deleteRange = extraction.matchRange
+
+            // Expand range to include surrounding whitespace/newlines
+            // Check for leading whitespace/newline
+            if deleteRange.location > 0 {
+                let prevCharIndex = deleteRange.location - 1
+                if let range = Range(NSRange(location: prevCharIndex, length: 1), in: text) {
+                    let prevChar = text[range]
+                    if prevChar.allSatisfy({ $0.isWhitespace || $0.isNewline }) {
+                        deleteRange = NSRange(location: prevCharIndex, length: deleteRange.length + 1)
+                    }
+                }
+            }
+
+            // Check for trailing whitespace/newline
+            let afterMatchEnd = deleteRange.location + deleteRange.length
+            if afterMatchEnd < text.count {
+                if let range = Range(NSRange(location: afterMatchEnd, length: 1), in: text) {
+                    let nextChar = text[range]
+                    if nextChar.allSatisfy({ $0.isWhitespace || $0.isNewline }) {
+                        deleteRange = NSRange(location: deleteRange.location, length: deleteRange.length + 1)
+                    }
+                }
+            }
+
+            mutablePost.deleteCharacters(in: deleteRange)
+        }
+
+        post = mutablePost
+    }
+
     /// Use this to signal that the post contents have changed. This will do two things:
-    /// 
+    ///
     /// 1. Save the new contents into our in-memory drafts
     /// 2. Signal that we need to save drafts persistently, which will happen after a certain wait period
     func post_changed(post: NSMutableAttributedString, media: [UploadedMedia]) {
+        // Ensure longform references are included in the saved draft
+        // so they're not lost when the post view is dismissed and reopened
+        var contentToSave = post
+        if !longformReferences.isEmpty {
+            let postText = post.string
+            // Check if references are already in the text (they shouldn't be after extraction)
+            let existingRefs = extractAllLongformReferences(from: postText)
+            let missingRefs = longformReferences.filter { ref in
+                !existingRefs.contains { $0.reference == ref }
+            }
+            if !missingRefs.isEmpty {
+                contentToSave = NSMutableAttributedString(attributedString: post)
+                let refStrings = missingRefs.map { "nostr:\($0.bech32)" }.joined(separator: "\n")
+                let trimmed = contentToSave.string.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !trimmed.isEmpty {
+                    contentToSave.append(NSAttributedString(string: "\n\n\(refStrings)"))
+                } else {
+                    contentToSave.append(NSAttributedString(string: refStrings))
+                }
+            }
+        }
+
         if let draft = load_draft_for_post(drafts: damus_state.drafts, action: action) {
-            draft.content = post
+            draft.content = contentToSave
             draft.media = uploadedMedias
             draft.references = references
             draft.filtered_pubkeys = filtered_pubkeys
         } else {
-            let artifacts = DraftArtifacts(content: post, media: uploadedMedias, references: references, id: UUID().uuidString)
+            let artifacts = DraftArtifacts(content: contentToSave, media: uploadedMedias, references: references, id: UUID().uuidString)
             set_draft_for_post(drafts: damus_state.drafts, action: action, artifacts: artifacts)
         }
         self.autoSaveModel.needsSaving()
@@ -286,6 +409,7 @@ struct PostView: View {
                 .textInputAutocapitalization(.sentences)
                 .onChange(of: post) { p in
                     post_changed(post: p, media: uploadedMedias)
+                    extractAndRemoveLongformReferences()
                 }
                 // Set a height based on the text content height, if it is available and valid
                 .frame(height: get_valid_text_height())
@@ -416,6 +540,15 @@ struct PostView: View {
                         let url = draft.getLinkURL() {
                     LinkViewRepresentable(meta: .url(url))
                         .frame(height: 50)
+                }
+
+                // Preview longform references carousel with delete buttons
+                if !longformReferences.isEmpty {
+                    LongformCarouselView(
+                        damus_state: damus_state,
+                        references: $longformReferences
+                    )
+                    .padding(.top, 8)
                 }
             }
             .padding(.horizontal)
@@ -972,5 +1105,150 @@ func isSupportedImage(url: URL) -> Bool {
     // It would be better to pull this programmatically from Apple's APIs, but there seems to be no such call
     let supportedTypes = ["jpg", "png", "gif"]
     return supportedTypes.contains(fileExtension)
+}
+
+/// Result of extracting a longform reference from text
+struct LongformExtractionResult {
+    let reference: LongformReference
+    let matchRange: NSRange
+}
+
+/// Extracts the first longform reference (naddr or nevent with kind 30023) from the given text
+func extractLongformReference(from text: String) -> LongformExtractionResult? {
+    // Try naddr first
+    if let result = extractLongformNaddrWithRange(from: text) {
+        return result
+    }
+    // Then try nevent
+    return extractLongformNeventWithRange(from: text)
+}
+
+/// Extracts all longform references (naddr or nevent with kind 30023) from the given text
+func extractAllLongformReferences(from text: String) -> [LongformExtractionResult] {
+    var results: [LongformExtractionResult] = []
+
+    // Find all naddr references
+    let naddrPattern = "(nostr:)?naddr1[a-zA-Z0-9]+"
+    if let naddrRegex = try? NSRegularExpression(pattern: naddrPattern, options: []) {
+        let range = NSRange(text.startIndex..., in: text)
+        let matches = naddrRegex.matches(in: text, options: [], range: range)
+        for match in matches {
+            guard let matchRange = Range(match.range, in: text) else { continue }
+            var naddrString = String(text[matchRange])
+            if naddrString.hasPrefix("nostr:") {
+                naddrString = String(naddrString.dropFirst(6))
+            }
+            if case .naddr(let naddr) = Bech32Object.parse(naddrString),
+               naddr.kind == NostrKind.longform.rawValue {
+                results.append(LongformExtractionResult(reference: .naddr(naddr), matchRange: match.range))
+            }
+        }
+    }
+
+    // Find all nevent references
+    let neventPattern = "(nostr:)?nevent1[a-zA-Z0-9]+"
+    if let neventRegex = try? NSRegularExpression(pattern: neventPattern, options: []) {
+        let range = NSRange(text.startIndex..., in: text)
+        let matches = neventRegex.matches(in: text, options: [], range: range)
+        for match in matches {
+            guard let matchRange = Range(match.range, in: text) else { continue }
+            var neventString = String(text[matchRange])
+            if neventString.hasPrefix("nostr:") {
+                neventString = String(neventString.dropFirst(6))
+            }
+            if case .nevent(let nevent) = Bech32Object.parse(neventString),
+               nevent.kind == NostrKind.longform.rawValue {
+                results.append(LongformExtractionResult(reference: .nevent(nevent), matchRange: match.range))
+            }
+        }
+    }
+
+    return results
+}
+
+/// Extracts the first longform naddr (kind 30023) from the given text with its range
+func extractLongformNaddrWithRange(from text: String) -> LongformExtractionResult? {
+    // Look for naddr1... pattern in the text (may be prefixed with nostr:)
+    let pattern = "(nostr:)?naddr1[a-zA-Z0-9]+"
+    guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
+        return nil
+    }
+
+    let range = NSRange(text.startIndex..., in: text)
+    guard let match = regex.firstMatch(in: text, options: [], range: range) else {
+        return nil
+    }
+
+    guard let matchRange = Range(match.range, in: text) else {
+        return nil
+    }
+
+    var naddrString = String(text[matchRange])
+    // Remove nostr: prefix if present for parsing
+    if naddrString.hasPrefix("nostr:") {
+        naddrString = String(naddrString.dropFirst(6))
+    }
+
+    // Parse the naddr using Bech32Object
+    guard case .naddr(let naddr) = Bech32Object.parse(naddrString),
+          naddr.kind == NostrKind.longform.rawValue else {
+        return nil
+    }
+
+    return LongformExtractionResult(reference: .naddr(naddr), matchRange: match.range)
+}
+
+/// Extracts the first longform nevent (kind 30023) from the given text with its range
+func extractLongformNeventWithRange(from text: String) -> LongformExtractionResult? {
+    // Look for nevent1... pattern in the text (may be prefixed with nostr:)
+    let pattern = "(nostr:)?nevent1[a-zA-Z0-9]+"
+    guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
+        return nil
+    }
+
+    let range = NSRange(text.startIndex..., in: text)
+    guard let match = regex.firstMatch(in: text, options: [], range: range) else {
+        return nil
+    }
+
+    guard let matchRange = Range(match.range, in: text) else {
+        return nil
+    }
+
+    var neventString = String(text[matchRange])
+    // Remove nostr: prefix if present for parsing
+    if neventString.hasPrefix("nostr:") {
+        neventString = String(neventString.dropFirst(6))
+    }
+
+    // Parse the nevent using Bech32Object
+    guard case .nevent(let nevent) = Bech32Object.parse(neventString),
+          nevent.kind == NostrKind.longform.rawValue else {
+        return nil
+    }
+
+    return LongformExtractionResult(reference: .nevent(nevent), matchRange: match.range)
+}
+
+/// Extracts the first longform naddr (kind 30023) from the given text
+func extractLongformNaddr(from text: String) -> NAddr? {
+    guard let result = extractLongformNaddrWithRange(from: text) else {
+        return nil
+    }
+    if case .naddr(let naddr) = result.reference {
+        return naddr
+    }
+    return nil
+}
+
+/// Extracts the first longform nevent (kind 30023) from the given text
+func extractLongformNevent(from text: String) -> NEvent? {
+    guard let result = extractLongformNeventWithRange(from: text) else {
+        return nil
+    }
+    if case .nevent(let nevent) = result.reference {
+        return nevent
+    }
+    return nil
 }
 
