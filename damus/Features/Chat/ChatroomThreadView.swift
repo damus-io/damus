@@ -23,8 +23,44 @@ struct ChatroomThreadView: View {
     @State var showStickyHeader: Bool = false
     @State var untrustedSectionOffset: CGFloat = 0
 
+    // Add state for reading progress (longform articles)
+    @State private var readingProgress: CGFloat = 0
+    @State private var viewportHeight: CGFloat = 0
+    @State private var contentTopY: CGFloat = 0
+    @State private var contentBottomY: CGFloat = 0
+    @State private var initialTopY: CGFloat? = nil
+
     private static let untrusted_network_section_id = "untrusted-network-section"
     private static let sticky_header_adjusted_anchor = UnitPoint(x: UnitPoint.top.x, y: 0.2)
+
+    /// Returns true if the selected event is a longform article (kind 30023).
+    var isLongformEvent: Bool {
+        thread.selected_event.kind == 30023
+    }
+
+    /// Updates reading progress based on scroll position.
+    private func updateReadingProgress() {
+        guard thread.selected_event.kind == 30023 else { return }
+        guard viewportHeight > 0 else { return }
+
+        // Capture initial position on first update
+        if initialTopY == nil {
+            initialTopY = contentTopY
+        }
+        guard let startY = initialTopY else { return }
+
+        // Content height is constant (bottom - top in global coords)
+        let contentHeight = contentBottomY - contentTopY
+        guard contentHeight > 0 else { return }
+
+        // How much we've scrolled from initial position
+        // As we scroll down, contentTopY decreases, so scrolled = startY - currentTopY
+        let scrolled = startY - contentTopY
+        let maxScroll = max(contentHeight - viewportHeight, 1)
+
+        let progress = scrolled / maxScroll
+        readingProgress = min(max(progress, 0), 1)
+    }
 
     func go_to_event(scroller: ScrollViewProxy, note_id: NoteId) {
         let adjustedAnchor: UnitPoint = showStickyHeader ? ChatroomThreadView.sticky_header_adjusted_anchor : .top
@@ -108,6 +144,20 @@ struct ChatroomThreadView: View {
 
             ZStack(alignment: .top) {
                 ScrollView(.vertical) {
+                    VStack(spacing: 0) {
+                    // Top scroll position tracker
+                    GeometryReader { geo in
+                        Color.clear
+                            .onChange(of: geo.frame(in: .global).minY) { newY in
+                                contentTopY = newY
+                                updateReadingProgress()
+                            }
+                            .onAppear {
+                                contentTopY = geo.frame(in: .global).minY
+                            }
+                    }
+                    .frame(height: 1)
+
                     LazyVStack(alignment: .leading, spacing: 8) {
                         // MARK: - Parents events view
                         ForEach(thread.parent_events, id: \.id) { parent_event in
@@ -214,11 +264,37 @@ struct ChatroomThreadView: View {
                         }
                     }
 
+                    // Bottom scroll position tracker - placed before EndBlock so we measure article content, not padding
+                    GeometryReader { geo in
+                        Color.clear
+                            .onChange(of: geo.frame(in: .global).minY) { newY in
+                                contentBottomY = newY
+                                updateReadingProgress()
+                            }
+                            .onAppear {
+                                contentBottomY = geo.frame(in: .global).minY
+                            }
+                    }
+                    .frame(height: 1)
+
                     EndBlock()
 
                     HStack {}
                         .frame(height: tabHeight + getSafeAreaBottom())
+                    } // End VStack wrapper
                 }
+                .background(
+                    GeometryReader { geo in
+                        Color.clear
+                            .onAppear {
+                                viewportHeight = geo.size.height
+                            }
+                            .onChange(of: geo.size.height) { newHeight in
+                                viewportHeight = newHeight
+                                updateReadingProgress()
+                            }
+                    }
+                )
 
                 if showStickyHeader && !untrusted_events.isEmpty {
                     VStack {
@@ -232,6 +308,15 @@ struct ChatroomThreadView: View {
                     }
                     .transition(.move(edge: .top).combined(with: .opacity))
                     .zIndex(1)
+                }
+
+                // Reading progress bar - show for longform articles
+                if thread.selected_event.kind == 30023 {
+                    VStack(spacing: 0) {
+                        ReadingProgressBar(progress: readingProgress)
+                        Spacer()
+                    }
+                    .zIndex(100)
                 }
             }
             .onReceive(handle_notify(.post), perform: { notify in
@@ -278,3 +363,4 @@ struct ChatroomView_Previews: PreviewProvider {
         }
     }
 }
+
