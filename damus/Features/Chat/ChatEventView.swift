@@ -143,14 +143,14 @@ struct ChatEventView: View {
                     }
                 }
                 
-                if let replying_to = event.direct_replies(),
-                   replying_to != selected_event.id {
-                    ReplyQuoteView(keypair: damus_state.keypair, quoter: event, event_id: replying_to, state: damus_state, thread: thread, options: reply_quote_options)
+                if let reply_ref = event.direct_reply_ref(),
+                   reply_ref.note_id != selected_event.id {
+                    ReplyQuoteView(keypair: damus_state.keypair, quoter: event, event_id: reply_ref.note_id, state: damus_state, thread: thread, options: reply_quote_options, relayHint: reply_ref.relay)
                         .background(is_ours ? DamusColors.adaptablePurpleBackground2 : DamusColors.adaptableGrey2)
                         .foregroundColor(is_ours ? Color.damusAdaptablePurpleForeground : Color.damusAdaptableBlack)
                         .cornerRadius(5)
                         .onTapGesture {
-                            self.scroll_to_event?(replying_to)
+                            self.scroll_to_event?(reply_ref.note_id)
                         }
                 }
                 
