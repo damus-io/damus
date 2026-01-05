@@ -162,6 +162,11 @@ struct ChatEventView: View {
                         .background(DamusColors.adaptableWhite)
                         .clipShape(RoundedRectangle(cornerSize: CGSize(width: 10, height: 10)))
                 }
+                if let longformMention = first_longform_naddr_mention(ndb: damus_state.ndb, ev: event, keypair: damus_state.keypair) {
+                    LongformNaddrMentionView(damus_state: damus_state, naddr: longformMention.ref)
+                        .background(DamusColors.adaptableWhite)
+                        .clipShape(RoundedRectangle(cornerSize: CGSize(width: 10, height: 10)))
+                }
             }
             .frame(minWidth: 5, alignment: is_ours ? .trailing : .leading)
             .padding(10)

@@ -114,6 +114,29 @@ func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide
     }
     let one_note_ref = note_ref_count == 1
 
+    // Check for any longform naddr/nevent mentions (kind 30023) - suppress inline when preview cards shown
+    let has_longform_ref: Bool = (try? blocks.reduce(initialResult: false) { index, partialResult, item in
+        switch item {
+        case .mention(let mention):
+            guard let mentionRef = MentionRef(block: mention) else { return .loopContinue }
+            switch mentionRef.nip19 {
+            case .naddr(let naddr):
+                if naddr.kind == NostrKind.longform.rawValue {
+                    return .loopReturn(true)
+                }
+            case .nevent(let nevent):
+                if nevent.kind == NostrKind.longform.rawValue {
+                    return .loopReturn(true)
+                }
+            default:
+                break
+            }
+        default:
+            break
+        }
+        return .loopContinue
+    }) ?? false
+
     // Search backwards until we find the beginning index of the chain of previewables that reach the end of the content.
     var hide_text_index: Int = 0
     if can_hide_last_previewable_refs {
@@ -239,6 +262,21 @@ func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide
             case .mention(let m):
                 if let typ = m.bech32_type, typ.is_notelike, one_note_ref {
                     return .loopContinue
+                }
+                // Suppress inline longform naddr/nevent when preview cards are shown
+                if has_longform_ref, let mentionRef = MentionRef(block: m) {
+                    switch mentionRef.nip19 {
+                    case .naddr(let naddr):
+                        if naddr.kind == NostrKind.longform.rawValue {
+                            return .loopContinue
+                        }
+                    case .nevent(let nevent):
+                        if nevent.kind == NostrKind.longform.rawValue {
+                            return .loopContinue
+                        }
+                    default:
+                        break
+                    }
                 }
                 guard let mention = MentionRef(block: m) else { return .loopContinue }
                 return .loopReturn(str + mention_str(.any(mention), profiles: profiles))

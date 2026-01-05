@@ -50,7 +50,9 @@ struct SelectedEventView: View {
                 EventBody(damus_state: damus, event: event, size: size, options: [.wide])
 
                 Mention
-                
+
+                LongformMention
+
                 Text(verbatim: "\(format_date(created_at: event.created_at))")
                     .padding([.top, .leading, .trailing])
                     .font(.footnote)
@@ -84,6 +86,15 @@ struct SelectedEventView: View {
         Group {
             if let mention = first_eref_mention(ndb: damus.ndb, ev: event, keypair: damus.keypair) {
                 MentionView(damus_state: damus, mention: mention)
+                    .padding(.horizontal)
+            }
+        }
+    }
+
+    var LongformMention: some View {
+        Group {
+            if let longformMention = first_longform_naddr_mention(ndb: damus.ndb, ev: event, keypair: damus.keypair) {
+                LongformNaddrMentionView(damus_state: damus, naddr: longformMention.ref)
                     .padding(.horizontal)
             }
         }

@@ -24,7 +24,17 @@ struct DMView: View {
             }
         }
     }
-    
+
+    var LongformMention: some View {
+        Group {
+            if let longformMention = first_longform_naddr_mention(ndb: damus_state.ndb, ev: event, keypair: damus_state.keypair) {
+                LongformNaddrMentionView(damus_state: damus_state, naddr: longformMention.ref)
+            } else {
+                EmptyView()
+            }
+        }
+    }
+
     var dm_options: EventViewOptions {
         /*
         if self.damus_state.settings.translate_dms {
@@ -69,9 +79,10 @@ struct DMView: View {
     var body: some View {
         VStack {
             Mention
+            LongformMention
             DM
         }
-        
+
     }
 }
 
