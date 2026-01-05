@@ -7,6 +7,23 @@
 
 import Combine
 import Foundation
+import Negentropy
+
+private actor NegentropyContinuationStore {
+    private var continuations: [String: AsyncStream<NegentropyResponse>.Continuation] = [:]
+    
+    func set(_ continuation: AsyncStream<NegentropyResponse>.Continuation, for id: String) {
+        continuations[id] = continuation
+    }
+    
+    func clear(_ id: String) {
+        continuations[id] = nil
+    }
+    
+    func yield(_ response: NegentropyResponse) {
+        continuations[response.subscriptionId]?.yield(response)
+    }
+}
 
 enum NostrConnectionEvent {
     /// Other non-message websocket events
@@ -61,6 +78,8 @@ final class RelayConnection: ObservableObject {
     private var processEvent: (WebSocketEvent) -> ()
     private let relay_url: RelayURL
     var log: RelayLog?
+    
+    private let negentropyStreams = NegentropyContinuationStore()
 
     init(url: RelayURL,
          handleEvent: @escaping (NostrConnectionEvent) async -> (),
@@ -223,10 +242,19 @@ final class RelayConnection: ObservableObject {
     private func receive(message: URLSessionWebSocketTask.Message) async {
         switch message {
         case .string(let messageString):
+            // Parse negentropy frames before nostrdb, since nostrdb does not know about NIP-77.
+            if let negentropyResponse = decode_negentropy_response(txt: messageString) {
+                await negentropyStreams.yield(negentropyResponse)
+                return
+            }
+            
             // NOTE: Once we switch to the local relay model,
             // we will not need to verify nostr events at this point.
             if let ev = decode_and_verify_nostr_response(txt: messageString) {
                 await self.handleEvent(.nostr_event(ev))
+                if let negentropyResponse = ev.negentropyResponse {
+                    await negentropyStreams.yield(negentropyResponse)
+                }
                 return
             }
             print("failed to decode event \(messageString)")
@@ -236,6 +264,76 @@ final class RelayConnection: ObservableObject {
             }
         @unknown default:
             print("An unexpected URLSessionWebSocketTask.Message was received.")
+        }
+    }
+    
+    // MARK: - Negentropy logic
+    
+    func getMissingIds(filters: [NostrFilter], negentropyVector: NegentropyStorageVector, timeout: Duration?) async throws -> [Id] {
+        let timeout = timeout ?? .seconds(5)
+        // Cap frames to keep hex-encoded messages within relay limits.
+        let frameSizeLimit = 60_000 // Copied from rust-nostr project: Default frame limit is 128k. Halve that (hex encoding) and subtract a bit (JSON msg overhead)
+        try negentropyVector.seal()
+        var negentropyClient = try Negentropy(storage: negentropyVector, frameSizeLimit: frameSizeLimit)
+        let subscriptionId = UUID().uuidString
+        let initialMessage = try negentropyClient.initiate()
+        Log.info("Negentropy open %s -> sending %d bytes", for: .networking, subscriptionId, initialMessage.count)
+        var needIds: [Id] = []
+        var haveIds: [Id] = []
+        
+        for await response in negentropyStream(subscriptionId: subscriptionId, filters: filters, initialMessage: initialMessage, timeoutDuration: timeout) {
+            switch response {
+            case .error(subscriptionId: _, reasonCodeString: let reasonCodeString):
+                Log.error("Negentropy error from relay: %s", for: .networking, reasonCodeString)
+                throw NegentropySyncError.genericError(reasonCodeString)
+            case .message(subscriptionId: _, data: let data):
+                var nextHave: [Id] = []
+                var nextNeed: [Id] = []
+                let nextMessage = try negentropyClient.reconcile(data, haveIds: &nextHave, needIds: &nextNeed)
+                needIds.append(contentsOf: nextNeed)
+                haveIds.append(contentsOf: nextHave)
+                
+                guard let nextMessage else {
+                    // Finished reconciliation.
+                    Log.info("Negentropy complete %s -> need %d ids", for: .networking, subscriptionId, needIds.count)
+                    return needIds
+                }
+                
+                // Keep going until reconcile returns nil.
+                Log.info("Negentropy msg %s -> sending %d bytes", for: .networking, subscriptionId, nextMessage.count)
+                self.send(.typical(.negentropyMessage(subscriptionId: subscriptionId, message: nextMessage)))
+            case .invalidResponse(subscriptionId: _):
+                throw NegentropySyncError.relayError
+            }
+        }
+        // If the stream completes without a response, throw a timeout/relay error
+        throw NegentropySyncError.relayError
+    }
+    
+    enum NegentropySyncError: Error {
+        case genericError(String)
+        case relayError
+    }
+    
+    private func negentropyStream(subscriptionId: String, filters: [NostrFilter], initialMessage: [UInt8], timeoutDuration: Duration? = nil) -> AsyncStream<NegentropyResponse> {
+        return AsyncStream<NegentropyResponse> { continuation in
+            Task { await self.negentropyStreams.set(continuation, for: subscriptionId) }
+            let nostrRequest: NostrRequest = .negentropyOpen(subscriptionId: subscriptionId, filters: filters, initialMessage: initialMessage)
+            self.send(.typical(nostrRequest))
+            // Respect caller timeout so the protocol can't hang forever.
+            let timeoutTask = Task {
+                if let timeoutDuration {
+                    try Task.checkCancellation()
+                    try await Task.sleep(for: timeoutDuration)
+                    try Task.checkCancellation()
+                    continuation.finish()
+                }
+            }
+            continuation.onTermination = { @Sendable _ in
+                Task { await self.negentropyStreams.clear(subscriptionId) }
+                self.send(.typical(.negentropyClose(subscriptionId: subscriptionId)))
+                timeoutTask.cancel()
+            }
         }
     }
 }
@@ -250,6 +348,12 @@ func make_nostr_req(_ req: NostrRequest) -> String? {
         return make_nostr_push_event(ev: ev)
     case .auth(let ev):
         return make_nostr_auth_event(ev: ev)
+    case .negentropyOpen(subscriptionId: let subscriptionId, filters: let filters, initialMessage: let initialMessage):
+        return make_nostr_negentropy_open_req(subscriptionId: subscriptionId, filters: filters, initialMessage: initialMessage)
+    case .negentropyMessage(subscriptionId: let subscriptionId, message: let message):
+        return make_nostr_negentropy_message_req(subscriptionId: subscriptionId, message: message)
+    case .negentropyClose(subscriptionId: let subscriptionId):
+        return make_nostr_negentropy_close_req(subscriptionId: subscriptionId)
     }
 }
 
@@ -288,4 +392,53 @@ func make_nostr_subscription_req(_ filters: [NostrFilter], sub_id: String) -> St
     }
     req += "]"
     return req
+}
+
+func make_nostr_negentropy_open_req(subscriptionId: String, filters: [NostrFilter], initialMessage: [UInt8]) -> String? {
+    let encoder = JSONEncoder()
+    guard let filter = filters.first else {
+        return nil
+    }
+    let messageData = Data(initialMessage)
+    let messageHex = hex_encode(messageData)
+    var req = "[\"NEG-OPEN\",\"\(subscriptionId)\""
+    guard let filter_json = try? encoder.encode(filter) else {
+        return nil
+    }
+    let filter_json_str = String(decoding: filter_json, as: UTF8.self)
+    req += ",\(filter_json_str),\"\(messageHex)\""
+    req += "]"
+    return req
+}
+
+func make_nostr_negentropy_message_req(subscriptionId: String, message: [UInt8]) -> String? {
+    let messageData = Data(message)
+    let messageHex = hex_encode(messageData)
+    return "[\"NEG-MSG\",\"\(subscriptionId)\",\"\(messageHex)\"]"
+}
+
+func make_nostr_negentropy_close_req(subscriptionId: String) -> String? {
+    return "[\"NEG-CLOSE\",\"\(subscriptionId)\"]"
+}
+
+private func decode_negentropy_response(txt: String) -> NegentropyResponse? {
+    guard let data = txt.data(using: .utf8) else { return nil }
+    guard let arr = try? JSONSerialization.jsonObject(with: data) as? [Any], arr.count >= 3 else {
+        return nil
+    }
+    guard let type = arr[0] as? String,
+          let subscriptionId = arr[1] as? String else { return nil }
+    
+    if type == "NEG-ERR" {
+        guard let reason = arr[2] as? String else { return nil }
+        return .error(subscriptionId: subscriptionId, reasonCodeString: reason)
+    }
+    
+    if type == "NEG-MSG" {
+        guard let hex = arr[2] as? String,
+              let bytes = hex_decode(hex) else { return nil }
+        return .message(subscriptionId: subscriptionId, data: bytes)
+    }
+    
+    return nil
 }

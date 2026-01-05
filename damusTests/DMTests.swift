@@ -10,6 +10,65 @@ import XCTest
 
 final class DMTests: XCTestCase {
 
+    @MainActor
+    func testFilterDMsShowsAllNonMutedUsers() async {
+        let state = test_damus_state
+        let our_pubkey = state.pubkey
+
+        // Create DM models from different users
+        let friend_keypair = generate_new_keypair().to_keypair()
+        let stranger_keypair = generate_new_keypair().to_keypair()
+        let muted_keypair = generate_new_keypair().to_keypair()
+
+        let friend_dm = DirectMessageModel(our_pubkey: our_pubkey, pubkey: friend_keypair.pubkey)
+        let stranger_dm = DirectMessageModel(our_pubkey: our_pubkey, pubkey: stranger_keypair.pubkey)
+        let muted_dm = DirectMessageModel(our_pubkey: our_pubkey, pubkey: muted_keypair.pubkey)
+
+        let all_dms = [friend_dm, stranger_dm, muted_dm]
+
+        // Add muted user to mutelist
+        let mute_item: MuteItem = .user(muted_keypair.pubkey, nil)
+        let existing_mutelist = await state.mutelist_manager.event
+
+        guard
+            let full_keypair = state.keypair.to_full(),
+            let mutelist = create_or_update_mutelist(keypair: full_keypair, mprev: existing_mutelist, to_add: mute_item)
+        else {
+            XCTFail("Failed to create mutelist")
+            return
+        }
+
+        await state.mutelist_manager.set_mutelist(mutelist)
+
+        // Filter DMs
+        let filtered = filter_dms_by_mute(dms: all_dms, mutelist_manager: state.mutelist_manager)
+
+        // Verify: muted user filtered out, but friend and stranger both visible
+        XCTAssertEqual(filtered.count, 2)
+        XCTAssertTrue(filtered.contains(where: { $0.pubkey == friend_keypair.pubkey }))
+        XCTAssertTrue(filtered.contains(where: { $0.pubkey == stranger_keypair.pubkey }))
+        XCTAssertFalse(filtered.contains(where: { $0.pubkey == muted_keypair.pubkey }))
+    }
+
+    @MainActor
+    func testFilterDMsShowsStrangersNotInTrustedNetwork() async {
+        let state = test_damus_state
+        let our_pubkey = state.pubkey
+
+        // Create a DM from someone not in contacts/trusted network
+        let stranger_keypair = generate_new_keypair().to_keypair()
+        let stranger_dm = DirectMessageModel(our_pubkey: our_pubkey, pubkey: stranger_keypair.pubkey)
+
+        // Verify stranger is NOT in contacts
+        XCTAssertFalse(state.contacts.is_friend(stranger_keypair.pubkey))
+
+        // Filter should still include the stranger (trusted network filtering disabled for DMs)
+        let filtered = filter_dms_by_mute(dms: [stranger_dm], mutelist_manager: state.mutelist_manager)
+
+        XCTAssertEqual(filtered.count, 1)
+        XCTAssertEqual(filtered.first?.pubkey, stranger_keypair.pubkey)
+    }
+
     var alice: Keypair {
         let sec = hex_decode_privkey("494c680d20f202807a116a6915815bd76a27d62802e7585806f6a2e034cb5cdb")!
         let pk = hex_decode_pubkey("22d925632551a3299022e98de7f9c1087f79a21209f3413ec24ec219b08bd1e4")!

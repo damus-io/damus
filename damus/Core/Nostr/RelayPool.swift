@@ -7,6 +7,24 @@
 
 import Foundation
 import Network
+import Negentropy
+
+private actor NegentropyMissingTracker {
+    private var seen: Set<NoteId> = []
+    
+    func filterNew(_ ids: [Id]) -> [NoteId] {
+        var fresh: [NoteId] = []
+        for id in ids {
+            let noteId = NoteId(id.toData())
+            if seen.contains(noteId) {
+                continue
+            }
+            seen.insert(noteId)
+            fresh.append(noteId)
+        }
+        return fresh
+    }
+}
 
 struct RelayHandler {
     let sub_id: String
@@ -262,6 +280,12 @@ actor RelayPool {
                 return true
             case .auth(_):
                 return true
+            case .negentropyOpen:
+                return false    // Do not persist negentropy requests across sessions
+            case .negentropyMessage:
+                return false    // Do not persist negentropy requests across sessions
+            case .negentropyClose:
+                return false    // Do not persist negentropy requests across sessions
             }
         }
     }
@@ -332,6 +356,8 @@ actor RelayPool {
                             }
                         case .ok(_): break    // No need to handle this, we are not sending an event to the relay
                         case .auth(_): break    // Handled in a separate function in RelayPool
+                        case .negentropyError(subscriptionId: _, reasonCodeString: _): break    // Not handled in regular subscriptions
+                        case .negentropyMessage(subscriptionId: _, hexEncodedData: _): break    // Not handled in regular subscriptions
                         }
                     }
                 }
@@ -355,6 +381,23 @@ actor RelayPool {
                 }
                 timeoutTask.cancel()
                 upstreamStreamingTask.cancel()
+            }
+        }
+    }
+    
+    func subscribeExistingItems(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, eoseTimeout: Duration? = nil, id: UUID? = nil) -> AsyncStream<NostrEvent> {
+        return AsyncStream<NostrEvent> { continuation in
+            let streamTask = Task {
+                outerLoop: for await item in await subscribe(filters: filters, to: desiredRelays, eoseTimeout: eoseTimeout, id: id) {
+                    try Task.checkCancellation()
+                    switch item {
+                    case .event(let event): continuation.yield(event)
+                    case .eose: break outerLoop
+                    }
+                }
+            }
+            continuation.onTermination = { @Sendable _ in
+                streamTask.cancel()
             }
         }
     }
@@ -544,6 +587,71 @@ actor RelayPool {
             handler.handler.yield((relay_id, event))
         }
     }
+    
+    // MARK: - Negentropy
+    
+    func negentropySubscribe(filters: [NostrFilter], to desiredRelayURLs: [RelayURL]? = nil, negentropyVector: NegentropyStorageVector, eoseTimeout: Duration? = nil, id: UUID? = nil) async throws -> AsyncStream<StreamItem> {
+        return AsyncStream<StreamItem> { continuation in
+            let missingTracker = NegentropyMissingTracker()
+            let streamTask = Task {
+                let desiredRelays = await getRelays(targetRelays: desiredRelayURLs)
+                // Prefer relays we expect to support negentropy; fall back to the first.
+                let preferredHosts: [String] = ["relay.damus.io", "nos.lol"]
+                let primaryRelay = desiredRelays.sorted { lhs, rhs in
+                    let lidx = preferredHosts.firstIndex(where: { lhs.descriptor.url.url.host?.contains($0) == true }) ?? preferredHosts.count
+                    let ridx = preferredHosts.firstIndex(where: { rhs.descriptor.url.url.host?.contains($0) == true }) ?? preferredHosts.count
+                    if lidx == ridx { return lhs.descriptor.url.absoluteString < rhs.descriptor.url.absoluteString }
+                    return lidx < ridx
+                }.first
+                guard let primaryRelay else {
+                    continuation.finish()
+                    return
+                }
+                Log.info("Negentropy primary relay: %s", for: .networking, primaryRelay.descriptor.url.absoluteString)
+                // Build a fresh vector per negentropy session to avoid sealing errors.
+                var sessionVector = negentropyVector
+                let negentropyStartTimestamp = UInt32(Date().timeIntervalSince1970)
+                do {
+                    try await self.negentropySync(filters: filters, to: primaryRelay, negentropyVector: sessionVector, missingTracker: missingTracker, eoseTimeout: eoseTimeout, streamContinuation: continuation)
+                } catch {
+                    Log.error("Negentropy sync failed for %s: %s", for: .networking, primaryRelay.descriptor.url.absoluteString, error.localizedDescription)
+                }
+                continuation.yield(.eose) // Signal completion of negentropy phase before regular subscribe.
+                let updatedFilters = filters.map({
+                    var newFilter = $0
+                    newFilter.since = negentropyStartTimestamp
+                    return newFilter
+                })
+                for await item in await self.subscribe(filters: updatedFilters, to: desiredRelayURLs, eoseTimeout: eoseTimeout, id: id) {
+                    try Task.checkCancellation()
+                    continuation.yield(item)
+                }
+            }
+            continuation.onTermination = { @Sendable _ in
+                streamTask.cancel()
+            }
+        }
+    }
+    
+    private func negentropySync(filters: [NostrFilter], to desiredRelay: Relay, negentropyVector: NegentropyStorageVector, missingTracker: NegentropyMissingTracker, eoseTimeout: Duration? = nil, streamContinuation: AsyncStream<StreamItem>.Continuation) async throws {
+        // No fallback to REQ: if relay does not support NIP-77 this sync will simply not return events.
+        let missingIds = try await desiredRelay.connection.getMissingIds(filters: filters, negentropyVector: negentropyVector, timeout: eoseTimeout)
+        let uniqueMissingNoteIds = await missingTracker.filterNew(missingIds)
+        guard !uniqueMissingNoteIds.isEmpty else {
+            return
+        }
+        let batchSize = 500
+        var idx = 0
+        while idx < uniqueMissingNoteIds.count {
+            let end = min(idx + batchSize, uniqueMissingNoteIds.count)
+            let batch = Array(uniqueMissingNoteIds[idx..<end])
+            let missingIdsFilter = NostrFilter(ids: batch)
+            for await event in self.subscribeExistingItems(filters: [missingIdsFilter], to: [desiredRelay.descriptor.url], eoseTimeout: eoseTimeout) {
+                streamContinuation.yield(.event(event))
+            }
+            idx = end
+        }
+    }
 }
 
 func add_rw_relay(_ pool: RelayPool, _ url: RelayURL) async {
@@ -556,5 +664,3 @@ extension RelayPool {
         func latestRelayListChanged(_ newEvent: NdbNote)
     }
 }
-
-
