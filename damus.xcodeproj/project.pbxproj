@@ -1004,6 +1004,7 @@
 		82D6FC3C2CD99F7900C925F4 /* LongformPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA9275E2A2902B20098A105 /* LongformPreview.swift */; };
 		82D6FC3D2CD99F7900C925F4 /* EventShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA927602A290E340098A105 /* EventShell.swift */; };
 		82D6FC3E2CD99F7900C925F4 /* MentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC02AC4750B0080BA88 /* MentionView.swift */; };
+		82D6FC3E2CD99F7900C925F5 /* LongformNaddrMentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC12AC4750C0080BA89 /* LongformNaddrMentionView.swift */; };
 		82D6FC3F2CD99F7900C925F4 /* EventLoaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC22AC47EBC0080BA88 /* EventLoaderView.swift */; };
 		82D6FC402CD99F7900C925F4 /* RepostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA24801297E3DC20090C62D /* RepostView.swift */; };
 		82D6FC412CD99F7900C925F4 /* RepostedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF8F6A29CD0079008DB934 /* RepostedEvent.swift */; };
@@ -1549,6 +1550,7 @@
 		D73E5F372C6A97F4007EB227 /* LongformPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA9275E2A2902B20098A105 /* LongformPreview.swift */; };
 		D73E5F382C6A97F4007EB227 /* EventShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA927602A290E340098A105 /* EventShell.swift */; };
 		D73E5F392C6A97F4007EB227 /* MentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC02AC4750B0080BA88 /* MentionView.swift */; };
+		D73E5F392C6A97F4007EB228 /* LongformNaddrMentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC12AC4750C0080BA89 /* LongformNaddrMentionView.swift */; };
 		D73E5F3A2C6A97F4007EB227 /* EventLoaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC22AC47EBC0080BA88 /* EventLoaderView.swift */; };
 		D73E5F3B2C6A97F4007EB227 /* RepostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA24801297E3DC20090C62D /* RepostView.swift */; };
 		D73E5F3C2C6A97F4007EB227 /* RepostedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF8F6A29CD0079008DB934 /* RepostedEvent.swift */; };
@@ -1694,6 +1696,7 @@
 		D783A63F2AD4E53D00658DDA /* SuggestedHashtagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D783A63E2AD4E53D00658DDA /* SuggestedHashtagsView.swift */; };
 		D78525252A7B2EA4002FA637 /* NoteContentViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78525242A7B2EA4002FA637 /* NoteContentViewTests.swift */; };
 		D7870BC12AC4750B0080BA88 /* MentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC02AC4750B0080BA88 /* MentionView.swift */; };
+		D7870BC42AC4750D0080BA89 /* LongformNaddrMentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC12AC4750C0080BA89 /* LongformNaddrMentionView.swift */; };
 		D7870BC32AC47EBC0080BA88 /* EventLoaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC22AC47EBC0080BA88 /* EventLoaderView.swift */; };
 		D789D1202AFEFBF20083A7AB /* secp256k1 in Frameworks */ = {isa = PBXBuildFile; productRef = D789D11F2AFEFBF20083A7AB /* secp256k1 */; };
 		D78BA6652DD7DFB9000AE62C /* InterestSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78BA6642DD7DFB9000AE62C /* InterestSelectionView.swift */; };
@@ -2795,6 +2798,7 @@
 		D783A63E2AD4E53D00658DDA /* SuggestedHashtagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedHashtagsView.swift; sourceTree = "<group>"; };
 		D78525242A7B2EA4002FA637 /* NoteContentViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteContentViewTests.swift; sourceTree = "<group>"; };
 		D7870BC02AC4750B0080BA88 /* MentionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MentionView.swift; sourceTree = "<group>"; };
+		D7870BC12AC4750C0080BA89 /* LongformNaddrMentionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongformNaddrMentionView.swift; sourceTree = "<group>"; };
 		D7870BC22AC47EBC0080BA88 /* EventLoaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventLoaderView.swift; sourceTree = "<group>"; };
 		D78BA6642DD7DFB9000AE62C /* InterestSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterestSelectionView.swift; sourceTree = "<group>"; };
 		D78CD5972B8990300014D539 /* DamusAppNotificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusAppNotificationView.swift; sourceTree = "<group>"; };
@@ -3707,6 +3711,7 @@
 				4CFF8F6C29CD022E008DB934 /* WideEventView.swift */,
 				4CA927602A290E340098A105 /* EventShell.swift */,
 				D7870BC02AC4750B0080BA88 /* MentionView.swift */,
+				D7870BC12AC4750C0080BA89 /* LongformNaddrMentionView.swift */,
 				D7870BC22AC47EBC0080BA88 /* EventLoaderView.swift */,
 				4CEE2AF0280B216B00AB5EEF /* EventDetailView.swift */,
 				4C75EFB82804A2740006080F /* EventView.swift */,
@@ -5787,6 +5792,7 @@
 				3A8CC6CC2A2CFEF900940F5F /* StringUtil.swift in Sources */,
 				D7FD12262BD345A700CF195B /* FirstAidSettingsView.swift in Sources */,
 				D7870BC12AC4750B0080BA88 /* MentionView.swift in Sources */,
+				D7870BC42AC4750D0080BA89 /* LongformNaddrMentionView.swift in Sources */,
 				4CB55EF5295E679D007FD187 /* UserRelaysView.swift in Sources */,
 				4C363AA228296A7E006E126D /* SearchView.swift in Sources */,
 				D798D2282B085CDA00234419 /* NdbNote+.swift in Sources */,
@@ -6812,6 +6818,7 @@
 				D75154C22EC5910A00BF2CB2 /* NdbUseLock.swift in Sources */,
 				82D6FC3D2CD99F7900C925F4 /* EventShell.swift in Sources */,
 				82D6FC3E2CD99F7900C925F4 /* MentionView.swift in Sources */,
+				82D6FC3E2CD99F7900C925F5 /* LongformNaddrMentionView.swift in Sources */,
 				82D6FC3F2CD99F7900C925F4 /* EventLoaderView.swift in Sources */,
 				5C8F97122EB45FAA009399B1 /* LiveChatTimeline.swift in Sources */,
 				82D6FC402CD99F7900C925F4 /* RepostView.swift in Sources */,
@@ -7249,6 +7256,7 @@
 				D73E5F382C6A97F4007EB227 /* EventShell.swift in Sources */,
 				D73E5F882C6AA661007EB227 /* NostrScript.swift in Sources */,
 				D73E5F392C6A97F4007EB227 /* MentionView.swift in Sources */,
+				D73E5F392C6A97F4007EB228 /* LongformNaddrMentionView.swift in Sources */,
 				D73E5F3A2C6A97F4007EB227 /* EventLoaderView.swift in Sources */,
 				D73E5F3B2C6A97F4007EB227 /* RepostView.swift in Sources */,
 				D73E5F3C2C6A97F4007EB227 /* RepostedEvent.swift in Sources */,

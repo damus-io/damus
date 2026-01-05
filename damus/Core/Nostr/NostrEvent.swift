@@ -830,6 +830,29 @@ func first_eref_mention(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> Mention<N
     })
 }
 
+/// Finds the first naddr mention that references a longform article (kind 30023).
+func first_longform_naddr_mention(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> Mention<NAddr>? {
+    return try? NdbBlockGroup.borrowBlockGroup(event: ev, using: ndb, and: keypair, borrow: { blockGroup in
+        return blockGroup.forEachBlock({ index, block in
+            switch block {
+            case .mention(let mention):
+                guard let mention = MentionRef(block: mention) else { return .loopContinue }
+                switch mention.nip19 {
+                case .naddr(let naddr):
+                    if naddr.kind == NostrKind.longform.rawValue {
+                        return .loopReturn(Mention<NAddr>(index: index, ref: naddr))
+                    }
+                    return .loopContinue
+                default:
+                    return .loopContinue
+                }
+            default:
+                return .loopContinue
+            }
+        })
+    })
+}
+
 func separate_invoices(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> [Invoice]? {
     return try? NdbBlockGroup.borrowBlockGroup(event: ev, using: ndb, and: keypair, borrow: { blockGroup in
         let invoiceBlocks: [Invoice] = (try? blockGroup.reduce(initialResult: [Invoice](), { index, invoices, block in
