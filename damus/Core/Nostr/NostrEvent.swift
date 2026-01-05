@@ -25,6 +25,22 @@ protocol NostrEventConvertible {
 }
 
 
+/// Reference type for longform articles - can be either naddr or nevent with kind 30023
+enum LongformReference: Equatable {
+    case naddr(NAddr)
+    case nevent(NEvent)
+
+    /// Returns the bech32 encoded string for this reference
+    var bech32: String {
+        switch self {
+        case .naddr(let naddr):
+            return Bech32Object.encode(.naddr(naddr))
+        case .nevent(let nevent):
+            return Bech32Object.encode(.nevent(nevent))
+        }
+    }
+}
+
 enum ValidationResult: Decodable {
     case unknown
     case ok
@@ -851,6 +867,34 @@ func first_longform_naddr_mention(ndb: Ndb, ev: NostrEvent, keypair: Keypair) ->
             }
         })
     })
+}
+
+/// Returns all longform article mentions (naddr or nevent with kind 30023) in the event content.
+func all_longform_mentions(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> [LongformReference] {
+    return (try? NdbBlockGroup.borrowBlockGroup(event: ev, using: ndb, and: keypair, borrow: { blockGroup in
+        let mentions: [LongformReference] = (try? blockGroup.reduce(initialResult: [LongformReference](), { index, refs, block in
+            switch block {
+            case .mention(let mention):
+                guard let mentionRef = MentionRef(block: mention) else { return .loopContinue }
+                switch mentionRef.nip19 {
+                case .naddr(let naddr):
+                    if naddr.kind == NostrKind.longform.rawValue {
+                        return .loopReturn(refs + [.naddr(naddr)])
+                    }
+                case .nevent(let nevent):
+                    if nevent.kind == NostrKind.longform.rawValue {
+                        return .loopReturn(refs + [.nevent(nevent)])
+                    }
+                default:
+                    break
+                }
+            default:
+                break
+            }
+            return .loopContinue
+        })) ?? []
+        return mentions
+    })) ?? []
 }
 
 func separate_invoices(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> [Invoice]? {

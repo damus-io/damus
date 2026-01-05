@@ -26,13 +26,7 @@ struct DMView: View {
     }
 
     var LongformMention: some View {
-        Group {
-            if let longformMention = first_longform_naddr_mention(ndb: damus_state.ndb, ev: event, keypair: damus_state.keypair) {
-                LongformNaddrMentionView(damus_state: damus_state, naddr: longformMention.ref)
-            } else {
-                EmptyView()
-            }
-        }
+        LongformMentionsStack(damus_state: damus_state, references: all_longform_mentions(ndb: damus_state.ndb, ev: event, keypair: damus_state.keypair))
     }
 
     var dm_options: EventViewOptions {

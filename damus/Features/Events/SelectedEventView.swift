@@ -92,12 +92,8 @@ struct SelectedEventView: View {
     }
 
     var LongformMention: some View {
-        Group {
-            if let longformMention = first_longform_naddr_mention(ndb: damus.ndb, ev: event, keypair: damus.keypair) {
-                LongformNaddrMentionView(damus_state: damus, naddr: longformMention.ref)
-                    .padding(.horizontal)
-            }
-        }
+        LongformMentionsStack(damus_state: damus, references: all_longform_mentions(ndb: damus.ndb, ev: event, keypair: damus.keypair))
+            .padding(.horizontal)
     }
 }
 
