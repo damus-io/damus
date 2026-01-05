@@ -11,12 +11,19 @@ struct SelectedEventView: View {
     let damus: DamusState
     let event: NostrEvent
     let size: EventViewKind
-    
+
+    @Environment(\.colorScheme) var colorScheme
+
     var pubkey: Pubkey {
         event.pubkey
     }
-    
+
     @StateObject var bar: ActionBarModel
+
+    /// Whether to apply sepia styling to the entire view (for longform articles)
+    var useSepia: Bool {
+        event.known_kind == .longform && damus.settings.longform_sepia_mode
+    }
 
     init(damus: DamusState, event: NostrEvent, size: EventViewKind) {
         self.damus = damus
@@ -24,7 +31,7 @@ struct SelectedEventView: View {
         self.size = size
         self._bar = StateObject(wrappedValue: make_actionbar_model(ev: event.id, damus: damus))
     }
-    
+
     var body: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading) {
@@ -78,6 +85,10 @@ struct SelectedEventView: View {
             }
             .compositingGroup()
         }
+        // Apply sepia background to outer HStack for full width coverage
+        // Note: foregroundStyle intentionally NOT applied here to preserve UI element contrast
+        // (buttons, icons, timestamps). Article text gets sepia styling via EventBody.
+        .background(useSepia ? DamusColors.sepiaBackground(for: colorScheme) : Color.clear)
     }
     
     var Mention: some View {

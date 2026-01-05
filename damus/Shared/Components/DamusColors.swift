@@ -61,7 +61,7 @@ class DamusColors {
     static let lighterPink = Color(red: 248/255.0, green: 105/255.0, blue: 182/255.0)
     static let lightBackgroundPink = Color(red: 0xF8/255.0, green: 0xE7/255.0, blue: 0xF8/255.0)
 
-    // Sepia mode colors for comfortable longform reading (based on research: 25% lower luminescence reduces eye strain)
+    // Sepia mode colors for comfortable longform reading
     // Light mode sepia
     static let sepiaBackgroundLight = Color(red: 0.98, green: 0.95, blue: 0.90)  // #FAF3E6 - warm off-white
     static let sepiaTextLight = Color(red: 0.35, green: 0.27, blue: 0.20)  // #5A4632 - warm brown
