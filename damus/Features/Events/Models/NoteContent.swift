@@ -383,7 +383,7 @@ struct LongformContent {
 
     /// Estimated reading time in minutes, based on average reading speed of 200 words per minute.
     var estimatedReadTimeMinutes: Int {
-        return max(1, words / 200)
+        return max(1, Int(ceil(Double(words) / 200.0)))
     }
 
     init(_ markdown: String) {

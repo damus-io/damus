@@ -166,6 +166,12 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "font_size", default_value: 1.0)
     var font_size: Double
 
+    @Setting(key: "longform_sepia_mode", default_value: false)
+    var longform_sepia_mode: Bool
+
+    @Setting(key: "longform_line_height", default_value: 1.5)
+    var longform_line_height: Double
+
     @Setting(key: "dm_notification", default_value: true)
     var dm_notification: Bool
     

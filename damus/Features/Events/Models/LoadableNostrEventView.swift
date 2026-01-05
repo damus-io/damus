@@ -78,7 +78,9 @@ class LoadableNostrEventViewModel: ObservableObject {
                 return .unknown_or_unsupported_kind
             }
         case .naddr(let naddr):
-            guard let event = await damus_state.nostrNetwork.reader.lookup(naddr: naddr) else { return .not_found }
+            guard let event = await damus_state.nostrNetwork.reader.lookup(naddr: naddr) else {
+                return .not_found
+            }
             return .loaded(route: Route.Thread(thread: ThreadModel(event: event, damus_state: damus_state)))
         }
     }

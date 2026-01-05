@@ -319,6 +319,8 @@
 		4CA5588329F33F5B00DC6A45 /* StringCodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA5588229F33F5B00DC6A45 /* StringCodable.swift */; };
 		4CA9275D2A28FF630098A105 /* LongformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA9275C2A28FF630098A105 /* LongformView.swift */; };
 		4CA9275F2A2902B20098A105 /* LongformPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA9275E2A2902B20098A105 /* LongformPreview.swift */; };
+		5C78A7912E30358100CF177D /* ReadingProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7902E30358000CF177D /* ReadingProgressBar.swift */; };
+		5C78A7952E30359100CF177D /* LongformMarkdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7942E30359000CF177D /* LongformMarkdownView.swift */; };
 		4CA927612A290E340098A105 /* EventShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA927602A290E340098A105 /* EventShell.swift */; };
 		4CA927632A290EB10098A105 /* EventTop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA927622A290EB10098A105 /* EventTop.swift */; };
 		4CA927652A290F1A0098A105 /* TimeDot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA927642A290F1A0098A105 /* TimeDot.swift */; };
@@ -1004,6 +1006,8 @@
 		82D6FC3A2CD99F7900C925F4 /* WideEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF8F6C29CD022E008DB934 /* WideEventView.swift */; };
 		82D6FC3B2CD99F7900C925F4 /* LongformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA9275C2A28FF630098A105 /* LongformView.swift */; };
 		82D6FC3C2CD99F7900C925F4 /* LongformPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA9275E2A2902B20098A105 /* LongformPreview.swift */; };
+		5C78A7922E30358200CF177D /* ReadingProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7902E30358000CF177D /* ReadingProgressBar.swift */; };
+		5C78A7962E30359200CF177D /* LongformMarkdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7942E30359000CF177D /* LongformMarkdownView.swift */; };
 		82D6FC3D2CD99F7900C925F4 /* EventShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA927602A290E340098A105 /* EventShell.swift */; };
 		82D6FC3E2CD99F7900C925F4 /* MentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC02AC4750B0080BA88 /* MentionView.swift */; };
 		82D6FC3F2CD99F7900C925F4 /* EventLoaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC22AC47EBC0080BA88 /* EventLoaderView.swift */; };
@@ -1550,6 +1554,8 @@
 		D73E5F352C6A97F4007EB227 /* WideEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF8F6C29CD022E008DB934 /* WideEventView.swift */; };
 		D73E5F362C6A97F4007EB227 /* LongformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA9275C2A28FF630098A105 /* LongformView.swift */; };
 		D73E5F372C6A97F4007EB227 /* LongformPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA9275E2A2902B20098A105 /* LongformPreview.swift */; };
+		5C78A7932E30358300CF177D /* ReadingProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7902E30358000CF177D /* ReadingProgressBar.swift */; };
+		5C78A7972E30359300CF177D /* LongformMarkdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78A7942E30359000CF177D /* LongformMarkdownView.swift */; };
 		D73E5F382C6A97F4007EB227 /* EventShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA927602A290E340098A105 /* EventShell.swift */; };
 		D73E5F392C6A97F4007EB227 /* MentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC02AC4750B0080BA88 /* MentionView.swift */; };
 		D73E5F3A2C6A97F4007EB227 /* EventLoaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC22AC47EBC0080BA88 /* EventLoaderView.swift */; };
@@ -2416,6 +2422,8 @@
 		4CA5588229F33F5B00DC6A45 /* StringCodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringCodable.swift; sourceTree = "<group>"; };
 		4CA9275C2A28FF630098A105 /* LongformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongformView.swift; sourceTree = "<group>"; };
 		4CA9275E2A2902B20098A105 /* LongformPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongformPreview.swift; sourceTree = "<group>"; };
+		5C78A7902E30358000CF177D /* ReadingProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingProgressBar.swift; sourceTree = "<group>"; };
+		5C78A7942E30359000CF177D /* LongformMarkdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongformMarkdownView.swift; sourceTree = "<group>"; };
 		4CA927602A290E340098A105 /* EventShell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventShell.swift; sourceTree = "<group>"; };
 		4CA927622A290EB10098A105 /* EventTop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTop.swift; sourceTree = "<group>"; };
 		4CA927642A290F1A0098A105 /* TimeDot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeDot.swift; sourceTree = "<group>"; };
@@ -4348,6 +4356,8 @@
 			children = (
 				4CA9275C2A28FF630098A105 /* LongformView.swift */,
 				4CA9275E2A2902B20098A105 /* LongformPreview.swift */,
+				5C78A7902E30358000CF177D /* ReadingProgressBar.swift */,
+				5C78A7942E30359000CF177D /* LongformMarkdownView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -6144,6 +6154,8 @@
 				D7D09AB52DADCA5C00AB170D /* CoinosDeterministicAccountClient.swift in Sources */,
 				D773BC5F2C6D538500349F0A /* CommentItem.swift in Sources */,
 				4CA9275F2A2902B20098A105 /* LongformPreview.swift in Sources */,
+				5C78A7912E30358100CF177D /* ReadingProgressBar.swift in Sources */,
+				5C78A7952E30359100CF177D /* LongformMarkdownView.swift in Sources */,
 				4C5F9116283D855D0052CD1C /* EventsModel.swift in Sources */,
 				4C32B94F2A9AD44700DC3548 /* Int+extension.swift in Sources */,
 				4CEE2AED2805B22500AB5EEF /* NostrRequest.swift in Sources */,
@@ -6816,6 +6828,8 @@
 				82D6FC3A2CD99F7900C925F4 /* WideEventView.swift in Sources */,
 				82D6FC3B2CD99F7900C925F4 /* LongformView.swift in Sources */,
 				82D6FC3C2CD99F7900C925F4 /* LongformPreview.swift in Sources */,
+				5C78A7922E30358200CF177D /* ReadingProgressBar.swift in Sources */,
+				5C78A7962E30359200CF177D /* LongformMarkdownView.swift in Sources */,
 				D75154C22EC5910A00BF2CB2 /* NdbUseLock.swift in Sources */,
 				82D6FC3D2CD99F7900C925F4 /* EventShell.swift in Sources */,
 				82D6FC3E2CD99F7900C925F4 /* MentionView.swift in Sources */,
@@ -7254,6 +7268,8 @@
 				D73E5F8A2C6AA69C007EB227 /* SideMenuView.swift in Sources */,
 				D73E5F362C6A97F4007EB227 /* LongformView.swift in Sources */,
 				D73E5F372C6A97F4007EB227 /* LongformPreview.swift in Sources */,
+				5C78A7932E30358300CF177D /* ReadingProgressBar.swift in Sources */,
+				5C78A7972E30359300CF177D /* LongformMarkdownView.swift in Sources */,
 				D73E5F382C6A97F4007EB227 /* EventShell.swift in Sources */,
 				D73E5F882C6AA661007EB227 /* NostrScript.swift in Sources */,
 				D73E5F392C6A97F4007EB227 /* MentionView.swift in Sources */,

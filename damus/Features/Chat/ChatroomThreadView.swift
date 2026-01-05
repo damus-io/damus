@@ -290,6 +290,10 @@ struct ChatroomThreadView: View {
                                 viewportHeight = geo.size.height
                             }
                             .onChange(of: geo.size.height) { newHeight in
+                                // Reset baseline on significant height change (orientation, text size)
+                                if abs(newHeight - viewportHeight) > 50 {
+                                    initialTopY = nil
+                                }
                                 viewportHeight = newHeight
                                 updateReadingProgress()
                             }
@@ -336,6 +340,11 @@ struct ChatroomThreadView: View {
             .onAppear() {
                 thread.subscribe()
                 scroll_to_event(scroller: scroller, id: thread.selected_event.id, delay: 0.1, animate: false)
+            }
+            .onChange(of: thread.selected_event.id) { _ in
+                // Reset reading progress when switching to a different event
+                initialTopY = nil
+                readingProgress = 0
             }
             .onDisappear() {
                 thread.unsubscribe()
