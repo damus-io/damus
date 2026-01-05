@@ -50,14 +50,20 @@ struct MenuItems: View {
 
     @State private var isBookmarked: Bool = false
     @State private var isMutedThread: Bool = false
-    
+    @State private var showReadOnlyAlert: Bool = false
+    @State private var readOnlyAlertMessage: String = ""
+
+    private var isReadOnly: Bool {
+        damus_state.keypair.privkey == nil
+    }
+
     init(damus_state: DamusState, event: NostrEvent, target_pubkey: Pubkey, profileModel: ProfileModel) {
         let bookmarked = damus_state.bookmarks.isBookmarked(event)
         self._isBookmarked = State(initialValue: bookmarked)
 
         let muted_thread = damus_state.mutelist_manager.is_event_muted(event)
         self._isMutedThread = State(initialValue: muted_thread)
-        
+
         self.damus_state = damus_state
         self.event = event
         self.target_pubkey = target_pubkey
@@ -102,8 +108,13 @@ struct MenuItems: View {
             }
             
             Button {
-                self.damus_state.bookmarks.updateBookmark(event)
-                isBookmarked = self.damus_state.bookmarks.isBookmarked(event)
+                if isReadOnly {
+                    readOnlyAlertMessage = NSLocalizedString("Log in with your private key (nsec) to bookmark notes.", comment: "Alert message for read-only bookmark")
+                    showReadOnlyAlert = true
+                } else {
+                    self.damus_state.bookmarks.updateBookmark(event)
+                    isBookmarked = self.damus_state.bookmarks.isBookmarked(event)
+                }
             } label: {
                 let imageName = isBookmarked ? "bookmark.fill" : "bookmark"
                 let removeBookmarkString = NSLocalizedString("Remove bookmark", comment: "Context menu option for removing a note bookmark.")
@@ -119,6 +130,11 @@ struct MenuItems: View {
             // Mute thread - relocated to below Broadcast, as to move further away from Add Bookmark to prevent accidental muted threads
             if event.known_kind != .dm {
                 MuteDurationMenu { duration in
+                    if isReadOnly {
+                        readOnlyAlertMessage = NSLocalizedString("Log in with your private key (nsec) to mute conversations.", comment: "Alert message for read-only mute")
+                        showReadOnlyAlert = true
+                        return
+                    }
                     if let full_keypair = self.damus_state.keypair.to_full(),
                        let new_mutelist_ev = toggle_from_mutelist(keypair: full_keypair, prev: damus_state.mutelist_manager.event, to_toggle: .thread(event.thread_id(), duration?.date_from_now)) {
                         damus_state.mutelist_manager.set_mutelist(new_mutelist_ev)
@@ -153,6 +169,16 @@ struct MenuItems: View {
         }
         .onDisappear() {
             profileModel.findRelaysListener?.cancel()
+        }
+        .alert(
+            NSLocalizedString("Read-Only Account", comment: "Alert title when read-only user tries to perform action"),
+            isPresented: $showReadOnlyAlert
+        ) {
+            Button(NSLocalizedString("OK", comment: "Button to dismiss read-only alert")) {
+                showReadOnlyAlert = false
+            }
+        } message: {
+            Text(readOnlyAlertMessage)
         }
     }
 }

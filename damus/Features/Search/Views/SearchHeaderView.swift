@@ -114,15 +114,36 @@ struct HashtagUnfollowButton: View {
     let damus_state: DamusState
     let hashtag: String
     @Binding var is_following: Bool
-    
+    @State private var showReadOnlyAlert: Bool = false
+
+    private var isReadOnly: Bool {
+        damus_state.keypair.privkey == nil
+    }
+
     var body: some View {
-        return Button(action: { unfollow(hashtag) }) {
+        return Button(action: {
+            if isReadOnly {
+                showReadOnlyAlert = true
+            } else {
+                unfollow(hashtag)
+            }
+        }) {
             Text("Unfollow hashtag", comment: "Button to unfollow a given hashtag.")
                 .font(.footnote.bold())
         }
         .buttonStyle(GradientButtonStyle(padding: 10))
+        .alert(
+            NSLocalizedString("Read-Only Account", comment: "Alert title when read-only user tries to unfollow"),
+            isPresented: $showReadOnlyAlert
+        ) {
+            Button(NSLocalizedString("OK", comment: "Button to dismiss read-only alert")) {
+                showReadOnlyAlert = false
+            }
+        } message: {
+            Text("Log in with your private key (nsec) to follow or unfollow.", comment: "Alert message explaining that private key is needed to follow")
+        }
     }
-        
+
     func unfollow(_ hashtag: String) {
         is_following = false
         Task { await handle_unfollow(state: damus_state, unfollow: FollowRef.hashtag(hashtag)) }
@@ -133,15 +154,36 @@ struct HashtagFollowButton: View {
     let damus_state: DamusState
     let hashtag: String
     @Binding var is_following: Bool
-    
+    @State private var showReadOnlyAlert: Bool = false
+
+    private var isReadOnly: Bool {
+        damus_state.keypair.privkey == nil
+    }
+
     var body: some View {
-        return Button(action: { follow(hashtag) }) {
+        return Button(action: {
+            if isReadOnly {
+                showReadOnlyAlert = true
+            } else {
+                follow(hashtag)
+            }
+        }) {
             Text("Follow hashtag", comment: "Button to follow a given hashtag.")
                 .font(.footnote.bold())
         }
         .buttonStyle(GradientButtonStyle(padding: 10))
+        .alert(
+            NSLocalizedString("Read-Only Account", comment: "Alert title when read-only user tries to follow"),
+            isPresented: $showReadOnlyAlert
+        ) {
+            Button(NSLocalizedString("OK", comment: "Button to dismiss read-only alert")) {
+                showReadOnlyAlert = false
+            }
+        } message: {
+            Text("Log in with your private key (nsec) to follow or unfollow.", comment: "Alert message explaining that private key is needed to follow")
+        }
     }
-    
+
     func follow(_ hashtag: String) {
         is_following = true
         Task { await handle_follow(state: damus_state, follow: .hashtag(hashtag)) }

@@ -167,7 +167,7 @@ struct NotificationSettingsView: View {
             
             Section(
                 header: Text("Notification Preferences", comment: "Section header for Notification Preferences"),
-                footer: VStack {
+                footer: VStack(alignment: .leading, spacing: 8) {
                     switch notification_preferences_sync_state {
                         case .undefined, .not_applicable:
                             EmptyView()
@@ -185,6 +185,11 @@ struct NotificationSettingsView: View {
                         case .failure(let error):
                             Text(error)
                                 .foregroundStyle(.damusDangerPrimary)
+                    }
+
+                    if AccountsStore.shared.accounts.count > 1 {
+                        Text("Notifications are only delivered for your active account. Switch accounts to receive notifications for a different account.", comment: "Footer text explaining notifications only work for active account")
+                            .padding(.top, 4)
                     }
                 }
             ) {

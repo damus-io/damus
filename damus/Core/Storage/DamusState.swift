@@ -41,7 +41,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
     private(set) var nostrNetwork: NostrNetworkManager
     var snapshotManager: DatabaseSnapshotManager
 
-    init(keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, contactCards: ContactCard, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: DamusVideoCoordinator, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider, favicon_cache: FaviconCache, addNdbToRelayPool: Bool = true) {
+    init(keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, contactCards: ContactCard, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: DamusVideoCoordinator, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider, favicon_cache: FaviconCache, addNdbToRelayPool: Bool = true, generation: UInt64 = 0, currentGenerationProvider: (() -> UInt64)? = nil) {
         self.keypair = keypair
         self.likes = likes
         self.boosts = boosts
@@ -75,7 +75,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
         self.favicon_cache = FaviconCache()
 
         let networkManagerDelegate = NostrNetworkManagerDelegate(settings: settings, contacts: contacts, ndb: ndb, keypair: keypair, relayModelCache: relay_model_cache, relayFilters: relay_filters)
-        let nostrNetwork = NostrNetworkManager(delegate: networkManagerDelegate, addNdbToRelayPool: addNdbToRelayPool)
+        let nostrNetwork = NostrNetworkManager(delegate: networkManagerDelegate, addNdbToRelayPool: addNdbToRelayPool, generation: generation, currentGenerationProvider: currentGenerationProvider)
         self.nostrNetwork = nostrNetwork
         self.wallet.nostrNetwork = nostrNetwork
         self.snapshotManager = .init(ndb: ndb)
@@ -175,6 +175,49 @@ class DamusState: HeadlessDamusState, ObservableObject {
             await nostrNetwork.close()  // Close ndb streaming tasks before closing ndb to avoid memory errors
             ndb.close()
         }
+    }
+
+    /// Async version of close() that can be awaited for safe account switching.
+    ///
+    /// Note: This does NOT close the Ndb instance - it's reused across account switches
+    /// to avoid LMDB lock issues. The Ndb is marked closed to stop pending operations,
+    /// then reopened by the next account's ContentView.connect().
+    ///
+    /// Note: SubscriptionManager tasks have a bug where CancellationError is caught
+    /// and swallowed, so they don't respond to cancellation. They'll keep running
+    /// with their reference to the OLD ndb until deallocated. This is fine since
+    /// the new DamusState has its own ndb instance.
+    @MainActor
+    func closeAsync() async {
+        let startTime = CFAbsoluteTimeGetCurrent()
+        print("DIAG[\(startTime)] closeAsync: START")
+
+        print("DIAG[\(startTime)] closeAsync: wallet.disconnect START")
+        wallet.disconnect()
+        print("DIAG[\(startTime)] closeAsync: wallet.disconnect END")
+
+        // Fire and forget - don't capture self strongly
+        let pushClient = self.push_notification_client
+        Task { try? await pushClient.revoke_token() }
+
+        // NOTE: We intentionally do NOT call ndb.markClosed() here.
+        // The generation guard in SubscriptionManager handles stale task detection,
+        // so we don't need to signal closure via markClosed(). Repeated markClosed/reopen
+        // cycles cause LMDB to eventually fail after ~4-5 switches.
+        print("DIAG[\(startTime)] closeAsync: skipping ndb.markClosed (generation guard handles staleness)")
+
+        print("DIAG[\(startTime)] closeAsync: nostrNetwork.close START")
+        await nostrNetwork.close()
+        print("DIAG[\(startTime)] closeAsync: nostrNetwork.close END")
+
+        // Note: We intentionally do NOT call ndb.close() here.
+        // The Ndb instance is shared across account switches and will be
+        // reopened by the next ContentView.connect(). This avoids LMDB
+        // lock contention issues from rapid close/reopen cycles.
+        print("DIAG[\(startTime)] closeAsync: skipping ndb.close (shared instance)")
+
+        let elapsed = CFAbsoluteTimeGetCurrent() - startTime
+        print("DIAG[\(startTime)] closeAsync: DONE (elapsed: \(String(format: "%.2f", elapsed))s)")
     }
 
     static var empty: DamusState {

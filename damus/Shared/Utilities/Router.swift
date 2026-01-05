@@ -32,6 +32,7 @@ enum Route: Hashable {
     case SearchSettings(settings: UserSettingsStore)
     case DeveloperSettings(settings: UserSettingsStore)
     case FirstAidSettings(settings: UserSettingsStore)
+    case ManageAccountsSettings
     case Thread(thread: ThreadModel)
     case LoadableNostrEvent(note_reference: LoadableNostrEventViewModel.NoteReference)
     case Reposts(reposts: EventsModel)
@@ -100,6 +101,8 @@ enum Route: Hashable {
             DeveloperSettingsView(settings: settings, damus_state: damusState)
         case .FirstAidSettings(settings: let settings):
             FirstAidSettingsView(damus_state: damusState, settings: settings)
+        case .ManageAccountsSettings:
+            ManageAccountsSettingsView(state: damusState, accountsStore: AccountsStore.shared)
         case .Thread(let thread):
             ChatroomThreadView(damus: damusState, thread: thread)
             //ThreadView(state: damusState, thread: thread)
@@ -204,6 +207,8 @@ enum Route: Hashable {
             hasher.combine("developerSettings")
         case .FirstAidSettings:
             hasher.combine("firstAidSettings")
+        case .ManageAccountsSettings:
+            hasher.combine("manageAccountsSettings")
         case .Thread(let threadModel):
             hasher.combine("thread")
             hasher.combine(threadModel.original_event.id)

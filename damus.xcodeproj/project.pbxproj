@@ -123,6 +123,23 @@
 		4C285C86283892E7008A31F1 /* CreateAccountModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C285C85283892E7008A31F1 /* CreateAccountModel.swift */; };
 		4C285C8A2838B985008A31F1 /* ProfilePictureSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C285C892838B985008A31F1 /* ProfilePictureSelector.swift */; };
 		4C285C8C28398BC7008A31F1 /* Keys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C285C8B28398BC6008A31F1 /* Keys.swift */; };
+		D7A1C7F52F4F8D8D00D9B5F1 /* AccountsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1C7F42F4F8D8D00D9B5F1 /* AccountsStore.swift */; };
+		D7A1C7F92F4F8F5600D9B5F1 /* OnboardingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1C7F82F4F8F5600D9B5F1 /* OnboardingSession.swift */; };
+		D7A1C7FD2F4F92B500D9B5F1 /* AccountPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1C7FC2F4F92B500D9B5F1 /* AccountPickerView.swift */; };
+		D7A1C8012F4F933E00D9B5F1 /* SaveAccountPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1C8002F4F933E00D9B5F1 /* SaveAccountPrompt.swift */; };
+		D7A1C8072F50C72600D9B5F1 /* LoginView+AccountFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1C8062F50C72600D9B5F1 /* LoginView+AccountFlow.swift */; };
+		D7A1C8082F50C72600D9B5F1 /* LoginView+AccountFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1C8062F50C72600D9B5F1 /* LoginView+AccountFlow.swift */; };
+		D7A1C80A2F50CC5300D9B5F1 /* OrientationTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1C8092F50CC5300D9B5F1 /* OrientationTracker.swift */; };
+		D7A1C80B2F50CC5300D9B5F1 /* OrientationTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1C8092F50CC5300D9B5F1 /* OrientationTracker.swift */; };
+		D7A1C80D2F50CD3900D9B5F1 /* AppDelegateShim.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1C80C2F50CD3900D9B5F1 /* AppDelegateShim.swift */; };
+		D7A1C80E2F50CE0100D9B5F1 /* OrientationTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1C8092F50CC5300D9B5F1 /* OrientationTracker.swift */; };
+		D7A1C80F2F50CE0100D9B5F1 /* AppDelegateShim.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1C80C2F50CD3900D9B5F1 /* AppDelegateShim.swift */; };
+		D7A1C8102F50CE0200D9B5F1 /* OrientationTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1C8092F50CC5300D9B5F1 /* OrientationTracker.swift */; };
+		D7A1C8112F50CE0300D9B5F1 /* OnboardingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1C7F82F4F8F5600D9B5F1 /* OnboardingSession.swift */; };
+		D7A1C8122F50CE0400D9B5F1 /* AccountPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1C7FC2F4F92B500D9B5F1 /* AccountPickerView.swift */; };
+		D7A1C8132F50CE0500D9B5F1 /* SaveAccountPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1C8002F4F933E00D9B5F1 /* SaveAccountPrompt.swift */; };
+		D7A1C8142F50CE0600D9B5F1 /* AccountsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1C7F42F4F8D8D00D9B5F1 /* AccountsStore.swift */; };
+		D7A1C8152F50CE0700D9B5F1 /* LoginView+AccountFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1C8062F50C72600D9B5F1 /* LoginView+AccountFlow.swift */; };
 		4C285C8E28399BFE008A31F1 /* SaveKeysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C285C8D28399BFD008A31F1 /* SaveKeysView.swift */; };
 		4C28A4122A6D03D200C1A7A5 /* ReferencedId.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C28A4112A6D03D200C1A7A5 /* ReferencedId.swift */; };
 		4C2B10282A7B0F5C008AA43E /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2B10272A7B0F5C008AA43E /* Log.swift */; };
@@ -427,6 +444,8 @@
 		4CE6DEEB27F7A08200C66700 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4CE6DEEA27F7A08200C66700 /* Assets.xcassets */; };
 		4CE6DEEE27F7A08200C66700 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4CE6DEED27F7A08200C66700 /* Preview Assets.xcassets */; };
 		4CE6DEF827F7A08200C66700 /* damusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DEF727F7A08200C66700 /* damusTests.swift */; };
+		B1A2C3D4E5F67890ABCD1234 /* AccountsStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1A2C3D4E5F67890ABCD5678 /* AccountsStoreTests.swift */; };
+		E7A1B2C3D4E5F67890ABCD01 /* QuoteNotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7A1B2C3D4E5F67890ABCD02 /* QuoteNotificationTests.swift */; };
 		4CE6DF0227F7A08200C66700 /* damusUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF0127F7A08200C66700 /* damusUITests.swift */; };
 		4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */; };
 		4CE8794829941DA700F758CC /* RelayFilters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE8794729941DA700F758CC /* RelayFilters.swift */; };
@@ -484,6 +503,12 @@
 		4FE60CDD295E1C5E00105A1F /* Wallet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE60CDC295E1C5E00105A1F /* Wallet.swift */; };
 		50088DA129E8271A008A1FDF /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50088DA029E8271A008A1FDF /* WebSocket.swift */; };
 		501F8C802A0220E1001AFC1D /* KeychainStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C7F2A0220E1001AFC1D /* KeychainStorage.swift */; };
+		355C2F4197E54B92A523E69A /* SecureEnclaveStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 355C2F4197E54B92A523E699 /* SecureEnclaveStorage.swift */; };
+		830065CFBBAD4021ADDE8A5E /* KeyStorageMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 830065CFBBAD4021ADDE8A5D /* KeyStorageMode.swift */; };
+		355C2F4197E54B92A523E69B /* SecureEnclaveStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 355C2F4197E54B92A523E699 /* SecureEnclaveStorage.swift */; };
+		830065CFBBAD4021ADDE8A5F /* KeyStorageMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 830065CFBBAD4021ADDE8A5D /* KeyStorageMode.swift */; };
+		355C2F4197E54B92A523E69C /* SecureEnclaveStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 355C2F4197E54B92A523E699 /* SecureEnclaveStorage.swift */; };
+		830065CFBBAD4021ADDE8A60 /* KeyStorageMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 830065CFBBAD4021ADDE8A5D /* KeyStorageMode.swift */; };
 		501F8C822A0224EB001AFC1D /* KeychainStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C812A0224EB001AFC1D /* KeychainStorageTests.swift */; };
 		504323A72A34915F006AE6DC /* RelayModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504323A62A34915F006AE6DC /* RelayModel.swift */; };
 		504323A92A3495B6006AE6DC /* RelayModelCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504323A82A3495B6006AE6DC /* RelayModelCache.swift */; };
@@ -1906,6 +1931,12 @@
 		D7FB14222BE5970000398331 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D7FB14212BE5970000398331 /* PrivacyInfo.xcprivacy */; };
 		D7FB14252BE5A9A800398331 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D7FB14242BE5A9A800398331 /* PrivacyInfo.xcprivacy */; };
 		D7FD12262BD345A700CF195B /* FirstAidSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FD12252BD345A700CF195B /* FirstAidSettingsView.swift */; };
+		EDFAF07540624BD3BBE07E7D /* ManageAccountsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9D8091D08048C685E2DCED /* ManageAccountsSettingsView.swift */; };
+		59EC8B75AFD24AB19C86FE0A /* ManageAccountsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9D8091D08048C685E2DCED /* ManageAccountsSettingsView.swift */; };
+		D39C9D5B8CD24B738257113B /* ManageAccountsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9D8091D08048C685E2DCED /* ManageAccountsSettingsView.swift */; };
+		F616ABE904B1475C9BC4FA4A /* AccountSwitcherSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D1DB797C4DD4EDCABE83937 /* AccountSwitcherSheet.swift */; };
+		F072E53962B3496F8943C47D /* AccountSwitcherSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D1DB797C4DD4EDCABE83937 /* AccountSwitcherSheet.swift */; };
+		61E8D98322314E6B86650F41 /* AccountSwitcherSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D1DB797C4DD4EDCABE83937 /* AccountSwitcherSheet.swift */; };
 		D7FF94002AC7AC5300FD969D /* RelayURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FF93FF2AC7AC5200FD969D /* RelayURL.swift */; };
 		E02429952B7E97740088B16C /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E02429942B7E97740088B16C /* CameraController.swift */; };
 		E02B54182B4DFADA0077FF42 /* Bech32ObjectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E02B54172B4DFADA0077FF42 /* Bech32ObjectTests.swift */; };
@@ -2171,6 +2202,14 @@
 		4C285C85283892E7008A31F1 /* CreateAccountModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateAccountModel.swift; sourceTree = "<group>"; };
 		4C285C892838B985008A31F1 /* ProfilePictureSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePictureSelector.swift; sourceTree = "<group>"; };
 		4C285C8B28398BC6008A31F1 /* Keys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keys.swift; sourceTree = "<group>"; };
+		D7A1C7F42F4F8D8D00D9B5F1 /* AccountsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsStore.swift; sourceTree = "<group>"; };
+		7D1DB797C4DD4EDCABE83937 /* AccountSwitcherSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSwitcherSheet.swift; sourceTree = "<group>"; };
+		D7A1C7F82F4F8F5600D9B5F1 /* OnboardingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingSession.swift; sourceTree = "<group>"; };
+		D7A1C7FC2F4F92B500D9B5F1 /* AccountPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountPickerView.swift; sourceTree = "<group>"; };
+		D7A1C8002F4F933E00D9B5F1 /* SaveAccountPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveAccountPrompt.swift; sourceTree = "<group>"; };
+		D7A1C8062F50C72600D9B5F1 /* LoginView+AccountFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LoginView+AccountFlow.swift"; sourceTree = "<group>"; };
+		D7A1C8092F50CC5300D9B5F1 /* OrientationTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationTracker.swift; sourceTree = "<group>"; };
+		D7A1C80C2F50CD3900D9B5F1 /* AppDelegateShim.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegateShim.swift; sourceTree = "<group>"; };
 		4C285C8D28399BFD008A31F1 /* SaveKeysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveKeysView.swift; sourceTree = "<group>"; };
 		4C28A4112A6D03D200C1A7A5 /* ReferencedId.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferencedId.swift; sourceTree = "<group>"; };
 		4C2B10272A7B0F5C008AA43E /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
@@ -2510,6 +2549,8 @@
 		4CE6DEED27F7A08200C66700 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		4CE6DEF327F7A08200C66700 /* damusTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = damusTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CE6DEF727F7A08200C66700 /* damusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damusTests.swift; sourceTree = "<group>"; };
+		B1A2C3D4E5F67890ABCD5678 /* AccountsStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsStoreTests.swift; sourceTree = "<group>"; };
+		E7A1B2C3D4E5F67890ABCD02 /* QuoteNotificationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteNotificationTests.swift; sourceTree = "<group>"; };
 		4CE6DEFD27F7A08200C66700 /* damusUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = damusUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CE6DF0127F7A08200C66700 /* damusUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damusUITests.swift; sourceTree = "<group>"; };
 		4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayConnection.swift; sourceTree = "<group>"; };
@@ -2609,6 +2650,8 @@
 		4FE60CDC295E1C5E00105A1F /* Wallet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wallet.swift; sourceTree = "<group>"; };
 		50088DA029E8271A008A1FDF /* WebSocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocket.swift; sourceTree = "<group>"; };
 		501F8C7F2A0220E1001AFC1D /* KeychainStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStorage.swift; sourceTree = "<group>"; };
+		355C2F4197E54B92A523E699 /* SecureEnclaveStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureEnclaveStorage.swift; sourceTree = "<group>"; };
+		830065CFBBAD4021ADDE8A5D /* KeyStorageMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyStorageMode.swift; sourceTree = "<group>"; };
 		501F8C812A0224EB001AFC1D /* KeychainStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStorageTests.swift; sourceTree = "<group>"; };
 		504323A62A34915F006AE6DC /* RelayModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayModel.swift; sourceTree = "<group>"; };
 		504323A82A3495B6006AE6DC /* RelayModelCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayModelCache.swift; sourceTree = "<group>"; };
@@ -2855,6 +2898,7 @@
 		D7FB14212BE5970000398331 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		D7FB14242BE5A9A800398331 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		D7FD12252BD345A700CF195B /* FirstAidSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstAidSettingsView.swift; sourceTree = "<group>"; };
+		8B9D8091D08048C685E2DCED /* ManageAccountsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManageAccountsSettingsView.swift; sourceTree = "<group>"; };
 		D7FF93FF2AC7AC5200FD969D /* RelayURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayURL.swift; sourceTree = "<group>"; };
 		E02429942B7E97740088B16C /* CameraController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraController.swift; sourceTree = "<group>"; };
 		E02B54172B4DFADA0077FF42 /* Bech32ObjectTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bech32ObjectTests.swift; sourceTree = "<group>"; };
@@ -3269,6 +3313,8 @@
 				4C4DD3DA2A6CA7E8005B4E85 /* ContentParsing.swift */,
 				4C7FF7D42823313F009601DB /* Mentions.swift */,
 				4C285C8B28398BC6008A31F1 /* Keys.swift */,
+				D7A1C7F42F4F8D8D00D9B5F1 /* AccountsStore.swift */,
+				D7A1C7F82F4F8F5600D9B5F1 /* OnboardingSession.swift */,
 				D773BC5E2C6D538500349F0A /* CommentItem.swift */,
 			);
 			path = Nostr;
@@ -3849,6 +3895,8 @@
 				4C363A9F2828A8DD006E126D /* LikeTests.swift */,
 				4C363A9D2828A822006E126D /* ReplyTests.swift */,
 				4CE6DEF727F7A08200C66700 /* damusTests.swift */,
+				B1A2C3D4E5F67890ABCD5678 /* AccountsStoreTests.swift */,
+				E7A1B2C3D4E5F67890ABCD02 /* QuoteNotificationTests.swift */,
 				4C3EA67A28FF7B3900C48A62 /* InvoiceTests.swift */,
 				3ACBCB77295FE5C70037388A /* TimeAgoTests.swift */,
 				4CB88399297322D200DC99E7 /* DMTests.swift */,
@@ -4145,6 +4193,7 @@
 		5C78A7792E22FDFE00CF177D /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				A94006EAD3E74E8D915FCBF5 /* Accounts */,
 				5C8F97042EB45E39009399B1 /* Live */,
 				D5C1AFC22E5DFF040092F72F /* ContactCard */,
 				5C78A7BC2E304D7400CF177D /* Translations */,
@@ -4416,6 +4465,9 @@
 				D783A63E2AD4E53D00658DDA /* SuggestedHashtagsView.swift */,
 				4C285C8D28399BFD008A31F1 /* SaveKeysView.swift */,
 				D78BA6642DD7DFB9000AE62C /* InterestSelectionView.swift */,
+				D7A1C7FC2F4F92B500D9B5F1 /* AccountPickerView.swift */,
+				D7A1C8002F4F933E00D9B5F1 /* SaveAccountPrompt.swift */,
+				D7A1C8062F50C72600D9B5F1 /* LoginView+AccountFlow.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -4453,6 +4505,7 @@
 				E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */,
 				5053ACA62A56DF3B00851AE3 /* DeveloperSettingsView.swift */,
 				D7FD12252BD345A700CF195B /* FirstAidSettingsView.swift */,
+				8B9D8091D08048C685E2DCED /* ManageAccountsSettingsView.swift */,
 				4CE4F9DD2852768D00C00DD9 /* ConfigView.swift */,
 			);
 			path = Views;
@@ -4873,6 +4926,8 @@
 				D767066E2C8BB3CE00F09726 /* URLHandler.swift */,
 				D7CB5D4D2B11728000AD4105 /* NewEventsBits.swift */,
 				D74AAFC12B153395006CF0F4 /* HeadlessDamusState.swift */,
+				D7A1C8092F50CC5300D9B5F1 /* OrientationTracker.swift */,
+				D7A1C80C2F50CD3900D9B5F1 /* AppDelegateShim.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -4930,6 +4985,8 @@
 				D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */,
 				D7315A292ACDF3B70036E30A /* DamusCacheManager.swift */,
 				501F8C7F2A0220E1001AFC1D /* KeychainStorage.swift */,
+				355C2F4197E54B92A523E699 /* SecureEnclaveStorage.swift */,
+				830065CFBBAD4021ADDE8A5D /* KeyStorageMode.swift */,
 				4C3BEFDF281DE1ED00B3DE84 /* DamusState.swift */,
 			);
 			path = Storage;
@@ -5144,6 +5201,22 @@
 			isa = PBXGroup;
 			children = (
 				D5C1AFD12E5EE2820092F72F /* FavoriteButtonView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A94006EAD3E74E8D915FCBF5 /* Accounts */ = {
+			isa = PBXGroup;
+			children = (
+				69718C227F25462A923FECCA /* Views */,
+			);
+			path = Accounts;
+			sourceTree = "<group>";
+		};
+		69718C227F25462A923FECCA /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				7D1DB797C4DD4EDCABE83937 /* AccountSwitcherSheet.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -5786,6 +5859,8 @@
 				5C4D9EA72C042FA5005EA0F7 /* HighlightDraftContentView.swift in Sources */,
 				3A8CC6CC2A2CFEF900940F5F /* StringUtil.swift in Sources */,
 				D7FD12262BD345A700CF195B /* FirstAidSettingsView.swift in Sources */,
+				EDFAF07540624BD3BBE07E7D /* ManageAccountsSettingsView.swift in Sources */,
+				F616ABE904B1475C9BC4FA4A /* AccountSwitcherSheet.swift in Sources */,
 				D7870BC12AC4750B0080BA88 /* MentionView.swift in Sources */,
 				4CB55EF5295E679D007FD187 /* UserRelaysView.swift in Sources */,
 				4C363AA228296A7E006E126D /* SearchView.swift in Sources */,
@@ -6112,6 +6187,7 @@
 				4C7D09762A0AF19E00943473 /* FillAndStroke.swift in Sources */,
 				D7E5B2D42EA0188200CF47AC /* StreamPipelineDiagnostics.swift in Sources */,
 				4CA927612A290E340098A105 /* EventShell.swift in Sources */,
+				D7A1C7F52F4F8D8D00D9B5F1 /* AccountsStore.swift in Sources */,
 				D74EC8502E1856B70091DC51 /* NonCopyableLinkedList.swift in Sources */,
 				4C363AA428296DEE006E126D /* SearchModel.swift in Sources */,
 				4C8D00CC29DF92DF0036AF10 /* Hashtags.swift in Sources */,
@@ -6229,6 +6305,8 @@
 				4C32B95A2A9AD44700DC3548 /* Verifiable.swift in Sources */,
 				4C73C5142A4437C10062CAC0 /* ZapUserView.swift in Sources */,
 				501F8C802A0220E1001AFC1D /* KeychainStorage.swift in Sources */,
+				355C2F4197E54B92A523E69A /* SecureEnclaveStorage.swift in Sources */,
+				830065CFBBAD4021ADDE8A5E /* KeyStorageMode.swift in Sources */,
 				3A92C0FE2DE16E9800CEEBAC /* FaviconCache.swift in Sources */,
 				5CB645A22EA31E410018BD91 /* LabsLogoView.swift in Sources */,
 				4C1A9A1D29DDCF9B00516EAC /* NotificationSettingsView.swift in Sources */,
@@ -6261,6 +6339,12 @@
 				4C9B0DF32A65C46800CBDA21 /* ProfileEditButton.swift in Sources */,
 				4C32B95F2A9AD44700DC3548 /* Enum.swift in Sources */,
 				4C2859622A12A7F0004746F7 /* GoldSupportGradient.swift in Sources */,
+				D7A1C8102F50CE0200D9B5F1 /* OrientationTracker.swift in Sources */,
+				D7A1C8112F50CE0300D9B5F1 /* OnboardingSession.swift in Sources */,
+				D7A1C8122F50CE0400D9B5F1 /* AccountPickerView.swift in Sources */,
+				D7A1C8132F50CE0500D9B5F1 /* SaveAccountPrompt.swift in Sources */,
+				D7A1C8142F50CE0600D9B5F1 /* AccountsStore.swift in Sources */,
+				D7A1C8152F50CE0700D9B5F1 /* LoginView+AccountFlow.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6320,6 +6404,8 @@
 				50A50A8D29A09E1C00C01BE7 /* RequestTests.swift in Sources */,
 				D7100CB62EEA3E20008D94B7 /* AutoSaveViewModelTests.swift in Sources */,
 				4CE6DEF827F7A08200C66700 /* damusTests.swift in Sources */,
+				B1A2C3D4E5F67890ABCD1234 /* AccountsStoreTests.swift in Sources */,
+				E7A1B2C3D4E5F67890ABCD01 /* QuoteNotificationTests.swift in Sources */,
 				D753CEAA2BE9DE04001C3A5D /* MutingTests.swift in Sources */,
 				3A3040F329A91366008A0F29 /* ProfileViewTests.swift in Sources */,
 				4CF0ABDC2981A19E00D66079 /* ListTests.swift in Sources */,
@@ -6508,6 +6594,7 @@
 				82D6FB312CD99F7900C925F4 /* KFOptionSetter+.swift in Sources */,
 				5C8F972F2EB46116009399B1 /* LiveStreamStatus.swift in Sources */,
 				D73BDB162D71216500D69970 /* UserRelayListManager.swift in Sources */,
+				D7A1C80E2F50CE0100D9B5F1 /* OrientationTracker.swift in Sources */,
 				82D6FB322CD99F7900C925F4 /* FillAndStroke.swift in Sources */,
 				82D6FB332CD99F7900C925F4 /* Array.swift in Sources */,
 				82D6FB342CD99F7900C925F4 /* VectorMath.swift in Sources */,
@@ -6609,6 +6696,7 @@
 				82D6FB8E2CD99F7900C925F4 /* SearchHomeModel.swift in Sources */,
 				82D6FB8F2CD99F7900C925F4 /* DirectMessagesModel.swift in Sources */,
 				D73C7EDD2DE517A1001F9392 /* OnboardingContentSettings.swift in Sources */,
+				D7A1C7F92F4F8F5600D9B5F1 /* OnboardingSession.swift in Sources */,
 				82D6FB902CD99F7900C925F4 /* DirectMessageModel.swift in Sources */,
 				82D6FB912CD99F7900C925F4 /* UserSettingsStore.swift in Sources */,
 				82D6FB922CD99F7900C925F4 /* Wallet.swift in Sources */,
@@ -6622,6 +6710,8 @@
 				82D6FB982CD99F7900C925F4 /* DraftsModel.swift in Sources */,
 				82D6FB992CD99F7900C925F4 /* NotificationsModel.swift in Sources */,
 				D78BA6662DD7DFB9000AE62C /* InterestSelectionView.swift in Sources */,
+				D7A1C7FD2F4F92B500D9B5F1 /* AccountPickerView.swift in Sources */,
+				D7A1C8012F4F933E00D9B5F1 /* SaveAccountPrompt.swift in Sources */,
 				82D6FB9A2CD99F7900C925F4 /* ImageUploadModel.swift in Sources */,
 				82D6FB9B2CD99F7900C925F4 /* MutedThreadsManager.swift in Sources */,
 				82D6FB9C2CD99F7900C925F4 /* WalletModel.swift in Sources */,
@@ -6699,12 +6789,16 @@
 				82D6FBE12CD99F7900C925F4 /* NotificationSettingsView.swift in Sources */,
 				82D6FBE22CD99F7900C925F4 /* AppearanceSettingsView.swift in Sources */,
 				D7DB930A2D69486700DA1EE5 /* NIP65.swift in Sources */,
+				355C2F4197E54B92A523E69B /* SecureEnclaveStorage.swift in Sources */,
+				830065CFBBAD4021ADDE8A5F /* KeyStorageMode.swift in Sources */,
 				82D6FBE32CD99F7900C925F4 /* KeySettingsView.swift in Sources */,
 				82D6FBE42CD99F7900C925F4 /* ZapSettingsView.swift in Sources */,
 				82D6FBE52CD99F7900C925F4 /* TranslationSettingsView.swift in Sources */,
 				5C8F97472EB461DB009399B1 /* EventTags.swift in Sources */,
 				82D6FBE62CD99F7900C925F4 /* SearchSettingsView.swift in Sources */,
 				82D6FBE82CD99F7900C925F4 /* FirstAidSettingsView.swift in Sources */,
+				59EC8B75AFD24AB19C86FE0A /* ManageAccountsSettingsView.swift in Sources */,
+				F072E53962B3496F8943C47D /* AccountSwitcherSheet.swift in Sources */,
 				82D6FBE92CD99F7900C925F4 /* ImageContextMenuModifier.swift in Sources */,
 				82D6FBEA2CD99F7900C925F4 /* FullScreenCarouselView.swift in Sources */,
 				D7F360272CEBBDC0009D34DA /* DamusVideoControlsView.swift in Sources */,
@@ -6879,9 +6973,15 @@
 				82D6FC762CD99F7900C925F4 /* RelayFilterView.swift in Sources */,
 				82D6FC772CD99F7900C925F4 /* SuggestedHashtagsView.swift in Sources */,
 				82D6FC782CD99F7900C925F4 /* ProfileActionSheetView.swift in Sources */,
-				82D6FC792CD99F7900C925F4 /* damusApp.swift in Sources */,
+				D7A1C7FD2F4F92B500D9B5F1 /* AccountPickerView.swift in Sources */,
+				D7A1C7F92F4F8F5600D9B5F1 /* OnboardingSession.swift in Sources */,
 				D5C1AFCC2E5EE12B0092F72F /* ContactCardNotify.swift in Sources */,
+				D7A1C7F52F4F8D8D00D9B5F1 /* AccountsStore.swift in Sources */,
+				D7A1C80A2F50CC5300D9B5F1 /* OrientationTracker.swift in Sources */,
+				D7A1C80D2F50CD3900D9B5F1 /* AppDelegateShim.swift in Sources */,
 				82D6FC7A2CD99F7900C925F4 /* ContentView.swift in Sources */,
+				D7A1C8012F4F933E00D9B5F1 /* SaveAccountPrompt.swift in Sources */,
+				D7A1C8082F50C72600D9B5F1 /* LoginView+AccountFlow.swift in Sources */,
 				82D6FC7B2CD99F7900C925F4 /* TestData.swift in Sources */,
 				82D6FC7C2CD99F7900C925F4 /* ContentParsing.swift in Sources */,
 				82D6FC7D2CD99F7900C925F4 /* NotificationFormatter.swift in Sources */,
@@ -6938,6 +7038,8 @@
 				D73E5E372C6A97F4007EB227 /* ReconnectRelaysNotify.swift in Sources */,
 				5C8F97202EB46097009399B1 /* LiveEventModel.swift in Sources */,
 				D73E5E382C6A97F4007EB227 /* PurpleAccountUpdateNotify.swift in Sources */,
+				D7A1C80B2F50CC5300D9B5F1 /* OrientationTracker.swift in Sources */,
+				D7A1C80D2F50CD3900D9B5F1 /* AppDelegateShim.swift in Sources */,
 				D73E5E392C6A97F4007EB227 /* DamusDuration.swift in Sources */,
 				D73E5E3A2C6A97F4007EB227 /* SwipeToDismiss.swift in Sources */,
 				D73E5E3B2C6A97F4007EB227 /* MusicController.swift in Sources */,
@@ -7143,6 +7245,8 @@
 				D73E5EE12C6A97F4007EB227 /* TranslationSettingsView.swift in Sources */,
 				D73E5EE22C6A97F4007EB227 /* SearchSettingsView.swift in Sources */,
 				D73E5EE42C6A97F4007EB227 /* FirstAidSettingsView.swift in Sources */,
+				D39C9D5B8CD24B738257113B /* ManageAccountsSettingsView.swift in Sources */,
+				61E8D98322314E6B86650F41 /* AccountSwitcherSheet.swift in Sources */,
 				D73E5EE52C6A97F4007EB227 /* ImageContextMenuModifier.swift in Sources */,
 				D73E5EE72C6A97F4007EB227 /* ProfilePicImageView.swift in Sources */,
 				D73E5EE82C6A97F4007EB227 /* ImageContainerView.swift in Sources */,
@@ -7313,9 +7417,13 @@
 				D73E5F6F2C6A97F5007EB227 /* RelayFilterView.swift in Sources */,
 				D703D78A2C670C8A00A400EA /* LibreTranslateServer.swift in Sources */,
 				D703D7602C670AAB00A400EA /* MigratedTypes.swift in Sources */,
-				D73E5F742C6A9890007EB227 /* damusApp.swift in Sources */,
+				D7A1C7F52F4F8D8D00D9B5F1 /* AccountsStore.swift in Sources */,
+				355C2F4197E54B92A523E69C /* SecureEnclaveStorage.swift in Sources */,
+				830065CFBBAD4021ADDE8A60 /* KeyStorageMode.swift in Sources */,
+				D7A1C7F92F4F8F5600D9B5F1 /* OnboardingSession.swift in Sources */,
 				D73E5E192C6A965A007EB227 /* DamusState.swift in Sources */,
 				D73E5F872C6AA639007EB227 /* ImageCarousel.swift in Sources */,
+				D7A1C8072F50C72600D9B5F1 /* LoginView+AccountFlow.swift in Sources */,
 				D703D7732C670B8500A400EA /* Offset.swift in Sources */,
 				D703D7572C670A5A00A400EA /* IdType.swift in Sources */,
 				D703D7542C670A2A00A400EA /* MediaUploader.swift in Sources */,
@@ -7325,6 +7433,8 @@
 				D703D7552C670A3700A400EA /* DamusUserDefaults.swift in Sources */,
 				5C4FA8002DC5119300CE658C /* FollowPackPreview.swift in Sources */,
 				5C8498042D5D150000F74FEB /* ZapExplainer.swift in Sources */,
+				D7A1C7FD2F4F92B500D9B5F1 /* AccountPickerView.swift in Sources */,
+				D7A1C8012F4F933E00D9B5F1 /* SaveAccountPrompt.swift in Sources */,
 				D703D7842C670C4700A400EA /* SequenceUtils.swift in Sources */,
 				D703D7912C670D1E00A400EA /* DisplayName.swift in Sources */,
 				D703D7B02C6710A500A400EA /* Root.swift in Sources */,
@@ -8108,7 +8218,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG APPLICATION_EXTENSION $(inherited)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "damus-c/damus-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -8140,6 +8250,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = APPLICATION_EXTENSION;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "damus-c/damus-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -8172,7 +8283,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG APPLICATION_EXTENSION $(inherited)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "damus-c/damus-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -8205,6 +8316,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = APPLICATION_EXTENSION;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "damus-c/damus-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;

@@ -51,19 +51,26 @@ extension NostrNetworkManager {
         }
         
         func stop() async {
+            let startTime = CFAbsoluteTimeGetCurrent()
+            print("DIAG[\(startTime)] ProfilesManager.stop: START")
             await withTaskGroup { group in
                 // Spawn each cancellation in parallel for better execution speed
                 group.addTask {
+                    print("DIAG[\(startTime)] ProfilesManager.stop: subscriptionSwitcherTask.cancel START")
                     await self.subscriptionSwitcherTask?.cancel()
                     try? await self.subscriptionSwitcherTask?.value
+                    print("DIAG[\(startTime)] ProfilesManager.stop: subscriptionSwitcherTask.cancel END")
                 }
                 group.addTask {
+                    print("DIAG[\(startTime)] ProfilesManager.stop: profileListenerTask.cancel START")
                     await self.profileListenerTask?.cancel()
                     try? await self.profileListenerTask?.value
+                    print("DIAG[\(startTime)] ProfilesManager.stop: profileListenerTask.cancel END")
                 }
                 // But await for all of them to be done before returning to avoid race conditions
                 for await value in group { continue }
             }
+            print("DIAG[\(startTime)] ProfilesManager.stop: END")
         }
         
         private func restartProfileListenerTask() {

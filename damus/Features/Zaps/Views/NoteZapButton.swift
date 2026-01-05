@@ -43,9 +43,14 @@ struct NoteZapButton: View {
     let damus_state: DamusState
     let target: ZapTarget
     let lnurl: String
-    
+
     @ObservedObject var zaps: ZapsDataModel
-    
+    @State private var showReadOnlyAlert: Bool = false
+
+    private var isReadOnly: Bool {
+        damus_state.keypair.privkey == nil
+    }
+
     var our_zap: Zapping? {
         zaps.zaps.first(where: { z in z.request.ev.pubkey == damus_state.pubkey })
     }
@@ -140,14 +145,30 @@ struct NoteZapButton: View {
         .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button"))
         .simultaneousGesture(LongPressGesture().onEnded {_  in
             guard !damus_state.settings.nozaps else { return }
-            
+            if isReadOnly {
+                showReadOnlyAlert = true
+                return
+            }
             present_sheet(.zap(target: target, lnurl: lnurl))
         })
         .highPriorityGesture(TapGesture().onEnded {
             guard !damus_state.settings.nozaps else { return }
-            
+            if isReadOnly {
+                showReadOnlyAlert = true
+                return
+            }
             tap()
         })
+        .alert(
+            NSLocalizedString("Read-Only Account", comment: "Alert title when read-only user tries to zap"),
+            isPresented: $showReadOnlyAlert
+        ) {
+            Button(NSLocalizedString("OK", comment: "Button to dismiss read-only alert")) {
+                showReadOnlyAlert = false
+            }
+        } message: {
+            Text("Log in with your private key (nsec) to send zaps.", comment: "Alert message explaining that private key is needed for zapping")
+        }
     }
 }
 

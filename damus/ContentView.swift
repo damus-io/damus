@@ -136,7 +136,8 @@ struct ContentView: View {
     @AppStorage("has_seen_suggested_users") private var hasSeenOnboardingSuggestions = false
     let sub_id = UUID().description
     @State var damusClosingTask: Task<Void, Never>? = nil
-    
+    @State private var showDMReadOnlyAlert: Bool = false
+
     // connect retry timer
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
@@ -303,8 +304,11 @@ struct ContentView: View {
         .ignoresSafeArea(.keyboard)
         .edgesIgnoringSafeArea(hide_bar ? [.bottom] : [])
         .onAppear() {
+            print("DIAG: ContentView.onAppear triggered for pubkey \(pubkey.npub.prefix(12))...")
             Task {
+                print("DIAG: ContentView.onAppear: calling connect()...")
                 await self.connect()
+                print("DIAG: ContentView.onAppear: connect() completed")
                 try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default, options: .mixWithOthers)
                 setup_notifications()
                 if !hasSeenOnboardingSuggestions || damus_state!.settings.always_show_onboarding_suggestions {
@@ -313,9 +317,20 @@ struct ContentView: View {
                         hasSeenOnboardingSuggestions = true
                     }
                 }
+#if !(APP_EXTENSION || APPLICATION_EXTENSION)
+                print("DIAG: ContentView.onAppear: setting appDelegate.state")
                 self.appDelegate?.state = damus_state
+                print("DIAG: ContentView.onAppear: appDelegate.state set successfully")
+#endif
                 Task {  // We probably don't need this to be a detached task. According to https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/#Defining-and-Calling-Asynchronous-Functions, awaits are only suspension points that do not block the thread.
                     await self.listenAndHandleLocalNotifications()
+                }
+                // Update account metadata after a delay to allow profile data to load
+                Task {
+                    try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
+                    await MainActor.run {
+                        updateActiveAccountMetadata()
+                    }
                 }
             }
         }
@@ -655,9 +670,37 @@ struct ContentView: View {
                 Text("Could not find user to mute...", comment: "Alert message to indicate that the muted user could not be found.")
             }
         })
+        .alert(
+            NSLocalizedString("Read-Only Account", comment: "Alert title when read-only user tries to access DMs"),
+            isPresented: $showDMReadOnlyAlert
+        ) {
+            Button(NSLocalizedString("OK", comment: "Button to dismiss read-only alert")) {
+                showDMReadOnlyAlert = false
+            }
+        } message: {
+            Text("Log in with your private key (nsec) to send and receive direct messages.", comment: "Alert message explaining that private key is needed for DMs")
+        }
     }
-    
+
+    /// Updates the active account's metadata (display name, avatar) from the loaded profile
+    private func updateActiveAccountMetadata() {
+        guard let ds = damus_state else { return }
+        let pubkey = ds.pubkey
+
+        if let profile = ds.profiles.lookup(id: pubkey) {
+            let displayName = profile.display_name ?? profile.name
+            let avatarURL = profile.picture.flatMap { URL(string: $0) }
+            AccountsStore.shared.updateMetadata(for: pubkey, displayName: displayName, avatarURL: avatarURL)
+        }
+    }
+
     func switch_timeline(_ timeline: Timeline) {
+        // Block DM tab for read-only users
+        if timeline == .dms && damus_state?.keypair.privkey == nil {
+            showDMReadOnlyAlert = true
+            return
+        }
+
         self.isSideBarOpened = false
         let navWasAtRoot = self.navIsAtRoot()
         self.popToRoot()
@@ -668,7 +711,7 @@ struct ContentView: View {
             notify(.scroll_to_top)
             return
         }
-        
+
         self.selected_timeline = timeline
     }
 
@@ -684,9 +727,8 @@ struct ContentView: View {
     func handleNotification(notification: LossyLocalNotification) {
         Log.info("ContentView is handling a notification", for: .push_notifications)
         guard damus_state != nil else {
-            // This should never happen because `listenAndHandleLocalNotifications` is called after damus state is initialized in `onAppear`
-            assertionFailure("DamusState not loaded when ContentView (new handler) was handling a notification")
-            Log.error("DamusState not loaded when ContentView (new handler) was handling a notification", for: .push_notifications)
+            // Can happen during account switching before damus_state is initialized
+            Log.info("Ignoring notification - DamusState not yet loaded", for: .push_notifications)
             return
         }
         let local = notification
@@ -695,21 +737,60 @@ struct ContentView: View {
     }
 
     func connect() async {
-        // nostrdb
+        let startTime = CFAbsoluteTimeGetCurrent()
+        print("DIAG[\(startTime)] ContentView.connect: START for pubkey \(pubkey.npub.prefix(12))...")
+
+        // nostrdb - reuse shared instance across account switches to avoid LMDB lock issues
+        let ndb: Ndb
+#if !(APP_EXTENSION || APPLICATION_EXTENSION)
+        // Check if shared Ndb exists and is healthy (not closed)
+        // If closed (e.g., from backgrounding), clear it and create fresh
+        if let existingNdb = appDelegate?.sharedNdb, existingNdb.is_closed {
+            print("DIAG[\(startTime)] ContentView.connect: shared Ndb is closed, clearing for fresh instance")
+            appDelegate?.sharedNdb = nil
+        }
+
+        if let existingNdb = appDelegate?.sharedNdb {
+            // Reuse the shared Ndb instance - it stays open across account switches
+            print("DIAG[\(startTime)] ContentView.connect: reusing existing shared Ndb")
+            ndb = existingNdb
+        } else {
+            print("DIAG[\(startTime)] ContentView.connect: creating new Ndb...")
+            var mndb = Ndb()
+            if mndb == nil {
+                // try recovery
+                print("DIAG[\(startTime)] ContentView.connect: DB ISSUE! RECOVERING")
+                mndb = Ndb.safemode()
+
+                // out of space or something?? maybe we need a in-memory fallback
+                if mndb == nil {
+                    print("DIAG[\(startTime)] ContentView.connect: Ndb.safemode() FAILED, logging out")
+                    logout(nil)
+                    return
+                }
+            }
+            print("DIAG[\(startTime)] ContentView.connect: Ndb created successfully")
+            guard let newNdb = mndb else { return }
+            ndb = newNdb
+            appDelegate?.sharedNdb = ndb
+        }
+#else
+        // Extensions don't have the shared Ndb - create fresh
+        print("DIAG[\(startTime)] ContentView.connect: creating new Ndb (extension)...")
         var mndb = Ndb()
         if mndb == nil {
-            // try recovery
-            print("DB ISSUE! RECOVERING")
+            print("DIAG[\(startTime)] ContentView.connect: DB ISSUE! RECOVERING")
             mndb = Ndb.safemode()
-
-            // out of space or something?? maybe we need a in-memory fallback
             if mndb == nil {
+                print("DIAG[\(startTime)] ContentView.connect: Ndb.safemode() FAILED, logging out")
                 logout(nil)
                 return
             }
         }
-
-        guard let ndb = mndb else { return  }
+        print("DIAG[\(startTime)] ContentView.connect: Ndb created successfully")
+        guard let newNdb = mndb else { return }
+        ndb = newNdb
+#endif
 
         let model_cache = RelayModelCache()
         let relay_filters = RelayFilters(our_pubkey: pubkey)
@@ -717,6 +798,17 @@ struct ContentView: View {
         let settings = UserSettingsStore.globally_load_for(pubkey: pubkey)
 
         let new_relay_filters = await load_relay_filters(pubkey) == nil
+
+        // Capture current generation for staleness detection in subscription tasks
+#if !(APP_EXTENSION || APPLICATION_EXTENSION)
+        let generation = appDelegate?.ndbGeneration ?? 0
+        let generationProvider: (() -> UInt64)? = { [weak appDelegate] in
+            appDelegate?.ndbGeneration ?? 0
+        }
+#else
+        let generation: UInt64 = 0
+        let generationProvider: (() -> UInt64)? = nil
+#endif
 
         self.damus_state = DamusState(keypair: keypair,
                                       likes: EventCounter(our_pubkey: pubkey),
@@ -743,7 +835,9 @@ struct ContentView: View {
                                       ndb: ndb,
                                       quote_reposts: .init(our_pubkey: pubkey),
                                       emoji_provider: DefaultEmojiProvider(showAllVariations: true),
-                                      favicon_cache: FaviconCache()
+                                      favicon_cache: FaviconCache(),
+                                      generation: generation,
+                                      currentGenerationProvider: generationProvider
         )
         
         home.damus_state = self.damus_state!
@@ -777,11 +871,17 @@ struct ContentView: View {
                 Log.error("Failed to configure tips: %s", for: .tips, error.localizedDescription)
             }
         }
+        print("DIAG[\(startTime)] ContentView.connect: calling nostrNetwork.connect...")
         await damus_state.nostrNetwork.connect()
+        print("DIAG[\(startTime)] ContentView.connect: nostrNetwork.connect completed")
         // TODO: Move this to a better spot. Not sure what is the best signal to listen to for sending initial filters
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: {
+            print("DIAG[\(startTime)] ContentView.connect: calling home.send_initial_filters")
             self.home.send_initial_filters()
+            print("DIAG[\(startTime)] ContentView.connect: home.send_initial_filters completed")
         })
+        let elapsed = CFAbsoluteTimeGetCurrent() - startTime
+        print("DIAG[\(startTime)] ContentView.connect: DONE (elapsed: \(String(format: "%.2f", elapsed))s)")
     }
 
     func music_changed(_ state: MusicState) {
@@ -897,10 +997,11 @@ struct LastNotification {
     let created_at: Int64
 }
 
-func get_last_event(_ timeline: Timeline) -> LastNotification? {
-    let str = timeline.rawValue
-    let last = UserDefaults.standard.string(forKey: "last_\(str)")
-    let last_created = UserDefaults.standard.string(forKey: "last_\(str)_time")
+func get_last_event(_ timeline: Timeline, pubkey: Pubkey) -> LastNotification? {
+    let id_key = pk_setting_key(pubkey, key: "last_\(timeline.rawValue)")
+    let time_key = pk_setting_key(pubkey, key: "last_\(timeline.rawValue)_time")
+    let last = UserDefaults.standard.string(forKey: id_key)
+    let last_created = UserDefaults.standard.string(forKey: time_key)
         .flatMap { Int64($0) }
 
     guard let last,
@@ -913,16 +1014,18 @@ func get_last_event(_ timeline: Timeline) -> LastNotification? {
     return LastNotification(id: note_id, created_at: last_created)
 }
 
-func save_last_event(_ ev: NostrEvent, timeline: Timeline) {
-    let str = timeline.rawValue
-    UserDefaults.standard.set(ev.id.hex(), forKey: "last_\(str)")
-    UserDefaults.standard.set(String(ev.created_at), forKey: "last_\(str)_time")
+func save_last_event(_ ev: NostrEvent, timeline: Timeline, pubkey: Pubkey) {
+    let id_key = pk_setting_key(pubkey, key: "last_\(timeline.rawValue)")
+    let time_key = pk_setting_key(pubkey, key: "last_\(timeline.rawValue)_time")
+    UserDefaults.standard.set(ev.id.hex(), forKey: id_key)
+    UserDefaults.standard.set(String(ev.created_at), forKey: time_key)
 }
 
-func save_last_event(_ ev_id: NoteId, created_at: UInt32, timeline: Timeline) {
-    let str = timeline.rawValue
-    UserDefaults.standard.set(ev_id.hex(), forKey: "last_\(str)")
-    UserDefaults.standard.set(String(created_at), forKey: "last_\(str)_time")
+func save_last_event(_ ev_id: NoteId, created_at: UInt32, timeline: Timeline, pubkey: Pubkey) {
+    let id_key = pk_setting_key(pubkey, key: "last_\(timeline.rawValue)")
+    let time_key = pk_setting_key(pubkey, key: "last_\(timeline.rawValue)_time")
+    UserDefaults.standard.set(ev_id.hex(), forKey: id_key)
+    UserDefaults.standard.set(String(created_at), forKey: time_key)
 }
 
 func update_filters_with_since(last_of_kind: [UInt32: NostrEvent], filters: [NostrFilter]) -> [NostrFilter] {

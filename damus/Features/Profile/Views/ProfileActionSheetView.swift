@@ -19,9 +19,15 @@ struct ProfileActionSheetView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.presentationMode) var presentationMode
-    
+    @State private var showReadOnlyAlert: Bool = false
+    @State private var readOnlyAlertMessage: String = ""
+
     var navigationHandler: (() -> Void)?
-    
+
+    private var isReadOnly: Bool {
+        damus_state.keypair.privkey == nil
+    }
+
     init(damus_state: DamusState, pubkey: Pubkey, onNavigate navigationHandler: (() -> Void)? = nil) {
         self.damus_state = damus_state
         self._profile = StateObject(wrappedValue: ProfileModel(pubkey: pubkey, damus: damus_state))
@@ -55,7 +61,8 @@ struct ProfileActionSheetView: View {
         return ProfileActionSheetFollowButton(
             target: .pubkey(self.profile.pubkey),
             follows_you: self.profile.follows(pubkey: damus_state.pubkey),
-            follow_state: damus_state.contacts.follow_state(profile.pubkey)
+            follow_state: damus_state.contacts.follow_state(profile.pubkey),
+            isReadOnly: isReadOnly
         )
     }
     
@@ -103,7 +110,12 @@ struct ProfileActionSheetView: View {
         return VStack(alignment: .center, spacing: 10) {
             Button(
                 action: {
-                    self.navigate(route: Route.DMChat(dms: dm_model))
+                    if isReadOnly {
+                        readOnlyAlertMessage = NSLocalizedString("Log in with your private key (nsec) to send direct messages.", comment: "Alert message for read-only DM")
+                        showReadOnlyAlert = true
+                    } else {
+                        self.navigate(route: Route.DMChat(dms: dm_model))
+                    }
                 },
                 label: {
                     Image("messages")
@@ -191,21 +203,37 @@ struct ProfileActionSheetView: View {
             sheetHeight = newHeight
         }
         .presentationDetents([.height(sheetHeight)])
+        .alert(
+            NSLocalizedString("Read-Only Account", comment: "Alert title when read-only user tries to perform action"),
+            isPresented: $showReadOnlyAlert
+        ) {
+            Button(NSLocalizedString("OK", comment: "Button to dismiss read-only alert")) {
+                showReadOnlyAlert = false
+            }
+        } message: {
+            Text(readOnlyAlertMessage)
+        }
     }
 }
 
 fileprivate struct ProfileActionSheetFollowButton: View {
     @Environment(\.colorScheme) var colorScheme
-    
+
     let target: FollowTarget
     let follows_you: Bool
     @State var follow_state: FollowState
-    
+    let isReadOnly: Bool
+    @State private var showReadOnlyAlert: Bool = false
+
     var body: some View {
         VStack(alignment: .center, spacing: 10) {
             Button(
                 action: {
-                    follow_state = perform_follow_btn_action(follow_state, target: target)
+                    if isReadOnly {
+                        showReadOnlyAlert = true
+                    } else {
+                        follow_state = perform_follow_btn_action(follow_state, target: target)
+                    }
                 },
                 label: {
                     switch follow_state {
@@ -218,11 +246,11 @@ fileprivate struct ProfileActionSheetFollowButton: View {
                                 .foregroundColor(Color.green)
                                 .profile_button_style(scheme: colorScheme)
                     }
-                    
+
                 }
             )
             .buttonStyle(NeutralButtonShape.circle.style)
-            
+
             Text(verbatim: "\(follow_btn_txt(follow_state, follows_you: follows_you))")
             .foregroundStyle(.secondary)
             .font(.caption)
@@ -238,6 +266,16 @@ fileprivate struct ProfileActionSheetFollowButton: View {
                   pk == target.pubkey else { return }
 
             self.follow_state = .unfollows
+        }
+        .alert(
+            NSLocalizedString("Read-Only Account", comment: "Alert title when read-only user tries to follow"),
+            isPresented: $showReadOnlyAlert
+        ) {
+            Button(NSLocalizedString("OK", comment: "Button to dismiss read-only alert")) {
+                showReadOnlyAlert = false
+            }
+        } message: {
+            Text("Log in with your private key (nsec) to follow users.", comment: "Alert message for read-only follow")
         }
     }
 }

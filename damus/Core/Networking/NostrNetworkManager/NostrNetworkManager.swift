@@ -35,11 +35,17 @@ class NostrNetworkManager {
     let reader: SubscriptionManager
     let profilesManager: ProfilesManager
     
-    init(delegate: Delegate, addNdbToRelayPool: Bool = true) {
+    init(delegate: Delegate, addNdbToRelayPool: Bool = true, generation: UInt64 = 0, currentGenerationProvider: (() -> UInt64)? = nil) {
         self.delegate = delegate
         let pool = RelayPool(ndb: addNdbToRelayPool ? delegate.ndb : nil, keypair: delegate.keypair)
         self.pool = pool
-        let reader = SubscriptionManager(pool: pool, ndb: delegate.ndb, experimentalLocalRelayModelSupport: self.delegate.experimentalLocalRelayModelSupport)
+        let reader = SubscriptionManager(
+            pool: pool,
+            ndb: delegate.ndb,
+            experimentalLocalRelayModelSupport: self.delegate.experimentalLocalRelayModelSupport,
+            generation: generation,
+            currentGenerationProvider: currentGenerationProvider
+        )
         let userRelayList = UserRelayListManager(delegate: delegate, pool: pool, reader: reader)
         self.reader = reader
         self.userRelayList = userRelayList
@@ -51,8 +57,16 @@ class NostrNetworkManager {
     
     /// Connects the app to the Nostr network
     func connect() async {
+        let startTime = CFAbsoluteTimeGetCurrent()
+        print("DIAG[\(startTime)] NostrNetworkManager.connect: START")
+        print("DIAG[\(startTime)] NostrNetworkManager.connect: userRelayList.connect START")
         await self.userRelayList.connect()    // Will load the user's list, apply it, and get RelayPool to connect to it.
+        print("DIAG[\(startTime)] NostrNetworkManager.connect: userRelayList.connect END")
+        print("DIAG[\(startTime)] NostrNetworkManager.connect: profilesManager.load START")
         await self.profilesManager.load()
+        print("DIAG[\(startTime)] NostrNetworkManager.connect: profilesManager.load END")
+        let elapsed = CFAbsoluteTimeGetCurrent() - startTime
+        print("DIAG[\(startTime)] NostrNetworkManager.connect: DONE (elapsed: \(String(format: "%.2f", elapsed))s)")
     }
     
     func disconnectRelays() async {
@@ -70,18 +84,28 @@ class NostrNetworkManager {
     }
     
     func close() async {
+        let startTime = CFAbsoluteTimeGetCurrent()
+        print("DIAG[\(startTime)] NostrNetworkManager.close: START")
         await withTaskGroup { group in
             // Spawn each cancellation task in parallel for faster execution speed
             group.addTask {
+                print("DIAG[\(startTime)] NostrNetworkManager.close: reader.cancelAllTasks START")
                 await self.reader.cancelAllTasks()
+                print("DIAG[\(startTime)] NostrNetworkManager.close: reader.cancelAllTasks END")
             }
             group.addTask {
+                print("DIAG[\(startTime)] NostrNetworkManager.close: profilesManager.stop START")
                 await self.profilesManager.stop()
+                print("DIAG[\(startTime)] NostrNetworkManager.close: profilesManager.stop END")
             }
             // But await on each one to prevent race conditions
             for await value in group { continue }
+            print("DIAG[\(startTime)] NostrNetworkManager.close: pool.close START")
             await pool.close()
+            print("DIAG[\(startTime)] NostrNetworkManager.close: pool.close END")
         }
+        let elapsed = CFAbsoluteTimeGetCurrent() - startTime
+        print("DIAG[\(startTime)] NostrNetworkManager.close: DONE (elapsed: \(String(format: "%.2f", elapsed))s)")
     }
     
     func ping() async {
