@@ -11,13 +11,13 @@ struct LongformView: View {
     let state: DamusState
     let event: LongformEvent
     @ObservedObject var artifacts: NoteArtifactsModel
-    
+
     init(state: DamusState, event: LongformEvent, artifacts: NoteArtifactsModel? = nil) {
         self.state = state
         self.event = event
         self._artifacts = ObservedObject(wrappedValue: artifacts ?? state.events.get_cache_data(event.event.id).artifacts_model)
     }
-    
+
     var options: EventViewOptions {
         return [.wide, .no_mentions, .no_replying_to]
     }

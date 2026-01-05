@@ -361,7 +361,10 @@ struct NoteContentView: View {
         Group {
             switch self.note_artifacts {
             case .longform(let md):
+                // Note: Do NOT apply .fixedSize to longform content - it prevents async images from expanding
                 Markdown(md.markdown)
+                    .markdownImageProvider(.kingfisher(disable_animation: damus_state.settings.disable_animation))
+                    .markdownInlineImageProvider(.kingfisher)
                     .padding([.leading, .trailing, .top])
             case .separated(let separated):
                 if #available(iOS 17.4, macOS 14.4, *) {
@@ -369,12 +372,13 @@ struct NoteContentView: View {
 #if !targetEnvironment(macCatalyst)
                         .translationPresentation(isPresented: $isAppleTranslationPopoverPresented, text: event.get_content(damus_state.keypair))
 #endif
+                        .fixedSize(horizontal: false, vertical: true)
                 } else {
                     MainContent(artifacts: separated)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }
-        .fixedSize(horizontal: false, vertical: true)
     }
 
     var normalizedHighlightTerms: [String] {
