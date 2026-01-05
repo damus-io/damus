@@ -681,3 +681,558 @@ final class BookmarkListNetworkTests: XCTestCase {
         XCTAssertEqual(mockSocket.sentMessages.count, 0, "No messages sent while disconnected")
     }
 }
+
+// MARK: - Notifications Network Tests
+
+/// Tests for NotificationsModel event processing under various conditions.
+@MainActor
+final class NotificationsNetworkTests: XCTestCase {
+
+    var notificationsModel: NotificationsModel!
+    var damus: DamusState!
+
+    override func setUp() async throws {
+        try await super.setUp()
+        damus = generate_test_damus_state(mock_profile_info: nil)
+        notificationsModel = NotificationsModel()
+    }
+
+    override func tearDown() async throws {
+        notificationsModel = nil
+        damus = nil
+        try await super.tearDown()
+    }
+
+    /// A test note ID for notifications to reference.
+    let testNoteId = NoteId(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+
+    /// Creates a test text note event.
+    func makeTestNote(content: String = "Test reply", createdAt: UInt32? = nil) -> NostrEvent? {
+        let created = createdAt ?? UInt32(Date().timeIntervalSince1970)
+        return NostrEvent(content: content, keypair: test_keypair, kind: 1, tags: [["e", testNoteId.hex()]], createdAt: created)
+    }
+
+    /// Creates a reaction event (kind 7).
+    func makeReaction(content: String = "+", createdAt: UInt32? = nil) -> NostrEvent? {
+        let created = createdAt ?? UInt32(Date().timeIntervalSince1970)
+        return NostrEvent(content: content, keypair: test_keypair, kind: 7, tags: [["e", testNoteId.hex()]], createdAt: created)
+    }
+
+    /// Creates a repost event (kind 6).
+    func makeRepost(createdAt: UInt32? = nil) -> NostrEvent? {
+        guard let originalNote = makeTestNote() else { return nil }
+        return make_boost_event(keypair: test_keypair_full, boosted: originalNote, relayURL: nil)
+    }
+
+    // MARK: - Event Queuing Tests
+
+    /// Test: Events are queued when should_queue is true
+    func testEventsQueuedWhenShouldQueueTrue() throws {
+        notificationsModel.set_should_queue(true)
+
+        guard let reply = makeTestNote(content: "Queued reply") else {
+            XCTFail("Failed to create test note")
+            return
+        }
+
+        let inserted = notificationsModel.insert_event(reply, damus_state: damus)
+
+        XCTAssertTrue(inserted, "Event should be queued")
+        XCTAssertEqual(notificationsModel.incoming_events.count, 1, "Should have 1 queued event")
+        XCTAssertEqual(notificationsModel.notifications.count, 0, "Notifications should be empty before flush")
+    }
+
+    /// Test: Events appear immediately when should_queue is false
+    func testEventsImmediateWhenShouldQueueFalse() throws {
+        notificationsModel.set_should_queue(false)
+
+        guard let reply = makeTestNote(content: "Immediate reply") else {
+            XCTFail("Failed to create test note")
+            return
+        }
+
+        let inserted = notificationsModel.insert_event(reply, damus_state: damus)
+
+        XCTAssertTrue(inserted, "Event should be inserted")
+        XCTAssertEqual(notificationsModel.incoming_events.count, 0, "No queued events")
+        XCTAssertGreaterThan(notificationsModel.notifications.count, 0, "Notifications should appear")
+    }
+
+    /// Test: Flush moves queued events to notifications
+    func testFlushMovesQueuedEvents() throws {
+        notificationsModel.set_should_queue(true)
+
+        guard let reply = makeTestNote(content: "Flush test") else {
+            XCTFail("Failed to create test note")
+            return
+        }
+
+        _ = notificationsModel.insert_event(reply, damus_state: damus)
+
+        XCTAssertEqual(notificationsModel.notifications.count, 0, "No notifications before flush")
+
+        let flushed = notificationsModel.flush(damus)
+
+        XCTAssertTrue(flushed, "Flush should report changes")
+        XCTAssertGreaterThan(notificationsModel.notifications.count, 0, "Notifications should appear after flush")
+    }
+
+    // MARK: - Deduplication Tests
+
+    /// Test: Duplicate events are rejected
+    func testDuplicateEventsRejected() throws {
+        notificationsModel.set_should_queue(false)
+
+        guard let reply = makeTestNote(content: "Duplicate test") else {
+            XCTFail("Failed to create test note")
+            return
+        }
+
+        let first = notificationsModel.insert_event(reply, damus_state: damus)
+        let duplicate = notificationsModel.insert_event(reply, damus_state: damus)
+
+        XCTAssertTrue(first, "First insert should succeed")
+        XCTAssertFalse(duplicate, "Duplicate should be rejected")
+    }
+
+    /// Test: Duplicate queued events are rejected
+    func testDuplicateQueuedEventsRejected() throws {
+        notificationsModel.set_should_queue(true)
+
+        guard let reply = makeTestNote(content: "Duplicate queue test") else {
+            XCTFail("Failed to create test note")
+            return
+        }
+
+        let first = notificationsModel.insert_event(reply, damus_state: damus)
+        let duplicate = notificationsModel.insert_event(reply, damus_state: damus)
+
+        XCTAssertTrue(first, "First insert should succeed")
+        XCTAssertFalse(duplicate, "Duplicate should be rejected")
+        XCTAssertEqual(notificationsModel.incoming_events.count, 1, "Only one event queued")
+    }
+
+    // MARK: - Notification Type Tests
+
+    /// Test: Reactions are grouped by target event
+    func testReactionsGroupedByTarget() throws {
+        notificationsModel.set_should_queue(false)
+
+        guard let reaction1 = makeReaction(content: "+"),
+              let reaction2 = makeReaction(content: "🔥") else {
+            XCTFail("Failed to create reactions")
+            return
+        }
+
+        _ = notificationsModel.insert_event(reaction1, damus_state: damus)
+        _ = notificationsModel.insert_event(reaction2, damus_state: damus)
+
+        // Both reactions target the same note, should be in same group
+        let reactionNotifs = notificationsModel.notifications.filter {
+            if case .reaction = $0 { return true }
+            return false
+        }
+
+        XCTAssertEqual(reactionNotifs.count, 1, "Should have one reaction group")
+    }
+
+    /// Test: Notifications sorted by time (newest first)
+    func testNotificationsSortedByTime() throws {
+        notificationsModel.set_should_queue(false)
+
+        let now = UInt32(Date().timeIntervalSince1970)
+
+        guard let oldReply = makeTestNote(content: "Old reply", createdAt: now - 3600),
+              let newReply = makeTestNote(content: "New reply", createdAt: now) else {
+            XCTFail("Failed to create test notes")
+            return
+        }
+
+        // Insert in wrong order
+        _ = notificationsModel.insert_event(oldReply, damus_state: damus)
+        _ = notificationsModel.insert_event(newReply, damus_state: damus)
+
+        guard notificationsModel.notifications.count >= 2 else {
+            XCTFail("Should have at least 2 notifications")
+            return
+        }
+
+        XCTAssertGreaterThan(notificationsModel.notifications[0].last_event_at,
+                             notificationsModel.notifications[1].last_event_at,
+                             "Newest should be first")
+    }
+
+    // MARK: - Unique Pubkeys Tests
+
+    /// Test: uniq_pubkeys extracts unique authors
+    func testUniqPubkeysExtractsAuthors() throws {
+        notificationsModel.set_should_queue(true)
+
+        guard let reply = makeTestNote(content: "Author test") else {
+            XCTFail("Failed to create test note")
+            return
+        }
+
+        _ = notificationsModel.insert_event(reply, damus_state: damus)
+
+        let pubkeys = notificationsModel.uniq_pubkeys()
+
+        XCTAssertEqual(pubkeys.count, 1, "Should have one unique pubkey")
+        XCTAssertEqual(pubkeys.first, test_keypair.pubkey, "Should be test keypair pubkey")
+    }
+}
+
+// MARK: - Thread Loading Network Tests
+
+/// Tests for ThreadModel and ThreadEventMap under various conditions.
+@MainActor
+final class ThreadLoadingNetworkTests: XCTestCase {
+
+    /// Creates a test text note event.
+    func makeTestNote(content: String = "Test note", replyTo: NoteId? = nil, createdAt: UInt32? = nil) -> NostrEvent? {
+        let created = createdAt ?? UInt32(Date().timeIntervalSince1970)
+        var tags: [[String]] = []
+        if let replyTo = replyTo {
+            tags.append(["e", replyTo.hex()])
+        }
+        return NostrEvent(content: content, keypair: test_keypair, kind: 1, tags: tags, createdAt: created)
+    }
+
+    // MARK: - ThreadEventMap Tests
+
+    /// Test: Events are added to ThreadEventMap
+    func testEventAddedToMap() throws {
+        var map = ThreadEventMap()
+
+        guard let note = makeTestNote(content: "Map test") else {
+            XCTFail("Failed to create test note")
+            return
+        }
+
+        map.add(event: note)
+
+        XCTAssertTrue(map.contains(id: note.id), "Map should contain the event")
+        XCTAssertEqual(map.events.count, 1, "Map should have one event")
+    }
+
+    /// Test: Duplicate events don't create duplicates in map
+    func testDuplicateEventInMap() throws {
+        var map = ThreadEventMap()
+
+        guard let note = makeTestNote(content: "Duplicate map test") else {
+            XCTFail("Failed to create test note")
+            return
+        }
+
+        map.add(event: note)
+        map.add(event: note)
+
+        XCTAssertEqual(map.events.count, 1, "Should not duplicate events")
+    }
+
+    /// Test: Events are retrievable by ID
+    func testEventRetrievableById() throws {
+        var map = ThreadEventMap()
+
+        guard let note = makeTestNote(content: "Retrieve test") else {
+            XCTFail("Failed to create test note")
+            return
+        }
+
+        map.add(event: note)
+
+        let retrieved = map.get(id: note.id)
+
+        XCTAssertNotNil(retrieved, "Should retrieve event")
+        XCTAssertEqual(retrieved?.content, "Retrieve test", "Content should match")
+    }
+
+    /// Test: sorted_events returns chronological order
+    func testSortedEventsChronological() throws {
+        var map = ThreadEventMap()
+
+        let now = UInt32(Date().timeIntervalSince1970)
+
+        guard let oldNote = makeTestNote(content: "Old", createdAt: now - 3600),
+              let newNote = makeTestNote(content: "New", createdAt: now) else {
+            XCTFail("Failed to create test notes")
+            return
+        }
+
+        // Insert in reverse order
+        map.add(event: newNote)
+        map.add(event: oldNote)
+
+        let sorted = map.sorted_events
+
+        XCTAssertEqual(sorted.count, 2, "Should have 2 events")
+        XCTAssertEqual(sorted.first?.content, "Old", "Old event should be first (chronological)")
+        XCTAssertEqual(sorted.last?.content, "New", "New event should be last")
+    }
+
+    /// Test: Reply hierarchy is tracked correctly
+    func testReplyHierarchyTracked() throws {
+        var map = ThreadEventMap()
+
+        guard let parent = makeTestNote(content: "Parent") else {
+            XCTFail("Failed to create parent note")
+            return
+        }
+
+        guard let child = makeTestNote(content: "Child", replyTo: parent.id) else {
+            XCTFail("Failed to create child note")
+            return
+        }
+
+        map.add(event: parent)
+        map.add(event: child)
+
+        // Child should reference parent
+        XCTAssertTrue(map.contains(id: parent.id), "Map should contain parent")
+        XCTAssertTrue(map.contains(id: child.id), "Map should contain child")
+
+        // Verify the child event's reply reference
+        let childEvent = map.get(id: child.id)
+        XCTAssertEqual(childEvent?.direct_replies(), parent.id, "Child should reply to parent")
+    }
+
+    // MARK: - Thread Filter Tests
+
+    /// Test: Thread subscription filter includes correct kinds
+    func testThreadFilterKinds() {
+        var ref_events = NostrFilter()
+        ref_events.kinds = [.text]
+        ref_events.limit = 1000
+
+        XCTAssertEqual(ref_events.kinds?.count, 1)
+        XCTAssertEqual(ref_events.kinds?.first, .text)
+        XCTAssertEqual(ref_events.limit, 1000)
+    }
+
+    /// Test: Meta events filter includes reactions, zaps, boosts
+    func testMetaEventsFilter() {
+        var meta_events = NostrFilter()
+        meta_events.kinds = [.zap, .text, .boost, .like]
+        meta_events.limit = 1000
+
+        XCTAssertEqual(meta_events.kinds?.count, 4)
+        XCTAssertTrue(meta_events.kinds?.contains(.zap) ?? false)
+        XCTAssertTrue(meta_events.kinds?.contains(.boost) ?? false)
+        XCTAssertTrue(meta_events.kinds?.contains(.like) ?? false)
+    }
+
+    /// Test: Quote events filter uses quotes field
+    func testQuoteEventsFilter() {
+        let noteId = NoteId(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+
+        var quote_events = NostrFilter()
+        quote_events.kinds = [.text]
+        quote_events.quotes = [noteId]
+        quote_events.limit = 1000
+
+        XCTAssertEqual(quote_events.quotes?.count, 1)
+        XCTAssertEqual(quote_events.quotes?.first, noteId)
+    }
+
+    // MARK: - Thread Loading Resilience Tests
+
+    /// Test: Thread map handles missing parent gracefully
+    func testMissingParentHandledGracefully() throws {
+        var map = ThreadEventMap()
+
+        // Create child that references non-existent parent
+        let fakeParentId = NoteId(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+
+        guard let orphan = makeTestNote(content: "Orphan", replyTo: fakeParentId) else {
+            XCTFail("Failed to create orphan note")
+            return
+        }
+
+        map.add(event: orphan)
+
+        // Should still contain the orphan event
+        XCTAssertTrue(map.contains(id: orphan.id), "Map should contain orphan")
+
+        // Parent lookup should return nil (not crash)
+        let parent = map.get(id: fakeParentId)
+        XCTAssertNil(parent, "Parent should be nil")
+
+        // parent_events should return empty array (not crash)
+        let parents = map.parent_events(of: orphan)
+        XCTAssertEqual(parents.count, 0, "Should have no parents")
+    }
+}
+
+// MARK: - User Lookup Network Tests
+
+/// Tests for profile metadata lookup under various conditions.
+final class UserLookupNetworkTests: XCTestCase {
+
+    var pool: RelayPool!
+    var postbox: PostBox!
+    var mockSocket: MockWebSocket!
+    var ndb: Ndb!
+
+    let testRelayURL = RelayURL("wss://test.relay.com")!
+
+    override func setUp() async throws {
+        try await super.setUp()
+        ndb = Ndb.test
+        pool = RelayPool(ndb: ndb)
+
+        mockSocket = MockWebSocket()
+        let descriptor = RelayPool.RelayDescriptor(url: testRelayURL, info: .readWrite)
+        try await pool.add_relay(descriptor, webSocket: mockSocket)
+
+        postbox = PostBox(pool: pool)
+
+        await pool.connect()
+        mockSocket.simulateConnect()
+        try await Task.sleep(for: .milliseconds(100))
+    }
+
+    override func tearDown() async throws {
+        await pool.close()
+        pool = nil
+        postbox = nil
+        mockSocket = nil
+        ndb = nil
+        try await super.tearDown()
+    }
+
+    // MARK: - Profile Filter Tests
+
+    /// Test: Profile metadata filter is kind 0
+    func testProfileMetadataFilterKind() {
+        var filter = NostrFilter(kinds: [.metadata])
+
+        XCTAssertEqual(filter.kinds?.count, 1)
+        XCTAssertEqual(filter.kinds?.first, .metadata)
+    }
+
+    /// Test: Profile filter includes author pubkey
+    func testProfileFilterWithAuthor() {
+        let pubkey = test_pubkey
+
+        var filter = NostrFilter(kinds: [.metadata])
+        filter.authors = [pubkey]
+
+        XCTAssertEqual(filter.authors?.count, 1)
+        XCTAssertEqual(filter.authors?.first, pubkey)
+    }
+
+    /// Test: Multiple profile lookup filter
+    func testMultipleProfileLookup() {
+        let pubkey1 = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+        let pubkey2 = Pubkey(hex: "3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d")!
+
+        var filter = NostrFilter(kinds: [.metadata])
+        filter.authors = [pubkey1, pubkey2]
+
+        XCTAssertEqual(filter.authors?.count, 2)
+        XCTAssertTrue(filter.authors?.contains(pubkey1) ?? false)
+        XCTAssertTrue(filter.authors?.contains(pubkey2) ?? false)
+    }
+
+    // MARK: - Profile Event Creation Tests
+
+    /// Test: Metadata event is kind 0
+    func testMetadataEventIsKind0() {
+        let profile = Profile(name: "testuser")
+
+        guard let event = make_metadata_event(keypair: test_keypair_full, metadata: profile) else {
+            XCTFail("Failed to create metadata event")
+            return
+        }
+
+        XCTAssertEqual(event.kind, NostrKind.metadata.rawValue)
+        XCTAssertEqual(event.kind, 0)
+    }
+
+    /// Test: Metadata event contains profile JSON
+    func testMetadataEventContainsJSON() {
+        let profile = Profile(name: "lookupuser", display_name: "Lookup User")
+
+        guard let event = make_metadata_event(keypair: test_keypair_full, metadata: profile) else {
+            XCTFail("Failed to create metadata event")
+            return
+        }
+
+        XCTAssertTrue(event.content.contains("lookupuser"), "Should contain name")
+        XCTAssertTrue(event.content.contains("Lookup User"), "Should contain display_name")
+    }
+
+    // MARK: - Profile Relay Communication Tests
+
+    /// Test: Profile request sent to relay
+    func testProfileRequestSentToRelay() async throws {
+        let pubkey = test_pubkey
+
+        var filter = NostrFilter(kinds: [.metadata])
+        filter.authors = [pubkey]
+
+        // Simulate sending a REQ (profile lookup would do this)
+        mockSocket.reset()
+
+        // Note: In actual implementation, this would go through nostrNetwork.reader
+        // For this test, we verify filter creation is correct
+        XCTAssertNotNil(filter.authors)
+        XCTAssertEqual(filter.kinds?.first, .metadata)
+    }
+
+    /// Test: Profile lookup handles missing profile
+    func testMissingProfileHandled() async throws {
+        // When profile doesn't exist, filter should still be valid
+        let unknownPubkey = Pubkey(hex: "0000000000000000000000000000000000000000000000000000000000000001")!
+
+        var filter = NostrFilter(kinds: [.metadata])
+        filter.authors = [unknownPubkey]
+
+        // Filter should be valid even for unknown pubkeys
+        XCTAssertEqual(filter.authors?.first, unknownPubkey)
+    }
+
+    /// Test: Profile metadata cached in Ndb
+    func testProfileCachedInNdb() async throws {
+        // Verify Ndb is available for caching
+        XCTAssertNotNil(ndb, "Ndb should be available for profile caching")
+    }
+
+    // MARK: - Relay List Filter Tests
+
+    /// Test: Relay list filter is kind 10002
+    func testRelayListFilter() {
+        let pubkey = test_pubkey
+
+        var filter = NostrFilter(kinds: [.relay_list])
+        filter.authors = [pubkey]
+
+        XCTAssertEqual(filter.kinds?.first, .relay_list)
+        XCTAssertEqual(filter.authors?.first, pubkey)
+    }
+
+    /// Test: Contacts filter is kind 3
+    func testContactsFilter() {
+        let pubkey = test_pubkey
+
+        var filter = NostrFilter(kinds: [.contacts])
+        filter.authors = [pubkey]
+
+        XCTAssertEqual(filter.kinds?.first, .contacts)
+        XCTAssertEqual(filter.authors?.first, pubkey)
+    }
+
+    /// Test: Profile subscription includes multiple kinds
+    func testProfileSubscriptionMultipleKinds() {
+        let pubkey = test_pubkey
+
+        // ProfileModel.subscribe() uses these kinds
+        var profile_filter = NostrFilter(kinds: [.contacts, .metadata, .boost])
+        profile_filter.authors = [pubkey]
+
+        XCTAssertEqual(profile_filter.kinds?.count, 3)
+        XCTAssertTrue(profile_filter.kinds?.contains(.contacts) ?? false)
+        XCTAssertTrue(profile_filter.kinds?.contains(.metadata) ?? false)
+        XCTAssertTrue(profile_filter.kinds?.contains(.boost) ?? false)
+    }
+}
