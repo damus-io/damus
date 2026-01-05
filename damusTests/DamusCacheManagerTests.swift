@@ -23,6 +23,7 @@ final class DamusCacheManagerTests: XCTestCase {
     }
     
     /// Simple smoke test to check if clearing cache will crash the system
+    @MainActor
     func testCacheManagerSmoke() throws {
         for _ in Range(0...20) {
             DamusCacheManager.shared.clear_cache(damus_state: test_damus_state)

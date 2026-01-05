@@ -23,6 +23,7 @@ final class ContactCardManagerTests: XCTestCase {
         XCTAssertFalse(result)
     }
     
+    @MainActor
     func testIsFavorite_WhenPubkeyExists_ReturnsTrue() {
         // Given: A pubkey added to favorites
         let sut = ContactCardManager()
@@ -36,6 +37,7 @@ final class ContactCardManagerTests: XCTestCase {
         XCTAssertTrue(result)
     }
     
+    @MainActor
     func testIsFavorite_WhenPubkeyDoesNotExist_ReturnsFalse() {
         // Given: A different pubkey added to favorites
         let sut = ContactCardManager()
@@ -50,6 +52,7 @@ final class ContactCardManagerTests: XCTestCase {
         XCTAssertFalse(result)
     }
 
+    @MainActor
     func testToggleFavorite_WhenNotFavorite_AddsToFavorites() {
         // Given: A pubkey not in favorites
         let sut = ContactCardManager()
@@ -64,6 +67,7 @@ final class ContactCardManagerTests: XCTestCase {
         XCTAssertEqual(sut.favorites.count, 1)
     }
     
+    @MainActor
     func testToggleFavorite_WhenAlreadyFavorite_RemovesFromFavorites() {
         // Given: A pubkey already in favorites
         let sut = ContactCardManager()
@@ -105,6 +109,7 @@ final class ContactCardManagerTests: XCTestCase {
         XCTAssertTrue(sut.isFavorite(targetPubkey))
     }
 
+    @MainActor
     func testloadEvent_WithContactCard_RemovesFromFavorites() {
         // Given: A contact card event without favorite tag (unfavorite)
         let sut = ContactCardManager()
@@ -219,6 +224,7 @@ final class ContactCardManagerTests: XCTestCase {
         XCTAssertTrue(sut.isFavorite(targetPubkey))
     }
 
+    @MainActor
     func testFilter_WithFavoritePubkey_ReturnsTrue() {
         // Given: A pubkey in favorites
         let sut = ContactCardManager()

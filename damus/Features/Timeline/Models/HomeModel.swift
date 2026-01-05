@@ -26,6 +26,7 @@ enum HomeResubFilter {
         return nil
     }
 
+    @MainActor
     func filter(contacts: Contacts, ev: NostrEvent) -> Bool {
         switch self {
         case .pubkey(let pk):
@@ -340,7 +341,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
             
             // since command results are not returned for ephemeral events,
             // remove the request from the postbox which is likely failing over and over
-            if damus_state.nostrNetwork.postbox.remove_relayer(relay_id: nwc.relay, event_id: resp.req_id) {
+            if await damus_state.nostrNetwork.postbox.remove_relayer(relay_id: nwc.relay, event_id: resp.req_id) {
                 Log.debug("HomeModel: got NWC response, removed %s from the postbox", for: .nwc, resp.req_id.hex())
             } else {
                 Log.debug("HomeModel: got NWC response, %s not found in the postbox, nothing to remove", for: .nwc, resp.req_id.hex())
@@ -925,6 +926,7 @@ func update_signal_from_pool(signal: SignalModel, pool: RelayPool) async {
     }
 }
 
+@MainActor
 func add_contact_if_friend(contacts: Contacts, ev: NostrEvent) {
     if !contacts.is_friend(ev.pubkey) {
         return
@@ -933,6 +935,7 @@ func add_contact_if_friend(contacts: Contacts, ev: NostrEvent) {
     contacts.add_friend_contact(ev)
 }
 
+@MainActor
 func load_our_contacts(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
     let contacts = state.contacts
     let new_refs = Set<FollowRef>(ev.referenced_follows)
@@ -1043,6 +1046,7 @@ func robohash(_ pk: Pubkey) -> String {
     return "https://robohash.org/" + pk.hex()
 }
 
+@MainActor
 func load_our_stuff(state: DamusState, ev: NostrEvent) {
     guard ev.pubkey == state.pubkey else {
         return
@@ -1061,6 +1065,7 @@ func load_our_stuff(state: DamusState, ev: NostrEvent) {
     load_our_contacts(state: state, m_old_ev: m_old_ev, ev: ev)
 }
 
+@MainActor
 func process_contact_event(state: DamusState, ev: NostrEvent) {
     load_our_stuff(state: state, ev: ev)
     add_contact_if_friend(contacts: state.contacts, ev: ev)

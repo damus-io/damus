@@ -36,7 +36,7 @@ func should_display_notification(state: HeadlessDamusState, event ev: NostrEvent
     }
 
     if state.settings.notification_only_from_following,
-       state.contacts.follow_state(ev.pubkey) != .follows
+       await state.contacts.follow_state(ev.pubkey) != .follows
         {
         return false
     }

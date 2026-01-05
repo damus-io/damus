@@ -10,6 +10,7 @@ import XCTest
 @testable import damus
 
 final class MutingTests: XCTestCase {
+    @MainActor
     func testWordMuting() async {
         // Setup some test data
         let test_note = NostrEvent(

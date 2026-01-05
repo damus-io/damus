@@ -44,30 +44,29 @@ class NotificationService: UNNotificationServiceExtension {
         // Log that we got a push notification
         Log.debug("Got nostr event push notification from pubkey %s", for: .push_notifications, nostr_event.pubkey.hex())
         
-        guard let state = NotificationExtensionState() else {
-            Log.debug("Failed to open nostrdb", for: .push_notifications)
+        Task {
+            guard let state = await NotificationExtensionState() else {
+                Log.debug("Failed to open nostrdb", for: .push_notifications)
 
-            // Something failed to initialize so let's go for the next best thing
-            guard let improved_content = NotificationFormatter.shared.format_message(event: nostr_event) else {
-                // We cannot format this nostr event. Suppress notification.
-                contentHandler(UNNotificationContent())
+                // Something failed to initialize so let's go for the next best thing
+                guard let improved_content = NotificationFormatter.shared.format_message(event: nostr_event) else {
+                    // We cannot format this nostr event. Suppress notification.
+                    contentHandler(UNNotificationContent())
+                    return
+                }
+                contentHandler(improved_content)
                 return
             }
-            contentHandler(improved_content)
-            return
-        }
 
-        let sender_profile = {
-            let profile = try? state.profiles.lookup(id: nostr_event.pubkey)
-            let picture = ((profile?.picture.map { URL(string: $0) }) ?? URL(string: robohash(nostr_event.pubkey)))!
-            return ProfileBuf(picture: picture,
-                                 name: profile?.name,
-                         display_name: profile?.display_name,
-                                nip05: profile?.nip05)
-        }()
-        let sender_pubkey = nostr_event.pubkey
-        
-        Task {
+            let sender_profile = {
+                let profile = try? state.profiles.lookup(id: nostr_event.pubkey)
+                let picture = ((profile?.picture.map { URL(string: $0) }) ?? URL(string: robohash(nostr_event.pubkey)))!
+                return ProfileBuf(picture: picture,
+                                     name: profile?.name,
+                             display_name: profile?.display_name,
+                                    nip05: profile?.nip05)
+            }()
+            let sender_pubkey = nostr_event.pubkey
 
             // Don't show notification details that match mute list.
             // TODO: Remove this code block once we get notification suppression entitlement from Apple. It will be covered by the `guard should_display_notification` block

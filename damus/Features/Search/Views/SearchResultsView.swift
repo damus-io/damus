@@ -206,7 +206,7 @@ struct SearchResultsView_Previews: PreviewProvider {
 }
  */
 
-
+@MainActor
 func search_for_string(profiles: Profiles, contacts: Contacts, search new: String) -> Search? {
     guard new.count != 0 else {
         return nil
@@ -267,6 +267,7 @@ func make_hashtagable(_ str: String) -> String {
     return String(new.filter{$0 != " "})
 }
 
+@MainActor
 func search_profiles(profiles: Profiles, contacts: Contacts, search: String) -> [Pubkey] {
     // Search by hex pubkey.
     if let pubkey = hex_decode_pubkey(search),

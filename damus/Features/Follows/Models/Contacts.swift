@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 class Contacts {
     private var friends: Set<Pubkey> = Set()
     private var friend_of_friends: Set<Pubkey> = Set()

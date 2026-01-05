@@ -33,6 +33,7 @@ class NotificationFilter: ObservableObject, Equatable {
         self.hellthread_notification_max_pubkeys = hellthread_notification_max_pubkeys
     }
     
+    @MainActor
     func filter(contacts: Contacts, items: [NotificationItem]) -> [NotificationItem] {
         
         return items.reduce(into: []) { acc, item in
@@ -214,6 +215,7 @@ struct NotificationsView_Previews: PreviewProvider {
     }
 }
 
+@MainActor
 func would_filter_non_friends_from_notifications(contacts: Contacts, state: NotificationFilterState, items: [NotificationItem]) -> Bool {
     for item in items {
         // this is only valid depending on which tab we're looking at

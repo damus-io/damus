@@ -136,6 +136,7 @@ class ProfileModel: ObservableObject, Equatable {
         conversationListener = nil
     }
     
+    @MainActor
     func handle_profile_contact_event(_ ev: NostrEvent) {
         process_contact_event(state: damus, ev: ev)
         

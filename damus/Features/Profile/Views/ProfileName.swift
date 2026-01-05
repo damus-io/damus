@@ -20,6 +20,7 @@ enum FriendType {
     }
 }
 
+@MainActor
 func get_friend_type(contacts: Contacts, pubkey: Pubkey) -> FriendType? {
     if contacts.is_friend_or_self(pubkey) {
         return .friend

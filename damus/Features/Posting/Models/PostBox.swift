@@ -53,7 +53,7 @@ enum CancelSendErr {
     case too_late
 }
 
-class PostBox {
+actor PostBox {
     private let pool: RelayPool
     var events: [NoteId: PostedEvent]
 
@@ -65,7 +65,7 @@ class PostBox {
                 Task { await self.pool.register_handler(sub_id: "postbox", filters: nil, to: nil, handler: streamContinuation) }
             }
             for await (relayUrl, connectionEvent) in stream {
-                handle_event(relay_id: relayUrl, connectionEvent)
+                await handle_event(relay_id: relayUrl, connectionEvent)
             }
         }
     }
