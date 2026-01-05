@@ -10,6 +10,7 @@ import XCTest
 
 final class RepostedTests: XCTestCase {
 
+    @MainActor
     func testPeopleRepostedText() throws {
         let enUsLocale = Locale(identifier: "en-US")
         let damusState = test_damus_state

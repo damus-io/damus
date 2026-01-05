@@ -141,6 +141,7 @@ func get_profile_url(picture: String?, pubkey: Pubkey, profiles: Profiles) -> UR
     return URL(string: robohash(pubkey))!
 }
 
+@MainActor
 func make_preview_profiles(_ pubkey: Pubkey) -> Profiles {
     let profiles = Profiles(ndb: test_damus_state.ndb)
     //let picture = "http://cdn.jb55.com/img/red-me.jpg"

@@ -94,8 +94,9 @@ final class WalletConnectTests: XCTestCase {
         XCTAssertEqual(pool.all_descriptors.count, 1)
         XCTAssertEqual(pool.all_descriptors[0].variant, .nwc)
         XCTAssertEqual(pool.all_descriptors[0].url.url.absoluteString, "ws://127.0.0.1")
-        XCTAssertEqual(box.events.count, 1)
-        let ev = box.events.first!.value
+        let boxEventCount = await box.events.count
+        XCTAssertEqual(boxEventCount, 1)
+        let ev = await box.events.first!.value
         XCTAssertEqual(ev.skip_ephemeral, false)
         XCTAssertEqual(ev.remaining.count, 1)
         XCTAssertEqual(ev.remaining[0].relay.url.absoluteString, "ws://127.0.0.1")

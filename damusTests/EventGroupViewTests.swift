@@ -18,6 +18,7 @@ final class EventGroupViewTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
+    @MainActor
     func testEventAuthorName() {
         let damusState = test_damus_state
         let damus_name = "17ldvg64:nq5mhr77"
@@ -26,6 +27,7 @@ final class EventGroupViewTests: XCTestCase {
         XCTAssertEqual(event_author_name(profiles: damusState.profiles, pubkey: ANON_PUBKEY), "Anonymous")
     }
 
+    @MainActor
     func testEventGroupUniquePubkeys() {
         let damusState = test_damus_state
 
@@ -48,6 +50,7 @@ final class EventGroupViewTests: XCTestCase {
         XCTAssertEqual(event_group_unique_pubkeys(profiles: damusState.profiles, group: .repost(EventGroup(events: [repost1, repost2, repost3]))), [pk1, pk2, pk3])
     }
 
+    @MainActor
     func testReactingToText() throws {
         let enUsLocale = Locale(identifier: "en-US")
         let damusState = test_damus_state

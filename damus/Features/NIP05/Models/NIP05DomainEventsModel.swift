@@ -46,7 +46,7 @@ class NIP05DomainEventsModel: ObservableObject {
         filter.kinds = [.text, .longform, .highlight]
 
         var authors = Set<Pubkey>()
-        for pubkey in state.contacts.get_friend_of_friends_list() {
+        for pubkey in await state.contacts.get_friend_of_friends_list() {
             guard let profile = try? state.profiles.lookup(id: pubkey),
                   let nip05_str = profile.nip05,
                   let nip05 = NIP05.parse(nip05_str),

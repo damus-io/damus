@@ -1015,6 +1015,7 @@ func timeline_name(_ timeline: Timeline?) -> String {
 }
 
 @discardableResult
+@MainActor
 func handle_unfollow(state: DamusState, unfollow: FollowRef) async -> Bool {
     guard let keypair = state.keypair.to_full() else {
         return false
@@ -1043,6 +1044,7 @@ func handle_unfollow(state: DamusState, unfollow: FollowRef) async -> Bool {
 }
 
 @discardableResult
+@MainActor
 func handle_follow(state: DamusState, follow: FollowRef) async -> Bool {
     guard let keypair = state.keypair.to_full() else {
         return false
@@ -1071,9 +1073,9 @@ func handle_follow(state: DamusState, follow: FollowRef) async -> Bool {
 func handle_follow_notif(state: DamusState, target: FollowTarget) async -> Bool {
     switch target {
     case .pubkey(let pk):
-        state.contacts.add_friend_pubkey(pk)
+        await state.contacts.add_friend_pubkey(pk)
     case .contact(let ev):
-        state.contacts.add_friend_contact(ev)
+        await state.contacts.add_friend_contact(ev)
     }
 
     return await handle_follow(state: state, follow: target.follow_ref)

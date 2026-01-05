@@ -70,7 +70,7 @@ struct NoteZapButton: View {
         return Color.orange
     }
     
-    func tap() {
+    func tap() async {
         guard let our_zap else {
             Task { await send_zap(damus_state: damus_state, target: target, lnurl: lnurl, is_custom: false, comment: nil, amount_sats: nil, zap_type: damus_state.settings.default_zap_type) }
             return
@@ -84,7 +84,7 @@ struct NoteZapButton: View {
             print("cancel_zap: we already have a real zap, can't cancel")
             break
         case .pending(let pzap):
-            guard let res = cancel_zap(zap: pzap, box: damus_state.nostrNetwork.postbox, zapcache: damus_state.zaps, evcache: damus_state.events) else {
+            guard let res = await cancel_zap(zap: pzap, box: damus_state.nostrNetwork.postbox, zapcache: damus_state.zaps, evcache: damus_state.events) else {
                 
                 UIImpactFeedbackGenerator(style: .soft).impactOccurred()
                 return
@@ -146,7 +146,7 @@ struct NoteZapButton: View {
         .highPriorityGesture(TapGesture().onEnded {
             guard !damus_state.settings.nozaps else { return }
             
-            tap()
+            Task { await tap() }
         })
     }
 }
@@ -276,7 +276,7 @@ enum CancelZapErr {
     case not_nwc
 }
 
-func cancel_zap(zap: PendingZap, box: PostBox, zapcache: Zaps, evcache: EventCache) -> CancelZapErr? {
+func cancel_zap(zap: PendingZap, box: PostBox, zapcache: Zaps, evcache: EventCache) async -> CancelZapErr? {
     guard case .nwc(let nwc_state) = zap.state else {
         return .not_nwc
     }
@@ -298,7 +298,7 @@ func cancel_zap(zap: PendingZap, box: PostBox, zapcache: Zaps, evcache: EventCac
         return .already_confirmed
         
     case .postbox_pending(let nwc_req):
-        if let err = box.cancel_send(evid: nwc_req.id) {
+        if let err = await box.cancel_send(evid: nwc_req.id) {
             return .send_err(err)
         }
         let reqid = ZapRequestId(from_pending: zap)

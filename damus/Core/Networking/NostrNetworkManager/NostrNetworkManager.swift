@@ -191,6 +191,7 @@ extension NostrNetworkManager {
         /// The latest contact list `NostrEvent`
         ///
         /// Note: Read-only access, because `NostrNetworkManager` does not manage contact lists.
+        @MainActor
         var latestContactListEvent: NostrEvent? { get }
         
         /// Default bootstrap relays to start with when a user relay list is not present

@@ -58,6 +58,7 @@ struct EventView: View {
 }
 
 // blame the porn bots for this code
+@MainActor
 func should_blur_images(settings: UserSettingsStore, contacts: Contacts, ev: NostrEvent, our_pubkey: Pubkey, booster_pubkey: Pubkey? = nil) -> Bool {
     if settings.undistractMode {
         return true
@@ -80,6 +81,7 @@ func should_blur_images(settings: UserSettingsStore, contacts: Contacts, ev: Nos
 }
 
 // blame the porn bots for this code too
+@MainActor
 func should_blur_images(damus_state: DamusState, ev: NostrEvent) -> Bool {
     return should_blur_images(
         settings: damus_state.settings,

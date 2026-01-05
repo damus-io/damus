@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 struct NotificationExtensionState: HeadlessDamusState {
     let ndb: Ndb
     let settings: UserSettingsStore

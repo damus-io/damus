@@ -177,6 +177,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
         }
     }
 
+    @MainActor
     static var empty: DamusState {
         let empty_pub: Pubkey = .empty
         let empty_sec: Privkey = .empty
@@ -226,6 +227,7 @@ fileprivate extension DamusState {
             set { self.settings.latestRelayListEventIdHex = newValue }
         }
         
+        @MainActor
         var latestContactListEvent: NostrEvent? { self.contacts.event }
         var bootstrapRelays: [RelayURL] { get_default_bootstrap_relays() }
         var developerMode: Bool { self.settings.developer_mode }

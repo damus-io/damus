@@ -30,6 +30,7 @@ extension NostrNetworkManager {
         
         // MARK: - Computing the relays to connect to
         
+        @MainActor
         private func relaysToConnectTo() -> [RelayPool.RelayDescriptor] {
             return self.computeRelaysToConnectTo(with: self.getBestEffortRelayList())
         }
@@ -49,6 +50,7 @@ extension NostrNetworkManager {
         /// It attempts to get a relay list from the user. If one is not available, it uses the default bootstrap list.
         ///
         /// This is always guaranteed to return a relay list.
+        @MainActor
         func getBestEffortRelayList() -> NIP65.RelayList {
             guard let userCurrentRelayList = self.getUserCurrentRelayList() else {
                 return NIP65.RelayList(relays: delegate.bootstrapRelays)
@@ -59,6 +61,7 @@ extension NostrNetworkManager {
         /// Gets the user's current relay list.
         ///
         /// It attempts to get a NIP-65 relay list from the local database, or falls back to a legacy list.
+        @MainActor
         func getUserCurrentRelayList() -> NIP65.RelayList? {
             if let latestRelayListEvent = try? self.getLatestNIP65RelayList() { return latestRelayListEvent }
             if let latestRelayListEvent = try? self.getLatestKind3RelayList() { return latestRelayListEvent }
@@ -93,6 +96,7 @@ extension NostrNetworkManager {
         /// Gets the latest `kind:3` relay list from NostrDB.
         ///
         /// This is `private` because it is part of internal logic. Callers should use the higher level functions.
+        @MainActor
         private func getLatestKind3RelayList() throws(LoadingError) -> NIP65.RelayList? {
             guard let latestContactListEvent = delegate.latestContactListEvent else { return nil }
             guard let legacyContactList = try? NIP65.RelayList.fromLegacyContactList(latestContactListEvent) else { throw .relayListParseError }
@@ -114,6 +118,7 @@ extension NostrNetworkManager {
         
         /// Gets the creation date of the user's current relay list, with preference to NIP-65 relay lists
         /// - Returns: The current relay list's creation date
+        @MainActor
         private func getUserCurrentRelayListCreationDate() -> UInt32? {
             if let latestNIP65RelayListEvent = self.getLatestNIP65RelayListEvent() { return latestNIP65RelayListEvent.created_at }
             if let latestKind3RelayListEvent = delegate.latestContactListEvent { return latestKind3RelayListEvent.created_at }
@@ -134,7 +139,7 @@ extension NostrNetworkManager {
         func listenAndHandleRelayUpdates() async {
             let filter = NostrFilter(kinds: [.relay_list], authors: [delegate.keypair.pubkey])
             for await noteLender in self.reader.streamIndefinitely(filters: [filter]) {
-                let currentRelayListCreationDate = self.getUserCurrentRelayListCreationDate()
+                let currentRelayListCreationDate = await self.getUserCurrentRelayListCreationDate()
                 guard let note = noteLender.justGetACopy() else { continue }
                 guard note.pubkey == self.delegate.keypair.pubkey else { continue }               // Ensure this new list was ours
                 guard note.created_at > (currentRelayListCreationDate ?? 0) else { continue }     // Ensure this is a newer list
@@ -147,7 +152,7 @@ extension NostrNetworkManager {
         // MARK: - Editing the user's relay list
     
         func upsert(relay: NIP65.RelayList.RelayItem, force: Bool = false, overwriteExisting: Bool = false) async throws(UpdateError) {
-            guard let currentUserRelayList = force ? self.getBestEffortRelayList() : self.getUserCurrentRelayList() else { throw .noInitialRelayList }
+            guard let currentUserRelayList = await force ? self.getBestEffortRelayList() : self.getUserCurrentRelayList() else { throw .noInitialRelayList }
             guard !currentUserRelayList.relays.keys.contains(relay.url) || overwriteExisting else { throw .relayAlreadyExists }
             var newList = currentUserRelayList.relays
             newList[relay.url] = relay
@@ -155,13 +160,13 @@ extension NostrNetworkManager {
         }
     
         func insert(relay: NIP65.RelayList.RelayItem, force: Bool = false) async throws(UpdateError) {
-            guard let currentUserRelayList = force ? self.getBestEffortRelayList() : self.getUserCurrentRelayList() else { throw .noInitialRelayList }
+            guard let currentUserRelayList = await force ? self.getBestEffortRelayList() : self.getUserCurrentRelayList() else { throw .noInitialRelayList }
             guard currentUserRelayList.relays[relay.url] == nil else { throw .relayAlreadyExists }
             try await self.upsert(relay: relay, force: force)
         }
     
         func remove(relayURL: RelayURL, force: Bool = false) async throws(UpdateError) {
-            guard let currentUserRelayList = force ? self.getBestEffortRelayList() : self.getUserCurrentRelayList() else { throw .noInitialRelayList }
+            guard let currentUserRelayList = await force ? self.getBestEffortRelayList() : self.getUserCurrentRelayList() else { throw .noInitialRelayList }
             guard currentUserRelayList.relays.keys.contains(relayURL) || force else { throw .noSuchRelay }
             var newList = currentUserRelayList.relays
             newList[relayURL] = nil

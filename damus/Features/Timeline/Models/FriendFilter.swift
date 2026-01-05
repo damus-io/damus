@@ -23,6 +23,7 @@ enum FriendFilter: String, StringCodable {
         self.rawValue
     }
     
+    @MainActor
     func filter(contacts: Contacts, pubkey: Pubkey) -> Bool {
         switch self {
         case .all:
