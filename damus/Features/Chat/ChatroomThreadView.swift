@@ -30,6 +30,12 @@ struct ChatroomThreadView: View {
     @State private var contentBottomY: CGFloat = 0
     @State private var initialTopY: CGFloat? = nil
 
+    // Focus mode: auto-hide chrome (nav bar + tab bar) during longform reading
+    @State private var chromeHidden: Bool = false
+    @State private var lastScrollY: CGFloat = 0
+    /// Minimum scroll distance before triggering chrome hide/show
+    private let scrollThreshold: CGFloat = 15
+
     private static let untrusted_network_section_id = "untrusted-network-section"
     private static let sticky_header_adjusted_anchor = UnitPoint(x: UnitPoint.top.x, y: 0.2)
 
@@ -60,6 +66,38 @@ struct ChatroomThreadView: View {
 
         let progress = scrolled / maxScroll
         readingProgress = min(max(progress, 0), 1)
+    }
+
+    /// Updates chrome visibility based on scroll direction (longform only).
+    /// Scrolling down hides chrome, scrolling up shows it.
+    private func updateChromeVisibility(newY: CGFloat) {
+        guard isLongformEvent else { return }
+
+        let delta = newY - lastScrollY
+
+        // Only toggle chrome state if scroll exceeds threshold
+        if abs(delta) > scrollThreshold {
+            let shouldHide = delta < 0  // Scrolling down (content moving up)
+
+            if shouldHide != chromeHidden {
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    chromeHidden = shouldHide
+                }
+                notify(.display_tabbar(!shouldHide))
+            }
+        }
+
+        // Always update lastScrollY to prevent stale delta accumulation
+        lastScrollY = newY
+    }
+
+    /// Shows chrome (nav bar + tab bar) - called on tap or when leaving view.
+    private func showChrome() {
+        guard chromeHidden else { return }
+        withAnimation(.easeInOut(duration: 0.25)) {
+            chromeHidden = false
+        }
+        notify(.display_tabbar(true))
     }
 
     func go_to_event(scroller: ScrollViewProxy, note_id: NoteId) {
@@ -151,9 +189,11 @@ struct ChatroomThreadView: View {
                             .onChange(of: geo.frame(in: .global).minY) { newY in
                                 contentTopY = newY
                                 updateReadingProgress()
+                                updateChromeVisibility(newY: newY)
                             }
                             .onAppear {
                                 contentTopY = geo.frame(in: .global).minY
+                                lastScrollY = geo.frame(in: .global).minY
                             }
                     }
                     .frame(height: 1)
@@ -341,6 +381,11 @@ struct ChatroomThreadView: View {
             .onAppear() {
                 thread.subscribe()
                 scroll_to_event(scroller: scroller, id: thread.selected_event.id, delay: 0.1, animate: false)
+                // Ensure chrome is visible when view appears (handles interrupted transitions)
+                if isLongformEvent {
+                    chromeHidden = false
+                    notify(.display_tabbar(true))
+                }
             }
             .onChange(of: thread.selected_event.id) { _ in
                 // Reset reading progress when switching to a different event
@@ -349,7 +394,18 @@ struct ChatroomThreadView: View {
             }
             .onDisappear() {
                 thread.unsubscribe()
+                showChrome()  // Restore chrome when leaving view
             }
+            .navigationBarHidden(chromeHidden && isLongformEvent)
+            // Tap anywhere to show chrome when hidden (doesn't block other gestures)
+            .simultaneousGesture(
+                TapGesture()
+                    .onEnded { _ in
+                        if isLongformEvent && chromeHidden {
+                            showChrome()
+                        }
+                    }
+            )
         }
     }
 }
