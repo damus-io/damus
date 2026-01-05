@@ -22,6 +22,7 @@ struct EventLoaderView<Content: View>: View {
         self.content = content
         let event = damus_state.events.lookup(event_id)
         _event = State(initialValue: event)
+        Log.debug("EventLoaderView init for %s, cache %s", for: .render, event_id.hex(), event != nil ? "HIT" : "MISS")
     }
 
     func unsubscribe() {
@@ -33,17 +34,26 @@ struct EventLoaderView<Content: View>: View {
     func subscribe() {
         self.loadingTask?.cancel()
         self.not_found = false
+        Log.debug("EventLoaderView subscribe started for %s", for: .render, event_id.hex())
         self.loadingTask = Task {
             let filter = NostrFilter(ids: [self.event_id], limit: 1)
             for await lender in damus_state.nostrNetwork.reader.streamExistingEvents(filters: [filter]) {
-                guard !Task.isCancelled else { return }
+                guard !Task.isCancelled else {
+                    Log.debug("EventLoaderView cancelled for %s", for: .render, self.event_id.hex())
+                    return
+                }
                 let foundEvent = lender.justGetACopy()
+                Log.debug("EventLoaderView FOUND event %s", for: .render, self.event_id.hex())
                 await MainActor.run {
                     event = foundEvent
                 }
                 return
             }
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled else {
+                Log.debug("EventLoaderView cancelled (post-stream) for %s", for: .render, self.event_id.hex())
+                return
+            }
+            Log.debug("EventLoaderView NOT FOUND for %s", for: .render, self.event_id.hex())
             await MainActor.run {
                 not_found = true
             }
@@ -67,7 +77,10 @@ struct EventLoaderView<Content: View>: View {
             }
         }
         .onAppear {
-            guard event == nil, !not_found else { return }
+            guard event == nil, !not_found else {
+                Log.debug("EventLoaderView onAppear skipped for %s (event: %s, not_found: %s)", for: .render, event_id.hex(), event != nil ? "YES" : "NO", not_found ? "YES" : "NO")
+                return
+            }
             self.load()
         }
     }
