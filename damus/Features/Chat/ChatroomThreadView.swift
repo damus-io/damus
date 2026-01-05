@@ -391,6 +391,8 @@ struct ChatroomThreadView: View {
                 // Reset reading progress when switching to a different event
                 initialTopY = nil
                 readingProgress = 0
+                // Restore chrome when switching events (user tapped to select)
+                showChrome()
             }
             .onDisappear() {
                 thread.unsubscribe()
