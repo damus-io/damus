@@ -43,8 +43,18 @@ struct EventLoaderView<Content: View>: View {
         self.loadingTask?.cancel()
         self.loadingTask = Task {
             let targetRelays = relayHints.isEmpty ? nil : relayHints
+            #if DEBUG
+            if let targetRelays, !targetRelays.isEmpty {
+                print("[relay-hints] EventLoaderView: Loading event \(event_id.hex().prefix(8))... with \(targetRelays.count) relay hint(s): \(targetRelays.map { $0.absoluteString })")
+            }
+            #endif
             let lender = try? await damus_state.nostrNetwork.reader.lookup(noteId: self.event_id, to: targetRelays)
             lender?.justUseACopy({ event = $0 })
+            #if DEBUG
+            if let targetRelays, !targetRelays.isEmpty {
+                print("[relay-hints] EventLoaderView: Event \(event_id.hex().prefix(8))... loaded: \(event != nil)")
+            }
+            #endif
         }
     }
     

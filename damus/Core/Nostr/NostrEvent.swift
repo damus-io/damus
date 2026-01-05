@@ -865,6 +865,11 @@ func first_eref_mention_with_hints(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -
                 case .note(let noteId):
                     return .loopReturn(NoteMentionWithHints(noteId: noteId, relayHints: [], index: index))
                 case .nevent(let nEvent):
+                    #if DEBUG
+                    if !nEvent.relays.isEmpty {
+                        print("[relay-hints] Inline nevent: Found \(nEvent.relays.count) hint(s) for \(nEvent.noteid.hex().prefix(8))...: \(nEvent.relays.map { $0.absoluteString })")
+                    }
+                    #endif
                     return .loopReturn(NoteMentionWithHints(noteId: nEvent.noteid, relayHints: nEvent.relays, index: index))
                 default:
                     return .loopContinue
@@ -879,10 +884,15 @@ func first_eref_mention_with_hints(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -
         return inlineMention
     }
 
-    // Fall back to q tags (NIP-18 quote reposts)
+    // Fall back to q tags (NIP-10/NIP-18 quote reposts)
     guard let quoteRef = ev.referenced_quote_refs.first else {
         return nil
     }
+    #if DEBUG
+    if !quoteRef.relayHints.isEmpty {
+        print("[relay-hints] Quote: Found q tag with \(quoteRef.relayHints.count) hint(s) for \(quoteRef.note_id.hex().prefix(8))...: \(quoteRef.relayHints.map { $0.absoluteString })")
+    }
+    #endif
     return NoteMentionWithHints(noteId: quoteRef.note_id, relayHints: quoteRef.relayHints, index: nil)
 }
 

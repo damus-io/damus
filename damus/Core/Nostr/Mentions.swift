@@ -156,6 +156,9 @@ struct MentionRef: TagKeys, TagConvertible, Equatable, Hashable {
             if relayHints.isEmpty {
                 return .init(nip19: .note(noteId))
             }
+            #if DEBUG
+            print("[relay-hints] e tag: Found \(relayHints.count) hint(s) for \(noteId.hex().prefix(8))...: \(relayHints.map { $0.absoluteString })")
+            #endif
             return .init(nip19: .nevent(NEvent(noteid: noteId, relays: relayHints)))
         case .a:
             let str = element.string()
