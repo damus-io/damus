@@ -362,10 +362,13 @@ struct NoteContentView: View {
             switch self.note_artifacts {
             case .longform(let md):
                 // Note: Do NOT apply .fixedSize to longform content - it prevents async images from expanding
-                Markdown(md.markdown)
-                    .markdownImageProvider(.kingfisher(disable_animation: damus_state.settings.disable_animation))
-                    .markdownInlineImageProvider(.kingfisher)
-                    .padding([.leading, .trailing, .top])
+                // Limit line length to ~600pt for optimal readability (50-75 chars per line)
+                LongformMarkdownView(
+                    markdown: md.markdown,
+                    disableAnimation: damus_state.settings.disable_animation,
+                    lineHeightMultiplier: damus_state.settings.longform_line_height,
+                    sepiaEnabled: damus_state.settings.longform_sepia_mode
+                )
             case .separated(let separated):
                 if #available(iOS 17.4, macOS 14.4, *) {
                     MainContent(artifacts: separated)

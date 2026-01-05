@@ -60,6 +60,24 @@ class DamusColors {
     static let pink = Color(red: 211/255.0, green: 76/255.0, blue: 217/255.0)
     static let lighterPink = Color(red: 248/255.0, green: 105/255.0, blue: 182/255.0)
     static let lightBackgroundPink = Color(red: 0xF8/255.0, green: 0xE7/255.0, blue: 0xF8/255.0)
+
+    // Sepia mode colors for comfortable longform reading (based on research: 25% lower luminescence reduces eye strain)
+    // Light mode sepia
+    static let sepiaBackgroundLight = Color(red: 0.98, green: 0.95, blue: 0.90)  // #FAF3E6 - warm off-white
+    static let sepiaTextLight = Color(red: 0.35, green: 0.27, blue: 0.20)  // #5A4632 - warm brown
+    // Dark mode sepia (subtle warm tint that blends with dark UI)
+    static let sepiaBackgroundDark = Color(red: 0.08, green: 0.07, blue: 0.06)  // Near-black with subtle warmth
+    static let sepiaTextDark = Color(red: 0.85, green: 0.80, blue: 0.72)  // Warm off-white text
+
+    /// Returns appropriate sepia background for current color scheme.
+    static func sepiaBackground(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark ? sepiaBackgroundDark : sepiaBackgroundLight
+    }
+
+    /// Returns appropriate sepia text color for current color scheme.
+    static func sepiaText(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark ? sepiaTextDark : sepiaTextLight
+    }
 }
 
 func hex_col(r: UInt8, g: UInt8, b: UInt8) -> Color {
