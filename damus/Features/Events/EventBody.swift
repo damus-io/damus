@@ -13,7 +13,9 @@ struct EventBody: View {
     let size: EventViewKind
     let should_blur_img: Bool
     let options: EventViewOptions
-    
+
+    @Environment(\.colorScheme) var colorScheme
+
     init(damus_state: DamusState, event: NostrEvent, size: EventViewKind, should_blur_img: Bool? = nil, options: EventViewOptions) {
         self.damus_state = damus_state
         self.event = event
@@ -29,11 +31,35 @@ struct EventBody: View {
 
     var body: some View {
         if event.known_kind == .longform {
-            LongformPreviewBody(state: damus_state, ev: event, options: options, header: true)
+            let isFullArticle = !options.contains(.truncate_content)
+            let sepiaEnabled = damus_state.settings.longform_sepia_mode
 
-            // truncated longform bodies are just the preview
-            if !options.contains(.truncate_content) {
-                note_content
+            if isFullArticle && sepiaEnabled {
+                // Wrap in single sepia container to eliminate gaps
+                VStack(spacing: 0) {
+                    LongformPreviewBody(
+                        state: damus_state,
+                        ev: event,
+                        options: options,
+                        header: true,
+                        sepiaEnabled: true
+                    )
+                    note_content
+                }
+                .background(DamusColors.sepiaBackground(for: colorScheme))
+            } else {
+                LongformPreviewBody(
+                    state: damus_state,
+                    ev: event,
+                    options: options,
+                    header: true,
+                    sepiaEnabled: false
+                )
+
+                // truncated longform bodies are just the preview
+                if isFullArticle {
+                    note_content
+                }
             }
         } else if event.known_kind == .highlight {
             HighlightBodyView(state: damus_state, ev: event, options: options)

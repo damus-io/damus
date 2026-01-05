@@ -205,7 +205,8 @@ struct ChatroomThreadView: View {
                             ThreadedSwipeViewGroup(scroller: scroller, events: trusted_events)
                         }
                     }
-                    .padding(.top)
+                    // Remove top padding for longform articles with sepia to eliminate gap
+                    .padding(.top, isLongformEvent && damus.settings.longform_sepia_mode ? 0 : nil)
 
                     // MARK: - Children view - outside trusted network
                     if !untrusted_events.isEmpty {
