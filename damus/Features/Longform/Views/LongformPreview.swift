@@ -139,11 +139,11 @@ struct LongformPreviewBody: View {
     var MainContent: some View {
         VStack(alignment: .leading, spacing: 10) {
             if let url = event.image {
-                if (self.options.contains(.no_media)) {
+                if self.options.contains(.no_media) {
                     EmptyView()
-                } else if !blur_images || (!blur_images && !state.settings.media_previews) {
+                } else if !blur_images {
                     titleImage(url: url)
-                } else if blur_images || (blur_images && !state.settings.media_previews) {
+                } else {
                     ZStack {
                         titleImage(url: url)
                         BlurOverlayView(blur_images: $blur_images, artifacts: nil, size: nil, damus_state: nil, parentView: .longFormView)
@@ -200,18 +200,18 @@ struct LongformPreviewBody: View {
     var Main: some View {
         VStack(alignment: .leading, spacing: 10) {
             if let url = event.image {
-                if (self.options.contains(.no_media)) {
+                if self.options.contains(.no_media) {
                     EmptyView()
-                } else if !blur_images || (!blur_images && !state.settings.media_previews) {
+                } else if !blur_images {
                     titleImage(url: url)
-                } else if blur_images || (blur_images && !state.settings.media_previews) {
+                } else {
                     ZStack {
                         titleImage(url: url)
                         BlurOverlayView(blur_images: $blur_images, artifacts: nil, size: nil, damus_state: nil, parentView: .longFormView)
                     }
                 }
             }
-            
+
             Text(event.title ?? NSLocalizedString("Untitled", comment: "Title of longform event if it is untitled."))
                 .font(header ? .title : .headline)
                 .padding(.horizontal, 10)
