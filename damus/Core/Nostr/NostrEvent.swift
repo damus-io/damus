@@ -834,6 +834,44 @@ func first_eref_mention(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> Mention<N
     })
 }
 
+/// Represents a note mention with optional relay hints for fetching.
+struct NoteMentionWithHints {
+    let noteId: NoteId
+    let relayHints: [RelayURL]
+    let index: Int?
+}
+
+/// Finds the first event reference mention in a note's content, preserving relay hints.
+///
+/// Per NIP-19, `nevent` bech32 entities may include relay hints. This function extracts
+/// those hints so they can be used when fetching the referenced event.
+///
+/// - Parameters:
+///   - ndb: The nostrdb instance.
+///   - ev: The event to search.
+///   - keypair: The keypair for decryption if needed.
+/// - Returns: A `NoteMentionWithHints` containing the note ID and relay hints, or nil if not found.
+func first_eref_mention_with_hints(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> NoteMentionWithHints? {
+    return try? NdbBlockGroup.borrowBlockGroup(event: ev, using: ndb, and: keypair, borrow: { blockGroup in
+        return blockGroup.forEachBlock({ index, block in
+            switch block {
+            case .mention(let mention):
+                guard let mentionRef = MentionRef(block: mention) else { return .loopContinue }
+                switch mentionRef.nip19 {
+                case .note(let noteId):
+                    return .loopReturn(NoteMentionWithHints(noteId: noteId, relayHints: [], index: index))
+                case .nevent(let nEvent):
+                    return .loopReturn(NoteMentionWithHints(noteId: nEvent.noteid, relayHints: nEvent.relays, index: index))
+                default:
+                    return .loopContinue
+                }
+            default:
+                return .loopContinue
+            }
+        })
+    })
+}
+
 func separate_invoices(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> [Invoice]? {
     return try? NdbBlockGroup.borrowBlockGroup(event: ev, using: ndb, and: keypair, borrow: { blockGroup in
         let invoiceBlocks: [Invoice] = (try? blockGroup.reduce(initialResult: [Invoice](), { index, invoices, block in
