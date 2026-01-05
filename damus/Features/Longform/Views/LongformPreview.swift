@@ -35,9 +35,16 @@ struct LongformPreviewBody: View {
         self._artifacts = ObservedObject(wrappedValue: state.events.get_cache_data(ev.id).artifacts_model)
     }
 
+    /// Formats word count for display.
     func Words(_ words: Int) -> Text {
         let wordCount = pluralizedString(key: "word_count", count: words)
         return Text(wordCount)
+    }
+
+    /// Formats estimated read time for display.
+    func ReadTime(_ minutes: Int) -> Text {
+        let readTime = pluralizedString(key: "read_time", count: minutes)
+        return Text(readTime)
     }
     
     var truncate: Bool {
@@ -161,8 +168,14 @@ struct LongformPreviewBody: View {
             if case .loaded(let arts) = artifacts.state,
                case .longform(let longform) = arts
             {
-                Words(longform.words).font(.footnote)
-                    .padding([.horizontal, .bottom], 10)
+                HStack(spacing: 8) {
+                    ReadTime(longform.estimatedReadTimeMinutes)
+                    Text("·")
+                    Words(longform.words)
+                }
+                .font(.footnote)
+                .foregroundColor(.gray)
+                .padding([.horizontal, .bottom], 10)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
