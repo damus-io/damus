@@ -28,7 +28,7 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 async function handleNostrRequest(method, params) {
     // Send to native Swift handler via Safari's native messaging
-    const response = await browser.runtime.sendNativeMessage('application.id', {
+    const response = await browser.runtime.sendNativeMessage('damoose', {
         method,
         params
     });
@@ -77,7 +77,7 @@ async function pollForResult(requestId, maxAttempts = 300, intervalMs = 1000) {
         await sleep(intervalMs);
 
         try {
-            const response = await browser.runtime.sendNativeMessage('application.id', {
+            const response = await browser.runtime.sendNativeMessage('damoose', {
                 method: 'checkResult',
                 params: { requestId }
             });
