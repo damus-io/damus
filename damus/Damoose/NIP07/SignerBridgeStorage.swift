@@ -62,6 +62,9 @@ enum SignerBridgeStorage {
             return nil
         }
 
+        // Clean up stale entries before storing new request
+        cleanup()
+
         let requestId = UUID().uuidString
         let request: [String: Any] = [
             "event": eventJson,

@@ -175,9 +175,16 @@ func sha256(_ data: Data) -> Data {
 }
 
 /// Generates random bytes for schnorr signing.
-func randomBytes(count: Int) -> [UInt8] {
+///
+/// - Parameter count: Number of random bytes to generate.
+/// - Returns: Random bytes, or nil if generation failed.
+func randomBytes(count: Int) -> [UInt8]? {
     var bytes = [UInt8](repeating: 0, count: count)
-    _ = SecRandomCopyBytes(kSecRandomDefault, count, &bytes)
+    let status = SecRandomCopyBytes(kSecRandomDefault, count, &bytes)
+    guard status == errSecSuccess else {
+        os_log(.error, "SecRandomCopyBytes failed with status: %d", status)
+        return nil
+    }
     return bytes
 }
 
@@ -210,7 +217,10 @@ func signEventId(privkeyHex: String, eventId: String) -> String? {
         return nil
     }
 
-    var auxRand = randomBytes(count: 64)
+    guard var auxRand = randomBytes(count: 64) else {
+        os_log(.error, "Failed to generate random bytes for signing")
+        return nil
+    }
     var digest = idBytes
 
     guard let signature = try? privateKey.schnorr.signature(message: &digest, auxiliaryRand: &auxRand) else {

@@ -163,38 +163,14 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 
     // MARK: - Shared Storage Bridge
 
-    /// Stores a signing request in shared UserDefaults.
+    /// Stores a signing request using SignerBridgeStorage.
     private func storeRequest(eventJson: String, origin: String) -> String? {
-        guard let defaults = UserDefaults(suiteName: Self.appGroup) else {
-            logger.error("Failed to access app group defaults")
-            return nil
-        }
-
-        let requestId = UUID().uuidString
-        let request: [String: Any] = [
-            "event": eventJson,
-            "origin": origin,
-            "timestamp": Date().timeIntervalSince1970
-        ]
-
-        defaults.set(request, forKey: "signer_request_\(requestId)")
-        defaults.synchronize()
-
-        return requestId
+        SignerBridgeStorage.storeRequest(eventJson: eventJson, origin: origin)
     }
 
-    /// Retrieves a signing result from shared UserDefaults.
+    /// Retrieves a signing result using SignerBridgeStorage.
     private func getResult(requestId: String) -> [String: Any]? {
-        guard let defaults = UserDefaults(suiteName: Self.appGroup),
-              let result = defaults.dictionary(forKey: "signer_result_\(requestId)") else {
-            return nil
-        }
-
-        // Remove after reading (one-time retrieval)
-        defaults.removeObject(forKey: "signer_result_\(requestId)")
-        defaults.synchronize()
-
-        return result
+        SignerBridgeStorage.getResult(requestId: requestId)
     }
 
     // MARK: - URL Building
