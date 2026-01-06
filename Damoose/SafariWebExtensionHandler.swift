@@ -10,19 +10,22 @@ import os.log
 import Foundation
 import Security
 
+/// NIP-07 request types from the Safari extension JavaScript.
 enum DamooseRequest {
     case getPublicKey
     case signEvent(SignEventPayload)
-    case checkResult(String)  // requestId
+    case checkResult(String)
     case getRelays
     case nip04_encrypt(Nip04EncryptPayload)
     case nip04_decrypt(Nip04DecryptPayload)
 }
 
+/// Response types returned to the Safari extension JavaScript.
 enum DamooseResponse {
     case pubkey(String)
     case signedEvent(SignedEvent)
 
+    /// The raw value to send back to JavaScript.
     var val: Any {
         switch self {
         case .pubkey(let string):
@@ -35,6 +38,7 @@ enum DamooseResponse {
 
 
 
+/// Unsigned event payload for signing requests.
 struct SignEventPayload: Codable {
     let created_at: Int
     let kind: Int
@@ -42,6 +46,7 @@ struct SignEventPayload: Codable {
     let content: String
 }
 
+/// Signed nostr event with id, signature, and pubkey.
 struct SignedEvent: Codable {
     let created_at: Int
     let kind: Int
@@ -52,23 +57,21 @@ struct SignedEvent: Codable {
     let pubkey: String
 }
 
+/// Payload for NIP-04 encryption requests.
 struct Nip04EncryptPayload: Codable {
     let pubkey: String
     let plaintext: String
 }
 
+/// Payload for NIP-04 decryption requests.
 struct Nip04DecryptPayload: Codable {
     let pubkey: String
     let ciphertext: String
 }
 
-// You can define similar structs for nip44 encryption/decryption if needed.
-
-// MARK: - Shared Keychain Storage
+// MARK: - Shared Storage Constants
 
 private let damooseAppGroupId = "group.com.damus"
-private let damooseKeychainService = "damus"
-private let damoosePrivkeyAccount = "privkey"
 private let damoosePubkeyDefaultsKey = "pubkey"
 
 /// Reads the stored public key from shared UserDefaults.
@@ -80,30 +83,12 @@ func getStoredPublicKey() -> String? {
     return defaults.string(forKey: damoosePubkeyDefaultsKey)
 }
 
-/// Reads the stored private key from keychain.
-func getStoredPrivateKey() -> String? {
-    let query: [CFString: Any] = [
-        kSecClass: kSecClassGenericPassword,
-        kSecAttrService: damooseKeychainService,
-        kSecAttrAccount: damoosePrivkeyAccount,
-        kSecReturnData: true,
-        kSecMatchLimit: kSecMatchLimitOne
-    ]
-
-    var result: AnyObject?
-    let status = SecItemCopyMatching(query as CFDictionary, &result)
-
-    guard status == errSecSuccess,
-          let data = result as? Data,
-          let hex = String(data: data, encoding: .utf8) else {
-        return nil
-    }
-
-    return hex.trimmingCharacters(in: .whitespaces)
-}
-
 // MARK: - Request Decoding
 
+/// Decodes a message from the Safari extension JavaScript into a typed request.
+///
+/// - Parameter message: Raw message dictionary from the extension.
+/// - Returns: Parsed request, or nil if the message is malformed.
 func decode_damoose_request(_ message: Any) -> DamooseRequest? {
     guard let dict = message as? [String: Any],
           let kind = dict["kind"] as? String,
@@ -152,6 +137,10 @@ func decode_damoose_request(_ message: Any) -> DamooseRequest? {
     return nil
 }
 
+/// Handles a decoded request and returns the appropriate response.
+///
+/// - Parameter req: The decoded request.
+/// - Returns: Response to send back to JavaScript, or nil if no response.
 func handle_request(_ req: DamooseRequest) -> DamooseResponse? {
     switch req {
     case .getPublicKey:
@@ -192,10 +181,6 @@ func handleSignEvent(_ payload: SignEventPayload) -> DamooseResponse? {
         os_log(.error, "Failed to access app group for signing request")
         return nil
     }
-
-    // Convert payload to JSON for storage
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = .withoutEscapingSlashes
 
     let eventDict: [String: Any] = [
         "created_at": payload.created_at,
@@ -292,7 +277,13 @@ func getSignResult(requestId: String) -> DamooseResponse? {
     return .signedEvent(signedEvent)
 }
 
+/// Native message handler for the Damoose NIP-07 Safari extension.
+///
+/// Handles messages from the extension JavaScript via `browser.runtime.sendNativeMessage()`.
+/// Supports getPublicKey, signEvent (delegated), and checkResult for polling.
 class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
+
+    /// Entry point for messages from the Safari extension.
     func beginRequest(with context: NSExtensionContext) {
         let request = context.inputItems.first as? NSExtensionItem
 
