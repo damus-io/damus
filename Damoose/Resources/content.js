@@ -3,6 +3,7 @@ let host_state = {
     requests: {},
     reqids: 0,
     approved: {},
+    iframe: null,  // Reference to popup iframe for origin validation
 }
 
 function setup_nip07() {
@@ -40,6 +41,9 @@ function setup_iframe() {
     // Append the iframe to the body
     document.body.appendChild(iframe);
 
+    // Store reference for origin validation
+    host_state.iframe = iframe;
+
     function show_popup() {
         iframe.style.display = 'block'
     }
@@ -64,21 +68,42 @@ function setup_iframe() {
     });
 
     window.addEventListener('message', async message => {
-        const validEvents = [
-            // window.nostr stuff
+        // NIP-07 events from injected nostr.js (come from window/self)
+        const nip07Events = [
             'getPubKey',
             'signEvent',
             'getRelays',
             'nip04.encrypt',
             'nip04.decrypt',
+        ];
 
-            // plugin stuff
+        // Popup events from the iframe
+        const popupEvents = [
             'popup_initialized',
             'approve',
             'deny',
         ];
+
         let { kind, reqId, payload } = message.data;
-        if (!validEvents.includes(kind)) return;
+
+        // Validate message origin for security
+        if (popupEvents.includes(kind)) {
+            // Popup messages must come from our iframe
+            if (message.source !== iframe.contentWindow) {
+                console.warn('Damoose: Ignoring popup message from unauthorized source');
+                return;
+            }
+        } else if (nip07Events.includes(kind)) {
+            // NIP-07 messages come from the page's window context (nostr.js)
+            // message.source === window for same-origin messages
+            if (message.source !== window) {
+                console.warn('Damoose: Ignoring NIP-07 message from unauthorized source');
+                return;
+            }
+        } else {
+            // Unknown message type
+            return;
+        }
 
         if (kind === 'popup_initialized') {
             if (browser.runtime.lastError)
