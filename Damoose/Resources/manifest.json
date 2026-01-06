@@ -16,8 +16,7 @@
 
     "background": {
         "scripts": [ "background.js" ],
-        "type": "module",
-        "run_at": "document_end"
+        "type": "module"
     },
 
     "content_scripts": [{

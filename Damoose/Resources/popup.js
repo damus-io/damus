@@ -31,34 +31,53 @@ function summarize_requests(rs) {
     return grouped
 }
 
-function render_request_groups(grp) {
-    return Object.keys(grp).map(k => {
-        let num = grp[k].length > 1 ? ` x${grp[k].length}` : ""
-        return `<li>${k}${num}</li>`
-    }).join("\n")
-}
-
 function update_view(host, rs) {
     const reqs = document.getElementById("requests")
     const groups = summarize_requests(rs)
-    const rendered_groups = render_request_groups(groups)
 
-    reqs.innerHTML = `
-    <pre>${host}</pre> is requesting:
-    <ul>
-      ${rendered_groups}
-    </ul>
-    <label>
-      <input type="checkbox" id="remember"> Remember this permission
-    </label>
-    <div style="margin-top: 10px;">
-      <button id="approve">Approve</button>
-      <button id="deny">Deny</button>
-    </div>
-    `
+    // Clear existing content safely
+    reqs.textContent = ''
 
-    document.getElementById("approve").addEventListener("click", approve)
-    document.getElementById("deny").addEventListener("click", deny)
+    // Create elements using DOM APIs to prevent XSS
+    const pre = document.createElement('pre')
+    pre.textContent = host
+    reqs.appendChild(pre)
+
+    reqs.appendChild(document.createTextNode(' is requesting:'))
+
+    const ul = document.createElement('ul')
+    for (const kind of Object.keys(groups)) {
+        const li = document.createElement('li')
+        const num = groups[kind].length > 1 ? ` x${groups[kind].length}` : ''
+        li.textContent = kind + num
+        ul.appendChild(li)
+    }
+    reqs.appendChild(ul)
+
+    const label = document.createElement('label')
+    const checkbox = document.createElement('input')
+    checkbox.type = 'checkbox'
+    checkbox.id = 'remember'
+    label.appendChild(checkbox)
+    label.appendChild(document.createTextNode(' Remember this permission'))
+    reqs.appendChild(label)
+
+    const buttonDiv = document.createElement('div')
+    buttonDiv.style.marginTop = '10px'
+
+    const approveBtn = document.createElement('button')
+    approveBtn.id = 'approve'
+    approveBtn.textContent = 'Approve'
+    approveBtn.addEventListener('click', approve)
+
+    const denyBtn = document.createElement('button')
+    denyBtn.id = 'deny'
+    denyBtn.textContent = 'Deny'
+    denyBtn.addEventListener('click', deny)
+
+    buttonDiv.appendChild(approveBtn)
+    buttonDiv.appendChild(denyBtn)
+    reqs.appendChild(buttonDiv)
 }
 
 function act(msgKind) {
