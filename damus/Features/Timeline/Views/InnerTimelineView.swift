@@ -10,17 +10,14 @@ import SwiftUI
 
 struct InnerTimelineView: View {
     var events: EventHolder
-    @ObservedObject var filteredEvents: EventHolder.FilteredHolder
-    var filteredEventHolderId: UUID
+    @StateObject var filteredEvents: EventHolder.FilteredHolder
     let state: DamusState
 
     init(events: EventHolder, damus: DamusState, filter: @escaping (NostrEvent) -> Bool, apply_mute_rules: Bool = true) {
         self.events = events
         self.state = damus
         let filter = apply_mute_rules ? { filter($0) && !damus.mutelist_manager.is_event_muted($0) } : filter
-        let filteredEvents = EventHolder.FilteredHolder(filter: filter)
-        self.filteredEvents = filteredEvents
-        self.filteredEventHolderId = events.add(filteredHolder: filteredEvents)
+        _filteredEvents = StateObject.init(wrappedValue: EventHolder.FilteredHolder(filter: filter, parent: events))
     }
     
     var event_options: EventViewOptions {
@@ -65,11 +62,6 @@ struct InnerTimelineView: View {
                 }
             }
         }
-        .onDisappear {
-            self.events.removeFilteredHolder(id: self.filteredEventHolderId)
-        }
-        //.padding(.horizontal)
-        
     }
 }
 

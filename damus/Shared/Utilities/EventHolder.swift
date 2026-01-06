@@ -56,16 +56,20 @@ class EventHolder: ObservableObject, ScrollQueue {
         
         has_event.insert(ev.id)
         
+        var changed = false
+        
         if insert_uniq_sorted_event_created(events: &self.events, new_ev: ev) {
-            return true
+            changed = true
         }
-        for (id, filteredView) in self.filteredHolders {
+        
+        for (_, filteredView) in self.filteredHolders {
             filteredView.insert(event: ev)
         }
         
-        return false
+        return changed
     }
     
+    @MainActor
     private func insert_queued(_ ev: NostrEvent) -> Bool {
         if has_event.contains(ev.id) {
             return false
@@ -79,6 +83,7 @@ class EventHolder: ObservableObject, ScrollQueue {
         return true
     }
     
+    @MainActor
     func flush() {
         guard !incoming.isEmpty else {
             return
@@ -89,7 +94,7 @@ class EventHolder: ObservableObject, ScrollQueue {
             if insert_uniq_sorted_event_created(events: &events, new_ev: event) {
                 changed = true
             }
-            for (id, filteredHolder) in self.filteredHolders {
+            for (_, filteredHolder) in self.filteredHolders {
                 filteredHolder.insert(event: event)
             }
         }
@@ -107,7 +112,7 @@ class EventHolder: ObservableObject, ScrollQueue {
     func reset() {
         self.incoming = []
         self.events = []
-        for (id, filteredHolder) in filteredHolders {
+        for (_, filteredHolder) in filteredHolders {
             filteredHolder.update(events: [])
         }
     }
@@ -125,13 +130,26 @@ class EventHolder: ObservableObject, ScrollQueue {
         self.filteredHolders[id] = nil
     }
     
+    @MainActor
     class FilteredHolder: ObservableObject {
         @Published private(set) var events: [NostrEvent]
         let filter: (NostrEvent) -> Bool
+        private var id: UUID?
+        private weak var parent: EventHolder?
         
-        init(filter: @escaping (NostrEvent) -> Bool) {
+        init(filter: @escaping (NostrEvent) -> Bool, parent: EventHolder) {
             self.events = []
             self.filter = filter
+            self.parent = parent
+            self.id = parent.add(filteredHolder: self)
+        }
+        
+        deinit {
+            // Capture for async cleanup
+            guard let id = id, let parent = parent else { return }
+            Task { @MainActor in
+                parent.removeFilteredHolder(id: id)
+            }
         }
         
         func update(events: [NostrEvent]) {
