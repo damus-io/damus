@@ -123,8 +123,7 @@ function setup_iframe() {
 }
 
 
-// signer
-//setup_nip07()
-//setup_iframe()
-setup_highlighter()
+// NIP-07 signer
+setup_nip07()
+setup_iframe()
 
