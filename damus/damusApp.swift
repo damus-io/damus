@@ -77,12 +77,19 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     var state: DamusState? = nil
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        #if DEBUG
+        // Only configure network simulator in main app (not extensions)
+        if !Bundle.main.bundlePath.contains(".appex") {
+            NetworkConditionSimulator.configureFromLaunchArguments()
+        }
+        #endif
+
         UNUserNotificationCenter.current().delegate = self
         SKPaymentQueue.default().add(StoreObserver.standard)
         registerNotificationCategories()
         ImageCacheMigrations.migrateKingfisherCacheIfNeeded()
         configureKingfisherCache()
-        
+
         return true
     }
     

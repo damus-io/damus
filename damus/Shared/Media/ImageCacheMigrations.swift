@@ -23,7 +23,19 @@ struct ImageCacheMigrations {
             return
         }
 
-        let oldCachePath = migration1Done ? migration1KingfisherCachePath() : migration0KingfisherCachePath()
+        // In test environments, app group may not be available - skip migration
+        let oldCachePath: String
+        if migration1Done {
+            guard let path = migration1KingfisherCachePath() else {
+                // App group unavailable (e.g., test environment) - mark as done and skip
+                defaults.set(true, forKey: migration1Key)
+                defaults.set(true, forKey: migration2Key)
+                return
+            }
+            oldCachePath = path
+        } else {
+            oldCachePath = migration0KingfisherCachePath()
+        }
 
         // New shared cache location
         let newCachePath = kingfisherCachePath().path
@@ -58,9 +70,11 @@ struct ImageCacheMigrations {
         return defaultCache.diskStorage.directoryURL.path
     }
     
-    static private func migration1KingfisherCachePath() -> String {
+    static private func migration1KingfisherCachePath() -> String? {
         // Implementation note: These are old, so they are hard-coded on purpose, because we can't change these values from the past.
-        let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.damus")!
+        guard let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.damus") else {
+            return nil
+        }
         return groupURL.appendingPathComponent("ImageCache").path
     }
     
@@ -70,7 +84,12 @@ struct ImageCacheMigrations {
     /// - https://developer.apple.com/documentation/foundation/filemanager/containerurl(forsecurityapplicationgroupidentifier:)#:~:text=The%20system%20creates%20only%20the%20Library/Caches%20subdirectory%20automatically
     /// - https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/FileSystemOverview/FileSystemOverview.html#:~:text=Put%20data%20cache,files%20as%20needed.
     static func kingfisherCachePath() -> URL {
-        let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Constants.DAMUS_APP_GROUP_IDENTIFIER)!
+        // Fall back to temporary directory in test environments where app group is unavailable
+        guard let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Constants.DAMUS_APP_GROUP_IDENTIFIER) else {
+            return FileManager.default.temporaryDirectory
+                .appendingPathComponent("Caches")
+                .appendingPathComponent(Constants.IMAGE_CACHE_DIRNAME)
+        }
         return groupURL
             .appendingPathComponent("Library")
             .appendingPathComponent("Caches")

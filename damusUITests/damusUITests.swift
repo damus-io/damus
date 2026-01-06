@@ -191,6 +191,44 @@ class damusUITests: XCTestCase {
     enum DamusUITestError: Error {
         case timeout_waiting_for_element
     }
+
+    // MARK: - Network Condition Simulator Infrastructure Tests
+
+    /// Verifies app launches correctly with timeout simulation enabled.
+    /// This is infrastructure scaffolding - a full upload timeout test would
+    /// navigate to composer, attach media, and verify error UI.
+    func testAppLaunchesWithTimeoutSimulation() throws {
+        app.launchArguments += ["-SimulateNetworkCondition", "timeout", "-SimulateNetworkPattern", "upload"]
+        app.terminate()
+        app.launch()
+
+        try self.loginIfNotAlready()
+
+        guard app.buttons[AID.main_side_menu_button.rawValue].waitForExistence(timeout: 5) else {
+            throw DamusUITestError.timeout_waiting_for_element
+        }
+
+        XCTAssertTrue(app.buttons[AID.main_side_menu_button.rawValue].exists,
+                      "App should launch successfully with network simulation enabled")
+    }
+
+    /// Verifies app launches correctly with failThenSucceed simulation enabled.
+    /// This is infrastructure scaffolding - a full retry test would attach media
+    /// and verify eventual upload success after simulated failures.
+    func testAppLaunchesWithRetrySimulation() throws {
+        app.launchArguments += ["-SimulateNetworkCondition", "failThenSucceed", "-SimulateNetworkPattern", "upload"]
+        app.terminate()
+        app.launch()
+
+        try self.loginIfNotAlready()
+
+        guard app.buttons[AID.main_side_menu_button.rawValue].waitForExistence(timeout: 5) else {
+            throw DamusUITestError.timeout_waiting_for_element
+        }
+
+        XCTAssertTrue(app.buttons[AID.main_side_menu_button.rawValue].exists,
+                      "App should launch successfully with failThenSucceed simulation")
+    }
 }
 
 extension XCUIElement {

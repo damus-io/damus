@@ -167,6 +167,7 @@ struct PostView: View {
             Image("images")
                 .padding(6)
         })
+        .accessibilityIdentifier(AppAccessibilityIdentifiers.post_composer_attach_media_button.rawValue)
     }
     
     var CameraButton: some View {
@@ -323,6 +324,11 @@ struct PostView: View {
                 if let error {
                     Text(error)
                         .foregroundColor(.red)
+                        .font(.caption)
+                        .lineLimit(3)
+                        .minimumScaleFactor(0.8)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityIdentifier(AppAccessibilityIdentifiers.post_composer_error_message.rawValue)
                 }
 
                 Spacer()
@@ -354,7 +360,7 @@ struct PostView: View {
         switch res {
         case .success(let url):
             guard let url = URL(string: url) else {
-                self.error = "Error uploading image :("
+                self.error = NSLocalizedString("Invalid URL returned from server", comment: "Error when upload returns malformed URL")
                 return false
             }
             let blurhash = await blurhash
@@ -362,13 +368,9 @@ struct PostView: View {
             let uploadedMedia = UploadedMedia(localURL: media.localURL, uploadedURL: url, metadata: meta)
             uploadedMedias.append(uploadedMedia)
             return true
-            
+
         case .failed(let error):
-            if let error {
-                self.error = error.localizedDescription
-            } else {
-                self.error = "Error uploading image :("
-            }
+            self.error = error.userMessage
             return false
         }
     }
@@ -487,7 +489,12 @@ struct PostView: View {
             }
             .background(DamusColors.adaptableWhite.edgesIgnoringSafeArea(.all))
             .sheet(isPresented: $attach_media) {
-                MediaPicker(mediaPickerEntry: .postView, onMediaSelected: { image_upload_confirm = true }) { media in
+                MediaPicker(mediaPickerEntry: .postView, onMediaSelected: { image_upload_confirm = true }, onError: { failedCount in
+                    let message = failedCount == 1
+                        ? NSLocalizedString("Failed to process 1 item", comment: "Error when one media item fails to process")
+                        : String(format: NSLocalizedString("Failed to process %d items", comment: "Error when multiple media items fail to process"), failedCount)
+                    self.error = message
+                }) { media in
                     self.preUploadedMedia.append(media)
                 }
                 .alert(NSLocalizedString("Are you sure you want to upload the selected media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $image_upload_confirm) {

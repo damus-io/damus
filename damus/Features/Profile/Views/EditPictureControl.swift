@@ -83,7 +83,9 @@ struct EditPictureControl: View {
             }))
         }
         .sheet(isPresented: self.model.show_library) {
-            MediaPicker(mediaPickerEntry: .editPictureControl) { media in
+            MediaPicker(mediaPickerEntry: .editPictureControl, onError: { _ in
+                self.model.failed(message: NSLocalizedString("Failed to process the selected image. Please try a different photo.", comment: "Error when image processing fails in picker"))
+            }) { media in
                 self.model.request_upload_authorization(media)
             }
         }
@@ -107,7 +109,21 @@ struct EditPictureControl: View {
             .presentationDragIndicator(.visible)
         }
         .sheet(item: self.model.error_message, onDismiss: { self.model.cancel() }, content: { error in
-            Text(error.rawValue)
+            VStack(spacing: 16) {
+                Text("Upload Failed", comment: "Title for upload error sheet")
+                    .font(.headline)
+                Text(error.rawValue)
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button(NSLocalizedString("OK", comment: "Dismiss button for error sheet")) {
+                    self.model.cancel()
+                }
+                .buttonStyle(.borderedProminent)
+            }
+            .padding()
+            .presentationDetents([.height(200)])
         })
     }
     
@@ -530,12 +546,8 @@ class EditPictureControlViewModel<T: ImageUploadModelProtocol>: ObservableObject
                 self.state = .ready
                 callback(url)
             case .failed(let error):
-                if let error {
-                    Log.info("Error uploading profile image with error: %@", for: .image_uploading, error.localizedDescription)
-                } else {
-                    Log.info("Failed to upload profile image without error", for: .image_uploading)
-                }
-                self.state = .failed(message: NSLocalizedString("Error uploading profile image. Please check your internet connection and try again. If error persists, please contact Damus support (support@damus.io).", comment: "Error label when uploading profile image"))
+                Log.info("Error uploading profile image: %@", for: .image_uploading, error.userMessage)
+                self.state = .failed(message: error.userMessage)
             }
             upload_observer.isLoading = false
         }
