@@ -8,7 +8,8 @@ window.addEventListener('message', message => {
         host = message.data.host
 
     if (kind === 'requests') {
-        requests = Object.assign({}, requests, payload.requests)
+        // payload IS the requests object directly from content.js
+        requests = Object.assign({}, requests, payload)
     } else if (kind === 'request') {
         requests[payload.reqId] = payload
     }
