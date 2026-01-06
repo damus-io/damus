@@ -9,12 +9,13 @@ import SafariServices
 import os.log
 import Foundation
 import Security
+import CommonCrypto
+import secp256k1
 
 /// NIP-07 request types from the Safari extension JavaScript.
 enum DamooseRequest {
     case getPublicKey
     case signEvent(SignEventPayload)
-    case checkResult(String)
     case getRelays
     case nip04_encrypt(Nip04EncryptPayload)
     case nip04_decrypt(Nip04DecryptPayload)
@@ -73,6 +74,8 @@ struct Nip04DecryptPayload: Codable {
 
 private let damooseAppGroupId = "group.com.damus"
 private let damoosePubkeyDefaultsKey = "pubkey"
+private let damooseKeychainService = "damus"
+private let damoosePrivkeyAccount = "privkey"
 
 /// Reads the stored public key from shared UserDefaults.
 func getStoredPublicKey() -> String? {
@@ -81,6 +84,105 @@ func getStoredPublicKey() -> String? {
         return nil
     }
     return defaults.string(forKey: damoosePubkeyDefaultsKey)
+}
+
+/// Reads the stored private key from keychain.
+func getStoredPrivateKey() -> String? {
+    let query: [CFString: Any] = [
+        kSecClass: kSecClassGenericPassword,
+        kSecAttrService: damooseKeychainService,
+        kSecAttrAccount: damoosePrivkeyAccount,
+        kSecReturnData: true,
+        kSecMatchLimit: kSecMatchLimitOne
+    ]
+
+    var result: AnyObject?
+    let status = SecItemCopyMatching(query as CFDictionary, &result)
+
+    guard status == errSecSuccess,
+          let data = result as? Data,
+          let hex = String(data: data, encoding: .utf8) else {
+        return nil
+    }
+
+    return hex.trimmingCharacters(in: .whitespaces)
+}
+
+// MARK: - Crypto Helpers
+
+/// Decodes a hex string to bytes.
+func hexDecode(_ hex: String) -> [UInt8]? {
+    guard hex.count % 2 == 0 else { return nil }
+    var bytes = [UInt8]()
+    var index = hex.startIndex
+    while index < hex.endIndex {
+        let nextIndex = hex.index(index, offsetBy: 2)
+        guard let byte = UInt8(hex[index..<nextIndex], radix: 16) else { return nil }
+        bytes.append(byte)
+        index = nextIndex
+    }
+    return bytes
+}
+
+/// Encodes bytes to a hex string.
+func hexEncode(_ bytes: [UInt8]) -> String {
+    return bytes.map { String(format: "%02x", $0) }.joined()
+}
+
+/// Computes SHA256 hash of data.
+func sha256(_ data: Data) -> Data {
+    var hash = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
+    data.withUnsafeBytes {
+        _ = CC_SHA256($0.baseAddress, CC_LONG(data.count), &hash)
+    }
+    return Data(hash)
+}
+
+/// Generates random bytes for schnorr signing.
+func randomBytes(count: Int) -> [UInt8] {
+    var bytes = [UInt8](repeating: 0, count: count)
+    _ = SecRandomCopyBytes(kSecRandomDefault, count, &bytes)
+    return bytes
+}
+
+/// Computes the nostr event commitment JSON for hashing.
+func eventCommitment(pubkey: String, createdAt: Int, kind: Int, tags: [[String]], content: String) -> String {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = .withoutEscapingSlashes
+    let contentJson = (try? encoder.encode(content)).flatMap { String(data: $0, encoding: .utf8) } ?? "\"\""
+    let tagsJson = (try? encoder.encode(tags)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
+    return "[0,\"\(pubkey)\",\(createdAt),\(kind),\(tagsJson),\(contentJson)]"
+}
+
+/// Computes the nostr event ID (SHA256 of commitment).
+func calculateEventId(pubkey: String, createdAt: Int, kind: Int, tags: [[String]], content: String) -> String {
+    let commitment = eventCommitment(pubkey: pubkey, createdAt: createdAt, kind: kind, tags: tags, content: content)
+    guard let data = commitment.data(using: .utf8) else { return "" }
+    let hash = sha256(data)
+    return hexEncode(Array(hash))
+}
+
+/// Signs an event ID with the private key using schnorr signature.
+func signEventId(privkeyHex: String, eventId: String) -> String? {
+    guard let privkeyBytes = hexDecode(privkeyHex),
+          let idBytes = hexDecode(eventId) else {
+        return nil
+    }
+
+    guard let privateKey = try? secp256k1.Signing.PrivateKey(rawRepresentation: privkeyBytes) else {
+        os_log(.error, "Failed to create private key from bytes")
+        return nil
+    }
+
+    var auxRand = randomBytes(count: 64)
+    var digest = idBytes
+
+    guard let signature = try? privateKey.schnorr.signature(message: &digest, auxiliaryRand: &auxRand) else {
+        os_log(.error, "Failed to create schnorr signature")
+        return nil
+    }
+
+    return hexEncode(Array(signature.rawRepresentation))
 }
 
 // MARK: - Request Decoding
@@ -112,11 +214,6 @@ func decode_damoose_request(_ message: Any) -> DamooseRequest? {
 
     case "getRelays":
         return .getRelays
-
-    case "checkResult":
-        if let requestId = payloadDict["requestId"] as? String {
-            return .checkResult(requestId)
-        }
 
     case "nip04Encrypt", "nip44Encrypt":
         if let pubkey = payloadDict["pubkey"] as? String,
@@ -151,8 +248,6 @@ func handle_request(_ req: DamooseRequest) -> DamooseResponse? {
         return .pubkey(pubkey)
     case .signEvent(let payload):
         return handleSignEvent(payload)
-    case .checkResult(let requestId):
-        return getSignResult(requestId: requestId)
     case .getRelays:
         return nil
     case .nip04_encrypt(_):
@@ -162,118 +257,57 @@ func handle_request(_ req: DamooseRequest) -> DamooseResponse? {
     }
 }
 
-// MARK: - Sign Event Delegation
+// MARK: - Direct Event Signing
 
-/// Uses the same storage key pattern as SignerBridgeStorage for consistency.
-private let signerRequestPrefix = "signer_request_"
-private let signerResultPrefix = "signer_result_"
-
-/// Stores a signing request and returns a response indicating the request needs app processing.
+/// Signs an event directly using the stored private key.
 ///
-/// The flow for signEvent:
-/// 1. This handler stores the request in App Group UserDefaults
-/// 2. Returns a special response with requestId and nostrsigner URL
-/// 3. JS side opens the URL (switches to Damus app)
-/// 4. Damus app signs and stores result
-/// 5. JS polls via checkResult to get the signed event
+/// This performs schnorr signing in the extension without app switching:
+/// 1. Reads private key from keychain
+/// 2. Computes event ID (SHA256 of commitment)
+/// 3. Signs with secp256k1 schnorr
+/// 4. Returns complete signed event
 func handleSignEvent(_ payload: SignEventPayload) -> DamooseResponse? {
-    guard let defaults = UserDefaults(suiteName: damooseAppGroupId) else {
-        os_log(.error, "Failed to access app group for signing request")
+    guard let pubkeyHex = getStoredPublicKey() else {
+        os_log(.error, "No pubkey stored - user not logged in")
         return nil
     }
 
-    let eventDict: [String: Any] = [
-        "created_at": payload.created_at,
-        "kind": payload.kind,
-        "tags": payload.tags,
-        "content": payload.content
-    ]
-
-    guard let eventData = try? JSONSerialization.data(withJSONObject: eventDict),
-          let eventJson = String(data: eventData, encoding: .utf8) else {
-        os_log(.error, "Failed to serialize event payload")
+    guard let privkeyHex = getStoredPrivateKey() else {
+        os_log(.error, "No privkey stored - read-only mode")
         return nil
     }
 
-    // Generate request ID
-    let requestId = UUID().uuidString
+    // Calculate event ID
+    let eventId = calculateEventId(
+        pubkey: pubkeyHex,
+        createdAt: payload.created_at,
+        kind: payload.kind,
+        tags: payload.tags,
+        content: payload.content
+    )
 
-    // Store the request (matching SignerBridgeStorage format)
-    let request: [String: Any] = [
-        "event": eventJson,
-        "origin": "safari-extension",
-        "timestamp": Date().timeIntervalSince1970
-    ]
-
-    defaults.set(request, forKey: signerRequestPrefix + requestId)
-    defaults.synchronize()
-
-    os_log(.info, "Stored sign request: %@", requestId)
-
-    // Build nostrsigner:// URL that the JS side can open
-    guard let encodedEvent = eventJson.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
+    guard !eventId.isEmpty else {
+        os_log(.error, "Failed to calculate event ID")
         return nil
     }
 
-    // The URL triggers the Damus app, which will process and store result
-    let signerUrl = "nostrsigner:\(encodedEvent)?type=sign_event&extensionRequestId=\(requestId)&returnType=event"
-
-    // Return nil for now - the native handler can't return arbitrary data
-    // The extension JS flow needs to be updated to open the URL and poll
-    // For now, log the URL for debugging
-    os_log(.info, "Sign URL: %@", signerUrl)
-
-    return nil
-}
-
-/// Retrieves a signing result from shared storage.
-/// Called when polling for results after the main app has signed.
-func getSignResult(requestId: String) -> DamooseResponse? {
-    guard let defaults = UserDefaults(suiteName: damooseAppGroupId),
-          let result = defaults.dictionary(forKey: signerResultPrefix + requestId) else {
-        return nil
-    }
-
-    // Clean up
-    defaults.removeObject(forKey: signerResultPrefix + requestId)
-    defaults.removeObject(forKey: signerRequestPrefix + requestId)
-    defaults.synchronize()
-
-    // Check for error
-    if let _ = result["error"] as? String {
-        return nil
-    }
-
-    // Parse the signed event JSON
-    guard let eventJsonString = result["event"] as? String,
-          let eventData = eventJsonString.data(using: .utf8),
-          let eventDict = try? JSONSerialization.jsonObject(with: eventData) as? [String: Any] else {
-        os_log(.error, "Invalid sign result format - missing event JSON")
-        return nil
-    }
-
-    // Parse event fields
-    guard let createdAt = eventDict["created_at"] as? Int,
-          let kind = eventDict["kind"] as? Int,
-          let tags = eventDict["tags"] as? [[String]],
-          let content = eventDict["content"] as? String,
-          let id = eventDict["id"] as? String,
-          let sig = eventDict["sig"] as? String,
-          let pubkey = eventDict["pubkey"] as? String else {
-        os_log(.error, "Invalid sign result format - missing fields")
+    // Sign the event
+    guard let signature = signEventId(privkeyHex: privkeyHex, eventId: eventId) else {
+        os_log(.error, "Failed to sign event")
         return nil
     }
 
     let signedEvent = SignedEvent(
-        created_at: createdAt,
-        kind: kind,
-        tags: tags,
-        content: content,
-        id: id,
-        sig: sig,
-        pubkey: pubkey
+        created_at: payload.created_at,
+        kind: payload.kind,
+        tags: payload.tags,
+        content: payload.content,
+        id: eventId,
+        sig: signature,
+        pubkey: pubkeyHex
     )
 
+    os_log(.info, "Signed event: %@", eventId)
     return .signedEvent(signedEvent)
 }
 

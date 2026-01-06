@@ -260,7 +260,8 @@
 		4C64305C2A945AFF00B0C0E9 /* MusicController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C64305B2A945AFF00B0C0E9 /* MusicController.swift */; };
 		4C64987C286D03E000EAE2B3 /* DirectMessagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C64987B286D03E000EAE2B3 /* DirectMessagesView.swift */; };
 		4C64987E286D082C00EAE2B3 /* DirectMessagesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C64987D286D082C00EAE2B3 /* DirectMessagesModel.swift */; };
-		4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */ = {isa = PBXBuildFile; productRef = 4C649880286E0EE300EAE2B3 /* secp256k1 */; };
+		4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */ = {isa = PBXBuildFile;
+		A14FAA9F3D34738FBCE6392D /* secp256k1 in Frameworks */ = {isa = PBXBuildFile; productRef = 6BAC5FED0B6276CB910C650F /* secp256k1 */; }; productRef = 4C649880286E0EE300EAE2B3 /* secp256k1 */; };
 		4C684A552A7E91FE005E6031 /* LargeEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C684A542A7E91FE005E6031 /* LargeEventTests.swift */; };
 		4C684A572A7FFAE6005E6031 /* UrlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C684A562A7FFAE6005E6031 /* UrlTests.swift */; };
 		4C687C212A5F7ED00092C550 /* DamusBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C687C202A5F7ED00092C550 /* DamusBackground.swift */; };
@@ -2982,6 +2983,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A14FAA9F3D34738FBCE6392D /* secp256k1 in Frameworks */,
 				6603FDF7C6E06045982AE97F /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -5617,6 +5619,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			packageProductDependencies = (
+				6BAC5FED0B6276CB910C650F /* secp256k1 */,
 			);
 			name = Damoose;
 			productName = Damoose;
@@ -8918,6 +8923,11 @@
 			productName = Kingfisher;
 		};
 		4C649880286E0EE300EAE2B3 /* secp256k1 */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */;
+			productName = secp256k1;
+		};
+		6BAC5FED0B6276CB910C650F /* secp256k1 */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */;
 			productName = secp256k1;
