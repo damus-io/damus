@@ -60,19 +60,19 @@ struct HighlightEventRef: View {
 
                         VStack(alignment: .leading, spacing: 5) {
                             Text(longform_event.title ?? NSLocalizedString("Untitled", comment: "Title of longform event if it is untitled."))
-                                .font(.system(size: 14, weight: .bold))
+                                .font(.footnote.weight(.bold))
                                 .lineLimit(1)
 
                             let profile = try? damus_state.profiles.lookup(id: longform_event.event.pubkey)
 
                             if let display_name = profile?.display_name {
                                 Text(display_name)
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.gray)
+                                    .font(.caption)
+                                    .foregroundColor(DamusColors.mediumGrey)
                             } else if let name = profile?.name {
                                 Text(name)
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.gray)
+                                    .font(.caption)
+                                    .foregroundColor(DamusColors.mediumGrey)
                             }
                         }
                     }

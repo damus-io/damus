@@ -23,15 +23,15 @@ struct LiveStreamProfile: View {
             switch displayName {
             case .one(let one):
                 Text(one)
-                    .font(.subheadline).foregroundColor(.gray)
+                    .font(.subheadline).foregroundColor(DamusColors.mediumGrey)
 
             case .both(username: let username, displayName: let displayName):
                 HStack(spacing: 6) {
                     Text(verbatim: displayName)
-                        .font(.subheadline).foregroundColor(.gray)
+                        .font(.subheadline).foregroundColor(DamusColors.mediumGrey)
 
                     Text(verbatim: "@\(username)")
-                        .font(.subheadline).foregroundColor(.gray)
+                        .font(.subheadline).foregroundColor(DamusColors.mediumGrey)
                 }
             }
         }

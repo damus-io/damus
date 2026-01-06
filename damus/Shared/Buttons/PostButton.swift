@@ -31,6 +31,8 @@ func PostButton(action: @escaping () -> ()) -> some View {
                 .foregroundColor(Color.white)
         }
     })
+    .accessibilityLabel(NSLocalizedString("New Post", comment: "Accessibility label for new post button"))
+    .accessibilityHint(NSLocalizedString("Double tap to compose a new note", comment: "Accessibility hint for new post button"))
     .keyboardShortcut("n", modifiers: [.command, .shift])
 }
 

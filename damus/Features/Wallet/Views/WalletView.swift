@@ -99,7 +99,7 @@ struct WalletView: View {
                             action: { show_settings = true },
                             label: {
                                 Image("settings")
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(DamusColors.mediumGrey)
                             }
                         )
                     }

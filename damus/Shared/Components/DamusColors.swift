@@ -17,6 +17,7 @@ class DamusColors {
     static let adaptablePurpleForeground = Color("DamusAdaptablePurpleForeground")
     static let adaptableBlack = Color("DamusAdaptableBlack")
     static let adaptableWhite = Color("DamusAdaptableWhite")
+    static let adaptableOrange = Color("DamusAdaptableOrange")
     static let white = Color("DamusWhite")
     static let black = Color("DamusBlack")
     static let brown = Color("DamusBrown")

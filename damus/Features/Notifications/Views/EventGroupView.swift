@@ -196,9 +196,9 @@ struct EventGroupView: View {
         let fmt = format_msats_abbrev(zapgrp.msat_total)
         return VStack(alignment: .center) {
             Image("zap.fill")
-                .foregroundColor(.orange)
+                .foregroundColor(DamusColors.adaptableOrange)
             Text(fmt)
-                .foregroundColor(Color.orange)
+                .foregroundColor(DamusColors.adaptableOrange)
         }
     }
     
@@ -241,7 +241,7 @@ struct EventGroupView: View {
                             EventBody(damus_state: state, event: event, size: .normal, options: [.truncate_content])
                                 .padding([.top], 1)
                                 .padding([.trailing])
-                                .foregroundColor(.gray)
+                                .foregroundColor(DamusColors.mediumGrey)
                         }
                     }
                     .buttonStyle(.plain)

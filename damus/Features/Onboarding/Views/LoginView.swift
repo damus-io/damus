@@ -83,7 +83,7 @@ struct LoginView: View {
 
                 if parsed?.is_pub ?? false {
                     Text("This is a public key, you will not be able to make notes or interact in any way. This is used for viewing accounts from their perspective.", comment: "Warning that the inputted account key is a public key and the result of what happens because of it.")
-                        .foregroundColor(Color.orange)
+                        .foregroundColor(DamusColors.adaptableOrange)
                         .bold()
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -307,7 +307,7 @@ struct KeyInput: View {
             }, label: {
                 Image(systemName: "doc.on.clipboard")
             })
-            .foregroundColor(.gray)
+            .foregroundColor(DamusColors.mediumGrey)
             .accessibilityLabel(NSLocalizedString("Paste private key", comment: "Accessibility label for the private key paste button"))
             
             SignInScan(shouldSaveKey: shouldSaveKey, loginKey: key, privKeyFound: privKeyFound)
@@ -327,7 +327,7 @@ struct KeyInput: View {
             }, label: {
                 Image(systemName: "eye.slash")
             })
-            .foregroundColor(.gray)
+            .foregroundColor(DamusColors.mediumGrey)
             .accessibilityLabel(NSLocalizedString("Toggle key visibility", comment: "Accessibility label for toggling the visibility of the private key input field"))
         }
         .padding(.vertical, 2)
@@ -355,7 +355,7 @@ struct SignInHeader: View {
             
             Text("Sign in", comment: "Title of view to log into an account.")
                 .foregroundColor(DamusColors.neutral6)
-                .font(.system(size: 32, weight: .bold))
+                .font(.largeTitle.weight(.bold))
                 .padding(.bottom, 5)
             
             Text("Welcome to the social network you control", comment: "Welcome text")
@@ -400,7 +400,7 @@ struct SignInScan: View {
         VStack {
             Button(action: { showQR.toggle() }, label: {
                 Image(systemName: "qrcode.viewfinder")})
-            .foregroundColor(.gray)
+            .foregroundColor(DamusColors.mediumGrey)
             .accessibilityLabel(NSLocalizedString("Scan QR code", comment: "Accessibility label for a button that scans a private key QR code"))
         }
         .sheet(isPresented: $showQR, onDismiss: {

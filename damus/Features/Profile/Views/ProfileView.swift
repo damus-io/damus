@@ -180,6 +180,7 @@ struct ProfileView: View {
         } label: {
             navImage(img: "chevron-left")
         }
+        .accessibilityLabel(NSLocalizedString("Back", comment: "Accessibility label for back button"))
     }
 
     var navActionSheetButton: some View {
@@ -191,6 +192,7 @@ struct ProfileView: View {
                 .background(Color.black.opacity(0.6))
                 .clipShape(Circle())
         }
+        .accessibilityLabel(NSLocalizedString("More Options", comment: "Accessibility label for more options button"))
         .confirmationDialog(NSLocalizedString("Actions", comment: "Title for confirmation dialog to either share, report, or mute a profile."), isPresented: $action_sheet_presented) {
             Button(NSLocalizedString("Share", comment: "Button to share the link to a profile.")) {
                 show_share_sheet = true
@@ -243,25 +245,27 @@ struct ProfileView: View {
     func lnButton(profile: Profile?, lnurl: String?) -> some View {
         return ProfileZapLinkView(profile: profile, lnurl: lnurl, profileModel: self.profile) { reactions_enabled, lud16, lnurl in
             Image(reactions_enabled ? "zap.fill" : "zap")
-                .foregroundColor(reactions_enabled ? .orange : Color.primary)
+                .foregroundColor(reactions_enabled ? DamusColors.adaptableOrange : Color.primary)
                 .profile_button_style(scheme: colorScheme)
                 .cornerRadius(24)
         }
+        .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button on profile"))
     }
-    
+
     var dmButton: some View {
         let dm_model = damus_state.dms.lookup_or_create(profile.pubkey)
         return NavigationLink(value: Route.DMChat(dms: dm_model)) {
             Image("messages")
                 .profile_button_style(scheme: colorScheme)
         }
+        .accessibilityLabel(NSLocalizedString("Direct Message", comment: "Accessibility label for DM button on profile"))
     }
     
     private var followsYouBadge: some View {
         Text("Follows you", comment: "Text to indicate that a user is following your profile.")
             .padding([.leading, .trailing], 6.0)
             .padding([.top, .bottom], 2.0)
-            .foregroundColor(.gray)
+            .foregroundColor(DamusColors.mediumGrey)
             .background {
                 RoundedRectangle(cornerRadius: 5.0)
                     .foregroundColor(DamusColors.adaptableGrey)
@@ -343,7 +347,7 @@ struct ProfileView: View {
         HStack {
             if let followerCount = followers.count {
                 let nounString = pluralizedString(key: "followers_count", count: followerCount)
-                let nounText = Text(verbatim: nounString).font(.subheadline).foregroundColor(.gray)
+                let nounText = Text(verbatim: nounString).font(.subheadline).foregroundColor(DamusColors.mediumGrey)
                 Text("\(Text(verbatim: followerCount.formatted()).font(.subheadline.weight(.medium))) \(nounText)", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.")
             } else {
                 Image("download")
@@ -351,7 +355,7 @@ struct ProfileView: View {
                     .frame(width: 20, height: 20)
                 Text("Followers", comment: "Label describing followers of a user.")
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundColor(DamusColors.mediumGrey)
             }
         }
     }
@@ -378,7 +382,7 @@ struct ProfileView: View {
                     let following_model = FollowingModel(damus_state: damus_state, contacts: contacts, hashtags: hashtags)
                     NavigationLink(value: Route.Following(following: following_model)) {
                         HStack {
-                            let noun_text = Text(verbatim: "\(pluralizedString(key: "following_count", count: profile.following))").font(.subheadline).foregroundColor(.gray)
+                            let noun_text = Text(verbatim: "\(pluralizedString(key: "following_count", count: profile.following))").font(.subheadline).foregroundColor(DamusColors.mediumGrey)
                             Text("\(Text(verbatim: profile.following.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
                         }
                     }
@@ -402,7 +406,7 @@ struct ProfileView: View {
                 if let relays = profile.relay_urls {
                     // Only open relay config view if the user is logged in with private key and they are looking at their own profile.
                     let noun_string = pluralizedString(key: "relays_count", count: relays.count)
-                    let noun_text = Text(noun_string).font(.subheadline).foregroundColor(.gray)
+                    let noun_text = Text(noun_string).font(.subheadline).foregroundColor(DamusColors.mediumGrey)
                     let relay_text = Text("\(Text(verbatim: relays.count.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
                     if profile.pubkey == damus_state.pubkey && damus_state.is_privkey_user {
                         NavigationLink(value: Route.RelayConfig) {
@@ -428,7 +432,7 @@ struct ProfileView: View {
                             CondensedProfilePicturesView(state: damus_state, pubkeys: friended_followers, maxPictures: 3)
                             let followedByString = followedByString(friended_followers, ndb: damus_state.ndb)
                             Text(followedByString)
-                                .font(.subheadline).foregroundColor(.gray)
+                                .font(.subheadline).foregroundColor(DamusColors.mediumGrey)
                                 .multilineTextAlignment(.leading)
                         }
                     }
@@ -562,7 +566,7 @@ struct ProfileView_Previews: PreviewProvider {
 extension View {
     func profile_button_style(scheme: ColorScheme) -> some View {
         self.symbolRenderingMode(.palette)
-            .font(.system(size: 32).weight(.thin))
+            .font(.title.weight(.thin))
             .foregroundStyle(scheme == .dark ? .white : .black, scheme == .dark ? .white : .black)
     }
 }

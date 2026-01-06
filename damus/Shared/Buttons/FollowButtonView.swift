@@ -15,6 +15,19 @@ struct FollowButtonView: View {
     let follows_you: Bool
     @State var follow_state: FollowState
     
+    var accessibilityLabelText: String {
+        switch follow_state {
+        case .follows:
+            return NSLocalizedString("Following, double tap to unfollow", comment: "Accessibility label for follow button when following")
+        case .following:
+            return NSLocalizedString("Processing follow", comment: "Accessibility label for follow button when processing")
+        case .unfollowing:
+            return NSLocalizedString("Processing unfollow", comment: "Accessibility label for follow button when processing")
+        case .unfollows:
+            return NSLocalizedString("Follow, double tap to follow this user", comment: "Accessibility label for follow button when not following")
+        }
+    }
+
     var body: some View {
         Button {
             follow_state = perform_follow_btn_action(follow_state, target: target)
@@ -31,6 +44,7 @@ struct FollowButtonView: View {
                         .stroke(follow_state == .unfollows ? .clear : borderColor(), lineWidth: 1)
                 }
         }
+        .accessibilityLabel(accessibilityLabelText)
         .onReceive(handle_notify(.followed)) { follow in
             guard case .pubkey(let pk) = follow,
                   pk == target.pubkey else { return }

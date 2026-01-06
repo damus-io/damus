@@ -15,7 +15,7 @@ struct RelativeTime: View {
     var body: some View {
         Text(verbatim: "\(time.value)")
             .font(eventviewsize_to_font(size, font_size: font_size))
-            .foregroundColor(.gray)
+            .foregroundColor(DamusColors.mediumGrey)
     }
 }
 

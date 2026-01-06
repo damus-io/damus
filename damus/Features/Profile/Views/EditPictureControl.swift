@@ -565,7 +565,7 @@ struct ImageURLSelector: View {
                 
                 HStack {
                     Image(systemName: "doc.on.clipboard")
-                        .foregroundColor(.gray)
+                        .foregroundColor(DamusColors.mediumGrey)
                         .onTapGesture {
                             if let pastedURL = UIPasteboard.general.string {
                                 image_url_temp = URL(string: pastedURL)?.absoluteString ?? ""

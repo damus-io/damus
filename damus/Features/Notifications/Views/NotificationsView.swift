@@ -120,7 +120,7 @@ struct NotificationsView: View {
                     label: {
                         Image(systemName: "gearshape")
                             .frame(width: 24, height: 24)
-                            .foregroundColor(.gray)
+                            .foregroundColor(DamusColors.mediumGrey)
                     }
                 )
             }

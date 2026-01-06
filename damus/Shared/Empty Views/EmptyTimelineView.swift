@@ -11,13 +11,13 @@ struct EmptyTimelineView: View {
     var body: some View {
         VStack {
             Image("question")
-                .font(.system(size: 35))
+                .font(.largeTitle)
                 .padding()
             Text("Nothing to see here. Check back later!", comment: "Indicates that there are no notes in the timeline to view.")
                 .multilineTextAlignment(.center)
                 .font(.callout.weight(.medium))
         }
-        .foregroundColor(.gray)
+        .foregroundColor(DamusColors.mediumGrey)
         .padding()
     }
 }
