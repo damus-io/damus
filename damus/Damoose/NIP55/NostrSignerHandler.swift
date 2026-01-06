@@ -16,6 +16,10 @@ enum SignerHandlerResult {
     /// Request requires user approval, show the approval UI.
     case requiresApproval(ApprovalContext, NostrSignerRequest)
 
+    /// Request was from extension and result stored in bridge storage.
+    /// No callback URL to open - extension will poll for result.
+    case extensionComplete
+
     /// Request failed with no callback (malformed request).
     case failed
 }
@@ -169,14 +173,11 @@ final class NostrSignerHandler: ObservableObject {
     ) -> SignerHandlerResult {
         // Need private key to sign
         guard let privkey = keypair.privkey else {
-            guard let url = NostrSignerResponse.error(
+            return handleError(
                 request: request,
                 message: "No private key available (read-only mode)",
                 rejected: false
-            ) else {
-                return .failed
-            }
-            return .callback(url)
+            )
         }
 
         // Create and sign the event
@@ -189,27 +190,62 @@ final class NostrSignerHandler: ObservableObject {
             tags: unsignedEvent.tags,
             createdAt: createdAt
         ) else {
-            guard let url = NostrSignerResponse.error(
+            return handleError(
                 request: request,
                 message: "Failed to sign event",
                 rejected: false
-            ) else {
-                return .failed
-            }
-            return .callback(url)
+            )
         }
 
         // Build response
+        let signature = hex_encode(signedEvent.sig.data)
         let eventJson = request.returnType == .event ? event_to_json(ev: signedEvent) : nil
 
+        // For extension requests, store result in bridge storage
+        if let requestId = request.extensionRequestId {
+            SignerBridgeStorage.storeResult(
+                requestId: requestId,
+                signedEventJson: eventJson,
+                signature: signature
+            )
+            return .extensionComplete
+        }
+
+        // For normal requests, build callback URL
         guard let url = NostrSignerResponse.signEventSuccess(
             request: request,
-            signature: hex_encode(signedEvent.sig.data),
+            signature: signature,
             signedEventJson: eventJson
         ) else {
             return .failed
         }
 
+        return .callback(url)
+    }
+
+    /// Handles an error response, routing to extension storage or callback URL.
+    private func handleError(
+        request: NostrSignerRequest,
+        message: String,
+        rejected: Bool
+    ) -> SignerHandlerResult {
+        // For extension requests, store error in bridge storage
+        if let requestId = request.extensionRequestId {
+            SignerBridgeStorage.storeResult(
+                requestId: requestId,
+                error: message
+            )
+            return .extensionComplete
+        }
+
+        // For normal requests, build callback URL
+        guard let url = NostrSignerResponse.error(
+            request: request,
+            message: message,
+            rejected: rejected
+        ) else {
+            return .failed
+        }
         return .callback(url)
     }
 
@@ -284,18 +320,33 @@ final class NostrSignerHandler: ObservableObject {
     ///   - approved: Whether the request was approved.
     ///   - request: The original request.
     ///   - context: The approval context.
-    /// - Returns: The callback URL to open.
+    /// - Returns: The callback URL to open, or nil for extension requests (result stored in bridge).
     func completeApproval(
         approved: Bool,
         request: NostrSignerRequest,
         context: ApprovalContext
     ) -> URL? {
         guard approved else {
+            // Handle rejection for extension requests
+            if let requestId = request.extensionRequestId {
+                SignerBridgeStorage.storeResult(
+                    requestId: requestId,
+                    error: "User rejected signing request"
+                )
+                return nil
+            }
             return NostrSignerResponse.rejected(request: request)
         }
 
         // Get keypair and sign
         guard let keypair = SharedKeychainStorage.getKeypair() else {
+            if let requestId = request.extensionRequestId {
+                SignerBridgeStorage.storeResult(
+                    requestId: requestId,
+                    error: "Not logged in to Damus"
+                )
+                return nil
+            }
             return NostrSignerResponse.notLoggedIn(request: request)
         }
 
@@ -308,7 +359,17 @@ final class NostrSignerHandler: ObservableObject {
         switch result {
         case .callback(let url):
             return url
+        case .extensionComplete:
+            // Result already stored in bridge storage
+            return nil
         case .requiresApproval, .failed:
+            if let requestId = request.extensionRequestId {
+                SignerBridgeStorage.storeResult(
+                    requestId: requestId,
+                    error: "Signing failed"
+                )
+                return nil
+            }
             return NostrSignerResponse.error(
                 request: request,
                 message: "Signing failed",

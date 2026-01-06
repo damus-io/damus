@@ -324,7 +324,8 @@ struct NostrSignerApprovalView_Previews: PreviewProvider {
             callbackUrl: URL(string: "example://callback")!,
             returnType: .event,
             compressionType: .none,
-            targetPubkey: nil
+            targetPubkey: nil,
+            extensionRequestId: nil
         )
 
         NostrSignerApprovalView(

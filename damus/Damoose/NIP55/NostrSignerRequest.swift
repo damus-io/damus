@@ -87,9 +87,18 @@ struct NostrSignerRequest: Equatable {
     /// Target pubkey for encryption/decryption operations.
     let targetPubkey: Pubkey?
 
+    /// Extension request ID for Safari extension bridge.
+    /// When present, result should be stored in SignerBridgeStorage instead of opening callback.
+    let extensionRequestId: String?
+
     /// Original requesting app identifier (derived from callback URL).
     var clientId: String {
         callbackUrl.host ?? callbackUrl.scheme ?? "unknown"
+    }
+
+    /// Whether this request came from the Safari extension.
+    var isExtensionRequest: Bool {
+        extensionRequestId != nil
     }
 
     // MARK: - Parsing
@@ -141,6 +150,9 @@ struct NostrSignerRequest: Equatable {
             targetPubkey = hex_decode_pubkey(pubkeyHex)
         }
 
+        // Extension request ID for Safari extension bridge
+        let extensionRequestId = queryItems.first(where: { $0.name == "extensionRequestId" })?.value
+
         // Content is in the URL path (after the scheme:)
         // URL format: nostrsigner:<content>?params...
         let content = parseContent(from: components)
@@ -151,7 +163,8 @@ struct NostrSignerRequest: Equatable {
             callbackUrl: callbackUrl,
             returnType: returnType,
             compressionType: compressionType,
-            targetPubkey: targetPubkey
+            targetPubkey: targetPubkey,
+            extensionRequestId: extensionRequestId
         )
     }
 

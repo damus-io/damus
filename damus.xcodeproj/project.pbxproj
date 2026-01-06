@@ -68,6 +68,7 @@
 		3ACF94472DAA006500971A4E /* NIP05DomainEventsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ACF94452DAA006500971A4E /* NIP05DomainEventsModel.swift */; };
 		3ACF94482DAA006500971A4E /* NIP05DomainEventsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ACF94452DAA006500971A4E /* NIP05DomainEventsModel.swift */; };
 		3AE45AF6297BB2E700C1D842 /* LibreTranslateServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE45AF5297BB2E700C1D842 /* LibreTranslateServer.swift */; };
+		3B4E40C70DA17F5E9DA25891 /* SignerBridgeStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F38BCAC82CF1EF63DAC715 /* SignerBridgeStorage.swift */; };
 		3CBFFAB21483D39472CE9D9C /* NostrSignerRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5F33E64B399631CC45907D /* NostrSignerRequest.swift */; };
 		3CCD1E6A2A874C4E0099A953 /* Nip98HTTPAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD1E692A874C4E0099A953 /* Nip98HTTPAuth.swift */; };
 		4C011B5E2BD0A56A002F2F9B /* ChatEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C011B5C2BD0A56A002F2F9B /* ChatEventView.swift */; };
@@ -2155,7 +2156,6 @@
 		3BEFA9DDC028EAD6CF8F2C1F /* NostrSignerApprovalView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NostrSignerApprovalView.swift; sourceTree = "<group>"; };
 		3CCD1E692A874C4E0099A953 /* Nip98HTTPAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Nip98HTTPAuth.swift; sourceTree = "<group>"; };
 		3D40F8593960E80C843C56D7 /* ContactListPolicy.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContactListPolicy.swift; sourceTree = "<group>"; };
-		3E23A75C84D14AAE0E5E45F0 /* manifest.json */ = {isa = PBXFileReference; includeInIndex = 1; name = manifest.json; path = DamusNostrSigner/Resources/manifest.json; sourceTree = "<group>"; };
 		4C011B5C2BD0A56A002F2F9B /* ChatEventView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatEventView.swift; sourceTree = "<group>"; };
 		4C011B5D2BD0A56A002F2F9B /* ChatroomThreadView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatroomThreadView.swift; sourceTree = "<group>"; };
 		4C011B602BD0B25C002F2F9B /* ReplyQuoteView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReplyQuoteView.swift; sourceTree = "<group>"; };
@@ -2737,7 +2737,6 @@
 		82D6FA992CD9820500C925F4 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		82D6FA9E2CD9820500C925F4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		82D6FAA62CD9820500C925F4 /* share extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "share extension.entitlements"; sourceTree = "<group>"; };
-		885F1419791278D5CD1B5FF1 /* injected.js */ = {isa = PBXFileReference; includeInIndex = 1; name = injected.js; path = DamusNostrSigner/Resources/injected.js; sourceTree = "<group>"; };
 		9026E9C3435D4FD77AA73D5F /* DamusNostrSigner.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DamusNostrSigner.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		9609F057296E220800069BF3 /* BannerImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerImageView.swift; sourceTree = "<group>"; };
 		9C83F89229A937B900136C08 /* TextViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextViewWrapper.swift; sourceTree = "<group>"; };
@@ -2768,8 +2767,7 @@
 		BA693073295D649800ADDB87 /* UserSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettingsStore.swift; sourceTree = "<group>"; };
 		BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectWalletView.swift; sourceTree = "<group>"; };
 		BC8FAE1CCDB3B47CDD7AB12C /* manifest.json */ = {isa = PBXFileReference; includeInIndex = 1; path = manifest.json; sourceTree = "<group>"; };
-		C3085D5F0A92D0E1307A0FAD /* background.js */ = {isa = PBXFileReference; includeInIndex = 1; name = background.js; path = DamusNostrSigner/Resources/background.js; sourceTree = "<group>"; };
-		D075B09D7D0CCCE86CDEE73B /* content.js */ = {isa = PBXFileReference; includeInIndex = 1; name = content.js; path = DamusNostrSigner/Resources/content.js; sourceTree = "<group>"; };
+		C4F38BCAC82CF1EF63DAC715 /* SignerBridgeStorage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SignerBridgeStorage.swift; path = NIP07/SignerBridgeStorage.swift; sourceTree = "<group>"; };
 		D2277EE92A089BD5006C3807 /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		D5C1AFBE2E5DF7E60092F72F /* ContactCardManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactCardManager.swift; sourceTree = "<group>"; };
 		D5C1AFC32E5DFF700092F72F /* ContactCardManagerMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactCardManagerMock.swift; sourceTree = "<group>"; };
@@ -3064,6 +3062,14 @@
 				5C78A7AE2E30437100CF177D /* Views */,
 			);
 			path = Reposts;
+			sourceTree = "<group>";
+		};
+		4A23636606EA22842FB1A2C7 /* NIP07 */ = {
+			isa = PBXGroup;
+			children = (
+				C4F38BCAC82CF1EF63DAC715 /* SignerBridgeStorage.swift */,
+			);
+			name = NIP07;
 			sourceTree = "<group>";
 		};
 		4C0C03962A61E2670098B3B8 /* Fixtures */ = {
@@ -5187,6 +5193,7 @@
 				FB5DC8601708330B96927EAD /* ClientPermissions.swift */,
 				7A98FBDCB5795D169055EAA1 /* SigningPolicyManager.swift */,
 				AE7A1C5C36BC7A8C56DC51F0 /* NIP55 */,
+				4A23636606EA22842FB1A2C7 /* NIP07 */,
 			);
 			name = Damoose;
 			path = Damoose;
@@ -5449,14 +5456,6 @@
 				D7EBF8BF2E5D39D1004EAE29 /* ThreadModelTests.swift */,
 			);
 			path = NostrNetworkManagerTests;
-			sourceTree = "<group>";
-		};
-		DC90AF30C435D1A9EE8F8419 /* images */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = images;
-			path = DamusNostrSigner/Resources/images;
 			sourceTree = "<group>";
 		};
 		E06336A72B7582D600A88E6B /* Assets */ = {
@@ -6461,6 +6460,7 @@
 				69E7EC3BEBDF4DEAEF899293 /* NostrSignerHandler.swift in Sources */,
 				1F2CA509E1DEFA14222FC6B6 /* NostrSignerApprovalView.swift in Sources */,
 				59102E60D090B047ABC17B74 /* NostrSignerApprovalSheet.swift in Sources */,
+				3B4E40C70DA17F5E9DA25891 /* SignerBridgeStorage.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

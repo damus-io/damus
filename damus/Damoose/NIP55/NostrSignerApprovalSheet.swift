@@ -99,6 +99,11 @@ struct NostrSignerApprovalSheet: View {
             openCallback(url)
             dismiss()
 
+        case .extensionComplete:
+            // Extension request - result stored in bridge storage, no callback needed
+            // User will switch back to Safari
+            dismiss()
+
         case .requiresApproval(let context, _):
             // Need user approval
             self.approvalContext = context
@@ -161,7 +166,8 @@ struct NostrSignerApprovalSheet_Previews: PreviewProvider {
             callbackUrl: URL(string: "example://callback")!,
             returnType: .event,
             compressionType: .none,
-            targetPubkey: nil
+            targetPubkey: nil,
+            extensionRequestId: nil
         )
 
         Text("Preview requires DamusState")
