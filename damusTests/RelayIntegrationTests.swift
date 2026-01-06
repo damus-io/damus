@@ -106,14 +106,22 @@ final class RelayIntegrationTests: XCTestCase {
         }
     }
 
-    /// Get relay URL - always uses public relay for reliable testing.
-    /// Local strfry requires special setup and iOS Simulator can't reach Docker localhost.
+    /// Get relay URL - uses local strfry if available (CI), otherwise public relay.
+    /// iOS Simulator can't reach Docker localhost, but CI can.
     func getRelayURL() async -> RelayURL {
-        networkTimeout = 30.0
-        return Self.publicRelayURL
+        if await isLocalRelayAvailable() {
+            return Self.localRelayURL
+        } else {
+            // Only increase timeout if not already set higher (e.g., by throttled tests)
+            if networkTimeout < 30.0 {
+                networkTimeout = 30.0
+            }
+            return Self.publicRelayURL
+        }
     }
 
     /// Connect to relay and wait for connection
+    /// Throws if connection times out
     func connectToRelay(_ url: RelayURL) async throws {
         let descriptor = RelayPool.RelayDescriptor(url: url, info: .readWrite)
         try await pool.add_relay(descriptor)
@@ -127,7 +135,8 @@ final class RelayIntegrationTests: XCTestCase {
                 return
             }
         }
-        XCTFail("Failed to connect to relay within \(networkTimeout) seconds")
+        throw NSError(domain: "RelayIntegrationTests", code: 1,
+                      userInfo: [NSLocalizedDescriptionKey: "Failed to connect to relay within \(networkTimeout) seconds"])
     }
 
     /// Parse JSON message to extract type (first element)
