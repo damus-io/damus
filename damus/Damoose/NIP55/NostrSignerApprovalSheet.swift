@@ -127,17 +127,19 @@ struct NostrSignerApprovalSheet: View {
             SigningPolicyManager.shared.blockClient(context.client)
         }
 
-        // Get callback URL
-        guard let callbackUrl = NostrSignerHandler.shared.completeApproval(
+        // Get callback URL (nil for extension requests - result stored in bridge)
+        let callbackUrl = NostrSignerHandler.shared.completeApproval(
             approved: approved,
             request: request,
             context: context
-        ) else {
-            self.errorMessage = "Failed to generate response"
-            return
+        )
+
+        // For extension requests, callbackUrl is nil and result is in bridge storage
+        // User will switch back to Safari manually
+        if let callbackUrl {
+            openCallback(callbackUrl)
         }
 
-        openCallback(callbackUrl)
         dismiss()
     }
 
