@@ -7,8 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		05990030808D8F1709B29C54 /* content.js in Resources */ = {isa = PBXBuildFile; fileRef = 4A55A119A636196B066BD23A /* content.js */; };
 		0E8A4BB72AE4359200065E81 /* NostrFilter+Hashable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E8A4BB62AE4359200065E81 /* NostrFilter+Hashable.swift */; };
+		19597E310ACD06460F7AAF0A /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = 92E7A3DCBFF57DE2B680EA4F /* popup.html */; };
 		1F2CA509E1DEFA14222FC6B6 /* NostrSignerApprovalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BEFA9DDC028EAD6CF8F2C1F /* NostrSignerApprovalView.swift */; };
+		255100AAA58739F43D61668E /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D56A6CE34E0251027FCCAFA /* SafariWebExtensionHandler.swift */; };
 		2710433D2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */; };
 		2710433E2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */; };
 		2710433F2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */; };
@@ -502,6 +505,7 @@
 		50C3E08A2AA8E3F7006A4BC0 /* AVPlayer+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C3E0892AA8E3F7006A4BC0 /* AVPlayer+Additions.swift */; };
 		50DA11262A16A23F00236234 /* Launch.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 50DA11252A16A23F00236234 /* Launch.storyboard */; };
 		55AF4186A2E0B85D9550F4DD /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9FD6A85B7BEB1B79F49C5F6F /* SafariServices.framework */; };
+		570A19771BE4FF96AADF17C5 /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 256227FDEA93182DD9AA96EC /* background.js */; };
 		59102E60D090B047ABC17B74 /* NostrSignerApprovalSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74D4B97BA76DE5AC7BFE2D48 /* NostrSignerApprovalSheet.swift */; };
 		5C0567532C8B5F9C0073F23A /* PostingTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */; };
 		5C0567552C8B60C20073F23A /* OffsetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567542C8B60C20073F23A /* OffsetExtension.swift */; };
@@ -626,12 +630,15 @@
 		5CF2DCCC2AA3AF0B00984B8D /* RelayPicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF2DCCB2AA3AF0B00984B8D /* RelayPicView.swift */; };
 		5CF2DCCE2AABE1A500984B8D /* DamusLightGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF2DCCD2AABE1A500984B8D /* DamusLightGradient.swift */; };
 		5CF72FC229B9142F00124A13 /* ShareAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF72FC129B9142F00124A13 /* ShareAction.swift */; };
+		5E25E297170F1C15B9259470 /* nostr.js in Resources */ = {isa = PBXBuildFile; fileRef = 0EBE2A8A93A5F5CA47407E45 /* nostr.js */; };
 		606F43042338B8DE2FCC3BE9 /* ClientPermissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB5DC8601708330B96927EAD /* ClientPermissions.swift */; };
 		63674150BF249FCDBE79C904 /* SigningPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5565A535F7D242F2BB775CF /* SigningPolicy.swift */; };
 		6439E014296790CF0020672B /* ProfilePicImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6439E013296790CF0020672B /* ProfilePicImageView.swift */; };
 		643EA5C8296B764E005081BB /* RelayFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 643EA5C7296B764E005081BB /* RelayFilterView.swift */; };
 		647D9A8D2968520300A295DE /* SideMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 647D9A8C2968520300A295DE /* SideMenuView.swift */; };
+		64E4B33D2E1D29802194C133 /* popup.css in Resources */ = {isa = PBXBuildFile; fileRef = ED6B4570DFBE54FC8A8B6598 /* popup.css */; };
 		64FBD06F296255C400D9D3B2 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64FBD06E296255C400D9D3B2 /* Theme.swift */; };
+		6603FDF7C6E06045982AE97F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FF6AE40E2192CE8CBD2C56B /* Foundation.framework */; };
 		676E8F8EE47E251878864707 /* injected.js in Resources */ = {isa = PBXBuildFile; fileRef = 522D287AAF3EAFE42A4FA783 /* injected.js */; };
 		69E7EC3BEBDF4DEAEF899293 /* NostrSignerHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09F652082F3612D2D958155A /* NostrSignerHandler.swift */; };
 		7527271E2A93FF0100214108 /* Block.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7527271D2A93FF0100214108 /* Block.swift */; };
@@ -1089,7 +1096,9 @@
 		9C83F89329A937B900136C08 /* TextViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C83F89229A937B900136C08 /* TextViewWrapper.swift */; };
 		9CA876E229A00CEA0003B9A3 /* AttachMediaUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */; };
 		A0D4F8CF0780353F18973E20 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = BC8FAE1CCDB3B47CDD7AB12C /* manifest.json */; };
+		ABE9EB86264ECCED5297C8AF /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = CA33ABC3C52B3945666924A4 /* manifest.json */; };
 		ADFE73552AD4793100EC7326 /* QRScanNSECView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADFE73542AD4793100EC7326 /* QRScanNSECView.swift */; };
+		B483F5146380E12C905D7EE0 /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = 688E185C4A90830B63F0DB83 /* popup.js */; };
 		B501062D2B363036003874F5 /* AuthIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B501062C2B363036003874F5 /* AuthIntegrationTests.swift */; };
 		B51C1CEA2B55A60A00E312A9 /* AddMuteItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51C1CE82B55A60A00E312A9 /* AddMuteItemView.swift */; };
 		B51C1CEB2B55A60A00E312A9 /* MuteDurationMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51C1CE92B55A60A00E312A9 /* MuteDurationMenu.swift */; };
@@ -1103,6 +1112,7 @@
 		B5C60C202B530D5100C5ECA7 /* MuteItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C60C1F2B530D5100C5ECA7 /* MuteItem.swift */; };
 		B5C60C212B530D5600C5ECA7 /* MuteItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C60C1F2B530D5100C5ECA7 /* MuteItem.swift */; };
 		B5C60C232B532A8700C5ECA7 /* DamusDuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C60C222B532A8700C5ECA7 /* DamusDuration.swift */; };
+		B614A296FB960D21577BED15 /* Damoose.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A7C28743E03F8D3B1AA0D68C /* Damoose.appex */; };
 		BA37598A2ABCCDE40018D73B /* ImageResizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3759892ABCCDE30018D73B /* ImageResizer.swift */; };
 		BA37598D2ABCCE500018D73B /* PhotoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA37598B2ABCCE500018D73B /* PhotoCaptureProcessor.swift */; };
 		BA37598E2ABCCE500018D73B /* VideoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA37598C2ABCCE500018D73B /* VideoCaptureProcessor.swift */; };
@@ -1973,6 +1983,13 @@
 			remoteGlobalIDString = 82D6FA962CD9820500C925F4;
 			remoteInfo = "share extension";
 		};
+		96061C3A0420A16C7C4900B1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4CE6DEDB27F7A08100C66700 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 454F3F97A25BAF4386597DA2;
+			remoteInfo = Damoose;
+		};
 		D703D7232C66E47100A400EA /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 4CE6DEDB27F7A08100C66700 /* Project object */;
@@ -2006,6 +2023,7 @@
 				82D6FAA12CD9820500C925F4 /* ShareExtension.appex in Embed Foundation Extensions */,
 				D703D7252C66E47100A400EA /* HighlighterActionExtension.appex in Embed Foundation Extensions */,
 				D79C4C1B2AFEB061003A41B4 /* DamusNotificationService.appex in Embed Foundation Extensions */,
+				B614A296FB960D21577BED15 /* Damoose.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2026,14 +2044,17 @@
 /* Begin PBXFileReference section */
 		09F652082F3612D2D958155A /* NostrSignerHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NostrSignerHandler.swift; sourceTree = "<group>"; };
 		0E8A4BB62AE4359200065E81 /* NostrFilter+Hashable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NostrFilter+Hashable.swift"; sourceTree = "<group>"; };
+		0EBE2A8A93A5F5CA47407E45 /* nostr.js */ = {isa = PBXFileReference; includeInIndex = 1; name = nostr.js; path = Damoose/Resources/nostr.js; sourceTree = "<group>"; };
 		168D00B2CC7643AD5746FAED /* NostrSignerResponse.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NostrSignerResponse.swift; sourceTree = "<group>"; };
 		193470E69DEC0B529B33A722 /* background.js */ = {isa = PBXFileReference; includeInIndex = 1; path = background.js; sourceTree = "<group>"; };
 		1FF6AE40E2192CE8CBD2C56B /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		256227FDEA93182DD9AA96EC /* background.js */ = {isa = PBXFileReference; includeInIndex = 1; name = background.js; path = Damoose/Resources/background.js; sourceTree = "<group>"; };
 		2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostingTimelineSwitcherView.swift; sourceTree = "<group>"; };
 		3165648A295B70D500C64604 /* LinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkView.swift; sourceTree = "<group>"; };
 		3169CAE5294E69C000EE4006 /* EmptyTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyTimelineView.swift; sourceTree = "<group>"; };
 		3169CAEC294FCCFC00EE4006 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Constants.swift; path = damus/Shared/Utilities/Constants.swift; sourceTree = SOURCE_ROOT; };
 		31D2E846295218AF006D67F8 /* Shimmer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shimmer.swift; sourceTree = "<group>"; };
+		35746FD8655A6221F84CF405 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = Info.plist; path = Damoose/Info.plist; sourceTree = "<group>"; };
 		3A185A04297F2C3800F4BDC0 /* lv-LV */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "lv-LV"; path = "lv-LV.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		3A185A05297F2C3800F4BDC0 /* lv-LV */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "lv-LV"; path = "lv-LV.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		3A185A06297F2C3800F4BDC0 /* lv-LV */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = "lv-LV"; path = "lv-LV.lproj/Localizable.stringsdict"; sourceTree = "<group>"; };
@@ -2156,6 +2177,8 @@
 		3BEFA9DDC028EAD6CF8F2C1F /* NostrSignerApprovalView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NostrSignerApprovalView.swift; sourceTree = "<group>"; };
 		3CCD1E692A874C4E0099A953 /* Nip98HTTPAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Nip98HTTPAuth.swift; sourceTree = "<group>"; };
 		3D40F8593960E80C843C56D7 /* ContactListPolicy.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContactListPolicy.swift; sourceTree = "<group>"; };
+		43ED5497F9FE4C075492DEB6 /* Damoose.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; name = Damoose.entitlements; path = Damoose/Damoose.entitlements; sourceTree = "<group>"; };
+		4A55A119A636196B066BD23A /* content.js */ = {isa = PBXFileReference; includeInIndex = 1; name = content.js; path = Damoose/Resources/content.js; sourceTree = "<group>"; };
 		4C011B5C2BD0A56A002F2F9B /* ChatEventView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatEventView.swift; sourceTree = "<group>"; };
 		4C011B5D2BD0A56A002F2F9B /* ChatroomThreadView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatroomThreadView.swift; sourceTree = "<group>"; };
 		4C011B602BD0B25C002F2F9B /* ReplyQuoteView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReplyQuoteView.swift; sourceTree = "<group>"; };
@@ -2724,6 +2747,7 @@
 		643EA5C7296B764E005081BB /* RelayFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayFilterView.swift; sourceTree = "<group>"; };
 		647D9A8C2968520300A295DE /* SideMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuView.swift; sourceTree = "<group>"; };
 		64FBD06E296255C400D9D3B2 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		688E185C4A90830B63F0DB83 /* popup.js */ = {isa = PBXFileReference; includeInIndex = 1; name = popup.js; path = Damoose/Resources/popup.js; sourceTree = "<group>"; };
 		74D4B97BA76DE5AC7BFE2D48 /* NostrSignerApprovalSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NostrSignerApprovalSheet.swift; sourceTree = "<group>"; };
 		7527271D2A93FF0100214108 /* Block.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Block.swift; sourceTree = "<group>"; };
 		75AD872A2AA23A460085EF2C /* Block+Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Block+Tests.swift"; sourceTree = "<group>"; };
@@ -2732,18 +2756,21 @@
 		7C902AE22981D55B002AB16E /* ZoomableScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableScrollView.swift; sourceTree = "<group>"; };
 		7C95CAED299DCEF1009DCB67 /* KFOptionSetter+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KFOptionSetter+.swift"; sourceTree = "<group>"; };
 		7CFF6316299FEFE5005D382A /* SelectableText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectableText.swift; sourceTree = "<group>"; };
+		7D56A6CE34E0251027FCCAFA /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SafariWebExtensionHandler.swift; path = Damoose/SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
 		7D63E9B4C14631B286D9378F /* SharedKeychainStorage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SharedKeychainStorage.swift; sourceTree = "<group>"; };
 		82D6FA972CD9820500C925F4 /* ShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		82D6FA992CD9820500C925F4 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		82D6FA9E2CD9820500C925F4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		82D6FAA62CD9820500C925F4 /* share extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "share extension.entitlements"; sourceTree = "<group>"; };
 		9026E9C3435D4FD77AA73D5F /* DamusNostrSigner.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DamusNostrSigner.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		92E7A3DCBFF57DE2B680EA4F /* popup.html */ = {isa = PBXFileReference; includeInIndex = 1; name = popup.html; path = Damoose/Resources/popup.html; sourceTree = "<group>"; };
 		9609F057296E220800069BF3 /* BannerImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerImageView.swift; sourceTree = "<group>"; };
 		9C83F89229A937B900136C08 /* TextViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextViewWrapper.swift; sourceTree = "<group>"; };
 		9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachMediaUtility.swift; sourceTree = "<group>"; };
 		9FD6A85B7BEB1B79F49C5F6F /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
 		A0A4D10D75CE8E201B5E42E6 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A2F0CD60F688EAA487166BAE /* DamusNostrSigner.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = DamusNostrSigner.entitlements; sourceTree = "<group>"; };
+		A7C28743E03F8D3B1AA0D68C /* Damoose.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = Damoose.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC5F33E64B399631CC45907D /* NostrSignerRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NostrSignerRequest.swift; sourceTree = "<group>"; };
 		ADFE73542AD4793100EC7326 /* QRScanNSECView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QRScanNSECView.swift; sourceTree = "<group>"; };
 		B501062C2B363036003874F5 /* AuthIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthIntegrationTests.swift; sourceTree = "<group>"; usesTabs = 0; };
@@ -2768,6 +2795,7 @@
 		BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectWalletView.swift; sourceTree = "<group>"; };
 		BC8FAE1CCDB3B47CDD7AB12C /* manifest.json */ = {isa = PBXFileReference; includeInIndex = 1; path = manifest.json; sourceTree = "<group>"; };
 		C4F38BCAC82CF1EF63DAC715 /* SignerBridgeStorage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SignerBridgeStorage.swift; path = NIP07/SignerBridgeStorage.swift; sourceTree = "<group>"; };
+		CA33ABC3C52B3945666924A4 /* manifest.json */ = {isa = PBXFileReference; includeInIndex = 1; name = manifest.json; path = Damoose/Resources/manifest.json; sourceTree = "<group>"; };
 		D2277EE92A089BD5006C3807 /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		D5C1AFBE2E5DF7E60092F72F /* ContactCardManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactCardManager.swift; sourceTree = "<group>"; };
 		D5C1AFC32E5DFF700092F72F /* ContactCardManagerMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactCardManagerMock.swift; sourceTree = "<group>"; };
@@ -2921,6 +2949,7 @@
 		E0EE9DD32B8E5FEA00F3002D /* ImageProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageProcessing.swift; sourceTree = "<group>"; };
 		E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSettingsView.swift; sourceTree = "<group>"; };
 		E990020E2955F837003BBC5A /* EditMetadataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditMetadataView.swift; sourceTree = "<group>"; };
+		ED6B4570DFBE54FC8A8B6598 /* popup.css */ = {isa = PBXFileReference; includeInIndex = 1; name = popup.css; path = Damoose/Resources/popup.css; sourceTree = "<group>"; };
 		F71694E92A662232001F4053 /* OnboardingSuggestionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingSuggestionsView.swift; sourceTree = "<group>"; };
 		F71694EB2A662292001F4053 /* SuggestedUsersViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedUsersViewModel.swift; sourceTree = "<group>"; };
 		F71694F12A67314D001F4053 /* SuggestedUserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedUserView.swift; sourceTree = "<group>"; };
@@ -2946,6 +2975,14 @@
 			files = (
 				F2EB6F7685B23EEACDD1DF0F /* Foundation.framework in Frameworks */,
 				55AF4186A2E0B85D9550F4DD /* SafariServices.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		36BAFB6F0B1C1B713CB88FAC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6603FDF7C6E06045982AE97F /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3861,6 +3898,7 @@
 				4CE6DEE427F7A08100C66700 /* Products */,
 				4CEE2AE62804F57B00AB5EEF /* Frameworks */,
 				71870F8E223FD99D1C1EEF87 /* DamusNostrSigner */,
+				EA1E5B64529194FF4566A699 /* Damoose */,
 			);
 			indentWidth = 4;
 			sourceTree = "<group>";
@@ -3876,6 +3914,7 @@
 				D703D7172C66E47100A400EA /* HighlighterActionExtension.appex */,
 				82D6FA972CD9820500C925F4 /* ShareExtension.appex */,
 				9026E9C3435D4FD77AA73D5F /* DamusNostrSigner.appex */,
+				A7C28743E03F8D3B1AA0D68C /* Damoose.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -5235,6 +5274,13 @@
 			path = "share extension";
 			sourceTree = "<group>";
 		};
+		9A59C25FBB891ECF67231169 /* _locales */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = _locales;
+			sourceTree = "<group>";
+		};
 		A3175E5A3737111893284EB5 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -5278,6 +5324,13 @@
 				E02429942B7E97740088B16C /* CameraController.swift */,
 			);
 			path = Camera;
+			sourceTree = "<group>";
+		};
+		C1C0F8818FA625FA1DC61D15 /* images */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = images;
 			sourceTree = "<group>";
 		};
 		D5C1AFC22E5DFF040092F72F /* ContactCard */ = {
@@ -5466,12 +5519,39 @@
 			path = Assets;
 			sourceTree = "<group>";
 		};
+		EA1E5B64529194FF4566A699 /* Damoose */ = {
+			isa = PBXGroup;
+			children = (
+				F25DD37FCE5241CF1DF679A1 /* Resources */,
+				7D56A6CE34E0251027FCCAFA /* SafariWebExtensionHandler.swift */,
+				43ED5497F9FE4C075492DEB6 /* Damoose.entitlements */,
+				35746FD8655A6221F84CF405 /* Info.plist */,
+			);
+			name = Damoose;
+			sourceTree = "<group>";
+		};
 		EED42668367911BFAD7705D0 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
 				1FF6AE40E2192CE8CBD2C56B /* Foundation.framework */,
 			);
 			name = iOS;
+			sourceTree = "<group>";
+		};
+		F25DD37FCE5241CF1DF679A1 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				256227FDEA93182DD9AA96EC /* background.js */,
+				4A55A119A636196B066BD23A /* content.js */,
+				0EBE2A8A93A5F5CA47407E45 /* nostr.js */,
+				CA33ABC3C52B3945666924A4 /* manifest.json */,
+				92E7A3DCBFF57DE2B680EA4F /* popup.html */,
+				ED6B4570DFBE54FC8A8B6598 /* popup.css */,
+				688E185C4A90830B63F0DB83 /* popup.js */,
+				C1C0F8818FA625FA1DC61D15 /* images */,
+				9A59C25FBB891ECF67231169 /* _locales */,
+			);
+			name = Resources;
 			sourceTree = "<group>";
 		};
 		F71694E82A66221E001F4053 /* Onboarding */ = {
@@ -5526,6 +5606,23 @@
 			productReference = 9026E9C3435D4FD77AA73D5F /* DamusNostrSigner.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		454F3F97A25BAF4386597DA2 /* Damoose */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D8C0D39B7D40EF41D5AE31D3 /* Build configuration list for PBXNativeTarget "Damoose" */;
+			buildPhases = (
+				BE8B85D9C2BD996D04E1525B /* Sources */,
+				36BAFB6F0B1C1B713CB88FAC /* Frameworks */,
+				BF1775C6B0530EE3CD211201 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Damoose;
+			productName = Damoose;
+			productReference = A7C28743E03F8D3B1AA0D68C /* Damoose.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		4CE6DEE227F7A08100C66700 /* damus */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4CE6DF0727F7A08200C66700 /* Build configuration list for PBXNativeTarget "damus" */;
@@ -5544,6 +5641,7 @@
 				D703D7242C66E47100A400EA /* PBXTargetDependency */,
 				82D6FAA02CD9820500C925F4 /* PBXTargetDependency */,
 				A0E1CDFEAEA00E22D5422E98 /* PBXTargetDependency */,
+				18241C40156802431B7F399D /* PBXTargetDependency */,
 			);
 			name = damus;
 			packageProductDependencies = (
@@ -5779,6 +5877,7 @@
 				D703D7162C66E47100A400EA /* HighlighterActionExtension */,
 				82D6FA962CD9820500C925F4 /* ShareExtension */,
 				13AE3D22F0CF1D41DEE86C10 /* DamusNostrSigner */,
+				454F3F97A25BAF4386597DA2 /* Damoose */,
 			);
 		};
 /* End PBXProject section */
@@ -5829,6 +5928,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				82D6FC822CD9A45D00C925F4 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BF1775C6B0530EE3CD211201 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				570A19771BE4FF96AADF17C5 /* background.js in Resources */,
+				05990030808D8F1709B29C54 /* content.js in Resources */,
+				5E25E297170F1C15B9259470 /* nostr.js in Resources */,
+				ABE9EB86264ECCED5297C8AF /* manifest.json in Resources */,
+				19597E310ACD06460F7AAF0A /* popup.html in Resources */,
+				64E4B33D2E1D29802194C133 /* popup.css in Resources */,
+				B483F5146380E12C905D7EE0 /* popup.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -7096,6 +7209,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BE8B85D9C2BD996D04E1525B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				255100AAA58739F43D61668E /* SafariWebExtensionHandler.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D703D7132C66E47100A400EA /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -7812,6 +7933,12 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		18241C40156802431B7F399D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Damoose;
+			target = 454F3F97A25BAF4386597DA2 /* Damoose */;
+			targetProxy = 96061C3A0420A16C7C4900B1 /* PBXContainerItemProxy */;
+		};
 		4CE6DEF527F7A08200C66700 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 4CE6DEE227F7A08100C66700 /* damus */;
@@ -8317,6 +8444,23 @@
 			};
 			name = Release;
 		};
+		5048BF14FD7EB52DC4C5A5C5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = Damoose/Damoose.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Damoose/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2.Damoose;
+				PRODUCT_NAME = Damoose;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
 		6EBA3562A32D18C724E1921C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -8405,6 +8549,24 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "damus-c/damus-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		C1BAEEE672C21D4D93B64202 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = Damoose/Damoose.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Damoose/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2.Damoose;
+				PRODUCT_NAME = Damoose;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -8613,6 +8775,15 @@
 			buildConfigurations = (
 				D79C4C1E2AFEB061003A41B4 /* Debug */,
 				D79C4C1F2AFEB061003A41B4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D8C0D39B7D40EF41D5AE31D3 /* Build configuration list for PBXNativeTarget "Damoose" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C1BAEEE672C21D4D93B64202 /* Release */,
+				5048BF14FD7EB52DC4C5A5C5 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

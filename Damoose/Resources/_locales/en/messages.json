@@ -1,0 +1,14 @@
+{
+    "extension_name": {
+        "message": "Damoose",
+        "description": "The display name for the extension."
+    },
+    "extension_description": {
+        "message": "The Damus nostr safari companion. Protect your key and create web highlights.",
+        "description": "Description of what the extension does."
+    },
+    "menuHighlight": {
+        "message": "Highlight",
+        "description": "The context menu item for the highlight action"
+    }
+}
