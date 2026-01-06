@@ -21,7 +21,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 
     // MARK: - Shared Storage Access
 
-    private static let appGroup = "group.com.jb55.damus2"
+    private static let appGroup = "group.com.damus"
     private static let pubkeyDefaultsKey = "pubkey"
 
     // MARK: - NSExtensionRequestHandling

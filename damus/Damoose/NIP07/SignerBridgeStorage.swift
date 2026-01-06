@@ -38,7 +38,7 @@ enum SignerBridgeStorage {
     // MARK: - Constants
 
     /// App Group identifier for shared storage.
-    private static let appGroup = "group.com.jb55.damus2"
+    private static let appGroup = "group.com.damus"
 
     /// Key prefix for pending requests.
     private static let requestPrefix = "signer_request_"
