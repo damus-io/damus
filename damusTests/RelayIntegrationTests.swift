@@ -32,7 +32,7 @@ final class RelayIntegrationTests: XCTestCase {
     /// Local strfry relay URL (Docker: docker run -p 7777:7777 dockurr/strfry)
     static let localRelayURL = RelayURL("ws://localhost:7777")!
 
-    /// Public relay for fallback testing (used when strfry not available)
+    /// Public relay for fallback testing
     static let publicRelayURL = RelayURL("wss://relay.damus.io")!
 
     /// Timeout for network operations (increase for throttled tests)
@@ -77,7 +77,13 @@ final class RelayIntegrationTests: XCTestCase {
     // MARK: - Helper Methods
 
     /// Check if local strfry relay is running
+    /// Uses environment variable FORCE_PUBLIC_RELAY=1 to skip local check
     func isLocalRelayAvailable() async -> Bool {
+        // Allow forcing public relay via environment (for local dev where Docker unreachable)
+        if ProcessInfo.processInfo.environment["FORCE_PUBLIC_RELAY"] == "1" {
+            return false
+        }
+
         let testPool = RelayPool(ndb: Ndb.test, keypair: keypair)
         let descriptor = RelayPool.RelayDescriptor(url: Self.localRelayURL, info: .readWrite)
 
@@ -85,25 +91,26 @@ final class RelayIntegrationTests: XCTestCase {
             try await testPool.add_relay(descriptor)
             await testPool.connect()
 
-            // Wait briefly for connection
-            try? await Task.sleep(for: .seconds(2))
-            let connected = await testPool.num_connected == 1
+            // Wait for connection with multiple checks
+            for _ in 0..<5 {
+                try? await Task.sleep(for: .milliseconds(500))
+                if await testPool.num_connected == 1 {
+                    await testPool.disconnect()
+                    return true
+                }
+            }
             await testPool.disconnect()
-            return connected
+            return false
         } catch {
             return false
         }
     }
 
-    /// Get relay URL (local strfry if available, otherwise public)
+    /// Get relay URL - always uses public relay for reliable testing.
+    /// Local strfry requires special setup and iOS Simulator can't reach Docker localhost.
     func getRelayURL() async -> RelayURL {
-        if await isLocalRelayAvailable() {
-            return Self.localRelayURL
-        } else {
-            // Increase timeout for public relay
-            networkTimeout = 30.0
-            return Self.publicRelayURL
-        }
+        networkTimeout = 30.0
+        return Self.publicRelayURL
     }
 
     /// Connect to relay and wait for connection
@@ -112,17 +119,15 @@ final class RelayIntegrationTests: XCTestCase {
         try await pool.add_relay(descriptor)
         await pool.connect()
 
-        // Wait for connection
-        let connectionExpectation = XCTestExpectation(description: "Waiting for connection")
-        Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { timer in
-            Task {
-                if await self.pool.num_connected == 1 {
-                    connectionExpectation.fulfill()
-                    timer.invalidate()
-                }
+        // Poll for connection with async sleep
+        for _ in 0..<Int(networkTimeout * 2) {
+            try await Task.sleep(for: .milliseconds(500))
+            let connected = await pool.num_connected
+            if connected >= 1 {
+                return
             }
         }
-        await fulfillment(of: [connectionExpectation], timeout: networkTimeout)
+        XCTFail("Failed to connect to relay within \(networkTimeout) seconds")
     }
 
     /// Parse JSON message to extract type (first element)
