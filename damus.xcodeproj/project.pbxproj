@@ -13,6 +13,7 @@
 		2710433E2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */; };
 		2710433F2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */; };
 		29FCAC04D2F32DC0AF2DD0DB /* SharedKeychainStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D63E9B4C14631B286D9378F /* SharedKeychainStorage.swift */; };
+		2FE60245345B4E46001D2428 /* content.js in Resources */ = {isa = PBXBuildFile; fileRef = F8DCE3961C99289AA8F15BD6 /* content.js */; };
 		3165648B295B70D500C64604 /* LinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3165648A295B70D500C64604 /* LinkView.swift */; };
 		3169CAE6294E69C000EE4006 /* EmptyTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CAE5294E69C000EE4006 /* EmptyTimelineView.swift */; };
 		3169CAED294FCCFC00EE4006 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CAEC294FCCFC00EE4006 /* Constants.swift */; };
@@ -499,6 +500,7 @@
 		50B5685329F97CB400A23243 /* CredentialHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B5685229F97CB400A23243 /* CredentialHandler.swift */; };
 		50C3E08A2AA8E3F7006A4BC0 /* AVPlayer+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C3E0892AA8E3F7006A4BC0 /* AVPlayer+Additions.swift */; };
 		50DA11262A16A23F00236234 /* Launch.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 50DA11252A16A23F00236234 /* Launch.storyboard */; };
+		55AF4186A2E0B85D9550F4DD /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9FD6A85B7BEB1B79F49C5F6F /* SafariServices.framework */; };
 		59102E60D090B047ABC17B74 /* NostrSignerApprovalSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74D4B97BA76DE5AC7BFE2D48 /* NostrSignerApprovalSheet.swift */; };
 		5C0567532C8B5F9C0073F23A /* PostingTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */; };
 		5C0567552C8B60C20073F23A /* OffsetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567542C8B60C20073F23A /* OffsetExtension.swift */; };
@@ -629,6 +631,7 @@
 		643EA5C8296B764E005081BB /* RelayFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 643EA5C7296B764E005081BB /* RelayFilterView.swift */; };
 		647D9A8D2968520300A295DE /* SideMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 647D9A8C2968520300A295DE /* SideMenuView.swift */; };
 		64FBD06F296255C400D9D3B2 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64FBD06E296255C400D9D3B2 /* Theme.swift */; };
+		676E8F8EE47E251878864707 /* injected.js in Resources */ = {isa = PBXBuildFile; fileRef = 522D287AAF3EAFE42A4FA783 /* injected.js */; };
 		69E7EC3BEBDF4DEAEF899293 /* NostrSignerHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09F652082F3612D2D958155A /* NostrSignerHandler.swift */; };
 		7527271E2A93FF0100214108 /* Block.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7527271D2A93FF0100214108 /* Block.swift */; };
 		75AD872B2AA23A460085EF2C /* Block+Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75AD872A2AA23A460085EF2C /* Block+Tests.swift */; };
@@ -1084,6 +1087,7 @@
 		98B76D31D3F167D9DC581FF3 /* NostrSignerResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168D00B2CC7643AD5746FAED /* NostrSignerResponse.swift */; };
 		9C83F89329A937B900136C08 /* TextViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C83F89229A937B900136C08 /* TextViewWrapper.swift */; };
 		9CA876E229A00CEA0003B9A3 /* AttachMediaUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */; };
+		A0D4F8CF0780353F18973E20 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = BC8FAE1CCDB3B47CDD7AB12C /* manifest.json */; };
 		ADFE73552AD4793100EC7326 /* QRScanNSECView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADFE73542AD4793100EC7326 /* QRScanNSECView.swift */; };
 		B501062D2B363036003874F5 /* AuthIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B501062C2B363036003874F5 /* AuthIntegrationTests.swift */; };
 		B51C1CEA2B55A60A00E312A9 /* AddMuteItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51C1CE82B55A60A00E312A9 /* AddMuteItemView.swift */; };
@@ -1106,6 +1110,8 @@
 		BA3759972ABCCF360018D73B /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3759962ABCCF360018D73B /* CameraPreview.swift */; };
 		BA693074295D649800ADDB87 /* UserSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA693073295D649800ADDB87 /* UserSettingsStore.swift */; };
 		BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */; };
+		C6AFF986F9412344F6C88A39 /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 193470E69DEC0B529B33A722 /* background.js */; };
+		CCB9F4B71BCB69EFE8EAA19F /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62CC338E2401529E37DB6760 /* SafariWebExtensionHandler.swift */; };
 		D2277EEA2A089BD5006C3807 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2277EE92A089BD5006C3807 /* Router.swift */; };
 		D5C1AFBF2E5DF7E60092F72F /* ContactCardManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5C1AFBE2E5DF7E60092F72F /* ContactCardManager.swift */; };
 		D5C1AFC02E5DF7E60092F72F /* ContactCardManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5C1AFBE2E5DF7E60092F72F /* ContactCardManager.swift */; };
@@ -1926,6 +1932,8 @@
 		E0EE9DD42B8E5FEA00F3002D /* ImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0EE9DD32B8E5FEA00F3002D /* ImageProcessing.swift */; };
 		E4FA1C032A24BB7F00482697 /* SearchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */; };
 		E990020F2955F837003BBC5A /* EditMetadataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E990020E2955F837003BBC5A /* EditMetadataView.swift */; };
+		F08581200EF8D654150E7208 /* DamusNostrSigner.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 9026E9C3435D4FD77AA73D5F /* DamusNostrSigner.appex */; };
+		F2EB6F7685B23EEACDD1DF0F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FF6AE40E2192CE8CBD2C56B /* Foundation.framework */; };
 		F71694EA2A662232001F4053 /* OnboardingSuggestionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694E92A662232001F4053 /* OnboardingSuggestionsView.swift */; };
 		F71694EC2A662292001F4053 /* SuggestedUsersViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694EB2A662292001F4053 /* SuggestedUsersViewModel.swift */; };
 		F71694F22A67314D001F4053 /* SuggestedUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694F12A67314D001F4053 /* SuggestedUserView.swift */; };
@@ -1978,6 +1986,13 @@
 			remoteGlobalIDString = D79C4C132AFEB061003A41B4;
 			remoteInfo = DamusNotificationService;
 		};
+		F87831C8A2DD3D549559BF82 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4CE6DEDB27F7A08100C66700 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 13AE3D22F0CF1D41DEE86C10;
+			remoteInfo = DamusNostrSigner;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -1994,12 +2009,25 @@
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D7B1004E81D79839428CD27E /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				F08581200EF8D654150E7208 /* DamusNostrSigner.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		09F652082F3612D2D958155A /* NostrSignerHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NostrSignerHandler.swift; sourceTree = "<group>"; };
 		0E8A4BB62AE4359200065E81 /* NostrFilter+Hashable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NostrFilter+Hashable.swift"; sourceTree = "<group>"; };
 		168D00B2CC7643AD5746FAED /* NostrSignerResponse.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NostrSignerResponse.swift; sourceTree = "<group>"; };
+		193470E69DEC0B529B33A722 /* background.js */ = {isa = PBXFileReference; includeInIndex = 1; path = background.js; sourceTree = "<group>"; };
+		1FF6AE40E2192CE8CBD2C56B /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostingTimelineSwitcherView.swift; sourceTree = "<group>"; };
 		3165648A295B70D500C64604 /* LinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkView.swift; sourceTree = "<group>"; };
 		3169CAE5294E69C000EE4006 /* EmptyTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyTimelineView.swift; sourceTree = "<group>"; };
@@ -2127,6 +2155,7 @@
 		3BEFA9DDC028EAD6CF8F2C1F /* NostrSignerApprovalView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NostrSignerApprovalView.swift; sourceTree = "<group>"; };
 		3CCD1E692A874C4E0099A953 /* Nip98HTTPAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Nip98HTTPAuth.swift; sourceTree = "<group>"; };
 		3D40F8593960E80C843C56D7 /* ContactListPolicy.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContactListPolicy.swift; sourceTree = "<group>"; };
+		3E23A75C84D14AAE0E5E45F0 /* manifest.json */ = {isa = PBXFileReference; includeInIndex = 1; name = manifest.json; path = DamusNostrSigner/Resources/manifest.json; sourceTree = "<group>"; };
 		4C011B5C2BD0A56A002F2F9B /* ChatEventView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatEventView.swift; sourceTree = "<group>"; };
 		4C011B5D2BD0A56A002F2F9B /* ChatroomThreadView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatroomThreadView.swift; sourceTree = "<group>"; };
 		4C011B602BD0B25C002F2F9B /* ReplyQuoteView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReplyQuoteView.swift; sourceTree = "<group>"; };
@@ -2634,6 +2663,7 @@
 		50B5685229F97CB400A23243 /* CredentialHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialHandler.swift; sourceTree = "<group>"; };
 		50C3E0892AA8E3F7006A4BC0 /* AVPlayer+Additions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVPlayer+Additions.swift"; sourceTree = "<group>"; };
 		50DA11252A16A23F00236234 /* Launch.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Launch.storyboard; sourceTree = "<group>"; };
+		522D287AAF3EAFE42A4FA783 /* injected.js */ = {isa = PBXFileReference; includeInIndex = 1; path = injected.js; sourceTree = "<group>"; };
 		5C0567542C8B60C20073F23A /* OffsetExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OffsetExtension.swift; sourceTree = "<group>"; };
 		5C0567572C8FBC560073F23A /* NDBSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NDBSearchView.swift; sourceTree = "<group>"; };
 		5C0707D02A1ECB38004E7B51 /* DamusLogoGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusLogoGradient.swift; sourceTree = "<group>"; };
@@ -2689,6 +2719,7 @@
 		5CF2DCCB2AA3AF0B00984B8D /* RelayPicView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayPicView.swift; sourceTree = "<group>"; };
 		5CF2DCCD2AABE1A500984B8D /* DamusLightGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusLightGradient.swift; sourceTree = "<group>"; };
 		5CF72FC129B9142F00124A13 /* ShareAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareAction.swift; sourceTree = "<group>"; };
+		62CC338E2401529E37DB6760 /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
 		6439E013296790CF0020672B /* ProfilePicImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePicImageView.swift; sourceTree = "<group>"; };
 		643EA5C7296B764E005081BB /* RelayFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayFilterView.swift; sourceTree = "<group>"; };
 		647D9A8C2968520300A295DE /* SideMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuView.swift; sourceTree = "<group>"; };
@@ -2706,9 +2737,14 @@
 		82D6FA992CD9820500C925F4 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		82D6FA9E2CD9820500C925F4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		82D6FAA62CD9820500C925F4 /* share extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "share extension.entitlements"; sourceTree = "<group>"; };
+		885F1419791278D5CD1B5FF1 /* injected.js */ = {isa = PBXFileReference; includeInIndex = 1; name = injected.js; path = DamusNostrSigner/Resources/injected.js; sourceTree = "<group>"; };
+		9026E9C3435D4FD77AA73D5F /* DamusNostrSigner.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DamusNostrSigner.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		9609F057296E220800069BF3 /* BannerImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerImageView.swift; sourceTree = "<group>"; };
 		9C83F89229A937B900136C08 /* TextViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextViewWrapper.swift; sourceTree = "<group>"; };
 		9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachMediaUtility.swift; sourceTree = "<group>"; };
+		9FD6A85B7BEB1B79F49C5F6F /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
+		A0A4D10D75CE8E201B5E42E6 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A2F0CD60F688EAA487166BAE /* DamusNostrSigner.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = DamusNostrSigner.entitlements; sourceTree = "<group>"; };
 		AC5F33E64B399631CC45907D /* NostrSignerRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NostrSignerRequest.swift; sourceTree = "<group>"; };
 		ADFE73542AD4793100EC7326 /* QRScanNSECView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QRScanNSECView.swift; sourceTree = "<group>"; };
 		B501062C2B363036003874F5 /* AuthIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthIntegrationTests.swift; sourceTree = "<group>"; usesTabs = 0; };
@@ -2731,6 +2767,9 @@
 		BA3759962ABCCF360018D73B /* CameraPreview.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraPreview.swift; sourceTree = "<group>"; };
 		BA693073295D649800ADDB87 /* UserSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettingsStore.swift; sourceTree = "<group>"; };
 		BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectWalletView.swift; sourceTree = "<group>"; };
+		BC8FAE1CCDB3B47CDD7AB12C /* manifest.json */ = {isa = PBXFileReference; includeInIndex = 1; path = manifest.json; sourceTree = "<group>"; };
+		C3085D5F0A92D0E1307A0FAD /* background.js */ = {isa = PBXFileReference; includeInIndex = 1; name = background.js; path = DamusNostrSigner/Resources/background.js; sourceTree = "<group>"; };
+		D075B09D7D0CCCE86CDEE73B /* content.js */ = {isa = PBXFileReference; includeInIndex = 1; name = content.js; path = DamusNostrSigner/Resources/content.js; sourceTree = "<group>"; };
 		D2277EE92A089BD5006C3807 /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		D5C1AFBE2E5DF7E60092F72F /* ContactCardManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactCardManager.swift; sourceTree = "<group>"; };
 		D5C1AFC32E5DFF700092F72F /* ContactCardManagerMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactCardManagerMock.swift; sourceTree = "<group>"; };
@@ -2897,11 +2936,21 @@
 		F79C7FAC29D5E9620000F946 /* EditPictureControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditPictureControl.swift; sourceTree = "<group>"; };
 		F7F0BA24297892BD009531F3 /* SwipeToDismiss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeToDismiss.swift; sourceTree = "<group>"; };
 		F7F0BA262978E54D009531F3 /* ParticipantsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsView.swift; sourceTree = "<group>"; };
+		F8DCE3961C99289AA8F15BD6 /* content.js */ = {isa = PBXFileReference; includeInIndex = 1; path = content.js; sourceTree = "<group>"; };
 		F944F56D29EA9CCC0067B3BF /* DamusParseContentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusParseContentTests.swift; sourceTree = "<group>"; };
 		FB5DC8601708330B96927EAD /* ClientPermissions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ClientPermissions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		1CAA67003388224F30381A99 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F2EB6F7685B23EEACDD1DF0F /* Foundation.framework in Frameworks */,
+				55AF4186A2E0B85D9550F4DD /* SafariServices.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4CE6DEE027F7A08100C66700 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -2981,6 +3030,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1B0292BDC6A10318AEA6B1AA /* images */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = images;
+			path = images;
+			sourceTree = "<group>";
+		};
 		3169CAE4294E699400EE4006 /* Empty Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -3797,6 +3854,7 @@
 				D703D71A2C66E47100A400EA /* highlighter action extension */,
 				4CE6DEE427F7A08100C66700 /* Products */,
 				4CEE2AE62804F57B00AB5EEF /* Frameworks */,
+				71870F8E223FD99D1C1EEF87 /* DamusNostrSigner */,
 			);
 			indentWidth = 4;
 			sourceTree = "<group>";
@@ -3811,6 +3869,7 @@
 				D79C4C142AFEB061003A41B4 /* DamusNotificationService.appex */,
 				D703D7172C66E47100A400EA /* HighlighterActionExtension.appex */,
 				82D6FA972CD9820500C925F4 /* ShareExtension.appex */,
+				9026E9C3435D4FD77AA73D5F /* DamusNostrSigner.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -3948,6 +4007,8 @@
 			children = (
 				4CEE2AE72804F57C00AB5EEF /* libsecp256k1.a */,
 				D703D7182C66E47100A400EA /* UniformTypeIdentifiers.framework */,
+				EED42668367911BFAD7705D0 /* iOS */,
+				9FD6A85B7BEB1B79F49C5F6F /* SafariServices.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -5131,6 +5192,18 @@
 			path = Damoose;
 			sourceTree = "<group>";
 		};
+		71870F8E223FD99D1C1EEF87 /* DamusNostrSigner */ = {
+			isa = PBXGroup;
+			children = (
+				62CC338E2401529E37DB6760 /* SafariWebExtensionHandler.swift */,
+				A0A4D10D75CE8E201B5E42E6 /* Info.plist */,
+				A2F0CD60F688EAA487166BAE /* DamusNostrSigner.entitlements */,
+				A3175E5A3737111893284EB5 /* Resources */,
+			);
+			name = DamusNostrSigner;
+			path = DamusNostrSigner;
+			sourceTree = "<group>";
+		};
 		7C0F392D29B57C8F0039859C /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
@@ -5153,6 +5226,19 @@
 				82D6FA992CD9820500C925F4 /* ShareViewController.swift */,
 			);
 			path = "share extension";
+			sourceTree = "<group>";
+		};
+		A3175E5A3737111893284EB5 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				BC8FAE1CCDB3B47CDD7AB12C /* manifest.json */,
+				F8DCE3961C99289AA8F15BD6 /* content.js */,
+				522D287AAF3EAFE42A4FA783 /* injected.js */,
+				193470E69DEC0B529B33A722 /* background.js */,
+				1B0292BDC6A10318AEA6B1AA /* images */,
+			);
+			name = Resources;
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		A788F30AB4EECC73595473F9 /* Policies */ = {
@@ -5365,12 +5451,28 @@
 			path = NostrNetworkManagerTests;
 			sourceTree = "<group>";
 		};
+		DC90AF30C435D1A9EE8F8419 /* images */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = images;
+			path = DamusNostrSigner/Resources/images;
+			sourceTree = "<group>";
+		};
 		E06336A72B7582D600A88E6B /* Assets */ = {
 			isa = PBXGroup;
 			children = (
 				E06336A82B7582E000A88E6B /* img_with_location.jpeg */,
 			);
 			path = Assets;
+			sourceTree = "<group>";
+		};
+		EED42668367911BFAD7705D0 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				1FF6AE40E2192CE8CBD2C56B /* Foundation.framework */,
+			);
+			name = iOS;
 			sourceTree = "<group>";
 		};
 		F71694E82A66221E001F4053 /* Onboarding */ = {
@@ -5408,6 +5510,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		13AE3D22F0CF1D41DEE86C10 /* DamusNostrSigner */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2BB7AB7FE0219058B2F32962 /* Build configuration list for PBXNativeTarget "DamusNostrSigner" */;
+			buildPhases = (
+				5D96B429F0B779FF0EEEB8D2 /* Sources */,
+				1CAA67003388224F30381A99 /* Frameworks */,
+				D85C3B1ACF36594289189AEB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DamusNostrSigner;
+			productName = DamusNostrSigner;
+			productReference = 9026E9C3435D4FD77AA73D5F /* DamusNostrSigner.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		4CE6DEE227F7A08100C66700 /* damus */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4CE6DF0727F7A08200C66700 /* Build configuration list for PBXNativeTarget "damus" */;
@@ -5417,6 +5536,7 @@
 				4C1D4FB22A7965230024F453 /* ShellScript */,
 				4CE6DEE127F7A08100C66700 /* Resources */,
 				D79C4C1D2AFEB061003A41B4 /* Embed Foundation Extensions */,
+				D7B1004E81D79839428CD27E /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
@@ -5424,6 +5544,7 @@
 				D79C4C1A2AFEB061003A41B4 /* PBXTargetDependency */,
 				D703D7242C66E47100A400EA /* PBXTargetDependency */,
 				82D6FAA02CD9820500C925F4 /* PBXTargetDependency */,
+				A0E1CDFEAEA00E22D5422E98 /* PBXTargetDependency */,
 			);
 			name = damus;
 			packageProductDependencies = (
@@ -5658,6 +5779,7 @@
 				D79C4C132AFEB061003A41B4 /* DamusNotificationService */,
 				D703D7162C66E47100A400EA /* HighlighterActionExtension */,
 				82D6FA962CD9820500C925F4 /* ShareExtension */,
+				13AE3D22F0CF1D41DEE86C10 /* DamusNostrSigner */,
 			);
 		};
 /* End PBXProject section */
@@ -5730,6 +5852,17 @@
 				D7C9701F2C890FEB00C56602 /* Localizable.stringsdict in Resources */,
 				D7C9701E2C890FC500C56602 /* Localizable.strings in Resources */,
 				D7FB14252BE5A9A800398331 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D85C3B1ACF36594289189AEB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A0D4F8CF0780353F18973E20 /* manifest.json in Resources */,
+				2FE60245345B4E46001D2428 /* content.js in Resources */,
+				676E8F8EE47E251878864707 /* injected.js in Resources */,
+				C6AFF986F9412344F6C88A39 /* background.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6402,6 +6535,14 @@
 			files = (
 				D71AD9012CEC2398002E2C3C /* AppAccessibilityIdentifiers.swift in Sources */,
 				4CE6DF0227F7A08200C66700 /* damusUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5D96B429F0B779FF0EEEB8D2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CCB9F4B71BCB69EFE8EAA19F /* SafariWebExtensionHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -7686,6 +7827,12 @@
 			target = 82D6FA962CD9820500C925F4 /* ShareExtension */;
 			targetProxy = 82D6FA9F2CD9820500C925F4 /* PBXContainerItemProxy */;
 		};
+		A0E1CDFEAEA00E22D5422E98 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = DamusNostrSigner;
+			target = 13AE3D22F0CF1D41DEE86C10 /* DamusNostrSigner */;
+			targetProxy = F87831C8A2DD3D549559BF82 /* PBXContainerItemProxy */;
+		};
 		D703D7242C66E47100A400EA /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D703D7162C66E47100A400EA /* HighlighterActionExtension */;
@@ -7827,6 +7974,29 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		12F9B85D578454A1165DFC0D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = DamusNostrSigner/DamusNostrSigner.entitlements;
+				INFOPLIST_FILE = DamusNostrSigner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2.DamusNostrSigner;
+				PRODUCT_NAME = DamusNostrSigner;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		4CE6DF0527F7A08200C66700 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -8147,6 +8317,28 @@
 			};
 			name = Release;
 		};
+		6EBA3562A32D18C724E1921C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = DamusNostrSigner/DamusNostrSigner.entitlements;
+				INFOPLIST_FILE = DamusNostrSigner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2.DamusNostrSigner;
+				PRODUCT_NAME = DamusNostrSigner;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 		82D6FAA22CD9820500C925F4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -8353,6 +8545,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		2BB7AB7FE0219058B2F32962 /* Build configuration list for PBXNativeTarget "DamusNostrSigner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				12F9B85D578454A1165DFC0D /* Release */,
+				6EBA3562A32D18C724E1921C /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		4CE6DEDE27F7A08100C66700 /* Build configuration list for PBXProject "damus" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
