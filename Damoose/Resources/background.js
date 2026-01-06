@@ -23,12 +23,13 @@ browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
 
 function setup_highlighter() {
-    browser.contextMenus.create {
-        id: "damoose-highlighter",
-        title: browser.i18n.getMessage("menuHighlight"),
-        contexts: ["selection", "image", "link"],
-      },
-      handle_menu_item_click
+    browser.contextMenus.create(
+        {
+            id: "damoose-highlighter",
+            title: browser.i18n.getMessage("menuHighlight"),
+            contexts: ["selection", "image", "link"],
+        },
+        handle_menu_item_click
     );
 
     function handle_menu_item_click(event) {
