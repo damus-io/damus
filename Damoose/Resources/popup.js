@@ -47,18 +47,32 @@ function update_view(host, rs) {
     <ul>
       ${rendered_groups}
     </ul>
-    <button id="approve">Approve</button>
-    <button id="deny">Deny</button>
+    <label>
+      <input type="checkbox" id="remember"> Remember this permission
+    </label>
+    <div style="margin-top: 10px;">
+      <button id="approve">Approve</button>
+      <button id="deny">Deny</button>
+    </div>
     `
 
     document.getElementById("approve").addEventListener("click", approve)
     document.getElementById("deny").addEventListener("click", deny)
 }
 
-function act(kind) {
+function act(msgKind) {
+    const remember = document.getElementById("remember")?.checked ?? false
     for (const reqId of Object.keys(requests)) {
         const payload = requests[reqId]
-        window.parent.postMessage({kind, reqId, payload}, '*')
+        // Include remember flag and origin for permission storage
+        const message = {
+            kind: msgKind,
+            reqId,
+            payload,
+            remember,
+            origin: host
+        }
+        window.parent.postMessage(message, '*')
         delete requests[reqId]
     }
 }

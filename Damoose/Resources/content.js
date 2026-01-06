@@ -101,7 +101,8 @@ function setup_iframe() {
 
             hide_popup()
 
-            const result = await browser.runtime.sendMessage({ kind, reqId, payload})
+            const { remember, origin } = message.data
+            const result = await browser.runtime.sendMessage({ kind, reqId, payload, remember, origin })
 
             console.log("%s %s result:", kind, payload.kind, result);
 
@@ -110,6 +111,35 @@ function setup_iframe() {
 
             console.log(`${kind} extension result: ${result}`)
         } else {
+            // Check if we have a saved permission for this request type
+            const requestKind = message.data.payload?.kind
+            if (message.data.kind === 'signEvent' && requestKind !== undefined) {
+                // Check permission before showing popup
+                const permissionResult = await browser.runtime.sendMessage({
+                    kind: 'checkPermission',
+                    payload: { kind: requestKind, origin: window.location.host }
+                })
+
+                if (permissionResult?.approved) {
+                    // Permission already granted, sign directly
+                    const signPayload = {
+                        ...message.data,
+                        remember: false,
+                        origin: window.location.host
+                    }
+                    const result = await browser.runtime.sendMessage({
+                        kind: 'approve',
+                        payload: signPayload,
+                        remember: false,
+                        origin: window.location.host
+                    })
+                    const returnKind = `return_${message.data.kind}`
+                    window.postMessage({kind: returnKind, reqId: message.data.reqId, payload: result}, '*')
+                    return
+                }
+            }
+
+            // No saved permission, show popup for approval
             queue_request(host_state, message.data)
             iframe.contentWindow.postMessage({
                 kind: 'request',

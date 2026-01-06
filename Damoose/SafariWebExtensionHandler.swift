@@ -15,7 +15,8 @@ import secp256k1
 /// NIP-07 request types from the Safari extension JavaScript.
 enum DamooseRequest {
     case getPublicKey
-    case signEvent(SignEventPayload)
+    case signEvent(SignEventPayload, remember: Bool, origin: String)
+    case checkPermission(kind: Int, origin: String)
     case getRelays
     case nip04_encrypt(Nip04EncryptPayload)
     case nip04_decrypt(Nip04DecryptPayload)
@@ -25,6 +26,7 @@ enum DamooseRequest {
 enum DamooseResponse {
     case pubkey(String)
     case signedEvent(SignedEvent)
+    case permissionApproved
 
     /// The raw value to send back to JavaScript.
     var val: Any {
@@ -33,6 +35,8 @@ enum DamooseResponse {
             string
         case .signedEvent(let signedEvent):
             signedEvent
+        case .permissionApproved:
+            ["approved": true]
         }
     }
 }
@@ -106,6 +110,38 @@ func getStoredPrivateKey() -> String? {
     }
 
     return hex.trimmingCharacters(in: .whitespaces)
+}
+
+// MARK: - Permission Storage
+
+private let damoosePermissionsKey = "damoose_permissions"
+
+/// Builds a unique key for a permission (origin + kind).
+private func permissionKey(origin: String, kind: Int) -> String {
+    return "\(origin):\(kind)"
+}
+
+/// Checks if a permission has been approved for a given origin and event kind.
+func isPermissionApproved(kind: Int, origin: String) -> Bool {
+    guard let defaults = UserDefaults(suiteName: damooseAppGroupId) else {
+        return false
+    }
+    let permissions = defaults.dictionary(forKey: damoosePermissionsKey) as? [String: Bool] ?? [:]
+    let key = permissionKey(origin: origin, kind: kind)
+    return permissions[key] == true
+}
+
+/// Saves an approved permission for a given origin and event kind.
+func savePermission(kind: Int, origin: String) {
+    guard let defaults = UserDefaults(suiteName: damooseAppGroupId) else {
+        os_log(.error, "Failed to access app group UserDefaults for saving permission")
+        return
+    }
+    var permissions = defaults.dictionary(forKey: damoosePermissionsKey) as? [String: Bool] ?? [:]
+    let key = permissionKey(origin: origin, kind: kind)
+    permissions[key] = true
+    defaults.set(permissions, forKey: damoosePermissionsKey)
+    os_log(.info, "Saved permission for %@ kind %d", origin, kind)
 }
 
 // MARK: - Crypto Helpers
@@ -209,7 +245,16 @@ func decode_damoose_request(_ message: Any) -> DamooseRequest? {
            let kind = payloadDict["kind"] as? Int,
            let tags = payloadDict["tags"] as? [[String]],
            let content = payloadDict["content"] as? String {
-            return .signEvent(SignEventPayload(created_at: createdAt, kind: kind, tags: tags, content: content))
+            // remember and origin come from the outer dict, not payload
+            let remember = dict["remember"] as? Bool ?? false
+            let origin = dict["origin"] as? String ?? ""
+            return .signEvent(SignEventPayload(created_at: createdAt, kind: kind, tags: tags, content: content), remember: remember, origin: origin)
+        }
+
+    case "checkPermission":
+        if let kind = payloadDict["kind"] as? Int,
+           let origin = payloadDict["origin"] as? String {
+            return .checkPermission(kind: kind, origin: origin)
         }
 
     case "getRelays":
@@ -246,14 +291,17 @@ func handle_request(_ req: DamooseRequest) -> DamooseResponse? {
             return nil
         }
         return .pubkey(pubkey)
-    case .signEvent(let payload):
-        return handleSignEvent(payload)
+    case .signEvent(let payload, let remember, let origin):
+        return handleSignEvent(payload, remember: remember, origin: origin)
     case .getRelays:
         return nil
     case .nip04_encrypt(_):
         return nil
     case .nip04_decrypt(_):
         return nil
+    case .checkPermission(let kind, let origin):
+        let approved = isPermissionApproved(kind: kind, origin: origin)
+        return approved ? .permissionApproved : nil
     }
 }
 
@@ -265,8 +313,14 @@ func handle_request(_ req: DamooseRequest) -> DamooseResponse? {
 /// 1. Reads private key from keychain
 /// 2. Computes event ID (SHA256 of commitment)
 /// 3. Signs with secp256k1 schnorr
-/// 4. Returns complete signed event
-func handleSignEvent(_ payload: SignEventPayload) -> DamooseResponse? {
+/// 4. Optionally saves permission if remember is true
+/// 5. Returns complete signed event
+///
+/// - Parameters:
+///   - payload: The unsigned event to sign.
+///   - remember: If true, saves permission for this origin+kind.
+///   - origin: The requesting website's origin for permission storage.
+func handleSignEvent(_ payload: SignEventPayload, remember: Bool, origin: String) -> DamooseResponse? {
     guard let pubkeyHex = getStoredPublicKey() else {
         os_log(.error, "No pubkey stored - user not logged in")
         return nil
@@ -295,6 +349,11 @@ func handleSignEvent(_ payload: SignEventPayload) -> DamooseResponse? {
     guard let signature = signEventId(privkeyHex: privkeyHex, eventId: eventId) else {
         os_log(.error, "Failed to sign event")
         return nil
+    }
+
+    // Save permission if requested
+    if remember && !origin.isEmpty {
+        savePermission(kind: payload.kind, origin: origin)
     }
 
     let signedEvent = SignedEvent(

@@ -1,10 +1,23 @@
 browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     switch (message.kind) {
         case 'approve':
-            return browser.runtime.sendNativeMessage("damoose", message.payload)
+            // Include remember flag and origin for permission storage
+            const nativePayload = {
+                ...message.payload,
+                remember: message.remember ?? false,
+                origin: message.origin ?? ""
+            }
+            return browser.runtime.sendNativeMessage("damoose", nativePayload)
 
         case 'deny':
             return Promise.resolve()
+
+        case 'checkPermission':
+            // Check if permission is already saved for this origin+kind
+            return browser.runtime.sendNativeMessage("damoose", {
+                kind: 'checkPermission',
+                payload: message.payload
+            })
     }
 });
 

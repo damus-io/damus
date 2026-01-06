@@ -25,6 +25,7 @@ struct ConfigView: View {
     // String constants
     private let DELETE_KEYWORD = "DELETE"
     private let keysTitle = NSLocalizedString("Keys", comment: "Settings section for managing keys")
+    private let safariExtensionTitle = NSLocalizedString("Safari Extension", comment: "Settings section for the NIP-07 Safari extension")
     private let appearanceTitle = NSLocalizedString("Appearance and filters", comment: "Section header for text, appearance, and content filter settings")
     private let searchUniverseTitle = NSLocalizedString("Search / Universe", comment: "Section header for search/universe settings")
     private let notificationsTitle = NSLocalizedString("Notifications", comment: "Section header for Damus notifications")
@@ -59,6 +60,12 @@ struct ConfigView: View {
                     if showSettingsButton(title: keysTitle){
                         NavigationLink(value:Route.KeySettings(keypair: state.keypair)){
                             IconLabel(keysTitle,img_name:"Key",color:.purple)
+                        }
+                    }
+                    // Safari Extension (Damoose NIP-07)
+                    if showSettingsButton(title: safariExtensionTitle){
+                        NavigationLink(value:Route.SafariExtensionSettings){
+                            IconLabel(safariExtensionTitle,img_name:"globe",color:.blue)
                         }
                     }
                     // Appearance and filters
