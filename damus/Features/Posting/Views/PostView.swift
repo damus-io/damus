@@ -811,21 +811,25 @@ private func isAlphanumeric(_ char: Character) -> Bool {
     return char.isLetter || char.isNumber
 }
 
+/// Generates NIP-10 compliant e-tags for replies.
+/// Format: `["e", <event-id>, <relay-url>, <marker>, <pubkey>]`
 func nip10_reply_tags(replying_to: NostrEvent, keypair: Keypair, relayURL: RelayURL?) -> [[String]] {
     guard let nip10 = replying_to.thread_reply() else {
         // we're replying to a post that isn't in a thread,
         // just add a single reply-to-root tag
-        return [["e", replying_to.id.hex(), relayURL?.absoluteString ?? "", "root"]]
+        return [["e", replying_to.id.hex(), relayURL?.absoluteString ?? "", "root", replying_to.pubkey.hex()]]
     }
 
     // otherwise use the root tag from the parent's nip10 reply and include the note
     // that we are replying to's note id.
-    let tags = [
-        ["e", nip10.root.note_id.hex(), nip10.root.relay ?? "", "root"],
-        ["e", replying_to.id.hex(), relayURL?.absoluteString ?? "", "reply"]
-    ]
+    var rootTag = ["e", nip10.root.note_id.hex(), nip10.root.relay ?? "", "root"]
+    if let rootPubkey = nip10.root.pubkey {
+        rootTag.append(rootPubkey.hex())
+    }
 
-    return tags
+    let replyTag = ["e", replying_to.id.hex(), relayURL?.absoluteString ?? "", "reply", replying_to.pubkey.hex()]
+
+    return [rootTag, replyTag]
 }
 
 func build_post(state: DamusState, action: PostAction, draft: DraftArtifacts) async -> NostrPost {

@@ -35,12 +35,12 @@ struct EventShell<Content: View>: View {
         !options.contains(.no_action_bar)
     }
     
-    func get_mention(ndb: Ndb) -> Mention<NoteId>? {
+    func get_mention(ndb: Ndb) -> NoteMentionWithHints? {
         if self.options.contains(.nested) || self.options.contains(.no_mentions) {
             return nil
         }
-        
-        return first_eref_mention(ndb: ndb, ev: event, keypair: state.keypair)
+
+        return first_eref_mention_with_hints(ndb: ndb, ev: event, keypair: state.keypair)
     }
     
     var ActionBar: some View {
@@ -76,7 +76,7 @@ struct EventShell<Content: View>: View {
                 content
 
                 if let mention = get_mention(ndb: state.ndb) {
-                    MentionView(damus_state: state, mention: mention)
+                    MentionView(damus_state: state, mention: .note(mention.noteId, index: mention.index), relayHints: mention.relayHints)
                 }
                 
                 if has_action_bar {
@@ -108,7 +108,7 @@ struct EventShell<Content: View>: View {
             if !options.contains(.no_mentions),
                let mention = get_mention(ndb: state.ndb)
             {
-                MentionView(damus_state: state, mention: mention)
+                MentionView(damus_state: state, mention: .note(mention.noteId, index: mention.index), relayHints: mention.relayHints)
                     .padding(.horizontal)
             }
             

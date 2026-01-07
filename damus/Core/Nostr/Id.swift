@@ -49,22 +49,22 @@ protocol TagItemConvertible {
 
 struct QuoteId: IdType, TagKey, TagConvertible {
     let id: Data
-    
+
     init(_ data: Data) {
         self.id = data
     }
-    
+
     /// The note id being quoted
     var note_id: NoteId {
         NoteId(self.id)
     }
 
     var keychar: AsciiCharacter { "q" }
-    
+
     var tag: [String] {
         ["q", self.hex()]
     }
-    
+
     static func from_tag(tag: TagSequence) -> QuoteId? {
         var i = tag.makeIterator()
 
@@ -77,6 +77,52 @@ struct QuoteId: IdType, TagKey, TagConvertible {
         else { return nil }
 
         return quote_id
+    }
+}
+
+/// A quote reference with optional relay hints for fetching.
+///
+/// Per NIP-10/NIP-18, `q` tags include a relay URL at position 2 where the quoted
+/// event can be found.
+///
+/// Note: The NIPs allow `q` tags to contain either event IDs (hex) or event addresses
+/// (`<kind>:<pubkey>:<d>` for replaceable events). This implementation currently only
+/// supports hex event IDs; quotes of addressable events are not yet handled.
+struct QuoteRef: TagConvertible {
+    let quote_id: QuoteId
+    let relayHints: [RelayURL]
+
+    /// The note ID being quoted
+    var note_id: NoteId {
+        quote_id.note_id
+    }
+
+    var tag: [String] {
+        var tagBuilder = ["q", quote_id.hex()]
+        if let relay = relayHints.first {
+            tagBuilder.append(relay.absoluteString)
+        }
+        return tagBuilder
+    }
+
+    /// Parses a `q` tag into a QuoteRef, preserving relay hints from position 2.
+    ///
+    /// Only parses `q` tags containing hex event IDs. Tags with event addresses
+    /// (`<kind>:<pubkey>:<d>`) are not currently supported and will return nil.
+    static func from_tag(tag: TagSequence) -> QuoteRef? {
+        var i = tag.makeIterator()
+
+        guard tag.count >= 2,
+              let t0 = i.next(),
+              let key = t0.single_char,
+              key == "q",
+              let t1 = i.next(),
+              let data = t1.id()
+        else { return nil }
+
+        let quoteId = QuoteId(data)
+        let relayHints = tag.relayHints
+        return QuoteRef(quote_id: quoteId, relayHints: relayHints)
     }
 }
 

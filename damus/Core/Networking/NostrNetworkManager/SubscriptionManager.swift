@@ -355,25 +355,89 @@ extension NostrNetworkManager {
         
         // MARK: - Finding specific data from Nostr
         
-        /// Finds a non-replaceable event based on a note ID
+        /// Finds a non-replaceable event based on a note ID.
+        ///
+        /// When relay hints are provided, they get a short exclusive window to respond.
+        /// If no event is found within that window, the remaining time is used to broadcast
+        /// to all connected relays. The `timeout` parameter is a total deadline for both phases.
         func lookup(noteId: NoteId, to targetRelays: [RelayURL]? = nil, timeout: Duration? = nil) async throws -> NdbNoteLender? {
-            let filter = NostrFilter(ids: [noteId], limit: 1)
-            
             // Since note ids point to immutable objects, we can do a simple ndb lookup first
             if let noteKey = try? self.ndb.lookup_note_key(noteId) {
                 return NdbNoteLender(ndb: self.ndb, noteKey: noteKey)
             }
-            
+
             // Not available in local ndb, stream from network
-            outerLoop: for await item in await self.pool.subscribe(filters: [NostrFilter(ids: [noteId], limit: 1)], to: targetRelays, eoseTimeout: timeout) {
+            let filter = NostrFilter(ids: [noteId], limit: 1)
+            let totalTimeout = timeout ?? .seconds(10)
+            let startTime = ContinuousClock.now
+
+            // If relay hints provided, try them first with a short timeout
+            if let targetRelays, !targetRelays.isEmpty {
+                // Acquire ephemeral relays and connect to them
+                await self.pool.acquireEphemeralRelays(targetRelays)
+                defer {
+                    Task { await self.pool.releaseEphemeralRelays(targetRelays) }
+                }
+
+                let connectedRelays = await self.pool.ensureConnected(to: targetRelays)
+                guard !connectedRelays.isEmpty else {
+                    #if DEBUG
+                    Self.logger.info("lookup(noteId): No hint relays connected, skipping to broadcast")
+                    #endif
+                    return await fetchFromRelays(filter: filter, relays: nil, timeout: totalTimeout)
+                }
+
+                // Use min of 3 seconds or half of total timeout for hint phase
+                let hintTimeout = min(.seconds(3), totalTimeout / 2)
+
+                #if DEBUG
+                Self.logger.info("lookup(noteId): Trying \(connectedRelays.count)/\(targetRelays.count) hint relay(s) with \(hintTimeout) timeout")
+                #endif
+
+                let result = await fetchFromRelays(filter: filter, relays: connectedRelays, timeout: hintTimeout)
+                if let result {
+                    return result
+                }
+
+                // Calculate remaining time for broadcast phase
+                let elapsed = ContinuousClock.now - startTime
+                let remaining = totalTimeout - elapsed
+
+                guard remaining > .zero else {
+                    #if DEBUG
+                    Self.logger.info("lookup(noteId): Total timeout exceeded, skipping broadcast")
+                    #endif
+                    return nil
+                }
+
+                // Hint relays didn't respond, fallback to broadcast with remaining time
+                #if DEBUG
+                Self.logger.info("lookup(noteId): Hint relays didn't respond, falling back to broadcast (\(remaining) remaining)")
+                #endif
+                return await fetchFromRelays(filter: filter, relays: nil, timeout: remaining)
+            }
+
+            // No hints, broadcast to all relays
+            return await fetchFromRelays(filter: filter, relays: nil, timeout: totalTimeout)
+        }
+
+        /// Fetches the first event matching the filter from the specified relays.
+        ///
+        /// - Parameters:
+        ///   - filter: The NostrFilter to match events against.
+        ///   - relays: Optional relay URLs to query. If nil, broadcasts to all connected relays.
+        ///   - timeout: Maximum duration to wait for a response.
+        /// - Returns: An `NdbNoteLender` for the first matching event, or `nil` if EOSE is received
+        ///   or the timeout expires without finding a match.
+        private func fetchFromRelays(filter: NostrFilter, relays: [RelayURL]?, timeout: Duration) async -> NdbNoteLender? {
+            for await item in await self.pool.subscribe(filters: [filter], to: relays, eoseTimeout: timeout) {
                 switch item {
                 case .event(let event):
                     return NdbNoteLender(ownedNdbNote: event)
                 case .eose:
-                    break outerLoop
+                    return nil
                 }
             }
-            
             return nil
         }
         
@@ -385,32 +449,53 @@ extension NostrNetworkManager {
             return events
         }
         
-        /// Finds a replaceable event based on an `naddr` address.
-        ///
+        /// Finds a Nostr event that corresponds to the provided naddr identifier.
         /// - Parameters:
-        ///   - naddr: the `naddr` address
+        ///   - naddr: The NAddr (network address) that identifies the target replaceable event (contains kind, author, and identifier).
+        ///   - targetRelays: Optional relay URLs to hint where to search; the method may acquire ephemeral relays and will use only the subset of those that become connected.
+        ///   - timeout: Optional duration to bound the search.
+        /// - Returns: The matching `NostrEvent` whose first referenced parameter equals `naddr.identifier`, or `nil` if no matching event is found.
         func lookup(naddr: NAddr, to targetRelays: [RelayURL]? = nil, timeout: Duration? = nil) async -> NostrEvent? {
-            var nostrKinds: [NostrKind]? = NostrKind(rawValue: naddr.kind).map { [$0] }
+            var connectedTargetRelays = targetRelays
+            var ephemeralRelays: [RelayURL] = []
+            if let relays = targetRelays, !relays.isEmpty {
+                await self.pool.acquireEphemeralRelays(relays)
+                ephemeralRelays = relays
+                let connectedRelays = await self.pool.ensureConnected(to: relays)
+                connectedTargetRelays = connectedRelays.isEmpty ? nil : connectedRelays
+                #if DEBUG
+                Self.logger.info("lookup(naddr): Using \(connectedRelays.count)/\(relays.count) relay hints: \(connectedRelays.map { $0.absoluteString }.joined(separator: ", "), privacy: .public)")
+                #endif
+            }
 
+            defer {
+                if !ephemeralRelays.isEmpty {
+                    Task { await self.pool.releaseEphemeralRelays(ephemeralRelays) }
+                }
+            }
+
+            let nostrKinds: [NostrKind]? = NostrKind(rawValue: naddr.kind).map { [$0] }
             let filter = NostrFilter(kinds: nostrKinds, authors: [naddr.author])
-            
-            for await noteLender in self.streamExistingEvents(filters: [filter], to: targetRelays, timeout: timeout) {
-                // TODO: This can be refactored to borrow the note instead of copying it. But we need to implement `referenced_params` on `UnownedNdbNote` to do so
+
+            for await noteLender in self.streamExistingEvents(filters: [filter], to: connectedTargetRelays, timeout: timeout) {
                 guard let event = noteLender.justGetACopy() else { continue }
                 if event.referenced_params.first?.param.string() == naddr.identifier {
                     return event
                 }
             }
-            
+
             return nil
         }
         
-        // TODO: Improve this. This is mostly intact to keep compatibility with its predecessor, but we can do better
+        /// Searches for a profile or event specified by `query` and returns the first matching result.
+        /// The function first checks the local NDB cache and, if not found, queries relays (honoring any relay hints in the query).
+        /// - Parameter query: Specifies what to find (profile by pubkey or event by id) and optional relay hints to use for network lookup.
+        /// - Returns: A `FoundEvent` containing the matched profile or event, or `nil` if no match is found.
         func findEvent(query: FindEvent) async -> FoundEvent? {
             var filter: NostrFilter? = nil
             let find_from = query.find_from
             let query = query.type
-            
+
             switch query {
             case .profile(let pubkey):
                 let profileNotNil = try? self.ndb.lookup_profile(pubkey, borrow: { pr in
@@ -429,12 +514,28 @@ extension NostrNetworkManager {
                 }
                 filter = NostrFilter(ids: [evid], limit: 1)
             }
-            
-            var attempts: Int = 0
-            var has_event = false
+
             guard let filter else { return nil }
-            
-            for await noteLender in self.streamExistingEvents(filters: [filter], to: find_from) {
+
+            var targetRelays = find_from
+            var ephemeralRelays: [RelayURL] = []
+            if let relays = find_from, !relays.isEmpty {
+                await self.pool.acquireEphemeralRelays(relays)
+                ephemeralRelays = relays
+                let connectedRelays = await self.pool.ensureConnected(to: relays)
+                targetRelays = connectedRelays.isEmpty ? nil : connectedRelays
+                #if DEBUG
+                Self.logger.info("findEvent: Using \(connectedRelays.count)/\(relays.count) relay hints: \(connectedRelays.map { $0.absoluteString }.joined(separator: ", "), privacy: .public)")
+                #endif
+            }
+
+            defer {
+                if !ephemeralRelays.isEmpty {
+                    Task { await self.pool.releaseEphemeralRelays(ephemeralRelays) }
+                }
+            }
+
+            for await noteLender in self.streamExistingEvents(filters: [filter], to: targetRelays) {
                 let foundEvent: FoundEvent? = try? noteLender.borrow({ event in
                     switch query {
                     case .profile:

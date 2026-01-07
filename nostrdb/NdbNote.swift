@@ -435,6 +435,10 @@ extension NdbNote {
         References<QuoteId>(tags: self.tags)
     }
 
+    public var referenced_quote_refs: References<QuoteRef> {
+        References<QuoteRef>(tags: self.tags)
+    }
+
     public var referenced_noterefs: References<NoteRef> {
         References<NoteRef>(tags: self.tags)
     }
@@ -537,6 +541,14 @@ extension NdbNote {
 
     public func direct_replies() -> NoteId? {
         return thread_reply()?.reply.note_id
+    }
+
+    /// Returns the direct reply reference with relay hint if available.
+    ///
+    /// Per NIP-10, the reply `e` tag may include a relay URL at position 2 where
+    /// the replied-to event can be found.
+    public func direct_reply_ref() -> NoteRef? {
+        return thread_reply()?.reply
     }
 
     // NDBTODO: just use Id

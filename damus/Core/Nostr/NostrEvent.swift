@@ -830,6 +830,68 @@ func first_eref_mention(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> Mention<N
     })
 }
 
+/// Represents a note mention with optional relay hints for fetching.
+struct NoteMentionWithHints {
+    let noteId: NoteId
+    let relayHints: [RelayURL]
+    let index: Int?
+}
+
+/// Finds the first event reference mention in a note's content, preserving relay hints.
+///
+/// Per NIP-19, `nevent` bech32 entities may include relay hints. This function extracts
+/// those hints so they can be used when fetching the referenced event.
+///
+/// If no inline mention is found in the content, falls back to checking `q` tags (NIP-10/NIP-18)
+/// to support quote reposts that don't embed the quoted note inline.
+///
+/// - Parameters:
+///   - ndb: The nostrdb instance.
+///   - ev: The event to search.
+///   - keypair: The keypair for decryption if needed.
+/// - Returns: A `NoteMentionWithHints` containing the note ID and relay hints, or nil if not found.
+func first_eref_mention_with_hints(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> NoteMentionWithHints? {
+    // First check content blocks for inline mentions
+    let inlineMention: NoteMentionWithHints? = try? NdbBlockGroup.borrowBlockGroup(event: ev, using: ndb, and: keypair, borrow: { blockGroup in
+        return blockGroup.forEachBlock({ index, block in
+            switch block {
+            case .mention(let mention):
+                guard let mentionRef = MentionRef(block: mention) else { return .loopContinue }
+                switch mentionRef.nip19 {
+                case .note(let noteId):
+                    return .loopReturn(NoteMentionWithHints(noteId: noteId, relayHints: [], index: index))
+                case .nevent(let nEvent):
+                    #if DEBUG
+                    if !nEvent.relays.isEmpty {
+                        print("[relay-hints] Inline nevent: Found \(nEvent.relays.count) hint(s) for \(nEvent.noteid.hex().prefix(8))...: \(nEvent.relays.map { $0.absoluteString })")
+                    }
+                    #endif
+                    return .loopReturn(NoteMentionWithHints(noteId: nEvent.noteid, relayHints: nEvent.relays, index: index))
+                default:
+                    return .loopContinue
+                }
+            default:
+                return .loopContinue
+            }
+        })
+    })
+
+    if let inlineMention {
+        return inlineMention
+    }
+
+    // Fall back to q tags (NIP-10/NIP-18 quote reposts)
+    guard let quoteRef = ev.referenced_quote_refs.first else {
+        return nil
+    }
+    #if DEBUG
+    if !quoteRef.relayHints.isEmpty {
+        print("[relay-hints] Quote: Found q tag with \(quoteRef.relayHints.count) hint(s) for \(quoteRef.note_id.hex().prefix(8))...: \(quoteRef.relayHints.map { $0.absoluteString })")
+    }
+    #endif
+    return NoteMentionWithHints(noteId: quoteRef.note_id, relayHints: quoteRef.relayHints, index: nil)
+}
+
 func separate_invoices(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> [Invoice]? {
     return try? NdbBlockGroup.borrowBlockGroup(event: ev, using: ndb, and: keypair, borrow: { blockGroup in
         let invoiceBlocks: [Invoice] = (try? blockGroup.reduce(initialResult: [Invoice](), { index, invoices, block in

@@ -44,6 +44,11 @@ actor RelayPool {
     var delegate: Delegate?
     private(set) var signal: SignalModel = SignalModel()
 
+    /// Tracks active leases on ephemeral relays to prevent premature cleanup.
+    /// Each lookup that uses an ephemeral relay acquires a lease; cleanup only
+    /// happens when the last lease is released.
+    private var ephemeralLeases: [RelayURL: Int] = [:]
+
     let network_monitor = NWPathMonitor()
     private let network_monitor_queue = DispatchQueue(label: "io.damus.network_monitor")
     private var last_network_status: NWPath.Status = .unsatisfied
@@ -151,23 +156,77 @@ actor RelayPool {
         Log.debug("Registering %s handler, current: %d", for: .networking, sub_id, self.handlers.count)
     }
 
+    /// Removes the relay with the given URL from the pool, permanently disables its connection, and ensures it is disconnected.
+    /// - Parameters:
+    ///   - relay_id: The RelayURL identifying the relay to disable and remove.
     @MainActor
     func remove_relay(_ relay_id: RelayURL) async {
         var i: Int = 0
 
         await self.disconnect(to: [relay_id])
-        
+
         for relay in relays {
             if relay.id == relay_id {
                 relay.connection.disablePermanently()
                 relays.remove(at: i)
                 break
             }
-            
+
             i += 1
         }
     }
 
+    /// Acquires a lease on ephemeral relays to prevent them from being cleaned up
+    /// Increment lease counts for the given ephemeral relay URLs to prevent their removal while leased.
+    /// - Parameters:
+    ///   - relayURLs: The relay URLs whose ephemeral lease counts will be incremented; each URL's lease count is increased by one.
+    func acquireEphemeralRelays(_ relayURLs: [RelayURL]) {
+        for url in relayURLs {
+            ephemeralLeases[url, default: 0] += 1
+            #if DEBUG
+            print("[RelayPool] Acquired lease on ephemeral relay \(url.absoluteString), count: \(ephemeralLeases[url] ?? 0)")
+            #endif
+        }
+    }
+
+    /// Releases leases on ephemeral relays. When the last lease is released,
+    /// Releases one lease for each specified relay and removes any ephemeral relay when its last lease is released.
+    /// - Parameters:
+    ///   - relayURLs: Relay URLs whose leases should be decremented. If a relay's lease count reaches zero and the relay is marked ephemeral, the relay will be removed. Relays not present in the lease table are ignored.
+    func releaseEphemeralRelays(_ relayURLs: [RelayURL]) async {
+        for url in relayURLs {
+            guard let count = ephemeralLeases[url], count > 0 else { continue }
+
+            // Decrement immediately (atomic with respect to this actor, before any suspension)
+            let newCount = count - 1
+            ephemeralLeases[url] = newCount == 0 ? nil : newCount
+
+            #if DEBUG
+            print("[RelayPool] Released lease on ephemeral relay \(url.absoluteString), count: \(newCount)")
+            #endif
+
+            if newCount == 0 {
+                // Check if relay exists and is ephemeral
+                if let relay = await get_relay(url), relay.descriptor.ephemeral {
+                    // Re-check: only remove if lease is still nil (not re-acquired during await)
+                    guard ephemeralLeases[url] == nil else {
+                        #if DEBUG
+                        print("[RelayPool] Lease re-acquired during check, skipping removal: \(url.absoluteString)")
+                        #endif
+                        continue
+                    }
+                    #if DEBUG
+                    print("[RelayPool] Removing ephemeral relay: \(url.absoluteString)")
+                    #endif
+                    await remove_relay(url)
+                }
+            }
+        }
+    }
+
+    /// Adds and registers a new relay in the pool using the provided descriptor.
+    /// - Parameter desc: Descriptor for the relay to add (includes its URL, metadata, and whether it is ephemeral).
+    /// - Throws: `RelayError.RelayAlreadyExists` if a relay with the same URL is already present in the pool.
     func add_relay(_ desc: RelayDescriptor) async throws(RelayError) {
         let relay_id = desc.url
         if await get_relay(relay_id) != nil {
@@ -180,6 +239,16 @@ actor RelayPool {
                   case .string(let str) = msg
             else { return }
 
+            #if DEBUG
+            if desc.ephemeral {
+                if str.hasPrefix("[\"EVENT\"") {
+                    print("[RelayPool] Received EVENT from ephemeral relay \(relay_id.absoluteString): \(str.prefix(200))...")
+                } else if str.hasPrefix("[\"EOSE\"") {
+                    print("[RelayPool] Received EOSE from ephemeral relay \(relay_id.absoluteString)")
+                }
+            }
+            #endif
+
             let _ = self.ndb?.processEvent(str, originRelayURL: relay_id)
             self.message_received_function?((str, desc))
         })
@@ -187,11 +256,116 @@ actor RelayPool {
         await self.appendRelayToList(relay: relay)
     }
     
+    /// Appends the given Relay to the pool's internal list of relays.
     @MainActor
     private func appendRelayToList(relay: Relay) {
         self.relays.append(relay)
     }
 
+    /// Ensures the given relay URLs are connected, adding them as ephemeral relays if not already in the pool.
+    /// Returns the list of relay URLs that are actually connected (ready for subscriptions).
+    ///
+    /// Callers should use `acquireEphemeralRelays` before the lookup and `releaseEphemeralRelays` after.
+    ///
+    /// - Parameters:
+    ///   - relayURLs: The relay URLs to ensure are connected
+    ///   - timeout: Maximum time to wait for pending connections (default 2s). Returns early when first relay connects.
+    /// Ensure the given relays are present in the pool and return those that are connected.
+    /// 
+    /// This will add missing URLs as ephemeral relays, initiate connections for relays that are not connected, and wait up to `timeout` for connections to establish. Once any relay connects, the method allows a short grace period for additional relays to connect before returning.
+    /// - Parameters:
+    ///   - relayURLs: The relay URLs to ensure connectivity for. Missing URLs will be added as ephemeral relays.
+    ///   - timeout: Maximum time to wait for connections (default: 2 seconds). A short grace period (≈300 ms) is applied after the first relay connects.
+    /// - Returns: The subset of `relayURLs` that are currently connected (includes relays that were already connected and those that became connected during the wait).
+    func ensureConnected(to relayURLs: [RelayURL], timeout: Duration = .seconds(2)) async -> [RelayURL] {
+        var toConnect: [RelayURL] = []
+        var alreadyConnected: [RelayURL] = []
+
+        for url in relayURLs {
+            if let existing = await get_relay(url) {
+                if existing.connection.isConnected {
+                    alreadyConnected.append(url)
+                    #if DEBUG
+                    print("[RelayPool] Relay \(url.absoluteString) already connected")
+                    #endif
+                } else {
+                    toConnect.append(url)
+                }
+                continue
+            }
+
+            let descriptor = RelayDescriptor(url: url, info: .readWrite, variant: .ephemeral)
+            do {
+                try await add_relay(descriptor)
+                toConnect.append(url)
+                #if DEBUG
+                print("[RelayPool] Added ephemeral relay: \(url.absoluteString)")
+                #endif
+            } catch {
+                #if DEBUG
+                print("[RelayPool] Failed to add relay \(url.absoluteString): \(error)")
+                #endif
+            }
+        }
+
+        guard !toConnect.isEmpty else { return alreadyConnected }
+
+        await connect(to: toConnect)
+
+        let checkInterval: Duration = .milliseconds(50)
+        let overallDeadline = ContinuousClock.now + timeout
+        var graceDeadline: ContinuousClock.Instant? = alreadyConnected.isEmpty ? nil : ContinuousClock.now + .milliseconds(300)
+
+        // Wait for relays to connect. Once the first connects, start a grace period for others.
+        waitLoop: while ContinuousClock.now < overallDeadline {
+            do {
+                try await Task.sleep(for: checkInterval)
+            } catch {
+                break
+            }
+
+            // Check if any relay has connected
+            var anyConnected = false
+            for url in toConnect {
+                if let relay = await get_relay(url), relay.connection.isConnected {
+                    anyConnected = true
+                    break
+                }
+            }
+
+            if anyConnected && graceDeadline == nil {
+                // Start grace period on first connection
+                graceDeadline = ContinuousClock.now + .milliseconds(300)
+            }
+
+            // Exit once grace period expires (check every iteration if deadline is set)
+            if let deadline = graceDeadline, ContinuousClock.now >= deadline {
+                break waitLoop
+            }
+        }
+
+        // Collect all connected relays
+        var connected = alreadyConnected
+        for url in toConnect {
+            if let relay = await get_relay(url), relay.connection.isConnected {
+                connected.append(url)
+                #if DEBUG
+                print("[RelayPool] Relay \(url.absoluteString) connected: true")
+                #endif
+            } else {
+                #if DEBUG
+                print("[RelayPool] Relay \(url.absoluteString) connected: false (excluded)")
+                #endif
+            }
+        }
+
+        return connected
+    }
+
+    /// Attaches a `RelayLog` to the connection for the specified relay and records the current network status in the log.
+    /// - Parameters:
+    ///   - log: The `RelayLog` instance to attach to the relay's connection.
+    ///   - relay_id: The `RelayURL` identifying the relay whose connection will receive the log.
     func setLog(_ log: RelayLog, for relay_id: RelayURL) async {
         // add the current network state to the log
         log.add("Network state: \(network_monitor.currentPath.status)")
@@ -244,9 +418,22 @@ actor RelayPool {
         }
     }
     
+    /// Gets relays matching the provided relay URLs, or all relays when no targets are specified.
+    /// - Parameter targetRelays: Optional list of relay URLs to filter by. If `nil`, the pool's full relay list is returned.
+    /// - Returns: An array of `Relay` instances corresponding to the requested URLs; any requested URL not present in the pool is omitted from the result.
     @MainActor
     func getRelays(targetRelays: [RelayURL]? = nil) -> [Relay] {
-        targetRelays.map{ get_relays($0) } ?? self.relays
+        let result = targetRelays.map{ get_relays($0) } ?? self.relays
+        #if DEBUG
+        if let targets = targetRelays {
+            let found = result.map { $0.descriptor.url.absoluteString }
+            let requested = targets.map { $0.absoluteString }
+            if found.count != targets.count {
+                print("[RelayPool] getRelays: MISMATCH! requested=\(requested) but found=\(found)")
+            }
+        }
+        #endif
+        return result
     }
     
     /// Deletes queued up requests that should not persist between app sessions (i.e. when the app goes to background then back to foreground)
@@ -291,10 +478,22 @@ actor RelayPool {
     ///   - filters: The filters specifying the desired content.
     ///   - desiredRelays: The desired relays which to subsctibe to. If `nil`, it defaults to the `RelayPool`'s default list
     ///   - eoseTimeout: The maximum timeout which to give up waiting for the eoseSignal
-    /// - Returns: Returns an async stream that callers can easily consume via a for-loop
+    /// Open a subscription for the given filters and provide a stream of matching items and EOSE notifications.
+    /// - Parameters:
+    ///   - filters: The list of NostrFilter objects that define which events to receive.
+    ///   - desiredRelays: Optional list of RelayURL to subscribe to; when `nil` the pool's relays are used.
+    ///   - eoseTimeout: Optional timeout to wait before emitting an EOSE if not all relays have reported EOSE; defaults to 5 seconds.
+    ///   - id: Optional UUID to use as the subscription identifier; a new UUID is generated when `nil`.
+    /// - Returns: An AsyncStream that yields StreamItem values representing matched events and end-of-stream (EOSE) notifications for this subscription. The stream deduplicates events by their NoteId. When the stream terminates it will unsubscribe from the chosen relays and remove the internal handler.
     func subscribe(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, eoseTimeout: Duration? = nil, id: UUID? = nil) async -> AsyncStream<StreamItem> {
         let eoseTimeout = eoseTimeout ?? .seconds(5)
         let desiredRelays = await getRelays(targetRelays: desiredRelays)
+        #if DEBUG
+        print("[RelayPool] subscribe: requested=\(desiredRelays.map { $0.descriptor.url.absoluteString }), pool has \(await relays.count) relays")
+        if let ids = filters.first?.ids {
+            print("[RelayPool] subscribe: filter ids=\(ids.map { $0.hex() })")
+        }
+        #endif
         let startTime = CFAbsoluteTimeGetCurrent()
         return AsyncStream<StreamItem> { continuation in
             let id = id ?? UUID()
@@ -408,6 +607,13 @@ actor RelayPool {
         }
     }
 
+    /// Dispatches a Nostr request to the pool's matching relays, writing a local copy to the NostrDB and queuing the request for any relay that is not currently connected.
+    ///
+    /// Filters target relays by their read/write capabilities and, optionally, by ephemeral status; connected relays receive the request immediately and disconnected relays have the request queued for later delivery. Sent messages are reported via `message_sent_function` when available.
+    /// - Parameters:
+    ///   - req: The Nostr request to send.
+    ///   - to: Optional list of relay URLs to restrict delivery to; `nil` targets the pool's default set of relays.
+    ///   - skip_ephemeral: If `true`, skip ephemeral relays when sending the request.
     func send_raw(_ req: NostrRequestType, to: [RelayURL]? = nil, skip_ephemeral: Bool = true) async {
         let relays = await getRelays(targetRelays: to)
 
@@ -432,6 +638,11 @@ actor RelayPool {
             }
             
             relay.connection.send(req, callback: { str in
+                #if DEBUG
+                if relay.descriptor.ephemeral && str.hasPrefix("[\"REQ\"") {
+                    print("[RelayPool] Sending REQ to ephemeral relay \(relay.id.absoluteString): \(str)")
+                }
+                #endif
                 self.message_sent_function?((str, relay))
             })
         }
@@ -556,5 +767,4 @@ extension RelayPool {
         func latestRelayListChanged(_ newEvent: NdbNote)
     }
 }
-
 
