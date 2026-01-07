@@ -218,6 +218,225 @@ final class PostViewTests: XCTestCase {
         // then
         XCTAssertEqual(post.content, "nostr:\(test_pubkey.npub)")
     }
+
+    // MARK: - Image URL Detection Tests
+
+    /// Tests that the image URL regex detects common image extensions
+    func testImageURLRegexDetectsCommonExtensions() {
+        let testCases = [
+            ("https://example.com/image.jpg", true),
+            ("https://example.com/image.jpeg", true),
+            ("https://example.com/image.png", true),
+            ("https://example.com/image.gif", true),
+            ("https://example.com/image.webp", true),
+            ("https://example.com/image.svg", true),
+            ("http://example.com/image.jpg", true),  // http also works
+            ("https://example.com/image.JPG", true), // case insensitive
+            ("https://example.com/image.PNG", true),
+        ]
+
+        let pattern = try! NSRegularExpression(
+            pattern: #"https?://[^\s#]+\.(jpg|jpeg|png|gif|webp|svg)(\?[^\s]*)?"#,
+            options: [.caseInsensitive]
+        )
+
+        for (url, shouldMatch) in testCases {
+            let range = NSRange(location: 0, length: url.utf16.count)
+            let matches = pattern.matches(in: url, options: [], range: range)
+            XCTAssertEqual(!matches.isEmpty, shouldMatch, "URL '\(url)' should \(shouldMatch ? "" : "not ")match")
+        }
+    }
+
+    /// Tests that image URLs with query parameters are detected
+    func testImageURLRegexWithQueryParams() {
+        let testCases = [
+            "https://example.com/image.jpg?size=large",
+            "https://example.com/image.png?width=100&height=100",
+            "https://cdn.example.com/path/to/image.gif?v=123",
+        ]
+
+        let pattern = try! NSRegularExpression(
+            pattern: #"https?://[^\s#]+\.(jpg|jpeg|png|gif|webp|svg)(\?[^\s]*)?"#,
+            options: [.caseInsensitive]
+        )
+
+        for url in testCases {
+            let range = NSRange(location: 0, length: url.utf16.count)
+            let matches = pattern.matches(in: url, options: [], range: range)
+            XCTAssertFalse(matches.isEmpty, "URL with query params '\(url)' should match")
+        }
+    }
+
+    /// Tests that non-image URLs are not detected
+    func testImageURLRegexDoesNotMatchNonImages() {
+        let testCases = [
+            "https://example.com/page.html",
+            "https://example.com/document.pdf",
+            "https://example.com/video.mp4",
+            "https://example.com/archive.zip",
+            "https://example.com/",
+            "not a url at all",
+            "image.jpg",  // no protocol
+        ]
+
+        let pattern = try! NSRegularExpression(
+            pattern: #"https?://[^\s#]+\.(jpg|jpeg|png|gif|webp|svg)(\?[^\s]*)?"#,
+            options: [.caseInsensitive]
+        )
+
+        for text in testCases {
+            let range = NSRange(location: 0, length: text.utf16.count)
+            let matches = pattern.matches(in: text, options: [], range: range)
+            XCTAssertTrue(matches.isEmpty, "Non-image text '\(text)' should not match")
+        }
+    }
+
+    /// Tests that URLs with fragment identifiers are not matched
+    /// Fragment identifiers (#) are not sent to the server, so URLs like
+    /// https://example.com/page#image.png won't actually return an image
+    func testImageURLRegexDoesNotMatchFragmentURLs() {
+        let testCases = [
+            "https://en.wikipedia.org/wiki/Siberia#/media/File:Russia_vegetation.png",
+            "https://example.com/page#image.jpg",
+            "https://example.com/article#photo.png",
+        ]
+
+        let pattern = try! NSRegularExpression(
+            pattern: #"https?://[^\s#]+\.(jpg|jpeg|png|gif|webp|svg)(\?[^\s]*)?"#,
+            options: [.caseInsensitive]
+        )
+
+        for url in testCases {
+            let range = NSRange(location: 0, length: url.utf16.count)
+            let matches = pattern.matches(in: url, options: [], range: range)
+            XCTAssertTrue(matches.isEmpty, "Fragment URL '\(url)' should not match")
+        }
+    }
+
+    /// Tests that multiple image URLs in text are all detected
+    func testImageURLRegexDetectsMultipleURLs() {
+        let text = "Check out https://example.com/one.jpg and https://example.com/two.png "
+
+        let pattern = try! NSRegularExpression(
+            pattern: #"https?://[^\s#]+\.(jpg|jpeg|png|gif|webp|svg)(\?[^\s]*)?"#,
+            options: [.caseInsensitive]
+        )
+
+        let range = NSRange(location: 0, length: text.utf16.count)
+        let matches = pattern.matches(in: text, options: [], range: range)
+
+        XCTAssertEqual(matches.count, 2, "Should detect 2 image URLs")
+    }
+
+    /// Tests isSupportedImage function
+    func testIsSupportedImage() {
+        let supportedURLs = [
+            URL(string: "https://example.com/image.jpg")!,
+            URL(string: "https://example.com/image.jpeg")!,
+            URL(string: "https://example.com/image.png")!,
+            URL(string: "https://example.com/image.gif")!,
+            URL(string: "https://example.com/image.webp")!,
+            URL(string: "https://example.com/image.svg")!,
+        ]
+
+        let unsupportedURLs = [
+            URL(string: "https://example.com/video.mp4")!,
+            URL(string: "https://example.com/document.pdf")!,
+            URL(string: "https://example.com/page.html")!,
+        ]
+
+        for url in supportedURLs {
+            XCTAssertTrue(isSupportedImage(url: url), "\(url) should be supported")
+        }
+
+        for url in unsupportedURLs {
+            XCTAssertFalse(isSupportedImage(url: url), "\(url) should not be supported")
+        }
+    }
+
+    // MARK: - Image URL Extraction Behavior
+
+    func testDetectAndExtractImageURLs_RemovesURLAndAddsMedia() {
+        var view = PostView(action: .posting(.none), damus_state: test_damus_state)
+        view.post = NSMutableAttributedString(string: "hello https://example.com/a.jpg ")
+        view.uploadedMedias = []
+
+        view.detectAndExtractImageURLs()
+
+        XCTAssertFalse(view.post.string.contains("https://example.com/a.jpg"))
+        XCTAssertEqual(view.uploadedMedias.count, 1)
+        XCTAssertEqual(view.uploadedMedias.first?.uploadedURL.absoluteString, "https://example.com/a.jpg")
+    }
+
+    func testDetectAndExtractImageURLs_DoesNotAddDuplicateMediaButRemovesText() {
+        let url = URL(string: "https://example.com/a.jpg")!
+        var view = PostView(action: .posting(.none), damus_state: test_damus_state)
+        view.post = NSMutableAttributedString(string: "https://example.com/a.jpg ")
+        view.uploadedMedias = [UploadedMedia(localURL: url, uploadedURL: url, metadata: nil)]
+
+        view.detectAndExtractImageURLs()
+
+        XCTAssertFalse(view.post.string.contains("https://example.com/a.jpg"))
+        XCTAssertEqual(view.uploadedMedias.count, 1)
+    }
+
+    func testDetectAndExtractImageURLs_MultipleURLsMaintainOrder() {
+        let url1 = "https://example.com/one.jpg"
+        let url2 = "https://example.com/two.png"
+        var view = PostView(action: .posting(.none), damus_state: test_damus_state)
+        view.post = NSMutableAttributedString(string: "x \(url1) y \(url2) ")
+        view.uploadedMedias = []
+
+        view.detectAndExtractImageURLs()
+
+        XCTAssertFalse(view.post.string.contains(url1))
+        XCTAssertFalse(view.post.string.contains(url2))
+        XCTAssertEqual(view.uploadedMedias.map { $0.uploadedURL.absoluteString }, [url1, url2])
+    }
+
+    func testDetectAndExtractImageURLs_IgnoresWhenNoTrailingWhitespace() {
+        var view = PostView(action: .posting(.none), damus_state: test_damus_state)
+        view.post = NSMutableAttributedString(string: "https://example.com/a.jpg")
+        view.uploadedMedias = []
+
+        view.detectAndExtractImageURLs()
+
+        XCTAssertEqual(view.post.string, "https://example.com/a.jpg")
+        XCTAssertTrue(view.uploadedMedias.isEmpty)
+    }
+
+    func testDetectAndExtractImageURLs_RemovesTrailingWhitespace() {
+        var view = PostView(action: .posting(.none), damus_state: test_damus_state)
+        view.post = NSMutableAttributedString(string: "https://example.com/a.jpg  \n")
+        view.uploadedMedias = []
+
+        view.detectAndExtractImageURLs()
+
+        // Only one trailing whitespace/newline is removed along with the URL
+        XCTAssertEqual(view.post.string, " \n")
+        XCTAssertEqual(view.uploadedMedias.count, 1)
+    }
+
+    func testAddImageURLAsMedia_AddsNewURL() {
+        var view = PostView(action: .posting(.none), damus_state: test_damus_state)
+        view.uploadedMedias = []
+
+        let url = URL(string: "https://example.com/image.jpg")!
+        view.addImageURLAsMedia(url)
+
+        XCTAssertEqual(view.uploadedMedias.count, 1)
+        XCTAssertEqual(view.uploadedMedias.first?.uploadedURL, url)
+    }
+
+    func testAddImageURLAsMedia_SkipsDuplicate() {
+        let url = URL(string: "https://example.com/image.jpg")!
+        var view = PostView(action: .posting(.none), damus_state: test_damus_state)
+        view.uploadedMedias = [UploadedMedia(localURL: url, uploadedURL: url, metadata: nil)]
+
+        view.addImageURLAsMedia(url)
+
+        XCTAssertEqual(view.uploadedMedias.count, 1)
+    }
 }
 
 func checkMentionLinkEditorHandling(

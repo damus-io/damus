@@ -120,7 +120,112 @@ struct PostView: View {
         uploadTasks.forEach { $0.cancel() }
         uploadTasks.removeAll()
     }
-    
+
+    // MARK: - Image URL Detection and Preview
+    //
+    // Detects image URLs in the post text and converts them to media previews.
+    // When a user types or pastes an image URL followed by whitespace/newline,
+    // the URL is extracted from the text and added to uploadedMedias for preview.
+    // The URL is removed from the post text to avoid duplication (it gets re-added on post).
+
+    /// Regex pattern for detecting image URLs in text.
+    /// Matches http/https URLs ending with common image extensions, with optional query params.
+    /// Excludes fragment identifiers (#) since content after # is not sent to the server.
+    private static let imageURLPattern = try! NSRegularExpression(
+        pattern: #"https?://[^\s#]+\.(jpg|jpeg|png|gif|webp|svg)(\?[^\s]*)?"#,
+        options: [.caseInsensitive]
+    )
+
+    /// Detects image URLs in the post text and extracts them as media previews.
+    ///
+    /// Called when text changes end with whitespace/newline (indicating URL is complete).
+    /// Found image URLs are converted to UploadedMedia and removed from the post text.
+    func detectAndExtractImageURLs() {
+        let text = post.string
+
+        // Only process if text ends with whitespace or newline (URL is complete)
+        guard let lastChar = text.last, lastChar.isWhitespace || lastChar.isNewline else {
+            return
+        }
+
+        let matches = Self.imageURLPattern.matches(
+            in: text,
+            options: [],
+            range: NSRange(location: 0, length: text.utf16.count)
+        )
+
+        // No image URLs found
+        guard !matches.isEmpty else { return }
+
+        var mutablePost = NSMutableAttributedString(attributedString: post)
+        var urlsToAdd: [URL] = []
+        var seenURLs: Set<String> = []  // Track URLs seen in this pass to avoid duplicates
+
+        // Process matches in reverse order to maintain valid indices during removal
+        var didRemoveURLs = false
+        for match in matches.reversed() {
+            guard let range = Range(match.range, in: text) else { continue }
+            let urlString = String(text[range])
+
+            guard let url = URL(string: urlString) else { continue }
+
+            // Remove URL from post text (including trailing whitespace if present)
+            // Always remove to avoid duplication, even if URL is already in uploadedMedias
+            let nsRange = match.range
+            let extendedRange = extendedRangeIncludingTrailingWhitespace(nsRange, in: mutablePost)
+            mutablePost.deleteCharacters(in: extendedRange)
+            didRemoveURLs = true
+
+            // Only add to media if not already present and not a duplicate in this pass
+            if uploadedMedias.contains(where: { $0.uploadedURL.absoluteString == urlString }) {
+                continue
+            }
+            if seenURLs.contains(urlString) {
+                continue
+            }
+            seenURLs.insert(urlString)
+
+            urlsToAdd.insert(url, at: 0)  // Insert at beginning to maintain order
+        }
+
+        // Add detected URLs as media
+        for url in urlsToAdd {
+            // Create UploadedMedia where both localURL and uploadedURL point to the remote URL
+            // Kingfisher in PVImageCarouselView handles remote URLs for preview
+            let media = UploadedMedia(localURL: url, uploadedURL: url, metadata: nil)
+            uploadedMedias.append(media)
+        }
+
+        // Update post if any URLs were removed
+        if didRemoveURLs {
+            post = mutablePost
+        }
+    }
+
+    /// Adds an image URL directly as media (used when pasting image URLs)
+    func addImageURLAsMedia(_ url: URL) {
+        let urlString = url.absoluteString
+        // Skip if already in uploadedMedias
+        guard !uploadedMedias.contains(where: { $0.uploadedURL.absoluteString == urlString }) else {
+            return
+        }
+        let media = UploadedMedia(localURL: url, uploadedURL: url, metadata: nil)
+        uploadedMedias.append(media)
+    }
+
+    /// Returns the range extended to include trailing whitespace/newline if present
+    private func extendedRangeIncludingTrailingWhitespace(_ range: NSRange, in text: NSMutableAttributedString) -> NSRange {
+        guard range.upperBound < text.length else { return range }
+
+        let nextCharRange = NSRange(location: range.upperBound, length: 1)
+        let nextChar = text.attributedSubstring(from: nextCharRange).string
+
+        guard let char = nextChar.first, char.isWhitespace || char.isNewline else {
+            return range
+        }
+        return NSRange(location: range.location, length: range.length + 1)
+    }
+
     func send_post() async {
         let new_post = await build_post(state: self.damus_state, post: self.post, action: action, uploadedMedias: uploadedMedias, references: self.references, filtered_pubkeys: filtered_pubkeys)
 
@@ -248,17 +353,22 @@ struct PostView: View {
     }
     
     /// Use this to signal that the post contents have changed. This will do two things:
-    /// 
+    ///
     /// 1. Save the new contents into our in-memory drafts
     /// 2. Signal that we need to save drafts persistently, which will happen after a certain wait period
+    /// 3. Detect image URLs and convert them to media previews
     func post_changed(post: NSMutableAttributedString, media: [UploadedMedia]) {
+        // Detect image URLs in text and extract them as media previews
+        // This triggers when text ends with whitespace/newline (URL is complete)
+        detectAndExtractImageURLs()
+
         if let draft = load_draft_for_post(drafts: damus_state.drafts, action: action) {
-            draft.content = post
+            draft.content = self.post  // Use self.post since detectAndExtractImageURLs may have modified it
             draft.media = uploadedMedias
             draft.references = references
             draft.filtered_pubkeys = filtered_pubkeys
         } else {
-            let artifacts = DraftArtifacts(content: post, media: uploadedMedias, references: references, id: UUID().uuidString)
+            let artifacts = DraftArtifacts(content: self.post, media: uploadedMedias, references: references, id: UUID().uuidString)
             set_draft_for_post(drafts: damus_state.drafts, action: action, artifacts: artifacts)
         }
         self.autoSaveModel.needsSaving()
@@ -276,9 +386,12 @@ struct PostView: View {
                 getFocusWordForMention: { word, range in
                     focusWordAttributes = (word, range)
                     self.newCursorIndex = nil
-                }, 
+                },
                 updateCursorPosition: { newCursorIndex in
                     self.newCursorIndex = newCursorIndex
+                },
+                onImageURLPasted: { url in
+                    self.addImageURLAsMedia(url)
                 }
             )
                 .environmentObject(tagModel)
@@ -388,8 +501,18 @@ struct PostView: View {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .top) {
                     ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
-                    
+
                     VStack(alignment: .leading) {
+                        if !uploadedMedias.isEmpty || mediaUploadUnderProgress != nil {
+                            PVImageCarouselView(media: $uploadedMedias,
+                                                mediaUnderProgress: $mediaUploadUnderProgress,
+                                                imageUploadModel: image_upload,
+                                                deviceWidth: deviceSize.size.width)
+                                .onChange(of: uploadedMedias) { media in
+                                    post_changed(post: post, media: media)
+                                }
+                        }
+
                         if let prompt_view {
                             prompt_view()
                         }
@@ -397,14 +520,6 @@ struct PostView: View {
                     }
                 }
                 .id("post")
-                
-                PVImageCarouselView(media: $uploadedMedias,
-                                    mediaUnderProgress: $mediaUploadUnderProgress,
-                                    imageUploadModel: image_upload,
-                                    deviceWidth: deviceSize.size.width)
-                        .onChange(of: uploadedMedias) { media in
-                            post_changed(post: post, media: media)
-                }
                 
                 if case .quoting(let ev) = action {
                     BuilderEventView(damus: damus_state, event: ev)
@@ -618,6 +733,14 @@ struct PostView_Previews: PreviewProvider {
     }
 }
 
+/// Preference key to track visible item indices in the carousel
+struct VisibleIndexPreferenceKey: PreferenceKey {
+    static var defaultValue: [Int: CGFloat] = [:]
+    static func reduce(value: inout [Int: CGFloat], nextValue: () -> [Int: CGFloat]) {
+        value.merge(nextValue()) { $1 }
+    }
+}
+
 struct PVImageCarouselView: View {
     @Binding var media: [UploadedMedia]
     @Binding var mediaUnderProgress: MediaUpload?
@@ -625,77 +748,117 @@ struct PVImageCarouselView: View {
 
     let deviceWidth: CGFloat
 
+    @State private var currentIndex: Int = 0
+
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack {
                 ForEach(media.indices, id: \.self) { index in
-                    if isSupportedVideo(url: media[index].uploadedURL) {
-                        VideoPlayer(player: configurePlayer(with: media[index].localURL))
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: media.count == 1 ? deviceWidth * 0.8 : 250, alignment: .topLeading)
-                            .cornerRadius(10)
-                            .contextMenu { contextMenuContent(for: media[index]) }
-                            .overlay(
-                                Button(action: {
-                                    media.remove(at: index)
-                                }) {
-                                    closeImageView
-                                }
-                                    .padding([.top, .leading], 8),
-                                alignment: .topLeading
-                            )
-                            .overlay(
-                                Image(systemName: "video")
-                                    .foregroundColor(.white)
-                                    .padding(10)
-                                    .background(Color.black.opacity(0.5))
-                                    .clipShape(Circle())
-                                    .shadow(radius: 5)
-                                    .opacity(0.6),
-                                alignment: .bottomLeading
-                            )
-                    } else {
-                        KFAnimatedImage(media[index].uploadedURL)
-                            .imageContext(.note, disable_animation: false)
-                            .configure { view in
-                                view.framePreloadCount = 3
-                            }
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: media.count == 1 ? deviceWidth * 0.8 : 250, alignment: .topLeading)
-                            .cornerRadius(10)
-                            .contextMenu { contextMenuContent(for: media[index]) }
-                            .overlay(
-                                Button(action: {
-                                    media.remove(at: index)
-                                }) {
-                                    closeImageView
-                                }
-                                    .padding([.top, .leading], 8),
-                                alignment: .topLeading
-                            )
-                    }
+                    carouselItem(for: index)
                 }
                 if let mediaUP = mediaUnderProgress, let progress = imageUploadModel.progress {
-                    ZStack {
-                        // Media under upload-progress
-                        Image(uiImage: getImage(media: mediaUP))
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: media.count == 1 ? deviceWidth * 0.8 : 250, alignment: .topLeading)
-                            .cornerRadius(10)
-                            .opacity(0.3)
-                            .padding()
-                        // Circle showing progress on top of media
-                        Circle()
-                            .trim(from: 0, to: CGFloat(progress))
-                            .stroke(Color.damusPurple, lineWidth: 5.0)
-                            .rotationEffect(.degrees(-90))
-                            .frame(width: 30, height: 30)
-                            .padding()
-                    }
+                    uploadProgressView(mediaUP: mediaUP, progress: progress)
                 }
             }
-            .padding()
+            .padding(.horizontal)
+        }
+        .onPreferenceChange(VisibleIndexPreferenceKey.self) { positions in
+            // Find the item whose center is closest to the left side of the screen (around 150pt in)
+            // This determines which image is "most visible" when scrolling
+            let targetX: CGFloat = 150
+            if let closest = positions.min(by: { abs($0.value - targetX) < abs($1.value - targetX) }) {
+                if currentIndex != closest.key {
+                    currentIndex = closest.key
+                }
+            }
+        }
+        .overlay(alignment: .bottomTrailing) {
+            // Badge showing current position / total count
+            if media.count > 1 {
+                Text("\(currentIndex + 1)/\(media.count)")
+                    .font(.caption2)
+                    .fontWeight(.semibold)
+                    .foregroundColor(DamusColors.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(DamusColors.purple)
+                    .cornerRadius(10)
+                    .padding(.trailing, 8)
+                    .padding(.bottom, 4)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func carouselItem(for index: Int) -> some View {
+        let item = media[index]
+        GeometryReader { itemGeometry in
+            let midX = itemGeometry.frame(in: .global).midX
+            Group {
+                if isSupportedVideo(url: item.uploadedURL) {
+                    VideoPlayer(player: configurePlayer(with: item.localURL))
+                        .aspectRatio(contentMode: .fit)
+                        .cornerRadius(10)
+                        .contextMenu { contextMenuContent(for: item) }
+                        .overlay(
+                            Button(action: {
+                                media.remove(at: index)
+                            }) {
+                                closeImageView
+                            }
+                                .padding([.top, .leading], 8),
+                            alignment: .topLeading
+                        )
+                        .overlay(
+                            Image(systemName: "video")
+                                .foregroundColor(.white)
+                                .padding(10)
+                                .background(Color.black.opacity(0.5))
+                                .clipShape(Circle())
+                                .shadow(radius: 5)
+                                .opacity(0.6),
+                            alignment: .bottomLeading
+                        )
+                } else {
+                    KFAnimatedImage(item.uploadedURL)
+                        .imageContext(.note, disable_animation: false)
+                        .configure { view in
+                            view.framePreloadCount = 3
+                        }
+                        .aspectRatio(contentMode: .fit)
+                        .cornerRadius(10)
+                        .contextMenu { contextMenuContent(for: item) }
+                        .overlay(
+                            Button(action: {
+                                media.remove(at: index)
+                            }) {
+                                closeImageView
+                            }
+                                .padding([.top, .leading], 8),
+                            alignment: .topLeading
+                        )
+                }
+            }
+            .preference(key: VisibleIndexPreferenceKey.self, value: [index: midX])
+        }
+        .frame(width: media.count == 1 ? deviceWidth * 0.8 : 250, height: 200)
+    }
+
+    private func uploadProgressView(mediaUP: MediaUpload, progress: Double) -> some View {
+        ZStack {
+            Image(uiImage: getImage(media: mediaUP))
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: media.count == 1 ? deviceWidth * 0.8 : 250, alignment: .topLeading)
+                .cornerRadius(10)
+                .opacity(0.3)
+                .padding()
+            Circle()
+                .trim(from: 0, to: CGFloat(progress))
+                .stroke(Color.damusPurple, lineWidth: 5.0)
+                .rotationEffect(.degrees(-90))
+                .frame(width: 30, height: 30)
+                .padding()
         }
     }
     
@@ -969,8 +1132,8 @@ func isSupportedVideo(url: URL?) -> Bool {
 
 func isSupportedImage(url: URL) -> Bool {
     let fileExtension = url.pathExtension.lowercased()
-    // It would be better to pull this programmatically from Apple's APIs, but there seems to be no such call
-    let supportedTypes = ["jpg", "png", "gif"]
+    // Common web image formats supported by Kingfisher/iOS
+    let supportedTypes = ["jpg", "jpeg", "png", "gif", "webp", "svg"]
     return supportedTypes.contains(fileExtension)
 }
 
