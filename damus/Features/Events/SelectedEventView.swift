@@ -57,7 +57,9 @@ struct SelectedEventView: View {
                 EventBody(damus_state: damus, event: event, size: size, options: [.wide])
 
                 Mention
-                
+
+                LongformMention
+
                 Text(verbatim: "\(format_date(created_at: event.created_at))")
                     .padding([.top, .leading, .trailing])
                     .font(.footnote)
@@ -98,6 +100,11 @@ struct SelectedEventView: View {
                     .padding(.horizontal)
             }
         }
+    }
+
+    var LongformMention: some View {
+        LongformMentionsStack(damus_state: damus, references: all_longform_mentions(ndb: damus.ndb, ev: event, keypair: damus.keypair))
+            .padding(.horizontal)
     }
 }
 

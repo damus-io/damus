@@ -162,6 +162,9 @@ struct ChatEventView: View {
                         .background(DamusColors.adaptableWhite)
                         .clipShape(RoundedRectangle(cornerSize: CGSize(width: 10, height: 10)))
                 }
+                LongformMentionsStack(damus_state: damus_state, references: all_longform_mentions(ndb: damus_state.ndb, ev: event, keypair: damus_state.keypair))
+                    .background(DamusColors.adaptableWhite)
+                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 10, height: 10)))
             }
             .frame(minWidth: 5, alignment: is_ours ? .trailing : .leading)
             .padding(10)

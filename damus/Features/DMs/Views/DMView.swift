@@ -24,7 +24,11 @@ struct DMView: View {
             }
         }
     }
-    
+
+    var LongformMention: some View {
+        LongformMentionsStack(damus_state: damus_state, references: all_longform_mentions(ndb: damus_state.ndb, ev: event, keypair: damus_state.keypair))
+    }
+
     var dm_options: EventViewOptions {
         /*
         if self.damus_state.settings.translate_dms {
@@ -69,9 +73,10 @@ struct DMView: View {
     var body: some View {
         VStack {
             Mention
+            LongformMention
             DM
         }
-        
+
     }
 }
 
