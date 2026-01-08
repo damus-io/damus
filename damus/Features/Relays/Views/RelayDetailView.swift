@@ -20,12 +20,25 @@ struct RelayDetailView: View {
         self.state = state
         self.relay = relay
         self.nip11 = nip11
-        
         log = state.relay_model_cache.model(with_relay_id: relay)?.log ?? RelayLog()
     }
-    
-    func check_connection() -> Bool {
-        return state.nostrNetwork.userRelayList.getUserCurrentRelayList()?.relays.keys.contains(self.relay) == true
+
+    /// Whether relay is connected (in the user's relay list)
+    var isConnected: Bool {
+        state.nostrNetwork.userRelayList.getUserCurrentRelayList()?.relays.keys.contains(self.relay) == true
+    }
+
+    /// Check if relay URL is purplepag.es (for showing Profile badge)
+    static func isPurplePagesRelay(_ relay: RelayURL) -> Bool {
+        relay.absoluteString.contains("purplepag.es")
+    }
+
+    /// Whether this relay is profile-only (for showing Profile badge)
+    var isProfileOnlyRelay: Bool {
+        if Self.isPurplePagesRelay(relay) {
+            return true
+        }
+        return state.nostrNetwork.getRelay(relay)?.descriptor.isProfilesOnly ?? false
     }
 
     func RemoveRelayButton(_ keypair: FullKeypair) -> some View {
@@ -87,10 +100,14 @@ struct RelayDetailView: View {
                     .foregroundColor(.gray)
                 
                 HStack {
+                    if isProfileOnlyRelay {
+                        RelayType(is_paid: false, is_profile_only: true)
+                    }
+
                     if nip11?.is_paid ?? false {
                         RelayPaidDetail(payments_url: nip11?.payments_url, fees: nip11?.fees)
                     }
-                    
+
                     if let authentication_state: RelayAuthenticationState = relay_object?.authentication_state,
                        authentication_state != .none {
                         RelayAuthenticationDetail(state: authentication_state)
@@ -138,7 +155,7 @@ struct RelayDetailView: View {
                         }
                         
                         if let keypair = state.keypair.to_full() {
-                            if check_connection() {
+                            if isConnected {
                                 RemoveRelayButton(keypair)
                                     .padding(.top)
                             } else {
@@ -187,7 +204,6 @@ struct RelayDetailView: View {
     
     func removeRelay() async {
         do {
-            // TODO: Concurrency problems?
             try await state.nostrNetwork.userRelayList.remove(relayURL: self.relay)
             dismiss()
         }
@@ -195,10 +211,9 @@ struct RelayDetailView: View {
             present_sheet(.error(error.humanReadableError))
         }
     }
-    
+
     func connectRelay() async {
         do {
-            // TODO: Concurrency problems?
             try await state.nostrNetwork.userRelayList.insert(relay: NIP65.RelayList.RelayItem(url: relay, rwConfiguration: .readWrite))
             dismiss()
         }
