@@ -18,14 +18,15 @@ enum NostrConnectionEvent {
     ///
     /// Implementation note: Messaging events should use `.nostr_event` in `NostrConnectionEvent`
     enum WSConnectionEvent {
-        case connected
+        /// Relay connected. `isReconnect` is true if this relay was previously connected this session.
+        case connected(isReconnect: Bool)
         case disconnected(URLSessionWebSocketTask.CloseCode, String?)
         case error(Error)
-        
-        static func from(full_ws_event: WebSocketEvent) -> Self? {
+
+        static func from(full_ws_event: WebSocketEvent, isReconnect: Bool = false) -> Self? {
             switch full_ws_event {
             case .connected:
-                return .connected
+                return .connected(isReconnect: isReconnect)
             case .message(_):
                 return nil
             case .disconnected(let closeCode, let string):
@@ -50,7 +51,11 @@ final class RelayConnection: ObservableObject {
     @Published private(set) var isConnected = false
     @Published private(set) var isConnecting = false
     private var isDisabled = false
-    
+
+    /// Tracks whether this relay has ever been connected during this app session.
+    /// Used to distinguish reconnects from initial connects (for triggering negentropy sync).
+    private(set) var hasConnectedAtLeastOnce = false
+
     private(set) var last_connection_attempt: TimeInterval = 0
     private(set) var last_pong: Date? = nil
     private(set) var backoff: TimeInterval = 1.0
@@ -150,6 +155,13 @@ final class RelayConnection: ObservableObject {
     private func receive(event: WebSocketEvent) async {
         assert(!Thread.isMainThread, "This code must not be executed on the main thread")
         processEvent(event)
+
+        // Track whether this is a reconnect (for negentropy sync on reconnect)
+        let isReconnect = hasConnectedAtLeastOnce
+        if case .connected = event {
+            hasConnectedAtLeastOnce = true
+        }
+
         switch event {
         case .connected:
             DispatchQueue.main.async {
@@ -185,7 +197,7 @@ final class RelayConnection: ObservableObject {
                 self.reconnect_with_backoff()
             }
         }
-        guard let ws_connection_event = NostrConnectionEvent.WSConnectionEvent.from(full_ws_event: event) else { return }
+        guard let ws_connection_event = NostrConnectionEvent.WSConnectionEvent.from(full_ws_event: event, isReconnect: isReconnect) else { return }
         await self.handleEvent(.ws_connection_event(ws_connection_event))
         
         if let description = event.description {
@@ -229,7 +241,7 @@ final class RelayConnection: ObservableObject {
                 await self.handleEvent(.nostr_event(ev))
                 return
             }
-            print("failed to decode event \(messageString)")
+            Log.info("failed to decode event from %s: %s", for: .networking, relay_url.absoluteString, messageString)
         case .data(let messageData):
             if let messageString = String(data: messageData, encoding: .utf8) {
                 await receive(message: .string(messageString))
@@ -250,6 +262,12 @@ func make_nostr_req(_ req: NostrRequest) -> String? {
         return make_nostr_push_event(ev: ev)
     case .auth(let ev):
         return make_nostr_auth_event(ev: ev)
+    case .negOpen(let neg):
+        return make_negentropy_open(neg)
+    case .negMsg(let neg):
+        return make_negentropy_msg(neg)
+    case .negClose(let neg):
+        return make_negentropy_close(neg)
     }
 }
 
@@ -288,4 +306,28 @@ func make_nostr_subscription_req(_ filters: [NostrFilter], sub_id: String) -> St
     }
     req += "]"
     return req
+}
+
+// MARK: - NIP-77 Negentropy Message Serialization
+
+/// Creates a NEG-OPEN request: ["NEG-OPEN", <subscription_id>, <filter>, <initial_message_hex>]
+func make_negentropy_open(_ neg: NegentropyOpen) -> String? {
+    let encoder = JSONEncoder()
+    guard let filter_json = try? encoder.encode(neg.filter) else {
+        return nil
+    }
+    let filter_str = String(decoding: filter_json, as: UTF8.self)
+    let msg = "[\"NEG-OPEN\",\"\(neg.sub_id)\",\(filter_str),\"\(neg.initial_message)\"]"
+    Log.info("NEG-OPEN message: filter=%s", for: .networking, filter_str)
+    return msg
+}
+
+/// Creates a NEG-MSG request: ["NEG-MSG", <subscription_id>, <message_hex>]
+func make_negentropy_msg(_ neg: NegentropyMessage) -> String? {
+    return "[\"NEG-MSG\",\"\(neg.sub_id)\",\"\(neg.message)\"]"
+}
+
+/// Creates a NEG-CLOSE request: ["NEG-CLOSE", <subscription_id>]
+func make_negentropy_close(_ neg: NegentropyClose) -> String? {
+    return "[\"NEG-CLOSE\",\"\(neg.sub_id)\"]"
 }
