@@ -208,7 +208,8 @@ extension NostrNetworkManager {
             if self.streams[pubkey]?.keys.count == 0 {
                 // We don't need to subscribe to this profile anymore
                 self.streams[pubkey] = nil
-                self.subscriptionNeedsUpdate = true
+                // NOTE: Do not update network subscription yet to avoid constant resubscriptions that resend the same large filter again and again
+                // Just leave the extra pubkey in the subscription until we naturally need to update the filter to fetch a new profile
             }
         }
         
