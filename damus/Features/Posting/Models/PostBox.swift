@@ -8,6 +8,11 @@
 import Foundation
 
 
+/// Tracks the publish state for a single relay destination.
+///
+/// Each relay gets its own retry timing to handle varying network conditions.
+/// The retry strategy uses exponential backoff to avoid overwhelming relays
+/// while still being responsive on unreliable cellular connections.
 class Relayer {
     let relay: RelayURL
     var attempts: Int
@@ -27,6 +32,10 @@ enum OnFlush {
     case all((PostedEvent) -> Void)
 }
 
+/// An event queued for publishing to one or more relays.
+///
+/// Tracks which relays have acknowledged the event and which still need retries.
+/// The event is removed from the queue once all relays acknowledge or give up.
 class PostedEvent {
     let event: NostrEvent
     let skip_ephemeral: Bool
@@ -35,6 +44,11 @@ class PostedEvent {
     var flushed_once: Bool
     let on_flush: OnFlush?
 
+    /// Initial retry delay in seconds before first retry attempt.
+    /// Reduced from 10s to 3s for better responsiveness on cellular connections
+    /// where transient failures are common but often resolve quickly.
+    private static let initialRetryDelay: Double = 3.0
+
     init(event: NostrEvent, remaining: [RelayURL], skip_ephemeral: Bool, flush_after: Date?, on_flush: OnFlush?) {
         self.event = event
         self.skip_ephemeral = skip_ephemeral
@@ -42,7 +56,7 @@ class PostedEvent {
         self.on_flush = on_flush
         self.flushed_once = false
         self.remaining = remaining.map {
-            Relayer(relay: $0, attempts: 0, retry_after: 10.0)
+            Relayer(relay: $0, attempts: 0, retry_after: Self.initialRetryDelay)
         }
     }
 }
