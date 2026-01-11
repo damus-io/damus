@@ -26,14 +26,16 @@ struct DamusVideoControlsView: View {
                 }, label: {
                     if video.is_muted {
                         Image(systemName: "speaker.slash")
-                            .frame(width: 30, height: 30)
+                            .frame(width: 44, height: 44)
                     }
                     else {
                         Image(systemName: "speaker.wave.2.fill")
-                            .frame(width: 30, height: 30)
+                            .frame(width: 44, height: 44)
                     }
                 })
                 .buttonStyle(PlayerCircleButtonStyle())
+                .accessibilityLabel(video.is_muted ? Text("Unmute video") : Text("Mute video"))
+                .accessibilityHint(Text("Toggles sound on this video"))
             }
             HStack {
                 Button(action: {
@@ -41,19 +43,24 @@ struct DamusVideoControlsView: View {
                 }, label: {
                     if video.is_playing {
                         Image(systemName: "pause.fill")
-                            .frame(width: 30, height: 30)
+                            .frame(width: 44, height: 44)
                     }
                     else {
                         Image(systemName: "play.fill")
-                            .frame(width: 30, height: 30)
+                            .frame(width: 44, height: 44)
                     }
                 })
                 .buttonStyle(PlayerCircleButtonStyle())
+                .accessibilityLabel(video.is_playing ? Text("Pause video") : Text("Play video"))
+                .accessibilityHint(Text("Toggles playback"))
                 if let video_duration = video.duration, video_duration > 0 {
                     Slider(value: $video.current_time, in: 0...video_duration, onEditingChanged: { editing in
                         video.is_editing_current_time = editing
                     })
                     .tint(.white)
+                    .accessibilityLabel(Text("Video timeline"))
+                    .accessibilityValue(Text(video_timestamp_indicator))
+                    .accessibilityHint(Text("Drag to scrub the video"))
                 }
                 else {
                     Spacer()
@@ -99,7 +106,7 @@ struct PlayerCircleButtonStyle: ButtonStyle {
             .foregroundColor(Color.white)
             .background {
                 Circle()
-                    .fill(Color.black.opacity(0.5))
+                    .fill(.ultraThinMaterial) // Use material for better contrast and adaptive appearance.
             }
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
     }
