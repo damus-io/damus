@@ -7,6 +7,7 @@
 
 import Dispatch
 import Synchronization
+import Foundation
 
 extension Ndb {
     /// Creates a `sync` mechanism for coordinating usages of ndb (read or write) with the app's ability to close ndb.
@@ -94,6 +95,11 @@ extension Ndb {
     class FallbackUseLock: UseLockProtocol {
         /// Number of functions using the `ndb` object (for reading or writing data)
         private var ndbUserCount: UInt = 0
+        /// Lock for protecting access to `ndbUserCount`
+        private let ndbUserCountLock = NSLock()
+        /// Lock for protecting access to `ndbIsOpen`
+        private let ndbIsOpenLock = NSLock()
+        private var ndbIsOpen: Bool = false
         /// Semaphore for general access to `ndb`. A closing task requires exclusive access. Users of `ndb` (read/write tasks) share the access
         private let ndbAccessSemaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
         /// How long a thread can block before throwing an error
@@ -120,18 +126,29 @@ extension Ndb {
         /// Implementation note: NEVER change this to `async`! This is a blocking operation, so we want to minimize the time of the operation
         func waitUntilNdbCanClose(thenClose operation: () -> Bool, maxTimeout: DispatchTimeInterval = DEFAULT_TIMEOUT) throws {
             try ndbAccessSemaphore.waitOrThrow(timeout: .now() + maxTimeout)
-            let ndbIsOpen = operation()
+            ndbIsOpenLock.lock()
+            ndbIsOpen = operation()
             if ndbIsOpen {
                 ndbAccessSemaphore.signal()
             }
+            ndbIsOpenLock.unlock()
         }
         
         /// Marks `ndb` as open to allow other users to use it. Do not call this more than once
         func markNdbOpen() {
-            ndbAccessSemaphore.signal()
+            ndbIsOpenLock.lock()
+            if !ndbIsOpen {
+                ndbIsOpen = true
+                ndbAccessSemaphore.signal()
+            }
+            ndbIsOpenLock.unlock()
         }
         
         private func incrementUserCount(maxTimeout: DispatchTimeInterval = .seconds(2)) throws {
+            ndbUserCountLock.lock()
+            defer { ndbUserCountLock.unlock() }
+            
+            // Signal that ndb cannot close while we have at least one user using ndb
             if ndbUserCount == 0 {
                 try ndbAccessSemaphore.waitOrThrow(timeout: .now() + maxTimeout)
             }
@@ -139,6 +156,9 @@ extension Ndb {
         }
         
         private func decrementUserCount() {
+            ndbUserCountLock.lock()
+            defer { ndbUserCountLock.unlock() }
+            
             ndbUserCount -= 1
             // Signal that ndb can close if we have zero users using ndb
             if ndbUserCount == 0 {
