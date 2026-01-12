@@ -21,9 +21,9 @@ final class EventGroupViewTests: XCTestCase {
     @MainActor
     func testEventAuthorName() {
         let damusState = test_damus_state
-        let damus_name = "17ldvg64:nq5mhr77"
+        let damus_name = "npub17ldv...hr77"
         XCTAssertEqual(event_author_name(profiles: damusState.profiles, pubkey: test_pubkey), damus_name)
-        XCTAssertEqual(event_author_name(profiles: damusState.profiles, pubkey: test_pubkey_2), "1rppft3m:4qxhsgnj")
+        XCTAssertEqual(event_author_name(profiles: damusState.profiles, pubkey: test_pubkey_2), "npub1rppf...sgnj")
         XCTAssertEqual(event_author_name(profiles: damusState.profiles, pubkey: ANON_PUBKEY), "Anonymous")
     }
 
@@ -75,9 +75,9 @@ final class EventGroupViewTests: XCTestCase {
         let repost3 = NostrEvent(content: encodedPost, keypair: pk3, kind: NostrKind.boost.rawValue, tags: [], createdAt: 1)!
 
         XCTAssertEqual(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [])), ev: test_note, pubkeys: [], locale: enUsLocale), "??")
-        XCTAssertEqual(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [repost1])), ev: test_note, pubkeys: [pk1.pubkey], locale: enUsLocale), "1jw906h6:6saq3vx4 reposted a note you were tagged in")
-        XCTAssertEqual(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [repost1, repost2])), ev: test_note, pubkeys: [pk1.pubkey, pk2.pubkey], locale: enUsLocale), "1jw906h6:6saq3vx4 and 1dwdm0t9:nqtnamhd reposted a note you were tagged in")
-        XCTAssertEqual(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [repost1, repost2, repost2])), ev: test_note, pubkeys: [pk1.pubkey, pk2.pubkey, pk3.pubkey], locale: enUsLocale), "1jw906h6:6saq3vx4 and 2 others reposted a note you were tagged in")
+        XCTAssertEqual(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [repost1])), ev: test_note, pubkeys: [pk1.pubkey], locale: enUsLocale), "npub1jw90...3vx4 reposted a note you were tagged in")
+        XCTAssertEqual(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [repost1, repost2])), ev: test_note, pubkeys: [pk1.pubkey, pk2.pubkey], locale: enUsLocale), "npub1jw90...3vx4 and npub1dwdm...amhd reposted a note you were tagged in")
+        XCTAssertEqual(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [repost1, repost2, repost2])), ev: test_note, pubkeys: [pk1.pubkey, pk2.pubkey, pk3.pubkey], locale: enUsLocale), "npub1jw90...3vx4 and 2 others reposted a note you were tagged in")
 
         Bundle.main.localizations.map { Locale(identifier: $0) }.forEach {
             XCTAssertNoThrow(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [])), ev: test_note, pubkeys: [], locale: $0), "??")

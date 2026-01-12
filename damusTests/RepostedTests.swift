@@ -21,9 +21,9 @@ final class RepostedTests: XCTestCase {
         XCTAssertEqual(people_reposted_text(profiles: damusState.profiles, pubkey: pubkey, reposts: 0, locale: enUsLocale), "")
 
         // Verify the English pluralization variations.
-        XCTAssertEqual(people_reposted_text(profiles: damusState.profiles, pubkey: pubkey, reposts: 1, locale: enUsLocale), "17ldvg64:nq5mhr77 reposted")
-        XCTAssertEqual(people_reposted_text(profiles: damusState.profiles, pubkey: pubkey, reposts: 2, locale: enUsLocale), "17ldvg64:nq5mhr77 and 1 other reposted")
-        XCTAssertEqual(people_reposted_text(profiles: damusState.profiles, pubkey: pubkey, reposts: 3, locale: enUsLocale), "17ldvg64:nq5mhr77 and 2 others reposted")
+        XCTAssertEqual(people_reposted_text(profiles: damusState.profiles, pubkey: pubkey, reposts: 1, locale: enUsLocale), "npub17ldv...hr77 reposted")
+        XCTAssertEqual(people_reposted_text(profiles: damusState.profiles, pubkey: pubkey, reposts: 2, locale: enUsLocale), "npub17ldv...hr77 and 1 other reposted")
+        XCTAssertEqual(people_reposted_text(profiles: damusState.profiles, pubkey: pubkey, reposts: 3, locale: enUsLocale), "npub17ldv...hr77 and 2 others reposted")
 
         // Sanity check that the non-English translations are likely not malformed.
         Bundle.main.localizations.map { Locale(identifier: $0) }.forEach {

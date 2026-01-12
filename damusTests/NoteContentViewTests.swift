@@ -365,7 +365,7 @@ class NoteContentViewTests: XCTestCase {
     func testMentionStr_Pubkey_ContainsAbbreviated() throws {
         let compatibleText = createCompatibleText(test_pubkey.npub)
         
-        assertCompatibleTextHasExpectedString(compatibleText: compatibleText, expected: "17ldvg64:nq5mhr77")
+        assertCompatibleTextHasExpectedString(compatibleText: compatibleText, expected: "npub17ldv...hr77")
     }
     
     @MainActor
@@ -379,7 +379,7 @@ class NoteContentViewTests: XCTestCase {
     func testMentionStr_Nprofile_ContainsAbbreviated() throws {
         let compatibleText = createCompatibleText("nprofile1qqsrhuxx8l9ex335q7he0f09aej04zpazpl0ne2cgukyawd24mayt8gpp4mhxue69uhhytnc9e3k7mgpz4mhxue69uhkg6nzv9ejuumpv34kytnrdaksjlyr9p")
                 
-        assertCompatibleTextHasExpectedString(compatibleText: compatibleText, expected: "180cvv07:wsyjh6w6")
+        assertCompatibleTextHasExpectedString(compatibleText: compatibleText, expected: "npub180cv...h6w6")
     }
     
     @MainActor
