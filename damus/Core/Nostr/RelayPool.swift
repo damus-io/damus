@@ -7,6 +7,7 @@
 
 import Foundation
 import Network
+import Negentropy
 
 struct RelayHandler {
     let sub_id: String
@@ -269,6 +270,12 @@ class RelayPool {
                 return true
             case .auth(_):
                 return true
+            case .negentropyOpen(subscriptionId: _, filter: _, initialMessage: _):
+                return false    // Do not persist negentropy requests across sessions
+            case .negentropyMessage(subscriptionId: _, message: _):
+                return false    // Do not persist negentropy requests across sessions
+            case .negentropyClose(subscriptionId: _):
+                return false    // Do not persist negentropy requests across sessions
             }
         }
     }
@@ -339,6 +346,8 @@ class RelayPool {
                             }
                         case .ok(_): break    // No need to handle this, we are not sending an event to the relay
                         case .auth(_): break    // Handled in a separate function in RelayPool
+                        case .negentropyError(subscriptionId: _, reasonCodeString: _): break    // Not handled in regular subscriptions
+                        case .negentropyMessage(subscriptionId: _, hexEncodedData: _): break    // Not handled in regular subscriptions
                         }
                     }
                 }
@@ -364,6 +373,21 @@ class RelayPool {
                 upstreamStreamingTask.cancel()
             }
         }
+    }
+    
+    /// This streams events that are pre-existing on the relay, and stops streaming as soon as it receives the EOSE signal.
+    func subscribeExistingItems(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, eoseTimeout: Duration? = nil, id: UUID? = nil) -> AsyncStream<NostrEvent> {
+        return AsyncStream<NostrEvent>.with(task: { continuation in
+            outerLoop: for await item in await self.subscribe(filters: filters, to: desiredRelays, eoseTimeout: eoseTimeout, id: id) {
+                if Task.isCancelled { return }
+                switch item {
+                case .event(let event):
+                    continuation.yield(event)
+                case .eose:
+                    break outerLoop
+                }
+            }
+        })
     }
     
     enum StreamItem {
@@ -550,6 +574,115 @@ class RelayPool {
             logStreamPipelineStats("RelayPool_\(relay_id.absoluteString)", "RelayPool_Handler_\(handler.sub_id)")
             handler.handler.yield((relay_id, event))
         }
+    }
+    
+    // MARK: - Negentropy
+    
+    /// This streams items in the following fashion:
+    /// 1. Performs a negentropy sync, sending missing notes to the stream
+    /// 2. Send EOSE to signal end of syncing
+    /// 3. Stream new notes
+    func negentropySubscribe(
+        filters: [NostrFilter],
+        to desiredRelayURLs: [RelayURL]? = nil,
+        negentropyVector: NegentropyStorageVector,
+        eoseTimeout: Duration? = nil,
+        id: UUID? = nil,
+        ignoreUnsupportedRelays: Bool
+    ) async throws -> AsyncThrowingStream<StreamItem, any Error> {
+        return AsyncThrowingStream<StreamItem, any Error>.with(task: { continuation in
+            // 1. Mark the time when we begin negentropy syncing
+            let negentropyStartTimestamp = UInt32(Date().timeIntervalSince1970)
+            // 2. Negentropy sync missing notes and send the missing notes over
+            for try await event in try await self.negentropySync(filters: filters, to: desiredRelayURLs, negentropyVector: negentropyVector, ignoreUnsupportedRelays: ignoreUnsupportedRelays) {
+                continuation.yield(.event(event))
+            }
+            // 3. When syncing is done, send the EOSE signal
+            continuation.yield(.eose)
+            // 3. Stream new notes that match the filter
+            let updatedFilters = filters.map({ filter in
+                var newFilter = filter
+                newFilter.since = negentropyStartTimestamp
+                return newFilter
+            })
+            for await item in await self.subscribe(filters: updatedFilters, to: desiredRelayURLs, eoseTimeout: eoseTimeout, id: id) {
+                try Task.checkCancellation()
+                switch item {
+                case .event(let nostrEvent):
+                    continuation.yield(.event(nostrEvent))
+                case .eose:
+                    continue    // We already sent the EOSE signal after negentropy sync, ignore this redundant EOSE
+                }
+            }
+        })
+    }
+    
+    /// This performs a negentropy syncing with various relays and various filters and sends missing notes over an async stream
+    func negentropySync(
+        filters: [NostrFilter],
+        to desiredRelayURLs: [RelayURL]? = nil,
+        negentropyVector: NegentropyStorageVector,
+        eoseTimeout: Duration? = nil,
+        ignoreUnsupportedRelays: Bool
+    ) async throws -> AsyncThrowingStream<NostrEvent, any Error> {
+        return AsyncThrowingStream<NostrEvent, any Error>.with(task: { continuation in
+            for filter in filters {
+                try Task.checkCancellation()
+                for try await event in try await self.negentropySync(filter: filter, to: desiredRelayURLs, negentropyVector: negentropyVector, eoseTimeout: eoseTimeout, ignoreUnsupportedRelays: ignoreUnsupportedRelays) {
+                    try Task.checkCancellation()
+                    continuation.yield(event)
+                    // Note: Negentropy vector already updated by the underlying stream, since it is a reference type
+                    try Task.checkCancellation()
+                }
+            }
+        })
+    }
+    
+    /// This performs a negentropy syncing with various relays and sends missing notes over an async stream
+    func negentropySync(
+        filter: NostrFilter,
+        to desiredRelayURLs: [RelayURL]? = nil,
+        negentropyVector: NegentropyStorageVector,
+        eoseTimeout: Duration? = nil,
+        ignoreUnsupportedRelays: Bool
+    ) async throws -> AsyncThrowingStream<NostrEvent, any Error> {
+        return AsyncThrowingStream<NostrEvent, any Error>.with(task: { continuation in
+            let desiredRelays = await self.getRelays(targetRelays: desiredRelayURLs)
+            for desiredRelay in desiredRelays {
+                try Task.checkCancellation()
+                do {
+                    for try await event in try await self.negentropySync(filter: filter, to: desiredRelay, negentropyVector: negentropyVector, eoseTimeout: eoseTimeout) {
+                        try Task.checkCancellation()
+                        continuation.yield(event)
+                        // Add to our negentropy vector so that we don't need to receive it from the next relay!
+                        negentropyVector.unseal()
+                        try negentropyVector.insert(nostrEvent: event)
+                        try Task.checkCancellation()
+                    }
+                }
+                catch {
+                    if let negentropyError = error as? RelayConnection.NegentropySyncError,
+                       case .notSupported = negentropyError,
+                       ignoreUnsupportedRelays {
+                        // Do not throw error, ignore the relays that do not support negentropy
+                    }
+                    else {
+                        throw error
+                    }
+                }
+            }
+        })
+    }
+    
+    /// This performs a negentropy syncing with one relay and sends missing notes over an async stream
+    func negentropySync(filter: NostrFilter, to desiredRelay: Relay, negentropyVector: NegentropyStorageVector, eoseTimeout: Duration? = nil) async throws -> AsyncThrowingStream<NostrEvent, any Error> {
+        return AsyncThrowingStream<NostrEvent, any Error>.with(task: { streamContinuation in
+            let missingIds = try await desiredRelay.connection.getMissingIds(filter: filter, negentropyVector: negentropyVector, timeout: eoseTimeout)
+            let missingIdsFilter = NostrFilter(ids: missingIds.map { NoteId($0.toData()) })
+            for await event in self.subscribeExistingItems(filters: [missingIdsFilter], to: [desiredRelay.descriptor.url], eoseTimeout: eoseTimeout) {
+                streamContinuation.yield(event)
+            }
+        })
     }
 }
 

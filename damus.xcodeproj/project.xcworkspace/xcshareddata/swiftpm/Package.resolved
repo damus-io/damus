@@ -1,5 +1,5 @@
 {
-  "originHash" : "1fc7e0b44329ba72cd285eeb022b5b92582cd01586b920d243cb0485c2e69dcc",
+  "originHash" : "c718c1e7dcc1a07671694b2d7d7311e11804fbbaf22f4b81e49523a3df816ad6",
   "pins" : [
     {
       "identity" : "codescanner",
@@ -60,6 +60,24 @@
       "state" : {
         "revision" : "4c6b067f96953ee19526e49e4189403a2be21fb3",
         "version" : "8.3.1"
+      }
+    },
+    {
+      "identity" : "negentropy-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/damus-io/negentropy-swift",
+      "state" : {
+        "revision" : "181789fb0842f5666020db87ffea0d120cc5aa5d",
+        "version" : "0.1.0"
+      }
+    },
+    {
+      "identity" : "nostr-sdk-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/rust-nostr/nostr-sdk-swift",
+      "state" : {
+        "revision" : "42fe7d379b326583ae8282a5fd7232745f195906",
+        "version" : "0.44.0"
       }
     },
     {
