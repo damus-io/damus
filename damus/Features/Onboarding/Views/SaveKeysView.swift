@@ -173,7 +173,7 @@ struct SaveKeysView: View {
         switch ev {
         case .ws_connection_event(let wsev):
             switch wsev {
-            case .connected:
+            case .connected(_):
                 let metadata = create_account_to_metadata(account)
                 
                 if let keypair = account.keypair.to_full(),
@@ -217,6 +217,10 @@ struct SaveKeysView: View {
                 break
             case .auth:
                 break
+            case .negMsg, .negErr:
+                break  // NIP-77 negentropy messages not relevant during signup
+            case .closed:
+                break  // CLOSED messages not relevant during signup
             }
         }
     }

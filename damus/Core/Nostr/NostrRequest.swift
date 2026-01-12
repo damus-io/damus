@@ -12,6 +12,26 @@ struct NostrSubscribe {
     let sub_id: String
 }
 
+// MARK: - NIP-77 Negentropy Types
+
+/// NIP-77 NEG-OPEN request to initiate negentropy reconciliation
+struct NegentropyOpen {
+    let sub_id: String
+    let filter: NostrFilter
+    let initial_message: String  // hex-encoded negentropy message
+}
+
+/// NIP-77 NEG-MSG request to continue negentropy reconciliation
+struct NegentropyMessage {
+    let sub_id: String
+    let message: String  // hex-encoded negentropy message
+}
+
+/// NIP-77 NEG-CLOSE request to terminate negentropy reconciliation
+struct NegentropyClose {
+    let sub_id: String
+}
+
 /// Models a request/message that is sent to a Nostr relay
 enum NostrRequestType {
     /// A standard nostr request
@@ -48,6 +68,12 @@ enum NostrRequest {
     case event(NostrEvent)
     /// Authenticate with the relay
     case auth(NostrEvent)
+    /// NIP-77: Initiate negentropy reconciliation
+    case negOpen(NegentropyOpen)
+    /// NIP-77: Continue negentropy reconciliation
+    case negMsg(NegentropyMessage)
+    /// NIP-77: Close negentropy reconciliation
+    case negClose(NegentropyClose)
 
     /// Whether this request is meant to write data to a relay
     var is_write: Bool {
@@ -60,12 +86,14 @@ enum NostrRequest {
             return true
         case .auth:
             return false
+        case .negOpen, .negMsg, .negClose:
+            return false
         }
     }
-    
+
     /// Whether this request is meant to read data from a relay
     var is_read: Bool {
         return !is_write
     }
-    
+
 }

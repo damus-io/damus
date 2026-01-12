@@ -8,5 +8,6 @@
 #include "wasm.h"
 #include "nostrscript.h"
 #include "nostrdb.h"
+#include "ndb_negentropy.h"
 #include "lmdb.h"
 
