@@ -21,12 +21,12 @@ final class NIP05DomainTimelineHeaderViewTests: XCTestCase {
 
         let ndb = Ndb(path: Ndb.db_path)!
 
-        let damus_name = "17ldvg64:nq5mhr77"
+        let damus_name = "npub17ldv...hr77"
         XCTAssertEqual(friendsOfFriendsString([pk1], ndb: ndb, locale: enUsLocale), "Notes from \(damus_name)")
-        XCTAssertEqual(friendsOfFriendsString([pk1, pk2], ndb: ndb, locale: enUsLocale), "Notes from \(damus_name) & 1rppft3m:4qxhsgnj")
-        XCTAssertEqual(friendsOfFriendsString([pk1, pk2, pk3], ndb: ndb, locale: enUsLocale), "Notes from \(damus_name), 1rppft3m:4qxhsgnj & 1kshyfd2:cq04aze0")
-        XCTAssertEqual(friendsOfFriendsString([pk1, pk2, pk3, pk4,], ndb: ndb, locale: enUsLocale), "Notes from \(damus_name), 1rppft3m:4qxhsgnj, 1kshyfd2:cq04aze0 & 1 other in your trusted network")
-        XCTAssertEqual(friendsOfFriendsString([pk1, pk2, pk3, pk4, pk5], ndb: ndb, locale: enUsLocale), "Notes from \(damus_name), 1rppft3m:4qxhsgnj, 1kshyfd2:cq04aze0 & 2 others in your trusted network")
+        XCTAssertEqual(friendsOfFriendsString([pk1, pk2], ndb: ndb, locale: enUsLocale), "Notes from \(damus_name) & npub1rppf...sgnj")
+        XCTAssertEqual(friendsOfFriendsString([pk1, pk2, pk3], ndb: ndb, locale: enUsLocale), "Notes from \(damus_name), npub1rppf...sgnj & npub1kshy...aze0")
+        XCTAssertEqual(friendsOfFriendsString([pk1, pk2, pk3, pk4,], ndb: ndb, locale: enUsLocale), "Notes from \(damus_name), npub1rppf...sgnj, npub1kshy...aze0 & 1 other in your trusted network")
+        XCTAssertEqual(friendsOfFriendsString([pk1, pk2, pk3, pk4, pk5], ndb: ndb, locale: enUsLocale), "Notes from \(damus_name), npub1rppf...sgnj, npub1kshy...aze0 & 2 others in your trusted network")
 
         let pubkeys = [pk1, pk2, pk3, pk4, pk5, pk1, pk2, pk3, pk4, pk5]
         Bundle.main.localizations.map { Locale(identifier: $0) }.forEach {
