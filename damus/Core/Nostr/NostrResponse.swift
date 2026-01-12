@@ -18,6 +18,23 @@ enum MaybeResponse {
     case ok(NostrResponse)
 }
 
+enum NegentropyResponse {
+    /// Negentropy error
+    case error(subscriptionId: String, reasonCodeString: String)
+    /// Negentropy message
+    case message(subscriptionId: String, data: [UInt8])
+    /// Invalid negentropy message
+    case invalidResponse(subscriptionId: String)
+    
+    var subscriptionId: String {
+        switch self {
+        case .error(subscriptionId: let subscriptionId, reasonCodeString: let reasonCodeString): subscriptionId
+        case .message(subscriptionId: let subscriptionId, data: let data): subscriptionId
+        case .invalidResponse(subscriptionId: let subscriptionId): subscriptionId
+        }
+    }
+}
+
 enum NostrResponse {
     case event(String, NostrEvent)
     case notice(String)
@@ -27,6 +44,10 @@ enum NostrResponse {
     ///
     /// The associated type of this case is the challenge string sent by the server.
     case auth(String)
+    /// Negentropy error
+    case negentropyError(subscriptionId: String, reasonCodeString: String)
+    /// Negentropy message
+    case negentropyMessage(subscriptionId: String, hexEncodedData: String)
 
     var subid: String? {
         switch self {
@@ -36,14 +57,84 @@ enum NostrResponse {
             return sub_id
         case .eose(let sub_id):
             return sub_id
-        case .notice:
+        case .notice(_):
             return nil
         case .auth(let challenge_string):
             return challenge_string
+        case .negentropyError(subscriptionId: let subscriptionId, reasonCodeString: _):
+            return subscriptionId
+        case .negentropyMessage(subscriptionId: let subscriptionId, hexEncodedData: _):
+            return subscriptionId
+        }
+    }
+    
+    var negentropyResponse: NegentropyResponse? {
+        switch self {
+        case .event(_, _): return nil
+        case .notice(_): return nil
+        case .eose(_): return nil
+        case .ok(_): return nil
+        case .auth(_): return nil
+        case .negentropyError(subscriptionId: let subscriptionId, reasonCodeString: let reasonCodeString):
+            return .error(subscriptionId: subscriptionId, reasonCodeString: reasonCodeString)
+        case .negentropyMessage(subscriptionId: let subscriptionId, hexEncodedData: let hexData):
+            if let bytes = hex_decode(hexData) {
+                return .message(subscriptionId: subscriptionId, data: bytes)
+            }
+            return .invalidResponse(subscriptionId: subscriptionId)
+        }
+    }
+    
+    /// Decode a Nostr response from JSON using idiomatic Swift parsing
+    /// Supports NEG-MSG and NEG-ERR formats, falling back to C parsing for other message types
+    static func decode(from json: String) -> NostrResponse? {
+        // Try Swift-based parsing first for negentropy messages
+        if let response = try? decodeNegentropyMessage(from: json) {
+            return response
+        }
+        
+        // Fall back to C-based parsing for standard Nostr messages
+        return owned_from_json(json: json)
+    }
+    
+    /// Decode negentropy messages using idiomatic Swift
+    private static func decodeNegentropyMessage(from json: String) throws -> NostrResponse? {
+        guard let jsonData = json.data(using: .utf8) else {
+            return nil
+        }
+        
+        guard let jsonArray = try JSONSerialization.jsonObject(with: jsonData) as? [Any],
+              jsonArray.count >= 2,
+              let messageType = jsonArray[0] as? String else {
+            return nil
+        }
+        
+        switch messageType {
+        case "NEG-MSG":
+            // Format: ["NEG-MSG", "subscription-id", "hex-encoded-data"]
+            guard jsonArray.count == 3,
+                  let subscriptionId = jsonArray[1] as? String,
+                  let hexData = jsonArray[2] as? String else {
+                return nil
+            }
+            return .negentropyMessage(subscriptionId: subscriptionId, hexEncodedData: hexData)
+            
+        case "NEG-ERR":
+            // Format: ["NEG-ERR", "subscription-id", "reason-code"]
+            guard jsonArray.count == 3,
+                  let subscriptionId = jsonArray[1] as? String,
+                  let reasonCode = jsonArray[2] as? String else {
+                return nil
+            }
+            return .negentropyError(subscriptionId: subscriptionId, reasonCodeString: reasonCode)
+            
+        default:
+            // Not a negentropy message
+            return nil
         }
     }
 
-    static func owned_from_json(json: String) -> NostrResponse? {
+    private static func owned_from_json(json: String) -> NostrResponse? {
         return json.withCString{ cstr in
             let bufsize: Int = max(Int(Double(json.utf8.count) * 8.0), Int(getpagesize()))
             let data = malloc(bufsize)

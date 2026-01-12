@@ -12,7 +12,7 @@ final class LargeEventTests: XCTestCase {
 
     func testLongPost() async throws {
         let json = "[\"EVENT\",\"subid\",\(test_failing_nostr_report)]"
-        let resp = NostrResponse.owned_from_json(json: json)
+        let resp = NostrResponse.decode(from: json)
 
         XCTAssertNotNil(resp)
         guard let resp,
@@ -32,7 +32,7 @@ final class LargeEventTests: XCTestCase {
 
     func testIsHellthread() throws {
         let json = "[\"EVENT\",\"subid\",\(test_failing_nostr_report)]"
-        let resp = NostrResponse.owned_from_json(json: json)
+        let resp = NostrResponse.decode(from: json)
 
         XCTAssertNotNil(resp)
         guard let resp,

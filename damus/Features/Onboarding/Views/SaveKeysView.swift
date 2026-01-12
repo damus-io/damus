@@ -217,6 +217,10 @@ struct SaveKeysView: View {
                 break
             case .auth:
                 break
+            case .negentropyError:
+                break  // Not relevant during signup
+            case .negentropyMessage:
+                break  // Not relevant during signup
             }
         }
     }
