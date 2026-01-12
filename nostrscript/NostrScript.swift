@@ -207,6 +207,10 @@ enum NScriptEventType: Int {
             self = .ok
         case .auth:
             self = .auth
+        case .negentropyError:
+            self = .notice  // Treat negentropy errors as notices for nostrscript
+        case .negentropyMessage:
+            self = .notice  // Treat negentropy messages as notices for nostrscript
         }
     }
 }
