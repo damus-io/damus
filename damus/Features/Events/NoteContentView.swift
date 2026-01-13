@@ -11,6 +11,7 @@ import NaturalLanguage
 import MarkdownUI
 import Translation
 import UIKit
+import Kingfisher
 
 struct Blur: UIViewRepresentable {
     var style: UIBlurEffect.Style = .systemUltraThinMaterial
@@ -432,10 +433,10 @@ struct NoteContentView: View {
         if case .loading = damus_state.events.get_cache_data(event.id).artifacts_model.state {
             return
         }
-        
+
         // always reload artifacts on load
         let plan = get_preload_plan(ndb: damus_state.ndb, evcache: damus_state.events, ev: event, our_keypair: damus_state.keypair, settings: damus_state.settings)
-        
+
         // TODO: make this cleaner
         Task {
             // this is surprisingly slow
@@ -443,7 +444,7 @@ struct NoteContentView: View {
             Task { @MainActor in
                 self.damus_state.events.get_cache_data(event.id).relative_time.value = rel
             }
-            
+
             if var plan {
                 if force_artifacts {
                     plan.load_artifacts = true
@@ -558,9 +559,109 @@ struct NoteContentView: View {
             .task {
                 try? await streamProfiles()
             }
+            .task {
+                await prefetchCustomEmojisAndReload()
+            }
             .onAppear {
                 load()
+                // Also check emoji images on appear (task only runs once)
+                Task {
+                    await prefetchCustomEmojisAndReload()
+                }
             }
+    }
+
+    /// Prefetches custom emoji images and triggers re-render when done.
+    /// Handles both downloading new images and loading disk-cached images into memory.
+    private func prefetchCustomEmojisAndReload() async {
+        let emojis = Array(event.referenced_custom_emojis)
+        guard !emojis.isEmpty else { return }
+
+        // Check which emojis need to be loaded into memory vs downloaded
+        var needsMemoryLoad: [CustomEmoji] = []
+        var needsDownload: [CustomEmoji] = []
+
+        for emoji in emojis {
+            let key = emoji.url.absoluteString
+            let inMemory = ImageCache.default.retrieveImageInMemoryCache(forKey: key) != nil
+            if inMemory { continue }
+
+            if ImageCache.default.isCached(forKey: key) {
+                needsMemoryLoad.append(emoji)
+            } else {
+                needsDownload.append(emoji)
+            }
+        }
+
+        // Load disk-cached images into memory
+        for emoji in needsMemoryLoad {
+            await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                ImageCache.default.retrieveImage(forKey: emoji.url.absoluteString) { result in
+                    if case .success(let cacheResult) = result, let image = cacheResult.image {
+                        ImageCache.default.store(image, forKey: emoji.url.absoluteString, toDisk: false)
+                    }
+                    continuation.resume()
+                }
+            }
+        }
+
+        // Download images not on disk
+        if !needsDownload.isEmpty {
+            let urls = needsDownload.map { $0.url }
+            await withCheckedContinuation { continuation in
+                let prefetcher = ImagePrefetcher(urls: urls) { _, _, _ in
+                    continuation.resume()
+                }
+                prefetcher.start()
+            }
+
+            // Load downloaded images into memory (prefetcher only downloads to disk)
+            for emoji in needsDownload {
+                await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                    ImageCache.default.retrieveImage(forKey: emoji.url.absoluteString) { result in
+                        if case .success(let cacheResult) = result, let image = cacheResult.image {
+                            ImageCache.default.store(image, forKey: emoji.url.absoluteString, toDisk: false)
+                        }
+                        continuation.resume()
+                    }
+                }
+            }
+        }
+
+        // If we loaded any images, trigger re-render
+        if !needsMemoryLoad.isEmpty || !needsDownload.isEmpty {
+            await MainActor.run {
+                load(force_artifacts: true)
+            }
+            return
+        }
+
+        // All images are in memory, but we still need to check if the current render used fallbacks.
+        // If another event loaded the emoji into memory AFTER this event rendered with fallbacks,
+        // we need to re-render to pick up the now-available image.
+        // Check if current artifacts contain fallback text (purple :shortcode:) instead of images.
+        let currentArtifacts = await MainActor.run { artifacts_model.state.artifacts }
+        let needsReRenderForFallbacks: Bool
+        if let artifacts = currentArtifacts {
+            switch artifacts {
+            case .separated(let sep):
+                // Check if content contains any emoji shortcode as purple fallback text
+                let contentStr = String(sep.content.attributed.characters)
+                needsReRenderForFallbacks = emojis.contains { emoji in
+                    contentStr.contains(":\(emoji.shortcode):")
+                }
+            case .longform:
+                needsReRenderForFallbacks = false
+            }
+        } else {
+            needsReRenderForFallbacks = true
+        }
+
+        if needsReRenderForFallbacks {
+            await MainActor.run {
+                load(force_artifacts: true)
+            }
+        }
     }
 }
 

@@ -360,11 +360,12 @@ struct ProfileView: View {
         VStack(alignment: .leading, spacing: 8.0) {
             let lnurl = try? damus_state.profiles.lookup_lnurl(profile.pubkey)
             let ndbprofile = try? damus_state.profiles.lookup(id: profile.pubkey)
+            let customEmojis = (try? damus_state.profiles.lookup_profile_custom_emojis(profile.pubkey)) ?? [:]
 
             nameSection(ndbprofile: ndbprofile, lnurl: lnurl)
 
             if let about = ndbprofile?.about {
-                AboutView(state: damus_state, about: about)
+                AboutView(state: damus_state, about: about, customEmojis: customEmojis)
             }
 
             if let url = ndbprofile?.website_url {
