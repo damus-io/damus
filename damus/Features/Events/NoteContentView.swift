@@ -11,6 +11,7 @@ import NaturalLanguage
 import MarkdownUI
 import Translation
 import UIKit
+import Kingfisher
 
 struct Blur: UIViewRepresentable {
     var style: UIBlurEffect.Style = .systemUltraThinMaterial
@@ -558,9 +559,65 @@ struct NoteContentView: View {
             .task {
                 try? await streamProfiles()
             }
+            .task {
+                await prefetchCustomEmojisAndReload()
+            }
             .onAppear {
                 load()
             }
+    }
+
+    /// Prefetches custom emoji images and triggers re-render when done.
+    /// Handles both downloading new images and loading disk-cached images into memory.
+    private func prefetchCustomEmojisAndReload() async {
+        let emojis = Array(event.referenced_custom_emojis)
+        guard !emojis.isEmpty else { return }
+
+        // Check which emojis need to be loaded into memory vs downloaded
+        var needsMemoryLoad: [CustomEmoji] = []
+        var needsDownload: [CustomEmoji] = []
+
+        for emoji in emojis {
+            let key = emoji.url.absoluteString
+            let inMemory = ImageCache.default.retrieveImageInMemoryCache(forKey: key) != nil
+            if inMemory { continue }
+
+            if ImageCache.default.isCached(forKey: key) {
+                needsMemoryLoad.append(emoji)
+            } else {
+                needsDownload.append(emoji)
+            }
+        }
+
+        // Load disk-cached images into memory
+        for emoji in needsMemoryLoad {
+            await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                ImageCache.default.retrieveImage(forKey: emoji.url.absoluteString) { result in
+                    if case .success(let cacheResult) = result, let image = cacheResult.image {
+                        ImageCache.default.store(image, forKey: emoji.url.absoluteString, toDisk: false)
+                    }
+                    continuation.resume()
+                }
+            }
+        }
+
+        // Download images not on disk
+        if !needsDownload.isEmpty {
+            let urls = needsDownload.map { $0.url }
+            await withCheckedContinuation { continuation in
+                let prefetcher = ImagePrefetcher(urls: urls) { _, _, _ in
+                    continuation.resume()
+                }
+                prefetcher.start()
+            }
+        }
+
+        // Re-render if any images were loaded
+        guard !needsMemoryLoad.isEmpty || !needsDownload.isEmpty else { return }
+
+        await MainActor.run {
+            load(force_artifacts: true)
+        }
     }
 }
 
