@@ -87,6 +87,8 @@ struct PostView: View {
     @State private var current_placeholder_index = 0
     @State private var uploadTasks: [Task<Void, Never>] = []
     @State private var profileFetchTasks: [Pubkey: Task<Void, Never>] = [:]
+    @State private var show_custom_emoji_picker: Bool = false
+    @State private var selectedCustomEmojis: [String: CustomEmoji] = [:]
 
     let action: PostAction
     let damus_state: DamusState
@@ -221,7 +223,7 @@ struct PostView: View {
     }
 
     func send_post() async {
-        let new_post = await build_post(state: self.damus_state, post: self.post, action: action, uploadedMedias: uploadedMedias, references: self.references, filtered_pubkeys: filtered_pubkeys)
+        let new_post = await build_post(state: self.damus_state, post: self.post, action: action, uploadedMedias: uploadedMedias, references: self.references, filtered_pubkeys: filtered_pubkeys, customEmojis: selectedCustomEmojis)
 
         notify(.post(.post(new_post)))
 
@@ -257,7 +259,24 @@ struct PostView: View {
             return 10
         }
     }
-    
+
+    /// Inserts a custom emoji shortcode into the post at the current cursor position.
+    ///
+    /// - Parameter emoji: The custom emoji to insert.
+    func insertCustomEmoji(_ emoji: CustomEmoji) {
+        // Track the emoji for inclusion in tags when posting
+        selectedCustomEmojis[emoji.shortcode] = emoji
+
+        // Insert the shortcode at the end of the post (or could insert at cursor)
+        let shortcodeText = ":\(emoji.shortcode): "
+        let mutablePost = NSMutableAttributedString(attributedString: post)
+        mutablePost.append(NSAttributedString(string: shortcodeText))
+        post = mutablePost
+
+        // Trigger draft save
+        post_changed(post: post, media: uploadedMedias)
+    }
+
     var ImageButton: some View {
         Button(action: {
             preUploadedMedia.removeAll()
@@ -276,11 +295,21 @@ struct PostView: View {
                 .padding(6)
         })
     }
-    
+
+    var CustomEmojiButton: some View {
+        Button(action: {
+            show_custom_emoji_picker = true
+        }, label: {
+            Image(systemName: "face.smiling")
+                .padding(6)
+        })
+    }
+
     var AttachmentBar: some View {
         HStack(alignment: .center, spacing: 15) {
             ImageButton
             CameraButton
+            CustomEmojiButton
             Spacer()
             AutoSaveIndicatorView(saveViewModel: self.autoSaveModel)
         }
@@ -623,6 +652,12 @@ struct PostView: View {
                     self.attach_media = true
                 }))
             }
+            .sheet(isPresented: $show_custom_emoji_picker) {
+                CustomEmojiPickerView(damus_state: damus_state) { emoji in
+                    insertCustomEmoji(emoji)
+                }
+                .presentationDetents([.medium, .large])
+            }
             // This alert seeks confirmation about Image-upload when user taps Paste option
             .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $imageUploadConfirmPasteboard) {
                 Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
@@ -949,7 +984,7 @@ func build_post(state: DamusState, action: PostAction, draft: DraftArtifacts) as
     )
 }
 
-func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], references: [RefId], filtered_pubkeys: Set<Pubkey>) async -> NostrPost {
+func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], references: [RefId], filtered_pubkeys: Set<Pubkey>, customEmojis: [String: CustomEmoji] = [:]) async -> NostrPost {
     // don't add duplicate pubkeys but retain order
     var pkset = Set<Pubkey>()
 
@@ -958,7 +993,7 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
         guard case .pubkey(let pk) = ref else {
             return
         }
-        
+
         if pkset.contains(pk) || filtered_pubkeys.contains(pk) {
             return
         }
@@ -966,8 +1001,8 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
         pkset.insert(pk)
         acc.append(pk)
     }
-    
-    return await build_post(state: state, post: post, action: action, uploadedMedias: uploadedMedias, pubkeys: pks)
+
+    return await build_post(state: state, post: post, action: action, uploadedMedias: uploadedMedias, pubkeys: pks, customEmojis: customEmojis)
 }
 
 /// This builds a Nostr post from draft data from `PostView` or other draft-related classes
@@ -982,8 +1017,9 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
 ///   - action: The intended action of the post (highlighting? replying?)
 ///   - uploadedMedias: The medias attached to this post
 ///   - pubkeys: The referenced pubkeys
+///   - customEmojis: Custom emojis (NIP-30) to include as tags
 /// - Returns: A NostrPost, which can then be signed into an event.
-func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], pubkeys: [Pubkey]) async -> NostrPost {
+func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], pubkeys: [Pubkey], customEmojis: [String: CustomEmoji] = [:]) async -> NostrPost {
     let post = NSMutableAttributedString(attributedString: post)
     post.enumerateAttributes(in: NSRange(location: 0, length: post.length), options: []) { attributes, range, stop in
         let linkValue = attributes[.link]
@@ -1045,7 +1081,12 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
 
     // append additional tags
     tags += uploadedMedias.compactMap { $0.metadata?.to_tag() }
-    
+
+    // Add custom emoji tags (NIP-30)
+    for emoji in customEmojis.values {
+        tags.append(emoji.tag)
+    }
+
     switch action {
         case .highlighting(let draft):
             tags.append(contentsOf: draft.source.tags())
