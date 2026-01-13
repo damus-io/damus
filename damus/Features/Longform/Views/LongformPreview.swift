@@ -188,6 +188,7 @@ struct LongformPreviewBody: View {
                     ReadTime(longform.estimatedReadTimeMinutes)
                     Text("·")
                     Words(longform.words)
+                    LongformEditedIndicator(state: state, event: event.event)
                 }
                 .font(.footnote)
                 .foregroundColor(.gray)
@@ -244,7 +245,6 @@ struct LongformPreviewBody: View {
                 .padding(10)
             }
 
-            
             if case .loaded(let arts) = artifacts.state,
                case .longform(let longform) = arts
             {
@@ -252,6 +252,7 @@ struct LongformPreviewBody: View {
                     ReadTime(longform.estimatedReadTimeMinutes)
                     Text("·")
                     Words(longform.words)
+                    LongformEditedIndicator(state: state, event: event.event)
                 }
                 .font(.footnote)
                 .foregroundColor(.gray)
