@@ -29,11 +29,10 @@ struct LongformMarkdownView: View {
         HStack(spacing: 0) {
             Spacer(minLength: 0)
             Markdown(markdown)
-                // Override only paragraph style, preserving all other default formatting (headings, lists, etc.)
                 .markdownBlockStyle(\.paragraph) { configuration in
                     configuration.label
                         .relativeLineSpacing(.em(relativeLineSpacing))
-                        .markdownMargin(top: 0, bottom: 16)
+                        .markdownMargin(top: .zero, bottom: .em(1))
                 }
                 .markdownImageProvider(.kingfisher(disable_animation: disableAnimation))
                 .markdownInlineImageProvider(.kingfisher)
