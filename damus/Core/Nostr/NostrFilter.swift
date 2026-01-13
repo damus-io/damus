@@ -49,7 +49,7 @@ struct NostrFilter: Codable, Equatable {
     }
     
     public static func copy(from: NostrFilter) -> NostrFilter {
-        NostrFilter(ids: from.ids, kinds: from.kinds, referenced_ids: from.referenced_ids, pubkeys: from.pubkeys, since: from.since, until: from.until, authors: from.authors, hashtag: from.hashtag)
+        NostrFilter(ids: from.ids, kinds: from.kinds, referenced_ids: from.referenced_ids, pubkeys: from.pubkeys, since: from.since, until: from.until, limit: from.limit, authors: from.authors, hashtag: from.hashtag, parameter: from.parameter, quotes: from.quotes)
     }
     
     public static func filter_hashtag(_ htags: [String]) -> NostrFilter {
