@@ -70,14 +70,52 @@ func render_immediately_available_note_content(ndb: Ndb, ev: NostrEvent, profile
     if ev.known_kind == .longform {
         return .longform(LongformContent(ev.content))
     }
-    
+
+    // Build custom emoji map for NIP-30 support
+    let customEmojis = build_custom_emoji_map(ev)
+
+    // Prefetch custom emoji images for future renders
+    if !customEmojis.isEmpty {
+        prefetch_custom_emojis(customEmojis.values)
+    }
+
+    #if DEBUG
+    // Debug: Log all events being rendered
+    let tagCount = ev.tags.count
+    print("NIP-30 DEBUG: Rendering event \(ev.id.hex().prefix(8)), \(tagCount) total tags, \(customEmojis.count) parsed emojis")
+    if !customEmojis.isEmpty {
+        print("NIP-30: Found custom emojis: \(customEmojis.keys.joined(separator: ", "))")
+    }
+    #endif
+
     do {
         return try NdbBlockGroup.borrowBlockGroup(event: ev, using: ndb, and: keypair, borrow: { blocks in
-            return .separated(render_blocks(blocks: blocks, profiles: profiles, can_hide_last_previewable_refs: true))
+            let rendered = render_blocks(blocks: blocks, profiles: profiles, custom_emojis: customEmojis, can_hide_last_previewable_refs: true)
+            #if DEBUG
+            if !customEmojis.isEmpty {
+                print("NIP-30 FINAL: Event \(ev.id.hex().prefix(8)) - \(rendered.content.items.count) items after render_blocks")
+                for (index, item) in rendered.content.items.enumerated() {
+                    switch item {
+                    case .attributed_string(let attrStr):
+                        let hasColor = attrStr.foregroundColor != nil
+                        let preview = String(attrStr.characters.prefix(30))
+                        print("NIP-30 FINAL:   [\(index)] hasColor=\(hasColor) '\(preview)'")
+                    case .icon(let name, _):
+                        print("NIP-30 FINAL:   [\(index)] icon '\(name)'")
+                    case .imageIcon(_, _):
+                        print("NIP-30 FINAL:   [\(index)] imageIcon (custom emoji)")
+                    }
+                }
+            }
+            #endif
+            return .separated(rendered)
         })
     }
     catch {
         // TODO: Improve error handling in the future, bubbling it up so that the view can decide how display errors. Keep legacy behavior for now.
+        #if DEBUG
+        print("NIP-30: Error rendering blocks for event \(ev.id.hex().prefix(8)): \(error)")
+        #endif
         return .separated(.just_content(ev.get_content(keypair)))
     }
 }
@@ -93,7 +131,7 @@ actor ContentRenderer {
 // Block previews should actually be rendered in the position of the note content where it was found.
 // Currently, we put some previews at the bottom of the note, which is incorrect as they take things out of
 // the author's intended context.
-func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide_last_previewable_refs: Bool = false) -> NoteArtifactsSeparated {
+func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, custom_emojis: [String: CustomEmoji] = [:], can_hide_last_previewable_refs: Bool = false) -> NoteArtifactsSeparated {
     var invoices: [Invoice] = []
     var urls: [UrlType] = []
     
@@ -255,7 +293,8 @@ func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide
                         break
                     }
                 })
-                return .loopReturn(str + CompatibleText(stringLiteral: reduce_text_block(ind: index, hide_text_index: hide_text_index_argument, txt: txt.as_str())))
+                let processedText = reduce_text_block(ind: index, hide_text_index: hide_text_index_argument, txt: txt.as_str())
+                return .loopReturn(str + emojify_text(processedText, emojis: custom_emojis))
             case .hashtag(let htag):
                 return .loopReturn(str + hashtag_str(htag.as_str()))
             case .invoice(let invoice):
