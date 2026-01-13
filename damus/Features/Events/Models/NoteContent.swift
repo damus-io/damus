@@ -103,7 +103,9 @@ func render_immediately_available_note_content(ndb: Ndb, ev: NostrEvent, profile
                     case .icon(let name, _):
                         print("NIP-30 FINAL:   [\(index)] icon '\(name)'")
                     case .imageIcon(_, _):
-                        print("NIP-30 FINAL:   [\(index)] imageIcon (custom emoji)")
+                        print("NIP-30 FINAL:   [\(index)] imageIcon (legacy)")
+                    case .customEmoji(_, let emoji, _):
+                        print("NIP-30 FINAL:   [\(index)] customEmoji '\(emoji.shortcode)'")
                     }
                 }
             }
