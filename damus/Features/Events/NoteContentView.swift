@@ -430,13 +430,28 @@ struct NoteContentView: View {
     }
     
     func load(force_artifacts: Bool = false) {
+        #if DEBUG
+        if force_artifacts {
+            print("NIP-30 load: force_artifacts=true for event \(event.id.hex().prefix(8))")
+        }
+        #endif
+
         if case .loading = damus_state.events.get_cache_data(event.id).artifacts_model.state {
+            #if DEBUG
+            print("NIP-30 load: returning early - state is .loading")
+            #endif
             return
         }
-        
+
         // always reload artifacts on load
         let plan = get_preload_plan(ndb: damus_state.ndb, evcache: damus_state.events, ev: event, our_keypair: damus_state.keypair, settings: damus_state.settings)
-        
+
+        #if DEBUG
+        if force_artifacts {
+            print("NIP-30 load: plan is \(plan == nil ? "nil" : "not nil")")
+        }
+        #endif
+
         // TODO: make this cleaner
         Task {
             // this is surprisingly slow
@@ -444,13 +459,19 @@ struct NoteContentView: View {
             Task { @MainActor in
                 self.damus_state.events.get_cache_data(event.id).relative_time.value = rel
             }
-            
+
             if var plan {
                 if force_artifacts {
                     plan.load_artifacts = true
+                    #if DEBUG
+                    print("NIP-30 load: calling preload_event with load_artifacts=true")
+                    #endif
                 }
                 await preload_event(plan: plan, state: damus_state)
             } else if force_artifacts {
+                #if DEBUG
+                print("NIP-30 load: plan is nil, directly rendering artifacts")
+                #endif
                 let arts = await ContentRenderer().render_note_content(ndb: damus_state.ndb, ev: event, profiles: damus_state.profiles, keypair: damus_state.keypair)
                 self.artifacts_model.state = .loaded(arts)
             }
@@ -564,6 +585,10 @@ struct NoteContentView: View {
             }
             .onAppear {
                 load()
+                // Also check emoji images on appear (task only runs once)
+                Task {
+                    await prefetchCustomEmojisAndReload()
+                }
             }
     }
 
@@ -631,7 +656,16 @@ struct NoteContentView: View {
         }
 
         // Re-render if any images were loaded
-        guard !needsMemoryLoad.isEmpty || !needsDownload.isEmpty else { return }
+        guard !needsMemoryLoad.isEmpty || !needsDownload.isEmpty else {
+            #if DEBUG
+            print("NIP-30 prefetch: no images needed loading, skipping re-render")
+            #endif
+            return
+        }
+
+        #if DEBUG
+        print("NIP-30 prefetch: \(needsMemoryLoad.count) from disk, \(needsDownload.count) downloaded - triggering re-render")
+        #endif
 
         await MainActor.run {
             load(force_artifacts: true)
