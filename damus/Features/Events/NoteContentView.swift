@@ -569,9 +569,15 @@ struct NoteContentView: View {
 
     /// Prefetches custom emoji images and triggers re-render when done.
     /// Handles both downloading new images and loading disk-cached images into memory.
+    /// Also collects emojis into the store for use in compose.
     private func prefetchCustomEmojisAndReload() async {
         let emojis = Array(event.referenced_custom_emojis)
         guard !emojis.isEmpty else { return }
+
+        // Collect emojis for compose use
+        await MainActor.run {
+            damus_state.custom_emojis.add(contentsOf: emojis)
+        }
 
         // Check which emojis need to be loaded into memory vs downloaded
         var needsMemoryLoad: [CustomEmoji] = []
