@@ -228,15 +228,21 @@ fileprivate struct TextViewRepresentable: UIViewRepresentable {
 
     func createNSAttributedString() -> NSMutableAttributedString {
         let mutableAttributedString = NSMutableAttributedString(attributedString)
-        let myAttribute = [
-            NSAttributedString.Key.font: font,
-            NSAttributedString.Key.foregroundColor: textColor
-        ]
+        let fullRange = NSRange(location: 0, length: mutableAttributedString.length)
 
-        mutableAttributedString.addAttributes(
-            myAttribute,
-            range: NSRange.init(location: 0, length: mutableAttributedString.length)
-        )
+        // Apply font to entire range
+        mutableAttributedString.addAttribute(.font, value: font, range: fullRange)
+
+        // Apply default foreground color only to ranges that don't already have one
+        mutableAttributedString.enumerateAttribute(
+            .foregroundColor,
+            in: fullRange,
+            options: []
+        ) { value, range, _ in
+            if value == nil {
+                mutableAttributedString.addAttribute(.foregroundColor, value: textColor, range: range)
+            }
+        }
 
         return mutableAttributedString
     }
