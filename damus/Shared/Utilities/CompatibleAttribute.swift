@@ -23,6 +23,7 @@ class CompatibleText: Equatable {
                 .foregroundColor(.secondary)
             )
         }
+        // Use render_to_text() to properly render imageIcon items as Text(Image(uiImage:))
         return AnyView(
             items.reduce(Text(""), { (accumulated, item) in
                 return accumulated + item.render_to_text()
@@ -80,6 +81,20 @@ extension CompatibleText {
     enum Item: Equatable {
         case attributed_string(AttributedString)
         case icon(named: String, offset: CGFloat)
+        case imageIcon(UIImage, offset: CGFloat)  // For custom emoji images
+
+        static func == (lhs: Item, rhs: Item) -> Bool {
+            switch (lhs, rhs) {
+            case (.attributed_string(let l), .attributed_string(let r)):
+                return l == r
+            case (.icon(let lName, let lOffset), .icon(let rName, let rOffset)):
+                return lName == rName && lOffset == rOffset
+            case (.imageIcon(let lImg, let lOffset), .imageIcon(let rImg, let rOffset)):
+                return lImg === rImg && lOffset == rOffset
+            default:
+                return false
+            }
+        }
 
         func render_to_text() -> Text {
             switch self {
@@ -87,6 +102,8 @@ extension CompatibleText {
                     return Text(attributed_string)
                 case .icon(named: let image_name, offset: let offset):
                     return Text(Image(image_name)).baselineOffset(offset)
+                case .imageIcon(let uiImage, let offset):
+                    return Text(Image(uiImage: uiImage)).baselineOffset(offset)
             }
         }
 
@@ -96,6 +113,8 @@ extension CompatibleText {
                     return attributed_string
                 case .icon(named: let name, offset: _):
                     guard let img = UIImage(named: name) else { return nil }
+                    return icon_attributed_string(img: img)
+                case .imageIcon(let img, offset: _):
                     return icon_attributed_string(img: img)
             }
         }
