@@ -115,6 +115,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
     func load_our_stuff_from_damus_state() {
         self.load_latest_contact_event_from_damus_state()
         self.load_latest_mutelist_event_from_damus_state()
+        self.load_latest_emojilist_event_from_damus_state()
         self.load_drafts_from_damus_state()
     }
     
@@ -175,7 +176,33 @@ class HomeModel: ContactsDelegate, ObservableObject {
         
         return candidates.max(by: { $0.created_at < $1.created_at })
     }
-    
+
+    /// Loads the latest emoji list event (kind 10030) from local storage.
+    @MainActor
+    func load_latest_emojilist_event_from_damus_state() {
+        if damus_state.custom_emojis.emojiListEvent != nil {
+            return
+        }
+
+        if let latest_event = load_latest_emojilist_event_from_db() {
+            damus_state.custom_emojis.setEmojiList(latest_event)
+        }
+    }
+
+    @MainActor
+    private func load_latest_emojilist_event_from_db(limit: Int = 5) -> NostrEvent? {
+        guard let filter = try? NdbFilter(from: NostrFilter(kinds: [.emoji_list], limit: UInt32(limit), authors: [damus_state.pubkey])) else { return nil }
+
+        guard let note_keys = try? damus_state.ndb.query(filters: [filter], maxResults: limit) else { return nil }
+
+        var candidates: [NostrEvent] = []
+        for key in note_keys {
+            guard let note = try? damus_state.ndb.lookup_note_by_key_and_copy(key) else { continue }
+            candidates.append(note)
+        }
+        return candidates.max(by: { $0.created_at < $1.created_at })
+    }
+
     func load_drafts_from_damus_state() {
         damus_state.drafts.load(from: damus_state)
     }
@@ -251,6 +278,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
             handle_old_list_event(ev)
         case .mute_list:
             handle_mute_list_event(ev)
+        case .emoji_list:
+            handle_emoji_list_event(ev)
         case .contact_card:
             damus_state.contactCards.loadEvent(ev, pubkey: damus_state.pubkey)
         case .boost:
@@ -545,6 +574,9 @@ class HomeModel: ContactsDelegate, ObservableObject {
         var our_blocklist_filter = NostrFilter(kinds: [.mute_list])
         our_blocklist_filter.authors = [damus_state.pubkey]
 
+        var our_emoji_list_filter = NostrFilter(kinds: [.emoji_list])
+        our_emoji_list_filter.authors = [damus_state.pubkey]
+
         var dms_filter = NostrFilter(kinds: [.dm])
 
         var our_dms_filter = NostrFilter(kinds: [.dm])
@@ -569,7 +601,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
 
         let notifications_filters = [notifications_filter]
         let contacts_filter_chunks = contacts_filter.chunked(on: .authors, into: MAX_CONTACTS_ON_FILTER)
-        let low_volume_important_filters = [our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter, contact_cards_filter]
+        let low_volume_important_filters = [our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter, contact_cards_filter, our_emoji_list_filter]
         let contacts_filters = contacts_filter_chunks + low_volume_important_filters
         let dms_filters = [dms_filter, our_dms_filter]
 
@@ -759,6 +791,17 @@ class HomeModel: ContactsDelegate, ObservableObject {
 
         damus_state.mutelist_manager.set_mutelist(ev)
         migrate_old_muted_threads_to_new_mutelist(keypair: damus_state.keypair, damus_state: damus_state)
+    }
+
+    @MainActor
+    func handle_emoji_list_event(_ ev: NostrEvent) {
+        // we only care about our emoji list
+        guard ev.pubkey == damus_state.pubkey else {
+            return
+        }
+
+        // setEmojiList handles timestamp comparison internally
+        damus_state.custom_emojis.setEmojiList(ev)
     }
 
     @MainActor
