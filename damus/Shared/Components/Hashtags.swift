@@ -154,7 +154,9 @@ func emojify_text(_ text: String, emojis: [String: CustomEmoji]) -> CompatibleTe
         case .icon(let name, _):
             print("NIP-30 emojify:   item[\(index)]: icon '\(name)'")
         case .imageIcon(_, _):
-            print("NIP-30 emojify:   item[\(index)]: imageIcon (custom emoji)")
+            print("NIP-30 emojify:   item[\(index)]: imageIcon (legacy)")
+        case .customEmoji(_, let emoji, _):
+            print("NIP-30 emojify:   item[\(index)]: customEmoji '\(emoji.shortcode)'")
         }
     }
     #endif
@@ -172,8 +174,8 @@ private func render_custom_emoji(_ emoji: CustomEmoji) -> CompatibleText.Item {
         print("NIP-30 render: :\(emoji.shortcode): using cached image")
         #endif
         let scaledImage = scaleEmojiImage(cachedImage, toSize: CGSize(width: CUSTOM_EMOJI_SIZE, height: CUSTOM_EMOJI_SIZE))
-        // Use .imageIcon for SwiftUI Text(Image(uiImage:)) compatibility
-        return .imageIcon(scaledImage, offset: -3.0)
+        // Use .customEmoji to preserve emoji metadata for context menu support
+        return .customEmoji(scaledImage, emoji, offset: -3.0)
     }
 
     // Fallback: render as styled text with purple color
