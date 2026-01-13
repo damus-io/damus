@@ -130,6 +130,33 @@ class Profiles {
 
         return fresh
     }
+
+    /// Looks up custom emoji tags from a profile's underlying event.
+    func lookup_profile_custom_emojis(_ pubkey: Pubkey) throws -> [String: CustomEmoji] {
+        // First, get the profile record to access the note key
+        let noteKey: NoteKey? = try lookup_with_timestamp(pubkey, borrow: { pr in
+            switch pr {
+            case .some(let record): return record.noteKey
+            case .none: return nil
+            }
+        })
+
+        guard let noteKey else { return [:] }
+
+        // Use the note key to lookup the profile event and extract emoji tags
+        return try ndb.lookup_note_by_key(noteKey, borrow: { maybeNote in
+            switch maybeNote {
+            case .some(let note):
+                var emojiMap: [String: CustomEmoji] = [:]
+                for emoji in note.referenced_custom_emojis {
+                    emojiMap[emoji.shortcode] = emoji
+                }
+                return emojiMap
+            case .none:
+                return [:]
+            }
+        })
+    }
 }
 
 

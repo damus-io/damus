@@ -12,14 +12,16 @@ struct AboutView: View {
     let about: String
     let max_about_length: Int
     let text_alignment: NSTextAlignment
+    let customEmojis: [String: CustomEmoji]
     @State var show_full_about: Bool = false
     @State private var about_string: AttributedString? = nil
-    
-    init(state: DamusState, about: String, max_about_length: Int? = nil, text_alignment: NSTextAlignment? = nil) {
+
+    init(state: DamusState, about: String, max_about_length: Int? = nil, text_alignment: NSTextAlignment? = nil, customEmojis: [String: CustomEmoji] = [:]) {
         self.state = state
         self.about = about
         self.max_about_length = max_about_length ?? 280
         self.text_alignment = text_alignment ?? .natural
+        self.customEmojis = customEmojis
     }
     
     var body: some View {
@@ -48,7 +50,7 @@ struct AboutView: View {
         }
         .onAppear {
             guard let blocks = try? NdbBlockGroup.parse(content: about) else { return }
-            self.about_string = render_blocks(blocks: blocks, profiles: state.profiles).content.attributed
+            self.about_string = render_blocks(blocks: blocks, profiles: state.profiles, custom_emojis: customEmojis).content.attributed
         }
         
     }
