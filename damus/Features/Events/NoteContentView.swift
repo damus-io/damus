@@ -430,27 +430,12 @@ struct NoteContentView: View {
     }
     
     func load(force_artifacts: Bool = false) {
-        #if DEBUG
-        if force_artifacts {
-            print("NIP-30 load: force_artifacts=true for event \(event.id.hex().prefix(8))")
-        }
-        #endif
-
         if case .loading = damus_state.events.get_cache_data(event.id).artifacts_model.state {
-            #if DEBUG
-            print("NIP-30 load: returning early - state is .loading")
-            #endif
             return
         }
 
         // always reload artifacts on load
         let plan = get_preload_plan(ndb: damus_state.ndb, evcache: damus_state.events, ev: event, our_keypair: damus_state.keypair, settings: damus_state.settings)
-
-        #if DEBUG
-        if force_artifacts {
-            print("NIP-30 load: plan is \(plan == nil ? "nil" : "not nil")")
-        }
-        #endif
 
         // TODO: make this cleaner
         Task {
@@ -463,15 +448,9 @@ struct NoteContentView: View {
             if var plan {
                 if force_artifacts {
                     plan.load_artifacts = true
-                    #if DEBUG
-                    print("NIP-30 load: calling preload_event with load_artifacts=true")
-                    #endif
                 }
                 await preload_event(plan: plan, state: damus_state)
             } else if force_artifacts {
-                #if DEBUG
-                print("NIP-30 load: plan is nil, directly rendering artifacts")
-                #endif
                 let arts = await ContentRenderer().render_note_content(ndb: damus_state.ndb, ev: event, profiles: damus_state.profiles, keypair: damus_state.keypair)
                 self.artifacts_model.state = .loaded(arts)
             }
@@ -655,20 +634,39 @@ struct NoteContentView: View {
             }
         }
 
-        // Re-render if any images were loaded
-        guard !needsMemoryLoad.isEmpty || !needsDownload.isEmpty else {
-            #if DEBUG
-            print("NIP-30 prefetch: no images needed loading, skipping re-render")
-            #endif
+        // If we loaded any images, trigger re-render
+        if !needsMemoryLoad.isEmpty || !needsDownload.isEmpty {
+            await MainActor.run {
+                load(force_artifacts: true)
+            }
             return
         }
 
-        #if DEBUG
-        print("NIP-30 prefetch: \(needsMemoryLoad.count) from disk, \(needsDownload.count) downloaded - triggering re-render")
-        #endif
+        // All images are in memory, but we still need to check if the current render used fallbacks.
+        // If another event loaded the emoji into memory AFTER this event rendered with fallbacks,
+        // we need to re-render to pick up the now-available image.
+        // Check if current artifacts contain fallback text (purple :shortcode:) instead of images.
+        let currentArtifacts = await MainActor.run { artifacts_model.state.artifacts }
+        let needsReRenderForFallbacks: Bool
+        if let artifacts = currentArtifacts {
+            switch artifacts {
+            case .separated(let sep):
+                // Check if content contains any emoji shortcode as purple fallback text
+                let contentStr = String(sep.content.attributed.characters)
+                needsReRenderForFallbacks = emojis.contains { emoji in
+                    contentStr.contains(":\(emoji.shortcode):")
+                }
+            case .longform:
+                needsReRenderForFallbacks = false
+            }
+        } else {
+            needsReRenderForFallbacks = true
+        }
 
-        await MainActor.run {
-            load(force_artifacts: true)
+        if needsReRenderForFallbacks {
+            await MainActor.run {
+                load(force_artifacts: true)
+            }
         }
     }
 }
