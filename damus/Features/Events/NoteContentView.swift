@@ -616,6 +616,18 @@ struct NoteContentView: View {
                 }
                 prefetcher.start()
             }
+
+            // Load downloaded images into memory (prefetcher only downloads to disk)
+            for emoji in needsDownload {
+                await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                    ImageCache.default.retrieveImage(forKey: emoji.url.absoluteString) { result in
+                        if case .success(let cacheResult) = result, let image = cacheResult.image {
+                            ImageCache.default.store(image, forKey: emoji.url.absoluteString, toDisk: false)
+                        }
+                        continuation.resume()
+                    }
+                }
+            }
         }
 
         // Re-render if any images were loaded
