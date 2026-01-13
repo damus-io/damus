@@ -38,10 +38,11 @@ class DamusState: HeadlessDamusState, ObservableObject {
     var push_notification_client: PushNotificationClient
     let emoji_provider: EmojiProvider
     let favicon_cache: FaviconCache
+    let custom_emojis: CustomEmojiStore
     private(set) var nostrNetwork: NostrNetworkManager
     var snapshotManager: DatabaseSnapshotManager
 
-    init(keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, contactCards: ContactCard, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: DamusVideoCoordinator, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider, favicon_cache: FaviconCache, addNdbToRelayPool: Bool = true) {
+    init(keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, contactCards: ContactCard, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: DamusVideoCoordinator, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider, favicon_cache: FaviconCache, custom_emojis: CustomEmojiStore = CustomEmojiStore(), addNdbToRelayPool: Bool = true) {
         self.keypair = keypair
         self.likes = likes
         self.boosts = boosts
@@ -73,6 +74,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
         self.push_notification_client = PushNotificationClient(keypair: keypair, settings: settings)
         self.emoji_provider = emoji_provider
         self.favicon_cache = FaviconCache()
+        self.custom_emojis = custom_emojis
 
         let networkManagerDelegate = NostrNetworkManagerDelegate(settings: settings, contacts: contacts, ndb: ndb, keypair: keypair, relayModelCache: relay_model_cache, relayFilters: relay_filters)
         let nostrNetwork = NostrNetworkManager(delegate: networkManagerDelegate, addNdbToRelayPool: addNdbToRelayPool)
@@ -209,7 +211,8 @@ class DamusState: HeadlessDamusState, ObservableObject {
             ndb: .empty,
             quote_reposts: .init(our_pubkey: empty_pub),
             emoji_provider: DefaultEmojiProvider(showAllVariations: true),
-            favicon_cache: FaviconCache()
+            favicon_cache: FaviconCache(),
+            custom_emojis: CustomEmojiStore()
         )
     }
 }
