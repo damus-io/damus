@@ -10,14 +10,18 @@ import SwiftUI
 struct ReactionView: View {
     let damus_state: DamusState
     let reaction: NostrEvent
-    
+
     var content: String {
         return to_reaction_emoji(ev: reaction) ?? ""
     }
-    
+
+    private var emojiMap: [String: CustomEmoji] {
+        build_custom_emoji_map(reaction)
+    }
+
     var body: some View {
         HStack {
-            Text(content)
+            emojify_text(content, emojis: emojiMap).text
                 .font(Font.headline)
                 .frame(width: 50, height: 50)
             
