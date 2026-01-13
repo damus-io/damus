@@ -34,7 +34,7 @@ struct NostrFilter: Codable, Equatable {
         case limit
     }
     
-    init(ids: [NoteId]? = nil, kinds: [NostrKind]? = nil, referenced_ids: [NoteId]? = nil, pubkeys: [Pubkey]? = nil, since: UInt32? = nil, until: UInt32? = nil, limit: UInt32? = nil, authors: [Pubkey]? = nil, hashtag: [String]? = nil, quotes: [NoteId]? = nil) {
+    init(ids: [NoteId]? = nil, kinds: [NostrKind]? = nil, referenced_ids: [NoteId]? = nil, pubkeys: [Pubkey]? = nil, since: UInt32? = nil, until: UInt32? = nil, limit: UInt32? = nil, authors: [Pubkey]? = nil, hashtag: [String]? = nil, parameter: [String]? = nil, quotes: [NoteId]? = nil) {
         self.ids = ids
         self.kinds = kinds
         self.referenced_ids = referenced_ids
@@ -44,6 +44,7 @@ struct NostrFilter: Codable, Equatable {
         self.limit = limit
         self.authors = authors
         self.hashtag = hashtag
+        self.parameter = parameter
         self.quotes = quotes
     }
     
