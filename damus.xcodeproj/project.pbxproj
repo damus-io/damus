@@ -1511,7 +1511,6 @@
 		D73E5EFB2C6A97F4007EB227 /* ProfilePicturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C30AC7F29A6A53F00E2BD5A /* ProfilePicturesView.swift */; };
 		D73E5EFC2C6A97F4007EB227 /* DamusAppNotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78CD5972B8990300014D539 /* DamusAppNotificationView.swift */; };
 		D73E5EFD2C6A97F4007EB227 /* InnerTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE0E2B529A3ED5500DB4CA2 /* InnerTimelineView.swift */; };
-		D73E5EFE2C6A97F4007EB227 /* BuildFile in Sources */ = {isa = PBXBuildFile; };
 		D73E5EFF2C6A97F4007EB227 /* ZapsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE879572996C45300F758CC /* ZapsView.swift */; };
 		D73E5F002C6A97F4007EB227 /* CustomizeZapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9F18E129AA9B6C008C55EC /* CustomizeZapView.swift */; };
 		D73E5F012C6A97F4007EB227 /* ZapTypePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA3FA0F29F593D000FDB3C3 /* ZapTypePicker.swift */; };
@@ -7235,7 +7234,6 @@
 				D73E5EFB2C6A97F4007EB227 /* ProfilePicturesView.swift in Sources */,
 				D73E5EFC2C6A97F4007EB227 /* DamusAppNotificationView.swift in Sources */,
 				D73E5EFD2C6A97F4007EB227 /* InnerTimelineView.swift in Sources */,
-				D73E5EFE2C6A97F4007EB227 /* BuildFile in Sources */,
 				D7EB00B02CD59C8D00660C07 /* PresentFullScreenItemNotify.swift in Sources */,
 				D73E5EFF2C6A97F4007EB227 /* ZapsView.swift in Sources */,
 				D73E5F002C6A97F4007EB227 /* CustomizeZapView.swift in Sources */,
