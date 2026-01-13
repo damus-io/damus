@@ -122,6 +122,32 @@ struct Hashtag: TagConvertible, Hashable {
     var keychar: AsciiCharacter { "t" }
 }
 
+/// Custom emoji tag per NIP-30.
+/// Tag format: ["emoji", shortcode, image-url]
+struct CustomEmoji: TagConvertible, Hashable {
+    /// The shortcode used in content as :shortcode:
+    let shortcode: String
+    /// URL to the emoji image
+    let url: URL
+
+    static func from_tag(tag: TagSequence) -> CustomEmoji? {
+        var i = tag.makeIterator()
+
+        guard tag.count >= 3,
+              let t0 = i.next(),
+              t0.matches_str("emoji"),
+              let t1 = i.next(),
+              let t2 = i.next(),
+              let url = URL(string: t2.string()) else {
+            return nil
+        }
+
+        return CustomEmoji(shortcode: t1.string(), url: url)
+    }
+
+    var tag: [String] { ["emoji", self.shortcode, self.url.absoluteString] }
+}
+
 struct ReplaceableParam: TagConvertible {
     let param: TagElem
 
