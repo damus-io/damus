@@ -4,7 +4,8 @@
 
 ### Added
 
-- Added new onboarding suggestions based on user-selected interests (Daniel D’Aquino)
+- Added edit history display for longform articles showing version list and diffs (alltheseas)
+- Added new onboarding suggestions based on user-selected interests (Daniel D'Aquino)
 - Added adjustable max budget setting for Coinos one-click wallets (Daniel D’Aquino)
 - Added send feature to the wallet view (Daniel D’Aquino)
 - Added popover tips to DMs and Notifications toolbars on Trusted Network button (Terry Yiu)
