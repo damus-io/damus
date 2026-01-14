@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Kingfisher
 
 struct ReactionView: View {
     let damus_state: DamusState
@@ -15,17 +16,33 @@ struct ReactionView: View {
         return to_reaction_emoji(ev: reaction) ?? ""
     }
 
-    private var emojiMap: [String: CustomEmoji] {
-        build_custom_emoji_map(reaction)
+    /// The first custom emoji from the reaction event's tags, if present
+    private var customEmoji: CustomEmoji? {
+        reaction.referenced_custom_emojis.first
     }
 
     var body: some View {
         HStack {
-            emojify_text(content, emojis: emojiMap).text
-                .font(Font.headline)
+            reactionContent
                 .frame(width: 50, height: 50)
-            
+
             FollowUserView(target: .pubkey(reaction.pubkey), damus_state: damus_state)
+        }
+    }
+
+    /// Renders either a custom emoji image (using KFAnimatedImage) or a standard text emoji based on availability.
+    @ViewBuilder
+    private var reactionContent: some View {
+        if let emoji = customEmoji {
+            // Custom emoji reaction - load image dynamically
+            KFAnimatedImage(emoji.url)
+                .configure { view in view.framePreloadCount = 1 }
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 30, height: 30)
+        } else {
+            // Standard emoji reaction
+            Text(content)
+                .font(Font.headline)
         }
     }
 }
