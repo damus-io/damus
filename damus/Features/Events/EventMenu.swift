@@ -116,6 +116,34 @@ struct MenuItems: View {
             } label: {
                 Label(NSLocalizedString("Broadcast", comment: "Context menu option for broadcasting the user's note to all of the user's connected relay servers."), image: "globe")
             }
+
+            // Save custom emojis from this note
+            let customEmojis = Array(event.referenced_custom_emojis)
+            if !customEmojis.isEmpty {
+                Menu {
+                    ForEach(customEmojis, id: \.shortcode) { emoji in
+                        let isSaved = damus_state.custom_emojis.isSaved(emoji)
+                        Button {
+                            Task { @MainActor in
+                                if isSaved {
+                                    damus_state.custom_emojis.unsave(emoji)
+                                } else {
+                                    damus_state.custom_emojis.save(emoji)
+                                }
+                                await damus_state.custom_emojis.publishEmojiList(damus_state: damus_state)
+                            }
+                        } label: {
+                            if isSaved {
+                                Label(":\(emoji.shortcode): ✓", systemImage: "star.fill")
+                            } else {
+                                Label(":\(emoji.shortcode):", systemImage: "star")
+                            }
+                        }
+                    }
+                } label: {
+                    Label(NSLocalizedString("Save custom emoji", comment: "Context menu option for saving custom emojis from a note."), systemImage: "face.smiling")
+                }
+            }
             // Mute thread - relocated to below Broadcast, as to move further away from Add Bookmark to prevent accidental muted threads
             if event.known_kind != .dm {
                 MuteDurationMenu { duration in

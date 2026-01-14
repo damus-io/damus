@@ -9,6 +9,7 @@ import SwiftUI
 import EmojiPicker
 import EmojiKit
 import SwipeActions
+import Kingfisher
 
 struct EventActionBar: View {
     let damus_state: DamusState
@@ -132,16 +133,29 @@ struct EventActionBar: View {
         }
     }
     
+    /// Extracts the first custom emoji from a reaction event, if present
+    private func reactionCustomEmoji(from event: NostrEvent?) -> CustomEmoji? {
+        guard let event else { return nil }
+        return event.referenced_custom_emojis.first
+    }
+
     var like_button: some View {
         HStack(spacing: 4) {
-            LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil) { emoji in
-                if bar.liked {
-                    //notify(.delete, bar.our_like)
-                } else {
+            LikeButton(
+                damus_state: damus_state,
+                liked: bar.liked,
+                liked_emoji: bar.our_like.map { to_reaction_emoji(ev: $0) } ?? nil,
+                liked_custom_emoji: reactionCustomEmoji(from: bar.our_like),
+                action: { emoji in
+                    guard !bar.liked else { return }
                     Task { await send_like(emoji: emoji) }
+                },
+                customEmojiAction: { customEmoji in
+                    guard !bar.liked else { return }
+                    Task { await send_like(emoji: "", customEmoji: customEmoji) }
                 }
-            }
-            
+            )
+
             Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
                 .font(.footnote.weight(.medium))
                 .nip05_colorized(gradient: bar.liked)
@@ -302,16 +316,18 @@ struct EventActionBar: View {
         }
     }
 
-    func send_like(emoji: String) async {
+    /// Sends a reaction event for the current note.
+    /// - Parameters:
+    ///   - emoji: The emoji to react with (ignored if customEmoji is provided)
+    ///   - customEmoji: Optional custom emoji for NIP-30 reactions
+    func send_like(emoji: String, customEmoji: CustomEmoji? = nil) async {
         guard let keypair = damus_state.keypair.to_full(),
-              let like_ev = await make_like_event(keypair: keypair, liked: event, content: emoji, relayURL: damus_state.nostrNetwork.relaysForEvent(event: event).first) else {
+              let like_ev = await make_like_event(keypair: keypair, liked: event, content: emoji, customEmoji: customEmoji, relayURL: damus_state.nostrNetwork.relaysForEvent(event: event).first) else {
             return
         }
 
         self.bar.our_like = like_ev
-
         generator.impactOccurred()
-        
         await damus_state.nostrNetwork.postbox.send(like_ev)
     }
     
@@ -340,30 +356,48 @@ func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> 
         }
 }
 
+/// A button that displays the like/reaction state and opens a reaction picker on long press.
+/// Supports both standard Unicode emoji reactions and custom emoji reactions per NIP-30.
 struct LikeButton: View {
     let damus_state: DamusState
     let liked: Bool
     let liked_emoji: String?
+    /// Custom emoji used for the reaction (for rendering the image)
+    let liked_custom_emoji: CustomEmoji?
+    /// Called when the user selects a Unicode emoji reaction
     let action: (_ emoji: String) -> Void
-
-    // For reactions background
-    @State private var showReactionsBG = 0
-    @State private var rotateThumb = -45
+    /// Called when the user selects a custom emoji reaction
+    let customEmojiAction: ((_ emoji: CustomEmoji) -> Void)?
 
     @State private var isReactionsVisible = false
-
     @State private var selectedEmoji: Emoji?
+    @State private var selectedTab: ReactionPickerTab = .unicode
 
-    // Following four are Shaka animation properties
+    // Shaka animation properties
     let timer = Timer.publish(every: 0.10, on: .main, in: .common).autoconnect()
     @State private var shouldAnimate = false
     @State private var rotationAngle = 0.0
     @State private var amountOfAngleIncrease: Double = 0.0
 
+    /// Tabs for switching between Unicode and custom emoji in the reaction picker
+    enum ReactionPickerTab {
+        case unicode
+        case custom
+    }
+
     var emojis: [String] {
         damus_state.settings.emoji_reactions
     }
-    
+
+    init(damus_state: DamusState, liked: Bool, liked_emoji: String?, liked_custom_emoji: CustomEmoji? = nil, action: @escaping (_ emoji: String) -> Void, customEmojiAction: ((_ emoji: CustomEmoji) -> Void)? = nil) {
+        self.damus_state = damus_state
+        self.liked = liked
+        self.liked_emoji = liked_emoji
+        self.liked_custom_emoji = liked_custom_emoji
+        self.action = action
+        self.customEmojiAction = customEmojiAction
+    }
+
     @ViewBuilder
     func buildMaskView(for emoji: String) -> some View {
         if emoji == "🤙" {
@@ -380,7 +414,13 @@ struct LikeButton: View {
 
     var body: some View {
         Group {
-            if let liked_emoji {
+            if let customEmoji = liked_custom_emoji {
+                // Custom emoji reaction - render the image
+                KFAnimatedImage(customEmoji.url)
+                    .configure { view in view.framePreloadCount = 1 }
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 22, height: 20)
+            } else if let liked_emoji {
                 buildMaskView(for: liked_emoji)
                     .frame(width: 22, height: 20)
             } else {
@@ -392,9 +432,7 @@ struct LikeButton: View {
             }
         }
         .sheet(isPresented: $isReactionsVisible) {
-            NavigationView {
-                EmojiPickerView(selectedEmoji: $selectedEmoji, emojiProvider: damus_state.emoji_provider)
-            }.presentationDetents([.medium, .large])
+            reactionPickerSheet
         }
         .accessibilityLabel(NSLocalizedString("Like", comment: "Accessibility Label for Like button"))
         .rotationEffect(Angle(degrees: shouldAnimate ? rotationAngle : 0))
@@ -413,6 +451,81 @@ struct LikeButton: View {
         .onChange(of: selectedEmoji) { newSelectedEmoji in
             if let newSelectedEmoji {
                 self.action(newSelectedEmoji.value)
+            }
+        }
+    }
+
+    private var reactionPickerSheet: some View {
+        NavigationView {
+            VStack(spacing: 0) {
+                // Tab picker for Unicode vs Custom
+                if damus_state.custom_emojis.count > 0 {
+                    Picker("Reaction Type", selection: $selectedTab) {
+                        Text("Emoji").tag(ReactionPickerTab.unicode)
+                        Text("Custom").tag(ReactionPickerTab.custom)
+                    }
+                    .pickerStyle(.segmented)
+                    .padding()
+                }
+
+                // Content based on selected tab
+                switch selectedTab {
+                case .unicode:
+                    EmojiPickerView(selectedEmoji: $selectedEmoji, emojiProvider: damus_state.emoji_provider)
+                case .custom:
+                    customEmojiPicker
+                }
+            }
+            .navigationTitle(NSLocalizedString("React", comment: "Title for reaction picker"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(NSLocalizedString("Cancel", comment: "Cancel button")) {
+                        isReactionsVisible = false
+                    }
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+    }
+
+    private var customEmojiPicker: some View {
+        ScrollView {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))], spacing: 12) {
+                ForEach(damus_state.custom_emojis.sortedEmojis, id: \.shortcode) { emoji in
+                    Button {
+                        customEmojiTapped(emoji)
+                    } label: {
+                        VStack(spacing: 4) {
+                            KFAnimatedImage(emoji.url)
+                                .configure { view in
+                                    view.framePreloadCount = 1
+                                }
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 32, height: 32)
+
+                            Text(":\(emoji.shortcode):")
+                                .font(.caption2)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(width: 60, height: 55)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding()
+
+            if damus_state.custom_emojis.count == 0 {
+                VStack(spacing: 8) {
+                    Text("No custom emojis", comment: "Empty state for custom emoji reaction picker")
+                        .foregroundColor(.secondary)
+                    Text("Save emojis from notes to use them as reactions", comment: "Hint for custom emoji reactions")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding()
             }
         }
     }
@@ -440,19 +553,29 @@ struct LikeButton: View {
     // When reaction button is long pressed, it displays the multiple emojis overlay and displays the user's selected emojis with an animation
     private func reactionLongPressed() {
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-        
         isReactionsVisible = true
     }
-    
+
     private func emojiTapped(_ emoji: String) {
-        print("Tapped emoji: \(emoji)")
-        
         self.action(emoji)
 
         withAnimation(.easeOut(duration: 0.2)) {
             isReactionsVisible = false
         }
-        
+
+        withAnimation(Animation.easeOut(duration: 0.15)) {
+            shouldAnimate = true
+            amountOfAngleIncrease = 20.0
+        }
+    }
+
+    private func customEmojiTapped(_ emoji: CustomEmoji) {
+        customEmojiAction?(emoji)
+
+        withAnimation(.easeOut(duration: 0.2)) {
+            isReactionsVisible = false
+        }
+
         withAnimation(Animation.easeOut(duration: 0.15)) {
             shouldAnimate = true
             amountOfAngleIncrease = 20.0

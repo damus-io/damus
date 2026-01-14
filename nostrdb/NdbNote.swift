@@ -451,6 +451,11 @@ extension NdbNote {
         References<Hashtag>(tags: self.tags)
     }
 
+    /// Custom emoji tags per NIP-30.
+    public var referenced_custom_emojis: References<CustomEmoji> {
+        References<CustomEmoji>(tags: self.tags)
+    }
+
     public var referenced_params: References<ReplaceableParam> {
         References<ReplaceableParam>(tags: self.tags)
     }

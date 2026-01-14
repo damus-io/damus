@@ -51,4 +51,56 @@ class LikeTests: XCTestCase {
         XCTAssertEqual(to_reaction_emoji(ev: shakaReaction), "🤙")
     }
 
+    // MARK: - Custom Emoji Reaction Tests (NIP-25/NIP-30)
+
+    func testCustomEmojiReactionContent() {
+        let liked = NostrEvent(content: "test post", keypair: test_keypair, tags: [])!
+        let customEmoji = CustomEmoji(shortcode: "soapbox", url: URL(string: "https://example.com/soapbox.png")!)
+
+        let reaction = make_like_event(keypair: test_keypair_full, liked: liked, customEmoji: customEmoji, relayURL: nil)!
+
+        XCTAssertEqual(reaction.content, ":soapbox:")
+    }
+
+    func testCustomEmojiReactionHasEmojiTag() {
+        let liked = NostrEvent(content: "test post", keypair: test_keypair, tags: [])!
+        let customEmoji = CustomEmoji(shortcode: "pepe", url: URL(string: "https://example.com/pepe.gif")!)
+
+        let reaction = make_like_event(keypair: test_keypair_full, liked: liked, customEmoji: customEmoji, relayURL: nil)!
+
+        let emojiTags = reaction.tags.filter { $0.count >= 3 && $0[0].matches_str("emoji") }
+        XCTAssertEqual(emojiTags.count, 1)
+
+        let emojiTag = emojiTags.first!
+        XCTAssertEqual(emojiTag[1].string(), "pepe")
+        XCTAssertEqual(emojiTag[2].string(), "https://example.com/pepe.gif")
+    }
+
+    func testCustomEmojiReactionPreservesEventTags() {
+        let liked = NostrEvent(content: "test post", keypair: test_keypair, tags: [["p", "somepubkey"]])!
+        let customEmoji = CustomEmoji(shortcode: "test", url: URL(string: "https://example.com/test.png")!)
+
+        let reaction = make_like_event(keypair: test_keypair_full, liked: liked, customEmoji: customEmoji, relayURL: nil)!
+
+        // Should have e tag, p tag(s), and emoji tag
+        let eTags = reaction.tags.filter { $0[0].matches_char("e") }
+        let pTags = reaction.tags.filter { $0[0].matches_char("p") }
+        let emojiTags = reaction.tags.filter { $0[0].matches_str("emoji") }
+
+        XCTAssertGreaterThan(eTags.count, 0, "Should have e tag")
+        XCTAssertGreaterThan(pTags.count, 0, "Should have p tag")
+        XCTAssertEqual(emojiTags.count, 1, "Should have exactly one emoji tag")
+    }
+
+    func testRegularReactionWithoutCustomEmoji() {
+        let liked = NostrEvent(content: "test post", keypair: test_keypair, tags: [])!
+
+        let reaction = make_like_event(keypair: test_keypair_full, liked: liked, content: "🔥", relayURL: nil)!
+
+        XCTAssertEqual(reaction.content, "🔥")
+
+        let emojiTags = reaction.tags.filter { $0[0].matches_str("emoji") }
+        XCTAssertEqual(emojiTags.count, 0, "Regular emoji reactions should not have emoji tags")
+    }
+
 }

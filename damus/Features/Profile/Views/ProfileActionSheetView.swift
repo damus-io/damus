@@ -147,7 +147,8 @@ struct ProfileActionSheetView: View {
             PubkeyView(pubkey: profile.pubkey)
             
             if let about = self.get_profile()?.about {
-                AboutView(state: damus_state, about: about, max_about_length: 140, text_alignment: .center)
+                let customEmojis = (try? damus_state.profiles.lookup_profile_custom_emojis(profile.pubkey)) ?? [:]
+                AboutView(state: damus_state, about: about, max_about_length: 140, text_alignment: .center, customEmojis: customEmojis)
                     .padding(.top)
             }
             ScrollView(.horizontal) {
