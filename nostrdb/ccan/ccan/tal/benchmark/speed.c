@@ -41,11 +41,11 @@ int main(int argc, char *argv[])
 	bool run_talloc = true, run_tal = true, run_malloc = true;
 
 	if (argv[1]) {
-		if (strcmp(argv[1], "--talloc") == 0)
+		if (strncmp(argv[1], "--talloc", 9) == 0)
 			run_tal = run_malloc = false;
-		else if (strcmp(argv[1], "--tal") == 0)
+		else if (strncmp(argv[1], "--tal", 6) == 0)
 			run_talloc = run_malloc = false;
-		else if (strcmp(argv[1], "--malloc") == 0)
+		else if (strncmp(argv[1], "--malloc", 9) == 0)
 			run_talloc = run_tal = false;
 		else
 			errx(1, "Bad flag %s", argv[1]);

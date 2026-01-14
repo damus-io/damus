@@ -115,11 +115,11 @@ int main(int argc, char *argv[])
 	flags = 0;
 	for (i = 0; i < 2; i++)
 	{
-		if (!strcmp(argv[1], "-d") && argv[2]) {
+		if (!strncmp(argv[1], "-d", 3) && argv[2]) {
 			dir = argv[2];
 			argv += 2;
 			argc -= 2;
-		} else if (!strcmp(argv[1], "--skip-verification")) {
+		} else if (!strncmp(argv[1], "--skip-verification", 20)) {
 			flags = NDB_FLAG_SKIP_NOTE_VERIFY;
 			argv += 1;
 			argc -= 1;
@@ -134,13 +134,13 @@ int main(int argc, char *argv[])
 		return 2;
 	}
 
-	if (argc >= 3 && !strcmp(argv[1], "search")) {
+	if (argc >= 3 && !strncmp(argv[1], "search", 7)) {
 		for (i = 0; i < 2; i++) {
-			if (!strcmp(argv[2], "--oldest-first")) {
+			if (!strncmp(argv[2], "--oldest-first", 15)) {
 				ndb_text_search_config_set_order(&search_config, NDB_ORDER_ASCENDING);
 				argv++;
 				argc--;
-			} else if (!strcmp(argv[2], "--limit")) {
+			} else if (!strncmp(argv[2], "--limit", 8)) {
 				limit = atoi(argv[3]);
 				ndb_text_search_config_set_limit(&search_config, limit);
 				argv += 2;
@@ -159,21 +159,21 @@ int main(int argc, char *argv[])
 		}
 
 		ndb_end_query(&txn);
-	} else if (argc == 2 && !strcmp(argv[1], "stat")) {
+	} else if (argc == 2 && !strncmp(argv[1], "stat", 5)) {
 		if (!ndb_stat(ndb, &stat)) {
 			return 3;
 		}
 
 		print_stats(&stat);
-	} else if (argc == 3 && !strcmp(argv[1], "import")) {
-		if (!strcmp(argv[2], "-")) {
+	} else if (argc == 3 && !strncmp(argv[1], "import", 7)) {
+		if (!strncmp(argv[2], "-", 2)) {
 			ndb_process_events_stream(ndb, stdin);
 		} else {
 			map_file(argv[2], &data, &data_len);
 			ndb_process_events(ndb, (const char *)data, data_len);
 			ndb_process_client_events(ndb, (const char *)data, data_len);
 		}
-	} else if (argc == 2 && !strcmp(argv[1], "print-search-keys")) {
+	} else if (argc == 2 && !strncmp(argv[1], "print-search-keys", 18)) {
 		ndb_begin_query(ndb, &txn);
 		ndb_print_search_keys(&txn);
 		ndb_end_query(&txn);
