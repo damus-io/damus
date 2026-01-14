@@ -260,21 +260,48 @@ struct PostView: View {
         }
     }
 
-    /// Inserts a custom emoji shortcode into the post at the current cursor position.
+    /// Inserts a custom emoji into the post as an inline image.
+    ///
+    /// Downloads the emoji image using Kingfisher and inserts it as a text attachment.
+    /// Falls back to the shortcode text if the image cannot be loaded.
     ///
     /// - Parameter emoji: The custom emoji to insert.
     func insertCustomEmoji(_ emoji: CustomEmoji) {
         // Track the emoji for inclusion in tags when posting
         selectedCustomEmojis[emoji.shortcode] = emoji
 
-        // Insert the shortcode at the end of the post (or could insert at cursor)
-        let shortcodeText = ":\(emoji.shortcode): "
-        let mutablePost = NSMutableAttributedString(attributedString: post)
-        mutablePost.append(NSAttributedString(string: shortcodeText))
-        post = mutablePost
+        // Size for inline emoji in the compose view
+        let emojiSize: CGFloat = 20
 
-        // Trigger draft save
-        post_changed(post: post, media: uploadedMedias)
+        // Try to load the emoji image from Kingfisher cache or network
+        KingfisherManager.shared.retrieveImage(with: emoji.url) { [self] result in
+            Task { @MainActor in
+                let mutablePost = NSMutableAttributedString(attributedString: post)
+
+                switch result {
+                case .success(let imageResult):
+                    // Resize the image to fit inline with text
+                    let image = imageResult.image
+                    let scaledImage = image.resized(to: CGSize(width: emojiSize, height: emojiSize))
+
+                    // Create a custom attachment that stores the emoji metadata
+                    let attachment = CustomEmojiTextAttachment(emoji: emoji, image: scaledImage)
+                    attachment.bounds = CGRect(x: 0, y: -4, width: emojiSize, height: emojiSize)
+
+                    let attachmentString = NSAttributedString(attachment: attachment)
+                    mutablePost.append(attachmentString)
+                    mutablePost.append(NSAttributedString(string: " "))
+
+                case .failure:
+                    // Fall back to shortcode text if image fails to load
+                    let shortcodeText = ":\(emoji.shortcode): "
+                    mutablePost.append(NSAttributedString(string: shortcodeText))
+                }
+
+                post = mutablePost
+                post_changed(post: post, media: uploadedMedias)
+            }
+        }
     }
 
     var ImageButton: some View {
@@ -1021,6 +1048,22 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
 /// - Returns: A NostrPost, which can then be signed into an event.
 func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], pubkeys: [Pubkey], customEmojis: [String: CustomEmoji] = [:]) async -> NostrPost {
     let post = NSMutableAttributedString(attributedString: post)
+
+    // First pass: Convert custom emoji attachments back to :shortcode: text
+    // We collect ranges first, then replace in reverse order to maintain valid indices
+    var emojiRanges: [(range: NSRange, shortcode: String)] = []
+    post.enumerateAttribute(.attachment, in: NSRange(location: 0, length: post.length), options: []) { value, range, _ in
+        if let emojiAttachment = value as? CustomEmojiTextAttachment {
+            emojiRanges.append((range: range, shortcode: emojiAttachment.emoji.shortcode))
+        }
+    }
+
+    // Replace in reverse order to keep indices valid
+    for (range, shortcode) in emojiRanges.reversed() {
+        post.replaceCharacters(in: range, with: ":\(shortcode):")
+    }
+
+    // Second pass: Handle link attributes (mentions, etc.)
     post.enumerateAttributes(in: NSRange(location: 0, length: post.length), options: []) { attributes, range, stop in
         let linkValue = attributes[.link]
         let link = (linkValue as? String) ?? (linkValue as? URL)?.absoluteString
