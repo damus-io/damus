@@ -135,6 +135,18 @@ class CustomEmojiStore: ObservableObject {
         )
     }
 
+    /// Publishes the current saved emoji list (kind 10030) to relays.
+    ///
+    /// Creates a new kind 10030 event with all saved emojis and sends it via the postbox.
+    ///
+    /// - Parameter damus_state: The damus state containing keypair and network.
+    func publishEmojiList(damus_state: DamusState) async {
+        guard let fullKeypair = damus_state.keypair.to_full() else { return }
+        let emojis = sortedSavedEmojis
+        guard let event = createEmojiListEvent(keypair: fullKeypair, emojis: emojis) else { return }
+        await damus_state.nostrNetwork.postbox.send(event)
+    }
+
     // MARK: - Recent Emojis (from timeline)
 
     /// Adds a custom emoji to the recent collection.

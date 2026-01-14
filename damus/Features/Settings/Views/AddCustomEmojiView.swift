@@ -305,16 +305,8 @@ struct AddCustomEmojiView: View {
 
         Task { @MainActor in
             damus_state.custom_emojis.save(emoji)
-            await publishEmojiList()
+            await damus_state.custom_emojis.publishEmojiList(damus_state: damus_state)
         }
-    }
-
-    /// Publishes the updated emoji list (kind 10030) to relays.
-    private func publishEmojiList() async {
-        guard let fullKeypair = damus_state.keypair.to_full() else { return }
-        let emojis = await MainActor.run { damus_state.custom_emojis.sortedSavedEmojis }
-        guard let event = damus_state.custom_emojis.createEmojiListEvent(keypair: fullKeypair, emojis: emojis) else { return }
-        await damus_state.nostrNetwork.postbox.send(event)
     }
 
     // MARK: - Error Types

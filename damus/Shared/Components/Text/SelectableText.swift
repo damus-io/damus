@@ -50,8 +50,7 @@ struct SelectableText: View {
                         } else {
                             store.save(emoji)
                         }
-                        // Publish the updated emoji list
-                        await publishEmojiList()
+                        await store.publishEmojiList(damus_state: damus_state)
                     }
                 },
                 isCustomEmojiSaved: { emoji in
@@ -103,14 +102,6 @@ struct SelectableText: View {
         self.event != nil
     }
 
-    /// Publishes the user's updated emoji list (kind 10030) to relays.
-    private func publishEmojiList() async {
-        guard let fullKeypair = damus_state.keypair.to_full() else { return }
-        let emojis = await MainActor.run { damus_state.custom_emojis.sortedSavedEmojis }
-        guard let event = damus_state.custom_emojis.createEmojiListEvent(keypair: fullKeypair, emojis: emojis) else { return }
-        await damus_state.nostrNetwork.postbox.send(event)
-    }
-    
     enum SelectedTextActionState {
         case hide
         case show_highlight_post_view(highlighted_text: String)
