@@ -564,10 +564,6 @@ struct NoteContentView: View {
             }
             .onAppear {
                 load()
-                // Also check emoji images on appear (task only runs once)
-                Task {
-                    await prefetchCustomEmojisAndReload()
-                }
             }
     }
 

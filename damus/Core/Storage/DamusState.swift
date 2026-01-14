@@ -73,7 +73,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
         self.quote_reposts = quote_reposts
         self.push_notification_client = PushNotificationClient(keypair: keypair, settings: settings)
         self.emoji_provider = emoji_provider
-        self.favicon_cache = FaviconCache()
+        self.favicon_cache = favicon_cache
         self.custom_emojis = custom_emojis
 
         let networkManagerDelegate = NostrNetworkManagerDelegate(settings: settings, contacts: contacts, ndb: ndb, keypair: keypair, relayModelCache: relay_model_cache, relayFilters: relay_filters)
