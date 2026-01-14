@@ -270,11 +270,11 @@ int main(int argc, char *argv[])
 			dump_vsize();
 			exit(0);
 		}
-		if (strcmp(argv[2], "--talloc") == 0)
+		if (strncmp(argv[2], "--talloc", 9) == 0)
 			run_tal = run_malloc = false;
-		else if (strcmp(argv[2], "--tal") == 0)
+		else if (strncmp(argv[2], "--tal", 6) == 0)
 			run_talloc = run_malloc = false;
-		else if (strcmp(argv[2], "--malloc") == 0)
+		else if (strncmp(argv[2], "--malloc", 9) == 0)
 			run_talloc = run_tal = false;
 		else
 			errx(1, "Bad flag %s", argv[2]);
