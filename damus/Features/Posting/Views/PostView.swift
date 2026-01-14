@@ -1032,11 +1032,13 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
     return await build_post(state: state, post: post, action: action, uploadedMedias: uploadedMedias, pubkeys: pks, customEmojis: customEmojis)
 }
 
-/// This builds a Nostr post from draft data from `PostView` or other draft-related classes
+/// Builds a Nostr post from draft data from `PostView` or other draft-related classes.
 ///
 /// ## Implementation notes
 ///
 /// - This function _likely_ causes no side-effects, and _should not_ cause side-effects to any of the inputs.
+/// - Custom emoji tags (NIP-30) are derived from the actual content, not tracked insertions.
+///   This ensures tags match content even if user deletes inserted emojis or types `:shortcode:` manually.
 ///
 /// - Parameters:
 ///   - state: The damus state, needed to fetch more Nostr data to form this event
@@ -1044,23 +1046,29 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
 ///   - action: The intended action of the post (highlighting? replying?)
 ///   - uploadedMedias: The medias attached to this post
 ///   - pubkeys: The referenced pubkeys
-///   - customEmojis: Custom emojis (NIP-30) to include as tags
+///   - customEmojis: Fallback custom emojis for manual shortcodes not found in the emoji store
 /// - Returns: A NostrPost, which can then be signed into an event.
 func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], pubkeys: [Pubkey], customEmojis: [String: CustomEmoji] = [:]) async -> NostrPost {
     let post = NSMutableAttributedString(attributedString: post)
 
     // First pass: Convert custom emoji attachments back to :shortcode: text
-    // We collect ranges first, then replace in reverse order to maintain valid indices
-    var emojiRanges: [(range: NSRange, shortcode: String)] = []
+    // Also collect the actual CustomEmoji objects for tag generation
+    var emojiReplacements: [(range: NSRange, emoji: CustomEmoji)] = []
     post.enumerateAttribute(.attachment, in: NSRange(location: 0, length: post.length), options: []) { value, range, _ in
         if let emojiAttachment = value as? CustomEmojiTextAttachment {
-            emojiRanges.append((range: range, shortcode: emojiAttachment.emoji.shortcode))
+            emojiReplacements.append((range: range, emoji: emojiAttachment.emoji))
         }
     }
 
+    // Collect emojis from attachments (these are definitely in the content)
+    var derivedEmojis: [String: CustomEmoji] = [:]
+    for (_, emoji) in emojiReplacements {
+        derivedEmojis[emoji.shortcode] = emoji
+    }
+
     // Replace in reverse order to keep indices valid
-    for (range, shortcode) in emojiRanges.reversed() {
-        post.replaceCharacters(in: range, with: ":\(shortcode):")
+    for (range, emoji) in emojiReplacements.reversed() {
+        post.replaceCharacters(in: range, with: ":\(emoji.shortcode):")
     }
 
     // Second pass: Handle link attributes (mentions, etc.)
@@ -1125,8 +1133,23 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
     // append additional tags
     tags += uploadedMedias.compactMap { $0.metadata?.to_tag() }
 
-    // Add custom emoji tags (NIP-30)
-    for emoji in customEmojis.values {
+    // Scan content for manually typed :shortcode: patterns and look them up.
+    // This ensures tags match actual content, not just inserted emojis.
+    if let pattern = try? NSRegularExpression(pattern: ":([a-zA-Z0-9_]+):", options: []) {
+        let matches = pattern.matches(in: content, options: [], range: NSRange(content.startIndex..., in: content))
+        for match in matches {
+            guard let shortcodeRange = Range(match.range(at: 1), in: content) else { continue }
+            let shortcode = String(content[shortcodeRange])
+            guard derivedEmojis[shortcode] == nil else { continue }
+
+            let emoji = await state.custom_emojis.emoji(for: shortcode) ?? customEmojis[shortcode]
+            guard let emoji else { continue }
+            derivedEmojis[shortcode] = emoji
+        }
+    }
+
+    // Add custom emoji tags (NIP-30) - only for emojis actually in the content
+    for emoji in derivedEmojis.values {
         tags.append(emoji.tag)
     }
 
