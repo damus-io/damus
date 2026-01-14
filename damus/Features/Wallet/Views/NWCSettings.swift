@@ -265,7 +265,10 @@ struct NWCSettings: View {
             
             let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: profile.lud16, nip05: profile.nip05, damus_donation: model.settings.donation_percent, reactions: profile.reactions)
 
-            guard let meta = make_metadata_event(keypair: keypair, metadata: prof) else {
+            // Preserve existing emoji tags from profile
+            let existingEmojis = (try? damus_state.profiles.lookup_profile_custom_emojis(damus_state.pubkey)).map { Array($0.values) } ?? []
+
+            guard let meta = make_metadata_event(keypair: keypair, metadata: prof, customEmojis: existingEmojis) else {
                 return
             }
             Task { await damus_state.nostrNetwork.postbox.send(meta) }

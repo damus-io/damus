@@ -94,10 +94,10 @@ func make_first_contact_event(keypair: Keypair) -> NostrEvent? {
     return NostrEvent(content: relay_json, keypair: keypair, kind: NostrKind.contacts.rawValue, tags: tags)
 }
 
-func make_metadata_event(keypair: FullKeypair, metadata: Profile) -> NostrEvent? {
+func make_metadata_event(keypair: FullKeypair, metadata: Profile, customEmojis: [CustomEmoji] = []) -> NostrEvent? {
     guard let metadata_json = encode_json(metadata) else {
         return nil
     }
-    return NostrEvent(content: metadata_json, keypair: keypair.to_keypair(), kind: NostrKind.metadata.rawValue, tags: [])
-
+    let emojiTags = customEmojis.map { $0.tag }
+    return NostrEvent(content: metadata_json, keypair: keypair.to_keypair(), kind: NostrKind.metadata.rawValue, tags: emojiTags)
 }

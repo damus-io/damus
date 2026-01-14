@@ -409,8 +409,11 @@ struct ContentView: View {
                 }
                 
                 let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: lud16, nip05: profile.nip05, damus_donation: profile.damus_donation, reactions: profile.reactions)
-                
-                guard let ev = make_metadata_event(keypair: keypair, metadata: prof) else { return }
+
+                // Preserve existing emoji tags from profile
+                let existingEmojis = (try? ds.profiles.lookup_profile_custom_emojis(ds.pubkey)).map { Array($0.values) } ?? []
+
+                guard let ev = make_metadata_event(keypair: keypair, metadata: prof, customEmojis: existingEmojis) else { return }
                 await ds.nostrNetwork.postbox.send(ev)
             }
         }
@@ -571,8 +574,11 @@ struct ContentView: View {
                 }
                 
                 let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: profile.lud16, nip05: profile.nip05, damus_donation: profile.damus_donation, reactions: !hide)
-                
-                guard let profile_ev = make_metadata_event(keypair: keypair, metadata: prof) else { return }
+
+                // Preserve existing emoji tags from profile
+                let existingEmojis = (try? ds.profiles.lookup_profile_custom_emojis(ds.pubkey)).map { Array($0.values) } ?? []
+
+                guard let profile_ev = make_metadata_event(keypair: keypair, metadata: prof, customEmojis: existingEmojis) else { return }
                 await ds.nostrNetwork.postbox.send(profile_ev)
             }
         }
