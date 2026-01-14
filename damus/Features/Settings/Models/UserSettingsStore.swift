@@ -228,6 +228,15 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "multiple_events_per_pubkey", default_value: false)
     var multiple_events_per_pubkey: Bool
 
+    /// When enabled, search queries are sent to relays supporting NIP-50.
+    /// This may expose search terms to relay operators.
+    @Setting(key: "enable_nip50_relay_search", default_value: false)
+    var enable_nip50_relay_search: Bool
+
+    /// When true, the relay search suggestion card is hidden.
+    @Setting(key: "dismiss_relay_search_suggestion", default_value: false)
+    var dismiss_relay_search_suggestion: Bool
+
     @Setting(key: "onlyzaps_mode", default_value: false)
     var onlyzaps_mode: Bool
     

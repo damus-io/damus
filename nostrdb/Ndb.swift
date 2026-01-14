@@ -525,6 +525,55 @@ class Ndb {
         })
     }
 
+    // MARK: - User-scoped text search
+
+    /// Searches for notes containing the query text, filtered to a specific author.
+    ///
+    /// This method performs a full-text search and then filters results to only include
+    /// notes from the specified pubkey. Useful for "search this user's notes" functionality.
+    ///
+    /// - Parameters:
+    ///   - query: The search text to find in note content
+    ///   - author: The pubkey of the author whose notes to search
+    ///   - limit: Maximum number of results to return (default 128)
+    ///   - order: Sort order for results (default newest first)
+    /// - Returns: Array of NoteKeys matching both the query and author filter
+    func text_search_by_author(
+        query: String,
+        author: Pubkey,
+        limit: Int = 128,
+        order: NdbSearchOrder = .newest_first
+    ) throws -> [NoteKey] {
+        // Perform broader search first, then filter by author.
+        // We search for more results than requested since many will be filtered out.
+        let search_limit = limit * 4
+        let all_results = try text_search(query: query, limit: search_limit, order: order)
+
+        guard !all_results.isEmpty else { return [] }
+
+        var filtered_results: [NoteKey] = []
+        filtered_results.reserveCapacity(limit)
+
+        for note_key in all_results {
+            guard filtered_results.count < limit else { break }
+
+            let matches_author = try lookup_note_by_key(note_key) { maybe_note -> Bool in
+                switch maybe_note {
+                case .none:
+                    return false
+                case .some(let note):
+                    return note.pubkey == author
+                }
+            }
+
+            if matches_author {
+                filtered_results.append(note_key)
+            }
+        }
+
+        return filtered_results
+    }
+
     func lookup_note_by_key<T>(_ key: NoteKey, borrow lendingFunction: (_: borrowing UnownedNdbNote?) throws -> T) throws -> T {
         return try withNdb({
             let txn = NdbTxn(ndb: self) { txn in

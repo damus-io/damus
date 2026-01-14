@@ -26,6 +26,7 @@ enum LogCategory: String {
     case tips
     case ndb
     case homeModel
+    case search
 }
 
 /// Damus structured logger

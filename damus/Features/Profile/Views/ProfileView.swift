@@ -78,6 +78,16 @@ struct ProfileView: View {
     @State var filter_state : FilterState = .posts
     @State var yOffset: CGFloat = 0
 
+    // Pull-down search state
+    @State private var is_search_active: Bool = false
+    // How far the user needs to pull past the top before we snap the search bar into view.
+    private let search_pull_threshold: CGFloat = 60
+    private let search_bar_height: CGFloat = 50
+    private let search_bar_extra_top_padding: CGFloat = 12
+    @State private var search_baseline: CGFloat? = nil
+    // Tracks whether the view has completed initial layout
+    @State private var has_appeared: Bool = false
+
     @StateObject var profile: ProfileModel
     @StateObject var followers: FollowersModel
     @StateObject var zap_button_model: ZapButtonModel = ZapButtonModel()
@@ -449,13 +459,72 @@ struct ProfileView: View {
         return tabs
     }
 
+    private var search_top_padding: CGFloat {
+        (Theme.safeAreaInsets?.top ?? 0) + search_bar_extra_top_padding
+    }
+
+    private var search_bar_offset: CGFloat {
+        is_search_active ? 0 : -(search_bar_height + search_top_padding)
+    }
+
+    private func handleSearchPull(_ newOffset: CGFloat) {
+        // Ignore offset changes during initial layout
+        guard has_appeared else { return }
+        guard !is_search_active else { return }
+
+        if search_baseline == nil {
+            search_baseline = newOffset
+        }
+
+        guard let baseline = search_baseline else { return }
+
+        let pullDistance = newOffset - baseline
+        let hasPulledEnough = pullDistance > search_pull_threshold
+
+        if !hasPulledEnough {
+            if newOffset < baseline {
+                search_baseline = newOffset
+            }
+            return
+        }
+
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+            is_search_active = true
+        }
+    }
+
+    @ViewBuilder
+    private var profileSearchView: some View {
+        UserProfilePullDownSearchView(
+            state: damus_state,
+            author: profile.pubkey,
+            on_cancel: {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                    is_search_active = false
+                    search_baseline = nil
+                }
+            },
+            is_active: $is_search_active
+        )
+    }
+
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             ScrollView(.vertical) {
                 VStack(spacing: 0) {
+                    // Search bar - always present but hidden via offset when not active
+                    profileSearchView
+                        .padding(.top, search_top_padding)
+                        .offset(y: search_bar_offset)
+                        .allowsHitTesting(is_search_active)
+                        .padding(.bottom, is_search_active ? 0 : -(search_bar_height))
+                        .background(is_search_active ? (colorScheme == .dark ? Color.black : Color.white) : Color.clear)
+                        .zIndex(2)
+
+                    // Profile content - always visible, search results appear above
                     bannerSection
                         .zIndex(1)
-                    
+
                     VStack() {
                         aboutSection
 
@@ -485,25 +554,30 @@ struct ProfileView: View {
             .navigationTitle("")
             .navigationBarBackButtonHidden()
             .toolbar {
+                // Always show back button for navigation
                 ToolbarItem(placement: .topBarLeading) {
                     HStack(spacing: 8) {
                         navBackButton
                             .padding(.top, 5)
                             .accentColor(DamusColors.white)
-                        VStack(alignment: .leading, spacing: -4.5) {
-                            Text(getProfileInfo().0) // Display name
-                                .font(.headline)
-                                .foregroundColor(.white)
-                            Text(getProfileInfo().1) // Username
-                                .font(.subheadline)
-                                .foregroundColor(.white.opacity(0.8))
+                        // Hide profile info when search is active
+                        if !is_search_active {
+                            VStack(alignment: .leading, spacing: -4.5) {
+                                Text(getProfileInfo().0) // Display name
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                Text(getProfileInfo().1) // Username
+                                    .font(.subheadline)
+                                    .foregroundColor(.white.opacity(0.8))
+                            }
+                            .opacity(bannerBlurViewOpacity())
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.top, max(5, 15 + (yOffset / 30)))
                         }
-                        .opacity(bannerBlurViewOpacity())
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.top, max(5, 15 + (yOffset / 30)))
                     }
                 }
-                if showFollowBtnInBlurrBanner() {
+                // Hide trailing toolbar items when search is active
+                if !is_search_active && showFollowBtnInBlurrBanner() {
                     ToolbarItem(placement: .topBarTrailing) {
                         FollowButtonView(
                             target: profile.get_follow_target(),
@@ -512,7 +586,7 @@ struct ProfileView: View {
                         )
                         .padding(.top, 8)
                     }
-                } else {
+                } else if !is_search_active {
                     ToolbarItem(placement: .topBarTrailing) {
                         navActionSheetButton
                             .padding(.top, 5)
@@ -521,6 +595,7 @@ struct ProfileView: View {
                 }
             }
             .toolbarBackground(.hidden)
+            .onChange(of: yOffset, perform: handleSearchPull)
             .onReceive(handle_notify(.switched_timeline)) { _ in
                 dismiss()
             }
@@ -528,6 +603,11 @@ struct ProfileView: View {
                 check_nip05_validity(pubkey: self.profile.pubkey, damus_state: self.damus_state)
                 profile.subscribe()
                 //followers.subscribe()
+
+                // Delay enabling search pull detection to avoid triggering during initial layout
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    has_appeared = true
+                }
             }
             .onDisappear {
                 profile.unsubscribe()
