@@ -59,14 +59,9 @@ struct EditMetadataView: View {
     
     func save() async {
         let profile = to_profile()
-        guard let keypair = damus_state.keypair.to_full() else {
-            return
-        }
-
-        // Find custom emojis in about text to include as tags
-        let emojis = damus_state.custom_emojis.emojisInText(about)
-
-        guard let metadata_ev = make_metadata_event(keypair: keypair, metadata: profile, customEmojis: emojis) else {
+        guard let keypair = damus_state.keypair.to_full(),
+              let metadata_ev = make_metadata_event(keypair: keypair, metadata: profile)
+        else {
             return
         }
 

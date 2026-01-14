@@ -218,34 +218,4 @@ class CustomEmojiStore: ObservableObject {
     func clearRecent() {
         recentEmojis.removeAll()
     }
-
-    /// Finds all saved emojis referenced in the given text.
-    ///
-    /// Searches the text for `:shortcode:` patterns and returns matching saved emojis.
-    /// Used when creating profile events to include emoji tags.
-    ///
-    /// - Parameter text: The text to search for emoji shortcodes.
-    /// - Returns: Array of saved emojis found in the text.
-    func emojisInText(_ text: String) -> [CustomEmoji] {
-        guard !savedEmojis.isEmpty else { return [] }
-        let pattern = try? NSRegularExpression(pattern: ":([a-zA-Z0-9_]+):", options: [])
-        guard let regex = pattern else { return [] }
-
-        let nsText = text as NSString
-        let range = NSRange(location: 0, length: nsText.length)
-        let matches = regex.matches(in: text, options: [], range: range)
-
-        var found: [String: CustomEmoji] = [:]
-        for match in matches {
-            guard match.numberOfRanges >= 2,
-                  let shortcodeRange = Range(match.range(at: 1), in: text) else {
-                continue
-            }
-            let shortcode = String(text[shortcodeRange])
-            if let emoji = savedEmojis[shortcode], found[shortcode] == nil {
-                found[shortcode] = emoji
-            }
-        }
-        return Array(found.values)
-    }
 }
