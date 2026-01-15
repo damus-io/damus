@@ -259,6 +259,7 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
 
             let ev = ZappingEvent(is_custom: is_custom, type: .sent_from_nwc, target: target)
             notify(.zapping(ev))
+            ToastManager.shared.showZapSent(amount_msat)
 
         case .external(let pending_ext):
             pending_ext.state = .done

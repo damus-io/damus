@@ -10,11 +10,11 @@ import SwiftUI
 struct ProfileZapLinkView<Content: View>: View {
     typealias ContentViewFunction = (_ reactions_enabled: Bool, _ lud16: String?, _ lnurl: String?) -> Content
     typealias ActionFunction = () -> Void
-    
+
     let pubkey: Pubkey
     @ViewBuilder let label: ContentViewFunction
     let action: ActionFunction?
-    
+
     let reactions_enabled: Bool
     let lud16: String?
     let lnurl: String?
@@ -75,12 +75,14 @@ struct ProfileZapLinkView<Content: View>: View {
             if let lud16 {
                 Button {
                     UIPasteboard.general.string = lud16
+                    ToastManager.shared.showCopied()
                 } label: {
                     Label(lud16, image: "copy2")
                 }
             } else {
                 Button {
                     UIPasteboard.general.string = lnurl
+                    ToastManager.shared.showCopied()
                 } label: {
                     Label(NSLocalizedString("Copy LNURL", comment: "Context menu option for copying a user's Lightning URL."), image: "copy")
                 }

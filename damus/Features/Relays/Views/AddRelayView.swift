@@ -12,7 +12,7 @@ struct AddRelayView: View {
     @State var new_relay: String = ""
     @State var relayAddErrorTitle: String? = nil
     @State var relayAddErrorMessage: String? = nil
-    
+
     @Environment(\.dismiss) var dismiss
     
     typealias UpdateError = NostrNetworkManager.UserRelayListManager.UpdateError
@@ -93,18 +93,18 @@ struct AddRelayView: View {
                     
                     do {
                         try await state.nostrNetwork.userRelayList.insert(relay: NIP65.RelayList.RelayItem(url: url, rwConfiguration: .readWrite))
-                        relayAddErrorTitle = nil      // Clear error title
-                        relayAddErrorMessage = nil    // Clear error message
+                        await MainActor.run {
+                            relayAddErrorTitle = nil
+                            relayAddErrorMessage = nil
+                            ToastManager.shared.showRelayAdded()
+                            new_relay = ""
+                            this_app.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            dismiss()
+                        }
                     }
                     catch {
                         present_sheet(.error(self.humanReadableError(for: error)))
                     }
-                    
-                    new_relay = ""
-                    
-                    this_app.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                    
-                    dismiss()
                 }
             }) {
                 HStack {

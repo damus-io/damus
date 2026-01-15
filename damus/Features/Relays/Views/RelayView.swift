@@ -154,6 +154,7 @@ struct RelayView: View {
     func CopyAction(relay: String) -> some View {
         Button {
             UIPasteboard.general.setValue(relay, forPasteboardType: "public.plain-text")
+            ToastManager.shared.showCopied()
         } label: {
             Label(NSLocalizedString("Copy", comment: "Button to copy a relay server address."), image: "copy2")
         }

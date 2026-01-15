@@ -10,13 +10,13 @@ import LocalAuthentication
 
 struct KeySettingsView: View {
     let keypair: Keypair
-    
+
     @State var privkey: String
     @State var privkey_copied: Bool = false
     @State var pubkey_copied: Bool = false
     @State var show_privkey: Bool = false
     @State var has_authenticated_locally: Bool = false
-    
+
     @Environment(\.dismiss) var dismiss
     
     init(keypair: Keypair) {
@@ -43,21 +43,22 @@ struct KeySettingsView: View {
                 UIPasteboard.general.string = is_pk ? self.keypair.pubkey.npub : self.privkey
                 self.privkey_copied = !is_pk
                 self.pubkey_copied = is_pk
-    
+
                 let generator = UIImpactFeedbackGenerator(style: .light)
                 generator.impactOccurred()
+                ToastManager.shared.showCopied()
             }
-            
+
             if is_pk {
                 copyKey()
                 return
             }
-            
+
             if has_authenticated_locally {
                 copyKey()
                 return
             }
-            
+
             authenticate_locally(has_authenticated_locally) { success in
                 self.has_authenticated_locally = success
                 if success {
