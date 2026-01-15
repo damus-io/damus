@@ -1,3 +1,13 @@
+## [Unreleased]
+
+### Added
+
+- Added Tor mode with embedded Arti client for anonymous relay connections (alltheseas)
+- Added TorSettingsView for configuring Tor mode with Arti status display (alltheseas)
+- Added persistent Tor onion icon indicator when Tor mode is enabled (alltheseas)
+- Added TorAwareURLSession to route all app traffic through Tor when enabled (alltheseas)
+
+
 ## [1.15] - 2025-07-11
 
 **Note:** This version was only released on TestFlight, and never officially released on the App Store.
