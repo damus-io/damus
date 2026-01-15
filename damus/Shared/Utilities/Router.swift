@@ -39,7 +39,7 @@ enum Route: Hashable {
     case Reactions(reactions: EventsModel)
     case Zaps(target: ZapTarget)
     case Search(search: SearchModel)
-    case NDBSearch(results:  Binding<[NostrEvent]>, query: String)
+    case NDBSearch(results: Binding<[NostrEvent]>, query: String, isLoading: Binding<Bool>, relayCount: Binding<Int>, relayAttempted: Binding<Bool>, onEnableRelaySearch: (() -> Void)?)
     case EULA
     case Login
     case CreateAccount
@@ -115,8 +115,16 @@ enum Route: Hashable {
             ZapsView(state: damusState, target: target)
         case .Search(let search):
             SearchView(appstate: damusState, search: search)
-        case .NDBSearch(let results, let query):
-            NDBSearchView(damus_state: damusState, results: results, searchQuery: query)
+        case .NDBSearch(let results, let query, let isLoading, let relayCount, let relayAttempted, let onEnableRelaySearch):
+            NDBSearchView(
+                damus_state: damusState,
+                results: results,
+                searchQuery: query,
+                is_loading: isLoading,
+                relay_result_count: relayCount,
+                relay_search_attempted: relayAttempted,
+                onEnableRelaySearch: onEnableRelaySearch
+            )
         case .EULA:
             EULAView(nav: navigationCoordinator)
         case .Login:
@@ -226,8 +234,8 @@ enum Route: Hashable {
         case .Search(let search):
             hasher.combine("search")
             hasher.combine(search.search)
-        case .NDBSearch(_, let query):
-            hasher.combine("results")
+        case .NDBSearch(_, let query, _, _, _, _):
+            hasher.combine("ndbsearch")
             hasher.combine(query)
         case .EULA:
             hasher.combine("eula")

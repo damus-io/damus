@@ -17,6 +17,14 @@ struct SearchSettingsView: View {
                 Toggle(NSLocalizedString("View multiple events per user", comment: "Setting to only see 1 event per user (npub) in the search/universe"), isOn: $settings.multiple_events_per_pubkey)
                     .toggleStyle(.switch)
             }
+
+            Section(header: Text("Privacy", comment: "Section header for search privacy settings")) {
+                Toggle(NSLocalizedString("Enable relay search (NIP-50)", comment: "Setting to enable NIP-50 relay search which may expose search queries to relay operators"), isOn: $settings.enable_nip50_relay_search)
+                    .toggleStyle(.switch)
+                Text("When enabled, search queries are sent to relays. This may expose your search terms to relay operators.", comment: "Description for NIP-50 relay search privacy setting")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+            }
         }
         .navigationTitle(NSLocalizedString("Search/Universe", comment: "Navigation title for universe/search settings."))
         .onReceive(handle_notify(.switched_timeline)) { _ in
