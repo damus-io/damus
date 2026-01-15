@@ -37,7 +37,11 @@ class NostrNetworkManager {
     
     init(delegate: Delegate, addNdbToRelayPool: Bool = true) {
         self.delegate = delegate
-        let pool = RelayPool(ndb: addNdbToRelayPool ? delegate.ndb : nil, keypair: delegate.keypair)
+        let pool = RelayPool(
+            ndb: addNdbToRelayPool ? delegate.ndb : nil,
+            keypair: delegate.keypair,
+            urlSession: delegate.relayURLSession
+        )
         self.pool = pool
         let reader = SubscriptionManager(pool: pool, ndb: delegate.ndb, experimentalLocalRelayModelSupport: self.delegate.experimentalLocalRelayModelSupport)
         let userRelayList = UserRelayListManager(delegate: delegate, pool: pool, reader: reader)
@@ -208,8 +212,12 @@ extension NostrNetworkManager {
         
         /// Relay filters
         var relayFilters: RelayFilters { get }
-        
+
         /// The user's connected NWC wallet
         var nwcWallet: WalletConnectURL? { get }
+
+        /// The URLSession to use for relay connections.
+        /// Returns a SOCKS-configured session when Tor mode is enabled.
+        var relayURLSession: URLSession { get }
     }
 }

@@ -50,25 +50,41 @@ final class RelayConnection: ObservableObject {
     @Published private(set) var isConnected = false
     @Published private(set) var isConnecting = false
     private var isDisabled = false
-    
+
     private(set) var last_connection_attempt: TimeInterval = 0
     private(set) var last_pong: Date? = nil
     private(set) var backoff: TimeInterval = 1.0
-    private lazy var socket = WebSocket(relay_url.url)
+    private lazy var socket = WebSocket(relay_url.url, session: urlSession)
     private var subscriptionToken: AnyCancellable?
 
     private var handleEvent: (NostrConnectionEvent) async -> ()
     private var processEvent: (WebSocketEvent) -> ()
     private let relay_url: RelayURL
+    private let urlSession: URLSession
     var log: RelayLog?
 
+    /// Creates a new relay connection.
+    ///
+    /// - Parameters:
+    ///   - url: The relay URL to connect to.
+    ///   - urlSession: The URLSession to use for WebSocket connections. Defaults to `.shared`.
+    ///                 Pass a custom session configured with SOCKS proxy for Tor support.
+    ///   - handleEvent: Async callback for handling Nostr connection events.
+    ///   - processUnverifiedWSEvent: Callback for processing raw WebSocket events before verification.
     init(url: RelayURL,
+         urlSession: URLSession = .shared,
          handleEvent: @escaping (NostrConnectionEvent) async -> (),
          processUnverifiedWSEvent: @escaping (WebSocketEvent) -> ())
     {
         self.relay_url = url
+        self.urlSession = urlSession
         self.handleEvent = handleEvent
         self.processEvent = processUnverifiedWSEvent
+
+        // Log whether this connection is using a custom session (e.g., Tor)
+        if urlSession !== URLSession.shared {
+            Log.info("[TOR] RelayConnection to %s using custom URLSession (Tor mode)", for: .networking, url.absoluteString)
+        }
     }
     
     func ping() {

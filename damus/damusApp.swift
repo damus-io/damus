@@ -75,16 +75,51 @@ func registerNotificationCategories() {
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     var state: DamusState? = nil
-    
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
         SKPaymentQueue.default().add(StoreObserver.standard)
         registerNotificationCategories()
         ImageCacheMigrations.migrateKingfisherCacheIfNeeded()
         configureKingfisherCache()
-        
+
+        #if !EXTENSION
+        // Start Arti if Tor is enabled
+        startArtiIfNeeded()
+        #endif
+
         return true
     }
+
+    #if !EXTENSION
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        // Restart Arti if Tor is enabled and it was stopped
+        startArtiIfNeeded()
+    }
+
+    func applicationWillResignActive(_ application: UIApplication) {
+        // Stop Arti when going to background to save resources
+        TorSessionFactory.stopArti()
+    }
+
+    private func startArtiIfNeeded() {
+        let settings = UserSettingsStore()
+        if settings.tor_enabled {
+            Log.info("[TOR] App starting with Tor enabled, starting Arti", for: .networking)
+            let result = ArtiClient.shared.start(port: settings.tor_socks_port)
+            switch result {
+            case .success(let port):
+                Log.info("[TOR] Arti started on port %d", for: .networking, port)
+                // Configure Kingfisher for Tor after Arti starts
+                CustomImageDownloader.shared.configureTorIfNeeded(settings: settings)
+            case .failure(let error):
+                Log.error("[TOR] Failed to start Arti: %@", for: .networking, error.localizedDescription)
+                // Still configure Kingfisher with fallback settings
+                CustomImageDownloader.shared.configureTorIfNeeded(settings: settings)
+            }
+        }
+    }
+    #endif
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         guard let state else {

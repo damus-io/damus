@@ -520,7 +520,7 @@ func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, msats: In
     
     var ret: (Data, URLResponse)? = nil
     do {
-        ret = try await URLSession.shared.data(from: url)
+        ret = try await TorAwareURLSession.shared.data(from: url)
     } catch {
         print(error.localizedDescription)
         return nil

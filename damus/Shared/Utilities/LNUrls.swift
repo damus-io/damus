@@ -69,7 +69,7 @@ func fetch_static_payreq(_ lnurl: String) async -> LNUrlPayRequest? {
         return nil
     }
     
-    guard let ret = try? await URLSession.shared.data(from: url) else {
+    guard let ret = try? await TorAwareURLSession.shared.data(from: url) else {
         return nil
     }
     

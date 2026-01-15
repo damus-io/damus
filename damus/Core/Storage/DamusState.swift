@@ -239,5 +239,14 @@ fileprivate extension DamusState {
             guard let nwcString = self.settings.nostr_wallet_connect else { return nil }
             return WalletConnectURL(str: nwcString)
         }
+
+        /// Returns a URLSession configured for Tor when enabled, otherwise the shared session.
+        var relayURLSession: URLSession {
+            guard settings.tor_enabled else { return .shared }
+            return TorSessionFactory.createSession(
+                host: settings.tor_socks_host,
+                port: settings.tor_socks_port
+            )
+        }
     }
 }

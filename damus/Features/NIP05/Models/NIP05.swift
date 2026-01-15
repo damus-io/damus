@@ -39,7 +39,7 @@ func fetch_nip05(nip05: NIP05) async -> NIP05Response? {
     }
 
     print("fetching nip05 \(url.absoluteString)")
-    guard let ret = try? await URLSession.shared.data(from: url) else {
+    guard let ret = try? await TorAwareURLSession.shared.data(from: url) else {
         return nil
     }
     let dat = ret.0

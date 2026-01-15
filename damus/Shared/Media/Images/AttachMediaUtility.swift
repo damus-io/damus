@@ -88,7 +88,7 @@ class AttachMediaUtility {
         request.httpBody = create_upload_body(mediaData: mediaData, boundary: boundary, mediaUploader: mediaUploader, mediaToUpload: mediaToUpload, mediaType: mediaType)
         
         do {
-            let (data, _) = try await URLSession.shared.data(for: request, delegate: progress)
+            let (data, _) = try await TorAwareURLSession.shared.data(for: request, delegate: progress)
 
             guard let url = mediaUploader.getMediaURL(from: data) else {
                 print("Upload failed getting media url")

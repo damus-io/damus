@@ -44,6 +44,10 @@ actor RelayPool {
     var delegate: Delegate?
     private(set) var signal: SignalModel = SignalModel()
 
+    /// The URLSession used for all relay WebSocket connections.
+    /// Configure with SOCKS proxy for Tor support.
+    private let urlSession: URLSession
+
     let network_monitor = NWPathMonitor()
     private let network_monitor_queue = DispatchQueue(label: "io.damus.network_monitor")
     private var last_network_status: NWPath.Status = .unsatisfied
@@ -72,9 +76,17 @@ actor RelayPool {
         seen.removeAll()
     }
 
-    init(ndb: Ndb?, keypair: Keypair? = nil) {
+    /// Creates a new relay pool.
+    ///
+    /// - Parameters:
+    ///   - ndb: The NostrDB instance for local event storage.
+    ///   - keypair: Optional keypair for relay authentication.
+    ///   - urlSession: The URLSession for WebSocket connections. Defaults to `.shared`.
+    ///                 Pass a SOCKS-configured session for Tor support.
+    init(ndb: Ndb?, keypair: Keypair? = nil, urlSession: URLSession = .shared) {
         self.ndb = ndb
         self.keypair = keypair
+        self.urlSession = urlSession
 
         network_monitor.pathUpdateHandler = { [weak self] path in
             Task { await self?.pathUpdateHandler(path: path) }
@@ -173,16 +185,21 @@ actor RelayPool {
         if await get_relay(relay_id) != nil {
             throw RelayError.RelayAlreadyExists
         }
-        let conn = RelayConnection(url: desc.url, handleEvent: { event in
-            await self.handle_event(relay_id: relay_id, event: event)
-        }, processUnverifiedWSEvent: { wsev in
-            guard case .message(let msg) = wsev,
-                  case .string(let str) = msg
-            else { return }
+        let conn = RelayConnection(
+            url: desc.url,
+            urlSession: urlSession,
+            handleEvent: { event in
+                await self.handle_event(relay_id: relay_id, event: event)
+            },
+            processUnverifiedWSEvent: { wsev in
+                guard case .message(let msg) = wsev,
+                      case .string(let str) = msg
+                else { return }
 
-            let _ = self.ndb?.processEvent(str, originRelayURL: relay_id)
-            self.message_received_function?((str, desc))
-        })
+                let _ = self.ndb?.processEvent(str, originRelayURL: relay_id)
+                self.message_received_function?((str, desc))
+            }
+        )
         let relay = Relay(descriptor: desc, connection: conn)
         await self.appendRelayToList(relay: relay)
     }

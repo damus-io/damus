@@ -275,7 +275,7 @@ class CoinosDeterministicAccountClient {
         if let payload_type {
             request.setValue(payload_type.rawValue, forHTTPHeaderField: "Content-Type")
         }
-        return try await URLSession.shared.data(for: request)
+        return try await TorAwareURLSession.shared.data(for: request)
     }
     
     /// Makes an authenticated request with our JWT auth token.
@@ -292,7 +292,7 @@ class CoinosDeterministicAccountClient {
         if let payload_type {
             request.setValue(payload_type.rawValue, forHTTPHeaderField: "Content-Type")
         }
-        return try await URLSession.shared.data(for: request)
+        return try await TorAwareURLSession.shared.data(for: request)
     }
     
     

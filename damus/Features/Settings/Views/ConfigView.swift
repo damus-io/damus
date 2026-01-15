@@ -31,6 +31,7 @@ struct ConfigView: View {
     private let zapsTitle = NSLocalizedString("Zaps", comment: "Section header for zap settings")
     private let translationTitle = NSLocalizedString("Translation", comment: "Section header for text and appearance settings")
     private let reactionsTitle = NSLocalizedString("Reactions", comment: "Section header for reactions settings")
+    private let torTitle = NSLocalizedString("Tor", comment: "Section header for Tor/privacy settings")
     private let developerTitle = NSLocalizedString("Developer", comment: "Section header for developer settings")
     private let firstAidTitle = NSLocalizedString("First Aid", comment: "Section header for first aid tools and settings")
     private let signOutTitle = NSLocalizedString("Sign out", comment: "Sidebar menu label to sign out of the account.")
@@ -96,6 +97,12 @@ struct ConfigView: View {
                     if showSettingsButton(title: reactionsTitle){
                         NavigationLink(value: Route.ReactionsSettings(settings: settings)){
                             IconLabel(reactionsTitle,img_name:"shaka.fill",color:.purple)
+                        }
+                    }
+                    //Tor
+                    if showSettingsButton(title: torTitle){
+                        NavigationLink(value: Route.TorSettings(settings: settings)){
+                            IconLabel(torTitle,img_name:"shield",color:.gray)
                         }
                     }
                     //Developer

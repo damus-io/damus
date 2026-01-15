@@ -13,7 +13,7 @@ import FoundationNetworking
 public struct Translator {
     private let userSettingsStore: UserSettingsStore
     private let purple: DamusPurple
-    private let session = URLSession.shared
+    private var session: URLSession { TorAwareURLSession.shared }
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
 

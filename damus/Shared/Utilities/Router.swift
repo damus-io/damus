@@ -31,6 +31,7 @@ enum Route: Hashable {
     case ReactionsSettings(settings: UserSettingsStore)
     case SearchSettings(settings: UserSettingsStore)
     case DeveloperSettings(settings: UserSettingsStore)
+    case TorSettings(settings: UserSettingsStore)
     case FirstAidSettings(settings: UserSettingsStore)
     case Thread(thread: ThreadModel)
     case LoadableNostrEvent(note_reference: LoadableNostrEventViewModel.NoteReference)
@@ -98,6 +99,8 @@ enum Route: Hashable {
             SearchSettingsView(settings: settings)
         case .DeveloperSettings(let settings):
             DeveloperSettingsView(settings: settings, damus_state: damusState)
+        case .TorSettings(let settings):
+            TorSettingsView(settings: settings)
         case .FirstAidSettings(settings: let settings):
             FirstAidSettingsView(damus_state: damusState, settings: settings)
         case .Thread(let thread):
@@ -202,6 +205,8 @@ enum Route: Hashable {
             hasher.combine("searchSettings")
         case .DeveloperSettings:
             hasher.combine("developerSettings")
+        case .TorSettings:
+            hasher.combine("torSettings")
         case .FirstAidSettings:
             hasher.combine("firstAidSettings")
         case .Thread(let threadModel):
