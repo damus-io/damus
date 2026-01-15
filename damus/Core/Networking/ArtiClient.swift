@@ -29,7 +29,7 @@ final class ArtiClient: ObservableObject {
     private let stateLock = NSLock()
 
     /// Internal state for lock-protected access (avoids @Published deadlock)
-    private var _state: ArtiState = .stopped
+    private var internalState: ArtiState = .stopped
 
     /// Arti state directory
     private var stateDir: URL {
@@ -59,9 +59,9 @@ final class ArtiClient: ObservableObject {
         // Check and update state atomically
         let canStart: Bool
         stateLock.lock()
-        switch _state {
+        switch internalState {
         case .stopped:
-            _state = .starting
+            internalState = .starting
             canStart = true
         case .running:
             stateLock.unlock()
@@ -132,7 +132,7 @@ final class ArtiClient: ObservableObject {
 
             // Check if stop was requested during startup
             stateLock.lock()
-            let currentState = _state
+            let currentState = internalState
             stateLock.unlock()
             if currentState == .stopping || currentState == .stopped {
                 return
@@ -150,7 +150,7 @@ final class ArtiClient: ObservableObject {
     /// Atomically transitions state and updates published properties.
     private func transitionState(to newState: ArtiState, port: Int? = nil) {
         stateLock.lock()
-        _state = newState
+        internalState = newState
         stateLock.unlock()
 
         DispatchQueue.main.async { [weak self] in
@@ -167,11 +167,11 @@ final class ArtiClient: ObservableObject {
     /// Can be called during .starting or .running states.
     func stop() {
         stateLock.lock()
-        guard _state == .running || _state == .starting else {
+        guard internalState == .running || internalState == .starting else {
             stateLock.unlock()
             return
         }
-        _state = .stopping
+        internalState = .stopping
         stateLock.unlock()
 
         // Update published state (no lock held)

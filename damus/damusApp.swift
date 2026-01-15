@@ -103,20 +103,21 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     }
 
     private func startArtiIfNeeded() {
-        let settings = UserSettingsStore()
-        if settings.tor_enabled {
-            Log.info("[TOR] App starting with Tor enabled, starting Arti", for: .networking)
-            let result = ArtiClient.shared.start(port: settings.tor_socks_port)
-            switch result {
-            case .success(let port):
-                Log.info("[TOR] Arti started on port %d", for: .networking, port)
-                // Configure Kingfisher for Tor after Arti starts
-                CustomImageDownloader.shared.configureTorIfNeeded(settings: settings)
-            case .failure(let error):
-                Log.error("[TOR] Failed to start Arti: %@", for: .networking, error.localizedDescription)
-                // Still configure Kingfisher with fallback settings
-                CustomImageDownloader.shared.configureTorIfNeeded(settings: settings)
-            }
+        // Use shared store if available (pubkey-scoped), otherwise create new
+        let settings = UserSettingsStore.shared ?? UserSettingsStore()
+        guard settings.tor_enabled else { return }
+
+        Log.info("[TOR] App starting with Tor enabled, starting Arti", for: .networking)
+        let result = ArtiClient.shared.start(port: settings.tor_socks_port)
+        switch result {
+        case .success(let port):
+            Log.info("[TOR] Arti started on port %d", for: .networking, port)
+            // Configure Kingfisher for Tor after Arti starts
+            CustomImageDownloader.shared.configureTorIfNeeded(settings: settings)
+        case .failure(let error):
+            Log.error("[TOR] Failed to start Arti: %@", for: .networking, error.localizedDescription)
+            // Still configure Kingfisher with fallback settings
+            CustomImageDownloader.shared.configureTorIfNeeded(settings: settings)
         }
     }
     #endif

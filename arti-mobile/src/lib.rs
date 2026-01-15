@@ -253,7 +253,7 @@ fn configure_and_run_arti_proxy(state_dir: &str, cache_dir: &str, socks_port: u1
 
 fn stop_arti_proxy() {
     if let Ok(mut state) = STATE.lock() {
-        if *state == ArtiState::Running {
+        if *state == ArtiState::Running || *state == ArtiState::Starting {
             *state = ArtiState::Stopping;
             info!("[ARTI] Stopping...");
         }
@@ -339,7 +339,10 @@ async fn run_proxy<R: ToplevelRuntime>(
             info!("[ARTI] Bootstrap complete, proxy ready on port {}", port);
 
             if let Ok(mut state) = STATE.lock() {
-                *state = ArtiState::Running;
+                // Only transition to Running if we haven't been asked to stop
+                if *state == ArtiState::Starting {
+                    *state = ArtiState::Running;
+                }
             }
 
             // Poll for stop request
@@ -352,7 +355,7 @@ async fn run_proxy<R: ToplevelRuntime>(
                     }
                 }
             }
-            Ok(())
+            Ok::<(), anyhow::Error>(())
         }.fuse() => r.context("shutdown"),
     )?;
 
