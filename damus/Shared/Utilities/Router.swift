@@ -135,7 +135,7 @@ enum Route: Hashable {
         case .FollowersYouKnow(let friendedFollowers, let followers):
             FollowersYouKnowView(damus_state: damusState, friended_followers: friendedFollowers, followers: followers)
         case .Script(let load_model):
-            LoadScript(pool: RelayPool(ndb: damusState.ndb, keypair: damusState.keypair), model: load_model)
+            LoadScript(pool: RelayPool(ndb: damusState.ndb, keypair: damusState.keypair, urlSession: TorAwareURLSession.shared), model: load_model)
         case .NIP05DomainEvents(let events, let nip05_domain_favicon):
             NIP05DomainTimelineView(damus_state: damusState, model: events, nip05_domain_favicon: nip05_domain_favicon)
         case .NIP05DomainPubkeys(let domain, let nip05_domain_favicon, let pubkeys):

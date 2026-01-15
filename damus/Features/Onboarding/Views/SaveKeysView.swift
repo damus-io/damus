@@ -10,7 +10,7 @@ import Security
 
 struct SaveKeysView: View {
     let account: CreateAccountModel
-    let pool: RelayPool = RelayPool(ndb: Ndb()!)
+    let pool: RelayPool = RelayPool(ndb: Ndb()!, urlSession: TorAwareURLSession.shared)
     @State var loading: Bool = false
     @State var error: String? = nil
     
