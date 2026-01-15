@@ -81,9 +81,9 @@ actor RelayPool {
     /// - Parameters:
     ///   - ndb: The NostrDB instance for local event storage.
     ///   - keypair: Optional keypair for relay authentication.
-    ///   - urlSession: The URLSession for WebSocket connections. Defaults to `.shared`.
-    ///                 Pass a SOCKS-configured session for Tor support.
-    init(ndb: Ndb?, keypair: Keypair? = nil, urlSession: URLSession = .shared) {
+    ///   - urlSession: The URLSession for WebSocket connections. Defaults to `TorAwareURLSession.shared`
+    ///                 which automatically routes through Tor when Tor mode is enabled.
+    init(ndb: Ndb?, keypair: Keypair? = nil, urlSession: URLSession = TorAwareURLSession.shared) {
         self.ndb = ndb
         self.keypair = keypair
         self.urlSession = urlSession

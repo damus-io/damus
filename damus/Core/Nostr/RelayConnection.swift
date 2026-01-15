@@ -67,12 +67,12 @@ final class RelayConnection: ObservableObject {
     ///
     /// - Parameters:
     ///   - url: The relay URL to connect to.
-    ///   - urlSession: The URLSession to use for WebSocket connections. Defaults to `.shared`.
-    ///                 Pass a custom session configured with SOCKS proxy for Tor support.
+    ///   - urlSession: The URLSession to use for WebSocket connections. Defaults to `TorAwareURLSession.shared`
+    ///                 which automatically routes through Tor when Tor mode is enabled.
     ///   - handleEvent: Async callback for handling Nostr connection events.
     ///   - processUnverifiedWSEvent: Callback for processing raw WebSocket events before verification.
     init(url: RelayURL,
-         urlSession: URLSession = .shared,
+         urlSession: URLSession = TorAwareURLSession.shared,
          handleEvent: @escaping (NostrConnectionEvent) async -> (),
          processUnverifiedWSEvent: @escaping (WebSocketEvent) -> ())
     {
@@ -81,9 +81,9 @@ final class RelayConnection: ObservableObject {
         self.handleEvent = handleEvent
         self.processEvent = processUnverifiedWSEvent
 
-        // Log whether this connection is using a custom session (e.g., Tor)
-        if urlSession !== URLSession.shared {
-            Log.info("[TOR] RelayConnection to %s using custom URLSession (Tor mode)", for: .networking, url.absoluteString)
+        // Log when Tor mode is active
+        if TorAwareURLSession.isTorEnabled {
+            Log.info("[TOR] RelayConnection to %s using Tor", for: .networking, url.absoluteString)
         }
     }
     
