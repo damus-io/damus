@@ -183,11 +183,59 @@ class CustomSessionDelegate: SessionDelegate, @unchecked Sendable {
 
 
 class CustomImageDownloader: ImageDownloader, @unchecked Sendable {
-    
+
     static let shared = CustomImageDownloader(name: "shared")
-    
+
+    /// Whether Tor has been configured for this downloader
+    private var torConfigured = false
+
     override init(name: String) {
         super.init(name: name)
         sessionDelegate = CustomSessionDelegate()
+        // Tor configuration deferred until settings are available
+    }
+
+    /// Configures the downloader to use Tor SOCKS proxy when Tor mode is enabled.
+    /// Should be called after user settings are available (e.g., during app initialization).
+    /// - Parameter settings: The user settings store to read Tor configuration from
+    func configureTorIfNeeded(settings: UserSettingsStore) {
+        guard !torConfigured, settings.tor_enabled else { return }
+
+        #if !EXTENSION
+        // Use Arti's port when running, otherwise fall back to configured settings
+        let host: String
+        let port: Int
+        if ArtiClient.shared.socksPort > 0 {
+            host = "127.0.0.1"
+            port = ArtiClient.shared.socksPort
+        } else {
+            host = settings.tor_socks_host
+            port = settings.tor_socks_port
+        }
+        #else
+        let host = settings.tor_socks_host
+        let port = settings.tor_socks_port
+        #endif
+
+        let config = URLSessionConfiguration.default
+        config.connectionProxyDictionary = [
+            kCFProxyTypeKey: kCFProxyTypeSOCKS,
+            kCFStreamPropertySOCKSProxyHost: host,
+            kCFStreamPropertySOCKSProxyPort: port
+        ]
+
+        // Longer timeouts for Tor
+        config.timeoutIntervalForRequest = 120
+        config.timeoutIntervalForResource = 600
+
+        // Disable caching for privacy
+        config.urlCache = nil
+        config.requestCachePolicy = .reloadIgnoringLocalCacheData
+
+        // Apply the Tor-configured session
+        self.sessionConfiguration = config
+        torConfigured = true
+
+        Log.info("[TOR] Kingfisher ImageDownloader configured for Tor on %@:%d", for: .networking, host, port)
     }
 }

@@ -50,5 +50,5 @@ func make_nip98_authenticated_request(method: HTTPMethod, url: URL, payload: Dat
     if let payload_type {
         request.setValue(payload_type.rawValue, forHTTPHeaderField: "Content-Type")
     }
-    return try await URLSession.shared.data(for: request)
+    return try await TorAwareURLSession.shared.data(for: request)
 }

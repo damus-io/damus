@@ -9,4 +9,5 @@
 #include "nostrscript.h"
 #include "nostrdb.h"
 #include "lmdb.h"
+#include "arti_mobile.h"
 

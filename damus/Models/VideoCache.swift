@@ -59,9 +59,10 @@ struct VideoCache {
         }
     }
     
-    /// Downloads video content using URLSession and caches it to disk.
+    /// Downloads video content and caches it to disk.
+    /// Uses mediaSession for extended timeouts when Tor is enabled.
     private func download_and_cache_video(from url: URL) async throws -> URL {
-        let (data, response) = try await URLSession.shared.data(from: url)
+        let (data, response) = try await TorAwareURLSession.mediaSession.data(from: url)
         
         guard let http_response = response as? HTTPURLResponse,
               200..<300 ~= http_response.statusCode else {

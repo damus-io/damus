@@ -31,6 +31,7 @@ enum Route: Hashable {
     case ReactionsSettings(settings: UserSettingsStore)
     case SearchSettings(settings: UserSettingsStore)
     case DeveloperSettings(settings: UserSettingsStore)
+    case TorSettings(settings: UserSettingsStore)
     case FirstAidSettings(settings: UserSettingsStore)
     case Thread(thread: ThreadModel)
     case LoadableNostrEvent(note_reference: LoadableNostrEventViewModel.NoteReference)
@@ -98,6 +99,8 @@ enum Route: Hashable {
             SearchSettingsView(settings: settings)
         case .DeveloperSettings(let settings):
             DeveloperSettingsView(settings: settings, damus_state: damusState)
+        case .TorSettings(let settings):
+            TorSettingsView(settings: settings)
         case .FirstAidSettings(settings: let settings):
             FirstAidSettingsView(damus_state: damusState, settings: settings)
         case .Thread(let thread):
@@ -132,7 +135,7 @@ enum Route: Hashable {
         case .FollowersYouKnow(let friendedFollowers, let followers):
             FollowersYouKnowView(damus_state: damusState, friended_followers: friendedFollowers, followers: followers)
         case .Script(let load_model):
-            LoadScript(pool: RelayPool(ndb: damusState.ndb, keypair: damusState.keypair), model: load_model)
+            LoadScript(pool: RelayPool(ndb: damusState.ndb, keypair: damusState.keypair, urlSession: TorAwareURLSession.shared), model: load_model)
         case .NIP05DomainEvents(let events, let nip05_domain_favicon):
             NIP05DomainTimelineView(damus_state: damusState, model: events, nip05_domain_favicon: nip05_domain_favicon)
         case .NIP05DomainPubkeys(let domain, let nip05_domain_favicon, let pubkeys):
@@ -202,6 +205,8 @@ enum Route: Hashable {
             hasher.combine("searchSettings")
         case .DeveloperSettings:
             hasher.combine("developerSettings")
+        case .TorSettings:
+            hasher.combine("torSettings")
         case .FirstAidSettings:
             hasher.combine("firstAidSettings")
         case .Thread(let threadModel):
