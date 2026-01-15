@@ -1035,9 +1035,11 @@ func handle_unfollow(state: DamusState, unfollow: FollowRef) async -> Bool {
     switch unfollow {
     case .pubkey(let pk):
         state.contacts.remove_friend(pk)
-    case .hashtag:
-        // nothing to handle here really
-        break
+        let profile = try? state.profiles.lookup(id: pk)
+        let name = profile?.display_name ?? profile?.name ?? abbrev_bech32_pubkey(pubkey: pk)
+        ToastManager.shared.showUnfollowed(name)
+    case .hashtag(let tag):
+        ToastManager.shared.showUnfollowed("#\(tag)")
     }
 
     return true
@@ -1061,9 +1063,11 @@ func handle_follow(state: DamusState, follow: FollowRef) async -> Bool {
     switch follow {
     case .pubkey(let pubkey):
         state.contacts.add_friend_pubkey(pubkey)
-    case .hashtag:
-        // nothing to do
-        break
+        let profile = try? state.profiles.lookup(id: pubkey)
+        let name = profile?.display_name ?? profile?.name ?? abbrev_bech32_pubkey(pubkey: pubkey)
+        ToastManager.shared.showFollowed(name)
+    case .hashtag(let tag):
+        ToastManager.shared.showFollowed("#\(tag)")
     }
 
     return true
@@ -1103,6 +1107,7 @@ func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: Ev
                 await postbox.send(ev)
             }
         }
+        await MainActor.run { ToastManager.shared.showNotePosted() }
         return true
     case .cancel:
         print("post cancelled")

@@ -24,10 +24,10 @@ struct EditMetadataView: View {
 
     @State var confirm_ln_address: Bool = false
     @State var confirm_save_alert: Bool = false
-    
+
     @StateObject var profileUploadObserver = ImageUploadingObserver()
     @StateObject var bannerUploadObserver = ImageUploadingObserver()
-    
+
     @Environment(\.dismiss) var dismiss
     @Environment(\.presentationMode) var presentationMode
     
@@ -212,7 +212,10 @@ struct EditMetadataView: View {
                 } else {
                     Task {
                         await save()
-                        dismiss()
+                        await MainActor.run {
+                            ToastManager.shared.showProfileUpdated()
+                            dismiss()
+                        }
                     }
                 }
             }, label: {

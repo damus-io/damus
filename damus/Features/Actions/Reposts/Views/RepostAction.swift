@@ -10,7 +10,7 @@ import SwiftUI
 struct RepostAction: View {
     let damus_state: DamusState
     let event: NostrEvent
-    
+
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
     
@@ -19,14 +19,15 @@ struct RepostAction: View {
             
             Button {
                 dismiss()
-                
+
                 Task {
                     guard let keypair = self.damus_state.keypair.to_full(),
                           let boost = await make_boost_event(keypair: keypair, boosted: self.event, relayURL: damus_state.nostrNetwork.relaysForEvent(event: self.event).first) else {
                         return
                     }
-                    
+
                     await damus_state.nostrNetwork.postbox.send(boost)
+                    await MainActor.run { ToastManager.shared.showReposted() }
                 }
             } label: {
                 Label(NSLocalizedString("Repost", comment: "Button to repost a note"), image: "repost")

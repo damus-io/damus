@@ -23,6 +23,7 @@ struct InvoiceView: View {
             }
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             UIPasteboard.general.string = invoice.string
+            ToastManager.shared.showCopied()
         } label: {
             if !copied {
                 Image("copy2")

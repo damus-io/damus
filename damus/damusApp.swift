@@ -23,8 +23,9 @@ struct MainView: View {
     @State var needs_setup = false;
     @State var keypair: Keypair? = nil;
     @StateObject private var orientationTracker = OrientationTracker()
+    @ObservedObject private var toastManager = ToastManager.shared
     var appDelegate: AppDelegate
-    
+
     var body: some View {
         Group {
             if let kp = keypair, !needs_setup {
@@ -41,6 +42,7 @@ struct MainView: View {
                     }
             }
         }
+        .toast(manager: toastManager)
         .dynamicTypeSize(.xSmall ... .xxxLarge)
         .onReceive(handle_notify(.logout)) { () in
             try? clear_keypair()
@@ -82,7 +84,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         registerNotificationCategories()
         ImageCacheMigrations.migrateKingfisherCacheIfNeeded()
         configureKingfisherCache()
-        
+
         return true
     }
     
