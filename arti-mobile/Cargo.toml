@@ -1,0 +1,42 @@
+[package]
+name = "arti_mobile"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "arti_mobile"
+crate-type = ["staticlib"]
+
+[dependencies]
+# Arti - based on Guardian Project's working config
+arti = { version = "= 1.7.0", default-features = false, features = ["async-std", "dns-proxy", "static-sqlite", "rustls", "experimental-api"]}
+arti-client = { version = "= 0.36.0", default-features = false, features = ["static-sqlite", "rustls"]}
+tor-config = { version = "= 0.36.0" }
+tor-rtcompat = { version = "= 0.36.0", default-features = false, features = ["rustls", "async-std"]}
+
+# Async runtime
+async-std = "1.13"
+
+# Helpers
+anyhow = "1.0"
+futures = "0.3"
+lazy_static = "1.5"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = "0.3"
+tracing-oslog = "0.3"
+
+# FFI
+libc = "0.2"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[profile.release-small]
+inherits = "release"
+opt-level = "z"
+strip = true
