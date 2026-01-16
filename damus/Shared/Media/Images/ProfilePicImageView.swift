@@ -79,24 +79,30 @@ struct NavDismissBarView: View {
     }
 }
 
+/// Full-screen view for displaying an expanded profile picture with zoom and share capabilities.
 struct ProfilePicImageView: View {
     let pubkey: Pubkey
     let profiles: Profiles
     let settings: UserSettingsStore
     let nav: NavigationCoordinator
     let shouldShowEditButton: Bool
-    @State var image: UIImage?
-    @State var showMenu = true
-    
+    let damusState: DamusState
+
+    @State private var image: UIImage?
+    @State private var showMenu = true
+    @State private var picture: String?
+
     @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
+        let url = get_profile_url(picture: picture, pubkey: pubkey, profiles: profiles)
+        let _ = Log.debug("ProfilePicImageView: pubkey=%@ picture=%@ url=%@", for: .render, pubkey.hex(), picture ?? "nil", url.absoluteString)
         ZStack {
             Color(.systemBackground)
                 .ignoresSafeArea()
-            
+
             ZoomableScrollView {
-                ProfileImageContainerView(url: get_profile_url(picture: nil, pubkey: pubkey, profiles: profiles), settings: settings, image: $image)
+                ProfileImageContainerView(url: url, settings: settings, image: $image)
                     .aspectRatio(contentMode: .fit)
                     .padding(.top, Theme.safeAreaInsets?.top)
                     .padding(.bottom, Theme.safeAreaInsets?.bottom)
@@ -107,6 +113,18 @@ struct ProfilePicImageView: View {
             .modifier(SwipeToDismissModifier(minDistance: 50, onDismiss: {
                 presentationMode.wrappedValue.dismiss()
             }))
+            .task {
+                Log.debug("ProfilePicImageView: starting profile stream for %@", for: .render, pubkey.hex())
+                for await profile in await damusState.nostrNetwork.profilesManager.streamProfile(pubkey: pubkey) {
+                    guard let pic = profile.picture else {
+                        Log.debug("ProfilePicImageView: got profile but no picture for %@", for: .render, pubkey.hex())
+                        continue
+                    }
+                    Log.debug("ProfilePicImageView: got picture for %@: %@", for: .render, pubkey.hex(), pic)
+                    self.picture = pic
+                }
+                Log.debug("ProfilePicImageView: stream ended for %@", for: .render, pubkey.hex())
+            }
         }
         .overlay(
             Group {
@@ -154,7 +172,11 @@ struct ProfileZoomView_Previews: PreviewProvider {
     static var previews: some View {
         ProfilePicImageView(
             pubkey: test_pubkey,
-            profiles: make_preview_profiles(test_pubkey),
-            settings: test_damus_state.settings, nav: test_damus_state.nav, shouldShowEditButton: true)
+            profiles: test_damus_state.profiles,
+            settings: test_damus_state.settings,
+            nav: test_damus_state.nav,
+            shouldShowEditButton: true,
+            damusState: test_damus_state
+        )
     }
 }
