@@ -897,7 +897,34 @@ class HomeModel: ContactsDelegate, ObservableObject {
             create_local_notification(profiles: damus_state.profiles, notify: notification_object)
         }
     }
-    
+
+    /// Fetches DM history from relays.
+    ///
+    /// By default, the DM subscription uses `optimizeNetworkFilter: true` which adds a
+    /// `since` parameter based on the latest local timestamp. This is efficient but can
+    /// miss older DMs if the local database doesn't have complete history.
+    ///
+    /// This method requests full DM history with negentropy.
+    func fetchFullDMHistory() async {
+        // DMs sent to us (limit to prevent runaway pulls; user can pull again for more)
+        var dms_filter = NostrFilter(kinds: [.dm])
+        dms_filter.pubkeys = [damus_state.pubkey]
+        dms_filter.limit = 500
+
+        // DMs we sent
+        var our_dms_filter = NostrFilter(kinds: [.dm])
+        our_dms_filter.authors = [damus_state.pubkey]
+        our_dms_filter.limit = 500
+
+        let filters = [dms_filter, our_dms_filter]
+        let timeoutSeconds: UInt64 = 20
+        
+        for await lender in self.damus_state.nostrNetwork.reader.streamExistingEvents(filters: filters, timeout: .seconds(timeoutSeconds), streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy)) {
+            if Task.isCancelled { return }
+            lender.justUseACopy({ self.process_event(ev: $0, context: .other) })
+        }
+    }
+
     @MainActor
     func handle_dm(_ ev: NostrEvent) {
         guard should_show_event(state: damus_state, ev: ev) else {

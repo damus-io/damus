@@ -270,7 +270,7 @@ final class RelayConnection: ObservableObject {
                 }
                 return
             }
-            print("failed to decode event \(messageString)")
+            print("\(self.relay_url): failed to decode event \(messageString)")
         case .data(let messageData):
             if let messageString = String(data: messageData, encoding: .utf8) {
                 await receive(message: .string(messageString))
@@ -299,7 +299,7 @@ final class RelayConnection: ObservableObject {
                 throw NegentropySyncError.notSupported
             }
         }
-        let timeout = timeout ?? .seconds(5)
+        let timeout = timeout ?? .seconds(3)
         let frameSizeLimit = 60_000 // Copied from rust-nostr project: Default frame limit is 128k. Halve that (hex encoding) and subtract a bit (JSON msg overhead)
         try? negentropyVector.seal()    // Error handling note: We do not care if it throws an `alreadySealed` error. As long as it is sealed in the end it is fine
         let negentropyClient = try Negentropy(storage: negentropyVector, frameSizeLimit: frameSizeLimit)

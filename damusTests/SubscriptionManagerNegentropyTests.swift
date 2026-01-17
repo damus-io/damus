@@ -134,7 +134,7 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
         negentropyEventExpectations: [NoteId: XCTestExpectation],
         ndbEoseExpectation: XCTestExpectation? = nil,
         networkEoseExpectation: XCTestExpectation? = nil,
-        eoseExpectation: XCTestExpectation? = nil
+        eoseExpectation: XCTestExpectation? = nil,
     ) {
         Task {
             var ndbEoseSeen = false
@@ -466,6 +466,51 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
         // Then: Should receive A and C from NDB, then ndbEose, then B and D via negentropy.
         // (Order not enforced because we don't make guarantees on the order of A/C and B/D
         await fulfillment(of: [getsNoteAFromNdb, getsNoteCFromNdb, ndbEose, getsNoteBFromNegentropy, getsNoteDFromNegentropy, networkEose], timeout: 10.0)
+    }
+    
+    func testPartialUnsupportedRelayPool() async throws {
+        // Given: Two relays (one with negentropy, another one not), and the one with negentropy has an event we need
+        let relay2 = try await setupRelay(port: 9092)
+        
+        let relayUrl1 = RelayURL("ws://nos.lol/v2")!    // This can be any relay that does not support negentropy
+                                                        // Adding an external relay may cause flakiness if the relay enables negentropy, but currently
+                                                        // there is no feasible way to configure a local relay that rejects negentropy requests.
+                                                        // Therefore, keep this external relay until it causes issues and then we can investigate
+                                                        // how to improve this test's robustness.
+        let relayUrl2 = RelayURL(await relay2.url().description)!
+        
+        let noteA = NostrEvent(content: "A", keypair: test_keypair)!
+        let noteB = NostrEvent(content: "B", keypair: test_keypair)!
+        
+        // Connect to relay1 and send noteA + noteB
+        let relayConnection2 = await connectToRelay(url: relayUrl2, label: "Relay1")
+        sendEvents([noteA, noteB], to: relayConnection2)
+        
+        let ndb = await test_damus_state.ndb
+        storeEventsInNdb([noteB], ndb: ndb)
+        
+        let networkManager = try await setupNetworkManager(with: [relayUrl1, relayUrl2], ndb: ndb)
+        
+        let getsNoteBFromNdb = XCTestExpectation(description: "Gets note B from NDB before ndbEose")
+        let getsNoteAFromNegentropy = XCTestExpectation(description: "Gets note A via negentropy after ndbEose")
+        let ndbEose = XCTestExpectation(description: "Receives NDB EOSE")
+        let networkEose = XCTestExpectation(description: "Receives network EOSE")
+        let generalEose = XCTestExpectation(description: "Receives general EOSE")
+        
+        // When: Using negentropy streaming mode across two relays
+        runAdvancedStream(
+            networkManager: networkManager,
+            filters: [NostrFilter(kinds: [.text])],
+            streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy),
+            ndbEventExpectations: [noteB.id: getsNoteBFromNdb],
+            negentropyEventExpectations: [noteA.id: getsNoteAFromNegentropy],
+            ndbEoseExpectation: ndbEose,
+            networkEoseExpectation: networkEose,
+            eoseExpectation: generalEose
+        )
+        
+        // Then: Should receive noteB from NDB, then ndbEose, then noteA via negentropy
+        await fulfillment(of: [getsNoteBFromNdb, ndbEose, getsNoteAFromNegentropy, networkEose, generalEose], timeout: 10.0)
     }
 }
 

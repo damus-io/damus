@@ -180,7 +180,7 @@ struct ContentView: View {
                 NotificationsView(state: damus, notifications: home.notifications, subtitle: $menu_subtitle)
                 
             case .dms:
-                DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms, settings: damus_state!.settings, subtitle: $menu_subtitle)
+                DirectMessagesView(damus_state: damus_state!, home: home, model: damus_state!.dms, settings: damus_state!.settings, subtitle: $menu_subtitle)
             }
         }
         .background(DamusColors.adaptableWhite)

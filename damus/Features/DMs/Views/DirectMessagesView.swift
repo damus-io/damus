@@ -15,7 +15,8 @@ enum DMType: Hashable {
 
 struct DirectMessagesView: View {
     let damus_state: DamusState
-    
+    let home: HomeModel
+
     @State var dm_type: DMType = .friend
     @ObservedObject var model: DirectMessagesModel
     @ObservedObject var settings: UserSettingsStore
@@ -36,6 +37,12 @@ struct DirectMessagesView: View {
                 }
             }
             .padding(.horizontal)
+        }
+        .refreshable {
+            // Fetch full DM history without the `since` optimization.
+            // This allows users to manually sync older DMs that may have
+            // been missed due to the optimized network filter.
+            await home.fetchFullDMHistory()
         }
         .padding(.bottom, tabHeight)
     }
@@ -136,6 +143,6 @@ func would_filter_non_friends_from_dms(contacts: Contacts, dms: [DirectMessageMo
 struct DirectMessagesView_Previews: PreviewProvider {
     static var previews: some View {
         let ds = test_damus_state
-        DirectMessagesView(damus_state: ds, model: ds.dms, settings: ds.settings, subtitle: .constant(nil))
+        DirectMessagesView(damus_state: ds, home: HomeModel(), model: ds.dms, settings: ds.settings, subtitle: .constant(nil))
     }
 }
