@@ -6,6 +6,7 @@
 //
 import Foundation
 import os
+import Negentropy
 
 
 extension NostrNetworkManager {
@@ -138,20 +139,18 @@ extension NostrNetworkManager {
                 
                 var networkStreamTask: Task<Void, any Error>? = nil
                 var latestNoteTimestampSeen: UInt32? = nil
+                var negentropyStorageVector = NegentropyStorageVector()
                 
                 let startNetworkStreamTask = {
                     guard streamMode.shouldStreamFromNetwork else { return }
                     networkStreamTask = Task {
                         while !Task.isCancelled {
-                            let optimizedFilters = filters.map {
-                                var optimizedFilter = $0
-                                // Shift the since filter 2 minutes (120 seconds) before the last note timestamp
-                                if let latestTimestamp = latestNoteTimestampSeen {
-                                    optimizedFilter.since = latestTimestamp > 120 ? latestTimestamp - 120 : 0
-                                }
-                                return optimizedFilter
-                            }
-                            for await item in self.multiSessionNetworkStream(filters: optimizedFilters, to: desiredRelays, streamMode: streamMode, id: id) {
+                            let networkOptimizationData = StreamMode.NetworkOptimizationData.from(
+                                strategy: streamMode.networkOptimizationStrategy,
+                                latestNoteTimestampSeen: latestNoteTimestampSeen,
+                                negentropyStorageVector: negentropyStorageVector
+                            )
+                            for await item in self.multiSessionNetworkStream(filters: filters, to: desiredRelays, streamMode: streamMode, id: id, networkOptimizationData: networkOptimizationData) {
                                 try Task.checkCancellation()
                                 logStreamPipelineStats("SubscriptionManager_Network_Stream_\(id)", "SubscriptionManager_Advanced_Stream_\(id)")
                                 switch item {
@@ -193,6 +192,7 @@ extension NostrNetworkManager {
                                     else {
                                         latestNoteTimestampSeen = event.createdAt
                                     }
+                                    negentropyStorageVector.unsealAndInsert(nostrEvent: event)
                                 })
                                 continuation.yield(item)
                             case .eose:
@@ -219,7 +219,7 @@ extension NostrNetworkManager {
             }
         }
         
-        private func multiSessionNetworkStream(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, streamMode: StreamMode? = nil, id: UUID? = nil) -> AsyncStream<StreamItem> {
+        private func multiSessionNetworkStream(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, streamMode: StreamMode? = nil, id: UUID? = nil, networkOptimizationData: StreamMode.NetworkOptimizationData?) -> AsyncStream<StreamItem> {
             let id = id ?? UUID()
             let streamMode = streamMode ?? defaultStreamMode()
             return AsyncStream<StreamItem> { continuation in
@@ -234,7 +234,7 @@ extension NostrNetworkManager {
                     }
                     
                     do {
-                        for await item in await self.pool.subscribe(filters: filters, to: desiredRelays, id: id) {
+                        for await item in await self.sessionNetworkStreamWithOptimization(filters: filters, to: desiredRelays, id: id, networkOptimizationData: networkOptimizationData) {
                             try Task.checkCancellation()
                             logStreamPipelineStats("RelayPool_Handler_\(id)", "SubscriptionManager_Network_Stream_\(id)")
                             switch item {
@@ -261,6 +261,36 @@ extension NostrNetworkManager {
                 continuation.onTermination = { @Sendable _ in
                     streamTask.cancel()
                 }
+            }
+        }
+        
+        /// Stream from the network with some optional optimization
+        private func sessionNetworkStreamWithOptimization(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, id: UUID? = nil, networkOptimizationData: StreamMode.NetworkOptimizationData?) async -> AsyncStream<RelayPool.StreamItem> {
+            guard let networkOptimizationData else {
+                // No optimization, just return a regular RelayPool subscription
+                return await self.pool.subscribe(filters: filters, to: desiredRelays, id: id)
+            }
+            switch networkOptimizationData {
+            case .sinceOptimization(let latestNoteTimestampSeen):
+                let optimizedFilters = filters.map {
+                    var optimizedFilter = $0
+                    // Shift the since filter 2 minutes (120 seconds) before the last note timestamp
+                    optimizedFilter.since = latestNoteTimestampSeen > 120 ? latestNoteTimestampSeen - 120 : 0
+                    return optimizedFilter
+                }
+                return await self.pool.subscribe(filters: optimizedFilters, to: desiredRelays, id: id)
+            case .negentropy(let negentropyStorageVector):
+                return AsyncStream<RelayPool.StreamItem>.with(task: { continuation in
+                    let id = id ?? UUID()
+                    do {
+                        for try await item in try await self.pool.negentropySubscribe(filters: filters, to: desiredRelays, negentropyVector: negentropyStorageVector, id: id, ignoreUnsupportedRelays: true) {
+                            continuation.yield(item)
+                        }
+                    }
+                    catch {
+                        Self.logger.error("Network subscription \(id.uuidString, privacy: .public): Streaming error: \(error.localizedDescription, privacy: .public)")
+                    }
+                })
             }
         }
         
@@ -350,7 +380,8 @@ extension NostrNetworkManager {
         // MARK: - Utility functions
         
         private func defaultStreamMode() -> StreamMode {
-            self.experimentalLocalRelayModelSupport ? .ndbFirst(optimizeNetworkFilter: false) : .ndbAndNetworkParallel(optimizeNetworkFilter: false)
+            // Note: Network optimizations disabled by default for now because we need more testing to understand the effects of turning them on by default.
+            self.experimentalLocalRelayModelSupport ? .ndbFirst(networkOptimization: nil) : .ndbAndNetworkParallel(networkOptimization: nil)
         }
         
         // MARK: - Finding specific data from Nostr
@@ -531,22 +562,24 @@ extension NostrNetworkManager {
     /// The mode of streaming
     enum StreamMode {
         /// Returns notes exclusively through NostrDB, treating it as the only channel for information in the pipeline. Generic EOSE is fired when EOSE is received from NostrDB
-        /// `optimizeNetworkFilter`: Returns notes from ndb, then streams from the network with an added "since" filter set to the latest note stored on ndb.
-        case ndbFirst(optimizeNetworkFilter: Bool)
+        case ndbFirst(networkOptimization: NetworkOptimizationStrategy?)
         /// Returns notes from both NostrDB and the network, in parallel, treating it with similar importance against the network relays. Generic EOSE is fired when EOSE is received from both the network and NostrDB
-        /// `optimizeNetworkFilter`: Returns notes from ndb, then streams from the network with an added "since" filter set to the latest note stored on ndb.
-        case ndbAndNetworkParallel(optimizeNetworkFilter: Bool)
+        case ndbAndNetworkParallel(networkOptimization: NetworkOptimizationStrategy?)
         /// Ignores the network.
         case ndbOnly
         
         var optimizeNetworkFilter: Bool {
+            return networkOptimizationStrategy != nil
+        }
+        
+        var networkOptimizationStrategy: NetworkOptimizationStrategy? {
             switch self {
-            case .ndbFirst(optimizeNetworkFilter: let optimizeNetworkFilter):
-                return optimizeNetworkFilter
-            case .ndbAndNetworkParallel(optimizeNetworkFilter: let optimizeNetworkFilter):
-                return optimizeNetworkFilter
+            case .ndbFirst(networkOptimization: let networkOptimization):
+                return networkOptimization
+            case .ndbAndNetworkParallel(networkOptimization: let networkOptimization):
+                return networkOptimization
             case .ndbOnly:
-                return false
+                return nil
             }
         }
         
@@ -558,6 +591,32 @@ extension NostrNetworkManager {
                 return true
             case .ndbOnly:
                 return false
+            }
+        }
+        
+        enum NetworkOptimizationStrategy {
+            /// Returns notes from ndb, then streams from the network with an added "since" filter set to the latest note stored on ndb.
+            case sinceOptimization
+            /// Returns notes from ndb, negentropy syncs missing notes with relays, then streams normally
+            case negentropy
+        }
+        
+        enum NetworkOptimizationData {
+            /// Returns notes from ndb, then streams from the network with an added "since" filter set to the latest note stored on ndb.
+            case sinceOptimization(latestNoteTimestampSeen: UInt32)
+            /// Returns notes from ndb, negentropy syncs missing notes with relays, then streams normally
+            case negentropy(negentropyStorageVector: NegentropyStorageVector)
+            
+            static func from(strategy: NetworkOptimizationStrategy?, latestNoteTimestampSeen: UInt32?, negentropyStorageVector: NegentropyStorageVector?) -> Self? {
+                guard let strategy else { return nil }
+                switch strategy {
+                case .sinceOptimization:
+                    guard let latestNoteTimestampSeen else { return nil }
+                    return .sinceOptimization(latestNoteTimestampSeen: latestNoteTimestampSeen)
+                case .negentropy:
+                    guard let negentropyStorageVector else { return nil }
+                    return .negentropy(negentropyStorageVector: negentropyStorageVector)
+                }
             }
         }
     }
