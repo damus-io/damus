@@ -661,10 +661,12 @@ class RelayPool {
                     }
                 }
                 catch {
-                    if let negentropyError = error as? RelayConnection.NegentropySyncError,
-                       case .notSupported = negentropyError,
-                       ignoreUnsupportedRelays {
+                    if ignoreUnsupportedRelays {
                         // Do not throw error, ignore the relays that do not support negentropy
+                        // Note: Some relays such as wss://nos.lol/v2 advertise negentropy but throw an error such as `["NOTICE","ERROR: bad msg: negentropy disabled"]`
+                        // Therefore, realistically, we cannot rely on what the relay advertises and
+                        // we have to suppress those errors if we want to ignore unsupported relays to avoid the whole multi-relay negentropy syncing operation to fail
+                        Log.error("Error while negentropy streaming: %s", for: .networking, error.localizedDescription)
                     }
                     else {
                         throw error
