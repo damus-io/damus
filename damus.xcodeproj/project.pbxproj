@@ -1707,6 +1707,8 @@
 		D77DA2C82F19D480000B7093 /* NegentropyUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77DA2C72F19D452000B7093 /* NegentropyUtilities.swift */; };
 		D77DA2C92F19D480000B7093 /* NegentropyUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77DA2C72F19D452000B7093 /* NegentropyUtilities.swift */; };
 		D77DA2CA2F19D480000B7093 /* NegentropyUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77DA2C72F19D452000B7093 /* NegentropyUtilities.swift */; };
+		D77DA2CE2F1C2596000B7093 /* SubscriptionManagerNegentropyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77DA2CD2F1C2596000B7093 /* SubscriptionManagerNegentropyTests.swift */; };
+		D77DA2D42F1EEB47000B7093 /* NostrRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */; };
 		D783A63F2AD4E53D00658DDA /* SuggestedHashtagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D783A63E2AD4E53D00658DDA /* SuggestedHashtagsView.swift */; };
 		D78525252A7B2EA4002FA637 /* NoteContentViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78525242A7B2EA4002FA637 /* NoteContentViewTests.swift */; };
 		D7870BC12AC4750B0080BA88 /* MentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC02AC4750B0080BA88 /* MentionView.swift */; };
@@ -2821,6 +2823,7 @@
 		D77BFA0A2AE3051200621634 /* ProfileActionSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileActionSheetView.swift; sourceTree = "<group>"; };
 		D77DA2C32F19CA40000B7093 /* AsyncStreamUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncStreamUtilities.swift; sourceTree = "<group>"; };
 		D77DA2C72F19D452000B7093 /* NegentropyUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NegentropyUtilities.swift; sourceTree = "<group>"; };
+		D77DA2CD2F1C2596000B7093 /* SubscriptionManagerNegentropyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManagerNegentropyTests.swift; sourceTree = "<group>"; };
 		D783A63E2AD4E53D00658DDA /* SuggestedHashtagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedHashtagsView.swift; sourceTree = "<group>"; };
 		D78525242A7B2EA4002FA637 /* NoteContentViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteContentViewTests.swift; sourceTree = "<group>"; };
 		D7870BC02AC4750B0080BA88 /* MentionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MentionView.swift; sourceTree = "<group>"; };
@@ -3864,6 +3867,7 @@
 		4CE6DEF627F7A08200C66700 /* damusTests */ = {
 			isa = PBXGroup;
 			children = (
+				D77DA2CD2F1C2596000B7093 /* SubscriptionManagerNegentropyTests.swift */,
 				D74723ED2F15B0D6002DA12A /* NegentropySupportTests.swift */,
 				D72734292F089EE600F90677 /* NdbMigrationTests.swift */,
 				D72734272F08912F00F90677 /* DatabaseSnapshotManagerTests.swift */,
@@ -6335,6 +6339,7 @@
 				D727342A2F089EEE00F90677 /* NdbMigrationTests.swift in Sources */,
 				D7CBD1D62B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift in Sources */,
 				D7EBF8BB2E59022A004EAE29 /* NostrNetworkManagerTests.swift in Sources */,
+				D77DA2CE2F1C2596000B7093 /* SubscriptionManagerNegentropyTests.swift in Sources */,
 				D7DEEF2F2A8C021E00E0C99F /* NostrEventTests.swift in Sources */,
 				4C8D00D429E3C5D40036AF10 /* NIP19Tests.swift in Sources */,
 				3A30410129AB12AA008A0F29 /* EventGroupViewTests.swift in Sources */,
@@ -7535,6 +7540,7 @@
 				D798D21F2B0858D600234419 /* MigratedTypes.swift in Sources */,
 				D7CE1B472B0BE719002EDAD4 /* NativeObject.swift in Sources */,
 				D71AD9002CEC176A002E2C3C /* AppAccessibilityIdentifiers.swift in Sources */,
+				D77DA2D42F1EEB47000B7093 /* NostrRequest.swift in Sources */,
 				D7CB5D552B11758A00AD4105 /* UnmuteThreadNotify.swift in Sources */,
 				D7CCFC192B058A3F00323D86 /* Block.swift in Sources */,
 				D7CCFC112B05884E00323D86 /* AsciiCharacter.swift in Sources */,

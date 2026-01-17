@@ -36,4 +36,22 @@ extension Ndb {
     func processEvent(_ str: String, originRelayURL: RelayURL? = nil) -> Bool {
         self.process_event(str, originRelayURL: originRelayURL?.absoluteString)
     }
+    
+    /// Adds a NostrEvent to the database by converting it to a push event and processing it.
+    /// - Parameter event: The NostrEvent to add
+    /// - Throws: NdbAddError.couldNotMakePushEvent if the event cannot be converted, or NdbAddError.processingFailed if processing fails
+    func add(event: NostrEvent) throws {
+        guard let nostrPushEvent = make_nostr_push_event(ev: event) else {
+            throw NdbAddError.couldNotMakePushEvent
+        }
+        let success = self.process_client_event(nostrPushEvent)
+        if !success {
+            throw NdbAddError.processingFailed
+        }
+    }
+    
+    enum NdbAddError: Error {
+        case couldNotMakePushEvent
+        case processingFailed
+    }
 }
