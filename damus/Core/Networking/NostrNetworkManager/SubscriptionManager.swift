@@ -115,6 +115,13 @@ extension NostrNetworkManager {
             let id = id ?? UUID()
             let streamMode = streamMode ?? defaultStreamMode()
             return AsyncStream<StreamItem> { continuation in
+                let timeoutTask = Task {
+                    guard let timeout else { return }
+                    try? await Task.sleep(for: timeout)
+                    Self.logger.debug("Subscription \(id.uuidString, privacy: .public): Timed out!")
+                    continuation.finish()
+                }
+                
                 let startTime = CFAbsoluteTimeGetCurrent()
                 Self.logger.debug("Session subscription \(id.uuidString, privacy: .public): Started")
                 var ndbEOSEIssued = false
@@ -213,6 +220,7 @@ extension NostrNetworkManager {
                 }
                 
                 continuation.onTermination = { @Sendable _ in
+                    timeoutTask.cancel()
                     networkStreamTask?.cancel()
                     ndbStreamTask.cancel()
                 }
