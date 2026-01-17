@@ -584,7 +584,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
             // fixing the race condition where onAppear fires before events arrive.
             for await item in damus_state.nostrNetwork.reader.advancedStream(
                 filters: notifications_filters,
-                streamMode: .ndbAndNetworkParallel(optimizeNetworkFilter: true)
+                streamMode: .ndbAndNetworkParallel(networkOptimization: .sinceOptimization)
             ) {
                 switch item {
                 case .event(let lender):
@@ -605,7 +605,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         }
         self.generalHandlerTask?.cancel()
         self.generalHandlerTask = Task {
-            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: dms_filters + contacts_filters, streamMode: .ndbAndNetworkParallel(optimizeNetworkFilter: true)) {
+            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: dms_filters + contacts_filters, streamMode: .ndbAndNetworkParallel(networkOptimization: .sinceOptimization)) {
                 switch item {
                 case .event(let lender):
                     await lender.justUseACopy({ await process_event(ev: $0, context: .other) })
@@ -706,7 +706,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
             DispatchQueue.main.async {
                 self.loading = true
             }
-            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: home_filters, streamMode: .ndbAndNetworkParallel(optimizeNetworkFilter: true), id: id) {
+            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: home_filters, streamMode: .ndbAndNetworkParallel(networkOptimization: .sinceOptimization), id: id) {
                 switch item {
                 case .event(let lender):
                     let currentTime = CFAbsoluteTimeGetCurrent()
