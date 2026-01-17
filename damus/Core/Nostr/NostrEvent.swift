@@ -331,11 +331,11 @@ func sign_id(privkey: String, id: String) -> String {
 }
 
 func decode_nostr_event(txt: String) -> NostrResponse? {
-    return NostrResponse.owned_from_json(json: txt)
+    return NostrResponse.decode(from: txt)
 }
 
 func decode_and_verify_nostr_response(txt: String) -> NostrResponse? {
-    guard let response = NostrResponse.owned_from_json(json: txt) else { return nil }
+    guard let response = NostrResponse.decode(from: txt) else { return nil }
     guard verify_nostr_response(response: response) == true else { return nil }
     return response
 }
@@ -351,6 +351,10 @@ func verify_nostr_response(response: borrowing NostrResponse) -> Bool {
     case .ok(_):
         return true
     case .auth(_):
+        return true
+    case .negentropyError(subscriptionId: let subscriptionId, reasonCodeString: let reasonCodeString):
+        return true
+    case .negentropyMessage(subscriptionId: let subscriptionId, hexEncodedData: let hexEncodedData):
         return true
     }
 }
