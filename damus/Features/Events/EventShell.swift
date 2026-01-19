@@ -39,10 +39,18 @@ struct EventShell<Content: View>: View {
         if self.options.contains(.nested) || self.options.contains(.no_mentions) {
             return nil
         }
-        
+
         return first_eref_mention(ndb: ndb, ev: event, keypair: state.keypair)
     }
-    
+
+    func get_longform_mentions(ndb: Ndb) -> [LongformReference] {
+        if self.options.contains(.nested) || self.options.contains(.no_mentions) {
+            return []
+        }
+
+        return all_longform_mentions(ndb: ndb, ev: event, keypair: state.keypair)
+    }
+
     var ActionBar: some View {
         return EventActionBar(damus_state: state, event: event)
             .padding([.top], 4)
@@ -78,7 +86,9 @@ struct EventShell<Content: View>: View {
                 if let mention = get_mention(ndb: state.ndb) {
                     MentionView(damus_state: state, mention: mention)
                 }
-                
+
+                LongformMentionsStack(damus_state: state, references: get_longform_mentions(ndb: state.ndb))
+
                 if has_action_bar {
                     ActionBar
                 }
@@ -104,14 +114,19 @@ struct EventShell<Content: View>: View {
             .padding(.horizontal)
 
             content
-            
+
             if !options.contains(.no_mentions),
                let mention = get_mention(ndb: state.ndb)
             {
                 MentionView(damus_state: state, mention: mention)
                     .padding(.horizontal)
             }
-            
+
+            if !options.contains(.no_mentions) {
+                LongformMentionsStack(damus_state: state, references: get_longform_mentions(ndb: state.ndb))
+                    .padding(.horizontal)
+            }
+
             if has_action_bar {
                 ActionBar
                     .padding(.horizontal)
