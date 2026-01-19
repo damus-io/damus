@@ -121,6 +121,30 @@ struct ChatEventView: View {
         ZapTarget.note(id: event.id, author: event.pubkey)
     }
 
+    /// Whether the action bar overlay should be shown.
+    ///
+    /// This check must stay in sync with `has_any_action` in EventActionBar (when using
+    /// `hide_items_without_activity`). The two checks serve different purposes:
+    /// - This check: decides whether to render the styled container (background, shadow, etc.)
+    /// - EventActionBar's check: decides which buttons to render inside
+    ///
+    /// If these checks disagree, we get an empty styled container ("dot") appearing on notes.
+    /// For example, `bar.is_empty` includes `relays` in its check, but relays don't produce
+    /// a visible button, so we'd render a container with nothing in it.
+    var should_show_action_bar: Bool {
+        let has_privkey = damus_state.keypair.privkey != nil
+        let show_like = !damus_state.settings.onlyzaps_mode
+        let zap_model = damus_state.events.get_cache_data(event.id).zaps_model
+
+        // Each condition corresponds to a button that would be visible in EventActionBar
+        let has_replies = bar.replies > 0 && has_privkey
+        let has_boosts = bar.boosts > 0
+        let has_likes = bar.likes > 0 && show_like
+        let has_zaps = zap_model.zap_total > 0 && lnurl != nil
+
+        return has_replies || has_boosts || has_likes || has_zaps
+    }
+
     // MARK: Views
 
     var event_bubble: some View {
@@ -262,26 +286,27 @@ struct ChatEventView: View {
         await damus_state.nostrNetwork.postbox.send(like_ev)
     }
     
+    @ViewBuilder
     var action_bar: some View {
-        return Group {
-            if !bar.is_empty {
-                HStack {
-                    if by_other_user {
-                        Spacer()
-                    }
-                    EventActionBar(damus_state: damus_state, event: event, bar: bar, options: [.no_spread, .hide_items_without_activity])
-                        .padding(10)
-                        .background(DamusColors.adaptableLighterGrey)
-                        .disabled(true)
-                        .cornerRadius(100)
-                        .overlay(RoundedRectangle(cornerSize: CGSize(width: 100, height: 100)).stroke(DamusColors.adaptableWhite, lineWidth: 1))
-                        .shadow(color: Color.black.opacity(0.05),radius: 3, y: 3)
-                        .scaleEffect(0.7, anchor: is_ours ? .leading : .trailing)
-                    if !by_other_user {
-                        Spacer()
-                    }
-                }
-                .padding(.vertical, -20)
+        if !should_show_action_bar {
+            EmptyView()
+        } else {
+            HStack {
+                if by_other_user { Spacer() }
+
+                // Offset pushes the bar below the bubble to avoid overlapping short message text.
+                // Previously used .padding(.vertical, -20) which pulled the bar UP into the bubble.
+                EventActionBar(damus_state: damus_state, event: event, bar: bar, options: [.no_spread, .hide_items_without_activity])
+                    .padding(10)
+                    .background(DamusColors.adaptableLighterGrey)
+                    .disabled(true)
+                    .cornerRadius(100)
+                    .overlay(RoundedRectangle(cornerSize: CGSize(width: 100, height: 100)).stroke(DamusColors.adaptableWhite, lineWidth: 1))
+                    .shadow(color: Color.black.opacity(0.05), radius: 3, y: 3)
+                    .scaleEffect(0.7, anchor: is_ours ? .leading : .trailing)
+                    .offset(y: 15)
+
+                if is_ours { Spacer() }
             }
         }
     }
@@ -339,7 +364,7 @@ struct ChatEventView: View {
             }
             .contentShape(Rectangle())
             .id(event.id)
-            .padding([.bottom], bar.is_empty ? 6 : 16)
+            .padding([.bottom], should_show_action_bar ? 16 : 6)
         }
     }
 
