@@ -174,6 +174,8 @@ struct ContentView: View {
                         // Fallback on earlier versions
                         SearchHomeView(damus_state: damus_state!, model: model)
                     }
+                } else {
+                    ProgressView()
                 }
                 
             case .home:
