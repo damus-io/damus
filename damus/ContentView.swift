@@ -132,6 +132,7 @@ struct ContentView: View {
     @State private var isSideBarOpened = false
     @State var headerOffset: CGFloat = 0.0
     var home: HomeModel = HomeModel()
+    @State var searchHomeModel: SearchHomeModel? = nil
     @StateObject var navigationCoordinator: NavigationCoordinator = NavigationCoordinator()
     @AppStorage("has_seen_suggested_users") private var hasSeenOnboardingSuggestions = false
     let sub_id = UUID().description
@@ -165,12 +166,14 @@ struct ContentView: View {
         VStack {
             switch selected_timeline {
             case .search:
-                if #available(iOS 16.0, *) {
-                    SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
-                        .scrollDismissesKeyboard(.immediately)
-                } else {
-                    // Fallback on earlier versions
-                    SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
+                if let model = searchHomeModel {
+                    if #available(iOS 16.0, *) {
+                        SearchHomeView(damus_state: damus_state!, model: model)
+                            .scrollDismissesKeyboard(.immediately)
+                    } else {
+                        // Fallback on earlier versions
+                        SearchHomeView(damus_state: damus_state!, model: model)
+                    }
                 }
                 
             case .home:
@@ -747,6 +750,7 @@ struct ContentView: View {
         )
         
         home.damus_state = self.damus_state!
+        searchHomeModel = SearchHomeModel(damus_state: self.damus_state!)
         
         await damus_state.snapshotManager.startPeriodicSnapshots()
         

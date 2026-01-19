@@ -11,7 +11,7 @@ import NaturalLanguage
 
 struct SearchHomeView: View {
     let damus_state: DamusState
-    @StateObject var model: SearchHomeModel
+    @ObservedObject var model: SearchHomeModel
     @State var search: String = ""
     @FocusState private var isFocused: Bool
     @State var loadingTask: Task<Void, Never>?
