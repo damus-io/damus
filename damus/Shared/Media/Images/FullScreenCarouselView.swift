@@ -18,6 +18,7 @@ struct FullScreenCarouselView<Content: View>: View {
     let settings: UserSettingsStore
     @ObservedObject var carouselSelection: CarouselSelection
     let content: (() -> Content)?
+    @State private var showControls: Bool = true
     
     init(video_coordinator: DamusVideoCoordinator, urls: [MediaUrl], showMenu: Bool = true, settings: UserSettingsStore, selectedIndex: Binding<Int>, @ViewBuilder content: @escaping () -> Content) {
         self.video_coordinator = video_coordinator
@@ -87,12 +88,20 @@ struct FullScreenCarouselView<Content: View>: View {
             }
             .ignoresSafeArea()
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-            .gesture(TapGesture(count: 2).onEnded {
-                // Prevents menu from hiding on double tap
-            })
-            .gesture(TapGesture(count: 1).onEnded {
-                showMenu.toggle()
-            })
+            // Gestures: single tap toggles play/pause; double tap toggles chrome.
+            // Use an exclusive high-priority gesture so double-tap wins when present.
+            .highPriorityGesture(
+                TapGesture(count: 2)
+                    .onEnded { toggle_chrome() }
+                    .exclusively(before:
+                        TapGesture()
+                            .onEnded { toggle_play_pause() }
+                    )
+            )
+            // Auto-manage chrome visibility when play state changes (including initial autoplay).
+            .onChange(of: video_coordinator.focused_video?.is_playing ?? false) { isPlaying in
+                manage_controls_visibility(for: isPlaying)
+            }
             .overlay(
                 GeometryReader { geo in
                     VStack {
@@ -132,7 +141,7 @@ struct FullScreenCarouselView<Content: View>: View {
                                         .padding(.top, 5)
                                 }
                                 
-                                if let focused_video = video_coordinator.focused_video {
+                                if showControls, let focused_video = video_coordinator.focused_video {
                                     DamusVideoControlsView(video: focused_video)
                                 }
                                 
@@ -146,6 +155,37 @@ struct FullScreenCarouselView<Content: View>: View {
                     .padding(.bottom, geo.safeAreaInsets.bottom == 0 ? 12 : 0)
                 }
             )
+        }
+    }
+    
+    private func toggle_play_pause() {
+        // Only toggle play/pause if the current item is actually a video
+        guard case .video = urls[safe: carouselSelection.index] else { return }
+        guard let video = video_coordinator.focused_video else { return }
+        video.is_playing.toggle()
+    }
+    
+    private func toggle_chrome() {
+        showMenu.toggle()
+        showControls = showMenu
+    }
+    
+    private func manage_controls_visibility(for isPlaying: Bool) {
+        // Keep controls visible when paused or when menu is shown; auto-hide during playback.
+        if !isPlaying {
+            showMenu = true
+            showControls = true
+            return
+        }
+        showMenu = true
+        showControls = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            if let video = video_coordinator.focused_video, video.is_playing {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    showControls = false
+                    showMenu = false
+                }
+            }
         }
     }
 }

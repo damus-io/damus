@@ -9,6 +9,7 @@ import Combine
 import Foundation
 import SwiftUI
 import AVFoundation
+import UIKit
 
 /// DamusVideoCoordinator is responsible for coordinating the various video players throughout the app, and providing a nicely orchestrated experience.
 /// The goals of this object are to:
@@ -51,7 +52,12 @@ final class DamusVideoCoordinator: ObservableObject {
     @Published private(set) var focused_video: DamusVideoPlayer? {
         didSet {
             oldValue?.pause()
-            focused_video?.play()
+            // Respect Reduce Motion by avoiding auto-play unless the user explicitly plays.
+            if UIAccessibility.isReduceMotionEnabled {
+                focused_video?.pause()
+            } else {
+                focused_video?.play()
+            }
             Log.info("VIDEO_COORDINATOR: %s paused, playing %s", for: .video_coordination, oldValue?.url.absoluteString ?? "no video", focused_video?.url.absoluteString ?? "no video")
         }
     }
