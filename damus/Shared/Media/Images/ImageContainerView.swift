@@ -78,9 +78,21 @@ struct ImageContainerView: View {
     }
 }
 
-/// Placeholder shown when Low Data Mode is active
+
+/// A placeholder view displayed when media loading is disabled due to Low Data Mode.
+///
+/// This view shows a gray placeholder with an icon and localized text indicating
+/// that media has been hidden to save data. Users can tap the placeholder to
+/// manually load the content (future enhancement).
+///
+/// - Parameters:
+///   - url: The `MediaUrl` of the hidden content.
+///   - onTap: A closure called when the user taps the placeholder.
 struct LowDataModePlaceholder: View {
+    /// The URL of the media that was not loaded.
     let url: MediaUrl
+    
+    /// Called when the user taps the placeholder to request manual load.
     let onTap: () -> Void
     
     var body: some View {
