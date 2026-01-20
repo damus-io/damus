@@ -7,11 +7,15 @@
 import SwiftUI
 import Kingfisher
 
+/// Container view for displaying profile pictures with Kingfisher.
+///
+/// Respects Low Data Mode settings and shows a placeholder when data saving is active.
 struct ProfileImageContainerView: View {
     let url: URL?
     let settings: UserSettingsStore
     @Binding var image: UIImage?
     @State private var showShareSheet = false
+    @StateObject private var networkMonitor = NetworkMonitor.shared
     
     private struct ImageHandler: ImageModifier {
         @Binding var handler: UIImage?
@@ -22,22 +26,70 @@ struct ProfileImageContainerView: View {
         }
     }
     
+    /// Returns true if we should block loading due to Low Data Mode.
+    private var shouldBlockLoading: Bool {
+        settings.low_data_mode || networkMonitor.isLowDataMode
+    }
+    
     var body: some View {
-        
-        KFAnimatedImage(url)
-            .imageContext(.pfp, disable_animation: settings.disable_animation)
-            .configure { view in
-                view.framePreloadCount = 3
-            }
-            .imageModifier(ImageHandler(handler: $image))
-            .clipShape(Circle())
-            .modifier(ImageContextMenuModifier(url: url, image: image, settings: settings, showShareSheet: $showShareSheet))
-            .kfClickable()
-            .sheet(isPresented: $showShareSheet) {
-                ShareSheet(activityItems: [url])
-            }
+        if shouldBlockLoading {
+            // Low Data Mode: Show stylish circular placeholder
+            ProfilePicPlaceholder()
+        } else {
+            KFAnimatedImage(url)
+                .imageContext(.pfp, disable_animation: settings.disable_animation)
+                .configure { view in
+                    view.framePreloadCount = 3
+                }
+                .imageModifier(ImageHandler(handler: $image))
+                .clipShape(Circle())
+                .modifier(ImageContextMenuModifier(url: url, image: image, settings: settings, showShareSheet: $showShareSheet))
+                .kfClickable()
+                .sheet(isPresented: $showShareSheet) {
+                    ShareSheet(activityItems: [url])
+                }
+        }
     }
 }
+
+/// A stylish circular placeholder for profile pictures in Low Data Mode.
+///
+/// Features a person silhouette icon with a subtle pulsing animation
+/// to indicate that the image could be loaded on demand.
+struct ProfilePicPlaceholder: View {
+    @State private var isPulsing = false
+    
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(
+                    LinearGradient(
+                        colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.1)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+            
+            Image(systemName: "person.fill")
+                .font(.system(size: 40))
+                .foregroundColor(.gray.opacity(0.6))
+                .scaleEffect(isPulsing ? 1.05 : 1.0)
+                .animation(
+                    Animation.easeInOut(duration: 1.5)
+                        .repeatForever(autoreverses: true),
+                    value: isPulsing
+                )
+        }
+        .overlay(
+            Circle()
+                .stroke(Color.gray.opacity(0.2), lineWidth: 2)
+        )
+        .onAppear {
+            isPulsing = true
+        }
+    }
+}
+
 
 enum NavDismissBarContainer {
     case fullScreenCarousel
