@@ -52,17 +52,56 @@ struct ImageContainerView: View {
             }
     }
     
+    /// Determines if media loading should be blocked due to low data mode.
+    /// Checks both user preference and iOS system Low Data Mode.
+    private var shouldBlockMediaLoading: Bool {
+        settings.low_data_mode || NetworkMonitor.shared.isLowDataMode
+    }
+    
     var body: some View {
         Group {
-            switch url {
-                case .image(let url):
-                    Img(url: url)
-                case .video(let url):
-                    DamusVideoPlayerView(url: url, coordinator: video_coordinator, style: .no_controls(on_tap: nil))
+            if shouldBlockMediaLoading {
+                // Low Data Mode: Show placeholder instead of loading media
+                LowDataModePlaceholder(url: url, onTap: {
+                    // Future: Allow manual load on tap
+                })
+            } else {
+                switch url {
+                    case .image(let url):
+                        Img(url: url)
+                    case .video(let url):
+                        DamusVideoPlayerView(url: url, coordinator: video_coordinator, style: .no_controls(on_tap: nil))
+                }
             }
         }
     }
 }
+
+/// Placeholder shown when Low Data Mode is active
+struct LowDataModePlaceholder: View {
+    let url: MediaUrl
+    let onTap: () -> Void
+    
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.gray.opacity(0.2))
+            VStack(spacing: 8) {
+                Image(systemName: "photo")
+                    .font(.largeTitle)
+                    .foregroundColor(.gray)
+                Text("Media hidden (Low Data Mode)")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+            }
+        }
+        .frame(minHeight: 150)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onTap()
+        }
+    }
+
 
 let test_image_url = URL(string: "https://jb55.com/red-me.jpg")!
 fileprivate let test_video_url = URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!
