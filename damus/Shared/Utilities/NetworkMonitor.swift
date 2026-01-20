@@ -24,8 +24,8 @@ class NetworkMonitor: ObservableObject {
         monitor.pathUpdateHandler = { [weak self] path in
             DispatchQueue.main.async {
                 // isConstrained: true when iOS Low Data Mode is enabled
-                // isExpensive: true on cellular (not always "low data" but useful)
-                self?.isLowDataMode = path.isConstrained
+                // isExpensive: true on cellular networks
+                self?.isLowDataMode = path.isConstrained || path.isExpensive
             }
         }
         monitor.start(queue: queue)

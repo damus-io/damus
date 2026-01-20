@@ -17,6 +17,7 @@ struct ImageContainerView: View {
     @Binding var imageDict: [URL: UIImage]
     @State private var image: UIImage?
     @State private var showShareSheet = false
+    @StateObject private var networkMonitor = NetworkMonitor.shared
     
     init(video_coordinator: DamusVideoCoordinator, url: MediaUrl, settings: UserSettingsStore, imageDict: Binding<[URL: UIImage]>) {
         self.video_coordinator = video_coordinator
@@ -55,7 +56,7 @@ struct ImageContainerView: View {
     /// Determines if media loading should be blocked due to low data mode.
     /// Checks both user preference and iOS system Low Data Mode.
     private var shouldBlockMediaLoading: Bool {
-        settings.low_data_mode || NetworkMonitor.shared.isLowDataMode
+        settings.low_data_mode || networkMonitor.isLowDataMode
     }
     
     var body: some View {
@@ -90,7 +91,7 @@ struct LowDataModePlaceholder: View {
                 Image(systemName: "photo")
                     .font(.largeTitle)
                     .foregroundColor(.gray)
-                Text("Media hidden (Low Data Mode)")
+                Text(NSLocalizedString("Media hidden (Low Data Mode)", comment: "Placeholder text when media is blocked due to low data mode"))
                     .font(.caption)
                     .foregroundColor(.gray)
             }

@@ -137,7 +137,7 @@ struct AppearanceSettingsView: View {
                 
                 Toggle(NSLocalizedString("Low Data Mode", comment: "Setting to enable low data mode"), isOn: $settings.low_data_mode)
                     .toggleStyle(.switch)
-                    .help("Prevents auto-loading of media to save data.")
+                    .help(NSLocalizedString("Prevents auto-loading of media to save data.", comment: "Help text for low data mode setting"))
                 
                 Picker(NSLocalizedString("Image uploader", comment: "Prompt selection of user's image uploader"),
                        selection: $settings.default_media_uploader) {
