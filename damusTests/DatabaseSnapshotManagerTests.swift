@@ -8,11 +8,77 @@
 import XCTest
 @testable import damus
 
-final class DatabaseSnapshotManagerTests: XCTestCase {
+class DatabaseSnapshotManagerTests: XCTestCase {
     
     var tempDirectory: URL!
     var manager: DatabaseSnapshotManager!
     var testNdb: Ndb!
+    
+    /// Helper function to collect note IDs from a database subscription until expected notes are found or timeout occurs.
+    /// - Parameters:
+    ///   - ndb: The database instance to subscribe to
+    ///   - filters: The filters to use for subscription
+    ///   - expectedNoteIds: The set of note IDs we expect to find
+    ///   - expectation: The XCTestExpectation to fulfill when all notes are found
+    ///   - timeout: Maximum time to wait in seconds (default: 5.0)
+    /// - Returns: The set of collected note IDs
+    private func collectNoteIds(
+        from ndb: Ndb,
+        filters: [NdbFilter],
+        expectedNoteIds: Set<NoteId>,
+        expectation: XCTestExpectation,
+        timeout: TimeInterval = 5.0
+    ) -> Task<Set<NoteId>, Never> {
+        Task {
+            await withCheckedContinuation { continuation in
+                var collectedNoteIds = Set<NoteId>()
+                var hasReturned = false
+                
+                // Timeout handler
+                Task {
+                    try? await Task.sleep(for: .seconds(timeout))
+                    guard !hasReturned else { return }
+                    hasReturned = true
+                    print("⚠️ Timeout: Expected \(expectedNoteIds.count) notes, collected \(collectedNoteIds.count)")
+                    continuation.resume(returning: collectedNoteIds)
+                }
+                
+                // Subscription handler
+                Task {
+                    do {
+                        for await item in try ndb.subscribe(filters: filters) {
+                            guard !hasReturned else { break }
+                            
+                            switch item {
+                            case .eose:
+                                continue
+                            case .event(let noteKey):
+                                try ndb.lookup_note_by_key(noteKey, borrow: { unownedNote in
+                                    switch unownedNote {
+                                    case .none:
+                                        return
+                                    case .some(let unownedNote):
+                                        collectedNoteIds.insert(unownedNote.id)
+                                    }
+                                })
+                            }
+                            
+                            if collectedNoteIds == expectedNoteIds {
+                                hasReturned = true
+                                expectation.fulfill()
+                                continuation.resume(returning: collectedNoteIds)
+                            }
+                        }
+                    } catch {
+                        guard !hasReturned else { return }
+                        hasReturned = true
+                        XCTFail("Note streaming failed: \(error)")
+                        continuation.resume(returning: collectedNoteIds)
+                    }
+                }
+            }
+        }
+    }
     
     override func setUp() async throws {
         try await super.setUp()
@@ -276,6 +342,146 @@ final class DatabaseSnapshotManagerTests: XCTestCase {
         XCTAssertFalse(result)
     }
     
+    // MARK: - Selective Snapshot Content Tests
+    
+    func testPerformSnapshot_ContainsOnlyRelevantNoteTypes() async throws {
+        // Given: A database with various note types
+        let profileNote = NostrEvent(content: "{\"name\":\"Test User\"}", keypair: test_keypair, kind: NostrKind.metadata.rawValue)!
+        let textNote = NostrEvent(content: "Hello world", keypair: test_keypair, kind: NostrKind.text.rawValue)!
+        let contactsNote = NostrEvent(content: "", keypair: test_keypair, kind: NostrKind.contacts.rawValue)!
+        let muteListNote = NostrEvent(content: "", keypair: test_keypair, kind: NostrKind.mute_list.rawValue)!
+        
+        let profileFilter = try NdbFilter(from: NostrFilter(kinds: [.metadata]))
+        let contactsFilter = try NdbFilter(from: NostrFilter(kinds: [.contacts]))
+        let muteListFilter = try NdbFilter(from: NostrFilter(kinds: [.mute_list]))
+        let textFilter = try NdbFilter(from: NostrFilter(kinds: [.text]))
+        
+        // Process notes into source database
+        let expectedIngestedNotes = [profileNote, textNote, contactsNote, muteListNote]
+        let expectedSnapshottedNotes = [profileNote, contactsNote, muteListNote]
+        
+        let expectedIngestedNoteIds = Set(expectedIngestedNotes.map { $0.id })
+        let expectedSnapshottedNoteIds = Set(expectedSnapshottedNotes.map { $0.id })
+        
+        let allNotesAreIngestedInSourceDB = XCTestExpectation(description: "All notes are ingested in source DB")
+        let ingestTask = collectNoteIds(
+            from: testNdb,
+            filters: [profileFilter, contactsFilter, muteListFilter, textFilter],
+            expectedNoteIds: expectedIngestedNoteIds,
+            expectation: allNotesAreIngestedInSourceDB
+        )
+        
+        for note in expectedIngestedNotes {
+            try testNdb.add(event: note)
+        }
+        
+        await fulfillment(of: [allNotesAreIngestedInSourceDB], timeout: 5)
+        let ingestedNoteIds = await ingestTask.value
+        XCTAssertEqual(expectedIngestedNoteIds, ingestedNoteIds)
+        
+        guard let snapshotPath = Ndb.snapshot_db_path else {
+            XCTFail("Snapshot path should be available")
+            return
+        }
+        
+        // When: Creating a snapshot
+        try await manager.performSnapshot()
+        
+        // Then: Snapshot database should exist
+        XCTAssertTrue(FileManager.default.fileExists(atPath: snapshotPath))
+        
+        // And: Snapshot should contain only profiles (kind 0), contacts (kind 3), and mute lists (kind 10000)
+        guard let snapshotNdb = Ndb(path: snapshotPath, owns_db_file: false) else {
+            XCTFail("Should be able to open snapshot database")
+            return
+        }
+        defer { snapshotNdb.close() }
+        
+        let allNotesAreSnapshottedToSnapshotDB = XCTestExpectation(description: "All notes are snapshotted to snapshot DB")
+        let snapshotTask = collectNoteIds(
+            from: snapshotNdb,
+            filters: [profileFilter, contactsFilter, muteListFilter, textFilter],
+            expectedNoteIds: expectedSnapshottedNoteIds,
+            expectation: allNotesAreSnapshottedToSnapshotDB
+        )
+        
+        await fulfillment(of: [allNotesAreSnapshottedToSnapshotDB], timeout: 5)
+        let snapshottedNoteIds = await snapshotTask.value
+        XCTAssertEqual(expectedSnapshottedNoteIds, snapshottedNoteIds)
+    }
+    
+    func testPerformSnapshot_HandlesEmptyDatabase() async throws {
+        // Given: An empty database with no notes
+        guard let snapshotPath = Ndb.snapshot_db_path else {
+            XCTFail("Snapshot path should be available")
+            return
+        }
+        
+        // When: Creating a snapshot of an empty database
+        try await manager.performSnapshot()
+        
+        // Then: Snapshot should be created successfully
+        XCTAssertTrue(FileManager.default.fileExists(atPath: snapshotPath))
+        
+        // And: Snapshot should be accessible but contain no notes
+        guard let snapshotNdb = Ndb(path: snapshotPath, owns_db_file: false) else {
+            XCTFail("Should be able to open snapshot database")
+            return
+        }
+        defer { snapshotNdb.close() }
+        
+        let allFilter = try NdbFilter(from: NostrFilter())
+        let allKeys = try snapshotNdb.query(filters: [allFilter], maxResults: 100)
+        XCTAssertEqual(allKeys.count, 0, "Empty database snapshot should contain no notes")
+    }
+    
+    func testPerformSnapshot_HandlesLargeNumberOfNotes() async throws {
+        // Given: A database with many profile notes
+        var profileNotes: [NostrEvent] = []
+        for i in 0..<2000 {
+            let profileNote = NostrEvent(content: "{\"name\":\"User \(i)\"}", keypair: generate_new_keypair().to_keypair(), kind: 0)!
+            profileNotes.append(profileNote)
+        }
+        
+        let profileFilter = try NdbFilter(from: NostrFilter(kinds: [.metadata]))
+        let expectedNoteIds = Set(profileNotes.map { $0.id })
+        let allNotesIngested = XCTestExpectation(description: "All 2000 profile notes are ingested")
+        
+        let ingestTask = collectNoteIds(
+            from: testNdb,
+            filters: [profileFilter],
+            expectedNoteIds: expectedNoteIds,
+            expectation: allNotesIngested
+        )
+        
+        for profileNote in profileNotes {
+            try testNdb.add(event: profileNote)
+        }
+        
+        // Wait for all notes to be ingested before snapshot
+        await fulfillment(of: [allNotesIngested], timeout: 10)
+        let ingestedNoteIds = await ingestTask.value
+        XCTAssertEqual(expectedNoteIds, ingestedNoteIds, "All 2000 profile notes should be ingested")
+        
+        guard let snapshotPath = Ndb.snapshot_db_path else {
+            XCTFail("Snapshot path should be available")
+            return
+        }
+        
+        // When: Creating a snapshot
+        try await manager.performSnapshot()
+        
+        // Then: Snapshot should contain all profile notes
+        guard let snapshotNdb = Ndb(path: snapshotPath, owns_db_file: false) else {
+            XCTFail("Should be able to open snapshot database")
+            return
+        }
+        defer { snapshotNdb.close() }
+        
+        let profileKeys = try snapshotNdb.query(filters: [profileFilter], maxResults: 100_000)
+        XCTAssertEqual(profileKeys.count, 2000, "Snapshot should contain all 2000 profile notes")
+    }
+    
     // MARK: - Edge Case Tests
     
     func testSnapshotInterval_BoundaryCondition() async throws {
@@ -301,6 +507,78 @@ final class DatabaseSnapshotManagerTests: XCTestCase {
         // Then: No snapshot should be created
         XCTAssertFalse(shouldCreate, "Snapshot should not be created before minimum interval")
     }
+    
+    func testPerformSnapshot_ReplacesExistingSnapshot() async throws {
+        // Given: A snapshot already exists with a profile note
+        let firstProfileNote = NostrEvent(content: "{\"name\":\"First User\"}", keypair: generate_new_keypair().to_keypair(), kind: 0)!
+        
+        let profileFilter = try NdbFilter(from: NostrFilter(kinds: [.metadata]))
+        let firstNoteIds = Set([firstProfileNote.id])
+        let firstNoteIngested = XCTestExpectation(description: "First note is ingested")
+        
+        let firstIngestTask = collectNoteIds(
+            from: testNdb,
+            filters: [profileFilter],
+            expectedNoteIds: firstNoteIds,
+            expectation: firstNoteIngested
+        )
+        
+        try testNdb.add(event: firstProfileNote)
+        
+        await fulfillment(of: [firstNoteIngested], timeout: 5)
+        let firstIngestedNoteIds = await firstIngestTask.value
+        XCTAssertEqual(firstNoteIds, firstIngestedNoteIds, "First profile note should be ingested")
+        
+        try await manager.performSnapshot()
+        
+        guard let snapshotPath = Ndb.snapshot_db_path else {
+            XCTFail("Snapshot path should be available")
+            return
+        }
+        
+        // Add a new profile note to the source database
+        let secondProfileNote = NostrEvent(content: "{\"name\":\"Second User\"}", keypair: generate_new_keypair().to_keypair(), kind: 0)!
+        
+        let bothNoteIds = Set([firstProfileNote.id, secondProfileNote.id])
+        let secondNoteIngested = XCTestExpectation(description: "Second note is ingested")
+        
+        let secondIngestTask = collectNoteIds(
+            from: testNdb,
+            filters: [profileFilter],
+            expectedNoteIds: bothNoteIds,
+            expectation: secondNoteIngested
+        )
+        
+        try testNdb.add(event: secondProfileNote)
+        
+        await fulfillment(of: [secondNoteIngested], timeout: 5)
+        let secondIngestedNoteIds = await secondIngestTask.value
+        XCTAssertEqual(bothNoteIds, secondIngestedNoteIds, "Both profile notes should be ingested")
+        
+        // When: Creating another snapshot
+        try await manager.performSnapshot()
+        
+        // Then: New snapshot should replace the old one and contain both notes
+        guard let snapshotNdb = Ndb(path: snapshotPath, owns_db_file: false) else {
+            XCTFail("Should be able to open snapshot database")
+            return
+        }
+        defer { snapshotNdb.close() }
+        
+        let expectedNoteIds = Set([firstProfileNote.id, secondProfileNote.id])
+        let allNotesAreInSnapshot = XCTestExpectation(description: "All notes are in snapshot")
+        
+        let snapshotTask = collectNoteIds(
+            from: snapshotNdb,
+            filters: [profileFilter],
+            expectedNoteIds: expectedNoteIds,
+            expectation: allNotesAreInSnapshot
+        )
+        
+        await fulfillment(of: [allNotesAreInSnapshot], timeout: 5)
+        let snapshottedNoteIds = await snapshotTask.value
+        XCTAssertEqual(expectedNoteIds, snapshottedNoteIds, "Snapshot should contain both profile notes")
+    }
 }
 
 
@@ -317,9 +595,12 @@ extension SnapshotError: Equatable {
             return true
         case (.directoryCreationFailed, .directoryCreationFailed):
             return true
+        case (.failedToCreateSnapshotDatabase, .failedToCreateSnapshotDatabase):
+            return true
+        case (.moveFailed, .moveFailed):
+            return true
         default:
             return false
         }
     }
 }
-
