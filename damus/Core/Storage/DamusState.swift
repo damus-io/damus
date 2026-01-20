@@ -8,6 +8,7 @@
 import Foundation
 import LinkPresentation
 import EmojiPicker
+import UIKit
 
 class DamusState: HeadlessDamusState, ObservableObject {
     let keypair: Keypair
@@ -38,6 +39,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
     var push_notification_client: PushNotificationClient
     let emoji_provider: EmojiProvider
     let favicon_cache: FaviconCache
+    let batteryOptimizer: BatteryOptimizationController?
     private(set) var nostrNetwork: NostrNetworkManager
     var snapshotManager: DatabaseSnapshotManager
 
@@ -73,9 +75,14 @@ class DamusState: HeadlessDamusState, ObservableObject {
         self.push_notification_client = PushNotificationClient(keypair: keypair, settings: settings)
         self.emoji_provider = emoji_provider
         self.favicon_cache = FaviconCache()
+        if settings.enable_adaptive_battery_optimization {
+            self.batteryOptimizer = BatteryOptimizationController(device: UIDevice.current)
+        } else {
+            self.batteryOptimizer = nil
+        }
 
         let networkManagerDelegate = NostrNetworkManagerDelegate(settings: settings, contacts: contacts, ndb: ndb, keypair: keypair, relayModelCache: relay_model_cache, relayFilters: relay_filters)
-        let nostrNetwork = NostrNetworkManager(delegate: networkManagerDelegate, addNdbToRelayPool: addNdbToRelayPool)
+        let nostrNetwork = NostrNetworkManager(delegate: networkManagerDelegate, batteryOptimizer: batteryOptimizer, addNdbToRelayPool: addNdbToRelayPool)
         self.nostrNetwork = nostrNetwork
         self.wallet.nostrNetwork = nostrNetwork
         self.snapshotManager = .init(ndb: ndb)
