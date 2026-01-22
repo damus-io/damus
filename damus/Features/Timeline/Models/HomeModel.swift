@@ -1090,7 +1090,7 @@ func fetch_relay_metadata(relay_id: RelayURL) async throws -> RelayMetadata? {
     
     var res: (Data, URLResponse)? = nil
     
-    res = try await URLSession.shared.data(for: request)
+    res = try await TorAwareURLSession.shared.data(for: request)
     
     guard let data = res?.0 else {
         return nil

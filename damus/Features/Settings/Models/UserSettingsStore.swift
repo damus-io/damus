@@ -373,6 +373,21 @@ class UserSettingsStore: ObservableObject {
         }
     }
     
+    // MARK: Tor / Privacy Settings
+
+    /// Whether Tor mode is enabled for relay connections.
+    /// When enabled, all WebSocket connections route through a SOCKS5 proxy.
+    @Setting(key: "tor_enabled", default_value: false)
+    var tor_enabled: Bool
+
+    /// The SOCKS5 proxy host for Tor connections (e.g., "127.0.0.1").
+    @Setting(key: "tor_socks_host", default_value: "127.0.0.1")
+    var tor_socks_host: String
+
+    /// The SOCKS5 proxy port for Tor connections (default: 9050 for Tor daemon, 9150 for Tor Browser).
+    @Setting(key: "tor_socks_port", default_value: 9050)
+    var tor_socks_port: Int
+
     // MARK: Damus Labs Experiments
     @Setting(key: "live", default_value: false)
     var live: Bool

@@ -265,7 +265,7 @@ func get_nip05_pubkey(id: String) async -> NIP05User? {
     let host = parts[1]
 
     guard let url = URL(string: "https://\(host)/.well-known/nostr.json?name=\(user)"),
-          let (data, _) = try? await URLSession.shared.data(for: URLRequest(url: url)),
+          let (data, _) = try? await TorAwareURLSession.shared.data(for: URLRequest(url: url)),
           let json: NIP05Result = decode_data(data),
           let pubkey_hex = json.names[user],
           let pubkey = hex_decode_pubkey(pubkey_hex)

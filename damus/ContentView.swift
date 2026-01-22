@@ -244,20 +244,12 @@ struct ContentView: View {
                                 }
                                 
                                 ToolbarItem(placement: .navigationBarTrailing) {
-                                    HStack(alignment: .center) {
-                                        SignalView(state: damus_state!, signal: home.signal)
-                                        
-                                        // maybe expand this to other timelines in the future
-                                        if selected_timeline == .search {
-                                            
-                                            Button(action: {
-                                                present_sheet(.filter)
-                                            }, label: {
-                                                Image("filter")
-                                                    .foregroundColor(.gray)
-                                            })
-                                        }
-                                    }
+                                    ContentViewTrailingToolbar(
+                                        damus_state: damus_state!,
+                                        settings: damus.settings,
+                                        signal: home.signal,
+                                        selected_timeline: selected_timeline
+                                    )
                                 }
                             }
                     }
@@ -298,6 +290,27 @@ struct ContentView: View {
                         }
                     }
                 }
+            }
+        }
+        .overlay(alignment: .top) {
+            // Tor status indicator visible when toolbar is hidden (home timeline).
+            // The toolbar contains a separate indicator for other timelines.
+            // Uses overlay instead of toolbar because toolbar is hidden on home.
+            if let damus = damus_state, damus.settings.tor_enabled, selected_timeline == .home {
+                HStack {
+                    Spacer()
+                    Button {
+                        navigationCoordinator.push(route: Route.TorSettings(settings: damus.settings))
+                    } label: {
+                        Image("tor")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 20, height: 20)
+                    }
+                    .accessibilityLabel(NSLocalizedString("Tor mode active", comment: "Accessibility label for Tor status indicator"))
+                    .padding(.trailing, 16)
+                }
+                .padding(.top, 58)
             }
         }
         .ignoresSafeArea(.keyboard)
@@ -1144,6 +1157,42 @@ extension LossyLocalNotification {
             )))
         case .nscript(let script):
             return .route(.Script(script: ScriptModel(data: script, state: .not_loaded)))
+        }
+    }
+}
+
+/// Trailing toolbar content for the main ContentView navigation bar
+struct ContentViewTrailingToolbar: View {
+    let damus_state: DamusState
+    let settings: UserSettingsStore
+    @ObservedObject var signal: SignalModel
+    let selected_timeline: Timeline
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 8) {
+            // Tor status indicator - shows onion icon when Tor is enabled
+            if settings.tor_enabled {
+                NavigationLink(value: Route.TorSettings(settings: settings)) {
+                    Image("tor")
+                        .resizable()
+                        .renderingMode(.template)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 16, height: 16)
+                        .foregroundColor(.purple)
+                }
+                .accessibilityLabel(NSLocalizedString("Tor mode active", comment: "Accessibility label for Tor status indicator"))
+            }
+
+            SignalView(state: damus_state, signal: signal)
+
+            if selected_timeline == .search {
+                Button(action: {
+                    present_sheet(.filter)
+                }, label: {
+                    Image("filter")
+                        .foregroundColor(.gray)
+                })
+            }
         }
     }
 }
