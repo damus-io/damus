@@ -27,8 +27,15 @@ struct SeenEvent: Hashable {
     let evid: NoteId
 }
 
+@globalActor
+actor RelayPoolActor {
+    static let shared = RelayPoolActor()
+    private init() {}
+}
+
 /// Establishes and manages connections and subscriptions to a list of relays.
-actor RelayPool {
+@RelayPoolActor
+class RelayPool {
     @MainActor
     private(set) var relays: [Relay] = []
     var open: Bool = false
@@ -72,7 +79,7 @@ actor RelayPool {
         seen.removeAll()
     }
 
-    init(ndb: Ndb?, keypair: Keypair? = nil) {
+    nonisolated init(ndb: Ndb?, keypair: Keypair? = nil) {
         self.ndb = ndb
         self.keypair = keypair
 
