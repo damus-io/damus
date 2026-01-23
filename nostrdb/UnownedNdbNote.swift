@@ -150,6 +150,7 @@ struct UnownedNdbNote: ~Copyable {
     var createdAt: UInt32 { _ndbNote.created_at }
     var id: NoteId { _ndbNote.id }
     var sig: Signature { _ndbNote.sig }
+    var referenced_pubkeys: References<Pubkey> { _ndbNote.referenced_pubkeys }
     
     func toOwned() -> NdbNote {
         return _ndbNote.to_owned()

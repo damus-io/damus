@@ -53,6 +53,7 @@ class NostrNetworkManager {
     func connect() async {
         await self.userRelayList.connect()    // Will load the user's list, apply it, and get RelayPool to connect to it.
         await self.profilesManager.load()
+        await self.reader.startPreloader()
     }
     
     func disconnectRelays() async {
@@ -61,12 +62,14 @@ class NostrNetworkManager {
     
     func handleAppBackgroundRequest() async {
         await self.reader.cancelAllTasks()
+        await self.reader.stopPreloader()
         await self.pool.cleanQueuedRequestForSessionEnd()
     }
     
     func handleAppForegroundRequest() async {
         // Pinging the network will automatically reconnect any dead websocket connections
         await self.ping()
+        await self.reader.startPreloader()
     }
     
     func close() async {
@@ -77,6 +80,9 @@ class NostrNetworkManager {
             }
             group.addTask {
                 await self.profilesManager.stop()
+            }
+            group.addTask {
+                await self.reader.stopPreloader()
             }
             // But await on each one to prevent race conditions
             for await value in group { continue }
