@@ -20,6 +20,7 @@ extension NostrNetworkManager {
         private var ndb: Ndb
         private var taskManager: TaskManager
         private let experimentalLocalRelayModelSupport: Bool
+        private let entityPreloader: EntityPreloader
         
         private static let logger = Logger(
             subsystem: Constants.MAIN_APP_BUNDLE_IDENTIFIER,
@@ -31,16 +32,17 @@ extension NostrNetworkManager {
             self.ndb = ndb
             self.taskManager = TaskManager()
             self.experimentalLocalRelayModelSupport = experimentalLocalRelayModelSupport
+            self.entityPreloader = EntityPreloader(pool: pool, ndb: ndb)
         }
         
         // MARK: - Subscribing and Streaming data from Nostr
         
         /// Streams notes until the EOSE signal
-        func streamExistingEvents(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, timeout: Duration? = nil, streamMode: StreamMode? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
+        func streamExistingEvents(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, timeout: Duration? = nil, streamMode: StreamMode? = nil, preloadStrategy: PreloadStrategy? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
             let timeout = timeout ?? .seconds(10)
             return AsyncStream<NdbNoteLender> { continuation in
                 let streamingTask = Task {
-                    outerLoop: for await item in self.advancedStream(filters: filters, to: desiredRelays, timeout: timeout, streamMode: streamMode, id: id) {
+                    outerLoop: for await item in self.advancedStream(filters: filters, to: desiredRelays, timeout: timeout, streamMode: streamMode, preloadStrategy: preloadStrategy, id: id) {
                         try Task.checkCancellation()
                         switch item {
                         case .event(let lender):
@@ -64,10 +66,10 @@ extension NostrNetworkManager {
         /// Subscribes to data from user's relays, for a maximum period of time — after which the stream will end.
         ///
         /// This is useful when waiting for some specific data from Nostr, but not indefinitely.
-        func timedStream(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, timeout: Duration, streamMode: StreamMode? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
+        func timedStream(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, timeout: Duration, streamMode: StreamMode? = nil, preloadStrategy: PreloadStrategy? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
             return AsyncStream<NdbNoteLender> { continuation in
                 let streamingTask = Task {
-                    for await item in self.advancedStream(filters: filters, to: desiredRelays, timeout: timeout, streamMode: streamMode, id: id) {
+                    for await item in self.advancedStream(filters: filters, to: desiredRelays, timeout: timeout, streamMode: streamMode, preloadStrategy: preloadStrategy, id: id) {
                         try Task.checkCancellation()
                         switch item {
                         case .event(lender: let lender):
@@ -88,10 +90,10 @@ extension NostrNetworkManager {
         /// Subscribes to notes indefinitely
         ///
         /// This is useful when simply streaming all events indefinitely
-        func streamIndefinitely(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, streamMode: StreamMode? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
+        func streamIndefinitely(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, streamMode: StreamMode? = nil, preloadStrategy: PreloadStrategy? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
             return AsyncStream<NdbNoteLender> { continuation in
                 let streamingTask = Task {
-                    for await item in self.advancedStream(filters: filters, to: desiredRelays, streamMode: streamMode, id: id) {
+                    for await item in self.advancedStream(filters: filters, to: desiredRelays, streamMode: streamMode, preloadStrategy: preloadStrategy, id: id) {
                         try Task.checkCancellation()
                         switch item {
                         case .event(lender: let lender):
@@ -111,9 +113,10 @@ extension NostrNetworkManager {
             }
         }
         
-        func advancedStream(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, timeout: Duration? = nil, streamMode: StreamMode? = nil, id: UUID? = nil) -> AsyncStream<StreamItem> {
+        func advancedStream(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, timeout: Duration? = nil, streamMode: StreamMode? = nil, preloadStrategy: PreloadStrategy? = nil, id: UUID? = nil) -> AsyncStream<StreamItem> {
             let id = id ?? UUID()
             let streamMode = streamMode ?? defaultStreamMode()
+            let preloadStrategy = preloadStrategy ?? self.defaultPreloadingMode()
             return AsyncStream<StreamItem> { continuation in
                 let timeoutTask = Task {
                     guard let timeout else { return }
@@ -163,6 +166,10 @@ extension NostrNetworkManager {
                                 switch item {
                                 case .event(let lender):
                                     logStreamPipelineStats("SubscriptionManager_Advanced_Stream_\(id)", "Consumer_\(id)")
+                                    // Preload entities if requested
+                                    if case .preload = preloadStrategy {
+                                        self.entityPreloader.preload(note: lender)
+                                    }
                                     continuation.yield(item)
                                 case .eose:
                                     break   // Should not happen
@@ -201,6 +208,10 @@ extension NostrNetworkManager {
                                     }
                                     negentropyStorageVector.unsealAndInsert(nostrEvent: event)
                                 })
+                                // Preload entities if requested
+                                if case .preload = preloadStrategy {
+                                    self.entityPreloader.preload(note: lender)
+                                }
                                 continuation.yield(item)
                             case .eose:
                                 break   // Should not happen
@@ -392,6 +403,10 @@ extension NostrNetworkManager {
             self.experimentalLocalRelayModelSupport ? .ndbFirst(networkOptimization: nil) : .ndbAndNetworkParallel(networkOptimization: nil)
         }
         
+        private func defaultPreloadingMode() -> PreloadStrategy {
+            return .preload
+        }
+        
         // MARK: - Finding specific data from Nostr
         
         /// Finds a non-replaceable event based on a note ID
@@ -494,6 +509,14 @@ extension NostrNetworkManager {
         }
         
         // MARK: - Task management
+        
+        func startPreloader() async {
+            await self.entityPreloader.start()
+        }
+        
+        func stopPreloader() async {
+            await self.entityPreloader.stop()
+        }
         
         func cancelAllTasks() async {
             await self.taskManager.cancelAllTasks()
@@ -627,5 +650,13 @@ extension NostrNetworkManager {
                 }
             }
         }
+    }
+    
+    /// Defines the preloading strategy for a stream
+    enum PreloadStrategy {
+        /// No preloading - notes are not sent to EntityPreloader
+        case noPreloading
+        /// Preload metadata for authors and referenced profiles
+        case preload
     }
 }

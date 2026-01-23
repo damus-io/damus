@@ -62,7 +62,7 @@ class SearchHomeModel: ObservableObject {
         var follow_list_filter = NostrFilter(kinds: [.follow_list])
         follow_list_filter.until = UInt32(Date.now.timeIntervalSince1970)
         
-        for await item in damus_state.nostrNetwork.reader.advancedStream(filters: [get_base_filter(), follow_list_filter], to: to_relays) {
+        for await item in damus_state.nostrNetwork.reader.advancedStream(filters: [get_base_filter(), follow_list_filter], to: to_relays, preloadStrategy: .preload) {
             switch item {
             case .event(lender: let lender):
                 await lender.justUseACopy({ event in
