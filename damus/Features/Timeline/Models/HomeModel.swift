@@ -260,6 +260,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
             handle_like_event(ev)
         case .dm:
             handle_dm(ev)
+        case .typing:
+            handle_typing_indicator(ev)
         case .delete:
             handle_delete_event(ev)
         case .zap:
@@ -546,9 +548,9 @@ class HomeModel: ContactsDelegate, ObservableObject {
         var our_blocklist_filter = NostrFilter(kinds: [.mute_list])
         our_blocklist_filter.authors = [damus_state.pubkey]
 
-        var dms_filter = NostrFilter(kinds: [.dm])
+        var dms_filter = NostrFilter(kinds: [.dm, .typing])
 
-        var our_dms_filter = NostrFilter(kinds: [.dm])
+        var our_dms_filter = NostrFilter(kinds: [.dm, .typing])
 
         // friends only?...
         //dms_filter.authors = friends
@@ -907,12 +909,12 @@ class HomeModel: ContactsDelegate, ObservableObject {
     /// This method requests full DM history with negentropy.
     func fetchFullDMHistory() async {
         // DMs sent to us (limit to prevent runaway pulls; user can pull again for more)
-        var dms_filter = NostrFilter(kinds: [.dm])
+        var dms_filter = NostrFilter(kinds: [.dm, .typing])
         dms_filter.pubkeys = [damus_state.pubkey]
         dms_filter.limit = 500
 
         // DMs we sent
-        var our_dms_filter = NostrFilter(kinds: [.dm])
+        var our_dms_filter = NostrFilter(kinds: [.dm, .typing])
         our_dms_filter.authors = [damus_state.pubkey]
         our_dms_filter.limit = 500
 
@@ -950,6 +952,47 @@ class HomeModel: ContactsDelegate, ObservableObject {
             }
             self.incoming_dms = []
         }
+    }
+
+    /// Handle kind 20001 typing indicator events (best-effort, ephemeral).
+    @MainActor
+    func handle_typing_indicator(_ ev: NostrEvent) {
+        // Only care about typing signals addressed to us
+        guard ev.referenced_pubkeys.contains(damus_state.pubkey) else {
+            return
+        }
+
+        // Ignore our own typing echoes
+        guard ev.pubkey != damus_state.pubkey else {
+            return
+        }
+
+        // Namespace guard: only react to the Damus typing convention
+        let hasNamespace = ev.tags.contains { t in
+            t.count >= 2 && t[0].matches_str("t") && t[1] == "damus-typing"
+        }
+        guard hasNamespace else {
+            return
+        }
+
+        guard let privkey = damus_state.keypair.privkey else {
+            return
+        }
+
+        // Decrypt to determine start/stop. If decryption fails, assume "start"
+        // (clients may send plaintext).
+        let decrypted = (try? NIP04.decryptContent(
+            recipientPrivateKey: privkey,
+            senderPubkey: ev.pubkey,
+            content: ev.content,
+            encoding: .base64
+        )) ?? ev.content
+
+        let action = decrypted.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let isTyping = action != "stop"
+
+        let model = damus_state.dms.lookup_or_create(ev.pubkey)
+        model.set_partner_typing(isTyping)
     }
 }
 
