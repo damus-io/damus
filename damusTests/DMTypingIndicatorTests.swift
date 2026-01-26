@@ -8,6 +8,7 @@
 import XCTest
 @testable import damus
 
+/// Unit tests for Damus DM typing indicator helpers.
 final class DMTypingIndicatorTests: XCTestCase {
 
     private var alice: Keypair {
@@ -22,6 +23,7 @@ final class DMTypingIndicatorTests: XCTestCase {
         return Keypair(pubkey: pk, privkey: sec)
     }
 
+    /// Creating an encrypted typing event should include the expected tags and decrypt back to the action string.
     func testTypingIndicatorEventCreationAndDecryption() throws {
         // Bob sends typing start to Alice
         guard let ev = DMTypingIndicator.makeEvent(action: .start, to: alice.pubkey, keypair: bob) else {
@@ -46,6 +48,7 @@ final class DMTypingIndicatorTests: XCTestCase {
         XCTAssertEqual(decrypted, "start")
     }
 
+    /// Partner typing state should automatically clear after the configured timeout.
     @MainActor
     func testDirectMessageModelTypingAutoClear() async {
         let model = DirectMessageModel(our_pubkey: alice.pubkey, pubkey: bob.pubkey)

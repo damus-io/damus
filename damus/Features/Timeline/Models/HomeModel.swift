@@ -975,6 +975,15 @@ class HomeModel: ContactsDelegate, ObservableObject {
             return
         }
 
+        // Ignore expired signals before attempting decryption.
+        if let expirationStr = ev.tags.first(where: { t in
+            t.count >= 2 && t[0].matches_str("expiration")
+        })?[1],
+           let expiration = UInt32(expirationStr),
+           UInt32(Date().timeIntervalSince1970) >= expiration {
+            return
+        }
+
         guard let privkey = damus_state.keypair.privkey else {
             return
         }

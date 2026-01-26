@@ -13,8 +13,10 @@ struct DMChatView: View, KeyboardReadable {
     @FocusState private var isTextFieldFocused: Bool
     @ObservedObject var dms: DirectMessageModel
 
-    // Outbound typing indicator state
+    /// Timestamp of the last outbound `.start` typing indicator we successfully queued for sending.
     @State private var lastTypingStartSentAt: Date? = nil
+
+    /// Minimum interval between outbound `.start` typing indicators, to avoid spamming relays.
     private let typingStartThrottleSeconds: TimeInterval = 5.0
     
     var pubkey: Pubkey {
@@ -140,6 +142,9 @@ struct DMChatView: View, KeyboardReadable {
          */
     }
 
+    /// Sends a best-effort typing indicator event to the current DM recipient.
+    ///
+    /// `.start` events are throttled unless `force` is set.
     func send_typing(_ action: DMTypingAction, force: Bool = false) async {
         if action == .start && !force {
             if let last = lastTypingStartSentAt,
