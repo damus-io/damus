@@ -71,6 +71,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
     var notificationsHandlerTask: Task<Void, Never>?
     var generalHandlerTask: Task<Void, Never>?
     var dmsHandlerTask: Task<Void, Never>?
+    var typingHandlerTask: Task<Void, Never>?
     var ndbOnlyHandlerTask: Task<Void, Never>?
     var nwcHandlerTask: Task<Void, Never>?
     
@@ -548,9 +549,13 @@ class HomeModel: ContactsDelegate, ObservableObject {
         var our_blocklist_filter = NostrFilter(kinds: [.mute_list])
         our_blocklist_filter.authors = [damus_state.pubkey]
 
-        var dms_filter = NostrFilter(kinds: [.dm, .typing])
+        var dms_filter = NostrFilter(kinds: [.dm])
 
-        var our_dms_filter = NostrFilter(kinds: [.dm, .typing])
+        var our_dms_filter = NostrFilter(kinds: [.dm])
+
+        // Typing indicators (kind 20001) are ephemeral and should not be fetched as part of DM history.
+        // Subscribe separately with a dedicated filter.
+        var typing_filter = NostrFilter(kinds: [.typing])
 
         // friends only?...
         //dms_filter.authors = friends
@@ -575,6 +580,9 @@ class HomeModel: ContactsDelegate, ObservableObject {
         let low_volume_important_filters = [our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter, contact_cards_filter]
         let contacts_filters = contacts_filter_chunks + low_volume_important_filters
         let dms_filters = [dms_filter, our_dms_filter]
+
+        typing_filter.pubkeys = [damus_state.pubkey]
+        typing_filter.limit = 0
 
         //print_filters(relay_id: relay_id, filters: [home_filters, contacts_filters, notifications_filters, dms_filters])
 
@@ -622,6 +630,21 @@ class HomeModel: ContactsDelegate, ObservableObject {
                 }
             }
         }
+        self.typingHandlerTask?.cancel()
+        self.typingHandlerTask = Task {
+            for await item in damus_state.nostrNetwork.reader.advancedStream(
+                filters: [typing_filter],
+                streamMode: .ndbAndNetworkParallel(networkOptimization: nil)
+            ) {
+                switch item {
+                case .event(let lender):
+                    await lender.justUseACopy({ await process_event(ev: $0, context: .other) })
+                case .eose, .ndbEose, .networkEose:
+                    break
+                }
+            }
+        }
+
         self.generalHandlerTask?.cancel()
         self.generalHandlerTask = Task {
             for await lender in damus_state.nostrNetwork.reader.streamIndefinitely(filters: contacts_filters, streamMode: .ndbAndNetworkParallel(networkOptimization: .sinceOptimization)) {
@@ -909,12 +932,12 @@ class HomeModel: ContactsDelegate, ObservableObject {
     /// This method requests full DM history with negentropy.
     func fetchFullDMHistory() async {
         // DMs sent to us (limit to prevent runaway pulls; user can pull again for more)
-        var dms_filter = NostrFilter(kinds: [.dm, .typing])
+        var dms_filter = NostrFilter(kinds: [.dm])
         dms_filter.pubkeys = [damus_state.pubkey]
         dms_filter.limit = 500
 
         // DMs we sent
-        var our_dms_filter = NostrFilter(kinds: [.dm, .typing])
+        var our_dms_filter = NostrFilter(kinds: [.dm])
         our_dms_filter.authors = [damus_state.pubkey]
         our_dms_filter.limit = 500
 
@@ -988,16 +1011,25 @@ class HomeModel: ContactsDelegate, ObservableObject {
             return
         }
 
-        // Decrypt to determine start/stop. If decryption fails, assume "start"
-        // (clients may send plaintext).
-        let decrypted = (try? NIP04.decryptContent(
+        // Decrypt to determine start/stop. If decryption fails, fall back to plaintext
+        // content when it is exactly "start"/"stop", otherwise default to "start".
+        let decrypted = try? NIP04.decryptContent(
             recipientPrivateKey: privkey,
             senderPubkey: ev.pubkey,
             content: ev.content,
             encoding: .base64
-        )) ?? ev.content
+        )
 
-        let action = decrypted.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let raw = ev.content.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let action: String
+        if let decrypted {
+            action = decrypted.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        } else if raw == "start" || raw == "stop" {
+            action = raw
+        } else {
+            action = "start"
+        }
+
         let isTyping = action != "stop"
 
         let model = damus_state.dms.lookup_or_create(ev.pubkey)

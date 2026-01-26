@@ -160,6 +160,9 @@ struct DMChatView: View, KeyboardReadable {
         if action == .start {
             // Only update throttle timestamp after we have a valid event to send.
             lastTypingStartSentAt = Date.now
+        } else if action == .stop {
+            // Allow immediate restart after a stop.
+            lastTypingStartSentAt = nil
         }
 
         // Best-effort: typing should never block normal message flow.
