@@ -969,7 +969,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
 
         // Namespace guard: only react to the Damus typing convention
         let hasNamespace = ev.tags.contains { t in
-            t.count >= 2 && t[0].matches_str("t") && t[1] == "damus-typing"
+            t.count >= 2 && t[0].matches_str("t") && t[1].matches_str("damus-typing")
         }
         guard hasNamespace else {
             return
