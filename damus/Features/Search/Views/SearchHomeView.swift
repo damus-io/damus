@@ -14,7 +14,6 @@ struct SearchHomeView: View {
     @StateObject var model: SearchHomeModel
     @State var search: String = ""
     @FocusState private var isFocused: Bool
-    @State var loadingTask: Task<Void, Never>?
 
     func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
         var filters = ContentFilters.defaults(damus_state: damus_state)
@@ -118,13 +117,8 @@ struct SearchHomeView: View {
         .onReceive(handle_notify(.new_mutes)) { _ in
             self.model.filter_muted()
         }
-        .onAppear {
-            if model.events.events.isEmpty {
-                loadingTask = Task { await model.load() }
-            }
-        }
-        .onDisappear {
-            loadingTask?.cancel()
+        .task {
+            await model.load()
         }
     }
 }
