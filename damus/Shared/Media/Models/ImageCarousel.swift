@@ -305,17 +305,21 @@ struct ImageCarousel<Content: View>: View {
     /// The model that holds information and state of this carousel
     /// This is observed to update the view when the model changes
     @ObservedObject var model: CarouselModel
+    @ObservedObject var settings: UserSettingsStore
+    @StateObject private var networkMonitor = NetworkMonitor.shared
     let content: ((_ dismiss: @escaping (() -> Void)) -> Content)?
 
     init(state: DamusState, evid: NoteId, urls: [MediaUrl]) {
         self.evid = evid
         self._model = ObservedObject(initialValue: CarouselModel(damus_state: state, urls: urls))
+        self.settings = state.settings
         self.content = nil
     }
     
     init(state: DamusState, evid: NoteId, urls: [MediaUrl], @ViewBuilder content: @escaping (_ dismiss: @escaping (() -> Void)) -> Content) {
         self.evid = evid
         self._model = ObservedObject(initialValue: CarouselModel(damus_state: state, urls: urls))
+        self.settings = state.settings
         self.content = content
     }
     
@@ -348,21 +352,28 @@ struct ImageCarousel<Content: View>: View {
     
     func Media(geo: GeometryProxy, url: MediaUrl, index: Int) -> some View {
         Group {
-            switch url {
-            case .image(let url):
-                Img(geo: geo, url: url, index: index)
-                    .onTapGesture {
-                        present(full_screen_item: .full_screen_carousel(urls: model.urls, selectedIndex: $model.selectedIndex))
-                    }
-            case .video(let url):
-                   let video_model = model.damus_state.video.get_player(for: url)
-                    DamusVideoPlayerView(
-                        model: video_model,
-                        coordinator: model.damus_state.video,
-                        style: .preview(on_tap: {
+            if settings.low_data_mode || networkMonitor.isLowDataMode {
+                 LowDataModePlaceholder(url: url, onTap: {
+                     // Future: Allow manual load
+                 })
+                 .frame(width: geo.size.width, height: height)
+            } else {
+                switch url {
+                case .image(let url):
+                    Img(geo: geo, url: url, index: index)
+                        .onTapGesture {
                             present(full_screen_item: .full_screen_carousel(urls: model.urls, selectedIndex: $model.selectedIndex))
-                        })
-                    )
+                        }
+                case .video(let url):
+                       let video_model = model.damus_state.video.get_player(for: url)
+                        DamusVideoPlayerView(
+                            model: video_model,
+                            coordinator: model.damus_state.video,
+                            style: .preview(on_tap: {
+                                present(full_screen_item: .full_screen_carousel(urls: model.urls, selectedIndex: $model.selectedIndex))
+                            })
+                        )
+                }
             }
         }
     }

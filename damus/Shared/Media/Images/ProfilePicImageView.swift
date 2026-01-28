@@ -12,7 +12,7 @@ import Kingfisher
 /// Respects Low Data Mode settings and shows a placeholder when data saving is active.
 struct ProfileImageContainerView: View {
     let url: URL?
-    let settings: UserSettingsStore
+    @ObservedObject var settings: UserSettingsStore
     @Binding var image: UIImage?
     @State private var showShareSheet = false
     @StateObject private var networkMonitor = NetworkMonitor.shared
@@ -134,7 +134,7 @@ struct NavDismissBarView: View {
 struct ProfilePicImageView: View {
     let pubkey: Pubkey
     let profiles: Profiles
-    let settings: UserSettingsStore
+    @ObservedObject var settings: UserSettingsStore
     let nav: NavigationCoordinator
     let shouldShowEditButton: Bool
     @State var image: UIImage?

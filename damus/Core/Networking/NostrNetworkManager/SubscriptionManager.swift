@@ -482,7 +482,7 @@ extension NostrNetworkManager {
             }
             
             func cancelAllTasks() async {
-                    await withTaskGroup { group in
+                    await withTaskGroup(of: Void.self) { group in
                         Self.logger.info("Cancelling all SubscriptionManager tasks")
                     // Start each task cancellation in parallel for faster execution
                     for (taskId, _) in self.tasks {

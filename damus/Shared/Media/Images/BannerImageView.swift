@@ -95,21 +95,23 @@ struct BannerImageView: View {
     let pubkey: Pubkey
     let profiles: Profiles
     let damusState: DamusState
+    @ObservedObject var settings: UserSettingsStore
     
     @State var banner: String?
     @StateObject private var networkMonitor = NetworkMonitor.shared
     
-    init(pubkey: Pubkey, profiles: Profiles, disable_animation: Bool, banner: String? = nil, damusState: DamusState) {
+    init(pubkey: Pubkey, profiles: Profiles, disable_animation: Bool, banner: String? = nil, damusState: DamusState, settings: UserSettingsStore) {
         self.pubkey = pubkey
         self.profiles = profiles
         self._banner = State(initialValue: banner)
         self.disable_animation = disable_animation
         self.damusState = damusState
+        self.settings = settings
     }
     
     /// Returns true if we should block loading due to Low Data Mode.
     private var shouldBlockLoading: Bool {
-        damusState.settings.low_data_mode || networkMonitor.isLowDataMode
+        settings.low_data_mode || networkMonitor.isLowDataMode
     }
     
     var body: some View {
@@ -201,7 +203,8 @@ struct BannerImageView_Previews: PreviewProvider {
             pubkey: test_pubkey,
             profiles: make_preview_profiles(test_pubkey),
             disable_animation: false,
-            damusState: test_damus_state
+            damusState: test_damus_state,
+            settings: test_damus_state.settings
         )
     }
 }

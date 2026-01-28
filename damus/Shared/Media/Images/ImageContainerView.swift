@@ -12,7 +12,7 @@ import Kingfisher
 struct ImageContainerView: View {
     let video_coordinator: DamusVideoCoordinator
     let url: MediaUrl
-    let settings: UserSettingsStore
+    @ObservedObject var settings: UserSettingsStore
     
     @Binding var imageDict: [URL: UIImage]
     @State private var image: UIImage?
@@ -114,6 +114,7 @@ struct LowDataModePlaceholder: View {
             onTap()
         }
     }
+}
 
 
 let test_image_url = URL(string: "https://jb55.com/red-me.jpg")!

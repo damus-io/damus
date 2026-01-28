@@ -34,6 +34,22 @@ struct InnerProfilePicView: View {
     let size: CGFloat
     let highlight: Highlight
     let disable_animation: Bool
+    @ObservedObject var settings: UserSettingsStore
+    @StateObject private var networkMonitor = NetworkMonitor.shared
+    
+    init(url: URL?, fallbackUrl: URL?, size: CGFloat, highlight: Highlight, disable_animation: Bool, settings: UserSettingsStore) {
+        self.url = url
+        self.fallbackUrl = fallbackUrl
+        self.size = size
+        self.highlight = highlight
+        self.disable_animation = disable_animation
+        self.settings = settings
+    }
+    
+    /// Returns true if we should block loading due to Low Data Mode.
+    private var shouldBlockLoading: Bool {
+        return settings.low_data_mode || networkMonitor.isLowDataMode
+    }
 
     var Placeholder: some View {
         Circle()
@@ -42,23 +58,47 @@ struct InnerProfilePicView: View {
             .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
             .padding(2)
     }
+    
+    /// Low Data Mode placeholder with person icon
+    var LowDataPlaceholder: some View {
+        ZStack {
+            Circle()
+                .fill(
+                    LinearGradient(
+                        colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.1)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .frame(width: size, height: size)
+            
+            Image(systemName: "person.fill")
+                .font(.system(size: size * 0.5))
+                .foregroundColor(.gray.opacity(0.6))
+        }
+        .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
+    }
 
     var body: some View {
-        KFAnimatedImage(url)
-            .imageContext(.pfp, disable_animation: disable_animation)
-            .onFailure(fallbackUrl: fallbackUrl, cacheKey: url?.absoluteString)
-            .cancelOnDisappear(true)
-            .configure { view in
-                view.framePreloadCount = 3
-            }
-            .placeholder { _ in
-                Placeholder
-            }
-            .scaledToFill()
-        .frame(width: size, height: size)
-        .kfClickable()
-        .clipShape(Circle())
-        .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
+        if shouldBlockLoading {
+            LowDataPlaceholder
+        } else {
+            KFAnimatedImage(url)
+                .imageContext(.pfp, disable_animation: disable_animation)
+                .onFailure(fallbackUrl: fallbackUrl, cacheKey: url?.absoluteString)
+                .cancelOnDisappear(true)
+                .configure { view in
+                    view.framePreloadCount = 3
+                }
+                .placeholder { _ in
+                    Placeholder
+                }
+                .scaledToFill()
+            .frame(width: size, height: size)
+            .kfClickable()
+            .clipShape(Circle())
+            .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
+        }
     }
 }
 
@@ -108,7 +148,7 @@ struct ProfilePicView: View {
     
     var body: some View {
         ZStack (alignment: Alignment(horizontal: .trailing, vertical: .bottom)) {
-            InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: privacy_sensitive_pubkey, profiles: profiles), fallbackUrl: URL(string: robohash(privacy_sensitive_pubkey)), size: size, highlight: highlight, disable_animation: disable_animation)
+            InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: privacy_sensitive_pubkey, profiles: profiles), fallbackUrl: URL(string: robohash(privacy_sensitive_pubkey)), size: size, highlight: highlight, disable_animation: disable_animation, settings: damusState.settings)
             
             if self.zappability_indicator, let lnurl = self.get_lnurl(), lnurl != "" {
                 Image("zap.fill")

@@ -51,7 +51,7 @@ extension NostrNetworkManager {
         }
         
         func stop() async {
-            await withTaskGroup { group in
+            await withTaskGroup(of: Void.self) { group in
                 // Spawn each cancellation in parallel for better execution speed
                 group.addTask {
                     await self.subscriptionSwitcherTask?.cancel()

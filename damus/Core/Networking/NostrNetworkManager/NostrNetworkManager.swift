@@ -70,7 +70,7 @@ class NostrNetworkManager {
     }
     
     func close() async {
-        await withTaskGroup { group in
+        await withTaskGroup(of: Void.self) { group in
             // Spawn each cancellation task in parallel for faster execution speed
             group.addTask {
                 await self.reader.cancelAllTasks()
