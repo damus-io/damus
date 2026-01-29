@@ -122,25 +122,20 @@ class WalletModel: ObservableObject {
     
     
     func refreshWalletInformation() async throws {
-        await self.resetWalletStateInformation()
+        // Implementation note: Do not reset wallet information here
+        // This is important to avoid re-rendering the view twice (waste),
+        // and to avoid refreshable tasks to be cancelled before updating everything
         try await loadWalletInformation()
     }
     
     func loadWalletInformation() async throws {
-        try await loadBalance()
-        try await loadTransactionList()
-    }
-    
-    func loadBalance() async throws {
+        // Implementation note: Get all needed info first, then atomically set the new state.
+        // This is important to avoid re-rendering the view twice (waste),
+        // and to avoid refreshable tasks to be cancelled before updating everything
         let balance = try await fetchBalance()
-        DispatchQueue.main.async {
-            self.balance = balance
-        }
-    }
-    
-    func loadTransactionList() async throws {
         let transactions = try await fetchTransactions(from: nil, until: nil, limit: 50, offset: 0, unpaid: false, type: "")
         DispatchQueue.main.async {
+            self.balance = balance
             self.transactions = transactions
         }
     }
