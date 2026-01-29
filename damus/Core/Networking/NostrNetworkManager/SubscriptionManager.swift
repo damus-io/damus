@@ -518,6 +518,7 @@ extension NostrNetworkManager {
             await self.entityPreloader.stop()
         }
         
+        /// Cancels and cleans up all managed tasks.
         func cancelAllTasks() async {
             await self.taskManager.cancelAllTasks()
         }
@@ -544,7 +545,7 @@ extension NostrNetworkManager {
             }
             
             func cancelAllTasks() async {
-                    await withTaskGroup { group in
+                    await withTaskGroup(of: Void.self) { group in
                         Self.logger.info("Cancelling all SubscriptionManager tasks")
                     // Start each task cancellation in parallel for faster execution
                     for (taskId, _) in self.tasks {

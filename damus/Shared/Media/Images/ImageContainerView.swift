@@ -12,11 +12,14 @@ import Kingfisher
 struct ImageContainerView: View {
     let video_coordinator: DamusVideoCoordinator
     let url: MediaUrl
-    let settings: UserSettingsStore
+    /// User settings driving media loading behavior.
+    @ObservedObject var settings: UserSettingsStore
     
     @Binding var imageDict: [URL: UIImage]
     @State private var image: UIImage?
     @State private var showShareSheet = false
+    /// Shared monitor for Low Data Mode changes.
+    @StateObject private var networkMonitor = NetworkMonitor.shared
     
     init(video_coordinator: DamusVideoCoordinator, url: MediaUrl, settings: UserSettingsStore, imageDict: Binding<[URL: UIImage]>) {
         self.video_coordinator = video_coordinator
@@ -52,17 +55,69 @@ struct ImageContainerView: View {
             }
     }
     
+    /// Determines if media loading should be blocked due to low data mode.
+    /// Checks both user preference and iOS system Low Data Mode.
+    private var shouldBlockMediaLoading: Bool {
+        settings.low_data_mode || networkMonitor.isLowDataMode
+    }
+    
     var body: some View {
         Group {
-            switch url {
-                case .image(let url):
-                    Img(url: url)
-                case .video(let url):
-                    DamusVideoPlayerView(url: url, coordinator: video_coordinator, style: .no_controls(on_tap: nil))
+            if shouldBlockMediaLoading {
+                // Low Data Mode: Show placeholder instead of loading media
+                LowDataModePlaceholder(url: url, onTap: {
+                    // Future: Allow manual load on tap
+                })
+            } else {
+                switch url {
+                    case .image(let url):
+                        Img(url: url)
+                    case .video(let url):
+                        DamusVideoPlayerView(url: url, coordinator: video_coordinator, style: .no_controls(on_tap: nil))
+                }
             }
         }
     }
 }
+
+
+/// A placeholder view displayed when media loading is disabled due to Low Data Mode.
+///
+/// This view shows a gray placeholder with an icon and localized text indicating
+/// that media has been hidden to save data. Users can tap the placeholder to
+/// manually load the content (future enhancement).
+///
+/// - Parameters:
+///   - url: The `MediaUrl` of the hidden content.
+///   - onTap: A closure called when the user taps the placeholder.
+struct LowDataModePlaceholder: View {
+    /// The URL of the media that was not loaded.
+    let url: MediaUrl
+    
+    /// Called when the user taps the placeholder to request manual load.
+    let onTap: () -> Void
+    
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.gray.opacity(0.2))
+            VStack(spacing: 8) {
+                Image(systemName: "photo")
+                    .font(.largeTitle)
+                    .foregroundColor(.gray)
+                Text(NSLocalizedString("Media hidden (Low Data Mode)", comment: "Placeholder text when media is blocked due to low data mode"))
+                    .font(.caption)
+                    .foregroundColor(.gray)
+            }
+        }
+        .frame(minHeight: 150)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onTap()
+        }
+    }
+}
+
 
 let test_image_url = URL(string: "https://jb55.com/red-me.jpg")!
 fileprivate let test_video_url = URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!
