@@ -98,6 +98,7 @@ struct BannerImageView: View {
     /// User settings controlling low‑data behavior.
     @ObservedObject var settings: UserSettingsStore
     
+    /// Current banner image URL string.
     @State private var banner: String?
     /// Shared monitor for Low Data Mode changes.
     @StateObject private var networkMonitor = NetworkMonitor.shared

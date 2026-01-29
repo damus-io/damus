@@ -39,7 +39,7 @@ There is no Big Tech moat. Therefore, seamless interoperability with thousands o
 
 ## If there are no ads, how is Damus funded?
 
-Damus offers a paid subscription 🟣 purple 🟣 https://damus.io/purple/. \
+Damus offers a paid subscription 🟣 purple 🟣 [damus.io/purple](https://damus.io/purple/). \
 Initial benefits include a unique subscriber number, subscriber badge, and auto-translate powered by DeepL.
 
 Damus has also graciously received donations or grants from hundreds of Damus users, [Opensats](https://opensats.org/), and the [Human Rights Foundation](https://hrf.org/).
@@ -81,6 +81,9 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 
 - Relays: You can add more relays to send your notes to by tapping the "+".
   - Find more relays to add: [nostr.info/relays](https://nostr.info/relays/)
+- Low Data Mode: Toggle this to save data by blocking automatic media loading.
+  - When enabled, images and banners will be replaced with placeholders.
+  - You can tap individual placeholders to load specific images.
 - Public Key (pubkey): Your public, personal address and how people can find and tag you
 - Secret Key: Your _private_ key unique to you. Never share your private key publicly and share with other clients at your own risk!
   - Save your keys somewhere safe
@@ -131,6 +134,7 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 
 Paste an invoice from your favorite LN wallet.
 (Sats or Satoshis are the smallest denomination of bitcoin)
+
 ##### Alby (browser extension)
 
 - Get the [Alby](https://getalby.com/) browser extension and create your Alby address [yourname]@getalby.com or connect your existing Lightning wallet
@@ -146,7 +150,7 @@ Paste an invoice from your favorite LN wallet.
 
 ## Contributing
 
-Contributors welcome! Start by examining known issues: https://github.com/damus-io/damus/issues.
+Contributors welcome! Start by examining known issues: [github.com/damus-io/damus/issues](https://github.com/damus-io/damus/issues).
 
 ### Mailing lists
 
