@@ -116,7 +116,7 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 
 #### 🔍 Global Feed (magnify glass, bottom navigation)
 
-- View the Global Feed from all the relays you've added in ⚙️ Settings. Currently you can only search hashtags and user names and pubkeys
+- View the Global Feed from all the relays you've added in ⚙️ Settings. Currently you can only search hashtags and usernames and pubkeys
 
 #### 🔔 Notifications
 
@@ -151,6 +151,10 @@ Paste an invoice from your favorite LN wallet.
 ## Contributing
 
 Contributors welcome! Start by examining known issues: [github.com/damus-io/damus/issues](https://github.com/damus-io/damus/issues).
+
+### CI/CD
+
+The project uses GitHub Actions for Continuous Integration. The workflow is defined in `.github/workflows/ci.yml`. It runs automated tests and checks on every push and pull request to ensure code quality and build stability.
 
 ### Mailing lists
 

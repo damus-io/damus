@@ -57,6 +57,7 @@ struct ProfileImageContainerView: View {
 /// Features a person silhouette icon with a subtle pulsing animation
 /// to indicate that the image could be loaded on demand.
 struct ProfilePicPlaceholder: View {
+    /// Controls the pulsing animation state.
     @State private var isPulsing = false
     
     var body: some View {
