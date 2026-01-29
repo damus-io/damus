@@ -34,9 +34,12 @@ struct InnerProfilePicView: View {
     let size: CGFloat
     let highlight: Highlight
     let disable_animation: Bool
+    /// User settings controlling low‑data behavior.
     @ObservedObject var settings: UserSettingsStore
+    /// Shared monitor for Low Data Mode changes.
     @StateObject private var networkMonitor = NetworkMonitor.shared
     
+    /// Initializes the profile picture view.
     init(url: URL?, fallbackUrl: URL?, size: CGFloat, highlight: Highlight, disable_animation: Bool, settings: UserSettingsStore) {
         self.url = url
         self.fallbackUrl = fallbackUrl

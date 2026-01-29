@@ -305,7 +305,9 @@ struct ImageCarousel<Content: View>: View {
     /// The model that holds information and state of this carousel
     /// This is observed to update the view when the model changes
     @ObservedObject var model: CarouselModel
+    /// User settings controlling low‑data behavior.
     @ObservedObject var settings: UserSettingsStore
+    /// Shared monitor for Low Data Mode changes.
     @StateObject private var networkMonitor = NetworkMonitor.shared
     let content: ((_ dismiss: @escaping (() -> Void)) -> Content)?
 

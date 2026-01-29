@@ -6,7 +6,7 @@
 
 The social network you control
 
-A twitter-like [nostr][nostr] client for iPhone, iPad and MacOS.
+A twitter-like [nostr][nostr] client for iPhone, iPad and macOS.
 
 [![License: GPL-3.0](https://img.shields.io/github/license/damus-io/damus?labelColor=27303D&color=0877d2)](/LICENSE)
 [![Damus CI](https://github.com/damus-io/damus/actions/workflows/ci.yml/badge.svg)](https://github.com/damus-io/damus/actions/workflows/ci.yml)
@@ -75,12 +75,12 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 
 ### Damus iOS
 
-1. Get the Damus app on the iOS App Store: https://apps.apple.com/ca/app/damus/id1628663131
+1. Get the Damus app on the iOS App Store: [apps.apple.com/ca/app/damus/id1628663131](https://apps.apple.com/ca/app/damus/id1628663131)
 
 #### ⚙️ Settings (gear icon, top right)
 
 - Relays: You can add more relays to send your notes to by tapping the "+".
-  - Find more relays to add: https://nostr.info/relays/
+  - Find more relays to add: [nostr.info/relays](https://nostr.info/relays/)
 - Public Key (pubkey): Your public, personal address and how people can find and tag you
 - Secret Key: Your _private_ key unique to you. Never share your private key publicly and share with other clients at your own risk!
   - Save your keys somewhere safe
@@ -124,21 +124,21 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 1. Go to your Profile Page on Damus app
 2. Tap on Edit button at the top
 3. You will see text fields to update your information and bio
-4. For PFP, insert a URL containing your image (support video: https://cdn.jb55.com/vid/pfp-editor.mp4)
+4. For PFP, insert a URL containing your image (support video: [cdn.jb55.com/vid/pfp-editor.mp4](https://cdn.jb55.com/vid/pfp-editor.mp4))
 5. Save
 
 #### ⚡️ Request Sats
 
 Paste an invoice from your favorite LN wallet.
 (Sats or Satoshis are the smallest denomination of bitcoin)
-**Alby (browser extension)**
+##### Alby (browser extension)
 
 - Get the [Alby](https://getalby.com/) browser extension and create your Alby address [yourname]@getalby.com or connect your existing Lightning wallet
-- Convert your Damus secret key from nsec to hex at https://damus.io/key then go to Settings in Alby and under the Nostr section at the bottom of the page add your private hex key. You can also generate new address in the extension
+- Convert your Damus secret key from nsec to hex at [damus.io/key](https://damus.io/key) then go to Settings in Alby and under the Nostr section at the bottom of the page add your private hex key. You can also generate new address in the extension
 - Click the Alby extension > click Receive > enter the amount of Sats > click Get Invoice > click Copy > then paste into Damus
 - Note: On Damus Web it will appear as a string of characters but on Damus iOS it will appear as a clickable image
 
-**Zeus (mobile app)**
+##### Zeus (mobile app)
 
 - Download [Zeus](https://zeusln.app/) app (iOS, Google, APK)
 - Tap Get Started button > tap Connect a node > click on + sign (top right) > select Indhub > press Scan Lndhub QR > (from the Alby browser extension… click your account on the top left > click Manage Accounts > click 3-dot menu to right of your account and click Export Account to get a QR code then go back to Zeus app) > scan the QR Code and tap Save Node Config button

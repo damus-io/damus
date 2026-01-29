@@ -456,6 +456,7 @@ extension NostrNetworkManager {
         
         // MARK: - Task management
         
+        /// Cancels and cleans up all managed tasks.
         func cancelAllTasks() async {
             await self.taskManager.cancelAllTasks()
         }

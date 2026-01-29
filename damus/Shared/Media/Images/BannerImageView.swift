@@ -95,9 +95,11 @@ struct BannerImageView: View {
     let pubkey: Pubkey
     let profiles: Profiles
     let damusState: DamusState
+    /// User settings controlling low‑data behavior.
     @ObservedObject var settings: UserSettingsStore
     
-    @State var banner: String?
+    @State private var banner: String?
+    /// Shared monitor for Low Data Mode changes.
     @StateObject private var networkMonitor = NetworkMonitor.shared
     
     init(pubkey: Pubkey, profiles: Profiles, disable_animation: Bool, banner: String? = nil, damusState: DamusState, settings: UserSettingsStore) {
@@ -137,6 +139,7 @@ struct BannerImageView: View {
 /// Features a landscape/panorama icon with a subtle shimmer effect
 /// to indicate the banner image is hidden to save data.
 struct BannerPlaceholder: View {
+    /// Horizontal offset driving the shimmer animation.
     @State private var shimmerOffset: CGFloat = -1
     
     var body: some View {

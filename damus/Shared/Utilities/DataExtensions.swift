@@ -7,6 +7,7 @@
 import Foundation
 
 extension Data {
+    /// Returns the contents of the Data value as a byte array.
     var byteArray: [UInt8] {
         return [UInt8](self)
     }

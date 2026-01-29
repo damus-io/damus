@@ -69,6 +69,7 @@ class NostrNetworkManager {
         await self.ping()
     }
     
+    /// Cancels active network/profile tasks and closes the relay pool.
     func close() async {
         await withTaskGroup(of: Void.self) { group in
             // Spawn each cancellation task in parallel for faster execution speed

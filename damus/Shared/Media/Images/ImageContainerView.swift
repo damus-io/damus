@@ -12,11 +12,13 @@ import Kingfisher
 struct ImageContainerView: View {
     let video_coordinator: DamusVideoCoordinator
     let url: MediaUrl
+    /// User settings driving media loading behavior.
     @ObservedObject var settings: UserSettingsStore
     
     @Binding var imageDict: [URL: UIImage]
     @State private var image: UIImage?
     @State private var showShareSheet = false
+    /// Shared monitor for Low Data Mode changes.
     @StateObject private var networkMonitor = NetworkMonitor.shared
     
     init(video_coordinator: DamusVideoCoordinator, url: MediaUrl, settings: UserSettingsStore, imageDict: Binding<[URL: UIImage]>) {

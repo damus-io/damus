@@ -134,6 +134,7 @@ struct NavDismissBarView: View {
 struct ProfilePicImageView: View {
     let pubkey: Pubkey
     let profiles: Profiles
+    /// User settings driving low‑data behavior.
     @ObservedObject var settings: UserSettingsStore
     let nav: NavigationCoordinator
     let shouldShowEditButton: Bool
