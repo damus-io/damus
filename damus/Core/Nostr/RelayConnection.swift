@@ -7,6 +7,7 @@
 
 import Combine
 import Foundation
+import Negentropy
 
 enum NostrConnectionEvent {
     /// Other non-message websocket events
@@ -61,6 +62,16 @@ final class RelayConnection: ObservableObject {
     private var processEvent: (WebSocketEvent) -> ()
     private let relay_url: RelayURL
     var log: RelayLog?
+    
+    /// The queue of WebSocket events to be processed
+    /// We need this queue to ensure events are processed and sent to RelayPool in the exact order in which they arrive.
+    /// See `processEventsTask()` for more information
+    var wsEventQueue: QueueableNotify<WebSocketEvent>
+    /// The task which will process WebSocket events in the order in which we receive them from the wire
+    var wsEventProcessTask: Task<Void, any Error>?
+    
+    @RelayPoolActor // Isolate this to a specific actor to avoid thread-satefy issues.
+    var negentropyStreams: [String: AsyncStream<NegentropyResponse>.Continuation] = [:]
 
     init(url: RelayURL,
          handleEvent: @escaping (NostrConnectionEvent) async -> (),
@@ -69,6 +80,33 @@ final class RelayConnection: ObservableObject {
         self.relay_url = url
         self.handleEvent = handleEvent
         self.processEvent = processUnverifiedWSEvent
+        self.wsEventQueue = .init(maxQueueItems: 1000)
+        self.wsEventProcessTask = nil
+        self.wsEventProcessTask = Task {
+            try await self.processEventsTask()
+        }
+    }
+    
+    deinit {
+        self.wsEventProcessTask?.cancel()
+    }
+    
+    /// The task that will stream the queue of WebSocket events to be processed
+    /// We need this in order to ensure events are processed and sent to RelayPool in the exact order in which they arrive.
+    ///
+    /// We need this (or some equivalent syncing mechanism) because without it, two WebSocket events can be processed concurrently,
+    /// and sometimes sent in the wrong order due to difference in processing timing.
+    ///
+    /// For example, streaming a filter that yields 1 event can cause the EOSE signal to arrive in RelayPool before the event, simply because the event
+    /// takes longer to process compared to the EOSE signal.
+    ///
+    /// To prevent this, we send raw WebSocket events to this queue BEFORE any processing (to ensure equal timing),
+    /// and then process the queue in the order in which they appear
+    func processEventsTask() async throws {
+        for await item in await self.wsEventQueue.stream {
+            try Task.checkCancellation()
+            await self.receive(event: item)
+        }
     }
     
     func ping() {
@@ -104,12 +142,12 @@ final class RelayConnection: ObservableObject {
             .sink { [weak self] completion in
                 switch completion {
                 case .failure(let error):
-                    Task { await self?.receive(event: .error(error)) }
+                    Task { await self?.wsEventQueue.add(item: .error(error)) }
                 case .finished:
-                    Task { await self?.receive(event: .disconnected(.normalClosure, nil)) }
+                    Task { await self?.wsEventQueue.add(item: .disconnected(.normalClosure, nil)) }
                 }
             } receiveValue: { [weak self] event in
-                Task { await self?.receive(event: event) }
+                Task { await self?.wsEventQueue.add(item: event) }
             }
             
         socket.connect()
@@ -227,9 +265,12 @@ final class RelayConnection: ObservableObject {
             // we will not need to verify nostr events at this point.
             if let ev = decode_and_verify_nostr_response(txt: messageString) {
                 await self.handleEvent(.nostr_event(ev))
+                if let negentropyResponse = ev.negentropyResponse {
+                    await self.negentropyStreams[negentropyResponse.subscriptionId]?.yield(negentropyResponse)
+                }
                 return
             }
-            print("failed to decode event \(messageString)")
+            print("\(self.relay_url): failed to decode event \(messageString)")
         case .data(let messageData):
             if let messageString = String(data: messageData, encoding: .utf8) {
                 await receive(message: .string(messageString))
@@ -238,54 +279,92 @@ final class RelayConnection: ObservableObject {
             print("An unexpected URLSessionWebSocketTask.Message was received.")
         }
     }
-}
-
-func make_nostr_req(_ req: NostrRequest) -> String? {
-    switch req {
-    case .subscribe(let sub):
-        return make_nostr_subscription_req(sub.filters, sub_id: sub.sub_id)
-    case .unsubscribe(let sub_id):
-        return make_nostr_unsubscribe_req(sub_id)
-    case .event(let ev):
-        return make_nostr_push_event(ev: ev)
-    case .auth(let ev):
-        return make_nostr_auth_event(ev: ev)
-    }
-}
-
-func make_nostr_auth_event(ev: NostrEvent) -> String? {
-    guard let event = encode_json(ev) else {
-        return nil
-    }
-    let encoded = "[\"AUTH\",\(event)]"
-    print(encoded)
-    return encoded
-}
-
-func make_nostr_push_event(ev: NostrEvent) -> String? {
-    guard let event = encode_json(ev) else {
-        return nil
-    }
-    let encoded = "[\"EVENT\",\(event)]"
-    print(encoded)
-    return encoded
-}
-
-func make_nostr_unsubscribe_req(_ sub_id: String) -> String? {
-    "[\"CLOSE\",\"\(sub_id)\"]"
-}
-
-func make_nostr_subscription_req(_ filters: [NostrFilter], sub_id: String) -> String? {
-    let encoder = JSONEncoder()
-    var req = "[\"REQ\",\"\(sub_id)\""
-    for filter in filters {
-        req += ","
-        guard let filter_json = try? encoder.encode(filter) else {
-            return nil
+    
+    // MARK: - Negentropy logic
+    
+    /// Retrieves the IDs of events missing locally compared to the relay using negentropy protocol.
+    ///
+    /// - Parameters:
+    ///   - filter: The Nostr filter to scope the sync
+    ///   - negentropyVector: The local storage vector for comparison
+    ///   - timeout: Optional timeout for the operation
+    /// - Returns: Array of IDs that the relay has but we don't
+    /// - Throws: NegentropySyncError on failure
+    @RelayPoolActor
+    func getMissingIds(filter: NostrFilter, negentropyVector: NegentropyStorageVector, timeout: Duration?) async throws -> [Id] {
+        if let relayMetadata = try? await fetch_relay_metadata(relay_id: self.relay_url),
+           let supportsNegentropy = relayMetadata.supports_negentropy {
+            if !supportsNegentropy {
+                // Throw an error if the relay specifically advertises that there is no support for negentropy
+                throw NegentropySyncError.notSupported
+            }
         }
-        let filter_json_str = String(decoding: filter_json, as: UTF8.self)
-        req += filter_json_str
+        let timeout = timeout ?? .seconds(3)
+        let frameSizeLimit = 60_000 // Copied from rust-nostr project: Default frame limit is 128k. Halve that (hex encoding) and subtract a bit (JSON msg overhead)
+        try? negentropyVector.seal()    // Error handling note: We do not care if it throws an `alreadySealed` error. As long as it is sealed in the end it is fine
+        let negentropyClient = try Negentropy(storage: negentropyVector, frameSizeLimit: frameSizeLimit)
+        let initialMessage = try negentropyClient.initiate()
+        let subscriptionId = UUID().uuidString
+        var allNeedIds: [Id] = []
+        for await response in negentropyStream(subscriptionId: subscriptionId, filter: filter, initialMessage: initialMessage, timeoutDuration: timeout) {
+            switch response {
+            case .error(subscriptionId: _, reasonCodeString: let reasonCodeString):
+                throw NegentropySyncError.genericError(reasonCodeString)
+            case .message(subscriptionId: _, data: let data):
+                var haveIds: [Id] = []
+                var needIds: [Id] = []
+                let nextMessage = try negentropyClient.reconcile(data, haveIds: &haveIds, needIds: &needIds)
+                allNeedIds.append(contentsOf: needIds)
+                if let nextMessage {
+                    self.send(.typical(.negentropyMessage(subscriptionId: subscriptionId, message: nextMessage)))
+                }
+                else {
+                    // Reconciliation is complete
+                    return allNeedIds
+                }
+            case .invalidResponse(subscriptionId: _):
+                throw NegentropySyncError.relayError
+            }
+        }
+        // If the stream completes without a response, throw a timeout/relay error
+        throw NegentropySyncError.relayError
     }
-    req += "]"
-    return req
+    
+    enum NegentropySyncError: Error {
+        /// Fallback generic error
+        case genericError(String)
+        /// Negentropy is not supported by the relay
+        case notSupported
+        /// Something went wrong with the relay communication during negentropy sync
+        case relayError
+    }
+    
+    @RelayPoolActor
+    private func negentropyStream(subscriptionId: String, filter: NostrFilter, initialMessage: [UInt8], timeoutDuration: Duration? = nil) -> AsyncStream<NegentropyResponse> {
+        return AsyncStream<NegentropyResponse> { continuation in
+            self.negentropyStreams[subscriptionId] = continuation
+            let nostrRequest: NostrRequest = .negentropyOpen(subscriptionId: subscriptionId, filter: filter, initialMessage: initialMessage)
+            self.send(.typical(nostrRequest))
+            let timeoutTask = Task {
+                if let timeoutDuration {
+                    try Task.checkCancellation()
+                    try await Task.sleep(for: timeoutDuration)
+                    try Task.checkCancellation()
+                    continuation.finish()
+                }
+            }
+            continuation.onTermination = { @Sendable _ in
+                Task {
+                    await self.removeNegentropyStream(id: subscriptionId)
+                    self.send(.typical(.negentropyClose(subscriptionId: subscriptionId)))
+                }
+                timeoutTask.cancel()
+            }
+        }
+    }
+    
+    @RelayPoolActor
+    private func removeNegentropyStream(id: String) {
+        self.negentropyStreams[id] = nil
+    }
 }

@@ -16,7 +16,6 @@ struct WalletView: View {
     @ObservedObject var model: WalletModel
     @ObservedObject var settings: UserSettingsStore
     @State private var showBalance: Bool = false
-    @State private var walletRefreshTask: Task<Void, Never>? = nil
 
     init(damus_state: DamusState, model: WalletModel? = nil) {
         self.damus_state = damus_state
@@ -104,11 +103,11 @@ struct WalletView: View {
                         )
                     }
                 }
-                .onAppear() {
-                    self.refreshWalletInformation()
+                .task {
+                    await self.refreshWalletInformation()
                 }
                 .refreshable {
-                    self.refreshWalletInformation()
+                    await self.refreshWalletInformation()
                 }
                 .sheet(isPresented: $show_settings, onDismiss: { self.show_settings = false }) {
                     ScrollView {
@@ -126,20 +125,16 @@ struct WalletView: View {
         }
     }
     
-    @MainActor
-    func refreshWalletInformation() {
-        walletRefreshTask?.cancel()
-        walletRefreshTask = Task {
-            do {
-                try await self.model.refreshWalletInformation()
+    func refreshWalletInformation() async {
+        do {
+            try await self.model.refreshWalletInformation()
+        }
+        catch {
+            guard let error = error as? ErrorView.UserPresentableErrorProtocol else {
+                Log.error("Error while refreshing wallet: %s", for: .nwc, error.localizedDescription)
+                return
             }
-            catch {
-                guard let error = error as? ErrorView.UserPresentableErrorProtocol else {
-                    Log.error("Error while refreshing wallet: %s", for: .nwc, error.localizedDescription)
-                    return
-                }
-                present_sheet(.error(error.userPresentableError))
-            }
+            present_sheet(.error(error.userPresentableError))
         }
     }
 }

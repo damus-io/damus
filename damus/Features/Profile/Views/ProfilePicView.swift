@@ -139,6 +139,17 @@ struct ProfilePicView: View {
             pubkey
         }
     }
+    
+    static func loadFromNdb(pubkey: Pubkey, ndb: Ndb) throws -> String? {
+        try ndb.lookup_profile(pubkey, borrow: { profileRecord in
+            switch profileRecord {
+            case .none:
+                return nil
+            case .some(let profileRecord):
+                return profileRecord.profile?.picture
+            }
+        })
+    }
 
     func get_lnurl() -> String? {
         return try? profiles.lookup_with_timestamp(pubkey, borrow: { pr in
@@ -167,6 +178,13 @@ struct ProfilePicView: View {
             }
         }
         .task {
+            // Load from ndb asynchronously to avoid blocking the main thread
+            if picture == nil {
+                if let loaded = try? Self.loadFromNdb(pubkey: pubkey, ndb: damusState.ndb) {
+                    self.picture = loaded
+                }
+            }
+            
             for await profile in await damusState.nostrNetwork.profilesManager.streamProfile(pubkey: pubkey) {
                 if let pic = profile.picture {
                     self.picture = pic

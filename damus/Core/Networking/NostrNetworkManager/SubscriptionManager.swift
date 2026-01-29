@@ -6,6 +6,7 @@
 //
 import Foundation
 import os
+import Negentropy
 
 
 extension NostrNetworkManager {
@@ -19,6 +20,7 @@ extension NostrNetworkManager {
         private var ndb: Ndb
         private var taskManager: TaskManager
         private let experimentalLocalRelayModelSupport: Bool
+        private let entityPreloader: EntityPreloader
         
         private static let logger = Logger(
             subsystem: Constants.MAIN_APP_BUNDLE_IDENTIFIER,
@@ -30,16 +32,17 @@ extension NostrNetworkManager {
             self.ndb = ndb
             self.taskManager = TaskManager()
             self.experimentalLocalRelayModelSupport = experimentalLocalRelayModelSupport
+            self.entityPreloader = EntityPreloader(pool: pool, ndb: ndb)
         }
         
         // MARK: - Subscribing and Streaming data from Nostr
         
         /// Streams notes until the EOSE signal
-        func streamExistingEvents(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, timeout: Duration? = nil, streamMode: StreamMode? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
+        func streamExistingEvents(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, timeout: Duration? = nil, streamMode: StreamMode? = nil, preloadStrategy: PreloadStrategy? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
             let timeout = timeout ?? .seconds(10)
             return AsyncStream<NdbNoteLender> { continuation in
                 let streamingTask = Task {
-                    outerLoop: for await item in self.advancedStream(filters: filters, to: desiredRelays, timeout: timeout, streamMode: streamMode, id: id) {
+                    outerLoop: for await item in self.advancedStream(filters: filters, to: desiredRelays, timeout: timeout, streamMode: streamMode, preloadStrategy: preloadStrategy, id: id) {
                         try Task.checkCancellation()
                         switch item {
                         case .event(let lender):
@@ -63,10 +66,10 @@ extension NostrNetworkManager {
         /// Subscribes to data from user's relays, for a maximum period of time — after which the stream will end.
         ///
         /// This is useful when waiting for some specific data from Nostr, but not indefinitely.
-        func timedStream(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, timeout: Duration, streamMode: StreamMode? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
+        func timedStream(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, timeout: Duration, streamMode: StreamMode? = nil, preloadStrategy: PreloadStrategy? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
             return AsyncStream<NdbNoteLender> { continuation in
                 let streamingTask = Task {
-                    for await item in self.advancedStream(filters: filters, to: desiredRelays, timeout: timeout, streamMode: streamMode, id: id) {
+                    for await item in self.advancedStream(filters: filters, to: desiredRelays, timeout: timeout, streamMode: streamMode, preloadStrategy: preloadStrategy, id: id) {
                         try Task.checkCancellation()
                         switch item {
                         case .event(lender: let lender):
@@ -87,10 +90,10 @@ extension NostrNetworkManager {
         /// Subscribes to notes indefinitely
         ///
         /// This is useful when simply streaming all events indefinitely
-        func streamIndefinitely(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, streamMode: StreamMode? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
+        func streamIndefinitely(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, streamMode: StreamMode? = nil, preloadStrategy: PreloadStrategy? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
             return AsyncStream<NdbNoteLender> { continuation in
                 let streamingTask = Task {
-                    for await item in self.advancedStream(filters: filters, to: desiredRelays, streamMode: streamMode, id: id) {
+                    for await item in self.advancedStream(filters: filters, to: desiredRelays, streamMode: streamMode, preloadStrategy: preloadStrategy, id: id) {
                         try Task.checkCancellation()
                         switch item {
                         case .event(lender: let lender):
@@ -110,10 +113,18 @@ extension NostrNetworkManager {
             }
         }
         
-        func advancedStream(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, timeout: Duration? = nil, streamMode: StreamMode? = nil, id: UUID? = nil) -> AsyncStream<StreamItem> {
+        func advancedStream(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, timeout: Duration? = nil, streamMode: StreamMode? = nil, preloadStrategy: PreloadStrategy? = nil, id: UUID? = nil) -> AsyncStream<StreamItem> {
             let id = id ?? UUID()
             let streamMode = streamMode ?? defaultStreamMode()
+            let preloadStrategy = preloadStrategy ?? self.defaultPreloadingMode()
             return AsyncStream<StreamItem> { continuation in
+                let timeoutTask = Task {
+                    guard let timeout else { return }
+                    try? await Task.sleep(for: timeout)
+                    Self.logger.debug("Subscription \(id.uuidString, privacy: .public): Timed out!")
+                    continuation.finish()
+                }
+                
                 let startTime = CFAbsoluteTimeGetCurrent()
                 Self.logger.debug("Session subscription \(id.uuidString, privacy: .public): Started")
                 var ndbEOSEIssued = false
@@ -138,25 +149,27 @@ extension NostrNetworkManager {
                 
                 var networkStreamTask: Task<Void, any Error>? = nil
                 var latestNoteTimestampSeen: UInt32? = nil
+                var negentropyStorageVector = NegentropyStorageVector()
                 
                 let startNetworkStreamTask = {
                     guard streamMode.shouldStreamFromNetwork else { return }
                     networkStreamTask = Task {
                         while !Task.isCancelled {
-                            let optimizedFilters = filters.map {
-                                var optimizedFilter = $0
-                                // Shift the since filter 2 minutes (120 seconds) before the last note timestamp
-                                if let latestTimestamp = latestNoteTimestampSeen {
-                                    optimizedFilter.since = latestTimestamp > 120 ? latestTimestamp - 120 : 0
-                                }
-                                return optimizedFilter
-                            }
-                            for await item in self.multiSessionNetworkStream(filters: optimizedFilters, to: desiredRelays, streamMode: streamMode, id: id) {
+                            let networkOptimizationData = StreamMode.NetworkOptimizationData.from(
+                                strategy: streamMode.networkOptimizationStrategy,
+                                latestNoteTimestampSeen: latestNoteTimestampSeen,
+                                negentropyStorageVector: negentropyStorageVector
+                            )
+                            for await item in self.multiSessionNetworkStream(filters: filters, to: desiredRelays, streamMode: streamMode, id: id, networkOptimizationData: networkOptimizationData) {
                                 try Task.checkCancellation()
                                 logStreamPipelineStats("SubscriptionManager_Network_Stream_\(id)", "SubscriptionManager_Advanced_Stream_\(id)")
                                 switch item {
                                 case .event(let lender):
                                     logStreamPipelineStats("SubscriptionManager_Advanced_Stream_\(id)", "Consumer_\(id)")
+                                    // Preload entities if requested
+                                    if case .preload = preloadStrategy {
+                                        self.entityPreloader.preload(note: lender)
+                                    }
                                     continuation.yield(item)
                                 case .eose:
                                     break   // Should not happen
@@ -193,7 +206,12 @@ extension NostrNetworkManager {
                                     else {
                                         latestNoteTimestampSeen = event.createdAt
                                     }
+                                    negentropyStorageVector.unsealAndInsert(nostrEvent: event)
                                 })
+                                // Preload entities if requested
+                                if case .preload = preloadStrategy {
+                                    self.entityPreloader.preload(note: lender)
+                                }
                                 continuation.yield(item)
                             case .eose:
                                 break   // Should not happen
@@ -213,13 +231,14 @@ extension NostrNetworkManager {
                 }
                 
                 continuation.onTermination = { @Sendable _ in
+                    timeoutTask.cancel()
                     networkStreamTask?.cancel()
                     ndbStreamTask.cancel()
                 }
             }
         }
         
-        private func multiSessionNetworkStream(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, streamMode: StreamMode? = nil, id: UUID? = nil) -> AsyncStream<StreamItem> {
+        private func multiSessionNetworkStream(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, streamMode: StreamMode? = nil, id: UUID? = nil, networkOptimizationData: StreamMode.NetworkOptimizationData?) -> AsyncStream<StreamItem> {
             let id = id ?? UUID()
             let streamMode = streamMode ?? defaultStreamMode()
             return AsyncStream<StreamItem> { continuation in
@@ -234,7 +253,7 @@ extension NostrNetworkManager {
                     }
                     
                     do {
-                        for await item in await self.pool.subscribe(filters: filters, to: desiredRelays, id: id) {
+                        for await item in await self.sessionNetworkStreamWithOptimization(filters: filters, to: desiredRelays, id: id, networkOptimizationData: networkOptimizationData) {
                             try Task.checkCancellation()
                             logStreamPipelineStats("RelayPool_Handler_\(id)", "SubscriptionManager_Network_Stream_\(id)")
                             switch item {
@@ -261,6 +280,36 @@ extension NostrNetworkManager {
                 continuation.onTermination = { @Sendable _ in
                     streamTask.cancel()
                 }
+            }
+        }
+        
+        /// Stream from the network with some optional optimization
+        private func sessionNetworkStreamWithOptimization(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, id: UUID? = nil, networkOptimizationData: StreamMode.NetworkOptimizationData?) async -> AsyncStream<RelayPool.StreamItem> {
+            guard let networkOptimizationData else {
+                // No optimization, just return a regular RelayPool subscription
+                return await self.pool.subscribe(filters: filters, to: desiredRelays, id: id)
+            }
+            switch networkOptimizationData {
+            case .sinceOptimization(let latestNoteTimestampSeen):
+                let optimizedFilters = filters.map {
+                    var optimizedFilter = $0
+                    // Shift the since filter 2 minutes (120 seconds) before the last note timestamp
+                    optimizedFilter.since = latestNoteTimestampSeen > 120 ? latestNoteTimestampSeen - 120 : 0
+                    return optimizedFilter
+                }
+                return await self.pool.subscribe(filters: optimizedFilters, to: desiredRelays, id: id)
+            case .negentropy(let negentropyStorageVector):
+                return AsyncStream<RelayPool.StreamItem>.with(task: { continuation in
+                    let id = id ?? UUID()
+                    do {
+                        for try await item in try await self.pool.negentropySubscribe(filters: filters, to: desiredRelays, negentropyVector: negentropyStorageVector, id: id, ignoreUnsupportedRelays: true) {
+                            continuation.yield(item)
+                        }
+                    }
+                    catch {
+                        Self.logger.error("Network subscription \(id.uuidString, privacy: .public): Streaming error: \(error.localizedDescription, privacy: .public)")
+                    }
+                })
             }
         }
         
@@ -350,7 +399,12 @@ extension NostrNetworkManager {
         // MARK: - Utility functions
         
         private func defaultStreamMode() -> StreamMode {
-            self.experimentalLocalRelayModelSupport ? .ndbFirst(optimizeNetworkFilter: false) : .ndbAndNetworkParallel(optimizeNetworkFilter: false)
+            // Note: Network optimizations disabled by default for now because we need more testing to understand the effects of turning them on by default.
+            self.experimentalLocalRelayModelSupport ? .ndbFirst(networkOptimization: nil) : .ndbAndNetworkParallel(networkOptimization: nil)
+        }
+        
+        private func defaultPreloadingMode() -> PreloadStrategy {
+            return .preload
         }
         
         // MARK: - Finding specific data from Nostr
@@ -456,6 +510,14 @@ extension NostrNetworkManager {
         
         // MARK: - Task management
         
+        func startPreloader() async {
+            await self.entityPreloader.start()
+        }
+        
+        func stopPreloader() async {
+            await self.entityPreloader.stop()
+        }
+        
         /// Cancels and cleans up all managed tasks.
         func cancelAllTasks() async {
             await self.taskManager.cancelAllTasks()
@@ -532,22 +594,24 @@ extension NostrNetworkManager {
     /// The mode of streaming
     enum StreamMode {
         /// Returns notes exclusively through NostrDB, treating it as the only channel for information in the pipeline. Generic EOSE is fired when EOSE is received from NostrDB
-        /// `optimizeNetworkFilter`: Returns notes from ndb, then streams from the network with an added "since" filter set to the latest note stored on ndb.
-        case ndbFirst(optimizeNetworkFilter: Bool)
+        case ndbFirst(networkOptimization: NetworkOptimizationStrategy?)
         /// Returns notes from both NostrDB and the network, in parallel, treating it with similar importance against the network relays. Generic EOSE is fired when EOSE is received from both the network and NostrDB
-        /// `optimizeNetworkFilter`: Returns notes from ndb, then streams from the network with an added "since" filter set to the latest note stored on ndb.
-        case ndbAndNetworkParallel(optimizeNetworkFilter: Bool)
+        case ndbAndNetworkParallel(networkOptimization: NetworkOptimizationStrategy?)
         /// Ignores the network.
         case ndbOnly
         
         var optimizeNetworkFilter: Bool {
+            return networkOptimizationStrategy != nil
+        }
+        
+        var networkOptimizationStrategy: NetworkOptimizationStrategy? {
             switch self {
-            case .ndbFirst(optimizeNetworkFilter: let optimizeNetworkFilter):
-                return optimizeNetworkFilter
-            case .ndbAndNetworkParallel(optimizeNetworkFilter: let optimizeNetworkFilter):
-                return optimizeNetworkFilter
+            case .ndbFirst(networkOptimization: let networkOptimization):
+                return networkOptimization
+            case .ndbAndNetworkParallel(networkOptimization: let networkOptimization):
+                return networkOptimization
             case .ndbOnly:
-                return false
+                return nil
             }
         }
         
@@ -561,5 +625,39 @@ extension NostrNetworkManager {
                 return false
             }
         }
+        
+        enum NetworkOptimizationStrategy {
+            /// Returns notes from ndb, then streams from the network with an added "since" filter set to the latest note stored on ndb.
+            case sinceOptimization
+            /// Returns notes from ndb, negentropy syncs missing notes with relays, then streams normally
+            case negentropy
+        }
+        
+        enum NetworkOptimizationData {
+            /// Returns notes from ndb, then streams from the network with an added "since" filter set to the latest note stored on ndb.
+            case sinceOptimization(latestNoteTimestampSeen: UInt32)
+            /// Returns notes from ndb, negentropy syncs missing notes with relays, then streams normally
+            case negentropy(negentropyStorageVector: NegentropyStorageVector)
+            
+            static func from(strategy: NetworkOptimizationStrategy?, latestNoteTimestampSeen: UInt32?, negentropyStorageVector: NegentropyStorageVector?) -> Self? {
+                guard let strategy else { return nil }
+                switch strategy {
+                case .sinceOptimization:
+                    guard let latestNoteTimestampSeen else { return nil }
+                    return .sinceOptimization(latestNoteTimestampSeen: latestNoteTimestampSeen)
+                case .negentropy:
+                    guard let negentropyStorageVector else { return nil }
+                    return .negentropy(negentropyStorageVector: negentropyStorageVector)
+                }
+            }
+        }
+    }
+    
+    /// Defines the preloading strategy for a stream
+    enum PreloadStrategy {
+        /// No preloading - notes are not sent to EntityPreloader
+        case noPreloading
+        /// Preload metadata for authors and referenced profiles
+        case preload
     }
 }

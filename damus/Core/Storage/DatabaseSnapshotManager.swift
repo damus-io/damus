@@ -108,6 +108,9 @@ actor DatabaseSnapshotManager {
     }
     
     /// Perform the actual snapshot operation.
+    ///
+    /// Creates a storage-efficient snapshot by creating a new temporary Ndb instance
+    /// and selectively copying only the necessary notes (profiles, mute lists, contact lists).
     func performSnapshot() async throws {
         guard let snapshotPath = Ndb.snapshot_db_path else {
             throw SnapshotError.pathsUnavailable
@@ -115,7 +118,7 @@ actor DatabaseSnapshotManager {
         
         Log.info("Starting nostrdb snapshot to %{public}@", for: .storage, snapshotPath)
         
-        try await copyDatabase(to: snapshotPath)
+        try await createSelectiveSnapshot(to: snapshotPath)
         
         // Update the last snapshot date
         UserDefaults.standard.set(Date(), forKey: Self.lastSnapshotDateKey)
@@ -124,39 +127,142 @@ actor DatabaseSnapshotManager {
         self.snapshotCount += 1
     }
     
-    /// Copy the database using LMDB's native copy function.    
-    private func copyDatabase(to snapshotPath: String) async throws {
-        return try await withCheckedThrowingContinuation { continuation in
-            let fileManager = FileManager.default
+    /// Creates a selective snapshot containing only profiles, mute lists, and contact lists.
+    ///
+    /// This method:
+    /// 1. Creates a temporary Ndb instance in a temp directory
+    /// 2. Queries the source database for relevant notes
+    /// 3. Writes each note to the temporary database
+    /// 4. Atomically moves the temporary database to the final destination
+    private func createSelectiveSnapshot(to snapshotPath: String) async throws {
+        let fileManager = FileManager.default
+        
+        // Create a temporary directory for the snapshot
+        let tempDir = FileManager.default.temporaryDirectory
+        let tempSnapshotPath = tempDir.appendingPathComponent("snapshot_temp_\(UUID().uuidString)")
+        
+        do {
+            try fileManager.createDirectory(atPath: tempSnapshotPath.path, withIntermediateDirectories: true)
+        } catch {
+            throw SnapshotError.directoryCreationFailed(error)
+        }
+        
+        // Ensure cleanup on error
+        defer {
+            try? fileManager.removeItem(atPath: tempSnapshotPath.path)
+        }
+        
+        Log.debug("Created temporary snapshot directory at %{public}@", for: .storage, tempSnapshotPath.path)
+        
+        // Create a new Ndb instance in the temporary directory
+        guard let snapshotNdb = Ndb(path: tempSnapshotPath.path, owns_db_file: true) else {
+            throw SnapshotError.failedToCreateSnapshotDatabase
+        }
+        
+        defer {
+            snapshotNdb.close()
+        }
+        
+        Log.debug("Created temporary Ndb instance for snapshot", for: .storage)
+        
+        // Query and copy notes to snapshot database
+        try await copyNotesToSnapshot(snapshotNdb: snapshotNdb)
+        
+        Log.debug("Copied notes to snapshot database", for: .storage)
+        
+        // Close the snapshot database before moving files
+        snapshotNdb.close()
+        
+        // Atomically move the temporary database to the final destination
+        try await moveSnapshotToFinalDestination(from: tempSnapshotPath.path, to: snapshotPath)
+        
+        Log.debug("Moved snapshot to final destination", for: .storage)
+    }
+    
+    /// Queries the source database and copies relevant notes to the snapshot database.
+    private func copyNotesToSnapshot(snapshotNdb: Ndb) async throws {
+        let filters = try createSnapshotFilters()
+        
+        Log.debug("Querying source database with %d filters", for: .storage, filters.count)
+        
+        var totalNotesCopied = 0
+        
+        for filter in filters {
+            let noteKeys = try ndb.query(filters: [filter], maxResults: 100_000)
             
-            // Delete existing database files at the destination if they exist
-            // LMDB creates multiple files (data.mdb, lock.mdb), so we remove the entire directory
-            if fileManager.fileExists(atPath: snapshotPath) {
-                do {
-                    try fileManager.removeItem(atPath: snapshotPath)
-                    Log.debug("Removed existing snapshot at %{public}@", for: .storage, snapshotPath)
-                } catch {
-                    continuation.resume(throwing: SnapshotError.removeFailed(error))
-                    return
-                }
+            Log.debug("Found %d notes for filter", for: .storage, noteKeys.count)
+            
+            for noteKey in noteKeys {
+                // Get the note from source database and copy to snapshot
+                try ndb.lookup_note_by_key(noteKey, borrow: { unownedNote in
+                    // Convert the note to owned, encode to JSON, and process into snapshot database
+                    guard let ownedNote = unownedNote?.toOwned() else {
+                        Log.error("Failed to get unowned note", for: .storage)
+                        return
+                    }
+                    
+                    // Process the note into the snapshot database
+                    
+                    // Implementation note: This does not _immediately_ add the event to the new Ndb.
+                    // It goes into the ingester queue first for later processing.
+                    // This raises the question: How to guarantee that all notes will be saved to the new
+                    // snapshot Ndb before we close it?
+                    //
+                    // The answer is that when `Ndb.close` is called, it actually waits for the ingester task
+                    // to finish processing its queue — unless the queue is full (an edge case).
+                    try snapshotNdb.add(event: ownedNote)
+                    totalNotesCopied += 1
+                })
             }
-            
-            Log.debug("Recreate the snapshot directory", for: .storage, snapshotPath)
-            // Recreate the snapshot directory
+        }
+        
+        Log.info("Copied %d notes to snapshot database", for: .storage, totalNotesCopied)
+    }
+    
+    /// Creates filters for querying profiles, mute lists, and contact lists.
+    private func createSnapshotFilters() throws -> [NdbFilter] {
+        // Filter for profile metadata (kind 0)
+        let profileFilter = try NdbFilter(from: NostrFilter(kinds: [.metadata]))
+        
+        // Filter for contact lists (kind 3)
+        let contactsFilter = try NdbFilter(from: NostrFilter(kinds: [.contacts]))
+        
+        // Filter for mute lists (kind 10000)
+        let muteListFilter = try NdbFilter(from: NostrFilter(kinds: [.mute_list]))
+        
+        return [profileFilter, contactsFilter, muteListFilter]
+    }
+    
+    /// Atomically moves the snapshot from temporary location to final destination.
+    private func moveSnapshotToFinalDestination(from tempPath: String, to finalPath: String) async throws {
+        let fileManager = FileManager.default
+        
+        // Remove existing snapshot if it exists
+        if fileManager.fileExists(atPath: finalPath) {
             do {
-                try fileManager.createDirectory(atPath: snapshotPath, withIntermediateDirectories: true)
+                try fileManager.removeItem(atPath: finalPath)
+                Log.debug("Removed existing snapshot at %{public}@", for: .storage, finalPath)
             } catch {
-                continuation.resume(throwing: SnapshotError.directoryCreationFailed(error))
-                return
+                throw SnapshotError.removeFailed(error)
             }
-            
+        }
+        
+        // Create parent directory if needed
+        let parentDir = URL(fileURLWithPath: finalPath).deletingLastPathComponent().path
+        if !fileManager.fileExists(atPath: parentDir) {
             do {
-                try ndb.snapshot(path: snapshotPath)
-                continuation.resume(returning: ())
+                try fileManager.createDirectory(atPath: parentDir, withIntermediateDirectories: true)
+            } catch {
+                throw SnapshotError.directoryCreationFailed(error)
             }
-            catch {
-                continuation.resume(throwing: SnapshotError.copyFailed(error))
-            }
+        }
+        
+        // Atomically move the temp snapshot to final destination
+        do {
+            try fileManager.moveItem(atPath: tempPath, toPath: finalPath)
+            Log.debug("Moved snapshot from %{public}@ to %{public}@", for: .storage, tempPath, finalPath)
+        } catch {
+            throw SnapshotError.moveFailed(error)
         }
     }
     
@@ -179,6 +285,8 @@ enum SnapshotError: Error, LocalizedError {
     case copyFailed(any Error)
     case removeFailed(Error)
     case directoryCreationFailed(Error)
+    case failedToCreateSnapshotDatabase
+    case moveFailed(Error)
     
     var errorDescription: String? {
         switch self {
@@ -190,6 +298,10 @@ enum SnapshotError: Error, LocalizedError {
             return "Failed to remove existing snapshot: \(error.localizedDescription)"
         case .directoryCreationFailed(let error):
             return "Failed to create snapshot directory: \(error.localizedDescription)"
+        case .failedToCreateSnapshotDatabase:
+            return "Failed to create temporary snapshot database"
+        case .moveFailed(let error):
+            return "Failed to move snapshot to final destination: \(error.localizedDescription)"
         }
     }
 }

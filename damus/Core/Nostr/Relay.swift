@@ -139,6 +139,11 @@ struct RelayMetadata: Codable {
     var is_paid: Bool {
         return limitation?.payment_required ?? false
     }
+    
+    var supports_negentropy: Bool? {
+        // Supports negentropy if NIP-77 is in the list of supported NIPs
+        supported_nips?.contains(where: { $0 == 77 })
+    }
 }
 
 extension RelayPool {

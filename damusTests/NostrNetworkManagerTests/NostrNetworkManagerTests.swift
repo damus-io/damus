@@ -224,7 +224,7 @@ private final class MockSubscriptionManager: NostrNetworkManager.SubscriptionMan
         super.init(pool: pool, ndb: ndb, experimentalLocalRelayModelSupport: false)
     }
 
-    override func streamIndefinitely(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, streamMode: NostrNetworkManager.StreamMode? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
+    override func streamIndefinitely(filters: [NostrFilter], to desiredRelays: [RelayURL]? = nil, streamMode: NostrNetworkManager.StreamMode? = nil, preloadStrategy: NostrNetworkManager.PreloadStrategy? = nil, id: UUID? = nil) -> AsyncStream<NdbNoteLender> {
         let lenders = queuedLenders
         return AsyncStream { continuation in
             lenders.forEach { continuation.yield($0) }

@@ -35,6 +35,16 @@ class NostrNetworkManager {
     let reader: SubscriptionManager
     let profilesManager: ProfilesManager
     
+    /// Tracks whether the network manager has completed its initial connection
+    private var isConnected = false
+    /// A list of continuations waiting for connection to complete
+    ///
+    /// We use a unique ID for each connection request so that multiple concurrent calls to `awaitConnection()`
+    /// can be properly tracked and resumed. This follows the pattern established in `RelayConnection` and `WalletModel`.
+    private var connectionContinuations: [UUID: CheckedContinuation<Void, Never>] = [:]
+    /// A lock to ensure thread-safe access to the continuations dictionary and connection state
+    private let continuationsLock = NSLock()
+    
     init(delegate: Delegate, addNdbToRelayPool: Bool = true) {
         self.delegate = delegate
         let pool = RelayPool(ndb: addNdbToRelayPool ? delegate.ndb : nil, keypair: delegate.keypair)
@@ -53,20 +63,123 @@ class NostrNetworkManager {
     func connect() async {
         await self.userRelayList.connect()    // Will load the user's list, apply it, and get RelayPool to connect to it.
         await self.profilesManager.load()
+        await self.reader.startPreloader()
+        
+        continuationsLock.lock()
+        isConnected = true
+        continuationsLock.unlock()
+        
+        resumeAllConnectionContinuations()
+    }
+    
+    /// Waits for the app to be connected to the network by checking for the next `connect()` call to complete
+    ///
+    /// This method allows code to await the app to load the relay list and connect to it.
+    /// It uses Swift continuations to handle completion notifications from potentially different threads.
+    ///
+    /// - Parameter timeout: Optional timeout duration (defaults to 30 seconds)
+    ///
+    /// ## Usage
+    /// ```swift
+    /// await nostrNetworkManager.awaitConnection()
+    /// // Code here runs after connection is established
+    /// ```
+    ///
+    /// ## Implementation notes
+    ///
+    /// - Thread-safe: Can be called from any thread and will handle synchronization properly
+    /// - Multiple callers: Supports multiple concurrent calls, each tracked by a unique ID
+    /// - Timeout handling: Automatically resumes after timeout even if connection fails
+    /// - Short-circuits immediately if already connected, preventing unnecessary waiting
+    func awaitConnection(timeout: Duration = .seconds(30)) async {
+        // Short-circuit if already connected
+        continuationsLock.lock()
+        let alreadyConnected = isConnected
+        continuationsLock.unlock()
+        
+        guard !alreadyConnected else {
+            return
+        }
+        
+        let requestId = UUID()
+        var timeoutTask: Task<Void, Never>?
+        var isResumed = false
+        
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            // Store the continuation in a thread-safe manner
+            continuationsLock.lock()
+            connectionContinuations[requestId] = continuation
+            continuationsLock.unlock()
+            
+            // Set up timeout
+            timeoutTask = Task {
+                try? await Task.sleep(for: timeout)
+                if !isResumed {
+                    self.resumeConnectionContinuation(requestId: requestId, isResumed: &isResumed)
+                }
+            }
+        }
+        
+        timeoutTask?.cancel()
+    }
+    
+    /// Resumes a connection continuation in a thread-safe manner
+    ///
+    /// This can be called from any thread and ensures the continuation is only resumed once
+    ///
+    /// - Parameters:
+    ///   - requestId: The unique identifier for this connection request
+    ///   - isResumed: Flag to track if the continuation has already been resumed
+    private func resumeConnectionContinuation(requestId: UUID, isResumed: inout Bool) {
+        continuationsLock.lock()
+        defer { continuationsLock.unlock() }
+        
+        guard !isResumed, let continuation = connectionContinuations[requestId] else {
+            return
+        }
+        
+        isResumed = true
+        connectionContinuations.removeValue(forKey: requestId)
+        continuation.resume()
+    }
+    
+    /// Resumes all pending connection continuations in a thread-safe manner
+    ///
+    /// This is useful for notifying all waiting callers when the connection is established
+    /// or when you need to unblock all pending connection requests.
+    ///
+    /// This can be called from any thread and ensures all continuations are resumed safely.
+    private func resumeAllConnectionContinuations() {
+        continuationsLock.lock()
+        defer { continuationsLock.unlock() }
+        
+        // Resume all pending continuations
+        for (_, continuation) in connectionContinuations {
+            continuation.resume()
+        }
+        
+        // Clear the dictionary
+        connectionContinuations.removeAll()
     }
     
     func disconnectRelays() async {
         await self.pool.disconnect()
+        
+        continuationsLock.lock()
+        isConnected = false
+        continuationsLock.unlock()
     }
     
     func handleAppBackgroundRequest() async {
         await self.reader.cancelAllTasks()
+        await self.reader.stopPreloader()
         await self.pool.cleanQueuedRequestForSessionEnd()
     }
     
     func handleAppForegroundRequest() async {
         // Pinging the network will automatically reconnect any dead websocket connections
         await self.ping()
+        await self.reader.startPreloader()
     }
     
     /// Cancels active network/profile tasks and closes the relay pool.
@@ -79,10 +192,17 @@ class NostrNetworkManager {
             group.addTask {
                 await self.profilesManager.stop()
             }
+            group.addTask {
+                await self.reader.stopPreloader()
+            }
             // But await on each one to prevent race conditions
             for await value in group { continue }
             await pool.close()
         }
+        
+        continuationsLock.lock()
+        isConnected = false
+        continuationsLock.unlock()
     }
     
     func ping() async {

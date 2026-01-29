@@ -45,7 +45,7 @@ final class ZapTests: XCTestCase {
         XCTAssertEqual(zap.target, ZapTarget.note(id: note_id, author: author))
 
         XCTAssertEqual(NotificationFormatter.zap_notification_title(zap), "Zap")
-        XCTAssertEqual(NotificationFormatter.zap_notification_body(profiles: Profiles(ndb: test_damus_state.ndb), zap: zap), "You received 1k sats from 1q5sah9f:mqzxky65: \"⚡Non-custodial zap from my Alby Hub\"")
+        XCTAssertEqual(NotificationFormatter.zap_notification_body(profiles: Profiles(ndb: test_damus_state.ndb), zap: zap), "You received 1k sats from npub1q5sa...ky65: \"⚡Non-custodial zap from my Alby Hub\"")
 
 
     }
@@ -103,7 +103,7 @@ final class ZapTests: XCTestCase {
         XCTAssertEqual(zap.target, ZapTarget.profile(profile))
 
         XCTAssertEqual(NotificationFormatter.zap_notification_title(zap), "Zap")
-        XCTAssertEqual(NotificationFormatter.zap_notification_body(profiles: Profiles(ndb: test_damus_state.ndb), zap: zap), "You received 1k sats from 107jk7ht:2quqncxg")
+        XCTAssertEqual(NotificationFormatter.zap_notification_body(profiles: Profiles(ndb: test_damus_state.ndb), zap: zap), "You received 1k sats from npub107jk...ncxg")
     }
 
 }
