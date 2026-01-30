@@ -490,18 +490,32 @@ func fetch_zapper_from_lnurl(lnurls: LNUrls, pubkey: Pubkey, lnurl: String) asyn
     return pk
 }
 
-func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, msats: Int64, zap_type: ZapType, comment: String?) async -> String? {
+/// Fetches a Lightning invoice from an LNURL pay endpoint.
+/// - Parameters:
+///   - payreq: The LNURL pay request containing callback URL and server capabilities.
+///   - zapreq: Optional zap request event to include (for NIP-57 zaps).
+///   - msats: Amount in millisatoshis.
+///   - zap_type: The type of zap (normal, private, anon, or non_zap).
+///   - comment: Optional comment to include (LUD-12).
+///   - lnurl: Optional recipient lnurl address to include in callback (NIP-57 Appendix B).
+/// - Returns: The bolt11 invoice string, or nil on failure.
+func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, msats: Int64, zap_type: ZapType, comment: String?, lnurl: String? = nil) async -> String? {
     guard var base_url = payreq.callback.flatMap({ URLComponents(string: $0) }) else {
         return nil
     }
-    
+
     let zappable = payreq.allowsNostr ?? false
-    
+
     var query = [URLQueryItem(name: "amount", value: "\(msats)")]
-    
+
     if zappable && zap_type != .non_zap, let json = encode_json(zapreq) {
         print("zapreq json: \(json)")
         query.append(URLQueryItem(name: "nostr", value: json))
+
+        // NIP-57 Appendix B: include lnurl in callback
+        if let lnurl {
+            query.append(URLQueryItem(name: "lnurl", value: lnurl))
+        }
     }
    
     // add a lud12 comment as well if we have it
