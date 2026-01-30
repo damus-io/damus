@@ -7,21 +7,34 @@
 
 import SwiftUI
 
+/// A view that displays an embedded/quoted Nostr event.
+///
+/// Supports NIP-01/NIP-10 relay hints to fetch events from relays not in the user's pool.
 struct BuilderEventView: View {
     let damus: DamusState
     let event_id: NoteId
     let event: NostrEvent?
-    
+    let relayHints: [RelayURL]
+
+    /// Creates a builder event view with a pre-loaded event.
     init(damus: DamusState, event: NostrEvent) {
         self.event = event
         self.damus = damus
         self.event_id = event.id
+        self.relayHints = []
     }
-    
-    init(damus: DamusState, event_id: NoteId) {
+
+    /// Creates a builder event view that will load the event by ID.
+    ///
+    /// - Parameters:
+    ///   - damus: The app's shared state.
+    ///   - event_id: The ID of the event to load.
+    ///   - relayHints: Optional relay URLs where the event may be found (per NIP-01/NIP-10).
+    init(damus: DamusState, event_id: NoteId, relayHints: [RelayURL] = []) {
         self.event_id = event_id
         self.damus = damus
         self.event = nil
+        self.relayHints = relayHints
     }
     
     func Event(event: NostrEvent) -> some View {
@@ -39,7 +52,7 @@ struct BuilderEventView: View {
             if let event {
                 self.Event(event: event)
             } else {
-                EventLoaderView(damus_state: damus, event_id: self.event_id) { loaded_event in
+                EventLoaderView(damus_state: damus, event_id: self.event_id, relayHints: relayHints) { loaded_event in
                     self.Event(event: loaded_event)
                 }
             }

@@ -7,6 +7,9 @@
 
 import SwiftUI
 
+/// Displays a compact preview of the event being replied to.
+///
+/// Supports NIP-10 relay hints to fetch events from relays not in the user's pool.
 struct ReplyQuoteView: View {
     let keypair: Keypair
     let quoter: NostrEvent
@@ -14,13 +17,24 @@ struct ReplyQuoteView: View {
     let state: DamusState
     @ObservedObject var thread: ThreadModel
     let options: EventViewOptions
-    
+    let relayHint: String?
+
+    init(keypair: Keypair, quoter: NostrEvent, event_id: NoteId, state: DamusState, thread: ThreadModel, options: EventViewOptions, relayHint: String? = nil) {
+        self.keypair = keypair
+        self.quoter = quoter
+        self.event_id = event_id
+        self.state = state
+        self.thread = thread
+        self.options = options
+        self.relayHint = relayHint
+    }
+
     @State var can_show_event = true
-    
+
     func update_should_show_event(event: NdbNote) async {
         self.can_show_event = await should_show_event(event: event, damus_state: state)
     }
-    
+
     func content(event: NdbNote) -> some View {
         ZStack(alignment: .leading) {
             VStack(alignment: .leading) {
@@ -65,6 +79,14 @@ struct ReplyQuoteView: View {
                     .onAppear {
                         Task { await self.update_should_show_event(event: event) }
                     }
+            } else if let relayHint, let relayURL = RelayURL(relayHint) {
+                // Event not in cache - try to fetch using relay hint
+                EventLoaderView(damus_state: state, event_id: event_id, relayHints: [relayURL]) { loaded_event in
+                    self.content(event: loaded_event)
+                        .onAppear {
+                            Task { await self.update_should_show_event(event: loaded_event) }
+                        }
+                }
             }
         }
     }
