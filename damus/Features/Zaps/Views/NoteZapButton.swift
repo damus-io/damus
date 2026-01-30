@@ -206,7 +206,7 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
             return
         }
 
-        guard let inv = await fetch_zap_invoice(payreq, zapreq: zapreq, msats: amount_msat, zap_type: zap_type, comment: comment) else {
+        guard let inv = await fetch_zap_invoice(payreq, zapreq: zapreq, msats: amount_msat, zap_type: zap_type, comment: comment, lnurl: lnurl) else {
             remove_zap(reqid: reqid, zapcache: damus_state.zaps, evcache: damus_state.events)
             let typ = ZappingEventType.failed(.fetching_invoice)
             let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
