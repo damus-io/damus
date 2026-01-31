@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		05F7D74C300667DC5BAEA895 /* CustomEmojiPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06BCAB2CED2695C9492F4C20 /* CustomEmojiPickerView.swift */; };
 		0E8A4BB72AE4359200065E81 /* NostrFilter+Hashable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E8A4BB62AE4359200065E81 /* NostrFilter+Hashable.swift */; };
+		1AC28BF6683C095ABFE1CCEB /* CustomEmojiPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06BCAB2CED2695C9492F4C20 /* CustomEmojiPickerView.swift */; };
 		2710433D2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */; };
 		2710433E2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */; };
 		2710433F2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */; };
@@ -93,6 +95,8 @@
 		4C1253682A76D2470004F4B8 /* MuteNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1253672A76D2470004F4B8 /* MuteNotify.swift */; };
 		4C12536A2A76D3850004F4B8 /* RelaysChangedNotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1253692A76D3850004F4B8 /* RelaysChangedNotify.swift */; };
 		4C15C7152A55DE7A00D0A0DB /* ReactionsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C15C7142A55DE7A00D0A0DB /* ReactionsSettingsView.swift */; };
+		FBC2004192186262A2FF8622 /* CustomEmojiSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35C2AD4C9EC5742D9B7DA194 /* CustomEmojiSettingsView.swift */; };
+		CB1345C6F224E24D089F9164 /* AddCustomEmojiView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F89F89DB7D99F4E4DD9001F4 /* AddCustomEmojiView.swift */; };
 		4C190F202A535FC200027FD5 /* CustomizeZapModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C190F1F2A535FC200027FD5 /* CustomizeZapModel.swift */; };
 		4C190F252A547D2000027FD5 /* LoadScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C190F242A547D2000027FD5 /* LoadScript.swift */; };
 		4C198DEF29F88C6B004C165C /* BlurHashEncode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C198DEB29F88C6B004C165C /* BlurHashEncode.swift */; };
@@ -918,6 +922,8 @@
 		82D6FBDD2CD99F7900C925F4 /* DamusVideoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFC2AA7525700DFEC1F /* DamusVideoPlayer.swift */; };
 		82D6FBDE2CD99F7900C925F4 /* DamusVideoCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFE2AA76A0900DFEC1F /* DamusVideoCoordinator.swift */; };
 		82D6FBE02CD99F7900C925F4 /* ReactionsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C15C7142A55DE7A00D0A0DB /* ReactionsSettingsView.swift */; };
+		1178587A9CEAFA7DF19D595F /* CustomEmojiSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35C2AD4C9EC5742D9B7DA194 /* CustomEmojiSettingsView.swift */; };
+		2D2D0B6878DB19332CC3FAF8 /* AddCustomEmojiView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F89F89DB7D99F4E4DD9001F4 /* AddCustomEmojiView.swift */; };
 		82D6FBE12CD99F7900C925F4 /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A1C29DDCF9B00516EAC /* NotificationSettingsView.swift */; };
 		82D6FBE22CD99F7900C925F4 /* AppearanceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A1E29DDD24B00516EAC /* AppearanceSettingsView.swift */; };
 		82D6FBE32CD99F7900C925F4 /* KeySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2029DDD3E100516EAC /* KeySettingsView.swift */; };
@@ -1082,6 +1088,7 @@
 		9C83F89329A937B900136C08 /* TextViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C83F89229A937B900136C08 /* TextViewWrapper.swift */; };
 		9CA876E229A00CEA0003B9A3 /* AttachMediaUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */; };
 		ADFE73552AD4793100EC7326 /* QRScanNSECView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADFE73542AD4793100EC7326 /* QRScanNSECView.swift */; };
+		B4708269996254FD6FD55E71 /* CustomEmojiPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06BCAB2CED2695C9492F4C20 /* CustomEmojiPickerView.swift */; };
 		B501062D2B363036003874F5 /* AuthIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B501062C2B363036003874F5 /* AuthIntegrationTests.swift */; };
 		B51C1CEA2B55A60A00E312A9 /* AddMuteItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51C1CE82B55A60A00E312A9 /* AddMuteItemView.swift */; };
 		B51C1CEB2B55A60A00E312A9 /* MuteDurationMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51C1CE92B55A60A00E312A9 /* MuteDurationMenu.swift */; };
@@ -1103,6 +1110,7 @@
 		BA3759972ABCCF360018D73B /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3759962ABCCF360018D73B /* CameraPreview.swift */; };
 		BA693074295D649800ADDB87 /* UserSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA693073295D649800ADDB87 /* UserSettingsStore.swift */; };
 		BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */; };
+		BFEB845C6B5368B09E42E051 /* CustomEmojiStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FE1FF92FCBCFC9D4804DBE9 /* CustomEmojiStore.swift */; };
 		D2277EEA2A089BD5006C3807 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2277EE92A089BD5006C3807 /* Router.swift */; };
 		D2585C7839C411EB3E0D79D6 /* RepostNotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64D0A2B0F048CC8D494945E6 /* RepostNotificationTests.swift */; };
 		D5C1AFBF2E5DF7E60092F72F /* ContactCardManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5C1AFBE2E5DF7E60092F72F /* ContactCardManager.swift */; };
@@ -1468,6 +1476,8 @@
 		D73E5ED92C6A97F4007EB227 /* DamusVideoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFC2AA7525700DFEC1F /* DamusVideoPlayer.swift */; };
 		D73E5EDA2C6A97F4007EB227 /* DamusVideoCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFE2AA76A0900DFEC1F /* DamusVideoCoordinator.swift */; };
 		D73E5EDC2C6A97F4007EB227 /* ReactionsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C15C7142A55DE7A00D0A0DB /* ReactionsSettingsView.swift */; };
+		C470AFCCC3FE9A3D318E1827 /* CustomEmojiSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35C2AD4C9EC5742D9B7DA194 /* CustomEmojiSettingsView.swift */; };
+		D42EE51A547374486CF1F352 /* AddCustomEmojiView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F89F89DB7D99F4E4DD9001F4 /* AddCustomEmojiView.swift */; };
 		D73E5EDD2C6A97F4007EB227 /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A1C29DDCF9B00516EAC /* NotificationSettingsView.swift */; };
 		D73E5EDE2C6A97F4007EB227 /* AppearanceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A1E29DDD24B00516EAC /* AppearanceSettingsView.swift */; };
 		D73E5EDF2C6A97F4007EB227 /* KeySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2029DDD3E100516EAC /* KeySettingsView.swift */; };
@@ -1499,7 +1509,6 @@
 		D73E5EFB2C6A97F4007EB227 /* ProfilePicturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C30AC7F29A6A53F00E2BD5A /* ProfilePicturesView.swift */; };
 		D73E5EFC2C6A97F4007EB227 /* DamusAppNotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78CD5972B8990300014D539 /* DamusAppNotificationView.swift */; };
 		D73E5EFD2C6A97F4007EB227 /* InnerTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE0E2B529A3ED5500DB4CA2 /* InnerTimelineView.swift */; };
-		D73E5EFE2C6A97F4007EB227 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		D73E5EFF2C6A97F4007EB227 /* ZapsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE879572996C45300F758CC /* ZapsView.swift */; };
 		D73E5F002C6A97F4007EB227 /* CustomizeZapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9F18E129AA9B6C008C55EC /* CustomizeZapView.swift */; };
 		D73E5F012C6A97F4007EB227 /* ZapTypePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA3FA0F29F593D000FDB3C3 /* ZapTypePicker.swift */; };
@@ -1938,6 +1947,7 @@
 		E04A37C62B544F090029650D /* URIParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = E04A37C52B544F090029650D /* URIParsing.swift */; };
 		E06336AA2B75832100A88E6B /* ImageMetadataTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E06336A92B75832100A88E6B /* ImageMetadataTest.swift */; };
 		E06336AB2B75850100A88E6B /* img_with_location.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = E06336A82B7582E000A88E6B /* img_with_location.jpeg */; };
+		E0774CDB8DF27A74AB7D3DEB /* CustomEmojiStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FE1FF92FCBCFC9D4804DBE9 /* CustomEmojiStore.swift */; };
 		E0E024112B7C19C20075735D /* TranslationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E024102B7C19C20075735D /* TranslationTests.swift */; };
 		E0EE9DD42B8E5FEA00F3002D /* ImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0EE9DD32B8E5FEA00F3002D /* ImageProcessing.swift */; };
 		E4FA1C032A24BB7F00482697 /* SearchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */; };
@@ -1955,7 +1965,9 @@
 		F79C7FAD29D5E9620000F946 /* EditPictureControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = F79C7FAC29D5E9620000F946 /* EditPictureControl.swift */; };
 		F7F0BA25297892BD009531F3 /* SwipeToDismiss.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F0BA24297892BD009531F3 /* SwipeToDismiss.swift */; };
 		F7F0BA272978E54D009531F3 /* ParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F0BA262978E54D009531F3 /* ParticipantsView.swift */; };
+		F8A3D64C2BCF08DD25FADC82 /* CustomEmojiStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FE1FF92FCBCFC9D4804DBE9 /* CustomEmojiStore.swift */; };
 		F944F56E29EA9CCC0067B3BF /* DamusParseContentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F944F56D29EA9CCC0067B3BF /* DamusParseContentTests.swift */; };
+		FB68FF75E4E11BAB624AA81D /* CustomEmojiTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A49DE1449BE8003AFE135BC /* CustomEmojiTests.swift */; };
 		FQ9UEENWE218BBQDVQXU3RA9 /* KingfisherImageProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAY65YZMB3VK8HOZYGCNV2YJ /* KingfisherImageProvider.swift */; };
 		K9G5YXAZ4Y19GSLH8TWS8CO1 /* KingfisherImageProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAY65YZMB3VK8HOZYGCNV2YJ /* KingfisherImageProvider.swift */; };
 /* End PBXBuildFile section */
@@ -2015,6 +2027,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		06BCAB2CED2695C9492F4C20 /* CustomEmojiPickerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CustomEmojiPickerView.swift; path = CustomEmojiPickerView.swift; sourceTree = "<group>"; };
 		0E8A4BB62AE4359200065E81 /* NostrFilter+Hashable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NostrFilter+Hashable.swift"; sourceTree = "<group>"; };
 		2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostingTimelineSwitcherView.swift; sourceTree = "<group>"; };
 		3165648A295B70D500C64604 /* LinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkView.swift; sourceTree = "<group>"; };
@@ -2056,6 +2069,7 @@
 		3A47CB782BDA05A200728A7C /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fi; path = fi.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3A47CB792BDA05A200728A7C /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = fi; path = fi.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		3A48E7AF29DFBE9D006E787E /* MutedThreadsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutedThreadsManager.swift; sourceTree = "<group>"; };
+		3A49DE1449BE8003AFE135BC /* CustomEmojiTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomEmojiTests.swift; sourceTree = "<group>"; };
 		3A515C4F2DF4E100002D3B34 /* TrustedNetworkRepliesTip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedNetworkRepliesTip.swift; sourceTree = "<group>"; };
 		3A515C532DF5371D002D3B34 /* TrustedNetworkButtonTipViewStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedNetworkButtonTipViewStyle.swift; sourceTree = "<group>"; };
 		3A5C4575296A879E0032D398 /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = "es-419"; path = "es-419.lproj/Localizable.stringsdict"; sourceTree = "<group>"; };
@@ -2167,6 +2181,8 @@
 		4C1253692A76D3850004F4B8 /* RelaysChangedNotify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelaysChangedNotify.swift; sourceTree = "<group>"; };
 		4C15224A2B8D499F007CDC17 /* parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parser.h; sourceTree = "<group>"; };
 		4C15C7142A55DE7A00D0A0DB /* ReactionsSettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReactionsSettingsView.swift; sourceTree = "<group>"; };
+		35C2AD4C9EC5742D9B7DA194 /* CustomEmojiSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomEmojiSettingsView.swift; sourceTree = "<group>"; };
+		F89F89DB7D99F4E4DD9001F4 /* AddCustomEmojiView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddCustomEmojiView.swift; sourceTree = "<group>"; };
 		4C190F1F2A535FC200027FD5 /* CustomizeZapModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomizeZapModel.swift; sourceTree = "<group>"; };
 		4C190F242A547D2000027FD5 /* LoadScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadScript.swift; sourceTree = "<group>"; };
 		4C198DEB29F88C6B004C165C /* BlurHashEncode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlurHashEncode.swift; sourceTree = "<group>"; };
@@ -2720,6 +2736,7 @@
 		82D6FA992CD9820500C925F4 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		82D6FA9E2CD9820500C925F4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		82D6FAA62CD9820500C925F4 /* share extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "share extension.entitlements"; sourceTree = "<group>"; };
+		8FE1FF92FCBCFC9D4804DBE9 /* CustomEmojiStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CustomEmojiStore.swift; path = CustomEmojiStore.swift; sourceTree = "<group>"; };
 		9609F057296E220800069BF3 /* BannerImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerImageView.swift; sourceTree = "<group>"; };
 		9C83F89229A937B900136C08 /* TextViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextViewWrapper.swift; sourceTree = "<group>"; };
 		9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachMediaUtility.swift; sourceTree = "<group>"; };
@@ -3928,6 +3945,7 @@
 				64D0A2B0F048CC8D494945E6 /* RepostNotificationTests.swift */,
 				4C0ED07E2D7A1E260020D8A2 /* Benchmarking.swift */,
 				3A92C1012DE17ACA00CEEBAC /* NIP05DomainTimelineHeaderViewTests.swift */,
+				3A49DE1449BE8003AFE135BC /* CustomEmojiTests.swift */,
 			);
 			path = damusTests;
 			sourceTree = "<group>";
@@ -4494,6 +4512,8 @@
 			isa = PBXGroup;
 			children = (
 				4C15C7142A55DE7A00D0A0DB /* ReactionsSettingsView.swift */,
+				35C2AD4C9EC5742D9B7DA194 /* CustomEmojiSettingsView.swift */,
+				F89F89DB7D99F4E4DD9001F4 /* AddCustomEmojiView.swift */,
 				4C1A9A1C29DDCF9B00516EAC /* NotificationSettingsView.swift */,
 				4C1A9A1E29DDD24B00516EAC /* AppearanceSettingsView.swift */,
 				4C1A9A2029DDD3E100516EAC /* KeySettingsView.swift */,
@@ -4715,6 +4735,7 @@
 				4C75EFA327FA577B0006080F /* PostView.swift */,
 				F7F0BA262978E54D009531F3 /* ParticipantsView.swift */,
 				4CACA9D4280C31E100D9BBE8 /* ReplyView.swift */,
+				06BCAB2CED2695C9492F4C20 /* CustomEmojiPickerView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -4982,6 +5003,7 @@
 				D7315A292ACDF3B70036E30A /* DamusCacheManager.swift */,
 				501F8C7F2A0220E1001AFC1D /* KeychainStorage.swift */,
 				4C3BEFDF281DE1ED00B3DE84 /* DamusState.swift */,
+				8FE1FF92FCBCFC9D4804DBE9 /* CustomEmojiStore.swift */,
 			);
 			path = Storage;
 			sourceTree = "<group>";
@@ -5637,7 +5659,7 @@
 			);
 			mainGroup = 4CE6DEDA27F7A08100C66700;
 			packageReferences = (
-				4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */,
+				4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */,
 				4C06670228FC7EC500038D2A /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				4CCF9AB02A1FE80B00E03CFB /* XCRemoteSwiftPackageReference "GSPlayer" */,
 				4C27C9302A64766F007DBC75 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
@@ -5864,6 +5886,8 @@
 				4CA5588329F33F5B00DC6A45 /* StringCodable.swift in Sources */,
 				4C75EFB92804A2740006080F /* EventView.swift in Sources */,
 				4C15C7152A55DE7A00D0A0DB /* ReactionsSettingsView.swift in Sources */,
+				FBC2004192186262A2FF8622 /* CustomEmojiSettingsView.swift in Sources */,
+				CB1345C6F224E24D089F9164 /* AddCustomEmojiView.swift in Sources */,
 				4C32B94C2A9AD44700DC3548 /* FbConstants.swift in Sources */,
 				4C8D00C829DF791C0036AF10 /* CompatibleAttribute.swift in Sources */,
 				4C687C272A6039500092C550 /* TestData.swift in Sources */,
@@ -6327,6 +6351,8 @@
 				4C9B0DF32A65C46800CBDA21 /* ProfileEditButton.swift in Sources */,
 				4C32B95F2A9AD44700DC3548 /* Enum.swift in Sources */,
 				4C2859622A12A7F0004746F7 /* GoldSupportGradient.swift in Sources */,
+				E0774CDB8DF27A74AB7D3DEB /* CustomEmojiStore.swift in Sources */,
+				1AC28BF6683C095ABFE1CCEB /* CustomEmojiPickerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6396,6 +6422,7 @@
 				4C684A552A7E91FE005E6031 /* LargeEventTests.swift in Sources */,
 				E02B54182B4DFADA0077FF42 /* Bech32ObjectTests.swift in Sources */,
 				3A92C1022DE17ACA00CEEBAC /* NIP05DomainTimelineHeaderViewTests.swift in Sources */,
+				FB68FF75E4E11BAB624AA81D /* CustomEmojiTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6770,6 +6797,8 @@
 				82D6FBDD2CD99F7900C925F4 /* DamusVideoPlayer.swift in Sources */,
 				82D6FBDE2CD99F7900C925F4 /* DamusVideoCoordinator.swift in Sources */,
 				82D6FBE02CD99F7900C925F4 /* ReactionsSettingsView.swift in Sources */,
+				1178587A9CEAFA7DF19D595F /* CustomEmojiSettingsView.swift in Sources */,
+				2D2D0B6878DB19332CC3FAF8 /* AddCustomEmojiView.swift in Sources */,
 				82D6FBE12CD99F7900C925F4 /* NotificationSettingsView.swift in Sources */,
 				82D6FBE22CD99F7900C925F4 /* AppearanceSettingsView.swift in Sources */,
 				D7DB930A2D69486700DA1EE5 /* NIP65.swift in Sources */,
@@ -6961,6 +6990,8 @@
 				82D6FC7B2CD99F7900C925F4 /* TestData.swift in Sources */,
 				82D6FC7C2CD99F7900C925F4 /* ContentParsing.swift in Sources */,
 				82D6FC7D2CD99F7900C925F4 /* NotificationFormatter.swift in Sources */,
+				BFEB845C6B5368B09E42E051 /* CustomEmojiStore.swift in Sources */,
+				05F7D74C300667DC5BAEA895 /* CustomEmojiPickerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -7213,6 +7244,8 @@
 				D73E5ED92C6A97F4007EB227 /* DamusVideoPlayer.swift in Sources */,
 				D73E5EDA2C6A97F4007EB227 /* DamusVideoCoordinator.swift in Sources */,
 				D73E5EDC2C6A97F4007EB227 /* ReactionsSettingsView.swift in Sources */,
+				C470AFCCC3FE9A3D318E1827 /* CustomEmojiSettingsView.swift in Sources */,
+				D42EE51A547374486CF1F352 /* AddCustomEmojiView.swift in Sources */,
 				D73E5EDD2C6A97F4007EB227 /* NotificationSettingsView.swift in Sources */,
 				D73E5EDE2C6A97F4007EB227 /* AppearanceSettingsView.swift in Sources */,
 				D73E5EDF2C6A97F4007EB227 /* KeySettingsView.swift in Sources */,
@@ -7254,7 +7287,6 @@
 				D73E5EFB2C6A97F4007EB227 /* ProfilePicturesView.swift in Sources */,
 				D73E5EFC2C6A97F4007EB227 /* DamusAppNotificationView.swift in Sources */,
 				D73E5EFD2C6A97F4007EB227 /* InnerTimelineView.swift in Sources */,
-				D73E5EFE2C6A97F4007EB227 /* (null) in Sources */,
 				D7EB00B02CD59C8D00660C07 /* PresentFullScreenItemNotify.swift in Sources */,
 				D73E5EFF2C6A97F4007EB227 /* ZapsView.swift in Sources */,
 				D73E5F002C6A97F4007EB227 /* CustomizeZapView.swift in Sources */,
@@ -7524,6 +7556,8 @@
 				D703D75B2C670A7F00A400EA /* Contacts.swift in Sources */,
 				D703D7812C670C2B00A400EA /* Bech32.swift in Sources */,
 				D73E5E1E2C6A9694007EB227 /* RelayFilters.swift in Sources */,
+				F8A3D64C2BCF08DD25FADC82 /* CustomEmojiStore.swift in Sources */,
+				B4708269996254FD6FD55E71 /* CustomEmojiPickerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8461,7 +8495,7 @@
 				kind = branch;
 			};
 		};
-		4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */ = {
+		4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/jb55/secp256k1.swift";
 			requirement = {
@@ -8573,12 +8607,12 @@
 		};
 		4C649880286E0EE300EAE2B3 /* secp256k1 */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
+			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */;
 			productName = secp256k1;
 		};
 		82D6FC802CD99FC500C925F4 /* secp256k1 */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
+			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */;
 			productName = secp256k1;
 		};
 		82D6FC832CD9A48500C925F4 /* Kingfisher */ = {
@@ -8603,7 +8637,7 @@
 		};
 		D703D7482C6709B100A400EA /* secp256k1 */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
+			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */;
 			productName = secp256k1;
 		};
 		D703D7AC2C670FA700A400EA /* MarkdownUI */ = {
@@ -8653,7 +8687,7 @@
 		};
 		D789D11F2AFEFBF20083A7AB /* secp256k1 */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
+			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */;
 			productName = secp256k1;
 		};
 		D78DB8582C1CE9CA00F0AB12 /* SwipeActions */ = {
