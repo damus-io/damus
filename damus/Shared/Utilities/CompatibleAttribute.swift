@@ -7,6 +7,28 @@
 
 import Foundation
 import SwiftUI
+import UIKit
+
+// MARK: - CustomEmojiTextAttachment
+
+/// A custom NSTextAttachment that stores the associated CustomEmoji metadata.
+/// This allows us to identify custom emojis in the text view for context menu actions.
+class CustomEmojiTextAttachment: NSTextAttachment {
+    /// The custom emoji this attachment represents.
+    let emoji: CustomEmoji
+
+    init(emoji: CustomEmoji, image: UIImage) {
+        self.emoji = emoji
+        super.init(data: nil, ofType: nil)
+        self.image = image
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+// MARK: - CompatibleText
 
 // Concatening too many `Text` objects can cause crashes (See https://github.com/damus-io/damus/issues/1826)
 fileprivate let MAX_TEXT_ITEMS = 100
@@ -81,7 +103,8 @@ extension CompatibleText {
     enum Item: Equatable {
         case attributed_string(AttributedString)
         case icon(named: String, offset: CGFloat)
-        case imageIcon(UIImage, offset: CGFloat)  // For custom emoji images
+        case imageIcon(UIImage, offset: CGFloat)  // For custom emoji images (legacy)
+        case customEmoji(UIImage, CustomEmoji, offset: CGFloat)  // For custom emoji with metadata
 
         static func == (lhs: Item, rhs: Item) -> Bool {
             switch (lhs, rhs) {
@@ -91,6 +114,8 @@ extension CompatibleText {
                 return lName == rName && lOffset == rOffset
             case (.imageIcon(let lImg, let lOffset), .imageIcon(let rImg, let rOffset)):
                 return lImg === rImg && lOffset == rOffset
+            case (.customEmoji(let lImg, let lEmoji, let lOffset), .customEmoji(let rImg, let rEmoji, let rOffset)):
+                return lImg === rImg && lEmoji == rEmoji && lOffset == rOffset
             default:
                 return false
             }
@@ -104,6 +129,8 @@ extension CompatibleText {
                     return Text(Image(image_name)).baselineOffset(offset)
                 case .imageIcon(let uiImage, let offset):
                     return Text(Image(uiImage: uiImage)).baselineOffset(offset)
+                case .customEmoji(let uiImage, _, let offset):
+                    return Text(Image(uiImage: uiImage)).baselineOffset(offset)
             }
         }
 
@@ -116,6 +143,8 @@ extension CompatibleText {
                     return icon_attributed_string(img: img)
                 case .imageIcon(let img, offset: _):
                     return icon_attributed_string(img: img)
+                case .customEmoji(let img, let emoji, offset: _):
+                    return custom_emoji_attributed_string(img: img, emoji: emoji)
             }
         }
     }
@@ -125,6 +154,18 @@ extension CompatibleText {
 func icon_attributed_string(img: UIImage) -> AttributedString {
     let attachment = NSTextAttachment()
     attachment.image = img
+    let attachmentString = NSAttributedString(attachment: attachment)
+    return AttributedString(attachmentString)
+}
+
+/// Creates an AttributedString with a custom emoji attachment that preserves emoji metadata.
+///
+/// - Parameters:
+///   - img: The emoji image to embed.
+///   - emoji: The CustomEmoji with shortcode and URL metadata.
+/// - Returns: An AttributedString containing the emoji as a CustomEmojiTextAttachment.
+func custom_emoji_attributed_string(img: UIImage, emoji: CustomEmoji) -> AttributedString {
+    let attachment = CustomEmojiTextAttachment(emoji: emoji, image: img)
     let attachmentString = NSAttributedString(attachment: attachment)
     return AttributedString(attachmentString)
 }

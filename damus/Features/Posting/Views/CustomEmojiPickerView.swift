@@ -17,9 +17,18 @@ struct CustomEmojiPickerView: View {
     @State private var searchText: String = ""
     @State private var selectedTab: EmojiTab = .saved
 
-    enum EmojiTab: String, CaseIterable {
-        case saved = "My Emojis"
-        case recent = "Recent"
+    enum EmojiTab: CaseIterable {
+        case saved
+        case recent
+
+        var localizedName: String {
+            switch self {
+            case .saved:
+                return NSLocalizedString("My Emojis", comment: "Tab label for saved custom emojis")
+            case .recent:
+                return NSLocalizedString("Recent", comment: "Tab label for recent custom emojis")
+            }
+        }
     }
 
     private var filteredEmojis: [CustomEmoji] {
@@ -73,10 +82,10 @@ struct CustomEmojiPickerView: View {
         switch tab {
         case .saved:
             let count = damus_state.custom_emojis.savedCount
-            return count > 0 ? "\(tab.rawValue) (\(count))" : tab.rawValue
+            return count > 0 ? "\(tab.localizedName) (\(count))" : tab.localizedName
         case .recent:
             let count = damus_state.custom_emojis.recentCount
-            return count > 0 ? "\(tab.rawValue) (\(count))" : tab.rawValue
+            return count > 0 ? "\(tab.localizedName) (\(count))" : tab.localizedName
         }
     }
 
@@ -208,24 +217,15 @@ struct CustomEmojiPickerView: View {
     private func saveEmoji(_ emoji: CustomEmoji) {
         Task { @MainActor in
             damus_state.custom_emojis.save(emoji)
-            await publishEmojiList()
+            await damus_state.custom_emojis.publishEmojiList(damus_state: damus_state)
         }
     }
 
     private func unsaveEmoji(_ emoji: CustomEmoji) {
         Task { @MainActor in
             damus_state.custom_emojis.unsave(emoji)
-            await publishEmojiList()
+            await damus_state.custom_emojis.publishEmojiList(damus_state: damus_state)
         }
-    }
-
-    private func publishEmojiList() async {
-        guard let fullKeypair = damus_state.keypair.to_full() else { return }
-
-        let emojis = await MainActor.run { damus_state.custom_emojis.sortedSavedEmojis }
-        guard let event = damus_state.custom_emojis.createEmojiListEvent(keypair: fullKeypair, emojis: emojis) else { return }
-
-        await damus_state.nostrNetwork.postbox.send(event)
     }
 }
 

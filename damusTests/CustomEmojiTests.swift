@@ -193,11 +193,6 @@ final class CustomEmojiTests: XCTestCase {
 
         // Verify we can parse the emoji tags
         let emojis = Array(event.referenced_custom_emojis)
-        print("Found \(emojis.count) emojis")
-        for emoji in emojis {
-            print("  - \(emoji.shortcode): \(emoji.url)")
-        }
-
         XCTAssertEqual(emojis.count, 4, "Should find 4 emoji tags")
 
         let shortcodes = Set(emojis.map { $0.shortcode })
@@ -213,5 +208,99 @@ final class CustomEmojiTests: XCTestCase {
         // Test emojify
         let result = emojify_text("Hello :Zapchat: world", emojis: emojiMap)
         XCTAssertEqual(result.items.count, 3, "Should have 3 items: text, emoji, text")
+    }
+
+    // MARK: - CustomEmojiStore Tests
+
+    /// Tests saving and checking saved status.
+    @MainActor
+    func testCustomEmojiStoreSave() throws {
+        let store = CustomEmojiStore()
+        let emoji = CustomEmoji(shortcode: "test", url: URL(string: "https://example.com/test.png")!)
+
+        XCTAssertFalse(store.isSaved(emoji))
+        XCTAssertEqual(store.savedCount, 0)
+
+        store.save(emoji)
+
+        XCTAssertTrue(store.isSaved(emoji))
+        XCTAssertEqual(store.savedCount, 1)
+    }
+
+    /// Tests unsaving an emoji.
+    @MainActor
+    func testCustomEmojiStoreUnsave() throws {
+        let store = CustomEmojiStore()
+        let emoji = CustomEmoji(shortcode: "test", url: URL(string: "https://example.com/test.png")!)
+
+        store.save(emoji)
+        XCTAssertTrue(store.isSaved(emoji))
+
+        store.unsave(emoji)
+        XCTAssertFalse(store.isSaved(emoji))
+        XCTAssertEqual(store.savedCount, 0)
+    }
+
+    /// Tests adding recent emojis.
+    @MainActor
+    func testCustomEmojiStoreRecent() throws {
+        let store = CustomEmojiStore()
+        let emoji = CustomEmoji(shortcode: "recent", url: URL(string: "https://example.com/recent.png")!)
+
+        XCTAssertEqual(store.recentCount, 0)
+
+        store.add(emoji)
+
+        XCTAssertEqual(store.recentCount, 1)
+        XCTAssertNotNil(store.emoji(for: "recent"))
+    }
+
+    /// Tests that saved emojis take precedence over recent in lookup.
+    @MainActor
+    func testCustomEmojiStoreLookupPrecedence() throws {
+        let store = CustomEmojiStore()
+        let savedUrl = URL(string: "https://example.com/saved.png")!
+        let recentUrl = URL(string: "https://example.com/recent.png")!
+
+        let savedEmoji = CustomEmoji(shortcode: "test", url: savedUrl)
+        let recentEmoji = CustomEmoji(shortcode: "test", url: recentUrl)
+
+        store.add(recentEmoji)
+        store.save(savedEmoji)
+
+        let result = store.emoji(for: "test")
+        XCTAssertEqual(result?.url, savedUrl, "Saved emoji should take precedence")
+    }
+
+    /// Tests search functionality.
+    @MainActor
+    func testCustomEmojiStoreSearch() throws {
+        let store = CustomEmojiStore()
+        store.save(CustomEmoji(shortcode: "wave", url: URL(string: "https://example.com/wave.png")!))
+        store.save(CustomEmoji(shortcode: "waving", url: URL(string: "https://example.com/waving.png")!))
+        store.save(CustomEmoji(shortcode: "smile", url: URL(string: "https://example.com/smile.png")!))
+
+        let waveResults = store.searchSaved("wav")
+        XCTAssertEqual(waveResults.count, 2)
+
+        let smileResults = store.searchSaved("smi")
+        XCTAssertEqual(smileResults.count, 1)
+
+        let allResults = store.searchSaved("")
+        XCTAssertEqual(allResults.count, 3)
+    }
+
+    /// Tests clearing recent emojis.
+    @MainActor
+    func testCustomEmojiStoreClearRecent() throws {
+        let store = CustomEmojiStore()
+        store.add(CustomEmoji(shortcode: "a", url: URL(string: "https://example.com/a.png")!))
+        store.add(CustomEmoji(shortcode: "b", url: URL(string: "https://example.com/b.png")!))
+
+        XCTAssertEqual(store.recentCount, 2)
+
+        store.clearRecent()
+
+        XCTAssertEqual(store.recentCount, 0)
     }
 }

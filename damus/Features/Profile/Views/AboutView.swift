@@ -14,7 +14,7 @@ struct AboutView: View {
     let text_alignment: NSTextAlignment
     let customEmojis: [String: CustomEmoji]
     @State var show_full_about: Bool = false
-    @State private var about_string: AttributedString? = nil
+    @State private var about_string: AttributedString?
 
     init(state: DamusState, about: String, max_about_length: Int? = nil, text_alignment: NSTextAlignment? = nil, customEmojis: [String: CustomEmoji] = [:]) {
         self.state = state

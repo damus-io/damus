@@ -21,7 +21,7 @@ class CustomEmojiStore: ObservableObject {
     @Published private(set) var recentEmojis: [String: CustomEmoji] = [:]
 
     /// The current kind 10030 event (if loaded).
-    private(set) var emojiListEvent: NostrEvent? = nil
+    private(set) var emojiListEvent: NostrEvent?
 
     /// Returns saved emojis sorted alphabetically by shortcode.
     var sortedSavedEmojis: [CustomEmoji] {
@@ -36,10 +36,8 @@ class CustomEmojiStore: ObservableObject {
     /// Returns all emojis (saved + recent, deduplicated) sorted alphabetically.
     var sortedEmojis: [CustomEmoji] {
         var combined = savedEmojis
-        for (shortcode, emoji) in recentEmojis {
-            if combined[shortcode] == nil {
-                combined[shortcode] = emoji
-            }
+        for (shortcode, emoji) in recentEmojis where combined[shortcode] == nil {
+            combined[shortcode] = emoji
         }
         return combined.values.sorted { $0.shortcode.lowercased() < $1.shortcode.lowercased() }
     }
@@ -133,6 +131,18 @@ class CustomEmojiStore: ObservableObject {
             kind: NostrKind.emoji_list.rawValue,
             tags: tags
         )
+    }
+
+    /// Publishes the current saved emoji list (kind 10030) to relays.
+    ///
+    /// Creates a new kind 10030 event with all saved emojis and sends it via the postbox.
+    ///
+    /// - Parameter damus_state: The damus state containing keypair and network.
+    func publishEmojiList(damus_state: DamusState) async {
+        guard let fullKeypair = damus_state.keypair.to_full() else { return }
+        let emojis = sortedSavedEmojis
+        guard let event = createEmojiListEvent(keypair: fullKeypair, emojis: emojis) else { return }
+        await damus_state.nostrNetwork.postbox.send(event)
     }
 
     // MARK: - Recent Emojis (from timeline)
