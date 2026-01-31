@@ -21,31 +21,30 @@ class LoadableNostrEventViewModel: ObservableObject {
     let damus_state: DamusState
     let note_reference: NoteReference
     @Published var state: ThreadModelLoadingState = .loading
-    /// The time period after which it will give up loading the view.
-    /// Written in nanoseconds
-    let TIMEOUT: UInt64 = 10 * 1_000_000_000    // 10 seconds
-    
+
     init(damus_state: DamusState, note_reference: NoteReference) {
         self.damus_state = damus_state
         self.note_reference = note_reference
         Task { await self.load() }
     }
-    
-    func load() async {
-        // Start the loading process in a separate task to manage the timeout independently.
-        let loadTask = Task { @MainActor in
-            self.state = await executeLoadingLogic(note_reference: self.note_reference)
-        }
 
-        // Setup a timer to cancel the load after the timeout period
-        let timeoutTask = Task { @MainActor in
-            try await Task.sleep(nanoseconds: TIMEOUT)
-            loadTask.cancel() // This sends a cancellation signal to the load task.
-            self.state = .not_found
-        }
-        
-        await loadTask.value
-        timeoutTask.cancel() // Cancel the timeout task if loading finishes earlier.
+    /// Loads the event from the network, ensuring connection is established first.
+    ///
+    /// This method waits for a network connection before attempting to load the event,
+    /// following the same pattern as `SearchHomeModel.load()`. The timeout is handled
+    /// by `awaitConnection()` which has a built-in 30-second timeout.
+    func load() async {
+        #if DEBUG
+        print("LoadableNostrEventView: awaiting connection...")
+        #endif
+        await damus_state.nostrNetwork.awaitConnection()
+        #if DEBUG
+        print("LoadableNostrEventView: connection ready, loading event")
+        #endif
+        self.state = await executeLoadingLogic(note_reference: self.note_reference)
+        #if DEBUG
+        print("LoadableNostrEventView: load complete, state = \(self.state)")
+        #endif
     }
     
     /// Asynchronously find an event from NostrDB or from the network (if not available on NostrDB)
