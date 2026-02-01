@@ -14,7 +14,7 @@ struct ShareAction: View {
     @State private var isBookmarked: Bool = false
 
     @Binding var show_share: Bool
-    
+
     @Environment(\.dismiss) var dismiss
     
     init(event: NostrEvent, bookmarks: BookmarksManager, show_share: Binding<Bool>, userProfile: ProfileModel) {
@@ -55,16 +55,23 @@ struct ShareAction: View {
             HStack(alignment: .top, spacing: 25) {
                 
                 ShareActionButton(img: "link", text: NSLocalizedString("Copy Link", comment: "Button to copy link to note")) {
-                    dismiss()
                     UIPasteboard.general.string = "https://damus.io/" + Bech32Object.encode(.nevent(NEvent(noteid: event.id, relays: userProfile.getCappedRelays())))
+                    ToastManager.shared.showCopied()
+                    dismiss()
                 }
-                
+
                 let bookmarkImg = isBookmarked ? "bookmark.fill" : "bookmark"
                 let bookmarkTxt = isBookmarked ? NSLocalizedString("Remove Bookmark", comment: "Button text to remove bookmark from a note.") : NSLocalizedString("Add Bookmark", comment: "Button text to add bookmark to a note.")
                 ShareActionButton(img: bookmarkImg, text: bookmarkTxt) {
-                    dismiss()
+                    let wasBookmarked = isBookmarked
                     self.bookmarks.updateBookmark(event)
                     isBookmarked = self.bookmarks.isBookmarked(event)
+                    if wasBookmarked {
+                        ToastManager.shared.showUnbookmarked()
+                    } else {
+                        ToastManager.shared.showBookmarked()
+                    }
+                    dismiss()
                 }
                 
                 ShareActionButton(img: "globe", text: NSLocalizedString("Broadcast", comment: "Button to broadcast note to all your relays")) {

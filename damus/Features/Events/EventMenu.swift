@@ -77,18 +77,26 @@ struct MenuItems: View {
         Group {
             Button {
                 UIPasteboard.general.string = event.get_content(damus_state.keypair)
+                ToastManager.shared.showCopied()
             } label: {
                 Label(NSLocalizedString("Copy text", comment: "Context menu option for copying the text from an note."), image: "copy2")
             }
 
             Button {
                 UIPasteboard.general.string = Bech32Object.encode(.nprofile(NProfile(author: target_pubkey, relays: profileModel.getCappedRelays())))
+                ToastManager.shared.showCopied()
             } label: {
                 Label(NSLocalizedString("Copy user public key", comment: "Context menu option for copying the ID of the user who created the note."), image: "user")
             }
 
             Button {
-                Task { UIPasteboard.general.string = Bech32Object.encode(.nevent(NEvent(event: event, relays: await event_relay_url_strings()))) }
+                Task {
+                    let encoded = Bech32Object.encode(.nevent(NEvent(event: event, relays: await event_relay_url_strings())))
+                    await MainActor.run {
+                        UIPasteboard.general.string = encoded
+                        ToastManager.shared.showCopied()
+                    }
+                }
             } label: {
                 Label(NSLocalizedString("Copy note ID", comment: "Context menu option for copying the ID of the note."), image: "note-book")
             }
@@ -96,14 +104,21 @@ struct MenuItems: View {
             if damus_state.settings.developer_mode {
                 Button {
                     UIPasteboard.general.string = event_to_json(ev: event)
+                    ToastManager.shared.showCopied()
                 } label: {
                     Label(NSLocalizedString("Copy note JSON", comment: "Context menu option for copying the JSON text from the note."), image: "code.on.square")
                 }
             }
-            
+
             Button {
+                let wasBookmarked = isBookmarked
                 self.damus_state.bookmarks.updateBookmark(event)
                 isBookmarked = self.damus_state.bookmarks.isBookmarked(event)
+                if wasBookmarked {
+                    ToastManager.shared.showUnbookmarked()
+                } else {
+                    ToastManager.shared.showBookmarked()
+                }
             } label: {
                 let imageName = isBookmarked ? "bookmark.fill" : "bookmark"
                 let removeBookmarkString = NSLocalizedString("Remove bookmark", comment: "Context menu option for removing a note bookmark.")
@@ -119,6 +134,7 @@ struct MenuItems: View {
             // Mute thread - relocated to below Broadcast, as to move further away from Add Bookmark to prevent accidental muted threads
             if event.known_kind != .dm {
                 MuteDurationMenu { duration in
+                    let wasMuted = isMutedThread
                     if let full_keypair = self.damus_state.keypair.to_full(),
                        let new_mutelist_ev = toggle_from_mutelist(keypair: full_keypair, prev: damus_state.mutelist_manager.event, to_toggle: .thread(event.thread_id(), duration?.date_from_now)) {
                         damus_state.mutelist_manager.set_mutelist(new_mutelist_ev)
@@ -126,6 +142,11 @@ struct MenuItems: View {
                     }
                     let muted = damus_state.mutelist_manager.is_event_muted(event)
                     isMutedThread = muted
+                    if wasMuted {
+                        ToastManager.shared.showThreadUnmuted()
+                    } else {
+                        ToastManager.shared.showThreadMuted()
+                    }
                 } label: {
                     let imageName = isMutedThread ? "mute" : "mute"
                     let unmuteThreadString = NSLocalizedString("Unmute conversation", comment: "Context menu option for unmuting a conversation.")
