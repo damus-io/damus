@@ -244,5 +244,54 @@ final class NdbTests: XCTestCase {
 
     }
 
+    // MARK: - Extension Context Tests
+
+    /// Tests that extension bundle path detection works correctly.
+    func test_extension_bundle_path_detection() {
+        // Main app paths should NOT be detected as extensions
+        let mainAppPaths = [
+            "/var/containers/Bundle/Application/UUID/Damus.app",
+            "/Applications/Damus.app",
+            "/path/to/App.app"
+        ]
+        for path in mainAppPaths {
+            XCTAssertFalse(path.hasSuffix(".appex"), "Main app path should not be detected as extension: \(path)")
+        }
+
+        // Extension paths SHOULD be detected as extensions
+        let extensionPaths = [
+            "/var/containers/Bundle/Application/UUID/Damus.app/PlugIns/DamusNotificationService.appex",
+            "/var/containers/Bundle/Application/UUID/Damus.app/PlugIns/HighlighterActionExtension.appex",
+            "/path/to/App.app/PlugIns/SomeExtension.appex"
+        ]
+        for path in extensionPaths {
+            XCTAssertTrue(path.hasSuffix(".appex"), "Extension path should be detected: \(path)")
+        }
+    }
+
+    /// Tests that Ndb initializes correctly when owns_db_file=false (extension mode).
+    /// This simulates extension context which should use smaller mapsize.
+    func test_ndb_init_extension_mode() throws {
+        // First, create a database with some data
+        let ndb = Ndb(path: db_dir, owns_db_file: true)!
+        let ok = ndb.process_events(test_wire_events)
+        XCTAssertTrue(ok)
+        ndb.close()
+
+        // Now open in "extension mode" (owns_db_file=false)
+        // This should use smaller mapsize and not crash
+        guard let extensionNdb = Ndb(path: db_dir, owns_db_file: false) else {
+            XCTFail("Ndb should initialize in extension mode")
+            return
+        }
+
+        // Verify we can still read data
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+        let profile = try? extensionNdb.lookup_profile_and_copy(pk)
+        XCTAssertNotNil(profile)
+        XCTAssertEqual(profile?.name, "jb55")
+        extensionNdb.close()
+    }
+
 }
 
