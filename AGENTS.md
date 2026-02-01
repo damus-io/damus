@@ -49,5 +49,5 @@ Damus is an iOS client built around a local relay model ([damus-io/damus#3204](h
 12. Commits which have code which contain fixes or refactors which were introduced in the same PR should be rebased such that the fixes are added to the original code history.
 13. Verify that existing code that can do the job is not ignored (in lieu of creating code that performs the same function of existing code).
 14. Do not accrue duplicate code. Always revisit how existing code can be applied and/or refactored in solving new issues.
-15. Always prefer simplicity One line of code is better than ten. Ten is better than a hundred. A commit with ten thousand lines of code is not reviewable by a human developer. A thousand line commit will be avoided unless it saves someone's life.
+15. Always prefer simplicity One line of code is better than ten. Ten is better than a hundred. A commit with ten thousand lines of code is not reviewable by a human developer. A thousand-line commit will be avoided unless it saves someone's life.
 16. Do not fudge CI tests, to get a commit or PR to pass. Instead identify the underlying root cause of CI failure, and address that.
