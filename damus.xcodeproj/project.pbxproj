@@ -449,6 +449,7 @@
 		4CF0ABD82981980C00D66079 /* Lists.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABD72981980C00D66079 /* Lists.swift */; };
 		4CF0ABDC2981A19E00D66079 /* ListTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABDB2981A19E00D66079 /* ListTests.swift */; };
 		4CF0ABE12981A83900D66079 /* MutelistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABE02981A83900D66079 /* MutelistView.swift */; };
+		5C3570022E303D0000MUTE02 /* MuteItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C3570012E303D0000MUTE01 /* MuteItemRow.swift */; };
 		4CF0ABE32981BC7D00D66079 /* UserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABE22981BC7D00D66079 /* UserView.swift */; };
 		4CF0ABE52981EE0C00D66079 /* EULAView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABE42981EE0C00D66079 /* EULAView.swift */; };
 		4CF0ABE7298444FD00D66079 /* EventMutingContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABE6298444FC00D66079 /* EventMutingContainerView.swift */; };
@@ -987,6 +988,7 @@
 		82D6FC242CD99F7900C925F4 /* AddMuteItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51C1CE82B55A60A00E312A9 /* AddMuteItemView.swift */; };
 		82D6FC252CD99F7900C925F4 /* MuteDurationMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51C1CE92B55A60A00E312A9 /* MuteDurationMenu.swift */; };
 		82D6FC262CD99F7900C925F4 /* MutelistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABE02981A83900D66079 /* MutelistView.swift */; };
+		5C3570032E303D0000MUTE03 /* MuteItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C3570012E303D0000MUTE01 /* MuteItemRow.swift */; };
 		82D6FC272CD99F7900C925F4 /* HighlightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC8529E2BD744F60039FFC5 /* HighlightView.swift */; };
 		82D6FC282CD99F7900C925F4 /* HighlightDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC852A12BDED9B90039FFC5 /* HighlightDescription.swift */; };
 		82D6FC292CD99F7900C925F4 /* HighlightLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC852A32BDF3CA10039FFC5 /* HighlightLink.swift */; };
@@ -1534,6 +1536,7 @@
 		D73E5F1E2C6A97F4007EB227 /* UserSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABF52985CD5500D66079 /* UserSearch.swift */; };
 		D73E5F202C6A97F4007EB227 /* MuteDurationMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51C1CE92B55A60A00E312A9 /* MuteDurationMenu.swift */; };
 		D73E5F212C6A97F4007EB227 /* MutelistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABE02981A83900D66079 /* MutelistView.swift */; };
+		5C3570042E303D0000MUTE04 /* MuteItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C3570012E303D0000MUTE01 /* MuteItemRow.swift */; };
 		D73E5F222C6A97F4007EB227 /* HighlightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC8529E2BD744F60039FFC5 /* HighlightView.swift */; };
 		D73E5F232C6A97F4007EB227 /* HighlightDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC852A12BDED9B90039FFC5 /* HighlightDescription.swift */; };
 		D73E5F242C6A97F4007EB227 /* HighlightLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC852A32BDF3CA10039FFC5 /* HighlightLink.swift */; };
@@ -2560,6 +2563,7 @@
 		4CF0ABD72981980C00D66079 /* Lists.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lists.swift; sourceTree = "<group>"; };
 		4CF0ABDB2981A19E00D66079 /* ListTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListTests.swift; sourceTree = "<group>"; };
 		4CF0ABE02981A83900D66079 /* MutelistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutelistView.swift; sourceTree = "<group>"; };
+		5C3570012E303D0000MUTE01 /* MuteItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuteItemRow.swift; sourceTree = "<group>"; };
 		4CF0ABE22981BC7D00D66079 /* UserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserView.swift; sourceTree = "<group>"; };
 		4CF0ABE42981EE0C00D66079 /* EULAView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EULAView.swift; sourceTree = "<group>"; };
 		4CF0ABE6298444FC00D66079 /* EventMutingContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventMutingContainerView.swift; sourceTree = "<group>"; };
@@ -4599,6 +4603,7 @@
 			children = (
 				B51C1CE82B55A60A00E312A9 /* AddMuteItemView.swift */,
 				B51C1CE92B55A60A00E312A9 /* MuteDurationMenu.swift */,
+				5C3570012E303D0000MUTE01 /* MuteItemRow.swift */,
 				4CF0ABE02981A83900D66079 /* MutelistView.swift */,
 			);
 			path = Views;
@@ -5951,6 +5956,7 @@
 				4C1253502A76C5B20004F4B8 /* UnfollowedNotify.swift in Sources */,
 				4C86F7C62A76C51100EC0817 /* AttachedWalletNotify.swift in Sources */,
 				4CF0ABE12981A83900D66079 /* MutelistView.swift in Sources */,
+				5C3570022E303D0000MUTE02 /* MuteItemRow.swift in Sources */,
 				4CB883A82975FC1800DC99E7 /* Zaps.swift in Sources */,
 				4C45E5022BED4D000025A428 /* ThreadReply.swift in Sources */,
 				D74AAFD42B155ECB006CF0F4 /* Zaps+.swift in Sources */,
@@ -6857,6 +6863,7 @@
 				82D6FC242CD99F7900C925F4 /* AddMuteItemView.swift in Sources */,
 				82D6FC252CD99F7900C925F4 /* MuteDurationMenu.swift in Sources */,
 				82D6FC262CD99F7900C925F4 /* MutelistView.swift in Sources */,
+				5C3570032E303D0000MUTE03 /* MuteItemRow.swift in Sources */,
 				82D6FC272CD99F7900C925F4 /* HighlightView.swift in Sources */,
 				82D6FC282CD99F7900C925F4 /* HighlightDescription.swift in Sources */,
 				82D6FC292CD99F7900C925F4 /* HighlightLink.swift in Sources */,
@@ -7297,6 +7304,7 @@
 				D73E5F1E2C6A97F4007EB227 /* UserSearch.swift in Sources */,
 				D73E5F202C6A97F4007EB227 /* MuteDurationMenu.swift in Sources */,
 				D73E5F212C6A97F4007EB227 /* MutelistView.swift in Sources */,
+				5C3570042E303D0000MUTE04 /* MuteItemRow.swift in Sources */,
 				D73E5F222C6A97F4007EB227 /* HighlightView.swift in Sources */,
 				D73E5F232C6A97F4007EB227 /* HighlightDescription.swift in Sources */,
 				D73E5F242C6A97F4007EB227 /* HighlightLink.swift in Sources */,
