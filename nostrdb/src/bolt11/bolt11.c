@@ -376,8 +376,15 @@ static bool bech32_decode_alloc(const tal_t *ctx,
 				size_t *data_len,
 				const char *str)
 {
-    char *hrp = tal_arr(ctx, char, strlen(str) - 6);
-    u5 *data = tal_arr(ctx, u5, strlen(str) - 8);
+    size_t len = strlen(str);
+
+    /* Minimum: 1 HRP + '1' separator + 6 checksum = 8 chars.
+     * Guard prevents underflow in (len - 6) and (len - 8) below. */
+    if (len < 8)
+        return false;
+
+    char *hrp = tal_arr(ctx, char, len - 6);
+    u5 *data = tal_arr(ctx, u5, len - 8);
 
     if (bech32_decode(hrp, data, data_len, str, (size_t)-1)
         != BECH32_ENCODING_BECH32) {
