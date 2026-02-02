@@ -102,6 +102,9 @@ struct DamusCacheManager {
             var removedCount = 0
             var freedBytes: UInt64 = 0
 
+            // NDB close/reopen is thread-safe: close() uses ndbAccessLock.waitUntilNdbCanClose()
+            // which waits for in-flight operations to complete before destroying the DB.
+            // New callers using withNdb() will get NdbStreamError.ndbClosed until reopen() is called.
             damus_state.ndb.close()
 
             let sharedCacheRootPath = containerURL.standardizedFileURL.path
@@ -129,9 +132,13 @@ struct DamusCacheManager {
                 }
             }
 
+            // Reset the Kingfisher shared cache on the main queue to avoid race conditions
+            // with concurrent image fetches that may be using the cache.
             let cachePath = ImageCacheMigrations.kingfisherCachePath()
             if let cache = try? ImageCache(name: "sharedCache", cacheDirectoryURL: cachePath) {
-                KingfisherManager.shared.cache = cache
+                DispatchQueue.main.async {
+                    KingfisherManager.shared.cache = cache
+                }
             } else {
                 Log.error("Failed to reset Kingfisher shared cache instance after clearing disk cache", for: .storage)
             }
