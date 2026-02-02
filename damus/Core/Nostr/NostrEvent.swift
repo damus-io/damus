@@ -32,6 +32,50 @@ enum ValidationResult: Decodable {
     case bad_sig
 }
 
+/// Represents metadata from a NIP-89 client tag (`["client", name, address?, relay?]`).
+/// Used to identify which application published a nostr event.
+struct ClientTagMetadata: Equatable {
+    /// The client application name (e.g., "Damus").
+    let name: String
+    /// Optional NIP-89 handler address for the client.
+    let handlerAddress: String?
+    /// Optional relay hint where the handler can be found.
+    let relayHint: String?
+
+    init(name: String, handlerAddress: String? = nil, relayHint: String? = nil) {
+        self.name = name
+        self.handlerAddress = handlerAddress
+        self.relayHint = relayHint
+    }
+
+    /// Parses client tag metadata from tag components array.
+    /// - Parameter tagComponents: Array where index 0 is "client", index 1 is name, etc.
+    /// - Returns: nil if the tag is not a valid client tag.
+    init?(tagComponents: [String]) {
+        guard tagComponents.first == "client", let clientName = tagComponents[safe: 1], !clientName.isEmpty else {
+            return nil
+        }
+        self.name = clientName
+        self.handlerAddress = tagComponents[safe: 2]
+        self.relayHint = tagComponents[safe: 3]
+    }
+
+    /// Converts this metadata back into a tag array suitable for inclusion in an event.
+    var tagValues: [String] {
+        var components = ["client", name]
+        if let handlerAddress, !handlerAddress.isEmpty {
+            components.append(handlerAddress)
+            if let relayHint, !relayHint.isEmpty {
+                components.append(relayHint)
+            }
+        }
+        return components
+    }
+
+    /// The default Damus client tag.
+    static let damus = ClientTagMetadata(name: "Damus")
+}
+
     /*
 class NostrEventOld: Codable, Identifiable, CustomStringConvertible, Equatable, Hashable, Comparable {
     // TODO: memory mapped db events

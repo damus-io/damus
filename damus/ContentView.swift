@@ -440,7 +440,7 @@ struct ContentView: View {
             }
 
             Task {
-                if await !handle_post_notification(keypair: keypair, postbox: state.nostrNetwork.postbox, events: state.events, post: post) {
+                if await !handle_post_notification(keypair: keypair, postbox: state.nostrNetwork.postbox, events: state.events, post: post, clientTag: state.clientTagComponents) {
                     self.active_sheet = nil
                 }
             }
@@ -1081,13 +1081,27 @@ func handle_follow_notif(state: DamusState, target: FollowTarget) async -> Bool 
     return await handle_follow(state: state, follow: target.follow_ref)
 }
 
-func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: EventCache, post: NostrPostResult) async -> Bool {
+/// Handles a post notification by converting the post to a signed nostr event and broadcasting it.
+///
+/// - Parameters:
+///   - keypair: The user's full keypair used to sign the event.
+///   - postbox: The postbox used to broadcast the event to relays.
+///   - events: The event cache used to look up referenced events for rebroadcasting.
+///   - post: The post result, either a post to publish or a cancellation.
+///   - clientTag: Optional client tag array (e.g., `["client", "Damus"]`) to include in the event,
+///                identifying which application created the post. Pass `nil` to omit the tag.
+/// - Returns: `true` if the post was successfully converted and sent, `false` if the post was
+///            cancelled or if event conversion failed.
+///
+/// When successful, this function also rebroadcasts up to 3 referenced events and 3 quoted events
+/// to help ensure they are available on relays.
+func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: EventCache, post: NostrPostResult, clientTag: [String]? = nil) async -> Bool {
     switch post {
     case .post(let post):
         //let post = tup.0
         //let to_relays = tup.1
         print("post \(post.content)")
-        guard let new_ev = post.to_event(keypair: keypair) else {
+        guard let new_ev = post.to_event(keypair: keypair, clientTag: clientTag) else {
             return false
         }
         await postbox.send(new_ev)

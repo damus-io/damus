@@ -466,6 +466,19 @@ extension NdbNote {
     public var references: References<RefId> {
         References<RefId>(tags: self.tags)
     }
+
+    /// Parses and returns the client tag metadata if present on this note.
+    var clientTag: ClientTagMetadata? {
+        for tag in tags {
+            guard tag.count >= 2, tag[0].matches_str("client") else {
+                continue
+            }
+            if let metadata = ClientTagMetadata(tagComponents: tag.strings()) {
+                return metadata
+            }
+        }
+        return nil
+    }
     
     func thread_reply() -> ThreadReply? {
         if self.known_kind != .highlight {
