@@ -165,6 +165,14 @@ class DamusState: HeadlessDamusState, ObservableObject {
         keypair.privkey != nil
     }
 
+    /// Returns the Damus client tag array if the user has enabled client tag publishing, nil otherwise.
+    var clientTagComponents: [String]? {
+        guard settings.publish_client_tag else {
+            return nil
+        }
+        return ClientTagMetadata.damus.tagValues
+    }
+
     func close() {
         print("txn: damus close")
         Task {
