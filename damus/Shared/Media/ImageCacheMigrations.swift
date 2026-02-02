@@ -2,19 +2,27 @@
 //  ImageCacheMigrations.swift
 //  damus
 //
-//  Created by Daniel D’Aquino on 2025-04-26.
+//  Created by Daniel D'Aquino on 2025-04-26.
 //
 
 import Foundation
 import Kingfisher
 
 struct ImageCacheMigrations {
+    /// Migrates Kingfisher image cache from legacy locations to the shared app group container.
+    /// Early-returns and logs via `Log.error` if the app group container is unavailable. Safe to call idempotently at startup.
     static func migrateKingfisherCacheIfNeeded() {
         let fileManager = FileManager.default
+
+        guard fileManager.containerURL(forSecurityApplicationGroupIdentifier: Constants.DAMUS_APP_GROUP_IDENTIFIER) != nil else {
+            Log.error("Skipping Kingfisher cache migration because app group container is unavailable", for: .storage)
+            return
+        }
+
         let defaults = UserDefaults.standard
         let migration1Key = "KingfisherCacheMigrated"   // Never ever changes
         let migration2Key = "KingfisherCacheMigratedV2" // Never ever changes
-        
+
         let migration1Done = defaults.bool(forKey: migration1Key)
         let migration2Done = defaults.bool(forKey: migration2Key)
 
@@ -46,34 +54,49 @@ struct ImageCacheMigrations {
                 }
             }
         }
-        
+
         // Mark migrations as complete
         defaults.set(true, forKey: migration1Key)
         defaults.set(true, forKey: migration2Key)
     }
-    
+
     static private func migration0KingfisherCachePath() -> String {
         // Implementation note: These are old, so they should not be changed
         let defaultCache = ImageCache.default
         return defaultCache.diskStorage.directoryURL.path
     }
-    
+
+    /// Returns the legacy Kingfisher cache path used in migration v1 (hard-coded for backwards-compatibility).
+    /// Falls back to app caches directory if app group is unavailable, logging an error via `Log.error`.
     static private func migration1KingfisherCachePath() -> String {
         // Implementation note: These are old, so they are hard-coded on purpose, because we can't change these values from the past.
-        let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.damus")!
-        return groupURL.appendingPathComponent("ImageCache").path
+        if let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.damus") {
+            return groupURL.appendingPathComponent("ImageCache").path
+        }
+
+        let fallback = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent(Constants.IMAGE_CACHE_DIRNAME)
+            .path
+        Log.error("Legacy Kingfisher cache path unavailable; using fallback at %s", for: .storage, fallback)
+        return fallback
     }
-    
+
     /// The latest path for kingfisher to store cached images on.
     ///
     /// Documentation references:
     /// - https://developer.apple.com/documentation/foundation/filemanager/containerurl(forsecurityapplicationgroupidentifier:)#:~:text=The%20system%20creates%20only%20the%20Library/Caches%20subdirectory%20automatically
     /// - https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/FileSystemOverview/FileSystemOverview.html#:~:text=Put%20data%20cache,files%20as%20needed.
     static func kingfisherCachePath() -> URL {
-        let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Constants.DAMUS_APP_GROUP_IDENTIFIER)!
-        return groupURL
-            .appendingPathComponent("Library")
-            .appendingPathComponent("Caches")
+        if let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Constants.DAMUS_APP_GROUP_IDENTIFIER) {
+            return groupURL
+                .appendingPathComponent("Library")
+                .appendingPathComponent("Caches")
+                .appendingPathComponent(Constants.IMAGE_CACHE_DIRNAME)
+        }
+
+        let fallbackURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
             .appendingPathComponent(Constants.IMAGE_CACHE_DIRNAME)
+        Log.error("App group container unavailable; using fallback cache directory at %s", for: .storage, fallbackURL.path)
+        return fallbackURL
     }
 }
