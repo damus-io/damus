@@ -330,5 +330,29 @@ final class NdbTests: XCTestCase {
         }
     }
 
+    /// Tests that write operations fail in readonly mode.
+    ///
+    /// Readonly mode (NDB_FLAG_READONLY) should reject write operations
+    /// to prevent accessing uninitialized writer/ingester threads.
+    func test_readonly_mode_rejects_writes() throws {
+        // First create database with data
+        let ndb = Ndb(path: db_dir, owns_db_file: true)!
+        let ok = ndb.process_events(test_wire_events)
+        XCTAssertTrue(ok)
+        ndb.close()
+
+        // Open in readonly mode
+        guard let readonlyNdb = Ndb(path: db_dir, owns_db_file: false) else {
+            XCTFail("Should be able to open in readonly mode")
+            return
+        }
+
+        // Attempt to write - should fail (return false)
+        let writeResult = readonlyNdb.process_events(test_wire_events)
+        XCTAssertFalse(writeResult, "Write operations should fail in readonly mode")
+
+        readonlyNdb.close()
+    }
+
 }
 
