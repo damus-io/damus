@@ -220,7 +220,7 @@ final class PostViewTests: XCTestCase {
         XCTAssertEqual(post.content, "nostr:\(test_pubkey.npub)")
     }
 
-    /// Tests that pasting an npub converts it to a mention link (issue #2289)
+/// Tests that pasting an npub converts it to a mention link (issue #2289)
     func testPastedNpubConvertsToMention() {
         let content = NSMutableAttributedString(string: "Hello ")
         var resultContent: NSMutableAttributedString?
@@ -318,6 +318,25 @@ final class PostViewTests: XCTestCase {
 
         XCTAssertTrue(shouldChange, "shouldChangeTextIn should return true for regular text")
     }
+
+    /// Tests that client tags are added to events when provided.
+    func testToEventAddsClientTagWhenProvided() {
+        let post = NostrPost(content: "gm")
+        let clientTag = ["client", "Damus"]
+        let event = post.to_event(keypair: test_keypair_full, clientTag: clientTag)
+        XCTAssertTrue(event?.tags.contains(where: { $0 == clientTag }) ?? false)
+    }
+
+    /// Tests that existing client tags are not duplicated.
+    func testToEventDoesNotDuplicateExistingClientTag() {
+        let existingTags = [["client", "Custom"]]
+        let post = NostrPost(content: "gm", tags: existingTags)
+        let clientTag = ["client", "Damus"]
+        let event = post.to_event(keypair: test_keypair_full, clientTag: clientTag)
+        let clientTagCount = event?.tags.filter { $0.first == "client" }.count
+        XCTAssertEqual(clientTagCount, 1)
+        XCTAssertEqual(event?.tags.first(where: { $0.first == "client" }), existingTags.first)
+    }
 }
 
 func checkMentionLinkEditorHandling(
@@ -353,5 +372,4 @@ func testAddingStringAfterLink(str: String) {
         XCTAssertNil(newManuallyEditedContent.attribute(.link, at: 11, effectiveRange: nil))
     })
 }
-
 

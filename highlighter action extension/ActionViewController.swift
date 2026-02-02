@@ -235,7 +235,7 @@ struct ShareExtensionView: View {
             self.highlighter_state = .not_logged_in
             return
         }
-        guard let posted_event = post.to_event(keypair: full_keypair) else {
+        guard let posted_event = post.to_event(keypair: full_keypair, clientTag: state.clientTagComponents) else {
             self.highlighter_state = .failed(error: "Cannot convert post data into a nostr event")
             return
         }

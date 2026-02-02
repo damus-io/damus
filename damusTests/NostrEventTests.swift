@@ -40,4 +40,18 @@ final class NostrEventTests: XCTestCase {
         let urlInContent2 = "https://cdn.nostr.build/i/5c1d3296f66c2630131bf123106486aeaf051ed8466031c0e0532d70b33cddb2.jpg"
         XCTAssert(testEvent2.content.contains(urlInContent2), "Issue parsing event. Expected to see '\(urlInContent2)' inside \(testEvent2.content)")
     }
+    
+    func testClientTagParsing() {
+        let tags = [["client", "Custom Client", "addr", "wss://relay.example"], ["p", test_pubkey.hex()]]
+        let event = NostrEvent(content: "hi", keypair: test_keypair, kind: 1, tags: tags)!
+        let metadata = event.clientTag
+        XCTAssertEqual(metadata?.name, "Custom Client")
+        XCTAssertEqual(metadata?.handlerAddress, "addr")
+        XCTAssertEqual(metadata?.relayHint, "wss://relay.example")
+    }
+
+    func testClientTagNilWhenMissing() {
+        let event = NostrEvent(content: "hi", keypair: test_keypair, kind: 1, tags: [])!
+        XCTAssertNil(event.clientTag)
+    }
 }

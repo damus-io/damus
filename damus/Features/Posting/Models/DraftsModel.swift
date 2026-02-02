@@ -67,7 +67,7 @@ class DraftArtifacts: Equatable {
     func to_nip37_draft(action: PostAction, damus_state: DamusState) async throws -> NIP37Draft? {
         guard let keypair = damus_state.keypair.to_full() else { return nil }
         let post = await build_post(state: damus_state, action: action, draft: self)
-        guard let note = post.to_event(keypair: keypair) else { return nil }
+        guard let note = post.to_event(keypair: keypair, clientTag: damus_state.clientTagComponents) else { return nil }
         return try NIP37Draft(unwrapped_note: note, draft_id: self.id, keypair: keypair)
     }
     
