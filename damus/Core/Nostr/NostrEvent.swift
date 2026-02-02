@@ -839,9 +839,7 @@ func separate_invoices(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> [Invoice]?
         let invoiceBlocks: [Invoice] = (try? blockGroup.reduce(initialResult: [Invoice](), { index, invoices, block in
             switch block {
             case .invoice(let invoice):
-                if let invoice = invoice.as_invoice() {
-                    return .loopReturn(invoices + [invoice])
-                }
+                return .loopReturn(invoices + [invoice.as_invoice()])
             default:
                 break
             }

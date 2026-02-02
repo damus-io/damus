@@ -191,8 +191,7 @@ func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide
                 let url_type = classify_url(url)
                 urls.append(url_type)
             case .invoice(let invoice_block):
-                guard let invoice = invoice_block.as_invoice() else { break }
-                invoices.append(invoice)
+                invoices.append(invoice_block.as_invoice())
             default:
                 break
             }
@@ -258,9 +257,9 @@ func render_blocks(blocks: borrowing NdbBlockGroup, profiles: Profiles, can_hide
                 return .loopReturn(str + CompatibleText(stringLiteral: reduce_text_block(ind: index, hide_text_index: hide_text_index_argument, txt: txt.as_str())))
             case .hashtag(let htag):
                 return .loopReturn(str + hashtag_str(htag.as_str()))
-            case .invoice(let invoice):
-                guard let inv = invoice.as_invoice() else { return .loopContinue }
-                invoices.append(inv)
+            case .invoice:
+                // Invoice already added in previewable-collection switch above
+                break
             case .url(let url):
                 guard let url = URL(string: url.as_str()) else { return .loopContinue }
                 return .loopReturn(str + url_str(url))

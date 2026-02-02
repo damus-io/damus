@@ -79,8 +79,7 @@ extension Block {
             guard let url = URL(string: block.as_str()) else { return nil }
             self = .url(url)
         case BLOCK_INVOICE:
-            guard let b = Block(invoice: block.block.invoice) else { return nil }
-            self = b
+            self = Block(invoice: block.block.invoice)
         case BLOCK_MENTION_BECH32:
             guard let b = Block(bech32: block.block.mention_bech32) else { return nil }
             self = b
@@ -113,26 +112,20 @@ fileprivate extension Block {
 }
 
 fileprivate extension Block {
-    /// Failable initializer for the C-backed type `invoice_block_t`.
-    init?(invoice: ndb_invoice_block) {
-
-        guard let invoice = invoice_block_as_invoice(invoice) else { return nil }
-        self = .invoice(invoice)
+    /// Initializer for the C-backed type `invoice_block_t`.
+    init(invoice: ndb_invoice_block) {
+        self = .invoice(invoice_block_as_invoice(invoice))
     }
 }
 
-func invoice_block_as_invoice(_ invoice: ndb_invoice_block) -> Invoice? {
+/// Converts a C-backed invoice block to a Swift Invoice.
+func invoice_block_as_invoice(_ invoice: ndb_invoice_block) -> Invoice {
     let invstr = invoice.invstr.as_str()
     let b11 = invoice.invoice
-
-    guard let description = convert_invoice_description(b11: b11) else {
-        return nil
-    }
-
+    let description = convert_invoice_description(b11: b11)
     let amount: Amount = b11.amount == 0 ? .any : .specific(Int64(b11.amount))
 
     return Invoice(description: description, amount: amount, string: invstr, expiry: b11.expiry, created_at: b11.timestamp)
-
 }
 
 fileprivate extension Block {

@@ -33,10 +33,7 @@ final class InvoiceTests: XCTestCase {
             let success: Bool? = blockList.useItem(at: 0, { block in
                 switch block {
                 case .invoice(let invoiceData):
-                    guard let invoice = invoiceData.as_invoice() else {
-                        XCTFail("Cannot get invoice from invoice block")
-                        return false
-                    }
+                    let invoice = invoiceData.as_invoice()
                     XCTAssertEqual(invoice.amount, .any)
                     XCTAssertEqual(invoice.string, invstr)
                     return true
@@ -110,10 +107,7 @@ final class InvoiceTests: XCTestCase {
             let success: Bool? = blockList.useItem(at: 0, { block in
                 switch block {
                 case .invoice(let invoiceData):
-                    guard let invoice = invoiceData.as_invoice() else {
-                        XCTFail("Cannot get invoice from invoice block")
-                        return false
-                    }
+                    let invoice = invoiceData.as_invoice()
                     XCTAssertEqual(invoice.amount, .specific(10000))
                     XCTAssertEqual(invoice.expiry, 604800)
                     XCTAssertEqual(invoice.created_at, 1666139119)
@@ -127,7 +121,7 @@ final class InvoiceTests: XCTestCase {
             XCTAssertEqual(success, true)
         })
     }
-    
+
     func testParseInvoiceWithPrefix() throws {
         let invstr = "lightning:lnbc100n1p357sl0sp5t9n56wdztun39lgdqlr30xqwksg3k69q4q2rkr52aplujw0esn0qpp5mrqgljk62z20q4nvgr6lzcyn6fhylzccwdvu4k77apg3zmrkujjqdpzw35xjueqd9ejqcfqv3jhxcmjd9c8g6t0dcxqyjw5qcqpjrzjqt56h4gvp5yx36u2uzqa6qwcsk3e2duunfxppzj9vhypc3wfe2wswz607uqq3xqqqsqqqqqqqqqqqlqqyg9qyysgqagx5h20aeulj3gdwx3kxs8u9f4mcakdkwuakasamm9562ffyr9en8yg20lg0ygnr9zpwp68524kmda0t5xp2wytex35pu8hapyjajxqpsql29r"
         
@@ -173,7 +167,36 @@ final class InvoiceTests: XCTestCase {
             XCTAssertEqual(success, true)
         })
     }
-    
+
+    /// Test parsing the specific invoice from GitHub issue that wasn't rendering
+    func testParseSpecificFailingInvoice() throws {
+        let invstr = "lnbc130n1p5h7alnpp5f83swv5wx9h25ansxsvkw7364c65vxktthy2m9ww5zf3cjrzp0vsdq9tfpygcqzysxqzjcsp5essuf0xnfeu4rpw7nllcggr6e9635xdpnaklr2fadtkwej0vvyfs9qxpqysgqddjjzxa2dwhntx8uvppx3u6pu864ul5dxkayp6jgf7n45ql5x7u9xzrvuav5rzsaz7h8d2gq455je2ezku40a5xrshu0w00ylprk03qq6kvvjd"
+
+        guard let blockGroup: NdbBlockGroup = try? NdbBlockGroup.parse(content: invstr) else {
+            XCTFail("Parsing threw an error")
+            return
+        }
+
+        blockGroup.withList({ blockList in
+            XCTAssertEqual(blockList.count, 1, "Expected 1 block, got \(blockList.count)")
+            let success: Bool? = blockList.useItem(at: 0, { block in
+                switch block {
+                case .invoice(let invoiceData):
+                    let invoice = invoiceData.as_invoice()
+                    XCTAssertEqual(invoice.amount, .specific(13000))
+                    return true
+                case .text(let txt):
+                    XCTFail("Expected invoice block, got text block")
+                    return false
+                default:
+                    XCTFail("Block is not an invoice")
+                    return false
+                }
+            })
+            XCTAssertEqual(success, true)
+        })
+    }
+
     /*
     // gh-3144: It was decided on a standup meeting that we do not need invoices to render, few people use this feature.
     func testParseInvoice() throws {
