@@ -37,14 +37,11 @@ enum NdbBech32Type: UInt32 {
 }
 
 extension ndb_invoice_block {
-    func as_invoice() -> Invoice? {
+    /// Converts to a Swift Invoice object.
+    func as_invoice() -> Invoice {
         let b11 = self.invoice
         let invstr = self.invstr.as_str()
-
-        guard let description = convert_invoice_description(b11: b11) else {
-            return nil
-        }
-        
+        let description = convert_invoice_description(b11: b11)
         let amount: Amount = b11.amount == 0 ? .any : .specific(Int64(b11.amount))
 
         return Invoice(description: description, amount: amount, string: invstr, expiry: b11.expiry, created_at: b11.timestamp)
@@ -110,12 +107,12 @@ struct NdbBlockGroup: ~Copyable {
     var words: Int {
         return metadata.words
     }
-    
+
     init(metadata: consuming BlocksMetadata, rawTextContent: String) {
         self.metadata = metadata
         self.rawTextContent = rawTextContent
     }
-    
+
     /// Gets the parsed blocks from a specific note.
     ///
     /// This function will:
@@ -125,17 +122,17 @@ struct NdbBlockGroup: ~Copyable {
         if event.is_content_encrypted() {
             return try lendingFunction(parse(event: event, keypair: keypair))
         }
-        else if event.known_kind == .highlight {
+        if event.known_kind == .highlight {
             return try lendingFunction(parse(event: event, keypair: keypair))
         }
-        else {
-            return try ndb.lookup_block_group_by_key(event: event, borrow: { group in
-                switch group {
-                case .none: return try lendingFunction(parse(event: event, keypair: keypair))
-                case .some(let group): return try lendingFunction(group)
-                }
-            })
-        }
+        return try ndb.lookup_block_group_by_key(event: event, borrow: { group in
+            switch group {
+            case .none:
+                return try lendingFunction(parse(event: event, keypair: keypair))
+            case .some(let group):
+                return try lendingFunction(group)
+            }
+        })
     }
     
     /// Parses the note contents on-demand from a specific note.

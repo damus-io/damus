@@ -294,16 +294,19 @@ func format_msats(_ msat: Int64, locale: Locale = Locale.current) -> String {
     return String(format: format, locale: locale, sats.decimalValue as NSDecimalNumber, formattedSats)
 }
 
-func convert_invoice_description(b11: ndb_invoice) -> InvoiceDescription? {
+/// Extracts the description from a BOLT11 invoice.
+/// Returns empty description if invoice has neither description nor description_hash,
+/// as both fields are optional per BOLT11 spec.
+func convert_invoice_description(b11: ndb_invoice) -> InvoiceDescription {
     if let desc = b11.description {
         return .description(String(cString: desc))
     }
-    
+
     if var deschash = maybe_pointee(b11.description_hash) {
         return .description_hash(Data(bytes: &deschash, count: 32))
     }
-    
-    return nil
+
+    return .description("")
 }
 
 func find_tag_ref(type: String, id: String, tags: [[String]]) -> Int? {
