@@ -6036,22 +6036,27 @@ int ndb_init(struct ndb **pndb, const char *filename, const struct ndb_config *c
 
 	ndb_monitor_init(&ndb->monitor, config->sub_cb, config->sub_cb_ctx);
 
-	if (!ndb_writer_init(&ndb->writer, &ndb->lmdb, &ndb->monitor, ndb->flags,
-			     config->writer_scratch_buffer_size)) {
-		fprintf(stderr, "ndb_writer_init failed\n");
-		return 0;
-	}
+	// Skip writer and ingester thread creation in readonly mode.
+	// This is used by app extensions that only need read access and have
+	// strict memory limits (~24MB) that cannot support background threads.
+	if (!ndb_flag_set(config->flags, NDB_FLAG_READONLY)) {
+		if (!ndb_writer_init(&ndb->writer, &ndb->lmdb, &ndb->monitor, ndb->flags,
+				     config->writer_scratch_buffer_size)) {
+			fprintf(stderr, "ndb_writer_init failed\n");
+			return 0;
+		}
 
-	if (!ndb_ingester_init(&ndb->ingester, &ndb->lmdb, &ndb->writer.inbox,
-			       config->writer_scratch_buffer_size, config)) {
-		fprintf(stderr, "failed to initialize %d ingester thread(s)\n",
-				config->ingester_threads);
-		return 0;
-	}
+		if (!ndb_ingester_init(&ndb->ingester, &ndb->lmdb, &ndb->writer.inbox,
+				       config->writer_scratch_buffer_size, config)) {
+			fprintf(stderr, "failed to initialize %d ingester thread(s)\n",
+					config->ingester_threads);
+			return 0;
+		}
 
-	if (!ndb_flag_set(config->flags, NDB_FLAG_NOMIGRATE)) {
-		struct ndb_writer_msg msg = { .type = NDB_WRITER_MIGRATE };
-		ndb_writer_queue_msg(&ndb->writer, &msg);
+		if (!ndb_flag_set(config->flags, NDB_FLAG_NOMIGRATE)) {
+			struct ndb_writer_msg msg = { .type = NDB_WRITER_MIGRATE };
+			ndb_writer_queue_msg(&ndb->writer, &msg);
+		}
 	}
 
 	// Initialize LMDB environment and spin up threads
@@ -6067,11 +6072,15 @@ void ndb_destroy(struct ndb *ndb)
 	if (ndb == NULL)
 		return;
 
-	// ingester depends on writer and must be destroyed first
-	ndb_debug("destroying ingester\n");
-	ndb_ingester_destroy(&ndb->ingester);
-	ndb_debug("destroying writer\n");
-	ndb_writer_destroy(&ndb->writer);
+	// Only destroy ingester/writer if they were initialized (not readonly mode)
+	if (!ndb_flag_set(ndb->flags, NDB_FLAG_READONLY)) {
+		// ingester depends on writer and must be destroyed first
+		ndb_debug("destroying ingester\n");
+		ndb_ingester_destroy(&ndb->ingester);
+		ndb_debug("destroying writer\n");
+		ndb_writer_destroy(&ndb->writer);
+	}
+
 	ndb_debug("destroying monitor\n");
 	ndb_monitor_destroy(&ndb->monitor);
 

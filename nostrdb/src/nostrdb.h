@@ -15,6 +15,9 @@
 #define NDB_FLAG_NO_FULLTEXT      (1 << 2)
 #define NDB_FLAG_NO_NOTE_BLOCKS   (1 << 3)
 #define NDB_FLAG_NO_STATS         (1 << 4)
+// Skip writer and ingester thread creation for read-only access.
+// Use this flag for app extensions that only need to read from the database.
+#define NDB_FLAG_READONLY         (1 << 5)
 
 //#define DEBUG 1
 
