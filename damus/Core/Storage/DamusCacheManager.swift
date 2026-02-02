@@ -33,14 +33,6 @@ enum CacheClearingPhase {
 struct DamusCacheManager {
     static var shared: DamusCacheManager = DamusCacheManager()
 
-    /// Formats byte counts as human-readable strings in MB/GB using file-size style.
-    private static let byteCountFormatter: ByteCountFormatter = {
-        let formatter = ByteCountFormatter()
-        formatter.allowedUnits = [.useMB, .useGB]
-        formatter.countStyle = .file
-        return formatter
-    }()
-
     /// Clears all application caches sequentially: Kingfisher, app group, cache folder, and temp directory.
     /// Invokes `completion` on the main thread after all caches are cleared.
     /// - Parameters:
@@ -264,9 +256,13 @@ struct DamusCacheManager {
     }
 
     /// Formats a byte count as a human-readable string (e.g., "1.5 GB").
+    /// Creates a new formatter each call to ensure thread safety from concurrent background queues.
     private func formattedByteCount(from bytes: UInt64) -> String {
+        let formatter = ByteCountFormatter()
+        formatter.allowedUnits = [.useMB, .useGB]
+        formatter.countStyle = .file
         let clamped = min(bytes, UInt64(Int64.max))
-        return Self.byteCountFormatter.string(fromByteCount: Int64(clamped))
+        return formatter.string(fromByteCount: Int64(clamped))
     }
 
     /// Returns the allocated disk size in bytes for a single file at the given URL.
