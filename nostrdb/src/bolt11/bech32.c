@@ -157,13 +157,21 @@ bech32_encoding bech32_decode_len(char* hrp, uint8_t *data, size_t *data_len, co
     }
 }
 
+/**
+ * Decode a bech32 string.
+ *
+ * IMPORTANT: Caller must allocate hrp buffer of at least (strlen(input) - 6) bytes
+ * to hold the maximum possible HRP for the given input. This matches bolt11.c usage.
+ */
 bech32_encoding bech32_decode(char* hrp, uint8_t *data, size_t *data_len, const char *input, size_t max_input_len) {
     size_t len = strlen(input);
     if (len > max_input_len) {
         return BECH32_ENCODING_NONE;
     }
-    static const int MAX_PREFIX = 10;    // 9 bytes for the text, 1 byte for the null terminator
-    return bech32_decode_len(hrp, data, data_len, input, len, MAX_PREFIX);
+    // Derive max HRP length from input: input = hrp + '1' + data + checksum(6)
+    // Caller must allocate hrp buffer of at least len-6 bytes (see bolt11.c:386)
+    int max_hrp_len = (len > 6) ? (int)(len - 6) : 1;
+    return bech32_decode_len(hrp, data, data_len, input, len, max_hrp_len);
 }
 
 int bech32_convert_bits(uint8_t* out, size_t* outlen, int outbits, const uint8_t* in, size_t inlen, int inbits, int pad) {
