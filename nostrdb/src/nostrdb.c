@@ -2431,6 +2431,9 @@ static int ndb_maybe_write_last_profile_fetch(struct ndb_txn *txn,
 int ndb_write_last_profile_fetch(struct ndb *ndb, const unsigned char *pubkey,
 				 uint64_t fetched_at)
 {
+	if (ndb->flags & NDB_FLAG_READONLY)
+		return 0;
+
 	struct ndb_writer_msg msg;
 	msg.type = NDB_WRITER_PROFILE_LAST_FETCH;
 	memcpy(&msg.last_fetch.pubkey[0], pubkey, 32);
@@ -6182,6 +6185,10 @@ int _ndb_process_events(struct ndb *ndb, const char *ldjson, size_t json_len,
 // TODO: windows
 int ndb_process_events_stream(struct ndb *ndb, FILE* fp)
 {
+	// Write operations not allowed in readonly mode
+	if (ndb_flag_set(ndb->flags, NDB_FLAG_READONLY))
+		return 0;
+
 	char *line = NULL;
 	size_t len = 0;
 	ssize_t nread;
@@ -8315,6 +8322,10 @@ struct ndb_blocks *ndb_get_blocks_by_key(struct ndb *ndb, struct ndb_txn *txn, u
 
 	 if (!(blocks = ndb_note_to_blocks(note)))
 		 return NULL;
+
+	 // In readonly mode, skip caching blocks to DB (no writer thread)
+	 if (ndb->flags & NDB_FLAG_READONLY)
+		 return blocks;
 
 	 // send a copy to the writer
 	 blocks_size = ndb_blocks_total_size(blocks);
