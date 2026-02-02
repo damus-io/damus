@@ -148,10 +148,14 @@ class Ndb {
 
         let minMapsize = isExtension ? extensionMinMapsize : mainAppMinMapsize
 
+        // Use readonly mode for extensions to skip writer/ingester thread creation.
+        // Extensions only need read access and have strict memory limits (~24MB).
+        let flags: Int32 = isExtension ? NDB_FLAG_READONLY : 0
+
         let ok = path.withCString { testdir in
             var ok = false
             while !ok && mapsize >= minMapsize {
-                var cfg = ndb_config(flags: 0, ingester_threads: ingest_threads, writer_scratch_buffer_size: DEFAULT_WRITER_SCRATCH_SIZE, mapsize: mapsize, filter_context: nil, ingest_filter: nil, sub_cb_ctx: nil, sub_cb: nil)
+                var cfg = ndb_config(flags: flags, ingester_threads: ingest_threads, writer_scratch_buffer_size: DEFAULT_WRITER_SCRATCH_SIZE, mapsize: mapsize, filter_context: nil, ingest_filter: nil, sub_cb_ctx: nil, sub_cb: nil)
                 
                 // Here we hook up the global callback function for subscription callbacks.
                 // We do an "unretained" pass here because the lifetime of the callback handler is larger than the lifetime of the nostrdb monitor in the C code.

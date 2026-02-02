@@ -270,27 +270,64 @@ final class NdbTests: XCTestCase {
     }
 
     /// Tests that Ndb initializes correctly when owns_db_file=false (extension mode).
-    /// This simulates extension context which should use smaller mapsize.
+    ///
+    /// Extension mode uses NDB_FLAG_READONLY which:
+    /// - Skips writer/ingester thread creation (prevents prot_queue crashes)
+    /// - Uses smaller mapsize (prevents memory pressure in 24MB limit)
+    /// - Still allows read operations
     func test_ndb_init_extension_mode() throws {
-        // First, create a database with some data
+        // First, create a database with some data using full mode
         let ndb = Ndb(path: db_dir, owns_db_file: true)!
         let ok = ndb.process_events(test_wire_events)
         XCTAssertTrue(ok)
         ndb.close()
 
         // Now open in "extension mode" (owns_db_file=false)
-        // This should use smaller mapsize and not crash
+        // This uses NDB_FLAG_READONLY which skips thread creation
         guard let extensionNdb = Ndb(path: db_dir, owns_db_file: false) else {
             XCTFail("Ndb should initialize in extension mode")
             return
         }
 
-        // Verify we can still read data
+        // Verify we can still read data (readonly mode supports reads)
         let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
         let profile = try? extensionNdb.lookup_profile_and_copy(pk)
         XCTAssertNotNil(profile)
         XCTAssertEqual(profile?.name, "jb55")
+
+        // Also verify note lookup works
+        let noteId = NoteId(hex: "d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349")!
+        let note = try? extensionNdb.lookup_note_and_copy(noteId)
+        XCTAssertNotNil(note)
+
         extensionNdb.close()
+    }
+
+    /// Tests that readonly mode can be opened and closed rapidly without crashes.
+    ///
+    /// This regression test verifies the fix for the 5h0 crash (prot_queue_pop_all)
+    /// where thread creation in extension context caused race conditions.
+    func test_readonly_mode_rapid_open_close() throws {
+        // First create database with data
+        let ndb = Ndb(path: db_dir, owns_db_file: true)!
+        let ok = ndb.process_events(test_wire_events)
+        XCTAssertTrue(ok)
+        ndb.close()
+
+        // Rapidly open and close in readonly mode multiple times
+        // This would crash before the fix due to thread races
+        for _ in 0..<10 {
+            guard let readonlyNdb = Ndb(path: db_dir, owns_db_file: false) else {
+                XCTFail("Should be able to open in readonly mode")
+                return
+            }
+
+            // Do a quick read
+            let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+            _ = try? readonlyNdb.lookup_profile_and_copy(pk)
+
+            readonlyNdb.close()
+        }
     }
 
 }
