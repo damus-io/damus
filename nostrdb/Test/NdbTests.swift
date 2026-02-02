@@ -244,5 +244,47 @@ final class NdbTests: XCTestCase {
 
     }
 
+    // MARK: - Use-After-Free Prevention Tests
+
+    /// Tests that profile data remains valid after lookup (owned buffer copy).
+    ///
+    /// This test verifies the fix for yjw crash (Data.withUnsafeBytes use-after-free).
+    /// The profile flatbuffer is now copied to an owned buffer instead of pointing
+    /// directly to LMDB memory-mapped region.
+    func test_profile_buffer_ownership() throws {
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+
+        // Phase 1: Write profile data to database
+        do {
+            let ndb = Ndb(path: db_dir)!
+            let ok = ndb.process_events(test_wire_events)
+            XCTAssertTrue(ok)
+        }
+
+        // Phase 2: Reopen database and lookup profile
+        var profile: Profile? = nil
+        do {
+            let ndb = Ndb(path: db_dir)!
+            profile = try? ndb.lookup_profile_and_copy(pk)
+
+            // Close the database to invalidate any LMDB memory mappings
+            ndb.close()
+        }
+
+        // Access profile data AFTER closing - this would crash if buffer wasn't owned
+        // With the fix, the data is copied so this should work fine
+        guard let profile else {
+            XCTFail("Expected profile to be non-nil")
+            return
+        }
+        XCTAssertEqual(profile.name, "jb55")
+
+        // Access additional fields to ensure full buffer is valid
+        _ = profile.display_name
+        _ = profile.about
+        _ = profile.picture
+        _ = profile.nip05
+    }
+
 }
 
