@@ -21,6 +21,7 @@ struct EventMutingContainerView<Content: View>: View {
     /// By default this is the same as `should_show_event`. However, if the user taps the button to manually show a muted note, this can become out of sync with `should_show_event`.
     @State var shown: Bool
 
+    /// Cached muted reason for this event, or nil when unmuted.
     @State var muted_reason: MuteItem?
 
     init(damus_state: DamusState, event: NostrEvent, @ViewBuilder content: () -> Content) {
@@ -42,36 +43,31 @@ struct EventMutingContainerView<Content: View>: View {
         return !should_show_event(state: damus_state, ev: event)
     }
 
+    /// Resolved muted reason, preferring cached state over fresh lookup.
     var current_muted_reason: MuteItem? {
         if let muted_reason {
             return muted_reason
         }
         return damus_state.mutelist_manager.event_muted_reason(event)
     }
-    
-    var should_show_mute_box: Bool {
-        guard should_mute else {
-            return false
-        }
-        guard let reason = current_muted_reason else {
-            return true
-        }
-        if case .user = reason {
-            // Skip placeholders for people the user has muted entirely.
-            return false
-        }
+
+    /// Whether the mute box should include an expand button.
+    /// User mutes show a static box with no expand option (like Twitter).
+    var should_show_expand_button: Bool {
+        guard let reason = current_muted_reason else { return true }
+        if case .user = reason { return false }
         return true
     }
-    
+
     var body: some View {
         Group {
-            if should_show_mute_box {
+            if should_mute {
                 let reason = current_muted_reason
                 if let customMuteBox {
                     customMuteBox($shown, reason)
                 }
                 else {
-                    EventMutedBoxView(shown: $shown, reason: reason)
+                    EventMutedBoxView(shown: $shown, reason: reason, showExpandButton: should_show_expand_button)
                 }
             }
             if shown || !should_mute {
@@ -101,12 +97,13 @@ struct EventMutingContainerView<Content: View>: View {
 struct EventMutedBoxView: View {
     @Binding var shown: Bool
     var reason: MuteItem?
+    var showExpandButton: Bool = true
 
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 20)
                 .foregroundColor(DamusColors.adaptableGrey)
-            
+
             HStack {
                 if let reason {
                     Text("Note from a \(reason.title) you've muted", comment: "Text to indicate that what is being shown is a note which has been muted.")
@@ -114,8 +111,10 @@ struct EventMutedBoxView: View {
                     Text("Note you've muted", comment: "Text to indicate that what is being shown is a note which has been muted.")
                 }
                 Spacer()
-                Button(shown ? NSLocalizedString("Hide", comment: "Button to hide a note which has been muted.") : NSLocalizedString("Show", comment: "Button to show a note which has been muted.")) {
-                    shown.toggle()
+                if showExpandButton {
+                    Button(shown ? NSLocalizedString("Hide", comment: "Button to hide a note which has been muted.") : NSLocalizedString("Show", comment: "Button to show a note which has been muted.")) {
+                        shown.toggle()
+                    }
                 }
             }
             .padding(10)
