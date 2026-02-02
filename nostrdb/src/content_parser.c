@@ -180,7 +180,15 @@ static int push_invoice_str(struct ndb_content_parser *p, struct ndb_str_block *
 	struct bolt11 *bolt11;
 	char *fail;
 
-	if (!(bolt11 = bolt11_decode_minimal(NULL, str->str, &fail)))
+	// Create null-terminated copy since str->str points into content buffer
+	char *invoice_str = strndup(str->str, str->len);
+	if (!invoice_str)
+		return 0;
+
+	bolt11 = bolt11_decode_minimal(NULL, invoice_str, &fail);
+	free(invoice_str);
+
+	if (!bolt11)
 		return 0;
 
 	start = p->buffer.p;
