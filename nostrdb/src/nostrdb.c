@@ -6099,6 +6099,10 @@ void ndb_destroy(struct ndb *ndb)
 // The client-sent variation of ndb_process_event
 int ndb_process_client_event(struct ndb *ndb, const char *json, int len)
 {
+	// Write operations not allowed in readonly mode
+	if (ndb_flag_set(ndb->flags, NDB_FLAG_READONLY))
+		return 0;
+
 	struct ndb_ingest_meta meta;
 	ndb_ingest_meta_init(&meta, 1, NULL);
 
@@ -6124,6 +6128,10 @@ int ndb_process_client_event(struct ndb *ndb, const char *json, int len)
 //
 int ndb_process_event(struct ndb *ndb, const char *json, int json_len)
 {
+	// Write operations not allowed in readonly mode
+	if (ndb_flag_set(ndb->flags, NDB_FLAG_READONLY))
+		return 0;
+
 	struct ndb_ingest_meta meta;
 	ndb_ingest_meta_init(&meta, 0, NULL);
 
@@ -6133,6 +6141,10 @@ int ndb_process_event(struct ndb *ndb, const char *json, int json_len)
 int ndb_process_event_with(struct ndb *ndb, const char *json, int json_len,
 			   struct ndb_ingest_meta *meta)
 {
+	// Write operations not allowed in readonly mode
+	if (ndb_flag_set(ndb->flags, NDB_FLAG_READONLY))
+		return 0;
+
 	return ndb_ingest_event(&ndb->ingester, json, json_len, meta);
 }
 
@@ -6190,11 +6202,19 @@ int ndb_process_events_stream(struct ndb *ndb, FILE* fp)
 int ndb_process_events_with(struct ndb *ndb, const char *ldjson, size_t json_len,
 			    struct ndb_ingest_meta *meta)
 {
+	// Write operations not allowed in readonly mode
+	if (ndb_flag_set(ndb->flags, NDB_FLAG_READONLY))
+		return 0;
+
 	return _ndb_process_events(ndb, ldjson, json_len, meta);
 }
 
 int ndb_process_client_events(struct ndb *ndb, const char *ldjson, size_t json_len)
 {
+	// Write operations not allowed in readonly mode
+	if (ndb_flag_set(ndb->flags, NDB_FLAG_READONLY))
+		return 0;
+
 	struct ndb_ingest_meta meta;
 	ndb_ingest_meta_init(&meta, 1, NULL);
 
@@ -6203,6 +6223,10 @@ int ndb_process_client_events(struct ndb *ndb, const char *ldjson, size_t json_l
 
 int ndb_process_events(struct ndb *ndb, const char *ldjson, size_t json_len)
 {
+	// Write operations not allowed in readonly mode
+	if (ndb_flag_set(ndb->flags, NDB_FLAG_READONLY))
+		return 0;
+
 	struct ndb_ingest_meta meta;
 	ndb_ingest_meta_init(&meta, 0, NULL);
 

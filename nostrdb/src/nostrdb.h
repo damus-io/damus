@@ -17,6 +17,12 @@
 #define NDB_FLAG_NO_STATS         (1 << 4)
 // Skip writer and ingester thread creation for read-only access.
 // Use this flag for app extensions that only need to read from the database.
+// When set:
+// - Writer/ingester threads are not created (saves memory, prevents races)
+// - Write APIs (ndb_process_event*, ndb_ingest*) return 0 (failure)
+// - Migrations are skipped (caller must ensure DB is at current schema)
+// Note: Extensions should read from a snapshot created by the main app,
+// which handles migrations before creating the snapshot.
 #define NDB_FLAG_READONLY         (1 << 5)
 
 //#define DEBUG 1
