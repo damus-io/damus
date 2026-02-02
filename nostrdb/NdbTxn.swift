@@ -109,7 +109,7 @@ class NdbTxn<T>: RawNdbTxnAccessible {
             if !inherited && !moved {
                 ndb.ndbAccessLock.releaseTransaction()
                 #if TXNDEBUG
-                txn_count -= 1;
+                txn_count -= 1
                 print("txn: close gen\(generation) '\(name)' \(txn_count)")
                 #endif
             }
@@ -285,7 +285,7 @@ class SafeNdbTxn<T: ~Copyable> {
             if !inherited && !moved {
                 ndb.ndbAccessLock.releaseTransaction()
                 #if TXNDEBUG
-                txn_count -= 1;
+                txn_count -= 1
                 print("txn: close gen\(generation) '\(name)' \(txn_count)")
                 #endif
             }

@@ -35,6 +35,9 @@ class Ndb {
     var generation: Int
     private var closed: Bool
     private var callbackHandler: Ndb.CallbackHandler
+    /// Internal lock that serializes access to Ndb resources across open/close and read/write operations.
+    /// Lives for the lifetime of the Ndb instance. Callers should use `withNdb(_:)` for short operations
+    /// or `retainForTransaction`/`releaseTransaction` for transaction lifetimes. Not part of public API.
     internal let ndbAccessLock: Ndb.UseLockProtocol = initLock()
     
     private static let DEFAULT_WRITER_SCRATCH_SIZE: Int32 = 2097152;  // 2mb scratch size for the writer thread, it should match with the one specified in nostrdb.c
@@ -138,12 +141,27 @@ class Ndb {
         // 2. If not specified, use a default path. The default path depends:
         //     a. If the process owns the db file, `Ndb.db_path` is the default.
         //     b. If the process does not own the db file, a read-only snapshot file (`Ndb.snapshot_db_path`) is used.
+        //
+        // IMPORTANT: Extensions should use `Ndb(path: nil, owns_db_file: false)` to open snapshots.
+        // This ensures the marker file is checked, preventing reads during snapshot updates.
+        // Passing an explicit path bypasses marker validation (needed for tests) but is NOT
+        // safe for production snapshot reads where race conditions with updates are possible.
+        let isUsingSnapshotPath = path == nil && !owns_db_file
         guard let path = path.map(remove_file_prefix) ?? (owns_db_file ? Ndb.db_path : Ndb.snapshot_db_path) else {
             return nil
         }
-        
-        guard owns_db_file || Self.db_file_exists(path: path) else {
-            return nil      // If the caller claims to not own the DB file, and the DB files do not exist, then we should not initialize Ndb
+
+        // For default snapshot path, verify the snapshot is complete (marker file exists)
+        // to prevent reading corrupt/incomplete data during snapshot updates.
+        // Explicit paths bypass this check (for tests and non-snapshot readonly databases).
+        if isUsingSnapshotPath {
+            guard Self.snapshot_is_ready(path: path) else {
+                return nil
+            }
+        } else if !owns_db_file {
+            guard Self.db_file_exists(path: path) else {
+                return nil
+            }
         }
 
         let minMapsize = isExtension ? extensionMinMapsize : mainAppMinMapsize
@@ -272,6 +290,21 @@ class Ndb {
     
     private static func db_file_exists(path: String) -> Bool {
         return FileManager.default.fileExists(atPath: "\(path)/\(Self.main_db_file_name)")
+    }
+
+    /// Marker file name indicating a snapshot is complete and safe to read.
+    /// Must match `DatabaseSnapshotManager.snapshotReadyMarker`.
+    private static let snapshotReadyMarker = "snapshot.ready"
+
+    /// Checks if a snapshot at the given path is ready for reading.
+    ///
+    /// A snapshot is considered ready when both the database file exists AND
+    /// the marker file is present, indicating the snapshot completed successfully.
+    /// This prevents extensions from reading a corrupt or incomplete snapshot.
+    private static func snapshot_is_ready(path: String) -> Bool {
+        let parentDir = URL(fileURLWithPath: path).deletingLastPathComponent().path
+        let markerPath = "\(parentDir)/\(snapshotReadyMarker)"
+        return db_file_exists(path: path) && FileManager.default.fileExists(atPath: markerPath)
     }
     
     /// Returns the path whose `data.mdb` file was modified most recently.
