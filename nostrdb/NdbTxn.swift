@@ -49,13 +49,24 @@ class NdbTxn<T>: RawNdbTxnAccessible {
             let new_ref_count = ref_count + 1
             Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
         } else {
+            // Retain ndb INSIDE withNdb to eliminate race window between
+            // withNdb returning and retainForTransaction acquiring.
             let result: R? = try? ndb.withNdb({
+                // Acquire retain BEFORE creating LMDB transaction.
+                // This ensures ndb cannot close while we hold the txn pointers.
+                guard (try? ndb.ndbAccessLock.retainForTransaction(maxTimeout: .milliseconds(200))) != nil else {
+                    return .none
+                }
                 var txn = ndb_txn()
                 #if TXNDEBUG
                 txn_count += 1
                 #endif
                 let ok = ndb_begin_query(ndb.ndb.ndb, &txn) != 0
-                guard ok else { return .none }
+                guard ok else {
+                    // LMDB query failed - release the retain we just acquired
+                    ndb.ndbAccessLock.releaseTransaction()
+                    return .none
+                }
                 return .some(R(txn: txn, generation: ndb.generation))
             }, maxWaitTimeout: .milliseconds(200))
             guard let result else { return nil }
@@ -85,12 +96,25 @@ class NdbTxn<T>: RawNdbTxnAccessible {
 
     /// Only access temporarily! Do not store database references for longterm use. If it's a primitive type you
     /// can retrieve this value with `.value`
-    internal var unsafeUnownedValue: T { 
+    internal var unsafeUnownedValue: T {
         precondition(!moved)
         return val
     }
 
     deinit {
+        // CRITICAL: Always release the transaction retain for non-inherited, non-moved txns.
+        // This MUST happen even if ndb.is_closed to prevent deadlock in close().
+        // Do this via defer to ensure it runs regardless of early returns.
+        defer {
+            if !inherited && !moved {
+                ndb.ndbAccessLock.releaseTransaction()
+                #if TXNDEBUG
+                txn_count -= 1;
+                print("txn: close gen\(generation) '\(name)' \(txn_count)")
+                #endif
+            }
+        }
+
         if self.generation != ndb.generation {
             print("txn: OLD GENERATION (\(self.generation) != \(ndb.generation)), IGNORING")
             return
@@ -119,11 +143,6 @@ class NdbTxn<T>: RawNdbTxnAccessible {
             //print("txn: not closing. moved")
             return
         }
-
-        #if TXNDEBUG
-        txn_count -= 1;
-        print("txn: close gen\(generation) '\(name)' \(txn_count)")
-        #endif
     }
 
     // functor
@@ -189,13 +208,24 @@ class SafeNdbTxn<T: ~Copyable> {
             let new_ref_count = ref_count + 1
             Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
         } else {
+            // Retain ndb INSIDE withNdb to eliminate race window between
+            // withNdb returning and retainForTransaction acquiring.
             let result: R? = try? ndb.withNdb({
+                // Acquire retain BEFORE creating LMDB transaction.
+                // This ensures ndb cannot close while we hold the txn pointers.
+                guard (try? ndb.ndbAccessLock.retainForTransaction(maxTimeout: .milliseconds(200))) != nil else {
+                    return .none
+                }
                 var txn = ndb_txn()
                 #if TXNDEBUG
                 txn_count += 1
                 #endif
                 let ok = ndb_begin_query(ndb.ndb.ndb, &txn) != 0
-                guard ok else { return .none }
+                guard ok else {
+                    // LMDB query failed - release the retain we just acquired
+                    ndb.ndbAccessLock.releaseTransaction()
+                    return .none
+                }
                 return .some(R(txn: txn, generation: ndb.generation))
             }, maxWaitTimeout: .milliseconds(200))
             guard let result else { return nil }
@@ -209,8 +239,31 @@ class SafeNdbTxn<T: ~Copyable> {
         #if TXNDEBUG
         print("txn: open  gen\(generation) '\(name)' \(txn_count)")
         #endif
+        var mutableTxn = txn
         let placeholderTxn = PlaceholderNdbTxn(txn: txn)
-        guard let val = valueGetter(placeholderTxn) else { return nil }
+        guard let val = valueGetter(placeholderTxn) else {
+            // valueGetter returned nil - must clean up the transaction we created
+            if inherited {
+                // Decrement ref count for inherited transaction
+                if let ref_count = Thread.current.threadDictionary["ndb_txn_ref_count"] as? Int {
+                    Thread.current.threadDictionary["ndb_txn_ref_count"] = ref_count - 1
+                }
+            } else {
+                // End LMDB query and release retain for non-inherited transaction
+                _ = try? ndb.withNdb({
+                    ndb_end_query(&mutableTxn)
+                }, maxWaitTimeout: .milliseconds(200))
+                Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")
+                Thread.current.threadDictionary.removeObject(forKey: "ndb_txn_ref_count")
+                Thread.current.threadDictionary.removeObject(forKey: "txn_generation")
+                ndb.ndbAccessLock.releaseTransaction()
+                #if TXNDEBUG
+                txn_count -= 1
+                print("txn: cleanup gen\(generation) '\(name)' (valueGetter nil) \(txn_count)")
+                #endif
+            }
+            return nil
+        }
         return SafeNdbTxn<T>(ndb: ndb, txn: txn, val: val, generation: generation, inherited: inherited, name: name)
     }
 
@@ -225,6 +278,19 @@ class SafeNdbTxn<T: ~Copyable> {
     }
 
     deinit {
+        // CRITICAL: Always release the transaction retain for non-inherited, non-moved txns.
+        // This MUST happen even if ndb.is_closed to prevent deadlock in close().
+        // Do this via defer to ensure it runs regardless of early returns.
+        defer {
+            if !inherited && !moved {
+                ndb.ndbAccessLock.releaseTransaction()
+                #if TXNDEBUG
+                txn_count -= 1;
+                print("txn: close gen\(generation) '\(name)' \(txn_count)")
+                #endif
+            }
+        }
+
         if self.generation != ndb.generation {
             print("txn: OLD GENERATION (\(self.generation) != \(ndb.generation)), IGNORING")
             return
@@ -253,11 +319,6 @@ class SafeNdbTxn<T: ~Copyable> {
             //print("txn: not closing. moved")
             return
         }
-
-        #if TXNDEBUG
-        txn_count -= 1;
-        print("txn: close gen\(generation) '\(name)' \(txn_count)")
-        #endif
     }
 
     // functor

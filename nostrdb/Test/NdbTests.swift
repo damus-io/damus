@@ -354,5 +354,182 @@ final class NdbTests: XCTestCase {
         readonlyNdb.close()
     }
 
+    // MARK: - Transaction Retention Tests
+
+    /// Tests that transactions retain ndb and prevent premature close.
+    ///
+    /// This verifies the fix for the 5nt crash (lookup_note_with_txn_inner use-after-free)
+    /// where ndb was destroyed while transactions still held pointers to LMDB state.
+    func test_transaction_retains_ndb() throws {
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+        let noteId = NoteId(hex: "d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349")!
+
+        // First: populate the database and close (flushes async writes)
+        do {
+            let ndb = Ndb(path: db_dir)!
+            let ok = ndb.process_events(test_wire_events)
+            XCTAssertTrue(ok)
+        }
+
+        // Second: reopen and verify lookups work with transaction retention
+        do {
+            let ndb = Ndb(path: db_dir)!
+            let result: Pubkey? = try? ndb.lookup_note(noteId) { maybeNote in
+                switch maybeNote {
+                case .none: return nil
+                case .some(let note): return note.pubkey
+                }
+            }
+
+            XCTAssertNotNil(result, "Should retrieve note")
+            XCTAssertEqual(result, pk, "Note should have correct pubkey")
+        }
+    }
+
+    /// Tests that close waits for active transactions to complete.
+    ///
+    /// Simulates the crash scenario: transaction is active, close is called.
+    /// The close should wait for the transaction to complete.
+    func test_close_waits_for_active_transaction() throws {
+        let noteId = NoteId(hex: "d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349")!
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+
+        // First: populate the database and close (flushes async writes)
+        do {
+            let ndb = Ndb(path: db_dir)!
+            let ok = ndb.process_events(test_wire_events)
+            XCTAssertTrue(ok)
+        }
+
+        // Second: reopen and test close-during-transaction behavior
+        let ndb = Ndb(path: db_dir)!
+
+        let transactionStarted = DispatchSemaphore(value: 0)
+        let closeCompleted = DispatchSemaphore(value: 0)
+        var transactionResult: Pubkey? = nil
+        let resultLock = NSLock()
+
+        // Start transaction on background queue
+        DispatchQueue.global().async {
+            let result: Pubkey? = try? ndb.lookup_note(noteId) { maybeNote in
+                // Signal that transaction has started
+                transactionStarted.signal()
+                // Hold the transaction open
+                Thread.sleep(forTimeInterval: 0.1)
+                switch maybeNote {
+                case .none: return nil
+                case .some(let note): return note.pubkey
+                }
+            }
+            resultLock.lock()
+            transactionResult = result
+            resultLock.unlock()
+        }
+
+        // Wait for transaction to start (with timeout to avoid CI hangs)
+        let startResult = transactionStarted.wait(timeout: .now() + 2.0)
+        XCTAssertEqual(startResult, .success, "Transaction should start within timeout")
+        guard startResult == .success else { return }
+
+        // Now call close on another thread - it should wait for transaction
+        DispatchQueue.global().async {
+            ndb.close()
+            closeCompleted.signal()
+        }
+
+        // Wait for close to complete (with timeout)
+        let closeResult = closeCompleted.wait(timeout: .now() + 2.0)
+        XCTAssertEqual(closeResult, .success, "Close should complete after transaction finishes")
+
+        // Read result with synchronization
+        resultLock.lock()
+        let finalResult = transactionResult
+        resultLock.unlock()
+        XCTAssertEqual(finalResult, pk, "Transaction should have returned correct data")
+    }
+
+    /// Tests multiple transactions can be created and destroyed without crashes.
+    ///
+    /// Regression test for transaction retention mechanism under concurrent load.
+    func test_multiple_concurrent_transactions() throws {
+        let noteId = NoteId(hex: "d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349")!
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+
+        // First: populate the database and close (flushes async writes)
+        do {
+            let ndb = Ndb(path: db_dir)!
+            let ok = ndb.process_events(test_wire_events)
+            XCTAssertTrue(ok)
+        }
+
+        // Second: reopen and test concurrent transaction behavior
+        let ndb = Ndb(path: db_dir)!
+
+        let group = DispatchGroup()
+        let queue = DispatchQueue.global(qos: .userInitiated)
+        var successCount = 0
+        let lock = NSLock()
+
+        // Spawn multiple concurrent lookups
+        for _ in 0..<10 {
+            group.enter()
+            queue.async {
+                let result: Pubkey? = try? ndb.lookup_note(noteId) { maybeNote in
+                    switch maybeNote {
+                    case .none: return nil
+                    case .some(let note): return note.pubkey
+                    }
+                }
+                if result == pk {
+                    lock.lock()
+                    successCount += 1
+                    lock.unlock()
+                }
+                group.leave()
+            }
+        }
+
+        // Wait for all transactions to complete
+        let waitResult = group.wait(timeout: .now() + 5.0)
+        XCTAssertEqual(waitResult, .success, "All transactions should complete")
+        XCTAssertEqual(successCount, 10, "All 10 lookups should succeed with correct data")
+
+        ndb.close()
+    }
+
+    /// Tests that SafeNdbTxn.new cleans up properly when valueGetter returns nil.
+    ///
+    /// Verifies no retain leak: close() should complete even after valueGetter returns nil.
+    func test_safe_txn_cleanup_on_nil_value() throws {
+        // First: populate the database and close (flushes async writes)
+        do {
+            let ndb = Ndb(path: db_dir)!
+            let ok = ndb.process_events(test_wire_events)
+            XCTAssertTrue(ok)
+        }
+
+        // Second: reopen and test cleanup when valueGetter returns nil
+        let ndb = Ndb(path: db_dir)!
+
+        // Create a SafeNdbTxn where valueGetter returns nil
+        let result: SafeNdbTxn<String>? = SafeNdbTxn.new(on: ndb, with: { _ in
+            // Simulate valueGetter returning nil (e.g., lookup failed)
+            return nil
+        }, name: "nil_value_test")
+
+        XCTAssertNil(result, "SafeNdbTxn should be nil when valueGetter returns nil")
+
+        // The critical test: close() should complete without blocking
+        // If cleanup failed, close() would deadlock waiting for the leaked retain
+        let closeCompleted = DispatchSemaphore(value: 0)
+        DispatchQueue.global().async {
+            ndb.close()
+            closeCompleted.signal()
+        }
+
+        let closeResult = closeCompleted.wait(timeout: .now() + 2.0)
+        XCTAssertEqual(closeResult, .success, "close() should complete - no retain leak")
+    }
+
 }
 

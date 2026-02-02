@@ -35,7 +35,7 @@ class Ndb {
     var generation: Int
     private var closed: Bool
     private var callbackHandler: Ndb.CallbackHandler
-    private let ndbAccessLock: Ndb.UseLockProtocol = initLock()
+    internal let ndbAccessLock: Ndb.UseLockProtocol = initLock()
     
     private static let DEFAULT_WRITER_SCRATCH_SIZE: Int32 = 2097152;  // 2mb scratch size for the writer thread, it should match with the one specified in nostrdb.c
 
