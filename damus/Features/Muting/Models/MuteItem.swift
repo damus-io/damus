@@ -29,34 +29,67 @@ enum MuteItem: Hashable, Equatable {
     /// The associated type is the `id` of the note that is muted. The second associated type is the date that the item should expire at. If no date is supplied, assume the muted item should remain active until it expires.
     case thread(NoteId, Date?)
 
-    func is_expired() -> Bool {
+    /// The expiration date for this mute item, or nil if it's a permanent mute.
+    var expirationDate: Date? {
         switch self {
-        case .user(_, let expiration_date):
-            return expiration_date ?? .distantFuture < Date()
-        case .hashtag(_, let expiration_date):
-            return expiration_date ?? .distantFuture < Date()
-        case .word(_, let expiration_date):
-            return expiration_date ?? .distantFuture < Date()
-        case .thread(_, let expiration_date):
-            return expiration_date ?? .distantFuture < Date()
+        case .user(_, let date), .hashtag(_, let date),
+             .word(_, let date), .thread(_, let date):
+            return date
         }
     }
 
-    static func == (lhs: MuteItem, rhs: MuteItem) -> Bool {
-        // lhs is the item we want to check (ie. the item the user is attempting to display)
-        // rhs is the item we want to check against (ie. the item in the mute list)
+    /// Returns true if this mute item has expired.
+    func is_expired() -> Bool {
+        guard let date = expirationDate else { return false }
+        return date < Date()
+    }
 
-        switch (lhs, rhs) {
-        case (.user(let lhs_pubkey, _), .user(let rhs_pubkey, _)):
-            return lhs_pubkey == rhs_pubkey && !rhs.is_expired()
-        case (.hashtag(let lhs_hashtag, _), .hashtag(let rhs_hashtag, _)):
-            return lhs_hashtag == rhs_hashtag && !rhs.is_expired()
-        case (.word(let lhs_word, _), .word(let rhs_word, _)):
-            return lhs_word == rhs_word && !rhs.is_expired()
-        case (.thread(let lhs_thread, _), .thread(let rhs_thread, _)):
-            return lhs_thread == rhs_thread && !rhs.is_expired()
+    /// Returns true if this mute is currently active (not expired).
+    /// Use this to check if a mute should actually block content.
+    func isActive() -> Bool {
+        return !is_expired()
+    }
+
+    /// Matches for storage operations (ignores expiration, uses case-insensitive comparison for hashtags and words).
+    /// Use this for add/remove/toggle operations on the mutelist.
+    func matchesStorage(_ other: MuteItem) -> Bool {
+        switch (self, other) {
+        case (.user(let lhs, _), .user(let rhs, _)):
+            return lhs == rhs
+        case (.hashtag(let lhs, _), .hashtag(let rhs, _)):
+            return lhs.hashtag.caseInsensitiveCompare(rhs.hashtag) == .orderedSame
+        case (.word(let lhs, _), .word(let rhs, _)):
+            return lhs.lowercased() == rhs.lowercased()
+        case (.thread(let lhs, _), .thread(let rhs, _)):
+            return lhs == rhs
         default:
             return false
+        }
+    }
+
+    /// Identity-based equality (symmetric, ignores expiration).
+    /// Uses case-insensitive comparison for hashtags and words.
+    /// Note: To check if a mute is active, use `isActive()` separately.
+    static func == (lhs: MuteItem, rhs: MuteItem) -> Bool {
+        return lhs.matchesStorage(rhs)
+    }
+
+    /// Hash must be consistent with equality.
+    /// Uses lowercased hashtag and word to match case-insensitive comparison.
+    func hash(into hasher: inout Hasher) {
+        switch self {
+        case .user(let pubkey, _):
+            hasher.combine("p")
+            hasher.combine(pubkey)
+        case .hashtag(let hashtag, _):
+            hasher.combine("t")
+            hasher.combine(hashtag.hashtag.lowercased())
+        case .word(let word, _):
+            hasher.combine("word")
+            hasher.combine(word.lowercased())
+        case .thread(let noteId, _):
+            hasher.combine("e")
+            hasher.combine(noteId)
         }
     }
 
