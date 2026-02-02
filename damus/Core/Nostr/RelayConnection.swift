@@ -55,7 +55,7 @@ final class RelayConnection: ObservableObject {
     private(set) var last_connection_attempt: TimeInterval = 0
     private(set) var last_pong: Date? = nil
     private(set) var backoff: TimeInterval = 1.0
-    private lazy var socket = WebSocket(relay_url.url)
+    private var socket: WebSocketProtocol
     private var subscriptionToken: AnyCancellable?
 
     private var handleEvent: (NostrConnectionEvent) async -> ()
@@ -73,11 +73,19 @@ final class RelayConnection: ObservableObject {
     @RelayPoolActor // Isolate this to a specific actor to avoid thread-satefy issues.
     var negentropyStreams: [String: AsyncStream<NegentropyResponse>.Continuation] = [:]
 
+    /// Creates a new RelayConnection
+    /// - Parameters:
+    ///   - url: The relay URL to connect to
+    ///   - webSocket: Optional WebSocket implementation for dependency injection (defaults to real WebSocket)
+    ///   - handleEvent: Callback for Nostr events
+    ///   - processUnverifiedWSEvent: Callback for raw WebSocket events
     init(url: RelayURL,
+         webSocket: WebSocketProtocol? = nil,
          handleEvent: @escaping (NostrConnectionEvent) async -> (),
          processUnverifiedWSEvent: @escaping (WebSocketEvent) -> ())
     {
         self.relay_url = url
+        self.socket = webSocket ?? WebSocket(url.url)
         self.handleEvent = handleEvent
         self.processEvent = processUnverifiedWSEvent
         self.wsEventQueue = .init(maxQueueItems: 1000)
@@ -154,9 +162,9 @@ final class RelayConnection: ObservableObject {
     }
 
     func disconnect() {
-        socket.disconnect()
+        socket.disconnect(closeCode: .normalClosure, reason: nil)
         subscriptionToken = nil
-        
+
         isConnected = false
         isConnecting = false
     }
