@@ -8,6 +8,28 @@
 import Foundation
 import Kingfisher
 
+/// Represents the current phase of cache clearing for progress reporting.
+enum CacheClearingPhase {
+    case kingfisher
+    case appGroup
+    case cacheFolder
+    case temporary
+
+    /// User-facing description of what is currently being cleared.
+    var localizedDescription: String {
+        switch self {
+        case .kingfisher:
+            return NSLocalizedString("Clearing image cache...", comment: "Progress message when clearing the image cache")
+        case .appGroup:
+            return NSLocalizedString("Clearing app data...", comment: "Progress message when clearing app group data")
+        case .cacheFolder:
+            return NSLocalizedString("Clearing cache folder...", comment: "Progress message when clearing the cache folder")
+        case .temporary:
+            return NSLocalizedString("Clearing temporary files...", comment: "Progress message when clearing temporary files")
+        }
+    }
+}
+
 struct DamusCacheManager {
     static var shared: DamusCacheManager = DamusCacheManager()
 
@@ -21,11 +43,20 @@ struct DamusCacheManager {
 
     /// Clears all application caches sequentially: Kingfisher, app group, cache folder, and temp directory.
     /// Invokes `completion` on the main thread after all caches are cleared.
-    func clear_cache(damus_state: DamusState, completion: (() -> Void)? = nil) {
+    /// - Parameters:
+    ///   - damus_state: The current application state
+    ///   - onPhaseChange: Optional callback invoked on the main thread when starting each phase
+    ///   - completion: Optional callback invoked on the main thread after all caches are cleared
+    func clear_cache(damus_state: DamusState, onPhaseChange: ((CacheClearingPhase) -> Void)? = nil, completion: (() -> Void)? = nil) {
         Log.info("Clearing all caches", for: .storage)
+
+        DispatchQueue.main.async { onPhaseChange?(.kingfisher) }
         clear_kingfisher_cache(completion: {
+            DispatchQueue.main.async { onPhaseChange?(.appGroup) }
             clear_app_group_cache(damus_state: damus_state, completion: {
+                DispatchQueue.main.async { onPhaseChange?(.cacheFolder) }
                 clear_cache_folder(completion: {
+                    DispatchQueue.main.async { onPhaseChange?(.temporary) }
                     clear_temporary_directory(completion: {
                         Log.info("All caches cleared", for: .storage)
                         completion?()
