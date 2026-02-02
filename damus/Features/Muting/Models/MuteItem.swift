@@ -50,7 +50,7 @@ enum MuteItem: Hashable, Equatable {
         return !is_expired()
     }
 
-    /// Matches for storage operations (ignores expiration, uses case-insensitive hashtag comparison).
+    /// Matches for storage operations (ignores expiration, uses case-insensitive comparison for hashtags and words).
     /// Use this for add/remove/toggle operations on the mutelist.
     func matchesStorage(_ other: MuteItem) -> Bool {
         switch (self, other) {
@@ -59,7 +59,7 @@ enum MuteItem: Hashable, Equatable {
         case (.hashtag(let lhs, _), .hashtag(let rhs, _)):
             return lhs.hashtag.caseInsensitiveCompare(rhs.hashtag) == .orderedSame
         case (.word(let lhs, _), .word(let rhs, _)):
-            return lhs == rhs
+            return lhs.lowercased() == rhs.lowercased()
         case (.thread(let lhs, _), .thread(let rhs, _)):
             return lhs == rhs
         default:
@@ -68,14 +68,14 @@ enum MuteItem: Hashable, Equatable {
     }
 
     /// Identity-based equality (symmetric, ignores expiration).
-    /// Uses case-insensitive comparison for hashtags.
+    /// Uses case-insensitive comparison for hashtags and words.
     /// Note: To check if a mute is active, use `isActive()` separately.
     static func == (lhs: MuteItem, rhs: MuteItem) -> Bool {
         return lhs.matchesStorage(rhs)
     }
 
     /// Hash must be consistent with equality.
-    /// Uses lowercased hashtag to match case-insensitive comparison.
+    /// Uses lowercased hashtag and word to match case-insensitive comparison.
     func hash(into hasher: inout Hasher) {
         switch self {
         case .user(let pubkey, _):
@@ -86,7 +86,7 @@ enum MuteItem: Hashable, Equatable {
             hasher.combine(hashtag.hashtag.lowercased())
         case .word(let word, _):
             hasher.combine("word")
-            hasher.combine(word)
+            hasher.combine(word.lowercased())
         case .thread(let noteId, _):
             hasher.combine("e")
             hasher.combine(noteId)
