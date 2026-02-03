@@ -35,7 +35,10 @@ class Ndb {
     var generation: Int
     private var closed: Bool
     private var callbackHandler: Ndb.CallbackHandler
-    private let ndbAccessLock: Ndb.UseLockProtocol = initLock()
+    /// Internal lock that serializes access to Ndb resources across open/close and read/write operations.
+    /// Lives for the lifetime of the Ndb instance. Callers should use `withNdb(_:)` for short operations
+    /// or `retainForTransaction`/`releaseTransaction` for transaction lifetimes. Not part of public API.
+    internal let ndbAccessLock: Ndb.UseLockProtocol = initLock()
     
     private static let DEFAULT_WRITER_SCRATCH_SIZE: Int32 = 2097152;  // 2mb scratch size for the writer thread, it should match with the one specified in nostrdb.c
 
@@ -87,16 +90,39 @@ class Ndb {
     static private let main_db_file_name: String = "data.mdb"
     static private let db_files: [String] = ["data.mdb", "lock.mdb"]
 
+    // MARK: - Mapsize Configuration
+
+    /// Default LMDB mapsize for main app (32GB for performance)
+    private static let mainAppMapsize = 1024 * 1024 * 1024 * 32
+    /// Minimum mapsize floor for main app (700MB)
+    private static let mainAppMinMapsize = 700 * 1024 * 1024
+    /// Default LMDB mapsize for extensions (32MB to fit within ~24MB memory limit)
+    private static let extensionMapsize = 32 * 1024 * 1024
+    /// Minimum mapsize floor for extensions (8MB)
+    private static let extensionMinMapsize = 8 * 1024 * 1024
+
     static var empty: Ndb {
         print("txn: NOSTRDB EMPTY")
         return Ndb(ndb: ndb_t(ndb: nil))
     }
-    
+
+    /// Detects if the current process is running as an app extension.
+    ///
+    /// App extensions (notification service, share extensions, etc.) have strict
+    /// memory limits (~24MB) and cannot allocate large memory maps.
+    private static var isAppExtension: Bool {
+        return Bundle.main.bundlePath.hasSuffix(".appex")
+    }
+
     static func open(path: String? = nil, owns_db_file: Bool = true, callbackHandler: Ndb.CallbackHandler) -> ndb_t? {
         var ndb_p: OpaquePointer? = nil
 
         let ingest_threads: Int32 = 4
-        var mapsize: Int = 1024 * 1024 * 1024 * 32
+
+        // Extensions have ~24MB memory limit. Use small mapsize to avoid
+        // memory pressure that crashes PKService/XPC listener setup.
+        let isExtension = isAppExtension || !owns_db_file
+        var mapsize: Int = isExtension ? extensionMapsize : mainAppMapsize
         
         if path == nil && owns_db_file {
             // `nil` path indicates the default path will be used.
@@ -115,18 +141,39 @@ class Ndb {
         // 2. If not specified, use a default path. The default path depends:
         //     a. If the process owns the db file, `Ndb.db_path` is the default.
         //     b. If the process does not own the db file, a read-only snapshot file (`Ndb.snapshot_db_path`) is used.
+        //
+        // IMPORTANT: Extensions should use `Ndb(path: nil, owns_db_file: false)` to open snapshots.
+        // This ensures the marker file is checked, preventing reads during snapshot updates.
+        // Passing an explicit path bypasses marker validation (needed for tests) but is NOT
+        // safe for production snapshot reads where race conditions with updates are possible.
+        let isUsingSnapshotPath = path == nil && !owns_db_file
         guard let path = path.map(remove_file_prefix) ?? (owns_db_file ? Ndb.db_path : Ndb.snapshot_db_path) else {
             return nil
         }
-        
-        guard owns_db_file || Self.db_file_exists(path: path) else {
-            return nil      // If the caller claims to not own the DB file, and the DB files do not exist, then we should not initialize Ndb
+
+        // For default snapshot path, verify the snapshot is complete (marker file exists)
+        // to prevent reading corrupt/incomplete data during snapshot updates.
+        // Explicit paths bypass this check (for tests and non-snapshot readonly databases).
+        if isUsingSnapshotPath {
+            guard Self.snapshot_is_ready(path: path) else {
+                return nil
+            }
+        } else if !owns_db_file {
+            guard Self.db_file_exists(path: path) else {
+                return nil
+            }
         }
+
+        let minMapsize = isExtension ? extensionMinMapsize : mainAppMinMapsize
+
+        // Use readonly mode for extensions to skip writer/ingester thread creation.
+        // Extensions only need read access and have strict memory limits (~24MB).
+        let flags: Int32 = isExtension ? NDB_FLAG_READONLY : 0
 
         let ok = path.withCString { testdir in
             var ok = false
-            while !ok && mapsize > 1024 * 1024 * 700 {
-                var cfg = ndb_config(flags: 0, ingester_threads: ingest_threads, writer_scratch_buffer_size: DEFAULT_WRITER_SCRATCH_SIZE, mapsize: mapsize, filter_context: nil, ingest_filter: nil, sub_cb_ctx: nil, sub_cb: nil)
+            while !ok && mapsize >= minMapsize {
+                var cfg = ndb_config(flags: flags, ingester_threads: ingest_threads, writer_scratch_buffer_size: DEFAULT_WRITER_SCRATCH_SIZE, mapsize: mapsize, filter_context: nil, ingest_filter: nil, sub_cb_ctx: nil, sub_cb: nil)
                 
                 // Here we hook up the global callback function for subscription callbacks.
                 // We do an "unretained" pass here because the lifetime of the callback handler is larger than the lifetime of the nostrdb monitor in the C code.
@@ -243,6 +290,21 @@ class Ndb {
     
     private static func db_file_exists(path: String) -> Bool {
         return FileManager.default.fileExists(atPath: "\(path)/\(Self.main_db_file_name)")
+    }
+
+    /// Marker file name indicating a snapshot is complete and safe to read.
+    /// Must match `DatabaseSnapshotManager.snapshotReadyMarker`.
+    private static let snapshotReadyMarker = "snapshot.ready"
+
+    /// Checks if a snapshot at the given path is ready for reading.
+    ///
+    /// A snapshot is considered ready when both the database file exists AND
+    /// the marker file is present, indicating the snapshot completed successfully.
+    /// This prevents extensions from reading a corrupt or incomplete snapshot.
+    private static func snapshot_is_ready(path: String) -> Bool {
+        let parentDir = URL(fileURLWithPath: path).deletingLastPathComponent().path
+        let markerPath = "\(parentDir)/\(snapshotReadyMarker)"
+        return db_file_exists(path: path) && FileManager.default.fileExists(atPath: markerPath)
     }
     
     /// Returns the path whose `data.mdb` file was modified most recently.

@@ -2431,6 +2431,9 @@ static int ndb_maybe_write_last_profile_fetch(struct ndb_txn *txn,
 int ndb_write_last_profile_fetch(struct ndb *ndb, const unsigned char *pubkey,
 				 uint64_t fetched_at)
 {
+	if (ndb->flags & NDB_FLAG_READONLY)
+		return 0;
+
 	struct ndb_writer_msg msg;
 	msg.type = NDB_WRITER_PROFILE_LAST_FETCH;
 	memcpy(&msg.last_fetch.pubkey[0], pubkey, 32);
@@ -6036,22 +6039,27 @@ int ndb_init(struct ndb **pndb, const char *filename, const struct ndb_config *c
 
 	ndb_monitor_init(&ndb->monitor, config->sub_cb, config->sub_cb_ctx);
 
-	if (!ndb_writer_init(&ndb->writer, &ndb->lmdb, &ndb->monitor, ndb->flags,
-			     config->writer_scratch_buffer_size)) {
-		fprintf(stderr, "ndb_writer_init failed\n");
-		return 0;
-	}
+	// Skip writer and ingester thread creation in readonly mode.
+	// This is used by app extensions that only need read access and have
+	// strict memory limits (~24MB) that cannot support background threads.
+	if (!ndb_flag_set(config->flags, NDB_FLAG_READONLY)) {
+		if (!ndb_writer_init(&ndb->writer, &ndb->lmdb, &ndb->monitor, ndb->flags,
+				     config->writer_scratch_buffer_size)) {
+			fprintf(stderr, "ndb_writer_init failed\n");
+			return 0;
+		}
 
-	if (!ndb_ingester_init(&ndb->ingester, &ndb->lmdb, &ndb->writer.inbox,
-			       config->writer_scratch_buffer_size, config)) {
-		fprintf(stderr, "failed to initialize %d ingester thread(s)\n",
-				config->ingester_threads);
-		return 0;
-	}
+		if (!ndb_ingester_init(&ndb->ingester, &ndb->lmdb, &ndb->writer.inbox,
+				       config->writer_scratch_buffer_size, config)) {
+			fprintf(stderr, "failed to initialize %d ingester thread(s)\n",
+					config->ingester_threads);
+			return 0;
+		}
 
-	if (!ndb_flag_set(config->flags, NDB_FLAG_NOMIGRATE)) {
-		struct ndb_writer_msg msg = { .type = NDB_WRITER_MIGRATE };
-		ndb_writer_queue_msg(&ndb->writer, &msg);
+		if (!ndb_flag_set(config->flags, NDB_FLAG_NOMIGRATE)) {
+			struct ndb_writer_msg msg = { .type = NDB_WRITER_MIGRATE };
+			ndb_writer_queue_msg(&ndb->writer, &msg);
+		}
 	}
 
 	// Initialize LMDB environment and spin up threads
@@ -6067,11 +6075,15 @@ void ndb_destroy(struct ndb *ndb)
 	if (ndb == NULL)
 		return;
 
-	// ingester depends on writer and must be destroyed first
-	ndb_debug("destroying ingester\n");
-	ndb_ingester_destroy(&ndb->ingester);
-	ndb_debug("destroying writer\n");
-	ndb_writer_destroy(&ndb->writer);
+	// Only destroy ingester/writer if they were initialized (not readonly mode)
+	if (!ndb_flag_set(ndb->flags, NDB_FLAG_READONLY)) {
+		// ingester depends on writer and must be destroyed first
+		ndb_debug("destroying ingester\n");
+		ndb_ingester_destroy(&ndb->ingester);
+		ndb_debug("destroying writer\n");
+		ndb_writer_destroy(&ndb->writer);
+	}
+
 	ndb_debug("destroying monitor\n");
 	ndb_monitor_destroy(&ndb->monitor);
 
@@ -6090,6 +6102,10 @@ void ndb_destroy(struct ndb *ndb)
 // The client-sent variation of ndb_process_event
 int ndb_process_client_event(struct ndb *ndb, const char *json, int len)
 {
+	// Write operations not allowed in readonly mode
+	if (ndb_flag_set(ndb->flags, NDB_FLAG_READONLY))
+		return 0;
+
 	struct ndb_ingest_meta meta;
 	ndb_ingest_meta_init(&meta, 1, NULL);
 
@@ -6115,6 +6131,10 @@ int ndb_process_client_event(struct ndb *ndb, const char *json, int len)
 //
 int ndb_process_event(struct ndb *ndb, const char *json, int json_len)
 {
+	// Write operations not allowed in readonly mode
+	if (ndb_flag_set(ndb->flags, NDB_FLAG_READONLY))
+		return 0;
+
 	struct ndb_ingest_meta meta;
 	ndb_ingest_meta_init(&meta, 0, NULL);
 
@@ -6124,6 +6144,10 @@ int ndb_process_event(struct ndb *ndb, const char *json, int json_len)
 int ndb_process_event_with(struct ndb *ndb, const char *json, int json_len,
 			   struct ndb_ingest_meta *meta)
 {
+	// Write operations not allowed in readonly mode
+	if (ndb_flag_set(ndb->flags, NDB_FLAG_READONLY))
+		return 0;
+
 	return ndb_ingest_event(&ndb->ingester, json, json_len, meta);
 }
 
@@ -6161,6 +6185,10 @@ int _ndb_process_events(struct ndb *ndb, const char *ldjson, size_t json_len,
 // TODO: windows
 int ndb_process_events_stream(struct ndb *ndb, FILE* fp)
 {
+	// Write operations not allowed in readonly mode
+	if (ndb_flag_set(ndb->flags, NDB_FLAG_READONLY))
+		return 0;
+
 	char *line = NULL;
 	size_t len = 0;
 	ssize_t nread;
@@ -6181,11 +6209,19 @@ int ndb_process_events_stream(struct ndb *ndb, FILE* fp)
 int ndb_process_events_with(struct ndb *ndb, const char *ldjson, size_t json_len,
 			    struct ndb_ingest_meta *meta)
 {
+	// Write operations not allowed in readonly mode
+	if (ndb_flag_set(ndb->flags, NDB_FLAG_READONLY))
+		return 0;
+
 	return _ndb_process_events(ndb, ldjson, json_len, meta);
 }
 
 int ndb_process_client_events(struct ndb *ndb, const char *ldjson, size_t json_len)
 {
+	// Write operations not allowed in readonly mode
+	if (ndb_flag_set(ndb->flags, NDB_FLAG_READONLY))
+		return 0;
+
 	struct ndb_ingest_meta meta;
 	ndb_ingest_meta_init(&meta, 1, NULL);
 
@@ -6194,6 +6230,10 @@ int ndb_process_client_events(struct ndb *ndb, const char *ldjson, size_t json_l
 
 int ndb_process_events(struct ndb *ndb, const char *ldjson, size_t json_len)
 {
+	// Write operations not allowed in readonly mode
+	if (ndb_flag_set(ndb->flags, NDB_FLAG_READONLY))
+		return 0;
+
 	struct ndb_ingest_meta meta;
 	ndb_ingest_meta_init(&meta, 0, NULL);
 
@@ -8282,6 +8322,10 @@ struct ndb_blocks *ndb_get_blocks_by_key(struct ndb *ndb, struct ndb_txn *txn, u
 
 	 if (!(blocks = ndb_note_to_blocks(note)))
 		 return NULL;
+
+	 // In readonly mode, skip caching blocks to DB (no writer thread)
+	 if (ndb->flags & NDB_FLAG_READONLY)
+		 return blocks;
 
 	 // send a copy to the writer
 	 blocks_size = ndb_blocks_total_size(blocks);

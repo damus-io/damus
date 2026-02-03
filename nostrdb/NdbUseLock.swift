@@ -20,7 +20,7 @@ extension Ndb {
     ///   and might create unnecessary async delays (e.g. it would prevent two tasks from reading Ndb data at once)
     @available(iOS 18.0, *)
     class UseLock: UseLockProtocol {
-        /// Number of functions using the `ndb` object (for reading or writing data)
+        /// Number of active users of ndb (includes both withNdb operations and transactions)
         private let ndbUserCount = Mutex<UInt>(0)
         /// Semaphore for general access to `ndb`. A closing task requires exclusive access. Users of `ndb` (read/write tasks) share the access
         private let ndbAccessSemaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
@@ -85,7 +85,18 @@ extension Ndb {
                 }
             }
         }
-        
+
+        /// Retains ndb for a transaction's lifetime. Call this when creating a transaction.
+        /// The transaction's pointers remain valid until `releaseTransaction` is called.
+        func retainForTransaction(maxTimeout: DispatchTimeInterval = DEFAULT_TIMEOUT) throws {
+            try incrementUserCount(maxTimeout: maxTimeout)
+        }
+
+        /// Releases the transaction retain on ndb. Call this when a transaction is destroyed.
+        func releaseTransaction() {
+            decrementUserCount()
+        }
+
         enum LockError: Error {
             case timeout
         }
@@ -93,7 +104,7 @@ extension Ndb {
     
     /// A fallback implementation for `UseLock` that works in iOS older than iOS 18, with reduced syncing mechanisms
     class FallbackUseLock: UseLockProtocol {
-        /// Number of functions using the `ndb` object (for reading or writing data)
+        /// Number of active users of ndb (includes both withNdb operations and transactions)
         private var ndbUserCount: UInt = 0
         /// Lock for protecting access to `ndbUserCount`
         private let ndbUserCountLock = NSLock()
@@ -158,22 +169,33 @@ extension Ndb {
         private func decrementUserCount() {
             ndbUserCountLock.lock()
             defer { ndbUserCountLock.unlock() }
-            
+
             ndbUserCount -= 1
             // Signal that ndb can close if we have zero users using ndb
             if ndbUserCount == 0 {
                 ndbAccessSemaphore.signal()
             }
         }
-        
+
+        /// Retains ndb for a transaction's lifetime. Call this when creating a transaction.
+        /// The transaction's pointers remain valid until `releaseTransaction` is called.
+        func retainForTransaction(maxTimeout: DispatchTimeInterval = DEFAULT_TIMEOUT) throws {
+            try incrementUserCount(maxTimeout: maxTimeout)
+        }
+
+        /// Releases the transaction retain on ndb. Call this when a transaction is destroyed.
+        func releaseTransaction() {
+            decrementUserCount()
+        }
+
         enum LockError: Error {
             case timeout
         }
     }
-    
+
     protocol UseLockProtocol {
         /// Keeps the ndb open while performing some specified operation.
-        /// 
+        ///
         /// **WARNING:** Ensure ndb is open _before_ calling this, otherwise the thread may block for the `maxTimeout` period.
         /// **Implementation note:** NEVER change this to `async`! This is a blocking operation, so we want to minimize the time of the operation
         ///
@@ -181,16 +203,30 @@ extension Ndb {
         /// - Parameter maxTimeout: The maximum amount of time the function will wait for the lock before giving up.
         /// - Returns: The return result for the given operation
         func keepNdbOpen<T>(during operation: () throws -> T, maxWaitTimeout: DispatchTimeInterval) throws -> T
-        
+
         /// Waits for ndb to be able to close, then closes it.
         ///
         /// - Parameter operation: The operation to close. Must return the final boolean value indicating if ndb was closed in the end
         ///
         /// Implementation note: NEVER change this to `async`! This is a blocking operation, so we want to minimize the time of the operation
         func waitUntilNdbCanClose(thenClose operation: () -> Bool, maxTimeout: DispatchTimeInterval) throws
-        
+
         /// Marks `ndb` as open to allow other users to use it. Do not call this more than once
         func markNdbOpen()
+
+        /// Retains ndb for a transaction's lifetime.
+        ///
+        /// Call this when creating a transaction to prevent ndb from being closed while the
+        /// transaction's pointers are still valid. The caller must call `releaseTransaction()`
+        /// when the transaction is destroyed.
+        ///
+        /// - Parameter maxTimeout: Maximum time to wait for ndb to be available
+        func retainForTransaction(maxTimeout: DispatchTimeInterval) throws
+
+        /// Releases the transaction retain on ndb.
+        ///
+        /// Call this when a transaction is destroyed, paired with an earlier `retainForTransaction()`.
+        func releaseTransaction()
     }
     
     static func initLock() -> UseLockProtocol {
