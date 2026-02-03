@@ -92,54 +92,49 @@ class NostrNetworkManager {
     /// - Timeout handling: Automatically resumes after timeout even if connection fails
     /// - Short-circuits immediately if already connected, preventing unnecessary waiting
     func awaitConnection(timeout: Duration = .seconds(30)) async {
-        // Short-circuit if already connected
-        continuationsLock.lock()
-        let alreadyConnected = isConnected
-        continuationsLock.unlock()
-        
-        guard !alreadyConnected else {
-            return
-        }
-        
         let requestId = UUID()
         var timeoutTask: Task<Void, Never>?
-        var isResumed = false
-        
+
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-            // Store the continuation in a thread-safe manner
+            // Check connection state and store continuation atomically to prevent race
+            // where connect() flips isConnected after our check but before we register.
             continuationsLock.lock()
+            if isConnected {
+                continuationsLock.unlock()
+                continuation.resume()
+                return
+            }
             connectionContinuations[requestId] = continuation
             continuationsLock.unlock()
-            
-            // Set up timeout
+
+            // Set up timeout - the continuation dictionary is the source of truth for
+            // whether a request has been resumed. No separate flag needed.
             timeoutTask = Task {
                 try? await Task.sleep(for: timeout)
-                if !isResumed {
-                    self.resumeConnectionContinuation(requestId: requestId, isResumed: &isResumed)
-                }
+                self.resumeConnectionContinuation(requestId: requestId)
             }
         }
-        
+
         timeoutTask?.cancel()
     }
-    
-    /// Resumes a connection continuation in a thread-safe manner
+
+    /// Resumes a connection continuation in a thread-safe manner.
     ///
-    /// This can be called from any thread and ensures the continuation is only resumed once
+    /// This can be called from any thread and ensures the continuation is only resumed once.
+    /// The continuation dictionary serves as the source of truth - if the continuation exists
+    /// in the dictionary, it hasn't been resumed yet. This eliminates the need for a separate
+    /// `isResumed` flag and prevents data races.
     ///
-    /// - Parameters:
-    ///   - requestId: The unique identifier for this connection request
-    ///   - isResumed: Flag to track if the continuation has already been resumed
-    private func resumeConnectionContinuation(requestId: UUID, isResumed: inout Bool) {
+    /// - Parameter requestId: The unique identifier for this connection request.
+    private func resumeConnectionContinuation(requestId: UUID) {
         continuationsLock.lock()
         defer { continuationsLock.unlock() }
-        
-        guard !isResumed, let continuation = connectionContinuations[requestId] else {
+
+        guard let continuation = connectionContinuations.removeValue(forKey: requestId) else {
+            // Already resumed by another path (e.g., connect() or another timeout)
             return
         }
-        
-        isResumed = true
-        connectionContinuations.removeValue(forKey: requestId)
+
         continuation.resume()
     }
     
