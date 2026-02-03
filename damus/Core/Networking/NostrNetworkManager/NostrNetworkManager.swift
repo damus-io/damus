@@ -278,7 +278,9 @@ class NostrNetworkManager {
         let donations_msats = Int64(percent_f * Double(base_msats))
         
         let payreq = LNUrlPayRequest(allowsNostr: true, commentAllowed: nil, nostrPubkey: "", callback: "https://sendsats.lol/@damus")
-        guard let invoice = await fetch_zap_invoice(payreq, zapreq: nil, msats: donations_msats, zap_type: .non_zap, comment: nil) else {
+        let result = await fetch_zap_invoice(payreq, zapreq: nil, msats: donations_msats, zap_type: .non_zap, comment: nil)
+
+        guard case .success(let invoice) = result else {
             // we failed... oh well. no donation for us.
             print("damus-donation failed to fetch invoice")
             return

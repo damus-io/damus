@@ -18,7 +18,8 @@ enum ZappingError {
     case bad_lnurl
     case canceled
     case send_failed
-    
+    case rate_limited
+
     func humanReadableMessage() -> String {
         switch self {
             case .fetching_invoice:
@@ -29,6 +30,8 @@ enum ZappingError {
                 return NSLocalizedString("Zap attempt from connected wallet was canceled.", comment: "Message to display when a zap from the user's connected wallet was canceled.")
             case .send_failed:
                 return NSLocalizedString("Zap attempt from connected wallet failed.", comment: "Message to display when sending a zap from the user's connected wallet failed.")
+            case .rate_limited:
+                return NSLocalizedString("Rate limited. Please try again later.", comment: "Message to display when zap request was rate limited by the server.")
         }
     }
 }
@@ -206,9 +209,13 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
             return
         }
 
-        guard let inv = await fetch_zap_invoice(payreq, zapreq: zapreq, msats: amount_msat, zap_type: zap_type, comment: comment, lnurl: lnurl) else {
+        let fetchResult = await fetch_zap_invoice_with_retry(payreq, zapreq: zapreq, msats: amount_msat, zap_type: zap_type, comment: comment, lnurl: lnurl)
+
+        guard let inv = fetchResult.invoice else {
+            let wasRateLimited = fetchResult.wasRateLimited
             remove_zap(reqid: reqid, zapcache: damus_state.zaps, evcache: damus_state.events)
-            let typ = ZappingEventType.failed(.fetching_invoice)
+            let errorType: ZappingError = wasRateLimited ? .rate_limited : .fetching_invoice
+            let typ = ZappingEventType.failed(errorType)
             let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
             notify(.zapping(ev))
             return

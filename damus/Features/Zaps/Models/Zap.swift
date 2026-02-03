@@ -7,6 +7,13 @@
 
 import Foundation
 
+/// Result of fetching a zap invoice from an LNURL endpoint.
+enum ZapInvoiceResult {
+    case success(String)
+    case rateLimited
+    case error
+}
+
 struct NoteZapTarget: Equatable, Hashable {
     public let note_id: NoteId
     public let author: Pubkey
@@ -498,10 +505,10 @@ func fetch_zapper_from_lnurl(lnurls: LNUrls, pubkey: Pubkey, lnurl: String) asyn
 ///   - zap_type: The type of zap (normal, private, anon, or non_zap).
 ///   - comment: Optional comment to include (LUD-12).
 ///   - lnurl: Optional recipient lnurl address to include in callback (NIP-57 Appendix B).
-/// - Returns: The bolt11 invoice string, or nil on failure.
-func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, msats: Int64, zap_type: ZapType, comment: String?, lnurl: String? = nil) async -> String? {
+/// - Returns: ZapInvoiceResult indicating success with invoice, rate limited, or error.
+func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, msats: Int64, zap_type: ZapType, comment: String?, lnurl: String? = nil) async -> ZapInvoiceResult {
     guard var base_url = payreq.callback.flatMap({ URLComponents(string: $0) }) else {
-        return nil
+        return .error
     }
 
     let zappable = payreq.allowsNostr ?? false
@@ -511,51 +518,110 @@ func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, msats: In
     if zappable && zap_type != .non_zap, let json = encode_json(zapreq) {
         print("[zap] zapreq json: \(json)")
         query.append(URLQueryItem(name: "nostr", value: json))
-
-        // NIP-57 Appendix B: include lnurl in callback
-        if let lnurl {
-            query.append(URLQueryItem(name: "lnurl", value: lnurl))
-        }
     }
-   
+
+    // NIP-57 Appendix B: include lnurl in callback for all request types
+    if let lnurl {
+        query.append(URLQueryItem(name: "lnurl", value: lnurl))
+    }
+
     // add a lud12 comment as well if we have it
     if zap_type != .priv, let comment, let limit = payreq.commentAllowed, limit != 0 {
         let limited_comment = String(comment.prefix(limit))
         query.append(URLQueryItem(name: "comment", value: limited_comment))
     }
-    
+
     base_url.queryItems = query
-    
+
     guard let url = base_url.url else {
-        return nil
+        return .error
     }
-    
+
     print("[zap] callback url: \(url)")
-    
+
     var ret: (Data, URLResponse)? = nil
     do {
         ret = try await URLSession.shared.data(from: url)
     } catch {
         print("[zap] fetch error: \(error.localizedDescription)")
-        return nil
+        return .error
     }
-    
+
     guard let ret else {
-        return nil
+        return .error
     }
-    
-    let json_str = String(decoding: ret.0, as: UTF8.self)
+
+    // Check for rate limiting via HTTP 429 status code
+    if let httpResponse = ret.1 as? HTTPURLResponse, httpResponse.statusCode == 429 {
+        print("[zap] rate limited by server (HTTP 429)")
+        return .rateLimited
+    }
+
+    // Use failable UTF-8 initializer to detect invalid byte sequences
+    guard let json_str = String(data: ret.0, encoding: .utf8) else {
+        print("[zap] fetch_zap_invoice UTF-8 decoding failed, raw bytes: \(ret.0.prefix(256).map { String(format: "%02x", $0) }.joined(separator: " "))")
+        return .error
+    }
+
+    // Fallback: check for rate limiting in response body
+    if json_str.lowercased().contains("too many requests") {
+        print("[zap] rate limited by server (body)")
+        return .rateLimited
+    }
+
     guard let result: LNUrlPayResponse = decode_json(json_str) else {
         print("[zap] fetch_zap_invoice error: \(json_str)")
-        return nil
+        return .error
     }
-    
+
     // make sure it's the correct amount
     guard let bolt11 = decode_bolt11(result.pr),
           .specific(msats) == bolt11.amount
     else {
-        return nil
+        return .error
     }
-    
-    return result.pr
+
+    return .success(result.pr)
+}
+
+/// Result of fetching a zap invoice with retry logic.
+struct ZapInvoiceFetchResult {
+    let invoice: String?
+    let wasRateLimited: Bool
+}
+
+/// Fetches a Lightning invoice with automatic retry on rate limiting.
+/// - Parameters:
+///   - payreq: The LNURL pay request containing callback URL and server capabilities.
+///   - zapreq: Optional zap request event to include (for NIP-57 zaps).
+///   - msats: Amount in millisatoshis.
+///   - zap_type: The type of zap (normal, private, anon, or non_zap).
+///   - comment: Optional comment to include (LUD-12).
+///   - lnurl: Optional recipient lnurl address to include in callback (NIP-57 Appendix B).
+///   - maxRetries: Maximum number of retry attempts (default: 3).
+/// - Returns: ZapInvoiceFetchResult with the invoice (if successful) and rate limit status.
+func fetch_zap_invoice_with_retry(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, msats: Int64, zap_type: ZapType, comment: String?, lnurl: String? = nil, maxRetries: Int = 3) async -> ZapInvoiceFetchResult {
+    var invoice: String? = nil
+    var wasRateLimited = false
+
+    for attempt in 0..<maxRetries {
+        let result = await fetch_zap_invoice(payreq, zapreq: zapreq, msats: msats, zap_type: zap_type, comment: comment, lnurl: lnurl)
+
+        switch result {
+        case .success(let inv):
+            return ZapInvoiceFetchResult(invoice: inv, wasRateLimited: false)
+        case .rateLimited:
+            wasRateLimited = true
+            if attempt < maxRetries - 1 {
+                let delay = UInt64(pow(2.0, Double(attempt + 1))) * 1_000_000_000
+                print("[zap] rate limited, retry \(attempt + 1)/\(maxRetries) in \(delay / 1_000_000_000)s")
+                try? await Task.sleep(nanoseconds: delay)
+                continue
+            }
+        case .error:
+            return ZapInvoiceFetchResult(invoice: nil, wasRateLimited: false)
+        }
+    }
+
+    return ZapInvoiceFetchResult(invoice: invoice, wasRateLimited: wasRateLimited)
 }

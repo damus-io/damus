@@ -137,10 +137,16 @@ struct LnurlAmountView: View {
                 return
             }
             
-            // Then fetch the invoice with the amount
-            guard let invoiceStr = await fetch_zap_invoice(payreq, zapreq: nil, msats: msats, zap_type: .non_zap, comment: nil, lnurl: lnurlString) else {
+            let fetchResult = await fetch_zap_invoice_with_retry(payreq, zapreq: nil, msats: msats, zap_type: .non_zap, comment: nil, lnurl: lnurlString)
+
+            guard let invoiceStr = fetchResult.invoice else {
+                let wasRateLimited = fetchResult.wasRateLimited
                 model.processing = false
-                model.error = NSLocalizedString("Error fetching lightning invoice", comment: "Error message when there was an error fetching a lightning invoice")
+                if wasRateLimited {
+                    model.error = NSLocalizedString("Rate limited. Please try again later.", comment: "Error message when LNURL request was rate limited")
+                } else {
+                    model.error = NSLocalizedString("Error fetching lightning invoice", comment: "Error message when there was an error fetching a lightning invoice")
+                }
                 return
             }
             
