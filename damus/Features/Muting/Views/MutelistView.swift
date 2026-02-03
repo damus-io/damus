@@ -54,25 +54,29 @@ struct MutelistView: View {
             Section(NSLocalizedString("Hashtags", comment: "Section header title for a list of hashtags that are muted.")) {
                 ForEach(hashtags, id: \.self) { item in
                     if case let MuteItem.hashtag(hashtag, _) = item {
-                        Text(verbatim: "#\(hashtag.hashtag)")
-                            .id(hashtag.hashtag)
-                            .swipeActions {
-                                RemoveAction(item: .hashtag(hashtag, nil))
-                            }
-                            .onTapGesture {
-                                damus_state.nav.push(route: Route.Search(search: SearchModel.init(state: damus_state, search: NostrFilter(hashtag: [hashtag.hashtag]))))
-                            }
+                        MuteItemRow(item: item) {
+                            Text(verbatim: "#\(hashtag.hashtag)")
+                        }
+                        .id(hashtag.hashtag)
+                        .swipeActions {
+                            RemoveAction(item: .hashtag(hashtag, nil))
+                        }
+                        .onTapGesture {
+                            damus_state.nav.push(route: Route.Search(search: SearchModel.init(state: damus_state, search: NostrFilter(hashtag: [hashtag.hashtag]))))
+                        }
                     }
                 }
             }
             Section(NSLocalizedString("Words", comment: "Section header title for a list of words that are muted.")) {
                 ForEach(words, id: \.self) { item in
                     if case let MuteItem.word(word, _) = item {
-                        Text(word)
-                            .id(word)
-                            .swipeActions {
-                                RemoveAction(item: .word(word, nil))
-                            }
+                        MuteItemRow(item: item) {
+                            Text(word)
+                        }
+                        .id(word)
+                        .swipeActions {
+                            RemoveAction(item: .word(word, nil))
+                        }
                     }
                 }
             }
@@ -80,11 +84,13 @@ struct MutelistView: View {
                 ForEach(threads, id: \.self) { item in
                     if case let MuteItem.thread(note_id, _) = item {
                         if let event = damus_state.events.lookup(note_id) {
-                            EventView(damus: damus_state, event: event)
-                                .id(note_id.hex())
-                                .swipeActions {
-                                    RemoveAction(item: .thread(note_id, nil))
-                                }
+                            MuteItemRow(item: item) {
+                                EventView(damus: damus_state, event: event)
+                            }
+                            .id(note_id.hex())
+                            .swipeActions {
+                                RemoveAction(item: .thread(note_id, nil))
+                            }
                         } else {
                             Text("Error retrieving muted event", comment: "Text for an item that application failed to retrieve the muted event for.")
                         }
@@ -97,14 +103,16 @@ struct MutelistView: View {
             ) {
                 ForEach(users, id: \.self) { user in
                     if case let MuteItem.user(pubkey, _) = user {
-                        UserViewRow(damus_state: damus_state, pubkey: pubkey)
-                            .id(pubkey)
-                            .swipeActions {
-                                RemoveAction(item: .user(pubkey, nil))
-                            }
-                            .onTapGesture {
-                                damus_state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))
-                            }
+                        MuteItemRow(item: user) {
+                            UserViewRow(damus_state: damus_state, pubkey: pubkey)
+                        }
+                        .id(pubkey)
+                        .swipeActions {
+                            RemoveAction(item: .user(pubkey, nil))
+                        }
+                        .onTapGesture {
+                            damus_state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))
+                        }
                     }
                 }
             }
