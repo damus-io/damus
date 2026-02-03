@@ -509,7 +509,7 @@ func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, msats: In
     var query = [URLQueryItem(name: "amount", value: "\(msats)")]
 
     if zappable && zap_type != .non_zap, let json = encode_json(zapreq) {
-        print("zapreq json: \(json)")
+        print("[zap] zapreq json: \(json)")
         query.append(URLQueryItem(name: "nostr", value: json))
 
         // NIP-57 Appendix B: include lnurl in callback
@@ -530,13 +530,13 @@ func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, msats: In
         return nil
     }
     
-    print("url \(url)")
+    print("[zap] callback url: \(url)")
     
     var ret: (Data, URLResponse)? = nil
     do {
         ret = try await URLSession.shared.data(from: url)
     } catch {
-        print(error.localizedDescription)
+        print("[zap] fetch error: \(error.localizedDescription)")
         return nil
     }
     
@@ -546,7 +546,7 @@ func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, msats: In
     
     let json_str = String(decoding: ret.0, as: UTF8.self)
     guard let result: LNUrlPayResponse = decode_json(json_str) else {
-        print("fetch_zap_invoice error: \(json_str)")
+        print("[zap] fetch_zap_invoice error: \(json_str)")
         return nil
     }
     

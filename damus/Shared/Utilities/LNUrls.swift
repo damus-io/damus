@@ -25,7 +25,7 @@ class LNUrls {
     func lookup_or_fetch(pubkey: Pubkey, lnurl: String) async -> LNUrlPayRequest? {
         switch lookup(pubkey: pubkey) {
         case .failed(let tries):
-            print("lnurls.lookup_or_fetch failed \(tries) \(lnurl)")
+            print("[zap] lnurls.lookup_or_fetch failed \(tries) \(lnurl)")
             guard tries < 5 else { return nil }
             self.endpoints[pubkey] = .failed(tries: tries + 1)
         case .fetched(let pr):
@@ -35,7 +35,7 @@ class LNUrls {
             //print("lnurls.lookup_or_fetch already fetching \(lnurl)")
             return await task.value
         case .not_fetched:
-            print("lnurls.lookup_or_fetch not fetched \(lnurl)")
+            print("[zap] lnurls.lookup_or_fetch not fetched \(lnurl)")
             break
         }
 
@@ -63,7 +63,7 @@ class LNUrls {
 }
 
 func fetch_static_payreq(_ lnurl: String) async -> LNUrlPayRequest? {
-    print("fetching static payreq \(lnurl)")
+    print("[zap] fetching static payreq \(lnurl)")
 
     guard let url = decode_lnurl(lnurl) else {
         return nil
