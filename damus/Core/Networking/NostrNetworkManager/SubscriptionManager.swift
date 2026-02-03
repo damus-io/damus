@@ -124,42 +124,118 @@ extension NostrNetworkManager {
                     Self.logger.debug("Subscription \(id.uuidString, privacy: .public): Timed out!")
                     continuation.finish()
                 }
-                
+
                 let startTime = CFAbsoluteTimeGetCurrent()
                 Self.logger.debug("Session subscription \(id.uuidString, privacy: .public): Started")
-                var ndbEOSEIssued = false
-                var networkEOSEIssued = false
-                
+
+                /// Thread-safe container for shared state accessed by concurrent NDB and network stream tasks.
+                /// All methods acquire an internal NSLock to ensure safe concurrent access.
+                final class StreamState: @unchecked Sendable {
+                    private let lock = NSLock()
+                    private var _ndbEOSEIssued = false
+                    private var _networkEOSEIssued = false
+                    private var _latestNoteTimestampSeen: UInt32? = nil
+                    private var _negentropyStorageVector = NegentropyStorageVector()
+
+                    /// Marks the NDB EOSE flag as issued. Thread-safe via NSLock.
+                    func setNdbEOSE() {
+                        lock.lock()
+                        defer { lock.unlock() }
+                        _ndbEOSEIssued = true
+                    }
+
+                    /// Marks the network EOSE flag as issued. Thread-safe via NSLock.
+                    func setNetworkEOSE() {
+                        lock.lock()
+                        defer { lock.unlock() }
+                        _networkEOSEIssued = true
+                    }
+
+                    /// Updates the latest note timestamp, keeping the maximum value seen.
+                    /// - Parameter timestamp: The note's created_at timestamp to compare.
+                    /// Thread-safe via NSLock.
+                    func updateTimestamp(_ timestamp: UInt32) {
+                        lock.lock()
+                        defer { lock.unlock() }
+                        if let latest = _latestNoteTimestampSeen {
+                            _latestNoteTimestampSeen = max(latest, timestamp)
+                        } else {
+                            _latestNoteTimestampSeen = timestamp
+                        }
+                    }
+
+                    /// Returns network optimization data based on the given strategy.
+                    /// - Parameter strategy: The optimization strategy (timestamp-based or negentropy).
+                    /// - Returns: Optimization data if strategy is non-nil, otherwise nil.
+                    /// Thread-safe via NSLock.
+                    ///
+                    /// Note: For negentropy strategy, this seals and detaches the current vector,
+                    /// creating a new one for future inserts. The returned vector is immutable
+                    /// and safe for async use without racing with insertToNegentropy().
+                    func getNetworkOptimizationData(strategy: StreamMode.NetworkOptimizationStrategy?) -> StreamMode.NetworkOptimizationData? {
+                        lock.lock()
+                        defer { lock.unlock() }
+
+                        // For negentropy strategy, seal the current vector and swap with a new one.
+                        // This ensures the returned vector is immutable and won't race with future inserts.
+                        var vectorToReturn: NegentropyStorageVector? = nil
+                        if case .negentropy = strategy {
+                            try? _negentropyStorageVector.seal()
+                            vectorToReturn = _negentropyStorageVector
+                            _negentropyStorageVector = NegentropyStorageVector()
+                        }
+
+                        return StreamMode.NetworkOptimizationData.from(
+                            strategy: strategy,
+                            latestNoteTimestampSeen: _latestNoteTimestampSeen,
+                            negentropyStorageVector: vectorToReturn
+                        )
+                    }
+
+                    /// Inserts an event into the negentropy storage vector for sync optimization.
+                    /// - Parameter event: The NDB note to insert.
+                    /// Thread-safe via NSLock.
+                    func insertToNegentropy(event: borrowing UnownedNdbNote) {
+                        lock.lock()
+                        defer { lock.unlock() }
+                        _negentropyStorageVector.unsealAndInsert(nostrEvent: event)
+                    }
+
+                    /// Determines if EOSE can be issued based on stream mode and network state.
+                    /// - Parameters:
+                    ///   - streamMode: The current stream mode (ndbFirst, ndbOnly, ndbAndNetworkParallel).
+                    ///   - connectedToNetwork: Whether network connectivity is available.
+                    /// - Returns: True if conditions are met to issue EOSE signal.
+                    /// Thread-safe via NSLock.
+                    func canIssueEOSE(streamMode: StreamMode, connectedToNetwork: Bool) -> Bool {
+                        lock.lock()
+                        defer { lock.unlock() }
+                        switch streamMode {
+                        case .ndbFirst, .ndbOnly: return _ndbEOSEIssued
+                        case .ndbAndNetworkParallel: return _ndbEOSEIssued && (_networkEOSEIssued || !connectedToNetwork)
+                        }
+                    }
+                }
+                let state = StreamState()
+
                 // This closure function issues (yields) an EOSE signal to the stream if all relevant conditions are met
                 let yieldEOSEIfReady = {
                     let connectedToNetwork = self.pool.network_monitor.currentPath.status == .satisfied
-                    // In normal mode: Issuing EOSE requires EOSE from both NDB and the network, since they are all considered separate relays
-                    // In experimental local relay model mode: Issuing EOSE requires only EOSE from NDB, since that is the only relay that "matters"
-                    let canIssueEOSE = switch streamMode {
-                    case .ndbFirst, .ndbOnly: (ndbEOSEIssued)
-                    case .ndbAndNetworkParallel: (ndbEOSEIssued && (networkEOSEIssued || !connectedToNetwork))
-                    }
-                    
-                    if canIssueEOSE {
+                    let canIssue = state.canIssueEOSE(streamMode: streamMode, connectedToNetwork: connectedToNetwork)
+                    if canIssue {
                         Self.logger.debug("Session subscription \(id.uuidString, privacy: .public): Issued EOSE for session. Elapsed: \(CFAbsoluteTimeGetCurrent() - startTime, format: .fixed(precision: 2), privacy: .public) seconds")
                         logStreamPipelineStats("SubscriptionManager_Advanced_Stream_\(id)", "Consumer_\(id)")
                         continuation.yield(.eose)
                     }
                 }
-                
+
                 var networkStreamTask: Task<Void, any Error>? = nil
-                var latestNoteTimestampSeen: UInt32? = nil
-                var negentropyStorageVector = NegentropyStorageVector()
                 
                 let startNetworkStreamTask = {
                     guard streamMode.shouldStreamFromNetwork else { return }
                     networkStreamTask = Task {
                         while !Task.isCancelled {
-                            let networkOptimizationData = StreamMode.NetworkOptimizationData.from(
-                                strategy: streamMode.networkOptimizationStrategy,
-                                latestNoteTimestampSeen: latestNoteTimestampSeen,
-                                negentropyStorageVector: negentropyStorageVector
-                            )
+                            let networkOptimizationData = state.getNetworkOptimizationData(strategy: streamMode.networkOptimizationStrategy)
                             for await item in self.multiSessionNetworkStream(filters: filters, to: desiredRelays, streamMode: streamMode, id: id, networkOptimizationData: networkOptimizationData) {
                                 try Task.checkCancellation()
                                 logStreamPipelineStats("SubscriptionManager_Network_Stream_\(id)", "SubscriptionManager_Advanced_Stream_\(id)")
@@ -178,7 +254,7 @@ extension NostrNetworkManager {
                                 case .networkEose:
                                     logStreamPipelineStats("SubscriptionManager_Advanced_Stream_\(id)", "Consumer_\(id)")
                                     continuation.yield(item)
-                                    networkEOSEIssued = true
+                                    state.setNetworkEOSE()
                                     yieldEOSEIfReady()
                                 }
                             }
@@ -200,13 +276,8 @@ extension NostrNetworkManager {
                             case .event(let lender):
                                 logStreamPipelineStats("SubscriptionManager_Advanced_Stream_\(id)", "Consumer_\(id)")
                                 try? lender.borrow({ event in
-                                    if let latestTimestamp = latestNoteTimestampSeen {
-                                        latestNoteTimestampSeen = max(latestTimestamp, event.createdAt)
-                                    }
-                                    else {
-                                        latestNoteTimestampSeen = event.createdAt
-                                    }
-                                    negentropyStorageVector.unsealAndInsert(nostrEvent: event)
+                                    state.updateTimestamp(event.createdAt)
+                                    state.insertToNegentropy(event: event)
                                 })
                                 // Preload entities if requested
                                 if case .preload = preloadStrategy {
@@ -218,7 +289,7 @@ extension NostrNetworkManager {
                             case .ndbEose:
                                 logStreamPipelineStats("SubscriptionManager_Advanced_Stream_\(id)", "Consumer_\(id)")
                                 continuation.yield(item)
-                                ndbEOSEIssued = true
+                                state.setNdbEOSE()
                                 if streamMode.optimizeNetworkFilter && streamMode.shouldStreamFromNetwork {
                                     startNetworkStreamTask()
                                 }

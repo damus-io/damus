@@ -46,6 +46,7 @@ struct ProfileName: View {
     @State var donation: Int?
     @State var purple_account: DamusPurple.Account?
     @State var nip05_domain_favicon: FaviconURL?
+    @State var profile: Profile?
 
     init(pubkey: Pubkey, prefix: String = "", damus: DamusState, show_nip5_domain: Bool = true, supporterBadgeStyle: SupporterBadge.Style = .compact) {
         self.pubkey = pubkey
@@ -54,6 +55,12 @@ struct ProfileName: View {
         self.show_nip5_domain = show_nip5_domain
         self.supporterBadgeStyle = supporterBadgeStyle
         self.purple_account = nil
+
+        // Initialize with safe defaults; async task will populate from cache
+        self._profile = State(initialValue: nil)
+        self._display_name = State(initialValue: nil)
+        self._donation = State(initialValue: nil)
+        self._nip05 = State(initialValue: nil)
     }
     
     var friend_type: FriendType? {
@@ -95,8 +102,6 @@ struct ProfileName: View {
     }
     
     var body: some View {
-        let profile = try? damus_state.profiles.lookup(id: pubkey)
-
         HStack(spacing: 2) {
             Text(verbatim: "\(prefix)\(name_choice(profile: profile))")
                 .font(.body)
@@ -125,7 +130,32 @@ struct ProfileName: View {
             }
         }
         .task {
-            if let domain = current_nip05?.host {
+            // Load cached profile off main thread to avoid blocking UI
+            let pubkey = self.pubkey
+            let ndb = damus_state.ndb
+
+            let cachedProfile = await withCheckedContinuation { continuation in
+                DispatchQueue.global(qos: .userInitiated).async {
+                    let profile = try? ndb.lookup_profile_and_copy(pubkey)
+                    continuation.resume(returning: profile)
+                }
+            }
+
+            // Check if view disappeared during async work
+            if Task.isCancelled { return }
+
+            if let cachedProfile {
+                self.profile = cachedProfile
+                self.display_name = Profile.displayName(profile: cachedProfile, pubkey: pubkey)
+                self.donation = cachedProfile.damus_donation
+            }
+
+            // profiles.is_validated must run on MainActor (not Sendable)
+            let cachedNip05 = damus_state.profiles.is_validated(pubkey)
+            self.nip05 = cachedNip05
+
+            // Load favicon after nip05 is set to avoid race condition
+            if let domain = cachedNip05?.host {
                 self.nip05_domain_favicon = try? await damus_state.favicon_cache.lookup(domain)
                     .largest()
             }
@@ -139,6 +169,8 @@ struct ProfileName: View {
 
     @MainActor
     func handle_profile_update(profile: Profile) {
+        self.profile = profile
+
         let display_name = Profile.displayName(profile: profile, pubkey: pubkey)
         if self.display_name != display_name {
             self.display_name = display_name

@@ -291,7 +291,7 @@ class RelayPool {
 
         for url in relayURLs {
             if let existing = await get_relay(url) {
-                if existing.connection.isConnected {
+                if existing.connection.isConnectedSnapshot {
                     alreadyConnected.append(url)
                     #if DEBUG
                     print("[RelayPool] Relay \(url.absoluteString) already connected")
@@ -335,7 +335,7 @@ class RelayPool {
             // Check if any relay has connected
             var anyConnected = false
             for url in toConnect {
-                if let relay = await get_relay(url), relay.connection.isConnected {
+                if let relay = await get_relay(url), relay.connection.isConnectedSnapshot {
                     anyConnected = true
                     break
                 }
@@ -355,7 +355,7 @@ class RelayPool {
         // Collect all connected relays
         var connected = alreadyConnected
         for url in toConnect {
-            if let relay = await get_relay(url), relay.connection.isConnected {
+            if let relay = await get_relay(url), relay.connection.isConnectedSnapshot {
                 connected.append(url)
                 #if DEBUG
                 print("[RelayPool] Relay \(url.absoluteString) connected: true")
@@ -386,15 +386,17 @@ class RelayPool {
         for relay in await relays {
             let c = relay.connection
             
-            let is_connecting = c.isConnecting
+            let is_connecting = c.isConnectingSnapshot
 
             if is_connecting && (Date.now.timeIntervalSince1970 - c.last_connection_attempt) > 5 {
-                print("stale connection detected (\(relay.descriptor.url.absoluteString)). retrying...")
-                relay.connection.reconnect()
-            } else if relay.is_broken || is_connecting || c.isConnected {
+                // Force reconnect for stale connections - normal reconnect would early-return
+                // because isConnecting is still true
+                print("stale connection detected (\(relay.descriptor.url.absoluteString)). forcing reconnect...")
+                relay.connection.connect(force: true)
+            } else if relay.is_broken || is_connecting || c.isConnectedSnapshot {
                 continue
             } else {
-                relay.connection.reconnect()
+                relay.connection.scheduleReconnect()
             }
             
         }
@@ -404,7 +406,7 @@ class RelayPool {
         let relays = await getRelays(targetRelays: targetRelays)
         for relay in relays {
             // don't try to reconnect to broken relays
-            relay.connection.reconnect()
+            relay.connection.scheduleReconnect()
         }
     }
 
@@ -537,7 +539,7 @@ class RelayPool {
                             break   // We do not support handling these yet
                         case .eose(_):
                             relaysWhoFinishedInitialResults.insert(relayUrl)
-                            let desiredAndConnectedRelays = desiredRelays.filter({ $0.connection.isConnected }).map({ $0.descriptor.url })
+                            let desiredAndConnectedRelays = desiredRelays.filter({ $0.connection.isConnectedSnapshot }).map({ $0.descriptor.url })
                             Log.debug("RelayPool subscription %s: EOSE from %s. EOSE count: %d/%d. Elapsed: %.2f seconds.", for: .networking, id.uuidString, relayUrl.absoluteString, relaysWhoFinishedInitialResults.count, Set(desiredAndConnectedRelays).count, CFAbsoluteTimeGetCurrent() - startTime)
                             if relaysWhoFinishedInitialResults == Set(desiredAndConnectedRelays) {
                                 continuation.yield(with: .success(.eose))
@@ -663,7 +665,7 @@ class RelayPool {
                 continue    // Do not send requests to ephemeral relays if we want to skip them
             }
             
-            guard relay.connection.isConnected else {
+            guard relay.connection.isConnectedSnapshot else {
                 Task { await queue_req(r: req, relay: relay.id, skip_ephemeral: skip_ephemeral) }
                 continue
             }

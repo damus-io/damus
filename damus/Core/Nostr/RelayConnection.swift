@@ -48,15 +48,67 @@ enum NostrConnectionEvent {
 }
 
 final class RelayConnection: ObservableObject {
-    @Published private(set) var isConnected = false
-    @Published private(set) var isConnecting = false
-    private var isDisabled = false
-    
+    /// Connection state properties are MainActor-isolated to ensure @Published
+    /// changes only fire on the main thread, preventing SwiftUI warnings.
+    @MainActor @Published private(set) var isConnected = false {
+        didSet {
+            stateLock.lock()
+            _isConnectedSnapshot = isConnected
+            stateLock.unlock()
+        }
+    }
+    @MainActor @Published private(set) var isConnecting = false {
+        didSet {
+            stateLock.lock()
+            _isConnectingSnapshot = isConnecting
+            stateLock.unlock()
+        }
+    }
+    @MainActor private var isDisabled = false
+
+    /// Lock and backing storage for nonisolated snapshot reads.
+    /// This allows RelayPool to check connection status from @RelayPoolActor.
+    private let stateLock = NSLock()
+    private var _isConnectedSnapshot = false
+    private var _isConnectingSnapshot = false
+
+    /// Nonisolated snapshot of isConnected for status checks from any context.
+    /// Note: This may be slightly stale compared to the MainActor-isolated property.
+    nonisolated var isConnectedSnapshot: Bool {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        return _isConnectedSnapshot
+    }
+
+    /// Nonisolated snapshot of isConnecting for status checks from any context.
+    nonisolated var isConnectingSnapshot: Bool {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        return _isConnectingSnapshot
+    }
+
     private(set) var last_connection_attempt: TimeInterval = 0
     private(set) var last_pong: Date? = nil
-    private(set) var backoff: TimeInterval = 1.0
-    private lazy var socket = WebSocket(relay_url.url)
-    private var subscriptionToken: AnyCancellable?
+    @MainActor private(set) var backoff: TimeInterval = 1.0
+
+    /// Lock protecting socket initialization.
+    /// Required because lazy vars are not thread-safe and socket is accessed from multiple threads.
+    private let socketLock = NSLock()
+    private var _socket: WebSocket?
+
+    /// Thread-safe accessor for the WebSocket. Creates socket on first access.
+    private var socket: WebSocket {
+        socketLock.lock()
+        defer { socketLock.unlock() }
+        if let existingSocket = _socket {
+            return existingSocket
+        }
+        let newSocket = WebSocket(relay_url.url)
+        _socket = newSocket
+        return newSocket
+    }
+
+    @MainActor private var subscriptionToken: AnyCancellable?
 
     private var handleEvent: (NostrConnectionEvent) async -> ()
     private var processEvent: (WebSocketEvent) -> ()
@@ -111,32 +163,42 @@ final class RelayConnection: ObservableObject {
     
     func ping() {
         socket.ping { [weak self] err in
-            guard let self else {
-                return
-            }
-            
+            guard let self else { return }
+
             if err == nil {
                 self.last_pong = .now
                 Log.info("Got pong from '%s'", for: .networking, self.relay_url.absoluteString)
                 self.log?.add("Successful ping")
             } else {
                 Log.info("Ping failed, reconnecting to '%s'", for: .networking, self.relay_url.absoluteString)
-                self.isConnected = false
-                self.isConnecting = false
-                self.reconnect_with_backoff()
+                Task { @MainActor in
+                    self.isConnected = false
+                    self.isConnecting = false
+                    self.reconnect_with_backoff()
+                }
                 self.log?.add("Ping failed")
             }
         }
     }
     
     func connect(force: Bool = false) {
-        if !force && (isConnected || isConnecting) {
-            return
+        // Dispatch to MainActor for atomic check-and-set of connection state
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            let shouldConnect = force || (!self.isConnected && !self.isConnecting)
+            if shouldConnect {
+                self.isConnecting = true
+            }
+            guard shouldConnect else { return }
+            self.performConnect()
         }
-        
-        isConnecting = true
+    }
+
+    /// Performs the actual connection. Called from MainActor after state check.
+    @MainActor
+    private func performConnect() {
         last_connection_attempt = Date().timeIntervalSince1970
-        
+
         subscriptionToken = socket.subject
             .receive(on: DispatchQueue.global(qos: .default))
             .sink { [weak self] completion in
@@ -149,18 +211,23 @@ final class RelayConnection: ObservableObject {
             } receiveValue: { [weak self] event in
                 Task { await self?.wsEventQueue.add(item: event) }
             }
-            
+
         socket.connect()
     }
 
     func disconnect() {
         socket.disconnect()
-        subscriptionToken = nil
-        
-        isConnected = false
-        isConnecting = false
+
+        // Clear subscription and connection state on MainActor to synchronize
+        // with performConnect() which also runs on MainActor
+        Task { @MainActor [weak self] in
+            self?.subscriptionToken = nil
+            self?.isConnected = false
+            self?.isConnecting = false
+        }
     }
     
+    @MainActor
     func disablePermanently() {
         isDisabled = true
     }
@@ -190,7 +257,7 @@ final class RelayConnection: ObservableObject {
         processEvent(event)
         switch event {
         case .connected:
-            DispatchQueue.main.async {
+            await MainActor.run {
                 self.backoff = 1.0
                 self.isConnected = true
                 self.isConnecting = false
@@ -201,7 +268,7 @@ final class RelayConnection: ObservableObject {
             if closeCode != .normalClosure {
                 Log.error("⚠️ Warning: RelayConnection (%d) closed with code: %s", for: .networking, String(describing: closeCode), String(describing: reason))
             }
-            DispatchQueue.main.async {
+            await MainActor.run {
                 self.isConnected = false
                 self.isConnecting = false
                 self.reconnect()
@@ -210,14 +277,12 @@ final class RelayConnection: ObservableObject {
             Log.error("⚠️ Warning: RelayConnection (%s) error: %s", for: .networking, self.relay_url.absoluteString, error.localizedDescription)
             let nserr = error as NSError
             if nserr.domain == NSPOSIXErrorDomain && nserr.code == 57 {
-                // ignore socket not connected?
-                return
+                return  // socket not connected
             }
             if nserr.domain == NSURLErrorDomain && nserr.code == -999 {
-                // these aren't real error, it just means task was cancelled
-                return
+                return  // task was cancelled
             }
-            DispatchQueue.main.async {
+            await MainActor.run {
                 self.isConnected = false
                 self.isConnecting = false
                 self.reconnect_with_backoff()
@@ -231,19 +296,17 @@ final class RelayConnection: ObservableObject {
         }
     }
     
+    @MainActor
     func reconnect_with_backoff() {
         self.backoff *= 2.0
         self.reconnect_in(after: self.backoff)
     }
     
+    @MainActor
     func reconnect() {
-        guard !isConnecting && !isDisabled else {
-            self.log?.add("Cancelling reconnect, already connecting")
-            return  // we're already trying to connect or we're disabled
-        }
-
-        guard !self.isConnected else {
-            self.log?.add("Cancelling reconnect, already connected")
+        // MainActor isolation ensures atomic check of state
+        if isConnecting || isDisabled || isConnected {
+            self.log?.add("Cancelling reconnect, already connecting or connected")
             return
         }
 
@@ -251,10 +314,20 @@ final class RelayConnection: ObservableObject {
         connect()
         log?.add("Reconnecting...")
     }
-    
-    func reconnect_in(after: TimeInterval) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + after) {
+
+    /// Schedules a reconnect on MainActor. Can be called from any context.
+    nonisolated func scheduleReconnect() {
+        Task { @MainActor in
             self.reconnect()
+        }
+    }
+
+    func reconnect_in(after: TimeInterval) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + after) { [weak self] in
+            guard let self else { return }
+            Task { @MainActor in
+                self.reconnect()
+            }
         }
     }
     

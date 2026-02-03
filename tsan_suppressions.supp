@@ -1,0 +1,60 @@
+# Thread Sanitizer Suppressions for Damus
+#
+# This file suppresses known benign races in third-party libraries.
+# See: https://clang.llvm.org/docs/ThreadSanitizer.html#suppression-file
+#
+# ============================================================================
+# Usage
+# ============================================================================
+#
+# For macOS/Command-line testing:
+#   TSAN_OPTIONS=suppressions=/path/to/tsan_suppressions.supp ./test
+#
+# For iOS Simulator (Xcode):
+#   TSan suppressions on iOS Simulator require the file to be accessible
+#   from within the simulator sandbox. There are two approaches:
+#
+#   1. Add a build phase to copy this file into the app bundle, then use:
+#      TSAN_OPTIONS=suppressions=@executable_path/tsan_suppressions.supp
+#
+#   2. Run tests on macOS target instead of iOS Simulator when debugging
+#      thread safety issues.
+#
+# IMPORTANT: iOS Simulator runs in a sandboxed environment where macOS
+# filesystem paths are not directly accessible. The $(PROJECT_DIR) variable
+# is not expanded at runtime.
+
+# ============================================================================
+# LMDB (Lightning Memory-Mapped Database) Suppressions
+# ============================================================================
+#
+# LMDB uses a lock-free protocol for read-only transactions that TSan
+# cannot understand. The database uses dual meta pages (pages 0-1) and
+# relies on atomic-like memory-mapped file semantics rather than explicit
+# mutexes for reader-writer synchronization.
+#
+# Background:
+# - Read transactions select a meta page without acquiring a mutex
+# - This is intentional and safe due to LMDB's MVCC design
+# - Writers toggle between meta pages; readers see a consistent snapshot
+# - See: https://github.com/damus-io/nostrdb/issues/120
+# - See: LMDB ITS#7970 for related discussion
+#
+# These suppressions cover the races between:
+# - ndb_ingester_thread reading metadata in mdb_txn_renew0
+# - ndb_writer_thread writing metadata in mdb_env_write_meta
+
+# Race in read-only transaction initialization accessing me_metas
+race:mdb_txn_renew0
+
+# Race in write transaction committing changes to meta pages
+# Benign: LMDB uses memory-mapped files with careful ordering
+race:mdb_env_write_meta
+
+# Race in selecting which meta page to read
+# Benign: Meta page selection uses atomic-like semantics via mmap
+race:mdb_env_pick_meta
+
+# ============================================================================
+# End of Suppressions
+# ============================================================================

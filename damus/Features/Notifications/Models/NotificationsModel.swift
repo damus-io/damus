@@ -92,6 +92,12 @@ enum NotificationItem {
     }
 }
 
+/// Manages user notification state and publishes changes to the UI.
+///
+/// Conforms to ObservableObject for SwiftUI binding and ScrollQueue for
+/// scroll-based queueing of incoming notifications. All access must occur
+/// on the main actor to ensure thread-safe UI updates.
+@MainActor
 class NotificationsModel: ObservableObject, ScrollQueue {
     var incoming_zaps: [Zapping] = []
     var incoming_events: [NostrEvent] = []
