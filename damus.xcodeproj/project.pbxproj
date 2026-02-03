@@ -635,6 +635,8 @@
 		7C902AE32981D55B002AB16E /* ZoomableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C902AE22981D55B002AB16E /* ZoomableScrollView.swift */; };
 		7C95CAEE299DCEF1009DCB67 /* KFOptionSetter+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C95CAED299DCEF1009DCB67 /* KFOptionSetter+.swift */; };
 		7CFF6317299FEFE5005D382A /* SelectableText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CFF6316299FEFE5005D382A /* SelectableText.swift */; };
+		7DC1F14072E1AA602A17CC47 /* NdbUseLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A42E0330DE9AE58401C32A99 /* NdbUseLockTests.swift */; };
+		7DC1F14172E1AA602A17CC48 /* NdbIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A42E0331DE9AE58401C32A9A /* NdbIntegrationTests.swift */; };
 		82D6FA9A2CD9820500C925F4 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D6FA992CD9820500C925F4 /* ShareViewController.swift */; };
 		82D6FAA12CD9820500C925F4 /* ShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 82D6FA972CD9820500C925F4 /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		82D6FAA92CD99F7900C925F4 /* FbConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C32B9372A9AD44700DC3548 /* FbConstants.swift */; };
@@ -2723,6 +2725,8 @@
 		9609F057296E220800069BF3 /* BannerImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerImageView.swift; sourceTree = "<group>"; };
 		9C83F89229A937B900136C08 /* TextViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextViewWrapper.swift; sourceTree = "<group>"; };
 		9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachMediaUtility.swift; sourceTree = "<group>"; };
+		A42E0330DE9AE58401C32A99 /* NdbUseLockTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NdbUseLockTests.swift; sourceTree = "<group>"; };
+		A42E0331DE9AE58401C32A9A /* NdbIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbIntegrationTests.swift; sourceTree = "<group>"; };
 		ADFE73542AD4793100EC7326 /* QRScanNSECView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QRScanNSECView.swift; sourceTree = "<group>"; };
 		B501062C2B363036003874F5 /* AuthIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthIntegrationTests.swift; sourceTree = "<group>"; usesTabs = 0; };
 		B51C1CE82B55A60A00E312A9 /* AddMuteItemView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddMuteItemView.swift; sourceTree = "<group>"; };
@@ -3928,6 +3932,8 @@
 				64D0A2B0F048CC8D494945E6 /* RepostNotificationTests.swift */,
 				4C0ED07E2D7A1E260020D8A2 /* Benchmarking.swift */,
 				3A92C1012DE17ACA00CEEBAC /* NIP05DomainTimelineHeaderViewTests.swift */,
+				A42E0330DE9AE58401C32A99 /* NdbUseLockTests.swift */,
+				A42E0331DE9AE58401C32A9A /* NdbIntegrationTests.swift */,
 			);
 			path = damusTests;
 			sourceTree = "<group>";
@@ -6396,6 +6402,8 @@
 				4C684A552A7E91FE005E6031 /* LargeEventTests.swift in Sources */,
 				E02B54182B4DFADA0077FF42 /* Bech32ObjectTests.swift in Sources */,
 				3A92C1022DE17ACA00CEEBAC /* NIP05DomainTimelineHeaderViewTests.swift in Sources */,
+				7DC1F14072E1AA602A17CC47 /* NdbUseLockTests.swift in Sources */,
+				7DC1F14172E1AA602A17CC48 /* NdbIntegrationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
