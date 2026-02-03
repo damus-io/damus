@@ -69,9 +69,15 @@ extension WalletConnect {
                 }
                 
                 if nwc_state.update_state(state: .confirmed) {
-                    // notify the zaps model of an update so it can mark them as paid
-                    state.events.get_cache_data(NoteId(pzap.target.id)).zaps_model.objectWillChange.send()
                     print("NWC success confirmed")
+                    let amount = pzap.amount_msat
+                    // Resolve cache lookup off main thread
+                    let zapsModel = state.events.get_cache_data(NoteId(pzap.target.id)).zaps_model
+                    // UI updates must run on main actor
+                    Task { @MainActor in
+                        zapsModel.objectWillChange.send()
+                        ToastManager.shared.showZapSent(amount)
+                    }
                 }
                 
                 return

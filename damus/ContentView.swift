@@ -469,8 +469,8 @@ struct ContentView: View {
             }
             
             switch zap_ev.type {
-            case .failed:
-                break
+            case .failed(let error):
+                ToastManager.shared.show(error.humanReadableMessage(), style: .error)
             case .got_zap_invoice(let inv):
                 if damus_state!.settings.show_wallet_selector {
                     present_sheet(.select_wallet(invoice: inv))
