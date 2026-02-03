@@ -17,16 +17,21 @@ struct EventProfileName: View {
     @State var nip05: NIP05?
     @State var donation: Int?
     @State var purple_account: DamusPurple.Account?
+    @State var profile: Profile?
 
     let size: EventViewKind
-    
+
     init(pubkey: Pubkey, damus: DamusState, size: EventViewKind) {
         self.damus_state = damus
         self.pubkey = pubkey
         self.size = size
-        let donation = try? damus.profiles.lookup(id: pubkey)?.damus_donation
-        self._donation = State(wrappedValue: donation)
         self.purple_account = nil
+
+        // Initialize with safe defaults; async task will populate from cache
+        self._profile = State(initialValue: nil)
+        self._display_name = State(initialValue: nil)
+        self._donation = State(initialValue: nil)
+        self._nip05 = State(initialValue: nil)
     }
     
     var friend_type: FriendType? {
@@ -59,7 +64,6 @@ struct EventProfileName: View {
     }
 
     var body: some View {
-        let profile = try? damus_state.profiles.lookup(id: pubkey)
         HStack(spacing: 2) {
             switch current_display_name(profile) {
             case .one(let one):
@@ -101,7 +105,33 @@ struct EventProfileName: View {
             }
         }
         .task {
+            // Load cached profile off main thread to avoid blocking UI
+            let pubkey = self.pubkey
+            let ndb = damus_state.ndb
+
+            let cachedProfile = await withCheckedContinuation { continuation in
+                DispatchQueue.global(qos: .userInitiated).async {
+                    let profile = try? ndb.lookup_profile_and_copy(pubkey)
+                    continuation.resume(returning: profile)
+                }
+            }
+
+            // Check if view disappeared during async work
+            if Task.isCancelled { return }
+
+            if let cachedProfile {
+                self.profile = cachedProfile
+                self.display_name = Profile.displayName(profile: cachedProfile, pubkey: pubkey)
+                self.donation = cachedProfile.damus_donation
+            }
+
+            // profiles.is_validated must run on MainActor (not Sendable)
+            self.nip05 = damus_state.profiles.is_validated(pubkey)
+        }
+        .task {
             for await profile in await damus_state.nostrNetwork.profilesManager.streamProfile(pubkey: pubkey) {
+                self.profile = profile
+
                 let display_name = Profile.displayName(profile: profile, pubkey: pubkey)
                 if display_name != self.display_name {
                     self.display_name = display_name
