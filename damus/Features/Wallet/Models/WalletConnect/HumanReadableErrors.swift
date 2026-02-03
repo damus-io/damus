@@ -65,7 +65,7 @@ extension WalletConnect.WalletResponseErr {
         case .quotaExceeded:
             return .init(
                 user_visible_description: NSLocalizedString("Your transaction quota has been exceeded.", comment: "Error description for quota exceeded"),
-                tip: NSLocalizedString("Wait for the quota to reset, or configure your wallet provider to allow a higher limit.", comment: "Tip for quota exceeded"),
+                tip: NSLocalizedString("Wait for the quota to reset, or update your Nostr Wallet Connect (NWC) connection from your wallet/provider to allow a higher spending limit.", comment: "Tip for quota exceeded"),
                 technical_info: "Wallet reported a quota exceeded error. Message: \(self.message ?? "No further details provided")"
             )
         case .restricted:

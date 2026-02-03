@@ -501,12 +501,13 @@ func fetch_zapper_from_lnurl(lnurls: LNUrls, pubkey: Pubkey, lnurl: String) asyn
 /// - Parameters:
 ///   - payreq: The LNURL pay request containing callback URL and server capabilities.
 ///   - zapreq: Optional zap request event to include (for NIP-57 zaps).
+///   - zapreq_json: Optional pre-encoded zap request JSON (avoids passing NostrEvent off-main).
 ///   - msats: Amount in millisatoshis.
 ///   - zap_type: The type of zap (normal, private, anon, or non_zap).
 ///   - comment: Optional comment to include (LUD-12).
 ///   - lnurl: Optional recipient lnurl address to include in callback (NIP-57 Appendix B).
 /// - Returns: ZapInvoiceResult indicating success with invoice, rate limited, or error.
-func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, msats: Int64, zap_type: ZapType, comment: String?, lnurl: String? = nil) async -> ZapInvoiceResult {
+func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent? = nil, zapreq_json: String? = nil, msats: Int64, zap_type: ZapType, comment: String?, lnurl: String? = nil) async -> ZapInvoiceResult {
     guard var base_url = payreq.callback.flatMap({ URLComponents(string: $0) }) else {
         return .error
     }
@@ -515,7 +516,7 @@ func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, msats: In
 
     var query = [URLQueryItem(name: "amount", value: "\(msats)")]
 
-    if zappable && zap_type != .non_zap, let json = encode_json(zapreq) {
+    if zappable && zap_type != .non_zap, let json = zapreq_json ?? encode_json(zapreq) {
         print("[zap] zapreq json: \(json)")
         query.append(URLQueryItem(name: "nostr", value: json))
     }
@@ -594,18 +595,19 @@ struct ZapInvoiceFetchResult {
 /// - Parameters:
 ///   - payreq: The LNURL pay request containing callback URL and server capabilities.
 ///   - zapreq: Optional zap request event to include (for NIP-57 zaps).
+///   - zapreq_json: Optional pre-encoded zap request JSON (avoids passing NostrEvent off-main).
 ///   - msats: Amount in millisatoshis.
 ///   - zap_type: The type of zap (normal, private, anon, or non_zap).
 ///   - comment: Optional comment to include (LUD-12).
 ///   - lnurl: Optional recipient lnurl address to include in callback (NIP-57 Appendix B).
 ///   - maxRetries: Maximum number of retry attempts (default: 3).
 /// - Returns: ZapInvoiceFetchResult with the invoice (if successful) and rate limit status.
-func fetch_zap_invoice_with_retry(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, msats: Int64, zap_type: ZapType, comment: String?, lnurl: String? = nil, maxRetries: Int = 3) async -> ZapInvoiceFetchResult {
+func fetch_zap_invoice_with_retry(_ payreq: LNUrlPayRequest, zapreq: NostrEvent? = nil, zapreq_json: String? = nil, msats: Int64, zap_type: ZapType, comment: String?, lnurl: String? = nil, maxRetries: Int = 3) async -> ZapInvoiceFetchResult {
     var invoice: String? = nil
     var wasRateLimited = false
 
     for attempt in 0..<maxRetries {
-        let result = await fetch_zap_invoice(payreq, zapreq: zapreq, msats: msats, zap_type: zap_type, comment: comment, lnurl: lnurl)
+        let result = await fetch_zap_invoice(payreq, zapreq: zapreq, zapreq_json: zapreq_json, msats: msats, zap_type: zap_type, comment: comment, lnurl: lnurl)
 
         switch result {
         case .success(let inv):

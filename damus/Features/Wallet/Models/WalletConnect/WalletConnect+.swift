@@ -54,6 +54,21 @@ extension WalletConnect {
         return ev
     }
 
+    /// Handles a successful NWC payment response by confirming the pending zap state.
+    ///
+    /// This function finds the pending zap matching the response's request ID and transitions
+    /// its NWC state from `.postbox_pending` to `.confirmed`. It then spawns a MainActor task
+    /// to update the UI:
+    ///
+    /// - Calls `events.get_cache_data(NoteId(...)).zaps_model` to get the zaps model
+    /// - Calls `zapsModel.objectWillChange.send()` to trigger SwiftUI view updates
+    /// - Calls `ToastManager.shared.showZapSent(amount)` to display success toast
+    ///
+    /// All cache and UI access runs on MainActor to avoid data races (EventCache is not thread-safe).
+    ///
+    /// - Parameters:
+    ///   - state: The DamusState containing zap caches and event caches
+    ///   - resp: The NWC wallet response confirming payment success
     static func handle_zap_success(state: DamusState, resp: WalletConnect.FullWalletResponse) {
         // find the pending zap and mark it as pending-confirmed
         for kv in state.zaps.our_zaps {
@@ -71,10 +86,11 @@ extension WalletConnect {
                 if nwc_state.update_state(state: .confirmed) {
                     print("NWC success confirmed")
                     let amount = pzap.amount_msat
-                    // Resolve cache lookup off main thread
-                    let zapsModel = state.events.get_cache_data(NoteId(pzap.target.id)).zaps_model
-                    // UI updates must run on main actor
+                    let targetId = pzap.target.id
+                    let events = state.events
+                    // All on MainActor - EventCache is not thread-safe
                     Task { @MainActor in
+                        let zapsModel = events.get_cache_data(NoteId(targetId)).zaps_model
                         zapsModel.objectWillChange.send()
                         ToastManager.shared.showZapSent(amount)
                     }
@@ -90,7 +106,7 @@ extension WalletConnect {
         // find a pending zap with the nwc request id associated with this response and remove it
         for kv in zapcache.our_zaps {
             let zaps = kv.value
-            
+
             for zap in zaps {
                 guard case .pending(let pzap) = zap,
                       case .nwc(let nwc_state) = pzap.state,
@@ -99,10 +115,26 @@ extension WalletConnect {
                 else {
                     continue
                 }
-                
+
+                // Mark as failed first so timeout task guard sees terminal state
+                nwc_state.update_state(state: .failed)
+
                 // remove the pending zap if there was an error
                 let reqid = ZapRequestId(from_pending: pzap)
                 remove_zap(reqid: reqid, zapcache: zapcache, evcache: evcache)
+
+                let errorMessage = resp.response.error?.message
+                    ?? NSLocalizedString("Zap failed", comment: "Generic error message when a zap payment fails")
+                print("[zap] NWC error: \(errorMessage)")
+
+                // All on MainActor - EventCache is not thread-safe
+                let targetId = pzap.target.id
+                Task { @MainActor in
+                    let zapsModel = evcache.get_cache_data(NoteId(targetId)).zaps_model
+                    zapsModel.objectWillChange.send()
+                    ToastManager.shared.showError(errorMessage)
+                }
+
                 return
             }
         }

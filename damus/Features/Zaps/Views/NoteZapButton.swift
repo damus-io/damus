@@ -19,6 +19,7 @@ enum ZappingError {
     case canceled
     case send_failed
     case rate_limited
+    case nwc_timeout
 
     func humanReadableMessage() -> String {
         switch self {
@@ -32,6 +33,8 @@ enum ZappingError {
                 return NSLocalizedString("Zap attempt from connected wallet failed.", comment: "Message to display when sending a zap from the user's connected wallet failed.")
             case .rate_limited:
                 return NSLocalizedString("Rate limited. Please try again later.", comment: "Message to display when zap request was rate limited by the server.")
+            case .nwc_timeout:
+                return NSLocalizedString("Wallet did not respond in time. Check your Nostr Wallet Connect (NWC) connection.", comment: "Message to display when the NWC wallet did not respond within the timeout period.")
         }
     }
 }
@@ -176,6 +179,35 @@ func initial_pending_zap_state(settings: UserSettingsStore) -> PendingZapState {
     return .external(ExtPendingZapState(state: .fetching_invoice))
 }
 
+/// Initiates a zap payment flow, handling both NWC (Nostr Wallet Connect) and external wallet flows.
+///
+/// This function creates a pending zap, fetches the Lightning invoice, and either sends via NWC
+/// or notifies for external wallet payment. For NWC flows, it spawns a detached timeout task.
+///
+/// ## NWC Timeout Handling
+///
+/// When using NWC, this function spawns a `Task { @MainActor in ... }` timeout:
+///
+/// 1. The timeout task sleeps for `timeoutSeconds` (30 seconds)
+/// 2. After waking, it checks if `pzap_state.state` is still `.postbox_pending`
+/// 3. If still pending (NWC never responded), it:
+///    - Calls `pzap_state.update_state(state: .failed)` to mark the zap as failed
+///    - Calls `remove_zap(reqid:zapcache:evcache:)` to clean up the zap and event caches
+///    - Dispatches UI updates on MainActor via `zapsModel.objectWillChange.send()` and
+///      `ToastManager.shared.showError(ZappingError.nwc_timeout.humanReadableMessage())`
+///    - Logs the timeout with `reqid.reqid` for debugging: `[zap] NWC timeout after Xs for zap_req_id`
+///
+/// The timeout task runs on the MainActor to keep cache access and state mutations thread-safe.
+/// `Task.sleep` suspends without blocking the main thread.
+///
+/// - Parameters:
+///   - damus_state: The app state containing keypair, settings, and caches
+///   - target: The zap target (profile or note)
+///   - lnurl: The recipient's Lightning address
+///   - is_custom: Whether this is a custom amount zap
+///   - comment: Optional zap comment
+///   - amount_sats: Zap amount in satoshis (uses default if nil)
+///   - zap_type: The type of zap (public, private, anonymous, non-zap)
 func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_custom: Bool, comment: String?, amount_sats: Int?, zap_type: ZapType) async {
     guard let keypair = damus_state.keypair.to_full() else {
         return
@@ -199,9 +231,11 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
     UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
     damus_state.add_zap(zap: .pending(pending_zap))
     
+    // MainActor orchestrates state; background task handles network fetch.
+    // This avoids Sendable capture issues (background task only sees value types).
     Task { @MainActor in
+        // LNURL lookup (already @MainActor)
         guard let payreq = await damus_state.lnurls.lookup_or_fetch(pubkey: target.pubkey, lnurl: lnurl) else {
-            // TODO: show error
             remove_zap(reqid: reqid, zapcache: damus_state.zaps, evcache: damus_state.events)
             let typ = ZappingEventType.failed(.bad_lnurl)
             let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
@@ -209,7 +243,18 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
             return
         }
 
-        let fetchResult = await fetch_zap_invoice_with_retry(payreq, zapreq: zapreq, msats: amount_msat, zap_type: zap_type, comment: comment, lnurl: lnurl)
+        // Pre-encode zapreq JSON on MainActor to avoid passing NostrEvent off-main
+        let zapreq_json = encode_json(zapreq)
+        let msats = amount_msat
+        let zt = zap_type
+        let cmt = comment
+        let ln = lnurl
+
+        // Network fetch in detached task (JSON decode, validation, retry backoff).
+        // Only captures value types (Strings, Int64, enum) - no Sendable issues.
+        let fetchResult = await Task.detached {
+            await fetch_zap_invoice_with_retry(payreq, zapreq_json: zapreq_json, msats: msats, zap_type: zt, comment: cmt, lnurl: ln)
+        }.value
 
         guard let inv = fetchResult.invoice else {
             let wasRateLimited = fetchResult.wasRateLimited
@@ -223,7 +268,7 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
 
         switch pending_zap_state {
         case .nwc(let nwc_state):
-            // don't both continuing, user has canceled
+            // Check if user has canceled
             if case .cancel_fetching_invoice = nwc_state.state {
                 remove_zap(reqid: reqid, zapcache: damus_state.zaps, evcache: damus_state.events)
                 let typ = ZappingEventType.failed(.canceled)
@@ -264,6 +309,31 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
                 // we don't need to trigger a ZapsDataModel update here
             }
 
+            // Timeout task on MainActor - all state and cache access is thread-safe.
+            // Task.sleep suspends without blocking the main thread.
+            let timeoutSeconds: UInt64 = 30
+            let zaps = damus_state.zaps
+            let events = damus_state.events
+            let targetId = target.id
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: timeoutSeconds * 1_000_000_000)
+
+                guard case .postbox_pending = pzap_state.state else {
+                    // Already resolved (confirmed or failed), nothing to do
+                    return
+                }
+
+                print("[zap] NWC timeout after \(timeoutSeconds)s for zap_req_id \(reqid.reqid)")
+
+                if pzap_state.update_state(state: .failed) {
+                    remove_zap(reqid: reqid, zapcache: zaps, evcache: events)
+
+                    let zapsModel = events.get_cache_data(NoteId(targetId)).zaps_model
+                    zapsModel.objectWillChange.send()
+                    ToastManager.shared.showError(ZappingError.nwc_timeout.humanReadableMessage())
+                }
+            }
+
             let ev = ZappingEvent(is_custom: is_custom, type: .sent_from_nwc, target: target)
             notify(.zapping(ev))
 
@@ -283,6 +353,37 @@ enum CancelZapErr {
     case not_nwc
 }
 
+/// Cancels a pending NWC (Nostr Wallet Connect) zap payment.
+///
+/// This function attempts to cancel an in-flight zap by:
+/// 1. Signaling cancellation to the NWC flow
+/// 2. Marking the local zap attempt as failed
+/// 3. Cleaning up caches
+///
+/// ## State Handling
+///
+/// Depending on the current NWC state:
+///
+/// - `.fetching_invoice`: Calls `nwc_state.update_state(state: .cancel_fetching_invoice)` to signal
+///   the invoice fetch should abort. The fetch code will see this and clean up.
+///
+/// - `.cancel_fetching_invoice`: Already cancelling, returns nil (no-op).
+///
+/// - `.confirmed`: Returns `.already_confirmed` - cannot cancel a confirmed payment.
+///
+/// - `.postbox_pending`: Attempts to cancel via `box.cancel_send(evid:)`, then calls
+///   `nwc_state.update_state(state: .failed)` **before** any timeout guard can check state.
+///   This ensures the timeout task in `send_zap` sees a terminal state and exits early.
+///   Finally calls `remove_zap(reqid:zapcache:evcache:)` to clean up caches.
+///
+/// - `.failed`: Already failed, just cleans up caches via `remove_zap`.
+///
+/// - Parameters:
+///   - zap: The pending zap to cancel
+///   - box: PostBox for cancelling pending network sends
+///   - zapcache: Zaps cache to remove the pending zap from
+///   - evcache: Event cache to update zap models
+/// - Returns: Error if cancellation failed, nil on success
 func cancel_zap(zap: PendingZap, box: PostBox, zapcache: Zaps, evcache: EventCache) async -> CancelZapErr? {
     guard case .nwc(let nwc_state) = zap.state else {
         return .not_nwc
@@ -308,6 +409,8 @@ func cancel_zap(zap: PendingZap, box: PostBox, zapcache: Zaps, evcache: EventCac
         if let err = await box.cancel_send(evid: nwc_req.id) {
             return .send_err(err)
         }
+        // Mark as failed first so timeout task guard sees terminal state
+        nwc_state.update_state(state: .failed)
         let reqid = ZapRequestId(from_pending: zap)
         remove_zap(reqid: reqid, zapcache: zapcache, evcache: evcache)
         
