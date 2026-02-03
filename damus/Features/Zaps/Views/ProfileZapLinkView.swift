@@ -75,12 +75,14 @@ struct ProfileZapLinkView<Content: View>: View {
             if let lud16 {
                 Button {
                     UIPasteboard.general.string = lud16
+                    ToastManager.shared.showCopied()
                 } label: {
                     Label(lud16, image: "copy2")
                 }
             } else {
                 Button {
                     UIPasteboard.general.string = lnurl
+                    ToastManager.shared.showCopied()
                 } label: {
                     Label(NSLocalizedString("Copy LNURL", comment: "Context menu option for copying a user's Lightning URL."), image: "copy")
                 }
