@@ -336,4 +336,179 @@ final class NdbUseLockTests: XCTestCase {
         startBarrier.leave()
         wait(for: [expectation], timeout: 10.0)
     }
+
+    // MARK: - Stress Tests
+    //
+    // These tests run concurrent access patterns many times to increase
+    // the probability of catching race conditions. Run with Thread Sanitizer
+    // enabled for best results: Edit Scheme → Test → Diagnostics → Thread Sanitizer
+
+    /// Stress test: runs concurrent access test 100 times to catch intermittent races.
+    func testFallbackUseLock_StressTest_100Iterations() throws {
+        for iteration in 0..<100 {
+            let lock = Ndb.FallbackUseLock()
+            lock.markNdbOpen()
+
+            let concurrentUsers = 10
+            let expectation = XCTestExpectation(description: "Iteration \(iteration)")
+            expectation.expectedFulfillmentCount = concurrentUsers
+
+            let startBarrier = DispatchGroup()
+            startBarrier.enter()
+
+            for i in 0..<concurrentUsers {
+                DispatchQueue.global(qos: .userInitiated).async {
+                    startBarrier.wait()
+                    do {
+                        _ = try lock.keepNdbOpen(during: {
+                            // Randomize work duration to vary timing
+                            Thread.sleep(forTimeInterval: Double.random(in: 0.001...0.01))
+                            return i
+                        }, maxWaitTimeout: .seconds(2))
+                        expectation.fulfill()
+                    } catch {
+                        XCTFail("Iteration \(iteration), thread \(i) failed: \(error)")
+                    }
+                }
+            }
+
+            startBarrier.leave()
+            wait(for: [expectation], timeout: 5.0)
+        }
+    }
+
+    /// Stress test for timeout racing with ndbIsAcquiring cleanup.
+    ///
+    /// This test specifically targets the fix where ndbIsAcquiring must be
+    /// cleared even when the semaphore wait throws a timeout error.
+    func testFallbackUseLock_StressTest_TimeoutRacing() throws {
+        for iteration in 0..<50 {
+            let lock = Ndb.FallbackUseLock()
+            // Don't open - force timeout scenarios
+
+            let concurrentUsers = 5
+            let expectation = XCTestExpectation(description: "Iteration \(iteration)")
+            expectation.expectedFulfillmentCount = concurrentUsers
+
+            for i in 0..<concurrentUsers {
+                DispatchQueue.global(qos: .userInitiated).async {
+                    do {
+                        _ = try lock.keepNdbOpen(during: {
+                            return i
+                        }, maxWaitTimeout: .milliseconds(50))
+                        XCTFail("Should have timed out")
+                    } catch {
+                        // Expected timeout
+                        expectation.fulfill()
+                    }
+                }
+            }
+
+            wait(for: [expectation], timeout: 3.0)
+
+            // Now open and verify lock still works (ndbIsAcquiring was properly cleared)
+            lock.markNdbOpen()
+            let result = try lock.keepNdbOpen(during: { return 42 }, maxWaitTimeout: .seconds(1))
+            XCTAssertEqual(result, 42, "Lock should work after timeout stress")
+        }
+    }
+
+    // MARK: - Race Condition Tests
+
+    /// Tests the race where timeout fires while another thread is acquiring the semaphore.
+    ///
+    /// This targets the error handling path (do/catch around waitOrThrow) where timeout
+    /// occurs after lock release but before ndbIsAcquiring is cleared.
+    func testFallbackUseLock_ContinuationTimeoutRace() throws {
+        for iteration in 0..<30 {
+            let lock = Ndb.FallbackUseLock()
+            // Don't open initially - will open mid-test to create race
+
+            let waitersStarted = DispatchSemaphore(value: 0)
+            let openNow = DispatchSemaphore(value: 0)
+            let allDone = XCTestExpectation(description: "Iteration \(iteration)")
+            allDone.expectedFulfillmentCount = 3
+
+            // Thread 1: Will timeout while waiting
+            DispatchQueue.global().async {
+                waitersStarted.signal()
+                do {
+                    _ = try lock.keepNdbOpen(during: { return 1 }, maxWaitTimeout: .milliseconds(50))
+                } catch {
+                    // Expected timeout
+                }
+                allDone.fulfill()
+            }
+
+            // Thread 2: Will also timeout or succeed depending on race
+            DispatchQueue.global().async {
+                waitersStarted.signal()
+                do {
+                    _ = try lock.keepNdbOpen(during: { return 2 }, maxWaitTimeout: .milliseconds(80))
+                } catch {
+                    // Timeout acceptable
+                }
+                allDone.fulfill()
+            }
+
+            // Wait for both waiters to start
+            waitersStarted.wait()
+            waitersStarted.wait()
+
+            // Thread 3: Open ndb at random time to create race with timeout
+            DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(Int.random(in: 20...60))) {
+                lock.markNdbOpen()
+                allDone.fulfill()
+            }
+
+            wait(for: [allDone], timeout: 2.0)
+
+            // Verify lock is still functional
+            let result = try lock.keepNdbOpen(during: { return 42 }, maxWaitTimeout: .seconds(1))
+            XCTAssertEqual(result, 42, "Lock should still work after race")
+        }
+    }
+
+    /// Tests that multiple threads timing out during acquisition are properly cleaned up.
+    ///
+    /// This verifies the NSCondition broadcast properly wakes all waiting threads
+    /// when ndbIsAcquiring is cleared.
+    func testFallbackUseLock_InterruptedWaiterCleanup() throws {
+        for iteration in 0..<20 {
+            let lock = Ndb.FallbackUseLock()
+            // Don't open - all will timeout
+
+            let concurrentWaiters = 8
+            let allTimedOut = XCTestExpectation(description: "Iteration \(iteration)")
+            allTimedOut.expectedFulfillmentCount = concurrentWaiters
+
+            let startBarrier = DispatchGroup()
+            startBarrier.enter()
+
+            for i in 0..<concurrentWaiters {
+                DispatchQueue.global(qos: .userInitiated).async {
+                    startBarrier.wait()
+
+                    do {
+                        // All use same short timeout
+                        _ = try lock.keepNdbOpen(during: {
+                            return i
+                        }, maxWaitTimeout: .milliseconds(100))
+                        XCTFail("Should have timed out")
+                    } catch {
+                        // Expected - all should timeout cleanly
+                        allTimedOut.fulfill()
+                    }
+                }
+            }
+
+            startBarrier.leave()
+            wait(for: [allTimedOut], timeout: 3.0)
+
+            // Critical: After all timeouts, lock must be usable
+            lock.markNdbOpen()
+            let result = try lock.keepNdbOpen(during: { return 99 }, maxWaitTimeout: .seconds(1))
+            XCTAssertEqual(result, 99, "Lock must work after mass timeout")
+        }
+    }
 }
