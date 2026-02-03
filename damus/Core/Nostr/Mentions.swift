@@ -122,6 +122,11 @@ struct MentionRef: TagKeys, TagConvertible, Equatable, Hashable {
         }
     }
 
+    /// Parses a tag sequence into a MentionRef, preserving relay hints.
+    ///
+    /// Per NIP-01/NIP-10, position 2 in `e`, `p`, and `a` tags contains an optional relay URL.
+    /// When present, this method creates `nevent`/`nprofile`/`naddr` variants that preserve
+    /// the relay hint for later use in event fetching.
     static func from_tag(tag: TagSequence) -> MentionRef? {
         guard tag.count >= 2 else { return nil }
 
@@ -135,23 +140,35 @@ struct MentionRef: TagKeys, TagConvertible, Equatable, Hashable {
             return nil
         }
 
+        let relayHints = tag.relayHints
+
         switch mention_type {
         case .p:
             guard let data = element.id() else { return nil }
-            return .init(nip19: .npub(Pubkey(data)))
+            let pubkey = Pubkey(data)
+            if relayHints.isEmpty {
+                return .init(nip19: .npub(pubkey))
+            }
+            return .init(nip19: .nprofile(NProfile(author: pubkey, relays: relayHints)))
         case .e:
             guard let data = element.id() else { return nil }
-            return .init(nip19: .note(NoteId(data)))
+            let noteId = NoteId(data)
+            if relayHints.isEmpty {
+                return .init(nip19: .note(noteId))
+            }
+            #if DEBUG
+            print("[relay-hints] e tag: Found \(relayHints.count) hint(s) for \(noteId.hex().prefix(8))...: \(relayHints.map { $0.absoluteString })")
+            #endif
+            return .init(nip19: .nevent(NEvent(noteid: noteId, relays: relayHints)))
         case .a:
             let str = element.string()
             let data = str.split(separator: ":")
-            if(data.count != 3) { return nil }
-            
+            guard data.count == 3 else { return nil }
             guard let pubkey = Pubkey(hex: String(data[1])) else { return nil }
             guard let kind = UInt32(data[0]) else { return nil }
-            
-            return .init(nip19: .naddr(NAddr(identifier: String(data[2]), author: pubkey, relays: [], kind: kind)))
-        case .r: return .init(nip19: .nrelay(element.string()))
+            return .init(nip19: .naddr(NAddr(identifier: String(data[2]), author: pubkey, relays: relayHints, kind: kind)))
+        case .r:
+            return .init(nip19: .nrelay(element.string()))
         }
     }
     

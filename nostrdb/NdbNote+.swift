@@ -32,4 +32,26 @@ extension NdbNote {
         }
         return self.parse_inner_event()
     }
+
+    /// Returns the target event ID and relay hints for a repost (kind 6) event.
+    ///
+    /// Per NIP-18, reposts MUST include an `e` tag with the reposted event's ID,
+    /// and the tag MUST include a relay URL as its third entry.
+    ///
+    /// - Returns: A tuple of (noteId, relayHints) if this is a repost with a valid e tag, nil otherwise.
+    func repostTarget() -> (noteId: NoteId, relayHints: [RelayURL])? {
+        guard self.known_kind == .boost else { return nil }
+
+        for tag in self.tags {
+            guard tag.count >= 2 else { continue }
+            guard tag[0].matches_char("e") else { continue }
+            guard let noteIdData = tag[1].id() else { continue }
+
+            let noteId = NoteId(noteIdData)
+            let relayHints = tag.relayHints
+            return (noteId, relayHints)
+        }
+
+        return nil
+    }
 }
