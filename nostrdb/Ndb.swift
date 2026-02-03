@@ -556,13 +556,18 @@ class Ndb {
         return profile_flatbuf_to_record(ptr: profile_p, size: size, key: key)
     }
 
+    /// Converts a profile flatbuffer pointer to a ProfileRecord.
+    ///
+    /// Creates an owned copy of the buffer data to prevent use-after-free when
+    /// the LMDB transaction closes (the original pointer becomes invalid).
     private func profile_flatbuf_to_record(ptr: UnsafeMutableRawPointer, size: Int, key: UInt64) -> ProfileRecord? {
         do {
-            var buf = ByteBuffer(assumingMemoryBound: ptr, capacity: size)
+            // Copy the data to create an owned buffer. The original ptr points to
+            // LMDB memory-mapped region which becomes invalid when transaction closes.
+            var buf = ByteBuffer(memory: ptr, count: size)
             let rec: NdbProfileRecord = try getDebugCheckedRoot(byteBuffer: &buf)
             return ProfileRecord(data: rec, key: key)
         } catch {
-            // Handle error appropriately
             print("UNUSUAL: \(error)")
             return nil
         }
