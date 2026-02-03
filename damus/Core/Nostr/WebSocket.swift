@@ -29,15 +29,28 @@ enum WebSocketEvent {
 }
 
 final class WebSocket: NSObject, URLSessionWebSocketDelegate {
-    
+
     private let url: URL
     private let session: URLSession
-    private lazy var webSocketTask: URLSessionWebSocketTask = {
+
+    /// Lock protecting webSocketTask initialization and reassignment.
+    /// Required because lazy vars are not thread-safe and disconnect() reassigns the task.
+    private let taskLock = NSLock()
+    private var _webSocketTask: URLSessionWebSocketTask?
+
+    /// Thread-safe accessor for the WebSocket task. Creates task on first access.
+    private var webSocketTask: URLSessionWebSocketTask {
+        taskLock.lock()
+        defer { taskLock.unlock() }
+        if let task = _webSocketTask {
+            return task
+        }
         let task = session.webSocketTask(with: url)
         task.delegate = self
+        _webSocketTask = task
         return task
-    }()
-    
+    }
+
     let subject = PassthroughSubject<WebSocketEvent, Never>()
     
     init(_ url: URL, session: URLSession = .shared) {
@@ -53,14 +66,35 @@ final class WebSocket: NSObject, URLSessionWebSocketDelegate {
         resume()
     }
     
+    /// Disconnects the WebSocket and prepares a new task for potential reconnection.
+    ///
+    /// This method acquires `taskLock` to safely read and replace `_webSocketTask` with a
+    /// newly created `session.webSocketTask(with:)`. The new task's delegate is set to `self`
+    /// while still holding the lock. After releasing the lock, the previous task is cancelled
+    /// with the specified close code and reason.
+    ///
+    /// - Parameters:
+    ///   - closeCode: The WebSocket close code to send. Defaults to `.normalClosure`.
+    ///   - reason: Optional data explaining the disconnection reason.
+    ///
+    /// - Note: The previous task is cancelled outside the lock to avoid holding the lock
+    ///   during potentially blocking I/O operations. A new task is created immediately
+    ///   (before cancelling the old one) to ensure the socket is ready for reconnection.
+    ///
+    /// - Thread Safety: All access to `_webSocketTask` is protected by `taskLock`.
     func disconnect(closeCode: URLSessionWebSocketTask.CloseCode = .normalClosure, reason: Data? = nil) {
-        webSocketTask.cancel(with: closeCode, reason: reason)
-        
-        // reset after disconnecting to be ready for reconnecting
-        let task = session.webSocketTask(with: url)
-        task.delegate = self
-        webSocketTask = task
-        
+        // Acquire lock to safely access and reassign the task
+        taskLock.lock()
+        let currentTask = _webSocketTask
+        // Create new task for potential reconnection while still holding lock
+        let newTask = session.webSocketTask(with: url)
+        newTask.delegate = self
+        _webSocketTask = newTask
+        taskLock.unlock()
+
+        // Cancel the old task outside the lock to avoid holding it during I/O
+        currentTask?.cancel(with: closeCode, reason: reason)
+
         let reason_str: String?
         if let reason {
             reason_str = String(data: reason, encoding: .utf8)
@@ -79,7 +113,12 @@ final class WebSocket: NSObject, URLSessionWebSocketDelegate {
     }
     
     private func resume() {
-        webSocketTask.receive { [weak self] result in
+        // Capture task reference once to ensure receive handler and resume()
+        // are called on the same task. Without this, disconnect() could swap
+        // the task between the two calls, causing the new task to resume
+        // without a receive handler.
+        let task = webSocketTask
+        task.receive { [weak self] result in
             switch result {
             case .success(let message):
                 self?.subject.send(.message(message))
@@ -88,8 +127,8 @@ final class WebSocket: NSObject, URLSessionWebSocketDelegate {
                 self?.subject.send(.error(error))
             }
         }
-        
-        webSocketTask.resume()
+
+        task.resume()
     }
     
     // MARK: - URLSessionWebSocketDelegate
