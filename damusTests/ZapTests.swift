@@ -208,4 +208,297 @@ final class ZapTests: XCTestCase {
         XCTAssertNil(result.invoice)
         XCTAssertFalse(result.wasRateLimited)
     }
+
+    // MARK: - Failed Zap Integration Tests
+
+    /// Test: PendingZap can transition from fetching_invoice to failed state
+    @MainActor
+    func test_pending_zap_state_transitions_to_failed() throws {
+        let keypair = generate_new_keypair()
+
+        // Create a mock NWC URL for testing
+        guard let nwcUrl = WalletConnectURL(str: "nostr+walletconnect://\(keypair.pubkey.hex())?relay=wss://relay.test&secret=\(keypair.privkey.hex())") else {
+            XCTFail("Failed to create test WalletConnectURL")
+            return
+        }
+
+        let nwcState = NWCPendingZapState(state: .fetching_invoice, url: nwcUrl)
+
+        // Verify initial state
+        XCTAssertTrue(nwcState.state == NWCStateType.fetching_invoice)
+
+        // Transition to failed
+        let updated = nwcState.update_state(state: .failed)
+        XCTAssertTrue(updated, "State should have changed")
+        XCTAssertTrue(nwcState.state == NWCStateType.failed)
+    }
+
+    /// Test: NWC state transitions through full lifecycle to failure
+    @MainActor
+    func test_nwc_state_full_lifecycle_to_failure() throws {
+        let keypair = generate_new_keypair()
+
+        guard let nwcUrl = WalletConnectURL(str: "nostr+walletconnect://\(keypair.pubkey.hex())?relay=wss://relay.test&secret=\(keypair.privkey.hex())") else {
+            XCTFail("Failed to create test WalletConnectURL")
+            return
+        }
+
+        let nwcState = NWCPendingZapState(state: .fetching_invoice, url: nwcUrl)
+
+        // Create a mock NWC request event
+        guard let nwcEvent = NostrEvent(content: "test", keypair: keypair.to_keypair(), kind: 23194) else {
+            XCTFail("Failed to create NWC event")
+            return
+        }
+
+        // Transition: fetching_invoice -> postbox_pending
+        XCTAssertTrue(nwcState.update_state(state: .postbox_pending(nwcEvent)))
+        if case .postbox_pending(let ev) = nwcState.state {
+            XCTAssertEqual(ev.id, nwcEvent.id)
+        } else {
+            XCTFail("Expected postbox_pending state")
+        }
+
+        // Transition: postbox_pending -> failed (simulating NWC error response)
+        XCTAssertTrue(nwcState.update_state(state: .failed))
+        XCTAssertTrue(nwcState.state == NWCStateType.failed)
+    }
+
+    /// Test: NWC state does not update when already in same state
+    @MainActor
+    func test_nwc_state_no_update_when_same() throws {
+        let keypair = generate_new_keypair()
+
+        guard let nwcUrl = WalletConnectURL(str: "nostr+walletconnect://\(keypair.pubkey.hex())?relay=wss://relay.test&secret=\(keypair.privkey.hex())") else {
+            XCTFail("Failed to create test WalletConnectURL")
+            return
+        }
+
+        let nwcState = NWCPendingZapState(state: .failed, url: nwcUrl)
+
+        // Attempting to set same state should return false
+        let updated = nwcState.update_state(state: .failed)
+        XCTAssertFalse(updated, "Should not update when state is the same")
+    }
+
+    /// Test: ZapsDataModel removes pending zap correctly
+    @MainActor
+    func test_zaps_data_model_removes_pending_zap() throws {
+        let target = ZapTarget.note(id: test_note.id, author: test_note.pubkey)
+
+        // Create a pending zap using test data
+        let pendingZap = PendingZap(
+            amount_msat: 10000,
+            target: target,
+            request: .normal(test_zap_request),
+            type: .pub,
+            state: .external(.init(state: .fetching_invoice))
+        )
+
+        let zapsModel = ZapsDataModel([.pending(pendingZap)])
+        XCTAssertEqual(zapsModel.zaps.count, 1)
+
+        // Remove the pending zap
+        let reqid = ZapRequestId(from_pending: pendingZap)
+        let removed = zapsModel.remove(reqid: reqid)
+
+        XCTAssertTrue(removed)
+        XCTAssertEqual(zapsModel.zaps.count, 0)
+    }
+
+    /// Test: Zaps cache properly removes pending zap on failure
+    @MainActor
+    func test_zaps_cache_removes_pending_on_failure() throws {
+        // Use fresh DamusState to avoid shared state issues
+        let damus = generate_test_damus_state(mock_profile_info: nil)
+        let target = ZapTarget.note(id: test_note.id, author: test_note.pubkey)
+
+        // Create unique zap request using test_keypair so pubkey matches damus.our_pubkey
+        // (add_zap only adds to our_zaps if request.pubkey == our_pubkey)
+        guard let zapReqEvent = NostrEvent(content: "test zap \(UUID())", keypair: test_keypair, kind: 9734) else {
+            XCTFail("Failed to create zap request event")
+            return
+        }
+        let zapRequest = ZapRequest(ev: zapReqEvent)
+
+        // Create and add a pending zap
+        let pendingZap = PendingZap(
+            amount_msat: 10000,
+            target: target,
+            request: .normal(zapRequest),
+            type: .pub,
+            state: .external(.init(state: .fetching_invoice))
+        )
+
+        damus.zaps.add_zap(zap: .pending(pendingZap))
+        XCTAssertNotNil(damus.zaps.zaps[zapReqEvent.id])
+
+        // Simulate failure by removing the zap
+        let reqid = ZapRequestId(from_pending: pendingZap)
+        let removedZap = damus.zaps.remove_zap(reqid: reqid.reqid)
+
+        XCTAssertNotNil(removedZap)
+        XCTAssertNil(damus.zaps.zaps[zapReqEvent.id])
+    }
+
+    /// Test: ExtPendingZapState transitions work correctly
+    func test_external_pending_zap_state_transitions() throws {
+        let extState = ExtPendingZapState(state: .fetching_invoice)
+
+        XCTAssertTrue(extState.state == ExtPendingZapStateType.fetching_invoice)
+
+        extState.state = .done
+        XCTAssertTrue(extState.state == ExtPendingZapStateType.done)
+    }
+
+    /// Test: Cancellation during fetching_invoice sets cancel state
+    @MainActor
+    func test_cancel_during_fetching_invoice() throws {
+        let keypair = generate_new_keypair()
+
+        guard let nwcUrl = WalletConnectURL(str: "nostr+walletconnect://\(keypair.pubkey.hex())?relay=wss://relay.test&secret=\(keypair.privkey.hex())") else {
+            XCTFail("Failed to create test WalletConnectURL")
+            return
+        }
+
+        let nwcState = NWCPendingZapState(state: .fetching_invoice, url: nwcUrl)
+
+        // Simulate user cancellation during invoice fetch
+        XCTAssertTrue(nwcState.update_state(state: .cancel_fetching_invoice))
+        XCTAssertTrue(nwcState.state == NWCStateType.cancel_fetching_invoice)
+    }
+
+    /// Test: Zapping.is_paid returns false for failed pending zaps
+    @MainActor
+    func test_zapping_is_paid_false_for_failed() throws {
+        let keypair = generate_new_keypair()
+        let target = ZapTarget.profile(keypair.pubkey)
+
+        guard let nwcUrl = WalletConnectURL(str: "nostr+walletconnect://\(keypair.pubkey.hex())?relay=wss://relay.test&secret=\(keypair.privkey.hex())") else {
+            XCTFail("Failed to create test WalletConnectURL")
+            return
+        }
+
+        let nwcState = NWCPendingZapState(state: .failed, url: nwcUrl)
+        let pendingZap = PendingZap(
+            amount_msat: 10000,
+            target: target,
+            request: .normal(test_zap_request),
+            type: .pub,
+            state: .nwc(nwcState)
+        )
+
+        let zapping = Zapping.pending(pendingZap)
+
+        // Failed zaps should not be considered paid
+        XCTAssertFalse(zapping.is_paid)
+        XCTAssertTrue(zapping.is_pending)
+    }
+
+    /// Test: Zapping.is_paid returns true for confirmed NWC zaps
+    @MainActor
+    func test_zapping_is_paid_true_for_confirmed() throws {
+        let keypair = generate_new_keypair()
+        let target = ZapTarget.profile(keypair.pubkey)
+
+        guard let nwcUrl = WalletConnectURL(str: "nostr+walletconnect://\(keypair.pubkey.hex())?relay=wss://relay.test&secret=\(keypair.privkey.hex())") else {
+            XCTFail("Failed to create test WalletConnectURL")
+            return
+        }
+
+        let nwcState = NWCPendingZapState(state: .confirmed, url: nwcUrl)
+        let pendingZap = PendingZap(
+            amount_msat: 10000,
+            target: target,
+            request: .normal(test_zap_request),
+            type: .pub,
+            state: .nwc(nwcState)
+        )
+
+        let zapping = Zapping.pending(pendingZap)
+
+        // Confirmed NWC zaps should be considered paid
+        XCTAssertTrue(zapping.is_paid)
+        XCTAssertTrue(zapping.is_pending) // Still pending until we get the zap event
+    }
+
+    /// Test: remove_zap updates event totals when removing note zap
+    @MainActor
+    func test_remove_zap_updates_event_totals() throws {
+        // Use fresh DamusState to avoid shared state issues
+        let damus = generate_test_damus_state(mock_profile_info: nil)
+        let noteId = test_note.id
+        let target = ZapTarget.note(id: noteId, author: test_note.pubkey)
+
+        // Create unique zap request for this test
+        // Must use test_keypair so pubkey matches damus.our_pubkey for our_zaps lookup
+        guard let zapReqEvent = NostrEvent(content: "test zap \(UUID())", keypair: test_keypair, kind: 9734) else {
+            XCTFail("Failed to create zap request event")
+            return
+        }
+        let zapRequest = ZapRequest(ev: zapReqEvent)
+
+        // Create a pending zap with a specific amount
+        let amount: Int64 = 50000
+        let pendingZap = PendingZap(
+            amount_msat: amount,
+            target: target,
+            request: .normal(zapRequest),
+            type: .pub,
+            state: .external(.init(state: .fetching_invoice))
+        )
+
+        // Add the zap - this should update totals
+        damus.zaps.add_zap(zap: .pending(pendingZap))
+
+        let totalBefore = damus.zaps.event_totals[noteId] ?? 0
+
+        // Remove the zap - this should decrease totals
+        let reqid = ZapRequestId(from_pending: pendingZap)
+        _ = damus.zaps.remove_zap(reqid: reqid.reqid)
+
+        let totalAfter = damus.zaps.event_totals[noteId] ?? 0
+        XCTAssertEqual(totalAfter, totalBefore - amount)
+    }
+
+    /// Test: ZapsDataModel.confirm_nwc updates state correctly
+    @MainActor
+    func test_zaps_data_model_confirm_nwc() throws {
+        let keypair = generate_new_keypair()
+        let target = ZapTarget.profile(keypair.pubkey)
+
+        guard let nwcUrl = WalletConnectURL(str: "nostr+walletconnect://\(keypair.pubkey.hex())?relay=wss://relay.test&secret=\(keypair.privkey.hex())") else {
+            XCTFail("Failed to create test WalletConnectURL")
+            return
+        }
+
+        // Create a mock NWC event to simulate postbox_pending state
+        guard let nwcEvent = NostrEvent(content: "test", keypair: keypair.to_keypair(), kind: 23194) else {
+            XCTFail("Failed to create NWC event")
+            return
+        }
+
+        let nwcState = NWCPendingZapState(state: .postbox_pending(nwcEvent), url: nwcUrl)
+        let pendingZap = PendingZap(
+            amount_msat: 10000,
+            target: target,
+            request: .normal(test_zap_request),
+            type: .pub,
+            state: .nwc(nwcState)
+        )
+
+        let zapsModel = ZapsDataModel([.pending(pendingZap)])
+
+        // Confirm the NWC zap
+        zapsModel.confirm_nwc(reqid: test_zap_request.ev.id)
+
+        // Verify state was updated to confirmed
+        guard case .pending(let updatedPzap) = zapsModel.zaps.first,
+              case .nwc(let updatedNwcState) = updatedPzap.state else {
+            XCTFail("Expected pending zap with NWC state")
+            return
+        }
+
+        XCTAssertTrue(updatedNwcState.state == NWCStateType.confirmed)
+    }
 }
