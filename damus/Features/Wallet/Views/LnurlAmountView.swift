@@ -138,7 +138,7 @@ struct LnurlAmountView: View {
             }
             
             // Then fetch the invoice with the amount
-            guard let invoiceStr = await fetch_zap_invoice(payreq, zapreq: nil, msats: msats, zap_type: .non_zap, comment: nil) else {
+            guard let invoiceStr = await fetch_zap_invoice(payreq, zapreq: nil, msats: msats, zap_type: .non_zap, comment: nil, lnurl: lnurlString) else {
                 model.processing = false
                 model.error = NSLocalizedString("Error fetching lightning invoice", comment: "Error message when there was an error fetching a lightning invoice")
                 return
