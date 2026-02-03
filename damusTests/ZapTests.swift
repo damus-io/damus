@@ -106,4 +106,106 @@ final class ZapTests: XCTestCase {
         XCTAssertEqual(NotificationFormatter.zap_notification_body(profiles: Profiles(ndb: test_damus_state.ndb), zap: zap), "You received 1k sats from npub107jk...ncxg")
     }
 
+    // MARK: - ZappingError tests
+
+    /// Test all ZappingError cases return localized human-readable messages
+    func test_zapping_error_human_readable_messages() throws {
+        // Test each error case has a non-empty localized message
+        let errors: [ZappingError] = [
+            .fetching_invoice,
+            .bad_lnurl,
+            .canceled,
+            .send_failed,
+            .rate_limited,
+            .nwc_timeout
+        ]
+
+        for error in errors {
+            let message = error.humanReadableMessage()
+            XCTAssertFalse(message.isEmpty, "Error \(error) should have a non-empty message")
+        }
+    }
+
+    /// Test specific error message content for NWC timeout
+    func test_nwc_timeout_error_mentions_nwc() throws {
+        let error = ZappingError.nwc_timeout
+        let message = error.humanReadableMessage()
+        // Message should mention NWC so user knows to check their wallet connection
+        XCTAssertTrue(
+            message.lowercased().contains("nwc") || message.lowercased().contains("wallet"),
+            "NWC timeout message should mention NWC or wallet connection"
+        )
+    }
+
+    /// Test rate limited error message
+    func test_rate_limited_error_message() throws {
+        let error = ZappingError.rate_limited
+        let message = error.humanReadableMessage()
+        XCTAssertTrue(
+            message.lowercased().contains("rate") || message.lowercased().contains("later"),
+            "Rate limited message should indicate rate limiting or retry later"
+        )
+    }
+
+    // MARK: - ZapInvoiceResult tests
+
+    /// Test ZapInvoiceResult enum cases
+    func test_zap_invoice_result_success() throws {
+        let invoice = "lnbc100u1p55gjvwpp5test"
+        let result = ZapInvoiceResult.success(invoice)
+
+        switch result {
+        case .success(let inv):
+            XCTAssertEqual(inv, invoice)
+        case .rateLimited, .error:
+            XCTFail("Expected success case")
+        }
+    }
+
+    func test_zap_invoice_result_rate_limited() throws {
+        let result = ZapInvoiceResult.rateLimited
+
+        switch result {
+        case .rateLimited:
+            break // Expected
+        case .success, .error:
+            XCTFail("Expected rateLimited case")
+        }
+    }
+
+    func test_zap_invoice_result_error() throws {
+        let result = ZapInvoiceResult.error
+
+        switch result {
+        case .error:
+            break // Expected
+        case .success, .rateLimited:
+            XCTFail("Expected error case")
+        }
+    }
+
+    // MARK: - ZapInvoiceFetchResult tests
+
+    /// Test ZapInvoiceFetchResult struct
+    func test_zap_invoice_fetch_result_with_invoice() throws {
+        let invoice = "lnbc100u1p55gjvwpp5test"
+        let result = ZapInvoiceFetchResult(invoice: invoice, wasRateLimited: false)
+
+        XCTAssertEqual(result.invoice, invoice)
+        XCTAssertFalse(result.wasRateLimited)
+    }
+
+    func test_zap_invoice_fetch_result_rate_limited() throws {
+        let result = ZapInvoiceFetchResult(invoice: nil, wasRateLimited: true)
+
+        XCTAssertNil(result.invoice)
+        XCTAssertTrue(result.wasRateLimited)
+    }
+
+    func test_zap_invoice_fetch_result_error() throws {
+        let result = ZapInvoiceFetchResult(invoice: nil, wasRateLimited: false)
+
+        XCTAssertNil(result.invoice)
+        XCTAssertFalse(result.wasRateLimited)
+    }
 }
