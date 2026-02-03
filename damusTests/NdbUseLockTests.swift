@@ -271,4 +271,69 @@ final class NdbUseLockTests: XCTestCase {
         // Both should complete
         wait(for: [userFinished, closeCompleted], timeout: 5.0)
     }
+
+    // MARK: - iOS 18+ UseLock Tests
+
+    /// Tests that UseLock correctly handles a simple open/use/close cycle.
+    ///
+    /// Verifies that `markNdbOpen` enables access, `keepNdbOpen` returns the
+    /// closure's value, and `waitUntilNdbCanClose` invokes the closer callback.
+    @available(iOS 18.0, *)
+    func testUseLock_BasicOpenUseClose() throws {
+        let lock = Ndb.UseLock()
+
+        lock.markNdbOpen()
+
+        let result = try lock.keepNdbOpen(during: {
+            return 42
+        }, maxWaitTimeout: .milliseconds(500))
+
+        XCTAssertEqual(result, 42)
+
+        var closeCalled = false
+        try lock.waitUntilNdbCanClose(thenClose: {
+            closeCalled = true
+            return false
+        }, maxTimeout: .milliseconds(500))
+
+        XCTAssertTrue(closeCalled)
+    }
+
+    /// Tests that multiple concurrent `keepNdbOpen` calls complete without deadlock.
+    ///
+    /// Spawns 10 concurrent threads that each call `keepNdbOpen` simultaneously,
+    /// verifying all return their expected values and no thread stalls indefinitely.
+    @available(iOS 18.0, *)
+    func testUseLock_ConcurrentAccess_NoDeadlock() throws {
+        let lock = Ndb.UseLock()
+        lock.markNdbOpen()
+
+        let concurrentUsers = 10
+        let expectation = XCTestExpectation(description: "All users complete")
+        expectation.expectedFulfillmentCount = concurrentUsers
+
+        let startBarrier = DispatchGroup()
+        startBarrier.enter()
+
+        for i in 0..<concurrentUsers {
+            DispatchQueue.global(qos: .userInitiated).async {
+                startBarrier.wait()
+
+                do {
+                    let result = try lock.keepNdbOpen(during: {
+                        Thread.sleep(forTimeInterval: 0.01)
+                        return i
+                    }, maxWaitTimeout: .seconds(5))
+
+                    XCTAssertEqual(result, i)
+                    expectation.fulfill()
+                } catch {
+                    XCTFail("Thread \(i) failed with error: \(error)")
+                }
+            }
+        }
+
+        startBarrier.leave()
+        wait(for: [expectation], timeout: 10.0)
+    }
 }
