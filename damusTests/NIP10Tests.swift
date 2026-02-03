@@ -147,6 +147,12 @@ final class NIP10Tests: XCTestCase {
         XCTAssertEqual(tr.is_reply_to_root, true)
     }
 
+    /// Tests NIP-10 relay hint behavior and pubkey propagation in reply tags.
+    ///
+    /// Validates that when building a reply:
+    /// - Root "e" tag lacks pubkey (since parent's e-tag didn't include one)
+    /// - Reply "e" tag includes the `replying_to.pubkey` at position 4
+    /// - Corresponding "p" tags are present for propagated pubkeys
     func test_marker_reply() async {
         let note_json = """
         {
@@ -184,10 +190,13 @@ final class NIP10Tests: XCTestCase {
         let reply = await build_post(state: test_damus_state, post: .init(string: "hello"), action: .replying_to(note), uploadedMedias: [], pubkeys: [pk] + note.referenced_pubkeys.map({pk in pk}))
         let root_hex = "00152d2945459fb394fed2ea95af879c903c4ec42d96327a739fa27c023f20e0"
 
+        // NIP-10 format: ["e", <event-id>, <relay-url>, <marker>, <pubkey>]
+        // Root tag doesn't have pubkey since parent event's e-tag didn't include one
+        // Reply tag includes replying_to.pubkey
         XCTAssertEqual(reply.tags,
             [
                 ["e", root_hex, "wss://nostr.mutinywallet.com/", "root"],
-                ["e", replying_to_hex, "", "reply"],
+                ["e", replying_to_hex, "", "reply", "5b0183ab6c3e322bf4d41c6b3aef98562a144847b7499543727c5539a114563e"],
                 ["p", "5b0183ab6c3e322bf4d41c6b3aef98562a144847b7499543727c5539a114563e"],
                 ["p", "6e75f7972397ca3295e0f4ca0fbc6eb9cc79be85bafdd56bd378220ca8eee74e"],
             ])
@@ -252,6 +261,177 @@ final class NIP10Tests: XCTestCase {
         self.measure {
             // Put the code you want to measure the time of here.
         }
+    }
+
+    // MARK: - Relay Hints Tests
+
+    /// Tests that NoteRef correctly parses pubkey from position 4 of e-tags per NIP-10.
+    func test_noteref_parses_pubkey_from_etag() {
+        // NIP-10 format: ["e", <event-id>, <relay-url>, <marker>, <pubkey>]
+        let eventIdHex = "a32d70d331f4bea7a859ac71d85a9b4e0c2d1fa9aaf7237a17f85a6227f52fdb"
+        let pubkeyHex = "f7dac46aa270f7287606a22beb4d7725573afa0e028cdfac39a4cb2331537f66"
+        let relayUrl = "wss://relay.example.com"
+
+        let tags = [
+            ["e", eventIdHex, relayUrl, "reply", pubkeyHex]
+        ]
+
+        let note = NdbNote(content: "test", keypair: test_keypair, kind: 1, tags: tags)!
+        let noteRefs = Array(note.referenced_noterefs)
+
+        XCTAssertEqual(noteRefs.count, 1)
+
+        let noteRef = noteRefs.first!
+        XCTAssertEqual(noteRef.note_id.hex(), eventIdHex)
+        XCTAssertEqual(noteRef.relay, relayUrl)
+        XCTAssertEqual(noteRef.marker, .reply)
+        XCTAssertEqual(noteRef.pubkey?.hex(), pubkeyHex)
+    }
+
+    /// Tests that NoteRef handles e-tags without pubkey (backwards compatibility).
+    func test_noteref_parses_without_pubkey() {
+        let eventIdHex = "a32d70d331f4bea7a859ac71d85a9b4e0c2d1fa9aaf7237a17f85a6227f52fdb"
+        let relayUrl = "wss://relay.example.com"
+
+        let tags = [
+            ["e", eventIdHex, relayUrl, "root"]
+        ]
+
+        let note = NdbNote(content: "test", keypair: test_keypair, kind: 1, tags: tags)!
+        let noteRefs = Array(note.referenced_noterefs)
+
+        XCTAssertEqual(noteRefs.count, 1)
+
+        let noteRef = noteRefs.first!
+        XCTAssertEqual(noteRef.note_id.hex(), eventIdHex)
+        XCTAssertEqual(noteRef.relay, relayUrl)
+        XCTAssertEqual(noteRef.marker, .root)
+        XCTAssertNil(noteRef.pubkey)
+    }
+
+    /// Tests that NoteRef.tag includes pubkey when present.
+    func test_noteref_tag_includes_pubkey() {
+        let noteId = NoteId(hex: "a32d70d331f4bea7a859ac71d85a9b4e0c2d1fa9aaf7237a17f85a6227f52fdb")!
+        let pubkey = Pubkey(hex: "f7dac46aa270f7287606a22beb4d7725573afa0e028cdfac39a4cb2331537f66")!
+        let relayUrl = "wss://relay.example.com"
+
+        let noteRef = NoteRef(note_id: noteId, relay: relayUrl, marker: .reply, pubkey: pubkey)
+        let tag = noteRef.tag
+
+        XCTAssertEqual(tag.count, 5)
+        XCTAssertEqual(tag[0], "e")
+        XCTAssertEqual(tag[1], noteId.hex())
+        XCTAssertEqual(tag[2], relayUrl)
+        XCTAssertEqual(tag[3], "reply")
+        XCTAssertEqual(tag[4], pubkey.hex())
+    }
+
+    /// Tests that NoteRef.tag omits pubkey when nil.
+    func test_noteref_tag_omits_pubkey_when_nil() {
+        let noteId = NoteId(hex: "a32d70d331f4bea7a859ac71d85a9b4e0c2d1fa9aaf7237a17f85a6227f52fdb")!
+        let relayUrl = "wss://relay.example.com"
+
+        let noteRef = NoteRef(note_id: noteId, relay: relayUrl, marker: .root, pubkey: nil)
+        let tag = noteRef.tag
+
+        XCTAssertEqual(tag.count, 4)
+        XCTAssertEqual(tag[0], "e")
+        XCTAssertEqual(tag[1], noteId.hex())
+        XCTAssertEqual(tag[2], relayUrl)
+        XCTAssertEqual(tag[3], "root")
+    }
+
+    /// Tests nip10_reply_tags includes pubkey when replying directly to a note.
+    func test_nip10_reply_tags_direct_reply_includes_pubkey() {
+        let parentNote = NostrEvent(
+            content: "parent note",
+            keypair: test_keypair,
+            kind: 1,
+            tags: []
+        )!
+
+        let relayUrl = RelayURL("wss://relay.example.com")
+
+        let tags = nip10_reply_tags(replying_to: parentNote, keypair: test_keypair, relayURL: relayUrl)
+
+        XCTAssertEqual(tags.count, 1)
+        let rootTag = tags[0]
+
+        // Should be: ["e", <id>, <relay>, "root", <pubkey>]
+        XCTAssertEqual(rootTag.count, 5)
+        XCTAssertEqual(rootTag[0], "e")
+        XCTAssertEqual(rootTag[1], parentNote.id.hex())
+        XCTAssertEqual(rootTag[2], "wss://relay.example.com")
+        XCTAssertEqual(rootTag[3], "root")
+        XCTAssertEqual(rootTag[4], parentNote.pubkey.hex())
+    }
+
+    /// Tests nip10_reply_tags preserves root pubkey from parent's e-tag.
+    func test_nip10_reply_tags_preserves_root_pubkey() {
+        let rootId = "a32d70d331f4bea7a859ac71d85a9b4e0c2d1fa9aaf7237a17f85a6227f52fdb"
+        let rootPubkey = "f7dac46aa270f7287606a22beb4d7725573afa0e028cdfac39a4cb2331537f66"
+
+        // Parent note is a reply to some root
+        let parentNote = NdbNote(
+            content: "reply to root",
+            keypair: test_keypair,
+            kind: 1,
+            tags: [
+                ["e", rootId, "wss://root-relay.com", "root", rootPubkey]
+            ]
+        )!
+
+        let relayUrl = RelayURL("wss://reply-relay.com")
+        let tags = nip10_reply_tags(replying_to: parentNote, keypair: test_keypair, relayURL: relayUrl)
+
+        XCTAssertEqual(tags.count, 2)
+
+        // Root tag should preserve pubkey from parent's e-tag
+        let rootTag = tags[0]
+        XCTAssertEqual(rootTag.count, 5)
+        XCTAssertEqual(rootTag[0], "e")
+        XCTAssertEqual(rootTag[1], rootId)
+        XCTAssertEqual(rootTag[3], "root")
+        XCTAssertEqual(rootTag[4], rootPubkey)
+
+        // Reply tag should include parent's pubkey
+        let replyTag = tags[1]
+        XCTAssertEqual(replyTag.count, 5)
+        XCTAssertEqual(replyTag[0], "e")
+        XCTAssertEqual(replyTag[1], parentNote.id.hex())
+        XCTAssertEqual(replyTag[3], "reply")
+        XCTAssertEqual(replyTag[4], parentNote.pubkey.hex())
+    }
+
+    /// Tests relay hint extraction from e-tags.
+    func test_relay_hint_extraction_from_etag() {
+        let eventIdHex = "a32d70d331f4bea7a859ac71d85a9b4e0c2d1fa9aaf7237a17f85a6227f52fdb"
+        let relayUrl = "wss://relay.example.com"
+
+        let tags = [
+            ["e", eventIdHex, relayUrl, "reply"]
+        ]
+
+        let note = NdbNote(content: "test", keypair: test_keypair, kind: 1, tags: tags)!
+        let noteRefs = Array(note.referenced_noterefs)
+
+        XCTAssertEqual(noteRefs.count, 1)
+        XCTAssertEqual(noteRefs.first?.relay, relayUrl)
+    }
+
+    /// Tests that empty relay hint is preserved as empty string.
+    func test_empty_relay_hint_preserved() {
+        let eventIdHex = "a32d70d331f4bea7a859ac71d85a9b4e0c2d1fa9aaf7237a17f85a6227f52fdb"
+
+        let tags = [
+            ["e", eventIdHex, "", "reply"]
+        ]
+
+        let note = NdbNote(content: "test", keypair: test_keypair, kind: 1, tags: tags)!
+        let noteRefs = Array(note.referenced_noterefs)
+
+        XCTAssertEqual(noteRefs.count, 1)
+        XCTAssertEqual(noteRefs.first?.relay, "")
     }
 
 }

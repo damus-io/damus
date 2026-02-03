@@ -20,12 +20,22 @@ struct DamusURLHandler {
     /// - Parameters:
     ///   - damus_state: The Damus state. May be mutated as part of this function
     ///   - url: The URL to be opened
-    /// - Returns: A view to be shown to the user
+    /// Computes the UI action to perform for an incoming URL and returns the corresponding view or sheet action.
+    /// - Parameters:
+    ///   - damus_state: The app state used for constructing models, performing network lookups, opening wallet connections, and handling Purple URLs. This state may be mutated (for example, when initiating a wallet connection or delegating to the Purple handler).
+    ///   - url: The incoming URL to parse and handle.
+    /// - Returns: A `ContentView.ViewOpenAction` that represents the action to take for the URL — typically a route to a specific view (profile, thread, search, wallet, script, loadable event), a sheet (error or wallet selection), or an external URL action if applicable. If the URL cannot be parsed, the returned action is an error sheet describing the failure.
     static func handle_opening_url_and_compute_view_action(damus_state: DamusState, url: URL) async -> ContentView.ViewOpenAction {
         let parsed_url_info = parse_url(url: url)
         
         switch parsed_url_info {
         case .profile(let pubkey):
+            return .route(.ProfileByKey(pubkey: pubkey))
+        case .profile_reference(let pubkey, let relays):
+            guard !relays.isEmpty else { return .route(.ProfileByKey(pubkey: pubkey)) }
+            Task {
+                let _ = await damus_state.nostrNetwork.reader.findEvent(query: .profile(pubkey: pubkey, find_from: relays))
+            }
             return .route(.ProfileByKey(pubkey: pubkey))
         case .filter(let nostrFilter):
             let search = SearchModel(state: damus_state, search: nostrFilter)
@@ -67,7 +77,11 @@ struct DamusURLHandler {
     /// This function does not cause any mutations on the app, or any side-effects.
     ///
     /// - Parameter url: The URL to be parsed
-    /// - Returns: Structured information about the contents inside the URL. Returns `nil` if URL is not compatible, invalid, or could not be parsed for some reason.
+    /// Interprets a URL as a Damus/nostr resource and produces the corresponding ParsedURLInfo.
+    /// 
+    /// Recognizes Damus purple links, WalletConnect URLs, Bech32 nevent/nprofile forms (including relay hints),
+    /// and decoded nostr URIs for refs (pubkey, event, naddr, hashtag), filters, scripts, and invoices.
+    /// - Returns: A `ParsedURLInfo` describing the interpreted resource, or `nil` if the URL cannot be interpreted.
     static func parse_url(url: URL) -> ParsedURLInfo? {
         if let purple_url = DamusPurpleURL(url: url) {
             return .purple(purple_url)
@@ -76,7 +90,26 @@ struct DamusURLHandler {
         if let nwc = WalletConnectURL(str: url.absoluteString) {
             return .wallet_connect(nwc)
         }
-        
+
+        // Parse nevent/nprofile directly since decode_nostr_uri discards relay hints
+        let uri = remove_nostr_uri_prefix(url.absoluteString)
+        if uri.hasPrefix("nevent"), case .nevent(let nevent) = Bech32Object.parse(uri) {
+            #if DEBUG
+            if !nevent.relays.isEmpty {
+                print("[relay-hints] URL nevent: Found \(nevent.relays.count) hint(s) for \(nevent.noteid.hex().prefix(8))...: \(nevent.relays.map { $0.absoluteString })")
+            }
+            #endif
+            return .event_reference(.note_id(nevent.noteid, relays: nevent.relays))
+        }
+        if uri.hasPrefix("nprofile"), case .nprofile(let nprofile) = Bech32Object.parse(uri) {
+            #if DEBUG
+            if !nprofile.relays.isEmpty {
+                print("[relay-hints] URL nprofile: Found \(nprofile.relays.count) hint(s) for \(nprofile.author.hex().prefix(8))...: \(nprofile.relays.map { $0.absoluteString })")
+            }
+            #endif
+            return .profile_reference(nprofile.author, relays: nprofile.relays)
+        }
+
         guard let link = decode_nostr_uri(url.absoluteString) else {
             return nil
         }
@@ -87,7 +120,7 @@ struct DamusURLHandler {
             case .pubkey(let pk):
                 return .profile(pk)
             case .event(let noteid):
-                return .event_reference(.note_id(noteid))
+                return .event_reference(.note_id(noteid, relays: []))
             case .hashtag(let ht):
                 return .filter(.filter_hashtag([ht.hashtag]))
             case .param, .quote, .reference:
@@ -111,6 +144,7 @@ struct DamusURLHandler {
     
     enum ParsedURLInfo {
         case profile(Pubkey)
+        case profile_reference(Pubkey, relays: [RelayURL])
         case filter(NostrFilter)
         case event(NostrEvent)
         case event_reference(LoadableNostrEventViewModel.NoteReference)

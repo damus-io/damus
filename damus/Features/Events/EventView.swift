@@ -36,6 +36,11 @@ struct EventView: View {
             if event.known_kind == .boost {
                 if let inner_ev = event.get_inner_event(cache: damus.events) {
                     RepostedEvent(damus: damus, event: event, inner_ev: inner_ev, options: options)
+                } else if let target = event.repostTarget() {
+                    // Inner event not in cache - load using relay hints from e tag (NIP-18)
+                    EventLoaderView(damus_state: damus, event_id: target.noteId, relayHints: target.relayHints) { loaded_event in
+                        RepostedEvent(damus: damus, event: event, inner_ev: loaded_event, options: options)
+                    }
                 } else {
                     EmptyView()
                 }
