@@ -90,18 +90,31 @@ class RelayPool {
         network_monitor.start(queue: network_monitor_queue)
     }
     
+    /// Handles network path updates from NWPathMonitor.
+    ///
+    /// This method atomically captures and updates the last network status to prevent
+    /// TOCTOU races. The old status is captured at the start, before any await points,
+    /// ensuring consistent comparisons even if another update arrives concurrently.
+    ///
+    /// - Parameter path: The new network path from NWPathMonitor.
     private func pathUpdateHandler(path: NWPath) async {
-        if (path.status == .satisfied || path.status == .requiresConnection) && self.last_network_status != path.status {
+        // Atomically capture and update the status to prevent TOCTOU race.
+        // We capture the old status before any await points to ensure consistent
+        // comparison even if another pathUpdateHandler runs concurrently.
+        let oldStatus = self.last_network_status
+        self.last_network_status = path.status
+
+        // Reconnect to disconnected relays when network becomes available
+        if (path.status == .satisfied || path.status == .requiresConnection) && oldStatus != path.status {
             await self.connect_to_disconnected()
         }
-        
-        if path.status != self.last_network_status {
+
+        // Log network state changes
+        if path.status != oldStatus {
             for relay in await self.relays {
                 relay.connection.log?.add("Network state: \(path.status)")
             }
         }
-        
-        self.last_network_status = path.status
     }
     
     @MainActor
