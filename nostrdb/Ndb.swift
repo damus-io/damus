@@ -280,17 +280,45 @@ class Ndb {
     func markClosed() {
         self.closed = true
     }
-    
+
+    /// Closes the database, waiting for active transactions to complete.
+    ///
+    /// - Important: When called from the main thread, this method returns immediately
+    ///   and performs the actual close asynchronously on a background queue. The database
+    ///   may not be fully closed when this method returns in that case.
+    /// - Note: The `generation` counter is incremented under `ndbAccessLock` protection
+    ///   to ensure thread-safe access during close/reopen cycles.
+    /// - Note: The ndb instance is captured at call time to prevent destroying a
+    ///   reopened database if reopen() is called before the close work executes.
     func close() {
         guard !self.is_closed else { return }
         self.closed = true
-        try! self.ndbAccessLock.waitUntilNdbCanClose(thenClose: {
-            print("txn: CLOSING NOSTRDB")
-            ndb_destroy(self.ndb.ndb)
-            self.generation += 1
-            print("txn: NOSTRDB CLOSED")
-            return false
-        }, maxTimeout: .milliseconds(2000))
+
+        // Capture the current ndb instance to close. This prevents a race where
+        // reopen() sets self.ndb to a new instance before closeWork runs,
+        // which would cause closeWork to destroy the wrong (new) database.
+        let ndbToClose = self.ndb
+
+        let closeWork = { [weak self] in
+            guard let self else { return }
+            try! self.ndbAccessLock.waitUntilNdbCanClose(thenClose: { [weak self] in
+                print("txn: CLOSING NOSTRDB")
+                ndb_destroy(ndbToClose.ndb)
+                // generation is protected by ndbAccessLock.waitUntilNdbCanClose
+                self?.generation += 1
+                print("txn: NOSTRDB CLOSED")
+                return false
+            }, maxTimeout: .milliseconds(2000))
+        }
+
+        if Thread.isMainThread {
+            // Dispatch to background to avoid blocking main thread
+            DispatchQueue.global(qos: .userInitiated).async {
+                closeWork()
+            }
+        } else {
+            closeWork()
+        }
     }
 
     func reopen() -> Bool {
