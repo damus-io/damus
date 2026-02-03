@@ -1704,6 +1704,7 @@
 		D776BE412F232B17002DA1C9 /* EntityPreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D776BE3F2F232B17002DA1C9 /* EntityPreloader.swift */; };
 		D776BE422F232B17002DA1C9 /* EntityPreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D776BE3F2F232B17002DA1C9 /* EntityPreloader.swift */; };
 		D776BE442F23301A002DA1C9 /* EntityPreloaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D776BE432F233012002DA1C9 /* EntityPreloaderTests.swift */; };
+		D77A96BF2F3131BE00CC3246 /* RelayHintsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A96BE2F3131BE00CC3246 /* RelayHintsTests.swift */; };
 		D77BFA0B2AE3051200621634 /* ProfileActionSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77BFA0A2AE3051200621634 /* ProfileActionSheetView.swift */; };
 		D77DA2C42F19CA48000B7093 /* AsyncStreamUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77DA2C32F19CA40000B7093 /* AsyncStreamUtilities.swift */; };
 		D77DA2C52F19CA48000B7093 /* AsyncStreamUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77DA2C32F19CA40000B7093 /* AsyncStreamUtilities.swift */; };
@@ -2826,6 +2827,7 @@
 		D773BC5E2C6D538500349F0A /* CommentItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentItem.swift; sourceTree = "<group>"; };
 		D776BE3F2F232B17002DA1C9 /* EntityPreloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityPreloader.swift; sourceTree = "<group>"; };
 		D776BE432F233012002DA1C9 /* EntityPreloaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityPreloaderTests.swift; sourceTree = "<group>"; };
+		D77A96BE2F3131BE00CC3246 /* RelayHintsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayHintsTests.swift; sourceTree = "<group>"; };
 		D77BFA0A2AE3051200621634 /* ProfileActionSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileActionSheetView.swift; sourceTree = "<group>"; };
 		D77DA2C32F19CA40000B7093 /* AsyncStreamUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncStreamUtilities.swift; sourceTree = "<group>"; };
 		D77DA2C72F19D452000B7093 /* NegentropyUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NegentropyUtilities.swift; sourceTree = "<group>"; };
@@ -3873,6 +3875,7 @@
 		4CE6DEF627F7A08200C66700 /* damusTests */ = {
 			isa = PBXGroup;
 			children = (
+				D77A96BE2F3131BE00CC3246 /* RelayHintsTests.swift */,
 				D776BE432F233012002DA1C9 /* EntityPreloaderTests.swift */,
 				D77DA2CD2F1C2596000B7093 /* SubscriptionManagerNegentropyTests.swift */,
 				D74723ED2F15B0D6002DA12A /* NegentropySupportTests.swift */,
@@ -6383,6 +6386,7 @@
 				4CB883AE2976FA9300DC99E7 /* FormatTests.swift in Sources */,
 				D72A2D052AD9C1B5002AFF62 /* MockDamusState.swift in Sources */,
 				E06336AA2B75832100A88E6B /* ImageMetadataTest.swift in Sources */,
+				D77A96BF2F3131BE00CC3246 /* RelayHintsTests.swift in Sources */,
 				4C363AA02828A8DD006E126D /* LikeTests.swift in Sources */,
 				D7A0D8752D1FE67900DCBE59 /* EditPictureControlTests.swift in Sources */,
 				D776BE442F23301A002DA1C9 /* EntityPreloaderTests.swift in Sources */,
