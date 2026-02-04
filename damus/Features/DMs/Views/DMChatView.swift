@@ -243,7 +243,7 @@ struct DMChatView: View, KeyboardReadable {
         await ensureOwnDMRelayListPublished(sender: sender)
 
         // Create gift-wrapped message (one for recipient, one for sender)
-        guard let (recipientWrap, senderWrap) = NIP17.createMessage(
+        guard let (recipientWrap, senderWrap) = await NIP17.createMessage(
             content: content,
             to: pubkey,
             from: sender

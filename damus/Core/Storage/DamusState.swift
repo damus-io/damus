@@ -185,18 +185,30 @@ class DamusState: HeadlessDamusState, ObservableObject {
     /// and reprocessing stored gift wraps. Runs on a background task to avoid blocking main thread.
     func initializeNip17KeysIfNeeded() {
         guard let privkey = keypair.privkey else {
-            print("[DM-DEBUG] No private key available for NIP-17")
+            #if DEBUG
+            print("[NIP17] No private key available")
+            #endif
             return
         }
 
         Task.detached(priority: .utility) { [ndb, keypair] in
-            print("[DM-DEBUG] Our pubkey: \(keypair.pubkey.hex())")
-            print("[DM-DEBUG] Adding key to nostrdb...")
+            #if DEBUG
+            // Only show truncated pubkey in debug builds
+            let truncatedPubkey = String(keypair.pubkey.hex().prefix(8))
+            print("[NIP17] Initializing for pubkey: \(truncatedPubkey)...")
+            #endif
+
             let keyAdded = ndb.addKey(privkey)
-            print("[DM-DEBUG] addKey returned: \(keyAdded)")
+
+            #if DEBUG
+            print("[NIP17] Key registration: \(keyAdded ? "success" : "failed")")
+            #endif
+
             do {
                 let result = try ndb.processGiftWraps()
-                print("[DM-DEBUG] processGiftWraps returned: \(result)")
+
+                #if DEBUG
+                print("[NIP17] Gift wrap processing: \(result ? "initiated" : "failed")")
 
                 // Wait a moment for async processing to complete
                 try await Task.sleep(nanoseconds: 500_000_000) // 0.5s
@@ -208,9 +220,12 @@ class DamusState: HeadlessDamusState, ObservableObject {
                 let dm_chat_keys = try ndb.query(filters: [NdbFilter(from: dm_chat_filter)], maxResults: 1000)
                 let giftwrap_keys = try ndb.query(filters: [NdbFilter(from: giftwrap_filter)], maxResults: 1000)
 
-                print("[DM-DEBUG] nostrdb contains: \(dm_chat_keys.count) kind:14 rumors, \(giftwrap_keys.count) kind:1059 gift_wraps")
+                print("[NIP17] nostrdb: \(dm_chat_keys.count) rumors, \(giftwrap_keys.count) gift_wraps")
+                #endif
             } catch {
-                print("[DM-DEBUG] processGiftWraps threw error: \(error)")
+                #if DEBUG
+                print("[NIP17] Error: \(error)")
+                #endif
             }
         }
     }

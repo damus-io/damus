@@ -29,10 +29,10 @@ final class NIP17Tests: XCTestCase {
     // MARK: - Message Creation Tests
 
     /// Test that createMessage returns two gift wraps (recipient + sender)
-    func testCreateMessageReturnsTwoWraps() throws {
+    func testCreateMessageReturnsTwoWraps() async throws {
         let content = "Hello Bob!"
 
-        let result = NIP17.createMessage(
+        let result = await NIP17.createMessage(
             content: content,
             to: bob.pubkey,
             from: alice
@@ -58,8 +58,8 @@ final class NIP17Tests: XCTestCase {
     }
 
     /// Test that gift wrap uses ephemeral key (not sender's key)
-    func testGiftWrapUsesEphemeralKey() throws {
-        let result = NIP17.createMessage(
+    func testGiftWrapUsesEphemeralKey() async throws {
+        let result = await NIP17.createMessage(
             content: "Secret message",
             to: bob.pubkey,
             from: alice
@@ -73,14 +73,14 @@ final class NIP17Tests: XCTestCase {
     }
 
     /// Test that timestamp is randomized (within 2 days in past)
-    func testTimestampRandomization() throws {
+    func testTimestampRandomization() async throws {
         let now = UInt32(Date().timeIntervalSince1970)
         let twoDaysAgo = now - (2 * 24 * 60 * 60)
 
         // Create multiple messages to check randomization
         var timestamps: [UInt32] = []
         for _ in 0..<5 {
-            let result = NIP17.createMessage(
+            let result = await NIP17.createMessage(
                 content: "Test",
                 to: bob.pubkey,
                 from: alice
@@ -108,11 +108,11 @@ final class NIP17Tests: XCTestCase {
     // MARK: - Unwrap Tests
 
     /// Test full wrap/unwrap round trip
-    func testWrapUnwrapRoundTrip() throws {
+    func testWrapUnwrapRoundTrip() async throws {
         let originalContent = "Hello Bob, this is a secret message!"
 
         // Alice creates message for Bob
-        let result = NIP17.createMessage(
+        let result = await NIP17.createMessage(
             content: originalContent,
             to: bob.pubkey,
             from: alice
@@ -136,10 +136,10 @@ final class NIP17Tests: XCTestCase {
     }
 
     /// Test sender can unwrap their own self-wrap
-    func testSenderCanUnwrapSelfWrap() throws {
+    func testSenderCanUnwrapSelfWrap() async throws {
         let originalContent = "Message I sent"
 
-        let result = NIP17.createMessage(
+        let result = await NIP17.createMessage(
             content: originalContent,
             to: bob.pubkey,
             from: alice
@@ -158,9 +158,9 @@ final class NIP17Tests: XCTestCase {
     }
 
     /// Test that wrong recipient cannot unwrap
-    func testWrongRecipientCannotUnwrap() throws {
+    func testWrongRecipientCannotUnwrap() async throws {
         // Alice sends to Bob
-        let result = NIP17.createMessage(
+        let result = await NIP17.createMessage(
             content: "For Bob only",
             to: bob.pubkey,
             from: alice
