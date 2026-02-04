@@ -243,6 +243,10 @@ class HomeModel: ContactsDelegate, ObservableObject {
         switch kind {
         case .chat, .longform, .text, .highlight:
             handle_text_event(ev, context: context)
+        case .poll:
+            handle_poll_event(ev, context: context)
+        case .poll_response:
+            handle_poll_response(ev)
         case .contacts:
             handle_contact_event(ev: ev)
         case .metadata:
@@ -666,7 +670,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
     func subscribe_to_home_filters(friends fs: [Pubkey]? = nil) {
         // TODO: separate likes?
         var home_filter_kinds: [NostrKind] = [
-            .text, .longform, .boost, .highlight
+            .text, .longform, .boost, .highlight, .poll
         ]
         if !damus_state.settings.onlyzaps_mode {
             home_filter_kinds.append(.like)
@@ -881,6 +885,15 @@ class HomeModel: ContactsDelegate, ObservableObject {
         case .other:
             break
         }
+    }
+    
+    func handle_poll_event(_ ev: NostrEvent, context: SubscriptionContext) {
+        damus_state.polls.registerPollEvent(ev)
+        handle_text_event(ev, context: context)
+    }
+    
+    func handle_poll_response(_ ev: NostrEvent) {
+        damus_state.polls.registerResponseEvent(ev)
     }
     
     func got_new_dm(notifs: NewEventsBits, ev: NostrEvent) {
@@ -1335,7 +1348,6 @@ func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: 
         }
     }
 }
-
 // MARK: - Extension to bridge NIP-65 relay list structs with app-native objects
 // TODO: Do we need this??
 

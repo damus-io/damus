@@ -21,6 +21,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
     let dms: DirectMessagesModel
     let previews: PreviewCache
     let zaps: Zaps
+    let polls: PollResultsStore
     let lnurls: LNUrls
     let settings: UserSettingsStore
     let relay_filters: RelayFilters
@@ -41,7 +42,37 @@ class DamusState: HeadlessDamusState, ObservableObject {
     private(set) var nostrNetwork: NostrNetworkManager
     var snapshotManager: DatabaseSnapshotManager
 
-    init(keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, contactCards: ContactCard, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: DamusVideoCoordinator, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider, favicon_cache: FaviconCache, addNdbToRelayPool: Bool = true) {
+    init(
+        keypair: Keypair,
+        likes: EventCounter,
+        boosts: EventCounter,
+        contacts: Contacts,
+        contactCards: ContactCard,
+        mutelist_manager: MutelistManager,
+        profiles: Profiles,
+        dms: DirectMessagesModel,
+        previews: PreviewCache,
+        zaps: Zaps,
+        polls: PollResultsStore,
+        lnurls: LNUrls,
+        settings: UserSettingsStore,
+        relay_filters: RelayFilters,
+        relay_model_cache: RelayModelCache,
+        drafts: Drafts,
+        events: EventCache,
+        bookmarks: BookmarksManager,
+        replies: ReplyCounter,
+        wallet: WalletModel,
+        nav: NavigationCoordinator,
+        music: MusicController?,
+        video: DamusVideoCoordinator,
+        ndb: Ndb,
+        purple: DamusPurple? = nil,
+        quote_reposts: EventCounter,
+        emoji_provider: EmojiProvider,
+        favicon_cache: FaviconCache,
+        addNdbToRelayPool: Bool = true
+    ) {
         self.keypair = keypair
         self.likes = likes
         self.boosts = boosts
@@ -52,6 +83,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
         self.dms = dms
         self.previews = previews
         self.zaps = zaps
+        self.polls = polls
         self.lnurls = lnurls
         self.settings = settings
         self.relay_filters = relay_filters
@@ -121,6 +153,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
             dms: home.dms,
             previews: PreviewCache(),
             zaps: Zaps(our_pubkey: pubkey),
+            polls: PollResultsStore(),
             lnurls: LNUrls(),
             settings: settings,
             relay_filters: relay_filters,
@@ -194,6 +227,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
             dms: DirectMessagesModel(our_pubkey: empty_pub),
             previews: PreviewCache(),
             zaps: Zaps(our_pubkey: empty_pub),
+            polls: PollResultsStore(),
             lnurls: LNUrls(),
             settings: UserSettingsStore(),
             relay_filters: RelayFilters(our_pubkey: empty_pub),
