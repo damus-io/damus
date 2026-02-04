@@ -136,6 +136,17 @@ class NdbNote: Codable, Equatable, Hashable {
         ndb_note_kind(note.ptr)
     }
 
+    /// Returns true if this note is a rumor (unwrapped from a gift wrap)
+    var isRumor: Bool {
+        ndb_note_is_rumor(note.ptr) != 0
+    }
+
+    /// Returns the note flags (NDB_NOTE_FLAG_RUMOR, NDB_NOTE_FLAG_UNWRAPPED, etc.)
+    var flags: UInt16 {
+        guard let flagsPtr = ndb_note_flags(note.ptr) else { return 0 }
+        return flagsPtr.pointee
+    }
+
     var tags: TagsSequence {
         .init(note: self)
     }

@@ -815,7 +815,32 @@ class Ndb {
             return pks
         }
     }
-    
+
+    // MARK: Gift Wrap Support (NIP-17/NIP-59)
+
+    /// Add a private key for gift wrap decryption.
+    /// Keys are dispatched to all ingester threads for automatic unwrapping of kind 1059 events.
+    /// - Parameter privkey: The 32-byte private key to add
+    /// - Returns: true if the key was successfully added
+    func addKey(_ privkey: Privkey) -> Bool {
+        return privkey.id.withUnsafeBytes { bytes in
+            guard let ptr = bytes.baseAddress else { return false }
+            let mutablePtr = UnsafeMutablePointer(mutating: ptr.assumingMemoryBound(to: UInt8.self))
+            return ndb_add_key(ndb.ndb, mutablePtr) != 0
+        }
+    }
+
+    /// Reprocess stored gift wraps with available keys.
+    /// Call this after adding a new key to decrypt previously received gift wraps.
+    /// - Returns: true if reprocessing was initiated successfully
+    func processGiftWraps() throws -> Bool {
+        return try withNdb({
+            guard let txn = NdbTxn(ndb: self) else { return false }
+            var mutableTxn = txn.txn
+            return ndb_process_giftwraps(ndb.ndb, &mutableTxn) != 0
+        })
+    }
+
     // MARK: NdbFilter queries and subscriptions
     
     func query(filters: [NdbFilter], maxResults: Int) throws -> [NoteKey] {
