@@ -31,6 +31,10 @@ struct EventView: View {
         self.highlightTerms = highlightTerms
     }
 
+    var pollsFeatureEnabled: Bool {
+        damus.settings.enable_nip88_polls
+    }
+
     var body: some View {
         VStack {
             if event.known_kind == .boost {
@@ -54,7 +58,7 @@ struct EventView: View {
                 LongformPreview(state: damus, ev: event, options: options)
             } else if event.known_kind == .highlight {
                 HighlightView(state: damus, event: event, options: options)
-            } else if event.known_kind == .poll, let poll = PollEvent(event: event) {
+            } else if pollsFeatureEnabled, event.known_kind == .poll, let poll = PollEvent(event: event) {
                 damus.polls.registerPollEvent(event)
                 PollEventView(damus: damus, event: event, poll: poll, options: options)
             } else {

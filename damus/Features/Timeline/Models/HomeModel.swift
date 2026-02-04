@@ -101,6 +101,10 @@ class HomeModel: ContactsDelegate, ObservableObject {
     var dms: DirectMessagesModel {
         return damus_state.dms
     }
+
+    var pollsFeatureEnabled: Bool {
+        damus_state.settings.enable_nip88_polls
+    }
     
     func setup_debouncer() {
         // turn off debouncer after initial load
@@ -244,9 +248,15 @@ class HomeModel: ContactsDelegate, ObservableObject {
         case .chat, .longform, .text, .highlight:
             handle_text_event(ev, context: context)
         case .poll:
-            handle_poll_event(ev, context: context)
+            if pollsFeatureEnabled {
+                handle_poll_event(ev, context: context)
+            } else {
+                handle_text_event(ev, context: context)
+            }
         case .poll_response:
-            handle_poll_response(ev)
+            if pollsFeatureEnabled {
+                handle_poll_response(ev)
+            }
         case .contacts:
             handle_contact_event(ev: ev)
         case .metadata:
@@ -670,8 +680,11 @@ class HomeModel: ContactsDelegate, ObservableObject {
     func subscribe_to_home_filters(friends fs: [Pubkey]? = nil) {
         // TODO: separate likes?
         var home_filter_kinds: [NostrKind] = [
-            .text, .longform, .boost, .highlight, .poll
+            .text, .longform, .boost, .highlight
         ]
+        if pollsFeatureEnabled {
+            home_filter_kinds.append(.poll)
+        }
         if !damus_state.settings.onlyzaps_mode {
             home_filter_kinds.append(.like)
         }
