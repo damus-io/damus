@@ -1120,8 +1120,10 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
 /// - Returns: A NostrPost, which can then be signed into an event.
 func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], pubkeys: [Pubkey], pollDraft: PollDraft? = nil) async -> NostrPost {
     let pollsFeatureEnabled = state.settings.enable_nip88_polls
-    if pollsFeatureEnabled, let pollDraft, case .posting = action, let pollPost = build_poll_post(state: state, post: post, pollDraft: pollDraft) {
-        return pollPost
+    if pollsFeatureEnabled, let pollDraft, case .posting = action {
+        if let pollPost = await MainActor.run(body: { build_poll_post(state: state, post: post, pollDraft: pollDraft) }) {
+            return pollPost
+        }
     }
     let post = NSMutableAttributedString(attributedString: post)
     post.enumerateAttributes(in: NSRange(location: 0, length: post.length), options: []) { attributes, range, stop in
@@ -1204,6 +1206,7 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
     return NostrPost(content: content.trimmingCharacters(in: .whitespacesAndNewlines), kind: .text, tags: tags)
 }
 
+@MainActor
 func build_poll_post(state: DamusState, post: NSAttributedString, pollDraft: PollDraft) -> NostrPost? {
     let question = post.string.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !question.isEmpty else { return nil }
@@ -1247,6 +1250,7 @@ func build_poll_post(state: DamusState, post: NSAttributedString, pollDraft: Pol
     return NostrPost(content: question, kind: .poll, tags: tags)
 }
 
+@MainActor
 private func defaultPollRelayHints(state: DamusState) -> [RelayURL] {
     let relayList = state.nostrNetwork.userRelayList.getBestEffortRelayList()
     return relayList.relays.values.compactMap { item in

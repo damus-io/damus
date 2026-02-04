@@ -115,7 +115,7 @@ final class PollResultsStore: ObservableObject {
         if subscriptionTasks[poll.id] != nil { return }
         let filter = NostrFilter(kinds: [.poll_response], referenced_ids: [poll.id])
         let relays = poll.relayHints.isEmpty ? nil : poll.relayHints
-        let streamMode: NostrNetworkManager.StreamMode = .ndbAndNetworkParallel(optimizeNetworkFilter: true)
+        let streamMode: NostrNetworkManager.StreamMode = .ndbAndNetworkParallel(networkOptimization: .sinceOptimization)
 
         let task = Task { [weak self] in
             let stream = network.reader.streamIndefinitely(filters: [filter], to: relays, streamMode: streamMode)
