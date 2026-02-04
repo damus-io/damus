@@ -14,6 +14,11 @@ struct DMView: View {
     var is_ours: Bool {
         event.pubkey == damus_state.pubkey
     }
+
+    /// Whether this message uses NIP-17 (kind 14) or NIP-04 (kind 4)
+    var isNIP17: Bool {
+        event.kind == NostrKind.dm_chat.rawValue
+    }
     
     var Mention: some View {
         Group {
@@ -37,6 +42,7 @@ struct DMView: View {
     
     var DM: some View {
         HStack {
+            let _ = debugPrintDM()
             if is_ours {
                 Spacer(minLength: UIScreen.main.bounds.width * 0.2)
             }
@@ -44,7 +50,7 @@ struct DMView: View {
             let should_blur_img = should_blur_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
 
             VStack(alignment: .trailing) {
-                NoteContentView(damus_state: damus_state, event: event, blur_images: should_blur_img, size: .normal, options: dm_options)
+                NoteContentView(damus_state: damus_state, event: event, blur_images: should_blur_img, size: .normal, options: dm_options, textColor: is_ours ? .white : .primary)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding([.top, .leading, .trailing], 10)
                     .padding([.bottom], 10)
@@ -53,6 +59,15 @@ struct DMView: View {
                     )
                     .cornerRadius(8.0)
                     .tint(is_ours ? Color.white : Color.accentColor)
+
+                HStack(spacing: 4) {
+                    // Encryption indicator with label
+                    Image(systemName: isNIP17 ? "lock.shield.fill" : "lock.open.fill")
+                        .font(.caption)
+                    Text(isNIP17 ? "private" : "legacy")
+                        .font(.caption)
+                }
+                .foregroundColor(isNIP17 ? .green : .gray.opacity(0.7))
 
                 Text(format_relative_time(event.created_at))
                    .font(.footnote)
@@ -66,12 +81,16 @@ struct DMView: View {
         }
     }
     
+    private func debugPrintDM() {
+        print("[DM-DEBUG] DMView: kind=\(event.kind) content_len=\(event.content_len) content='\(event.content.prefix(50))' get_content='\(event.get_content(damus_state.keypair).prefix(50))'")
+    }
+
     var body: some View {
         VStack {
             Mention
             DM
         }
-        
+
     }
 }
 
