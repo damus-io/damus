@@ -230,6 +230,131 @@ class DamusState: HeadlessDamusState, ObservableObject {
         }
     }
 
+    /// Task handle for the DM relay subscription
+    private var dmRelaySubscriptionTask: Task<Void, Never>?
+
+    /// Subscribes to the user's own kind:10050 DM relays for receiving inbound NIP-17 messages.
+    ///
+    /// Per NIP-17, senders publish gift wraps to the recipient's 10050 relays. This function
+    /// fetches our own 10050 relay list and subscribes for kind:1059 (gift_wrap) events
+    /// on those relays so we can receive inbound DMs.
+    ///
+    /// Should be called after the network is connected.
+    func subscribeToOwnDMRelays() {
+        guard keypair.privkey != nil else {
+            #if DEBUG
+            print("[NIP17-Inbound] No private key, skipping DM relay subscription")
+            #endif
+            return
+        }
+
+        // Cancel any existing subscription task
+        dmRelaySubscriptionTask?.cancel()
+
+        dmRelaySubscriptionTask = Task { [weak self] in
+            guard let self else { return }
+
+            #if DEBUG
+            print("[NIP17-Inbound] Fetching own kind:10050 DM relay list...")
+            #endif
+
+            // Wait for network to be ready
+            await self.nostrNetwork.awaitConnection(timeout: .seconds(10))
+
+            // Fetch our own kind:10050 event
+            let dmRelays = await self.fetchOwnDMRelayList()
+
+            guard !dmRelays.isEmpty else {
+                #if DEBUG
+                print("[NIP17-Inbound] No DM relays found in 10050, will use regular relays for DMs")
+                #endif
+                return
+            }
+
+            #if DEBUG
+            print("[NIP17-Inbound] Found \(dmRelays.count) DM relays: \(dmRelays.map { $0.absoluteString })")
+            #endif
+
+            // Connect to these relays as ephemeral relays
+            await self.nostrNetwork.acquireEphemeralRelays(dmRelays)
+            let connectedRelays = await self.nostrNetwork.ensureConnected(to: dmRelays, timeout: .seconds(10))
+
+            guard !connectedRelays.isEmpty else {
+                #if DEBUG
+                print("[NIP17-Inbound] Failed to connect to any DM relays")
+                #endif
+                await self.nostrNetwork.releaseEphemeralRelays(dmRelays)
+                return
+            }
+
+            #if DEBUG
+            print("[NIP17-Inbound] Connected to \(connectedRelays.count)/\(dmRelays.count) DM relays, subscribing for gift wraps...")
+            #endif
+
+            // Subscribe for gift wraps (kind:1059) addressed to us on these relays
+            var giftwrapFilter = NostrFilter(kinds: [.gift_wrap])
+            giftwrapFilter.pubkeys = [self.keypair.pubkey]
+
+            // Stream indefinitely from these DM relays
+            // The events will be ingested into nostrdb and processed like any other gift wrap
+            for await lender in self.nostrNetwork.reader.streamIndefinitely(
+                filters: [giftwrapFilter],
+                to: connectedRelays,
+                streamMode: .ndbAndNetworkParallel(networkOptimization: .none)
+            ) {
+                // Check for cancellation
+                if Task.isCancelled {
+                    break
+                }
+
+                // The event is automatically ingested into nostrdb by the subscription
+                // nostrdb will unwrap it and make the kind:14 rumor available
+                #if DEBUG
+                lender.justUseACopy { event in
+                    print("[NIP17-Inbound] Received gift wrap id:\(event.id.hex().prefix(8)) from DM relay")
+                }
+                #endif
+
+                // Trigger gift wrap processing
+                do {
+                    let _ = try self.ndb.processGiftWraps()
+                } catch {
+                    #if DEBUG
+                    print("[NIP17-Inbound] processGiftWraps error: \(error)")
+                    #endif
+                }
+            }
+
+            // Clean up when task is cancelled
+            await self.nostrNetwork.releaseEphemeralRelays(dmRelays)
+            #if DEBUG
+            print("[NIP17-Inbound] DM relay subscription ended")
+            #endif
+        }
+    }
+
+    /// Fetches the user's own kind:10050 DM relay list
+    private func fetchOwnDMRelayList() async -> [RelayURL] {
+        let filter = NostrFilter(kinds: [.dm_relay_list], authors: [keypair.pubkey])
+
+        var latestEvent: NostrEvent? = nil
+
+        for await lender in nostrNetwork.reader.streamExistingEvents(
+            filters: [filter],
+            timeout: .seconds(5)
+        ) {
+            lender.justUseACopy { event in
+                // Keep the most recent event (replaceable event semantics)
+                if latestEvent == nil || event.created_at > latestEvent!.created_at {
+                    latestEvent = event.to_owned()
+                }
+            }
+        }
+
+        guard let event = latestEvent else { return [] }
+        return NIP17.parseDMRelayList(event: event)
+    }
+
     @MainActor
     static var empty: DamusState {
         let empty_pub: Pubkey = .empty

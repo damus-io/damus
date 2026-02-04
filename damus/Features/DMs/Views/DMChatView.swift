@@ -274,9 +274,18 @@ struct DMChatView: View, KeyboardReadable {
 
         dms.draft = ""
 
-        // Send sender's self-wrap to our relays for cross-device recovery
-        print("[DM-DEBUG] NIP-17: Sending self-wrap for recovery")
-        await damus_state.nostrNetwork.postbox.send(senderWrap)
+        // Send sender's self-wrap to our own DM relays for cross-device recovery
+        // Fetch our own 10050 relay list (should exist after ensureOwnDMRelayListPublished)
+        let senderDMRelays = await fetchDMRelayList(for: sender.pubkey)
+        if !senderDMRelays.isEmpty {
+            print("[DM-DEBUG] NIP-17: Sending self-wrap to our DM relays: \(senderDMRelays.map { $0.absoluteString })")
+            let sentTo = await damus_state.nostrNetwork.sendToEphemeralRelays(senderWrap, to: senderDMRelays)
+            print("[DM-DEBUG] NIP-17: Self-wrap sent to \(sentTo.count)/\(senderDMRelays.count) DM relays")
+        } else {
+            // Fallback: send to regular relay pool if no 10050 available
+            print("[DM-DEBUG] NIP-17: No DM relays found for self, sending to regular relays")
+            await damus_state.nostrNetwork.postbox.send(senderWrap)
+        }
 
         // Create a display event for local UI (unwrapped rumor-like event)
         // Using the original content so it shows immediately in the conversation
