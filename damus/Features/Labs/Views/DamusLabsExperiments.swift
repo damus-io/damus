@@ -13,9 +13,11 @@ struct DamusLabsExperiments: View {
     @ObservedObject var settings: UserSettingsStore
     @State var show_live_explainer: Bool = false
     @State var show_favorites_explainer: Bool = false
+    @State var show_polls_explainer: Bool = false
     
     let live_label = NSLocalizedString("Live", comment: "Label for a toggle that enables an experimental feature")
     let favorites_label = NSLocalizedString("Favorites", comment: "Label for a toggle that enables an experimental feature")
+    let polls_label = NSLocalizedString("Polls", comment: "Label for a toggle that enables an experimental feature")
     
     var body: some View {
         ScrollView {
@@ -44,6 +46,7 @@ struct DamusLabsExperiments: View {
                 
                 LabsToggleView(toggleName: live_label, systemImage: "record.circle", isOn: $settings.live, showInfo: $show_live_explainer)
                 LabsToggleView(toggleName: favorites_label, systemImage: "heart.fill", isOn: $settings.enable_favourites_feature, showInfo: $show_favorites_explainer)
+                LabsToggleView(toggleName: polls_label, systemImage: "chart.bar.fill", isOn: $settings.enable_nip88_polls, showInfo: $show_polls_explainer)
 
             }
             .padding([.trailing, .leading], 20)
@@ -66,6 +69,12 @@ struct DamusLabsExperiments: View {
                 labName: favorites_label,
                 systemImage: "heart.fill",
                 labDescription: NSLocalizedString("This will allow you to pick users to be part of your favorites list. You can also switch your profile timeline to only see posts from your favorite contacts.", comment: "Damus Labs feature explanation"))
+        }
+        .sheet(isPresented: $show_polls_explainer) {
+            LabsExplainerView(
+                labName: polls_label,
+                systemImage: "chart.bar.fill",
+                labDescription: NSLocalizedString("This enables the experimental NIP-88 polls composer and voting experience.", comment: "Damus Labs feature explanation"))
         }
     }
 }
