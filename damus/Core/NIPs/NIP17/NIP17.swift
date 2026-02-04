@@ -153,7 +153,9 @@ struct NIP17 {
     ) -> NostrEvent? {
 
         guard giftWrap.kind == NostrKind.gift_wrap.rawValue else {
+            #if DEBUG
             print("[DM-DEBUG] unwrap: not a gift_wrap (kind \(giftWrap.kind))")
+            #endif
             return nil
         }
 
@@ -169,25 +171,33 @@ struct NIP17 {
                 publicKeyB: wrapSenderPubkey
             )
         } catch {
+            #if DEBUG
             print("[DM-DEBUG] unwrap: seal decrypt FAILED: \(error)")
+            #endif
             return nil
         }
 
         // Parse seal event
         guard let seal = NostrEvent.owned_from_json(json: sealJson) else {
+            #if DEBUG
             print("[DM-DEBUG] unwrap: seal JSON parse FAILED")
+            #endif
             return nil
         }
 
         guard seal.kind == NostrKind.seal.rawValue else {
+            #if DEBUG
             print("[DM-DEBUG] unwrap: seal wrong kind \(seal.kind), expected 13")
+            #endif
             return nil
         }
 
         // SECURITY: Verify seal signature to prevent spoofed sender pubkeys
         // Without this, an attacker could forge messages appearing to come from anyone
         guard validate_event(ev: seal) == .ok else {
+            #if DEBUG
             print("[DM-DEBUG] unwrap: seal signature INVALID")
+            #endif
             return nil
         }
 
@@ -203,13 +213,17 @@ struct NIP17 {
                 publicKeyB: senderPubkey
             )
         } catch {
+            #if DEBUG
             print("[DM-DEBUG] unwrap: rumor decrypt FAILED: \(error)")
+            #endif
             return nil
         }
 
         // Parse rumor event - rumors may not have id field, so parse manually
         guard let rumor = parseRumorJson(rumorJson, senderPubkey: senderPubkey) else {
+            #if DEBUG
             print("[DM-DEBUG] unwrap: rumor JSON parse FAILED, content: \(rumorJson.prefix(200))...")
+            #endif
             return nil
         }
 
@@ -217,17 +231,23 @@ struct NIP17 {
         // Per NIP-17, the seal pubkey is the authoritative sender. If the rumor
         // contains a different pubkey, it could be an attempt to spoof the sender.
         guard rumor.pubkey == senderPubkey else {
+            #if DEBUG
             print("[DM-DEBUG] unwrap: SECURITY - rumor pubkey mismatch (rumor: \(rumor.pubkey.hex().prefix(16)), seal: \(senderPubkey.hex().prefix(16)))")
+            #endif
             return nil
         }
 
         // Rumors should be kind 14 (dm_chat) and unsigned
         guard rumor.kind == NostrKind.dm_chat.rawValue else {
+            #if DEBUG
             print("[DM-DEBUG] unwrap: rumor wrong kind \(rumor.kind), expected 14")
+            #endif
             return nil
         }
 
+        #if DEBUG
         print("[DM-DEBUG] unwrap: SUCCESS rumor from:\(rumor.pubkey.npub.prefix(16)) content:'\(rumor.content.prefix(30))'")
+        #endif
         return rumor
     }
 
@@ -382,7 +402,9 @@ struct NIP17 {
         guard let content = dict["content"] as? String,
               let kind = dict["kind"] as? Int,
               let createdAt = dict["created_at"] as? Int else {
+            #if DEBUG
             print("[DM-DEBUG] parseRumorJson: missing required fields")
+            #endif
             return nil
         }
 

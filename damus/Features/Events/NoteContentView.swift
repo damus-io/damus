@@ -64,12 +64,14 @@ struct NoteContentView: View {
             return .separated(.just_content(Undistractor.makeGibberish(text: event.get_content(damus_state.keypair))))
         }
         let artifacts = self.artifacts_model.state.artifacts ?? .separated(.just_content(event.get_content(damus_state.keypair)))
+        #if DEBUG
         // Debug logging for DM content
         if event.known_kind == .dm_chat || event.known_kind == .dm {
             if case .separated(let sep) = artifacts {
                 print("[DM-DEBUG] NoteContentView: kind=\(event.kind) charCount=\(sep.content.attributed.characters.count) content='\(String(sep.content.attributed.characters.prefix(50)))'")
             }
         }
+        #endif
         return artifacts
     }
     
@@ -185,10 +187,12 @@ struct NoteContentView: View {
     func MainContent(artifacts: NoteArtifactsSeparated) -> some View {
         let contentToRender = highlightedContent(artifacts.content)
 
+        #if DEBUG
         // Debug: log rendering path for DMs
         if event.known_kind == .dm_chat || event.known_kind == .dm {
             print("[DM-DEBUG] MainContent: size=\(size) charCount=\(artifacts.content.attributed.characters.count) truncate=\(truncate) with_padding=\(with_padding)")
         }
+        #endif
 
         return VStack(alignment: .leading) {
             if artifacts.content.attributed.characters.count != 0 {

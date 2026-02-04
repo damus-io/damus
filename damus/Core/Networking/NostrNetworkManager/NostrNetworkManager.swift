@@ -316,9 +316,11 @@ class NostrNetworkManager {
             await self?.pool.releaseEphemeralRelays(urlsToRelease)
             // Cancel retries so PostBox doesn't keep trying removed relays
             let cancelled = await self?.postbox.force_cancel_send(evid: event.id) ?? false
+            #if DEBUG
             if !cancelled {
                 print("[DM-DEBUG] sendToEphemeralRelays: No pending PostBox entry to cancel for id:\(event.id.hex().prefix(8))")
             }
+            #endif
         }
 
         return connectedRelays
