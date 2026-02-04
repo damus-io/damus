@@ -78,11 +78,12 @@ static inline int threadpool_dispatch(struct threadpool *tp, void *msg)
 
 static inline int threadpool_dispatch_all_threads(struct threadpool *tp, void *msg)
 {
-	int i, ok;
+	int i, ok, res;
 	ok = 1;
 
 	for (i = 0; i < tp->num_threads; i++) {
-		ok = ok && prot_queue_push(&tp->pool[i].inbox, msg);
+		res = prot_queue_push(&tp->pool[i].inbox, msg);
+		ok = ok && res;
 	}
 
 	return ok;

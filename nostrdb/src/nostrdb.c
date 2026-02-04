@@ -2413,7 +2413,7 @@ static int ndb_note_meta_builder_counts(struct ndb_txn *txn,
 	}
 
 	/* no entry needed */
-	if (quotes == 0 && direct_replies == 0 && thread_replies == 0 && quotes == 0 && reposts == 0) {
+	if (total_reactions == 0 && quotes == 0 && direct_replies == 0 && thread_replies == 0 && reposts == 0) {
 		return 0;
 	}
 
@@ -6194,6 +6194,8 @@ static int handle_reprocessed_giftwrap(
 		return 1;
 
 	data = malloc(note_size);
+	if (data == NULL)
+		return 0;
 	memcpy(data, giftwrap, note_size);
 	giftwrap = (struct ndb_note*)data;
 	flags = ndb_note_flags(giftwrap);
@@ -6204,8 +6206,10 @@ static int handle_reprocessed_giftwrap(
 	/* relay must be dup'd because it is assumed to be cloned */
 	if (relay != NULL) {
 		relay = strdup(relay);
-		if (relay == NULL)
+		if (relay == NULL) {
+			free(data);
 			return 0;
+		}
 	}
 	ndb_writer_note_init(&msg.note, giftwrap, note_size, relay, note_key);
 
@@ -6355,13 +6359,17 @@ static int ndb_ingest_rumor(secp256k1_context *secp,
 	*flags = *flags | NDB_NOTE_FLAG_RUMOR;
 
 	rumor_msg = malloc(rc);
+	if (rumor_msg == NULL)
+		return 0;
 	memcpy(rumor_msg, rumor, rc);
 
 	/* relay must be dup'd because it is assumed to be cloned */
 	if (relay != NULL) {
 		relay = strdup(relay);
-		if (relay == NULL)
+		if (relay == NULL) {
+			free(rumor_msg);
 			return 0;
+		}
 	}
 	return ndb_ingester_process_note(secp, rumor_msg, rc, ingester,
 					 scratch+rc, scratch_size-rc,

@@ -98,7 +98,10 @@ static inline size_t ndb_note_meta_entries_size(struct ndb_note_meta *meta)
 
 void *ndb_note_meta_data_table(struct ndb_note_meta *meta, size_t *size)
 {
-	return meta + ndb_note_meta_entries_size(meta);
+	size_t entries_size = ndb_note_meta_entries_size(meta);
+	if (size != NULL)
+		*size = entries_size;
+	return (void *)((unsigned char *)meta + sizeof(*meta) + entries_size);
 }
 
 size_t ndb_note_meta_total_size(struct ndb_note_meta *header)
@@ -339,11 +342,11 @@ enum ndb_meta_clone_result ndb_note_meta_clone_with_entry(
 		*meta = (struct ndb_note_meta*)buf;
 		*entry = (struct ndb_note_meta_entry*)(((unsigned char *)(*meta)) + offset);
 		return NDB_META_CLONE_EXISTING_ENTRY;
-	} else if (size + sizeof(*entry) > bufsize) {
+	} else if (size + sizeof(struct ndb_note_meta_entry) > bufsize) {
 		/* if we don't have an existing entry, make sure we have room to add one */
 
 		ndb_debug("note metadata is too big (%d > %d) to clone with entry\n",
-			  (int)(size + sizeof(*entry)), (int)bufsize);
+			  (int)(size + sizeof(struct ndb_note_meta_entry)), (int)bufsize);
 		/* no room. this is bad, if this happens we should fix it */
 		goto fail;
 	} else {
