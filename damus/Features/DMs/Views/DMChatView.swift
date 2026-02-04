@@ -14,6 +14,7 @@ struct DMChatView: View, KeyboardReadable {
     @ObservedObject var dms: DirectMessageModel
     @State private var showRelayWarning = false
     @State private var pendingMessageContent: String? = nil
+    @State private var isSending = false
 
     var pubkey: Pubkey {
         dms.pubkey
@@ -127,23 +128,36 @@ struct DMChatView: View, KeyboardReadable {
             HStack(spacing: 0) {
                 InputField
 
-                if !dms.draft.isEmpty {
+                if !dms.draft.isEmpty || isSending {
                     Button(
                         role: .none,
                         action: {
-                            Task { await send_message() }
+                            guard !isSending else { return }
+                            let draftContent = dms.draft
+                            dms.draft = ""  // Clear immediately for responsive feel
+                            isSending = true
+                            Task {
+                                await send_message(content: draftContent)
+                                await MainActor.run { isSending = false }
+                            }
                         }
                     ) {
-                        Label("", image: "send")
-                            .font(.title)
+                        if isSending {
+                            ProgressView()
+                                .frame(width: 24, height: 24)
+                        } else {
+                            Label("", image: "send")
+                                .font(.title)
+                        }
                     }
+                    .disabled(isSending)
                 }
             }
         }
     }
 
-    func send_message() async {
-        guard let post_blocks = parse_post_blocks(content: dms.draft)?.blocks else {
+    func send_message(content draftContent: String) async {
+        guard let post_blocks = parse_post_blocks(content: draftContent)?.blocks else {
             return
         }
         let content = post_blocks.map({ pb in pb.asString }).joined(separator: "")
@@ -287,12 +301,10 @@ struct DMChatView: View, KeyboardReadable {
             await damus_state.nostrNetwork.postbox.send(senderWrap)
         }
 
-        // Create a display event for local UI (unwrapped rumor-like event)
-        // Using the original content so it shows immediately in the conversation
-        if let displayEvent = createDisplayEvent(content: content, to: pubkey, keypair: damus_state.keypair) {
-            print("[DM-DEBUG] NIP-17: Created display event kind:\(displayEvent.kind) id:\(displayEvent.id.hex().prefix(8))")
-            handle_incoming_dm(ev: displayEvent, our_pubkey: damus_state.pubkey, dms: damus_state.dms, prev_events: NewEventsBits())
-        }
+        // Note: We don't create a local display event here because the self-wrap
+        // will be received back from our DM relays very quickly. Creating a display
+        // event with a different ID than the actual rumor causes duplicate messages.
+        // The self-wrap flow ensures the message appears in the UI with the correct ID.
 
         end_editing()
         return true
@@ -327,20 +339,6 @@ struct DMChatView: View, KeyboardReadable {
         print("[DM-DEBUG] NIP-04: Sent to relays")
 
         handle_incoming_dm(ev: dm, our_pubkey: damus_state.pubkey, dms: damus_state.dms, prev_events: NewEventsBits())
-    }
-
-    /// Creates a local display event for immediate UI feedback
-    /// Uses kind 14 (dm_chat) to match NIP-17 rumors - content is plaintext, no decryption needed
-    private func createDisplayEvent(content: String, to recipient: Pubkey, keypair: Keypair) -> NostrEvent? {
-        let tags = [["p", recipient.hex()]]
-        // Create a kind-14 event matching the rumor structure
-        // This ensures proper protocol detection and avoids decrypt errors
-        return NostrEvent(
-            content: content,
-            keypair: keypair,
-            kind: NostrKind.dm_chat.rawValue,
-            tags: tags
-        )
     }
 
     var body: some View {
