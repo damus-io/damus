@@ -39,18 +39,20 @@ struct DMChatView: View, KeyboardReadable {
             .onChange(of: dms.events.count) { _ in
                 scroll_to_end(scroller, animated: true)
             }
-
-            Footer
-                .onReceive(keyboardPublisher) { visible in
-                    guard visible else {
-                        return
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        scroll_to_end(scroller, animated: true)
-                    }
+            .onReceive(keyboardPublisher) { visible in
+                guard visible else {
+                    return
                 }
+                // Note: Simulator hardware keyboards can bypass keyboard insets; the iOS software keyboard behaves correctly.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    scroll_to_end(scroller, animated: true)
+                }
+            }
         }
-        .padding(.bottom, isTextFieldFocused ? 0 : tabHeight)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            Footer
+                .padding(.bottom, isTextFieldFocused ? 0 : tabHeight)
+        }
     }
     
     func scroll_to_end(_ scroller: ScrollViewProxy, animated: Bool = false) {
@@ -109,26 +111,11 @@ struct DMChatView: View, KeyboardReadable {
 
     var Footer: some View {
         VStack(spacing: 0) {
-            // Protocol indicator banner
-            HStack(spacing: 6) {
-                Image(systemName: willSendNIP17 ? "lock.shield.fill" : "lock.open.fill")
-                    .font(.footnote)
-                Text(willSendNIP17 ? "Private message (NIP-17)" : "Legacy encryption (NIP-04)")
-                    .font(.footnote)
-            }
-            .foregroundColor(willSendNIP17 ? .green : .secondary)
-            .padding(.vertical, 6)
-            .padding(.horizontal, 14)
-            .background(
-                Capsule()
-                    .fill(willSendNIP17 ? Color.green.opacity(0.15) : Color.secondary.opacity(0.1))
-            )
-            .padding(.top, 8)
-
             HStack(spacing: 0) {
                 InputField
 
                 if !dms.draft.isEmpty || isSending {
+                    // Keep the tap target at least 44x44 per HIG.
                     Button(
                         role: .none,
                         action: {
@@ -151,6 +138,8 @@ struct DMChatView: View, KeyboardReadable {
                         }
                     }
                     .disabled(isSending)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
                 }
             }
         }
