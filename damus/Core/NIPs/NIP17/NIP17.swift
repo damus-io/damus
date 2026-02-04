@@ -36,7 +36,8 @@ struct NIP17 {
 
     /// Creates a gift-wrapped NIP-17 direct message
     ///
-    /// Creates two gift wraps: one for recipient (to receive) and one for sender (for cross-device recovery)
+    /// Creates two gift wraps: one for recipient (to receive) and one for sender (for cross-device recovery).
+    /// Runs expensive keypair generation off the main thread.
     ///
     /// - Parameters:
     ///   - content: The message content
@@ -49,7 +50,7 @@ struct NIP17 {
         to recipient: Pubkey,
         from sender: FullKeypair,
         replyTo: NoteId? = nil
-    ) -> (recipientWrap: NostrEvent, senderWrap: NostrEvent)? {
+    ) async -> (recipientWrap: NostrEvent, senderWrap: NostrEvent)? {
 
         // Build participant tags (recipient + sender for group context)
         var tags: [[String]] = [["p", recipient.hex()]]
@@ -67,7 +68,7 @@ struct NIP17 {
         }
 
         // 2. Create seal for recipient
-        guard let recipientWrap = createGiftWrap(
+        guard let recipientWrap = await createGiftWrap(
             rumorJson: rumorJson,
             sender: sender,
             recipient: recipient
@@ -76,7 +77,7 @@ struct NIP17 {
         }
 
         // 3. Create seal for sender (self-wrap for recovery)
-        guard let senderWrap = createGiftWrap(
+        guard let senderWrap = await createGiftWrap(
             rumorJson: rumorJson,
             sender: sender,
             recipient: sender.pubkey
@@ -87,12 +88,13 @@ struct NIP17 {
         return (recipientWrap, senderWrap)
     }
 
-    /// Creates a single gift wrap for a recipient
+    /// Creates a single gift wrap for a recipient.
+    /// Generates ephemeral keypair on background thread to avoid blocking main thread.
     private static func createGiftWrap(
         rumorJson: String,
         sender: FullKeypair,
         recipient: Pubkey
-    ) -> NostrEvent? {
+    ) async -> NostrEvent? {
 
         // Encrypt rumor with NIP-44 (sender → recipient)
         guard let encryptedRumor = try? NIP44v2Encryption.encrypt(
@@ -113,8 +115,10 @@ struct NIP17 {
             return nil
         }
 
-        // Generate ephemeral keypair for gift wrap
-        let wrapKeys = generate_new_keypair()
+        // Generate ephemeral keypair on background thread (secp256k1 key generation is expensive)
+        let wrapKeys = await Task.detached(priority: .userInitiated) {
+            generate_new_keypair()
+        }.value
 
         // Encrypt seal with NIP-44 (ephemeral → recipient)
         guard let encryptedSeal = try? NIP44v2Encryption.encrypt(

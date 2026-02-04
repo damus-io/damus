@@ -820,14 +820,20 @@ class Ndb {
 
     /// Add a private key for gift wrap decryption.
     /// Keys are dispatched to all ingester threads for automatic unwrapping of kind 1059 events.
+    /// Thread-safe: uses withNdb wrapper to ensure proper synchronization.
     /// - Parameter privkey: The 32-byte private key to add
-    /// - Returns: true if the key was successfully added
+    /// - Returns: true if the key was successfully added, false if ndb is closed or addition failed
     func addKey(_ privkey: Privkey) -> Bool {
-        return privkey.id.withUnsafeBytes { bytes in
-            guard let ptr = bytes.baseAddress else { return false }
-            let mutablePtr = UnsafeMutablePointer(mutating: ptr.assumingMemoryBound(to: UInt8.self))
-            return ndb_add_key(ndb.ndb, mutablePtr) != 0
+        guard let result = try? withNdb({
+            privkey.id.withUnsafeBytes { bytes in
+                guard let ptr = bytes.baseAddress else { return false }
+                let mutablePtr = UnsafeMutablePointer(mutating: ptr.assumingMemoryBound(to: UInt8.self))
+                return ndb_add_key(ndb.ndb, mutablePtr) != 0
+            }
+        }) else {
+            return false
         }
+        return result
     }
 
     /// Reprocess stored gift wraps with available keys.
