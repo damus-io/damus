@@ -294,6 +294,17 @@ class HomeModel: ContactsDelegate, ObservableObject {
         case .gift_wrap:
             // NIP-17/NIP-59: Gift wraps are processed automatically by nostrdb
             // when ingested. The unwrapped rumors (kind 14) are streamed separately.
+            #if DEBUG
+            // Debug fallback: try Swift-side unwrap to diagnose nostrdb issues
+            if let fullKeypair = damus_state.keypair.to_full() {
+                if let rumor = NIP17.unwrap(giftWrap: ev, recipientKeypair: fullKeypair) {
+                    print("[DM-DEBUG] process_event: Swift unwrapped gift_wrap id:\(ev.id.hex().prefix(8)) -> rumor content:'\(rumor.content.prefix(30))'")
+                    handle_dm(rumor)
+                } else {
+                    print("[DM-DEBUG] process_event: Swift FAILED to unwrap gift_wrap id:\(ev.id.hex().prefix(8))")
+                }
+            }
+            #endif
             break
         case .dm_relay_list:
             break   // TODO: Handle NIP-17 DM relay preferences (kind 10050)
