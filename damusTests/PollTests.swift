@@ -26,7 +26,7 @@ final class PollTests: XCTestCase {
         XCTAssertNotNil(poll.endsAt)
     }
 
-    func testPollResultsStoreSubmitVote() {
+    func testPollResultsStoreSubmitVote() async throws {
         let pollEvent = makePollEvent(
             question: "Best season",
             optionTuples: [
@@ -49,7 +49,7 @@ final class PollTests: XCTestCase {
         let store = PollResultsStore()
         store.registerPollEvent(pollEvent)
 
-        let result = store.submitVote(for: poll, selections: ["summer"], damusState: damusState)
+        let result = await store.submitVote(for: poll, selections: ["summer"], damusState: damusState)
 
         switch result {
         case .success:

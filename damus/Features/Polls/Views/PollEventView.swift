@@ -177,15 +177,18 @@ private struct PollEventCard: View {
         isSubmitting = true
         errorMessage = nil
 
-        let result = store.submitVote(for: poll, selections: Array(selectedOptions), damusState: damusState)
-        switch result {
-        case .success:
-            selectedOptions = Set(ourSelections)
-        case .failure(let error):
-            errorMessage = errorMessage(for: error)
+        Task {
+            let result = await store.submitVote(for: poll, selections: Array(selectedOptions), damusState: damusState)
+            await MainActor.run {
+                switch result {
+                case .success:
+                    selectedOptions = Set(ourSelections)
+                case .failure(let error):
+                    errorMessage = errorMessage(for: error)
+                }
+                isSubmitting = false
+            }
         }
-
-        isSubmitting = false
     }
 
     private func summaryText() -> String {
@@ -301,4 +304,3 @@ private struct PollResultRow: View {
         }
     }
 }
-

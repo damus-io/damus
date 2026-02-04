@@ -66,12 +66,13 @@ final class PollResultsStore: ObservableObject {
     @Published private(set) var polls: [NoteId: PollState] = [:]
 
     private var pendingResponses: [NoteId: [PollResponse]] = [:]
-    private var subscriptions: [NoteId: String] = [:]
+    private var subscriptionTasks: [NoteId: Task<Void, Never>] = [:]
 
     func reset() {
         polls.removeAll()
         pendingResponses.removeAll()
-        subscriptions.removeAll()
+        subscriptionTasks.values.forEach { $0.cancel() }
+        subscriptionTasks.removeAll()
     }
 
     func registerPollEvent(_ event: NostrEvent) {
@@ -111,31 +112,27 @@ final class PollResultsStore: ObservableObject {
     }
 
     func ensureResults(for poll: PollEvent, network: NostrNetworkManager) {
-        if subscriptions[poll.id] != nil { return }
-        let subid = "poll-\(poll.id.hex())"
-        subscriptions[poll.id] = subid
-
+        if subscriptionTasks[poll.id] != nil { return }
         let filter = NostrFilter(kinds: [.poll_response], referenced_ids: [poll.id])
         let relays = poll.relayHints.isEmpty ? nil : poll.relayHints
+        let streamMode: NostrNetworkManager.StreamMode = .ndbAndNetworkParallel(optimizeNetworkFilter: true)
 
-        network.pool.subscribe_to(sub_id: subid, filters: [filter], to: relays) { [weak self] _, event in
-            guard let self else { return }
-            guard case .nostr_event(let response) = event else { return }
-
-            switch response {
-            case .event(_, let nostrEvent):
-                Task { @MainActor in
-                    self.registerResponseEvent(nostrEvent)
+        let task = Task { [weak self] in
+            let stream = network.reader.streamIndefinitely(filters: [filter], to: relays, streamMode: streamMode)
+            for await lender in stream {
+                guard let self else { break }
+                await lender.justUseACopy { event in
+                    await MainActor.run {
+                        self.registerResponseEvent(event)
+                    }
                 }
-            case .eose:
-                break
-            default:
-                break
             }
         }
+
+        subscriptionTasks[poll.id] = task
     }
 
-    func submitVote(for poll: PollEvent, selections: [String], damusState: DamusState) -> Result<Void, PollVoteError> {
+    func submitVote(for poll: PollEvent, selections: [String], damusState: DamusState) async -> Result<Void, PollVoteError> {
         guard let keypair = damusState.keypair.to_full() else { return .failure(.noKeypair) }
         guard !selections.isEmpty else { return .failure(.noSelection) }
         guard !poll.isExpired(now: Date()) else { return .failure(.pollClosed) }
@@ -147,7 +144,7 @@ final class PollResultsStore: ObservableObject {
             return .failure(.eventBuildFailed)
         }
 
-        damusState.nostrNetwork.postbox.send(event, to: poll.relayHints.isEmpty ? nil : poll.relayHints)
+        await damusState.nostrNetwork.postbox.send(event, to: poll.relayHints.isEmpty ? nil : poll.relayHints)
         registerResponseEvent(event)
         return .success(())
     }

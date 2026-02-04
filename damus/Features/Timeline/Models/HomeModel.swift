@@ -900,6 +900,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         }
     }
     
+    @MainActor
     func handle_poll_event(_ ev: NostrEvent, context: SubscriptionContext) {
         Task { @MainActor in
             damus_state.polls.registerPollEvent(ev)
@@ -907,6 +908,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         handle_text_event(ev, context: context)
     }
     
+    @MainActor
     func handle_poll_response(_ ev: NostrEvent) {
         Task { @MainActor in
             damus_state.polls.registerResponseEvent(ev)
