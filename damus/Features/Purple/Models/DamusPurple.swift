@@ -422,8 +422,8 @@ class DamusPurple: StoreObserverDelegate {
         
         struct PurpleAccountAttributes: OptionSet {
             let rawValue: Int
-            
             static let memberForMoreThanOneYear = PurpleAccountAttributes(rawValue: 1 << 0)
+            static let memberForMoreThanThreeYears = PurpleAccountAttributes(rawValue: 1 << 1)
         }
 
         func ordinal() -> String? {
@@ -440,13 +440,22 @@ class DamusPurple: StoreObserverDelegate {
         
         static func from(payload: Payload) -> Self? {
             guard let pubkey = Pubkey(hex: payload.pubkey) else { return nil }
+
+            var attributes: PurpleAccountAttributes = []
+            if payload.attributes?.member_for_more_than_one_year == true {
+                attributes.insert(.memberForMoreThanOneYear)
+            }
+            if payload.attributes?.member_for_more_than_three_years == true {
+                attributes.insert(.memberForMoreThanThreeYears)
+            }
+
             return Self(
                 pubkey: pubkey,
                 created_at: Date.init(timeIntervalSince1970: TimeInterval(payload.created_at)),
                 expiry: Date.init(timeIntervalSince1970: TimeInterval(payload.expiry)),
                 subscriber_number: Int(payload.subscriber_number),
                 active: payload.active,
-                attributes: (payload.attributes?.member_for_more_than_one_year ?? false) ? [.memberForMoreThanOneYear] : []
+                attributes: attributes
             )
         }
         
@@ -460,6 +469,8 @@ class DamusPurple: StoreObserverDelegate {
             
             struct Attributes: Codable {
                 let member_for_more_than_one_year: Bool
+                /// Optional for backward compatibility with older server responses.
+                let member_for_more_than_three_years: Bool?
             }
         }
     }
