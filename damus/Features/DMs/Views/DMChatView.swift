@@ -193,15 +193,78 @@ struct DMChatView: View, KeyboardReadable {
 
     /// Fetches the DM relay list (kind 10050) for a pubkey.
     /// Returns the most recent relay list (by created_at) to handle replaceable events correctly.
+    /// Performs a quick local lookup, then does a bounded network fetch if needed.
     private func fetchDMRelayList(for target: Pubkey) async -> [RelayURL] {
         let filter = NostrFilter(kinds: [.dm_relay_list], authors: [target])
+        print("[DM-DEBUG] DM Relay List: Checking local cache for \(target.npub)")
+        if let localEvent = await fetchLatestDMRelayListEvent(
+            filter: filter,
+            timeout: Duration.seconds(1),
+            streamMode: NostrNetworkManager.StreamMode.ndbOnly,
+            targetRelays: nil
+        ) {
+            print("[DM-DEBUG] DM Relay List: Found local kind:10050 for \(target.npub)")
+            return NIP17.parseDMRelayList(event: localEvent)
+        }
 
+        print("[DM-DEBUG] DM Relay List: Fetching from network for \(target.npub)")
+        await damus_state.nostrNetwork.awaitConnection(timeout: Duration.seconds(5))
+        let bestEffortRelays = await MainActor.run {
+            Array(damus_state.nostrNetwork.userRelayList.getBestEffortRelayList().relays.keys)
+        }
+        if !bestEffortRelays.isEmpty {
+            let connectedRelays = await damus_state.nostrNetwork.ensureConnected(to: bestEffortRelays, timeout: Duration.seconds(5))
+            print("[DM-DEBUG] DM Relay List: Connected to \(connectedRelays.count)/\(bestEffortRelays.count) best-effort relay(s)")
+        }
+        if let networkEvent = await fetchLatestDMRelayListEvent(
+            filter: filter,
+            timeout: Duration.seconds(6),
+            streamMode: NostrNetworkManager.StreamMode.ndbAndNetworkParallel(networkOptimization: nil),
+            targetRelays: bestEffortRelays
+        ) {
+            print("[DM-DEBUG] DM Relay List: Found network kind:10050 for \(target.npub)")
+            return NIP17.parseDMRelayList(event: networkEvent)
+        }
+
+        let relayHints = await fetchNIP65RelayHints(for: target)
+        if !relayHints.isEmpty {
+            print("[DM-DEBUG] DM Relay List: Trying relay hints (\(relayHints.count)) for \(target.npub)")
+            await damus_state.nostrNetwork.acquireEphemeralRelays(relayHints)
+            defer { Task { await damus_state.nostrNetwork.releaseEphemeralRelays(relayHints) } }
+
+            let connectedRelays = await damus_state.nostrNetwork.ensureConnected(to: relayHints, timeout: Duration.seconds(5))
+            let targetRelays = connectedRelays.isEmpty ? nil : connectedRelays
+            if let hintedEvent = await fetchLatestDMRelayListEvent(
+                filter: filter,
+                timeout: Duration.seconds(6),
+                streamMode: NostrNetworkManager.StreamMode.ndbAndNetworkParallel(networkOptimization: nil),
+                targetRelays: targetRelays
+            ) {
+                print("[DM-DEBUG] DM Relay List: Found hinted kind:10050 for \(target.npub)")
+                return NIP17.parseDMRelayList(event: hintedEvent)
+            }
+        }
+
+        print("[DM-DEBUG] DM Relay List: No kind:10050 found for \(target.npub)")
+        return []
+    }
+
+    /// Finds the most recent DM relay list event matching the filter within the given timeout.
+    /// Optionally limits the search to target relays.
+    private func fetchLatestDMRelayListEvent(
+        filter: NostrFilter,
+        timeout: Duration,
+        streamMode: NostrNetworkManager.StreamMode,
+        targetRelays: [RelayURL]?
+    ) async -> NostrEvent? {
         var latestEvent: NostrEvent? = nil
         var latestTimestamp: UInt32 = 0
 
         for await lender in damus_state.nostrNetwork.reader.streamExistingEvents(
             filters: [filter],
-            timeout: .seconds(3)
+            to: targetRelays,
+            timeout: timeout,
+            streamMode: streamMode
         ) {
             lender.justUseACopy { event in
                 // Keep the most recent event (kind 10050 is replaceable)
@@ -212,8 +275,62 @@ struct DMChatView: View, KeyboardReadable {
             }
         }
 
-        guard let event = latestEvent else { return [] }
-        return NIP17.parseDMRelayList(event: event)
+        if let latestEvent {
+            print("[DM-DEBUG] DM Relay List: Latest kind:10050 ts=\(latestTimestamp) mode=\(streamMode)")
+        } else {
+            print("[DM-DEBUG] DM Relay List: No events mode=\(streamMode) timeout=\(timeout)")
+        }
+        return latestEvent
+    }
+
+    /// Fetches relay hints (kind 10002) to locate a user's DM relay list.
+    private func fetchNIP65RelayHints(for target: Pubkey) async -> [RelayURL] {
+        let filter = NostrFilter(kinds: [.relay_list], authors: [target])
+        if let relayListNote = await fetchLatestNIP65RelayListEvent(
+            filter: filter,
+            timeout: Duration.seconds(6),
+            streamMode: NostrNetworkManager.StreamMode.ndbAndNetworkParallel(networkOptimization: nil)
+        ) {
+            if let relayList = try? NIP65.RelayList(event: relayListNote) {
+                let relays = Array(relayList.relays.keys)
+                print("[DM-DEBUG] DM Relay List: Found \(relays.count) relay hint(s) for \(target.npub)")
+                return relays
+            }
+        }
+
+        print("[DM-DEBUG] DM Relay List: No relay hints found for \(target.npub)")
+        return []
+    }
+
+    /// Finds the most recent NIP-65 relay list event matching the filter within the given timeout.
+    private func fetchLatestNIP65RelayListEvent(
+        filter: NostrFilter,
+        timeout: Duration,
+        streamMode: NostrNetworkManager.StreamMode
+    ) async -> NdbNote? {
+        var latestEvent: NdbNote? = nil
+        var latestTimestamp: UInt32 = 0
+
+        for await lender in damus_state.nostrNetwork.reader.streamExistingEvents(
+            filters: [filter],
+            timeout: timeout,
+            streamMode: streamMode
+        ) {
+            lender.justUseACopy { event in
+                // Keep the most recent event (kind 10002 is replaceable)
+                if event.created_at > latestTimestamp {
+                    latestTimestamp = event.created_at
+                    latestEvent = event
+                }
+            }
+        }
+
+        if latestEvent != nil {
+            print("[DM-DEBUG] DM Relay List: Latest kind:10002 ts=\(latestTimestamp) mode=\(streamMode)")
+        } else {
+            print("[DM-DEBUG] DM Relay List: No kind:10002 events mode=\(streamMode) timeout=\(timeout)")
+        }
+        return latestEvent
     }
 
     /// Ensures our own DM relay list (kind 10050) is published
