@@ -17,11 +17,19 @@ enum NostrKind: UInt32, Codable {
     case delete = 5
     case boost = 6
     case like = 7
+    // NIP-59: Gift Wrap - seal containing encrypted rumor
+    case seal = 13
+    // NIP-17: Private Direct Messages - unsigned rumor inside seal
+    case dm_chat = 14
     case chat = 42
+    // NIP-59: Gift Wrap - outer wrapper with ephemeral key
+    case gift_wrap = 1059
     case live_chat = 1311
     case mute_list = 10000
     case relay_list = 10002
     case interest_list = 10015
+    // NIP-17: Preferred relays for receiving DMs
+    case dm_relay_list = 10050
     case list_deprecated = 30000
     case draft = 31234
     case longform = 30023
