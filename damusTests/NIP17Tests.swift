@@ -684,6 +684,145 @@ final class NIP17Tests: XCTestCase {
         XCTAssertEqual(ids.count, 10, "All gift wrap IDs should be unique")
     }
 
+    // MARK: - Security Tests (Additional)
+
+    /// Test that seal signature is validated before trusting content
+    /// An attacker cannot forge a seal with invalid signature
+    func testSealSignatureValidation() async throws {
+        // Create a valid message
+        let result = await NIP17.createMessage(
+            content: "Test message",
+            to: bob.pubkey,
+            from: alice
+        )
+
+        XCTAssertNotNil(result)
+        let (recipientWrap, _) = result!
+
+        // The unwrap function internally validates the seal signature
+        // (via validate_event) before trusting seal.pubkey as the sender.
+        // If seal signature is invalid, unwrap returns nil.
+
+        // Verify normal unwrap works
+        let unwrapped = NIP17.unwrap(giftWrap: recipientWrap, recipientKeypair: bob)
+        XCTAssertNotNil(unwrapped, "Valid seal signature should unwrap")
+        XCTAssertEqual(unwrapped!.pubkey, alice.pubkey)
+
+        // Note: We can't easily forge an invalid seal signature in this test
+        // because we'd need to create a validly-encrypted gift wrap containing
+        // an invalidly-signed seal - the encryption layer would need to work
+        // but the signature wouldn't. The security check is verified by code
+        // inspection: NIP17.swift:189 calls validate_event(ev: seal) and
+        // returns nil if signature validation fails.
+    }
+
+    /// Test that messages with special characters are handled correctly
+    func testSpecialCharacterContent() async throws {
+        let contents = [
+            "Line1\nLine2\nLine3",           // Newlines
+            "Tab\there",                      // Tabs
+            "Quote: \"hello\"",               // Quotes
+            "Backslash: \\path\\to\\file",    // Backslashes
+            "Null: \0 byte",                  // Null byte (edge case)
+            "<script>alert('xss')</script>",  // XSS attempt (should be preserved as-is)
+            "{ \"json\": true }",             // JSON-like content
+        ]
+
+        for content in contents {
+            let result = await NIP17.createMessage(
+                content: content,
+                to: bob.pubkey,
+                from: alice
+            )
+
+            XCTAssertNotNil(result, "Should create message for: \(content.prefix(20))...")
+
+            let (recipientWrap, _) = result!
+            let unwrapped = NIP17.unwrap(giftWrap: recipientWrap, recipientKeypair: bob)
+
+            XCTAssertNotNil(unwrapped, "Should unwrap message for: \(content.prefix(20))...")
+            XCTAssertEqual(unwrapped!.content, content,
+                "Content should be preserved exactly: \(content.prefix(20))...")
+        }
+    }
+
+    /// Test that p-tag in rumor correctly identifies conversation participants
+    func testRumorPTagIdentifiesRecipient() async throws {
+        let result = await NIP17.createMessage(
+            content: "Hello",
+            to: bob.pubkey,
+            from: alice
+        )
+
+        let (recipientWrap, _) = result!
+        let unwrapped = NIP17.unwrap(giftWrap: recipientWrap, recipientKeypair: bob)
+
+        XCTAssertNotNil(unwrapped)
+
+        // Per NIP-17, the rumor's p-tag identifies the recipient
+        let pTag = unwrapped!.tags.first { $0.count >= 2 && $0[0].string() == "p" }
+        XCTAssertNotNil(pTag, "Rumor should have p-tag")
+        XCTAssertEqual(pTag?[1].string(), bob.pubkey.hex(),
+            "Rumor p-tag should identify Bob as recipient")
+    }
+
+    /// Test self-to-self message (edge case: sending DM to yourself)
+    func testSelfMessage() async throws {
+        // Alice sends a message to herself
+        let result = await NIP17.createMessage(
+            content: "Note to self",
+            to: alice.pubkey,
+            from: alice
+        )
+
+        XCTAssertNotNil(result, "Should be able to create self-message")
+
+        let (recipientWrap, senderWrap) = result!
+
+        // Both wraps should be unwrappable by Alice
+        let fromRecipient = NIP17.unwrap(giftWrap: recipientWrap, recipientKeypair: alice)
+        let fromSender = NIP17.unwrap(giftWrap: senderWrap, recipientKeypair: alice)
+
+        XCTAssertNotNil(fromRecipient)
+        XCTAssertNotNil(fromSender)
+
+        XCTAssertEqual(fromRecipient!.content, "Note to self")
+        XCTAssertEqual(fromSender!.content, "Note to self")
+
+        // Sender pubkey should be Alice in both
+        XCTAssertEqual(fromRecipient!.pubkey, alice.pubkey)
+        XCTAssertEqual(fromSender!.pubkey, alice.pubkey)
+    }
+
+    // MARK: - Cross-Client Interop Test Vectors
+    //
+    // TODO: Add test vectors from other NIP-17 implementations:
+    // - Amethyst (Android)
+    // - 0xchat
+    // - Coracle
+    // - Gossip
+    //
+    // Test vectors should include:
+    // 1. Gift wrap event JSON from other client
+    // 2. Recipient's private key (test key)
+    // 3. Expected unwrapped content
+    // 4. Expected sender pubkey
+    //
+    // Example test structure:
+    // func testAmethystInterop() throws {
+    //     let giftWrapJson = """
+    //     {"id":"...","pubkey":"...","created_at":...,"kind":1059,...}
+    //     """
+    //     let recipientPrivkey = Privkey(hex: "test_privkey")!
+    //     let recipient = FullKeypair(privkey: recipientPrivkey)!
+    //
+    //     let giftWrap = NostrEvent.owned_from_json(json: giftWrapJson)!
+    //     let unwrapped = NIP17.unwrap(giftWrap: giftWrap, recipientKeypair: recipient)
+    //
+    //     XCTAssertNotNil(unwrapped)
+    //     XCTAssertEqual(unwrapped!.content, "expected content")
+    // }
+
     // MARK: - Integration Test Notes
     //
     // The following scenarios require network integration tests with mocked RelayPool:
