@@ -747,7 +747,8 @@ struct ContentView: View {
         )
         
         home.damus_state = self.damus_state!
-        
+        self.damus_state?.initializeNip17KeysIfNeeded()
+
         await damus_state.snapshotManager.startPeriodicSnapshots()
         
         if let damus_state, damus_state.purple.enable_purple {
