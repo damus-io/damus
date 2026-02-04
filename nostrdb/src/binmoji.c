@@ -23,6 +23,7 @@ typedef struct {
 	size_t count;
 	uint32_t components[16];
 } EmojiHashEntry;
+#define EMOJI_HASH_ENTRY_DEFINED
 
 #include "binmoji_table.h"
 

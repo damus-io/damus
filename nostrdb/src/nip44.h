@@ -2,6 +2,10 @@
 #ifndef NDB_NIP44_H
 #define NDB_NIP44_H
 
+#include <stddef.h>
+#include <stdint.h>
+#include <sys/types.h>
+
 enum ndb_decrypt_result
 {
 	NIP44_OK = 0,

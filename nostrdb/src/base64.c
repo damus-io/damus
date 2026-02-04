@@ -63,9 +63,10 @@ size_t base64_encoded_length(size_t srclen)
 void base64_encode_triplet_using_maps(const base64_maps_t *maps,
 				      char dest[4], const char src[3])
 {
-	char a = src[0];
-	char b = src[1];
-	char c = src[2];
+	/* Use unsigned to avoid sign-extension issues on platforms with signed char */
+	unsigned char a = (unsigned char)src[0];
+	unsigned char b = (unsigned char)src[1];
+	unsigned char c = (unsigned char)src[2];
 
 	dest[0] = sixbit_to_b64(maps, (a & 0xfc) >> 2);
 	dest[1] = sixbit_to_b64(maps, ((a & 0x3) << 4) | ((b & 0xf0) >> 4));
