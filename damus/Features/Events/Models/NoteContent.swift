@@ -67,18 +67,40 @@ func note_artifact_is_separated(kind: NostrKind?) -> Bool {
 }
 
 func render_immediately_available_note_content(ndb: Ndb, ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> NoteArtifacts {
+    // Debug logging for DM artifact rendering
+    let isDM = ev.known_kind == .dm_chat || ev.known_kind == .dm
+    if isDM {
+        print("[DM-DEBUG] render_artifacts: kind=\(ev.kind) id=\(ev.id.hex().prefix(8)) contentLen=\(ev.content_len) content='\(ev.content.prefix(30))'")
+    }
+
     if ev.known_kind == .longform {
         return .longform(LongformContent(ev.content))
     }
-    
+
     do {
         return try NdbBlockGroup.borrowBlockGroup(event: ev, using: ndb, and: keypair, borrow: { blocks in
-            return .separated(render_blocks(blocks: blocks, profiles: profiles, can_hide_last_previewable_refs: true))
+            let result = render_blocks(blocks: blocks, profiles: profiles, can_hide_last_previewable_refs: true)
+            if isDM {
+                print("[DM-DEBUG] render_artifacts: SUCCESS via blocks, charCount=\(result.content.attributed.characters.count)")
+            }
+            // Fallback: if blocks render empty but event has content, use just_content
+            if result.content.attributed.characters.count == 0 && ev.content_len > 0 {
+                let content = ev.get_content(keypair)
+                if isDM {
+                    print("[DM-DEBUG] render_artifacts: blocks empty but content exists, using just_content='\(content.prefix(30))'")
+                }
+                return .separated(.just_content(content))
+            }
+            return .separated(result)
         })
     }
     catch {
         // TODO: Improve error handling in the future, bubbling it up so that the view can decide how display errors. Keep legacy behavior for now.
-        return .separated(.just_content(ev.get_content(keypair)))
+        let content = ev.get_content(keypair)
+        if isDM {
+            print("[DM-DEBUG] render_artifacts: FALLBACK due to error: \(error), using content='\(content.prefix(30))'")
+        }
+        return .separated(.just_content(content))
     }
 }
 
