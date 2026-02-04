@@ -420,10 +420,14 @@ class DamusPurple: StoreObserverDelegate {
         let active: Bool
         let attributes: PurpleAccountAttributes
         
+        /// Attributes indicating membership tenure milestones.
         struct PurpleAccountAttributes: OptionSet {
             let rawValue: Int
-            
+
+            /// Member has been subscribed for more than one year.
             static let memberForMoreThanOneYear = PurpleAccountAttributes(rawValue: 1 << 0)
+            /// Member has been subscribed for more than three years.
+            static let memberForMoreThanThreeYears = PurpleAccountAttributes(rawValue: 1 << 1)
         }
 
         func ordinal() -> String? {
@@ -440,13 +444,22 @@ class DamusPurple: StoreObserverDelegate {
         
         static func from(payload: Payload) -> Self? {
             guard let pubkey = Pubkey(hex: payload.pubkey) else { return nil }
+
+            var attributes: PurpleAccountAttributes = []
+            if payload.attributes?.member_for_more_than_one_year == true {
+                attributes.insert(.memberForMoreThanOneYear)
+            }
+            if payload.attributes?.member_for_more_than_three_years == true {
+                attributes.insert(.memberForMoreThanThreeYears)
+            }
+
             return Self(
                 pubkey: pubkey,
                 created_at: Date.init(timeIntervalSince1970: TimeInterval(payload.created_at)),
                 expiry: Date.init(timeIntervalSince1970: TimeInterval(payload.expiry)),
                 subscriber_number: Int(payload.subscriber_number),
                 active: payload.active,
-                attributes: (payload.attributes?.member_for_more_than_one_year ?? false) ? [.memberForMoreThanOneYear] : []
+                attributes: attributes
             )
         }
         
@@ -458,8 +471,17 @@ class DamusPurple: StoreObserverDelegate {
             let active: Bool
             let attributes: Attributes?
             
+            /// Server-provided membership tenure attributes.
+            ///
+            /// These flags indicate subscription milestones. The server determines
+            /// eligibility based on continuous subscription history.
             struct Attributes: Codable {
+                /// `true` when the member has been subscribed for more than one year.
                 let member_for_more_than_one_year: Bool
+
+                /// `true` when the member has been subscribed for more than three years.
+                /// Optional because older server responses may not include this field.
+                let member_for_more_than_three_years: Bool?
             }
         }
     }
