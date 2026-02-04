@@ -82,7 +82,9 @@ struct DMView: View {
     }
     
     private func debugPrintDM() {
+        #if DEBUG
         print("[DM-DEBUG] DMView: kind=\(event.kind) content_len=\(event.content_len) content='\(event.content.prefix(50))' get_content='\(event.get_content(damus_state.keypair).prefix(50))'")
+        #endif
     }
 
     var body: some View {

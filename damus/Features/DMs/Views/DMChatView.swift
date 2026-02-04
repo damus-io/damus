@@ -163,12 +163,16 @@ struct DMChatView: View, KeyboardReadable {
             } else {
                 // DM Outbox: Send to recipient's DM relays
                 // sendToEphemeralRelays handles connect, send, and lease lifecycle
+                #if DEBUG
                 print("[DM-DEBUG] DM Outbox: Attempting to send to \(recipientDMRelays.count) DM relays")
+                #endif
                 let success = await send_nip17_message(content: content, sender: fullKeypair, toRelays: recipientDMRelays)
 
                 if !success {
                     // Failed to connect to any of recipient's DM relays - show warning
+                    #if DEBUG
                     print("[DM-DEBUG] DM Outbox: Connection failed, showing fallback warning")
+                    #endif
                     pendingMessageContent = content
                     showRelayWarning = true
                 }
@@ -185,68 +189,87 @@ struct DMChatView: View, KeyboardReadable {
     /// Performs a quick local lookup, then does a bounded network fetch if needed.
     private func fetchDMRelayList(for target: Pubkey) async -> [RelayURL] {
         let filter = NostrFilter(kinds: [.dm_relay_list], authors: [target])
-        print("[DM-DEBUG] DM Relay List: Checking local cache for \(target.npub)")
-        if let localEvent = await fetchLatestDMRelayListEvent(
-            filter: filter,
-            timeout: Duration.seconds(1),
-            streamMode: NostrNetworkManager.StreamMode.ndbOnly,
-            targetRelays: nil
-        ) {
+
+        // Step 1: Check local cache first (fast path)
+        if let localEvent = await fetchLatestEvent(filter: filter, timeout: .seconds(1), streamMode: .ndbOnly, targetRelays: nil) {
+            #if DEBUG
             print("[DM-DEBUG] DM Relay List: Found local kind:10050 for \(target.npub)")
+            #endif
             return NIP17.parseDMRelayList(event: localEvent)
         }
 
-        print("[DM-DEBUG] DM Relay List: Fetching from network for \(target.npub)")
-        await damus_state.nostrNetwork.awaitConnection(timeout: Duration.seconds(5))
+        // Step 2: Try network via best-effort relays
+        await damus_state.nostrNetwork.awaitConnection(timeout: .seconds(5))
         let bestEffortRelays = await MainActor.run {
             Array(damus_state.nostrNetwork.userRelayList.getBestEffortRelayList().relays.keys)
         }
+
         if !bestEffortRelays.isEmpty {
-            let connectedRelays = await damus_state.nostrNetwork.ensureConnected(to: bestEffortRelays, timeout: Duration.seconds(5))
-            print("[DM-DEBUG] DM Relay List: Connected to \(connectedRelays.count)/\(bestEffortRelays.count) best-effort relay(s)")
-        }
-        if let networkEvent = await fetchLatestDMRelayListEvent(
-            filter: filter,
-            timeout: Duration.seconds(6),
-            streamMode: NostrNetworkManager.StreamMode.ndbAndNetworkParallel(networkOptimization: nil),
-            targetRelays: bestEffortRelays
-        ) {
-            print("[DM-DEBUG] DM Relay List: Found network kind:10050 for \(target.npub)")
-            return NIP17.parseDMRelayList(event: networkEvent)
-        }
-
-        let relayHints = await fetchNIP65RelayHints(for: target)
-        if !relayHints.isEmpty {
-            print("[DM-DEBUG] DM Relay List: Trying relay hints (\(relayHints.count)) for \(target.npub)")
-            await damus_state.nostrNetwork.acquireEphemeralRelays(relayHints)
-            defer { Task { await damus_state.nostrNetwork.releaseEphemeralRelays(relayHints) } }
-
-            let connectedRelays = await damus_state.nostrNetwork.ensureConnected(to: relayHints, timeout: Duration.seconds(5))
-            let targetRelays = connectedRelays.isEmpty ? nil : connectedRelays
-            if let hintedEvent = await fetchLatestDMRelayListEvent(
-                filter: filter,
-                timeout: Duration.seconds(6),
-                streamMode: NostrNetworkManager.StreamMode.ndbAndNetworkParallel(networkOptimization: nil),
-                targetRelays: targetRelays
-            ) {
-                print("[DM-DEBUG] DM Relay List: Found hinted kind:10050 for \(target.npub)")
-                return NIP17.parseDMRelayList(event: hintedEvent)
+            let _ = await damus_state.nostrNetwork.ensureConnected(to: bestEffortRelays, timeout: .seconds(5))
+            if let networkEvent = await fetchLatestEvent(filter: filter, timeout: .seconds(6), streamMode: .ndbAndNetworkParallel(networkOptimization: nil), targetRelays: bestEffortRelays) {
+                #if DEBUG
+                print("[DM-DEBUG] DM Relay List: Found network kind:10050 for \(target.npub)")
+                #endif
+                return NIP17.parseDMRelayList(event: networkEvent)
             }
         }
 
+        // Step 3: Try relay hints from NIP-65
+        let relayHints = await fetchNIP65RelayHints(for: target)
+        guard !relayHints.isEmpty else {
+            #if DEBUG
+            print("[DM-DEBUG] DM Relay List: No kind:10050 found for \(target.npub)")
+            #endif
+            return []
+        }
+
+        await damus_state.nostrNetwork.acquireEphemeralRelays(relayHints)
+        defer { Task { await damus_state.nostrNetwork.releaseEphemeralRelays(relayHints) } }
+
+        let connectedRelays = await damus_state.nostrNetwork.ensureConnected(to: relayHints, timeout: .seconds(5))
+        let targetRelays = connectedRelays.isEmpty ? nil : connectedRelays
+
+        if let hintedEvent = await fetchLatestEvent(filter: filter, timeout: .seconds(6), streamMode: .ndbAndNetworkParallel(networkOptimization: nil), targetRelays: targetRelays) {
+            #if DEBUG
+            print("[DM-DEBUG] DM Relay List: Found hinted kind:10050 for \(target.npub)")
+            #endif
+            return NIP17.parseDMRelayList(event: hintedEvent)
+        }
+
+        #if DEBUG
         print("[DM-DEBUG] DM Relay List: No kind:10050 found for \(target.npub)")
+        #endif
         return []
     }
 
-    /// Finds the most recent DM relay list event matching the filter within the given timeout.
-    /// Optionally limits the search to target relays.
-    private func fetchLatestDMRelayListEvent(
+    /// Fetches relay hints (kind 10002) to locate a user's DM relay list.
+    private func fetchNIP65RelayHints(for target: Pubkey) async -> [RelayURL] {
+        let filter = NostrFilter(kinds: [.relay_list], authors: [target])
+
+        guard let relayListNote = await fetchLatestEvent(filter: filter, timeout: .seconds(6), streamMode: .ndbAndNetworkParallel(networkOptimization: nil), targetRelays: nil),
+              let relayList = try? NIP65.RelayList(event: relayListNote) else {
+            #if DEBUG
+            print("[DM-DEBUG] DM Relay List: No relay hints found for \(target.npub)")
+            #endif
+            return []
+        }
+
+        let relays = Array(relayList.relays.keys)
+        #if DEBUG
+        print("[DM-DEBUG] DM Relay List: Found \(relays.count) relay hint(s) for \(target.npub)")
+        #endif
+        return relays
+    }
+
+    /// Finds the most recent replaceable event matching the filter within the given timeout.
+    /// Works for any replaceable event kind (10050, 10002, etc.).
+    private func fetchLatestEvent(
         filter: NostrFilter,
         timeout: Duration,
         streamMode: NostrNetworkManager.StreamMode,
         targetRelays: [RelayURL]?
-    ) async -> NostrEvent? {
-        var latestEvent: NostrEvent? = nil
+    ) async -> NdbNote? {
+        var latestEvent: NdbNote? = nil
         var latestTimestamp: UInt32 = 0
 
         for await lender in damus_state.nostrNetwork.reader.streamExistingEvents(
@@ -256,7 +279,6 @@ struct DMChatView: View, KeyboardReadable {
             streamMode: streamMode
         ) {
             lender.justUseACopy { event in
-                // Keep the most recent event (kind 10050 is replaceable)
                 if event.created_at > latestTimestamp {
                     latestTimestamp = event.created_at
                     latestEvent = event
@@ -264,61 +286,6 @@ struct DMChatView: View, KeyboardReadable {
             }
         }
 
-        if let latestEvent {
-            print("[DM-DEBUG] DM Relay List: Latest kind:10050 ts=\(latestTimestamp) mode=\(streamMode)")
-        } else {
-            print("[DM-DEBUG] DM Relay List: No events mode=\(streamMode) timeout=\(timeout)")
-        }
-        return latestEvent
-    }
-
-    /// Fetches relay hints (kind 10002) to locate a user's DM relay list.
-    private func fetchNIP65RelayHints(for target: Pubkey) async -> [RelayURL] {
-        let filter = NostrFilter(kinds: [.relay_list], authors: [target])
-        if let relayListNote = await fetchLatestNIP65RelayListEvent(
-            filter: filter,
-            timeout: Duration.seconds(6),
-            streamMode: NostrNetworkManager.StreamMode.ndbAndNetworkParallel(networkOptimization: nil)
-        ) {
-            if let relayList = try? NIP65.RelayList(event: relayListNote) {
-                let relays = Array(relayList.relays.keys)
-                print("[DM-DEBUG] DM Relay List: Found \(relays.count) relay hint(s) for \(target.npub)")
-                return relays
-            }
-        }
-
-        print("[DM-DEBUG] DM Relay List: No relay hints found for \(target.npub)")
-        return []
-    }
-
-    /// Finds the most recent NIP-65 relay list event matching the filter within the given timeout.
-    private func fetchLatestNIP65RelayListEvent(
-        filter: NostrFilter,
-        timeout: Duration,
-        streamMode: NostrNetworkManager.StreamMode
-    ) async -> NdbNote? {
-        var latestEvent: NdbNote? = nil
-        var latestTimestamp: UInt32 = 0
-
-        for await lender in damus_state.nostrNetwork.reader.streamExistingEvents(
-            filters: [filter],
-            timeout: timeout,
-            streamMode: streamMode
-        ) {
-            lender.justUseACopy { event in
-                // Keep the most recent event (kind 10002 is replaceable)
-                if event.created_at > latestTimestamp {
-                    latestTimestamp = event.created_at
-                    latestEvent = event
-                }
-            }
-        }
-
-        if latestEvent != nil {
-            print("[DM-DEBUG] DM Relay List: Latest kind:10002 ts=\(latestTimestamp) mode=\(streamMode)")
-        } else {
-            print("[DM-DEBUG] DM Relay List: No kind:10002 events mode=\(streamMode) timeout=\(timeout)")
-        }
         return latestEvent
     }
 
@@ -357,7 +324,9 @@ struct DMChatView: View, KeyboardReadable {
     /// - Returns: true if message was sent successfully, false if connection to relays failed
     @discardableResult
     private func send_nip17_message(content: String, sender: FullKeypair, toRelays: [RelayURL]?) async -> Bool {
+        #if DEBUG
         print("[DM-DEBUG] NIP-17: Starting send to \(pubkey.npub)")
+        #endif
 
         // Ensure our own DM relay list is published (for receiving replies)
         await ensureOwnDMRelayListPublished(sender: sender)
@@ -368,27 +337,37 @@ struct DMChatView: View, KeyboardReadable {
             to: pubkey,
             from: sender
         ) else {
+            #if DEBUG
             print("[DM-DEBUG] NIP-17: Failed to create gift wraps, falling back to NIP-04")
+            #endif
             await send_nip04_message(content: content)
             return true // NIP-04 fallback succeeded
         }
 
+        #if DEBUG
         print("[DM-DEBUG] NIP-17: Created gift wraps - recipient:\(recipientWrap.id.hex().prefix(8)) sender:\(senderWrap.id.hex().prefix(8))")
+        #endif
 
         // Send recipient's gift wrap to their DM relays (with proper ephemeral relay lifecycle)
         if let targetRelays = toRelays, !targetRelays.isEmpty {
+            #if DEBUG
             print("[DM-DEBUG] NIP-17: Sending to recipient's DM relays: \(targetRelays.map { $0.absoluteString })")
+            #endif
             let sentTo = await damus_state.nostrNetwork.sendToEphemeralRelays(recipientWrap, to: targetRelays)
+            #if DEBUG
             print("[DM-DEBUG] NIP-17: Connected to \(sentTo.count)/\(targetRelays.count) relays")
+            #endif
 
             if sentTo.isEmpty {
-                // Failed to connect to any of recipient's DM relays
+                #if DEBUG
                 print("[DM-DEBUG] NIP-17: Failed to connect to any DM relays")
+                #endif
                 return false
             }
         } else {
-            // Fallback: send to our own relays (user consented via warning dialog)
+            #if DEBUG
             print("[DM-DEBUG] NIP-17: Sending to our relays (fallback)")
+            #endif
             await damus_state.nostrNetwork.postbox.send(recipientWrap)
         }
 
@@ -398,12 +377,17 @@ struct DMChatView: View, KeyboardReadable {
         // Fetch our own 10050 relay list (should exist after ensureOwnDMRelayListPublished)
         let senderDMRelays = await fetchDMRelayList(for: sender.pubkey)
         if !senderDMRelays.isEmpty {
+            #if DEBUG
             print("[DM-DEBUG] NIP-17: Sending self-wrap to our DM relays: \(senderDMRelays.map { $0.absoluteString })")
+            #endif
             let sentTo = await damus_state.nostrNetwork.sendToEphemeralRelays(senderWrap, to: senderDMRelays)
+            #if DEBUG
             print("[DM-DEBUG] NIP-17: Self-wrap sent to \(sentTo.count)/\(senderDMRelays.count) DM relays")
+            #endif
         } else {
-            // Fallback: send to regular relay pool if no 10050 available
+            #if DEBUG
             print("[DM-DEBUG] NIP-17: No DM relays found for self, sending to regular relays")
+            #endif
             await damus_state.nostrNetwork.postbox.send(senderWrap)
         }
 
@@ -428,21 +412,29 @@ struct DMChatView: View, KeyboardReadable {
 
     /// Send a NIP-04 direct message (legacy, kind 4)
     private func send_nip04_message(content: String) async {
+        #if DEBUG
         print("[DM-DEBUG] NIP-04: Starting send to \(pubkey.npub)")
+        #endif
 
         let tags = [["p", pubkey.hex()]]
 
         guard let dm = NIP04.create_dm(content, to_pk: pubkey, tags: tags, keypair: damus_state.keypair) else {
+            #if DEBUG
             print("[DM-DEBUG] NIP-04: Failed to create DM")
+            #endif
             return
         }
 
+        #if DEBUG
         print("[DM-DEBUG] NIP-04: Created DM id:\(dm.id.hex().prefix(8))")
+        #endif
 
         dms.draft = ""
 
         await damus_state.nostrNetwork.postbox.send(dm)
+        #if DEBUG
         print("[DM-DEBUG] NIP-04: Sent to relays")
+        #endif
 
         handle_incoming_dm(ev: dm, our_pubkey: damus_state.pubkey, dms: damus_state.dms, prev_events: NewEventsBits())
     }

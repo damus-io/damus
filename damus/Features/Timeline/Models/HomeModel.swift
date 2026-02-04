@@ -642,50 +642,60 @@ class HomeModel: ContactsDelegate, ObservableObject {
         }
         self.dmsHandlerTask?.cancel()
         self.dmsHandlerTask = Task {
+            #if DEBUG
             print("[DM-DEBUG] dmsHandlerTask: Starting DM stream")
+            #endif
             for await item in damus_state.nostrNetwork.reader.advancedStream(filters: dms_filters, streamMode: .ndbAndNetworkParallel(networkOptimization: .sinceOptimization)) {
                 switch item {
                 case .event(let lender):
                     await lender.justUseACopy({ ev in
+                        #if DEBUG
                         let kindName: String
                         switch ev.kind {
                         case NostrKind.dm.rawValue: kindName = "NIP-04"
                         case NostrKind.dm_chat.rawValue: kindName = "NIP-17"
-                        case NostrKind.gift_wrap.rawValue:
-                            // Gift wraps are processed by nostrdb internally
-                            kindName = "gift_wrap"
+                        case NostrKind.gift_wrap.rawValue: kindName = "gift_wrap"
                         default: kindName = "kind:\(ev.kind)"
                         }
                         if ev.kind == NostrKind.gift_wrap.rawValue {
-                            // Log gift wrap with p-tag recipient
                             let pTag = ev.tags.first(where: { $0.count >= 2 && $0[0].string() == "p" })
                             let recipient = pTag.map { $0[1].string().prefix(16) } ?? "none"
                             print("[DM-DEBUG] dmsStream: Received gift_wrap id:\(ev.id.hex().prefix(8)) from:\(ev.pubkey.npub.prefix(16)) pTag:\(recipient)")
-                            // Trigger nostrdb to reprocess gift wraps
+                        } else {
+                            print("[DM-DEBUG] dmsStream: Received \(kindName) id:\(ev.id.hex().prefix(8)) from:\(ev.pubkey.npub.prefix(16))")
+                        }
+                        #endif
+                        // Trigger nostrdb to reprocess gift wraps
+                        if ev.kind == NostrKind.gift_wrap.rawValue {
                             let ndb = self.damus_state.ndb
                             Task.detached {
                                 do {
-                                    let result = try ndb.processGiftWraps()
-                                    print("[DM-DEBUG] dmsStream: processGiftWraps after new gift_wrap: \(result)")
+                                    let _ = try ndb.processGiftWraps()
                                 } catch {
+                                    #if DEBUG
                                     print("[DM-DEBUG] dmsStream: processGiftWraps error: \(error)")
+                                    #endif
                                 }
                             }
-                        } else {
-                            print("[DM-DEBUG] dmsStream: Received \(kindName) id:\(ev.id.hex().prefix(8)) from:\(ev.pubkey.npub.prefix(16))")
                         }
                         await process_event(ev: ev, context: .other)
                     })
                 case .eose:
+                    #if DEBUG
                     print("[DM-DEBUG] dmsStream: EOSE received")
+                    #endif
                     var dms = dms.dms.flatMap { $0.events }
                     dms.append(contentsOf: incoming_dms)
                 case .ndbEose:
+                    #if DEBUG
                     print("[DM-DEBUG] dmsStream: ndbEOSE received, loading from local DB")
+                    #endif
                     var dms = dms.dms.flatMap { $0.events }
                     dms.append(contentsOf: incoming_dms)
                 case .networkEose:
+                    #if DEBUG
                     print("[DM-DEBUG] dmsStream: networkEOSE received")
+                    #endif
                 }
             }
         }
@@ -1011,16 +1021,22 @@ class HomeModel: ContactsDelegate, ObservableObject {
 
     @MainActor
     func handle_dm(_ ev: NostrEvent) {
+        #if DEBUG
         let kindName = ev.kind == NostrKind.dm_chat.rawValue ? "NIP-17" : "NIP-04"
         print("[DM-DEBUG] handle_dm: Received \(kindName) kind:\(ev.kind) id:\(ev.id.hex().prefix(8)) from:\(ev.pubkey.npub.prefix(16)) contentLen:\(ev.content.count) content:'\(ev.content.prefix(30))'")
+        #endif
 
         guard should_show_event(state: damus_state, ev: ev) else {
+            #if DEBUG
             print("[DM-DEBUG] handle_dm: Filtered out by should_show_event")
+            #endif
             return
         }
 
         damus_state.events.insert(ev)
+        #if DEBUG
         print("[DM-DEBUG] handle_dm: Inserted into event cache")
+        #endif
         
         if !should_debounce_dms {
             self.incoming_dms.append(ev)
@@ -1228,11 +1244,15 @@ func fetch_relay_metadata(relay_id: RelayURL) async throws -> RelayMetadata? {
 func handle_incoming_dm(ev: NostrEvent, our_pubkey: Pubkey, dms: DirectMessagesModel, prev_events: NewEventsBits) -> (Bool, NewEventsBits?) {
     // Guardrail: drop empty NIP-17 rumors to avoid blank bubbles from bad artifacts.
     if ev.kind == NostrKind.dm_chat.rawValue, ev.content.isEmpty {
+        #if DEBUG
         print("[DM-DEBUG] Dropping empty NIP-17 rumor id:\(ev.id)")
+        #endif
         return (false, nil)
     }
+    #if DEBUG
     let kindName = ev.kind == NostrKind.dm_chat.rawValue ? "NIP-17" : "NIP-04"
     print("[DM-DEBUG] handle_incoming_dm: Processing \(kindName) kind:\(ev.kind) id:\(ev.id.hex().prefix(8))")
+    #endif
 
     var inserted = false
     var found = false
@@ -1244,14 +1264,17 @@ func handle_incoming_dm(ev: NostrEvent, our_pubkey: Pubkey, dms: DirectMessagesM
     if ours {
         if let ref_pk = ev.referenced_pubkeys.first {
             the_pk = ref_pk
+            #if DEBUG
             print("[DM-DEBUG] handle_incoming_dm: Our outgoing DM to \(the_pk.npub.prefix(16))")
-        } else {
-            // self dm!?
-            print("[DM-DEBUG] handle_incoming_dm: Self DM detected")
+            #endif
         }
-    } else {
+        // else: self dm - no logging needed
+    }
+    #if DEBUG
+    else {
         print("[DM-DEBUG] handle_incoming_dm: Incoming DM from \(the_pk.npub.prefix(16))")
     }
+    #endif
 
     for model in dms.dms {
         if model.pubkey == the_pk {
@@ -1259,7 +1282,9 @@ func handle_incoming_dm(ev: NostrEvent, our_pubkey: Pubkey, dms: DirectMessagesM
             inserted = insert_uniq_sorted_event(events: &(dms.dms[i].events), new_ev: ev) {
                 $0.created_at < $1.created_at
             }
+            #if DEBUG
             print("[DM-DEBUG] handle_incoming_dm: Found existing conversation, inserted=\(inserted)")
+            #endif
             break
         }
         i += 1
@@ -1269,13 +1294,17 @@ func handle_incoming_dm(ev: NostrEvent, our_pubkey: Pubkey, dms: DirectMessagesM
         let model = DirectMessageModel(events: [ev], our_pubkey: our_pubkey, pubkey: the_pk)
         dms.dms.append(model)
         inserted = true
+        #if DEBUG
         print("[DM-DEBUG] handle_incoming_dm: Created new conversation model")
+        #endif
     }
 
     var new_bits: NewEventsBits? = nil
     if inserted {
         new_bits = handle_last_events(new_events: prev_events, ev: ev, timeline: .dms, shouldNotify: !ours)
+        #if DEBUG
         print("[DM-DEBUG] handle_incoming_dm: Event inserted successfully")
+        #endif
     }
 
     return (inserted, new_bits)
