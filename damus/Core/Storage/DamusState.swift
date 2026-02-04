@@ -334,7 +334,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
     }
 
     /// Fetches the user's own kind:10050 DM relay list
-    private func fetchOwnDMRelayList() async -> [RelayURL] {
+    func fetchOwnDMRelayList() async -> [RelayURL] {
         let filter = NostrFilter(kinds: [.dm_relay_list], authors: [keypair.pubkey])
 
         var latestEvent: NostrEvent? = nil

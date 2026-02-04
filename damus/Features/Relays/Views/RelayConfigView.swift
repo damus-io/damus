@@ -9,12 +9,15 @@ import SwiftUI
 
 enum RelayTab: Int, CaseIterable{
     case myRelays = 0
+    case dmRelays
     case recommended
-    
+
     var title: String{
         switch self {
         case .myRelays:
             return NSLocalizedString("My Relays", comment: "Title of the tab that shows the user's list of their own relays.")
+        case .dmRelays:
+            return NSLocalizedString("DM Relays", comment: "Title of the tab that shows the user's DM relay list for receiving encrypted messages.")
         case .recommended:
             return NSLocalizedString("Recommended", comment: "Title of the tab that shows the list of relays recommended by Damus.")
         }
@@ -51,8 +54,11 @@ struct RelayConfigView: View {
                     RelayList(title: RelayTab.myRelays.title, relayList: relays, recommended: false)
                         .tag(0)
 
-                    RelayList(title: RelayTab.recommended.title, relayList: recommended, recommended: true)
+                    DMRelayListView(state: state)
                         .tag(1)
+
+                    RelayList(title: RelayTab.recommended.title, relayList: recommended, recommended: true)
+                        .tag(2)
                 }
                 ZStack{
                     HStack{
@@ -65,7 +71,7 @@ struct RelayConfigView: View {
                         }
                     }
                 }
-                .frame(width: 235, height: 35)
+                .frame(width: 320, height: 35)
                 .background(.damusNeutral3)
                 .cornerRadius(30)
                 .padding(.horizontal, 26)
@@ -153,7 +159,7 @@ extension RelayConfigView{
                 .font(.system(size: 12, weight: isActive ? .bold : .regular))
                 .foregroundColor(isActive ? .damusAdaptableBlack : .damusAdaptableBlack.opacity(0.7))
         }
-        .frame(width: 110, height: 30)
+        .frame(width: 100, height: 30)
         .background(isActive ? .damusAdaptableWhite.opacity(0.9) : .clear)
         .cornerRadius(30)
     }
