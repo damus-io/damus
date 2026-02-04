@@ -277,7 +277,7 @@ struct NoteContentView: View {
                             
                             if artifacts.media.count > 1 {
                                 Text("\(artifacts.media.count)")
-                                    .font(.system(size: 10, weight: .semibold))
+                                    .font(.system(size: 11, weight: .semibold))
                                     .foregroundStyle(.white)
                                     .padding(.horizontal, 4)
                                     .padding(.vertical, 2)
