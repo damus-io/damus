@@ -201,6 +201,18 @@
 		5C78B8122E40000000CF177D /* PollDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78B8112E40000000CF177D /* PollDraft.swift */; };
 		5C78B8222E40000000CF177D /* PollComposerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78B8212E40000000CF177D /* PollComposerView.swift */; };
 		5C78B8322E40000000CF177D /* PollEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78B8312E40000000CF177D /* PollEventView.swift */; };
+		82D6FD002CD99F7900C925F4 /* PollModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78B8022E40000000CF177D /* PollModels.swift */; };
+		82D6FD012CD99F7900C925F4 /* PollResultsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78B8032E40000000CF177D /* PollResultsStore.swift */; };
+		82D6FD022CD99F7900C925F4 /* PollVoteBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78B80C2E40000000CF177D /* PollVoteBuilder.swift */; };
+		82D6FD032CD99F7900C925F4 /* PollDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78B8112E40000000CF177D /* PollDraft.swift */; };
+		82D6FD042CD99F7900C925F4 /* PollComposerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78B8212E40000000CF177D /* PollComposerView.swift */; };
+		82D6FD052CD99F7900C925F4 /* PollEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78B8312E40000000CF177D /* PollEventView.swift */; };
+		D703FD002E6C0F5B00A400EA /* PollModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78B8022E40000000CF177D /* PollModels.swift */; };
+		D703FD012E6C0F5B00A400EA /* PollResultsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78B8032E40000000CF177D /* PollResultsStore.swift */; };
+		D703FD022E6C0F5B00A400EA /* PollVoteBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78B80C2E40000000CF177D /* PollVoteBuilder.swift */; };
+		D703FD032E6C0F5B00A400EA /* PollDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78B8112E40000000CF177D /* PollDraft.swift */; };
+		D703FD042E6C0F5B00A400EA /* PollComposerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78B8212E40000000CF177D /* PollComposerView.swift */; };
+		D703FD052E6C0F5B00A400EA /* PollEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78B8312E40000000CF177D /* PollEventView.swift */; };
 		4C363A9A28283854006E126D /* Reply.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A9928283854006E126D /* Reply.swift */; };
 		4C363A9E2828A822006E126D /* ReplyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A9D2828A822006E126D /* ReplyTests.swift */; };
 		5C78B8412E40000000CF177D /* PollTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78B8402E40000000CF177D /* PollTests.swift */; };
@@ -6983,6 +6995,12 @@
 				5CB017322D4422DB00A9ED05 /* NWCSettings.swift in Sources */,
 				82D6FC5D2CD99F7900C925F4 /* PostView.swift in Sources */,
 				82D6FC5E2CD99F7900C925F4 /* AttachMediaUtility.swift in Sources */,
+				82D6FD002CD99F7900C925F4 /* PollModels.swift in Sources */,
+				82D6FD012CD99F7900C925F4 /* PollResultsStore.swift in Sources */,
+				82D6FD022CD99F7900C925F4 /* PollVoteBuilder.swift in Sources */,
+				82D6FD032CD99F7900C925F4 /* PollDraft.swift in Sources */,
+				82D6FD042CD99F7900C925F4 /* PollComposerView.swift in Sources */,
+				82D6FD052CD99F7900C925F4 /* PollEventView.swift in Sources */,
 				82D6FC5F2CD99F7900C925F4 /* MediaPicker.swift in Sources */,
 				82D6FC602CD99F7900C925F4 /* TextViewWrapper.swift in Sources */,
 				82D6FC612CD99F7900C925F4 /* MainTabView.swift in Sources */,
@@ -7137,6 +7155,12 @@
 				D73E5E702C6A97F4007EB227 /* Parser.swift in Sources */,
 				D73E5E722C6A97F4007EB227 /* LinkView.swift in Sources */,
 				5C4FA7EE2DC29AE900CE658C /* FollowPackEvent.swift in Sources */,
+				D703FD002E6C0F5B00A400EA /* PollModels.swift in Sources */,
+				D703FD012E6C0F5B00A400EA /* PollResultsStore.swift in Sources */,
+				D703FD022E6C0F5B00A400EA /* PollVoteBuilder.swift in Sources */,
+				D703FD032E6C0F5B00A400EA /* PollDraft.swift in Sources */,
+				D703FD042E6C0F5B00A400EA /* PollComposerView.swift in Sources */,
+				D703FD052E6C0F5B00A400EA /* PollEventView.swift in Sources */,
 				D73E5F922C6AA720007EB227 /* QRCodeView.swift in Sources */,
 				D73E5E742C6A97F4007EB227 /* Lists.swift in Sources */,
 				D73C7ED92DE51690001F9392 /* OnboardingSuggestionsView.swift in Sources */,

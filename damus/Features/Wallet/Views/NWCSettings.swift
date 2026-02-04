@@ -429,9 +429,16 @@ struct NWCSettings: View {
 }
 
 struct NWCSettings_Previews: PreviewProvider {
-    static let tds = test_damus_state
+    @MainActor
     static var previews: some View {
-        NWCSettings(damus_state: tds, nwc: test_wallet_connect_url, model: WalletModel(state: .existing(test_wallet_connect_url), settings: tds.settings), settings: tds.settings)
+        let state = test_damus_state
+        let connectURL = WalletConnectURL(
+            pubkey: test_pubkey,
+            relay: .init("wss://relay.damus.io")!,
+            keypair: state.keypair.to_full()!,
+            lud16: "jb55@sendsats.com"
+        )
+        return NWCSettings(damus_state: state, nwc: connectURL, model: WalletModel(state: .existing(connectURL), settings: state.settings), settings: state.settings)
     }
 }
 

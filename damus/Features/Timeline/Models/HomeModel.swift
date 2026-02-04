@@ -85,7 +85,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
     var zap_button: ZapButtonModel = ZapButtonModel()
     
     init() {
-        self.damus_state = DamusState.empty
+        self.damus_state = MainActor.assumeIsolated { DamusState.empty }
         self.setup_debouncer()
         DispatchQueue.main.async {
             self.filter_events()
@@ -901,12 +901,16 @@ class HomeModel: ContactsDelegate, ObservableObject {
     }
     
     func handle_poll_event(_ ev: NostrEvent, context: SubscriptionContext) {
-        damus_state.polls.registerPollEvent(ev)
+        Task { @MainActor in
+            damus_state.polls.registerPollEvent(ev)
+        }
         handle_text_event(ev, context: context)
     }
     
     func handle_poll_response(_ ev: NostrEvent) {
-        damus_state.polls.registerResponseEvent(ev)
+        Task { @MainActor in
+            damus_state.polls.registerResponseEvent(ev)
+        }
     }
     
     func got_new_dm(notifs: NewEventsBits, ev: NostrEvent) {
