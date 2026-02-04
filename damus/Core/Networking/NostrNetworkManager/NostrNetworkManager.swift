@@ -263,7 +263,78 @@ class NostrNetworkManager {
             .map { $0.url }
             .filter { !filters.is_filtered(timeline: .search, relay_id: $0) }
     }
-    
+
+    // MARK: - DM Outbox (On-demand relay connection)
+
+    /// Sends an event to recipient's DM relays with proper ephemeral relay lifecycle management.
+    /// This acquires leases, connects, sends via PostBox (with retries), and releases leases when done.
+    ///
+    /// - Parameters:
+    ///   - event: The event to send (typically a gift wrap)
+    ///   - relayURLs: The relay URLs to send to (from recipient's kind 10050)
+    ///   - timeout: Maximum time to wait for connections (default 5 seconds)
+    /// - Returns: The relays that were connected (empty if all connections failed)
+    func sendToEphemeralRelays(_ event: NostrEvent, to relayURLs: [RelayURL], timeout: Duration = .seconds(5)) async -> [RelayURL] {
+        guard !relayURLs.isEmpty else { return [] }
+
+        // Acquire leases to prevent premature cleanup
+        await self.pool.acquireEphemeralRelays(relayURLs)
+
+        // Connect to relays
+        let connectedRelays = await self.pool.ensureConnected(to: relayURLs, timeout: timeout)
+
+        guard !connectedRelays.isEmpty else {
+            // No relays connected - release leases immediately
+            await self.pool.releaseEphemeralRelays(relayURLs)
+            return []
+        }
+
+        // Capture relayURLs for the closure
+        let urlsToRelease = relayURLs
+
+        // Send via PostBox for retry/backoff reliability
+        // Release leases only after PostBox has flushed all relays
+        await self.postbox.send(
+            event,
+            to: connectedRelays,
+            skip_ephemeral: false,
+            on_flush: .all { [weak self] posted in
+                Task { [weak self] in
+                    guard let self else { return }
+
+                    // Only release once all relays have flushed
+                    if posted.remaining.isEmpty {
+                        await self.pool.releaseEphemeralRelays(urlsToRelease)
+                    }
+                }
+            }
+        )
+
+        // Safety timeout: release leases if no ACKs ever arrive
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(20))
+            await self?.pool.releaseEphemeralRelays(urlsToRelease)
+            // Cancel retries so PostBox doesn't keep trying removed relays
+            let cancelled = await self?.postbox.force_cancel_send(evid: event.id) ?? false
+            if !cancelled {
+                print("[DM-DEBUG] sendToEphemeralRelays: No pending PostBox entry to cancel for id:\(event.id.hex().prefix(8))")
+            }
+        }
+
+        return connectedRelays
+    }
+
+    /// Ensures connection to the specified relays, connecting on-demand if needed.
+    /// Note: For DM sending, prefer sendToEphemeralRelays() which handles lease lifecycle.
+    ///
+    /// - Parameters:
+    ///   - relayURLs: The relay URLs to connect to (typically from recipient's kind 10050)
+    ///   - timeout: Maximum time to wait for connections (default 5 seconds for DMs)
+    /// - Returns: The subset of relays that are now connected
+    func ensureConnected(to relayURLs: [RelayURL], timeout: Duration = .seconds(5)) async -> [RelayURL] {
+        await self.pool.ensureConnected(to: relayURLs, timeout: timeout)
+    }
+
     // MARK: NWC
     // TODO: Move this to NWCManager
     

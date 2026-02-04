@@ -87,6 +87,13 @@ actor PostBox {
         events.removeValue(forKey: evid)
         return nil
     }
+
+    /// Force-cancels a pending send regardless of delay settings.
+    /// - Parameter evid: The event id to remove from the retry queue.
+    /// - Returns: true if the event was removed, false if it was not found.
+    func force_cancel_send(evid: NoteId) -> Bool {
+        return events.removeValue(forKey: evid) != nil
+    }
     
     func try_flushing_events() async {
         let now = Int64(Date().timeIntervalSince1970)
@@ -189,5 +196,4 @@ actor PostBox {
         }
     }
 }
-
 

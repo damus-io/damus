@@ -103,32 +103,8 @@ class DamusState: HeadlessDamusState, ObservableObject {
 
         guard let ndb = mndb else { return nil }
 
-        // Add user's private key to nostrdb for gift wrap decryption (NIP-17)
-        if let privkey = keypair.privkey {
-            print("[DM-DEBUG] Adding key to nostrdb...")
-            let keyAdded = ndb.addKey(privkey)
-            print("[DM-DEBUG] addKey returned: \(keyAdded)")
-            if keyAdded {
-                // Reprocess any previously received gift wraps with the new key
-                do {
-                    let result = try ndb.processGiftWraps()
-                    print("[DM-DEBUG] processGiftWraps returned: \(result)")
-                } catch {
-                    print("[DM-DEBUG] processGiftWraps threw error: \(error)")
-                }
-            } else {
-                print("[DM-DEBUG] addKey failed or key already exists")
-                // Try processing anyway in case key was already added
-                do {
-                    let result = try ndb.processGiftWraps()
-                    print("[DM-DEBUG] processGiftWraps (retry) returned: \(result)")
-                } catch {
-                    print("[DM-DEBUG] processGiftWraps (retry) threw: \(error)")
-                }
-            }
-        } else {
-            print("[DM-DEBUG] No private key available for NIP-17")
-        }
+        // NIP-17 key initialization is done in initializeNip17KeysIfNeeded()
+        // which runs on a background thread to avoid blocking main thread
 
         let pubkey = keypair.pubkey
 
