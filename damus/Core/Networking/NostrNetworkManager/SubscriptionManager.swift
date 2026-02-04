@@ -293,8 +293,14 @@ extension NostrNetworkManager {
             case .sinceOptimization(let latestNoteTimestampSeen):
                 let optimizedFilters = filters.map {
                     var optimizedFilter = $0
-                    // Shift the since filter 2 minutes (120 seconds) before the last note timestamp
-                    optimizedFilter.since = latestNoteTimestampSeen > 120 ? latestNoteTimestampSeen - 120 : 0
+                    // Skip since optimization for gift_wrap (kind 1059) filters.
+                    // NIP-17 randomizes gift_wrap created_at up to 2 days in the past,
+                    // so applying a recent `since` filter would miss new messages.
+                    let containsGiftWrap = optimizedFilter.kinds?.contains(.gift_wrap) ?? false
+                    if !containsGiftWrap {
+                        // Shift the since filter 2 minutes (120 seconds) before the last note timestamp
+                        optimizedFilter.since = latestNoteTimestampSeen > 120 ? latestNoteTimestampSeen - 120 : 0
+                    }
                     return optimizedFilter
                 }
                 return await self.pool.subscribe(filters: optimizedFilters, to: desiredRelays, id: id)

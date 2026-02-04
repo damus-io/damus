@@ -335,6 +335,21 @@ class NostrNetworkManager {
         await self.pool.ensureConnected(to: relayURLs, timeout: timeout)
     }
 
+    /// Acquires leases on ephemeral relays to prevent premature cleanup.
+    /// Call releaseEphemeralRelays when done with the relays.
+    ///
+    /// - Parameter relayURLs: The relay URLs to acquire leases for
+    func acquireEphemeralRelays(_ relayURLs: [RelayURL]) async {
+        await self.pool.acquireEphemeralRelays(relayURLs)
+    }
+
+    /// Releases leases on ephemeral relays, allowing cleanup when no longer needed.
+    ///
+    /// - Parameter relayURLs: The relay URLs to release leases for
+    func releaseEphemeralRelays(_ relayURLs: [RelayURL]) async {
+        await self.pool.releaseEphemeralRelays(relayURLs)
+    }
+
     // MARK: NWC
     // TODO: Move this to NWCManager
     

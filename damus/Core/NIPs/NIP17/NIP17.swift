@@ -213,6 +213,14 @@ struct NIP17 {
             return nil
         }
 
+        // SECURITY: Verify rumor.pubkey matches seal.pubkey
+        // Per NIP-17, the seal pubkey is the authoritative sender. If the rumor
+        // contains a different pubkey, it could be an attempt to spoof the sender.
+        guard rumor.pubkey == senderPubkey else {
+            print("[DM-DEBUG] unwrap: SECURITY - rumor pubkey mismatch (rumor: \(rumor.pubkey.hex().prefix(16)), seal: \(senderPubkey.hex().prefix(16)))")
+            return nil
+        }
+
         // Rumors should be kind 14 (dm_chat) and unsigned
         guard rumor.kind == NostrKind.dm_chat.rawValue else {
             print("[DM-DEBUG] unwrap: rumor wrong kind \(rumor.kind), expected 14")
