@@ -85,7 +85,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
     var zap_button: ZapButtonModel = ZapButtonModel()
     
     init() {
-        self.damus_state = DamusState.empty
+        self.damus_state = MainActor.assumeIsolated { DamusState.empty }
         self.setup_debouncer()
         DispatchQueue.main.async {
             self.filter_events()
@@ -100,6 +100,10 @@ class HomeModel: ContactsDelegate, ObservableObject {
     
     var dms: DirectMessagesModel {
         return damus_state.dms
+    }
+
+    var pollsFeatureEnabled: Bool {
+        damus_state.settings.enable_nip88_polls
     }
     
     func setup_debouncer() {
@@ -243,6 +247,16 @@ class HomeModel: ContactsDelegate, ObservableObject {
         switch kind {
         case .chat, .longform, .text, .highlight:
             handle_text_event(ev, context: context)
+        case .poll:
+            if pollsFeatureEnabled {
+                handle_poll_event(ev, context: context)
+            } else {
+                handle_text_event(ev, context: context)
+            }
+        case .poll_response:
+            if pollsFeatureEnabled {
+                handle_poll_response(ev)
+            }
         case .contacts:
             handle_contact_event(ev: ev)
         case .metadata:
@@ -668,6 +682,9 @@ class HomeModel: ContactsDelegate, ObservableObject {
         var home_filter_kinds: [NostrKind] = [
             .text, .longform, .boost, .highlight
         ]
+        if pollsFeatureEnabled {
+            home_filter_kinds.append(.poll)
+        }
         if !damus_state.settings.onlyzaps_mode {
             home_filter_kinds.append(.like)
         }
@@ -880,6 +897,21 @@ class HomeModel: ContactsDelegate, ObservableObject {
 
         case .other:
             break
+        }
+    }
+    
+    @MainActor
+    func handle_poll_event(_ ev: NostrEvent, context: SubscriptionContext) {
+        Task { @MainActor in
+            damus_state.polls.registerPollEvent(ev)
+        }
+        handle_text_event(ev, context: context)
+    }
+    
+    @MainActor
+    func handle_poll_response(_ ev: NostrEvent) {
+        Task { @MainActor in
+            damus_state.polls.registerResponseEvent(ev)
         }
     }
     
@@ -1335,7 +1367,6 @@ func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: 
         }
     }
 }
-
 // MARK: - Extension to bridge NIP-65 relay list structs with app-native objects
 // TODO: Do we need this??
 

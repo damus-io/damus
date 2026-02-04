@@ -25,6 +25,10 @@ struct NostrPost {
             .map(\.asString)
             .joined(separator: "")
         
+        if self.kind == .poll {
+            return NostrEvent(content: self.content, keypair: keypair.to_keypair(), kind: self.kind.rawValue, tags: self.tags)
+        }
+
         if self.kind == .highlight {
             var new_tags = post_tags.tags.filter({ $0[safe: 0] != "comment" })
             if content.count > 0 {
