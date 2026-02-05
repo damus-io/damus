@@ -416,8 +416,8 @@ extension NostrNetworkManager {
         /// to all connected relays. The `timeout` parameter is a total deadline for both phases.
         func lookup(noteId: NoteId, to targetRelays: [RelayURL]? = nil, timeout: Duration? = nil) async throws -> NdbNoteLender? {
             // Since note ids point to immutable objects, we can do a simple ndb lookup first
-            if let noteKey = try? self.ndb.lookup_note_key(noteId) {
-                return NdbNoteLender(ndb: self.ndb, noteKey: noteKey)
+            if let note = try? self.ndb.lookup_note_and_copy(noteId) {
+                return NdbNoteLender(ownedNdbNote: note)
             }
 
             // Not available in local ndb, stream from network
