@@ -1056,32 +1056,6 @@ func print_filters(relay_id: String?, filters groups: [[NostrFilter]]) {
 }
  */
 
-// TODO: remove this, let nostrdb handle all validation
-func guard_valid_event(events: EventCache, ev: NostrEvent, callback: @escaping () -> Void) {
-    let validated = events.is_event_valid(ev.id)
-    
-    switch validated {
-    case .unknown:
-        Task.detached(priority: .medium) {
-            let result = validate_event(ev: ev)
-            
-            DispatchQueue.main.async {
-                events.store_event_validation(evid: ev.id, validated: result)
-                guard result == .ok else {
-                    return
-                }
-                callback()
-            }
-        }
-        
-    case .ok:
-        callback()
-        
-    case .bad_id, .bad_sig:
-        break
-    }
-}
-
 func robohash(_ pk: Pubkey) -> String {
     return "https://robohash.org/" + pk.hex()
 }
