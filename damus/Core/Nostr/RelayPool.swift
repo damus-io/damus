@@ -527,7 +527,8 @@ class RelayPool {
                         // For the future, perhaps we should abstract away `.ws_connection_event` in `RelayPool`? Seems like something to be handled on the `RelayConnection` layer.
                         break
                     case .nostr_event(let nostrResponse):
-                        guard nostrResponse.subid == sub_id else { return } // Do not stream items that do not belong in this subscription
+                        // Skip events from other subscriptions; continue processing this stream
+                        guard nostrResponse.subid == sub_id else { continue }
                         switch nostrResponse {
                         case .event(_, let nostrEvent):
                             if seenEvents.contains(nostrEvent.id) { break } // Don't send two of the same events.
