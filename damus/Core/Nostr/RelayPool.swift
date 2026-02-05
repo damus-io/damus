@@ -414,12 +414,18 @@ class RelayPool {
             relay.connection.connect()
         }
         // Mark as open last, to prevent other classes from pulling data before the relays are actually connected
-        open = true
+        // Only mark as open when connecting ALL relays (not specific ones)
+        if targetRelays == nil {
+            open = true
+        }
     }
 
     func disconnect(to targetRelays: [RelayURL]? = nil) async {
         // Mark as closed first, to prevent other classes from pulling data while the relays are being disconnected
-        open = false
+        // Only mark as closed when disconnecting ALL relays (not specific ones)
+        if targetRelays == nil {
+            open = false
+        }
         let relays = await getRelays(targetRelays: targetRelays)
         for relay in relays {
             relay.connection.disconnect()
