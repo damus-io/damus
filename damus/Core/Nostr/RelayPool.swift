@@ -787,7 +787,35 @@ class RelayPool {
             handler.handler.yield((relay_id, event))
         }
     }
-    
+
+    // MARK: - Test Hooks
+
+    #if DEBUG
+    /// Returns the subscription IDs of all currently registered handlers.
+    /// Used in tests to discover the sub_id after starting a subscription.
+    var testableHandlerSubIds: [String] {
+        handlers.map { $0.sub_id }
+    }
+
+    /// Injects a test event into all registered handlers, simulating an event
+    /// arriving from a relay. Used to test handler dispatch and filtering logic.
+    ///
+    /// This bypasses the dispatch-side filtering to directly test the consumer-side
+    /// guard statement that filters events by subscription ID.
+    ///
+    /// - Parameters:
+    ///   - subId: The subscription ID to attach to this event
+    ///   - event: The NostrEvent to inject
+    ///   - relay: The relay URL to use as the source
+    func injectTestEvent(subId: String, event: NostrEvent, relay: RelayURL) {
+        let response = NostrResponse.event(subId, event)
+        let connectionEvent = NostrConnectionEvent.nostr_event(response)
+        for handler in handlers {
+            handler.handler.yield((relay, connectionEvent))
+        }
+    }
+    #endif
+
     // MARK: - Negentropy
     
     /// This streams items in the following fashion:
