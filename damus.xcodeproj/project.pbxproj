@@ -428,6 +428,8 @@
 		4CE6DEEB27F7A08200C66700 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4CE6DEEA27F7A08200C66700 /* Assets.xcassets */; };
 		4CE6DEEE27F7A08200C66700 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4CE6DEED27F7A08200C66700 /* Preview Assets.xcassets */; };
 		4CE6DEF827F7A08200C66700 /* damusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DEF727F7A08200C66700 /* damusTests.swift */; };
+		D7SPINNER2F3498A200CF659F /* SpinnerFixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7SPINNER2F3498A100CF659F /* SpinnerFixTests.swift */; };
+		D7NEVENT2F3498B200CF659F /* NeventParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7NEVENT2F3498B100CF659F /* NeventParsingTests.swift */; };
 		4CE6DF0227F7A08200C66700 /* damusUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF0127F7A08200C66700 /* damusUITests.swift */; };
 		4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */; };
 		4CE8794829941DA700F758CC /* RelayFilters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE8794729941DA700F758CC /* RelayFilters.swift */; };
@@ -2539,6 +2541,8 @@
 		4CE6DEED27F7A08200C66700 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		4CE6DEF327F7A08200C66700 /* damusTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = damusTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CE6DEF727F7A08200C66700 /* damusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damusTests.swift; sourceTree = "<group>"; };
+		D7SPINNER2F3498A100CF659F /* SpinnerFixTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpinnerFixTests.swift; sourceTree = "<group>"; };
+		D7NEVENT2F3498B100CF659F /* NeventParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeventParsingTests.swift; sourceTree = "<group>"; };
 		4CE6DEFD27F7A08200C66700 /* damusUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = damusUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CE6DF0127F7A08200C66700 /* damusUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damusUITests.swift; sourceTree = "<group>"; };
 		4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayConnection.swift; sourceTree = "<group>"; };
@@ -3898,6 +3902,8 @@
 				4C363A9F2828A8DD006E126D /* LikeTests.swift */,
 				4C363A9D2828A822006E126D /* ReplyTests.swift */,
 				4CE6DEF727F7A08200C66700 /* damusTests.swift */,
+				D7SPINNER2F3498A100CF659F /* SpinnerFixTests.swift */,
+				D7NEVENT2F3498B100CF659F /* NeventParsingTests.swift */,
 				4C3EA67A28FF7B3900C48A62 /* InvoiceTests.swift */,
 				3ACBCB77295FE5C70037388A /* TimeAgoTests.swift */,
 				4CB88399297322D200DC99E7 /* DMTests.swift */,
@@ -6367,6 +6373,8 @@
 				D78525252A7B2EA4002FA637 /* NoteContentViewTests.swift in Sources */,
 				4C3EA67B28FF7B3900C48A62 /* InvoiceTests.swift in Sources */,
 				4C363A9E2828A822006E126D /* ReplyTests.swift in Sources */,
+				D7SPINNER2F3498A200CF659F /* SpinnerFixTests.swift in Sources */,
+				D7NEVENT2F3498B200CF659F /* NeventParsingTests.swift in Sources */,
 				3A96E3FE2D6BCE3800AE1630 /* RepostedTests.swift in Sources */,
 				D2585C7839C411EB3E0D79D6 /* RepostNotificationTests.swift in Sources */,
 				4C7D097E2A0C58B900943473 /* WalletConnectTests.swift in Sources */,
