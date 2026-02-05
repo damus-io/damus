@@ -479,12 +479,24 @@ extension NostrNetworkManager {
         ///
         /// - Parameters:
         ///   - filter: The NostrFilter to match events against.
-        ///   - relays: Optional relay URLs to query. If nil, broadcasts to all connected relays.
+        ///   - relays: Optional relay URLs to query. If nil, ensures pool relays are connected first.
         ///   - timeout: Maximum duration to wait for a response.
-        /// - Returns: An `NdbNoteLender` for the first matching event, or `nil` if EOSE is received
-        ///   or the timeout expires without finding a match.
+        /// - Returns: An `NdbNoteLender` for the first matching event, or `nil` if no relays
+        ///   connected, EOSE received, or timeout expires without finding a match.
         private func fetchFromRelays(filter: NostrFilter, relays: [RelayURL]?, timeout: Duration) async -> NdbNoteLender? {
-            for await item in await self.pool.subscribe(filters: [filter], to: relays, eoseTimeout: timeout) {
+            // When broadcasting (no specific relays), ensure at least some relays are connected
+            let effectiveRelays: [RelayURL]?
+            if relays == nil {
+                let poolRelays = await self.pool.getRelays(targetRelays: nil)
+                let poolRelayURLs = poolRelays.map { $0.descriptor.url }
+                let connectedRelays = await self.pool.ensureConnected(to: poolRelayURLs, timeout: .seconds(2))
+                guard !connectedRelays.isEmpty else { return nil }
+                effectiveRelays = connectedRelays
+            } else {
+                effectiveRelays = relays
+            }
+
+            for await item in await self.pool.subscribe(filters: [filter], to: effectiveRelays, eoseTimeout: timeout) {
                 switch item {
                 case .event(let event):
                     return NdbNoteLender(ownedNdbNote: event)
