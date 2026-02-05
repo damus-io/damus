@@ -39,22 +39,36 @@ struct EventLoaderView<Content: View>: View {
         self.loadingTask?.cancel()
     }
     
+    /// Attempts to load the event with retry logic for transient failures.
+    ///
+    /// Retries up to 3 times with exponential backoff (0.5s, 1.0s, 2.0s) when the event
+    /// is not found, handling cases where events arrive late from relays.
+    /// Runs off the main actor to avoid blocking SwiftUI.
     func subscribe() {
         self.loadingTask?.cancel()
-        self.loadingTask = Task {
+        let eventState = _event  // Capture @State wrapper for detached task access
+        self.loadingTask = Task.detached(priority: .userInitiated) { [damus_state, event_id, relayHints, eventState] in
             let targetRelays = relayHints.isEmpty ? nil : relayHints
-            #if DEBUG
-            if let targetRelays, !targetRelays.isEmpty {
-                print("[relay-hints] EventLoaderView: Loading event \(event_id.hex().prefix(8))... with \(targetRelays.count) relay hint(s): \(targetRelays.map { $0.absoluteString })")
+
+            for attempt in 1...3 {
+                guard !Task.isCancelled else { return }
+
+                let lender = try? await damus_state.nostrNetwork.reader.lookup(noteId: event_id, to: targetRelays)
+
+                var copiedEvent: NostrEvent?
+                lender?.justUseACopy({ copiedEvent = $0 })
+
+                if let copiedEvent {
+                    await MainActor.run {
+                        eventState.wrappedValue = copiedEvent
+                    }
+                    return
+                }
+
+                // Event not found - retry with exponential backoff
+                guard attempt < 3 else { break }
+                try? await Task.sleep(for: .seconds(0.5 * pow(2.0, Double(attempt - 1))))
             }
-            #endif
-            let lender = try? await damus_state.nostrNetwork.reader.lookup(noteId: self.event_id, to: targetRelays)
-            lender?.justUseACopy({ event = $0 })
-            #if DEBUG
-            if let targetRelays, !targetRelays.isEmpty {
-                print("[relay-hints] EventLoaderView: Event \(event_id.hex().prefix(8))... loaded: \(event != nil)")
-            }
-            #endif
         }
     }
     
