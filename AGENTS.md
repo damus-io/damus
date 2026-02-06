@@ -37,7 +37,7 @@ Damus is an iOS client built around a local relay model ([damus-io/damus#3204](h
 
 1. **Always prefer simplicity.** One line of code is better than ten. Ten is better than a hundred. A thousand-line commit will be avoided unless it saves someone's life. Reuse existing code; do not accrue duplicates. Always revisit how existing code can be applied or refactored before writing new code that performs the same function.
 2. Commits should be logically distinct and standalone.
-3. Code should be human readable and human reviewable.
+3. Code should be human-readable and human-reviewable.
 4. Ensure docstring coverage for any code added or modified.
 5. Review and follow `.github/pull_request_template.md` when creating PRs for iOS Damus.
 6. Ensure nevernesting: favor early returns and guard clauses over deeply nested conditionals; simplify control flow by exiting early instead of wrapping logic in multiple layers of `if` statements.
