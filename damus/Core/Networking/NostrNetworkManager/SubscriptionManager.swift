@@ -257,7 +257,7 @@ extension NostrNetworkManager {
                             try Task.checkCancellation()
                             logStreamPipelineStats("RelayPool_Handler_\(id)", "SubscriptionManager_Network_Stream_\(id)")
                             switch item {
-                            case .event(let event):
+                            case .event(let event, _):
                                 switch streamMode {
                                 case .ndbFirst, .ndbOnly:
                                     break   // NO-OP
@@ -486,7 +486,7 @@ extension NostrNetworkManager {
         private func fetchFromRelays(filter: NostrFilter, relays: [RelayURL]?, timeout: Duration) async -> NdbNoteLender? {
             for await item in await self.pool.subscribe(filters: [filter], to: relays, eoseTimeout: timeout) {
                 switch item {
-                case .event(let event):
+                case .event(let event, _):
                     return NdbNoteLender(ownedNdbNote: event)
                 case .eose:
                     return nil
@@ -559,12 +559,12 @@ extension NostrNetworkManager {
                     }
                 })
                 if profileNotNil ?? false {
-                    return .profile(pubkey)
+                    return .profile(pubkey, source: .cache)
                 }
                 filter = NostrFilter(kinds: [.metadata], limit: 1, authors: [pubkey])
             case .event(let evid):
                 if let event = try? self.ndb.lookup_note_and_copy(evid) {
-                    return .event(event)
+                    return .event(event, source: .cache)
                 }
                 filter = NostrFilter(ids: [evid], limit: 1)
             }
@@ -589,20 +589,35 @@ extension NostrNetworkManager {
                 }
             }
 
-            for await noteLender in self.streamExistingEvents(filters: [filter], to: targetRelays) {
-                let foundEvent: FoundEvent? = try? noteLender.borrow({ event in
+            networkStream: for await item in await self.pool.subscribe(filters: [filter], to: targetRelays, eoseTimeout: .seconds(10)) {
+                switch item {
+                case .event(let event, let relayURL):
+                    #if DEBUG
+                    print("[nprofile-debug] findEvent: got event kind=\(event.kind) relay=\(relayURL?.absoluteString ?? "nil") known_kind=\(String(describing: event.known_kind))")
+                    #endif
+                    guard let relayURL else {
+                        #if DEBUG
+                        let queryDesc: String
+                        switch query {
+                        case .profile(let pk): queryDesc = "profile(\(pk.hex().prefix(8))...)"
+                        case .event(let eid): queryDesc = "event(\(eid.hex().prefix(8))...)"
+                        }
+                        print("[nprofile-debug] findEvent: nil relay — dropping event id=\(event.id.hex().prefix(8))... kind=\(event.kind) known_kind=\(String(describing: event.known_kind)) query=\(queryDesc)")
+                        #endif
+                        continue
+                    }
+                    let source: EventSource = .network(relayURL)
                     switch query {
-                    case .profile:
+                    case .profile(let pubkey):
                         if event.known_kind == .metadata {
-                            return .profile(event.pubkey)
+                            guard event.pubkey == pubkey else { continue }
+                            return .profile(event.pubkey, source: source)
                         }
                     case .event:
-                        return .event(event.toOwned())
+                        return .event(event, source: source)
                     }
-                    return nil
-                })
-                if let foundEvent {
-                    return foundEvent
+                case .eose:
+                    break networkStream
                 }
             }
 

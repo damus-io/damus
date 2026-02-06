@@ -537,7 +537,7 @@ class RelayPool {
                         switch nostrResponse {
                         case .event(_, let nostrEvent):
                             if seenEvents.contains(nostrEvent.id) { break } // Don't send two of the same events.
-                            continuation.yield(with: .success(.event(nostrEvent)))
+                            continuation.yield(with: .success(.event(nostrEvent, from: relayUrl)))
                             seenEvents.insert(nostrEvent.id)
                         case .notice(let note):
                             break   // We do not support handling these yet
@@ -586,7 +586,7 @@ class RelayPool {
             outerLoop: for await item in await self.subscribe(filters: filters, to: desiredRelays, eoseTimeout: eoseTimeout, id: id) {
                 if Task.isCancelled { return }
                 switch item {
-                case .event(let event):
+                case .event(let event, _):
                     continuation.yield(event)
                 case .eose:
                     break outerLoop
@@ -596,8 +596,8 @@ class RelayPool {
     }
     
     enum StreamItem {
-        /// A Nostr event
-        case event(NostrEvent)
+        /// A Nostr event, with the relay that delivered it (nil for negentropy sync path)
+        case event(NostrEvent, from: RelayURL?)
         /// The "end of stored events" signal
         case eose
     }
@@ -812,7 +812,7 @@ class RelayPool {
             let negentropyStartTimestamp = UInt32(Date().timeIntervalSince1970)
             // 2. Negentropy sync missing notes and send the missing notes over
             for try await event in try await self.negentropySync(filters: filters, to: desiredRelayURLs, negentropyVector: negentropyVector, ignoreUnsupportedRelays: ignoreUnsupportedRelays) {
-                continuation.yield(.event(event))
+                continuation.yield(.event(event, from: nil))
             }
             // 3. When syncing is done, send the EOSE signal
             continuation.yield(.eose)
@@ -825,8 +825,8 @@ class RelayPool {
             for await item in await self.subscribe(filters: updatedFilters, to: desiredRelayURLs, eoseTimeout: eoseTimeout, id: id) {
                 try Task.checkCancellation()
                 switch item {
-                case .event(let nostrEvent):
-                    continuation.yield(.event(nostrEvent))
+                case .event(let nostrEvent, let relayURL):
+                    continuation.yield(.event(nostrEvent, from: relayURL))
                 case .eose:
                     continue    // We already sent the EOSE signal after negentropy sync, ignore this redundant EOSE
                 }

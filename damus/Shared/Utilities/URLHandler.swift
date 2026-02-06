@@ -33,8 +33,21 @@ struct DamusURLHandler {
             return .route(.ProfileByKey(pubkey: pubkey))
         case .profile_reference(let pubkey, let relays):
             guard !relays.isEmpty else { return .route(.ProfileByKey(pubkey: pubkey)) }
+            #if DEBUG
+            print("[nprofile-debug] URL: fetching profile \(pubkey.hex().prefix(8))... from \(relays.count) relay(s)")
+            #endif
             Task {
-                let _ = await damus_state.nostrNetwork.reader.findEvent(query: .profile(pubkey: pubkey, find_from: relays))
+                let result = await damus_state.nostrNetwork.reader.findEvent(query: .profile(pubkey: pubkey, find_from: relays))
+                #if DEBUG
+                switch result {
+                case .profile(_, let source):
+                    print("[nprofile-debug] URL: found profile \(pubkey.hex().prefix(8))... source: \(source)")
+                case .event(_, let source):
+                    print("[nprofile-debug] URL: found event (unexpected for profile query) source: \(source)")
+                case nil:
+                    print("[nprofile-debug] URL: could not find profile \(pubkey.hex().prefix(8))... from relay hints")
+                }
+                #endif
             }
             return .route(.ProfileByKey(pubkey: pubkey))
         case .filter(let nostrFilter):
@@ -104,7 +117,7 @@ struct DamusURLHandler {
         if uri.hasPrefix("nprofile"), case .nprofile(let nprofile) = Bech32Object.parse(uri) {
             #if DEBUG
             if !nprofile.relays.isEmpty {
-                print("[relay-hints] URL nprofile: Found \(nprofile.relays.count) hint(s) for \(nprofile.author.hex().prefix(8))...: \(nprofile.relays.map { $0.absoluteString })")
+                print("[nprofile-debug] URL: found \(nprofile.relays.count) hint(s) for \(nprofile.author.hex().prefix(8))...: \(nprofile.relays.map { $0.absoluteString })")
             }
             #endif
             return .profile_reference(nprofile.author, relays: nprofile.relays)

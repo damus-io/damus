@@ -88,7 +88,7 @@ struct SearchingEventView: View {
             Task {
                 let targetRelays = relays.isEmpty ? nil : relays
                 let res = await state.nostrNetwork.reader.findEvent(query: .event(evid: note_id, find_from: targetRelays))
-                guard case .event(let ev) = res else {
+                guard case .event(let ev, _) = res else {
                     self.search_state = .not_found
                     return
                 }
@@ -98,7 +98,7 @@ struct SearchingEventView: View {
             Task {
                 let targetRelays = relays.isEmpty ? nil : relays
                 let res = await state.nostrNetwork.reader.findEvent(query: .profile(pubkey: pubkey, find_from: targetRelays))
-                guard case .profile(let pubkey) = res else {
+                guard case .profile(let pubkey, _) = res else {
                     self.search_state = .not_found
                     return
                 }

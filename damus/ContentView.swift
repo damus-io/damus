@@ -992,10 +992,25 @@ enum FindEventType {
     case event(NoteId)
 }
 
+/// Describes where an event was sourced from.
+enum EventSource: CustomStringConvertible {
+    /// Delivered by a relay (the first responder, due to RelayPool deduplication)
+    case network(RelayURL)
+    /// Found in local NDB cache
+    case cache
+
+    var description: String {
+        switch self {
+        case .network(let relay): return "network(\(relay.absoluteString))"
+        case .cache: return "cache"
+        }
+    }
+}
+
 enum FoundEvent {
     // TODO: Why not return the profile record itself? Right now the code probably just wants to trigger ndb to ingest the profile record and be available at ndb in parallel, but it would be cleaner if the function that uses this simply does that ndb query on their behalf.
-    case profile(Pubkey)
-    case event(NostrEvent)
+    case profile(Pubkey, source: EventSource)
+    case event(NostrEvent, source: EventSource)
 }
 
 func timeline_name(_ timeline: Timeline?) -> String {
@@ -1128,17 +1143,22 @@ extension LossyLocalNotification {
             return .route(.LoadableNostrEvent(note_reference: .note_id(nEvent.noteid, relays: nEvent.relays)))
         case .nprofile(let nProfile):
             if !nProfile.relays.isEmpty {
-                Log.info("nprofile: fetching profile %{public}@ from %d relay hint(s)", for: .networking, nProfile.author.hex(), nProfile.relays.count)
+                #if DEBUG
+                print("[nprofile-debug] push: fetching profile \(nProfile.author.hex().prefix(8))... from \(nProfile.relays.count) relay(s)")
+                #endif
                 Task {
                     let result = await damus_state.nostrNetwork.reader.findEvent(query: .profile(pubkey: nProfile.author, find_from: nProfile.relays))
-                    if result != nil {
-                        Log.info("nprofile: successfully found profile from relay hints", for: .networking)
-                    } else {
-                        Log.info("nprofile: could not find profile from relay hints", for: .networking)
+                    #if DEBUG
+                    switch result {
+                    case .profile(_, let source):
+                        print("[nprofile-debug] push: found profile \(nProfile.author.hex().prefix(8))... source: \(source)")
+                    case .event(_, let source):
+                        print("[nprofile-debug] push: found event (unexpected for profile query) source: \(source)")
+                    case nil:
+                        print("[nprofile-debug] push: could not find profile \(nProfile.author.hex().prefix(8))... from relay hints")
                     }
+                    #endif
                 }
-            } else {
-                Log.info("nprofile: no relay hints provided, using default profile lookup", for: .networking)
             }
             return .route(.ProfileByKey(pubkey: nProfile.author))
         case .nrelay:

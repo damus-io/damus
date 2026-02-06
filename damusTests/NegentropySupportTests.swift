@@ -107,7 +107,7 @@ final class NegentropySupportTests: XCTestCase {
                     ignoreUnsupportedRelays: ignoreUnsupportedRelays
                 ) {
                     switch item {
-                    case .event(let event):
+                    case .event(let event, _):
                         if let expectation = eventExpectations[event.id] {
                             expectation.fulfill()
                         }

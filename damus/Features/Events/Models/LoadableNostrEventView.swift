@@ -58,7 +58,7 @@ class LoadableNostrEventViewModel: ObservableObject {
     private func loadEvent(noteId: NoteId, relays: [RelayURL]) async -> NostrEvent? {
         let targetRelays = relays.isEmpty ? nil : relays
         let res = await damus_state.nostrNetwork.reader.findEvent(query: .event(evid: noteId, find_from: targetRelays))
-        guard let res, case .event(let ev) = res else { return nil }
+        guard let res, case .event(let ev, _) = res else { return nil }
         return ev
     }
     

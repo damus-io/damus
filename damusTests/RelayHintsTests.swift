@@ -432,19 +432,54 @@ final class RelayHintsTests: XCTestCase {
         let targetRelays = nevent.relays.isEmpty ? nil : nevent.relays
         let result = await networkManager.reader.findEvent(query: .event(evid: nevent.noteid, find_from: targetRelays))
         
-        // Verify we got the event back
-        guard case .event(let foundNote) = result else {
+        // Verify we got the event back with network source attribution
+        guard case .event(let foundNote, let source) = result else {
             XCTFail("Should find note using nevent relay hints via findEvent")
             return
         }
-        
+
         XCTAssertEqual(foundNote.id, testNote.id, "Found note should match nevent note ID")
         XCTAssertEqual(foundNote.content, testNote.content, "Found note content should match")
+        guard case .network = source else {
+            XCTFail("Event from relay should have .network source, got \(source)")
+            return
+        }
         
         // Cleanup
         await networkManager.close()
     }
-    
+
+    /// Test that findEvent rejects metadata events whose pubkey does not match the requested profile.
+    /// A non-compliant relay could return kind-0 metadata for a different pubkey than requested.
+    /// The pubkey guard in findEvent must prevent this from being accepted.
+    func testFindEventRejectsMismatchedProfilePubkey() async throws {
+        // Given: A relay that has metadata for keypair B, but we query for keypair A
+        let relay = try await setupRelay()
+        let relayUrl = RelayURL(await relay.url().description)!
+
+        let keypairA = generate_new_keypair().to_keypair()
+        let keypairB = generate_new_keypair().to_keypair()
+
+        // Publish keypair B's metadata to the relay
+        let metadataB = NostrEvent(content: "{\"name\":\"attacker\"}", keypair: keypairB, kind: NostrKind.metadata.rawValue)!
+        let connection = await connectToRelay(url: relayUrl, label: "MismatchRelay")
+        sendEvents([metadataB], to: connection)
+
+        try await Task.sleep(for: .milliseconds(500))
+
+        // When: Network manager queries for keypair A's profile using the relay hint
+        let ndb = await test_damus_state.ndb
+        let networkManager = try await setupNetworkManager(with: [], ndb: ndb)
+
+        let result = await networkManager.reader.findEvent(query: .profile(pubkey: keypairA.pubkey, find_from: [relayUrl]))
+
+        // Then: findEvent must NOT return keypair B's metadata as keypair A's profile
+        XCTAssertNil(result, "findEvent must reject metadata whose pubkey does not match the requested profile")
+
+        // Cleanup
+        await networkManager.close()
+    }
+
     /// Test that relay hints work correctly when some events are cached in NDB.
     /// This verifies that cached events are returned from NDB and relay hints are only
     /// used for non-cached events, avoiding unnecessary network calls.
