@@ -555,7 +555,7 @@ extension NostrNetworkManager {
                 let profileNotNil = try? self.ndb.lookup_profile(pubkey, borrow: { pr in
                     switch pr {
                     case .some(let pr): return pr.profile != nil
-                    case .none: return true
+                    case .none: return false
                     }
                 })
                 if profileNotNil ?? false {
