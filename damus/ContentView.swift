@@ -683,14 +683,14 @@ struct ContentView: View {
 
     func handleNotification(notification: LossyLocalNotification) {
         Log.info("ContentView is handling a notification", for: .push_notifications)
-        guard damus_state != nil else {
+        guard let damus_state else {
             // This should never happen because `listenAndHandleLocalNotifications` is called after damus state is initialized in `onAppear`
             assertionFailure("DamusState not loaded when ContentView (new handler) was handling a notification")
             Log.error("DamusState not loaded when ContentView (new handler) was handling a notification", for: .push_notifications)
             return
         }
         let local = notification
-        let openAction = local.toViewOpenAction()
+        let openAction = local.toViewOpenAction(damus_state: damus_state)
         self.execute_open_action(openAction)
     }
 
@@ -1115,8 +1115,10 @@ extension LossyLocalNotification {
     /// Converts this mention's NIP-19 reference into a UI action for the app.
     ///
     /// Maps NPUB and NPROFILE references to profile routes, NOTE/NEVENT/NADDR references to loadable note routes, NSCRIPT to a script view, and returns an error sheet for deprecated or unsafe references (`nrelay`, `nsec`).
+    /// - Parameters:
+    ///   - damus_state: The app state used for fetching profiles from relay hints.
     /// - Returns: A `ContentView.ViewOpenAction` that represents the route or sheet to present for this mention.
-    func toViewOpenAction() -> ContentView.ViewOpenAction {
+    func toViewOpenAction(damus_state: DamusState) -> ContentView.ViewOpenAction {
         switch self.mention.nip19 {
         case .npub(let pubkey):
             return .route(.ProfileByKey(pubkey: pubkey))
@@ -1125,7 +1127,19 @@ extension LossyLocalNotification {
         case .nevent(let nEvent):
             return .route(.LoadableNostrEvent(note_reference: .note_id(nEvent.noteid, relays: nEvent.relays)))
         case .nprofile(let nProfile):
-            // TODO: Improve this by implementing a profile route that handles nprofiles with their relay hints.
+            if !nProfile.relays.isEmpty {
+                Log.info("nprofile: fetching profile %{public}@ from %d relay hint(s)", for: .networking, nProfile.author.hex(), nProfile.relays.count)
+                Task {
+                    let result = await damus_state.nostrNetwork.reader.findEvent(query: .profile(pubkey: nProfile.author, find_from: nProfile.relays))
+                    if result != nil {
+                        Log.info("nprofile: successfully found profile from relay hints", for: .networking)
+                    } else {
+                        Log.info("nprofile: could not find profile from relay hints", for: .networking)
+                    }
+                }
+            } else {
+                Log.info("nprofile: no relay hints provided, using default profile lookup", for: .networking)
+            }
             return .route(.ProfileByKey(pubkey: nProfile.author))
         case .nrelay:
             // We do not need to implement `nrelay` support, it has been deprecated.

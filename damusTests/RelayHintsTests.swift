@@ -323,7 +323,82 @@ final class RelayHintsTests: XCTestCase {
         // Cleanup
         await networkManager.close()
     }
-    
+
+    /// Test that toViewOpenAction correctly handles nprofile mentions with relay hints.
+    /// This exercises the production code path in LossyLocalNotification.toViewOpenAction.
+    func testToViewOpenActionWithNProfileRelayHints() async throws {
+        // Given: A relay with a real profile event and an nprofile pointing to that relay
+        let authorKeypair = generate_new_keypair().to_keypair()
+        let hintedRelay = try await setupRelay()
+        let hintedRelayUrl = RelayURL(await hintedRelay.url().description)!
+        let profileEvent = NostrEvent(
+            content: "{\"name\": \"Hinted User\", \"about\": \"Fetched via nprofile relay hint\"}",
+            keypair: authorKeypair,
+            kind: 0,
+            tags: []
+        )!
+
+        let hintedConnection = await connectToRelay(url: hintedRelayUrl, label: "HintedRelay")
+        sendEvents([profileEvent], to: hintedConnection)
+        try await Task.sleep(for: .milliseconds(500))
+
+        let nprofile = NProfile(author: authorKeypair.pubkey, relays: [hintedRelayUrl])
+        let mentionRef = MentionRef(nip19: .nprofile(nprofile))
+        let notification = LossyLocalNotification(type: .profile_zap, mention: mentionRef)
+        let damus_state = await test_damus_state
+
+        // When: Converting the notification to a view open action
+        let openAction = notification.toViewOpenAction(damus_state: damus_state)
+
+        // Then: The route is correct
+        guard case .route(let route) = openAction else {
+            XCTFail("Expected route action, got \(openAction)")
+            return
+        }
+        guard case .ProfileByKey(let pubkey) = route else {
+            XCTFail("Expected ProfileByKey route, got \(route)")
+            return
+        }
+        XCTAssertEqual(pubkey, authorKeypair.pubkey, "Route should contain the correct pubkey from nprofile")
+
+        // And: The side effect happened (relay hints were consumed to prefetch profile data)
+        let fetchedProfile = await waitForProfile(id: authorKeypair.pubkey, in: damus_state.profiles, timeoutSeconds: 5.0)
+        XCTAssertNotNil(fetchedProfile, "Expected profile prefetch using nprofile relay hints")
+        XCTAssertEqual(fetchedProfile?.name, "Hinted User", "Fetched profile should match relay-hosted profile data")
+    }
+
+    /// Test that toViewOpenAction handles nprofile without relay hints (empty relays).
+    func testToViewOpenActionWithNProfileNoRelayHints() async throws {
+        // Given: A notification with an nprofile mention without relay hints and a pubkey
+        // that does not already exist in shared test profile storage
+        let damus_state = await test_damus_state
+        let authorPubkey = makeUnusedPubkey(in: damus_state.profiles)
+        XCTAssertNil(try? damus_state.profiles.lookup(id: authorPubkey), "Test precondition failed: pubkey must be absent before opening action")
+
+        let nprofile = NProfile(author: authorPubkey, relays: [])
+        let mentionRef = MentionRef(nip19: .nprofile(nprofile))
+        let notification = LossyLocalNotification(type: .profile_zap, mention: mentionRef)
+
+        // When: Converting the notification to a view open action
+        let openAction = notification.toViewOpenAction(damus_state: damus_state)
+
+        // Then: The action is still the expected profile route
+        guard case .route(let route) = openAction else {
+            XCTFail("Expected route action, got \(openAction)")
+            return
+        }
+        guard case .ProfileByKey(let pubkey) = route else {
+            XCTFail("Expected ProfileByKey route, got \(route)")
+            return
+        }
+        XCTAssertEqual(pubkey, authorPubkey, "Route should contain the correct pubkey from nprofile")
+
+        // And: No relay-hint prefetch side effect is triggered for empty relay hints
+        try await Task.sleep(for: .milliseconds(250))
+        let profile = try? damus_state.profiles.lookup(id: authorPubkey)
+        XCTAssertNil(profile, "No profile prefetch should occur when nprofile relay hints are empty")
+    }
+
     /// Test that relay hints from NIP-19 nevent entities are correctly used for lookups.
     /// This verifies that nevent-style relay hints (common in nostr: URLs) work correctly.
     func testRelayHintsFromNEventEntity() async throws {
@@ -521,6 +596,38 @@ final class RelayHintsTests: XCTestCase {
         }
         
         return networkManager
+    }
+
+    /// Polls for a profile to appear in storage within a timeout window.
+    /// - Parameters:
+    ///   - id: The pubkey to lookup.
+    ///   - profiles: The Profiles storage object.
+    ///   - timeoutSeconds: Maximum time to wait.
+    /// - Returns: The fetched profile if available before timeout; otherwise nil.
+    private func waitForProfile(id: Pubkey, in profiles: Profiles, timeoutSeconds: TimeInterval) async -> Profile? {
+        let deadline = Date().addingTimeInterval(timeoutSeconds)
+        while Date() < deadline {
+            if let profile = try? profiles.lookup(id: id) {
+                return profile
+            }
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+        return nil
+    }
+
+    /// Generates a pubkey that is currently absent from the provided profile store.
+    /// This avoids false failures caused by shared global test state.
+    /// - Parameter profiles: The profile storage to check for preexisting records.
+    /// - Returns: A pubkey that is not currently present in storage.
+    private func makeUnusedPubkey(in profiles: Profiles) -> Pubkey {
+        for _ in 0..<64 {
+            let candidate = generate_new_keypair().to_keypair().pubkey
+            if (try? profiles.lookup(id: candidate)) == nil {
+                return candidate
+            }
+        }
+        // Fallback is practically unreachable; retained to keep control flow explicit.
+        return generate_new_keypair().to_keypair().pubkey
     }
 }
 
