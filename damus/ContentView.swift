@@ -461,7 +461,7 @@ struct ContentView: View {
             self.active_full_screen_item = item
         }
         .onReceive(handle_notify(.favoriteUpdated)) { _ in
-            home.resubscribe(.following)
+            home.subscribe_to_favorites()
         }
         .onReceive(handle_notify(.zapping)) { zap_ev in
             guard !zap_ev.is_custom else {
