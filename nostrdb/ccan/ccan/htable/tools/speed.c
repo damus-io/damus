@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 	struct htable_obj ht;
 	bool make_dumb = false;
 
-	if (argv[1] && strcmp(argv[1], "--dumb") == 0) {
+	if (argv[1] && strncmp(argv[1], "--dumb", 7) == 0) {
 		argv++;
 		make_dumb = true;
 	}
