@@ -95,15 +95,23 @@ struct PostingTimelineView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .overlay {
-                    Image("damus-home")
-                        .resizable()
-                        .frame(width:30,height:30)
-                        .shadow(color: DamusColors.purple, radius: 2)
-                        .opacity(isSideBarOpened ? 0 : 1)
-                        .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
-                        .onTapGesture {
-                            isSideBarOpened.toggle()
+                    VStack(spacing: 2) {
+                        Image("damus-home")
+                            .resizable()
+                            .frame(width: 30, height: 30)
+                            .shadow(color: DamusColors.purple, radius: 2)
+                        if damus_state.settings.enable_favourites_feature {
+                            Text(timeline_source == .favorites ? timeline_source.description : " ")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                                .opacity(timeline_source == .favorites ? 1 : 0)
                         }
+                    }
+                    .opacity(isSideBarOpened ? 0 : 1)
+                    .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
+                    .onTapGesture {
+                        isSideBarOpened.toggle()
+                    }
                 }
             }
             .padding(.horizontal, 20)
