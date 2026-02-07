@@ -248,17 +248,19 @@ struct ChatEventView: View {
         )
     }
     
-    func send_like(emoji: String) async {
+    /// Sends a reaction event for the current chat message.
+    /// - Parameters:
+    ///   - emoji: The emoji to react with (ignored if customEmoji is provided)
+    ///   - customEmoji: Optional custom emoji for NIP-30 reactions
+    func send_like(emoji: String, customEmoji: CustomEmoji? = nil) async {
         guard let keypair = damus_state.keypair.to_full(),
-              let like_ev = make_like_event(keypair: keypair, liked: event, content: emoji, relayURL: await damus_state.nostrNetwork.relaysForEvent(event: event).first) else {
+              let like_ev = make_like_event(keypair: keypair, liked: event, content: emoji, customEmoji: customEmoji, relayURL: await damus_state.nostrNetwork.relaysForEvent(event: event).first) else {
             return
         }
 
         self.bar.our_like = like_ev
-
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.impactOccurred()
-        
         await damus_state.nostrNetwork.postbox.send(like_ev)
     }
     

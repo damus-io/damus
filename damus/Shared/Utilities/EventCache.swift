@@ -389,10 +389,11 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
     
     //print("Preloading event \(plan.event.content)")
 
-    if artifacts == nil && plan.load_artifacts {
+    // Re-render if no artifacts exist, OR if force reload requested (e.g., after custom emoji images loaded)
+    if artifacts == nil || plan.load_artifacts {
         let arts = await ContentRenderer().render_note_content(ndb: state.ndb, ev: plan.event, profiles: profiles, keypair: our_keypair)
         artifacts = arts
-        
+
         // we need these asap
         DispatchQueue.main.async {
             plan.data.artifacts_model.state = .loaded(arts)

@@ -492,7 +492,15 @@ func make_boost_event(keypair: FullKeypair, boosted: NostrEvent, relayURL: Relay
     return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 6, tags: tags)
 }
 
-func make_like_event(keypair: FullKeypair, liked: NostrEvent, content: String = "🤙", relayURL: RelayURL?) -> NostrEvent? {
+/// Creates a reaction event (kind 7) for a given note per NIP-25.
+/// - Parameters:
+///   - keypair: The user's full keypair for signing
+///   - liked: The event being reacted to
+///   - content: The reaction content (emoji). Defaults to shaka. Ignored if customEmoji is provided.
+///   - customEmoji: Optional custom emoji for NIP-30 reactions. When provided, content becomes `:shortcode:` and an emoji tag is added.
+///   - relayURL: Optional relay URL to include in tags
+/// - Returns: A signed reaction event, or nil if creation fails
+func make_like_event(keypair: FullKeypair, liked: NostrEvent, content: String = "🤙", customEmoji: CustomEmoji? = nil, relayURL: RelayURL?) -> NostrEvent? {
     var tags = liked.tags.reduce(into: [[String]]()) { ts, tag in
         guard tag.count >= 2,
               (tag[0].matches_char("e") || tag[0].matches_char("p")) else {
@@ -513,7 +521,15 @@ func make_like_event(keypair: FullKeypair, liked: NostrEvent, content: String = 
     tags.append(eTagBuilder)
     tags.append(pTagBuilder)
 
-    return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 7, tags: tags)
+    // Add emoji tag for custom emoji reactions (NIP-25/NIP-30)
+    if let emoji = customEmoji {
+        tags.append(emoji.tag)
+    }
+
+    // Content is :shortcode: for custom emoji, or the provided content otherwise
+    let reactionContent = customEmoji.map { ":\($0.shortcode):" } ?? content
+
+    return NostrEvent(content: reactionContent, keypair: keypair.to_keypair(), kind: 7, tags: tags)
 }
 
 func make_live_chat_event(keypair: FullKeypair, content: String, root: String, dtag: String, relayURL: RelayURL?) -> NostrEvent? {

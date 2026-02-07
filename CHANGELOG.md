@@ -1,10 +1,20 @@
+## [Unreleased]
+
+### Added
+
+- Added NIP-30 custom emoji support: view custom emojis in notes, profiles, and reactions (alltheseas)
+- Added custom emoji picker in compose view with saved and recent tabs (alltheseas)
+- Added custom emoji upload with settings page for managing emoji collection (alltheseas)
+- Added save/remove emoji options via long-press context menu on emojis in notes (alltheseas)
+
+
 ## [1.15] - 2025-07-11
 
 **Note:** This version was only released on TestFlight, and never officially released on the App Store.
 
 ### Added
 
-- Added new onboarding suggestions based on user-selected interests (Daniel D’Aquino)
+- Added new onboarding suggestions based on user-selected interests (Daniel D'Aquino)
 - Added adjustable max budget setting for Coinos one-click wallets (Daniel D’Aquino)
 - Added send feature to the wallet view (Daniel D’Aquino)
 - Added popover tips to DMs and Notifications toolbars on Trusted Network button (Terry Yiu)
