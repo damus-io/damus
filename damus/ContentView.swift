@@ -747,7 +747,8 @@ struct ContentView: View {
         )
         
         home.damus_state = self.damus_state!
-        
+        self.damus_state?.initializeNip17KeysIfNeeded()
+
         await damus_state.snapshotManager.startPeriodicSnapshots()
         
         if let damus_state, damus_state.purple.enable_purple {
@@ -778,6 +779,8 @@ struct ContentView: View {
             }
         }
         await damus_state.nostrNetwork.connect()
+        // Subscribe to our own DM relays (kind:10050) for receiving inbound NIP-17 messages
+        self.damus_state?.subscribeToOwnDMRelays()
         // TODO: Move this to a better spot. Not sure what is the best signal to listen to for sending initial filters
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: {
             self.home.send_initial_filters()
