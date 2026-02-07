@@ -38,16 +38,15 @@ class NdbTxn<T>: RawNdbTxnAccessible {
         self.generation = ndb.generation
         if let active_txn = Thread.current.threadDictionary["ndb_txn"] as? ndb_txn,
            let txn_generation = Thread.current.threadDictionary["txn_generation"] as? Int,
+           let ref_count = Thread.current.threadDictionary["ndb_txn_ref_count"] as? Int,
            txn_generation == ndb.generation
         {
             // some parent thread is active, use that instead
             print("txn: inherited txn")
             self.txn = active_txn
             self.inherited = true
-            self.generation = Thread.current.threadDictionary["txn_generation"] as! Int
-            let ref_count = Thread.current.threadDictionary["ndb_txn_ref_count"] as! Int
-            let new_ref_count = ref_count + 1
-            Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
+            self.generation = txn_generation
+            Thread.current.threadDictionary["ndb_txn_ref_count"] = ref_count + 1
         } else {
             let result: R? = try? ndb.withNdb({
                 var txn = ndb_txn()
@@ -178,16 +177,15 @@ class SafeNdbTxn<T: ~Copyable> {
         let inherited: Bool
         if let active_txn = Thread.current.threadDictionary["ndb_txn"] as? ndb_txn,
            let txn_generation = Thread.current.threadDictionary["txn_generation"] as? Int,
+           let ref_count = Thread.current.threadDictionary["ndb_txn_ref_count"] as? Int,
            txn_generation == ndb.generation
         {
             // some parent thread is active, use that instead
             print("txn: inherited txn")
             txn = active_txn
             inherited = true
-            generation = Thread.current.threadDictionary["txn_generation"] as! Int
-            let ref_count = Thread.current.threadDictionary["ndb_txn_ref_count"] as! Int
-            let new_ref_count = ref_count + 1
-            Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
+            generation = txn_generation
+            Thread.current.threadDictionary["ndb_txn_ref_count"] = ref_count + 1
         } else {
             let result: R? = try? ndb.withNdb({
                 var txn = ndb_txn()
