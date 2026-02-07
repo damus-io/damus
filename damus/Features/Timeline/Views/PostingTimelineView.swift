@@ -52,21 +52,21 @@ struct PostingTimelineView: View {
     func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
         var filters = ContentFilters.defaults(damus_state: damus_state)
         filters.append(fstate.filter)
-        
+
         // If favourites feature is disabled, always use follows
         let sourceToUse = damus_state.settings.enable_favourites_feature ? timeline_source : .follows
-        
-        switch sourceToUse {
-        case .follows:
+
+        // Only apply friend_filter for follows timeline
+        // Favorites timeline uses a dedicated EventHolder (favoriteEvents) that already contains only favorited users' events
+        if sourceToUse == .follows {
             filters.append(damus_state.contacts.friend_filter)
-        case .favorites:
-            filters.append(damus_state.contactCards.filter)
         }
         return ContentFilters(filters: filters).filter
     }
     
     func contentTimelineView(filter: (@escaping (NostrEvent) -> Bool)) -> some View {
-        TimelineView<AnyView>(events: home.events, loading: self.loading, headerHeight: $headerHeight, headerOffset: $headerOffset, damus: damus_state, show_friend_icon: false, filter: filter)
+        let eventsSource = timeline_source == .favorites ? home.favoriteEvents : home.events
+        return TimelineView<AnyView>(events: eventsSource, loading: self.loading, headerHeight: $headerHeight, headerOffset: $headerOffset, damus: damus_state, show_friend_icon: false, filter: filter, viewId: timeline_source)
     }
     
     func HeaderView() -> some View {

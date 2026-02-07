@@ -68,6 +68,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
     var should_debounce_dms = true
 
     var homeHandlerTask: Task<Void, Never>?
+    var favoritesHandlerTask: Task<Void, Never>?
     var notificationsHandlerTask: Task<Void, Never>?
     var generalHandlerTask: Task<Void, Never>?
     var dmsHandlerTask: Task<Void, Never>?
@@ -81,6 +82,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
     var notifications = NotificationsModel()
     var notification_status = NotificationStatusModel()
     var events: EventHolder = EventHolder()
+    var favoriteEvents: EventHolder = EventHolder()
     var already_reposted: Set<NoteId> = Set()
     var zap_button: ZapButtonModel = ZapButtonModel()
     
@@ -692,18 +694,6 @@ class HomeModel: ContactsDelegate, ObservableObject {
             home_filters.append(hashtag_filter)
         }
 
-        // Add filter for favorited users who we dont follow
-        if damus_state.settings.enable_favourites_feature {
-            let all_favorites = damus_state.contactCards.favorites
-            let favorited_not_followed = Array(all_favorites.subtracting(Set(friends)))
-            if !favorited_not_followed.isEmpty {
-                var favorites_filter = NostrFilter(kinds: home_filter_kinds)
-                favorites_filter.authors = favorited_not_followed
-                favorites_filter.limit = 500
-                home_filters.append(favorites_filter)
-            }
-        }
-
         self.homeHandlerTask?.cancel()
         self.homeHandlerTask = Task {
             let startTime = CFAbsoluteTimeGetCurrent()
@@ -742,7 +732,43 @@ class HomeModel: ContactsDelegate, ObservableObject {
             }
         }
     }
-    
+
+    /// Subscribe to favorites - called when contact cards are loaded or favorites change
+    func subscribe_to_favorites() {
+        guard damus_state.settings.enable_favourites_feature else { return }
+
+        let all_favorites = Array(damus_state.contactCards.favorites)
+        guard !all_favorites.isEmpty else { return }
+
+        var home_filter_kinds: [NostrKind] = [.text, .longform, .boost, .highlight]
+        if !damus_state.settings.onlyzaps_mode {
+            home_filter_kinds.append(.like)
+        }
+
+        var favorites_filter = NostrFilter(kinds: home_filter_kinds)
+        favorites_filter.authors = all_favorites
+        favorites_filter.limit = 500
+
+        self.favoritesHandlerTask?.cancel()
+        self.favoritesHandlerTask = Task {
+            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: [favorites_filter], streamMode: .ndbAndNetworkParallel(networkOptimization: .sinceOptimization)) {
+                switch item {
+                case .event(let lender):
+                    await lender.justUseACopy({ await self.insert_favorite_event($0) })
+                case .eose, .ndbEose, .networkEose:
+                    break
+                }
+            }
+        }
+    }
+
+    @MainActor
+    func insert_favorite_event(_ ev: NostrEvent) {
+        guard should_show_event(state: damus_state, ev: ev) else { return }
+        damus_state.events.insert(ev)
+        favoriteEvents.insert(ev)
+    }
+
     /// Adapter pattern to make migration easier
     enum SubscriptionContext {
         case home
