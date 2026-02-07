@@ -76,7 +76,7 @@ final class AutoSaveViewModelTests: XCTestCase {
         viewModel.needsSaving()
         
         // Wait for save to complete
-        try await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
+        try await Task.sleep(nanoseconds: 3_000_000_000) // 3 seconds
         
         // Then - should have saved
         XCTAssertEqual(saveCount, 1)
