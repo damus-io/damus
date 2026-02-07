@@ -66,6 +66,6 @@ final class ThreadModelTests: XCTestCase {
             XCTAssertEqual(actionBarModel.boosts, 5)
             testShouldComplete.fulfill()
         }
-        wait(for: [testShouldComplete], timeout: 10.0)
+        await fulfillment(of: [testShouldComplete], timeout: 10.0)
     }
 }
