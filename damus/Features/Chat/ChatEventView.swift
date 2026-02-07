@@ -68,26 +68,6 @@ struct ChatEventView: View {
         return prev_ev == nil || prev_ev!.pubkey != event.pubkey
     }
 
-    func next_replies_to_this() -> Bool {
-        guard let next = next_ev else {
-            return false
-        }
-
-        return damus_state.events.replies.lookup(next.id) != nil
-    }
-
-    func is_reply_to_prev(ref_id: NoteId) -> Bool {
-        guard let prev = prev_ev else {
-            return true
-        }
-
-        if let rep = damus_state.events.replies.lookup(event.id) {
-            return rep.contains(prev.id)
-        }
-
-        return false
-    }
-
     var disable_animation: Bool {
         self.damus_state.settings.disable_animation
     }

@@ -68,41 +68,48 @@ class EventData {
     var preview_model: PreviewModel
     var zaps_model : ZapsDataModel
     var relative_time: RelativeTimeModel = RelativeTimeModel()
-    var validated: ValidationResult
     var media_metadata_model: MediaMetaModel
-    
+
     var translations: TranslateStatus {
         return translations_model.state
     }
-    
+
     var artifacts: NoteArtifactState {
         return artifacts_model.state
     }
-    
+
     var preview: PreviewState {
         return preview_model.state
     }
-    
+
     init(zaps: [Zapping] = []) {
         self.translations_model = .init(state: .havent_tried)
         self.artifacts_model = .init(state: .not_loaded)
         self.zaps_model = .init(zaps)
-        self.validated = .unknown
         self.media_metadata_model = MediaMetaModel()
         self.preview_model = .init(state: .not_loaded)
     }
 }
 
+/// Caches events and event-related metadata, with ndb as the backing store.
+///
+/// This class provides a fast in-memory cache layer over nostrdb for:
+/// - Events (especially ephemeral ones like inner events from boosts that may not be in ndb)
+/// - Per-event UI metadata (translations, artifacts, previews, zaps)
+/// - Image metadata for display
+///
+/// The in-memory event cache is important for:
+/// 1. Reducing repeated ndb lookups in SwiftUI view bodies
+/// 2. Caching ephemeral events parsed from JSON (e.g., inner events from boosts)
+///
+/// Note: `lookup` will still hit ndb on cache miss; avoid calling from hot
+/// view-body paths unless the cache is expected to be warm.
 class EventCache {
-    // TODO: remove me and change code to use ndb directly
     private let ndb: Ndb
     private var events: [NoteId: NostrEvent] = [:]
     private var cancellable: AnyCancellable?
-    private var image_metadata: [String: ImageMetadataState] = [:] // lowercased URL key
+    private var image_metadata: [String: ImageMetadataState] = [:]
     private var event_data: [NoteId: EventData] = [:]
-    var replies = ReplyMap()
-
-    //private var thread_latest: [String: Int64]
 
     init(ndb: Ndb) {
         self.ndb = ndb
@@ -113,24 +120,18 @@ class EventCache {
         }
     }
     
+    /// Returns cached EventData for a note, creating it if needed.
     func get_cache_data(_ evid: NoteId) -> EventData {
         guard let data = event_data[evid] else {
             let data = EventData()
             event_data[evid] = data
             return data
         }
-        
+
         return data
     }
-    
-    func is_event_valid(_ evid: NoteId) -> ValidationResult {
-        return get_cache_data(evid).validated
-    }
-    
-    func store_event_validation(evid: NoteId, validated: ValidationResult) {
-        get_cache_data(evid).validated = validated
-    }
-    
+
+    /// Stores a zap in the cache, sorted by amount.
     @discardableResult
     func store_zap(zap: Zapping) -> Bool {
         let data = get_cache_data(NoteId(zap.target.id)).zaps_model
@@ -139,7 +140,8 @@ class EventCache {
         }
         return insert_uniq_sorted_zap_by_amount(zaps: &data.zaps, new_zap: zap)
     }
-    
+
+    /// Removes a zap from the cache.
     func remove_zap(zap: Zapping) {
         switch zap.target {
         case .note(let note_target):
@@ -150,19 +152,23 @@ class EventCache {
             break
         }
     }
-    
+
+    /// Returns cached zaps for a target, sorted by amount.
     func lookup_zaps(target: ZapTarget) -> [Zapping] {
         return get_cache_data(NoteId(target.id)).zaps_model.zaps
     }
-    
+
+    /// Stores image metadata in the cache, keyed by lowercased URL.
     func store_img_metadata(url: URL, meta: ImageMetadataState) {
         self.image_metadata[url.absoluteString.lowercased()] = meta
     }
-    
+
+    /// Returns cached image metadata for a URL.
     func lookup_img_metadata(url: URL) -> ImageMetadataState? {
         return image_metadata[url.absoluteString.lowercased()]
     }
-    
+
+    /// Returns parent events in thread order (root first, direct parent last).
     func parent_events(event: NostrEvent, keypair: Keypair) -> [NostrEvent] {
         var parents: [NostrEvent] = []
         
@@ -181,55 +187,32 @@ class EventCache {
         
         return parents.reversed()
     }
-    
-    func add_replies(ev: NostrEvent, keypair: Keypair) {
-        if let reply = ev.direct_replies() {
-            replies.add(id: reply, reply_id: ev.id)
-        }
-    }
 
-    func child_events(event: NostrEvent) -> [NostrEvent] {
-        guard let xs = replies.lookup(event.id) else {
-            return []
-        }
-        let evs: [NostrEvent] = xs.reduce(into: [], { evs, evid in
-            guard let ev = self.lookup(evid) else {
-                return
-            }
-            
-            evs.append(ev)
-        }).sorted(by: { $0.created_at < $1.created_at })
-        return evs
-    }
-    
+    /// Returns the event from cache/ndb if found, otherwise inserts and returns the provided event.
     func upsert(_ ev: NostrEvent) -> NostrEvent {
         if let found = lookup(ev.id) {
             return found
         }
-        
         insert(ev)
         return ev
     }
 
-    /*
-    func lookup_by_key(_ key: UInt64) -> NostrEvent? {
-        ndb.lookup_note_by_key(key)
-    }
-     */
-
+    /// Looks up an event by ID, checking in-memory cache first, then ndb.
+    /// Cache misses may touch ndb, so avoid calling from hot main-thread paths
+    /// unless the cache is expected to be warm.
     func lookup(_ evid: NoteId) -> NostrEvent? {
         if let ev = events[evid] {
             return ev
         }
-
         if let ev = try? self.ndb.lookup_note_and_copy(evid) {
             events[ev.id] = ev
             return ev
         }
-
         return nil
     }
-    
+
+    /// Caches an event in memory for fast subsequent lookups.
+    /// Used for ephemeral events (e.g., inner events from boosts) that may not be in ndb.
     func insert(_ ev: NostrEvent) {
         guard events[ev.id] == nil else {
             return
@@ -240,7 +223,7 @@ class EventCache {
     private func prune() {
         events = [:]
         event_data = [:]
-        replies.replies = [:]
+        image_metadata = [:]
     }
 }
 

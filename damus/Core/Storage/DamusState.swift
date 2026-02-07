@@ -150,7 +150,6 @@ class DamusState: HeadlessDamusState, ObservableObject {
         if let ev = zap.event, !settings.nozaps, zap.is_in_thread {
             // [nozaps]: thread zaps are only available outside of the app store
             replies.count_replies(ev, keypair: self.keypair)
-            events.add_replies(ev: ev, keypair: self.keypair)
         }
 
         // associate with events as well
