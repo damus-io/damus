@@ -244,5 +244,205 @@ final class NdbTests: XCTestCase {
 
     }
 
+    // MARK: - Transaction Retention Tests (for issue #3610)
+
+    /// Verifies that ndb close waits for an active transaction to complete.
+    /// This prevents use-after-free crashes when transactions hold LMDB pointers.
+    func test_close_waits_for_active_transaction() throws {
+        let ndb = Ndb(path: db_dir)!
+        let ok = ndb.process_events(test_wire_events)
+        XCTAssertTrue(ok)
+
+        let expectation = self.expectation(description: "Transaction completes before close")
+        let syncQueue = DispatchQueue(label: "test.sync")
+        var transactionCompleted = false
+        var closeCompleted = false
+
+        // Start a transaction on a background thread
+        DispatchQueue.global().async {
+            guard let txn: NdbTxn<()> = NdbTxn(ndb: ndb) else {
+                XCTFail("Failed to create transaction")
+                return
+            }
+
+            // Hold the transaction for a bit
+            Thread.sleep(forTimeInterval: 0.1)
+            syncQueue.sync { transactionCompleted = true }
+            _ = txn // Keep transaction alive until this point
+        }
+
+        // Try to close ndb after transaction starts
+        DispatchQueue.global().asyncAfter(deadline: .now() + 0.05) {
+            ndb.close()
+            syncQueue.sync {
+                closeCompleted = true
+                XCTAssertTrue(transactionCompleted, "Close should wait for transaction to complete")
+            }
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 2.0)
+        syncQueue.sync {
+            XCTAssertTrue(transactionCompleted)
+            XCTAssertTrue(closeCompleted)
+        }
+    }
+
+    /// Verifies that a transaction can safely access data even when close is attempted.
+    /// This is the core fix for the startup crash in #3610.
+    func test_transaction_access_during_close_attempt() throws {
+        let ndb = Ndb(path: db_dir)!
+        let ok = ndb.process_events(test_wire_events)
+        XCTAssertTrue(ok)
+
+        let expectation = self.expectation(description: "Transaction accesses data safely")
+        let syncQueue = DispatchQueue(label: "test.sync")
+        var dataAccessSucceeded = false
+
+        let id = NoteId(hex: "d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349")!
+
+        // Start a transaction that will access data
+        DispatchQueue.global().async {
+            guard let txn = NdbTxn(ndb: ndb, with: { _ in
+                return ()
+            }) else {
+                XCTFail("Failed to create transaction")
+                return
+            }
+
+            // Simulate close attempt while transaction is active
+            DispatchQueue.global().async {
+                Thread.sleep(forTimeInterval: 0.05)
+                ndb.close()
+            }
+
+            // Access data through the transaction (this should not crash)
+            Thread.sleep(forTimeInterval: 0.1)
+            let content = try? ndb.lookup_note(id, borrow: { maybeNote -> String? in
+                switch maybeNote {
+                case .none: return nil
+                case .some(let note): return String(note.content)
+                }
+            })
+
+            // Content may be nil if close completed, but should not crash
+            syncQueue.sync { dataAccessSucceeded = true }
+            _ = content
+            _ = txn
+
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 2.0)
+        syncQueue.sync {
+            XCTAssertTrue(dataAccessSucceeded, "Transaction should complete without crash")
+        }
+    }
+
+    /// Verifies that multiple concurrent transactions correctly block close.
+    func test_multiple_transactions_block_close() throws {
+        let ndb = Ndb(path: db_dir)!
+        let ok = ndb.process_events(test_wire_events)
+        XCTAssertTrue(ok)
+
+        let txnExpectation = self.expectation(description: "All transactions complete")
+        txnExpectation.expectedFulfillmentCount = 3
+        let closeExpectation = self.expectation(description: "Close completes")
+
+        var allTransactionsCompleted = false
+        let completionQueue = DispatchQueue(label: "test.completion")
+        var completedCount = 0
+
+        // Start multiple transactions
+        for i in 0..<3 {
+            DispatchQueue.global().async {
+                guard let txn: NdbTxn<()> = NdbTxn(ndb: ndb) else {
+                    XCTFail("Failed to create transaction \(i)")
+                    return
+                }
+
+                Thread.sleep(forTimeInterval: 0.1)
+                _ = txn
+
+                completionQueue.sync {
+                    completedCount += 1
+                    if completedCount == 3 {
+                        allTransactionsCompleted = true
+                    }
+                }
+                txnExpectation.fulfill()
+            }
+        }
+
+        // Attempt close after all transactions start
+        DispatchQueue.global().asyncAfter(deadline: .now() + 0.05) {
+            ndb.close()
+            completionQueue.sync {
+                XCTAssertTrue(allTransactionsCompleted, "All transactions should complete before close")
+            }
+            closeExpectation.fulfill()
+        }
+
+        wait(for: [txnExpectation, closeExpectation], timeout: 2.0)
+    }
+
+    /// Simulates the startup crash scenario from #3610.
+    /// During app startup, ContentView creates Ndb and immediately begins lookup operations.
+    /// This test verifies that transactions created during initialization don't crash.
+    func test_startup_simulation_with_concurrent_transactions() throws {
+        let ndb = Ndb(path: db_dir)!
+        let ok = ndb.process_events(test_wire_events)
+        XCTAssertTrue(ok)
+
+        let expectation = self.expectation(description: "Startup lookups complete safely")
+        expectation.expectedFulfillmentCount = 5
+
+        let id = NoteId(hex: "d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349")!
+
+        // Simulate rapid concurrent lookups during startup (like ContentView.onAppear)
+        for _ in 0..<5 {
+            DispatchQueue.global().async {
+                // This simulates lookup_note_with_txn_inner from the crash stack trace
+                let content = try? ndb.lookup_note(id, borrow: { maybeNote -> String? in
+                    switch maybeNote {
+                    case .none: return nil
+                    case .some(let note): return String(note.content)
+                    }
+                })
+
+                // Should complete without crash (content may be nil if note doesn't exist)
+                _ = content // Result may be nil, but should not crash
+                expectation.fulfill()
+            }
+        }
+
+        wait(for: [expectation], timeout: 2.0)
+
+        // Now close and verify no crashes occurred
+        ndb.close()
+        XCTAssert(true, "Startup simulation completed without crash")
+    }
+
+    /// Verifies that transaction retain/release is properly balanced.
+    func test_transaction_retain_release_balance() throws {
+        let ndb = Ndb(path: db_dir)!
+
+        // Create and destroy multiple transactions
+        for _ in 0..<10 {
+            autoreleasepool {
+                guard let txn: NdbTxn<()> = NdbTxn(ndb: ndb) else {
+                    XCTFail("Failed to create transaction")
+                    return
+                }
+                _ = txn
+                // Transaction should auto-release on scope exit
+            }
+        }
+
+        // Close should succeed immediately since all transactions released
+        ndb.close()
+        XCTAssertTrue(ndb.is_closed, "Ndb should be closed after all transactions released")
+    }
+
 }
 
