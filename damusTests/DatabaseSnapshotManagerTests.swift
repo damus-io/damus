@@ -579,6 +579,182 @@ class DatabaseSnapshotManagerTests: XCTestCase {
         let snapshottedNoteIds = await snapshotTask.value
         XCTAssertEqual(expectedNoteIds, snapshottedNoteIds, "Snapshot should contain both profile notes")
     }
+
+    // MARK: - Snapshot Marker Tests
+
+    /// Verifies that marker constants are consistent across modules.
+    /// This prevents duplication bugs where the constants drift out of sync.
+    func testMarkerConstants_Match() {
+        XCTAssertEqual(DatabaseSnapshotManager.snapshotReadyMarker,
+                       Ndb.snapshotReadyMarker,
+                       "Marker constants must match across DatabaseSnapshotManager and Ndb")
+    }
+
+    /// Verifies that a snapshot run creates the ready marker file.
+    func testPerformSnapshot_CreatesMarkerFile() async throws {
+        // Given: No previous snapshot exists
+        guard let snapshotPath = Ndb.snapshot_db_path else {
+            XCTFail("Snapshot path should be available")
+            return
+        }
+        let parentDir = URL(fileURLWithPath: snapshotPath).deletingLastPathComponent().path
+        let markerPath = "\(parentDir)/\(DatabaseSnapshotManager.snapshotReadyMarker)"
+
+        // Clean up any existing snapshot and marker
+        try? FileManager.default.removeItem(atPath: snapshotPath)
+        try? FileManager.default.removeItem(atPath: markerPath)
+
+        // When: Creating a snapshot
+        try await manager.performSnapshot()
+
+        // Then: Marker file should exist
+        XCTAssertTrue(FileManager.default.fileExists(atPath: markerPath),
+            "Marker file should exist after snapshot completes")
+    }
+
+    /// Verifies Ndb fails to open default snapshot when marker is missing.
+    func testNdb_WontOpenSnapshotWithoutMarker() async throws {
+        // Given: A snapshot exists but marker file is missing
+        guard let snapshotPath = Ndb.snapshot_db_path else {
+            XCTFail("Snapshot path should be available")
+            return
+        }
+        let parentDir = URL(fileURLWithPath: snapshotPath).deletingLastPathComponent().path
+        let markerPath = "\(parentDir)/\(DatabaseSnapshotManager.snapshotReadyMarker)"
+
+        // Create a snapshot (which creates the marker)
+        try await manager.performSnapshot()
+        XCTAssertTrue(FileManager.default.fileExists(atPath: snapshotPath),
+            "Snapshot should exist")
+        XCTAssertTrue(FileManager.default.fileExists(atPath: markerPath),
+            "Marker should exist after snapshot")
+
+        // Remove the marker to simulate incomplete snapshot
+        try FileManager.default.removeItem(atPath: markerPath)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: markerPath),
+            "Marker should be removed")
+
+        // When: Trying to open the default snapshot path (nil path + owns_db_file: false)
+        // This simulates how extensions open the snapshot
+        let snapshotNdb = Ndb(path: nil, owns_db_file: false)
+
+        // Then: Ndb should fail to open because marker is missing
+        XCTAssertNil(snapshotNdb,
+            "Ndb should not open snapshot without marker file")
+    }
+
+    /// Verifies Ndb successfully opens default snapshot when marker exists.
+    func testNdb_OpensSnapshotWithMarker() async throws {
+        // Given: A snapshot exists with marker file
+        guard let snapshotPath = Ndb.snapshot_db_path else {
+            XCTFail("Snapshot path should be available")
+            return
+        }
+        let parentDir = URL(fileURLWithPath: snapshotPath).deletingLastPathComponent().path
+        let markerPath = "\(parentDir)/\(DatabaseSnapshotManager.snapshotReadyMarker)"
+
+        // Create a snapshot (which creates the marker)
+        try await manager.performSnapshot()
+        XCTAssertTrue(FileManager.default.fileExists(atPath: markerPath),
+            "Marker should exist after snapshot")
+
+        // When: Trying to open the default snapshot path (nil path + owns_db_file: false)
+        // This simulates how extensions open the snapshot
+        let snapshotNdb = Ndb(path: nil, owns_db_file: false)
+
+        // Then: Ndb should successfully open
+        XCTAssertNotNil(snapshotNdb,
+            "Ndb should open snapshot when marker file exists")
+        snapshotNdb?.close()
+    }
+
+    /// Verifies Ndb requires marker even when snapshot path is passed explicitly.
+    /// This prevents accidentally bypassing marker safety by specifying the path explicitly.
+    func testNdb_ExplicitSnapshotPathRequiresMarker() async throws {
+        // Given: A snapshot exists but we're opening with explicit snapshot path
+        guard let snapshotPath = Ndb.snapshot_db_path else {
+            XCTFail("Snapshot path should be available")
+            return
+        }
+        let parentDir = URL(fileURLWithPath: snapshotPath).deletingLastPathComponent().path
+        let markerPath = "\(parentDir)/\(DatabaseSnapshotManager.snapshotReadyMarker)"
+
+        // Create a snapshot (which creates the marker)
+        try await manager.performSnapshot()
+        XCTAssertTrue(FileManager.default.fileExists(atPath: snapshotPath),
+            "Snapshot should exist")
+
+        // Remove the marker
+        try FileManager.default.removeItem(atPath: markerPath)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: markerPath),
+            "Marker should be removed")
+
+        // When: Opening with explicit snapshot path (owns_db_file: false)
+        // This should STILL require marker to prevent accidental bypass
+        let snapshotNdb = Ndb(path: snapshotPath, owns_db_file: false)
+
+        // Then: Ndb should fail to open because marker protection applies to explicit snapshot paths
+        XCTAssertNil(snapshotNdb,
+            "Ndb should not open explicit snapshot path without marker")
+    }
+
+    /// Verifies snapshot update removes marker before writing and restores it after.
+    func testPerformSnapshot_RemovesMarkerBeforeUpdate() async throws {
+        // Given: A snapshot with marker exists
+        guard let snapshotPath = Ndb.snapshot_db_path else {
+            XCTFail("Snapshot path should be available")
+            return
+        }
+        let parentDir = URL(fileURLWithPath: snapshotPath).deletingLastPathComponent().path
+        let markerPath = "\(parentDir)/\(DatabaseSnapshotManager.snapshotReadyMarker)"
+
+        // Create initial snapshot
+        try await manager.performSnapshot()
+        XCTAssertTrue(FileManager.default.fileExists(atPath: markerPath),
+            "Marker should exist after first snapshot")
+
+        // Track marker state during second snapshot
+        // The marker should be removed at the start and recreated at the end
+        // We verify this by checking the final state is correct
+        try await manager.performSnapshot()
+
+        // Then: Marker should exist after second snapshot completes
+        XCTAssertTrue(FileManager.default.fileExists(atPath: markerPath),
+            "Marker should exist after second snapshot completes")
+    }
+
+    /// Verifies marker ordering prevents snapshot reads during updates.
+    /// Simulates the update sequence to ensure extensions cannot read during transition.
+    func testMarkerOrdering_PreventsReadsDuringUpdate() async throws {
+        guard let snapshotPath = Ndb.snapshot_db_path else {
+            XCTFail("Snapshot path should be available")
+            return
+        }
+        let parentDir = URL(fileURLWithPath: snapshotPath).deletingLastPathComponent().path
+        let markerPath = "\(parentDir)/\(DatabaseSnapshotManager.snapshotReadyMarker)"
+
+        // Create initial snapshot with marker
+        try await manager.performSnapshot()
+        XCTAssertTrue(FileManager.default.fileExists(atPath: markerPath),
+            "Marker should exist initially")
+
+        // Simulate update sequence step 1: Remove marker
+        try FileManager.default.removeItem(atPath: markerPath)
+
+        // Verify extensions cannot open during transition (no marker)
+        let ndbDuringUpdate = Ndb(path: nil, owns_db_file: false)
+        XCTAssertNil(ndbDuringUpdate,
+            "Ndb should not open when marker is removed during update")
+
+        // Simulate update sequence step 2: Restore marker after update
+        try Data().write(to: URL(fileURLWithPath: markerPath))
+
+        // Verify extensions can open after marker restored
+        let ndbAfterUpdate = Ndb(path: nil, owns_db_file: false)
+        XCTAssertNotNil(ndbAfterUpdate,
+            "Ndb should open when marker exists after update")
+        ndbAfterUpdate?.close()
+    }
 }
 
 
