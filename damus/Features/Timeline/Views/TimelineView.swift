@@ -86,7 +86,7 @@ struct TimelineView<Content: View>: View {
                                 direction = .up
                                 lastHeaderOffset = headerOffset
                             }
-                            
+
                             let offset = current < 0 ? (current - shiftOffset) : 0
                             headerOffset = (-offset < headerHeight ? (offset < 0 ? offset : 0) : -headerHeight)
                         }else {
@@ -95,15 +95,14 @@ struct TimelineView<Content: View>: View {
                                 direction = .down
                                 lastHeaderOffset = headerOffset
                             }
-                            
+
                             let offset = lastHeaderOffset + (current - shiftOffset)
                             headerOffset = (offset > 0 ? 0 : offset)
                         }
-                    }
-                    .background {
-                        GeometryReader { proxy -> Color in
-                            handle_scroll_queue(proxy, queue: self.events)
-                            return Color.clear
+
+                        let new_should_queue = -current > 0
+                        if self.events.should_queue != new_should_queue {
+                            self.events.set_should_queue(new_should_queue)
                         }
                     }
             }
