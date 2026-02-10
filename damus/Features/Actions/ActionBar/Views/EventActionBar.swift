@@ -55,12 +55,13 @@ struct EventActionBar: View {
         return true
     }
     
-    var space_if_spread: AnyView {
+    @ViewBuilder
+    var space_if_spread: some View {
         if options.contains(.no_spread) {
-            return AnyView(EmptyView())
+            EmptyView()
         }
         else {
-            return AnyView(Spacer())
+            Spacer()
         }
     }
     
@@ -223,15 +224,16 @@ struct EventActionBar: View {
         }
     }
     
+    @ViewBuilder
     var content: some View {
         if options.contains(.swipe_action_menu) {
-            AnyView(self.swipe_action_menu_content)
+            self.swipe_action_menu_content
         }
         else if options.contains(.swipe_action_menu_reverse) {
-            AnyView(self.swipe_action_menu_reverse_content)
+            self.swipe_action_menu_reverse_content
         }
         else {
-            AnyView(self.action_bar_content)
+            self.action_bar_content
         }
     }
 
