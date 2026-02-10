@@ -567,11 +567,10 @@ final class RelayHintsTests: XCTestCase {
                 print("RELAY_HINTS_TEST \(prefix): Received error: \(error)")
             }
         })
-        relayConnection.connect()
-        
         // Wait for connection to be established
         await withCheckedContinuation { continuation in
             connectionContinuation = continuation
+            relayConnection.connect()
         }
         
         return relayConnection
