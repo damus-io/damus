@@ -14,7 +14,7 @@ enum Route: Hashable {
     case Followers(followers: FollowersModel)
     case Relay(relay: RelayURL, showActionButtons: Binding<Bool>)
     case RelayDetail(relay: RelayURL, metadata: RelayMetadata?)
-    case Following(following: FollowingModel)
+    case Following(contacts: NostrEvent)
     case MuteList
     case RelayConfig
     case Script(script: ScriptModel)
@@ -66,8 +66,8 @@ enum Route: Hashable {
             RelayView(state: damusState, relay: relay, showActionButtons: showActionButtons, recommended: false)
         case .RelayDetail(let relay, let metadata):
             RelayDetailView(state: damusState, relay: relay, nip11: metadata)
-        case .Following(let following):
-            FollowingView(damus_state: damusState, following: following)
+        case .Following(let contacts):
+            FollowingView(damus_state: damusState, following: FollowingModel(damus_state: damusState, contacts: Array(contacts.referenced_pubkeys), hashtags: Array(contacts.referenced_hashtags)))
         case .MuteList:
             MutelistView(damus_state: damusState)
         case .RelayConfig:
@@ -167,8 +167,9 @@ enum Route: Hashable {
         case .RelayDetail(let relay, _):
             hasher.combine("relayDetail")
             hasher.combine(relay)
-        case .Following:
+        case .Following(let contacts):
             hasher.combine("following")
+            hasher.combine(contacts.id)
         case .MuteList:
             hasher.combine("muteList")
         case .RelayConfig:

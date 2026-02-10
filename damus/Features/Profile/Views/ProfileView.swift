@@ -367,10 +367,7 @@ struct ProfileView: View {
 
             HStack {
                 if let contact = profile.contacts {
-                    let contacts = Array(contact.referenced_pubkeys)
-                    let hashtags = Array(contact.referenced_hashtags)
-                    let following_model = FollowingModel(damus_state: damus_state, contacts: contacts, hashtags: hashtags)
-                    NavigationLink(value: Route.Following(following: following_model)) {
+                    NavigationLink(value: Route.Following(contacts: contact)) {
                         HStack {
                             let noun_text = Text(verbatim: "\(pluralizedString(key: "following_count", count: profile.following))").font(.subheadline).foregroundColor(.gray)
                             Text("\(Text(verbatim: profile.following.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
