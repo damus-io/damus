@@ -434,7 +434,7 @@ struct NoteContentView: View {
         }
         
         // always reload artifacts on load
-        let plan = get_preload_plan(ndb: damus_state.ndb, evcache: damus_state.events, ev: event, our_keypair: damus_state.keypair, settings: damus_state.settings)
+        let plan = get_preload_plan(evcache: damus_state.events, ev: event, our_keypair: damus_state.keypair, settings: damus_state.settings)
         
         // TODO: make this cleaner
         Task {

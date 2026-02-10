@@ -311,24 +311,21 @@ func load_preview(artifacts: NoteArtifactsSeparated) async -> Preview? {
     return Preview(meta: meta)
 }
 
-@MainActor
-private func compute_note_language(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> String? {
-    return ev.note_language(ndb: ndb, keypair)
+private func compute_note_language(ev: NostrEvent, keypair: Keypair) -> String? {
+    assert(!Thread.isMainThread, "note_language must not be run on the main thread.")
+    return ev.note_language(keypair)
 }
 
-@MainActor
-func get_preload_plan(ndb: Ndb, evcache: EventCache, ev: NostrEvent, our_keypair: Keypair, settings: UserSettingsStore) -> PreloadPlan? {
+func get_preload_plan(evcache: EventCache, ev: NostrEvent, our_keypair: Keypair, settings: UserSettingsStore) -> PreloadPlan? {
     let cache = evcache.get_cache_data(ev.id)
     let load_artifacts = cache.artifacts.should_preload
     if load_artifacts {
         cache.artifacts_model.state = .loading
     }
 
-    // Cached event might not have the note language determined yet, so determine the language here before figuring out if translations should be preloaded.
-    let note_lang = cache.translations_model.note_language ?? compute_note_language(ndb: ndb, ev: ev, keypair: our_keypair)
-    if cache.translations_model.note_language == nil {
-        cache.translations_model.note_language = note_lang
-    }
+    // Use cached language if available; actual computation deferred to async preload_event()
+    let note_lang = cache.translations_model.note_language
+    let needs_language = note_lang == nil && settings.auto_translate
 
     let load_translations = should_preload_translation(event: ev, our_keypair: our_keypair, current_status: cache.translations, settings: settings, note_lang: note_lang)
     if load_translations {
@@ -352,7 +349,7 @@ func get_preload_plan(ndb: Ndb, evcache: EventCache, ev: NostrEvent, our_keypair
         cache.preview_model.state = .loading
     }
     
-    if !load_artifacts && !load_translations && !load_preview && load_urls.count == 0 {
+    if !load_artifacts && !load_translations && !load_preview && !needs_language && load_urls.count == 0 {
         return nil
     }
     
@@ -436,15 +433,15 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
     if let cached_language = plan.data.translations_model.note_language {
         note_language = cached_language
     } else {
-        note_language = await compute_note_language(ndb: state.ndb, ev: plan.event, keypair: our_keypair)
+        note_language = compute_note_language(ev: plan.event, keypair: our_keypair)
     }
 
     var translations: TranslateStatus? = nil
-    // We have to recheck should_translate here now that we have note_language
-    if plan.load_translations,
-       let note_language,
+    // Check if we should translate now that we have note_language (which may have just been computed)
+    if let note_language,
        can_and_should_translate(event: plan.event, our_keypair: our_keypair, settings: settings, note_lang: note_language),
-       settings.auto_translate
+       settings.auto_translate,
+       plan.data.translations == .havent_tried
     {
         translations = await translate_note(profiles: profiles, keypair: our_keypair, event: plan.event, settings: settings, note_lang: note_language, purple: state.purple)
     }
@@ -468,27 +465,15 @@ func preload_events(state: DamusState, events: [NostrEvent]) {
     let our_keypair = state.keypair
     let settings = state.settings
     
+    let plans = events.compactMap { ev in
+        get_preload_plan(evcache: event_cache, ev: ev, our_keypair: our_keypair, settings: settings)
+    }
+
+    if plans.count == 0 {
+        return
+    }
+
     Task {
-        let plans = await withTaskGroup(of: PreloadPlan?.self) { group in
-            for ev in events {
-                group.addTask {
-                    await get_preload_plan(ndb: state.ndb, evcache: event_cache, ev: ev, our_keypair: our_keypair, settings: settings)
-                }
-            }
-            
-            var results: [PreloadPlan] = []
-            for await plan in group {
-                if let plan {
-                    results.append(plan)
-                }
-            }
-            return results
-        }
-        
-        if plans.count == 0 {
-            return
-        }
-        
         for plan in plans {
             await preload_event(plan: plan, state: state)
         }
