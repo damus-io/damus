@@ -2211,7 +2211,7 @@
 		4C1253652A76D0FF0004F4B8 /* OnlyZapsNotify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnlyZapsNotify.swift; sourceTree = "<group>"; };
 		4C1253672A76D2470004F4B8 /* MuteNotify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuteNotify.swift; sourceTree = "<group>"; };
 		4C1253692A76D3850004F4B8 /* RelaysChangedNotify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelaysChangedNotify.swift; sourceTree = "<group>"; };
-		4C15224A2B8D499F007CDC17 /* parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parser.h; sourceTree = "<group>"; };
+		4C15224A2B8D499F007CDC17 /* parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nostrdb/deps/flatcc/src/compiler/parser.h; sourceTree = SOURCE_ROOT; };
 		4C15C7142A55DE7A00D0A0DB /* ReactionsSettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReactionsSettingsView.swift; sourceTree = "<group>"; };
 		4C190F1F2A535FC200027FD5 /* CustomizeZapModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomizeZapModel.swift; sourceTree = "<group>"; };
 		4C190F242A547D2000027FD5 /* LoadScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadScript.swift; sourceTree = "<group>"; };
@@ -2387,10 +2387,10 @@
 		4C4792DC2A9939BD00489948 /* reflection_builder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = reflection_builder.h; sourceTree = "<group>"; };
 		4C4792DD2A9939BD00489948 /* reflection_verifier.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = reflection_verifier.h; sourceTree = "<group>"; };
 		4C4792DE2A9939BD00489948 /* flatbuffers_common_builder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatbuffers_common_builder.h; sourceTree = "<group>"; };
-		4C4792FF2A993B9A00489948 /* lmdb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lmdb.h; sourceTree = "<group>"; };
-		4C4793002A993B9A00489948 /* mdb.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mdb.c; sourceTree = "<group>"; };
-		4C4793022A993D9300489948 /* midl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = midl.h; sourceTree = "<group>"; };
-		4C4793032A993DB900489948 /* midl.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = midl.c; sourceTree = "<group>"; };
+		4C4792FF2A993B9A00489948 /* lmdb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nostrdb/deps/lmdb/lmdb.h; sourceTree = SOURCE_ROOT; };
+		4C4793002A993B9A00489948 /* mdb.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nostrdb/deps/lmdb/mdb.c; sourceTree = SOURCE_ROOT; };
+		4C4793022A993D9300489948 /* midl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nostrdb/deps/lmdb/midl.h; sourceTree = SOURCE_ROOT; };
+		4C4793032A993DB900489948 /* midl.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nostrdb/deps/lmdb/midl.c; sourceTree = SOURCE_ROOT; };
 		4C4A3A5A288A1B2200453788 /* damus.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = damus.entitlements; sourceTree = "<group>"; };
 		4C4DD3DA2A6CA7E8005B4E85 /* ContentParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentParsing.swift; sourceTree = "<group>"; };
 		4C4E137A2A76D5FB00BDD832 /* MuteThreadNotify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuteThreadNotify.swift; sourceTree = "<group>"; };
@@ -2432,10 +2432,10 @@
 		4C75EFB628049D990006080F /* RelayPool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayPool.swift; sourceTree = "<group>"; };
 		4C75EFB82804A2740006080F /* EventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventView.swift; sourceTree = "<group>"; };
 		4C75EFBA2804A34C0006080F /* ProofOfWork.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProofOfWork.swift; sourceTree = "<group>"; };
-		4C78EFD72A707C4D007E8197 /* secp256k1_schnorrsig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = secp256k1_schnorrsig.h; sourceTree = "<group>"; };
-		4C78EFD82A707C4D007E8197 /* secp256k1_ecdh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = secp256k1_ecdh.h; sourceTree = "<group>"; };
-		4C78EFD92A707C4D007E8197 /* secp256k1.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = secp256k1.h; sourceTree = "<group>"; };
-		4C78EFDA2A707C67007E8197 /* secp256k1_extrakeys.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = secp256k1_extrakeys.h; sourceTree = "<group>"; };
+		4C78EFD72A707C4D007E8197 /* secp256k1_schnorrsig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nostrdb/secp256k1_schnorrsig.h; sourceTree = SOURCE_ROOT; };
+		4C78EFD82A707C4D007E8197 /* secp256k1_ecdh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nostrdb/secp256k1_ecdh.h; sourceTree = SOURCE_ROOT; };
+		4C78EFD92A707C4D007E8197 /* secp256k1.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nostrdb/secp256k1.h; sourceTree = SOURCE_ROOT; };
+		4C78EFDA2A707C67007E8197 /* secp256k1_extrakeys.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nostrdb/secp256k1_extrakeys.h; sourceTree = SOURCE_ROOT; };
 		4C7D09582A05BEAD00943473 /* KeyboardVisible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardVisible.swift; sourceTree = "<group>"; };
 		4C7D095C2A098C5D00943473 /* ConnectWalletView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectWalletView.swift; sourceTree = "<group>"; };
 		4C7D095D2A098C5D00943473 /* WalletView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WalletView.swift; sourceTree = "<group>"; };
@@ -3234,8 +3234,8 @@
 				4C4792D72A9939BD00489948 /* flatcc_assert.h */,
 				4C4792D82A9939BD00489948 /* reflection */,
 			);
-			path = flatcc;
-			sourceTree = "<group>";
+			path = nostrdb/flatcc;
+			sourceTree = SOURCE_ROOT;
 		};
 		4C4792982A9939BD00489948 /* portable */ = {
 			isa = PBXGroup;
@@ -3456,7 +3456,7 @@
 				D798D2272B085CDA00234419 /* NdbNote+.swift */,
 				4CF480582B633F3800F2B2C0 /* NdbBlock.swift */,
 			);
-			path = nostrdb;
+			path = "damus/Bindings/nostrdb";
 			sourceTree = "<group>";
 		};
 		4C9B0DEC2A65A74000CBDA21 /* Util */ = {
@@ -3801,8 +3801,8 @@
 			children = (
 				4CC6A9F22CAB688500989CEF /* ccan */,
 			);
-			path = ccan;
-			sourceTree = "<group>";
+			path = nostrdb/ccan;
+			sourceTree = SOURCE_ROOT;
 		};
 		4CC7AAEE297F11B300430951 /* Events */ = {
 			isa = PBXGroup;
@@ -4131,8 +4131,8 @@
 				CA1FA68796C4A1B3AF0BB971 /* binmoji.h */,
 				EFF66D62F30B0B8127FC735B /* binmoji_table.h */,
 			);
-			path = src;
-			sourceTree = "<group>";
+			path = nostrdb/src;
+			sourceTree = SOURCE_ROOT;
 		};
 		4CF47FF72B631C0100F2B2C0 /* bindings */ = {
 			isa = PBXGroup;
