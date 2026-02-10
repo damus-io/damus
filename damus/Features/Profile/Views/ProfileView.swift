@@ -133,31 +133,25 @@ struct ProfileView: View {
     }
 
     var bannerSection: some View {
-        GeometryReader { proxy -> AnyView in
-
+        GeometryReader { proxy in
             let minY = proxy.frame(in: .global).minY
 
-            DispatchQueue.main.async {
-                self.yOffset = minY
-            }
+            VStack(spacing: 0) {
+                ZStack {
+                    BannerImageView(pubkey: profile.pubkey, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: proxy.size.width, height: minY > 0 ? bannerHeight + minY : bannerHeight)
+                        .clipped()
 
-            return AnyView(
-                VStack(spacing: 0) {
-                    ZStack {
-                        BannerImageView(pubkey: profile.pubkey, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: proxy.size.width, height: minY > 0 ? bannerHeight + minY : bannerHeight)
-                            .clipped()
-
-                        VisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial)).opacity(bannerBlurViewOpacity())
-                    }
-
-                    Divider().opacity(bannerBlurViewOpacity())
+                    VisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial)).opacity(bannerBlurViewOpacity())
                 }
-                .frame(height: minY > 0 ? bannerHeight + minY : nil)
-                .offset(y: minY > 0 ? -minY : -minY < navbarHeight ? 0 : -minY - navbarHeight)
-            )
 
+                Divider().opacity(bannerBlurViewOpacity())
+            }
+            .frame(height: minY > 0 ? bannerHeight + minY : nil)
+            .offset(y: minY > 0 ? -minY : -minY < navbarHeight ? 0 : -minY - navbarHeight)
+            .onAppear { self.yOffset = minY }
+            .onChange(of: minY) { newY in self.yOffset = newY }
         }
         .frame(height: bannerHeight)
         .allowsHitTesting(false)
