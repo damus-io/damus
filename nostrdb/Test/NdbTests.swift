@@ -537,6 +537,96 @@ final class NdbTests: XCTestCase {
         }
     }
 
+    /// RESOURCE LEAK TEST: SafeNdbTxn.new nil-path leak (damus-vxu)
+    ///
+    /// Bug: When valueGetter returns nil, SafeNdbTxn.new opens a transaction
+    /// but never closes it before returning nil.
+    ///
+    /// Expected: Test FAILS on old code (leak detected), PASSES on new code (fixed)
+    func test_SafeNdbTxn_new_nil_path_leaks_transaction() throws {
+        let ndb = Ndb(path: db_dir)!
+        let ok = ndb.process_events(test_wire_events)
+        XCTAssertTrue(ok)
+
+        print("🔍 LEAK TEST: SafeNdbTxn.new nil-path")
+
+        #if TXNDEBUG
+        let initialTxnCount = txn_count
+        print("🔍 Initial txn_count: \(initialTxnCount)")
+
+        // Trigger the nil-path in SafeNdbTxn.new
+        // This happens when valueGetter returns outer nil
+        let result = SafeNdbTxn<String?>.new(on: ndb) { _ in
+            // Return outer nil (not .some(nil))
+            // This triggers "guard let val = valueGetter(placeholderTxn) else { return nil }"
+            return nil
+        }
+
+        XCTAssertNil(result, "Should return nil on valueGetter nil")
+
+        let finalTxnCount = txn_count
+        print("🔍 Final txn_count: \(finalTxnCount)")
+
+        // WITHOUT FIX: txn_count will be +1 (transaction leaked)
+        // WITH FIX: txn_count should return to initial (transaction closed)
+        XCTAssertEqual(finalTxnCount, initialTxnCount,
+                       "❌ LEAK DETECTED: Transaction was not closed on nil path. Expected \(initialTxnCount), got \(finalTxnCount)")
+
+        print("✅ No leak - transaction properly closed on nil path")
+        #else
+        print("⚠️  TXNDEBUG not enabled - cannot detect leaks. Skipping test.")
+        #endif
+    }
+
+    /// RESOURCE LEAK TEST: SafeNdbTxn.maybeExtend nil-path leak (damus-3do)
+    ///
+    /// Bug: When maybeExtend's closure returns nil, self.moved=true was set
+    /// before consume, causing deinit to skip close. Transaction is orphaned.
+    ///
+    /// Expected: Test FAILS on old code (leak detected), PASSES on new code (fixed)
+    func test_SafeNdbTxn_maybeExtend_nil_path_leaks_transaction() throws {
+        let ndb = Ndb(path: db_dir)!
+        let ok = ndb.process_events(test_wire_events)
+        XCTAssertTrue(ok)
+
+        print("🔍 LEAK TEST: SafeNdbTxn.maybeExtend nil-path")
+
+        #if TXNDEBUG
+        let initialTxnCount = txn_count
+        print("🔍 Initial txn_count: \(initialTxnCount)")
+
+        // Create SafeNdbTxn then call maybeExtend with nil-returning closure
+        let txn = SafeNdbTxn<Int>.new(on: ndb) { _ in 42 }
+        XCTAssertNotNil(txn)
+
+        let midTxnCount = txn_count
+        print("🔍 Mid txn_count: \(midTxnCount)")
+        XCTAssertEqual(midTxnCount, initialTxnCount + 1, "One txn should be active")
+
+        // Call maybeExtend with closure that returns nil
+        let result = txn?.maybeExtend { _ in
+            return nil as String?  // Returns nil, triggers leak path
+        }
+
+        XCTAssertNil(result, "Should return nil when with() returns nil")
+
+        // Force txn to go out of scope and deinit
+        _ = result
+
+        let finalTxnCount = txn_count
+        print("🔍 Final txn_count: \(finalTxnCount)")
+
+        // WITHOUT FIX: txn_count still +1 (leaked, moved=true prevented close)
+        // WITH FIX: txn_count back to initial (explicitly closed on nil path)
+        XCTAssertEqual(finalTxnCount, initialTxnCount,
+                       "❌ LEAK DETECTED: Transaction leaked after maybeExtend nil. Expected \(initialTxnCount), got \(finalTxnCount)")
+
+        print("✅ No leak - transaction properly closed after maybeExtend nil")
+        #else
+        print("⚠️  TXNDEBUG not enabled - cannot detect leaks. Skipping test.")
+        #endif
+    }
+
     func test_perf_old_iter()  {
         self.measure {
             let event = decode_nostr_event_json(test_contact_list_json)

@@ -11,6 +11,22 @@ import Foundation
 fileprivate var txn_count: Int = 0
 #endif
 
+/// Type-safe keys for NdbTxn thread-local storage
+fileprivate enum NdbTxnThreadDictionaryKey {
+    static let txn = "ndb_txn"
+    static let refCount = "ndb_txn_ref_count"
+    static let generation = "txn_generation"
+}
+
+/// Helper to safely clear all NdbTxn thread-local state
+fileprivate extension NSMutableDictionary {
+    func clearNdbTxnState() {
+        self.removeObject(forKey: NdbTxnThreadDictionaryKey.txn)
+        self.removeObject(forKey: NdbTxnThreadDictionaryKey.refCount)
+        self.removeObject(forKey: NdbTxnThreadDictionaryKey.generation)
+    }
+}
+
 // Would use struct and ~Copyable but generics aren't supported well
 class NdbTxn<T>: RawNdbTxnAccessible {
     var txn: ndb_txn
@@ -36,19 +52,28 @@ class NdbTxn<T>: RawNdbTxnAccessible {
         self.name = name ?? "txn"
         self.ndb = ndb
         self.generation = ndb.generation
-        if let active_txn = Thread.current.threadDictionary["ndb_txn"] as? ndb_txn,
-           let txn_generation = Thread.current.threadDictionary["txn_generation"] as? Int,
-           txn_generation == ndb.generation
-        {
-            // some parent thread is active, use that instead
+
+        // Extract all thread dictionary values safely (no force unwraps)
+        let threadDictionary = Thread.current.threadDictionary
+        let activeTxn = threadDictionary[NdbTxnThreadDictionaryKey.txn] as? ndb_txn
+        let txnGeneration = threadDictionary[NdbTxnThreadDictionaryKey.generation] as? Int
+        let refCount = threadDictionary[NdbTxnThreadDictionaryKey.refCount] as? Int
+
+        // Check if we can inherit a valid parent transaction
+        if let activeTxn, let txnGeneration, txnGeneration == ndb.generation, let refCount {
+            // All required values present and valid - inherit the transaction
             print("txn: inherited txn")
-            self.txn = active_txn
+            self.txn = activeTxn
             self.inherited = true
-            self.generation = Thread.current.threadDictionary["txn_generation"] as! Int
-            let ref_count = Thread.current.threadDictionary["ndb_txn_ref_count"] as! Int
-            let new_ref_count = ref_count + 1
-            Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
+            self.generation = txnGeneration
+            threadDictionary[NdbTxnThreadDictionaryKey.refCount] = refCount + 1
         } else {
+            // Cannot inherit - clear any partial/stale state and create fresh transaction
+            if activeTxn != nil || txnGeneration != nil || refCount != nil {
+                print("txn: inconsistent state detected, clearing and creating fresh transaction")
+                threadDictionary.clearNdbTxnState()
+            }
+
             let result: R? = try? ndb.withNdb({
                 var txn = ndb_txn()
                 #if TXNDEBUG
@@ -61,9 +86,9 @@ class NdbTxn<T>: RawNdbTxnAccessible {
             guard let result else { return nil }
             self.txn = result.txn
             self.generation = result.generation
-            Thread.current.threadDictionary["ndb_txn"] = self.txn
-            Thread.current.threadDictionary["ndb_txn_ref_count"] = 1
-            Thread.current.threadDictionary["txn_generation"] = ndb.generation
+            threadDictionary[NdbTxnThreadDictionaryKey.txn] = self.txn
+            threadDictionary[NdbTxnThreadDictionaryKey.refCount] = 1
+            threadDictionary[NdbTxnThreadDictionaryKey.generation] = ndb.generation
             self.inherited = false
         }
         #if TXNDEBUG
@@ -85,7 +110,7 @@ class NdbTxn<T>: RawNdbTxnAccessible {
 
     /// Only access temporarily! Do not store database references for longterm use. If it's a primitive type you
     /// can retrieve this value with `.value`
-    internal var unsafeUnownedValue: T { 
+    internal var unsafeUnownedValue: T {
         precondition(!moved)
         return val
     }
@@ -99,16 +124,17 @@ class NdbTxn<T>: RawNdbTxnAccessible {
             print("txn: not closing. db closed")
             return
         }
-        if let ref_count = Thread.current.threadDictionary["ndb_txn_ref_count"] as? Int {
-            let new_ref_count = ref_count - 1
-            Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
-            assert(new_ref_count >= 0, "NdbTxn reference count should never be below zero")
-            if new_ref_count <= 0 {
+
+        let threadDictionary = Thread.current.threadDictionary
+        if let refCount = threadDictionary[NdbTxnThreadDictionaryKey.refCount] as? Int {
+            let newRefCount = refCount - 1
+            threadDictionary[NdbTxnThreadDictionaryKey.refCount] = newRefCount
+            assert(newRefCount >= 0, "NdbTxn reference count should never be below zero")
+            if newRefCount <= 0 {
                 _ = try? ndb.withNdb({
                     ndb_end_query(&self.txn)
                 }, maxWaitTimeout: .milliseconds(200))
-                Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")
-                Thread.current.threadDictionary.removeObject(forKey: "ndb_txn_ref_count")
+                threadDictionary.clearNdbTxnState()
             }
         }
         if inherited {
@@ -176,19 +202,28 @@ class SafeNdbTxn<T: ~Copyable> {
         let generation: Int
         let txn: ndb_txn
         let inherited: Bool
-        if let active_txn = Thread.current.threadDictionary["ndb_txn"] as? ndb_txn,
-           let txn_generation = Thread.current.threadDictionary["txn_generation"] as? Int,
-           txn_generation == ndb.generation
-        {
-            // some parent thread is active, use that instead
+
+        // Extract all thread dictionary values safely (no force unwraps)
+        let threadDictionary = Thread.current.threadDictionary
+        let activeTxn = threadDictionary[NdbTxnThreadDictionaryKey.txn] as? ndb_txn
+        let txnGeneration = threadDictionary[NdbTxnThreadDictionaryKey.generation] as? Int
+        let refCount = threadDictionary[NdbTxnThreadDictionaryKey.refCount] as? Int
+
+        // Check if we can inherit a valid parent transaction
+        if let activeTxn, let txnGeneration, txnGeneration == ndb.generation, let refCount {
+            // All required values present and valid - inherit the transaction
             print("txn: inherited txn")
-            txn = active_txn
+            txn = activeTxn
             inherited = true
-            generation = Thread.current.threadDictionary["txn_generation"] as! Int
-            let ref_count = Thread.current.threadDictionary["ndb_txn_ref_count"] as! Int
-            let new_ref_count = ref_count + 1
-            Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
+            generation = txnGeneration
+            threadDictionary[NdbTxnThreadDictionaryKey.refCount] = refCount + 1
         } else {
+            // Cannot inherit - clear any partial/stale state and create fresh transaction
+            if activeTxn != nil || txnGeneration != nil || refCount != nil {
+                print("txn: inconsistent state detected, clearing and creating fresh transaction")
+                threadDictionary.clearNdbTxnState()
+            }
+
             let result: R? = try? ndb.withNdb({
                 var txn = ndb_txn()
                 #if TXNDEBUG
@@ -201,16 +236,27 @@ class SafeNdbTxn<T: ~Copyable> {
             guard let result else { return nil }
             txn = result.txn
             generation = result.generation
-            Thread.current.threadDictionary["ndb_txn"] = txn
-            Thread.current.threadDictionary["ndb_txn_ref_count"] = 1
-            Thread.current.threadDictionary["txn_generation"] = ndb.generation
+            threadDictionary[NdbTxnThreadDictionaryKey.txn] = txn
+            threadDictionary[NdbTxnThreadDictionaryKey.refCount] = 1
+            threadDictionary[NdbTxnThreadDictionaryKey.generation] = ndb.generation
             inherited = false
         }
         #if TXNDEBUG
         print("txn: open  gen\(generation) '\(name)' \(txn_count)")
         #endif
         let placeholderTxn = PlaceholderNdbTxn(txn: txn)
-        guard let val = valueGetter(placeholderTxn) else { return nil }
+        guard let val = valueGetter(placeholderTxn) else {
+            // Fix leak: Close transaction before returning nil
+            if !inherited {
+                var mutableTxn = txn
+                _ = try? ndb.withNdb({ ndb_end_query(&mutableTxn) }, maxWaitTimeout: .milliseconds(200))
+                #if TXNDEBUG
+                txn_count -= 1
+                print("txn: close (valueGetter nil) gen\(generation) '\(name)' \(txn_count)")
+                #endif
+            }
+            return nil
+        }
         return SafeNdbTxn<T>(ndb: ndb, txn: txn, val: val, generation: generation, inherited: inherited, name: name)
     }
 
@@ -233,16 +279,17 @@ class SafeNdbTxn<T: ~Copyable> {
             print("txn: not closing. db closed")
             return
         }
-        if let ref_count = Thread.current.threadDictionary["ndb_txn_ref_count"] as? Int {
-            let new_ref_count = ref_count - 1
-            Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
-            assert(new_ref_count >= 0, "NdbTxn reference count should never be below zero")
-            if new_ref_count <= 0 {
+
+        let threadDictionary = Thread.current.threadDictionary
+        if let refCount = threadDictionary[NdbTxnThreadDictionaryKey.refCount] as? Int {
+            let newRefCount = refCount - 1
+            threadDictionary[NdbTxnThreadDictionaryKey.refCount] = newRefCount
+            assert(newRefCount >= 0, "NdbTxn reference count should never be below zero")
+            if newRefCount <= 0 {
                 _ = try? ndb.withNdb({
                     ndb_end_query(&self.txn)
                 }, maxWaitTimeout: .milliseconds(200))
-                Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")
-                Thread.current.threadDictionary.removeObject(forKey: "ndb_txn_ref_count")
+                threadDictionary.clearNdbTxnState()
             }
         }
         if inherited {
@@ -280,7 +327,20 @@ class SafeNdbTxn<T: ~Copyable> {
         let generation = self.generation
         let inherited = self.inherited
         let name = self.name
-        guard let newVal = with(consume self) else { return nil }
+
+        guard let newVal = with(consume self) else {
+            // Fix leak: Close transaction on nil path if we own it
+            if !inherited {
+                var mutableTxn = txn
+                _ = try? ndb.withNdb({ ndb_end_query(&mutableTxn) }, maxWaitTimeout: .milliseconds(200))
+                #if TXNDEBUG
+                txn_count -= 1
+                print("txn: close (maybeExtend nil) gen\(generation) '\(name)' \(txn_count)")
+                #endif
+            }
+            return nil
+        }
+
         return .init(ndb: ndb, txn: txn, val: newVal, generation: generation, inherited: inherited, name: name)
     }
 }
