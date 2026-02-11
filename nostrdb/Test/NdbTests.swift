@@ -165,154 +165,6 @@ final class NdbTests: XCTestCase {
         XCTAssertEqual(testNote.content, "https://cdn.nostr.build/i/5c1d3296f66c2630131bf123106486aeaf051ed8466031c0e0532d70b33cddb2.jpg")
     }
     
-    func test_inherited_transactions() throws {
-        let ndb = Ndb(path: db_dir)!
-        do {
-            guard let txn1 = NdbTxn(ndb: ndb) else { return XCTAssert(false) }
-
-            let ntxn = (Thread.current.threadDictionary.value(forKey: "ndb_txn") as? ndb_txn)!
-            XCTAssertEqual(txn1.txn.lmdb, ntxn.lmdb)
-            XCTAssertEqual(txn1.txn.mdb_txn, ntxn.mdb_txn)
-
-            guard let txn2 = NdbTxn(ndb: ndb) else { return XCTAssert(false) }
-
-            // With inheritance removed, both transactions own their txn
-            XCTAssertEqual(txn1.ownsTxn, true)
-            XCTAssertEqual(txn2.ownsTxn, true)
-        }
-
-        let ndb_txn = Thread.current.threadDictionary.value(forKey: "ndb_txn")
-        XCTAssertNil(ndb_txn)
-    }
-
-    /// DETERMINISTIC REGRESSION TEST for PR #3614 invariant bug
-    /// Tests that NdbTxn recovers from missing ndb_txn_ref_count in threadDictionary
-    ///
-    /// Bug: Safety check (lines 39-41) validates 2 keys but force unwraps 3rd key (line 48)
-    /// - Checks: "ndb_txn", "txn_generation"
-    /// - Force unwraps: "ndb_txn_ref_count" (NOT checked!)
-    ///
-    /// WITHOUT FIX: This test would CRASH at line 48 (as! Int on nil)
-    /// WITH FIX: Detects inconsistent state, clears it, creates fresh transaction
-    ///
-    /// This test satisfies jb55 requirement: "test that replicates the issue and fails + a fix"
-    func test_missing_ref_count_recovers_gracefully() throws {
-        let ndb = Ndb(path: db_dir)!
-
-        // First create a valid transaction to get a real ndb_txn
-        var seededTxn: ndb_txn!
-        do {
-            guard let validTxn = NdbTxn<()>(ndb: ndb, name: "seed_txn") else {
-                return XCTFail("Could not create seed transaction")
-            }
-            seededTxn = validTxn.txn
-            // validTxn will deinit and clean up threadDictionary
-        }
-
-        // Manually seed threadDictionary with PARTIAL state (missing ref_count)
-        // This simulates the bug condition where ref_count is missing
-        Thread.current.threadDictionary["ndb_txn"] = seededTxn
-        Thread.current.threadDictionary["txn_generation"] = ndb.generation
-        // Deliberately omit "ndb_txn_ref_count" to trigger the bug
-
-        print("🧪 Test: Attempting to create NdbTxn with missing ref_count")
-        print("🧪 WITHOUT FIX: Would crash at NdbTxn.swift:48 (as! Int on nil)")
-        print("🧪 WITH FIX: Should detect inconsistent state and recover")
-
-        // Try to create transaction with inconsistent threadDictionary state
-        // OLD CODE (before fix): Crashes on line 48 - let ref_count = ... as! Int
-        // NEW CODE (with fix): Detects missing ref_count, clears state, creates fresh txn
-        guard let txn = NdbTxn<()>(ndb: ndb, name: "recovery_txn") else {
-            return XCTFail("Transaction creation should succeed with fix")
-        }
-
-        print("✅ Test PASSED: NdbTxn recovered from inconsistent state")
-
-        // Verify the transaction was created successfully
-        XCTAssertNotNil(txn)
-        XCTAssertEqual(txn.ownsTxn, true, "Should own the transaction")
-
-        // Verify threadDictionary is now in consistent state
-        XCTAssertNotNil(Thread.current.threadDictionary["ndb_txn"])
-        XCTAssertNotNil(Thread.current.threadDictionary["txn_generation"])
-        XCTAssertNotNil(Thread.current.threadDictionary["ndb_txn_ref_count"])
-    }
-
-    /// Test recovery from missing txn_generation
-    func test_missing_generation_recovers_gracefully() throws {
-        let ndb = Ndb(path: db_dir)!
-
-        // Seed with valid txn
-        var seededTxn: ndb_txn!
-        do {
-            guard let validTxn = NdbTxn<()>(ndb: ndb, name: "seed_txn") else {
-                return XCTFail("Could not create seed transaction")
-            }
-            seededTxn = validTxn.txn
-        }
-
-        // Manually seed with missing txn_generation
-        Thread.current.threadDictionary["ndb_txn"] = seededTxn
-        Thread.current.threadDictionary["ndb_txn_ref_count"] = 1
-        // Deliberately omit "txn_generation"
-
-        print("🧪 Test: Missing txn_generation - should recover")
-
-        guard let txn = NdbTxn<()>(ndb: ndb, name: "recovery_txn") else {
-            return XCTFail("Transaction creation should succeed with fix")
-        }
-
-        XCTAssertNotNil(txn)
-        XCTAssertEqual(txn.ownsTxn, true, "Should own the transaction")
-    }
-
-    /// Test recovery from completely empty threadDictionary (baseline sanity check)
-    func test_empty_threadDict_creates_fresh_transaction() throws {
-        let ndb = Ndb(path: db_dir)!
-
-        // Ensure threadDictionary is completely clean
-        Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")
-        Thread.current.threadDictionary.removeObject(forKey: "txn_generation")
-        Thread.current.threadDictionary.removeObject(forKey: "ndb_txn_ref_count")
-
-        print("🧪 Test: Empty threadDict - should create fresh transaction")
-
-        guard let txn = NdbTxn<()>(ndb: ndb, name: "fresh_txn") else {
-            return XCTFail("Should create fresh transaction when dict is empty")
-        }
-
-        XCTAssertNotNil(txn)
-        XCTAssertEqual(txn.ownsTxn, true)
-    }
-
-    /// Test recovery from stale generation (generation mismatch)
-    func test_stale_generation_recovers_gracefully() throws {
-        let ndb = Ndb(path: db_dir)!
-
-        // Seed with valid txn
-        var seededTxn: ndb_txn!
-        do {
-            guard let validTxn = NdbTxn<()>(ndb: ndb, name: "seed_txn") else {
-                return XCTFail("Could not create seed transaction")
-            }
-            seededTxn = validTxn.txn
-        }
-
-        // Manually seed with STALE generation (doesn't match ndb.generation)
-        Thread.current.threadDictionary["ndb_txn"] = seededTxn
-        Thread.current.threadDictionary["txn_generation"] = ndb.generation - 1  // Stale!
-        Thread.current.threadDictionary["ndb_txn_ref_count"] = 1
-
-        print("🧪 Test: Stale generation - should create fresh transaction")
-
-        guard let txn = NdbTxn<()>(ndb: ndb, name: "recovery_txn") else {
-            return XCTFail("Transaction creation should succeed with fix")
-        }
-
-        XCTAssertNotNil(txn)
-        XCTAssertEqual(txn.ownsTxn, true, "Should own the transaction")
-    }
-
     func test_decode_perf() throws {
         // This is an example of a performance test case.
         self.measure {
@@ -472,8 +324,10 @@ final class NdbTests: XCTestCase {
         DispatchQueue.global().async {
             print("🔍 Creating parent transaction...")
             guard let txn1 = NdbTxn<()>(ndb: ndb, name: "parent_txn") else {
-                testResult = "parent_failed"
-                expectation.fulfill()
+                DispatchQueue.main.sync {
+                    testResult = "parent_failed"
+                    expectation.fulfill()
+                }
                 return
             }
 
@@ -484,8 +338,10 @@ final class NdbTests: XCTestCase {
             guard let txn2 = NdbTxn<()>(ndb: ndb, name: "child_txn") else {
                 print("⚠️  DEADLOCK DETECTED: Second transaction blocked by first")
                 print("⚠️  NDB_FLAG_NOTLS is REQUIRED to remove inheritance safely")
-                testResult = "deadlock_detected"
-                expectation.fulfill()
+                DispatchQueue.main.sync {
+                    testResult = "deadlock_detected"
+                    expectation.fulfill()
+                }
                 return
             }
 
@@ -493,13 +349,14 @@ final class NdbTests: XCTestCase {
             print("✅ No deadlock - multiple same-thread transactions work!")
             print("✅ NDB_FLAG_NOTLS is either already enabled or not needed")
 
-            testResult = "no_deadlock"
-
             // Keep both alive
             _ = txn1
             _ = txn2
 
-            expectation.fulfill()
+            DispatchQueue.main.sync {
+                testResult = "no_deadlock"
+                expectation.fulfill()
+            }
         }
 
         // Wait with timeout - if we deadlock, this will timeout

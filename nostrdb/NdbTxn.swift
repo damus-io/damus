@@ -11,20 +11,13 @@ import Foundation
 fileprivate var txn_count: Int = 0
 #endif
 
-/// Type-safe keys for NdbTxn thread-local storage
-fileprivate enum NdbTxnThreadDictionaryKey {
-    static let txn = "ndb_txn"
-    static let refCount = "ndb_txn_ref_count"
-    static let generation = "txn_generation"
-}
-
-/// Helper to safely clear all NdbTxn thread-local state
-fileprivate extension NSMutableDictionary {
-    func clearNdbTxnState() {
-        self.removeObject(forKey: NdbTxnThreadDictionaryKey.txn)
-        self.removeObject(forKey: NdbTxnThreadDictionaryKey.refCount)
-        self.removeObject(forKey: NdbTxnThreadDictionaryKey.generation)
-    }
+/// Standard timeout for nostrdb transaction operations.
+///
+/// This timeout prevents indefinite hangs while allowing normal database operations to complete.
+/// The value is chosen empirically: long enough for typical database operations on the main thread,
+/// short enough to prevent user-visible freezes.
+private extension DispatchTimeInterval {
+    static let ndbTransactionTimeout = DispatchTimeInterval.milliseconds(200)
 }
 
 // Would use struct and ~Copyable but generics aren't supported well
@@ -40,13 +33,29 @@ class NdbTxn<T>: RawNdbTxnAccessible {
     static func pure(ndb: Ndb, val: T) -> NdbTxn<T> {
         .init(ndb: ndb, txn: ndb_txn(), val: val, generation: ndb.generation, ownsTxn: false, name: "pure_txn")
     }
-    
+
     /// Simple helper struct for the init function to avoid compiler errors encountered by using other techniques
     private struct R {
         let txn: ndb_txn
         let generation: Int
     }
 
+    /// Creates a new transaction with its own LMDB snapshot.
+    ///
+    /// Each transaction gets a fresh MVCC (Multi-Version Concurrency Control) snapshot,
+    /// ensuring it sees all data committed up to the moment it was created. Transactions
+    /// are independent and do not share state with other transactions on the same thread.
+    ///
+    /// - Parameters:
+    ///   - ndb: The database instance
+    ///   - with: Optional closure to compute a value within the transaction context
+    ///   - name: Optional name for debugging (defaults to "txn")
+    ///
+    /// - Returns: A new transaction, or `nil` if the database is closed or transaction creation fails
+    ///
+    /// - Note: This replaces the old inheritance pattern where transactions on the same thread
+    ///         would share MVCC snapshots via `Thread.current.threadDictionary`, which caused
+    ///         stale data bugs (#3607) and force unwrap crashes (#3614).
     init?(ndb: Ndb, with: (NdbTxn<T>) -> T = { _ in () }, name: String? = nil) {
         guard !ndb.is_closed else { return nil }
         self.name = name ?? "txn"
@@ -56,13 +65,13 @@ class NdbTxn<T>: RawNdbTxnAccessible {
         // Always create fresh transaction
         let result: R? = try? ndb.withNdb({
             var txn = ndb_txn()
+            let ok = ndb_begin_query(ndb.ndb.ndb, &txn) != 0
+            guard ok else { return .none }
             #if TXNDEBUG
             txn_count += 1
             #endif
-            let ok = ndb_begin_query(ndb.ndb.ndb, &txn) != 0
-            guard ok else { return .none }
             return .some(R(txn: txn, generation: ndb.generation))
-        }, maxWaitTimeout: .milliseconds(200))
+        }, maxWaitTimeout: .ndbTransactionTimeout)
         guard let result else { return nil }
         self.txn = result.txn
         self.generation = result.generation
@@ -112,7 +121,7 @@ class NdbTxn<T>: RawNdbTxnAccessible {
 
         _ = try? ndb.withNdb({
             ndb_end_query(&self.txn)
-        }, maxWaitTimeout: .milliseconds(200))
+        }, maxWaitTimeout: .ndbTransactionTimeout)
 
         #if TXNDEBUG
         txn_count -= 1;
@@ -164,20 +173,35 @@ class SafeNdbTxn<T: ~Copyable> {
         let txn: ndb_txn
         let generation: Int
     }
-    
+
+    /// Creates a new transaction with its own LMDB snapshot.
+    ///
+    /// Similar to `NdbTxn.init` but uses a static factory method for better ergonomics
+    /// with non-copyable types. Each transaction gets a fresh MVCC snapshot.
+    ///
+    /// - Parameters:
+    ///   - ndb: The database instance
+    ///   - valueGetter: Closure to compute a value within the transaction context.
+    ///                  Returns `nil` to abort transaction creation.
+    ///   - name: Name for debugging (defaults to "txn")
+    ///
+    /// - Returns: A new transaction, or `nil` if creation fails or `valueGetter` returns `nil`
+    ///
+    /// - Note: If `valueGetter` returns `nil`, the transaction is properly closed before
+    ///         returning to prevent resource leaks.
     static func new(on ndb: Ndb, with valueGetter: (PlaceholderNdbTxn) -> T? = { _ in () }, name: String = "txn") -> SafeNdbTxn<T>? {
         guard !ndb.is_closed else { return nil }
 
         // Always create fresh transaction
         let result: R? = try? ndb.withNdb({
             var txn = ndb_txn()
+            let ok = ndb_begin_query(ndb.ndb.ndb, &txn) != 0
+            guard ok else { return .none }
             #if TXNDEBUG
             txn_count += 1
             #endif
-            let ok = ndb_begin_query(ndb.ndb.ndb, &txn) != 0
-            guard ok else { return .none }
             return .some(R(txn: txn, generation: ndb.generation))
-        }, maxWaitTimeout: .milliseconds(200))
+        }, maxWaitTimeout: .ndbTransactionTimeout)
         guard let result else { return nil }
         let txn = result.txn
         let generation = result.generation
@@ -189,7 +213,7 @@ class SafeNdbTxn<T: ~Copyable> {
         guard let val = valueGetter(placeholderTxn) else {
             // Fix leak: Close transaction before returning nil
             var mutableTxn = txn
-            _ = try? ndb.withNdb({ ndb_end_query(&mutableTxn) }, maxWaitTimeout: .milliseconds(200))
+            _ = try? ndb.withNdb({ ndb_end_query(&mutableTxn) }, maxWaitTimeout: .ndbTransactionTimeout)
             #if TXNDEBUG
             txn_count -= 1
             print("txn: close (valueGetter nil) gen\(generation) '\(name)' \(txn_count)")
@@ -229,7 +253,7 @@ class SafeNdbTxn<T: ~Copyable> {
 
         _ = try? ndb.withNdb({
             ndb_end_query(&self.txn)
-        }, maxWaitTimeout: .milliseconds(200))
+        }, maxWaitTimeout: .ndbTransactionTimeout)
 
         #if TXNDEBUG
         txn_count -= 1;
@@ -262,7 +286,7 @@ class SafeNdbTxn<T: ~Copyable> {
             // Fix leak: Close transaction on nil path if we own it
             if ownsTxn {
                 var mutableTxn = txn
-                _ = try? ndb.withNdb({ ndb_end_query(&mutableTxn) }, maxWaitTimeout: .milliseconds(200))
+                _ = try? ndb.withNdb({ ndb_end_query(&mutableTxn) }, maxWaitTimeout: .ndbTransactionTimeout)
                 #if TXNDEBUG
                 txn_count -= 1
                 print("txn: close (maybeExtend nil) gen\(generation) '\(name)' \(txn_count)")
