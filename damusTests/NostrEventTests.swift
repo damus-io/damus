@@ -98,28 +98,30 @@ final class VineVideoTests: XCTestCase {
         XCTAssertEqual(video?.hashtags, ["attack"])
     }
     
-    func testReplacementKeepsNewestEvent() {
+    func testReplacementKeepsNewestEvent() async {
         var first = makeVineEvent(tags: VineFixtures.replacementOriginal)
         first.created_at = 100
         var updated = makeVineEvent(tags: VineFixtures.replacementUpdated)
         updated.created_at = 200
         let feed = VineTestFeed()
-        feed.apply(first)
-        feed.apply(updated)
-        XCTAssertEqual(feed.vines.count, 1)
-        XCTAssertEqual(feed.vines.first?.title, "Updated cut")
+        await feed.apply(first)
+        await feed.apply(updated)
+        let vines = await feed.vines
+        XCTAssertEqual(vines.count, 1)
+        XCTAssertEqual(vines.first?.title, "Updated cut")
     }
-    
-    func testReplacementKeepsOldestWhenOlder() {
+
+    func testReplacementKeepsOldestWhenOlder() async {
         var first = makeVineEvent(tags: VineFixtures.replacementOriginal)
         first.created_at = 200
         var updated = makeVineEvent(tags: VineFixtures.replacementUpdated)
         updated.created_at = 100
         let feed = VineTestFeed()
-        feed.apply(first)
-        feed.apply(updated)
-        XCTAssertEqual(feed.vines.count, 1)
-        XCTAssertEqual(feed.vines.first?.title, "First cut")
+        await feed.apply(first)
+        await feed.apply(updated)
+        let vines = await feed.vines
+        XCTAssertEqual(vines.count, 1)
+        XCTAssertEqual(vines.first?.title, "First cut")
     }
     
     func testExpiredVineIsSkipped() {

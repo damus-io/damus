@@ -556,16 +556,34 @@ private final class VineFeedModel: ObservableObject {
     @MainActor
     private func prefetch(url: URL, allowCellular: Bool) async {
         guard markPrefetching(url) else { return }
+        defer { unmarkPrefetching(url) }
+
         var request = URLRequest(url: url)
         request.allowsExpensiveNetworkAccess = allowCellular
         request.allowsConstrainedNetworkAccess = allowCellular
         request.timeoutInterval = 15
+
         do {
-            _ = try await URLSession.shared.data(for: request)
+            let (data, response) = try await URLSession.shared.data(for: request)
+
+            guard let httpResponse = response as? HTTPURLResponse,
+                  200..<300 ~= httpResponse.statusCode else {
+                Log.debug("Vine prefetch got bad response for %s", for: .timeline, url.absoluteString)
+                return
+            }
+
+            // Write to VideoCache for persistent caching with 1-day expiry
+            guard let cache = VideoCache.standard else {
+                Log.debug("VideoCache not available for prefetch", for: .timeline)
+                return
+            }
+
+            let cachedURL = cache.url_to_cached_url(url: url)
+            try data.write(to: cachedURL)
+            Log.debug("Prefetched Vine video to cache: %s", for: .timeline, url.absoluteString)
         } catch {
             Log.debug("Vine prefetch failed for %s: %s", for: .timeline, url.absoluteString, error.localizedDescription)
         }
-        unmarkPrefetching(url)
     }
     
     @MainActor

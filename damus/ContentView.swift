@@ -163,11 +163,6 @@ struct ContentView: View {
     
     func MainContent(damus: DamusState) -> some View {
         let immersiveTimeline = selected_timeline == .home || selected_timeline == .vines
-        if selected_timeline == .vines && !damus.settings.vines_feature_enabled {
-            DispatchQueue.main.async {
-                self.selected_timeline = .home
-            }
-        }
         return VStack {
             switch selected_timeline {
             case .search:
@@ -211,6 +206,18 @@ struct ContentView: View {
         }
         .onAppear {
             notify(.display_tabbar(true))
+        }
+        .onChange(of: damus.settings.vines_feature_enabled) { enabled in
+            // Fall back to home timeline if vines are disabled while viewing vines
+            if !enabled && selected_timeline == .vines {
+                selected_timeline = .home
+            }
+        }
+        .onChange(of: selected_timeline) { timeline in
+            // Fall back to home timeline if switching to vines when feature is disabled
+            if timeline == .vines && !damus.settings.vines_feature_enabled {
+                selected_timeline = .home
+            }
         }
     }
     

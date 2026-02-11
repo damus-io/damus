@@ -44,6 +44,12 @@ class NostrNetworkManager {
     private var connectionContinuations: [UUID: CheckedContinuation<Void, Never>] = [:]
     /// A lock to ensure thread-safe access to the continuations dictionary and connection state
     private let continuationsLock = NSLock()
+
+    /// Tracks relays that were added by features (not user-configured) so we can safely remove them
+    /// without deleting user's relay configuration
+    private var featureManagedRelays: Set<RelayURL> = []
+    /// Lock for thread-safe access to featureManagedRelays
+    private let featureRelaysLock = NSLock()
     
     init(delegate: Delegate, addNdbToRelayPool: Bool = true) {
         self.delegate = delegate
@@ -267,21 +273,46 @@ class NostrNetworkManager {
     /// Ensures the relay pool is connected to a specific relay, adding it if necessary. Useful for feature-specific relays (e.g., Vine POC).
     func ensureRelayConnected(_ relayURL: RelayURL) async {
         if await pool.get_relay(relayURL) != nil {
+            // Relay already exists, mark it as feature-managed if not already tracked
+            featureRelaysLock.lock()
+            featureManagedRelays.insert(relayURL)
+            featureRelaysLock.unlock()
             return
         }
-        
+
         let descriptor = RelayPool.RelayDescriptor(url: relayURL, info: .readWrite)
         try? await pool.add_relay(descriptor)
         await pool.connect(to: [relayURL])
+
+        // Track this relay as feature-managed
+        featureRelaysLock.lock()
+        featureManagedRelays.insert(relayURL)
+        featureRelaysLock.unlock()
     }
     
-    /// Disconnects and removes a relay from the pool if we previously added it.
+    /// Disconnects and removes a relay from the pool if we previously added it via ensureRelayConnected.
+    /// Only removes relays that were added by features, not user-configured relays.
     func disconnectRelay(_ relayURL: RelayURL) async {
+        // Only remove if this relay was managed by a feature
+        featureRelaysLock.lock()
+        let isFeatureManaged = featureManagedRelays.contains(relayURL)
+        featureRelaysLock.unlock()
+
+        guard isFeatureManaged else {
+            Log.debug("Skipping removal of relay %s - not feature-managed", for: .network, relayURL.id)
+            return
+        }
+
         guard await pool.get_relay(relayURL) != nil else {
             return
         }
-        
+
         await pool.remove_relay(relayURL)
+
+        // Remove from tracking set
+        featureRelaysLock.lock()
+        featureManagedRelays.remove(relayURL)
+        featureRelaysLock.unlock()
     }
     
     // MARK: NWC

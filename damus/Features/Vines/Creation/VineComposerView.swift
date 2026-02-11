@@ -229,10 +229,11 @@ struct VineComposerView: View {
         }
         uploadPhase = .uploading
         mediaDescriptor = nil
-        
-        let metadata = videoMetadata(for: media.localURL)
-        
+
         Task.detached {
+            // Extract metadata on background thread to avoid blocking main thread
+            let metadata = self.videoMetadata(for: media.localURL)
+
             do {
                 let response = try await uploadService.uploadVideo(
                     fileURL: media.localURL,
