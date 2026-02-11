@@ -271,22 +271,6 @@ actor DatabaseSnapshotManager {
             .appendingPathComponent(Self.snapshotReadyMarker)
             .path
 
-        // Verify same filesystem for fast rename (not slow copy+delete)
-        // If on different filesystems, moveItem becomes copy+delete (~500ms) instead of rename (~10ms)
-        let tempURL = URL(fileURLWithPath: tempPath)
-        let finalURL = URL(fileURLWithPath: finalPath)
-        if let tempVolume = try? tempURL.resourceValues(forKeys: [.volumeIdentifierKey]).volumeIdentifier,
-           let finalVolume = try? finalURL.resourceValues(forKeys: [.volumeIdentifierKey]).volumeIdentifier {
-            // Compare volume UUIDs as strings to avoid protocol comparison issues
-            let tempVolumeStr = String(describing: tempVolume)
-            let finalVolumeStr = String(describing: finalVolume)
-            if tempVolumeStr != finalVolumeStr {
-                Log.error("⚠️ Snapshot temp and final paths on different filesystems", for: .storage)
-                Log.error("⚠️ This causes slow copy+delete (~500ms) instead of fast rename (~10ms)", for: .storage)
-                Log.error("⚠️ Race window extended significantly", for: .storage)
-            }
-        }
-
         // Check for cancellation before starting expensive operations
         try Task.checkCancellation()
 

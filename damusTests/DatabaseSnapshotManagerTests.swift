@@ -758,21 +758,18 @@ class DatabaseSnapshotManagerTests: XCTestCase {
 
     // MARK: - Crash Replication Tests (jb55's "99% Merge Odds" Requirement)
 
-    /// **Production Evidence (Issue #3560):**
-    /// - Crash: mdb_page_search+232 in DamusNotificationService (extension)
-    /// - Root cause: Extension tries to open snapshot during main app update
-    /// - Race window: 10-550ms between old snapshot delete and new snapshot move
+    private enum ConcurrencyTestConfig {
+        static let concurrentOpenAttempts = 100
+        static let attemptSpacingMs = 5
+        static let updateStartDelayMs = 10
+        static let updateDurationMs = 50
+    }
+
+    /// Tests marker protocol prevents production crash (issue #3560: mdb_page_search+232 in DamusNotificationService).
     ///
-    /// **This Test Proves:**
-    /// 1. Race window exists (documented in Phase 2: non-atomic operations)
-    /// 2. Extensions blocked when marker missing (during race window)
-    /// 3. Extensions allowed when marker present (before/after race window)
-    /// 4. Therefore: Marker protocol closes the vulnerability window
-    ///
-    /// **XCTest Limitation:**
-    /// Cannot directly test crash (XCTest process dies). Instead, we prove the
-    /// protection mechanism works: marker timing guarantees prevent reads during
-    /// the vulnerable window that causes production crashes.
+    /// **XCTest limitation:** Cannot crash-test directly. Instead proves marker protocol closes 10-550ms race window:
+    /// - Marker missing → Ndb returns nil (safe, prevents crash)
+    /// - Marker present → Ndb opens successfully
     ///
     /// Reference: https://github.com/damus-io/damus/issues/3560
     func testMarkerProtocol_PreventsProductionCrashScenario() async throws {
@@ -783,21 +780,7 @@ class DatabaseSnapshotManagerTests: XCTestCase {
         let parentDir = URL(fileURLWithPath: snapshotPath).deletingLastPathComponent().path
         let markerPath = "\(parentDir)/\(DatabaseSnapshotManager.snapshotReadyMarker)"
 
-        // === SCENARIO: Production Crash Sequence ===
-        //
-        // WITHOUT marker protocol:
-        // 1. Main app deletes old snapshot
-        // 2. ⚠️ RACE WINDOW - Extension tries to open
-        // 3. mdb_env_open succeeds with corrupted state
-        // 4. mdb_page_search+232 crashes (#3560)
-        //
-        // WITH marker protocol (this test):
-        // 1. Main app removes marker
-        // 2. ⚠️ RACE WINDOW - Extension tries to open
-        // 3. Ndb.init returns nil (marker missing)
-        // 4. No crash, graceful failure
-
-        // Step 1: Create valid snapshot
+        // Create valid snapshot
         try await manager.performSnapshot()
 
         // Verify initial state: snapshot opens successfully
@@ -818,31 +801,18 @@ class DatabaseSnapshotManagerTests: XCTestCase {
         // Step 4: Main app completes update (restores marker)
         try Data().write(to: URL(fileURLWithPath: markerPath))
 
-        // Step 5: Extension tries to open after update
+        // After update: should open successfully
         let ndb2 = Ndb(path: nil, owns_db_file: false)
         XCTAssertNotNil(ndb2, "Snapshot should open after marker restored")
         ndb2?.close()
-
-        // === WHAT THIS TEST PROVES ===
-        // - Marker protocol blocks opens during vulnerable window ✅
-        // - Production crash window is closed by this protection ✅
-        // - Extensions fail safely (nil) instead of crashing ✅
     }
 
-    /// Stress test: Concurrent extension opens during snapshot updates
+    /// Tests marker timing holds under concurrent extension opens during snapshot update.
     ///
-    /// **Production Scenario:**
-    /// - Main app updates snapshot (takes 10-550ms)
-    /// - Multiple notifications arrive → multiple extension processes try to open
-    /// - Without marker protocol: Race condition → crashes
-    /// - With marker protocol: All extensions either succeed or fail safely
+    /// Simulates production: Multiple notifications arrive → multiple extensions try to open while main app updates snapshot.
+    /// Proves invariant: Extensions can open iff marker exists (no crashes, no data races).
     ///
-    /// **This Test Proves:**
-    /// - Marker timing holds under concurrent access
-    /// - No window where some opens succeed and others crash
-    /// - 100 iterations prove reliability (not timing-dependent)
-    ///
-    /// Run with Thread Sanitizer enabled to verify no data races.
+    /// Run with Thread Sanitizer for data race verification.
     func testConcurrentExtensionOpens_DuringSnapshotUpdate() async throws {
         guard let snapshotPath = Ndb.snapshot_db_path else {
             XCTFail("Snapshot path should be available")
@@ -854,92 +824,52 @@ class DatabaseSnapshotManagerTests: XCTestCase {
         // Create initial snapshot
         try await manager.performSnapshot()
 
-        // Track results with proper synchronization
-        actor ResultTracker {
-            var openSuccesses = 0
-            var openFailures = 0
-            var invariantViolations = 0
-
-            func recordSuccess() { openSuccesses += 1 }
-            func recordFailure() { openFailures += 1 }
-            func recordViolation() { invariantViolations += 1 }
-
-            func getStats() -> (successes: Int, failures: Int, violations: Int) {
-                (openSuccesses, openFailures, invariantViolations)
-            }
+        // Track invariant violations with proper synchronization
+        actor ViolationTracker {
+            private(set) var count = 0
+            func record() { count += 1 }
         }
 
-        let tracker = ResultTracker()
+        let violations = ViolationTracker()
 
-        // Launch 100 concurrent "extension" opens
+        // Launch concurrent "extension" opens
         await withTaskGroup(of: Void.self) { group in
-            for i in 0..<100 {
+            for i in 0..<ConcurrencyTestConfig.concurrentOpenAttempts {
                 group.addTask {
-                    // Each iteration simulates an extension trying to open
+                    // Simulate extension trying to open
                     let markerExists = FileManager.default.fileExists(atPath: markerPath)
                     let ndb = Ndb(path: nil, owns_db_file: false)
                     let openSucceeded = (ndb != nil)
 
-                    // CRITICAL INVARIANT: Can open if and only if marker exists
-                    if markerExists == openSucceeded {
-                        if openSucceeded {
-                            await tracker.recordSuccess()
-                        } else {
-                            await tracker.recordFailure()
-                        }
-                    } else {
-                        // Invariant violated: marker state doesn't match open state
-                        await tracker.recordViolation()
+                    // Critical invariant: Can open iff marker exists
+                    if markerExists != openSucceeded {
+                        await violations.record()
                         print("⚠️ Iteration \(i): Invariant violation - marker=\(markerExists), opened=\(openSucceeded)")
                     }
 
                     ndb?.close()
-
-                    // Small delay to spread out attempts
-                    try? await Task.sleep(for: .milliseconds(5))
+                    try? await Task.sleep(for: .milliseconds(ConcurrencyTestConfig.attemptSpacingMs))
                 }
             }
 
-            // While extensions are trying to open, simulate snapshot update
+            // Simulate snapshot update while extensions attempt to open
             group.addTask {
-                try? await Task.sleep(for: .milliseconds(10))
-
-                // Remove marker (start of race window)
-                try? FileManager.default.removeItem(atPath: markerPath)
-
-                // Simulate update delay
-                try? await Task.sleep(for: .milliseconds(50))
-
-                // Restore marker (end of race window)
-                try? Data().write(to: URL(fileURLWithPath: markerPath))
+                try? await Task.sleep(for: .milliseconds(ConcurrencyTestConfig.updateStartDelayMs))
+                try? FileManager.default.removeItem(atPath: markerPath)  // Start race window
+                try? await Task.sleep(for: .milliseconds(ConcurrencyTestConfig.updateDurationMs))
+                try? Data().write(to: URL(fileURLWithPath: markerPath))  // End race window
             }
         }
 
-        let (successes, failures, violations) = await tracker.getStats()
-
-        print("📊 Concurrent open results: \(successes) successes, \(failures) failures, \(violations) violations")
-
-        // Key assertion: NO invariant violations
-        // If invariant holds, marker protocol prevents race conditions
-        XCTAssertEqual(violations, 0,
+        // Assert: No invariant violations (marker state always matches open state)
+        let violationCount = await violations.count
+        XCTAssertEqual(violationCount, 0,
             "CRITICAL: Marker state must always match open state (prevents race condition crashes)")
-
-        // Sanity checks
-        XCTAssertGreaterThan(successes + failures, 0, "Should have attempted opens")
     }
 
-    /// Test marker timing with rapid consecutive updates
+    /// Tests marker protocol consistency across rapid consecutive updates.
     ///
-    /// **Scenario:** Main app performs multiple rapid snapshot updates
-    /// (e.g., user switches accounts, triggers multiple profile loads)
-    ///
-    /// **Without marker protocol:** Extensions could open mid-transition → crash
-    /// **With marker protocol:** Every update safely blocks extensions
-    ///
-    /// **This Test Proves:**
-    /// - Marker protocol works across multiple updates
-    /// - No accumulated timing bugs
-    /// - Consistent protection regardless of update frequency
+    /// Proves no accumulated timing bugs - marker protection works consistently regardless of update frequency.
     func testRapidConsecutiveUpdates_MarkerTimingConsistent() async throws {
         guard let snapshotPath = Ndb.snapshot_db_path else {
             XCTFail("Snapshot path should be available")
