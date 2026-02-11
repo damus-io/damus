@@ -138,6 +138,14 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "prefetch_vines_on_cellular", default_value: false)
     var prefetch_vines_on_cellular: Bool
+    
+    var vines_feature_enabled: Bool {
+        #if DEBUG
+        true
+        #else
+        enable_vine_feature
+        #endif
+    }
 
     @Setting(key: "show_trusted_replies_first", default_value: true)
     var show_trusted_replies_first: Bool

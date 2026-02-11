@@ -79,7 +79,7 @@ struct TabBar: View {
             Divider()
             HStack {
                 TabButton(timeline: .home, img: "home", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("1")
-                if settings.enable_vine_feature {
+                if settings.vines_feature_enabled {
                     TabButton(timeline: .vines, img: "vine", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("2")
                 }
                 TabButton(timeline: .search, img: "search", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("3")

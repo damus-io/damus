@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import AVFoundation
 
 /// Removes GPS data from image at url and writes changes to new file
 func processImage(url: URL) -> URL? {
@@ -39,9 +40,19 @@ fileprivate func processImage(source: CGImageSource, fileExtension: String) -> U
     return destinationURL
 }
 
-/// TODO: strip GPS data from video
-func processVideo(videoURL: URL) -> URL? {
-    saveVideoToTemporaryFolder(videoURL: videoURL)
+/// Re-encodes the video to MP4 and removes sensitive metadata (GPS, etc.)
+/// We always run this before uploading so clips recorded anywhere inside Damus
+/// (camera, share extension, etc.) never leak location data.
+func processVideo(videoURL: URL) async -> URL? {
+    let destinationURL = generateUniqueTemporaryMediaURL(fileExtension: "mp4")
+    if await exportVideoStrippingSensitiveMetadata(from: videoURL, to: destinationURL) {
+        return destinationURL
+    }
+
+    // SECURITY: Never fall back to raw copy - return nil if sanitization fails
+    // to prevent leaking GPS metadata. Callers must handle this failure gracefully.
+    Log.error("Failed to strip sensitive metadata from video at %s", for: .storage, videoURL.path)
+    return nil
 }
 
 fileprivate func saveVideoToTemporaryFolder(videoURL: URL) -> URL? {
@@ -68,14 +79,14 @@ func generateUniqueTemporaryMediaURL(fileExtension: String) -> URL {
 /**
  Take the PreUploadedMedia payload, process it, if necessary, and convert it into a URL
  which is ready to be uploaded to the upload service.
- 
+
  URLs containing media that hasn't been processed were generated from the system and were granted
  access as a security scoped resource. The data will need to be processed to strip GPS data
  and saved to a new location which isn't security scoped.
  */
-func generateMediaUpload(_ media: PreUploadedMedia?) -> MediaUpload? {
+func generateMediaUpload(_ media: PreUploadedMedia?) async -> MediaUpload? {
     guard let media else { return nil }
-    
+
     switch media {
     case .uiimage(let image):
             guard let url = processImage(image: image) else { return nil }
@@ -87,9 +98,10 @@ func generateMediaUpload(_ media: PreUploadedMedia?) -> MediaUpload? {
     case .processed_image(let url):
         return .image(url)
     case .processed_video(let url):
-        return .video(url)
+        guard let sanitizedUrl = await processVideo(videoURL: url) else { return nil }
+        return .video(sanitizedUrl)
     case .unprocessed_video(let url):
-        guard let newUrl = processVideo(videoURL: url) else { return nil }
+        guard let newUrl = await processVideo(videoURL: url) else { return nil }
         url.stopAccessingSecurityScopedResource()
         return .video(newUrl)
     }
@@ -148,4 +160,54 @@ fileprivate func removeGPSDataFromImage(source: CGImageSource, url: URL) -> CGIm
     }
     
     return destination
+}
+
+private func exportVideoStrippingSensitiveMetadata(from sourceURL: URL, to destinationURL: URL) async -> Bool {
+    let asset = AVAsset(url: sourceURL)
+    guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {
+        Log.error("Failed to create export session for video at %s", for: .storage, sourceURL.path)
+        return false
+    }
+
+    exportSession.outputURL = destinationURL
+    exportSession.outputFileType = .mp4
+    exportSession.shouldOptimizeForNetworkUse = true
+    exportSession.metadataItemFilter = AVMetadataItemFilter.forSharing()
+
+    // Export with timeout and cancellation support
+    return await withTaskGroup(of: Bool.self) { group in
+        // Start the export task
+        group.addTask {
+            await withCheckedContinuation { continuation in
+                exportSession.exportAsynchronously {
+                    if exportSession.status == .completed {
+                        continuation.resume(returning: true)
+                    } else {
+                        if let error = exportSession.error {
+                            Log.error("Video export failed: %s", for: .storage, error.localizedDescription)
+                        }
+                        continuation.resume(returning: false)
+                    }
+                }
+            }
+        }
+
+        // Add timeout task (30 seconds)
+        group.addTask {
+            try? await Task.sleep(nanoseconds: 30_000_000_000)
+            return false
+        }
+
+        // Wait for first result (export or timeout)
+        let result = await group.next() ?? false
+
+        // Cancel export if task is cancelled or timed out
+        if Task.isCancelled || !result {
+            exportSession.cancelExport()
+            Log.debug("Video export cancelled or timed out for %s", for: .storage, sourceURL.path)
+        }
+
+        group.cancelAll()
+        return result
+    }
 }

@@ -43,4 +43,35 @@ enum VineFixtures {
         ["r", "https://vine.co/v/O0FhWJIuZzw"],
         ["published_at", "1425506914"]
     ]
+    
+    static let replacementOriginal: [[String]] = [
+        ["d", "repl-vine"],
+        ["title", "First cut"],
+        ["imeta", "url", "https://example.com/original.mp4", "m", "video/mp4"]
+    ]
+    
+    static let replacementUpdated: [[String]] = [
+        ["d", "repl-vine"],
+        ["title", "Updated cut"],
+        ["imeta", "url", "https://example.com/updated.mp4", "m", "video/mp4"]
+    ]
+    
+    static let mutedAuthor: [[String]] = [
+        ["d", "muted-vine"],
+        ["title", "Muted content"],
+        ["imeta", "url", "https://example.com/muted.mp4", "m", "video/mp4"]
+    ]
+    
+    static let expired: [[String]] = [
+        ["d", "expired-vine"],
+        ["expiration", "1"],
+        ["title", "Gone soon"],
+        ["imeta", "url", "https://example.com/expired.mp4", "m", "video/mp4"]
+    ]
+
+    static let repost: [[String]] = [
+        ["d", "original-vine"],
+        ["title", "Original content"],
+        ["imeta", "url", "https://example.com/original.mp4", "m", "video/mp4"]
+    ]
 }

@@ -604,7 +604,7 @@ struct PostView: View {
                         // initiate asynchronous uploading Task for multiple-images
                         let task = Task {
                             for media in preUploadedMedia {
-                                if let mediaToUpload = generateMediaUpload(media) {
+                                if let mediaToUpload = await generateMediaUpload(media) {
                                     await self.handle_upload(media: mediaToUpload)
                                 }
                             }
@@ -626,10 +626,11 @@ struct PostView: View {
             // This alert seeks confirmation about Image-upload when user taps Paste option
             .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $imageUploadConfirmPasteboard) {
                 Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
-                    if let image = imagePastedFromPasteboard,
-                       let mediaToUpload = generateMediaUpload(image) {
+                    if let image = imagePastedFromPasteboard {
                         let task = Task {
-                            _ = await self.handle_upload(media: mediaToUpload)
+                            if let mediaToUpload = await generateMediaUpload(image) {
+                                _ = await self.handle_upload(media: mediaToUpload)
+                            }
                         }
                         uploadTasks.append(task)
                     }
@@ -641,7 +642,7 @@ struct PostView: View {
                 Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
                     let task = Task {
                         for media in preUploadedMedia {
-                            if let mediaToUpload = generateMediaUpload(media) {
+                            if let mediaToUpload = await generateMediaUpload(media) {
                                 await self.handle_upload(media: mediaToUpload)
                             }
                         }

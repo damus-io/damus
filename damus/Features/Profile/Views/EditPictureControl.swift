@@ -455,7 +455,7 @@ class EditPictureControlViewModel<T: ImageUploadModelProtocol>: ObservableObject
         }
         switch self.context {
         case .normal:
-            self.upload(media: preUploadedMedia)
+            Task { await self.upload(media: preUploadedMedia) }
         case .profile_picture:
             self.state = .cropping(preUploadedMedia)
         }
@@ -466,12 +466,12 @@ class EditPictureControlViewModel<T: ImageUploadModelProtocol>: ObservableObject
         guard let croppedImage else { return }
         let resizedCroppedImage = croppedImage.resized(to: profile_image_size)
         let newPreUploadedMedia: PreUploadedMedia = .uiimage(resizedCroppedImage)
-        self.upload(media: newPreUploadedMedia)
+        Task { await self.upload(media: newPreUploadedMedia) }
     }
     
     /// Upload the media
-    func upload(media: PreUploadedMedia) {
-        if let mediaToUpload = generateMediaUpload(media) {
+    func upload(media: PreUploadedMedia) async {
+        if let mediaToUpload = await generateMediaUpload(media) {
             self.handle_upload(media: mediaToUpload)
         }
         else {

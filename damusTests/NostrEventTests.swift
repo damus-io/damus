@@ -98,10 +98,72 @@ final class VineVideoTests: XCTestCase {
         XCTAssertEqual(video?.hashtags, ["attack"])
     }
     
+    func testReplacementKeepsNewestEvent() {
+        var first = makeVineEvent(tags: VineFixtures.replacementOriginal)
+        first.created_at = 100
+        var updated = makeVineEvent(tags: VineFixtures.replacementUpdated)
+        updated.created_at = 200
+        let feed = VineTestFeed()
+        feed.apply(first)
+        feed.apply(updated)
+        XCTAssertEqual(feed.vines.count, 1)
+        XCTAssertEqual(feed.vines.first?.title, "Updated cut")
+    }
+    
+    func testReplacementKeepsOldestWhenOlder() {
+        var first = makeVineEvent(tags: VineFixtures.replacementOriginal)
+        first.created_at = 200
+        var updated = makeVineEvent(tags: VineFixtures.replacementUpdated)
+        updated.created_at = 100
+        let feed = VineTestFeed()
+        feed.apply(first)
+        feed.apply(updated)
+        XCTAssertEqual(feed.vines.count, 1)
+        XCTAssertEqual(feed.vines.first?.title, "First cut")
+    }
+    
+    func testExpiredVineIsSkipped() {
+        var expired = makeVineEvent(tags: VineFixtures.expired)
+        expired.created_at = 1
+        let video = VineVideo(event: expired)
+        XCTAssertNotNil(video)
+        XCTAssertEqual(video?.expirationTimestamp, 1)
+    }
+    
+    func testMutedAuthorFiltered() async {
+        var vine = makeVineEvent(tags: VineFixtures.mutedAuthor)
+        vine.pubkey = test_damus_state.mutelist_manager.pubkey
+        let feed = VineTestFeed()
+        feed.shouldShowEvent = { _ in false }
+        await feed.handle(vine)
+        XCTAssertTrue(feed.vines.isEmpty)
+    }
+    
     // MARK: - Helpers
     
     private func makeVineEvent(content: String = "", tags: [[String]]) -> NostrEvent {
         let keypair = generate_new_keypair().to_keypair()
         return NostrEvent(content: content, keypair: keypair, kind: NostrKind.vine_short.rawValue, tags: tags)!
+    }
+}
+
+private actor VineTestFeed {
+    private(set) var vines: [VineVideo] = []
+    var shouldShowEvent: (NostrEvent) -> Bool = { _ in true }
+    
+    func apply(_ event: NostrEvent) {
+        guard let video = VineVideo(event: event) else { return }
+        if let index = vines.firstIndex(where: { $0.dedupeKey == video.dedupeKey }) {
+            if vines[index].createdAt >= video.createdAt { return }
+            vines[index] = video
+        } else {
+            vines.append(video)
+        }
+        vines.sort { $0.createdAt > $1.createdAt }
+    }
+    
+    func handle(_ event: NostrEvent) async {
+        guard shouldShowEvent(event) else { return }
+        apply(event)
     }
 }
