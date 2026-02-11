@@ -99,6 +99,84 @@ class ProfilePictureURLTests: XCTestCase {
         }
     }
 
+    /// CRASH REPRODUCTION TEST: Before/After Demonstration
+    ///
+    /// This test demonstrates the exact crash from issue #3141 and proves the fix works.
+    ///
+    /// **To reproduce the crash:**
+    /// 1. Uncomment the "OLD CODE" section below (lines marked with ❌)
+    /// 2. Comment out the "NEW CODE" section (lines marked with ✅)
+    /// 3. Run this test → it WILL CRASH with:
+    ///    "Fatal error: Unexpectedly found nil while unwrapping an Optional value"
+    ///
+    /// **Production crash scenario:**
+    /// - Nostr profile has empty or invalid picture field: `{"picture": ""}`
+    /// - NotificationService receives notification from that user
+    /// - Old code: `((picture.map { URL(string: $0) }) ?? fallback)!` → crash
+    /// - Frequency: ~1/day on TestFlight build 1277 (issue #3560)
+    ///
+    /// **The fix:**
+    /// - Use `flatMap` instead of `map` to collapse URL?? → URL?
+    /// - Allows ?? fallback to fire correctly
+    /// - Never force unwraps, always returns valid URL
+    func testCrashReproduction_BeforeAfterFix() throws {
+        // Simulate corrupted Nostr profile data
+        let picture: String? = ""  // Empty string triggers the crash
+
+        // ============================================================
+        // ❌ OLD CODE (CRASHES) - Exact pattern from NotificationService.swift:63
+        // ============================================================
+        // Uncomment these lines to reproduce the crash:
+        //
+        // let oldResult = ((picture.map { URL(string: $0) })
+        //                 ?? URL(string: "https://robohash.org/fallback"))!
+        //                                                                  ^ CRASH HERE!
+        // XCTAssertNotNil(oldResult)  // Never reaches here - crashes first
+        //
+        // Why it crashes:
+        // 1. picture.map { URL(string: $0) } → .some(nil)  (URL?? double-optional trap!)
+        // 2. ?? sees .some(nil) as non-nil, doesn't use fallback
+        // 3. Result is nil
+        // 4. ! force unwrap → CRASH
+
+        // ============================================================
+        // ✅ NEW CODE (SAFE) - Uses resolve_profile_picture_url with flatMap
+        // ============================================================
+        let newResult = resolve_profile_picture_url(picture: picture, pubkey: test_pubkey)
+
+        // Assertions proving the fix works:
+        XCTAssertTrue(newResult.absoluteString.contains("robohash.org"),
+                      "Fix: Empty picture safely falls back to robohash")
+        print("✅ PASS: Fix prevents crash, returns valid URL: \(newResult)")
+
+        // ============================================================
+        // DEMONSTRATION: Why old code creates the trap
+        // ============================================================
+        let step1: URL?? = picture.map { URL(string: $0) }
+        XCTAssertNotNil(step1, "Step 1: map creates .some(nil) - outer optional is non-nil")
+
+        if case .some(let inner) = step1 {
+            XCTAssertNil(inner, "Step 2: Inner optional IS nil - this is the trap!")
+        }
+
+        let step2 = step1 ?? URL(string: "https://robohash.org/fallback")
+        XCTAssertNil(step2, "Step 3: ?? doesn't fire (.some(nil) is not nil to ??), result is nil")
+
+        // Step 4: Force unwrap would crash here (don't actually do it in test)
+        print("Step 4: Old code would do step2! → CRASH (we don't execute this)")
+
+        // ============================================================
+        // DEMONSTRATION: Why new code (flatMap) is safe
+        // ============================================================
+        let safe1: URL? = picture.flatMap(URL.init(string:))
+        XCTAssertNil(safe1, "flatMap collapses .some(nil) → nil (single optional, not double)")
+
+        let safe2 = safe1 ?? URL(string: "https://robohash.org/fallback")
+        XCTAssertNotNil(safe2, "?? sees nil, fires correctly, returns fallback")
+
+        print("✅ flatMap fix: No double-optional trap, no crash, fallback works!")
+    }
+
     // MARK: - get_profile_url (main-app wrapper that delegates to resolve_)
 
     func testGetProfileUrlDelegatesToResolve() throws {
