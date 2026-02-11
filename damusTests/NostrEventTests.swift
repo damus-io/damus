@@ -99,10 +99,8 @@ final class VineVideoTests: XCTestCase {
     }
     
     func testReplacementKeepsNewestEvent() async {
-        var first = makeVineEvent(tags: VineFixtures.replacementOriginal)
-        first.created_at = 100
-        var updated = makeVineEvent(tags: VineFixtures.replacementUpdated)
-        updated.created_at = 200
+        let first = makeVineEvent(tags: VineFixtures.replacementOriginal, createdAt: 100)
+        let updated = makeVineEvent(tags: VineFixtures.replacementUpdated, createdAt: 200)
         let feed = VineTestFeed()
         await feed.apply(first)
         await feed.apply(updated)
@@ -112,10 +110,8 @@ final class VineVideoTests: XCTestCase {
     }
 
     func testReplacementKeepsOldestWhenOlder() async {
-        var first = makeVineEvent(tags: VineFixtures.replacementOriginal)
-        first.created_at = 200
-        var updated = makeVineEvent(tags: VineFixtures.replacementUpdated)
-        updated.created_at = 100
+        let first = makeVineEvent(tags: VineFixtures.replacementOriginal, createdAt: 200)
+        let updated = makeVineEvent(tags: VineFixtures.replacementUpdated, createdAt: 100)
         let feed = VineTestFeed()
         await feed.apply(first)
         await feed.apply(updated)
@@ -123,36 +119,221 @@ final class VineVideoTests: XCTestCase {
         XCTAssertEqual(vines.count, 1)
         XCTAssertEqual(vines.first?.title, "First cut")
     }
-    
-    func testExpiredVineIsSkipped() {
-        var expired = makeVineEvent(tags: VineFixtures.expired)
-        expired.created_at = 1
+
+    func testExpiredVineParsesExpirationTimestamp() {
+        let expired = makeVineEvent(tags: VineFixtures.expired, createdAt: 1)
         let video = VineVideo(event: expired)
         XCTAssertNotNil(video)
         XCTAssertEqual(video?.expirationTimestamp, 1)
     }
     
     func testMutedAuthorFiltered() async {
-        var vine = makeVineEvent(tags: VineFixtures.mutedAuthor)
-        vine.pubkey = test_damus_state.mutelist_manager.pubkey
+        let vine = makeVineEvent(tags: VineFixtures.mutedAuthor)
         let feed = VineTestFeed()
-        feed.shouldShowEvent = { _ in false }
+        await feed.setFilter { _ in false }
         await feed.handle(vine)
-        XCTAssertTrue(feed.vines.isEmpty)
+        let vines = await feed.vines
+        XCTAssertTrue(vines.isEmpty)
     }
     
+    // MARK: - Deduplication & Sorting
+
+    func testDedupeKeyUseDTag() {
+        let tags: [[String]] = [
+            ["d", "my-unique-vine-id"],
+            ["imeta", "url", "https://example.com/video.mp4", "m", "video/mp4"]
+        ]
+        let video = VineVideo(event: makeVineEvent(tags: tags))
+        XCTAssertEqual(video?.dedupeKey, "my-unique-vine-id")
+    }
+
+    func testDedupeKeyFallsBackToEventIdWhenDTagMissing() {
+        let tags: [[String]] = [
+            ["imeta", "url", "https://example.com/video.mp4", "m", "video/mp4"]
+        ]
+        let event = makeVineEvent(tags: tags)
+        let video = VineVideo(event: event)
+        XCTAssertNotNil(video)
+        XCTAssertEqual(video?.dedupeKey, event.id.hex())
+    }
+
+    func testDeduplicationKeepsNewestByDedupeKey() async {
+        let olderEvent = makeVineEvent(tags: VineFixtures.replacementOriginal, createdAt: 1000)
+        let newerEvent = makeVineEvent(tags: VineFixtures.replacementUpdated, createdAt: 2000)
+        let feed = VineTestFeed()
+        await feed.apply(olderEvent)
+        await feed.apply(newerEvent)
+        let vines = await feed.vines
+        XCTAssertEqual(vines.count, 1, "Two events with the same d tag should deduplicate to one entry")
+        XCTAssertEqual(vines.first?.dedupeKey, "repl-vine")
+        XCTAssertEqual(vines.first?.createdAt, 2000, "The newer event should be kept")
+        XCTAssertEqual(vines.first?.title, "Updated cut")
+    }
+
+    func testDeduplicationKeepsExistingWhenIncomingIsOlder() async {
+        let newerEvent = makeVineEvent(tags: VineFixtures.replacementUpdated, createdAt: 2000)
+        let olderEvent = makeVineEvent(tags: VineFixtures.replacementOriginal, createdAt: 1000)
+        let feed = VineTestFeed()
+        await feed.apply(newerEvent)
+        await feed.apply(olderEvent)
+        let vines = await feed.vines
+        XCTAssertEqual(vines.count, 1, "Older duplicate should not replace newer entry")
+        XCTAssertEqual(vines.first?.createdAt, 2000, "The newer event should still be kept")
+        XCTAssertEqual(vines.first?.title, "Updated cut")
+    }
+
+    func testSortOrderDescendingByCreatedAt() async {
+        let eventA = makeVineEvent(tags: [["d", "vine-a"], ["imeta", "url", "https://example.com/a.mp4", "m", "video/mp4"]], createdAt: 100)
+        let eventB = makeVineEvent(tags: [["d", "vine-b"], ["imeta", "url", "https://example.com/b.mp4", "m", "video/mp4"]], createdAt: 300)
+        let eventC = makeVineEvent(tags: [["d", "vine-c"], ["imeta", "url", "https://example.com/c.mp4", "m", "video/mp4"]], createdAt: 200)
+
+        let feed = VineTestFeed()
+        await feed.apply(eventA)
+        await feed.apply(eventB)
+        await feed.apply(eventC)
+        let vines = await feed.vines
+
+        XCTAssertEqual(vines.count, 3)
+        XCTAssertEqual(vines[0].dedupeKey, "vine-b", "Newest event (createdAt 300) should be first")
+        XCTAssertEqual(vines[1].dedupeKey, "vine-c", "Middle event (createdAt 200) should be second")
+        XCTAssertEqual(vines[2].dedupeKey, "vine-a", "Oldest event (createdAt 100) should be last")
+    }
+
+    func testDistinctDTagsAreNotDeduplicated() async {
+        let eventA = makeVineEvent(tags: [["d", "vine-alpha"], ["imeta", "url", "https://example.com/alpha.mp4", "m", "video/mp4"]], createdAt: 500)
+        let eventB = makeVineEvent(tags: [["d", "vine-beta"], ["imeta", "url", "https://example.com/beta.mp4", "m", "video/mp4"]], createdAt: 500)
+
+        let feed = VineTestFeed()
+        await feed.apply(eventA)
+        await feed.apply(eventB)
+        let vines = await feed.vines
+
+        XCTAssertEqual(vines.count, 2, "Events with distinct d tags should both be present")
+        let keys = Set(vines.map(\.dedupeKey))
+        XCTAssertTrue(keys.contains("vine-alpha"))
+        XCTAssertTrue(keys.contains("vine-beta"))
+    }
+
     // MARK: - Helpers
-    
-    private func makeVineEvent(content: String = "", tags: [[String]]) -> NostrEvent {
+
+    private func makeVineEvent(content: String = "", tags: [[String]], createdAt: UInt32 = UInt32(Date().timeIntervalSince1970)) -> NostrEvent {
         let keypair = generate_new_keypair().to_keypair()
-        return NostrEvent(content: content, keypair: keypair, kind: NostrKind.vine_short.rawValue, tags: tags)!
+        return NostrEvent(content: content, keypair: keypair, kind: NostrKind.vine_short.rawValue, tags: tags, createdAt: createdAt)!
+    }
+}
+
+/// Tests for VineFeedModel logic (deduplication, page application, prefetch gating)
+/// exercised through the VineTestFeed actor that mirrors VineFeedModel's core algorithms
+/// without requiring DamusState or a network connection.
+final class VineFeedModelTests: XCTestCase {
+
+    // MARK: - Page Application
+
+    func testApplyPageResetSortsDescending() async {
+        let events = [
+            makeVineEvent(tags: [["d", "p-old"], ["imeta", "url", "https://example.com/old.mp4", "m", "video/mp4"]], createdAt: 100),
+            makeVineEvent(tags: [["d", "p-new"], ["imeta", "url", "https://example.com/new.mp4", "m", "video/mp4"]], createdAt: 300),
+            makeVineEvent(tags: [["d", "p-mid"], ["imeta", "url", "https://example.com/mid.mp4", "m", "video/mp4"]], createdAt: 200),
+        ]
+        let feed = VineTestFeed()
+        await feed.applyPage(events, reset: true)
+        let vines = await feed.vines
+        XCTAssertEqual(vines.count, 3)
+        XCTAssertEqual(vines.map(\.createdAt), [300, 200, 100], "Reset page should sort descending by createdAt")
+    }
+
+    func testApplyPageAppendDeduplicatesAndSorts() async {
+        let initial = [
+            makeVineEvent(tags: [["d", "existing"], ["imeta", "url", "https://example.com/existing.mp4", "m", "video/mp4"]], createdAt: 500),
+        ]
+        let feed = VineTestFeed()
+        await feed.applyPage(initial, reset: true)
+
+        let olderPage = [
+            makeVineEvent(tags: [["d", "existing"], ["imeta", "url", "https://example.com/existing-dup.mp4", "m", "video/mp4"]], createdAt: 400),
+            makeVineEvent(tags: [["d", "older"], ["imeta", "url", "https://example.com/older.mp4", "m", "video/mp4"]], createdAt: 300),
+        ]
+        await feed.applyPage(olderPage, reset: false)
+        let vines = await feed.vines
+
+        XCTAssertEqual(vines.count, 2, "Duplicate dedupeKey should be filtered on append")
+        XCTAssertEqual(vines[0].dedupeKey, "existing")
+        XCTAssertEqual(vines[1].dedupeKey, "older")
+        XCTAssertEqual(vines.map(\.createdAt), [500, 300], "Combined list should be sorted descending")
+    }
+
+    func testApplyPageEmptyAppendDoesNotAlterExisting() async {
+        let initial = [
+            makeVineEvent(tags: [["d", "solo"], ["imeta", "url", "https://example.com/solo.mp4", "m", "video/mp4"]], createdAt: 100),
+        ]
+        let feed = VineTestFeed()
+        await feed.applyPage(initial, reset: true)
+        await feed.applyPage([], reset: false)
+        let vines = await feed.vines
+        XCTAssertEqual(vines.count, 1)
+        XCTAssertEqual(vines.first?.dedupeKey, "solo")
+    }
+
+    // MARK: - Prefetch Gating
+
+    func testShouldPrefetchReturnsFalseWhenConstrained() async {
+        let gate = PrefetchGate()
+        await gate.setConstrained(true)
+        let result = await gate.shouldPrefetch(allowCellular: true)
+        XCTAssertFalse(result, "Prefetch should be blocked on constrained paths regardless of cellular preference")
+    }
+
+    func testShouldPrefetchReturnsFalseWhenExpensiveAndCellularDisallowed() async {
+        let gate = PrefetchGate()
+        await gate.setExpensive(true)
+        let result = await gate.shouldPrefetch(allowCellular: false)
+        XCTAssertFalse(result, "Prefetch should be blocked on expensive paths when cellular prefetch is disallowed")
+    }
+
+    func testShouldPrefetchReturnsTrueWhenExpensiveAndCellularAllowed() async {
+        let gate = PrefetchGate()
+        await gate.setExpensive(true)
+        let result = await gate.shouldPrefetch(allowCellular: true)
+        XCTAssertTrue(result, "Prefetch should be allowed on expensive paths when cellular prefetch is allowed")
+    }
+
+    func testShouldPrefetchReturnsTrueOnUnconstrainedPath() async {
+        let gate = PrefetchGate()
+        let result = await gate.shouldPrefetch(allowCellular: false)
+        XCTAssertTrue(result, "Prefetch should be allowed on unconstrained, non-expensive paths")
+    }
+
+    // MARK: - Helpers
+
+    private func makeVineEvent(content: String = "", tags: [[String]], createdAt: UInt32 = UInt32(Date().timeIntervalSince1970)) -> NostrEvent {
+        let keypair = generate_new_keypair().to_keypair()
+        return NostrEvent(content: content, keypair: keypair, kind: NostrKind.vine_short.rawValue, tags: tags, createdAt: createdAt)!
+    }
+}
+
+/// Mirrors `VineFeedModel.shouldPrefetchVideos` logic for testing without DamusState.
+private actor PrefetchGate {
+    private var isExpensive = false
+    private var isConstrained = false
+
+    func setExpensive(_ value: Bool) { isExpensive = value }
+    func setConstrained(_ value: Bool) { isConstrained = value }
+
+    func shouldPrefetch(allowCellular: Bool) -> Bool {
+        if isConstrained { return false }
+        if isExpensive && !allowCellular { return false }
+        return true
     }
 }
 
 private actor VineTestFeed {
     private(set) var vines: [VineVideo] = []
-    var shouldShowEvent: (NostrEvent) -> Bool = { _ in true }
-    
+    private var shouldShowEvent: @Sendable (NostrEvent) -> Bool = { _ in true }
+
+    func setFilter(_ predicate: @Sendable @escaping (NostrEvent) -> Bool) {
+        shouldShowEvent = predicate
+    }
+
     func apply(_ event: NostrEvent) {
         guard let video = VineVideo(event: event) else { return }
         if let index = vines.firstIndex(where: { $0.dedupeKey == video.dedupeKey }) {
@@ -167,5 +348,20 @@ private actor VineTestFeed {
     func handle(_ event: NostrEvent) async {
         guard shouldShowEvent(event) else { return }
         apply(event)
+    }
+
+    /// Mirrors VineFeedModel.applyPage for testing page-application logic.
+    func applyPage(_ events: [NostrEvent], reset: Bool) {
+        var videos = events.compactMap { VineVideo(event: $0) }
+        videos.sort { $0.createdAt > $1.createdAt }
+        if reset {
+            vines = videos
+        } else {
+            let newVideos = videos.filter { video in
+                !vines.contains(where: { $0.dedupeKey == video.dedupeKey })
+            }
+            vines.append(contentsOf: newVideos)
+            vines.sort { $0.createdAt > $1.createdAt }
+        }
     }
 }

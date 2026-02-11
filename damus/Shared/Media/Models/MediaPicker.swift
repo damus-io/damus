@@ -138,15 +138,17 @@ struct MediaPicker: UIViewControllerRepresentable {
             self.dispatchGroup.leave()
         }
         
-        private func attemptAcquireResourceAndChooseMedia(url: URL, fallback: (URL) -> URL?, unprocessedEnum: (URL) -> PreUploadedMedia, processedEnum: (URL) -> PreUploadedMedia, orderId: String) {
+        private func attemptAcquireResourceAndChooseMedia(url: URL, fallback: @escaping (URL) async -> URL?, unprocessedEnum: (URL) -> PreUploadedMedia, processedEnum: @escaping (URL) -> PreUploadedMedia, orderId: String) {
             if url.startAccessingSecurityScopedResource() {
                 // Have permission from system to use url out of scope
                 print("Acquired permission to security scoped resource")
                 self.chooseMedia(unprocessedEnum(url), orderId: orderId)
             } else {
                 // Need to copy URL to non-security scoped location
-                guard let newUrl = fallback(url) else { return }
-                self.chooseMedia(processedEnum(newUrl), orderId: orderId)
+                Task {
+                    guard let newUrl = await fallback(url) else { return }
+                    self.chooseMedia(processedEnum(newUrl), orderId: orderId)
+                }
             }
         }
 

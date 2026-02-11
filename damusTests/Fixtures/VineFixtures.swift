@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// Tag arrays representing real-world Vine event structures for use in tests.
 enum VineFixtures {
     static let classicImport: [[String]] = [
         ["d", "iOV6nx5l5Uj"],

@@ -13,8 +13,8 @@ struct DamusLabsExperiments: View {
     @ObservedObject var settings: UserSettingsStore
     @State var show_live_explainer: Bool = false
     @State var show_favorites_explainer: Bool = false
-    @State var show_vines_explainer: Bool = false
-    @State var show_vine_prefetch_explainer: Bool = false
+    @State private var show_vines_explainer: Bool = false
+    @State private var show_vine_prefetch_explainer: Bool = false
     
     let live_label = NSLocalizedString("Live", comment: "Label for a toggle that enables an experimental feature")
     let favorites_label = NSLocalizedString("Favorites", comment: "Label for a toggle that enables an experimental feature")
