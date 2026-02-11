@@ -222,7 +222,7 @@ extension NostrNetworkManager {
             let relaysToRemove = currentRelayURLs.subtracting(newRelayURLs)
             let relaysToAdd = newRelayURLs.subtracting(currentRelayURLs)
             
-            await withTaskGroup { taskGroup in
+            await withTaskGroup(of: Void.self) { taskGroup in
                 // Remove relays not in the new list
                 relaysToRemove.forEach { url in
                     taskGroup.addTask(operation: { await self.pool.remove_relay(url) })
