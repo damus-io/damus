@@ -9,6 +9,7 @@ import SwiftUI
 
 enum Timeline: String, CustomStringConvertible, Hashable {
     case home
+    case vines
     case notifications
     case search
     case dms
@@ -78,7 +79,7 @@ struct TabBar: View {
             Divider()
             HStack {
                 TabButton(timeline: .home, img: "home", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("1")
-                TabButton(timeline: .dms, img: "messages", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("2")
+                TabButton(timeline: .vines, img: "vine", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("2")
                 TabButton(timeline: .search, img: "search", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("3")
                 TabButton(timeline: .notifications, img: "notification-bell", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("4")
             }

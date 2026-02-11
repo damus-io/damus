@@ -162,7 +162,8 @@ struct ContentView: View {
     }
     
     func MainContent(damus: DamusState) -> some View {
-        VStack {
+        let immersiveTimeline = selected_timeline == .home || selected_timeline == .vines
+        return VStack {
             switch selected_timeline {
             case .search:
                 if #available(iOS 16.0, *) {
@@ -176,6 +177,9 @@ struct ContentView: View {
             case .home:
                 PostingTimelineView(damus_state: damus_state!, home: home, homeEvents: home.events, isSideBarOpened: $isSideBarOpened, active_sheet: $active_sheet, headerOffset: $headerOffset)
                 
+            case .vines:
+                VineTimelineView(damus_state: damus_state!)
+                
             case .notifications:
                 NotificationsView(state: damus, notifications: home.notifications, subtitle: $menu_subtitle)
                 
@@ -184,9 +188,9 @@ struct ContentView: View {
             }
         }
         .background(DamusColors.adaptableWhite)
-        .edgesIgnoringSafeArea(selected_timeline != .home ? [] : [.top, .bottom])
+        .edgesIgnoringSafeArea(immersiveTimeline ? [.top, .bottom] : [])
         .navigationBarTitle(timeline_name(selected_timeline), displayMode: .inline)
-        .toolbar(selected_timeline != .home ? .visible : .hidden)
+        .toolbar(immersiveTimeline ? .hidden : .visible)
         .toolbar {
             ToolbarItem(placement: .principal) {
                 VStack {
@@ -233,7 +237,9 @@ struct ContentView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        let immersiveTimeline = selected_timeline == .home || selected_timeline == .vines
+        
+        return VStack(alignment: .leading, spacing: 0) {
             if let damus = self.damus_state {
                 NavigationStack(path: $navigationCoordinator.path) {
                     TabView { // Prevents navbar appearance change on scroll
@@ -262,7 +268,7 @@ struct ContentView: View {
                             }
                     }
                     .background(DamusColors.adaptableWhite)
-                    .edgesIgnoringSafeArea(selected_timeline != .home ? [] : [.top, .bottom])
+                    .edgesIgnoringSafeArea(immersiveTimeline ? [.top, .bottom] : [])
                     .tabViewStyle(.page(indexDisplayMode: .never))
                     .overlay(
                         SideMenuView(damus_state: damus_state!, isSidebarVisible: $isSideBarOpened.animation(), selected: $selected_timeline)
@@ -283,7 +289,7 @@ struct ContentView: View {
                         if !isSideBarOpened {
                             TabBar(nstatus: home.notification_status, navIsAtRoot: navIsAtRoot(), selected: $selected_timeline, headerOffset: $headerOffset, settings: damus.settings, action: switch_timeline)
                                 .padding([.bottom], 8)
-                                .background(selected_timeline != .home || (selected_timeline == .home && !self.navIsAtRoot()) ? DamusColors.adaptableWhite : DamusColors.adaptableWhite.opacity(abs(1.25 - (abs(headerOffset/100.0)))))
+                                .background(!immersiveTimeline || !self.navIsAtRoot() ? DamusColors.adaptableWhite : DamusColors.adaptableWhite.opacity(abs(1.25 - (abs(headerOffset/100.0)))))
                                 .anchorPreference(key: HeaderBoundsKey.self, value: .bounds){$0}
                                 .overlayPreferenceValue(HeaderBoundsKey.self) { value in
                                     GeometryReader{ proxy in
@@ -1005,6 +1011,8 @@ func timeline_name(_ timeline: Timeline?) -> String {
     switch timeline {
     case .home:
         return NSLocalizedString("Home", comment: "Navigation bar title for Home view where notes and replies appear from those who the user is following.")
+    case .vines:
+        return NSLocalizedString("Vines", comment: "Navigation bar title for Vine video feed.")
     case .notifications:
         return NSLocalizedString("Notifications", comment: "Toolbar label for Notifications view.")
     case .search:

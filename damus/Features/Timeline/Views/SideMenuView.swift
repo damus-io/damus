@@ -42,6 +42,14 @@ struct SideMenuView: View {
             }
             .accessibilityIdentifier(AppAccessibilityIdentifiers.side_menu_profile_button.rawValue)
 
+            Button {
+                selected = .dms
+                isSidebarVisible = false
+            } label: {
+                navLabel(title: NSLocalizedString("Messages", comment: "Sidebar menu label for direct messages view."), img: "messages")
+            }
+            .buttonStyle(.plain)
+
             NavigationLink(value: Route.Wallet(wallet: damus_state.wallet)) {
                 navLabel(title: NSLocalizedString("Wallet", comment: "Sidebar menu label for Wallet view."), img: "wallet")
             }

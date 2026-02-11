@@ -274,6 +274,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
             handle_nwc_response(ev)
         case .http_auth:
             break
+        case .vine_short:
+            break
         case .status:
             handle_status_event(ev)
         case .draft:
@@ -709,7 +711,9 @@ class HomeModel: ContactsDelegate, ObservableObject {
                     let currentTime = CFAbsoluteTimeGetCurrent()
                     // Process events in parallel on a separate task, to avoid holding up upcoming signals
                     // Empirical evidence has shown that in at least one instance this technique saved up to 5 seconds of load time!
-                    Task { await lender.justUseACopy({ await process_event(ev: $0, context: .home) }) }
+                    Task { @MainActor in
+                        await lender.justUseACopy({ await process_event(ev: $0, context: .home) })
+                    }
                 case .eose:
                     let eoseTime = CFAbsoluteTimeGetCurrent()
                     Log.info("Home handler task %s: Received general EOSE after %.2f seconds", for: .homeModel, id.uuidString, eoseTime - startTime)
@@ -1257,6 +1261,8 @@ func timeline_to_notification_bits(_ timeline: Timeline, ev: NostrEvent?) -> New
     switch timeline {
     case .home:
         return [.home]
+    case .vines:
+        return []
     case .notifications:
         if let ev {
             return determine_event_notifications(ev)

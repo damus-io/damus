@@ -25,6 +25,7 @@ enum NostrKind: UInt32, Codable {
     case list_deprecated = 30000
     case draft = 31234
     case longform = 30023
+    case vine_short = 34236
     case zap = 9735
     case zap_request = 9734
     case highlight = 9802
