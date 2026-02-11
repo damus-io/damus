@@ -59,4 +59,5 @@ Damus is an iOS client built around a local relay model ([damus-io/damus#3204](h
     - Validate edge cases identified during debugging (e.g., boundary conditions like `MAX_PREFIX` limits)
     - Be runnable in CI without manual intervention
 19. PRs without test coverage for new code paths will not be merged unless the code is demonstrably untestable (e.g., pure UI layout) and this is documented in the PR description.
-20. **Run a code-simplifier pass** before submitting PRs. See [`docs/code-simplifier.md`](docs/code-simplifier.md) for the full protocol.
+20. Having a test that replicates the issue and fails + a fix for that test will increase the odds of merging by 99%.
+21. **Run a code-simplifier pass** before submitting PRs. See [`docs/code-simplifier.md`](docs/code-simplifier.md) for the full protocol.
