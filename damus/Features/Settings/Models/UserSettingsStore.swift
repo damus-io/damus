@@ -112,6 +112,9 @@ class UserSettingsStore: ObservableObject {
     @StringSetting(key: "default_media_uploader", default_value: .nostrBuild)
     var default_media_uploader: MediaUploader
 
+    @Setting(key: "enable_vine_feature", default_value: false)
+    var enable_vine_feature: Bool
+    
     @Setting(key: "enable_vine_relay", default_value: true)
     var enable_vine_relay: Bool
     
@@ -132,6 +135,9 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "media_previews", default_value: true)
     var media_previews: Bool
+    
+    @Setting(key: "prefetch_vines_on_cellular", default_value: false)
+    var prefetch_vines_on_cellular: Bool
 
     @Setting(key: "show_trusted_replies_first", default_value: true)
     var show_trusted_replies_first: Bool

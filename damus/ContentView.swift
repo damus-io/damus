@@ -163,6 +163,11 @@ struct ContentView: View {
     
     func MainContent(damus: DamusState) -> some View {
         let immersiveTimeline = selected_timeline == .home || selected_timeline == .vines
+        if selected_timeline == .vines && !damus.settings.enable_vine_feature {
+            DispatchQueue.main.async {
+                self.selected_timeline = .home
+            }
+        }
         return VStack {
             switch selected_timeline {
             case .search:
@@ -178,7 +183,11 @@ struct ContentView: View {
                 PostingTimelineView(damus_state: damus_state!, home: home, homeEvents: home.events, isSideBarOpened: $isSideBarOpened, active_sheet: $active_sheet, headerOffset: $headerOffset)
                 
             case .vines:
-                VineTimelineView(damus_state: damus_state!)
+                if damus_state.settings.enable_vine_feature {
+                    VineTimelineView(damus_state: damus_state!)
+                } else {
+                    PostingTimelineView(damus_state: damus_state!, home: home, homeEvents: home.events, isSideBarOpened: $isSideBarOpened, active_sheet: $active_sheet, headerOffset: $headerOffset)
+                }
                 
             case .notifications:
                 NotificationsView(state: damus, notifications: home.notifications, subtitle: $menu_subtitle)
