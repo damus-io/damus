@@ -53,98 +53,100 @@ enum Route: Hashable {
     case LiveEvents(model: LiveEventModel)
     case LiveEvent(LiveEvent: NostrEvent, model: LiveEventModel)
 
-    @ViewBuilder
-    func view(navigationCoordinator: NavigationCoordinator, damusState: DamusState) -> some View {
+    // AnyView is intentional here: a 44-case @ViewBuilder switch creates 44
+    // levels of nested _ConditionalContent that SwiftUI must evaluate on every
+    // navigation push. AnyView flattens this to a single type. Navigation
+    // destinations are created once per push (not per frame), so the usual
+    // AnyView diffing penalty does not apply.
+    func view(navigationCoordinator: NavigationCoordinator, damusState: DamusState) -> AnyView {
         switch self {
         case .ProfileByKey(let pubkey):
-            ProfileView(damus_state: damusState, pubkey: pubkey)
+            AnyView(ProfileView(damus_state: damusState, pubkey: pubkey))
         case .Profile(let profile, let followers):
-            ProfileView(damus_state: damusState, profile: profile, followers: followers)
+            AnyView(ProfileView(damus_state: damusState, profile: profile, followers: followers))
         case .Followers(let followers):
-            FollowersView(damus_state: damusState, followers: followers)
+            AnyView(FollowersView(damus_state: damusState, followers: followers))
         case .Relay(let relay, let showActionButtons):
-            RelayView(state: damusState, relay: relay, showActionButtons: showActionButtons, recommended: false)
+            AnyView(RelayView(state: damusState, relay: relay, showActionButtons: showActionButtons, recommended: false))
         case .RelayDetail(let relay, let metadata):
-            RelayDetailView(state: damusState, relay: relay, nip11: metadata)
+            AnyView(RelayDetailView(state: damusState, relay: relay, nip11: metadata))
         case .Following(let contacts):
-            FollowingView(damus_state: damusState, following: FollowingModel(damus_state: damusState, contacts: Array(contacts.referenced_pubkeys), hashtags: Array(contacts.referenced_hashtags)))
+            AnyView(FollowingView(damus_state: damusState, following: FollowingModel(damus_state: damusState, contacts: Array(contacts.referenced_pubkeys), hashtags: Array(contacts.referenced_hashtags))))
         case .MuteList:
-            MutelistView(damus_state: damusState)
+            AnyView(MutelistView(damus_state: damusState))
         case .RelayConfig:
-            RelayConfigView(state: damusState)
+            AnyView(RelayConfigView(state: damusState))
         case .Bookmarks:
-            BookmarksView(state: damusState)
+            AnyView(BookmarksView(state: damusState))
         case .Config:
-            ConfigView(state: damusState)
+            AnyView(ConfigView(state: damusState))
         case .EditMetadata:
-            EditMetadataView(damus_state: damusState)
+            AnyView(EditMetadataView(damus_state: damusState))
         case .DMChat(let dms):
-            DMChatView(damus_state: damusState, dms: dms)
+            AnyView(DMChatView(damus_state: damusState, dms: dms))
         case .UserRelays(let relays):
-            UserRelaysView(state: damusState, relays: relays)
+            AnyView(UserRelaysView(state: damusState, relays: relays))
         case .KeySettings(let keypair):
-            KeySettingsView(keypair: keypair)
+            AnyView(KeySettingsView(keypair: keypair))
         case .AppearanceSettings(let settings):
-            AppearanceSettingsView(damus_state: damusState, settings: settings)
+            AnyView(AppearanceSettingsView(damus_state: damusState, settings: settings))
         case .NotificationSettings(let settings):
-            NotificationSettingsView(damus_state: damusState, settings: settings)
+            AnyView(NotificationSettingsView(damus_state: damusState, settings: settings))
         case .ZapSettings(let settings):
-            ZapSettingsView(settings: settings)
+            AnyView(ZapSettingsView(settings: settings))
         case .TranslationSettings(let settings):
-            TranslationSettingsView(settings: settings, damus_state: damusState)
+            AnyView(TranslationSettingsView(settings: settings, damus_state: damusState))
         case .ReactionsSettings(let settings):
-            ReactionsSettingsView(settings: settings, damus_state: damusState)
+            AnyView(ReactionsSettingsView(settings: settings, damus_state: damusState))
         case .SearchSettings(let settings):
-            SearchSettingsView(settings: settings)
+            AnyView(SearchSettingsView(settings: settings))
         case .DeveloperSettings(let settings):
-            DeveloperSettingsView(settings: settings, damus_state: damusState)
+            AnyView(DeveloperSettingsView(settings: settings, damus_state: damusState))
         case .FirstAidSettings(settings: let settings):
-            FirstAidSettingsView(damus_state: damusState, settings: settings)
+            AnyView(FirstAidSettingsView(damus_state: damusState, settings: settings))
         case .Thread(let thread):
-            ChatroomThreadView(damus: damusState, thread: thread)
-            //ThreadView(state: damusState, thread: thread)
+            AnyView(ChatroomThreadView(damus: damusState, thread: thread))
         case .LoadableNostrEvent(let note_reference):
-            LoadableNostrEventView(state: damusState, note_reference: note_reference)
+            AnyView(LoadableNostrEventView(state: damusState, note_reference: note_reference))
         case .Reposts(let reposts):
-            RepostsView(damus_state: damusState, model: reposts)
+            AnyView(RepostsView(damus_state: damusState, model: reposts))
         case .QuoteReposts(let quote_reposts):
-            QuoteRepostsView(damus_state: damusState, model: quote_reposts)
+            AnyView(QuoteRepostsView(damus_state: damusState, model: quote_reposts))
         case .Reactions(let reactions):
-            ReactionsView(damus_state: damusState, model: reactions)
+            AnyView(ReactionsView(damus_state: damusState, model: reactions))
         case .Zaps(let target):
-            ZapsView(state: damusState, target: target)
+            AnyView(ZapsView(state: damusState, target: target))
         case .Search(let search):
-            SearchView(appstate: damusState, search: search)
+            AnyView(SearchView(appstate: damusState, search: search))
         case .NDBSearch(let results, let query):
-            NDBSearchView(damus_state: damusState, results: results, searchQuery: query)
+            AnyView(NDBSearchView(damus_state: damusState, results: results, searchQuery: query))
         case .EULA:
-            EULAView(nav: navigationCoordinator)
+            AnyView(EULAView(nav: navigationCoordinator))
         case .Login:
-            LoginView(nav: navigationCoordinator)
+            AnyView(LoginView(nav: navigationCoordinator))
         case .CreateAccount:
-            CreateAccountView(nav: navigationCoordinator)
+            AnyView(CreateAccountView(nav: navigationCoordinator))
         case .SaveKeys(let account):
-            SaveKeysView(account: account)
+            AnyView(SaveKeysView(account: account))
         case .Wallet(let walletModel):
-            WalletView(damus_state: damusState, model: walletModel)
+            AnyView(WalletView(damus_state: damusState, model: walletModel))
         case .WalletScanner(let walletScanResult):
-            WalletScannerView(result: walletScanResult)
+            AnyView(WalletScannerView(result: walletScanResult))
         case .FollowersYouKnow(let friendedFollowers, let followers):
-            FollowersYouKnowView(damus_state: damusState, friended_followers: friendedFollowers, followers: followers)
+            AnyView(FollowersYouKnowView(damus_state: damusState, friended_followers: friendedFollowers, followers: followers))
         case .Script(let load_model):
-            LoadScript(pool: RelayPool(ndb: damusState.ndb, keypair: damusState.keypair), model: load_model)
+            AnyView(LoadScript(pool: RelayPool(ndb: damusState.ndb, keypair: damusState.keypair), model: load_model))
         case .NIP05DomainEvents(let events, let nip05_domain_favicon):
-            NIP05DomainTimelineView(damus_state: damusState, model: events, nip05_domain_favicon: nip05_domain_favicon)
+            AnyView(NIP05DomainTimelineView(damus_state: damusState, model: events, nip05_domain_favicon: nip05_domain_favicon))
         case .NIP05DomainPubkeys(let domain, let nip05_domain_favicon, let pubkeys):
-            NIP05DomainPubkeysView(damus_state: damusState, domain: domain, nip05_domain_favicon: nip05_domain_favicon, pubkeys: pubkeys)
+            AnyView(NIP05DomainPubkeysView(damus_state: damusState, domain: domain, nip05_domain_favicon: nip05_domain_favicon, pubkeys: pubkeys))
         case .FollowPack(let followPack, let followPackModel, let blur_imgs):
-            FollowPackView(state: damusState, ev: followPack, model: followPackModel, blur_imgs: blur_imgs)
+            AnyView(FollowPackView(state: damusState, ev: followPack, model: followPackModel, blur_imgs: blur_imgs))
         case .LiveEvents(let model):
-            LiveStreamHomeView(damus_state: damusState, model: model)
+            AnyView(LiveStreamHomeView(damus_state: damusState, model: model))
         case .LiveEvent(let liveEvent, let liveEventModel):
-            LiveStreamView(state: damusState, ev: liveEvent, model: liveEventModel)
+            AnyView(LiveStreamView(state: damusState, ev: liveEvent, model: liveEventModel))
         }
-        
     }
 
     static func == (lhs: Route, rhs: Route) -> Bool {
