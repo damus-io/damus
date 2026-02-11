@@ -146,11 +146,7 @@ struct VineCard: View {
             }
 
             if let duration = vine.durationDescription {
-                VineMetadataRow(icon: "clock", text: duration)
-            }
-
-            if let dim = vine.dimensionDescription {
-                VineMetadataRow(icon: "aspectratio", text: dim)
+                VineMetadataRow(icon: "clock", text: "\(duration)s")
             }
 
             if let loops = vine.loopCount {
@@ -178,7 +174,7 @@ struct VineCard: View {
             Divider()
                 .padding(.vertical, 4)
 
-            EventActionBar(damus_state: damus_state, event: vine.event, options: [.no_spread])
+            EventActionBar(damus_state: damus_state, event: vine.event, options: [])
         }
     }
 

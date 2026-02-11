@@ -9,68 +9,31 @@ import Foundation
 
 /// A parsed representation of a Vine short-video Nostr event (kind 34236).
 ///
-/// Extracts playback URLs, thumbnails, engagement stats, and metadata from the
-/// event's tag set. Immutable after construction — the contained `NostrEvent` is
-/// only read, never mutated.
+/// Parses `imeta` tags per NIP-71 / NIP-92: each `imeta` tag is a separate
+/// media variant (e.g. 1080p mp4 vs 720p HLS). The best variant is selected
+/// by mime-type priority (mp4 > HLS > other). Within a variant, `url` and
+/// `fallback` URLs are weighted equally per spec.
 ///
 /// - Note: `@unchecked Sendable` because the sole reference-type field (`event:
 ///   NostrEvent`) is an `NdbNote` whose mutable properties (`decrypted_content`,
 ///   `owned`) are never written by `VineVideo`.
 public struct VineVideo: Identifiable, Equatable, @unchecked Sendable {
-    struct MediaCandidate: Hashable {
-        enum Kind: Hashable {
-            case mp4
-            case mov
-            case hls
-            case dash
-            case fallback
-            case unknown
 
-            var priority: Int {
-                switch self {
-                case .mp4, .mov:
-                    return 0
-                case .hls:
-                    return 1
-                case .dash, .fallback:
-                    return 2
-                case .unknown:
-                    return 3
-                }
-            }
-        }
+    // MARK: - NIP-71 Types
 
-        enum Source: Hashable {
-            case direct
-            case imeta(String)
-            case streaming(String?)
-            case reference(String?)
-            case content
-            case fallback
-
-            var priority: Int {
-                switch self {
-                case .direct, .imeta:
-                    return 0
-                case .reference:
-                    return 1
-                case .streaming:
-                    return 2
-                case .content:
-                    return 3
-                case .fallback:
-                    return 4
-                }
-            }
-        }
-
-        let url: URL
-        let kind: Kind
-        let source: Source
-
-        var priority: Int {
-            (source.priority * 10) + kind.priority
-        }
+    /// A single `imeta` tag parsed into its constituent key-value properties.
+    /// Each imeta tag represents one media variant (resolution / format).
+    private struct IMetaVariant {
+        var url: URL?
+        var mimeType: String?
+        var dim: String?
+        var duration: String?
+        var bitrate: String?
+        var images: [URL] = []
+        var fallbacks: [URL] = []
+        var blurhash: String?
+        var service: String?
+        var hash: String?
     }
 
     struct VineOrigin: Equatable {
@@ -96,10 +59,21 @@ public struct VineVideo: Identifiable, Equatable, @unchecked Sendable {
         let values: [String]
     }
 
-    private struct IMetaEntry {
-        let key: String
-        let value: String
+    /// A chapter marker within a video (NIP-71 `segment` tag).
+    struct VideoSegment: Equatable {
+        let start: String
+        let end: String
+        let title: String?
+        let thumbnailURL: URL?
     }
+
+    /// A WebVTT text track reference (NIP-71 `text-track` tag).
+    struct TextTrack: Equatable {
+        let content: String
+        let relayURLs: String?
+    }
+
+    // MARK: - Properties
 
     let event: NostrEvent
     let dedupeKey: String
@@ -116,8 +90,11 @@ public struct VineVideo: Identifiable, Equatable, @unchecked Sendable {
     let altText: String?
     let durationDescription: String?
     let dimensionDescription: String?
+    let bitrate: String?
     let origin: VineOrigin?
     let proofTags: [VineProof]
+    let segments: [VideoSegment]
+    let textTracks: [TextTrack]
     let expirationTimestamp: UInt32?
     let loopCount: Int?
     let likeCount: Int?
@@ -130,6 +107,8 @@ public struct VineVideo: Identifiable, Equatable, @unchecked Sendable {
     public var id: String { event.id.hex() }
     var originDescription: String? { origin?.displayText }
 
+    // MARK: - Init
+
     init?(event: NostrEvent, repostSource: NostrEvent? = nil) {
         guard event.known_kind == .vine_short else { return nil }
         self.event = event
@@ -137,14 +116,20 @@ public struct VineVideo: Identifiable, Equatable, @unchecked Sendable {
         let content = event.content.trimmingCharacters(in: .whitespacesAndNewlines)
         self.summary = content.isEmpty ? nil : content
         self.hashtags = event.referenced_hashtags.map(\.hashtag)
-        let imetaEntries = VineVideo.imetaEntries(in: event)
+
+        // Parse each imeta tag as a separate media variant (NIP-71)
+        let variants = VineVideo.parseIMetaVariants(from: event)
+
         self.title = VineVideo.tagValue("title", in: event) ?? summary ?? NSLocalizedString("Untitled Vine", comment: "Fallback title when a Vine video is missing metadata.")
-        self.contentWarning = VineVideo.contentWarning(from: event, imetaEntries: imetaEntries)
-        self.altText = VineVideo.altText(from: event, imetaEntries: imetaEntries)
-        self.durationDescription = VineVideo.duration(from: event, imetaEntries: imetaEntries)
-        self.dimensionDescription = VineVideo.dimension(from: event, imetaEntries: imetaEntries)
+        self.contentWarning = VineVideo.tagValue("content-warning", in: event) ?? VineVideo.tagValue("cw", in: event)
+        self.altText = VineVideo.tagValue("alt", in: event)
+        self.durationDescription = VineVideo.tagValue("duration", in: event) ?? variants.compactMap(\.duration).first
+        self.dimensionDescription = VineVideo.tagValue("dim", in: event) ?? variants.compactMap(\.dim).first
+        self.bitrate = variants.compactMap(\.bitrate).first
         self.origin = VineVideo.origin(from: event)
         self.proofTags = VineVideo.proofTags(from: event)
+        self.segments = VineVideo.segments(from: event)
+        self.textTracks = VineVideo.textTracks(from: event)
         self.expirationTimestamp = VineVideo.expirationTimestamp(from: event)
         self.loopCount = VineVideo.intTagValue("loops", in: event)
         self.likeCount = VineVideo.intTagValue("likes", in: event)
@@ -163,171 +148,169 @@ public struct VineVideo: Identifiable, Equatable, @unchecked Sendable {
         self.createdAt = event.created_at
         self.authorDisplay = VineVideo.truncatedNpub(event.pubkey.npub)
 
-        var candidateMap: [URL: MediaCandidate] = [:]
-        VineVideo.collectDirectURLs(from: event, into: &candidateMap)
-        VineVideo.collectIMetaURLs(from: imetaEntries, into: &candidateMap)
-        VineVideo.collectStreamingURLs(from: event, into: &candidateMap)
-        VineVideo.collectReferenceURLs(from: event, into: &candidateMap)
-        VineVideo.collectContentURLs(from: content, into: &candidateMap)
-        if candidateMap.isEmpty {
-            VineVideo.collectFallbackURLs(from: event, into: &candidateMap)
-        }
+        // Select best playback URL from imeta variants
+        let selection = VineVideo.selectPlayback(from: variants)
 
-        let sorted = candidateMap.values.sorted { lhs, rhs in
-            if lhs.priority == rhs.priority {
-                return lhs.url.absoluteString < rhs.url.absoluteString
-            }
-            return lhs.priority < rhs.priority
-        }
-        guard let primaryURL = sorted.first?.url else {
+        if let primary = selection.primary {
+            self.playbackURL = primary
+        } else if let contentURL = VineVideo.firstVideoURL(in: content) {
+            // Last resort: extract URL from content text for malformed events
+            self.playbackURL = contentURL
+        } else {
             Log.debug("VineVideo missing playable URL for event %s", for: .timeline, event.id.hex())
             return nil
         }
 
-        self.playbackURL = primaryURL
-        self.fallbackURL = sorted.dropFirst().first(where: { $0.kind == .hls || $0.kind == .dash })?.url
-        self.thumbnailURL = VineVideo.thumbnailURL(from: event, imetaEntries: imetaEntries)
-        self.blurhash = VineVideo.blurhash(from: event, imetaEntries: imetaEntries)
+        self.fallbackURL = selection.fallback
+        self.thumbnailURL = selection.thumbnail ?? VineVideo.thumbnailFromStandaloneTags(in: event)
+        self.blurhash = selection.blurhash ?? VineVideo.tagValue("blurhash", in: event)
     }
 
     var requiresBlur: Bool {
         contentWarning != nil
     }
 
-    /// Returns a shortened npub like `npub1abc…wxyz` for display.
-    private static func truncatedNpub(_ npub: String) -> String {
-        guard npub.count > 12 else { return npub }
-        return "\(npub.prefix(8))…\(npub.suffix(4))"
-    }
+    // MARK: - imeta Variant Parsing (NIP-71 / NIP-92)
 
-    private static func collectDirectURLs(from event: NostrEvent, into candidates: inout [URL: MediaCandidate]) {
+    /// Parses each `imeta` tag into a separate `IMetaVariant`.
+    /// Handles both NIP-92 inline format (`"key value"`) and paired format (`key`, `value`).
+    private static func parseIMetaVariants(from event: NostrEvent) -> [IMetaVariant] {
+        var variants: [IMetaVariant] = []
         for tag in event.tags {
             let values = tag.strings()
-            guard values.first == "url", values.count > 1,
-                  let url = normalizedURL(values[1]) else { continue }
-            addCandidate(url, kind: mediaKind(for: url), source: .direct, into: &candidates)
-        }
-    }
+            guard values.first == "imeta" else { continue }
+            let payload = Array(values.dropFirst())
 
-    private static func collectIMetaURLs(from entries: [IMetaEntry], into candidates: inout [URL: MediaCandidate]) {
-        for entry in entries {
-            switch entry.key {
-            case "url", "video", "mp4":
-                guard let url = normalizedURL(entry.value) else { continue }
-                addCandidate(url, kind: mediaKind(forMetaKey: entry.key, url: url), source: .imeta(entry.key), into: &candidates)
-            case "fallback":
-                guard let url = normalizedURL(entry.value) else { continue }
-                addCandidate(url, kind: .fallback, source: .imeta(entry.key), into: &candidates)
-            case "hls", "stream", "streaming":
-                guard let url = normalizedURL(entry.value) else { continue }
-                addCandidate(url, kind: .hls, source: .imeta(entry.key), into: &candidates)
-            case "dash":
-                guard let url = normalizedURL(entry.value) else { continue }
-                addCandidate(url, kind: .dash, source: .imeta(entry.key), into: &candidates)
-            default:
-                continue
-            }
-        }
-    }
-
-    private static func collectStreamingURLs(from event: NostrEvent, into candidates: inout [URL: MediaCandidate]) {
-        for tag in event.tags {
-            let values = tag.strings()
-            guard values.first == "streaming", values.count >= 2,
-                  let url = normalizedURL(values[1]) else { continue }
-            let format = values.count >= 3 ? values[2] : nil
-            let kind: MediaCandidate.Kind = mediaKind(for: url)
-            addCandidate(url, kind: kind, source: .streaming(format), into: &candidates)
-        }
-    }
-
-    private static func collectReferenceURLs(from event: NostrEvent, into candidates: inout [URL: MediaCandidate]) {
-        for tag in event.tags {
-            let values = tag.strings()
-            guard let first = values.first else { continue }
-            switch first {
-            case "r":
-                guard values.count > 1,
-                      let url = normalizedURL(values[1]) else { continue }
-                let type = values.count > 2 ? values[2] : nil
-                if let type, type == "thumbnail" {
-                    continue
+            var entries: [(String, String)] = []
+            let usesInlineFormat = payload.contains(where: { $0.contains(" ") })
+            if usesInlineFormat {
+                for element in payload {
+                    let parts = element.split(separator: " ", maxSplits: 1)
+                    guard parts.count == 2 else { continue }
+                    entries.append((String(parts[0]), String(parts[1])))
                 }
-                addCandidate(url, kind: mediaKind(for: url), source: .reference(type), into: &candidates)
-            case "e", "i":
-                guard values.count > 1,
-                      let url = normalizedURL(values[1]) else { continue }
-                addCandidate(url, kind: mediaKind(for: url), source: .reference(first), into: &candidates)
-            default:
-                continue
+            } else {
+                var iterator = payload.makeIterator()
+                while let key = iterator.next(), let value = iterator.next() {
+                    entries.append((key, value))
+                }
             }
+
+            var variant = IMetaVariant()
+            for (key, value) in entries {
+                switch key {
+                case "url":
+                    if let url = normalizedURL(value) { variant.url = url }
+                case "m":
+                    variant.mimeType = value
+                case "dim":
+                    variant.dim = value
+                case "duration":
+                    variant.duration = value
+                case "bitrate":
+                    variant.bitrate = value
+                case "image":
+                    if let url = normalizedURL(value) { variant.images.append(url) }
+                case "fallback":
+                    if let url = normalizedURL(value) { variant.fallbacks.append(url) }
+                case "blurhash":
+                    variant.blurhash = value
+                case "service":
+                    variant.service = value
+                case "x":
+                    variant.hash = value
+                default:
+                    break
+                }
+            }
+            variants.append(variant)
+        }
+        return variants
+    }
+
+    // MARK: - Playback URL Selection
+
+    /// Selects the best playback URL from parsed imeta variants.
+    /// Prefers mp4 > other video > HLS/DASH. Within a variant, `url` and `fallback`
+    /// are weighted equally per NIP-71.
+    private static func selectPlayback(from variants: [IMetaVariant]) -> (primary: URL?, fallback: URL?, thumbnail: URL?, blurhash: String?) {
+        let sorted = variants.sorted { lhs, rhs in
+            mimeTypePriority(lhs.mimeType) < mimeTypePriority(rhs.mimeType)
+        }
+
+        // Primary: best variant's url (or first fallback if url is nil)
+        guard let best = sorted.first else {
+            return (nil, nil, nil, nil)
+        }
+        let primary = best.url ?? best.fallbacks.first
+
+        // Fallback: a streaming variant if available (different from primary variant)
+        let streamingURL: URL? = sorted.dropFirst().first(where: {
+            $0.mimeType == "application/x-mpegURL" || $0.mimeType == "application/dash+xml"
+        })?.url
+
+        // If the primary is already HLS, use a non-HLS variant as fallback instead
+        let fallback: URL?
+        if best.mimeType == "application/x-mpegURL" || best.mimeType == "application/dash+xml" {
+            fallback = sorted.dropFirst().compactMap(\.url).first
+        } else {
+            fallback = streamingURL
+        }
+
+        // Thumbnail: from best variant, then fall through other variants
+        let thumbnail = best.images.first ?? sorted.compactMap(\.images.first).first
+        let blurhash = best.blurhash ?? sorted.compactMap(\.blurhash).first
+
+        return (primary, fallback, thumbnail, blurhash)
+    }
+
+    private static func mimeTypePriority(_ mimeType: String?) -> Int {
+        switch mimeType {
+        case "video/mp4", "video/quicktime": return 0
+        case "video/webm": return 1
+        case "application/x-mpegURL": return 2
+        case "application/dash+xml": return 3
+        default: return 4
         }
     }
 
-    private static func collectContentURLs(from content: String?, into candidates: inout [URL: MediaCandidate]) {
-        guard let content, !content.isEmpty else { return }
-        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else { return }
+    // MARK: - Thumbnail from Standalone Tags
+
+    private static func thumbnailFromStandaloneTags(in event: NostrEvent) -> URL? {
+        if let direct = tagValue("thumb", in: event), let url = normalizedURL(direct) {
+            return url
+        }
+        if let image = tagValue("image", in: event), let url = normalizedURL(image) {
+            return url
+        }
+        return nil
+    }
+
+    // MARK: - Content URL Fallback
+
+    /// Last-resort extraction of a video URL from the event content text.
+    /// Used only when no imeta tags provide a playback URL.
+    private static func firstVideoURL(in content: String?) -> URL? {
+        guard let content, !content.isEmpty else { return nil }
+        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else { return nil }
         let range = NSRange(content.startIndex..<content.endIndex, in: content)
         let matches = detector.matches(in: content, options: [], range: range)
         for match in matches {
             guard let matchRange = Range(match.range, in: content) else { continue }
             let urlString = String(content[matchRange])
             guard let url = normalizedURL(urlString) else { continue }
-            addCandidate(url, kind: mediaKind(for: url), source: .content, into: &candidates)
-        }
-    }
-
-    private static func collectFallbackURLs(from event: NostrEvent, into candidates: inout [URL: MediaCandidate]) {
-        for tag in event.tags {
-            let values = tag.strings().dropFirst()
-            for value in values {
-                guard let url = normalizedURL(value) else { continue }
-                addCandidate(url, kind: mediaKind(for: url), source: .fallback, into: &candidates)
+            let ext = url.pathExtension.lowercased()
+            if ["mp4", "mov", "m3u8", "mpd", "webm"].contains(ext) {
+                return url
             }
         }
+        return nil
     }
 
-    private static func addCandidate(_ url: URL, kind: MediaCandidate.Kind, source: MediaCandidate.Source, into candidates: inout [URL: MediaCandidate]) {
-        let candidate = MediaCandidate(url: url, kind: kind, source: source)
-        if let existing = candidates[url], existing.priority <= candidate.priority {
-            return
-        }
-        candidates[url] = candidate
-    }
+    // MARK: - URL Normalization
 
-    private static func mediaKind(for url: URL) -> MediaCandidate.Kind {
-        let ext = url.pathExtension.lowercased()
-        switch ext {
-        case "mp4":
-            return .mp4
-        case "mov":
-            return .mov
-        case "m3u8":
-            return .hls
-        case "mpd":
-            return .dash
-        default:
-            return .unknown
-        }
-    }
-
-    private static func mediaKind(forMetaKey key: String, url: URL) -> MediaCandidate.Kind {
-        switch key {
-        case "url", "mp4", "video":
-            return mediaKind(for: url)
-        case "hls", "stream":
-            return .hls
-        case "dash":
-            return .dash
-        case "fallback":
-            return .fallback
-        default:
-            return mediaKind(for: url)
-        }
-    }
-
-    /// Normalises a raw URL string for use in media candidates.
-    /// Workaround: rewrites the known typo domain "apt.openvine.co" → "api.openvine.co"
+    /// Normalises a raw URL string.
+    /// Workaround: rewrites the known typo domain "apt.openvine.co" -> "api.openvine.co"
     /// that appears in some early Vine events. Remove once upstream data is corrected.
     private static func normalizedURL(_ raw: String) -> URL? {
         var cleaned = raw.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -340,58 +323,32 @@ public struct VineVideo: Identifiable, Equatable, @unchecked Sendable {
         return url
     }
 
-    private static func thumbnailURL(from event: NostrEvent, imetaEntries: [IMetaEntry]) -> URL? {
-        if let direct = tagValue("thumb", in: event), let url = normalizedURL(direct) {
-            return url
-        }
-        if let image = tagValue("image", in: event), let url = normalizedURL(image) {
-            return url
-        }
-        if let imetaImage = imetaEntries.first(where: { $0.key == "image" || $0.key == "thumb" }), let url = normalizedURL(imetaImage.value) {
-            return url
-        }
+    // MARK: - NIP-71 Tag Parsers
+
+    private static func segments(from event: NostrEvent) -> [VideoSegment] {
+        var result: [VideoSegment] = []
         for tag in event.tags {
             let values = tag.strings()
-            guard values.first == "r", values.count > 2 else { continue }
-            guard values[2] == "thumbnail", let url = normalizedURL(values[1]) else { continue }
-            return url
+            guard values.first == "segment", values.count >= 3 else { continue }
+            let start = values[1]
+            let end = values[2]
+            let title = values.count > 3 ? values[3] : nil
+            let thumbURL = values.count > 4 ? normalizedURL(values[4]) : nil
+            result.append(VideoSegment(start: start, end: end, title: title, thumbnailURL: thumbURL))
         }
-        return nil
+        return result
     }
 
-    private static func blurhash(from event: NostrEvent, imetaEntries: [IMetaEntry]) -> String? {
-        if let tagValue = tagValue("blurhash", in: event) {
-            return tagValue
+    private static func textTracks(from event: NostrEvent) -> [TextTrack] {
+        var result: [TextTrack] = []
+        for tag in event.tags {
+            let values = tag.strings()
+            guard values.first == "text-track", values.count >= 2 else { continue }
+            let content = values[1]
+            let relayURLs = values.count > 2 ? values[2] : nil
+            result.append(TextTrack(content: content, relayURLs: relayURLs))
         }
-        return imetaEntries.first(where: { $0.key == "blurhash" })?.value
-    }
-
-    private static func contentWarning(from event: NostrEvent, imetaEntries: [IMetaEntry]) -> String? {
-        if let tagValue = tagValue("content-warning", in: event) ?? tagValue("cw", in: event) {
-            return tagValue
-        }
-        return imetaEntries.first(where: { $0.key == "content-warning" || $0.key == "cw" })?.value
-    }
-
-    private static func altText(from event: NostrEvent, imetaEntries: [IMetaEntry]) -> String? {
-        if let tagValue = tagValue("alt", in: event) {
-            return tagValue
-        }
-        return imetaEntries.first(where: { $0.key == "alt" })?.value
-    }
-
-    private static func duration(from event: NostrEvent, imetaEntries: [IMetaEntry]) -> String? {
-        if let tagValue = tagValue("duration", in: event) {
-            return tagValue
-        }
-        return imetaEntries.first(where: { $0.key == "duration" })?.value
-    }
-
-    private static func dimension(from event: NostrEvent, imetaEntries: [IMetaEntry]) -> String? {
-        if let tagValue = tagValue("dim", in: event) {
-            return tagValue
-        }
-        return imetaEntries.first(where: { $0.key == "dim" })?.value
+        return result
     }
 
     private static func origin(from event: NostrEvent) -> VineOrigin? {
@@ -422,6 +379,14 @@ public struct VineVideo: Identifiable, Equatable, @unchecked Sendable {
         return intVal
     }
 
+    // MARK: - Helpers
+
+    /// Returns a shortened npub like `npub1abc...wxyz` for display.
+    private static func truncatedNpub(_ npub: String) -> String {
+        guard npub.count > 12 else { return npub }
+        return "\(npub.prefix(8))…\(npub.suffix(4))"
+    }
+
     private static func intTagValue(_ key: String, in event: NostrEvent) -> Int? {
         guard let value = tagValue(key, in: event) else { return nil }
         return Int(value)
@@ -434,28 +399,5 @@ public struct VineVideo: Identifiable, Equatable, @unchecked Sendable {
             return values.count > 1 ? values[1] : nil
         }
         return nil
-    }
-
-    private static func imetaEntries(in event: NostrEvent) -> [IMetaEntry] {
-        var entries: [IMetaEntry] = []
-        for tag in event.tags {
-            let values = tag.strings()
-            guard values.first == "imeta" else { continue }
-            let payload = Array(values.dropFirst())
-            let usesInlineFormat = payload.contains(where: { $0.contains(" ") })
-            if usesInlineFormat {
-                for element in payload {
-                    let parts = element.split(separator: " ", maxSplits: 1)
-                    guard parts.count == 2 else { continue }
-                    entries.append(IMetaEntry(key: String(parts[0]), value: String(parts[1])))
-                }
-            } else {
-                var iterator = payload.makeIterator()
-                while let key = iterator.next(), let value = iterator.next() {
-                    entries.append(IMetaEntry(key: key, value: value))
-                }
-            }
-        }
-        return entries
     }
 }

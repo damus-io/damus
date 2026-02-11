@@ -46,8 +46,8 @@ final class VineVideoTests: XCTestCase {
     func testPrefersExplicitMp4OverStreaming() {
         let tags: [[String]] = [
             ["d", "vine-prefers-mp4"],
-            ["streaming", "https://example.com/video.m3u8", "hls"],
-            ["imeta", "url", "https://example.com/video.m3u8", "mp4", "https://example.com/video.mp4"]
+            ["imeta", "url", "https://example.com/video.m3u8", "m", "application/x-mpegURL"],
+            ["imeta", "url", "https://example.com/video.mp4", "m", "video/mp4"]
         ]
         let video = VineVideo(event: makeVineEvent(tags: tags))
         XCTAssertEqual(video?.playbackURL?.absoluteString, "https://example.com/video.mp4")
@@ -65,17 +65,17 @@ final class VineVideoTests: XCTestCase {
     func testParsesOriginMetadata() {
         let tags: [[String]] = [
             ["d", "vine-origin"],
+            ["imeta", "url", "https://example.com/video.mp4", "m", "video/mp4"],
             ["origin", "vine", "abc123", "Recovered"]
         ]
         let video = VineVideo(event: makeVineEvent(tags: tags))
         XCTAssertEqual(video?.originDescription, "vine • abc123 – Recovered")
     }
     
-    func testUsesReferenceThumbnailWhenAvailable() {
+    func testUsesImetaThumbnailWhenAvailable() {
         let tags: [[String]] = [
             ["d", "vine-thumb"],
-            ["url", "https://example.com/video.mp4"],
-            ["r", "https://example.com/thumb.jpg", "thumbnail"]
+            ["imeta", "url", "https://example.com/video.mp4", "m", "video/mp4", "image", "https://example.com/thumb.jpg"]
         ]
         let video = VineVideo(event: makeVineEvent(tags: tags))
         XCTAssertEqual(video?.thumbnailURL?.absoluteString, "https://example.com/thumb.jpg")
