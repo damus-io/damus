@@ -44,4 +44,81 @@ Damus is an iOS client built around a local relay model ([damus-io/damus#3204](h
 7. Review and follow `pull_request_template.md` when creating PRs for iOS Damus.
 8. Ensure nevernesting: favor early returns and guard clauses over deeply nested conditionals; simplify control flow by exiting early instead of wrapping logic in multiple layers of `if` statements.
 9. Before proposing changes, please **review and analyze if a change or upgrade to nostrdb** is beneficial to the change at hand.
-10. **Never block the main thread**: All network requests, database queries, and expensive computations must run on background threads/queues. Use `Task { }`, `DispatchQueue.global()`, or Swift concurrency (`async/await`) appropriately. UI updates must dispatch back to `@MainActor`. Test for hangs and freezes before submitting.      
+10. **Never block the main thread**: All network requests, database queries, and expensive computations must run on background threads/queues. Use `Task { }`, `DispatchQueue.global()`, or Swift concurrency (`async/await`) appropriately. UI updates must dispatch back to `@MainActor`. Test for hangs and freezes before submitting.
+
+## Crash Investigation Standards
+
+When addressing production crashes reported via TestFlight or crash logs:
+
+### Gold Standard: Local Reproduction ✅
+
+1. Reproduce the crash locally in your development environment
+2. Write a test that crashes before the fix is applied
+3. Apply the fix
+4. Verify the test passes
+5. Document the crash scenario and fix in the PR
+
+→ **This meets jb55's "99% merge odds" requirement:**
+> "actually having a test that replicates the issue and fails + a fix for that test will increase the odds of merging by 99%"
+
+**Example:** A crash in profile loading that can be triggered by loading a specific malformed profile JSON.
+
+### When Direct Reproduction Is Impossible ⚠️
+
+Some crashes cannot be reproduced in test environments due to:
+- **Race conditions** (timing-dependent, hard to trigger deterministically)
+- **XCTest limitations** (crashes kill the test process before assertions run)
+- **Hardware-specific issues** (memory pressure, device-specific bugs)
+- **Production-only state** (specific database corruption, network conditions)
+
+**In these cases, follow the pragmatic approach:**
+
+1. **Link production evidence**
+   - Reference the issue number (e.g., #3560)
+   - Include crash logs, stack traces, affected device counts
+   - Document crash location and frequency
+
+2. **Prove the protection mechanism works**
+   - Write tests showing the vulnerability exists (prove the race window)
+   - Write tests proving your fix closes the vulnerability
+   - Document why direct crash testing isn't feasible
+
+3. **Show how the fix closes the vulnerability window**
+   - Explain the crash scenario step-by-step
+   - Show what happens WITHOUT your fix (crash path)
+   - Show what happens WITH your fix (safe failure path)
+   - Prove timing/ordering guarantees if applicable
+
+4. **Plan production monitoring**
+   - Note that crash elimination must be verified in TestFlight
+   - Consider adding telemetry if appropriate
+   - Plan follow-up if crash persists
+
+**Example:** PR #3615 (snapshot marker protocol)
+- **Cannot crash in XCTest** (process dies, can't test crashes directly)
+- **But proves:** Marker timing closes 10-550ms race window
+- **Links:** Issue #3560 (production mdb_page_search+232 crashes in DamusNotificationService)
+- **Tests:** `testMarkerProtocol_PreventsProductionCrashScenario()` proves protection works
+- **Therefore:** Satisfies pragmatic interpretation of requirement
+
+### Unacceptable Approaches ❌
+
+- Fixing without understanding the root cause
+- Guess-and-hope changes based only on stack traces
+- No tests whatsoever
+- No link to production evidence or issue tracking
+- "Let's see if this helps" without analysis
+
+### Crash Investigation Checklist
+
+When working on a crash fix:
+
+- [ ] Link to production evidence (issue number, crash logs)
+- [ ] Explain root cause analysis
+- [ ] Either reproduce locally OR explain why reproduction is impossible
+- [ ] Write tests (either crash reproduction or protection mechanism proof)
+- [ ] Document the crash scenario clearly
+- [ ] Show before/after behavior
+- [ ] Plan production verification
+
+This balances the **ideal** (direct crash reproduction) with **reality** (some crashes can't be reproduced in test environments, but fixes can still be proven correct).
