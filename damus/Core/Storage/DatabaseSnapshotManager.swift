@@ -237,16 +237,51 @@ actor DatabaseSnapshotManager {
         return [profileFilter, contactsFilter, muteListFilter]
     }
     
-    /// Atomically moves the snapshot from temporary location to final destination.
+    /// Moves snapshot to final destination with marker-based synchronization.
     ///
-    /// Uses a marker file to signal when the snapshot is complete and safe to read.
-    /// Extensions should only open a snapshot when the marker file exists.
+    /// **IMPORTANT: This operation is NOT atomic.** There is a race window between
+    /// removing the old snapshot and moving the new one into place.
+    ///
+    /// **Race window timeline:**
+    /// 1. Remove marker (prevents new extension reads)
+    /// 2. Delete old snapshot (~10-50ms)
+    /// 3. ⚠️ **RACE WINDOW** - no valid snapshot exists (~10-550ms total)
+    /// 4. Move new snapshot (~1-10ms same filesystem, ~100-500ms cross-filesystem)
+    /// 5. Write marker (signals snapshot ready for extensions)
+    ///
+    /// The marker protocol prevents extensions from reading during this window by:
+    /// - Extensions check `Ndb.snapshot_is_ready()` before opening
+    /// - Returns nil if marker missing → extensions fail safely
+    /// - Prevents mdb_page_search crashes (issue #3560)
+    ///
+    /// **Performance Note:**
+    /// If `tempPath` and `finalPath` are on different filesystems, `moveItem`
+    /// becomes a copy+delete operation (~500ms) instead of a fast rename (~1-10ms).
+    /// This extends the race window significantly. Ensure both paths are on the
+    /// same filesystem for optimal performance.
+    ///
+    /// - Parameters:
+    ///   - tempPath: Temporary snapshot location
+    ///   - finalPath: Final snapshot destination
+    /// - Throws: SnapshotError if any operation fails
     private func moveSnapshotToFinalDestination(from tempPath: String, to finalPath: String) async throws {
         let fileManager = FileManager.default
         let markerPath = URL(fileURLWithPath: finalPath)
             .deletingLastPathComponent()
             .appendingPathComponent(Self.snapshotReadyMarker)
             .path
+
+        // Verify same filesystem for fast rename (not slow copy+delete)
+        let tempURL = URL(fileURLWithPath: tempPath)
+        let finalURL = URL(fileURLWithPath: finalPath)
+        let tempVolume = try? tempURL.resourceValues(forKeys: [.volumeIdentifierKey]).volumeIdentifier
+        let finalVolume = try? finalURL.resourceValues(forKeys: [.volumeIdentifierKey]).volumeIdentifier
+
+        if let tempVol = tempVolume, let finalVol = finalVolume, tempVol != finalVol {
+            Log.warn("⚠️ Snapshot temp and final paths on different filesystems", for: .storage)
+            Log.warn("⚠️ This causes slow copy+delete (~500ms) instead of fast rename (~10ms)", for: .storage)
+            Log.warn("⚠️ Race window extended significantly", for: .storage)
+        }
 
         // Check for cancellation before starting expensive operations
         try Task.checkCancellation()
@@ -287,7 +322,8 @@ actor DatabaseSnapshotManager {
 
         try Task.checkCancellation()
 
-        // Atomically move the temp snapshot to final destination
+        // Move the temp snapshot to final destination
+        // Note: moveItem is atomic if same filesystem (rename), but not if cross-filesystem (copy+delete)
         do {
             try fileManager.moveItem(atPath: tempPath, toPath: finalPath)
             Log.debug("Moved snapshot from %{public}@ to %{public}@", for: .storage, tempPath, finalPath)
