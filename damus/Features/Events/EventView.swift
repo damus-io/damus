@@ -31,33 +31,31 @@ struct EventView: View {
         self.highlightTerms = highlightTerms
     }
 
+    @ViewBuilder
     var body: some View {
-        VStack {
-            if event.known_kind == .boost {
-                if let inner_ev = event.get_inner_event(cache: damus.events) {
-                    RepostedEvent(damus: damus, event: event, inner_ev: inner_ev, options: options)
-                } else if let target = event.repostTarget() {
-                    // Inner event not in cache - load using relay hints from e tag (NIP-18)
-                    EventLoaderView(damus_state: damus, event_id: target.noteId, relayHints: target.relayHints) { loaded_event in
-                        RepostedEvent(damus: damus, event: event, inner_ev: loaded_event, options: options)
-                    }
-                } else {
-                    EmptyView()
+        if event.known_kind == .boost {
+            if let inner_ev = event.get_inner_event(cache: damus.events) {
+                RepostedEvent(damus: damus, event: event, inner_ev: inner_ev, options: options)
+            } else if let target = event.repostTarget() {
+                // Inner event not in cache - load using relay hints from e tag (NIP-18)
+                EventLoaderView(damus_state: damus, event_id: target.noteId, relayHints: target.relayHints) { loaded_event in
+                    RepostedEvent(damus: damus, event: event, inner_ev: loaded_event, options: options)
                 }
-            } else if event.known_kind == .zap {
-                if let zap = damus.zaps.zaps[event.id] {
-                    ZapEvent(damus: damus, zap: zap, is_top_zap: options.contains(.top_zap))
-                } else {
-                    EmptyView()
-                }
-            } else if event.known_kind == .longform {
-                LongformPreview(state: damus, ev: event, options: options)
-            } else if event.known_kind == .highlight {
-                HighlightView(state: damus, event: event, options: options)
             } else {
-                TextEvent(damus: damus, event: event, pubkey: pubkey, options: options, highlightTerms: highlightTerms)
-                    //.padding([.top], 6)
+                EmptyView()
             }
+        } else if event.known_kind == .zap {
+            if let zap = damus.zaps.zaps[event.id] {
+                ZapEvent(damus: damus, zap: zap, is_top_zap: options.contains(.top_zap))
+            } else {
+                EmptyView()
+            }
+        } else if event.known_kind == .longform {
+            LongformPreview(state: damus, ev: event, options: options)
+        } else if event.known_kind == .highlight {
+            HighlightView(state: damus, event: event, options: options)
+        } else {
+            TextEvent(damus: damus, event: event, pubkey: pubkey, options: options, highlightTerms: highlightTerms)
         }
     }
 }

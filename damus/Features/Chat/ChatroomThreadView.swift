@@ -221,10 +221,8 @@ struct ChatroomThreadView: View {
                             damus_state: damus,
                             event: self.thread.selected_event,
                             muteBox: { event_shown, muted_reason in
-                                AnyView(
-                                    EventMutedBoxView(shown: event_shown, reason: muted_reason)
-                                        .padding(5)
-                                )
+                                EventMutedBoxView(shown: event_shown, reason: muted_reason)
+                                    .padding(5)
                             }
                         ) {
                             SelectedEventView(damus: damus, event: self.thread.selected_event, size: .selected)
