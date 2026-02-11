@@ -7,3 +7,6 @@ TODO.bak
 tags
 build-git-hash.txt
 .build
+.beads/*.db
+.beads/*.db-shm
+.beads/*.db-wal

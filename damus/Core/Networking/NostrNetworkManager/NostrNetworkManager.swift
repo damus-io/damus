@@ -281,9 +281,19 @@ class NostrNetworkManager {
         }
 
         let descriptor = RelayPool.RelayDescriptor(url: relayURL, info: .readWrite)
-        try? await pool.add_relay(descriptor)
-        await pool.connect(to: [relayURL])
+        do {
+            try await pool.add_relay(descriptor)
+        } catch {
+            // If the relay already exists we can still connect to it;
+            // for any other error, log and bail out.
+            let isAlreadyAdded = await pool.get_relay(relayURL) != nil
+            if !isAlreadyAdded {
+                Log.debug("Failed to add relay %s: %s", for: .networking, relayURL.id as CVarArg, error.localizedDescription)
+                return
+            }
+        }
         await MainActor.run { featureManagedRelays.insert(relayURL) }
+        await pool.connect(to: [relayURL])
     }
     
     /// Disconnects and removes a relay that was previously added via ``ensureRelayConnected(_:)``.

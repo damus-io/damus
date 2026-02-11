@@ -8,6 +8,8 @@
 import SwiftUI
 import AVFoundation
 
+/// Form-based composer for creating and publishing a new Vine short-video event (kind 34236).
+/// Lets the user pick or record a video, upload it to Blossom, fill in NIP-71 metadata, and publish.
 struct VineComposerView: View {
     enum UploadPhase: Equatable {
         case idle
@@ -170,7 +172,7 @@ struct VineComposerView: View {
             TextField(NSLocalizedString("Origin detail", comment: "Placeholder for Vine origin detail field."), text: $originDetail)
             TextField(NSLocalizedString("Reference link", comment: "Placeholder for Vine reference link field."), text: $referenceURL)
                 .keyboardType(.URL)
-                .autocapitalization(.none)
+                .textInputAutocapitalization(.never)
                 .disableAutocorrection(true)
         }
     }
@@ -189,6 +191,7 @@ struct VineComposerView: View {
         return false
     }
     
+    /// Processes a media item from the picker or camera: validates it is a video, converts to MP4 if needed, then uploads.
     private func handlePickedMedia(_ media: PreUploadedMedia) {
         Task {
             guard var upload = await generateMediaUpload(media) else {
@@ -221,6 +224,7 @@ struct VineComposerView: View {
         }
     }
     
+    /// Uploads the selected video to Blossom, extracts metadata, and updates the upload phase on completion.
     @MainActor
     private func uploadSelectedMedia(_ media: MediaUpload) async {
         guard let keypair = damus_state.keypair.privkey != nil ? damus_state.keypair : nil else {
@@ -271,6 +275,7 @@ struct VineComposerView: View {
         return (durationSeconds.isFinite ? durationSeconds : nil, dimensions)
     }
     
+    /// Transcodes the video at `localURL` to MP4 if it isn't already. Returns the MP4 URL, or `nil` on failure.
     private func convertVideoToMP4IfNeeded(localURL: URL) async -> URL? {
         return await withCheckedContinuation { continuation in
             let asset = AVAsset(url: localURL)
@@ -328,6 +333,7 @@ struct VineComposerView: View {
         }
     }
     
+    /// Builds a kind 34236 Nostr event from the current metadata and media descriptor, then posts it.
     private func publishVine() {
         guard let descriptor = mediaDescriptor else { return }
         let metadata = VineDraftMetadata(
