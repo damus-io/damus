@@ -16,7 +16,6 @@ struct EventLoaderView<Content: View>: View {
     let relayHints: [RelayURL]
     @State var event: NostrEvent?
     @State var subscription_uuid: String = UUID().description
-    @State var loadingTask: Task<Void, Never>? = nil
     let content: (NostrEvent) -> Content
 
     /// Creates an event loader view.
@@ -34,32 +33,21 @@ struct EventLoaderView<Content: View>: View {
         let event = damus_state.events.lookup(event_id)
         _event = State(initialValue: event)
     }
-    
-    func unsubscribe() {
-        self.loadingTask?.cancel()
-    }
-    
-    func subscribe() {
-        self.loadingTask?.cancel()
-        self.loadingTask = Task {
-            let targetRelays = relayHints.isEmpty ? nil : relayHints
-            #if DEBUG
-            if let targetRelays, !targetRelays.isEmpty {
-                print("[relay-hints] EventLoaderView: Loading event \(event_id.hex().prefix(8))... with \(targetRelays.count) relay hint(s): \(targetRelays.map { $0.absoluteString })")
-            }
-            #endif
-            let lender = try? await damus_state.nostrNetwork.reader.lookup(noteId: self.event_id, to: targetRelays)
-            lender?.justUseACopy({ event = $0 })
-            #if DEBUG
-            if let targetRelays, !targetRelays.isEmpty {
-                print("[relay-hints] EventLoaderView: Event \(event_id.hex().prefix(8))... loaded: \(event != nil)")
-            }
-            #endif
+
+    func load() async {
+        let targetRelays = relayHints.isEmpty ? nil : relayHints
+        #if DEBUG
+        if let targetRelays, !targetRelays.isEmpty {
+            print("[relay-hints] EventLoaderView: Loading event \(event_id.hex().prefix(8))... with \(targetRelays.count) relay hint(s): \(targetRelays.map { $0.absoluteString })")
         }
-    }
-    
-    func load() {
-        subscribe()
+        #endif
+        let lender = try? await damus_state.nostrNetwork.reader.lookup(noteId: self.event_id, to: targetRelays)
+        lender?.justUseACopy({ event = $0 })
+        #if DEBUG
+        if let targetRelays, !targetRelays.isEmpty {
+            print("[relay-hints] EventLoaderView: Event \(event_id.hex().prefix(8))... loaded: \(event != nil)")
+        }
+        #endif
     }
     
     var body: some View {
@@ -70,11 +58,11 @@ struct EventLoaderView<Content: View>: View {
                 ProgressView().padding()
             }
         }
-        .onAppear {
+        .task {
             guard event == nil else {
                 return
             }
-            self.load()
+            await self.load()
         }
     }
 }
