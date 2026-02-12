@@ -311,7 +311,7 @@ func classify_url(_ url: URL) -> UrlType {
     switch fileExtension {
     case "png", "jpg", "jpeg", "gif", "webp":
         return .media(.image(url))
-    case "mp4", "mov", "m3u8":
+    case "mp4", "mov", "m3u8", "webm", "mkv":
         return .media(.video(url))
     default:
         return .link(url)
