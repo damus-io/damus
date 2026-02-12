@@ -256,6 +256,7 @@
 		4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */ = {isa = PBXBuildFile; productRef = 4C649880286E0EE300EAE2B3 /* secp256k1 */; };
 		4C684A552A7E91FE005E6031 /* LargeEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C684A542A7E91FE005E6031 /* LargeEventTests.swift */; };
 		4C684A572A7FFAE6005E6031 /* UrlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C684A562A7FFAE6005E6031 /* UrlTests.swift */; };
+		AAAA00082F1600000000KSPL /* DamusVideoPlayerFallbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA00092F1600000000KSPL /* DamusVideoPlayerFallbackTests.swift */; };
 		4C687C212A5F7ED00092C550 /* DamusBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C687C202A5F7ED00092C550 /* DamusBackground.swift */; };
 		4C687C242A5FA86D0092C550 /* SearchHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C687C232A5FA86D0092C550 /* SearchHeaderView.swift */; };
 		4C687C272A6039500092C550 /* TestData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C687C262A6039500092C550 /* TestData.swift */; };
@@ -491,6 +492,9 @@
 		5053ACA72A56DF3B00851AE3 /* DeveloperSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5053ACA62A56DF3B00851AE3 /* DeveloperSettingsView.swift */; };
 		50A16FFD2AA7525700DFEC1F /* DamusVideoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFC2AA7525700DFEC1F /* DamusVideoPlayer.swift */; };
 		50A16FFF2AA76A0900DFEC1F /* DamusVideoCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFE2AA76A0900DFEC1F /* DamusVideoCoordinator.swift */; };
+		AAAA00042F1600000000KSPL /* DamusAudioSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA00072F1600000000KSPL /* DamusAudioSession.swift */; };
+		AAAA00052F1600000000KSPL /* DamusAudioSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA00072F1600000000KSPL /* DamusAudioSession.swift */; };
+		AAAA00062F1600000000KSPL /* DamusAudioSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA00072F1600000000KSPL /* DamusAudioSession.swift */; };
 		50A50A8D29A09E1C00C01BE7 /* RequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */; };
 		50A60D142A28BEEE00186190 /* RelayLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A60D132A28BEEE00186190 /* RelayLog.swift */; };
 		50B5685329F97CB400A23243 /* CredentialHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B5685229F97CB400A23243 /* CredentialHandler.swift */; };
@@ -2372,6 +2376,7 @@
 		4C64987D286D082C00EAE2B3 /* DirectMessagesModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectMessagesModel.swift; sourceTree = "<group>"; };
 		4C684A542A7E91FE005E6031 /* LargeEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LargeEventTests.swift; sourceTree = "<group>"; };
 		4C684A562A7FFAE6005E6031 /* UrlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrlTests.swift; sourceTree = "<group>"; };
+		AAAA00092F1600000000KSPL /* DamusVideoPlayerFallbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusVideoPlayerFallbackTests.swift; sourceTree = "<group>"; };
 		4C687C202A5F7ED00092C550 /* DamusBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusBackground.swift; sourceTree = "<group>"; };
 		4C687C232A5FA86D0092C550 /* SearchHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHeaderView.swift; sourceTree = "<group>"; };
 		4C687C262A6039500092C550 /* TestData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestData.swift; sourceTree = "<group>"; };
@@ -2644,6 +2649,7 @@
 		5053ACA62A56DF3B00851AE3 /* DeveloperSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperSettingsView.swift; sourceTree = "<group>"; };
 		50A16FFC2AA7525700DFEC1F /* DamusVideoPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusVideoPlayer.swift; sourceTree = "<group>"; };
 		50A16FFE2AA76A0900DFEC1F /* DamusVideoCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusVideoCoordinator.swift; sourceTree = "<group>"; };
+		AAAA00072F1600000000KSPL /* DamusAudioSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusAudioSession.swift; sourceTree = "<group>"; };
 		50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestTests.swift; sourceTree = "<group>"; };
 		50A60D132A28BEEE00186190 /* RelayLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayLog.swift; sourceTree = "<group>"; };
 		50B5685229F97CB400A23243 /* CredentialHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialHandler.swift; sourceTree = "<group>"; };
@@ -3092,6 +3098,7 @@
 				50A16FFC2AA7525700DFEC1F /* DamusVideoPlayer.swift */,
 				50A16FFE2AA76A0900DFEC1F /* DamusVideoCoordinator.swift */,
 				D7EFBA362CC322F300F45588 /* DamusVideoControlsView.swift */,
+				AAAA00072F1600000000KSPL /* DamusAudioSession.swift */,
 			);
 			path = Video;
 			sourceTree = "<group>";
@@ -3915,6 +3922,7 @@
 				D78525242A7B2EA4002FA637 /* NoteContentViewTests.swift */,
 				4C684A542A7E91FE005E6031 /* LargeEventTests.swift */,
 				4C684A562A7FFAE6005E6031 /* UrlTests.swift */,
+				AAAA00092F1600000000KSPL /* DamusVideoPlayerFallbackTests.swift */,
 				D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */,
 				D71DC1EB2A9129C3006E207C /* PostViewTests.swift */,
 				D72A2CFF2AD9B66B002AFF62 /* EventViewTests.swift */,
@@ -5436,6 +5444,7 @@
 				D7DB1FE32D5A9AC900CF06DA /* CryptoSwift */,
 				3ACF94372DA9A52F00971A4E /* FaviconFinder */,
 				D7E5B2DA2EA080BE00CF47AC /* Negentropy */,
+				AAAA00022F1600000000KSPL /* KSPlayer */,
 			);
 			productName = damus;
 			productReference = 4CE6DEE327F7A08100C66700 /* damus.app */;
@@ -5642,7 +5651,6 @@
 			packageReferences = (
 				4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */,
 				4C06670228FC7EC500038D2A /* XCRemoteSwiftPackageReference "Kingfisher" */,
-				4CCF9AB02A1FE80B00E03CFB /* XCRemoteSwiftPackageReference "GSPlayer" */,
 				4C27C9302A64766F007DBC75 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 				D7A343EC2AD0D77C00CED48B /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
 				3A0A30B92C21397A00F8C9BC /* XCRemoteSwiftPackageReference "EmojiPicker" */,
@@ -5653,6 +5661,7 @@
 				3ACF94362DA9A52F00971A4E /* XCRemoteSwiftPackageReference "FaviconFinder" */,
 				D7E5B2D92EA080BE00CF47AC /* XCRemoteSwiftPackageReference "negentropy-swift" */,
 				D74723EA2F15B0C3002DA12A /* XCRemoteSwiftPackageReference "nostr-sdk-swift" */,
+				AAAA00012F1600000000KSPL /* XCRemoteSwiftPackageReference "KSPlayer" */,
 			);
 			productRefGroup = 4CE6DEE427F7A08100C66700 /* Products */;
 			projectDirPath = "";
@@ -5968,6 +5977,7 @@
 				D78DB85B2C20FE5000F0AB12 /* VectorMath.swift in Sources */,
 				D7CB5D3E2B116DAD00AD4105 /* NotificationsManager.swift in Sources */,
 				50A16FFF2AA76A0900DFEC1F /* DamusVideoCoordinator.swift in Sources */,
+				AAAA00042F1600000000KSPL /* DamusAudioSession.swift in Sources */,
 				D733F9E32D92C1D900317B11 /* SubscriptionManager.swift in Sources */,
 				F7908E97298B1FDF00AB113A /* NIPURLBuilder.swift in Sources */,
 				4C285C8228385570008A31F1 /* CarouselView.swift in Sources */,
@@ -6128,7 +6138,6 @@
 				5C8F97132EB45FAA009399B1 /* LiveChatTimeline.swift in Sources */,
 				50A16FFD2AA7525700DFEC1F /* DamusVideoPlayer.swift in Sources */,
 				4CF480552B631C4F00F2B2C0 /* wasm.c in Sources */,
-				50A16FFD2AA7525700DFEC1F /* DamusVideoPlayer.swift in Sources */,
 				4CFF8F6B29CD0079008DB934 /* RepostedEvent.swift in Sources */,
 				D78CD5982B8990300014D539 /* DamusAppNotificationView.swift in Sources */,
 				5C8F972B2EB460E6009399B1 /* LiveStreamProfile.swift in Sources */,
@@ -6339,6 +6348,7 @@
 			files = (
 				4C2D34412BDAF1B300F9FB44 /* NIP10Tests.swift in Sources */,
 				4C684A572A7FFAE6005E6031 /* UrlTests.swift in Sources */,
+				AAAA00082F1600000000KSPL /* DamusVideoPlayerFallbackTests.swift in Sources */,
 				4C9B0DEE2A65A75F00CBDA21 /* AttrStringTestExtensions.swift in Sources */,
 				4C19AE552A5D977400C90DB7 /* HashtagTests.swift in Sources */,
 				D72927AD2BAB515C00F93E90 /* RelayURLTests.swift in Sources */,
@@ -6773,6 +6783,7 @@
 				82D6FBDC2CD99F7900C925F4 /* DamusVideoPlayerView.swift in Sources */,
 				82D6FBDD2CD99F7900C925F4 /* DamusVideoPlayer.swift in Sources */,
 				82D6FBDE2CD99F7900C925F4 /* DamusVideoCoordinator.swift in Sources */,
+				AAAA00052F1600000000KSPL /* DamusAudioSession.swift in Sources */,
 				82D6FBE02CD99F7900C925F4 /* ReactionsSettingsView.swift in Sources */,
 				82D6FBE12CD99F7900C925F4 /* NotificationSettingsView.swift in Sources */,
 				82D6FBE22CD99F7900C925F4 /* AppearanceSettingsView.swift in Sources */,
@@ -7216,6 +7227,7 @@
 				D73E5ED82C6A97F4007EB227 /* DamusVideoPlayerView.swift in Sources */,
 				D73E5ED92C6A97F4007EB227 /* DamusVideoPlayer.swift in Sources */,
 				D73E5EDA2C6A97F4007EB227 /* DamusVideoCoordinator.swift in Sources */,
+				AAAA00062F1600000000KSPL /* DamusAudioSession.swift in Sources */,
 				D73E5EDC2C6A97F4007EB227 /* ReactionsSettingsView.swift in Sources */,
 				D73E5EDD2C6A97F4007EB227 /* NotificationSettingsView.swift in Sources */,
 				D73E5EDE2C6A97F4007EB227 /* AppearanceSettingsView.swift in Sources */,
@@ -8037,13 +8049,14 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = YES;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG KSPLAYER_ENABLED";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "damus-c/damus-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_EMBEDDED_BINARY_IDS = NO; /* KSPlayer/FFmpegKit: libshaderc_combined.framework has an invalid bundle ID (underscore). Disable until upstream fix. TODO: re-enable when kingslay/FFmpegKit ships a corrected bundle ID. */
 			};
 			name = Debug;
 		};
@@ -8091,11 +8104,13 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = YES;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = KSPLAYER_ENABLED;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "damus-c/damus-Bridging-Header.h";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_EMBEDDED_BINARY_IDS = NO; /* KSPlayer/FFmpegKit: libshaderc_combined.framework has an invalid bundle ID (underscore). Disable until upstream fix. TODO: re-enable when kingslay/FFmpegKit ships a corrected bundle ID. */
 			};
 			name = Release;
 		};
@@ -8473,14 +8488,6 @@
 				revision = 40b4b38b3b1c83f7088c76189a742870e0ca06a9;
 			};
 		};
-		4CCF9AB02A1FE80B00E03CFB /* XCRemoteSwiftPackageReference "GSPlayer" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/wxxsw/GSPlayer";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.2.26;
-			};
-		};
 		D70D90962CDED61800CD0534 /* XCRemoteSwiftPackageReference "CodeScanner" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/twostraws/CodeScanner.git";
@@ -8745,7 +8752,20 @@
 			package = D70D90962CDED61800CD0534 /* XCRemoteSwiftPackageReference "CodeScanner" */;
 			productName = CodeScanner;
 		};
+		AAAA00022F1600000000KSPL /* KSPlayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = KSPlayer;
+		};
 /* End XCSwiftPackageProductDependency section */
+
+		AAAA00012F1600000000KSPL /* XCRemoteSwiftPackageReference "KSPlayer" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kingslay/KSPlayer.git";
+			requirement = {
+				kind = revision;
+				revision = bb6d367c02f3247ef3f328dc0cfea34e77aef7c5; /* Post-2.3.4 dev commit (Jan 28 2026). Pinned by revision for VP9/FFmpeg stability. */
+			};
+		};
 	};
 	rootObject = 4CE6DEDB27F7A08100C66700 /* Project object */;
 }

@@ -1,5 +1,5 @@
 {
-  "originHash" : "c718c1e7dcc1a07671694b2d7d7311e11804fbbaf22f4b81e49523a3df816ad6",
+  "originHash" : "57357d89d5a48ed4f06f9f72edb3b55acbcc317c8712e344bcd775e83055d2da",
   "pins" : [
     {
       "identity" : "codescanner",
@@ -45,12 +45,12 @@
       }
     },
     {
-      "identity" : "gsplayer",
+      "identity" : "ffmpegkit",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/wxxsw/GSPlayer",
+      "location" : "https://github.com/kingslay/FFmpegKit.git",
       "state" : {
-        "revision" : "aa6dad7943d52f5207f7fcc2ad3e4274583443b8",
-        "version" : "0.2.26"
+        "revision" : "85b77c589de0360c111de16752db86b60496d70b",
+        "version" : "6.1.3"
       }
     },
     {
@@ -60,6 +60,14 @@
       "state" : {
         "revision" : "4c6b067f96953ee19526e49e4189403a2be21fb3",
         "version" : "8.3.1"
+      }
+    },
+    {
+      "identity" : "ksplayer",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kingslay/KSPlayer.git",
+      "state" : {
+        "revision" : "bb6d367c02f3247ef3f328dc0cfea34e77aef7c5"
       }
     },
     {

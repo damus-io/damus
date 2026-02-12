@@ -305,7 +305,7 @@ struct ContentView: View {
         .onAppear() {
             Task {
                 await self.connect()
-                try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default, options: .mixWithOthers)
+                DamusAudioSession.restore()
                 setup_notifications()
                 if !hasSeenOnboardingSuggestions || damus_state!.settings.always_show_onboarding_suggestions {
                     if damus_state.is_privkey_user {
