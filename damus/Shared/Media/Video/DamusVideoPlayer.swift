@@ -217,7 +217,7 @@ struct DefaultFallbackPlayerFactory: FallbackPlayerFactory {
     }
 
     func reinitializePlayer() {
-        Log.info("DamusVideoPlayer: Reinitializing internal player…", for: .video_coordination)
+        Log.info("[debug-video] DamusVideoPlayer: Reinitializing internal player…", for: .video_coordination)
 
         // Tear down
         tearDownObservers()
@@ -362,8 +362,14 @@ struct DefaultFallbackPlayerFactory: FallbackPlayerFactory {
             DispatchQueue.main.async {
                 switch item.status {
                 case .failed:
+                    let nsErr = item.error as NSError?
+                    Log.info("[debug-video] DamusVideoPlayer: AVPlayerItem status → .failed (domain=%s code=%d desc='%s')",
+                             for: .video_coordination,
+                             nsErr?.domain ?? "nil", nsErr?.code ?? 0,
+                             nsErr?.localizedDescription ?? "nil")
                     self.handleAVPlayerFailure(error: item.error)
                 case .readyToPlay:
+                    Log.info("[debug-video] DamusVideoPlayer: AVPlayerItem status → .readyToPlay", for: .video_coordination)
                     break
                 case .unknown:
                     break
@@ -380,6 +386,11 @@ struct DefaultFallbackPlayerFactory: FallbackPlayerFactory {
         let error = notification.userInfo?[AVPlayerItemFailedToPlayToEndTimeErrorKey] as? Error
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
+            let nsErr = error as NSError?
+            Log.info("[debug-video] DamusVideoPlayer: AVPlayerItemFailedToPlayToEndTime (domain=%s code=%d desc='%s')",
+                     for: .video_coordination,
+                     nsErr?.domain ?? "nil", nsErr?.code ?? 0,
+                     nsErr?.localizedDescription ?? "nil")
             self.handleAVPlayerFailure(error: error)
         }
     }
@@ -394,10 +405,17 @@ struct DefaultFallbackPlayerFactory: FallbackPlayerFactory {
     /// AVFoundation domain first and defaulted to true, wrapped network errors would incorrectly
     /// trigger fallback. Root-cause-first ordering prevents this.
     func isLikelyDecodeError(_ error: Error?) -> Bool {
-        guard let nsError = error as NSError? else { return true }  // No error detail → assume decode
+        guard let nsError = error as NSError? else {
+            Log.info("[debug-video] DamusVideoPlayer: isLikelyDecodeError — nil error, assuming decode", for: .video_coordination)
+            return true
+        }
+
+        Log.info("[debug-video] DamusVideoPlayer: isLikelyDecodeError — domain=%s code=%d desc='%s'",
+                 for: .video_coordination, nsError.domain, nsError.code, nsError.localizedDescription)
 
         // Check underlying error FIRST — root cause takes priority over wrapper domain
         if let underlying = nsError.userInfo[NSUnderlyingErrorKey] as? Error {
+            Log.info("[debug-video] DamusVideoPlayer: isLikelyDecodeError — has underlying error, recursing", for: .video_coordination)
             return isLikelyDecodeError(underlying)
         }
 
@@ -424,7 +442,7 @@ struct DefaultFallbackPlayerFactory: FallbackPlayerFactory {
         if nsError.domain == "CoreMediaErrorDomain" || nsError.domain == NSOSStatusErrorDomain {
             // Already checked underlying above — if we're here, there's none.
             // Log the code to help diagnose unexpected fallback triggers.
-            Log.info("DamusVideoPlayer: media-stack error (domain=%s code=%d) with no underlying — assuming decode",
+            Log.info("[debug-video] DamusVideoPlayer: media-stack error (domain=%s code=%d) with no underlying — assuming decode",
                      for: .video_coordination, nsError.domain, nsError.code)
             return true
         }
@@ -438,7 +456,7 @@ struct DefaultFallbackPlayerFactory: FallbackPlayerFactory {
     private func handleAVPlayerFailure(error: Error?) {
         guard !is_using_fallback else { return }
         guard isLikelyDecodeError(error) else {
-            Log.error("DamusVideoPlayer: AVPlayer failed with non-decode error: '%s'",
+            Log.error("[debug-video] DamusVideoPlayer: AVPlayer failed with non-decode error: '%s'",
                       for: .video_coordination, (error as NSError?)?.localizedDescription ?? "unknown")
             is_loading = false
             is_playing = false
@@ -447,7 +465,7 @@ struct DefaultFallbackPlayerFactory: FallbackPlayerFactory {
         #if KSPLAYER_ENABLED
         activateFallbackPlayer()
         #else
-        Log.error("DamusVideoPlayer: AVPlayer failed and no fallback available", for: .video_coordination)
+        Log.error("[debug-video] DamusVideoPlayer: AVPlayer failed and no fallback available", for: .video_coordination)
         is_loading = false
         is_playing = false
         #endif
@@ -457,7 +475,7 @@ struct DefaultFallbackPlayerFactory: FallbackPlayerFactory {
     /// Activates KSMEPlayer as fallback when AVPlayer cannot decode the video.
     private func activateFallbackPlayer() {
         guard !is_using_fallback else { return }
-        Log.info("DamusVideoPlayer: AVPlayer failed for '%s', activating KSMEPlayer fallback",
+        Log.info("[debug-video] DamusVideoPlayer: AVPlayer failed for '%s', activating KSMEPlayer fallback",
                  for: .video_coordination, url.absoluteString)
 
         // Tear down AVPlayer
@@ -562,7 +580,7 @@ struct DefaultFallbackPlayerFactory: FallbackPlayerFactory {
         #endif
         switch self.player.status {
         case .failed:
-            Log.error("DamusVideoPlayer: Failed to play video. Error: '%s'", for: .video_coordination, self.player.error?.localizedDescription ?? "no error")
+            Log.error("[debug-video] DamusVideoPlayer: Failed to play video. Error: '%s'", for: .video_coordination, self.player.error?.localizedDescription ?? "no error")
             self.reinitializePlayer()
         default:
             break
@@ -581,7 +599,10 @@ struct DefaultFallbackPlayerFactory: FallbackPlayerFactory {
 extension DamusVideoPlayer: MediaPlayerDelegate {
     func readyToPlay(player: some MediaPlayerProtocol) {
         let size = player.naturalSize
+        let duration = player.duration
         let hasAudio = !player.tracks(mediaType: .audio).isEmpty
+        Log.info("[debug-video] DamusVideoPlayer: Fallback readyToPlay (size=%@, duration=%.1f)",
+                 for: .video_coordination, NSCoder.string(for: size), duration)
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             self.is_loading = false
@@ -592,6 +613,8 @@ extension DamusVideoPlayer: MediaPlayerDelegate {
 
     func changeLoadState(player: some MediaPlayerProtocol) {
         let loadState = player.loadState
+        Log.info("[debug-video] DamusVideoPlayer: Fallback loadState → %@ (fallbackFailed=%d)",
+                 for: .video_coordination, "\(loadState)", fallbackFailed ? 1 : 0)
         DispatchQueue.main.async { [weak self] in
             guard let self, !self.fallbackFailed else { return }
             switch loadState {
@@ -604,6 +627,7 @@ extension DamusVideoPlayer: MediaPlayerDelegate {
     }
 
     func changeBuffering(player: some MediaPlayerProtocol, progress: Int) {
+        Log.info("[debug-video] DamusVideoPlayer: Fallback buffering %d%%", for: .video_coordination, progress)
         DispatchQueue.main.async { [weak self] in
             guard let self, !self.fallbackFailed else { return }
             self.is_loading = progress < 100
@@ -611,12 +635,15 @@ extension DamusVideoPlayer: MediaPlayerDelegate {
     }
 
     func playBack(player: some MediaPlayerProtocol, loopCount: Int) {
-        // Loop handled by KSOptions.isLoopPlay = true
+        Log.info("[debug-video] DamusVideoPlayer: Fallback loop count %d", for: .video_coordination, loopCount)
     }
 
     func finish(player: some MediaPlayerProtocol, error: Error?) {
-        guard let error else { return }
-        Log.error("DamusVideoPlayer: Fallback player error: '%s'", for: .video_coordination, error.localizedDescription)
+        guard let error else {
+            Log.info("[debug-video] DamusVideoPlayer: Fallback finished (no error, likely loop)", for: .video_coordination)
+            return
+        }
+        Log.error("[debug-video] DamusVideoPlayer: Fallback player error: '%s'", for: .video_coordination, error.localizedDescription)
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             self.fallbackFailed = true
