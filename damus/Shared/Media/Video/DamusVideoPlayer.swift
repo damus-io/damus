@@ -277,9 +277,11 @@ extension DamusVideoPlayer {
         }
         
         func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
-            /// - If `player.player` is changed (e.g. `DamusVideoPlayer` gets reinitialized), this will refresh the video player to the new working one.
-            /// - If `player.player` is unchanged, this is basically a very low cost no-op (Because `AVPlayer` is a class type, this assignment only copies a pointer, not a large structure)
-            uiViewController.player = player.player
+            // Only assign when the player actually changes — AVPlayerViewController.setPlayer
+            // rebuilds internal video layers (~13ms) even for the same reference.
+            if uiViewController.player !== player.player {
+                uiViewController.player = player.player
+            }
         }
         
         static func dismantleUIViewController(_ uiViewController: AVPlayerViewController, coordinator: ()) {
