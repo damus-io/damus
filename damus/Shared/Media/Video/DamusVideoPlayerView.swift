@@ -21,8 +21,10 @@ struct DamusVideoPlayerView: View {
     let url: URL
     @ObservedObject var model: DamusVideoPlayer
     let style: Style
-    let main_state_requestor_id: UUID = UUID()
-    
+    @State private var main_state_requestor_id = UUID()
+    /// Whether this view instance currently owns the render surface for fallback players.
+    @State private var is_render_owner = false
+
     @State var is_visible: Bool = false {
         didSet {
             if self.is_visible {
@@ -32,64 +34,95 @@ struct DamusVideoPlayerView: View {
                         requestor_id: self.main_state_requestor_id,
                         layer_context: self.view_layer,
                         player: self.model,
-                        main_stage_granted: self.main_stage_granted
+                        main_stage_granted: {
+                            self.is_render_owner = true
+                            self.main_stage_granted()
+                        },
+                        main_stage_revoked: {
+                            self.is_render_owner = false
+                        }
                     )
                 )
             }
             else {
                 // We are no longer visible, give up the main stage
+                is_render_owner = false
                 video_coordinator.give_up_main_stage(request_id: self.main_state_requestor_id)
             }
         }
     }
-    
+
     /// The context this video player is in.
     @Environment(\.view_layer_context) var view_layer_context
     /// The video coordinator in this environment
     let video_coordinator: DamusVideoCoordinator
-    
+
     var view_layer: ViewLayerContext {
         return view_layer_context ?? .normal_layer
     }
-    
+
+    /// Only render the fallback surface if this view instance owns the render rights.
+    /// AVPlayer path always renders (each AVPlayerViewController is independent).
+    private var shouldRenderSurface: Bool {
+        !model.is_using_fallback || is_render_owner
+    }
+
     init(url: URL, coordinator: DamusVideoCoordinator, style: Style) {
         self.url = url
         self.model = coordinator.get_player(for: url)
         self.video_coordinator = coordinator
         self.style = style
     }
-    
+
     init(model: DamusVideoPlayer, coordinator: DamusVideoCoordinator, style: Style) {
         self.url = model.url
         self.model = model
         self.video_coordinator = coordinator
         self.style = style
     }
-    
+
     var body: some View {
         ZStack {
             switch self.style {
                 case .full:
-                    DamusVideoPlayer.BaseView(player: model, show_playback_controls: true)
+                    if shouldRenderSurface {
+                        DamusVideoPlayer.BaseView(player: model, show_playback_controls: true)
+                            .id(model.is_using_fallback)
+                    } else {
+                        Color.black
+                    }
                 case .preview(on_tap: let on_tap), .no_controls(on_tap: let on_tap):
                     if let on_tap {
-                        DamusVideoPlayer.BaseView(player: model, show_playback_controls: false)
-                            .highPriorityGesture(TapGesture().onEnded({
-                                on_tap()
-                            }))
+                        if shouldRenderSurface {
+                            DamusVideoPlayer.BaseView(player: model, show_playback_controls: false)
+                                .id(model.is_using_fallback)
+                                .highPriorityGesture(TapGesture().onEnded({
+                                    on_tap()
+                                }))
+                        } else {
+                            Color.black
+                                .highPriorityGesture(TapGesture().onEnded({
+                                    on_tap()
+                                }))
+                        }
                     }
                     else {
-                        DamusVideoPlayer.BaseView(player: model, show_playback_controls: false)
+                        if shouldRenderSurface {
+                            DamusVideoPlayer.BaseView(player: model, show_playback_controls: false)
+                                .id(model.is_using_fallback)
+                        } else {
+                            Color.black
+                        }
                     }
             }
-            
+
             if model.is_loading {
                 ProgressView()
                     .progressViewStyle(.circular)
                     .tint(.white)
                     .scaleEffect(CGSize(width: 1.5, height: 1.5))
             }
-            
+
             if case .preview = self.style {
                 if model.has_audio {
                     mute_button
@@ -103,7 +136,7 @@ struct DamusVideoPlayerView: View {
             self.is_visible = new_is_visible
         }, method: self.visibility_tracking_method)
     }
-    
+
     private var visibility_tracking_method: VisibilityTracker.Method {
         switch self.view_layer {
             case .normal_layer:
@@ -112,7 +145,7 @@ struct DamusVideoPlayerView: View {
                 return .no_y_scroll_detection
         }
     }
-    
+
     func main_stage_granted() {
         switch self.style {
             case .full, .no_controls:
@@ -121,15 +154,15 @@ struct DamusVideoPlayerView: View {
                 self.model.is_muted = true
         }
     }
-    
+
     private var mute_icon: String {
         !model.has_audio || model.is_muted ? "speaker.slash" : "speaker"
     }
-    
+
     private var mute_icon_color: Color {
         model.has_audio ? .white : .red
     }
-    
+
     private var mute_button: some View {
         HStack {
             Spacer()
@@ -139,7 +172,7 @@ struct DamusVideoPlayerView: View {
                         .opacity(0.2)
                         .frame(width: 32, height: 32)
                         .foregroundColor(.black)
-    
+
                     Image(systemName: mute_icon)
                         .padding()
                         .foregroundColor(mute_icon_color)
@@ -151,7 +184,7 @@ struct DamusVideoPlayerView: View {
             }
         }
     }
-    
+
     private var live_indicator: some View {
         VStack {
             HStack {
@@ -170,9 +203,9 @@ struct DamusVideoPlayerView: View {
             Spacer()
         }
     }
-    
+
     // MARK: - Helper structures
-    
+
     enum Style {
         /// A full video player with playback controls
         case full
@@ -189,7 +222,7 @@ struct DamusVideoPlayer_Previews: PreviewProvider {
                 .environmentObject(OrientationTracker())
                 .environmentObject(DamusVideoCoordinator())
                 .previewDisplayName("Full video player")
-            
+
             DamusVideoPlayerView(url: URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!, coordinator: DamusVideoCoordinator(), style: .preview(on_tap: nil))
                 .environmentObject(OrientationTracker())
                 .environmentObject(DamusVideoCoordinator())

@@ -19,6 +19,13 @@ import AVFoundation
 /// This is used as a singleton object (one global object per `DamusState`), which gets passed around to video players, which can then interact with the coordinator to ensure an app-wide coherent experience
 ///
 /// A good analogy here is that video players and their models/states are like individual cars and their drivers, and this coordinator is like a traffic control person + traffic lights that ensures cars don't crash each other.
+///
+/// `@MainActor` ensures all mutable state (request stacks, focused video, player cache) is
+/// accessed exclusively on the main thread. All callers are SwiftUI views which already run
+/// on main. The `DispatchQueue.main.async` calls inside `select_focused_video` and
+/// `invokeOnMain` are retained to defer work to the next run loop iteration, avoiding
+/// re-entrancy during SwiftUI view update cycles.
+@MainActor
 final class DamusVideoCoordinator: ObservableObject {
     // MARK: - States
     
@@ -39,6 +46,9 @@ final class DamusVideoCoordinator: ObservableObject {
     // MARK: Coordinator state
     // Members representing the state of the coordinator itself
     
+    /// Tracks the requestor that currently has render ownership for fallback surface management
+    private var focused_requestor_id: UUID?
+
     private var full_screen_mode: Bool = false {
         didSet {
             self.select_focused_video()
@@ -47,7 +57,6 @@ final class DamusVideoCoordinator: ObservableObject {
     
     /// The video currently in focus
     /// This can only be chosen by the coordinator. To get a video in focus, use one of the instance methods that provide an interface for focus control.
-    @MainActor
     @Published private(set) var focused_video: DamusVideoPlayer? {
         didSet {
             oldValue?.pause()
@@ -59,7 +68,6 @@ final class DamusVideoCoordinator: ObservableObject {
     // MARK: - Interface to set and fetch information about each different video
 
     
-    @MainActor
     func get_player(for url: URL) -> DamusVideoPlayer {
         if let player = self.players[url] {
             return player
@@ -89,6 +97,14 @@ final class DamusVideoCoordinator: ObservableObject {
     
     func give_up_main_stage(request_id: UUID) {
         Log.info("VIDEO_COORDINATOR: %s gave up the main stage", for: .video_coordination, request_id.uuidString)
+        // Fire revoke before removal so the requestor can clean up render ownership
+        let allRequests = normal_layer_main_stage_requests + full_screen_layer_stage_requests
+        if let request = allRequests.first(where: { $0.requestor_id == request_id }) {
+            invokeOnMain(request.main_stage_revoked)
+        }
+        if focused_requestor_id == request_id {
+            focused_requestor_id = nil
+        }
         normal_layer_main_stage_requests.removeAll(where: { $0.requestor_id == request_id })
         full_screen_layer_stage_requests.removeAll(where: { $0.requestor_id == request_id })
         self.select_focused_video()
@@ -102,6 +118,14 @@ final class DamusVideoCoordinator: ObservableObject {
     
     // MARK: - Internal video coordination logic
     
+    /// Ensures UI-affecting callbacks run asynchronously on the main thread.
+    /// Always dispatches async to avoid re-entrancy when mutating @State
+    /// during a SwiftUI view update cycle.
+    private func invokeOnMain(_ callback: (() -> Void)?) {
+        guard let callback else { return }
+        DispatchQueue.main.async(execute: callback)
+    }
+
     private func select_focused_video() {
         // This function may be called during a SwiftUI view update,
         // so schedule this change for the next render pass to ensure state immutability/stability within a single render pass
@@ -112,8 +136,16 @@ final class DamusVideoCoordinator: ObservableObject {
             // - both a LIFO stack and a FIFO queue are decent at selecting videos when scrolling on the Y axis (timeline),
             // - The LIFO stack is better at selecting videos when navigating on the Z axis (e.g. opening and closing full screen covers or sheets), since those sheets operate like a stack as well
             let winning_request = self.full_screen_mode ? self.full_screen_layer_stage_requests.last : self.normal_layer_main_stage_requests.last
+
+            // Notify old requestor it lost focus (if different from new winner)
+            if let oldId = self.focused_requestor_id, oldId != winning_request?.requestor_id {
+                let allRequests = self.normal_layer_main_stage_requests + self.full_screen_layer_stage_requests
+                self.invokeOnMain(allRequests.first(where: { $0.requestor_id == oldId })?.main_stage_revoked)
+            }
+
             self.focused_video = winning_request?.player
-            winning_request?.main_stage_granted?()
+            self.focused_requestor_id = winning_request?.requestor_id
+            self.invokeOnMain(winning_request?.main_stage_granted)
         }
         Log.info("VIDEO_COORDINATOR: fullscreen layer main stage request stack: %s", for: .video_coordination, full_screen_layer_stage_requests.map({ $0.requestor_id.uuidString }).debugDescription)
         Log.info("VIDEO_COORDINATOR: normal layer main stage request stack: %s", for: .video_coordination, normal_layer_main_stage_requests.map({ $0.requestor_id.uuidString }).debugDescription)
@@ -126,6 +158,9 @@ final class DamusVideoCoordinator: ObservableObject {
         var requestor_id: UUID
         var layer_context: ViewLayerContext
         var player: DamusVideoPlayer
+        /// Called when this requestor is granted focus and should begin rendering.
         var main_stage_granted: (() -> Void)?
+        /// Called when this requestor loses focus and should stop rendering the fallback surface.
+        var main_stage_revoked: (() -> Void)?
     }
 }
