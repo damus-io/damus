@@ -157,9 +157,7 @@ class ProfileModel: ObservableObject, Equatable {
         }
 
         if ev.is_textlike || ev.known_kind == .boost {
-            if self.events.insert(ev) {
-                self.objectWillChange.send()
-            }
+            let _ = self.events.insert(ev)
         } else if ev.known_kind == .contacts {
             handle_profile_contact_event(ev)
         }
