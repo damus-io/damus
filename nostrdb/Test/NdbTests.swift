@@ -165,25 +165,6 @@ final class NdbTests: XCTestCase {
         XCTAssertEqual(testNote.content, "https://cdn.nostr.build/i/5c1d3296f66c2630131bf123106486aeaf051ed8466031c0e0532d70b33cddb2.jpg")
     }
     
-    func test_inherited_transactions() throws {
-        let ndb = Ndb(path: db_dir)!
-        do {
-            guard let txn1 = NdbTxn(ndb: ndb) else { return XCTAssert(false) }
-
-            let ntxn = (Thread.current.threadDictionary.value(forKey: "ndb_txn") as? ndb_txn)!
-            XCTAssertEqual(txn1.txn.lmdb, ntxn.lmdb)
-            XCTAssertEqual(txn1.txn.mdb_txn, ntxn.mdb_txn)
-
-            guard let txn2 = NdbTxn(ndb: ndb) else { return XCTAssert(false) }
-
-            XCTAssertEqual(txn1.inherited, false)
-            XCTAssertEqual(txn2.inherited, true)
-        }
-
-        let ndb_txn = Thread.current.threadDictionary.value(forKey: "ndb_txn")
-        XCTAssertNil(ndb_txn)
-    }
-
     func test_decode_perf() throws {
         // This is an example of a performance test case.
         self.measure {
@@ -196,6 +177,127 @@ final class NdbTests: XCTestCase {
             let event = decode_nostr_event_json(test_contact_list_json)
             XCTAssertNotNil(event)
         }
+    }
+
+    /// Verifies Ndb.close() doesn't crash when a transaction is still active.
+    /// Old code: use-after-free when accessing txn after close.
+    /// New code: close is blocked or gracefully handled.
+    func test_use_after_free_crash_during_close() throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+
+        let id = NoteId(hex: "d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349")!
+
+        guard let txn = NdbTxn<()>(ndb: ndb, name: "test_txn") else {
+            return XCTFail("Could not create transaction")
+        }
+
+        let closeExpectation = XCTestExpectation(description: "Ndb close completes")
+        DispatchQueue.global().async {
+            ndb.close()
+            closeExpectation.fulfill()
+        }
+
+        wait(for: [closeExpectation], timeout: 2.0)
+
+        // If we reach here without crashing, the fix works.
+        // On old code this would crash with use-after-free.
+        let result = try? ndb.lookup_note(id, borrow: { $0 != nil })
+        // Result may be nil (db closed) — the point is no crash.
+        _ = result
+        _ = txn
+    }
+
+    /// Verifies concurrent transaction creation doesn't crash.
+    /// Old code: threadDictionary race between deinit clearing entries
+    /// and init reading them caused force-unwrap crashes.
+    /// New code: no shared state, so no race.
+    func test_concurrent_transaction_creation_no_crash() throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+
+        let iterations = 200
+        let group = DispatchGroup()
+
+        for i in 0..<iterations {
+            let queue = DispatchQueue(label: "txn.\(i)")
+            group.enter()
+            queue.async {
+                autoreleasepool {
+                    _ = NdbTxn<()>(ndb: ndb, name: "concurrent_\(i)")
+                }
+                group.leave()
+            }
+        }
+
+        let result = group.wait(timeout: .now() + 5.0)
+        XCTAssertEqual(result, .success, "All \(iterations) concurrent transactions should complete without crash")
+    }
+
+    /// Verifies MDB_NOTLS allows multiple read transactions on the same thread.
+    /// Without NOTLS, the second transaction would deadlock.
+    func test_same_thread_overlapping_txns_no_deadlock() throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+
+        let expectation = XCTestExpectation(description: "Overlapping txns complete")
+        var txn2Created = false
+
+        DispatchQueue.global().async {
+            guard let txn1 = NdbTxn<()>(ndb: ndb, name: "parent_txn") else {
+                return
+            }
+
+            // Open second txn on same thread while first is active
+            if let txn2 = NdbTxn<()>(ndb: ndb, name: "child_txn") {
+                txn2Created = true
+                _ = txn2
+            }
+            _ = txn1
+            expectation.fulfill()
+        }
+
+        let waiterResult = XCTWaiter.wait(for: [expectation], timeout: 3.0)
+        XCTAssertEqual(waiterResult, .completed, "Should not deadlock — MDB_NOTLS must be enabled")
+        XCTAssertTrue(txn2Created, "Second transaction on same thread should succeed")
+    }
+
+    /// Verifies SafeNdbTxn.new properly closes the transaction when valueGetter returns nil.
+    /// Old code: leaked the transaction (never called ndb_end_query).
+    func test_SafeNdbTxn_new_nil_path_closes_transaction() throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+
+        #if TXNDEBUG
+        let initialCount = txn_count
+
+        let result = SafeNdbTxn<String?>.new(on: ndb) { _ in nil }
+        XCTAssertNil(result, "Should return nil when valueGetter returns nil")
+        XCTAssertEqual(txn_count, initialCount, "Transaction should be closed on nil path (leak detected)")
+        #else
+        throw XCTSkip("TXNDEBUG required to detect transaction leaks")
+        #endif
+    }
+
+    /// Verifies SafeNdbTxn.maybeExtend properly closes the transaction when closure returns nil.
+    /// Old code: set moved=true before consume, so deinit skipped close.
+    func test_SafeNdbTxn_maybeExtend_nil_path_closes_transaction() throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+
+        #if TXNDEBUG
+        let initialCount = txn_count
+
+        let txn = SafeNdbTxn<Int>.new(on: ndb) { _ in 42 }
+        XCTAssertNotNil(txn)
+        XCTAssertEqual(txn_count, initialCount + 1)
+
+        let result = txn?.maybeExtend { _ in nil as String? }
+        XCTAssertNil(result, "Should return nil when closure returns nil")
+        XCTAssertEqual(txn_count, initialCount, "Transaction should be closed on nil path (leak detected)")
+        #else
+        throw XCTSkip("TXNDEBUG required to detect transaction leaks")
+        #endif
     }
 
     func test_perf_old_iter()  {
@@ -242,6 +344,27 @@ final class NdbTests: XCTestCase {
             XCTAssertEqual(char_count, 24370)
         }
 
+    }
+
+    /// Regression test: transaction inheritance removed (#3607).
+    /// Old code: txn2 inherited txn1's snapshot via threadDictionary (stale data).
+    /// New code: each transaction owns its own fresh LMDB snapshot.
+    func test_transaction_inheritance_removed() throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+
+        guard let txn1 = NdbTxn<()>(ndb: ndb, name: "txn1") else {
+            return XCTFail("Should create first transaction")
+        }
+        XCTAssertTrue(txn1.ownsTxn, "txn1 should own its transaction")
+
+        // Open second txn on same thread while txn1 is active.
+        // Old code: txn2.inherited=true (shared stale snapshot).
+        // New code: txn2.ownsTxn=true (independent fresh snapshot).
+        guard let txn2 = NdbTxn<()>(ndb: ndb, name: "txn2") else {
+            return XCTFail("Should create second transaction")
+        }
+        XCTAssertTrue(txn2.ownsTxn, "txn2 should own its own transaction, not inherit from txn1")
     }
 
 }

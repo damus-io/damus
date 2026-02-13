@@ -5834,7 +5834,10 @@ static int ndb_init_lmdb(const char *filename, struct ndb_lmdb *lmdb, size_t map
 		return 0;
 	}
 
-	if ((rc = mdb_env_open(lmdb->env, filename, 0, 0664))) {
+	// Enable MDB_NOTLS to allow multiple read transactions on same thread
+	// Required for removing transaction inheritance (#3612, damus-cy9)
+	// Without this, nested transaction calls would deadlock
+	if ((rc = mdb_env_open(lmdb->env, filename, MDB_NOTLS, 0664))) {
 		fprintf(stderr, "mdb_env_open failed, error %d\n", rc);
 		return 0;
 	}
