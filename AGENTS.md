@@ -35,11 +35,11 @@ Damus is an iOS client built around a local relay model ([damus-io/damus#3204](h
 
 ## Agent Requirements
 
-1. **Always prefer simplicity.** One line of code is better than ten. Ten is better than a hundred. A thousand-line commit will be avoided unless it saves someone's life. Reuse existing code; do not accrue duplicates. Always revisit how existing code can be applied or refactored before writing new code that performs the same function.
+1. **Always prefer simplicity.** One line of code is better than ten. Ten is better than a hundred. A thousand-line commit will be avoided unless it saves someone's life. The fewer lines of code, the greater the merge probability. Reuse existing code; do not accrue duplicates. Always revisit how existing code can be applied or refactored before writing new code that performs the same function.
 2. Commits should be logically distinct and standalone.
 3. Code should be human-readable and human-reviewable.
 4. Ensure docstring coverage for any code added or modified.
-5. Review and follow `.github/pull_request_template.md` when creating PRs for iOS Damus. Include a **line count breakdown** in the PR body showing lines of test code vs non-test code (e.g., "420 lines test, 80 lines implementation") so reviewers can gauge review effort at a glance.
+5. Review and follow `.github/pull_request_template.md` when creating PRs for iOS Damus. Include a **line count breakdown** in the PR body showing lines of test code, lines of docstrings/comments, and lines of implementation code (e.g., "120 lines test, 15 lines docstrings, 40 lines implementation") so reviewers can gauge review effort at a glance. Keep docstrings minimal — only document non-obvious behavior. Do not pad PRs with verbose documentation on self-explanatory code.
 6. Ensure nevernesting: favor early returns and guard clauses over deeply nested conditionals; simplify control flow by exiting early instead of wrapping logic in multiple layers of `if` statements.
 7. Before proposing changes, please **review and analyze if a change or upgrade to nostrdb** is beneficial to the change at hand.
 8. **Never block the main thread.** All network requests, database queries, and expensive computations must run on background threads/queues. Use `Task { }`, `DispatchQueue.global()`, or Swift concurrency (`async/await`) appropriately. UI updates must dispatch back to `@MainActor`. Never perform blocking work inside SwiftUI view `body` properties. Test for hangs and freezes before submitting.
@@ -52,7 +52,12 @@ Damus is an iOS client built around a local relay model ([damus-io/damus#3204](h
 15. Cherry-pick commits — when incorporating work from other branches or contributors, use `git cherry-pick` to preserve original authorship rather than copying code manually.
 16. Commits containing fixes or refactors for code introduced in the same PR should be rebased so that the fixes are incorporated into the original commit history.
 17. Do not fudge CI tests to get a commit or PR to pass. Instead, identify the underlying root cause of CI failure and address that.
-18. **Test coverage for new code.** All new features, bug fixes, and behavioral changes must include corresponding test cases. Tests should:
+18. **Test coverage for new code.** All new features, bug fixes, and behavioral changes must include corresponding test cases. Tests must:
+    - **Every test must include at least one assertion that can fail the test.** `XCTAssert*`, `XCTFail`, or a project-standard assertion helper that fails the test on mismatch (e.g., snapshot comparison) count. `print()` is not an assertion. `expectation.fulfill()` alone is not an assertion — it confirms execution reached a point, not that behavior is correct. If a test "passes" regardless of whether the bug exists, it is worthless.
+    - **Test the code that actually ships, not code you removed.** Do not write tests that exercise deleted code paths, reference removed APIs, or manually set up internal state that production code no longer touches. If a test manipulates `threadDictionary` and the PR removes `threadDictionary`, the test is dead on arrival.
+    - **Use `do/catch` only around throwing code.** Swift failable initializers (`init?`) return `nil` on failure — they do not throw. Wrapping them in `do/catch` creates an unreachable catch block that gives false confidence. Know the API contract of the code you are testing.
+    - **Use `XCTSkip` when a test requires a compile flag.** Tests gated by `#if TXNDEBUG` (or similar) that silently `print()` and return when the flag is off will show as "passed" in CI. Use `throw XCTSkip("TXNDEBUG required")` in the `#else` branch so CI reports them as skipped, not passed. The test function must be declared `throws` (or `async throws`) for `throw XCTSkip` to compile.
+    - **No data races in test code.** Test code must meet the same thread-safety standards as production code. Variables written on one queue and read on another require synchronization. Prefer actor isolation or a dedicated serial queue (per Rule 9) over locks when coordinating across async boundaries in tests.
     - Cover the happy path and relevant error paths
     - Be deterministic and not flaky
     - Use real test data where possible (e.g., actual invoice strings from reported issues)
@@ -61,3 +66,9 @@ Damus is an iOS client built around a local relay model ([damus-io/damus#3204](h
 19. PRs without test coverage for new code paths will not be merged unless the code is demonstrably untestable (e.g., pure UI layout) and this is documented in the PR description.
 20. Having a test that replicates the issue and fails + a fix for that test will increase the odds of merging by 99%.
 21. **Run a code-simplifier pass** before submitting PRs. See [`docs/code-simplifier.md`](docs/code-simplifier.md) for the full protocol.
+22. **Pre-submit test audit.** Before marking a PR ready for review, verify every test function by asking:
+    1. If I delete the fix and run this test, does it fail? If not, the test proves nothing.
+    2. Does every test function contain at least one assertion that can fail the test (`XCTAssert*`, `XCTFail`, or project-standard helper that fails on mismatch)? `print()` is not an assertion. `fulfill()` alone is not an assertion.
+    3. Does the test reference any API, property, or behavior that this PR removes? If so, delete or rewrite the test.
+    4. Are there `do/catch` blocks around non-throwing code? Remove them.
+    5. Are there `#if FLAG ... #else print("skipped") #endif` blocks? Replace with `XCTSkip`.
