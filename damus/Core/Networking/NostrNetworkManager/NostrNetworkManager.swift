@@ -246,6 +246,11 @@ class NostrNetworkManager {
     var connectedRelays: [RelayPool.Relay] {
         self.pool.relays
     }
+
+    @MainActor
+    var signal: SignalModel {
+        self.pool.signal
+    }
     
     @MainActor
     var ourRelayDescriptors: [RelayPool.RelayDescriptor] {
