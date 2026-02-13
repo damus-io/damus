@@ -216,188 +216,17 @@ struct ProfileView: View {
         }
     }
 
-    func lnButton(profile: Profile?, lnurl: String?) -> some View {
-        return ProfileZapLinkView(profile: profile, lnurl: lnurl, profileModel: self.profile) { reactions_enabled, lud16, lnurl in
-            Image(reactions_enabled ? "zap.fill" : "zap")
-                .foregroundColor(reactions_enabled ? .orange : Color.primary)
-                .profile_button_style(scheme: colorScheme)
-                .cornerRadius(24)
-        }
-    }
-    
-    var dmButton: some View {
-        let dm_model = damus_state.dms.lookup_or_create(profile.pubkey)
-        return NavigationLink(value: Route.DMChat(dms: dm_model)) {
-            Image("messages")
-                .profile_button_style(scheme: colorScheme)
-        }
-    }
-    
-    private var followsYouBadge: some View {
-        Text("Follows you", comment: "Text to indicate that a user is following your profile.")
-            .padding([.leading, .trailing], 6.0)
-            .padding([.top, .bottom], 2.0)
-            .foregroundColor(.gray)
-            .background {
-                RoundedRectangle(cornerRadius: 5.0)
-                    .foregroundColor(DamusColors.adaptableGrey)
-            }
-            .font(.footnote)
-    }
-
-    func actionSection(ndbprofile: Profile?, lnurl: String?, pubkey: Pubkey) -> some View {
-        return Group {
-            if damus_state.settings.enable_favourites_feature {
-                FavoriteButtonView(pubkey: profile.pubkey, damus_state: damus_state)
-            }
-            if let profile = ndbprofile,
-               let lnurl,
-               lnurl != ""
-            {
-                lnButton(profile: ndbprofile, lnurl: lnurl)
-            }
-
-            dmButton
-
-            if profile.pubkey != damus_state.pubkey {
-                FollowButtonView(
-                    target: profile.get_follow_target(),
-                    follows_you: profile.follows(pubkey: damus_state.pubkey),
-                    follow_state: damus_state.contacts.follow_state(profile.pubkey)
-                )
-            } else if damus_state.keypair.privkey != nil {
-                NavigationLink(value: Route.EditMetadata) {
-                    ProfileEditButton(damus_state: damus_state)
-                }
-            }
-
-        }
-    }
-
-    func nameSection(ndbprofile: Profile?, lnurl: String?) -> some View {
-        return Group {
-            let follows_you = profile.pubkey != damus_state.pubkey && profile.follows(pubkey: damus_state.pubkey)
-
-            HStack(alignment: .center) {
-                ProfilePicScrollEffect(
-                    scrollTracker: scrollTracker,
-                    pubkey: profile.pubkey,
-                    pfp_size: pfp_size,
-                    navbarHeight: navbarHeight,
-                    highlight: .custom(imageBorderColor(), 4.0),
-                    profiles: damus_state.profiles,
-                    disable_animation: damus_state.settings.disable_animation,
-                    damusState: damus_state,
-                    is_zoomed: $is_zoomed
-                )
-
-                Spacer()
-
-                if follows_you {
-                    followsYouBadge
-                }
-
-                actionSection(ndbprofile: ndbprofile, lnurl: lnurl, pubkey: profile.pubkey)
-            }
-
-            ProfileNameView(pubkey: profile.pubkey, damus: damus_state)
-        }
-    }
-
-    var followersCount: some View {
-        HStack {
-            if let followerCount = followers.count {
-                let nounString = pluralizedString(key: "followers_count", count: followerCount)
-                let nounText = Text(verbatim: nounString).font(.subheadline).foregroundColor(.gray)
-                Text("\(Text(verbatim: followerCount.formatted()).font(.subheadline.weight(.medium))) \(nounText)", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.")
-            } else {
-                Image("download")
-                    .resizable()
-                    .frame(width: 20, height: 20)
-                Text("Followers", comment: "Label describing followers of a user.")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-            }
-        }
-    }
-
     var aboutSection: some View {
-        VStack(alignment: .leading, spacing: 8.0) {
-            let lnurl = try? damus_state.profiles.lookup_lnurl(profile.pubkey)
-            let ndbprofile = try? damus_state.profiles.lookup(id: profile.pubkey)
-
-            nameSection(ndbprofile: ndbprofile, lnurl: lnurl)
-
-            if let about = ndbprofile?.about {
-                AboutView(state: damus_state, about: about)
-            }
-
-            if let url = ndbprofile?.website_url {
-                WebsiteLink(url: url)
-            }
-
-            HStack {
-                if let contact = profile.contacts {
-                    NavigationLink(value: Route.Following(contacts: contact)) {
-                        HStack {
-                            let noun_text = Text(verbatim: "\(pluralizedString(key: "following_count", count: profile.following))").font(.subheadline).foregroundColor(.gray)
-                            Text("\(Text(verbatim: profile.following.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
-                        }
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-
-                if followers.contacts != nil {
-                    NavigationLink(value: Route.Followers(followers: followers)) {
-                        followersCount
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                } else {
-                    followersCount
-                        .onTapGesture {
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            followers.contacts = []
-                            followers.subscribe()
-                        }
-                }
-
-                if let relays = profile.relay_urls {
-                    // Only open relay config view if the user is logged in with private key and they are looking at their own profile.
-                    let noun_string = pluralizedString(key: "relays_count", count: relays.count)
-                    let noun_text = Text(noun_string).font(.subheadline).foregroundColor(.gray)
-                    let relay_text = Text("\(Text(verbatim: relays.count.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
-                    if profile.pubkey == damus_state.pubkey && damus_state.is_privkey_user {
-                        NavigationLink(value: Route.RelayConfig) {
-                            relay_text
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                    } else {
-                        NavigationLink(value: Route.UserRelays(relays: relays.sorted())) {
-                            relay_text
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                    }
-                }
-            }
-
-            if profile.pubkey != damus_state.pubkey {
-                let friended_followers = damus_state.contacts.get_friended_followers(profile.pubkey)
-                if !friended_followers.isEmpty {
-                    Spacer()
-
-                    NavigationLink(value: Route.FollowersYouKnow(friendedFollowers: friended_followers, followers: followers)) {
-                        HStack {
-                            CondensedProfilePicturesView(state: damus_state, pubkeys: friended_followers, maxPictures: 3)
-                            let followedByString = followedByString(friended_followers, ndb: damus_state.ndb)
-                            Text(followedByString)
-                                .font(.subheadline).foregroundColor(.gray)
-                                .multilineTextAlignment(.leading)
-                        }
-                    }
-                }
-            }
-        }
-        .padding(.horizontal)
+        ProfileAboutSection(
+            damus_state: damus_state,
+            profile: profile,
+            followers: followers,
+            scrollTracker: scrollTracker,
+            pfp_size: pfp_size,
+            navbarHeight: navbarHeight,
+            imageBorderColor: imageBorderColor(),
+            is_zoomed: $is_zoomed
+        )
     }
 
     var tabs: [(String, FilterState)] {
@@ -580,6 +409,201 @@ private struct ProfilePicScrollEffect: View {
             .damus_full_screen_cover($is_zoomed, damus_state: damusState) {
                 ProfilePicImageView(pubkey: pubkey, profiles: profiles, settings: damusState.settings, nav: damusState.nav, shouldShowEditButton: damusState.pubkey == pubkey)
             }
+    }
+}
+
+private struct ProfileAboutSection: View {
+    let damus_state: DamusState
+    @ObservedObject var profile: ProfileModel
+    @ObservedObject var followers: FollowersModel
+    let scrollTracker: ScrollOffsetTracker
+    let pfp_size: CGFloat
+    let navbarHeight: CGFloat
+    let imageBorderColor: Color
+    @Binding var is_zoomed: Bool
+
+    @Environment(\.colorScheme) var colorScheme
+
+    private func lnButton(ndbprofile: Profile?, lnurl: String?) -> some View {
+        return ProfileZapLinkView(profile: ndbprofile, lnurl: lnurl, profileModel: profile) { reactions_enabled, lud16, lnurl in
+            Image(reactions_enabled ? "zap.fill" : "zap")
+                .foregroundColor(reactions_enabled ? .orange : Color.primary)
+                .profile_button_style(scheme: colorScheme)
+                .cornerRadius(24)
+        }
+    }
+
+    private var dmButton: some View {
+        let dm_model = damus_state.dms.lookup_or_create(profile.pubkey)
+        return NavigationLink(value: Route.DMChat(dms: dm_model)) {
+            Image("messages")
+                .profile_button_style(scheme: colorScheme)
+        }
+    }
+
+    private var followsYouBadge: some View {
+        Text("Follows you", comment: "Text to indicate that a user is following your profile.")
+            .padding([.leading, .trailing], 6.0)
+            .padding([.top, .bottom], 2.0)
+            .foregroundColor(.gray)
+            .background {
+                RoundedRectangle(cornerRadius: 5.0)
+                    .foregroundColor(DamusColors.adaptableGrey)
+            }
+            .font(.footnote)
+    }
+
+    private func actionSection(ndbprofile: Profile?, lnurl: String?) -> some View {
+        return Group {
+            if damus_state.settings.enable_favourites_feature {
+                FavoriteButtonView(pubkey: profile.pubkey, damus_state: damus_state)
+            }
+            if let _ = ndbprofile,
+               let lnurl,
+               lnurl != ""
+            {
+                lnButton(ndbprofile: ndbprofile, lnurl: lnurl)
+            }
+
+            dmButton
+
+            if profile.pubkey != damus_state.pubkey {
+                FollowButtonView(
+                    target: profile.get_follow_target(),
+                    follows_you: profile.follows(pubkey: damus_state.pubkey),
+                    follow_state: damus_state.contacts.follow_state(profile.pubkey)
+                )
+            } else if damus_state.keypair.privkey != nil {
+                NavigationLink(value: Route.EditMetadata) {
+                    ProfileEditButton(damus_state: damus_state)
+                }
+            }
+        }
+    }
+
+    private func nameSection(ndbprofile: Profile?, lnurl: String?) -> some View {
+        return Group {
+            let follows_you = profile.pubkey != damus_state.pubkey && profile.follows(pubkey: damus_state.pubkey)
+
+            HStack(alignment: .center) {
+                ProfilePicScrollEffect(
+                    scrollTracker: scrollTracker,
+                    pubkey: profile.pubkey,
+                    pfp_size: pfp_size,
+                    navbarHeight: navbarHeight,
+                    highlight: .custom(imageBorderColor, 4.0),
+                    profiles: damus_state.profiles,
+                    disable_animation: damus_state.settings.disable_animation,
+                    damusState: damus_state,
+                    is_zoomed: $is_zoomed
+                )
+
+                Spacer()
+
+                if follows_you {
+                    followsYouBadge
+                }
+
+                actionSection(ndbprofile: ndbprofile, lnurl: lnurl)
+            }
+
+            ProfileNameView(pubkey: profile.pubkey, damus: damus_state)
+        }
+    }
+
+    private var followersCount: some View {
+        HStack {
+            if let followerCount = followers.count {
+                let nounString = pluralizedString(key: "followers_count", count: followerCount)
+                let nounText = Text(verbatim: nounString).font(.subheadline).foregroundColor(.gray)
+                Text("\(Text(verbatim: followerCount.formatted()).font(.subheadline.weight(.medium))) \(nounText)", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.")
+            } else {
+                Image("download")
+                    .resizable()
+                    .frame(width: 20, height: 20)
+                Text("Followers", comment: "Label describing followers of a user.")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+            }
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8.0) {
+            let lnurl = try? damus_state.profiles.lookup_lnurl(profile.pubkey)
+            let ndbprofile = try? damus_state.profiles.lookup(id: profile.pubkey)
+
+            nameSection(ndbprofile: ndbprofile, lnurl: lnurl)
+
+            if let about = ndbprofile?.about {
+                AboutView(state: damus_state, about: about)
+            }
+
+            if let url = ndbprofile?.website_url {
+                WebsiteLink(url: url)
+            }
+
+            HStack {
+                if let contact = profile.contacts {
+                    NavigationLink(value: Route.Following(contacts: contact)) {
+                        HStack {
+                            let noun_text = Text(verbatim: "\(pluralizedString(key: "following_count", count: profile.following))").font(.subheadline).foregroundColor(.gray)
+                            Text("\(Text(verbatim: profile.following.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
+                        }
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+
+                if followers.contacts != nil {
+                    NavigationLink(value: Route.Followers(followers: followers)) {
+                        followersCount
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                } else {
+                    followersCount
+                        .onTapGesture {
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            followers.contacts = []
+                            followers.subscribe()
+                        }
+                }
+
+                if let relays = profile.relay_urls {
+                    let noun_string = pluralizedString(key: "relays_count", count: relays.count)
+                    let noun_text = Text(noun_string).font(.subheadline).foregroundColor(.gray)
+                    let relay_text = Text("\(Text(verbatim: relays.count.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
+                    if profile.pubkey == damus_state.pubkey && damus_state.is_privkey_user {
+                        NavigationLink(value: Route.RelayConfig) {
+                            relay_text
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    } else {
+                        NavigationLink(value: Route.UserRelays(relays: relays.sorted())) {
+                            relay_text
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+            }
+
+            if profile.pubkey != damus_state.pubkey {
+                let friended_followers = damus_state.contacts.get_friended_followers(profile.pubkey)
+                if !friended_followers.isEmpty {
+                    Spacer()
+
+                    NavigationLink(value: Route.FollowersYouKnow(friendedFollowers: friended_followers, followers: followers)) {
+                        HStack {
+                            CondensedProfilePicturesView(state: damus_state, pubkeys: friended_followers, maxPictures: 3)
+                            let followedByString = followedByString(friended_followers, ndb: damus_state.ndb)
+                            Text(followedByString)
+                                .font(.subheadline).foregroundColor(.gray)
+                                .multilineTextAlignment(.leading)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.horizontal)
     }
 }
 
