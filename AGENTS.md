@@ -39,7 +39,7 @@ Damus is an iOS client built around a local relay model ([damus-io/damus#3204](h
 2. Commits should be logically distinct and standalone.
 3. Code should be human-readable and human-reviewable.
 4. Ensure docstring coverage for any code added or modified.
-5. Review and follow `.github/pull_request_template.md` when creating PRs for iOS Damus.
+5. Review and follow `.github/pull_request_template.md` when creating PRs for iOS Damus. Include a **line count breakdown** in the PR body showing lines of test code vs non-test code (e.g., "420 lines test, 80 lines implementation") so reviewers can gauge review effort at a glance.
 6. Ensure nevernesting: favor early returns and guard clauses over deeply nested conditionals; simplify control flow by exiting early instead of wrapping logic in multiple layers of `if` statements.
 7. Before proposing changes, please **review and analyze if a change or upgrade to nostrdb** is beneficial to the change at hand.
 8. **Never block the main thread.** All network requests, database queries, and expensive computations must run on background threads/queues. Use `Task { }`, `DispatchQueue.global()`, or Swift concurrency (`async/await`) appropriately. UI updates must dispatch back to `@MainActor`. Never perform blocking work inside SwiftUI view `body` properties. Test for hangs and freezes before submitting.
