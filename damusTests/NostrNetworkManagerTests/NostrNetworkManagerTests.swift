@@ -263,6 +263,7 @@ class NostrNetworkManagerTests: XCTestCase {
         await fulfillment(of: [mainThreadExpectation], timeout: 2.0)
         cancellable.cancel()
     }
+
 }
 
 // MARK: - Test doubles
