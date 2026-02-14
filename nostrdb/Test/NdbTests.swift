@@ -358,13 +358,38 @@ final class NdbTests: XCTestCase {
         }
         XCTAssertTrue(txn1.ownsTxn, "txn1 should own its transaction")
 
-        // Open second txn on same thread while txn1 is active.
-        // Old code: txn2.inherited=true (shared stale snapshot).
-        // New code: txn2.ownsTxn=true (independent fresh snapshot).
         guard let txn2 = NdbTxn<()>(ndb: ndb, name: "txn2") else {
             return XCTFail("Should create second transaction")
         }
         XCTAssertTrue(txn2.ownsTxn, "txn2 should own its own transaction, not inherit from txn1")
+    }
+
+    /// Smoke test: profile data accessible after db close (owned buffer copy).
+    /// The underlying bug (ByteBuffer borrowing LMDB mmap pointer) is a
+    /// use-after-free that cannot be reliably triggered in a unit test —
+    /// macOS does not immediately reclaim munmap'd pages, and ASan does
+    /// not instrument mmap/munmap. The fix is verified by code inspection:
+    /// ByteBuffer(memory:count:) copies data vs (assumingMemoryBound:capacity:)
+    /// which wraps the pointer with unowned=true. See #3625 for full analysis.
+    func test_profile_buffer_ownership() throws {
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+
+        do {
+            let ndb = Ndb(path: db_dir)!
+            XCTAssertTrue(ndb.process_events(test_wire_events))
+        }
+
+        var profile: Profile? = nil
+        do {
+            let ndb = Ndb(path: db_dir)!
+            profile = try? ndb.lookup_profile_and_copy(pk)
+            ndb.close()
+        }
+
+        guard let profile else {
+            return XCTFail("Expected profile to be non-nil")
+        }
+        XCTAssertEqual(profile.name, "jb55")
     }
 
 }

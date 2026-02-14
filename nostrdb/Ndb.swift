@@ -556,13 +556,13 @@ class Ndb {
         return profile_flatbuf_to_record(ptr: profile_p, size: size, key: key)
     }
 
+    /// Copies buffer data so the profile survives after the LMDB transaction closes.
     private func profile_flatbuf_to_record(ptr: UnsafeMutableRawPointer, size: Int, key: UInt64) -> ProfileRecord? {
         do {
-            var buf = ByteBuffer(assumingMemoryBound: ptr, capacity: size)
+            var buf = ByteBuffer(memory: ptr, count: size)
             let rec: NdbProfileRecord = try getDebugCheckedRoot(byteBuffer: &buf)
             return ProfileRecord(data: rec, key: key)
         } catch {
-            // Handle error appropriately
             print("UNUSUAL: \(error)")
             return nil
         }
