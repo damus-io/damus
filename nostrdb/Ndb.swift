@@ -375,6 +375,11 @@ class Ndb {
     }
 
     private func lookup_note_by_key_with_txn<Y>(_ key: NoteKey, txn: NdbTxn<Y>) -> NdbNote? {
+        if txn.ndb.is_closed || txn.generation != self.generation {
+            Log.error("Aborting lookup_note_by_key: closed or stale txn (gen %d vs %d)", for: .ndb, txn.generation, self.generation)
+            return nil
+        }
+
         var size: Int = 0
         guard let note_p = ndb_get_note_by_key(&txn.txn, key, &size) else {
             return nil
@@ -560,6 +565,18 @@ class Ndb {
         })
     }
 
+    func snapshot_note_by_key(_ key: NoteKey) throws -> NdbNote? {
+        return try withNdb({
+            guard let txn = NdbTxn(ndb: self, name: "snapshot_note_by_key") else {
+                return nil
+            }
+            guard let note = lookup_note_by_key_with_txn(key, txn: txn) else {
+                return nil
+            }
+            return note.to_owned()
+        })
+    }
+
     private func lookup_profile_by_key_inner(_ key: ProfileKey, txn: RawNdbTxnAccessible) -> ProfileRecord? {
         var size: Int = 0
         guard let profile_p = ndb_get_profile_by_key(&txn.txn, key, &size) else {
@@ -582,6 +599,11 @@ class Ndb {
     }
 
     private func lookup_note_with_txn_inner<Y>(id: NoteId, txn: NdbTxn<Y>) -> NdbNote? {
+        if txn.ndb.is_closed || txn.generation != self.generation {
+            Log.error("Aborting lookup_note_with_txn_inner: closed or stale txn (gen %d vs %d)", for: .ndb, txn.generation, self.generation)
+            return nil
+        }
+
         return id.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> NdbNote? in
             var key: UInt64 = 0
             var size: Int = 0

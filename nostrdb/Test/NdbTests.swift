@@ -392,6 +392,59 @@ final class NdbTests: XCTestCase {
         XCTAssertEqual(profile.name, "jb55")
     }
 
+    /// Verifies snapshot_note_by_key returns an owned copy that survives ndb close.
+    func test_snapshot_note_by_key_returns_owned_copy() throws {
+        let id = NoteId(hex: "d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349")!
+
+        do {
+            let ndb = Ndb(path: db_dir)!
+            XCTAssertTrue(ndb.process_events(test_wire_events))
+        }
+
+        var snapshot: NdbNote? = nil
+        do {
+            let ndb = Ndb(path: db_dir)!
+            guard let note = try? ndb.lookup_note_and_copy(id) else {
+                return XCTFail("Expected to find note in test data")
+            }
+            guard let key = note.key else {
+                return XCTFail("Expected note.key to be non-nil")
+            }
+            snapshot = try ndb.snapshot_note_by_key(key)
+            XCTAssertNotNil(snapshot)
+            ndb.close()
+        }
+
+        // Owned copy survives ndb close because it's a deep copy
+        guard let snapshot else {
+            return XCTFail("snapshot_note_by_key should return an owned copy")
+        }
+        XCTAssertEqual(snapshot.id, id)
+    }
+
+    /// Verifies NdbNoteLender.snapshot() returns an owned copy via snapshot_note_by_key.
+    func test_note_lender_snapshot() throws {
+        let id = NoteId(hex: "d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349")!
+
+        do {
+            let ndb = Ndb(path: db_dir)!
+            XCTAssertTrue(ndb.process_events(test_wire_events))
+        }
+
+        let ndb = Ndb(path: db_dir)!
+        guard let note = try? ndb.lookup_note_and_copy(id) else {
+            return XCTFail("Expected to find note in test data")
+        }
+
+        guard let key = note.key else {
+            return XCTFail("Expected note.key to be non-nil for NdbNoteLender")
+        }
+
+        let lender = NdbNoteLender(ndb: ndb, noteKey: key)
+        let owned = try lender.snapshot()
+        XCTAssertEqual(owned.id, id)
+    }
+
     /// Verifies Ndb initializes with smaller mapsize in extension mode.
     func test_ndb_init_extension_mode() throws {
         do {

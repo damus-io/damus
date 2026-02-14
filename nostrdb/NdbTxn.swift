@@ -47,7 +47,10 @@ class NdbTxn<T>: RawNdbTxnAccessible {
         let result: R? = try? ndb.withNdb({
             var txn = ndb_txn()
             let ok = ndb_begin_query(ndb.ndb.ndb, &txn) != 0
-            guard ok else { return .none }
+            guard ok else {
+                Log.error("Failed to begin NdbTxn '%s' (is_closed=%d)", for: .ndb, name ?? "txn", ndb.is_closed ? 1 : 0)
+                return .none
+            }
             #if TXNDEBUG
             txn_count += 1
             #endif
