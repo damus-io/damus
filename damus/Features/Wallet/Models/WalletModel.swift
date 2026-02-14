@@ -40,10 +40,25 @@ class WalletModel: ObservableObject {
     
     @Published private(set) var connect_state: WalletConnectState
     
-    /// A dictionary listing continuations waiting for a response for each request note id.
+    /// Holds a waiting continuation and its associated timeout task.
+    private struct PendingRequest {
+        let continuation: CheckedContinuation<WalletConnect.Response.Result, any Error>
+        let timeoutTask: Task<Void, Never>
+    }
+
+    /// A dictionary listing pending requests waiting for a response for each request note id.
     ///
     /// Please see the `waitForResponse` method for context.
-    private var continuations: [NoteId: CheckedContinuation<WalletConnect.Response.Result, any Error>] = [:]
+    ///
+    /// - Important: Access to this dictionary must be synchronized using `continuationsLock`
+    ///   to prevent data races when responses arrive from different threads.
+    private var pendingRequests: [NoteId: PendingRequest] = [:]
+
+    /// Lock protecting access to the `pendingRequests` dictionary.
+    ///
+    /// This ensures thread-safe access when multiple concurrent requests are in flight
+    /// and responses may arrive on different threads.
+    private let continuationsLock = NSLock()
     
     init(state: WalletConnectState, settings: UserSettingsStore) {
         self.connect_state = state
@@ -208,34 +223,84 @@ class WalletModel: ObservableObject {
     }
     
     // MARK: - Async wallet response waiting mechanism
-    
+
+    /// Waits for a response to a wallet request.
+    ///
+    /// This method registers a continuation that will be resumed when a response
+    /// for the given request ID arrives, or when the timeout expires.
+    ///
+    /// - Parameters:
+    ///   - requestId: The note ID of the request to wait for.
+    ///   - timeout: Maximum time to wait for a response (default: 10 seconds).
+    /// - Returns: The wallet response result.
+    /// - Throws: `WaitError.timeout` if no response arrives within the timeout.
     func waitForResponse(for requestId: NoteId, timeout: Duration = .seconds(10)) async throws -> WalletConnect.Response.Result {
         return try await withCheckedThrowingContinuation({ continuation in
-            self.continuations[requestId] = continuation
-            
             let timeoutTask = Task {
                 try? await Task.sleep(for: timeout)
-                self.resume(request: requestId, throwing: WaitError.timeout)    // Must resume the continuation exactly once even if there is no response
+                self.resume(request: requestId, throwing: WaitError.timeout)
             }
+
+            let pendingRequest = PendingRequest(continuation: continuation, timeoutTask: timeoutTask)
+
+            continuationsLock.lock()
+            self.pendingRequests[requestId] = pendingRequest
+            continuationsLock.unlock()
         })
     }
-    
+
+    /// Resumes a waiting continuation with a successful result.
+    ///
+    /// Thread-safe: Uses `continuationsLock` to protect dictionary access.
+    /// Cancels the associated timeout task to prevent spurious timeout errors.
+    ///
+    /// - Parameters:
+    ///   - requestId: The note ID of the request.
+    ///   - result: The successful result to return.
     private func resume(request requestId: NoteId, with result: WalletConnect.Response.Result) {
-        continuations[requestId]?.resume(returning: result)
-        continuations[requestId] = nil      // Never resume a continuation twice
+        continuationsLock.lock()
+        let pendingRequest = pendingRequests.removeValue(forKey: requestId)
+        continuationsLock.unlock()
+
+        // Cancel the timeout task to prevent spurious timeout handling
+        pendingRequest?.timeoutTask.cancel()
+        pendingRequest?.continuation.resume(returning: result)
     }
-    
+
+    /// Resumes a waiting continuation with an error.
+    ///
+    /// Thread-safe: Uses `continuationsLock` to protect dictionary access.
+    /// Unlocks before resuming to prevent deadlock if continuation re-enters.
+    /// If no continuation is waiting (e.g., already resumed by a response), this is a no-op
+    /// for timeout errors, but displays an error sheet for wallet errors.
+    ///
+    /// - Parameters:
+    ///   - requestId: The note ID of the request.
+    ///   - error: The error to throw.
     private func resume(request requestId: NoteId, throwing error: any Error) {
-        if let continuation = continuations[requestId] {
-            continuation.resume(throwing: error)
-            continuations[requestId] = nil      // Never resume a continuation twice
-            return      // Error will be handled by the listener, no need for the generic error sheet
+        continuationsLock.lock()
+        let pendingRequest = pendingRequests.removeValue(forKey: requestId)
+        continuationsLock.unlock()
+
+        if let pendingRequest {
+            // Cancel the timeout task (may already be cancelled if this is from timeout)
+            pendingRequest.timeoutTask.cancel()
+            pendingRequest.continuation.resume(throwing: error)
+            return
         }
-        
+
+        // No pending request - if this is a timeout, it's a no-op (response already handled)
+        if error is WaitError {
+            return
+        }
+
         // No listeners to catch the error, show generic error sheet
+        // Dispatch to main thread since this can be called from background threads
         if let error = error as? WalletConnect.WalletResponseErr,
            let humanReadableError = error.humanReadableError {
-            present_sheet(.error(humanReadableError))
+            DispatchQueue.main.async {
+                present_sheet(.error(humanReadableError))
+            }
         }
     }
     
