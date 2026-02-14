@@ -60,7 +60,7 @@ class NotificationService: UNNotificationServiceExtension {
 
             let sender_profile = {
                 let profile = try? state.profiles.lookup(id: nostr_event.pubkey)
-                let picture = ((profile?.picture.map { URL(string: $0) }) ?? URL(string: robohash(nostr_event.pubkey)))!
+                let picture = resolve_profile_picture_url(picture: profile?.picture, pubkey: nostr_event.pubkey)
                 return ProfileBuf(picture: picture,
                                      name: profile?.name,
                              display_name: profile?.display_name,
