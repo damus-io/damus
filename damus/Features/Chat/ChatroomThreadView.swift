@@ -9,6 +9,13 @@ import SwiftUI
 import SwipeActions
 import TipKit
 
+private struct UntrustedSectionMinYKey: PreferenceKey {
+    static var defaultValue: CGFloat = .infinity
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
 struct ChatroomThreadView: View {
     @Environment(\.dismiss) var dismiss
     @State var once: Bool = false
@@ -21,7 +28,6 @@ struct ChatroomThreadView: View {
 
     // Add state for sticky header
     @State var showStickyHeader: Bool = false
-    @State var untrustedSectionOffset: CGFloat = 0
 
     // Add state for reading progress (longform articles)
     @State private var readingProgress: CGFloat = 0
@@ -186,21 +192,6 @@ struct ChatroomThreadView: View {
             ZStack(alignment: .top) {
                 ScrollView(.vertical) {
                     VStack(spacing: 0) {
-                    // Top scroll position tracker
-                    GeometryReader { geo in
-                        Color.clear
-                            .onChange(of: geo.frame(in: .global).minY) { newY in
-                                contentTopY = newY
-                                updateReadingProgress()
-                                updateChromeVisibility(newY: newY)
-                            }
-                            .onAppear {
-                                contentTopY = geo.frame(in: .global).minY
-                                lastScrollY = geo.frame(in: .global).minY
-                            }
-                    }
-                    .frame(height: 1)
-
                     LazyVStack(alignment: .leading, spacing: 8) {
                         // MARK: - Parents events view
                         ForEach(thread.parent_events, id: \.id) { parent_event in
@@ -218,24 +209,20 @@ struct ChatroomThreadView: View {
                                 .padding(.top, 4)
                                 .padding(.leading, 25 * 2)
 
-                        }.background(GeometryReader { geometry in
-                            let eventHeight = geometry.frame(in: .global).height
-
+                        }.overlay(alignment: .topLeading) {
                             Rectangle()
                                 .fill(Color.gray.opacity(0.25))
-                                .frame(width: 2, height: eventHeight)
+                                .frame(width: 2)
                                 .offset(x: 40, y: 40)
-                        })
+                        }
 
                         // MARK: - Actual event view
                         EventMutingContainerView(
                             damus_state: damus,
                             event: self.thread.selected_event,
                             muteBox: { event_shown, muted_reason in
-                                AnyView(
-                                    EventMutedBoxView(shown: event_shown, reason: muted_reason)
-                                        .padding(5)
-                                )
+                                EventMutedBoxView(shown: event_shown, reason: muted_reason)
+                                    .padding(5)
                             }
                         ) {
                             SelectedEventView(damus: damus, event: self.thread.selected_event, size: .selected)
@@ -260,25 +247,15 @@ struct ChatroomThreadView: View {
                         }
 
                         VStack(alignment: .leading, spacing: 0) {
-                            // Track this section's position
+                            // Track this section's position for sticky header
                             Color.clear
                                 .frame(height: 1)
-                                .background(
+                                .overlay {
                                     GeometryReader { proxy in
                                         Color.clear
-                                            .onAppear {
-                                                untrustedSectionOffset = proxy.frame(in: .global).minY
-                                            }
-                                            .onChange(of: proxy.frame(in: .global).minY) { newY in
-                                                let shouldShow = newY <= 100 // Adjust this threshold as needed
-                                                if shouldShow != showStickyHeader {
-                                                    withAnimation(.easeInOut(duration: 0.3)) {
-                                                        showStickyHeader = shouldShow
-                                                    }
-                                                }
-                                            }
+                                            .preference(key: UntrustedSectionMinYKey.self, value: proxy.frame(in: .global).minY)
                                     }
-                                )
+                                }
 
                             Button(action: {
                                 withAnimation {
@@ -308,24 +285,28 @@ struct ChatroomThreadView: View {
                         }
                     }
 
-                    // Bottom scroll position tracker - placed before EndBlock so we measure article content, not padding
-                    GeometryReader { geo in
-                        Color.clear
-                            .onChange(of: geo.frame(in: .global).minY) { newY in
-                                contentBottomY = newY
-                                updateReadingProgress()
-                            }
-                            .onAppear {
-                                contentBottomY = geo.frame(in: .global).minY
-                            }
-                    }
-                    .frame(height: 1)
-
                     EndBlock()
 
                     HStack {}
                         .frame(height: tabHeight + getSafeAreaBottom())
                     } // End VStack wrapper
+                    .overlay {
+                        GeometryReader { geo in
+                            Color.clear
+                                .onChange(of: geo.frame(in: .global).minY) { newY in
+                                    contentTopY = newY
+                                    contentBottomY = newY + geo.size.height
+                                    updateReadingProgress()
+                                    updateChromeVisibility(newY: newY)
+                                }
+                                .onAppear {
+                                    let f = geo.frame(in: .global)
+                                    contentTopY = f.minY
+                                    contentBottomY = f.maxY
+                                    lastScrollY = f.minY
+                                }
+                        }
+                    }
                 }
                 .background(
                     GeometryReader { geo in
@@ -343,6 +324,14 @@ struct ChatroomThreadView: View {
                             }
                     }
                 )
+                .onPreferenceChange(UntrustedSectionMinYKey.self) { newY in
+                    let shouldShow = newY <= 100
+                    if shouldShow != showStickyHeader {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            showStickyHeader = shouldShow
+                        }
+                    }
+                }
 
                 if showStickyHeader && !untrusted_events.isEmpty {
                     VStack {

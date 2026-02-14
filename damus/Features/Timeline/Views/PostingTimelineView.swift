@@ -141,16 +141,15 @@ struct PostingTimelineView: View {
     var body: some View {
         VStack {
             ZStack {
-                TabView(selection: $filter_state) {
+                switch filter_state {
+                case .posts:
                     contentTimelineView(filter: content_filter(.posts))
-                        .tag(FilterState.posts)
-                        .id(FilterState.posts)
+                case .posts_and_replies:
                     contentTimelineView(filter: content_filter(.posts_and_replies))
-                        .tag(FilterState.posts_and_replies)
-                        .id(FilterState.posts_and_replies)
+                default:
+                    contentTimelineView(filter: content_filter(.posts))
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
-                
+
                 if damus_state.keypair.privkey != nil {
                     PostButtonContainer(is_left_handed: damus_state.settings.left_handed) {
                         self.active_sheet = .post(.posting(.none))

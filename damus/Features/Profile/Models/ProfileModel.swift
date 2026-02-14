@@ -38,6 +38,7 @@ class ProfileModel: ObservableObject, Equatable {
     var conversationListener: Task<Void, Never>? = nil
     
     var conversation_events: Set<NoteId> = Set()
+    private var contactPubkeys: Set<Pubkey> = Set()
     
     init(pubkey: Pubkey, damus: DamusState) {
         self.pubkey = pubkey
@@ -48,11 +49,7 @@ class ProfileModel: ObservableObject, Equatable {
     }
     
     func follows(pubkey: Pubkey) -> Bool {
-        guard let contacts = self.contacts else {
-            return false
-        }
-        
-        return contacts.referenced_pubkeys.contains(pubkey)
+        return contactPubkeys.contains(pubkey)
     }
     
     func get_follow_target() -> FollowTarget {
@@ -148,6 +145,7 @@ class ProfileModel: ObservableObject, Equatable {
         }
         
         self.contacts = ev
+        self.contactPubkeys = Set(ev.referenced_pubkeys)
         self.following = count_pubkeys(ev.tags)
         self.legacy_relay_list = decode_json_relays(ev.content)
     }
@@ -159,9 +157,7 @@ class ProfileModel: ObservableObject, Equatable {
         }
 
         if ev.is_textlike || ev.known_kind == .boost {
-            if self.events.insert(ev) {
-                self.objectWillChange.send()
-            }
+            let _ = self.events.insert(ev)
         } else if ev.known_kind == .contacts {
             handle_profile_contact_event(ev)
         }
