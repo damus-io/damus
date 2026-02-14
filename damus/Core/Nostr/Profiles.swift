@@ -133,6 +133,19 @@ class Profiles {
 }
 
 
+/// Resolves a profile picture string to a URL with robohash fallback.
+///
+/// Uses `flatMap` to collapse `String?` → `URL?` (avoiding the `URL??`
+/// double-optional trap that occurs with `Optional.map`). Falls through:
+///   1. picture string → URL
+///   2. robohash(pubkey) → URL
+///   3. constant fallback (compile-time valid)
+func resolve_profile_picture_url(picture: String?, pubkey: Pubkey) -> URL {
+    return (picture).flatMap(URL.init(string:))
+        ?? URL(string: robohash(pubkey))
+        ?? URL(string: "https://robohash.org/default")!
+}
+
 @MainActor
 func invalidate_zapper_cache(pubkey: Pubkey, profiles: Profiles, lnurl: LNUrls) {
     profiles.profile_data(pubkey).zapper = nil

@@ -152,11 +152,8 @@ struct ProfilePicView: View {
 }
 
 func get_profile_url(picture: String?, pubkey: Pubkey, profiles: Profiles) -> URL {
-    let pic = picture ?? (try? profiles.lookup(id: pubkey)?.picture) ?? robohash(pubkey)
-    if let url = URL(string: pic) {
-        return url
-    }
-    return URL(string: robohash(pubkey))!
+    let pic = picture ?? (try? profiles.lookup(id: pubkey)?.picture)
+    return resolve_profile_picture_url(picture: pic, pubkey: pubkey)
 }
 
 @MainActor
