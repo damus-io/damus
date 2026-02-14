@@ -3053,38 +3053,58 @@ static void ndb_make_search_key_low(struct ndb_search_key *key, const char *sear
 	key->search[sizeof(key->search) - 1] = '\0';
 }
 
+// Check if a search key matches the original query prefix.
+// Returns 1 if the key starts with the query, 0 otherwise.
+static inline int ndb_search_key_matches_prefix(struct ndb_search *search)
+{
+	return strncmp(search->key->search, search->query, search->query_len) == 0;
+}
+
 int ndb_search_profile(struct ndb_txn *txn, struct ndb_search *search, const char *query)
 {
 	int rc;
 	struct ndb_search_key s;
 	MDB_val k, v;
-	search->cursor = NULL;
-
 	MDB_cursor **cursor = (MDB_cursor **)&search->cursor;
 
+	search->cursor = NULL;
+
 	ndb_make_search_key_low(&s, query);
+
+	// Store the lowercase query for prefix matching in _next().
+	// This ensures iteration stops when we move past matching entries.
+	lowercase_strncpy(search->query, query, sizeof(search->query) - 1);
+	search->query[sizeof(search->query) - 1] = '\0';
+	search->query_len = strlen(search->query);
 
 	k.mv_data = &s;
 	k.mv_size = sizeof(s);
 
-	if ((rc = mdb_cursor_open(txn->mdb_txn,
-				  txn->lmdb->dbs[NDB_DB_PROFILE_SEARCH],
-				  cursor))) {
+	rc = mdb_cursor_open(txn->mdb_txn,
+			     txn->lmdb->dbs[NDB_DB_PROFILE_SEARCH],
+			     cursor);
+	if (rc) {
 		printf("search_profile: cursor opened failed: %s\n",
-				mdb_strerror(rc));
+		       mdb_strerror(rc));
 		return 0;
 	}
 
-	// Position cursor at the next key greater than or equal to the specified key
+	// Position cursor at the first key >= our search key
 	if (mdb_cursor_get(search->cursor, &k, &v, MDB_SET_RANGE)) {
 		printf("search_profile: cursor get failed\n");
 		goto cleanup;
-	} else {
-		search->key = k.mv_data;
-		assert(v.mv_size == 8);
-		search->profile_key = *((uint64_t*)v.mv_data);
-		return 1;
 	}
+
+	search->key = k.mv_data;
+	assert(v.mv_size == 8);
+	search->profile_key = *((uint64_t*)v.mv_data);
+
+	// Verify first result actually matches our search prefix.
+	// MDB_SET_RANGE finds first key >= query, which may not match.
+	if (!ndb_search_key_matches_prefix(search))
+		goto cleanup;
+
+	return 1;
 
 cleanup:
 	mdb_cursor_close(search->cursor);
@@ -3109,19 +3129,26 @@ int ndb_search_profile_next(struct ndb_search *search)
 	k.mv_size = sizeof(*search->key);
 
 retry:
-	if ((rc = mdb_cursor_get(search->cursor, &k, &v, MDB_NEXT))) {
-		ndb_debug("ndb_search_profile_next: %s\n",
-				mdb_strerror(rc));
+	rc = mdb_cursor_get(search->cursor, &k, &v, MDB_NEXT);
+	if (rc) {
+		ndb_debug("ndb_search_profile_next: %s\n", mdb_strerror(rc));
 		return 0;
-	} else {
-		search->key = k.mv_data;
-		assert(v.mv_size == 8);
-		search->profile_key = *((uint64_t*)v.mv_data);
-
-		// skip duplicate pubkeys
-		if (!memcmp(init_id, search->key->id, 32))
-			goto retry;
 	}
+
+	search->key = k.mv_data;
+	assert(v.mv_size == 8);
+	search->profile_key = *((uint64_t*)v.mv_data);
+
+	// Stop iteration when we've moved past all matching entries.
+	// The index is sorted lexically, so once we see a non-matching
+	// prefix, there are no more matches.
+	if (!ndb_search_key_matches_prefix(search))
+		return 0;
+
+	// Skip duplicate pubkeys. A user with both name and display_name
+	// will have two index entries; we only want to return them once.
+	if (!memcmp(init_id, search->key->id, 32))
+		goto retry;
 
 	return 1;
 }

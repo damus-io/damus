@@ -478,6 +478,40 @@ final class NdbTests: XCTestCase {
         XCTAssertLessThan(elapsed, 2.5, "Threads should timeout in parallel, not serially (elapsed: \(elapsed)s)")
     }
 
+    /// Regression test: profile search must only return profiles matching the search prefix.
+    /// Bug (#3394): ndb_search_profile used MDB_SET_RANGE which returns the first key >= query,
+    /// even if it doesn't match the prefix. Fix adds ndb_search_key_matches_prefix validation.
+    func test_profile_search_prefix_matching() throws {
+        let ndb = Ndb(path: db_dir)!
+        let ok = ndb.process_events(test_wire_events)
+        XCTAssertTrue(ok)
+
+        // Poll for the ingester thread to process and commit events
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+        var profile: Profile? = nil
+        for _ in 0..<50 {
+            profile = try? ndb.lookup_profile_and_copy(pk)
+            if profile != nil { break }
+            Thread.sleep(forTimeInterval: 0.1)
+        }
+        XCTAssertEqual(profile?.name, "jb55", "Test data should contain profile 'jb55'")
+
+        // Positive case: "jb5" is a valid prefix of "jb55" — should find the profile
+        let matchingResults = try ndb.search_profile("jb5", limit: 10)
+        XCTAssertFalse(matchingResults.isEmpty, "Search for 'jb5' should match profile 'jb55'")
+
+        // Negative case: "jb54" is NOT a prefix of "jb55", but MDB_SET_RANGE
+        // positions the cursor at "jb55" (first key >= "jb54"). Without the fix,
+        // this incorrectly returns "jb55".
+        let nonMatchingResults = try ndb.search_profile("jb54", limit: 10)
+        XCTAssertTrue(nonMatchingResults.isEmpty, "Search for 'jb54' should NOT match profile 'jb55' — prefix mismatch")
+
+        // Another negative case: completely unrelated prefix "aaa" < "jb55"
+        // lexically, so MDB_SET_RANGE finds "jb55". Without the fix, returns it.
+        let unrelatedResults = try ndb.search_profile("aaa", limit: 10)
+        XCTAssertTrue(unrelatedResults.isEmpty, "Search for 'aaa' should NOT match profile 'jb55' — prefix mismatch")
+    }
+
     /// Verifies Ndb initializes with smaller mapsize in extension mode.
     func test_ndb_init_extension_mode() throws {
         do {
