@@ -126,10 +126,23 @@ class Ndb {
         // 2. If not specified, use a default path. The default path depends:
         //     a. If the process owns the db file, `Ndb.db_path` is the default.
         //     b. If the process does not own the db file, a read-only snapshot file (`Ndb.snapshot_db_path`) is used.
+        //
+        // IMPORTANT: Extensions should use `Ndb(path: nil, owns_db_file: false)` to open snapshots.
+        // This ensures the marker file is checked, preventing reads during snapshot updates.
+        let isUsingSnapshotPath = path == nil && !owns_db_file
         guard let path = path.map(remove_file_prefix) ?? (owns_db_file ? Ndb.db_path : Ndb.snapshot_db_path) else {
             return nil
         }
-        
+
+        // For snapshot path, verify the snapshot is complete (marker file exists)
+        // to prevent reading corrupt/incomplete data during snapshot updates.
+        let isSnapshotPath = isUsingSnapshotPath || (!owns_db_file && path == Self.snapshot_db_path)
+        if isSnapshotPath {
+            guard Self.snapshot_is_ready(path: path) else {
+                return nil
+            }
+        }
+
         guard owns_db_file || Self.db_file_exists(path: path) else {
             return nil      // If the caller claims to not own the DB file, and the DB files do not exist, then we should not initialize Ndb
         }
@@ -257,7 +270,21 @@ class Ndb {
     private static func db_file_exists(path: String) -> Bool {
         return FileManager.default.fileExists(atPath: "\(path)/\(Self.main_db_file_name)")
     }
-    
+
+    /// Marker file name indicating a snapshot is complete and safe to read.
+    /// This must match `DatabaseSnapshotManager.snapshotReadyMarker`.
+    static let snapshotReadyMarker = "snapshot.ready"
+
+    /// Checks if a snapshot at the given path is ready for reading.
+    ///
+    /// A snapshot is considered ready when both the database file exists AND
+    /// the marker file is present, indicating the snapshot completed successfully.
+    private static func snapshot_is_ready(path: String) -> Bool {
+        let parentDir = URL(fileURLWithPath: path).deletingLastPathComponent().path
+        let markerPath = "\(parentDir)/\(snapshotReadyMarker)"
+        return db_file_exists(path: path) && FileManager.default.fileExists(atPath: markerPath)
+    }
+
     /// Returns the path whose `data.mdb` file was modified most recently.
     private static func latestDatabasePath(primaryPath: String,
                                            legacyPath: String?,

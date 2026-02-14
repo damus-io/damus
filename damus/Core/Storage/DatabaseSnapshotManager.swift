@@ -23,7 +23,11 @@ actor DatabaseSnapshotManager {
     
     /// Key for storing last snapshot timestamp in UserDefaults
     private static let lastSnapshotDateKey = "lastDatabaseSnapshotDate"
-    
+
+    /// Marker file name indicating a snapshot is complete and safe to read.
+    /// Extensions should only open a snapshot if this file exists.
+    static let snapshotReadyMarker = "snapshot.ready"
+
     private let ndb: Ndb
     private var snapshotTimerTask: Task<Void, Never>? = nil
     var snapshotTimerTickCount: Int = 0
@@ -233,10 +237,43 @@ actor DatabaseSnapshotManager {
         return [profileFilter, contactsFilter, muteListFilter]
     }
     
-    /// Atomically moves the snapshot from temporary location to final destination.
+    /// Moves snapshot to final destination with marker-based synchronization.
+    ///
+    /// **IMPORTANT: This operation is NOT atomic.** There is a race window between
+    /// removing the old snapshot and moving the new one into place.
+    ///
+    /// **Race window timeline:**
+    /// 1. Remove marker (prevents new extension reads)
+    /// 2. Delete old snapshot (~10-50ms)
+    /// 3. Move new snapshot (~1-10ms same filesystem, ~100-500ms cross-filesystem)
+    /// 4. Write marker (signals snapshot ready for extensions)
+    ///
+    /// The marker protocol prevents extensions from reading during this window by:
+    /// - Extensions check `Ndb.snapshot_is_ready()` before opening
+    /// - Returns nil if marker missing → extensions fail safely
+    /// - Prevents mdb_page_search crashes (issue #3560)
     private func moveSnapshotToFinalDestination(from tempPath: String, to finalPath: String) async throws {
         let fileManager = FileManager.default
-        
+        let markerPath = URL(fileURLWithPath: finalPath)
+            .deletingLastPathComponent()
+            .appendingPathComponent(Self.snapshotReadyMarker)
+            .path
+
+        try Task.checkCancellation()
+
+        // Remove marker first so extensions know snapshot is invalid during transition.
+        if fileManager.fileExists(atPath: markerPath) {
+            do {
+                try fileManager.removeItem(atPath: markerPath)
+                Log.debug("Removed snapshot marker before update", for: .storage)
+            } catch {
+                Log.error("Failed to remove snapshot marker: %{public}@", for: .storage, error.localizedDescription)
+                throw SnapshotError.removeFailed(error)
+            }
+        }
+
+        try Task.checkCancellation()
+
         // Remove existing snapshot if it exists
         if fileManager.fileExists(atPath: finalPath) {
             do {
@@ -246,7 +283,7 @@ actor DatabaseSnapshotManager {
                 throw SnapshotError.removeFailed(error)
             }
         }
-        
+
         // Create parent directory if needed
         let parentDir = URL(fileURLWithPath: finalPath).deletingLastPathComponent().path
         if !fileManager.fileExists(atPath: parentDir) {
@@ -256,13 +293,24 @@ actor DatabaseSnapshotManager {
                 throw SnapshotError.directoryCreationFailed(error)
             }
         }
-        
-        // Atomically move the temp snapshot to final destination
+
+        try Task.checkCancellation()
+
+        // Move the temp snapshot to final destination
         do {
             try fileManager.moveItem(atPath: tempPath, toPath: finalPath)
             Log.debug("Moved snapshot from %{public}@ to %{public}@", for: .storage, tempPath, finalPath)
         } catch {
             throw SnapshotError.moveFailed(error)
+        }
+
+        // Write marker file to signal snapshot is complete and safe to read.
+        do {
+            try Data().write(to: URL(fileURLWithPath: markerPath))
+            Log.debug("Wrote snapshot ready marker at %{public}@", for: .storage, markerPath)
+        } catch {
+            Log.error("Failed to write snapshot marker: %{public}@", for: .storage, error.localizedDescription)
+            throw SnapshotError.markerWriteFailed(error)
         }
     }
     
@@ -287,7 +335,8 @@ enum SnapshotError: Error, LocalizedError {
     case directoryCreationFailed(Error)
     case failedToCreateSnapshotDatabase
     case moveFailed(Error)
-    
+    case markerWriteFailed(Error)
+
     var errorDescription: String? {
         switch self {
         case .pathsUnavailable:
@@ -302,6 +351,8 @@ enum SnapshotError: Error, LocalizedError {
             return "Failed to create temporary snapshot database"
         case .moveFailed(let error):
             return "Failed to move snapshot to final destination: \(error.localizedDescription)"
+        case .markerWriteFailed(let error):
+            return "Failed to write snapshot marker file: \(error.localizedDescription)"
         }
     }
 }
