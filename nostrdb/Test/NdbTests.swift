@@ -392,5 +392,24 @@ final class NdbTests: XCTestCase {
         XCTAssertEqual(profile.name, "jb55")
     }
 
+    /// Verifies Ndb initializes with smaller mapsize in extension mode.
+    func test_ndb_init_extension_mode() throws {
+        do {
+            let ndb = Ndb(path: db_dir)!
+            XCTAssertTrue(ndb.process_events(test_wire_events))
+            ndb.close()
+        }
+
+        guard let extensionNdb = Ndb(path: db_dir, owns_db_file: false) else {
+            return XCTFail("Ndb should initialize in extension mode")
+        }
+
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+        let profile = try? extensionNdb.lookup_profile_and_copy(pk)
+        XCTAssertNotNil(profile)
+        XCTAssertEqual(profile?.name, "jb55")
+        extensionNdb.close()
+    }
+
 }
 

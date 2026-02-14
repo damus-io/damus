@@ -87,16 +87,27 @@ class Ndb {
     static private let main_db_file_name: String = "data.mdb"
     static private let db_files: [String] = ["data.mdb", "lock.mdb"]
 
+    private static let mainAppMapsize = 1024 * 1024 * 1024 * 32
+    private static let mainAppMinMapsize = 700 * 1024 * 1024
+    private static let extensionMapsize = 32 * 1024 * 1024
+    private static let extensionMinMapsize = 8 * 1024 * 1024
+
     static var empty: Ndb {
         print("txn: NOSTRDB EMPTY")
         return Ndb(ndb: ndb_t(ndb: nil))
     }
-    
+
+    private static var isAppExtension: Bool {
+        Bundle.main.bundlePath.hasSuffix(".appex")
+    }
+
     static func open(path: String? = nil, owns_db_file: Bool = true, callbackHandler: Ndb.CallbackHandler) -> ndb_t? {
         var ndb_p: OpaquePointer? = nil
 
         let ingest_threads: Int32 = 4
-        var mapsize: Int = 1024 * 1024 * 1024 * 32
+
+        let isExtension = isAppExtension || !owns_db_file
+        var mapsize: Int = isExtension ? extensionMapsize : mainAppMapsize
         
         if path == nil && owns_db_file {
             // `nil` path indicates the default path will be used.
@@ -123,9 +134,11 @@ class Ndb {
             return nil      // If the caller claims to not own the DB file, and the DB files do not exist, then we should not initialize Ndb
         }
 
+        let minMapsize = isExtension ? extensionMinMapsize : mainAppMinMapsize
+
         let ok = path.withCString { testdir in
             var ok = false
-            while !ok && mapsize > 1024 * 1024 * 700 {
+            while !ok && mapsize >= minMapsize {
                 var cfg = ndb_config(flags: 0, ingester_threads: ingest_threads, writer_scratch_buffer_size: DEFAULT_WRITER_SCRATCH_SIZE, mapsize: mapsize, filter_context: nil, ingest_filter: nil, sub_cb_ctx: nil, sub_cb: nil)
                 
                 // Here we hook up the global callback function for subscription callbacks.
