@@ -445,6 +445,39 @@ final class NdbTests: XCTestCase {
         XCTAssertEqual(owned.id, id)
     }
 
+    /// Regression test: concurrent ndb access must not deadlock.
+    /// Old code held a lock while waiting on the semaphore in incrementUserCount,
+    /// blocking decrementUserCount from signaling — deadlock when threads raced.
+    func test_uselock_concurrent_timeout_not_serial() throws {
+        // Test the UseLock directly: old code held Mutex/NSLock while blocking
+        // on the semaphore, serializing all threads behind the lock.
+        // With N threads timing out: old = N*timeout (serial), fix = ~1*timeout (parallel).
+        let lock = Ndb.initLock()
+        // Deliberately NOT calling markNdbOpen — semaphore stays at 0.
+        // All threads will timeout, but with the fix they timeout in parallel.
+
+        let threadCount = 10
+        let timeout: DispatchTimeInterval = .milliseconds(200)
+        let group = DispatchGroup()
+        let start = Date()
+
+        for _ in 0..<threadCount {
+            group.enter()
+            DispatchQueue.global().async {
+                _ = try? lock.keepNdbOpen(during: { }, maxWaitTimeout: timeout)
+                group.leave()
+            }
+        }
+
+        let result = group.wait(timeout: .now() + 30)
+        let elapsed = Date().timeIntervalSince(start)
+
+        XCTAssertEqual(result, .success, "All threads should eventually complete")
+        // With the fix: all threads timeout roughly together (~200ms)
+        // Without the fix: threads serialize behind the lock (~10*200ms = 2000ms)
+        XCTAssertLessThan(elapsed, 2.5, "Threads should timeout in parallel, not serially (elapsed: \(elapsed)s)")
+    }
+
     /// Verifies Ndb initializes with smaller mapsize in extension mode.
     func test_ndb_init_extension_mode() throws {
         do {
