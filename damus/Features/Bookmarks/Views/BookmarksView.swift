@@ -9,7 +9,6 @@ import SwiftUI
 
 struct BookmarksView: View {
     let state: DamusState
-    private let noneFilter: (NostrEvent) -> Bool = { _ in true }
     private let bookmarksTitle = NSLocalizedString("Bookmarks", comment: "Title of bookmarks view")
     @State private var clearAllAlert: Bool = false
     
@@ -37,7 +36,11 @@ struct BookmarksView: View {
                 }
             } else {
                 ScrollView {
-                    InnerTimelineView(events: EventHolder(events: bookmarks, incoming: []), damus: state, filter: noneFilter)
+                    InnerTimelineView(
+                        events: EventHolder(events: bookmarks, incoming: []),
+                        damus: state,
+                        filter: ContentFilters.default_filters(damus_state: state).filter(ev:)
+                    )
                 }
                 .padding(.bottom, 10 + tabHeight + getSafeAreaBottom())
             }
