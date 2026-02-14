@@ -192,6 +192,77 @@ class NostrNetworkManagerTests: XCTestCase {
         XCTAssertEqual(manager.setCallCount, 1)
         XCTAssertEqual(manager.appliedRelayLists.first?.relays.count, validRelayList.relays.count)
     }
+
+    /// Ensures duplicate relay list events with the same created_at are deduplicated.
+    ///
+    /// Regression test for PR #3542: When the same relay list event arrives from multiple
+    /// relays simultaneously, only the first should be processed. Before the fix,
+    /// an async DB lookup created a race window where both events passed the created_at guard.
+    func testRelayListListenerDeduplicatesSameTimestampEvents() async throws {
+        let ndb = Ndb.test
+        let delegate = MockNetworkDelegate(ndb: ndb, keypair: test_keypair, bootstrapRelays: [RelayURL("wss://relay.damus.io")!])
+        let pool = RelayPool(ndb: ndb, keypair: test_keypair)
+        let reader = MockSubscriptionManager(pool: pool, ndb: ndb)
+        let manager = SpyUserRelayListManager(delegate: delegate, pool: pool, reader: reader)
+        let appliedExpectation = expectation(description: "At least one relay list should be applied")
+        manager.setExpectation = appliedExpectation
+
+        let timestamp: UInt32 = 1000
+
+        let relayList1 = NIP65.RelayList(relays: [RelayURL("wss://relay-1.damus.io")!])
+        guard let event1 = relayList1.toNostrEvent(keypair: test_keypair_full, timestamp: timestamp) else {
+            XCTFail("Failed to create relay list event 1")
+            return
+        }
+
+        let relayList2 = NIP65.RelayList(relays: [RelayURL("wss://relay-2.damus.io")!])
+        guard let event2 = relayList2.toNostrEvent(keypair: test_keypair_full, timestamp: timestamp) else {
+            XCTFail("Failed to create relay list event 2")
+            return
+        }
+
+        // Simulate the same relay list event arriving from two different relays
+        reader.queuedLenders = [.owned(event1), .owned(event2)]
+
+        await manager.listenAndHandleRelayUpdates()
+        await fulfillment(of: [appliedExpectation], timeout: 1.0)
+
+        // With the fix: only the first event is processed (local timestamp dedup)
+        // Before the fix: both pass (async DB lookup returns nil/0 each time)
+        XCTAssertEqual(manager.setCallCount, 1, "Duplicate relay list events with same created_at should be deduplicated")
+    }
+
+    /// Ensures @Published property updates from disconnect() arrive on the main thread.
+    ///
+    /// Regression test for PR #3542: RelayConnection's @Published properties (isConnected,
+    /// isConnecting) must be updated on the main thread for Combine/SwiftUI safety.
+    /// Before the fix, calling disconnect() from a background thread set them directly
+    /// on that thread, causing undefined behavior and UI freezes.
+    func testRelayConnectionDisconnectUpdatesStateOnMainThread() async throws {
+        let url = RelayURL("wss://relay.damus.io")!
+        let connection = RelayConnection(
+            url: url,
+            handleEvent: { _ in },
+            processUnverifiedWSEvent: { _ in }
+        )
+
+        let mainThreadExpectation = expectation(description: "isConnected update should arrive on main thread")
+
+        let cancellable = connection.$isConnected
+            .dropFirst() // Skip initial value
+            .sink { _ in
+                XCTAssertTrue(Thread.isMainThread, "isConnected was updated off the main thread")
+                mainThreadExpectation.fulfill()
+            }
+
+        // Call disconnect from a background thread to trigger the bug
+        DispatchQueue.global(qos: .userInitiated).async {
+            connection.disconnect()
+        }
+
+        await fulfillment(of: [mainThreadExpectation], timeout: 2.0)
+        cancellable.cancel()
+    }
 }
 
 // MARK: - Test doubles
