@@ -1304,6 +1304,18 @@ func should_show_event(state: DamusState, ev: NostrEvent) -> Bool {
         return false
     }
 
+    if state.settings.hide_nsfw_tagged_content {
+        if event_has_nsfw_tag(ev) {
+            return false
+        }
+
+        if ev.known_kind == .boost,
+           let inner_ev = ev.get_cached_inner_event(cache: state.events),
+           event_has_nsfw_tag(inner_ev) {
+            return false
+        }
+    }
+
     return ev.should_show_event
 }
 
@@ -1362,6 +1374,7 @@ func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: 
     }
 }
 
+
 // MARK: - Extension to bridge NIP-65 relay list structs with app-native objects
 // TODO: Do we need this??
 
@@ -1373,12 +1386,12 @@ func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: 
 //        })
 //        return NIP65.RelayList(relays: relayItems)
 //    }
-//    
+//
 //    static func fromLegacyContactList(_ contactList: NdbNote?) throws(BridgeError) -> Self? {
 //        guard let contactList = contactList else { return nil }
 //        return try fromLegacyContactList(contactList)
 //    }
-//    
+//
 //    enum BridgeError: Error {
 //        case couldNotDecodeRelayListInfo
 //    }

@@ -431,6 +431,7 @@
 		4CE6DEEE27F7A08200C66700 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4CE6DEED27F7A08200C66700 /* Preview Assets.xcassets */; };
 		4CE6DEF827F7A08200C66700 /* damusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DEF727F7A08200C66700 /* damusTests.swift */; };
 		CCCC2222AAAA222200000002 /* WalletModelConcurrencyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCCC2222AAAA222200000001 /* WalletModelConcurrencyTests.swift */; };
+		DDDD0001BBBB000100000002 /* ContentFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDD0001BBBB000100000001 /* ContentFilterTests.swift */; };
 		CCCC1111AAAA111100000002 /* NostrNetworkManagerConcurrencyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCCC1111AAAA111100000001 /* NostrNetworkManagerConcurrencyTests.swift */; };
 		4CE6DF0227F7A08200C66700 /* damusUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF0127F7A08200C66700 /* damusUITests.swift */; };
 		4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */; };
@@ -2546,6 +2547,7 @@
 		4CE6DEF327F7A08200C66700 /* damusTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = damusTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CE6DEF727F7A08200C66700 /* damusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damusTests.swift; sourceTree = "<group>"; };
 		CCCC2222AAAA222200000001 /* WalletModelConcurrencyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletModelConcurrencyTests.swift; sourceTree = "<group>"; };
+		DDDD0001BBBB000100000001 /* ContentFilterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentFilterTests.swift; sourceTree = "<group>"; };
 		CCCC1111AAAA111100000001 /* NostrNetworkManagerConcurrencyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrNetworkManagerConcurrencyTests.swift; sourceTree = "<group>"; };
 		4CE6DEFD27F7A08200C66700 /* damusUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = damusUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CE6DF0127F7A08200C66700 /* damusUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damusUITests.swift; sourceTree = "<group>"; };
@@ -3942,6 +3944,7 @@
 				3A92C1012DE17ACA00CEEBAC /* NIP05DomainTimelineHeaderViewTests.swift */,
 				C0AE7EE3216D7983A50BE2D9 /* LoadableNostrEventViewModelTests.swift */,
 				CCCC2222AAAA222200000001 /* WalletModelConcurrencyTests.swift */,
+				DDDD0001BBBB000100000001 /* ContentFilterTests.swift */,
 				CCCC1111AAAA111100000001 /* NostrNetworkManagerConcurrencyTests.swift */,
 			);
 			path = damusTests;
@@ -6415,6 +6418,7 @@
 				3A92C1022DE17ACA00CEEBAC /* NIP05DomainTimelineHeaderViewTests.swift in Sources */,
 				EBCC3486DE53D8DB2532B98E /* LoadableNostrEventViewModelTests.swift in Sources */,
 				CCCC2222AAAA222200000002 /* WalletModelConcurrencyTests.swift in Sources */,
+				DDDD0001BBBB000100000002 /* ContentFilterTests.swift in Sources */,
 				CCCC1111AAAA111100000002 /* NostrNetworkManagerConcurrencyTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
