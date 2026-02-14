@@ -320,17 +320,27 @@ class Ndb {
     func markClosed() {
         self.closed = true
     }
-    
+
     func close() {
         guard !self.is_closed else { return }
         self.closed = true
-        try! self.ndbAccessLock.waitUntilNdbCanClose(thenClose: {
-            print("txn: CLOSING NOSTRDB")
-            ndb_destroy(self.ndb.ndb)
-            self.generation += 1
-            print("txn: NOSTRDB CLOSED")
-            return false
-        }, maxTimeout: .milliseconds(2000))
+
+        // Capture the current ndb instance to close. This prevents a race where
+        // reopen() sets self.ndb to a new instance before closeWork runs,
+        // which would cause closeWork to destroy the wrong (new) database.
+        let ndbToClose = self.ndb
+
+        do {
+            try self.ndbAccessLock.waitUntilNdbCanClose(thenClose: { [weak self] in
+                print("txn: CLOSING NOSTRDB")
+                ndb_destroy(ndbToClose.ndb)
+                self?.generation += 1
+                print("txn: NOSTRDB CLOSED")
+                return false
+            }, maxTimeout: .milliseconds(2000))
+        } catch {
+            Log.error("Failed to close NostrDB: %@", for: .storage, String(describing: error))
+        }
     }
 
     func reopen() -> Bool {
