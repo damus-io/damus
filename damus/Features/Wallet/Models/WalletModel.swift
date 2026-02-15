@@ -133,7 +133,7 @@ class WalletModel: ObservableObject {
         // This is important to avoid re-rendering the view twice (waste),
         // and to avoid refreshable tasks to be cancelled before updating everything
         let balance = try await fetchBalance()
-        let transactions = try await fetchTransactions(from: nil, until: nil, limit: 50, offset: 0, unpaid: false, type: "")
+        let transactions = try await fetchTransactions(from: nil, until: nil, limit: 50, offset: 0, unpaid: false, type: nil)
         DispatchQueue.main.async {
             self.balance = balance
             self.transactions = transactions
