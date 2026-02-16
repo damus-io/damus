@@ -512,6 +512,92 @@ final class NdbTests: XCTestCase {
         XCTAssertTrue(unrelatedResults.isEmpty, "Search for 'aaa' should NOT match profile 'jb55' — prefix mismatch")
     }
 
+    // MARK: - Transaction Performance Benchmarks
+
+    /// Baseline: cost of a single lookup_profile_and_copy call.
+    func test_perf_single_profile_lookup() throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+        Thread.sleep(forTimeInterval: 0.5)
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+
+        measure {
+            let profile = try? ndb.lookup_profile_and_copy(pk)
+            XCTAssertEqual(profile?.name, "jb55")
+        }
+    }
+
+    /// Sequential N lookups, each opening its own LMDB read transaction.
+    /// This is the current hot-path pattern after transaction inheritance removal.
+    func test_perf_sequential_profile_lookups() throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+        Thread.sleep(forTimeInterval: 0.5)
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+        let lookupCount = 100
+
+        measure {
+            for _ in 0..<lookupCount {
+                let profile = try? ndb.lookup_profile_and_copy(pk)
+                XCTAssertNotNil(profile)
+            }
+        }
+    }
+
+    /// Batch N lookups sharing a single LMDB read transaction.
+    /// Theoretical optimum: one transaction open/close for N lookups.
+    func test_perf_batch_profile_lookups_single_txn() throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+        Thread.sleep(forTimeInterval: 0.5)
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+        let lookupCount = 100
+
+        measure {
+            guard let txn = NdbTxn<()>(ndb: ndb, name: "batch_bench") else {
+                XCTFail("Could not create transaction")
+                return
+            }
+            for _ in 0..<lookupCount {
+                pk.id.withUnsafeBytes { ptr in
+                    var size: Int = 0
+                    var key: UInt64 = 0
+                    guard let baseAddress = ptr.baseAddress else { return }
+                    let result = ndb_get_profile_by_pubkey(&txn.txn, baseAddress, &size, &key)
+                    XCTAssertNotNil(result)
+                }
+            }
+            _ = txn // keep transaction alive for the loop
+        }
+    }
+
+    /// Concurrent lookups: N threads each doing lookup_profile_and_copy.
+    /// Measures contention from the withNdb lock under parallel access.
+    func test_perf_concurrent_profile_lookups() throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+        Thread.sleep(forTimeInterval: 0.5)
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+        let threadCount = 10
+        let lookupsPerThread = 10
+
+        measure {
+            let group = DispatchGroup()
+            for _ in 0..<threadCount {
+                group.enter()
+                DispatchQueue.global().async {
+                    for _ in 0..<lookupsPerThread {
+                        let profile = try? ndb.lookup_profile_and_copy(pk)
+                        XCTAssertNotNil(profile)
+                    }
+                    group.leave()
+                }
+            }
+            let result = group.wait(timeout: .now() + 10)
+            XCTAssertEqual(result, .success)
+        }
+    }
+
     /// Verifies Ndb initializes with smaller mapsize in extension mode.
     func test_ndb_init_extension_mode() throws {
         do {
