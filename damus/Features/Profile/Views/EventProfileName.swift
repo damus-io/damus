@@ -103,12 +103,10 @@ struct EventProfileName: View {
         }
         .task {
             let ndb = damus_state.ndb
-            let cachedProfile: Profile? = await withCheckedContinuation { continuation in
-                DispatchQueue.global(qos: .userInitiated).async {
-                    let profile = try? ndb.lookup_profile_and_copy(pubkey)
-                    continuation.resume(returning: profile)
-                }
-            }
+            let pk = pubkey
+            let cachedProfile = await Task.detached(priority: .userInitiated) {
+                try? ndb.lookup_profile_and_copy(pk)
+            }.value
             guard !Task.isCancelled else { return }
             if let cachedProfile {
                 self.profile = cachedProfile
@@ -119,8 +117,7 @@ struct EventProfileName: View {
             if self.nip05 != nip05 {
                 self.nip05 = nip05
             }
-        }
-        .task {
+
             for await profile in await damus_state.nostrNetwork.profilesManager.streamProfile(pubkey: pubkey) {
                 self.profile = profile
                 let display_name = Profile.displayName(profile: profile, pubkey: pubkey)
