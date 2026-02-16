@@ -206,4 +206,31 @@ final class WalletConnectTests: XCTestCase {
             XCTFail("Decoded to the wrong case")
         }
     }
+
+    func testEncodingListTransactionsType() throws {
+        func encoded_request_with_type(type: String?) throws -> String {
+            let request = WalletConnect.Request.getTransactionList(
+                from: nil,
+                until: nil,
+                limit: nil,
+                offset: nil,
+                unpaid: nil,
+                type: type,
+            )
+            let encodedData = try JSONEncoder().encode(request)
+            return String(data: encodedData, encoding: .utf8)!
+        }
+        
+        var encodedRequest = try encoded_request_with_type(type: nil)
+        XCTAssertFalse(encodedRequest.contains("\"type\""))
+        
+        encodedRequest = try encoded_request_with_type(type: "")
+        XCTAssertTrue(encodedRequest.contains("\"type\":\"\""))
+
+        encodedRequest = try encoded_request_with_type(type: "incoming")
+        XCTAssertTrue(encodedRequest.contains("\"type\":\"incoming\""))
+        
+        encodedRequest = try encoded_request_with_type(type: "outgoing")
+        XCTAssertTrue(encodedRequest.contains("\"type\":\"outgoing\""))
+    }
 }
