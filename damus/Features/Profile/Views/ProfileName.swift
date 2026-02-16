@@ -123,12 +123,10 @@ struct ProfileName: View {
         }
         .task {
             let ndb = damus_state.ndb
-            let cachedProfile: Profile? = await withCheckedContinuation { continuation in
-                DispatchQueue.global(qos: .userInitiated).async {
-                    let profile = try? ndb.lookup_profile_and_copy(pubkey)
-                    continuation.resume(returning: profile)
-                }
-            }
+            let pk = pubkey
+            let cachedProfile = await Task.detached(priority: .userInitiated) {
+                try? ndb.lookup_profile_and_copy(pk)
+            }.value
             guard !Task.isCancelled else { return }
             if let cachedProfile {
                 self.profile = cachedProfile
@@ -143,15 +141,14 @@ struct ProfileName: View {
                 self.nip05_domain_favicon = try? await damus_state.favicon_cache.lookup(domain)
                     .largest()
             }
+
+            for await profile in await damus_state.nostrNetwork.profilesManager.streamProfile(pubkey: pubkey) {
+                handle_profile_update(profile: profile)
+            }
         }
         .task {
             if damus_state.purple.enable_purple {
                 self.purple_account = try? await damus_state.purple.get_maybe_cached_account(pubkey: pubkey)
-            }
-        }
-        .task {
-            for await profile in await damus_state.nostrNetwork.profilesManager.streamProfile(pubkey: pubkey) {
-                handle_profile_update(profile: profile)
             }
         }
     }
