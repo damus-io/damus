@@ -121,9 +121,13 @@ final class RelayConnection: ObservableObject {
                 self.log?.add("Successful ping")
             } else {
                 Log.info("Ping failed, reconnecting to '%s'", for: .networking, self.relay_url.absoluteString)
-                self.isConnected = false
-                self.isConnecting = false
-                self.reconnect_with_backoff()
+                // @Published writes must happen on the main thread to avoid
+                // SwiftUI crashes. The ping callback fires on an arbitrary thread.
+                DispatchQueue.main.async {
+                    self.isConnected = false
+                    self.isConnecting = false
+                    self.reconnect_with_backoff()
+                }
                 self.log?.add("Ping failed")
             }
         }
