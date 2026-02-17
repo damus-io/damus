@@ -1,3 +1,22 @@
+
+## [1.16.1] - 2026-02-17
+
+### Added
+
+- Added a view for quotes notes that could not be loaded, including actionable items (Daniel D’Aquino)
+- Added relay hint support for nevent, nprofile, naddr links and event tag references (reposts, quotes, replies) (alltheseas)
+
+
+### Fixed
+
+- Fixed an issue where notes would keep loading indefinitely in some cases (Daniel D’Aquino)
+- Fixed Lightning invoice parsing and fetching for all amounts (alltheseas)
+
+
+
+[1.16.1]: https://github.com/damus-io/damus/releases/tag/v1.16.1
+
+
 ## [1.15] - 2025-07-11
 
 **Note:** This version was only released on TestFlight, and never officially released on the App Store.
