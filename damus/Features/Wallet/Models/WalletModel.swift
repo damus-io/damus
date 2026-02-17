@@ -44,6 +44,10 @@ class WalletModel: ObservableObject {
     ///
     /// Please see the `waitForResponse` method for context.
     private var continuations: [NoteId: CheckedContinuation<WalletConnect.Response.Result, any Error>] = [:]
+    /// Timeout tasks for each pending request, cancelled when the response arrives.
+    private var timeoutTasks: [NoteId: Task<Void, Never>] = [:]
+    /// Protects `continuations` and `timeoutTasks` from concurrent access (e.g. response + timeout racing)
+    private let continuationsLock = NSLock()
     
     init(state: WalletConnectState, settings: UserSettingsStore) {
         self.connect_state = state
@@ -211,27 +215,38 @@ class WalletModel: ObservableObject {
     
     func waitForResponse(for requestId: NoteId, timeout: Duration = .seconds(10)) async throws -> WalletConnect.Response.Result {
         return try await withCheckedThrowingContinuation({ continuation in
+            self.continuationsLock.lock()
             self.continuations[requestId] = continuation
-            
             let timeoutTask = Task {
                 try? await Task.sleep(for: timeout)
-                self.resume(request: requestId, throwing: WaitError.timeout)    // Must resume the continuation exactly once even if there is no response
+                self.resume(request: requestId, throwing: WaitError.timeout)
             }
+            self.timeoutTasks[requestId] = timeoutTask
+            self.continuationsLock.unlock()
         })
     }
     
     private func resume(request requestId: NoteId, with result: WalletConnect.Response.Result) {
-        continuations[requestId]?.resume(returning: result)
-        continuations[requestId] = nil      // Never resume a continuation twice
+        continuationsLock.lock()
+        let continuation = continuations.removeValue(forKey: requestId)
+        let timeout = timeoutTasks.removeValue(forKey: requestId)
+        continuationsLock.unlock()
+        timeout?.cancel()
+        continuation?.resume(returning: result)
     }
-    
+
     private func resume(request requestId: NoteId, throwing error: any Error) {
-        if let continuation = continuations[requestId] {
+        continuationsLock.lock()
+        let continuation = continuations.removeValue(forKey: requestId)
+        let timeout = timeoutTasks.removeValue(forKey: requestId)
+        continuationsLock.unlock()
+        timeout?.cancel()
+
+        if let continuation {
             continuation.resume(throwing: error)
-            continuations[requestId] = nil      // Never resume a continuation twice
             return      // Error will be handled by the listener, no need for the generic error sheet
         }
-        
+
         // No listeners to catch the error, show generic error sheet
         if let error = error as? WalletConnect.WalletResponseErr,
            let humanReadableError = error.humanReadableError {
