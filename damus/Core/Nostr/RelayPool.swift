@@ -60,6 +60,8 @@ class RelayPool {
     let network_monitor = NWPathMonitor()
     private let network_monitor_queue = DispatchQueue(label: "io.damus.network_monitor")
     private var last_network_status: NWPath.Status = .unsatisfied
+    private var isHandlingPathUpdate = false
+    private var pendingPath: NWPath? = nil
     
     /// The limit of maximum concurrent subscriptions. Any subscriptions beyond this limit will be paused until subscriptions clear
     /// This is to avoid error states and undefined behaviour related to hitting subscription limits on the relays, by letting those wait instead — with the principle that although slower is not ideal, it is better than completely broken.
@@ -96,16 +98,42 @@ class RelayPool {
     }
     
     private func pathUpdateHandler(path: NWPath) async {
+        // Re-entrancy guard: rapid network toggles can queue multiple
+        // pathUpdateHandler calls. Record the latest and process it after
+        // the current handler completes — never drop a transition.
+        if isHandlingPathUpdate {
+            pendingPath = path
+            return
+        }
+        isHandlingPathUpdate = true
+
+        var currentPath = path
+        while true {
+            await processPathUpdate(currentPath)
+            if let next = pendingPath {
+                pendingPath = nil
+                currentPath = next
+            } else {
+                break
+            }
+        }
+
+        isHandlingPathUpdate = false
+    }
+
+    private func processPathUpdate(_ path: NWPath) async {
         if (path.status == .satisfied || path.status == .requiresConnection) && self.last_network_status != path.status {
             await self.connect_to_disconnected()
         }
-        
+
         if path.status != self.last_network_status {
-            for relay in await self.relays {
+            // Snapshot relays before iteration — the property crosses to @MainActor
+            let relaysSnapshot = await self.relays
+            for relay in relaysSnapshot {
                 relay.connection.log?.add("Network state: \(path.status)")
             }
         }
-        
+
         self.last_network_status = path.status
     }
     
