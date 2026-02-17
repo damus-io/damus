@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 class DirectMessagesModel: ObservableObject {
     @Published var dms: [DirectMessageModel] = []
     @Published var loading: Bool = false
