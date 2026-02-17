@@ -125,11 +125,16 @@ final class RelayLog: ObservableObject {
         }
     }
     
-    /// Writes the contents of the lines in memory to disk
+    /// Writes the contents of the lines in memory to disk.
+    /// Snapshots lines before dispatching to avoid reading @MainActor state
+    /// from the notification callback's arbitrary thread.
     private func writeToDisk() {
+        // Snapshot lines — this may be called from a notification handler
+        // on an arbitrary thread, while addLine runs on @MainActor.
+        let linesToWrite = self.lines
         guard let log_file_url, let relay_url,
-              !lines.isEmpty,
-              let content = lines.joined(separator: "\n").data(using: .utf8) else {
+              !linesToWrite.isEmpty,
+              let content = linesToWrite.joined(separator: "\n").data(using: .utf8) else {
             return
         }
         
