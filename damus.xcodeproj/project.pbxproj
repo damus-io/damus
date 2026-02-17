@@ -1722,6 +1722,7 @@
 		D774A5D12F4FBDEA006A4D64 /* NdbDatabase+UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = D774A5CD2F4FBDEA006A4D64 /* NdbDatabase+UI.swift */; };
 		D774A5D32F4FC947006A4D64 /* RaceConditionTestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D774A5D22F4FC93D006A4D64 /* RaceConditionTestHelpers.swift */; };
 		D774A5D72F4FCA9A006A4D64 /* HomeModelConcurrencyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D774A5D52F4FCA9A006A4D64 /* HomeModelConcurrencyTests.swift */; };
+		D774A5D92F4FCE07006A4D64 /* EventHolderConcurrencyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D774A5D82F4FCE07006A4D64 /* EventHolderConcurrencyTests.swift */; };
 		D776BE402F232B17002DA1C9 /* EntityPreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D776BE3F2F232B17002DA1C9 /* EntityPreloader.swift */; };
 		D776BE412F232B17002DA1C9 /* EntityPreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D776BE3F2F232B17002DA1C9 /* EntityPreloader.swift */; };
 		D776BE422F232B17002DA1C9 /* EntityPreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D776BE3F2F232B17002DA1C9 /* EntityPreloader.swift */; };
@@ -2867,6 +2868,7 @@
 		D774A5CD2F4FBDEA006A4D64 /* NdbDatabase+UI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NdbDatabase+UI.swift"; sourceTree = "<group>"; };
 		D774A5D22F4FC93D006A4D64 /* RaceConditionTestHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RaceConditionTestHelpers.swift; sourceTree = "<group>"; };
 		D774A5D52F4FCA9A006A4D64 /* HomeModelConcurrencyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeModelConcurrencyTests.swift; sourceTree = "<group>"; };
+		D774A5D82F4FCE07006A4D64 /* EventHolderConcurrencyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventHolderConcurrencyTests.swift; sourceTree = "<group>"; };
 		D776BE3F2F232B17002DA1C9 /* EntityPreloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityPreloader.swift; sourceTree = "<group>"; };
 		D776BE432F233012002DA1C9 /* EntityPreloaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityPreloaderTests.swift; sourceTree = "<group>"; };
 		D77A96BE2F3131BE00CC3246 /* RelayHintsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayHintsTests.swift; sourceTree = "<group>"; };
@@ -5351,6 +5353,7 @@
 		D774A5D62F4FCA9A006A4D64 /* RaceConditionTests */ = {
 			isa = PBXGroup;
 			children = (
+				D774A5D82F4FCE07006A4D64 /* EventHolderConcurrencyTests.swift */,
 				D774A5D52F4FCA9A006A4D64 /* HomeModelConcurrencyTests.swift */,
 			);
 			path = RaceConditionTests;
@@ -6438,6 +6441,7 @@
 				D7DEEF2F2A8C021E00E0C99F /* NostrEventTests.swift in Sources */,
 				4C8D00D429E3C5D40036AF10 /* NIP19Tests.swift in Sources */,
 				3A30410129AB12AA008A0F29 /* EventGroupViewTests.swift in Sources */,
+				D774A5D92F4FCE07006A4D64 /* EventHolderConcurrencyTests.swift in Sources */,
 				501F8C822A0224EB001AFC1D /* KeychainStorageTests.swift in Sources */,
 				D72E127A2BEEEED000F4F781 /* NostrFilterTests.swift in Sources */,
 				B5B4D1432B37D47600844320 /* NdbExtensions.swift in Sources */,
