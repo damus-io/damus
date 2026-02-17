@@ -26,6 +26,7 @@ actor DatabaseSnapshotManager {
     
     private let ndb: Ndb
     private var snapshotTimerTask: Task<Void, Never>? = nil
+    private var isCreatingSnapshot = false
     var snapshotTimerTickCount: Int = 0
     var snapshotCount: Int = 0
     
@@ -92,7 +93,16 @@ actor DatabaseSnapshotManager {
             Log.debug("Skipping snapshot - minimum interval not yet elapsed", for: .storage)
             return false
         }
-        
+
+        // Prevent concurrent snapshot creation — performSnapshot suspends
+        // (async file I/O), which allows the actor to start another call.
+        guard !isCreatingSnapshot else {
+            Log.debug("Skipping snapshot - already in progress", for: .storage)
+            return false
+        }
+        isCreatingSnapshot = true
+        defer { isCreatingSnapshot = false }
+
         try await self.performSnapshot()
         return true
     }
@@ -236,25 +246,23 @@ actor DatabaseSnapshotManager {
     /// Atomically moves the snapshot from temporary location to final destination.
     private func moveSnapshotToFinalDestination(from tempPath: String, to finalPath: String) async throws {
         let fileManager = FileManager.default
-        
-        // Remove existing snapshot if it exists
-        if fileManager.fileExists(atPath: finalPath) {
-            do {
-                try fileManager.removeItem(atPath: finalPath)
-                Log.debug("Removed existing snapshot at %{public}@", for: .storage, finalPath)
-            } catch {
-                throw SnapshotError.removeFailed(error)
-            }
+
+        // Remove existing snapshot — use try? to avoid TOCTOU (no fileExists check)
+        do {
+            try fileManager.removeItem(atPath: finalPath)
+            Log.debug("Removed existing snapshot at %{public}@", for: .storage, finalPath)
+        } catch let error as NSError where error.domain == NSCocoaErrorDomain && error.code == NSFileNoSuchFileError {
+            // File doesn't exist — expected, continue
+        } catch {
+            throw SnapshotError.removeFailed(error)
         }
-        
-        // Create parent directory if needed
+
+        // Create parent directory — withIntermediateDirectories:true is safe if it already exists
         let parentDir = URL(fileURLWithPath: finalPath).deletingLastPathComponent().path
-        if !fileManager.fileExists(atPath: parentDir) {
-            do {
-                try fileManager.createDirectory(atPath: parentDir, withIntermediateDirectories: true)
-            } catch {
-                throw SnapshotError.directoryCreationFailed(error)
-            }
+        do {
+            try fileManager.createDirectory(atPath: parentDir, withIntermediateDirectories: true)
+        } catch {
+            throw SnapshotError.directoryCreationFailed(error)
         }
         
         // Atomically move the temp snapshot to final destination
