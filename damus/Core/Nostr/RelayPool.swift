@@ -521,6 +521,7 @@ class RelayPool {
             var seenEvents: Set<NoteId> = []
             var relaysWhoFinishedInitialResults: Set<RelayURL> = []
             var eoseSent = false
+            let eoseLock = NSLock()
             let upstreamStream = AsyncStream<(RelayURL, NostrConnectionEvent)> { upstreamContinuation in
                 self.subscribe(sub_id: sub_id, filters: filters, handler: upstreamContinuation, to: desiredRelays.map({ $0.descriptor.url }))
             }
@@ -546,8 +547,13 @@ class RelayPool {
                             let desiredAndConnectedRelays = desiredRelays.filter({ $0.connection.isConnected }).map({ $0.descriptor.url })
                             Log.debug("RelayPool subscription %s: EOSE from %s. EOSE count: %d/%d. Elapsed: %.2f seconds.", for: .networking, id.uuidString, relayUrl.absoluteString, relaysWhoFinishedInitialResults.count, Set(desiredAndConnectedRelays).count, CFAbsoluteTimeGetCurrent() - startTime)
                             if relaysWhoFinishedInitialResults == Set(desiredAndConnectedRelays) {
-                                continuation.yield(with: .success(.eose))
+                                eoseLock.lock()
+                                let alreadySent = eoseSent
                                 eoseSent = true
+                                eoseLock.unlock()
+                                if !alreadySent {
+                                    continuation.yield(with: .success(.eose))
+                                }
                             }
                         case .ok(_): break    // No need to handle this, we are not sending an event to the relay
                         case .auth(_): break    // Handled in a separate function in RelayPool
@@ -559,7 +565,11 @@ class RelayPool {
             }
             let timeoutTask = Task {
                 try? await Task.sleep(for: eoseTimeout)
-                if !eoseSent { continuation.yield(with: .success(.eose)) }
+                eoseLock.lock()
+                let alreadySent = eoseSent
+                eoseSent = true
+                eoseLock.unlock()
+                if !alreadySent { continuation.yield(with: .success(.eose)) }
             }
             continuation.onTermination = { @Sendable termination in
                 switch termination {
