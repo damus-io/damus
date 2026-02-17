@@ -50,6 +50,8 @@ struct DamusUserDefaults {
     
     private let main: UserDefaults
     private let mirrors: [UserDefaults]
+    /// Protects the main write + mirror loop to make them atomic
+    private let lock = NSLock()
     
     // MARK: - Initializers
     
@@ -72,22 +74,30 @@ struct DamusUserDefaults {
     // MARK: - Functions for feature parity with UserDefaults
     
     func string(forKey defaultName: String) -> String? {
+        lock.lock()
+        defer { lock.unlock() }
         let value = self.main.string(forKey: defaultName)
         self.mirror(value, forKey: defaultName)
         return value
     }
-    
+
     func set(_ value: Any?, forKey defaultName: String) {
+        lock.lock()
+        defer { lock.unlock() }
         self.main.set(value, forKey: defaultName)
         self.mirror(value, forKey: defaultName)
     }
-    
+
     func removeObject(forKey defaultName: String) {
+        lock.lock()
+        defer { lock.unlock() }
         self.main.removeObject(forKey: defaultName)
         self.mirror_object_removal(forKey: defaultName)
     }
-    
+
     func object(forKey defaultName: String) -> Any? {
+        lock.lock()
+        defer { lock.unlock() }
         let value = self.main.object(forKey: defaultName)
         self.mirror(value, forKey: defaultName)
         return value
