@@ -491,16 +491,23 @@ public class CameraService: NSObject, Identifiable {
                     }, completionHandler: { (photoCaptureProcessor) in
                         if let data = photoCaptureProcessor.photoData {
                             let url = self.savePhoto(data: data)
-                            if let unwrappedURL = url {
-                                self.thumbnail = Thumbnail(type: .image, url: unwrappedURL)
+                            DispatchQueue.main.async {
+                                if let unwrappedURL = url {
+                                    self.mediaItems.append(MediaItem(url: unwrappedURL, type: .image))
+                                    self.thumbnail = Thumbnail(type: .image, url: unwrappedURL)
+                                }
+                                self.isCameraButtonDisabled = false
                             }
                         } else {
                             print("Data for photo not found")
+                            DispatchQueue.main.async {
+                                self.isCameraButtonDisabled = false
+                            }
                         }
-
-                        self.isCameraButtonDisabled = false
                     }, photoProcessingHandler: { animate in
-                        self.isPhotoProcessing = animate
+                        DispatchQueue.main.async {
+                            self.isPhotoProcessing = animate
+                        }
                     })
                 }
 
@@ -528,15 +535,20 @@ public class CameraService: NSObject, Identifiable {
 
                 if self.videoCaptureProcessor == nil {
                     self.videoCaptureProcessor = VideoCaptureProcessor(movieOutput: self.movieOutput, beginHandler: {
-                        self.isRecording = true
+                        DispatchQueue.main.async {
+                            self.isRecording = true
+                        }
                     }, completionHandler: { (videoCaptureProcessor, outputFileURL) in
-                        self.isCameraButtonDisabled = false
-                        self.captureMode = .image
-
-                        self.mediaItems.append(MediaItem(url: outputFileURL, type: .video))
-                        self.thumbnail = Thumbnail(type: .video, url: outputFileURL)
+                        DispatchQueue.main.async {
+                            self.isCameraButtonDisabled = false
+                            self.captureMode = .image
+                            self.mediaItems.append(MediaItem(url: outputFileURL, type: .video))
+                            self.thumbnail = Thumbnail(type: .video, url: outputFileURL)
+                        }
                     }, videoProcessingHandler: { animate in
-                        self.isPhotoProcessing = animate
+                        DispatchQueue.main.async {
+                            self.isPhotoProcessing = animate
+                        }
                     })
                 }
 
@@ -547,7 +559,9 @@ public class CameraService: NSObject, Identifiable {
 
     func stopRecording() {
         if let videoCaptureProcessor = self.videoCaptureProcessor {
-            isRecording = false
+            DispatchQueue.main.async {
+                self.isRecording = false
+            }
             videoCaptureProcessor.stopCapture()
         }
     }
@@ -569,7 +583,6 @@ public class CameraService: NSObject, Identifiable {
 
         do {
             try compressedData.write(to: tempFileURL)
-            self.mediaItems.append(MediaItem(url: tempFileURL, type: .image))
             return tempFileURL
         } catch {
             print("Error saving image data to temporary URL: \(error.localizedDescription)")
