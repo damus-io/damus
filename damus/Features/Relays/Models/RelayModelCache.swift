@@ -16,9 +16,12 @@ import Foundation
 /// For example, it is used by `RelayView` to supplement information about the relay without having to fetch those again from the network, as well as to display logs collected throughout the use of the app.
 final class RelayModelCache: ObservableObject {
     private var models = [RelayURL: RelayModel]()
-    
+    private let lock = NSLock()
+
     func model(withURL url: RelayURL) -> RelayModel? {
-        models[url]
+        lock.lock()
+        defer { lock.unlock() }
+        return models[url]
     }
 
     func model(with_relay_id url_string: RelayURL) -> RelayModel? {
@@ -26,7 +29,11 @@ final class RelayModelCache: ObservableObject {
     }
 
     func insert(model: RelayModel) {
+        lock.lock()
         models[model.url] = model
-        objectWillChange.send()
+        lock.unlock()
+        DispatchQueue.main.async {
+            self.objectWillChange.send()
+        }
     }
 }
