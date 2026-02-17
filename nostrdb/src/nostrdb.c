@@ -614,10 +614,20 @@ int ndb_filter_end(struct ndb_filter *filter)
 	memmove(filter->elem_buf.p, filter->data_buf.start, data_len);
 
 	// realloc the whole thing
-	rel = realloc(filter->elem_buf.start, elem_len + data_len);
-	if (rel) 
-		filter->elem_buf.start = rel;
-	assert(filter->elem_buf.start);
+	size_t new_size = elem_len + data_len;
+	if (new_size == 0) {
+		// Avoid calling realloc with size 0 (implementation-defined behavior)
+		// Explicitly free and set to NULL
+		free(filter->elem_buf.start);
+		filter->elem_buf.start = NULL;
+	} else {
+		rel = realloc(filter->elem_buf.start, new_size);
+		if (rel) {
+			filter->elem_buf.start = rel;
+		}
+		// Assert allocation succeeded for non-zero size
+		assert(filter->elem_buf.start);
+	}
 	filter->elem_buf.end = filter->elem_buf.start + elem_len;
 	filter->elem_buf.p = filter->elem_buf.end;
 
