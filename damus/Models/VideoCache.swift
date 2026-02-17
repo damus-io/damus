@@ -13,9 +13,31 @@ fileprivate let DEFAULT_EXPIRY_TIME: TimeInterval = 60*60*24
 // (https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/FileSystemOverview/FileSystemOverview.html)
 fileprivate let DEFAULT_CACHE_DIRECTORY_PATH: URL? = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent("video_cache")
 
+/// Thread-safe tracker for in-flight download URLs.
+/// @unchecked Sendable: NSLock protects `urls` Set from concurrent access.
+private class InFlightTracker: @unchecked Sendable {
+    private let lock = NSLock()
+    private var urls = Set<URL>()
+
+    /// Returns true if the URL was not already in-flight and is now tracked.
+    func tryInsert(_ url: URL) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return urls.insert(url).inserted
+    }
+
+    func remove(_ url: URL) {
+        lock.lock()
+        defer { lock.unlock() }
+        urls.remove(url)
+    }
+}
+
 struct VideoCache {
     private let cache_url: URL
     private let expiry_time: TimeInterval
+    /// Tracks URLs currently being downloaded to prevent duplicate concurrent downloads.
+    private let inFlight = InFlightTracker()
     static let standard: VideoCache? = try? VideoCache()
     
     init?(cache_url: URL? = nil, expiry_time: TimeInterval = DEFAULT_EXPIRY_TIME) throws {
@@ -33,30 +55,41 @@ struct VideoCache {
     }
     
     /// Checks for a cached video and returns its URL if available, otherwise downloads and caches the video.
-    func maybe_cached_url_for(video_url: URL) throws -> URL {
+    func maybe_cached_url_for(video_url: URL) -> URL {
         let cached_url = url_to_cached_url(url: video_url)
-        
-        if FileManager.default.fileExists(atPath: cached_url.path) {
-            // Check if the cached video has expired
-            let file_attributes = try FileManager.default.attributesOfItem(atPath: cached_url.path)
-            if let modification_date = file_attributes[.modificationDate] as? Date, Date().timeIntervalSince(modification_date) <= expiry_time {
-                // Video is not expired
-                return cached_url
-            } else {
-                Task {
-                    // Video is expired, delete and re-download on the background
-                    try FileManager.default.removeItem(at: cached_url)
-                    return try await download_and_cache_video(from: video_url)
-                }
-                return video_url
-            }
-        } else {
-            Task {
-                // Video is not cached, download and cache on the background
-                return try await download_and_cache_video(from: video_url)
-            }
+
+        // Use try? to avoid TOCTOU: instead of fileExists + attributesOfItem,
+        // attempt to read attributes directly. If the file doesn't exist,
+        // attributes will be nil and we fall through to download.
+        let file_attributes = try? FileManager.default.attributesOfItem(atPath: cached_url.path)
+
+        if let file_attributes,
+           let modification_date = file_attributes[.modificationDate] as? Date,
+           Date().timeIntervalSince(modification_date) <= expiry_time {
+            // Cached and not expired
+            return cached_url
+        }
+
+        // Prevent duplicate concurrent downloads for the same URL
+        guard inFlight.tryInsert(video_url) else {
             return video_url
         }
+
+        if file_attributes != nil {
+            // File exists but is expired — remove and re-download
+            Task.detached(priority: .background) { [self] in
+                defer { inFlight.remove(video_url) }
+                try? FileManager.default.removeItem(at: cached_url)
+                _ = try? await download_and_cache_video(from: video_url)
+            }
+        } else {
+            // Not cached — download
+            Task.detached(priority: .background) { [self] in
+                defer { inFlight.remove(video_url) }
+                _ = try? await download_and_cache_video(from: video_url)
+            }
+        }
+        return video_url
     }
     
     /// Downloads video content using URLSession and caches it to disk.
@@ -70,7 +103,7 @@ struct VideoCache {
         
         let destination_url = url_to_cached_url(url: url)
         
-        try data.write(to: destination_url)
+        try data.write(to: destination_url, options: .atomic)
         return destination_url
     }
 
