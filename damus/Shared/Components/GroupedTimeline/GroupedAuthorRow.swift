@@ -1,14 +1,14 @@
 //
-//  NIP05GroupedAuthorRow.swift
+//  GroupedAuthorRow.swift
 //  damus
 //
-//  Created by Claude on 2025-12-07.
+//  Created by alltheseas on 2025-12-07.
 //
 
 import SwiftUI
 
-/// A row in the grouped view showing an author with their post count
-struct NIP05GroupedAuthorRow: View {
+/// A row in the grouped view showing an author with their post count.
+struct GroupedAuthorRow: View {
     let damus_state: DamusState
     let pubkey: Pubkey
     let latestEvent: NostrEvent
@@ -34,14 +34,12 @@ struct NIP05GroupedAuthorRow: View {
                         .foregroundColor(.gray)
                 }
 
-                // Preview of latest post
                 Text(eventPreviewText(latestEvent))
                     .font(.subheadline)
                     .foregroundColor(.gray)
                     .lineLimit(2)
             }
 
-            // Post count badge
             postCountBadge
         }
         .padding(.vertical, 8)
@@ -66,11 +64,10 @@ struct NIP05GroupedAuthorRow: View {
             )
     }
 
-    /// Extract preview text from an event
+    /// Extract preview text from an event.
     func eventPreviewText(_ event: NostrEvent) -> String {
         let content = event.content
 
-        // Remove nostr: references and clean up
         let cleaned = content
             .replacingOccurrences(of: "nostr:[a-zA-Z0-9]+", with: "", options: .regularExpression)
             .replacingOccurrences(of: "\n+", with: " ", options: .regularExpression)
@@ -80,7 +77,6 @@ struct NIP05GroupedAuthorRow: View {
             return NSLocalizedString("(no text content)", comment: "Placeholder for events with no text")
         }
 
-        // Truncate if too long
         if cleaned.count > 150 {
             return String(cleaned.prefix(150)) + "..."
         }
@@ -91,7 +87,7 @@ struct NIP05GroupedAuthorRow: View {
 
 #Preview {
     let damus_state = test_damus_state
-    NIP05GroupedAuthorRow(
+    GroupedAuthorRow(
         damus_state: damus_state,
         pubkey: test_pubkey,
         latestEvent: test_note,

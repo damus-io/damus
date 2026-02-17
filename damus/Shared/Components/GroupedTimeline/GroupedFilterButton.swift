@@ -1,5 +1,5 @@
 //
-//  NIP05FilterBar.swift
+//  GroupedFilterButton.swift
 //  damus
 //
 //  Created by alltheseas on 2025-12-08.
@@ -9,9 +9,9 @@ import SwiftUI
 
 // MARK: - Time Range
 
-/// Time range options for filtering NIP-05 domain feed events.
-/// Controls how far back in time to fetch and display notes.
-enum NIP05TimeRange: String, CaseIterable {
+/// Time range options for filtering grouped feed events.
+/// Controls how far back in time to display notes.
+enum GroupedTimeRange: String, CaseIterable {
     case day = "24h"
     case week = "7d"
 
@@ -32,6 +32,16 @@ enum NIP05TimeRange: String, CaseIterable {
             return NSLocalizedString("7d", comment: "Filter option for last 7 days")
         }
     }
+
+    /// Full label for display in settings (e.g., "24 Hours", "7 Days").
+    var displayTitle: String {
+        switch self {
+        case .day:
+            return NSLocalizedString("24 Hours", comment: "Time range option for last 24 hours")
+        case .week:
+            return NSLocalizedString("7 Days", comment: "Time range option for last 7 days")
+        }
+    }
 }
 
 // MARK: - Filter Button
@@ -40,8 +50,8 @@ enum NIP05TimeRange: String, CaseIterable {
 /// Shows the view mode (Grouped/Timeline) and time range (24h/7d) at a glance.
 ///
 /// Example appearance: `[≡ Grouped · 24h]`
-struct NIP05FilterButton: View {
-    @ObservedObject var settings: NIP05FilterSettings
+struct GroupedFilterButton: View {
+    @ObservedObject var settings: GroupedFilterSettings
     @Binding var showFilterSheet: Bool
 
     /// When true, shows a loading spinner (used during background data fetches).
@@ -84,8 +94,8 @@ struct NIP05FilterButton: View {
 
 #Preview {
     VStack {
-        NIP05FilterButton(
-            settings: NIP05FilterSettings(),
+        GroupedFilterButton(
+            settings: GroupedFilterSettings(),
             showFilterSheet: .constant(false)
         )
         .background(Color.black)

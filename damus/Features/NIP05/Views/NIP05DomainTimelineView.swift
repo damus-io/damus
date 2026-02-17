@@ -25,7 +25,7 @@ struct NIP05DomainTimelineView: View {
     let nip05_domain_favicon: FaviconURL?
 
     /// Filter settings that control display mode, time range, and content filters.
-    @StateObject private var filterSettings = NIP05FilterSettings(enableGroupedMode: true)
+    @StateObject private var filterSettings = GroupedFilterSettings(enableGroupedMode: true)
 
     /// Controls visibility of the filter settings sheet.
     @State private var showFilterSheet: Bool = false
@@ -75,7 +75,7 @@ struct NIP05DomainTimelineView: View {
                     backButton
                     NIP05DomainTitleView(model: model, nip05_domain_favicon: nip05_domain_favicon)
                     Spacer()
-                    NIP05FilterButton(
+                    GroupedFilterButton(
                         settings: filterSettings,
                         showFilterSheet: $showFilterSheet,
                         isLoading: model.loading || model.loading_more
@@ -119,7 +119,7 @@ struct NIP05DomainTimelineView: View {
         ScrollView {
             headerContent
 
-            NIP05GroupedListView(
+            GroupedListView(
                 damus_state: damus_state,
                 events: model.events,
                 filter: contentFilters.filter(ev:),

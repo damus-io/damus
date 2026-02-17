@@ -1,5 +1,5 @@
 //
-//  NIP05FilterSettingsView.swift
+//  GroupedFilterSettingsView.swift
 //  damus
 //
 //  Created by alltheseas on 2025-12-08.
@@ -7,10 +7,11 @@
 
 import SwiftUI
 
-/// Settings for NIP-05 domain feed filtering (fevela-style)
-class NIP05FilterSettings: ObservableObject {
+/// Settings for grouped feed filtering (fevela-style).
+/// Used by both NIP-05 domain feeds and the home timeline.
+class GroupedFilterSettings: ObservableObject {
     @Published var enableGroupedMode: Bool
-    @Published var timeRange: NIP05TimeRange = .day
+    @Published var timeRange: GroupedTimeRange = .day
     @Published var includeReplies: Bool = false
     @Published var hideShortNotes: Bool = false
     @Published var filteredWords: String = ""
@@ -18,13 +19,17 @@ class NIP05FilterSettings: ObservableObject {
 
     static let maxNotesOptions: [Int?] = [nil, 3, 5, 10, 20]
 
+    /// The default value passed at init, used by `reset()` to restore per-screen defaults.
+    private let defaultGroupedMode: Bool
+
     /// - Parameter enableGroupedMode: Initial grouped mode state. NIP-05 domain views pass `true`; home timeline defaults to `false`.
     init(enableGroupedMode: Bool = false) {
+        self.defaultGroupedMode = enableGroupedMode
         self.enableGroupedMode = enableGroupedMode
     }
 
     func reset() {
-        enableGroupedMode = false
+        enableGroupedMode = defaultGroupedMode
         timeRange = .day
         includeReplies = false
         hideShortNotes = false
@@ -33,16 +38,15 @@ class NIP05FilterSettings: ObservableObject {
     }
 }
 
-/// Filter settings view that appears when tapping on grouped mode
-struct NIP05FilterSettingsView: View {
-    @ObservedObject var settings: NIP05FilterSettings
+/// Filter settings view that appears when tapping on grouped mode.
+struct GroupedFilterSettingsView: View {
+    @ObservedObject var settings: GroupedFilterSettings
     @Environment(\.dismiss) var dismiss
     let onApply: () -> Void
 
     var body: some View {
         NavigationView {
             Form {
-                // Grouped mode toggle
                 Section {
                     Toggle(isOn: $settings.enableGroupedMode) {
                         Text("Enable grouped notes mode", comment: "Toggle to enable grouping notes by author")
@@ -50,7 +54,6 @@ struct NIP05FilterSettingsView: View {
                     .tint(DamusColors.purple)
                 }
 
-                // Time range
                 Section {
                     HStack {
                         Text("Show me a summary for single users of what happened in the last", comment: "Label for time range picker")
@@ -58,14 +61,13 @@ struct NIP05FilterSettingsView: View {
                     }
 
                     Picker("Time Range", selection: $settings.timeRange) {
-                        ForEach(NIP05TimeRange.allCases, id: \.self) { range in
+                        ForEach(GroupedTimeRange.allCases, id: \.self) { range in
                             Text(range.displayTitle).tag(range)
                         }
                     }
                     .pickerStyle(.menu)
                 }
 
-                // Content filters
                 Section {
                     Toggle(isOn: $settings.includeReplies) {
                         Text("Include replies", comment: "Toggle to include reply notes in feed")
@@ -78,7 +80,6 @@ struct NIP05FilterSettingsView: View {
                     .tint(DamusColors.purple)
                 }
 
-                // Word filter
                 Section {
                     Text("Filter out notes with these words (comma separated):", comment: "Label for word filter input")
                         .font(.subheadline)
@@ -88,7 +89,6 @@ struct NIP05FilterSettingsView: View {
                         .textFieldStyle(.roundedBorder)
                 }
 
-                // Max notes per user
                 Section {
                     Text("Filter out users who have published more than X notes in the timeframe:", comment: "Label for max notes filter")
                         .font(.subheadline)
@@ -96,14 +96,13 @@ struct NIP05FilterSettingsView: View {
 
                     Picker("Max Notes", selection: $settings.maxNotesPerUser) {
                         Text("Disabled", comment: "Option to disable max notes filter").tag(nil as Int?)
-                        ForEach(NIP05FilterSettings.maxNotesOptions.compactMap({ $0 }), id: \.self) { count in
+                        ForEach(GroupedFilterSettings.maxNotesOptions.compactMap({ $0 }), id: \.self) { count in
                             Text("\(count)").tag(count as Int?)
                         }
                     }
                     .pickerStyle(.menu)
                 }
 
-                // Reset and Apply buttons
                 Section {
                     HStack {
                         Button {
@@ -142,20 +141,8 @@ struct NIP05FilterSettingsView: View {
     }
 }
 
-// Add display title to NIP05TimeRange
-extension NIP05TimeRange {
-    var displayTitle: String {
-        switch self {
-        case .day:
-            return NSLocalizedString("24 Hours", comment: "Time range option for last 24 hours")
-        case .week:
-            return NSLocalizedString("7 Days", comment: "Time range option for last 7 days")
-        }
-    }
-}
-
 #Preview {
-    NIP05FilterSettingsView(settings: NIP05FilterSettings()) {
+    GroupedFilterSettingsView(settings: GroupedFilterSettings()) {
         print("Applied!")
     }
 }
