@@ -165,20 +165,23 @@ class EventCache {
     
     func parent_events(event: NostrEvent, keypair: Keypair) -> [NostrEvent] {
         var parents: [NostrEvent] = []
-        
+        var visited: Set<NoteId> = [event.id]
+
         var ev = event
-        
+
         while true {
             guard let direct_reply = ev.direct_replies(),
-                  let next_ev = lookup(direct_reply), next_ev != ev
+                  let next_ev = lookup(direct_reply),
+                  !visited.contains(next_ev.id)
             else {
                 break
             }
-            
+
+            visited.insert(next_ev.id)
             parents.append(next_ev)
             ev = next_ev
         }
-        
+
         return parents.reversed()
     }
     

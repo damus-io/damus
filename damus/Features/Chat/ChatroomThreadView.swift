@@ -144,7 +144,7 @@ struct ChatroomThreadView: View {
                               highlight_bubble: highlighted_note_id == ev.id
                 )
                 .id(ev.id)
-                .matchedGeometryEffect(id: ev.id.hex(), in: animation, anchor: .center)
+                .matchedGeometryEffect(id: ev.id.hex(), in: animation, anchor: .top)
                 .padding(.horizontal)
             }
         }
@@ -190,6 +190,8 @@ struct ChatroomThreadView: View {
                     GeometryReader { geo in
                         Color.clear
                             .onChange(of: geo.frame(in: .global).minY) { newY in
+                                // Skip updates during initial layout to prevent cascading re-renders
+                                guard once else { return }
                                 contentTopY = newY
                                 updateReadingProgress()
                                 updateChromeVisibility(newY: newY)
@@ -201,55 +203,66 @@ struct ChatroomThreadView: View {
                     }
                     .frame(height: 1)
 
-                    LazyVStack(alignment: .leading, spacing: 8) {
-                        // MARK: - Parents events view
-                        ForEach(thread.parent_events, id: \.id) { parent_event in
-                            EventMutingContainerView(damus_state: damus, event: parent_event) {
-                                EventView(damus: damus, event: parent_event)
-                                    .matchedGeometryEffect(id: parent_event.id.hex(), in: animation, anchor: .center)
-                            }
-                            .padding(.horizontal)
-                            .onTapGesture {
-                                self.set_active_event(scroller: scroller, ev: parent_event)
-                            }
-                            .id(parent_event.id)
+                    // MARK: - Parents events view
+                    // Parents in their own LazyVStack to isolate from selected event layout
+                    if !thread.parent_events.isEmpty {
+                        LazyVStack(alignment: .leading, spacing: 8) {
+                            ForEach(thread.parent_events, id: \.id) { parent_event in
+                                EventMutingContainerView(damus_state: damus, event: parent_event) {
+                                    EventView(damus: damus, event: parent_event)
+                                        .matchedGeometryEffect(id: parent_event.id.hex(), in: animation, anchor: .top)
+                                }
+                                .padding(.horizontal)
+                                .onTapGesture {
+                                    self.set_active_event(scroller: scroller, ev: parent_event)
+                                }
+                                .id(parent_event.id)
 
-                            Divider()
-                                .padding(.top, 4)
-                                .padding(.leading, 25 * 2)
+                                Divider()
+                                    .padding(.top, 4)
+                                    .padding(.leading, 25 * 2)
 
-                        }.background(GeometryReader { geometry in
-                            let eventHeight = geometry.frame(in: .global).height
+                            }.background(GeometryReader { geometry in
+                                let eventHeight = geometry.frame(in: .global).height
 
-                            Rectangle()
-                                .fill(Color.gray.opacity(0.25))
-                                .frame(width: 2, height: eventHeight)
-                                .offset(x: 40, y: 40)
-                        })
-
-                        // MARK: - Actual event view
-                        EventMutingContainerView(
-                            damus_state: damus,
-                            event: self.thread.selected_event,
-                            muteBox: { event_shown, muted_reason in
-                                AnyView(
-                                    EventMutedBoxView(shown: event_shown, reason: muted_reason)
-                                        .padding(5)
-                                )
-                            }
-                        ) {
-                            SelectedEventView(damus: damus, event: self.thread.selected_event, size: .selected)
-                                .matchedGeometryEffect(id: self.thread.selected_event.id.hex(), in: animation, anchor: .center)
+                                Rectangle()
+                                    .fill(Color.gray.opacity(0.25))
+                                    .frame(width: 2, height: eventHeight)
+                                    .offset(x: 40, y: 40)
+                            })
                         }
-                        .id(self.thread.selected_event.id)
+                    }
 
-                        // MARK: - Children view - inside trusted network
-                        if !trusted_events.isEmpty {
+                    // MARK: - Actual event view
+                    // Selected event is OUTSIDE LazyVStack to prevent AllItemsPhaseMutation.
+                    // When a large note (6000+ chars) is inside LazyVStack, any size change
+                    // invalidates the entire lazy layout cache, causing repeated full re-layouts.
+                    EventMutingContainerView(
+                        damus_state: damus,
+                        event: self.thread.selected_event,
+                        muteBox: { event_shown, muted_reason in
+                            AnyView(
+                                EventMutedBoxView(shown: event_shown, reason: muted_reason)
+                                    .padding(5)
+                            )
+                        }
+                    ) {
+                        SelectedEventView(damus: damus, event: self.thread.selected_event, size: .selected)
+                            // Use .top anchor instead of .center - computing center requires full height
+                            // which is expensive for large notes (6000+ chars)
+                            .matchedGeometryEffect(id: self.thread.selected_event.id.hex(), in: animation, anchor: .top)
+                    }
+                    .id(self.thread.selected_event.id)
+                    // Remove top padding for longform articles with sepia to eliminate gap
+                    .padding(.top, isLongformEvent && damus.settings.longform_sepia_mode ? 0 : nil)
+
+                    // MARK: - Children view - inside trusted network
+                    // Children in their own LazyVStack to isolate from selected event layout
+                    if !trusted_events.isEmpty {
+                        LazyVStack(alignment: .leading, spacing: 8) {
                             ThreadedSwipeViewGroup(scroller: scroller, events: trusted_events)
                         }
                     }
-                    // Remove top padding for longform articles with sepia to eliminate gap
-                    .padding(.top, isLongformEvent && damus.settings.longform_sepia_mode ? 0 : nil)
 
                     // MARK: - Children view - outside trusted network
                     if !untrusted_events.isEmpty {
@@ -270,6 +283,8 @@ struct ChatroomThreadView: View {
                                                 untrustedSectionOffset = proxy.frame(in: .global).minY
                                             }
                                             .onChange(of: proxy.frame(in: .global).minY) { newY in
+                                                // Skip updates during initial layout
+                                                guard once else { return }
                                                 let shouldShow = newY <= 100 // Adjust this threshold as needed
                                                 if shouldShow != showStickyHeader {
                                                     withAnimation(.easeInOut(duration: 0.3)) {
@@ -312,6 +327,8 @@ struct ChatroomThreadView: View {
                     GeometryReader { geo in
                         Color.clear
                             .onChange(of: geo.frame(in: .global).minY) { newY in
+                                // Skip updates during initial layout
+                                guard once else { return }
                                 contentBottomY = newY
                                 updateReadingProgress()
                             }
@@ -334,6 +351,8 @@ struct ChatroomThreadView: View {
                                 viewportHeight = geo.size.height
                             }
                             .onChange(of: geo.size.height) { newHeight in
+                                // Skip updates during initial layout
+                                guard once else { return }
                                 // Reset baseline on significant height change (orientation, text size)
                                 if abs(newHeight - viewportHeight) > 50 {
                                     initialTopY = nil
@@ -391,6 +410,10 @@ struct ChatroomThreadView: View {
                 if isLongformEvent {
                     chromeHidden = false
                     notify(.display_tabbar(true))
+                }
+                // Enable geometry tracking after initial layout settles to prevent cascading re-renders
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    once = true
                 }
             }
             .onChange(of: thread.selected_event.id) { _ in

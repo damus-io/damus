@@ -290,18 +290,22 @@ struct ThreadEventMap {
     /// - Returns: An array of parent events, sorted from the highest level in the thread (The root of the thread), down to the direct parent of the query event. If query event is not found, this will return an empty array
     func parent_events(of query_event: NostrEvent) -> [NostrEvent] {
         var parents: [NostrEvent] = []
+        var visited: Set<NoteId> = [query_event.id]
         var event = query_event
+
         while true {
             guard let direct_reply = event.direct_replies(),
-                  let parent_event = self.get(id: direct_reply), parent_event != event
+                  let parent_event = self.get(id: direct_reply),
+                  !visited.contains(parent_event.id)
             else {
                 break
             }
-            
+
+            visited.insert(parent_event.id)
             parents.append(parent_event)
             event = parent_event
         }
-        
+
         return parents.reversed()
     }
     
@@ -328,21 +332,33 @@ struct ThreadEventMap {
     /// - Parameter query_event: The event for which to find the children for
     /// - Returns: All of the direct and indirect replies for an event, sorted in chronological order. If query event is not present, this will be an empty array.
     func recursive_child_events(of query_event: NostrEvent) -> Set<NostrEvent> {
+        var visited: Set<NoteId> = []
+        return recursive_child_events_impl(of: query_event, visited: &visited)
+    }
+
+    /// Recursive implementation that tracks visited events to prevent cycles.
+    private func recursive_child_events_impl(of query_event: NostrEvent, visited: inout Set<NoteId>) -> Set<NostrEvent> {
+        guard !visited.contains(query_event.id) else {
+            return []
+        }
+        visited.insert(query_event.id)
+
         let immediate_children_ids = self.event_reply_index[query_event.id] ?? []
         var immediate_children: Set<NostrEvent> = []
         for immediate_child_id in immediate_children_ids {
+            guard !visited.contains(immediate_child_id) else {
+                continue
+            }
             guard let immediate_child = self.event_map[immediate_child_id] else {
-                // This is an internal inconsistency.
-                // Crash the app in debug mode to increase awareness, but let it go in production mode (not mission critical)
                 assertionFailure("Desync between `event_map` and `event_reply_index` should never happen in `ThreadEventMap`!")
                 continue
             }
             immediate_children.insert(immediate_child)
         }
-        
-        var indirect_children: Set<NdbNote> = []
+
+        var indirect_children: Set<NostrEvent> = []
         for immediate_child in immediate_children {
-            let recursive_children = self.recursive_child_events(of: immediate_child)
+            let recursive_children = self.recursive_child_events_impl(of: immediate_child, visited: &visited)
             indirect_children = indirect_children.union(recursive_children)
         }
         return immediate_children.union(indirect_children)

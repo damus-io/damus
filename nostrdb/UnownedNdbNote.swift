@@ -8,6 +8,7 @@
 /// Allows an unowned note to be safely lent out temporarily.
 ///
 /// Use this to provide access to NostrDB unowned notes in a way that has much better compile-time safety guarantees.
+/// Do not pass lenders carrying live transaction lookups across async boundaries — snapshot or copy at the boundary.
 ///
 /// # Usage examples
 ///
@@ -109,7 +110,7 @@ enum NdbNoteLender: Sendable {
     /// - On production builds, an error will be printed to the logs.
     func justGetACopy() -> NdbNote? {
         do {
-            return try self.getCopy()
+            return try self.snapshot()
         }
         catch {
 //            assertionFailure("Unexpected error while fetching a copy of an NdbNote: \(error.localizedDescription)")
@@ -118,6 +119,19 @@ enum NdbNoteLender: Sendable {
         return nil
     }
     
+    /// Returns an owned copy using `snapshot_note_by_key`, avoiding live LMDB transaction retention.
+    func snapshot() throws -> NdbNote {
+        switch self {
+        case .ndbNoteKey(let ndb, let noteKey):
+            guard let owned = try ndb.snapshot_note_by_key(noteKey) else {
+                throw LendingError.errorLoadingNote
+            }
+            return owned
+        case .owned(let note):
+            return note.to_owned()
+        }
+    }
+
     enum LendingError: Error {
         case errorLoadingNote
         case ndbClosed

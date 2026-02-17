@@ -87,16 +87,27 @@ class Ndb {
     static private let main_db_file_name: String = "data.mdb"
     static private let db_files: [String] = ["data.mdb", "lock.mdb"]
 
+    private static let mainAppMapsize = 1024 * 1024 * 1024 * 32
+    private static let mainAppMinMapsize = 700 * 1024 * 1024
+    private static let extensionMapsize = 32 * 1024 * 1024
+    private static let extensionMinMapsize = 8 * 1024 * 1024
+
     static var empty: Ndb {
         print("txn: NOSTRDB EMPTY")
         return Ndb(ndb: ndb_t(ndb: nil))
     }
-    
+
+    private static var isAppExtension: Bool {
+        Bundle.main.bundlePath.hasSuffix(".appex")
+    }
+
     static func open(path: String? = nil, owns_db_file: Bool = true, callbackHandler: Ndb.CallbackHandler) -> ndb_t? {
         var ndb_p: OpaquePointer? = nil
 
         let ingest_threads: Int32 = 4
-        var mapsize: Int = 1024 * 1024 * 1024 * 32
+
+        let isExtension = isAppExtension || !owns_db_file
+        var mapsize: Int = isExtension ? extensionMapsize : mainAppMapsize
         
         if path == nil && owns_db_file {
             // `nil` path indicates the default path will be used.
@@ -115,17 +126,32 @@ class Ndb {
         // 2. If not specified, use a default path. The default path depends:
         //     a. If the process owns the db file, `Ndb.db_path` is the default.
         //     b. If the process does not own the db file, a read-only snapshot file (`Ndb.snapshot_db_path`) is used.
+        //
+        // IMPORTANT: Extensions should use `Ndb(path: nil, owns_db_file: false)` to open snapshots.
+        // This ensures the marker file is checked, preventing reads during snapshot updates.
+        let isUsingSnapshotPath = path == nil && !owns_db_file
         guard let path = path.map(remove_file_prefix) ?? (owns_db_file ? Ndb.db_path : Ndb.snapshot_db_path) else {
             return nil
         }
-        
+
+        // For snapshot path, verify the snapshot is complete (marker file exists)
+        // to prevent reading corrupt/incomplete data during snapshot updates.
+        let isSnapshotPath = isUsingSnapshotPath || (!owns_db_file && path == Self.snapshot_db_path)
+        if isSnapshotPath {
+            guard Self.snapshot_is_ready(path: path) else {
+                return nil
+            }
+        }
+
         guard owns_db_file || Self.db_file_exists(path: path) else {
             return nil      // If the caller claims to not own the DB file, and the DB files do not exist, then we should not initialize Ndb
         }
 
+        let minMapsize = isExtension ? extensionMinMapsize : mainAppMinMapsize
+
         let ok = path.withCString { testdir in
             var ok = false
-            while !ok && mapsize > 1024 * 1024 * 700 {
+            while !ok && mapsize >= minMapsize {
                 var cfg = ndb_config(flags: 0, ingester_threads: ingest_threads, writer_scratch_buffer_size: DEFAULT_WRITER_SCRATCH_SIZE, mapsize: mapsize, filter_context: nil, ingest_filter: nil, sub_cb_ctx: nil, sub_cb: nil)
                 
                 // Here we hook up the global callback function for subscription callbacks.
@@ -244,7 +270,21 @@ class Ndb {
     private static func db_file_exists(path: String) -> Bool {
         return FileManager.default.fileExists(atPath: "\(path)/\(Self.main_db_file_name)")
     }
-    
+
+    /// Marker file name indicating a snapshot is complete and safe to read.
+    /// This must match `DatabaseSnapshotManager.snapshotReadyMarker`.
+    static let snapshotReadyMarker = "snapshot.ready"
+
+    /// Checks if a snapshot at the given path is ready for reading.
+    ///
+    /// A snapshot is considered ready when both the database file exists AND
+    /// the marker file is present, indicating the snapshot completed successfully.
+    private static func snapshot_is_ready(path: String) -> Bool {
+        let parentDir = URL(fileURLWithPath: path).deletingLastPathComponent().path
+        let markerPath = "\(parentDir)/\(snapshotReadyMarker)"
+        return db_file_exists(path: path) && FileManager.default.fileExists(atPath: markerPath)
+    }
+
     /// Returns the path whose `data.mdb` file was modified most recently.
     private static func latestDatabasePath(primaryPath: String,
                                            legacyPath: String?,
@@ -280,17 +320,27 @@ class Ndb {
     func markClosed() {
         self.closed = true
     }
-    
+
     func close() {
         guard !self.is_closed else { return }
         self.closed = true
-        try! self.ndbAccessLock.waitUntilNdbCanClose(thenClose: {
-            print("txn: CLOSING NOSTRDB")
-            ndb_destroy(self.ndb.ndb)
-            self.generation += 1
-            print("txn: NOSTRDB CLOSED")
-            return false
-        }, maxTimeout: .milliseconds(2000))
+
+        // Capture the current ndb instance to close. This prevents a race where
+        // reopen() sets self.ndb to a new instance before closeWork runs,
+        // which would cause closeWork to destroy the wrong (new) database.
+        let ndbToClose = self.ndb
+
+        do {
+            try self.ndbAccessLock.waitUntilNdbCanClose(thenClose: { [weak self] in
+                print("txn: CLOSING NOSTRDB")
+                ndb_destroy(ndbToClose.ndb)
+                self?.generation += 1
+                print("txn: NOSTRDB CLOSED")
+                return false
+            }, maxTimeout: .milliseconds(2000))
+        } catch {
+            Log.error("Failed to close NostrDB: %@", for: .storage, String(describing: error))
+        }
     }
 
     func reopen() -> Bool {
@@ -362,6 +412,11 @@ class Ndb {
     }
 
     private func lookup_note_by_key_with_txn<Y>(_ key: NoteKey, txn: NdbTxn<Y>) -> NdbNote? {
+        if txn.ndb.is_closed || txn.generation != self.generation {
+            Log.error("Aborting lookup_note_by_key: closed or stale txn (gen %d vs %d)", for: .ndb, txn.generation, self.generation)
+            return nil
+        }
+
         var size: Int = 0
         guard let note_p = ndb_get_note_by_key(&txn.txn, key, &size) else {
             return nil
@@ -547,6 +602,18 @@ class Ndb {
         })
     }
 
+    func snapshot_note_by_key(_ key: NoteKey) throws -> NdbNote? {
+        return try withNdb({
+            guard let txn = NdbTxn(ndb: self, name: "snapshot_note_by_key") else {
+                return nil
+            }
+            guard let note = lookup_note_by_key_with_txn(key, txn: txn) else {
+                return nil
+            }
+            return note.to_owned()
+        })
+    }
+
     private func lookup_profile_by_key_inner(_ key: ProfileKey, txn: RawNdbTxnAccessible) -> ProfileRecord? {
         var size: Int = 0
         guard let profile_p = ndb_get_profile_by_key(&txn.txn, key, &size) else {
@@ -556,19 +623,24 @@ class Ndb {
         return profile_flatbuf_to_record(ptr: profile_p, size: size, key: key)
     }
 
+    /// Copies buffer data so the profile survives after the LMDB transaction closes.
     private func profile_flatbuf_to_record(ptr: UnsafeMutableRawPointer, size: Int, key: UInt64) -> ProfileRecord? {
         do {
-            var buf = ByteBuffer(assumingMemoryBound: ptr, capacity: size)
+            var buf = ByteBuffer(memory: ptr, count: size)
             let rec: NdbProfileRecord = try getDebugCheckedRoot(byteBuffer: &buf)
             return ProfileRecord(data: rec, key: key)
         } catch {
-            // Handle error appropriately
             print("UNUSUAL: \(error)")
             return nil
         }
     }
 
     private func lookup_note_with_txn_inner<Y>(id: NoteId, txn: NdbTxn<Y>) -> NdbNote? {
+        if txn.ndb.is_closed || txn.generation != self.generation {
+            Log.error("Aborting lookup_note_with_txn_inner: closed or stale txn (gen %d vs %d)", for: .ndb, txn.generation, self.generation)
+            return nil
+        }
+
         return id.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> NdbNote? in
             var key: UInt64 = 0
             var size: Int = 0

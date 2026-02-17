@@ -41,6 +41,7 @@ struct ProfileName: View {
     let show_nip5_domain: Bool
     private let supporterBadgeStyle: SupporterBadge.Style
     
+    @State var profile: Profile?
     @State var display_name: DisplayName?
     @State var nip05: NIP05?
     @State var donation: Int?
@@ -53,6 +54,9 @@ struct ProfileName: View {
         self.damus_state = damus
         self.show_nip5_domain = show_nip5_domain
         self.supporterBadgeStyle = supporterBadgeStyle
+        self.profile = nil
+        self.display_name = nil
+        self.donation = nil
         self.purple_account = nil
     }
     
@@ -95,8 +99,6 @@ struct ProfileName: View {
     }
     
     var body: some View {
-        let profile = try? damus_state.profiles.lookup(id: pubkey)
-
         HStack(spacing: 2) {
             Text(verbatim: "\(prefix)\(name_choice(profile: profile))")
                 .font(.body)
@@ -120,25 +122,40 @@ struct ProfileName: View {
 
         }
         .task {
-            if damus_state.purple.enable_purple {
-                self.purple_account = try? await damus_state.purple.get_maybe_cached_account(pubkey: pubkey)
+            let ndb = damus_state.ndb
+            let pk = pubkey
+            let cachedProfile = await Task.detached(priority: .userInitiated) {
+                try? ndb.lookup_profile_and_copy(pk)
+            }.value
+            guard !Task.isCancelled else { return }
+            if let cachedProfile {
+                self.profile = cachedProfile
+                self.display_name = Profile.displayName(profile: cachedProfile, pubkey: pubkey)
+                self.donation = cachedProfile.damus_donation
             }
-        }
-        .task {
-            if let domain = current_nip05?.host {
+            let nip05 = damus_state.profiles.is_validated(pubkey)
+            if self.nip05 != nip05 {
+                self.nip05 = nip05
+            }
+            if let domain = nip05?.host {
                 self.nip05_domain_favicon = try? await damus_state.favicon_cache.lookup(domain)
                     .largest()
             }
-        }
-        .task {
+
             for await profile in await damus_state.nostrNetwork.profilesManager.streamProfile(pubkey: pubkey) {
                 handle_profile_update(profile: profile)
+            }
+        }
+        .task {
+            if damus_state.purple.enable_purple {
+                self.purple_account = try? await damus_state.purple.get_maybe_cached_account(pubkey: pubkey)
             }
         }
     }
 
     @MainActor
     func handle_profile_update(profile: Profile) {
+        self.profile = profile
         let display_name = Profile.displayName(profile: profile, pubkey: pubkey)
         if self.display_name != display_name {
             self.display_name = display_name

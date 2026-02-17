@@ -364,14 +364,18 @@ extension NostrNetworkManager {
                                 Self.logger.debug("Session subscription \(id.uuidString, privacy: .public): Received EOSE from nostrdb. Elapsed: \(CFAbsoluteTimeGetCurrent() - startTime, format: .fixed(precision: 2), privacy: .public) seconds")
                                 continuation.yield(.ndbEose)
                             case .event(let noteKey):
-                                let lender = NdbNoteLender(ndb: self.ndb, noteKey: noteKey)
+                                guard let ownedSnapshot = try? self.ndb.snapshot_note_by_key(noteKey) else {
+                                    Self.logger.error("Session subscription \(id.uuidString, privacy: .public): snapshot failed for note key \(noteKey, privacy: .public)")
+                                    continue
+                                }
+                                let lender = NdbNoteLender(ownedNdbNote: ownedSnapshot)
                                 try Task.checkCancellation()
                                 guard let desiredRelays else {
-                                    continuation.yield(.event(lender: lender))  // If no desired relays are specified, return all notes we see.
+                                    continuation.yield(.event(lender: lender))
                                     break
                                 }
                                 if try ndb.was(noteKey: noteKey, seenOnAnyOf: desiredRelays) {
-                                    continuation.yield(.event(lender: lender))  // If desired relays were specified and this note was seen there, return it.
+                                    continuation.yield(.event(lender: lender))
                                 }
                             }
                         }

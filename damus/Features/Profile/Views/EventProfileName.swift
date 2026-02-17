@@ -13,19 +13,21 @@ struct EventProfileName: View {
     var damus_state: DamusState
     let pubkey: Pubkey
 
+    @State var profile: Profile?
     @State var display_name: DisplayName?
     @State var nip05: NIP05?
     @State var donation: Int?
     @State var purple_account: DamusPurple.Account?
 
     let size: EventViewKind
-    
+
     init(pubkey: Pubkey, damus: DamusState, size: EventViewKind) {
         self.damus_state = damus
         self.pubkey = pubkey
         self.size = size
-        let donation = try? damus.profiles.lookup(id: pubkey)?.damus_donation
-        self._donation = State(wrappedValue: donation)
+        self.profile = nil
+        self.display_name = nil
+        self.donation = nil
         self.purple_account = nil
     }
     
@@ -59,7 +61,6 @@ struct EventProfileName: View {
     }
 
     var body: some View {
-        let profile = try? damus_state.profiles.lookup(id: pubkey)
         HStack(spacing: 2) {
             switch current_display_name(profile) {
             case .one(let one):
@@ -101,7 +102,24 @@ struct EventProfileName: View {
             }
         }
         .task {
+            let ndb = damus_state.ndb
+            let pk = pubkey
+            let cachedProfile = await Task.detached(priority: .userInitiated) {
+                try? ndb.lookup_profile_and_copy(pk)
+            }.value
+            guard !Task.isCancelled else { return }
+            if let cachedProfile {
+                self.profile = cachedProfile
+                self.display_name = Profile.displayName(profile: cachedProfile, pubkey: pubkey)
+                self.donation = cachedProfile.damus_donation
+            }
+            let nip05 = damus_state.profiles.is_validated(pubkey)
+            if self.nip05 != nip05 {
+                self.nip05 = nip05
+            }
+
             for await profile in await damus_state.nostrNetwork.profilesManager.streamProfile(pubkey: pubkey) {
+                self.profile = profile
                 let display_name = Profile.displayName(profile: profile, pubkey: pubkey)
                 if display_name != self.display_name {
                     self.display_name = display_name

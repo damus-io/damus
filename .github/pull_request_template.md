@@ -42,6 +42,19 @@ CHOOSE YOUR CHECKLIST:
     - [ ] I do not need to add a changelog entry. Reason: _[Please provide a reason]_
 - [ ] I have added appropriate `Closes:` or `Fixes:` tags in the commit messages wherever applicable, or made sure those are not needed. See [Submitting patches](https://github.com/damus-io/damus/blob/master/docs/CONTRIBUTING.md#submitting-patches)
 
+## Commit series breakdown
+
+<!-- DELETE THIS SECTION for single-commit PRs -->
+
+_For topic branches with multiple commits, list each commit so reviewers can gauge scope at each step._
+
+<!--
+1. `abc1234` — Short description (X impl, Y test)
+2. `def5678` — Short description (X impl, Y test)
+
+Total: X impl, Y test
+-->
+
 ## Test report
 
 _Please provide a test report for the changes in this PR. You can use the template below, but feel free to modify it as needed._

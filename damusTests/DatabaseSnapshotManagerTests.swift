@@ -33,22 +33,28 @@ class DatabaseSnapshotManagerTests: XCTestCase {
             await withCheckedContinuation { continuation in
                 var collectedNoteIds = Set<NoteId>()
                 var hasReturned = false
-                
+                let lock = NSLock()
+
                 // Timeout handler
                 Task {
                     try? await Task.sleep(for: .seconds(timeout))
-                    guard !hasReturned else { return }
+                    lock.lock()
+                    guard !hasReturned else { lock.unlock(); return }
                     hasReturned = true
+                    lock.unlock()
                     print("⚠️ Timeout: Expected \(expectedNoteIds.count) notes, collected \(collectedNoteIds.count)")
                     continuation.resume(returning: collectedNoteIds)
                 }
-                
+
                 // Subscription handler
                 Task {
                     do {
                         for await item in try ndb.subscribe(filters: filters) {
-                            guard !hasReturned else { break }
-                            
+                            lock.lock()
+                            let done = hasReturned
+                            lock.unlock()
+                            guard !done else { break }
+
                             switch item {
                             case .eose:
                                 continue
@@ -62,16 +68,21 @@ class DatabaseSnapshotManagerTests: XCTestCase {
                                     }
                                 })
                             }
-                            
+
                             if collectedNoteIds == expectedNoteIds {
+                                lock.lock()
+                                guard !hasReturned else { lock.unlock(); break }
                                 hasReturned = true
+                                lock.unlock()
                                 expectation.fulfill()
                                 continuation.resume(returning: collectedNoteIds)
                             }
                         }
                     } catch {
-                        guard !hasReturned else { return }
+                        lock.lock()
+                        guard !hasReturned else { lock.unlock(); return }
                         hasReturned = true
+                        lock.unlock()
                         XCTFail("Note streaming failed: \(error)")
                         continuation.resume(returning: collectedNoteIds)
                     }
@@ -579,6 +590,131 @@ class DatabaseSnapshotManagerTests: XCTestCase {
         let snapshottedNoteIds = await snapshotTask.value
         XCTAssertEqual(expectedNoteIds, snapshottedNoteIds, "Snapshot should contain both profile notes")
     }
+
+    // MARK: - Snapshot Marker Tests
+
+    /// Verifies that marker constants are consistent across modules.
+    func testMarkerConstants_Match() {
+        XCTAssertEqual(DatabaseSnapshotManager.snapshotReadyMarker,
+                       Ndb.snapshotReadyMarker,
+                       "Marker constants must match across DatabaseSnapshotManager and Ndb")
+    }
+
+    /// Verifies that a snapshot run creates the ready marker file.
+    func testPerformSnapshot_CreatesMarkerFile() async throws {
+        guard let snapshotPath = Ndb.snapshot_db_path else {
+            XCTFail("Snapshot path should be available")
+            return
+        }
+        let parentDir = URL(fileURLWithPath: snapshotPath).deletingLastPathComponent().path
+        let markerPath = "\(parentDir)/\(DatabaseSnapshotManager.snapshotReadyMarker)"
+
+        try? FileManager.default.removeItem(atPath: snapshotPath)
+        try? FileManager.default.removeItem(atPath: markerPath)
+
+        try await manager.performSnapshot()
+
+        XCTAssertTrue(FileManager.default.fileExists(atPath: markerPath),
+            "Marker file should exist after snapshot completes")
+    }
+
+    /// Verifies Ndb fails to open default snapshot when marker is missing.
+    func testNdb_WontOpenSnapshotWithoutMarker() async throws {
+        guard let snapshotPath = Ndb.snapshot_db_path else {
+            XCTFail("Snapshot path should be available")
+            return
+        }
+        let parentDir = URL(fileURLWithPath: snapshotPath).deletingLastPathComponent().path
+        let markerPath = "\(parentDir)/\(DatabaseSnapshotManager.snapshotReadyMarker)"
+
+        try await manager.performSnapshot()
+        XCTAssertTrue(FileManager.default.fileExists(atPath: snapshotPath))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: markerPath))
+
+        try FileManager.default.removeItem(atPath: markerPath)
+
+        let snapshotNdb = Ndb(path: nil, owns_db_file: false)
+        XCTAssertNil(snapshotNdb,
+            "Ndb should not open snapshot without marker file")
+    }
+
+    /// Verifies Ndb successfully opens default snapshot when marker exists.
+    func testNdb_OpensSnapshotWithMarker() async throws {
+        guard let snapshotPath = Ndb.snapshot_db_path else {
+            XCTFail("Snapshot path should be available")
+            return
+        }
+        let parentDir = URL(fileURLWithPath: snapshotPath).deletingLastPathComponent().path
+        let markerPath = "\(parentDir)/\(DatabaseSnapshotManager.snapshotReadyMarker)"
+
+        try await manager.performSnapshot()
+        XCTAssertTrue(FileManager.default.fileExists(atPath: markerPath))
+
+        let snapshotNdb = Ndb(path: nil, owns_db_file: false)
+        XCTAssertNotNil(snapshotNdb,
+            "Ndb should open snapshot when marker file exists")
+        snapshotNdb?.close()
+    }
+
+    /// Verifies marker ordering prevents snapshot reads during updates.
+    func testMarkerOrdering_PreventsReadsDuringUpdate() async throws {
+        guard let snapshotPath = Ndb.snapshot_db_path else {
+            XCTFail("Snapshot path should be available")
+            return
+        }
+        let parentDir = URL(fileURLWithPath: snapshotPath).deletingLastPathComponent().path
+        let markerPath = "\(parentDir)/\(DatabaseSnapshotManager.snapshotReadyMarker)"
+
+        try await manager.performSnapshot()
+        XCTAssertTrue(FileManager.default.fileExists(atPath: markerPath))
+
+        // Simulate update: remove marker
+        try FileManager.default.removeItem(atPath: markerPath)
+
+        // Extension cannot open during transition
+        let ndbDuringUpdate = Ndb(path: nil, owns_db_file: false)
+        XCTAssertNil(ndbDuringUpdate,
+            "Ndb should not open when marker is removed during update")
+
+        // Simulate update complete: restore marker
+        try Data().write(to: URL(fileURLWithPath: markerPath))
+
+        let ndbAfterUpdate = Ndb(path: nil, owns_db_file: false)
+        XCTAssertNotNil(ndbAfterUpdate,
+            "Ndb should open when marker exists after update")
+        ndbAfterUpdate?.close()
+    }
+
+    /// Tests marker protocol prevents production crash scenario (issue #3560).
+    func testMarkerProtocol_PreventsProductionCrashScenario() async throws {
+        guard let snapshotPath = Ndb.snapshot_db_path else {
+            XCTFail("Snapshot path should be available")
+            return
+        }
+        let parentDir = URL(fileURLWithPath: snapshotPath).deletingLastPathComponent().path
+        let markerPath = "\(parentDir)/\(DatabaseSnapshotManager.snapshotReadyMarker)"
+
+        try await manager.performSnapshot()
+
+        let ndb1 = Ndb(path: nil, owns_db_file: false)
+        XCTAssertNotNil(ndb1, "Snapshot should open with marker present")
+        ndb1?.close()
+
+        // Simulate main app starting update (removes marker)
+        try FileManager.default.removeItem(atPath: markerPath)
+
+        // Extension tries to open during race window — must return nil safely
+        let ndbDuringRaceWindow = Ndb(path: nil, owns_db_file: false)
+        XCTAssertNil(ndbDuringRaceWindow,
+            "Extension must not open during race window (prevents #3560 crash)")
+
+        // Main app completes update (restores marker)
+        try Data().write(to: URL(fileURLWithPath: markerPath))
+
+        let ndb2 = Ndb(path: nil, owns_db_file: false)
+        XCTAssertNotNil(ndb2, "Snapshot should open after marker restored")
+        ndb2?.close()
+    }
 }
 
 
@@ -598,6 +734,8 @@ extension SnapshotError: Equatable {
         case (.failedToCreateSnapshotDatabase, .failedToCreateSnapshotDatabase):
             return true
         case (.moveFailed, .moveFailed):
+            return true
+        case (.markerWriteFailed, .markerWriteFailed):
             return true
         default:
             return false

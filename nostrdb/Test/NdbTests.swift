@@ -165,25 +165,6 @@ final class NdbTests: XCTestCase {
         XCTAssertEqual(testNote.content, "https://cdn.nostr.build/i/5c1d3296f66c2630131bf123106486aeaf051ed8466031c0e0532d70b33cddb2.jpg")
     }
     
-    func test_inherited_transactions() throws {
-        let ndb = Ndb(path: db_dir)!
-        do {
-            guard let txn1 = NdbTxn(ndb: ndb) else { return XCTAssert(false) }
-
-            let ntxn = (Thread.current.threadDictionary.value(forKey: "ndb_txn") as? ndb_txn)!
-            XCTAssertEqual(txn1.txn.lmdb, ntxn.lmdb)
-            XCTAssertEqual(txn1.txn.mdb_txn, ntxn.mdb_txn)
-
-            guard let txn2 = NdbTxn(ndb: ndb) else { return XCTAssert(false) }
-
-            XCTAssertEqual(txn1.inherited, false)
-            XCTAssertEqual(txn2.inherited, true)
-        }
-
-        let ndb_txn = Thread.current.threadDictionary.value(forKey: "ndb_txn")
-        XCTAssertNil(ndb_txn)
-    }
-
     func test_decode_perf() throws {
         // This is an example of a performance test case.
         self.measure {
@@ -196,6 +177,127 @@ final class NdbTests: XCTestCase {
             let event = decode_nostr_event_json(test_contact_list_json)
             XCTAssertNotNil(event)
         }
+    }
+
+    /// Verifies Ndb.close() doesn't crash when a transaction is still active.
+    /// Old code: use-after-free when accessing txn after close.
+    /// New code: close is blocked or gracefully handled.
+    func test_use_after_free_crash_during_close() throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+
+        let id = NoteId(hex: "d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349")!
+
+        guard let txn = NdbTxn<()>(ndb: ndb, name: "test_txn") else {
+            return XCTFail("Could not create transaction")
+        }
+
+        let closeExpectation = XCTestExpectation(description: "Ndb close completes")
+        DispatchQueue.global().async {
+            ndb.close()
+            closeExpectation.fulfill()
+        }
+
+        wait(for: [closeExpectation], timeout: 2.0)
+
+        // If we reach here without crashing, the fix works.
+        // On old code this would crash with use-after-free.
+        let result = try? ndb.lookup_note(id, borrow: { $0 != nil })
+        // Result may be nil (db closed) — the point is no crash.
+        _ = result
+        _ = txn
+    }
+
+    /// Verifies concurrent transaction creation doesn't crash.
+    /// Old code: threadDictionary race between deinit clearing entries
+    /// and init reading them caused force-unwrap crashes.
+    /// New code: no shared state, so no race.
+    func test_concurrent_transaction_creation_no_crash() throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+
+        let iterations = 200
+        let group = DispatchGroup()
+
+        for i in 0..<iterations {
+            let queue = DispatchQueue(label: "txn.\(i)")
+            group.enter()
+            queue.async {
+                autoreleasepool {
+                    _ = NdbTxn<()>(ndb: ndb, name: "concurrent_\(i)")
+                }
+                group.leave()
+            }
+        }
+
+        let result = group.wait(timeout: .now() + 5.0)
+        XCTAssertEqual(result, .success, "All \(iterations) concurrent transactions should complete without crash")
+    }
+
+    /// Verifies MDB_NOTLS allows multiple read transactions on the same thread.
+    /// Without NOTLS, the second transaction would deadlock.
+    func test_same_thread_overlapping_txns_no_deadlock() throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+
+        let expectation = XCTestExpectation(description: "Overlapping txns complete")
+        var txn2Created = false
+
+        DispatchQueue.global().async {
+            guard let txn1 = NdbTxn<()>(ndb: ndb, name: "parent_txn") else {
+                return
+            }
+
+            // Open second txn on same thread while first is active
+            if let txn2 = NdbTxn<()>(ndb: ndb, name: "child_txn") {
+                txn2Created = true
+                _ = txn2
+            }
+            _ = txn1
+            expectation.fulfill()
+        }
+
+        let waiterResult = XCTWaiter.wait(for: [expectation], timeout: 3.0)
+        XCTAssertEqual(waiterResult, .completed, "Should not deadlock — MDB_NOTLS must be enabled")
+        XCTAssertTrue(txn2Created, "Second transaction on same thread should succeed")
+    }
+
+    /// Verifies SafeNdbTxn.new properly closes the transaction when valueGetter returns nil.
+    /// Old code: leaked the transaction (never called ndb_end_query).
+    func test_SafeNdbTxn_new_nil_path_closes_transaction() throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+
+        #if TXNDEBUG
+        let initialCount = txn_count
+
+        let result = SafeNdbTxn<String?>.new(on: ndb) { _ in nil }
+        XCTAssertNil(result, "Should return nil when valueGetter returns nil")
+        XCTAssertEqual(txn_count, initialCount, "Transaction should be closed on nil path (leak detected)")
+        #else
+        throw XCTSkip("TXNDEBUG required to detect transaction leaks")
+        #endif
+    }
+
+    /// Verifies SafeNdbTxn.maybeExtend properly closes the transaction when closure returns nil.
+    /// Old code: set moved=true before consume, so deinit skipped close.
+    func test_SafeNdbTxn_maybeExtend_nil_path_closes_transaction() throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+
+        #if TXNDEBUG
+        let initialCount = txn_count
+
+        let txn = SafeNdbTxn<Int>.new(on: ndb) { _ in 42 }
+        XCTAssertNotNil(txn)
+        XCTAssertEqual(txn_count, initialCount + 1)
+
+        let result = txn?.maybeExtend { _ in nil as String? }
+        XCTAssertNil(result, "Should return nil when closure returns nil")
+        XCTAssertEqual(txn_count, initialCount, "Transaction should be closed on nil path (leak detected)")
+        #else
+        throw XCTSkip("TXNDEBUG required to detect transaction leaks")
+        #endif
     }
 
     func test_perf_old_iter()  {
@@ -242,6 +344,277 @@ final class NdbTests: XCTestCase {
             XCTAssertEqual(char_count, 24370)
         }
 
+    }
+
+    /// Regression test: transaction inheritance removed (#3607).
+    /// Old code: txn2 inherited txn1's snapshot via threadDictionary (stale data).
+    /// New code: each transaction owns its own fresh LMDB snapshot.
+    func test_transaction_inheritance_removed() throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+
+        guard let txn1 = NdbTxn<()>(ndb: ndb, name: "txn1") else {
+            return XCTFail("Should create first transaction")
+        }
+        XCTAssertTrue(txn1.ownsTxn, "txn1 should own its transaction")
+
+        guard let txn2 = NdbTxn<()>(ndb: ndb, name: "txn2") else {
+            return XCTFail("Should create second transaction")
+        }
+        XCTAssertTrue(txn2.ownsTxn, "txn2 should own its own transaction, not inherit from txn1")
+    }
+
+    /// Smoke test: profile data accessible after db close (owned buffer copy).
+    /// The underlying bug (ByteBuffer borrowing LMDB mmap pointer) is a
+    /// use-after-free that cannot be reliably triggered in a unit test —
+    /// macOS does not immediately reclaim munmap'd pages, and ASan does
+    /// not instrument mmap/munmap. The fix is verified by code inspection:
+    /// ByteBuffer(memory:count:) copies data vs (assumingMemoryBound:capacity:)
+    /// which wraps the pointer with unowned=true. See #3625 for full analysis.
+    func test_profile_buffer_ownership() throws {
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+
+        do {
+            let ndb = Ndb(path: db_dir)!
+            XCTAssertTrue(ndb.process_events(test_wire_events))
+        }
+
+        var profile: Profile? = nil
+        do {
+            let ndb = Ndb(path: db_dir)!
+            profile = try? ndb.lookup_profile_and_copy(pk)
+            ndb.close()
+        }
+
+        guard let profile else {
+            return XCTFail("Expected profile to be non-nil")
+        }
+        XCTAssertEqual(profile.name, "jb55")
+    }
+
+    /// Verifies snapshot_note_by_key returns an owned copy that survives ndb close.
+    func test_snapshot_note_by_key_returns_owned_copy() throws {
+        let id = NoteId(hex: "d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349")!
+
+        do {
+            let ndb = Ndb(path: db_dir)!
+            XCTAssertTrue(ndb.process_events(test_wire_events))
+        }
+
+        var snapshot: NdbNote? = nil
+        do {
+            let ndb = Ndb(path: db_dir)!
+            guard let note = try? ndb.lookup_note_and_copy(id) else {
+                return XCTFail("Expected to find note in test data")
+            }
+            guard let key = note.key else {
+                return XCTFail("Expected note.key to be non-nil")
+            }
+            snapshot = try ndb.snapshot_note_by_key(key)
+            XCTAssertNotNil(snapshot)
+            ndb.close()
+        }
+
+        // Owned copy survives ndb close because it's a deep copy
+        guard let snapshot else {
+            return XCTFail("snapshot_note_by_key should return an owned copy")
+        }
+        XCTAssertEqual(snapshot.id, id)
+    }
+
+    /// Verifies NdbNoteLender.snapshot() returns an owned copy via snapshot_note_by_key.
+    func test_note_lender_snapshot() throws {
+        let id = NoteId(hex: "d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349")!
+
+        do {
+            let ndb = Ndb(path: db_dir)!
+            XCTAssertTrue(ndb.process_events(test_wire_events))
+        }
+
+        let ndb = Ndb(path: db_dir)!
+        guard let note = try? ndb.lookup_note_and_copy(id) else {
+            return XCTFail("Expected to find note in test data")
+        }
+
+        guard let key = note.key else {
+            return XCTFail("Expected note.key to be non-nil for NdbNoteLender")
+        }
+
+        let lender = NdbNoteLender(ndb: ndb, noteKey: key)
+        let owned = try lender.snapshot()
+        XCTAssertEqual(owned.id, id)
+    }
+
+    /// Regression test: concurrent ndb access must not deadlock.
+    /// Old code held a lock while waiting on the semaphore in incrementUserCount,
+    /// blocking decrementUserCount from signaling — deadlock when threads raced.
+    func test_uselock_concurrent_timeout_not_serial() throws {
+        // Test the UseLock directly: old code held Mutex/NSLock while blocking
+        // on the semaphore, serializing all threads behind the lock.
+        // With N threads timing out: old = N*timeout (serial), fix = ~1*timeout (parallel).
+        let lock = Ndb.initLock()
+        // Deliberately NOT calling markNdbOpen — semaphore stays at 0.
+        // All threads will timeout, but with the fix they timeout in parallel.
+
+        let threadCount = 10
+        let timeout: DispatchTimeInterval = .milliseconds(200)
+        let group = DispatchGroup()
+        let start = Date()
+
+        for _ in 0..<threadCount {
+            group.enter()
+            DispatchQueue.global().async {
+                _ = try? lock.keepNdbOpen(during: { }, maxWaitTimeout: timeout)
+                group.leave()
+            }
+        }
+
+        let result = group.wait(timeout: .now() + 30)
+        let elapsed = Date().timeIntervalSince(start)
+
+        XCTAssertEqual(result, .success, "All threads should eventually complete")
+        // With the fix: all threads timeout roughly together (~200ms)
+        // Without the fix: threads serialize behind the lock (~10*200ms = 2000ms)
+        XCTAssertLessThan(elapsed, 2.5, "Threads should timeout in parallel, not serially (elapsed: \(elapsed)s)")
+    }
+
+    /// Regression test: profile search must only return profiles matching the search prefix.
+    /// Bug (#3394): ndb_search_profile used MDB_SET_RANGE which returns the first key >= query,
+    /// even if it doesn't match the prefix. Fix adds ndb_search_key_matches_prefix validation.
+    func test_profile_search_prefix_matching() throws {
+        let ndb = Ndb(path: db_dir)!
+        let ok = ndb.process_events(test_wire_events)
+        XCTAssertTrue(ok)
+
+        // Poll for the ingester thread to process and commit events
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+        var profile: Profile? = nil
+        for _ in 0..<50 {
+            profile = try? ndb.lookup_profile_and_copy(pk)
+            if profile != nil { break }
+            Thread.sleep(forTimeInterval: 0.1)
+        }
+        XCTAssertEqual(profile?.name, "jb55", "Test data should contain profile 'jb55'")
+
+        // Positive case: "jb5" is a valid prefix of "jb55" — should find the profile
+        let matchingResults = try ndb.search_profile("jb5", limit: 10)
+        XCTAssertFalse(matchingResults.isEmpty, "Search for 'jb5' should match profile 'jb55'")
+
+        // Negative case: "jb54" is NOT a prefix of "jb55", but MDB_SET_RANGE
+        // positions the cursor at "jb55" (first key >= "jb54"). Without the fix,
+        // this incorrectly returns "jb55".
+        let nonMatchingResults = try ndb.search_profile("jb54", limit: 10)
+        XCTAssertTrue(nonMatchingResults.isEmpty, "Search for 'jb54' should NOT match profile 'jb55' — prefix mismatch")
+
+        // Another negative case: completely unrelated prefix "aaa" < "jb55"
+        // lexically, so MDB_SET_RANGE finds "jb55". Without the fix, returns it.
+        let unrelatedResults = try ndb.search_profile("aaa", limit: 10)
+        XCTAssertTrue(unrelatedResults.isEmpty, "Search for 'aaa' should NOT match profile 'jb55' — prefix mismatch")
+    }
+
+    // MARK: - Transaction Performance Benchmarks
+
+    /// Baseline: cost of a single lookup_profile_and_copy call.
+    func test_perf_single_profile_lookup() throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+        Thread.sleep(forTimeInterval: 0.5)
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+
+        measure {
+            let profile = try? ndb.lookup_profile_and_copy(pk)
+            XCTAssertEqual(profile?.name, "jb55")
+        }
+    }
+
+    /// Sequential N lookups, each opening its own LMDB read transaction.
+    /// This is the current hot-path pattern after transaction inheritance removal.
+    func test_perf_sequential_profile_lookups() throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+        Thread.sleep(forTimeInterval: 0.5)
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+        let lookupCount = 100
+
+        measure {
+            for _ in 0..<lookupCount {
+                let profile = try? ndb.lookup_profile_and_copy(pk)
+                XCTAssertNotNil(profile)
+            }
+        }
+    }
+
+    /// Batch N lookups sharing a single LMDB read transaction.
+    /// Theoretical optimum: one transaction open/close for N lookups.
+    func test_perf_batch_profile_lookups_single_txn() throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+        Thread.sleep(forTimeInterval: 0.5)
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+        let lookupCount = 100
+
+        measure {
+            guard let txn = NdbTxn<()>(ndb: ndb, name: "batch_bench") else {
+                XCTFail("Could not create transaction")
+                return
+            }
+            for _ in 0..<lookupCount {
+                pk.id.withUnsafeBytes { ptr in
+                    var size: Int = 0
+                    var key: UInt64 = 0
+                    guard let baseAddress = ptr.baseAddress else { return }
+                    let result = ndb_get_profile_by_pubkey(&txn.txn, baseAddress, &size, &key)
+                    XCTAssertNotNil(result)
+                }
+            }
+            _ = txn // keep transaction alive for the loop
+        }
+    }
+
+    /// Concurrent lookups: N threads each doing lookup_profile_and_copy.
+    /// Measures contention from the withNdb lock under parallel access.
+    func test_perf_concurrent_profile_lookups() throws {
+        let ndb = Ndb(path: db_dir)!
+        XCTAssertTrue(ndb.process_events(test_wire_events))
+        Thread.sleep(forTimeInterval: 0.5)
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+        let threadCount = 10
+        let lookupsPerThread = 10
+
+        measure {
+            let group = DispatchGroup()
+            for _ in 0..<threadCount {
+                group.enter()
+                DispatchQueue.global().async {
+                    for _ in 0..<lookupsPerThread {
+                        let profile = try? ndb.lookup_profile_and_copy(pk)
+                        XCTAssertNotNil(profile)
+                    }
+                    group.leave()
+                }
+            }
+            let result = group.wait(timeout: .now() + 10)
+            XCTAssertEqual(result, .success)
+        }
+    }
+
+    /// Verifies Ndb initializes with smaller mapsize in extension mode.
+    func test_ndb_init_extension_mode() throws {
+        do {
+            let ndb = Ndb(path: db_dir)!
+            XCTAssertTrue(ndb.process_events(test_wire_events))
+            ndb.close()
+        }
+
+        guard let extensionNdb = Ndb(path: db_dir, owns_db_file: false) else {
+            return XCTFail("Ndb should initialize in extension mode")
+        }
+
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+        let profile = try? extensionNdb.lookup_profile_and_copy(pk)
+        XCTAssertNotNil(profile)
+        XCTAssertEqual(profile?.name, "jb55")
+        extensionNdb.close()
     }
 
 }

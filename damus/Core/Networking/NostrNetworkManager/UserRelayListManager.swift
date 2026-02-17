@@ -21,7 +21,13 @@ extension NostrNetworkManager {
         
         private var relayListObserverTask: Task<Void, Never>? = nil
         private var walletUpdatesObserverTask: AnyCancellable? = nil
-        
+
+        /// Tracks the created_at timestamp of the latest relay list event we know about.
+        /// This is used to prevent re-processing events in `listenAndHandleRelayUpdates()`.
+        /// We store this locally rather than looking it up from NostrDB to avoid race conditions
+        /// where we update the event ID before the event is written to NostrDB.
+        private var latestRelayListCreatedAt: UInt32 = 0
+
         init(delegate: Delegate, pool: RelayPool, reader: SubscriptionManager) {
             self.delegate = delegate
             self.pool = pool
@@ -139,12 +145,19 @@ extension NostrNetworkManager {
         func listenAndHandleRelayUpdates() async {
             let filter = NostrFilter(kinds: [.relay_list], authors: [delegate.keypair.pubkey])
             for await noteLender in self.reader.streamIndefinitely(filters: [filter]) {
-                let currentRelayListCreationDate = await self.getUserCurrentRelayListCreationDate()
                 guard let note = noteLender.justGetACopy() else { continue }
                 guard note.pubkey == self.delegate.keypair.pubkey else { continue }               // Ensure this new list was ours
-                guard note.created_at > (currentRelayListCreationDate ?? 0) else { continue }     // Ensure this is a newer list
+
+                // Use local latestRelayListCreatedAt to avoid race conditions.
+                // We must check AND update atomically to prevent duplicate processing
+                // when the same event arrives from multiple relays simultaneously.
+                guard note.created_at > self.latestRelayListCreatedAt else { continue }
+
+                // Update immediately to prevent duplicate processing from other relays
+                self.latestRelayListCreatedAt = note.created_at
+
                 guard let relayList = try? NIP65.RelayList(event: note) else { continue }         // Ensure it is a valid NIP-65 list
-                
+
                 try? await self.set(userRelayList: relayList)                                     // Set the validated list
             }
         }
@@ -176,17 +189,27 @@ extension NostrNetworkManager {
         func set(userRelayList: NIP65.RelayList) async throws(UpdateError) {
             guard let fullKeypair = delegate.keypair.to_full() else { throw .notAuthorizedToChangeRelayList }
             guard let relayListEvent = userRelayList.toNostrEvent(keypair: fullKeypair) else { throw .cannotFormRelayListEvent }
-    
+
+            // Update the timestamp and event ID BEFORE sending to prevent listenAndHandleRelayUpdates()
+            // from re-processing this event. The listener uses latestRelayListCreatedAt to skip events
+            // we already know about. Without this, there's a race condition where the listener receives
+            // the event before we update the state, causing duplicate processing and UI flickering.
+            self.latestRelayListCreatedAt = relayListEvent.created_at
+            self.delegate.latestRelayListEventIdHex = relayListEvent.id.hex()
+
             await self.apply(newRelayList: self.computeRelaysToConnectTo(with: userRelayList))
-    
-            await self.pool.send(.event(relayListEvent))   // This will send to NostrDB as well, which will locally save that NIP-65 event
-            self.delegate.latestRelayListEventIdHex = relayListEvent.id.hex()   // Make sure we are able to recall this event from NostrDB
+            await self.pool.send(.event(relayListEvent))
         }
         
         // MARK: - Syncing our saved user relay list with the active `RelayPool`
         
         /// Loads the current user relay list
         func load() async {
+            // Initialize latestRelayListCreatedAt from the stored relay list event
+            // to prevent re-processing of events we already know about
+            if let currentCreatedAt = await self.getUserCurrentRelayListCreationDate() {
+                self.latestRelayListCreatedAt = max(self.latestRelayListCreatedAt, currentCreatedAt)
+            }
             await self.apply(newRelayList: self.relaysToConnectTo())
         }
         
