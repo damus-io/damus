@@ -1160,7 +1160,7 @@ func fetch_relay_metadata(relay_id: RelayURL) async throws -> RelayMetadata? {
     return nip11
 }
 
-@discardableResult
+@MainActor @discardableResult
 func handle_incoming_dm(ev: NostrEvent, our_pubkey: Pubkey, dms: DirectMessagesModel, prev_events: NewEventsBits) -> (Bool, NewEventsBits?) {
     var inserted = false
     var found = false
@@ -1204,7 +1204,7 @@ func handle_incoming_dm(ev: NostrEvent, our_pubkey: Pubkey, dms: DirectMessagesM
     return (inserted, new_bits)
 }
 
-@discardableResult
+@MainActor @discardableResult
 func handle_incoming_dms(prev_events: NewEventsBits, dms: DirectMessagesModel, our_pubkey: Pubkey, evs: [NostrEvent]) -> NewEventsBits? {
     var inserted = false
 

@@ -10,6 +10,7 @@ import Foundation
 class Debouncer {
     private let queue = DispatchQueue.main
     private var workItem: DispatchWorkItem?
+    private let lock = NSLock()
     private var interval: TimeInterval
 
     init(interval: TimeInterval) {
@@ -17,37 +18,57 @@ class Debouncer {
     }
 
     func debounce(action: @escaping () -> Void) {
+        lock.lock()
         // Cancel the previous work item if it hasn't yet executed
         workItem?.cancel()
 
         // Create a new work item with a delay
-        workItem = DispatchWorkItem { action() }
-        queue.asyncAfter(deadline: .now() + interval, execute: workItem!)
+        let item = DispatchWorkItem { [weak self] in
+            action()
+            self?.lock.lock()
+            self?.workItem = nil
+            self?.lock.unlock()
+        }
+        workItem = item
+        lock.unlock()
+        queue.asyncAfter(deadline: .now() + interval, execute: item)
     }
 
     func debounce_immediate(action: @escaping () -> Void) {
+        lock.lock()
         guard self.workItem == nil else {
+            lock.unlock()
             return
         }
 
-        self.workItem = DispatchWorkItem(block: {
-            self.workItem = nil
+        let item = DispatchWorkItem(block: { [weak self] in
+            self?.lock.lock()
+            self?.workItem = nil
+            self?.lock.unlock()
         })
+        self.workItem = item
+        lock.unlock()
 
         action()
-        queue.asyncAfter(deadline: .now() + interval, execute: self.workItem!)
+        queue.asyncAfter(deadline: .now() + interval, execute: item)
     }
 
     func debounce_once(action: @escaping () -> Void) {
+        lock.lock()
         guard self.workItem == nil else {
+            lock.unlock()
             return
         }
 
-        self.workItem = DispatchWorkItem(block: {
-            self.workItem = nil
+        let item = DispatchWorkItem(block: { [weak self] in
+            self?.lock.lock()
+            self?.workItem = nil
+            self?.lock.unlock()
             action()
         })
+        self.workItem = item
+        lock.unlock()
 
-        queue.asyncAfter(deadline: .now() + interval, execute: self.workItem!)
+        queue.asyncAfter(deadline: .now() + interval, execute: item)
     }
 }

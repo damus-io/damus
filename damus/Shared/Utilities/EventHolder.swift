@@ -16,6 +16,7 @@ class EventHolder: ObservableObject, ScrollQueue {
     private(set) var should_queue = false
     var on_queue: ((NostrEvent) -> Void)?
     
+    @MainActor
     func set_should_queue(_ val: Bool) {
         self.should_queue = val
     }
@@ -34,6 +35,7 @@ class EventHolder: ObservableObject, ScrollQueue {
         self.on_queue = on_queue
     }
     
+    @MainActor
     func filter(_ isIncluded: (NostrEvent) -> Bool) {
         self.events = self.events.filter(isIncluded)
         self.incoming = self.incoming.filter(isIncluded)

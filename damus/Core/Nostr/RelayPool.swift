@@ -60,6 +60,8 @@ class RelayPool {
     let network_monitor = NWPathMonitor()
     private let network_monitor_queue = DispatchQueue(label: "io.damus.network_monitor")
     private var last_network_status: NWPath.Status = .unsatisfied
+    private var isHandlingPathUpdate = false
+    private var pendingPath: NWPath? = nil
     
     /// The limit of maximum concurrent subscriptions. Any subscriptions beyond this limit will be paused until subscriptions clear
     /// This is to avoid error states and undefined behaviour related to hitting subscription limits on the relays, by letting those wait instead — with the principle that although slower is not ideal, it is better than completely broken.
@@ -96,16 +98,42 @@ class RelayPool {
     }
     
     private func pathUpdateHandler(path: NWPath) async {
+        // Re-entrancy guard: rapid network toggles can queue multiple
+        // pathUpdateHandler calls. Record the latest and process it after
+        // the current handler completes — never drop a transition.
+        if isHandlingPathUpdate {
+            pendingPath = path
+            return
+        }
+        isHandlingPathUpdate = true
+
+        var currentPath = path
+        while true {
+            await processPathUpdate(currentPath)
+            if let next = pendingPath {
+                pendingPath = nil
+                currentPath = next
+            } else {
+                break
+            }
+        }
+
+        isHandlingPathUpdate = false
+    }
+
+    private func processPathUpdate(_ path: NWPath) async {
         if (path.status == .satisfied || path.status == .requiresConnection) && self.last_network_status != path.status {
             await self.connect_to_disconnected()
         }
-        
+
         if path.status != self.last_network_status {
-            for relay in await self.relays {
+            // Snapshot relays before iteration — the property crosses to @MainActor
+            let relaysSnapshot = await self.relays
+            for relay in relaysSnapshot {
                 relay.connection.log?.add("Network state: \(path.status)")
             }
         }
-        
+
         self.last_network_status = path.status
     }
     
@@ -521,6 +549,7 @@ class RelayPool {
             var seenEvents: Set<NoteId> = []
             var relaysWhoFinishedInitialResults: Set<RelayURL> = []
             var eoseSent = false
+            let eoseLock = NSLock()
             let upstreamStream = AsyncStream<(RelayURL, NostrConnectionEvent)> { upstreamContinuation in
                 self.subscribe(sub_id: sub_id, filters: filters, handler: upstreamContinuation, to: desiredRelays.map({ $0.descriptor.url }))
             }
@@ -546,8 +575,13 @@ class RelayPool {
                             let desiredAndConnectedRelays = desiredRelays.filter({ $0.connection.isConnected }).map({ $0.descriptor.url })
                             Log.debug("RelayPool subscription %s: EOSE from %s. EOSE count: %d/%d. Elapsed: %.2f seconds.", for: .networking, id.uuidString, relayUrl.absoluteString, relaysWhoFinishedInitialResults.count, Set(desiredAndConnectedRelays).count, CFAbsoluteTimeGetCurrent() - startTime)
                             if relaysWhoFinishedInitialResults == Set(desiredAndConnectedRelays) {
-                                continuation.yield(with: .success(.eose))
+                                eoseLock.lock()
+                                let alreadySent = eoseSent
                                 eoseSent = true
+                                eoseLock.unlock()
+                                if !alreadySent {
+                                    continuation.yield(with: .success(.eose))
+                                }
                             }
                         case .ok(_): break    // No need to handle this, we are not sending an event to the relay
                         case .auth(_): break    // Handled in a separate function in RelayPool
@@ -559,7 +593,11 @@ class RelayPool {
             }
             let timeoutTask = Task {
                 try? await Task.sleep(for: eoseTimeout)
-                if !eoseSent { continuation.yield(with: .success(.eose)) }
+                eoseLock.lock()
+                let alreadySent = eoseSent
+                eoseSent = true
+                eoseLock.unlock()
+                if !alreadySent { continuation.yield(with: .success(.eose)) }
             }
             continuation.onTermination = { @Sendable termination in
                 switch termination {
@@ -726,7 +764,10 @@ class RelayPool {
     }
     
     func resubscribeAll(relayId: RelayURL) async {
-        for handler in self.handlers {
+        // Snapshot handlers — the `await send` below suspends the actor,
+        // allowing concurrent mutations to self.handlers.
+        let handlersSnapshot = self.handlers
+        for handler in handlersSnapshot {
             guard let filters = handler.filters else { continue }
             // When the caller specifies no relays, it is implied that the user wants to use the ones in the user relay list. Skip ephemeral relays in that case.
             // When the caller specifies specific relays, do not skip ephemeral relays to respect the exact list given by the caller.
@@ -783,7 +824,10 @@ class RelayPool {
             }
         }
 
-        for handler in handlers {
+        // Snapshot handlers before iteration — register_handler/remove_handler
+        // can mutate the array between yield calls.
+        let currentHandlers = self.handlers
+        for handler in currentHandlers {
             // We send data to the handlers if:
             // - the subscription ID matches, or
             // - the handler filters is `nil`, which is used in some cases as a blanket "give me all notes" (e.g. during signup)

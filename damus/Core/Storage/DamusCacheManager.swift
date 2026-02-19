@@ -39,21 +39,22 @@ struct DamusCacheManager {
             
             for fileName in fileNames {
                 let filePath = cacheURL.appendingPathComponent(fileName)
-                
-                // Prevent issues by double-checking if files are in use, and do not delete them if they are.
-                // This is not perfect. There is still a small chance for a race condition if a file is opened between this check and the file removal.
-                let isBusy = (!(access(filePath.path, F_OK) == -1 && errno == ETXTBSY))
-                if isBusy {
+
+                // Instead of check-then-act (access + removeItem TOCTOU),
+                // just attempt removal and let it fail gracefully.
+                do {
+                    try FileManager.default.removeItem(at: filePath)
+                } catch {
+                    // File may be in use or already deleted — skip gracefully
                     continue
                 }
-                
-                try FileManager.default.removeItem(at: filePath)
             }
             
             Log.info("Cache folder cleared successfully.", for: .storage)
             completion?()
         } catch {
             Log.error("Could not clear cache folder", for: .storage)
+            completion?()
         }
     }
 }

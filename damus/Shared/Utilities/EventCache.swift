@@ -101,6 +101,7 @@ class EventCache {
     private var image_metadata: [String: ImageMetadataState] = [:] // lowercased URL key
     private var event_data: [NoteId: EventData] = [:]
     var replies = ReplyMap()
+    private let lock = NSLock()
 
     //private var thread_latest: [String: Int64]
 
@@ -112,76 +113,99 @@ class EventCache {
             self?.prune()
         }
     }
-    
-    func get_cache_data(_ evid: NoteId) -> EventData {
+
+    /// Internal helper — caller must hold `lock`.
+    private func _get_cache_data(_ evid: NoteId) -> EventData {
         guard let data = event_data[evid] else {
             let data = EventData()
             event_data[evid] = data
             return data
         }
-        
         return data
     }
-    
+
+    func get_cache_data(_ evid: NoteId) -> EventData {
+        lock.lock()
+        defer { lock.unlock() }
+        return _get_cache_data(evid)
+    }
+
     func is_event_valid(_ evid: NoteId) -> ValidationResult {
-        return get_cache_data(evid).validated
+        lock.lock()
+        defer { lock.unlock() }
+        return event_data[evid]?.validated ?? .unknown
     }
-    
+
     func store_event_validation(evid: NoteId, validated: ValidationResult) {
-        get_cache_data(evid).validated = validated
+        lock.lock()
+        defer { lock.unlock() }
+        if event_data[evid] == nil {
+            event_data[evid] = EventData()
+        }
+        event_data[evid]!.validated = validated
     }
-    
+
     @discardableResult
     func store_zap(zap: Zapping) -> Bool {
-        let data = get_cache_data(NoteId(zap.target.id)).zaps_model
+        lock.lock()
+        defer { lock.unlock() }
+        let data = _get_cache_data(NoteId(zap.target.id)).zaps_model
         if let ev = zap.event {
-            insert(ev)
+            _insert(ev)
         }
         return insert_uniq_sorted_zap_by_amount(zaps: &data.zaps, new_zap: zap)
     }
-    
+
     func remove_zap(zap: Zapping) {
+        lock.lock()
+        defer { lock.unlock() }
         switch zap.target {
         case .note(let note_target):
-            let zaps = get_cache_data(note_target.note_id).zaps_model
+            let zaps = _get_cache_data(note_target.note_id).zaps_model
             zaps.remove(reqid: zap.request.id)
         case .profile:
             // these aren't stored anywhere yet
             break
         }
     }
-    
+
     func lookup_zaps(target: ZapTarget) -> [Zapping] {
-        return get_cache_data(NoteId(target.id)).zaps_model.zaps
+        lock.lock()
+        defer { lock.unlock() }
+        return _get_cache_data(NoteId(target.id)).zaps_model.zaps
     }
-    
+
     func store_img_metadata(url: URL, meta: ImageMetadataState) {
+        lock.lock()
+        defer { lock.unlock() }
         self.image_metadata[url.absoluteString.lowercased()] = meta
     }
-    
+
     func lookup_img_metadata(url: URL) -> ImageMetadataState? {
+        lock.lock()
+        defer { lock.unlock() }
         return image_metadata[url.absoluteString.lowercased()]
     }
-    
+
     func parent_events(event: NostrEvent, keypair: Keypair) -> [NostrEvent] {
         var parents: [NostrEvent] = []
-        
+
         var ev = event
-        
+
         while true {
             guard let direct_reply = ev.direct_replies(),
                   let next_ev = lookup(direct_reply), next_ev != ev
             else {
                 break
             }
-            
+
             parents.append(next_ev)
             ev = next_ev
         }
-        
+
         return parents.reversed()
     }
-    
+
     func add_replies(ev: NostrEvent, keypair: Keypair) {
         if let reply = ev.direct_replies() {
             replies.add(id: reply, reply_id: ev.id)
@@ -196,17 +220,17 @@ class EventCache {
             guard let ev = self.lookup(evid) else {
                 return
             }
-            
+
             evs.append(ev)
         }).sorted(by: { $0.created_at < $1.created_at })
         return evs
     }
-    
+
     func upsert(_ ev: NostrEvent) -> NostrEvent {
         if let found = lookup(ev.id) {
             return found
         }
-        
+
         insert(ev)
         return ev
     }
@@ -218,29 +242,45 @@ class EventCache {
      */
 
     func lookup(_ evid: NoteId) -> NostrEvent? {
+        lock.lock()
         if let ev = events[evid] {
+            lock.unlock()
             return ev
         }
+        lock.unlock()
 
         if let ev = try? self.ndb.lookup_note_and_copy(evid) {
-            events[ev.id] = ev
-            return ev
+            lock.lock()
+            defer { lock.unlock() }
+            // Guard against concurrent insert clobbering
+            if events[ev.id] == nil {
+                events[ev.id] = ev
+            }
+            return events[ev.id] ?? ev
         }
 
         return nil
     }
-    
-    func insert(_ ev: NostrEvent) {
-        guard events[ev.id] == nil else {
-            return
-        }
+
+    /// Internal helper — caller must hold `lock`.
+    private func _insert(_ ev: NostrEvent) {
+        guard events[ev.id] == nil else { return }
         events[ev.id] = ev
     }
-    
+
+    func insert(_ ev: NostrEvent) {
+        lock.lock()
+        defer { lock.unlock() }
+        _insert(ev)
+    }
+
     private func prune() {
+        lock.lock()
+        defer { lock.unlock() }
         events = [:]
         event_data = [:]
-        replies.replies = [:]
+        image_metadata = [:]
+        replies.clear()
     }
 }
 
