@@ -13,12 +13,13 @@ struct SupporterBadge: View {
     let style: Style
     let text_color: Color
     var badge_variant: BadgeVariant {
-        if purple_account?.attributes.contains(.memberForMoreThanOneYear) == true {
-            return .oneYearSpecial
-        }
-        else {
+        guard let duration = purple_account?.active_membership_duration else {
             return .normal
         }
+        if duration > DamusPurple.Account.one_year {
+            return .oneYearSpecial
+        }
+        return .normal
     }
     
     init(percent: Int?, purple_account: DamusPurple.Account? = nil, style: Style, text_color: Color = .secondary) {
@@ -193,7 +194,7 @@ struct SupporterBadge_Previews: PreviewProvider {
         HStack(alignment: .center) {
             SupporterBadge(
                 percent: nil,
-                purple_account: DamusPurple.Account(pubkey: test_pubkey, created_at: .now, expiry: .now.addingTimeInterval(10000), subscriber_number: subscriber_number, active: true, attributes: []),
+                purple_account: DamusPurple.Account(pubkey: test_pubkey, created_at: .now, expiry: .now.addingTimeInterval(10000), subscriber_number: subscriber_number, active: true, active_membership_duration: 0),
                 style: .full
             )
                 .frame(width: 100)
@@ -230,7 +231,7 @@ struct SupporterBadge_Previews: PreviewProvider {
         HStack(alignment: .center) {
             SupporterBadge(
                 percent: nil,
-                purple_account: DamusPurple.Account(pubkey: test_pubkey, created_at: .now, expiry: .now.addingTimeInterval(10000), subscriber_number: 3, active: true, attributes: []),
+                purple_account: DamusPurple.Account(pubkey: test_pubkey, created_at: .now, expiry: .now.addingTimeInterval(10000), subscriber_number: 3, active: true, active_membership_duration: 0),
                 style: .full
             )
                 .frame(width: 100)
@@ -239,7 +240,7 @@ struct SupporterBadge_Previews: PreviewProvider {
         HStack(alignment: .center) {
             SupporterBadge(
                 percent: nil,
-                purple_account: DamusPurple.Account(pubkey: test_pubkey, created_at: .now, expiry: .now.addingTimeInterval(10000), subscriber_number: 3, active: true, attributes: [.memberForMoreThanOneYear]),
+                purple_account: DamusPurple.Account(pubkey: test_pubkey, created_at: .now, expiry: .now.addingTimeInterval(10000), subscriber_number: 3, active: true, active_membership_duration: DamusPurple.Account.one_year + 1),
                 style: .full
             )
                 .frame(width: 100)
