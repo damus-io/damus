@@ -86,4 +86,26 @@ final class DamusPurpleAccountAttributesTests: XCTestCase {
         let account = try XCTUnwrap(DamusPurple.Account.from(json_data: json.data(using: .utf8)!))
         XCTAssertEqual(account.active_membership_duration, 0)
     }
+
+    // MARK: - Star count
+
+    func testStarCountFromDuration() throws {
+        let oneYear = DamusPurple.Account.one_year
+        let badge = { (duration: TimeInterval) in
+            let account = DamusPurple.Account(
+                pubkey: test_pubkey, created_at: .now,
+                expiry: .now.addingTimeInterval(10000),
+                subscriber_number: 1, active: true,
+                active_membership_duration: duration
+            )
+            return SupporterBadge(percent: nil, purple_account: account, style: .compact).star_count
+        }
+
+        XCTAssertEqual(badge(0), 1)
+        XCTAssertEqual(badge(oneYear - 1), 1)
+        XCTAssertEqual(badge(oneYear + 1), 2)
+        XCTAssertEqual(badge(2 * oneYear + 1), 3)
+        XCTAssertEqual(badge(9 * oneYear + 1), 10)
+        XCTAssertEqual(badge(99 * oneYear), 10, "should cap at 10")
+    }
 }
