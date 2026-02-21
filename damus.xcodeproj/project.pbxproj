@@ -1706,6 +1706,9 @@
 		D76BE18C2E0CF3DA004AD0C6 /* Interests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76BE18B2E0CF3D5004AD0C6 /* Interests.swift */; };
 		D76BE18D2E0CF3DA004AD0C6 /* Interests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76BE18B2E0CF3D5004AD0C6 /* Interests.swift */; };
 		D76BE18E2E0CF3DA004AD0C6 /* Interests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76BE18B2E0CF3D5004AD0C6 /* Interests.swift */; };
+		D76C034D2F6B6D78002CAEB5 /* ToolbarItemModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76C034C2F6B6D78002CAEB5 /* ToolbarItemModifier.swift */; };
+		D76C034E2F6B6D78002CAEB5 /* ToolbarItemModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76C034C2F6B6D78002CAEB5 /* ToolbarItemModifier.swift */; };
+		D76C034F2F6B6D78002CAEB5 /* ToolbarItemModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76C034C2F6B6D78002CAEB5 /* ToolbarItemModifier.swift */; };
 		D77135D32E7B766B00E7639F /* DataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77135D22E7B766300E7639F /* DataExtensions.swift */; };
 		D77135D42E7B766B00E7639F /* DataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77135D22E7B766300E7639F /* DataExtensions.swift */; };
 		D77135D52E7B766B00E7639F /* DataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77135D22E7B766300E7639F /* DataExtensions.swift */; };
@@ -2863,6 +2866,7 @@
 		D767066E2C8BB3CE00F09726 /* URLHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLHandler.swift; sourceTree = "<group>"; };
 		D76874F22AE3632B00FB0F68 /* ProfileZapLinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileZapLinkView.swift; sourceTree = "<group>"; };
 		D76BE18B2E0CF3D5004AD0C6 /* Interests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interests.swift; sourceTree = "<group>"; };
+		D76C034C2F6B6D78002CAEB5 /* ToolbarItemModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarItemModifier.swift; sourceTree = "<group>"; };
 		D77135D22E7B766300E7639F /* DataExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExtensions.swift; sourceTree = "<group>"; };
 		D773BC5E2C6D538500349F0A /* CommentItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentItem.swift; sourceTree = "<group>"; };
 		D774A5C72F4F93F5006A4D64 /* StorageStatsViewHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageStatsViewHelper.swift; sourceTree = "<group>"; };
@@ -5458,6 +5462,7 @@
 			children = (
 				5C8F97482EB46208009399B1 /* Glow.swift */,
 				F7F0BA24297892BD009531F3 /* SwipeToDismiss.swift */,
+				D76C034C2F6B6D78002CAEB5 /* ToolbarItemModifier.swift */,
 			);
 			path = Modifiers;
 			sourceTree = "<group>";
@@ -6197,6 +6202,7 @@
 				5C513FCC2984ACA60072348F /* QRCodeView.swift in Sources */,
 				4CC14FF52A740BB7007AEB17 /* NoteId.swift in Sources */,
 				4C19AE512A5CEF7C00C90DB7 /* NostrScript.swift in Sources */,
+				D76C034E2F6B6D78002CAEB5 /* ToolbarItemModifier.swift in Sources */,
 				4C32B95E2A9AD44700DC3548 /* FlatBufferObject.swift in Sources */,
 				D783A63F2AD4E53D00658DDA /* SuggestedHashtagsView.swift in Sources */,
 				D73FA9E12DDC12AA00C706E1 /* OnboardingContentSettings.swift in Sources */,
@@ -6775,6 +6781,7 @@
 				82D6FB8F2CD99F7900C925F4 /* DirectMessagesModel.swift in Sources */,
 				D73C7EDD2DE517A1001F9392 /* OnboardingContentSettings.swift in Sources */,
 				82D6FB902CD99F7900C925F4 /* DirectMessageModel.swift in Sources */,
+				D76C034F2F6B6D78002CAEB5 /* ToolbarItemModifier.swift in Sources */,
 				82D6FB912CD99F7900C925F4 /* UserSettingsStore.swift in Sources */,
 				82D6FB922CD99F7900C925F4 /* Wallet.swift in Sources */,
 				82D6FB932CD99F7900C925F4 /* Report.swift in Sources */,
@@ -7348,6 +7355,7 @@
 				D73E5EF72C6A97F4007EB227 /* PullDownSearch.swift in Sources */,
 				D73E5EF82C6A97F4007EB227 /* NotificationsView.swift in Sources */,
 				D5C1AFC12E5DF7E60092F72F /* ContactCardManager.swift in Sources */,
+				D76C034D2F6B6D78002CAEB5 /* ToolbarItemModifier.swift in Sources */,
 				D73B74E32D8365BA0067BDBC /* ExtraFonts.swift in Sources */,
 				D73E5EF92C6A97F4007EB227 /* EventGroupView.swift in Sources */,
 				D73E5EFA2C6A97F4007EB227 /* NotificationItemView.swift in Sources */,

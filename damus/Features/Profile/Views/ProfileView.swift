@@ -503,6 +503,8 @@ struct ProfileView: View {
                         .padding(.top, max(5, 15 + (yOffset / 30)))
                     }
                 }
+                .hideToolbarBackground()
+                
                 if showFollowBtnInBlurrBanner() {
                     ToolbarItem(placement: .topBarTrailing) {
                         FollowButtonView(
@@ -512,12 +514,14 @@ struct ProfileView: View {
                         )
                         .padding(.top, 8)
                     }
+                    .hideToolbarBackground()
                 } else {
                     ToolbarItem(placement: .topBarTrailing) {
                         navActionSheetButton
                             .padding(.top, 5)
                             .accentColor(DamusColors.white)
                     }
+                    .hideToolbarBackground()
                 }
             }
             .toolbarBackground(.hidden)
