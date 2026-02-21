@@ -130,6 +130,11 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "media_previews", default_value: true)
     var media_previews: Bool
 
+    /// Low Data Mode: When enabled, prevents auto-loading of images, videos, and link previews.
+    /// Addresses issue #919.
+    @Setting(key: "low_data_mode", default_value: false)
+    var low_data_mode: Bool
+
     @Setting(key: "show_trusted_replies_first", default_value: true)
     var show_trusted_replies_first: Bool
 

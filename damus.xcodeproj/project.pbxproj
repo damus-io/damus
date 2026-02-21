@@ -1711,6 +1711,10 @@
 		D77135D42E7B766B00E7639F /* DataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77135D22E7B766300E7639F /* DataExtensions.swift */; };
 		D77135D52E7B766B00E7639F /* DataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77135D22E7B766300E7639F /* DataExtensions.swift */; };
 		D77135D62E7B78D700E7639F /* DataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77135D22E7B766300E7639F /* DataExtensions.swift */; };
+C38AA7263C1D4183950F64CC /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C90CAF3490482DA896A0D7 /* NetworkMonitor.swift */; };
+		32D0BA479EA9496DB7D2F0E6 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C90CAF3490482DA896A0D7 /* NetworkMonitor.swift */; };
+		D8D1A2B505A749BBA45E4E6F /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C90CAF3490482DA896A0D7 /* NetworkMonitor.swift */; };
+		90A1B72145AF4E4AB11129F0 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C90CAF3490482DA896A0D7 /* NetworkMonitor.swift */; };
 		D773BC5F2C6D538500349F0A /* CommentItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D773BC5E2C6D538500349F0A /* CommentItem.swift */; };
 		D773BC602C6D538500349F0A /* CommentItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D773BC5E2C6D538500349F0A /* CommentItem.swift */; };
 		D776BE402F232B17002DA1C9 /* EntityPreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D776BE3F2F232B17002DA1C9 /* EntityPreloader.swift */; };
@@ -2842,6 +2846,7 @@
 		D76874F22AE3632B00FB0F68 /* ProfileZapLinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileZapLinkView.swift; sourceTree = "<group>"; };
 		D76BE18B2E0CF3D5004AD0C6 /* Interests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interests.swift; sourceTree = "<group>"; };
 		D77135D22E7B766300E7639F /* DataExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExtensions.swift; sourceTree = "<group>"; };
+43C90CAF3490482DA896A0D7 /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
 		D773BC5E2C6D538500349F0A /* CommentItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentItem.swift; sourceTree = "<group>"; };
 		D776BE3F2F232B17002DA1C9 /* EntityPreloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityPreloader.swift; sourceTree = "<group>"; };
 		D776BE432F233012002DA1C9 /* EntityPreloaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityPreloaderTests.swift; sourceTree = "<group>"; };
@@ -4903,6 +4908,7 @@
 		5C78A7B82E3047DE00CF177D /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				43C90CAF3490482DA896A0D7 /* NetworkMonitor.swift */,
 				D77DA2C72F19D452000B7093 /* NegentropyUtilities.swift */,
 				D77DA2C32F19CA40000B7093 /* AsyncStreamUtilities.swift */,
 				D7E5B2D22EA0187B00CF47AC /* StreamPipelineDiagnostics.swift */,
@@ -6359,6 +6365,7 @@
 				D733F9E82D92C76100317B11 /* UnownedNdbNote.swift in Sources */,
 				5CB6459C2EA31D8E0018BD91 /* LabsIntroduction.swift in Sources */,
 				D77135D42E7B766B00E7639F /* DataExtensions.swift in Sources */,
+					32D0BA479EA9496DB7D2F0E6 /* NetworkMonitor.swift in Sources */,
 				D74EA0902D2E271E002290DD /* ErrorView.swift in Sources */,
 				4CE4F0F429D779B5005914DB /* PostBox.swift in Sources */,
 				BA37598E2ABCCE500018D73B /* VideoCaptureProcessor.swift in Sources */,
@@ -6461,6 +6468,7 @@
 				4C36246E2D5EA10400DD066E /* hash_u5.c in Sources */,
 				4C36246C2D5EA0E500DD066E /* bolt11.c in Sources */,
 				D77135D52E7B766B00E7639F /* DataExtensions.swift in Sources */,
+					D8D1A2B505A749BBA45E4E6F /* NetworkMonitor.swift in Sources */,
 				4C36246B2D5EA0D700DD066E /* invoice.c in Sources */,
 				4C36246A2D5EA0CB00DD066E /* content_parser.c in Sources */,
 				4C3624692D5EA0C200DD066E /* list.c in Sources */,
@@ -7082,6 +7090,7 @@
 				D73E5E502C6A97F4007EB227 /* Highlight.swift in Sources */,
 				D73E5E512C6A97F4007EB227 /* CustomPicker.swift in Sources */,
 				D77135D32E7B766B00E7639F /* DataExtensions.swift in Sources */,
+					C38AA7263C1D4183950F64CC /* NetworkMonitor.swift in Sources */,
 				D73E5E522C6A97F4007EB227 /* UserView.swift in Sources */,
 				D73E5E532C6A97F4007EB227 /* ZoomableScrollView.swift in Sources */,
 				D73E5E542C6A97F4007EB227 /* NoteZapButton.swift in Sources */,
@@ -7715,6 +7724,7 @@
 				D798D22E2B086E4800234419 /* NostrResponse.swift in Sources */,
 				D7EDED162B1177840018B19C /* LNUrls.swift in Sources */,
 				D77135D62E7B78D700E7639F /* DataExtensions.swift in Sources */,
+					90A1B72145AF4E4AB11129F0 /* NetworkMonitor.swift in Sources */,
 				D7CCFC132B05887C00323D86 /* ProofOfWork.swift in Sources */,
 				D7CE1B392B0BE719002EDAD4 /* Table.swift in Sources */,
 				D7CE1B452B0BE719002EDAD4 /* Root.swift in Sources */,
