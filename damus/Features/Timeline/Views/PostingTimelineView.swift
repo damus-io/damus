@@ -29,7 +29,12 @@ struct PostingTimelineView: View {
     @Binding var headerOffset: CGFloat
     @SceneStorage("PostingTimelineView.filter_state") var filter_state : FilterState = .posts_and_replies
     @State var timeline_source: TimelineSource = .follows
-    
+
+    @SceneStorage("PostingTimelineView.grouped_mode") var groupedModeStored: Bool = false
+    @StateObject private var groupedFilterSettings = GroupedFilterSettings()
+    @State private var showGroupedFilterSheet: Bool = false
+    @State private var lastVisitedGroupedPubkey: Pubkey? = nil
+
     @State private var damusTips: Any? = {
         if #available(iOS 18.0, *) {
             return TipGroup(.ordered) {
@@ -83,6 +88,11 @@ struct PostingTimelineView: View {
 
                     HStack(alignment: .center) {
                         SignalView(state: damus_state, signal: home.signal)
+                        GroupedFilterButton(
+                            settings: groupedFilterSettings,
+                            showFilterSheet: $showGroupedFilterSheet,
+                            isLoading: home.backfilling
+                        )
                         if damus_state.settings.enable_favourites_feature {
                             Image(systemName: "square.stack")
                                 .foregroundColor(DamusColors.purple)
@@ -121,15 +131,17 @@ struct PostingTimelineView: View {
                     .tipViewStyle(TrustedNetworkButtonTipViewStyle())
                     .padding(.horizontal)
             }
-            VStack(spacing: 0) {
-                CustomPicker(tabs: [
-                    (NSLocalizedString("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies)."), FilterState.posts),
-                    (NSLocalizedString("Notes & Replies", comment: "Label for filter for seeing notes and replies (instead of only notes)."), FilterState.posts_and_replies)
-                ],
-                             selection: $filter_state)
-                
-                Divider()
-                    .frame(height: 1)
+            if !groupedFilterSettings.enableGroupedMode {
+                VStack(spacing: 0) {
+                    CustomPicker(tabs: [
+                        (NSLocalizedString("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies)."), FilterState.posts),
+                        (NSLocalizedString("Notes & Replies", comment: "Label for filter for seeing notes and replies (instead of only notes)."), FilterState.posts_and_replies)
+                    ],
+                                 selection: $filter_state)
+
+                    Divider()
+                        .frame(height: 1)
+                }
             }
         }
         .background {
@@ -141,16 +153,20 @@ struct PostingTimelineView: View {
     var body: some View {
         VStack {
             ZStack {
-                TabView(selection: $filter_state) {
-                    contentTimelineView(filter: content_filter(.posts))
-                        .tag(FilterState.posts)
-                        .id(FilterState.posts)
-                    contentTimelineView(filter: content_filter(.posts_and_replies))
-                        .tag(FilterState.posts_and_replies)
-                        .id(FilterState.posts_and_replies)
+                if groupedFilterSettings.enableGroupedMode {
+                    groupedContentView
+                } else {
+                    TabView(selection: $filter_state) {
+                        contentTimelineView(filter: content_filter(.posts))
+                            .tag(FilterState.posts)
+                            .id(FilterState.posts)
+                        contentTimelineView(filter: content_filter(.posts_and_replies))
+                            .tag(FilterState.posts_and_replies)
+                            .id(FilterState.posts_and_replies)
+                    }
+                    .tabViewStyle(.page(indexDisplayMode: .never))
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
-                
+
                 if damus_state.keypair.privkey != nil {
                     PostButtonContainer(is_left_handed: damus_state.settings.left_handed) {
                         self.active_sheet = .post(.posting(.none))
@@ -159,6 +175,31 @@ struct PostingTimelineView: View {
                     .opacity(0.35 + abs(1.25 - (abs(headerOffset/100.0))))
                 }
             }
+        }
+        .onAppear {
+            groupedFilterSettings.enableGroupedMode = groupedModeStored
+        }
+        .onChange(of: groupedFilterSettings.enableGroupedMode) { newValue in
+            groupedModeStored = newValue
+            headerOffset = 0
+            if newValue {
+                flushActiveSource()
+                backfillForGroupedMode()
+            }
+        }
+        .onChange(of: timeline_source) { _ in
+            if groupedFilterSettings.enableGroupedMode {
+                flushActiveSource()
+                backfillForGroupedMode()
+            }
+        }
+        .sheet(isPresented: $showGroupedFilterSheet) {
+            GroupedFilterSettingsView(settings: groupedFilterSettings) {
+                if groupedFilterSettings.enableGroupedMode {
+                    backfillForGroupedMode()
+                }
+            }
+                .presentationDetents([.medium, .large])
         }
         .overlay(alignment: .top) {
             HeaderView()
@@ -176,6 +217,58 @@ struct PostingTimelineView: View {
                 .offset(y: -headerOffset < headerHeight ? headerOffset : (headerOffset < 0 ? headerOffset : 0))
                 .opacity(1.0 - (abs(headerOffset/100.0)))
         }
+    }
+
+    // MARK: - Grouped Mode
+
+    private var groupedContentView: some View {
+        let eventsSource = timeline_source == .favorites
+            ? home.favoriteEvents : home.events
+        return ScrollView {
+            GroupedListView(
+                damus_state: damus_state,
+                events: eventsSource,
+                filter: content_filter(.posts_and_replies),
+                settings: groupedFilterSettings,
+                onProfileTapped: { pubkey in
+                    lastVisitedGroupedPubkey = pubkey
+                }
+            )
+            .redacted(reason: home.backfilling ? .placeholder : [])
+            .shimmer(home.backfilling)
+            .padding(.top, headerHeight)
+        }
+        .onAppear {
+            // When returning from a profile, do a targeted refresh for just that
+            // author. Single-author queries avoid the dilution problem of querying
+            // all 500+ friends at once, ensuring the author's full event history
+            // within the time window is fetched.
+            if let pubkey = lastVisitedGroupedPubkey {
+                lastVisitedGroupedPubkey = nil
+                let since = UInt32(Date().timeIntervalSince1970) - groupedFilterSettings.timeRange.seconds
+                home.refreshSingleAuthorEvents(pubkey: pubkey, since: since, source: timeline_source)
+            } else if !home.backfilling {
+                refreshFromNdb()
+            }
+        }
+    }
+
+    @MainActor
+    private func flushActiveSource() {
+        GroupedModeQueueManager.flush(
+            source: timeline_source == .favorites
+                ? home.favoriteEvents : home.events
+        )
+    }
+
+    private func backfillForGroupedMode(showLoading: Bool = true) {
+        let since = UInt32(Date().timeIntervalSince1970) - groupedFilterSettings.timeRange.seconds
+        home.backfillForGroupedMode(since: since, source: timeline_source, showLoading: showLoading)
+    }
+
+    private func refreshFromNdb() {
+        let since = UInt32(Date().timeIntervalSince1970) - groupedFilterSettings.timeRange.seconds
+        home.refreshGroupedFromNdb(since: since, source: timeline_source)
     }
 }
 

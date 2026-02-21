@@ -76,6 +76,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
     var nwcHandlerTask: Task<Void, Never>?
     
     @Published var loading: Bool = true
+    @Published var backfilling: Bool = false
 
     var signal = SignalModel()
     
@@ -756,6 +757,156 @@ class HomeModel: ContactsDelegate, ObservableObject {
                 case .event(let lender):
                     await lender.justUseACopy({ await self.insert_favorite_event($0) })
                 case .eose, .ndbEose, .networkEose:
+                    break
+                }
+            }
+        }
+    }
+
+    /// Backfills the given EventHolder with events from the relay going back to `since`.
+    /// Used by grouped mode to ensure the full time window is represented,
+    /// since the normal subscription only fetches the most recent N events.
+    private var backfillTask: Task<Void, Never>?
+
+    private var ndbRefreshTask: Task<Void, Never>?
+    private let backfillPageLimit: UInt32 = 5000
+
+    /// Fast local-only refresh: queries ndb for events within the time window.
+    /// Picks up events cached by profile visits or other subscriptions instantly.
+    func refreshGroupedFromNdb(since: UInt32, source: TimelineSource) {
+        ndbRefreshTask?.cancel()
+
+        let kinds: [NostrKind] = [.text, .longform, .boost, .highlight]
+        let isFavorites = source == .favorites
+
+        let authors: [Pubkey]
+        if isFavorites {
+            authors = Array(damus_state.contactCards.favorites)
+            guard !authors.isEmpty else { return }
+        } else {
+            authors = get_friends()
+        }
+
+        var ndbFilter = NostrFilter(kinds: kinds)
+        ndbFilter.authors = authors
+        ndbFilter.since = since
+
+        let filters = ndbFilter.chunked(on: .authors, into: MAX_CONTACTS_ON_FILTER)
+
+        ndbRefreshTask = Task {
+            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: filters, streamMode: .ndbOnly) {
+                switch item {
+                case .event(let lender):
+                    await lender.justUseACopy({ ev in
+                        guard should_show_event(state: self.damus_state, ev: ev) else { return }
+                        self.damus_state.events.insert(ev)
+                        if isFavorites {
+                            await self.favoriteEvents.insert(ev)
+                        } else {
+                            await self.insert_home_event(ev)
+                        }
+                    })
+                case .eose:
+                    return
+                case .ndbEose, .networkEose:
+                    break
+                }
+            }
+        }
+    }
+
+    /// - Parameter showLoading: When `true`, sets `backfilling = true` to show shimmer.
+    ///   Pass `false` for silent refreshes (e.g. re-appearing after profile visit).
+    func backfillForGroupedMode(since: UInt32, source: TimelineSource, showLoading: Bool = true) {
+        backfillTask?.cancel()
+
+        let kinds: [NostrKind] = [.text, .longform, .boost, .highlight]
+        let isFavorites = source == .favorites
+
+        let authors: [Pubkey]
+        if isFavorites {
+            authors = Array(damus_state.contactCards.favorites)
+            guard !authors.isEmpty else { backfilling = false; return }
+        } else {
+            authors = get_friends()
+        }
+
+        if showLoading { backfilling = true }
+        backfillTask = Task {
+            // Query each author chunk as a SEPARATE subscription so each gets its
+            // own relay limit. Relays apply `limit` per-subscription, not per-filter,
+            // so sending all chunks in one REQ still returns events biased toward
+            // active authors. Separate subscriptions ensure every chunk gets fair
+            // relay bandwidth.
+            let authorsPerChunk = 50
+            let chunks = authors.chunked(into: authorsPerChunk)
+            var allEvents: [NostrEvent] = []
+
+            for chunk in chunks {
+                guard !Task.isCancelled else { break }
+
+                var chunkFilter = NostrFilter(kinds: kinds)
+                chunkFilter.authors = chunk
+                chunkFilter.since = since
+                chunkFilter.limit = backfillPageLimit
+
+                for await item in damus_state.nostrNetwork.reader.advancedStream(filters: [chunkFilter], streamMode: .ndbAndNetworkParallel(networkOptimization: nil)) {
+                    switch item {
+                    case .event(let lender):
+                        await lender.justUseACopy({ ev in
+                            guard should_show_event(state: self.damus_state, ev: ev) else { return }
+                            allEvents.append(ev)
+                        })
+                    case .eose:
+                        break
+                    case .ndbEose, .networkEose:
+                        continue
+                    }
+                    if case .eose = item { break }
+                }
+            }
+
+            // Insert all events at once, then clear shimmer
+            for ev in allEvents {
+                self.damus_state.events.insert(ev)
+                if isFavorites {
+                    await self.favoriteEvents.insert(ev)
+                } else {
+                    await self.insert_home_event(ev)
+                }
+            }
+            self.backfilling = false
+        }
+    }
+
+    /// Targeted refresh for a single author's events within the time window.
+    /// Queries both ndb and network for just one pubkey, avoiding the dilution
+    /// problem of querying all 500+ friends at once.
+    func refreshSingleAuthorEvents(pubkey: Pubkey, since: UInt32, source: TimelineSource) {
+        let kinds: [NostrKind] = [.text, .longform, .boost, .highlight]
+        let isFavorites = source == .favorites
+
+        var filter = NostrFilter(kinds: kinds)
+        filter.authors = [pubkey]
+        filter.since = since
+        filter.limit = 500
+
+        Task {
+            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: [filter], streamMode: .ndbAndNetworkParallel(networkOptimization: nil)) {
+                switch item {
+                case .event(let lender):
+                    await lender.justUseACopy({ ev in
+                        guard should_show_event(state: self.damus_state, ev: ev) else { return }
+                        self.damus_state.events.insert(ev)
+                        if isFavorites {
+                            await self.favoriteEvents.insert(ev)
+                        } else {
+                            await self.insert_home_event(ev)
+                        }
+                    })
+                case .eose:
+                    return
+                case .ndbEose, .networkEose:
                     break
                 }
             }
