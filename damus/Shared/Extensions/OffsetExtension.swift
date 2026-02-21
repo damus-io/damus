@@ -29,9 +29,14 @@ extension View {
 
 struct OffsetHelper: ViewModifier{
     var onChange: (CGFloat,CGFloat)->()
-    @State var currentOffset: CGFloat = 0
-    @State var previousOffset: CGFloat = 0
-    
+
+    private class Storage {
+        var currentOffset: CGFloat = 0
+        var previousOffset: CGFloat = 0
+    }
+
+    @State private var storage = Storage()
+
     func body(content: Content) -> some View {
         content
             .overlay {
@@ -40,9 +45,9 @@ struct OffsetHelper: ViewModifier{
                     Color.clear
                         .preference(key: OffsetKey.self, value: minY)
                         .onPreferenceChange(OffsetKey.self) { value in
-                            previousOffset = currentOffset
-                            currentOffset = value
-                            onChange(previousOffset,currentOffset)
+                            storage.previousOffset = storage.currentOffset
+                            storage.currentOffset = value
+                            onChange(storage.previousOffset, storage.currentOffset)
                         }
                 }
             }

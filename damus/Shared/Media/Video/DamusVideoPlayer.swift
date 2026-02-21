@@ -52,9 +52,16 @@ import SwiftUI
     }
     /// Whether the video is loading
     @Published private(set) var is_loading = true
-    /// The current time of playback, in seconds
-    /// Usage note: If editing (such as in a slider), make sure to set `is_editing_current_time` to `true` to detach this value from the current playback
-    @Published var current_time: TimeInterval = .zero
+    /// The current time of playback, in seconds.
+    /// Not @Published — updates every second and would force every
+    /// @ObservedObject subscriber (including DamusVideoPlayerView) to
+    /// re-evaluate its body on each tick.  Views that need live updates
+    /// (e.g. DamusVideoControlsView) should use `currentTimeSubject`.
+    var current_time: TimeInterval = .zero
+
+    /// Combine subject for views that need to observe current_time changes
+    /// without triggering objectWillChange on every tick.
+    let currentTimeSubject = CurrentValueSubject<TimeInterval, Never>(.zero)
     /// Whether video is playing or not
     @Published var is_playing = false {
         didSet {
@@ -202,9 +209,10 @@ import SwiftUI
     private func observeCurrentTime() {
         videoCurrentTimeObserver = player.addPeriodicTimeObserver(forInterval: CMTime(seconds: 1, preferredTimescale: 600), queue: .main) { [weak self] time in
             guard let self else { return }
-            DispatchQueue.main.async {  // Must use main thread to update @Published properties
+            DispatchQueue.main.async {
                 if self.is_editing_current_time == false {
                     self.current_time = time.seconds
+                    self.currentTimeSubject.send(time.seconds)
                 }
             }
         }
@@ -277,9 +285,11 @@ extension DamusVideoPlayer {
         }
         
         func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
-            /// - If `player.player` is changed (e.g. `DamusVideoPlayer` gets reinitialized), this will refresh the video player to the new working one.
-            /// - If `player.player` is unchanged, this is basically a very low cost no-op (Because `AVPlayer` is a class type, this assignment only copies a pointer, not a large structure)
-            uiViewController.player = player.player
+            // Only assign when the player actually changes — AVPlayerViewController.setPlayer
+            // rebuilds internal video layers (~13ms) even for the same reference.
+            if uiViewController.player !== player.player {
+                uiViewController.player = player.player
+            }
         }
         
         static func dismantleUIViewController(_ uiViewController: AVPlayerViewController, coordinator: ()) {
