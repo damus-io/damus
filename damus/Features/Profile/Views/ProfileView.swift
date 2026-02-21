@@ -188,8 +188,8 @@ struct ProfileView: View {
         }) {
             Image(systemName: "ellipsis")
                 .frame(width: 33, height: 33)
-                .background(Color.black.opacity(0.6))
-                .clipShape(Circle())
+//                .background(Color.black.opacity(0.6))
+//                .clipShape(Circle())
         }
         .confirmationDialog(NSLocalizedString("Actions", comment: "Title for confirmation dialog to either share, report, or mute a profile."), isPresented: $action_sheet_presented) {
             Button(NSLocalizedString("Share", comment: "Button to share the link to a profile.")) {
@@ -485,22 +485,44 @@ struct ProfileView: View {
             .navigationTitle("")
             .navigationBarBackButtonHidden()
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    HStack(spacing: 8) {
-                        navBackButton
-                            .padding(.top, 5)
-                            .accentColor(DamusColors.white)
-                        VStack(alignment: .leading, spacing: -4.5) {
-                            Text(getProfileInfo().0) // Display name
-                                .font(.headline)
-                                .foregroundColor(.white)
-                            Text(getProfileInfo().1) // Username
-                                .font(.subheadline)
-                                .foregroundColor(.white.opacity(0.8))
+                if #available(iOS 26.0, *) {
+                    ToolbarItem(placement: .topBarLeading) {
+                        HStack(spacing: 8) {
+                            navBackButton
+                                .padding(.top, 5)
+                                .accentColor(DamusColors.white)
+                            VStack(alignment: .leading, spacing: -4.5) {
+                                Text(getProfileInfo().0) // Display name
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                Text(getProfileInfo().1) // Username
+                                    .font(.subheadline)
+                                    .foregroundColor(.white.opacity(0.8))
+                            }
+                            .opacity(bannerBlurViewOpacity())
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.top, max(5, 15 + (yOffset / 30)))
                         }
-                        .opacity(bannerBlurViewOpacity())
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.top, max(5, 15 + (yOffset / 30)))
+                    }
+                    .sharedBackgroundVisibility(.hidden)
+                } else {
+                    ToolbarItem(placement: .topBarLeading) {
+                        HStack(spacing: 8) {
+                            navBackButton
+                                .padding(.top, 5)
+                                .accentColor(DamusColors.white)
+                            VStack(alignment: .leading, spacing: -4.5) {
+                                Text(getProfileInfo().0) // Display name
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                Text(getProfileInfo().1) // Username
+                                    .font(.subheadline)
+                                    .foregroundColor(.white.opacity(0.8))
+                            }
+                            .opacity(bannerBlurViewOpacity())
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.top, max(5, 15 + (yOffset / 30)))
+                        }
                     }
                 }
                 if showFollowBtnInBlurrBanner() {
