@@ -15,6 +15,10 @@ class DirectMessageModel: ObservableObject {
     }
 
     @Published var draft: String = ""
+
+    /// True while the other participant is actively typing (best-effort, time-based).
+    @Published private(set) var partner_is_typing: Bool = false
+    private var typing_clear_work: DispatchWorkItem?
     
     let pubkey: Pubkey
 
@@ -35,5 +39,29 @@ class DirectMessageModel: ObservableObject {
         self.events = events
         self.our_pubkey = our_pubkey
         self.pubkey = pubkey
+    }
+
+    /// Update the local typing state for the DM partner.
+    ///
+    /// We automatically clear after a short timeout to avoid getting stuck "on"
+    /// if we miss a stop event (ephemeral delivery is best-effort).
+    @MainActor
+    func set_partner_typing(_ isTyping: Bool, autoClearAfter seconds: TimeInterval = 8.0) {
+        typing_clear_work?.cancel()
+        typing_clear_work = nil
+
+        partner_is_typing = isTyping
+
+        guard isTyping else {
+            return
+        }
+
+        let work = DispatchWorkItem { [weak self] in
+            Task { @MainActor in
+                self?.partner_is_typing = false
+            }
+        }
+        typing_clear_work = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + seconds, execute: work)
     }
 }

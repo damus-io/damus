@@ -12,6 +12,12 @@ struct DMChatView: View, KeyboardReadable {
     let damus_state: DamusState
     @FocusState private var isTextFieldFocused: Bool
     @ObservedObject var dms: DirectMessageModel
+
+    /// Timestamp of the last outbound `.start` typing indicator we successfully queued for sending.
+    @State private var lastTypingStartSentAt: Date? = nil
+
+    /// Minimum interval between outbound `.start` typing indicators, to avoid spamming relays.
+    private let typingStartThrottleSeconds: TimeInterval = 5.0
     
     var pubkey: Pubkey {
         dms.pubkey
@@ -100,19 +106,31 @@ struct DMChatView: View, KeyboardReadable {
     }
 
     var Footer: some View {
-    
-        HStack(spacing: 0) {
-            InputField
+        VStack(spacing: 0) {
+            if dms.partner_is_typing {
+                HStack {
+                    Text("Typing…", comment: "Shown in a DM chat when the other person is typing")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 4)
+            }
 
-            if !dms.draft.isEmpty {
-                Button(
-                    role: .none,
-                    action: {
-                        Task { await send_message() }
+            HStack(spacing: 0) {
+                InputField
+
+                if !dms.draft.isEmpty {
+                    Button(
+                        role: .none,
+                        action: {
+                            Task { await send_message() }
+                        }
+                    ) {
+                        Label("", image: "send")
+                            .font(.title)
                     }
-                ) {
-                    Label("", image: "send")
-                        .font(.title)
                 }
             }
         }
@@ -122,6 +140,33 @@ struct DMChatView: View, KeyboardReadable {
             .fixedSize(horizontal: false, vertical: true)
             .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
          */
+    }
+
+    /// Sends a best-effort typing indicator event to the current DM recipient.
+    ///
+    /// `.start` events are throttled unless `force` is set.
+    func send_typing(_ action: DMTypingAction, force: Bool = false) async {
+        if action == .start && !force {
+            if let last = lastTypingStartSentAt,
+               Date.now.timeIntervalSince(last) < typingStartThrottleSeconds {
+                return
+            }
+        }
+
+        guard let ev = DMTypingIndicator.makeEvent(action: action, to: pubkey, keypair: damus_state.keypair) else {
+            return
+        }
+
+        if action == .start {
+            // Only update throttle timestamp after we have a valid event to send.
+            lastTypingStartSentAt = Date.now
+        } else if action == .stop {
+            // Allow immediate restart after a stop.
+            lastTypingStartSentAt = nil
+        }
+
+        // Best-effort: typing should never block normal message flow.
+        await damus_state.nostrNetwork.postbox.send(ev, skip_ephemeral: false)
     }
 
     func send_message() async {
@@ -135,6 +180,9 @@ struct DMChatView: View, KeyboardReadable {
             print("error creating dm")
             return
         }
+
+        // Immediately stop typing when we send.
+        await send_typing(.stop, force: true)
 
         dms.draft = ""
 
@@ -158,7 +206,18 @@ struct DMChatView: View, KeyboardReadable {
         }
         .navigationTitle(NSLocalizedString("DMs", comment: "Navigation title for DMs view, where DM is the English abbreviation for Direct Message."))
         .toolbar { Header }
+        .onChange(of: dms.draft) { _ in
+            let trimmed = dms.draft.trimmingCharacters(in: .whitespacesAndNewlines)
+            Task {
+                if trimmed.isEmpty {
+                    await send_typing(.stop)
+                } else {
+                    await send_typing(.start)
+                }
+            }
+        }
         .onDisappear {
+            Task { await send_typing(.stop, force: true) }
             if dms.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 dms.draft = ""
             }

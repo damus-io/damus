@@ -114,6 +114,9 @@
 		4C1D4FB12A7958E60024F453 /* VersionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1D4FB02A7958E60024F453 /* VersionInfo.swift */; };
 		4C1D4FB42A7967990024F453 /* build-git-hash.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4C1D4FB32A7967990024F453 /* build-git-hash.txt */; };
 		4C216F32286E388800040376 /* DMChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F31286E388800040376 /* DMChatView.swift */; };
+		0E06D54DA4E9403081BED9EA /* DMTypingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63852FD830714F6EA2EE6000 /* DMTypingIndicator.swift */; };
+		5B7B99AB48E7481F90427D7B /* DMTypingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63852FD830714F6EA2EE6000 /* DMTypingIndicator.swift */; };
+		5F60A3C6D18F41EDA127B7F6 /* DMTypingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63852FD830714F6EA2EE6000 /* DMTypingIndicator.swift */; };
 		4C216F34286F5ACD00040376 /* DMView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F33286F5ACD00040376 /* DMView.swift */; };
 		4C216F362870A9A700040376 /* InputDismissKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F352870A9A700040376 /* InputDismissKeyboard.swift */; };
 		4C216F382871EDE300040376 /* DirectMessageModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F372871EDE300040376 /* DirectMessageModel.swift */; };
@@ -2204,6 +2207,7 @@
 		4C1D4FB02A7958E60024F453 /* VersionInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VersionInfo.swift; sourceTree = "<group>"; };
 		4C1D4FB32A7967990024F453 /* build-git-hash.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "build-git-hash.txt"; sourceTree = SOURCE_ROOT; };
 		4C216F31286E388800040376 /* DMChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMChatView.swift; sourceTree = "<group>"; };
+		63852FD830714F6EA2EE6000 /* DMTypingIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMTypingIndicator.swift; sourceTree = "<group>"; };
 		4C216F33286F5ACD00040376 /* DMView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMView.swift; sourceTree = "<group>"; };
 		4C216F352870A9A700040376 /* InputDismissKeyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputDismissKeyboard.swift; sourceTree = "<group>"; };
 		4C216F372871EDE300040376 /* DirectMessageModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectMessageModel.swift; sourceTree = "<group>"; };
@@ -4568,6 +4572,7 @@
 			isa = PBXGroup;
 			children = (
 				4C216F372871EDE300040376 /* DirectMessageModel.swift */,
+				63852FD830714F6EA2EE6000 /* DMTypingIndicator.swift */,
 				4C64987D286D082C00EAE2B3 /* DirectMessagesModel.swift */,
 			);
 			path = Models;
@@ -6085,6 +6090,7 @@
 				9609F058296E220800069BF3 /* BannerImageView.swift in Sources */,
 				4C363A94282704FA006E126D /* Post.swift in Sources */,
 				4C216F32286E388800040376 /* DMChatView.swift in Sources */,
+				5F60A3C6D18F41EDA127B7F6 /* DMTypingIndicator.swift in Sources */,
 				4C7D09782A0B0CC900943473 /* WalletModel.swift in Sources */,
 				4C1253522A76C6130004F4B8 /* ComposeNotify.swift in Sources */,
 				D7100C582B76FC8400C59298 /* MarketingContentView.swift in Sources */,
@@ -6954,6 +6960,7 @@
 				82D6FC4F2CD99F7900C925F4 /* CreateAccountView.swift in Sources */,
 				82D6FC502CD99F7900C925F4 /* DirectMessagesView.swift in Sources */,
 				82D6FC512CD99F7900C925F4 /* DMChatView.swift in Sources */,
+				0E06D54DA4E9403081BED9EA /* DMTypingIndicator.swift in Sources */,
 				82D6FC522CD99F7900C925F4 /* DMView.swift in Sources */,
 				82D6FC532CD99F7900C925F4 /* EmptyTimelineView.swift in Sources */,
 				82D6FC542CD99F7900C925F4 /* EmptyUserSearchView.swift in Sources */,
@@ -7403,6 +7410,7 @@
 				D73E5F7A2C6A9C55007EB227 /* NotificationFormatter.swift in Sources */,
 				D73E5F4B2C6A97F5007EB227 /* DirectMessagesView.swift in Sources */,
 				D73E5F4C2C6A97F5007EB227 /* DMChatView.swift in Sources */,
+				5B7B99AB48E7481F90427D7B /* DMTypingIndicator.swift in Sources */,
 				D73E5F962C6AA7B0007EB227 /* ConnectWalletView.swift in Sources */,
 				D73E5F4D2C6A97F5007EB227 /* DMView.swift in Sources */,
 				D73E5F4E2C6A97F5007EB227 /* EmptyTimelineView.swift in Sources */,

@@ -72,6 +72,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
     var notificationsHandlerTask: Task<Void, Never>?
     var generalHandlerTask: Task<Void, Never>?
     var dmsHandlerTask: Task<Void, Never>?
+    var typingHandlerTask: Task<Void, Never>?
     var ndbOnlyHandlerTask: Task<Void, Never>?
     var nwcHandlerTask: Task<Void, Never>?
     
@@ -262,6 +263,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
             handle_like_event(ev)
         case .dm:
             handle_dm(ev)
+        case .typing:
+            handle_typing_indicator(ev)
         case .delete:
             handle_delete_event(ev)
         case .zap:
@@ -552,6 +555,10 @@ class HomeModel: ContactsDelegate, ObservableObject {
 
         var our_dms_filter = NostrFilter(kinds: [.dm])
 
+        // Typing indicators (kind 20001) are ephemeral and should not be fetched as part of DM history.
+        // Subscribe separately with a dedicated filter.
+        var typing_filter = NostrFilter(kinds: [.typing])
+
         // friends only?...
         //dms_filter.authors = friends
         dms_filter.limit = 500
@@ -575,6 +582,9 @@ class HomeModel: ContactsDelegate, ObservableObject {
         let low_volume_important_filters = [our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter, contact_cards_filter]
         let contacts_filters = contacts_filter_chunks + low_volume_important_filters
         let dms_filters = [dms_filter, our_dms_filter]
+
+        typing_filter.pubkeys = [damus_state.pubkey]
+        typing_filter.limit = 0
 
         //print_filters(relay_id: relay_id, filters: [home_filters, contacts_filters, notifications_filters, dms_filters])
 
@@ -622,6 +632,21 @@ class HomeModel: ContactsDelegate, ObservableObject {
                 }
             }
         }
+        self.typingHandlerTask?.cancel()
+        self.typingHandlerTask = Task {
+            for await item in damus_state.nostrNetwork.reader.advancedStream(
+                filters: [typing_filter],
+                streamMode: .ndbAndNetworkParallel(networkOptimization: nil)
+            ) {
+                switch item {
+                case .event(let lender):
+                    await lender.justUseACopy({ await process_event(ev: $0, context: .other) })
+                case .eose, .ndbEose, .networkEose:
+                    break
+                }
+            }
+        }
+
         self.generalHandlerTask?.cancel()
         self.generalHandlerTask = Task {
             for await lender in damus_state.nostrNetwork.reader.streamIndefinitely(filters: contacts_filters, streamMode: .ndbAndNetworkParallel(networkOptimization: .sinceOptimization)) {
@@ -976,6 +1001,65 @@ class HomeModel: ContactsDelegate, ObservableObject {
             }
             self.incoming_dms = []
         }
+    }
+
+    /// Handle kind 20001 typing indicator events (best-effort, ephemeral).
+    @MainActor
+    func handle_typing_indicator(_ ev: NostrEvent) {
+        // Only care about typing signals addressed to us
+        guard ev.referenced_pubkeys.contains(damus_state.pubkey) else {
+            return
+        }
+
+        // Ignore our own typing echoes
+        guard ev.pubkey != damus_state.pubkey else {
+            return
+        }
+
+        // Namespace guard: only react to the Damus typing convention
+        let hasNamespace = ev.tags.contains { t in
+            t.count >= 2 && t[0].matches_str("t") && t[1].matches_str("damus-typing")
+        }
+        guard hasNamespace else {
+            return
+        }
+
+        // Ignore expired signals before attempting decryption.
+        if let expirationElem = ev.tags.first(where: { t in
+            t.count >= 2 && t[0].matches_str("expiration")
+        })?[1],
+           let expiration = UInt32(expirationElem.string()),
+           UInt32(Date().timeIntervalSince1970) >= expiration {
+            return
+        }
+
+        guard let privkey = damus_state.keypair.privkey else {
+            return
+        }
+
+        // Decrypt to determine start/stop. If decryption fails, fall back to plaintext
+        // content when it is exactly "start"/"stop", otherwise default to "start".
+        let decrypted = try? NIP04.decryptContent(
+            recipientPrivateKey: privkey,
+            senderPubkey: ev.pubkey,
+            content: ev.content,
+            encoding: .base64
+        )
+
+        let raw = ev.content.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let action: String
+        if let decrypted {
+            action = decrypted.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        } else if raw == "start" || raw == "stop" {
+            action = raw
+        } else {
+            action = "start"
+        }
+
+        let isTyping = action != "stop"
+
+        let model = damus_state.dms.lookup_or_create(ev.pubkey)
+        model.set_partner_typing(isTyping)
     }
 }
 
