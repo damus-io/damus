@@ -84,8 +84,8 @@ class Ndb {
         return remove_file_prefix(containerURL.appendingPathComponent("snapshot", conformingTo: .directory).absoluteString)
     }
     
-    static private let main_db_file_name: String = "data.mdb"
-    static private let db_files: [String] = ["data.mdb", "lock.mdb"]
+    static let main_db_file_name: String = "data.mdb"
+    static let db_files: [String] = ["data.mdb", "lock.mdb"]
 
     static var empty: Ndb {
         print("txn: NOSTRDB EMPTY")
