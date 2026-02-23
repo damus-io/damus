@@ -1180,3 +1180,149 @@ func getDebugCheckedRoot<T: FlatBufferObject>(byteBuffer: inout ByteBuffer) thro
 func remove_file_prefix(_ str: String) -> String {
     return str.replacingOccurrences(of: "file://", with: "")
 }
+
+// MARK: - NostrDB Storage Statistics
+
+/// Per-kind storage statistics from NostrDB
+struct NdbKindStats: Hashable {
+    /// Human-readable kind name (e.g., "profile", "text", "reaction")
+    let kind: String
+    
+    /// Number of entries for this kind
+    let count: Int
+    
+    /// Total key bytes for this kind
+    let keySize: UInt64
+    
+    /// Total value bytes for this kind
+    let valueSize: UInt64
+    
+    /// Total storage used by this kind (keys + values)
+    var totalSize: UInt64 {
+        return keySize + valueSize
+    }
+}
+
+/// Detailed NostrDB storage statistics with breakdown by kind and category
+struct NdbStats: Hashable {
+    /// Per-kind breakdown of storage (profile, text notes, reactions, etc.)
+    let kindStats: [NdbKindStats]
+    
+    /// Combined size of all database indices
+    let indicesSize: UInt64
+    
+    /// Size of other database storage not categorized above
+    let otherSize: UInt64
+    
+    /// Total storage across all categories
+    var totalSize: UInt64 {
+        let kindsTotal = kindStats.reduce(0) { $0 + $1.totalSize }
+        return kindsTotal + indicesSize + otherSize
+    }
+}
+
+extension Ndb {
+    /// Get detailed storage statistics for this database
+    ///
+    /// This method calls the C `ndb_stat` function to retrieve per-database and per-kind
+    /// storage statistics, then categorizes them into user-friendly groups:
+    /// - Per-kind stats (profile, text notes, reactions, zaps, etc.)
+    /// - Indices (all index databases combined)
+    /// - Other (remaining database storage)
+    ///
+    /// - Returns: NdbStats with detailed breakdown, or nil if stat collection fails
+    func getStats() -> NdbStats? {
+        guard !is_closed else { return nil }
+        
+        var stat = ndb_stat()
+        
+        // Call C ndb_stat function
+        let result = ndb_stat(self.ndb.ndb, &stat)
+        guard result != 0 else {
+            Log.error("ndb_stat failed", for: .storage)
+            return nil
+        }
+        
+        // Extract per-kind stats using withUnsafeBytes to access C array
+        var kindStats: [NdbKindStats] = []
+        
+        // Access common_kinds array via pointer
+        withUnsafePointer(to: &stat.common_kinds) { kindsPtr in
+            let kindsBuffer = UnsafeRawPointer(kindsPtr).assumingMemoryBound(to: ndb_stat_counts.self)
+            
+            for i in 0..<Int(NDB_CKIND_COUNT.rawValue) {
+                let count = kindsBuffer[i]
+                
+                // Skip kinds with no data
+                guard count.count > 0 else { continue }
+                
+                // Get human-readable kind name from C function
+                let kindName = String(cString: ndb_kind_name(ndb_common_kind(UInt32(i))))
+                
+                kindStats.append(NdbKindStats(
+                    kind: kindName,
+                    count: count.count,
+                    keySize: UInt64(count.key_size),
+                    valueSize: UInt64(count.value_size)
+                ))
+            }
+        }
+        
+        // Add "other kinds" if present
+        if stat.other_kinds.count > 0 {
+            kindStats.append(NdbKindStats(
+                kind: "other",
+                count: stat.other_kinds.count,
+                keySize: UInt64(stat.other_kinds.key_size),
+                valueSize: UInt64(stat.other_kinds.value_size)
+            ))
+        }
+        
+        // Calculate indices total and other sizes using pointer access to dbs array
+        let indexDBs: [ndb_dbs] = [
+            NDB_DB_NOTE_ID,
+            NDB_DB_PROFILE_PK,
+            NDB_DB_NOTE_KIND,
+            NDB_DB_NOTE_TEXT,
+            NDB_DB_NOTE_TAGS,
+            NDB_DB_NOTE_PUBKEY,
+            NDB_DB_NOTE_PUBKEY_KIND,
+            NDB_DB_NOTE_RELAY_KIND,
+            NDB_DB_PROFILE_SEARCH
+        ]
+        
+        let contentDBs: [ndb_dbs] = [NDB_DB_NOTE, NDB_DB_PROFILE, NDB_DB_META]
+        
+        var indicesSize: UInt64 = 0
+        var otherSize: UInt64 = 0
+        
+        withUnsafePointer(to: &stat.dbs) { dbsPtr in
+            let dbsBuffer = UnsafeRawPointer(dbsPtr).assumingMemoryBound(to: ndb_stat_counts.self)
+            
+            // Calculate indices size
+            for db in indexDBs {
+                let dbStat = dbsBuffer[Int(db.rawValue)]
+                indicesSize += UInt64(dbStat.key_size + dbStat.value_size)
+            }
+            
+            // Calculate "other" size (non-index, non-content databases)
+            for dbIndex in 0..<Int(NDB_DBS.rawValue) {
+                let db = ndb_dbs(rawValue: UInt32(dbIndex))
+                
+                // Skip if it's an index or content DB
+                if indexDBs.contains(db) || contentDBs.contains(db) {
+                    continue
+                }
+                
+                let dbStat = dbsBuffer[dbIndex]
+                otherSize += UInt64(dbStat.key_size + dbStat.value_size)
+            }
+        }
+        
+        return NdbStats(
+            kindStats: kindStats,
+            indicesSize: indicesSize,
+            otherSize: otherSize
+        )
+    }
+}

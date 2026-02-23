@@ -9,8 +9,11 @@ import Foundation
 import Kingfisher
 
 /// Storage statistics for various Damus data stores
-struct StorageStats {
-    /// Size of the main NostrDB database file in bytes
+struct StorageStats: Hashable {
+    /// Detailed breakdown of NostrDB storage by kind, indices, and other
+    let nostrdbDetails: NdbStats?
+    
+    /// Size of the main NostrDB database file in bytes (total)
     let nostrdbSize: UInt64
     
     /// Size of the snapshot NostrDB database file in bytes
@@ -44,18 +47,23 @@ struct StorageStatsManager {
     /// This method runs all file operations on a background thread to avoid blocking
     /// the main thread. It calculates:
     /// - NostrDB database file size
+    /// - Detailed NostrDB breakdown (if ndb instance provided)
     /// - Snapshot database file size
     /// - Kingfisher image cache size
     ///
+    /// - Parameter ndb: Optional Ndb instance to get detailed storage breakdown
     /// - Returns: StorageStats containing all calculated sizes
     /// - Throws: Error if critical file operations fail
-    func calculateStorageStats() async throws -> StorageStats {
+    func calculateStorageStats(ndb: Ndb? = nil) async throws -> StorageStats {
         // Run all file operations on background thread
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 do {
                     let nostrdbSize = self.getNostrDBSize()
                     let snapshotSize = self.getSnapshotDBSize()
+                    
+                    // Get detailed NostrDB stats if ndb instance provided
+                    let nostrdbDetails: NdbStats? = ndb?.getStats()
                     
                     // Kingfisher cache size requires async callback
                     KingfisherManager.shared.cache.calculateDiskStorageSize { result in
@@ -69,6 +77,7 @@ struct StorageStatsManager {
                         }
                         
                         let stats = StorageStats(
+                            nostrdbDetails: nostrdbDetails,
                             nostrdbSize: nostrdbSize,
                             snapshotSize: snapshotSize,
                             imageCacheSize: imageCacheSize

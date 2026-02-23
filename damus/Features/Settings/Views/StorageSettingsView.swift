@@ -56,7 +56,7 @@ struct StorageSettingsView: View {
         return nil
     }
     
-    /// All storage categories for display
+    /// All storage categories for display (top-level view)
     private var categories: [StorageCategory] {
         guard let stats = stats else { return [] }
         
@@ -105,18 +105,38 @@ struct StorageSettingsView: View {
                 // Categories List
                 Section {
                     ForEach(categories) { category in
-                        if #available(iOS 17.0, *) {
-                            StorageCategoryRow(
-                                category: category,
-                                percentage: stats.percentage(for: category.size),
-                                isSelected: selectedCategory?.id == category.id
-                            )
+                        if category.id == "nostrdb", stats.nostrdbDetails != nil {
+                            // NostrDB is drillable when we have detailed stats
+                            NavigationLink(value: Route.NostrDBStorageDetail(stats: stats)) {
+                                if #available(iOS 17.0, *) {
+                                    StorageCategoryRow(
+                                        category: category,
+                                        percentage: stats.percentage(for: category.size),
+                                        isSelected: selectedCategory?.id == category.id
+                                    )
+                                } else {
+                                    StorageCategoryRow(
+                                        category: category,
+                                        percentage: stats.percentage(for: category.size),
+                                        isSelected: false
+                                    )
+                                }
+                            }
                         } else {
-                            StorageCategoryRow(
-                                category: category,
-                                percentage: stats.percentage(for: category.size),
-                                isSelected: false
-                            )
+                            // Other categories are not drillable
+                            if #available(iOS 17.0, *) {
+                                StorageCategoryRow(
+                                    category: category,
+                                    percentage: stats.percentage(for: category.size),
+                                    isSelected: selectedCategory?.id == category.id
+                                )
+                            } else {
+                                StorageCategoryRow(
+                                    category: category,
+                                    percentage: stats.percentage(for: category.size),
+                                    isSelected: false
+                                )
+                            }
                         }
                     }
                 }
@@ -188,7 +208,7 @@ struct StorageSettingsView: View {
         }
         
         do {
-            let calculatedStats = try await StorageStatsManager.shared.calculateStorageStats()
+            let calculatedStats = try await StorageStatsManager.shared.calculateStorageStats(ndb: damus_state.ndb)
             await MainActor.run {
                 self.stats = calculatedStats
                 self.isLoading = false
