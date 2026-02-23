@@ -31,6 +31,9 @@ struct StorageSettingsView: View {
     @State private var isLoading: Bool = false
     @State private var error: String?
     @State private var selectedAngle: Double?
+    @State private var showShareSheet: Bool = false
+    @State private var exportText: String?
+    @State private var isPreparingExport: Bool = false
     
     /// Storage categories with cumulative ranges for angle selection (iOS 17+)
     private var categoryRanges: [(category: String, range: Range<Double>)] {
@@ -175,6 +178,25 @@ struct StorageSettingsView: View {
             }
         }
         .navigationTitle(NSLocalizedString("Storage", comment: "Navigation title for storage settings"))
+        .toolbar {
+            if stats != nil {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { Task { await prepareExport() } }) {
+                        if isPreparingExport {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "square.and.arrow.up")
+                        }
+                    }
+                    .disabled(isPreparingExport)
+                }
+            }
+        }
+        .sheet(isPresented: $showShareSheet) {
+            if let exportText = exportText {
+                TextShareSheet(activityItems: [exportText])
+            }
+        }
         .refreshable {
             await loadStorageStatsAsync()
         }
@@ -185,6 +207,34 @@ struct StorageSettingsView: View {
         }
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()
+        }
+    }
+    
+    /// Prepare export text on background thread before showing share sheet
+    @concurrent
+    private func prepareExport() async {
+        guard stats != nil, !isPreparingExport else { return }
+        
+        await MainActor.run {
+            isPreparingExport = true
+        }
+        
+        // Capture stats to avoid MainActor isolation issues
+        guard let statsSnapshot = stats else {
+            await MainActor.run {
+                isPreparingExport = false
+            }
+            return
+        }
+        
+        // Format text on background thread
+        let text = await formatStorageStatsAsText(statsSnapshot)
+        
+        // Update UI on main thread
+        await MainActor.run {
+            self.exportText = text
+            self.isPreparingExport = false
+            self.showShareSheet = true
         }
     }
     
@@ -201,6 +251,7 @@ struct StorageSettingsView: View {
     }
     
     /// Load storage statistics asynchronously (for refreshable)
+    @concurrent
     private func loadStorageStatsAsync() async {
         await MainActor.run {
             isLoading = true
@@ -218,6 +269,144 @@ struct StorageSettingsView: View {
                 self.error = String(format: NSLocalizedString("Failed to calculate storage: %@", comment: "Error message when storage calculation fails"), error.localizedDescription)
                 self.isLoading = false
             }
+        }
+    }
+    
+    /// Format storage statistics as exportable text
+    /// - Parameter stats: The storage statistics to format
+    /// - Returns: Formatted text representation of storage stats
+    @concurrent
+    private func formatStorageStatsAsText(_ stats: StorageStats) async -> String {
+        // Build categories list
+        let categories = [
+            StorageCategory(
+                id: "nostrdb",
+                title: NSLocalizedString("NostrDB", comment: "Label for main NostrDB database"),
+                icon: "internaldrive.fill",
+                color: .blue,
+                size: stats.nostrdbSize
+            ),
+            StorageCategory(
+                id: "snapshot",
+                title: NSLocalizedString("Snapshot Database", comment: "Label for snapshot database"),
+                icon: "doc.on.doc.fill",
+                color: .purple,
+                size: stats.snapshotSize
+            ),
+            StorageCategory(
+                id: "cache",
+                title: NSLocalizedString("Image Cache", comment: "Label for Kingfisher image cache"),
+                icon: "photo.fill",
+                color: .orange,
+                size: stats.imageCacheSize
+            )
+        ]
+        
+        var text = "Damus Storage Statistics\n"
+        text += "Generated: \(Date().formatted(date: .abbreviated, time: .shortened))\n"
+        text += String(repeating: "=", count: 50) + "\n\n"
+        
+        // Top-level Categories
+        text += "Storage Breakdown:\n"
+        text += String(repeating: "-", count: 50) + "\n"
+        
+        for category in categories {
+            let percentage = stats.percentage(for: category.size)
+            let titlePadded = category.title.padding(toLength: 25, withPad: " ", startingAt: 0)
+            let sizePadded = StorageStatsManager.formatBytes(category.size).padding(toLength: 10, withPad: " ", startingAt: 0)
+            text += "\(titlePadded) \(sizePadded) (\(String(format: "%.1f", percentage))%)\n"
+        }
+        
+        text += String(repeating: "-", count: 50) + "\n"
+        let totalTitlePadded = "Total Storage".padding(toLength: 25, withPad: " ", startingAt: 0)
+        let totalSizePadded = StorageStatsManager.formatBytes(stats.totalSize).padding(toLength: 10, withPad: " ", startingAt: 0)
+        text += "\(totalTitlePadded) \(totalSizePadded)\n\n"
+        
+        // Add NostrDB detailed breakdown if available
+        if let details = stats.nostrdbDetails {
+            text += String(repeating: "=", count: 50) + "\n\n"
+            text += "NostrDB Detailed Breakdown:\n"
+            text += String(repeating: "-", count: 50) + "\n"
+            
+            // Event Kinds breakdown
+            let sortedKindStats = details.kindStats
+                .filter { $0.totalSize > 0 }
+                .sorted { $0.totalSize > $1.totalSize }
+            
+            if !sortedKindStats.isEmpty {
+                text += "\nEvent Kinds:\n"
+                
+                for kindStat in sortedKindStats {
+                    let percentage = stats.nostrdbSize > 0 ? Double(kindStat.totalSize) / Double(stats.nostrdbSize) * 100.0 : 0.0
+                    let kindNamePadded = localizedNostrDBKindName(kindStat.kind).padding(toLength: 25, withPad: " ", startingAt: 0)
+                    let sizePadded = StorageStatsManager.formatBytes(kindStat.totalSize).padding(toLength: 12, withPad: " ", startingAt: 0)
+                    text += "\(kindNamePadded) \(sizePadded) (\(String(format: "%.1f", percentage))%)\n"
+                    text += "  Count: \(kindStat.count), Keys: \(StorageStatsManager.formatBytes(kindStat.keySize)), Values: \(StorageStatsManager.formatBytes(kindStat.valueSize))\n"
+                }
+            }
+            
+            // Indices
+            if details.indicesSize > 0 {
+                let percentage = stats.nostrdbSize > 0 ? Double(details.indicesSize) / Double(stats.nostrdbSize) * 100.0 : 0.0
+                text += "\n"
+                let titlePadded = "Indices".padding(toLength: 25, withPad: " ", startingAt: 0)
+                let sizePadded = StorageStatsManager.formatBytes(details.indicesSize).padding(toLength: 12, withPad: " ", startingAt: 0)
+                text += "\(titlePadded) \(sizePadded) (\(String(format: "%.1f", percentage))%)\n"
+            }
+            
+            // Other
+            if details.otherSize > 0 {
+                let percentage = stats.nostrdbSize > 0 ? Double(details.otherSize) / Double(stats.nostrdbSize) * 100.0 : 0.0
+                let titlePadded = "Other Data".padding(toLength: 25, withPad: " ", startingAt: 0)
+                let sizePadded = StorageStatsManager.formatBytes(details.otherSize).padding(toLength: 12, withPad: " ", startingAt: 0)
+                text += "\(titlePadded) \(sizePadded) (\(String(format: "%.1f", percentage))%)\n"
+            }
+            
+            text += "\n" + String(repeating: "-", count: 50) + "\n"
+            let nostrdbTitlePadded = "NostrDB Total".padding(toLength: 25, withPad: " ", startingAt: 0)
+            let nostrdbSizePadded = StorageStatsManager.formatBytes(stats.nostrdbSize).padding(toLength: 12, withPad: " ", startingAt: 0)
+            text += "\(nostrdbTitlePadded) \(nostrdbSizePadded)\n"
+        }
+        
+        return text
+    }
+    
+    /// Get localized display name for a NostrDB kind (helper for export)
+    /// - Parameter kind: The kind name
+    /// - Returns: Localized display name
+    private func localizedNostrDBKindName(_ kind: String) -> String {
+        switch kind.lowercased() {
+        case "profile":
+            return NSLocalizedString("Profile", comment: "Label for profile kind")
+        case "text":
+            return NSLocalizedString("Text Notes", comment: "Label for text note kind")
+        case "contacts":
+            return NSLocalizedString("Contacts", comment: "Label for contacts kind")
+        case "dm":
+            return NSLocalizedString("Direct Messages", comment: "Label for DM kind")
+        case "reaction":
+            return NSLocalizedString("Reactions", comment: "Label for reaction kind")
+        case "repost":
+            return NSLocalizedString("Reposts", comment: "Label for repost kind")
+        case "zap", "zap_request":
+            return NSLocalizedString("Zaps", comment: "Label for zap kind")
+        case "longform":
+            return NSLocalizedString("Long-form", comment: "Label for longform kind")
+        case "status":
+            return NSLocalizedString("Status", comment: "Label for status kind")
+        case "list":
+            return NSLocalizedString("Lists", comment: "Label for list kind")
+        case "delete":
+            return NSLocalizedString("Deletions", comment: "Label for delete kind")
+        case "http_auth":
+            return NSLocalizedString("HTTP Auth", comment: "Label for HTTP auth kind")
+        case "nwc_request", "nwc_response":
+            return NSLocalizedString("Wallet Connect", comment: "Label for NWC kind")
+        case "other":
+            return NSLocalizedString("Other Kinds", comment: "Label for other event kinds")
+        default:
+            // Capitalize first letter for unknown kinds
+            return kind.prefix(1).uppercased() + kind.dropFirst()
         }
     }
 }
@@ -308,6 +497,23 @@ struct StorageCategoryRow: View {
         }
         .padding(.vertical, 4)
         .opacity(isSelected ? 1.0 : 0.9)
+    }
+}
+
+/// Text-based ShareSheet wrapper for SwiftUI
+struct TextShareSheet: UIViewControllerRepresentable {
+    let activityItems: [Any]
+    
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        let controller = UIActivityViewController(
+            activityItems: activityItems,
+            applicationActivities: nil
+        )
+        return controller
+    }
+    
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {
+        // No updates needed
     }
 }
 
