@@ -233,4 +233,30 @@ final class WalletConnectTests: XCTestCase {
         encodedRequest = try encoded_request_with_type(type: "outgoing")
         XCTAssertTrue(encodedRequest.contains("\"type\":\"outgoing\""))
     }
+    
+    /// Tests that responses with an unknown `result_type` (e.g. `get_info` from a different NWC client)
+    /// are decoded gracefully without throwing an error.
+    func testDecodingUnknownResultTypeIsGraceful() throws {
+        let jsonData = """
+        {
+            "result_type": "get_info",
+            "error": null,
+            "result": {
+                "alias": "some-wallet",
+                "color": "#3399FF",
+                "pubkey": "abc123",
+                "network": "mainnet",
+                "block_height": 800000,
+                "block_hash": "000000",
+                "methods": ["pay_invoice", "get_balance", "get_info"]
+            }
+        }
+        """.data(using: .utf8)!
+        
+        let response = try JSONDecoder().decode(WalletConnect.Response.self, from: jsonData)
+        
+        XCTAssertNil(response.result_type, "Unknown result_type should be nil")
+        XCTAssertNil(response.result, "Result should be nil for unknown result_type")
+        XCTAssertNil(response.error, "Error should be nil for a successful get_info response")
+    }
 }
