@@ -63,7 +63,7 @@ struct StorageStatsManager {
                     let snapshotSize = self.getSnapshotDBSize()
                     
                     // Get detailed NostrDB stats if ndb instance provided
-                    let nostrdbDetails: NdbStats? = ndb?.getStats()
+                    let nostrdbDetails: NdbStats? = ndb?.getStats(physicalSize: nostrdbSize)
                     
                     // Kingfisher cache size requires async callback
                     KingfisherManager.shared.cache.calculateDiskStorageSize { result in

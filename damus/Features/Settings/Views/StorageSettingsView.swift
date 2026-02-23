@@ -328,86 +328,30 @@ struct StorageSettingsView: View {
             text += "NostrDB Detailed Breakdown:\n"
             text += String(repeating: "-", count: 50) + "\n"
             
-            // Event Kinds breakdown
-            let sortedKindStats = details.kindStats
-                .filter { $0.totalSize > 0 }
-                .sorted { $0.totalSize > $1.totalSize }
-            
-            if !sortedKindStats.isEmpty {
-                text += "\nEvent Kinds:\n"
+            // Per-database breakdown (sorted by size, already done in getStats)
+            if !details.databaseStats.isEmpty {
+                text += "\nDatabases:\n"
                 
-                for kindStat in sortedKindStats {
-                    let percentage = stats.nostrdbSize > 0 ? Double(kindStat.totalSize) / Double(stats.nostrdbSize) * 100.0 : 0.0
-                    let kindNamePadded = localizedNostrDBKindName(kindStat.kind).padding(toLength: 25, withPad: " ", startingAt: 0)
-                    let sizePadded = StorageStatsManager.formatBytes(kindStat.totalSize).padding(toLength: 12, withPad: " ", startingAt: 0)
-                    text += "\(kindNamePadded) \(sizePadded) (\(String(format: "%.1f", percentage))%)\n"
-                    text += "  Count: \(kindStat.count), Keys: \(StorageStatsManager.formatBytes(kindStat.keySize)), Values: \(StorageStatsManager.formatBytes(kindStat.valueSize))\n"
+                for dbStat in details.databaseStats {
+                    let percentage = details.totalSize > 0 ? Double(dbStat.totalSize) / Double(details.totalSize) * 100.0 : 0.0
+                    let dbNamePadded = dbStat.database.padding(toLength: 30, withPad: " ", startingAt: 0)
+                    let sizePadded = StorageStatsManager.formatBytes(dbStat.totalSize).padding(toLength: 12, withPad: " ", startingAt: 0)
+                    text += "\(dbNamePadded) \(sizePadded) (\(String(format: "%.1f", percentage))%)\n"
+                    
+                    // Only show keys/values breakdown if both exist
+                    if dbStat.keySize > 0 && dbStat.valueSize > 0 {
+                        text += "  Keys: \(StorageStatsManager.formatBytes(dbStat.keySize)), Values: \(StorageStatsManager.formatBytes(dbStat.valueSize))\n"
+                    }
                 }
             }
             
-            // Indices
-            if details.indicesSize > 0 {
-                let percentage = stats.nostrdbSize > 0 ? Double(details.indicesSize) / Double(stats.nostrdbSize) * 100.0 : 0.0
-                text += "\n"
-                let titlePadded = "Indices".padding(toLength: 25, withPad: " ", startingAt: 0)
-                let sizePadded = StorageStatsManager.formatBytes(details.indicesSize).padding(toLength: 12, withPad: " ", startingAt: 0)
-                text += "\(titlePadded) \(sizePadded) (\(String(format: "%.1f", percentage))%)\n"
-            }
-            
-            // Other
-            if details.otherSize > 0 {
-                let percentage = stats.nostrdbSize > 0 ? Double(details.otherSize) / Double(stats.nostrdbSize) * 100.0 : 0.0
-                let titlePadded = "Other Data".padding(toLength: 25, withPad: " ", startingAt: 0)
-                let sizePadded = StorageStatsManager.formatBytes(details.otherSize).padding(toLength: 12, withPad: " ", startingAt: 0)
-                text += "\(titlePadded) \(sizePadded) (\(String(format: "%.1f", percentage))%)\n"
-            }
-            
             text += "\n" + String(repeating: "-", count: 50) + "\n"
-            let nostrdbTitlePadded = "NostrDB Total".padding(toLength: 25, withPad: " ", startingAt: 0)
-            let nostrdbSizePadded = StorageStatsManager.formatBytes(stats.nostrdbSize).padding(toLength: 12, withPad: " ", startingAt: 0)
+            let nostrdbTitlePadded = "NostrDB Total".padding(toLength: 30, withPad: " ", startingAt: 0)
+            let nostrdbSizePadded = StorageStatsManager.formatBytes(details.totalSize).padding(toLength: 12, withPad: " ", startingAt: 0)
             text += "\(nostrdbTitlePadded) \(nostrdbSizePadded)\n"
         }
         
         return text
-    }
-    
-    /// Get localized display name for a NostrDB kind (helper for export)
-    /// - Parameter kind: The kind name
-    /// - Returns: Localized display name
-    private func localizedNostrDBKindName(_ kind: String) -> String {
-        switch kind.lowercased() {
-        case "profile":
-            return NSLocalizedString("Profile", comment: "Label for profile kind")
-        case "text":
-            return NSLocalizedString("Text Notes", comment: "Label for text note kind")
-        case "contacts":
-            return NSLocalizedString("Contacts", comment: "Label for contacts kind")
-        case "dm":
-            return NSLocalizedString("Direct Messages", comment: "Label for DM kind")
-        case "reaction":
-            return NSLocalizedString("Reactions", comment: "Label for reaction kind")
-        case "repost":
-            return NSLocalizedString("Reposts", comment: "Label for repost kind")
-        case "zap", "zap_request":
-            return NSLocalizedString("Zaps", comment: "Label for zap kind")
-        case "longform":
-            return NSLocalizedString("Long-form", comment: "Label for longform kind")
-        case "status":
-            return NSLocalizedString("Status", comment: "Label for status kind")
-        case "list":
-            return NSLocalizedString("Lists", comment: "Label for list kind")
-        case "delete":
-            return NSLocalizedString("Deletions", comment: "Label for delete kind")
-        case "http_auth":
-            return NSLocalizedString("HTTP Auth", comment: "Label for HTTP auth kind")
-        case "nwc_request", "nwc_response":
-            return NSLocalizedString("Wallet Connect", comment: "Label for NWC kind")
-        case "other":
-            return NSLocalizedString("Other Kinds", comment: "Label for other event kinds")
-        default:
-            // Capitalize first letter for unknown kinds
-            return kind.prefix(1).uppercased() + kind.dropFirst()
-        }
     }
 }
 

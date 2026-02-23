@@ -1183,55 +1183,47 @@ func remove_file_prefix(_ str: String) -> String {
 
 // MARK: - NostrDB Storage Statistics
 
-/// Per-kind storage statistics from NostrDB
-struct NdbKindStats: Hashable {
-    /// Human-readable kind name (e.g., "profile", "text", "reaction")
-    let kind: String
+/// Per-database storage statistics from NostrDB
+struct NdbDatabaseStats: Hashable {
+    /// Human-readable database name (e.g., "Notes (NDB_DB_NOTE)", "Note ID Index")
+    let database: String
     
-    /// Number of entries for this kind
-    let count: Int
-    
-    /// Total key bytes for this kind
+    /// Total key bytes for this database
     let keySize: UInt64
     
-    /// Total value bytes for this kind
+    /// Total value bytes for this database
     let valueSize: UInt64
     
-    /// Total storage used by this kind (keys + values)
+    /// Total storage used by this database (keys + values)
     var totalSize: UInt64 {
         return keySize + valueSize
     }
 }
 
-/// Detailed NostrDB storage statistics with breakdown by kind and category
+/// Detailed NostrDB storage statistics with per-database breakdown
 struct NdbStats: Hashable {
-    /// Per-kind breakdown of storage (profile, text notes, reactions, etc.)
-    let kindStats: [NdbKindStats]
+    /// Per-database breakdown of storage (notes, profiles, indices, etc.)
+    let databaseStats: [NdbDatabaseStats]
     
-    /// Combined size of all database indices
-    let indicesSize: UInt64
-    
-    /// Size of other database storage not categorized above
-    let otherSize: UInt64
-    
-    /// Total storage across all categories
+    /// Total storage across all databases
     var totalSize: UInt64 {
-        let kindsTotal = kindStats.reduce(0) { $0 + $1.totalSize }
-        return kindsTotal + indicesSize + otherSize
+        return databaseStats.reduce(0) { $0 + $1.totalSize }
     }
 }
 
 extension Ndb {
     /// Get detailed storage statistics for this database
     ///
-    /// This method calls the C `ndb_stat` function to retrieve per-database and per-kind
-    /// storage statistics, then categorizes them into user-friendly groups:
-    /// - Per-kind stats (profile, text notes, reactions, zaps, etc.)
-    /// - Indices (all index databases combined)
-    /// - Other (remaining database storage)
+    /// This method calls the C `ndb_stat` function to retrieve per-database
+    /// storage statistics from the underlying LMDB storage. Each database
+    /// (notes, profiles, indices, etc.) is reported with its key and value sizes.
     ///
-    /// - Returns: NdbStats with detailed breakdown, or nil if stat collection fails
-    func getStats() -> NdbStats? {
+    /// Any unaccounted space between the sum of database stats and the physical
+    /// file size is reported as "Other Data".
+    ///
+    /// - Parameter physicalSize: The physical file size in bytes from the filesystem
+    /// - Returns: NdbStats with detailed per-database breakdown, or nil if stat collection fails
+    func getStats(physicalSize: UInt64) -> NdbStats? {
         guard !is_closed else { return nil }
         
         var stat = ndb_stat()
@@ -1243,86 +1235,65 @@ extension Ndb {
             return nil
         }
         
-        // Extract per-kind stats using withUnsafeBytes to access C array
-        var kindStats: [NdbKindStats] = []
-        
-        // Access common_kinds array via pointer
-        withUnsafePointer(to: &stat.common_kinds) { kindsPtr in
-            let kindsBuffer = UnsafeRawPointer(kindsPtr).assumingMemoryBound(to: ndb_stat_counts.self)
-            
-            for i in 0..<Int(NDB_CKIND_COUNT.rawValue) {
-                let count = kindsBuffer[i]
-                
-                // Skip kinds with no data
-                guard count.count > 0 else { continue }
-                
-                // Get human-readable kind name from C function
-                let kindName = String(cString: ndb_kind_name(ndb_common_kind(UInt32(i))))
-                
-                kindStats.append(NdbKindStats(
-                    kind: kindName,
-                    count: count.count,
-                    keySize: UInt64(count.key_size),
-                    valueSize: UInt64(count.value_size)
-                ))
-            }
-        }
-        
-        // Add "other kinds" if present
-        if stat.other_kinds.count > 0 {
-            kindStats.append(NdbKindStats(
-                kind: "other",
-                count: stat.other_kinds.count,
-                keySize: UInt64(stat.other_kinds.key_size),
-                valueSize: UInt64(stat.other_kinds.value_size)
-            ))
-        }
-        
-        // Calculate indices total and other sizes using pointer access to dbs array
-        let indexDBs: [ndb_dbs] = [
-            NDB_DB_NOTE_ID,
-            NDB_DB_PROFILE_PK,
-            NDB_DB_NOTE_KIND,
-            NDB_DB_NOTE_TEXT,
-            NDB_DB_NOTE_TAGS,
-            NDB_DB_NOTE_PUBKEY,
-            NDB_DB_NOTE_PUBKEY_KIND,
-            NDB_DB_NOTE_RELAY_KIND,
-            NDB_DB_PROFILE_SEARCH
+        // Database names matching ndb_dbs enum order
+        let dbNames = [
+            "Notes (NDB_DB_NOTE)",
+            "Metadata (NDB_DB_META)",
+            "Profiles (NDB_DB_PROFILE)",
+            "Note ID Index",
+            "Profile Key Index",
+            "NostrDB Metadata",
+            "Profile Search Index",
+            "Profile Last Fetch",
+            "Note Kind Index",
+            "Note Text Index",
+            "Note Blocks",
+            "Note Tags Index",
+            "Note Pubkey Index",
+            "Note Pubkey+Kind Index",
+            "Note Relay+Kind Index",
+            "Note Relays"
         ]
         
-        let contentDBs: [ndb_dbs] = [NDB_DB_NOTE, NDB_DB_PROFILE, NDB_DB_META]
+        var databaseStats: [NdbDatabaseStats] = []
+        var accountedSize: UInt64 = 0
         
-        var indicesSize: UInt64 = 0
-        var otherSize: UInt64 = 0
-        
+        // Extract per-database stats from stat.dbs array
         withUnsafePointer(to: &stat.dbs) { dbsPtr in
             let dbsBuffer = UnsafeRawPointer(dbsPtr).assumingMemoryBound(to: ndb_stat_counts.self)
             
-            // Calculate indices size
-            for db in indexDBs {
-                let dbStat = dbsBuffer[Int(db.rawValue)]
-                indicesSize += UInt64(dbStat.key_size + dbStat.value_size)
-            }
-            
-            // Calculate "other" size (non-index, non-content databases)
             for dbIndex in 0..<Int(NDB_DBS.rawValue) {
-                let db = ndb_dbs(rawValue: UInt32(dbIndex))
-                
-                // Skip if it's an index or content DB
-                if indexDBs.contains(db) || contentDBs.contains(db) {
-                    continue
-                }
-                
                 let dbStat = dbsBuffer[dbIndex]
-                otherSize += UInt64(dbStat.key_size + dbStat.value_size)
+                
+                // Skip databases with no data
+                guard dbStat.key_size > 0 || dbStat.value_size > 0 else { continue }
+                
+                // Get database name (use index as fallback if name array is too short)
+                let dbName = dbIndex < dbNames.count ? dbNames[dbIndex] : "Database \(dbIndex)"
+                
+                let dbStats = NdbDatabaseStats(
+                    database: dbName,
+                    keySize: UInt64(dbStat.key_size),
+                    valueSize: UInt64(dbStat.value_size)
+                )
+                databaseStats.append(dbStats)
+                accountedSize += dbStats.totalSize
             }
         }
         
-        return NdbStats(
-            kindStats: kindStats,
-            indicesSize: indicesSize,
-            otherSize: otherSize
-        )
+        // Add "Other Data" for any unaccounted space
+        if physicalSize > accountedSize {
+            let otherSize = physicalSize - accountedSize
+            databaseStats.append(NdbDatabaseStats(
+                database: "Other Data",
+                keySize: 0,
+                valueSize: otherSize
+            ))
+        }
+        
+        // Sort by total size descending to show largest databases first
+        databaseStats.sort { $0.totalSize > $1.totalSize }
+        
+        return NdbStats(databaseStats: databaseStats)
     }
 }

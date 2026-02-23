@@ -54,46 +54,20 @@ struct NostrDBDetailView: View {
         return nil
     }
     
-    /// Detailed categories showing per-kind breakdown plus indices and other
+    /// Detailed categories showing per-database breakdown
     private var detailedCategories: [StorageCategory] {
         guard let details = stats.nostrdbDetails else { return [] }
         
         var result: [StorageCategory] = []
         
-        // Per-kind categories - sorted by size descending, filtered to only show non-zero
-        let sortedKindStats = details.kindStats
-            .filter { $0.totalSize > 0 }
-            .sorted { $0.totalSize > $1.totalSize }
-        
-        for kindStat in sortedKindStats {
+        // Per-database categories (sorted by size descending in getStats)
+        for dbStat in details.databaseStats {
             result.append(StorageCategory(
-                id: "kind_\(kindStat.kind)",
-                title: localizedKindName(kindStat.kind),
-                icon: iconForKind(kindStat.kind),
-                color: colorForKind(kindStat.kind),
-                size: kindStat.totalSize
-            ))
-        }
-        
-        // Indices category - only if non-zero
-        if details.indicesSize > 0 {
-            result.append(StorageCategory(
-                id: "indices",
-                title: NSLocalizedString("Indices", comment: "Label for database indices"),
-                icon: "list.bullet.indent",
-                color: .gray,
-                size: details.indicesSize
-            ))
-        }
-        
-        // Other databases - only if non-zero
-        if details.otherSize > 0 {
-            result.append(StorageCategory(
-                id: "other_dbs",
-                title: NSLocalizedString("Other Data", comment: "Label for other database storage"),
-                icon: "square.grid.2x2",
-                color: .secondary,
-                size: details.otherSize
+                id: "db_\(dbStat.database)",
+                title: dbStat.database,
+                icon: iconForDatabase(dbStat.database),
+                color: colorForDatabase(dbStat.database),
+                size: dbStat.totalSize
             ))
         }
         
@@ -249,43 +223,6 @@ struct NostrDBDetailView: View {
     
     // MARK: - Helper Functions
     
-    /// Get localized display name for a kind
-    private func localizedKindName(_ kind: String) -> String {
-        switch kind.lowercased() {
-        case "profile":
-            return NSLocalizedString("Profile", comment: "Label for profile kind")
-        case "text":
-            return NSLocalizedString("Text Notes", comment: "Label for text note kind")
-        case "contacts":
-            return NSLocalizedString("Contacts", comment: "Label for contacts kind")
-        case "dm":
-            return NSLocalizedString("Direct Messages", comment: "Label for DM kind")
-        case "reaction":
-            return NSLocalizedString("Reactions", comment: "Label for reaction kind")
-        case "repost":
-            return NSLocalizedString("Reposts", comment: "Label for repost kind")
-        case "zap", "zap_request":
-            return NSLocalizedString("Zaps", comment: "Label for zap kind")
-        case "longform":
-            return NSLocalizedString("Long-form", comment: "Label for longform kind")
-        case "status":
-            return NSLocalizedString("Status", comment: "Label for status kind")
-        case "list":
-            return NSLocalizedString("Lists", comment: "Label for list kind")
-        case "delete":
-            return NSLocalizedString("Deletions", comment: "Label for delete kind")
-        case "http_auth":
-            return NSLocalizedString("HTTP Auth", comment: "Label for HTTP auth kind")
-        case "nwc_request", "nwc_response":
-            return NSLocalizedString("Wallet Connect", comment: "Label for NWC kind")
-        case "other":
-            return NSLocalizedString("Other Kinds", comment: "Label for other event kinds")
-        default:
-            // Capitalize first letter for unknown kinds
-            return kind.prefix(1).uppercased() + kind.dropFirst()
-        }
-    }
-    
     /// Format NostrDB statistics as exportable text
     /// - Parameter stats: The storage statistics containing NostrDB details
     /// - Returns: Formatted text representation of NostrDB stats breakdown
@@ -299,135 +236,68 @@ struct NostrDBDetailView: View {
         text += "Generated: \(Date().formatted(date: .abbreviated, time: .shortened))\n"
         text += String(repeating: "=", count: 50) + "\n\n"
         
-        // Event Kinds breakdown
-        let sortedKindStats = details.kindStats
-            .filter { $0.totalSize > 0 }
-            .sorted { $0.totalSize > $1.totalSize }
-        
-        if !sortedKindStats.isEmpty {
-            text += "Event Kinds:\n"
+        // Per-database breakdown (sorted by size, already done in getStats)
+        if !details.databaseStats.isEmpty {
+            text += "Databases:\n"
             text += String(repeating: "-", count: 50) + "\n"
             
-            for kindStat in sortedKindStats {
-                let percentage = Self.percentageOfNostrDB(for: kindStat.totalSize, nostrdbSize: stats.nostrdbSize)
-                let kindNamePadded = Self.localizedKindName(kindStat.kind).padding(toLength: 25, withPad: " ", startingAt: 0)
-                let sizePadded = StorageStatsManager.formatBytes(kindStat.totalSize).padding(toLength: 12, withPad: " ", startingAt: 0)
-                text += "\(kindNamePadded) \(sizePadded) (\(String(format: "%.1f", percentage))%)\n"
-                text += "  Count: \(kindStat.count), Keys: \(StorageStatsManager.formatBytes(kindStat.keySize)), Values: \(StorageStatsManager.formatBytes(kindStat.valueSize))\n"
+            for dbStat in details.databaseStats {
+                let percentage = details.totalSize > 0 ? Double(dbStat.totalSize) / Double(details.totalSize) * 100.0 : 0.0
+                let dbNamePadded = dbStat.database.padding(toLength: 30, withPad: " ", startingAt: 0)
+                let sizePadded = StorageStatsManager.formatBytes(dbStat.totalSize).padding(toLength: 12, withPad: " ", startingAt: 0)
+                text += "\(dbNamePadded) \(sizePadded) (\(String(format: "%.1f", percentage))%)\n"
+                
+                // Only show keys/values breakdown if both exist
+                if dbStat.keySize > 0 && dbStat.valueSize > 0 {
+                    text += "  Keys: \(StorageStatsManager.formatBytes(dbStat.keySize)), Values: \(StorageStatsManager.formatBytes(dbStat.valueSize))\n"
+                }
             }
             text += "\n"
         }
         
-        // Indices
-        if details.indicesSize > 0 {
-            let percentage = Self.percentageOfNostrDB(for: details.indicesSize, nostrdbSize: stats.nostrdbSize)
-            let titlePadded = "Indices".padding(toLength: 25, withPad: " ", startingAt: 0)
-            let sizePadded = StorageStatsManager.formatBytes(details.indicesSize).padding(toLength: 12, withPad: " ", startingAt: 0)
-            text += "\(titlePadded) \(sizePadded) (\(String(format: "%.1f", percentage))%)\n"
-        }
-        
-        // Other
-        if details.otherSize > 0 {
-            let percentage = Self.percentageOfNostrDB(for: details.otherSize, nostrdbSize: stats.nostrdbSize)
-            let titlePadded = "Other Data".padding(toLength: 25, withPad: " ", startingAt: 0)
-            let sizePadded = StorageStatsManager.formatBytes(details.otherSize).padding(toLength: 12, withPad: " ", startingAt: 0)
-            text += "\(titlePadded) \(sizePadded) (\(String(format: "%.1f", percentage))%)\n"
-        }
-        
         text += String(repeating: "-", count: 50) + "\n"
-        let totalTitlePadded = "NostrDB Total".padding(toLength: 25, withPad: " ", startingAt: 0)
-        let totalSizePadded = StorageStatsManager.formatBytes(stats.nostrdbSize).padding(toLength: 12, withPad: " ", startingAt: 0)
+        let totalTitlePadded = "NostrDB Total".padding(toLength: 30, withPad: " ", startingAt: 0)
+        let totalSizePadded = StorageStatsManager.formatBytes(details.totalSize).padding(toLength: 12, withPad: " ", startingAt: 0)
         text += "\(totalTitlePadded) \(totalSizePadded)\n"
         
         return text
     }
     
-    /// Calculate percentage of NostrDB size (static helper)
-    /// - Parameters:
-    ///   - size: The size to calculate percentage for
-    ///   - nostrdbSize: Total NostrDB size
-    /// - Returns: Percentage as a double
-    private static func percentageOfNostrDB(for size: UInt64, nostrdbSize: UInt64) -> Double {
-        guard nostrdbSize > 0 else { return 0.0 }
-        return Double(size) / Double(nostrdbSize) * 100.0
-    }
-    
-    /// Get localized display name for a kind (static helper)
-    /// - Parameter kind: The kind name
-    /// - Returns: Localized display name
-    private static func localizedKindName(_ kind: String) -> String {
-        switch kind.lowercased() {
-        case "profile":
-            return NSLocalizedString("Profile", comment: "Label for profile kind")
-        case "text":
-            return NSLocalizedString("Text Notes", comment: "Label for text note kind")
-        case "contacts":
-            return NSLocalizedString("Contacts", comment: "Label for contacts kind")
-        case "dm":
-            return NSLocalizedString("Direct Messages", comment: "Label for DM kind")
-        case "reaction":
-            return NSLocalizedString("Reactions", comment: "Label for reaction kind")
-        case "repost":
-            return NSLocalizedString("Reposts", comment: "Label for repost kind")
-        case "zap", "zap_request":
-            return NSLocalizedString("Zaps", comment: "Label for zap kind")
-        case "longform":
-            return NSLocalizedString("Long-form", comment: "Label for longform kind")
-        case "status":
-            return NSLocalizedString("Status", comment: "Label for status kind")
-        case "list":
-            return NSLocalizedString("Lists", comment: "Label for list kind")
-        case "delete":
-            return NSLocalizedString("Deletions", comment: "Label for delete kind")
-        case "http_auth":
-            return NSLocalizedString("HTTP Auth", comment: "Label for HTTP auth kind")
-        case "nwc_request", "nwc_response":
-            return NSLocalizedString("Wallet Connect", comment: "Label for NWC kind")
-        case "other":
-            return NSLocalizedString("Other Kinds", comment: "Label for other event kinds")
-        default:
-            // Capitalize first letter for unknown kinds
-            return kind.prefix(1).uppercased() + kind.dropFirst()
+    /// Get icon for a specific database
+    private func iconForDatabase(_ database: String) -> String {
+        if database.contains("Notes (NDB_DB_NOTE)") {
+            return "text.bubble.fill"
+        } else if database.contains("Profiles (NDB_DB_PROFILE)") {
+            return "person.circle.fill"
+        } else if database.contains("Metadata") {
+            return "info.circle.fill"
+        } else if database.contains("Note Blocks") {
+            return "square.stack.3d.up.fill"
+        } else if database.contains("Index") || database.contains("Search") {
+            return "list.bullet.indent"
+        } else if database.contains("Relay") {
+            return "antenna.radiowaves.left.and.right"
+        } else {
+            return "internaldrive.fill"
         }
     }
     
-    /// Get icon for a specific kind
-    private func iconForKind(_ kind: String) -> String {
-        switch kind.lowercased() {
-        case "profile": return "person.circle.fill"
-        case "text": return "text.bubble.fill"
-        case "contacts": return "person.2.fill"
-        case "dm": return "envelope.fill"
-        case "reaction": return "heart.fill"
-        case "repost": return "arrow.2.squarepath"
-        case "zap", "zap_request": return "bolt.fill"
-        case "longform": return "doc.text.fill"
-        case "status": return "bubble.left.fill"
-        case "list": return "list.bullet"
-        case "delete": return "trash.fill"
-        case "http_auth": return "key.fill"
-        case "nwc_request", "nwc_response": return "wallet.pass.fill"
-        default: return "doc.fill"
-        }
-    }
-    
-    /// Get color for a specific kind
-    private func colorForKind(_ kind: String) -> Color {
-        switch kind.lowercased() {
-        case "profile": return .blue
-        case "text": return .green
-        case "contacts": return .cyan
-        case "dm": return .pink
-        case "reaction": return .red
-        case "repost": return .teal
-        case "zap", "zap_request": return .yellow
-        case "longform": return .indigo
-        case "status": return .mint
-        case "list": return .purple
-        case "delete": return .orange
-        case "http_auth": return .brown
-        case "nwc_request", "nwc_response": return .blue
-        default: return .gray
+    /// Get color for a specific database
+    private func colorForDatabase(_ database: String) -> Color {
+        if database.contains("Notes (NDB_DB_NOTE)") {
+            return .green
+        } else if database.contains("Profiles (NDB_DB_PROFILE)") {
+            return .blue
+        } else if database.contains("Note Blocks") {
+            return .purple
+        } else if database.contains("Metadata") {
+            return .orange
+        } else if database.contains("Index") || database.contains("Search") {
+            return .gray
+        } else if database.contains("Relay") {
+            return .cyan
+        } else {
+            return .secondary
         }
     }
 }
@@ -440,15 +310,15 @@ struct NostrDBDetailView: View {
             settings: test_damus_state.settings,
             stats: StorageStats(
                 nostrdbDetails: NdbStats(
-                    kindStats: [
-                        NdbKindStats(kind: "text", count: 1000, keySize: 50000, valueSize: 200000),
-                        NdbKindStats(kind: "profile", count: 500, keySize: 25000, valueSize: 100000),
-                        NdbKindStats(kind: "reaction", count: 2000, keySize: 100000, valueSize: 50000)
-                    ],
-                    indicesSize: 150000,
-                    otherSize: 50000
+                    databaseStats: [
+                        NdbDatabaseStats(database: "Other Data", keySize: 0, valueSize: 2000000000),
+                        NdbDatabaseStats(database: "Notes (NDB_DB_NOTE)", keySize: 50000, valueSize: 200000),
+                        NdbDatabaseStats(database: "Note Blocks", keySize: 100000, valueSize: 50000),
+                        NdbDatabaseStats(database: "Profiles (NDB_DB_PROFILE)", keySize: 25000, valueSize: 100000),
+                        NdbDatabaseStats(database: "Note ID Index", keySize: 75000, valueSize: 75000)
+                    ]
                 ),
-                nostrdbSize: 725000,
+                nostrdbSize: 2500000000,
                 snapshotSize: 100000,
                 imageCacheSize: 5000000
             )
