@@ -391,11 +391,38 @@ struct StorageSettingsView: View {
     /// Request database compaction
     func compact_database_action() {
         Task {
+            // Collect user pubkeys
+            var pubkeys: [[UInt8]] = []
+            
+            // Add main account pubkey
+            let mainPubkeyBytes = Array(damus_state.keypair.pubkey.id)
+            pubkeys.append(mainPubkeyBytes)
+            
+            // TODO: Add other logged-in account pubkeys if multi-account support exists
+            // For now, just use the main keypair
+            
+            guard !pubkeys.isEmpty else {
+                await MainActor.run {
+                    self.error = "No user public keys available for compaction"
+                }
+                return
+            }
+            
+            // Request compaction flag
             await damus_state.compactionManager.requestCompaction()
             
-            // Show alert that app will restart
-            await MainActor.run {
-                showing_compaction_requested_alert = true
+            // Perform compaction in background
+            do {
+                try await damus_state.compactionManager.performCompaction(ownPubkeys: pubkeys)
+                
+                // Show alert that app will restart
+                await MainActor.run {
+                    showing_compaction_requested_alert = true
+                }
+            } catch {
+                await MainActor.run {
+                    self.error = "Compaction failed: \(error.localizedDescription)"
+                }
             }
         }
     }
