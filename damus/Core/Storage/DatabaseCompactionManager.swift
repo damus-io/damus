@@ -23,8 +23,11 @@ actor DatabaseCompactionManager {
     /// Key for storing compaction request flag in UserDefaults
     private static let compactionRequestedKey = "databaseCompactionRequested"
     
-    /// Key for storing compacted database path in UserDefaults
+    /// Key for storing compacted database relative path in UserDefaults
     private static let compactedDatabasePathKey = "compactedDatabasePath"
+    
+    /// Relative directory name for compacted database (within Documents directory)
+    private static let compactedDatabaseDirName = "compacted_db_temp"
     
     private let ndb: Ndb
     
@@ -51,7 +54,7 @@ actor DatabaseCompactionManager {
             return false
         }
         
-        guard let compactedPath = UserDefaults.standard.string(forKey: compactedDatabasePathKey) else {
+        guard let compactedRelativePath = UserDefaults.standard.string(forKey: compactedDatabasePathKey) else {
             Log.info("Compaction requested but no compacted database path found", for: .storage)
             UserDefaults.standard.removeObject(forKey: compactionRequestedKey)
             return false
@@ -64,6 +67,18 @@ actor DatabaseCompactionManager {
         
         let fileManager = FileManager.default
         
+        // Resolve the compacted database path relative to current documents directory
+        guard let docsDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            Log.error("Could not access documents directory during swap", for: .storage)
+            UserDefaults.standard.removeObject(forKey: compactionRequestedKey)
+            UserDefaults.standard.removeObject(forKey: compactedDatabasePathKey)
+            return false
+        }
+        
+        let compactedPath = docsDir.appendingPathComponent(compactedRelativePath).path
+        
+        Log.info("Resolved compacted database path: %{public}@", for: .storage, compactedPath)
+        
         // Verify compacted database exists
         guard fileManager.fileExists(atPath: compactedPath) else {
             Log.info("Compacted database not found at %{public}@", for: .storage, compactedPath)
@@ -72,27 +87,46 @@ actor DatabaseCompactionManager {
             return false
         }
         
-        Log.info("Swapping database: %{public}@ -> %{public}@", for: .storage, compactedPath, mainDbPath)
+        Log.info("Swapping database files from %{public}@ to %{public}@", for: .storage, compactedPath, mainDbPath)
         
         do {
-            // Backup old database before replacing
-            let backupPath = mainDbPath + ".backup"
-            if fileManager.fileExists(atPath: backupPath) {
-                try fileManager.removeItem(atPath: backupPath)
+            // Swap each database file individually (data.mdb, lock.mdb)
+            for dbFile in Ndb.db_files {
+                let sourceFile = (compactedPath as NSString).appendingPathComponent(dbFile)
+                let destFile = (mainDbPath as NSString).appendingPathComponent(dbFile)
+                let backupFile = destFile + ".backup"
+                
+                // Verify source file exists
+                guard fileManager.fileExists(atPath: sourceFile) else {
+                    Log.info("Source database file not found: %{public}@", for: .storage, sourceFile)
+                    continue
+                }
+                
+                Log.debug("Swapping file: %{public}@", for: .storage, dbFile)
+                
+                // Remove old backup if exists
+                if fileManager.fileExists(atPath: backupFile) {
+                    try fileManager.removeItem(atPath: backupFile)
+                }
+                
+                // Backup current file if it exists
+                if fileManager.fileExists(atPath: destFile) {
+                    try fileManager.moveItem(atPath: destFile, toPath: backupFile)
+                    Log.debug("Backed up %{public}@ to backup", for: .storage, dbFile)
+                }
+                
+                // Move compacted file to main location
+                try fileManager.moveItem(atPath: sourceFile, toPath: destFile)
+                Log.debug("Moved compacted %{public}@ to main location", for: .storage, dbFile)
+                
+                // Clean up backup after successful swap
+                try? fileManager.removeItem(atPath: backupFile)
             }
             
-            // Move old database to backup
-            if fileManager.fileExists(atPath: mainDbPath) {
-                try fileManager.moveItem(atPath: mainDbPath, toPath: backupPath)
-                Log.debug("Backed up old database to %{public}@", for: .storage, backupPath)
-            }
+            // Remove the now-empty compacted database directory
+            try? fileManager.removeItem(atPath: compactedPath)
             
-            // Move compacted database to main location
-            try fileManager.moveItem(atPath: compactedPath, toPath: mainDbPath)
             Log.info("Database swap completed successfully", for: .storage)
-            
-            // Clean up backup after successful swap
-            try? fileManager.removeItem(atPath: backupPath)
             
             // Clear the compaction request flags
             UserDefaults.standard.removeObject(forKey: compactionRequestedKey)
@@ -102,11 +136,15 @@ actor DatabaseCompactionManager {
         } catch {
             Log.error("Failed to swap database: %{public}@", for: .storage, error.localizedDescription)
             
-            // Attempt to restore backup if swap failed
-            let backupPath = mainDbPath + ".backup"
-            if fileManager.fileExists(atPath: backupPath) && !fileManager.fileExists(atPath: mainDbPath) {
-                try? fileManager.moveItem(atPath: backupPath, toPath: mainDbPath)
-                Log.info("Restored database from backup after failed swap", for: .storage)
+            // Attempt to restore backups if swap failed
+            for dbFile in Ndb.db_files {
+                let destFile = (mainDbPath as NSString).appendingPathComponent(dbFile)
+                let backupFile = destFile + ".backup"
+                
+                if fileManager.fileExists(atPath: backupFile) && !fileManager.fileExists(atPath: destFile) {
+                    try? fileManager.moveItem(atPath: backupFile, toPath: destFile)
+                    Log.info("Restored %{public}@ from backup after failed swap", for: .storage, dbFile)
+                }
             }
             
             return false
@@ -196,28 +234,46 @@ actor DatabaseCompactionManager {
     private func performCompactionInternal(ownPubkeys: [[UInt8]]) async throws {
         let fileManager = FileManager.default
         
-        // Create a temporary directory for the compacted database
-        let tempDir = FileManager.default.temporaryDirectory
-        let tempCompactPath = tempDir.appendingPathComponent("compacted_db_\(UUID().uuidString)")
+        Log.info("performCompactionInternal: starting with %d pubkeys", for: .storage, ownPubkeys.count)
+        
+        // Create a directory for the compacted database in documents directory (persistent across launches)
+        guard let docsDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            Log.error("performCompactionInternal: could not access documents directory", for: .storage)
+            throw CompactionError.directoryCreationFailed(NSError(domain: "DatabaseCompactionManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Could not access documents directory"]))
+        }
+        
+        let compactedDbDir = docsDir.appendingPathComponent(Self.compactedDatabaseDirName)
+        
+        Log.info("performCompactionInternal: compacted db will be at %{public}@", for: .storage, compactedDbDir.path)
         
         var shouldCleanup = true
         
         // Ensure cleanup on error
         defer {
             if shouldCleanup {
-                try? fileManager.removeItem(atPath: tempCompactPath.path)
+                Log.info("performCompactionInternal: cleaning up compacted db (error occurred)", for: .storage)
+                try? fileManager.removeItem(at: compactedDbDir)
+            } else {
+                Log.info("performCompactionInternal: keeping compacted db for swap", for: .storage)
             }
         }
         
+        // Remove any existing compacted database directory
+        if fileManager.fileExists(atPath: compactedDbDir.path) {
+            Log.info("performCompactionInternal: removing existing compacted db", for: .storage)
+            try? fileManager.removeItem(at: compactedDbDir)
+        }
+        
         do {
-            try fileManager.createDirectory(atPath: tempCompactPath.path, withIntermediateDirectories: true)
+            try fileManager.createDirectory(at: compactedDbDir, withIntermediateDirectories: true)
+            Log.debug("Created compaction directory at %{public}@", for: .storage, compactedDbDir.path)
         } catch {
+            Log.error("performCompactionInternal: failed to create directory: %{public}@", for: .storage, error.localizedDescription)
             throw CompactionError.directoryCreationFailed(error)
         }
         
-        Log.debug("Created temporary compaction directory at %{public}@", for: .storage, tempCompactPath.path)
-        
         guard !ownPubkeys.isEmpty else {
+            Log.error("performCompactionInternal: no pubkeys provided", for: .storage)
             throw CompactionError.noPubkeysAvailable
         }
         
@@ -225,17 +281,30 @@ actor DatabaseCompactionManager {
         
         // Perform the compaction using ndb_compact
         do {
-            try ndb.compact(outputPath: tempCompactPath.path, ownPubkeys: ownPubkeys)
+            Log.info("performCompactionInternal: calling ndb.compact()", for: .storage)
+            try ndb.compact(outputPath: compactedDbDir.path, ownPubkeys: ownPubkeys)
+            Log.info("performCompactionInternal: ndb.compact() returned successfully", for: .storage)
         } catch {
+            Log.error("performCompactionInternal: ndb.compact() failed: %{public}@", for: .storage, error.localizedDescription)
             throw CompactionError.compactionFailed(error)
+        }
+        
+        // Verify the compacted database was actually created
+        let dataFile = compactedDbDir.appendingPathComponent("data.mdb")
+        guard fileManager.fileExists(atPath: dataFile.path) else {
+            Log.error("performCompactionInternal: data.mdb not found after compaction", for: .storage)
+            throw CompactionError.compactionFailed(NSError(domain: "DatabaseCompactionManager", code: -2, userInfo: [NSLocalizedDescriptionKey: "Compacted database file not found"]))
         }
         
         Log.info("Database compaction completed successfully", for: .storage)
         
-        // Store the compacted database path for swap on next launch
-        UserDefaults.standard.set(tempCompactPath.path, forKey: Self.compactedDatabasePathKey)
+        // Store the relative path (just the directory name) for swap on next launch
+        // This allows the path to be resolved relative to the documents directory at swap time,
+        // avoiding issues with the app container UUID changing between launches
+        UserDefaults.standard.set(Self.compactedDatabaseDirName, forKey: Self.compactedDatabasePathKey)
+        Log.info("performCompactionInternal: stored relative path in UserDefaults: %{public}@", for: .storage, Self.compactedDatabaseDirName)
         
-        // Don't delete the temp dir on success since we're keeping it for swap
+        // Don't delete the compacted db on success since we're keeping it for swap
         shouldCleanup = false
     }
 }

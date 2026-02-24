@@ -339,16 +339,22 @@ class Ndb {
     func compact(outputPath: String, ownPubkeys: [[UInt8]]) throws {
         enum CompactError: Error {
             case failed
+            case invalidPubkeyCount
+            case invalidPubkeySize
         }
         
         guard !ownPubkeys.isEmpty else {
-            throw CompactError.failed
+            print("ndb_compact: no pubkeys provided")
+            throw CompactError.invalidPubkeyCount
         }
         
         // Validate all pubkeys are 32 bytes
         guard ownPubkeys.allSatisfy({ $0.count == 32 }) else {
-            throw CompactError.failed
+            print("ndb_compact: invalid pubkey size")
+            throw CompactError.invalidPubkeySize
         }
+        
+        print("ndb_compact: starting compaction to \(outputPath) with \(ownPubkeys.count) pubkey(s)")
         
         try withNdb({
             try outputPath.withCString({ pathCString in
@@ -359,9 +365,14 @@ class Ndb {
                     return ndb_compact(self.ndb.ndb, pathCString, baseAddress, Int32(ownPubkeys.count))
                 }
                 
+                print("ndb_compact: C function returned \(rc)")
+                
                 guard rc == 1 else {
+                    print("ndb_compact: failed with return code \(rc)")
                     throw CompactError.failed
                 }
+                
+                print("ndb_compact: completed successfully")
             })
         })
     }

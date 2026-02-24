@@ -1776,6 +1776,9 @@
 		D7B62B9A2F4CE59B001EE26F /* NostrDBDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B62B992F4CE59B001EE26F /* NostrDBDetailView.swift */; };
 		D7B62B9B2F4CE59B001EE26F /* NostrDBDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B62B992F4CE59B001EE26F /* NostrDBDetailView.swift */; };
 		D7B62B9C2F4CE59B001EE26F /* NostrDBDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B62B992F4CE59B001EE26F /* NostrDBDetailView.swift */; };
+		D7B62B9E2F4D4265001EE26F /* DatabaseCompactionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B62B9D2F4D4265001EE26F /* DatabaseCompactionManager.swift */; };
+		D7B62B9F2F4D4265001EE26F /* DatabaseCompactionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B62B9D2F4D4265001EE26F /* DatabaseCompactionManager.swift */; };
+		D7B62BA02F4D4265001EE26F /* DatabaseCompactionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B62B9D2F4D4265001EE26F /* DatabaseCompactionManager.swift */; };
 		D7B76C902C825042003A16CB /* PushNotificationClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D2A3802BF815D000E4B42B /* PushNotificationClient.swift */; };
 		D7B76C912C82507F003A16CB /* NIP98AuthenticatedRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C6787D2B2D34CC00BCEAFB /* NIP98AuthenticatedRequest.swift */; };
 		D7BEE6F92D37B37400CF659F /* DraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7BEE6F82D37B37400CF659F /* DraftTests.swift */; };
@@ -2870,6 +2873,7 @@
 		D7ADD3DF2B538D4200F104C4 /* DamusPurpleURLSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleURLSheetView.swift; sourceTree = "<group>"; };
 		D7ADD3E12B538E3500F104C4 /* DamusPurpleVerifyNpubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleVerifyNpubView.swift; sourceTree = "<group>"; };
 		D7B62B992F4CE59B001EE26F /* NostrDBDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrDBDetailView.swift; sourceTree = "<group>"; };
+		D7B62B9D2F4D4265001EE26F /* DatabaseCompactionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseCompactionManager.swift; sourceTree = "<group>"; };
 		D7BEE6F82D37B37400CF659F /* DraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DraftTests.swift; sourceTree = "<group>"; };
 		D7C6787D2B2D34CC00BCEAFB /* NIP98AuthenticatedRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP98AuthenticatedRequest.swift; sourceTree = "<group>"; };
 		D7CB5D3D2B116DAD00AD4105 /* NotificationsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsManager.swift; sourceTree = "<group>"; };
@@ -4997,6 +5001,7 @@
 		5C78A7BD2E306D6000CF177D /* Storage */ = {
 			isa = PBXGroup;
 			children = (
+				D7B62B9D2F4D4265001EE26F /* DatabaseCompactionManager.swift */,
 				D78778212F49476700DA73E4 /* StorageStatsManager.swift */,
 				D7CCDB882F034FBB00218972 /* DatabaseSnapshotManager.swift */,
 				D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */,
@@ -5787,6 +5792,7 @@
 			files = (
 				4C3DCC762A9FE9EC0091E592 /* NdbTxn.swift in Sources */,
 				4CEF958D2A9CE650000F901B /* verifier.c in Sources */,
+				D7B62B9E2F4D4265001EE26F /* DatabaseCompactionManager.swift in Sources */,
 				D73BDB0E2D6FF5F600D69970 /* NostrNetworkManager.swift in Sources */,
 				5C8F97262EB460CA009399B1 /* LiveStreamBanner.swift in Sources */,
 				4C32B9332A99845B00DC3548 /* Ndb.swift in Sources */,
@@ -6881,6 +6887,7 @@
 				82D6FC202CD99F7900C925F4 /* RelayType.swift in Sources */,
 				82D6FC212CD99F7900C925F4 /* SignalView.swift in Sources */,
 				82D6FC222CD99F7900C925F4 /* RelayPicView.swift in Sources */,
+				D7B62B9F2F4D4265001EE26F /* DatabaseCompactionManager.swift in Sources */,
 				5C4FA7EC2DC29AE900CE658C /* FollowPackEvent.swift in Sources */,
 				82D6FC232CD99F7900C925F4 /* UserSearch.swift in Sources */,
 				82D6FC242CD99F7900C925F4 /* AddMuteItemView.swift in Sources */,
@@ -7020,6 +7027,7 @@
 				D73E5E242C6A97F4007EB227 /* FollowedNotify.swift in Sources */,
 				D73E5E252C6A97F4007EB227 /* FollowNotify.swift in Sources */,
 				D73E5E262C6A97F4007EB227 /* LikedNotify.swift in Sources */,
+				D7B62BA02F4D4265001EE26F /* DatabaseCompactionManager.swift in Sources */,
 				D72B6FA42E7DFB450050CD1D /* ProfilesManager.swift in Sources */,
 				D73E5E272C6A97F4007EB227 /* LocalNotificationNotify.swift in Sources */,
 				D73E5F8B2C6AA6A2007EB227 /* UserStatusSheet.swift in Sources */,
