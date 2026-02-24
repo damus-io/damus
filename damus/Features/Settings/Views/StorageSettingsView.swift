@@ -8,6 +8,16 @@
 import SwiftUI
 import Charts
 
+fileprivate let CACHE_CLEAR_BUTTON_RESET_TIME_IN_SECONDS: Double = 60
+fileprivate let MINIMUM_CACHE_CLEAR_BUTTON_DELAY_IN_SECONDS: Double = 1
+
+/// A simple type to keep track of the cache clearing state
+fileprivate enum CacheClearingState {
+    case not_cleared
+    case clearing
+    case cleared
+}
+
 /// Storage category for display in list and chart
 struct StorageCategory: Identifiable {
     let id: String
@@ -34,6 +44,8 @@ struct StorageSettingsView: View {
     @State private var showShareSheet: Bool = false
     @State private var exportText: String?
     @State private var isPreparingExport: Bool = false
+    @State fileprivate var cache_clearing_state: CacheClearingState = .not_cleared
+    @State var showing_cache_clear_alert: Bool = false
     
     /// Storage categories with cumulative ranges for angle selection (iOS 17+)
     private var categoryRanges: [(category: String, range: Range<Double>)] {
@@ -155,6 +167,11 @@ struct StorageSettingsView: View {
                             .font(.headline)
                     }
                 }
+                
+                // Clear Cache Section
+                Section {
+                    self.ClearCacheButton
+                }
             }
             
             // Loading state
@@ -269,6 +286,63 @@ struct StorageSettingsView: View {
                 self.error = String(format: NSLocalizedString("Failed to calculate storage: %@", comment: "Error message when storage calculation fails"), error.localizedDescription)
                 self.isLoading = false
             }
+        }
+    }
+    
+    /// Clear cache button action with loading state management
+    func clear_cache_button_action() {
+        cache_clearing_state = .clearing
+        
+        let group = DispatchGroup()
+        
+        group.enter()
+        DamusCacheManager.shared.clear_cache(damus_state: self.damus_state, completion: {
+            group.leave()
+        })
+        
+        // Make clear cache button take at least a second or so to avoid issues with labor perception bias (https://growth.design/case-studies/labor-perception-bias)
+        group.enter()
+        DispatchQueue.main.asyncAfter(deadline: .now() + MINIMUM_CACHE_CLEAR_BUTTON_DELAY_IN_SECONDS) {
+            group.leave()
+        }
+        
+        group.notify(queue: .main) {
+            cache_clearing_state = .cleared
+            
+            // Refresh storage stats after clearing cache
+            loadStorageStats()
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + CACHE_CLEAR_BUTTON_RESET_TIME_IN_SECONDS) {
+                cache_clearing_state = .not_cleared
+            }
+        }
+    }
+    
+    /// Clear cache button view with confirmation dialog
+    var ClearCacheButton: some View {
+        Button(action: { self.showing_cache_clear_alert = true }, label: {
+            HStack(spacing: 6) {
+                switch cache_clearing_state {
+                    case .not_cleared:
+                        Text("Clear Cache", comment: "Button to clear image cache.")
+                    case .clearing:
+                        ProgressView()
+                        Text("Clearing Cache", comment: "Loading message indicating that the cache is being cleared.")
+                    case .cleared:
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                        Text("Cache has been cleared", comment: "Message indicating that the cache was successfully cleared.")
+                }
+            }
+        })
+        .disabled(self.cache_clearing_state != .not_cleared)
+        .alert(isPresented: $showing_cache_clear_alert) {
+            Alert(title: Text("Confirmation", comment: "Confirmation dialog title"),
+                  message: Text("Are you sure you want to clear the cache? This will free space, but images may take longer to load again.", comment: "Message explaining what it means to clear the cache, asking if user wants to proceed."),
+                  primaryButton: .default(Text("OK", comment: "Button label indicating user wants to proceed.")) {
+                      self.clear_cache_button_action()
+                  },
+                  secondaryButton: .cancel())
         }
     }
     
