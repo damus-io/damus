@@ -46,6 +46,8 @@ struct StorageSettingsView: View {
     @State private var isPreparingExport: Bool = false
     @State fileprivate var cache_clearing_state: CacheClearingState = .not_cleared
     @State var showing_cache_clear_alert: Bool = false
+    @State private var showing_compact_db_alert: Bool = false
+    @State private var showing_compaction_requested_alert: Bool = false
     
     /// Storage categories with cumulative ranges for angle selection (iOS 17+)
     private var categoryRanges: [(category: String, range: Range<Double>)] {
@@ -172,6 +174,15 @@ struct StorageSettingsView: View {
                 Section {
                     self.ClearCacheButton
                 }
+                
+                // Compact Database Section
+                Section {
+                    self.CompactDatabaseButton
+                } header: {
+                    Text("Database Compaction", comment: "Header for database compaction section")
+                } footer: {
+                    Text("Compacts your database to keep only your own posts and all profiles. This can significantly reduce storage usage but will remove other people's posts from your local database. Your data will remain on relays.", comment: "Footer explaining database compaction feature")
+                }
             }
             
             // Loading state
@@ -213,6 +224,17 @@ struct StorageSettingsView: View {
             if let exportText = exportText {
                 TextShareSheet(activityItems: [exportText])
             }
+        }
+        .alert(isPresented: $showing_compaction_requested_alert) {
+            Alert(
+                title: Text("Compaction Requested", comment: "Alert title when compaction is requested"),
+                message: Text("The database will be compacted on next app launch. Please restart the app now.", comment: "Alert message explaining app needs to restart for compaction"),
+                primaryButton: .default(Text("Restart Now", comment: "Button to restart the app")) {
+                    // Request app restart
+                    exit(0)
+                },
+                secondaryButton: .cancel(Text("Later", comment: "Button to defer action"))
+            )
         }
         .refreshable {
             await loadStorageStatsAsync()
@@ -343,6 +365,38 @@ struct StorageSettingsView: View {
                       self.clear_cache_button_action()
                   },
                   secondaryButton: .cancel())
+        }
+    }
+    
+    /// Compact database button view with confirmation dialog
+    var CompactDatabaseButton: some View {
+        Button(action: { self.showing_compact_db_alert = true }, label: {
+            HStack(spacing: 6) {
+                Image(systemName: "arrow.down.circle")
+                Text("Compact Database", comment: "Button to compact the database to save storage space.")
+            }
+        })
+        .alert(isPresented: $showing_compact_db_alert) {
+            Alert(
+                title: Text("Compact Database?", comment: "Confirmation dialog title for database compaction"),
+                message: Text("This will create a new compact database containing only your posts and all profiles. Other people's posts will be removed from your local database but remain on relays. The app will restart when complete. This may take a few minutes.", comment: "Explanation of database compaction process"),
+                primaryButton: .default(Text("Compact", comment: "Button label to proceed with database compaction")) {
+                    self.compact_database_action()
+                },
+                secondaryButton: .cancel()
+            )
+        }
+    }
+    
+    /// Request database compaction
+    func compact_database_action() {
+        Task {
+            await damus_state.compactionManager.requestCompaction()
+            
+            // Show alert that app will restart
+            await MainActor.run {
+                showing_compaction_requested_alert = true
+            }
         }
     }
     
