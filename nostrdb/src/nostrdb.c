@@ -6093,7 +6093,6 @@ int ndb_compact(struct ndb *ndb, const char *output_path,
 	MDB_val k, v;
 	MDB_envinfo info;
 	struct ndb_txn src_txn, dst_txn;
-	secp256k1_context *secp;
 	size_t scratch_size;
 	unsigned char *scratch;
 	int count_profiles, count_notes;
@@ -6137,8 +6136,6 @@ int ndb_compact(struct ndb *ndb, const char *output_path,
 	dst_txn.lmdb = &dst_lmdb;
 	dst_txn.mdb_txn = dst_mdb_txn;
 
-	secp = secp256k1_context_create(SECP256K1_CONTEXT_NONE);
-
 	// Phase 1: Copy all profiles
 	count_profiles = 0;
 	if ((rc = mdb_cursor_open(src_mdb_txn, ndb->lmdb.dbs[NDB_DB_PROFILE], &cur))) {
@@ -6165,11 +6162,11 @@ int ndb_compact(struct ndb *ndb, const char *output_path,
 			continue;
 
 		// note data is stable in source mmap for duration of read txn
-		ndb_writer_note_init(&profile.note, note, note_len, NULL, 0);
+		ndb_writer_note_init(&profile.note, note, note_len, NULL);
 
-		if (ndb_write_note_and_profile(secp, &dst_txn, &profile,
+		if (ndb_write_note_and_profile(&dst_txn, &profile,
 					       scratch, scratch_size,
-					       NDB_FLAG_NO_STATS, NULL))
+					       NDB_FLAG_NO_STATS))
 		{
 			count_profiles++;
 		}
@@ -6203,11 +6200,11 @@ int ndb_compact(struct ndb *ndb, const char *output_path,
 			continue;
 
 		// note data is stable in source mmap for duration of read txn
-		ndb_writer_note_init(&writer_note, note, v.mv_size, NULL, 0);
+		ndb_writer_note_init(&writer_note, note, v.mv_size, NULL);
 
-		if (ndb_write_note(secp, &dst_txn, &writer_note,
+		if (ndb_write_note(&dst_txn, &writer_note,
 				   scratch, scratch_size,
-				   NDB_FLAG_NO_STATS, NULL))
+				   NDB_FLAG_NO_STATS))
 		{
 			count_notes++;
 		}
@@ -6244,7 +6241,6 @@ cleanup_txns:
 	if (dst_mdb_txn)
 		mdb_txn_abort(dst_mdb_txn);
 	mdb_txn_abort(src_mdb_txn);
-	secp256k1_context_destroy(secp);
 
 cleanup_env:
 	mdb_env_close(dst_lmdb.env);
