@@ -325,6 +325,47 @@ class Ndb {
         })
     }
     
+    /// Compacts the database by copying only profiles and notes from specified pubkeys
+    ///
+    /// Creates a new database at `outputPath` containing:
+    /// - All profiles (kind 0 notes)
+    /// - Notes authored by pubkeys in `ownPubkeys` array
+    /// - Profile last-fetch metadata
+    ///
+    /// - Parameters:
+    ///   - outputPath: Destination path for compacted database
+    ///   - ownPubkeys: Array of 32-byte public keys whose notes should be retained
+    /// - Throws: `CompactError.failed` if compaction operation fails
+    func compact(outputPath: String, ownPubkeys: [[UInt8]]) throws {
+        enum CompactError: Error {
+            case failed
+        }
+        
+        guard !ownPubkeys.isEmpty else {
+            throw CompactError.failed
+        }
+        
+        // Validate all pubkeys are 32 bytes
+        guard ownPubkeys.allSatisfy({ $0.count == 32 }) else {
+            throw CompactError.failed
+        }
+        
+        try withNdb({
+            try outputPath.withCString({ pathCString in
+                // Convert [[UInt8]] to contiguous memory that C can read
+                let flatPubkeys = ownPubkeys.flatMap { $0 }
+                let rc = flatPubkeys.withUnsafeBytes { bufferPtr in
+                    let baseAddress = bufferPtr.baseAddress!.assumingMemoryBound(to: (UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8).self)
+                    return ndb_compact(self.ndb.ndb, pathCString, baseAddress, Int32(ownPubkeys.count))
+                }
+                
+                guard rc == 1 else {
+                    throw CompactError.failed
+                }
+            })
+        })
+    }
+    
     // MARK: Thread safety mechanisms
     // Use these for all externally accessible methods that interact with the nostrdb database to prevent race conditions with app lifecycle events (i.e. NostrDB opening and closing)
     
