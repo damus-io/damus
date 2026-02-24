@@ -77,6 +77,12 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     var state: DamusState? = nil
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        // Check and swap database if compaction was requested
+        let didSwap = DatabaseCompactionManager.swapDatabaseIfReady()
+        if didSwap {
+            Log.info("Database was swapped with compacted version", for: .storage)
+        }
+        
         UNUserNotificationCenter.current().delegate = self
         SKPaymentQueue.default().add(StoreObserver.standard)
         registerNotificationCategories()

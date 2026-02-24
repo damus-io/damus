@@ -37,6 +37,82 @@ actor DatabaseCompactionManager {
         self.ndb = ndb
     }
     
+    // MARK: - Static Startup Methods
+    
+    /// Check if compaction was requested and swap the database if ready.
+    ///
+    /// This should be called at app startup before initializing the main database.
+    /// If a compacted database is ready, this method will atomically replace the
+    /// main database with the compacted version.
+    ///
+    /// - Returns: `true` if a database swap occurred, `false` otherwise
+    static func swapDatabaseIfReady() -> Bool {
+        guard UserDefaults.standard.bool(forKey: compactionRequestedKey) else {
+            return false
+        }
+        
+        guard let compactedPath = UserDefaults.standard.string(forKey: compactedDatabasePathKey) else {
+            Log.info("Compaction requested but no compacted database path found", for: .storage)
+            UserDefaults.standard.removeObject(forKey: compactionRequestedKey)
+            return false
+        }
+        
+        guard let mainDbPath = Ndb.db_path else {
+            Log.error("Could not determine main database path", for: .storage)
+            return false
+        }
+        
+        let fileManager = FileManager.default
+        
+        // Verify compacted database exists
+        guard fileManager.fileExists(atPath: compactedPath) else {
+            Log.info("Compacted database not found at %{public}@", for: .storage, compactedPath)
+            UserDefaults.standard.removeObject(forKey: compactionRequestedKey)
+            UserDefaults.standard.removeObject(forKey: compactedDatabasePathKey)
+            return false
+        }
+        
+        Log.info("Swapping database: %{public}@ -> %{public}@", for: .storage, compactedPath, mainDbPath)
+        
+        do {
+            // Backup old database before replacing
+            let backupPath = mainDbPath + ".backup"
+            if fileManager.fileExists(atPath: backupPath) {
+                try fileManager.removeItem(atPath: backupPath)
+            }
+            
+            // Move old database to backup
+            if fileManager.fileExists(atPath: mainDbPath) {
+                try fileManager.moveItem(atPath: mainDbPath, toPath: backupPath)
+                Log.debug("Backed up old database to %{public}@", for: .storage, backupPath)
+            }
+            
+            // Move compacted database to main location
+            try fileManager.moveItem(atPath: compactedPath, toPath: mainDbPath)
+            Log.info("Database swap completed successfully", for: .storage)
+            
+            // Clean up backup after successful swap
+            try? fileManager.removeItem(atPath: backupPath)
+            
+            // Clear the compaction request flags
+            UserDefaults.standard.removeObject(forKey: compactionRequestedKey)
+            UserDefaults.standard.removeObject(forKey: compactedDatabasePathKey)
+            
+            return true
+        } catch {
+            Log.error("Failed to swap database: %{public}@", for: .storage, error.localizedDescription)
+            
+            // Attempt to restore backup if swap failed
+            let backupPath = mainDbPath + ".backup"
+            if fileManager.fileExists(atPath: backupPath) && !fileManager.fileExists(atPath: mainDbPath) {
+                try? fileManager.moveItem(atPath: backupPath, toPath: mainDbPath)
+                Log.info("Restored database from backup after failed swap", for: .storage)
+            }
+            
+            return false
+        }
+    }
+    
     // MARK: - Public API
     
     /// Request a database compaction to be performed on next app launch.
