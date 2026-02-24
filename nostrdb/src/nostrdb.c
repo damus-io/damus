@@ -6072,6 +6072,187 @@ int ndb_snapshot(struct ndb *ndb, const char *path, unsigned int flags) {
     return mdb_env_copy2(ndb->lmdb.env, path, flags);
 }
 
+static int ndb_compact_is_own_pubkey(const unsigned char *pubkey,
+				     const unsigned char (*own_pubkeys)[32],
+				     int num_pubkeys)
+{
+	for (int i = 0; i < num_pubkeys; i++) {
+		if (memcmp(pubkey, own_pubkeys[i], 32) == 0)
+			return 1;
+	}
+	return 0;
+}
+
+int ndb_compact(struct ndb *ndb, const char *output_path,
+		const unsigned char (*own_pubkeys)[32], int num_pubkeys)
+{
+	int rc, ret;
+	struct ndb_lmdb dst_lmdb;
+	MDB_txn *src_mdb_txn, *dst_mdb_txn;
+	MDB_cursor *cur;
+	MDB_val k, v;
+	MDB_envinfo info;
+	struct ndb_txn src_txn, dst_txn;
+	secp256k1_context *secp;
+	size_t scratch_size;
+	unsigned char *scratch;
+	int count_profiles, count_notes;
+
+	ret = 0;
+	scratch_size = 2 * 1024 * 1024;
+	scratch = malloc(scratch_size);
+	if (!scratch) {
+		fprintf(stderr, "ndb_compact: failed to allocate scratch buffer\n");
+		return 0;
+	}
+
+	// get source mapsize
+	if ((rc = mdb_env_info(ndb->lmdb.env, &info))) {
+		fprintf(stderr, "ndb_compact: mdb_env_info failed: %s\n", mdb_strerror(rc));
+		free(scratch);
+		return 0;
+	}
+
+	// create destination lmdb environment
+	if (!ndb_init_lmdb(output_path, &dst_lmdb, info.me_mapsize)) {
+		fprintf(stderr, "ndb_compact: failed to init destination lmdb\n");
+		free(scratch);
+		return 0;
+	}
+
+	// open read txn on source
+	if ((rc = mdb_txn_begin(ndb->lmdb.env, NULL, MDB_RDONLY, &src_mdb_txn))) {
+		fprintf(stderr, "ndb_compact: src mdb_txn_begin failed: %s\n", mdb_strerror(rc));
+		goto cleanup_env;
+	}
+	src_txn.lmdb = &ndb->lmdb;
+	src_txn.mdb_txn = src_mdb_txn;
+
+	// open write txn on destination
+	if ((rc = mdb_txn_begin(dst_lmdb.env, NULL, 0, &dst_mdb_txn))) {
+		fprintf(stderr, "ndb_compact: dst mdb_txn_begin failed: %s\n", mdb_strerror(rc));
+		mdb_txn_abort(src_mdb_txn);
+		goto cleanup_env;
+	}
+	dst_txn.lmdb = &dst_lmdb;
+	dst_txn.mdb_txn = dst_mdb_txn;
+
+	secp = secp256k1_context_create(SECP256K1_CONTEXT_NONE);
+
+	// Phase 1: Copy all profiles
+	count_profiles = 0;
+	if ((rc = mdb_cursor_open(src_mdb_txn, ndb->lmdb.dbs[NDB_DB_PROFILE], &cur))) {
+		fprintf(stderr, "ndb_compact: profile cursor open failed: %s\n", mdb_strerror(rc));
+		goto cleanup_txns;
+	}
+
+	while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
+		NdbProfileRecord_table_t record;
+		uint64_t note_key;
+		struct ndb_note *note;
+		size_t note_len;
+		struct ndb_writer_profile profile;
+
+		record = NdbProfileRecord_as_root(v.mv_data);
+		note_key = NdbProfileRecord_note_key(record);
+		note = ndb_get_note_by_key(&src_txn, note_key, &note_len);
+
+		if (note == NULL)
+			continue;
+
+		// re-process profile from JSON content
+		if (!ndb_process_profile_note(note, &profile.record))
+			continue;
+
+		// note data is stable in source mmap for duration of read txn
+		ndb_writer_note_init(&profile.note, note, note_len, NULL, 0);
+
+		if (ndb_write_note_and_profile(secp, &dst_txn, &profile,
+					       scratch, scratch_size,
+					       NDB_FLAG_NO_STATS, NULL))
+		{
+			count_profiles++;
+		}
+
+		ndb_profile_record_builder_free(&profile.record);
+	}
+	mdb_cursor_close(cur);
+
+	fprintf(stderr, "ndb_compact: copied %d profiles\n", count_profiles);
+
+	// Phase 2: Copy own notes (skip kind 0, already handled above)
+	count_notes = 0;
+	if ((rc = mdb_cursor_open(src_mdb_txn, ndb->lmdb.dbs[NDB_DB_NOTE], &cur))) {
+		fprintf(stderr, "ndb_compact: note cursor open failed: %s\n", mdb_strerror(rc));
+		goto cleanup_txns;
+	}
+
+	while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
+		struct ndb_note *note;
+		struct ndb_writer_note writer_note;
+
+		note = v.mv_data;
+
+		// skip kind 0 (profiles already handled)
+		if (ndb_note_kind(note) == 0)
+			continue;
+
+		// only keep notes from our own pubkeys
+		if (!ndb_compact_is_own_pubkey(ndb_note_pubkey(note),
+					       own_pubkeys, num_pubkeys))
+			continue;
+
+		// note data is stable in source mmap for duration of read txn
+		ndb_writer_note_init(&writer_note, note, v.mv_size, NULL, 0);
+
+		if (ndb_write_note(secp, &dst_txn, &writer_note,
+				   scratch, scratch_size,
+				   NDB_FLAG_NO_STATS, NULL))
+		{
+			count_notes++;
+		}
+	}
+	mdb_cursor_close(cur);
+
+	fprintf(stderr, "ndb_compact: copied %d own notes\n", count_notes);
+
+	// Phase 3: Copy profile_last_fetch entries
+	if ((rc = mdb_cursor_open(src_mdb_txn, ndb->lmdb.dbs[NDB_DB_PROFILE_LAST_FETCH], &cur))) {
+		fprintf(stderr, "ndb_compact: profile_last_fetch cursor open failed: %s\n", mdb_strerror(rc));
+		goto cleanup_txns;
+	}
+
+	while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
+		mdb_put(dst_mdb_txn, dst_lmdb.dbs[NDB_DB_PROFILE_LAST_FETCH], &k, &v, 0);
+	}
+	mdb_cursor_close(cur);
+
+	// Write database version
+	ndb_write_version(&dst_txn, sizeof(MIGRATIONS) / sizeof(MIGRATIONS[0]));
+
+	// Commit destination
+	if ((rc = mdb_txn_commit(dst_mdb_txn))) {
+		fprintf(stderr, "ndb_compact: dst commit failed: %s\n", mdb_strerror(rc));
+		dst_mdb_txn = NULL;
+		goto cleanup_txns;
+	}
+	dst_mdb_txn = NULL;
+
+	ret = 1;
+
+cleanup_txns:
+	if (dst_mdb_txn)
+		mdb_txn_abort(dst_mdb_txn);
+	mdb_txn_abort(src_mdb_txn);
+	secp256k1_context_destroy(secp);
+
+cleanup_env:
+	mdb_env_close(dst_lmdb.env);
+	free(scratch);
+
+	return ret;
+}
+
 void ndb_destroy(struct ndb *ndb)
 {
 	if (ndb == NULL)
