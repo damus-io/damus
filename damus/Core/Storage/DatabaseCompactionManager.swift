@@ -27,18 +27,14 @@ actor DatabaseCompactionManager {
     private static let compactedDatabasePathKey = "compactedDatabasePath"
     
     private let ndb: Ndb
-    private let damusState: DamusState
     
     /// Current compaction task, if one is running
     private var compactionTask: Task<Void, Error>? = nil
     
     /// Initialize the compaction manager
-    /// - Parameters:
-    ///   - ndb: The NostrDB instance to compact
-    ///   - damusState: The app state containing user keypairs
-    init(ndb: Ndb, damusState: DamusState) {
+    /// - Parameter ndb: The NostrDB instance to compact
+    init(ndb: Ndb) {
         self.ndb = ndb
-        self.damusState = damusState
     }
     
     // MARK: - Public API
@@ -73,8 +69,9 @@ actor DatabaseCompactionManager {
     /// This performs the compaction in the background and stores the path
     /// to the compacted database in UserDefaults when complete.
     ///
+    /// - Parameter ownPubkeys: Array of 32-byte public keys whose notes should be retained
     /// - Throws: `CompactionError` if compaction fails
-    func performCompaction() async throws {
+    func performCompaction(ownPubkeys: [[UInt8]]) async throws {
         guard !isCompacting() else {
             Log.info("Compaction already in progress", for: .storage)
             return
@@ -83,7 +80,7 @@ actor DatabaseCompactionManager {
         Log.info("Starting database compaction", for: .storage)
         
         compactionTask = Task {
-            try await self.performCompactionInternal()
+            try await self.performCompactionInternal(ownPubkeys: ownPubkeys)
         }
         
         try await compactionTask?.value
@@ -119,16 +116,21 @@ actor DatabaseCompactionManager {
     // MARK: - Internal Implementation
     
     /// Internal compaction logic.
-    private func performCompactionInternal() async throws {
+    /// - Parameter ownPubkeys: Array of 32-byte public keys whose notes should be retained
+    private func performCompactionInternal(ownPubkeys: [[UInt8]]) async throws {
         let fileManager = FileManager.default
         
         // Create a temporary directory for the compacted database
         let tempDir = FileManager.default.temporaryDirectory
         let tempCompactPath = tempDir.appendingPathComponent("compacted_db_\(UUID().uuidString)")
         
+        var shouldCleanup = true
+        
         // Ensure cleanup on error
         defer {
-            try? fileManager.removeItem(atPath: tempCompactPath.path)
+            if shouldCleanup {
+                try? fileManager.removeItem(atPath: tempCompactPath.path)
+            }
         }
         
         do {
@@ -139,18 +141,15 @@ actor DatabaseCompactionManager {
         
         Log.debug("Created temporary compaction directory at %{public}@", for: .storage, tempCompactPath.path)
         
-        // Collect all user pubkeys
-        let pubkeys = collectUserPubkeys()
-        
-        guard !pubkeys.isEmpty else {
+        guard !ownPubkeys.isEmpty else {
             throw CompactionError.noPubkeysAvailable
         }
         
-        Log.info("Compacting database for %d pubkey(s)", for: .storage, pubkeys.count)
+        Log.info("Compacting database for %d pubkey(s)", for: .storage, ownPubkeys.count)
         
         // Perform the compaction using ndb_compact
         do {
-            try ndb.compact(outputPath: tempCompactPath.path, ownPubkeys: pubkeys)
+            try ndb.compact(outputPath: tempCompactPath.path, ownPubkeys: ownPubkeys)
         } catch {
             throw CompactionError.compactionFailed(error)
         }
@@ -160,40 +159,8 @@ actor DatabaseCompactionManager {
         // Store the compacted database path for swap on next launch
         UserDefaults.standard.set(tempCompactPath.path, forKey: Self.compactedDatabasePathKey)
         
-        // Don't delete the temp dir in defer since we're keeping it for swap
-        fileManager.stopAccessingSecurityScopedResource()
-    }
-    
-    /// Collect all user public keys from the app state.
-    ///
-    /// - Returns: Array of 32-byte public keys
-    private func collectUserPubkeys() -> [[UInt8]] {
-        var pubkeys: [[UInt8]] = []
-        
-        // Add main account pubkey if available
-        if let mainPubkey = damusState.keypair.pubkey_bytes {
-            pubkeys.append(Array(mainPubkey))
-        }
-        
-        // Add all logged-in account pubkeys
-        for keypair in damusState.login_manager.getKeypairs() {
-            if let pubkeyBytes = keypair.pubkey_bytes {
-                pubkeys.append(Array(pubkeyBytes))
-            }
-        }
-        
-        // Deduplicate pubkeys
-        var uniquePubkeys: [[UInt8]] = []
-        var seenPubkeys: Set<[UInt8]> = []
-        
-        for pubkey in pubkeys {
-            if !seenPubkeys.contains(pubkey) {
-                seenPubkeys.insert(pubkey)
-                uniquePubkeys.append(pubkey)
-            }
-        }
-        
-        return uniquePubkeys
+        // Don't delete the temp dir on success since we're keeping it for swap
+        shouldCleanup = false
     }
 }
 
