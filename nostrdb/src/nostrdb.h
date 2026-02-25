@@ -506,6 +506,12 @@ int ndb_db_version(struct ndb_txn *txn);
 /// See `mdb_env_copy2` header for documentation on `path` and `flags`
 int ndb_snapshot(struct ndb *ndb, const char *path, unsigned int flags);
 
+/// Compact the database, copying only selected data to a new database at
+/// `output_path`. All profiles are kept. Only notes authored by pubkeys in
+/// the `own_pubkeys` array are kept. Returns 1 on success, 0 on failure.
+int ndb_compact(struct ndb *ndb, const char *output_path,
+		const unsigned char (*own_pubkeys)[32], int num_pubkeys);
+
 // NOTE PROCESSING
 int ndb_process_event(struct ndb *, const char *json, int len);
 void ndb_ingest_meta_init(struct ndb_ingest_meta *meta, unsigned client, const char *relay);

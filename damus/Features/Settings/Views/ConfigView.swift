@@ -32,6 +32,7 @@ struct ConfigView: View {
     private let translationTitle = NSLocalizedString("Translation", comment: "Section header for text and appearance settings")
     private let reactionsTitle = NSLocalizedString("Reactions", comment: "Section header for reactions settings")
     private let developerTitle = NSLocalizedString("Developer", comment: "Section header for developer settings")
+    private let storageTitle = NSLocalizedString("Storage", comment: "Section header for storage usage statistics")
     private let firstAidTitle = NSLocalizedString("First Aid", comment: "Section header for first aid tools and settings")
     private let signOutTitle = NSLocalizedString("Sign out", comment: "Sidebar menu label to sign out of the account.")
     private let deleteAccountTitle = NSLocalizedString("Delete Account", comment: "Button to delete the user's account.")
@@ -102,6 +103,12 @@ struct ConfigView: View {
                     if showSettingsButton(title: developerTitle){
                         NavigationLink(value: Route.DeveloperSettings(settings: settings)){
                             IconLabel(developerTitle,img_name:"magic-stick2.fill",color:DamusColors.adaptableBlack)
+                        }
+                    }
+                    // Storage
+                    if showSettingsButton(title: storageTitle){
+                        NavigationLink(value: Route.StorageSettings(settings: settings)){
+                            IconLabel(storageTitle, img_name: "disk", color: .gray)
                         }
                     }
                     //First Aid

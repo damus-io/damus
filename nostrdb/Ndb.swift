@@ -84,8 +84,8 @@ class Ndb {
         return remove_file_prefix(containerURL.appendingPathComponent("snapshot", conformingTo: .directory).absoluteString)
     }
     
-    static private let main_db_file_name: String = "data.mdb"
-    static private let db_files: [String] = ["data.mdb", "lock.mdb"]
+    static let main_db_file_name: String = "data.mdb"
+    static let db_files: [String] = ["data.mdb", "lock.mdb"]
 
     static var empty: Ndb {
         print("txn: NOSTRDB EMPTY")
@@ -321,6 +321,58 @@ class Ndb {
                 guard rc == 0 else {
                     throw SnapshotError.mdbOperationError(errno: rc)
                 }
+            })
+        })
+    }
+    
+    /// Compacts the database by copying only profiles and notes from specified pubkeys
+    ///
+    /// Creates a new database at `outputPath` containing:
+    /// - All profiles (kind 0 notes)
+    /// - Notes authored by pubkeys in `ownPubkeys` array
+    /// - Profile last-fetch metadata
+    ///
+    /// - Parameters:
+    ///   - outputPath: Destination path for compacted database
+    ///   - ownPubkeys: Array of 32-byte public keys whose notes should be retained
+    /// - Throws: `CompactError.failed` if compaction operation fails
+    func compact(outputPath: String, ownPubkeys: [[UInt8]]) throws {
+        enum CompactError: Error {
+            case failed
+            case invalidPubkeyCount
+            case invalidPubkeySize
+        }
+        
+        guard !ownPubkeys.isEmpty else {
+            print("ndb_compact: no pubkeys provided")
+            throw CompactError.invalidPubkeyCount
+        }
+        
+        // Validate all pubkeys are 32 bytes
+        guard ownPubkeys.allSatisfy({ $0.count == 32 }) else {
+            print("ndb_compact: invalid pubkey size")
+            throw CompactError.invalidPubkeySize
+        }
+        
+        print("ndb_compact: starting compaction to \(outputPath) with \(ownPubkeys.count) pubkey(s)")
+        
+        try withNdb({
+            try outputPath.withCString({ pathCString in
+                // Convert [[UInt8]] to contiguous memory that C can read
+                let flatPubkeys = ownPubkeys.flatMap { $0 }
+                let rc = flatPubkeys.withUnsafeBytes { bufferPtr in
+                    let baseAddress = bufferPtr.baseAddress!.assumingMemoryBound(to: (UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8).self)
+                    return ndb_compact(self.ndb.ndb, pathCString, baseAddress, Int32(ownPubkeys.count))
+                }
+                
+                print("ndb_compact: C function returned \(rc)")
+                
+                guard rc == 1 else {
+                    print("ndb_compact: failed with return code \(rc)")
+                    throw CompactError.failed
+                }
+                
+                print("ndb_compact: completed successfully")
             })
         })
     }
@@ -1179,4 +1231,121 @@ func getDebugCheckedRoot<T: FlatBufferObject>(byteBuffer: inout ByteBuffer) thro
 
 func remove_file_prefix(_ str: String) -> String {
     return str.replacingOccurrences(of: "file://", with: "")
+}
+
+// MARK: - NostrDB Storage Statistics
+
+/// Per-database storage statistics from NostrDB
+struct NdbDatabaseStats: Hashable {
+    /// Human-readable database name (e.g., "Notes (NDB_DB_NOTE)", "Note ID Index")
+    let database: String
+    
+    /// Total key bytes for this database
+    let keySize: UInt64
+    
+    /// Total value bytes for this database
+    let valueSize: UInt64
+    
+    /// Total storage used by this database (keys + values)
+    var totalSize: UInt64 {
+        return keySize + valueSize
+    }
+}
+
+/// Detailed NostrDB storage statistics with per-database breakdown
+struct NdbStats: Hashable {
+    /// Per-database breakdown of storage (notes, profiles, indices, etc.)
+    let databaseStats: [NdbDatabaseStats]
+    
+    /// Total storage across all databases
+    var totalSize: UInt64 {
+        return databaseStats.reduce(0) { $0 + $1.totalSize }
+    }
+}
+
+extension Ndb {
+    /// Get detailed storage statistics for this database
+    ///
+    /// This method calls the C `ndb_stat` function to retrieve per-database
+    /// storage statistics from the underlying LMDB storage. Each database
+    /// (notes, profiles, indices, etc.) is reported with its key and value sizes.
+    ///
+    /// Any unaccounted space between the sum of database stats and the physical
+    /// file size is reported as "Other Data".
+    ///
+    /// - Parameter physicalSize: The physical file size in bytes from the filesystem
+    /// - Returns: NdbStats with detailed per-database breakdown, or nil if stat collection fails
+    func getStats(physicalSize: UInt64) -> NdbStats? {
+        guard !is_closed else { return nil }
+        
+        var stat = ndb_stat()
+        
+        // Call C ndb_stat function
+        let result = ndb_stat(self.ndb.ndb, &stat)
+        guard result != 0 else {
+            Log.error("ndb_stat failed", for: .storage)
+            return nil
+        }
+        
+        // Database names matching ndb_dbs enum order
+        let dbNames = [
+            "Notes (NDB_DB_NOTE)",
+            "Metadata (NDB_DB_META)",
+            "Profiles (NDB_DB_PROFILE)",
+            "Note ID Index",
+            "Profile Key Index",
+            "NostrDB Metadata",
+            "Profile Search Index",
+            "Profile Last Fetch",
+            "Note Kind Index",
+            "Note Text Index",
+            "Note Blocks",
+            "Note Tags Index",
+            "Note Pubkey Index",
+            "Note Pubkey+Kind Index",
+            "Note Relay+Kind Index",
+            "Note Relays"
+        ]
+        
+        var databaseStats: [NdbDatabaseStats] = []
+        var accountedSize: UInt64 = 0
+        
+        // Extract per-database stats from stat.dbs array
+        withUnsafePointer(to: &stat.dbs) { dbsPtr in
+            let dbsBuffer = UnsafeRawPointer(dbsPtr).assumingMemoryBound(to: ndb_stat_counts.self)
+            
+            for dbIndex in 0..<Int(NDB_DBS.rawValue) {
+                let dbStat = dbsBuffer[dbIndex]
+                
+                // Skip databases with no data
+                guard dbStat.key_size > 0 || dbStat.value_size > 0 else { continue }
+                
+                // Get database name (use index as fallback if name array is too short)
+                let dbName = dbIndex < dbNames.count ? dbNames[dbIndex] : "Database \(dbIndex)"
+                
+                let dbStats = NdbDatabaseStats(
+                    database: dbName,
+                    keySize: UInt64(dbStat.key_size),
+                    valueSize: UInt64(dbStat.value_size)
+                )
+                databaseStats.append(dbStats)
+                accountedSize += dbStats.totalSize
+            }
+        }
+        
+        // Add "Other Data" for any unaccounted space
+        if physicalSize > accountedSize {
+            let otherSize = physicalSize - accountedSize
+            databaseStats.append(NdbDatabaseStats(
+                database: "Other Data",
+                keySize: 0,
+                valueSize: otherSize
+            ))
+        }
+        
+        // Sort by total size descending to show largest databases first
+        databaseStats.sort { $0.totalSize > $1.totalSize }
+        
+        return NdbStats(databaseStats: databaseStats)
+    }
 }

@@ -40,6 +40,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
     let favicon_cache: FaviconCache
     private(set) var nostrNetwork: NostrNetworkManager
     var snapshotManager: DatabaseSnapshotManager
+    var compactionManager: DatabaseCompactionManager
 
     init(keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, contactCards: ContactCard, mutelist_manager: MutelistManager, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, replies: ReplyCounter, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: DamusVideoCoordinator, ndb: Ndb, purple: DamusPurple? = nil, quote_reposts: EventCounter, emoji_provider: EmojiProvider, favicon_cache: FaviconCache, addNdbToRelayPool: Bool = true) {
         self.keypair = keypair
@@ -79,6 +80,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
         self.nostrNetwork = nostrNetwork
         self.wallet.nostrNetwork = nostrNetwork
         self.snapshotManager = .init(ndb: ndb)
+        self.compactionManager = .init(ndb: ndb)
     }
     
     @MainActor
