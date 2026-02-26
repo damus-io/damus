@@ -12,7 +12,7 @@
 
 **Goal:** Produce a detailed, externally reviewable implementation plan that adapts the notedeck outbox architecture to iOS Damus's Swift/async-await paradigm, leveraging the substantial existing infrastructure.
 
-**NIPs reviewed:** 01, 05, 10, 11, 17, 19, 42, 51, 65, 66, 70.
+**NIPs reviewed:** 01, 10, 11, 17, 19, 42, 51, 65, 66, 70.
 
 ---
 
@@ -39,7 +39,6 @@
 | No CLOSED message handling | Can't retry auth-required subs or handle server-side termination | NIP-01, NIP-42 |
 | `Limitations` struct is minimal | Can't enforce max_subscriptions, max_message_length, etc. | NIP-11 |
 | No machine-readable prefix parsing on OK/CLOSED | Can't distinguish auth-required vs rate-limited vs blocked | NIP-01, NIP-42 |
-| No NIP-05 relay hint fallback | Missing bootstrap path when kind:10002 unavailable | NIP-05 |
 | No NIP-70 protected event awareness | Write path could fail silently on `["-"]` events without auth | NIP-70 |
 
 **Key insight:** The lookup path (single-event fetch with relay hints) already works end-to-end. What's missing is the **feed path** (multi-author timeline subscriptions routed per-author), the **write path** (publishing to tagged users' inboxes, split by event class), and **relay protocol compliance** (CLOSED handling, auth retry, limits enforcement).
@@ -88,13 +87,12 @@ App Layer (Damus/Columns)
 ## Proposed Architecture for iOS Damus
 
 ### Layer 1: OutboxRelayResolver (New)
-**Purpose:** Maintains a cache of relay preferences per pubkey from multiple sources: kind:10002 (NIP-65), kind:10050 (NIP-17 DM relays), NIP-05 hints, and kind:10006 (NIP-51 blocked relays as denylist).
+**Purpose:** Maintains a cache of relay preferences per pubkey from multiple sources: kind:10002 (NIP-65), kind:10050 (NIP-17 DM relays), and kind:10006 (NIP-51 blocked relays as denylist).
 
 ```
 Actor: OutboxRelayResolver
 ├── relayListCache: [Pubkey: NIP65.RelayList]         // kind:10002
 ├── dmRelayCache: [Pubkey: [RelayURL]]                // kind:10050
-├── nip05RelayCache: [Pubkey: [RelayURL]]             // from /.well-known/nostr.json
 ├── blockedRelays: Set<RelayURL>                       // kind:10006 for current user
 │
 ├── resolveWriteRelays(for: Pubkey) -> [RelayURL]     // where to fetch FROM a user (their 10002 write relays)
@@ -103,12 +101,11 @@ Actor: OutboxRelayResolver
 ├── resolveWriteRelays(for: [Pubkey]) -> [Pubkey: [RelayURL]]  // batch
 │
 ├── refreshFromNdb(ndb: Ndb, pubkeys: [Pubkey])       // query NostrDB for kind:10002 + kind:10050
-├── refreshFromNip05(pubkey: Pubkey, nip05: String)    // fetch /.well-known/nostr.json relay hints
 ├── loadBlockedRelays(ndb: Ndb, user: Pubkey)          // load kind:10006 for current user
 ├── invalidate(pubkey: Pubkey)                          // on new kind:10002/10050 event
 │
 ├── isBlocked(relay: RelayURL) -> Bool                  // check user's kind:10006 denylist
-└── fallbackRelays(for: Pubkey) -> [RelayURL]          // cascade: 10002 → NIP-05 → empty
+└── fallbackRelays(for: Pubkey) -> [RelayURL]          // cascade: 10002 → empty
 ```
 
 **File:** `damus/Core/Networking/OutboxRelayResolver.swift` (new)
@@ -120,20 +117,20 @@ Actor: OutboxRelayResolver
 - Lazily populates on first request per pubkey
 - Watches for new kind:10002 and kind:10050 events to invalidate
 - Returns empty array for unknown pubkeys (caller falls back to user's relays)
-- NIP-05 relay hints used as fallback when kind:10002 unavailable — helpful for first-run bootstrap
 - **All relay resolution filters through `isBlocked()` denylist** from kind:10006 (NIP-51)
 - NIP-10 pubkey hints on `e` tags used as outbox fallback: if relay hint fails, resolve via the pubkey's write relays
 
 ### Layer 2: OutboxRelaySelector (New)
-**Purpose:** Given a set of pubkeys and their relay preferences, computes a minimal relay set while respecting the user's blocked relay list.
+**Purpose:** Given a set of pubkeys and their relay preferences, computes a relay set using stochastic weighted scoring while respecting the user's blocked relay list.
 
-```
+```text
 struct OutboxRelaySelector
 ├── selectRelays(
 │     authorRelays: [Pubkey: [RelayURL]],
 │     userRelays: [RelayURL],           // user's own configured relays
 │     blockedRelays: Set<RelayURL>,     // kind:10006 denylist
-│     maxConnections: Int = 8           // configurable limit
+│     relayStats: RelayStatsDB?,        // persisted delivery stats (nil on first run)
+│     maxConnections: Int = 15          // configurable limit
 │   ) -> RelayPlan
 └── RelayPlan:
       ├── relayAssignments: [RelayURL: Set<Pubkey>]  // which authors on which relay
@@ -143,21 +140,35 @@ struct OutboxRelaySelector
 
 **File:** `damus/Core/Networking/OutboxRelaySelector.swift` (new)
 
-**Algorithm (adapted from hzrd149):**
+**Algorithm: Stochastic weighted scoring (adapted from Welshman/Coracle + Thompson Sampling):**
+
+Greedy set-cover (used by Gossip, Applesauce, Wisp) wins on-paper relay assignments but ranks 7th at actually retrieving events in [nostrability benchmarks](https://github.com/nostrability/outbox) — 84% mean recall at 7d, crashing to 16% at 1yr. Stochastic scoring gets 2.4× better recall at 1yr by spreading queries across relays that happen to retain history.
+
 1. **Filter:** Remove all `blockedRelays` from candidate relays
-2. For each pubkey, get their write relays, **hard-capped to `maxRelaysPerAuthor` (2)** after filtering
-3. Count relay popularity across all pubkeys
-4. Greedily: pick relay covering most uncovered pubkeys, assign them
+2. For each pubkey, get their write relays, **hard-capped to `maxRelaysPerAuthor` (3)** after filtering
+3. **Score each relay** using stochastic weighted scoring:
+   ```swift
+   // Stochastic scoring (Welshman-style + Thompson Sampling):
+   let weight = Double(authorsCovered)  // how many authors publish here
+   let exploration = relayStats != nil
+       ? sampleBeta(alpha: stats.delivered + 1, beta: stats.expected - stats.delivered + 1)
+       : Double.random(in: 0...1)  // uniform prior on first run
+   let score = (1.0 + log(weight)) * exploration
+   ```
+4. Sort relays by score descending, greedily assign uncovered pubkeys
 5. Repeat until all covered or `maxConnections` hit
 6. Remaining pubkeys → `fallbackAuthors` (query on user's own relays)
 
+**Why stochastic over greedy:** Greedy deterministically picks the same popular relays every time. Those relays often prune old events or silently drop writes. Stochastic scoring spreads queries across more relays over time, discovering which ones actually retain events. The `log(weight)` dampens hub bias (a relay with 100 authors scores ~5.6× vs 1 author, not 100×), and the random/Thompson factor provides anti-centralization for free (Gini 0.39–0.51 vs greedy's 0.77). See [benchmark data](https://github.com/nostrability/outbox#algorithm-quick-reference).
+
 **Design notes:**
-- Pure function, no state, easily testable
+- Pure function, no state beyond optional `relayStats`, easily testable
 - `maxConnections` prevents opening too many ephemeral connections on mobile
-- `maxRelaysPerAuthor` (hard cap = 2) prevents hostile kind:10002 lists with 30+ relays from inflating the plan
+- `maxRelaysPerAuthor` (hard cap = 3) prevents hostile kind:10002 lists with 30+ relays from inflating the plan
 - User's own relays always included (they serve as hubs)
 - **Blocked relays never dialed** — filtered at selection time
 - All budget constants defined in `OutboxBudget` (see Design Decision #8)
+- On first run (no `relayStats`), `sampleBeta` degrades to `random()` — equivalent to Welshman's deployed behavior, which already has the best archival recall among deployed clients
 
 ### Layer 3: Effective Relay Policy / NIP-11 (New)
 **Purpose:** Fetch, cache, and enforce full NIP-11 relay information. Not just `max_subscriptions` — the full effective policy that controls what the client can do with each relay.
@@ -181,13 +192,7 @@ Actor: RelayPolicyCache
 ├── effectiveLimit(relay: RelayURL, requestedLimit: Int?) -> Int  // clamp to max_limit
 ├── canWrite(relay: RelayURL) -> Bool                              // !restricted_writes || authenticated
 ├── needsAuth(relay: RelayURL) -> Bool                             // auth_required
-├── maxMessageBytes(relay: RelayURL) -> Int                        // for filter JSON size budgets
-│
-└── Subscription Slot Tracking (per relay):
-      ├── activeSubscriptions: [RelayURL: Int]
-      ├── acquireSlot(relay: RelayURL) -> Bool          // false if at max_subscriptions
-      ├── releaseSlot(relay: RelayURL)
-      └── queuedSubscriptions: [RelayURL: [(filters, continuation)]]  // QueuedTasks analog
+└── maxMessageBytes(relay: RelayURL) -> Int                        // for filter JSON size budgets
 ```
 
 **File:** `damus/Core/Networking/RelayPolicyCache.swift` (new)
@@ -250,7 +255,6 @@ Default Fallback Values (when fetch fails or field is null):
 These defaults are deliberately **conservative but permissive**: conservative for message size (don't overwhelm relay), permissive for access (don't self-restrict). The client will learn actual limits from CLOSED/OK responses at runtime even without NIP-11.
 
 **Integration points:**
-- `SubscriptionManager` checks `acquireSlot` before opening new subs. If at limit, queues the subscription. When a sub closes (`releaseSlot`), flushes the queue.
 - `outboxStream` respects `maxMessageBytes` when building per-relay filters (don't exceed relay's `max_message_length`)
 - `effectiveLimit` applied to all filters before sending (relay would silently clamp anyway, but this lets the client know the true limit)
 - Adaptive downshift: if relay responds with CLOSED/OK invalid/error indicating message/filter too large,
@@ -332,11 +336,11 @@ Extension on SubscriptionManager:
 │
 │   Implementation:
 │   1. Extract author pubkeys from filters
-│   2. Resolve relay preferences via OutboxRelayResolver (cascading: 10002 → NIP-05 → empty)
+│   2. Resolve relay preferences via OutboxRelayResolver (cascading: 10002 → empty)
 │   3. Compute relay plan via OutboxRelaySelector (respects blocked relays, maxConnections)
 │   4. For each relay in plan:
 │      a. Build author-scoped filter (original filter + only this relay's assigned authors)
-│      b. Check RelayPolicyCache: acquireSlot, clamp limit, check maxMessageBytes for filter JSON
+│      b. Check RelayPolicyCache: clamp limit, check maxMessageBytes for filter JSON
 │      c. Acquire ephemeral relay lease
 │      d. If relay needs auth (NIP-11 auth_required): trigger auth flow before subscribing
 │      e. Subscribe to that relay with scoped filter
@@ -344,7 +348,7 @@ Extension on SubscriptionManager:
 │   6. Merge all streams into single output
 │   7. On per-relay EOSE: apply since-optimization for future re-subscriptions
 │   8. On CLOSED with auth-required: trigger auth retry flow (Layer 4b)
-│   9. Release leases on cancellation/completion, releaseSlot on unsubscribe
+│   9. Release leases on cancellation/completion
 │
 │   NIP-10 fallback: When a relay hint on an `e` tag doesn't resolve the event,
 │   use the `<pubkey>` from the tag to look up that author's write relays and try those next.
@@ -359,6 +363,26 @@ Extension on SubscriptionManager:
 - Since-optimization applied per relay after EOSE (like notedeck `MetadataFilters.since_optimize`)
 - Filter JSON size checked against `maxMessageBytes` before sending
 
+#### 5b: Delivery Verification (Self-Healing)
+
+No analyzed client tracks "did I actually get this author's posts?" — [benchmarks show](https://github.com/nostrability/outbox) 85% assignment coverage can mean 16% event recall at 1yr. Add a lightweight delivery check:
+
+```text
+Delivery Check (periodic, background):
+├── Trigger: every 30 minutes, for a random sample of ~20 followed authors
+├── Method: query an indexer relay (relay.nostr.band) for each sampled author
+│   Compare event IDs against what outbox relays returned in the current session
+├── On gap detected (>5 missing events for an author):
+│   a. Add the indexer's best relay for that author as a fallback
+│   b. Update RelayStatsDB: penalize the outbox relay that missed events
+│   c. Log at info level for diagnostics
+├── Invisible to user: self-healing happens automatically (like email retry)
+├── Budget: max 3 indexer queries per check cycle (don't overload indexer)
+└── Feeds RelayStatsDB: Thompson Sampling learns from gaps, improving future selection
+```
+
+This closes the feedback loop: select relays → observe delivery → detect gaps → fix → learn.
+
 ### Layer 6: Write-Side Routing — Split by Event Class (Enhancement to PostBox/NostrNetworkManager)
 **Purpose:** Route published events to the right relays based on event type.
 
@@ -372,7 +396,7 @@ ROUTING POLICY BY EVENT CLASS:
 1. Normal notes (kind:1, etc.) with p-tags:
    a. Send to author's WRITE relays (from kind:10002)
    b. Send to each tagged user's READ relays (from kind:10002) — "inbox delivery"
-   c. Republish author's kind:10002 per dedup policy in Design Decision #10
+   c. Republish author's kind:10002 per dedup policy in Design Decision #9
       (to all target relays, deduplicated by per-relay sent-state)
 
 2. NIP-17 DM giftwrap (kind:1059):
@@ -388,7 +412,7 @@ ROUTING POLICY BY EVENT CLASS:
 
 4. Events without p-tags (kind:1 root posts, etc.):
    a. Send to author's WRITE relays only
-   b. Republish author's kind:10002 per dedup policy in Design Decision #10
+   b. Republish author's kind:10002 per dedup policy in Design Decision #9
 
 For ALL event classes:
    - Filter target relays through blockedRelays denylist (kind:10006)
@@ -420,18 +444,20 @@ Phase 0 (Protocol Compliance — unblocks everything):
 
 Phase 1 (Foundation):
   OutboxRelayResolver                                         ← no deps, start here
-       includes: kind:10002, kind:10050, kind:10006, NIP-05 fallback
+       includes: kind:10002, kind:10050, kind:10006
+  NIP-66 pre-filter (fetch kind:30166, classify relays)       ← no deps
   Tests: resolver + selector                                  ← depends on resolver, selector
 
 Phase 2 (Selection + Policy):
-  RelaySelector algorithm                                     ← depends on resolver
+  Stochastic relay selector + RelayStatsDB                    ← depends on resolver
   RelayPolicyCache (full NIP-11)                              ← depends on Phase 0
   Auth orchestrator + CLOSED retry                            ← depends on Phase 0
   Tests: CLOSED parsing + NIP-11 policy                       ← depends on CLOSED parsing, policy cache
 
 Phase 3 (Core Integration):
   Feed-level outbox routing                                   ← depends on resolver + selector + policy + auth
-  Tests: auth retry + feed routing                            ← depends on auth orchestrator, feed routing
+  Delivery verification (self-healing)                        ← depends on feed routing + RelayStatsDB
+  Tests: auth retry + feed routing + delivery check           ← depends on auth orchestrator, feed routing
 
 Phase 4 (Write Path):
   Write-side routing (split by event class)                   ← depends on resolver + auth
@@ -453,17 +479,37 @@ Phase 5 (Polish):
 **Notedeck:** Complex bin-packing of multiple outbox subs into shared REQ messages with pass accounting.
 **iOS Damus (proposed):** Simpler per-relay filter splitting. Instead of packing N logical subs into M physical REQs, we split one logical subscription into N per-relay subscriptions each with a smaller author list. This is simpler and fits the existing `pool.subscribe(filters:to:)` API. The relay selection algorithm handles the "minimize connections" concern at a higher level.
 
-**Trade-off:** Less optimal subscription slot usage per relay, but dramatically simpler code. If NIP-11 limits become a problem in practice, the subscription slot tracking in `RelayPolicyCache` provides the foundation for compaction later.
+**Trade-off:** Less optimal subscription slot usage per relay, but dramatically simpler code. If NIP-11 limits become a problem in practice, `RelayPolicyCache` provides the foundation for adding subscription slot tracking and compaction later.
 
 ### 3. DM vs Generic Routing (Critical)
 **Write routing is NOT one-size-fits-all.** NIP-17 DM giftwrap (kind:1059) MUST use kind:10050 DM relays, NOT kind:10002 read relays. If kind:10050 is missing, the client must not attempt delivery — the recipient isn't ready for NIP-17. This is explicitly stated in NIP-17.
 
-### 4. Relay Scoring
-**Start without scoring.** Use kind:10002 as truth, NIP-05 as fallback. Add scoring in a follow-up if needed (track which relays actually return events vs timeout). NIP-66 (relay monitor events kind:30166) could provide liveness/RTT data for future scoring.
+### 4. Relay Scoring — Learn from Delivery (Thompson Sampling)
+
+**Learn from what relays actually return.** No deployed client tracks "did this relay deliver events?" — our [benchmarks](https://github.com/nostrability/outbox) show this is the single highest-value addition. Thompson Sampling improved event recall by **60–73pp** after 2–3 sessions on hard cases (long windows, large follow lists).
+
+**How it works:** Track per-relay `(events_delivered, events_expected)`. Replace `random()` in the scoring formula with `sampleBeta(delivered + 1, expected - delivered + 1)`. On first run (no data), this degrades to `random()` (uniform Beta(1,1) prior). After observing delivery, the Beta distribution shifts toward relays that actually return events.
+
+```text
+RelayStatsDB (persisted to UserDefaults or SQLite):
+├── relayUrl: String (primary key)
+├── timesSelected: Int
+├── eventsDelivered: Int
+├── eventsExpected: Int
+├── lastSelectedAt: Date
+│
+├── update(relay, delivered, expected)  // called after each feed subscription EOSE
+├── sampleScore(relay) -> Double        // sampleBeta(α, β) for relay selection
+└── decay(factor: 0.95)                 // exponential decay on app launch to adapt to relay changes
+```
+
+Storage is ~100 bytes per relay. The infrastructure already exists: `RelayPolicyCache` has per-relay state, `event_completeness_delta` metric tracks delivery. Closing the loop is a few dozen lines.
+
+**NIP-66 pre-filtering (Phase 1):** Before running the selector, fetch NIP-66 monitor data (kind 30166) and exclude dead relays. This stops wasting connection budget on relays that will never respond — our benchmarks show 40–66% of declared relays are dead, and filtering them improves relay success rates from ~30% to ~75%. Important nuance: the benefit is **efficiency** (fewer wasted connections), not a coverage guarantee. Classify as online/offline/dead — only exclude "dead" (offline relays may still serve historical events from disk).
 
 ### 5. Connection Limits
 **Concern:** Opening connections to many ephemeral relays could be expensive on mobile.
-**Mitigation:** `maxConnections` parameter on `OutboxRelaySelector` (default 8). Long-tail authors fall back to user's own relays. Ephemeral connections are reference-counted and released when subscriptions end.
+**Mitigation:** `maxConnections` parameter on `OutboxRelaySelector` (default 15). [Benchmark data](https://github.com/nostrability/outbox) shows all algorithms reach within 1–2% of their unlimited ceiling at 20 connections. At 8, significant coverage is left on the table for users with 500+ follows. 15 is a mobile-friendly compromise — WebSocket connections are cheap when idle (ping/pong every 30s). Long-tail authors fall back to user's own relays. Ephemeral connections are reference-counted and released when subscriptions end.
 
 ### 6. Auth-Required Relay Handling
 Outbox will inevitably connect to relays that require NIP-42 authentication. The client must:
@@ -473,74 +519,47 @@ Outbox will inevitably connect to relays that require NIP-42 authentication. The
 - On `"restricted: "`: relay rejected our key even after auth — don't retry, skip relay
 - Per NIP-42: *"the client must have a stored challenge associated with that relay"*
 
-### 7. CLOSED Handling — Explicit State Machine
+### 7. CLOSED Handling — Simple Retry
 
-CLOSED is not parsed in the current codebase. The outbox must implement a per-subscription state machine with prefix-aware branching, retry limits, and terminal states.
+CLOSED is not parsed in the current codebase. The outbox needs prefix-aware branching with a simple retry budget.
 
-**State machine per (relay, subscription_id):**
-
-Each (relay, subscription_id) pair tracks a **unified retry budget**: `total_retries` across all CLOSED reasons. This prevents infinite loops from any combination of prefixes.
+**Per (relay, subscription_id):**
 
 ```
-States: Active → (CLOSED received) → Evaluating → Retrying | Terminal | Requeued
-
-Shared budget per (relay, subscription_id):
-  total_retries: Int = 0
-  MAX_TOTAL_RETRIES = 5          // absolute ceiling across all prefix types
+retries: Int = 0
+MAX_RETRIES = 3
 
 On CLOSED:
-  if total_retries >= MAX_TOTAL_RETRIES:
-    → Terminal (retry budget exhausted, regardless of prefix)
-
   Parse MachineReadablePrefix from message.
-  total_retries += 1
 
   "auth-required:" →
-    if auth_retries < MAX_AUTH_RETRIES (2):
-      → Retrying: sign kind:22242, send AUTH, wait OK, re-send REQ
-      auth_retries += 1
+    if retries < MAX_RETRIES:
+      sign kind:22242, send AUTH, wait OK, re-send REQ
+      retries += 1
     else:
-      → Terminal (auth exhausted)
-
-  "restricted:" →
-    → Terminal (relay rejected our key, don't retry)
+      give up (auth exhausted)
 
   "rate-limited:" →
-    if rate_limit_retries < MAX_RATE_RETRIES (3):
-      → Requeued: jittered backoff (1s * 2^retry + random(0..500ms))
-      rate_limit_retries += 1
+    if retries < MAX_RETRIES:
+      backoff (1s * 2^retries + jitter), re-send REQ
+      retries += 1
     else:
-      → Terminal (rate limit exhausted)
+      give up
 
-  "blocked:" →
-    → Terminal (add relay to session-scoped denylist)
+  "restricted:" | "blocked:" | "mute:" | "invalid:" →
+    give up immediately (no retry)
 
-  "invalid:" →
-    → Terminal (filter rejected, log error)
-
-  "error:" →
-    if error_retries < MAX_ERROR_RETRIES (1):
-      → Requeued: 2s backoff
+  "error:" | unknown/empty prefix →
+    if retries < MAX_RETRIES:
+      backoff 2s, re-send REQ
+      retries += 1
     else:
-      → Terminal (server error)
+      give up
 
-  "mute:" →
-    → Terminal (relay silently ignoring)
-
-  Unknown/empty prefix (no recognized prefix, including server-side termination):
-    if unknown_retries < MAX_UNKNOWN_RETRIES (2):
-      → Requeued: 5s backoff (relay may have restarted)
-      unknown_retries += 1
-    else:
-      → Terminal (unknown error exhausted, log full CLOSED message for diagnostics)
-
-Terminal states: subscription cleaned up, slot released, no further retries.
-Requeued states: subscription placed in relay queue, flushed on next slot availability or timer.
+On give up: clean up subscription, log reason.
 ```
 
-**Key invariant:** Every path reaches Terminal in at most `MAX_TOTAL_RETRIES` (5) attempts. Unknown/empty prefixes are **not** exempt — they are capped at 2 retries.
-
-**Idempotency:** Re-sending a REQ with the same subscription_id is safe per NIP-01 (replaces previous filter). No dedup needed.
+**Key invariant:** Every path terminates in at most 3 retries. Re-sending REQ with the same subscription_id is safe per NIP-01 (replaces previous filter).
 
 ### 8. Anti-Amplification Budgets
 
@@ -548,85 +567,22 @@ Hostile kind:10002/10050 lists can force excessive relay connections. Hard caps:
 
 ```
 OutboxBudget (configurable constants):
-├── maxEphemeralRelaysPerResolve: Int = 8        // per outboxStream call (already in selector)
-├── maxRelaysPerAuthor: Int = 2                   // hard cap AFTER popularity filtering
+├── maxEphemeralRelaysPerResolve: Int = 15       // per outboxStream call (already in selector)
+├── maxRelaysPerAuthor: Int = 3                   // hard cap AFTER popularity filtering
 ├── maxNewRelaysPerMinute: Int = 12               // rate limit on new ephemeral connections (shared)
 ├── maxFanoutRelaysPerPublish: Int = 6            // max relays per single event publish (inbox delivery)
 ├── maxDMRelaysPerRecipient: Int = 3              // cap on kind:10050 relay count per recipient
 └── maxTotalEphemeralRelays: Int = 20             // absolute ceiling on concurrent ephemeral relays
 ```
 
-#### Priority-Aware Rate Budgeting
-
-The `maxNewRelaysPerMinute` (12) budget is consumed in priority order. When the sliding window is near exhaustion, higher-priority flows proceed while lower-priority flows are deferred or dropped.
-
-```
-Connection Priority Tiers (highest to lowest):
-  P0 — DM delivery (kind:1059 to kind:10050 relays):
-        Rationale: user-initiated, latency-sensitive, small fanout
-        Budget reservation: 4 of 12 slots reserved (always available for P0)
-
-  P1 — Event publish (inbox delivery to tagged users' read relays):
-        Rationale: user-initiated write, but broader fanout
-        Budget: draws from remaining pool after P0 reservation
-
-  P2 — Feed/timeline subscriptions (outboxStream to authors' write relays):
-        Rationale: background, can tolerate delay, largest consumer
-        Budget: draws from remaining pool after P0+P1
-
-  P3 — Single-event lookups (relay hint fetches, profile lookups):
-        Rationale: speculative, user can retry
-        Budget: draws from remaining pool, first to be deferred
-```
-
 **Enforcement:**
-- `RelayPool`: sliding window tracks connections per minute. Each `acquireEphemeralRelays` call carries a priority tier.
-- P0 reservation: 4 of 12 slots are reserved exclusively for P0. P1-P3 share the remaining 8. When only reserved slots remain, P1-P3 queue instead of dialing.
-- Starvation guard: if there is at least one pending P1 request and no P1 slot has been granted
-  in the current 10-second slice, grant the next available non-P0 slot to P1 before P2/P3.
-  This prevents sustained P0 traffic from indefinitely starving user-initiated publishes.
-- When budget exhausted for a tier: queue the request with jittered backoff (100ms + random(0..200ms)). Queued requests drain as the sliding window advances.
+- `RelayPool`: sliding window tracks new connections per minute. Beyond `maxNewRelaysPerMinute`, new connections queue FIFO with jittered backoff (100ms + random(0..200ms)). Drained as the sliding window advances.
 - `OutboxRelayResolver`: clamp returned relay lists to `maxRelaysPerAuthor` after filtering
 - `OutboxRelaySelector`: already has `maxConnections`; also check `maxTotalEphemeralRelays` against `RelayPool.ephemeralLeases.count`
 - Write path: clamp total target relays to `maxFanoutRelaysPerPublish`
 - DM path: clamp kind:10050 results to `maxDMRelaysPerRecipient`
 
-### 9. Subscription Queue Policy
-
-The `RelayPolicyCache` subscription queue needs explicit fairness and lifecycle semantics:
-
-```
-Queue Policy:
-├── Order: FIFO (first queued = first served when slot frees)
-├── Priority tiers:
-│   P0: Feed subscriptions (timeline, notifications) — PROTECTED, never dropped
-│   P1: Single-event lookups (relay hints, thread context)
-│   P2: Profile/metadata fetches
-│   (within same priority: FIFO)
-├── Drop policy (when queue full):
-│   - Max queue depth per relay: 20
-│   - If queue full, drop lowest-priority item (P2 first, then P1)
-│   - P0 (feed subscriptions) are NEVER dropped by lower-priority eviction.
-│   - P0 coalescing: when a new P0 item targets the same
-│     (relay, author_set, filter_signature, stream_mode) as an existing queued P0 item,
-│     REPLACE the older item (the newer request is more relevant).
-│     This prevents unbounded P0 accumulation from repeated feed refreshes.
-│   - If queue is full of non-coalescable P0 items: reject the new item and log
-│     "queue full, all protected" at warning level.
-│   - This prevents silent feed degradation while bounding queue growth.
-├── Timeout: queued items expire after 30s. On expiry:
-│   - Release continuation with empty result
-│   - Log "subscription queue timeout" with priority level for diagnostics
-│   - P0 timeouts logged at warning level (indicates relay is too slow for feeds)
-├── Cancellation: when parent outboxStream task is cancelled:
-│   - Remove all its queued items from all relay queues
-│   - No dangling continuations
-├── Backpressure: if queue depth > 10 for a relay, log warning
-│   and consider that relay overloaded (don't add more from selector)
-│   Exception: P0 items bypass backpressure (feeds must not be silently dropped)
-```
-
-### 10. kind:10002 Republish Policy
+### 9. kind:10002 Republish Policy
 
 NIP-65 says: *"Send the author's kind:10002 event to all relays the event was published to."* This is a discoverability mechanism — other clients need to find our relay list to reach us.
 
@@ -650,25 +606,7 @@ Republish Rules:
 │   as a follow-up optimization (not required for v1).
 ```
 
-### 11. NIP-05 Relay Hints — Trust Boundaries
-
-NIP-05 hints are useful for bootstrap but are a weak signal:
-
-```
-NIP-05 Trust Policy:
-├── Classification: "weak hint" (vs kind:10002 = "authoritative")
-├── Cache TTL: 1 hour (vs kind:10002 = until replaced by newer event)
-├── Demotion: if NIP-05 relay fails to return events 3 times consecutively,
-│   demote to "unreliable" and stop using for 24 hours
-├── Priority: always prefer kind:10002 when available
-│   NIP-05 only used when kind:10002 is absent
-├── Trust boundary: NIP-05 relays are treated as read-only hints
-│   (never used for write routing / inbox delivery)
-├── Scoring integration (future): when relay scoring is added,
-│   NIP-05 hints start with lower initial score than kind:10002
-```
-
-### 12. NostrDB Decision
+### 10. NostrDB Decision
 
 **Decision: No nostrdb schema changes needed for initial outbox implementation.**
 
@@ -677,9 +615,9 @@ Rationale:
 - The OutboxRelayResolver maintains an in-memory cache populated from NostrDB queries — no new index needed
 - Relay hint extraction from tags uses existing `TagSequence` API
 
-**Future consideration:** If relay scoring is added (Phase 2+), a `person_relay` table (like gossip's approach) tracking seen-on-relay timestamps and success rates would benefit from a nostrdb index. This would be a separate proposal.
+**Relay stats storage:** `RelayStatsDB` (see Design Decision #4) stores per-relay delivery stats for Thompson Sampling. This is lightweight (~100 bytes per relay) and can use UserDefaults or a simple SQLite table. If relay stats grow complex (per-author-per-relay tracking), a nostrdb index would help — but that's a follow-up optimization.
 
-### 13. Metrics & Rollout Plan
+### 11. Metrics & Rollout Plan
 
 Default-on autopilot requires guardrails. Define launch gates and runtime metrics:
 
@@ -694,9 +632,6 @@ Metrics to Track (structured logging, not analytics):
 ├── auth_failure_rate:
 │   - Auth attempts vs successes per relay
 │   - Relays with > 50% failure rate flagged in diagnostics
-├── queue_depth_p95:
-│   - 95th percentile subscription queue depth across all relays
-│   - > 10 sustained suggests budget is too tight or relay is slow
 ├── ephemeral_relay_lifetime:
 │   - Average time from acquireEphemeralRelay to release
 │   - Unexpectedly long = possible lease leak
@@ -718,7 +653,7 @@ Launch Gates (must pass before Phase C):
 ├── Event completeness improvement measurable (> 0 events recovered per session avg)
 ```
 
-### 14. kind:10006 Blocked Relay Scope
+### 12. kind:10006 Blocked Relay Scope
 
 **Semantics:** kind:10006 blocked relays apply globally to all outbox routing:
 - Read path: never dial blocked relay for feed subscriptions
@@ -752,16 +687,16 @@ Override Scope:
 ## Verification Plan
 
 ### Unit Tests
-1. `OutboxRelayResolver`: Mock NostrDB with fixture kind:10002 and kind:10050 events, verify correct relay resolution per pubkey. Test NIP-05 fallback when 10002 missing. Test blocked relay filtering.
+1. `OutboxRelayResolver`: Mock NostrDB with fixture kind:10002 and kind:10050 events, verify correct relay resolution per pubkey. Test blocked relay filtering.
 2. `OutboxRelaySelector`: Given known relay maps, verify minimal relay set computation. Edge cases: no kind:10002 for any user, all users on same relay, maxConnections=1, blocked relays excluded.
-3. `RelayPolicyCache`: Mock HTTP responses, verify full NIP-11 parsing. Test subscription slot tracking (acquire/release/queue).
+3. `RelayPolicyCache`: Mock HTTP responses, verify full NIP-11 parsing.
 4. `MachineReadablePrefix`: Parse all standard prefixes from OK and CLOSED messages.
 5. `ClosedResult`: Verify CLOSED message parsing and prefix extraction.
 
 ### Integration Tests
 6. **fiatjaf scenario** (from issue #423): Publish event only to obscure relay, verify outbox routing discovers it via kind:10002
 7. **Feed routing**: Set up 3 test relays, distribute authors' kind:10002 across them, subscribe to timeline, verify events arrive from correct relays
-8. **Fallback**: Verify authors without kind:10002 still work via user's relays (and NIP-05 if available)
+8. **Fallback**: Verify authors without kind:10002 still work via user's relays
 9. **DM routing**: Verify kind:1059 giftwrap sent to kind:10050 relays, NOT kind:10002. Verify delivery blocked when 10050 missing.
 10. **Auth retry**: Simulate relay sending CLOSED "auth-required:", verify client performs auth and re-sends REQ
 11. **Blocked relay**: Add relay to kind:10006, verify it's never dialed even if it appears in an author's kind:10002
@@ -770,10 +705,9 @@ Override Scope:
 
 ### Stress / Soak Tests
 14. **Large follow graph** (500+ follows): Verify selector converges in <100ms, total ephemeral relays stays within `maxTotalEphemeralRelays`, no lease leaks after 10 minutes
-15. **Relay flap simulation**: Rapidly connect/disconnect ephemeral relays (10 cycles), verify subscription queue drains correctly, slots released, no dangling continuations
+15. **Relay flap simulation**: Rapidly connect/disconnect ephemeral relays (10 cycles), verify connections close cleanly, no dangling continuations
 16. **Hostile kind:10002** (30 relays listed): Verify clamped to `maxRelaysPerAuthor`, total connections within budget
-17. **Queue backpressure**: Fill relay queue to capacity (20), verify oldest/lowest-priority items dropped, new items accepted, no deadlock
-18. **Auth retry exhaustion**: Relay always returns CLOSED "auth-required:", verify max 2 retries then terminal state, subscription cleaned up
+17. **Auth retry exhaustion**: Relay always returns CLOSED "auth-required:", verify max 3 retries then give up, subscription cleaned up
 
 ### Manual Testing
 19. Fresh install: Verify feed loads without manual relay configuration
@@ -790,16 +724,18 @@ Override Scope:
 |---|-------|----------|------------|-------|
 | 1 | CLOSED message parsing + MachineReadablePrefix | P1 | — | 0 |
 | 2 | Expand Limitations struct to full NIP-11 | P1 | — | 0 |
-| 3 | OutboxRelayResolver (10002 + 10050 + 10006 + NIP-05) | P1 | — | 1 |
-| 4 | Relay selection algorithm (with denylist) | P1 | 3 | 2 |
-| 5 | RelayPolicyCache (full NIP-11 + slot tracking) | P2 | 1, 2 | 2 |
+| 3 | OutboxRelayResolver (10002 + 10050 + 10006) | P1 | — | 1 |
+| 3b | NIP-66 pre-filter (fetch kind:30166, classify relays) | P1 | — | 1 |
+| 4 | Stochastic relay selector + RelayStatsDB (Thompson Sampling) | P1 | 3 | 2 |
+| 5 | RelayPolicyCache (full NIP-11) | P2 | 1, 2 | 2 |
 | 6 | Auth retry orchestrator (NIP-42 CLOSED/OK auth-required) | P1 | 1 | 2 |
-| 7 | Feed-level outbox routing | P1 | 3, 4, 5, 6 | 3 |
+| 7 | Feed-level outbox routing | P1 | 3, 3b, 4, 5, 6 | 3 |
+| 7b | Delivery verification (self-healing) | P1 | 4, 7 | 3 |
 | 8 | Write-side routing (split by event class) | P2 | 3, 6 | 4 |
 | 9 | Autopilot toggle UI | P3 | 7 | 5 |
 | 10 | Tests: resolver + selector | P1 | 3, 4 | 1-2 |
 | 11 | Tests: CLOSED parsing + NIP-11 policy | P1 | 1, 5 | 2 |
-| 12 | Tests: auth retry + feed routing | P1 | 6, 7 | 3 |
+| 12 | Tests: auth retry + feed routing + delivery check | P1 | 6, 7, 7b | 3 |
 | 13 | Tests: write-side routing + stress | P1 | 8 | 4 |
 
 ---
@@ -809,7 +745,8 @@ Override Scope:
 - **Notedeck PR:** damus-io/notedeck#1288 (6931+, 1788-)
 - **Damus Issue:** damus-io/damus#423 (Autopilot/Outbox)
 - **Nostrability:** nostrability/nostrability#69 (community outbox implementations)
-- **NIPs:** [01](https://github.com/nostr-protocol/nips/blob/master/01.md) (protocol/CLOSED), [05](https://github.com/nostr-protocol/nips/blob/master/05.md) (relay hints), [10](https://github.com/nostr-protocol/nips/blob/master/10.md) (e-tag pubkey for outbox fallback), [11](https://github.com/nostr-protocol/nips/blob/master/11.md) (relay info/limitations), [17](https://github.com/nostr-protocol/nips/blob/master/17.md) (DM via kind:10050), [19](https://github.com/nostr-protocol/nips/blob/master/19.md) (bech32 relay hints), [42](https://github.com/nostr-protocol/nips/blob/master/42.md) (authentication), [51](https://github.com/nostr-protocol/nips/blob/master/51.md) (lists/blocked relays kind:10006), [65](https://github.com/nostr-protocol/nips/blob/master/65.md) (relay list kind:10002), [66](https://github.com/nostr-protocol/nips/blob/master/66.md) (relay monitoring), [70](https://github.com/nostr-protocol/nips/blob/master/70.md) (protected events)
+- **NIPs:** [01](https://github.com/nostr-protocol/nips/blob/master/01.md) (protocol/CLOSED), [10](https://github.com/nostr-protocol/nips/blob/master/10.md) (e-tag pubkey for outbox fallback), [11](https://github.com/nostr-protocol/nips/blob/master/11.md) (relay info/limitations), [17](https://github.com/nostr-protocol/nips/blob/master/17.md) (DM via kind:10050), [19](https://github.com/nostr-protocol/nips/blob/master/19.md) (bech32 relay hints), [42](https://github.com/nostr-protocol/nips/blob/master/42.md) (authentication), [51](https://github.com/nostr-protocol/nips/blob/master/51.md) (lists/blocked relays kind:10006), [65](https://github.com/nostr-protocol/nips/blob/master/65.md) (relay list kind:10002), [66](https://github.com/nostr-protocol/nips/blob/master/66.md) (relay monitoring), [70](https://github.com/nostr-protocol/nips/blob/master/70.md) (protected events)
+- **Outbox benchmark:** [nostrability/outbox](https://github.com/nostrability/outbox) — 16 algorithms, 120 runs, event recall data informing selection algorithm and learning choices
 - **Community approaches:** hzrd149 (greedy set cover), gossip (per-pubkey relay scoring), coracle (relay stats, large follow list splitting), nostur (follow-limited outbox)
 - **jb55 quote:** *"nostrdb was built specifically to support the outbox model"*
 - **kernelkind on TransparentRelay:** *"guaranteed that the relay subscription the OutboxSubId uses is not used by any other OutboxSubId subscriptions"*
