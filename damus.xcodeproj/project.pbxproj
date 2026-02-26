@@ -1720,6 +1720,7 @@
 		D774A5CF2F4FBDEA006A4D64 /* NdbDatabase+UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = D774A5CD2F4FBDEA006A4D64 /* NdbDatabase+UI.swift */; };
 		D774A5D02F4FBDEA006A4D64 /* NdbDatabase+UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = D774A5CD2F4FBDEA006A4D64 /* NdbDatabase+UI.swift */; };
 		D774A5D12F4FBDEA006A4D64 /* NdbDatabase+UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = D774A5CD2F4FBDEA006A4D64 /* NdbDatabase+UI.swift */; };
+		D774A5D32F4FC947006A4D64 /* RaceConditionTestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D774A5D22F4FC93D006A4D64 /* RaceConditionTestHelpers.swift */; };
 		D776BE402F232B17002DA1C9 /* EntityPreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D776BE3F2F232B17002DA1C9 /* EntityPreloader.swift */; };
 		D776BE412F232B17002DA1C9 /* EntityPreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D776BE3F2F232B17002DA1C9 /* EntityPreloader.swift */; };
 		D776BE422F232B17002DA1C9 /* EntityPreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D776BE3F2F232B17002DA1C9 /* EntityPreloader.swift */; };
@@ -2863,6 +2864,7 @@
 		D774A5C72F4F93F5006A4D64 /* StorageStatsViewHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageStatsViewHelper.swift; sourceTree = "<group>"; };
 		D774A5CB2F4F9679006A4D64 /* StorageStatsManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageStatsManagerTests.swift; sourceTree = "<group>"; };
 		D774A5CD2F4FBDEA006A4D64 /* NdbDatabase+UI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NdbDatabase+UI.swift"; sourceTree = "<group>"; };
+		D774A5D22F4FC93D006A4D64 /* RaceConditionTestHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RaceConditionTestHelpers.swift; sourceTree = "<group>"; };
 		D776BE3F2F232B17002DA1C9 /* EntityPreloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityPreloader.swift; sourceTree = "<group>"; };
 		D776BE432F233012002DA1C9 /* EntityPreloaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityPreloaderTests.swift; sourceTree = "<group>"; };
 		D77A96BE2F3131BE00CC3246 /* RelayHintsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayHintsTests.swift; sourceTree = "<group>"; };
@@ -3437,6 +3439,7 @@
 		4C9B0DEC2A65A74000CBDA21 /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				D774A5D22F4FC93D006A4D64 /* RaceConditionTestHelpers.swift */,
 				4C9B0DED2A65A75F00CBDA21 /* AttrStringTestExtensions.swift */,
 				B5B4D1422B37D47600844320 /* NdbExtensions.swift */,
 			);
@@ -6446,6 +6449,7 @@
 				4CB8839A297322D200DC99E7 /* DMTests.swift in Sources */,
 				D5C1AFC82E5E00690092F72F /* ContactCardManagerTests.swift in Sources */,
 				D72734282F08914C00F90677 /* DatabaseSnapshotManagerTests.swift in Sources */,
+				D774A5D32F4FC947006A4D64 /* RaceConditionTestHelpers.swift in Sources */,
 				D7315A2C2ACDF4DA0036E30A /* DamusCacheManagerTests.swift in Sources */,
 				4C9054852A6AEAA000811EEC /* NdbTests.swift in Sources */,
 				75AD872B2AA23A460085EF2C /* Block+Tests.swift in Sources */,
