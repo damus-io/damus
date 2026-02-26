@@ -208,19 +208,7 @@ struct ProfileView: View {
 
                 if damus_state.mutelist_manager.is_muted(.user(profile.pubkey, nil)) {
                     Button(NSLocalizedString("Unmute", comment: "Button to unmute a profile.")) {
-                        guard
-                            let keypair = damus_state.keypair.to_full(),
-                            let mutelist = damus_state.mutelist_manager.event
-                        else {
-                            return
-                        }
-
-                        guard let new_ev = remove_from_mutelist(keypair: keypair, prev: mutelist, to_remove: .user(profile.pubkey, nil)) else {
-                            return
-                        }
-
-                        damus_state.mutelist_manager.set_mutelist(new_ev)
-                        Task { await damus_state.nostrNetwork.postbox.send(new_ev) }
+                        perform_unmute(profile_pubkey: profile.pubkey, damus_state: damus_state)
                     }
                 } else {
                     Button(NSLocalizedString("Mute", comment: "Button to mute a profile"), role: .destructive) {
@@ -371,71 +359,79 @@ struct ProfileView: View {
                 WebsiteLink(url: url)
             }
 
-            HStack {
-                if let contact = profile.contacts {
-                    let contacts = Array(contact.referenced_pubkeys)
-                    let hashtags = Array(contact.referenced_hashtags)
-                    let following_model = FollowingModel(damus_state: damus_state, contacts: contacts, hashtags: hashtags)
-                    NavigationLink(value: Route.Following(following: following_model)) {
-                        HStack {
-                            let noun_text = Text(verbatim: "\(pluralizedString(key: "following_count", count: profile.following))").font(.subheadline).foregroundColor(.gray)
-                            Text("\(Text(verbatim: profile.following.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
-                        }
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
+            statsRow
 
-                if followers.contacts != nil {
-                    NavigationLink(value: Route.Followers(followers: followers)) {
-                        followersCount
+            friendsFollowingSection
+        }
+        .padding(.horizontal)
+    }
+
+    private var statsRow: some View {
+        HStack {
+            if let contact = profile.contacts {
+                let contacts = Array(contact.referenced_pubkeys)
+                let hashtags = Array(contact.referenced_hashtags)
+                let following_model = FollowingModel(damus_state: damus_state, contacts: contacts, hashtags: hashtags)
+                NavigationLink(value: Route.Following(following: following_model)) {
+                    HStack {
+                        let noun_text = Text(verbatim: "\(pluralizedString(key: "following_count", count: profile.following))").font(.subheadline).foregroundColor(.gray)
+                        Text("\(Text(verbatim: profile.following.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
+                    }
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+
+            if followers.contacts != nil {
+                NavigationLink(value: Route.Followers(followers: followers)) {
+                    followersCount
+                }
+                .buttonStyle(PlainButtonStyle())
+            } else {
+                followersCount
+                    .onTapGesture {
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        followers.contacts = []
+                        followers.subscribe()
+                    }
+            }
+
+            if let relays = profile.relay_urls {
+                let noun_string = pluralizedString(key: "relays_count", count: relays.count)
+                let noun_text = Text(noun_string).font(.subheadline).foregroundColor(.gray)
+                let relay_text = Text("\(Text(verbatim: relays.count.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
+                if profile.pubkey == damus_state.pubkey && damus_state.is_privkey_user {
+                    NavigationLink(value: Route.RelayConfig) {
+                        relay_text
                     }
                     .buttonStyle(PlainButtonStyle())
                 } else {
-                    followersCount
-                        .onTapGesture {
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            followers.contacts = []
-                            followers.subscribe()
-                        }
-                }
-
-                if let relays = profile.relay_urls {
-                    // Only open relay config view if the user is logged in with private key and they are looking at their own profile.
-                    let noun_string = pluralizedString(key: "relays_count", count: relays.count)
-                    let noun_text = Text(noun_string).font(.subheadline).foregroundColor(.gray)
-                    let relay_text = Text("\(Text(verbatim: relays.count.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
-                    if profile.pubkey == damus_state.pubkey && damus_state.is_privkey_user {
-                        NavigationLink(value: Route.RelayConfig) {
-                            relay_text
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                    } else {
-                        NavigationLink(value: Route.UserRelays(relays: relays.sorted())) {
-                            relay_text
-                        }
-                        .buttonStyle(PlainButtonStyle())
+                    NavigationLink(value: Route.UserRelays(relays: relays.sorted())) {
+                        relay_text
                     }
+                    .buttonStyle(PlainButtonStyle())
                 }
             }
+        }
+    }
 
-            if profile.pubkey != damus_state.pubkey {
-                let friended_followers = damus_state.contacts.get_friended_followers(profile.pubkey)
-                if !friended_followers.isEmpty {
-                    Spacer()
+    @ViewBuilder
+    private var friendsFollowingSection: some View {
+        if profile.pubkey != damus_state.pubkey {
+            let friended_followers = damus_state.contacts.get_friended_followers(profile.pubkey)
+            if !friended_followers.isEmpty {
+                Spacer()
 
-                    NavigationLink(value: Route.FollowersYouKnow(friendedFollowers: friended_followers, followers: followers)) {
-                        HStack {
-                            CondensedProfilePicturesView(state: damus_state, pubkeys: friended_followers, maxPictures: 3)
-                            let followedByString = followedByString(friended_followers, ndb: damus_state.ndb)
-                            Text(followedByString)
-                                .font(.subheadline).foregroundColor(.gray)
-                                .multilineTextAlignment(.leading)
-                        }
+                NavigationLink(value: Route.FollowersYouKnow(friendedFollowers: friended_followers, followers: followers)) {
+                    HStack {
+                        CondensedProfilePicturesView(state: damus_state, pubkeys: friended_followers, maxPictures: 3)
+                        let followedByString = followedByString(friended_followers, ndb: damus_state.ndb)
+                        Text(followedByString)
+                            .font(.subheadline).foregroundColor(.gray)
+                            .multilineTextAlignment(.leading)
                     }
                 }
             }
         }
-        .padding(.horizontal)
     }
 
     var tabs: [(String, FilterState)] {
@@ -449,76 +445,92 @@ struct ProfileView: View {
         return tabs
     }
 
+    @ViewBuilder
+    private var timelineContent: some View {
+        switch filter_state {
+        case .posts:
+            InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(.posts))
+        case .posts_and_replies:
+            InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(.posts_and_replies))
+        case .conversations:
+            if !profile.conversation_events.isEmpty {
+                InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(.conversations))
+            }
+        default:
+            EmptyView()
+        }
+    }
+
+    private var profileScrollContent: some View {
+        VStack(spacing: 0) {
+            bannerSection
+                .zIndex(1)
+
+            VStack() {
+                aboutSection
+
+                VStack(spacing: 0) {
+                    CustomPicker(tabs: tabs, selection: $filter_state)
+                    Divider()
+                        .frame(height: 1)
+                }
+                .background(colorScheme == .dark ? Color.black : Color.white)
+
+                timelineContent
+            }
+            .padding(.horizontal, Theme.safeAreaInsets?.left)
+            .zIndex(-yOffset > navbarHeight ? 0 : 1)
+        }
+    }
+
+    private var leadingToolbarContent: some View {
+        let profileInfo = getProfileInfo()
+        return HStack(spacing: 8) {
+            navBackButton
+                .padding(.top, 5)
+                .accentColor(DamusColors.white)
+            VStack(alignment: .leading, spacing: -4.5) {
+                Text(profileInfo.0)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                Text(profileInfo.1)
+                    .font(.subheadline)
+                    .foregroundColor(.white.opacity(0.8))
+            }
+            .opacity(bannerBlurViewOpacity())
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, max(5, 15 + (yOffset / 30)))
+        }
+    }
+
+    @ViewBuilder
+    private var trailingToolbarContent: some View {
+        if showFollowBtnInBlurrBanner() {
+            FollowButtonView(
+                target: profile.get_follow_target(),
+                follows_you: profile.follows(pubkey: damus_state.pubkey),
+                follow_state: damus_state.contacts.follow_state(profile.pubkey)
+            )
+            .padding(.top, 8)
+        } else {
+            navActionSheetButton
+                .padding(.top, 5)
+                .accentColor(DamusColors.white)
+        }
+    }
+
     var body: some View {
         ZStack {
             ScrollView(.vertical) {
-                VStack(spacing: 0) {
-                    bannerSection
-                        .zIndex(1)
-                    
-                    VStack() {
-                        aboutSection
-
-                        VStack(spacing: 0) {
-                            CustomPicker(tabs: tabs, selection: $filter_state)
-                            Divider()
-                                .frame(height: 1)
-                        }
-                        .background(colorScheme == .dark ? Color.black : Color.white)
-
-                        if filter_state == FilterState.posts {
-                            InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.posts))
-                        }
-                        if filter_state == FilterState.posts_and_replies {
-                            InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.posts_and_replies))
-                        }
-                        if filter_state == FilterState.conversations && !profile.conversation_events.isEmpty {
-                            InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.conversations))
-                        }
-                    }
-                    .padding(.horizontal, Theme.safeAreaInsets?.left)
-                    .zIndex(-yOffset > navbarHeight ? 0 : 1)
-                }
+                profileScrollContent
             }
             .padding(.bottom, tabHeight + getSafeAreaBottom())
             .ignoresSafeArea()
             .navigationTitle("")
             .navigationBarBackButtonHidden()
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    HStack(spacing: 8) {
-                        navBackButton
-                            .padding(.top, 5)
-                            .accentColor(DamusColors.white)
-                        VStack(alignment: .leading, spacing: -4.5) {
-                            Text(getProfileInfo().0) // Display name
-                                .font(.headline)
-                                .foregroundColor(.white)
-                            Text(getProfileInfo().1) // Username
-                                .font(.subheadline)
-                                .foregroundColor(.white.opacity(0.8))
-                        }
-                        .opacity(bannerBlurViewOpacity())
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.top, max(5, 15 + (yOffset / 30)))
-                    }
-                }
-                if showFollowBtnInBlurrBanner() {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        FollowButtonView(
-                            target: profile.get_follow_target(),
-                            follows_you: profile.follows(pubkey: damus_state.pubkey),
-                            follow_state: damus_state.contacts.follow_state(profile.pubkey)
-                        )
-                        .padding(.top, 8)
-                    }
-                } else {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        navActionSheetButton
-                            .padding(.top, 5)
-                            .accentColor(DamusColors.white)
-                    }
-                }
+                ToolbarItem(placement: .topBarLeading) { leadingToolbarContent }
+                ToolbarItem(placement: .topBarTrailing) { trailingToolbarContent }
             }
             .toolbarBackground(.hidden)
             .onReceive(handle_notify(.switched_timeline)) { _ in
@@ -527,12 +539,10 @@ struct ProfileView: View {
             .onAppear() {
                 check_nip05_validity(pubkey: self.profile.pubkey, damus_state: self.damus_state)
                 profile.subscribe()
-                //followers.subscribe()
             }
             .onDisappear {
                 profile.unsubscribe()
                 followers.unsubscribe()
-                // our profilemodel needs a bit more help
             }
             .sheet(isPresented: $show_share_sheet) {
                 let url = URL(string: "https://damus.io/" + profile.pubkey.npub)!
@@ -565,6 +575,23 @@ extension View {
             .font(.system(size: 32).weight(.thin))
             .foregroundStyle(scheme == .dark ? .white : .black, scheme == .dark ? .white : .black)
     }
+}
+
+@MainActor
+func perform_unmute(profile_pubkey: Pubkey, damus_state: DamusState) {
+    guard
+        let keypair = damus_state.keypair.to_full(),
+        let mutelist = damus_state.mutelist_manager.event
+    else {
+        return
+    }
+
+    guard let new_ev = remove_from_mutelist(keypair: keypair, prev: mutelist, to_remove: .user(profile_pubkey, nil)) else {
+        return
+    }
+
+    damus_state.mutelist_manager.set_mutelist(new_ev)
+    Task { await damus_state.nostrNetwork.postbox.send(new_ev) }
 }
 
 @MainActor
