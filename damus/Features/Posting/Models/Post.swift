@@ -122,7 +122,6 @@ func parse_post_blocks(content: String) -> Blocks? {
     }
 }
 
-
 fileprivate func collect_blocks(ptr: ndb_blocks_ptr, content: UnsafePointer<CChar>) -> [Block] {
     var i = ndb_block_iterator()
     var blocks: [Block] = []

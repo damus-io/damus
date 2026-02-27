@@ -695,6 +695,9 @@ struct ContentView: View {
     }
 
     func connect() async {
+        // Check for and swap in a compacted database before opening
+        let _ = Ndb.try_swap_compacted_db()
+
         // nostrdb
         var mndb = Ndb()
         if mndb == nil {

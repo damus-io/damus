@@ -18,6 +18,20 @@ fileprivate enum CacheClearingState {
     case cleared
 }
 
+/// Tracks the state of database compaction
+fileprivate enum CompactionState {
+    case idle
+    case confirming
+    case compacting
+    case success
+    case failed(String)
+
+    var isIdle: Bool {
+        if case .idle = self { return true }
+        return false
+    }
+}
+
 /// Storage category for display in list and chart
 struct StorageCategory: Identifiable {
     let id: String
@@ -46,6 +60,7 @@ struct StorageSettingsView: View {
     @State private var isPreparingExport: Bool = false
     @State fileprivate var cache_clearing_state: CacheClearingState = .not_cleared
     @State var showing_cache_clear_alert: Bool = false
+    @State fileprivate var compaction_state: CompactionState = .idle
     
     /// Storage categories with cumulative ranges for angle selection (iOS 17+)
     private var categoryRanges: [(category: String, range: Range<Double>)] {
@@ -164,6 +179,11 @@ struct StorageSettingsView: View {
                 // Clear Cache Section
                 Section {
                     self.ClearCacheButton
+                }
+
+                // Compact Database Section
+                Section(footer: Text("Compaction keeps all profiles and your own notes, removing everything else to free up space. The app will need to restart to apply.", comment: "Explanation of database compaction")) {
+                    self.CompactDatabaseButton
                 }
             }
             
@@ -338,7 +358,87 @@ struct StorageSettingsView: View {
                   secondaryButton: .cancel())
         }
     }
+
+    var CompactDatabaseButton: some View {
+        Button(action: {
+            if case .idle = compaction_state {
+                compaction_state = .confirming
+            }
+        }, label: {
+            HStack(spacing: 6) {
+                switch compaction_state {
+                case .idle, .confirming:
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                    Text("Compact Database", comment: "Button to compact the NostrDB database.")
+                case .compacting:
+                    ProgressView()
+                    Text("Compacting...", comment: "Loading message indicating database compaction is in progress.")
+                case .success:
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.green)
+                    Text("Compaction complete. Restart to apply.", comment: "Message indicating compaction succeeded.")
+                case .failed(let msg):
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.red)
+                    Text(msg)
+                }
+            }
+        })
+        .disabled(!compaction_state.isIdle)
+        .alert(
+            Text("Compact Database", comment: "Compact database confirmation title"),
+            isPresented: Binding(
+                get: { if case .confirming = compaction_state { return true } else { return false } },
+                set: { if !$0 { compaction_state = .idle } }
+            )
+        ) {
+            Button(NSLocalizedString("Compact", comment: "Confirm compact button"), role: .destructive) {
+                compact_database()
+            }
+            Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {
+                compaction_state = .idle
+            }
+        } message: {
+            Text("This will remove all notes except your own and keep all profiles. The app will need to restart to apply the changes.", comment: "Compact database confirmation message")
+        }
+    }
+
+    func compact_database() {
+        compaction_state = .compacting
+
+        let ndb = damus_state.ndb
+        let pubkey = damus_state.pubkey
+
+        Task.detached {
+            guard let db_path = Ndb.db_path else {
+                await MainActor.run { compaction_state = .failed("Could not find database path") }
+                return
+            }
+
+            let compact_path = "\(db_path)/compact"
+            let fm = FileManager.default
+
+            // Create the compact output directory
+            try? fm.createDirectory(atPath: compact_path, withIntermediateDirectories: true)
+
+            do {
+                let ok = try ndb.compact(output_path: compact_path, pubkeys: [pubkey])
+                await MainActor.run {
+                    if ok {
+                        compaction_state = .success
+                    } else {
+                        compaction_state = .failed("Compaction failed")
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    compaction_state = .failed("Compaction error: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
 }
+
 
 /// Pie chart displaying storage usage distribution (iOS 17+)
 @available(iOS 17.0, *)

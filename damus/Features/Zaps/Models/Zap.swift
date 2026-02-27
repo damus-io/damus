@@ -88,7 +88,6 @@ enum PendingZapState: Equatable {
     case external(ExtPendingZapState)
 }
 
-
 enum NWCStateType: Equatable {
     case fetching_invoice
     case cancel_fetching_invoice
@@ -476,7 +475,6 @@ func event_tag(_ ev: NostrEvent, name: String) -> String? {
 func decode_nostr_event_json(_ desc: String) -> NostrEvent? {
     return NostrEvent.owned_from_json(json: desc)
 }
-
 
 func fetch_zapper_from_lnurl(lnurls: LNUrls, pubkey: Pubkey, lnurl: String) async -> Pubkey? {
     guard let endpoint = await lnurls.lookup_or_fetch(pubkey: pubkey, lnurl: lnurl),

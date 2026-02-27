@@ -5,7 +5,6 @@
 
 import Foundation
 
-
 /// Represents a block of data stored in nostrdb. This can be
 /// simple text, a hashtag, a url, a relay reference, a mention ref and
 /// potentially more in the future.

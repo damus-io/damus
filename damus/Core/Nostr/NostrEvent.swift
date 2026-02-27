@@ -12,7 +12,6 @@ import secp256k1_implementation
 import CryptoKit
 import NaturalLanguage
 
-
 /// A protocol for structs and classes that can convert themselves from/to a NostrEvent
 protocol NostrEventConvertible {
     associatedtype E: Error
@@ -23,7 +22,6 @@ protocol NostrEventConvertible {
     /// Convert this type into a Nostr Event, using a keypair for signing and a specific timestamp
     func toNostrEvent(keypair: FullKeypair, timestamp: UInt32?) -> NostrEvent?
 }
-
 
 enum ValidationResult: Decodable {
     case unknown
@@ -154,7 +152,6 @@ extension NostrEventOld {
         return parse_note_content(content: content, tags: self.tags)
     }
 
-
     func get_inner_event(cache: EventCache) -> NostrEventOld? {
         guard self.known_kind == .boost else {
             return nil
@@ -175,7 +172,6 @@ extension NostrEventOld {
         self._event_refs = refs
         return refs
     }
-
 
     func decrypted(privkey: String?) -> String? {
         if let decrypted_content = decrypted_content {
@@ -443,7 +439,6 @@ func calculate_event_id(pubkey: Pubkey, created_at: UInt32, kind: UInt32, tags: 
     return NoteId(sha256(commitment))
 }
 
-
 func sha256(_ data: Data) -> Data {
     var hash = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
     data.withUnsafeBytes {
@@ -560,7 +555,6 @@ func gather_quote_ids(our_pubkey: Pubkey, from: NostrEvent) -> [RefId] {
     return ids
 }
 
-
 func gather_reply_ids(our_pubkey: Pubkey, from: NostrEvent) -> [RefId] {
     var ids: [RefId] = from.referenced_ids.first.map({ ref in [ .event(ref) ] }) ?? []
 
@@ -666,8 +660,6 @@ struct DirectMessageBase64 {
     let content: [UInt8]
     let iv: [UInt8]
 }
-
-
 
 func encode_dm_bech32(content: [UInt8], iv: [UInt8]) -> String {
     let content_bech32 = bech32_encode(hrp: "pzap", content)
@@ -786,8 +778,6 @@ func aes_operation(operation: CCOperation, data: [UInt8], iv: [UInt8], shared_se
     return Data(bytes: decrypted_data, count: num_bytes_decrypted)
 
 }
-
-
 
 func validate_event(ev: NostrEvent) -> ValidationResult {
     let id = calculate_event_id(pubkey: ev.pubkey, created_at: ev.created_at, kind: ev.kind, tags: ev.tags.strings(), content: ev.content)
