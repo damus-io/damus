@@ -726,7 +726,10 @@ class RelayPool {
     }
     
     func resubscribeAll(relayId: RelayURL) async {
-        for handler in self.handlers {
+        // Snapshot handlers — the `await send` below suspends the actor,
+        // allowing concurrent mutations to self.handlers.
+        let handlersSnapshot = self.handlers
+        for handler in handlersSnapshot {
             guard let filters = handler.filters else { continue }
             // When the caller specifies no relays, it is implied that the user wants to use the ones in the user relay list. Skip ephemeral relays in that case.
             // When the caller specifies specific relays, do not skip ephemeral relays to respect the exact list given by the caller.
@@ -783,7 +786,10 @@ class RelayPool {
             }
         }
 
-        for handler in handlers {
+        // Snapshot handlers before iteration — register_handler/remove_handler
+        // can mutate the array between yield calls.
+        let currentHandlers = self.handlers
+        for handler in currentHandlers {
             // We send data to the handlers if:
             // - the subscription ID matches, or
             // - the handler filters is `nil`, which is used in some cases as a blanket "give me all notes" (e.g. during signup)

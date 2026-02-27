@@ -90,15 +90,19 @@ actor PostBox {
     
     func try_flushing_events() async {
         let now = Int64(Date().timeIntervalSince1970)
-        for kv in events {
-            let event = kv.value
-            
+        // Snapshot events before iteration — the `await flush_event` below
+        // suspends the actor, allowing concurrent mutations to `events`.
+        let eventsSnapshot = Array(events.values)
+        for event in eventsSnapshot {
             // some are delayed
             if let after = event.flush_after, Date.now.timeIntervalSince1970 < after.timeIntervalSince1970 {
                 continue
             }
-            
-            for relayer in event.remaining {
+
+            // Snapshot remaining relayers — flush_event suspends, and
+            // handle_event could mutate `remaining` between iterations.
+            let relayersSnapshot = Array(event.remaining)
+            for relayer in relayersSnapshot {
                 if relayer.last_attempt == nil ||
                    (now >= (relayer.last_attempt! + Int64(relayer.retry_after))) {
                     print("attempt #\(relayer.attempts) to flush event '\(event.event.content)' to \(relayer.relay) after \(relayer.retry_after) seconds")
@@ -130,6 +134,9 @@ actor PostBox {
             switch on_flush {
             case .once(let cb):
                 if !ev.flushed_once {
+                    // Set flag BEFORE callback to prevent re-entrancy from
+                    // triggering the callback again if handle_event fires
+                    // concurrently within the actor's re-entrant window.
                     ev.flushed_once = true
                     cb(ev)
                 }
