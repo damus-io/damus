@@ -136,7 +136,7 @@ struct DamusPurpleAccountView: View {
             expiry: Date.init(timeIntervalSinceNow: 60 * 60 * 24 * 30),
             subscriber_number: 7,
             active: true,
-            attributes: []
+            active_membership_duration: 0
         )
     )
 }
@@ -150,7 +150,7 @@ struct DamusPurpleAccountView: View {
             expiry: Date.init(timeIntervalSinceNow: -60 * 60 * 24 * 7),
             subscriber_number: 7,
             active: false,
-            attributes: []
+            active_membership_duration: 0
         )
     )
 }
