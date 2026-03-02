@@ -10,10 +10,15 @@ import SwiftUI
 /// This view handles the loading logic for Nostr events, so that you can easily use views that require `NostrEvent`, even if you only have a `NoteId`.
 ///
 /// Supports NIP-01/NIP-10 relay hints to fetch events from relays not in the user's pool.
+/// When no relay hints are available, falls back to the author's NIP-65 write relays per NIP-65.
 struct EventLoaderView<Content: View>: View {
     let damus_state: DamusState
     let event_id: NoteId
     let relayHints: [RelayURL]
+    /// The pubkey of the note's author. Used as a NIP-65 fallback when relay hints are absent and the
+    /// initial lookup fails: the loader will fetch the author's kind-10002 relay list and retry from
+    /// their write relays.
+    let authorPubkey: Pubkey?
     @State var event: NostrEvent?
     @State private var eventNotFound: Bool = false
     @State private var isReloading: Bool = false
@@ -25,11 +30,13 @@ struct EventLoaderView<Content: View>: View {
     ///   - damus_state: The app's shared state.
     ///   - event_id: The ID of the event to load.
     ///   - relayHints: Optional relay URLs where the event may be found (per NIP-01/NIP-10).
+    ///   - authorPubkey: Optional pubkey of the note's author, used as a NIP-65 relay list fallback.
     ///   - content: A view builder that receives the loaded event.
-    init(damus_state: DamusState, event_id: NoteId, relayHints: [RelayURL] = [], @ViewBuilder content: @escaping (NostrEvent) -> Content) {
+    init(damus_state: DamusState, event_id: NoteId, relayHints: [RelayURL] = [], authorPubkey: Pubkey? = nil, @ViewBuilder content: @escaping (NostrEvent) -> Content) {
         self.damus_state = damus_state
         self.event_id = event_id
         self.relayHints = relayHints
+        self.authorPubkey = authorPubkey
         self.content = content
         let event = damus_state.events.lookup(event_id)
         _event = State(initialValue: event)
@@ -40,6 +47,11 @@ struct EventLoaderView<Content: View>: View {
     /// This method attempts to fetch the event via `nostrNetwork.reader.lookup`, which first checks
     /// nostrdb for a cached copy, then queries the network if not found locally. Network queries use
     /// either the specified relay hints (if provided) or the user's relay pool (if no hints are provided).
+    ///
+    /// If the initial lookup fails and an `authorPubkey` is available, the loader fetches the author's
+    /// NIP-65 kind-10002 relay list and retries from their write relays, per NIP-65 which states that
+    /// clients SHOULD download events from the user's write relays.
+    ///
     /// On success, sets `event` and clears `eventNotFound`. On failure, sets `eventNotFound` to true.
     ///
     /// Side effects:
@@ -57,16 +69,48 @@ struct EventLoaderView<Content: View>: View {
         if let foundEvent = lender?.justGetACopy() {
             event = foundEvent
             eventNotFound = false
+            return
         }
-        else {
-            // Handle nil case: event was not found
-            eventNotFound = true
+
+        // Primary lookup failed. If we have the author's pubkey, try their NIP-65 write relays
+        // as a fallback per NIP-65: "When downloading events from a user, clients SHOULD use
+        // the write relays of that user."
+        if let authorPubkey {
+            if let foundEvent = await lookupViaAuthorRelayList(authorPubkey: authorPubkey) {
+                event = foundEvent
+                eventNotFound = false
+                return
+            }
         }
+
+        eventNotFound = true
         #if DEBUG
         if let targetRelays, !targetRelays.isEmpty {
             print("[relay-hints] EventLoaderView: Event \(event_id.hex().prefix(8))... loaded: \(event != nil)")
         }
         #endif
+    }
+
+    /// Fetches the author's NIP-65 kind-10002 relay list and retries the note lookup from their write relays.
+    ///
+    /// - Parameter authorPubkey: The pubkey of the note's author.
+    /// - Returns: The found `NostrEvent`, or `nil` if not found.
+    private func lookupViaAuthorRelayList(authorPubkey: Pubkey) async -> NostrEvent? {
+        let relayListFilter = NostrFilter(kinds: [.relay_list], authors: [authorPubkey], limit: 1)
+        let relayListEvents = await damus_state.nostrNetwork.reader.query(filters: [relayListFilter], timeout: .seconds(5))
+        guard let relayListEvent = relayListEvents.first,
+              let relayList = try? NIP65.RelayList(event: relayListEvent) else {
+            return nil
+        }
+        let writeRelays = relayList.relays.values
+            .filter { $0.rwConfiguration.canWrite }
+            .map { $0.url }
+        guard !writeRelays.isEmpty else { return nil }
+        #if DEBUG
+        print("[relay-hints] EventLoaderView: Falling back to author's \(writeRelays.count) NIP-65 write relay(s) for \(event_id.hex().prefix(8))...")
+        #endif
+        let lender = try? await damus_state.nostrNetwork.reader.lookup(noteId: self.event_id, to: writeRelays)
+        return lender?.justGetACopy()
     }
     
     /// Retries loading the event and displays loading state during the operation.
