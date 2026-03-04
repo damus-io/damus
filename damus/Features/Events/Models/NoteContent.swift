@@ -386,7 +386,8 @@ struct LongformContent {
     }
 
     init(_ markdown: String, profiles: Profiles) {
-        let mentionsResolved = LongformContent.resolveNostrMentions(in: markdown, profiles: profiles)
+        let sanitized = LongformContent.sanitizeUnicodeSeparators(markdown)
+        let mentionsResolved = LongformContent.resolveNostrMentions(in: sanitized, profiles: profiles)
         // Pre-process markdown to ensure images are block-level (have blank lines around them)
         // This prevents images from being parsed as inline within text paragraphs
         let processedMarkdown = LongformContent.ensureBlockLevelImages(mentionsResolved)
@@ -600,6 +601,13 @@ struct LongformContent {
         }
 
         return result
+    }
+
+    /// Replaces Unicode line/paragraph separators (U+2028, U+2029) that cause unexpected breaks in SwiftUI Text.
+    static func sanitizeUnicodeSeparators(_ markdown: String) -> String {
+        return markdown
+            .replacingOccurrences(of: "\u{2028}", with: " ")
+            .replacingOccurrences(of: "\u{2029}", with: "\n\n")
     }
 }
 
