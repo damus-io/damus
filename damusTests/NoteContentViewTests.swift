@@ -436,6 +436,67 @@ class NoteContentViewTests: XCTestCase {
         assertCompatibleTextHasExpectedString(compatibleText: compatibleText, expected: bech)
     }
 
+    // MARK: - resolveNostrMentions
+
+    @MainActor
+    func testResolveNostrMentions_bareNpub_wrapsInMarkdownLink() {
+        let npub = test_pubkey.npub
+        let input = "Hello nostr:\(npub) world"
+        let result = LongformContent.resolveNostrMentions(in: input, profiles: test_damus_state.profiles)
+
+        XCTAssertTrue(result.contains("](nostr:\(npub))"), "Bare npub should be wrapped in markdown link")
+        XCTAssertFalse(result.hasPrefix("["), "Text before mention should be preserved")
+        XCTAssertTrue(result.contains("Hello "), "Text before mention should be preserved")
+        XCTAssertTrue(result.contains(" world"), "Text after mention should be preserved")
+    }
+
+    @MainActor
+    func testResolveNostrMentions_bareNote_wrapsInMarkdownLink() {
+        let noteId = test_note.id.bech32
+        let input = "Check nostr:\(noteId) out"
+        let result = LongformContent.resolveNostrMentions(in: input, profiles: test_damus_state.profiles)
+
+        XCTAssertTrue(result.contains("](nostr:\(noteId))"), "Bare note should be wrapped in markdown link")
+    }
+
+    @MainActor
+    func testResolveNostrMentions_existingMarkdownLink_skipped() {
+        let npub = test_pubkey.npub
+        let input = "[some text](nostr:\(npub))"
+        let result = LongformContent.resolveNostrMentions(in: input, profiles: test_damus_state.profiles)
+
+        XCTAssertEqual(result, input, "Already-linked nostr reference should not be double-wrapped")
+    }
+
+    @MainActor
+    func testResolveNostrMentions_insideCodeBlock_skipped() {
+        let npub = test_pubkey.npub
+        let input = "```\nnostr:\(npub)\n```"
+        let result = LongformContent.resolveNostrMentions(in: input, profiles: test_damus_state.profiles)
+
+        XCTAssertEqual(result, input, "nostr reference inside code block should not be modified")
+    }
+
+    @MainActor
+    func testResolveNostrMentions_multipleMentions_allWrapped() {
+        let npub = test_pubkey.npub
+        let noteId = test_note.id.bech32
+        let input = "By nostr:\(npub) see nostr:\(noteId)"
+        let result = LongformContent.resolveNostrMentions(in: input, profiles: test_damus_state.profiles)
+
+        XCTAssertTrue(result.contains("](nostr:\(npub))"), "npub mention should be wrapped")
+        XCTAssertTrue(result.contains("](nostr:\(noteId))"), "note mention should be wrapped")
+    }
+
+    @MainActor
+    func testResolveNostrMentions_npubDisplayText_hasAtPrefix() {
+        let npub = test_pubkey.npub
+        let input = "nostr:\(npub)"
+        let result = LongformContent.resolveNostrMentions(in: input, profiles: test_damus_state.profiles)
+
+        XCTAssertTrue(result.hasPrefix("[@"), "npub display text should start with @")
+    }
+
 }
 
 private func assertCompatibleTextHasExpectedString(compatibleText: CompatibleText, expected: String) {
