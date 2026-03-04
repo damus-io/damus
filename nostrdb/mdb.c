@@ -4446,7 +4446,19 @@ mdb_env_open2(MDB_env *env)
 		size_t minsize = (meta.mm_last_pg + 1) * meta.mm_psize;
 		if (env->me_mapsize < minsize)
 			env->me_mapsize = minsize;
+		/* Reject truncated files: valid meta pages but missing data pages
+		 * cause SIGSEGV when B-tree pointers are followed via mmap.
+		 * Skip new environments (file is empty until mdb_env_init_meta).
+		 */
+		if (!newenv) {
+			size_t fsize = 0;
+			if ((rc = mdb_fsize(env->me_fd, &fsize)))
+				return rc;
+			if (fsize < minsize)
+				return MDB_INVALID;
+		}
 	}
+
 	meta.mm_mapsize = env->me_mapsize;
 
 	if (newenv && !(flags & MDB_FIXEDMAP)) {
