@@ -211,6 +211,238 @@ final class NdbTests: XCTestCase {
         return opts
     }
 
+    // MARK: - Extension snapshot crash reproduction
+    // Reproduces the #1 crash (40 devices): mdb_page_search_root SIGSEGV
+    // in DamusNotificationService during profile lookup on snapshot database.
+
+    /// Step 1: Does the basic extension flow work at all?
+    /// Create a db, snapshot it, open snapshot with owns_db_file:false, query.
+    func test_extension_snapshot_profile_lookup() throws {
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+        let snapshotDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("snapshot_test_\(UUID().uuidString)")
+        let snapshotPath = remove_file_prefix(snapshotDir.absoluteString)
+        defer { try? FileManager.default.removeItem(at: snapshotDir) }
+
+        // Create main db with profile data
+        do {
+            let ndb = Ndb(path: db_dir)!
+            XCTAssertTrue(ndb.process_events(test_wire_events))
+            Thread.sleep(forTimeInterval: 1.0)
+
+            // Verify profile exists in source
+            let profile = try? ndb.lookup_profile_and_copy(pk)
+            XCTAssertNotNil(profile, "Profile should exist in source db")
+            XCTAssertEqual(profile?.name, "jb55")
+
+            // Snapshot to separate path (like DatabaseSnapshotManager does)
+            try FileManager.default.createDirectory(at: snapshotDir, withIntermediateDirectories: true)
+            try ndb.snapshot(path: snapshotPath)
+            ndb.close()
+        }
+
+        // Open snapshot like the notification extension does (owns_db_file: false)
+        do {
+            guard let extNdb = Ndb(path: snapshotPath, owns_db_file: false) else {
+                XCTFail("Extension Ndb should open snapshot successfully")
+                return
+            }
+
+            // This is the exact code path that crashes on 40 devices:
+            // lookup_profile → SafeNdbTxn.new → lookup_profile_with_txn_inner
+            //   → ndb_lookup_tsid → mdb_page_search_root
+            let profile = try? extNdb.lookup_profile_and_copy(pk)
+            XCTAssertNotNil(profile, "Profile should be readable from snapshot")
+            XCTAssertEqual(profile?.name, "jb55")
+            extNdb.close()
+        }
+    }
+
+    /// Step 2: What happens when snapshot directory is deleted while Ndb is open?
+    /// Simulates DatabaseSnapshotManager.moveSnapshotToFinalDestination replacing
+    /// the directory while the extension has the database open.
+    func test_extension_snapshot_deleted_while_open() throws {
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+        let snapshotDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("snapshot_race_\(UUID().uuidString)")
+        let snapshotPath = remove_file_prefix(snapshotDir.absoluteString)
+        defer { try? FileManager.default.removeItem(at: snapshotDir) }
+
+        // Create and snapshot
+        do {
+            let ndb = Ndb(path: db_dir)!
+            XCTAssertTrue(ndb.process_events(test_wire_events))
+            Thread.sleep(forTimeInterval: 1.0)
+            try FileManager.default.createDirectory(at: snapshotDir, withIntermediateDirectories: true)
+            try ndb.snapshot(path: snapshotPath)
+            ndb.close()
+        }
+
+        // Open snapshot (like extension)
+        guard let extNdb = Ndb(path: snapshotPath, owns_db_file: false) else {
+            XCTFail("Extension Ndb should open snapshot successfully")
+            return
+        }
+
+        // Verify it works before deletion
+        let profileBefore = try? extNdb.lookup_profile_and_copy(pk)
+        XCTAssertNotNil(profileBefore, "Profile should work before directory deletion")
+
+        // Simulate main app replacing snapshot: delete the directory
+        // (This is what DatabaseSnapshotManager.moveSnapshotToFinalDestination does)
+        try FileManager.default.removeItem(at: snapshotDir)
+
+        // Query again — UNIX keeps mmap alive via open fd after unlink,
+        // so the profile should still be accessible
+        let profileAfter = try? extNdb.lookup_profile_and_copy(pk)
+        XCTAssertNotNil(profileAfter, "Profile should survive directory deletion (UNIX fd semantics)")
+
+        extNdb.close()
+    }
+
+    /// Step 3: What happens with delete + replace (full race simulation)?
+    /// Delete snapshot dir, move a NEW snapshot in, then query through old handle.
+    func test_extension_snapshot_replaced_while_open() throws {
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+        let snapshotDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("snapshot_replace_\(UUID().uuidString)")
+        let snapshotPath = remove_file_prefix(snapshotDir.absoluteString)
+        defer { try? FileManager.default.removeItem(at: snapshotDir) }
+
+        // Create and snapshot
+        do {
+            let ndb = Ndb(path: db_dir)!
+            XCTAssertTrue(ndb.process_events(test_wire_events))
+            Thread.sleep(forTimeInterval: 1.0)
+            try FileManager.default.createDirectory(at: snapshotDir, withIntermediateDirectories: true)
+            try ndb.snapshot(path: snapshotPath)
+            ndb.close()
+        }
+
+        // Open snapshot (like extension)
+        guard let extNdb = Ndb(path: snapshotPath, owns_db_file: false) else {
+            XCTFail("Extension Ndb should open snapshot")
+            return
+        }
+
+        // Verify baseline
+        let profileBefore = try? extNdb.lookup_profile_and_copy(pk)
+        XCTAssertNotNil(profileBefore)
+
+        // Create a second snapshot in a temp location
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("snapshot_temp_\(UUID().uuidString)")
+        let tempPath = remove_file_prefix(tempDir.absoluteString)
+        do {
+            let ndb2 = Ndb(path: db_dir)!
+            XCTAssertTrue(ndb2.process_events(test_wire_events))
+            Thread.sleep(forTimeInterval: 1.0)
+            try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+            try ndb2.snapshot(path: tempPath)
+            ndb2.close()
+        }
+
+        // Simulate DatabaseSnapshotManager.moveSnapshotToFinalDestination:
+        // Step 1: Delete old snapshot
+        try FileManager.default.removeItem(at: snapshotDir)
+        // Step 2: Move new snapshot into same path
+        try FileManager.default.moveItem(at: tempDir, to: snapshotDir)
+
+        // Query through the OLD Ndb handle — files underneath have been replaced
+        // but UNIX fd semantics keep the original mmap alive
+        let profileAfter = try? extNdb.lookup_profile_and_copy(pk)
+        XCTAssertNotNil(profileAfter, "Profile should survive directory replacement (UNIX fd semantics)")
+
+        extNdb.close()
+    }
+
+    /// Step 4: What if the snapshot directory exists but data.mdb is missing?
+    func test_extension_snapshot_no_data_file() throws {
+        let snapshotDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("snapshot_empty_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: snapshotDir) }
+        try FileManager.default.createDirectory(at: snapshotDir, withIntermediateDirectories: true)
+        let snapshotPath = remove_file_prefix(snapshotDir.absoluteString)
+
+        // Open like extension — directory exists but no data.mdb
+        let extNdb = Ndb(path: snapshotPath, owns_db_file: false)
+        // Should return nil (db_file_exists check), not crash
+        XCTAssertNil(extNdb, "Ndb should return nil when no data.mdb exists")
+    }
+
+    /// Step 5: What if data.mdb exists but is truncated/empty (0 bytes)?
+    func test_extension_snapshot_truncated_data_file() throws {
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+        let snapshotDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("snapshot_truncated_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: snapshotDir) }
+        try FileManager.default.createDirectory(at: snapshotDir, withIntermediateDirectories: true)
+        let snapshotPath = remove_file_prefix(snapshotDir.absoluteString)
+
+        // Create an empty data.mdb file (0 bytes)
+        XCTAssertTrue(FileManager.default.createFile(atPath: snapshotDir.appendingPathComponent("data.mdb").path, contents: Data()), "Failed to create empty data.mdb")
+
+        // LMDB treats a 0-byte file as a new environment — opens successfully
+        // but the database is empty, so profile lookup must return nil
+        guard let extNdb = Ndb(path: snapshotPath, owns_db_file: false) else {
+            // Also acceptable: Ndb may reject a 0-byte snapshot
+            return
+        }
+        let profile = try? extNdb.lookup_profile_and_copy(pk)
+        XCTAssertNil(profile, "Empty database should not contain any profiles")
+        extNdb.close()
+    }
+
+    /// Step 6: What if data.mdb exists but contains garbage?
+    func test_extension_snapshot_corrupted_data_file() throws {
+        let snapshotDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("snapshot_corrupt_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: snapshotDir) }
+        try FileManager.default.createDirectory(at: snapshotDir, withIntermediateDirectories: true)
+        let snapshotPath = remove_file_prefix(snapshotDir.absoluteString)
+
+        // Create a data.mdb with garbage data (random bytes, page-sized)
+        var garbage = Data(count: 4096 * 4) // 4 pages of garbage
+        for i in 0..<garbage.count { garbage[i] = UInt8.random(in: 0...255) }
+        try garbage.write(to: snapshotDir.appendingPathComponent("data.mdb"))
+
+        // Garbage bytes won't have valid LMDB magic/meta pages — must be rejected
+        let extNdb = Ndb(path: snapshotPath, owns_db_file: false)
+        XCTAssertNil(extNdb, "Ndb should refuse to open a corrupted data.mdb")
+        extNdb?.close()
+    }
+
+    /// Step 7: What if the snapshot is mid-write? Simulate by creating a valid snapshot
+    /// then truncating data.mdb to half its size.
+    func test_extension_snapshot_partially_written() throws {
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+        let snapshotDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("snapshot_partial_\(UUID().uuidString)")
+        let snapshotPath = remove_file_prefix(snapshotDir.absoluteString)
+        defer { try? FileManager.default.removeItem(at: snapshotDir) }
+
+        // Create a valid snapshot first
+        do {
+            let ndb = Ndb(path: db_dir)!
+            XCTAssertTrue(ndb.process_events(test_wire_events))
+            Thread.sleep(forTimeInterval: 1.0)
+            try FileManager.default.createDirectory(at: snapshotDir, withIntermediateDirectories: true)
+            try ndb.snapshot(path: snapshotPath)
+            ndb.close()
+        }
+
+        // Truncate data.mdb to half its size (simulating interrupted write)
+        let dataPath = snapshotDir.appendingPathComponent("data.mdb")
+        let fullData = try Data(contentsOf: dataPath)
+        let halfData = fullData.prefix(fullData.count / 2)
+        try halfData.write(to: dataPath)
+        print("Truncated data.mdb from \(fullData.count) to \(halfData.count) bytes")
+
+        let extNdb = Ndb(path: snapshotPath, owns_db_file: false)
+        XCTAssertNil(extNdb, "Ndb should refuse to open a truncated snapshot")
+        extNdb?.close()
+    }
+
     func test_iteration_perf() throws {
         guard let note = NdbNote.owned_from_json(json: test_contact_list_json) else {
             XCTAssert(false)
