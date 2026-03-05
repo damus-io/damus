@@ -215,7 +215,7 @@ struct NoteContentView: View {
                         ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media) { dismiss in
                             fullscreen_preview(dismiss: dismiss)
                         }
-                        BlurOverlayView(blur_images: $blur_images, artifacts: artifacts, size: size, damus_state: damus_state, parentView: .noteContentView)
+                        BlurOverlayView(blur_images: $blur_images)
                     }
                 }
             }
@@ -615,59 +615,34 @@ func lookup_cached_preview_size(previews: PreviewCache, evid: NoteId) -> CGFloat
 
 struct BlurOverlayView: View {
     @Binding var blur_images: Bool
-    let artifacts: NoteArtifactsSeparated?
-    let size: EventViewKind?
-    let damus_state: DamusState?
-    let parentView: ParentViewType
+
     var body: some View {
         ZStack {
-            
-            Color.black
-                .opacity(0.54)
-            
+            Color.black.opacity(0.54)
             Blur()
-            
-            VStack(alignment: .center) {
-                Image(systemName: "eye.slash")
+            VStack(spacing: 12) {
+                Image(systemName: "shield")
+                    .font(.system(size: 28))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .accessibilityHidden(true)
+
+                Text(NSLocalizedString("Content hidden", comment: "Title on the image blur overlay indicating media is intentionally hidden"))
                     .foregroundStyle(.white)
-                    .bold()
-                    .padding(EdgeInsets(top: 5, leading: 10, bottom: 0, trailing: 10))
-                Text(NSLocalizedString("Media from someone you don't follow", comment: "Label on the image blur mask"))
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(Color.white)
-                    .font(.title2)
-                    .padding(EdgeInsets(top: 5, leading: 10, bottom: 0, trailing: 10))
-                Button(NSLocalizedString("Tap to load", comment: "Label for button that allows user to dismiss media content warning and unblur the image")) {
+                    .font(.headline)
+
+                Button(NSLocalizedString("Show", comment: "Button to reveal hidden media on the blur overlay")) {
                     blur_images = false
                 }
                 .buttonStyle(.bordered)
-                .fontWeight(.bold)
+                .fontWeight(.semibold)
                 .foregroundStyle(.white)
-                .padding(EdgeInsets(top: 5, leading: 10, bottom: 0, trailing: 10))
-                
-                if parentView == .noteContentView,
-                   let artifacts = artifacts,
-                   let size = size,
-                   let damus_state = damus_state
-                {
-                    switch artifacts.media[0] {
-                    case .image(let url), .video(let url):
-                        Text(abbreviateURL(url, maxLength: 30))
-                            .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size * 0.8))
-                            .foregroundStyle(.white)
-                            .multilineTextAlignment(.center)
-                            .padding(EdgeInsets(top: 20, leading: 10, bottom: 5, trailing: 10))
-                    }
-                }
+                .padding(.top, 4)
             }
+            .padding(.horizontal, 20)
         }
         .onTapGesture {
             blur_images = false
         }
-    }
-    
-    enum ParentViewType {
-        case noteContentView, longFormView
     }
 }
 
