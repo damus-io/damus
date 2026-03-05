@@ -7,20 +7,29 @@
 
 import SwiftUI
 import AVFoundation
+import Combine
 
 /// A view with playback video controls, made to work seamlessly with `DamusVideoPlayer`
 struct DamusVideoControlsView: View {
     @ObservedObject var video: DamusVideoPlayer
-    
+    @State private var current_time: TimeInterval = .zero
+
+    private var currentTimeBinding: Binding<TimeInterval> {
+        Binding(
+            get: { current_time },
+            set: { video.current_time = $0; current_time = $0 }
+        )
+    }
+
     var body: some View {
         VStack {
             HStack {
                 Text(video_timestamp_indicator)
                     .bold()
                     .foregroundStyle(.white)
-                
+
                 Spacer()
-                
+
                 Button(action: {
                     video.is_muted.toggle()
                 }, label: {
@@ -50,7 +59,7 @@ struct DamusVideoControlsView: View {
                 })
                 .buttonStyle(PlayerCircleButtonStyle())
                 if let video_duration = video.duration, video_duration > 0 {
-                    Slider(value: $video.current_time, in: 0...video_duration, onEditingChanged: { editing in
+                    Slider(value: currentTimeBinding, in: 0...video_duration, onEditingChanged: { editing in
                         video.is_editing_current_time = editing
                     })
                     .tint(.white)
@@ -61,13 +70,14 @@ struct DamusVideoControlsView: View {
             }
         }
         .padding(10)
+        .onReceive(video.currentTimeSubject) { current_time = $0 }
     }
-    
+
     var video_timestamp_indicator: String {
         guard let video_duration = video.duration else {
-            return "\(formatTimeInterval(video.current_time))"
+            return "\(formatTimeInterval(current_time))"
         }
-        return "\(formatTimeInterval(video.current_time)) / \(formatTimeInterval(video_duration))"
+        return "\(formatTimeInterval(current_time)) / \(formatTimeInterval(video_duration))"
     }
     
     func formatTimeInterval(_ interval: TimeInterval) -> String {

@@ -8,14 +8,13 @@
 import SwiftUI
 
 /// A container view that shows or hides provided content based on whether the given event should be muted or not, with built-in user controls to show or hide content, and an option to customize the muted box
-struct EventMutingContainerView<Content: View>: View {
-    typealias MuteBoxViewClosure = ((_ shown: Binding<Bool>, _ mutedReason: MuteItem?) -> AnyView)
+struct EventMutingContainerView<Content: View, MuteBox: View>: View {
 
     let damus_state: DamusState
     let event: NostrEvent
     let content: Content
-    var customMuteBox: MuteBoxViewClosure?
-    
+    let customMuteBox: ((Binding<Bool>, MuteItem?) -> MuteBox)?
+
     /// Represents if the note itself should be shown.
     ///
     /// By default this is the same as `should_show_event`. However, if the user taps the button to manually show a muted note, this can become out of sync with `should_show_event`.
@@ -23,48 +22,55 @@ struct EventMutingContainerView<Content: View>: View {
 
     @State var muted_reason: MuteItem?
 
-    init(damus_state: DamusState, event: NostrEvent, @ViewBuilder content: () -> Content) {
+    init(damus_state: DamusState, event: NostrEvent, @ViewBuilder content: () -> Content) where MuteBox == EmptyView {
         self.damus_state = damus_state
         self.event = event
         self.content = content()
+        self.customMuteBox = nil
         self._shown = State(initialValue: should_show_event(state: damus_state, ev: event))
     }
-    
-    init(damus_state: DamusState, event: NostrEvent, muteBox: @escaping MuteBoxViewClosure, @ViewBuilder content: () -> Content) {
-        self.init(damus_state: damus_state, event: event, content: content)
+
+    init(damus_state: DamusState, event: NostrEvent, muteBox: @escaping (Binding<Bool>, MuteItem?) -> MuteBox, @ViewBuilder content: () -> Content) {
+        self.damus_state = damus_state
+        self.event = event
+        self.content = content()
         self.customMuteBox = muteBox
+        self._shown = State(initialValue: should_show_event(state: damus_state, ev: event))
     }
-    
+
     var should_mute: Bool {
         return !should_show_event(state: damus_state, ev: event)
     }
-    
+
     var body: some View {
-        Group {
-            if should_mute {
-                if let customMuteBox {
-                    customMuteBox($shown, muted_reason)
-                }
-                else {
-                    EventMutedBoxView(shown: $shown, reason: muted_reason)
+        innerBody
+            .onReceive(handle_notify(.new_mutes)) { mutes in
+                let new_muted_event_reason = damus_state.mutelist_manager.event_muted_reason(event)
+                if new_muted_event_reason != nil {
+                    shown = false
+                    muted_reason = new_muted_event_reason
                 }
             }
-            if shown {
-                self.content
+            .onReceive(handle_notify(.new_unmutes)) { unmutes in
+                if damus_state.mutelist_manager.event_muted_reason(event) != nil {
+                    shown = true
+                    muted_reason = nil
+                }
+            }
+    }
+
+    @ViewBuilder
+    private var innerBody: some View {
+        if should_mute {
+            if let customMuteBox {
+                customMuteBox($shown, muted_reason)
+            }
+            else {
+                EventMutedBoxView(shown: $shown, reason: muted_reason)
             }
         }
-        .onReceive(handle_notify(.new_mutes)) { mutes in
-            let new_muted_event_reason = damus_state.mutelist_manager.event_muted_reason(event)
-            if new_muted_event_reason != nil {
-                shown = false
-                muted_reason = new_muted_event_reason
-            }
-        }
-        .onReceive(handle_notify(.new_unmutes)) { unmutes in
-            if damus_state.mutelist_manager.event_muted_reason(event) != nil {
-                shown = true
-                muted_reason = nil
-            }
+        if shown {
+            self.content
         }
     }
 }

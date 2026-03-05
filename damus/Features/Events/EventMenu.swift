@@ -10,35 +10,162 @@ import SwiftUI
 struct EventMenuContext: View {
     let damus_state: DamusState
     let event: NostrEvent
-    let target_pubkey: Pubkey
-    let profileModel : ProfileModel
-    
+
     init(damus: DamusState, event: NostrEvent) {
         self.damus_state = damus
         self.event = event
-        self.target_pubkey = event.pubkey
-        self.profileModel = ProfileModel(pubkey: target_pubkey, damus: damus)
     }
-    
+
     var body: some View {
-        HStack {
-            Label("", systemImage: "ellipsis")
-                .foregroundColor(Color.gray)
-                .contentShape(Circle())
-                // Add our Menu button inside an overlay modifier to avoid affecting the rest of the layout around us.
-                .overlay(
-                    Menu {
-                        MenuItems(damus_state: damus_state, event: event, target_pubkey: target_pubkey, profileModel: profileModel)
-                    } label: {
-                        Color.clear
-                    }
-                    // Hitbox frame size
-                    .frame(width: 50, height: 35)
-                )
+        EventMenuButton(damus_state: damus_state, event: event)
+            .frame(width: 50, height: 35)
+            .padding([.bottom], 4)
+    }
+}
+
+/// UIKit-backed menu button that replaces the SwiftUI Menu overlay.
+///
+/// Using UIButton + UIDeferredMenuElement instead of SwiftUI Menu because:
+/// 1. SwiftUI Menu eagerly evaluates its content builder on every row body,
+///    creating deeply nested ZStack/Menu layout nodes that the layout engine
+///    must recurse through for spacing computation (15ms+ per row).
+/// 2. UIKit UIButton is an opaque leaf node — no recursive spacing traversal.
+/// 3. UIDeferredMenuElement.uncached only builds menu items when tapped,
+///    deferring ProfileModel allocation and menu construction to interaction time.
+struct EventMenuButton: UIViewRepresentable {
+    let damus_state: DamusState
+    let event: NostrEvent
+
+    func makeUIView(context: Context) -> UIButton {
+        let button = UIButton(type: .system)
+        let config = UIImage.SymbolConfiguration(textStyle: .body)
+        button.setImage(UIImage(systemName: "ellipsis", withConfiguration: config), for: .normal)
+        button.tintColor = .gray
+        button.showsMenuAsPrimaryAction = true
+        button.menu = buildDeferredMenu()
+        return button
+    }
+
+    func updateUIView(_ button: UIButton, context: Context) {
+        button.menu = buildDeferredMenu()
+    }
+
+    private func buildDeferredMenu() -> UIMenu {
+        let ds = damus_state
+        let ev = event
+        return UIMenu(children: [
+            UIDeferredMenuElement.uncached { completion in
+                completion(EventMenuButton.menuActions(damus_state: ds, event: ev))
+            }
+        ])
+    }
+
+    @MainActor
+    static func menuActions(damus_state: DamusState, event: NostrEvent) -> [UIMenuElement] {
+        let target_pubkey = event.pubkey
+        let profileModel = ProfileModel(pubkey: target_pubkey, damus: damus_state)
+        let isBookmarked = damus_state.bookmarks.isBookmarked(event)
+        let isMutedThread = damus_state.mutelist_manager.is_event_muted(event)
+
+        var actions: [UIMenuElement] = []
+
+        actions.append(UIAction(
+            title: NSLocalizedString("Copy text", comment: "Context menu option for copying the text from an note."),
+            image: UIImage(named: "copy2")
+        ) { _ in
+            UIPasteboard.general.string = event.get_content(damus_state.keypair)
+        })
+
+        actions.append(UIAction(
+            title: NSLocalizedString("Copy user public key", comment: "Context menu option for copying the ID of the user who created the note."),
+            image: UIImage(named: "user")
+        ) { _ in
+            UIPasteboard.general.string = Bech32Object.encode(.nprofile(NProfile(author: target_pubkey, relays: profileModel.getCappedRelays())))
+        })
+
+        actions.append(UIAction(
+            title: NSLocalizedString("Copy note ID", comment: "Context menu option for copying the ID of the note."),
+            image: UIImage(named: "note-book")
+        ) { _ in
+            Task {
+                let relays = await damus_state.nostrNetwork.relaysForEvent(event: event)
+                let urls: [RelayURL]
+                if !relays.isEmpty {
+                    urls = relays.prefix(Constants.MAX_SHARE_RELAYS).map { $0 }
+                } else {
+                    urls = profileModel.getCappedRelays()
+                }
+                UIPasteboard.general.string = Bech32Object.encode(.nevent(NEvent(event: event, relays: urls)))
+            }
+        })
+
+        if damus_state.settings.developer_mode {
+            actions.append(UIAction(
+                title: NSLocalizedString("Copy note JSON", comment: "Context menu option for copying the JSON text from the note."),
+                image: UIImage(named: "code.on.square")
+            ) { _ in
+                UIPasteboard.general.string = event_to_json(ev: event)
+            })
         }
-        .padding([.bottom], 4)
-        .contentShape(Rectangle())
-        .onTapGesture {}
+
+        actions.append(UIAction(
+            title: isBookmarked
+                ? NSLocalizedString("Remove bookmark", comment: "Context menu option for removing a note bookmark.")
+                : NSLocalizedString("Add bookmark", comment: "Context menu option for adding a note bookmark."),
+            image: UIImage(named: isBookmarked ? "bookmark.fill" : "bookmark")
+        ) { _ in
+            damus_state.bookmarks.updateBookmark(event)
+        })
+
+        actions.append(UIAction(
+            title: NSLocalizedString("Broadcast", comment: "Context menu option for broadcasting the user's note to all of the user's connected relay servers."),
+            image: UIImage(named: "globe")
+        ) { _ in
+            notify(.broadcast(event))
+        })
+
+        if event.known_kind != .dm {
+            actions.append(muteDurationMenu(
+                title: isMutedThread
+                    ? NSLocalizedString("Unmute conversation", comment: "Context menu option for unmuting a conversation.")
+                    : NSLocalizedString("Mute conversation", comment: "Context menu option for muting a conversation."),
+                image: UIImage(named: "mute")
+            ) { duration in
+                if let full_keypair = damus_state.keypair.to_full(),
+                   let new_mutelist_ev = toggle_from_mutelist(keypair: full_keypair, prev: damus_state.mutelist_manager.event, to_toggle: .thread(event.thread_id(), duration?.date_from_now)) {
+                    damus_state.mutelist_manager.set_mutelist(new_mutelist_ev)
+                    Task { await damus_state.nostrNetwork.postbox.send(new_mutelist_ev) }
+                }
+            })
+        }
+
+        if damus_state.keypair.pubkey != target_pubkey && damus_state.keypair.privkey != nil {
+            actions.append(UIAction(
+                title: NSLocalizedString("Report", comment: "Context menu option for reporting content."),
+                image: UIImage(named: "raising-hand"),
+                attributes: .destructive
+            ) { _ in
+                notify(.report(.note(ReportNoteTarget(pubkey: target_pubkey, note_id: event.id))))
+            })
+
+            actions.append(muteDurationMenu(
+                title: NSLocalizedString("Mute/Block user", comment: "Context menu option for muting/blocking users."),
+                image: UIImage(named: "mute")
+            ) { duration in
+                notify(.mute(.user(target_pubkey, duration?.date_from_now)))
+            })
+        }
+
+        return actions
+    }
+
+    private static func muteDurationMenu(title: String, image: UIImage?, action: @escaping (DamusDuration?) -> Void) -> UIMenu {
+        let children = DamusDuration.allCases.map { duration in
+            UIAction(title: duration.title) { _ in
+                action(duration)
+            }
+        }
+        return UIMenu(title: title, image: image, children: children)
     }
 }
 
@@ -157,41 +284,3 @@ struct MenuItems: View {
     }
 }
 
-/*
-struct EventMenu: UIViewRepresentable {
-    
-    typealias UIViewType = UIButton
-
-    let saveAction = UIAction(title: "") { action in }
-    let saveMenu = UIMenu(title: "", children: [
-        UIAction(title: "First Menu Item", image: UIImage(systemName: "nameOfSFSymbol")) { action in
-            //code action for menu item
-        },
-        UIAction(title: "First Menu Item", image: UIImage(systemName: "nameOfSFSymbol")) { action in
-            //code action for menu item
-        },
-        UIAction(title: "First Menu Item", image: UIImage(systemName: "nameOfSFSymbol")) { action in
-            //code action for menu item
-        },
-    ])
-
-    func makeUIView(context: Context) -> UIButton {
-        let button = UIButton(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
-        button.showsMenuAsPrimaryAction = true
-        button.menu = saveMenu
-        
-        return button
-    }
-    
-    func updateUIView(_ uiView: UIButton, context: Context) {
-        uiView.setImage(UIImage(systemName: "plus"), for: .normal)
-    }
-}
-
-struct EventMenu_Previews: PreviewProvider {
-    static var previews: some View {
-        EventMenu(event: test_event, privkey: nil, pubkey: test_event.pubkey)
-    }
-}
-
-*/
