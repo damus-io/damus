@@ -970,11 +970,12 @@ func build_post(state: DamusState, action: PostAction, draft: DraftArtifacts) as
         action: action,
         uploadedMedias: draft.media,
         references: draft.references,
-        filtered_pubkeys: draft.filtered_pubkeys
+        filtered_pubkeys: draft.filtered_pubkeys,
+        preserveWebLinks: draft.preserveWebLinks
     )
 }
 
-func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], references: [RefId], filtered_pubkeys: Set<Pubkey>) async -> NostrPost {
+func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], references: [RefId], filtered_pubkeys: Set<Pubkey>, preserveWebLinks: Bool = false) async -> NostrPost {
     // don't add duplicate pubkeys but retain order
     var pkset = Set<Pubkey>()
 
@@ -983,7 +984,7 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
         guard case .pubkey(let pk) = ref else {
             return
         }
-        
+
         if pkset.contains(pk) || filtered_pubkeys.contains(pk) {
             return
         }
@@ -991,8 +992,8 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
         pkset.insert(pk)
         acc.append(pk)
     }
-    
-    return await build_post(state: state, post: post, action: action, uploadedMedias: uploadedMedias, pubkeys: pks)
+
+    return await build_post(state: state, post: post, action: action, uploadedMedias: uploadedMedias, pubkeys: pks, preserveWebLinks: preserveWebLinks)
 }
 
 /// This builds a Nostr post from draft data from `PostView` or other draft-related classes
@@ -1008,7 +1009,7 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
 ///   - uploadedMedias: The medias attached to this post
 ///   - pubkeys: The referenced pubkeys
 /// - Returns: A NostrPost, which can then be signed into an event.
-func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], pubkeys: [Pubkey]) async -> NostrPost {
+func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], pubkeys: [Pubkey], preserveWebLinks: Bool = false) async -> NostrPost {
     let post = NSMutableAttributedString(attributedString: post)
     post.enumerateAttributes(in: NSRange(location: 0, length: post.length), options: []) { attributes, range, stop in
         let linkValue = attributes[.link]
@@ -1088,6 +1089,12 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
             tags += pubkeys.map { pk in
                 ["p", pk.hex()]
             }
+    }
+
+    // Convert web URLs containing NIP-19 bech32 identifiers to nostr: format,
+    // unless the user chose to preserve web links.
+    if !preserveWebLinks {
+        content = convertNostrWebLinksToNative(content)
     }
 
     return NostrPost(content: content.trimmingCharacters(in: .whitespacesAndNewlines), kind: .text, tags: tags)

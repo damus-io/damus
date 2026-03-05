@@ -44,6 +44,49 @@ class DraftTests: XCTestCase {
         XCTAssertTrue(result.contains(nevent))
     }
 
+    // MARK: - convertNostrWebLinksToNative tests
+
+    /// A njump.me nevent URL should be converted to nostr: format.
+    func testConvertNostrWebLinksToNative_nevent() {
+        let nevent = "nevent1qqstna2yrezu5wghjvswqqculvvwxsrcvu7uc0f78gan4xqhvz49d9spr3mhxue69uhkummnw3ez6un9d3shjtn4de6x2argwghx6egpr4mhxue69uhkummnw3ez6ur4vgh8wetvd3hhyer9wghxuet5nxnepm"
+        let input = "Check this out: https://njump.me/\(nevent)"
+        XCTAssertEqual(convertNostrWebLinksToNative(input), "Check this out: nostr:\(nevent)")
+    }
+
+    /// An npub URL should be converted to nostr: format.
+    func testConvertNostrWebLinksToNative_npub() {
+        let npub = "npub1sg6plzptd64u62a878hep2kev88swjh3tw00gjsfl8f237lmu63q0uf63m"
+        let input = "Follow https://njump.me/\(npub) on nostr"
+        XCTAssertEqual(convertNostrWebLinksToNative(input), "Follow nostr:\(npub) on nostr")
+    }
+
+    /// Invalid bech32 checksums should not be converted.
+    func testConvertNostrWebLinksToNative_invalidBech32() {
+        let input = "Check https://njump.me/nevent1invalidchecksum123"
+        XCTAssertEqual(convertNostrWebLinksToNative(input), input)
+    }
+
+    /// note1 URLs should not be converted (draft classifier misclassifies them).
+    func testConvertNostrWebLinksToNative_note1Skipped() {
+        let note = bech32_encode(hrp: "note", test_note.id.bytes)
+        let input = "See https://njump.me/\(note)"
+        XCTAssertEqual(convertNostrWebLinksToNative(input), input, "note1 URLs should not be converted")
+    }
+
+    // MARK: - firstNostrWebLink tests
+
+    /// firstNostrWebLink should detect a nevent URL and return a parsed Bech32Object.
+    func testFirstNostrWebLink_findsNevent() {
+        let nevent = "nevent1qqstna2yrezu5wghjvswqqculvvwxsrcvu7uc0f78gan4xqhvz49d9spr3mhxue69uhkummnw3ez6un9d3shjtn4de6x2argwghx6egpr4mhxue69uhkummnw3ez6ur4vgh8wetvd3hhyer9wghxuet5nxnepm"
+        let result = firstNostrWebLink("Check https://njump.me/\(nevent)")
+        XCTAssertNotNil(result, "Should detect nevent URL")
+    }
+
+    /// firstNostrWebLink should return nil for plain text without nostr web links.
+    func testFirstNostrWebLink_nilForPlainText() {
+        XCTAssertNil(firstNostrWebLink("Just a regular post"), "Should return nil for text without nostr web links")
+    }
+
     // MARK: - C parser regression
 
     /// Regression: C parser previously converted damus.io URLs to BLOCK_MENTION_BECH32,
