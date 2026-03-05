@@ -114,21 +114,45 @@ struct NotificationsView: View {
             .tag(NotificationFilterState.replies)
         }
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button(
-                    action: { state.nav.push(route: Route.NotificationSettings(settings: state.settings)) },
-                    label: {
-                        Image(systemName: "gearshape")
-                            .frame(width: 24, height: 24)
-                            .foregroundColor(.gray)
-                    }
-                )
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                if showTrustedButton {
-                    TrustedNetworkButton(filter: $filter.friend_filter) {
-                        if #available(iOS 17, *) {
+            if #available(iOS 26.0, *) {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(
+                        action: { state.nav.push(route: Route.NotificationSettings(settings: state.settings)) },
+                        label: {
+                            Image(systemName: "gearshape")
+                                .frame(width: 24, height: 24)
+                                .foregroundColor(.gray)
+                        }
+                    )
+                }
+                .sharedBackgroundVisibility(.hidden)
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if showTrustedButton {
+                        TrustedNetworkButton(filter: $filter.friend_filter) {
                             TrustedNetworkButtonTip.shared.invalidate(reason: .actionPerformed)
+                        }
+                    }
+                }
+                .sharedBackgroundVisibility(.hidden)
+            } else {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(
+                        action: { state.nav.push(route: Route.NotificationSettings(settings: state.settings)) },
+                        label: {
+                            Image(systemName: "gearshape")
+                                .frame(width: 24, height: 24)
+                                .foregroundColor(.gray)
+                        }
+                    )
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if showTrustedButton {
+                        TrustedNetworkButton(filter: $filter.friend_filter) {
+                            if #available(iOS 17, *) {
+                                TrustedNetworkButtonTip.shared.invalidate(reason: .actionPerformed)
+                            }
                         }
                     }
                 }
