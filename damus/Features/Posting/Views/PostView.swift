@@ -1068,6 +1068,9 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
         break
     }
 
+    // Strip any nsec1 private key tokens from content before publishing
+    content = sanitizeNsecTokens(content)
+
     // append additional tags
     tags += uploadedMedias.compactMap { $0.metadata?.to_tag() }
     

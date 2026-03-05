@@ -37,9 +37,42 @@ func remove_nostr_uri_prefix(_ s: String) -> String {
 
 func abbreviateURL(_ url: URL, maxLength: Int = MAX_CHAR_URL) -> String {
     let urlString = url.absoluteString
-    
+
     if urlString.count > maxLength {
         return String(urlString.prefix(maxLength)) + "…"
     }
     return urlString
+}
+
+// MARK: - nsec sanitization
+
+private let bech32Charset = "023456789acdefghjklmnpqrstuvwxyz"
+
+private let nsecPattern = "\\bnsec1[\(bech32Charset)]{58,}\\b"
+
+/// Strips validated nsec1 tokens from the content string to prevent accidental private key leakage.
+/// Only strips tokens that pass `Bech32Object.parse()` validation (which returns `.npub` for valid nsec1).
+func sanitizeNsecTokens(_ content: String) -> String {
+    guard let regex = try? NSRegularExpression(pattern: nsecPattern, options: []) else {
+        return content
+    }
+
+    let nsRange = NSRange(content.startIndex..., in: content)
+    let matches = regex.matches(in: content, options: [], range: nsRange)
+
+    guard !matches.isEmpty else { return content }
+
+    var result = content
+    for match in matches.reversed() {
+        guard let swiftRange = Range(match.range, in: result) else { continue }
+        let candidate = String(result[swiftRange])
+        // Bech32Object.parse returns .npub for valid nsec1 (never .nsec)
+        guard Bech32Object.parse(candidate) != nil else { continue }
+        result.replaceSubrange(swiftRange, with: "")
+    }
+
+    // Clean up any multiple spaces left behind
+    result = result.replacingOccurrences(of: " {2,}", with: " ", options: .regularExpression)
+
+    return result.trimmingCharacters(in: .whitespaces)
 }

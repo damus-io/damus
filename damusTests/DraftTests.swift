@@ -19,6 +19,31 @@ class DraftTests: XCTestCase {
         XCTAssertEqual(draft.unwrapped_note, test_note)
     }
 
+    // MARK: - sanitizeNsecTokens tests
+
+    /// Validates that a real nsec1 token is stripped from plain text, URL paths, and query strings.
+    func testSanitizeNsecTokens_stripsValidNsec() {
+        let nsec = bech32_privkey(test_seckey)
+        XCTAssertFalse(sanitizeNsecTokens("My key is \(nsec) please help").contains(nsec))
+        XCTAssertFalse(sanitizeNsecTokens("https://example.com/\(nsec)/info").contains(nsec))
+        XCTAssertFalse(sanitizeNsecTokens("https://example.com?key=\(nsec)").contains(nsec))
+    }
+
+    /// Short or incidental "nsec1" substrings that don't form a valid key should be left alone.
+    func testSanitizeNsecTokens_incidentalTextNotStripped() {
+        let input = "The word nsec1 is not a key and nsec1abc is also not"
+        XCTAssertEqual(sanitizeNsecTokens(input), input)
+    }
+
+    /// Other bech32 tokens (e.g. nevent1) must survive even when an nsec1 is stripped from the same string.
+    func testSanitizeNsecTokens_preservesOtherBech32() {
+        let nsec = bech32_privkey(test_seckey)
+        let nevent = "nevent1qqstna2yrezu5wghjvswqqculvvwxsrcvu7uc0f78gan4xqhvz49d9spr3mhxue69uhkummnw3ez6un9d3shjtn4de6x2argwghx6egpr4mhxue69uhkummnw3ez6ur4vgh8wetvd3hhyer9wghxuet5nxnepm"
+        let result = sanitizeNsecTokens("Event: nostr:\(nevent) key: \(nsec)")
+        XCTAssertFalse(result.contains(nsec))
+        XCTAssertTrue(result.contains(nevent))
+    }
+
     // MARK: - C parser regression
 
     /// Regression: C parser previously converted damus.io URLs to BLOCK_MENTION_BECH32,
