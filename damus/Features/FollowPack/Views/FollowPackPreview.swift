@@ -75,7 +75,7 @@ struct FollowPackBannerImage: View {
             } else {
                 ZStack {
                     titleImage(url: url, preview: preview)
-                    BlurOverlayView(blur_images: $blur_imgs, artifacts: nil, size: nil, damus_state: nil, parentView: .longFormView)
+                    BlurOverlayView(blur_images: $blur_imgs)
                         .frame(maxWidth: preview ? 350 : UIScreen.main.bounds.width, minHeight: preview ? 180 : 200, maxHeight: preview ? 180 : 200)
                 }
             }
