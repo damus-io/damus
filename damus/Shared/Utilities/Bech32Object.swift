@@ -172,7 +172,22 @@ enum Bech32Object : Equatable, Hashable {
 
         guard ok else { return nil }
 
-        return decodeCBech32(b)
+        guard var obj = decodeCBech32(b) else { return nil }
+
+        // Patch in the kind from raw TLV data, since nostrdb's C parser
+        // doesn't extract it. See: https://github.com/damus-io/nostrdb/issues/126
+        switch obj {
+        case .nevent(let ev):
+            let kind = extractTLVKind(fromBech32: str)
+            obj = .nevent(NEvent(noteid: ev.noteid, relays: ev.relays, author: ev.author, kind: kind))
+        case .naddr(let addr):
+            let kind = extractTLVKind(fromBech32: str) ?? 0
+            obj = .naddr(NAddr(identifier: addr.identifier, author: addr.author, relays: addr.relays, kind: kind))
+        default:
+            break
+        }
+
+        return obj
     }
     
     static func encode(_ obj: Bech32Object) -> String {
@@ -236,6 +251,36 @@ private enum TLVType: UInt8 {
     case RELAY
     case AUTHOR
     case KIND
+}
+
+/// Extracts the NIP-19 TLV kind field (type 3) from raw bech32 data.
+///
+/// This is a Swift-side workaround for the nostrdb C parser which defines
+/// TLV_KIND but never parses it — the bech32_nevent and bech32_naddr structs
+/// lack a kind field entirely. See: https://github.com/damus-io/nostrdb/issues/126
+///
+/// Once nostrdb adds kind support upstream, this function can be removed and
+/// the kind can be read directly from the C structs.
+private func extractTLVKind(fromBech32 str: String) -> UInt32? {
+    guard let decoded = try? bech32_decode(str) else { return nil }
+    let data = decoded.data
+    var i = 0
+    while i < data.count {
+        guard i + 1 < data.count else { break }
+        let tlvType = data[i]
+        let tlvLen = Int(data[i + 1])
+        i += 2
+        guard i + tlvLen <= data.count else { break }
+        if tlvType == TLVType.KIND.rawValue && tlvLen == 4 {
+            let kind = UInt32(data[i]) << 24
+                     | UInt32(data[i + 1]) << 16
+                     | UInt32(data[i + 2]) << 8
+                     | UInt32(data[i + 3])
+            return kind
+        }
+        i += tlvLen
+    }
+    return nil
 }
 
 private func writeBytesList(bytesList: inout [UInt8], tlvType: TLVType, data: [UInt8]){
