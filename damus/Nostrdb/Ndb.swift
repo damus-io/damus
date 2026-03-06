@@ -325,9 +325,80 @@ class Ndb {
         })
     }
     
+    // MARK: Database compaction
+
+    func compact(output_path: String, pubkeys: [Pubkey]) throws -> Bool {
+        return try withNdb({
+            // Build a contiguous buffer of 32-byte pubkeys
+            var raw_pubkeys: [UInt8] = []
+            raw_pubkeys.reserveCapacity(pubkeys.count * 32)
+            for pk in pubkeys {
+                pk.id.withUnsafeBytes { buf in
+                    raw_pubkeys.append(contentsOf: buf)
+                }
+            }
+
+            let result = output_path.withCString { path_cstr in
+                raw_pubkeys.withUnsafeBufferPointer { buf -> Int32 in
+                    guard let base = buf.baseAddress else { return 0 }
+                    return base.withMemoryRebound(to: (UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8).self, capacity: pubkeys.count) { ptr in
+                        ndb_compact(self.ndb.ndb, path_cstr, ptr, Int32(pubkeys.count))
+                    }
+                }
+            }
+
+            return result == 1
+        })
+    }
+
+    /// Swaps a compacted database into place, replacing the current database.
+    /// Call this at startup before opening ndb.
+    /// Returns true if a swap was performed.
+    static func try_swap_compacted_db() -> Bool {
+        guard let db_path = Self.db_path else { return false }
+
+        let fm = FileManager.default
+        let compact_db = "\(db_path)/compact/\(main_db_file_name)"
+        let current_db = "\(db_path)/\(main_db_file_name)"
+        let old_db = "\(db_path)/\(main_db_file_name).old"
+
+        guard fm.fileExists(atPath: compact_db) else { return false }
+
+        Log.info("Found compacted database, swapping into place...", for: .storage)
+
+        do {
+            // Rename current -> old
+            if fm.fileExists(atPath: current_db) {
+                if fm.fileExists(atPath: old_db) {
+                    try fm.removeItem(atPath: old_db)
+                }
+                try fm.moveItem(atPath: current_db, toPath: old_db)
+            }
+
+            // Move compacted -> current
+            try fm.moveItem(atPath: compact_db, toPath: current_db)
+
+            // Clean up old db and compact directory
+            if fm.fileExists(atPath: old_db) {
+                try? fm.removeItem(atPath: old_db)
+            }
+            try? fm.removeItem(atPath: "\(db_path)/compact")
+
+            Log.info("Successfully swapped compacted database", for: .storage)
+            return true
+        } catch {
+            Log.error("Failed to swap compacted database: %@", for: .storage, String(describing: error))
+            // Try to restore the old db if something went wrong
+            if !fm.fileExists(atPath: current_db) && fm.fileExists(atPath: old_db) {
+                try? fm.moveItem(atPath: old_db, toPath: current_db)
+            }
+            return false
+        }
+    }
+
     // MARK: Thread safety mechanisms
     // Use these for all externally accessible methods that interact with the nostrdb database to prevent race conditions with app lifecycle events (i.e. NostrDB opening and closing)
-    
+
     internal func withNdb<T>(_ useFunction: () throws -> T, maxWaitTimeout: DispatchTimeInterval = .milliseconds(500)) throws -> T {
         guard !self.is_closed else { throw NdbStreamError.ndbClosed }
         return try self.ndbAccessLock.keepNdbOpen(during: {
