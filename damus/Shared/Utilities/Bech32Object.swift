@@ -117,6 +117,9 @@ enum Bech32Object : Equatable, Hashable {
 
     init?(block: ndb_mention_bech32_block) {
         let b32 = block.bech32
+        // Extract kind via Swift TLV fallback since nostrdb's C parser
+        // doesn't populate it. See: https://github.com/damus-io/nostrdb/issues/126
+        let bech32Str = block.str.as_str()
         switch block.bech32_type {
         case .note:
             let data = b32.note.event_id.as_data(size: 32)
@@ -136,14 +139,16 @@ enum Bech32Object : Equatable, Hashable {
             if nevent.pubkey != nil {
                 author = Pubkey(nevent.pubkey.as_data(size: 32))
             }
-            self = .nevent(NEvent(noteid: note_id, relays: relays, author: author, kind: nil))
+            let kind = extractTLVKind(fromBech32: bech32Str)
+            self = .nevent(NEvent(noteid: note_id, relays: relays, author: author, kind: kind))
         case .nrelay:
             self = .nrelay(b32.nrelay.relay.as_str())
         case .naddr:
             let identifier = b32.naddr.identifier.as_str()
             let author = Pubkey(b32.naddr.pubkey.as_data(size: 32))
             let relays = b32.naddr.relays.as_urls()
-            self = .naddr(NAddr(identifier: identifier, author: author, relays: relays, kind: 0))
+            let kind = extractTLVKind(fromBech32: bech32Str) ?? 0
+            self = .naddr(NAddr(identifier: identifier, author: author, relays: relays, kind: kind))
         case .nsec:
             return nil
         case .none:
