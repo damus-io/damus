@@ -21,34 +21,19 @@ class LoadableNostrEventViewModel: ObservableObject {
     let damus_state: DamusState
     let note_reference: NoteReference
     @Published var state: ThreadModelLoadingState = .loading
-    /// The time period after which it will give up loading the view.
-    /// Written in nanoseconds
-    let TIMEOUT: UInt64 = 10 * 1_000_000_000    // 10 seconds
-    
+
     init(damus_state: DamusState, note_reference: NoteReference) {
         self.damus_state = damus_state
         self.note_reference = note_reference
         Task { await self.load() }
     }
-    
-    /// Starts loading the referenced Nostr event and updates the view model's `state` with the result or a timeout outcome.
-    /// 
-    /// This launches a dedicated task that runs the loading logic and a separate timeout task that cancels the loader after `TIMEOUT`. If the timeout fires, `state` is set to `.not_found`. If the load finishes first, the timeout task is cancelled.
-    func load() async {
-        // Start the loading process in a separate task to manage the timeout independently.
-        let loadTask = Task { @MainActor in
-            self.state = await executeLoadingLogic(note_reference: self.note_reference)
-        }
 
-        // Setup a timer to cancel the load after the timeout period
-        let timeoutTask = Task { @MainActor in
-            try await Task.sleep(nanoseconds: TIMEOUT)
-            loadTask.cancel() // This sends a cancellation signal to the load task.
-            self.state = .not_found
-        }
-        
-        await loadTask.value
-        timeoutTask.cancel() // Cancel the timeout task if loading finishes earlier.
+    /// Waits for relay connection then loads the referenced event.
+    ///
+    /// Timeout is handled by `awaitConnection()` (30 s built-in).
+    func load() async {
+        await damus_state.nostrNetwork.awaitConnection()
+        self.state = await executeLoadingLogic(note_reference: self.note_reference)
     }
     
     /// Loads the Nostr event identified by `noteId`, optionally restricting the lookup to specific relays.

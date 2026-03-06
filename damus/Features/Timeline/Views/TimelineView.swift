@@ -21,8 +21,9 @@ struct TimelineView<Content: View>: View {
     let filter: (NostrEvent) -> Bool
     let content: Content?
     let apply_mute_rules: Bool
+    let viewId: AnyHashable?
 
-    init(events: EventHolder, loading: Binding<Bool>, headerHeight: Binding<CGFloat>, headerOffset: Binding<CGFloat>, damus: DamusState, show_friend_icon: Bool, filter: @escaping (NostrEvent) -> Bool, apply_mute_rules: Bool = true, content: (() -> Content)? = nil) {
+    init(events: EventHolder, loading: Binding<Bool>, headerHeight: Binding<CGFloat>, headerOffset: Binding<CGFloat>, damus: DamusState, show_friend_icon: Bool, filter: @escaping (NostrEvent) -> Bool, apply_mute_rules: Bool = true, viewId: AnyHashable? = nil, content: (() -> Content)? = nil) {
         self.events = events
         self._loading = loading
         self._headerHeight = headerHeight
@@ -31,10 +32,11 @@ struct TimelineView<Content: View>: View {
         self.show_friend_icon = show_friend_icon
         self.filter = filter
         self.apply_mute_rules = apply_mute_rules
+        self.viewId = viewId
         self.content = content?()
     }
     
-    init(events: EventHolder, loading: Binding<Bool>, damus: DamusState, show_friend_icon: Bool, filter: @escaping (NostrEvent) -> Bool, apply_mute_rules: Bool = true, content: (() -> Content)? = nil) {
+    init(events: EventHolder, loading: Binding<Bool>, damus: DamusState, show_friend_icon: Bool, filter: @escaping (NostrEvent) -> Bool, apply_mute_rules: Bool = true, viewId: AnyHashable? = nil, content: (() -> Content)? = nil) {
         self.events = events
         self._loading = loading
         self._headerHeight = .constant(0.0)
@@ -43,6 +45,7 @@ struct TimelineView<Content: View>: View {
         self.show_friend_icon = show_friend_icon
         self.filter = filter
         self.apply_mute_rules = apply_mute_rules
+        self.viewId = viewId
         self.content = content?()
     }
 
@@ -71,6 +74,7 @@ struct TimelineView<Content: View>: View {
                     .frame(height: 0)
 
                 InnerTimelineView(events: events, damus: damus, filter: loading ? { _ in true } : filter, apply_mute_rules: self.apply_mute_rules)
+                    .id(viewId)
                     .redacted(reason: loading ? .placeholder : [])
                     .shimmer(loading)
                     .disabled(loading)

@@ -38,7 +38,7 @@ extension WalletConnect.WalletResponseErr {
     var humanReadableError: ErrorView.UserPresentableError? {
         guard let code = self.code else {
             return .init(
-                user_visible_description: String(format: NSLocalizedString("Your connected wallet raised an unknown error. Message: %s", comment: "Human readable error description for unknown error"), self.message ?? NSLocalizedString("Empty error message", comment: "A human readable placeholder to indicate that the error message is empty")),
+                user_visible_description: String(format: NSLocalizedString("Your connected wallet raised an unknown error. Message: %@", comment: "Human readable error description for unknown error"), self.message ?? NSLocalizedString("Empty error message", comment: "A human readable placeholder to indicate that the error message is empty")),
                 tip: NSLocalizedString("Please contact the developer of your wallet provider for help.", comment: "Human readable error description for an unknown error raised by a wallet provider."),
                 technical_info: "NWC wallet provider returned an error response without a valid reason code. Message: \(self.message ?? "Empty error message")"
             )

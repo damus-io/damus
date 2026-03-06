@@ -481,6 +481,19 @@ extension NdbNote {
     public var references: References<RefId> {
         References<RefId>(tags: self.tags)
     }
+
+    /// Parses and returns the client tag metadata if present on this note.
+    var clientTag: ClientTagMetadata? {
+        for tag in tags {
+            guard tag.count >= 2, tag[0].matches_str("client") else {
+                continue
+            }
+            if let metadata = ClientTagMetadata(tagComponents: tag.strings()) {
+                return metadata
+            }
+        }
+        return nil
+    }
     
     func thread_reply() -> ThreadReply? {
         if self.known_kind != .highlight {
@@ -579,8 +592,8 @@ extension NdbNote {
         return thread_reply() != nil
     }
 
-    @MainActor
-    func note_language(ndb: Ndb, _ keypair: Keypair) -> String? {
+    func note_language(_ keypair: Keypair) -> String? {
+        assert(!Thread.isMainThread, "This function must not be run on the main thread.")
 
         // Rely on Apple's NLLanguageRecognizer to tell us which language it thinks the note is in
         // and filter on only the text portions of the content as URLs and hashtags confuse the language recognizer.

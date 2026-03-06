@@ -106,6 +106,11 @@ struct WalletView: View {
                 .task {
                     await self.refreshWalletInformation()
                 }
+                .onReceive(handle_notify(.attached_wallet)) { _ in
+                    Task {
+                        await self.refreshWalletInformation()
+                    }
+                }
                 .refreshable {
                     await self.refreshWalletInformation()
                 }

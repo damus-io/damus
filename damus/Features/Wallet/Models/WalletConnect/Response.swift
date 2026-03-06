@@ -10,7 +10,8 @@ import Combine
 extension WalletConnect {
     /// Models a response from the NWC provider
     struct Response: Decodable {
-        let result_type: Response.Result.ResultType
+        /// The type of the result. `nil` if the result type is unsupported/unknown.
+        let result_type: Response.Result.ResultType?
         let error: WalletResponseErr?
         let result: Response.Result?
         
@@ -21,13 +22,16 @@ extension WalletConnect {
         init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             let result_type_str = try container.decode(String.self, forKey: .result_type)
-            
-            guard let result_type = Response.Result.ResultType(rawValue: result_type_str) else {
-                throw DecodingError.typeMismatch(Response.Result.ResultType.self, .init(codingPath: decoder.codingPath, debugDescription: "result_type \(result_type_str) is unknown"))
-            }
+            let result_type = Response.Result.ResultType(rawValue: result_type_str)
             
             self.result_type = result_type
             self.error = try container.decodeIfPresent(WalletResponseErr.self, forKey: .error)
+            
+            guard let result_type else {
+                // Unknown/unsupported result type — gracefully ignore without an error
+                self.result = nil
+                return
+            }
             
             guard self.error == nil else {
                 self.result = nil

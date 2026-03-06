@@ -84,8 +84,8 @@ class Ndb {
         return remove_file_prefix(containerURL.appendingPathComponent("snapshot", conformingTo: .directory).absoluteString)
     }
     
-    static private let main_db_file_name: String = "data.mdb"
-    static private let db_files: [String] = ["data.mdb", "lock.mdb"]
+    static let main_db_file_name: String = "data.mdb"
+    static let db_files: [String] = ["data.mdb", "lock.mdb"]
 
     static var empty: Ndb {
         print("txn: NOSTRDB EMPTY")
@@ -1182,6 +1182,72 @@ extension Ndb {
     }
 }
 
+extension Ndb {
+    /// Get detailed storage statistics for this database
+    ///
+    /// This method calls the C `ndb_stat` function to retrieve per-database
+    /// storage statistics from the underlying LMDB storage. Each database
+    /// (notes, profiles, indices, etc.) is reported with its key and value sizes.
+    ///
+    /// Any unaccounted space between the sum of database stats and the physical
+    /// file size is reported as "Other Data".
+    ///
+    /// - Parameter physicalSize: The physical file size in bytes from the filesystem
+    /// - Returns: NdbStats with detailed per-database breakdown, or nil if stat collection fails
+    func getStats(physicalSize: UInt64) -> NdbStats? {
+        // All of this must be done under withNdb to avoid races with close()/ndb_destroy
+        let copiedStats: ([NdbDatabaseStats], UInt64)? = try? withNdb({
+            var stat = ndb_stat()
+            // Call C ndb_stat function
+            let result = ndb_stat(self.ndb.ndb, &stat)
+            guard result != 0 else {
+                Log.error("ndb_stat failed", for: .storage)
+                return nil
+            }
+
+            var databaseStats: [NdbDatabaseStats] = []
+            var accountedSize: UInt64 = 0
+
+            // Extract per-database stats from stat.dbs array
+            withUnsafePointer(to: &stat.dbs) { dbsPtr in
+                let dbsBuffer = UnsafeRawPointer(dbsPtr).assumingMemoryBound(to: ndb_stat_counts.self)
+
+                for dbIndex in 0..<Int(NDB_DBS.rawValue) {
+                    let dbStat = dbsBuffer[dbIndex]
+                    // Skip databases with no data
+                    guard dbStat.key_size > 0 || dbStat.value_size > 0 else { continue }
+                    // Get database type from index
+                    let database = NdbDatabase(fromIndex: dbIndex)
+                    let dbStats = NdbDatabaseStats(
+                        database: database,
+                        keySize: UInt64(dbStat.key_size),
+                        valueSize: UInt64(dbStat.value_size)
+                    )
+                    databaseStats.append(dbStats)
+                    accountedSize += dbStats.totalSize
+                }
+            }
+            return (databaseStats, accountedSize)
+        })
+        guard let (databaseStatsRaw, accountedSize) = copiedStats else { return nil }
+        var databaseStats = databaseStatsRaw
+
+        // Add "Other Data" for any unaccounted space
+        if physicalSize > accountedSize {
+            let otherSize = physicalSize - accountedSize
+            databaseStats.append(NdbDatabaseStats(
+                database: .other,
+                keySize: 0,
+                valueSize: otherSize
+            ))
+        }
+        // Sort by total size descending to show largest databases first
+        databaseStats.sort { $0.totalSize > $1.totalSize }
+
+        return NdbStats(databaseStats: databaseStats)
+    }
+}
+
 /// This callback "trampoline" function will be called when new notes arrive for NostrDB subscriptions.
 ///
 /// This is needed as a separate global function in order to allow us to pass it to the C code as a callback (We can't pass native Swift fuctions directly as callbacks).
@@ -1211,3 +1277,73 @@ func getDebugCheckedRoot<T: FlatBufferObject>(byteBuffer: inout ByteBuffer) thro
 func remove_file_prefix(_ str: String) -> String {
     return str.replacingOccurrences(of: "file://", with: "")
 }
+
+// MARK: - NostrDB Storage Statistics
+
+/// NostrDB database types corresponding to the ndb_dbs C enum
+enum NdbDatabase: Int, Hashable, CaseIterable, Identifiable {
+    case note = 0              // NDB_DB_NOTE
+    case meta = 1              // NDB_DB_META
+    case profile = 2           // NDB_DB_PROFILE
+    case noteId = 3            // NDB_DB_NOTE_ID
+    case profileKey = 4        // NDB_DB_PROFILE_PK
+    case ndbMeta = 5           // NDB_DB_NDB_META
+    case profileSearch = 6     // NDB_DB_PROFILE_SEARCH
+    case profileLastFetch = 7  // NDB_DB_PROFILE_LAST_FETCH
+    case noteKind = 8          // NDB_DB_NOTE_KIND
+    case noteText = 9          // NDB_DB_NOTE_TEXT
+    case noteBlocks = 10       // NDB_DB_NOTE_BLOCKS
+    case noteTags = 11         // NDB_DB_NOTE_TAGS
+    case notePubkey = 12       // NDB_DB_NOTE_PUBKEY
+    case notePubkeyKind = 13   // NDB_DB_NOTE_PUBKEY_KIND
+    case noteRelayKind = 14    // NDB_DB_NOTE_RELAY_KIND
+    case noteRelays = 15       // NDB_DB_NOTE_RELAYS
+    case other                 // For unaccounted data
+    
+    var id: String {
+        return String(self.rawValue)
+    }
+    
+    /// Database index matching the C ndb_dbs enum
+    var index: Int {
+        return self.rawValue
+    }
+    
+    /// Initialize from database index (matching ndb_dbs C enum order)
+    init(fromIndex index: Int) {
+        if let db = NdbDatabase(rawValue: index) {
+            self = db
+        } else {
+            self = .other
+        }
+    }
+}
+
+/// Per-database storage statistics from NostrDB
+struct NdbDatabaseStats: Hashable {
+    /// Database type
+    let database: NdbDatabase
+    
+    /// Total key bytes for this database
+    let keySize: UInt64
+    
+    /// Total value bytes for this database
+    let valueSize: UInt64
+    
+    /// Total storage used by this database (keys + values)
+    var totalSize: UInt64 {
+        return keySize + valueSize
+    }
+}
+
+/// Detailed NostrDB storage statistics with per-database breakdown
+struct NdbStats: Hashable {
+    /// Per-database breakdown of storage (notes, profiles, indices, etc.)
+    let databaseStats: [NdbDatabaseStats]
+    
+    /// Total storage across all databases
+    var totalSize: UInt64 {
+        return databaseStats.reduce(0) { $0 + $1.totalSize }
+    }
+}
+
