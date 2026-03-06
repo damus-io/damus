@@ -192,7 +192,7 @@ extension NdbBlockGroup {
         private let blocks_ptr: ndb_blocks_ptr
         private let buffer: UnsafeMutableRawPointer?
         
-        init(ptr: OpaquePointer?, buffer: UnsafeMutableRawPointer? = nil) {
+        init(ptr: UnsafeMutablePointer<ndb_blocks>?, buffer: UnsafeMutableRawPointer? = nil) {
             self.blocks_ptr = ndb_blocks_ptr(ptr: ptr)
             self.buffer = buffer
         }
@@ -204,7 +204,7 @@ extension NdbBlockGroup {
         /// Gets the opaque pointer
         ///
         /// **Implementation note:** This is marked `fileprivate` because we want to minimize the exposure of raw pointers to Swift code outside these wrapper structs.
-        fileprivate func as_ptr() -> OpaquePointer? {
+        fileprivate func as_ptr() -> UnsafeMutablePointer<ndb_blocks>? {
             return self.blocks_ptr.ptr
         }
         
@@ -217,7 +217,7 @@ extension NdbBlockGroup {
                 return nil
             }
             
-            var blocks: OpaquePointer? = nil
+            var blocks: UnsafeMutablePointer<ndb_blocks>? = nil
             
             // Call the C parsing function and check its success status
             let success = content.withCString { contentPtr -> Bool in

@@ -136,19 +136,14 @@ enum Bech32Object : Equatable, Hashable {
             if nevent.pubkey != nil {
                 author = Pubkey(nevent.pubkey.as_data(size: 32))
             }
-            var kind: UInt32? = nil
-            if nevent.has_kind {
-                kind = nevent.kind
-            }
-
-            self = .nevent(NEvent(noteid: note_id, relays: relays, author: author, kind: kind))
+            self = .nevent(NEvent(noteid: note_id, relays: relays, author: author, kind: nil))
         case .nrelay:
             self = .nrelay(b32.nrelay.relay.as_str())
         case .naddr:
             let identifier = b32.naddr.identifier.as_str()
             let author = Pubkey(b32.naddr.pubkey.as_data(size: 32))
             let relays = b32.naddr.relays.as_urls()
-            self = .naddr(NAddr(identifier: identifier, author: author, relays: relays, kind: b32.naddr.kind))
+            self = .naddr(NAddr(identifier: identifier, author: author, relays: relays, kind: 0))
         case .nsec:
             return nil
         case .none:
@@ -161,7 +156,7 @@ enum Bech32Object : Equatable, Hashable {
             return .nscript(decoded.data.bytes)
         }
 
-        var b: nostr_bech32_t = nostr_bech32()
+        var b: nostr_bech32 = nostr_bech32()
         var bytes = Data(capacity: str.utf8.count)
 
         let ok = str.withCString { cstr in
@@ -204,7 +199,7 @@ enum Bech32Object : Equatable, Hashable {
 
 }
 
-func decodeCBech32(_ b: nostr_bech32_t) -> Bech32Object? {
+func decodeCBech32(_ b: nostr_bech32) -> Bech32Object? {
     switch b.type {
     case NOSTR_BECH32_NOTE:
         let note_id = NoteId(Data(bytes: b.note.event_id, count: 32))
@@ -212,9 +207,8 @@ func decodeCBech32(_ b: nostr_bech32_t) -> Bech32Object? {
     case NOSTR_BECH32_NEVENT:
         let note_id = NoteId(Data(bytes: b.nevent.event_id, count: 32))
         let pubkey = b.nevent.pubkey != nil ? Pubkey(Data(bytes: b.nevent.pubkey, count: 32)) : nil
-        let kind: UInt32? = !b.nevent.has_kind ? nil : b.nevent.kind
         let relays = b.nevent.relays.as_urls()
-        return .nevent(NEvent(noteid: note_id, relays: relays, author: pubkey, kind: kind))
+        return .nevent(NEvent(noteid: note_id, relays: relays, author: pubkey, kind: nil))
     case NOSTR_BECH32_NPUB:
         let pubkey = Pubkey(Data(bytes: b.npub.pubkey, count: 32))
         return .npub(pubkey)
@@ -229,10 +223,9 @@ func decodeCBech32(_ b: nostr_bech32_t) -> Bech32Object? {
         return .nrelay(b.nrelay.relay.as_str())
     case NOSTR_BECH32_NADDR:
         let pubkey = Pubkey(Data(bytes: b.naddr.pubkey, count: 32))
-        let kind = b.naddr.kind
         let identifier = b.naddr.identifier.as_str()
 
-        return .naddr(NAddr(identifier: identifier, author: pubkey, relays: b.naddr.relays.as_urls(), kind: kind))
+        return .naddr(NAddr(identifier: identifier, author: pubkey, relays: b.naddr.relays.as_urls(), kind: 0))
     default:
         return nil
     }

@@ -1269,12 +1269,11 @@ func handle_incoming_dm(ev: NostrEvent, our_pubkey: Pubkey, dms: DirectMessagesM
             #endif
         }
         // else: self dm - no logging needed
-    }
-    #if DEBUG
-    else {
+    } else {
+        #if DEBUG
         print("[DM-DEBUG] handle_incoming_dm: Incoming DM from \(the_pk.npub.prefix(16))")
+        #endif
     }
-    #endif
 
     for model in dms.dms {
         if model.pubkey == the_pk {
