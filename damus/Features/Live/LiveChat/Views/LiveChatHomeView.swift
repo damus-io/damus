@@ -111,7 +111,7 @@ struct LiveChatHomeView: View, KeyboardReadable {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text("Live Chat")
+                Text("Live Chat", comment: "Title for the live stream chat.")
                     .fontWeight(.bold)
                     .padding(5)
 

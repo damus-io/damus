@@ -80,7 +80,7 @@ struct FollowPackBannerImage: View {
                 }
             }
         } else {
-            Text(NSLocalizedString("No cover image", comment: "Text letting user know there is no cover image."))
+            Text("No cover image", comment: "Text letting user know there is no cover image.")
                 .foregroundColor(.gray)
                 .frame(width: 350, height: 180)
             Divider()

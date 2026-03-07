@@ -20,14 +20,14 @@ extension OnboardingSuggestionsView {
             ScrollView {
                 VStack(spacing: 20) {
                     // Title
-                    Text(NSLocalizedString("Other preferences", comment: "Screen title for content preferences screen during onboarding"))
+                    Text("Other preferences", comment: "Screen title for content preferences screen during onboarding")
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .multilineTextAlignment(.center)
                         .padding(.top)
                     
                     // Instruction subtitle
-                    Text(NSLocalizedString("Tweak these settings to better match your preferences", comment: "Instructions for content preferences screen during onboarding"))
+                    Text("Tweak these settings to better match your preferences", comment: "Instructions for content preferences screen during onboarding")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -38,7 +38,7 @@ extension OnboardingSuggestionsView {
                             Toggle(NSLocalizedString("Hide notes with #nsfw tags", comment: "Setting to hide notes with not safe for work tags"), isOn: $settings.hide_nsfw_tagged_content)
                                 .toggleStyle(.switch)
                             
-                            Text(NSLocalizedString("Notes with the #nsfw tag usually contains adult content or other \"Not safe for work\" content", comment: "Explanation of what NSFW means"))
+                            Text("Notes with the #nsfw tag usually contains adult content or other \"Not safe for work\" content", comment: "Explanation of what NSFW means")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                                 .padding(.bottom, 10)
@@ -50,7 +50,7 @@ extension OnboardingSuggestionsView {
                                 )
                                 .toggleStyle(.switch)
                                 
-                                Text(NSLocalizedString("Some profiles tend to have a lot of Bitcoin-related content alongside their topics of interest. Disable this setting if you prefer to filter out follow suggestions that frequently talk about Bitcoin.", comment: "Explanation label for the 'Show Bitcoin-heavy profile suggestions' onboarding toggle setting"))
+                                Text("Some profiles tend to have a lot of Bitcoin-related content alongside their topics of interest. Disable this setting if you prefer to filter out follow suggestions that frequently talk about Bitcoin.", comment: "Explanation label for the 'Show Bitcoin-heavy profile suggestions' onboarding toggle setting")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
@@ -66,7 +66,7 @@ extension OnboardingSuggestionsView {
                     Button(action: {
                         self.next_page()
                     }, label: {
-                        Text(NSLocalizedString("Next", comment: "Next button title"))
+                        Text("Next", comment: "Next button title")
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                     })

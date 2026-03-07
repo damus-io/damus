@@ -119,7 +119,7 @@ extension FirstAidSettingsView {
                                 .foregroundColor(.red)
                         case .confirming_with_user, .in_progress:
                             ProgressView()
-                            Text(NSLocalizedString("In progress…", comment: "Loading message indicating that a first aid operation is in progress."))
+                            Text("In progress…", comment: "Loading message indicating that a first aid operation is in progress.")
                         case .completed:
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundColor(.green)

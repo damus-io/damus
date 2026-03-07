@@ -25,7 +25,7 @@ struct LiveStreamViewers: View {
                 Image("user")
                     .resizable()
                     .frame(width: 15, height: 15)
-                Text("\(Text(verbatim: viewerCount.formatted()).font(.subheadline.weight(.medium)))", comment: "number")
+                Text(verbatim: viewerCount.formatted()).font(.subheadline.weight(.medium))
             }
         }
         .padding(.vertical, preview ? 2 : 0)

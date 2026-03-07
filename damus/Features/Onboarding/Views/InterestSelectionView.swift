@@ -21,14 +21,14 @@ extension OnboardingSuggestionsView {
             ScrollView {
                 VStack(spacing: 20) {
                     // Title
-                    Text(NSLocalizedString("Select Your Interests", comment: "Screen title for interest selection"))
+                    Text("Select Your Interests", comment: "Screen title for interest selection")
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .multilineTextAlignment(.center)
                         .padding(.top)
                     
                     // Instruction subtitle
-                    Text(NSLocalizedString("Please pick your interests. This will help us recommend accounts to follow.", comment: "Instruction for interest selection"))
+                    Text("Please pick your interests. This will help us recommend accounts to follow.", comment: "Instruction for interest selection")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -44,7 +44,7 @@ extension OnboardingSuggestionsView {
                     Button(action: {
                         self.next_page()
                     }, label: {
-                        Text(NSLocalizedString("Next", comment: "Next button title"))
+                        Text("Next", comment: "Next button title")
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                     })

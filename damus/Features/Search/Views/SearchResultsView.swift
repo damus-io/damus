@@ -54,7 +54,7 @@ struct InnerSearchResults: View {
         let search_model = SearchModel(state: damus_state, search: .filter_hashtag([ht]))
         return NavigationLink(value: Route.Search(search: search_model)) {
             HStack {
-                Text("#\(ht)", comment: "Navigation link to search hashtag.")
+                Text(verbatim: "#\(ht)")
             }
             .padding(.horizontal, 15)
             .padding(.vertical, 5)

@@ -54,7 +54,7 @@ struct LiveStreamBanner: View {
                 titleImage(url: url, preview: preview)
             }
         } else {
-            Text(NSLocalizedString("No cover image", comment: "Text letting user know there is no cover image."))
+            Text("No cover image", comment: "Text letting user know there is no cover image.")
                 .bold()
                 .foregroundColor(.white)
                 .frame(width: UIScreen.main.bounds.width, height: 200)

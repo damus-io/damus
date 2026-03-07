@@ -13,9 +13,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>media item</string>
+			<string>Load %d media item</string>
 			<key>other</key>
-			<string>media items</string>
+			<string>Load %d media items</string>
 		</dict>
 	</dict>
 	<key>viewer_count</key>

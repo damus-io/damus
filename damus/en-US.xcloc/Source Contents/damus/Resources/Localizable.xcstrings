@@ -10,8 +10,8 @@
     "(Contents are encrypted)" : {
       "comment" : "Label on push notification indicating that the contents of the message are encrypted"
     },
-    "#%@" : {
-      "comment" : "Navigation link to search hashtag."
+    "%@" : {
+
     },
     "%@ / %@" : {
       "comment" : "Amount of money required to subscribe to the Nostr relay. In English, this would look something like '4,000 sats / 30 days', meaning it costs 4000 sats to subscribe to the Nostr relay for 30 days.",
@@ -28,7 +28,7 @@
       "comment" : "Amount of money required to publish to the Nostr relay. In English, this would look something like '10 sats / event', meaning it costs 10 sats to publish one event."
     },
     "%@ %@" : {
-      "comment" : "Sentence composed of 2 variables to describe how many imports were performed from loading a NostrScript. In source English, the first variable is the number of imports, and the second variable is 'Import' or 'Imports'.\nSentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.\nSentence composed of 2 variables to describe how many people are in the follow pack. In source English, the first variable is the number of users, and the second variable is 'user' or 'users'.\nSentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.\nSentence composed of 2 variables to describe how many quoted reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.\nSentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.\nSentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.\nSentence composed of 2 variables to describe how many relays a note was found on. In source English, the first variable is the number of relays, and the second variable is 'Relay' or 'Relays'.\nSentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.\nSentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.",
+      "comment" : "Sentence composed of 2 variables to describe how many imports were performed from loading a NostrScript. In source English, the first variable is the number of imports, and the second variable is 'Import' or 'Imports'.\nSentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.\nSentence composed of 2 variables to describe how many people are in the follow pack. In source English, the first variable is the number of users, and the second variable is 'user' or 'users'.\nSentence composed of 2 variables to describe how many people are viewing the live event. In source English, the first variable is the number of viewers, and the second variable is 'viewer' or 'viewers'.\nSentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.\nSentence composed of 2 variables to describe how many quoted reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.\nSentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.\nSentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.\nSentence composed of 2 variables to describe how many relays a note was found on. In source English, the first variable is the number of relays, and the second variable is 'Relay' or 'Relays'.\nSentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.\nSentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.",
       "localizations" : {
         "en-US" : {
           "stringUnit" : {
@@ -291,6 +291,9 @@
     "Are you sure you want to upload this media?" : {
       "comment" : "Alert message asking if the user wants to upload media."
     },
+    "As a subscriber, you’re getting an early look at new and innovative tools. These are beta features — still being tested and tuned. Try them out, share your thoughts, and help us perfect what’s next." : {
+      "comment" : "Damus Labs explainer"
+    },
     "As part of your Damus Purple membership, you get complimentary and automated translations. Would you like to enable Damus Purple translations?\n\nTip: You can always change this later in Settings → Translations" : {
       "comment" : "Message notifying the user that they get auto-translations as part of their service"
     },
@@ -352,13 +355,16 @@
       "comment" : "User-visible heading for an error message indicating a note has an unknown kind or is unsupported for viewing."
     },
     "Cancel" : {
-      "comment" : "Alert button to cancel out of alert for muting a user.\nButton to cancel a repost.\nButton to cancel any interaction with the QRCode link.\nButton to cancel out of alert that creates a new mutelist.\nButton to cancel out of posting a note.\nButton to cancel out of search text entry mode.\nButton to cancel the LNURL payment process.\nButton to cancel the upload.\nCancel button text for dismissing profile status settings view.\nCancel button text for dismissing updating image url.\nCancel deleting bookmarks.\nCancel deleting the user.\nCancel out of logging out the user.\nCancel out of search view.\nCancel the user-requested operation.\nText for button to cancel out of connecting Nostr Wallet Connect lightning wallet."
+      "comment" : "Alert button to cancel out of alert for muting a user.\nButton to cancel GIF selection\nButton to cancel a repost.\nButton to cancel any interaction with the QRCode link.\nButton to cancel out of alert that creates a new mutelist.\nButton to cancel out of posting a note.\nButton to cancel out of search text entry mode.\nButton to cancel the LNURL payment process.\nButton to cancel the upload.\nCancel button text for dismissing profile status settings view.\nCancel button text for dismissing updating image url.\nCancel deleting bookmarks.\nCancel deleting the user.\nCancel out of logging out the user.\nCancel out of search view.\nCancel the user-requested operation.\nText for button to cancel out of connecting Nostr Wallet Connect lightning wallet."
     },
     "Cancelled" : {
       "comment" : "Title indicating that the user has cancelled."
     },
     "Changing this setting will cause the cache to be cleared. This will free space, but images may take longer to load again. Are you sure you want to proceed?" : {
       "comment" : "Message explaining consequences of changing the 'enable animation' setting"
+    },
+    "Chat" : {
+      "comment" : "Placeholder text to prompt entry of chat message."
     },
     "Check if the invoice is valid, your wallet is online, configured correctly, and try again. If the error persists, please contact support and/or your wallet provider." : {
       "comment" : "A human-readable tip guiding the user on what to do when seeing a timeout error while sending a wallet payment."
@@ -395,6 +401,9 @@
     },
     "Click here if you have a Coinos username and password." : {
       "comment" : "Button description hint for users who may want to connect via the website."
+    },
+    "Client tags can help other apps understand new kinds of events. Turn this off if you prefer not to identify Damus when posting." : {
+      "comment" : "Description for the client tag privacy toggle."
     },
     "Close" : {
       "comment" : "Button label giving the user the option to close the sheet due to not being logged in.\nButton label giving the user the option to close the sheet from which they shared content\nButton label giving the user the option to close the sheet from which they were trying share.\nButton label giving the user the option to close the sheet from which they were trying to share.\nButton label giving the user the option to close the view when no content is available to share"
@@ -486,6 +495,9 @@
     "Copy LNURL" : {
       "comment" : "Context menu option for copying a user's Lightning URL."
     },
+    "Copy media link" : {
+      "comment" : "Accessibility label for copy media link button"
+    },
     "Copy note ID" : {
       "comment" : "Context menu option for copying the ID of the note."
     },
@@ -545,6 +557,9 @@
     },
     "Damus" : {
       "comment" : "Name of the app for the title of an internal notification"
+    },
+    "Damus Labs stylized logo" : {
+      "comment" : "Accessibility label for a stylized Damus Labs logo"
     },
     "Damus logo" : {
       "comment" : "Accessibility label for damus logo"
@@ -699,6 +714,9 @@
     "Expiry date" : {
       "comment" : "Label for Purple subscription expiry date"
     },
+    "Failed to calculate storage: %@" : {
+      "comment" : "Error message when storage calculation fails"
+    },
     "Failed to generate media for upload. Please try again. If error persists, please contact Damus support at support@damus.io" : {
       "comment" : "Error label forming media for upload after user crops the image."
     },
@@ -711,8 +729,17 @@
     "Failed to parse" : {
       "comment" : "NostrScript error message when it fails to parse a script."
     },
+    "Failed to parse GIF data" : {
+      "comment" : "Error message for Tenor decoding failure"
+    },
     "Failed to scan QR code, please try again." : {
       "comment" : "Error message for failed QR scan"
+    },
+    "Favorite" : {
+      "comment" : "Button label that allows the user to favorite the user shown on-screen"
+    },
+    "Favorites" : {
+      "comment" : "Label for a toggle that enables an experimental feature\nShow Notes from your favorites"
     },
     "Find a Wallet" : {
       "comment" : "The heading for one of the \"Why add Zaps?\" boxes"
@@ -778,6 +805,9 @@
     "Following..." : {
       "comment" : "Label to indicate that the user is in the process of following another user."
     },
+    "Follows" : {
+      "comment" : "Show Notes from your following"
+    },
     "Follows you" : {
       "comment" : "Text to indicate that a user is following your profile."
     },
@@ -814,11 +844,17 @@
     "Get paid for being you" : {
       "comment" : "Description for monetizing one's presence."
     },
+    "GIFs" : {
+      "comment" : "Label for a toggle that enables an experimental feature\nSection title for GIFs configuration."
+    },
     "Give thanks" : {
       "comment" : "Heading explaining a benefit of connecting a lightning wallet."
     },
     "Go to the app" : {
       "comment" : "Button label giving the user the option to go to the app after sharing content"
+    },
+    "Happening Now" : {
+      "comment" : "Indicates that live events are happening now."
     },
     "Hashtags" : {
       "comment" : "Label for filter for seeing only hashtag follows.\nSection header title for a list of hashtags that are muted."
@@ -844,11 +880,17 @@
     "Hide balance" : {
       "comment" : "Setting to hide wallet balance."
     },
+    "Hide media links" : {
+      "comment" : "Accessibility label for toggle button to hide media link list"
+    },
     "Hide notes with #nsfw tags" : {
       "comment" : "Setting to hide notes with not safe for work tags\nSetting to hide notes with the #nsfw (not safe for work) tags"
     },
     "Hide notifications that tag many profiles" : {
       "comment" : "Label for notification settings toggle that hides notifications that tag many people."
+    },
+    "Hide posts with too many hashtags" : {
+      "comment" : "Setting to hide notes that contain too many hashtags (spam)"
     },
     "Highlight" : {
       "comment" : "Context menu action to highlight the selected text as context to draft a new note."
@@ -879,6 +921,9 @@
     },
     "Illegal Content" : {
       "comment" : "Description of report type for illegal content."
+    },
+    "Image Cache" : {
+      "comment" : "Label for Kingfisher image cache"
     },
     "Image is setup" : {
       "comment" : "Accessibility value on image control"
@@ -919,11 +964,14 @@
     "Invalid relay address" : {
       "comment" : "Heading for an error when adding a relay"
     },
+    "Invalid response from server" : {
+      "comment" : "Error message for invalid Tenor response"
+    },
     "Invalid Tip Address" : {
       "comment" : "Title of alerting as invalid tip address."
     },
     "Invalid URL" : {
-      "comment" : "Error label when user enters an invalid URL"
+      "comment" : "Error label when user enters an invalid URL\nError message for invalid Tenor URL"
     },
     "It seems that you already have a translation service configured. Would you like to switch to Damus Purple as your translator?" : {
       "comment" : "Confirmation dialog question asking users if they want their translation settings to be automatically switched to the Damus Purple translation service"
@@ -934,8 +982,17 @@
     "Keys" : {
       "comment" : "Navigation title for managing keys.\nSettings section for managing keys"
     },
+    "Labs" : {
+      "comment" : "Sidebar menu label for Damus Labs experimental features."
+    },
+    "Labs " : {
+      "comment" : "Feature name"
+    },
     "Latest transactions" : {
       "comment" : "Heading for latest wallet transactions list"
+    },
+    "Learn more about Purple" : {
+      "comment" : "Button to learn more about the Damus Purple subscription."
     },
     "Learn more about the features" : {
       "comment" : "Label for a link to the Damus website, to allow the user to learn more about the features of Purple"
@@ -961,17 +1018,32 @@
     "Likes" : {
       "comment" : "Setting to enable Like Local Notification"
     },
+    "Line height: %.1fx" : {
+      "comment" : "Label showing current line height multiplier setting"
+    },
     "Link to services that support Nostr Wallet Connect like Alby, Coinos and more." : {
       "comment" : "The description for one of the \"Why add Zaps?\" boxes"
     },
     "Link your account" : {
       "comment" : "The heading for one of the \"Why add Zaps?\" boxes"
     },
+    "Live" : {
+      "comment" : "Label for a toggle that enables an experimental feature\nSidebar menu label for live events view."
+    },
     "LIVE" : {
       "comment" : "Text indicator that the video is a livestream."
     },
-    "Load media" : {
-      "comment" : "Button to show media in note."
+    "Live Chat" : {
+      "comment" : "Title for the live stream chat."
+    },
+    "Live events going on right now" : {
+      "comment" : "Indicates that live events are happening now."
+    },
+    "Load %@" : {
+      "comment" : "Accessibility label for button to load specific media item"
+    },
+    "Loading GIFs..." : {
+      "comment" : "Loading indicator text for GIF picker"
     },
     "Loading thread" : {
       "comment" : "Accessibility label for the thread view when it is loading"
@@ -1015,6 +1087,9 @@
     "Max weekly budget" : {
       "comment" : "Label for setting the maximum weekly budget for Coinos wallet"
     },
+    "Maximum hashtags: %d" : {
+      "comment" : "Label showing the maximum number of hashtags allowed before a post is hidden"
+    },
     "Maybe later" : {
       "comment" : "Text for button to disconnect from Nostr Wallet Connect lightning wallet."
     },
@@ -1036,8 +1111,14 @@
     "Message" : {
       "comment" : "Button label that allows the user to start a direct message conversation with the user shown on-screen"
     },
+    "Metadata (NDB_DB_META)" : {
+      "comment" : "Database name for metadata"
+    },
     "Monthly" : {
       "comment" : "Monthly renewal of purple subscription"
+    },
+    "More features coming soon!" : {
+      "comment" : "Label indicating that more features for Damus Lab experiments are coming soon."
     },
     "Mute" : {
       "comment" : "Alert button to mute a user.\nButton label that allows the user to mute the user shown on-screen\nButton to mute a profile\nContext menu action to mute the selected word.\nTitle for confirmation dialog to mute a profile."
@@ -1069,6 +1150,9 @@
     "Name" : {
       "comment" : "Label to prompt name entry."
     },
+    "Ndb has been snapshotted successfully" : {
+      "comment" : "Developer settings message indicating that ndb was successfully snapshotted."
+    },
     "Never" : {
       "comment" : "Profile status duration setting of never expiring."
     },
@@ -1098,6 +1182,9 @@
     },
     "No cover image" : {
       "comment" : "Text letting user know there is no cover image."
+    },
+    "No GIFs found" : {
+      "comment" : "Message when no GIFs match search"
     },
     "No image is currently setup" : {
       "comment" : "Accessibility value on image control"
@@ -1156,6 +1243,18 @@
     "Nostr Address" : {
       "comment" : "Label for the Nostr Address section of user profile form."
     },
+    "NostrDB" : {
+      "comment" : "Label for main NostrDB database"
+    },
+    "NostrDB Details" : {
+      "comment" : "Navigation title for NostrDB detail view"
+    },
+    "NostrDB Metadata" : {
+      "comment" : "Database name for NostrDB metadata"
+    },
+    "NostrDB Total" : {
+      "comment" : "Label for total NostrDB storage"
+    },
     "NostrScript" : {
       "comment" : "Navigation title for the view showing NostrScript."
     },
@@ -1168,17 +1267,47 @@
     "Not now" : {
       "comment" : "Button to not save key, complete account creation, and start using the app."
     },
+    "Note Blocks" : {
+      "comment" : "Database name for note blocks"
+    },
     "Note from a %@ you've muted" : {
       "comment" : "Text to indicate that what is being shown is a note which has been muted."
     },
+    "Note ID Index" : {
+      "comment" : "Database name for note ID index"
+    },
+    "Note Kind Index" : {
+      "comment" : "Database name for note kind index"
+    },
     "Note not found" : {
-      "comment" : "Heading for the thread view in a not found error state."
+      "comment" : "Heading for the event loader view in a not found error state.\nHeading for the thread view in a not found error state."
+    },
+    "Note Pubkey Index" : {
+      "comment" : "Database name for note pubkey index"
+    },
+    "Note Pubkey+Kind Index" : {
+      "comment" : "Database name for note pubkey+kind index"
+    },
+    "Note Relay+Kind Index" : {
+      "comment" : "Database name for note relay+kind index"
+    },
+    "Note Relays" : {
+      "comment" : "Database name for note relays"
+    },
+    "Note Tags Index" : {
+      "comment" : "Database name for note tags index"
+    },
+    "Note Text Index" : {
+      "comment" : "Database name for note text index"
     },
     "Note you've muted" : {
       "comment" : "Label indicating note has been muted\nText to indicate that what is being shown is a note which has been muted."
     },
     "Notes" : {
       "comment" : "A label indicating that the notes being displayed below it are from a timeline, not search results\nLabel for filter for seeing only notes (instead of notes and replies)."
+    },
+    "Notes (NDB_DB_NOTE)" : {
+      "comment" : "Database name for notes"
     },
     "Notes & Replies" : {
       "comment" : "Label for filter for seeing notes and replies (instead of only notes)."
@@ -1283,6 +1412,9 @@
     "Orange-pill" : {
       "comment" : "Button label that allows the user to start a direct message conversation with the user shown on-screen, to orange-pill them (i.e. help them to setup zaps)"
     },
+    "Other Data" : {
+      "comment" : "Database name for other/unaccounted data"
+    },
     "Other preferences" : {
       "comment" : "Screen title for content preferences screen during onboarding"
     },
@@ -1330,6 +1462,9 @@
     },
     "Please check the address and try again" : {
       "comment" : "Tip for an error where the relay address being added is invalid"
+    },
+    "Please check your internet connection and restart the app. If the error persists, please go to Settings > First Aid." : {
+      "comment" : "Human readable tips for what to do for a failure to find the relay list"
     },
     "Please choose relays from the list below to filter the current feed:" : {
       "comment" : "Instructions on how to filter a specific timeline feed by choosing relay servers to filter on."
@@ -1403,6 +1538,9 @@
     "Posts" : {
       "comment" : "Label for filter for seeing the posts from the people in this follow pack."
     },
+    "Privacy" : {
+      "comment" : "Section header for privacy related settings"
+    },
     "Private" : {
       "comment" : "Button text to indicate that the zap type is a private zap.\nHeading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading.\nPicker option to indicate that a zap should be sent privately and not identify the user to the public."
     },
@@ -1445,11 +1583,23 @@
     "Profile action sheets allow you to follow, zap, or DM profiles more quickly without having to view their full profile" : {
       "comment" : "Section footer clarifying what the profile action sheet feature does"
     },
+    "Profile Key Index" : {
+      "comment" : "Database name for profile key index"
+    },
+    "Profile Last Fetch" : {
+      "comment" : "Database name for profile last fetch"
+    },
     "Profile picture is setup" : {
       "comment" : "Accessibility value on profile picture image control"
     },
+    "Profile Search Index" : {
+      "comment" : "Database name for profile search"
+    },
     "Profiles" : {
       "comment" : "Section title for profile view configuration."
+    },
+    "Profiles (NDB_DB_PROFILE)" : {
+      "comment" : "Database name for profiles"
     },
     "Public" : {
       "comment" : "Button text to indicate that the zap type is a public zap.\nPicker option to indicate that a zap should be sent publicly and identify the user as who sent it."
@@ -1471,6 +1621,9 @@
     },
     "Purple" : {
       "comment" : "Subscription service name"
+    },
+    "Purple subscribers get first access to new and experimental features — fresh ideas straight from the lab." : {
+      "comment" : "Damus purple subscription pitch"
     },
     "Push" : {
       "comment" : "Option for notification mode setting: Push notification mode"
@@ -1495,6 +1648,9 @@
     },
     "Reactions" : {
       "comment" : "Navigation bar title for Reactions view.\nSection header for reactions settings\nTitle of emoji reactions view"
+    },
+    "Reading" : {
+      "comment" : "Section header for reading appearance settings"
     },
     "Received an incorrect or unexpected response from the wallet provider. This looks like an issue with your wallet provider." : {
       "comment" : "A human-readable error message"
@@ -1606,6 +1762,9 @@
     "Retry" : {
       "comment" : "Button to retry completing account creation after an error occurred."
     },
+    "Retrying…" : {
+      "comment" : "Button label for the retry-in-progress state when loading a note"
+    },
     "Routing" : {
       "comment" : "Label indicating the routing address for Nostr Wallet Connect payments. In other words, the relay used by the NWC wallet provider"
     },
@@ -1678,11 +1837,17 @@
     "Search / Universe" : {
       "comment" : "Section header for search/universe settings"
     },
+    "Search GIFs..." : {
+      "comment" : "Placeholder for GIF search field"
+    },
     "Search within settings" : {
       "comment" : "Text to prompt the user to search settings."
     },
     "Search word: %@" : {
       "comment" : "Navigation link to search for a word."
+    },
+    "Search: %@" : {
+      "comment" : "Label indicating the search query that resulted in the current list of notes"
     },
     "Search..." : {
       "comment" : "Placeholder text to prompt entry of search query."
@@ -1702,6 +1867,9 @@
     "Select default wallet" : {
       "comment" : "Prompt selection of user's default wallet"
     },
+    "Select GIF" : {
+      "comment" : "Title for GIF picker sheet"
+    },
     "Select your interests" : {
       "comment" : "Title for a screen asking the user for interests"
     },
@@ -1719,6 +1887,9 @@
     },
     "Send a message with your zap..." : {
       "comment" : "Placeholder text for a comment to send as part of a zap to the user."
+    },
+    "Sepia mode for longform articles" : {
+      "comment" : "Setting to enable sepia reading mode for longform articles"
     },
     "Server" : {
       "comment" : "Prompt selection of LibreTranslate server to perform machine translations on notes"
@@ -1740,6 +1911,9 @@
     },
     "Share" : {
       "comment" : "Button to share a note\nButton to share an image.\nButton to share the link to a profile.\nSave button text for saving profile status settings."
+    },
+    "Share Damus client tag" : {
+      "comment" : "Setting to publish a client tag indicating Damus posted the note"
     },
     "Share externally" : {
       "comment" : "Accessibility label for external share button"
@@ -1770,6 +1944,9 @@
     },
     "Show less" : {
       "comment" : "Button to show less of a long profile description."
+    },
+    "Show media links" : {
+      "comment" : "Accessibility label for toggle button to show media link list"
     },
     "Show more" : {
       "comment" : "Button to show entire note.\nButton to show more of a long profile description."
@@ -1804,8 +1981,20 @@
     "Sign out" : {
       "comment" : "Sidebar menu label to sign out of the account."
     },
+    "Size" : {
+      "comment" : "Label for size in disk storage chart"
+    },
     "Skip" : {
       "comment" : "Button to dismiss the suggested users screen"
+    },
+    "Snapshot Database" : {
+      "comment" : "Label for snapshot database"
+    },
+    "Snapshot Ndb to shared container" : {
+      "comment" : "Developer settings button to snapshot ndb to shared container."
+    },
+    "Snapshotting Ndb to shared container" : {
+      "comment" : "Developer settings loading message indicating that ndb is being snapshotted to the shared container."
     },
     "SOFTWARE" : {
       "comment" : "Text label indicating which relay software is used to run this Nostr relay."
@@ -1852,6 +2041,9 @@
     "Staying humble..." : {
       "comment" : "Placeholder as an example of what the user could set as their profile status."
     },
+    "Storage" : {
+      "comment" : "Navigation title for storage settings\nSection header for storage usage statistics"
+    },
     "Subscriber number" : {
       "comment" : "Label for Purple account subscriber number"
     },
@@ -1879,6 +2071,9 @@
     "Supporter Badge" : {
       "comment" : "Title for supporter badge"
     },
+    "Switch between posts from your follows or your favorites." : {
+      "comment" : "Description of the tip that informs users that they can switch between posts from your follows or your favorites."
+    },
     "Syncing" : {
       "comment" : "Label indicating success in syncing notification preferences"
     },
@@ -1890,6 +2085,12 @@
     },
     "Tap to load" : {
       "comment" : "Label for button that allows user to dismiss media content warning and unblur the image"
+    },
+    "Tenor API Key (optional)" : {
+      "comment" : "Prompt for optional entry of API Key to use with Tenor."
+    },
+    "Tenor API key not configured" : {
+      "comment" : "Error message for missing Tenor API key"
     },
     "Test (local)" : {
       "comment" : "Label indicating a local test environment for Damus Purple functionality (Developer feature)\nLabel indicating a local test environment for Push notification functionality (Developer feature)"
@@ -1920,6 +2121,9 @@
     },
     "The payment request did not receive a response and the request timed-out." : {
       "comment" : "A human-readable error message"
+    },
+    "The quick brown fox jumps over the lazy dog. This preview shows how your line spacing will appear in longform articles." : {
+      "comment" : "Sample text for line height preview in settings"
     },
     "The social network you control" : {
       "comment" : "Quick description of what Damus is"
@@ -1963,6 +2167,9 @@
     "This note contains too many items and cannot be rendered" : {
       "comment" : "Error message indicating that a note is too big and cannot be rendered"
     },
+    "This note may have been deleted, or it might not be available on the relays you're connected to." : {
+      "comment" : "Text for the event loader view when it is unable to find the note the user is looking for"
+    },
     "This operation is restricted by your wallet." : {
       "comment" : "Error description for restricted operation"
     },
@@ -1972,8 +2179,31 @@
     "This user cannot be zapped because they have not configured zaps on their account yet. Time to orange-pill?" : {
       "comment" : "Comment explaining why a user cannot be zapped."
     },
+    "This will allow you to easily add gifs from Tenor to your posts. You will see the GIF icon in the attachment bar when creating a post. Tapping it will show you all of tenor's featured GIFs. You can also search for GIFs." : {
+      "comment" : "Damus Labs feature explanation"
+    },
+    "This will allow you to pick users to be part of your favorites list. You can also switch your profile timeline to only see posts from your favorite contacts." : {
+      "comment" : "Damus Labs feature explanation"
+    },
+    "This will allow you to see all the real-time live streams happening on Nostr! As well as let you view and interact in the Live Chat. Please keep in mind this is still a work in progress and issues are expected. When enabled you will see the Live option in your side menu." : {
+      "comment" : "Damus Labs feature explanation"
+    },
     "Threads" : {
       "comment" : "Section header title for a list of threads that are muted."
+    },
+    "Timeline switcher" : {
+      "comment" : "Title of tip that informs users that they can switch timelines."
+    },
+    "Timeline switcher, select %@ or %@" : {
+      "comment" : "Accessibility label for the timeline switcher button at the topbar",
+      "localizations" : {
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Timeline switcher, select %1$@ or %2$@"
+          }
+        }
+      }
     },
     "To continue your Purple subscription checkout, please verify your npub by clicking on the button below" : {
       "comment" : "Instruction on how to verify npub during Damus Purple checkout"
@@ -1992,6 +2222,12 @@
     },
     "Top Zap" : {
       "comment" : "Text indicating that this zap is the one with the highest amount of sats."
+    },
+    "Total" : {
+      "comment" : "Label for total storage in pie chart center"
+    },
+    "Total Storage" : {
+      "comment" : "Label for total storage used"
     },
     "Translate DMs" : {
       "comment" : "Toggle to translate direct messages."
@@ -2021,13 +2257,16 @@
       "comment" : "Human-readable short description of the 'trusted network filter' when it is enabled, and therefore showing content from only the trusted network."
     },
     "Try Again" : {
-      "comment" : "Button to retry payment"
+      "comment" : "Button label to retry loading a note that was not found\nButton to retry loading GIFs\nButton to retry payment"
     },
     "Try again. If the error persists, please contact your wallet provider and/or our support team." : {
       "comment" : "A human-readable tip for an error when a payment request cannot be made to a wallet."
     },
     "Try checking the link again, your internet connection, or contact the person who provided you the link for help." : {
       "comment" : "Tips on what to do if a note cannot be found."
+    },
+    "Try checking your internet connection, expanding your relay list, or contacting the person who quoted this note." : {
+      "comment" : "Tips on what to do if a quoted note cannot be found."
     },
     "Try restarting your wallet or contacting support if the problem persists." : {
       "comment" : "Tip for internal error"
@@ -2124,6 +2363,9 @@
     },
     "VERSION" : {
       "comment" : "Text label indicating which version of the relay software is being run for this Nostr relay."
+    },
+    "via %@" : {
+      "comment" : "Label indicating which client published the event"
     },
     "View full profile" : {
       "comment" : "A button label that allows the user to see the full profile of the profile they are previewing"
@@ -2260,7 +2502,7 @@
     "You unlocked" : {
       "comment" : "Part 1 of 2 in message 'You unlocked automatic translations' the user gets when they sign up for Damus Purple"
     },
-    "Your connected wallet raised an unknown error. Message: %s" : {
+    "Your connected wallet raised an unknown error. Message: %@" : {
       "comment" : "Human readable error description for unknown error"
     },
     "Your content is being broadcasted to the network. Please wait." : {
@@ -2289,6 +2531,9 @@
     },
     "Your relay list appears to be broken, so we cannot connect you to your Nostr network." : {
       "comment" : "Human readable error description for a failure to parse the relay list due to a bad relay list"
+    },
+    "Your relay list could not be found, so we cannot connect you to your Nostr network." : {
+      "comment" : "Human readable error description for a failure to find the relay list"
     },
     "Your report will be sent to the relays you are connected to" : {
       "comment" : "Footer text to inform user what will happen when the report is submitted."
@@ -2342,5 +2587,5 @@
       "comment" : "Describing the functional benefits of Zaps."
     }
   },
-  "version" : "1.0"
+  "version" : "1.1"
 }

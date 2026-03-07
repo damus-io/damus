@@ -28,7 +28,7 @@ struct LabsExplainerView: View {
                 
                 Spacer()
                 
-                Text(NSLocalizedString(labDescription, comment: "Description of the feature."))
+                Text(labDescription)
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
                 
