@@ -12,12 +12,12 @@
 		2710433D2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */; };
 		2710433E2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */; };
 		2710433F2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */; };
-		2DE5511CCCDA4B5086BBFE89 /* Clibsodium in Frameworks */ = {isa = PBXBuildFile; productRef = 5B22637F18304563875BC3C5 /* Clibsodium */; };
+
 		3165648B295B70D500C64604 /* LinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3165648A295B70D500C64604 /* LinkView.swift */; };
 		3169CAE6294E69C000EE4006 /* EmptyTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CAE5294E69C000EE4006 /* EmptyTimelineView.swift */; };
 		3169CAED294FCCFC00EE4006 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CAEC294FCCFC00EE4006 /* Constants.swift */; };
 		31D2E847295218AF006D67F8 /* Shimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D2E846295218AF006D67F8 /* Shimmer.swift */; };
-		3363BD22C3AA446C81E48388 /* Clibsodium in Frameworks */ = {isa = PBXBuildFile; productRef = 06F5E2B33E344D17A06AA442 /* Clibsodium */; };
+
 		3A0A30BB2C21397A00F8C9BC /* EmojiPicker in Frameworks */ = {isa = PBXBuildFile; productRef = 3A0A30BA2C21397A00F8C9BC /* EmojiPicker */; };
 		3A23838E2A297DD200E5AA2E /* ZapButtonModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A23838D2A297DD200E5AA2E /* ZapButtonModel.swift */; };
 		3A2BAC5A2DD7E4C400EBB4CC /* NIP05DomainTimelineHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A2BAC592DD7E4C400EBB4CC /* NIP05DomainTimelineHeaderView.swift */; };
@@ -411,7 +411,7 @@
 		50C3E08A2AA8E3F7006A4BC0 /* AVPlayer+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C3E0892AA8E3F7006A4BC0 /* AVPlayer+Additions.swift */; };
 		50DA11262A16A23F00236234 /* Launch.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 50DA11252A16A23F00236234 /* Launch.storyboard */; };
 		5134E51E1A288235039554E7 /* NIP17.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171FF9F8F1CF2BD23C8A489F /* NIP17.swift */; };
-		573115493E424D43AB0B9512 /* Clibsodium in Frameworks */ = {isa = PBXBuildFile; productRef = 7A78520CF26C4553A84B40B7 /* Clibsodium */; };
+
 		5C0567532C8B5F9C0073F23A /* PostingTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8711DD2C460C06007879C2 /* PostingTimelineView.swift */; };
 		5C0567552C8B60C20073F23A /* OffsetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567542C8B60C20073F23A /* OffsetExtension.swift */; };
 		5C0567562C8B60E60073F23A /* OffsetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0567542C8B60C20073F23A /* OffsetExtension.swift */; };
@@ -1027,7 +1027,7 @@
 		BA3759972ABCCF360018D73B /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3759962ABCCF360018D73B /* CameraPreview.swift */; };
 		BA693074295D649800ADDB87 /* UserSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA693073295D649800ADDB87 /* UserSettingsStore.swift */; };
 		BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */; };
-		D10360D8586D4A4580EC5EF9 /* Clibsodium in Frameworks */ = {isa = PBXBuildFile; productRef = B6A73EE06C764FA88985AF04 /* Clibsodium */; };
+
 		D2277EEA2A089BD5006C3807 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2277EE92A089BD5006C3807 /* Router.swift */; };
 		D2585C7839C411EB3E0D79D6 /* RepostNotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64D0A2B0F048CC8D494945E6 /* RepostNotificationTests.swift */; };
 		D38DA39D28DBB3923E538B5C /* NIP17.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171FF9F8F1CF2BD23C8A489F /* NIP17.swift */; };
@@ -2712,7 +2712,7 @@
 				D7C48C0B2D12DE0C00A3BACF /* SwiftyCrop in Frameworks */,
 				D78DB8592C1CE9CA00F0AB12 /* SwipeActions in Frameworks */,
 				4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */,
-				D10360D8586D4A4580EC5EF9 /* Clibsodium in Frameworks */,
+
 				4C27C9322A64766F007DBC75 /* MarkdownUI in Frameworks */,
 				D7E5B2DB2EA080BE00CF47AC /* Negentropy in Frameworks */,
 			);
@@ -2748,7 +2748,7 @@
 				82D6FC882CD9A4DE00C925F4 /* EmojiPicker in Frameworks */,
 				82D6FC842CD9A48500C925F4 /* Kingfisher in Frameworks */,
 				82D6FC812CD99FC500C925F4 /* secp256k1 in Frameworks */,
-				2DE5511CCCDA4B5086BBFE89 /* Clibsodium in Frameworks */,
+
 				D7E5B2E32EA0A69900CF47AC /* Negentropy in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2766,7 +2766,7 @@
 				D7E5B2E12EA0A69200CF47AC /* Negentropy in Frameworks */,
 				D7C48C0F2D12E35600A3BACF /* SwiftyCrop in Frameworks */,
 				D703D7492C6709B100A400EA /* secp256k1 in Frameworks */,
-				3363BD22C3AA446C81E48388 /* Clibsodium in Frameworks */,
+
 				D70D909C2CDED7B200CD0534 /* CodeScanner in Frameworks */,
 				D73E5F9B2C6AA8B0007EB227 /* Kingfisher in Frameworks */,
 			);
@@ -2778,7 +2778,7 @@
 			files = (
 				4C5726BA2D72C6FA00E7FF82 /* Kingfisher in Frameworks */,
 				D789D1202AFEFBF20083A7AB /* secp256k1 in Frameworks */,
-				573115493E424D43AB0B9512 /* Clibsodium in Frameworks */,
+
 				D7EDED312B1290B80018B19C /* MarkdownUI in Frameworks */,
 				D7DB1FEA2D5A9F5A00CF06DA /* CryptoSwift in Frameworks */,
 				D7E5B2DF2EA0A68600CF47AC /* Negentropy in Frameworks */,
@@ -5014,7 +5014,7 @@
 				3ACF94362DA9A52F00971A4E /* XCRemoteSwiftPackageReference "FaviconFinder" */,
 				D7E5B2D92EA080BE00CF47AC /* XCRemoteSwiftPackageReference "negentropy-swift" */,
 				D74723EA2F15B0C3002DA12A /* XCRemoteSwiftPackageReference "nostr-sdk-swift" */,
-				B5801E8B522B2AFF8DDB6889 /* XCRemoteSwiftPackageReference "swift-sodium" */,
+
 			);
 			productRefGroup = 4CE6DEE427F7A08100C66700 /* Products */;
 			projectDirPath = "";
@@ -7776,14 +7776,7 @@
 				minimumVersion = 0.2.26;
 			};
 		};
-		B5801E8B522B2AFF8DDB6889 /* XCRemoteSwiftPackageReference "swift-sodium" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/jedisct1/swift-sodium.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.9.1;
-			};
-		};
+
 		D70D90962CDED61800CD0534 /* XCRemoteSwiftPackageReference "CodeScanner" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/twostraws/CodeScanner.git";
@@ -7843,11 +7836,7 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		06F5E2B33E344D17A06AA442 /* Clibsodium */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B5801E8B522B2AFF8DDB6889 /* XCRemoteSwiftPackageReference "swift-sodium" */;
-			productName = Clibsodium;
-		};
+
 		3A0A30BA2C21397A00F8C9BC /* EmojiPicker */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 3A0A30B92C21397A00F8C9BC /* XCRemoteSwiftPackageReference "EmojiPicker" */;
@@ -7888,16 +7877,7 @@
 			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */;
 			productName = secp256k1;
 		};
-		5B22637F18304563875BC3C5 /* Clibsodium */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B5801E8B522B2AFF8DDB6889 /* XCRemoteSwiftPackageReference "swift-sodium" */;
-			productName = Clibsodium;
-		};
-		7A78520CF26C4553A84B40B7 /* Clibsodium */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B5801E8B522B2AFF8DDB6889 /* XCRemoteSwiftPackageReference "swift-sodium" */;
-			productName = Clibsodium;
-		};
+
 		82D6FC802CD99FC500C925F4 /* secp256k1 */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */;
@@ -7923,11 +7903,7 @@
 			package = D78DB8572C1CE9CA00F0AB12 /* XCRemoteSwiftPackageReference "SwipeActions" */;
 			productName = SwipeActions;
 		};
-		B6A73EE06C764FA88985AF04 /* Clibsodium */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B5801E8B522B2AFF8DDB6889 /* XCRemoteSwiftPackageReference "swift-sodium" */;
-			productName = Clibsodium;
-		};
+
 		D703D7482C6709B100A400EA /* secp256k1 */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1.swift" */;
