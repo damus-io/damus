@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import UIKit
 
 enum EventViewKind {
     case small
@@ -119,19 +120,31 @@ func make_actionbar_model(ev: NoteId, damus: DamusState) -> ActionBarModel {
     return model
 }
 
+/// Returns a Dynamic Type-aware font for the given event view size and user font multiplier.
 func eventviewsize_to_font(_ size: EventViewKind, font_size: Double) -> Font {
+    let baseSize: CGFloat
+    let textStyle: UIFont.TextStyle
+
     switch size {
     case .small:
-        return Font.system(size: 12.0 * font_size)
+        baseSize = 12.0 * font_size
+        textStyle = .caption1
     case .normal:
-        return Font.system(size: 17.0 * font_size) // Assuming .body is 17pt by default
+        baseSize = 17.0 * font_size
+        textStyle = .body
     case .selected:
-        return .custom("selected", size: 21.0 * font_size)
+        baseSize = 21.0 * font_size
+        textStyle = .title2
     case .title:
-        return Font.system(size: 24.0 * font_size) // Assuming .title is 24pt by default
+        baseSize = 24.0 * font_size
+        textStyle = .title1
     case .subheadline:
-        return Font.system(size: 14.0 * font_size) // Assuming .subheadline is 14pt by default
+        baseSize = 14.0 * font_size
+        textStyle = .subheadline
     }
+
+    let scaledUIFont = UIFontMetrics(forTextStyle: textStyle).scaledFont(for: UIFont.systemFont(ofSize: baseSize))
+    return Font(scaledUIFont)
 }
 
 func eventviewsize_to_uifont(_ size: EventViewKind) -> UIFont {
