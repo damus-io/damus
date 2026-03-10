@@ -12,7 +12,8 @@ struct DMChatView: View, KeyboardReadable {
     let damus_state: DamusState
     @FocusState private var isTextFieldFocused: Bool
     @ObservedObject var dms: DirectMessageModel
-    
+    @State private var rotation = RotationState()
+
     var pubkey: Pubkey {
         dms.pubkey
     }
@@ -24,10 +25,29 @@ struct DMChatView: View, KeyboardReadable {
                     ForEach(Array(zip(dms.events, dms.events.indices)).filter { should_show_event(state: damus_state, ev: $0.0)}, id: \.0.id) { (ev, ind) in
                         DMView(event: dms.events[ind], damus_state: damus_state)
                             .contextMenu{MenuItems(damus_state: damus_state, event: ev, target_pubkey: ev.pubkey, profileModel: ProfileModel(pubkey: ev.pubkey, damus: damus_state))}
+                            .onAppear { rotation.trackAppeared(ev.id) }
+                            .onDisappear { rotation.trackDisappeared(ev.id) }
                     }
                     EndBlock(height: 1)
                 }
                 .padding(.horizontal)
+                .background(
+                    ScrollViewRotationHandler(
+                        onWillRotate: {
+                            guard let target = rotation.scrollTarget(in: dms.events) else { return }
+                            rotation.freeze(targetID: target.id)
+                        },
+                        onScrollCorrection: {
+                            guard let targetID = rotation.targetID else { return }
+                            DispatchQueue.main.async {
+                                scroller.scrollTo(targetID, anchor: .bottom)
+                            }
+                        },
+                        onDidStabilize: {
+                            rotation.unfreeze()
+                        }
+                    )
+                )
 
             }
             .dismissKeyboardOnTap()
@@ -162,6 +182,126 @@ struct DMChatView: View, KeyboardReadable {
             if dms.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 dms.draft = ""
             }
+        }
+    }
+}
+
+// MARK: - Rotation state
+
+private struct RotationState {
+    private var visibleMessageIDs: Set<NoteId> = []
+    private(set) var isActive: Bool = false
+    private(set) var targetID: NoteId? = nil
+
+    mutating func trackAppeared(_ id: NoteId) {
+        guard !isActive else { return }
+        visibleMessageIDs.insert(id)
+    }
+
+    mutating func trackDisappeared(_ id: NoteId) {
+        guard !isActive else { return }
+        visibleMessageIDs.remove(id)
+    }
+
+    /// Returns the last visible message to use as scroll anchor after rotation.
+    func scrollTarget(in events: [NostrEvent]) -> NostrEvent? {
+        return events.last { visibleMessageIDs.contains($0.id) }
+    }
+
+    mutating func freeze(targetID: NoteId) {
+        isActive = true
+        self.targetID = targetID
+    }
+
+    mutating func unfreeze() {
+        isActive = false
+        targetID = nil
+    }
+}
+
+// MARK: - Scroll position preservation during rotation
+//
+// LazyVStack aggressively recycles views during rotation, which corrupts
+// SwiftUI's scroll position and any onAppear/onDisappear-based tracking.
+// We freeze the visible-ID set during rotation to preserve the scroll target.
+//
+// UIViewControllerRepresentable is required because viewWillTransition(to:with:)
+// fires BEFORE layout changes begin — the only reliable time to capture the
+// visible set. UIDevice.orientationDidChangeNotification fires too late.
+//
+// KVO on the underlying UIScrollView's contentSize reactively corrects
+// the scroll position as layout settles after rotation.
+
+struct ScrollViewRotationHandler: UIViewControllerRepresentable {
+    var onWillRotate: () -> Void
+    var onScrollCorrection: () -> Void
+    var onDidStabilize: () -> Void
+
+    func makeUIViewController(context: Context) -> ScrollViewRotationVC {
+        let vc = ScrollViewRotationVC()
+        vc.onWillRotate = onWillRotate
+        vc.onScrollCorrection = onScrollCorrection
+        vc.onDidStabilize = onDidStabilize
+        return vc
+    }
+
+    func updateUIViewController(_ vc: ScrollViewRotationVC, context: Context) {
+        vc.onWillRotate = onWillRotate
+        vc.onScrollCorrection = onScrollCorrection
+        vc.onDidStabilize = onDidStabilize
+    }
+
+    class ScrollViewRotationVC: UIViewController {
+        var onWillRotate: (() -> Void)?
+        var onScrollCorrection: (() -> Void)?
+        var onDidStabilize: (() -> Void)?
+
+        private weak var scrollView: UIScrollView?
+        private var contentSizeObservation: NSKeyValueObservation?
+        private var cleanupWorkItem: DispatchWorkItem?
+
+        override func viewDidAppear(_ animated: Bool) {
+            super.viewDidAppear(animated)
+            scrollView = findParentScrollView()
+        }
+
+        override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+            super.viewWillTransition(to: size, with: coordinator)
+            guard scrollView != nil else { return }
+
+            onWillRotate?()
+            onScrollCorrection?()
+
+            // Reactively correct scroll position each time content layout changes
+            contentSizeObservation = scrollView?.observe(\.contentSize) { [weak self] _, _ in
+                guard let self else { return }
+                self.onScrollCorrection?()
+                self.scheduleCleanup()
+            }
+
+            scheduleCleanup()
+        }
+
+        /// Stop observing and unfreeze once contentSize has stabilized (no KVO
+        /// fires before the next run-loop iteration).
+        private func scheduleCleanup() {
+            cleanupWorkItem?.cancel()
+            cleanupWorkItem = DispatchWorkItem { [weak self] in
+                guard let self else { return }
+                self.contentSizeObservation?.invalidate()
+                self.contentSizeObservation = nil
+                self.onDidStabilize?()
+            }
+            DispatchQueue.main.async(execute: cleanupWorkItem!)
+        }
+
+        private func findParentScrollView() -> UIScrollView? {
+            var current: UIView? = view
+            while let v = current {
+                if let sv = v as? UIScrollView { return sv }
+                current = v.superview
+            }
+            return nil
         }
     }
 }
