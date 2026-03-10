@@ -1,5 +1,6 @@
 xcuserdata
 /.direnv
+.beads/
 damus/TestingPrivate.swift
 damus.xcodeproj/xcshareddata/xcbaselines
 .DS_Store
