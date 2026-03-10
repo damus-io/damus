@@ -324,7 +324,7 @@ final class PostViewTests: XCTestCase {
         let post = NostrPost(content: "gm")
         let clientTag = ["client", "Damus"]
         let event = post.to_event(keypair: test_keypair_full, clientTag: clientTag)
-        XCTAssertTrue(event?.tags.contains(where: { $0 == clientTag }) ?? false)
+        XCTAssertTrue(event?.tags.contains(where: { $0.strings() == clientTag }) ?? false)
     }
 
     /// Tests that existing client tags are not duplicated.
@@ -333,9 +333,9 @@ final class PostViewTests: XCTestCase {
         let post = NostrPost(content: "gm", tags: existingTags)
         let clientTag = ["client", "Damus"]
         let event = post.to_event(keypair: test_keypair_full, clientTag: clientTag)
-        let clientTagCount = event?.tags.filter { $0.first == "client" }.count
+        let clientTagCount = event?.tags.filter { $0[0].matches_str("client") }.count
         XCTAssertEqual(clientTagCount, 1)
-        XCTAssertEqual(event?.tags.first(where: { $0.first == "client" }), existingTags.first)
+        XCTAssertEqual(event?.tags.first(where: { $0[0].matches_str("client") })?.strings(), existingTags.first)
     }
 }
 
