@@ -581,64 +581,64 @@ extension NdbNote {
         return thread_reply() != nil
     }
 
+    /// Detects the language of this note's text content for translation UI.
+    ///
+    /// Returns `nil` for empty text, for short Latin-script text (< 11 chars)
+    /// where detection is unreliable, or when no hypothesis reaches 50%
+    /// confidence. For text under 60 characters, returns the user's current
+    /// locale language if it appears among the top hypotheses with >= 10%
+    /// confidence. Non-Latin scripts (CJK, Cyrillic, Arabic, etc.) bypass
+    /// the short-text guard because the writing system is a strong signal.
+    ///
+    /// Must not be called on the main thread.
     func note_language(_ keypair: Keypair) -> String? {
         assert(!Thread.isMainThread, "This function must not be run on the main thread.")
 
-        // Rely on Apple's NLLanguageRecognizer to tell us which language it thinks the note is in
-        // and filter on only the text portions of the content as URLs and hashtags confuse the language recognizer.
-        /*
-        guard let blocks_txn = self.blocks(ndb: ndb) else {
+        let text = self.get_content(keypair)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !text.isEmpty else {
             return nil
         }
-        let blocks = blocks_txn.unsafeUnownedValue
 
-        let originalOnlyText = blocks.blocks(note: self).compactMap {
-                if case .text(let txt) = $0 {
-                    // Replacing right single quotation marks (’) with "typewriter or ASCII apostrophes" (')
-                    // as a workaround to get Apple's language recognizer to predict language the correctly.
-                    // It is important to add this workaround to get the language right because it wastes users' money to send translation requests.
-                    // Until Apple fixes their language model, this workaround will be kept in place.
-                    // See https://en.wikipedia.org/wiki/Apostrophe#Unicode for an explanation of the differences between the two characters.
-                    //
-                    // For example,
-                    // "nevent1qqs0wsknetaju06xk39cv8sttd064amkykqalvfue7ydtg3p0lyfksqzyrhxagf6h8l9cjngatumrg60uq22v66qz979pm32v985ek54ndh8gj42wtp"
-                    // has the note content "It’s a meme".
-                    // Without the character replacement, it is 61% confident that the text is in Turkish (tr) and 8% confident that the text is in English (en),
-                    // which is a wildly incorrect hypothesis.
-                    // With the character replacement, it is 65% confident that the text is in English (en) and 24% confident that the text is in Turkish (tr), which is more accurate.
-                    //
-                    // Similarly,
-                    // "nevent1qqspjqlln6wvxrqg6kzl2p7gk0rgr5stc7zz5sstl34cxlw55gvtylgpp4mhxue69uhkummn9ekx7mqpr4mhxue69uhkummnw3ez6ur4vgh8wetvd3hhyer9wghxuet5qy28wumn8ghj7un9d3shjtnwdaehgu3wvfnsygpx6655ve67vqlcme9ld7ww73pqx7msclhwzu8lqmkhvuluxnyc7yhf3xut"
-                    // has the note content "You’re funner".
-                    // Without the character replacement, it is 52% confident that the text is in Norwegian Bokmål (nb) and 41% confident that the text is in English (en).
-                    // With the character replacement, it is 93% confident that the text is in English (en) and 4% confident that the text is in Norwegian Bokmål (nb).
-                    return txt.replacingOccurrences(of: "’", with: "'")
-                }
-                else {
-                    return nil
-                }
+        // Very short Latin-script text (single words, abbreviations) is too
+        // ambiguous for reliable language detection between Latin-script
+        // languages. Non-Latin scripts (CJK, Cyrillic, Arabic, etc.) are
+        // reliably detected even for short text because the writing system
+        // itself is a strong signal.
+        if text.count < 11 {
+            let hasNonLatin = text.unicodeScalars.contains { scalar in
+                CharacterSet.letters.contains(scalar)
+                    && scalar.value > 0x02AF
+                    && !(scalar.value >= 0x1E00 && scalar.value <= 0x1EFF)
             }
-            .joined(separator: " ")
-         */
-        
-        let originalOnlyText = self.get_content(keypair)
-
-        // If there is no text, there's nothing to use to detect language.
-        guard !originalOnlyText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return nil
+            if !hasNonLatin { return nil }
         }
 
         let languageRecognizer = NLLanguageRecognizer()
-        languageRecognizer.processString(originalOnlyText)
+        languageRecognizer.processString(text)
 
-        // Only accept language recognition hypothesis if there's at least a 50% probability that it's accurate.
-        guard let locale = languageRecognizer.languageHypotheses(withMaximum: 1).first(where: { $0.value >= 0.5 })?.key.rawValue else {
+        let hypotheses = languageRecognizer.languageHypotheses(withMaximum: 3)
+
+        // For short text (< 60 chars), NLLanguageRecognizer is unreliable and
+        // often misidentifies the language. If the user's current language
+        // appears as a plausible hypothesis (>= 10% confidence), treat the note
+        // as being in the user's language to avoid false "translate note" prompts.
+        if text.count < 60,
+           let currentLang = localeToLanguage(Locale.current.identifier) {
+            for (lang, prob) in hypotheses {
+                if localeToLanguage(lang.rawValue) == currentLang && prob >= 0.1 {
+                    return currentLang
+                }
+            }
+        }
+
+        guard let best = hypotheses.max(by: { $0.value < $1.value }),
+              best.value >= 0.5 else {
             return nil
         }
 
-        // Remove the variant component and just take the language part as translation services typically only supports the variant-less language.
-        // Moreover, speakers of one variant can generally understand other variants.
-        return localeToLanguage(locale)
+        return localeToLanguage(best.key.rawValue)
     }
 
     var age: TimeInterval {
