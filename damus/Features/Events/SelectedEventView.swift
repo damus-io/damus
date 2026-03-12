@@ -58,10 +58,19 @@ struct SelectedEventView: View {
 
                 Mention
                 
-                Text(verbatim: "\(format_date(created_at: event.created_at))")
-                    .padding([.top, .leading, .trailing])
-                    .font(.footnote)
-                    .foregroundColor(.gray)
+                HStack {
+                    Text(verbatim: "\(format_date(created_at: event.created_at))")
+                        .font(.footnote)
+                        .foregroundColor(.gray)
+                    if let clientTag = event.clientTag {
+                        Text(String(format: NSLocalizedString("via %@", comment: "Label indicating which client published the event"), clientTag.name))
+                            .font(.footnote)
+                            .foregroundColor(.gray)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
+                }
+                .padding([.top, .leading, .trailing])
                 
                 Divider()
                     .padding([.bottom], 4)
