@@ -695,6 +695,10 @@ struct ContentView: View {
     }
 
     func connect() async {
+        // Compact the database if requested from the previous session.
+        // This runs before opening the main Ndb instance so that it works on an idle database.
+        Ndb.compact_if_needed()
+
         // nostrdb
         var mndb = Ndb()
         if mndb == nil {
