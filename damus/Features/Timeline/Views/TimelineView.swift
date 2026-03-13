@@ -131,10 +131,10 @@ struct TimelineView_Previews: PreviewProvider {
 
 protocol ScrollQueue {
     var should_queue: Bool { get }
-    func set_should_queue(_ val: Bool)
+    @MainActor func set_should_queue(_ val: Bool)
 }
     
-func handle_scroll_queue(_ proxy: GeometryProxy, queue: ScrollQueue) {
+@MainActor func handle_scroll_queue(_ proxy: GeometryProxy, queue: ScrollQueue) {
     let offset = -proxy.frame(in: .named("scroll")).origin.y
     let new_should_queue = offset > 0
     if queue.should_queue != new_should_queue {

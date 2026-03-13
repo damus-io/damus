@@ -1720,6 +1720,9 @@
 		D774A5CF2F4FBDEA006A4D64 /* NdbDatabase+UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = D774A5CD2F4FBDEA006A4D64 /* NdbDatabase+UI.swift */; };
 		D774A5D02F4FBDEA006A4D64 /* NdbDatabase+UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = D774A5CD2F4FBDEA006A4D64 /* NdbDatabase+UI.swift */; };
 		D774A5D12F4FBDEA006A4D64 /* NdbDatabase+UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = D774A5CD2F4FBDEA006A4D64 /* NdbDatabase+UI.swift */; };
+		D774A5D32F4FC947006A4D64 /* RaceConditionTestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D774A5D22F4FC93D006A4D64 /* RaceConditionTestHelpers.swift */; };
+		D774A5D72F4FCA9A006A4D64 /* HomeModelConcurrencyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D774A5D52F4FCA9A006A4D64 /* HomeModelConcurrencyTests.swift */; };
+		D774A5D92F4FCE07006A4D64 /* EventHolderConcurrencyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D774A5D82F4FCE07006A4D64 /* EventHolderConcurrencyTests.swift */; };
 		D776BE402F232B17002DA1C9 /* EntityPreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D776BE3F2F232B17002DA1C9 /* EntityPreloader.swift */; };
 		D776BE412F232B17002DA1C9 /* EntityPreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D776BE3F2F232B17002DA1C9 /* EntityPreloader.swift */; };
 		D776BE422F232B17002DA1C9 /* EntityPreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D776BE3F2F232B17002DA1C9 /* EntityPreloader.swift */; };
@@ -2863,6 +2866,9 @@
 		D774A5C72F4F93F5006A4D64 /* StorageStatsViewHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageStatsViewHelper.swift; sourceTree = "<group>"; };
 		D774A5CB2F4F9679006A4D64 /* StorageStatsManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageStatsManagerTests.swift; sourceTree = "<group>"; };
 		D774A5CD2F4FBDEA006A4D64 /* NdbDatabase+UI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NdbDatabase+UI.swift"; sourceTree = "<group>"; };
+		D774A5D22F4FC93D006A4D64 /* RaceConditionTestHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RaceConditionTestHelpers.swift; sourceTree = "<group>"; };
+		D774A5D52F4FCA9A006A4D64 /* HomeModelConcurrencyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeModelConcurrencyTests.swift; sourceTree = "<group>"; };
+		D774A5D82F4FCE07006A4D64 /* EventHolderConcurrencyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventHolderConcurrencyTests.swift; sourceTree = "<group>"; };
 		D776BE3F2F232B17002DA1C9 /* EntityPreloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityPreloader.swift; sourceTree = "<group>"; };
 		D776BE432F233012002DA1C9 /* EntityPreloaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityPreloaderTests.swift; sourceTree = "<group>"; };
 		D77A96BE2F3131BE00CC3246 /* RelayHintsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayHintsTests.swift; sourceTree = "<group>"; };
@@ -3437,6 +3443,7 @@
 		4C9B0DEC2A65A74000CBDA21 /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				D774A5D22F4FC93D006A4D64 /* RaceConditionTestHelpers.swift */,
 				4C9B0DED2A65A75F00CBDA21 /* AttrStringTestExtensions.swift */,
 				B5B4D1422B37D47600844320 /* NdbExtensions.swift */,
 			);
@@ -3918,6 +3925,7 @@
 		4CE6DEF627F7A08200C66700 /* damusTests */ = {
 			isa = PBXGroup;
 			children = (
+				D774A5D62F4FCA9A006A4D64 /* RaceConditionTests */,
 				D774A5CB2F4F9679006A4D64 /* StorageStatsManagerTests.swift */,
 				D77A96BE2F3131BE00CC3246 /* RelayHintsTests.swift */,
 				D776BE432F233012002DA1C9 /* EntityPreloaderTests.swift */,
@@ -5342,6 +5350,15 @@
 			path = DIP06;
 			sourceTree = "<group>";
 		};
+		D774A5D62F4FCA9A006A4D64 /* RaceConditionTests */ = {
+			isa = PBXGroup;
+			children = (
+				D774A5D82F4FCE07006A4D64 /* EventHolderConcurrencyTests.swift */,
+				D774A5D52F4FCA9A006A4D64 /* HomeModelConcurrencyTests.swift */,
+			);
+			path = RaceConditionTests;
+			sourceTree = "<group>";
+		};
 		D78DB85D2C20FE9E00F0AB12 /* Chat */ = {
 			isa = PBXGroup;
 			children = (
@@ -6424,6 +6441,7 @@
 				D7DEEF2F2A8C021E00E0C99F /* NostrEventTests.swift in Sources */,
 				4C8D00D429E3C5D40036AF10 /* NIP19Tests.swift in Sources */,
 				3A30410129AB12AA008A0F29 /* EventGroupViewTests.swift in Sources */,
+				D774A5D92F4FCE07006A4D64 /* EventHolderConcurrencyTests.swift in Sources */,
 				501F8C822A0224EB001AFC1D /* KeychainStorageTests.swift in Sources */,
 				D72E127A2BEEEED000F4F781 /* NostrFilterTests.swift in Sources */,
 				B5B4D1432B37D47600844320 /* NdbExtensions.swift in Sources */,
@@ -6435,6 +6453,7 @@
 				4C4F14A72A2A61A30045A0B9 /* NostrScriptTests.swift in Sources */,
 				D78525252A7B2EA4002FA637 /* NoteContentViewTests.swift in Sources */,
 				D774A5CC2F4F9679006A4D64 /* StorageStatsManagerTests.swift in Sources */,
+				D774A5D72F4FCA9A006A4D64 /* HomeModelConcurrencyTests.swift in Sources */,
 				4C3EA67B28FF7B3900C48A62 /* InvoiceTests.swift in Sources */,
 				4C363A9E2828A822006E126D /* ReplyTests.swift in Sources */,
 				3A96E3FE2D6BCE3800AE1630 /* RepostedTests.swift in Sources */,
@@ -6446,6 +6465,7 @@
 				4CB8839A297322D200DC99E7 /* DMTests.swift in Sources */,
 				D5C1AFC82E5E00690092F72F /* ContactCardManagerTests.swift in Sources */,
 				D72734282F08914C00F90677 /* DatabaseSnapshotManagerTests.swift in Sources */,
+				D774A5D32F4FC947006A4D64 /* RaceConditionTestHelpers.swift in Sources */,
 				D7315A2C2ACDF4DA0036E30A /* DamusCacheManagerTests.swift in Sources */,
 				4C9054852A6AEAA000811EEC /* NdbTests.swift in Sources */,
 				75AD872B2AA23A460085EF2C /* Block+Tests.swift in Sources */,
