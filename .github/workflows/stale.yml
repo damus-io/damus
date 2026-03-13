@@ -11,13 +11,13 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v9
+      - uses: actions/stale@v10
         with:
-          days-before-stale: 60
+          days-before-stale: 180
           days-before-close: 30
           stale-issue-label: 'stalled'
           stale-issue-message: >
-            This issue has had no activity for 60 days. This usually means
+            This issue has had no activity for 180 days. This usually means
             it's too big and should be broken down, is blocked and needs
             attention, or isn't a priority right now.
 
