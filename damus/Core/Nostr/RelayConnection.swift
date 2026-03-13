@@ -121,44 +121,64 @@ final class RelayConnection: ObservableObject {
                 self.log?.add("Successful ping")
             } else {
                 Log.info("Ping failed, reconnecting to '%s'", for: .networking, self.relay_url.absoluteString)
-                self.isConnected = false
-                self.isConnecting = false
-                self.reconnect_with_backoff()
+                // Must update @Published properties on main thread
+                DispatchQueue.main.async {
+                    self.isConnected = false
+                    self.isConnecting = false
+                    self.reconnect_with_backoff()
+                }
                 self.log?.add("Ping failed")
             }
         }
     }
     
     func connect(force: Bool = false) {
-        if !force && (isConnected || isConnecting) {
-            return
-        }
-        
-        isConnecting = true
-        last_connection_attempt = Date().timeIntervalSince1970
-        
-        subscriptionToken = socket.subject
-            .receive(on: DispatchQueue.global(qos: .default))
-            .sink { [weak self] completion in
-                switch completion {
-                case .failure(let error):
-                    Task { await self?.wsEventQueue.add(item: .error(error)) }
-                case .finished:
-                    Task { await self?.wsEventQueue.add(item: .disconnected(.normalClosure, nil)) }
-                }
-            } receiveValue: { [weak self] event in
-                Task { await self?.wsEventQueue.add(item: event) }
+        // Ensure we check and update @Published properties on main thread
+        let doConnect = {
+            if !force && (self.isConnected || self.isConnecting) {
+                return
             }
-            
-        socket.connect()
+
+            self.isConnecting = true
+            self.last_connection_attempt = Date().timeIntervalSince1970
+
+            self.subscriptionToken = self.socket.subject
+                .receive(on: DispatchQueue.global(qos: .default))
+                .sink { [weak self] completion in
+                    switch completion {
+                    case .failure(let error):
+                        Task { await self?.wsEventQueue.add(item: .error(error)) }
+                    case .finished:
+                        Task { await self?.wsEventQueue.add(item: .disconnected(.normalClosure, nil)) }
+                    }
+                } receiveValue: { [weak self] event in
+                    Task { await self?.wsEventQueue.add(item: event) }
+                }
+
+            self.socket.connect()
+        }
+
+        if Thread.isMainThread {
+            doConnect()
+        } else {
+            DispatchQueue.main.async { doConnect() }
+        }
     }
 
     func disconnect() {
-        socket.disconnect()
-        subscriptionToken = nil
-        
-        isConnected = false
-        isConnecting = false
+        // All state mutations must happen on main thread to match connect()'s guarantee
+        let doDisconnect = {
+            self.socket.disconnect()
+            self.subscriptionToken = nil
+            self.isConnected = false
+            self.isConnecting = false
+        }
+
+        if Thread.isMainThread {
+            doDisconnect()
+        } else {
+            DispatchQueue.main.async { doDisconnect() }
+        }
     }
     
     func disablePermanently() {
