@@ -485,39 +485,83 @@ struct ProfileView: View {
             .navigationTitle("")
             .navigationBarBackButtonHidden()
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    HStack(spacing: 8) {
-                        navBackButton
-                            .padding(.top, 5)
-                            .accentColor(DamusColors.white)
-                        VStack(alignment: .leading, spacing: -4.5) {
-                            Text(getProfileInfo().0) // Display name
-                                .font(.headline)
-                                .foregroundColor(.white)
-                            Text(getProfileInfo().1) // Username
-                                .font(.subheadline)
-                                .foregroundColor(.white.opacity(0.8))
+                if #available(iOS 26.0, *) {
+                    ToolbarItem(placement: .topBarLeading) {
+                        HStack(spacing: 8) {
+                            navBackButton
+                                .padding(.top, 5)
+                                .accentColor(DamusColors.white)
+                            VStack(alignment: .leading, spacing: -4.5) {
+                                Text(getProfileInfo().0) // Display name
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                Text(getProfileInfo().1) // Username
+                                    .font(.subheadline)
+                                    .foregroundColor(.white.opacity(0.8))
+                            }
+                            .opacity(bannerBlurViewOpacity())
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.top, max(5, 15 + (yOffset / 30)))
                         }
-                        .opacity(bannerBlurViewOpacity())
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.top, max(5, 15 + (yOffset / 30)))
+                    }
+                    .sharedBackgroundVisibility(.hidden)
+                } else {
+                    ToolbarItem(placement: .topBarLeading) {
+                        HStack(spacing: 8) {
+                            navBackButton
+                                .padding(.top, 5)
+                                .accentColor(DamusColors.white)
+                            VStack(alignment: .leading, spacing: -4.5) {
+                                Text(getProfileInfo().0) // Display name
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                Text(getProfileInfo().1) // Username
+                                    .font(.subheadline)
+                                    .foregroundColor(.white.opacity(0.8))
+                            }
+                            .opacity(bannerBlurViewOpacity())
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.top, max(5, 15 + (yOffset / 30)))
+                        }
                     }
                 }
                 if showFollowBtnInBlurrBanner() {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        FollowButtonView(
-                            target: profile.get_follow_target(),
-                            follows_you: profile.follows(pubkey: damus_state.pubkey),
-                            follow_state: damus_state.contacts.follow_state(profile.pubkey)
-                        )
-                        .padding(.top, 8)
+                    if #available(iOS 26.0, *) {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            FollowButtonView(
+                                target: profile.get_follow_target(),
+                                follows_you: profile.follows(pubkey: damus_state.pubkey),
+                                follow_state: damus_state.contacts.follow_state(profile.pubkey)
+                            )
+                            .padding(.top, 8)
+                        }
+                        .sharedBackgroundVisibility(.hidden)
+                    } else {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            FollowButtonView(
+                                target: profile.get_follow_target(),
+                                follows_you: profile.follows(pubkey: damus_state.pubkey),
+                                follow_state: damus_state.contacts.follow_state(profile.pubkey)
+                            )
+                            .padding(.top, 8)
+                        }
                     }
                 } else {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        navActionSheetButton
-                            .padding(.top, 5)
-                            .accentColor(DamusColors.white)
+                    if #available(iOS 26.0, *) {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            navActionSheetButton
+                                .padding(.top, 5)
+                                .accentColor(DamusColors.white)
+                        }
+                        .sharedBackgroundVisibility(.hidden)
+                    } else {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            navActionSheetButton
+                                .padding(.top, 5)
+                                .accentColor(DamusColors.white)
+                        }
                     }
+                    
                 }
             }
             .toolbarBackground(.hidden)

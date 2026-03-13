@@ -239,26 +239,55 @@ struct ContentView: View {
                     TabView { // Prevents navbar appearance change on scroll
                         MainContent(damus: damus)
                             .toolbar() {
-                                ToolbarItem(placement: .navigationBarLeading) {
-                                    TopbarSideMenuButton(damus_state: damus, isSideBarOpened: $isSideBarOpened)
-                                }
-                                
-                                ToolbarItem(placement: .navigationBarTrailing) {
-                                    HStack(alignment: .center) {
-                                        SignalView(state: damus_state!, signal: home.signal)
-                                        
-                                        // maybe expand this to other timelines in the future
-                                        if selected_timeline == .search {
+                                if #available(iOS 26.0, *) {
+                                    ToolbarItem(placement: .navigationBarLeading) {
+                                        TopbarSideMenuButton(damus_state: damus, isSideBarOpened: $isSideBarOpened)
+                                    }
+                                    .sharedBackgroundVisibility(.hidden)
+                                    
+                                    
+                                    if selected_timeline == .home || selected_timeline == .search {
+                                        ToolbarItem(placement: .navigationBarTrailing) {
+                                            HStack(alignment: .center) {
+                                                SignalView(state: damus_state!, signal: home.signal)
+                                                
+                                                // maybe expand this to other timelines in the future
+                                                if selected_timeline == .search {
+                                                    
+                                                    Button(action: {
+                                                        present_sheet(.filter)
+                                                    }, label: {
+                                                        Image("filter")
+                                                            .foregroundColor(.gray)
+                                                    })
+                                                }
+                                            }
+                                        }
+                                        .sharedBackgroundVisibility(.hidden)
+                                    }
+                                } else {
+                                    ToolbarItem(placement: .navigationBarLeading) {
+                                        TopbarSideMenuButton(damus_state: damus, isSideBarOpened: $isSideBarOpened)
+                                    }
+                                    
+                                    ToolbarItem(placement: .navigationBarTrailing) {
+                                        HStack(alignment: .center) {
+                                            SignalView(state: damus_state!, signal: home.signal)
                                             
-                                            Button(action: {
-                                                present_sheet(.filter)
-                                            }, label: {
-                                                Image("filter")
-                                                    .foregroundColor(.gray)
-                                            })
+                                            // maybe expand this to other timelines in the future
+                                            if selected_timeline == .search {
+                                                
+                                                Button(action: {
+                                                    present_sheet(.filter)
+                                                }, label: {
+                                                    Image("filter")
+                                                        .foregroundColor(.gray)
+                                                })
+                                            }
                                         }
                                     }
                                 }
+                                
                             }
                     }
                     .background(DamusColors.adaptableWhite)
