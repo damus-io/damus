@@ -110,6 +110,9 @@ enum StorageStatsViewHelper {
             text += await formatNostrDBDetails(details: details)
         }
         
+        // Full container file listing for debugging orphaned files
+        text += await formatContainerFileBreakdown()
+        
         return text
     }
     
@@ -163,6 +166,38 @@ enum StorageStatsViewHelper {
         let nostrdbTitlePadded = "NostrDB Total".padding(toLength: 30, withPad: " ", startingAt: 0)
         let nostrdbSizePadded = StorageStatsManager.formatBytes(details.totalSize).padding(toLength: 12, withPad: " ", startingAt: 0)
         text += "\(nostrdbTitlePadded) \(nostrdbSizePadded)\n"
+        
+        return text
+    }
+    
+    /// Enumerate all files in the app sandbox and shared app group container and format them as text.
+    ///
+    /// Files are sorted by size descending so the largest contributors appear first,
+    /// making orphaned or unexpectedly large files easy to identify.
+    ///
+    /// - Returns: Formatted text listing every file with its size and relative path.
+    @concurrent
+    private static func formatContainerFileBreakdown() async -> String {
+        let entries = StorageStatsManager.shared.containerFileBreakdown()
+        
+        var text = String(repeating: "=", count: 50) + "\n\n"
+        text += "Full Container File Breakdown:\n"
+        text += String(repeating: "-", count: 50) + "\n"
+        
+        if entries.isEmpty {
+            text += "(no files found)\n"
+        } else {
+            var totalSize: UInt64 = 0
+            for entry in entries {
+                let sizePadded = StorageStatsManager.formatBytes(entry.size).padding(toLength: 12, withPad: " ", startingAt: 0)
+                text += "[\(entry.containerLabel)] \(sizePadded)  \(entry.relativePath)\n"
+                totalSize += entry.size
+            }
+            text += String(repeating: "-", count: 50) + "\n"
+            let totalTitlePadded = "Total (all files)".padding(toLength: 25, withPad: " ", startingAt: 0)
+            let totalSizePadded = StorageStatsManager.formatBytes(totalSize).padding(toLength: 12, withPad: " ", startingAt: 0)
+            text += "\(totalTitlePadded) \(totalSizePadded)\n"
+        }
         
         return text
     }

@@ -151,4 +151,72 @@ struct StorageStatsManager {
         formatter.isAdaptive = true
         return formatter.string(fromByteCount: Int64(bytes))
     }
+    
+    /// A single file entry produced by container enumeration
+    struct ContainerFileEntry {
+        /// Human-readable label for the container root (e.g. "Documents")
+        let containerLabel: String
+        /// File path relative to the container root URL
+        let relativePath: String
+        /// File size in bytes
+        let size: UInt64
+    }
+    
+    /// Enumerate every file in the app sandbox and the shared app group container.
+    ///
+    /// Results are sorted by size descending so the largest files appear first,
+    /// making it easy to spot unexpectedly large or orphaned items.
+    ///
+    /// - Returns: Array of `ContainerFileEntry` values, one per regular file found.
+    func containerFileBreakdown() -> [ContainerFileEntry] {
+        let fm = FileManager.default
+        
+        // Collect (label, root URL) pairs to walk
+        var roots: [(label: String, url: URL)] = []
+        
+        // Primary sandbox container
+        if let home = fm.urls(for: .documentDirectory, in: .userDomainMask).first?.deletingLastPathComponent() {
+            roots.append((label: "Sandbox", url: home))
+        }
+        
+        // Shared app group container (legacy nostrdb + snapshot)
+        if let groupURL = fm.containerURL(forSecurityApplicationGroupIdentifier: "group.com.damus") {
+            roots.append((label: "AppGroup", url: groupURL))
+        }
+        
+        var entries: [ContainerFileEntry] = []
+        
+        for root in roots {
+            guard let enumerator = fm.enumerator(
+                at: root.url,
+                includingPropertiesForKeys: [.fileSizeKey, .isRegularFileKey],
+                options: [.skipsHiddenFiles]
+            ) else { continue }
+            
+            for case let fileURL as URL in enumerator {
+                guard let resourceValues = try? fileURL.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey]),
+                      resourceValues.isRegularFile == true,
+                      let size = resourceValues.fileSize else { continue }
+                
+                // Build a path relative to the container root
+                let relativePath: String
+                if fileURL.path.hasPrefix(root.url.path) {
+                    relativePath = String(fileURL.path.dropFirst(root.url.path.count))
+                        .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+                } else {
+                    relativePath = fileURL.path
+                }
+                
+                entries.append(ContainerFileEntry(
+                    containerLabel: root.label,
+                    relativePath: relativePath,
+                    size: UInt64(max(0, size))
+                ))
+            }
+        }
+        
+        // Largest files first
+        entries.sort { $0.size > $1.size }
+        return entries
+    }
 }
