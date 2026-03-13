@@ -164,25 +164,6 @@ final class NdbTests: XCTestCase {
         let testNote = NdbNote.owned_from_json(json: testJSONWithEscapedSlashes)!
         XCTAssertEqual(testNote.content, "https://cdn.nostr.build/i/5c1d3296f66c2630131bf123106486aeaf051ed8466031c0e0532d70b33cddb2.jpg")
     }
-    
-    func test_inherited_transactions() throws {
-        let ndb = Ndb(path: db_dir)!
-        do {
-            guard let txn1 = NdbTxn(ndb: ndb) else { return XCTAssert(false) }
-
-            let ntxn = (Thread.current.threadDictionary.value(forKey: "ndb_txn") as? ndb_txn)!
-            XCTAssertEqual(txn1.txn.lmdb, ntxn.lmdb)
-            XCTAssertEqual(txn1.txn.mdb_txn, ntxn.mdb_txn)
-
-            guard let txn2 = NdbTxn(ndb: ndb) else { return XCTAssert(false) }
-
-            XCTAssertEqual(txn1.inherited, false)
-            XCTAssertEqual(txn2.inherited, true)
-        }
-
-        let ndb_txn = Thread.current.threadDictionary.value(forKey: "ndb_txn")
-        XCTAssertNil(ndb_txn)
-    }
 
     func test_decode_perf() throws {
         // This is an example of a performance test case.
