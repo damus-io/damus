@@ -34,7 +34,11 @@ class DraftArtifacts: Equatable {
     ///
     /// For example, when replying to an event, the user can select which pubkey mentions they want to keep, and which ones to remove.
     var filtered_pubkeys: Set<Pubkey> = []
-    
+
+    /// When true, web URLs containing NIP-19 bech32 identifiers will be preserved as-is
+    /// instead of being converted to `nostr:` format before publishing.
+    var preserveWebLinks: Bool = false
+
     /// A unique ID for this draft that allows us to address these if we need to.
     ///
     /// This will be the unique identifier in the NIP-37 note
