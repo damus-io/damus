@@ -65,6 +65,10 @@ struct VisualEffectView: UIViewRepresentable {
     }
 }
 
+class ScrollOffsetTracker: ObservableObject {
+    @Published var yOffset: CGFloat = 0
+}
+
 struct ProfileView: View {
     let damus_state: DamusState
     let pfp_size: CGFloat = 90.0
@@ -76,7 +80,7 @@ struct ProfileView: View {
     @State var action_sheet_presented: Bool = false
     @State var mute_dialog_presented: Bool = false
     @State var filter_state : FilterState = .posts
-    @State var yOffset: CGFloat = 0
+    @State var scrollTracker = ScrollOffsetTracker()
 
     @StateObject var profile: ProfileModel
     @StateObject var followers: FollowersModel
@@ -102,20 +106,11 @@ struct ProfileView: View {
         colorScheme == .light ? DamusColors.white : DamusColors.black
     }
 
-    func bannerBlurViewOpacity() -> Double  {
-        let progress = -(yOffset + navbarHeight) / 100
-        return Double(-yOffset > navbarHeight ? progress : 0)
-    }
-    
     func getProfileInfo() -> (String, String) {
         let ndbprofile = try? self.damus_state.profiles.lookup(id: profile.pubkey)
         let displayName = Profile.displayName(profile: ndbprofile, pubkey: profile.pubkey).displayName.truncate(maxLength: 25)
         let userName = Profile.displayName(profile: ndbprofile, pubkey: profile.pubkey).username.truncate(maxLength: 25)
         return (displayName, "@\(userName)")
-    }
-    
-    func showFollowBtnInBlurrBanner() -> Bool {
-        damus_state.contacts.follow_state(profile.pubkey) == .unfollows && bannerBlurViewOpacity() > 1.0
     }
     
     func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
@@ -133,34 +128,15 @@ struct ProfileView: View {
     }
 
     var bannerSection: some View {
-        GeometryReader { proxy -> AnyView in
-
-            let minY = proxy.frame(in: .global).minY
-
-            DispatchQueue.main.async {
-                self.yOffset = minY
-            }
-
-            return AnyView(
-                VStack(spacing: 0) {
-                    ZStack {
-                        BannerImageView(pubkey: profile.pubkey, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: proxy.size.width, height: minY > 0 ? bannerHeight + minY : bannerHeight)
-                            .clipped()
-
-                        VisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial)).opacity(bannerBlurViewOpacity())
-                    }
-
-                    Divider().opacity(bannerBlurViewOpacity())
-                }
-                .frame(height: minY > 0 ? bannerHeight + minY : nil)
-                .offset(y: minY > 0 ? -minY : -minY < navbarHeight ? 0 : -minY - navbarHeight)
-            )
-
-        }
-        .frame(height: bannerHeight)
-        .allowsHitTesting(false)
+        ProfileBannerSection(
+            scrollTracker: scrollTracker,
+            pubkey: profile.pubkey,
+            profiles: damus_state.profiles,
+            disable_animation: damus_state.settings.disable_animation,
+            damusState: damus_state,
+            bannerHeight: bannerHeight,
+            navbarHeight: navbarHeight
+        )
     }
 
     var navbarHeight: CGFloat {
@@ -240,23 +216,231 @@ struct ProfileView: View {
         }
     }
 
-    func lnButton(profile: Profile?, lnurl: String?) -> some View {
-        return ProfileZapLinkView(profile: profile, lnurl: lnurl, profileModel: self.profile) { reactions_enabled, lud16, lnurl in
+    var aboutSection: some View {
+        ProfileAboutSection(
+            damus_state: damus_state,
+            profile: profile,
+            followers: followers,
+            scrollTracker: scrollTracker,
+            pfp_size: pfp_size,
+            navbarHeight: navbarHeight,
+            imageBorderColor: imageBorderColor(),
+            is_zoomed: $is_zoomed
+        )
+    }
+
+    var tabs: [(String, FilterState)] {
+        var tabs = [
+            (NSLocalizedString("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies)."), FilterState.posts),
+            (NSLocalizedString("Notes & Replies", comment: "Label for filter for seeing notes and replies (instead of only notes)."), FilterState.posts_and_replies)
+        ]
+        if profile.pubkey != damus_state.pubkey && !profile.conversation_events.isEmpty {
+            tabs.append((NSLocalizedString("Conversations", comment: "Label for filter for seeing notes and replies that involve conversations between the signed in user and the current profile."), FilterState.conversations))
+        }
+        return tabs
+    }
+
+    var body: some View {
+        ZStack {
+            ScrollView(.vertical) {
+                VStack(spacing: 0) {
+                    bannerSection
+                        .zIndex(0)
+                    
+                    VStack() {
+                        aboutSection
+
+                        VStack(spacing: 0) {
+                            CustomPicker(tabs: tabs, selection: $filter_state)
+                            Divider()
+                                .frame(height: 1)
+                        }
+                        .background(colorScheme == .dark ? Color.black : Color.white)
+
+                        if filter_state == FilterState.posts {
+                            InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.posts))
+                        }
+                        if filter_state == FilterState.posts_and_replies {
+                            InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.posts_and_replies))
+                        }
+                        if filter_state == FilterState.conversations && !profile.conversation_events.isEmpty {
+                            InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.conversations))
+                        }
+                    }
+                    .padding(.horizontal, Theme.safeAreaInsets?.left)
+                    .zIndex(1)
+                }
+            }
+            .padding(.bottom, tabHeight + getSafeAreaBottom())
+            .ignoresSafeArea()
+            .navigationTitle("")
+            .navigationBarBackButtonHidden()
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    ProfileToolbarLeading(
+                        scrollTracker: scrollTracker,
+                        navbarHeight: navbarHeight,
+                        profileInfo: getProfileInfo(),
+                        navBackButton: navBackButton
+                    )
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    ProfileToolbarTrailing(
+                        scrollTracker: scrollTracker,
+                        navbarHeight: navbarHeight,
+                        profile: profile,
+                        damus_state: damus_state,
+                        navActionSheetButton: navActionSheetButton
+                    )
+                }
+            }
+            .toolbarBackground(.hidden)
+            .onReceive(handle_notify(.switched_timeline)) { _ in
+                dismiss()
+            }
+            .onAppear() {
+                check_nip05_validity(pubkey: self.profile.pubkey, damus_state: self.damus_state)
+                profile.subscribe()
+                //followers.subscribe()
+            }
+            .onDisappear {
+                profile.unsubscribe()
+                followers.unsubscribe()
+                // our profilemodel needs a bit more help
+            }
+            .sheet(isPresented: $show_share_sheet) {
+                let url = URL(string: "https://damus.io/" + profile.pubkey.npub)!
+                ShareSheet(activityItems: [url])
+            }
+            .damus_full_screen_cover($show_qr_code, damus_state: damus_state) {
+                QRCodeView(damus_state: damus_state, pubkey: profile.pubkey)
+            }
+
+            if damus_state.is_privkey_user {
+                PostButtonContainer(is_left_handed: damus_state.settings.left_handed) {
+                    notify(.compose(.posting(.user(profile.pubkey))))
+                }
+                .padding(.bottom, tabHeight)
+            }
+        }
+    }
+}
+
+// MARK: - Scroll-driven subviews
+// These subviews observe ScrollOffsetTracker via @ObservedObject so that only
+// they re-evaluate on scroll, keeping ProfileView.body (and expensive children
+// like aboutSection / InnerTimelineView) frozen during scroll.
+
+private struct ProfileBannerSection: View {
+    @ObservedObject var scrollTracker: ScrollOffsetTracker
+    let pubkey: Pubkey
+    let profiles: Profiles
+    let disable_animation: Bool
+    let damusState: DamusState
+    let bannerHeight: CGFloat
+    let navbarHeight: CGFloat
+
+    private var yOffset: CGFloat { scrollTracker.yOffset }
+
+    private func blurOpacity() -> Double {
+        let progress = -(yOffset + navbarHeight) / 100
+        return Double(-yOffset > navbarHeight ? progress : 0)
+    }
+
+    var body: some View {
+        GeometryReader { proxy in
+            let minY = proxy.frame(in: .global).minY
+
+            VStack(spacing: 0) {
+                ZStack {
+                    BannerImageView(pubkey: pubkey, profiles: profiles, disable_animation: disable_animation, damusState: damusState)
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: proxy.size.width, height: minY > 0 ? bannerHeight + minY : bannerHeight)
+                        .clipped()
+
+                    VisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial)).opacity(blurOpacity())
+                }
+
+                Divider().opacity(blurOpacity())
+            }
+            .frame(height: minY > 0 ? bannerHeight + minY : nil)
+            .offset(y: minY > 0 ? -minY : -minY < navbarHeight ? 0 : -minY - navbarHeight)
+            .onAppear { scrollTracker.yOffset = minY }
+            .onChange(of: minY) { newY in scrollTracker.yOffset = newY }
+        }
+        .frame(height: bannerHeight)
+        .allowsHitTesting(false)
+    }
+}
+
+private struct ProfilePicScrollEffect: View {
+    @ObservedObject var scrollTracker: ScrollOffsetTracker
+    let pubkey: Pubkey
+    let pfp_size: CGFloat
+    let navbarHeight: CGFloat
+    let highlight: Highlight
+    let profiles: Profiles
+    let disable_animation: Bool
+    let damusState: DamusState
+    @Binding var is_zoomed: Bool
+
+    private var yOffset: CGFloat { scrollTracker.yOffset }
+
+    private func pfpOffset() -> CGFloat {
+        let progress = -yOffset / navbarHeight
+        let offset = (pfp_size / 4.0) * (progress < 1.0 ? progress : 1)
+        return offset > 0 ? offset : 0
+    }
+
+    private func pfpScale() -> CGFloat {
+        let progress = -yOffset / navbarHeight
+        let scale = 1.0 - (0.5 * (progress < 1.0 ? progress : 1))
+        return scale < 1 ? scale : 1
+    }
+
+    var body: some View {
+        ProfilePicView(pubkey: pubkey, size: pfp_size, highlight: highlight, profiles: profiles, disable_animation: disable_animation, damusState: damusState)
+            .padding(.top, -(pfp_size / 2.0))
+            .offset(y: pfpOffset())
+            .scaleEffect(pfpScale())
+            .onTapGesture {
+                is_zoomed.toggle()
+            }
+            .damus_full_screen_cover($is_zoomed, damus_state: damusState) {
+                ProfilePicImageView(pubkey: pubkey, profiles: profiles, settings: damusState.settings, nav: damusState.nav, shouldShowEditButton: damusState.pubkey == pubkey)
+            }
+    }
+}
+
+private struct ProfileAboutSection: View {
+    let damus_state: DamusState
+    @ObservedObject var profile: ProfileModel
+    @ObservedObject var followers: FollowersModel
+    let scrollTracker: ScrollOffsetTracker
+    let pfp_size: CGFloat
+    let navbarHeight: CGFloat
+    let imageBorderColor: Color
+    @Binding var is_zoomed: Bool
+
+    @Environment(\.colorScheme) var colorScheme
+
+    private func lnButton(ndbprofile: Profile?, lnurl: String?) -> some View {
+        return ProfileZapLinkView(profile: ndbprofile, lnurl: lnurl, profileModel: profile) { reactions_enabled, lud16, lnurl in
             Image(reactions_enabled ? "zap.fill" : "zap")
                 .foregroundColor(reactions_enabled ? .orange : Color.primary)
                 .profile_button_style(scheme: colorScheme)
                 .cornerRadius(24)
         }
     }
-    
-    var dmButton: some View {
+
+    private var dmButton: some View {
         let dm_model = damus_state.dms.lookup_or_create(profile.pubkey)
         return NavigationLink(value: Route.DMChat(dms: dm_model)) {
             Image("messages")
                 .profile_button_style(scheme: colorScheme)
         }
     }
-    
+
     private var followsYouBadge: some View {
         Text("Follows you", comment: "Text to indicate that a user is following your profile.")
             .padding([.leading, .trailing], 6.0)
@@ -269,16 +453,16 @@ struct ProfileView: View {
             .font(.footnote)
     }
 
-    func actionSection(ndbprofile: Profile?, lnurl: String?, pubkey: Pubkey) -> some View {
+    private func actionSection(ndbprofile: Profile?, lnurl: String?) -> some View {
         return Group {
             if damus_state.settings.enable_favourites_feature {
                 FavoriteButtonView(pubkey: profile.pubkey, damus_state: damus_state)
             }
-            if let profile = ndbprofile,
+            if let _ = ndbprofile,
                let lnurl,
                lnurl != ""
             {
-                lnButton(profile: ndbprofile, lnurl: lnurl)
+                lnButton(ndbprofile: ndbprofile, lnurl: lnurl)
             }
 
             dmButton
@@ -294,37 +478,25 @@ struct ProfileView: View {
                     ProfileEditButton(damus_state: damus_state)
                 }
             }
-
         }
     }
 
-    func pfpOffset() -> CGFloat {
-        let progress = -yOffset / navbarHeight
-        let offset = (pfp_size / 4.0) * (progress < 1.0 ? progress : 1)
-        return offset > 0 ? offset : 0
-    }
-
-    func pfpScale() -> CGFloat {
-        let progress = -yOffset / navbarHeight
-        let scale = 1.0 - (0.5 * (progress < 1.0 ? progress : 1))
-        return scale < 1 ? scale : 1
-    }
-
-    func nameSection(ndbprofile: Profile?, lnurl: String?) -> some View {
+    private func nameSection(ndbprofile: Profile?, lnurl: String?) -> some View {
         return Group {
             let follows_you = profile.pubkey != damus_state.pubkey && profile.follows(pubkey: damus_state.pubkey)
 
             HStack(alignment: .center) {
-                ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
-                    .padding(.top, -(pfp_size / 2.0))
-                    .offset(y: pfpOffset())
-                    .scaleEffect(pfpScale())
-                    .onTapGesture {
-                        is_zoomed.toggle()
-                    }
-                    .damus_full_screen_cover($is_zoomed, damus_state: damus_state) {
-                        ProfilePicImageView(pubkey: profile.pubkey, profiles: damus_state.profiles, settings: damus_state.settings, nav: damus_state.nav, shouldShowEditButton: damus_state.pubkey == profile.pubkey)
-                    }
+                ProfilePicScrollEffect(
+                    scrollTracker: scrollTracker,
+                    pubkey: profile.pubkey,
+                    pfp_size: pfp_size,
+                    navbarHeight: navbarHeight,
+                    highlight: .custom(imageBorderColor, 4.0),
+                    profiles: damus_state.profiles,
+                    disable_animation: damus_state.settings.disable_animation,
+                    damusState: damus_state,
+                    is_zoomed: $is_zoomed
+                )
 
                 Spacer()
 
@@ -332,14 +504,14 @@ struct ProfileView: View {
                     followsYouBadge
                 }
 
-                actionSection(ndbprofile: ndbprofile, lnurl: lnurl, pubkey: profile.pubkey)
+                actionSection(ndbprofile: ndbprofile, lnurl: lnurl)
             }
 
             ProfileNameView(pubkey: profile.pubkey, damus: damus_state)
         }
     }
 
-    var followersCount: some View {
+    private var followersCount: some View {
         HStack {
             if let followerCount = followers.count {
                 let nounString = pluralizedString(key: "followers_count", count: followerCount)
@@ -356,7 +528,7 @@ struct ProfileView: View {
         }
     }
 
-    var aboutSection: some View {
+    var body: some View {
         VStack(alignment: .leading, spacing: 8.0) {
             let lnurl = try? damus_state.profiles.lookup_lnurl(profile.pubkey)
             let ndbprofile = try? damus_state.profiles.lookup(id: profile.pubkey)
@@ -373,10 +545,7 @@ struct ProfileView: View {
 
             HStack {
                 if let contact = profile.contacts {
-                    let contacts = Array(contact.referenced_pubkeys)
-                    let hashtags = Array(contact.referenced_hashtags)
-                    let following_model = FollowingModel(damus_state: damus_state, contacts: contacts, hashtags: hashtags)
-                    NavigationLink(value: Route.Following(following: following_model)) {
+                    NavigationLink(value: Route.Following(contacts: contact)) {
                         HStack {
                             let noun_text = Text(verbatim: "\(pluralizedString(key: "following_count", count: profile.following))").font(.subheadline).foregroundColor(.gray)
                             Text("\(Text(verbatim: profile.following.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
@@ -400,7 +569,6 @@ struct ProfileView: View {
                 }
 
                 if let relays = profile.relay_urls {
-                    // Only open relay config view if the user is logged in with private key and they are looking at their own profile.
                     let noun_string = pluralizedString(key: "relays_count", count: relays.count)
                     let noun_text = Text(noun_string).font(.subheadline).foregroundColor(.gray)
                     let relay_text = Text("\(Text(verbatim: relays.count.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
@@ -437,117 +605,71 @@ struct ProfileView: View {
         }
         .padding(.horizontal)
     }
+}
 
-    var tabs: [(String, FilterState)] {
-        var tabs = [
-            (NSLocalizedString("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies)."), FilterState.posts),
-            (NSLocalizedString("Notes & Replies", comment: "Label for filter for seeing notes and replies (instead of only notes)."), FilterState.posts_and_replies)
-        ]
-        if profile.pubkey != damus_state.pubkey && !profile.conversation_events.isEmpty {
-            tabs.append((NSLocalizedString("Conversations", comment: "Label for filter for seeing notes and replies that involve conversations between the signed in user and the current profile."), FilterState.conversations))
-        }
-        return tabs
+private struct ProfileToolbarLeading<BackButton: View>: View {
+    @ObservedObject var scrollTracker: ScrollOffsetTracker
+    let navbarHeight: CGFloat
+    let profileInfo: (String, String)
+    let navBackButton: BackButton
+
+    private var yOffset: CGFloat { scrollTracker.yOffset }
+
+    private func blurOpacity() -> Double {
+        let progress = -(yOffset + navbarHeight) / 100
+        return Double(-yOffset > navbarHeight ? progress : 0)
     }
 
     var body: some View {
-        ZStack {
-            ScrollView(.vertical) {
-                VStack(spacing: 0) {
-                    bannerSection
-                        .zIndex(1)
-                    
-                    VStack() {
-                        aboutSection
+        HStack(spacing: 8) {
+            navBackButton
+                .padding(.top, 5)
+                .accentColor(DamusColors.white)
+            VStack(alignment: .leading, spacing: -4.5) {
+                Text(profileInfo.0)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                Text(profileInfo.1)
+                    .font(.subheadline)
+                    .foregroundColor(.white.opacity(0.8))
+            }
+            .opacity(blurOpacity())
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, max(5, 15 + (yOffset / 30)))
+        }
+    }
+}
 
-                        VStack(spacing: 0) {
-                            CustomPicker(tabs: tabs, selection: $filter_state)
-                            Divider()
-                                .frame(height: 1)
-                        }
-                        .background(colorScheme == .dark ? Color.black : Color.white)
+private struct ProfileToolbarTrailing<ActionButton: View>: View {
+    @ObservedObject var scrollTracker: ScrollOffsetTracker
+    let navbarHeight: CGFloat
+    @ObservedObject var profile: ProfileModel
+    let damus_state: DamusState
+    let navActionSheetButton: ActionButton
 
-                        if filter_state == FilterState.posts {
-                            InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.posts))
-                        }
-                        if filter_state == FilterState.posts_and_replies {
-                            InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.posts_and_replies))
-                        }
-                        if filter_state == FilterState.conversations && !profile.conversation_events.isEmpty {
-                            InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.conversations))
-                        }
-                    }
-                    .padding(.horizontal, Theme.safeAreaInsets?.left)
-                    .zIndex(-yOffset > navbarHeight ? 0 : 1)
-                }
-            }
-            .padding(.bottom, tabHeight + getSafeAreaBottom())
-            .ignoresSafeArea()
-            .navigationTitle("")
-            .navigationBarBackButtonHidden()
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    HStack(spacing: 8) {
-                        navBackButton
-                            .padding(.top, 5)
-                            .accentColor(DamusColors.white)
-                        VStack(alignment: .leading, spacing: -4.5) {
-                            Text(getProfileInfo().0) // Display name
-                                .font(.headline)
-                                .foregroundColor(.white)
-                            Text(getProfileInfo().1) // Username
-                                .font(.subheadline)
-                                .foregroundColor(.white.opacity(0.8))
-                        }
-                        .opacity(bannerBlurViewOpacity())
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.top, max(5, 15 + (yOffset / 30)))
-                    }
-                }
-                if showFollowBtnInBlurrBanner() {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        FollowButtonView(
-                            target: profile.get_follow_target(),
-                            follows_you: profile.follows(pubkey: damus_state.pubkey),
-                            follow_state: damus_state.contacts.follow_state(profile.pubkey)
-                        )
-                        .padding(.top, 8)
-                    }
-                } else {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        navActionSheetButton
-                            .padding(.top, 5)
-                            .accentColor(DamusColors.white)
-                    }
-                }
-            }
-            .toolbarBackground(.hidden)
-            .onReceive(handle_notify(.switched_timeline)) { _ in
-                dismiss()
-            }
-            .onAppear() {
-                check_nip05_validity(pubkey: self.profile.pubkey, damus_state: self.damus_state)
-                profile.subscribe()
-                //followers.subscribe()
-            }
-            .onDisappear {
-                profile.unsubscribe()
-                followers.unsubscribe()
-                // our profilemodel needs a bit more help
-            }
-            .sheet(isPresented: $show_share_sheet) {
-                let url = URL(string: "https://damus.io/" + profile.pubkey.npub)!
-                ShareSheet(activityItems: [url])
-            }
-            .damus_full_screen_cover($show_qr_code, damus_state: damus_state) {
-                QRCodeView(damus_state: damus_state, pubkey: profile.pubkey)
-            }
+    private var yOffset: CGFloat { scrollTracker.yOffset }
 
-            if damus_state.is_privkey_user {
-                PostButtonContainer(is_left_handed: damus_state.settings.left_handed) {
-                    notify(.compose(.posting(.user(profile.pubkey))))
-                }
-                .padding(.bottom, tabHeight)
-            }
+    private func blurOpacity() -> Double {
+        let progress = -(yOffset + navbarHeight) / 100
+        return Double(-yOffset > navbarHeight ? progress : 0)
+    }
+
+    private func showFollowBtn() -> Bool {
+        damus_state.contacts.follow_state(profile.pubkey) == .unfollows && blurOpacity() > 1.0
+    }
+
+    var body: some View {
+        if showFollowBtn() {
+            FollowButtonView(
+                target: profile.get_follow_target(),
+                follows_you: profile.follows(pubkey: damus_state.pubkey),
+                follow_state: damus_state.contacts.follow_state(profile.pubkey)
+            )
+            .padding(.top, 8)
+        } else {
+            navActionSheetButton
+                .padding(.top, 5)
+                .accentColor(DamusColors.white)
         }
     }
 }

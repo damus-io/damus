@@ -109,6 +109,24 @@ enum ImageContext {
     }
 }
 
+/// Quick check for SVG signatures without converting the entire Data to String.
+/// SVGs start with "<svg" or "<?xml" (possibly after whitespace/BOM).
+private func data_looks_like_svg(_ data: Data) -> Bool {
+    // Skip leading whitespace and BOM
+    let limit = min(data.count, 256)
+    var i = 0
+    while i < limit {
+        let b = data[i]
+        if b == 0x20 || b == 0x09 || b == 0x0A || b == 0x0D || b == 0xEF || b == 0xBB || b == 0xBF {
+            i += 1
+            continue
+        }
+        // Must start with '<'
+        return b == 0x3C // '<'
+    }
+    return false
+}
+
 struct CustomImageProcessor: ImageProcessor {
     
     let maxSize: Int
@@ -117,22 +135,19 @@ struct CustomImageProcessor: ImageProcessor {
     let identifier = "com.damus.customimageprocessor"
     
     func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
-        
+
         switch item {
         case .image:
             // This case will never run
             return DefaultImageProcessor.default.process(item: item, options: options)
         case .data(let data):
-            
-            // Handle large image size
-            if data.count > maxSize {
-                return KingfisherWrapper.downsampledImage(data: data, to: downsampleSize, scale: options.scaleFactor)
-            }
-            
-            // Handle SVG image
-            if let dataString = String(data: data, encoding: .utf8),
-                let svg = SVG(dataString) {
-                
+
+            // Handle SVG image — check magic bytes before attempting
+            // a full String conversion to avoid allocating on binary data
+            if data.count > 4, data_looks_like_svg(data),
+               let dataString = String(data: data, encoding: .utf8),
+               let svg = SVG(dataString) {
+
                     let render = UIGraphicsImageRenderer(size: svg.size)
                     let image = render.image { context in
                         svg.draw(in: context.cgContext)
@@ -140,8 +155,12 @@ struct CustomImageProcessor: ImageProcessor {
 
                     return image.kf.scaled(to: options.scaleFactor)
             }
-            
-            return DefaultImageProcessor.default.process(item: item, options: options)
+
+            // Always downsample to target size. This uses
+            // CGImageSourceCreateThumbnailAtIndex which decodes directly at
+            // the target resolution, avoiding a full-size decode that CA
+            // would otherwise redo on the main thread during commit.
+            return KingfisherWrapper.downsampledImage(data: data, to: downsampleSize, scale: options.scaleFactor)
         }
     }
 }
@@ -156,11 +175,7 @@ struct CustomCacheSerializer: CacheSerializer {
     }
 
     func image(with data: Data, options: Kingfisher.KingfisherParsedOptionsInfo) -> Kingfisher.KFCrossPlatformImage? {
-        if data.count > maxSize {
-            return KingfisherWrapper.downsampledImage(data: data, to: downsampleSize, scale: options.scaleFactor)
-        }
-
-        return DefaultCacheSerializer.default.image(with: data, options: options)
+        return KingfisherWrapper.downsampledImage(data: data, to: downsampleSize, scale: options.scaleFactor)
     }
 }
 

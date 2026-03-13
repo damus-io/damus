@@ -120,16 +120,19 @@ struct EventShell<Content: View>: View {
     }
 
     var body: some View {
-        Group {
-            if options.contains(.wide) {
-                Wide
-            } else {
-                Threaded
-            }
+        innerBody
+            .contentShape(Rectangle())
+            .id(event.id)
+            .padding([.bottom], 2)
+    }
+
+    @ViewBuilder
+    private var innerBody: some View {
+        if options.contains(.wide) {
+            Wide
+        } else {
+            Threaded
         }
-        .contentShape(Rectangle())
-        .id(event.id)
-        .padding([.bottom], 2)
     }
 }
 
