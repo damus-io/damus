@@ -418,13 +418,10 @@ class DamusPurple: StoreObserverDelegate {
         let expiry: Date
         let subscriber_number: Int
         let active: Bool
-        let attributes: PurpleAccountAttributes
-        
-        struct PurpleAccountAttributes: OptionSet {
-            let rawValue: Int
-            
-            static let memberForMoreThanOneYear = PurpleAccountAttributes(rawValue: 1 << 0)
-        }
+        /// Active membership duration in seconds, as reported by the API.
+        let active_membership_duration: TimeInterval
+
+        static let one_year: TimeInterval = 360 * 24 * 60 * 60
 
         func ordinal() -> String? {
             let number = Int(self.subscriber_number)
@@ -440,13 +437,17 @@ class DamusPurple: StoreObserverDelegate {
         
         static func from(payload: Payload) -> Self? {
             guard let pubkey = Pubkey(hex: payload.pubkey) else { return nil }
+
+            let duration = payload.attributes?.active_membership_duration
+                ?? (payload.attributes?.member_for_more_than_one_year == true ? Self.one_year + 1 : 0)
+
             return Self(
                 pubkey: pubkey,
                 created_at: Date.init(timeIntervalSince1970: TimeInterval(payload.created_at)),
                 expiry: Date.init(timeIntervalSince1970: TimeInterval(payload.expiry)),
                 subscriber_number: Int(payload.subscriber_number),
                 active: payload.active,
-                attributes: (payload.attributes?.member_for_more_than_one_year ?? false) ? [.memberForMoreThanOneYear] : []
+                active_membership_duration: duration
             )
         }
         
@@ -459,7 +460,10 @@ class DamusPurple: StoreObserverDelegate {
             let attributes: Attributes?
             
             struct Attributes: Codable {
-                let member_for_more_than_one_year: Bool
+                /// Kept for backward compatibility with older server responses.
+                let member_for_more_than_one_year: Bool?
+                /// Active membership duration in seconds. Optional for backward compatibility.
+                let active_membership_duration: TimeInterval?
             }
         }
     }
