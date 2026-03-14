@@ -186,7 +186,7 @@ struct LongformPreviewBody: View {
             {
                 HStack(spacing: 8) {
                     ReadTime(longform.estimatedReadTimeMinutes)
-                    Text("·")
+                    Text(verbatim: "·")
                     Words(longform.words)
                 }
                 .font(.footnote)
@@ -250,7 +250,7 @@ struct LongformPreviewBody: View {
             {
                 HStack(spacing: 8) {
                     ReadTime(longform.estimatedReadTimeMinutes)
-                    Text("·")
+                    Text(verbatim: "·")
                     Words(longform.words)
                 }
                 .font(.footnote)

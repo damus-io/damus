@@ -92,7 +92,7 @@ struct MutelistView: View {
                 }
             }
             Section(
-                header: Text(NSLocalizedString("Users", comment: "Section header title for a list of muted users.")),
+                header: Text("Users", comment: "Section header title for a list of muted users."),
                 footer: VStack { EmptyView() }.padding(.bottom, paddingBottom)
             ) {
                 ForEach(users, id: \.self) { user in

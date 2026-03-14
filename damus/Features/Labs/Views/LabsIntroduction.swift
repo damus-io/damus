@@ -22,7 +22,7 @@ struct LabsIntroductionView: View {
                     NavigationLink(destination: DamusPurpleView(damus_state: damus_state)) {
                         HStack(spacing: 10) {
                             Spacer()
-                            Text("Learn more about Purple")
+                            Text("Learn more about Purple", comment: "Button to learn more about the Damus Purple subscription.")
                                 .foregroundColor(Color.white)
                             Spacer()
                         }

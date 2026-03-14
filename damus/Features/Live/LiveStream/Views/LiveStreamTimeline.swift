@@ -43,10 +43,10 @@ struct LiveStreamTimelineView<Content: View>: View {
 
                 HStack {
                     VStack(alignment: .leading) {
-                        Text("Happening Now")
+                        Text("Happening Now", comment: "Indicates that live events are happening now.")
                             .font(.title2)
                             .fontWeight(.bold)
-                        Text("Live events going on right now")
+                        Text("Live events going on right now", comment: "Indicates that live events are happening now.")
                             .font(.caption)
                             .foregroundColor(.gray)
                     }

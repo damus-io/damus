@@ -3,10 +3,10 @@
   "project" : "damus.xcodeproj",
   "targetLocale" : "en-US",
   "toolInfo" : {
-    "toolBuildNumber" : "16F6",
+    "toolBuildNumber" : "17C529",
     "toolID" : "com.apple.dt.xcode",
     "toolName" : "Xcode",
-    "toolVersion" : "16.4"
+    "toolVersion" : "26.3"
   },
   "version" : "1.0"
 }

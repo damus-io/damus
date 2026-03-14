@@ -216,7 +216,7 @@ struct EditMetadataView: View {
                     }
                 }
             }, label: {
-                Text(NSLocalizedString("Save", comment: "Button for saving profile."))
+                Text("Save", comment: "Button for saving profile.")
                     .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
             })
             .buttonStyle(GradientButtonStyle(padding: 15))

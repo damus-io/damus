@@ -20,15 +20,17 @@ final class LocalizationUtilTests: XCTestCase {
             ["following_count", "Following", "Following", "Following"],
             ["hellthread_notifications_disabled", "Hide notifications that tag more than 0 profiles", "Hide notifications that tag more than 1 profile", "Hide notifications that tag more than 2 profiles"],
             ["imports_count", "Imports", "Import", "Imports"],
+            ["media_count", "Load 0 media items", "Load 1 media item", "Load 2 media items"],
             ["quoted_reposts_count", "Quotes", "Quote", "Quotes"],
             ["reactions_count", "Reactions", "Reaction", "Reactions"],
+            ["read_time", "0 min read", "1 min read", "2 min read"],
             ["relays_count", "Relays", "Relay", "Relays"],
             ["reposts_count", "Reposts", "Repost", "Reposts"],
             ["sats", "sats", "sat", "sats"],
             ["users_talking_about_it", "0 users talking about it", "1 user talking about it", "2 users talking about it"],
+            ["viewer_count", "viewers", "viewer", "viewers"],
             ["word_count", "0 Words", "1 Word", "2 Words"],
-            ["zaps_count", "Zaps", "Zap", "Zaps"],
-            ["media_count", "media items", "media item", "media items"]
+            ["zaps_count", "Zaps", "Zap", "Zaps"]
         ]
 
         for key in keys {

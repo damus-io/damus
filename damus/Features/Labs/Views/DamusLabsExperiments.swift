@@ -32,7 +32,7 @@ struct DamusLabsExperiments: View {
                 
                 HStack {
                     Spacer()
-                    Text(NSLocalizedString("More features coming soon!", comment: ""))
+                    Text("More features coming soon!", comment: "Label indicating that more features for Damus Lab experiments are coming soon.")
                         .font(.title2)
                         .foregroundColor(.white)
                         .fontWeight(.bold)
