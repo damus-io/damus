@@ -1907,6 +1907,11 @@
 		D7DF58322DFCF18D00E9AD28 /* SendPaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DF58312DFCF18800E9AD28 /* SendPaymentView.swift */; };
 		D7DF58332DFCF18D00E9AD28 /* SendPaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DF58312DFCF18800E9AD28 /* SendPaymentView.swift */; };
 		D7DF58342DFCF18D00E9AD28 /* SendPaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DF58312DFCF18800E9AD28 /* SendPaymentView.swift */; };
+		D7E14B8E2F68B0D000BF84B7 /* Ndb+Compaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E14B8D2F68B0C900BF84B7 /* Ndb+Compaction.swift */; };
+		D7E14B8F2F68B0D000BF84B7 /* Ndb+Compaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E14B8D2F68B0C900BF84B7 /* Ndb+Compaction.swift */; };
+		D7E14B902F68B0D000BF84B7 /* Ndb+Compaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E14B8D2F68B0C900BF84B7 /* Ndb+Compaction.swift */; };
+		D7E14B912F68B0D000BF84B7 /* Ndb+Compaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E14B8D2F68B0C900BF84B7 /* Ndb+Compaction.swift */; };
+		D7E14B932F68B22D00BF84B7 /* NdbCompactionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E14B922F68B22D00BF84B7 /* NdbCompactionTests.swift */; };
 		D7E5B2D32EA0188200CF47AC /* StreamPipelineDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E5B2D22EA0187B00CF47AC /* StreamPipelineDiagnostics.swift */; };
 		D7E5B2D42EA0188200CF47AC /* StreamPipelineDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E5B2D22EA0187B00CF47AC /* StreamPipelineDiagnostics.swift */; };
 		D7E5B2D52EA0188200CF47AC /* StreamPipelineDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E5B2D22EA0187B00CF47AC /* StreamPipelineDiagnostics.swift */; };
@@ -2920,6 +2925,8 @@
 		D7DB93092D69485A00DA1EE5 /* NIP65.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP65.swift; sourceTree = "<group>"; };
 		D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrEventTests.swift; sourceTree = "<group>"; };
 		D7DF58312DFCF18800E9AD28 /* SendPaymentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendPaymentView.swift; sourceTree = "<group>"; };
+		D7E14B8D2F68B0C900BF84B7 /* Ndb+Compaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Ndb+Compaction.swift"; sourceTree = "<group>"; };
+		D7E14B922F68B22D00BF84B7 /* NdbCompactionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbCompactionTests.swift; sourceTree = "<group>"; };
 		D7E5B2D22EA0187B00CF47AC /* StreamPipelineDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPipelineDiagnostics.swift; sourceTree = "<group>"; };
 		D7EB00AF2CD59C8300660C07 /* PresentFullScreenItemNotify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentFullScreenItemNotify.swift; sourceTree = "<group>"; };
 		D7EBF8BA2E5901F7004EAE29 /* NostrNetworkManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrNetworkManagerTests.swift; sourceTree = "<group>"; };
@@ -3402,6 +3409,7 @@
 		4C9054862A6AEB4500811EEC /* nostrdb */ = {
 			isa = PBXGroup;
 			children = (
+				D7E14B8D2F68B0C900BF84B7 /* Ndb+Compaction.swift */,
 				D75154BE2EC5910600BF2CB2 /* NdbUseLock.swift */,
 				D74EC84E2E1856AF0091DC51 /* NonCopyableLinkedList.swift */,
 				D733F9E42D92C75C00317B11 /* UnownedNdbNote.swift */,
@@ -3918,6 +3926,7 @@
 		4CE6DEF627F7A08200C66700 /* damusTests */ = {
 			isa = PBXGroup;
 			children = (
+				D7E14B922F68B22D00BF84B7 /* NdbCompactionTests.swift */,
 				D774A5CB2F4F9679006A4D64 /* StorageStatsManagerTests.swift */,
 				D77A96BE2F3131BE00CC3246 /* RelayHintsTests.swift */,
 				D776BE432F233012002DA1C9 /* EntityPreloaderTests.swift */,
@@ -5983,6 +5992,7 @@
 				4C8D00CA29DF80350036AF10 /* TruncatedText.swift in Sources */,
 				D5C1AFC62E5DFF700092F72F /* ContactCardManagerMock.swift in Sources */,
 				4C4DD3DB2A6CA7E8005B4E85 /* ContentParsing.swift in Sources */,
+				D7E14B912F68B0D000BF84B7 /* Ndb+Compaction.swift in Sources */,
 				F71694F22A67314D001F4053 /* SuggestedUserView.swift in Sources */,
 				5C8F97172EB45FD7009399B1 /* LiveChatView.swift in Sources */,
 				4C9BB83429C12D9900FC4E37 /* EventProfileName.swift in Sources */,
@@ -6427,6 +6437,7 @@
 				501F8C822A0224EB001AFC1D /* KeychainStorageTests.swift in Sources */,
 				D72E127A2BEEEED000F4F781 /* NostrFilterTests.swift in Sources */,
 				B5B4D1432B37D47600844320 /* NdbExtensions.swift in Sources */,
+				D7E14B932F68B22D00BF84B7 /* NdbCompactionTests.swift in Sources */,
 				3ACBCB78295FE5C70037388A /* TimeAgoTests.swift in Sources */,
 				D795356B2EBD28A800AACF98 /* AppLifecycleHandlingTests.swift in Sources */,
 				D72A2D072AD9C1FB002AFF62 /* MockProfiles.swift in Sources */,
@@ -6619,6 +6630,7 @@
 				82D6FB0F2CD99F7900C925F4 /* DamusLogoGradient.swift in Sources */,
 				82D6FB102CD99F7900C925F4 /* DamusBackground.swift in Sources */,
 				82D6FB112CD99F7900C925F4 /* DamusLightGradient.swift in Sources */,
+				D7E14B902F68B0D000BF84B7 /* Ndb+Compaction.swift in Sources */,
 				5C4FA8042DCAF80E00CE658C /* FollowPackTimeline.swift in Sources */,
 				82D6FB132CD99F7900C925F4 /* Shimmer.swift in Sources */,
 				82D6FB142CD99F7900C925F4 /* EndBlock.swift in Sources */,
@@ -7377,6 +7389,7 @@
 				D73E5F152C6A97F4007EB227 /* RelayNipList.swift in Sources */,
 				D73E5F162C6A97F4007EB227 /* RelayView.swift in Sources */,
 				D73E5F172C6A97F4007EB227 /* RelayConfigView.swift in Sources */,
+				D7E14B8F2F68B0D000BF84B7 /* Ndb+Compaction.swift in Sources */,
 				D73E5F182C6A97F4007EB227 /* RelayDetailView.swift in Sources */,
 				D73E5F192C6A97F4007EB227 /* RelayToggle.swift in Sources */,
 				D73E5F1A2C6A97F4007EB227 /* RelayStatusView.swift in Sources */,
@@ -7635,6 +7648,7 @@
 				4CBB6F7A2B7311AA000477A4 /* bech32_util.c in Sources */,
 				4CBB6F712B731184000477A4 /* bolt11.c in Sources */,
 				D74EC84F2E1856B70091DC51 /* NonCopyableLinkedList.swift in Sources */,
+				D7E14B8E2F68B0D000BF84B7 /* Ndb+Compaction.swift in Sources */,
 				4CBB6F702B731179000477A4 /* invoice.c in Sources */,
 				4CBB6F6F2B73116B000477A4 /* content_parser.c in Sources */,
 				4CBB6F6E2B731113000477A4 /* block.c in Sources */,

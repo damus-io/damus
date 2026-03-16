@@ -241,7 +241,7 @@ class Ndb {
         }
     }
     
-    private static func db_file_exists(path: String) -> Bool {
+    static func db_file_exists(path: String) -> Bool {
         return FileManager.default.fileExists(atPath: "\(path)/\(Self.main_db_file_name)")
     }
     
@@ -324,7 +324,7 @@ class Ndb {
             })
         })
     }
-    
+
     // MARK: Thread safety mechanisms
     // Use these for all externally accessible methods that interact with the nostrdb database to prevent race conditions with app lifecycle events (i.e. NostrDB opening and closing)
     
