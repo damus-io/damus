@@ -51,6 +51,7 @@ struct NoteContentView: View {
     let preview_height: CGFloat?
     let options: EventViewOptions
     let highlightTerms: [String]
+    let textColor: Color?
 
     @State var isAppleTranslationPopoverPresented: Bool = false
 
@@ -62,16 +63,26 @@ struct NoteContentView: View {
         if damus_state.settings.undistractMode {
             return .separated(.just_content(Undistractor.makeGibberish(text: event.get_content(damus_state.keypair))))
         }
-        return self.artifacts_model.state.artifacts ?? .separated(.just_content(event.get_content(damus_state.keypair)))
+        let artifacts = self.artifacts_model.state.artifacts ?? .separated(.just_content(event.get_content(damus_state.keypair)))
+        #if DEBUG
+        // Debug logging for DM content
+        if event.known_kind == .dm_chat || event.known_kind == .dm {
+            if case .separated(let sep) = artifacts {
+                print("[DM-DEBUG] NoteContentView: kind=\(event.kind) charCount=\(sep.content.attributed.characters.count) content='\(String(sep.content.attributed.characters.prefix(50)))'")
+            }
+        }
+        #endif
+        return artifacts
     }
     
-    init(damus_state: DamusState, event: NostrEvent, blur_images: Bool, size: EventViewKind, options: EventViewOptions, highlightTerms: [String] = []) {
+    init(damus_state: DamusState, event: NostrEvent, blur_images: Bool, size: EventViewKind, options: EventViewOptions, highlightTerms: [String] = [], textColor: Color? = nil) {
         self.damus_state = damus_state
         self.event = event
         self.blur_images = blur_images
         self.size = size
         self.options = options
         self.highlightTerms = highlightTerms
+        self.textColor = textColor
         self.preview_height = lookup_cached_preview_size(previews: damus_state.previews, evid: event.id)
         let cached = damus_state.events.get_cache_data(event.id)
         self._preview_model = ObservedObject(wrappedValue: cached.preview_model)
@@ -131,13 +142,16 @@ struct NoteContentView: View {
             if truncate_very_short {
                 TruncatedText(text: content, maxChars: 140, show_show_more_button: !options.contains(.no_show_more))
                     .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
+                    .foregroundStyle(textColor ?? Color.primary)
             }
             else if truncate {
                 TruncatedText(text: content, show_show_more_button: !options.contains(.no_show_more))
                     .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
+                    .foregroundStyle(textColor ?? Color.primary)
             } else {
                 content.text
                     .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
+                    .foregroundStyle(textColor ?? Color.primary)
             }
         }
     }
@@ -172,6 +186,13 @@ struct NoteContentView: View {
     
     func MainContent(artifacts: NoteArtifactsSeparated) -> some View {
         let contentToRender = highlightedContent(artifacts.content)
+
+        #if DEBUG
+        // Debug: log rendering path for DMs
+        if event.known_kind == .dm_chat || event.known_kind == .dm {
+            print("[DM-DEBUG] MainContent: size=\(size) charCount=\(artifacts.content.attributed.characters.count) truncate=\(truncate) with_padding=\(with_padding)")
+        }
+        #endif
 
         return VStack(alignment: .leading) {
             if artifacts.content.attributed.characters.count != 0 {
@@ -260,7 +281,7 @@ struct NoteContentView: View {
                             
                             if artifacts.media.count > 1 {
                                 Text("\(artifacts.media.count)")
-                                    .font(.system(size: 10, weight: .semibold))
+                                    .font(.system(size: 11, weight: .semibold))
                                     .foregroundStyle(.white)
                                     .padding(.horizontal, 4)
                                     .padding(.vertical, 2)

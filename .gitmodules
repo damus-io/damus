@@ -1,0 +1,4 @@
+[submodule "nostrdb"]
+	path = nostrdb
+	url = https://github.com/alltheseas/nostrdb.git
+	branch = spm
