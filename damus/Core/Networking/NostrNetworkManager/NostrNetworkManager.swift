@@ -304,10 +304,7 @@ extension NostrNetworkManager {
         
         /// The keypair to use for relay authentication and updating relay lists
         var keypair: Keypair { get }
-        
-        /// The latest relay list event id hex
-        var latestRelayListEventIdHex: String? { get set }  // TODO: Update this once we have full NostrDB query support
-        
+
         /// The latest contact list `NostrEvent`
         ///
         /// Note: Read-only access, because `NostrNetworkManager` does not manage contact lists.

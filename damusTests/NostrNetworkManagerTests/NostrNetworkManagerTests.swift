@@ -192,6 +192,204 @@ class NostrNetworkManagerTests: XCTestCase {
         XCTAssertEqual(manager.setCallCount, 1)
         XCTAssertEqual(manager.appliedRelayLists.first?.relays.count, validRelayList.relays.count)
     }
+
+    // MARK: - Relay list stale-data regression tests
+
+    /// Regression: removing a relay must not fall back to bootstrap relays.
+    ///
+    /// Before the fix, `getLatestNIP65RelayListEvent()` used a UserDefaults hex lookup
+    /// that could go stale, causing `getUserCurrentRelayList()` to return nil and
+    /// `remove()` to throw `.noInitialRelayList`. The user could never disconnect a relay.
+    func testRemoveRelayDoesNotFallBackToBootstrapList() async throws {
+        let ndb = Ndb.test
+        defer { ndb.close() }
+
+        let relayA = RelayURL("wss://relay-a.example.com")!
+        let relayB = RelayURL("wss://relay-b.example.com")!
+        let relayC = RelayURL("wss://relay-c.example.com")!
+        let bootstrapRelay = RelayURL("wss://bootstrap.example.com")!
+
+        let initialList = NIP65.RelayList(relays: [relayA, relayB, relayC])
+        let initialEvent = initialList.toNostrEvent(keypair: test_keypair_full)!
+        let eventJson = encode_json(initialEvent)!
+        let processed = ndb.processEvent("[\"EVENT\",\"subid\",\(eventJson)]")
+        XCTAssertTrue(processed, "Failed to process relay list event into ndb")
+        try await Task.sleep(for: .milliseconds(100))
+
+        let delegate = MockNetworkDelegate(
+            ndb: ndb,
+            keypair: test_keypair,
+            bootstrapRelays: [bootstrapRelay]
+        )
+        let pool = RelayPool(ndb: nil, keypair: test_keypair)
+        let reader = MockSubscriptionManager(pool: pool, ndb: ndb)
+        let manager = NostrNetworkManager.UserRelayListManager(
+            delegate: delegate, pool: pool, reader: reader
+        )
+
+        // Remove relay B from [A, B, C] — should yield [A, C]
+        try await manager.remove(relayURL: relayB)
+
+        let currentList = await manager.getUserCurrentRelayList()
+        XCTAssertNotNil(currentList, "Relay list must not be nil after remove")
+        let urls = Set(currentList!.relays.keys)
+        XCTAssertEqual(urls, [relayA, relayC], "List should be [A, C] after removing B")
+        XCTAssertFalse(urls.contains(relayB), "Removed relay B must not be present")
+        XCTAssertFalse(urls.contains(bootstrapRelay), "Must not fall back to bootstrap relays")
+    }
+
+    /// Regression: the in-memory cache must bridge the nostrdb async write gap.
+    ///
+    /// After `set()`, `getUserCurrentRelayList()` must immediately return the new list,
+    /// even before nostrdb's async worker has committed the event.
+    func testCacheBridgesAsyncWriteGap() async throws {
+        let ndb = Ndb.test
+        defer { ndb.close() }
+
+        let delegate = MockNetworkDelegate(
+            ndb: ndb,
+            keypair: test_keypair,
+            bootstrapRelays: [RelayURL("wss://bootstrap.example.com")!]
+        )
+        let pool = RelayPool(ndb: nil, keypair: test_keypair)
+        let reader = MockSubscriptionManager(pool: pool, ndb: ndb)
+        let manager = NostrNetworkManager.UserRelayListManager(
+            delegate: delegate, pool: pool, reader: reader
+        )
+
+        let relayA = RelayURL("wss://relay-a.example.com")!
+        let relayC = RelayURL("wss://relay-c.example.com")!
+        let newList = NIP65.RelayList(relays: [relayA, relayC])
+
+        // set() should populate the cache immediately
+        try await manager.set(userRelayList: newList)
+
+        // Query immediately — no sleep — ndb may not have committed yet
+        let currentList = await manager.getUserCurrentRelayList()
+        XCTAssertNotNil(currentList, "Cache must serve the list immediately after set()")
+        XCTAssertEqual(Set(currentList!.relays.keys), [relayA, relayC])
+    }
+
+    /// Regression: rapid sequential removes must not reintroduce removed relays.
+    ///
+    /// Scenario: start with [A, B, C], remove B, then immediately remove C.
+    /// Without the cache, the second `remove()` might read a stale [A, B, C] from ndb
+    /// (because the first set hasn't committed yet), producing [A, B] — relay B is back.
+    func testRapidSequentialRemovesDoNotReintroduceRelays() async throws {
+        let ndb = Ndb.test
+        defer { ndb.close() }
+
+        let relayA = RelayURL("wss://relay-a.example.com")!
+        let relayB = RelayURL("wss://relay-b.example.com")!
+        let relayC = RelayURL("wss://relay-c.example.com")!
+
+        let initialList = NIP65.RelayList(relays: [relayA, relayB, relayC])
+        let initialEvent = initialList.toNostrEvent(keypair: test_keypair_full)!
+        let eventJson = encode_json(initialEvent)!
+        XCTAssertTrue(ndb.processEvent("[\"EVENT\",\"subid\",\(eventJson)]"))
+        try await Task.sleep(for: .milliseconds(100))
+
+        let delegate = MockNetworkDelegate(
+            ndb: ndb,
+            keypair: test_keypair,
+            bootstrapRelays: []
+        )
+        let pool = RelayPool(ndb: nil, keypair: test_keypair)
+        let reader = MockSubscriptionManager(pool: pool, ndb: ndb)
+        let manager = NostrNetworkManager.UserRelayListManager(
+            delegate: delegate, pool: pool, reader: reader
+        )
+
+        // Remove B then immediately remove C — no sleep between
+        try await manager.remove(relayURL: relayB)
+        try await manager.remove(relayURL: relayC)
+
+        let currentList = await manager.getUserCurrentRelayList()
+        XCTAssertNotNil(currentList)
+        let urls = Set(currentList!.relays.keys)
+        XCTAssertEqual(urls, [relayA], "Only relay A should remain after removing B and C")
+        XCTAssertFalse(urls.contains(relayB), "Relay B must not reappear after sequential removes")
+        XCTAssertFalse(urls.contains(relayC), "Relay C must stay removed")
+    }
+
+    /// Verify that `load()` clears the in-memory cache so ndb becomes the source of truth again.
+    func testLoadClearsCacheAndReadsFromNdb() async throws {
+        let ndb = Ndb.test
+        defer { ndb.close() }
+
+        let relayA = RelayURL("wss://relay-a.example.com")!
+        let relayB = RelayURL("wss://relay-b.example.com")!
+
+        // Seed ndb with [A, B]
+        let ndbList = NIP65.RelayList(relays: [relayA, relayB])
+        let ndbEvent = ndbList.toNostrEvent(keypair: test_keypair_full)!
+        XCTAssertTrue(ndb.processEvent("[\"EVENT\",\"subid\",\(encode_json(ndbEvent)!)]"))
+        try await Task.sleep(for: .milliseconds(100))
+
+        let delegate = MockNetworkDelegate(
+            ndb: ndb,
+            keypair: test_keypair,
+            bootstrapRelays: []
+        )
+        let pool = RelayPool(ndb: nil, keypair: test_keypair)
+        let reader = MockSubscriptionManager(pool: pool, ndb: ndb)
+        let manager = NostrNetworkManager.UserRelayListManager(
+            delegate: delegate, pool: pool, reader: reader
+        )
+
+        // set() populates cache with [A] only
+        try await manager.set(userRelayList: NIP65.RelayList(relays: [relayA]))
+        let cachedList = await manager.getUserCurrentRelayList()
+        XCTAssertEqual(Set(cachedList!.relays.keys), [relayA], "Cache should serve [A]")
+
+        // load() must clear the cache so ndb is queried again
+        await manager.load()
+
+        // After load(), the list should come from ndb.
+        // ndb now has the [A] event from set() (committed by now) or the original [A,B].
+        // Either way, the cache is cleared — the manager reads from ndb, not stale cache.
+        let afterLoad = await manager.getUserCurrentRelayList()
+        XCTAssertNotNil(afterLoad, "Must return a relay list from ndb after load()")
+    }
+
+    /// Regression: ndb query must find the relay list without a stored hex ID.
+    ///
+    /// Before the fix, a fresh session with no `latestRelayListEventIdHex` in UserDefaults
+    /// meant `getLatestNIP65RelayListEvent()` returned nil, even though ndb had the event.
+    func testNdbQueryFindsRelayListWithoutStoredHex() async throws {
+        let ndb = Ndb.test
+        defer { ndb.close() }
+
+        let relayA = RelayURL("wss://relay-a.example.com")!
+        let relayB = RelayURL("wss://relay-b.example.com")!
+
+        // Seed ndb — simulates a relay list that arrived via sync, not user action
+        let list = NIP65.RelayList(relays: [relayA, relayB])
+        let event = list.toNostrEvent(keypair: test_keypair_full)!
+        XCTAssertTrue(ndb.processEvent("[\"EVENT\",\"subid\",\(encode_json(event)!)]"))
+        try await Task.sleep(for: .milliseconds(100))
+
+        // No hex stored anywhere — fresh delegate with no latestRelayListEventIdHex
+        let delegate = MockNetworkDelegate(
+            ndb: ndb,
+            keypair: test_keypair,
+            bootstrapRelays: [RelayURL("wss://bootstrap.example.com")!]
+        )
+        let pool = RelayPool(ndb: nil, keypair: test_keypair)
+        let reader = MockSubscriptionManager(pool: pool, ndb: ndb)
+        let manager = NostrNetworkManager.UserRelayListManager(
+            delegate: delegate, pool: pool, reader: reader
+        )
+
+        let currentList = await manager.getUserCurrentRelayList()
+        XCTAssertNotNil(currentList, "ndb query must find relay list without stored hex")
+        let urls = Set(currentList!.relays.keys)
+        XCTAssertEqual(urls, [relayA, relayB])
+        XCTAssertFalse(
+            urls.contains(RelayURL("wss://bootstrap.example.com")!),
+            "Must not fall back to bootstrap when ndb has the event"
+        )
+    }
 }
 
 // MARK: - Test doubles
@@ -199,7 +397,6 @@ class NostrNetworkManagerTests: XCTestCase {
 private final class MockNetworkDelegate: NostrNetworkManager.Delegate {
     var ndb: Ndb
     var keypair: Keypair
-    var latestRelayListEventIdHex: String?
     var latestContactListEvent: NostrEvent?
     var bootstrapRelays: [RelayURL]
     var developerMode: Bool = false

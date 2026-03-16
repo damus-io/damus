@@ -520,7 +520,6 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
 private final class TestNetworkDelegate: NostrNetworkManager.Delegate {
     var ndb: Ndb
     var keypair: Keypair
-    var latestRelayListEventIdHex: String?
     var latestContactListEvent: NostrEvent?
     var bootstrapRelays: [RelayURL]
     var developerMode: Bool = false
