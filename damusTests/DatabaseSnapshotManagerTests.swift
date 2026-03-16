@@ -579,6 +579,39 @@ class DatabaseSnapshotManagerTests: XCTestCase {
         let snapshottedNoteIds = await snapshotTask.value
         XCTAssertEqual(expectedNoteIds, snapshottedNoteIds, "Snapshot should contain both profile notes")
     }
+
+    func testPerformSnapshot_RemovesStaleTemporarySnapshotDirectories() async throws {
+        let fileManager = FileManager.default
+        let staleTempSnapshotURL = fileManager.temporaryDirectory
+            .appendingPathComponent("snapshot_temp_\(UUID().uuidString)", conformingTo: .directory)
+
+        try fileManager.createDirectory(at: staleTempSnapshotURL, withIntermediateDirectories: true)
+        try fileManager.setAttributes(
+            [.modificationDate: Date().addingTimeInterval(-(60 * 60 * 25))],
+            ofItemAtPath: staleTempSnapshotURL.path
+        )
+
+        XCTAssertTrue(fileManager.fileExists(atPath: staleTempSnapshotURL.path))
+
+        try await manager.performSnapshot()
+
+        XCTAssertFalse(fileManager.fileExists(atPath: staleTempSnapshotURL.path), "Stale temporary snapshot directory should be cleaned up before snapshotting")
+    }
+
+    func testPerformSnapshot_KeepsRecentTemporarySnapshotDirectories() async throws {
+        let fileManager = FileManager.default
+        let recentTempSnapshotURL = fileManager.temporaryDirectory
+            .appendingPathComponent("snapshot_temp_\(UUID().uuidString)", conformingTo: .directory)
+
+        try fileManager.createDirectory(at: recentTempSnapshotURL, withIntermediateDirectories: true)
+        defer {
+            try? fileManager.removeItem(at: recentTempSnapshotURL)
+        }
+
+        try await manager.performSnapshot()
+
+        XCTAssertTrue(fileManager.fileExists(atPath: recentTempSnapshotURL.path), "Recent temporary snapshot directory should not be cleaned up")
+    }
 }
 
 
