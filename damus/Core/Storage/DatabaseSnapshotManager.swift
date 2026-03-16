@@ -20,6 +20,12 @@ actor DatabaseSnapshotManager {
     
     /// Minimum interval between snapshots (in seconds)
     private static let minimumSnapshotInterval: TimeInterval = 60 * 60 // 1 hour
+
+    /// Prefix used for temporary directories that stage snapshot databases before promotion.
+    private static let temporarySnapshotDirectoryPrefix = "snapshot_temp_"
+
+    /// Maximum age for temporary snapshot directories before they are considered stale.
+    private static let staleTemporarySnapshotLifetime: TimeInterval = 60 * 60 * 24
     
     /// Key for storing last snapshot timestamp in UserDefaults
     private static let lastSnapshotDateKey = "lastDatabaseSnapshotDate"
@@ -51,6 +57,8 @@ actor DatabaseSnapshotManager {
         Log.info("Starting periodic database snapshot timer", for: .storage)
         
         snapshotTimerTask = Task(priority: .utility) { [weak self] in
+            await self?.cleanupStaleTemporarySnapshots()
+
             while !Task.isCancelled {
                 guard let self else { return }
                 Log.debug("Snapshot timer - tick", for: .storage)
@@ -112,6 +120,8 @@ actor DatabaseSnapshotManager {
     /// Creates a storage-efficient snapshot by creating a new temporary Ndb instance
     /// and selectively copying only the necessary notes (profiles, mute lists, contact lists).
     func performSnapshot() async throws {
+        await cleanupStaleTemporarySnapshots()
+
         guard let snapshotPath = Ndb.snapshot_db_path else {
             throw SnapshotError.pathsUnavailable
         }
@@ -133,13 +143,14 @@ actor DatabaseSnapshotManager {
     /// 1. Creates a temporary Ndb instance in a temp directory
     /// 2. Queries the source database for relevant notes
     /// 3. Writes each note to the temporary database
-    /// 4. Atomically moves the temporary database to the final destination
+    /// 4. Promotes the temporary database to the final destination
     private func createSelectiveSnapshot(to snapshotPath: String) async throws {
         let fileManager = FileManager.default
         
         // Create a temporary directory for the snapshot
         let tempDir = FileManager.default.temporaryDirectory
-        let tempSnapshotPath = tempDir.appendingPathComponent("snapshot_temp_\(UUID().uuidString)")
+        let tempSnapshotPath = tempDir.appendingPathComponent("\(Self.temporarySnapshotDirectoryPrefix)\(UUID().uuidString)")
+        var didPromoteSnapshot = false
         
         do {
             try fileManager.createDirectory(atPath: tempSnapshotPath.path, withIntermediateDirectories: true)
@@ -149,7 +160,13 @@ actor DatabaseSnapshotManager {
         
         // Ensure cleanup on error
         defer {
-            try? fileManager.removeItem(atPath: tempSnapshotPath.path)
+            if !didPromoteSnapshot && fileManager.fileExists(atPath: tempSnapshotPath.path) {
+                do {
+                    try fileManager.removeItem(atPath: tempSnapshotPath.path)
+                } catch {
+                    Log.error("Failed to cleanup temporary snapshot directory: %{public}@", for: .storage, error.localizedDescription)
+                }
+            }
         }
         
         Log.debug("Created temporary snapshot directory at %{public}@", for: .storage, tempSnapshotPath.path)
@@ -173,8 +190,9 @@ actor DatabaseSnapshotManager {
         // Close the snapshot database before moving files
         snapshotNdb.close()
         
-        // Atomically move the temporary database to the final destination
+        // Promote the temporary database to the final destination
         try await moveSnapshotToFinalDestination(from: tempSnapshotPath.path, to: snapshotPath)
+        didPromoteSnapshot = true
         
         Log.debug("Moved snapshot to final destination", for: .storage)
     }
@@ -233,22 +251,58 @@ actor DatabaseSnapshotManager {
         return [profileFilter, contactsFilter, muteListFilter]
     }
     
-    /// Atomically moves the snapshot from temporary location to final destination.
+    /// Removes stale temporary snapshot directories left behind by interrupted snapshot attempts.
+    private func cleanupStaleTemporarySnapshots(now: Date = Date()) {
+        let fileManager = FileManager.default
+        let tempDir = fileManager.temporaryDirectory
+
+        do {
+            let tempEntries = try fileManager.contentsOfDirectory(
+                at: tempDir,
+                includingPropertiesForKeys: [.isDirectoryKey, .contentModificationDateKey, .creationDateKey],
+                options: [.skipsHiddenFiles]
+            )
+
+            for tempEntry in tempEntries {
+                guard tempEntry.lastPathComponent.hasPrefix(Self.temporarySnapshotDirectoryPrefix) else {
+                    continue
+                }
+
+                let resourceValues = try tempEntry.resourceValues(forKeys: [.isDirectoryKey, .contentModificationDateKey, .creationDateKey])
+
+                guard resourceValues.isDirectory == true else {
+                    continue
+                }
+
+                let referenceDate = resourceValues.contentModificationDate ?? resourceValues.creationDate
+                guard let referenceDate else {
+                    continue
+                }
+
+                guard now.timeIntervalSince(referenceDate) >= Self.staleTemporarySnapshotLifetime else {
+                    continue
+                }
+
+                do {
+                    try fileManager.removeItem(at: tempEntry)
+                    Log.info("Removed stale temporary snapshot directory at %{public}@", for: .storage, tempEntry.path)
+                } catch {
+                    Log.error("Failed to cleanup stale temporary snapshot directory: %{public}@", for: .storage, error.localizedDescription)
+                }
+            }
+        } catch {
+            Log.error("Failed to enumerate temporary snapshot directories: %{public}@", for: .storage, error.localizedDescription)
+        }
+    }
+
+    /// Promotes the snapshot from temporary location to final destination without deleting the current snapshot first.
     private func moveSnapshotToFinalDestination(from tempPath: String, to finalPath: String) async throws {
         let fileManager = FileManager.default
-        
-        // Remove existing snapshot if it exists
-        if fileManager.fileExists(atPath: finalPath) {
-            do {
-                try fileManager.removeItem(atPath: finalPath)
-                Log.debug("Removed existing snapshot at %{public}@", for: .storage, finalPath)
-            } catch {
-                throw SnapshotError.removeFailed(error)
-            }
-        }
+        let finalURL = URL(fileURLWithPath: finalPath, isDirectory: true)
+        let tempURL = URL(fileURLWithPath: tempPath, isDirectory: true)
         
         // Create parent directory if needed
-        let parentDir = URL(fileURLWithPath: finalPath).deletingLastPathComponent().path
+        let parentDir = finalURL.deletingLastPathComponent().path
         if !fileManager.fileExists(atPath: parentDir) {
             do {
                 try fileManager.createDirectory(atPath: parentDir, withIntermediateDirectories: true)
@@ -257,9 +311,14 @@ actor DatabaseSnapshotManager {
             }
         }
         
-        // Atomically move the temp snapshot to final destination
+        // Replace the existing snapshot only after the staged snapshot is ready.
         do {
-            try fileManager.moveItem(atPath: tempPath, toPath: finalPath)
+            if fileManager.fileExists(atPath: finalPath) {
+                _ = try fileManager.replaceItemAt(finalURL, withItemAt: tempURL, backupItemName: nil, options: [.usingNewMetadataOnly])
+            } else {
+                try fileManager.moveItem(at: tempURL, to: finalURL)
+            }
+
             Log.debug("Moved snapshot from %{public}@ to %{public}@", for: .storage, tempPath, finalPath)
         } catch {
             throw SnapshotError.moveFailed(error)
