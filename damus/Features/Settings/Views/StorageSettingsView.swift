@@ -18,6 +18,12 @@ fileprivate enum CacheClearingState {
     case cleared
 }
 
+/// A simple type to keep track of the compact scheduling state
+fileprivate enum CompactSchedulingState {
+    case not_scheduled
+    case scheduled
+}
+
 /// Storage category for display in list and chart
 struct StorageCategory: Identifiable {
     let id: String
@@ -46,6 +52,8 @@ struct StorageSettingsView: View {
     @State private var isPreparingExport: Bool = false
     @State fileprivate var cache_clearing_state: CacheClearingState = .not_cleared
     @State var showing_cache_clear_alert: Bool = false
+    @State fileprivate var compact_scheduling_state: CompactSchedulingState = .not_scheduled
+    @State var showing_compact_alert: Bool = false
     
     /// Storage categories with cumulative ranges for angle selection (iOS 17+)
     private var categoryRanges: [(category: String, range: Range<Double>)] {
@@ -164,6 +172,7 @@ struct StorageSettingsView: View {
                 // Clear Cache Section
                 Section {
                     self.ClearCacheButton
+                    self.CompactDatabaseButton
                 }
             }
             
@@ -214,6 +223,10 @@ struct StorageSettingsView: View {
         .onAppear {
             if stats == nil {
                 loadStorageStats()
+            }
+            // Reflect any previously scheduled compaction in the button state.
+            if UserDefaults.standard.bool(forKey: Ndb.compact_on_next_launch_key) {
+                compact_scheduling_state = .scheduled
             }
         }
         .onReceive(handle_notify(.switched_timeline)) { _ in
@@ -336,6 +349,38 @@ struct StorageSettingsView: View {
                       self.clear_cache_button_action()
                   },
                   secondaryButton: .cancel())
+        }
+    }
+
+    /// Compact database button view with confirmation dialog.
+    ///
+    /// Schedules a one-time database compaction to run on the next app launch.  The user
+    /// is informed that the app will need to restart to complete the operation.
+    var CompactDatabaseButton: some View {
+        Button(action: { self.showing_compact_alert = true }, label: {
+            HStack(spacing: 6) {
+                switch compact_scheduling_state {
+                    case .not_scheduled:
+                        Text("Compact Database", comment: "Button to compact the NostrDB database on next launch.")
+                    case .scheduled:
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .accessibilityHidden(true)
+                        Text("Compaction scheduled. Restart app to continue.", comment: "Message indicating that a database compaction has been scheduled for the next app launch.")
+                }
+            }
+        })
+        .disabled(self.compact_scheduling_state != .not_scheduled)
+        .alert(isPresented: $showing_compact_alert) {
+            Alert(
+                title: Text("Compact Database", comment: "Confirmation dialog title for database compaction"),
+                message: Text("This will reclaim unused space in the database. The app will need to restart to complete the operation. Proceed?", comment: "Message explaining what database compaction does and that a restart is required."),
+                primaryButton: .default(Text("OK", comment: "Button label indicating user wants to proceed.")) {
+                    Ndb.set_compact_on_next_launch()
+                    compact_scheduling_state = .scheduled
+                },
+                secondaryButton: .cancel()
+            )
         }
     }
 }
