@@ -230,11 +230,6 @@ fileprivate extension DamusState {
         var ndb: Ndb
         var keypair: Keypair
         
-        var latestRelayListEventIdHex: String? {
-            get { self.settings.latestRelayListEventIdHex }
-            set { self.settings.latestRelayListEventIdHex = newValue }
-        }
-        
         @MainActor
         var latestContactListEvent: NostrEvent? { self.contacts.event }
         var bootstrapRelays: [RelayURL] { get_default_bootstrap_relays() }

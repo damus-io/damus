@@ -166,7 +166,6 @@ struct SaveKeysView: View {
         // Save the ID to user settings so that we can easily find it later.
         let settings = UserSettingsStore.globally_load_for(pubkey: account.pubkey)
         settings.latest_contact_event_id_hex = first_contact_event.id.hex()
-        settings.latestRelayListEventIdHex = first_relay_list_event.id.hex()
     }
 
     func handle_event(relay: RelayURL, ev: NostrConnectionEvent) async {

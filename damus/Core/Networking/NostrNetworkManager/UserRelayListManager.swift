@@ -18,9 +18,14 @@ extension NostrNetworkManager {
         private var delegate: Delegate
         private let pool: RelayPool
         private let reader: SubscriptionManager
-        
+
         private var relayListObserverTask: Task<Void, Never>? = nil
         private var walletUpdatesObserverTask: AnyCancellable? = nil
+
+        /// In-memory cache of the most recently set relay list.
+        /// Bridges the gap between sending an event to nostrdb (async write) and it being queryable.
+        @MainActor
+        private var lastSetRelayList: NIP65.RelayList?
         
         init(delegate: Delegate, pool: RelayPool, reader: SubscriptionManager) {
             self.delegate = delegate
@@ -60,9 +65,11 @@ extension NostrNetworkManager {
         
         /// Gets the user's current relay list.
         ///
-        /// It attempts to get a NIP-65 relay list from the local database, or falls back to a legacy list.
+        /// It attempts to get the in-memory cache first (to bridge the nostrdb async write gap),
+        /// then a NIP-65 relay list from the local database, or falls back to a legacy list.
         @MainActor
         func getUserCurrentRelayList() -> NIP65.RelayList? {
+            if let lastSetRelayList { return lastSetRelayList }
             if let latestRelayListEvent = try? self.getLatestNIP65RelayList() { return latestRelayListEvent }
             if let latestRelayListEvent = try? self.getLatestKind3RelayList() { return latestRelayListEvent }
             if let latestRelayListEvent = try? self.getLatestUserDefaultsRelayList() { return latestRelayListEvent }
@@ -80,17 +87,18 @@ extension NostrNetworkManager {
             return list
         }
         
-        /// Gets the latest NIP-65 relay list event from NostrDB.
-        /// 
+        /// Gets the latest NIP-65 relay list event from NostrDB via query.
+        ///
         /// This is `private` because it is part of internal logic. Callers should use the higher level functions.
         ///
         /// It is recommended to use this function only if the NostrEvent metadata is needed. For cases where only the relay list info is needed, use `getLatestNIP65RelayList` instead.
         ///
         /// - Returns: The latest NIP-65 relay list NdbNote
         private func getLatestNIP65RelayListEvent() -> NdbNote? {
-            guard let latestRelayListEventId = delegate.latestRelayListEventIdHex else { return nil }
-            guard let latestRelayListEventId = NoteId(hex: latestRelayListEventId) else { return nil }
-            return try? delegate.ndb.lookup_note_and_copy(latestRelayListEventId)
+            let filter = NostrFilter(kinds: [.relay_list], limit: 1, authors: [delegate.keypair.pubkey])
+            guard let ndbFilter = try? NdbFilter(from: filter) else { return nil }
+            guard let noteKey = try? delegate.ndb.query(filters: [ndbFilter], maxResults: 1).first else { return nil }
+            return try? delegate.ndb.lookup_note_by_key_and_copy(noteKey)
         }
         
         /// Gets the latest `kind:3` relay list from NostrDB.
@@ -176,17 +184,19 @@ extension NostrNetworkManager {
         func set(userRelayList: NIP65.RelayList) async throws(UpdateError) {
             guard let fullKeypair = delegate.keypair.to_full() else { throw .notAuthorizedToChangeRelayList }
             guard let relayListEvent = userRelayList.toNostrEvent(keypair: fullKeypair) else { throw .cannotFormRelayListEvent }
-    
+
+            await MainActor.run { self.lastSetRelayList = userRelayList }
+
             await self.apply(newRelayList: self.computeRelaysToConnectTo(with: userRelayList))
-    
+
             await self.pool.send(.event(relayListEvent))   // This will send to NostrDB as well, which will locally save that NIP-65 event
-            self.delegate.latestRelayListEventIdHex = relayListEvent.id.hex()   // Make sure we are able to recall this event from NostrDB
         }
         
         // MARK: - Syncing our saved user relay list with the active `RelayPool`
         
         /// Loads the current user relay list
         func load() async {
+            await MainActor.run { self.lastSetRelayList = nil }  // Clear cache; ndb has had time to commit by now
             await self.apply(newRelayList: self.relaysToConnectTo())
         }
         
