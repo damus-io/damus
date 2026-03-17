@@ -80,5 +80,7 @@
 	<string>Damus needs access to your media library for playback statuses</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Damus needs access to your microphone to allow you to create video recordings that you can choose to post publicly on the network</string>
+	<key>TENOR_API_KEY</key>
+	<string>$(TENOR_API_KEY)</string>
 </dict>
 </plist>
