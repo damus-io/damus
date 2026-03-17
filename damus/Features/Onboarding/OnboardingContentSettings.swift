@@ -38,7 +38,7 @@ extension OnboardingSuggestionsView {
                             Toggle(NSLocalizedString("Hide notes with #nsfw tags", comment: "Setting to hide notes with not safe for work tags"), isOn: $settings.hide_nsfw_tagged_content)
                                 .toggleStyle(.switch)
                             
-                            Text("Notes with the #nsfw tag usually contains adult content or other \"Not safe for work\" content", comment: "Explanation of what NSFW means")
+                            Text("Notes with the `#nsfw` tag usually contain adult content or other \"Not safe for work\" content", comment: "Explanation of what NSFW means")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                                 .padding(.bottom, 10)
