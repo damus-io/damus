@@ -61,7 +61,7 @@ enum StorageStatsViewHelper {
     @concurrent
     static func formatStorageStatsAsText(_ stats: StorageStats) async -> String {
         // Build categories list
-        let categories = [
+        var categories = [
             StorageCategory(
                 id: "nostrdb",
                 title: NSLocalizedString("NostrDB", comment: "Label for main NostrDB database"),
@@ -84,6 +84,24 @@ enum StorageStatsViewHelper {
                 size: stats.imageCacheSize
             )
         ]
+        if stats.videoCacheSize > 0 {
+            categories.append(StorageCategory(
+                id: "video_cache",
+                title: NSLocalizedString("Video Cache", comment: "Label for cached video files"),
+                icon: "video.fill",
+                color: .teal,
+                size: stats.videoCacheSize
+            ))
+        }
+        if stats.otherSize > 0 {
+            categories.append(StorageCategory(
+                id: "other",
+                title: NSLocalizedString("Other", comment: "Label for other uncategorized storage"),
+                icon: "folder.fill",
+                color: .gray,
+                size: stats.otherSize
+            ))
+        }
         
         var text = "Damus Storage Statistics\n"
         text += "Generated: \(Date().formatted(date: .abbreviated, time: .shortened))\n"

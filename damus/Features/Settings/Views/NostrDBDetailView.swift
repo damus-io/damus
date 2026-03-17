@@ -238,7 +238,9 @@ struct NostrDBDetailView: View {
                 ),
                 nostrdbSize: 2500000000,
                 snapshotSize: 100000,
-                imageCacheSize: 5000000
+                imageCacheSize: 5000000,
+                videoCacheSize: 0,
+                otherSize: 0
             )
         )
     }

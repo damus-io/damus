@@ -89,9 +89,11 @@ final class StorageStatsManagerTests: XCTestCase {
             nostrdbDetails: nil,
             nostrdbSize: 1000,
             snapshotSize: 500,
-            imageCacheSize: 250
+            imageCacheSize: 250,
+            videoCacheSize: 0,
+            otherSize: 0
         )
-        
+
         XCTAssertEqual(stats.totalSize, 1750, "Total size should sum all components")
     }
     
@@ -101,7 +103,9 @@ final class StorageStatsManagerTests: XCTestCase {
             nostrdbDetails: nil,
             nostrdbSize: 600,
             snapshotSize: 300,
-            imageCacheSize: 100
+            imageCacheSize: 100,
+            videoCacheSize: 0,
+            otherSize: 0
         )
         
         // Total = 1000, so 600 should be 60%
@@ -121,7 +125,9 @@ final class StorageStatsManagerTests: XCTestCase {
             nostrdbDetails: nil,
             nostrdbSize: 0,
             snapshotSize: 0,
-            imageCacheSize: 0
+            imageCacheSize: 0,
+            videoCacheSize: 0,
+            otherSize: 0
         )
         
         let percentage = stats.percentage(for: 100)
@@ -134,21 +140,27 @@ final class StorageStatsManagerTests: XCTestCase {
             nostrdbDetails: nil,
             nostrdbSize: 1000,
             snapshotSize: 500,
-            imageCacheSize: 250
+            imageCacheSize: 250,
+            videoCacheSize: 0,
+            otherSize: 0
         )
-        
+
         let stats2 = StorageStats(
             nostrdbDetails: nil,
             nostrdbSize: 1000,
             snapshotSize: 500,
-            imageCacheSize: 250
+            imageCacheSize: 250,
+            videoCacheSize: 0,
+            otherSize: 0
         )
-        
+
         let stats3 = StorageStats(
             nostrdbDetails: nil,
             nostrdbSize: 2000,
             snapshotSize: 500,
-            imageCacheSize: 250
+            imageCacheSize: 250,
+            videoCacheSize: 0,
+            otherSize: 0
         )
         
         // Equal stats should be equal and have same hash
@@ -303,7 +315,7 @@ final class StorageStatsManagerTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(stats.imageCacheSize, 0, "Image cache size should be non-negative")
         
         // Total should equal sum
-        let expectedTotal = stats.nostrdbSize + stats.snapshotSize + stats.imageCacheSize
+        let expectedTotal = stats.nostrdbSize + stats.snapshotSize + stats.imageCacheSize + stats.videoCacheSize + stats.otherSize
         XCTAssertEqual(stats.totalSize, expectedTotal, "Total should equal sum of components")
     }
     
@@ -486,18 +498,20 @@ final class StorageStatsManagerTests: XCTestCase {
     /// Test storage stats with extreme UInt64 values, including sum at UInt64 boundary (no overflow)
     func testStorageStatsExtremeValues() {
         // Case: Sum at UInt64 boundary (no overflow)
-        // UInt64.max - 2 + 1 + 1 == UInt64.max
+        // UInt64.max - 4 + 1 + 1 + 1 + 1 == UInt64.max
         let maxStats = StorageStats(
             nostrdbDetails: nil,
-            nostrdbSize: UInt64.max - 2,
+            nostrdbSize: UInt64.max - 4,
             snapshotSize: 1,
-            imageCacheSize: 1
+            imageCacheSize: 1,
+            videoCacheSize: 1,
+            otherSize: 1
         )
         // Verify correct summation at UInt64 boundary
         XCTAssertEqual(maxStats.totalSize, UInt64.max, "Total should be exactly UInt64.max at boundary; no overflow should occur")
 
         // Verify percentage calculation for each component
-        XCTAssertEqual(maxStats.percentage(for: UInt64.max - 2), (Double(UInt64.max - 2) / Double(UInt64.max)) * 100.0, accuracy: 0.0001)
+        XCTAssertEqual(maxStats.percentage(for: UInt64.max - 4), (Double(UInt64.max - 4) / Double(UInt64.max)) * 100.0, accuracy: 0.0001)
         XCTAssertEqual(maxStats.percentage(for: 1), (1.0 / Double(UInt64.max)) * 100.0, accuracy: 0.0001)
 
         // All zeros case (already tested elsewhere, but included for completeness)
@@ -505,7 +519,9 @@ final class StorageStatsManagerTests: XCTestCase {
             nostrdbDetails: nil,
             nostrdbSize: 0,
             snapshotSize: 0,
-            imageCacheSize: 0
+            imageCacheSize: 0,
+            videoCacheSize: 0,
+            otherSize: 0
         )
         XCTAssertEqual(zeroStats.totalSize, 0, "Zero stats should have zero total")
         XCTAssertEqual(zeroStats.percentage(for: 0), 0.0, "Zero percentage for zero total")

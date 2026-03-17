@@ -508,12 +508,14 @@ class HomeModel: ContactsDelegate, ObservableObject {
 
     /// Send the initial filters, just our contact list and relay list mostly
     func send_initial_filters() {
+        // Contacts gate done_init — must arrive before send_home_filters()
+        // so that get_friends() has the relay-fetched contacts list.
         Task {
             let startTime = CFAbsoluteTimeGetCurrent()
             let id = UUID()
             Log.info("Initial filter task started with ID %s", for: .homeModel, id.uuidString)
-            let filter = NostrFilter(kinds: [.contacts], limit: 1, authors: [damus_state.pubkey])
-            for await event in damus_state.nostrNetwork.reader.streamExistingEvents(filters: [filter]) {
+            let contacts_filter = NostrFilter(kinds: [.contacts], limit: 1, authors: [damus_state.pubkey])
+            for await event in damus_state.nostrNetwork.reader.streamExistingEvents(filters: [contacts_filter]) {
                 await event.justUseACopy({ await process_event(ev: $0, context: .other) })
                 if !done_init {
                     done_init = true
@@ -521,7 +523,15 @@ class HomeModel: ContactsDelegate, ObservableObject {
                     send_home_filters()
                 }
             }
-            
+        }
+        // Mute list fetched independently so it's available even after a
+        // database purge. Runs in a separate task to avoid gating done_init
+        // on mute list arrival order.
+        Task {
+            let mutelist_filter = NostrFilter(kinds: [.mute_list], limit: 1, authors: [damus_state.pubkey])
+            for await event in damus_state.nostrNetwork.reader.streamExistingEvents(filters: [mutelist_filter]) {
+                await event.justUseACopy({ await process_event(ev: $0, context: .other) })
+            }
         }
     }
 

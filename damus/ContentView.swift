@@ -141,11 +141,13 @@ struct ContentView: View {
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     init(keypair: Keypair, appDelegate: AppDelegate?) {
-        // Compact the database if requested from the previous session.
-        // This runs before opening the main Ndb instance so that it works on an idle database.
+        // Purge or compact the database if requested from the previous session.
+        // These run before opening the main Ndb instance so that they work on an idle database.
         // This also gets run here instead of `connect` because we should anticipate this to add a few seconds of delay in worst case scenarios.
         // If we were to add this in the `connect` function, parallel functions that depend on `damus_state!` could cause crashes in the app.
-        // By placing this here, we only delay the splash screen a bit
+        // By placing this here, we only delay the splash screen a bit.
+        // Purge runs first: if it fires it clears the compact flag, making compact_if_needed a no-op.
+        Ndb.purge_if_needed()
         Ndb.compact_if_needed()
         
         self.keypair = keypair

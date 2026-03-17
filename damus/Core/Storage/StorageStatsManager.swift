@@ -12,21 +12,27 @@ import Kingfisher
 struct StorageStats: Hashable {
     /// Detailed breakdown of NostrDB storage by kind, indices, and other
     let nostrdbDetails: NdbStats?
-    
+
     /// Size of the main NostrDB database file in bytes (total)
     let nostrdbSize: UInt64
-    
+
     /// Size of the snapshot NostrDB database file in bytes
     let snapshotSize: UInt64
-    
+
     /// Size of the Kingfisher image cache in bytes
     let imageCacheSize: UInt64
-    
+
+    /// Size of the video cache in bytes (`~/Library/Caches/video_cache/`)
+    let videoCacheSize: UInt64
+
+    /// Size of all other storage not covered by the tracked categories
+    let otherSize: UInt64
+
     /// Total storage used across all data stores
     var totalSize: UInt64 {
-        return nostrdbSize + snapshotSize + imageCacheSize
+        return nostrdbSize + snapshotSize + imageCacheSize + videoCacheSize + otherSize
     }
-    
+
     /// Calculate the percentage of total storage used by a specific size
     /// - Parameter size: The size to calculate percentage for
     /// - Returns: Percentage value between 0.0 and 100.0
@@ -65,6 +71,10 @@ struct StorageStatsManager {
                     // Get detailed NostrDB stats if ndb instance provided
                     let nostrdbDetails: NdbStats? = ndb?.getStats(physicalSize: nostrdbSize)
                     
+                    // Calculate total container size from file enumeration
+                    let containerTotal = self.containerTotalSize()
+                    let videoCacheSize = self.getVideoCacheSize()
+
                     // Kingfisher cache size requires async callback
                     KingfisherManager.shared.cache.calculateDiskStorageSize { result in
                         let imageCacheSize: UInt64
@@ -75,14 +85,19 @@ struct StorageStatsManager {
                             Log.error("Failed to calculate Kingfisher cache size: %@", for: .storage, error.localizedDescription)
                             imageCacheSize = 0
                         }
-                        
+
+                        let trackedSize = nostrdbSize + snapshotSize + imageCacheSize + videoCacheSize
+                        let otherSize: UInt64 = containerTotal > trackedSize ? containerTotal - trackedSize : 0
+
                         let stats = StorageStats(
                             nostrdbDetails: nostrdbDetails,
                             nostrdbSize: nostrdbSize,
                             snapshotSize: snapshotSize,
-                            imageCacheSize: imageCacheSize
+                            imageCacheSize: imageCacheSize,
+                            videoCacheSize: videoCacheSize,
+                            otherSize: otherSize
                         )
-                        
+
                         continuation.resume(returning: stats)
                     }
                 } catch {
@@ -116,6 +131,41 @@ struct StorageStatsManager {
         return getFileSize(at: dataFilePath, description: "Snapshot DB")
     }
     
+    /// Get the total size of the video cache directory
+    /// - Returns: Size in bytes, or 0 if directory doesn't exist or error occurs
+    private func getVideoCacheSize() -> UInt64 {
+        guard let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
+            return 0
+        }
+        let videoCacheURL = cachesURL.appendingPathComponent("video_cache")
+        return getDirectorySize(at: videoCacheURL, description: "Video Cache")
+    }
+
+    /// Get the total size of all files in a directory (recursively)
+    /// - Parameters:
+    ///   - url: URL of the directory
+    ///   - description: Human-readable description for logging
+    /// - Returns: Size in bytes, or 0 if directory doesn't exist or error occurs
+    private func getDirectorySize(at url: URL, description: String) -> UInt64 {
+        let fm = FileManager.default
+        guard fm.fileExists(atPath: url.path) else { return 0 }
+
+        guard let enumerator = fm.enumerator(
+            at: url,
+            includingPropertiesForKeys: [.fileSizeKey, .isRegularFileKey],
+            options: [.skipsHiddenFiles]
+        ) else { return 0 }
+
+        var total: UInt64 = 0
+        for case let fileURL as URL in enumerator {
+            guard let rv = try? fileURL.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey]),
+                  rv.isRegularFile == true,
+                  let size = rv.fileSize else { continue }
+            total += UInt64(max(0, size))
+        }
+        return total
+    }
+
     /// Get the size of a file at the specified path
     /// - Parameters:
     ///   - path: Full path to the file
@@ -152,6 +202,41 @@ struct StorageStatsManager {
         return formatter.string(fromByteCount: Int64(bytes))
     }
     
+    /// Sum the size of all files across the app sandbox and shared app group container.
+    ///
+    /// Unlike `containerFileBreakdown()`, this enumerates files without collecting
+    /// them into an intermediate array, avoiding allocation proportional to file count.
+    ///
+    /// - Returns: Total size in bytes.
+    func containerTotalSize() -> UInt64 {
+        let fm = FileManager.default
+        var roots: [URL] = []
+
+        if let home = fm.urls(for: .documentDirectory, in: .userDomainMask).first?.deletingLastPathComponent() {
+            roots.append(home)
+        }
+        if let groupURL = fm.containerURL(forSecurityApplicationGroupIdentifier: "group.com.damus") {
+            roots.append(groupURL)
+        }
+
+        var total: UInt64 = 0
+        for root in roots {
+            guard let enumerator = fm.enumerator(
+                at: root,
+                includingPropertiesForKeys: [.fileSizeKey, .isRegularFileKey],
+                options: [.skipsHiddenFiles]
+            ) else { continue }
+
+            for case let fileURL as URL in enumerator {
+                guard let rv = try? fileURL.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey]),
+                      rv.isRegularFile == true,
+                      let size = rv.fileSize else { continue }
+                total += UInt64(max(0, size))
+            }
+        }
+        return total
+    }
+
     /// A single file entry produced by container enumeration
     struct ContainerFileEntry {
         /// Human-readable label for the container root (e.g. "Documents")

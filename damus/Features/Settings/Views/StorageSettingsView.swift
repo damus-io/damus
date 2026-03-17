@@ -24,6 +24,12 @@ fileprivate enum CompactSchedulingState {
     case scheduled
 }
 
+/// A simple type to keep track of the purge scheduling state
+fileprivate enum PurgeSchedulingState {
+    case not_scheduled
+    case scheduled
+}
+
 /// Storage category for display in list and chart
 struct StorageCategory: Identifiable {
     let id: String
@@ -54,6 +60,8 @@ struct StorageSettingsView: View {
     @State var showing_cache_clear_alert: Bool = false
     @State fileprivate var compact_scheduling_state: CompactSchedulingState = .not_scheduled
     @State var showing_compact_alert: Bool = false
+    @State fileprivate var purge_scheduling_state: PurgeSchedulingState = .not_scheduled
+    @State var showing_purge_alert: Bool = false
     
     /// Storage categories with cumulative ranges for angle selection (iOS 17+)
     private var categoryRanges: [(category: String, range: Range<Double>)] {
@@ -75,8 +83,8 @@ struct StorageSettingsView: View {
     /// All storage categories for display (top-level view)
     private var categories: [StorageCategory] {
         guard let stats = stats else { return [] }
-        
-        return [
+
+        var result = [
             StorageCategory(
                 id: "nostrdb",
                 title: NSLocalizedString("NostrDB", comment: "Label for main NostrDB database"),
@@ -99,6 +107,25 @@ struct StorageSettingsView: View {
                 size: stats.imageCacheSize
             )
         ]
+        if stats.videoCacheSize > 0 {
+            result.append(StorageCategory(
+                id: "video_cache",
+                title: NSLocalizedString("Video Cache", comment: "Label for cached video files"),
+                icon: "video.fill",
+                color: .teal,
+                size: stats.videoCacheSize
+            ))
+        }
+        if stats.otherSize > 0 {
+            result.append(StorageCategory(
+                id: "other",
+                title: NSLocalizedString("Other", comment: "Label for other uncategorized storage"),
+                icon: "folder.fill",
+                color: .gray,
+                size: stats.otherSize
+            ))
+        }
+        return result
     }
     
     var body: some View {
@@ -173,6 +200,7 @@ struct StorageSettingsView: View {
                 Section {
                     self.ClearCacheButton
                     self.CompactDatabaseButton
+                    self.PurgeDatabaseButton
                 }
             }
             
@@ -224,8 +252,10 @@ struct StorageSettingsView: View {
             if stats == nil {
                 loadStorageStats()
             }
-            // Reflect any previously scheduled compaction in the button state.
-            if UserDefaults.standard.bool(forKey: Ndb.compact_on_next_launch_key) {
+            // Reflect any previously scheduled purge or compaction in the button state.
+            if UserDefaults.standard.bool(forKey: Ndb.purge_on_next_launch_key) {
+                purge_scheduling_state = .scheduled
+            } else if UserDefaults.standard.bool(forKey: Ndb.compact_on_next_launch_key) {
                 compact_scheduling_state = .scheduled
             }
         }
@@ -370,7 +400,7 @@ struct StorageSettingsView: View {
                 }
             }
         })
-        .disabled(self.compact_scheduling_state != .not_scheduled)
+        .disabled(self.compact_scheduling_state != .not_scheduled || self.purge_scheduling_state == .scheduled)
         .alert(isPresented: $showing_compact_alert) {
             Alert(
                 title: Text("Compact Database", comment: "Confirmation dialog title for database compaction"),
@@ -378,6 +408,38 @@ struct StorageSettingsView: View {
                 primaryButton: .default(Text("OK", comment: "Button label indicating user wants to proceed.")) {
                     Ndb.set_compact_on_next_launch()
                     compact_scheduling_state = .scheduled
+                },
+                secondaryButton: .cancel()
+            )
+        }
+    }
+
+    /// Purge database button view with confirmation dialog.
+    ///
+    /// Schedules a full database wipe to run on the next app launch. The user
+    /// is informed that cached data will be deleted but keys and settings are preserved.
+    var PurgeDatabaseButton: some View {
+        Button(action: { self.showing_purge_alert = true }, label: {
+            HStack(spacing: 6) {
+                switch purge_scheduling_state {
+                    case .not_scheduled:
+                        Text("Purge Database", comment: "Button to purge the NostrDB database on next launch.")
+                    case .scheduled:
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .accessibilityHidden(true)
+                        Text("Purge scheduled. Restart app to continue.", comment: "Message indicating that a database purge has been scheduled for the next app launch.")
+                }
+            }
+        })
+        .disabled(self.purge_scheduling_state != .not_scheduled)
+        .alert(isPresented: $showing_purge_alert) {
+            Alert(
+                title: Text("Purge Database", comment: "Confirmation dialog title for database purge"),
+                message: Text("This will delete all cached notes, profiles, timeline data, and unsent drafts. Your account keys and settings will not be affected. Data will be re-fetched from relays on next launch, but drafts cannot be recovered. The app will need to restart. Proceed?", comment: "Message explaining what database purge does, that drafts are lost, what is preserved, and that a restart is required."),
+                primaryButton: .destructive(Text("Purge", comment: "Button label to confirm database purge.")) {
+                    Ndb.set_purge_on_next_launch()
+                    purge_scheduling_state = .scheduled
                 },
                 secondaryButton: .cancel()
             )
