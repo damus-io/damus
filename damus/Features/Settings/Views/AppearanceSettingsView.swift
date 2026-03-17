@@ -84,7 +84,7 @@ struct AppearanceSettingsView: View {
                     .toggleStyle(.switch)
 
                 VStack(alignment: .leading) {
-                    Text(String(format: NSLocalizedString("Line height: %.1fx", comment: "Label showing current line height multiplier setting"), settings.longform_line_height))
+                    Text(verbatim: "\(String(format: NSLocalizedString("Line height: %.1fx", comment: "Label showing current line height multiplier setting"), settings.longform_line_height))")
                     Slider(value: $settings.longform_line_height, in: 1.2...1.8, step: 0.1)
 
                     // Preview of line height
@@ -154,7 +154,7 @@ struct AppearanceSettingsView: View {
                     .toggleStyle(.switch)
                 if settings.hide_hashtag_spam {
                     VStack(alignment: .leading) {
-                        Text(String(format: NSLocalizedString("Maximum hashtags: %d", comment: "Label showing the maximum number of hashtags allowed before a post is hidden"), settings.max_hashtags))
+                        Text("\(String(format: NSLocalizedString("Maximum hashtags: %d", comment: "Label showing the maximum number of hashtags allowed before a post is hidden"), settings.max_hashtags))")
                         Slider(value: max_hashtags_binding, in: 1...20, step: 1)
                     }
                 }

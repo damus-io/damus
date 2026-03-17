@@ -57,7 +57,7 @@ struct NDBSearchView: View {
                 .foregroundColor(.secondary)
 
                 if !highlightTerms.isEmpty {
-                    Text("Search: \(searchQuery)")
+                    Text("Search: \(searchQuery)", comment: "Label indicating the search query that resulted in the current list of notes")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                         .padding(.bottom, 4)

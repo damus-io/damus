@@ -19,12 +19,12 @@ struct LiveStreamStatus: View {
                     .foregroundColor(Color.white)
 
                 if let starts = starts {
-                    Text("\(starts)")
+                    Text(starts)
                         .foregroundColor(Color.white)
                         .bold()
                         .glow()
                 } else {
-                    Text("\(status.rawValue)")
+                    Text(status.rawValue)
                         .foregroundColor(Color.white)
                         .bold()
                 }
@@ -33,11 +33,11 @@ struct LiveStreamStatus: View {
                     .foregroundColor(Color.red)
                     .glow()
 
-                Text("\(status.rawValue)")
+                Text(status.rawValue)
                     .foregroundColor(DamusColors.adaptableWhite)
                     .bold()
             case .ended:
-                Text("\(status.rawValue)")
+                Text(status.rawValue)
                     .foregroundColor(DamusColors.adaptableWhite)
                     .bold()
             }

@@ -37,7 +37,7 @@ struct PostingTimelineSwitcherView: View {
         }
         .frame(width: 50, height: 35)
         .menuOrder(.fixed)
-        .accessibilityLabel(NSLocalizedString("Timeline switcher, select \(TimelineSource.follows.description) or \(TimelineSource.favorites.description)", comment: "Accessibility label for the timeline switcher button at the topbar"))
+        .accessibilityLabel(String(format: NSLocalizedString("Timeline switcher, select %@ or %@", comment: "Accessibility label for the timeline switcher button at the topbar"), TimelineSource.follows.description, TimelineSource.favorites.description))
     }
 
     @available(iOS 17, *)

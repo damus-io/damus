@@ -259,7 +259,7 @@ struct NoteContentView: View {
                                 .accessibilityHidden(true)
                             
                             if artifacts.media.count > 1 {
-                                Text("\(artifacts.media.count)")
+                                Text(verbatim: "\(artifacts.media.count)")
                                     .font(.system(size: 10, weight: .semibold))
                                     .foregroundStyle(.white)
                                     .padding(.horizontal, 4)
@@ -273,7 +273,7 @@ struct NoteContentView: View {
                             }
                         }
                         
-                        Text("Load \(artifacts.media.count) \(pluralizedString(key: "media_count", count: artifacts.media.count))")
+                        Text(verbatim: "\(pluralizedString(key: "media_count", count: artifacts.media.count))")
                             .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
                             .foregroundStyle(DamusColors.neutral6)
                         
@@ -304,7 +304,7 @@ struct NoteContentView: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(PlainButtonStyle())
-                .accessibilityLabel(NSLocalizedString(showLinksDropdown ? "Hide media links" : "Show media links", comment: "Accessibility label for toggle button to show/hide media link list"))
+                .accessibilityLabel(showLinksDropdown ? NSLocalizedString("Hide media links", comment: "Accessibility label for toggle button to hide media link list") : NSLocalizedString("Show media links", comment: "Accessibility label for toggle button to show media link list"))
             }
             .background(
                  RoundedRectangle(cornerRadius: 10)
@@ -424,7 +424,7 @@ struct NoteContentView: View {
                 )
             }
             .buttonStyle(PlainButtonStyle())
-            .accessibilityLabel(NSLocalizedString("Load \(abbreviateURL(url))", comment: "Accessibility label for button to load specific media item"))
+            .accessibilityLabel(String(format: NSLocalizedString("Load %@", comment: "Accessibility label for button to load specific media item"), abbreviateURL(url)))
         }
     }
     
@@ -632,7 +632,7 @@ struct BlurOverlayView: View {
                     .foregroundStyle(.white)
                     .bold()
                     .padding(EdgeInsets(top: 5, leading: 10, bottom: 0, trailing: 10))
-                Text(NSLocalizedString("Media from someone you don't follow", comment: "Label on the image blur mask"))
+                Text("Media from someone you don't follow", comment: "Label on the image blur mask")
                     .multilineTextAlignment(.center)
                     .foregroundStyle(Color.white)
                     .font(.title2)
@@ -652,7 +652,7 @@ struct BlurOverlayView: View {
                 {
                     switch artifacts.media[0] {
                     case .image(let url), .video(let url):
-                        Text(abbreviateURL(url, maxLength: 30))
+                        Text(verbatim: "\(abbreviateURL(url, maxLength: 30))")
                             .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size * 0.8))
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.center)

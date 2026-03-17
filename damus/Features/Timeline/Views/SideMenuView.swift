@@ -81,7 +81,7 @@ struct SideMenuView: View {
                     Image(systemName: "flask")
                         .fontWeight(.bold)
                         .tint(DamusColors.adaptableBlack)
-                    Text("Labs")
+                    Text("Labs", comment: "Sidebar menu label for Damus Labs experimental features.")
                         .font(.title2.weight(.semibold))
                         .foregroundColor(DamusColors.adaptableBlack)
                         .frame(maxWidth: .infinity, alignment: .leading)

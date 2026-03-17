@@ -396,7 +396,7 @@ struct StoragePieChart: View {
     var body: some View {
         Chart(categories) { category in
             SectorMark(
-                angle: .value("Size", category.size),
+                angle: .value(NSLocalizedString("Size", comment: "Label for size in disk storage chart"), category.size),
                 innerRadius: .ratio(0.618),
                 angularInset: 1.5
             )
