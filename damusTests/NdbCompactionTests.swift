@@ -129,4 +129,46 @@ final class NdbCompactionTests: XCTestCase {
             "Temp directory should be cleaned up after successful compaction"
         )
     }
+
+    // MARK: - compact_if_needed: lock.mdb removal
+
+    func testCompactIfNeeded_removesLockFileAfterCompaction() {
+        // Given: a real Ndb database that has been opened and closed (so lock.mdb exists)
+        let dbPath = testDirectory.appendingPathComponent("lock_test_db").path
+        try? FileManager.default.createDirectory(atPath: dbPath, withIntermediateDirectories: true)
+
+        guard let ndb = Ndb(path: dbPath) else {
+            XCTFail("Could not open Ndb at \(dbPath)")
+            return
+        }
+        ndb.close()
+
+        let lockPath = "\(dbPath)/lock.mdb"
+        XCTAssertTrue(
+            FileManager.default.fileExists(atPath: lockPath),
+            "lock.mdb should exist after opening and closing Ndb"
+        )
+
+        // When: compact_if_needed runs
+        Ndb.set_compact_on_next_launch()
+        Ndb.compact_if_needed(db_path: dbPath)
+
+        // Then: lock.mdb should NOT exist (it was deleted during compaction)
+        XCTAssertFalse(
+            FileManager.default.fileExists(atPath: lockPath),
+            "lock.mdb should be removed after compaction to prevent stale reader-table crashes"
+        )
+
+        // And: LMDB recreates a fresh lock.mdb when re-opened
+        guard let reopenedNdb = Ndb(path: dbPath) else {
+            XCTFail("Could not re-open Ndb after compaction — database may be corrupt")
+            return
+        }
+        reopenedNdb.close()
+
+        XCTAssertTrue(
+            FileManager.default.fileExists(atPath: lockPath),
+            "lock.mdb should be recreated by LMDB after opening the compacted database"
+        )
+    }
 }
