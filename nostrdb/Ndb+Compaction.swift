@@ -109,6 +109,25 @@ extension Ndb {
         let originalDataMdb = URL(fileURLWithPath: "\(path)/\(main_db_file_name)")
         let compactedDataMdb = URL(fileURLWithPath: "\(tempPath)/\(main_db_file_name)")
 
+        // Validate the compacted file before replacing the original.
+        let originalSize = (try? FileManager.default.attributesOfItem(atPath: originalDataMdb.path)[.size] as? Int) ?? 0
+        let compactedSize = (try? FileManager.default.attributesOfItem(atPath: compactedDataMdb.path)[.size] as? Int) ?? 0
+        Log.info("compact_if_needed: original=%d bytes, compacted=%d bytes", for: .storage, originalSize, compactedSize)
+
+        guard compactedSize > 0 else {
+            Log.error("compact_if_needed: compacted file is missing or empty — aborting", for: .storage)
+            try? FileManager.default.removeItem(atPath: tempPath)
+            return
+        }
+
+        // Delete the stale lock.mdb BEFORE replacing data.mdb.
+        // The temp Ndb wrote reader-table / txn state into lock.mdb that references
+        // pages in the old data.mdb. After data.mdb is replaced with the smaller
+        // compacted copy, those page references become invalid and cause SIGBUS.
+        // LMDB will recreate a fresh lock file on the next open.
+        let lockPath = "\(path)/lock.mdb"
+        try? FileManager.default.removeItem(atPath: lockPath)
+
         do {
             _ = try FileManager.default.replaceItemAt(
                 originalDataMdb,
@@ -116,12 +135,21 @@ extension Ndb {
                 backupItemName: nil,
                 options: [.usingNewMetadataOnly]
             )
-            Log.info("NostrDB compacted successfully", for: .storage)
         } catch {
             Log.error("compact_if_needed: failed to replace db file: %@", for: .storage, String(describing: error))
             try? FileManager.default.removeItem(atPath: tempPath)
             return
         }
+
+        // Post-replace sanity check: verify the destination file exists with the expected size.
+        let finalSize = (try? FileManager.default.attributesOfItem(atPath: originalDataMdb.path)[.size] as? Int) ?? 0
+        if finalSize != compactedSize {
+            Log.error("compact_if_needed: post-replace size mismatch — expected %d, got %d", for: .storage, compactedSize, finalSize)
+            try? FileManager.default.removeItem(atPath: tempPath)
+            return
+        }
+
+        Log.info("NostrDB compacted successfully", for: .storage)
 
         // Clean up the temp directory (any remaining files such as lock.mdb).
         try? FileManager.default.removeItem(atPath: tempPath)
