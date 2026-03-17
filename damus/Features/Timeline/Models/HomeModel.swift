@@ -69,6 +69,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
 
     var homeHandlerTask: Task<Void, Never>?
     var favoritesHandlerTask: Task<Void, Never>?
+    private var lastFavoritesCount: Int = 0
     var notificationsHandlerTask: Task<Void, Never>?
     var generalHandlerTask: Task<Void, Never>?
     var dmsHandlerTask: Task<Void, Never>?
@@ -738,7 +739,19 @@ class HomeModel: ContactsDelegate, ObservableObject {
         guard damus_state.settings.enable_favourites_feature else { return }
 
         let all_favorites = Array(damus_state.contactCards.favorites)
-        guard !all_favorites.isEmpty else { return }
+
+        // Always reset the subscription so we don't keep streaming stale authors.
+        favoritesHandlerTask?.cancel()
+        favoritesHandlerTask = nil
+
+        // If we have no favorites, clear the favorites timeline and stop here.
+        guard !all_favorites.isEmpty else {
+            Task { @MainActor in
+                favoriteEvents.reset()
+            }
+            lastFavoritesCount = 0
+            return
+        }
 
         var home_filter_kinds: [NostrKind] = [.text, .longform, .boost, .highlight]
         if !damus_state.settings.onlyzaps_mode {
@@ -749,9 +762,24 @@ class HomeModel: ContactsDelegate, ObservableObject {
         favorites_filter.authors = all_favorites
         favorites_filter.limit = 500
 
-        self.favoritesHandlerTask?.cancel()
-        self.favoritesHandlerTask = Task {
-            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: [favorites_filter], streamMode: .ndbAndNetworkParallel(networkOptimization: .sinceOptimization)) {
+        // Reset current favorites timeline contents; they'll be re-filled from NDB + network.
+        Task { @MainActor in
+            favoriteEvents.reset()
+        }
+
+        // IMPORTANT:
+        // When favorites goes from 0 -> N, `sinceOptimization` often results in
+        // a `since` very close to "now", which prevents backfilling recent notes for those newly
+        // favorited authors. For the first favorites subscription, disable the optimization so we
+        // get immediate history.
+        let shouldBackfill = lastFavoritesCount == 0
+        let streamMode: NostrNetworkManager.StreamMode =
+            shouldBackfill
+            ? .ndbAndNetworkParallel(networkOptimization: nil)
+            : .ndbAndNetworkParallel(networkOptimization: .sinceOptimization)
+
+        favoritesHandlerTask = Task {
+            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: [favorites_filter], streamMode: streamMode) {
                 switch item {
                 case .event(let lender):
                     await lender.justUseACopy({ await self.insert_favorite_event($0) })
@@ -760,6 +788,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
                 }
             }
         }
+        lastFavoritesCount = all_favorites.count
     }
 
     @MainActor
