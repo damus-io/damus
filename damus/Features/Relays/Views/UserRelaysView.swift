@@ -31,6 +31,7 @@ struct UserRelaysView: View {
             RelayView(state: state, relay: r, showActionButtons: .constant(true), recommended: true)
         }
         .listStyle(PlainListStyle())
+        .padding(.bottom, tabHeight)
         .navigationBarTitle(NSLocalizedString("Relays", comment: "Navigation bar title that shows the list of relays for a user."))
     }
 }
