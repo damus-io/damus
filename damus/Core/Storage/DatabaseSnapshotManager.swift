@@ -25,7 +25,7 @@ actor DatabaseSnapshotManager {
     private static let temporarySnapshotDirectoryPrefix = "snapshot_temp_"
 
     /// Maximum age for temporary snapshot directories before they are considered stale.
-    private static let staleTemporarySnapshotLifetime: TimeInterval = 60 * 60 * 24
+    private static let staleTemporarySnapshotLifetime: TimeInterval = 60 * 30    // 30 minutes
     
     /// Key for storing last snapshot timestamp in UserDefaults
     private static let lastSnapshotDateKey = "lastDatabaseSnapshotDate"
