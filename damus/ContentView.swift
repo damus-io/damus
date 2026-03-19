@@ -131,6 +131,7 @@ struct ContentView: View {
     @State var confirm_overwrite_mutelist: Bool = false
     @State private var isSideBarOpened = false
     @State var headerOffset: CGFloat = 0.0
+    @State private var postingTimelineSource: TimelineSource = .follows
     var home: HomeModel = HomeModel()
     @StateObject var navigationCoordinator: NavigationCoordinator = NavigationCoordinator()
     @AppStorage("has_seen_suggested_users") private var hasSeenOnboardingSuggestions = false
@@ -186,7 +187,7 @@ struct ContentView: View {
                 }
                 
             case .home:
-                PostingTimelineView(damus_state: damus_state!, home: home, homeEvents: home.events, isSideBarOpened: $isSideBarOpened, active_sheet: $active_sheet, headerOffset: $headerOffset)
+                PostingTimelineView(damus_state: damus_state!, home: home, homeEvents: home.events, isSideBarOpened: $isSideBarOpened, active_sheet: $active_sheet, headerOffset: $headerOffset, timeline_source: $postingTimelineSource)
                 
             case .notifications:
                 NotificationsView(state: damus, notifications: home.notifications, subtitle: $menu_subtitle)

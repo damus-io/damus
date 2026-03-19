@@ -83,6 +83,10 @@ class HomeModel: ContactsDelegate, ObservableObject {
     var notification_status = NotificationStatusModel()
     var events: EventHolder = EventHolder()
     var favoriteEvents: EventHolder = EventHolder()
+    /// Tracks the set of favorited pubkeys from the last `subscribe_to_favorites()` call.
+    /// Used to detect when new authors are added so we can skip `sinceOptimization`
+    /// (ndb may lack their history). Cleared when favorites become empty.
+    private var previousFavorites: Set<Pubkey> = []
     var already_reposted: Set<NoteId> = Set()
     var zap_button: ZapButtonModel = ZapButtonModel()
     
@@ -738,7 +742,17 @@ class HomeModel: ContactsDelegate, ObservableObject {
         guard damus_state.settings.enable_favourites_feature else { return }
 
         let all_favorites = Array(damus_state.contactCards.favorites)
-        guard !all_favorites.isEmpty else { return }
+
+        // Filter out events from users who are no longer favorites,
+        // keeping existing events for users who are still favorites.
+        self.favoriteEvents.filter { all_favorites.contains($0.pubkey) }
+        refreshFavoriteFilteredHolders()
+
+        guard !all_favorites.isEmpty else {
+            self.favoritesHandlerTask?.cancel()
+            previousFavorites = []
+            return
+        }
 
         var home_filter_kinds: [NostrKind] = [.text, .longform, .boost, .highlight]
         if !damus_state.settings.onlyzaps_mode {
@@ -749,24 +763,67 @@ class HomeModel: ContactsDelegate, ObservableObject {
         favorites_filter.authors = all_favorites
         favorites_filter.limit = 500
 
+        // Skip sinceOptimization when new authors were added, since ndb may not have
+        // their history and the `since` timestamp would be based on other authors' events.
+        let currentFavorites = Set(all_favorites)
+        let hasNewAuthors = !currentFavorites.isSubset(of: previousFavorites)
+        let streamMode: NostrNetworkManager.StreamMode =
+            hasNewAuthors
+            ? .ndbAndNetworkParallel(networkOptimization: nil)
+            : .ndbAndNetworkParallel(networkOptimization: .sinceOptimization)
+
+        previousFavorites = currentFavorites
+
+        // Temporarily disable queuing so the initial batch of events from the
+        // new subscription goes directly into `events` instead of `incoming`.
+        // Once the initial load completes (eose), re-enable queuing.
+        // Capture the original state before any prior call may have disabled it,
+        // so rapid resubscriptions don't permanently leave queuing off.
+        let shouldRestoreQueuing = self.favoriteEvents.should_queue
+        self.favoriteEvents.set_should_queue(false)
+
         self.favoritesHandlerTask?.cancel()
         self.favoritesHandlerTask = Task {
-            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: [favorites_filter], streamMode: .ndbAndNetworkParallel(networkOptimization: .sinceOptimization)) {
+            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: [favorites_filter], streamMode: streamMode) {
                 switch item {
                 case .event(let lender):
                     await lender.justUseACopy({ await self.insert_favorite_event($0) })
-                case .eose, .ndbEose, .networkEose:
+                case .ndbEose:
+                    self.refreshFavoriteFilteredHolders()
+                case .eose:
+                    self.refreshFavoriteFilteredHolders()
+                    // Only re-enable queuing after network EOSE so the full
+                    // initial load (including network-only events) is visible.
+                    if shouldRestoreQueuing {
+                        self.favoriteEvents.set_should_queue(true)
+                    }
+                case .networkEose:
                     break
                 }
             }
         }
     }
 
+    /// Updates all filtered holders with the current favorite events.
+    @MainActor
+    private func refreshFavoriteFilteredHolders() {
+        for (_, filteredHolder) in favoriteEvents.filteredHolders {
+            filteredHolder.update(events: favoriteEvents.events)
+        }
+    }
+
+    /// Inserts a favorite event into the holder and mirrors it to the global cache.
+    /// Rejects events from authors no longer in the favorites list (e.g. in-flight
+    /// events arriving after a favorite was removed and the stream cancelled).
     @MainActor
     func insert_favorite_event(_ ev: NostrEvent) {
         guard should_show_event(state: damus_state, ev: ev) else { return }
-        damus_state.events.insert(ev)
-        favoriteEvents.insert(ev)
+        guard damus_state.contactCards.favorites.contains(ev.pubkey) else { return }
+        // Only add to the global event cache if the event is new to the holder
+        let inserted = favoriteEvents.insert(ev)
+        if inserted {
+            damus_state.events.insert(ev)
+        }
     }
 
     /// Adapter pattern to make migration easier
