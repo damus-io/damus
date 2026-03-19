@@ -16,12 +16,21 @@ struct GIFPickerView: View {
 
     @StateObject private var viewModel: GIFSearchModel
     @State private var searchText: String = ""
+    @State private var friend_filter: FriendFilter = .all
     @FocusState private var isSearchFocused: Bool
 
     init(damus_state: DamusState, onGIFSelected: @escaping (URL) -> Void) {
         self.damus_state = damus_state
         self.onGIFSelected = onGIFSelected
         _viewModel = StateObject(wrappedValue: GIFSearchModel(damus_state: damus_state))
+    }
+
+    private var filteredGIFs: [DiscoveredGIF] {
+        viewModel.gifs.filter { gif in
+            // Bootstrap GIFs (nil pubkey) always pass through
+            guard let pubkey = gif.pubkey else { return true }
+            return friend_filter.filter(contacts: damus_state.contacts, pubkey: pubkey)
+        }
     }
 
     var body: some View {
@@ -33,9 +42,9 @@ struct GIFPickerView: View {
 
                 Divider()
 
-                if viewModel.loading && viewModel.gifs.isEmpty {
+                if viewModel.loading && filteredGIFs.isEmpty {
                     loadingView
-                } else if viewModel.gifs.isEmpty && !viewModel.loading {
+                } else if filteredGIFs.isEmpty && !viewModel.loading {
                     emptyView
                 } else {
                     gifGrid
@@ -48,6 +57,9 @@ struct GIFPickerView: View {
                     Button(NSLocalizedString("Cancel", comment: "Button to cancel GIF selection")) {
                         dismiss()
                     }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    TrustedNetworkButton(filter: $friend_filter)
                 }
             }
         }
@@ -95,7 +107,7 @@ struct GIFPickerView: View {
                 GridItem(.flexible(), spacing: 4),
                 GridItem(.flexible(), spacing: 4)
             ], spacing: 4) {
-                ForEach(viewModel.gifs) { gif in
+                ForEach(filteredGIFs) { gif in
                     GIFThumbnailView(gif: gif, disable_animation: damus_state.settings.disable_animation)
                         .onTapGesture {
                             onGIFSelected(gif.url)
@@ -105,7 +117,7 @@ struct GIFPickerView: View {
             }
             .padding(4)
 
-            if viewModel.loading && !viewModel.gifs.isEmpty {
+            if viewModel.loading && !filteredGIFs.isEmpty {
                 ProgressView()
                     .padding()
             }

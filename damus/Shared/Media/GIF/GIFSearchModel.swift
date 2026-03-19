@@ -15,13 +15,15 @@ struct DiscoveredGIF: Identifiable, Equatable {
     let thumbURL: URL?
     let dim: ImageMetaDim?
     let alt: String?
+    let pubkey: Pubkey?
 
-    init(eventID: NoteId, url: URL, thumbURL: URL? = nil, dim: ImageMetaDim? = nil, alt: String? = nil) {
-        self.id = eventID.hex()
+    init(eventID: NoteId, url: URL, thumbURL: URL? = nil, dim: ImageMetaDim? = nil, alt: String? = nil, pubkey: Pubkey? = nil) {
+        self.id = url.absoluteString
         self.url = url
         self.thumbURL = thumbURL
         self.dim = dim
         self.alt = alt
+        self.pubkey = pubkey
     }
 
     init(url: URL) {
@@ -30,6 +32,7 @@ struct DiscoveredGIF: Identifiable, Equatable {
         self.thumbURL = nil
         self.dim = nil
         self.alt = nil
+        self.pubkey = nil
     }
 }
 
@@ -41,8 +44,8 @@ class GIFSearchModel: ObservableObject {
     @Published var loading: Bool = false
 
     private let damus_state: DamusState
+    private var loadTask: Task<Void, Never>?
     private var searchTask: Task<Void, any Error>?
-    private var scourTask: Task<Void, any Error>?
     private var seenURLs = Set<String>()
 
     init(damus_state: DamusState) {
@@ -58,14 +61,13 @@ class GIFSearchModel: ObservableObject {
 
         // Seed with bootstrap catalog immediately
         loadBootstrapGIFs()
+        loading = true
 
-        searchTask = Task {
-            self.loading = true
-            await self.queryFileMetadata(limit: limit)
-        }
-
-        scourTask = Task {
-            await self.scourKind1ForGIFs(limit: limit)
+        let hideNSFW = damus_state.settings.hide_nsfw_tagged_content
+        loadTask = Task {
+            async let metadata: Void = self.queryFileMetadata(limit: limit, hideNSFW: hideNSFW)
+            async let scour: Void = self.scourKind1ForGIFs(limit: limit, hideNSFW: hideNSFW)
+            _ = await (metadata, scour)
             self.loading = false
         }
     }
@@ -80,6 +82,7 @@ class GIFSearchModel: ObservableObject {
         seenURLs.removeAll()
         gifs.removeAll()
 
+        let hideNSFW = damus_state.settings.hide_nsfw_tagged_content
         searchTask = Task {
             self.loading = true
 
@@ -89,16 +92,16 @@ class GIFSearchModel: ObservableObject {
             filter.until = UInt32(Date.now.timeIntervalSince1970)
             filter.hashtag = [query.lowercased()]
 
-            await self.streamFilter(filter)
+            await self.streamFilter(filter, hideNSFW: hideNSFW)
             self.loading = false
         }
     }
 
     func cancel() {
+        loadTask?.cancel()
+        loadTask = nil
         searchTask?.cancel()
         searchTask = nil
-        scourTask?.cancel()
-        scourTask = nil
         loading = false
     }
 
@@ -118,16 +121,16 @@ class GIFSearchModel: ObservableObject {
 
     // MARK: - Kind 1063 query
 
-    private func queryFileMetadata(limit: UInt32) async {
+    private func queryFileMetadata(limit: UInt32, hideNSFW: Bool) async {
         var filter = NostrFilter(kinds: [.file_metadata])
         filter.mime_types = ["image/gif"]
         filter.limit = limit
         filter.until = UInt32(Date.now.timeIntervalSince1970)
 
-        await streamFilter(filter)
+        await streamFilter(filter, hideNSFW: hideNSFW)
     }
 
-    private func streamFilter(_ filter: NostrFilter) async {
+    private func streamFilter(_ filter: NostrFilter, hideNSFW: Bool) async {
         let to_relays = await damus_state.nostrNetwork.ourRelayDescriptors
             .map { $0.url }
             .filter { !damus_state.relay_filters.is_filtered(timeline: .search, relay_id: $0) }
@@ -139,47 +142,17 @@ class GIFSearchModel: ObservableObject {
             switch item {
             case .event(let lender):
                 await lender.justUseACopy({ ev in
-                    await self.handleFileMetadataEvent(ev)
+                    await self.processFileMetadataEvent(ev, hideNSFW: hideNSFW)
                 })
-            case .eose:
-                break
-            case .ndbEose:
-                break
-            case .networkEose:
+            case .eose, .ndbEose, .networkEose:
                 break
             }
         }
     }
 
-    @MainActor
-    private func handleFileMetadataEvent(_ ev: NostrEvent) {
-        guard ev.known_kind == .file_metadata else { return }
-
-        // Filter NSFW content when the user preference is set
-        if damus_state.settings.hide_nsfw_tagged_content && event_has_content_warning(ev) {
-            return
-        }
-
-        guard let meta = decode_file_metadata(from: ev), meta.isGIF else {
-            return
-        }
-
-        let urlKey = meta.url.absoluteString
-        guard !seenURLs.contains(urlKey) else { return }
-
-        seenURLs.insert(urlKey)
-        gifs.append(DiscoveredGIF(
-            eventID: ev.id,
-            url: meta.url,
-            thumbURL: meta.thumbURL ?? meta.imageURL,
-            dim: meta.dim,
-            alt: meta.alt ?? meta.summary
-        ))
-    }
-
     // MARK: - Kind:1 GIF URL scour
 
-    private func scourKind1ForGIFs(limit: UInt32) async {
+    private func scourKind1ForGIFs(limit: UInt32, hideNSFW: Bool) async {
         var filter = NostrFilter(kinds: [.text])
         filter.limit = limit
         filter.until = UInt32(Date.now.timeIntervalSince1970)
@@ -195,7 +168,7 @@ class GIFSearchModel: ObservableObject {
             switch item {
             case .event(let lender):
                 await lender.justUseACopy({ ev in
-                    await self.extractGIFsFromNote(ev)
+                    await self.processKind1Event(ev, hideNSFW: hideNSFW)
                 })
             case .eose, .ndbEose, .networkEose:
                 break
@@ -203,23 +176,57 @@ class GIFSearchModel: ObservableObject {
         }
     }
 
-    @MainActor
-    private func extractGIFsFromNote(_ ev: NostrEvent) {
+    // MARK: - Nonisolated event parsing (off MainActor)
+
+    /// Parse kind 1063 file metadata off the main thread, then commit result on MainActor.
+    nonisolated private func processFileMetadataEvent(_ ev: NostrEvent, hideNSFW: Bool) async {
+        guard ev.known_kind == .file_metadata else { return }
+        if hideNSFW && event_has_content_warning(ev) { return }
+        guard let meta = decode_file_metadata(from: ev), meta.isGIF else { return }
+
+        let gif = DiscoveredGIF(
+            eventID: ev.id,
+            url: meta.url,
+            thumbURL: meta.thumbURL ?? meta.imageURL,
+            dim: meta.dim,
+            alt: meta.alt ?? meta.summary,
+            pubkey: ev.pubkey
+        )
+        await self.commitGIF(gif)
+    }
+
+    /// Parse kind:1 note content for GIF URLs off the main thread, then commit on MainActor.
+    nonisolated private func processKind1Event(_ ev: NostrEvent, hideNSFW: Bool) async {
         guard ev.known_kind == .text else { return }
+        if hideNSFW && event_has_content_warning(ev) { return }
+        guard let blocks = parse_post_blocks(content: ev.content)?.blocks else { return }
 
-        guard let blocks = parse_post_blocks(content: ev.content)?.blocks else {
-            return
-        }
-
+        let pubkey = ev.pubkey
+        let eventID = ev.id
+        var parsed: [DiscoveredGIF] = []
         for block in blocks {
             guard case .url(let url) = block else { continue }
             guard url_is_gif(url) else { continue }
+            parsed.append(DiscoveredGIF(eventID: eventID, url: url, pubkey: pubkey))
+        }
 
-            let urlKey = url.absoluteString
-            guard !seenURLs.contains(urlKey) else { continue }
+        if !parsed.isEmpty {
+            await self.commitGIFs(parsed)
+        }
+    }
 
-            seenURLs.insert(urlKey)
-            gifs.append(DiscoveredGIF(eventID: ev.id, url: url))
+    // MARK: - State mutations (MainActor)
+
+    private func commitGIF(_ gif: DiscoveredGIF) {
+        let urlKey = gif.url.absoluteString
+        guard !seenURLs.contains(urlKey) else { return }
+        seenURLs.insert(urlKey)
+        gifs.append(gif)
+    }
+
+    private func commitGIFs(_ newGIFs: [DiscoveredGIF]) {
+        for gif in newGIFs {
+            commitGIF(gif)
         }
     }
 }
