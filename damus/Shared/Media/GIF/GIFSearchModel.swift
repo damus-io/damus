@@ -126,6 +126,11 @@ class GIFSearchModel: ObservableObject {
         guard ev.known_kind == .file_metadata else { return }
         guard !seenIDs.contains(ev.id) else { return }
 
+        // Filter NSFW content when the user preference is set
+        if damus_state.settings.hide_nsfw_tagged_content && event_has_content_warning(ev) {
+            return
+        }
+
         guard let meta = decode_file_metadata(from: ev), meta.isGIF else {
             return
         }
@@ -207,4 +212,19 @@ class GIFSearchModel: ObservableObject {
 func url_is_gif(_ url: URL) -> Bool {
     let ext = url.pathExtension.lowercased()
     return ext == "gif"
+}
+
+/// Check if an event has a content-warning tag (NIP-36) or #nsfw hashtag.
+func event_has_content_warning(_ ev: NostrEvent) -> Bool {
+    for tag in ev.tags {
+        guard tag.count >= 1 else { continue }
+        let key = tag[0].string()
+        if key == "content-warning" {
+            return true
+        }
+        if key == "t" && tag.count >= 2 && tag[1].string().lowercased() == "nsfw" {
+            return true
+        }
+    }
+    return false
 }
