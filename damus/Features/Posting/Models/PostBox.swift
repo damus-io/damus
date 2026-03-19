@@ -34,12 +34,15 @@ class PostedEvent {
     let flush_after: Date?
     var flushed_once: Bool
     let on_flush: OnFlush?
+    let is_targeted: Bool
+    var inboxDeliveryDispatched: Bool = false
 
-    init(event: NostrEvent, remaining: [RelayURL], skip_ephemeral: Bool, flush_after: Date?, on_flush: OnFlush?) {
+    init(event: NostrEvent, remaining: [RelayURL], skip_ephemeral: Bool, flush_after: Date?, on_flush: OnFlush?, is_targeted: Bool = false) {
         self.event = event
         self.skip_ephemeral = skip_ephemeral
         self.flush_after = flush_after
         self.on_flush = on_flush
+        self.is_targeted = is_targeted
         self.flushed_once = false
         self.remaining = remaining.map {
             Relayer(relay: $0, attempts: 0, retry_after: 10.0)
@@ -55,10 +58,12 @@ enum CancelSendErr {
 
 actor PostBox {
     private let pool: RelayPool
+    private let ndb: Ndb?
     var events: [NoteId: PostedEvent]
 
-    init(pool: RelayPool) {
+    init(pool: RelayPool, ndb: Ndb? = nil) {
         self.pool = pool
+        self.ndb = ndb
         self.events = [:]
         Task {
             let stream = AsyncStream<(RelayURL, NostrConnectionEvent)> { streamContinuation in
@@ -152,7 +157,7 @@ actor PostBox {
         if let to_relay {
             relayers = [to_relay]
         }
-        
+
         for relayer in relayers {
             relayer.attempts += 1
             relayer.last_attempt = Int64(Date().timeIntervalSince1970)
@@ -163,6 +168,22 @@ actor PostBox {
                 print("could not find relay when flushing: \(relayer.relay)")
             }
             await pool.send(.event(event.event), to: [relayer.relay], skip_ephemeral: event.skip_ephemeral)
+        }
+
+        // On first flush: republish author's relay list and trigger inbox delivery
+        if !event.inboxDeliveryDispatched {
+            event.inboxDeliveryDispatched = true
+
+            // NIP-65: send the author's kind:10002 to the same relays so recipients
+            // can discover how to reach the author.
+            if !event.is_targeted, let ndb = self.ndb {
+                let relayURLs = relayers.map { $0.relay }
+                if let authorRelayList = InboxRelayResolver.lookupRelayListEvent(ndb: ndb, pubkey: event.event.pubkey) {
+                    await pool.send(.event(authorRelayList), to: relayURLs, skip_ephemeral: event.skip_ephemeral)
+                }
+            }
+
+            dispatchInboxDelivery(for: event)
         }
     }
 
@@ -180,13 +201,131 @@ actor PostBox {
             remaining = await pool.our_descriptors.map { $0.url }
         }
         let after = delay.map { d in Date.now.addingTimeInterval(d) }
-        let posted_ev = PostedEvent(event: event, remaining: remaining, skip_ephemeral: skip_ephemeral, flush_after: after, on_flush: on_flush)
+        let posted_ev = PostedEvent(event: event, remaining: remaining, skip_ephemeral: skip_ephemeral, flush_after: after, on_flush: on_flush, is_targeted: to != nil)
 
         events[event.id] = posted_ev
-        
+
         if after == nil {
             await flush_event(posted_ev)
         }
+    }
+
+    // MARK: - NIP-65 Inbox Delivery
+
+    /// Dispatches inbox delivery as a fire-and-forget background task.
+    /// Only dispatches when the event is a normal broadcast (not targeted) with p-tags and ndb is available.
+    private func dispatchInboxDelivery(for posted: PostedEvent) {
+        // Skip targeted sends (e.g. NWC payments to a specific relay)
+        guard !posted.is_targeted else { return }
+        guard let ndb = self.ndb else { return }
+
+        // Only for events with p-tags
+        let event = posted.event
+        var hasPTags = false
+        for _ in event.referenced_pubkeys {
+            hasPTags = true
+            break
+        }
+        guard hasPTags else { return }
+
+        let pool = self.pool
+
+        Task.detached(priority: .utility) {
+            await PostBox.deliverToInboxRelays(event: event, pool: pool, ndb: ndb)
+        }
+    }
+
+    /// Fetches kind:10002 relay lists from the network for any tagged pubkeys missing them in NDB.
+    ///
+    /// Returns parsed relay lists keyed by pubkey for immediate use. Events are also
+    /// ingested into NDB for future cache benefit, but the caller does not depend on
+    /// NDB queryability (avoids both the pool-without-NDB case and the ingester queue race).
+    ///
+    /// Only queries the user's own relays (non-ephemeral) to avoid leaking the pubkey
+    /// set to NWC wallet relays or other ephemeral connections.
+    private static func fetchMissingRelayLists(event: NostrEvent, pool: RelayPool, ndb: Ndb) async -> [Pubkey: NIP65.RelayList] {
+        let missingPubkeys = InboxRelayResolver.pubkeysMissingRelayLists(event: event, ndb: ndb)
+        guard !missingPubkeys.isEmpty else { return [:] }
+
+        #if DEBUG
+        print("[PostBox] Fetching \(missingPubkeys.count) missing relay lists from network")
+        #endif
+
+        // Scope to non-ephemeral relays only (excludes NWC wallet relays)
+        let targetRelays = await pool.our_descriptors.map { $0.url }
+        guard !targetRelays.isEmpty else { return [:] }
+
+        let filter = NostrFilter(kinds: [.relay_list], authors: missingPubkeys)
+        let stream = await pool.subscribeExistingItems(filters: [filter], to: targetRelays, eoseTimeout: .seconds(3))
+
+        // Parse relay lists directly from the stream for immediate use.
+        // Also ingest into NDB so future lookups find them without a network fetch.
+        var fetched: [Pubkey: NIP65.RelayList] = [:]
+        for await receivedEvent in stream {
+            if let relayList = try? NIP65.RelayList(event: receivedEvent) {
+                fetched[receivedEvent.pubkey] = relayList
+            }
+            // Best-effort cache into NDB (may already be ingested by pool.ndb)
+            if let json = encode_json(receivedEvent) {
+                ndb.processEvent("[\"EVENT\",\"fetch\",\(json)]")
+            }
+        }
+        return fetched
+    }
+
+    /// Resolves inbox relays for tagged pubkeys and delivers the event to them.
+    ///
+    /// This is fire-and-forget: failures are logged but never block the normal publish path.
+    static func deliverToInboxRelays(event: NostrEvent, pool: RelayPool, ndb: Ndb) async {
+        // Fetch any missing relay lists from the network before resolving.
+        // Returns parsed relay lists directly — no dependency on NDB queryability.
+        let fetchedRelayLists = await fetchMissingRelayLists(event: event, pool: pool, ndb: ndb)
+
+        // Only exclude relays the event was actually written to (writable relays).
+        // our_descriptors includes read-only relays too, but RelayPool.send skips
+        // writes to those, so they should not be subtracted from inbox fanout.
+        let authorRelays = await Set(pool.our_descriptors.filter { $0.info.canWrite }.map { $0.url })
+        let inboxRelays = InboxRelayResolver.resolveInboxRelays(event: event, ndb: ndb, excludeRelays: authorRelays, additionalRelayLists: fetchedRelayLists)
+
+        guard !inboxRelays.isEmpty else { return }
+
+        #if DEBUG
+        print("[PostBox] Inbox delivery: sending to \(inboxRelays.map { $0.absoluteString })")
+        #endif
+
+        // Acquire ephemeral leases so the relays aren't cleaned up while we send
+        await pool.acquireEphemeralRelays(inboxRelays)
+
+        // Connect (adds as ephemeral if not already present) and wait up to 2s
+        let connected = await pool.ensureConnected(to: inboxRelays)
+
+        guard !connected.isEmpty else {
+            #if DEBUG
+            print("[PostBox] Inbox delivery: no relays connected, skipping")
+            #endif
+            await pool.releaseEphemeralRelays(inboxRelays)
+            return
+        }
+
+        // Send the event to connected inbox relays
+        await pool.send(.event(event), to: connected, skip_ephemeral: false)
+
+        // Also send the author's kind:10002 relay list if available (NIP-65 republish requirement)
+        if let authorRelayListEvent = InboxRelayResolver.lookupRelayListEvent(ndb: ndb, pubkey: event.pubkey) {
+            await pool.send(.event(authorRelayListEvent), to: connected, skip_ephemeral: false)
+        }
+
+        #if DEBUG
+        print("[PostBox] Inbox delivery: sent to \(connected.count) relays, waiting grace period")
+        #endif
+
+        // Grace period before releasing ephemeral leases
+        try? await Task.sleep(for: .seconds(5))
+        await pool.releaseEphemeralRelays(inboxRelays)
+
+        #if DEBUG
+        print("[PostBox] Inbox delivery: released ephemeral leases")
+        #endif
     }
 }
 

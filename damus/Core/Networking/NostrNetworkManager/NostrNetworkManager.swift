@@ -53,7 +53,7 @@ class NostrNetworkManager {
         let userRelayList = UserRelayListManager(delegate: delegate, pool: pool, reader: reader)
         self.reader = reader
         self.userRelayList = userRelayList
-        self.postbox = PostBox(pool: pool)
+        self.postbox = PostBox(pool: pool, ndb: delegate.ndb)
         self.profilesManager = ProfilesManager(subscriptionManager: reader, ndb: delegate.ndb)
     }
     
