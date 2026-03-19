@@ -124,6 +124,8 @@ struct NotificationsView: View {
                     }
                 )
             }
+            .hideToolbarBackground()
+            
             ToolbarItem(placement: .navigationBarTrailing) {
                 if showTrustedButton {
                     TrustedNetworkButton(filter: $filter.friend_filter) {
@@ -133,6 +135,7 @@ struct NotificationsView: View {
                     }
                 }
             }
+            .hideToolbarBackground()
         }
         .onChange(of: filter.friend_filter) { val in
             state.settings.friend_filter = val

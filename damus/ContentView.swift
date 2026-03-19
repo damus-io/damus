@@ -254,6 +254,7 @@ struct ContentView: View {
                                 ToolbarItem(placement: .navigationBarLeading) {
                                     TopbarSideMenuButton(damus_state: damus, isSideBarOpened: $isSideBarOpened)
                                 }
+                                .hideToolbarBackground()
                                 
                                 ToolbarItem(placement: .navigationBarTrailing) {
                                     HStack(alignment: .center) {
@@ -271,6 +272,7 @@ struct ContentView: View {
                                         }
                                     }
                                 }
+                                .hideToolbarBackground()
                             }
                     }
                     .background(DamusColors.adaptableWhite)
