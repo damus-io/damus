@@ -111,7 +111,10 @@ class UserSettingsStore: ObservableObject {
     
     @StringSetting(key: "default_media_uploader", default_value: .nostrBuild)
     var default_media_uploader: MediaUploader
-    
+
+    @Setting(key: "blossom_server_url", default_value: "https://blossom.nostr.build")
+    var blossom_server_url: String
+
     @Setting(key: "show_wallet_selector", default_value: false)
     var show_wallet_selector: Bool
     

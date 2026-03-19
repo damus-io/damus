@@ -7,21 +7,27 @@
 
 import Foundation
 
-protocol MediaUploaderProtocol: Identifiable {    
+protocol MediaUploaderProtocol: Identifiable {
     var nameParam: String { get }
     var mediaTypeParam: String { get }
     var supportsVideo: Bool { get }
     var requiresNip98: Bool { get }
     var postAPI: String { get }
-    
+    var isBlossom: Bool { get }
+
     func getMediaURL(from data: Data) -> String?
     func mediaTypeValue(for mediaType: ImageUploadMediaType) -> String?
+}
+
+extension MediaUploaderProtocol {
+    var isBlossom: Bool { false }
 }
 
 enum MediaUploader: String, CaseIterable, MediaUploaderProtocol, StringCodable {
     var id: String { self.rawValue }
     case nostrBuild
     case nostrcheck
+    case blossom
     
     init?(from string: String) {
         guard let mu = MediaUploader(rawValue: string) else {
@@ -39,6 +45,8 @@ enum MediaUploader: String, CaseIterable, MediaUploaderProtocol, StringCodable {
         switch self {
         case .nostrBuild:
             return "\"fileToUpload\""
+        case .blossom:
+            return "" // Blossom uses raw binary PUT, not multipart
         default:
             return "\"file\""
         }
@@ -58,19 +66,14 @@ enum MediaUploader: String, CaseIterable, MediaUploaderProtocol, StringCodable {
     }
     
     var supportsVideo: Bool {
-        switch self {
-        case .nostrBuild:
-            return true
-        case .nostrcheck:
-            return true
-        }
+        return true
     }
-    
+
     var requiresNip98: Bool {
         switch self {
-        case .nostrBuild:
-            return true
-        case .nostrcheck:
+        case .blossom:
+            return false // Blossom uses kind 24242 auth, not NIP-98
+        default:
             return true
         }
     }
@@ -88,16 +91,25 @@ enum MediaUploader: String, CaseIterable, MediaUploaderProtocol, StringCodable {
             return .init(index: -1, tag: "nostrBuild", displayName: "nostr.build")
         case .nostrcheck:
             return .init(index: 0, tag: "nostrcheck", displayName: "nostrcheck.me")
+        case .blossom:
+            return .init(index: 1, tag: "blossom", displayName: "Blossom")
         }
     }
-    
+
     var postAPI: String {
         switch self {
         case .nostrBuild:
             return "https://nostr.build/api/v2/nip96/upload"
         case .nostrcheck:
             return "https://nostrcheck.me/api/v2/media"
+        case .blossom:
+            return "" // Blossom server URL is user-configured
         }
+    }
+
+    var isBlossom: Bool {
+        if case .blossom = self { return true }
+        return false
     }
     
     func getMediaURL(from data: Data) -> String? {
