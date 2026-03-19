@@ -10,16 +10,31 @@ import Foundation
 
 /// A single discovered GIF with its metadata.
 struct DiscoveredGIF: Identifiable, Equatable {
-    let id: NoteId
+    let id: String
     let url: URL
     let thumbURL: URL?
     let dim: ImageMetaDim?
     let alt: String?
-    let pubkey: Pubkey
-    let createdAt: UInt32
+
+    init(eventID: NoteId, url: URL, thumbURL: URL? = nil, dim: ImageMetaDim? = nil, alt: String? = nil) {
+        self.id = eventID.hex()
+        self.url = url
+        self.thumbURL = thumbURL
+        self.dim = dim
+        self.alt = alt
+    }
+
+    init(url: URL) {
+        self.id = url.absoluteString
+        self.url = url
+        self.thumbURL = nil
+        self.dim = nil
+        self.alt = nil
+    }
 }
 
 /// Queries relays for GIFs via kind 1063 metadata events and kind:1 content scouring.
+/// Falls back to a bundled bootstrap catalog when relay results are sparse.
 @MainActor
 class GIFSearchModel: ObservableObject {
     @Published var gifs: [DiscoveredGIF] = []
@@ -28,7 +43,6 @@ class GIFSearchModel: ObservableObject {
     private let damus_state: DamusState
     private var searchTask: Task<Void, any Error>?
     private var scourTask: Task<Void, any Error>?
-    private var seenIDs = Set<NoteId>()
     private var seenURLs = Set<String>()
 
     init(damus_state: DamusState) {
@@ -36,11 +50,14 @@ class GIFSearchModel: ObservableObject {
     }
 
     /// Load GIFs from both kind 1063 metadata events and kind:1 note scouring.
+    /// Immediately shows bootstrap GIFs while relay queries run.
     func load(limit: UInt32 = 200) {
         cancel()
-        seenIDs.removeAll()
         seenURLs.removeAll()
         gifs.removeAll()
+
+        // Seed with bootstrap catalog immediately
+        loadBootstrapGIFs()
 
         searchTask = Task {
             self.loading = true
@@ -60,7 +77,6 @@ class GIFSearchModel: ObservableObject {
             return
         }
         cancel()
-        seenIDs.removeAll()
         seenURLs.removeAll()
         gifs.removeAll()
 
@@ -84,6 +100,20 @@ class GIFSearchModel: ObservableObject {
         scourTask?.cancel()
         scourTask = nil
         loading = false
+    }
+
+    // MARK: - Bootstrap catalog
+
+    @MainActor
+    private func loadBootstrapGIFs() {
+        guard let urls = load_bootstrap_gif_urls() else { return }
+
+        for url in urls.shuffled() {
+            let urlKey = url.absoluteString
+            guard !seenURLs.contains(urlKey) else { continue }
+            seenURLs.insert(urlKey)
+            gifs.append(DiscoveredGIF(url: url))
+        }
     }
 
     // MARK: - Kind 1063 query
@@ -124,7 +154,6 @@ class GIFSearchModel: ObservableObject {
     @MainActor
     private func handleFileMetadataEvent(_ ev: NostrEvent) {
         guard ev.known_kind == .file_metadata else { return }
-        guard !seenIDs.contains(ev.id) else { return }
 
         // Filter NSFW content when the user preference is set
         if damus_state.settings.hide_nsfw_tagged_content && event_has_content_warning(ev) {
@@ -138,16 +167,13 @@ class GIFSearchModel: ObservableObject {
         let urlKey = meta.url.absoluteString
         guard !seenURLs.contains(urlKey) else { return }
 
-        seenIDs.insert(ev.id)
         seenURLs.insert(urlKey)
         gifs.append(DiscoveredGIF(
-            id: ev.id,
+            eventID: ev.id,
             url: meta.url,
             thumbURL: meta.thumbURL ?? meta.imageURL,
             dim: meta.dim,
-            alt: meta.alt ?? meta.summary,
-            pubkey: ev.pubkey,
-            createdAt: ev.created_at
+            alt: meta.alt ?? meta.summary
         ))
     }
 
@@ -180,7 +206,6 @@ class GIFSearchModel: ObservableObject {
     @MainActor
     private func extractGIFsFromNote(_ ev: NostrEvent) {
         guard ev.known_kind == .text else { return }
-        guard !seenIDs.contains(ev.id) else { return }
 
         guard let blocks = parse_post_blocks(content: ev.content)?.blocks else {
             return
@@ -193,20 +218,13 @@ class GIFSearchModel: ObservableObject {
             let urlKey = url.absoluteString
             guard !seenURLs.contains(urlKey) else { continue }
 
-            seenIDs.insert(ev.id)
             seenURLs.insert(urlKey)
-            gifs.append(DiscoveredGIF(
-                id: ev.id,
-                url: url,
-                thumbURL: nil,
-                dim: nil,
-                alt: nil,
-                pubkey: ev.pubkey,
-                createdAt: ev.created_at
-            ))
+            gifs.append(DiscoveredGIF(eventID: ev.id, url: url))
         }
     }
 }
+
+// MARK: - Helpers
 
 /// Check if a URL points to a GIF by file extension.
 func url_is_gif(_ url: URL) -> Bool {
@@ -227,4 +245,15 @@ func event_has_content_warning(_ ev: NostrEvent) -> Bool {
         }
     }
     return false
+}
+
+/// Load the bundled bootstrap GIF URL catalog.
+func load_bootstrap_gif_urls() -> [URL]? {
+    guard let path = Bundle.main.path(forResource: "bootstrap_gifs", ofType: "json"),
+          let data = FileManager.default.contents(atPath: path),
+          let strings = try? JSONDecoder().decode([String].self, from: data)
+    else {
+        return nil
+    }
+    return strings.compactMap { URL(string: $0) }
 }

@@ -1094,6 +1094,7 @@
 		82D6FC882CD9A4DE00C925F4 /* EmojiPicker in Frameworks */ = {isa = PBXBuildFile; productRef = 82D6FC872CD9A4DE00C925F4 /* EmojiPicker */; };
 		82D6FC8A2CD9A54600C925F4 /* SwipeActions in Frameworks */ = {isa = PBXBuildFile; productRef = 82D6FC892CD9A54600C925F4 /* SwipeActions */; };
 		856F5F239001BF162EF0743D /* GIFSearchModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CA21BF809B90C37D67D0EE4 /* GIFSearchModel.swift */; };
+		947C9838F275FC67D78CF280 /* bootstrap_gifs.json in Resources */ = {isa = PBXBuildFile; fileRef = 89FAFC82ACB1357EC91EF987 /* bootstrap_gifs.json */; };
 		953F05D28AA7A5FF4121593D /* MediaServersSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93B93335CDE1A14528658058 /* MediaServersSettingsView.swift */; };
 		9609F058296E220800069BF3 /* BannerImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9609F057296E220800069BF3 /* BannerImageView.swift */; };
 		9C83F89329A937B900136C08 /* TextViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C83F89229A937B900136C08 /* TextViewWrapper.swift */; };
@@ -2779,6 +2780,7 @@
 		82D6FA992CD9820500C925F4 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		82D6FA9E2CD9820500C925F4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		82D6FAA62CD9820500C925F4 /* share extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "share extension.entitlements"; sourceTree = "<group>"; };
+		89FAFC82ACB1357EC91EF987 /* bootstrap_gifs.json */ = {isa = PBXFileReference; includeInIndex = 1; path = bootstrap_gifs.json; sourceTree = "<group>"; };
 		93B93335CDE1A14528658058 /* MediaServersSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MediaServersSettingsView.swift; sourceTree = "<group>"; };
 		9609F057296E220800069BF3 /* BannerImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerImageView.swift; sourceTree = "<group>"; };
 		9C83F89229A937B900136C08 /* TextViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextViewWrapper.swift; sourceTree = "<group>"; };
@@ -5252,6 +5254,7 @@
 			children = (
 				5CFDE6EC2EF4F7AB004E8661 /* GIFPickerView.swift */,
 				1CA21BF809B90C37D67D0EE4 /* GIFSearchModel.swift */,
+				89FAFC82ACB1357EC91EF987 /* bootstrap_gifs.json */,
 			);
 			path = GIF;
 			sourceTree = "<group>";
@@ -5801,6 +5804,7 @@
 				4CF4803F2B631C0100F2B2C0 /* ndb_profile.rs in Resources */,
 				4CF480402B631C0100F2B2C0 /* ndb_meta.rs in Resources */,
 				3A4325A82961E11400BFCD9D /* Localizable.stringsdict in Resources */,
+				947C9838F275FC67D78CF280 /* bootstrap_gifs.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
