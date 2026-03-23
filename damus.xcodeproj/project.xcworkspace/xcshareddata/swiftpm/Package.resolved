@@ -1,5 +1,5 @@
 {
-  "originHash" : "c718c1e7dcc1a07671694b2d7d7311e11804fbbaf22f4b81e49523a3df816ad6",
+  "originHash" : "5c57c08d6affa9d3d22bb9a4f1ed42ad4d4891190ba2da238feb90ca22c05360",
   "pins" : [
     {
       "identity" : "codescanner",
@@ -40,8 +40,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/will-lumley/FaviconFinder.git",
       "state" : {
-        "revision" : "9279f4371f4877ca302ba3bf1015f3f58ae4a56c",
-        "version" : "5.1.4"
+        "revision" : "11c2b27fbdc5fdfe0bf3addac01d27c40299a819",
+        "version" : "5.1.5"
       }
     },
     {
@@ -49,8 +49,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/wxxsw/GSPlayer",
       "state" : {
-        "revision" : "aa6dad7943d52f5207f7fcc2ad3e4274583443b8",
-        "version" : "0.2.26"
+        "revision" : "7a384dee1fbeca02e176de8b4112bfded36f42e0",
+        "version" : "0.2.30"
+      }
+    },
+    {
+      "identity" : "jsonschema.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kylef/JSONSchema.swift.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "8c7ec156dde09715d8d2ed83cc8fe6b1ba90648c"
       }
     },
     {
@@ -58,8 +67,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/onevcat/Kingfisher",
       "state" : {
-        "revision" : "4c6b067f96953ee19526e49e4189403a2be21fb3",
-        "version" : "8.3.1"
+        "revision" : "c92b84898e34ab46ff0dad86c02a0acbe2d87008",
+        "version" : "8.8.0"
       }
     },
     {
@@ -76,8 +85,26 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/rust-nostr/nostr-sdk-swift",
       "state" : {
-        "revision" : "42fe7d379b326583ae8282a5fd7232745f195906",
-        "version" : "0.44.0"
+        "revision" : "0c60d43fe0a92f6e8e3dbde29093a799d5ee6c8c",
+        "version" : "0.44.2"
+      }
+    },
+    {
+      "identity" : "pathkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kylef/PathKit.git",
+      "state" : {
+        "revision" : "3bfd2737b700b9a36565a8c94f4ad2b050a5e574",
+        "version" : "1.0.1"
+      }
+    },
+    {
+      "identity" : "schemata-validator-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/nostrability/schemata-validator-swift.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "23d00c836f6a9bc8c2e9ace2c7b07263e34fbc54"
       }
     },
     {
@@ -89,12 +116,29 @@
       }
     },
     {
+      "identity" : "spectre",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kylef/Spectre.git",
+      "state" : {
+        "revision" : "d02129a9af77729de049d328dd61e530b6f2bb2b"
+      }
+    },
+    {
       "identity" : "swift-collections",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-collections.git",
       "state" : {
-        "revision" : "ee97538f5b81ae89698fd95938896dec5217b148",
-        "version" : "1.1.1"
+        "revision" : "6675bc0ff86e61436e615df6fc5174e043e57924",
+        "version" : "1.4.1"
+      }
+    },
+    {
+      "identity" : "swift-custom-dump",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pointfreeco/swift-custom-dump",
+      "state" : {
+        "revision" : "06c57924455064182d6b217f06ebc05d00cb2990",
+        "version" : "1.5.0"
       }
     },
     {
@@ -110,17 +154,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-snapshot-testing",
       "state" : {
-        "revision" : "5b356adceabff6ca027f6574aac79e9fee145d26",
-        "version" : "1.14.1"
+        "revision" : "05b6f05b55ff9e2dcdcc21ac78c6ba81ea624791",
+        "version" : "1.19.1"
       }
     },
     {
       "identity" : "swift-syntax",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-syntax.git",
+      "location" : "https://github.com/swiftlang/swift-syntax",
       "state" : {
-        "revision" : "74203046135342e4a4a627476dd6caf8b28fe11b",
-        "version" : "509.0.0"
+        "revision" : "4799286537280063c85a32f09884cfbca301b1a1",
+        "version" : "602.0.0"
       }
     },
     {
@@ -137,8 +181,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/scinfu/SwiftSoup.git",
       "state" : {
-        "revision" : "bba848db50462894e7fc0891d018dfecad4ef11e",
-        "version" : "2.8.7"
+        "revision" : "fd541c4b3fa7dcec2e7cfe049505b6e4382cd66b",
+        "version" : "2.13.2"
       }
     },
     {
@@ -155,6 +199,15 @@
       "location" : "https://github.com/damus-io/SwipeActions.git",
       "state" : {
         "revision" : "33d99756c3112e1a07c1732e3cddc5ad5bd0c5f4"
+      }
+    },
+    {
+      "identity" : "xctest-dynamic-overlay",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
+      "state" : {
+        "revision" : "dfd70507def84cb5fb821278448a262c6ff2bbad",
+        "version" : "1.9.0"
       }
     }
   ],
