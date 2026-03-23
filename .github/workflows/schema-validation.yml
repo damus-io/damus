@@ -1,0 +1,15 @@
+name: Schema Validation
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  validate:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run kind-1 schema validation tests
+        run: cd damus/schema-validation && swift test

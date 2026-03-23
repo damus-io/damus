@@ -1,0 +1,49 @@
+{
+  "pins" : [
+    {
+      "identity" : "jsonschema.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kylef/JSONSchema.swift.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "8c7ec156dde09715d8d2ed83cc8fe6b1ba90648c"
+      }
+    },
+    {
+      "identity" : "pathkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kylef/PathKit.git",
+      "state" : {
+        "revision" : "3bfd2737b700b9a36565a8c94f4ad2b050a5e574",
+        "version" : "1.0.1"
+      }
+    },
+    {
+      "identity" : "schemata-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/nostrability/schemata-swift.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "766290bb7e1fca02e003e6b246fd43712cd2c28a"
+      }
+    },
+    {
+      "identity" : "schemata-validator-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/nostrability/schemata-validator-swift.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "971e07bbc15bed013450f81fb760b65514525d2b"
+      }
+    },
+    {
+      "identity" : "spectre",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kylef/Spectre.git",
+      "state" : {
+        "revision" : "d02129a9af77729de049d328dd61e530b6f2bb2b"
+      }
+    }
+  ],
+  "version" : 2
+}
