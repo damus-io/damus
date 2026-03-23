@@ -54,6 +54,8 @@ struct EventView: View {
                 LongformPreview(state: damus, ev: event, options: options)
             } else if event.known_kind == .highlight {
                 HighlightView(state: damus, event: event, options: options)
+            } else if event.known_kind == .spell {
+                SpellCardView(state: damus, event: event, options: options)
             } else {
                 TextEvent(damus: damus, event: event, pubkey: pubkey, options: options, highlightTerms: highlightTerms)
                     //.padding([.top], 6)
