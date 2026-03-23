@@ -71,6 +71,18 @@
             ReferencedContainer = "container:damus.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "RUST_BACKTRACE"
+            value = "full"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "RUST_LOG"
+            value = "trace"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
       <StoreKitConfigurationFileReference
          identifier = "../../Purple.storekit">
       </StoreKitConfigurationFileReference>

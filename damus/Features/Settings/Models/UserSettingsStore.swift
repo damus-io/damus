@@ -401,6 +401,10 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "labs_experiment_gifs", default_value: false)
     var enable_gifs_feature: Bool
     
+    /// Whether the app should show the orange wallet feature
+    @Setting(key: "labs_experiment_orange_wallet", default_value: true)
+    var enable_orange_wallet: Bool
+    
     // MARK: Internal, hidden settings
     
     // TODO: Get rid of this once we have NostrDB query capabilities integrated

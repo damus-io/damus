@@ -7,6 +7,7 @@
 
 import FaviconFinder
 import SwiftUI
+import DamusWallet
 
 enum Route: Hashable {
     case ProfileByKey(pubkey: Pubkey)
@@ -54,7 +55,22 @@ enum Route: Hashable {
     case FollowPack(followPack: NostrEvent, model: FollowPackModel, blur_imgs: Bool)
     case LiveEvents(model: LiveEventModel)
     case LiveEvent(LiveEvent: NostrEvent, model: LiveEventModel)
+    case OrangeWalletWelcome
+    case OrangeWalletSetup
+    case OrangeWalletKeyCustodyConfirmation
+    case OrangeWalletBackupToICloud
+    case OrangeWalletManualBackup
+    case OrangeWalletSeedWordsQuiz
+    case OrangeWalletSetupComplete
+    case OrangeWalletReceive(ReceiveFlowContext)
+    case OrangeWalletReceiveAmountEntry(ReceiveFlowContext)
+    case OrangeWalletReceiveConfirmation(ReceiveFlowContext)
+    case OrangeWalletSendScan(SendFlowContext)
+    case OrangeWalletSendAmountEntry(SendFlowContext)
+    case OrangeWalletSendReview(SendFlowContext)
+    case OrangeWalletSendConfirmation(SendFlowContext)
 
+    @MainActor
     @ViewBuilder
     func view(navigationCoordinator: NavigationCoordinator, damusState: DamusState) -> some View {
         switch self {
@@ -149,6 +165,64 @@ enum Route: Hashable {
             LiveStreamHomeView(damus_state: damusState, model: model)
         case .LiveEvent(let liveEvent, let liveEventModel):
             LiveStreamView(state: damusState, ev: liveEvent, model: liveEventModel)
+        case .OrangeWalletWelcome:
+            let model = HomeView.ViewModel.init(
+                navigationCoordinator: navigationCoordinator,
+                walletProvider: damusState.orangeWallet,
+                priceManager: navigationCoordinator.bitcoinPriceManager
+            )
+            HomeView(model: model)
+        case .OrangeWalletSetup:
+            let model = CreateNewWalletView.ViewModel.init(navigationCoordinator: navigationCoordinator, walletProvider: damusState.orangeWallet)
+            CreateNewWalletView(model: model)
+        case .OrangeWalletKeyCustodyConfirmation:
+            let model = KeyCustodyConfirmationView.ViewModel.init(navigationCoordinator: navigationCoordinator)
+            KeyCustodyConfirmationView(viewModel: model)
+        case .OrangeWalletBackupToICloud:
+            let model = BackupToICloudView.ViewModel.init(navigationCoordinator: navigationCoordinator, walletProvider: damusState.orangeWallet)
+            BackupToICloudView(model: model)
+        case .OrangeWalletManualBackup:
+            let model = ManualBackupView.ViewModel.init(navigationCoordinator: navigationCoordinator, walletProvider: damusState.orangeWallet)
+            ManualBackupView(model: model)
+        case .OrangeWalletSeedWordsQuiz:
+            let model = SeedWordsQuizView.ViewModel.init(navigationCoordinator: navigationCoordinator, walletProvider: damusState.orangeWallet)
+            SeedWordsQuizView(model: model)
+        case .OrangeWalletSetupComplete:
+            let model = SetupCompleteView.ViewModel.init(navigationCoordinator: navigationCoordinator)
+            SetupCompleteView(model: model)
+        case .OrangeWalletReceive(let receiveFlowContext):
+            let model = ReceiveView.ViewModel.init(
+                flow: receiveFlowContext,
+                navigationCoordinator: navigationCoordinator,
+                walletProvider: damusState.orangeWallet,
+                priceManager: navigationCoordinator.bitcoinPriceManager
+            )
+            ReceiveView(model: model)
+        case .OrangeWalletReceiveAmountEntry(let receiveFlowContext):
+            let model = ReceiveAmountEntryView.ViewModel(
+                flow: receiveFlowContext,
+                navigationCoordinator: navigationCoordinator,
+                amountModel: AmountInputModel.make(priceManager: navigationCoordinator.bitcoinPriceManager)
+            )
+            ReceiveAmountEntryView(model: model)
+        case .OrangeWalletReceiveConfirmation(let receiveFlowContext):
+            let model = ReceiveConfirmationView.ViewModel(
+                flow: receiveFlowContext,
+                navigationCoordinator: navigationCoordinator
+            )
+            ReceiveConfirmationView(model: model)
+        case .OrangeWalletSendScan(let sendFlowContext):
+            SendScanView(model: .init(flow: sendFlowContext, navigationCoordinator: navigationCoordinator, walletProvider: damusState.orangeWallet, priceManager: navigationCoordinator.bitcoinPriceManager))
+        case .OrangeWalletSendAmountEntry(let sendFlowContext):
+            SendAmountEntryView(model: .init(
+                flow: sendFlowContext,
+                navigationCoordinator: navigationCoordinator,
+                amountModel: AmountInputModel.make(priceManager: navigationCoordinator.bitcoinPriceManager)
+            ))
+        case .OrangeWalletSendReview(let sendFlowContext):
+            SendReviewView(model: .init(flow: sendFlowContext, navigationCoordinator: navigationCoordinator, walletProvider: damusState.orangeWallet, priceManager: navigationCoordinator.bitcoinPriceManager))
+        case .OrangeWalletSendConfirmation(let sendFlowContext):
+            SendConfirmationView(model: .init(flow: sendFlowContext, navigationCoordinator: navigationCoordinator))
         }
         
     }
@@ -273,12 +347,46 @@ enum Route: Hashable {
         case .LiveEvent(let liveEvent, let liveEventModel):
             hasher.combine("liveEvent")
             hasher.combine(liveEvent.id)
+        case .OrangeWalletWelcome:
+            hasher.combine("orangeWalletWelcome")
+        case .OrangeWalletSetup:
+            hasher.combine("orangeWalletSetup")
+        case .OrangeWalletKeyCustodyConfirmation:
+            hasher.combine("orangeWalletKeyCustodyConfirmation")
+        case .OrangeWalletBackupToICloud:
+            hasher.combine("orangeWalletBackupToICloud")
+        case .OrangeWalletManualBackup:
+            hasher.combine("orangeWalletManualBackup")
+        case .OrangeWalletSeedWordsQuiz:
+            hasher.combine("orangeWalletSeedWordsQuiz")
+        case .OrangeWalletSetupComplete:
+            hasher.combine("orangeWalletSetupComplete")
+        case .OrangeWalletReceive:
+            hasher.combine("orangeWalletReceive")
+        case .OrangeWalletReceiveAmountEntry:
+            hasher.combine("orangeWalletReceiveAmountEntry")
+        case .OrangeWalletReceiveConfirmation:
+            hasher.combine("orangeWalletReceiveConfirmation")
+        case .OrangeWalletSendScan:
+            hasher.combine("orangeWalletSendScan")
+        case .OrangeWalletSendAmountEntry:
+            hasher.combine("orangeWalletSendAmountEntry")
+        case .OrangeWalletSendReview:
+            hasher.combine("orangeWalletSendReview")
+        case .OrangeWalletSendConfirmation:
+            hasher.combine("orangeWalletSendConfirmation")
         }
     }
 }
 
 class NavigationCoordinator: ObservableObject {
+    @MainActor let bitcoinPriceManager: BitcoinPriceManager
     @Published var path = [Route]()
+
+    @MainActor
+    init(bitcoinPriceManager: BitcoinPriceManager? = nil) {
+        self.bitcoinPriceManager = bitcoinPriceManager ?? BitcoinPriceManager()
+    }
 
     func push(route: Route) {
         guard route != path.last else {
@@ -293,5 +401,192 @@ class NavigationCoordinator: ObservableObject {
 
     func popToRoot() {
         path = []
+    }
+}
+
+extension NavigationCoordinator: WalletNavigationCoordinator {
+    func push(route: DamusWallet.WalletRoute) {
+        self.push(route: route.toDamusRoute())
+    }
+    
+    func pop() {
+        self.path.removeLast()
+    }
+    
+    func popTo(route: DamusWallet.WalletRoute) {
+        let damusRoute = route.toDamusRoute()
+        if let index = path.lastIndex(where: { $0 == damusRoute }) {
+            path = Array(path[...index])
+        }
+    }
+    
+    func currentRoute() -> DamusWallet.WalletRoute? {
+        self.path.last?.toWalletRoute()
+    }
+}
+
+extension Route {
+    func toWalletRoute() -> WalletRoute? {
+        switch self {
+        case .ProfileByKey(pubkey: let pubkey):
+            return nil
+        case .Profile(profile: let profile, followers: _):
+            return nil
+        case .Followers(followers: _):
+            return nil
+        case .Relay(relay: let relay, showActionButtons: let showActionButtons):
+            return nil
+        case .RelayDetail(relay: let relay, metadata: let metadata):
+            return nil
+        case .Following(following: let following):
+            return nil
+        case .MuteList:
+            return nil
+        case .RelayConfig:
+            return nil
+        case .Script(script: let script):
+            return nil
+        case .Bookmarks:
+            return nil
+        case .Config:
+            return nil
+        case .EditMetadata:
+            return nil
+        case .DMChat(dms: let dms):
+            return nil
+        case .UserRelays(relays: let relays):
+            return nil
+        case .KeySettings(keypair: let keypair):
+            return nil
+        case .AppearanceSettings(settings: let settings):
+            return nil
+        case .NotificationSettings(settings: let settings):
+            return nil
+        case .ZapSettings(settings: let settings):
+            return nil
+        case .TranslationSettings(settings: let settings):
+            return nil
+        case .ReactionsSettings(settings: let settings):
+            return nil
+        case .SearchSettings(settings: let settings):
+            return nil
+        case .DeveloperSettings(settings: let settings):
+            return nil
+        case .FirstAidSettings(settings: let settings):
+            return nil
+        case .StorageSettings(settings: let settings):
+            return nil
+        case .NostrDBStorageDetail(stats: let stats):
+            return nil
+        case .Thread(thread: let thread):
+            return nil
+        case .LoadableNostrEvent(note_reference: let note_reference):
+            return nil
+        case .Reposts(reposts: let reposts):
+            return nil
+        case .QuoteReposts(quotes: let quotes):
+            return nil
+        case .Reactions(reactions: let reactions):
+            return nil
+        case .Zaps(target: let target):
+            return nil
+        case .Search(search: let search):
+            return nil
+        case .NDBSearch(results: let results, query: let query):
+            return nil
+        case .EULA:
+            return nil
+        case .Login:
+            return nil
+        case .CreateAccount:
+            return nil
+        case .SaveKeys(account: let account):
+            return nil
+        case .Wallet(wallet: let wallet):
+            return nil
+        case .WalletScanner(result: let result):
+            return nil
+        case .FollowersYouKnow(friendedFollowers: let friendedFollowers, followers: _):
+            return nil
+        case .NIP05DomainEvents(events: let events, nip05_domain_favicon: let nip05_domain_favicon):
+            return nil
+        case .NIP05DomainPubkeys(domain: let domain, nip05_domain_favicon: let nip05_domain_favicon, pubkeys: let pubkeys):
+            return nil
+        case .FollowPack(followPack: let followPack, model: _, blur_imgs: _):
+            return nil
+        case .LiveEvents(model: _):
+            return nil
+        case .LiveEvent(LiveEvent: let LiveEvent, model: _):
+            return nil
+        case .OrangeWalletWelcome:
+            return .home
+        case .OrangeWalletSetup:
+            return .createNewWallet
+        case .OrangeWalletKeyCustodyConfirmation:
+            return .keyCustodyConfirmation
+        case .OrangeWalletBackupToICloud:
+            return .backupToICloud
+        case .OrangeWalletManualBackup:
+            return .manualBackup
+        case .OrangeWalletSeedWordsQuiz:
+            return .seedWordsQuiz
+        case .OrangeWalletSetupComplete:
+            return .setupComplete
+        case .OrangeWalletReceive(let receiveFlowContext):
+            return .receive(receiveFlowContext)
+        case .OrangeWalletReceiveAmountEntry(let receiveFlowContext):
+            return .receiveAmountEntry(receiveFlowContext)
+        case .OrangeWalletReceiveConfirmation(let receiveFlowContext):
+            return .receiveConfirmation(receiveFlowContext)
+        case .OrangeWalletSendScan(let sendFlowContext):
+            return .sendScan(sendFlowContext)
+        case .OrangeWalletSendAmountEntry(let sendFlowContext):
+            return .sendAmountEntry(sendFlowContext)
+        case .OrangeWalletSendReview(let sendFlowContext):
+            return .sendReview(sendFlowContext)
+        case .OrangeWalletSendConfirmation(let sendFlowContext):
+            return .sendConfirmation(sendFlowContext)
+        }
+    }
+}
+
+extension DamusWallet.WalletRoute {
+    func toDamusRoute() -> Route {
+        switch self {
+        case .home:
+            .OrangeWalletWelcome
+        case .createNewWallet:
+            .OrangeWalletSetup
+        case .keyCustodyConfirmation:
+            .OrangeWalletKeyCustodyConfirmation
+        case .backupOptions:
+            .OrangeWalletWelcome
+        case .backupToICloud:
+            .OrangeWalletBackupToICloud
+        case .manualBackup:
+            .OrangeWalletManualBackup
+        case .seedWordsQuiz:
+            .OrangeWalletSeedWordsQuiz
+        case .setupComplete:
+            .OrangeWalletSetupComplete
+        case .recoverWallet:
+            .OrangeWalletWelcome
+        case .walletSettings:
+            .OrangeWalletWelcome
+        case .receive(let receiveContext):
+            .OrangeWalletReceive(receiveContext)
+        case .receiveAmountEntry(let receiveContext):
+            .OrangeWalletReceiveAmountEntry(receiveContext)
+        case .receiveConfirmation(let receiveContext):
+            .OrangeWalletReceiveConfirmation(receiveContext)
+        case .sendScan(let sendContext):
+            .OrangeWalletSendScan(sendContext)
+        case .sendAmountEntry(let sendContext):
+            .OrangeWalletSendAmountEntry(sendContext)
+        case .sendReview(let sendContext):
+            .OrangeWalletSendReview(sendContext)
+        case .sendConfirmation(let sendContext):
+            .OrangeWalletSendConfirmation(sendContext)
+        }
     }
 }

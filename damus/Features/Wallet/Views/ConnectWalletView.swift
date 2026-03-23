@@ -148,6 +148,25 @@ struct ConnectWalletView: View {
             
             Spacer()
             
+            if model.settings.enable_orange_wallet {
+                NavigationLink(value: Route.OrangeWalletWelcome, label: {
+                    HStack {
+                        Image(systemName: "bitcoinsign")
+                        
+                        Text("Setup Orange Wallet", comment:  "Button to setup the Orange Wallet, a graduated wallet.")
+                            .padding()
+                            .bold()
+                    }
+                    .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
+                    .foregroundColor(DamusColors.black)
+                    .background {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.orange)
+                    }
+                })
+                .padding()
+            }
+            
             VStack(spacing: 5) {
                 CoinosButton() {
                     self.show_coinos_options = true

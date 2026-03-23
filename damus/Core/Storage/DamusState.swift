@@ -8,6 +8,7 @@
 import Foundation
 import LinkPresentation
 import EmojiPicker
+import DamusWallet
 
 class DamusState: HeadlessDamusState, ObservableObject {
     let keypair: Keypair
@@ -30,6 +31,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
     let bookmarks: BookmarksManager
     let replies: ReplyCounter
     let wallet: WalletModel
+    let orangeWallet: OrangeWalletProvider
     let nav: NavigationCoordinator
     let music: MusicController?
     let video: DamusVideoCoordinator
@@ -79,6 +81,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
         self.nostrNetwork = nostrNetwork
         self.wallet.nostrNetwork = nostrNetwork
         self.snapshotManager = .init(ndb: ndb)
+        self.orangeWallet = OrangeWalletProvider()
     }
     
     @MainActor
