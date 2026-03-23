@@ -1,0 +1,116 @@
+[
+  {
+    "_description": "Jumble: Comments - media kinds from me+contacts with hashtag filters, 7d window",
+    "kind": 777,
+    "id": "02b19e7daf78b072a29e8f1a2572e9b5ae71d3d14febedfd95181851b1f9af84",
+    "pubkey": "592295cf2b09a7f9555f43adb734cbee8a84ee892ed3f9336e6a09b6413a0db9",
+    "created_at": 1773930755,
+    "tags": [
+      ["cmd", "REQ"],
+      ["name", "Comments"],
+      ["alt", "This event was published by https://jumble.imwald.eu."],
+      ["k", "20"],
+      ["k", "22"],
+      ["k", "24"],
+      ["k", "1111"],
+      ["authors", "$me", "$contacts"],
+      ["tag", "t", "nature", "musicstr", "artnostr"],
+      ["limit", "80"],
+      ["since", "7d"],
+      ["client", "jumble"]
+    ],
+    "content": "",
+    "sig": "775fcc7884f256567e526e8c2b35ec43e745415d0758e76000bc44616bae146b28035421e55874c5cc2f1f7f7400364445ce461b38f7c185274246468a565b3e"
+  },
+  {
+    "_description": "Grimoire (purrgrammer): MLS KeyPackage relay lists from contacts",
+    "kind": 777,
+    "id": "0b6bdc159d61e2c8f33c8a7d7a1ded0f1533ad0593baa39fef63c53ab745b459",
+    "pubkey": "7fa56f5d6962ab1e3cd424e758c3002b8665f7b0d8dcee9fe9e288d7751ac194",
+    "created_at": 1773920199,
+    "tags": [
+      ["cmd", "REQ"],
+      ["name", "🦫"],
+      ["alt", "Grimoire REQ spell: your frens' MLS KeyPackage relay lists. tells you which ones can be reached via Marmot."],
+      ["k", "10051"],
+      ["authors", "$contacts"],
+      ["client", "grimoire", "31990:7fa56f5d6962ab1e3cd424e758c3002b8665f7b0d8dcee9fe9e288d7751ac194:k50nvf8d85"]
+    ],
+    "content": "your frens' MLS KeyPackage relay lists. tells you which ones can be reached via Marmot.",
+    "sig": "2b8431bbee79d9c929ea020abe1fdb31ba6b446a01c6a251dec589a75611daac22b02c6ea4dfda61bb24d8e9ebd52802a74c1f86879f639bcde8108cb2b0e8c2"
+  },
+  {
+    "_description": "Grimoire: Mentions - notes/reposts/reactions that tag me",
+    "kind": 777,
+    "id": "bfd178d57bc72d1a2cbb6d04bbaddacbe5b8998ef60890e6f916aea46ca09210",
+    "pubkey": "d0a1ffb8761b974cec4a3be8cbcb2e96a7090dcf465ffeac839aa4ca20c9a59e",
+    "created_at": 1773842292,
+    "tags": [
+      ["cmd", "REQ"],
+      ["name", "Mentions"],
+      ["alt", "Grimoire REQ spell"],
+      ["k", "1"],
+      ["k", "11"],
+      ["k", "6"],
+      ["k", "7"],
+      ["tag", "p", "$me"],
+      ["limit", "50"],
+      ["client", "grimoire", "31990:7fa56f5d6962ab1e3cd424e758c3002b8665f7b0d8dcee9fe9e288d7751ac194:k50nvf8d85"]
+    ],
+    "content": "",
+    "sig": "80e7989c01fcfaf8fb05c91bdfa261fdca1e60991de6a036a2ce0297732a56b0984e56622616f67564f46012d4695695608f57ce9a6676e50db678100ee79e9b"
+  },
+  {
+    "_description": "Grimoire (purrgrammer): frens reporting frens - kind:1984 reports from and about contacts",
+    "kind": 777,
+    "id": "d56a00f2e1e15b5fff0a71eaf4cf51bce0cb98fbb877ccd73113b38d841049a4",
+    "pubkey": "7fa56f5d6962ab1e3cd424e758c3002b8665f7b0d8dcee9fe9e288d7751ac194",
+    "created_at": 1773837431,
+    "tags": [
+      ["cmd", "REQ"],
+      ["name", "👮"],
+      ["alt", "Grimoire REQ spell: frens reporting frens"],
+      ["k", "1984"],
+      ["authors", "$contacts"],
+      ["tag", "p", "$contacts"],
+      ["client", "grimoire", "31990:7fa56f5d6962ab1e3cd424e758c3002b8665f7b0d8dcee9fe9e288d7751ac194:k50nvf8d85"]
+    ],
+    "content": "frens reporting frens",
+    "sig": "e493d4f577ebe48d8cbeccc24bc37c259a5818f9606c5334b9b36686a12b9948d6ded53679ce94058e45f5a2883f4c1cbcb6543d0a1dae3782691bc6cf81d5e8"
+  },
+  {
+    "_description": "Grimoire: Playlists from the Network - kind:34139 with specific relays",
+    "kind": 777,
+    "id": "1b2c9c1f73e71c81bbdb0a4655ccaeff79c803d4a2f0781c5d8d86f8882ee922",
+    "pubkey": "3f11abb2e235da2d4dda5d6deb2f123173476a745a3ca56895a1d0f632a42f40",
+    "created_at": 1773236322,
+    "tags": [
+      ["cmd", "REQ"],
+      ["name", "Playlists from the Network"],
+      ["alt", "Grimoire REQ spell"],
+      ["k", "34139"],
+      ["limit", "420"],
+      ["relays", "wss://drops.basspistol.org/", "wss://nos.lol/", "wss://relay.damus.io/", "wss://basspistol.org/", "wss://wot.basspistol.org/", "wss://nostr.mom/"],
+      ["client", "grimoire", "31990:7fa56f5d6962ab1e3cd424e758c3002b8665f7b0d8dcee9fe9e288d7751ac194:k50nvf8d85"]
+    ],
+    "content": "",
+    "sig": "0e7479ff22fecfdf44d0daf0b9931221ba03dcdee6344bd89ae69a7e4acc1a4131aab4baabd3b1f3b0cada38498c55f254e27ed7f30f4b17e8db2b55e207d638"
+  },
+  {
+    "_description": "Grimoire: Music by me and frens - kind:36787 from me+contacts",
+    "kind": 777,
+    "id": "1b9a7e563a9b2fbe84e193c7a4d227e3ff135fdc597ec7ea62c0b89d3d9577f6",
+    "pubkey": "3f11abb2e235da2d4dda5d6deb2f123173476a745a3ca56895a1d0f632a42f40",
+    "created_at": 1773165969,
+    "tags": [
+      ["cmd", "REQ"],
+      ["name", "Music by me and frens"],
+      ["alt", "Grimoire REQ spell"],
+      ["k", "36787"],
+      ["authors", "$me", "$contacts"],
+      ["client", "grimoire", "31990:7fa56f5d6962ab1e3cd424e758c3002b8665f7b0d8dcee9fe9e288d7751ac194:k50nvf8d85"]
+    ],
+    "content": "",
+    "sig": "a1b921acdff39d1a02462e18049e79d48fa50ae60c75d2f0dae18457882c2763ef125cb72c667ce725b816aca613062a6e6a3ce23a7aaf9d19f5cfa1f94aafde"
+  }
+]
