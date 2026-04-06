@@ -146,7 +146,7 @@ struct LongformPreviewBody: View {
                 } else {
                     ZStack {
                         titleImage(url: url)
-                        BlurOverlayView(blur_images: $blur_images, artifacts: nil, size: nil, damus_state: nil, parentView: .longFormView)
+                        BlurOverlayView(blur_images: $blur_images)
                     }
                 }
             }
@@ -207,7 +207,7 @@ struct LongformPreviewBody: View {
                 } else {
                     ZStack {
                         titleImage(url: url)
-                        BlurOverlayView(blur_images: $blur_images, artifacts: nil, size: nil, damus_state: nil, parentView: .longFormView)
+                        BlurOverlayView(blur_images: $blur_images)
                     }
                 }
             }
