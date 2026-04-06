@@ -5,6 +5,38 @@
 
 import Foundation
 
+/// Defines how often the database should be automatically compacted.
+enum AutoCompactSchedule: String, CaseIterable, Equatable {
+    case daily
+    case weekly
+    case monthly
+    case never
+
+    /// Human-readable label shown in the settings UI.
+    func text_description() -> String {
+        switch self {
+        case .daily:
+            return NSLocalizedString("Once a day", comment: "Auto-compact schedule option: compact once a day")
+        case .weekly:
+            return NSLocalizedString("Once a week", comment: "Auto-compact schedule option: compact once a week")
+        case .monthly:
+            return NSLocalizedString("Once a month", comment: "Auto-compact schedule option: compact once a month")
+        case .never:
+            return NSLocalizedString("Never", comment: "Auto-compact schedule option: never auto-compact")
+        }
+    }
+
+    /// The time interval (in seconds) between automatic compactions, or `nil` for `.never`.
+    var interval: TimeInterval? {
+        switch self {
+        case .daily:   return 60 * 60 * 24
+        case .weekly:  return 60 * 60 * 24 * 7
+        case .monthly: return 60 * 60 * 24 * 30
+        case .never:   return nil
+        }
+    }
+}
+
 extension Ndb {
     /// Makes a compacted copy of the database in a separate directory.
     ///
@@ -37,12 +69,55 @@ extension Ndb {
     /// The `UserDefaults` key used to signal that the database should be compacted on the next app launch.
     static let compact_on_next_launch_key = "ndb_compact_on_next_launch"
 
+    /// The `UserDefaults` key used to persist the auto-compact schedule (stored as raw string).
+    static let auto_compact_schedule_key = "ndb_auto_compact_schedule"
+
+    /// The `UserDefaults` key used to record when the last successful compaction occurred.
+    static let last_compact_date_key = "ndb_last_compact_date"
+
     /// Requests that the database be compacted the next time the app launches.
     ///
     /// Call this to schedule a one-time compaction. The flag is cleared automatically after
     /// a successful compaction in `compact_if_needed()`.
     static func set_compact_on_next_launch() {
         UserDefaults.standard.set(true, forKey: compact_on_next_launch_key)
+    }
+
+    /// Reads the persisted auto-compact schedule from `UserDefaults`.
+    ///
+    /// Defaults to `.weekly` if no value has been saved yet.
+    static func get_auto_compact_schedule() -> AutoCompactSchedule {
+        guard let raw = UserDefaults.standard.string(forKey: auto_compact_schedule_key),
+              let schedule = AutoCompactSchedule(rawValue: raw) else {
+            return .weekly
+        }
+        return schedule
+    }
+
+    /// Persists the auto-compact schedule to `UserDefaults`.
+    static func set_auto_compact_schedule(_ schedule: AutoCompactSchedule) {
+        UserDefaults.standard.set(schedule.rawValue, forKey: auto_compact_schedule_key)
+    }
+
+    /// Returns the date of the last successful compaction, or `nil` if none has occurred.
+    static func get_last_compact_date() -> Date? {
+        return UserDefaults.standard.object(forKey: last_compact_date_key) as? Date
+    }
+
+    /// Sets the compact-on-next-launch flag if the scheduled interval has elapsed since the
+    /// last successful compaction.
+    ///
+    /// Call this once on app startup **before** `compact_if_needed()`.
+    static func schedule_auto_compact_if_needed() {
+        let schedule = get_auto_compact_schedule()
+        guard let interval = schedule.interval else { return }
+
+        let now = Date()
+        let lastDate = get_last_compact_date() ?? .distantPast
+        guard now.timeIntervalSince(lastDate) >= interval else { return }
+
+        Log.info("Auto-compact: interval elapsed — scheduling compaction on next launch", for: .storage)
+        set_compact_on_next_launch()
     }
 
     /// Compacts the NostrDB database files if the compact-on-next-launch flag is set.
@@ -153,6 +228,9 @@ extension Ndb {
 
         // Clean up the temp directory (any remaining files such as lock.mdb).
         try? FileManager.default.removeItem(atPath: tempPath)
+
+        // Record the date of this successful compaction for the auto-compact scheduler.
+        UserDefaults.standard.set(Date(), forKey: last_compact_date_key)
 
         // Clear the flag so we don't compact again on the next launch.
         UserDefaults.standard.set(false, forKey: compact_on_next_launch_key)
