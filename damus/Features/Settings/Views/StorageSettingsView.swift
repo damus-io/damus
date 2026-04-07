@@ -54,6 +54,7 @@ struct StorageSettingsView: View {
     @State var showing_cache_clear_alert: Bool = false
     @State fileprivate var compact_scheduling_state: CompactSchedulingState = .not_scheduled
     @State var showing_compact_alert: Bool = false
+    @State fileprivate var auto_compact_schedule: AutoCompactSchedule = Ndb.get_auto_compact_schedule()
     
     /// Storage categories with cumulative ranges for angle selection (iOS 17+)
     private var categoryRanges: [(category: String, range: Range<Double>)] {
@@ -174,6 +175,9 @@ struct StorageSettingsView: View {
                     self.ClearCacheButton
                     self.CompactDatabaseButton
                 }
+
+                // Auto-compact Section
+                self.AutoCompactSection
             }
             
             // Loading state
@@ -351,6 +355,77 @@ struct StorageSettingsView: View {
                   secondaryButton: .cancel())
         }
     }
+
+    /// Section that lets the user configure automatic periodic compaction.
+    ///
+    /// Shows a `Picker` with four schedule options and a caption that describes the
+    /// current state: either the time remaining until the next compaction or a note
+    /// that compaction will run on the next app launch.
+    var AutoCompactSection: some View {
+        Section(
+            header: Text("Auto-Compact", comment: "Section header for automatic database compaction schedule"),
+            footer: AutoCompactCaption
+        ) {
+            Picker(
+                NSLocalizedString("Automatically compact database", comment: "Setting label for choosing how often to auto-compact the database"),
+                selection: $auto_compact_schedule
+            ) {
+                ForEach(AutoCompactSchedule.allCases, id: \.self) { option in
+                    Text(option.text_description()).tag(option)
+                }
+            }
+            .onChange(of: auto_compact_schedule) { newSchedule in
+                Ndb.set_auto_compact_schedule(newSchedule)
+            }
+        }
+    }
+
+    /// Caption displayed below the auto-compact picker.
+    ///
+    /// Shows either the time remaining until the next scheduled compaction or a message
+    /// indicating that compaction will happen on the next app launch.
+    private var AutoCompactCaption: some View {
+        Group {
+            if auto_compact_schedule == .never {
+                Text("Automatic database compaction is disabled.", comment: "Caption shown when auto-compact is set to never")
+            } else if compact_scheduling_state == .scheduled {
+                Text("Will compact on the next app launch.", comment: "Caption shown when a compaction is already queued for the next launch")
+            } else if let timeRemaining = nextCompactTimeRemaining {
+                Text(
+                    String(
+                        format: NSLocalizedString(
+                            "Next automatic compaction %@.",
+                            comment: "Caption showing how long until the next automatic compaction. %@ is replaced with a human-readable duration like 'in 3 days'."
+                        ),
+                        timeRemaining
+                    )
+                )
+            } else {
+                Text("Will compact on the next app launch.", comment: "Caption shown when the scheduled compaction interval has already elapsed")
+            }
+        }
+        .font(.caption)
+        .foregroundColor(.secondary)
+    }
+
+    /// Human-readable string describing the time remaining until the next auto-compaction,
+    /// or `nil` if the interval has already elapsed (i.e., compaction is due now).
+    private var nextCompactTimeRemaining: String? {
+        guard let interval = auto_compact_schedule.interval else { return nil }
+        let lastDate = Ndb.get_last_compact_date() ?? .distantPast
+        let nextDate = lastDate.addingTimeInterval(interval)
+        let remaining = nextDate.timeIntervalSince(Date())
+        guard remaining > 0 else { return nil }
+
+        return Self.relativeFormatter.localizedString(fromTimeInterval: remaining)
+    }
+
+    /// Shared formatter for human-readable relative durations (e.g. "in 3 days").
+    private static let relativeFormatter: RelativeDateTimeFormatter = {
+        let f = RelativeDateTimeFormatter()
+        f.unitsStyle = .full
+        return f
+    }()
 
     /// Compact database button view with confirmation dialog.
     ///
