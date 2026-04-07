@@ -29,6 +29,12 @@
 #include "secp256k1_ecdh.h"
 #include "secp256k1_schnorrsig.h"
 
+static inline int ndb_txn_is_valid(struct ndb_txn *txn)
+{
+	// Only check pointers; avoid dereferencing txn->lmdb because it's forward-declared in the header.
+	return txn && txn->lmdb && txn->mdb_txn;
+}
+
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #define min(a,b) ((a) < (b) ? (a) : (b))
 
@@ -2488,6 +2494,11 @@ int ndb_get_tsid(struct ndb_txn *txn, enum ndb_dbs db, const unsigned char *id,
 	int success = 0, rc;
 	struct ndb_tsid tsid;
 
+	if (!ndb_txn_is_valid(txn)) {
+		ndb_debug("ndb_get_tsid: invalid transaction\n");
+		return 0;
+	}
+
 	// position at the most recent
 	ndb_tsid_high(&tsid, id);
 
@@ -2516,6 +2527,11 @@ static void *ndb_lookup_by_key(struct ndb_txn *txn, uint64_t key,
 			       enum ndb_dbs store, size_t *len)
 {
 	MDB_val k, v;
+
+	if (txn == NULL || txn->mdb_txn == NULL || txn->lmdb == NULL) {
+		ndb_debug("ndb_lookup_by_key: invalid transaction\n");
+		return NULL;
+	}
 
 	k.mv_data = &key;
 	k.mv_size = sizeof(key);
@@ -2562,11 +2578,15 @@ static void *ndb_lookup_tsid(struct ndb_txn *txn, enum ndb_dbs ind,
 
 void *ndb_get_profile_by_pubkey(struct ndb_txn *txn, const unsigned char *pk, size_t *len, uint64_t *key)
 {
+	if (!ndb_txn_is_valid(txn))
+		return NULL;
 	return ndb_lookup_tsid(txn, NDB_DB_PROFILE_PK, NDB_DB_PROFILE, pk, len, key);
 }
 
 struct ndb_note *ndb_get_note_by_id(struct ndb_txn *txn, const unsigned char *id, size_t *len, uint64_t *key)
 {
+	if (!ndb_txn_is_valid(txn))
+		return NULL;
 	return ndb_lookup_tsid(txn, NDB_DB_NOTE_ID, NDB_DB_NOTE, id, len, key);
 }
 
@@ -2575,6 +2595,9 @@ static inline uint64_t ndb_get_indexkey_by_id(struct ndb_txn *txn,
 					      const unsigned char *id)
 {
 	MDB_val k;
+
+	if (!ndb_txn_is_valid(txn))
+		return 0;
 
 	if (!ndb_get_tsid(txn, db, id, &k))
 		return 0;
@@ -2606,6 +2629,9 @@ uint64_t
 ndb_read_last_profile_fetch(struct ndb_txn *txn, const unsigned char *pubkey)
 {
 	MDB_val k, v;
+
+	if (!ndb_txn_is_valid(txn))
+		return 0;
 
 	k.mv_data = (unsigned char*)pubkey;
 	k.mv_size = 32;
