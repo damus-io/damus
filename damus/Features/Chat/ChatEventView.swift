@@ -158,7 +158,7 @@ struct ChatEventView: View {
                 NoteContentView(damus_state: damus_state, event: event, blur_images: blur_images, size: .normal, options: [.truncate_content])
                     .padding(2)
                 if let mention = first_eref_mention_with_hints(ndb: damus_state.ndb, ev: event, keypair: damus_state.keypair) {
-                    MentionView(damus_state: damus_state, mention: .note(mention.noteId, index: mention.index), relayHints: mention.relayHints)
+                    MentionView(damus_state: damus_state, mention: .note(mention.noteId, index: mention.index), relayHints: mention.relayHints, authorPubkey: mention.authorPubkey)
                         .background(DamusColors.adaptableWhite)
                         .clipShape(RoundedRectangle(cornerSize: CGSize(width: 10, height: 10)))
                 }
