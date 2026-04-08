@@ -17,6 +17,7 @@ enum NostrKind: UInt32, Codable {
     case delete = 5
     case boost = 6
     case like = 7
+    case picture = 20
     case chat = 42
     case live_chat = 1311
     case mute_list = 10000
@@ -34,5 +35,6 @@ enum NostrKind: UInt32, Codable {
     case live = 30311
     case status = 30315
     case contact_card = 30_382
+    case spell = 777
     case follow_list = 39089
 }

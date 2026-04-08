@@ -29,7 +29,12 @@ struct PostingTimelineView: View {
     @Binding var headerOffset: CGFloat
     @SceneStorage("PostingTimelineView.filter_state") var filter_state : FilterState = .posts_and_replies
     @State var timeline_source: TimelineSource = .follows
-    
+    @StateObject private var feedTabStore = FeedTabStore()
+    @State private var activeSpellModel: SpellFeedModel?
+    @State private var activeSpellFeedId: String?
+    @State private var showFeedDiscovery: Bool = false
+    @State private var showSpellOnboarding: Bool = false
+
     @State private var damusTips: Any? = {
         if #available(iOS 18.0, *) {
             return TipGroup(.ordered) {
@@ -121,15 +126,23 @@ struct PostingTimelineView: View {
                     .tipViewStyle(TrustedNetworkButtonTipViewStyle())
                     .padding(.horizontal)
             }
-            VStack(spacing: 0) {
-                CustomPicker(tabs: [
-                    (NSLocalizedString("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies)."), FilterState.posts),
-                    (NSLocalizedString("Notes & Replies", comment: "Label for filter for seeing notes and replies (instead of only notes)."), FilterState.posts_and_replies)
-                ],
-                             selection: $filter_state)
-                
-                Divider()
-                    .frame(height: 1)
+            if feedTabStore.tabs.count > 1 {
+                FeedTabBarView(store: feedTabStore) {
+                    showFeedDiscovery = true
+                }
+                Divider().frame(height: 1)
+            }
+            if feedTabStore.selectedTab == .following {
+                VStack(spacing: 0) {
+                    CustomPicker(tabs: [
+                        (NSLocalizedString("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies)."), FilterState.posts),
+                        (NSLocalizedString("Notes & Replies", comment: "Label for filter for seeing notes and replies (instead of only notes)."), FilterState.posts_and_replies)
+                    ],
+                                 selection: $filter_state)
+
+                    Divider()
+                        .frame(height: 1)
+                }
             }
         }
         .background {
@@ -141,16 +154,21 @@ struct PostingTimelineView: View {
     var body: some View {
         VStack {
             ZStack {
-                TabView(selection: $filter_state) {
-                    contentTimelineView(filter: content_filter(.posts))
-                        .tag(FilterState.posts)
-                        .id(FilterState.posts)
-                    contentTimelineView(filter: content_filter(.posts_and_replies))
-                        .tag(FilterState.posts_and_replies)
-                        .id(FilterState.posts_and_replies)
+                if feedTabStore.selectedTab == .following {
+                    TabView(selection: $filter_state) {
+                        contentTimelineView(filter: content_filter(.posts))
+                            .tag(FilterState.posts)
+                            .id(FilterState.posts)
+                        contentTimelineView(filter: content_filter(.posts_and_replies))
+                            .tag(FilterState.posts_and_replies)
+                            .id(FilterState.posts_and_replies)
+                    }
+                    .tabViewStyle(.page(indexDisplayMode: .never))
+                } else if let model = activeSpellModel {
+                    SpellFeedView(damus_state: damus_state, model: model)
+                        .padding(.top, headerHeight)
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
-                
+
                 if damus_state.keypair.privkey != nil {
                     PostButtonContainer(is_left_handed: damus_state.settings.left_handed) {
                         self.active_sheet = .post(.posting(.none))
@@ -176,6 +194,50 @@ struct PostingTimelineView: View {
                 .offset(y: -headerOffset < headerHeight ? headerOffset : (headerOffset < 0 ? headerOffset : 0))
                 .opacity(1.0 - (abs(headerOffset/100.0)))
         }
+        .onChange(of: feedTabStore.selectedTabId) { newTabId in
+            if newTabId == "following" {
+                activeSpellModel?.unsubscribe()
+                activeSpellModel = nil
+                activeSpellFeedId = nil
+            } else if newTabId != activeSpellFeedId {
+                activateSpellFeed(for: newTabId)
+            }
+        }
+        .sheet(isPresented: $showFeedDiscovery) {
+            SpellDiscoveryView(damus_state: damus_state, feedTabStore: feedTabStore)
+        }
+        .sheet(isPresented: $showSpellOnboarding) {
+            SpellOnboardingView()
+                .presentationDetents([.medium])
+        }
+        .onAppear {
+            feedTabStore.seedStarterFeedsIfNeeded(starterFeeds: StarterSpells.feeds)
+            showOnboardingIfNeeded()
+        }
+    }
+
+    private func showOnboardingIfNeeded() {
+        let key = "spell_onboarding_shown"
+        guard !UserDefaults.standard.bool(forKey: key) else { return }
+        guard feedTabStore.tabs.count > 1 else { return }
+        UserDefaults.standard.set(true, forKey: key)
+        showSpellOnboarding = true
+    }
+
+    private func activateSpellFeed(for tabId: String) {
+        activeSpellModel?.unsubscribe()
+
+        guard case .spell(let saved) = feedTabStore.selectedTab,
+              let spell = saved.parseSpell() else {
+            activeSpellModel = nil
+            activeSpellFeedId = nil
+            return
+        }
+
+        let model = SpellFeedModel(damus_state: damus_state, spell: spell)
+        activeSpellModel = model
+        activeSpellFeedId = tabId
+        model.subscribe()
     }
 }
 
