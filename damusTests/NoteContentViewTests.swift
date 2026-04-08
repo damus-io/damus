@@ -436,6 +436,125 @@ class NoteContentViewTests: XCTestCase {
         assertCompatibleTextHasExpectedString(compatibleText: compatibleText, expected: bech)
     }
 
+    // MARK: - resolveNostrMentions
+
+    @MainActor
+    func testResolveNostrMentions_bareNpub_wrapsInMarkdownLink() {
+        let npub = test_pubkey.npub
+        let input = "Hello nostr:\(npub) world"
+        let result = LongformContent.resolveNostrMentions(in: input, profiles: test_damus_state.profiles)
+
+        XCTAssertTrue(result.contains("](nostr:\(npub))"), "Bare npub should be wrapped in markdown link")
+        XCTAssertFalse(result.hasPrefix("["), "Text before mention should be preserved")
+        XCTAssertTrue(result.contains("Hello "), "Text before mention should be preserved")
+        XCTAssertTrue(result.contains(" world"), "Text after mention should be preserved")
+    }
+
+    @MainActor
+    func testResolveNostrMentions_bareNote_wrapsInMarkdownLink() {
+        let noteId = test_note.id.bech32
+        let input = "Check nostr:\(noteId) out"
+        let result = LongformContent.resolveNostrMentions(in: input, profiles: test_damus_state.profiles)
+
+        XCTAssertTrue(result.contains("](nostr:\(noteId))"), "Bare note should be wrapped in markdown link")
+    }
+
+    @MainActor
+    func testResolveNostrMentions_existingMarkdownLink_skipped() {
+        let npub = test_pubkey.npub
+        let input = "[some text](nostr:\(npub))"
+        let result = LongformContent.resolveNostrMentions(in: input, profiles: test_damus_state.profiles)
+
+        XCTAssertEqual(result, input, "Already-linked nostr reference should not be double-wrapped")
+    }
+
+    @MainActor
+    func testResolveNostrMentions_insideCodeBlock_skipped() {
+        let npub = test_pubkey.npub
+        let input = "```\nnostr:\(npub)\n```"
+        let result = LongformContent.resolveNostrMentions(in: input, profiles: test_damus_state.profiles)
+
+        XCTAssertEqual(result, input, "nostr reference inside code block should not be modified")
+    }
+
+    @MainActor
+    func testResolveNostrMentions_multipleMentions_allWrapped() {
+        let npub = test_pubkey.npub
+        let noteId = test_note.id.bech32
+        let input = "By nostr:\(npub) see nostr:\(noteId)"
+        let result = LongformContent.resolveNostrMentions(in: input, profiles: test_damus_state.profiles)
+
+        XCTAssertTrue(result.contains("](nostr:\(npub))"), "npub mention should be wrapped")
+        XCTAssertTrue(result.contains("](nostr:\(noteId))"), "note mention should be wrapped")
+    }
+
+    @MainActor
+    func testResolveNostrMentions_npubDisplayText_hasAtPrefix() {
+        let npub = test_pubkey.npub
+        let input = "nostr:\(npub)"
+        let result = LongformContent.resolveNostrMentions(in: input, profiles: test_damus_state.profiles)
+
+        XCTAssertTrue(result.hasPrefix("[@"), "npub display text should start with @")
+    }
+
+    @MainActor
+    func testResolveNostrMentions_nprofileDisplayText() {
+        let nprofile = "nprofile1qqsrhuxx8l9ex335q7he0f09aej04zpazpl0ne2cgukyawd24mayt8gpp4mhxue69uhhytnc9e3k7mgpz4mhxue69uhkg6nzv9ejuumpv34kytnrdaksjlyr9p"
+        let input = "By nostr:\(nprofile) today"
+        let result = LongformContent.resolveNostrMentions(in: input, profiles: test_damus_state.profiles)
+
+        XCTAssertTrue(result.contains("](nostr:\(nprofile))"), "nprofile should be wrapped in markdown link")
+        XCTAssertTrue(result.contains("[@"), "nprofile display text should start with @")
+    }
+
+    @MainActor
+    func testResolveNostrMentions_naddrDisplayText() {
+        let naddr = "naddr1qqxnzdesxqmnxvpexqunzvpcqyt8wumn8ghj7un9d3shjtnwdaehgu3wvfskueqzypve7elhmamff3sr5mgxxms4a0rppkmhmn7504h96pfcdkpplvl2jqcyqqq823cnmhuld"
+        let input = "See nostr:\(naddr) for details"
+        let result = LongformContent.resolveNostrMentions(in: input, profiles: test_damus_state.profiles)
+
+        XCTAssertTrue(result.contains("](nostr:\(naddr))"), "naddr should be wrapped in markdown link")
+        XCTAssertTrue(result.contains("[naddr1qq:3cnmhuld]"), "naddr should use abbreviated identifier")
+    }
+
+    @MainActor
+    func testResolveNostrMentions_insideInlineCode_skipped() {
+        let npub = test_pubkey.npub
+        let input = "Use `nostr:\(npub)` in your client"
+        let result = LongformContent.resolveNostrMentions(in: input, profiles: test_damus_state.profiles)
+
+        XCTAssertEqual(result, input, "nostr reference inside inline code should not be modified")
+    }
+
+    // MARK: - sanitizeUnicodeSeparators
+
+    func testSanitizeUnicodeSeparators_lineSeparator_replacedWithSpace() {
+        let input = "Hello\u{2028}world"
+        let result = LongformContent.sanitizeUnicodeSeparators(input)
+
+        XCTAssertEqual(result, "Hello world", "U+2028 should be replaced with space")
+    }
+
+    func testSanitizeUnicodeSeparators_paragraphSeparator_replacedWithDoubleNewline() {
+        let input = "Hello\u{2029}world"
+        let result = LongformContent.sanitizeUnicodeSeparators(input)
+
+        XCTAssertEqual(result, "Hello\n\nworld", "U+2029 should be replaced with double newline")
+    }
+
+    func testSanitizeUnicodeSeparators_noSeparators_unchanged() {
+        let input = "Hello world\nNew line"
+        let result = LongformContent.sanitizeUnicodeSeparators(input)
+
+        XCTAssertEqual(result, input, "Normal text should be unchanged")
+    }
+
+    func testSanitizeUnicodeSeparators_multipleSeparators_allReplaced() {
+        let input = "A\u{2028}B\u{2028}C\u{2029}D"
+        let result = LongformContent.sanitizeUnicodeSeparators(input)
+
+        XCTAssertEqual(result, "A B C\n\nD")
+    }
 }
 
 private func assertCompatibleTextHasExpectedString(compatibleText: CompatibleText, expected: String) {
