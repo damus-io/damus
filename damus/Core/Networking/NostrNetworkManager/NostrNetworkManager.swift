@@ -45,6 +45,10 @@ class NostrNetworkManager {
     /// A lock to ensure thread-safe access to the continuations dictionary and connection state
     private let continuationsLock = NSLock()
     
+    /// Initializes the network manager and wires shared network/storage dependencies.
+    ///
+    /// `delegate.ndb` is injected into `PostBox` so it can resolve NIP-65 inbox
+    /// relays for tagged users when publishing events.
     init(delegate: Delegate, addNdbToRelayPool: Bool = true) {
         self.delegate = delegate
         let pool = RelayPool(ndb: addNdbToRelayPool ? delegate.ndb : nil, keypair: delegate.keypair)
@@ -53,7 +57,7 @@ class NostrNetworkManager {
         let userRelayList = UserRelayListManager(delegate: delegate, pool: pool, reader: reader)
         self.reader = reader
         self.userRelayList = userRelayList
-        self.postbox = PostBox(pool: pool)
+        self.postbox = PostBox(pool: pool, ndb: delegate.ndb)
         self.profilesManager = ProfilesManager(subscriptionManager: reader, ndb: delegate.ndb)
     }
     
