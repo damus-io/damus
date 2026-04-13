@@ -28,7 +28,7 @@ struct PostingTimelineView: View {
     @State var headerHeight: CGFloat = 0
     @Binding var headerOffset: CGFloat
     @SceneStorage("PostingTimelineView.filter_state") var filter_state : FilterState = .posts_and_replies
-    @State var timeline_source: TimelineSource = .follows
+    @Binding var timeline_source: TimelineSource
     
     @State private var damusTips: Any? = {
         if #available(iOS 18.0, *) {
@@ -187,7 +187,8 @@ struct PostingTimelineView_Previews: PreviewProvider {
             homeEvents: .init(),
             isSideBarOpened: .constant(false),
             active_sheet: .constant(nil),
-            headerOffset: .constant(0)
+            headerOffset: .constant(0),
+            timeline_source: .constant(.follows)
         )
     }
 }

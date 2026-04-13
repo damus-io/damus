@@ -34,9 +34,13 @@ class EventHolder: ObservableObject, ScrollQueue {
         self.on_queue = on_queue
     }
     
+    /// Filters stored events in place and rebuilds dedup state.
+    /// Note: callers are responsible for refreshing `filteredHolders` afterwards.
     func filter(_ isIncluded: (NostrEvent) -> Bool) {
         self.events = self.events.filter(isIncluded)
         self.incoming = self.incoming.filter(isIncluded)
+        // Rebuild has_event so removed events can be re-inserted later
+        self.has_event = Set(self.events.map(\.id) + self.incoming.map(\.id))
     }
     
     @MainActor
