@@ -323,6 +323,26 @@ actor DatabaseSnapshotManager {
         } catch {
             throw SnapshotError.moveFailed(error)
         }
+
+        // Exclude the snapshot directory from iCloud backup — it is derived data that can be regenerated.
+        exclude_from_icloud_backup(url: finalURL)
+    }
+
+    /// Marks a directory or file URL as excluded from iCloud backup, logging any error without throwing.
+    ///
+    /// The snapshot is derived data regenerated periodically from the main database,
+    /// so it does not need to be included in the user's iCloud backup quota.
+    ///
+    /// - Parameter url: The file or directory URL to exclude from iCloud backup.
+    private func exclude_from_icloud_backup(url: URL) {
+        var mutableURL = url
+        var resourceValues = URLResourceValues()
+        resourceValues.isExcludedFromBackup = true
+        do {
+            try mutableURL.setResourceValues(resourceValues)
+        } catch {
+            Log.error("Failed to exclude snapshot from iCloud backup: %{public}@", for: .storage, error.localizedDescription)
+        }
     }
     
     // MARK: - Stats functions
