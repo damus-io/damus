@@ -22,8 +22,8 @@
 - Fixed issue where mentioned profile names would not render properly (Daniel D'Aquino)
 - Fix stale relay list causing inability to disconnect relays (alltheseas)
 - Fixed issue where temporary files would not get cleaned up (Daniel D'Aquino)
-- Wallet view now immediately clears stale data when switching wallets (copilot-swe-agent[bot])
-- Fixed issue where the app could display an error message when using another NWC wallet in parallel (copilot-swe-agent[bot])
+- Wallet view now immediately clears stale data when switching wallets (Daniel D'Aquino)
+- Fixed issue where the app could display an error message when using another NWC wallet in parallel (Daniel D'Aquino)
 - Fix memory corruption crash when creating empty filters (Daniel D'Aquino)
 
 
