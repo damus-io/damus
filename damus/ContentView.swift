@@ -142,15 +142,6 @@ struct ContentView: View {
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     init(keypair: Keypair, appDelegate: AppDelegate?) {
-        // Schedule automatic compaction based on the user's configured interval, then
-        // run compaction if it was previously requested (either manually or by the scheduler).
-        // Both calls run before opening the main Ndb instance so they work on an idle database.
-        // This also gets run here instead of `connect` because we should anticipate this to add a few seconds of delay in worst case scenarios.
-        // If we were to add this in the `connect` function, parallel functions that depend on `damus_state!` could cause crashes in the app.
-        // By placing this here, we only delay the splash screen a bit
-        Ndb.schedule_auto_compact_if_needed()
-        Ndb.compact_if_needed()
-        
         self.keypair = keypair
         self.appDelegate = appDelegate
     }
@@ -396,7 +387,8 @@ struct ContentView: View {
         }
         .onReceive(timer) { n in
             Task{ await self.damus_state?.nostrNetwork.postbox.try_flushing_events() }
-            self.damus_state!.profiles.profile_data(self.damus_state!.pubkey).status.try_expire()
+            guard let damus_state = self.damus_state else { return }
+            damus_state.profiles.profile_data(damus_state.pubkey).status.try_expire()
         }
         .onReceive(handle_notify(.report)) { target in
             self.active_sheet = .report(target)
@@ -712,6 +704,17 @@ struct ContentView: View {
     }
 
     func connect() async {
+        // Schedule automatic compaction based on the user's configured interval, then
+        // run compaction if it was previously requested (either manually or by the scheduler).
+        // Both calls run before opening the main Ndb instance so they work on an idle database.
+        // Compaction is dispatched to a background thread via Task.detached to avoid blocking
+        // the main thread — large databases can take minutes to compact and would trigger
+        // the iOS watchdog (0x8badf00d) if run synchronously on the main actor.
+        await Task.detached(priority: .utility) {
+            Ndb.schedule_auto_compact_if_needed()
+            Ndb.compact_if_needed()
+        }.value
+
         // nostrdb
         var mndb = Ndb()
         if mndb == nil {
