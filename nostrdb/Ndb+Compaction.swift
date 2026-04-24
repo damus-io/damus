@@ -38,6 +38,37 @@ enum AutoCompactSchedule: String, CaseIterable, Equatable {
 }
 
 extension Ndb {
+    /// Errors that can occur while compacting the database.
+    enum CompactionError: LocalizedError {
+        case missingDatabasePath
+        case createTempDirectoryFailed(underlyingError: Error)
+        case openDatabaseFailed(path: String)
+        case snapshotFailed(underlyingError: Error)
+        case compactedFileMissingOrEmpty(path: String)
+        case replaceDatabaseFailed(underlyingError: Error)
+        case postReplaceSizeMismatch(expected: Int, actual: Int)
+        
+        /// A user-presentable description of the compaction failure.
+        var errorDescription: String? {
+            switch self {
+            case .missingDatabasePath:
+                return "Could not determine the database path."
+            case .createTempDirectoryFailed(let underlyingError):
+                return "Failed to create the temporary compaction directory: \(underlyingError.localizedDescription)"
+            case .openDatabaseFailed(let path):
+                return "Failed to open the database for compaction at path: \(path)"
+            case .snapshotFailed(let underlyingError):
+                return "Failed to create a compacted database snapshot: \(underlyingError.localizedDescription)"
+            case .compactedFileMissingOrEmpty(let path):
+                return "The compacted database file is missing or empty at path: \(path)"
+            case .replaceDatabaseFailed(let underlyingError):
+                return "Failed to replace the original database with the compacted copy: \(underlyingError.localizedDescription)"
+            case .postReplaceSizeMismatch(let expected, let actual):
+                return "The compacted database size verification failed. Expected \(expected) bytes, got \(actual) bytes."
+            }
+        }
+    }
+    
     /// Makes a compacted copy of the database in a separate directory.
     ///
     /// This uses `mdb_env_copy2` with `MDB_CP_COMPACT` (flag = 0x01), which omits free pages
@@ -133,12 +164,13 @@ extension Ndb {
     ///
     /// - Parameter db_path: Override the database directory path.  Pass `nil` (default) to use
     ///   `Ndb.db_path`.  Mainly useful for testing.
-    static func compact_if_needed(db_path: String? = nil) {
+    /// - Throws: `CompactionError` when compaction was requested but could not be completed.
+    static func compact_if_needed(db_path: String? = nil) throws {
         guard UserDefaults.standard.bool(forKey: compact_on_next_launch_key) else { return }
 
         guard let path = db_path ?? Self.db_path else {
             Log.error("compact_if_needed: could not determine db path", for: .storage)
-            return
+            throw CompactionError.missingDatabasePath
         }
 
         guard db_file_exists(path: path) else {
@@ -158,14 +190,14 @@ extension Ndb {
             try FileManager.default.createDirectory(atPath: tempPath, withIntermediateDirectories: true)
         } catch {
             Log.error("compact_if_needed: failed to create temp dir: %@", for: .storage, String(describing: error))
-            return
+            throw CompactionError.createTempDirectoryFailed(underlyingError: error)
         }
 
         // Open a temporary Ndb instance just to drive the compaction.
         guard let tempNdb = Ndb(path: path) else {
             Log.error("compact_if_needed: failed to open ndb for compaction", for: .storage)
             try? FileManager.default.removeItem(atPath: tempPath)
-            return
+            throw CompactionError.openDatabaseFailed(path: path)
         }
         // Ensure the temporary Ndb is closed regardless of how this function exits.
         defer { tempNdb.close() }
@@ -175,7 +207,7 @@ extension Ndb {
         } catch {
             Log.error("compact_if_needed: compaction failed: %@", for: .storage, String(describing: error))
             try? FileManager.default.removeItem(atPath: tempPath)
-            return
+            throw CompactionError.snapshotFailed(underlyingError: error)
         }
         
         tempNdb.close()
@@ -192,7 +224,7 @@ extension Ndb {
         guard compactedSize > 0 else {
             Log.error("compact_if_needed: compacted file is missing or empty — aborting", for: .storage)
             try? FileManager.default.removeItem(atPath: tempPath)
-            return
+            throw CompactionError.compactedFileMissingOrEmpty(path: compactedDataMdb.path)
         }
 
         // Delete the stale lock.mdb BEFORE replacing data.mdb.
@@ -213,7 +245,7 @@ extension Ndb {
         } catch {
             Log.error("compact_if_needed: failed to replace db file: %@", for: .storage, String(describing: error))
             try? FileManager.default.removeItem(atPath: tempPath)
-            return
+            throw CompactionError.replaceDatabaseFailed(underlyingError: error)
         }
 
         // Post-replace sanity check: verify the destination file exists with the expected size.
@@ -221,7 +253,7 @@ extension Ndb {
         if finalSize != compactedSize {
             Log.error("compact_if_needed: post-replace size mismatch — expected %d, got %d", for: .storage, compactedSize, finalSize)
             try? FileManager.default.removeItem(atPath: tempPath)
-            return
+            throw CompactionError.postReplaceSizeMismatch(expected: compactedSize, actual: finalSize)
         }
 
         Log.info("NostrDB compacted successfully", for: .storage)
