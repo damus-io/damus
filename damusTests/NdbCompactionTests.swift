@@ -56,8 +56,8 @@ final class NdbCompactionTests: XCTestCase {
         // Given: the flag is false (set in setUp)
         let dbPath = testDirectory.path
 
-        // When
-        Ndb.compact_if_needed(db_path: dbPath)
+        // When / Then
+        XCTAssertNoThrow(try Ndb.compact_if_needed(db_path: dbPath))
 
         // Then: no temp directory was created, no files were touched
         let tempPath = "\(dbPath)/ndb_compact_temp"
@@ -79,8 +79,8 @@ final class NdbCompactionTests: XCTestCase {
         let emptyPath = testDirectory.appendingPathComponent("empty_db").path
         try? FileManager.default.createDirectory(atPath: emptyPath, withIntermediateDirectories: true)
 
-        // When
-        Ndb.compact_if_needed(db_path: emptyPath)
+        // When / Then
+        XCTAssertNoThrow(try Ndb.compact_if_needed(db_path: emptyPath))
 
         // Then: flag is cleared, no temp directory left over
         XCTAssertFalse(
@@ -112,8 +112,8 @@ final class NdbCompactionTests: XCTestCase {
 
         Ndb.set_compact_on_next_launch()
 
-        // When
-        Ndb.compact_if_needed(db_path: dbPath)
+        // When / Then
+        XCTAssertNoThrow(try Ndb.compact_if_needed(db_path: dbPath))
 
         // Then: the flag is cleared
         XCTAssertFalse(
@@ -157,7 +157,7 @@ final class NdbCompactionTests: XCTestCase {
 
         // When: compact_if_needed runs
         Ndb.set_compact_on_next_launch()
-        Ndb.compact_if_needed(db_path: dbPath)
+        XCTAssertNoThrow(try Ndb.compact_if_needed(db_path: dbPath))
 
         // Then: lock.mdb should NOT exist (it was deleted during compaction)
         XCTAssertFalse(
@@ -279,7 +279,7 @@ final class NdbCompactionTests: XCTestCase {
         Ndb.set_compact_on_next_launch()
 
         let beforeCompact = Date()
-        Ndb.compact_if_needed(db_path: dbPath)
+        XCTAssertNoThrow(try Ndb.compact_if_needed(db_path: dbPath))
         let afterCompact = Date()
 
         guard let lastDate = Ndb.get_last_compact_date() else {
