@@ -25,6 +25,7 @@
 - Wallet view now immediately clears stale data when switching wallets (Daniel D'Aquino)
 - Fixed issue where the app could display an error message when using another NWC wallet in parallel (Daniel D'Aquino)
 - Fix memory corruption crash when creating empty filters (Daniel D'Aquino)
+- Fixed startup crash when app performs long-running compaction procedure (Daniel D'Aquino)
 
 
 
