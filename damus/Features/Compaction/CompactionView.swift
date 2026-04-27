@@ -24,19 +24,45 @@ struct CompactionView: View {
     let keypair: Keypair
     let appDelegate: AppDelegate?
 
-    @State private var isCompacting: Bool = false
-    @State private var compactionComplete: Bool = false
-    @State private var compactionError: String? = nil
+    /// The current state of the startup compaction flow.
+    enum CompactionState {
+        case idle
+        case compacting(progress: Double, stepTitle: String, stepDetail: String)
+        case failed(error: String)
+        case complete
+
+        /// The initial visible state shown when compaction begins.
+        static var initialCompactingState: CompactionState {
+            return .compacting(
+                progress: 0.05,
+                stepTitle: NSLocalizedString("Preparing database compaction", comment: "Initial title shown during database compaction"),
+                stepDetail: NSLocalizedString("Checking the database and getting everything ready.", comment: "Initial detail shown during database compaction")
+            )
+        }
+    }
+
+    @State private var compactionState: CompactionState = .idle
     @State private var hasStartedCompactionFlow: Bool = false
 
     var body: some View {
         Group {
-            if compactionComplete {
+            switch compactionState {
+            case .complete:
                 ContentView(keypair: keypair, appDelegate: appDelegate)
-            } else {
+
+            case .idle:
                 CompactionLoadingView(
-                    isCompacting: isCompacting,
-                    error: compactionError,
+                    state: .compacting(
+                        progress: 0.0,
+                        stepTitle: NSLocalizedString("Preparing database compaction", comment: "Title shown before database compaction starts"),
+                        stepDetail: NSLocalizedString("Checking whether database optimization is needed.", comment: "Detail shown before database compaction starts")
+                    ),
+                    continueAfterError: continueAfterError
+                )
+
+            case .compacting, .failed:
+                CompactionLoadingView(
+                    state: compactionState,
                     continueAfterError: continueAfterError
                 )
             }
@@ -60,24 +86,32 @@ struct CompactionView: View {
 
         let needsCompaction = UserDefaults.standard.bool(forKey: Ndb.compact_on_next_launch_key)
         guard needsCompaction else {
-            compactionComplete = true
+            compactionState = .complete
             return
         }
 
-        isCompacting = true
+        compactionState = CompactionState.initialCompactingState
 
         Task.detached(priority: .userInitiated) {
             do {
-                try Ndb.compact_if_needed()
+                try Ndb.compact_if_needed(
+                    progress: { progress in
+                        Task { @MainActor in
+                            compactionState = .compacting(
+                                progress: progress.fractionCompleted,
+                                stepTitle: progress.step.title,
+                                stepDetail: progress.step.detail
+                            )
+                        }
+                    }
+                )
 
                 await MainActor.run {
-                    isCompacting = false
-                    compactionComplete = true
+                    compactionState = .complete
                 }
             } catch {
                 await MainActor.run {
-                    isCompacting = false
-                    compactionError = error.localizedDescription
+                    compactionState = .failed(error: error.localizedDescription)
                 }
             }
         }
@@ -85,7 +119,7 @@ struct CompactionView: View {
 
     /// Continues to the main content after the user acknowledges a compaction error.
     private func continueAfterError() {
-        compactionComplete = true
+        compactionState = .complete
     }
 }
 
@@ -94,86 +128,160 @@ struct CompactionView: View {
 /// Shows a spinner and informative text to the user while the compaction process runs.
 /// If compaction fails, it shows the error and requires explicit acknowledgement before continuing.
 struct CompactionLoadingView: View {
-    let isCompacting: Bool
-    let error: String?
+    let state: CompactionView.CompactionState
     let continueAfterError: () -> Void
+
+    /// A percentage label for the current compaction progress.
+    private var progressPercentageText: String? {
+        guard case .compacting(let progress, _, _) = state else { return nil }
+
+        let percentage = Int((progress * 100).rounded())
+        return String(
+            format: NSLocalizedString("%d%% complete", comment: "Accessibility and status label showing database compaction progress percentage"),
+            percentage
+        )
+    }
 
     var body: some View {
         ZStack {
-            Color(uiColor: .systemBackground)
-                .ignoresSafeArea()
+            LinearGradient(
+                colors: [
+                    Color(uiColor: .systemBackground),
+                    Color.accentColor.opacity(0.08)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
 
-            VStack(spacing: 20) {
-                Image("icon")
-                    .resizable()
-                    .frame(width: 80, height: 80)
-                    .cornerRadius(16)
-
-                if isCompacting {
-                    ProgressView()
-                        .scaleEffect(1.5)
-                        .padding()
+            VStack(spacing: 28) {
+                VStack(spacing: 16) {
+                    Image("icon")
+                        .resizable()
+                        .frame(width: 88, height: 88)
+                        .cornerRadius(20)
+                        .shadow(color: .black.opacity(0.08), radius: 12, y: 6)
 
                     Text("Optimizing Database", comment: "Title shown during database compaction")
-                        .font(.headline)
+                        .font(.title2.weight(.semibold))
                         .foregroundColor(.primary)
 
-                    Text("This may take a moment…", comment: "Subtitle shown during database compaction")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
+                    if let progressPercentageText {
+                        Text(progressPercentageText)
+                            .font(.caption.weight(.semibold))
+                            .foregroundColor(.accentColor)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(
+                                Capsule()
+                                    .fill(Color.accentColor.opacity(0.12))
+                            )
+                    }
                 }
 
-                if let error {
-                    VStack(spacing: 12) {
-                        Image(systemName: "exclamationmark.triangle")
-                            .font(.system(size: 40))
+                switch state {
+                case .idle, .complete:
+                    EmptyView()
+
+                case .compacting(let progress, let stepTitle, let stepDetail):
+                    VStack(spacing: 20) {
+                        ProgressView(value: progress, total: 1.0)
+                            .progressViewStyle(.linear)
+                            .tint(.accentColor)
+                            .scaleEffect(x: 1, y: 1.4, anchor: .center)
+                        
+                        VStack(alignment: .leading, spacing: 14) {                                
+                            Text(stepTitle)
+                                .font(.headline)
+                                .foregroundColor(.primary)
+
+                            Text(stepDetail)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.leading)
+                        }
+                        .padding(20)
+                        .frame(maxWidth: 420, alignment: .leading)
+                        .background(
+                            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                .fill(Color(uiColor: .secondarySystemBackground))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                .stroke(Color.primary.opacity(0.06), lineWidth: 1)
+                        )
+
+                        Label(
+                            NSLocalizedString("This can take a few minutes. Please keep the app open.", comment: "Subtitle shown during long-running database compaction"),
+                            systemImage: "clock"
+                        )
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: 420)
+                    }
+
+                case .failed(let error):
+                    VStack(spacing: 16) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 42))
                             .foregroundColor(.orange)
 
-                        Text("Compaction Warning", comment: "Title shown when database compaction encounters an error")
-                            .font(.headline)
-                            .foregroundColor(.primary)
+                        VStack(spacing: 8) {
+                            Text("Compaction Warning", comment: "Title shown when database compaction encounters an error")
+                                .font(.headline)
+                                .foregroundColor(.primary)
 
-                        Text(error)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
+                            Text(error)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
 
-                        Text("The app can continue, but some storage may not have been freed.", comment: "Message shown when compaction fails but app can continue after acknowledgement")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
+                            Text("The app can continue, but some storage may not have been freed.", comment: "Message shown when compaction fails but app can continue after acknowledgement")
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
 
                         Button(action: continueAfterError) {
                             Text("Continue", comment: "Button title used to continue into the app after acknowledging a compaction error")
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.borderedProminent)
-                        .padding(.top, 8)
-                        .padding(.horizontal)
+                        .padding(.top, 4)
                     }
+                    .padding(20)
+                    .frame(maxWidth: 420)
+                    .background(
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .fill(Color(uiColor: .secondarySystemBackground))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .stroke(Color.orange.opacity(0.2), lineWidth: 1)
+                    )
                 }
             }
-            .padding()
+            .padding(.horizontal, 24)
+            .padding(.vertical, 32)
         }
     }
 }
 
 #Preview {
     CompactionLoadingView(
-        isCompacting: true,
-        error: nil,
+        state: CompactionView.CompactionState.compacting(
+            progress: 0.55,
+            stepTitle: "Creating compacted snapshot",
+            stepDetail: "Copying data into a smaller optimized database file. This is usually the longest step."
+        ),
         continueAfterError: {}
     )
 }
 
 #Preview("With Error") {
     CompactionLoadingView(
-        isCompacting: false,
-        error: "Failed to compact database",
+        state: CompactionView.CompactionState.failed(error: "Failed to compact database"),
         continueAfterError: {}
     )
 }
