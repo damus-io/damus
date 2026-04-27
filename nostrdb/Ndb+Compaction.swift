@@ -5,6 +5,84 @@
 
 import Foundation
 
+/// A progress update emitted while database compaction advances through its major stages.
+struct NdbCompactionProgress: Equatable {
+    /// A stable identifier for the current compaction stage.
+    enum Step: Int, CaseIterable, Equatable {
+        case preparing
+        case creatingTempDirectory
+        case openingDatabase
+        case creatingSnapshot
+        case validatingSnapshot
+        case replacingDatabase
+        case cleaningUp
+        case completed
+
+        /// The user-facing title for the current stage.
+        var title: String {
+            switch self {
+            case .preparing:
+                return NSLocalizedString("Preparing database compaction", comment: "Compaction progress stage title")
+            case .creatingTempDirectory:
+                return NSLocalizedString("Creating temporary workspace", comment: "Compaction progress stage title")
+            case .openingDatabase:
+                return NSLocalizedString("Opening database", comment: "Compaction progress stage title")
+            case .creatingSnapshot:
+                return NSLocalizedString("Creating compacted snapshot", comment: "Compaction progress stage title")
+            case .validatingSnapshot:
+                return NSLocalizedString("Validating compacted database", comment: "Compaction progress stage title")
+            case .replacingDatabase:
+                return NSLocalizedString("Replacing database files", comment: "Compaction progress stage title")
+            case .cleaningUp:
+                return NSLocalizedString("Cleaning up temporary files", comment: "Compaction progress stage title")
+            case .completed:
+                return NSLocalizedString("Finishing up", comment: "Compaction progress stage title")
+            }
+        }
+
+        /// A short user-facing description for the current stage.
+        var detail: String {
+            switch self {
+            case .preparing:
+                return NSLocalizedString("Checking the database and getting everything ready.", comment: "Compaction progress stage detail")
+            case .creatingTempDirectory:
+                return NSLocalizedString("Setting up a temporary location for the compacted copy.", comment: "Compaction progress stage detail")
+            case .openingDatabase:
+                return NSLocalizedString("Opening the existing database safely in the background.", comment: "Compaction progress stage detail")
+            case .creatingSnapshot:
+                return NSLocalizedString("Copying data into a smaller optimized database file. This is usually the longest step.", comment: "Compaction progress stage detail")
+            case .validatingSnapshot:
+                return NSLocalizedString("Making sure the compacted database looks valid before replacing the original.", comment: "Compaction progress stage detail")
+            case .replacingDatabase:
+                return NSLocalizedString("Swapping in the optimized database files.", comment: "Compaction progress stage detail")
+            case .cleaningUp:
+                return NSLocalizedString("Removing temporary files and recording completion.", comment: "Compaction progress stage detail")
+            case .completed:
+                return NSLocalizedString("Database optimization is complete.", comment: "Compaction progress stage detail")
+            }
+        }
+
+        /// The zero-based index of the step in the overall compaction flow.
+        var index: Int {
+            return Self.allCases.firstIndex(of: self) ?? 0
+        }
+
+        /// The total number of steps in the overall compaction flow.
+        static var totalCount: Int {
+            return Self.allCases.count
+        }
+    }
+
+    /// The current compaction stage.
+    let step: Step
+
+    /// The fraction completed for the overall compaction flow.
+    var fractionCompleted: Double {
+        guard Step.totalCount > 1 else { return 1.0 }
+        return Double(step.index) / Double(Step.totalCount - 1)
+    }
+}
+
 /// Defines how often the database should be automatically compacted.
 enum AutoCompactSchedule: String, CaseIterable, Equatable {
     case daily
@@ -162,11 +240,18 @@ extension Ndb {
     ///   5. Remove the temp directory.
     ///   6. Clear the flag so compaction does not run again on the following launch.
     ///
-    /// - Parameter db_path: Override the database directory path.  Pass `nil` (default) to use
-    ///   `Ndb.db_path`.  Mainly useful for testing.
+    /// - Parameters:
+    ///   - db_path: Override the database directory path. Pass `nil` (default) to use
+    ///     `Ndb.db_path`. Mainly useful for testing.
+    ///   - progress: An optional callback invoked as the compaction advances through major stages.
     /// - Throws: `CompactionError` when compaction was requested but could not be completed.
-    static func compact_if_needed(db_path: String? = nil) throws {
+    static func compact_if_needed(
+        db_path: String? = nil,
+        progress: ((NdbCompactionProgress) -> Void)? = nil
+    ) throws {
         guard UserDefaults.standard.bool(forKey: compact_on_next_launch_key) else { return }
+
+        progress?(.init(step: .preparing))
 
         guard let path = db_path ?? Self.db_path else {
             Log.error("compact_if_needed: could not determine db path", for: .storage)
@@ -176,6 +261,7 @@ extension Ndb {
         guard db_file_exists(path: path) else {
             // No database file present yet; nothing to compact — just clear the flag.
             UserDefaults.standard.set(false, forKey: compact_on_next_launch_key)
+            progress?(.init(step: .completed))
             return
         }
 
@@ -186,12 +272,16 @@ extension Ndb {
         // Clean up any leftover temp directory from a previously failed attempt.
         try? FileManager.default.removeItem(atPath: tempPath)
 
+        progress?(.init(step: .creatingTempDirectory))
+
         do {
             try FileManager.default.createDirectory(atPath: tempPath, withIntermediateDirectories: true)
         } catch {
             Log.error("compact_if_needed: failed to create temp dir: %@", for: .storage, String(describing: error))
             throw CompactionError.createTempDirectoryFailed(underlyingError: error)
         }
+
+        progress?(.init(step: .openingDatabase))
 
         // Open a temporary Ndb instance just to drive the compaction.
         guard let tempNdb = Ndb(path: path) else {
@@ -202,6 +292,8 @@ extension Ndb {
         // Ensure the temporary Ndb is closed regardless of how this function exits.
         defer { tempNdb.close() }
 
+        progress?(.init(step: .creatingSnapshot))
+
         do {
             try tempNdb.compact(to: tempPath)
         } catch {
@@ -209,8 +301,10 @@ extension Ndb {
             try? FileManager.default.removeItem(atPath: tempPath)
             throw CompactionError.snapshotFailed(underlyingError: error)
         }
-        
+
         tempNdb.close()
+
+        progress?(.init(step: .validatingSnapshot))
 
         // Atomically replace the original data.mdb with the compacted copy.
         let originalDataMdb = URL(fileURLWithPath: "\(path)/\(main_db_file_name)")
@@ -226,6 +320,8 @@ extension Ndb {
             try? FileManager.default.removeItem(atPath: tempPath)
             throw CompactionError.compactedFileMissingOrEmpty(path: compactedDataMdb.path)
         }
+
+        progress?(.init(step: .replacingDatabase))
 
         // Delete the stale lock.mdb BEFORE replacing data.mdb.
         // The temp Ndb wrote reader-table / txn state into lock.mdb that references
@@ -256,6 +352,8 @@ extension Ndb {
             throw CompactionError.postReplaceSizeMismatch(expected: compactedSize, actual: finalSize)
         }
 
+        progress?(.init(step: .cleaningUp))
+
         Log.info("NostrDB compacted successfully", for: .storage)
 
         // Clean up the temp directory (any remaining files such as lock.mdb).
@@ -266,5 +364,7 @@ extension Ndb {
 
         // Clear the flag so we don't compact again on the next launch.
         UserDefaults.standard.set(false, forKey: compact_on_next_launch_key)
+
+        progress?(.init(step: .completed))
     }
 }
