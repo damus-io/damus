@@ -81,6 +81,30 @@ class damusTests: XCTestCase {
         XCTAssertEqual(bytes.count, 32)
     }
     
+    func testSearchHomeHintStateSuggestsMultipleEventsPerUserWhenDisplayedNotesAreLowAndDedupedCountIsMuchHigher() {
+        let hintState = SearchHomeHintState(displayedNotes: 12, totalNotesWithoutPubkeyFilter: 24)
+        
+        XCTAssertTrue(hintState.shouldSuggestMultipleEventsPerUser)
+    }
+    
+    func testSearchHomeHintStateDoesNotSuggestMultipleEventsPerUserWhenDisplayedNotesAreTooHigh() {
+        let hintState = SearchHomeHintState(displayedNotes: 20, totalNotesWithoutPubkeyFilter: 80)
+        
+        XCTAssertFalse(hintState.shouldSuggestMultipleEventsPerUser)
+    }
+    
+    func testSearchHomeHintStateDoesNotSuggestMultipleEventsPerUserWhenTotalNotesAreNotAtLeastDouble() {
+        let hintState = SearchHomeHintState(displayedNotes: 12, totalNotesWithoutPubkeyFilter: 23)
+        
+        XCTAssertFalse(hintState.shouldSuggestMultipleEventsPerUser)
+    }
+    
+    func testSearchHomeHintStateDoesNotSuggestMultipleEventsPerUserWhenThereAreNoDisplayedNotes() {
+        let hintState = SearchHomeHintState(displayedNotes: 0, totalNotesWithoutPubkeyFilter: 100)
+        
+        XCTAssertFalse(hintState.shouldSuggestMultipleEventsPerUser)
+    }
+    
     func testTrimSuffix() {
         let txt = "   bobs   "
         
