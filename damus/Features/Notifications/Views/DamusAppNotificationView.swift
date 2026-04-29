@@ -67,6 +67,8 @@ struct DamusAppNotificationView: View {
                         PurpleExpiryNotificationView(damus_state: self.damus_state, days_remaining: days_remaining, expired: false)
                     case .purple_expired(expiry_date: _):
                         PurpleExpiryNotificationView(damus_state: self.damus_state, days_remaining: 0, expired: true)
+                    case .large_db_compaction_recommended(let database_size_bytes):
+                        LargeDatabaseCompactionNotificationView(damus_state: self.damus_state, database_size_bytes: database_size_bytes)
                 }
             }
             .padding(.horizontal)
@@ -146,6 +148,35 @@ struct DamusAppNotificationView: View {
             return String(format: message_format, String(days_remaining))
         }
     }
+    
+    struct LargeDatabaseCompactionNotificationView: View {
+        let damus_state: DamusState
+        let database_size_bytes: UInt64
+        
+        var body: some View {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(message())
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .font(eventviewsize_to_font(.normal, font_size: damus_state.settings.font_size))
+                
+                NavigationLink(destination: StorageSettingsView(damus_state: damus_state, settings: damus_state.settings), label: {
+                    HStack {
+                        Text("Open Storage Settings", comment: "Button to open StorageSettingsView, where the user can manually schedule database compaction")
+                            .font(eventviewsize_to_font(.normal, font_size: damus_state.settings.font_size))
+                        Image("arrow-right")
+                            .font(eventviewsize_to_font(.normal, font_size: damus_state.settings.font_size))
+                    }
+                })
+            }
+        }
+        
+        func message() -> String {
+            let sizeText = ByteCountFormatter.string(fromByteCount: Int64(database_size_bytes), countStyle: .file)
+            let messageFormat = NSLocalizedString("Your database is currently %@, so automatic optimization was skipped to avoid a long startup delay. This is usually a one-time catch-up step. You can schedule optimization for your next launch.", comment: "A notification message explaining that automatic compaction was skipped because the database is large, and that the user can manually schedule it.")
+            return String(format: messageFormat, sizeText)
+        }
+    }
 }
 
 // `AppIcon` code from: https://stackoverflow.com/a/65153628 and licensed with CC BY-SA 4.0 with the following modifications:
@@ -178,4 +209,8 @@ fileprivate struct AppIcon: View {
 
 #Preview {
     DamusAppNotificationView(damus_state: test_damus_state, notification: .init(content: .purple_expired(expiry_date: 1709156602), timestamp: Date.now))
+}
+
+#Preview {
+    DamusAppNotificationView(damus_state: test_damus_state, notification: .init(content: .large_db_compaction_recommended(database_size_bytes: 12 * 1024 * 1024 * 1024), timestamp: Date.now))
 }

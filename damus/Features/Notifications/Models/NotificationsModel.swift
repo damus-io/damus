@@ -387,5 +387,6 @@ struct DamusAppNotification {
     enum Content: Hashable, Equatable {
         case purple_impending_expiration(days_remaining: Int, expiry_date: UInt64)
         case purple_expired(expiry_date: UInt64)
+        case large_db_compaction_recommended(database_size_bytes: UInt64)
     }
 }

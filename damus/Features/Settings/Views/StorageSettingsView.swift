@@ -56,6 +56,21 @@ struct StorageSettingsView: View {
     @State var showing_compact_alert: Bool = false
     @State fileprivate var auto_compact_schedule: AutoCompactSchedule = Ndb.get_auto_compact_schedule()
     
+    /// Whether the current database is large enough that automatic compaction will be skipped.
+    private var isLargeDatabaseSkippingAutoCompact: Bool {
+        guard let dbPath = Ndb.db_path else { return false }
+        return Ndb.is_large_database(path: dbPath)
+    }
+    
+    /// The auto-compact schedule options currently available to the user.
+    private var availableAutoCompactSchedules: [AutoCompactSchedule] {
+        if settings.developer_mode {
+            return AutoCompactSchedule.allCases
+        }
+        
+        return AutoCompactSchedule.allCases.filter { $0 != .everyMinute }
+    }
+    
     /// Storage categories with cumulative ranges for angle selection (iOS 17+)
     private var categoryRanges: [(category: String, range: Range<Double>)] {
         guard let stats = stats else { return [] }
@@ -357,8 +372,9 @@ struct StorageSettingsView: View {
     }
 
     /// Section that lets the user configure automatic periodic compaction.
+    /// Auto-compact schedule picker and status section.
     ///
-    /// Shows a `Picker` with four schedule options and a caption that describes the
+    /// Shows a `Picker` with the available schedule options and a caption that describes the
     /// current state: either the time remaining until the next compaction or a note
     /// that compaction will run on the next app launch.
     var AutoCompactSection: some View {
@@ -370,7 +386,7 @@ struct StorageSettingsView: View {
                 NSLocalizedString("Automatically compact database", comment: "Setting label for choosing how often to auto-compact the database"),
                 selection: $auto_compact_schedule
             ) {
-                ForEach(AutoCompactSchedule.allCases, id: \.self) { option in
+                ForEach(availableAutoCompactSchedules, id: \.self) { option in
                     Text(option.text_description()).tag(option)
                 }
             }
@@ -385,23 +401,32 @@ struct StorageSettingsView: View {
     /// Shows either the time remaining until the next scheduled compaction or a message
     /// indicating that compaction will happen on the next app launch.
     private var AutoCompactCaption: some View {
-        Group {
-            if auto_compact_schedule == .never {
-                Text("Automatic database compaction is disabled.", comment: "Caption shown when auto-compact is set to never")
-            } else if compact_scheduling_state == .scheduled {
-                Text("Will compact on the next app launch.", comment: "Caption shown when a compaction is already queued for the next launch")
-            } else if let timeRemaining = nextCompactTimeRemaining {
-                Text(
-                    String(
-                        format: NSLocalizedString(
-                            "Next automatic compaction %@.",
-                            comment: "Caption showing how long until the next automatic compaction. %@ is replaced with a human-readable duration like 'in 3 days'."
-                        ),
-                        timeRemaining
+        VStack(alignment: .leading, spacing: 6) {
+            Group {
+                if auto_compact_schedule == .never {
+                    Text("Automatic database compaction is disabled.", comment: "Caption shown when auto-compact is set to never")
+                } else if compact_scheduling_state == .scheduled {
+                    Text("Will compact on the next app launch.", comment: "Caption shown when a compaction is already queued for the next launch")
+                }
+                else if isLargeDatabaseSkippingAutoCompact {
+                    Text("Automatic compaction is currently skipped because your database is very large. Use “Compact Database” above to request a manual compaction on the next app launch.", comment: "Caption shown when automatic compaction is skipped because the database is too large and the user must request compaction manually")
+                } else if let timeRemaining = nextCompactTimeRemaining {
+                    Text(
+                        String(
+                            format: NSLocalizedString(
+                                "Next automatic compaction %@.",
+                                comment: "Caption showing how long until the next automatic compaction. %@ is replaced with a human-readable duration like 'in 3 days'."
+                            ),
+                            timeRemaining
+                        )
                     )
-                )
-            } else {
-                Text("Will compact on the next app launch.", comment: "Caption shown when the scheduled compaction interval has already elapsed")
+                } else {
+                    Text("Will compact on the next app launch.", comment: "Caption shown when the scheduled compaction interval has already elapsed")
+                }
+            }
+            
+            if settings.developer_mode {
+                Text("“Every minute” is a developer-only testing option.", comment: "Caption explaining that the every-minute auto-compact schedule is only intended for developer testing")
             }
         }
         .font(.caption)
@@ -451,7 +476,7 @@ struct StorageSettingsView: View {
                 title: Text("Compact Database", comment: "Confirmation dialog title for database compaction"),
                 message: Text("This will reclaim unused space in the database. The app will need to restart to complete the operation. Proceed?", comment: "Message explaining what database compaction does and that a restart is required."),
                 primaryButton: .default(Text("OK", comment: "Button label indicating user wants to proceed.")) {
-                    Ndb.set_compact_on_next_launch()
+                    Ndb.set_compact_on_next_launch(source: .manual)
                     compact_scheduling_state = .scheduled
                 },
                 secondaryButton: .cancel()

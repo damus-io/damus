@@ -27,16 +27,18 @@ struct CompactionView: View {
     /// The current state of the startup compaction flow.
     enum CompactionState {
         case idle
-        case compacting(progress: Double, stepTitle: String, stepDetail: String)
+        case compacting(progress: Double, stepTitle: String, stepDetail: String, showsLargeDatabaseWarning: Bool)
         case failed(error: String)
         case complete
 
         /// The initial visible state shown when compaction begins.
-        static var initialCompactingState: CompactionState {
+        /// - Parameter showsLargeDatabaseWarning: Whether the loading UI should explain that a large database may take longer to compact.
+        static func initialCompactingState(showsLargeDatabaseWarning: Bool) -> CompactionState {
             return .compacting(
                 progress: 0.05,
                 stepTitle: NSLocalizedString("Preparing database compaction", comment: "Initial title shown during database compaction"),
-                stepDetail: NSLocalizedString("Checking the database and getting everything ready.", comment: "Initial detail shown during database compaction")
+                stepDetail: NSLocalizedString("Checking the database and getting everything ready.", comment: "Initial detail shown during database compaction"),
+                showsLargeDatabaseWarning: showsLargeDatabaseWarning
             )
         }
     }
@@ -55,7 +57,8 @@ struct CompactionView: View {
                     state: .compacting(
                         progress: 0.0,
                         stepTitle: NSLocalizedString("Preparing database compaction", comment: "Title shown before database compaction starts"),
-                        stepDetail: NSLocalizedString("Checking whether database optimization is needed.", comment: "Detail shown before database compaction starts")
+                        stepDetail: NSLocalizedString("Checking whether database optimization is needed.", comment: "Detail shown before database compaction starts"),
+                        showsLargeDatabaseWarning: false
                     ),
                     continueAfterError: continueAfterError
                 )
@@ -90,7 +93,8 @@ struct CompactionView: View {
             return
         }
 
-        compactionState = CompactionState.initialCompactingState
+        let showsLargeDatabaseWarning = Ndb.db_path.map({ Ndb.is_large_database(path: $0) }) ?? false
+        compactionState = CompactionState.initialCompactingState(showsLargeDatabaseWarning: showsLargeDatabaseWarning)
 
         Task.detached(priority: .userInitiated) {
             do {
@@ -100,7 +104,8 @@ struct CompactionView: View {
                             compactionState = .compacting(
                                 progress: progress.fractionCompleted,
                                 stepTitle: progress.step.title,
-                                stepDetail: progress.step.detail
+                                stepDetail: progress.step.detail,
+                                showsLargeDatabaseWarning: showsLargeDatabaseWarning
                             )
                         }
                     }
@@ -133,13 +138,19 @@ struct CompactionLoadingView: View {
 
     /// A percentage label for the current compaction progress.
     private var progressPercentageText: String? {
-        guard case .compacting(let progress, _, _) = state else { return nil }
+        guard case .compacting(let progress, _, _, _) = state else { return nil }
 
         let percentage = Int((progress * 100).rounded())
         return String(
             format: NSLocalizedString("%d%% complete", comment: "Accessibility and status label showing database compaction progress percentage"),
             percentage
         )
+    }
+    
+    /// Whether the current loading state should show the large-database warning.
+    private var showsLargeDatabaseWarning: Bool {
+        guard case .compacting(_, _, _, let showsLargeDatabaseWarning) = state else { return false }
+        return showsLargeDatabaseWarning
     }
 
     var body: some View {
@@ -183,14 +194,14 @@ struct CompactionLoadingView: View {
                 case .idle, .complete:
                     EmptyView()
 
-                case .compacting(let progress, let stepTitle, let stepDetail):
+                case .compacting(let progress, let stepTitle, let stepDetail, _):
                     VStack(spacing: 20) {
                         ProgressView(value: progress, total: 1.0)
                             .progressViewStyle(.linear)
                             .tint(.accentColor)
                             .scaleEffect(x: 1, y: 1.4, anchor: .center)
                         
-                        VStack(alignment: .leading, spacing: 14) {                                
+                        VStack(alignment: .leading, spacing: 14) {
                             Text(stepTitle)
                                 .font(.headline)
                                 .foregroundColor(.primary)
@@ -199,6 +210,8 @@ struct CompactionLoadingView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.leading)
+                            
+
                         }
                         .padding(20)
                         .frame(maxWidth: 420, alignment: .leading)
@@ -212,7 +225,9 @@ struct CompactionLoadingView: View {
                         )
 
                         Label(
-                            NSLocalizedString("This can take a few minutes. Please keep the app open.", comment: "Subtitle shown during long-running database compaction"),
+                            showsLargeDatabaseWarning
+                            ? NSLocalizedString("Your database is very large, so this optimization may take a few minutes. This is usually a one-time catch-up cost, and future optimizations should be faster once the database has been compacted. Please keep the app open.", comment: "Subtitle shown during long-running compaction when the database is large")
+                            : NSLocalizedString("This can take several seconds. Please keep the app open.", comment: "Subtitle shown during long-running database compaction"),
                             systemImage: "clock"
                         )
                         .font(.footnote)
@@ -273,7 +288,20 @@ struct CompactionLoadingView: View {
         state: CompactionView.CompactionState.compacting(
             progress: 0.55,
             stepTitle: "Creating compacted snapshot",
-            stepDetail: "Copying data into a smaller optimized database file. This is usually the longest step."
+            stepDetail: "Copying data into a smaller optimized database file. This is usually the longest step.",
+            showsLargeDatabaseWarning: false
+        ),
+        continueAfterError: {}
+    )
+}
+
+#Preview("Large database warning") {
+    CompactionLoadingView(
+        state: CompactionView.CompactionState.compacting(
+            progress: 0.55,
+            stepTitle: "Creating compacted snapshot",
+            stepDetail: "Copying data into a smaller optimized database file. This is usually the longest step.",
+            showsLargeDatabaseWarning: true
         ),
         continueAfterError: {}
     )

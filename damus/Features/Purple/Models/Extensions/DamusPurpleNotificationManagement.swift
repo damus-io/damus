@@ -16,6 +16,7 @@ extension DamusPurple {
     
     func check_and_send_app_notifications_if_needed(handler: NotificationHandlerFunction) async {
         await self.check_and_send_purple_expiration_notifications_if_needed(handler: handler)
+        await self.check_and_send_large_db_compaction_notification_if_needed(handler: handler)
     }
     
     /// Checks if we need to send a DamusPurple impending expiration notification to the user, and sends them if needed.
@@ -52,6 +53,23 @@ extension DamusPurple {
                 timestamp: purple_expiration_date)
             )
         }
+    }
+    
+    /// Sends an in-app reminder when automatic compaction was skipped because the database is too large.
+    ///
+    /// This uses a persisted pending flag so the reminder can be surfaced in the notifications tab
+    /// without blocking startup. The reminder is cleared once it has been emitted.
+    private func check_and_send_large_db_compaction_notification_if_needed(handler: NotificationHandlerFunction) async {
+        guard Ndb.is_large_db_compaction_notification_pending() else { return }
+        guard let dbPath = Ndb.db_path else { return }
+        guard let databaseSize = Ndb.database_file_size(path: dbPath) else { return }
+        
+        await handler(.init(
+            content: .large_db_compaction_recommended(database_size_bytes: databaseSize),
+            timestamp: Date.now
+        ))
+        
+        Ndb.set_large_db_compaction_notification_pending(false)
     }
 }
 
