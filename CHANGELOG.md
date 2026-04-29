@@ -1,3 +1,37 @@
+## [1.17] - 2026-04-22
+
+### Added
+
+- Automatic lossless storage optimization (Daniel D'Aquino)
+- Added "Compact Database" button in Settings → Storage that reclaims unused space by compacting the NostrDB on the next app launch (Daniel D'Aquino)
+- Full container file breakdown in storage settings export (Daniel D'Aquino)
+- Show client name on events when available (alltheseas)
+- Add client tag to published events to identify Damus (alltheseas)
+- Storage usage statistics view in Settings (Daniel D'Aquino)
+- Added GIF keyboard support (Damus Labs only) (ericholguin)
+
+
+### Changed
+
+- Redesigned media blur overlay to look like intentional protection instead of a broken state (alltheseas)
+- Moved clear cache button to storage settings (Daniel D'Aquino)
+
+
+### Fixed
+
+- Fixed issue where mentioned profile names would not render properly (Daniel D'Aquino)
+- Fix stale relay list causing inability to disconnect relays (alltheseas)
+- Fixed issue where temporary files would not get cleaned up (Daniel D'Aquino)
+- Wallet view now immediately clears stale data when switching wallets (Daniel D'Aquino)
+- Fixed issue where the app could display an error message when using another NWC wallet in parallel (Daniel D'Aquino)
+- Fix memory corruption crash when creating empty filters (Daniel D'Aquino)
+- Fixed startup crash when app performs long-running compaction procedure (Daniel D'Aquino)
+
+
+
+[1.17]: https://github.com/damus-io/damus/releases/tag/v1.17
+
+
 ## [1.16.1] - 2026-02-17
 
 ### Added
