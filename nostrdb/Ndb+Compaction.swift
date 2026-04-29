@@ -85,6 +85,7 @@ struct NdbCompactionProgress: Equatable {
 
 /// Defines how often the database should be automatically compacted.
 enum AutoCompactSchedule: String, CaseIterable, Equatable {
+    case everyMinute
     case daily
     case weekly
     case monthly
@@ -93,6 +94,8 @@ enum AutoCompactSchedule: String, CaseIterable, Equatable {
     /// Human-readable label shown in the settings UI.
     func text_description() -> String {
         switch self {
+        case .everyMinute:
+            return NSLocalizedString("Every minute", comment: "Auto-compact schedule option: compact every minute for developer testing")
         case .daily:
             return NSLocalizedString("Once a day", comment: "Auto-compact schedule option: compact once a day")
         case .weekly:
@@ -107,12 +110,26 @@ enum AutoCompactSchedule: String, CaseIterable, Equatable {
     /// The time interval (in seconds) between automatic compactions, or `nil` for `.never`.
     var interval: TimeInterval? {
         switch self {
-        case .daily:   return 60 * 60 * 24
-        case .weekly:  return 60 * 60 * 24 * 7
-        case .monthly: return 60 * 60 * 24 * 30
-        case .never:   return nil
+        case .everyMinute: return 60
+        case .daily:       return 60 * 60 * 24
+        case .weekly:      return 60 * 60 * 24 * 7
+        case .monthly:     return 60 * 60 * 24 * 30
+        case .never:       return nil
         }
     }
+}
+
+/// Describes why a compaction was scheduled for the next launch.
+enum NdbCompactionRequestSource: String, Equatable {
+    case automatic
+    case manual
+}
+
+/// Describes the result of evaluating whether an automatic compaction should proceed.
+enum AutoCompactionDecision: Equatable {
+    case noAction
+    case scheduled
+    case skippedBecauseDatabaseTooLarge(databaseSizeBytes: UInt64)
 }
 
 extension Ndb {
@@ -175,8 +192,14 @@ extension Ndb {
     /// Name of the temporary subdirectory created during an in-place compaction.
     private static let compactTempDirName = "ndb_compact_temp"
 
+    /// Databases at or above this size skip automatic compaction and require explicit user opt-in.
+    static let large_database_compaction_threshold_bytes: UInt64 = 10 * 1024 * 1024 * 1024
+
     /// The `UserDefaults` key used to signal that the database should be compacted on the next app launch.
     static let compact_on_next_launch_key = "ndb_compact_on_next_launch"
+
+    /// The `UserDefaults` key used to persist why compaction was scheduled.
+    static let compact_on_next_launch_source_key = "ndb_compact_on_next_launch_source"
 
     /// The `UserDefaults` key used to persist the auto-compact schedule (stored as raw string).
     static let auto_compact_schedule_key = "ndb_auto_compact_schedule"
@@ -184,12 +207,74 @@ extension Ndb {
     /// The `UserDefaults` key used to record when the last successful compaction occurred.
     static let last_compact_date_key = "ndb_last_compact_date"
 
+    /// The `UserDefaults` key used to remember that a large-database compaction reminder should be shown.
+    static let large_db_compaction_notification_pending_key = "ndb_large_db_compaction_notification_pending"
+
     /// Requests that the database be compacted the next time the app launches.
     ///
     /// Call this to schedule a one-time compaction. The flag is cleared automatically after
     /// a successful compaction in `compact_if_needed()`.
-    static func set_compact_on_next_launch() {
+    /// - Parameter source: Whether the request came from automatic scheduling or explicit user action.
+    static func set_compact_on_next_launch(source: NdbCompactionRequestSource = .manual) {
         UserDefaults.standard.set(true, forKey: compact_on_next_launch_key)
+        UserDefaults.standard.set(source.rawValue, forKey: compact_on_next_launch_source_key)
+    }
+
+    /// Returns the source of the currently scheduled compaction request, if any.
+    static func get_compact_on_next_launch_source() -> NdbCompactionRequestSource? {
+        guard UserDefaults.standard.bool(forKey: compact_on_next_launch_key) else { return nil }
+        guard let rawValue = UserDefaults.standard.string(forKey: compact_on_next_launch_source_key) else {
+            return .manual
+        }
+        return NdbCompactionRequestSource(rawValue: rawValue) ?? .manual
+    }
+
+    /// Clears any pending compaction request and its associated metadata.
+    static func clear_compact_on_next_launch() {
+        UserDefaults.standard.set(false, forKey: compact_on_next_launch_key)
+        UserDefaults.standard.removeObject(forKey: compact_on_next_launch_source_key)
+    }
+
+    /// Returns the size of the main LMDB file in bytes, or `nil` if it cannot be determined.
+    /// - Parameter path: The database directory path.
+    static func database_file_size(path: String) -> UInt64? {
+        let dataPath = "\(path)/\(main_db_file_name)"
+        guard let attributes = try? FileManager.default.attributesOfItem(atPath: dataPath),
+              let sizeValue = attributes[.size] else {
+            return nil
+        }
+        
+        if let number = sizeValue as? NSNumber {
+            return number.uint64Value
+        }
+        
+        if let uint64 = sizeValue as? UInt64 {
+            return uint64
+        }
+        
+        if let int = sizeValue as? Int {
+            return UInt64(int)
+        }
+        
+        return nil
+    }
+
+    /// Returns whether the database at `path` is considered large enough to skip automatic compaction.
+    /// - Parameter path: The database directory path.
+    static func is_large_database(path: String) -> Bool {
+        guard let size = database_file_size(path: path) else { return false }
+        return size >= large_database_compaction_threshold_bytes
+    }
+
+    /// Returns whether a large-database compaction reminder is pending.
+    static func is_large_db_compaction_notification_pending() -> Bool {
+        return UserDefaults.standard.bool(forKey: large_db_compaction_notification_pending_key)
+    }
+
+    /// Marks whether a large-database compaction reminder should be shown.
+    /// - Parameter pending: `true` to show the reminder, `false` to clear it.
+    static func set_large_db_compaction_notification_pending(_ pending: Bool) {
+        UserDefaults.standard.set(pending, forKey: large_db_compaction_notification_pending_key)
     }
 
     /// Reads the persisted auto-compact schedule from `UserDefaults`.
@@ -214,19 +299,38 @@ extension Ndb {
     }
 
     /// Sets the compact-on-next-launch flag if the scheduled interval has elapsed since the
-    /// last successful compaction.
+    /// last successful compaction and the database is not too large for automatic compaction.
     ///
     /// Call this once on app startup **before** `compact_if_needed()`.
-    static func schedule_auto_compact_if_needed() {
+    /// - Parameter db_path: Override the database directory path. Pass `nil` (default) to use `Ndb.db_path`.
+    /// - Returns: The decision taken for this launch.
+    static func schedule_auto_compact_if_needed(db_path: String? = nil) -> AutoCompactionDecision {
         let schedule = get_auto_compact_schedule()
-        guard let interval = schedule.interval else { return }
+        guard let interval = schedule.interval else { return .noAction }
 
         let now = Date()
         let lastDate = get_last_compact_date() ?? .distantPast
-        guard now.timeIntervalSince(lastDate) >= interval else { return }
+        guard now.timeIntervalSince(lastDate) >= interval else { return .noAction }
+
+        guard let path = db_path ?? Self.db_path else {
+            Log.error("schedule_auto_compact_if_needed: could not determine db path", for: .storage)
+            return .noAction
+        }
+
+        guard db_file_exists(path: path) else {
+            return .noAction
+        }
+
+        if is_large_database(path: path) {
+            let databaseSize = database_file_size(path: path) ?? 0
+            Log.info("Auto-compact skipped because database is too large: %d bytes", for: .storage, databaseSize)
+            set_large_db_compaction_notification_pending(true)
+            return .skippedBecauseDatabaseTooLarge(databaseSizeBytes: databaseSize)
+        }
 
         Log.info("Auto-compact: interval elapsed — scheduling compaction on next launch", for: .storage)
-        set_compact_on_next_launch()
+        set_compact_on_next_launch(source: .automatic)
+        return .scheduled
     }
 
     /// Compacts the NostrDB database files if the compact-on-next-launch flag is set.
@@ -260,7 +364,16 @@ extension Ndb {
 
         guard db_file_exists(path: path) else {
             // No database file present yet; nothing to compact — just clear the flag.
-            UserDefaults.standard.set(false, forKey: compact_on_next_launch_key)
+            clear_compact_on_next_launch()
+            progress?(.init(step: .completed))
+            return
+        }
+
+        if get_compact_on_next_launch_source() == .automatic, is_large_database(path: path) {
+            let databaseSize = database_file_size(path: path) ?? 0
+            Log.info("compact_if_needed: skipping automatic compaction because database is too large: %d bytes", for: .storage, databaseSize)
+            set_large_db_compaction_notification_pending(true)
+            clear_compact_on_next_launch()
             progress?(.init(step: .completed))
             return
         }
@@ -362,8 +475,11 @@ extension Ndb {
         // Record the date of this successful compaction for the auto-compact scheduler.
         UserDefaults.standard.set(Date(), forKey: last_compact_date_key)
 
+        // Clear any pending reminder because the user has now completed compaction.
+        set_large_db_compaction_notification_pending(false)
+
         // Clear the flag so we don't compact again on the next launch.
-        UserDefaults.standard.set(false, forKey: compact_on_next_launch_key)
+        clear_compact_on_next_launch()
 
         progress?(.init(step: .completed))
     }
