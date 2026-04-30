@@ -79,8 +79,9 @@ enum MediaUpload {
 
 protocol ImageUploadModelProtocol {
     init()
-    
+
     func start(media: MediaUpload, uploader: any MediaUploaderProtocol, mediaType: ImageUploadMediaType, keypair: Keypair?) async -> ImageUploadResult
+    func startBlossomUpload(media: MediaUpload, keypair: Keypair?, serverURL: String?) async -> ImageUploadResult
 }
 
 class ImageUploadModel: NSObject, URLSessionTaskDelegate, ObservableObject, ImageUploadModelProtocol {
@@ -114,6 +115,42 @@ class ImageUploadModel: NSObject, URLSessionTaskDelegate, ObservableObject, Imag
         return res
     }
     
+    func startBlossomUpload(media: MediaUpload, keypair: Keypair?, serverURL: String?) async -> ImageUploadResult {
+        guard let keypair else {
+            return .failed(BlossomError.authError("Keypair required for Blossom upload"))
+        }
+        guard let serverURL, let server = BlossomServerURL(string: serverURL) else {
+            return .failed(BlossomError.invalidServerURL)
+        }
+
+        do {
+            let descriptor = try await BlossomUploader.upload(
+                media: media,
+                server: server,
+                keypair: keypair,
+                delegate: self
+            )
+
+            DispatchQueue.main.async {
+                self.progress = nil
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            }
+            return .success(descriptor.url)
+        } catch {
+            DispatchQueue.main.async {
+                self.progress = nil
+                if let nsError = error as NSError?,
+                   nsError.domain == NSURLErrorDomain,
+                   nsError.code == NSURLErrorCancelled {
+                    print("Blossom upload cancelled by user, no feedback triggered.")
+                } else {
+                    UINotificationFeedbackGenerator().notificationOccurred(.error)
+                }
+            }
+            return .failed(error)
+        }
+    }
+
     func urlSession(_ session: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
         DispatchQueue.main.async {
             self.progress = Double(totalBytesSent) / Double(totalBytesExpectedToSend)

@@ -37,6 +37,7 @@ struct EditBannerImageView: View {
                 context: .normal,
                 keypair: damus_state.keypair,
                 pubkey: damus_state.pubkey,
+                blossom_server_url: damus_state.settings.blossom_server_url,
                 current_image_url: $banner_image,
                 upload_observer: viewModel,
                 callback: callback

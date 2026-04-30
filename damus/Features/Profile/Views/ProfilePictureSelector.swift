@@ -38,6 +38,7 @@ struct EditProfilePictureView: View {
                 context: .profile_picture,
                 keypair: damus_state?.keypair,
                 pubkey: pubkey,
+                blossom_server_url: damus_state?.settings.blossom_server_url,
                 current_image_url: $profile_url,
                 upload_observer: uploadObserver,
                 callback: callback

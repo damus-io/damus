@@ -111,7 +111,10 @@ class UserSettingsStore: ObservableObject {
     
     @StringSetting(key: "default_media_uploader", default_value: .nostrBuild)
     var default_media_uploader: MediaUploader
-    
+
+    @Setting(key: "blossom_server_url", default_value: "https://blossom.nostr.build")
+    var blossom_server_url: String
+
     @Setting(key: "show_wallet_selector", default_value: false)
     var show_wallet_selector: Bool
     
@@ -343,15 +346,6 @@ class UserSettingsStore: ObservableObject {
         }
     }
     
-    var tenor_api_key: String {
-        get {
-            return internal_tenor_api_key ?? ""
-        }
-        set {
-            internal_tenor_api_key = newValue == "" ? nil : newValue
-        }
-    }
-    
     // These internal keys are necessary because entries in the keychain need to be Optional,
     // but the translation view needs non-Optional String in order to use them as Bindings.
     @KeychainStorage(account: "deepl_apikey")
@@ -365,9 +359,6 @@ class UserSettingsStore: ObservableObject {
     
     @KeychainStorage(account: "libretranslate_apikey")
     var internal_libretranslate_api_key: String?
-    
-    @KeychainStorage(account: "tenor_api_key")
-    var internal_tenor_api_key: String?
     
     @KeychainStorage(account: "nostr_wallet_connect")
     var nostr_wallet_connect: String? // TODO: strongly type this to WalletConnectURL

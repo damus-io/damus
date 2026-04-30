@@ -44,6 +44,7 @@ struct EditPictureControl: View {
         context: Model.Context,
         keypair: Keypair?,
         pubkey: Pubkey,
+        blossom_server_url: String? = nil,
         style: Style? = nil,
         current_image_url: Binding<URL?>,
         upload_observer: ImageUploadingObserver? = nil,
@@ -55,6 +56,7 @@ struct EditPictureControl: View {
             current_image_url: current_image_url,
             keypair: keypair,
             uploader: uploader,
+            blossom_server_url: blossom_server_url,
             callback: callback
         )
         self.init(model: model, style: style, callback: callback)
@@ -336,6 +338,8 @@ class EditPictureControlViewModel<T: ImageUploadModelProtocol>: ObservableObject
     let keypair: Keypair?
     /// The uploader service to be used when uploading
     let uploader: any MediaUploaderProtocol
+    /// The Blossom server URL, needed when uploader is Blossom
+    let blossom_server_url: String?
     /// An image upload observer, that can be set when the parent view wants to keep track of the upload process
     let image_upload_observer: ImageUploadingObserver?
     /// A callback to receive new image urls once the picture selection and upload is complete.
@@ -358,6 +362,7 @@ class EditPictureControlViewModel<T: ImageUploadModelProtocol>: ObservableObject
         state: PictureSelectionState = .ready,
         keypair: Keypair?,
         uploader: any MediaUploaderProtocol,
+        blossom_server_url: String? = nil,
         image_upload_observer: ImageUploadingObserver? = nil,
         callback: @escaping (URL?) -> Void
     ) {
@@ -367,6 +372,7 @@ class EditPictureControlViewModel<T: ImageUploadModelProtocol>: ObservableObject
         self.state = state
         self.keypair = keypair
         self.uploader = uploader
+        self.blossom_server_url = blossom_server_url
         self.image_upload_observer = image_upload_observer
         self.callback = callback
     }
@@ -521,7 +527,12 @@ class EditPictureControlViewModel<T: ImageUploadModelProtocol>: ObservableObject
         self.state = .uploading(media: media, upload: image_upload, uploadObserver: upload_observer)
         upload_observer.isLoading = true
         Task {
-            let res = await image_upload.start(media: media, uploader: uploader, mediaType: self.context.mediaType, keypair: keypair)
+            let res: ImageUploadResult
+            if uploader.isBlossom {
+                res = await image_upload.startBlossomUpload(media: media, keypair: keypair, serverURL: blossom_server_url)
+            } else {
+                res = await image_upload.start(media: media, uploader: uploader, mediaType: self.context.mediaType, keypair: keypair)
+            }
             
             switch res {
             case .success(let urlString):

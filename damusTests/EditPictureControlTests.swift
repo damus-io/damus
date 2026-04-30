@@ -270,6 +270,38 @@ final class EditPictureControlTests: XCTestCase {
         XCTAssertEqual(view_model.state.step, SelectionState.Step.ready)
     }
     
+    @MainActor
+    func testBlossomUploaderRoutesToBlossomPath() async {
+        MockImageUploadModel.resetFlags()
+        let expectation = XCTestExpectation(description: "Received URL via Blossom")
+        let blossom_uploader = MockBlossomUploader()
+        let view_model = ViewModel(
+            context: .normal,
+            pubkey: mock_pubkey,
+            current_image_url: .constant(mock_url),
+            state: .ready,
+            keypair: mock_keypair,
+            uploader: blossom_uploader,
+            blossom_server_url: "https://blossom.example.com",
+            callback: { url in
+                XCTAssertEqual(url, URL(string: get_test_uploaded_url()))
+                expectation.fulfill()
+            }
+        )
+
+        view_model.select_image_from_library()
+        view_model.request_upload_authorization(.uiimage(test_image))
+        view_model.confirm_upload_authorization()
+        XCTAssertEqual(view_model.state.step, SelectionState.Step.uploading)
+
+        await fulfillment(of: [expectation], timeout: 5)
+        XCTAssertEqual(view_model.state.step, SelectionState.Step.ready)
+
+        XCTAssertTrue(MockImageUploadModel.lastBlossomCalled, "Blossom uploader should route to startBlossomUpload")
+        XCTAssertFalse(MockImageUploadModel.lastStartCalled, "Blossom uploader should not call the NIP-96 start path")
+        XCTAssertEqual(MockImageUploadModel.lastServerURL, "https://blossom.example.com", "Blossom server URL should be forwarded to startBlossomUpload")
+    }
+
     /*
     @MainActor
     func testEditPictureControlFirstTimeSetup() async {
@@ -336,23 +368,52 @@ final class EditPictureControlTests: XCTestCase {
         var supportsVideo: Bool { return true }
         var requiresNip98: Bool { return true }
         var postAPI: String { return "http://localhost:8000" }
-        
+
         func getMediaURL(from data: Data) -> String? {
             return "http://localhost:8000"
         }
-        
+
         func mediaTypeValue(for mediaType: damus.ImageUploadMediaType) -> String? {
             return "media_type_value"
         }
-        
+
         var uploadCalled = false
         var uploadCompletion: (() -> Void)?
     }
-    
+
+    class MockBlossomUploader: MediaUploaderProtocol {
+        var nameParam: String { return "" }
+        var mediaTypeParam: String { return "" }
+        var supportsVideo: Bool { return true }
+        var requiresNip98: Bool { return false }
+        var postAPI: String { return "" }
+        var isBlossom: Bool { return true }
+
+        func getMediaURL(from data: Data) -> String? { return nil }
+        func mediaTypeValue(for mediaType: damus.ImageUploadMediaType) -> String? { return nil }
+    }
+
     class MockImageUploadModel: ImageUploadModelProtocol {
+        static var lastStartCalled = false
+        static var lastBlossomCalled = false
+        static var lastServerURL: String?
+
+        static func resetFlags() {
+            lastStartCalled = false
+            lastBlossomCalled = false
+            lastServerURL = nil
+        }
+
         required init() {}
-        
+
         func start(media: damus.MediaUpload, uploader: any damus.MediaUploaderProtocol, mediaType: damus.ImageUploadMediaType, keypair: damus.Keypair?) async -> damus.ImageUploadResult {
+            MockImageUploadModel.lastStartCalled = true
+            return damus.ImageUploadResult.success(get_test_uploaded_url())
+        }
+
+        func startBlossomUpload(media: damus.MediaUpload, keypair: damus.Keypair?, serverURL: String?) async -> damus.ImageUploadResult {
+            MockImageUploadModel.lastBlossomCalled = true
+            MockImageUploadModel.lastServerURL = serverURL
             return damus.ImageUploadResult.success(get_test_uploaded_url())
         }
     }

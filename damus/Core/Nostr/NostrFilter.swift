@@ -19,6 +19,7 @@ struct NostrFilter: Codable, Equatable {
     var hashtag: [String]?
     var parameter: [String]?
     var quotes: [NoteId]?
+    var mime_types: [String]?
 
     private enum CodingKeys : String, CodingKey {
         case ids
@@ -28,6 +29,7 @@ struct NostrFilter: Codable, Equatable {
         case hashtag = "#t"
         case parameter = "#d"
         case quotes = "#q"
+        case mime_types = "#m"
         case since
         case until
         case authors

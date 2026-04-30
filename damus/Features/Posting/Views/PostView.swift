@@ -470,7 +470,12 @@ struct PostView: View {
         print("img size w:\(img.size.width) h:\(img.size.height)")
         
         async let blurhash = calculate_blurhash(img: img)
-        let res = await image_upload.start(media: media, uploader: uploader, mediaType: .normal, keypair: damus_state.keypair)
+        let res: ImageUploadResult
+        if uploader.isBlossom {
+            res = await image_upload.startBlossomUpload(media: media, keypair: damus_state.keypair, serverURL: damus_state.settings.blossom_server_url)
+        } else {
+            res = await image_upload.start(media: media, uploader: uploader, mediaType: .normal, keypair: damus_state.keypair)
+        }
         
         mediaUploadUnderProgress = nil
         switch res {

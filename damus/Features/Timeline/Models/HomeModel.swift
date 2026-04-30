@@ -292,6 +292,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
             break   // Don't care for now
         case .live, .live_chat:
             break
+        case .file_metadata, .blossom_server_list, .blossom_auth:
+            break
         }
     }
 

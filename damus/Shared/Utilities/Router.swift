@@ -32,6 +32,7 @@ enum Route: Hashable {
     case SearchSettings(settings: UserSettingsStore)
     case DeveloperSettings(settings: UserSettingsStore)
     case FirstAidSettings(settings: UserSettingsStore)
+    case MediaServersSettings(settings: UserSettingsStore)
     case StorageSettings(settings: UserSettingsStore)
     case NostrDBStorageDetail(stats: StorageStats)
     case Thread(thread: ThreadModel)
@@ -102,6 +103,8 @@ enum Route: Hashable {
             DeveloperSettingsView(settings: settings, damus_state: damusState)
         case .FirstAidSettings(settings: let settings):
             FirstAidSettingsView(damus_state: damusState, settings: settings)
+        case .MediaServersSettings(let settings):
+            MediaServersSettingsView(settings: settings)
         case .StorageSettings(settings: let settings):
             StorageSettingsView(damus_state: damusState, settings: settings)
         case .NostrDBStorageDetail(stats: let stats):
@@ -210,6 +213,8 @@ enum Route: Hashable {
             hasher.combine("developerSettings")
         case .FirstAidSettings:
             hasher.combine("firstAidSettings")
+        case .MediaServersSettings:
+            hasher.combine("mediaServersSettings")
         case .StorageSettings:
             hasher.combine("storageSettings")
         case .NostrDBStorageDetail(let stats):

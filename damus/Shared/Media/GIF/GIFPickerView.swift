@@ -3,6 +3,7 @@
 //  damus
 //
 //  Created by eric on 12/11/25.
+//  Updated for Nostr-native GIF discovery.
 //
 
 import SwiftUI
@@ -13,9 +14,24 @@ struct GIFPickerView: View {
     let damus_state: DamusState
     let onGIFSelected: (URL) -> Void
 
-    @StateObject private var viewModel = GIFPickerViewModel()
+    @StateObject private var viewModel: GIFSearchModel
     @State private var searchText: String = ""
+    @State private var friend_filter: FriendFilter = .all
     @FocusState private var isSearchFocused: Bool
+
+    init(damus_state: DamusState, onGIFSelected: @escaping (URL) -> Void) {
+        self.damus_state = damus_state
+        self.onGIFSelected = onGIFSelected
+        _viewModel = StateObject(wrappedValue: GIFSearchModel(damus_state: damus_state))
+    }
+
+    private var filteredGIFs: [DiscoveredGIF] {
+        viewModel.gifs.filter { gif in
+            // Bootstrap GIFs (nil pubkey) always pass through
+            guard let pubkey = gif.pubkey else { return true }
+            return friend_filter.filter(contacts: damus_state.contacts, pubkey: pubkey)
+        }
+    }
 
     var body: some View {
         NavigationView {
@@ -26,11 +42,9 @@ struct GIFPickerView: View {
 
                 Divider()
 
-                if viewModel.isLoading && viewModel.gifs.isEmpty {
+                if viewModel.loading && filteredGIFs.isEmpty {
                     loadingView
-                } else if let error = viewModel.error {
-                    errorView(error)
-                } else if viewModel.gifs.isEmpty {
+                } else if filteredGIFs.isEmpty && !viewModel.loading {
                     emptyView
                 } else {
                     gifGrid
@@ -44,13 +58,23 @@ struct GIFPickerView: View {
                         dismiss()
                     }
                 }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    TrustedNetworkButton(filter: $friend_filter)
+                }
             }
         }
         .task {
-            await viewModel.loadFeatured()
+            viewModel.load()
         }
         .onChange(of: searchText) { newValue in
-            viewModel.search(query: newValue)
+            if newValue.isEmpty {
+                viewModel.load()
+            } else {
+                viewModel.search(query: newValue)
+            }
+        }
+        .onDisappear {
+            viewModel.cancel()
         }
     }
 
@@ -83,24 +107,17 @@ struct GIFPickerView: View {
                 GridItem(.flexible(), spacing: 4),
                 GridItem(.flexible(), spacing: 4)
             ], spacing: 4) {
-                ForEach(viewModel.gifs) { gif in
+                ForEach(filteredGIFs) { gif in
                     GIFThumbnailView(gif: gif, disable_animation: damus_state.settings.disable_animation)
                         .onTapGesture {
-                            if let gifURL = gif.mediumURL ?? gif.fullURL {
-                                onGIFSelected(gifURL)
-                                dismiss()
-                            }
-                        }
-                        .onAppear {
-                            if gif.id == viewModel.gifs.last?.id {
-                                Task { await viewModel.loadMore() }
-                            }
+                            onGIFSelected(gif.url)
+                            dismiss()
                         }
                 }
             }
             .padding(4)
 
-            if viewModel.isLoading && !viewModel.gifs.isEmpty {
+            if viewModel.loading && !filteredGIFs.isEmpty {
                 ProgressView()
                     .padding()
             }
@@ -115,30 +132,6 @@ struct GIFPickerView: View {
             Text("Loading GIFs...", comment: "Loading indicator text for GIF picker")
                 .foregroundColor(.secondary)
                 .padding(.top)
-            Spacer()
-        }
-    }
-
-    private func errorView(_ error: String) -> some View {
-        VStack {
-            Spacer()
-            Image(systemName: "exclamationmark.triangle")
-                .font(.largeTitle)
-                .foregroundColor(.secondary)
-            Text(error)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding()
-            Button(NSLocalizedString("Try Again", comment: "Button to retry loading GIFs")) {
-                Task {
-                    if searchText.isEmpty {
-                        await viewModel.loadFeatured()
-                    } else {
-                        viewModel.search(query: searchText)
-                    }
-                }
-            }
-            .buttonStyle(.bordered)
             Spacer()
         }
     }
@@ -158,123 +151,23 @@ struct GIFPickerView: View {
 }
 
 struct GIFThumbnailView: View {
-    let gif: TenorGIFResult
+    let gif: DiscoveredGIF
     let disable_animation: Bool
 
     var body: some View {
-        if let previewURL = gif.previewURL {
-            KFAnimatedImage(previewURL)
-                .configure { view in
-                    view.framePreloadCount = 3
-                }
-                .placeholder {
-                    Rectangle()
-                        .fill(Color.secondary.opacity(0.2))
-                }
-                .imageContext(.note, disable_animation: disable_animation)
-                .aspectRatio(contentMode: .fill)
-                .frame(height: 120)
-                .clipped()
-                .cornerRadius(8)
-        } else {
-            Rectangle()
-                .fill(Color.secondary.opacity(0.2))
-                .frame(height: 120)
-                .cornerRadius(8)
-        }
-    }
-}
-
-@MainActor
-class GIFPickerViewModel: ObservableObject {
-    @Published var gifs: [TenorGIFResult] = []
-    @Published var isLoading: Bool = false
-    @Published var error: String? = nil
-
-    private let api = TenorAPIClient()
-    private var currentQuery: String?
-    private var nextPos: String?
-    private var searchTask: Task<Void, Never>?
-
-    func loadFeatured() async {
-        guard !isLoading else { return }
-
-        isLoading = true
-        error = nil
-        currentQuery = nil
-
-        do {
-            let response = try await api.fetchFeatured()
-            gifs = response.results
-            nextPos = response.next
-        } catch {
-            self.error = error.localizedDescription
-        }
-
-        isLoading = false
-    }
-
-    func search(query: String) {
-        searchTask?.cancel()
-
-        guard !query.isEmpty else {
-            Task { await loadFeatured() }
-            return
-        }
-
-        searchTask = Task {
-            try? await Task.sleep(nanoseconds: 300_000_000)
-            guard !Task.isCancelled else { return }
-            await performSearch(query: query)
-        }
-    }
-
-    private func performSearch(query: String) async {
-        guard !isLoading else { return }
-
-        isLoading = true
-        error = nil
-        currentQuery = query
-        nextPos = nil
-
-        do {
-            let response = try await api.search(query: query)
-            gifs = response.results
-            nextPos = response.next
-        } catch {
-            self.error = error.localizedDescription
-        }
-
-        isLoading = false
-    }
-
-    func loadMore() async {
-        guard !isLoading, let nextPos else { return }
-
-        isLoading = true
-
-        do {
-            let response: TenorSearchResponse
-            if let query = currentQuery {
-                response = try await api.search(query: query, pos: nextPos)
-            } else {
-                response = try await api.fetchFeatured(pos: nextPos)
+        let displayURL = gif.thumbURL ?? gif.url
+        KFAnimatedImage(displayURL)
+            .configure { view in
+                view.framePreloadCount = 3
             }
-            gifs.append(contentsOf: response.results)
-            self.nextPos = response.next
-        } catch {
-            // Don't show error for pagination failures
-            print("Failed to load more GIFs: \(error)")
-        }
-
-        isLoading = false
+            .placeholder {
+                Rectangle()
+                    .fill(Color.secondary.opacity(0.2))
+            }
+            .imageContext(.note, disable_animation: disable_animation)
+            .aspectRatio(contentMode: .fill)
+            .frame(height: 120)
+            .clipped()
+            .cornerRadius(8)
     }
 }
-
-#Preview {
-    GIFPickerView(damus_state: test_damus_state) { url in
-        print("Selected GIF: \(url)")
-    }
-}
-
-
