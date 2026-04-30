@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Sentry
 
 /// Implements a client that can talk to the Coinos API server with a deterministic account derived from the user's private key.
 ///
@@ -95,7 +96,15 @@ class CoinosDeterministicAccountClient {
         if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
             return
         } else {
-            throw ClientError.unexpectedHTTPResponse(status_code: (response as? HTTPURLResponse)?.statusCode ?? -1, response: data)
+            let error = ClientError.unexpectedHTTPResponse(status_code: (response as? HTTPURLResponse)?.statusCode ?? -1, response: data)
+            DamusSentry.captureSentryError(error) { scope in
+                scope.setContext(value: [
+                    "operation": "coinos_register",
+                    "status_code": (response as? HTTPURLResponse)?.statusCode ?? -1,
+                    "response_length": data.count
+                ], key: "wallet")
+            }
+            throw error
         }
     }
     
@@ -128,7 +137,16 @@ class CoinosDeterministicAccountClient {
             switch httpResponse.statusCode {
             case 200: return try JSONDecoder().decode(AuthResponse.self, from: data)
             case 401: throw ClientError.unauthorized
-            default: throw ClientError.unexpectedHTTPResponse(status_code: httpResponse.statusCode, response: data)
+            default:
+                let error = ClientError.unexpectedHTTPResponse(status_code: httpResponse.statusCode, response: data)
+                DamusSentry.captureSentryError(error) { scope in
+                    scope.setContext(value: [
+                        "operation": "coinos_login",
+                        "status_code": httpResponse.statusCode,
+                        "response_length": data.count
+                    ], key: "wallet")
+                }
+                throw error
             }
         }
         throw ClientError.errorProcessingResponse
@@ -159,10 +177,27 @@ class CoinosDeterministicAccountClient {
         if let httpResponse = response as? HTTPURLResponse {
             switch httpResponse.statusCode {
             case 200:
-                guard let nwc = try await self.getNWCUrl() else { throw ClientError.errorProcessingResponse }
+                guard let nwc = try await self.getNWCUrl() else {
+                    let error = ClientError.errorProcessingResponse
+                    DamusSentry.captureSentryError(error) { scope in
+                        scope.setContext(value: [
+                            "operation": "create_nwc_connection_get_url"
+                        ], key: "wallet")
+                    }
+                    throw error
+                }
                 return nwc
             case 401: throw ClientError.unauthorized
-            default: throw ClientError.unexpectedHTTPResponse(status_code: httpResponse.statusCode, response: data)
+            default:
+                let error = ClientError.unexpectedHTTPResponse(status_code: httpResponse.statusCode, response: data)
+                DamusSentry.captureSentryError(error) { scope in
+                    scope.setContext(value: [
+                        "operation": "create_nwc_connection",
+                        "status_code": httpResponse.statusCode,
+                        "response_length": data.count
+                    ], key: "wallet")
+                }
+                throw error
             }
         }
         throw ClientError.errorProcessingResponse
@@ -203,10 +238,28 @@ class CoinosDeterministicAccountClient {
         if let httpResponse = response as? HTTPURLResponse {
             switch httpResponse.statusCode {
             case 200:
-                guard let nwc = try await self.getNWCUrl() else { throw ClientError.errorProcessingResponse }
+                guard let nwc = try await self.getNWCUrl() else {
+                    let error = ClientError.errorProcessingResponse
+                    DamusSentry.captureSentryError(error) { scope in
+                        scope.setContext(value: [
+                            "operation": "update_nwc_connection_get_url"
+                        ], key: "wallet")
+                    }
+                    throw error
+                }
                 return nwc
             case 401: throw ClientError.unauthorized
-            default: throw ClientError.unexpectedHTTPResponse(status_code: httpResponse.statusCode, response: data)
+            default:
+                let error = ClientError.unexpectedHTTPResponse(status_code: httpResponse.statusCode, response: data)
+                DamusSentry.captureSentryError(error) { scope in
+                    scope.setContext(value: [
+                        "operation": "update_nwc_connection",
+                        "status_code": httpResponse.statusCode,
+                        "max_amount": maxAmount,
+                        "response_length": data.count
+                    ], key: "wallet")
+                }
+                throw error
             }
         }
         throw ClientError.errorProcessingResponse

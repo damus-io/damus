@@ -7,6 +7,7 @@
 
 import Foundation
 import OSLog
+import Sentry
 
 /// Manages periodic snapshots of the main NostrDB database to a shared container location.
 ///
@@ -155,6 +156,12 @@ actor DatabaseSnapshotManager {
         do {
             try fileManager.createDirectory(atPath: tempSnapshotPath.path, withIntermediateDirectories: true)
         } catch {
+            DamusSentry.captureSentryError(error) { scope in
+                scope.setContext(value: [
+                    "operation": "create_temp_snapshot_directory",
+                    "path": tempSnapshotPath.path
+                ], key: "snapshot")
+            }
             throw SnapshotError.directoryCreationFailed(error)
         }
         
@@ -165,6 +172,12 @@ actor DatabaseSnapshotManager {
                     try fileManager.removeItem(atPath: tempSnapshotPath.path)
                 } catch {
                     Log.error("Failed to cleanup temporary snapshot directory: %{public}@", for: .storage, error.localizedDescription)
+                    DamusSentry.captureSentryError(error) { scope in
+                        scope.setContext(value: [
+                            "operation": "cleanup_temp_snapshot_directory",
+                            "path": tempSnapshotPath.path
+                        ], key: "snapshot")
+                    }
                 }
             }
         }
@@ -173,7 +186,14 @@ actor DatabaseSnapshotManager {
         
         // Create a new Ndb instance in the temporary directory
         guard let snapshotNdb = Ndb(path: tempSnapshotPath.path, owns_db_file: true) else {
-            throw SnapshotError.failedToCreateSnapshotDatabase
+            let error = SnapshotError.failedToCreateSnapshotDatabase
+            DamusSentry.captureSentryError(error) { scope in
+                scope.setContext(value: [
+                    "operation": "create_snapshot_ndb",
+                    "path": tempSnapshotPath.path
+                ], key: "snapshot")
+            }
+            throw error
         }
         
         defer {
@@ -307,6 +327,12 @@ actor DatabaseSnapshotManager {
             do {
                 try fileManager.createDirectory(atPath: parentDir, withIntermediateDirectories: true)
             } catch {
+                DamusSentry.captureSentryError(error) { scope in
+                    scope.setContext(value: [
+                        "operation": "create_parent_directory",
+                        "path": parentDir
+                    ], key: "snapshot")
+                }
                 throw SnapshotError.directoryCreationFailed(error)
             }
         }
@@ -321,6 +347,14 @@ actor DatabaseSnapshotManager {
 
             Log.debug("Moved snapshot from %{public}@ to %{public}@", for: .storage, tempPath, finalPath)
         } catch {
+            DamusSentry.captureSentryError(error) { scope in
+                scope.setContext(value: [
+                    "operation": "move_snapshot_to_final_destination",
+                    "temp_path": tempPath,
+                    "final_path": finalPath,
+                    "file_exists": fileManager.fileExists(atPath: finalPath)
+                ], key: "snapshot")
+            }
             throw SnapshotError.moveFailed(error)
         }
     }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Sentry
 
 // Minimum threshold the hellthread pubkey tag count setting can go down to.
 let HELLTHREAD_MIN_PUBKEYS: Int = 6
@@ -55,7 +56,15 @@ struct PushNotificationClient {
                     Log.info("Sent device token to Damus push notification server successfully", for: .push_notifications)
                 default:
                     Log.error("Error in sending device_token to Damus push notification server. HTTP status code: %d; Response: %s", for: .push_notifications, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
-                    throw ClientError.http_response_error(status_code: httpResponse.statusCode, response: data)
+                    let error = ClientError.http_response_error(status_code: httpResponse.statusCode, response: data)
+                    DamusSentry.captureSentryError(error) { scope in
+                        scope.setContext(value: [
+                            "operation": "send_device_token",
+                            "status_code": httpResponse.statusCode,
+                            "data_length": data.count
+                        ], key: "push_notifications")
+                    }
+                    throw error
             }
         }
         
@@ -90,7 +99,15 @@ struct PushNotificationClient {
                     Log.info("Sent device token removal request to Damus push notification server successfully", for: .push_notifications)
                 default:
                     Log.error("Error in sending device_token removal to Damus push notification server. HTTP status code: %d; Response: %s", for: .push_notifications, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
-                    throw ClientError.http_response_error(status_code: httpResponse.statusCode, response: data)
+                    let error = ClientError.http_response_error(status_code: httpResponse.statusCode, response: data)
+                    DamusSentry.captureSentryError(error) { scope in
+                        scope.setContext(value: [
+                            "operation": "revoke_device_token",
+                            "status_code": httpResponse.statusCode,
+                            "data_length": data.count
+                        ], key: "push_notifications")
+                    }
+                    throw error
             }
         }
         
@@ -125,7 +142,15 @@ struct PushNotificationClient {
                     Log.info("Sent notification settings to Damus push notification server successfully", for: .push_notifications)
                 default:
                     Log.error("Error in sending notification settings to Damus push notification server. HTTP status code: %d; Response: %s", for: .push_notifications, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
-                    throw ClientError.http_response_error(status_code: httpResponse.statusCode, response: data)
+                    let error = ClientError.http_response_error(status_code: httpResponse.statusCode, response: data)
+                    DamusSentry.captureSentryError(error) { scope in
+                        scope.setContext(value: [
+                            "operation": "set_notification_settings",
+                            "status_code": httpResponse.statusCode,
+                            "data_length": data.count
+                        ], key: "push_notifications")
+                    }
+                    throw error
             }
         }
         
@@ -155,11 +180,28 @@ struct PushNotificationClient {
         if let httpResponse = response as? HTTPURLResponse {
             switch httpResponse.statusCode {
                 case 200:
-                    guard let notification_settings = NotificationSettings.from(json_data: data) else { throw ClientError.json_decoding_error }
+                    guard let notification_settings = NotificationSettings.from(json_data: data) else {
+                        let error = ClientError.json_decoding_error
+                        DamusSentry.captureSentryError(error) { scope in
+                            scope.setContext(value: [
+                                "operation": "get_notification_settings_decode",
+                                "data_length": data.count
+                            ], key: "push_notifications")
+                        }
+                        throw error
+                    }
                     return notification_settings
                 default:
                     Log.error("Error in getting notification settings to Damus push notification server. HTTP status code: %d; Response: %s", for: .push_notifications, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
-                    throw ClientError.http_response_error(status_code: httpResponse.statusCode, response: data)
+                    let error = ClientError.http_response_error(status_code: httpResponse.statusCode, response: data)
+                    DamusSentry.captureSentryError(error) { scope in
+                        scope.setContext(value: [
+                            "operation": "get_notification_settings",
+                            "status_code": httpResponse.statusCode,
+                            "data_length": data.count
+                        ], key: "push_notifications")
+                    }
+                    throw error
             }
         }
         throw ClientError.could_not_process_response

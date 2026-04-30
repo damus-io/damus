@@ -7,6 +7,7 @@
 
 import Foundation
 import StoreKit
+import Sentry
 
 class DamusPurple: StoreObserverDelegate {
     let settings: UserSettingsStore
@@ -151,11 +152,19 @@ class DamusPurple: StoreObserverDelegate {
         
         if let httpResponse = response as? HTTPURLResponse {
             switch httpResponse.statusCode {
-                case 200:
-                    Log.info("Got user UUID from Damus Purple server", for: .damus_purple)
-                default:
-                    Log.error("Error in getting user UUID with Damus Purple. HTTP status code: %d; Response: %s", for: .damus_purple, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
-                    throw PurpleError.http_response_error(status_code: httpResponse.statusCode, response: data)
+            case 200:
+                Log.info("Successfully fetched account UUID from Damus Purple server", for: .damus_purple)
+            default:
+                Log.error("Error fetching account UUID from Damus Purple server. Status code: %d; Response: %s", for: .damus_purple, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "")
+                let error = PurpleError.http_response_error(status_code: httpResponse.statusCode, response: data)
+                DamusSentry.captureSentryError(error) { scope in
+                    scope.setContext(value: [
+                        "operation": "fetch_uuid_for_account",
+                        "status_code": httpResponse.statusCode,
+                        "response": String(data: data, encoding: .utf8) ?? "Unknown"
+                    ], key: "damus_purple")
+                }
+                throw error
             }
         }
         
@@ -193,7 +202,15 @@ class DamusPurple: StoreObserverDelegate {
                         Log.info("Sent in-app purchase receipt to Damus Purple server successfully", for: .damus_purple)
                     default:
                         Log.error("Error in sending in-app purchase receipt to Damus Purple. HTTP status code: %d; Response: %s", for: .damus_purple, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
-                        throw DamusPurple.PurpleError.iap_receipt_verification_error(status: httpResponse.statusCode, response: data)
+                        let error = DamusPurple.PurpleError.iap_receipt_verification_error(status: httpResponse.statusCode, response: data)
+                        DamusSentry.captureSentryError(error) { scope in
+                            scope.setContext(value: [
+                                "operation": "send_iap_receipt",
+                                "status_code": httpResponse.statusCode,
+                                "response": String(data: data, encoding: .utf8) ?? "Unknown"
+                            ], key: "damus_purple")
+                        }
+                        throw error
                 }
             }
         }
@@ -219,8 +236,16 @@ class DamusPurple: StoreObserverDelegate {
                 case 200:
                     Log.info("Sent transaction ID to Damus Purple server and activated successfully", for: .damus_purple)
                 default:
-                    Log.error("Error in sending or verifying transaction ID with Damus Purple server. HTTP status code: %d; Response: %s", for: .damus_purple, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
-                    throw DamusPurple.PurpleError.iap_receipt_verification_error(status: httpResponse.statusCode, response: data)
+                    Log.error("Error in sending in-app purchase receipt to Damus Purple. HTTP status code: %d; Response: %s", for: .damus_purple, httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
+                    let error = DamusPurple.PurpleError.iap_receipt_verification_error(status: httpResponse.statusCode, response: data)
+                    DamusSentry.captureSentryError(error) { scope in
+                        scope.setContext(value: [
+                            "operation": "send_transaction_id",
+                            "status_code": httpResponse.statusCode,
+                            "response": String(data: data, encoding: .utf8) ?? "Unknown"
+                        ], key: "damus_purple")
+                    }
+                    throw error
             }
         }
     }

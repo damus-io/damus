@@ -11,6 +11,7 @@ import UserNotifications
 import Foundation
 import UniformTypeIdentifiers
 import Intents
+import Sentry
 
 class NotificationService: UNNotificationServiceExtension {
 
@@ -29,6 +30,7 @@ class NotificationService: UNNotificationServiceExtension {
     }
 
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
+        DamusSentry.startIfEnabled()
         configureKingfisherCache()
 
         self.contentHandler = contentHandler
@@ -117,6 +119,12 @@ class NotificationService: UNNotificationServiceExtension {
                 improvedContent.attachments = [attachment]
             } catch {
                 Log.error("failed to get notification attachment: %s", for: .push_notifications, error.localizedDescription)
+                DamusSentry.captureSentryError(error) { scope in
+                    scope.setContext(value: [
+                        "operation": "fetch_notification_attachment",
+                        "image_url": sender_profile.picture.absoluteString
+                    ], key: "notification_service")
+                }
             }
 
             let kind = nostr_event.known_kind
@@ -146,6 +154,12 @@ class NotificationService: UNNotificationServiceExtension {
                 contentHandler(updated)
             } catch {
                 Log.error("failed to donate interaction: %s", for: .push_notifications, error.localizedDescription)
+                DamusSentry.captureSentryError(error) { scope in
+                    scope.setContext(value: [
+                        "operation": "donate_notification_interaction",
+                        "note_kind": nostr_event.kind
+                    ], key: "notification_service")
+                }
                 contentHandler(improvedContent)
             }
         }

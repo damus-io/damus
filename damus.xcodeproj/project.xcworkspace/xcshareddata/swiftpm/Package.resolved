@@ -1,5 +1,5 @@
 {
-  "originHash" : "c718c1e7dcc1a07671694b2d7d7311e11804fbbaf22f4b81e49523a3df816ad6",
+  "originHash" : "69116d3b516f6eb000e56fb88ccfca91c324778f3b97dfa2704e221da07b1ca2",
   "pins" : [
     {
       "identity" : "codescanner",
@@ -86,6 +86,15 @@
       "location" : "https://github.com/jb55/secp256k1.swift",
       "state" : {
         "revision" : "40b4b38b3b1c83f7088c76189a742870e0ca06a9"
+      }
+    },
+    {
+      "identity" : "sentry-cocoa",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/getsentry/sentry-cocoa/",
+      "state" : {
+        "revision" : "a49e7c2148ac9e38bd35ef4f13bc9d6ea3ff0b81",
+        "version" : "9.11.0"
       }
     },
     {
