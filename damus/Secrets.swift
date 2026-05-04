@@ -10,5 +10,4 @@
 import Foundation
 
 enum Secrets {
-    static let TENOR_API_KEY: String? = ProcessInfo.processInfo.environment["TENOR_API_KEY"]
 }

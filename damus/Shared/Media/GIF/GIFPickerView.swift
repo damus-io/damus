@@ -13,9 +13,16 @@ struct GIFPickerView: View {
     let damus_state: DamusState
     let onGIFSelected: (URL) -> Void
 
-    @StateObject private var viewModel = GIFPickerViewModel()
+    @StateObject private var viewModel: GIFPickerViewModel
     @State private var searchText: String = ""
     @FocusState private var isSearchFocused: Bool
+
+    /// Creates a GIF picker bound to the current Damus state.
+    init(damus_state: DamusState, onGIFSelected: @escaping (URL) -> Void) {
+        self.damus_state = damus_state
+        self.onGIFSelected = onGIFSelected
+        _viewModel = StateObject(wrappedValue: GIFPickerViewModel(purple: damus_state.purple))
+    }
 
     var body: some View {
         NavigationView {
@@ -59,7 +66,7 @@ struct GIFPickerView: View {
             HStack {
                 Image("search")
                     .foregroundColor(.gray)
-                TextField(NSLocalizedString("Search GIFs...", comment: "Placeholder for GIF search field"), text: $searchText)
+                TextField(NSLocalizedString("Search KLIPY", comment: "Placeholder for GIF search field"), text: $searchText)
                     .autocorrectionDisabled(true)
                     .textInputAutocapitalization(.never)
                     .focused($isSearchFocused)
@@ -119,27 +126,22 @@ struct GIFPickerView: View {
         }
     }
 
-    private func errorView(_ error: String) -> some View {
+    private func errorView(_ error: ErrorView.UserPresentableError) -> some View {
         VStack {
-            Spacer()
-            Image(systemName: "exclamationmark.triangle")
-                .font(.largeTitle)
-                .foregroundColor(.secondary)
-            Text(error)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding()
+            ErrorView(damus_state: damus_state, error: error)
+
             Button(NSLocalizedString("Try Again", comment: "Button to retry loading GIFs")) {
                 Task {
-                    if searchText.isEmpty {
+                    if searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         await viewModel.loadFeatured()
-                    } else {
-                        viewModel.search(query: searchText)
+                        return
                     }
+
+                    viewModel.search(query: searchText)
                 }
             }
             .buttonStyle(.bordered)
-            Spacer()
+            .padding(.bottom, 20)
         }
     }
 
@@ -158,7 +160,7 @@ struct GIFPickerView: View {
 }
 
 struct GIFThumbnailView: View {
-    let gif: TenorGIFResult
+    let gif: GIFResult
     let disable_animation: Bool
 
     var body: some View {
@@ -187,37 +189,55 @@ struct GIFThumbnailView: View {
 
 @MainActor
 class GIFPickerViewModel: ObservableObject {
-    @Published var gifs: [TenorGIFResult] = []
+    @Published var gifs: [GIFResult] = []
     @Published var isLoading: Bool = false
-    @Published var error: String? = nil
+    @Published var error: ErrorView.UserPresentableError? = nil
 
-    private let api = TenorAPIClient()
+    private let api: PurpleGIFAPIClient
+    private let featuredPageSize = 30
+    private let searchPageSize = 30
     private var currentQuery: String?
+    private var pendingQuery: String?
     private var nextPos: String?
+    private var currentPage = 1
+    private var hasMoreSearchResults = false
     private var searchTask: Task<Void, Never>?
 
+    /// Initializes a GIF picker view model backed by Purple.
+    init(purple: DamusPurple) {
+        self.api = PurpleGIFAPIClient(purple: purple)
+    }
+
+    /// Loads featured GIFs for the initial picker state.
     func loadFeatured() async {
         guard !isLoading else { return }
 
         isLoading = true
         error = nil
         currentQuery = nil
+        currentPage = 1
+        hasMoreSearchResults = false
 
         do {
-            let response = try await api.fetchFeatured()
+            let response = try await api.fetchFeatured(limit: featuredPageSize)
             gifs = response.results
             nextPos = response.next
         } catch {
-            self.error = error.localizedDescription
+            self.error = makePresentableError(from: error, action: "loading featured GIFs")
         }
 
         isLoading = false
+        await runPendingQueryIfNeeded()
     }
 
+    /// Starts a debounced GIF search.
     func search(query: String) {
         searchTask?.cancel()
 
-        guard !query.isEmpty else {
+        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        pendingQuery = trimmedQuery.isEmpty ? nil : trimmedQuery
+
+        guard !trimmedQuery.isEmpty else {
             Task { await loadFeatured() }
             return
         }
@@ -225,49 +245,146 @@ class GIFPickerViewModel: ObservableObject {
         searchTask = Task {
             try? await Task.sleep(nanoseconds: 300_000_000)
             guard !Task.isCancelled else { return }
-            await performSearch(query: query)
+            await performSearch(query: trimmedQuery)
         }
     }
 
+    /// Performs a GIF search request.
     private func performSearch(query: String) async {
-        guard !isLoading else { return }
+        guard !isLoading else {
+            pendingQuery = query
+            return
+        }
 
         isLoading = true
         error = nil
         currentQuery = query
+        pendingQuery = nil
+        currentPage = 1
         nextPos = nil
+        hasMoreSearchResults = false
 
         do {
-            let response = try await api.search(query: query)
+            let response = try await api.search(query: query, page: currentPage, perPage: searchPageSize)
             gifs = response.results
-            nextPos = response.next
+            hasMoreSearchResults = response.results.count >= searchPageSize
         } catch {
-            self.error = error.localizedDescription
+            self.error = makePresentableError(from: error, action: "searching GIFs")
         }
 
         isLoading = false
+        await runPendingQueryIfNeeded()
     }
 
+    /// Converts technical GIF loading errors into user-presentable content.
+    private func makePresentableError(from error: Error, action: String) -> ErrorView.UserPresentableError {
+        if let presentableError = error as? ErrorView.UserPresentableErrorProtocol {
+            return presentableError.userPresentableError
+        }
+
+        if let gifError = error as? PurpleGIFAPIError {
+            return gifError.userPresentableError(action: action, currentQuery: currentQuery)
+        }
+
+        return .init(
+            user_visible_description: NSLocalizedString("We couldn't load GIFs right now.", comment: "Fallback error shown when the GIF picker fails unexpectedly."),
+            tip: NSLocalizedString("Try again in a moment. If the problem keeps happening, copy the technical information and send it to support.", comment: "Fallback advice shown when the GIF picker fails unexpectedly."),
+            technical_info: "GIF picker error while \(action): \(String(describing: error))"
+        )
+    }
+
+    /// Runs the latest queued search after the current load completes.
+    private func runPendingQueryIfNeeded() async {
+        guard !isLoading else { return }
+        guard let pendingQuery, pendingQuery != currentQuery else { return }
+
+        self.pendingQuery = nil
+        await performSearch(query: pendingQuery)
+    }
+
+    /// Loads the next page of GIF results.
     func loadMore() async {
-        guard !isLoading, let nextPos else { return }
+        guard !isLoading else { return }
+
+        if let query = currentQuery {
+            guard hasMoreSearchResults else { return }
+
+            isLoading = true
+
+            do {
+                let nextPage = currentPage + 1
+                let response = try await api.search(query: query, page: nextPage, perPage: searchPageSize)
+                gifs.append(contentsOf: response.results)
+                currentPage = nextPage
+                hasMoreSearchResults = response.results.count >= searchPageSize
+            } catch {
+                print("Failed to load more GIFs: \(error)")
+            }
+
+            isLoading = false
+            return
+        }
+
+        guard let nextPos else { return }
 
         isLoading = true
 
         do {
-            let response: TenorSearchResponse
-            if let query = currentQuery {
-                response = try await api.search(query: query, pos: nextPos)
-            } else {
-                response = try await api.fetchFeatured(pos: nextPos)
-            }
+            let response = try await api.fetchFeatured(limit: featuredPageSize, pos: nextPos)
             gifs.append(contentsOf: response.results)
             self.nextPos = response.next
         } catch {
-            // Don't show error for pagination failures
             print("Failed to load more GIFs: \(error)")
         }
 
         isLoading = false
+    }
+}
+
+private extension PurpleGIFAPIError {
+    /// Converts Purple GIF API failures into a reusable user-presentable error.
+    func userPresentableError(action: String, currentQuery: String?) -> ErrorView.UserPresentableError {
+        let queryContext = currentQuery.map { "query=\($0)" } ?? "featured"
+
+        switch self {
+        case .unauthorized:
+            return .init(
+                user_visible_description: NSLocalizedString("You need an active Purple subscription to use GIF search.", comment: "Error shown when the user is not authorized to use the GIF picker."),
+                tip: NSLocalizedString("Make sure you're signed in with the right account and that your Purple subscription is active, then try again.", comment: "Advice shown when GIF picker access is denied."),
+                technical_info: "GIF picker unauthorized while \(action); context=\(queryContext)"
+            )
+        case .invalidURL:
+            return .init(
+                user_visible_description: NSLocalizedString("The GIF service is misconfigured.", comment: "Error shown when the GIF picker generated an invalid URL."),
+                tip: NSLocalizedString("Try again later. If this keeps happening, copy the technical information and send it to support.", comment: "Advice shown when the GIF picker URL is invalid."),
+                technical_info: "GIF picker invalid URL while \(action); context=\(queryContext)"
+            )
+        case .invalidResponse:
+            return .init(
+                user_visible_description: NSLocalizedString("The GIF service returned an unexpected response.", comment: "Error shown when the GIF picker receives an invalid server response."),
+                tip: NSLocalizedString("Try again in a moment. If it keeps happening, copy the technical information and send it to support.", comment: "Advice shown when the GIF picker receives an invalid server response."),
+                technical_info: "GIF picker invalid response while \(action); context=\(queryContext)"
+            )
+        case .decodingError(let decodingError, let rawResponse):
+            let responseText = rawResponse ?? "<unavailable>"
+            return .init(
+                user_visible_description: NSLocalizedString("We couldn't understand the GIF data from the server.", comment: "Error shown when GIF response parsing fails."),
+                tip: NSLocalizedString("Try again in a moment. If the problem continues, copy the technical information and send it to support.", comment: "Advice shown when GIF response parsing fails."),
+                technical_info: "GIF picker decoding error while \(action); context=\(queryContext); error=\(String(describing: decodingError)); response=\(responseText)"
+            )
+        case .networkError(let networkError):
+            return .init(
+                user_visible_description: NSLocalizedString("We couldn't reach the GIF service.", comment: "Error shown when GIF loading fails because of a network issue."),
+                tip: NSLocalizedString("Check your internet connection and try again.", comment: "Advice shown when GIF loading fails because of a network issue."),
+                technical_info: "GIF picker network error while \(action); context=\(queryContext); error=\(String(describing: networkError))"
+            )
+        case .upstreamError(let statusCode, let message):
+            return .init(
+                user_visible_description: NSLocalizedString("The GIF service is temporarily unavailable.", comment: "Error shown when the upstream GIF service fails."),
+                tip: NSLocalizedString("Try again in a moment. If the problem keeps happening, copy the technical information and send it to support.", comment: "Advice shown when the upstream GIF service fails."),
+                technical_info: "GIF picker upstream error while \(action); context=\(queryContext); status=\(statusCode); message=\(message ?? "none")"
+            )
+        }
     }
 }
 
@@ -276,5 +393,3 @@ class GIFPickerViewModel: ObservableObject {
         print("Selected GIF: \(url)")
     }
 }
-
-

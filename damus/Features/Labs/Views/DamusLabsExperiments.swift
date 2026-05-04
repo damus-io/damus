@@ -74,7 +74,7 @@ struct DamusLabsExperiments: View {
             LabsExplainerView(
                 labName: gifs_label,
                 systemImage: "",
-                labDescription: NSLocalizedString("This will allow you to easily add gifs from Tenor to your posts. You will see the GIF icon in the attachment bar when creating a post. Tapping it will show you all of tenor's featured GIFs. You can also search for GIFs.", comment: "Damus Labs feature explanation"))
+                labDescription: NSLocalizedString("This will allow you to easily add GIFs to your posts. You will see the GIF icon in the attachment bar when creating a post. Tapping it will show featured GIFs for Purple subscribers, and you can also search for GIFs.", comment: "Damus Labs feature explanation"))
         }
     }
 }
