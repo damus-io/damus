@@ -22,6 +22,36 @@ func test_ndb_dir() -> String? {
 final class NdbTests: XCTestCase {
     var db_dir: String = ""
 
+    /// Saves and clears thread-local transaction state for deterministic transaction tests, then returns a restoration closure.
+    @discardableResult
+    private func resetThreadLocalTransactionState() -> () -> Void {
+        let threadDictionary = Thread.current.threadDictionary
+        let originalTxn = threadDictionary["ndb_txn"]
+        let originalRefCount = threadDictionary["ndb_txn_ref_count"]
+        let originalGeneration = threadDictionary["txn_generation"]
+        threadDictionary.removeObject(forKey: "ndb_txn")
+        threadDictionary.removeObject(forKey: "ndb_txn_ref_count")
+        threadDictionary.removeObject(forKey: "txn_generation")
+
+        return {
+            if let originalTxn {
+                threadDictionary["ndb_txn"] = originalTxn
+            } else {
+                threadDictionary.removeObject(forKey: "ndb_txn")
+            }
+            if let originalRefCount {
+                threadDictionary["ndb_txn_ref_count"] = originalRefCount
+            } else {
+                threadDictionary.removeObject(forKey: "ndb_txn_ref_count")
+            }
+            if let originalGeneration {
+                threadDictionary["txn_generation"] = originalGeneration
+            } else {
+                threadDictionary.removeObject(forKey: "txn_generation")
+            }
+        }
+    }
+
     override func setUpWithError() throws {
         guard let db = test_ndb_dir() else {
             XCTFail("Could not create temp directory")
@@ -182,6 +212,46 @@ final class NdbTests: XCTestCase {
 
         let ndb_txn = Thread.current.threadDictionary.value(forKey: "ndb_txn")
         XCTAssertNil(ndb_txn)
+    }
+    
+    /// Verifies that a failed top-level SafeNdbTxn creation fully cleans up thread-local transaction state.
+    func testSafeNdbTxnFailure_cleansUpTopLevelThreadLocalTransactionState() throws {
+        let restoreThreadLocalTransactionState = resetThreadLocalTransactionState()
+        defer { restoreThreadLocalTransactionState() }
+
+        let ndb = try XCTUnwrap(Ndb(path: db_dir))
+
+        let txn = SafeNdbTxn<Int>.new(on: ndb, with: { _ in nil }, name: "failing_top_level_txn")
+
+        XCTAssertNil(txn)
+        XCTAssertNil(Thread.current.threadDictionary["ndb_txn"], "Top-level SafeNdbTxn failure should clear the thread-local transaction")
+        XCTAssertNil(Thread.current.threadDictionary["ndb_txn_ref_count"], "Top-level SafeNdbTxn failure should clear the thread-local reference count")
+        XCTAssertNil(Thread.current.threadDictionary["txn_generation"], "Top-level SafeNdbTxn failure should clear the thread-local generation")
+    }
+    
+    /// Verifies that a failed inherited SafeNdbTxn creation decrements the ref-count without clearing the parent transaction.
+    func testSafeNdbTxnFailure_onInheritedTransactionRestoresParentThreadLocalState() throws {
+        let restoreThreadLocalTransactionState = resetThreadLocalTransactionState()
+        defer { restoreThreadLocalTransactionState() }
+
+        let ndb = try XCTUnwrap(Ndb(path: db_dir))
+
+        let parent = try XCTUnwrap(SafeNdbTxn<Int>.new(on: ndb, with: { _ in 1 }, name: "parent_txn"))
+        let parentThreadTxn = Thread.current.threadDictionary["ndb_txn"] as? ndb_txn
+        XCTAssertNotNil(parentThreadTxn)
+        XCTAssertEqual(Thread.current.threadDictionary["ndb_txn_ref_count"] as? Int, 1)
+
+        let child = SafeNdbTxn<Int>.new(on: ndb, with: { _ in nil }, name: "failing_child_txn")
+
+        XCTAssertNil(child)
+        let restoredThreadTxn = Thread.current.threadDictionary["ndb_txn"] as? ndb_txn
+        XCTAssertNotNil(restoredThreadTxn, "Inherited SafeNdbTxn failure should keep the parent transaction installed")
+        XCTAssertEqual(restoredThreadTxn?.lmdb, parentThreadTxn?.lmdb)
+        XCTAssertEqual(restoredThreadTxn?.mdb_txn, parentThreadTxn?.mdb_txn)
+        XCTAssertEqual(Thread.current.threadDictionary["ndb_txn_ref_count"] as? Int, 1, "Inherited SafeNdbTxn failure should restore the parent ref-count")
+        XCTAssertEqual(Thread.current.threadDictionary["txn_generation"] as? Int, ndb.generation)
+
+        _ = parent
     }
 
     func test_decode_perf() throws {

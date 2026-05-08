@@ -210,7 +210,22 @@ class SafeNdbTxn<T: ~Copyable> {
         print("txn: open  gen\(generation) '\(name)' \(txn_count)")
         #endif
         let placeholderTxn = PlaceholderNdbTxn(txn: txn)
-        guard let val = valueGetter(placeholderTxn) else { return nil }
+        guard let val = valueGetter(placeholderTxn) else {
+            if inherited {
+                if let refCount = Thread.current.threadDictionary["ndb_txn_ref_count"] as? Int {
+                    Thread.current.threadDictionary["ndb_txn_ref_count"] = max(0, refCount - 1)
+                }
+                return nil
+            }
+
+            _ = try? ndb.withNdb({
+                ndb_end_query(&placeholderTxn.txn)
+            }, maxWaitTimeout: .milliseconds(200))
+            Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")
+            Thread.current.threadDictionary.removeObject(forKey: "ndb_txn_ref_count")
+            Thread.current.threadDictionary.removeObject(forKey: "txn_generation")
+            return nil
+        }
         return SafeNdbTxn<T>(ndb: ndb, txn: txn, val: val, generation: generation, inherited: inherited, name: name)
     }
 

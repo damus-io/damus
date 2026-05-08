@@ -165,6 +165,32 @@ struct ndb_lmdb {
 	MDB_dbi dbs[NDB_DBS];
 };
 
+/**
+ * Clears stale LMDB reader slots after opening the environment.
+ *
+ * This protects startup on platforms where reader slots are not reclaimed
+ * automatically after process termination.
+ *
+ * @param[in] env The LMDB environment to inspect.
+ * @return 1 when the check succeeds, 0 when LMDB reports an error.
+ */
+static int ndb_lmdb_reader_check(MDB_env *env)
+{
+	int rc;
+	int dead = 0;
+
+	rc = mdb_reader_check(env, &dead);
+	if (rc != MDB_SUCCESS) {
+		fprintf(stderr, "mdb_reader_check failed: %s\n", mdb_strerror(rc));
+		return 0;
+	}
+
+	if (dead > 0)
+		fprintf(stderr, "mdb_reader_check cleared %d stale reader(s)\n", dead);
+
+	return 1;
+}
+
 struct ndb_writer {
 	struct ndb_lmdb *lmdb;
 	struct ndb_monitor *monitor;
@@ -5846,6 +5872,12 @@ static int ndb_init_lmdb(const char *filename, struct ndb_lmdb *lmdb, size_t map
 
 	if ((rc = mdb_env_open(lmdb->env, filename, 0, 0664))) {
 		fprintf(stderr, "mdb_env_open failed, error %d\n", rc);
+		return 0;
+	}
+
+	if (!ndb_lmdb_reader_check(lmdb->env)) {
+		mdb_env_close(lmdb->env);
+		lmdb->env = NULL;
 		return 0;
 	}
 
