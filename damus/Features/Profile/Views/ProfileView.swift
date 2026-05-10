@@ -144,7 +144,7 @@ struct ProfileView: View {
             return AnyView(
                 VStack(spacing: 0) {
                     ZStack {
-                        BannerImageView(pubkey: profile.pubkey, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
+                        BannerImageView(pubkey: profile.pubkey, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state, settings: damus_state.settings)
                             .aspectRatio(contentMode: .fill)
                             .frame(width: proxy.size.width, height: minY > 0 ? bannerHeight + minY : bannerHeight)
                             .clipped()

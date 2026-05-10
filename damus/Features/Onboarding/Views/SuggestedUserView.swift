@@ -37,7 +37,8 @@ struct SuggestedUserView: View {
                                 fallbackUrl: nil,
                                 size: 50,
                                 highlight: .none,
-                                disable_animation: false)
+                                disable_animation: false,
+                                settings: damus_state.settings)
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     ProfileName(pubkey: user.pubkey, damus: damus_state)

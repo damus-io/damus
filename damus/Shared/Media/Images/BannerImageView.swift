@@ -86,33 +86,112 @@ struct InnerBannerImageView: View {
     }
 }
 
+/// Displays a user's profile banner image.
+///
+/// Respects Low Data Mode and shows a stylish placeholder when data saving is active.
+/// Streams profile updates to automatically refresh the banner when available.
 struct BannerImageView: View {
     let disable_animation: Bool
     let pubkey: Pubkey
     let profiles: Profiles
     let damusState: DamusState
+    /// User settings controlling low‑data behavior.
+    @ObservedObject var settings: UserSettingsStore
     
-    @State var banner: String?
+    /// Current banner image URL string.
+    @State private var banner: String?
+    /// Shared monitor for Low Data Mode changes.
+    @StateObject private var networkMonitor = NetworkMonitor.shared
     
-    init(pubkey: Pubkey, profiles: Profiles, disable_animation: Bool, banner: String? = nil, damusState: DamusState) {
+    init(pubkey: Pubkey, profiles: Profiles, disable_animation: Bool, banner: String? = nil, damusState: DamusState, settings: UserSettingsStore) {
         self.pubkey = pubkey
         self.profiles = profiles
         self._banner = State(initialValue: banner)
         self.disable_animation = disable_animation
         self.damusState = damusState
+        self.settings = settings
+    }
+    
+    /// Returns true if we should block loading due to Low Data Mode.
+    private var shouldBlockLoading: Bool {
+        settings.low_data_mode || networkMonitor.isLowDataMode
     }
     
     var body: some View {
-        InnerBannerImageView(disable_animation: disable_animation, url: get_banner_url(banner: banner, pubkey: pubkey, profiles: profiles))
-            .task {
-                for await profile in await damusState.nostrNetwork.profilesManager.streamProfile(pubkey: pubkey) {
-                    if let bannerImage = profile.banner, bannerImage != self.banner {
-                        self.banner = bannerImage
-                    }
+        Group {
+            if shouldBlockLoading {
+                BannerPlaceholder()
+            } else {
+                InnerBannerImageView(disable_animation: disable_animation, url: get_banner_url(banner: banner, pubkey: pubkey, profiles: profiles))
+            }
+        }
+        .task {
+            for await profile in await damusState.nostrNetwork.profilesManager.streamProfile(pubkey: pubkey) {
+                if let bannerImage = profile.banner, bannerImage != self.banner {
+                    self.banner = bannerImage
                 }
             }
+        }
     }
 }
+
+/// A stylish wide placeholder for profile banners in Low Data Mode.
+///
+/// Features a landscape/panorama icon with a subtle shimmer effect
+/// to indicate the banner image is hidden to save data.
+struct BannerPlaceholder: View {
+    /// Horizontal offset driving the shimmer animation.
+    @State private var shimmerOffset: CGFloat = -1
+    
+    var body: some View {
+        ZStack {
+            // Gradient background simulating a landscape
+            LinearGradient(
+                colors: [
+                    Color.blue.opacity(0.15),
+                    Color.purple.opacity(0.1),
+                    Color.gray.opacity(0.2)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            
+            // Shimmer overlay
+            Rectangle()
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.clear,
+                            Color.white.opacity(0.2),
+                            Color.clear
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .offset(x: shimmerOffset * 400)
+                .animation(
+                    Animation.linear(duration: 2.0)
+                        .repeatForever(autoreverses: false),
+                    value: shimmerOffset
+                )
+            
+            // Center icon
+            VStack(spacing: 4) {
+                Image(systemName: "panorama")
+                    .font(.system(size: 32))
+                    .foregroundColor(.gray.opacity(0.5))
+                Text(NSLocalizedString("Banner hidden", comment: "Text shown when banner is hidden in low data mode"))
+                    .font(.caption2)
+                    .foregroundColor(.gray.opacity(0.6))
+            }
+        }
+        .onAppear {
+            shimmerOffset = 1
+        }
+    }
+}
+
 
 func get_banner_url(banner: String?, pubkey: Pubkey, profiles: Profiles) -> URL? {
     let bannerUrlString = banner ?? (try? profiles.lookup(id: pubkey)?.banner) ?? ""
@@ -128,7 +207,8 @@ struct BannerImageView_Previews: PreviewProvider {
             pubkey: test_pubkey,
             profiles: make_preview_profiles(test_pubkey),
             disable_animation: false,
-            damusState: test_damus_state
+            damusState: test_damus_state,
+            settings: test_damus_state.settings
         )
     }
 }

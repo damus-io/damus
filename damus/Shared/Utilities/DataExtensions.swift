@@ -7,11 +7,8 @@
 import Foundation
 
 extension Data {
+    /// Returns the contents of the Data value as a byte array.
     var byteArray: [UInt8] {
-        var bytesToReturn: [UInt8] = []
-        for i in self.bytes.byteOffsets {
-            bytesToReturn.append(self[i])
-        }
-        return bytesToReturn
+        return [UInt8](self)
     }
 }
