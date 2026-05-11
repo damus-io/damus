@@ -688,8 +688,13 @@ class HomeModel: ContactsDelegate, ObservableObject {
         // include our pubkey as well even if we're not technically a friend
         home_filter.authors = friends
         home_filter.limit = 500
+        let selfOnlyHomeFilter = makeSelfOnlyHomeFilter(
+            homeFilterKinds: home_filter_kinds,
+            pubkey: damus_state.pubkey
+        )
 
         var home_filters = home_filter.chunked(on: .authors, into: MAX_CONTACTS_ON_FILTER)
+        home_filters.append(selfOnlyHomeFilter)
 
         let followed_hashtags = Array(damus_state.contacts.get_followed_hashtags())
         if followed_hashtags.count != 0 {
@@ -1034,6 +1039,15 @@ class HomeModel: ContactsDelegate, ObservableObject {
             self.incoming_dms = []
         }
     }
+}
+
+/// Builds a dedicated home filter for only the current user.
+/// This keeps our own posts visible even when high-volume author filters are clipped.
+func makeSelfOnlyHomeFilter(homeFilterKinds: [NostrKind], pubkey: Pubkey) -> NostrFilter {
+    var filter = NostrFilter(kinds: homeFilterKinds)
+    filter.authors = [pubkey]
+    filter.limit = 500
+    return filter
 }
 
 
