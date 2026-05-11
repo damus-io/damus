@@ -40,6 +40,11 @@ class StoriesModel: ObservableObject {
 
     init(damus: DamusState) {
         self.damus = damus
+        subscribe()
+    }
+
+    deinit {
+        listener?.cancel()
     }
 
     func subscribe() {

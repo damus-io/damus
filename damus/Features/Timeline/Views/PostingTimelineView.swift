@@ -66,9 +66,7 @@ struct PostingTimelineView: View {
     
     func contentTimelineView(filter: (@escaping (NostrEvent) -> Bool)) -> some View {
         let eventsSource = timeline_source == .favorites ? home.favoriteEvents : home.events
-        return TimelineView(events: eventsSource, loading: self.loading, headerHeight: $headerHeight, headerOffset: $headerOffset, damus: damus_state, show_friend_icon: false, filter: filter, viewId: timeline_source) {
-            StoryTrayContainerView(damus_state: damus_state)
-        }
+        return TimelineView<AnyView>(events: eventsSource, loading: self.loading, headerHeight: $headerHeight, headerOffset: $headerOffset, damus: damus_state, show_friend_icon: false, filter: filter, viewId: timeline_source)
     }
     
     func HeaderView() -> some View {
@@ -123,6 +121,7 @@ struct PostingTimelineView: View {
                     .tipViewStyle(TrustedNetworkButtonTipViewStyle())
                     .padding(.horizontal)
             }
+            StoryTrayContainerView(damus_state: damus_state)
             VStack(spacing: 0) {
                 CustomPicker(tabs: [
                     (NSLocalizedString("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies)."), FilterState.posts),
