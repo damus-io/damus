@@ -19,6 +19,13 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <assert.h>
+#include <time.h>
+#if defined(DEBUG) && (defined(__APPLE__) || defined(__linux__))
+#include <execinfo.h>
+#define NDB_DEBUG_HAS_STACKTRACE 1
+#else
+#define NDB_DEBUG_HAS_STACKTRACE 0
+#endif
 
 #include "bindings/c/profile_json_parser.h"
 #include "bindings/c/profile_builder.h"
@@ -63,6 +70,155 @@ static const int DEFAULT_WRITER_SCRATCH_SIZE = 2097152;
 typedef int (*ndb_migrate_fn)(struct ndb_txn *);
 typedef int (*ndb_word_parser_fn)(void *, const char *word, int word_len,
 				  int word_index);
+
+#ifdef DEBUG
+#define NDB_DEBUG_QUERY_TIMEOUT_SECONDS 3
+#define NDB_DEBUG_MAX_ACTIVE_QUERY_TXNS 1024
+#define NDB_DEBUG_QUERY_STACK_FRAME_LIMIT 64
+
+struct ndb_debug_query_txn {
+	const void *mdb_txn;
+	time_t opened_at;
+	int flags;
+	int stack_frame_count;
+	void *stack_frames[NDB_DEBUG_QUERY_STACK_FRAME_LIMIT];
+};
+
+static pthread_mutex_t ndb_debug_query_txns_mutex = PTHREAD_MUTEX_INITIALIZER;
+static struct ndb_debug_query_txn ndb_debug_query_txns[NDB_DEBUG_MAX_ACTIVE_QUERY_TXNS];
+
+static int ndb_debug_capture_stack_trace(void **stack_frames, int max_frames)
+{
+#if NDB_DEBUG_HAS_STACKTRACE
+	return backtrace(stack_frames, max_frames);
+#else
+	(void)stack_frames;
+	(void)max_frames;
+	return 0;
+#endif
+}
+
+static void ndb_debug_print_query_open_stack_trace(const struct ndb_debug_query_txn *entry)
+{
+#if NDB_DEBUG_HAS_STACKTRACE
+	char **symbols;
+	int i;
+
+	if (entry->stack_frame_count <= 0)
+		return;
+
+	symbols = backtrace_symbols(entry->stack_frames, entry->stack_frame_count);
+	if (symbols == NULL) {
+		fprintf(stderr, "ndb debug assertion note: failed to symbolize opening stack trace\n");
+		return;
+	}
+
+	fprintf(stderr, "ndb debug assertion note: transaction was opened at:\n");
+	for (i = 0; i < entry->stack_frame_count; i++) {
+		fprintf(stderr, "  [%d] %s\n", i, symbols[i]);
+	}
+	free(symbols);
+#else
+	(void)entry;
+#endif
+}
+
+static void ndb_debug_abort_on_long_lived_queries(time_t now)
+{
+	int i;
+
+	for (i = 0; i < NDB_DEBUG_MAX_ACTIVE_QUERY_TXNS; i++) {
+		const struct ndb_debug_query_txn *entry = &ndb_debug_query_txns[i];
+		double age_seconds;
+
+		if (entry->mdb_txn == NULL)
+			continue;
+
+		age_seconds = difftime(now, entry->opened_at);
+		if (age_seconds <= NDB_DEBUG_QUERY_TIMEOUT_SECONDS)
+			continue;
+
+		fprintf(stderr,
+			"ndb debug assertion failed: query transaction %p remained open for %.0f seconds (limit: %d seconds, flags: 0x%x)\n",
+			entry->mdb_txn,
+			age_seconds,
+			NDB_DEBUG_QUERY_TIMEOUT_SECONDS,
+			entry->flags);
+		ndb_debug_print_query_open_stack_trace(entry);
+		abort();
+	}
+}
+
+static void ndb_debug_register_query_txn(const struct ndb_txn *txn, int flags)
+{
+	const void *mdb_txn;
+	time_t now;
+	int i;
+
+	mdb_txn = txn->mdb_txn;
+	if (mdb_txn == NULL)
+		return;
+
+	now = time(NULL);
+	pthread_mutex_lock(&ndb_debug_query_txns_mutex);
+	ndb_debug_abort_on_long_lived_queries(now);
+
+	for (i = 0; i < NDB_DEBUG_MAX_ACTIVE_QUERY_TXNS; i++) {
+		if (ndb_debug_query_txns[i].mdb_txn == mdb_txn) {
+			ndb_debug_query_txns[i].opened_at = now;
+			ndb_debug_query_txns[i].flags = flags;
+			ndb_debug_query_txns[i].stack_frame_count = ndb_debug_capture_stack_trace(
+				ndb_debug_query_txns[i].stack_frames,
+				NDB_DEBUG_QUERY_STACK_FRAME_LIMIT
+			);
+			pthread_mutex_unlock(&ndb_debug_query_txns_mutex);
+			return;
+		}
+
+		if (ndb_debug_query_txns[i].mdb_txn != NULL)
+			continue;
+
+		ndb_debug_query_txns[i].mdb_txn = mdb_txn;
+		ndb_debug_query_txns[i].opened_at = now;
+		ndb_debug_query_txns[i].flags = flags;
+		ndb_debug_query_txns[i].stack_frame_count = ndb_debug_capture_stack_trace(
+			ndb_debug_query_txns[i].stack_frames,
+			NDB_DEBUG_QUERY_STACK_FRAME_LIMIT
+		);
+		pthread_mutex_unlock(&ndb_debug_query_txns_mutex);
+		return;
+	}
+
+	fprintf(stderr,
+		"ndb debug assertion failed: active query transaction registry exhausted (%d entries)\n",
+		NDB_DEBUG_MAX_ACTIVE_QUERY_TXNS);
+	pthread_mutex_unlock(&ndb_debug_query_txns_mutex);
+	abort();
+}
+
+static void ndb_debug_unregister_query_txn(const struct ndb_txn *txn)
+{
+	const void *mdb_txn;
+	int i;
+
+	mdb_txn = txn->mdb_txn;
+	if (mdb_txn == NULL)
+		return;
+
+	pthread_mutex_lock(&ndb_debug_query_txns_mutex);
+	for (i = 0; i < NDB_DEBUG_MAX_ACTIVE_QUERY_TXNS; i++) {
+		if (ndb_debug_query_txns[i].mdb_txn != mdb_txn)
+			continue;
+
+		ndb_debug_query_txns[i].mdb_txn = NULL;
+		ndb_debug_query_txns[i].opened_at = 0;
+		ndb_debug_query_txns[i].flags = 0;
+		ndb_debug_query_txns[i].stack_frame_count = 0;
+		break;
+	}
+	pthread_mutex_unlock(&ndb_debug_query_txns_mutex);
+}
+#endif
 
 // these must be byte-aligned, they are directly accessing the serialized data
 // representation
@@ -1629,11 +1785,19 @@ static inline void ndb_tsid_high(struct ndb_tsid *key, const unsigned char *id)
 
 static int _ndb_begin_query(struct ndb *ndb, struct ndb_txn *txn, int flags)
 {
+	int ok;
+
 	txn->lmdb = &ndb->lmdb;
 	MDB_txn **mdb_txn = (MDB_txn **)&txn->mdb_txn;
 	if (!txn->lmdb->env)
 		return 0;
-	return mdb_txn_begin(txn->lmdb->env, NULL, flags, mdb_txn) == 0;
+
+	ok = mdb_txn_begin(txn->lmdb->env, NULL, flags, mdb_txn) == 0;
+#ifdef DEBUG
+	if (ok && flags == MDB_RDONLY)
+		ndb_debug_register_query_txn(txn, flags);
+#endif
+	return ok;
 }
 
 int ndb_begin_query(struct ndb *ndb, struct ndb_txn *txn)
@@ -2363,6 +2527,9 @@ static struct ndb_migration MIGRATIONS[] = {
 
 int ndb_end_query(struct ndb_txn *txn)
 {
+#ifdef DEBUG
+	ndb_debug_unregister_query_txn(txn);
+#endif
 	// this works on read or write queries.
 	return mdb_txn_commit(txn->mdb_txn) == 0;
 }
