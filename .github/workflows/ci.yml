@@ -4,11 +4,13 @@ on:
   pull_request:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build-and-test:
     runs-on: macos-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
@@ -20,7 +22,7 @@ jobs:
         id: simulator
         shell: bash
         run: |
-          destination_id=$(xcodebuild -scheme damus -showdestinations | awk -F'id:' '/platform:iOS Simulator/ {split($2, parts, ","); gsub(/^[[:space:]]+|[[:space:]]+$/, "", parts[1]); print parts[1]; exit}')
+          destination_id=$(xcodebuild -scheme damus -showdestinations | grep -m1 -o 'id:[^,]*' | cut -d: -f2 | xargs)
 
           if [[ -z "$destination_id" ]]; then
             echo "Unable to find an available iOS Simulator destination for scheme 'damus'."
