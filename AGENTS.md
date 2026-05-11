@@ -7,7 +7,7 @@ Damus is an iOS client built around a local relay model ([damus-io/damus#3204](h
 ## Codebase Layout
 
 - `damus/` contains the SwiftUI app. Key subdirectories: `Core` (protocol, storage, networking, nostr primitives), `Features` (feature-specific flows like Timeline, Wallet, Purple), `Shared` (reusable UI components and utilities), `Models`, and localized resources (`*.lproj`, `en-US.xcloc`).
-- `nostrdb/` hosts the embedded database. Swift bindings (`Ndb.swift`, iterators) wrap a C/LMDB core; prefer these abstractions when working with persistence or queries.
+- `nostrdb/` is a git submodule hosting the embedded database C core; Damus-specific Swift bindings (`Ndb.swift`, iterators) live in `damus/Bindings/nostrdb/`.
 - `damus-c/` bridges C helpers (e.g., WASM runner) into Swift; check `damus-Bridging-Header.h` before adding new bridges.
 - `nostrscript/` contains AssemblyScript sources compiled to WASM via the top-level `Makefile`.
 - Tests live in `damusTests/` (unit/snapshot coverage) and `damusUITests/` (UI smoke tests). Keep them running before submitting changes.
