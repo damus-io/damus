@@ -11,6 +11,9 @@ jobs:
     runs-on: macos-latest
     permissions:
       contents: read
+    env:
+      SCHEME: damus
+      DESTINATION: platform=iOS Simulator,name=iPhone 16e
 
     steps:
       - name: Checkout
@@ -18,22 +21,8 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Select simulator destination
-        id: simulator
-        shell: bash
-        run: |
-          destination_id=$(xcodebuild -scheme damus -showdestinations | grep -m1 -o 'id:[^,]*' | cut -d: -f2 | xargs)
-
-          if [[ -z "$destination_id" ]]; then
-            echo "Unable to find an available iOS Simulator destination for scheme 'damus'."
-            xcodebuild -scheme damus -showdestinations
-            exit 1
-          fi
-
-          echo "destination=id=$destination_id" >> "$GITHUB_OUTPUT"
-
       - name: Build
-        run: xcodebuild -scheme damus -destination "${{ steps.simulator.outputs.destination }}" build
+        run: xcodebuild -scheme "${{ env.SCHEME }}" -destination "${{ env.DESTINATION }}" -quiet build
 
       - name: Test
-        run: xcodebuild -scheme damus -destination "${{ steps.simulator.outputs.destination }}" test
+        run: xcodebuild -scheme "${{ env.SCHEME }}" -destination "${{ env.DESTINATION }}" -quiet test
