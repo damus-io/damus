@@ -13,7 +13,7 @@ jobs:
       contents: read
     env:
       SCHEME: damus
-      DESTINATION: platform=iOS Simulator,name=iPhone 16e
+      DESTINATION: platform=iOS Simulator,name=iPhone 16
 
     steps:
       - name: Checkout
