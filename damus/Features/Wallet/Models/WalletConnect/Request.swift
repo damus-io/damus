@@ -72,6 +72,25 @@ extension WalletConnect {
         
         // MARK: - Interface
         
+        /// Returns a privacy-safe string representing only the type of request, without exposing sensitive details
+        /// like invoice strings, amounts, or timestamps.
+        ///
+        /// This is intended for logging and error reporting to external services like Sentry.
+        var requestTypeForLogging: String {
+            return methodForLogging.rawValue
+        }
+        
+        private var methodForLogging: Method {
+            switch self {
+            case .payInvoice:
+                return .payInvoice
+            case .getBalance:
+                return .getBalance
+            case .getTransactionList:
+                return .listTransactions
+            }
+        }
+        
         /// Converts the NWC request into a raw Nostr event to be sent in the network
         ///
         /// - Parameters:

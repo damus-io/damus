@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Sentry
 
 enum WalletConnectState {
     case new(WalletConnectURL)
@@ -100,6 +101,13 @@ class WalletModel: ObservableObject {
     /// - Parameter response: The NWC response received from the network
     func handle_nwc_response(response: WalletConnect.FullWalletResponse) {
         if let error = response.response.error {
+            DamusSentry.captureSentryError(error) { scope in
+                scope.setContext(value: [
+                    "operation": "nwc_response_error",
+                    "error_code": error.code,
+                    "error_message": error.message ?? "No message"
+                ], key: "wallet")
+            }
             self.resume(request: response.req_id, throwing: error)
             return
         }
@@ -148,7 +156,20 @@ class WalletModel: ObservableObject {
     
     func fetchTransactions(from: UInt64?, until: UInt64?, limit: Int?, offset: Int?, unpaid: Bool?, type: String?) async throws -> [WalletConnect.Transaction] {
         let response = try await self.request(.getTransactionList(from: from, until: until, limit: limit, offset: offset, unpaid: unpaid, type: type))
-        guard case .list_transactions(let transactionResponse) = response else { throw FetchError.responseMismatch }
+        let safeResponseType = response.safeTypeForLogging
+        guard case .list_transactions(let transactionResponse) = response else {
+            let error = FetchError.responseMismatch
+            DamusSentry.captureSentryError(error) { scope in
+                scope.setContext(value: [
+                    "operation": "fetch_transactions_response_mismatch",
+                    "response_type": safeResponseType,
+                    "from": from as Any,
+                    "until": until as Any,
+                    "limit": limit as Any
+                ], key: "wallet")
+            }
+            throw error
+        }
         return transactionResponse.transactions
     }
     
@@ -156,7 +177,17 @@ class WalletModel: ObservableObject {
     /// Fetches the balance amount from the network and returns the amount in sats
     func fetchBalance() async throws -> Int64 {
         let response = try await self.request(.getBalance)
-        guard case .get_balance(let balanceResponse) = response else { throw FetchError.responseMismatch }
+        let safeResponseType = response.safeTypeForLogging
+        guard case .get_balance(let balanceResponse) = response else {
+            let error = FetchError.responseMismatch
+            DamusSentry.captureSentryError(error) { scope in
+                scope.setContext(value: [
+                    "operation": "fetch_balance_response_mismatch",
+                    "response_type": safeResponseType
+                ], key: "wallet")
+            }
+            throw error
+        }
         return balanceResponse.balance / 1000
     }
     
@@ -169,7 +200,15 @@ class WalletModel: ObservableObject {
     func request(_ request: WalletConnect.Request, timeout: Duration = .seconds(10)) async throws(WalletRequestError) -> WalletConnect.Response.Result {
         guard let nostrNetwork else { throw .notConnectedToTheNostrNetwork }
         guard let currentNwcUrl = self.connect_state.currentNwcUrl() else { throw .noConnectedWallet }
-        guard let requestEvent = request.to_nostr_event(to_pk: currentNwcUrl.pubkey, keypair: currentNwcUrl.keypair) else { throw .errorFormattingRequest }
+        guard let requestEvent = request.to_nostr_event(to_pk: currentNwcUrl.pubkey, keypair: currentNwcUrl.keypair) else {
+            DamusSentry.captureSentryMessage("Wallet request failed: error formatting request") { scope in
+                scope.setContext(value: [
+                    "operation": "wallet_request_format",
+                    "request_type": request.requestTypeForLogging
+                ], key: "wallet")
+            }
+            throw .errorFormattingRequest
+        }
 
         let responseFilters = [
             NostrFilter(
@@ -182,19 +221,60 @@ class WalletModel: ObservableObject {
         
         await nostrNetwork.send(event: requestEvent, to: [currentNwcUrl.relay], skipEphemeralRelays: false)
         for await event in nostrNetwork.reader.timedStream(filters: responseFilters, to: [currentNwcUrl.relay], timeout: timeout) {
-            guard let responseEvent = try? event.getCopy() else { throw .internalError }
+            let responseEvent: NdbNote
+            do {
+                responseEvent = try event.getCopy()
+            } catch {
+                DamusSentry.captureSentryError(error) { scope in
+                    scope.setContext(value: [
+                        "operation": "wallet_response_get_copy",
+                        "error_type": String(describing: type(of: error))
+                    ], key: "wallet")
+                }
+                throw .internalError
+            }
             
             let fullWalletResponse: WalletConnect.FullWalletResponse
             do { fullWalletResponse = try WalletConnect.FullWalletResponse(from: responseEvent, nwc: currentNwcUrl) }
-            catch { throw WalletRequestError.walletResponseDecodingError(error) }
+            catch {
+                DamusSentry.captureSentryError(error) { scope in
+                    scope.setContext(value: [
+                        "operation": "wallet_response_decode",
+                        "error_type": String(describing: type(of: error))
+                    ], key: "wallet")
+                }
+                throw WalletRequestError.walletResponseDecodingError(error)
+            }
             
             guard fullWalletResponse.req_id == requestEvent.id else { continue }    // Our filters may match other responses
-            if let responseError = fullWalletResponse.response.error { throw .walletResponseError(responseError) }
+            if let responseError = fullWalletResponse.response.error {
+                DamusSentry.captureSentryError(responseError) { scope in
+                    scope.setContext(value: [
+                        "operation": "wallet_response_error",
+                        "error_code": responseError.code,
+                        "error_message": responseError.message ?? "No message"
+                    ], key: "wallet")
+                }
+                throw .walletResponseError(responseError)
+            }
             
-            guard let result = fullWalletResponse.response.result else { throw .walletEmptyResponse }
+            guard let result = fullWalletResponse.response.result else {
+                DamusSentry.captureSentryMessage("Wallet response has no result") { scope in
+                    scope.setContext(value: [
+                        "operation": "wallet_empty_response",
+                    ], key: "wallet")
+                }
+                throw .walletEmptyResponse
+            }
             return result
         }
         do { try Task.checkCancellation() } catch { throw .cancelled }
+        DamusSentry.captureSentryMessage("Wallet request timeout") { scope in
+            scope.setContext(value: [
+                "operation": "wallet_request_timeout",
+                "request_type": request.requestTypeForLogging,
+            ], key: "wallet")
+        }
         throw .responseTimeout
     }
     
@@ -245,5 +325,19 @@ class WalletModel: ObservableObject {
     
     enum WaitError: Error {
         case timeout
+    }
+}
+
+private extension WalletConnect.Response.Result {
+    /// Returns a privacy-safe label describing only the response case for telemetry.
+    var safeTypeForLogging: String {
+        switch self {
+        case .get_balance:
+            return "get_balance"
+        case .pay_invoice:
+            return "pay_invoice"
+        case .list_transactions:
+            return "list_transactions"
+        }
     }
 }

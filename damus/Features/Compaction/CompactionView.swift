@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import Sentry
 
 /// A view that handles database compaction on a background thread before showing the main content.
 ///
@@ -45,6 +46,11 @@ struct CompactionView: View {
 
     @State private var compactionState: CompactionState = .idle
     @State private var hasStartedCompactionFlow: Bool = false
+    
+    /// The source of the compaction request (automatic scheduling or manual user action).
+    /// Used to determine error handling behavior: automatic compactions report to Sentry silently,
+    /// while manual compactions show errors to the user.
+    @State private var compactionSource: NdbCompactionRequestSource = .automatic
 
     var body: some View {
         Group {
@@ -92,6 +98,9 @@ struct CompactionView: View {
             compactionState = .complete
             return
         }
+        
+        // Determine if this is a manual or automatic compaction request
+        compactionSource = Ndb.get_compact_on_next_launch_source() ?? .automatic
 
         let showsLargeDatabaseWarning = Ndb.db_path.map({ Ndb.is_large_database(path: $0) }) ?? false
         compactionState = CompactionState.initialCompactingState(showsLargeDatabaseWarning: showsLargeDatabaseWarning)
@@ -116,7 +125,21 @@ struct CompactionView: View {
                 }
             } catch {
                 await MainActor.run {
-                    compactionState = .failed(error: error.localizedDescription)
+                    // Always send errors to Sentry with compaction source context
+                    DamusSentry.captureSentryError(error) { scope in
+                        scope.setContext(value: [
+                            "compaction_source": compactionSource.rawValue,
+                            "error_description": error.localizedDescription
+                        ], key: "compaction")
+                    }
+                    
+                    // For automatic compaction, silently continue
+                    // For manual compaction, show the error UI to the user
+                    if compactionSource == .automatic {
+                        compactionState = .complete
+                    } else {
+                        compactionState = .failed(error: error.localizedDescription)
+                    }
                 }
             }
         }

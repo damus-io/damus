@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Sentry
 
 enum ZappingEventType {
     case failed(ZappingError)
@@ -184,6 +185,14 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
     
     guard let mzapreq = make_zap_request_event(keypair: keypair, content: content, relays: relays, target: target, zap_type: zap_type) else {
         // this should never happen
+        DamusSentry.captureSentryMessage("Failed to create zap request event") { scope in
+            scope.setContext(value: [
+                "operation": "make_zap_request_event",
+                "zap_type": String(describing: zap_type),
+                "relay_count": relays.count,
+                "has_comment": comment != nil
+            ], key: "zaps")
+        }
         return
     }
     
@@ -203,6 +212,11 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
             let typ = ZappingEventType.failed(.bad_lnurl)
             let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
             notify(.zapping(ev))
+            DamusSentry.captureSentryMessage("Failed to fetch lnurl payreq for zap") { scope in
+                scope.setContext(value: [
+                    "operation": "zap_fetch_lnurl"
+                ], key: "zaps")
+            }
             return
         }
 
@@ -211,6 +225,12 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
             let typ = ZappingEventType.failed(.fetching_invoice)
             let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
             notify(.zapping(ev))
+            DamusSentry.captureSentryMessage("Failed to fetch zap invoice") { scope in
+                scope.setContext(value: [
+                    "operation": "zap_fetch_invoice",
+                    "zap_type": String(describing: zap_type)
+                ], key: "zaps")
+            }
             return
         }
 
@@ -248,6 +268,11 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
                 let typ = ZappingEventType.failed(.send_failed)
                 let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
                 notify(.zapping(ev))
+                DamusSentry.captureSentryMessage("Failed to send NWC zap request") { scope in
+                    scope.setContext(value: [
+                        "operation": "nwc_pay_request",
+                    ], key: "zaps")
+                }
                 return
             }
 

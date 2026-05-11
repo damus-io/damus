@@ -7,6 +7,7 @@
 import Foundation
 import os
 import Negentropy
+import Sentry
 
 
 extension NostrNetworkManager {
@@ -272,6 +273,13 @@ extension NostrNetworkManager {
                     }
                     catch {
                         Self.logger.error("Network subscription \(id.uuidString, privacy: .public): Streaming error: \(error.localizedDescription, privacy: .public)")
+                        DamusSentry.captureSentryError(error) { scope in
+                            scope.setContext(value: [
+                                "operation": "network_subscription_stream",
+                                "subscription_id": id.uuidString,
+                                "filter_count": filters.count
+                            ], key: "network")
+                        }
                     }
                     Self.logger.debug("Network subscription \(id.uuidString, privacy: .public): Network streaming ended")
                     continuation.finish()
@@ -308,6 +316,13 @@ extension NostrNetworkManager {
                     }
                     catch {
                         Self.logger.error("Network subscription \(id.uuidString, privacy: .public): Streaming error: \(error.localizedDescription, privacy: .public)")
+                        DamusSentry.captureSentryError(error) { scope in
+                            scope.setContext(value: [
+                                "operation": "negentropy_subscription_stream",
+                                "subscription_id": id.uuidString,
+                                "filter_count": filters.count
+                            ], key: "network")
+                        }
                     }
                 })
             }

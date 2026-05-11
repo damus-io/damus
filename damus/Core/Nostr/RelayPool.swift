@@ -8,6 +8,7 @@
 import Foundation
 import Network
 import Negentropy
+import Sentry
 
 struct RelayHandler {
     let sub_id: String
@@ -313,6 +314,12 @@ class RelayPool {
                 #if DEBUG
                 print("[RelayPool] Failed to add relay \(url.absoluteString): \(error)")
                 #endif
+                DamusSentry.captureSentryError(error) { scope in
+                    scope.setContext(value: [
+                        "operation": "add_ephemeral_relay",
+                        "relay_url": url.absoluteString
+                    ], key: "relay_pool")
+                }
             }
         }
 
@@ -886,6 +893,12 @@ class RelayPool {
                         Log.error("Error while negentropy streaming: %s", for: .networking, error.localizedDescription)
                     }
                     else {
+                        DamusSentry.captureSentryError(error) { scope in
+                            scope.setContext(value: [
+                                "operation": "negentropy_sync_multi_relay",
+                                "ignore_unsupported": ignoreUnsupportedRelays
+                            ], key: "relay_pool")
+                        }
                         throw error
                     }
                 }

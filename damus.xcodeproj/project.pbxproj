@@ -1093,6 +1093,7 @@
 		9609F058296E220800069BF3 /* BannerImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9609F057296E220800069BF3 /* BannerImageView.swift */; };
 		9C83F89329A937B900136C08 /* TextViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C83F89229A937B900136C08 /* TextViewWrapper.swift */; };
 		9CA876E229A00CEA0003B9A3 /* AttachMediaUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */; };
+		ABE98D51D7DF44DAAD333D5E /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 5A958478DCE24724BA3B6460 /* Sentry */; };
 		ADFE73552AD4793100EC7326 /* QRScanNSECView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADFE73542AD4793100EC7326 /* QRScanNSECView.swift */; };
 		B501062D2B363036003874F5 /* AuthIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B501062C2B363036003874F5 /* AuthIntegrationTests.swift */; };
 		B51C1CEA2B55A60A00E312A9 /* AddMuteItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51C1CE82B55A60A00E312A9 /* AddMuteItemView.swift */; };
@@ -1738,6 +1739,7 @@
 		D77DA2CE2F1C2596000B7093 /* SubscriptionManagerNegentropyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77DA2CD2F1C2596000B7093 /* SubscriptionManagerNegentropyTests.swift */; };
 		D77DA2D42F1EEB47000B7093 /* NostrRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */; };
 		D783A63F2AD4E53D00658DDA /* SuggestedHashtagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D783A63E2AD4E53D00658DDA /* SuggestedHashtagsView.swift */; };
+		D7840B782FA28C6500221E4D /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 5A958478DCE24724BA3B6460 /* Sentry */; };
 		D78525252A7B2EA4002FA637 /* NoteContentViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78525242A7B2EA4002FA637 /* NoteContentViewTests.swift */; };
 		D7870BC12AC4750B0080BA88 /* MentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC02AC4750B0080BA88 /* MentionView.swift */; };
 		D7870BC32AC47EBC0080BA88 /* EventLoaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC22AC47EBC0080BA88 /* EventLoaderView.swift */; };
@@ -1788,6 +1790,18 @@
 		D798D22C2B086C7400234419 /* NostrEvent+.swift in Sources */ = {isa = PBXBuildFile; fileRef = D798D22B2B086C7400234419 /* NostrEvent+.swift */; };
 		D798D22D2B086DC400234419 /* NostrEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFB228049D640006080F /* NostrEvent.swift */; };
 		D798D22E2B086E4800234419 /* NostrResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFB028049D510006080F /* NostrResponse.swift */; };
+		D79C07402FA579DE00BD4BFF /* DamusSentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79C073F2FA579D600BD4BFF /* DamusSentry.swift */; };
+		D79C07412FA579DE00BD4BFF /* DamusSentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79C073F2FA579D600BD4BFF /* DamusSentry.swift */; };
+		D79C07422FA579DE00BD4BFF /* DamusSentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79C073F2FA579D600BD4BFF /* DamusSentry.swift */; };
+		D79C07442FA57BB700BD4BFF /* SensitiveDataScrubbingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79C07432FA57BB200BD4BFF /* SensitiveDataScrubbingTests.swift */; };
+		D79C07462FA69DDB00BD4BFF /* PrivacySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79C07452FA69DDB00BD4BFF /* PrivacySettingsView.swift */; };
+		D79C07472FA69DDB00BD4BFF /* PrivacySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79C07452FA69DDB00BD4BFF /* PrivacySettingsView.swift */; };
+		D79C07482FA69DDB00BD4BFF /* PrivacySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79C07452FA69DDB00BD4BFF /* PrivacySettingsView.swift */; };
+		D79C074A2FA6A5AE00BD4BFF /* GlobalSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79C07492FA6A5AE00BD4BFF /* GlobalSettingsStore.swift */; };
+		D79C074B2FA6A5AE00BD4BFF /* GlobalSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79C07492FA6A5AE00BD4BFF /* GlobalSettingsStore.swift */; };
+		D79C074C2FA6A5AE00BD4BFF /* GlobalSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79C07492FA6A5AE00BD4BFF /* GlobalSettingsStore.swift */; };
+		D79C074D2FA6A5AE00BD4BFF /* GlobalSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79C07492FA6A5AE00BD4BFF /* GlobalSettingsStore.swift */; };
+		D79C074E2FA9252600BD4BFF /* DamusSentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79C073F2FA579D600BD4BFF /* DamusSentry.swift */; };
 		D79C4C172AFEB061003A41B4 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79C4C162AFEB061003A41B4 /* NotificationService.swift */; };
 		D79C4C1B2AFEB061003A41B4 /* DamusNotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D79C4C142AFEB061003A41B4 /* DamusNotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D7A0D8752D1FE67900DCBE59 /* EditPictureControlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A0D8742D1FE66A00DCBE59 /* EditPictureControlTests.swift */; };
@@ -2900,6 +2914,10 @@
 		D798D21D2B0858BB00234419 /* MigratedTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigratedTypes.swift; sourceTree = "<group>"; };
 		D798D2272B085CDA00234419 /* NdbNote+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NdbNote+.swift"; sourceTree = "<group>"; };
 		D798D22B2B086C7400234419 /* NostrEvent+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NostrEvent+.swift"; sourceTree = "<group>"; };
+		D79C073F2FA579D600BD4BFF /* DamusSentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusSentry.swift; sourceTree = "<group>"; };
+		D79C07432FA57BB200BD4BFF /* SensitiveDataScrubbingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensitiveDataScrubbingTests.swift; sourceTree = "<group>"; };
+		D79C07452FA69DDB00BD4BFF /* PrivacySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacySettingsView.swift; sourceTree = "<group>"; };
+		D79C07492FA6A5AE00BD4BFF /* GlobalSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalSettingsStore.swift; sourceTree = "<group>"; };
 		D79C4C142AFEB061003A41B4 /* DamusNotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DamusNotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D79C4C162AFEB061003A41B4 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		D79C4C182AFEB061003A41B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -2982,6 +3000,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D7840B782FA28C6500221E4D /* Sentry in Frameworks */,
 				3ACF94382DA9A52F00971A4E /* FaviconFinder in Frameworks */,
 				4C06670428FC7EC500038D2A /* Kingfisher in Frameworks */,
 				D7DB1FE42D5A9AC900CF06DA /* CryptoSwift in Frameworks */,
@@ -3056,6 +3075,7 @@
 				D7EDED312B1290B80018B19C /* MarkdownUI in Frameworks */,
 				D7DB1FEA2D5A9F5A00CF06DA /* CryptoSwift in Frameworks */,
 				D7E5B2DF2EA0A68600CF47AC /* Negentropy in Frameworks */,
+				ABE98D51D7DF44DAAD333D5E /* Sentry in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3934,6 +3954,7 @@
 		4CE6DEF627F7A08200C66700 /* damusTests */ = {
 			isa = PBXGroup;
 			children = (
+				D79C07432FA57BB200BD4BFF /* SensitiveDataScrubbingTests.swift */,
 				D7E14B922F68B22D00BF84B7 /* NdbCompactionTests.swift */,
 				D774A5CB2F4F9679006A4D64 /* StorageStatsManagerTests.swift */,
 				D77A96BE2F3131BE00CC3246 /* RelayHintsTests.swift */,
@@ -4559,6 +4580,7 @@
 		5C78A7912E3036DA00CF177D /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				D79C07452FA69DDB00BD4BFF /* PrivacySettingsView.swift */,
 				D7B62B992F4CE59B001EE26F /* NostrDBDetailView.swift */,
 				D78778252F49478200DA73E4 /* StorageSettingsView.swift */,
 				4C15C7142A55DE7A00D0A0DB /* ReactionsSettingsView.swift */,
@@ -4646,6 +4668,7 @@
 		5C78A7992E303C1400CF177D /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				D79C07492FA6A5AE00BD4BFF /* GlobalSettingsStore.swift */,
 				BA693073295D649800ADDB87 /* UserSettingsStore.swift */,
 			);
 			path = Models;
@@ -4948,6 +4971,7 @@
 		5C78A7B82E3047DE00CF177D /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				D79C073F2FA579D600BD4BFF /* DamusSentry.swift */,
 				D77DA2C72F19D452000B7093 /* NegentropyUtilities.swift */,
 				D77DA2C32F19CA40000B7093 /* AsyncStreamUtilities.swift */,
 				D7E5B2D22EA0187B00CF47AC /* StreamPipelineDiagnostics.swift */,
@@ -5523,6 +5547,7 @@
 				D7DB1FE32D5A9AC900CF06DA /* CryptoSwift */,
 				3ACF94372DA9A52F00971A4E /* FaviconFinder */,
 				D7E5B2DA2EA080BE00CF47AC /* Negentropy */,
+				5A958478DCE24724BA3B6460 /* Sentry */,
 			);
 			productName = damus;
 			productReference = 4CE6DEE327F7A08100C66700 /* damus.app */;
@@ -5740,6 +5765,7 @@
 				3ACF94362DA9A52F00971A4E /* XCRemoteSwiftPackageReference "FaviconFinder" */,
 				D7E5B2D92EA080BE00CF47AC /* XCRemoteSwiftPackageReference "negentropy-swift" */,
 				D74723EA2F15B0C3002DA12A /* XCRemoteSwiftPackageReference "nostr-sdk-swift" */,
+				B1B8FE6C91C1401D965BD8DA /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
 			);
 			productRefGroup = 4CE6DEE427F7A08100C66700 /* Products */;
 			projectDirPath = "";
@@ -5847,6 +5873,7 @@
 			shellPath = /bin/sh;
 			shellScript = "git rev-parse --short HEAD > \"${SRCROOT}/build-git-hash.txt\"\n";
 		};
+
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -5955,6 +5982,7 @@
 				4CA5588329F33F5B00DC6A45 /* StringCodable.swift in Sources */,
 				4C75EFB92804A2740006080F /* EventView.swift in Sources */,
 				4C15C7152A55DE7A00D0A0DB /* ReactionsSettingsView.swift in Sources */,
+				D79C074D2FA6A5AE00BD4BFF /* GlobalSettingsStore.swift in Sources */,
 				4C32B94C2A9AD44700DC3548 /* FbConstants.swift in Sources */,
 				4C8D00C829DF791C0036AF10 /* CompatibleAttribute.swift in Sources */,
 				4C687C272A6039500092C550 /* TestData.swift in Sources */,
@@ -6115,11 +6143,13 @@
 				4CC7AAF0297F11C700430951 /* SelectedEventView.swift in Sources */,
 				4CC7AAF8297F1CEE00430951 /* EventProfile.swift in Sources */,
 				5CF2DCCC2AA3AF0B00984B8D /* RelayPicView.swift in Sources */,
+				D79C07472FA69DDB00BD4BFF /* PrivacySettingsView.swift in Sources */,
 				4C687C242A5FA86D0092C550 /* SearchHeaderView.swift in Sources */,
 				64FBD06F296255C400D9D3B2 /* Theme.swift in Sources */,
 				D7D2A3812BF815D000E4B42B /* PushNotificationClient.swift in Sources */,
 				4C1A9A2329DDDB8100516EAC /* IconLabel.swift in Sources */,
 				4CA352AC2A76C07F003BB08B /* NewUnmutesNotify.swift in Sources */,
+				D79C07412FA579DE00BD4BFF /* DamusSentry.swift in Sources */,
 				D7870BC32AC47EBC0080BA88 /* EventLoaderView.swift in Sources */,
 				4CE879522996B68900F758CC /* RelayType.swift in Sources */,
 				4CE8795B2996C47A00F758CC /* ZapsModel.swift in Sources */,
@@ -6464,6 +6494,7 @@
 				B5A75C2A2B546D94007AFBC0 /* MuteItemTests.swift in Sources */,
 				D7DB1FEE2D5AC51B00CF06DA /* NIP44v2EncryptionTests.swift in Sources */,
 				4C4F14A72A2A61A30045A0B9 /* NostrScriptTests.swift in Sources */,
+				D79C07442FA57BB700BD4BFF /* SensitiveDataScrubbingTests.swift in Sources */,
 				D78525252A7B2EA4002FA637 /* NoteContentViewTests.swift in Sources */,
 				D774A5CC2F4F9679006A4D64 /* StorageStatsManagerTests.swift in Sources */,
 				4C3EA67B28FF7B3900C48A62 /* InvoiceTests.swift in Sources */,
@@ -6558,6 +6589,7 @@
 				82D6FAB52CD99F7900C925F4 /* NativeObject.swift in Sources */,
 				82D6FAB62CD99F7900C925F4 /* String+extension.swift in Sources */,
 				3A515C552DF5371D002D3B34 /* TrustedNetworkButtonTipViewStyle.swift in Sources */,
+				D79C07422FA579DE00BD4BFF /* DamusSentry.swift in Sources */,
 				82D6FAB72CD99F7900C925F4 /* FlatBufferObject.swift in Sources */,
 				82D6FAB82CD99F7900C925F4 /* Enum.swift in Sources */,
 				82D6FAB92CD99F7900C925F4 /* builder.c in Sources */,
@@ -6754,6 +6786,7 @@
 				82D6FB672CD99F7900C925F4 /* Zaps+.swift in Sources */,
 				D7D09AB72DADCA5C00AB170D /* CoinosDeterministicAccountClient.swift in Sources */,
 				82D6FB682CD99F7900C925F4 /* WalletConnect+.swift in Sources */,
+				D79C07482FA69DDB00BD4BFF /* PrivacySettingsView.swift in Sources */,
 				82D6FB692CD99F7900C925F4 /* DamusPurpleNotificationManagement.swift in Sources */,
 				82D6FB6A2CD99F7900C925F4 /* DamusPurple.swift in Sources */,
 				82D6FB6B2CD99F7900C925F4 /* StoreObserver.swift in Sources */,
@@ -6987,6 +7020,7 @@
 				82D6FC312CD99F7900C925F4 /* ProxyView.swift in Sources */,
 				82D6FC322CD99F7900C925F4 /* SelectedEventView.swift in Sources */,
 				5C8F97352EB46145009399B1 /* LiveStreamView.swift in Sources */,
+				D79C074A2FA6A5AE00BD4BFF /* GlobalSettingsStore.swift in Sources */,
 				82D6FC332CD99F7900C925F4 /* EventBody.swift in Sources */,
 				D5C1AFC02E5DF7E60092F72F /* ContactCardManager.swift in Sources */,
 				82D6FC342CD99F7900C925F4 /* BuilderEventView.swift in Sources */,
@@ -7334,6 +7368,7 @@
 				D73E5ED52C6A97F4007EB227 /* GradientFollowButton.swift in Sources */,
 				D73E5ED82C6A97F4007EB227 /* DamusVideoPlayerView.swift in Sources */,
 				D73E5ED92C6A97F4007EB227 /* DamusVideoPlayer.swift in Sources */,
+				D79C07462FA69DDB00BD4BFF /* PrivacySettingsView.swift in Sources */,
 				D73E5EDA2C6A97F4007EB227 /* DamusVideoCoordinator.swift in Sources */,
 				D73E5EDC2C6A97F4007EB227 /* ReactionsSettingsView.swift in Sources */,
 				D73E5EDD2C6A97F4007EB227 /* NotificationSettingsView.swift in Sources */,
@@ -7560,6 +7595,7 @@
 				D703D7A92C670E5A00A400EA /* refmap.c in Sources */,
 				D73C7EDC2DE51699001F9392 /* OnboardingContentSettings.swift in Sources */,
 				5CFDE6F72EF4F93D004E8661 /* Secrets.swift in Sources */,
+				D79C07402FA579DE00BD4BFF /* DamusSentry.swift in Sources */,
 				D703D77B2C670BF000A400EA /* TableVerifier.swift in Sources */,
 				3ACF94442DA9FCAB00971A4E /* NIP05DomainTimelineView.swift in Sources */,
 				D703D76D2C670B4500A400EA /* ZapDataModel.swift in Sources */,
@@ -7618,6 +7654,7 @@
 				D703D7892C670C8600A400EA /* DeepLPlan.swift in Sources */,
 				5CB645AA2EAC01430018BD91 /* DamusLabsExperiments.swift in Sources */,
 				D73E5E182C6A963D007EB227 /* AttachMediaUtility.swift in Sources */,
+				D79C074C2FA6A5AE00BD4BFF /* GlobalSettingsStore.swift in Sources */,
 				D73E5F852C6AA628007EB227 /* LoadScript.swift in Sources */,
 				D703D74E2C6709DA00A400EA /* Pubkey.swift in Sources */,
 				D7D09AB62DADCA5C00AB170D /* CoinosDeterministicAccountClient.swift in Sources */,
@@ -7741,10 +7778,12 @@
 				D7CCFC162B05894300323D86 /* Pubkey.swift in Sources */,
 				D7EDED2C2B128CFA0018B19C /* DamusColors.swift in Sources */,
 				D74AAFC52B1538DF006CF0F4 /* NotificationExtensionState.swift in Sources */,
+				D79C074E2FA9252600BD4BFF /* DamusSentry.swift in Sources */,
 				D798D2292B08686C00234419 /* ContentParsing.swift in Sources */,
 				D798D2242B0859C900234419 /* LocalizationUtil.swift in Sources */,
 				D7CE1B322B0BE6C3002EDAD4 /* NdbTxn.swift in Sources */,
 				D7CE1B372B0BE719002EDAD4 /* Verifier.swift in Sources */,
+				D79C074B2FA6A5AE00BD4BFF /* GlobalSettingsStore.swift in Sources */,
 				D74AAFC82B155C9D006CF0F4 /* InsertSort.swift in Sources */,
 				D723411A2B6864F200E1E135 /* DamusPurpleEnvironment.swift in Sources */,
 				D7EDED292B1182060018B19C /* AttachMediaUtility.swift in Sources */,
@@ -8131,6 +8170,7 @@
 				CODE_SIGN_ENTITLEMENTS = damus/damus.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"damus/Preview Content\"";
 				DEVELOPMENT_TEAM = XK7H4JAB3D;
 				ENABLE_PREVIEWS = YES;
@@ -8185,6 +8225,7 @@
 				CODE_SIGN_ENTITLEMENTS = damus/damus.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"damus/Preview Content\"";
 				DEVELOPMENT_TEAM = XK7H4JAB3D;
 				ENABLE_PREVIEWS = YES;
@@ -8609,6 +8650,16 @@
 				minimumVersion = 0.2.26;
 			};
 		};
+		B1B8FE6C91C1401D965BD8DA /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/getsentry/sentry-cocoa/";
+			requirement = {
+				kind = exactVersion;
+				version = 9.11.0;
+			};
+			traits = (
+			);
+		};
 		D70D90962CDED61800CD0534 /* XCRemoteSwiftPackageReference "CodeScanner" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/twostraws/CodeScanner.git";
@@ -8707,6 +8758,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
 			productName = secp256k1;
+		};
+		5A958478DCE24724BA3B6460 /* Sentry */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B1B8FE6C91C1401D965BD8DA /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			productName = Sentry;
 		};
 		82D6FC802CD99FC500C925F4 /* secp256k1 */ = {
 			isa = XCSwiftPackageProductDependency;

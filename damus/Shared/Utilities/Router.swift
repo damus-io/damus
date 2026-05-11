@@ -24,6 +24,7 @@ enum Route: Hashable {
     case DMChat(dms: DirectMessageModel)
     case UserRelays(relays: [RelayURL])
     case KeySettings(keypair: Keypair)
+    case PrivacySettings
     case AppearanceSettings(settings: UserSettingsStore)
     case NotificationSettings(settings: UserSettingsStore)
     case ZapSettings(settings: UserSettingsStore)
@@ -86,6 +87,8 @@ enum Route: Hashable {
             UserRelaysView(state: damusState, relays: relays)
         case .KeySettings(let keypair):
             KeySettingsView(keypair: keypair)
+        case .PrivacySettings:
+            PrivacySettingsView()
         case .AppearanceSettings(let settings):
             AppearanceSettingsView(damus_state: damusState, settings: settings)
         case .NotificationSettings(let settings):
@@ -194,6 +197,8 @@ enum Route: Hashable {
         case .KeySettings(let keypair):
             hasher.combine("keySettings")
             hasher.combine(keypair.pubkey)
+        case .PrivacySettings:
+            hasher.combine("privacySettings")
         case .AppearanceSettings:
             hasher.combine("appearanceSettings")
         case .NotificationSettings:
