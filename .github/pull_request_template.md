@@ -10,6 +10,10 @@ CHOOSE YOUR CHECKLIST:
 - If this is a STANDARD PR, follow the "Standard PR Checklist" below and DELETE the "Experimental Feature Checklist"
 -->
 
+> [!WARNING]
+> Please file an issue or create a ticket for the work in this PR, then link it here.
+> We use issues and tickets to triage and prioritize work, so PRs without a linked issue/ticket may be delayed.
+
 ### Experimental Feature Checklist
 
 <!-- DELETE THIS SECTION if this is a standard PR -->
@@ -20,6 +24,7 @@ CHOOSE YOUR CHECKLIST:
 
 - [ ] I have read (or I am familiar with) the [Contribution Guidelines](../docs/CONTRIBUTING.md).
 - [ ] I have done some testing on the changes in this PR to ensure it is at least functional.
+- [ ] I have filed or linked an existing issue/ticket related to this change.
 - [ ] I made sure that this new feature is only available when the user opts-in from the Damus Labs screen, and does not affect the rest of the app when turned off. 
 - [ ] My PR is either small, or I have split it into smaller logical commits that are easier to review.
 - [ ] I have added the signoff line to all my commits. See [Signing off your work](../docs/CONTRIBUTING.md#sign-your-work---the-developers-certificate-of-origin).
@@ -35,7 +40,7 @@ CHOOSE YOUR CHECKLIST:
 - [ ] I have profiled the changes to ensure there are no performance regressions, or I do not need to profile the changes.
     - Utilize Xcode profiler to measure performance impact of code changes. See https://developer.apple.com/videos/play/wwdc2025/306
     - If not needed, provide reason:
-- [ ] I have opened or referred to an existing github issue related to this change.
+- [ ] I have filed or linked an existing issue/ticket related to this change.
 - [ ] My PR is either small, or I have split it into smaller logical commits that are easier to review
 - [ ] I have added the signoff line to all my commits. See [Signing off your work](../docs/CONTRIBUTING.md#sign-your-work---the-developers-certificate-of-origin)
 - [ ] I have added appropriate changelog entries for the changes in this PR. See [Adding changelog entries](../docs/CONTRIBUTING.md#add-changelog-changed-changelog-fixed-etc)
