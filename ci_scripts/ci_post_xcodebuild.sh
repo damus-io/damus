@@ -28,6 +28,9 @@ fi
 export SENTRY_ORG=damus-nostr-inc
 export SENTRY_PROJECT=apple-ios
 
-if ! sentry-cli debug-files upload --include-sources "${DSYM_PATH}" >/dev/null 2>&1; then
-  echo "warning: sentry-cli failed to upload dSYMs from ${DSYM_PATH}"
+if ! error_output=$(sentry-cli debug-files upload --include-sources "${DSYM_PATH}" 2>&1 >/dev/null); then
+  echo "warning: sentry-cli failed to upload dSYMs with sources from ${DSYM_PATH}: ${error_output}"
+  if ! error_output=$(sentry-cli debug-files upload "${DSYM_PATH}" 2>&1 >/dev/null); then
+    echo "warning: sentry-cli failed to upload dSYMs from ${DSYM_PATH}: ${error_output}"
+  fi
 fi
