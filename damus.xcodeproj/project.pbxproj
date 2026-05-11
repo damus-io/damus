@@ -2221,7 +2221,7 @@
 		4C1253652A76D0FF0004F4B8 /* OnlyZapsNotify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnlyZapsNotify.swift; sourceTree = "<group>"; };
 		4C1253672A76D2470004F4B8 /* MuteNotify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuteNotify.swift; sourceTree = "<group>"; };
 		4C1253692A76D3850004F4B8 /* RelaysChangedNotify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelaysChangedNotify.swift; sourceTree = "<group>"; };
-		4C15224A2B8D499F007CDC17 /* parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parser.h; sourceTree = "<group>"; };
+		4C15224A2B8D499F007CDC17 /* parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = damus-c/parser.h; sourceTree = SOURCE_ROOT; };
 		4C15C7142A55DE7A00D0A0DB /* ReactionsSettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReactionsSettingsView.swift; sourceTree = "<group>"; };
 		4C190F1F2A535FC200027FD5 /* CustomizeZapModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomizeZapModel.swift; sourceTree = "<group>"; };
 		4C190F242A547D2000027FD5 /* LoadScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadScript.swift; sourceTree = "<group>"; };
@@ -2314,21 +2314,21 @@
 		4C3BEFDF281DE1ED00B3DE84 /* DamusState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusState.swift; sourceTree = "<group>"; };
 		4C3D52B5298DB4E6001C5831 /* ZapEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapEvent.swift; sourceTree = "<group>"; };
 		4C3D52B7298DB5C6001C5831 /* TextEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEvent.swift; sourceTree = "<group>"; };
-		4C3DCC752A9FC2030091E592 /* NdbTxn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbTxn.swift; sourceTree = "<group>"; };
+		4C3DCC752A9FC2030091E592 /* NdbTxn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damus/Bindings/nostrdb/NdbTxn.swift; sourceTree = SOURCE_ROOT; };
 		4C3EA67A28FF7B3900C48A62 /* InvoiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvoiceTests.swift; sourceTree = "<group>"; };
 		4C3EA67C28FFBBA200C48A62 /* InvoicesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvoicesView.swift; sourceTree = "<group>"; };
 		4C3EA67E28FFC01D00C48A62 /* InvoiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvoiceView.swift; sourceTree = "<group>"; };
 		4C42812B298C848200DBF26F /* TranslateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslateView.swift; sourceTree = "<group>"; };
 		4C45E5012BED4D000025A428 /* ThreadReply.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadReply.swift; sourceTree = "<group>"; };
 		4C463CBE2B960B96008A8C36 /* PurpleBackdrop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurpleBackdrop.swift; sourceTree = "<group>"; };
-		4C478E242A9932C100489948 /* Ndb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ndb.swift; sourceTree = "<group>"; };
+		4C478E242A9932C100489948 /* Ndb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damus/Bindings/nostrdb/Ndb.swift; sourceTree = SOURCE_ROOT; };
 		4C47928E2A9939BD00489948 /* flatcc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatcc.h; sourceTree = "<group>"; };
 		4C47928F2A9939BD00489948 /* flatcc_version.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatcc_version.h; sourceTree = "<group>"; };
 		4C4792902A9939BD00489948 /* flatcc_emitter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatcc_emitter.h; sourceTree = "<group>"; };
 		4C4792912A9939BD00489948 /* flatcc_alloc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatcc_alloc.h; sourceTree = "<group>"; };
 		4C4792922A9939BD00489948 /* flatcc_json_printer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatcc_json_printer.h; sourceTree = "<group>"; };
 		4C4792932A9939BD00489948 /* CMakeLists.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
-		4C4792942A9939BD00489948 /* builder.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = builder.c; sourceTree = "<group>"; };
+		4C4792942A9939BD00489948 /* builder.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nostrdb/deps/flatcc/src/runtime/builder.c; sourceTree = SOURCE_ROOT; };
 		4C4792952A9939BD00489948 /* flatcc_verifier.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatcc_verifier.h; sourceTree = "<group>"; };
 		4C4792962A9939BD00489948 /* flatcc_refmap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatcc_refmap.h; sourceTree = "<group>"; };
 		4C4792972A9939BD00489948 /* flatcc_unaligned.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatcc_unaligned.h; sourceTree = "<group>"; };
@@ -2376,20 +2376,20 @@
 		4C4792C52A9939BD00489948 /* flatcc_identifier.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatcc_identifier.h; sourceTree = "<group>"; };
 		4C4792C62A9939BD00489948 /* flatcc_prologue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatcc_prologue.h; sourceTree = "<group>"; };
 		4C4792C72A9939BD00489948 /* flatcc_builder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatcc_builder.h; sourceTree = "<group>"; };
-		4C4792C82A9939BD00489948 /* json_parser.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = json_parser.c; sourceTree = "<group>"; };
+		4C4792C82A9939BD00489948 /* json_parser.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nostrdb/deps/flatcc/src/runtime/json_parser.c; sourceTree = SOURCE_ROOT; };
 		4C4792CA2A9939BD00489948 /* README */ = {isa = PBXFileReference; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 		4C4792CB2A9939BD00489948 /* readfile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = readfile.h; sourceTree = "<group>"; };
 		4C4792CC2A9939BD00489948 /* cdump.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cdump.h; sourceTree = "<group>"; };
 		4C4792CD2A9939BD00489948 /* elapsed.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = elapsed.h; sourceTree = "<group>"; };
 		4C4792CE2A9939BD00489948 /* hexdump.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hexdump.h; sourceTree = "<group>"; };
-		4C4792CF2A9939BD00489948 /* emitter.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = emitter.c; sourceTree = "<group>"; };
+		4C4792CF2A9939BD00489948 /* emitter.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nostrdb/deps/flatcc/src/runtime/emitter.c; sourceTree = SOURCE_ROOT; };
 		4C4792D02A9939BD00489948 /* flatcc_json_parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatcc_json_parser.h; sourceTree = "<group>"; };
-		4C4792D12A9939BD00489948 /* refmap.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = refmap.c; sourceTree = "<group>"; };
+		4C4792D12A9939BD00489948 /* refmap.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nostrdb/deps/flatcc/src/runtime/refmap.c; sourceTree = SOURCE_ROOT; };
 		4C4792D22A9939BD00489948 /* flatcc_flatbuffers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatcc_flatbuffers.h; sourceTree = "<group>"; };
 		4C4792D32A9939BD00489948 /* flatcc_portable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatcc_portable.h; sourceTree = "<group>"; };
-		4C4792D42A9939BD00489948 /* verifier.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = verifier.c; sourceTree = "<group>"; };
+		4C4792D42A9939BD00489948 /* verifier.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nostrdb/deps/flatcc/src/runtime/verifier.c; sourceTree = SOURCE_ROOT; };
 		4C4792D52A9939BD00489948 /* flatcc_types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatcc_types.h; sourceTree = "<group>"; };
-		4C4792D62A9939BD00489948 /* json_printer.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = json_printer.c; sourceTree = "<group>"; };
+		4C4792D62A9939BD00489948 /* json_printer.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nostrdb/deps/flatcc/src/runtime/json_printer.c; sourceTree = SOURCE_ROOT; };
 		4C4792D72A9939BD00489948 /* flatcc_assert.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatcc_assert.h; sourceTree = "<group>"; };
 		4C4792D92A9939BD00489948 /* README */ = {isa = PBXFileReference; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 		4C4792DA2A9939BD00489948 /* reflection_reader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = reflection_reader.h; sourceTree = "<group>"; };
@@ -2397,10 +2397,10 @@
 		4C4792DC2A9939BD00489948 /* reflection_builder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = reflection_builder.h; sourceTree = "<group>"; };
 		4C4792DD2A9939BD00489948 /* reflection_verifier.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = reflection_verifier.h; sourceTree = "<group>"; };
 		4C4792DE2A9939BD00489948 /* flatbuffers_common_builder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flatbuffers_common_builder.h; sourceTree = "<group>"; };
-		4C4792FF2A993B9A00489948 /* lmdb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lmdb.h; sourceTree = "<group>"; };
-		4C4793002A993B9A00489948 /* mdb.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mdb.c; sourceTree = "<group>"; };
-		4C4793022A993D9300489948 /* midl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = midl.h; sourceTree = "<group>"; };
-		4C4793032A993DB900489948 /* midl.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = midl.c; sourceTree = "<group>"; };
+		4C4792FF2A993B9A00489948 /* lmdb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nostrdb/deps/lmdb/lmdb.h; sourceTree = SOURCE_ROOT; };
+		4C4793002A993B9A00489948 /* mdb.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nostrdb/deps/lmdb/mdb.c; sourceTree = SOURCE_ROOT; };
+		4C4793022A993D9300489948 /* midl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nostrdb/deps/lmdb/midl.h; sourceTree = SOURCE_ROOT; };
+		4C4793032A993DB900489948 /* midl.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nostrdb/deps/lmdb/midl.c; sourceTree = SOURCE_ROOT; };
 		4C4A3A5A288A1B2200453788 /* damus.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = damus.entitlements; sourceTree = "<group>"; };
 		4C4DD3DA2A6CA7E8005B4E85 /* ContentParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentParsing.swift; sourceTree = "<group>"; };
 		4C4E137A2A76D5FB00BDD832 /* MuteThreadNotify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuteThreadNotify.swift; sourceTree = "<group>"; };
@@ -2414,7 +2414,7 @@
 		4C59B98B2A76C2550032FFEB /* ProfileUpdatedNotify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileUpdatedNotify.swift; sourceTree = "<group>"; };
 		4C5C7E67284ED36500A22DF5 /* SearchHomeModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHomeModel.swift; sourceTree = "<group>"; };
 		4C5C7E69284EDE2E00A22DF5 /* SearchResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultsView.swift; sourceTree = "<group>"; };
-		4C5D5C9C2A6B2CB40024563C /* AsciiCharacter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsciiCharacter.swift; sourceTree = "<group>"; };
+		4C5D5C9C2A6B2CB40024563C /* AsciiCharacter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damus/Bindings/nostrdb/AsciiCharacter.swift; sourceTree = SOURCE_ROOT; };
 		4C5E54022A9522F600FF6E60 /* UserStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserStatus.swift; sourceTree = "<group>"; };
 		4C5E54052A9671F800FF6E60 /* UserStatusSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserStatusSheet.swift; sourceTree = "<group>"; };
 		4C5F9113283D694D0052CD1C /* FollowTarget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowTarget.swift; sourceTree = "<group>"; };
@@ -2442,10 +2442,10 @@
 		4C75EFB628049D990006080F /* RelayPool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayPool.swift; sourceTree = "<group>"; };
 		4C75EFB82804A2740006080F /* EventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventView.swift; sourceTree = "<group>"; };
 		4C75EFBA2804A34C0006080F /* ProofOfWork.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProofOfWork.swift; sourceTree = "<group>"; };
-		4C78EFD72A707C4D007E8197 /* secp256k1_schnorrsig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = secp256k1_schnorrsig.h; sourceTree = "<group>"; };
-		4C78EFD82A707C4D007E8197 /* secp256k1_ecdh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = secp256k1_ecdh.h; sourceTree = "<group>"; };
-		4C78EFD92A707C4D007E8197 /* secp256k1.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = secp256k1.h; sourceTree = "<group>"; };
-		4C78EFDA2A707C67007E8197 /* secp256k1_extrakeys.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = secp256k1_extrakeys.h; sourceTree = "<group>"; };
+		4C78EFD72A707C4D007E8197 /* secp256k1_schnorrsig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nostrdb/deps/secp256k1/include/secp256k1_schnorrsig.h; sourceTree = SOURCE_ROOT; };
+		4C78EFD82A707C4D007E8197 /* secp256k1_ecdh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nostrdb/deps/secp256k1/include/secp256k1_ecdh.h; sourceTree = SOURCE_ROOT; };
+		4C78EFD92A707C4D007E8197 /* secp256k1.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nostrdb/deps/secp256k1/include/secp256k1.h; sourceTree = SOURCE_ROOT; };
+		4C78EFDA2A707C67007E8197 /* secp256k1_extrakeys.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nostrdb/deps/secp256k1/include/secp256k1_extrakeys.h; sourceTree = SOURCE_ROOT; };
 		4C7D09582A05BEAD00943473 /* KeyboardVisible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardVisible.swift; sourceTree = "<group>"; };
 		4C7D095C2A098C5D00943473 /* ConnectWalletView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectWalletView.swift; sourceTree = "<group>"; };
 		4C7D095D2A098C5D00943473 /* WalletView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WalletView.swift; sourceTree = "<group>"; };
@@ -2467,9 +2467,9 @@
 		4C8D1A6B29F1DFC200ACDF75 /* FriendIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendIcon.swift; sourceTree = "<group>"; };
 		4C8D1A6E29F31E5000ACDF75 /* TrustedNetworkButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedNetworkButton.swift; sourceTree = "<group>"; };
 		4C8EC52429D1FA6C0085D9A8 /* DamusColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusColors.swift; sourceTree = "<group>"; };
-		4C9054842A6AEAA000811EEC /* NdbTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbTests.swift; sourceTree = "<group>"; };
-		4C9054882A6AED4700811EEC /* NdbTagIterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbTagIterator.swift; sourceTree = "<group>"; };
-		4C90548A2A6AEDEE00811EEC /* NdbNote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbNote.swift; sourceTree = "<group>"; };
+		4C9054842A6AEAA000811EEC /* NdbTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damus/Bindings/nostrdb/Test/NdbTests.swift; sourceTree = SOURCE_ROOT; };
+		4C9054882A6AED4700811EEC /* NdbTagIterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damus/Bindings/nostrdb/NdbTagIterator.swift; sourceTree = SOURCE_ROOT; };
+		4C90548A2A6AEDEE00811EEC /* NdbNote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damus/Bindings/nostrdb/NdbNote.swift; sourceTree = SOURCE_ROOT; };
 		4C90BD17283A9EE5008EE7EF /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		4C90BD19283AA67F008EE7EF /* Bech32.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bech32.swift; sourceTree = "<group>"; };
 		4C90BD1B283AC38E008EE7EF /* Bech32Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bech32Tests.swift; sourceTree = "<group>"; };
@@ -2575,8 +2575,8 @@
 		4CD7641A28A1641400B6928F /* EndBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndBlock.swift; sourceTree = "<group>"; };
 		4CDA128929E9D10C0006FA5A /* SignalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalView.swift; sourceTree = "<group>"; };
 		4CDA128B29EB19C40006FA5A /* LocalNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalNotification.swift; sourceTree = "<group>"; };
-		4CDD1ADF2A6B305F001CD4DF /* NdbTagElem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbTagElem.swift; sourceTree = "<group>"; };
-		4CDD1AE12A6B3074001CD4DF /* NdbTagsIterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbTagsIterator.swift; sourceTree = "<group>"; };
+		4CDD1ADF2A6B305F001CD4DF /* NdbTagElem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damus/Bindings/nostrdb/NdbTagElem.swift; sourceTree = SOURCE_ROOT; };
+		4CDD1AE12A6B3074001CD4DF /* NdbTagsIterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damus/Bindings/nostrdb/NdbTagsIterator.swift; sourceTree = SOURCE_ROOT; };
 		4CE0E2AE29A2E82100DB4CA2 /* EventHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventHolder.swift; sourceTree = "<group>"; };
 		4CE0E2B529A3ED5500DB4CA2 /* InnerTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InnerTimelineView.swift; sourceTree = "<group>"; };
 		4CE1398F29F0661A00AC6A0B /* RepostAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepostAction.swift; sourceTree = "<group>"; };
@@ -2682,7 +2682,7 @@
 		4CF480372B631C0100F2B2C0 /* invoice.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = invoice.c; sourceTree = "<group>"; };
 		4CF480532B631C4F00F2B2C0 /* wasm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = wasm.c; sourceTree = "<group>"; };
 		4CF480542B631C4F00F2B2C0 /* wasm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = wasm.h; sourceTree = "<group>"; };
-		4CF480582B633F3800F2B2C0 /* NdbBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbBlock.swift; sourceTree = "<group>"; };
+		4CF480582B633F3800F2B2C0 /* NdbBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damus/Bindings/nostrdb/NdbBlock.swift; sourceTree = SOURCE_ROOT; };
 		4CFD502E2A2DA45800A229DB /* MediaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaView.swift; sourceTree = "<group>"; };
 		4CFF8F5829C9FD1E008DB934 /* DamusPurpleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleView.swift; sourceTree = "<group>"; };
 		4CFF8F6229CC9AD7008DB934 /* ImageContextMenuModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageContextMenuModifier.swift; sourceTree = "<group>"; };
@@ -2849,7 +2849,7 @@
 		D7315A292ACDF3B70036E30A /* DamusCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusCacheManager.swift; sourceTree = "<group>"; };
 		D7315A2B2ACDF4DA0036E30A /* DamusCacheManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusCacheManagerTests.swift; sourceTree = "<group>"; };
 		D733F9E02D92C1AA00317B11 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
-		D733F9E42D92C75C00317B11 /* UnownedNdbNote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnownedNdbNote.swift; sourceTree = "<group>"; };
+		D733F9E42D92C75C00317B11 /* UnownedNdbNote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damus/Bindings/nostrdb/UnownedNdbNote.swift; sourceTree = SOURCE_ROOT; };
 		D734B1442CCC19B1000B5C97 /* DamusFullScreenCover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusFullScreenCover.swift; sourceTree = "<group>"; };
 		D7373BA52B688EA200F7783D /* DamusPurpleTranslationSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleTranslationSetupView.swift; sourceTree = "<group>"; };
 		D7373BA72B68974500F7783D /* DamusPurpleNewUserOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleNewUserOnboardingView.swift; sourceTree = "<group>"; };
@@ -2872,10 +2872,10 @@
 		D74E64112DC95CBE004C7892 /* HumanReadableErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HumanReadableErrors.swift; sourceTree = "<group>"; };
 		D74EA08D2D2E271E002290DD /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
 		D74EA0922D2E77B9002290DD /* LoadableNostrEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadableNostrEventView.swift; sourceTree = "<group>"; };
-		D74EC84E2E1856AF0091DC51 /* NonCopyableLinkedList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NonCopyableLinkedList.swift; sourceTree = "<group>"; };
+		D74EC84E2E1856AF0091DC51 /* NonCopyableLinkedList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damus/Bindings/nostrdb/NonCopyableLinkedList.swift; sourceTree = SOURCE_ROOT; };
 		D74F43092B23F0BE00425B75 /* DamusPurple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurple.swift; sourceTree = "<group>"; };
 		D74F430B2B23FB9B00425B75 /* StoreObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreObserver.swift; sourceTree = "<group>"; };
-		D75154BE2EC5910600BF2CB2 /* NdbUseLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbUseLock.swift; sourceTree = "<group>"; };
+		D75154BE2EC5910600BF2CB2 /* NdbUseLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damus/Bindings/nostrdb/NdbUseLock.swift; sourceTree = SOURCE_ROOT; };
 		D751FA982EF62C8100E10F1B /* ProfilesManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilesManagerTests.swift; sourceTree = "<group>"; };
 		D753CEA92BE9DE04001C3A5D /* MutingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutingTests.swift; sourceTree = "<group>"; };
 		D755B28C2D3E7D7D00BBEEFA /* NIP37Draft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP37Draft.swift; sourceTree = "<group>"; };
@@ -2964,7 +2964,7 @@
 		D7EDED2D2B128E8A0018B19C /* CollectionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionExtension.swift; sourceTree = "<group>"; };
 		D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusUserDefaults.swift; sourceTree = "<group>"; };
 		D7EFBA362CC322F300F45588 /* DamusVideoControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusVideoControlsView.swift; sourceTree = "<group>"; };
-		D7F5630F2DEE71BB008509DE /* NdbFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbFilter.swift; sourceTree = "<group>"; };
+		D7F5630F2DEE71BB008509DE /* NdbFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damus/Bindings/nostrdb/NdbFilter.swift; sourceTree = SOURCE_ROOT; };
 		D7FA46E42DBDAA75002C9BB0 /* ImageCacheMigrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCacheMigrations.swift; sourceTree = "<group>"; };
 		D7FB14212BE5970000398331 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		D7FB14242BE5A9A800398331 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -8072,8 +8072,15 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/nostrdb",
+					"$(PROJECT_DIR)/nostrdb/src",
+					"$(PROJECT_DIR)/nostrdb/src/bolt11",
 					"$(PROJECT_DIR)/nostrdb/ccan",
 					"$(PROJECT_DIR)/nostrdb/ccan/ccan/short_types",
+					"$(PROJECT_DIR)/nostrdb/deps/lmdb",
+					"$(PROJECT_DIR)/nostrdb/deps/flatcc/include",
+					"$(PROJECT_DIR)/nostrdb/deps/flatcc/include/flatcc",
+					"$(PROJECT_DIR)/nostrdb/deps/flatcc/src/runtime",
+					"$(PROJECT_DIR)/nostrdb/deps/secp256k1/include",
 					"$(PROJECT_DIR)/damus-c",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -8143,8 +8150,15 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/nostrdb",
+					"$(PROJECT_DIR)/nostrdb/src",
+					"$(PROJECT_DIR)/nostrdb/src/bolt11",
 					"$(PROJECT_DIR)/nostrdb/ccan",
 					"$(PROJECT_DIR)/nostrdb/ccan/ccan/short_types",
+					"$(PROJECT_DIR)/nostrdb/deps/lmdb",
+					"$(PROJECT_DIR)/nostrdb/deps/flatcc/include",
+					"$(PROJECT_DIR)/nostrdb/deps/flatcc/include/flatcc",
+					"$(PROJECT_DIR)/nostrdb/deps/flatcc/src/runtime",
+					"$(PROJECT_DIR)/nostrdb/deps/secp256k1/include",
 					"$(PROJECT_DIR)/damus-c",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
