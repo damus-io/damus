@@ -294,6 +294,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
             break   // Don't care for now
         case .live, .live_chat:
             break
+        case .picture:
+            break   // Story events are consumed by StoriesModel via local nostrdb subscription.
         }
     }
 
