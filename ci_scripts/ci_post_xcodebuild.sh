@@ -25,12 +25,14 @@ if [ ! -d "${DSYM_PATH}" ]; then
   exit 0
 fi
 
-export SENTRY_ORG=damus-nostr-inc
-export SENTRY_PROJECT=apple-ios
+if [ -z "${SENTRY_AUTH_TOKEN:-}" ]; then
+  echo "warning: SENTRY_AUTH_TOKEN is not set, skipping Sentry dSYM upload"
+  exit 0
+fi
 
-if ! error_output=$(sentry-cli debug-files upload --include-sources "${DSYM_PATH}" 2>&1); then
+if ! error_output=$(sentry-cli debug-files upload --auth-token "${SENTRY_AUTH_TOKEN}" --org damus-nostr-inc --project apple-ios --include-sources "${DSYM_PATH}" 2>&1); then
   echo "warning: sentry-cli failed to upload dSYMs with sources from ${DSYM_PATH}: ${error_output}"
-  if ! error_output=$(sentry-cli debug-files upload "${DSYM_PATH}" 2>&1); then
+  if ! error_output=$(sentry-cli debug-files upload --auth-token "${SENTRY_AUTH_TOKEN}" --org damus-nostr-inc --project apple-ios "${DSYM_PATH}" 2>&1); then
     echo "warning: sentry-cli failed to upload dSYMs from ${DSYM_PATH}: ${error_output}"
   fi
 fi
