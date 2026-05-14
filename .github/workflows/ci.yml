@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: macos-26
+    permissions:
+      contents: read
+    env:
+      SCHEME: damus
+      DESTINATION: platform=iOS Simulator,name=iPhone 17
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build
+        run: xcodebuild -scheme "${{ env.SCHEME }}" -destination "${{ env.DESTINATION }}" -quiet build
+
+      - name: Test
+        run: xcodebuild -scheme "${{ env.SCHEME }}" -destination "${{ env.DESTINATION }}" -only-testing:damusTests test
