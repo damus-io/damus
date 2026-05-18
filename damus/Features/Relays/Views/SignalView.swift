@@ -50,7 +50,7 @@ struct SignalView: View {
 
     var body: some View {
         Group {
-            if signal.max_signal > 0 {
+            if signal.max_signal > 0 && signal.signal < signal.max_signal {
                 NavigationLink(value: Route.RelayConfig) {
                     HStack(alignment: .bottom, spacing: Self.bar_spacing) {
                         ForEach(0..<Self.num_bars, id: \.self) { i in
