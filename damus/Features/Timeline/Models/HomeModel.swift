@@ -77,8 +77,6 @@ class HomeModel: ContactsDelegate, ObservableObject {
     
     @Published var loading: Bool = true
 
-    var signal = SignalModel()
-    
     var notifications = NotificationsModel()
     var notification_status = NotificationStatusModel()
     var events: EventHolder = EventHolder()
@@ -1036,18 +1034,6 @@ class HomeModel: ContactsDelegate, ObservableObject {
     }
 }
 
-
-func update_signal_from_pool(signal: SignalModel, pool: RelayPool) async {
-    let relayCount = await pool.relays.count
-    if signal.max_signal != relayCount {
-        signal.max_signal = relayCount
-    }
-
-    let numberOfConnectedRelays = await pool.num_connected
-    if signal.signal != numberOfConnectedRelays {
-        signal.signal = numberOfConnectedRelays
-    }
-}
 
 @MainActor
 func add_contact_if_friend(contacts: Contacts, ev: NostrEvent) {

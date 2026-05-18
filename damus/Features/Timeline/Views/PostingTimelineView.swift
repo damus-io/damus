@@ -82,7 +82,7 @@ struct PostingTimelineView: View {
                     Spacer()
 
                     HStack(alignment: .center) {
-                        SignalView(state: damus_state, signal: home.signal)
+                        SignalView(state: damus_state, signal: damus_state.nostrNetwork.signal)
                         if damus_state.settings.enable_favourites_feature {
                             Image(systemName: "square.stack")
                                 .foregroundColor(DamusColors.purple)

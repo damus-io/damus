@@ -252,7 +252,7 @@ struct ContentView: View {
                                 
                                 ToolbarItem(placement: .navigationBarTrailing) {
                                     HStack(alignment: .center) {
-                                        SignalView(state: damus_state!, signal: home.signal)
+                                        SignalView(state: damus_state!, signal: damus_state!.nostrNetwork.signal)
                                         
                                         // maybe expand this to other timelines in the future
                                         if selected_timeline == .search {

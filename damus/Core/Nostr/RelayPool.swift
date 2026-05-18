@@ -51,6 +51,7 @@ class RelayPool {
     var message_received_function: (((String, RelayDescriptor)) -> Void)?
     var message_sent_function: (((String, Relay)) -> Void)?
     var delegate: Delegate?
+    @MainActor
     private(set) var signal: SignalModel = SignalModel()
 
     /// Tracks active leases on ephemeral relays to prevent premature cleanup.
@@ -125,6 +126,18 @@ class RelayPool {
         return relays.reduce(0) { n, r in n + (r.connection.isConnected ? 1 : 0) }
     }
 
+    @MainActor
+    func update_signal() {
+        let connected = num_connected
+        let total = relays.count
+        if signal.signal != connected {
+            signal.signal = connected
+        }
+        if signal.max_signal != total {
+            signal.max_signal = total
+        }
+    }
+
     func remove_handler(sub_id: String) {
         self.handlers = handlers.filter {
             if $0.sub_id != sub_id {
@@ -183,6 +196,7 @@ class RelayPool {
 
             i += 1
         }
+        update_signal()
     }
 
     /// Acquires a lease on ephemeral relays to prevent them from being cleaned up
@@ -269,6 +283,7 @@ class RelayPool {
     @MainActor
     private func appendRelayToList(relay: Relay) {
         self.relays.append(relay)
+        update_signal()
     }
 
     /// Ensures the given relay URLs are connected, adding them as ephemeral relays if not already in the pool.
@@ -761,6 +776,7 @@ class RelayPool {
                 run_queue(relay_id)
                 await self.resubscribeAll(relayId: relay_id)
             }
+            await update_signal()
         }
 
         // Handle auth
