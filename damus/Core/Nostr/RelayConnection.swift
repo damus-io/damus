@@ -114,7 +114,7 @@ final class RelayConnection: ObservableObject {
             guard let self else {
                 return
             }
-            
+
             if err == nil {
                 self.last_pong = .now
                 Log.info("Got pong from '%s'", for: .networking, self.relay_url.absoluteString)
@@ -214,7 +214,7 @@ final class RelayConnection: ObservableObject {
                 return
             }
             if nserr.domain == NSURLErrorDomain && nserr.code == -999 {
-                // these aren't real error, it just means task was cancelled
+                // these aren't real errors, it just means task was cancelled
                 return
             }
             DispatchQueue.main.async {
@@ -237,14 +237,25 @@ final class RelayConnection: ObservableObject {
     }
     
     func reconnect() {
-        guard !isConnecting && !isDisabled else {
-            self.log?.add("Cancelling reconnect, already connecting")
-            return  // we're already trying to connect or we're disabled
+        guard !isDisabled else {
+            self.log?.add("Cancelling reconnect, relay is disabled")
+            return
         }
 
         guard !self.isConnected else {
             self.log?.add("Cancelling reconnect, already connected")
             return
+        }
+
+        // If we're already connecting, only force a reconnect if the
+        // attempt has gone stale (>5s with no response from the socket)
+        if isConnecting {
+            let elapsed = Date.now.timeIntervalSince1970 - last_connection_attempt
+            guard elapsed > 5 else {
+                self.log?.add("Cancelling reconnect, already connecting")
+                return
+            }
+            self.log?.add("Stale connection detected, forcing reconnect")
         }
 
         disconnect()
