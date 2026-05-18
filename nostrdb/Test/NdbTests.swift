@@ -176,7 +176,7 @@ final class NdbTests: XCTestCase {
             }
 
             for elem in tag {
-                print("tag[\(tags)][\(elem.index)]")
+                //print("tag[\(tags)][\(elem.index)]")
                 total_count_iter += 1
             }
 
@@ -294,7 +294,7 @@ final class NdbTests: XCTestCase {
 
             for tag in note.tags {
                 for elem in tag {
-                    print("iter_elem \(elem.string())")
+                    //print("iter_elem \(elem.string())")
                     for c in elem {
                         if char_count == 0 {
                             let ac = AsciiCharacter(c)
