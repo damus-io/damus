@@ -176,6 +176,7 @@ changelogs, please include:
 - Changelog-Fixed: Fixed notes not appearing on profile
 - Changelog-Added: Added a cool new feature
 - Changelog-Removed: Removed zaps
+- Changelog-None: No user-facing changes in this commit
 
 The changelog script will pick these up and give you attribution for your
 change
@@ -279,4 +280,3 @@ Feel free to ask our team about questions you may have regarding these guideline
 be happy to clarify any of the above items!
 
 Thank you for contributing to Damus!
-
