@@ -92,6 +92,7 @@ struct GIFPickerView: View {
             ], spacing: 4) {
                 ForEach(viewModel.gifs) { gif in
                     GIFThumbnailView(gif: gif, disable_animation: damus_state.settings.disable_animation)
+                        .contentShape(Rectangle())
                         .onTapGesture {
                             if let gifURL = gif.mediumURL ?? gif.fullURL {
                                 onGIFSelected(gifURL)
@@ -178,6 +179,7 @@ struct GIFThumbnailView: View {
                 .frame(height: 120)
                 .clipped()
                 .cornerRadius(8)
+                .kfClickable()
         } else {
             Rectangle()
                 .fill(Color.secondary.opacity(0.2))
