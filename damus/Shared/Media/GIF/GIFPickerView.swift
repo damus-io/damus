@@ -347,44 +347,71 @@ private extension PurpleGIFAPIError {
     /// Converts Purple GIF API failures into a reusable user-presentable error.
     func userPresentableError(action: String, currentQuery: String?) -> ErrorView.UserPresentableError {
         let queryContext = currentQuery.map { "query=\($0)" } ?? "featured"
+        
+        // Build comprehensive technical info including error context
+        let baseTechnicalInfo = "GIF picker error while \(action); context=\(queryContext)"
+        let fullTechnicalInfo: String
+        
+        if let errorContext = self.context {
+            fullTechnicalInfo = "\(baseTechnicalInfo); \(errorContext.debugDescription)"
+        } else {
+            fullTechnicalInfo = baseTechnicalInfo
+        }
 
         switch self {
-        case .unauthorized:
-            return .init(
-                user_visible_description: NSLocalizedString("You need an active Purple subscription to use GIF search.", comment: "Error shown when the user is not authorized to use the GIF picker."),
-                tip: NSLocalizedString("Make sure you're signed in with the right account and that your Purple subscription is active, then try again.", comment: "Advice shown when GIF picker access is denied."),
-                technical_info: "GIF picker unauthorized while \(action); context=\(queryContext)"
-            )
+        case .unauthorized(let context):
+            // For 401 errors, show the server's error message with context
+            let serverMessage = context?.extractedMessage
+            
+            if let message = serverMessage, !message.isEmpty {
+                // Quote and provide context around the server message
+                let contextualizedMessage = String(format: NSLocalizedString("Access to the GIF service was denied by the server with the following message: \"%@\"", comment: "Error message format that quotes the server's error message"), message)
+                return .init(
+                    user_visible_description: contextualizedMessage,
+                    tip: NSLocalizedString("If the problem persists, copy the technical information and send it to support.", comment: "Advice shown when GIF picker access is denied with server message."),
+                    technical_info: fullTechnicalInfo
+                )
+            } else {
+                // Fallback to generic message if no server message available
+                return .init(
+                    user_visible_description: NSLocalizedString("Access to the GIF service was denied.", comment: "Generic error shown when the user is not authorized to use the GIF picker and no server message is available."),
+                    tip: NSLocalizedString("This could be due to an expired subscription, authentication issue, or network problem. Copy the technical information and send it to support for help.", comment: "Advice shown when GIF picker access is denied without specific details."),
+                    technical_info: fullTechnicalInfo
+                )
+            }
         case .invalidURL:
             return .init(
                 user_visible_description: NSLocalizedString("The GIF service is misconfigured.", comment: "Error shown when the GIF picker generated an invalid URL."),
                 tip: NSLocalizedString("Try again later. If this keeps happening, copy the technical information and send it to support.", comment: "Advice shown when the GIF picker URL is invalid."),
-                technical_info: "GIF picker invalid URL while \(action); context=\(queryContext)"
+                technical_info: fullTechnicalInfo
             )
         case .invalidResponse:
             return .init(
                 user_visible_description: NSLocalizedString("The GIF service returned an unexpected response.", comment: "Error shown when the GIF picker receives an invalid server response."),
                 tip: NSLocalizedString("Try again in a moment. If it keeps happening, copy the technical information and send it to support.", comment: "Advice shown when the GIF picker receives an invalid server response."),
-                technical_info: "GIF picker invalid response while \(action); context=\(queryContext)"
+                technical_info: fullTechnicalInfo
             )
-        case .decodingError(let decodingError, let rawResponse):
+        case .decodingError(let decodingError, let rawResponse, _):
+            // Include decoding error details for legacy compatibility
             let responseText = rawResponse ?? "<unavailable>"
+            let detailedInfo = "\(baseTechnicalInfo); error=\(String(describing: decodingError)); response=\(responseText)"
+            let withContext = self.context.map { "; \($0.debugDescription)" } ?? ""
             return .init(
                 user_visible_description: NSLocalizedString("We couldn't understand the GIF data from the server.", comment: "Error shown when GIF response parsing fails."),
                 tip: NSLocalizedString("Try again in a moment. If the problem continues, copy the technical information and send it to support.", comment: "Advice shown when GIF response parsing fails."),
-                technical_info: "GIF picker decoding error while \(action); context=\(queryContext); error=\(String(describing: decodingError)); response=\(responseText)"
+                technical_info: detailedInfo + withContext
             )
-        case .networkError(let networkError):
+        case .networkError(let networkError, _):
             return .init(
                 user_visible_description: NSLocalizedString("We couldn't reach the GIF service.", comment: "Error shown when GIF loading fails because of a network issue."),
                 tip: NSLocalizedString("Check your internet connection and try again.", comment: "Advice shown when GIF loading fails because of a network issue."),
-                technical_info: "GIF picker network error while \(action); context=\(queryContext); error=\(String(describing: networkError))"
+                technical_info: "\(baseTechnicalInfo); error=\(String(describing: networkError))" + (self.context.map { "; \($0.debugDescription)" } ?? "")
             )
-        case .upstreamError(let statusCode, let message):
+        case .upstreamError(let statusCode, let message, _):
             return .init(
                 user_visible_description: NSLocalizedString("The GIF service is temporarily unavailable.", comment: "Error shown when the upstream GIF service fails."),
                 tip: NSLocalizedString("Try again in a moment. If the problem keeps happening, copy the technical information and send it to support.", comment: "Advice shown when the upstream GIF service fails."),
-                technical_info: "GIF picker upstream error while \(action); context=\(queryContext); status=\(statusCode); message=\(message ?? "none")"
+                technical_info: "\(baseTechnicalInfo); status=\(statusCode); message=\(message ?? "none")" + (self.context.map { "; \($0.debugDescription)" } ?? "")
             )
         }
     }
