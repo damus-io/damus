@@ -82,6 +82,16 @@ class NdbTxn<T>: RawNdbTxnAccessible {
         self.generation = generation
         self.name = name
     }
+    
+    /// Closes the underlying query transaction and clears its thread-local bookkeeping state.
+    private func closeAndClearThreadLocalTransactionState() {
+        _ = try? ndb.withNdb({
+            ndb_end_query(&self.txn)
+        }, maxWaitTimeout: .milliseconds(200))
+        Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")
+        Thread.current.threadDictionary.removeObject(forKey: "ndb_txn_ref_count")
+        Thread.current.threadDictionary.removeObject(forKey: "txn_generation")
+    }
 
     /// Only access temporarily! Do not store database references for longterm use. If it's a primitive type you
     /// can retrieve this value with `.value`
@@ -104,20 +114,10 @@ class NdbTxn<T>: RawNdbTxnAccessible {
             Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
             assert(new_ref_count >= 0, "NdbTxn reference count should never be below zero")
             if new_ref_count <= 0 {
-                _ = try? ndb.withNdb({
-                    ndb_end_query(&self.txn)
-                }, maxWaitTimeout: .milliseconds(200))
-                Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")
-                Thread.current.threadDictionary.removeObject(forKey: "ndb_txn_ref_count")
-                Thread.current.threadDictionary.removeObject(forKey: "txn_generation")
+                closeAndClearThreadLocalTransactionState()
             }
         } else if !inherited && !moved {
-            _ = try? ndb.withNdb({
-                ndb_end_query(&self.txn)
-            }, maxWaitTimeout: .milliseconds(200))
-            Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")
-            Thread.current.threadDictionary.removeObject(forKey: "ndb_txn_ref_count")
-            Thread.current.threadDictionary.removeObject(forKey: "txn_generation")
+            closeAndClearThreadLocalTransactionState()
         }
         if inherited {
             print("txn: not closing. inherited ")
