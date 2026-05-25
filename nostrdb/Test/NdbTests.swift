@@ -215,7 +215,7 @@ final class NdbTests: XCTestCase {
     }
     
     /// Verifies that NdbTxn deinit still closes and clears thread-local state when the ref-count key is unexpectedly missing.
-    func testNdbTxnDeinit_withoutRefCountKeyCleansUpThreadLocalTransactionState() throws {
+    func testNdbTxnDeinitCleansUpWithMissingRefCount() throws {
         let restoreThreadLocalTransactionState = resetThreadLocalTransactionState()
         defer { restoreThreadLocalTransactionState() }
         
