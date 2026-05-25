@@ -109,7 +109,15 @@ class NdbTxn<T>: RawNdbTxnAccessible {
                 }, maxWaitTimeout: .milliseconds(200))
                 Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")
                 Thread.current.threadDictionary.removeObject(forKey: "ndb_txn_ref_count")
+                Thread.current.threadDictionary.removeObject(forKey: "txn_generation")
             }
+        } else if !inherited && !moved {
+            _ = try? ndb.withNdb({
+                ndb_end_query(&self.txn)
+            }, maxWaitTimeout: .milliseconds(200))
+            Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")
+            Thread.current.threadDictionary.removeObject(forKey: "ndb_txn_ref_count")
+            Thread.current.threadDictionary.removeObject(forKey: "txn_generation")
         }
         if inherited {
             print("txn: not closing. inherited ")
