@@ -85,11 +85,15 @@ class NdbTxn<T>: RawNdbTxnAccessible {
     
     /// Closes the underlying query transaction and clears its thread-local bookkeeping state.
     ///
-    /// This is best-effort cleanup for deinit: any error from `withNdb` is intentionally ignored so teardown does not throw.
+    /// This is best-effort cleanup for deinit: errors are logged but not propagated so teardown never throws.
     private func closeAndClearThreadLocalTransactionState() {
-        _ = try? ndb.withNdb({
-            ndb_end_query(&self.txn)
-        }, maxWaitTimeout: .milliseconds(200))
+        do {
+            try ndb.withNdb({
+                ndb_end_query(&self.txn)
+            }, maxWaitTimeout: .milliseconds(200))
+        } catch {
+            print("txn: failed to close transaction during deinit: \(error)")
+        }
         Thread.current.threadDictionary.removeObject(forKey: "ndb_txn")
         Thread.current.threadDictionary.removeObject(forKey: "ndb_txn_ref_count")
         Thread.current.threadDictionary.removeObject(forKey: "txn_generation")
@@ -111,20 +115,20 @@ class NdbTxn<T>: RawNdbTxnAccessible {
             print("txn: not closing. db closed")
             return
         }
-        var shouldCloseTransaction = false
+        var shouldClose = false
         if let ref_count = Thread.current.threadDictionary["ndb_txn_ref_count"] as? Int {
             let new_ref_count = ref_count - 1
             Thread.current.threadDictionary["ndb_txn_ref_count"] = new_ref_count
             assert(new_ref_count >= 0, "NdbTxn reference count should never be below zero")
             if new_ref_count <= 0 {
-                shouldCloseTransaction = true
+                shouldClose = true
             }
         } else if !inherited && !moved {
             // Defensive fallback: if thread-local ref-count state is missing, this transaction still owns the reader
             // handle and must close it to avoid leaking a query transaction.
-            shouldCloseTransaction = true
+            shouldClose = true
         }
-        if shouldCloseTransaction {
+        if shouldClose {
             closeAndClearThreadLocalTransactionState()
         }
         if inherited {
