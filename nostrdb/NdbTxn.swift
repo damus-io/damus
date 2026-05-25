@@ -117,6 +117,8 @@ class NdbTxn<T>: RawNdbTxnAccessible {
                 closeAndClearThreadLocalTransactionState()
             }
         } else if !inherited && !moved {
+            // Defensive fallback: if thread-local ref-count state is missing, this transaction still owns the reader
+            // handle and must close it to avoid leaking a query transaction.
             closeAndClearThreadLocalTransactionState()
         }
         if inherited {
