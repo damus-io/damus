@@ -57,6 +57,60 @@ final class RelayPoolTests: XCTestCase {
         ], expectedError: .RelayAlreadyExists)
     }
 
+    /// Creates fresh inputs for seen-recording tests.
+    func makeRecordSeenFixture() throws -> (pool: RelayPool, relay: RelayURL, noteID: NoteId) {
+        let relay = try XCTUnwrap(RelayURL("wss://relay.example.com"))
+        let noteID = try XCTUnwrap(NoteId(hex: String(repeating: "a", count: 64)))
+        return (RelayPool(ndb: nil), relay, noteID)
+    }
+
+    /// Verifies successful relay OK responses update the relay provenance map.
+    func testRecordSeenRecordsSuccessfulOKResponses() async throws {
+        let (pool, relay, noteID) = try makeRecordSeenFixture()
+        let result = CommandResult(event_id: noteID, ok: true, msg: "")
+
+        await pool.record_seen(relay_id: relay, event: .nostr_event(.ok(result)))
+
+        let seenRelays = await pool.seen[noteID]
+        let relayCount = await pool.counts[relay]
+
+        XCTAssertEqual(seenRelays, Set([relay]))
+        XCTAssertEqual(relayCount, Optional(UInt64(1)))
+    }
+
+    /// Verifies duplicate relay OK responses do not increment provenance twice.
+    func testRecordSeenRecordsDuplicateSuccessfulOKResponsesOnce() async throws {
+        let (pool, relay, noteID) = try makeRecordSeenFixture()
+        let acceptedResult = CommandResult(event_id: noteID, ok: true, msg: "")
+        let duplicateResult = CommandResult(
+            event_id: noteID,
+            ok: true,
+            msg: "duplicate: already have this event"
+        )
+
+        await pool.record_seen(relay_id: relay, event: .nostr_event(.ok(acceptedResult)))
+        await pool.record_seen(relay_id: relay, event: .nostr_event(.ok(duplicateResult)))
+
+        let seenRelays = await pool.seen[noteID]
+        let relayCount = await pool.counts[relay]
+
+        XCTAssertEqual(seenRelays, Set([relay]))
+        XCTAssertEqual(relayCount, Optional(UInt64(1)))
+    }
+
+    /// Verifies failed relay OK responses do not count as relay provenance.
+    func testRecordSeenIgnoresFailedOKResponses() async throws {
+        let (pool, relay, noteID) = try makeRecordSeenFixture()
+        let result = CommandResult(event_id: noteID, ok: false, msg: "blocked: test")
+
+        await pool.record_seen(relay_id: relay, event: .nostr_event(.ok(result)))
+
+        let seenRelays = await pool.seen[noteID]
+        let relayCount = await pool.counts[relay]
+
+        XCTAssertNil(seenRelays)
+        XCTAssertNil(relayCount)
+    }
 }
 
 /// Adds relay URLs to a pool and verifies duplicate URL handling.
@@ -84,5 +138,3 @@ func testAddRelays(urls: [String], expectedError: RelayPool.RelayError? = nil) a
         XCTFail("An unexpected error was thrown: \(error)")
     }
 }
-
-

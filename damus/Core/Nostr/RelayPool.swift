@@ -749,6 +749,8 @@ class RelayPool {
         if case .nostr_event(let ev) = event {
             if case .event(_, let nev) = ev {
                 record_seen(relay_id: relay_id, note_id: nev.id)
+            } else if case .ok(let result) = ev, result.ok {
+                record_seen(relay_id: relay_id, note_id: result.event_id)
             }
         }
     }
