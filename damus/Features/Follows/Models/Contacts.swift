@@ -98,10 +98,11 @@ class Contacts {
         return Array((pubkey_to_our_friends[pubkey] ?? Set()))
     }
 
+    /// Filters timeline events to authors the user follows, while still allowing the user's own events through.
     var friend_filter: (NostrEvent) -> Bool {
         { [weak self] ev in
             guard let self else { return false }
-            return self.is_friend(ev.pubkey)
+            return self.is_friend_or_self(ev.pubkey)
         }
     }
 }
