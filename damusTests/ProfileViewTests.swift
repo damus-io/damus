@@ -12,12 +12,43 @@ final class ProfileViewTests: XCTestCase {
 
     let enUsLocale = Locale(identifier: "en-US")
 
+    @MainActor
+    private func makeProfileEvent(content: String, tags: [[String]], keypair: Keypair = test_keypair) -> NostrEvent {
+        guard let event = NostrEvent(content: content, keypair: keypair, tags: tags) else {
+            XCTFail("Expected test event creation to succeed")
+            fatalError("Failed to create test event")
+        }
+        return event
+    }
+
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }
 
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
+    }
+
+    @MainActor
+    func testOwnProfileBypassesNsfwAndHashtagFilters() throws {
+        let damusState = generate_test_damus_state(mock_profile_info: nil)
+        damusState.settings.hide_nsfw_tagged_content = true
+        damusState.settings.hide_hashtag_spam = true
+        damusState.settings.max_hashtags = 1
+
+        let ownNsfwEvent = makeProfileEvent(content: "hello #nsfw", tags: [["t", "nsfw"]])
+        let ownHashtagSpamEvent = makeProfileEvent(content: "#one #two", tags: [["t", "one"], ["t", "two"]])
+        let otherKeypair = generate_new_keypair().to_keypair()
+        let otherNsfwEvent = makeProfileEvent(content: "hello #nsfw", tags: [["t", "nsfw"]], keypair: otherKeypair)
+        let otherHashtagSpamEvent = makeProfileEvent(content: "#one #two", tags: [["t", "one"], ["t", "two"]], keypair: otherKeypair)
+
+        let filters = ContentFilters.defaults(damus_state: damusState)
+        let combinedFilter = ContentFilters(filters: filters)
+
+        XCTAssertTrue(combinedFilter.filter(ev: ownNsfwEvent))
+        XCTAssertTrue(combinedFilter.filter(ev: ownHashtagSpamEvent))
+        XCTAssertFalse(combinedFilter.filter(ev: otherNsfwEvent))
+        XCTAssertFalse(combinedFilter.filter(ev: otherHashtagSpamEvent))
     }
 
     func testFollowedByString() throws {

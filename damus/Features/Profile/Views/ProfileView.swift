@@ -118,6 +118,7 @@ struct ProfileView: View {
         damus_state.contacts.follow_state(profile.pubkey) == .unfollows && bannerBlurViewOpacity() > 1.0
     }
     
+    /// Builds the profile timeline filter, while ensuring the user's own profile bypasses NSFW and hashtag-spam content filters.
     func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
         var filters = ContentFilters.defaults(damus_state: damus_state)
         filters.append(fstate.filter)
