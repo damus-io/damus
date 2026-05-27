@@ -107,15 +107,24 @@ extension ContentFilters {
         return ContentFilters(filters: ContentFilters.defaults(damus_state: damus_state))
     }
 
+    /// Returns the app's standard content filters.
+    ///
+    /// The logged-in user's own events bypass NSFW and hashtag-spam filters so they remain visible on their own profile.
     @MainActor
     static func defaults(damus_state: DamusState) -> [(NostrEvent) -> Bool] {
         var filters = Array<(NostrEvent) -> Bool>()
         if damus_state.settings.hide_nsfw_tagged_content {
-            filters.append(nsfw_tag_filter)
+            filters.append { ev in
+                guard ev.pubkey != damus_state.pubkey else { return true }
+                return nsfw_tag_filter(ev: ev)
+            }
         }
         if damus_state.settings.hide_hashtag_spam {
             let max_hashtags = damus_state.settings.max_hashtags
-            filters.append({ ev in hashtag_spam_filter(ev: ev, max_hashtags: max_hashtags) })
+            filters.append { ev in
+                guard ev.pubkey != damus_state.pubkey else { return true }
+                return hashtag_spam_filter(ev: ev, max_hashtags: max_hashtags)
+            }
         }
         filters.append(get_repost_of_muted_user_filter(damus_state: damus_state))
         filters.append(timestamp_filter)
