@@ -734,15 +734,23 @@ class RelayPool {
         }
     }
 
+    /// Records that a relay is known to have accepted or returned a note.
+    func record_seen(relay_id: RelayURL, note_id: NoteId) {
+        if seen[note_id]?.contains(relay_id) == true {
+            return
+        }
+
+        seen[note_id, default: Set()].insert(relay_id)
+        counts[relay_id, default: 0] += 1
+        notify(.update_stats(note_id: note_id))
+    }
+
     func record_seen(relay_id: RelayURL, event: NostrConnectionEvent) {
         if case .nostr_event(let ev) = event {
             if case .event(_, let nev) = ev {
-                if seen[nev.id]?.contains(relay_id) == true {
-                    return
-                }
-                seen[nev.id, default: Set()].insert(relay_id)
-                counts[relay_id, default: 0] += 1
-                notify(.update_stats(note_id: nev.id))
+                record_seen(relay_id: relay_id, note_id: nev.id)
+            } else if case .ok(let result) = ev, result.ok {
+                record_seen(relay_id: relay_id, note_id: result.event_id)
             }
         }
     }

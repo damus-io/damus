@@ -430,6 +430,7 @@
 		4CE6DEF827F7A08200C66700 /* damusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DEF727F7A08200C66700 /* damusTests.swift */; };
 		4CE6DF0227F7A08200C66700 /* damusUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF0127F7A08200C66700 /* damusUITests.swift */; };
 		4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */; };
+		D72A1A022F73B9F800B0010B /* RelayPoolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A1A012F73B9F800B0010B /* RelayPoolTests.swift */; };
 		4CE8794829941DA700F758CC /* RelayFilters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE8794729941DA700F758CC /* RelayFilters.swift */; };
 		4CE8794E2996B16A00F758CC /* RelayToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE8794D2996B16A00F758CC /* RelayToggle.swift */; };
 		4CE879502996B2BD00F758CC /* RelayStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE8794F2996B2BD00F758CC /* RelayStatusView.swift */; };
@@ -2838,6 +2839,7 @@
 		D72734272F08912F00F90677 /* DatabaseSnapshotManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseSnapshotManagerTests.swift; sourceTree = "<group>"; };
 		D72734292F089EE600F90677 /* NdbMigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbMigrationTests.swift; sourceTree = "<group>"; };
 		D72927AC2BAB515C00F93E90 /* RelayURLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayURLTests.swift; sourceTree = "<group>"; };
+		D72A1A012F73B9F800B0010B /* RelayPoolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayPoolTests.swift; sourceTree = "<group>"; };
 		D72A2CFF2AD9B66B002AFF62 /* EventViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventViewTests.swift; sourceTree = "<group>"; };
 		D72A2D042AD9C1B5002AFF62 /* MockDamusState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDamusState.swift; sourceTree = "<group>"; };
 		D72A2D062AD9C1FB002AFF62 /* MockProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockProfiles.swift; sourceTree = "<group>"; };
@@ -4005,6 +4007,7 @@
 				E0E024102B7C19C20075735D /* TranslationTests.swift */,
 				E06336A92B75832100A88E6B /* ImageMetadataTest.swift */,
 				D7CBD1D52B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift */,
+				D72A1A012F73B9F800B0010B /* RelayPoolTests.swift */,
 				D72927AC2BAB515C00F93E90 /* RelayURLTests.swift */,
 				D753CEA92BE9DE04001C3A5D /* MutingTests.swift */,
 				4C2D34402BDAF1B300F9FB44 /* NIP10Tests.swift */,
@@ -6519,6 +6522,7 @@
 				D72A2D052AD9C1B5002AFF62 /* MockDamusState.swift in Sources */,
 				E06336AA2B75832100A88E6B /* ImageMetadataTest.swift in Sources */,
 				D77A96BF2F3131BE00CC3246 /* RelayHintsTests.swift in Sources */,
+				D72A1A022F73B9F800B0010B /* RelayPoolTests.swift in Sources */,
 				4C363AA02828A8DD006E126D /* LikeTests.swift in Sources */,
 				D7A0D8752D1FE67900DCBE59 /* EditPictureControlTests.swift in Sources */,
 				D776BE442F23301A002DA1C9 /* EntityPreloaderTests.swift in Sources */,
