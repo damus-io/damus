@@ -1,3 +1,46 @@
+## [1.17] - 2026-04-22
+
+### Added
+
+- Added Sentry error and diagnostics reporting to aid future quality improvements (Daniel D'Aquino)
+- Automatic lossless storage optimization (Daniel D'Aquino)
+- Added "Compact Database" button in Settings → Storage that reclaims unused space by compacting the NostrDB on the next app launch (Daniel D'Aquino)
+- Full container file breakdown in storage settings export (Daniel D'Aquino)
+- Show client name on events when available (alltheseas)
+- Add client tag to published events to identify Damus (alltheseas)
+- Storage usage statistics view in Settings (Daniel D'Aquino)
+- Added GIF keyboard support (Damus Labs only) (ericholguin)
+- Added detailed diagnostics reporting to GIF keyboard errors (Daniel D'Aquino)
+
+
+### Changed
+
+- Redesigned media blur overlay to look like intentional protection instead of a broken state (alltheseas)
+- Moved clear cache button to storage settings (Daniel D'Aquino)
+- Clear stale LMDB readers on NostrDB init to prevent reader slot leakage and runaway storage usage (Daniel D'Aquino)
+- Made GIF keyboard widely available to Purple users without need for an API key (Damus Labs) (Daniel D'Aquino)
+- Restored signal indicator (William Casarin)
+
+
+### Fixed
+
+- Fixed issue where mentioned profile names would not render properly (Daniel D'Aquino)
+- Fix stale relay list causing inability to disconnect relays (alltheseas)
+- Fixed issue where temporary files would not get cleaned up (Daniel D'Aquino)
+- Wallet view now immediately clears stale data when switching wallets (Daniel D'Aquino)
+- Fixed issue where the app could display an error message when using another NWC wallet in parallel (Daniel D'Aquino)
+- Fix memory corruption crash when creating empty filters (Daniel D'Aquino)
+- Fixed startup crash when app performs long-running compaction procedure (Daniel D'Aquino)
+- Fixed database transaction leak that could lead to higher storage usage (Daniel D'Aquino)
+- Fix GIF picker grid tap hitbox selecting adjacent item (Daniel D'Aquino)
+- Fixed issues that could cause the signal indicator to become outdated (William Casarin)
+- Fixed issue where some of the user's own notes would not show up in their own profile (Daniel D'Aquino)
+- Fixed an issue where posts would not appear on the user's own timeline if they did not follow themselves (Daniel D'Aquino)
+
+
+[1.17]: https://github.com/damus-io/damus/releases/tag/v1.17
+
+
 ## [1.16.1] - 2026-02-17
 
 ### Added
