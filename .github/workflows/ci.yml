@@ -7,6 +7,44 @@ on:
       - main
 
 jobs:
+  changelog-check:
+    name: Changelog Trailers
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check commits for Changelog trailers
+        run: |
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.event.pull_request.head.sha }}"
+          fail=0
+
+          for sha in $(git rev-list "$base".."$head"); do
+            msg=$(git log -1 --format="%B" "$sha")
+
+            # Skip merge commits
+            if echo "$msg" | head -1 | grep -qE '^Merge '; then
+              continue
+            fi
+
+            if ! echo "$msg" | grep -qE '^Changelog-(Added|Changed|Fixed|Removed|None):'; then
+              echo "FAIL: Commit $sha is missing a Changelog trailer:"
+              echo "$msg" | head -5
+              echo "---"
+              fail=1
+            fi
+          done
+
+          if [ "$fail" -eq 1 ]; then
+            echo ""
+            echo "Every commit must have a Changelog-{Added,Changed,Fixed,Removed,None} trailer."
+            exit 1
+          fi
+
   build-and-test:
     runs-on: macos-26
     permissions:
