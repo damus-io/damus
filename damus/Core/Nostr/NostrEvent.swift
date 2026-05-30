@@ -878,11 +878,14 @@ func first_eref_mention(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> Mention<N
     })
 }
 
-/// Represents a note mention with optional relay hints for fetching.
+/// Represents a note mention with optional relay hints and author pubkey for fetching.
 struct NoteMentionWithHints {
     let noteId: NoteId
     let relayHints: [RelayURL]
     let index: Int?
+    /// The author pubkey extracted from a NIP-19 `nevent` entity, if available.
+    /// Used as a fallback to look up the author's NIP-65 write relays when no relay hints are present.
+    let authorPubkey: Pubkey?
 }
 
 /// Finds the first event reference mention in a note's content, preserving relay hints.
@@ -907,14 +910,14 @@ func first_eref_mention_with_hints(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -
                 guard let mentionRef = MentionRef(block: mention) else { return .loopContinue }
                 switch mentionRef.nip19 {
                 case .note(let noteId):
-                    return .loopReturn(NoteMentionWithHints(noteId: noteId, relayHints: [], index: index))
+                    return .loopReturn(NoteMentionWithHints(noteId: noteId, relayHints: [], index: index, authorPubkey: nil))
                 case .nevent(let nEvent):
                     #if DEBUG
                     if !nEvent.relays.isEmpty {
                         print("[relay-hints] Inline nevent: Found \(nEvent.relays.count) hint(s) for \(nEvent.noteid.hex().prefix(8))...: \(nEvent.relays.map { $0.absoluteString })")
                     }
                     #endif
-                    return .loopReturn(NoteMentionWithHints(noteId: nEvent.noteid, relayHints: nEvent.relays, index: index))
+                    return .loopReturn(NoteMentionWithHints(noteId: nEvent.noteid, relayHints: nEvent.relays, index: index, authorPubkey: nEvent.author))
                 default:
                     return .loopContinue
                 }
@@ -937,7 +940,7 @@ func first_eref_mention_with_hints(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -
         print("[relay-hints] Quote: Found q tag with \(quoteRef.relayHints.count) hint(s) for \(quoteRef.note_id.hex().prefix(8))...: \(quoteRef.relayHints.map { $0.absoluteString })")
     }
     #endif
-    return NoteMentionWithHints(noteId: quoteRef.note_id, relayHints: quoteRef.relayHints, index: nil)
+    return NoteMentionWithHints(noteId: quoteRef.note_id, relayHints: quoteRef.relayHints, index: nil, authorPubkey: nil)
 }
 
 func separate_invoices(ndb: Ndb, ev: NostrEvent, keypair: Keypair) -> [Invoice]? {

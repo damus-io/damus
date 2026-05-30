@@ -103,7 +103,7 @@ struct SelectedEventView: View {
     var Mention: some View {
         Group {
             if let mention = first_eref_mention_with_hints(ndb: damus.ndb, ev: event, keypair: damus.keypair) {
-                MentionView(damus_state: damus, mention: .note(mention.noteId, index: mention.index), relayHints: mention.relayHints)
+                MentionView(damus_state: damus, mention: .note(mention.noteId, index: mention.index), relayHints: mention.relayHints, authorPubkey: mention.authorPubkey)
                     .padding(.horizontal)
             }
         }
