@@ -43,7 +43,9 @@ struct KingfisherInlineImageProvider: InlineImageProvider {
             KingfisherManager.shared.retrieveImage(with: url) { result in
                 switch result {
                 case .success(let imageResult):
-                    continuation.resume(returning: Image(uiImage: imageResult.image))
+                    // Use .renderingMode(.original) to prevent the surrounding text foreground
+                    // color from being applied as a tint to inline images.
+                    continuation.resume(returning: Image(uiImage: imageResult.image).renderingMode(.original))
                 case .failure(let error):
                     continuation.resume(throwing: error)
                 }
