@@ -70,6 +70,9 @@ enum AppAccessibilityIdentifiers: String {
     /// A user result in the mention autocomplete list
     case post_composer_mention_user_result
 
+    /// Toggle button to preserve web links instead of converting to nostr: format
+    case post_composer_web_link_toggle
+
 
     // MARK: Post button (FAB)
     // Prefix: `post_button`

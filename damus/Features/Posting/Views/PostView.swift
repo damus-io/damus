@@ -8,6 +8,7 @@
 import SwiftUI
 import AVKit
 import Kingfisher
+import LinkPresentation
 
 enum NostrPostResult {
     case post(NostrPost)
@@ -84,7 +85,12 @@ struct PostView: View {
     
     @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
     @StateObject var tagModel: TagModel = TagModel()
-    
+
+    @State var preserveWebLinks: Bool = false
+    /// Cached result of `firstNostrWebLink()`, updated in `.onChange(of: post)` to avoid
+    /// running `NSDataDetector` in the SwiftUI view body.
+    @State private var detectedWebLink: (url: URL, bech32: Bech32Object)? = nil
+
     @State private var current_placeholder_index = 0
     @State private var uploadTasks: [Task<Void, Never>] = []
     @State private var profileFetchTasks: [Pubkey: Task<Void, Never>] = [:]
@@ -222,7 +228,7 @@ struct PostView: View {
     }
 
     func send_post() async {
-        let new_post = await build_post(state: self.damus_state, post: self.post, action: action, uploadedMedias: uploadedMedias, references: self.references, filtered_pubkeys: filtered_pubkeys)
+        let new_post = await build_post(state: self.damus_state, post: self.post, action: action, uploadedMedias: uploadedMedias, references: self.references, filtered_pubkeys: filtered_pubkeys, preserveWebLinks: preserveWebLinks)
 
         notify(.post(.post(new_post)))
 
@@ -277,7 +283,7 @@ struct PostView: View {
                 .padding(6)
         })
     }
-    
+
     var GIFButton: some View {
         Button(action: {
             attach_gif = true
@@ -286,7 +292,27 @@ struct PostView: View {
                 .padding(6)
         })
     }
-    
+
+    /// Whether the Embed/Link picker should be visible in the composer.
+    var showWebLinkToggle: Bool {
+        preserveWebLinks || detectedWebLink != nil
+    }
+
+    /// Segmented picker letting the user choose between embedding a nostr web link
+    /// as inline content ("Embed") or keeping the URL as-is ("Link").
+    var WebLinkPicker: some View {
+        Picker("", selection: $preserveWebLinks) {
+            Text(NSLocalizedString("Embed", comment: "Picker option to embed a nostr link as inline content in the post."))
+                .tag(false)
+            Text(NSLocalizedString("Link", comment: "Picker option to keep a web link as-is in the post."))
+                .tag(true)
+        }
+        .pickerStyle(.segmented)
+        .padding(.horizontal)
+        .padding(.vertical, 4)
+        .accessibilityIdentifier(AppAccessibilityIdentifiers.post_composer_web_link_toggle.rawValue)
+    }
+
     var AttachmentBar: some View {
         HStack(alignment: .center, spacing: 15) {
             ImageButton
@@ -355,6 +381,7 @@ struct PostView: View {
         
         self.uploadedMedias = draft.media
         self.post = draft.content
+        self.preserveWebLinks = draft.preserveWebLinks
         self.autoSaveModel.markSaved()  // The draft we just loaded is saved to memory. Mark it as such.
         return true
     }
@@ -369,8 +396,10 @@ struct PostView: View {
             draft.media = uploadedMedias
             draft.references = references
             draft.filtered_pubkeys = filtered_pubkeys
+            draft.preserveWebLinks = preserveWebLinks
         } else {
             let artifacts = DraftArtifacts(content: post, media: uploadedMedias, references: references, id: UUID().uuidString)
+            artifacts.preserveWebLinks = preserveWebLinks
             set_draft_for_post(drafts: damus_state.drafts, action: action, artifacts: artifacts)
         }
         self.autoSaveModel.needsSaving()
@@ -408,6 +437,10 @@ struct PostView: View {
                 .accessibilityIdentifier(AppAccessibilityIdentifiers.post_composer_text_view.rawValue)
                 .onChange(of: post) { p in
                     post_changed(post: p, media: uploadedMedias)
+                    detectedWebLink = firstNostrWebLink(p.string)
+                }
+                .onChange(of: preserveWebLinks) { _ in
+                    post_changed(post: post, media: uploadedMedias)
                 }
                 // Set a height based on the text content height, if it is available and valid
                 .frame(height: get_valid_text_height())
@@ -572,9 +605,15 @@ struct PostView: View {
                             if case .replying_to(let replying_to) = self.action {
                                 ReplyView(replying_to: replying_to, damus: damus_state, original_pubkeys: pubkeys, filtered_pubkeys: $filtered_pubkeys)
                             }
-                            
+
                             Editor(deviceSize: deviceSize)
                                 .padding(.top, 5)
+
+                            if showWebLinkToggle, let link = detectedWebLink {
+                                WebLinkPreview(link: link, preserveWebLinks: preserveWebLinks, damus_state: damus_state)
+                                    .padding(.horizontal)
+                                    .padding(.top, 8)
+                            }
                         }
                     }
                     .frame(maxHeight: searching == nil && searchingHashTag == nil ? deviceSize.size.height : 70)
@@ -600,7 +639,11 @@ struct PostView: View {
                         .environmentObject(tagModel)
                } else {
                     Divider()
-                    VStack(alignment: .leading) {
+                    VStack(alignment: .leading, spacing: 0) {
+                        if showWebLinkToggle {
+                            WebLinkPicker
+                            Divider()
+                        }
                         AttachmentBar
                             .padding(.vertical, 5)
                             .padding(.horizontal)
@@ -970,11 +1013,12 @@ func build_post(state: DamusState, action: PostAction, draft: DraftArtifacts) as
         action: action,
         uploadedMedias: draft.media,
         references: draft.references,
-        filtered_pubkeys: draft.filtered_pubkeys
+        filtered_pubkeys: draft.filtered_pubkeys,
+        preserveWebLinks: draft.preserveWebLinks
     )
 }
 
-func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], references: [RefId], filtered_pubkeys: Set<Pubkey>) async -> NostrPost {
+func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], references: [RefId], filtered_pubkeys: Set<Pubkey>, preserveWebLinks: Bool = false) async -> NostrPost {
     // don't add duplicate pubkeys but retain order
     var pkset = Set<Pubkey>()
 
@@ -983,7 +1027,7 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
         guard case .pubkey(let pk) = ref else {
             return
         }
-        
+
         if pkset.contains(pk) || filtered_pubkeys.contains(pk) {
             return
         }
@@ -991,8 +1035,8 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
         pkset.insert(pk)
         acc.append(pk)
     }
-    
-    return await build_post(state: state, post: post, action: action, uploadedMedias: uploadedMedias, pubkeys: pks)
+
+    return await build_post(state: state, post: post, action: action, uploadedMedias: uploadedMedias, pubkeys: pks, preserveWebLinks: preserveWebLinks)
 }
 
 /// This builds a Nostr post from draft data from `PostView` or other draft-related classes
@@ -1008,7 +1052,7 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
 ///   - uploadedMedias: The medias attached to this post
 ///   - pubkeys: The referenced pubkeys
 /// - Returns: A NostrPost, which can then be signed into an event.
-func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], pubkeys: [Pubkey]) async -> NostrPost {
+func build_post(state: DamusState, post: NSAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], pubkeys: [Pubkey], preserveWebLinks: Bool = false) async -> NostrPost {
     let post = NSMutableAttributedString(attributedString: post)
     post.enumerateAttributes(in: NSRange(location: 0, length: post.length), options: []) { attributes, range, stop in
         let linkValue = attributes[.link]
@@ -1068,6 +1112,9 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
         break
     }
 
+    // Strip any nsec1 private key tokens from content before publishing
+    content = sanitizeNsecTokens(content)
+
     // append additional tags
     tags += uploadedMedias.compactMap { $0.metadata?.to_tag() }
     
@@ -1087,6 +1134,12 @@ func build_post(state: DamusState, post: NSAttributedString, action: PostAction,
             }
     }
 
+    // Convert web URLs containing NIP-19 bech32 identifiers to nostr: format,
+    // unless the user chose to preserve web links.
+    if !preserveWebLinks {
+        content = convertNostrWebLinksToNative(content)
+    }
+
     return NostrPost(content: content.trimmingCharacters(in: .whitespacesAndNewlines), kind: .text, tags: tags)
 }
 
@@ -1099,6 +1152,71 @@ func isSupportedVideo(url: URL?) -> Bool {
             return fileUTType.conforms(to: utType)
         }
         return false
+    }
+}
+
+// MARK: - Web link preview
+
+/// Shows a compact preview of how a nostr web link will appear in the published post.
+struct WebLinkPreview: View {
+    let link: (url: URL, bech32: Bech32Object)
+    let preserveWebLinks: Bool
+    let damus_state: DamusState
+    @State private var linkMeta: LPLinkMetadata?
+
+    var body: some View {
+        Group {
+            if preserveWebLinks {
+                if let meta = linkMeta {
+                    LinkViewRepresentable(meta: .linkmeta(CachedMetadata(meta: meta)))
+                        .frame(minHeight: 100)
+                } else {
+                    ProgressView()
+                        .frame(height: 80)
+                        .frame(maxWidth: .infinity)
+                }
+            } else {
+                embeddedPreview
+            }
+        }
+        .task(id: link.url) {
+            guard linkMeta == nil else { return }
+            linkMeta = await Preview.fetch_metadata(for: link.url)
+        }
+    }
+
+    @ViewBuilder
+    var embeddedPreview: some View {
+        switch link.bech32 {
+        case .nevent(let nevent):
+            BuilderEventView(damus: damus_state, event_id: nevent.noteid, relayHints: nevent.relays)
+        case .note(let noteId):
+            BuilderEventView(damus: damus_state, event_id: noteId)
+        case .npub(let pubkey):
+            profilePreview(pubkey: pubkey)
+        case .nprofile(let nprofile):
+            profilePreview(pubkey: nprofile.author)
+        default:
+            EmptyView()
+        }
+    }
+
+    /// Renders a compact profile card for npub/nprofile links.
+    func profilePreview(pubkey: Pubkey) -> some View {
+        HStack(spacing: 8) {
+            ProfilePicView(pubkey: pubkey, size: 30, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
+            let profile = try? damus_state.profiles.lookup(id: pubkey)
+            Text(DisplayName(profile: profile, pubkey: pubkey).username)
+                .font(.callout.bold())
+                .lineLimit(1)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Color.gray.opacity(0.2), lineWidth: 1.0)
+        )
     }
 }
 
