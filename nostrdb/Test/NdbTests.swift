@@ -214,6 +214,26 @@ final class NdbTests: XCTestCase {
         XCTAssertNil(ndb_txn)
     }
     
+    /// Verifies that NdbTxn deinit still closes and clears thread-local state when the ref-count key is unexpectedly missing (e.g. thread-local corruption or external mutation).
+    func testNdbTxnDeinitCleansUpWithMissingRefCount() throws {
+        let restoreThreadLocalTransactionState = resetThreadLocalTransactionState()
+        defer { restoreThreadLocalTransactionState() }
+        
+        let ndb = try XCTUnwrap(Ndb(path: db_dir))
+        var txn: NdbTxn<Int>? = try XCTUnwrap(NdbTxn(ndb: ndb, with: { _ in 1 }, name: "missing_ref_count_key_txn"))
+        
+        XCTAssertNotNil(Thread.current.threadDictionary["ndb_txn"])
+        XCTAssertEqual(Thread.current.threadDictionary["ndb_txn_ref_count"] as? Int, 1)
+        XCTAssertEqual(Thread.current.threadDictionary["txn_generation"] as? Int, ndb.generation)
+        
+        Thread.current.threadDictionary.removeObject(forKey: "ndb_txn_ref_count")
+        txn = nil
+        
+        XCTAssertNil(Thread.current.threadDictionary["ndb_txn"], "NdbTxn deinit should clear thread-local transaction if the ref-count key is missing")
+        XCTAssertNil(Thread.current.threadDictionary["ndb_txn_ref_count"], "NdbTxn deinit should keep thread-local ref-count cleared")
+        XCTAssertNil(Thread.current.threadDictionary["txn_generation"], "NdbTxn deinit should clear thread-local generation when closing a transaction")
+    }
+    
     /// Verifies that a failed top-level SafeNdbTxn creation fully cleans up thread-local transaction state.
     func testSafeNdbTxnFailure_cleansUpTopLevelThreadLocalTransactionState() throws {
         let restoreThreadLocalTransactionState = resetThreadLocalTransactionState()
@@ -315,4 +335,3 @@ final class NdbTests: XCTestCase {
     }
 
 }
-
