@@ -87,6 +87,27 @@ class Ndb {
     static let main_db_file_name: String = "data.mdb"
     static let db_files: [String] = ["data.mdb", "lock.mdb"]
 
+    /// Marks the NostrDB database files at the given directory path as excluded from iCloud backup.
+    ///
+    /// NostrDB stores events cached from relays. Since these can be fully re-synced,
+    /// there is no need to include these potentially very large files in the user's iCloud
+    /// backup quota.
+    ///
+    /// - Parameter path: The directory path containing the NostrDB files.
+    static func exclude_db_files_from_icloud_backup(path: String) {
+        for db_file in db_files {
+            var fileURL = URL(fileURLWithPath: path).appendingPathComponent(db_file)
+            guard FileManager.default.fileExists(atPath: fileURL.path) else { continue }
+            var resourceValues = URLResourceValues()
+            resourceValues.isExcludedFromBackup = true
+            do {
+                try fileURL.setResourceValues(resourceValues)
+            } catch {
+                Log.error("Failed to exclude %{public}@ from iCloud backup: %{public}@", for: .storage, db_file, error.localizedDescription)
+            }
+        }
+    }
+
     static var empty: Ndb {
         print("txn: NOSTRDB EMPTY")
         return Ndb(ndb: ndb_t(ndb: nil))
@@ -152,6 +173,11 @@ class Ndb {
 
         if !ok {
             return nil
+        }
+
+        // Exclude database files from iCloud backup — they can be re-synced from relays.
+        if owns_db_file {
+            Self.exclude_db_files_from_icloud_backup(path: path)
         }
         
         let ndb_instance = ndb_t(ndb: ndb_p)

@@ -612,6 +612,50 @@ class DatabaseSnapshotManagerTests: XCTestCase {
 
         XCTAssertTrue(fileManager.fileExists(atPath: recentTempSnapshotURL.path), "Recent temporary snapshot directory should not be cleaned up")
     }
+    
+    // MARK: - iCloud Backup Exclusion Tests
+    
+    func testPerformSnapshot_SnapshotDirectoryIsExcludedFromICloudBackup() async throws {
+        // Given: No previous snapshot exists
+        guard let snapshotPath = Ndb.snapshot_db_path else {
+            XCTFail("Snapshot path should be available")
+            return
+        }
+        try? FileManager.default.removeItem(atPath: snapshotPath)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: snapshotPath), "Snapshot directory should not exist before snapshot")
+        
+        // When: A snapshot is created
+        try await manager.performSnapshot()
+        
+        // Then: The snapshot directory should be excluded from iCloud backup
+        XCTAssertTrue(FileManager.default.fileExists(atPath: snapshotPath), "Snapshot directory should exist after snapshot")
+        let snapshotURL = URL(fileURLWithPath: snapshotPath, isDirectory: true)
+        let resourceValues = try snapshotURL.resourceValues(forKeys: [.isExcludedFromBackupKey])
+        XCTAssertEqual(
+            resourceValues.isExcludedFromBackup, true,
+            "Snapshot directory should be excluded from iCloud backup"
+        )
+    }
+    
+    func testPerformSnapshot_SnapshotDirectoryRemainsExcludedFromICloudBackupAfterMultipleSnapshots() async throws {
+        // Given: An initial snapshot is created
+        guard let snapshotPath = Ndb.snapshot_db_path else {
+            XCTFail("Snapshot path should be available")
+            return
+        }
+        try await manager.performSnapshot()
+        
+        // When: A second snapshot replaces the first
+        try await manager.performSnapshot()
+        
+        // Then: The snapshot directory should still be excluded from iCloud backup
+        let snapshotURL = URL(fileURLWithPath: snapshotPath, isDirectory: true)
+        let resourceValues = try snapshotURL.resourceValues(forKeys: [.isExcludedFromBackupKey])
+        XCTAssertEqual(
+            resourceValues.isExcludedFromBackup, true,
+            "Snapshot directory should remain excluded from iCloud backup after being replaced"
+        )
+    }
 }
 
 
