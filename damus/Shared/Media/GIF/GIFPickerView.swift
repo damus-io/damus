@@ -175,9 +175,7 @@ struct GIFThumbnailView: View {
                         .fill(Color.secondary.opacity(0.2))
                 }
                 .imageContext(.note, disable_animation: disable_animation)
-                .aspectRatio(contentMode: .fill)
-                .frame(height: 120)
-                .clipped()
+                .aspectRatio(contentMode: .fit)
                 .cornerRadius(8)
                 .kfClickable()
         } else {
