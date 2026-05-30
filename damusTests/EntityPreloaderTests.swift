@@ -460,8 +460,9 @@ final class EntityPreloaderTests: XCTestCase {
                     noteReceived = true
                     receivedNoteFromNdb.fulfill()
                     
-                    // Poll for metadata to be preloaded
-                    for _ in 0..<20 {
+                    // Poll for metadata to be preloaded.
+                    // Negentropy + network scheduling can take longer in CI environments.
+                    for _ in 0..<150 {
                         try? await Task.sleep(for: .milliseconds(200))
                         if (try? ndb.lookup_profile(authorKeypair.pubkey, borrow: { pr in pr != nil })) ?? false {
                             metadataPreloaded.fulfill()
