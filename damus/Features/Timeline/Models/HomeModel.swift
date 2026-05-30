@@ -74,6 +74,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
     var dmsHandlerTask: Task<Void, Never>?
     var ndbOnlyHandlerTask: Task<Void, Never>?
     var nwcHandlerTask: Task<Void, Never>?
+    var storiesHandlerTask: Task<Void, Never>?
     
     @Published var loading: Bool = true
 
@@ -235,6 +236,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
             }
 
             self.subscribe_to_home_filters()
+            self.subscribe_to_stories()
         }
     }
 
@@ -290,6 +292,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
             break   // Don't care for now
         case .live, .live_chat:
             break
+        case .picture:
+            break   // Story events are consumed by StoriesModel via local nostrdb subscription.
         }
     }
 
@@ -581,6 +585,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         //print_filters(relay_id: relay_id, filters: [home_filters, contacts_filters, notifications_filters, dms_filters])
 
         subscribe_to_home_filters()
+        subscribe_to_stories()
 
         self.notificationsHandlerTask?.cancel()
         self.notificationsHandlerTask = Task {
@@ -731,6 +736,28 @@ class HomeModel: ContactsDelegate, ObservableObject {
                 case .networkEose:
                     break
                 }
+            }
+        }
+    }
+
+    /// Remote subscription that pulls story events (kind:20, #T=story) into nostrdb.
+    /// `StoriesModel` then reacts via a local nostrdb subscription.
+    func subscribe_to_stories() {
+        var authors = damus_state.contacts.get_friend_list()
+        authors.insert(damus_state.pubkey)
+        let since = UInt32(Date().timeIntervalSince1970 - 24 * 60 * 60)
+        let stories_filter = NostrFilter(
+            kinds: [.picture],
+            since: since,
+            authors: Array(authors),
+            tag_T: ["story"]
+        )
+        let chunked = stories_filter.chunked(on: .authors, into: MAX_CONTACTS_ON_FILTER)
+
+        self.storiesHandlerTask?.cancel()
+        self.storiesHandlerTask = Task {
+            for await _ in damus_state.nostrNetwork.reader.streamIndefinitely(filters: chunked) {
+                // No-op: events ingest into nostrdb upstream; StoriesModel reacts via its local sub.
             }
         }
     }
