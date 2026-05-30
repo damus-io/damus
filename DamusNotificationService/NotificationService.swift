@@ -29,6 +29,37 @@ class NotificationService: UNNotificationServiceExtension {
         }
     }
 
+    /// Captures technical context whenever push processing falls back to the original payload.
+    ///
+    /// This helps investigate why formatting failed without requiring full event contents.
+    /// - Parameters:
+    ///   - reason: Short reason describing why fallback was used.
+    ///   - request: Original push notification request.
+    ///   - nostrEvent: Parsed nostr event associated with the push.
+    ///   - notificationObject: Optional generated local notification model when available.
+    private func captureFallbackFormattingFailure(reason: String, request: UNNotificationRequest, nostrEvent: NdbNote, notificationObject: LocalNotification? = nil) {
+        let userInfoKeys = request.content.userInfo.keys.map { String(describing: $0) }.sorted()
+        var context: [String: Any] = [
+            "reason": reason,
+            "notification_identifier": request.identifier,
+            "trigger_type": request.trigger.map { String(describing: type(of: $0)) } ?? "none",
+            "nostr_event_kind": nostrEvent.kind,
+            "nostr_event_known_kind": String(describing: nostrEvent.known_kind),
+            "nostr_event_content_length": nostrEvent.content.count,
+            "nostr_event_referenced_pubkeys_count": nostrEvent.referenced_pubkeys.count,
+            "request_user_info_keys": userInfoKeys
+        ]
+
+        if let notificationObject {
+            context["local_notification_type"] = notificationObject.type.rawValue
+            context["local_notification_content_length"] = notificationObject.content.count
+        }
+
+        DamusSentry.captureSentryMessage("Push notification used fallback payload due to formatting failure") { scope in
+            scope.setContext(value: context, key: "push_notification_fallback")
+        }
+    }
+
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         DamusSentry.startIfEnabled()
         configureKingfisherCache()
@@ -94,6 +125,7 @@ class NotificationService: UNNotificationServiceExtension {
 
             guard let notification_object = generate_local_notification_object(ndb: state.ndb, from: nostr_event, state: state) else {
                 Log.debug("generate_local_notification_object failed", for: .push_notifications)
+                captureFallbackFormattingFailure(reason: "generate_local_notification_object_failed", request: request, nostrEvent: nostr_event)
                 // We could not process this notification. Probably an unsupported nostr event kind. Suppress.
                 // contentHandler(UNNotificationContent())
                 // TODO: We cannot really suppress until we have the notification supression entitlement. Show the raw notification
@@ -105,6 +137,8 @@ class NotificationService: UNNotificationServiceExtension {
             guard let (improvedContent, _) = await NotificationFormatter.shared.format_message(displayName: sender_dn.displayName, notify: notification_object, state: state) else {
 
                 Log.debug("NotificationFormatter.format_message failed", for: .push_notifications)
+                captureFallbackFormattingFailure(reason: "notification_formatter_failed", request: request, nostrEvent: nostr_event, notificationObject: notification_object)
+                contentHandler(request.content)
                 return
             }
 
@@ -340,5 +374,4 @@ func profile_to_inperson(name: String?, display_name: String?, picture: String?,
 func robohash(_ pk: Pubkey) -> String {
     return "https://robohash.org/" + pk.hex()
 }
-
 
