@@ -13,12 +13,54 @@ struct SearchHomeView: View {
     let damus_state: DamusState
     @StateObject var model: SearchHomeModel
     @State var search: String = ""
+    @State private var lastMultipleEventsPerPubkeySetting: Bool
     @FocusState private var isFocused: Bool
 
+    init(damus_state: DamusState, model: SearchHomeModel) {
+        self.damus_state = damus_state
+        self._model = StateObject(wrappedValue: model)
+        self._lastMultipleEventsPerPubkeySetting = State(initialValue: damus_state.settings.multiple_events_per_pubkey)
+    }
+    
     func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
         var filters = ContentFilters.defaults(damus_state: damus_state)
         filters.append(fstate.filter)
         return ContentFilters(filters: filters).filter
+    }
+    
+    var shouldShowMultipleEventsHint: Bool {
+        let hintState = model.hintState
+        return !damus_state.settings.multiple_events_per_pubkey && hintState.shouldSuggestMultipleEventsPerUser
+    }
+    
+    var MultipleEventsHint: some View {
+        Button {
+            damus_state.settings.multiple_events_per_pubkey = true
+        } label: {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: "info.circle.fill")
+                    .foregroundColor(.accentColor)
+                
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Showing one note per user", comment: "Headline for a universe hint explaining that results are deduplicated by user.")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.primary)
+                    
+                    Text("This relay has many more recent notes, but Universe is currently hiding additional notes from the same author. Tap to show multiple events per user.", comment: "Body text for a universe hint explaining why only a few notes are visible.")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.leading)
+                }
+                
+                Spacer(minLength: 0)
+            }
+            .padding(12)
+            .background(.secondary.opacity(0.12))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .padding(.horizontal)
+            .padding(.top, 12)
+        }
+        .buttonStyle(.plain)
     }
 
     var SearchInput: some View {
@@ -79,6 +121,10 @@ struct SearchHomeView: View {
                     .foregroundColor(.secondary)
                     .padding(.top, 20)
                     .padding(.horizontal)
+                    
+                    if shouldShowMultipleEventsHint {
+                        MultipleEventsHint
+                    }
                 }.padding(.bottom, 50))
             }
         )
@@ -116,6 +162,17 @@ struct SearchHomeView: View {
         }
         .onReceive(handle_notify(.new_mutes)) { _ in
             self.model.filter_muted()
+        }
+        .onChange(of: damus_state.settings.multiple_events_per_pubkey) { newValue in
+            guard newValue != lastMultipleEventsPerPubkeySetting else {
+                return
+            }
+            
+            lastMultipleEventsPerPubkeySetting = newValue
+            
+            Task {
+                await model.reload()
+            }
         }
         .task {
             await model.load()
