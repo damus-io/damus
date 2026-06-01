@@ -218,6 +218,17 @@ static void ndb_debug_unregister_query_txn(const struct ndb_txn *txn)
 	}
 	pthread_mutex_unlock(&ndb_debug_query_txns_mutex);
 }
+
+// Clear all entries from the debug query transaction registry.
+// Should be called when ndb is destroyed so that stale entries from
+// transactions that were open during shutdown do not trigger false-positive
+// leak assertions after the database is reopened.
+static void ndb_debug_clear_query_txns(void)
+{
+	pthread_mutex_lock(&ndb_debug_query_txns_mutex);
+	memset(ndb_debug_query_txns, 0, sizeof(ndb_debug_query_txns));
+	pthread_mutex_unlock(&ndb_debug_query_txns_mutex);
+}
 #endif
 
 // these must be byte-aligned, they are directly accessing the serialized data
@@ -6286,6 +6297,12 @@ void ndb_destroy(struct ndb *ndb)
 
 	ndb_debug("closing env\n");
 	mdb_env_close(ndb->lmdb.env);
+
+#ifdef DEBUG
+	// Clear the debug transaction registry so that transactions open during
+	// shutdown do not cause false-positive leak assertions after reopen.
+	ndb_debug_clear_query_txns();
+#endif
 
 	ndb_debug("ndb destroyed\n");
 	free(ndb);
