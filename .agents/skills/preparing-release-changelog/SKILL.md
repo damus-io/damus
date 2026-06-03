@@ -1,5 +1,5 @@
 ---
-name: Preparing Release Changelog
+name: preparing-release-changelog
 description: Prepare the CHANGELOG.md for a Damus release by running the changelog script, curating the output, and committing the result. Covers prerequisites, known pitfalls (duplicate entries, reverted commits, truncated annotations, wrong version label), and the editing/commit steps.
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: Filing User Bug Reports
+name: filing-user-bug-reports
 description: Process conversations or chat logs to identify reported bugs, search for existing GitHub issues, update existing issues when new undocumented details are discovered, and create new issues for untracked problems.
 ---
 
