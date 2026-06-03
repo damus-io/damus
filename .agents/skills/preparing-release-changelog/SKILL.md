@@ -1,6 +1,16 @@
-# Skills: How to Make Changelogs for Damus
+---
+name: Preparing Release Changelog
+description: Prepare the CHANGELOG.md for a Damus release by running the changelog script, curating the output, and committing the result. Covers prerequisites, known pitfalls (duplicate entries, reverted commits, truncated annotations, wrong version label), and the editing/commit steps.
+---
 
-This document explains how to prepare a changelog for a Damus release.
+# Preparing Release Changelog
+
+## Description
+Prepare the CHANGELOG.md for a Damus release by running the changelog script, curating the output, and committing the result. Covers prerequisites, known pitfalls (duplicate entries, reverted commits, truncated annotations, wrong version label), and the editing/commit steps.
+
+## When to Use
+- When preparing a new Damus release and the changelog needs to be updated
+- When rebasing a release-changelog branch onto master and picking up new entries
 
 ## Overview
 
