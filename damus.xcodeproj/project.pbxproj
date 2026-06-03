@@ -5873,7 +5873,6 @@
 			shellPath = /bin/sh;
 			shellScript = "git rev-parse --short HEAD > \"${SRCROOT}/build-git-hash.txt\"\n";
 		};
-
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -8078,7 +8077,7 @@
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 12.3;
-				MARKETING_VERSION = 1.17;
+				MARKETING_VERSION = 1.18;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -8149,7 +8148,7 @@
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 12.3;
-				MARKETING_VERSION = 1.17;
+				MARKETING_VERSION = 1.18;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
