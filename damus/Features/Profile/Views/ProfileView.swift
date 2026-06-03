@@ -102,7 +102,9 @@ struct ProfileView: View {
         colorScheme == .light ? DamusColors.white : DamusColors.black
     }
 
-    func bannerBlurViewOpacity() -> Double  {
+    /// Returns the blur opacity for the collapsing banner based on the current scroll offset and top safe-area inset.
+    func bannerBlurViewOpacity(topSafeAreaInset: CGFloat) -> Double {
+        let navbarHeight = navbarHeight(topSafeAreaInset: topSafeAreaInset)
         let progress = -(yOffset + navbarHeight) / 100
         return Double(-yOffset > navbarHeight ? progress : 0)
     }
@@ -114,8 +116,9 @@ struct ProfileView: View {
         return (displayName, "@\(userName)")
     }
     
-    func showFollowBtnInBlurrBanner() -> Bool {
-        damus_state.contacts.follow_state(profile.pubkey) == .unfollows && bannerBlurViewOpacity() > 1.0
+    /// Determines whether the follow button should appear in the collapsed banner state.
+    func showFollowBtnInBlurrBanner(topSafeAreaInset: CGFloat) -> Bool {
+        damus_state.contacts.follow_state(profile.pubkey) == .unfollows && bannerBlurViewOpacity(topSafeAreaInset: topSafeAreaInset) > 1.0
     }
     
     /// Builds the profile timeline filter, while ensuring the user's own profile bypasses NSFW and hashtag-spam content filters.
@@ -133,10 +136,12 @@ struct ProfileView: View {
         return ContentFilters(filters: filters).filter
     }
 
-    var bannerSection: some View {
+    /// Builds the stretching and collapsing banner while avoiding synchronous window safe-area queries on the main thread.
+    func bannerSection(topSafeAreaInset: CGFloat) -> some View {
         GeometryReader { proxy -> AnyView in
-
             let minY = proxy.frame(in: .global).minY
+            let navbarHeight = navbarHeight(topSafeAreaInset: topSafeAreaInset)
+            let blurOpacity = bannerBlurViewOpacity(topSafeAreaInset: topSafeAreaInset)
 
             DispatchQueue.main.async {
                 self.yOffset = minY
@@ -150,10 +155,10 @@ struct ProfileView: View {
                             .frame(width: proxy.size.width, height: minY > 0 ? bannerHeight + minY : bannerHeight)
                             .clipped()
 
-                        VisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial)).opacity(bannerBlurViewOpacity())
+                        VisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial)).opacity(blurOpacity)
                     }
 
-                    Divider().opacity(bannerBlurViewOpacity())
+                    Divider().opacity(blurOpacity)
                 }
                 .frame(height: minY > 0 ? bannerHeight + minY : nil)
                 .offset(y: minY > 0 ? -minY : -minY < navbarHeight ? 0 : -minY - navbarHeight)
@@ -164,8 +169,9 @@ struct ProfileView: View {
         .allowsHitTesting(false)
     }
 
-    var navbarHeight: CGFloat {
-        return 100.0 - (Theme.safeAreaInsets?.top ?? 0)
+    /// Computes the profile navigation height using the view's current safe-area context instead of querying the key window during SwiftUI updates.
+    func navbarHeight(topSafeAreaInset: CGFloat) -> CGFloat {
+        100.0 - topSafeAreaInset
     }
 
     func navImage(img: String) -> some View {
@@ -299,27 +305,30 @@ struct ProfileView: View {
         }
     }
 
-    func pfpOffset() -> CGFloat {
-        let progress = -yOffset / navbarHeight
+    /// Returns the avatar's vertical offset during banner collapse.
+    func pfpOffset(topSafeAreaInset: CGFloat) -> CGFloat {
+        let progress = -yOffset / navbarHeight(topSafeAreaInset: topSafeAreaInset)
         let offset = (pfp_size / 4.0) * (progress < 1.0 ? progress : 1)
         return offset > 0 ? offset : 0
     }
 
-    func pfpScale() -> CGFloat {
-        let progress = -yOffset / navbarHeight
+    /// Returns the avatar's scale during banner collapse.
+    func pfpScale(topSafeAreaInset: CGFloat) -> CGFloat {
+        let progress = -yOffset / navbarHeight(topSafeAreaInset: topSafeAreaInset)
         let scale = 1.0 - (0.5 * (progress < 1.0 ? progress : 1))
         return scale < 1 ? scale : 1
     }
 
-    func nameSection(ndbprofile: Profile?, lnurl: String?) -> some View {
+    /// Builds the name and avatar section using geometry-provided safe-area values to avoid AttributeGraph cycles.
+    func nameSection(ndbprofile: Profile?, lnurl: String?, topSafeAreaInset: CGFloat) -> some View {
         return Group {
             let follows_you = profile.pubkey != damus_state.pubkey && profile.follows(pubkey: damus_state.pubkey)
 
             HStack(alignment: .center) {
                 ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
                     .padding(.top, -(pfp_size / 2.0))
-                    .offset(y: pfpOffset())
-                    .scaleEffect(pfpScale())
+                    .offset(y: pfpOffset(topSafeAreaInset: topSafeAreaInset))
+                    .scaleEffect(pfpScale(topSafeAreaInset: topSafeAreaInset))
                     .onTapGesture {
                         is_zoomed.toggle()
                     }
@@ -357,12 +366,13 @@ struct ProfileView: View {
         }
     }
 
-    var aboutSection: some View {
+    /// Builds the profile summary section using safe-area values from the surrounding geometry.
+    func aboutSection(topSafeAreaInset: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: 8.0) {
             let lnurl = try? damus_state.profiles.lookup_lnurl(profile.pubkey)
             let ndbprofile = try? damus_state.profiles.lookup(id: profile.pubkey)
 
-            nameSection(ndbprofile: ndbprofile, lnurl: lnurl)
+            nameSection(ndbprofile: ndbprofile, lnurl: lnurl, topSafeAreaInset: topSafeAreaInset)
 
             if let about = ndbprofile?.about {
                 AboutView(state: damus_state, about: about)
@@ -451,107 +461,114 @@ struct ProfileView: View {
     }
 
     var body: some View {
-        ZStack {
-            ScrollView(.vertical) {
-                VStack(spacing: 0) {
-                    bannerSection
-                        .zIndex(1)
-                    
-                    VStack() {
-                        aboutSection
+        GeometryReader { geometry in
+            let safeAreaInsets = geometry.safeAreaInsets
+            let topSafeAreaInset = safeAreaInsets.top
+            let navbarHeight = navbarHeight(topSafeAreaInset: topSafeAreaInset)
+            let blurOpacity = bannerBlurViewOpacity(topSafeAreaInset: topSafeAreaInset)
 
-                        VStack(spacing: 0) {
-                            CustomPicker(tabs: tabs, selection: $filter_state)
-                            Divider()
-                                .frame(height: 1)
-                        }
-                        .background(colorScheme == .dark ? Color.black : Color.white)
+            ZStack {
+                ScrollView(.vertical) {
+                    VStack(spacing: 0) {
+                        bannerSection(topSafeAreaInset: topSafeAreaInset)
+                            .zIndex(1)
 
-                        if filter_state == FilterState.posts {
-                            InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.posts))
+                        VStack {
+                            aboutSection(topSafeAreaInset: topSafeAreaInset)
+
+                            VStack(spacing: 0) {
+                                CustomPicker(tabs: tabs, selection: $filter_state)
+                                Divider()
+                                    .frame(height: 1)
+                            }
+                            .background(colorScheme == .dark ? Color.black : Color.white)
+
+                            if filter_state == FilterState.posts {
+                                InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.posts))
+                            }
+                            if filter_state == FilterState.posts_and_replies {
+                                InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.posts_and_replies))
+                            }
+                            if filter_state == FilterState.conversations && !profile.conversation_events.isEmpty {
+                                InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.conversations))
+                            }
                         }
-                        if filter_state == FilterState.posts_and_replies {
-                            InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.posts_and_replies))
-                        }
-                        if filter_state == FilterState.conversations && !profile.conversation_events.isEmpty {
-                            InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.conversations))
-                        }
-                    }
-                    .padding(.horizontal, Theme.safeAreaInsets?.left)
-                    .zIndex(-yOffset > navbarHeight ? 0 : 1)
-                }
-            }
-            .padding(.bottom, tabHeight + getSafeAreaBottom())
-            .ignoresSafeArea()
-            .navigationTitle("")
-            .navigationBarBackButtonHidden()
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    HStack(spacing: 8) {
-                        navBackButton
-                            .padding(.top, 5)
-                            .accentColor(DamusColors.white)
-                        VStack(alignment: .leading, spacing: -4.5) {
-                            Text(getProfileInfo().0) // Display name
-                                .font(.headline)
-                                .foregroundColor(.white)
-                            Text(getProfileInfo().1) // Username
-                                .font(.subheadline)
-                                .foregroundColor(.white.opacity(0.8))
-                        }
-                        .opacity(bannerBlurViewOpacity())
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.top, max(5, 15 + (yOffset / 30)))
+                        .padding(.horizontal, safeAreaInsets.leading)
+                        .zIndex(-yOffset > navbarHeight ? 0 : 1)
                     }
                 }
-                .hideToolbarBackground()
-                
-                if showFollowBtnInBlurrBanner() {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        FollowButtonView(
-                            target: profile.get_follow_target(),
-                            follows_you: profile.follows(pubkey: damus_state.pubkey),
-                            follow_state: damus_state.contacts.follow_state(profile.pubkey)
-                        )
-                        .padding(.top, 8)
+                .padding(.bottom, tabHeight + safeAreaInsets.bottom)
+                .ignoresSafeArea()
+                .navigationTitle("")
+                .navigationBarBackButtonHidden()
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        HStack(spacing: 8) {
+                            navBackButton
+                                .padding(.top, 5)
+                                .accentColor(DamusColors.white)
+                            VStack(alignment: .leading, spacing: -4.5) {
+                                Text(getProfileInfo().0) // Display name
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                Text(getProfileInfo().1) // Username
+                                    .font(.subheadline)
+                                    .foregroundColor(.white.opacity(0.8))
+                            }
+                            .opacity(blurOpacity)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.top, max(5, 15 + (yOffset / 30)))
+                        }
                     }
                     .hideToolbarBackground()
-                } else {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        navActionSheetButton
-                            .padding(.top, 5)
-                            .accentColor(DamusColors.white)
-                    }
-                    .hideToolbarBackground()
-                }
-            }
-            .toolbarBackground(.hidden)
-            .onReceive(handle_notify(.switched_timeline)) { _ in
-                dismiss()
-            }
-            .onAppear() {
-                check_nip05_validity(pubkey: self.profile.pubkey, damus_state: self.damus_state)
-                profile.subscribe()
-                //followers.subscribe()
-            }
-            .onDisappear {
-                profile.unsubscribe()
-                followers.unsubscribe()
-                // our profilemodel needs a bit more help
-            }
-            .sheet(isPresented: $show_share_sheet) {
-                let url = URL(string: "https://damus.io/" + profile.pubkey.npub)!
-                ShareSheet(activityItems: [url])
-            }
-            .damus_full_screen_cover($show_qr_code, damus_state: damus_state) {
-                QRCodeView(damus_state: damus_state, pubkey: profile.pubkey)
-            }
 
-            if damus_state.is_privkey_user {
-                PostButtonContainer(is_left_handed: damus_state.settings.left_handed) {
-                    notify(.compose(.posting(.user(profile.pubkey))))
+                    if showFollowBtnInBlurrBanner(topSafeAreaInset: topSafeAreaInset) {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            FollowButtonView(
+                                target: profile.get_follow_target(),
+                                follows_you: profile.follows(pubkey: damus_state.pubkey),
+                                follow_state: damus_state.contacts.follow_state(profile.pubkey)
+                            )
+                            .padding(.top, 8)
+                        }
+                        .hideToolbarBackground()
+                    } else {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            navActionSheetButton
+                                .padding(.top, 5)
+                                .accentColor(DamusColors.white)
+                        }
+                        .hideToolbarBackground()
+                    }
                 }
-                .padding(.bottom, tabHeight)
+                .toolbarBackground(.hidden)
+                .onReceive(handle_notify(.switched_timeline)) { _ in
+                    dismiss()
+                }
+                .onAppear() {
+                    check_nip05_validity(pubkey: self.profile.pubkey, damus_state: self.damus_state)
+                    profile.subscribe()
+                    //followers.subscribe()
+                }
+                .onDisappear {
+                    profile.unsubscribe()
+                    followers.unsubscribe()
+                    // our profilemodel needs a bit more help
+                }
+                .sheet(isPresented: $show_share_sheet) {
+                    let url = URL(string: "https://damus.io/" + profile.pubkey.npub)!
+                    ShareSheet(activityItems: [url])
+                }
+                .damus_full_screen_cover($show_qr_code, damus_state: damus_state) {
+                    QRCodeView(damus_state: damus_state, pubkey: profile.pubkey)
+                }
+
+                if damus_state.is_privkey_user {
+                    PostButtonContainer(is_left_handed: damus_state.settings.left_handed) {
+                        notify(.compose(.posting(.user(profile.pubkey))))
+                    }
+                    .padding(.bottom, tabHeight)
+                }
             }
         }
     }
